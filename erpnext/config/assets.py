@@ -12,7 +12,15 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Location",
+				},
+				{
+					"type": "doctype",
 					"name": "Asset Category",
+				},
+				{
+					"type": "doctype",
+					"name": "Asset Settings",
 				}
 			]
 		},
@@ -34,6 +42,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Asset Maintenance Log",
+				},
+				{
+					"type": "doctype",
+					"name": "Asset Value Adjustment",
 				},
 				{
 					"type": "doctype",

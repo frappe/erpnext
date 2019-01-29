@@ -23,5 +23,19 @@ frappe.ui.form.on('Healthcare Settings', {
 				}
 			};
 		});
+		set_query_service_item(frm, 'inpatient_visit_charge_item');
+		set_query_service_item(frm, 'op_consulting_charge_item');
+		set_query_service_item(frm, 'clinical_procedure_consumable_item');
 	}
 });
+
+var set_query_service_item = function(frm, service_item_field) {
+	frm.set_query(service_item_field, function() {
+		return {
+			filters: {
+				'is_sales_item': 1,
+				'is_stock_item': 0
+			}
+		};
+	});
+};

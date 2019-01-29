@@ -1,0 +1,59 @@
+{
+    "customer": {
+        "id": 2324518599,
+        "email": "andrew@wyatt.co.in",
+        "accepts_marketing": false,
+        "created_at": "2016-01-20T17:18:35+05:30",
+        "updated_at": "2016-01-20T17:22:23+05:30",
+        "first_name": "Andrew",
+        "last_name": "Wyatt",
+        "orders_count": 0,
+        "state": "disabled",
+        "total_spent": "0.00",
+        "last_order_id": null,
+        "note": "",
+        "verified_email": true,
+        "multipass_identifier": null,
+        "tax_exempt": false,
+        "tags": "",
+        "last_order_name": null,
+        "default_address": {
+            "id": 2476804295,
+            "first_name": "Andrew",
+            "last_name": "Wyatt",
+            "company": "Wyatt Inc.",
+            "address1": "B-11, Betahouse",
+            "address2": "Street 11, Sector 52",
+            "city": "Manhattan",
+            "province": "New York",
+            "country": "United States",
+            "zip": "10027",
+            "phone": "145-112211",
+            "name": "Andrew Wyatt",
+            "province_code": "NY",
+            "country_code": "US",
+            "country_name": "United States",
+            "default": true
+        },
+        "addresses": [
+            {
+                "id": 2476804295,
+                "first_name": "Andrew",
+                "last_name": "Wyatt",
+                "company": "Wyatt Inc.",
+                "address1": "B-11, Betahouse",
+                "address2": "Street 11, Sector 52",
+                "city": "Manhattan",
+                "province": "New York",
+                "country": "United States",
+                "zip": "10027",
+                "phone": "145-112211",
+                "name": "Andrew Wyatt",
+                "province_code": "NY",
+                "country_code": "US",
+                "country_name": "United States",
+                "default": true
+            }
+        ]
+    }
+}

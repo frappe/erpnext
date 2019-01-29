@@ -1,2 +1,0 @@
-donor_type
-donor

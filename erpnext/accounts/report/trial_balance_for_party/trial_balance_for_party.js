@@ -25,9 +25,10 @@ frappe.query_reports["Trial Balance for Party"] = {
 				}
 				frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
 					var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
-					frappe.query_report_filters_by_name.from_date.set_input(fy.year_start_date);
-					frappe.query_report_filters_by_name.to_date.set_input(fy.year_end_date);
-					query_report.trigger_refresh();
+					frappe.query_report.set_filter_value({
+						from_date: fy.year_start_date,
+						to_date: fy.year_end_date
+					});
 				});
 			}
 		},
@@ -46,17 +47,18 @@ frappe.query_reports["Trial Balance for Party"] = {
 		{
 			"fieldname":"party_type",
 			"label": __("Party Type"),
-			"fieldtype": "Select",
-			"options": ["Customer", "Supplier"],
-			"default": "Customer"
+			"fieldtype": "Link",
+			"options": "Party Type",
+			"default": "Customer",
+			"reqd": 1
 		},
 		{
 			"fieldname":"party",
 			"label": __("Party"),
 			"fieldtype": "Dynamic Link",
 			"get_options": function() {
-				var party_type = frappe.query_report_filters_by_name.party_type.get_value();
-				var party = frappe.query_report_filters_by_name.party.get_value();
+				var party_type = frappe.query_report.get_filter_value('party_type');
+				var party = frappe.query_report.get_filter_value('party');
 				if(party && !party_type) {
 					frappe.throw(__("Please select Party Type first"));
 				}

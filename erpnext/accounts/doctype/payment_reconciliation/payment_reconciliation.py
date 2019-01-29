@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe.utils import flt
 from frappe import msgprint, _
 from frappe.model.document import Document
@@ -25,16 +25,18 @@ class PaymentReconciliation(Document):
 	def get_payment_entries(self):
 		order_doctype = "Sales Order" if self.party_type=="Customer" else "Purchase Order"
 		payment_entries = get_advance_payment_entries(self.party_type, self.party, 
-			self.receivable_payable_account, order_doctype, against_all_orders=True)
+			self.receivable_payable_account, order_doctype, against_all_orders=True, limit=self.limit)
 			
 		return payment_entries
 
 	def get_jv_entries(self):
-		dr_or_cr = "credit_in_account_currency" if self.party_type == "Customer" \
-			else "debit_in_account_currency"
+		dr_or_cr = ("credit_in_account_currency" if erpnext.get_party_account_type(self.party_type) == 'Receivable'
+			else "debit_in_account_currency")
 
 		bank_account_condition = "t2.against_account like %(bank_cash_account)s" \
 				if self.bank_cash_account else "1=1"
+
+		limit_cond = "limit %s" % (self.limit or 1000)
 
 		journal_entries = frappe.db.sql("""
 			select
@@ -55,10 +57,11 @@ class PaymentReconciliation(Document):
 					THEN 1=1
 					ELSE {bank_account_condition}
 				END)
-			order by t1.posting_date
+			order by t1.posting_date {limit_cond}
 			""".format(**{
 				"dr_or_cr": dr_or_cr,
 				"bank_account_condition": bank_account_condition,
+				"limit_cond": limit_cond
 			}), {
 				"party_type": self.party_type,
 				"party": self.party,
@@ -80,7 +83,7 @@ class PaymentReconciliation(Document):
 		condition = self.check_condition()
 
 		non_reconciled_invoices = get_outstanding_invoices(self.party_type, self.party,
-			self.receivable_payable_account, condition=condition)
+			self.receivable_payable_account, condition=condition, limit=self.limit)
 
 		self.add_invoice_entries(non_reconciled_invoices)
 
@@ -104,8 +107,8 @@ class PaymentReconciliation(Document):
 
 		self.get_invoice_entries()
 		self.validate_invoice()
-		dr_or_cr = "credit_in_account_currency" \
-			if self.party_type == "Customer" else "debit_in_account_currency"
+		dr_or_cr = ("credit_in_account_currency"
+			if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit_in_account_currency")
 			
 		lst = []
 		for e in self.get('payments'):
@@ -173,11 +176,8 @@ class PaymentReconciliation(Document):
 	def check_condition(self):
 		cond = " and posting_date >= '{0}'".format(frappe.db.escape(self.from_date)) if self.from_date else ""
 		cond += " and posting_date <= '{0}'".format(frappe.db.escape(self.to_date)) if self.to_date else ""
-
-		if self.party_type == "Customer":
-			dr_or_cr = "debit_in_account_currency"
-		else:
-			dr_or_cr = "credit_in_account_currency"
+		dr_or_cr = ("debit_in_account_currency" if erpnext.get_party_account_type(self.party_type) == 'Receivable'
+			else "credit_in_account_currency")
 
 		if self.minimum_amount:
 			cond += " and `{0}` >= {1}".format(dr_or_cr, flt(self.minimum_amount))

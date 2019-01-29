@@ -1,3 +1,0 @@
-stock-settings
-item-group
-item-attribute

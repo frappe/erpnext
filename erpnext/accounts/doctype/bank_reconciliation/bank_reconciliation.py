@@ -14,7 +14,7 @@ form_grid_templates = {
 class BankReconciliation(Document):
 	def get_payment_entries(self):
 		if not (self.bank_account and self.from_date and self.to_date):
-			msgprint("Bank Account, From Date and To Date are Mandatory")
+			msgprint(_("Bank Account, From Date and To Date are Mandatory"))
 			return
 
 		condition = ""
@@ -26,7 +26,7 @@ class BankReconciliation(Document):
 			select 
 				"Journal Entry" as payment_document, t1.name as payment_entry, 
 				t1.cheque_no as cheque_number, t1.cheque_date, 
-				t2.debit_in_account_currency as debit, t2.credit_in_account_currency as credit, 
+				sum(t2.debit_in_account_currency) as debit, sum(t2.credit_in_account_currency) as credit,
 				t1.posting_date, t2.against_account, t1.clearance_date, t2.account_currency 
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
@@ -34,6 +34,7 @@ class BankReconciliation(Document):
 				t2.parent = t1.name and t2.account = %s and t1.docstatus=1
 				and t1.posting_date >= %s and t1.posting_date <= %s 
 				and ifnull(t1.is_opening, 'No') = 'No' {0}
+			group by t2.account, t1.name
 			order by t1.posting_date ASC, t1.name DESC
 		""".format(condition), (self.bank_account, self.from_date, self.to_date), as_dict=1)
 

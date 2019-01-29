@@ -84,7 +84,7 @@ erpnext.setup.slides_settings = [
 
 			slide.get_input("company_abbr").on("change", function () {
 				if (slide.get_input("company_abbr").val().length > 5) {
-					frappe.msgprint("Company Abbreviation cannot have more than 5 characters");
+					frappe.msgprint(__("Company Abbreviation cannot have more than 5 characters"));
 					slide.get_field("company_abbr").set_value("");
 				}
 			});
@@ -126,6 +126,7 @@ erpnext.setup.slides_settings = [
 				fieldname: 'chart_of_accounts', label: __('Chart of Accounts'),
 				options: "", fieldtype: 'Select'
 			},
+			{ fieldname: 'view_coa', label: __('View Chart of Accounts'), fieldtype: 'Button' },
 
 			{ fieldtype: "Section Break", label: __('Financial Year') },
 			{ fieldname: 'fy_start_date', label: __('Start Date'), fieldtype: 'Date', reqd: 1 },
@@ -140,6 +141,37 @@ erpnext.setup.slides_settings = [
 		},
 
 		validate: function () {
+			let me = this;
+			let exist;
+
+			if (!this.validate_fy_dates()) {
+				return false;
+			}
+
+			// Validate bank name
+			if(me.values.bank_account){
+				frappe.call({
+					async: false,
+					method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.validate_bank_account",
+					args: {
+						"coa": me.values.chart_of_accounts,
+						"bank_account": me.values.bank_account
+					},
+					callback: function (r) {
+						if(r.message){
+							exist = r.message;
+							me.get_field("bank_account").set_value("");
+							frappe.msgprint(__(`Account ${me.values.bank_account} already exists, enter a different name for your bank account`));
+						}
+					}
+				});
+				return !exist; // Return False if exist = true
+			}
+
+			return true;
+		},
+
+		validate_fy_dates: function() {
 			// validate fiscal year start and end dates
 			const invalid = this.values.fy_start_date == 'Invalid date' ||
 				this.values.fy_end_date == 'Invalid date';
@@ -182,18 +214,11 @@ erpnext.setup.slides_settings = [
 			if (country) {
 				frappe.call({
 					method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.get_charts_for_country",
-					args: { "country": country },
+					args: { "country": country, with_standard: true },
 					callback: function (r) {
 						if (r.message) {
 							slide.get_input("chart_of_accounts").empty()
 								.add_options(r.message);
-
-							if (r.message.length === 1) {
-								var field = slide.get_field("chart_of_accounts");
-								field.set_value(r.message[0]);
-								field.df.hidden = 1;
-								field.refresh();
-							}
 						}
 					}
 				})
@@ -201,12 +226,72 @@ erpnext.setup.slides_settings = [
 		},
 
 		bind_events: function (slide) {
+			let me = this;
 			slide.get_input("fy_start_date").on("change", function () {
 				var start_date = slide.form.fields_dict.fy_start_date.get_value();
 				var year_end_date =
 					frappe.datetime.add_days(frappe.datetime.add_months(start_date, 12), -1);
 				slide.form.fields_dict.fy_end_date.set_value(year_end_date);
 			});
+
+			slide.get_input("view_coa").on("click", function() {
+				let chart_template = slide.form.fields_dict.chart_of_accounts.get_value();
+				if(!chart_template) return;
+
+				me.charts_modal(slide, chart_template);
+			});
+		},
+
+		charts_modal: function(slide, chart_template) {
+			let parent = __('All Accounts');
+
+			var dialog = new frappe.ui.Dialog({
+				title: chart_template,
+				fields: [
+					{'fieldname': 'expand_all', 'label': __('Expand All'), 'fieldtype': 'Button',
+						click: function() {
+							// expand all nodes on button click
+							coa_tree.load_children(coa_tree.root_node, true);
+						}
+					},
+					{'fieldname': 'collapse_all', 'label': __('Collapse All'), 'fieldtype': 'Button',
+						click: function() {
+							// collapse all nodes
+							coa_tree.get_all_nodes(coa_tree.root_node.data.value, coa_tree.root_node.is_root)
+								.then(data_list => {
+									data_list.map(d => { coa_tree.toggle_node(coa_tree.nodes[d.parent]); });
+								});
+						}
+					}
+				]
+			});
+
+			// render tree structure in the dialog modal
+			let coa_tree = new frappe.ui.Tree({
+				parent: $(dialog.body),
+				label: parent,
+				expandable: true,
+				method: 'erpnext.accounts.utils.get_coa',
+				args: {
+					chart: chart_template,
+					parent: parent,
+					doctype: 'Account'
+				},
+				onclick: function(node) {
+					parent = node.value;
+				}
+			});
+
+			// add class to show buttons side by side
+			const form_container = $(dialog.body).find('form');
+			const buttons = $(form_container).find('.frappe-control');
+			form_container.addClass('flex');
+			buttons.map((index, button) => {
+				$(button).css({"margin-right": "1em"});
+			})
+
+			dialog.show();
+			coa_tree.load_children(coa_tree.root_node, true); // expand all node trigger
 		}
 	}
 ];

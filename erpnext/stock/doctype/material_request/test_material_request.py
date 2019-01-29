@@ -7,7 +7,7 @@
 from __future__ import unicode_literals
 import frappe, unittest, erpnext
 from frappe.utils import flt, today
-from erpnext.stock.doctype.material_request.material_request import raise_production_orders
+from erpnext.stock.doctype.material_request.material_request import raise_work_orders
 
 class TestMaterialRequest(unittest.TestCase):
 	def setUp(self):
@@ -25,8 +25,8 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 		po = make_purchase_order(mr.name)
 
-		self.assertEquals(po.doctype, "Purchase Order")
-		self.assertEquals(len(po.get("items")), len(mr.get("items")))
+		self.assertEqual(po.doctype, "Purchase Order")
+		self.assertEqual(len(po.get("items")), len(mr.get("items")))
 
 	def test_make_supplier_quotation(self):
 		from erpnext.stock.doctype.material_request.material_request import make_supplier_quotation
@@ -39,8 +39,8 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 		sq = make_supplier_quotation(mr.name)
 
-		self.assertEquals(sq.doctype, "Supplier Quotation")
-		self.assertEquals(len(sq.get("items")), len(mr.get("items")))
+		self.assertEqual(sq.doctype, "Supplier Quotation")
+		self.assertEqual(len(sq.get("items")), len(mr.get("items")))
 
 
 	def test_make_stock_entry(self):
@@ -56,8 +56,8 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 		se = make_stock_entry(mr.name)
 
-		self.assertEquals(se.doctype, "Stock Entry")
-		self.assertEquals(len(se.get("items")), len(mr.get("items")))
+		self.assertEqual(se.doctype, "Stock Entry")
+		self.assertEqual(len(se.get("items")), len(mr.get("items")))
 
 	def _insert_stock_entry(self, qty1, qty2, warehouse = None ):
 		se = frappe.get_doc({
@@ -197,9 +197,9 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# check if per complete is None
 		mr.load_from_db()
-		self.assertEquals(mr.per_ordered, 0)
-		self.assertEquals(mr.get("items")[0].ordered_qty, 0)
-		self.assertEquals(mr.get("items")[1].ordered_qty, 0)
+		self.assertEqual(mr.per_ordered, 0)
+		self.assertEqual(mr.get("items")[0].ordered_qty, 0)
+		self.assertEqual(mr.get("items")[1].ordered_qty, 0)
 
 		# map a purchase order
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
@@ -231,28 +231,28 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# check if per complete is as expected
 		mr.load_from_db()
-		self.assertEquals(mr.per_ordered, 50)
-		self.assertEquals(mr.get("items")[0].ordered_qty, 27.0)
-		self.assertEquals(mr.get("items")[1].ordered_qty, 1.5)
+		self.assertEqual(mr.per_ordered, 50)
+		self.assertEqual(mr.get("items")[0].ordered_qty, 27.0)
+		self.assertEqual(mr.get("items")[1].ordered_qty, 1.5)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
 
-		self.assertEquals(current_requested_qty_item1, existing_requested_qty_item1 + 27.0)
-		self.assertEquals(current_requested_qty_item2, existing_requested_qty_item2 + 1.5)
+		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 + 27.0)
+		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 + 1.5)
 
 		po.cancel()
 		# check if per complete is as expected
 		mr.load_from_db()
-		self.assertEquals(mr.per_ordered, 0)
-		self.assertEquals(mr.get("items")[0].ordered_qty, 0)
-		self.assertEquals(mr.get("items")[1].ordered_qty, 0)
+		self.assertEqual(mr.per_ordered, 0)
+		self.assertEqual(mr.get("items")[0].ordered_qty, 0)
+		self.assertEqual(mr.get("items")[1].ordered_qty, 0)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
 
-		self.assertEquals(current_requested_qty_item1, existing_requested_qty_item1 + 54.0)
-		self.assertEquals(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
+		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 + 54.0)
+		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
 
 	def test_completed_qty_for_transfer(self):
 		existing_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
@@ -266,15 +266,15 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# check if per complete is None
 		mr.load_from_db()
-		self.assertEquals(mr.per_ordered, 0)
-		self.assertEquals(mr.get("items")[0].ordered_qty, 0)
-		self.assertEquals(mr.get("items")[1].ordered_qty, 0)
+		self.assertEqual(mr.per_ordered, 0)
+		self.assertEqual(mr.get("items")[0].ordered_qty, 0)
+		self.assertEqual(mr.get("items")[1].ordered_qty, 0)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
 
-		self.assertEquals(current_requested_qty_item1, existing_requested_qty_item1 + 54.0)
-		self.assertEquals(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
+		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 + 54.0)
+		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
 
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 
@@ -321,28 +321,28 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# check if per complete is as expected
 		mr.load_from_db()
-		self.assertEquals(mr.per_ordered, 50)
-		self.assertEquals(mr.get("items")[0].ordered_qty, 27.0)
-		self.assertEquals(mr.get("items")[1].ordered_qty, 1.5)
+		self.assertEqual(mr.per_ordered, 50)
+		self.assertEqual(mr.get("items")[0].ordered_qty, 27.0)
+		self.assertEqual(mr.get("items")[1].ordered_qty, 1.5)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
 
-		self.assertEquals(current_requested_qty_item1, existing_requested_qty_item1 + 27.0)
-		self.assertEquals(current_requested_qty_item2, existing_requested_qty_item2 + 1.5)
+		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 + 27.0)
+		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 + 1.5)
 
 		# check if per complete is as expected for Stock Entry cancelled
 		se.cancel()
 		mr.load_from_db()
-		self.assertEquals(mr.per_ordered, 0)
-		self.assertEquals(mr.get("items")[0].ordered_qty, 0)
-		self.assertEquals(mr.get("items")[1].ordered_qty, 0)
+		self.assertEqual(mr.per_ordered, 0)
+		self.assertEqual(mr.get("items")[0].ordered_qty, 0)
+		self.assertEqual(mr.get("items")[1].ordered_qty, 0)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
 
-		self.assertEquals(current_requested_qty_item1, existing_requested_qty_item1 + 54.0)
-		self.assertEquals(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
+		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 + 54.0)
+		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
 
 	def test_completed_qty_for_over_transfer(self):
 		existing_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
@@ -356,9 +356,9 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# check if per complete is None
 		mr.load_from_db()
-		self.assertEquals(mr.per_ordered, 0)
-		self.assertEquals(mr.get("items")[0].ordered_qty, 0)
-		self.assertEquals(mr.get("items")[1].ordered_qty, 0)
+		self.assertEqual(mr.per_ordered, 0)
+		self.assertEqual(mr.get("items")[0].ordered_qty, 0)
+		self.assertEqual(mr.get("items")[1].ordered_qty, 0)
 
 		# map a stock entry
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
@@ -400,28 +400,28 @@ class TestMaterialRequest(unittest.TestCase):
 		# check if per complete is as expected
 		mr.load_from_db()
 
-		self.assertEquals(mr.per_ordered, 100)
-		self.assertEquals(mr.get("items")[0].ordered_qty, 54.0)
-		self.assertEquals(mr.get("items")[1].ordered_qty, 3.0)
+		self.assertEqual(mr.per_ordered, 100)
+		self.assertEqual(mr.get("items")[0].ordered_qty, 54.0)
+		self.assertEqual(mr.get("items")[1].ordered_qty, 3.0)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
 
-		self.assertEquals(current_requested_qty_item1, existing_requested_qty_item1)
-		self.assertEquals(current_requested_qty_item2, existing_requested_qty_item2)
+		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1)
+		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2)
 
 		# check if per complete is as expected for Stock Entry cancelled
 		se.cancel()
 		mr.load_from_db()
-		self.assertEquals(mr.per_ordered, 0)
-		self.assertEquals(mr.get("items")[0].ordered_qty, 0)
-		self.assertEquals(mr.get("items")[1].ordered_qty, 0)
+		self.assertEqual(mr.per_ordered, 0)
+		self.assertEqual(mr.get("items")[0].ordered_qty, 0)
+		self.assertEqual(mr.get("items")[1].ordered_qty, 0)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
 
-		self.assertEquals(current_requested_qty_item1, existing_requested_qty_item1 + 54.0)
-		self.assertEquals(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
+		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 + 54.0)
+		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
 
 	def test_incorrect_mapping_of_stock_entry(self):
 		# submit material request of type Transfer
@@ -466,7 +466,7 @@ class TestMaterialRequest(unittest.TestCase):
 		# map a stock entry
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 		se_doc = make_stock_entry(mr.name)
-		self.assertEquals(se_doc.get("items")[0].s_warehouse, "_Test Warehouse - _TC")
+		self.assertEqual(se_doc.get("items")[0].s_warehouse, "_Test Warehouse - _TC")
 
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany
@@ -490,8 +490,8 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 		se = make_stock_entry(mr.name)
 
-		self.assertEquals(se.doctype, "Stock Entry")
-		self.assertEquals(len(se.get("items")), len(mr.get("items")))
+		self.assertEqual(se.doctype, "Stock Entry")
+		self.assertEqual(len(se.get("items")), len(mr.get("items")))
 
 	def test_completed_qty_for_issue(self):
 		def _get_requested_qty():
@@ -507,7 +507,7 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 
 		#testing bin value after material request is submitted
-		self.assertEquals(_get_requested_qty(), existing_requested_qty + 54.0)
+		self.assertEqual(_get_requested_qty(), existing_requested_qty + 54.0)
 
 		# receive items to allow issue
 		self._insert_stock_entry(60, 6, "_Test Warehouse - _TC")
@@ -522,11 +522,11 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# check if per complete is as expected
 		mr.load_from_db()
-		self.assertEquals(mr.get("items")[0].ordered_qty, 54.0)
-		self.assertEquals(mr.get("items")[1].ordered_qty, 3.0)
+		self.assertEqual(mr.get("items")[0].ordered_qty, 54.0)
+		self.assertEqual(mr.get("items")[1].ordered_qty, 3.0)
 
 		#testing bin requested qty after issuing stock against material request
-		self.assertEquals(_get_requested_qty(), existing_requested_qty)
+		self.assertEqual(_get_requested_qty(), existing_requested_qty)
 		
 	def test_material_request_type_manufacture(self):
 		mr = frappe.copy_doc(test_records[1]).insert()
@@ -536,27 +536,27 @@ class TestMaterialRequest(unittest.TestCase):
 		requested_qty = frappe.db.sql("""select indented_qty from `tabBin` where \
 			item_code= %s and warehouse= %s """, (mr.items[0].item_code, mr.items[0].warehouse))[0][0]
 
-		prod_order = raise_production_orders(mr.name)
-		po = frappe.get_doc("Production Order", prod_order[0])
+		prod_order = raise_work_orders(mr.name)
+		po = frappe.get_doc("Work Order", prod_order[0])
 		po.wip_warehouse = "_Test Warehouse 1 - _TC"
 		po.submit()
 		
 		mr = frappe.get_doc("Material Request", mr.name)
-		self.assertEquals(completed_qty + po.qty, mr.items[0].ordered_qty)
+		self.assertEqual(completed_qty + po.qty, mr.items[0].ordered_qty)
 
 		new_requested_qty = frappe.db.sql("""select indented_qty from `tabBin` where \
 			item_code= %s and warehouse= %s """, (mr.items[0].item_code, mr.items[0].warehouse))[0][0]
 		
-		self.assertEquals(requested_qty - po.qty, new_requested_qty)
+		self.assertEqual(requested_qty - po.qty, new_requested_qty)
 		
 		po.cancel()
 
 		mr = frappe.get_doc("Material Request", mr.name)
-		self.assertEquals(completed_qty, mr.items[0].ordered_qty)
+		self.assertEqual(completed_qty, mr.items[0].ordered_qty)
 		
 		new_requested_qty = frappe.db.sql("""select indented_qty from `tabBin` where \
 			item_code= %s and warehouse= %s """, (mr.items[0].item_code, mr.items[0].warehouse))[0][0]
-		self.assertEquals(requested_qty, new_requested_qty)
+		self.assertEqual(requested_qty, new_requested_qty)
 
 	def test_multi_uom_for_purchase(self):
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
@@ -587,19 +587,35 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 		item = mr.items[0]
 
-		self.assertEquals(item.uom, "Kg")
-		self.assertEquals(item.conversion_factor, 5.0)
-		self.assertEquals(item.stock_qty, flt(item.qty * 5))
+		self.assertEqual(item.uom, "Kg")
+		self.assertEqual(item.conversion_factor, 5.0)
+		self.assertEqual(item.stock_qty, flt(item.qty * 5))
 
 		po = make_purchase_order(mr.name)
-		self.assertEquals(po.doctype, "Purchase Order")
-		self.assertEquals(len(po.get("items")), len(mr.get("items")))
+		self.assertEqual(po.doctype, "Purchase Order")
+		self.assertEqual(len(po.get("items")), len(mr.get("items")))
 
 		po.supplier = '_Test Supplier'
 		po.insert()
 		po.submit()
 		mr = frappe.get_doc("Material Request", mr.name)
-		self.assertEquals(mr.per_ordered, 100)
+		self.assertEqual(mr.per_ordered, 100)
+
+def make_material_request(**args):
+	args = frappe._dict(args)
+	mr = frappe.new_doc("Material Request")
+	mr.material_request_type = args.material_request_type or "Purchase"
+	mr.company = args.company or "_Test Company"
+	mr.append("items", {
+		"item_code": args.item_code or "_Test Item",
+		"qty": args.qty or 10,
+		"schedule_date": args.schedule_date or today(),
+		"warehouse": args.warehouse or "_Test Warehouse - _TC"
+	})
+	mr.insert()
+	if not args.do_not_submit:
+		mr.submit()
+	return mr
 
 test_dependencies = ["Currency Exchange", "BOM"]
 test_records = frappe.get_test_records('Material Request')

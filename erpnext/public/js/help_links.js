@@ -254,7 +254,7 @@ frappe.help.help_links['List/Company'] = [
 //Accounts
 
 frappe.help.help_links['modules/Accounts'] = [
-	{ label: 'Introduction to Accounts', url: 'http://erpnext.com/docs/user/manual/en/accounts/' },
+	{ label: 'Introduction to Accounts', url: docsUrl + 'user/manual/en/accounts/' },
 	{ label: 'Chart of Accounts', url: docsUrl + 'user/manual/en/accounts/chart-of-accounts.html' },
 	{ label: 'Multi Currency Accounting', url: docsUrl + 'user/manual/en/accounts/multi-currency-accounting' },
 ]
@@ -319,7 +319,7 @@ frappe.help.help_links['Tree/Cost Center'] = [
 ]
 
 frappe.help.help_links['List/Item'] = [
-	{ label: 'Item', url: 'http://erpnext.com/docs/user/manual/en/stock/item' },
+	{ label: 'Item', url: docsUrl + 'user/manual/en/stock/item' },
 	{ label: 'Item Price', url: docsUrl + 'user/manual/en/stock/item/item-price' },
 	{ label: 'Barcode', url: docsUrl + 'user/manual/en/stock/articles/track-items-using-barcode' },
 	{ label: 'Item Wise Taxation', url: docsUrl + 'user/manual/en/accounts/item-wise-taxation' },
@@ -330,7 +330,7 @@ frappe.help.help_links['List/Item'] = [
 ]
 
 frappe.help.help_links['Form/Item'] = [
-	{ label: 'Item', url: 'http://erpnext.com/docs/user/manual/en/stock/item' },
+	{ label: 'Item', url: docsUrl + 'user/manual/en/stock/item' },
 	{ label: 'Item Price', url: docsUrl + 'user/manual/en/stock/item/item-price' },
 	{ label: 'Barcode', url: docsUrl + 'user/manual/en/stock/articles/track-items-using-barcode' },
 	{ label: 'Item Wise Taxation', url: docsUrl + 'user/manual/en/accounts/item-wise-taxation' },

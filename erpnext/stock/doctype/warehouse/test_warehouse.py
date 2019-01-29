@@ -8,6 +8,7 @@ from erpnext import set_perpetual_inventory
 from frappe.test_runner import make_test_records
 from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
 
+import erpnext
 import frappe
 import unittest
 test_records = frappe.get_test_records('Warehouse')
@@ -19,7 +20,7 @@ class TestWarehouse(unittest.TestCase):
 
 	def test_parent_warehouse(self):
 		parent_warehouse = frappe.get_doc("Warehouse", "_Test Warehouse Group - _TC")
-		self.assertEquals(parent_warehouse.is_group, 1)
+		self.assertEqual(parent_warehouse.is_group, 1)
 
 	def test_warehouse_hierarchy(self):
 		p_warehouse = frappe.get_doc("Warehouse", "_Test Warehouse Group - _TC")
@@ -28,8 +29,8 @@ class TestWarehouse(unittest.TestCase):
 			where wh.lft > %s and wh.rgt < %s""", (p_warehouse.lft, p_warehouse.rgt), as_dict=1)
 
 		for child_warehouse in child_warehouses:
-			self.assertEquals(p_warehouse.name, child_warehouse.parent_warehouse)
-			self.assertEquals(child_warehouse.is_group, 0)
+			self.assertEqual(p_warehouse.name, child_warehouse.parent_warehouse)
+			self.assertEqual(child_warehouse.is_group, 0)
 
 	def test_warehouse_renaming(self):
 		set_perpetual_inventory(1)
@@ -90,17 +91,24 @@ class TestWarehouse(unittest.TestCase):
 		self.assertTrue(frappe.db.get_value("Warehouse",
 			filters={"account": "Test Warehouse for Merging 2 - _TC"}))
 
-def create_warehouse(warehouse_name, properties=None):
-	if not frappe.db.exists("Warehouse", warehouse_name + " - _TC"):
+def create_warehouse(warehouse_name, properties=None, company=None):
+	if not company:
+		company = "_Test Company"
+
+	warehouse_id = erpnext.encode_company_abbr(warehouse_name, company)
+	if not frappe.db.exists("Warehouse", warehouse_id):
 		w = frappe.new_doc("Warehouse")
 		w.warehouse_name = warehouse_name
 		w.parent_warehouse = "_Test Warehouse Group - _TC"
-		w.company = "_Test Company"
+		w.company = company
 		make_account_for_warehouse(warehouse_name, w)
-		w.account = warehouse_name + " - _TC"
+		w.account = warehouse_id
 		if properties:
 			w.update(properties)
 		w.save()
+		return w.name
+	else:
+		return warehouse_id
 
 def make_account_for_warehouse(warehouse_name, warehouse_obj):
 	if not frappe.db.exists("Account", warehouse_name + " - _TC"):

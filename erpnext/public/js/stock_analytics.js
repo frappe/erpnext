@@ -34,10 +34,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	},
 	setup_columns: function() {
 		var std_columns = [
-			{id: "_check", name: __("Plot"), field: "_check", width: 30,
-				formatter: this.check_formatter},
-			{id: "name", name: __("Item"), field: "name", width: 300,
-				formatter: this.tree_formatter},
+			{id: "name", name: __("Item"), field: "name", width: 300},
 			{id: "brand", name: __("Brand"), field: "brand", width: 100},
 			{id: "stock_uom", name: __("UOM"), field: "stock_uom", width: 100},
 			{id: "opening", name: __("Opening"), field: "opening", hidden: true,
@@ -77,7 +74,6 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		this.trigger_refresh_on_change(["value_or_qty", "brand", "warehouse", "range"]);
 
 		this.show_zero_check();
-		this.setup_chart_check();
 	},
 	init_filter_values: function() {
 		this._super();

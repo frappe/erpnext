@@ -3,8 +3,9 @@ from __future__ import unicode_literals
 import frappe, sys
 import erpnext
 import frappe.utils
-from erpnext.demo.user import hr, sales, purchase, manufacturing, stock, accounts, projects, fixed_asset, education
-from erpnext.demo.setup import education, manufacture, setup_data, healthcare
+from erpnext.demo.user import hr, sales, purchase, manufacturing, stock, accounts, projects, fixed_asset
+from erpnext.demo.user import education as edu
+from erpnext.demo.setup import education, manufacture, setup_data, healthcare, retail
 """
 Make a demo
 
@@ -28,6 +29,8 @@ def make(domain='Manufacturing', days=100):
 	setup_data.setup(domain)
 	if domain== 'Manufacturing':
 		manufacture.setup_data()
+	elif domain == "Retail":
+		retail.setup_data()
 	elif domain== 'Education':
 		education.setup_data()
 	elif domain== 'Healthcare':
@@ -63,7 +66,7 @@ def simulate(domain='Manufacturing', days=100):
 		# runs_for = 100
 
 	fixed_asset.work()
-	for i in xrange(runs_for):
+	for i in range(runs_for):
 		sys.stdout.write("\rSimulating {0}: Day {1}".format(
 			current_date.strftime("%Y-%m-%d"), i))
 		sys.stdout.flush()
@@ -77,13 +80,13 @@ def simulate(domain='Manufacturing', days=100):
 			stock.work()
 			accounts.work()
 			projects.run_projects(current_date)
+			sales.work(domain)
 			# run_messages()
 
 			if domain=='Manufacturing':
-				sales.work()
 				manufacturing.work()
 			elif domain=='Education':
-				education.work()
+				edu.work()
 
 		except:
 			frappe.db.set_global('demo_last_date', current_date)

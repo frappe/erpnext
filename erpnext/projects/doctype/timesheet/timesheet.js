@@ -3,6 +3,7 @@
 
 frappe.ui.form.on("Timesheet", {
 	setup: function(frm) {
+		frappe.require("/assets/erpnext/js/projects/timer.js");
 		frm.add_fetch('employee', 'employee_name', 'employee_name');
 		frm.fields_dict.employee.get_query = function() {
 			return {
@@ -50,10 +51,50 @@ frappe.ui.form.on("Timesheet", {
 			}
 		}
 
+		if (frm.doc.docstatus < 1) {
+
+			let button = 'Start Timer';
+			$.each(frm.doc.time_logs || [], function(i, row) {
+				if ((row.from_time <= frappe.datetime.now_datetime()) && !row.completed) {
+					button = 'Resume Timer';
+				}
+			})
+
+			frm.add_custom_button(__(button), function() {
+				var flag = true;
+				$.each(frm.doc.time_logs || [], function(i, row) {
+					// Fetch the row for which from_time is not present
+					if (flag && row.activity_type && !row.from_time){
+						erpnext.timesheet.timer(frm, row);
+						row.from_time = frappe.datetime.now_datetime();
+						frm.refresh_fields("time_logs");
+						frm.save();
+						flag = false;
+					}
+					// Fetch the row for timer where activity is not completed and from_time is before now_time
+					if (flag && row.from_time <= frappe.datetime.now_datetime() && !row.completed) {
+						let timestamp = moment(frappe.datetime.now_datetime()).diff(moment(row.from_time),"seconds");
+						erpnext.timesheet.timer(frm, row, timestamp);
+						flag = false;
+					}
+				})
+				// If no activities found to start a timer, create new
+				if (flag) {
+					erpnext.timesheet.timer(frm);
+				}
+			}).addClass("btn-primary");
+		}
 		if(frm.doc.per_billed > 0) {
 			frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
 			frm.fields_dict["time_logs"].grid.toggle_enable("billable", false);
 		}
+	},
+
+	company: function(frm) {
+		frappe.db.get_value('Company', { 'company_name' : frm.doc.company }, 'standard_working_hours')
+			.then(({ message }) => {
+				(frappe.working_hours = message.standard_working_hours || 0);
+		});
 	},
 
 	make_invoice: function(frm) {
@@ -86,7 +127,6 @@ frappe.ui.form.on("Timesheet", {
 				}
 			})
 		})
-
 		dialog.show();
 	},
 
@@ -109,12 +149,30 @@ frappe.ui.form.on("Timesheet Detail", {
 
 	to_time: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
+		var time_diff = (moment(child.to_time).diff(moment(child.from_time),"seconds")) / ( 60 * 60 * 24);
+		var std_working_hours = 0;
 
 		if(frm._setting_hours) return;
-		frappe.model.set_value(cdt, cdn, "hours", moment(child.to_time).diff(moment(child.from_time),
-			"seconds") / 3600);
+
+		var hours = moment(child.to_time).diff(moment(child.from_time), "seconds") / 3600;
+		std_working_hours = time_diff * frappe.working_hours;
+
+		if (std_working_hours < hours && std_working_hours > 0) {
+			frappe.model.set_value(cdt, cdn, "hours", std_working_hours);
+		} else {
+			frappe.model.set_value(cdt, cdn, "hours", hours);
+		}
 	},
 
+	time_logs_add: function(frm) {
+		var $trigger_again = $('.form-grid').find('.grid-row').find('.btn-open-row');
+		$trigger_again.on('click', () => {
+			$('.form-grid')
+				.find('[data-fieldname="timer"]')
+				.append(frappe.render_template("timesheet"));
+			frm.trigger("control_timer");
+		})
+	},
 	hours: function(frm, cdt, cdn) {
 		calculate_end_time(frm, cdt, cdn)
 	},
@@ -168,17 +226,23 @@ var calculate_end_time = function(frm, cdt, cdn) {
 
 	let d = moment(child.from_time);
 	if(child.hours) {
-		d.add(child.hours, "hours");
-		frm._setting_hours = true;
-		frappe.model.set_value(cdt, cdn, "to_time",
-			d.format(moment.defaultDatetimeFormat)).then(() => {
-				frm._setting_hours = false;
-			});
-	}
+		var time_diff = (moment(child.to_time).diff(moment(child.from_time),"seconds")) / (60 * 60 * 24);
+		var std_working_hours = 0;
+		var hours = moment(child.to_time).diff(moment(child.from_time), "seconds") / 3600;
 
+		std_working_hours = time_diff * frappe.working_hours;
 
-	if((frm.doc.__islocal || frm.doc.__onload.maintain_bill_work_hours_same) && child.hours){
-		frappe.model.set_value(cdt, cdn, "billing_hours", child.hours);
+		if (std_working_hours < hours && std_working_hours > 0) {
+			frappe.model.set_value(cdt, cdn, "hours", std_working_hours);
+			frappe.model.set_value(cdt, cdn, "to_time", d.add(hours, "hours").format(frappe.defaultDatetimeFormat));
+		} else {
+			d.add(child.hours, "hours");
+			frm._setting_hours = true;
+			frappe.model.set_value(cdt, cdn, "to_time",
+				d.format(frappe.defaultDatetimeFormat)).then(() => {
+					frm._setting_hours = false;
+				});
+		}
 	}
 }
 

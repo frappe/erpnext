@@ -81,6 +81,22 @@ class Issue(Document):
 
 		self.db_set("description", "")
 
+	def split_issue(self, subject, communication_id):
+		# Bug: Pressing enter doesn't send subject
+		from copy import deepcopy
+		replicated_issue = deepcopy(self)
+		replicated_issue.subject = subject
+		frappe.get_doc(replicated_issue).insert()
+		# Replicate linked Communications
+		# todo get all communications in timeline before this, and modify them to append them to new doc
+		comm_to_split_from = frappe.get_doc("Communication", communication_id)
+		communications = frappe.get_all("Communication", filters={"reference_name": comm_to_split_from.reference_name, "reference_doctype": "Issue", "creation": ('>=', comm_to_split_from.creation)})
+		for communication in communications:
+			doc = frappe.get_doc("Communication", communication.name)
+			doc.reference_name = replicated_issue.name
+			doc.save(ignore_permissions=True)
+		return replicated_issue.name
+
 def get_list_context(context=None):
 	return {
 		"title": _("Issues"),
@@ -94,10 +110,16 @@ def get_list_context(context=None):
 def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by=None):
 	from frappe.www.list import get_list
 	user = frappe.session.user
+	contact = frappe.db.get_value('Contact', {'user': user}, 'name')
+	customer = None
+	if contact:
+		contact_doc = frappe.get_doc('Contact', contact)
+		customer = contact_doc.get_link_for('Customer')
+
 	ignore_permissions = False
 	if is_website_user():
 		if not filters: filters = []
-		filters.append(("Issue", "raised_by", "=", user))
+		filters.append(("Issue", "customer", "=", customer)) if customer else filters.append(("Issue", "raised_by", "=", user))
 		ignore_permissions = True
 
 	return get_list(doctype, txt, filters, limit_start, limit_page_length, ignore_permissions=ignore_permissions)
@@ -129,4 +151,12 @@ def set_multiple_status(names, status):
 		set_status(name, status)
 
 def has_website_permission(doc, ptype, user, verbose=False):
-	return doc.raised_by==user
+	from erpnext.controllers.website_list_for_contact import has_website_permission
+	permission_based_on_customer = has_website_permission(doc, ptype, user, verbose)
+
+	return permission_based_on_customer or doc.raised_by==user
+
+
+def update_issue(contact, method):
+	"""Called when Contact is deleted"""
+	frappe.db.sql("""UPDATE `tabIssue` set contact='' where contact=%s""", contact.name)

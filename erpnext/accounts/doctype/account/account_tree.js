@@ -7,9 +7,9 @@ frappe.treeview_settings["Account"] = {
 	filters: [{
 		fieldname: "company",
 		fieldtype:"Select",
-		options: $.map(locals[':Company'], function(c) { return c.name; }).sort(),
+		options: erpnext.utils.get_tree_options("company"),
 		label: __("Company"),
-		default: frappe.defaults.get_default('company') ? frappe.defaults.get_default('company'): ""
+		default: erpnext.utils.get_tree_default("company")
 	}],
 	root_label: "Accounts",
 	get_tree_nodes: 'erpnext.accounts.utils.get_children',
@@ -32,9 +32,7 @@ frappe.treeview_settings["Account"] = {
 			options: ['Asset', 'Liability', 'Equity', 'Income', 'Expense'].join('\n'),
 			depends_on: 'eval:doc.is_group && !doc.parent_account'},
 		{fieldtype:'Select', fieldname:'account_type', label:__('Account Type'),
-			options: ['', 'Accumulated Depreciation', 'Bank', 'Cash', 'Chargeable', 'Cost of Goods Sold', 'Depreciation',
-				'Equity', 'Expense Account', 'Expenses Included In Valuation', 'Fixed Asset', 'Income Account', 'Payable', 'Receivable',
-				'Round Off', 'Stock', 'Stock Adjustment', 'Stock Received But Not Billed', 'Tax', 'Temporary'].join('\n'),
+			options: frappe.get_meta("Account").fields.filter(d => d.fieldname=='account_type')[0].options,
 			description: __("Optional. This setting will be used to filter in various transactions.")
 		},
 		{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate'),
@@ -44,6 +42,8 @@ frappe.treeview_settings["Account"] = {
 	],
 	ignore_fields:["parent_account"],
 	onload: function(treeview) {
+		frappe.treeview_settings['Account'].page = {};
+		$.extend(frappe.treeview_settings['Account'].page, treeview.page);
 		function get_company() {
 			return treeview.page.fields_dict.company.get_value();
 		}
@@ -103,7 +103,7 @@ frappe.treeview_settings["Account"] = {
 					"account": node.label,
 					"from_date": frappe.sys_defaults.year_start_date,
 					"to_date": frappe.sys_defaults.year_end_date,
-					"company": frappe.defaults.get_default('company') ? frappe.defaults.get_default('company'): ""
+					"company": frappe.treeview_settings['Account'].page.fields_dict.company.get_value()
 				};
 				frappe.set_route("query-report", "General Ledger");
 			},

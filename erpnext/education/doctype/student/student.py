@@ -26,12 +26,12 @@ class Student(Document):
 			if not meta.issingle:
 				if "student_name" in [f.fieldname for f in meta.fields]:
 					frappe.db.sql("""UPDATE `tab{0}` set student_name = %s where {1} = %s"""
-						.format(d, linked_doctypes[d]["fieldname"]),(self.title, self.name))
+						.format(d, linked_doctypes[d]["fieldname"][0]),(self.title, self.name))
 
 				if "child_doctype" in linked_doctypes[d].keys() and "student_name" in \
 					[f.fieldname for f in frappe.get_meta(linked_doctypes[d]["child_doctype"]).fields]:
 					frappe.db.sql("""UPDATE `tab{0}` set student_name = %s where {1} = %s"""
-						.format(linked_doctypes[d]["child_doctype"], linked_doctypes[d]["fieldname"]),(self.title, self.name))
+						.format(linked_doctypes[d]["child_doctype"], linked_doctypes[d]["fieldname"][0]),(self.title, self.name))
 
 	def check_unique(self):
 		"""Validates if the Student Applicant is Unique"""
