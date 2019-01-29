@@ -115,7 +115,7 @@ class PayrollEntry(Document):
 				frappe.enqueue(create_salary_slips_for_employees, timeout=600, employees=emp_list, args=args)
 			else:
 				create_salary_slips_for_employees(emp_list, args, publish_progress=False)
-			
+
 	def get_sal_slip_list(self, ss_status, as_dict=False):
 		"""
 			Returns list of salary slips based on selected criteria
@@ -196,7 +196,7 @@ class PayrollEntry(Document):
 		return account_dict
 
 	def get_default_payroll_payable_account(self):
-		payroll_payable_account = frappe.get_cached_value('Company', 
+		payroll_payable_account = frappe.get_cached_value('Company',
 			{"company_name": self.company},  "default_payroll_payable_account")
 
 		if not payroll_payable_account:
@@ -482,7 +482,6 @@ def payroll_entry_has_bank_entries(name):
 
 	return response
 
-<<<<<<< HEAD
 def create_salary_slips_for_employees(employees, args, publish_progress=True):
 	salary_slips_exists_for = get_existing_salary_slips(employees, args)
 	count=0
@@ -505,9 +504,9 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 
 def get_existing_salary_slips(employees, args):
 	return frappe.db.sql_list("""
-		select distinct employee from `tabSalary Slip` 
+		select distinct employee from `tabSalary Slip`
 		where docstatus!= 2 and company = %s
-			and start_date >= %s and end_date <= %s 
+			and start_date >= %s and end_date <= %s
 			and employee in (%s)
 	""" % ('%s', '%s', '%s', ', '.join(['%s']*len(employees))),
 		[args.company, args.start_date, args.end_date] + employees)
@@ -528,7 +527,7 @@ def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progr
 				submitted_ss.append(ss_obj)
 			except frappe.ValidationError:
 				not_submitted_ss.append(ss[0])
-		
+
 		count += 1
 		if publish_progress:
 			frappe.publish_progress(count*100/len(salary_slips), title = _("Submitting Salary Slips..."))
@@ -539,7 +538,7 @@ def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progr
 			.format(ss_obj.start_date, ss_obj.end_date))
 
 		payroll_entry.email_salary_slip(submitted_ss)
-	
+
 	payroll_entry.db_set("salary_slips_submitted", 1)
 	payroll_entry.notify_update()
 
@@ -547,8 +546,7 @@ def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progr
 		frappe.msgprint(_("No salary slip found to submit for the above selected criteria OR salary slip already submitted"))
 
 	if not_submitted_ss:
-		frappe.msgprint(_("Could not submit some Salary Slips"))	
-=======
+		frappe.msgprint(_("Could not submit some Salary Slips"))
 def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
 		select name from `tabPayroll Entry`
@@ -561,4 +559,3 @@ def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filte
 			'txt': "%%%s%%" % frappe.db.escape(txt),
 			'start': start, 'page_len': page_len
 		})
->>>>>>> master
