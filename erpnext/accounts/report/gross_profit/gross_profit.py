@@ -184,7 +184,7 @@ class GrossProfitGenerator(object):
 	def get_returned_invoice_items(self):
 		returned_invoices = frappe.db.sql("""
 			select
-				si.name, si_item.item_code, si_item.qty, si_item.base_amount, si.return_against
+				si.name, si_item.item_code, si_item.stock_qty as qty, si_item.base_net_amount as base_amount, si.return_against
 			from
 				`tabSales Invoice` si, `tabSales Invoice Item` si_item
 			where
@@ -329,7 +329,7 @@ class GrossProfitGenerator(object):
 			where company=%(company)s
 			order by
 				item_code desc, warehouse desc, posting_date desc,
-				posting_time desc, name desc""", self.filters, as_dict=True)
+				posting_time desc, creation desc""", self.filters, as_dict=True)
 		self.sle = {}
 		for r in res:
 			if (r.item_code, r.warehouse) not in self.sle:

@@ -8,7 +8,7 @@ from frappe import _, throw
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.stock.doctype.item.item import get_item_defaults, set_item_default
+from erpnext.stock.doctype.item.item import set_item_default
 from frappe.contacts.doctype.address.address import get_address_display
 
 from erpnext.controllers.stock_controller import StockController
@@ -179,7 +179,7 @@ class SellingController(StockController):
 			last_valuation_rate = frappe.db.sql("""
 				SELECT valuation_rate FROM `tabStock Ledger Entry` WHERE item_code = %s
 				AND warehouse = %s AND valuation_rate > 0
-				ORDER BY posting_date DESC, posting_time DESC, name DESC LIMIT 1
+				ORDER BY posting_date DESC, posting_time DESC, creation DESC LIMIT 1
 				""", (it.item_code, it.warehouse))
 			if last_valuation_rate:
 				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] / (it.conversion_factor or 1)
