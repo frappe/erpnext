@@ -40,7 +40,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "BOM",
+					"name": "BOM Browser",
 					"icon": "fa fa-sitemap",
 					"label": _("BOM Browser"),
 					"description": _("Tree of Bill of Materials"),
