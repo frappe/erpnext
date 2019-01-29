@@ -525,3 +525,16 @@ def payroll_entry_has_bank_entries(name):
 	response['submitted'] = 1 if bank_entries else 0
 
 	return response
+
+def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""
+		select name from `tabPayroll Entry`
+		where `{key}` LIKE %(txt)s
+		and name not in
+			(select reference_name from `tabJournal Entry Account`
+				where reference_type="Payroll Entry")
+		order by name limit %(start)s, %(page_len)s"""
+		.format(key=searchfield), {
+			'txt': "%%%s%%" % frappe.db.escape(txt),
+			'start': start, 'page_len': page_len
+		})
