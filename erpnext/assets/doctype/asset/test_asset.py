@@ -49,7 +49,17 @@ class TestAsset(unittest.TestCase):
 		
 		self.assertFalse(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Purchase Invoice", "voucher_no": pi.name}))
-		
+
+	def test_is_fixed_asset_set(self):
+		doc = frappe.new_doc('Purchase Invoice')
+		doc.supplier = '_Test Supplier'
+		doc.append('items', {
+			'item_code': 'Macbook Pro',
+			'qty': 1
+		})
+
+		doc.set_missing_values()
+		self.assertEquals(doc.items[0].is_fixed_asset, 1)
 
 	def test_schedule_for_straight_line_method(self):
 		asset = frappe.get_doc("Asset", "Macbook Pro 1")
