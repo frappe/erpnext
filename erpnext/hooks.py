@@ -12,11 +12,9 @@ app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
 develop_version = '12.x.x-develop'
-staging_version = '11.0.3-beta.37'
+staging_version = '11.1.0'
 
 error_report_email = "support@erpnext.com"
-
-docs_app = "foundation"
 
 app_include_js = "assets/js/erpnext.min.js"
 app_include_css = "assets/css/erpnext.css"
@@ -182,7 +180,8 @@ dump_report_map = "erpnext.startup.report_data_map.data_map"
 before_tests = "erpnext.setup.utils.before_tests"
 
 standard_queries = {
-	"Customer": "erpnext.selling.doctype.customer.customer.get_customer_list"
+	"Customer": "erpnext.selling.doctype.customer.customer.get_customer_list",
+	"Healthcare Practitioner": "erpnext.healthcare.doctype.healthcare_practitioner.healthcare_practitioner.get_practitioner_list"
 }
 
 doc_events = {
