@@ -11,18 +11,6 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
-			"fieldname":"supplier",
-			"label": __("Supplier"),
-			"fieldtype": "Link",
-			"options": "Supplier"
-		},
-		{
-			"fieldname":"report_date",
-			"label": __("Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.get_today()
-		},
-		{
 			"fieldname":"ageing_based_on",
 			"label": __("Ageing Based On"),
 			"fieldtype": "Select",
@@ -30,7 +18,10 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			"default": "Posting Date"
 		},
 		{
-			"fieldtype": "Break",
+			"fieldname":"report_date",
+			"label": __("Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.get_today()
 		},
 		{
 			"fieldname":"range1",
@@ -52,6 +43,24 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			"fieldtype": "Int",
 			"default": "90",
 			"reqd": 1
+		},
+		{
+			"fieldname":"finance_book",
+			"label": __("Finance Book"),
+			"fieldtype": "Link",
+			"options": "Finance Book"
+		},
+		{
+			"fieldname":"supplier",
+			"label": __("Supplier"),
+			"fieldtype": "Link",
+			"options": "Supplier"
+		},
+		{
+			"fieldname":"supplier_group",
+			"label": __("Supplier Group"),
+			"fieldtype": "Link",
+			"options": "Supplier Group"
 		}
 	],
 

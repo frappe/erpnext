@@ -6,6 +6,13 @@ cur_frm.add_fetch('time_sheet', 'total_hours', 'working_hours');
 
 frappe.ui.form.on("Salary Slip", {
 	setup: function(frm) {
+		$.each(["earnings", "deductions"], function(i, table_fieldname) {
+			frm.get_field(table_fieldname).grid.editable_fields = [
+				{fieldname: 'salary_component', columns: 6},
+				{fieldname: 'amount', columns: 4}
+			];
+		})
+
 		frm.fields_dict["timesheets"].grid.get_field("time_sheet").get_query = function(){
 			return {
 				filters: {
@@ -32,8 +39,11 @@ frappe.ui.form.on("Salary Slip", {
 	start_date: function(frm, dt, dn){
 		if(frm.doc.start_date){
 			frm.trigger("set_end_date");
-			get_emp_and_leave_details(frm.doc, dt, dn);
 		}
+	},
+
+	end_date: function(frm, dt, dn) {
+		get_emp_and_leave_details(frm.doc, dt, dn);
 	},
 
 	set_end_date: function(frm){
@@ -61,21 +71,20 @@ frappe.ui.form.on("Salary Slip", {
 	refresh: function(frm) {
 		frm.trigger("toggle_fields")
 		frm.trigger("toggle_reqd_fields")
-		var salary_detail_fields = ['formula', 'abbr', 'statistical_component']
+		var salary_detail_fields = ["formula", "abbr", "statistical_component", "is_tax_applicable",
+			"is_flexible_benefit", "variable_based_on_taxable_salary", "is_additional_component"]
 		cur_frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields,false);
 		cur_frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields,false);
-	},	
+	},
 
 	salary_slip_based_on_timesheet: function(frm, dt, dn) {
 		frm.trigger("toggle_fields");
 		get_emp_and_leave_details(frm.doc, dt, dn);
 	},
-	
+
 	payroll_frequency: function(frm, dt, dn) {
 		frm.trigger("toggle_fields");
 		frm.set_value('end_date', '');
-		frm.set_value('start_date', '');
-		get_emp_and_leave_details(frm.doc, dt, dn);
 	},
 
 	employee: function(frm, dt, dn) {
@@ -89,7 +98,7 @@ frappe.ui.form.on("Salary Slip", {
 		frm.toggle_display(['payment_days', 'total_working_days', 'leave_without_pay'],
 			frm.doc.payroll_frequency!="");
 	}
-	
+
 })
 
 frappe.ui.form.on('Salary Detail', {
@@ -168,7 +177,7 @@ var calculate_earning_total = function(doc, dt, dn, reset_amount) {
 		if(cint(tbl[i].depends_on_lwp) == 1) {
 			tbl[i].amount =  Math.round(tbl[i].default_amount)*(flt(doc.payment_days) /
 				cint(doc.total_working_days)*100)/100;
-		} else if(reset_amount) {
+		} else if(reset_amount && tbl[i].default_amount) {
 			tbl[i].amount = tbl[i].default_amount;
 		}
 		if(!tbl[i].do_not_include_in_total) {
@@ -189,7 +198,7 @@ var calculate_ded_total = function(doc, dt, dn, reset_amount) {
 	for(var i = 0; i < tbl.length; i++){
 		if(cint(tbl[i].depends_on_lwp) == 1) {
 			tbl[i].amount = Math.round(tbl[i].default_amount)*(flt(doc.payment_days)/cint(doc.total_working_days)*100)/100;
-		} else if(reset_amount) {
+		} else if(reset_amount && tbl[i].default_amount) {
 			tbl[i].amount = tbl[i].default_amount;
 		}
 		if(!tbl[i].do_not_include_in_total) {

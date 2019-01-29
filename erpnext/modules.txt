@@ -20,3 +20,5 @@ Restaurant
 Agriculture
 ERPNext Integrations
 Non Profit
+Hotels
+Hub Node

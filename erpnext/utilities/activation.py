@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from __future__ import unicode_literals
 import frappe, erpnext
 
 from frappe import _
@@ -54,7 +55,7 @@ def get_help_messages():
 	if get_level() > 6:
 		return []
 
-	domain = frappe.db.get_value('Company', erpnext.get_default_company(), 'domain')
+	domain = frappe.get_cached_value('Company',  erpnext.get_default_company(),  'domain')
 	messages = []
 
 	message_settings = [

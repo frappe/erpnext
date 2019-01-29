@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from frappe import _
 
 def get_data():
@@ -8,15 +9,11 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Leave and Attendance'),
-				'items': ['Attendance', 'Leave Application', 'Leave Allocation']
+				'items': ['Attendance', 'Attendance Request', 'Leave Application', 'Leave Allocation']
 			},
 			{
 				'label': _('Payroll'),
-				'items': ['Salary Structure', 'Salary Slip', 'Timesheet']
-			},
-			{
-				'label': _('Training Events/Results'),
-				'items': ['Training Event', 'Training Result']
+				'items': ['Salary Structure Assignment', 'Salary Slip', 'Timesheet']
 			},
 			{
 				'label': _('Expense'),
@@ -25,6 +22,14 @@ def get_data():
 			{
 				'label': _('Evaluation'),
 				'items': ['Appraisal']
+			},
+			{
+				'label': _('Training'),
+				'items': ['Training Event', 'Training Result']
+			},
+			{
+				'label': _('Lifecycle'),
+				'items': ['Employee Transfer', 'Employee Promotion', 'Employee Separation']
 			}
 		]
 	}

@@ -6,41 +6,44 @@ import frappe
 
 def execute():
 	# reload schema
-	for doctype in ("Production Order", "Production Order Item", "Production Order Operation", 
+	for doctype in ("Work Order", "Work Order Item", "Work Order Operation", 
 		"BOM Item", "BOM Explosion Item", "BOM"):
 			frappe.reload_doctype(doctype)
 
-	# fetch all draft and submitted production orders
+	frappe.reload_doc("stock", "doctype", "item")
+	frappe.reload_doc("stock", "doctype", "item_default")
+
+	# fetch all draft and submitted work orders
 	fields = ["name"]
-	if "source_warehouse" in frappe.db.get_table_columns("Production Order"):
+	if "source_warehouse" in frappe.db.get_table_columns("Work Order"):
 		fields.append("source_warehouse")
 		
-	pro_orders = frappe.get_all("Production Order", filters={"docstatus": ["!=", 2]}, fields=fields)
+	wo_orders = frappe.get_all("Work Order", filters={"docstatus": ["!=", 2]}, fields=fields)
 	
 	count = 0
-	for p in pro_orders:
-		pro_order = frappe.get_doc("Production Order", p.name)
+	for p in wo_orders:
+		wo_order = frappe.get_doc("Work Order", p.name)
 		count += 1
 
 		# set required items table
-		pro_order.set_required_items()
+		wo_order.set_required_items()
 		
-		for item in pro_order.get("required_items"):
+		for item in wo_order.get("required_items"):
 			# set source warehouse based on parent
 			if not item.source_warehouse and "source_warehouse" in fields:
-				item.source_warehouse = pro_order.get("source_warehouse")
+				item.source_warehouse = wo_order.get("source_warehouse")
 			item.db_update()
 		
-		if pro_order.docstatus == 1:
+		if wo_order.docstatus == 1:
 			# update transferred qty based on Stock Entry, it also updates db
-			pro_order.update_transaferred_qty_for_required_items()
+			wo_order.update_transaferred_qty_for_required_items()
 			
 			# Set status where it was 'Unstopped', as it is deprecated
-			if pro_order.status == "Unstopped":
-				status = pro_order.get_status()
-				pro_order.db_set("status", status)
-			elif pro_order.status == "Stopped":
-				pro_order.update_reserved_qty_for_production()
+			if wo_order.status == "Unstopped":
+				status = wo_order.get_status()
+				wo_order.db_set("status", status)
+			elif wo_order.status == "Stopped":
+				wo_order.update_reserved_qty_for_production()
 		
 		if count % 200 == 0:
 			frappe.db.commit()

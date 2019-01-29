@@ -12,6 +12,21 @@ frappe.query_reports["GSTR-1"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
+			"fieldname":"company_address",
+			"label": __("Address"),
+			"fieldtype": "Link",
+			"options": "Address",
+			"get_query": function() {
+				var company = frappe.query_report.get_filter_value('company');
+				if (company) {
+					return {
+						"query": 'frappe.contacts.doctype.address.address.address_query',
+						"filters": { link_doctype: 'Company', link_name: company}
+					};
+				}
+			}
+		},
+		{
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",

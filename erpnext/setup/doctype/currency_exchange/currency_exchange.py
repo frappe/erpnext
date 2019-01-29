@@ -5,9 +5,9 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
+from frappe import _, throw
 from frappe.model.document import Document
-from frappe.utils import get_datetime_str, formatdate, nowdate
+from frappe.utils import get_datetime_str, formatdate, nowdate, cint
 
 class CurrencyExchange(Document):
 	def autoname(self):
@@ -20,4 +20,7 @@ class CurrencyExchange(Document):
 		self.validate_value("exchange_rate", ">", 0)
 
 		if self.from_currency == self.to_currency:
-			frappe.throw(_("From Currency and To Currency cannot be same"))
+			throw(_("From Currency and To Currency cannot be same"))
+
+		if not cint(self.for_buying) and not cint(self.for_selling):
+			throw(_("Currency Exchange must be applicable for Buying or for Selling."))

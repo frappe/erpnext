@@ -219,12 +219,7 @@ def get_data():
 				},
 				{
 					"type": "help",
-					"label": _("Production Planning Tool"),
-					"youtube_id": "CzatSl4zJ2Y"
-				},
-				{
-					"type": "help",
-					"label": _("Production Order"),
+					"label": _("Work Order"),
 					"youtube_id": "ZotgLyp2YFY"
 				},
 
@@ -247,12 +242,7 @@ def get_data():
 					"type": "help",
 					"label": _("Expense Claims"),
 					"youtube_id": "5SZHJF--ZFY"
-				},
-				{
-					"type": "help",
-					"label": _("Processing Payroll"),
-					"youtube_id": "apgE-f25Rm0"
-				},
+				}
 			]
 		},
 		{

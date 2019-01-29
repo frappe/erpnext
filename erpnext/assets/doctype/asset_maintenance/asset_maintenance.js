@@ -24,7 +24,28 @@ frappe.ui.form.on('Asset Maintenance', {
 				return indicator;
 			}
 		);
+
+		frm.set_query('select_serial_no', function(doc){
+			return {
+				asset: frm.doc.asset_name
+			}
+		})
 	},
+
+	select_serial_no: (frm) => {
+		let serial_nos = frm.doc.serial_no || frm.doc.select_serial_no;
+		if (serial_nos) {
+			serial_nos = serial_nos.split('\n');
+			serial_nos.push(frm.doc.select_serial_no);
+
+			const unique_sn = serial_nos.filter(function(elem, index, self) {
+			    return index === self.indexOf(elem);
+			});
+
+			frm.set_value("serial_no", unique_sn.join('\n'));
+		}
+	},
+
 	refresh: (frm) => {
 		if(!frm.is_new()) {
 			frm.trigger('make_dashboard');

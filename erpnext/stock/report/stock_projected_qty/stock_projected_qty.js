@@ -7,7 +7,8 @@ frappe.query_reports["Stock Projected Qty"] = {
 			"fieldname":"company",
 			"label": __("Company"),
 			"fieldtype": "Link",
-			"options": "Company"
+			"options": "Company",
+			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
 			"fieldname":"warehouse",
@@ -27,10 +28,22 @@ frappe.query_reports["Stock Projected Qty"] = {
 			}
 		},
 		{
+			"fieldname":"item_group",
+			"label": __("Item Group"),
+			"fieldtype": "Link",
+			"options": "Item Group"
+		},
+		{
 			"fieldname":"brand",
 			"label": __("Brand"),
 			"fieldtype": "Link",
 			"options": "Brand"
+		},
+		{
+			"fieldname":"include_uom",
+			"label": __("Include UOM"),
+			"fieldtype": "Link",
+			"options": "UOM"
 		}
 	]
 }

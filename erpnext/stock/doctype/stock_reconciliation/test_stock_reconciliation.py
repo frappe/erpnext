@@ -12,7 +12,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import EmptyStockReconciliationItemsError, get_items
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.item.test_item import create_item
 
 class TestStockReconciliation(unittest.TestCase):
 	def setUp(self):
@@ -83,11 +83,13 @@ class TestStockReconciliation(unittest.TestCase):
 
 	def test_get_items(self):
 		create_warehouse("_Test Warehouse Group 1", {"is_group": 1})
-		create_warehouse("_Test Warehouse Ledger 1", {"is_group": 0, "parent_warehouse": "_Test Warehouse Group 1 - _TC"})
-		make_item("_Test Stock Reco Item", {"default_warehouse": "_Test Warehouse Ledger 1 - _TC",
-			"is_stock_item": 1, "opening_stock": 100, "valuation_rate": 100})
+		create_warehouse("_Test Warehouse Ledger 1",
+			{"is_group": 0, "parent_warehouse": "_Test Warehouse Group 1 - _TC"})
 
-		items = get_items("_Test Warehouse Group 1 - _TC", nowdate(), nowtime())
+		create_item("_Test Stock Reco Item", is_stock_item=1, valuation_rate=100,
+			warehouse="_Test Warehouse Ledger 1 - _TC", opening_stock=100)
+
+		items = get_items("_Test Warehouse Group 1 - _TC", nowdate(), nowtime(), "_Test Company")
 
 		self.assertEqual(["_Test Stock Reco Item", "_Test Warehouse Ledger 1 - _TC", 100],
 			[items[0]["item_code"], items[0]["warehouse"], items[0]["qty"]])

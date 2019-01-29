@@ -1,6 +1,6 @@
 frappe.listview_settings['Stock Entry'] = {
 	add_fields: ["`tabStock Entry`.`from_warehouse`", "`tabStock Entry`.`to_warehouse`",
-		"`tabStock Entry`.`purpose`", "`tabStock Entry`.`production_order`", "`tabStock Entry`.`bom_no`"],
+		"`tabStock Entry`.`purpose`", "`tabStock Entry`.`work_order`", "`tabStock Entry`.`bom_no`"],
 	column_render: {
 		"from_warehouse": function(doc) {
 			var html = "";

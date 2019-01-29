@@ -13,6 +13,13 @@ $.extend(erpnext, {
 			return frappe.boot.sysdefaults.currency;
 	},
 
+	get_presentation_currency_list: () => {
+		const docs = frappe.boot.docs;
+		let currency_list = docs.filter(d => d.doctype === ":Currency").map(d => d.name);
+		currency_list.unshift("");
+		return currency_list;
+	},
+
 	toggle_naming_series: function() {
 		if(cur_frm.fields_dict.naming_series) {
 			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal?true:false);
@@ -63,7 +70,7 @@ $.extend(erpnext, {
 						"get_query": function () {
 							return {
 								filters: {
-									item_code:grid_row.doc.item_code ,
+									item_code:grid_row.doc.item_code,
 									warehouse:cur_frm.doc.is_return ? null : grid_row.doc.warehouse
 								}
 							}
@@ -96,13 +103,52 @@ $.extend(erpnext, {
 $.extend(erpnext.utils, {
 	set_party_dashboard_indicators: function(frm) {
 		if(frm.doc.__onload && frm.doc.__onload.dashboard_info) {
-			var info = frm.doc.__onload.dashboard_info;
-			frm.dashboard.add_indicator(__('Annual Billing: {0}',
-				[format_currency(info.billing_this_year, info.currency)]), 'blue');
-			frm.dashboard.add_indicator(__('Total Unpaid: {0}',
-				[format_currency(info.total_unpaid, info.currency)]),
-				info.total_unpaid ? 'orange' : 'green');
+			var company_wise_info = frm.doc.__onload.dashboard_info;
+			if(company_wise_info.length > 1) {
+				company_wise_info.forEach(function(info) {
+					erpnext.utils.add_indicator_for_multicompany(frm, info);
+				});
+			} else if (company_wise_info.length === 1) {
+				frm.dashboard.add_indicator(__('Annual Billing: {0}',
+					[format_currency(company_wise_info[0].billing_this_year, company_wise_info[0].currency)]), 'blue');
+				frm.dashboard.add_indicator(__('Total Unpaid: {0}',
+					[format_currency(company_wise_info[0].total_unpaid, company_wise_info[0].currency)]),
+				company_wise_info[0].total_unpaid ? 'orange' : 'green');
+
+				if(company_wise_info[0].loyalty_points) {
+					frm.dashboard.add_indicator(__('Loyalty Points: {0}',
+						[company_wise_info[0].loyalty_points]), 'blue');
+				}
+			}
 		}
+	},
+
+	add_indicator_for_multicompany: function(frm, info) {
+		frm.dashboard.stats_area.removeClass('hidden');
+		frm.dashboard.stats_area_row.addClass('flex');
+		frm.dashboard.stats_area_row.css('flex-wrap', 'wrap');
+
+		var color = info.total_unpaid ? 'orange' : 'green';
+
+		var indicator = $('<div class="flex-column col-xs-6">'+
+			'<div style="margin-top:10px"><h6>'+info.company+'</h6></div>'+
+
+			'<div class="badge-link small" style="margin-bottom:10px"><span class="indicator blue">'+
+			'Annual Billing: '+format_currency(info.billing_this_year, info.currency)+'</span></div>'+
+
+			'<div class="badge-link small" style="margin-bottom:10px">'+
+			'<span class="indicator '+color+'">Total Unpaid: '
+			+format_currency(info.total_unpaid, info.currency)+'</span></div>'+
+
+
+			'</div>').appendTo(frm.dashboard.stats_area_row);
+
+		if(info.loyalty_points){
+			$('<div class="badge-link small" style="margin-bottom:10px"><span class="indicator blue">'+
+			'Loyalty Points: '+info.loyalty_points+'</span></div>').appendTo(indicator);
+		}
+
+		return indicator;
 	},
 
 	get_party_name: function(party_type) {
@@ -111,7 +157,7 @@ $.extend(erpnext.utils, {
 		return dict[party_type];
 	},
 
-	copy_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname) {
+	copy_value_in_all_rows: function(doc, dt, dn, table_fieldname, fieldname) {
 		var d = locals[dt][dn];
 		if(d[fieldname]){
 			var cl = doc[table_fieldname] || [];
@@ -137,9 +183,38 @@ $.extend(erpnext.utils, {
 		}
 	},
 
+	make_bank_account: function(doctype, docname) {
+		frappe.call({
+			method: "erpnext.accounts.doctype.bank_account.bank_account.make_bank_account",
+			args: {
+				doctype: doctype,
+				docname: docname
+			},
+			freeze: true,
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		})
+	},
+
 	make_subscription: function(doctype, docname) {
 		frappe.call({
-			method: "erpnext.accounts.doctype.subscription.subscription.make_subscription",
+			method: "frappe.desk.doctype.auto_repeat.auto_repeat.make_auto_repeat",
+			args: {
+				doctype: doctype,
+				docname: docname
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		})
+	},
+
+	make_pricing_rule: function(doctype, docname) {
+		frappe.call({
+			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.make_pricing_rule",
 			args: {
 				doctype: doctype,
 				docname: docname
@@ -176,7 +251,251 @@ $.extend(erpnext.utils, {
 		}
 		return rows;
 	},
+	get_tree_options: function(option) {
+		// get valid options for tree based on user permission & locals dict
+		let unscrub_option = frappe.model.unscrub(option);
+		let user_permission = frappe.defaults.get_user_permissions();
+		if(user_permission && user_permission[unscrub_option]) {
+			return user_permission[unscrub_option].map(perm => perm.doc);
+		} else {
+			return $.map(locals[`:${unscrub_option}`], function(c) { return c.name; }).sort();
+		}
+	},
+	get_tree_default: function(option) {
+		// set default for a field based on user permission
+		let options = this.get_tree_options(option);
+		if(options.includes(frappe.defaults.get_default(option))) {
+			return frappe.defaults.get_default(option);
+		} else {
+			return options[0];
+		}
+	},
+	copy_parent_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname, parent_fieldname) {
+		var d = locals[dt][dn];
+		if(d[fieldname]){
+			var cl = doc[table_fieldname] || [];
+			for(var i = 0; i < cl.length; i++) {
+				cl[i][fieldname] = doc[parent_fieldname];
+			}
+		}
+		refresh_field(table_fieldname);
+	},
+
 });
+
+erpnext.utils.select_alternate_items = function(opts) {
+	const frm = opts.frm;
+	const warehouse_field = opts.warehouse_field || 'warehouse';
+	const item_field = opts.item_field || 'item_code';
+
+	this.data = [];
+	const dialog = new frappe.ui.Dialog({
+		title: __("Select Alternate Item"),
+		fields: [
+			{fieldtype:'Section Break', label: __('Items')},
+			{
+				fieldname: "alternative_items", fieldtype: "Table", cannot_add_rows: true,
+				in_place_edit: true, data: this.data,
+				get_data: () => {
+					return this.data;
+				},
+				fields: [{
+					fieldtype:'Data',
+					fieldname:"docname",
+					hidden: 1
+				}, {
+					fieldtype:'Link',
+					fieldname:"item_code",
+					options: 'Item',
+					in_list_view: 1,
+					read_only: 1,
+					label: __('Item Code')
+				}, {
+					fieldtype:'Link',
+					fieldname:"alternate_item",
+					options: 'Item',
+					default: "",
+					in_list_view: 1,
+					label: __('Alternate Item'),
+					onchange: function() {
+						const item_code = this.get_value();
+						const warehouse = this.grid_row.on_grid_fields_dict.warehouse.get_value();
+						if (item_code && warehouse) {
+							frappe.call({
+								method: "erpnext.stock.utils.get_latest_stock_qty",
+								args: {
+									item_code: item_code,
+									warehouse: warehouse
+								},
+								callback: (r) => {
+									this.grid_row.on_grid_fields_dict
+										.actual_qty.set_value(r.message || 0);
+								}
+							})
+						}
+					},
+					get_query: (e) => {
+						return {
+							query: "erpnext.stock.doctype.item_alternative.item_alternative.get_alternative_items",
+							filters: {
+								item_code: e.item_code
+							}
+						};
+					}
+				}, {
+					fieldtype:'Link',
+					fieldname:"warehouse",
+					options: 'Warehouse',
+					default: "",
+					in_list_view: 1,
+					label: __('Warehouse'),
+					onchange: function() {
+						const warehouse = this.get_value();
+						const item_code = this.grid_row.on_grid_fields_dict.item_code.get_value();
+						if (item_code && warehouse) {
+							frappe.call({
+								method: "erpnext.stock.utils.get_latest_stock_qty",
+								args: {
+									item_code: item_code,
+									warehouse: warehouse
+								},
+								callback: (r) => {
+									this.grid_row.on_grid_fields_dict
+										.actual_qty.set_value(r.message || 0);
+								}
+							})
+						}
+					},
+				}, {
+					fieldtype:'Float',
+					fieldname:"actual_qty",
+					default: 0,
+					read_only: 1,
+					in_list_view: 1,
+					label: __('Available Qty')
+				}]
+			},
+		],
+		primary_action: function() {
+			const args = this.get_values()["alternative_items"];
+			const alternative_items = args.filter(d => {
+				if (d.alternate_item && d.item_code != d.alternate_item) {
+					return true;
+				}
+			});
+
+			alternative_items.forEach(d => {
+				let row = frappe.get_doc(opts.child_doctype, d.docname);
+				let qty = null;
+				if (row.doctype === 'Work Order Item') {
+					qty = row.required_qty;
+				} else {
+					qty = row.qty;
+				}
+				row[item_field] = d.alternate_item;
+				frm.script_manager.trigger(item_field, row.doctype, row.name)
+					.then(() => {
+						frappe.model.set_value(row.doctype, row.name, 'qty', qty);
+						frappe.model.set_value(row.doctype, row.name,
+							opts.original_item_field, d.item_code);
+					});
+			});
+
+			refresh_field(opts.child_docname);
+			this.hide();
+		},
+		primary_action_label: __('Update')
+	});
+
+	frm.doc[opts.child_docname].forEach(d => {
+		if (!opts.condition || opts.condition(d)) {
+			dialog.fields_dict.alternative_items.df.data.push({
+				"docname": d.name,
+				"item_code": d[item_field],
+				"warehouse": d[warehouse_field],
+				"actual_qty": d.actual_qty
+			});
+		}
+	})
+
+	this.data = dialog.fields_dict.alternative_items.df.data;
+	dialog.fields_dict.alternative_items.grid.refresh();
+	dialog.show();
+}
+
+erpnext.utils.update_child_items = function(opts) {
+	const frm = opts.frm;
+
+	this.data = [];
+	const dialog = new frappe.ui.Dialog({
+		title: __("Update Items"),
+		fields: [
+			{fieldtype:'Section Break', label: __('Items')},
+			{
+				fieldname: "trans_items", fieldtype: "Table", cannot_add_rows: true,
+				in_place_edit: true, data: this.data,
+				get_data: () => {
+					return this.data;
+				},
+				fields: [{
+					fieldtype:'Data',
+					fieldname:"docname",
+					hidden: 0,
+				}, {
+					fieldtype:'Link',
+					fieldname:"item_code",
+					options: 'Item',
+					in_list_view: 1,
+					read_only: 1,
+					label: __('Item Code')
+				}, {
+					fieldtype:'Float',
+					fieldname:"qty",
+					default: 0,
+					read_only: 0,
+					in_list_view: 1,
+					label: __('Qty')
+				}, {
+					fieldtype:'Currency',
+					fieldname:"rate",
+					default: 0,
+					read_only: 0,
+					in_list_view: 1,
+					label: __('Rate')
+				}]
+			},
+		],
+		primary_action: function() {
+			const trans_items = this.get_values()["trans_items"];
+			frappe.call({
+				method: 'erpnext.controllers.accounts_controller.update_child_qty_rate',
+				args: {
+					'parent_doctype': frm.doc.doctype,
+					'trans_items': trans_items,
+					'parent_doctype_name': frm.doc.name
+				},
+				callback: function() {
+					frm.reload_doc();
+				}
+			});
+			this.hide();
+			refresh_field("items");
+		},
+		primary_action_label: __('Update')
+	});
+
+	frm.doc[opts.child_docname].forEach(d => {
+		dialog.fields_dict.trans_items.df.data.push({
+			"docname": d.name,
+			"item_code": d.item_code,
+			"qty": d.qty,
+			"rate": d.rate,
+		});
+		this.data = dialog.fields_dict.trans_items.df.data;
+		dialog.fields_dict.trans_items.grid.refresh();
+	})
+	dialog.show();
+}
 
 erpnext.utils.map_current_doc = function(opts) {
 	if(opts.get_query_filters) {
@@ -247,6 +566,7 @@ erpnext.utils.map_current_doc = function(opts) {
 				"method": opts.method,
 				"source_names": opts.source_name,
 				"target_doc": cur_frm.doc,
+				'args': opts.args
 			},
 			callback: function(r) {
 				if(!r.exc) {

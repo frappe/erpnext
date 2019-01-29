@@ -1,2 +1,0 @@
-volunteer_type
-volunteer

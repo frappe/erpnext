@@ -96,7 +96,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 
 def prepare_data(accounts, filters, total_row, parent_children_map, based_on):
 	data = []
-	company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
+	company_currency = frappe.get_cached_value('Company',  filters.get("company"),  "default_currency")
 
 	for d in accounts:
 		has_value = False

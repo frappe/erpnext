@@ -7,7 +7,7 @@ from frappe import msgprint, _
 from frappe.utils import cint, now
 from erpnext.accounts.doctype.sales_invoice.pos import get_child_nodes
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import set_account_for_mode_of_payment
-
+from six import iteritems
 from frappe.model.document import Document
 
 class POSProfile(Document):
@@ -39,7 +39,7 @@ class POSProfile(Document):
 			self.expense_account], "Cost Center": [self.cost_center],
 			"Warehouse": [self.warehouse]}
 
-		for link_dt, dn_list in accounts.items():
+		for link_dt, dn_list in iteritems(accounts):
 			for link_dn in dn_list:
 				if link_dn and not frappe.db.exists({"doctype": link_dt,
 						"company": self.company, "name": link_dn}):
@@ -102,7 +102,7 @@ class POSProfile(Document):
 
 def get_item_groups(pos_profile):
 	item_groups = []
-	pos_profile = frappe.get_doc('POS Profile', pos_profile)
+	pos_profile = frappe.get_cached_doc('POS Profile', pos_profile)
 
 	if pos_profile.get('item_groups'):
 		# Get items based on the item groups defined in the POS profile
@@ -127,25 +127,26 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 		'txt': '%%%s%%' % txt
 	}
 
-	pos_profile = frappe.db.sql("""select pf.name, pf.pos_profile_name
+	pos_profile = frappe.db.sql("""select pf.name
 		from
 			`tabPOS Profile` pf, `tabPOS Profile User` pfu
 		where
 			pfu.parent = pf.name and pfu.user = %(user)s and pf.company = %(company)s
-			and (pf.name like %(txt)s or pf.pos_profile_name like %(txt)s)
+			and (pf.name like %(txt)s)
 			and pf.disabled = 0 limit %(start)s, %(page_len)s""", args)
 
 	if not pos_profile:
 		del args['user']
 
-		pos_profile = frappe.db.sql("""select pf.name, pf.pos_profile_name
+		pos_profile = frappe.db.sql("""select pf.name
 			from
 				`tabPOS Profile` pf left join `tabPOS Profile User` pfu
 			on
 				pf.name = pfu.parent
 			where
-				ifnull(pfu.user, '') = '' and pf.company = %(company)s and
-				(pf.name like %(txt)s or pf.pos_profile_name like %(txt)s)
+				ifnull(pfu.user, '') = ''
+				and pf.company = %(company)s
+				and pf.name like %(txt)s
 				and pf.disabled = 0""", args)
 
 	return pos_profile

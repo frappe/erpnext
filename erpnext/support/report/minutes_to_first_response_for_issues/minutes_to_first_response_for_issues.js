@@ -20,7 +20,7 @@ frappe.query_reports["Minutes to First Response for Issues"] = {
 			data: {
 				labels: result.map(d => d[0]),
 				datasets: [{
-					title: 'Mins to first response',
+					name: 'Mins to first response',
 					values: result.map(d => d[1])
 				}]
 			},

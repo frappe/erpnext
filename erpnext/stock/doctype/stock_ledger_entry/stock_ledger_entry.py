@@ -31,7 +31,7 @@ class StockLedgerEntry(Document):
 		self.check_stock_frozen_date()
 		self.actual_amt_check()
 
-		if not self.get("via_landed_cost_voucher"):
+		if not self.get("via_landed_cost_voucher") and self.voucher_type != 'Stock Reconciliation':
 			from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
 			process_serial_no(self)
 
@@ -131,3 +131,5 @@ def on_doctype_update():
 			add index posting_sort_index(posting_date, posting_time, name)""")
 
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
+	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
+
