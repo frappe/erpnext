@@ -19,7 +19,7 @@ def get_context(context):
 
 	# show atleast 3 products
 	if len(homepage.products) < 3:
-		for i in xrange(3 - len(homepage.products)):
+		for i in range(3 - len(homepage.products)):
 			homepage.append('products', {
 				'item_code': 'product-{0}'.format(i),
 				'item_name': frappe._('Product {0}').format(i),

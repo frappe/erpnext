@@ -27,7 +27,7 @@ class NamingSeries(Document):
 			try:
 				options = self.get_options(d)
 			except frappe.DoesNotExistError:
-				frappe.msgprint('Unable to find DocType {0}'.format(d))
+				frappe.msgprint(_('Unable to find DocType {0}').format(d))
 				#frappe.pass_does_not_exist_error()
 				continue
 
@@ -49,7 +49,7 @@ class NamingSeries(Document):
 		}
 
 	def scrub_options_list(self, ol):
-		options = filter(lambda x: x, [cstr(n).strip() for n in ol])
+		options = list(filter(lambda x: x, [cstr(n).strip() for n in ol]))
 		return options
 
 	def update_series(self, arg=None):
@@ -166,13 +166,12 @@ class NamingSeries(Document):
 
 	def parse_naming_series(self):
 		parts = self.prefix.split('.')
-		# If series contain date format like INV.YYYY.MM.#####
-		if len(parts) > 2:
-			del parts[-1] # Removed ### from the series
-			prefix = parse_naming_series(parts)
-		else:
-			prefix = parts[0]
 
+		# Remove ### from the end of series
+		if parts[-1] == "#" * len(parts[-1]):
+			del parts[-1]
+
+		prefix = parse_naming_series(parts)
 		return prefix
 
 def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True):

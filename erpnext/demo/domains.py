@@ -5,7 +5,7 @@ data = {
 		'company_name': 'Wind Power LLC'
 	},
 	'Retail': {
-		'company_name': 'Annapurna Dairy Shop',
+		'company_name': 'Mobile Next',
 	},
 	'Distribution': {
 		'company_name': 'Soltice Hardware',

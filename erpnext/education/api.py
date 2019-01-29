@@ -187,7 +187,7 @@ def get_course_schedule_events(start, end, filters=None):
 	from frappe.desk.calendar import get_event_conditions
 	conditions = get_event_conditions("Course Schedule", filters)
 
-	data = frappe.db.sql("""select name, course,
+	data = frappe.db.sql("""select name, course, color,
 			timestamp(schedule_date, from_time) as from_datetime,
 			timestamp(schedule_date, to_time) as to_datetime,
 			room, student_group, 0 as 'allDay'
@@ -333,7 +333,7 @@ def get_assessment_result_doc(student, assessment_plan):
 		if doc.docstatus == 0:
 			return doc
 		elif doc.docstatus == 1:
-			frappe.msgprint("Result already Submitted")
+			frappe.msgprint(_("Result already Submitted"))
 			return None
 	else:
 		return frappe.new_doc("Assessment Result")

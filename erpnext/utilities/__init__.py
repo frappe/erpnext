@@ -1,5 +1,5 @@
 ## temp utility
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 import frappe
 from erpnext.utilities.activation import get_level
 from frappe.utils import cstr
@@ -27,7 +27,7 @@ def get_site_info(site_info):
 		company = company[0][0] if company else None
 
 	if company:
-		domain = frappe.db.get_value('Company', cstr(company), 'domain')
+		domain = frappe.get_cached_value('Company',  cstr(company),  'domain')
 
 	return {
 		'company': company,

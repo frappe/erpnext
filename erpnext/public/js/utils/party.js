@@ -18,6 +18,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 			args = {
 				party: frm.doc.supplier,
 				party_type: "Supplier",
+				bill_date: frm.doc.bill_date,
 				price_list: frm.doc.buying_price_list
 			};
 		}
@@ -26,7 +27,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 			args.posting_date = frm.doc.posting_date || frm.doc.transaction_date;
 		}
 	}
-	if(!args) return;
+	if(!args || !args.party) return;
 
 	if(frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
 		if(!erpnext.utils.validate_mandatory(frm, "Posting/Transaction Date",
@@ -41,6 +42,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 		args: args,
 		callback: function(r) {
 			if(r.message) {
+				frm.supplier_tds = r.message.supplier_tds;
 				frm.updating_party_details = true;
 				frappe.run_serially([
 					() => frm.set_value(r.message),

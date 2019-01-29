@@ -9,6 +9,8 @@ from erpnext.accounts.doctype.tax_rule.tax_rule import IncorrectCustomerGroup, I
 
 test_records = frappe.get_test_records('Tax Rule')
 
+from six import iteritems
+
 class TestTaxRule(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("delete from `tabTax Rule`")
@@ -41,8 +43,7 @@ class TestTaxRule(unittest.TestCase):
 		tax_rule1 = make_tax_rule(customer_group= "All Customer Groups",
 			sales_tax_template = "_Test Sales Taxes and Charges Template - _TC", priority = 1, from_date = "2015-01-01")
 		tax_rule1.save()
-
-		self.assertEquals(get_tax_template("2015-01-01", {"customer_group" : "Commercial", "use_for_shopping_cart":0}),
+		self.assertEqual(get_tax_template("2015-01-01", {"customer_group" : "Commercial", "use_for_shopping_cart":0}),
 			"_Test Sales Taxes and Charges Template - _TC")
 
 	def test_conflict_with_overlapping_dates(self):
@@ -57,7 +58,7 @@ class TestTaxRule(unittest.TestCase):
 
 	def test_tax_template(self):
 		tax_rule = make_tax_rule()
-		self.assertEquals(tax_rule.purchase_tax_template, None)
+		self.assertEqual(tax_rule.purchase_tax_template, None)
 
 
 	def test_select_tax_rule_based_on_customer(self):
@@ -70,7 +71,7 @@ class TestTaxRule(unittest.TestCase):
 		make_tax_rule(customer= "_Test Customer 2",
 			sales_tax_template = "_Test Sales Taxes and Charges Template 2 - _TC", save=1)
 
-		self.assertEquals(get_tax_template("2015-01-01", {"customer":"_Test Customer 2"}),
+		self.assertEqual(get_tax_template("2015-01-01", {"customer":"_Test Customer 2"}),
 			"_Test Sales Taxes and Charges Template 2 - _TC")
 
 	def test_select_tax_rule_based_on_better_match(self):
@@ -80,7 +81,7 @@ class TestTaxRule(unittest.TestCase):
 		make_tax_rule(customer= "_Test Customer",  billing_city = "Test City1", billing_state = "Test State",
 			sales_tax_template = "_Test Sales Taxes and Charges Template 1 - _TC", save=1)
 
-		self.assertEquals(get_tax_template("2015-01-01", {"customer":"_Test Customer", "billing_city": "Test City", "billing_state": "Test State"}),
+		self.assertEqual(get_tax_template("2015-01-01", {"customer":"_Test Customer", "billing_city": "Test City", "billing_state": "Test State"}),
 			"_Test Sales Taxes and Charges Template - _TC")
 
 	def test_select_tax_rule_based_on_state_match(self):
@@ -90,7 +91,7 @@ class TestTaxRule(unittest.TestCase):
 		make_tax_rule(customer= "_Test Customer", shipping_state = "Test State12",
 			sales_tax_template = "_Test Sales Taxes and Charges Template 1 - _TC", priority=2, save=1)
 
-		self.assertEquals(get_tax_template("2015-01-01", {"customer":"_Test Customer", "shipping_state": "Test State"}),
+		self.assertEqual(get_tax_template("2015-01-01", {"customer":"_Test Customer", "shipping_state": "Test State"}),
 			"_Test Sales Taxes and Charges Template - _TC")
 
 	def test_select_tax_rule_based_on_better_priority(self):
@@ -100,7 +101,7 @@ class TestTaxRule(unittest.TestCase):
 		make_tax_rule(customer= "_Test Customer", billing_city = "Test City",
 			sales_tax_template = "_Test Sales Taxes and Charges Template 1 - _TC", priority=2, save=1)
 
-		self.assertEquals(get_tax_template("2015-01-01", {"customer":"_Test Customer", "billing_city": "Test City"}),
+		self.assertEqual(get_tax_template("2015-01-01", {"customer":"_Test Customer", "billing_city": "Test City"}),
 			"_Test Sales Taxes and Charges Template 1 - _TC")
 
 	def test_select_tax_rule_based_cross_matching_keys(self):
@@ -110,7 +111,7 @@ class TestTaxRule(unittest.TestCase):
 		make_tax_rule(customer= "_Test Customer 1", billing_city = "Test City 1",
 			sales_tax_template = "_Test Sales Taxes and Charges Template 1 - _TC", save=1)
 
-		self.assertEquals(get_tax_template("2015-01-01", {"customer":"_Test Customer", "billing_city": "Test City 1"}),
+		self.assertEqual(get_tax_template("2015-01-01", {"customer":"_Test Customer", "billing_city": "Test City 1"}),
 			None)
 
 	def test_select_tax_rule_based_cross_partially_keys(self):
@@ -120,7 +121,7 @@ class TestTaxRule(unittest.TestCase):
 		make_tax_rule(billing_city = "Test City 1",
 			sales_tax_template = "_Test Sales Taxes and Charges Template 1 - _TC", save=1)
 
-		self.assertEquals(get_tax_template("2015-01-01", {"customer":"_Test Customer", "billing_city": "Test City 1"}),
+		self.assertEqual(get_tax_template("2015-01-01", {"customer":"_Test Customer", "billing_city": "Test City 1"}),
 			"_Test Sales Taxes and Charges Template 1 - _TC")
 
 
@@ -129,7 +130,7 @@ def make_tax_rule(**args):
 
 	tax_rule = frappe.new_doc("Tax Rule")
 
-	for key, val in args.iteritems():
+	for key, val in iteritems(args):
 		if key != "save":
 			tax_rule.set(key, val)
 

@@ -1,2 +1,0 @@
-perpetual-inventory
-migrate-to-perpetual-inventory

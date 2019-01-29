@@ -35,7 +35,7 @@ def make_payment_entry(advance):
 
 def make_employee_advance():
 	doc = frappe.new_doc("Employee Advance")
-	doc.employee = "_T-Employee-0001"
+	doc.employee = "_T-Employee-00001"
 	doc.company  = "_Test company"
 	doc.purpose = "For site visit"
 	doc.advance_amount = 1000
@@ -43,5 +43,5 @@ def make_employee_advance():
 	doc.advance_account = "_Test Employee Advance - _TC"
 	doc.insert()
 	doc.submit()
-	
+
 	return doc

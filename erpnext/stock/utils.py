@@ -7,6 +7,8 @@ from frappe import _
 import json
 from frappe.utils import flt, cstr, nowdate, nowtime
 
+from six import string_types
+
 class InvalidWarehouseCompany(frappe.ValidationError): pass
 
 def get_stock_value_from_bin(warehouse=None, item_code=None):
@@ -65,7 +67,7 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 
 	sle_map = {}
 	for sle in stock_ledger_entries:
-		if not sle_map.has_key((sle.item_code, sle.warehouse)):
+		if not (sle.item_code, sle.warehouse) in sle_map:
 			sle_map[(sle.item_code, sle.warehouse)] = flt(sle.stock_value)
 
 	return sum(sle_map.values())
@@ -147,10 +149,10 @@ def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 		frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
 
 @frappe.whitelist()
-def get_incoming_rate(args):
+def get_incoming_rate(args, raise_error_if_no_rate=True):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	in_rate = 0
@@ -170,7 +172,8 @@ def get_incoming_rate(args):
 		voucher_no = args.get('voucher_no') or args.get('name')
 		in_rate = get_valuation_rate(args.get('item_code'), args.get('warehouse'),
 			args.get('voucher_type'), voucher_no, args.get('allow_zero_valuation'),
-			currency=erpnext.get_company_currency(args.get('company')), company=args.get('company'))
+			currency=erpnext.get_company_currency(args.get('company')), company=args.get('company'),
+			raise_error_if_no_rate=True)
 
 	return in_rate
 
@@ -243,3 +246,34 @@ def validate_warehouse_company(warehouse, company):
 def is_group_warehouse(warehouse):
 	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
 		frappe.throw(_("Group node warehouse is not allowed to select for transactions"))
+
+def update_included_uom_in_report(columns, result, include_uom, conversion_factors):
+	if not include_uom or not conversion_factors:
+		return
+
+	convertible_cols = {}
+	for col_idx in reversed(range(0, len(columns))):
+		col = columns[col_idx]
+		if isinstance(col, dict) and col.get("convertible") in ['rate', 'qty']:
+			convertible_cols[col_idx] = col['convertible']
+			columns.insert(col_idx+1, col.copy())
+			columns[col_idx+1]['fieldname'] += "_alt"
+			if convertible_cols[col_idx] == 'rate':
+				columns[col_idx+1]['label'] += " (per {})".format(include_uom)
+			else:
+				columns[col_idx+1]['label'] += " ({})".format(include_uom)
+
+	for row_idx, row in enumerate(result):
+		new_row = []
+		for col_idx, d in enumerate(row):
+			new_row.append(d)
+			if col_idx in convertible_cols:
+				if conversion_factors[row_idx]:
+					if convertible_cols[col_idx] == 'rate':
+						new_row.append(flt(d) * conversion_factors[row_idx])
+					else:
+						new_row.append(flt(d) / conversion_factors[row_idx])
+				else:
+					new_row.append(None)
+
+		result[row_idx] = new_row

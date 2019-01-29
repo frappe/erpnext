@@ -1,9 +1,10 @@
+from __future__ import unicode_literals
 from frappe import _
 
 def get_data():
 	return {
 		'heatmap': True,
-		'heatmap_message': _('Memeber Activity'),
+		'heatmap_message': _('Member Activity'),
 		'fieldname': 'member',
 		'transactions': [
 			{

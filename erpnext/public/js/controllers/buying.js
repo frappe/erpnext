@@ -28,7 +28,10 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 		if (this.frm.doc.__islocal
 			&& frappe.meta.has_field(this.frm.doc.doctype, "disable_rounded_total")) {
-			this.frm.set_value("disable_rounded_total", cint(frappe.sys_defaults.disable_rounded_total));
+
+				var df = frappe.meta.get_docfield(this.frm.doc.doctype, "disable_rounded_total");
+				var disable = df.default || cint(frappe.sys_defaults.disable_rounded_total);
+				this.frm.set_value("disable_rounded_total", disable);
 		}
 
 		/* eslint-disable */
@@ -98,7 +101,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	supplier: function() {
 		var me = this;
-		erpnext.utils.get_party_details(this.frm, null, null, function(){me.apply_pricing_rule()});
+		erpnext.utils.get_party_details(this.frm, null, null, function(){
+			me.apply_price_list();
+		});
 	},
 
 	supplier_address: function() {
@@ -113,7 +118,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
-		item.discount_amount = flt(item.price_list_rate) * flt(item.discount_percentage) / 100;
+		let item_rate = item.price_list_rate;
+		if (doc.doctype == "Purchase Order" && item.blanket_order_rate) {
+			item_rate = item.blanket_order_rate;
+		}
+		item.discount_amount = flt(item_rate) * flt(item.discount_percentage) / 100;
 		item.rate = flt((item.price_list_rate) - (item.discount_amount), precision('rate', item));
 
 		this.calculate_taxes_and_totals();
@@ -260,26 +269,26 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 								d.qty = d.qty  - my_qty;
 								cur_frm.doc.items[i].stock_qty = my_qty*cur_frm.doc.items[i].conversion_factor;
 								cur_frm.doc.items[i].qty = my_qty;
-	
+
 								frappe.msgprint("Assigning " + d.mr_name + " to " + d.item_code + " (row " + cur_frm.doc.items[i].idx + ")");
 								if (qty > 0)
 								{
 									frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
 									var newrow = frappe.model.add_child(cur_frm.doc, cur_frm.doc.items[i].doctype, "items");
 									item_length++;
-	
+
 									for (var key in cur_frm.doc.items[i])
 									{
 										newrow[key] = cur_frm.doc.items[i][key];
 									}
-	
+
 									newrow.idx = item_length;
 									newrow["stock_qty"] = newrow.conversion_factor*qty;
 									newrow["qty"] = qty;
-	
+
 									newrow["material_request"] = "";
 									newrow["material_request_item"] = "";
-	
+
 								}
 							}
 						});
@@ -290,6 +299,25 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				}
 			}
 		});
+	},
+
+	update_auto_repeat_reference: function(doc) {
+		if (doc.auto_repeat) {
+			frappe.call({
+				method:"frappe.desk.doctype.auto_repeat.auto_repeat.update_reference",
+				args:{
+					docname: doc.auto_repeat,
+					reference:doc.name
+				},
+				callback: function(r){
+					if (r.message=="success") {
+						frappe.show_alert({message:__("Auto repeat document updated"), indicator:'green'});
+					} else {
+						frappe.show_alert({message:__("An error occurred during the update process"), indicator:'red'});
+					}
+				}
+			})
+		}
 	}
 });
 
@@ -402,4 +430,3 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 	});
 	dialog.show();
 }
-

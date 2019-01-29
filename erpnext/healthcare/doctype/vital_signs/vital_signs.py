@@ -32,7 +32,7 @@ def delete_vital_signs_from_medical_record(doc):
 		frappe.delete_doc("Patient Medical Record", medical_record_id[0][0])
 
 def set_subject_field(doc):
-	subject = " "
+	subject = ""
 	if(doc.temperature):
 		subject += "Temperature: \n"+ cstr(doc.temperature)+". "
 	if(doc.pulse):

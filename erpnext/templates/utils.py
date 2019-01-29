@@ -3,9 +3,8 @@
 
 from __future__ import unicode_literals
 
-import frappe, json
-from frappe import _
-from frappe.utils import cint, formatdate
+import frappe
+
 
 @frappe.whitelist(allow_guest=True)
 def send_message(subject="Website Query", message="", sender="", status="Open"):

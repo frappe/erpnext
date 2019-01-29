@@ -1,4 +1,0 @@
-course-schedule
-student-attendance
-scheduling-tool
-examination

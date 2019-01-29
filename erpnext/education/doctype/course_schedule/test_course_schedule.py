@@ -9,6 +9,7 @@ import unittest
 import datetime
 from frappe.utils import today, to_timedelta
 from erpnext.education.utils import OverlapError
+from frappe.utils.make_random import get_random
 
 # test_records = frappe.get_test_records('Course Schedule')
 
@@ -17,14 +18,14 @@ class TestCourseSchedule(unittest.TestCase):
 		cs1 = make_course_schedule_test_record(simulate= True)
 
 		cs2 = make_course_schedule_test_record(schedule_date=cs1.schedule_date, from_time= cs1.from_time, 
-			to_time= cs1.to_time, instructor="_Test Instructor 2", room="RM0002", do_not_save= 1)
+			to_time= cs1.to_time, instructor="_Test Instructor 2", room=frappe.get_all("Room")[1].name, do_not_save= 1)
 		self.assertRaises(OverlapError, cs2.save)
 
 	def test_instructor_conflict(self):
 		cs1 = make_course_schedule_test_record(simulate= True)
 		
 		cs2 = make_course_schedule_test_record(from_time= cs1.from_time, to_time= cs1.to_time, 
-			student_group="Course-TC101-2014-2015 (_Test Academic Term)", room="RM0002", do_not_save= 1)
+			student_group="Course-TC101-2014-2015 (_Test Academic Term)", room=frappe.get_all("Room")[1].name, do_not_save= 1)
 		self.assertRaises(OverlapError, cs2.save)
 
 	def test_room_conflict(self):
@@ -38,7 +39,7 @@ class TestCourseSchedule(unittest.TestCase):
 		cs1 = make_course_schedule_test_record(simulate= True)
 		
 		make_course_schedule_test_record(from_time= cs1.from_time, to_time= cs1.to_time, 
-			student_group="Course-TC102-2014-2015 (_Test Academic Term)", instructor="_Test Instructor 2", room="RM0002")
+			student_group="Course-TC102-2014-2015 (_Test Academic Term)", instructor="_Test Instructor 2", room=frappe.get_all("Room")[1].name)
 
 def make_course_schedule_test_record(**args):
 	args = frappe._dict(args)
@@ -47,7 +48,7 @@ def make_course_schedule_test_record(**args):
 	course_schedule.student_group = args.student_group or "Course-TC101-2014-2015 (_Test Academic Term)"
 	course_schedule.course = args.course or "TC101"
 	course_schedule.instructor = args.instructor or "_Test Instructor"
-	course_schedule.room = args.room or "RM0001"
+	course_schedule.room = args.room or frappe.get_all("Room")[0].name
 	
 	course_schedule.schedule_date = args.schedule_date or today()
 	course_schedule.from_time = args.from_time or to_timedelta("01:00:00")
