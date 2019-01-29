@@ -4,13 +4,40 @@ frappe.treeview_settings["Account"] = {
 	breadcrumbs: "Accounts",
 	title: __("Chart Of Accounts"),
 	get_tree_root: false,
-	filters: [{
-		fieldname: "company",
-		fieldtype:"Select",
-		options: erpnext.utils.get_tree_options("company"),
-		label: __("Company"),
-		default: erpnext.utils.get_tree_default("company")
-	}],
+	filters: [
+		{
+			fieldname: "company",
+			fieldtype:"Select",
+			options: erpnext.utils.get_tree_options("company"),
+			label: __("Company"),
+			default: erpnext.utils.get_tree_default("company"),
+			on_change: function() {
+				var me = frappe.treeview_settings['Account'].treeview;
+				var company = me.page.fields_dict.company.get_value();
+				frappe.call({
+					method: "frappe.client.get_value",
+					args: {
+						doctype: "Company",
+						fieldname: "parent_company",
+						filters: { name:  company},
+					},
+					callback: function(r, rt) {
+						if(r.message) {
+							me.page.fields_dict.parent_company.set_value(r.message["parent_company"] || "");
+						}
+					}
+				});
+			}
+		},
+		{
+			fieldname: "parent_company",
+			fieldtype:"Data",
+			fetch_from: "company.parent_company",
+			label: __("Parent Company"),
+			hidden: true,
+			disable_onchange: true
+		}
+	],
 	root_label: "Accounts",
 	get_tree_nodes: 'erpnext.accounts.utils.get_children',
 	add_tree_node: 'erpnext.accounts.utils.add_ac',
@@ -42,8 +69,8 @@ frappe.treeview_settings["Account"] = {
 	],
 	ignore_fields:["parent_account"],
 	onload: function(treeview) {
-		frappe.treeview_settings['Account'].page = {};
-		$.extend(frappe.treeview_settings['Account'].page, treeview.page);
+		frappe.treeview_settings['Account'].treeview = {};
+		$.extend(frappe.treeview_settings['Account'].treeview, treeview);
 		function get_company() {
 			return treeview.page.fields_dict.company.get_value();
 		}
@@ -93,6 +120,19 @@ frappe.treeview_settings["Account"] = {
 		}
 	},
 	toolbar: [
+		{
+			label:__("Add Child"),
+			condition: function(node) {
+				return frappe.boot.user.can_create.indexOf("Account") !== -1 &&
+				!frappe.treeview_settings['Account'].treeview.page.fields_dict.parent_company.get_value() &&
+					node.expandable && !node.hide_add;
+			},
+			click: function(node) {
+				var me = frappe.treeview_settings['Account'].treeview;
+				me.new_node(node);
+			},
+			btnClass: "hidden-xs"
+		},
 		{
 			condition: function(node) {
 				return !node.root && frappe.boot.user.can_read.indexOf("GL Entry") !== -1
