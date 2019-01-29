@@ -110,16 +110,22 @@ def get_item_details(items, sl_entries, include_uom):
 	cf_field = cf_join = ""
 	if include_uom:
 		cf_field = ", ucd.conversion_factor"
-		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%(include_uom)s"
+		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom='%s'" \
+			% frappe.db.escape(include_uom)
 
-	for item in frappe.db.sql("""
-		select item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom{cf_field}
-		from `tabItem` item
-		{cf_join}
-		where item.name in ({names})
-		""".format(cf_field=cf_field, cf_join=cf_join, names=', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])),
-		{"include_uom": include_uom}, as_dict=1):
-			item_details.setdefault(item.name, item)
+	item_codes = ', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])
+	res = frappe.db.sql("""
+		select
+			item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom {cf_field}
+		from
+			`tabItem` item
+			{cf_join}
+		where
+			item.name in ({item_codes})
+	""".format(cf_field=cf_field, cf_join=cf_join, item_codes=item_codes), as_dict=1)
+
+	for item in res:
+		item_details.setdefault(item.name, item)
 
 	return item_details
 

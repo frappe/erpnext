@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe, os, json
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from frappe.permissions import add_permission
+from frappe.permissions import add_permission, update_permission_property
 from erpnext.regional.india import states
 from erpnext.accounts.utils import get_fiscal_year
 from frappe.utils import today
@@ -79,6 +79,9 @@ def add_custom_roles_for_reports():
 def add_permissions():
 	for doctype in ('GST HSN Code', 'GST Settings'):
 		add_permission(doctype, 'All', 0)
+		add_permission(doctype, 'Accounts Manager', 0)
+		update_permission_property(doctype, 'Accounts Manager', 0, 'write', 1)
+		update_permission_property(doctype, 'Accounts Manager', 0, 'create', 1)
 
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
