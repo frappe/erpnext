@@ -13,11 +13,11 @@ from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.buying.utils import update_last_purchase_rate
 from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled
+from erpnext.accounts.doctype.pricing_rule.utils import validate_pricing_rules
 from erpnext.exceptions import InvalidCurrency
 from six import text_type
 
-force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate")
-
+force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules")
 
 class AccountsController(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -94,6 +94,9 @@ class AccountsController(TransactionBase):
 
 			if self.is_return:
 				self.validate_qty()
+
+		if self.doctype != 'Material Request':
+			validate_pricing_rules(self)
 
 	def validate_invoice_documents_schedule(self):
 		self.validate_payment_schedule_dates()
@@ -235,6 +238,7 @@ class AccountsController(TransactionBase):
 				document_type = "{} Item".format(self.doctype)
 				parent_dict.update({"document_type": document_type})
 
+			self.set('pricing_rules', [])
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
@@ -242,13 +246,16 @@ class AccountsController(TransactionBase):
 
 					args["doctype"] = self.doctype
 					args["name"] = self.name
+					args["child_docname"] = item.name
 
 					if not args.get("transaction_date"):
 						args["transaction_date"] = args.get("posting_date")
 
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
-					ret = get_item_details(args)
+
+					ret = get_item_details(args, self)
+
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (item.get(fieldname) is None or fieldname in force_item_fields):
@@ -268,16 +275,20 @@ class AccountsController(TransactionBase):
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
 
-					if ret.get("pricing_rule"):
+					if args.get("pricing_rules"):
 						# if user changed the discount percentage then set user's discount percentage ?
-						item.set("pricing_rule", ret.get("pricing_rule"))
+						item.set("pricing_rules", ret.get("pricing_rules"))
 						item.set("discount_percentage", ret.get("discount_percentage"))
+						item.set("discount_amount", ret.get("discount_amount"))
 						if ret.get("pricing_rule_for") == "Rate":
 							item.set("price_list_rate", ret.get("price_list_rate"))
 
 						if item.price_list_rate:
 							item.rate = flt(item.price_list_rate *
-											(1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate"))
+								(1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate"))
+
+							if args.get('discount_amount'):
+								item.rate = item.price_list_rate - item.discount_amount
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)

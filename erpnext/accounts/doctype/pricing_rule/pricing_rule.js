@@ -191,6 +191,24 @@ frappe.ui.form.on('Pricing Rule', {
 
 		set_field_options("pricing_rule_help", help_content);
 		frm.events.set_options_for_applicable_for(frm);
+		frm.trigger("toggle_reqd_apply_on");
+	},
+
+	apply_on: function(frm) {
+		frm.trigger("toggle_reqd_apply_on");
+	},
+
+	toggle_reqd_apply_on: function(frm) {
+		const fields = {
+			'Item Code': 'items',
+			'Item Group': 'item_groups',
+			'Brand': 'brands'
+		}
+
+		for (var key in fields) {
+			frm.toggle_reqd(fields[key],
+				frm.doc.apply_on === key ? 1 : 0);
+		}
 	},
 
 	rate_or_discount: function(frm) {
@@ -220,7 +238,7 @@ frappe.ui.form.on('Pricing Rule', {
 			options = $.merge(options, ["Customer", "Customer Group", "Territory", "Sales Partner", "Campaign"]);
 		}
 		if(frm.doc.buying) {
-			$.merge(options, ["Supplier", "Supplier Type"]);
+			$.merge(options, ["Supplier", "Supplier Group"]);
 		}
 	
 		set_field_options("applicable_for", options.join("\n"));

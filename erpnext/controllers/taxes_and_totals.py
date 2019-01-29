@@ -59,9 +59,12 @@ class calculate_taxes_and_totals(object):
 
 				if item.discount_percentage == 100:
 					item.rate = 0.0
-				elif not item.rate:
+				elif item.discount_percentage > 0 and item.price_list_rate:
+					item.discount_amount = 0
 					item.rate = flt(item.price_list_rate *
 						(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
+				elif item.discount_amount and item.price_list_rate:
+					item.rate =  item.price_list_rate - item.discount_amount
 
 				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']:
 					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
@@ -69,8 +72,8 @@ class calculate_taxes_and_totals(object):
 					if flt(item.rate_with_margin) > 0:
 						item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
 						item.discount_amount = item.rate_with_margin - item.rate
-				elif flt(item.price_list_rate) > 0:
-						item.discount_amount = item.price_list_rate - item.rate
+				elif flt(item.price_list_rate) > 0 and not item.discount_amount:
+					item.discount_amount = item.price_list_rate - item.rate
 
 				item.net_rate = item.rate
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))

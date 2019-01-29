@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
 from frappe.utils import flt, cint, add_days, cstr, add_months
-import json
+import json, copy
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, set_transaction_type
 from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
@@ -17,7 +17,7 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from six import string_types, iteritems
 
 @frappe.whitelist()
-def get_item_details(args):
+def get_item_details(args, doc=None):
 	"""
 		args = {
 			"item_code": "",
@@ -68,7 +68,8 @@ def get_item_details(args):
 		if args.get(key) is None:
 			args[key] = value
 
-	out.update(get_pricing_rule_for_item(args))
+	data = get_pricing_rule_for_item(args, out.price_list_rate, doc)
+	out.update(data)
 
 	update_stock(args, out)
 
@@ -830,7 +831,7 @@ def apply_price_list_on_item(args):
 	item_doc = frappe.get_doc("Item", args.item_code)
 	get_price_list_rate(args, item_doc, item_details)
 
-	item_details.update(get_pricing_rule_for_item(args))
+	item_details.update(get_pricing_rule_for_item(args, item_details.price_list_rate))
 
 	return item_details
 
