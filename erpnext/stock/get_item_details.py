@@ -440,13 +440,12 @@ def get_item_price(args, item_code, ignore_party=False):
 		and ifnull(uom, '') in ('', %(uom)s)"""
 
 	if not ignore_party:
-		conditions += " and (customer is null or customer = '') and (supplier is null or supplier = '')"
 		if args.get("customer"):
 			conditions += " and customer=%(customer)s"
-
-		if args.get("supplier"):
+		elif args.get("supplier"):
 			conditions += " and supplier=%(supplier)s"
-
+		else:
+			conditions += " and (customer is null or customer = '') and (supplier is null or supplier = '')"
 
 	if args.get('min_qty'):
 		conditions += " and ifnull(min_qty, 0) <= %(min_qty)s"
