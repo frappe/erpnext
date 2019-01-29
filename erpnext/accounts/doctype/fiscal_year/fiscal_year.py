@@ -9,6 +9,8 @@ from dateutil.relativedelta import relativedelta
 
 from frappe.model.document import Document
 
+class FiscalYearIncorrectDate(frappe.ValidationError): pass
+
 class FiscalYear(Document):
 	def set_as_default(self):
 		frappe.db.set_value("Global Defaults", None, "current_fiscal_year", self.name)
@@ -35,12 +37,14 @@ class FiscalYear(Document):
 
 	def validate_dates(self):
 		if getdate(self.year_start_date) > getdate(self.year_end_date):
-			frappe.throw(_("Fiscal Year Start Date should be one year earlier than Fiscal Year End Date"))
+			frappe.throw(_("Fiscal Year Start Date should be one year earlier than Fiscal Year End Date"),
+				FiscalYearIncorrectDate)
 
 		date = getdate(self.year_start_date) + relativedelta(years=1) - relativedelta(days=1)
 
 		if getdate(self.year_end_date) != date:
-			frappe.throw(_("Fiscal Year End Date should be one year after Fiscal Year Start Date"))
+			frappe.throw(_("Fiscal Year End Date should be one year after Fiscal Year Start Date"),
+				FiscalYearIncorrectDate)
 
 	def on_update(self):
 		check_duplicate_fiscal_year(self)
