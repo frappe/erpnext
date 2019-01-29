@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
 from erpnext.setup.doctype.setup_progress.setup_progress import get_action_completed_state
