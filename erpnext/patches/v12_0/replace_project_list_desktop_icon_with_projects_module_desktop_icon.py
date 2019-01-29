@@ -1,24 +1,23 @@
 import frappe
 
 def execute():
-	frappe.db.sql("""DELETE
-		FROM `tabDesktop Icon`
-		WHERE
-			`module_name` in ('Project', 'Projects') AND
-			`standard`=1 AND
-			`app`='erpnext'
-	""")
+	projects_icons = frappe.get_all('Desktop Icon', filters={
+		'module_name': ['in', ('Project', 'Projects')],
+	})
 
-	desktop_icon = frappe.get_doc({
-		'doctype': 'Desktop Icon',
-		'idx': 5,
-		'standard': 1,
-		'app': 'erpnext',
-		'owner': 'Administrator',
+	fields_to_update = {
 		'module_name': 'Projects',
 		'color': '#8e44ad',
 		'icon': 'octicon octicon-rocket',
-		'type': 'module'
-	})
+		'type': 'module',
+		'link': ''
+	}
 
-	desktop_icon.save()
+	for icon in projects_icons:
+		icon_doc = frappe.get_doc('Desktop Icon', icon.name)
+		icon_doc.update(fields_to_update)
+		try:
+			icon_doc.save()
+		except frappe.exceptions.UniqueValidationError:
+			# delete duplicate icon
+			icon_doc.delete()
