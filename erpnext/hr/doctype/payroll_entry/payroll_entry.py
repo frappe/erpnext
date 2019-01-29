@@ -482,6 +482,7 @@ def payroll_entry_has_bank_entries(name):
 
 	return response
 
+<<<<<<< HEAD
 def create_salary_slips_for_employees(employees, args, publish_progress=True):
 	salary_slips_exists_for = get_existing_salary_slips(employees, args)
 	count=0
@@ -547,3 +548,17 @@ def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progr
 
 	if not_submitted_ss:
 		frappe.msgprint(_("Could not submit some Salary Slips"))	
+=======
+def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""
+		select name from `tabPayroll Entry`
+		where `{key}` LIKE %(txt)s
+		and name not in
+			(select reference_name from `tabJournal Entry Account`
+				where reference_type="Payroll Entry")
+		order by name limit %(start)s, %(page_len)s"""
+		.format(key=searchfield), {
+			'txt': "%%%s%%" % frappe.db.escape(txt),
+			'start': start, 'page_len': page_len
+		})
+>>>>>>> master
