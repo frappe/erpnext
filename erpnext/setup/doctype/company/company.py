@@ -141,6 +141,7 @@ class Company(NestedSet):
 
 	def create_default_accounts(self):
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
+		frappe.local.flags.ignore_root_company_validation = True
 		create_charts(self.name, self.chart_of_accounts, self.existing_company)
 
 		frappe.db.set(self, "default_receivable_account", frappe.db.get_value("Account",
