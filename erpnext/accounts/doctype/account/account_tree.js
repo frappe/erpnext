@@ -15,25 +15,23 @@ frappe.treeview_settings["Account"] = {
 				var me = frappe.treeview_settings['Account'].treeview;
 				var company = me.page.fields_dict.company.get_value();
 				frappe.call({
-					method: "frappe.client.get_value",
+					method: "erpnext.accounts.doctype.account.account.get_root_company",
 					args: {
-						doctype: "Company",
-						fieldname: "parent_company",
-						filters: { name:  company},
+						company: company,
 					},
 					callback: function(r, rt) {
 						if(r.message) {
-							me.page.fields_dict.parent_company.set_value(r.message["parent_company"] || "");
+							let root_company = r.message.length ? r.message[0] : "";
+							me.page.fields_dict.root_company.set_value(root_company);
 						}
 					}
 				});
 			}
 		},
 		{
-			fieldname: "parent_company",
+			fieldname: "root_company",
 			fieldtype:"Data",
-			fetch_from: "company.parent_company",
-			label: __("Parent Company"),
+			label: __("Root Company"),
 			hidden: true,
 			disable_onchange: true
 		}
@@ -105,6 +103,18 @@ frappe.treeview_settings["Account"] = {
 		}
 
 	},
+	post_render: function(treeview) {
+		frappe.treeview_settings['Account'].treeview["tree"] = treeview.tree;
+		treeview.page.set_primary_action(__("New"), function() {
+			let root_company = treeview.page.fields_dict.root_company.get_value();
+
+			if(root_company) {
+				frappe.throw(__("Please add the account to root level Company - ") + root_company);
+			} else {
+				treeview.new_node();
+			}
+		}, "octicon octicon-plus");
+	},
 	onrender: function(node) {
 		if(frappe.boot.user.can_read.indexOf("GL Entry") !== -1){
 			var dr_or_cr = node.data.balance < 0 ? "Cr" : "Dr";
@@ -124,12 +134,12 @@ frappe.treeview_settings["Account"] = {
 			label:__("Add Child"),
 			condition: function(node) {
 				return frappe.boot.user.can_create.indexOf("Account") !== -1 &&
-				!frappe.treeview_settings['Account'].treeview.page.fields_dict.parent_company.get_value() &&
+				!frappe.treeview_settings['Account'].treeview.page.fields_dict.root_company.get_value() &&
 					node.expandable && !node.hide_add;
 			},
 			click: function(node) {
 				var me = frappe.treeview_settings['Account'].treeview;
-				me.new_node(node);
+				me.new_node();
 			},
 			btnClass: "hidden-xs"
 		},
@@ -143,7 +153,7 @@ frappe.treeview_settings["Account"] = {
 					"account": node.label,
 					"from_date": frappe.sys_defaults.year_start_date,
 					"to_date": frappe.sys_defaults.year_end_date,
-					"company": frappe.treeview_settings['Account'].page.fields_dict.company.get_value()
+					"company": frappe.treeview_settings['Account'].treeview.page.fields_dict.company.get_value()
 				};
 				frappe.set_route("query-report", "General Ledger");
 			},
