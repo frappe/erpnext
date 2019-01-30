@@ -177,6 +177,6 @@ def update_packing_list_suggested_from_sales_order_invoice(doclist, doctype, nam
 
 		# make packed_items from product bundle
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		make_packing_list(doclist, doctype, name, "maintain_packed_items_list")
+		make_packing_list(doclist, doctype, name)
 
 	return doclist
