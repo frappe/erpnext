@@ -103,7 +103,7 @@ export default {
 				subtitle_items.push(rating + `<i class='fa fa-fw fa-star-o'></i>`)
 			}
 
-			subtitle_items.push(this.item.company);
+			subtitle_items.push({value:this.item.company,on_click:this.go_to_seller_profile_page});
 
 			return subtitle_items;
 		},
@@ -169,7 +169,9 @@ export default {
 				this.make_dialogs();
 			});
 		},
-
+		go_to_seller_profile_page(seller_name) {
+			frappe.set_route(`marketplace/seller/${seller_name}`);
+		},
 		build_data() {
 			this.title = this.item.item_name || this.item.name;
 			this.image = this.item.image;
