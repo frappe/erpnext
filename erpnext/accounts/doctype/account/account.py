@@ -34,6 +34,7 @@ class Account(NestedSet):
 			return
 		self.validate_parent()
 		self.validate_root_details()
+		self.validate_root_company()
 		validate_field_number("Account", self.name, self.account_number, self.company, "account_number")
 		self.validate_group_or_ledger()
 		self.set_root_and_report_type()
@@ -89,6 +90,13 @@ class Account(NestedSet):
 
 		if not self.parent_account and not self.is_group:
 			frappe.throw(_("Root Account must be a group"))
+
+	def validate_root_company(self):
+		# fetch all ancestors in top-down hierarchy
+		if frappe.local.flags.ignore_root_company_validation: return
+		ancestors = get_root_company(self.company)
+		if ancestors:
+			frappe.throw(_("Please add the account to root level Company - %s" % ancestors[0]))
 
 	def validate_group_or_ledger(self):
 		if self.get("__islocal"):
@@ -250,3 +258,9 @@ def merge_account(old, new, is_group, root_type, company):
 	frappe.rename_doc("Account", old, new, merge=1, ignore_permissions=1)
 
 	return new
+
+@frappe.whitelist()
+def get_root_company(company):
+	# return the topmost company in the hierarchy
+	ancestors = frappe.utils.nestedset.get_ancestors_of('Company', company, "lft asc")
+	return [ancestors[0]] if ancestors else []
