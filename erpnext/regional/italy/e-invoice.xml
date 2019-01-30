@@ -16,7 +16,8 @@
 <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" 
   xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" 
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-  versione="{{ doc.transmission_format_code }}" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+  versione="{{ doc.transmission_format_code }}" 
+  xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
   <FatturaElettronicaHeader>
     <DatiTrasmissione>
       <IdTrasmittente>
@@ -57,6 +58,12 @@
     <CessionarioCommittente>
       <DatiAnagrafici>
         {%- if doc.customer_data.customer_type == "Individual" %}
+        {%- if doc.customer_data.tax_id %}
+        <IdFiscaleIVA>
+          <IdPaese>{{ doc.customer_address_data.country_code }}</IdPaese>
+          <IdCodice>{{ doc.tax_id | replace("IT","") }}</IdCodice>
+        </IdFiscaleIVA>
+        {%- endif %}
         <CodiceFiscale>{{ doc.customer_data.fiscal_code }}</CodiceFiscale>
         <Anagrafica>
           <Nome>{{ doc.customer_data.first_name }}</Nome>
@@ -120,7 +127,7 @@
           <CodiceTipo>CODICE</CodiceTipo>
           <CodiceValore>{{ item.item_code }}</CodiceValore>
         </CodiceArticolo>
-        <Descrizione>{{ item.item_name }}</Descrizione>
+        <Descrizione>{{ item.description or item.item_name }}</Descrizione>
         <Quantita>{{ format_float(item.qty) }}</Quantita>
         <UnitaMisura>{{ item.stock_uom }}</UnitaMisura>
         {%- if item.discount_percentage  %}
