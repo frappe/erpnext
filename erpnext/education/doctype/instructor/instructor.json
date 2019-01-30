@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_events_in_timeline": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 0, 
@@ -287,7 +288,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2018-08-21 14:44:36.714519", 
+ "modified": "2019-01-30 11:28:17.571207", 
  "modified_by": "Administrator", 
  "module": "Education", 
  "name": "Instructor", 
