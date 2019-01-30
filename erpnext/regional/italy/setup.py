@@ -10,7 +10,8 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from erpnext.regional.italy import fiscal_regimes, tax_exemption_reasons, mode_of_payment_codes, vat_collectability_options
 
 def setup(company=None, patch=True):
-	make_custom_fields()
+    make_custom_fields()
+    setup_report()
 
 def make_custom_fields(update=True):
     fiscal_code_field = dict(fieldname='fiscal_code', label='Fiscal Code', fieldtype='Data', insert_after='tax_id', print_hide=1)
@@ -92,3 +93,19 @@ def make_custom_fields(update=True):
     }
 
     create_custom_fields(custom_fields, ignore_validate = frappe.flags.in_patch, update=update)
+
+def setup_report():
+    report_name = 'Electronic Invoice Register'
+
+    frappe.db.sql(""" update `tabReport` set disabled = 0 where
+        name = '{0}' """.format(report_name))
+
+    if not frappe.db.get_value('Custom Role', dict(report=report_name)):
+        frappe.get_doc(dict(
+            doctype='Custom Role',
+            report=report_name,
+            roles= [
+                dict(role='Accounts User'),
+                dict(role='Accounts Manager')
+            ]
+        )).insert()
