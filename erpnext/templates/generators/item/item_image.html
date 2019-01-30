@@ -24,4 +24,79 @@
 {% else %}
 {{ product_image(website_image) }}
 {% endif %}
+
+<!-- Simple image preview -->
+
+<div class="image-zoom-view" style="display: none;">
+	<button type="button" class="close" aria-label="Close">
+		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+		 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+			<line x1="18" y1="6" x2="6" y2="18"></line>
+			<line x1="6" y1="6" x2="18" y2="18"></line>
+		</svg>
+	</button>
 </div>
+</div>
+<style>
+	.image-zoom-view {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		height: 100vh;
+		width: 100vw;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		background: rgba(0, 0, 0, 0.8);
+		z-index: 1080;
+	}
+
+	.image-zoom-view img {
+		max-height: 100%;
+		max-width: 100%;
+	}
+
+	.image-zoom-view button {
+		position: absolute;
+		right: 3rem;
+		top: 2rem;
+	}
+
+	.image-zoom-view svg {
+		color: var(--white);
+	}
+</style>
+<script>
+	frappe.ready(() => {
+		const $zoom_wrapper = $('.image-zoom-view');
+
+		$('.product-image').on('click', (e) => {
+			e.preventDefault();
+			const $img = $(e.target).find('img').addBack('img');
+			const src = $img.prop('src');
+			if (!src) return;
+			show_preview(src);
+		});
+
+		$zoom_wrapper.on('click', 'button', hide_preview);
+
+		$(document).on('keydown', (e) => {
+			if (e.key === 'Escape') {
+				hide_preview();
+			}
+		});
+
+		function show_preview(src) {
+			$zoom_wrapper.show();
+			const $img = $(`<img src="${src}">`)
+			$zoom_wrapper.append($img);
+		}
+
+		function hide_preview() {
+			$zoom_wrapper.find('img').remove();
+			$zoom_wrapper.hide();
+		}
+	})
+</script>
