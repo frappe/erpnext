@@ -8,6 +8,30 @@
 
 {% block page_content %}
 <div class="row">
+	<div class="col-8">
+		<div class="input-group input-group-sm mb-3">
+			<input type="search" class="form-control" placeholder="Search"
+				aria-label="Product Search" aria-describedby="product-search"
+				value="{{ frappe.form_dict.search or '' }}"
+			>
+		</div>
+	</div>
+
+	<div class="col-4 pl-0">
+		<button class="btn btn-light btn-sm btn-block d-md-none"
+			type="button"
+			data-toggle="collapse"
+			data-target="#product-filters"
+			aria-expanded="false"
+			aria-controls="product-filters"
+			style="white-space: nowrap;"
+		>
+			{{ _('Toggle Filters') }}
+		</button>
+	</div>
+</div>
+
+<div class="row">
 	<div class="col-12 order-2 col-md-8 order-md-1 products-list">
 		{% if items %}
 			{% for item in items %}
@@ -22,30 +46,6 @@
 		{% if frappe.form_dict.start or frappe.form_dict.field_filters or frappe.form_dict.search %}
 		<a class="mb-3 d-inline-block" href="/products">{{ _('Reset filters') }}</a>
 		{% endif  %}
-
-		<div class="row">
-			<div class="col-8">
-				<div class="input-group input-group-sm mb-3">
-					<input type="search" class="form-control" placeholder="Search"
-						aria-label="Product Search" aria-describedby="product-search"
-						value="{{ frappe.form_dict.search or '' }}"
-					>
-				</div>
-			</div>
-
-			<div class="col-4 pl-0">
-				<button class="btn btn-light btn-sm btn-block d-md-none"
-					type="button"
-					data-toggle="collapse"
-					data-target="#product-filters"
-					aria-expanded="false"
-					aria-controls="product-filters"
-					style="white-space: nowrap;"
-				>
-					{{ _('Toggle Filters') }}
-				</button>
-			</div>
-		</div>
 
 		<div class="collapse d-md-block" id="product-filters">
 			{% for field_filter in field_filters %}
