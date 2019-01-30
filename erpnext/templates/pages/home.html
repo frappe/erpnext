@@ -5,8 +5,8 @@
 <main>
 	<section class="hero-section border-bottom" style="background-image: url('{{ homepage.hero_image }}')">
 		<div class="container py-5">
-			<h1 class="text-uppercase font-weight-bold display-4 d-none d-sm-block">{{ homepage.title }}</h1>
-			<h1 class="text-uppercase font-weight-bold d-block d-sm-none">{{ homepage.title }}</h1>
+			<h1 class="d-none d-sm-block display-4">{{ homepage.title }}</h1>
+			<h1 class="d-block d-sm-none">{{ homepage.title }}</h1>
 			<h2 class="d-none d-sm-block">{{ homepage.tag_line }}</h2>
 			<h3 class="d-block d-sm-none">{{ homepage.tag_line }}</h3>
 		</div>
@@ -23,13 +23,10 @@
 		<div class="row">
 			{% for item in homepage.products %}
 			<div class="col-md-4 mt-4 mt-md-0">
-				<div class="card h-100">
+				<div class="card h-100 justify-content-between">
 					<img class="card-img-top" src="{{ item.image }}" alt="{{ item.item_name }}">
-					<div class="card-body">
+					<div class="card-body" style="flex: 0">
 						<h5 class="card-title">{{ item.item_name }}</h5>
-						<!-- <p class="card-text">{{ item.item_group }}</p> -->
-					</div>
-					<div class="card-body">
 						<a href="{{ item.route }}" class="card-link">{{ _('More details') }}</a>
 					</div>
 				</div>
