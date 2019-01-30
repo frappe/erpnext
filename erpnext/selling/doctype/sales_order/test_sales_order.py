@@ -731,9 +731,6 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(mr_doc.items[0].sales_order, so.name)
 
 	def test_maintain_product_bundle_items_during_sales_cycle(self):
-		if frappe.flags.test_events_created:
-			return
-
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 
@@ -751,7 +748,7 @@ class TestSalesOrder(unittest.TestCase):
 		so.submit()
 		frappe.db.sql("""delete from `tabProduct Bundle Item` where parent = '_Test Service Product Bundle_' and idx = 2""")
 		dn = create_dn_against_so(so.name, 1)
-		########################
+		self.assertTrue(dn.submit)
 
 		# CHECKED - CHECKBOX
 		frappe.delete_doc("Product Bundle", "_Test Service Product Bundle_")
@@ -763,9 +760,7 @@ class TestSalesOrder(unittest.TestCase):
 		so2.submit()
 		frappe.db.sql("""delete from `tabProduct Bundle Item` where parent = '_Test Service Product Bundle_' and idx = 2""")
 		dn2 = create_dn_against_so(so2.name, 1)
-		#####################
-
-		frappe.flags.test_events_created = True
+		self.assertTrue(dn2.submit)
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
