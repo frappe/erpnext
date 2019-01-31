@@ -1,7 +1,7 @@
 import frappe, json, os
 from frappe.utils import flt
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
-from frappe.contacts.doctype.address.address import get_default_address, get_company_address
+from frappe.contacts.doctype.address.address import get_default_address
 
 def update_itemised_tax_data(doc):
 	if not doc.taxes: return
@@ -48,9 +48,9 @@ def export_invoices(filters=None):
 			saved_xmls.append(xml_filename)
 
 	zip_filename = "e-invoices_{0}.zip".format(frappe.generate_hash(length=6))
-	
+
 	download_zip(saved_xmls, zip_filename)
-	
+
 	cleanup_files(saved_xmls)
 
 @frappe.whitelist()
@@ -70,7 +70,7 @@ def prepare_invoice(invoice):
 		invoice["return_against_corrected"] =  extract_doc_number(frappe.get_doc(invoice.return_against))
 	else:
 		invoice["type_of_document"] = "TD01" #Sales Invoice (Fattura)
-	
+
 	#set customer information
 	invoice["customer_data"] = frappe.get_doc("Customer", invoice.customer)
 	invoice["customer_address_data"] = frappe.get_doc("Address", invoice.customer_address)
@@ -112,10 +112,10 @@ def get_conditions(filters):
 
 	if filters.get("from_date"): conditions["posting_date"] = (">=", filters["from_date"])
 	if filters.get("to_date"): conditions["posting_date"] = ("<=", filters["to_date"])
-	
+
 	if filters.get("from_date") and filters.get("to_date"):
 		conditions["posting_date"] = ("between", [filters.get("from_date"), filters.get("to_date")])
-	
+
 	return conditions
 
 def download_zip(files, output_filename):
@@ -142,7 +142,7 @@ def cleanup_files(files):
 def extract_doc_number(doc):
 	if not hasattr(doc, "naming_series"):
 		return doc.name
-	
+
 	name_parts = doc.name.split("-")
 
 	if hasattr(doc, "amended_from"):
