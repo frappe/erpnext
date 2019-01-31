@@ -93,14 +93,20 @@
         <Divisa>EUR</Divisa>
         <Data>{{ doc.posting_date }}</Data>
         <Numero>{{ doc.progressive_number }}</Numero>
-        <ImportoTotaleDocumento>{{ format_float(doc.grand_total) }}</ImportoTotaleDocumento>
-        <Causale>VENDITA</Causale>
+        {%- if doc.stamp_duty %}
+        <DatiBollo>
+          <BolloVirtuale>SI</BolloVirtuale>
+          <ImportoBollo>{{ format_float(doc.stamp_duty) }}</ImportoBollo>
+        </DatiBollo>
+        {%- endif %}
         {%- if doc.additional_discount_percentage or doc.additional_discount_amount %}
         <ScontoMaggiorazione>
           <Tipo>SC</Tipo>
           {%- if doc.additional_discount_percentage -%}<Percentuale>{{ doc.additional_discount_percentage }}</Percentuale>{%- endif -%}
           {%- if doc.additional_discount_amount -%}<Importo>{{ doc.additional_discount_amount }}</Percentuale>{%- endif -%}
         </ScontoMaggiorazione>
+        <ImportoTotaleDocumento>{{ format_float(doc.grand_total) }}</ImportoTotaleDocumento>
+        <Causale>VENDITA</Causale>
         {%- endif %}
       </DatiGeneraliDocumento>
       {%- if doc.po_no %}
