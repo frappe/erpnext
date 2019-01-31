@@ -31,7 +31,7 @@ def make_custom_fields(update=True):
         'Company': [
             fiscal_code_field,
             dict(fieldname='fiscal_regime', label='Fiscal Regime',
-			    fieldtype='Select', insert_after='fiscal_code', print_hide=1,                
+			    fieldtype='Select', insert_after='fiscal_code', print_hide=1,  
                 options="\n".join(map(lambda x: x.decode('utf-8'), fiscal_regimes)))
         ],
         'Account': [
@@ -98,7 +98,7 @@ def setup_report():
     report_name = 'Electronic Invoice Register'
 
     frappe.db.sql(""" update `tabReport` set disabled = 0 where
-        name = '{0}' """.format(report_name))
+        name = %s """, report_name)
 
     if not frappe.db.get_value('Custom Role', dict(report=report_name)):
         frappe.get_doc(dict(
