@@ -1347,4 +1347,6 @@ def validate_sample_quantity(item_code, sample_quantity, qty, batch_no = None):
 
 @frappe.whitelist()
 def get_available_batches_in_warehouse(doctype, txt, searchfield, start, page_len, filters):
-	return get_batches(filters.get("item"), filters.get("s_warehouse"), filters.get("qty"), as_dict=False)
+	warehouse = filters.get("t_warehouse") or filters.get("s_warehouse")
+
+	return get_batches(filters.get("item"), warehouse, filters.get("qty"), as_dict=False)
