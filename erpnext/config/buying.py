@@ -4,27 +4,74 @@ from frappe import _
 def get_data():
 	return [
 		{
+			"label": _("Items and Pricing"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Item",
+					"onboard": 1,
+					"description": _("All Products or Services."),
+				},
+				{
+					"type": "doctype",
+					"name": "Price List",
+					"onboard": 1,
+					"description": _("Price List master.")
+				},
+				{
+					"type": "doctype",
+					"name": "Item Price",
+					"description": _("Multiple Item prices."),
+					"onboard": 1,
+					"route": "Report/Item Price"
+				},
+				{
+					"type": "doctype",
+					"name": "Product Bundle",
+					"description": _("Bundle items at time of sale."),
+				},
+				{
+					"type": "doctype",
+					"name": "Item Group",
+					"icon": "fa fa-sitemap",
+					"label": _("Item Group"),
+					"link": "Tree/Item Group",
+					"description": _("Tree of Item Groups."),
+				},
+				{
+					"type": "doctype",
+					"name": "Pricing Rule",
+					"description": _("Rules for applying pricing and discount.")
+				},
+
+			]
+		},
+		{
 			"label": _("Purchasing"),
 			"icon": "fa fa-star",
 			"items": [
 				{
 					"type": "doctype",
 					"name": "Material Request",
+					"dependencies": ["Item"],
 					"description": _("Request for purchase."),
 				},
 				{
 					"type": "doctype",
 					"name": "Request for Quotation",
+					"dependencies": ["Item", "Supplier"],
 					"description": _("Request for quotation."),
 				},
 				{
 					"type": "doctype",
 					"name": "Supplier Quotation",
+					"dependencies": ["Item", "Supplier"],
 					"description": _("Quotations received from Suppliers."),
 				},
 				{
 					"type": "doctype",
 					"name": "Purchase Order",
+					"dependencies": ["Item", "Supplier"],
 					"description": _("Purchase Orders given to Suppliers."),
 				},
 			]
@@ -35,6 +82,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Supplier",
+					"onboard": 1,
 					"description": _("Supplier database."),
 				},
 				{
@@ -75,46 +123,6 @@ def get_data():
 					"name": "Purchase Taxes and Charges Template",
 					"description": _("Tax template for buying transactions.")
 				},
-			]
-		},
-		{
-			"label": _("Items and Pricing"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Item",
-					"description": _("All Products or Services."),
-				},
-				{
-					"type": "doctype",
-					"name": "Product Bundle",
-					"description": _("Bundle items at time of sale."),
-				},
-				{
-					"type": "doctype",
-					"name": "Price List",
-					"description": _("Price List master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Item Group",
-					"icon": "fa fa-sitemap",
-					"label": _("Item Group"),
-					"link": "Tree/Item Group",
-					"description": _("Tree of Item Groups."),
-				},
-				{
-					"type": "doctype",
-					"name": "Item Price",
-					"description": _("Multiple Item prices."),
-					"route": "Report/Item Price"
-				},
-				{
-					"type": "doctype",
-					"name": "Pricing Rule",
-					"description": _("Rules for applying pricing and discount.")
-				},
-
 			]
 		},
 		{
