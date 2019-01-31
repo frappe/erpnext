@@ -585,3 +585,7 @@ erpnext.patches.v11_0.rename_additional_salary_component_additional_salary
 erpnext.patches.v11_0.renamed_from_to_fields_in_project
 erpnext.patches.v11_0.add_permissions_in_gst_settings
 erpnext.patches.v11_1.setup_guardian_role
+erpnext.patches.v12_0.change_qms_icon
+erpnext.patches.v12_0.rename_learn_to_help
+erpnext.patches.v12_0.rename_accounts_desktop_icon_to_accounting
+erpnext.patches.v12_0.replace_project_list_desktop_icon_with_projects_module_desktop_icon # 09-01-2019
