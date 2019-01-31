@@ -63,7 +63,7 @@ def make_custom_fields(update=True):
         'Payment Schedule': [
             dict(fieldname='mode_of_payment_code', label='Code',
 		    fieldtype='Select', insert_after='mode_of_payment', print_hide=1,
-            options="mode_of_payment.mode_of_payment_code"),
+            options="\n".join(map(lambda x: x.decode('utf-8'), mode_of_payment_codes))),
             dict(fieldname='bank_account', label='Bank Account',
 		    fieldtype='Link', insert_after='mode_of_payment_code', print_hide=1,
             options="Bank Account"),
