@@ -67,6 +67,7 @@ def prepare_invoice(invoice):
 	#Set invoice type
 	if invoice.is_return and invoice.return_against:
 		invoice["type_of_document"] = "TD04" #Credit Note (Nota di Credito)
+		invoice["return_against_corrected"] =  extract_doc_number(frappe.get_doc(invoice.return_against))
 	else:
 		invoice["type_of_document"] = "TD01" #Sales Invoice (Fattura)
 	
