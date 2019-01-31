@@ -124,11 +124,11 @@ frappe.ui.form.on('Stock Entry', {
 	},
 
 	refresh: function(frm) {
-		frm.add_custom_button(__('Select Item Batches'), () => {
-			frm.trigger("select_batch_no");
-		});
-
 		if(!frm.doc.docstatus) {
+			frm.add_custom_button(__('Select Item Batches'), () => {
+				frm.trigger("select_batch_no");
+			});
+
 			frm.trigger('validate_purpose_consumption');
 			frm.add_custom_button(__('Create Material Request'), function() {
 				frappe.model.with_doctype('Material Request', function() {
@@ -356,6 +356,7 @@ frappe.ui.form.on('Stock Entry', {
 										label: __('Quantity'),
 										fieldtype: 'Read Only',
 										fieldname: 'qty',
+										in_list_view: 1
 									},
 									{
 										label: __('Batch No'),
@@ -368,6 +369,7 @@ frappe.ui.form.on('Stock Entry', {
 												filters: {
 													item: doc.item_code,
 													s_warehouse: doc.s_warehouse,
+													t_warehouse: doc.t_warehouse,
 													qty: doc.qty
 												}
 											};
