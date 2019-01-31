@@ -547,7 +547,7 @@ def get_data():
 			"icon": "octicon octicon-credit-card",
 			"type": "module",
 			"hidden": 1,
-			"description": "Streamline your production with BOMS, Work Orders and Timesheets."
+			"description": "Point of Sale, Cashier Closing and Loyalty Programs."
 		},
 		{
 			"module_name": "Education",
