@@ -34,11 +34,14 @@ def make_custom_fields(update=True):
 			    fieldtype='Select', insert_after='fiscal_code', print_hide=1,  
                 options="\n".join(map(lambda x: x.decode('utf-8'), fiscal_regimes)))
         ],
-        'Account': [
+        'Sales Taxes and Charges': [
             dict(fieldname='tax_exemption_reason', label='Tax Exemption Reason',
 		    fieldtype='Select', insert_after='included_in_print_rate', print_hide=1,
-            depends_on='eval:doc.account_type==__("Tax") && doc.tax_rate==0.0',
-            options="\n" + "\n".join(map(lambda x: x.decode('utf-8'), tax_exemption_reasons)))
+            depends_on='eval:doc.charge_type=="On Net Total" && doc.rate==0.0',
+            options="\n" + "\n".join(map(lambda x: x.decode('utf-8'), tax_exemption_reasons))),
+            dict(fieldname='tax_exemption_law', label='Tax Exempt Under',
+		    fieldtype='Text', insert_after='tax_exemption_reason', print_hide=1,
+            depends_on='eval:doc.charge_type=="On Net Total" && doc.rate==0.0')
         ],
         'Customer': [
             fiscal_code_field,
