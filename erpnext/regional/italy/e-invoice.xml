@@ -105,9 +105,9 @@
           {%- if doc.additional_discount_percentage -%}<Percentuale>{{ doc.additional_discount_percentage }}</Percentuale>{%- endif -%}
           {%- if doc.additional_discount_amount -%}<Importo>{{ doc.additional_discount_amount }}</Percentuale>{%- endif -%}
         </ScontoMaggiorazione>
+        {%- endif %}
         <ImportoTotaleDocumento>{{ format_float(doc.grand_total) }}</ImportoTotaleDocumento>
         <Causale>VENDITA</Causale>
-        {%- endif %}
       </DatiGeneraliDocumento>
       {%- if doc.po_no %}
       <DatiOrdineAcquisto>
