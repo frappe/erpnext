@@ -36,6 +36,10 @@ class InvalidBarcode(frappe.ValidationError):
 	pass
 
 
+class ConflictingConversionFactors(frappe.ValidationError):
+	pass
+
+
 class Item(WebsiteGenerator):
 	website = frappe._dict(
 		page_title_field="item_name",
@@ -509,7 +513,7 @@ class Item(WebsiteGenerator):
 			for w in weights:
 				if abs(w-conv) >= 1.0/10**self.precision("conversion_factor", "uoms"):
 					frappe.throw(_("Multiple conversion factors found from {0} to {1}")
-						.format(uom, self.stock_uom))
+						.format(uom, self.stock_uom), ConflictingConversionFactors)
 
 			if not conv:
 				frappe.throw(_("Conversion factor for UOM {0} is 0").format(uom))
