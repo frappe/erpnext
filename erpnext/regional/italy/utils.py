@@ -86,17 +86,19 @@ def prepare_invoice(invoice):
 	else:
 		invoice["transmission_format_code"] = "FPR12"
 	
-	#append items, and tax exemption reason.
+
 	items = frappe.get_all("Sales Invoice Item", filters={"parent":invoice.name}, fields=["*"], order_by="idx")
+	taxes = frappe.get_all("Sales Taxes and Charges", filters={"parent":invoice.name}, fields=["*"], order_by="idx")
+	tax_data = get_invoice_summary(items, taxes) #get_rate_wise_tax_data(invoice["invoice_items"])
+
+	invoice["tax_data"] = tax_data
+
+	#append items, and tax exemption reason.
 	for item in items:
-		item_tax_rate = json.loads(item.item_tax_rate)
-		for account in item_tax_rate.keys():
-			item["tax_exemption_reason"] = frappe.db.get_value("Account", account, "tax_exemption_reason")
+		if item.tax_rate == 0.0:
+			item["tax_exemption_reason"] = tax_data["0.0"]["tax_exemption_reason"]
 
 	invoice["invoice_items"] = items
-
-	#tax rate wise grouping of tax amount and taxable amount.
-	invoice["tax_data"] = get_rate_wise_tax_data(invoice["invoice_items"])
 
 	invoice["payment_terms"] = frappe.get_all("Payment Schedule", filters={"parent": invoice.name}, fields=["*"])
 
@@ -118,6 +120,7 @@ def get_conditions(filters):
 
 	return conditions
 
+#TODO: Use function from frappe once PR #6853 is merged.
 def download_zip(files, output_filename):
 	from zipfile import ZipFile
 
@@ -152,3 +155,37 @@ def extract_doc_number(doc):
 			return name_parts[-1:][0]
 	else:
 		return doc.name
+
+def get_invoice_summary(items, taxes):
+	summary_data = frappe._dict()
+	for tax in taxes:
+		#Include only VAT charges.
+		if tax.charge_type == "Actual":
+			continue 
+
+		#Check item tax rates if tax rate is zero.
+		if tax.rate == 0:
+			for item in items:
+				item_tax_rate = json.loads(item.item_tax_rate)
+				if tax.account_head in item_tax_rate:
+					key = str(item_tax_rate[tax.account_head]) 
+					summary_data.setdefault(key, {"tax_amount": 0.0, "taxable_amount": 0.0, "tax_exemption_reason": "", "tax_exemption_law": ""})
+					summary_data[key]["tax_amount"] += item.tax_amount
+					summary_data[key]["taxable_amount"] += item.net_amount
+					if key == "0.0":
+						summary_data[key]["tax_exemption_reason"] = tax.tax_exemption_reason
+						summary_data[key]["tax_exemption_law"] = tax.tax_exemption_law
+
+			if summary_data == {}: #Zero VAT has not been set on any item. zero vat from tax row.
+				summary_data.setdefault("0.0", {"tax_amount": 0.0, "taxable_amount": tax.total, 
+					"tax_exemption_reason": tax.tax_exemption_reason, "tax_exemption_law": tax.tax_exemption_law})
+
+		else:
+			item_wise_tax_detail = json.loads(tax.item_wise_tax_detail)
+			for rate_item in [tax_item for tax_item in item_wise_tax_detail.items() if tax_item[1][0] == tax.rate]:
+				key = str(tax.rate)
+				if not summary_data.get(key): summary_data.setdefault(key, {"tax_amount": 0.0, "taxable_amount": 0.0})
+				summary_data[key]["tax_amount"] += rate_item[1][1]
+				summary_data[key]["taxable_amount"] += sum([item.net_amount for item in items if item.item_code == rate_item[0]])
+
+	return summary_data
