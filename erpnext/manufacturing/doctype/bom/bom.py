@@ -163,47 +163,51 @@ class BOM(WebsiteGenerator):
 	def get_rm_rate(self, arg):
 		"""	Get raw material rate as per selected method, if bom exists takes bom cost """
 		rate = 0
+		if not self.rm_cost_as_per:
+			self.rm_cost_as_per = "Valuation Rate"
 
 		if arg.get('scrap_items'):
 			rate = self.get_valuation_rate(arg)
 		elif arg:
-			if arg.get('bom_no') and self.set_rate_of_sub_assembly_item_based_on_bom:
-				rate = self.get_bom_unitcost(arg['bom_no'])
-			else:
-				if self.rm_cost_as_per == 'Valuation Rate':
-					rate = self.get_valuation_rate(arg)
-				elif self.rm_cost_as_per == 'Last Purchase Rate':
-					rate = arg.get('last_purchase_rate') \
-						or frappe.db.get_value("Item", arg['item_code'], "last_purchase_rate")
-				elif self.rm_cost_as_per == "Price List":
-					if not self.buying_price_list:
-						frappe.throw(_("Please select Price List"))
-					args = frappe._dict({
-						"doctype": "BOM",
-						"price_list": self.buying_price_list,
-						"qty": arg.get("qty"),
-						"uom": arg.get("uom") or arg.get("stock_uom"),
-						"stock_uom": arg.get("stock_uom"),
-						"transaction_type": "buying",
-						"company": self.company,
-						"currency": self.currency,
-						"conversion_rate": self.conversion_rate or 1,
-						"conversion_factor": arg.get("conversion_factor") or 1,
-						"plc_conversion_rate": 1,
-						"ignore_party": True
-					})
-					item_doc = frappe.get_doc("Item", arg.get("item_code"))
-					out = frappe._dict()
-					get_price_list_rate(args, item_doc, out)
-					rate = out.price_list_rate
+			#Customer Provided parts will have zero rate
+			if not frappe.db.get_value('Item', arg["item_code"], 'is_customer_provided_item'):
+				if arg.get('bom_no') and self.set_rate_of_sub_assembly_item_based_on_bom:
+					rate = self.get_bom_unitcost(arg['bom_no'])
+				else:
+					if self.rm_cost_as_per == 'Valuation Rate':
+						rate = self.get_valuation_rate(arg)
+					elif self.rm_cost_as_per == 'Last Purchase Rate':
+						rate = arg.get('last_purchase_rate') \
+							or frappe.db.get_value("Item", arg['item_code'], "last_purchase_rate")
+					elif self.rm_cost_as_per == "Price List":
+						if not self.buying_price_list:
+							frappe.throw(_("Please select Price List"))
+						args = frappe._dict({
+							"doctype": "BOM",
+							"price_list": self.buying_price_list,
+							"qty": arg.get("qty"),
+							"uom": arg.get("uom") or arg.get("stock_uom"),
+							"stock_uom": arg.get("stock_uom"),
+							"transaction_type": "buying",
+							"company": self.company,
+							"currency": self.currency,
+							"conversion_rate": self.conversion_rate or 1,
+							"conversion_factor": arg.get("conversion_factor") or 1,
+							"plc_conversion_rate": 1,
+							"ignore_party": True
+						})
+						item_doc = frappe.get_doc("Item", arg.get("item_code"))
+						out = frappe._dict()
+						get_price_list_rate(args, item_doc, out)
+						rate = out.price_list_rate
 
-				if not rate:
-					if self.rm_cost_as_per == "Price List":
-						frappe.msgprint(_("Price not found for item {0} and price list {1}")
-							.format(arg["item_code"], self.buying_price_list), alert=True)
-					else:
-						frappe.msgprint(_("{0} not found for item {1}")
-							.format(self.rm_cost_as_per, arg["item_code"]), alert=True)
+					if not rate:
+						if self.rm_cost_as_per == "Price List":
+							frappe.msgprint(_("Price not found for item {0} and price list {1}")
+								.format(arg["item_code"], self.buying_price_list), alert=True)
+						else:
+							frappe.msgprint(_("{0} not found for item {1}")
+								.format(self.rm_cost_as_per, arg["item_code"]), alert=True)
 
 		return flt(rate)
 
@@ -273,7 +277,7 @@ class BOM(WebsiteGenerator):
 			last_valuation_rate = frappe.db.sql("""select valuation_rate
 				from `tabStock Ledger Entry`
 				where item_code = %s and valuation_rate > 0
-				order by posting_date desc, posting_time desc, name desc limit 1""", args['item_code'])
+				order by posting_date desc, posting_time desc, creation desc limit 1""", args['item_code'])
 
 			valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
 

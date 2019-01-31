@@ -242,7 +242,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Opening Invoice Creation Tool",
-					"description": _("Make Opening Sales and Purchase Invoices")
+					"description": _("Create Opening Sales and Purchase Invoices")
 				},
 			]
 		},

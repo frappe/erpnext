@@ -15,7 +15,7 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 	refresh: function(frm) {
 		frm.disable_save();
 		frm.trigger("make_dashboard");
-		frm.page.set_primary_action(__("Make Invoices"), () => {
+		frm.page.set_primary_action(__('Create Invoices'), () => {
 			let btn_primary = frm.page.btn_primary.get(0);
 			return frm.call({
 				doc: frm.doc,

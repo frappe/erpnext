@@ -38,12 +38,10 @@ def get_data():
 			"link": "List/Employee"
 		},
 		{
-			"module_name": "Project",
-			"_doctype": "Project",
+			"module_name": "Projects",
 			"color": "#8e44ad",
 			"icon": "octicon octicon-rocket",
-			"type": "link",
-			"link": "List/Project"
+			"type": "module",
 		},
 		{
 			"module_name": "Issue",
@@ -71,6 +69,7 @@ def get_data():
 
 		# old
 		{
+			"label": _("Accounting"),
 			"module_name": "Accounts",
 			"color": "#3498db",
 			"icon": "octicon octicon-repo",
@@ -137,13 +136,6 @@ def get_data():
 			"label": _("Leaderboard")
 		},
 		{
-			"module_name": "Projects",
-			"color": "#8e44ad",
-			"icon": "octicon octicon-rocket",
-			"type": "module",
-			"hidden": 1
-		},
-		{
 			"module_name": "Support",
 			"color": "#2c3e50",
 			"icon": "octicon octicon-issue-opened",
@@ -151,12 +143,12 @@ def get_data():
 			"hidden": 1
 		},
 		{
-			"module_name": "Learn",
+			"module_name": "Help",
 			"color": "#FF888B",
 			"icon": "octicon octicon-device-camera-video",
 			"type": "module",
 			"is_help": True,
-			"label": _("Learn"),
+			"label": _("Help"),
 			"hidden": 1
 		},
 		{
@@ -573,5 +565,12 @@ def get_data():
 			"type": "module",
 			"label": _("Non Profit"),
 			"hidden": 1
+		},
+		{
+			"module_name": "Quality Management",
+			"color": "#1abc9c",
+			"icon": "fa fa-check-square-o",
+			"type": "module",
+			"label": _("Quality")
 		}
 	]

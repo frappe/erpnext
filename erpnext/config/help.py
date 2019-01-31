@@ -70,7 +70,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Accounts"),
+			"label": _("Accounting"),
 			"items": [
 				{
 					"type": "help",

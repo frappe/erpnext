@@ -61,13 +61,13 @@ frappe.treeview_settings["Account"] = {
 			frappe.set_route('List', 'Period Closing Voucher', {company: get_company()});
 		}, __('View'));
 
-		// make
+
 		treeview.page.add_inner_button(__("Journal Entry"), function() {
 			frappe.new_doc('Journal Entry', {company: get_company()});
-		}, __('Make'));
+		}, __('Create'));
 		treeview.page.add_inner_button(__("New Company"), function() {
 			frappe.new_doc('Company');
-		}, __('Make'));
+		}, __('Create'));
 
 		// financial statements
 		for (let report of ['Trial Balance', 'General Ledger', 'Balance Sheet',
