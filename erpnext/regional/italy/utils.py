@@ -2,6 +2,7 @@ import frappe, json, os
 from frappe.utils import flt
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
 from frappe.contacts.doctype.address.address import get_default_address
+from frappe import _
 
 def update_itemised_tax_data(doc):
 	if not doc.taxes: return
@@ -92,6 +93,11 @@ def prepare_invoice(invoice):
 	tax_data = get_invoice_summary(items, taxes) #get_rate_wise_tax_data(invoice["invoice_items"])
 
 	invoice["tax_data"] = tax_data
+
+	#Check if stamp duty (Bollo) of 2 EUR exists.
+	stamp_duty_charge_row = next((tax for tax in taxes if tax.charge_type == _("Actual") and tax.tax_amount == 2.0 ), None)
+	if stamp_duty_charge_row:
+		invoice["stamp_duty"] = stamp_duty_charge_row.tax_amount
 
 	#append items, and tax exemption reason.
 	for item in items:
