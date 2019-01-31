@@ -10,6 +10,7 @@ import Home from './pages/Home.vue';
 import Search from './pages/Search.vue';
 import Category from './pages/Category.vue';
 import SavedItems from './pages/SavedItems.vue';
+import FeaturedItems from './pages/FeaturedItems.vue';
 import PublishedItems from './pages/PublishedItems.vue';
 import Item from './pages/Item.vue';
 import Seller from './pages/Seller.vue';
@@ -32,6 +33,7 @@ function get_route_map() {
 	const registered_routes = {
 		'marketplace/profile': Profile,
 		'marketplace/saved-items': SavedItems,
+		'marketplace/featured-items': FeaturedItems,
 		'marketplace/publish': Publish,
 		'marketplace/published-items': PublishedItems,
 		'marketplace/buying': Buying,
