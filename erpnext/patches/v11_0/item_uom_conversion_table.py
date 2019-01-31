@@ -14,14 +14,17 @@ def execute():
 				continue
 
 			if abs(d.conversion_factor) >= 1:
-				to_qty = flt(d.conversion_factor, doc.precision("to_qty", "uom_conversion_graph"))
+				conv = doc.append("uom_conversion_graph", {
+					"from_qty": flt(d.conversion_factor, doc.precision("to_qty", "uom_conversion_graph")),
+					"from_uom": doc.stock_uom,
+					"to_qty": 1.0,
+					"to_uom": d.uom
+				})
 			else:
-				to_qty = flt(1/flt(d.conversion_factor), doc.precision("from_qty", "uom_conversion_graph"))
-
-			conv = doc.append("uom_conversion_graph", {
-				"from_qty": 1.0,
-				"from_uom": doc.stock_uom,
-				"to_qty": to_qty,
-				"to_uom": d.uom
-			})
+				conv = doc.append("uom_conversion_graph", {
+					"from_qty": 1.0,
+					"from_uom": doc.stock_uom,
+					"to_qty": flt(1/flt(d.conversion_factor), doc.precision("to_qty", "uom_conversion_graph")),
+					"to_uom": d.uom
+				})
 			conv.db_insert()
