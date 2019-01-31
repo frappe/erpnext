@@ -164,6 +164,12 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				}
 			}
 		});
+
+		frappe.ui.form.on('Sales Invoice', 'selling_price_list', (frm) => {
+			if(this.items) {
+				this.items.reset_items();
+			}
+		})
 	}
 
 	toggle_editing(flag) {
@@ -1384,6 +1390,7 @@ class POSItems {
 	}
 
 	get_items({start = 0, page_length = 40, search_value='', item_group=this.parent_item_group}={}) {
+		const price_list = this.frm.doc.selling_price_list;
 		return new Promise(res => {
 			frappe.call({
 				method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
@@ -1391,10 +1398,10 @@ class POSItems {
 				args: {
 					start,
 					page_length,
-					'price_list': this.frm.doc.selling_price_list,
+					price_list,
 					item_group,
 					search_value,
-					'pos_profile': this.frm.doc.pos_profile
+					pos_profile: this.frm.doc.pos_profile
 				}
 			}).then(r => {
 				// const { items, serial_no, batch_no } = r.message;

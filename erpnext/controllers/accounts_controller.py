@@ -265,6 +265,9 @@ class AccountsController(TransactionBase):
 								if item_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
 
+					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
+						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
+
 					if ret.get("pricing_rule"):
 						# if user changed the discount percentage then set user's discount percentage ?
 						item.set("pricing_rule", ret.get("pricing_rule"))
