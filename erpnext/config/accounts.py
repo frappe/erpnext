@@ -351,6 +351,36 @@ def get_data():
 					"is_query_report": True,
 					"doctype": "Sales Invoice"
 				},
+				{
+					"type": "report",
+					"name": "Item-wise Sales Register",
+					"is_query_report": True,
+					"doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"name": "Item-wise Purchase Register",
+					"is_query_report": True,
+					"doctype": "Purchase Invoice"
+				},
+				{
+					"type": "report",
+					"name": "Profitability Analysis",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Customer Ledger Summary",
+					"doctype": "Sales Invoice",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Supplier Ledger Summary",
+					"doctype": "Sales Invoice",
+					"is_query_report": True,
+				}
 			]
 		},
 		{
@@ -365,12 +395,6 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Profitability Analysis",
-					"doctype": "GL Entry",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
 					"name": "Payment Period Based On Invoice Date",
 					"is_query_report": True,
 					"doctype": "Journal Entry"
@@ -380,18 +404,6 @@ def get_data():
 					"name": "Sales Partners Commission",
 					"is_query_report": True,
 					"doctype": "Sales Invoice"
-				},
-				{
-					"type": "report",
-					"name": "Item-wise Sales Register",
-					"is_query_report": True,
-					"doctype": "Sales Invoice"
-				},
-				{
-					"type": "report",
-					"name": "Item-wise Purchase Register",
-					"is_query_report": True,
-					"doctype": "Purchase Invoice"
 				},
 				{
 					"type": "report",

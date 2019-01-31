@@ -1,8 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
-
+from __future__ import unicode_literals
 import unittest
 import frappe, erpnext
 import frappe.defaults
@@ -352,7 +351,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		set_perpetual_inventory(1, "_Test Company")
 		pr = make_purchase_receipt(cost_center=cost_center)
-		
+
 		stock_in_hand_account = get_inventory_account(pr.company, pr.get("items")[0].warehouse)
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 

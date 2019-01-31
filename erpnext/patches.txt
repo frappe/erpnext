@@ -576,14 +576,16 @@ erpnext.patches.v11_0.ewaybill_fields_gst_india #2018-11-13 #2019-01-09
 erpnext.patches.v11_0.drop_column_max_days_allowed
 erpnext.patches.v11_0.change_healthcare_desktop_icons
 erpnext.patches.v10_0.update_user_image_in_employee
-erpnext.patches.v11_0.update_delivery_trip_status
 erpnext.patches.v10_0.repost_gle_for_purchase_receipts_with_rejected_items
+erpnext.patches.v10_0.allow_operators_in_supplier_scorecard
+erpnext.patches.v11_0.update_delivery_trip_status
 erpnext.patches.v11_0.set_missing_gst_hsn_code
 erpnext.patches.v11_0.rename_bom_wo_fields
 erpnext.patches.v11_0.rename_additional_salary_component_additional_salary
 erpnext.patches.v11_0.renamed_from_to_fields_in_project
+erpnext.patches.v11_0.add_permissions_in_gst_settings
+erpnext.patches.v11_1.setup_guardian_role
 erpnext.patches.v12_0.change_qms_icon
 erpnext.patches.v12_0.rename_learn_to_help
 erpnext.patches.v12_0.rename_accounts_desktop_icon_to_accounting
 erpnext.patches.v12_0.replace_project_list_desktop_icon_with_projects_module_desktop_icon # 09-01-2019
-erpnext.patches.v11_0.rename_additional_salary_component_additional_salary
