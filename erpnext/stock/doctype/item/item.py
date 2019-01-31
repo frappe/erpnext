@@ -474,11 +474,15 @@ class Item(WebsiteGenerator):
 			predefined_conv_factor = get_uom_conv_factor(d.from_uom, d.to_uom)
 			if predefined_conv_factor:
 				input_conv_factor = flt(d.to_qty) / flt(d.from_qty)
-				if abs(predefined_conv_factor - input_conv_factor) > 1.0/10**self.precision("conversion_factor", "uoms"):
+				if abs(predefined_conv_factor - input_conv_factor) > 0.1/10**self.precision("conversion_factor", "uoms"):
 					frappe.msgprint("Row {0}: Setting conversion quantities from {1} to {2} from UOM Conversion Factor"
 						.format(d.idx, d.from_uom, d.to_uom), alert=True)
-					d.from_qty = 1
-					d.to_qty = flt(predefined_conv_factor, self.precision("to_qty", "uom_conversion_graph"))
+					if abs(predefined_conv_factor) >= 1:
+						d.from_qty = 1
+						d.to_qty = flt(predefined_conv_factor, self.precision("to_qty", "uom_conversion_graph"))
+					else:
+						d.from_qty = flt(1/flt(predefined_conv_factor), self.precision("from_qty", "uom_conversion_graph"))
+						d.to_qty = 1
 
 			if d.from_uom not in uoms:
 				uoms.append(d.from_uom)
@@ -511,7 +515,7 @@ class Item(WebsiteGenerator):
 			# if there are multiple paths, make sure their conversion_factors are the same
 			conv = weights[0]
 			for w in weights:
-				if abs(w-conv) >= 1.0/10**self.precision("conversion_factor", "uoms"):
+				if abs(w-conv) > 0.1/10**self.precision("conversion_factor", "uoms"):
 					frappe.throw(_("Multiple conversion factors found from {0} to {1}")
 						.format(uom, self.stock_uom), ConflictingConversionFactors)
 
@@ -856,7 +860,7 @@ class Item(WebsiteGenerator):
 		if self.uoms:
 			for d in self.uoms:
 				value = get_uom_conv_factor(d.uom, self.stock_uom)
-				if value and abs(value - d.conversion_factor) > 1.0/10**self.precision("conversion_factor", "uoms"):
+				if value and abs(value - d.conversion_factor) > 0.1/10**self.precision("conversion_factor", "uoms"):
 					frappe.msgprint("Setting conversion factor for UOM {0} from UOM Conversion Factor Master as {1}"
 						.format(d.uom, value), alert=True)
 					d.conversion_factor = value
