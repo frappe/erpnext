@@ -110,6 +110,13 @@
         <Data>{{ doc.po_date }}</Data>
         {%- endif %}
       </DatiOrdineAcquisto>
+      {%- if doc.is_return and doc.return_against_corrected %}
+      <DatiFattureCollegate>
+        <IdDocumento>
+        {{ doc.return_against_corrected }}
+        </IdDocumento>
+      </DatiFattureCollegate>
+      {%- endif %}
       {%- endif %}
       {%- if doc.shipping_address_data %}
       <DatiTrasporto>
