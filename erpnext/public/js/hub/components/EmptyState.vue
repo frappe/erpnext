@@ -3,7 +3,7 @@
 		:class="{ 'bordered': bordered, 'align-center': centered, 'justify-center': centered }"
 		:style="{ height: height + 'px' }"
 	>
-		<p class="text-muted">{{ message }}</p>
+		<p class="text-muted" v-html="message" ></p>
 		<p v-if="action">
 			<button class="btn btn-default btn-xs"
 				@click="action.on_click"

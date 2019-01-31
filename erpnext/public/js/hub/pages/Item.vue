@@ -73,6 +73,11 @@ export default {
 					action: this.add_to_saved_items
 				},
 				{
+					label: __('Add to Featured Item'),
+					condition: hub.is_user_registered() && this.is_own_item,
+					action: this.add_to_featured_items
+				},
+				{
 					label: __('Report this Item'),
 					condition: !this.is_own_item,
 					action: this.report_item
@@ -206,6 +211,21 @@ export default {
 				const saved_items_link = `<b><a href="#marketplace/saved-items">${__('Saved')}</a></b>`
 				frappe.show_alert(saved_items_link);
 				erpnext.hub.trigger('action:item_save');
+			})
+			.catch(e => {
+				console.error(e);
+			});
+		},
+
+		add_to_featured_items() {
+			hub.call('add_item_to_seller_featured_items', {
+				hub_item_name: this.hub_item_name,
+				hub_user: frappe.session.user
+			},)
+			.then(() => {
+				const featured_items_link = `<b><a href="#marketplace/featured-items">${__('Added to Featured Items')}</a></b>`
+				frappe.show_alert(featured_items_link);
+				erpnext.hub.trigger('action:item_feature');
 			})
 			.catch(e => {
 				console.error(e);
