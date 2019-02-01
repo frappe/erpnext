@@ -101,7 +101,7 @@ def get_conditions(filters):
 		frappe.throw(_("'From Date' is required"))
 
 	if filters.get("to_date"):
-		conditions += " and sle.posting_date <= '%s'" % frappe.db.escape(filters.get("to_date"))
+		conditions += " and sle.posting_date <= %s" % frappe.db.escape(filters.get("to_date"))
 	else:
 		frappe.throw(_("'To Date' is required"))
 
@@ -119,7 +119,7 @@ def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
 	if items:
 		item_conditions_sql = ' and sle.item_code in ({})'\
-			.format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items]))
+			.format(', '.join([frappe.db.escape(i, percent=False) for i in items]))
 
 	conditions = get_conditions(filters)
 
@@ -130,7 +130,7 @@ def get_stock_ledger_entries(filters, items):
 		from
 			`tabStock Ledger Entry` sle force index (posting_sort_index)
 		where sle.docstatus < 2 %s %s
-		order by sle.posting_date, sle.posting_time, sle.name""" %
+		order by sle.posting_date, sle.posting_time, sle.creation""" %
 		(item_conditions_sql, conditions), as_dict=1)
 
 def get_item_warehouse_map(filters, sle):
@@ -173,15 +173,15 @@ def get_item_warehouse_map(filters, sle):
 		qty_dict.val_rate = d.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
-		
+
 	iwb_map = filter_items_with_no_transactions(iwb_map)
 
 	return iwb_map
-	
+
 def filter_items_with_no_transactions(iwb_map):
 	for (company, item, warehouse) in sorted(iwb_map):
 		qty_dict = iwb_map[(company, item, warehouse)]
-		
+
 		no_transactions = True
 		float_precision = cint(frappe.db.get_default("float_precision")) or 3
 		for key, val in iteritems(qty_dict):
@@ -189,7 +189,7 @@ def filter_items_with_no_transactions(iwb_map):
 			qty_dict[key] = val
 			if key != "val_rate" and val:
 				no_transactions = False
-		
+
 		if no_transactions:
 			iwb_map.pop((company, item, warehouse))
 
@@ -219,15 +219,15 @@ def get_item_details(items, sle, filters):
 	if items:
 		cf_field = cf_join = ""
 		if filters.get("include_uom"):
-			cf_field = ", ucd.conversion_factor"
-			cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%(include_uom)s"
+			cf_field = ", ucd.`conversion_factor`"
+			cf_join = "LEFT JOIN `tabUOM Conversion Detail` ucd ON ucd.`parent`=item.`name` AND ucd.`uom`=%(include_uom)s"
 
 		for item in frappe.db.sql("""
-			select item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom{cf_field}
-			from `tabItem` item
+			SELECT item.`name`, item.`item_name`, item.`description`, item.`item_group`, item.`brand`, item.`stock_uom` {cf_field}
+			FROM `tabItem` item
 			{cf_join}
-			where item.name in ({names}) and ifnull(item.disabled, 0) = 0
-			""".format(cf_field=cf_field, cf_join=cf_join, names=', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])),
+			WHERE item.`name` IN ({names}) AND IFNULL(item.`disabled`, 0) = 0
+			""".format(cf_field=cf_field, cf_join=cf_join, names=', '.join([frappe.db.escape(i, percent=False) for i in items])),
 			{"include_uom": filters.get("include_uom")}, as_dict=1):
 				item_details.setdefault(item.name, item)
 
@@ -245,7 +245,7 @@ def get_item_reorder_details(items):
 			select parent, warehouse, warehouse_reorder_qty, warehouse_reorder_level
 			from `tabItem Reorder`
 			where parent in ({0})
-		""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])), as_dict=1)
+		""".format(', '.join([frappe.db.escape(i, percent=False) for i in items])), as_dict=1)
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
 

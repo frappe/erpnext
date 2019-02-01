@@ -16,6 +16,13 @@ class StockFreezeError(frappe.ValidationError): pass
 exclude_from_linked_with = True
 
 class StockLedgerEntry(Document):
+	def autoname(self):
+		"""
+		Temporarily name doc for fast insertion
+		name will be changed using autoname options (in a scheduled job)
+		"""
+		self.name = frappe.generate_hash(txt="", length=10)
+
 	def validate(self):
 		self.flags.ignore_submit_comment = True
 		from erpnext.stock.utils import validate_warehouse_company
@@ -124,11 +131,11 @@ class StockLedgerEntry(Document):
 		is_group_warehouse(self.warehouse)
 
 def on_doctype_update():
-	if not frappe.db.sql("""show index from `tabStock Ledger Entry`
-		where Key_name="posting_sort_index" """):
+	if not frappe.db.has_index('tabStock Ledger Entry', 'posting_sort_index'):
 		frappe.db.commit()
-		frappe.db.sql("""alter table `tabStock Ledger Entry`
-			add index posting_sort_index(posting_date, posting_time, name)""")
+		frappe.db.add_index("Stock Ledger Entry",
+			fields=["posting_date", "posting_time", "name"],
+			index_name="posting_sort_index")
 
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
 	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
