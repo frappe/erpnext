@@ -905,6 +905,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_sales_invoice_with_advance(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
 			import test_records as jv_test_records
+		from erpnext.accounts.utils import get_balance_on_voucher
 
 		jv = frappe.copy_doc(jv_test_records[0])
 		jv.insert()
@@ -929,12 +930,20 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where reference_name=%s and credit_in_account_currency=300""", si.name))
 
-		self.assertEqual(si.outstanding_amount, 262.0)
+		self.assertEqual(si.outstanding_amount,
+			262.0)
+		self.assertEqual(get_balance_on_voucher(si.doctype, si.name, "Customer", si.customer, si.debit_to),
+			262.0)
+		self.assertEqual(get_balance_on_voucher(jv.doctype, jv.name, "Customer", si.customer, si.debit_to),
+			-100.0)
 
 		si.cancel()
 
-		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
+		self.assertFalse(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where reference_name=%s""", si.name))
+
+		self.assertEqual(get_balance_on_voucher(jv.doctype, jv.name, "Customer", si.customer, si.debit_to),
+			-400.0)
 
 	def test_serialized(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item

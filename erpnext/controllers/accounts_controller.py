@@ -1064,7 +1064,7 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 
 	against_account_condition = ""
 	if against_account:
-		against_account_condition = "and pe.{against_account_field} = '{against_account}'".format(
+		against_account_condition = "and pe.{against_account_field} = {against_account}".format(
 			against_account_field=against_account_field, against_account=frappe.db.escape(against_account))
 
 	if order_list or against_all_orders:
