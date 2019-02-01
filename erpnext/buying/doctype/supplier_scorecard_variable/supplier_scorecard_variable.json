@@ -4,7 +4,7 @@
  "allow_import": 0, 
  "allow_rename": 0, 
  "autoname": "field:variable_label", 
- "beta": 1, 
+ "beta": 0, 
  "creation": "2017-05-29 01:30:34.688389", 
  "custom": 0, 
  "docstatus": 0, 
@@ -101,7 +101,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "unique": 0
+   "unique": 1
   }, 
   {
    "allow_bulk_edit": 0, 
@@ -203,7 +203,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-07-12 07:33:31.395262", 
+ "modified": "2019-01-23 09:39:59.866398", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Scorecard Variable", 

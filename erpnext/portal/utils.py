@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe
 
 def set_default_role(doc, method):
