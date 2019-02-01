@@ -129,6 +129,8 @@ def _make_test_records(verbose):
 		["_Test Write Off", "Indirect Expenses", 0, None, None],
 		["_Test Exchange Gain/Loss", "Indirect Expenses", 0, None, None],
 
+		["_Test Account Sales", "Direct Income", 0, None, None],
+
 		# related to Account Inventory Integration
 		["_Test Account Stock In Hand", "Current Assets", 0, None, None],
 		
