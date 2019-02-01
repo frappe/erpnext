@@ -12,6 +12,25 @@
 <Nazione>IT</Nazione>
 {%- endmacro -%}
 
+{%- macro render_discount_or_margin(item) -%}
+{%- if item.discount_percentage > 0.0 or item.margin_type %}
+<ScontoMaggiorazione>
+  {%- if item.discount_percentage > 0.0 %}
+  <Tipo>SC</Tipo>
+  <Percentuale>{{ format_float(item.discount_percentage) }}</Percentuale>
+  {%- endif %}
+  {%- if item.margin_rate_or_amount > 0.0 -%}
+    <Tipo>MG</Tipo>
+    {%- if item.margin_type == "Percentage" -%}
+      <Percentuale>{{ format_float(item.margin_rate_or_amount) }}</Percentuale>
+    {%- elif item.margin_type == "Amount" -%}
+      <Importo>{{ format_float(item.margin_rate_or_amount) }}</Importo>
+    {%- endif -%}
+  {%- endif %}
+</ScontoMaggiorazione>
+{%- endif -%}
+{%- endmacro -%}
+
 <?xml version='1.0' encoding='UTF-8'?>
 <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" 
   xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" 
@@ -143,12 +162,7 @@
         <Descrizione>{{ item.description or item.item_name }}</Descrizione>
         <Quantita>{{ format_float(item.qty) }}</Quantita>
         <UnitaMisura>{{ item.stock_uom }}</UnitaMisura>
-        {%- if item.discount_percentage  %}
-        <ScontoMaggiorazione>
-          <Tipo>SC</Tipo>
-          <Percentuale>{{ item.discount_percentage }}</Percentuale>
-        </ScontoMaggiorazione>
-        {%- endif %}
+        {{ render_discount_or_margin(item) }}
         <PrezzoUnitario>{{ format_float(item.net_rate) }}</PrezzoUnitario>
         <PrezzoTotale>{{ format_float(item.net_amount) }}</PrezzoTotale>
         <AliquotaIVA>{{ format_float(item.tax_rate) }}</AliquotaIVA>
@@ -181,9 +195,9 @@
       {%- endif %}
       {%- for payment_term in doc.payment_terms %}
       <DettaglioPagamento>
-        <ModalitaPagamento>{{ payment_term.mode_of_payment_code }}</ModalitaPagamento>
-        <ImportoPagamento>{{ payment_term.payment_amount }}</ImportoPagamento>
+        <ModalitaPagamento>{{ payment_term.mode_of_payment_code.split("-")[0] }}</ModalitaPagamento>
         <DataScadenzaPagamento>{{ payment_term.due_date }}</DataScadenzaPagamento>
+        <ImportoPagamento>{{ payment_term.payment_amount }}</ImportoPagamento>
         {%- if payment_term.iban %}<IBAN>{{ payment_term.bank_account_iban }}</IBAN>{%- endif %}
       </DettaglioPagamento>
       {%- endfor %}
