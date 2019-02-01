@@ -36,8 +36,8 @@ def get_conditions(filters):
 def get_entries(filters):
 	conditions = get_conditions(filters)
 	journal_entries =  frappe.db.sql("""SELECT
-			"Journal Entry", jv.name, jv.posting_date, jvd.cheque_no, jvd.clearance_date, jvd.against_account,
-			if((jvd.debit - jvd.credit) < 0, (jvd.debit - jvd.credit) * -1, (jvd.debit - jvd.credit))
+			"Journal Entry", jv.name, jv.posting_date, jvd.cheque_no,
+			jvd.clearance_date, jvd.against_account, jvd.debit - jvd.credit
 		FROM 
 			`tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		WHERE 
@@ -46,7 +46,7 @@ def get_entries(filters):
 
 	payment_entries =  frappe.db.sql("""SELECT
 			"Payment Entry", name, posting_date, reference_no, clearance_date, party, 
-			if(paid_from=%(account)s, paid_amount, received_amount)
+			if(paid_from=%(account)s, paid_amount * -1, received_amount)
 		FROM 
 			`tabPayment Entry`
 		WHERE 

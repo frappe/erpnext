@@ -29,14 +29,12 @@
     "warehouse_reorder_qty": 20
    }
   ],
-  "uoms": [
+  "uom_conversion_graph": [
     {
-      "uom": "_Test UOM",
-      "conversion_factor": 1.0
-    },
-    {
-      "uom": "_Test UOM 1",
-      "conversion_factor": 10.0
+      "from_qty": 10.0,
+      "from_uom": "_Test UOM",
+      "to_qty": 1.0,
+      "to_uom": "_Test UOM 1"
     }
   ],
   "stock_uom": "_Test UOM",
