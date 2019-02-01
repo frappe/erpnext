@@ -17,6 +17,7 @@ from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entri
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.buying.utils import check_for_closed_status
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
+from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import update_rate_in_serial_no
 from erpnext.assets.doctype.asset.asset import get_asset_account
 from frappe.model.mapper import get_mapped_doc
 from six import iteritems
@@ -184,6 +185,30 @@ class PurchaseInvoice(BuyingController):
 				["Purchase Receipt", "purchase_receipt", "pr_detail"]
 			])
 
+	def check_valuation_amounts_with_previous_doc(self):
+		does_revalue = False
+		for item in self.items:
+			if item.purchase_receipt:
+				pr_item = frappe.db.get_value("Purchase Receipt Item", item.pr_detail,
+					["base_net_rate", "item_tax_amount"], as_dict=1)
+
+				# if rate is different
+				if abs(item.base_net_rate - pr_item.base_net_rate) >= 1.0 / (10 ** self.precision("base_net_rate", "items")):
+					does_revalue = True
+					if not cint(self.revalue_purchase_receipt):
+						frappe.throw(_("Row {0}: Item Rate does not match the Rate in Purchase Receipt. "
+							"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx))
+
+				# if item tax amount is different
+				if abs(item.item_tax_amount - pr_item.item_tax_amount) >= 1.0 / (10 ** self.precision("item_tax_amount", "items")):
+					does_revalue = True
+					if not cint(self.revalue_purchase_receipt):
+						frappe.throw(_("Row {0}: Item Valuation Tax Amount does not match the Valuation Tax Amount in Purchase Receipt. "
+							"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx))
+
+		if not does_revalue:
+			self.revalue_purchase_receipt = 0
+
 	def validate_warehouse(self):
 		if self.update_stock:
 			for d in self.get('items'):
@@ -314,6 +339,7 @@ class PurchaseInvoice(BuyingController):
 		super(PurchaseInvoice, self).on_submit()
 
 		self.check_prev_docstatus()
+		self.check_valuation_amounts_with_previous_doc()
 		self.update_status_updater_args()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
@@ -332,11 +358,42 @@ class PurchaseInvoice(BuyingController):
 			from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 			update_serial_nos_after_submit(self, "items")
 
+		self.update_receipts_valuation()
+
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
 
 		self.update_project()
 		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
+
+	def update_receipts_valuation(self):
+		purchase_receipts = set([item.purchase_receipt for item in self.items if item.purchase_receipt])
+
+		for pr_name in purchase_receipts:
+			pr_doc = frappe.get_doc("Purchase Receipt", pr_name)
+
+			# set billed item tax amount and billed net amount in pr item
+			pr_doc.set_billed_valuation_amounts()
+
+			# set valuation rate in pr item
+			pr_doc.update_valuation_rate("items")
+
+			# db_update will update and save valuation_rate in PR
+			for item in pr_doc.get("items"):
+				item.db_update()
+
+			# update latest valuation rate in serial no
+			update_rate_in_serial_no(pr_doc)
+
+			# update stock & gl entries for cancelled state of PR
+			pr_doc.docstatus = 2
+			pr_doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
+			pr_doc.make_gl_entries_on_cancel(repost_future_gle=False)
+
+			# update stock & gl entries for submit state of PR
+			pr_doc.docstatus = 1
+			pr_doc.update_stock_ledger(via_landed_cost_voucher=True)
+			pr_doc.make_gl_entries()
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if not self.grand_total:
@@ -762,6 +819,8 @@ class PurchaseInvoice(BuyingController):
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		if self.update_stock == 1:
 			self.update_stock_ledger()
+
+		self.update_receipts_valuation()
 
 		self.make_gl_entries_on_cancel()
 		self.update_project()

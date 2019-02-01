@@ -165,6 +165,8 @@ class BuyingController(StockController):
 
 		valuation_amount_adjustment = total_valuation_amount
 		for i, item in enumerate(self.get(parentfield)):
+			item.valuation_rate = 0.0
+
 			if item.item_code and item.qty and item.item_code in stock_items:
 				item_proportion = flt(item.base_net_amount) / stock_items_amount if stock_items_amount \
 					else flt(item.qty) / stock_items_qty
@@ -186,10 +188,33 @@ class BuyingController(StockController):
 				landed_cost_voucher_amount = flt(item.landed_cost_voucher_amount) \
 					if self.doctype in ["Purchase Receipt", "Purchase Invoice"] else 0.0
 
-				item.valuation_rate = ((item.base_net_amount + item.item_tax_amount + rm_supp_cost
+				valuation_item_tax_amount = self.get_item_valuation_tax_amount(item)
+				valuation_net_amount = self.get_item_valuation_net_amount(item)
+
+				item.valuation_rate = ((valuation_net_amount + valuation_item_tax_amount + rm_supp_cost
 					 + landed_cost_voucher_amount) / qty_in_stock_uom)
-			else:
-				item.valuation_rate = 0.0
+
+	def get_item_valuation_tax_amount(self, item):
+		amt = item.item_tax_amount
+		if self.doctype == "Purchase Receipt":
+			# If item has been billed/overbilled, use the amount from invoices
+			# If item is partially billed, then use the amounts from both with the ratio billed_qty:unbilled_qty
+			if item.billed_qty:
+				unbilled_qty = max(0, item.qty - item.billed_qty)
+				amt = item.billed_item_tax_amount
+				amt += item.item_tax_amount * unbilled_qty / item.qty
+		return flt(amt, self.precision("item_tax_amount", "items"))
+
+	def get_item_valuation_net_amount(self, item):
+		amt = item.base_net_amount
+		if self.doctype == "Purchase Receipt":
+			# If item has been billed/overbilled, use the amount from invoices
+			# If item is partially billed, then use the amounts from both with the ratio billed_qty:unbilled_qty
+			if item.billed_qty:
+				unbilled_qty = max(0, item.qty - item.billed_qty)
+				amt = item.billed_net_amount
+				amt += item.base_net_amount * unbilled_qty / item.qty
+		return flt(amt, self.precision("base_net_amount", "items"))
 
 	def validate_for_subcontracting(self):
 		if not self.is_subcontracted and self.sub_contracted_items:
