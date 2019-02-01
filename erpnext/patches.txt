@@ -650,3 +650,4 @@ erpnext.patches.v12_0.update_price_or_product_discount
 erpnext.patches.v12_0.add_export_type_field_in_party_master
 erpnext.patches.v11_0.update_package_total_in_delivery_trips
 erpnext.patches.v12_0.enable_auto_select_batches_in_stock_settings
+erpnext.patches.v12_0.set_is_completed_field_in_sales_orders
