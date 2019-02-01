@@ -508,7 +508,7 @@ def get_price_list_rate_for(args, item_code):
 	if item_price_data:
 		if item_price_data[0][2] == args.get("uom"):
 			return item_price_data[0][1]
-		elif not args.get('price_list_uom_dependant'):
+		elif args.get('price_list_uom_dependant'):
 			return flt(item_price_data[0][1] * flt(args.get("conversion_factor", 1)))
 		else:
 			return item_price_data[0][1]

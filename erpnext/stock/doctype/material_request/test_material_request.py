@@ -566,14 +566,15 @@ class TestMaterialRequest(unittest.TestCase):
 		item = mr.items[0]
 		mr.schedule_date = today()
 
-		if not frappe.db.get_value('UOM Conversion Detail',
-			 {'parent': item.item_code, 'uom': 'Kg'}):
-			 item_doc = frappe.get_doc('Item', item.item_code)
-			 item_doc.append('uoms', {
-				 'uom': 'Kg',
-				 'conversion_factor': 5
-			 })
-			 item_doc.save(ignore_permissions=True)
+		if not frappe.db.get_value('UOM Conversion Detail', {'parent': item.item_code, 'uom': 'Kg'}):
+			item_doc = frappe.get_doc('Item', item.item_code)
+			item_doc.append('uom_conversion_graph', {
+				'from_qty': 1,
+				'from_uom': 'Kg',
+				'to_qty': 5, # conversion factor
+				'to_uom': item_doc.stock_uom
+			})
+		item_doc.save(ignore_permissions=True)
 
 		item.uom = 'Kg'
 		for item in mr.items:

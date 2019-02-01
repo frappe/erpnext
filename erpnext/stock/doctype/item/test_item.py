@@ -247,17 +247,138 @@ class TestItem(unittest.TestCase):
 
 		item_doc = make_item("Test Item UOM", {
 			"stock_uom": "Gram",
-			"uoms": [dict(uom='Carat'), dict(uom='Kg')]
+			"uom_conversion_graph": [
+				dict(from_qty=1, from_uom='Carat', to_uom='Gram', to_qty=get_uom_conv_factor('Carat', 'Gram')),
+				dict(from_qty=1, from_uom='Kg', to_uom='Gram', to_qty=get_uom_conv_factor('Kg', 'Gram'))
+			]
 		})
 
-		for d in item_doc.uoms:
-			value = get_uom_conv_factor(d.uom, item_doc.stock_uom)
-			d.conversion_factor = value
+		carat = filter(lambda d: d.uom == "Carat", item_doc.uoms)
+		self.assertEqual(len(carat), 1)
+		self.assertEqual(carat[0].conversion_factor, 0.2)
 
-		self.assertEqual(item_doc.uoms[0].uom, "Carat")
-		self.assertEqual(item_doc.uoms[0].conversion_factor, 0.2)
-		self.assertEqual(item_doc.uoms[1].uom, "Kg")
-		self.assertEqual(item_doc.uoms[1].conversion_factor, 1000)
+		kg = filter(lambda d: d.uom == "Kg", item_doc.uoms)
+		self.assertEqual(len(kg), 1)
+		self.assertEqual(kg[0].conversion_factor, 1000)
+
+	def test_uom_conversion_graph(self):
+		from item import ConflictingConversionFactors
+
+		# Scenario 1
+		#   Litre (5)
+		#   (1)      \
+		#    |        \
+		#    |        (1)
+		#    |    '_Test UOM (10)------(1) Box
+		#    |
+		#    |
+		# (1000)
+		#  Gram
+		item_doc = make_item("Test Item UOM 2.1", {
+			"stock_uom": "_Test UOM",
+			"uom_conversion_graph": [
+				dict(from_qty=1, from_uom='_Test UOM', to_uom='Litre', to_qty=5),
+				dict(from_qty=1, from_uom='Litre', to_uom='Gram', to_qty=1000),
+				dict(from_qty=1, from_uom='Box', to_uom='_Test UOM', to_qty=10)
+			]
+		})
+		litre = filter(lambda d: d.uom == "Litre", item_doc.uoms)
+		self.assertEqual(len(litre), 1)
+		self.assertEqual(litre[0].conversion_factor, 0.2)
+		gram = filter(lambda d: d.uom == "Gram", item_doc.uoms)
+		self.assertEqual(len(gram), 1)
+		self.assertEqual(gram[0].conversion_factor, 0.0002)
+		box = filter(lambda d: d.uom == "Box", item_doc.uoms)
+		self.assertEqual(len(box), 1)
+		self.assertEqual(box[0].conversion_factor, 10)
+		stock_uom = filter(lambda d: d.uom == "_Test UOM", item_doc.uoms)
+		self.assertEqual(len(stock_uom), 1)
+		self.assertEqual(stock_uom[0].conversion_factor, 1)
+
+		# Scenario 2
+		#   Litre (5)
+		#   (2)      \
+		#    |        \
+		#    |        (2)
+		#    |    '_Test UOM (10)------(4) Box
+		#    |
+		#    |
+		# (1000)
+		#  Gram
+		item_doc = make_item("Test Item UOM 2.2", {
+			"stock_uom": "_Test UOM",
+			"uom_conversion_graph": [
+				dict(from_qty=2, from_uom='_Test UOM', to_uom='Litre', to_qty=5),
+				dict(from_qty=2, from_uom='Litre', to_uom='Gram', to_qty=1000),
+				dict(from_qty=4, from_uom='Box', to_uom='_Test UOM', to_qty=10)
+			]
+		})
+		litre = filter(lambda d: d.uom == "Litre", item_doc.uoms)
+		self.assertEqual(len(litre), 1)
+		self.assertEqual(litre[0].conversion_factor, 0.4)
+		gram = filter(lambda d: d.uom == "Gram", item_doc.uoms)
+		self.assertEqual(len(gram), 1)
+		self.assertEqual(gram[0].conversion_factor, 0.0008)
+		box = filter(lambda d: d.uom == "Box", item_doc.uoms)
+		self.assertEqual(len(box), 1)
+		self.assertEqual(box[0].conversion_factor, 2.5)
+		stock_uom = filter(lambda d: d.uom == "_Test UOM", item_doc.uoms)
+		self.assertEqual(len(stock_uom), 1)
+		self.assertEqual(stock_uom[0].conversion_factor, 1)
+
+		# From UOM and To UOM must not be the same
+		self.assertRaises(frappe.ValidationError, make_item, item_code="Test Item UOM 3", properties={
+			"stock_uom": "_Test UOM",
+			"uom_conversion_graph": [
+				dict(from_qty=1, from_uom='_Test UOM', to_uom='_Test UOM', to_qty=5)
+			]
+		})
+
+		# From Qty and To Qty must not be 0
+		self.assertRaises(frappe.ValidationError, make_item, item_code="Test Item UOM 4", properties={
+			"stock_uom": "_Test UOM",
+			"uom_conversion_graph": [
+				dict(from_qty=1, from_uom='_Test UOM', to_uom='_Test UOM', to_qty=0)
+			]
+		})
+		self.assertRaises(frappe.ValidationError, make_item, item_code="Test Item UOM 5", properties={
+			"stock_uom": "_Test UOM",
+			"uom_conversion_graph": [
+				dict(from_qty=0, from_uom='_Test UOM', to_uom='_Test UOM', to_qty=1)
+			]
+		})
+
+		# Override conversion factor it is already defined in UOM Conversion Factor DocType
+		item_doc = make_item("Test Item UOM 6", {
+			"stock_uom": "_Test UOM",
+			"uom_conversion_graph": [
+				dict(from_qty=1, from_uom='_Test UOM', to_uom='Gram', to_qty=1000),
+				dict(from_qty=1, from_uom='Gram', to_uom='Kg', to_qty=333),  # this should be overriden
+			]
+		})
+		gram = filter(lambda d: d.uom == "Gram", item_doc.uoms)
+		self.assertEqual(len(gram), 1)
+		self.assertEqual(gram[0].conversion_factor, 0.001)
+		kg = filter(lambda d: d.uom == "Kg", item_doc.uoms)
+		self.assertEqual(len(kg), 1)
+		self.assertEqual(kg[0].conversion_factor, 1)
+
+		# Do not allow conflicting conversion factors
+		self.assertRaises(ConflictingConversionFactors, make_item, item_code="Test Item UOM 7", properties={
+			"stock_uom": "_Test UOM",
+			"uom_conversion_graph": [
+				dict(from_qty=1, from_uom='_Test UOM', to_uom='Litre', to_qty=5),
+				dict(from_qty=1, from_uom='_Test UOM', to_uom='Litre', to_qty=4)
+			]
+		})
+		self.assertRaises(ConflictingConversionFactors, make_item, item_code="Test Item UOM 8", properties={
+			"stock_uom": "_Test UOM",
+			"uom_conversion_graph": [
+				dict(from_qty=1, from_uom='_Test UOM', to_uom='Litre', to_qty=5),
+				dict(from_qty=1, from_uom='Litre', to_uom='Millilitre', to_qty=1000),
+				dict(from_qty=1, from_uom='_Test UOM', to_uom='Millilitre', to_qty=4000)
+			]
+		})
 
 	def test_item_variant_by_manufacturer(self):
 		fields = [{'field_name': 'description'}, {'field_name': 'variant_based_on'}]
