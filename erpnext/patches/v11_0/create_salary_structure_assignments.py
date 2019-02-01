@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from datetime import datetime
+from frappe.utils import getdate
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import DuplicateAssignment
 
 def execute():
