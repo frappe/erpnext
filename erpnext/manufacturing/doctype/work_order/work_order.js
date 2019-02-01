@@ -349,7 +349,8 @@ frappe.ui.form.on("Work Order", {
 	before_submit: function(frm) {
 		frm.toggle_reqd(["fg_warehouse", "wip_warehouse"], true);
 		frm.fields_dict.required_items.grid.toggle_reqd("source_warehouse", true);
-		frm.toggle_reqd("transfer_material_against", frm.doc.operations);
+		frm.toggle_reqd("transfer_material_against",
+			frm.doc.operations && frm.doc.operations.length > 0);
 		frm.fields_dict.operations.grid.toggle_reqd("workstation", frm.doc.operations);
 	},
 

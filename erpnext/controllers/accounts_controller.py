@@ -248,7 +248,6 @@ class AccountsController(TransactionBase):
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
 					ret = get_item_details(args)
-
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (item.get(fieldname) is None or fieldname in force_item_fields):
@@ -265,11 +264,15 @@ class AccountsController(TransactionBase):
 								if item_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
 
+					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
+						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
+
 					if ret.get("pricing_rule"):
 						# if user changed the discount percentage then set user's discount percentage ?
+						item.set("pricing_rule", ret.get("pricing_rule"))
 						item.set("discount_percentage", ret.get("discount_percentage"))
-						if ret.get("pricing_rule_for") == "Price":
-							item.set("pricing_list_rate", ret.get("pricing_list_rate"))
+						if ret.get("pricing_rule_for") == "Rate":
+							item.set("price_list_rate", ret.get("price_list_rate"))
 
 						if item.price_list_rate:
 							item.rate = flt(item.price_list_rate *
@@ -604,13 +607,14 @@ class AccountsController(TransactionBase):
 								advance.account_currency)
 
 			if advance.account_currency == self.currency:
-				order_total = self.grand_total
-				formatted_order_total = fmt_money(order_total, precision=self.precision("grand_total"),
-												  currency=advance.account_currency)
+				order_total = self.get("rounded_total") or self.grand_total
+				precision = "rounded_total" if self.get("rounded_total") else "grand_total"
 			else:
-				order_total = self.base_grand_total
-				formatted_order_total = fmt_money(order_total, precision=self.precision("base_grand_total"),
-												  currency=advance.account_currency)
+				order_total = self.get("base_rounded_total") or self.base_grand_total
+				precision = "base_rounded_total" if self.get("base_rounded_total") else "base_grand_total"
+
+			formatted_order_total = fmt_money(order_total, precision=self.precision(precision),
+											  currency=advance.account_currency)
 
 			if self.currency == self.company_currency and advance_paid > order_total:
 				frappe.throw(_("Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2})")
@@ -952,11 +956,12 @@ def get_advance_journal_entries(party_type, party, party_account, amount_field,
 	return list(journal_entries)
 
 
-def get_advance_payment_entries(party_type, party, party_account,
-								order_doctype, order_list=None, include_unallocated=True, against_all_orders=False):
+def get_advance_payment_entries(party_type, party, party_account, order_doctype,
+		order_list=None, include_unallocated=True, against_all_orders=False, limit=1000):
 	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
 	payment_type = "Receive" if party_type == "Customer" else "Pay"
 	payment_entries_against_order, unallocated_payment_entries = [], []
+	limit_cond = "limit %s" % (limit or 1000)
 
 	if order_list or against_all_orders:
 		if order_list:
@@ -976,8 +981,8 @@ def get_advance_payment_entries(party_type, party, party_account,
 				t1.name = t2.parent and t1.{0} = %s and t1.payment_type = %s
 				and t1.party_type = %s and t1.party = %s and t1.docstatus = 1
 				and t2.reference_doctype = %s {1}
-			order by t1.posting_date
-		""".format(party_account_field, reference_condition),
+			order by t1.posting_date {2}
+		""".format(party_account_field, reference_condition, limit_cond),
 													  [party_account, payment_type, party_type, party,
 													   order_doctype] + order_list, as_dict=1)
 
@@ -989,8 +994,8 @@ def get_advance_payment_entries(party_type, party, party_account,
 				where
 					{0} = %s and party_type = %s and party = %s and payment_type = %s
 					and docstatus = 1 and unallocated_amount > 0
-				order by posting_date
-			""".format(party_account_field), (party_account, party_type, party, payment_type), as_dict=1)
+				order by posting_date {1}
+			""".format(party_account_field, limit_cond), (party_account, party_type, party, payment_type), as_dict=1)
 
 	return list(payment_entries_against_order) + list(unallocated_payment_entries)
 
@@ -1073,6 +1078,13 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
 	data = json.loads(trans_items)
 	for d in data:
 		child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
+
+		if parent_doctype == "Sales Order" and flt(d.get("qty")) < child_item.delivered_qty:
+			frappe.throw(_("Cannot set quantity less than delivered quantity"))
+
+		if parent_doctype == "Purchase Order" and flt(d.get("qty")) < child_item.received_qty:
+			frappe.throw(_("Cannot set quantity less than received quantity"))
+
 		child_item.qty = flt(d.get("qty"))
 
 		if child_item.billed_amt > (flt(d.get("rate")) * flt(d.get("qty"))):

@@ -8,7 +8,7 @@ from frappe import _, throw
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.stock.doctype.item.item import get_item_defaults, set_item_default
+from erpnext.stock.doctype.item.item import set_item_default
 from frappe.contacts.doctype.address.address import get_address_display
 
 from erpnext.controllers.stock_controller import StockController
