@@ -18,14 +18,13 @@ class GLEntry(Document):
 		self.flags.ignore_submit_comment = True
 		self.check_mandatory()
 		self.validate_and_set_fiscal_year()
+		self.pl_must_have_cost_center()
+		self.validate_cost_center()
 
 		if not self.flags.from_repost:
-			self.pl_must_have_cost_center()
 			self.check_pl_account()
-			self.validate_cost_center()
 			self.validate_party()
 			self.validate_currency()
-
 
 	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes', from_repost=False):
 		if not from_repost:
