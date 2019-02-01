@@ -6,5 +6,9 @@
  {
   "doctype": "Tax Category",
   "title": "_Test Tax Category 2"
+ },
+ {
+  "doctype": "Tax Category",
+  "title": "_Test Tax Category 3"
  }
 ]
