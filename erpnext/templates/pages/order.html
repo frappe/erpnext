@@ -73,14 +73,12 @@
 			<div class="col-sm-3 col-xs-3 text-right">
 				{{ d.qty }}
 				{% if d.delivered_qty is defined and d.delivered_qty != None %}
-				<p class="text-muted small">{{
-					_("Delivered: {0}").format(d.delivered_qty) }}</p>
+				<p class="text-muted small">{{ _("Delivered") }}&nbsp;{{ d.delivered_qty }}</p>
 				{% endif %}
 			</div>
 			<div class="col-sm-3 col-xs-3 text-right">
 				{{ d.get_formatted("amount")	 }}
-				<p class="text-muted small">{{
-					_("@ {0}").format(d.get_formatted("rate")) }}</p>
+				<p class="text-muted small">{{ _("Rate:") }}&nbsp;{{ d.get_formatted("rate") }}</p>
 			</div>
 		</div>
 		{% endfor %}
