@@ -7,6 +7,7 @@ from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
 from frappe.utils import getdate, cstr, flt, fmt_money
 from frappe import _, _dict
+from collections import OrderedDict
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from six import iteritems
@@ -52,9 +53,8 @@ def validate_filters(filters, account_details):
 		and account_details[filters.account].is_group == 0):
 		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
 
-	if (filters.get("voucher_no")
-		and filters.get("group_by") in [_('Group by Voucher'), _('Group by Voucher (Consolidated)')]):
-		frappe.throw(_("Can not filter based on Voucher No, if grouped by Voucher"))
+	if filters.get("voucher_no") and filters.get("group_by") == _('Group by Voucher (Consolidated)'):
+		frappe.throw(_("Can not filter based on Voucher No, if grouped by Voucher (Consolidated)"))
 
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
@@ -117,8 +117,8 @@ def get_result(filters, account_details):
 
 def get_gl_entries(filters):
 	currency_map = get_currency(filters)
-	select_fields = """, debit, credit, debit_in_account_currency,
-		credit_in_account_currency """
+	select_fields = """, debit, credit, debit_in_account_currency, credit_in_account_currency,
+		reference_no, reference_date, against_voucher"""
 
 	group_by_statement = ''
 	order_by_statement = "order by posting_date, account"
@@ -127,18 +127,20 @@ def get_gl_entries(filters):
 		order_by_statement = "order by posting_date, voucher_type, voucher_no"
 
 	if filters.get("group_by") == _("Group by Voucher (Consolidated)"):
-		group_by_statement = "group by voucher_type, voucher_no, account, cost_center"
+		group_by_statement = "group by voucher_type, voucher_no, account, cost_center, against_voucher_type, party_type, party"
 		select_fields = """, sum(debit) as debit, sum(credit) as credit,
 			sum(debit_in_account_currency) as debit_in_account_currency,
-			sum(credit_in_account_currency) as  credit_in_account_currency"""
+			sum(credit_in_account_currency) as credit_in_account_currency,
+			GROUP_CONCAT(DISTINCT reference_no SEPARATOR ', ') as reference_no,
+			min(reference_date) as reference_date,
+			GROUP_CONCAT(against_voucher SEPARATOR ', ') as against_voucher"""
 
 	gl_entries = frappe.db.sql(
 		"""
 		select
 			posting_date, account, party_type, party,
-			voucher_type, voucher_no, cost_center, project,
-			against_voucher_type, against_voucher, account_currency,
-			remarks, against, is_opening {select_fields}
+			voucher_type, voucher_no, cost_center, project, account_currency,
+			remarks, against, is_opening, against_voucher_type {select_fields}
 		from `tabGL Entry`
 		where company=%(company)s {conditions} {group_by_statement}
 		{order_by_statement}
@@ -168,6 +170,12 @@ def get_conditions(filters):
 
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
+
+	if filters.get("against_voucher"):
+		conditions.append("against_voucher=%(against_voucher)s")
+
+	if filters.get("reference_no"):
+		conditions.append("reference_no=%(reference_no)s")
 
 	if filters.get("group_by") == "Group by Party" and not filters.get("party_type"):
 		conditions.append("party_type in ('Customer', 'Supplier')")
@@ -212,7 +220,7 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	# Opening for filtered account
 	data.append(totals.opening)
 
-	if filters.get("group_by") != _('Group by Voucher (Consolidated)'):
+	if filters.get("group_by") and filters.get("group_by") != _('Group by Voucher (Consolidated)'):
 		for acc, acc_dict in iteritems(gle_map):
 			# acc
 			if acc_dict.entries:
@@ -265,7 +273,7 @@ def group_by_field(group_by):
 		return 'voucher_no'
 
 def initialize_gle_map(gl_entries, filters):
-	gle_map = frappe._dict()
+	gle_map = OrderedDict()
 	group_by = group_by_field(filters.get('group_by'))
 
 	for gle in gl_entries:
@@ -297,7 +305,7 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 		elif gle.posting_date <= to_date:
 			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'total', gle)
 			update_value_in_dict(totals, 'total', gle)
-			if filters.get("group_by") != _('Group by Voucher (Consolidated)'):
+			if filters.get("group_by") and filters.get("group_by") != _('Group by Voucher (Consolidated)'):
 				gle_map[gle.get(group_by)].entries.append(gle)
 			else:
 				entries.append(gle)
@@ -354,44 +362,52 @@ def get_columns(filters):
 			"width": 90
 		},
 		{
+			"label": _("Ref Date"),
+			"fieldname": "reference_date",
+			"fieldtype": "Date",
+			"width": 90
+		},
+		{
 			"label": _("Account"),
 			"fieldname": "account",
 			"fieldtype": "Link",
 			"options": "Account",
-			"width": 180
+			"width": 120
+		},
+		{
+			"label": _("Party"),
+			"fieldname": "party",
+			"width": 120,
+			"fieldtype": "Dynamic Link",
+			"options": "party_type"
+		},
+		{
+			"label": _("Ref No"),
+			"fieldname": "reference_no",
+			"width": 80
+		},
+		{
+			"label": _("Remarks"),
+			"fieldname": "remarks",
+			"width": 200
 		},
 		{
 			"label": _("Debit ({0})".format(currency)),
 			"fieldname": "debit",
-			"fieldtype": "Float",
+			"fieldtype": "Currency",
 			"width": 100
 		},
 		{
 			"label": _("Credit ({0})".format(currency)),
 			"fieldname": "credit",
-			"fieldtype": "Float",
+			"fieldtype": "Currency",
 			"width": 100
 		},
 		{
 			"label": _("Balance ({0})".format(currency)),
 			"fieldname": "balance",
-			"fieldtype": "Float",
-			"width": 130
-		}
-	]
-
-	columns.extend([
-		{
-			"label": _("Voucher Type"),
-			"fieldname": "voucher_type",
+			"fieldtype": "Currency",
 			"width": 120
-		},
-		{
-			"label": _("Voucher No"),
-			"fieldname": "voucher_no",
-			"fieldtype": "Dynamic Link",
-			"options": "voucher_type",
-			"width": 180
 		},
 		{
 			"label": _("Against Account"),
@@ -399,14 +415,21 @@ def get_columns(filters):
 			"width": 120
 		},
 		{
-			"label": _("Party Type"),
-			"fieldname": "party_type",
-			"width": 100
+			"label": _("Voucher No"),
+			"fieldname": "voucher_no",
+			"fieldtype": "Dynamic Link",
+			"options": "voucher_type",
+			"width": 150
 		},
+	]
+
+	columns.extend([
 		{
-			"label": _("Party"),
-			"fieldname": "party",
-			"width": 100
+			"label": _("Against Voucher"),
+			"fieldname": "against_voucher",
+			"fieldtype": "Dynamic Link",
+			"options": "against_voucher_type",
+			"width": 150
 		},
 		{
 			"label": _("Project"),
@@ -421,27 +444,25 @@ def get_columns(filters):
 			"width": 100
 		},
 		{
-			"label": _("Against Voucher Type"),
-			"fieldname": "against_voucher_type",
-			"width": 100
-		},
-		{
-			"label": _("Against Voucher"),
-			"fieldname": "against_voucher",
-			"fieldtype": "Dynamic Link",
-			"options": "against_voucher_type",
-			"width": 100
-		},
-		{
 			"label": _("Supplier Invoice No"),
 			"fieldname": "bill_no",
 			"fieldtype": "Data",
 			"width": 100
 		},
 		{
-			"label": _("Remarks"),
-			"fieldname": "remarks",
-			"width": 400
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"width": 120
+		},
+		{
+			"label": _("Against Voucher Type"),
+			"fieldname": "against_voucher_type",
+			"width": 100
+		},
+		{
+			"label": _("Party Type"),
+			"fieldname": "party_type",
+			"width": 100
 		}
 	])
 

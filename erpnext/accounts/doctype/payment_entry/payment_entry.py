@@ -377,18 +377,20 @@ class PaymentEntry(AccountsController):
 				frappe.throw(_("Reference No and Reference Date is mandatory for Bank transaction"))
 
 	def set_remarks(self):
-		if self.remarks: return
+		remarks = []
+
+		if self.user_remark:
+			remarks.append("Note: {0}".format(self.user_remark))
 
 		if self.payment_type=="Internal Transfer":
-			remarks = [_("Amount {0} {1} transferred from {2} to {3}")
-				.format(self.paid_from_account_currency, self.paid_amount, self.paid_from, self.paid_to)]
+			remarks.append(_("Amount {0} {1} transferred from {2} to {3}")
+				.format(self.paid_from_account_currency, self.paid_amount, self.paid_from, self.paid_to))
 		else:
-
-			remarks = [_("Amount {0} {1} {2} {3}").format(
+			remarks.append(_("Amount {0} {1} {2} {3}").format(
 				self.party_account_currency,
 				self.paid_amount if self.payment_type=="Receive" else self.received_amount,
 				_("received from") if self.payment_type=="Receive" else _("to"), self.party
-			)]
+			))
 
 		if self.reference_no:
 			remarks.append(_("Transaction reference no {0} dated {1}")
@@ -431,16 +433,27 @@ class PaymentEntry(AccountsController):
 				"party": self.party,
 				"against": against_account,
 				"account_currency": self.party_account_currency,
-				"cost_center": self.cost_center
+				"cost_center": self.cost_center,
+				"reference_no": self.reference_no,
+				"reference_date": self.reference_date,
+				"remarks": _("Note: {0}").format(self.user_remark) if self.user_remark else ""
 			})
 
 			dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
 
 			for d in self.get("references"):
+				r = []
+				if d.user_remark:
+					r.append(d.user_remark)
+				if self.user_remark:
+					r.append(_("Note: {0}").format(self.user_remark))
+				remarks = "\n".join(r)
+
 				gle = party_gl_dict.copy()
 				gle.update({
 					"against_voucher_type": d.reference_doctype,
-					"against_voucher": d.reference_name
+					"against_voucher": d.reference_name,
+					"remarks": remarks
 				})
 
 				allocated_amount_in_company_currency = flt(flt(d.allocated_amount) * flt(d.exchange_rate),
@@ -475,7 +488,10 @@ class PaymentEntry(AccountsController):
 					"against": self.party if self.payment_type=="Pay" else self.paid_to,
 					"credit_in_account_currency": self.paid_amount,
 					"credit": self.base_paid_amount,
-					"cost_center": self.cost_center
+					"cost_center": self.cost_center,
+					"reference_no": self.reference_no,
+					"reference_date": self.reference_date,
+					"remarks": _("Note: {0}").format(self.user_remark) if self.user_remark else ""
 				})
 			)
 		if self.payment_type in ("Receive", "Internal Transfer"):
@@ -486,7 +502,10 @@ class PaymentEntry(AccountsController):
 					"against": self.party if self.payment_type=="Receive" else self.paid_from,
 					"debit_in_account_currency": self.received_amount,
 					"debit": self.base_received_amount,
-					"cost_center": self.cost_center
+					"cost_center": self.cost_center,
+					"reference_no": self.reference_no,
+					"reference_date": self.reference_date,
+					"remarks": _("Note: {0}").format(self.user_remark) if self.user_remark else ""
 				})
 			)
 
@@ -497,6 +516,13 @@ class PaymentEntry(AccountsController):
 				if account_currency != self.company_currency:
 					frappe.throw(_("Currency for {0} must be {1}").format(d.account, self.company_currency))
 
+				r = []
+				if d.user_remark:
+					r.append(d.user_remark)
+				if self.user_remark:
+					r.append(_("Note: {0}").format(self.user_remark))
+				remarks = "\n".join(r)
+
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": d.account,
@@ -504,7 +530,10 @@ class PaymentEntry(AccountsController):
 						"against": self.party or self.paid_from,
 						"debit_in_account_currency": d.amount,
 						"debit": d.amount,
-						"cost_center": d.cost_center
+						"cost_center": d.cost_center,
+						"reference_no": self.reference_no,
+						"reference_date": self.reference_date,
+						"remarks": remarks
 					})
 				)
 

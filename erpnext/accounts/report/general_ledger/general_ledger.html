@@ -1,4 +1,24 @@
-<h2 class="text-center">{%= __("Statement of Account") %}</h2>
+{%
+var show_ref_col = false;
+for(var i=0, l=data.length; i<l; i++) {
+	if(data[i].reference_no || data[i].reference_date) {
+		show_ref_col = true;
+		break;
+	}
+}
+%}
+
+<style>
+.print-format {
+	padding:10mm;
+	font-size:8pt;
+}
+.print-format td {
+	vertical-align:middle !important;
+}
+</style>
+
+<h2 class="text-center" style="margin-top:0;">{%= __("Statement of Account") %}</h2>
 <h4 class="text-center">
 	{% if (filters.party_name) { %}
 		{%= filters.party_name %}
@@ -20,55 +40,104 @@
 	{%= __("to") %}
 	{%= frappe.datetime.str_to_user(filters.to_date) %}
 </h5>
-<hr>
 <table class="table table-bordered">
 	<thead>
 		<tr>
-			<th style="width: 12%">{%= __("Date") %}</th>
-			<th style="width: 15%">{%= __("Ref") %}</th>
-			<th style="width: 25%">{%= __("Party") %}</th>
-			<th style="width: 15%">{%= __("Debit") %}</th>
-			<th style="width: 15%">{%= __("Credit") %}</th>
-			<th style="width: 18%">{%= __("Balance (Dr - Cr)") %}</th>
+			<th class="text-center">{%= __("Voucher") %}</th>
+			{% if(show_ref_col) { %}
+			<th class="text-center">{%= __("Reference") %}</th>
+			{% } %}
+			{% if(!(filters.party || filters.account)) { %}
+			<th class="text-center">{%= __("Account") %}</th>
+			{% } %}
+			{% if(filters.against_in_print) { %}
+			<th class="text-center">{%= __("Against") %}</th>
+			{% } %}
+			<th class="text-center">{%= __("Remarks") %}</th>
+			<th class="text-center">{%= __("Debit") %}</th>
+			<th class="text-center">{%= __("Credit") %}</th>
+			<th class="text-center">{%= __("Balance") %}</th>
 		</tr>
 	</thead>
 	<tbody>
 		{% for(var i=0, l=data.length; i<l; i++) { %}
 			<tr>
 			{% if(data[i].posting_date) { %}
-				<td>{%= frappe.datetime.str_to_user(data[i].posting_date) %}</td>
-				<td>{%= data[i].voucher_type %}
-					<br>{%= data[i].voucher_no %}</td>
-				<td>
-					{% if(!(filters.party || filters.account)) { %}
-						{%= data[i].party || data[i].account %}
-						<br>
-					{% } %}
+				<td class="text-center text-nowrap">
+					<strong><a href="#Form/{%= data[i].voucher_type %}/{%= data[i].voucher_no %}" target="_blank">{%= data[i].voucher_no %}</a></strong>
+					<br />{%= frappe.datetime.str_to_user(data[i].posting_date) %}
+				</td>
 
-					{{ __("Against") }}: {%= data[i].against %}
-					<br>{%= __("Remarks") %}: {%= data[i].remarks %}
-					{% if(data[i].bill_no) { %}
-						<br>{%= __("Supplier Invoice No") %}: {%= data[i].bill_no %}
+				{% if(show_ref_col) { %}
+				<td class="text-center text-nowrap">
+					<strong>{%= data[i].reference_no %}</strong>
+					<div>{%= frappe.datetime.str_to_user(data[i].reference_date) %}</div>
+				</td>
+				{% } %}
+
+				{% if(!(filters.party || filters.account)) { %}
+				<td>
+					<a href="#Form/Account/{%= data[i].account %}" target="_blank">{%= data[i].account %}</a>
+					{% if(data[i].party) { %}
+					<br /><a href="#Form/{%= data[i].party_type %}/{%= data[i].party %}" target="_blank">{%= data[i].party %}</a>
 					{% } %}
-					</td>
-					<td style="text-align: right">
-						{%= format_currency(data[i].debit, filters.presentation_currency) %}</td>
-					<td style="text-align: right">
-						{%= format_currency(data[i].credit, filters.presentation_currency) %}</td>
-			{% } else { %}
-				<td></td>
-				<td></td>
-				<td><b>{%= frappe.format(data[i].account, {fieldtype: "Link"}) || "&nbsp;" %}</b></td>
-				<td style="text-align: right">
-					{%= data[i].account && format_currency(data[i].debit, filters.presentation_currency) %}
 				</td>
-				<td style="text-align: right">
-					{%= data[i].account && format_currency(data[i].credit, filters.presentation_currency) %}
+				{% } %}
+
+				{% if(filters.against_in_print) { %}
+				<td>
+					{%= (data[i].against || "").split(", ").join("<br />").split(",").join("<br />") %}
 				</td>
-			{% } %}
-				<td style="text-align: right">
+				{% } %}
+
+				<td>
+					{%= (data[i].remarks || "").split("\n").join("<br />") %}
+					{% if(data[i].against_voucher) { %}
+						{% if(data[i].remarks) { %}<br />{% } %}
+						{%= __("Against") %}
+						{%= data[i].against_voucher_type %}:
+						<a href="#Form/{%= data[i].against_voucher_type %}/{%= data[i].against_voucher %}" target="_blank">{%= data[i].against_voucher %}</a>
+					{% } %}
+					{% if(data[i].bill_no) { %}
+						<br />{%= __("Supplier Invoice No") %}: {%= data[i].bill_no %}
+					{% } %}
+				</td>
+
+				<td class="text-right text-nowrap">
+					{%= format_currency(data[i].debit, filters.presentation_currency) %}
+				</td>
+
+				<td class="text-right text-nowrap">
+					{%= format_currency(data[i].credit, filters.presentation_currency) %}
+				</td>
+
+				<td class="text-right text-nowrap">
 					{%= format_currency(data[i].balance, filters.presentation_currency) %}
 				</td>
+			{% } else { %}
+				{% if(!data[i].debit && !data[i].credit && !data[i].balance && !data[i].account) { %}
+					{% var colspan = 5 %}
+					{% if(show_ref_col) { colspan++; } %}
+					{% if(!(filters.party || filters.account)) { colspan++; } %}
+					{% if(filters.against_in_print) { colspan++; } %}
+					<td colspan="{%= colspan %}"></td>
+				{% } else { %}
+					{% var colspan = 2 %}
+					{% if(show_ref_col) { colspan++; } %}
+					{% if(!(filters.party || filters.account)) { colspan++; } %}
+					{% if(filters.against_in_print) { colspan++; } %}
+					<td class="text-right" colspan="{%= colspan %}"><strong>{%= frappe.format(data[i].account, {fieldtype: "Link"}) || "&nbsp;" %}</strong></td>
+					<td class="text-right text-nowrap">
+						<b>{%= data[i].account && format_currency(data[i].debit, filters.presentation_currency) %}</b>
+					</td>
+					<td class="text-right text-nowrap">
+						<b>{%= data[i].account && format_currency(data[i].credit, filters.presentation_currency) %}</b>
+					</td>
+					<td class="text-right text-nowrap">
+						<b>{%= format_currency(data[i].balance, filters.presentation_currency) %}</b>
+					</td>
+				{% } %}
+			{% } %}
 			</tr>
 		{% } %}
 	</tbody>

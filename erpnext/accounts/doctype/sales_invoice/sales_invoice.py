@@ -84,7 +84,6 @@ class SalesInvoice(SellingController):
 		self.check_close_sales_order("sales_order")
 		self.validate_debit_to_acc()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
-		self.add_remarks()
 		self.validate_write_off_account()
 		self.validate_account_for_change_amount()
 		self.validate_fixed_asset()
@@ -489,10 +488,7 @@ class SalesInvoice(SellingController):
 		for d in self.get('items'):
 			if d.income_account not in against_acc:
 				against_acc.append(d.income_account)
-		self.against_income_account = ','.join(against_acc)
-
-	def add_remarks(self):
-		if not self.remarks: self.remarks = 'No Remarks'
+		self.against_income_account = ', '.join(against_acc)
 
 	def validate_auto_set_posting_time(self):
 		# Don't auto set the posting date and time if invoice is amended

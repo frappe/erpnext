@@ -118,8 +118,6 @@ class PurchaseInvoice(BuyingController):
 			if self.bill_no and self.bill_date:
 				self.remarks = _("Against Supplier Invoice {0} dated {1}").format(self.bill_no,
 					formatdate(self.bill_date))
-			else:
-				self.remarks = _("No Remarks")
 
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
@@ -242,7 +240,7 @@ class PurchaseInvoice(BuyingController):
 			if item.expense_account not in against_accounts:
 				against_accounts.append(item.expense_account)
 
-		self.against_expense_account = ",".join(against_accounts)
+		self.against_expense_account = ", ".join(against_accounts)
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':

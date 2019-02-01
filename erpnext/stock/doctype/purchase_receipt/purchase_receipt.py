@@ -283,7 +283,7 @@ class PurchaseReceipt(BuyingController):
 			if negative_expense_booked_in_pi:
 				expenses_included_in_valuation = stock_rbnb
 
-			against_account = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
+			against_account = ", ".join(set([d.account for d in gl_entries if flt(d.debit) > 0]))
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
 			i = 1
