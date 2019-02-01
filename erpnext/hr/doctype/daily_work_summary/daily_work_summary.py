@@ -112,6 +112,10 @@ def get_user_emails_from_group(group):
 	if isinstance(group_doc, string_types):
 		group_doc = frappe.get_doc('Daily Work Summary Group', group)
 
-	emails = [d.email for d in group_doc.users if frappe.db.get_value("User", d.user, "enabled")]
+	emails = get_users_email(group_doc)
 
 	return emails
+
+def get_users_email(doc):
+	return [d.email for d in doc.users
+		if frappe.db.get_value("User", d.user, "enabled")]

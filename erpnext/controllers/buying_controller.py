@@ -703,7 +703,9 @@ class BuyingController(StockController):
 		frappe.db.sql("delete from `tabSerial No` where purchase_document_no=%s", self.name)
 
 	def validate_schedule_date(self):
-		if not self.schedule_date and self.get("items"):
+		if not self.get("items"):
+			return
+		if not self.schedule_date:
 			self.schedule_date = min([d.schedule_date for d in self.get("items")])
 
 		if self.schedule_date:
