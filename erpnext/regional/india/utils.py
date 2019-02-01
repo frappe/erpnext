@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe, re
 from frappe import _
 from frappe.utils import cstr, flt, date_diff, getdate
@@ -8,25 +9,52 @@ from erpnext.hr.utils import get_salary_assignment
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 
 def validate_gstin_for_india(doc, method):
-	if not hasattr(doc, 'gstin'):
+	if not hasattr(doc, 'gstin') or not doc.gstin:
 		return
 
-	if doc.gstin:
-		doc.gstin = doc.gstin.upper()
-		if doc.gstin not in ["NA", "na"]:
-			p = re.compile("[0-9]{2}[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}[1-9A-Za-z]{1}[Z]{1}[0-9a-zA-Z]{1}")
-			if not p.match(doc.gstin):
-				frappe.throw(_("Invalid GSTIN or Enter NA for Unregistered"))
+	doc.gstin = doc.gstin.upper().strip() if doc.gstin else ""
+	if not doc.gstin or doc.gstin == 'NA':
+		return
+
+	if len(doc.gstin) != 15:
+		frappe.throw(_("Invalid GSTIN! A GSTIN must have 15 characters."))
+
+	p = re.compile("^[0-9]{2}[A-Z]{4}[0-9A-Z]{1}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[1-9A-Z]{1}[0-9A-Z]{1}$")
+	if not p.match(doc.gstin):
+		frappe.throw(_("Invalid GSTIN! The input you've entered doesn't match the format of GSTIN."))
+
+	validate_gstin_check_digit(doc.gstin)
 
 	if not doc.gst_state:
-		if doc.state in states:
-			doc.gst_state = doc.state
+		if not doc.state:
+			return
+		state = doc.state.lower()
+		states_lowercase = {s.lower():s for s in states}
+		if state in states_lowercase:
+			doc.gst_state = states_lowercase[state]
+		else:
+			return
 
-	if doc.gst_state:
-		doc.gst_state_number = state_numbers[doc.gst_state]
-		if doc.gstin and doc.gstin != "NA" and doc.gst_state_number != doc.gstin[:2]:
-			frappe.throw(_("First 2 digits of GSTIN should match with State number {0}")
-				.format(doc.gst_state_number))
+	doc.gst_state_number = state_numbers[doc.gst_state]
+	if doc.gst_state_number != doc.gstin[:2]:
+		frappe.throw(_("Invalid GSTIN! First 2 digits of GSTIN should match with State number {0}.")
+			.format(doc.gst_state_number))
+
+def validate_gstin_check_digit(gstin):
+	''' Function to validate the check digit of the GSTIN.'''
+	factor = 1
+	total = 0
+	code_point_chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	mod = len(code_point_chars)
+	input_chars = gstin[:-1]
+	for char in input_chars:
+		digit = factor * code_point_chars.find(char)
+		digit = (digit // mod) + (digit % mod)
+		total += digit
+		factor = 2 if factor == 1 else 1
+	if gstin[-1] != code_point_chars[((mod - (total % mod)) % mod)]:
+		frappe.throw(_("Invalid GSTIN! The check digit validation has failed. " +
+			"Please ensure you've typed the GSTIN correctly."))
 
 def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
 	if frappe.get_meta(item_doctype).has_field('gst_hsn_code'):

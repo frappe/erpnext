@@ -8,6 +8,7 @@ from frappe import _
 from erpnext.setup.utils import get_exchange_rate
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.get_item_details import get_price_list_rate
 
 import functools
 
@@ -109,7 +110,11 @@ class BOM(WebsiteGenerator):
 				"item_name": item.item_name,
 				"bom_no": item.bom_no,
 				"stock_qty": item.stock_qty,
-				"include_item_in_manufacturing": item.include_item_in_manufacturing
+				"include_item_in_manufacturing": item.include_item_in_manufacturing,
+				"qty": item.qty,
+				"uom": item.uom,
+				"stock_uom": item.stock_uom,
+				"conversion_factor": item.conversion_factor
 			})
 			for r in ret:
 				if not item.get(r):
@@ -141,7 +146,7 @@ class BOM(WebsiteGenerator):
 			 'uom'			: item and args['stock_uom'] or '',
  			 'conversion_factor': 1,
 			 'bom_no'		: args['bom_no'],
-			 'rate'			: rate / self.conversion_rate if self.conversion_rate else rate,
+			 'rate'			: rate,
 			 'qty'			: args.get("qty") or args.get("stock_qty") or 1,
 			 'stock_qty'	: args.get("qty") or args.get("stock_qty") or 1,
 			 'base_rate'	: rate,
@@ -158,6 +163,8 @@ class BOM(WebsiteGenerator):
 	def get_rm_rate(self, arg):
 		"""	Get raw material rate as per selected method, if bom exists takes bom cost """
 		rate = 0
+		if not self.rm_cost_as_per:
+			self.rm_cost_as_per = "Valuation Rate"
 
 		if arg.get('scrap_items'):
 			rate = self.get_valuation_rate(arg)
@@ -173,35 +180,59 @@ class BOM(WebsiteGenerator):
 				elif self.rm_cost_as_per == "Price List":
 					if not self.buying_price_list:
 						frappe.throw(_("Please select Price List"))
-					rate = frappe.db.get_value("Item Price", {"price_list": self.buying_price_list,
-						"item_code": arg["item_code"]}, "price_list_rate") or 0.0
-
-					price_list_currency = frappe.db.get_value("Price List",
-						self.buying_price_list, "currency")
-					if price_list_currency != self.company_currency():
-						rate = flt(rate * self.conversion_rate)
+					args = frappe._dict({
+						"doctype": "BOM",
+						"price_list": self.buying_price_list,
+						"qty": arg.get("qty"),
+						"uom": arg.get("uom") or arg.get("stock_uom"),
+						"stock_uom": arg.get("stock_uom"),
+						"transaction_type": "buying",
+						"company": self.company,
+						"currency": self.currency,
+						"conversion_rate": self.conversion_rate or 1,
+						"conversion_factor": arg.get("conversion_factor") or 1,
+						"plc_conversion_rate": 1,
+						"ignore_party": True
+					})
+					item_doc = frappe.get_doc("Item", arg.get("item_code"))
+					out = frappe._dict()
+					get_price_list_rate(args, item_doc, out)
+					rate = out.price_list_rate
 
 				if not rate:
-					frappe.msgprint(_("{0} not found for Item {1}")
-						.format(self.rm_cost_as_per, arg["item_code"]), alert=True)
+					if self.rm_cost_as_per == "Price List":
+						frappe.msgprint(_("Price not found for item {0} and price list {1}")
+							.format(arg["item_code"], self.buying_price_list), alert=True)
+					else:
+						frappe.msgprint(_("{0} not found for item {1}")
+							.format(self.rm_cost_as_per, arg["item_code"]), alert=True)
 
 		return flt(rate)
 
-	def update_cost(self, update_parent=True, from_child_bom=False):
+	def update_cost(self, update_parent=True, from_child_bom=False, save=True):
 		if self.docstatus == 2:
 			return
 
 		existing_bom_cost = self.total_cost
 
 		for d in self.get("items"):
-			rate = self.get_rm_rate({"item_code": d.item_code, "bom_no": d.bom_no})
+			rate = self.get_rm_rate({
+				"item_code": d.item_code,
+				"bom_no": d.bom_no,
+				"qty": d.qty,
+				"uom": d.uom,
+				"stock_uom": d.stock_uom,
+				"conversion_factor": d.conversion_factor
+			})
 			if rate:
-				d.rate = rate * flt(d.conversion_factor) / flt(self.conversion_rate)
+				d.rate = rate
+			d.amount = flt(d.rate) * flt(d.qty)
 
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
 			self.calculate_cost()
-		self.save()
+		if save:
+			self.save()
 		self.update_exploded_items()
 
 		# update parent BOMs
