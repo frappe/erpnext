@@ -568,7 +568,11 @@ def get_items_for_material_requests(doc, sales_order=None, company=None):
 					item_details = get_subitems(doc, data, item_details, bom_no, company,
 						include_non_stock_items, include_subcontracted_items, 1, planned_qty=planned_qty)
 		else:
-			item_master = frappe.get_doc('Item', data['item_code']).as_dict()
+			if data['item_code']:
+				item_master = frappe.get_doc('Item', data['item_code']).as_dict()
+			else:
+				frappe.throw(_("Please select items in SELECT ITEMS section"))
+
 			purchase_uom = item_master.purchase_uom or item_master.stock_uom
 			conversion_factor = 0
 			for d in item_master.get("uoms"):
