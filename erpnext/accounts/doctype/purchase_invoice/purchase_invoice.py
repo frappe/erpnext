@@ -197,23 +197,24 @@ class PurchaseInvoice(BuyingController):
 	def check_valuation_amounts_with_previous_doc(self):
 		does_revalue = False
 		for item in self.items:
-			if item.purchase_receipt:
+			if item.pr_detail:
 				pr_item = frappe.db.get_value("Purchase Receipt Item", item.pr_detail,
 					["base_net_rate", "item_tax_amount"], as_dict=1)
 
-				# if rate is different
-				if abs(item.base_net_rate - pr_item.base_net_rate) >= 1.0 / (10 ** self.precision("base_net_rate", "items")):
-					does_revalue = True
-					if not cint(self.revalue_purchase_receipt):
-						frappe.throw(_("Row {0}: Item Rate does not match the Rate in Purchase Receipt. "
-							"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx))
+				if pr_item:
+					# if rate is different
+					if abs(item.base_net_rate - pr_item.base_net_rate) > 0.1/10**self.precision("base_net_rate", "items"):
+						does_revalue = True
+						if not cint(self.revalue_purchase_receipt):
+							frappe.throw(_("Row {0}: Item Rate does not match the Rate in Purchase Receipt. "
+								"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx))
 
-				# if item tax amount is different
-				if abs(item.item_tax_amount - pr_item.item_tax_amount) >= 1.0 / (10 ** self.precision("item_tax_amount", "items")):
-					does_revalue = True
-					if not cint(self.revalue_purchase_receipt):
-						frappe.throw(_("Row {0}: Item Valuation Tax Amount does not match the Valuation Tax Amount in Purchase Receipt. "
-							"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx))
+					# if item tax amount is different
+					if abs(item.item_tax_amount - pr_item.item_tax_amount) > 0.1/10**self.precision("item_tax_amount", "items"):
+						does_revalue = True
+						if not cint(self.revalue_purchase_receipt):
+							frappe.throw(_("Row {0}: Item Valuation Tax Amount does not match the Valuation Tax Amount in Purchase Receipt. "
+								"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx))
 
 		if not does_revalue:
 			self.revalue_purchase_receipt = 0
