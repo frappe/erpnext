@@ -102,6 +102,61 @@ class TestItem(unittest.TestCase):
 		for key, value in iteritems(to_check):
 			self.assertEqual(value, details.get(key))
 
+	def test_item_defaults(self):
+		frappe.delete_doc_if_exists("Item", "Test Item With Defaults", force=1)
+		make_item("Test Item With Defaults", {
+			"item_group": "_Test Item Group",
+			"brand": "_Test Brand With Item Defaults",
+			"item_defaults": [{
+				"company": "_Test Company",
+				"default_warehouse": "_Test Warehouse 2 - _TC",  # no override
+				"expense_account": "_Test Account Stock Expenses - _TC",  # override brand default
+				"buying_cost_center": "_Test Write Off Cost Center - _TC",  # override item group default
+			}]
+		})
+
+		sales_item_check = {
+			"item_code": "Test Item With Defaults",
+			"warehouse": "_Test Warehouse 2 - _TC",  # from item
+			"income_account": "_Test Account Sales - _TC",  # from brand
+			"expense_account": "_Test Account Stock Expenses - _TC",  # from item
+			"cost_center": "_Test Cost Center 2 - _TC",  # from item group
+		}
+		sales_item_details = get_item_details({
+			"item_code": "Test Item With Defaults",
+			"company": "_Test Company",
+			"price_list": "_Test Price List",
+			"currency": "_Test Currency",
+			"doctype": "Sales Invoice",
+			"conversion_rate": 1,
+			"price_list_currency": "_Test Currency",
+			"plc_conversion_rate": 1,
+			"customer": "_Test Customer",
+		})
+		for key, value in iteritems(sales_item_check):
+			self.assertEqual(value, sales_item_details.get(key))
+
+		purchase_item_check = {
+			"item_code": "Test Item With Defaults",
+			"warehouse": "_Test Warehouse 2 - _TC",  # from item
+			"expense_account": "_Test Account Stock Expenses - _TC",  # from item
+			"income_account": "_Test Account Sales - _TC",  # from brand
+			"cost_center": "_Test Write Off Cost Center - _TC"  # from item
+		}
+		purchase_item_details = get_item_details({
+			"item_code": "Test Item With Defaults",
+			"company": "_Test Company",
+			"price_list": "_Test Price List",
+			"currency": "_Test Currency",
+			"doctype": "Purchase Invoice",
+			"conversion_rate": 1,
+			"price_list_currency": "_Test Currency",
+			"plc_conversion_rate": 1,
+			"supplier": "_Test Supplier",
+		})
+		for key, value in iteritems(purchase_item_check):
+			self.assertEqual(value, purchase_item_details.get(key))
+
 	def test_item_tax_template(self):
 		expected_item_tax_template = [
 			{"item_code": "_Test Item With Item Tax Template", "tax_category": "",
