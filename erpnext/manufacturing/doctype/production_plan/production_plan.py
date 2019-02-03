@@ -571,7 +571,7 @@ def get_items_for_material_requests(doc, sales_order=None, company=None):
 			if data['item_code']:
 				item_master = frappe.get_doc('Item', data['item_code']).as_dict()
 			else:
-				frappe.throw(_("Please select items in SELECT ITEMS section"))
+				frappe.throw(_("Please select items first"))
 
 			purchase_uom = item_master.purchase_uom or item_master.stock_uom
 			conversion_factor = 0
