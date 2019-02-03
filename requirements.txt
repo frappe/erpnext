@@ -7,3 +7,5 @@ braintree
 gocardless_pro
 woocommerce
 pandas
+
+dirk's change
