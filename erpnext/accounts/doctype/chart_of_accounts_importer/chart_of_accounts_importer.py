@@ -45,6 +45,19 @@ def generate_data_from_csv(file_name):
 	forest = build_forest(data)
 	return forest
 
+@frappe.whitelist()
+def get_coa(doctype, parent, is_root=False, file_name=None):
+	''' called by tree view (to fetch node's children) '''
+
+	parent = None if parent==_('All Accounts') else parent
+	forest = generate_data_from_csv(file_name)
+	accounts = build_tree_from_json("", chart_data=forest) # returns alist of dict in a tree render-able form
+
+	# filter out to show data for the selected node only
+	accounts = [d for d in accounts if d['parent_account']==parent]
+
+	return accounts
+
 def build_forest(data):
 	'''
 		converts list of list into a nested tree
