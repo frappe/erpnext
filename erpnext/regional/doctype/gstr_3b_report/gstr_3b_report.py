@@ -154,12 +154,25 @@ class GSTR3BReport(Document):
 			'OTH': 'Others'
 		}
 
-		for d in self.report_dict["itc_elg"]["itc_avl"]:
-			d["iamt"] = flt(itc_details.get(itc_type_map.get(d["ty"]), {}).get("itc_iamt"))
-			d["camt"] = flt(itc_details.get(itc_type_map.get(d["ty"]), {}).get("itc_camt"))
-			d["samt"] = flt(itc_details.get(itc_type_map.get(d["ty"]), {}).get("itc_samt"))
-			d["csamt"] = flt(itc_details.get(itc_type_map.get(d["ty"]), {}).get("itc_csamt"))
+		net_itc = elf.report_dict["itc_elg"]["itc_net"]
 
+		for d in self.report_dict["itc_elg"]["itc_avl"]:
+			if d["ty"] == 'ISRC':
+				reverse_charge = 'Y'
+			else:
+				reverse_charge = 'N'
+
+			d["iamt"] = flt(itc_details.get((itc_type_map.get(d["ty"]), reverse_charge), {}).get("itc_iamt",))
+			net_itc["iamt"] += d["iamt"]
+
+			d["camt"] = flt(itc_details.get((itc_type_map.get(d["ty"]), reverse_charge), {}).get("itc_camt"))
+			net_itc["camt"] += d["camt"]
+
+			d["samt"] = flt(itc_details.get((itc_type_map.get(d["ty"]), reverse_charge), {}).get("itc_samt"))
+			net_itc["samt"] += d["samt"]
+
+			d["csamt"] = flt(itc_details.get((itc_type_map.get(d["ty"]), reverse_charge), {}).get("itc_csamt"))
+			net_itc["csamt"] += d["csamt"]
 
 	def prepare_data(self, doctype, tax_details, supply_type, supply_category, gst_category_list, reverse_charge="N"):
 
@@ -202,18 +215,6 @@ def get_itc_details(reverse_charge='N'):
 		from `tabPurchase Invoice`
 		where docstatus = 1
 		group by eligibility_for_itc, reverse_charge""", as_dict=1)
-
-	# itc_amount = frappe.get_all('Purchase Invoice',
-	# 	fields = ["sum(itc_integrated_tax) as itc_iamt",
-	# 		"sum(itc_central_tax) as itc_camt",
-	# 		"sum(itc_state_tax) as itc_samt",
-	# 		"sum(itc_cess_amount) as itc_csamt",
-	# 		"eligibility_for_itc"
-	# 	],
-	# 	filters = {
-	# 		"docstatus":1,
-	# 	},
-	# 	group_by = ['eligibility_for_itc', 'reverse_charge'])
 
 	itc_details = {}
 
