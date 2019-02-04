@@ -8,3 +8,8 @@ from frappe.model.document import Document
 
 class ChartofAccountsImporter(Document):
 	pass
+
+@frappe.whitelist()
+def validate_company(company):
+	if frappe.db.get_all('GL Entry', {"company": company}, "name", limit=1):
+		return False	
