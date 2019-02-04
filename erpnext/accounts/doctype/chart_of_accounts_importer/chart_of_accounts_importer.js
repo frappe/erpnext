@@ -7,6 +7,12 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 		// disable default save
 		frm.disable_save();
 
+		// make company mandatory
+		frm.set_df_property('company', 'reqd', frm.doc.company ? 0 : 1);
+		frm.set_df_property('import_file_section', 'hidden', frm.doc.company ? 0 : 1);
+		frm.set_df_property('chart_preview', 'hidden',
+			$(frm.fields_dict['chart_tree'].wrapper).html()!="" ? 0 : 1);
+
 		// Show import button when file is successfully attached
 		if (frm.doc.import_file) {
 			frm.page.set_primary_action(__("Start Import"), function () {
