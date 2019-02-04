@@ -51,7 +51,9 @@ class SalesInvoice(SellingController):
 			'percent_join_field': 'sales_order',
 			'status_field': 'billing_status',
 			'keyword': 'Billed',
-			'overflow_type': 'billing'
+			'overflow_type': 'billing',
+			'extra_cond': """ and exists(select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent
+				and (is_return=0 or update_billed_amount_in_sales_order=1))"""
 		}]
 
 	def set_indicator(self):
@@ -943,8 +945,11 @@ class SalesInvoice(SellingController):
 		updated_delivery_notes = []
 		for d in self.get("items"):
 			if d.dn_detail:
-				billed_amt = frappe.db.sql("""select sum(qty) from `tabSales Invoice Item`
-					where dn_detail=%s and docstatus=1""", d.dn_detail)
+				billed_amt = frappe.db.sql("""
+					select sum(item.qty)
+					from `tabSales Invoice Item` item, `tabSales Invoice` inv
+					where inv.name=item.parent and item.dn_detail=%s and item.docstatus=1 and inv.is_return = 0
+				""", d.dn_detail)
 				billed_amt = billed_amt and billed_amt[0][0] or 0
 				frappe.db.set_value("Delivery Note Item", d.dn_detail, "billed_amt", billed_amt, update_modified=update_modified)
 				updated_delivery_notes.append(d.delivery_note)

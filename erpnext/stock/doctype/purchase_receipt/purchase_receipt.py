@@ -387,8 +387,12 @@ class PurchaseReceipt(BuyingController):
 
 def update_billed_amount_based_on_po(po_detail, update_modified=True):
 	# Billed against Sales Order directly
-	billed_against_po = frappe.db.sql("""select sum(qty) from `tabPurchase Invoice Item`
-		where po_detail=%s and (pr_detail is null or pr_detail = '') and docstatus=1""", po_detail)
+	billed_against_po = frappe.db.sql("""
+		select sum(item.qty)
+		from `tabPurchase Invoice Item` item, `tabPurchase Invoice` inv
+		where inv.name=item.parent and item.po_detail=%s and (item.pr_detail is null or item.pr_detail = '') and item.docstatus=1
+			and inv.is_return = 0
+	""", po_detail)
 	billed_against_po = billed_against_po and billed_against_po[0][0] or 0
 
 	# Get all Delivery Note Item rows against the Sales Order Item row
@@ -401,8 +405,10 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 	updated_pr = []
 	for pr_item in pr_details:
 		# Get billed qty directly against Purchase Receipt
-		billed_qty_agianst_pr = frappe.db.sql("""select sum(qty) from `tabPurchase Invoice Item`
-			where pr_detail=%s and docstatus=1""", pr_item.name)
+		billed_qty_agianst_pr = frappe.db.sql("""
+			select sum(item.qty)
+			from `tabPurchase Invoice Item` item, `tabPurchase Invoice` inv
+			where inv.name=item.parent and item.pr_detail=%s and item.docstatus=1 and inv.is_return = 0""", pr_item.name)
 		billed_qty_agianst_pr = billed_qty_agianst_pr and billed_qty_agianst_pr[0][0] or 0
 
 		# Distribute billed qty directly against PO between PRs based on FIFO
@@ -425,8 +431,11 @@ def update_billed_amount_based_on_pr(bill_doc, update_modified=True):
 	updated_pr = []
 	for d in bill_doc.get("items"):
 		if d.get("pr_detail"):
-			billed_amt = frappe.db.sql("""select sum(qty) from `tabPurchase Invoice Item`
-				where pr_detail=%s and docstatus=1""", d.get("pr_detail"))
+			billed_amt = frappe.db.sql("""
+				select sum(item.qty)
+				from `tabPurchase Invoice Item` item, `tabPurchase Invoice` inv
+				where inv.name=item.parent and item.pr_detail=%s and item.docstatus=1 and inv.is_return = 0
+			""", d.get("pr_detail"))
 			billed_amt = billed_amt and billed_amt[0][0] or 0
 
 			frappe.db.set_value("Purchase Receipt Item", d.get("pr_detail"), "billed_amt", billed_amt, update_modified=update_modified)

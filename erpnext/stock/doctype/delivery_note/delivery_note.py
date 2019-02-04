@@ -328,8 +328,12 @@ class DeliveryNote(SellingController):
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
 	# Billed against Sales Order directly
-	billed_against_so = frappe.db.sql("""select sum(qty) from `tabSales Invoice Item`
-		where so_detail=%s and (dn_detail is null or dn_detail = '') and docstatus=1""", so_detail)
+	billed_against_so = frappe.db.sql("""
+		select sum(item.qty)
+		from `tabSales Invoice Item` item, `tabSales Invoice` inv
+		where inv.name=item.parent and item.so_detail=%s and (item.dn_detail is null or item.dn_detail = '')
+			and item.docstatus=1 and inv.is_return = 0
+	""", so_detail)
 	billed_against_so = billed_against_so and billed_against_so[0][0] or 0
 
 	# Get all Delivery Note Item rows against the Sales Order Item row
@@ -349,8 +353,11 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 			billed_against_so -= billed_qty_agianst_dn
 		else:
 			# Get billed qty directly against Delivery Note
-			billed_qty_agianst_dn = frappe.db.sql("""select sum(qty) from `tabSales Invoice Item`
-				where dn_detail=%s and docstatus=1""", dnd.name)
+			billed_qty_agianst_dn = frappe.db.sql("""
+				select sum(item.qty)
+				from `tabSales Invoice Item` item, `tabSales Invoice` inv
+				where inv.name=item.parent and item.dn_detail=%s and item.docstatus=1 and inv.is_return = 0
+			""", dnd.name)
 			billed_qty_agianst_dn = billed_qty_agianst_dn and billed_qty_agianst_dn[0][0] or 0
 
 		# Distribute billed qty directly against SO between DNs based on FIFO

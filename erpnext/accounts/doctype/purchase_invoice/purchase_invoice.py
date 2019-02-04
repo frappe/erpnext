@@ -43,7 +43,9 @@ class PurchaseInvoice(BuyingController):
 			'target_ref_field': 'qty',
 			'source_field': 'qty',
 			'percent_join_field': 'purchase_order',
-			'overflow_type': 'billing'
+			'overflow_type': 'billing',
+			'extra_cond': """ and exists(select name from `tabPurchase Invoice` where name=`tabPurchase Invoice Item`.parent
+				and is_return=0)"""
 		}]
 
 	def onload(self):
