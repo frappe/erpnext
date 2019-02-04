@@ -20,6 +20,32 @@ def validate_company(company):
 		return False	
 
 @frappe.whitelist()
+def import_coa(file_name, company):
+	# delete existing data for accounts
+	frappe.db.sql('''delete from `tabAccount` where company="%s"''' % company, debug=1)
+
+	# create accounts
+	create_charts(company, custom_chart=generate_data_from_csv(file_name))
+
+def generate_data_from_csv(file_name):
+	''' read csv file and return the generated nested tree '''
+	file_path = get_file_path(file_name)
+
+	data = []
+	with open(file_path, 'r') as in_file:
+		csv_reader = list(csv.reader(in_file))
+		headers = csv_reader[1][1:]
+		del csv_reader[0:2] # delete top row and headers row
+
+		for row in csv_reader:
+			if not row[2]: row[2] = row[1]
+			data.append(row[1:])
+
+	# convert csv data to a child-parent structure
+	forest = {}
+	return forest
+
+@frappe.whitelist()
 def download_template():
 	data = frappe._dict(frappe.local.form_dict)
 	fields = ["Account Name", "Parent Account", "Is Group", "Account Type", "Root Type"]
