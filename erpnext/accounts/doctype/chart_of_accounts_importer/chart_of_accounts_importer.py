@@ -42,8 +42,55 @@ def generate_data_from_csv(file_name):
 			data.append(row[1:])
 
 	# convert csv data to a child-parent structure
-	forest = {}
+	forest = build_forest(data)
 	return forest
+
+def build_forest(data):
+	'''
+		converts list of list into a nested tree
+		if a = [[1,1], [1,2], [3,2], [4,4], [5,4]]
+		tree = {
+			1: {
+				2: {
+					3: {}
+				}
+			},
+			4: {
+				5: {}
+			}
+		}
+	'''
+
+	# set the value of nested dictionary
+	def set_nested(d, path, value):
+		reduce(lambda d, k: d.setdefault(k, {}), path[:-1], d)[path[-1]] = value
+		return d
+
+	# returns the path of any node in list format
+	def return_parent(data, child):
+		for row in data:
+			id, parent_id = row[0:2]
+			if parent_id == id == child:
+				return [parent_id]
+			elif id == child:
+				return [child] + return_parent(data, parent_id)
+
+	charts_map, paths = {}, []
+	for i in data:
+		id, parent_id, is_group, account_type, root_type = i
+		charts_map[id] = {}
+		if is_group: charts_map[id]["is_group"] = is_group
+		if account_type: charts_map[id]["account_type"] = account_type
+		if root_type: charts_map[id]["root_type"] = root_type
+		path = return_parent(data, id)[::-1]
+		paths.append(path) # List of path is created
+
+	out = {}
+	for path in paths:
+		for n, id in enumerate(path):
+			set_nested(out, path[:n+1], charts_map[id]) # setting the value of nested dictionary.
+
+	return out
 
 @frappe.whitelist()
 def download_template():
