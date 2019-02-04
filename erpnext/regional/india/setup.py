@@ -103,12 +103,9 @@ def make_custom_fields(update=True):
 		dict(fieldname='reverse_charge', label='Reverse Charge',
 			fieldtype='Select', insert_after='invoice_copy', print_hide=1,
 			options='Y\nN', default='N'),
-		dict(fieldname='invoice_type', label='Invoice Type',
-			fieldtype='Select', insert_after='invoice_copy', print_hide=1,
-			options='Regular\nSEZ\nExport\nDeemed Export', default='Regular'),
 		dict(fieldname='export_type', label='Export Type',
-			fieldtype='Select', insert_after='invoice_type', print_hide=1,
-			depends_on='eval:in_list(["SEZ", "Export", "Deemed Export"], doc.invoice_type)',
+			fieldtype='Select', insert_after='gst_category', print_hide=1,
+			depends_on='eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.invoice_type)',
 			options='\nWith Payment of Tax\nWithout Payment of Tax'),
 		dict(fieldname='ecommerce_gstin', label='E-commerce GSTIN',
 			fieldtype='Data', insert_after='export_type', print_hide=1),
@@ -129,12 +126,15 @@ def make_custom_fields(update=True):
 			dict(fieldname='place_of_supply', label='Place of Supply',
 				fieldtype='Data', insert_after='shipping_address',
 				print_hide=1, read_only=0),
+			dict(fieldname='gst_category', label='GST Category',
+				fieldtype='Data', insert_after='reverse_charge', print_hide=1,
+				fetch_from='supplier.gst_category'),
 		]
 
 	purchase_invoice_itc_fields = [
 			dict(fieldname='eligibility_for_itc', label='Eligibility For ITC',
 				fieldtype='Select', insert_after='reason_for_issuing_document', print_hide=1,
-				options='input\ninput service\ncapital goods\nineligible', default="ineligible"),
+				options='Input Service Distributor\nImport Of Service\nImport Of Capital Goods\nIneligible\nOther', default="Ineligible"),
 			dict(fieldname='itc_integrated_tax', label='Availed ITC Integrated Tax',
 				fieldtype='Data', insert_after='eligibility_for_itc', print_hide=1),
 			dict(fieldname='itc_central_tax', label='Availed ITC Central Tax',
@@ -158,6 +158,9 @@ def make_custom_fields(update=True):
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='company_address',
 				fetch_from='company_address.gstin', print_hide=1),
+			dict(fieldname='gst_category', label='GST Category',
+				fieldtype='Data', insert_after='reverse_charge', print_hide=1,
+				fetch_from='customer.gst_category'),
 		]
 
 	sales_invoice_shipping_fields = [
@@ -224,11 +227,11 @@ def make_custom_fields(update=True):
 				fieldtype='Data', insert_after='gst_state', read_only=1),
 		],
 		'Purchase Invoice': invoice_gst_fields + purchase_invoice_gst_fields + purchase_invoice_itc_fields,
-		'Purchase Order': purchase_invoice_gst_fields,
-		'Purchase Receipt': purchase_invoice_gst_fields,
+		'Purchase Order': purchase_invoice_gst_fields[:-1],
+		'Purchase Receipt': purchase_invoice_gst_fields[:-1],
 		'Sales Invoice': invoice_gst_fields + sales_invoice_gst_fields + sales_invoice_shipping_fields,
-		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields,
-		'Sales Order': sales_invoice_gst_fields,
+		'Delivery Note': sales_invoice_gst_fields[:-1] + ewaybill_fields + sales_invoice_shipping_fields,
+		'Sales Order': sales_invoice_gst_fields[:-1],
 		'Sales Taxes and Charges Template': inter_state_gst_field,
 		'Purchase Taxes and Charges Template': inter_state_gst_field,
 		'Item': [
@@ -301,6 +304,24 @@ def make_custom_fields(update=True):
 				'fieldtype': 'Data',
 				'insert_after': 'supplier_type',
 				'depends_on': 'eval:doc.is_transporter'
+			},
+			{
+				'fieldname': 'gst_category',
+				'label': 'GST Category',
+				'fieldtype': 'Select',
+				'insert_after': 'gst_transporter_id',
+				'options': 'Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas',
+				'default': 'Unregistered'
+			}
+		],
+		'Customer': [
+			{
+				'fieldname': 'gst_category',
+				'label': 'GST Category',
+				'fieldtype': 'Select',
+				'insert_after': 'customer_type',
+				'options': 'Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export',
+				'default': 'Unregistered'
 			}
 		]
 	}

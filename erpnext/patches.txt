@@ -590,4 +590,4 @@ erpnext.patches.v12_0.rename_learn_to_help
 erpnext.patches.v12_0.rename_accounts_desktop_icon_to_accounting
 erpnext.patches.v12_0.replace_project_list_desktop_icon_with_projects_module_desktop_icon # 09-01-2019
 erpnext.patches.v12_0.move_item_tax_to_item_tax_template
-erpnext.patches.v12_0.set_gst_category
+erpnext.patches.v12_0.set_gst_category #2019-02-04
