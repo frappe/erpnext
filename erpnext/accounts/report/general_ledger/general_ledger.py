@@ -359,37 +359,38 @@ def get_columns(filters):
 			"label": _("Posting Date"),
 			"fieldname": "posting_date",
 			"fieldtype": "Date",
-			"width": 90
+			"width": 80
 		},
 		{
-			"label": _("Ref Date"),
-			"fieldname": "reference_date",
-			"fieldtype": "Date",
-			"width": 90
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"width": 120
+		},
+		{
+			"label": _("Voucher No"),
+			"fieldname": "voucher_no",
+			"fieldtype": "Dynamic Link",
+			"options": "voucher_type",
+			"width": 150
 		},
 		{
 			"label": _("Account"),
 			"fieldname": "account",
 			"fieldtype": "Link",
 			"options": "Account",
-			"width": 120
+			"width": 150
+		},
+		{
+			"label": _("Party Type"),
+			"fieldname": "party_type",
+			"width": 100
 		},
 		{
 			"label": _("Party"),
 			"fieldname": "party",
-			"width": 120,
+			"width": 150,
 			"fieldtype": "Dynamic Link",
 			"options": "party_type"
-		},
-		{
-			"label": _("Ref No"),
-			"fieldname": "reference_no",
-			"width": 80
-		},
-		{
-			"label": _("Remarks"),
-			"fieldname": "remarks",
-			"width": 200
 		},
 		{
 			"label": _("Debit ({0})".format(currency)),
@@ -410,26 +411,37 @@ def get_columns(filters):
 			"width": 120
 		},
 		{
+			"label": _("Remarks"),
+			"fieldname": "remarks",
+			"width": 200
+		},
+		{
 			"label": _("Against Account"),
 			"fieldname": "against",
 			"width": 120
 		},
 		{
-			"label": _("Voucher No"),
-			"fieldname": "voucher_no",
-			"fieldtype": "Dynamic Link",
-			"options": "voucher_type",
-			"width": 150
+			"label": _("Against Voucher Type"),
+			"fieldname": "against_voucher_type",
+			"width": 120
 		},
-	]
-
-	columns.extend([
 		{
 			"label": _("Against Voucher"),
 			"fieldname": "against_voucher",
 			"fieldtype": "Dynamic Link",
 			"options": "against_voucher_type",
 			"width": 150
+		},
+		{
+			"label": _("Ref Date"),
+			"fieldname": "reference_date",
+			"fieldtype": "Date",
+			"width": 90
+		},
+		{
+			"label": _("Ref No"),
+			"fieldname": "reference_no",
+			"width": 80
 		},
 		{
 			"label": _("Project"),
@@ -449,21 +461,6 @@ def get_columns(filters):
 			"fieldtype": "Data",
 			"width": 100
 		},
-		{
-			"label": _("Voucher Type"),
-			"fieldname": "voucher_type",
-			"width": 120
-		},
-		{
-			"label": _("Against Voucher Type"),
-			"fieldname": "against_voucher_type",
-			"width": 100
-		},
-		{
-			"label": _("Party Type"),
-			"fieldname": "party_type",
-			"width": 100
-		}
-	])
+	]
 
 	return columns
