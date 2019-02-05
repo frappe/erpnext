@@ -51,15 +51,6 @@ class ReceivablePayableReport(object):
 				"width": 110
 			})
 
-		if args.get("party_type") == 'Customer':
-			columns.append({
-				"label": _("Customer Contact"),
-				"fieldtype": "Link",
-				"fieldname": "contact",
-				"options":"Contact",
-				"width": 100
-			})
-
 		columns += [
 			{
 				"label": _("Voucher Type"),
