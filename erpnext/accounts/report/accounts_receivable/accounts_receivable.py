@@ -31,7 +31,7 @@ class ReceivablePayableReport(object):
 				"label": _("Posting Date"),
 				"fieldtype": "Date",
 				"fieldname": "posting_date",
-				"width": 90
+				"width": 80
 			},
 			{
 				"label": _(args.get("party_type")),
@@ -41,15 +41,6 @@ class ReceivablePayableReport(object):
 				"width": 200
 			}
 		]
-
-		if args.get("party_type") == 'Customer':
-			columns.append({
-				"label": _("Customer Contact"),
-				"fieldtype": "Link",
-				"fieldname": "contact",
-				"options":"Contact",
-				"width": 100
-			})
 
 		if party_naming_by == "Naming Series":
 			columns.append({
@@ -71,7 +62,7 @@ class ReceivablePayableReport(object):
 				"label": _("Voucher No"),
 				"fieldtype": "Dynamic Link",
 				"fieldname": "voucher_no",
-				"width": 110,
+				"width": 150,
 				"options": "voucher_type",
 			},
 			{
@@ -179,7 +170,7 @@ class ReceivablePayableReport(object):
 			"label": _("Currency"),
 			"fieldtype": "Link",
 			"options": "Currency",
-			"width": 100
+			"width": 50
 		},
 		{
 			"fieldname": "pdc/lc_ref",
@@ -248,6 +239,15 @@ class ReceivablePayableReport(object):
 					"width": 120
 				}
 			]
+
+		if args.get("party_type") == 'Customer':
+			columns.append({
+				"label": _("Customer Contact"),
+				"fieldtype": "Link",
+				"fieldname": "contact",
+				"options": "Contact",
+				"width": 130
+			})
 
 		columns.append({
 			"fieldname": "remarks",
