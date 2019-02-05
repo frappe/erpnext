@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe, re
 from frappe import _
 from frappe.utils import cstr, flt, date_diff, getdate
@@ -11,7 +12,7 @@ def validate_gstin_for_india(doc, method):
 	if not hasattr(doc, 'gstin') or not doc.gstin:
 		return
 
-	doc.gstin = doc.gstin.upper().strip() if doc.gstin else ""
+	doc.gstin = doc.gstin.upper().strip()
 	if not doc.gstin or doc.gstin == 'NA':
 		return
 

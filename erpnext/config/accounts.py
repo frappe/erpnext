@@ -165,6 +165,11 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Tax Category",
+					"description": _("Tax Category for overriding tax rates.")
+				},
+				{
+					"type": "doctype",
 					"name": "Sales Taxes and Charges Template",
 					"description": _("Tax template for selling transactions.")
 				},
@@ -172,6 +177,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Purchase Taxes and Charges Template",
 					"description": _("Tax template for buying transactions.")
+				},
+				{
+					"type": "doctype",
+					"name": "Item Tax Template",
+					"description": _("Tax template for item tax rates.")
 				},
 				{
 					"type": "doctype",
@@ -351,6 +361,36 @@ def get_data():
 					"is_query_report": True,
 					"doctype": "Sales Invoice"
 				},
+				{
+					"type": "report",
+					"name": "Item-wise Sales Register",
+					"is_query_report": True,
+					"doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"name": "Item-wise Purchase Register",
+					"is_query_report": True,
+					"doctype": "Purchase Invoice"
+				},
+				{
+					"type": "report",
+					"name": "Profitability Analysis",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Customer Ledger Summary",
+					"doctype": "Sales Invoice",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Supplier Ledger Summary",
+					"doctype": "Sales Invoice",
+					"is_query_report": True,
+				}
 			]
 		},
 		{
@@ -365,12 +405,6 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Profitability Analysis",
-					"doctype": "GL Entry",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
 					"name": "Payment Period Based On Invoice Date",
 					"is_query_report": True,
 					"doctype": "Journal Entry"
@@ -380,18 +414,6 @@ def get_data():
 					"name": "Sales Partners Commission",
 					"is_query_report": True,
 					"doctype": "Sales Invoice"
-				},
-				{
-					"type": "report",
-					"name": "Item-wise Sales Register",
-					"is_query_report": True,
-					"doctype": "Sales Invoice"
-				},
-				{
-					"type": "report",
-					"name": "Item-wise Purchase Register",
-					"is_query_report": True,
-					"doctype": "Purchase Invoice"
 				},
 				{
 					"type": "report",

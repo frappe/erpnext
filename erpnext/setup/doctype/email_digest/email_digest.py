@@ -524,7 +524,7 @@ class EmailDigest(Document):
 				filters = {
 					"root_type": "Asset",
 					"account_type": "Bank",
-					"date": self.future_to_date,
+					"report_date": self.future_to_date,
 					"company": self.company
 				}
 				label = get_link_to_report('Account Balance', label=self.meta.get_label(fieldname), filters=filters)
@@ -532,7 +532,7 @@ class EmailDigest(Document):
 				filters = {
 					"root_type": "Liability",
 					"account_type": "Bank",
-					"to_date": self.future_to_date,
+					"report_date": self.future_to_date,
 					"company": self.company
 				}
 				label = get_link_to_report('Account Balance', label=self.meta.get_label(fieldname), filters=filters)
