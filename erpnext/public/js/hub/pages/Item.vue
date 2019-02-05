@@ -53,7 +53,20 @@ export default {
 			image: null,
 			sections: [],
 
-			menu_items: [
+		};
+	},
+	computed: {
+		is_own_item() {
+			let is_own_item = false;
+			if(this.item) {
+				if(this.item.hub_seller === hub.settings.hub_seller_name) {
+					is_own_item = true;
+				}
+			}
+			return is_own_item;
+		},
+		menu_items(){
+			return [
 				{
 					label: __('Save Item'),
 					condition: hub.is_user_registered() && !this.is_own_item,
@@ -75,17 +88,6 @@ export default {
 					action: this.unpublish_item
 				}
 			]
-		};
-	},
-	computed: {
-		is_own_item() {
-			let is_own_item = false;
-			if(this.item) {
-				if(this.item.hub_seller === hub.settings.hub_seller_name) {
-					is_own_item = true;
-				}
-			}
-			return is_own_item;
 		},
 
 		item_subtitle() {
@@ -272,11 +274,11 @@ export default {
 		},
 
 		edit_details() {
-			//
+			frappe.msgprint(__('This feature is under development...'));
 		},
 
 		unpublish_item() {
-			//
+			frappe.msgprint(__('This feature is under development...'));
 		}
 	}
 }
