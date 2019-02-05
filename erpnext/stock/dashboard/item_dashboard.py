@@ -13,7 +13,13 @@ def get_data(item_code=None, warehouse=None, item_group=None,
 	if warehouse:
 		filters.append(['warehouse', '=', warehouse])
 	if item_group:
-		filters.append(['item_group', '=', item_group])
+		lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
+		items = frappe.db.sql_list("""
+			select i.name from `tabItem` i
+			where exists(select name from `tabItem Group`
+				where name=i.item_group and lft >=%s and rgt<=%s)
+		""", (lft, rgt))
+		filters.append(['item_code', 'in', items])
 	try:
 		# check if user has any restrictions based on user permissions on warehouse
 		if DatabaseQuery('Warehouse', user=frappe.session.user).build_match_conditions():
