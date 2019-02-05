@@ -190,10 +190,10 @@ def get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account,
 	res = frappe.db.sql("""
 		select ifnull(sum({dr_or_cr}), 0)
 		from `tabGL Entry`
-		where
-		((voucher_type=%(voucher_type)s and voucher_no=%(voucher_no)s and (against_voucher is null or against_voucher=''))
-			or (against_voucher_type=%(voucher_type)s and against_voucher=%(voucher_no)s))
-		and party_type=%(party_type)s and party=%(party)s and account=%(account)s""".format(dr_or_cr=dr_or_cr),
+		where party_type=%(party_type)s and party=%(party)s and account=%(account)s
+			and ((voucher_type=%(voucher_type)s and voucher_no=%(voucher_no)s and (against_voucher is null or against_voucher=''))
+				or (against_voucher_type=%(voucher_type)s and against_voucher=%(voucher_no)s))
+	""".format(dr_or_cr=dr_or_cr),
 	{"voucher_type": voucher_type, "voucher_no": voucher_no, "party_type": party_type, "party": party, "account": account})
 
 	return flt(res[0][0]) if res else 0.0
@@ -757,6 +757,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, negativ
 
 	outstanding_invoices = sorted(outstanding_invoices, key=lambda k: k['due_date'] or getdate(nowdate()))
 	return outstanding_invoices
+
 
 def get_account_name(account_type=None, root_type=None, is_group=None, account_currency=None, company=None):
 	"""return account based on matching conditions"""

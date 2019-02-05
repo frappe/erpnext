@@ -562,7 +562,7 @@ def get_outstanding_reference_documents(args):
 	negative_invoices = False
 	party_account_type = erpnext.get_party_account_type(args.get("party_type"))
 	if (args.get("payment_type") == "Receive" and party_account_type == "Payable") \
-			or (args.get("payment_type") == "Payable" and party_account_type == "Receivable"):
+			or (args.get("payment_type") == "Pay" and party_account_type == "Receivable"):
 		negative_invoices = True
 
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
