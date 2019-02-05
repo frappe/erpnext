@@ -459,7 +459,7 @@ def get_projects_for_collect_progress(frequency, fields):
 	fields.extend(["name"])
 
 	return frappe.get_all("Project", fields = fields,
-		filters = {'collect_progress': 1, 'frequency': frequency})
+		filters = {'collect_progress': 1, 'frequency': frequency, 'status': 'Open'})
 
 def send_project_update_email_to_users(project):
 	doc = frappe.get_doc('Project', project)

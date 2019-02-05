@@ -57,7 +57,7 @@ class JobCard(Document):
 					.format(d.idx, d.item_code))
 
 			if self.get('operation') == d.operation:
-				child = self.append('items', {
+				self.append('items', {
 					'item_code': d.item_code,
 					'source_warehouse': d.source_warehouse,
 					'uom': frappe.db.get_value("Item", d.item_code, 'stock_uom'),
@@ -107,6 +107,10 @@ class JobCard(Document):
 	def set_transferred_qty(self, update_status=False):
 		if not self.items:
 			self.transferred_qty = self.for_quantity if self.docstatus == 1 else 0
+
+		doc = frappe.get_doc('Work Order', self.get('work_order'))
+		if doc.transfer_material_against == 'Work Order' or doc.skip_transfer:
+			return
 
 		if self.items:
 			self.transferred_qty = frappe.db.get_value('Stock Entry', {
