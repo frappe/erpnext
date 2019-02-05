@@ -737,9 +737,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, negativ
 	for d in invoice_list:
 		payment_amount = pe_map.get((d.voucher_type, d.voucher_no), 0)
 		outstanding_amount = flt(d.invoice_amount - payment_amount, precision)
-		if negative_invoices:
-			outstanding_amount = -1 * outstanding_amount
-		if outstanding_amount > 0.5 / (10**precision):
+		diff = -outstanding_amount if negative_invoices else outstanding_amount
+		if diff > 0.5 / (10**precision):
 			if not d.voucher_type == "Purchase Invoice" or d.voucher_no not in held_invoices:
 				due_date = frappe.db.get_value(
 					d.voucher_type, d.voucher_no, "posting_date" if party_type == "Employee" else "due_date")
