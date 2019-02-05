@@ -39,7 +39,7 @@ def export_invoices(filters=None):
 		invoice_xml = frappe.render_template('erpnext/regional/italy/e-invoice.xml', context={"doc": invoice}, is_path=True)
 
 		xml_filename = "{company_tax_id}_{invoice_number}.xml".format(
-			company_tax_id=invoice["company_tax_id"],
+			company_tax_id=invoice.company_data.tax_id,
 			invoice_number=extract_doc_number(invoice)
 		)
 		xml_filename = frappe.get_site_path("private", "files", xml_filename)
@@ -57,11 +57,11 @@ def export_invoices(filters=None):
 @frappe.whitelist()
 def prepare_invoice(invoice):
 	#set company information
-	company_fiscal_code, fiscal_regime, company_tax_id = frappe.db.get_value("Company", invoice.company, ["fiscal_code", "fiscal_regime", "tax_id"])
+	company = frappe.get_doc("Company", invoice.company)
+	#company_fiscal_code, fiscal_regime, company_tax_id = frappe.db.get_value("Company", invoice.company, ["fiscal_code", "fiscal_regime", "tax_id"])
+
 	invoice["progressive_number"] = extract_doc_number(invoice)
-	invoice["company_fiscal_code"] = company_fiscal_code
-	invoice["fiscal_regime"] = fiscal_regime
-	invoice["company_tax_id"] = company_tax_id
+	invoice["company_data"] = company
 	invoice["company_address_data"] = frappe.get_doc("Address", invoice.company_address)
 	invoice["company_contact_data"] = frappe.db.get_value("Company", filters=invoice.company, fieldname=["phone_no", "email"], as_dict=1)
 
@@ -79,8 +79,6 @@ def prepare_invoice(invoice):
 	if invoice.shipping_address_name:
 		invoice["shipping_address_data"] = frappe.get_doc("Address", invoice.shipping_address_name)
 
-	if not invoice["vat_collectability"]:
-		invoice["vat_collectability"] = frappe.db.get_value("Company", invoice.company, "vat_collectability")
 
 	if invoice["customer_data"].is_public_administration:
 		invoice["transmission_format_code"] = "FPA12"
