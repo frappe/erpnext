@@ -41,10 +41,10 @@
     <DatiTrasmissione>
       <IdTrasmittente>
         <IdPaese>IT</IdPaese>
-        <IdCodice>{{ doc.company_fiscal_code or doc.company_tax_id | replace("IT","") }}</IdCodice>
+        <IdCodice>{{ doc.company_data.fiscal_code or doc.company_data.tax_id | replace("IT","") }}</IdCodice>
       </IdTrasmittente>
-      {%- if doc.company_fiscal_code %}
-        <CodiceFiscale>{{ doc.company_fiscal_code }}</CodiceFiscale>
+      {%- if doc.company_data.fiscal_code %}
+        <CodiceFiscale>{{ doc.doc.company_data.fiscal_code }}</CodiceFiscale>
       {%- endif %}
       <ProgressivoInvio>{{ doc.progressive_number }}</ProgressivoInvio>
       <FormatoTrasmissione>{{ doc.transmission_format_code }}</FormatoTrasmissione>
@@ -60,19 +60,34 @@
       <DatiAnagrafici>
         <IdFiscaleIVA>
           <IdPaese>IT</IdPaese>
-          <IdCodice>{{ doc.company_tax_id | replace("IT","") }}</IdCodice>
+          <IdCodice>{{ doc.company_data.tax_id | replace("IT","") }}</IdCodice>
         </IdFiscaleIVA>
-        {%- if doc.company_fiscal_code %}
-        <CodiceFiscale>{{ doc.company_fiscal_code }}</CodiceFiscale>
+        {%- if doc.company_data.fiscal_code %}
+        <CodiceFiscale>{{ doc.company_data.fiscal_code }}</CodiceFiscale>
         {%- endif %}
         <Anagrafica>
           <Denominazione>{{ doc.company }}</Denominazione>
         </Anagrafica>
-        <RegimeFiscale>{{ doc.fiscal_regime.split("-")[0] }}</RegimeFiscale>
+        <RegimeFiscale>{{ doc.company_data.fiscal_regime.split("-")[0] }}</RegimeFiscale>
       </DatiAnagrafici>
       <Sede>
       {{ render_address(doc.company_address_data) }}
       </Sede>
+      {%- if doc.company_data.registration_number %}
+      <IscrizioneREA>
+        <Ufficio>{{ doc.company_data.registrar_office_province }}</Ufficio>
+        <NumeroREA>{{ doc.company_data.registration_number }}</NumeroREA>
+        {%- if doc.company_data.share_capital_amount %}
+        <CapitaleSociale>{{ doc.company_data.share_capital_amount }}</CapitaleSociale>
+        {%- endif %}
+        {%- if doc.company_data.no_of_members %}
+        <SocioUnico>{{ doc.company_data.no_of_members }}</SocioUnico>
+        {%- endif %}
+        {%- if doc.company_data.liquidation_state %}
+        <StatoLiquidazione>{{ doc.company_data.liquidation_state }}</StatoLiquidazione>
+        {%- endif %}
+      </IscrizioneREA>
+      {%- endif %}
     </CedentePrestatore>
     <CessionarioCommittente>
       <DatiAnagrafici>

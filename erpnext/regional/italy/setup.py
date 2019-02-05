@@ -32,7 +32,20 @@ def make_custom_fields(update=True):
             fiscal_code_field,
             dict(fieldname='fiscal_regime', label='Fiscal Regime',
 			    fieldtype='Select', insert_after='fiscal_code', print_hide=1,
-                options="\n".join(map(lambda x: x.decode('utf-8'), fiscal_regimes)))
+                options="\n".join(map(lambda x: x.decode('utf-8'), fiscal_regimes))),
+            dict(fieldname='registrar_office_province', label='Province of the Registrar Office',
+			    fieldtype='Data', insert_after='registration_details', print_hide=1, length=2),
+            dict(fieldname='registration_number', label='Registration Number',
+			    fieldtype='Data', insert_after='registrar_office_province', print_hide=1, length=20),
+            dict(fieldname='share_capital_amount', label='Share Capital',
+			    fieldtype='Data', insert_after='registration_number', print_hide=1,
+                description=_('Applicable if the company is SpA, SApA or SRL')),
+            dict(fieldname='no_of_members', label='No of Members',
+			    fieldtype='Select', insert_after='share_capital_amount', print_hide=1,
+                options="SU-Socio Unico\nSM-Piu Soci", description=_("Applicable if the company is a limited liability company")),
+            dict(fieldname='liquidation_state', label='Liquidation State',
+			    fieldtype='Select', insert_after='no_of_members', print_hide=1,
+                options="LS-In Liquidazione\nLN-Non in Liquidazione"),
         ],
         'Sales Taxes and Charges': [
             dict(fieldname='tax_exemption_reason', label='Tax Exemption Reason',
@@ -84,7 +97,8 @@ def make_custom_fields(update=True):
         "Sales Invoice": [
             dict(fieldname='vat_collectability', label='VAT Collectability',
 			    fieldtype='Select', insert_after='taxes_and_charges', print_hide=1,
-                options="\n".join(map(lambda x: x.decode('utf-8'), vat_collectability_options)))
+                options="\n".join(map(lambda x: x.decode('utf-8'), vat_collectability_options)),
+                fetch_from="company.vat_collectability")
         ],
         'Purchase Invoice Item': invoice_item_fields,
 		'Sales Order Item': invoice_item_fields,
