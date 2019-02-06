@@ -212,7 +212,7 @@
       <DettaglioPagamento>
         <ModalitaPagamento>{{ payment_term.mode_of_payment_code.split("-")[0] }}</ModalitaPagamento>
         <DataScadenzaPagamento>{{ payment_term.due_date }}</DataScadenzaPagamento>
-        <ImportoPagamento>{{ payment_term.payment_amount }}</ImportoPagamento>
+        <ImportoPagamento>{{ format_float(payment_term.payment_amount) }}</ImportoPagamento>
         {%- if payment_term.iban %}<IBAN>{{ payment_term.bank_account_iban }}</IBAN>{%- endif %}
       </DettaglioPagamento>
       {%- endfor %}
