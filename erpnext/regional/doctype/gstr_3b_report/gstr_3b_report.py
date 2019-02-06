@@ -132,15 +132,17 @@ class GSTR3BReport(Document):
 
 		self.account_heads = get_account_heads(self.company)
 
-		outward_supply_tax_amounts = get_tax_amounts("Sales Invoice", self.month)
-		inward_supply_tax_amounts = get_tax_amounts("Purchase Invoice", self.month, reverse_charge="Y")
+		outward_supply_tax_amounts = get_tax_amounts("Sales Invoice", self.month, self.year)
+		inward_supply_tax_amounts = get_tax_amounts("Purchase Invoice", self.month, self.year, reverse_charge="Y")
 		itc_details = get_itc_details()
+		inter_state_supplies = get_inter_state_supplies(gst_details.gst_state, self.month, self.year)
 
 		self.prepare_data("Sales Invoice", outward_supply_tax_amounts, "sup_details", "osup_det", ["Registered Regular"])
 		self.prepare_data("Sales Invoice", outward_supply_tax_amounts, "sup_details", "osup_zero", ["SEZ", "Deemed Export", "Overseas"])
 		self.prepare_data("Purchase Invoice", inward_supply_tax_amounts, "sup_details", "isup_rev", ["Registered Regular"], reverse_charge="Y")
 		self.report_dict["sup_details"]["osup_nil_exmp"]["txval"] = get_nil_rated_supply_value()
 		self.set_itc_details(itc_details)
+		self.set_inter_state_supply(inter_state_supplies)
 
 
 		self.json_output = frappe.as_json(self.report_dict)
@@ -154,7 +156,7 @@ class GSTR3BReport(Document):
 			'OTH': 'Others'
 		}
 
-		net_itc = elf.report_dict["itc_elg"]["itc_net"]
+		net_itc = self.report_dict["itc_elg"]["itc_net"]
 
 		for d in self.report_dict["itc_elg"]["itc_avl"]:
 			if d["ty"] == 'ISRC':
@@ -183,7 +185,7 @@ class GSTR3BReport(Document):
 			'igst_account': 'iamt'
 		}
 
-		total_taxable_value = get_total_taxable_value(doctype, self.month, reverse_charge)
+		total_taxable_value = get_total_taxable_value(doctype, self.month, self.year, reverse_charge)
 
 		for gst_category in gst_category_list:
 			for k, v in iteritems(account_map):
@@ -194,17 +196,70 @@ class GSTR3BReport(Document):
 			self.report_dict[supply_type][supply_category]["txval"] += \
 				flt(total_taxable_value.get(gst_category, 0))
 
-def get_total_taxable_value(doctype, month, reverse_charge):
+	def set_inter_state_supply(self, inter_state_supply):
+
+		for d in inter_state_supply.get("Unregistered", []):
+			self.report_dict["inter_sup"]["unreg_details"].append(d)
+
+		for d in inter_state_supply.get("Registered Composition", []):
+			self.report_dict["inter_sup"]["comp_details"].append(d)
+
+def get_total_taxable_value(doctype, month, year, reverse_charge):
 
 	month_no = get_period(month)
 
 	return frappe._dict(frappe.db.sql("""
 		select gst_category, sum(grand_total) as total
 		from `tab{doctype}`
-		where docstatus = 1 and month(posting_date) = %s and reverse_charge = %s
+		where docstatus = 1 and month(posting_date) = %s
+		and year(posting_date) = %s and reverse_charge = %s
 		group by gst_category
 		"""
-		.format(doctype = doctype), (month_no, reverse_charge)))
+		.format(doctype = doctype), (month_no, year, reverse_charge)))
+
+def get_state_code(state):
+
+	state_code = {
+		"Jammu & Kashmir": "01",
+		"Himachal Pradesh": "02",
+		"Punjab": "03",
+		"Chandigarh": "04",
+		"Uttarakhand": "05",
+		"Haryana": "06",
+		"Delhi": "07",
+		"Rajasthan": "08",
+		"Uttar Pradesh": "09",
+		"Bihar": "10",
+		"Sikkim": "11",
+		"Arunachal Pradesh": "12",
+		"Nagaland": "13",
+		"Manipur": "14",
+		"Mizoram": "15",
+		"Tripura": "16",
+		"Meghalaya": "17",
+		"Assam": "18",
+		"West Bengal": "19",
+		"Jharkhand": "20",
+		"Orissa": "21",
+		"Chhattisgarh": "22",
+		"Madhya Pradesh": "23",
+		"Gujarat": "24",
+		"Daman & Diu": "25",
+		"Dadra & Nagar Haveli": "26",
+		"Maharashtra": "27",
+		"Andhra Pradesh": "28",
+		"Karnataka": "29",
+		"Goa": "30",
+		"Lakshadweep": "31",
+		"Kerala": "32",
+		"Tamil Nadu": "33",
+		"Puducherry": "34",
+		"Andaman & Nicobar Islands": "35",
+		"Telengana": "36",
+		"Andrapradesh(New)": "37"
+	}.get(state)
+
+	return state_code
 
 def get_itc_details(reverse_charge='N'):
 
@@ -239,8 +294,34 @@ def get_nil_rated_supply_value():
 		i.item_tax_rate = '{}' and
 		s.taxes_and_charges IS NULL""", as_dict=1)[0].total
 
+def get_inter_state_supplies(state, month, year):
 
-def get_tax_amounts(doctype, month, reverse_charge="N"):
+	month_no = get_period(month)
+
+	inter_state_supply = frappe.db.sql(""" select sum(s.grand_total) as total, t.tax_amount, a.state, s.gst_category
+		from `tabSales Invoice` s, `tabSales Taxes and Charges` t, `tabAddress` a
+		where t.parent = s.name and s.customer_address = a.name and
+		s.docstatus = 1 and month(s.posting_date) = %s and year(s.posting_date) = %s and
+		a.state <> %s and
+		s.gst_category in ('Unregistered', 'Registered Composition')
+		group by gst_category""", (month_no, year, state), as_dict=1)
+
+	inter_state_supply_details = {}
+
+	for d in inter_state_supply:
+		inter_state_supply_details.setdefault(
+			d.gst_category, []
+		)
+
+		inter_state_supply_details[d.gst_category].append({
+			"pos": get_state_code(d.state),
+			"txval": d.total,
+			"iamt": d.tax_amount
+		})
+
+	return inter_state_supply_details
+
+def get_tax_amounts(doctype, month, year, reverse_charge="N"):
 
 	month_no = get_period(month)
 
@@ -252,9 +333,10 @@ def get_tax_amounts(doctype, month, reverse_charge="N"):
 	tax_amounts = frappe.db.sql("""
 		select s.gst_category, sum(t.tax_amount) as tax_amount, t.account_head
 		from `tab{doctype}` s , `tab{template}` t
-		where s.docstatus = 1 and t.parent = s.name and s.reverse_charge = %s and month(s.posting_date) = %s
+		where s.docstatus = 1 and t.parent = s.name and s.reverse_charge = %s
+		and month(s.posting_date) = %s and year(s.posting_date) = %s
 		group by t.account_head, s.gst_category
-		""".format(doctype=doctype, template=tax_template), (reverse_charge, month_no), as_dict=1)
+		""".format(doctype=doctype, template=tax_template), (reverse_charge, month_no, year), as_dict=1)
 
 	tax_details = {}
 
