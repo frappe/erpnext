@@ -15,16 +15,7 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 
 		// Show import button when file is successfully attached
 		if (frm.doc.import_file) {
-			frm.page.set_primary_action(__("Start Import"), function () {
-				frappe.call({
-					method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.import_coa",
-					args: {
-						file_name: frm.doc.import_file,
-						company: frm.doc.company
-					},
-					callback: function(r) { }
-				});
-			}).addClass('btn btn-primary');
+			create_import_button(frm);
 		}
 
 		// show download template button when company is properly selected
@@ -43,24 +34,8 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 		if (!frm.doc.import_file) {
 			$(frm.fields_dict['chart_tree'].wrapper).empty(); // empty wrapper on removing file
 		} else {
-			let parent = __('All Accounts');
-			$(frm.fields_dict['chart_tree'].wrapper).empty(); // empty wrapper to load new data
-
-			// generate tree structure based on the csv data
-			new frappe.ui.Tree({
-				parent: $(frm.fields_dict['chart_tree'].wrapper),
-				label: parent,
-				expandable: true,
-				method: 'erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.get_coa',
-				args: {
-					file_name: frm.doc.import_file,
-					parent: parent,
-					doctype: 'Chart of Accounts Importer'
-				},
-				onclick: function(node) {
-					parent = node.value;
-				}
-			});
+			generate_tree_preview(frm);
+			validate_csv_data(frm);
 		}
 	},
 
@@ -82,3 +57,45 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 		});
 	}
 });
+
+var validate_csv_data = function(frm) {
+	frappe.call({
+		method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.validate_accounts",
+		args: {file_name: frm.doc.import_file},
+		callback: function(r) { }
+	});
+}
+
+var create_import_button = function(frm) {
+	frm.page.set_primary_action(__("Start Import"), function () {
+		frappe.call({
+			method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.import_coa",
+			args: {
+				file_name: frm.doc.import_file,
+				company: frm.doc.company
+			},
+			callback: function(r) { }
+		});
+	}).addClass('btn btn-primary');
+}
+
+var generate_tree_preview = function(frm) {
+	let parent = __('All Accounts');
+	$(frm.fields_dict['chart_tree'].wrapper).empty(); // empty wrapper to load new data
+
+	// generate tree structure based on the csv data
+	new frappe.ui.Tree({
+		parent: $(frm.fields_dict['chart_tree'].wrapper),
+		label: parent,
+		expandable: true,
+		method: 'erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.get_coa',
+		args: {
+			file_name: frm.doc.import_file,
+			parent: parent,
+			doctype: 'Chart of Accounts Importer'
+		},
+		onclick: function(node) {
+			parent = node.value;
+		}
+	});
+}
