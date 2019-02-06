@@ -40,5 +40,6 @@ frappe.dashboard_chart_sources["Account Balance Timeline"] = {
 			],
 			reqd: 1
 		},
-	]
+	],
+	is_time_series: true
 };
