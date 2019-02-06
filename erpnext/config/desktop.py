@@ -464,7 +464,7 @@ def get_data():
 			"icon": "octicon octicon-briefcase",
 			"type": "module",
 			"hidden": 1,
-			"description": "Purchasing, Suppliers and Products. Bluuuuu"
+			"description": "Purchasing, Suppliers and Products."
 		},
 		{
 			"module_name": "Stock",

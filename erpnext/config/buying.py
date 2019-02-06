@@ -14,16 +14,15 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Price List",
-					"onboard": 1,
-					"description": _("Price List master.")
-				},
-				{
-					"type": "doctype",
 					"name": "Item Price",
 					"description": _("Multiple Item prices."),
 					"onboard": 1,
 					"route": "Report/Item Price"
+				},
+				{
+					"type": "doctype",
+					"name": "Price List",
+					"description": _("Price List master.")
 				},
 				{
 					"type": "doctype",
@@ -43,7 +42,6 @@ def get_data():
 					"name": "Pricing Rule",
 					"description": _("Rules for applying pricing and discount.")
 				},
-
 			]
 		},
 		{
@@ -52,13 +50,22 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Purchase Order",
+					"onboard": 1,
+					"dependencies": ["Item", "Supplier"],
+					"description": _("Purchase Orders given to Suppliers."),
+				},
+				{
+					"type": "doctype",
 					"name": "Material Request",
+					"onboard": 1,
 					"dependencies": ["Item"],
 					"description": _("Request for purchase."),
 				},
 				{
 					"type": "doctype",
 					"name": "Request for Quotation",
+					"onboard": 1,
 					"dependencies": ["Item", "Supplier"],
 					"description": _("Request for quotation."),
 				},
@@ -67,12 +74,6 @@ def get_data():
 					"name": "Supplier Quotation",
 					"dependencies": ["Item", "Supplier"],
 					"description": _("Quotations received from Suppliers."),
-				},
-				{
-					"type": "doctype",
-					"name": "Purchase Order",
-					"dependencies": ["Item", "Supplier"],
-					"description": _("Purchase Orders given to Suppliers."),
 				},
 			]
 		},
@@ -110,6 +111,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Buying Settings",
+					"onboard": 1,
 					"description": _("Default settings for buying transactions.")
 				},
 				{
@@ -133,19 +135,22 @@ def get_data():
 					"type": "report",
 					"is_query_report": True,
 					"name": "Purchase Analytics",
-					"doctype": "Purchase Order"
+					"reference_doctype": "Purchase Order",
+					"onboard": 1
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Supplier-Wise Sales Analytics",
-					"doctype": "Stock Ledger Entry"
+					"reference_doctype": "Stock Ledger Entry",
+					"onboard": 1
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Purchase Order Trends",
-					"doctype": "Purchase Order"
+					"reference_doctype": "Purchase Order",
+					"onboard": 1,
 				},
 			]
 		},
@@ -183,32 +188,35 @@ def get_data():
 					"type": "report",
 					"is_query_report": True,
 					"name": "Items To Be Requested",
-					"doctype": "Item"
+					"reference_doctype": "Item",
+					"onboard": 1,
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Requested Items To Be Ordered",
-					"doctype": "Material Request"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Material Requests for which Supplier Quotations are not created",
-					"doctype": "Material Request"
+					"reference_doctype": "Material Request",
+					"onboard": 1,
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Item-wise Purchase History",
-					"doctype": "Item"
+					"reference_doctype": "Item",
+					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Material Requests for which Supplier Quotations are not created",
+					"reference_doctype": "Material Request"
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Address And Contacts",
 					"label": "Supplier Addresses And Contacts",
-					"doctype": "Address",
+					"reference_doctype": "Address",
 					"route_options": {
 						"party_type": "Supplier"
 					}
