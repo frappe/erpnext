@@ -17,17 +17,18 @@ class ChartofAccountsImporter(Document):
 @frappe.whitelist()
 def validate_company(company):
 	if frappe.db.get_all('GL Entry', {"company": company}, "name", limit=1):
-		return False	
+		return False
 
 @frappe.whitelist()
 def import_coa(file_name, company):
 	# delete existing data for accounts
-	frappe.db.sql('''delete from `tabAccount` where company="%s"''' % company, debug=1)
+	frappe.db.sql('''delete from `tabAccount` where company="%s"''' % company)
 
 	# create accounts
-	create_charts(company, custom_chart=generate_data_from_csv(file_name))
+	forest = build_forest(generate_data_from_csv(file_name))
+	create_charts(company, custom_chart=forest)
 
-def generate_data_from_csv(file_name):
+def generate_data_from_csv(file_name, as_dict=False):
 	''' read csv file and return the generated nested tree '''
 	file_path = get_file_path(file_name)
 
@@ -38,19 +39,21 @@ def generate_data_from_csv(file_name):
 		del csv_reader[0:2] # delete top row and headers row
 
 		for row in csv_reader:
-			if not row[2]: row[2] = row[1]
-			data.append(row[1:])
+			if as_dict:
+				data.append({frappe.scrub(header): row[index+1] for index, header in enumerate(headers)})
+			else:
+				if not row[2]: row[2] = row[1]
+				data.append(row[1:])
 
-	# convert csv data to a child-parent structure
-	forest = build_forest(data)
-	return forest
+	# convert csv data
+	return data
 
 @frappe.whitelist()
 def get_coa(doctype, parent, is_root=False, file_name=None):
 	''' called by tree view (to fetch node's children) '''
 
 	parent = None if parent==_('All Accounts') else parent
-	forest = generate_data_from_csv(file_name)
+	forest = build_forest(generate_data_from_csv(file_name))
 	accounts = build_tree_from_json("", chart_data=forest) # returns alist of dict in a tree render-able form
 
 	# filter out to show data for the selected node only
@@ -119,3 +122,42 @@ def download_template():
 	frappe.response['result'] = cstr(writer.getvalue())
 	frappe.response['type'] = 'csv'
 	frappe.response['doctype'] = data.get('doctype')
+
+@frappe.whitelist()
+def validate_accounts(file_name):
+	accounts = generate_data_from_csv(file_name, as_dict=True)
+
+	accounts_dict = {}
+	for account in accounts:
+		accounts_dict.setdefault(account["account_name"], account)
+		if account["parent_account"] and accounts_dict[account["parent_account"]]:
+			accounts_dict[account["parent_account"]]["is_group"] = 1
+
+	validate_root(accounts_dict)
+	validate_account_types(accounts_dict)
+
+def validate_root(accounts):
+	roots = [accounts[d] for d in accounts if not accounts[d].get('parent_account')]
+	if len(roots) < 4:
+		frappe.throw(_("Number of root accounts cannot be less than 4"))
+
+	for account in roots:
+		if not account.get("root_type"):
+			frappe.throw(_("Please enter Root Type for - {0}").format(account.get("account_name")))
+		elif account.get("root_type") not in ("Asset", "Liability", "Expense", "Income", "Equity"):
+			frappe.throw(_('Root Type for "{0}" must be one of the Asset, Liability, Income, Expense and Equity').format(account.get("account_name")))
+
+def validate_account_types(accounts):
+	account_types_for_ledger = ["Cost of Goods Sold", "Depreciation", "Fixed Asset", "Payable", "Receivable", "Stock Adjustment"]
+	account_types = [accounts[d]["account_type"] for d in accounts if not accounts[d]['is_group']]
+
+	missing = list(set(account_types_for_ledger) - set(account_types))
+	if missing:
+		frappe.throw(_("Please identify/create Account (Ledger) for type - {0}").format(' , '.join(missing)))
+
+	account_types_for_group = ["Bank", "Cash", "Stock"]
+	account_groups = [accounts[d]["account_type"] for d in accounts if accounts[d]['is_group']]
+
+	missing = list(set(account_types_for_group) - set(account_groups))
+	if missing:
+		frappe.throw(_("Please identify/create Account (Group) for type - {0}").format(' , '.join(missing)))
