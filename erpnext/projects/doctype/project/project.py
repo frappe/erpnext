@@ -66,11 +66,11 @@ class Project(Document):
 
 	def validate(self):
 		self.validate_project_name()
-		self.validate_dates()
 		self.validate_weights()
 		self.sync_tasks()
 		self.tasks = []
 		self.load_tasks()
+		self.validate_dates()
 		self.send_welcome_email()
 		self.update_percent_complete()
 
@@ -79,6 +79,16 @@ class Project(Document):
 			frappe.throw(_("Project {0} already exists").format(frappe.safe_decode(self.project_name)))
 
 	def validate_dates(self):
+		if self.tasks:
+			for d in self.tasks:
+				if not getdate(self.expected_start_date) <= getdate(d.start_date) <= getdate(self.expected_end_date):
+					frappe.throw(_("Start date of task <b>{0}</b> should be between <b>{1}</b> expected start and end dates")
+						.format(d.title, self.name))
+
+				if not getdate(self.expected_start_date) <= getdate(d.end_date) <= getdate(self.expected_end_date):
+					frappe.throw(_("End date of task <b>{0}</b> should be between <b>{1}</b> expected start and end dates")
+						.format(d.title, self.name))
+
 		if self.expected_start_date and self.expected_end_date:
 			if getdate(self.expected_end_date) < getdate(self.expected_start_date):
 				frappe.throw(_("Expected End Date can not be less than Expected Start Date"))
