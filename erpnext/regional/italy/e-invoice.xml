@@ -44,7 +44,7 @@
         <IdCodice>{{ doc.company_data.fiscal_code or doc.company_data.tax_id | replace("IT","") }}</IdCodice>
       </IdTrasmittente>
       {%- if doc.company_data.fiscal_code %}
-        <CodiceFiscale>{{ doc.doc.company_data.fiscal_code }}</CodiceFiscale>
+        <CodiceFiscale>{{ doc.company_data.fiscal_code }}</CodiceFiscale>
       {%- endif %}
       <ProgressivoInvio>{{ doc.progressive_number }}</ProgressivoInvio>
       <FormatoTrasmissione>{{ doc.transmission_format_code }}</FormatoTrasmissione>
