@@ -14,7 +14,7 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 			$(frm.fields_dict['chart_tree'].wrapper).html()!="" ? 0 : 1);
 
 		// Show import button when file is successfully attached
-		if (frm.doc.import_file) {
+		if (frm.page && frm.page.show_import_button) {
 			create_import_button(frm);
 		}
 
@@ -32,6 +32,7 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 
 	import_file: function (frm) {
 		if (!frm.doc.import_file) {
+			frm.page.set_indicator("");
 			$(frm.fields_dict['chart_tree'].wrapper).empty(); // empty wrapper on removing file
 		} else {
 			generate_tree_preview(frm);
@@ -62,7 +63,15 @@ var validate_csv_data = function(frm) {
 	frappe.call({
 		method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.validate_accounts",
 		args: {file_name: frm.doc.import_file},
-		callback: function(r) { }
+		callback: function(r) {
+			if(r.message==true) {
+				frm.page["show_import_button"] = true;
+				frm.trigger("refresh");
+			} else {
+				frm.page.set_indicator(__('Resolve error and upload again.'), 'orange');
+				frappe.throw(__(r.message));
+			}
+		}
 	});
 }
 

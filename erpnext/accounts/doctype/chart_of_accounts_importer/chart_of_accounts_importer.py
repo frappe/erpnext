@@ -133,19 +133,23 @@ def validate_accounts(file_name):
 		if account["parent_account"] and accounts_dict[account["parent_account"]]:
 			accounts_dict[account["parent_account"]]["is_group"] = 1
 
-	validate_root(accounts_dict)
-	validate_account_types(accounts_dict)
+	message = validate_root(accounts_dict)
+	if message: return message
+	message = validate_account_types(accounts_dict)
+	if message: return message
+
+	return True
 
 def validate_root(accounts):
 	roots = [accounts[d] for d in accounts if not accounts[d].get('parent_account')]
 	if len(roots) < 4:
-		frappe.throw(_("Number of root accounts cannot be less than 4"))
+		return _("Number of root accounts cannot be less than 4")
 
 	for account in roots:
 		if not account.get("root_type"):
-			frappe.throw(_("Please enter Root Type for - {0}").format(account.get("account_name")))
+			return _("Please enter Root Type for - {0}").format(account.get("account_name"))
 		elif account.get("root_type") not in ("Asset", "Liability", "Expense", "Income", "Equity"):
-			frappe.throw(_('Root Type for "{0}" must be one of the Asset, Liability, Income, Expense and Equity').format(account.get("account_name")))
+			return _('Root Type for "{0}" must be one of the Asset, Liability, Income, Expense and Equity').format(account.get("account_name"))
 
 def validate_account_types(accounts):
 	account_types_for_ledger = ["Cost of Goods Sold", "Depreciation", "Fixed Asset", "Payable", "Receivable", "Stock Adjustment"]
@@ -153,11 +157,11 @@ def validate_account_types(accounts):
 
 	missing = list(set(account_types_for_ledger) - set(account_types))
 	if missing:
-		frappe.throw(_("Please identify/create Account (Ledger) for type - {0}").format(' , '.join(missing)))
+		return _("Please identify/create Account (Ledger) for type - {0}").format(' , '.join(missing))
 
 	account_types_for_group = ["Bank", "Cash", "Stock"]
 	account_groups = [accounts[d]["account_type"] for d in accounts if accounts[d]['is_group']]
 
 	missing = list(set(account_types_for_group) - set(account_groups))
 	if missing:
-		frappe.throw(_("Please identify/create Account (Group) for type - {0}").format(' , '.join(missing)))
+		return _("Please identify/create Account (Group) for type - {0}").format(' , '.join(missing))
