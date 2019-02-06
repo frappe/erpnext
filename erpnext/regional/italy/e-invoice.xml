@@ -78,13 +78,13 @@
         <Ufficio>{{ doc.company_data.registrar_office_province }}</Ufficio>
         <NumeroREA>{{ doc.company_data.registration_number }}</NumeroREA>
         {%- if doc.company_data.share_capital_amount %}
-        <CapitaleSociale>{{ doc.company_data.share_capital_amount }}</CapitaleSociale>
+        <CapitaleSociale>{{ format_float(doc.company_data.share_capital_amount) }}</CapitaleSociale>
         {%- endif %}
         {%- if doc.company_data.no_of_members %}
-        <SocioUnico>{{ doc.company_data.no_of_members }}</SocioUnico>
+        <SocioUnico>{{ doc.company_data.no_of_members.split("-")[0] }}</SocioUnico>
         {%- endif %}
         {%- if doc.company_data.liquidation_state %}
-        <StatoLiquidazione>{{ doc.company_data.liquidation_state }}</StatoLiquidazione>
+        <StatoLiquidazione>{{ doc.company_data.liquidation_state.split("-")[0] }}</StatoLiquidazione>
         {%- endif %}
       </IscrizioneREA>
       {%- endif %}
