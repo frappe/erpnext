@@ -280,25 +280,52 @@ class StatusUpdater(Document):
 	def _update_percent_field(self, args, update_modified=True):
 		"""Update percent field in parent transaction"""
 
-		self._update_modified(args, update_modified)
-
 		if args.get('target_parent_field'):
-			frappe.db.sql("""update `tab%(target_parent_dt)s`
-				set %(target_parent_field)s = round(
-					ifnull((select
-						ifnull(sum(if(%(target_ref_field)s > %(target_field)s, abs(%(target_field)s), abs(%(target_ref_field)s))), 0)
-						/ sum(abs(%(target_ref_field)s)) * 100
-					from `tab%(target_dt)s` where parent="%(name)s" having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
-					%(update_modified)s
-				where name='%(name)s'""" % args)
+			# Get the total of the reference field values
+			target_ref_field_value = frappe.db.sql("""
+				SELECT
+					SUM(ABS(%(target_ref_field)s))
+				FROM
+					`tab%(target_dt)s`
+				WHERE
+					parent="%(name)s"
+			""", args)[0][0]
 
-			# update field
+			# Since the target field in the parent is always a percentage, we assume it to
+			# be 100% if the reference field total is zero, thereby avoiding ZeroDivisionError
+			# USE CASE: if a document's amount or quantity is zero, we assume it to be fully
+			# billed or fully recieved / delivered, which would say incorrectly otherwise
+			if target_ref_field_value == 0:
+				target_field_value = 100
+			else:
+				target_field_value = frappe.db.sql("""
+					SELECT
+						ROUND(
+							IFNULL(
+								(IFNULL(SUM(IF(%(target_ref_field)s > %(target_field)s, ABS(%(target_field)s), ABS(%(target_ref_field)s))), 0)
+								/ SUM(ABS(%(target_ref_field)s)) * 100), 0
+							), 6
+						)
+					FROM
+						`tab%(target_dt)s`
+					WHERE
+						parent="%(name)s"
+				""", args)[0][0]
+
+			frappe.db.set_value(args.get("target_parent_dt"), args.get("name"), args.get("target_parent_field"), target_field_value, update_modified=update_modified)
+
+			# Update the status field
 			if args.get('status_field'):
-				frappe.db.sql("""update `tab%(target_parent_dt)s`
-					set %(status_field)s = if(%(target_parent_field)s<0.001,
-						'Not %(keyword)s', if(%(target_parent_field)s>=99.999999,
-						'Fully %(keyword)s', 'Partly %(keyword)s'))
-					where name='%(name)s'""" % args)
+				if args.get("target_parent_field") < 0.001:
+					status = 'Not '
+				else:
+					if args.get("target_parent_field") >= 99.999999:
+						status = 'Fully '
+					else:
+						status = 'Partly '
+
+				status += args.get("keyword")
+				frappe.db.set_value(args.get("target_parent_dt"), args.get("name"), args.get("status_field"), status, update_modified=update_modified)
 
 			if update_modified:
 				target = frappe.get_doc(args["target_parent_dt"], args["name"])
