@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 from itertools import groupby
 from operator import itemgetter
-import json
 import frappe
 from frappe.core.page.dashboard.dashboard import cache_source
 from frappe.utils import add_to_date, date_diff, getdate, nowdate
