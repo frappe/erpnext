@@ -6,43 +6,30 @@ import frappe
 def get_data():
 	config = [
 		{
-			"label": _("Billing"),
+			"label": _("Masters and Accounts"),
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Sales Invoice",
-					"description": _("Bills raised to Customers.")
+					"name": "Item",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
-					"name": "Purchase Invoice",
-					"description": _("Bills raised by Suppliers.")
+					"name": "Customer",
+					"description": _("Customer database."),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
-					"name": "Payment Request",
-					"description": _("Payment Request")
+					"name": "Supplier",
+					"description": _("Supplier database."),
+					"onboard": 1,
 				},
-				{
-					"type": "doctype",
-					"name": "Payment Entry",
-					"description": _("Bank/Cash transactions against party or for internal transfer")
-				}
-			]
-
-		},
-		{
-			"label": _("Company and Accounts"),
-			"items": [
 				{
 					"type": "doctype",
 					"name": "Company",
-					"description": _("Company (not Customer or Supplier) master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Journal Entry",
-					"description": _("Accounting journal entries.")
+					"description": _("Company (not Customer or Supplier) master."),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
@@ -51,37 +38,144 @@ def get_data():
 					"label": _("Chart of Accounts"),
 					"route": "Tree/Account",
 					"description": _("Tree of financial accounts."),
+					"onboard": 1,
 				},
+				{
+					"type": "doctype",
+					"name": "Journal Entry",
+					"description": _("Accounting journal entries."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Opening Invoice Creation Tool",
+					"description": _("Create Opening Sales and Purchase Invoices")
+				},
+			]
+		},
+		{
+			"label": _("Billing"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Sales Invoice",
+					"description": _("Bills raised to Customers."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Purchase Invoice",
+					"description": _("Bills raised by Suppliers."),
+					"onboard": 1
+				},
+				{
+					"type": "doctype",
+					"name": "Payment Request",
+					"description": _("Payment Request"),
+				},
+				{
+					"type": "doctype",
+					"name": "Payment Entry",
+					"description": _("Bank/Cash transactions against party or for internal transfer")
+				},
+
+				# Reports
+				{
+					"type": "report",
+					"name": "Ordered Items To Be Billed",
+					"is_query_report": True,
+					"reference_doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"name": "Delivered Items To Be Billed",
+					"is_query_report": True,
+					"reference_doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"name": "Purchase Order Items To Be Billed",
+					"is_query_report": True,
+					"reference_doctype": "Purchase Invoice"
+				},
+				{
+					"type": "report",
+					"name": "Received Items To Be Billed",
+					"is_query_report": True,
+					"reference_doctype": "Purchase Invoice"
+				},
+			]
+
+		},
+		{
+			"label": _("Setup"),
+			"icon": "fa fa-cog",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Opening Invoice Creation Tool",
+					"description": _("Create Opening Sales and Purchase Invoices")
+				},
+				{
+					"type": "doctype",
+					"name": "Accounts Settings",
+					"description": _("Default settings for accounting transactions.")
+				},
+				{
+					"type": "doctype",
+					"name": "Fiscal Year",
+					"description": _("Financial / accounting year.")
+				},
+				{
+					"type": "doctype",
+					"name": "Currency",
+					"description": _("Enable / disable currencies.")
+				},
+				{
+					"type": "doctype",
+					"name": "Currency Exchange",
+					"description": _("Currency exchange rate master.")
+				},
+				{
+					"type": "doctype",
+					"name": "Payment Gateway Account",
+					"description": _("Setup Gateway accounts.")
+				},
+				{
+					"type": "doctype",
+					"name": "Terms and Conditions",
+					"label": _("Terms and Conditions Template"),
+					"description": _("Template of terms or contract.")
+				},
+				{
+					"type": "doctype",
+					"name": "Mode of Payment",
+					"description": _("e.g. Bank, Cash, Credit Card")
+				},
+				{
+					"type": "doctype",
+					"name": "Auto Repeat",
+					"label": _("Auto Repeat"),
+					"description": _("To make recurring documents")
+				},
+				{
+					"type": "doctype",
+					"name": "C-Form",
+					"description": _("C-Form records"),
+					"country": "India"
+				}
+			]
+		},
+		{
+			"label": _("Financial Statements"),
+			"items": [
 				{
 					"type": "report",
 					"name": "General Ledger",
 					"doctype": "GL Entry",
 					"is_query_report": True,
+					"onboard": 1,
 				},
-			]
-		},
-		{
-			"label": _("Masters"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Customer",
-					"description": _("Customer database.")
-				},
-				{
-					"type": "doctype",
-					"name": "Supplier",
-					"description": _("Supplier database.")
-				},
-				{
-					"type": "doctype",
-					"name": "Item",
-				}
-			]
-		},
-		{
-			"label": _("Accounting Statements"),
-			"items": [
 				{
 					"type": "report",
 					"name": "Accounts Receivable",
@@ -193,22 +287,10 @@ def get_data():
 					"name": "Tax Withholding Category",
 					"description": _("Tax Withholding rates to be applied on transactions.")
 				},
-				{
-					"type": "report",
-					"name": "Sales Register",
-					"doctype": "Sales Invoice",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Purchase Register",
-					"doctype": "Purchase Invoice",
-					"is_query_report": True
-				},
 			]
 		},
 		{
-			"label": _("Budget and Cost Center"),
+			"label": _("Cost Center and Budgeting"),
 			"items": [
 				{
 					"type": "doctype",
@@ -234,11 +316,6 @@ def get_data():
 					"name": "Monthly Distribution",
 					"description": _("Seasonality for setting budgets, targets etc.")
 				},
-			]
-		},
-		{
-			"label": _("Tools"),
-			"items": [
 				{
 					"type": "doctype",
 					"name": "Period Closing Voucher",
@@ -249,104 +326,27 @@ def get_data():
 					"name": "Cheque Print Template",
 					"description": _("Setup cheque dimensions for printing")
 				},
-				{
-					"type": "doctype",
-					"name": "Opening Invoice Creation Tool",
-					"description": _("Create Opening Sales and Purchase Invoices")
-				},
 			]
 		},
 		{
-			"label": _("Setup"),
-			"icon": "fa fa-cog",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Accounts Settings",
-					"description": _("Default settings for accounting transactions.")
-				},
-				{
-					"type": "doctype",
-					"name": "Fiscal Year",
-					"description": _("Financial / accounting year.")
-				},
-				{
-					"type": "doctype",
-					"name": "Currency",
-					"description": _("Enable / disable currencies.")
-				},
-				{
-					"type": "doctype",
-					"name": "Currency Exchange",
-					"description": _("Currency exchange rate master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Payment Gateway Account",
-					"description": _("Setup Gateway accounts.")
-				},
-				{
-					"type": "doctype",
-					"name": "Terms and Conditions",
-					"label": _("Terms and Conditions Template"),
-					"description": _("Template of terms or contract.")
-				},
-				{
-					"type": "doctype",
-					"name": "Mode of Payment",
-					"description": _("e.g. Bank, Cash, Credit Card")
-				},
-				{
-					"type": "doctype",
-					"name": "Auto Repeat",
-					"label": _("Auto Repeat"),
-					"description": _("To make recurring documents")
-				},
-				{
-					"type": "doctype",
-					"name": "C-Form",
-					"description": _("C-Form records"),
-					"country": "India"
-				}
-			]
-		},
-		{
-			"label": _("To Bill"),
-			"items": [
-				{
-					"type": "report",
-					"name": "Ordered Items To Be Billed",
-					"is_query_report": True,
-					"doctype": "Sales Invoice"
-				},
-				{
-					"type": "report",
-					"name": "Delivered Items To Be Billed",
-					"is_query_report": True,
-					"doctype": "Sales Invoice"
-				},
-				{
-					"type": "report",
-					"name": "Purchase Order Items To Be Billed",
-					"is_query_report": True,
-					"doctype": "Purchase Invoice"
-				},
-				{
-					"type": "report",
-					"name": "Received Items To Be Billed",
-					"is_query_report": True,
-					"doctype": "Purchase Invoice"
-				},
-			]
-
-		},
-		{
-			"label": _("Analytics"),
+			"label": _("Key Reports"),
 			"items": [
 				{
 					"type": "report",
 					"name": "Gross Profit",
 					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Sales Register",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Purchase Register",
+					"doctype": "Purchase Invoice",
 					"is_query_report": True
 				},
 				{
@@ -572,7 +572,7 @@ def get_data():
 		config.insert(7, gst)
 	domains = frappe.get_active_domains()
 	if "Services" in domains:
-		config.insert(2, subscriptions)
+		config.insert(5, subscriptions)
 	else:
 		config.insert(7, subscriptions)
 	return config

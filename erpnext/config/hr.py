@@ -201,10 +201,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Loan Application",
 				},
-				{
-					"type": "doctype",
-					"name": "Loan"
-				},
 			]
 		},
 		{

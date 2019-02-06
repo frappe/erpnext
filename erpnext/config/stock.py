@@ -9,18 +9,26 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Stock Entry",
+					"onboard": 1,
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "doctype",
 					"name": "Delivery Note",
+					"onboard": 1,
+					"dependencies": ["Item", "Customer"],
 				},
 				{
 					"type": "doctype",
 					"name": "Purchase Receipt",
+					"onboard": 1,
+					"dependencies": ["Item", "Supplier"],
 				},
 				{
 					"type": "doctype",
 					"name": "Material Request",
+					"onboard": 1,
+					"dependencies": ["Item"],
 				},
 			]
 		},
@@ -32,35 +40,44 @@ def get_data():
 					"is_query_report": True,
 					"name": "Stock Ledger",
 					"doctype": "Stock Ledger Entry",
+					"onboard": 1,
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Balance",
-					"doctype": "Stock Ledger Entry"
+					"doctype": "Stock Ledger Entry",
+					"onboard": 1,
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Projected Qty",
 					"doctype": "Item",
+					"onboard": 1,
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "page",
 					"name": "stock-balance",
-					"label": _("Stock Summary")
+					"label": _("Stock Summary"),
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Ageing",
 					"doctype": "Item",
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Item Price Stock",
 					"doctype": "Item",
+					"dependencies": ["Item"],
 				}
 			]
 		},
@@ -70,18 +87,12 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Item",
-				},
-				{
-					"type": "doctype",
-					"name": "Item Alternative",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Product Bundle",
-				},
-				{
-					"type": "doctype",
-					"name": "Price List",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
@@ -89,6 +100,11 @@ def get_data():
 					"icon": "fa fa-sitemap",
 					"label": _("Item Group"),
 					"link": "Tree/Item Group",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Price List",
 				},
 				{
 					"type": "doctype",
@@ -104,6 +120,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Item Alternative",
+				},
+				{
+					"type": "doctype",
 					"name": "Item Variant Settings",
 				},
 			]
@@ -114,14 +134,19 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Serial No",
+					"onboard": 1,
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "doctype",
 					"name": "Batch",
+					"onboard": 1,
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "doctype",
 					"name": "Installation Note",
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "report",
@@ -145,9 +170,14 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Delivery Trip",
-					"description": _("Delivery Trip service tours to customers.")
-				}
+					"name": "Delivery Note",
+					"description": _("Delivery Trip service tours to customers."),
+					"onboard": 1
+				},
+				{
+					"type": "doctype",
+					"name": "Delivery Trip"
+				},
 			]
 		},
 		{
@@ -157,14 +187,17 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Stock Reconciliation",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Packing Slip",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Quality Inspection",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
@@ -183,23 +216,27 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Stock Settings",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Warehouse",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "UOM",
 					"label": _("Unit of Measure") + " (UOM)",
-				},
-				{
-					"type": "doctype",
-					"name": "Item Attribute",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Brand",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Item Attribute",
 				},
 				{
 					"type": "doctype",
@@ -216,12 +253,14 @@ def get_data():
 					"is_query_report": False,
 					"name": "Item-wise Price List Rate",
 					"doctype": "Item Price",
+					"onboard": 1,
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Analytics",
-					"doctype": "Stock Entry"
+					"doctype": "Stock Entry",
+					"onboard": 1,
 				},
 				{
 					"type": "report",
