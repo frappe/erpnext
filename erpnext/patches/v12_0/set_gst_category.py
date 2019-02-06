@@ -48,6 +48,6 @@ def execute():
 	}
 
 	for old, new in itc_update_map.items():
-		frappe.db.set_value('Purchase Invoice', {'eligibility_for_itc': old}, 'eligibility_for_itc', new)
+		frappe.db.sql("UPDATE `tabPurchase Invoice` SET eligibility_for_itc = replace(eligibility_for_itc, %s, %s)", (old, new))
 
 	make_custom_fields()
