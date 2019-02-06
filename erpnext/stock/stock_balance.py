@@ -131,7 +131,7 @@ def get_ordered_qty(item_code, warehouse):
 
 def get_planned_qty(item_code, warehouse):
 	planned_qty = frappe.db.sql("""
-		select sum(qty - produced_qty) from `tabProduction Order`
+		select sum(qty - produced_qty) from `tabWork Order`
 		where production_item = %s and fg_warehouse = %s and status not in ("Stopped", "Completed")
 		and docstatus=1 and qty > produced_qty""", (item_code, warehouse))
 
@@ -148,11 +148,9 @@ def update_bin_qty(item_code, warehouse, qty_dict=None):
 			mismatch = True
 
 	if mismatch:
-		bin.projected_qty = (flt(bin.actual_qty) + flt(bin.ordered_qty) +
-			flt(bin.indented_qty) + flt(bin.planned_qty) - flt(bin.reserved_qty)
-			- flt(bin.reserved_qty_for_production)) - flt(bin.reserved_qty_for_sub_contract)
-
-		bin.save()
+		bin.set_projected_qty()
+		bin.db_update()
+		bin.clear_cache()
 
 def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, posting_time=None,
 	 	fiscal_year=None):
@@ -259,7 +257,7 @@ def repost_all_stock_vouchers():
 			doc.update_stock_ledger()
 			doc.make_gl_entries(repost_future_gle=False)
 			frappe.db.commit()
-		except Exception as e:
+		except Exception:
 			print(frappe.get_traceback())
 			rejected.append([voucher_type, voucher_no])
 			frappe.db.rollback()

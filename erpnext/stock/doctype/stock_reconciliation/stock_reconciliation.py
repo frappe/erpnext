@@ -8,6 +8,7 @@ from frappe import msgprint, _
 from frappe.utils import cstr, flt, cint
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import StockController
+from erpnext.accounts.utils import get_company_default
 from erpnext.stock.utils import get_stock_balance
 
 class OpeningEntryAccountError(frappe.ValidationError): pass
@@ -20,9 +21,9 @@ class StockReconciliation(StockController):
 
 	def validate(self):
 		if not self.expense_account:
-			self.expense_account = frappe.db.get_value("Company", self.company, "stock_adjustment_account")
+			self.expense_account = frappe.get_cached_value('Company',  self.company,  "stock_adjustment_account")
 		if not self.cost_center:
-			self.cost_center = frappe.db.get_value("Company", self.company, "cost_center")
+			self.cost_center = frappe.get_cached_value('Company',  self.company,  "cost_center")
 		self.validate_posting_time()
 		self.remove_items_with_no_change()
 		self.validate_data()
@@ -60,7 +61,7 @@ class StockReconciliation(StockController):
 					- flt(qty, item.precision("qty")) * flt(rate, item.precision("valuation_rate")))
 				return True
 
-		items = filter(lambda d: _changed(d), self.items)
+		items = list(filter(lambda d: _changed(d), self.items))
 
 		if not items:
 			frappe.throw(_("None of the items have any change in quantity or value."),
@@ -253,7 +254,7 @@ class StockReconciliation(StockController):
 
 	def get_items_for(self, warehouse):
 		self.items = []
-		for item in get_items(warehouse, self.posting_date, self.posting_time):
+		for item in get_items(warehouse, self.posting_date, self.posting_time, self.company):
 			self.append("items", item)
 
 	def submit(self):
@@ -269,25 +270,36 @@ class StockReconciliation(StockController):
 			self._cancel()
 
 @frappe.whitelist()
-def get_items(warehouse, posting_date, posting_time):
-	items = frappe.get_list("Bin", fields=["item_code"], filters={"warehouse": warehouse}, as_list=1)
+def get_items(warehouse, posting_date, posting_time, company):
+	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+	items = frappe.db.sql("""
+		select i.name, i.item_name, bin.warehouse
+		from tabBin bin, tabItem i
+		where i.name=bin.item_code and i.disabled=0
+		and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=bin.warehouse)
+	""", (lft, rgt))
 
-	items += frappe.get_list("Item", fields=["name"], filters= {"is_stock_item": 1, "has_serial_no": 0,
-		"has_batch_no": 0, "has_variants": 0, "disabled": 0, "default_warehouse": warehouse},
-			as_list=1)
+	items += frappe.db.sql("""
+		select i.name, i.item_name, id.default_warehouse
+		from tabItem i, `tabItem Default` id
+		where i.name = id.parent
+			and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=id.default_warehouse)
+			and i.is_stock_item = 1 and i.has_serial_no = 0 and i.has_batch_no = 0
+			and i.has_variants = 0 and i.disabled = 0 and id.company=%s
+		group by i.name
+	""", (lft, rgt, company))
 
 	res = []
-	for item in set(items):
-		stock_bal = get_stock_balance(item[0], warehouse, posting_date, posting_time,
+	for d in set(items):
+		stock_bal = get_stock_balance(d[0], d[2], posting_date, posting_time,
 			with_valuation_rate=True)
 
-		if frappe.db.get_value("Item",item[0],"disabled") == 0:
-
+		if frappe.db.get_value("Item", d[0], "disabled") == 0:
 			res.append({
-				"item_code": item[0],
-				"warehouse": warehouse,
+				"item_code": d[0],
+				"warehouse": d[2],
 				"qty": stock_bal[0],
-				"item_name": frappe.db.get_value('Item', item[0], 'item_name'),
+				"item_name": d[1],
 				"valuation_rate": stock_bal[1],
 				"current_qty": stock_bal[0],
 				"current_valuation_rate": stock_bal[1]
@@ -306,3 +318,13 @@ def get_stock_balance_for(item_code, warehouse, posting_date, posting_time):
 		'qty': qty,
 		'rate': rate
 	}
+
+@frappe.whitelist()
+def get_difference_account(purpose, company):
+	if purpose == 'Stock Reconciliation':
+		account = get_company_default(company, "stock_adjustment_account")
+	else:
+		account = frappe.db.get_value('Account', {'is_group': 0,
+			'company': company, 'account_type': 'Temporary'}, 'name')
+
+	return account

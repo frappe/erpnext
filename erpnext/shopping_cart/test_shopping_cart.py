@@ -30,11 +30,11 @@ class TestShoppingCart(unittest.TestCase):
 
 		# test if lead is created and quotation with new lead is fetched
 		quotation = _get_cart_quotation()
-		self.assertEquals(quotation.quotation_to, "Customer")
-		self.assertEquals(quotation.contact_person,
+		self.assertEqual(quotation.quotation_to, "Customer")
+		self.assertEqual(quotation.contact_person,
 			frappe.db.get_value("Contact", dict(email_id="test_cart_user@example.com")))
-		self.assertEquals(quotation.lead, None)
-		self.assertEquals(quotation.contact_email, frappe.session.user)
+		self.assertEqual(quotation.lead, None)
+		self.assertEqual(quotation.contact_email, frappe.session.user)
 
 		return quotation
 
@@ -43,10 +43,10 @@ class TestShoppingCart(unittest.TestCase):
 
 		# test if quotation with customer is fetched
 		quotation = _get_cart_quotation()
-		self.assertEquals(quotation.quotation_to, "Customer")
-		self.assertEquals(quotation.customer, "_Test Customer")
-		self.assertEquals(quotation.lead, None)
-		self.assertEquals(quotation.contact_email, frappe.session.user)
+		self.assertEqual(quotation.quotation_to, "Customer")
+		self.assertEqual(quotation.customer, "_Test Customer")
+		self.assertEqual(quotation.lead, None)
+		self.assertEqual(quotation.contact_email, frappe.session.user)
 
 		return quotation
 
@@ -61,18 +61,18 @@ class TestShoppingCart(unittest.TestCase):
 
 		quotation = self.test_get_cart_customer()
 
-		self.assertEquals(quotation.get("items")[0].item_code, "_Test Item")
-		self.assertEquals(quotation.get("items")[0].qty, 1)
-		self.assertEquals(quotation.get("items")[0].amount, 10)
+		self.assertEqual(quotation.get("items")[0].item_code, "_Test Item")
+		self.assertEqual(quotation.get("items")[0].qty, 1)
+		self.assertEqual(quotation.get("items")[0].amount, 10)
 
 		# add second item
 		update_cart("_Test Item 2", 1)
 		quotation = self.test_get_cart_customer()
-		self.assertEquals(quotation.get("items")[1].item_code, "_Test Item 2")
-		self.assertEquals(quotation.get("items")[1].qty, 1)
-		self.assertEquals(quotation.get("items")[1].amount, 20)
+		self.assertEqual(quotation.get("items")[1].item_code, "_Test Item 2")
+		self.assertEqual(quotation.get("items")[1].qty, 1)
+		self.assertEqual(quotation.get("items")[1].amount, 20)
 
-		self.assertEquals(len(quotation.get("items")), 2)
+		self.assertEqual(len(quotation.get("items")), 2)
 
 	def test_update_cart(self):
 		# first, add to cart
@@ -81,11 +81,11 @@ class TestShoppingCart(unittest.TestCase):
 		# update first item
 		update_cart("_Test Item", 5)
 		quotation = self.test_get_cart_customer()
-		self.assertEquals(quotation.get("items")[0].item_code, "_Test Item")
-		self.assertEquals(quotation.get("items")[0].qty, 5)
-		self.assertEquals(quotation.get("items")[0].amount, 50)
-		self.assertEquals(quotation.net_total, 70)
-		self.assertEquals(len(quotation.get("items")), 2)
+		self.assertEqual(quotation.get("items")[0].item_code, "_Test Item")
+		self.assertEqual(quotation.get("items")[0].qty, 5)
+		self.assertEqual(quotation.get("items")[0].amount, 50)
+		self.assertEqual(quotation.net_total, 70)
+		self.assertEqual(len(quotation.get("items")), 2)
 
 	def test_remove_from_cart(self):
 		# first, add to cart
@@ -95,11 +95,11 @@ class TestShoppingCart(unittest.TestCase):
 		update_cart("_Test Item", 0)
 		quotation = self.test_get_cart_customer()
 
-		self.assertEquals(quotation.get("items")[0].item_code, "_Test Item 2")
-		self.assertEquals(quotation.get("items")[0].qty, 1)
-		self.assertEquals(quotation.get("items")[0].amount, 20)
-		self.assertEquals(quotation.net_total, 20)
-		self.assertEquals(len(quotation.get("items")), 1)
+		self.assertEqual(quotation.get("items")[0].item_code, "_Test Item 2")
+		self.assertEqual(quotation.get("items")[0].qty, 1)
+		self.assertEqual(quotation.get("items")[0].amount, 20)
+		self.assertEqual(quotation.net_total, 20)
+		self.assertEqual(len(quotation.get("items")), 1)
 
 	def test_tax_rule(self):
 		self.login_as_customer()
@@ -110,9 +110,8 @@ class TestShoppingCart(unittest.TestCase):
 		tax_rule_master = set_taxes(quotation.customer, "Customer", \
 			quotation.transaction_date, quotation.company, None, None, \
 			quotation.customer_address, quotation.shipping_address_name, 1)
-
-		self.assertEquals(quotation.taxes_and_charges, tax_rule_master)
-		self.assertEquals(quotation.total_taxes_and_charges, 1000.0)
+		self.assertEqual(quotation.taxes_and_charges, tax_rule_master)
+		self.assertEqual(quotation.total_taxes_and_charges, 1000.0)
 
 		self.remove_test_quotation(quotation)
 

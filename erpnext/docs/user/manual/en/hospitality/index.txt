@@ -1,4 +1,0 @@
-restaurant
-restaurant-menu
-reservations
-order-entry

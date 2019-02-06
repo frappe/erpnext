@@ -24,8 +24,10 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 	onload: function() {
 		var me = this;
 		this.frm.set_query("party_type", function() {
-			return{
-				query: "erpnext.setup.doctype.party_type.party_type.get_party_type"
+			return {
+				"filters": {
+					"name": ["in", Object.keys(frappe.boot.party_account_types)],
+				}
 			}
 		});
 
@@ -37,7 +39,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 					filters: {
 						"company": me.frm.doc.company,
 						"is_group": 0,
-						"account_type": (me.frm.doc.party_type == "Customer" ? "Receivable" : "Payable")
+						"account_type": frappe.boot.party_account_types[me.frm.doc.party_type]
 					}
 				};
 			}

@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from frappe import _
 
 def get_data():
@@ -7,7 +8,7 @@ def get_data():
 			.format('<a href="#query-report/Stock Ledger">' + _('Stock Ledger') + '</a>'),
 		'fieldname': 'item_code',
 		'non_standard_fieldnames': {
-			'Production Order': 'production_item',
+			'Work Order': 'production_item',
 			'Product Bundle': 'new_item_code',
 			'BOM': 'item',
 			'Batch': 'item'
@@ -15,7 +16,7 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Groups'),
-				'items': ['BOM', 'Product Bundle']
+				'items': ['BOM', 'Product Bundle', 'Item Alternative']
 			},
 			{
 				'label': _('Pricing'),
@@ -40,7 +41,7 @@ def get_data():
 			},
 			{
 				'label': _('Manufacture'),
-				'items': ['Production Order']
+				'items': ['Work Order']
 			}
 		]
 	}

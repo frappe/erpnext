@@ -1,10 +1,11 @@
+from __future__ import unicode_literals
 from frappe import _
 
 def get_data():
 	return {
 		'fieldname': 'supplier_quotation',
 		'non_standard_fieldnames': {
-			'Subscription': 'reference_document'
+			'Auto Repeat': 'reference_document'
 		},
 		'internal_links': {
 			'Material Request': ['items', 'material_request'],
@@ -22,7 +23,7 @@ def get_data():
 			},
 			{
 				'label': _('Subscription'),
-				'items': ['Subscription']
+				'items': ['Auto Repeat']
 			},
 		]
 

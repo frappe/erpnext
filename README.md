@@ -1,14 +1,24 @@
-# ERPNext - ERP made simple
+<div align="center">
+    <img src="https://github.com/frappe/design/blob/master/logos/erpnext-logo.svg" height="128">
+    <h2>ERPNext</h2>
+    <p align="center">
+        <p>ERP made simple</p>
+    </p>
 
-[![Build Status](https://travis-ci.org/frappe/erpnext.png)](https://travis-ci.org/frappe/erpnext) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/frappe/erpnext?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.com/frappe/erpnext.png)](https://travis-ci.com/frappe/erpnext)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/frappe/erpnext?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
+[![Open Source Helpers](https://www.codetriage.com/frappe/erpnext/badges/users.svg)](https://www.codetriage.com/frappe/erpnext)
+[![Coverage Status](https://coveralls.io/repos/github/frappe/erpnext/badge.svg?branch=develop)](https://coveralls.io/github/frappe/erpnext?branch=develop)
 
 [https://erpnext.com](https://erpnext.com)
 
+</div>
+
 Includes: Accounting, Inventory, Manufacturing, CRM, Sales, Purchase, Project Management, HRMS. Requires MariaDB.
 
-ERPNext is built on the [Frappé](https://github.com/frappe/frappe) Framework, a full-stack web app framework in Python & JavaScript.
+ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web app framework in Python & JavaScript.
 
-- [User Guide](https://erpnext.org/docs/user)
+- [User Guide](https://erpnext.com/docs/user)
 - [Discussion Forum](https://discuss.erpnext.com/)
 
 ---
@@ -31,15 +41,16 @@ System and user credentials are listed on the download page.
 
 ## License
 
-GNU/General Public License (see LICENSE.txt)
+GNU/General Public License (see [license.txt](license.txt))
 
-The ERPNext code is licensed as GNU General Public License (v3) and the Documentation is licensed as Creative Commons (CC-BY-SA-3.0) and the copyright is owned by Frappé Technologies Pvt Ltd (Frappé) and Contributors.
+The ERPNext code is licensed as GNU General Public License (v3) and the Documentation is licensed as Creative Commons (CC-BY-SA-3.0) and the copyright is owned by Frappe Technologies Pvt Ltd (Frappe) and Contributors.
 
 ---
 
 ## Contributing
 
 1. [Issue Guidelines](https://github.com/frappe/erpnext/wiki/Issue-Guidelines)
+1. [Report Security Vulnerabilities](https://erpnext.com/report)
 1. [Pull Request Requirements](https://github.com/frappe/erpnext/wiki/Contribution-Guidelines)
 1. [Translations](https://translate.erpnext.com)
 1. [Chart of Accounts](https://charts.erpnext.com)
@@ -48,19 +59,19 @@ The ERPNext code is licensed as GNU General Public License (v3) and the Document
 
 ## Logo and Trademark
 
-The brand name ERPNext and the logo are trademarks of Frappé Technologies Pvt. Ltd.
+The brand name ERPNext and the logo are trademarks of Frappe Technologies Pvt. Ltd.
 
 ### Introduction
 
-Frappé Technologies Pvt. Ltd. (Frappé) owns and oversees the trademarks for the ERPNext name and logos. We have developed this trademark usage policy with the following goals in mind:
+Frappe Technologies Pvt. Ltd. (Frappe) owns and oversees the trademarks for the ERPNext name and logos. We have developed this trademark usage policy with the following goals in mind:
 
 - We’d like to make it easy for anyone to use the ERPNext name or logo for community-oriented efforts that help spread and improve ERPNext.
 - We’d like to make it clear how ERPNext-related businesses and projects can (and cannot) use the ERPNext name and logo.
 - We’d like to make it hard for anyone to use the ERPNext name and logo to unfairly profit from, trick or confuse people who are looking for official ERPNext resources.
 
-### Frappé Trademark Usage Policy
+### Frappe Trademark Usage Policy
 
-Permission from Frappé is required to use the ERPNext name or logo as part of any project, product, service, domain or company name.
+Permission from Frappe is required to use the ERPNext name or logo as part of any project, product, service, domain or company name.
 
 We will grant permission to use the ERPNext name and logo for projects that meet the following criteria:
 
@@ -71,7 +82,7 @@ Your project neither promotes nor is associated with entities that currently fai
 
 Use of the ERPNext name and logo is additionally allowed in the following situations:
 
-All other ERPNext-related businesses or projects can use the ERPNext name and logo to refer to and explain their services, but they cannot use them as part of a product, project, service, domain, or company name and they cannot use them in any way that suggests an affiliation with or endorsement by ERPNext or Frappé Technologies or the ERPNext open source project. For example, a consulting company can describe its business as “123 Web Services, offering ERPNext consulting for small businesses,” but cannot call its business “The ERPNext Consulting Company.”
+All other ERPNext-related businesses or projects can use the ERPNext name and logo to refer to and explain their services, but they cannot use them as part of a product, project, service, domain, or company name and they cannot use them in any way that suggests an affiliation with or endorsement by ERPNext or Frappe Technologies or the ERPNext open source project. For example, a consulting company can describe its business as “123 Web Services, offering ERPNext consulting for small businesses,” but cannot call its business “The ERPNext Consulting Company.”
 
 Similarly, it’s OK to use the ERPNext logo as part of a page that describes your products or services, but it is not OK to use it as part of your company or product logo or branding itself. Under no circumstances is it permitted to use ERPNext as part of a top-level domain name.
 
@@ -79,6 +90,6 @@ We do not allow the use of the trademark in advertising, including AdSense/AdWor
 
 Please note that it is not the goal of this policy to limit commercial activity around ERPNext. We encourage ERPNext-based businesses, and we would love to see hundreds of them.
 
-When in doubt about your use of the ERPNext name or logo, please contact Frappé Technologies for clarification.
+When in doubt about your use of the ERPNext name or logo, please contact Frappe Technologies for clarification.
 
 (inspired by WordPress)

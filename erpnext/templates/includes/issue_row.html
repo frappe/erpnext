@@ -5,12 +5,29 @@
             <span class="indicator {{ "red" if doc.status=="Open" else "darkgrey"   }}">
                 {{ doc.name }}</span>
 				   </div>
-                <div class="col-xs-6 items-preview ellipsis">
-                    {{ doc.subject }}</div>
-     
+                <div class="col-xs-5 items-preview ellipsis ellipsis-width">
+					{{ doc.subject }}</div>
+					<div class="col-xs-2 text-muted">
+						<span class="indicator
+							{% if doc.status == "Open" %}
+								{% if doc.priority == "Medium" %}
+									orange"> Medium
+								{% elif doc.priority == "Low" %}
+									yellow"> Low
+								{% else %}
+									red"> High
+								{% endif  %}
+							{% elif doc.status == "Closed" %}
+								green"> Closed
+							{% else %}
+								darkgrey"> {{ doc.status }}
+							{% endif %}
+						</span>
+					</div>
         <div class="col-xs-3 text-right small text-muted">
             {{ frappe.format_date(doc.modified) }}
         </div>
     </div>
     </a>
 </div>
+ 

@@ -24,6 +24,14 @@ frappe.ui.form.on('Asset', {
 			};
 		});
 
+		frm.set_query("department", function() {
+			return {
+				"filters": {
+					"company": frm.doc.company,
+				}
+			};
+		});
+		
 		frm.set_query("cost_center", function() {
 			return {
 				"filters": {
@@ -57,6 +65,19 @@ frappe.ui.form.on('Asset', {
 					erpnext.asset.restore_asset(frm);
 				});
 			}
+
+			if (frm.doc.purchase_receipt || !frm.doc.is_existing_asset) {
+				frm.add_custom_button("General Ledger", function() {
+					frappe.route_options = {
+						"voucher_no": frm.doc.name,
+						"from_date": frm.doc.available_for_use_date,
+						"to_date": frm.doc.available_for_use_date,
+						"company": frm.doc.company
+					};
+					frappe.set_route("query-report", "General Ledger");
+				});
+			}
+
 			if (frm.doc.status=='Submitted' && !frm.doc.is_existing_asset && !frm.doc.purchase_invoice) {
 				frm.add_custom_button(__("Purchase Invoice"), function() {
 					frm.trigger("make_purchase_invoice");
@@ -65,6 +86,11 @@ frappe.ui.form.on('Asset', {
 			if (frm.doc.maintenance_required && !frm.doc.maintenance_schedule) {
 				frm.add_custom_button(__("Asset Maintenance"), function() {
 					frm.trigger("create_asset_maintenance");
+				}, __("Make"));
+			}
+			if (frm.doc.status != 'Fully Depreciated') {
+				frm.add_custom_button(__("Asset Value Adjustment"), function() {
+					frm.trigger("create_asset_adjustment");
 				}, __("Make"));
 			}
 
@@ -76,6 +102,10 @@ frappe.ui.form.on('Asset', {
 
 			frm.page.set_inner_btn_group_as_primary(__("Make"));
 			frm.trigger("setup_chart");
+		}
+
+		if (frm.doc.docstatus == 0) {
+			frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
 		}
 	},
 
@@ -149,21 +179,27 @@ frappe.ui.form.on('Asset', {
 			frappe.call({
 				method: "erpnext.assets.doctype.asset.asset.get_item_details",
 				args: {
-					item_code: frm.doc.item_code
+					item_code: frm.doc.item_code,
+					asset_category: frm.doc.asset_category
 				},
 				callback: function(r, rt) {
 					if(r.message) {
-						$.each(r.message, function(field, value) {
-							frm.set_value(field, value);
-						})
+						frm.set_value('finance_books', r.message);
 					}
 				}
 			})
 		}
 	},
 
+	available_for_use_date: function(frm) {
+		$.each(frm.doc.finance_books || [], function(i, d) {
+			if(!d.depreciation_start_date) d.depreciation_start_date = frm.doc.available_for_use_date;
+		});
+		refresh_field("finance_books");
+	},
+
 	is_existing_asset: function(frm) {
-		frm.toggle_reqd("next_depreciation_date", (!frm.doc.is_existing_asset && frm.doc.calculate_depreciation));
+		// frm.toggle_reqd("next_depreciation_date", (!frm.doc.is_existing_asset && frm.doc.calculate_depreciation));
 	},
 
 	opening_accumulated_depreciation: function(frm) {
@@ -203,7 +239,8 @@ frappe.ui.form.on('Asset', {
 			args: {
 				"asset": frm.doc.name,
 				"item_code": frm.doc.item_code,
-				"company": frm.doc.company
+				"company": frm.doc.company,
+				"serial_no": frm.doc.serial_no
 			},
 			method: "erpnext.assets.doctype.asset.asset.make_sales_invoice",
 			callback: function(r) {
@@ -228,6 +265,37 @@ frappe.ui.form.on('Asset', {
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		})
+	},
+
+	create_asset_adjustment: function(frm) {
+		frappe.call({
+			args: {
+				"asset": frm.doc.name,
+				"asset_category": frm.doc.asset_category,
+				"company": frm.doc.company
+			},
+			method: "erpnext.assets.doctype.asset.asset.create_asset_adjustment",
+			freeze: 1,
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		})
+	},
+
+	calculate_depreciation: function(frm) {
+		frappe.db.get_value("Asset Settings", {'name':"Asset Settings"}, 'schedule_based_on_fiscal_year', (data) => {
+			if (data.schedule_based_on_fiscal_year == 1) {
+				frm.set_df_property("depreciation_method", "options", "\nStraight Line\nManual");
+				frm.toggle_reqd("available_for_use_date", true);
+				frm.toggle_display("frequency_of_depreciation", false);
+				frappe.db.get_value("Fiscal Year", {'name': frappe.sys_defaults.fiscal_year}, "year_end_date", (data) => {
+					frm.set_value("next_depreciation_date", data.year_end_date);
+				})
+			}
+		})
+
+		frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
 	}
 });
 
@@ -299,19 +367,54 @@ erpnext.asset.transfer_asset = function(frm) {
 		title: __("Transfer Asset"),
 		fields: [
 			{
-				"label": __("Target Warehouse"),
-				"fieldname": "target_warehouse",
+				"label": __("Target Location"),
+				"fieldname": "target_location",
 				"fieldtype": "Link",
-				"options": "Warehouse",
+				"options": "Location",
 				"get_query": function () {
 					return {
 						filters: [
-							["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
-							["Warehouse", "is_group", "=", 0]
+							["Location", "is_group", "=", 0]
 						]
 					}
 				},
 				"reqd": 1
+			},
+			{
+				"label": __("Select Serial No"),
+				"fieldname": "serial_nos",
+				"fieldtype": "Link",
+				"options": "Serial No",
+				"get_query": function () {
+					return {
+						filters: {
+							'asset': frm.doc.name
+						}
+					}
+				},
+				"onchange": function() {
+					let val = this.get_value();
+					if (val) {
+						let serial_nos = dialog.get_value("serial_no") || val;
+						if (serial_nos) {
+							serial_nos = serial_nos.split('\n');
+							serial_nos.push(val);
+
+							const unique_sn = serial_nos.filter(function(elem, index, self) {
+							    return index === self.indexOf(elem);
+							});
+
+							dialog.set_value("serial_no", unique_sn.join('\n'));
+							dialog.set_value("serial_nos", "");
+						}
+					}
+				}
+			},
+			{
+				"label": __("Serial No"),
+				"fieldname": "serial_no",
+				"read_only": 1,
+				"fieldtype": "Small Text"
 			},
 			{
 				"label": __("Date"),
@@ -334,8 +437,9 @@ erpnext.asset.transfer_asset = function(frm) {
 				args: {
 					"asset": frm.doc.name,
 					"transaction_date": args.transfer_date,
-					"source_warehouse": frm.doc.warehouse,
-					"target_warehouse": args.target_warehouse,
+					"source_location": frm.doc.location,
+					"target_location": args.target_location,
+					"serial_no": args.serial_no,
 					"company": frm.doc.company
 				}
 			},

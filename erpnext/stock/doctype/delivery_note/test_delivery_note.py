@@ -12,7 +12,7 @@ from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.accounts.utils import get_balance_on
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
 	import get_gl_entries, set_perpetual_inventory
-from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice, make_delivery_trip
 from erpnext.stock.doctype.stock_entry.test_stock_entry \
 	import make_stock_entry, make_serialized_item, get_qty_after_transaction
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, SerialNoWarehouseError
@@ -41,7 +41,7 @@ class TestDeliveryNote(unittest.TestCase):
 
 		dn.submit()
 		si = make_sales_invoice(dn.name)
-		self.assertEquals(len(si.get("items")), len(dn.get("items")))
+		self.assertEqual(len(si.get("items")), len(dn.get("items")))
 
 		# modify amount
 		si.get("items")[0].rate = 200
@@ -91,11 +91,11 @@ class TestDeliveryNote(unittest.TestCase):
 			"Cost of Goods Sold - _TC": [stock_value_difference, 0.0]
 		}
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals([gle.debit, gle.credit], expected_values.get(gle.account))
+			self.assertEqual([gle.debit, gle.credit], expected_values.get(gle.account))
 
 		# check stock in hand balance
 		bal = get_balance_on(stock_in_hand_account)
-		self.assertEquals(bal, prev_bal - stock_value_difference)
+		self.assertEqual(bal, prev_bal - stock_value_difference)
 
 		# back dated incoming entry
 		make_stock_entry(posting_date=add_days(nowdate(), -2), target="_Test Warehouse - _TC",
@@ -112,7 +112,7 @@ class TestDeliveryNote(unittest.TestCase):
 			"Cost of Goods Sold - _TC": [stock_value_difference, 0.0]
 		}
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals([gle.debit, gle.credit], expected_values.get(gle.account))
+			self.assertEqual([gle.debit, gle.credit], expected_values.get(gle.account))
 
 		dn.cancel()
 		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
@@ -149,11 +149,11 @@ class TestDeliveryNote(unittest.TestCase):
 			"Cost of Goods Sold - _TC": [stock_value_diff, 0.0]
 		}
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals([gle.debit, gle.credit], expected_values.get(gle.account))
+			self.assertEqual([gle.debit, gle.credit], expected_values.get(gle.account))
 
 		# check stock in hand balance
 		bal = get_balance_on(stock_in_hand_account)
-		self.assertEquals(flt(bal, 2), flt(prev_bal - stock_value_diff, 2))
+		self.assertEqual(flt(bal, 2), flt(prev_bal - stock_value_diff, 2))
 
 		dn.cancel()
 		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
@@ -173,7 +173,7 @@ class TestDeliveryNote(unittest.TestCase):
 
 		si = make_sales_invoice(dn.name)
 		si.insert(ignore_permissions=True)
-		self.assertEquals(dn.items[0].serial_no, si.items[0].serial_no)
+		self.assertEqual(dn.items[0].serial_no, si.items[0].serial_no)
 
 		dn.cancel()
 
@@ -192,11 +192,11 @@ class TestDeliveryNote(unittest.TestCase):
 		si = make_sales_invoice(dn.name)
 		si.items[0].qty = 1
 		si.submit()
-		self.assertEquals(si.items[0].qty, 1)
+		self.assertEqual(si.items[0].qty, 1)
 
 		si = make_sales_invoice(dn.name)
 		si.submit()
-		self.assertEquals(si.items[0].qty, len(get_serial_nos(si.items[0].serial_no)))
+		self.assertEqual(si.items[0].qty, len(get_serial_nos(si.items[0].serial_no)))
 
 	def test_serialize_status(self):
 		from frappe.model.naming import make_autoname
@@ -215,7 +215,7 @@ class TestDeliveryNote(unittest.TestCase):
 	def check_serial_no_values(self, serial_no, field_values):
 		serial_no = frappe.get_doc("Serial No", serial_no)
 		for field, value in field_values.items():
-			self.assertEquals(cstr(serial_no.get(field)), value)
+			self.assertEqual(cstr(serial_no.get(field)), value)
 
 	def test_sales_return_for_non_bundled_items(self):
 		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
@@ -228,7 +228,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn = create_delivery_note(qty=5, rate=500)
 
 		actual_qty_1 = get_qty_after_transaction()
-		self.assertEquals(actual_qty_0 - 5, actual_qty_1)
+		self.assertEqual(actual_qty_0 - 5, actual_qty_1)
 
 		# outgoing_rate
 		outgoing_rate = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note",
@@ -239,19 +239,19 @@ class TestDeliveryNote(unittest.TestCase):
 
 		actual_qty_2 = get_qty_after_transaction()
 
-		self.assertEquals(actual_qty_1 + 2, actual_qty_2)
+		self.assertEqual(actual_qty_1 + 2, actual_qty_2)
 
 		incoming_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
 			{"voucher_type": "Delivery Note", "voucher_no": dn1.name},
 			["incoming_rate", "stock_value_difference"])
 
-		self.assertEquals(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
+		self.assertEqual(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
 		stock_in_hand_account = get_inventory_account('_Test Company', dn1.items[0].warehouse)
 
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Delivery Note",
 			"voucher_no": dn1.name, "account": stock_in_hand_account}, "debit")
 
-		self.assertEquals(gle_warehouse_amount, stock_value_difference)
+		self.assertEqual(gle_warehouse_amount, stock_value_difference)
 
 		set_perpetual_inventory(0, company)
 
@@ -267,7 +267,7 @@ class TestDeliveryNote(unittest.TestCase):
 
 		# Qty after delivery
 		actual_qty_1 = get_qty_after_transaction()
-		self.assertEquals(actual_qty_1,  25)
+		self.assertEqual(actual_qty_1,  25)
 
 		# outgoing_rate
 		outgoing_rate = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note",
@@ -278,21 +278,21 @@ class TestDeliveryNote(unittest.TestCase):
 
 		# qty after return
 		actual_qty_2 = get_qty_after_transaction()
-		self.assertEquals(actual_qty_2, 35)
+		self.assertEqual(actual_qty_2, 35)
 
 		# Check incoming rate for return entry
 		incoming_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
 			{"voucher_type": "Delivery Note", "voucher_no": dn1.name},
 			["incoming_rate", "stock_value_difference"])
 
-		self.assertEquals(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
+		self.assertEqual(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
 		stock_in_hand_account = get_inventory_account('_Test Company', dn1.items[0].warehouse)
 
 		# Check gl entry for warehouse
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Delivery Note",
 			"voucher_no": dn1.name, "account": stock_in_hand_account}, "debit")
 
-		self.assertEquals(gle_warehouse_amount, stock_value_difference)
+		self.assertEqual(gle_warehouse_amount, stock_value_difference)
 
 		set_perpetual_inventory(0, company)
 
@@ -306,14 +306,14 @@ class TestDeliveryNote(unittest.TestCase):
 			target="_Test Warehouse - _TC", qty=50, rate=100)
 
 		actual_qty = get_qty_after_transaction()
-		self.assertEquals(actual_qty, 50)
+		self.assertEqual(actual_qty, 50)
 
 		dn = create_delivery_note(item_code="_Test Product Bundle Item",
 			qty=5, rate=500)
 
 		# qty after return
 		actual_qty = get_qty_after_transaction()
-		self.assertEquals(actual_qty, 25)
+		self.assertEqual(actual_qty, 25)
 
 		#  return bundled item
 		dn1 = create_delivery_note(item_code='_Test Product Bundle Item', is_return=1,
@@ -321,21 +321,21 @@ class TestDeliveryNote(unittest.TestCase):
 
 		# qty after return
 		actual_qty = get_qty_after_transaction()
-		self.assertEquals(actual_qty, 35)
+		self.assertEqual(actual_qty, 35)
 
 		# Check incoming rate for return entry
 		incoming_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
 			{"voucher_type": "Delivery Note", "voucher_no": dn1.name},
 			["incoming_rate", "stock_value_difference"])
 
-		self.assertEquals(incoming_rate, 100)
+		self.assertEqual(incoming_rate, 100)
 		stock_in_hand_account = get_inventory_account('_Test Company', dn1.items[0].warehouse)
 
 		# Check gl entry for warehouse
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Delivery Note",
 			"voucher_no": dn1.name, "account": stock_in_hand_account}, "debit")
 
-		self.assertEquals(gle_warehouse_amount, 1400)
+		self.assertEqual(gle_warehouse_amount, 1400)
 
 		set_perpetual_inventory(0, company)
 
@@ -395,10 +395,10 @@ class TestDeliveryNote(unittest.TestCase):
 
 		# qty after delivery
 		actual_qty = get_qty_after_transaction(warehouse="_Test Warehouse - _TC")
-		self.assertEquals(actual_qty, 75)
+		self.assertEqual(actual_qty, 75)
 
 		actual_qty = get_qty_after_transaction(warehouse="_Test Warehouse 1 - _TC")
-		self.assertEquals(actual_qty, opening_qty_test_warehouse_1 + 25)
+		self.assertEqual(actual_qty, opening_qty_test_warehouse_1 + 25)
 
 		# stock value diff for source warehouse
 		# for "_Test Item"
@@ -413,7 +413,7 @@ class TestDeliveryNote(unittest.TestCase):
 				"item_code": "_Test Item", "warehouse": "_Test Warehouse 1 - _TC"},
 			"stock_value_difference")
 
-		self.assertEquals(abs(stock_value_difference), stock_value_difference1)
+		self.assertEqual(abs(stock_value_difference), stock_value_difference1)
 
 		# for "_Test Item Home Desktop 100"
 		stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
@@ -427,7 +427,7 @@ class TestDeliveryNote(unittest.TestCase):
 				"item_code": "_Test Item Home Desktop 100", "warehouse": "_Test Warehouse 1 - _TC"},
 			"stock_value_difference")
 
-		self.assertEquals(abs(stock_value_difference), stock_value_difference1)
+		self.assertEqual(abs(stock_value_difference), stock_value_difference1)
 
 		# Check gl entries
 		gl_entries = get_gl_entries("Delivery Note", dn.name)
@@ -442,7 +442,7 @@ class TestDeliveryNote(unittest.TestCase):
 			"_Test Warehouse 1 - _TC": [stock_value_difference, 0.0]
 		}
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals([gle.debit, gle.credit], expected_values.get(gle.account))
+			self.assertEqual([gle.debit, gle.credit], expected_values.get(gle.account))
 
 		set_perpetual_inventory(0, company)
 
@@ -453,7 +453,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.submit()
 
 		update_delivery_note_status(dn.name, "Closed")
-		self.assertEquals(frappe.db.get_value("Delivery Note", dn.name, "Status"), "Closed")
+		self.assertEqual(frappe.db.get_value("Delivery Note", dn.name, "Status"), "Closed")
 
 	def test_dn_billing_status_case1(self):
 		# SO -> DN -> SI
@@ -564,6 +564,79 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(dn.per_billed, 100)
 		self.assertEqual(dn.status, "Completed")
 
+	def test_delivery_trip(self):
+		dn = create_delivery_note()
+		dt = make_delivery_trip(dn.name)
+		self.assertEqual(dn.name, dt.delivery_stops[0].delivery_note)
+
+	def test_delivery_note_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
+		accounts_settings.save()
+		cost_center = "_Test Cost Center for BS Account - _TC"
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
+
+		set_valuation_method("_Test Item", "FIFO")
+
+		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		stock_in_hand_account = get_inventory_account('_Test Company')
+		dn = create_delivery_note(cost_center=cost_center)
+
+		gl_entries = get_gl_entries("Delivery Note", dn.name)
+		self.assertTrue(gl_entries)
+
+		expected_values = {
+			"Cost of Goods Sold - _TC": {
+				"cost_center": cost_center
+			},
+			stock_in_hand_account: {
+				"cost_center": cost_center
+			}
+		}
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+
+		set_perpetual_inventory(0, company)
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+
+	def test_delivery_note_for_disable_allow_cost_center_in_entry_of_bs_account(self):
+		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
+		accounts_settings.save()
+		cost_center = "_Test Cost Center - _TC"
+
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
+
+		set_valuation_method("_Test Item", "FIFO")
+
+		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		stock_in_hand_account = get_inventory_account('_Test Company')
+		dn = create_delivery_note()
+
+		gl_entries = get_gl_entries("Delivery Note", dn.name)
+
+		self.assertTrue(gl_entries)
+		expected_values = {
+			"Cost of Goods Sold - _TC": {
+				"cost_center": cost_center
+			},
+			stock_in_hand_account: {
+				"cost_center": None
+			}
+		}
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+
+		set_perpetual_inventory(0, company)
+	
 	def test_make_sales_invoice_from_dn_for_returned_qty(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
@@ -602,7 +675,7 @@ def create_delivery_note(**args):
 		"rate": args.rate or 100,
 		"conversion_factor": 1.0,
 		"expense_account": "Cost of Goods Sold - _TC",
-		"cost_center": "_Test Cost Center - _TC",
+		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no,
 		"target_warehouse": args.target_warehouse
 	})

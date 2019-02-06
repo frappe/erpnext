@@ -42,5 +42,5 @@ class TestNotifications(unittest.TestCase):
 
 		config = notifications.get_notification_config()
 		doc_target_percents = notifications.get_notifications_for_targets(config, {})
-		self.assertEquals(doc_target_percents['Company']['_Test Company 7'], 10)
-		self.assertEquals(doc_target_percents['Company']['_Test Company 6'], 0)
+		self.assertEqual(doc_target_percents['Company']['_Test Company 7'], 10)
+		self.assertEqual(doc_target_percents['Company']['_Test Company 6'], 0)

@@ -8,7 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, cstr, getdate
 import dateutil
-from frappe.model.naming import make_autoname
+from frappe.model.naming import set_name_by_naming_series
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account,send_registration_sms
 
 class Patient(Document):
@@ -33,7 +33,6 @@ class Patient(Document):
 					"email": self.email,
 					"user_type": "Website User"
 				})
-				user.flags.no_welcome_email = True
 				user.flags.ignore_permissions = True
 				user.add_roles("Patient")
 
@@ -42,10 +41,7 @@ class Patient(Document):
 		if patient_master_name == 'Patient Name':
 			self.name = self.get_patient_name()
 		else:
-			if not self.naming_series:
-				frappe.throw(_("Series is mandatory"), frappe.MandatoryError)
-
-			self.name = make_autoname(self.naming_series+'.#####')
+			set_name_by_naming_series(self)
 
 	def get_patient_name(self):
 		name = self.patient_name
@@ -84,7 +80,7 @@ def create_customer(doc):
 		territory = "Rest Of The World"
 		frappe.msgprint(_("Please set default customer group and territory in Selling Settings"), alert=True)
 	customer = frappe.get_doc({"doctype": "Customer",
-	"customer_name": doc.name,
+	"customer_name": doc.patient_name,
 	"customer_group": customer_group,
 	"territory" : territory,
 	"customer_type": "Individual"
@@ -116,8 +112,9 @@ def make_invoice(patient, company):
 def get_patient_detail(patient):
 	patient_dict = frappe.db.sql("""select * from tabPatient where name=%s""", (patient), as_dict=1)
 	if not patient_dict:
-		frappe.throw("Patient not found")
-	vital_sign = frappe.db.sql("""select * from `tabVital Signs` where patient=%s order by signs_date desc limit 1""", (patient), as_dict=1)
+		frappe.throw(_("Patient not found"))
+	vital_sign = frappe.db.sql("""select * from `tabVital Signs` where patient=%s
+		order by signs_date desc limit 1""", (patient), as_dict=1)
 
 	details = patient_dict[0]
 	if vital_sign:

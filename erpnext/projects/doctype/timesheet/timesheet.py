@@ -9,14 +9,14 @@ from frappe import _
 import json
 from datetime import timedelta
 from erpnext.controllers.queries import get_match_cond
-from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint
+from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, date_diff, add_to_date
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.workstation.workstation import (check_if_within_operating_hours,
 	WorkstationHolidayError)
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
 
 class OverlapError(frappe.ValidationError): pass
-class OverProductionLoggedError(frappe.ValidationError): pass
+class OverWorkLoggedError(frappe.ValidationError): pass
 
 class Timesheet(Document):
 	def onload(self):
@@ -27,6 +27,7 @@ class Timesheet(Document):
 		self.set_status()
 		self.validate_dates()
 		self.validate_time_logs()
+		self.calculate_std_hours()
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
@@ -93,23 +94,28 @@ class Timesheet(Document):
 				self.start_date = getdate(start_date)
 				self.end_date = getdate(end_date)
 
+	def calculate_std_hours(self):
+		std_working_hours = frappe.get_value("Company", self.company, 'standard_working_hours')
+
+		for time in self.time_logs:
+			if time.from_time and time.to_time:
+				if flt(std_working_hours) > 0:
+					time.hours = flt(std_working_hours) * date_diff(time.to_time, time.from_time)
+				else:
+					if not time.hours:
+						time.hours = time_diff_in_hours(time.to_time, time.from_time)
+
 	def before_cancel(self):
 		self.set_status()
 
 	def on_cancel(self):
-		self.update_production_order(None)
 		self.update_task_and_project()
 
 	def on_submit(self):
 		self.validate_mandatory_fields()
-		self.update_production_order(self.name)
 		self.update_task_and_project()
 
 	def validate_mandatory_fields(self):
-		if self.production_order:
-			production_order = frappe.get_doc("Production Order", self.production_order)
-			pending_qty = flt(production_order.qty) - flt(production_order.produced_qty)
-
 		for data in self.time_logs:
 			if not data.from_time and not data.to_time:
 				frappe.throw(_("Row {0}: From Time and To Time is mandatory.").format(data.idx))
@@ -119,41 +125,6 @@ class Timesheet(Document):
 
 			if flt(data.hours) == 0.0:
 				frappe.throw(_("Row {0}: Hours value must be greater than zero.").format(data.idx))
-
-			if self.production_order and flt(data.completed_qty) == 0:
-				frappe.throw(_("Row {0}: Completed Qty must be greater than zero.").format(data.idx))
-
-			if self.production_order and flt(pending_qty) < flt(data.completed_qty) and flt(pending_qty) > 0:
-				frappe.throw(_("Row {0}: Completed Qty cannot be more than {1} for operation {2}").format(data.idx, pending_qty, data.operation),
-					OverProductionLoggedError)
-
-	def update_production_order(self, time_sheet):
-		if self.production_order:
-			pro = frappe.get_doc('Production Order', self.production_order)
-
-			for timesheet in self.time_logs:
-				for data in pro.operations:
-					if data.name == timesheet.operation_id:
-						summary = self.get_actual_timesheet_summary(timesheet.operation_id)
-						data.time_sheet = time_sheet
-						data.completed_qty = summary.completed_qty
-						data.actual_operation_time = summary.mins
-						data.actual_start_time = summary.from_time
-						data.actual_end_time = summary.to_time
-
-			pro.flags.ignore_validate_update_after_submit = True
-			pro.update_operation_status()
-			pro.calculate_operating_cost()
-			pro.set_actual_dates()
-			pro.save()
-
-	def get_actual_timesheet_summary(self, operation_id):
-		"""Returns 'Actual Operating Time'. """
-		return frappe.db.sql("""select
-			sum(tsd.hours*60) as mins, sum(tsd.completed_qty) as completed_qty, min(tsd.from_time) as from_time,
-			max(tsd.to_time) as to_time from `tabTimesheet Detail` as tsd, `tabTimesheet` as ts where
-			ts.production_order = %s and tsd.operation_id = %s and ts.docstatus=1 and ts.name = tsd.parent""",
-			(self.production_order, operation_id), as_dict=1)[0]
 
 	def update_task_and_project(self):
 		tasks, projects = [], []
@@ -176,18 +147,16 @@ class Timesheet(Document):
 
 	def validate_time_logs(self):
 		for data in self.get('time_logs'):
-			self.check_workstation_timings(data)
 			self.validate_overlap(data)
 
 	def validate_overlap(self, data):
-		if self.production_order:
-			self.validate_overlap_for("workstation", data, data.workstation)
-		else:
-			self.validate_overlap_for("user", data, self.user)
-			self.validate_overlap_for("employee", data, self.employee)
+		settings = frappe.get_single('Projects Settings')
+		self.validate_overlap_for("user", data, self.user, settings.ignore_user_time_overlap)
+		self.validate_overlap_for("employee", data, self.employee, settings.ignore_employee_time_overlap)
 
-	def validate_overlap_for(self, fieldname, args, value):
-		if not value: return
+	def validate_overlap_for(self, fieldname, args, value, ignore_validation=False):
+		if not value or ignore_validation:
+			return
 
 		existing = self.get_overlap_for(fieldname, args, value)
 		if existing:
@@ -224,48 +193,6 @@ class Timesheet(Document):
 				return self
 
 		return existing[0] if existing else None
-
-	def check_workstation_timings(self, args):
-		"""Checks if **Time Log** is between operating hours of the **Workstation**."""
-		if args.workstation and args.from_time and args.to_time:
-			check_if_within_operating_hours(args.workstation, args.operation, args.from_time, args.to_time)
-
-	def schedule_for_production_order(self, index):
-		for data in self.time_logs:
-			if data.idx == index:
-				self.move_to_next_day(data) #check for workstation holiday
-				self.move_to_next_non_overlapping_slot(data) #check for overlap
-				break
-
-	def move_to_next_non_overlapping_slot(self, data):
-		overlapping = self.get_overlap_for("workstation", data, data.workstation)
-		if overlapping:
-			time_sheet = self.get_last_working_slot(overlapping.name, data.workstation)
-			data.from_time = get_datetime(time_sheet.to_time) + get_mins_between_operations()
-			data.to_time = self.get_to_time(data)
-			self.check_workstation_working_day(data)
-
-	def get_last_working_slot(self, time_sheet, workstation):
-		return frappe.db.sql(""" select max(from_time) as from_time, max(to_time) as to_time
-			from `tabTimesheet Detail` where workstation = %(workstation)s""",
-			{'workstation': workstation}, as_dict=True)[0]
-
-	def move_to_next_day(self, data):
-		"""Move start and end time one day forward"""
-		self.check_workstation_working_day(data)
-
-	def check_workstation_working_day(self, data):
-		while True:
-			try:
-				self.check_workstation_timings(data)
-				break
-			except WorkstationHolidayError:
-				if frappe.message_log: frappe.message_log.pop()
-				data.from_time = get_datetime(data.from_time) + timedelta(hours=24)
-				data.to_time = self.get_to_time(data)
-
-	def get_to_time(self, data):
-		return get_datetime(data.from_time) + timedelta(hours=data.hours)
 
 	def update_cost(self):
 		for data in self.time_logs:
@@ -341,6 +268,7 @@ def make_sales_invoice(source_name, item_code=None, customer=None):
 	billing_amount = flt(timesheet.total_billable_amount) - flt(timesheet.total_billed_amount)
 	billing_rate = billing_amount / hours
 
+	target.company = timesheet.company
 	if customer:
 		target.customer = customer
 
@@ -378,6 +306,11 @@ def set_missing_values(time_sheet, target):
 	target.start_date = doc.start_date
 	target.end_date = doc.end_date
 	target.posting_date = doc.modified
+	target.total_working_hours = doc.total_hours
+	target.append('timesheets', {
+		'time_sheet': doc.name,
+		'working_hours': doc.total_hours
+	})
 
 @frappe.whitelist()
 def get_activity_cost(employee=None, activity_type=None):

@@ -29,7 +29,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 		submit_landed_cost_voucher("Purchase Receipt", pr.name)
 
 		pr_lc_value = frappe.db.get_value("Purchase Receipt Item", {"parent": pr.name}, "landed_cost_voucher_amount")
-		self.assertEquals(pr_lc_value, 25.0)
+		self.assertEqual(pr_lc_value, 25.0)
 
 		last_sle_after_landed_cost = frappe.db.get_value("Stock Ledger Entry", {
 				"voucher_type": pr.doctype,
@@ -66,8 +66,8 @@ class TestLandedCostVoucher(unittest.TestCase):
 			}
 
 		for gle in gl_entries:
-			self.assertEquals(expected_values[gle.account][0], gle.debit)
-			self.assertEquals(expected_values[gle.account][1], gle.credit)
+			self.assertEqual(expected_values[gle.account][0], gle.debit)
+			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
 		set_perpetual_inventory(0)
 		
@@ -90,7 +90,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 		pi_lc_value = frappe.db.get_value("Purchase Invoice Item", {"parent": pi.name}, 
 			"landed_cost_voucher_amount")
 			
-		self.assertEquals(pi_lc_value, 50.0)
+		self.assertEqual(pi_lc_value, 50.0)
 
 		last_sle_after_landed_cost = frappe.db.get_value("Stock Ledger Entry", {
 				"voucher_type": pi.doctype,
@@ -116,8 +116,8 @@ class TestLandedCostVoucher(unittest.TestCase):
 		}
 
 		for gle in gl_entries:
-			self.assertEquals(expected_values[gle.account][0], gle.debit)
-			self.assertEquals(expected_values[gle.account][1], gle.credit)
+			self.assertEqual(expected_values[gle.account][0], gle.debit)
+			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
 		set_perpetual_inventory(0)
 		
@@ -137,8 +137,8 @@ class TestLandedCostVoucher(unittest.TestCase):
 		serial_no = frappe.db.get_value("Serial No", "SN001",
 			["warehouse", "purchase_rate"], as_dict=1)
 
-		self.assertEquals(serial_no.purchase_rate - serial_no_rate, 5.0)
-		self.assertEquals(serial_no.warehouse, "_Test Warehouse - _TC")
+		self.assertEqual(serial_no.purchase_rate - serial_no_rate, 5.0)
+		self.assertEqual(serial_no.warehouse, "_Test Warehouse - _TC")
 
 		set_perpetual_inventory(0)
 
@@ -159,8 +159,8 @@ class TestLandedCostVoucher(unittest.TestCase):
 
 		lcv = submit_landed_cost_voucher("Purchase Receipt", pr.name, 123.22)
 		
-		self.assertEquals(lcv.items[0].applicable_charges, 41.07)
-		self.assertEquals(lcv.items[2].applicable_charges, 41.08)		
+		self.assertEqual(lcv.items[0].applicable_charges, 41.07)
+		self.assertEqual(lcv.items[2].applicable_charges, 41.08)		
 		
 		set_perpetual_inventory(0)
 

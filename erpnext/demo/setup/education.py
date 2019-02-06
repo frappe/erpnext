@@ -1,5 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
+from __future__ import unicode_literals
 
 import frappe, json
 from frappe.utils.make_random import get_random
@@ -36,7 +37,8 @@ def setup_item():
 		item = frappe.new_doc('Item')
 		item.update(i)
 		item.min_order_qty = random.randint(10, 30)
-		item.default_warehouse = frappe.get_all('Warehouse', filters={'warehouse_name': item.default_warehouse}, limit=1)[0].name
+		item.item_defaults[0].default_warehouse = frappe.get_all('Warehouse',
+			filters={'warehouse_name': item.item_defaults[0].default_warehouse}, limit=1)[0].name
 		item.insert()
 
 def make_student_applicants():
@@ -161,7 +163,7 @@ def make_assessment_groups():
 
 def get_json_path(doctype):
 		return frappe.get_app_path('erpnext', 'demo', 'data', frappe.scrub(doctype) + '.json')
-		
+
 def weighted_choice(weights):
 	totals = []
 	running_total = 0

@@ -133,8 +133,8 @@ class ShippingRule(Document):
 			return (not separate)
 
 		overlaps = []
-		for i in xrange(0, len(self.conditions)):
-			for j in xrange(i+1, len(self.conditions)):
+		for i in range(0, len(self.conditions)):
+			for j in range(i+1, len(self.conditions)):
 				d1, d2 = self.conditions[i], self.conditions[j]
 				if d1.as_dict() != d2.as_dict():
 					# in our case, to_value can be zero, hence pass the from_value if so

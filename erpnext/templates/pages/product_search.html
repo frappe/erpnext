@@ -9,8 +9,8 @@
 
 <script>
 frappe.ready(function() {
-	var txt = get_url_arg("search");
-	$(".search-results").html("{{ _('Search results for') }}: " + encodeURIComponent(txt));
+	var txt = frappe.utils.get_url_arg("search");
+	$(".search-results").html('{{ _("Search results for") + ": " + html2text(frappe.form_dict.search or "") | e | trim }}');
 	window.search = txt;
 	window.start = 0;
 	window.get_product_list();

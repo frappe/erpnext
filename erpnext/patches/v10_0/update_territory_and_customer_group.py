@@ -1,10 +1,10 @@
+from __future__ import unicode_literals
 import frappe
 from frappe.model.rename_doc import get_fetch_fields
 
 def execute():
 	ignore_doctypes = ["Lead", "Opportunity", "POS Profile", "Tax Rule", "Pricing Rule"]
 	customers = frappe.get_all('Customer', fields=["name", "customer_group"])
-
 	customer_group_fetch = get_fetch_fields('Customer', 'Customer Group', ignore_doctypes)
 
 	batch_size = 1000

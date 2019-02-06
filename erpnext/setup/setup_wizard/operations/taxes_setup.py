@@ -51,7 +51,7 @@ def make_tax_account(company, account_name, tax_rate):
 			}).insert(ignore_permissions=True, ignore_mandatory=True)
 		except frappe.NameError:
 			if frappe.message_log: frappe.message_log.pop()
-			abbr = frappe.db.get_value('Company', company, 'abbr')
+			abbr = frappe.get_cached_value('Company',  company,  'abbr')
 			account = '{0} - {1}'.format(account_name, abbr)
 			return frappe.get_doc('Account', account)
 

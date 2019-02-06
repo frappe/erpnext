@@ -12,8 +12,8 @@ from erpnext.education.api import get_grade
 class TestAssessmentResult(unittest.TestCase):
 	def test_grade(self):
 		grade = get_grade("_Test Grading Scale", 80)
-		self.assertEquals("A", grade)
+		self.assertEqual("A", grade)
 
 		grade = get_grade("_Test Grading Scale", 70)
-		self.assertEquals("B", grade)
+		self.assertEqual("B", grade)
 		

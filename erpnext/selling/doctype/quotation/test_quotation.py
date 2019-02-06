@@ -31,6 +31,26 @@ class TestQuotation(unittest.TestCase):
 
 		self.assertFalse(sales_order.get('payment_schedule'))
 
+	def test_make_sales_order_with_different_currency(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+
+		quotation = frappe.copy_doc(test_records[0])
+		quotation.transaction_date = nowdate()
+		quotation.valid_till = add_months(quotation.transaction_date, 1)
+		quotation.insert()
+		quotation.submit()
+
+		sales_order = make_sales_order(quotation.name)
+		sales_order.currency = "USD"
+		sales_order.conversion_rate = 20.0
+		sales_order.delivery_date = "2019-01-01"
+		sales_order.naming_series = "_T-Quotation-"
+		sales_order.transaction_date = nowdate()
+		sales_order.insert()
+
+		self.assertEquals(sales_order.currency, "USD")
+		self.assertNotEqual(sales_order.currency, quotation.currency)
+
 	def test_make_sales_order(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 
@@ -44,11 +64,11 @@ class TestQuotation(unittest.TestCase):
 
 		sales_order = make_sales_order(quotation.name)
 
-		self.assertEquals(sales_order.doctype, "Sales Order")
-		self.assertEquals(len(sales_order.get("items")), 1)
-		self.assertEquals(sales_order.get("items")[0].doctype, "Sales Order Item")
-		self.assertEquals(sales_order.get("items")[0].prevdoc_docname, quotation.name)
-		self.assertEquals(sales_order.customer, "_Test Customer")
+		self.assertEqual(sales_order.doctype, "Sales Order")
+		self.assertEqual(len(sales_order.get("items")), 1)
+		self.assertEqual(sales_order.get("items")[0].doctype, "Sales Order Item")
+		self.assertEqual(sales_order.get("items")[0].prevdoc_docname, quotation.name)
+		self.assertEqual(sales_order.customer, "_Test Customer")
 
 		sales_order.delivery_date = "2014-01-01"
 		sales_order.naming_series = "_T-Quotation-"
@@ -77,11 +97,11 @@ class TestQuotation(unittest.TestCase):
 
 		sales_order = make_sales_order(quotation.name)
 
-		self.assertEquals(sales_order.doctype, "Sales Order")
-		self.assertEquals(len(sales_order.get("items")), 1)
-		self.assertEquals(sales_order.get("items")[0].doctype, "Sales Order Item")
-		self.assertEquals(sales_order.get("items")[0].prevdoc_docname, quotation.name)
-		self.assertEquals(sales_order.customer, "_Test Customer")
+		self.assertEqual(sales_order.doctype, "Sales Order")
+		self.assertEqual(len(sales_order.get("items")), 1)
+		self.assertEqual(sales_order.get("items")[0].doctype, "Sales Order Item")
+		self.assertEqual(sales_order.get("items")[0].prevdoc_docname, quotation.name)
+		self.assertEqual(sales_order.customer, "_Test Customer")
 
 		sales_order.delivery_date = "2014-01-01"
 		sales_order.naming_series = "_T-Quotation-"
@@ -123,7 +143,7 @@ class TestQuotation(unittest.TestCase):
 		quotation.valid_till = add_months(quotation.transaction_date, 1)
 		quotation.insert()
 
-		self.assertEquals(quotation.get("items")[0].rate, rate_with_margin)
+		self.assertEqual(quotation.get("items")[0].rate, rate_with_margin)
 		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
 		quotation.submit()
 
@@ -134,28 +154,26 @@ class TestQuotation(unittest.TestCase):
 
 		sales_order.insert()
 
-		self.assertEquals(quotation.get("items")[0].rate, rate_with_margin)
+		self.assertEqual(quotation.get("items")[0].rate, rate_with_margin)
 
 		sales_order.submit()
 
 		dn = make_delivery_note(sales_order.name)
-		self.assertEquals(quotation.get("items")[0].rate, rate_with_margin)
+		self.assertEqual(quotation.get("items")[0].rate, rate_with_margin)
 		dn.save()
 
 		si = make_sales_invoice(sales_order.name)
-		self.assertEquals(quotation.get("items")[0].rate, rate_with_margin)
+		self.assertEqual(quotation.get("items")[0].rate, rate_with_margin)
 		si.save()
 
 	def test_create_two_quotations(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		first_item = make_item("_Test Laptop",
-							{"is_stock_item": 1, "expense_account": "_Test Account Cost for Goods Sold - _TC",
-							 "cost_center": "_Test Cost Center - _TC"})
+							{"is_stock_item": 1})
 
 		second_item = make_item("_Test CPU",
-							{"is_stock_item": 1, "expense_account": "_Test Account Cost for Goods Sold - _TC",
-							 "cost_center": "_Test Cost Center - _TC"})
+							{"is_stock_item": 1})
 
 		qo_item1 = [
 			{
