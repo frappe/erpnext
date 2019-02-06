@@ -4,12 +4,14 @@
 from __future__ import unicode_literals
 from itertools import groupby
 from operator import itemgetter
+import json
 import frappe
 from frappe.utils import add_to_date, date_diff, getdate, nowdate
 from erpnext.accounts.report.general_ledger.general_ledger import execute
 
-
-def get(filters= None):
+@frappe.whitelist()
+def get(filters=None):
+	filters = json.loads(filters)
 	timespan = filters.get("timespan")
 	timegrain = filters.get("timegrain")
 	account = filters.get("account")
