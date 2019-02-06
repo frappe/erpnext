@@ -3,10 +3,12 @@
 
 from __future__ import unicode_literals
 import unittest, frappe
+import datetime
 from frappe.utils import flt, nowdate
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.exceptions import InvalidAccountCurrency
 from erpnext.accounts.utils import get_balance_on_voucher
+from six import iteritems
 
 class TestJournalEntry(unittest.TestCase):
 	def test_journal_entry_with_against_jv(self):
@@ -203,6 +205,30 @@ class TestJournalEntry(unittest.TestCase):
 
 		self.assertEqual(jv.inter_company_journal_entry_reference, "")
 		self.assertEqual(jv1.inter_company_journal_entry_reference, "")
+
+	def test_jv_reference_no_in_gle(self):
+		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 500, save=False)
+		jv.append("accounts", frappe.copy_doc(jv.accounts[1]).update({"account": "_Test Account Discount - _TC", "idx": 3}))
+		jv.get("accounts")[0].update({"cheque_no": "1", "cheque_date": "2019-01-01", "debit_in_account_currency": 1000})
+		jv.get("accounts")[1].update({"cheque_no": "2", "cheque_date": "2019-01-02"})
+		jv.cheque_no = "3"
+		jv.cheque_date = "2019-01-03"
+		jv.insert()
+		jv.submit()
+
+		expected_account_values = {
+			"_Test Cash - _TC": {"reference_no": "1", "reference_date": datetime.date(2019, 1, 1)},
+			"_Test Bank - _TC": {"reference_no": "2", "reference_date": datetime.date(2019, 1, 2)},
+			"_Test Account Discount - _TC": {"reference_no": "3", "reference_date": datetime.date(2019, 1, 3)}
+		}
+
+		gle_list = frappe.db.sql("""select account, reference_no, reference_date from `tabGL Entry`
+			where voucher_type = 'Journal Entry' and voucher_no = %s""", jv.name, as_dict=1)
+		for gle in gle_list:
+			expected_values = expected_account_values.get(gle.account)
+			self.assertTrue(expected_values)
+			for field, value in iteritems(expected_values):
+				self.assertEqual(gle.get(field), value)
 
 	def test_jv_for_enable_allow_cost_center_in_entry_of_bs_account(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
