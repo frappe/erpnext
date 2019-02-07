@@ -1,7 +1,6 @@
 import frappe, json, os
 from frappe.utils import flt
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
-from frappe.contacts.doctype.address.address import get_default_address
 from frappe import _
 
 def update_itemised_tax_data(doc):
@@ -84,7 +83,7 @@ def prepare_invoice(invoice):
 		invoice["transmission_format_code"] = "FPA12"
 	else:
 		invoice["transmission_format_code"] = "FPR12"
-	
+
 
 	items = frappe.get_all("Sales Invoice Item", filters={"parent":invoice.name}, fields=["*"], order_by="idx")
 	taxes = frappe.get_all("Sales Taxes and Charges", filters={"parent":invoice.name}, fields=["*"], order_by="idx")
@@ -130,7 +129,7 @@ def download_zip(files, output_filename):
 
 	input_files = [filename for filename in files]
 	output_path = frappe.get_site_path('private', 'files', output_filename)
-	
+
 	with ZipFile(output_path, 'w') as output_zip:
 		for input_file in input_files:
 			output_zip.write(input_file, arcname=os.path.basename(input_file))
@@ -165,14 +164,14 @@ def get_invoice_summary(items, taxes):
 	for tax in taxes:
 		#Include only VAT charges.
 		if tax.charge_type == "Actual":
-			continue 
+			continue
 
 		#Check item tax rates if tax rate is zero.
 		if tax.rate == 0:
 			for item in items:
 				item_tax_rate = json.loads(item.item_tax_rate)
 				if tax.account_head in item_tax_rate:
-					key = str(item_tax_rate[tax.account_head]) 
+					key = str(item_tax_rate[tax.account_head])
 					summary_data.setdefault(key, {"tax_amount": 0.0, "taxable_amount": 0.0, "tax_exemption_reason": "", "tax_exemption_law": ""})
 					summary_data[key]["tax_amount"] += item.tax_amount
 					summary_data[key]["taxable_amount"] += item.net_amount
@@ -181,7 +180,7 @@ def get_invoice_summary(items, taxes):
 						summary_data[key]["tax_exemption_law"] = tax.tax_exemption_law
 
 			if summary_data == {}: #Zero VAT has not been set on any item. zero vat from tax row.
-				summary_data.setdefault("0.0", {"tax_amount": 0.0, "taxable_amount": tax.total, 
+				summary_data.setdefault("0.0", {"tax_amount": 0.0, "taxable_amount": tax.total,
 					"tax_exemption_reason": tax.tax_exemption_reason, "tax_exemption_law": tax.tax_exemption_law})
 
 		else:
