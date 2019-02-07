@@ -42,7 +42,7 @@ def export_invoices(filters=None):
 			invoice_number=extract_doc_number(invoice)
 		)
 		xml_filename = frappe.get_site_path("private", "files", xml_filename)
-		
+
 		with open(xml_filename, "wb") as xml_file:
 			xml_file.write(invoice_xml)
 			saved_xmls.append(xml_filename)
