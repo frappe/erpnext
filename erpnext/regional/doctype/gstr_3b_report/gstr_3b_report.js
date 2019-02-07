@@ -16,7 +16,7 @@ frappe.ui.form.on('GSTR 3B Report', {
 			});
 			frm.add_custom_button(__('View Form'), function() {
 				frappe.call({
-					"method" : "erpnext.regional.gstr_3b_report.gstr_3b_report.view_report",
+					"method" : "erpnext.regional.doctype.gstr_3b_report.gstr_3b_report.view_report",
 					"args" : {
 						name : frm.doc.name,
 					},

@@ -304,7 +304,7 @@ def get_inter_state_supplies(state, month, year):
 		s.docstatus = 1 and month(s.posting_date) = %s and year(s.posting_date) = %s and
 		a.state <> %s and
 		s.gst_category in ('Unregistered', 'Registered Composition')
-		group by gst_category""", (month_no, year, state), as_dict=1)
+		group by s.gst_category, a.state""", (month_no, year, state), as_dict=1)
 
 	inter_state_supply_details = {}
 
