@@ -11,22 +11,33 @@ def get_data():
 					"type": "doctype",
 					"name": "Work Order",
 					"description": _("Orders released for production."),
+					"onboard": 1,
+					"dependencies": ["Item", "BOM"]
 				},
 				{
 					"type": "doctype",
 					"name": "Production Plan",
 					"description": _("Generate Material Requests (MRP) and Work Orders."),
+					"onboard": 1,
+					"dependencies": ["Item", "BOM"]
 				},
 				{
 					"type": "doctype",
 					"name": "Stock Entry",
+					"onboard": 1,
+					"dependencies": ["Item"]
 				},
 				{
 					"type": "doctype",
 					"name": "Timesheet",
 					"description": _("Time Sheet for manufacturing."),
+					"onboard": 1,
+					"dependencies": ["Activity Type"]
 				},
-
+				{
+					"type": "doctype",
+					"name": "Job Card"
+				}
 			]
 		},
 		{
@@ -34,9 +45,17 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Item",
+					"description": _("All Products or Services."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "BOM",
 					"description": _("Bill of Materials (BOM)"),
-					"label": _("Bill of Materials")
+					"label": _("Bill of Materials"),
+					"onboard": 1,
+					"dependencies": ["Item"]
 				},
 				{
 					"type": "doctype",
@@ -45,12 +64,10 @@ def get_data():
 					"label": _("BOM Browser"),
 					"description": _("Tree of Bill of Materials"),
 					"link": "Tree/BOM",
+					"onboard": 1,
+					"dependencies": ["Item"]
 				},
-				{
-					"type": "doctype",
-					"name": "Item",
-					"description": _("All Products or Services."),
-				},
+
 				{
 					"type": "doctype",
 					"name": "Workstation",
@@ -61,6 +78,10 @@ def get_data():
 					"name": "Operation",
 					"description": _("Details of the operations carried out."),
 				},
+				{
+					"type": "doctype",
+					"name": "Routing"
+				}
 
 			]
 		},

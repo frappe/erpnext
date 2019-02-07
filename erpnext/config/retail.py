@@ -7,26 +7,29 @@ def get_data():
             "label": _("Retail Operations"),
             "items": [
                 {
+                    "type": "doctype",
+                    "name": "POS Profile",
+                    "label": _("Point-of-Sale Profile"),
+                    "description": _("Setup default values for POS Invoices"),
+					"onboard": 1,
+                },
+                {
                     "type": "page",
                     "name": "pos",
                     "label": _("POS"),
-                    "description": _("Point of Sale")
+                    "description": _("Point of Sale"),
+					"onboard": 1,
+					"dependencies": ["POS Profile"]
                 },
                 {
                     "type": "doctype",
                     "name": "Cashier Closing",
-                    "description": _("Cashier Closing")
+                    "description": _("Cashier Closing"),
                 },
                 {
                     "type": "doctype",
                     "name": "POS Settings",
                     "description": _("Setup mode of POS (Online / Offline)")
-                },
-                {
-                    "type": "doctype",
-                    "name": "POS Profile",
-                    "label": _("Point-of-Sale Profile"),
-                    "description": _("Setup default values for POS Invoices")
                 },
                 {
                     "type": "doctype",

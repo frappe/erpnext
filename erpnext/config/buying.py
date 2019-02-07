@@ -4,6 +4,39 @@ from frappe import _
 def get_data():
 	return [
 		{
+			"label": _("Purchasing"),
+			"icon": "fa fa-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Purchase Order",
+					"onboard": 1,
+					"dependencies": ["Item", "Supplier"],
+					"description": _("Purchase Orders given to Suppliers."),
+				},
+				{
+					"type": "doctype",
+					"name": "Material Request",
+					"onboard": 1,
+					"dependencies": ["Item"],
+					"description": _("Request for purchase."),
+				},
+				{
+					"type": "doctype",
+					"name": "Request for Quotation",
+					"onboard": 1,
+					"dependencies": ["Item", "Supplier"],
+					"description": _("Request for quotation."),
+				},
+				{
+					"type": "doctype",
+					"name": "Supplier Quotation",
+					"dependencies": ["Item", "Supplier"],
+					"description": _("Quotations received from Suppliers."),
+				},
+			]
+		},
+		{
 			"label": _("Items and Pricing"),
 			"items": [
 				{
@@ -45,35 +78,25 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Purchasing"),
-			"icon": "fa fa-star",
+			"label": _("Setup"),
+			"icon": "fa fa-cog",
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Purchase Order",
+					"name": "Buying Settings",
 					"onboard": 1,
-					"dependencies": ["Item", "Supplier"],
-					"description": _("Purchase Orders given to Suppliers."),
+					"description": _("Default settings for buying transactions.")
 				},
 				{
 					"type": "doctype",
-					"name": "Material Request",
-					"onboard": 1,
-					"dependencies": ["Item"],
-					"description": _("Request for purchase."),
+					"name": "Purchase Taxes and Charges Template",
+					"description": _("Tax template for buying transactions.")
 				},
 				{
 					"type": "doctype",
-					"name": "Request for Quotation",
-					"onboard": 1,
-					"dependencies": ["Item", "Supplier"],
-					"description": _("Request for quotation."),
-				},
-				{
-					"type": "doctype",
-					"name": "Supplier Quotation",
-					"dependencies": ["Item", "Supplier"],
-					"description": _("Quotations received from Suppliers."),
+					"name":"Terms and Conditions",
+					"label": _("Terms and Conditions Template"),
+					"description": _("Template of terms or contract.")
 				},
 			]
 		},
@@ -105,30 +128,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Setup"),
-			"icon": "fa fa-cog",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Buying Settings",
-					"onboard": 1,
-					"description": _("Default settings for buying transactions.")
-				},
-				{
-					"type": "doctype",
-					"name":"Terms and Conditions",
-					"label": _("Terms and Conditions Template"),
-					"description": _("Template of terms or contract.")
-				},
-				{
-					"type": "doctype",
-					"name": "Purchase Taxes and Charges Template",
-					"description": _("Tax template for buying transactions.")
-				},
-			]
-		},
-		{
-			"label": _("Analytics"),
+			"label": _("Key Reports"),
 			"icon": "fa fa-table",
 			"items": [
 				{
@@ -150,6 +150,13 @@ def get_data():
 					"is_query_report": True,
 					"name": "Purchase Order Trends",
 					"reference_doctype": "Purchase Order",
+					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Requested Items To Be Ordered",
+					"reference_doctype": "Material Request",
 					"onboard": 1,
 				},
 			]
@@ -189,13 +196,6 @@ def get_data():
 					"is_query_report": True,
 					"name": "Items To Be Requested",
 					"reference_doctype": "Item",
-					"onboard": 1,
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Requested Items To Be Ordered",
-					"reference_doctype": "Material Request",
 					"onboard": 1,
 				},
 				{
