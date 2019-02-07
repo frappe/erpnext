@@ -14,7 +14,6 @@ def setup(company=None, patch=True):
     setup_report()
 
 def make_custom_fields(update=True):
-    fiscal_code_field = dict(fieldname='fiscal_code', label='Fiscal Code', fieldtype='Data', insert_after='tax_id', print_hide=1)
     invoice_item_fields = [
         dict(fieldname='tax_rate', label='Tax Rate',
 			fieldtype='Float', insert_after='description',
@@ -29,26 +28,27 @@ def make_custom_fields(update=True):
 
     custom_fields = {
         'Company': [
-            fiscal_code_field,
+            dict(fieldname='fiscal_code', label='Fiscal Code', fieldtype='Data', insert_after='tax_id', print_hide=1),
             dict(fieldname='fiscal_regime', label='Fiscal Regime',
 			    fieldtype='Select', insert_after='fiscal_code', print_hide=1,
                 options="\n".join(map(lambda x: x.decode('utf-8'), fiscal_regimes))),
             dict(fieldname='vat_collectability', label='VAT Collectability',
 			    fieldtype='Select', insert_after='fiscal_regime', print_hide=1,
                 options="\n".join(map(lambda x: x.decode('utf-8'), vat_collectability_options))),
+            dict(fieldname='cb_registration_details_1', fieldtype='Column Break', insert_after='delete_company_transactions', print_hide=1),
             dict(fieldname='registrar_office_province', label='Province of the Registrar Office',
-			    fieldtype='Data', insert_after='registration_details', print_hide=1, length=2),
+			    fieldtype='Data', insert_after='cb_registration_details_1', print_hide=1, length=2),
             dict(fieldname='registration_number', label='Registration Number',
 			    fieldtype='Data', insert_after='registrar_office_province', print_hide=1, length=20),
             dict(fieldname='share_capital_amount', label='Share Capital',
-			    fieldtype='Data', insert_after='registration_number', print_hide=1,
+			    fieldtype='Currency', insert_after='registration_number', print_hide=1,
                 description=_('Applicable if the company is SpA, SApA or SRL')),
             dict(fieldname='no_of_members', label='No of Members',
 			    fieldtype='Select', insert_after='share_capital_amount', print_hide=1,
                 options="\nSU-Socio Unico\nSM-Piu Soci", description=_("Applicable if the company is a limited liability company")),
             dict(fieldname='liquidation_state', label='Liquidation State',
 			    fieldtype='Select', insert_after='no_of_members', print_hide=1,
-                options="\nLS-In Liquidazione\nLN-Non in Liquidazione"),
+                options="\nLS-In Liquidazione\nLN-Non in Liquidazione")
         ],
         'Sales Taxes and Charges': [
             dict(fieldname='tax_exemption_reason', label='Tax Exemption Reason',
@@ -60,7 +60,7 @@ def make_custom_fields(update=True):
                 depends_on='eval:doc.charge_type!="Actual" && doc.rate==0.0')
         ],
         'Customer': [
-            fiscal_code_field,
+            dict(fieldname='fiscal_code', label='Fiscal Code', fieldtype='Data', insert_after='tax_id', print_hide=1),
             dict(fieldname='recipient_code', label='Recipient Code',
                 fieldtype='Data', insert_after='fiscal_code', print_hide=1, default="0000000"),
             dict(fieldname='pec', label='Recipient PEC',
