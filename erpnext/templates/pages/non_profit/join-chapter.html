@@ -15,7 +15,7 @@
 		{{ chapter_button() }}
 		<p><a href="">Leave Chapter</a></p>
 	{% else %}
-		{% if frappe.local.request.method=='POST' %}
+		{% if request.method=='POST' %}
 			<p>Welcome to chapter {{ chapter.name }}!</p>
 			{{ chapter_button() }}
 		{% else %}
