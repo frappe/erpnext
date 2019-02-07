@@ -9,65 +9,31 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Employee",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Employee Attendance Tool",
-					"hide_count": True
+					"hide_count": True,
+					"onboard": 1,
+					"dependencies": ["Employee"]
 				},
 				{
 					"type": "doctype",
 					"name": "Attendance",
+					"onboard": 1,
+					"dependencies": ["Employee"]
 				},
 				{
 					"type": "doctype",
 					"name": "Attendance Request",
+					"dependencies": ["Employee"]
 				},
 				{
 					"type": "doctype",
 					"name": "Upload Attendance",
-					"hide_count": True
-				}
-			]
-		},
-		{
-			"label": _("Leaves and Holiday"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Leave Application",
-				},
-				{
-					"type": "doctype",
-					"name": "Leave Allocation",
-				},
-				{
-					"type": "doctype",
-					"name": "Compensatory Leave Request",
-				},
-				{
-					"type": "doctype",
-					"name": "Leave Encashment",
-				},
-				{
-					"type": "doctype",
-					"name": "Leave Period",
-				},
-				{
-					"type": "doctype",
-					"name": "Leave Policy",
-				},
-				{
-					"type": "doctype",
-					"name":"Leave Type",
-				},
-				{
-					"type": "doctype",
-					"name": "Holiday List",
-				},
-				{
-					"type": "doctype",
-					"name": "Leave Block List",
+					"hide_count": True,
+					"dependencies": ["Employee"]
 				},
 			]
 		},
@@ -76,23 +42,34 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Salary Structure",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Salary Structure Assignment",
+					"onboard": 1,
+					"dependencies": ["Salary Structure", "Employee"],
 				},
 				{
 					"type": "doctype",
 					"name": "Salary Slip",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
-					"name": "Payroll Entry"
+					"name": "Payroll Entry",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Employee Benefit Application",
+					"dependencies": ["Employee"]
 				},
 				{
 					"type": "doctype",
 					"name": "Employee Benefit Claim",
+					"dependencies": ["Employee"]
 				},
 				{
 					"type": "doctype",
@@ -101,24 +78,23 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Employee Tax Exemption Declaration",
+					"dependencies": ["Employee"]
 				},
 				{
 					"type": "doctype",
 					"name": "Employee Tax Exemption Proof Submission",
+					"dependencies": ["Employee"]
 				},
 				{
 					"type": "doctype",
 					"name": "Employee Incentive",
+					"dependencies": ["Employee"]
 				},
 				{
 					"type": "doctype",
 					"name": "Retention Bonus",
+					"dependencies": ["Employee"]
 				},
-			]
-		},
-		{
-			"label": _("Payroll Setup"),
-			"items": [
 				{
 					"type": "doctype",
 					"name": "Payroll Period",
@@ -126,172 +102,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Salary Component",
-				},
-				{
-					"type": "doctype",
-					"name": "Salary Structure",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Tax Exemption Category",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Tax Exemption Sub Category"
-				}
-			]
-		},
-		{
-			"label": _("Travel and Expense Claim"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Employee Advance",
-				},
-				{
-					"type": "doctype",
-					"name": "Expense Claim",
-				},
-				{
-					"type": "doctype",
-					"name": "Expense Claim Type",
-				},
-				{
-					"type": "doctype",
-					"name": "Travel Request",
-				},
-			]
-		},
-		{
-			"label": _("Appraisals"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Appraisal",
-				},
-				{
-					"type": "doctype",
-					"name": "Appraisal Template",
-				},
-				{
-					"type": "page",
-					"name": "team-updates",
-					"label": _("Team Updates")
-				},
-			]
-		},
-		{
-			"label": _("Loan Management"),
-			"icon": "icon-list",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Loan Type",
-				},
-				{
-					"type": "doctype",
-					"name": "Loan Application",
-				},
-				{
-					"type": "doctype",
-					"name": "Loan"
-				},
-			]
-		},
-		{
-			"label": _("Employee Lifecycle"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Employee Transfer",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Promotion",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Separation",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Onboarding"
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Separation Template",
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Onboarding Template"
-				}
-			]
-		},
-		{
-			"label": _("Recruitment"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Job Applicant",
-				},
-				{
-					"type": "doctype",
-					"name": "Job Opening",
-				},
-				{
-					"type": "doctype",
-					"name": "Job Offer",
-				},
-			]
-		},
-		{
-			"label": _("Training"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Training Program"
-				},
-				{
-					"type": "doctype",
-					"name": "Training Event"
-				},
-				{
-					"type": "doctype",
-					"name": "Training Result"
-				},
-				{
-					"type": "doctype",
-					"name": "Training Feedback"
-				},
-			]
-		},
-		{
-			"label": _("Shift Management"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Shift Type",
-				},
-				{
-					"type": "doctype",
-					"name": "Shift Request",
-				},
-				{
-					"type": "doctype",
-					"name": "Shift Assignment",
-				}
-			]
-		},
-		{
-			"label": _("Fleet Management"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Vehicle"
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle Log"
 				},
 			]
 		},
@@ -335,6 +145,157 @@ def get_data():
 					"type": "doctype",
 					"name": "Staffing Plan",
 				}
+			]
+		},
+
+		{
+			"label": _("Leaves"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Leave Application",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Allocation",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Compensatory Leave Request",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Encashment",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Period",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name":"Leave Type",
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Policy",
+					"dependencies": ["Leave Type"]
+				},
+				{
+					"type": "doctype",
+					"name": "Holiday List",
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Block List",
+				},
+			]
+		},
+		{
+			"label": _("Recruitment and Training"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Job Applicant",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Job Opening",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Job Offer",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Training Program"
+				},
+				{
+					"type": "doctype",
+					"name": "Training Event"
+				},
+				{
+					"type": "doctype",
+					"name": "Training Result"
+				},
+				{
+					"type": "doctype",
+					"name": "Training Feedback"
+				},
+			]
+		},
+		{
+			"label": _("Employee Lifecycle"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Employee Transfer",
+					"dependencies": ["Employee"],
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Promotion",
+					"dependencies": ["Employee"],
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Separation",
+					"dependencies": ["Employee"],
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Onboarding",
+					"dependencies": ["Job Applicant"],
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Separation Template",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Onboarding Template",
+					"dependencies": ["Employee"]
+				}
+			]
+		},
+		{
+			"label": _("Appraisals, Expense Claims and Loans"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Appraisal",
+				},
+				{
+					"type": "doctype",
+					"name": "Appraisal Template",
+				},
+				{
+					"type": "page",
+					"name": "team-updates",
+					"label": _("Team Updates")
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Advance",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Loan Type",
+				},
+				{
+					"type": "doctype",
+					"name": "Loan Application",
+					"dependencies": ["Employee"]
+				},
 			]
 		},
 		{
@@ -382,33 +343,6 @@ def get_data():
 					"name": "Vehicle Expenses",
 					"doctype": "Vehicle"
 				},
-
-			]
-		},
-		{
-			"label": _("Help"),
-			"icon": "fa fa-facetime-video",
-			"items": [
-				{
-					"type": "help",
-					"label": _("Setting up Employees"),
-					"youtube_id": "USfIUdZlUhw"
-				},
-				{
-					"type": "help",
-					"label": _("Leave Management"),
-					"youtube_id": "fc0p_AXebc8"
-				},
-				{
-					"type": "help",
-					"label": _("Expense Claims"),
-					"youtube_id": "5SZHJF--ZFY"
-				}
-			]
-		},
-		{
-			"label": _("Analytics"),
-			"items": [
 				{
 					"type": "report",
 					"is_query_report": True,
@@ -416,5 +350,51 @@ def get_data():
 					"doctype": "Employee"
 				},
 			]
-		}
+		},
+		{
+			"label": _("Shifts and Fleet Management"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Shift Type",
+				},
+				{
+					"type": "doctype",
+					"name": "Shift Request",
+				},
+				{
+					"type": "doctype",
+					"name": "Shift Assignment",
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle"
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Log"
+				},
+			]
+		},
+		# {
+		# 	"label": _("Help"),
+		# 	"icon": "fa fa-facetime-video",
+		# 	"items": [
+		# 		{
+		# 			"type": "help",
+		# 			"label": _("Setting up Employees"),
+		# 			"youtube_id": "USfIUdZlUhw"
+		# 		},
+		# 		{
+		# 			"type": "help",
+		# 			"label": _("Leave Management"),
+		# 			"youtube_id": "fc0p_AXebc8"
+		# 		},
+		# 		{
+		# 			"type": "help",
+		# 			"label": _("Expense Claims"),
+		# 			"youtube_id": "5SZHJF--ZFY"
+		# 		}
+		# 	]
+		# },
 	]
