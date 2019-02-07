@@ -13,7 +13,8 @@ def get_data():
 					"name": "Global Defaults",
 					"label": _("Global Settings"),
 					"description": _("Set Default Values like Company, Currency, Current Fiscal Year, etc."),
-					"hide_count": True
+					"hide_count": True,
+					"onboard": 1,
 				}
 			]
 		},
@@ -24,7 +25,8 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Letter Head",
-					"description": _("Letter Heads for print templates.")
+					"description": _("Letter Heads for print templates."),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
