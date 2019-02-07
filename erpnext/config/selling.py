@@ -45,16 +45,6 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Address And Contacts",
-					"label": _("Sales Partner Addresses And Contacts"),
-					"doctype": "Address",
-					"route_options": {
-						"party_type": "Sales Partner"
-					}
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
 					"name": "Territory Target Variance (Item Group-Wise)",
 					"route": "query-report/Territory Target Variance Item Group-Wise",
 					"doctype": "Territory",
@@ -80,6 +70,20 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Item Price",
+					"description": _("Multiple Item prices."),
+					"route": "Report/Item Price",
+					"dependencies": ["Item", "Price List"],
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Price List",
+					"description": _("Price List master."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Item Group",
 					"icon": "fa fa-sitemap",
 					"label": _("Item Group"),
@@ -92,19 +96,6 @@ def get_data():
 					"name": "Product Bundle",
 					"description": _("Bundle items at time of sale."),
 					"dependencies": ["Item"],
-				},
-				{
-					"type": "doctype",
-					"name": "Price List",
-					"description": _("Price List master."),
-					"dependencies": ["Item"],
-				},
-				{
-					"type": "doctype",
-					"name": "Item Price",
-					"description": _("Multiple Item prices."),
-					"route": "Report/Item Price",
-					"dependencies": ["Item", "Price List"],
 				},
 				{
 					"type": "doctype",
@@ -132,26 +123,16 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Campaign",
-					"description": _("Sales campaigns."),
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Industry Type",
-					"description": _("Track Leads by Industry Type."),
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
 					"name":"Terms and Conditions",
 					"label": _("Terms and Conditions Template"),
-					"description": _("Template of terms or contract.")
+					"description": _("Template of terms or contract."),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Sales Taxes and Charges Template",
-					"description": _("Tax template for selling transactions.")
+					"description": _("Tax template for selling transactions."),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
@@ -184,10 +165,15 @@ def get_data():
 					"link": "Tree/Territory",
 					"description": _("Manage Territory Tree."),
 				},
+				{
+					"type": "doctype",
+					"name": "Campaign",
+					"description": _("Sales campaigns."),
+				},
 			]
 		},
 		{
-			"label": _("Analytics"),
+			"label": _("Key Reports"),
 			"icon": "fa fa-table",
 			"items": [
 				{
@@ -210,6 +196,30 @@ def get_data():
 					"name": "Customer Acquisition and Loyalty",
 					"doctype": "Customer",
 					"icon": "fa fa-bar-chart",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Inactive Customers",
+					"doctype": "Sales Order"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Ordered Items To Be Delivered",
+					"doctype": "Sales Order"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Person-wise Transaction Summary",
+					"doctype": "Sales Order"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Item-wise Sales History",
+					"doctype": "Item"
 				},
 				{
 					"type": "report",
@@ -248,32 +258,8 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Ordered Items To Be Delivered",
-					"doctype": "Sales Order"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Sales Person-wise Transaction Summary",
-					"doctype": "Sales Order"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Item-wise Sales History",
-					"doctype": "Item"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
 					"name": "BOM Search",
 					"doctype": "BOM"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Inactive Customers",
-					"doctype": "Sales Order"
 				},
 				{
 					"type": "report",

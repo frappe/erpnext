@@ -44,80 +44,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Support"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Issue",
-					"description": _("Support queries from customers."),
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Communication",
-					"description": _("Communication log."),
-				},
-				{
-					"type": "doctype",
-					"name": "Warranty Claim",
-					"description": _("Warranty Claim against Serial No."),
-				},
-				{
-					"type": "doctype",
-					"name": "Serial No",
-					"description": _("Single unit of an Item."),
-				},
-				{
-					"type": "page",
-					"name": "support-analytics",
-					"label": _("Support Analytics"),
-					"icon": "fa fa-bar-chart"
-				},
-				{
-					"type": "report",
-					"name": "Minutes to First Response for Issues",
-					"doctype": "Issue",
-					"is_query_report": True,
-					"dependencies": ["Issue"],
-				},
-				{
-					"type": "report",
-					"name": "Support Hours",
-					"doctype": "Issue",
-					"is_query_report": True,
-					"dependencies": ["Issue"]
-				},
-			]
-		},
-		{
-			"label": _("Maintenance"),
-			"icon": "fa fa-star",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Maintenance Schedule",
-					"description": _("Plan for maintenance visits."),
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Maintenance Visit",
-					"description": _("Visit report for maintenance call."),
-				},
-				{
-					"type": "report",
-					"name": "Maintenance Schedules",
-					"is_query_report": True,
-					"doctype": "Maintenance Schedule"
-				},
-				{
-					"type": "doctype",
-					"name": "Warranty Claim",
-					"description": _("Warranty Claim against Serial No."),
-				},
-			]
-		},
-		{
 			"label": _("Reports"),
 			"icon": "fa fa-list",
 			"items": [
@@ -230,6 +156,80 @@ def get_data():
 					"name": "SMS Settings",
 					"description": _("Setup SMS gateway settings")
 				}
+			]
+		},
+		{
+			"label": _("Support"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Issue",
+					"description": _("Support queries from customers."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Communication",
+					"description": _("Communication log."),
+				},
+				{
+					"type": "doctype",
+					"name": "Warranty Claim",
+					"description": _("Warranty Claim against Serial No."),
+				},
+				{
+					"type": "doctype",
+					"name": "Serial No",
+					"description": _("Single unit of an Item."),
+				},
+				{
+					"type": "page",
+					"name": "support-analytics",
+					"label": _("Support Analytics"),
+					"icon": "fa fa-bar-chart"
+				},
+				{
+					"type": "report",
+					"name": "Minutes to First Response for Issues",
+					"doctype": "Issue",
+					"is_query_report": True,
+					"dependencies": ["Issue"],
+				},
+				{
+					"type": "report",
+					"name": "Support Hours",
+					"doctype": "Issue",
+					"is_query_report": True,
+					"dependencies": ["Issue"]
+				},
+			]
+		},
+		{
+			"label": _("Maintenance"),
+			"icon": "fa fa-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Maintenance Schedule",
+					"description": _("Plan for maintenance visits."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Maintenance Visit",
+					"description": _("Visit report for maintenance call."),
+				},
+				{
+					"type": "report",
+					"name": "Maintenance Schedules",
+					"is_query_report": True,
+					"doctype": "Maintenance Schedule"
+				},
+				{
+					"type": "doctype",
+					"name": "Warranty Claim",
+					"description": _("Warranty Claim against Serial No."),
+				},
 			]
 		},
 		# {

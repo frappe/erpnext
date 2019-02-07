@@ -36,7 +36,7 @@ def get_data():
 					"name": "Account",
 					"icon": "fa fa-sitemap",
 					"label": _("Chart of Accounts"),
-					"route": "Tree/Account",
+					"route": "#Tree/Account",
 					"description": _("Tree of financial accounts."),
 					"onboard": 1,
 				},
@@ -113,11 +113,6 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Opening Invoice Creation Tool",
-					"description": _("Create Opening Sales and Purchase Invoices")
-				},
-				{
-					"type": "doctype",
 					"name": "Accounts Settings",
 					"description": _("Default settings for accounting transactions.")
 				},
@@ -163,7 +158,12 @@ def get_data():
 					"name": "C-Form",
 					"description": _("C-Form records"),
 					"country": "India"
-				}
+				},
+				{
+					"type": "doctype",
+					"name": "Cheque Print Template",
+					"description": _("Setup cheque dimensions for printing")
+				},
 			]
 		},
 		{
@@ -225,6 +225,34 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"label": _("Bank"),
+					"name": "Bank",
+				},
+				{
+					"type": "doctype",
+					"label": _("Bank Account"),
+					"name": "Bank Account",
+				},
+				{
+					"type": "doctype",
+					"label": _("Bank Statement Transaction Entry List"),
+					"name": "Bank Statement Transaction Entry",
+					"route": "#List/Bank Statement Transaction Entry",
+				},
+				{
+					"type": "doctype",
+					"label": _("Bank Statement Transaction Entry Report"),
+					"name": "Bank Statement Transaction Entry",
+					"route": "#Report/Bank Statement Transaction Entry",
+				},
+				{
+					"type": "doctype",
+					"label": _("Bank Statement Settings"),
+					"name": "Bank Statement Settings",
+				},
+
+				{
+					"type": "doctype",
 					"label": _("Update Bank Transaction Dates"),
 					"name": "Bank Reconciliation",
 					"description": _("Update bank payment dates with journals.")
@@ -251,6 +279,40 @@ def get_data():
 					"type": "doctype",
 					"name": "Bank Guarantee",
 					"doctype": "Bank Guarantee"
+				},
+			]
+		},
+		{
+			"label": _("Cost Center and Budgeting"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Cost Center",
+					"icon": "fa fa-sitemap",
+					"label": _("Chart of Cost Centers"),
+					"route": "#Tree/Cost Center",
+					"description": _("Tree of financial Cost Centers."),
+				},
+				{
+					"type": "doctype",
+					"name": "Budget",
+					"description": _("Define budget for a financial year.")
+				},
+				{
+					"type": "report",
+					"name": "Budget Variance Report",
+					"is_query_report": True,
+					"doctype": "Cost Center"
+				},
+				{
+					"type": "doctype",
+					"name": "Monthly Distribution",
+					"description": _("Seasonality for setting budgets, targets etc.")
+				},
+				{
+					"type": "doctype",
+					"name": "Period Closing Voucher",
+					"description": _("Close Balance Sheet and book Profit or Loss.")
 				},
 			]
 		},
@@ -290,42 +352,25 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Cost Center and Budgeting"),
+			"label": _("Subscription Management"),
+			"icon": "fa fa-microchip ",
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Cost Center",
-					"icon": "fa fa-sitemap",
-					"label": _("Chart of Cost Centers"),
-					"route": "Tree/Cost Center",
-					"description": _("Tree of financial Cost Centers."),
+					"name": "Subscriber",
 				},
 				{
 					"type": "doctype",
-					"name": "Budget",
-					"description": _("Define budget for a financial year.")
-				},
-				{
-					"type": "report",
-					"name": "Budget Variance Report",
-					"is_query_report": True,
-					"doctype": "Cost Center"
+					"name": "Subscription Plan",
 				},
 				{
 					"type": "doctype",
-					"name": "Monthly Distribution",
-					"description": _("Seasonality for setting budgets, targets etc.")
+					"name": "Subscription"
 				},
 				{
 					"type": "doctype",
-					"name": "Period Closing Voucher",
-					"description": _("Close Balance Sheet and book Profit or Loss.")
-				},
-				{
-					"type": "doctype",
-					"name": "Cheque Print Template",
-					"description": _("Setup cheque dimensions for printing")
-				},
+					"name": "Subscription Settings"
+				}
 			]
 		},
 		{
@@ -542,37 +587,10 @@ def get_data():
 		]
 	}
 
-	subscriptions = {
-		"label": _("Subscription Management"),
-		"icon": "fa fa-microchip ",
-		"items": [
-			{
-				"type": "doctype",
-				"name": "Subscriber",
-			},
-			{
-				"type": "doctype",
-				"name": "Subscription Plan",
-			},
-			{
-				"type": "doctype",
-				"name": "Subscription"
-			},
-			{
-				"type": "doctype",
-				"name": "Subscription Settings"
-			}
-		]
-	}
-
 
 	countries = frappe.get_all("Company", fields="country")
 	countries = [country["country"] for country in countries]
 	if "India" in countries:
 		config.insert(7, gst)
 	domains = frappe.get_active_domains()
-	if "Services" in domains:
-		config.insert(5, subscriptions)
-	else:
-		config.insert(7, subscriptions)
 	return config

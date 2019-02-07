@@ -30,6 +30,10 @@ def get_data():
 					"onboard": 1,
 					"dependencies": ["Item"],
 				},
+				{
+					"type": "doctype",
+					"name": "Delivery Trip"
+				},
 			]
 		},
 		{
@@ -79,6 +83,41 @@ def get_data():
 					"doctype": "Item",
 					"dependencies": ["Item"],
 				}
+			]
+		},
+		{
+			"label": _("Setup"),
+			"icon": "fa fa-cog",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Stock Settings",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Warehouse",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "UOM",
+					"label": _("Unit of Measure") + " (UOM)",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Brand",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Item Attribute",
+				},
+				{
+					"type": "doctype",
+					"name": "Item Variant Settings",
+				},
 			]
 		},
 		{
@@ -166,21 +205,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Fulfilment"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Delivery Note",
-					"description": _("Delivery Trip service tours to customers."),
-					"onboard": 1
-				},
-				{
-					"type": "doctype",
-					"name": "Delivery Trip"
-				},
-			]
-		},
-		{
 			"label": _("Tools"),
 			"icon": "fa fa-wrench",
 			"items": [
@@ -191,61 +215,26 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Landed Cost Voucher",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Packing Slip",
 					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Quality Inspection",
-					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Quality Inspection Template",
 				},
-				{
-					"type": "doctype",
-					"name": "Landed Cost Voucher",
-				}
 			]
 		},
 		{
-			"label": _("Setup"),
-			"icon": "fa fa-cog",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Stock Settings",
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Warehouse",
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "UOM",
-					"label": _("Unit of Measure") + " (UOM)",
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Brand",
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Item Attribute",
-				},
-				{
-					"type": "doctype",
-					"name": "Item Variant Settings",
-				},
-			]
-		},
-		{
-			"label": _("Analytics"),
+			"label": _("Key Reports"),
 			"icon": "fa fa-table",
 			"items": [
 				{
@@ -274,13 +263,6 @@ def get_data():
 					"name": "Purchase Receipt Trends",
 					"doctype": "Purchase Receipt"
 				},
-
-			]
-		},
-		{
-			"label": _("Reports"),
-			"icon": "fa fa-list",
-			"items": [
 				{
 					"type": "report",
 					"is_query_report": True,
@@ -302,14 +284,20 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Requested Items To Be Transferred",
-					"doctype": "Material Request"
+					"name": "Batch-Wise Balance History",
+					"doctype": "Batch"
 				},
+			]
+		},
+		{
+			"label": _("Other Reports"),
+			"icon": "fa fa-list",
+			"items": [
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Batch-Wise Balance History",
-					"doctype": "Batch"
+					"name": "Requested Items To Be Transferred",
+					"doctype": "Material Request"
 				},
 				{
 					"type": "report",
