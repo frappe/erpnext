@@ -263,10 +263,13 @@ def install(country=None):
 
 def set_more_defaults():
 	# Do more setup stuff that can be done here with no dependencies
-
-	# set default customer group and territory
 	selling_settings = frappe.get_doc("Selling Settings")
 	selling_settings.set_default_customer_group_and_territory()
+	selling_settings.cust_master_name = "Customer Name"
+	selling_settings.so_required = "No"
+	selling_settings.dn_required = "No"
+	selling_settings.allow_multiple_items = 1
+	selling_settings.sales_update_frequency = "Each Transaction"
 	selling_settings.save()
 
 	add_uom_data()
@@ -275,14 +278,6 @@ def set_more_defaults():
 	doc = frappe.get_doc('Item Variant Settings')
 	doc.set_default_fields()
 	doc.save()
-
-	selling_settings = frappe.get_doc("Selling Settings")
-	selling_settings.cust_master_name = "Customer Name"
-	selling_settings.so_required = "No"
-	selling_settings.dn_required = "No"
-	selling_settings.allow_multiple_items = 1
-	selling_settings.sales_update_frequency = "Each Transaction"
-	selling_settings.save()
 
 	buying_settings = frappe.get_doc("Buying Settings")
 	buying_settings.supp_master_name = "Supplier Name"
