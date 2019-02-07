@@ -55,3 +55,7 @@ jobs:
         - bench --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz --mariadb-root-password travis
         - bench migrate
       env: Patch Testing
+      
+matrix:
+  exclude:
+  - python: 2.7
