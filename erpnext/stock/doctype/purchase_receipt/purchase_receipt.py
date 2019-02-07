@@ -120,12 +120,12 @@ class PurchaseReceipt(BuyingController):
 			self.company, self.base_grand_total)
 
 		self.update_prevdoc_status()
-		if self.per_billed < 100:
+		if flt(self.per_billed) < 100:
 			self.update_billing_status()
 		else:
 			self.status = "Completed"
 
-		
+
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty, reserved_qty_for_subcontract in bin
 		# depends upon updated ordered qty in PO
@@ -311,7 +311,7 @@ class PurchaseReceipt(BuyingController):
 				"\n".join(warehouse_with_no_account))
 
 		return process_gl_map(gl_entries)
-		
+
 	def get_asset_gl_entry(self, gl_entries):
 		for d in self.get("items"):
 			if d.is_fixed_asset:
