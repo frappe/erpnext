@@ -12,7 +12,7 @@ install:
   # fix mongodb travis error
   - sudo rm /etc/apt/sources.list.d/mongodb*.list
   - pip install flake8==3.3.0
-  - flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics
+  - flake8 . --count --select=E901,E999,F822,F823 --show-source --statistics
   - sudo rm /etc/apt/sources.list.d/docker.list
   - sudo apt-get install hhvm && rm -rf /home/travis/.kiex/
   - sudo apt-get purge -y mysql-common mysql-server mysql-client
