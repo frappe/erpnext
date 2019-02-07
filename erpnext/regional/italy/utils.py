@@ -16,7 +16,7 @@ def update_itemised_tax_data(doc):
 		row.tax_rate = flt(tax_rate, row.precision("tax_rate"))
 		row.tax_amount = flt((row.net_amount * tax_rate) / 100, row.precision("net_amount"))
 		row.total_amount = flt((row.net_amount + row.tax_amount), row.precision("total_amount"))
-	
+
 def get_rate_wise_tax_data(items):
 	tax_data = {}
 	for rate in set([item.item_tax_rate for item in items]):
@@ -57,7 +57,6 @@ def export_invoices(filters=None):
 def prepare_invoice(invoice):
 	#set company information
 	company = frappe.get_doc("Company", invoice.company)
-	#company_fiscal_code, fiscal_regime, company_tax_id = frappe.db.get_value("Company", invoice.company, ["fiscal_code", "fiscal_regime", "tax_id"])
 
 	invoice["progressive_number"] = extract_doc_number(invoice)
 	invoice["company_data"] = company
@@ -87,7 +86,7 @@ def prepare_invoice(invoice):
 
 	items = frappe.get_all("Sales Invoice Item", filters={"parent":invoice.name}, fields=["*"], order_by="idx")
 	taxes = frappe.get_all("Sales Taxes and Charges", filters={"parent":invoice.name}, fields=["*"], order_by="idx")
-	tax_data = get_invoice_summary(items, taxes) #get_rate_wise_tax_data(invoice["invoice_items"])
+	tax_data = get_invoice_summary(items, taxes)
 
 	invoice["tax_data"] = tax_data
 
@@ -179,7 +178,7 @@ def get_invoice_summary(items, taxes):
 						summary_data[key]["tax_exemption_reason"] = tax.tax_exemption_reason
 						summary_data[key]["tax_exemption_law"] = tax.tax_exemption_law
 
-			if summary_data == {}: #Zero VAT has not been set on any item. zero vat from tax row.
+			if summary_data == {}: #Implies that Zero VAT has not been set on any item.
 				summary_data.setdefault("0.0", {"tax_amount": 0.0, "taxable_amount": tax.total,
 					"tax_exemption_reason": tax.tax_exemption_reason, "tax_exemption_law": tax.tax_exemption_law})
 
