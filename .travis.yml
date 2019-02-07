@@ -45,6 +45,7 @@ jobs:
   include:
     - stage: test
       script:
+        - set -e
         - bench run-tests --app erpnext --coverage
       after_script:
         - coveralls -b apps/erpnext -d ../../sites/.coverage
