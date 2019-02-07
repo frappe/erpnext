@@ -37,9 +37,9 @@ def export_invoices(filters=None):
 	for invoice in invoices:
 		invoice = prepare_invoice(invoice)
 		invoice_xml = frappe.render_template('erpnext/regional/italy/e-invoice.xml', context={"doc": invoice}, is_path=True)
-
+		company_tax_id = invoice.company_data.tax_id if invoice.company_data.tax_id.startswith("IT") else "IT" + invoice.company_data.tax_id
 		xml_filename = "{company_tax_id}_{invoice_number}.xml".format(
-			company_tax_id=invoice.company_data.tax_id,
+			company_tax_id=company_tax_id,
 			invoice_number=extract_doc_number(invoice)
 		)
 		xml_filename = frappe.get_site_path("private", "files", xml_filename)
@@ -68,7 +68,7 @@ def prepare_invoice(invoice):
 	#Set invoice type
 	if invoice.is_return and invoice.return_against:
 		invoice["type_of_document"] = "TD04" #Credit Note (Nota di Credito)
-		invoice["return_against_corrected"] =  extract_doc_number(frappe.get_doc(invoice.return_against))
+		invoice["return_against_corrected"] =  extract_doc_number(frappe.get_doc("Sales Invoice", invoice.return_against))
 	else:
 		invoice["type_of_document"] = "TD01" #Sales Invoice (Fattura)
 
