@@ -47,8 +47,8 @@ class TestSalesPaymentSummary(unittest.TestCase):
 			pe.submit()
 
 		mop = get_mode_of_payments(filters)
-		self.assertTrue('Credit Card' in mop.values()[0])
-		self.assertTrue('Cash' in mop.values()[0])
+		self.assertTrue('Credit Card' in list(mop.values())[0])
+		self.assertTrue('Cash' in list(mop.values())[0])
 
 		# Cancel all Cash payment entry and check if this mode of payment is still fetched.
 		payment_entries = frappe.get_all("Payment Entry", filters={"mode_of_payment": "Cash", "docstatus": 1}, fields=["name", "docstatus"])
