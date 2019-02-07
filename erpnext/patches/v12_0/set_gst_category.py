@@ -53,4 +53,8 @@ def execute():
 		for old, new in itc_update_map.items():
 			frappe.db.sql("UPDATE `tabPurchase Invoice` SET eligibility_for_itc = replace(eligibility_for_itc, %s, %s)", (old, new))
 
+	company = frappe.get_all('Company', filters = {'country': 'India'})
+	if not company:
+		return
+
 	make_custom_fields()
