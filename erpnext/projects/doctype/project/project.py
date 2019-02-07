@@ -81,13 +81,22 @@ class Project(Document):
 	def validate_dates(self):
 		if self.tasks:
 			for d in self.tasks:
-				if not getdate(self.expected_start_date) <= getdate(d.start_date) <= getdate(self.expected_end_date):
-					frappe.throw(_("Start date of task <b>{0}</b> should be between <b>{1}</b> expected start and end dates")
-						.format(d.title, self.name))
+				if self.expected_start_date:
+					if d.start_date and getdate(d.start_date) < getdate(self.expected_start_date):
+						frappe.throw(_("Start date of task <b>{0}</b> cannot be less than <b>{1}</b> expected start date")
+							.format(d.title, self.name))
+					if d.end_date and getdate(d.end_date) < getdate(self.expected_start_date):
+						frappe.throw(_("End date of task <b>{0}</b> cannot be less than <b>{1}</b> expected start date")
+							.format(d.title, self.name))
 
-				if not getdate(self.expected_start_date) <= getdate(d.end_date) <= getdate(self.expected_end_date):
-					frappe.throw(_("End date of task <b>{0}</b> should be between <b>{1}</b> expected start and end dates")
-						.format(d.title, self.name))
+				if self.expected_end_date:
+					if d.start_date and getdate(d.start_date) > getdate(self.expected_end_date):
+						frappe.throw(_("Start date of task <b>{0}</b> cannot be greater than <b>{1}</b> expected end date")
+							.format(d.title, self.name))
+					if d.end_date and getdate(d.end_date) > getdate(self.expected_end_date):
+						print(d.end_date, self.expected_end_date)
+						frappe.throw(_("End date of task <b>{0}</b> cannot be greater than <b>{1}</b> expected end date")
+							.format(d.title, self.name))
 
 		if self.expected_start_date and self.expected_end_date:
 			if getdate(self.expected_end_date) < getdate(self.expected_start_date):
