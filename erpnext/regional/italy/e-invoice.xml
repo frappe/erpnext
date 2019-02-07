@@ -1,8 +1,8 @@
 {%- macro format_float(value) -%}
-{{ "%.2f" % value }}
+{{ "%.2f" % value|abs }}
 {%- endmacro -%}
 
-{%- macro render_address(address) -%}
+{% macro render_address(address) -%}
 <Indirizzo>{{ address.address_line1 }}</Indirizzo>
 <CAP>{{ address.pincode }}</CAP>
 <Comune>{{ address.city }}</Comune>
@@ -10,7 +10,7 @@
 <Provincia>{{ address.state }}</Provincia>
 {%- endif %}
 <Nazione>IT</Nazione>
-{%- endmacro -%}
+{% endmacro -%}
 
 {%- macro render_discount_or_margin(item) -%}
 {%- if item.discount_percentage > 0.0 or item.margin_type %}
@@ -46,12 +46,12 @@
       <ProgressivoInvio>{{ doc.progressive_number }}</ProgressivoInvio>
       <FormatoTrasmissione>{{ doc.transmission_format_code }}</FormatoTrasmissione>
       <CodiceDestinatario>{{ doc.customer_data.recipient_code }}</CodiceDestinatario>
-      {%- if doc.company_contact_data.phone or doc.company_contact_data.email -%}
+      {% if doc.company_contact_data.phone or doc.company_contact_data.email -%}
       <ContattiTrasmittente>
-        {%- if doc.company_contact_data.phone_no -%}<Telefono>{{ doc.company_contact_data.phone_no }}</Telefono>{%- endif -%}
-        {%- if doc.company_contact_data.email -%}<Email>{{ doc.company_contact_data.email }}</Email>{%- endif -%}
+        {% if doc.company_contact_data.phone_no -%}<Telefono>{{ doc.company_contact_data.phone_no }}</Telefono>{%- endif %}
+        {% if doc.company_contact_data.email -%}<Email>{{ doc.company_contact_data.email }}</Email>{%- endif %}
       </ContattiTrasmittente>
-      {%- endif %}
+      {% endif -%}
     </DatiTrasmissione>
     <CedentePrestatore>
       <DatiAnagrafici>
@@ -147,13 +147,11 @@
         <Data>{{ doc.po_date }}</Data>
         {%- endif %}
       </DatiOrdineAcquisto>
+      {%- endif %}
       {%- if doc.is_return and doc.return_against_corrected %}
       <DatiFattureCollegate>
-        <IdDocumento>
-        {{ doc.return_against_corrected }}
-        </IdDocumento>
+        <IdDocumento>{{ doc.return_against_corrected }}</IdDocumento>
       </DatiFattureCollegate>
-      {%- endif %}
       {%- endif %}
       {%- if doc.shipping_address_data %}
       <DatiTrasporto>
@@ -210,7 +208,7 @@
         <ModalitaPagamento>{{ payment_term.mode_of_payment_code.split("-")[0] }}</ModalitaPagamento>
         <DataScadenzaPagamento>{{ payment_term.due_date }}</DataScadenzaPagamento>
         <ImportoPagamento>{{ format_float(payment_term.payment_amount) }}</ImportoPagamento>
-        {%- if payment_term.iban %}<IBAN>{{ payment_term.bank_account_iban }}</IBAN>{%- endif %}
+        {%- if payment_term.bank_account_iban %}<IBAN>{{ payment_term.bank_account_iban }}</IBAN>{%- endif %}
       </DettaglioPagamento>
       {%- endfor %}
     </DatiPagamento>
