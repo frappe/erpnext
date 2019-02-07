@@ -214,7 +214,7 @@ def get_total_taxable_value(doctype, month, year, reverse_charge):
 		where docstatus = 1 and month(posting_date) = %s
 		and year(posting_date) = %s and reverse_charge = %s
 		group by gst_category
-		"""
+		""" #nosec
 		.format(doctype = doctype), (month_no, year, reverse_charge)))
 
 def get_state_code(state):
@@ -336,7 +336,8 @@ def get_tax_amounts(doctype, month, year, reverse_charge="N"):
 		where s.docstatus = 1 and t.parent = s.name and s.reverse_charge = %s
 		and month(s.posting_date) = %s and year(s.posting_date) = %s
 		group by t.account_head, s.gst_category
-		""".format(doctype=doctype, template=tax_template), (reverse_charge, month_no, year), as_dict=1)
+		""" #nosec
+		.format(doctype=doctype, template=tax_template), (reverse_charge, month_no, year), as_dict=1)
 
 	tax_details = {}
 

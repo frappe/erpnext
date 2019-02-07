@@ -22,7 +22,7 @@ frappe.ui.form.on('GSTR 3B Report', {
 					},
 					"callback" : function(r){
 
-						let data = r.message
+						let data = r.message;
 
 						frappe.ui.get_print_settings(false, print_settings => {
 
