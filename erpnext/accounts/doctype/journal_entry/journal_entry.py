@@ -465,10 +465,12 @@ class JournalEntry(AccountsController):
 		bank_amount = party_amount = total_amount = 0.0
 		currency = bank_account_currency = party_account_currency = pay_to_recd_from= None
 		for d in self.get('accounts'):
-			if d.party_type in ['Customer', 'Supplier', 'Letter of Credit'] and d.party:
+			if d.party_type in ['Customer', 'Supplier', 'Letter of Credit', 'Employee'] and d.party:
 				if not pay_to_recd_from:
 					if d.party_type == "Letter of Credit":
 						name_field = "name"
+					elif d.party_type == "Employee":
+						name_field = "employee_name"
 					else:
 						name_field = "customer_name" if d.party_type=="Customer" else "supplier_name"
 					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party, name_field)
@@ -974,9 +976,10 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 	if account_details.account_type == "Receivable":
 		party_type = "Customer"
 	elif account_details.account_type == "Payable":
-		default_letter_of_credit_account = frappe.get_cached_value('Company', {"company_name": company}, "default_letter_of_credit_account")
-		if account == default_letter_of_credit_account:
+		if account == frappe.get_cached_value('Company', {"company_name": company}, "default_letter_of_credit_account"):
 			party_type = "Letter of Credit"
+		elif account == frappe.get_cached_value('Company', {"company_name": company}, "default_employee_advance_account"):
+			party_type = "Employee"
 		else:
 			party_type = "Supplier"
 	else:
