@@ -57,8 +57,8 @@ class TestSalesPaymentSummary(unittest.TestCase):
 			pe.cancel()
 
 		mop = get_mode_of_payments(filters)
-		self.assertTrue('Credit Card' in mop.values()[0])
-		self.assertTrue('Cash' not in mop.values()[0])
+		self.assertTrue('Credit Card' in list(mop.values())[0])
+		self.assertTrue('Cash' not in list(mop.values())[0])
 
 	def test_get_mode_of_payments_details(self):
 		filters = get_filters()
@@ -84,7 +84,7 @@ class TestSalesPaymentSummary(unittest.TestCase):
 
 		mopd = get_mode_of_payment_details(filters)
 
-		mopd_values = mopd.values()[0]
+		mopd_values = list(mopd.values())[0]
 		for mopd_value in mopd_values:
 			if mopd_value[0] == "Credit Card":
 				cc_init_amount = mopd_value[1]
@@ -96,7 +96,7 @@ class TestSalesPaymentSummary(unittest.TestCase):
 			pe.cancel()
 
 		mopd = get_mode_of_payment_details(filters)
-		mopd_values = mopd.values()[0]
+		mopd_values = list(mopd.values())[0]
 		for mopd_value in mopd_values:
 			if mopd_value[0] == "Credit Card":
 				cc_final_amount = mopd_value[1]
