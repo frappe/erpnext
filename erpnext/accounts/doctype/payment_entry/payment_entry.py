@@ -502,6 +502,8 @@ class PaymentEntry(AccountsController):
 						"account": d.account,
 						"account_currency": account_currency,
 						"against": self.party or self.paid_from,
+						"against_voucher": d.reference_name,
+						"against_voucher_type": d.reference_doctype,
 						"debit_in_account_currency": d.amount,
 						"debit": d.amount,
 						"cost_center": d.cost_center
