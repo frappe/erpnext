@@ -191,7 +191,6 @@ def get_data():
 			"label": _("Learn"),
 			"color": "#FF888B",
 			"icon": "octicon octicon-device-camera-video",
-			"type": "module",
 			"is_help": True,
 			"description": "Explore Help Articles and Videos."
 		},
