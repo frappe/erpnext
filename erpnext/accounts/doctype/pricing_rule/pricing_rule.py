@@ -346,7 +346,7 @@ def filter_pricing_rules(args, pricing_rules):
 	if len(pricing_rules) > 1:
 		rate_or_discount = list(set([d.rate_or_discount for d in pricing_rules]))
 		if len(rate_or_discount) == 1 and rate_or_discount[0] == "Discount Percentage":
-			pricing_rules = filter(lambda x: x.for_price_list==args.price_list, pricing_rules) \
+			pricing_rules = list(filter(lambda x: x.for_price_list==args.price_list, pricing_rules)) \
 				or pricing_rules
 
 	if len(pricing_rules) > 1 and not args.for_shopping_cart:
