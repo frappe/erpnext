@@ -92,11 +92,9 @@ class Company(NestedSet):
 				self.create_default_accounts()
 				self.create_default_warehouses()
 
-		if frappe.flags.country_change:
+		if frappe.flags.country_change or frappe.local.flags.coa_importer:
 			install_country_fixtures(self.name)
 			self.create_default_tax_template()
-
-
 
 		if not frappe.db.get_value("Department", {"company": self.name}):
 			from erpnext.setup.setup_wizard.operations.install_fixtures import install_post_company_fixtures
@@ -325,6 +323,11 @@ class Company(NestedSet):
 		# reset default company
 		frappe.db.sql("""update `tabSingles` set value=""
 			where doctype='Global Defaults' and field='default_company'
+			and value=%s""", self.name)
+
+		# reset default company
+		frappe.db.sql("""update `tabSingles` set value=""
+			where doctype='Chart of Accounts Importer' and field='company'
 			and value=%s""", self.name)
 
 		# delete BOMs

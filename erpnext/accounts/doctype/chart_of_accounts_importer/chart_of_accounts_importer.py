@@ -22,11 +22,14 @@ def validate_company(company):
 @frappe.whitelist()
 def import_coa(file_name, company):
 	# delete existing data for accounts
-	frappe.db.sql('''delete from `tabAccount` where company="%s"''' % company)
+	unset_existing_data(company)
 
 	# create accounts
 	forest = build_forest(generate_data_from_csv(file_name))
 	create_charts(company, custom_chart=forest)
+
+	# trigger on_update for company to reset default accounts
+	set_default_accounts(company)
 
 def generate_data_from_csv(file_name, as_dict=False):
 	''' read csv file and return the generated nested tree '''
@@ -165,3 +168,28 @@ def validate_account_types(accounts):
 	missing = list(set(account_types_for_group) - set(account_groups))
 	if missing:
 		return _("Please identify/create Account (Group) for type - {0}").format(' , '.join(missing))
+
+def unset_existing_data(company):
+	linked = frappe.db.sql('''select fieldname from tabDocField
+		where fieldtype="Link" and options="Account" and parent="Company"''', as_dict=True)
+
+	# remove accounts data from company
+	update_values = {d.fieldname: '' for d in linked}
+	frappe.db.set_value('Company', company, update_values, update_values)
+
+	# remove accounts data from various doctypes
+	for doctype in ["Account", "Party Account", "Mode of Payment Account", "Tax Withholding Account",
+		"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
+		frappe.db.sql("delete from `tab{0}` where company = %s".format(doctype), company)
+
+def set_default_accounts(company):
+	company = frappe.get_doc('Company', company)
+	company.update({
+		"default_receivable_account": frappe.db.get_value("Account",
+			{"company": company.name, "account_type": "Receivable", "is_group": 0}),
+		"default_payable_account": frappe.db.get_value("Account",
+			{"company": company.name, "account_type": "Payable", "is_group": 0})
+	})
+
+	frappe.local.flags.coa_importer = True
+	company.save()
