@@ -206,4 +206,15 @@ def get_data():
 			'standard': 1,
 			"description": "Publish items to other ERPNext users and start a conversation."
 		},
+		{
+			"module_name": "Settings",
+			"category": "Administration",
+			"label": _("Settings"),
+			"color": "#bdc3c7",
+			"reverse": 1,
+			"icon": "octicon octicon-settings",
+			"type": "module",
+			"hidden": 1,
+			"description": "Global settings for all modules in ERPNext, with Email Digest and SMS."
+		},
 	]
