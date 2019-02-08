@@ -974,7 +974,10 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 		return
 
 	if account_details.account_type == "Receivable":
-		party_type = "Customer"
+		if account == frappe.get_cached_value('Company', {"company_name": company}, "default_employee_loan_account"):
+			party_type = "Employee"
+		else:
+			party_type = "Customer"
 	elif account_details.account_type == "Payable":
 		if account == frappe.get_cached_value('Company', {"company_name": company}, "default_letter_of_credit_account"):
 			party_type = "Letter of Credit"

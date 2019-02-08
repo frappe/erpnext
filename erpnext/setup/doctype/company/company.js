@@ -219,6 +219,7 @@ erpnext.company.setup_queries = function(frm) {
 		["round_off_cost_center", {}],
 		["depreciation_cost_center", {}],
 		["default_employee_advance_account", {"root_type": "Asset"}],
+		["default_employee_loan_account", {"root_type": "Asset"}],
 		["expenses_included_in_asset_valuation", {"account_type": "Expenses Included In Asset Valuation"}],
 		["capital_work_in_progress_account", {"account_type": "Capital Work in Progress"}],
 		["asset_received_but_not_billed", {"account_type": "Asset Received But Not Billed"}]
