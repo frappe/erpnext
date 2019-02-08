@@ -391,9 +391,27 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			? this.frm.doc["taxes"][tax_count - 1].total + flt(this.frm.doc.rounding_adjustment)
 			: this.frm.doc.net_total);
 
+		var paid_amount = 0.0;
+		var base_paid_amount = 0.0;
+		var base_grand_total = 0.0;
+		var payment_status = true;
 		if(in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"], this.frm.doc.doctype)) {
 			this.frm.doc.base_grand_total = (this.frm.doc.total_taxes_and_charges) ?
 				flt(this.frm.doc.grand_total * this.frm.doc.conversion_rate) : this.frm.doc.base_net_total;
+			base_grand_total = this.frm.doc.base_grand_total;
+			if (this.frm.doc.is_pos && this.frm.doc.is_return) {
+				$.each(this.frm.doc['payments'] || [], function (index, data) {
+					if (payment_status) {
+						data.amount = base_grand_total;
+						data.base_amount = flt(data.amount * me.frm.doc.conversion_rate, precision("base_amount"));
+						paid_amount += data.amount;
+						base_paid_amount += data.base_amount;
+						payment_status = false;
+					}
+				});
+				this.frm.doc.paid_amount = flt(paid_amount, precision("paid_amount"));
+				this.frm.doc.base_paid_amount = flt(base_paid_amount, precision("base_paid_amount"));
+			}
 		} else {
 			// other charges added/deducted
 			this.frm.doc.taxes_and_charges_added = this.frm.doc.taxes_and_charges_deducted = 0.0;
