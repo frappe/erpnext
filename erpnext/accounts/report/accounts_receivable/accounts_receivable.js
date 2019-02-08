@@ -162,11 +162,14 @@ frappe.query_reports["Accounts Receivable"] = {
 	get_datatable_options(options) {
 		return Object.assign(options, {
 			hooks: {
-				totalAccumulator: function(column, values) {
+				columnTotal: function(values, column) {
 					const me = this;
-					values = values.filter(d => me.datamanager.getData(d.rowIndex).posting_date);
-					let type = column.fieldname == "age" ? "mean" : null;
-					return frappe.utils.report_total_accumulator(column, values, type);
+					values = values.filter((d, i) => {
+						let idx = me.bodyRenderer.visibleRowIndices[i];
+						return me.datamanager.getData(idx).posting_date
+					});
+					let type = column.column.fieldname == "age" ? "mean" : null;
+					return frappe.utils.report_column_total(values, column, type);
 				}
 			}
 		});
