@@ -92,7 +92,7 @@ class Company(NestedSet):
 				self.create_default_accounts()
 				self.create_default_warehouses()
 
-		if frappe.flags.country_change or frappe.local.flags.coa_importer:
+		if frappe.flags.country_change:
 			install_country_fixtures(self.name)
 			self.create_default_tax_template()
 

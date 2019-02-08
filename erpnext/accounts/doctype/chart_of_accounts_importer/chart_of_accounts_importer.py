@@ -183,6 +183,7 @@ def unset_existing_data(company):
 		frappe.db.sql("delete from `tab{0}` where company = %s".format(doctype), company)
 
 def set_default_accounts(company):
+	from erpnext.setup.doctype.company.company import install_country_fixtures
 	company = frappe.get_doc('Company', company)
 	company.update({
 		"default_receivable_account": frappe.db.get_value("Account",
@@ -191,5 +192,6 @@ def set_default_accounts(company):
 			{"company": company.name, "account_type": "Payable", "is_group": 0})
 	})
 
-	frappe.local.flags.coa_importer = True
 	company.save()
+	install_country_fixtures(company.name)
+	company.create_default_tax_template()
