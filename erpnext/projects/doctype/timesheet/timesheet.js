@@ -30,6 +30,14 @@ frappe.ui.form.on("Timesheet", {
 				}
 			};
 		};
+
+		// set employee (and company) to the one that's currently logged in
+		const options = { user_id: frappe.session.user };
+		const fields = ['name', 'company'];
+		frappe.db.get_value('Employee', options, fields).then(({ message }) => {
+			frm.fields_dict['employee'].set_value(message.name);
+			frm.fields_dict['company'].set_value(message.company);
+		});
 	},
 
 	onload: function(frm){
