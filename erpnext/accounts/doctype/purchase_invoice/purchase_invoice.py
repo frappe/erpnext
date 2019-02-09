@@ -95,7 +95,7 @@ class PurchaseInvoice(BuyingController):
 		self.set_expense_account(for_validate=True)
 		self.set_against_expense_account()
 		self.validate_write_off_account()
-		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount", "items")
+		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "qty", "items")
 		self.validate_fixed_asset()
 		self.create_remarks()
 		self.set_status()
