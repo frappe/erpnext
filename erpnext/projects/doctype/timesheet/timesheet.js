@@ -35,8 +35,11 @@ frappe.ui.form.on("Timesheet", {
 		const options = { user_id: frappe.session.user };
 		const fields = ['name', 'company'];
 		frappe.db.get_value('Employee', options, fields).then(({ message }) => {
-			frm.fields_dict['employee'].set_value(message.name);
-			frm.fields_dict['company'].set_value(message.company);
+			if (message){
+				// there is an employee with the currently logged in user_id
+				frm.fields_dict['employee'].set_value(message.name);
+				frm.fields_dict['company'].set_value(message.company);
+			}
 		});
 	},
 
