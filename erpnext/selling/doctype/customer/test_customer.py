@@ -117,8 +117,8 @@ class TestCustomer(unittest.TestCase):
 	def test_rename(self):
 		# delete communication linked to these 2 customers
 		for name in ("_Test Customer 1", "_Test Customer 1 Renamed"):
-			frappe.db.sql("""delete from `tabCommunication`
-				where communication_type='Comment' and reference_doctype=%s and reference_name=%s""",
+			frappe.db.sql("""delete from `tabComment`
+				where reference_doctype=%s and reference_name=%s""",
 				("Customer", name))
 
 		# add comments
@@ -132,8 +132,7 @@ class TestCustomer(unittest.TestCase):
 		self.assertFalse(frappe.db.exists("Customer", "_Test Customer 1"))
 
 		# test that comment gets linked to renamed doc
-		self.assertEqual(frappe.db.get_value("Communication", {
-			"communication_type": "Comment",
+		self.assertEqual(frappe.db.get_value("Comment", {
 			"reference_doctype": "Customer",
 			"reference_name": "_Test Customer 1 Renamed"
 		}), comment.name)
