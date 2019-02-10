@@ -38,15 +38,13 @@ class ItemConfigure {
 		});
 
 		this.attribute_data.forEach(a => {
-			if (a.optional) {
-				const field = this.dialog.get_field(a.attribute);
-				const $a = $('<a href>Reset</a>');
-				$a.on('click', (e) => {
-					e.preventDefault();
-					this.dialog.set_value(a.attribute, '');
-				});
-				field.$wrapper.find('.help-box').append($a);
-			}
+			const field = this.dialog.get_field(a.attribute);
+			const $a = $(`<a href>${__("Clear")}</a>`);
+			$a.on('click', (e) => {
+				e.preventDefault();
+				this.dialog.set_value(a.attribute, '');
+			});
+			field.$wrapper.find('.help-box').append($a);
 		});
 
 		this.append_alert_box();
@@ -120,10 +118,15 @@ class ItemConfigure {
 			filtered_items_count === 1 ?
 			filtered_items[0] : '';
 
-		const add_to_cart = one_item ? `
+		const action_buttons = one_item ? `
+			<div class="d-flex align-items-center">
+			<a href class="btn-clear-values d-inline-block mr-3">
+				${__('Clear values')}
+			</a>
 			<button class="btn btn-primary btn-add-to-cart" data-item-code="${one_item}">
 				${__('Add to cart')}
 			</button>
+			</div>
 		` : `
 			<a href class="btn-clear-values">
 				${__('Clear values')}
@@ -139,7 +142,7 @@ class ItemConfigure {
 				${exact_match.length === 1 ? '' : items_found}
 				${exact_match.length === 1 ? `<span>${exact_match_message}</span>` : ''}
 			</span>
-			${add_to_cart}
+			${action_buttons}
 		`;
 	}
 
