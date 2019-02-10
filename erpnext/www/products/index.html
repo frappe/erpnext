@@ -44,7 +44,7 @@
 	<div class="col-12 order-1 col-md-4 order-md-2">
 
 		{% if frappe.form_dict.start or frappe.form_dict.field_filters or frappe.form_dict.search %}
-		<a class="mb-3 d-inline-block" href="/products">{{ _('Reset filters') }}</a>
+		<a class="mb-3 d-inline-block" href="/products">{{ _('Clear filters') }}</a>
 		{% endif  %}
 
 		<div class="collapse d-md-block" id="product-filters">
@@ -54,9 +54,14 @@
 				<div class="mb-4">
 					<h6>{{ item_field.label }}</h6>
 
+					{% if values | len > 20 %}
+					<!-- show inline filter if values more than 20 -->
+					<input type="text" class="form-control form-control-sm mb-2 product-filter-filter"/>
+					{% endif %}
+
 					<div class="filter-options">
 						{% for value in values %}
-						<div class="custom-control custom-checkbox">
+						<div class="custom-control custom-checkbox" data-value="{{ value }}">
 							<input type="checkbox"
 								class="product-filter field-filter custom-control-input"
 								id="{{value}}"
@@ -76,9 +81,14 @@
 				<div class="mb-4">
 					<h6>{{ attribute.name }}</h6>
 
+					{% if values | len > 20 %}
+					<!-- show inline filter if values more than 20 -->
+					<input type="text" class="form-control form-control-sm mb-2 product-filter-filter"/>
+					{% endif %}
+
 					<div class="filter-options">
 						{% for attr_value in attribute.item_attribute_values %}
-						<div class="custom-control custom-checkbox">
+						<div class="custom-control custom-checkbox" data-value="{{ value }}">
 							<input type="checkbox"
 								class="product-filter attribute-filter custom-control-input"
 								id="{{attr_value.name}}"
@@ -95,6 +105,25 @@
 				</div>
 			{% endfor %}
 		</div>
+
+		<script>
+			frappe.ready(() => {
+				$('.product-filter-filter').on('keydown', frappe.utils.debounce((e) => {
+					const $input = $(e.target);
+					const keyword = ($input.val() || '').toLowerCase();
+					const $filter_options = $input.next('.filter-options');
+
+					$filter_options.find('.custom-control').show();
+					$filter_options.find('.custom-control').each((i, el) => {
+						const $el = $(el);
+						const value = $el.data('value').toLowerCase();
+						if (!value.includes(keyword)) {
+							$el.hide();
+						}
+					});
+				}, 300));
+			})
+		</script>
 	</div>
 </div>
 <div class="row">
