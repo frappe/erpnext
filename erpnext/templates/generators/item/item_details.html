@@ -8,7 +8,6 @@
 	<span itemprop="productID">{{ doc.name }}</span>
 </p>
 <!-- description -->
-<h6 class="text-uppercase text-muted mt-4">{{ _("Description") }}</h6>
 <div itemprop="description">
 	{{ doc.web_long_description or doc.description or _("No description given") | safe }}
 </div>
