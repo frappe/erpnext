@@ -22,10 +22,10 @@
 
 		<div class="row">
 			{% for item in homepage.products %}
-			<div class="col-md-4 mt-4 mt-md-0">
+			<div class="col-md-4 mb-4">
 				<div class="card h-100 justify-content-between">
 					<img class="card-img-top" src="{{ item.image }}" alt="{{ item.item_name }}">
-					<div class="card-body" style="flex: 0">
+					<div class="card-body flex-grow-0">
 						<h5 class="card-title">{{ item.item_name }}</h5>
 						<a href="{{ item.route }}" class="card-link">{{ _('More details') }}</a>
 					</div>
@@ -42,12 +42,14 @@
 
 		<div class="row">
 			{% for blog in blogs %}
-			<div class="col-md-4 h-100 mt-4 mt-md-0">
-				<div class="card">
+			<div class="col-md-4 mb-4">
+				<div class="card h-100">
 					<div class="card-body">
 						<h5 class="card-title">{{ blog.title }}</h5>
 						<p class="card-subtitle mb-2 text-muted">{{ _('By {0}').format(blog.blogger) }}</p>
 						<p class="card-text">{{ blog.blog_intro }}</p>
+					</div>
+					<div class="card-body flex-grow-0">
 						<a href="{{ blog.route }}" class="card-link">{{ _('Read blog') }}</a>
 					</div>
 				</div>
@@ -57,28 +59,34 @@
 	</section>
 	{% endif %}
 
-	{% for section in custom_sections %}
+	{% for section in homepage_sections %}
+	{% if section.custom_html %}
+		{{ section.section_html }}
+	{% else %}
 	<section class="container my-5">
 		<h3>{{ section.name }}</h3>
 
 		<div class="row">
-
-			{% for card in section.section_content %}
-			<div class="col-md-4 h-100 mt-4 mt-md-0">
-				<div class="card">
+			{% for card in section.section_cards %}
+			<div class="col-md-{{ section.column_value }} mb-4">
+				<div class="card h-100 justify-content-between">
+					{% if card.image %}
+					<img class="card-img-top" src="{{ card.image }}" alt="{{ card.title }}">
+					{% endif %}
 					<div class="card-body">
 						<h5 class="card-title">{{ card.title }}</h5>
 						<p class="card-subtitle mb-2 text-muted">{{ card.subtitle or '' }}</p>
 						<p class="card-text">{{ card.content | truncate(140, True) }}</p>
 					</div>
-					<div class="card-body">
-						<a href="{{ card.link }}" class="card-link">{{ _('More details') }}</a>
+					<div class="card-body flex-grow-0">
+						<a href="{{ card.route }}" class="card-link">{{ _('More details') }}</a>
 					</div>
 				</div>
 			</div>
 			{% endfor %}
 		</div>
 	</section>
+	{% endif %}
 
 	{% endfor %}
 </main>
