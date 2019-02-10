@@ -211,21 +211,14 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 
 @frappe.whitelist(allow_guest=True)
 def get_attributes_and_values(item_code):
+	'''Build a list of attributes and their possible values.
+	This will ignore the values upon selection of which there cannot exist one item.
+	'''
 	item_cache = ItemVariantsCacheManager(item_code)
 	item_variants_data = item_cache.get_item_variants_data()
 
 	attributes = get_item_attributes(item_code)
 	attribute_list = [a.attribute for a in attributes]
-
-	attribute_values = frappe.db.get_all('Item Attribute Value',
-		filters={'parent': ['in', attribute_list]},
-		fields=['parent as attribute', 'attribute_value'],
-		order_by='idx asc')
-
-	for a in attribute_values:
-		for attr in attributes:
-			if attr.attribute == a.attribute:
-				attr.setdefault('values', []).append(a.attribute_value)
 
 	valid_options = {}
 	for item_code, attribute, attribute_value in item_variants_data:
@@ -233,13 +226,18 @@ def get_attributes_and_values(item_code):
 			valid_options.setdefault(attribute, set()).add(attribute_value)
 
 	for attr in attributes:
-		attr['valid_values'] = valid_options.get(attr.attribute, [])
+		attr['values'] = valid_options.get(attr.attribute, [])
 
 	return attributes
 
 
 @frappe.whitelist(allow_guest=True)
 def get_next_attribute_and_values(item_code, selected_attributes):
+	'''Find the count of Items that match the selected attributes.
+	Also, find the attribute values that are not applicable for further searching.
+	If less than equal to 10 items are found, return item_codes of those items.
+	If one item is matched exactly, return item_code of that item.
+	'''
 	selected_attributes = frappe.parse_json(selected_attributes)
 
 	item_cache = ItemVariantsCacheManager(item_code)

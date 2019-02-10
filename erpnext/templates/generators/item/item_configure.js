@@ -19,8 +19,7 @@ class ItemConfigure {
 				options: a.values.map(v => {
 					return {
 						label: v,
-						value: v,
-						disabled: !a.valid_values.includes(v)
+						value: v
 					}
 				}),
 				change: () => {
