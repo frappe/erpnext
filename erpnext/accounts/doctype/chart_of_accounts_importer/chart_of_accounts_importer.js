@@ -64,8 +64,9 @@ var validate_csv_data = function(frm) {
 		method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.validate_accounts",
 		args: {file_name: frm.doc.import_file},
 		callback: function(r) {
-			if(r.message==true) {
+			if(r.message && r.message[0]==true) {
 				frm.page["show_import_button"] = true;
+				frm.page["total_accounts"] = r.message[1];
 				frm.trigger("refresh");
 			} else {
 				frm.page.set_indicator(__('Resolve error and upload again.'), 'orange');
@@ -77,14 +78,29 @@ var validate_csv_data = function(frm) {
 
 var create_import_button = function(frm) {
 	frm.page.set_primary_action(__("Start Import"), function () {
+		setup_progress_bar(frm);
 		frappe.call({
 			method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.import_coa",
 			args: {
 				file_name: frm.doc.import_file,
 				company: frm.doc.company
 			},
-			callback: function(r) { }
+			freeze: true,
+			callback: function(r) {
+				clearInterval(frm.page["interval"]);
+				frm.page.set_indicator(__('Import Successfull'), 'blue');
+				frappe.hide_progress();
+				create_reset_button(frm);
+			}
 		});
+	}).addClass('btn btn-primary');
+}
+
+var create_reset_button = function(frm) {
+	frm.page.set_primary_action(__("Reset"), function () {
+		frm.page.clear_primary_action();
+		delete frm.page["show_import_button"];
+		frm.reload_doc();
 	}).addClass('btn btn-primary');
 }
 
@@ -107,4 +123,14 @@ var generate_tree_preview = function(frm) {
 			parent = node.value;
 		}
 	});
+}
+
+var setup_progress_bar = function(frm) {
+	frm.page["seconds_elapsed"] = 0;
+	frm.page["execution_time"] = (frm.page["total_accounts"] > 100) ? 100 : frm.page["total_accounts"];
+
+	frm.page["interval"] = setInterval(function()  {
+		frm.page["seconds_elapsed"] += 1;
+		frappe.show_progress(__('Creating Accounts'), frm.page["seconds_elapsed"], frm.page["execution_time"]);
+	}, 250);
 }

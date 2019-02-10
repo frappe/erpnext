@@ -141,7 +141,7 @@ def validate_accounts(file_name):
 	message = validate_account_types(accounts_dict)
 	if message: return message
 
-	return True
+	return [True, len(accounts)]
 
 def validate_root(accounts):
 	roots = [accounts[d] for d in accounts if not accounts[d].get('parent_account')]
