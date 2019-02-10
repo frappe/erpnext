@@ -22,8 +22,8 @@ class ItemConfigure {
 						value: v
 					}
 				}),
-				change: () => {
-					this.on_attribute_selection();
+				change: (e) => {
+					this.on_attribute_selection(e);
 				}
 			}
 		});
@@ -54,7 +54,9 @@ class ItemConfigure {
 		$('.btn-configure').prop('disabled', false);
 	}
 
-	on_attribute_selection() {
+	on_attribute_selection(e) {
+		this.hande_range_values(e);
+
 		const values = this.dialog.get_values();
 		if (Object.keys(values).length === 0) {
 			this.dialog.$item_status.addClass('hidden').removeClass('d-flex');
@@ -89,6 +91,38 @@ class ItemConfigure {
 					this.dialog.get_field(attribute).set_options();
 				}
 			});
+	}
+
+	hande_range_values(e) {
+		if (!e) return;
+		const changed_fieldname = $(e.target).data('fieldname');
+		const changed_field = this.dialog.get_field(changed_fieldname);
+		const changed_value = changed_field.get_value();
+		if (changed_value && changed_value.includes(' to ')) {
+			// possible range input
+			let numbers = changed_value.split(' to ');
+			numbers = numbers.map(number => parseFloat(number));
+			if (!numbers.some(n => isNaN(n))) {
+				numbers.sort();
+				const parent = $('<div>').insertBefore(changed_field.$input_wrapper.find('.help-box'));
+				const control = frappe.ui.form.make_control({
+					df: {
+						fieldtype: 'Int',
+						placeholder: __('Enter value betweeen {0} and {1}', [numbers[0], numbers[1]]),
+						input_class: 'mt-3',
+						change() {
+							const value = control.get_value()
+							if (!(value <= numbers[1] && value >= numbers[0])) {
+								//
+							}
+						}
+					},
+					only_input: true,
+					render_input: true,
+					parent
+				});
+			}
+		}
 	}
 
 	show_remaining_optional_attributes() {
