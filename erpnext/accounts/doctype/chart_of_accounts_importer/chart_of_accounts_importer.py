@@ -8,7 +8,6 @@ from frappe import _
 from frappe.utils import cstr
 from frappe.model.document import Document
 from frappe.utils.csvutils import UnicodeWriter
-from frappe.utils.file_manager import get_file_path
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts, build_tree_from_json
 
 class ChartofAccountsImporter(Document):
@@ -33,7 +32,8 @@ def import_coa(file_name, company):
 
 def generate_data_from_csv(file_name, as_dict=False):
 	''' read csv file and return the generated nested tree '''
-	file_path = get_file_path(file_name)
+	file_doc = frappe.get_doc('File', {"file_url": file_name})
+	file_path = file_doc.get_full_path()
 
 	data = []
 	with open(file_path, 'r') as in_file:
