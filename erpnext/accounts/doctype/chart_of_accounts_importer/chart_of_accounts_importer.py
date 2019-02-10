@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, csv, os
+import frappe, csv
 from frappe import _
 from frappe.utils import cstr
 from frappe.model.document import Document
@@ -88,26 +88,26 @@ def build_forest(data):
 	# returns the path of any node in list format
 	def return_parent(data, child):
 		for row in data:
-			id, parent_id = row[0:2]
-			if parent_id == id == child:
-				return [parent_id]
-			elif id == child:
-				return [child] + return_parent(data, parent_id)
+			account_name, parent_account = row[0:2]
+			if parent_account == account_name == child:
+				return [parent_account]
+			elif account_name == child:
+				return [child] + return_parent(data, parent_account)
 
 	charts_map, paths = {}, []
 	for i in data:
-		id, parent_id, is_group, account_type, root_type = i
-		charts_map[id] = {}
-		if is_group: charts_map[id]["is_group"] = is_group
-		if account_type: charts_map[id]["account_type"] = account_type
-		if root_type: charts_map[id]["root_type"] = root_type
-		path = return_parent(data, id)[::-1]
+		account_name, _, is_group, account_type, root_type = i
+		charts_map[account_name] = {}
+		if is_group: charts_map[account_name]["is_group"] = is_group
+		if account_type: charts_map[account_name]["account_type"] = account_type
+		if root_type: charts_map[account_name]["root_type"] = root_type
+		path = return_parent(data, account_name)[::-1]
 		paths.append(path) # List of path is created
 
 	out = {}
 	for path in paths:
-		for n, id in enumerate(path):
-			set_nested(out, path[:n+1], charts_map[id]) # setting the value of nested dictionary.
+		for n, account_name in enumerate(path):
+			set_nested(out, path[:n+1], charts_map[account_name]) # setting the value of nested dictionary.
 
 	return out
 
@@ -180,7 +180,8 @@ def unset_existing_data(company):
 	# remove accounts data from various doctypes
 	for doctype in ["Account", "Party Account", "Mode of Payment Account", "Tax Withholding Account",
 		"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
-		frappe.db.sql("delete from `tab{0}` where company = %s".format(doctype), company)
+		frappe.db.sql('''delete from `tab{0}` where `company`="%s"''' # nosec
+			.format(doctype) % (company))
 
 def set_default_accounts(company):
 	from erpnext.setup.doctype.company.company import install_country_fixtures

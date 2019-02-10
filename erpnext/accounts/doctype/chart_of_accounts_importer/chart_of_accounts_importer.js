@@ -48,9 +48,9 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 				company: frm.doc.company
 			},
 			callback: function(r) {
-				if(r.message==false) {
+				if(r.message===false) {
 					frm.set_value("company", "");
-					frappe.throw(__("Transactions against the company already exist! "))
+					frappe.throw(__("Transactions against the company already exist! "));
 				} else {
 					frm.trigger("refresh");
 				}
@@ -64,7 +64,7 @@ var validate_csv_data = function(frm) {
 		method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.validate_accounts",
 		args: {file_name: frm.doc.import_file},
 		callback: function(r) {
-			if(r.message && r.message[0]==true) {
+			if(r.message && r.message[0]===true) {
 				frm.page["show_import_button"] = true;
 				frm.page["total_accounts"] = r.message[1];
 				frm.trigger("refresh");
@@ -74,7 +74,7 @@ var validate_csv_data = function(frm) {
 			}
 		}
 	});
-}
+};
 
 var create_import_button = function(frm) {
 	frm.page.set_primary_action(__("Start Import"), function () {
@@ -87,14 +87,16 @@ var create_import_button = function(frm) {
 			},
 			freeze: true,
 			callback: function(r) {
-				clearInterval(frm.page["interval"]);
-				frm.page.set_indicator(__('Import Successfull'), 'blue');
-				frappe.hide_progress();
-				create_reset_button(frm);
+				if(!r.exc) {
+					clearInterval(frm.page["interval"]);
+					frm.page.set_indicator(__('Import Successfull'), 'blue');
+					frappe.hide_progress();
+					create_reset_button(frm);
+				}
 			}
 		});
 	}).addClass('btn btn-primary');
-}
+};
 
 var create_reset_button = function(frm) {
 	frm.page.set_primary_action(__("Reset"), function () {
@@ -102,7 +104,7 @@ var create_reset_button = function(frm) {
 		delete frm.page["show_import_button"];
 		frm.reload_doc();
 	}).addClass('btn btn-primary');
-}
+};
 
 var generate_tree_preview = function(frm) {
 	let parent = __('All Accounts');
@@ -123,7 +125,7 @@ var generate_tree_preview = function(frm) {
 			parent = node.value;
 		}
 	});
-}
+};
 
 var setup_progress_bar = function(frm) {
 	frm.page["seconds_elapsed"] = 0;
@@ -133,4 +135,4 @@ var setup_progress_bar = function(frm) {
 		frm.page["seconds_elapsed"] += 1;
 		frappe.show_progress(__('Creating Accounts'), frm.page["seconds_elapsed"], frm.page["execution_time"]);
 	}, 250);
-}
+};
