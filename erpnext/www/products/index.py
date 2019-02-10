@@ -35,8 +35,17 @@ def get_field_filter_data():
 
 	filter_data = []
 	for f in fields:
-		doctype = f.options
-		values = [d.name for d in frappe.get_all(doctype)]
+		doctype = f.get_link_doctype()
+
+		# apply enable/disable filter
+		meta = frappe.get_meta(doctype)
+		filters = {}
+		if meta.has_field('enabled'):
+			filters['enabled'] = 1
+		if meta.has_field('disabled'):
+			filters['disabled'] = 0
+
+		values = [d.name for d in frappe.get_all(doctype, filters)]
 		filter_data.append([f, values])
 
 	return filter_data
@@ -137,7 +146,7 @@ def get_items_by_attributes(attribute_filters, template_item_code=None):
 def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 	items = []
 
-	for attribute, values in attribute_filters.iteritems():
+	for attribute, values in attribute_filters.items():
 		attribute_values = values
 
 		if not attribute_values: continue
@@ -294,13 +303,27 @@ def get_items_with_selected_attributes(item_code, selected_attributes):
 
 
 def get_items_by_fields(field_filters):
-	filters = frappe._dict({})
-	for fieldname, values in field_filters.iteritems():
+	meta = frappe.get_meta('Item')
+	filters = []
+	for fieldname, values in field_filters.items():
 		if not values: continue
+
+		_doctype = 'Item'
+		_fieldname = fieldname
+
+		df = meta.get_field(fieldname)
+		if df.fieldtype == 'Table MultiSelect':
+			child_doctype = df.options
+			child_meta = frappe.get_meta(child_doctype)
+			fields = child_meta.get("fields", { "fieldtype": "Link", "in_list_view": 1 })
+			if fields:
+				_doctype = child_doctype
+				_fieldname = fields[0].fieldname
+
 		if len(values) == 1:
-			filters[fieldname] = values[0]
+			filters.append([_doctype, _fieldname, '=', values[0]])
 		else:
-			filters[fieldname] = ['in', values]
+			filters.append([_doctype, _fieldname, 'in', values])
 
 	return get_items(filters)
 
@@ -310,14 +333,16 @@ def get_items(filters=None, search=None):
 	products_settings = frappe.get_cached_doc('Products Settings')
 	page_length = products_settings.products_per_page
 
-	filters = filters or {}
+	filters = filters or []
+	# convert to list of filters
+	if isinstance(filters, dict):
+		filters = [['Item', fieldname, '=', value] for fieldname, value in filters.items()]
+
 	or_filters = None
 
 	if products_settings.only_search_item_templates:
-		filters.update({
-			'has_variants': 1,
-			'show_in_website': 1
-		})
+		filters.append(['Item', 'has_variants', '=', 1])
+		filters.append(['Item', 'show_in_website', '=', 1])
 
 	if search:
 		search = '%{}%'.format(search)
@@ -333,7 +358,8 @@ def get_items(filters=None, search=None):
 		filters=filters,
 		or_filters=or_filters,
 		start=start,
-		page_length=page_length
+		page_length=page_length,
+		group_by='name'
 	)
 
 
