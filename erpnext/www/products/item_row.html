@@ -12,7 +12,7 @@
 				{{ item.item_name }}
 			</a>
 		</h5>
-		<p>{{ html2text(item.description) | truncate(140) }}</p>
+		<p>{{ item.description }}</p>
 		<a href="{{ item.route }}" class="btn btn-sm btn-light">{{ _('More details') }}</a>
 	</div>
 </div>
