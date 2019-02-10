@@ -116,4 +116,210 @@ def get_data():
 			"color": colors["Accounts"], "icon": "fa fa-exchange"},
 		{"module_name": "Sales Payment Summary", "_report": "Sales Payment Summary", "type": "query-report", "link": "query-report/Sales Payment Summary",
 			"color": colors["Accounts"], "icon": "fa fa-exchange"},
+
+		# old
+		{
+			"module_name": "Item",
+			"_doctype": "Item",
+			"color": "#f39c12",
+			"icon": "octicon octicon-package",
+			"type": "link",
+			"link": "List/Item"
+		},
+		{
+			"module_name": "Customer",
+			"_doctype": "Customer",
+			"color": "#1abc9c",
+			"icon": "octicon octicon-tag",
+			"type": "link",
+			"link": "List/Customer"
+		},
+		{
+			"module_name": "Supplier",
+			"_doctype": "Supplier",
+			"color": "#c0392b",
+			"icon": "octicon octicon-briefcase",
+			"type": "link",
+			"link": "List/Supplier"
+		},
+		{
+			"_doctype": "Employee",
+			"module_name": "Employee",
+			"color": "#2ecc71",
+			"icon": "octicon octicon-organization",
+			"type": "link",
+			"link": "List/Employee"
+		},
+		{
+			"module_name": "Project",
+			"_doctype": "Project",
+			"color": "#8e44ad",
+			"icon": "octicon octicon-rocket",
+			"type": "link",
+			"link": "List/Project"
+		},
+		{
+			"module_name": "Issue",
+			"color": "#2c3e50",
+			"icon": "octicon octicon-issue-opened",
+			"_doctype": "Issue",
+			"type": "link",
+			"link": "List/Issue"
+		},
+		{
+			"module_name": "Lead",
+			"icon": "octicon octicon-broadcast",
+			"_doctype": "Lead",
+			"type": "link",
+			"link": "List/Lead"
+		},
+		{
+			"module_name": "Profit and Loss Statement",
+			"_doctype": "Account",
+			"color": "#3498db",
+			"icon": "octicon octicon-repo",
+			"type": "link",
+			"link": "query-report/Profit and Loss Statement"
+		},
+
+		# old
+		{
+			"module_name": "Accounts",
+			"color": "#3498db",
+			"icon": "octicon octicon-repo",
+			"type": "module",
+			"hidden": 1
+		},
+		{
+			"module_name": "Stock",
+			"color": "#f39c12",
+			"icon": "octicon octicon-package",
+			"type": "module",
+			"hidden": 1
+		},
+		{
+			"module_name": "CRM",
+			"color": "#EF4DB6",
+			"icon": "octicon octicon-broadcast",
+			"type": "module",
+			"hidden": 1
+		},
+		{
+			"module_name": "Selling",
+			"color": "#1abc9c",
+			"icon": "octicon octicon-tag",
+			"type": "module",
+			"hidden": 1
+		},
+		{
+			"module_name": "Buying",
+			"color": "#c0392b",
+			"icon": "octicon octicon-briefcase",
+			"type": "module",
+			"hidden": 1
+		},
+		{
+			"module_name": "HR",
+			"color": "#2ecc71",
+			"icon": "octicon octicon-organization",
+			"label": _("Human Resources"),
+			"type": "module",
+			"hidden": 1
+		},
+		{
+			"module_name": "Manufacturing",
+			"color": "#7f8c8d",
+			"icon": "octicon octicon-tools",
+			"type": "module",
+			"hidden": 1
+		},
+		{
+			"module_name": "Projects",
+			"color": "#8e44ad",
+			"icon": "octicon octicon-rocket",
+			"type": "module",
+			"hidden": 1
+		},
+		{
+			"module_name": "Support",
+			"color": "#2c3e50",
+			"icon": "octicon octicon-issue-opened",
+			"type": "module",
+			"hidden": 1
+		},
+		{
+			"module_name": "Learn",
+			"color": "#FF888B",
+			"icon": "octicon octicon-device-camera-video",
+			"type": "module",
+			"is_help": True,
+			"label": _("Learn"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Maintenance",
+			"color": "#FF888B",
+			"icon": "octicon octicon-tools",
+			"type": "module",
+			"label": _("Maintenance"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Education",
+			"color": "#428B46",
+			"icon": "octicon octicon-mortar-board",
+			"type": "module",
+			"label": _("Education"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Healthcare",
+			"color": "#FF888B",
+			"icon": "fa fa-heartbeat",
+			"type": "module",
+			"label": _("Healthcare"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Restaurant",
+			"color": "#EA81E8",
+			"icon": "🍔",
+			"_doctype": "Restaurant",
+			"type": "module",
+			"link": "List/Restaurant",
+			"label": _("Restaurant"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Hotels",
+			"color": "#EA81E8",
+			"icon": "fa fa-bed",
+			"type": "module",
+			"label": _("Hotels"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Agriculture",
+			"color": "#8BC34A",
+			"icon": "octicon octicon-globe",
+			"type": "module",
+			"label": _("Agriculture"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Assets",
+			"color": "#4286f4",
+			"icon": "octicon octicon-database",
+			"hidden": 1,
+			"label": _("Assets"),
+			"type": "module"
+		},
+		{
+			"module_name": "Non Profit",
+			"color": "#DE2B37",
+			"icon": "octicon octicon-heart",
+			"type": "module",
+			"label": _("Non Profit"),
+			"hidden": 1
+		}
 	]
