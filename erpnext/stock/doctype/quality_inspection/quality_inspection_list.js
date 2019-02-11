@@ -1,7 +1,7 @@
 frappe.listview_settings['Quality Inspection'] = {
 	add_fields: ["status", "inspection_type"],
 	get_indicator: function (doc) {
-		if (in_list(["Rejected"], doc.status)) {
+		if (in_list(["Untested", "Rejected"], doc.status)) {
 			return [__(doc.status), "red", "status,=," + doc.status];
 		} else if (in_list(["Skipped"], doc.status)) {
 			return [__(doc.status), "darkgrey", "status,=," + doc.status];
