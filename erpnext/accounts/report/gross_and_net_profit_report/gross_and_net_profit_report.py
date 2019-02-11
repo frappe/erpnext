@@ -7,7 +7,6 @@ from frappe import _
 from frappe.utils import flt
 from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
 import copy
-from pprint import pprint
 
 
 def execute(filters=None):
