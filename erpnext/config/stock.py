@@ -86,7 +86,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Setup"),
+			"label": _("Settings"),
 			"icon": "fa fa-cog",
 			"items": [
 				{
