@@ -7,6 +7,16 @@ def get_data():
 	return [
 		# Modules
 		{
+			"module_name": "Getting Started",
+			"category": "Modules",
+			"label": _("Getting Started"),
+			"color": "#1abc9c",
+			"icon": "fa fa-check-square-o",
+			"type": "module",
+			"hidden": 1,
+			"description": "Dive into the basics for your organisation's needs."
+		},
+		{
 			"module_name": "Accounting",
 			"category": "Modules",
 			"label": _("Accounting"),
@@ -14,7 +24,7 @@ def get_data():
 			"icon": "octicon octicon-repo",
 			"type": "module",
 			"hidden": 1,
-			"description": "Accounts, Billing, Payments, Cost Center and Budgeting."
+			"description": "Accounts, billing, finances and payments; with cost center, taxes and budgeting."
 		},
 		{
 			"module_name": "Selling",
@@ -74,7 +84,17 @@ def get_data():
 			"icon": "octicon octicon-broadcast",
 			"type": "module",
 			"hidden": 1,
-			"description": "Everything in your sales pipeline, from Leads to Customers, to Support."
+			"description": "Everything in your sales pipeline, from Leads and Opportunities to Customers."
+		},
+		{
+			"module_name": "Help Desk",
+			"category": "Modules",
+			"label": _("Help Desk"),
+			"color": "#1abc9c",
+			"icon": "fa fa-check-square-o",
+			"type": "module",
+			"hidden": 1,
+			"description": "User interactions, support issues and knowledge base."
 		},
 		{
 			"module_name": "HR",
@@ -94,7 +114,7 @@ def get_data():
 			"icon": "fa fa-check-square-o",
 			"type": "module",
 			"hidden": 1,
-			"description": "Volunteers, Memberships, Grants and Chapters."
+			"description": "Quality goals, procedures, reviews and action."
 		},
 
 
