@@ -208,6 +208,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 	map_row_values: function(row, values, number, qty_field, warehouse) {
 		row.qty = values[qty_field];
+		row.transfer_qty = flt(values[qty_field]) * flt(row.conversion_factor);
 		row[number] = values[number];
 		if(this.warehouse_details.type === 'Source Warehouse') {
 			row.s_warehouse = values.warehouse || warehouse;

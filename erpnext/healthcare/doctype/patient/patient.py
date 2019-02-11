@@ -33,7 +33,6 @@ class Patient(Document):
 					"email": self.email,
 					"user_type": "Website User"
 				})
-				user.flags.no_welcome_email = True
 				user.flags.ignore_permissions = True
 				user.add_roles("Patient")
 

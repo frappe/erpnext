@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_events_in_timeline": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
@@ -1905,7 +1906,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-07-27 19:23:35.587516", 
+ "modified": "2019-01-30 11:28:11.774739", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Slip", 
