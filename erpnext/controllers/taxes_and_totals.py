@@ -73,9 +73,6 @@ class calculate_taxes_and_totals(object):
 					item.discount_amount = item.rate_with_margin - item.rate
 				elif flt(item.price_list_rate) > 0:
 					item.discount_amount = item.price_list_rate - item.rate
-					if not item.discount_percentage:
-						item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0,
-							item.precision("discount_percentage"))
 				else:
 					item.discount_amount = 0
 					item.discount_percentage = 0

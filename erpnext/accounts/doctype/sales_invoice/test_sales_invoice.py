@@ -1160,13 +1160,6 @@ class TestSalesInvoice(unittest.TestCase):
 		si.items[0].margin_type = 'Percentage'
 		si.items[0].margin_rate_or_amount = 25
 		si.save()
-
-		print()
-		print("----------------------------------------------------")
-		import pprint
-		pprint.pprint(si.items[0].as_dict(), indent=4)
-		print("----------------------------------------------------")
-
 		self.assertEqual(si.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
 
 	def test_outstanding_amount_after_advance_jv_cancelation(self):

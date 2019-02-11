@@ -247,13 +247,6 @@ class TestPricingRule(unittest.TestCase):
 		so.items[0].price_list_rate = 100
 		so.submit()
 		so = frappe.get_doc('Sales Order', so.name)
-
-		print()
-		print("----------------------------------------------------")
-		import pprint
-		pprint.pprint(so.items[0].as_dict(), indent=4)
-		print("----------------------------------------------------")
-
 		self.assertEqual(so.items[0].discount_percentage, 0)
 		self.assertEqual(so.items[0].rate, 100)
 
