@@ -163,6 +163,8 @@ class BOM(WebsiteGenerator):
 	def get_rm_rate(self, arg):
 		"""	Get raw material rate as per selected method, if bom exists takes bom cost """
 		rate = 0
+		if not self.rm_cost_as_per:
+			self.rm_cost_as_per = "Valuation Rate"
 
 		if arg.get('scrap_items'):
 			rate = self.get_valuation_rate(arg)
@@ -189,7 +191,8 @@ class BOM(WebsiteGenerator):
 						"currency": self.currency,
 						"conversion_rate": self.conversion_rate or 1,
 						"conversion_factor": arg.get("conversion_factor") or 1,
-						"plc_conversion_rate": 1
+						"plc_conversion_rate": 1,
+						"ignore_party": True
 					})
 					item_doc = frappe.get_doc("Item", arg.get("item_code"))
 					out = frappe._dict()
@@ -213,7 +216,7 @@ class BOM(WebsiteGenerator):
 		existing_bom_cost = self.total_cost
 
 		for d in self.get("items"):
-			d.rate = self.get_rm_rate({
+			rate = self.get_rm_rate({
 				"item_code": d.item_code,
 				"bom_no": d.bom_no,
 				"qty": d.qty,
@@ -221,6 +224,8 @@ class BOM(WebsiteGenerator):
 				"stock_uom": d.stock_uom,
 				"conversion_factor": d.conversion_factor
 			})
+			if rate:
+				d.rate = rate
 			d.amount = flt(d.rate) * flt(d.qty)
 
 		if self.docstatus == 1:

@@ -68,6 +68,7 @@ def create_appointment(patient, practitioner, appointment_date, department):
 	appointment.department = department
 	appointment.appointment_date = appointment_date
 	appointment.company = "_Test Company"
+	appointment.duration = 15
 	appointment.save(ignore_permissions=True)
 	return appointment
 

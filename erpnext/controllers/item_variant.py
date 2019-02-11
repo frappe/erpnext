@@ -260,8 +260,6 @@ def generate_keyed_value_combinations(args):
 	return results
 
 def copy_attributes_to_variant(item, variant):
-	from frappe.model import no_value_fields
-
 	# copy non no-copy fields
 
 	exclude_fields = ["naming_series", "item_code", "item_name", "show_in_website",
