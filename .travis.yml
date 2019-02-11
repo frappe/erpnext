@@ -33,16 +33,16 @@ before_script:
   - cd ~/frappe-bench
   - bench get-app erpnext $TRAVIS_BUILD_DIR
   - bench use test_site
+  - bench reinstall --mariadb-root-username root --mariadb-root-password travis --yes
+  - bench scheduler disable
+  - sed -i 's/9000/9001/g' sites/common_site_config.json
+  - bench start &
+  - sleep 10
 
 jobs:
   include:
     - stage: test
       script:
-        - bench reinstall --mariadb-root-username root --mariadb-root-password travis --yes
-        - bench scheduler disable
-        - sed -i 's/9000/9001/g' sites/common_site_config.json
-        - bench start &
-        - sleep 10
         - set -e
         - bench run-tests --app erpnext --coverage
       after_script:

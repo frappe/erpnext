@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_events_in_timeline": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 1, 
@@ -523,7 +524,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-09-12 16:41:06.378899", 
+ "modified": "2019-01-30 11:28:16.966735", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Person", 

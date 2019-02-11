@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cstr, cint, get_request_session

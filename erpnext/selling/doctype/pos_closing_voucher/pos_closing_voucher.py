@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from collections import defaultdict
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
@@ -26,6 +27,7 @@ class POSClosingVoucher(Document):
 
 		sales_summary = get_sales_summary(invoice_list)
 		self.set_sales_summary_values(sales_summary)
+		self.total_amount = sales_summary['grand_total']
 
 		if not self.get('payment_reconciliation'):
 			mop = get_mode_of_payment_details(invoice_list)
@@ -35,6 +37,21 @@ class POSClosingVoucher(Document):
 		self.set_taxes(taxes)
 
 		return self.get_payment_reconciliation_details()
+
+	def validate(self):
+		user = frappe.get_all('POS Closing Voucher',
+			filters = {
+				'user': self.user,
+				'docstatus': 1
+			},
+			or_filters = {
+					'period_start_date': ('between', [self.period_start_date, self.period_end_date]),
+					'period_end_date': ('between', [self.period_start_date, self.period_end_date])
+			})
+
+		if user:
+			frappe.throw(_("POS Closing Voucher alreday exists for {0} between date {1} and {2}"
+				.format(self.user, self.period_start_date, self.period_end_date)))
 
 	def set_invoice_list(self, invoice_list):
 		self.sales_invoices_summary = []

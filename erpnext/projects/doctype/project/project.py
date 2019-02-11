@@ -162,7 +162,7 @@ class Project(Document):
 	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data: return True
 
-		d = existing_task_data.get(row.task_id)
+		d = existing_task_data.get(row.task_id, {})
 
 		for field in fields:
 			if row.get(field) != d.get(field):
@@ -459,7 +459,7 @@ def get_projects_for_collect_progress(frequency, fields):
 	fields.extend(["name"])
 
 	return frappe.get_all("Project", fields = fields,
-		filters = {'collect_progress': 1, 'frequency': frequency})
+		filters = {'collect_progress': 1, 'frequency': frequency, 'status': 'Open'})
 
 def send_project_update_email_to_users(project):
 	doc = frappe.get_doc('Project', project)

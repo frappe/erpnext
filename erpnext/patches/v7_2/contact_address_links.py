@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe
 from frappe.core.doctype.dynamic_link.dynamic_link import deduplicate_dynamic_links
 from frappe.utils import update_progress_bar
