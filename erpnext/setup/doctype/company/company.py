@@ -94,6 +94,9 @@ class Company(NestedSet):
 
 		if frappe.flags.country_change:
 			install_country_fixtures(self.name)
+			self.create_default_tax_template()
+
+
 
 		if not frappe.db.get_value("Department", {"company": self.name}):
 			from erpnext.setup.setup_wizard.operations.install_fixtures import install_post_company_fixtures
@@ -341,6 +344,9 @@ class Company(NestedSet):
 		frappe.db.sql("delete from tabEmployee where company=%s", self.name)
 		frappe.db.sql("delete from tabDepartment where company=%s", self.name)
 		frappe.db.sql("delete from `tabTax Withholding Account` where company=%s", self.name)
+
+		frappe.db.sql("delete from `tabSales Taxes and Charges Template` where company=%s", self.name)
+		frappe.db.sql("delete from `tabPurchase Taxes and Charges Template` where company=%s", self.name)
 
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):

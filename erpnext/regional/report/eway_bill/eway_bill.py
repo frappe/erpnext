@@ -16,7 +16,7 @@ def execute(filters=None):
 	return columns, data
 
 def get_data(filters):
-	
+
 	conditions = get_conditions(filters)
 
 	data = frappe.db.sql("""
@@ -25,7 +25,7 @@ def get_data(filters):
 		FROM
 			`tabDelivery Note` AS dn join `tabDelivery Note Item` AS dni on (dni.parent = dn.name)
 		WHERE
-			dn.docstatus < 2 
+			dn.docstatus < 2
 			%s """ % conditions, as_dict=1)
 
 	unit = {
@@ -40,14 +40,14 @@ def get_data(filters):
 		'Set': "SETS"
 	}
 
-	# Regular expression set to remove all the special characters 
+	# Regular expression set to remove all the special characters
 	special_characters = "[$%^*()+\\[\]{};':\"\\|<>.?]"
 
 	for row in data:
 		set_defaults(row)
 		set_taxes(row, filters)
 		set_address_details(row, special_characters)
-		
+
 		# Eway Bill accepts date as dd/mm/yyyy and not dd-mm-yyyy
 		row.posting_date = '/'.join(str(row.posting_date).replace("-", "/").split('/')[::-1])
 		row.lr_date = '/'.join(str(row.lr_date).replace("-", "/").split('/')[::-1])
@@ -66,7 +66,7 @@ def get_data(filters):
 	return data
 
 def get_conditions(filters):
-	
+
 	conditions = ""
 
 	conditions += filters.get('company') and " AND dn.company = '%s' " % filters.get('company') or ""
@@ -92,7 +92,7 @@ def set_address_details(row, special_characters):
 		row.update({'from_pin_code': pincode and pincode.replace(" ", "") or ''})
 		row.update({'from_state': state and state.upper() or ''})
 		row.update({'dispatch_state': row.from_state})
-		
+
 	if row.get('shipping_address_name'):
 		address_line1, address_line2, city, pincode, state = frappe.db.get_value("Address", row.get('shipping_address_name'), ['address_line1', 'address_line2', 'city', 'pincode', 'state'])
 
@@ -104,19 +104,22 @@ def set_address_details(row, special_characters):
 		row.update({'ship_to_state': row.to_state})
 
 def set_taxes(row, filters):
-	taxes = frappe.get_list("Sales Taxes and Charges", 
+	taxes = frappe.get_list("Sales Taxes and Charges",
 				filters={
 					'parent': row.dn_id
-				}, 
+				},
 				fields=('item_wise_tax_detail', 'account_head'))
 
 	account_list = ["cgst_account", "sgst_account", "igst_account", "cess_account"]
 	taxes_list = frappe.get_list("GST Account",
 		filters={
-			"parent": "GST Settings", 
+			"parent": "GST Settings",
 			"company": filters.company
 		},
 		fields=account_list)
+
+	if not taxes_list:
+		frappe.throw(_("Please set GST Accounts in GST Settings"))
 
 	item_tax_rate = {}
 

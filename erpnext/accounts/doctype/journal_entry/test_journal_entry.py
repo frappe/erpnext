@@ -6,6 +6,7 @@ import unittest, frappe
 from frappe.utils import flt, nowdate
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.exceptions import InvalidAccountCurrency
+from erpnext.accounts.utils import get_balance_on_voucher
 
 class TestJournalEntry(unittest.TestCase):
 	def test_journal_entry_with_against_jv(self):
@@ -262,6 +263,215 @@ class TestJournalEntry(unittest.TestCase):
 
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
 		accounts_settings.save()
+
+	def test_jv_receivable_voucher_balance(self):
+		# Receivable entry
+		receivable_jv = make_journal_entry("_Test Receivable - _TC", "Sales - _TC", 500, save=False)
+		receivable_jv.get("accounts")[0].update({"party_type": "Customer", "party": "_Test Customer"})
+		receivable_jv.insert()
+		receivable_jv.submit()
+		receivable_balance = get_balance_on_voucher(receivable_jv.doctype, receivable_jv.name,
+			"Customer", "_Test Customer", "_Test Receivable - _TC")
+		self.assertEqual(receivable_balance, 500)
+
+		# Attempt to allocate a receivable entry against another receivable entry
+		receivable_jv2 = make_journal_entry("_Test Receivable - _TC", "Sales - _TC", 100, save=False)
+		receivable_jv2.get("accounts")[0].update({"party_type": "Customer", "party": "_Test Customer",
+			"reference_type": receivable_jv.doctype, "reference_name": receivable_jv.name})
+		self.assertRaises(frappe.ValidationError, receivable_jv2.insert)
+
+		# Partial payment against receivable entry
+		payment_jv1 = make_journal_entry("_Test Bank - _TC", "_Test Receivable - _TC", 150, save=False)
+		payment_jv1.get("accounts")[1].update({"party_type": "Customer", "party": "_Test Customer",
+			"reference_type": receivable_jv.doctype, "reference_name": receivable_jv.name})
+		payment_jv1.insert()
+		payment_jv1.submit()
+		payment_balance = get_balance_on_voucher(payment_jv1.doctype, payment_jv1.name,
+			"Customer", "_Test Customer", "_Test Receivable - _TC")
+		self.assertEqual(payment_balance, 0)
+
+		receivable_balance = get_balance_on_voucher(receivable_jv.doctype, receivable_jv.name,
+			"Customer", "_Test Customer", "_Test Receivable - _TC")
+		self.assertEqual(receivable_balance, 350)
+
+		# Attempt to over allocate payment against receivable entry
+		payment_jv2 = make_journal_entry("_Test Bank - _TC", "_Test Receivable - _TC", 1000, save=False)
+		payment_jv2.get("accounts")[1].update({"party_type": "Customer", "party": "_Test Customer",
+			"reference_type": receivable_jv.doctype, "reference_name": receivable_jv.name})
+		self.assertRaises(frappe.ValidationError, payment_jv2.insert)
+
+		# Payment for the remaining balance of receivable entry
+		payment_jv3 = make_journal_entry("_Test Bank - _TC", "_Test Receivable - _TC", 350, save=False)
+		payment_jv3.get("accounts")[1].update({"party_type": "Customer", "party": "_Test Customer",
+			"reference_type": receivable_jv.doctype, "reference_name": receivable_jv.name})
+		payment_jv3.insert()
+		payment_jv3.submit()
+		receivable_balance = get_balance_on_voucher(receivable_jv.doctype, receivable_jv.name,
+			"Customer", "_Test Customer", "_Test Receivable - _TC")
+		self.assertEqual(receivable_balance, 0)
+
+		# Cancel a payment
+		payment_jv1.cancel()
+		receivable_balance = get_balance_on_voucher(receivable_jv.doctype, receivable_jv.name,
+			"Customer", "_Test Customer", "_Test Receivable - _TC")
+		self.assertEqual(receivable_balance, 150)
+
+	def test_jv_receivable_advance_payment_voucher_balance(self):
+		# Advance payment
+		payment_jv = make_journal_entry("_Test Bank - _TC", "_Test Receivable - _TC", 500, save=False)
+		payment_jv.get("accounts")[1].update({"party_type": "Customer", "party": "_Test Customer"})
+		payment_jv.insert()
+		payment_jv.submit()
+		payment_balance = get_balance_on_voucher(payment_jv.doctype, payment_jv.name,
+			"Customer", "_Test Customer", "_Test Receivable - _TC")
+		self.assertEqual(payment_balance, -500)
+
+		# Attempt to allocate an advance payment against another advance payment
+		payment_jv2 = make_journal_entry("_Test Bank - _TC", "_Test Receivable - _TC", 100, save=False)
+		payment_jv2.get("accounts")[0].update({"party_type": "Customer", "party": "_Test Customer",
+			"reference_type": payment_jv.doctype, "reference_name": payment_jv.name})
+		self.assertRaises(frappe.ValidationError, payment_jv2.insert)
+
+		# Partial return of advance payment
+		return_jv1 = make_journal_entry("_Test Receivable - _TC", "_Test Bank - _TC", 150, save=False)
+		return_jv1.get("accounts")[0].update({"party_type": "Customer", "party": "_Test Customer",
+			"reference_type": payment_jv.doctype, "reference_name": payment_jv.name})
+		return_jv1.insert()
+		return_jv1.submit()
+		return_balance = get_balance_on_voucher(return_jv1.doctype, return_jv1.name,
+			"Customer", "_Test Customer", "_Test Receivable - _TC")
+		self.assertEqual(return_balance, 0)
+
+		payment_balance = get_balance_on_voucher(payment_jv.doctype, payment_jv.name,
+			"Customer", "_Test Customer", "_Test Receivable - _TC")
+		self.assertEqual(payment_balance, -350)
+
+		# Attempt to return more than advance payment balance
+		return_jv2 = make_journal_entry("_Test Receivable - _TC", "_Test Bank - _TC", 1000, save=False)
+		return_jv2.get("accounts")[0].update({"party_type": "Customer", "party": "_Test Customer",
+			"reference_type": payment_jv.doctype, "reference_name": payment_jv.name})
+		self.assertRaises(frappe.ValidationError, return_jv2.insert)
+
+		# Return for the remaining balance of advance payment
+		return_jv3 = make_journal_entry("_Test Receivable - _TC", "_Test Bank - _TC", 350, save=False)
+		return_jv3.get("accounts")[0].update({"party_type": "Customer", "party": "_Test Customer",
+			"reference_type": payment_jv.doctype, "reference_name": payment_jv.name})
+		return_jv3.insert()
+		return_jv3.submit()
+		payment_balance = get_balance_on_voucher(payment_jv.doctype, payment_jv.name,
+			"Customer", "_Test Customer", "_Test Receivable - _TC")
+		self.assertEqual(payment_balance, 0)
+
+		# Cancel a return
+		return_jv1.cancel()
+		payment_balance = get_balance_on_voucher(payment_jv.doctype, payment_jv.name,
+			"Customer", "_Test Customer", "_Test Receivable - _TC")
+		self.assertEqual(payment_balance, -150)
+
+	def test_jv_payable_voucher_balance(self):
+		# Payable entry
+		payable_jv = make_journal_entry("_Test Account Shipping Charges - _TC", "_Test Payable - _TC", 500, save=False)
+		payable_jv.get("accounts")[1].update({"party_type": "Supplier", "party": "_Test Supplier"})
+		payable_jv.insert()
+		payable_jv.submit()
+		payable_balance = get_balance_on_voucher(payable_jv.doctype, payable_jv.name,
+			"Supplier", "_Test Supplier", "_Test Payable - _TC")
+		self.assertEqual(payable_balance, 500)
+
+		# Attempt to allocate a payable entry against another payable entry
+		payable_jv2 = make_journal_entry("_Test Account Shipping Charges - _TC", "_Test Payable - _TC", 100, save=False)
+		payable_jv2.get("accounts")[0].update({"party_type": "Supplier", "party": "_Test Supplier",
+			"reference_type": payable_jv.doctype, "reference_name": payable_jv.name})
+		self.assertRaises(frappe.ValidationError, payable_jv2.insert)
+
+		# Partial payment against payable entry
+		payment_jv1 = make_journal_entry("_Test Payable - _TC", "_Test Bank - _TC", 150, save=False)
+		payment_jv1.get("accounts")[0].update({"party_type": "Supplier", "party": "_Test Supplier",
+			"reference_type": payable_jv.doctype, "reference_name": payable_jv.name})
+		payment_jv1.insert()
+		payment_jv1.submit()
+		payment_balance = get_balance_on_voucher(payment_jv1.doctype, payment_jv1.name,
+			"Supplier", "_Test Supplier", "_Test Payable - _TC")
+		self.assertEqual(payment_balance, 0)
+
+		payable_balance = get_balance_on_voucher(payable_jv.doctype, payable_jv.name,
+			"Supplier", "_Test Supplier", "_Test Payable - _TC")
+		self.assertEqual(payable_balance, 350)
+
+		# Attempt to over allocate payment against payable entry
+		payable_jv2 = make_journal_entry("_Test Payable - _TC", "_Test Bank - _TC", 1000, save=False)
+		payable_jv2.get("accounts")[0].update({"party_type": "Supplier", "party": "_Test Supplier",
+			"reference_type": payable_jv.doctype, "reference_name": payable_jv.name})
+		self.assertRaises(frappe.ValidationError, payable_jv2.insert)
+
+		# Payment for the remaining balance of payable entry
+		payment_jv3 = make_journal_entry("_Test Payable - _TC", "_Test Bank - _TC", 350, save=False)
+		payment_jv3.get("accounts")[0].update({"party_type": "Supplier", "party": "_Test Supplier",
+			"reference_type": payable_jv.doctype, "reference_name": payable_jv.name})
+		payment_jv3.insert()
+		payment_jv3.submit()
+		payable_balance = get_balance_on_voucher(payable_jv.doctype, payable_jv.name,
+			"Supplier", "_Test Supplier", "_Test Payable - _TC")
+		self.assertEqual(payable_balance, 0)
+
+		# Cancel a payment
+		payment_jv1.cancel()
+		payable_balance = get_balance_on_voucher(payable_jv.doctype, payable_jv.name,
+			"Supplier", "_Test Supplier", "_Test Payable - _TC")
+		self.assertEqual(payable_balance, 150)
+
+	def test_jv_payable_advance_payment_voucher_balance(self):
+		# Advance payment
+		payment_jv = make_journal_entry("_Test Payable - _TC", "_Test Account Shipping Charges - _TC", 500, save=False)
+		payment_jv.get("accounts")[0].update({"party_type": "Supplier", "party": "_Test Supplier"})
+		payment_jv.insert()
+		payment_jv.submit()
+		payment_balance = get_balance_on_voucher(payment_jv.doctype, payment_jv.name,
+			"Supplier", "_Test Supplier", "_Test Payable - _TC")
+		self.assertEqual(payment_balance, -500)
+
+		# Attempt to allocate an advance payment against another advance payment
+		payment_jv2 = make_journal_entry("_Test Payable - _TC", "_Test Account Shipping Charges - _TC", 100, save=False)
+		payment_jv2.get("accounts")[0].update({"party_type": "Supplier", "party": "_Test Supplier",
+			"reference_type": payment_jv.doctype, "reference_name": payment_jv.name})
+		self.assertRaises(frappe.ValidationError, payment_jv2.insert)
+
+		# Partial return of advance payment
+		return_jv1 = make_journal_entry("_Test Bank - _TC", "_Test Payable - _TC", 150, save=False)
+		return_jv1.get("accounts")[1].update({"party_type": "Supplier", "party": "_Test Supplier",
+			"reference_type": payment_jv.doctype, "reference_name": payment_jv.name})
+		return_jv1.insert()
+		return_jv1.submit()
+		return_balance = get_balance_on_voucher(return_jv1.doctype, return_jv1.name,
+			"Supplier", "_Test Supplier", "_Test Payable - _TC")
+		self.assertEqual(return_balance, 0)
+
+		payment_balance = get_balance_on_voucher(payment_jv.doctype, payment_jv.name,
+			"Supplier", "_Test Supplier", "_Test Payable - _TC")
+		self.assertEqual(payment_balance, -350)
+
+		# Attempt to return more than advance payment balance
+		return_jv2 = make_journal_entry("_Test Bank - _TC", "_Test Payable - _TC", 1000, save=False)
+		return_jv2.get("accounts")[1].update({"party_type": "Supplier", "party": "_Test Supplier",
+			"reference_type": payment_jv.doctype, "reference_name": payment_jv.name})
+		self.assertRaises(frappe.ValidationError, return_jv2.insert)
+
+		# Return for the remaining balance of advance payment
+		return_jv3 = make_journal_entry("_Test Bank - _TC", "_Test Payable - _TC", 350, save=False)
+		return_jv3.get("accounts")[1].update({"party_type": "Supplier", "party": "_Test Supplier",
+			"reference_type": payment_jv.doctype, "reference_name": payment_jv.name})
+		return_jv3.insert()
+		return_jv3.submit()
+		payment_balance = get_balance_on_voucher(payment_jv.doctype, payment_jv.name,
+			"Supplier", "_Test Supplier", "_Test Payable - _TC")
+		self.assertEqual(payment_balance, 0)
+
+		# Cancel a payment
+		return_jv1.cancel()
+		payment_balance = get_balance_on_voucher(payment_jv.doctype, payment_jv.name,
+			"Supplier", "_Test Supplier", "_Test Payable - _TC")
+		self.assertEqual(payment_balance, -150)
+
 
 def make_journal_entry(account1, account2, amount, cost_center=None, posting_date=None, exchange_rate=1, save=True, submit=False, project=None):
 	if not cost_center:

@@ -272,6 +272,9 @@ class AccountsController(TransactionBase):
 								if item_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
 
+					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
+						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
+
 					if ret.get("pricing_rule"):
 						# if user changed the discount percentage then set user's discount percentage ?
 						item.set("pricing_rule", ret.get("pricing_rule"))
@@ -1061,7 +1064,7 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 
 	against_account_condition = ""
 	if against_account:
-		against_account_condition = "and pe.{against_account_field} = '{against_account}'".format(
+		against_account_condition = "and pe.{against_account_field} = {against_account}".format(
 			against_account_field=against_account_field, against_account=frappe.db.escape(against_account))
 
 	if order_list or against_all_orders:
