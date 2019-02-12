@@ -30,6 +30,9 @@ form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
 
+class ConfirmRevaluePurchaseReceipt(frappe.ValidationError):
+	pass
+
 class PurchaseInvoice(BuyingController):
 	def __init__(self, *args, **kwargs):
 		super(PurchaseInvoice, self).__init__(*args, **kwargs)
@@ -209,14 +212,14 @@ class PurchaseInvoice(BuyingController):
 						does_revalue = True
 						if not cint(self.revalue_purchase_receipt):
 							frappe.throw(_("Row {0}: Item Rate does not match the Rate in Purchase Receipt. "
-								"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx))
+								"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx), ConfirmRevaluePurchaseReceipt)
 
 					# if item tax amount is different
 					if abs(item.item_tax_amount - pr_item.item_tax_amount) > 0.1/10**self.precision("item_tax_amount", "items"):
 						does_revalue = True
 						if not cint(self.revalue_purchase_receipt):
 							frappe.throw(_("Row {0}: Item Valuation Tax Amount does not match the Valuation Tax Amount in Purchase Receipt. "
-								"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx))
+								"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx), ConfirmRevaluePurchaseReceipt)
 
 		if not does_revalue:
 			self.revalue_purchase_receipt = 0
@@ -359,11 +362,13 @@ class PurchaseInvoice(BuyingController):
 					frappe.throw(_("Stock cannot be updated against Purchase Receipt {0}")
 						.format(item.purchase_receipt))
 
+	def before_submit(self):
+		self.check_valuation_amounts_with_previous_doc()
+
 	def on_submit(self):
 		super(PurchaseInvoice, self).on_submit()
 
 		self.check_prev_docstatus()
-		self.check_valuation_amounts_with_previous_doc()
 		self.update_status_updater_args()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
