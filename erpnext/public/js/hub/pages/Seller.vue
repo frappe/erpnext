@@ -125,15 +125,14 @@ export default {
 			return hub.is_user_registered()
 		},
 		get_seller_profile_and_items() {
+			let post_data = {company: this.seller_company}
 			if (this.page_name == 'profile'){
 				this.seller_company = null;
 				this.hub_seller = hub.settings.hub_seller_name
+				post_data = {hub_seller: this.hub_seller}
 			}
-			hub.call(
-				'get_hub_seller_page_info',
-				{ company: this.seller_company, 
-				  hub_seller: this.hub_seller }
-			).then(data => {
+			hub.call('get_hub_seller_page_info', post_data)
+			.then(data => {
 				this.init = false;
 				this.profile = data.profile;
 				this.items = data.items;
