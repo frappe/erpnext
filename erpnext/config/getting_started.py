@@ -112,12 +112,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Opportunity",
-					"description": _("Potential opportunities for selling."),
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
 					"label": _("Customer Group"),
 					"name": "Customer Group",
 					"icon": "fa fa-sitemap",
@@ -174,7 +168,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Student Group",
+					"name": "Instructor",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Room",
 					"onboard": 1,
 				},
 			]
@@ -185,20 +184,20 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Patient Appointment",
-					"label": _("Patient Appointment"),
+					"name": "Patient",
+					"label": _("Patient"),
 					"onboard": 1,
 				},
 				{
 					"type": "doctype",
-					"name": "Clinical Procedure",
-					"label": _("Clinical Procedure"),
+					"name": "Physician",
+					"label": _("Physician"),
 					"onboard": 1,
 				},
 				{
 					"type": "doctype",
-					"name": "Inpatient Record",
-					"label": _("Inpatient Record"),
+					"name": "Diagnosis",
+					"label": _("Diagnosis"),
 					"onboard": 1,
 				}
 			]
