@@ -87,6 +87,26 @@ frappe.ui.form.on("Project", {
 			}
 		});
 	},
+	show_dashboard: function(frm) {
+		if(frm.doc.__onload.activity_summary.length) {	
+			var hours = $.map(frm.doc.__onload.activity_summary, function(d) { return d.total_hours });	
+			var max_count = Math.max.apply(null, hours);	
+			var sum = hours.reduce(function(a, b) { return a + b; }, 0);	
+			var section = frm.dashboard.add_section(	
+				frappe.render_template('project_dashboard',	
+					{	
+						data: frm.doc.__onload.activity_summary,	
+						max_count: max_count,	
+						sum: sum	
+					}));	
+
+ 			section.on('click', '.time-sheet-link', function() {	
+				var activity_type = $(this).attr('data-activity_type');	
+				frappe.set_route('List', 'Timesheet',	
+					{'activity_type': activity_type, 'project': frm.doc.name, 'status': ["!=", "Cancelled"]});	
+			});	
+		}	
+	}
 });
 
 frappe.ui.form.on("Project Task", {
