@@ -63,7 +63,7 @@ def get_help_messages():
 			doctype='Lead',
 			title=_('Create Leads'),
 			description=_('Leads help you get business, add all your contacts and more as your leads'),
-			action=_('Make Lead'),
+			action=_('Create Lead'),
 			route='List/Lead',
 			domain=('Manufacturing', 'Retail', 'Services', 'Distribution'),
 			target=3
@@ -72,7 +72,7 @@ def get_help_messages():
 			doctype='Quotation',
 			title=_('Create customer quotes'),
 			description=_('Quotations are proposals, bids you have sent to your customers'),
-			action=_('Make Quotation'),
+			action=_('Create Quotation'),
 			route='List/Quotation',
 			domain=('Manufacturing', 'Retail', 'Services', 'Distribution'),
 			target=3
@@ -80,8 +80,8 @@ def get_help_messages():
 		frappe._dict(
 			doctype='Sales Order',
 			title=_('Manage your orders'),
-			description=_('Make Sales Orders to help you plan your work and deliver on-time'),
-			action=_('Make Sales Order'),
+			description=_('Create Sales Orders to help you plan your work and deliver on-time'),
+			action=_('Create Sales Order'),
 			route='List/Sales Order',
 			domain=('Manufacturing', 'Retail', 'Services', 'Distribution'),
 			target=3
@@ -90,7 +90,7 @@ def get_help_messages():
 			doctype='Purchase Order',
 			title=_('Create Purchase Orders'),
 			description=_('Purchase orders help you plan and follow up on your purchases'),
-			action=_('Make Purchase Order'),
+			action=_('Create Purchase Order'),
 			route='List/Purchase Order',
 			domain=('Manufacturing', 'Retail', 'Services', 'Distribution'),
 			target=3
@@ -99,7 +99,7 @@ def get_help_messages():
 			doctype='User',
 			title=_('Create Users'),
 			description=_('Add the rest of your organization as your users. You can also add invite Customers to your portal by adding them from Contacts'),
-			action=_('Make User'),
+			action=_('Create User'),
 			route='List/User',
 			domain=('Manufacturing', 'Retail', 'Services', 'Distribution'),
 			target=3
@@ -108,7 +108,7 @@ def get_help_messages():
 			doctype='Timesheet',
 			title=_('Add Timesheets'),
 			description=_('Timesheets help keep track of time, cost and billing for activites done by your team'),
-			action=_('Make Timesheet'),
+			action=_('Create Timesheet'),
 			route='List/Timesheet',
 			domain=('Services',),
 			target=5
@@ -117,7 +117,7 @@ def get_help_messages():
 			doctype='Student',
 			title=_('Add Students'),
 			description=_('Students are at the heart of the system, add all your students'),
-			action=_('Make Student'),
+			action=_('Create Student'),
 			route='List/Student',
 			domain=('Education',),
 			target=5
@@ -126,7 +126,7 @@ def get_help_messages():
 			doctype='Student Batch',
 			title=_('Group your students in batches'),
 			description=_('Student Batches help you track attendance, assessments and fees for students'),
-			action=_('Make Student Batch'),
+			action=_('Create Student Batch'),
 			route='List/Student Batch',
 			domain=('Education',),
 			target=3
@@ -135,7 +135,7 @@ def get_help_messages():
 			doctype='Employee',
 			title=_('Create Employee Records'),
 			description=_('Create Employee records to manage leaves, expense claims and payroll'),
-			action=_('Make Employee'),
+			action=_('Create Employee'),
 			route='List/Employee',
 			target=3
 		)

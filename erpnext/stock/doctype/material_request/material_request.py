@@ -70,7 +70,7 @@ class MaterialRequest(BuyingController):
 		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status,
 			["Draft", "Submitted", "Stopped", "Cancelled", "Pending",
-			"Partially Ordered", "Ordered", "Issued", "Transferred"])
+			"Partially Ordered", "Ordered", "Issued", "Transferred", "Received"])
 
 		validate_for_items(self)
 
@@ -154,7 +154,7 @@ class MaterialRequest(BuyingController):
 
 		for d in self.get("items"):
 			if d.name in mr_items:
-				if self.material_request_type in ("Material Issue", "Material Transfer"):
+				if self.material_request_type in ("Material Issue", "Material Transfer", "Customer Provided"):
 					d.ordered_qty =  flt(frappe.db.sql("""select sum(transfer_qty)
 						from `tabStock Entry Detail` where material_request = %s
 						and material_request_item = %s and docstatus = 1""",
@@ -238,6 +238,18 @@ def update_item(obj, target, source_parent):
 	target.conversion_factor = obj.conversion_factor
 	target.qty = flt(flt(obj.stock_qty) - flt(obj.ordered_qty))/ target.conversion_factor
 	target.stock_qty = (target.qty * target.conversion_factor)
+
+def get_list_context(context=None):
+	from erpnext.controllers.website_list_for_contact import get_list_context
+	list_context = get_list_context(context)
+	list_context.update({
+		'show_sidebar': True,
+		'show_search': True,
+		'no_breadcrumbs': True,
+		'title': _('Material Request'),
+	})
+
+	return list_context
 
 @frappe.whitelist()
 def update_status(name, status):
@@ -400,7 +412,7 @@ def make_stock_entry(source_name, target_doc=None):
 		target.transfer_qty = qty * obj.conversion_factor
 		target.conversion_factor = obj.conversion_factor
 
-		if source_parent.material_request_type == "Material Transfer":
+		if source_parent.material_request_type == "Material Transfer" or source_parent.material_request_type == "Customer Provided":
 			target.t_warehouse = obj.warehouse
 		else:
 			target.s_warehouse = obj.warehouse
@@ -409,6 +421,9 @@ def make_stock_entry(source_name, target_doc=None):
 		target.purpose = source.material_request_type
 		if source.job_card:
 			target.purpose = 'Material Transfer for Manufacture'
+
+		if source.material_request_type == "Customer Provided":
+			target.purpose = "Material Receipt"
 
 		target.run_method("calculate_rate_and_amount")
 		target.set_job_card_data()
