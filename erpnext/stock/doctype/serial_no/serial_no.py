@@ -136,7 +136,7 @@ class SerialNo(StockController):
 		sle_dict = {}
 		for sle in frappe.db.sql("""select * from `tabStock Ledger Entry`
 			where serial_no like %s and item_code=%s and ifnull(is_cancelled, 'No')='No'
-			order by posting_date desc, posting_time desc, name desc""",
+			order by posting_date desc, posting_time desc, creation desc""",
 			("%%%s%%" % self.name, self.item_code), as_dict=1):
 				if self.name.upper() in get_serial_nos(sle.serial_no):
 					if cint(sle.actual_qty) > 0:
@@ -171,7 +171,7 @@ class SerialNo(StockController):
 			where fieldname='serial_no' and fieldtype in ('Text', 'Small Text')"""):
 
 			for item in frappe.db.sql("""select name, serial_no from `tab%s`
-				where serial_no like '%%%s%%'""" % (dt[0], frappe.db.escape(old))):
+				where serial_no like %s""" % (dt[0], frappe.db.escape('%' + old + '%'))):
 
 				serial_nos = map(lambda i: new if i.upper()==old.upper() else i, item[1].split('\n'))
 				frappe.db.sql("""update `tab%s` set serial_no = %s

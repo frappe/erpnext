@@ -20,6 +20,10 @@ class PayrollEntry(Document):
 			if self.validate_employee_attendance():
 				frappe.throw(_("Cannot Submit, Employees left to mark attendance"))
 
+	def on_cancel(self):
+		frappe.delete_doc("Salary Slip", frappe.db.sql_list("""select name from `tabSalary Slip`
+			where payroll_entry=%s """, (self.name)))
+
 	def get_emp_list(self):
 		"""
 			Returns list of active employees based on selected criteria
