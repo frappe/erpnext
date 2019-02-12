@@ -29,7 +29,7 @@ def validate_service_stop_date(doc):
 			if date_diff(item.service_stop_date, item.service_end_date) > 0:
 				frappe.throw(_("Service Stop Date cannot be after Service End Date"))
 
-		if old_stop_dates and old_stop_dates.get(item.name) and item.service_stop_date!=old_stop_dates[item.name]:
+		if old_stop_dates and old_stop_dates.get(item.name) and item.service_stop_date!=old_stop_dates.get(item.name):
 			frappe.throw(_("Cannot change Service Stop Date for item in row {0}".format(item.idx)))
 
 def convert_deferred_expense_to_expense(start_date=None, end_date=None):
@@ -128,9 +128,13 @@ def book_deferred_income_or_expense(doc, start_date=None, end_date=None):
 	# book the expense/income on the last day, but it will be trigger on the 1st of month at 12:00 AM
 	# start_date: 1st of the last month or the start date
 	# end_date: end_date or today-1
+	enable_check = "enable_deferred_revenue" \
+		if doc.doctype=="Sales Invoice" else "enable_deferred_expense"
 
 	gl_entries = []
 	for item in doc.get('items'):
+		if not item.get(enable_check): continue
+
 		skip = False
 		last_gl_entry, booking_start_date, booking_end_date, skip = \
 			get_booking_dates(doc, item, start_date, end_date)

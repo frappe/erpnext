@@ -317,6 +317,8 @@ class calculate_taxes_and_totals(object):
 		elif tax.charge_type == "On Previous Row Total":
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.doc.get("taxes")[cint(tax.row_id) - 1].grand_total_for_current_item
+		elif tax.charge_type == "On Item Quantity":
+			current_tax_amount = tax_rate * item.stock_qty
 
 		self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 

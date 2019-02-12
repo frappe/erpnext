@@ -13,16 +13,16 @@ def execute(filters=None):
 	data = get_bom_stock(filters)
 	qty_to_make = filters.get("qty_to_make")
 
-	for rows in data:
-		item_map = get_item_details(rows[0])
-		reqd_qty = qty_to_make * rows[3]
-		last_pur_price = frappe.db.get_value("Item", rows[0], "last_purchase_rate")
-		if rows[4] > 0:
-			diff_qty = rows[4] - reqd_qty
-			summ_data.append([rows[0], rows[1], item_map[rows[0]]["manufacturer"], item_map[rows[0]]["manufacturer_part_no"], rows[3], rows[4], reqd_qty, diff_qty, last_pur_price])
+	for row in data:
+		item_map = get_item_details(row.item_code)
+		reqd_qty = qty_to_make * row.actual_qty
+		last_pur_price = frappe.db.get_value("Item", row.item_code, "last_purchase_rate")
+		if row.to_build > 0:
+			diff_qty = row.to_build - reqd_qty
+			summ_data.append([row.item_code, row.description, item_map[row.item_code]["manufacturer"], item_map[row.item_code]["manufacturer_part_no"], row.actual_qty, row.to_build, reqd_qty, diff_qty, last_pur_price])
 		else:
 			diff_qty = 0 - reqd_qty
-			summ_data.append([rows[0], rows[1], item_map[rows[0]]["manufacturer"], item_map[rows[0]]["manufacturer_part_no"], rows[3], "0.000", reqd_qty, diff_qty, last_pur_price])
+			summ_data.append([row.item_code, row.description, item_map[row.item_code]["manufacturer"], item_map[row.item_code]["manufacturer_part_no"], row.actual_qty, "0.000", reqd_qty, diff_qty, last_pur_price])
 
 	return columns, summ_data
 
@@ -62,7 +62,7 @@ def get_bom_stock(filters):
 				where wh.lft >= %s and wh.rgt <= %s and ledger.warehouse = wh.name)" % (warehouse_details.lft,
 				warehouse_details.rgt)
 		else:
-			conditions += " and ledger.warehouse = '%s'" % frappe.db.escape(filters.get("warehouse"))
+			conditions += " and ledger.warehouse = %s" % frappe.db.escape(filters.get("warehouse"))
 
 	else:
 		conditions += ""
@@ -72,8 +72,8 @@ def get_bom_stock(filters):
 				bom_item.item_code,
 				bom_item.description,
 				bom_item.{qty_field},
-				sum(ledger.actual_qty) as actual_qty,
-				sum(FLOOR(ledger.actual_qty / bom_item.{qty_field}))as to_build
+				ifnull(sum(ledger.actual_qty), 0) as actual_qty,
+				ifnull(sum(FLOOR(ledger.actual_qty / bom_item.{qty_field})), 0) as to_build
 			FROM
 				{table} AS bom_item
 				LEFT JOIN `tabBin` AS ledger
@@ -83,7 +83,7 @@ def get_bom_stock(filters):
 			WHERE
 				bom_item.parent = '{bom}' and bom_item.parenttype='BOM'
 
-			GROUP BY bom_item.item_code""".format(qty_field=qty_field, table=table, conditions=conditions, bom=bom))
+			GROUP BY bom_item.item_code""".format(qty_field=qty_field, table=table, conditions=conditions, bom=bom), as_dict=1)
 
 def get_item_details(item_code):
 		items = frappe.db.sql("""select it.item_group, it.item_name, it.stock_uom, it.name, it.brand, it.description, it.manufacturer_part_no, it.manufacturer from tabItem it where it.item_code = %s""", item_code, as_dict=1)

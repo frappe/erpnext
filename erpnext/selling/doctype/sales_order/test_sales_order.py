@@ -12,6 +12,8 @@ from erpnext.selling.doctype.sales_order.sales_order import make_work_orders
 from erpnext.controllers.accounts_controller import update_child_qty_rate
 import json
 from erpnext.selling.doctype.sales_order.sales_order import make_raw_material_request
+
+
 class TestSalesOrder(unittest.TestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
@@ -267,6 +269,22 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1 + 50)
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"),
 			existing_reserved_qty_item2 + 20)
+
+	def test_add_new_item_in_update_child_qty_rate(self):
+		so = make_sales_order(item_code= "_Test Item", qty=4)
+		create_dn_against_so(so.name, 4)
+		make_sales_invoice(so.name)
+
+		trans_item = json.dumps([{'item_code' : '_Test Item 2', 'rate' : 200, 'qty' : 7}])
+		update_child_qty_rate('Sales Order', trans_item, so.name)
+
+		so.reload()
+		self.assertEqual(so.get("items")[-1].item_code, '_Test Item 2')
+		self.assertEqual(so.get("items")[-1].rate, 200)
+		self.assertEqual(so.get("items")[-1].qty, 7)
+		self.assertEqual(so.get("items")[-1].amount, 1400)
+		self.assertEqual(so.status, 'To Deliver and Bill')
+
 
 	def test_update_child_qty_rate(self):
 		so = make_sales_order(item_code= "_Test Item", qty=4)

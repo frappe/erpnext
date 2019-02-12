@@ -192,7 +192,7 @@ frappe.ui.form.on("Expense Claim", {
 				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
 				&& frappe.model.can_create("Payment Entry")) {
 			frm.add_custom_button(__('Payment'),
-				function() { frm.events.make_payment_entry(frm); }, __("Make"));
+				function() { frm.events.make_payment_entry(frm); }, __('Create'));
 		}
 	},
 

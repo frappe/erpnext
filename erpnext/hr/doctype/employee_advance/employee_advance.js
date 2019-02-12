@@ -19,7 +19,6 @@ frappe.ui.form.on('Employee Advance', {
 				filters: {
 					"root_type": "Asset",
 					"is_group": 0,
-					"account_type": "Payable",
 					"company": frm.doc.company
 				}
 			};
@@ -31,7 +30,7 @@ frappe.ui.form.on('Employee Advance', {
 			&& (flt(frm.doc.paid_amount) < flt(frm.doc.advance_amount))
 			&& frappe.model.can_create("Payment Entry")) {
 			frm.add_custom_button(__('Payment'),
-				function() { frm.events.make_payment_entry(frm); }, __("Make"));
+				function() { frm.events.make_payment_entry(frm); }, __('Create'));
 		}
 		else if (
 			frm.doc.docstatus === 1
@@ -43,7 +42,7 @@ frappe.ui.form.on('Employee Advance', {
 				function() {
 					frm.events.make_expense_claim(frm);
 				},
-				__("Make")
+				__('Create')
 			);
 		}
 	},
