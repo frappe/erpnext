@@ -173,15 +173,15 @@ def get_item_warehouse_map(filters, sle):
 		qty_dict.val_rate = d.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
-		
+
 	iwb_map = filter_items_with_no_transactions(iwb_map)
 
 	return iwb_map
-	
+
 def filter_items_with_no_transactions(iwb_map):
 	for (company, item, warehouse) in sorted(iwb_map):
 		qty_dict = iwb_map[(company, item, warehouse)]
-		
+
 		no_transactions = True
 		float_precision = cint(frappe.db.get_default("float_precision")) or 3
 		for key, val in iteritems(qty_dict):
@@ -189,7 +189,7 @@ def filter_items_with_no_transactions(iwb_map):
 			qty_dict[key] = val
 			if key != "val_rate" and val:
 				no_transactions = False
-		
+
 		if no_transactions:
 			iwb_map.pop((company, item, warehouse))
 
@@ -218,18 +218,28 @@ def get_item_details(items, sle, filters):
 
 	if items:
 		cf_field = cf_join = ""
-		if filters.get("include_uom"):
+		include_uom = filters.get("include_uom", None)
+		if include_uom:
 			cf_field = ", ucd.conversion_factor"
-			cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%(include_uom)s"
+			cf_join = '''
+				left join `tabUOM Conversion Detail` ucd
+				on ucd.parent=item.name and ucd.uom="{0}"
+			'''.format(frappe.db.escape(include_uom))
 
-		for item in frappe.db.sql("""
-			select item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom{cf_field}
+		item_names = ', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])
+
+		query = """
+			select
+				item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom {cf_field}
 			from `tabItem` item
 			{cf_join}
 			where item.name in ({names}) and ifnull(item.disabled, 0) = 0
-			""".format(cf_field=cf_field, cf_join=cf_join, names=', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])),
-			{"include_uom": filters.get("include_uom")}, as_dict=1):
-				item_details.setdefault(item.name, item)
+		""".format(cf_field=cf_field, cf_join=cf_join, names=item_names)
+
+		res = frappe.db.sql(query, as_dict=1)
+
+		for item in res:
+			item_details.setdefault(item.name, item)
 
 	if filters.get('show_variant_attributes', 0) == 1:
 		variant_values = get_variant_values_for(list(item_details))
