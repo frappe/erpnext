@@ -186,7 +186,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				item.tax_exclusive_amount = flt(item.amount / (1 + item.cumulated_tax_fraction));
 				item.tax_exclusive_rate = item.qty ? (item.tax_exclusive_amount / item.qty)
 					: (item.rate / (1 + item.cumulated_tax_fraction));
-				item.tax_exclusive_amount = flt(item.tax_exclusive_amount, precision("tax_exclusive_amount", item));
 				item.tax_exclusive_rate = flt(item.tax_exclusive_rate, precision("tax_exclusive_rate", item));
 
 				var has_margin_field = frappe.meta.has_field(item.doctype, 'margin_type');
@@ -328,7 +327,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					me.set_cumulative_total(i, tax);
 
 					me.set_in_company_currency(tax,
-						["total", "tax_amount", "tax_amount_after_discount_amount"]);
+						["total", "total_before_discount_amount", "tax_amount", "tax_amount_after_discount_amount"]);
 
 					// adjust Discount Amount loss in last tax iteration
 					if ((i == me.frm.doc["taxes"].length - 1) && me.discount_amount_applied
@@ -343,16 +342,25 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	set_cumulative_total: function(row_idx, tax) {
 		var tax_amount = tax.tax_amount_after_discount_amount;
+		var tax_amount_before_discount = tax.tax_amount;
 		if (tax.category == 'Valuation') {
 			tax_amount = 0;
+			tax_amount_before_discount = 0;
 		}
-
-		if (tax.add_deduct_tax == "Deduct") { tax_amount = -1*tax_amount; }
+		if (tax.add_deduct_tax == "Deduct")
+		{
+			tax_amount = -1*tax_amount;
+			tax_amount_before_discount = -1*tax_amount_before_discount;
+		}
 
 		if(row_idx==0) {
 			tax.total = flt(this.frm.doc.net_total + tax_amount, precision("total", tax));
+			tax.total_before_discount_amount = flt(this.frm.doc.tax_exclusive_total + tax_amount_before_discount,
+				precision("total_before_discount_amount", tax))
 		} else {
 			tax.total = flt(this.frm.doc["taxes"][row_idx-1].total + tax_amount, precision("total", tax));
+			tax.total_before_discount_amount = flt(this.frm.doc["taxes"][row_idx-1].total_before_discount_amount + tax_amount_before_discount,
+				precision("total_before_discount_amount", tax))
 		}
 	},
 

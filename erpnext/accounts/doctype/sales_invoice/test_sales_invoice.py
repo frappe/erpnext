@@ -442,9 +442,9 @@ class TestSalesInvoice(unittest.TestCase):
 				"tax_exclusive_price_list_rate", "tax_exclusive_rate", "tax_exclusive_amount",
 				"base_tax_exclusive_price_list_rate", "base_tax_exclusive_rate", "base_tax_exclusive_amount"],
 			"_Test Item Home Desktop 100": [62.5, 0, 62.5, 625.0, 62.5, 62.5, 625.0, 50, 499.97600115194473,
-				50, 50, 499.98, 50, 50, 499.98],
+				50, 50, 499.97600115194473, 50, 50, 499.98],
 			"_Test Item Home Desktop 200": [190.66, 0, 190.66, 953.3, 190.66, 190.66, 953.3, 150, 749.9968530500239,
-				150, 150, 750, 150, 150, 750],
+				150, 150, 749.9968530500239, 150, 150, 750],
 		}
 
 		# check if children are saved
@@ -457,7 +457,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# check net total
 		self.assertEqual(si.net_total, 1249.97)
-		self.assertEqual(si.tax_exclusive_total, 1249.98)
+		self.assertEqual(si.tax_exclusive_total, 1249.97)
 		self.assertEqual(si.total, 1578.3)
 
 		# check tax calculation
@@ -504,7 +504,7 @@ class TestSalesInvoice(unittest.TestCase):
 				"rate": 50,
 				"tax_exclusive_rate": 40,
 				"amount": 500,
-				"tax_exclusive_amount": 399.98,
+				"tax_exclusive_amount": 399.9808009215558,
 				"base_price_list_rate": 2778,
 				"base_tax_exclusive_price_list_rate": 2222.5,
 				"base_rate": 2500,
@@ -524,7 +524,7 @@ class TestSalesInvoice(unittest.TestCase):
 				"rate": 150,
 				"tax_exclusive_rate": 118.01,
 				"amount": 750,
-				"tax_exclusive_amount": 590.05,
+				"tax_exclusive_amount": 590.0531205155963,
 				"base_price_list_rate": 9375,
 				"base_tax_exclusive_price_list_rate": 7375.5,
 				"base_rate": 7500,
