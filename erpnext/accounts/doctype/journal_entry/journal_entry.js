@@ -235,7 +235,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 				out.filters.push([jvd.reference_type, "per_billed", "<", 100]);
 			}
-			
+
 			if(jvd.party_type && jvd.party) {
 				var party_field = "";
 				if(jvd.reference_type == "Landed Cost Voucher") {

@@ -595,3 +595,4 @@ erpnext.patches.v11_0.update_billing_status
 erpnext.patches.v11_0.renamed_from_to_fields_in_project
 erpnext.patches.v11_0.add_permissions_in_gst_settings
 erpnext.patches.v11_1.setup_guardian_role
+execute:frappe.delete_doc('DocType', 'Notification Control')

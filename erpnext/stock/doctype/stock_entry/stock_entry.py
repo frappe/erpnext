@@ -923,6 +923,11 @@ class StockEntry(StockController):
 				filters={'parent': self.work_order, 'item_code': item_code},
 				fields=["required_qty", "consumed_qty"]
 				)
+			if not req_items:
+				frappe.msgprint(_("Did not found transfered item {0} in Work Order {1}, the item not added in Stock Entry")
+					.format(item_code, self.work_order))
+				continue
+
 			req_qty = flt(req_items[0].required_qty)
 			req_qty_each = flt(req_qty / manufacturing_qty)
 			consumed_qty = flt(req_items[0].consumed_qty)
