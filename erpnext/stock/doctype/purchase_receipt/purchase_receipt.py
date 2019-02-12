@@ -206,9 +206,7 @@ class PurchaseReceipt(BuyingController):
 						"against": warehouse_account[d.warehouse]["account"],
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-						"credit": valuation_net_amount,
-						"credit_in_account_currency": flt(d.base_net_amount, d.precision("base_net_amount")) \
-							if stock_rbnb_currency==self.company_currency else flt(d.net_amount, d.precision("net_amount"))
+						"credit": valuation_net_amount if self.taxes else valuation_net_amount + valuation_item_tax_amount
 					}, stock_rbnb_currency))
 
 					negative_expense_to_be_booked += valuation_item_tax_amount
