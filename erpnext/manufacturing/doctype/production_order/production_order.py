@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import json
+from six import text_type
 from frappe import _
 from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate
 from frappe.model.document import Document
@@ -591,10 +592,10 @@ def make_timesheet(production_order, company):
 
 @frappe.whitelist()
 def add_timesheet_detail(timesheet, args):
-	if isinstance(timesheet, unicode):
+	if isinstance(timesheet, text_type):
 		timesheet = frappe.get_doc('Timesheet', timesheet)
 
-	if isinstance(args, unicode):
+	if isinstance(args, text_type):
 		args = json.loads(args)
 
 	timesheet.append('time_logs', args)

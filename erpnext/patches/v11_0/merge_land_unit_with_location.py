@@ -29,7 +29,7 @@ def execute():
 
 	if 'land_unit' in frappe.db.get_table_columns('Linked Location'):
 		rename_field('Linked Location', 'land_unit', 'location')
-	
+
 	if not frappe.db.exists("Location", "All Land Units"):
 		frappe.get_doc({"doctype": "Location", "is_group": True, "location_name": "All Land Units"}).insert(ignore_permissions=True)
 
@@ -51,9 +51,6 @@ def execute():
 					'lft': land_unit.get('lft'),
 					'rgt': land_unit.get('rgt')
 				}).insert(ignore_permissions=True)
-
-	# frappe.db.sql("""update `tabDesktop Icon` set label='Location', module_name='Location' where label='Land Unit'""")
-	frappe.db.sql("""update `tabDesktop Icon` set link='List/Location' where link='List/Land Unit'""")
 
 	# Delete the Land Unit and Linked Land Unit doctypes
 	if frappe.db.table_exists('Land Unit'):

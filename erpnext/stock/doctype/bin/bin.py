@@ -60,7 +60,7 @@ class Bin(Document):
 			select * from `tabStock Ledger Entry`
 			where item_code = %s
 			and warehouse = %s
-			order by timestamp(posting_date, posting_time) asc, name asc
+			order by timestamp(posting_date, posting_time) asc, creation asc
 			limit 1
 		""", (self.item_code, self.warehouse), as_dict=1)
 		return sle and sle[0] or None
