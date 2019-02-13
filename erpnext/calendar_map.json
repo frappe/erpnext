@@ -1,0 +1,160 @@
+{
+	"Holiday List": {
+		"field_map": {
+				"start": "holiday_date",
+				"end": "holiday_date",
+				"id": "name",
+				"title": "name",
+				"allDay": "allDay",
+				"color": "color",
+				"description" :"description"
+		},
+		"get_events_method": "erpnext.hr.doctype.holiday_list.holiday_list.get_events"
+	},
+	"Leave Application":{
+		"field_map": {
+			"start": "from_date",
+			"end": "to_date",
+			"id": "name",
+			"title": "name",
+			"docstatus": 1,
+			"color": "color",
+			"description" :"description"
+
+	},
+	"get_events_method": "erpnext.hr.doctype.leave_application.leave_application.get_events"
+	},
+	"Sales Order":{
+		"field_map": {
+			"start": "delivery_date",
+			"end": "delivery_date",
+			"id": "name",
+			"title": "customer_name",
+			"allDay": "allDay",
+			"description" :"status"
+		},
+		"get_events_method": "erpnext.selling.doctype.sales_order.sales_order.get_events"
+	},
+	"Task":{
+		"field_map": {
+			"start": "exp_start_date",
+			"end": "exp_end_date",
+			"id": "name",
+			"title": "subject",
+			"allDay": "allDay",
+			"progress": "progress",
+			"color": "color",
+			"description" :"description"
+		}
+	},
+	"Work Order":{
+		"field_map": {
+			"start": "planned_start_date",
+			"end": "planned_end_date",
+			"id": "name",
+			"title": "name",
+			"allDay": "allDay",
+			"description" :"status"
+		}
+
+	},
+	"Attendance": {
+		"field_map": {
+			"start": "date",
+			"end": "date",
+			"id": "name",
+			"docstatus": 1
+		},
+		"get_events_method": "erpnext.hr.doctype.attendance.attendance.get_events"
+	},
+	"Timesheet":{
+		"field_map": {
+			"start": "start_date",
+			"end": "end_date",
+			"name": "parent",
+			"id": "name",
+			"allDay": "allDay",
+			"child_name": "name",
+			"title": "title",
+			"description": "note"
+		},
+		"get_events_method": "erpnext.projects.doctype.timesheet.timesheet.get_events"
+	},
+	"Training Event": {
+		"field_map": {
+			"start": "start_time",
+			"end": "end_time",
+			"id": "name",
+			"title": "event_name",
+			"allDay": "allDay",
+			"description": "introduction"
+		}
+	},
+	"Course Schedule": {
+		"field_map": {
+			"start": "from_datetime",
+			"end": "to_datetime",
+			"id": "name",
+			"title": "course",
+			"allDay": "allDay",
+			"description":"title"
+		},
+		"get_events_method": "erpnext.education.api.get_course_schedule_events"
+	},
+	"Shift Assignment":{
+		"field_map": {
+			"start": "date",
+			"end": "date",
+			"id": "name",
+			"title" : "title",
+			"docstatus": 1,
+			"description":"title"
+
+		},
+		"get_events_method": "erpnext.hr.doctype.shift_assignment.shift_assignment.get_events"
+	},
+	"Asset Maintenance Log":{
+		"field_map": {
+			"start": "due_date",
+			"end": "due_date",
+			"id": "name",
+			"title": "task",
+			"allDay": "allDay",
+			"progress": "progress",
+			"description":"name"
+		}
+	},
+	"Patient Appointment":{
+		"field_map": {
+			"start": "start",
+			"end": "end",
+			"id": "name",
+			"title": "patient",
+			"allDay": "allDay",
+			"eventColor": "color",
+			"description":"name"
+		},
+		"get_events_method": "erpnext.healthcare.doctype.patient_appointment.patient_appointment.get_events"
+
+	},
+	"Hotel Room Reservation":{
+		"field_map": {
+			"start": "from_date",
+			"end": "to_date",
+			"id": "name",
+			"title": "guest_name",
+			"status": "status",
+			"description":"name"
+		}
+	},
+	"Restaurant Reservation":{
+		"field_map": {
+			"start": "reservation_time",
+			"end": "reservation_end_time",
+			"id": "name",
+			"title": "customer_name",
+			"allDay": "allDay",
+			"description":"name"
+		}
+	}
+}
