@@ -59,7 +59,7 @@ def get_events(start, end, filters=None):
 	return events
 
 def add_assignments(events, start, end, conditions=None):
-	query = """select name, date, employee_name, 
+	query = """select name, date, employee_name,
 		employee, docstatus
 		from `tabShift Assignment` where
 		date <= %(date)s

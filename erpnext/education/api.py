@@ -38,7 +38,7 @@ def enroll_student(source_name):
 	program_enrollment.student = student.name
 	program_enrollment.student_name = student.title
 	program_enrollment.program = frappe.db.get_value("Student Applicant", source_name, "program")
-	frappe.publish_realtime('enroll_student_progress', {"progress": [4, 4]}, user=frappe.session.user)	
+	frappe.publish_realtime('enroll_student_progress', {"progress": [4, 4]}, user=frappe.session.user)
 	return program_enrollment
 
 
@@ -69,7 +69,7 @@ def mark_attendance(students_present, students_absent, course_schedule=None, stu
 
 	present = json.loads(students_present)
 	absent = json.loads(students_absent)
-	
+
 	for d in present:
 		make_attendance_records(d["student"], d["student_name"], "Present", course_schedule, student_group, date)
 
@@ -89,7 +89,7 @@ def make_attendance_records(student, student_name, status, course_schedule=None,
 	:param status: Status (Present/Absent)
 	"""
 	student_attendance = frappe.get_doc({
-		"doctype": "Student Attendance", 
+		"doctype": "Student Attendance",
 		"student": student,
 		"course_schedule": course_schedule,
 		"student_group": student_group,
@@ -112,7 +112,7 @@ def get_student_guardians(student):
 
 	:param student: Student.
 	"""
-	guardians = frappe.get_list("Student Guardian", fields=["guardian"] , 
+	guardians = frappe.get_list("Student Guardian", fields=["guardian"] ,
 		filters={"parent": student})
 	return guardians
 
@@ -187,7 +187,7 @@ def get_course_schedule_events(start, end, filters=None):
 	from frappe.desk.calendar import get_event_conditions
 	conditions = get_event_conditions("Course Schedule", filters)
 
-	data = frappe.db.sql("""select name, course, color,
+	data = frappe.db.sql("""select name, course, color, title,
 			timestamp(schedule_date, from_time) as from_datetime,
 			timestamp(schedule_date, to_time) as to_datetime,
 			room, student_group, 0 as 'allDay'
@@ -353,7 +353,7 @@ def update_email_group(doctype, name):
 		for guard in get_student_guardians(stud.student):
 			email = frappe.db.get_value("Guardian", guard.guardian, "email_address")
 			if email:
-				email_list.append(email)	
+				email_list.append(email)
 	add_subscribers(name, email_list)
 
 @frappe.whitelist()
@@ -363,9 +363,9 @@ def get_current_enrollment(student, academic_year=None):
 		select
 			name as program_enrollment, student_name, program, student_batch_name as student_batch,
 			student_category, academic_term, academic_year
-		from 
+		from
 			`tabProgram Enrollment`
-		where 
+		where
 			student = %s and academic_year = %s
 		order by creation''', (student, current_academic_year), as_dict=1)
 

@@ -504,7 +504,7 @@ def add_department_leaves(events, start, end, employee, company):
 	add_leaves(events, start, end, match_conditions=match_conditions)
 
 def add_leaves(events, start, end, match_conditions=None):
-	query = """select name, from_date, to_date, employee_name, half_day,
+	query = """select name, from_date, to_date, employee_name, half_day,color,description,
 		status, employee, docstatus
 		from `tabLeave Application` where
 		from_date <= %(end)s and to_date >= %(start)s <= to_date
@@ -522,6 +522,7 @@ def add_leaves(events, start, end, match_conditions=None):
 			"to_date": d.to_date,
 			"docstatus": d.docstatus,
 			"color": d.color,
+			"description": d.description,
 			"title": cstr(d.employee_name) + \
 				(d.half_day and _(" (Half Day)") or ""),
 		}
@@ -557,6 +558,7 @@ def add_holidays(events, start, end, employee, company):
 				"doctype": "Holiday",
 				"from_date": holiday.holiday_date,
 				"to_date":  holiday.holiday_date,
+				"description": holiday.description,
 				"title": _("Holiday") + ": " + cstr(holiday.description),
 				"name": holiday.name
 			})

@@ -329,11 +329,11 @@ def get_events(start, end, filters=None):
 	:param end: End date-time.
 	:param filters: Filters (JSON).
 	"""
-	filters = json.loads(filters)
+	#filters = json.loads(filters)
 	from frappe.desk.calendar import get_event_conditions
 	conditions = get_event_conditions("Timesheet", filters)
 
-	return frappe.db.sql("""select `tabTimesheet Detail`.name as name,
+	return frappe.db.sql("""select `tabTimesheet Detail`.name as name, note,
 			`tabTimesheet Detail`.docstatus as status, `tabTimesheet Detail`.parent as parent,
 			from_time as start_date, hours, activity_type,
 			`tabTimesheet Detail`.project, to_time as end_date,
