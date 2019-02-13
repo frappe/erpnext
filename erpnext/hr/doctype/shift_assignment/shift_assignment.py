@@ -62,7 +62,7 @@ def get_events(start, end, filters=None):
 	return events
 
 def add_assignments(events, start, end, conditions=None):
-	query = """select name, date, employee_name, 
+	query = """select name, date, employee_name,
 		employee, docstatus
 		from `tabShift Assignment` where
 		date <= %(date)s
@@ -134,7 +134,7 @@ def get_employee_shift(employee, for_date=nowdate(), consider_default_shift=Fals
 def get_employee_shift_timings(employee, for_timestamp=now_datetime(), consider_default_shift=False):
 	"""Returns previous shift, current/upcoming shift, next_shift for the given timestamp and employee
 	"""
-	# write and verify a test case for midnight shift. 
+	# write and verify a test case for midnight shift.
 	prev_shift = curr_shift = next_shift = None
 	curr_shift = get_employee_shift(employee, for_timestamp.date(), consider_default_shift, 'forward')
 	if curr_shift:

@@ -187,7 +187,7 @@ def get_course_schedule_events(start, end, filters=None):
 	from frappe.desk.calendar import get_event_conditions
 	conditions = get_event_conditions("Course Schedule", filters)
 
-	data = frappe.db.sql("""select name, course, color,
+	data = frappe.db.sql("""select name, course, color, title,
 			timestamp(schedule_date, from_time) as from_datetime,
 			timestamp(schedule_date, to_time) as to_datetime,
 			room, student_group, 0 as 'allDay'
@@ -363,9 +363,9 @@ def get_current_enrollment(student, academic_year=None):
 		select
 			name as program_enrollment, student_name, program, student_batch_name as student_batch,
 			student_category, academic_term, academic_year
-		from 
+		from
 			`tabProgram Enrollment`
-		where 
+		where
 			student = %s and academic_year = %s
 		order by creation''', (student, current_academic_year), as_dict=1)
 
