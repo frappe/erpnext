@@ -150,7 +150,6 @@ class calculate_taxes_and_totals(object):
 				item.tax_exclusive_amount = flt(item.amount / (1 + item.cumulated_tax_fraction))
 				item.tax_exclusive_rate = (item.tax_exclusive_amount / item.qty) if item.qty \
 					else (item.rate / (1 + item.cumulated_tax_fraction))
-				item.tax_exclusive_amount = flt(item.tax_exclusive_amount, item.precision("tax_exclusive_amount"))
 				item.tax_exclusive_rate = flt(item.tax_exclusive_rate, item.precision("tax_exclusive_rate"))
 
 				if has_margin_field and flt(item.tax_exclusive_rate_with_margin) > 0:
@@ -273,7 +272,7 @@ class calculate_taxes_and_totals(object):
 					self.set_cumulative_total(i, tax)
 
 					self._set_in_company_currency(tax,
-						["total", "tax_amount", "tax_amount_after_discount_amount"])
+						["total", "total_before_discount_amount", "tax_amount", "tax_amount_after_discount_amount"])
 
 					# adjust Discount Amount loss in last tax iteration
 					if i == (len(self.doc.get("taxes")) - 1) and self.discount_amount_applied \
@@ -294,11 +293,17 @@ class calculate_taxes_and_totals(object):
 	def set_cumulative_total(self, row_idx, tax):
 		tax_amount = tax.tax_amount_after_discount_amount
 		tax_amount = self.get_tax_amount_if_for_valuation_or_deduction(tax_amount, tax)
+		tax_amount_before_discount = tax.tax_amount
+		tax_amount_before_discount = self.get_tax_amount_if_for_valuation_or_deduction(tax_amount_before_discount, tax)
 
 		if row_idx == 0:
 			tax.total = flt(self.doc.net_total + tax_amount, tax.precision("total"))
+			tax.total_before_discount_amount = flt(self.doc.tax_exclusive_total + tax_amount_before_discount,
+				tax.precision("total_before_discount_amount"))
 		else:
 			tax.total = flt(self.doc.get("taxes")[row_idx-1].total + tax_amount, tax.precision("total"))
+			tax.total_before_discount_amount = flt(self.doc.get("taxes")[row_idx-1].total_before_discount_amount + tax_amount_before_discount,
+				tax.precision("total_before_discount_amount"))
 
 	def get_current_tax_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)
