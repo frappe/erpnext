@@ -313,7 +313,7 @@ class Item(WebsiteGenerator):
 		self.set_variant_context(context)
 		self.set_attribute_context(context)
 		self.set_disabled_attributes(context)
-		self.set_website_meta(context)
+		self.set_metatags(context)
 
 		return context
 
@@ -432,16 +432,31 @@ class Item(WebsiteGenerator):
 				if not find_variant(combination):
 					context.disabled_attributes.setdefault(attr.attribute, []).append(combination[-1])
 
-	def set_website_meta(self, context):
-		context.meta = frappe._dict({})
+	def set_metatags(self, context):
+		from frappe.website.doctype.website_meta_tag.website_meta_tag import set_metatags
+
+		context.metatags = frappe._dict({})
+
 		safe_description = frappe.utils.to_markdown(self.description)
-		keywords = ','.join([self.item_code, self.item_name, safe_description, self.item_group])
-		keywords = ', '.join(keywords.split(' '))
-		context.meta.keywords = keywords
-		context.meta.url = frappe.utils.get_url() + '/' + context.route
+
+		context.metatags.url = frappe.utils.get_url() + '/' + context.route
+
 		if context.website_image:
-			context.meta.image = frappe.utils.get_url() + context.website_image
-		context.meta.description = safe_description[:150]
+			if context.website_image.startswith('http'):
+				url = context.website_image
+			else:
+				url = frappe.utils.get_url() + context.website_image
+			context.metatags.image = url
+
+		context.metatags.description = safe_description[:300]
+
+		context.metatags.title = self.item_name or self.item_code
+
+		context.metatags['og:type'] = 'product'
+		context.metatags['og:site_name'] = 'ERPNext'
+
+		# set meta tags from child table
+		context = set_metatags(self.meta_tags, context)
 
 	def add_default_uom_in_conversion_factor_table(self):
 		uom_conv_list = [d.uom for d in self.get("uoms")]
