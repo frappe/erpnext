@@ -25,14 +25,23 @@ def execute(filters=None):
 
 	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 
+
+	gross_income = get_revenue(income, period_list, 'gross')
+
+	gross_expense = get_revenue(expense, period_list, 'gross')
+
+	if(len(gross_income)==0 and len(gross_expense)== 0):
+		data.append({"account_name": "'" + _("Nothing is included in gross") + "'",
+		"account": "'" + _("Nothing is included in gross") + "'"})
+
+		return columns, data
+
 	data.append({"account_name": "'" + _("Included in Gross Profit") + "'",
 		"account": "'" + _("Included in Gross Profit") + "'"})
 
-	gross_income = get_revenue(income, period_list, 'gross')
 	data.append({})
 	data.extend(gross_income or [])
 
-	gross_expense = get_revenue(expense, period_list, 'gross')
 	data.append({})
 	data.extend(gross_expense or [])
 
@@ -48,7 +57,7 @@ def execute(filters=None):
 	data.append({})
 	data.extend(non_gross_expense or [])
 
-	net_profit =get_net_profit(non_gross_income, gross_income, gross_expense, non_gross_expense, period_list, filters.company,filters.presentation_currency)
+	net_profit = get_net_profit(non_gross_income, gross_income, gross_expense, non_gross_expense, period_list, filters.company,filters.presentation_currency)
 	data.append({})
 	data.append(net_profit)
 
@@ -124,7 +133,7 @@ def get_profit(gross_income, gross_expense, period_list, company, profit_type, c
 
 	for period in period_list:
 		key = period if consolidated else period.key
-		profit_loss[key] = flt(gross_income[0][key]) - flt(gross_expense[0][key])
+		profit_loss[key] = flt(gross_income[0][key] if len(gross_income) else 0) - flt(gross_expense[0][key] if len(gross_expense) else 0)
 
 		if profit_loss[key]:
 			has_value=True
@@ -148,8 +157,8 @@ def get_net_profit(non_gross_income, gross_income, gross_expense, non_gross_expe
 
 	for period in period_list:
 		key = period if consolidated else period.key
-		total_income = flt(gross_income[0][key]) + flt(non_gross_income[0][key])
-		total_expense = flt(gross_expense[0][key]) + flt(non_gross_expense[0][key])
+		total_income = flt(gross_income[0][key] if len(gross_income) else 0) + flt(non_gross_income[0][key] if len(non_gross_income) else 0)
+		total_expense = flt(gross_expense[0][key] if len(gross_expense) else 0) + flt(non_gross_expense[0][key] if len(non_gross_expense) else 0)
 		profit_loss[key] = flt(total_income) - flt(total_expense)
 
 		if profit_loss[key]:
