@@ -76,7 +76,7 @@ frappe.query_reports["Accounts Payable"] = {
 			"fieldname":"group_by",
 			"label": __("Group By"),
 			"fieldtype": "Select",
-			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group\nGroup by Sales Person",
+			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group",
 			"default": "Ungrouped"
 		},
 		{
