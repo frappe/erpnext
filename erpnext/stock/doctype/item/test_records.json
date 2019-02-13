@@ -342,5 +342,29 @@
   "stock_uom": "_Test UOM",
   "show_in_website": 1,
   "website_warehouse": "_Test Warehouse Group-C1 - _TC"
+ },
+ {
+  "description": "_Test Item With Contents UOM",
+  "doctype": "Item",
+  "has_batch_no": 0,
+  "has_serial_no": 0,
+  "inspection_required": 0,
+  "is_stock_item": 1,
+  "is_sub_contracted_item": 0,
+  "item_code": "_Test Item With Contents UOM",
+  "item_group": "_Test Item Group",
+  "item_name": "_Test Item With Contents UOM",
+  "gst_hsn_code": "999800",
+  "stock_uom": "_Test UOM",
+  "alt_uom": "_Test UOM 1",
+  "alt_uom_size": "5",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }]
  }
 ]
