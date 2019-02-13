@@ -1,0 +1,208 @@
+{%- macro format_float(value) -%}
+{{ "%.2f" % value|abs }}
+{%- endmacro -%}
+
+{%- macro render_address(address) %}
+<Indirizzo>{{ address.address_line1 }}</Indirizzo>
+<CAP>{{ address.pincode }}</CAP>
+<Comune>{{ address.city }}</Comune>
+{%- if address.state %}
+<Provincia>{{ address.state }}</Provincia>
+{%- endif %}
+<Nazione>{{ address.country_code|upper }}</Nazione>
+{%- endmacro %}
+
+{%- macro render_discount_or_margin(item) -%}
+{%- if item.discount_percentage > 0.0 or item.margin_type %}
+<ScontoMaggiorazione>
+  {%- if item.discount_percentage > 0.0 %}
+  <Tipo>SC</Tipo>
+  <Percentuale>{{ format_float(item.discount_percentage) }}</Percentuale>
+  {%- endif %}
+  {%- if item.margin_rate_or_amount > 0.0 -%}
+    <Tipo>MG</Tipo>
+    {%- if item.margin_type == "Percentage" -%}
+      <Percentuale>{{ format_float(item.margin_rate_or_amount) }}</Percentuale>
+    {%- elif item.margin_type == "Amount" -%}
+      <Importo>{{ format_float(item.margin_rate_or_amount) }}</Importo>
+    {%- endif -%}
+  {%- endif %}
+</ScontoMaggiorazione>
+{%- endif -%}
+{%- endmacro -%}
+
+<?xml version='1.0' encoding='UTF-8'?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" 
+  xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  versione="{{ doc.transmission_format_code }}" 
+  xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente>
+        <IdPaese>{{ doc.company_address_data.country_code|upper or "IT" }}</IdPaese>
+        <IdCodice>{{ doc.company_fiscal_code or doc.company_tax_id | replace("IT","") }}</IdCodice>
+      </IdTrasmittente>
+      <ProgressivoInvio>{{ doc.progressive_number }}</ProgressivoInvio>
+      <FormatoTrasmissione>{{ doc.transmission_format_code }}</FormatoTrasmissione>
+      <CodiceDestinatario>{{ doc.customer_data.recipient_code }}</CodiceDestinatario>
+      {% if doc.company_data.phone or doc.company_data.email -%}
+      <ContattiTrasmittente>
+        {% if doc.company_data.phone -%}<Telefono>{{ doc.company_data.phone }}</Telefono>{%- endif %}
+        {% if doc.company_data.email -%}<Email>{{ doc.company_data.email }}</Email>{%- endif %}
+      </ContattiTrasmittente>
+      {% endif -%}
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA>
+          <IdPaese>{{ doc.company_address_data.country_code|upper or "IT"}}</IdPaese>
+          <IdCodice>{{ doc.company_tax_id | replace("IT","") }}</IdCodice>
+        </IdFiscaleIVA>
+        {%- if doc.company_fiscal_code %}
+        <CodiceFiscale>{{ doc.company_fiscal_code }}</CodiceFiscale>
+        {%- endif %}
+        <Anagrafica>
+          <Denominazione>{{ doc.company }}</Denominazione>
+        </Anagrafica>
+        <RegimeFiscale>{{ doc.company_fiscal_regime.split("-")[0] }}</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede>
+      {{ render_address(doc.company_address_data) }}
+      </Sede>
+      {%- if doc.company_data.registration_number %}
+      <IscrizioneREA>
+        <Ufficio>{{ doc.company_data.registrar_office_province }}</Ufficio>
+        <NumeroREA>{{ doc.company_data.registration_number }}</NumeroREA>
+        {%- if doc.company_data.share_capital_amount %}
+        <CapitaleSociale>{{ format_float(doc.company_data.share_capital_amount) }}</CapitaleSociale>
+        {%- endif %}
+        {%- if doc.company_data.no_of_members %}
+        <SocioUnico>{{ doc.company_data.no_of_members.split("-")[0] }}</SocioUnico>
+        {%- endif %}
+        {%- if doc.company_data.liquidation_state %}
+        <StatoLiquidazione>{{ doc.company_data.liquidation_state.split("-")[0] }}</StatoLiquidazione>
+        {%- endif %}
+      </IscrizioneREA>
+      {%- endif %}
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        {%- if doc.customer_data.customer_type == "Individual" %}
+          <CodiceFiscale>{{ doc.customer_data.fiscal_code }}</CodiceFiscale>
+          <Anagrafica>
+            <Nome>{{ doc.customer_data.first_name }}</Nome>
+            <Cognome>{{ doc.customer_data.last_name }}</Cognome>
+          </Anagrafica>
+        {%- else %}
+          {%- if doc.customer_data.is_public_administration %}
+          <CodiceFiscale>{{ doc.customer_data.fiscal_code }}</CodiceFiscale>
+          {%- else %}
+          <IdFiscaleIVA>
+            <IdPaese>{{ doc.customer_address_data.country_code|upper or "IT" }}</IdPaese>
+            <IdCodice>{{ doc.tax_id | replace("IT","") }}</IdCodice>
+          </IdFiscaleIVA>
+          {%- endif %}
+          <Anagrafica>
+            <Denominazione>{{ doc.customer_name }}</Denominazione>
+          </Anagrafica>
+        {%- endif %}
+      </DatiAnagrafici>
+      {%- if doc.customer_address_data %}
+      <Sede>
+      {{ render_address(doc.customer_address_data) }}
+      </Sede>
+      {%- endif %}
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>{{ doc.type_of_document }}</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>{{ doc.posting_date }}</Data>
+        <Numero>{{ doc.unamended_name }}</Numero>
+        {%- if doc.stamp_duty %}
+        <DatiBollo>
+          <BolloVirtuale>SI</BolloVirtuale>
+          <ImportoBollo>{{ format_float(doc.stamp_duty) }}</ImportoBollo>
+        </DatiBollo>
+        {%- endif %}
+        <ImportoTotaleDocumento>{{ format_float(doc.grand_total) }}</ImportoTotaleDocumento>
+        <Causale>VENDITA</Causale>
+      </DatiGeneraliDocumento>
+      {%- if doc.po_no %}
+      <DatiOrdineAcquisto>
+        <IdDocumento>{{ doc.po_no }}</IdDocumento>
+        {%- if doc.po_date %}
+        <Data>{{ doc.po_date }}</Data>
+        {%- endif %}
+      </DatiOrdineAcquisto>
+      {%- endif %}
+      {%- if doc.is_return and doc.return_against_unamended %}
+      <DatiFattureCollegate>
+        <IdDocumento>{{ doc.return_against_unamended }}</IdDocumento>
+      </DatiFattureCollegate>
+      {%- endif %}
+      {%- if doc.shipping_address_data %}
+      <DatiTrasporto>
+      <IndirizzoResa>
+        {{ render_address(doc.shipping_address_data) }}
+      </IndirizzoResa>
+      </DatiTrasporto>
+      {%- endif %}
+    </DatiGenerali>
+    <DatiBeniServizi>
+      {%- for item in doc.items %}
+      <DettaglioLinee>
+        <NumeroLinea>{{ item.idx }}</NumeroLinea>
+        <CodiceArticolo>
+          <CodiceTipo>CODICE</CodiceTipo>
+          <CodiceValore>{{ item.item_code }}</CodiceValore>
+        </CodiceArticolo>
+        <Descrizione>{{ item.description or item.item_name }}</Descrizione>
+        <Quantita>{{ format_float(item.qty) }}</Quantita>
+        <UnitaMisura>{{ item.stock_uom }}</UnitaMisura>
+        <PrezzoUnitario>{{ format_float(item.price_list_rate or item.rate) }}</PrezzoUnitario>
+        {{ render_discount_or_margin(item) }}
+        <PrezzoTotale>{{ format_float(item.amount) }}</PrezzoTotale>
+        <AliquotaIVA>{{ format_float(item.tax_rate) }}</AliquotaIVA>
+        {%- if item.tax_exemption_reason %}
+        <Natura>{{ item.tax_exemption_reason.split("-")[0] }}</Natura>
+        {%- endif %}
+      </DettaglioLinee>
+      {%- endfor %}
+      {%- for tax, data in doc.tax_data.items() %}
+      <DatiRiepilogo>
+        <AliquotaIVA>{{ format_float(tax|flt) }}</AliquotaIVA>
+        {%- if data.tax_exemption_reason %}
+        <Natura>{{ data.tax_exemption_reason.split("-")[0] }}</Natura>
+        {%- endif %}
+        <ImponibileImporto>{{ format_float(data.taxable_amount) }}</ImponibileImporto>
+        <Imposta>{{ format_float(data.tax_amount) }}</Imposta>
+        <EsigibilitaIVA>{{ doc.vat_collectability.split("-")[0] }}</EsigibilitaIVA>
+        {%- if data.tax_exemption_law %}
+        <RiferimentoNormativo>{{ data.tax_exemption_law }}</RiferimentoNormativo>
+        {%- endif %}
+      </DatiRiepilogo>
+      {%- endfor %}
+    </DatiBeniServizi>
+    {%- if doc.payment_schedule %}
+    <DatiPagamento>
+      {%- if payment_schedule|length > 1 %}
+      <CondizioniPagamento>TP01</CondizioniPagamento>
+      {%- else %}
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      {%- endif %}
+      {%- for payment_term in doc.payment_schedule %}
+      <DettaglioPagamento>
+        <ModalitaPagamento>{{ payment_term.mode_of_payment_code.split("-")[0] }}</ModalitaPagamento>
+        <DataScadenzaPagamento>{{ payment_term.due_date }}</DataScadenzaPagamento>
+        <ImportoPagamento>{{ format_float(payment_term.payment_amount) }}</ImportoPagamento>
+        {%- if payment_term.bank_account_iban %}<IBAN>{{ payment_term.bank_account_iban }}</IBAN>{%- endif %}
+      </DettaglioPagamento>
+      {%- endfor %}
+    </DatiPagamento>
+    {%- endif %}
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>
