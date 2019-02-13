@@ -195,7 +195,7 @@ class Analytics(object):
 		self.data=[]
 		self.get_periodic_data()
 
-		total_row = frappe._dict({"entity": _("Total"), "total": 0})
+		total_row = frappe._dict({"entity": _("'Total'"), "total": 0})
 		self.data.append(total_row)
 
 		for entity, period_data in iteritems(self.entity_periodic_data):
