@@ -1,5 +1,5 @@
 {% extends "templates/web.html" %}
-{% from "erpnext/templates/includes/macros.html" import product_image_square %}
+{% from "erpnext/templates/includes/macros.html" import product_image_square, homepage_section %}
 
 {% block content %}
 <main>
@@ -24,7 +24,7 @@
 			{% for item in homepage.products %}
 			<div class="col-md-4 mb-4">
 				<div class="card h-100 justify-content-between">
-					<img class="card-img-top" src="{{ item.image }}" alt="{{ item.item_name }}">
+					<div class="lazy-image" data-class="card-img-top" data-src="{{ item.image }}" data-alt="{{ item.item_name }}"></div>
 					<div class="card-body flex-grow-0">
 						<h5 class="card-title">{{ item.item_name }}</h5>
 						<a href="{{ item.route }}" class="card-link">{{ _('More details') }}</a>
@@ -71,7 +71,7 @@
 			<div class="col-md-{{ section.column_value }} mb-4">
 				<div class="card h-100 justify-content-between">
 					{% if card.image %}
-					<img class="card-img-top" src="{{ card.image }}" alt="{{ card.title }}">
+					<div class="lazy-image" data-src="{{ card.image }}"></div>
 					{% endif %}
 					<div class="card-body">
 						<h5 class="card-title">{{ card.title }}</h5>
