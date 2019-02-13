@@ -4,6 +4,7 @@
 frappe.ui.form.on('GSTR 3B Report', {
 	refresh : function(frm){
 		if(!frm.is_new()) {
+			frm.set_intro(__("Please save the report again to rebuild or update"));
 			frm.add_custom_button(__('Download JSON'), function() {
 				var w = window.open(
 					frappe.urllib.get_full_url(
