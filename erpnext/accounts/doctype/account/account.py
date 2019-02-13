@@ -101,9 +101,10 @@ class Account(NestedSet):
 			frappe.throw(_("Please add the account to root level Company - %s" % ancestors[0]))
 		else:
 			descendants = get_descendants_of('Company', self.company)
-			acc_name = frappe.db.get_value('Account', self.parent_account, "account_name")
+			if not descendants: return
 
 			acc_name_map = {}
+			acc_name = frappe.db.get_value('Account', self.parent_account, "account_name")
 			for d in frappe.db.get_values('Account',
 				{"company": ["in", descendants], "account_name": acc_name},
 				["company", "name"], as_dict=True):
