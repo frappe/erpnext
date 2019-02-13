@@ -9,23 +9,135 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Customer",
+					"description": _("Customer database."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Quotation",
 					"description": _("Quotes to Leads or Customers."),
+					"onboard": 1,
+					"dependencies": ["Item", "Customer"],
 				},
 				{
 					"type": "doctype",
 					"name": "Sales Order",
 					"description": _("Confirmed orders from Customers."),
+					"onboard": 1,
+					"dependencies": ["Item", "Customer"],
+				},
+				{
+					"type": "doctype",
+					"name": "Sales Partner",
+					"description": _("Manage Sales Partners."),
+					"dependencies": ["Item"],
+				},
+				{
+					"type": "doctype",
+					"label": _("Sales Person"),
+					"name": "Sales Person",
+					"icon": "fa fa-sitemap",
+					"link": "Tree/Sales Person",
+					"description": _("Manage Sales Person Tree."),
+					"dependencies": ["Item", "Customer"],
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Territory Target Variance (Item Group-Wise)",
+					"route": "query-report/Territory Target Variance Item Group-Wise",
+					"doctype": "Territory",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Person Target Variance (Item Group-Wise)",
+					"route": "query-report/Sales Person Target Variance Item Group-Wise",
+					"doctype": "Sales Person",
+					"dependencies": ["Sales Person"],
 				},
 			]
 		},
 		{
-			"label": _("Customers"),
+			"label": _("Items and Pricing"),
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Customer",
-					"description": _("Customer database."),
+					"name": "Item",
+					"description": _("All Products or Services."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Item Price",
+					"description": _("Multiple Item prices."),
+					"route": "Report/Item Price",
+					"dependencies": ["Item", "Price List"],
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Price List",
+					"description": _("Price List master."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Item Group",
+					"icon": "fa fa-sitemap",
+					"label": _("Item Group"),
+					"link": "Tree/Item Group",
+					"description": _("Tree of Item Groups."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Product Bundle",
+					"description": _("Bundle items at time of sale."),
+					"dependencies": ["Item"],
+				},
+				{
+					"type": "doctype",
+					"name": "Pricing Rule",
+					"description": _("Rules for applying pricing and discount."),
+					"dependencies": ["Item"],
+				},
+				{
+					"type": "doctype",
+					"name": "Shipping Rule",
+					"description": _("Rules for adding shipping costs."),
+				},
+
+			]
+		},
+		{
+			"label": _("Setup"),
+			"icon": "fa fa-cog",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Selling Settings",
+					"description": _("Default settings for selling transactions."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name":"Terms and Conditions",
+					"label": _("Terms and Conditions Template"),
+					"description": _("Template of terms or contract."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Sales Taxes and Charges Template",
+					"description": _("Tax template for selling transactions."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Lead Source",
+					"description": _("Track Leads by Lead Source.")
 				},
 				{
 					"type": "doctype",
@@ -45,57 +157,6 @@ def get_data():
 					"name": "Address",
 					"description": _("All Addresses."),
 				},
-
-			]
-		},
-		{
-			"label": _("Items and Pricing"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Item",
-					"description": _("All Products or Services."),
-				},
-				{
-					"type": "doctype",
-					"name": "Product Bundle",
-					"description": _("Bundle items at time of sale."),
-				},
-				{
-					"type": "doctype",
-					"name": "Price List",
-					"description": _("Price List master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Item Group",
-					"icon": "fa fa-sitemap",
-					"label": _("Item Group"),
-					"link": "Tree/Item Group",
-					"description": _("Tree of Item Groups."),
-				},
-				{
-					"type": "doctype",
-					"name": "Item Price",
-					"description": _("Multiple Item prices."),
-					"route": "Report/Item Price"
-				},
-				{
-					"type": "doctype",
-					"name": "Shipping Rule",
-					"description": _("Rules for adding shipping costs.")
-				},
-				{
-					"type": "doctype",
-					"name": "Pricing Rule",
-					"description": _("Rules for applying pricing and discount.")
-				},
-
-			]
-		},
-		{
-			"label": _("Sales Partners and Territory"),
-			"items": [
 				{
 					"type": "doctype",
 					"label": _("Territory"),
@@ -106,95 +167,28 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Sales Partner",
-					"description": _("Manage Sales Partners."),
-				},
-				{
-					"type": "doctype",
-					"label": _("Sales Person"),
-					"name": "Sales Person",
-					"icon": "fa fa-sitemap",
-					"link": "Tree/Sales Person",
-					"description": _("Manage Sales Person Tree."),
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Address And Contacts",
-					"label": _("Sales Partner Addresses And Contacts"),
-					"doctype": "Address",
-					"route_options": {
-						"party_type": "Sales Partner"
-					}
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Territory Target Variance (Item Group-Wise)",
-					"route": "query-report/Territory Target Variance Item Group-Wise",
-					"doctype": "Territory"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Sales Person Target Variance (Item Group-Wise)",
-					"route": "query-report/Sales Person Target Variance Item Group-Wise",
-					"doctype": "Sales Person",
-				},
-			]
-		},
-		{
-			"label": _("Setup"),
-			"icon": "fa fa-cog",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Selling Settings",
-					"description": _("Default settings for selling transactions.")
-				},
-				{
-					"type": "doctype",
 					"name": "Campaign",
 					"description": _("Sales campaigns."),
 				},
-				{
-					"type": "doctype",
-					"name":"Terms and Conditions",
-					"label": _("Terms and Conditions Template"),
-					"description": _("Template of terms or contract.")
-				},
-				{
-					"type": "doctype",
-					"name": "Sales Taxes and Charges Template",
-					"description": _("Tax template for selling transactions.")
-				},
-				{
-					"type": "doctype",
-					"name": "Industry Type",
-					"description": _("Track Leads by Industry Type.")
-				},
-				{
-					"type": "doctype",
-					"name": "Lead Source",
-					"description": _("Track Leads by Lead Source.")
-				},
 			]
 		},
 		{
-			"label": _("Analytics"),
+			"label": _("Key Reports"),
 			"icon": "fa fa-table",
 			"items": [
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Sales Analytics",
-					"doctype": "Sales Order"
+					"doctype": "Sales Order",
+					"onboard": 1,
 				},
 				{
 					"type": "page",
 					"name": "sales-funnel",
 					"label": _("Sales Funnel"),
 					"icon": "fa fa-bar-chart",
+					"onboard": 1,
 				},
 				{
 					"type": "report",
@@ -202,6 +196,30 @@ def get_data():
 					"name": "Customer Acquisition and Loyalty",
 					"doctype": "Customer",
 					"icon": "fa fa-bar-chart",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Inactive Customers",
+					"doctype": "Sales Order"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Ordered Items To Be Delivered",
+					"doctype": "Sales Order"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Person-wise Transaction Summary",
+					"doctype": "Sales Order"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Item-wise Sales History",
+					"doctype": "Item"
 				},
 				{
 					"type": "report",
@@ -240,32 +258,8 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Ordered Items To Be Delivered",
-					"doctype": "Sales Order"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Sales Person-wise Transaction Summary",
-					"doctype": "Sales Order"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Item-wise Sales History",
-					"doctype": "Item"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
 					"name": "BOM Search",
 					"doctype": "BOM"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Inactive Customers",
-					"doctype": "Sales Order"
 				},
 				{
 					"type": "report",
@@ -290,27 +284,6 @@ def get_data():
 					"is_query_report": True,
 					"name": "Customers Without Any Sales Transactions",
 					"doctype": "Customer"
-				},
-			]
-		},
-		{
-			"label": _("SMS"),
-			"icon": "fa fa-wrench",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "SMS Center",
-					"description":_("Send mass SMS to your contacts"),
-				},
-				{
-					"type": "doctype",
-					"name": "SMS Log",
-					"description":_("Logs for maintaining sms delivery status"),
-				},
-				{
-					"type": "doctype",
-					"name": "SMS Settings",
-					"description": _("Setup SMS gateway settings")
 				},
 			]
 		},

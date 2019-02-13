@@ -3149,6 +3149,7 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 1, 
+   "collapsible_depends_on": "taxes", 
    "columns": 0, 
    "fieldname": "item_tax_section_break", 
    "fieldtype": "Section Break", 
