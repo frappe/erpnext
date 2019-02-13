@@ -19,7 +19,7 @@ frappe.treeview_settings["Account"] = {
 					args: {
 						company: company,
 					},
-					callback: function(r, rt) {
+					callback: function(r) {
 						if(r.message) {
 							let root_company = r.message.length ? r.message[0] : "";
 							me.page.fields_dict.root_company.set_value(root_company);
@@ -137,7 +137,7 @@ frappe.treeview_settings["Account"] = {
 				!frappe.treeview_settings['Account'].treeview.page.fields_dict.root_company.get_value() &&
 					node.expandable && !node.hide_add;
 			},
-			click: function(node) {
+			click: function() {
 				var me = frappe.treeview_settings['Account'].treeview;
 				me.new_node();
 			},
