@@ -314,8 +314,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					show_description(child.idx, r.message.item_code, child.item_code);
 
 					frappe.model.set_value(child.doctype, child.name, {
-						"item_code": r.message.item_code,
-						"qty": (child.qty || 0) + 1
+						item_code: r.message.item_code,
+						qty: (child.qty || 0) + 1,
+						barcode: r.message.barcode
 					});
 				}
 				else{
@@ -477,7 +478,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 
-		if (item.serial_no) {
+		if (item && item.serial_no) {
 			if (!item.item_code) {
 				this.frm.trigger("item_code", cdt, cdn);
 			}
