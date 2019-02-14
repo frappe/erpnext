@@ -9,6 +9,13 @@ frappe.ui.form.on("Issue", {
 				frm.set_value("status", "Closed");
 				frm.save();
 			});
+
+			frm.add_custom_button(__("Task"), function () {
+				frappe.model.open_mapped_doc({
+					method: "erpnext.support.doctype.issue.issue.make_task",
+					frm: frm
+				});
+			}, __("Make"));
 		} else {
 			frm.add_custom_button(__("Reopen"), function() {
 				frm.set_value("status", "Open");
@@ -37,7 +44,7 @@ frappe.ui.form.on("Issue", {
 		if (!frm.timeline.wrapper.find('.btn-split-issue').length) {
 			let split_issue = __("Split Issue")
 			$(`<button class="btn btn-xs btn-link btn-add-to-kb text-muted hidden-xs btn-split-issue pull-right" style="display:inline-block; margin-right: 15px">
-				${split_issue} 
+				${split_issue}
 			</button>`)
 				.appendTo(frm.timeline.wrapper.find('.comment-header .asset-details:not([data-communication-type="Comment"])'))
 			if (!frm.timeline.wrapper.data("split-issue-event-attached")){
