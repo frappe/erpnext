@@ -133,6 +133,7 @@ class Item(WebsiteGenerator):
 		self.validate_uom_conversion_factor()
 		self.validate_item_defaults()
 		self.update_defaults_from_item_group()
+		self.validate_customer_provided_part()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -151,6 +152,14 @@ class Item(WebsiteGenerator):
 		'''Clean HTML description if set'''
 		if cint(frappe.db.get_single_value('Stock Settings', 'clean_description_html')):
 			self.description = clean_html(self.description)
+
+	def validate_customer_provided_part(self):
+		if self.is_customer_provided_item:
+			if self.is_purchase_item:
+				frappe.throw(_('"Customer Provided Item" cannot be Purchase Item also'))
+			if self.valuation_rate:
+				frappe.throw(_('"Customer Provided Item" cannot have Valuation Rate'))
+			self.default_material_request_type = "Customer Provided"
 
 	def add_price(self, price_list=None):
 		'''Add a new price'''
@@ -266,7 +275,7 @@ class Item(WebsiteGenerator):
 						"file_url": self.website_image,
 						"attached_to_doctype": "Item",
 						"attached_to_name": self.name
-					}).insert()
+					}).save()
 
 				except IOError:
 					self.website_image = None
@@ -559,7 +568,7 @@ class Item(WebsiteGenerator):
 
 		# add item taxes from template
 		for d in template.get("taxes"):
-			self.append("taxes", {"tax_type": d.tax_type, "tax_rate": d.tax_rate})
+			self.append("taxes", {"item_tax_template": d.item_tax_template})
 
 		# copy re-order table if empty
 		if not self.get("reorder_levels"):
@@ -611,17 +620,11 @@ class Item(WebsiteGenerator):
 		"""Check whether Tax Rate is not entered twice for same Tax Type"""
 		check_list = []
 		for d in self.get('taxes'):
-			if d.tax_type:
-				account_type = frappe.db.get_value("Account", d.tax_type, "account_type")
-
-				if account_type not in ['Tax', 'Chargeable', 'Income Account', 'Expense Account']:
-					frappe.throw(
-						_("Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable").format(d.idx))
+			if d.item_tax_template:
+				if d.item_tax_template in check_list:
+					frappe.throw(_("{0} entered twice in Item Tax").format(d.item_tax_template))
 				else:
-					if d.tax_type in check_list:
-						frappe.throw(_("{0} entered twice in Item Tax").format(d.tax_type))
-					else:
-						check_list.append(d.tax_type)
+					check_list.append(d.item_tax_template)
 
 	def validate_barcode(self):
 		from stdnum import ean
@@ -1100,7 +1103,7 @@ def get_uom_conv_factor(uom, stock_uom):
 	value = ""
 	uom_details = frappe.db.sql("""select to_uom, from_uom, value from `tabUOM Conversion Factor`\
 		where to_uom in ({0})
-		""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in uoms])), as_dict=True)
+		""".format(', '.join([frappe.db.escape(i, percent=False) for i in uoms])), as_dict=True)
 
 	for d in uom_details:
 		if d.from_uom == stock_uom and d.to_uom == uom:
