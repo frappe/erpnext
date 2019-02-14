@@ -22,16 +22,10 @@ frappe.query_reports["Purchase Analytics"] = {
 		},
 		{
 			fieldname: "value_field",
-			label: __("Value Or Qty"),
+			label: __("Amount Or Qty"),
 			fieldtype: "Select",
-			options: [
-				{ "value": "base_net_amount", "label": __("Net Amount") },
-				{ "value": "base_amount", "label": __("Amount") },
-				{ "value": "stock_qty", "label": __("Stock Qty") },
-				{ "value": "alt_uom_qty", "label": __("Contents Qty") },
-				{ "value": "qty", "label": __("Transaction Qty") },
-			],
-			default: "base_net_amount",
+			options: ["Net Amount", "Amount", "Stock Qty", "Contents Qty", "Transaction Qty"],
+			default: "Net Amount",
 			reqd: 1
 		},
 		{
