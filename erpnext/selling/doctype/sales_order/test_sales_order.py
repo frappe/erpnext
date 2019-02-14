@@ -733,6 +733,30 @@ class TestSalesOrder(unittest.TestCase):
 		mr_doc = frappe.get_doc('Material Request',mr.get('name'))
 		self.assertEqual(mr_doc.items[0].sales_order, so.name)
 
+	def test_alt_uom_qty(self):
+		so = make_sales_order(**{
+			"item_list": [
+				{
+					"item_code": "_Test Item With Contents UOM",
+					"qty": 10,
+					"rate": 100
+				},
+				{
+					"item_code": "_Test Item",
+					"qty": 10,
+					"rate": 100
+				}
+			]
+		})
+
+		self.assertEqual(so.items[0].alt_uom, "_Test UOM 1")
+		self.assertEqual(so.items[0].alt_uom_size, 5)
+		self.assertEqual(so.items[0].alt_uom_qty, 50)
+
+		self.assertFalse(so.items[1].alt_uom)
+		self.assertEqual(so.items[1].alt_uom_size, 1)
+		self.assertEqual(so.items[1].alt_uom_qty, 10)
+
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
 	args = frappe._dict(args)
