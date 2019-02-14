@@ -7,10 +7,12 @@ import json
 from frappe import _
 
 from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
 from frappe.utils import now
 from frappe.utils.user import is_website_user
 
 sender_field = "raised_by"
+
 
 class Issue(Document):
 	def get_feed(self):
@@ -97,6 +99,7 @@ class Issue(Document):
 			doc.save(ignore_permissions=True)
 		return replicated_issue.name
 
+
 def get_list_context(context=None):
 	return {
 		"title": _("Issues"),
@@ -106,6 +109,7 @@ def get_list_context(context=None):
 		"show_search": True,
 		'no_breadcrumbs': True
 	}
+
 
 def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by=None):
 	from frappe.www.list import get_list
@@ -124,11 +128,13 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 
 	return get_list(doctype, txt, filters, limit_start, limit_page_length, ignore_permissions=ignore_permissions)
 
+
 @frappe.whitelist()
 def set_status(name, status):
 	st = frappe.get_doc("Issue", name)
 	st.status = status
 	st.save()
+
 
 def auto_close_tickets():
 	""" auto close the replied support tickets after 7 days """
@@ -150,6 +156,7 @@ def set_multiple_status(names, status):
 	for name in names:
 		set_status(name, status)
 
+
 def has_website_permission(doc, ptype, user, verbose=False):
 	from erpnext.controllers.website_list_for_contact import has_website_permission
 	permission_based_on_customer = has_website_permission(doc, ptype, user, verbose)
@@ -160,3 +167,18 @@ def has_website_permission(doc, ptype, user, verbose=False):
 def update_issue(contact, method):
 	"""Called when Contact is deleted"""
 	frappe.db.sql("""UPDATE `tabIssue` set contact='' where contact=%s""", contact.name)
+
+
+@frappe.whitelist()
+def make_task(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		if not target.project:
+			target.project = frappe.db.get_value("Project", {"customer": source.customer})
+
+	doclist = get_mapped_doc("Issue", source_name, {
+		"Issue": {
+			"doctype": "Task"
+		}
+	}, target_doc, set_missing_values)
+
+	return doclist
