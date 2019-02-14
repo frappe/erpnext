@@ -4,6 +4,10 @@ frappe.ui.form.on("Issue", {
 	},
 
 	refresh: function(frm) {
+		frm.add_custom_button(__("Task"), function () {
+			frappe.set_route("List", "Task", { "issue": frm.doc.name });
+		}, __("View"));
+
 		if(frm.doc.status!=="Closed") {
 			frm.add_custom_button(__("Close"), function() {
 				frm.set_value("status", "Closed");
