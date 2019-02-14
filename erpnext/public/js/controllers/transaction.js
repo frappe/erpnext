@@ -314,8 +314,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					show_description(child.idx, r.message.item_code, child.item_code);
 
 					frappe.model.set_value(child.doctype, child.name, {
-						"item_code": r.message.item_code,
-						"qty": (child.qty || 0) + 1
+						item_code: r.message.item_code,
+						qty: (child.qty || 0) + 1,
+						barcode: r.message.barcode
 					});
 				}
 				else{
@@ -416,6 +417,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							item_code: item.item_code,
 							barcode: item.barcode,
 							serial_no: item.serial_no,
+							set_warehouse: me.frm.doc.set_warehouse,
 							warehouse: item.warehouse,
 							customer: me.frm.doc.customer,
 							supplier: me.frm.doc.supplier,
@@ -440,6 +442,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							weight_per_unit: item.weight_per_unit,
 							weight_uom: item.weight_uom,
 							uom : item.uom,
+							stock_uom: item.stock_uom,
 							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
 							cost_center: item.cost_center
 						}
@@ -475,7 +478,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 
-		if (item.serial_no) {
+		if (item && item.serial_no) {
 			if (!item.item_code) {
 				this.frm.trigger("item_code", cdt, cdn);
 			}

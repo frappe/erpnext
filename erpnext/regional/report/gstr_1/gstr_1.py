@@ -120,7 +120,7 @@ class Gstr1Report(object):
 				and customer in ('{0}')""".format("', '".join([frappe.db.escape(c.name) for c in customers]))
 
 		if self.filters.get("type_of_business") in ("B2C Large", "B2C Small"):
-			b2c_limit = frappe.db.get_single_value('GSt Settings', 'b2c_limit')
+			b2c_limit = frappe.db.get_single_value('GST Settings', 'b2c_limit')
 			if not b2c_limit:
 				frappe.throw(_("Please set B2C Limit in GST Settings."))
 
@@ -201,7 +201,7 @@ class Gstr1Report(object):
 		if unidentified_gst_accounts:
 			frappe.msgprint(_("Following accounts might be selected in GST Settings:")
 				+ "<br>" + "<br>".join(unidentified_gst_accounts), alert=True)
-		
+
 		# Build itemised tax for export invoices where tax table is blank
 		for invoice, items in iteritems(self.invoice_items):
 			if invoice not in self.items_based_on_tax_rate \

@@ -76,7 +76,7 @@ class TestBOM(unittest.TestCase):
 
 		# update cost of all BOMs based on latest valuation rate
 		update_cost()
-		
+
 		# check if new valuation rate updated in all BOMs
 		for d in frappe.db.sql("""select rate from `tabBOM Item`
 			where item_code='_Test Item 2' and docstatus=1 and parenttype='BOM'""", as_dict=1):
@@ -105,7 +105,7 @@ class TestBOM(unittest.TestCase):
 			item_price.item_code = item_code
 			item_price.price_list_rate = rate
 			item_price.insert()
-		
+
 		bom = frappe.copy_doc(test_records[2])
 		bom.set_rate_of_sub_assembly_item_based_on_bom = 0
 		bom.rm_cost_as_per = "Price List"

@@ -286,6 +286,9 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 3)
 
+		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 2, 'docname': so.items[0].name}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Sales Order', trans_item, so.name)
+
 	def test_warehouse_user(self):
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
@@ -730,6 +733,30 @@ class TestSalesOrder(unittest.TestCase):
 		mr_doc = frappe.get_doc('Material Request',mr.get('name'))
 		self.assertEqual(mr_doc.items[0].sales_order, so.name)
 
+	def test_alt_uom_qty(self):
+		so = make_sales_order(**{
+			"item_list": [
+				{
+					"item_code": "_Test Item With Contents UOM",
+					"qty": 10,
+					"rate": 100
+				},
+				{
+					"item_code": "_Test Item",
+					"qty": 10,
+					"rate": 100
+				}
+			]
+		})
+
+		self.assertEqual(so.items[0].alt_uom, "_Test UOM 1")
+		self.assertEqual(so.items[0].alt_uom_size, 5)
+		self.assertEqual(so.items[0].alt_uom_qty, 50)
+
+		self.assertFalse(so.items[1].alt_uom)
+		self.assertEqual(so.items[1].alt_uom_size, 1)
+		self.assertEqual(so.items[1].alt_uom_qty, 10)
+
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
 	args = frappe._dict(args)
@@ -760,7 +787,7 @@ def make_sales_order(**args):
 		})
 
 	so.delivery_date = add_days(so.transaction_date, 10)
- 
+
 	if not args.do_not_save:
 		so.insert()
 		if not args.do_not_submit:
