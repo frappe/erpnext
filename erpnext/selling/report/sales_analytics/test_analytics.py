@@ -29,7 +29,7 @@ class TestAnalytics(unittest.TestCase):
 			'to_date': '2018-03-31',
 			'tree_type': 'Customer',
 			'company': '_Test Company 2',
-			'value_field': 'base_net_amount'
+			'value_field': 'Net Amount'
 		}
 
 		report = execute(filters)
@@ -117,7 +117,7 @@ class TestAnalytics(unittest.TestCase):
 			'to_date': '2018-03-31',
 			'tree_type': 'Customer Group',
 			'company': '_Test Company 2',
-			'value_field': 'base_net_amount'
+			'value_field': 'Net Amount'
 		}
 
 		report = execute(filters)
@@ -149,7 +149,7 @@ class TestAnalytics(unittest.TestCase):
 			'to_date': '2018-03-31',
 			'tree_type': 'Customer',
 			'company': '_Test Company 2',
-			'value_field': 'stock_qty'
+			'value_field': 'Stock Qty'
 		}
 
 		report = execute(filters)
