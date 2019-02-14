@@ -79,6 +79,9 @@ class TestItem(unittest.TestCase):
 			"batch_no": None,
 			"uom": "_Test UOM",
 			"conversion_factor": 1.0,
+			"alt_uom": None,
+			"alt_uom_size": 1,
+			"alt_uom_qty": 1
 		}
 
 		make_test_objects("Item Price")
@@ -218,6 +221,34 @@ class TestItem(unittest.TestCase):
 
 			self.assertEqual(details.item_tax_template, data['item_tax_template'])
 			self.assertEqual(json.loads(details.item_tax_rate), expected_item_tax_map[details.item_tax_template])
+
+	def test_get_item_details_alt_uom(self):
+		to_check = {
+			"item_code": "_Test Item With Contents UOM",
+			"qty": 1.0,
+			"alt_uom": "_Test UOM 1",
+			"alt_uom_size": 5,
+			"alt_uom_qty": 5
+		}
+
+		details = get_item_details({
+			"item_code": "_Test Item With Contents UOM",
+			"company": "_Test Company",
+			"price_list": "_Test Price List",
+			"currency": "_Test Currency",
+			"doctype": "Sales Order",
+			"conversion_rate": 1,
+			"price_list_currency": "_Test Currency",
+			"plc_conversion_rate": 1,
+			"order_type": "Sales",
+			"customer": "_Test Customer",
+			"conversion_factor": 1,
+			"price_list_uom_dependant": 1,
+			"ignore_pricing_rule": 1
+		})
+
+		for key, value in iteritems(to_check):
+			self.assertEqual(value, details.get(key))
 
 	def test_item_attribute_change_after_variant(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
@@ -496,6 +527,29 @@ class TestItem(unittest.TestCase):
 				dict(from_qty=1, from_uom='_Test UOM', to_uom='Millilitre', to_qty=4000)
 			]
 		})
+
+	def test_item_with_alt_uom(self):
+		item = frappe.get_doc("Item", "_Test Item With Contents UOM")
+		self.assertEqual(item.stock_uom, "_Test UOM")
+		self.assertEqual(item.alt_uom, "_Test UOM 1")
+		self.assertEqual(item.alt_uom_size, 5)
+
+		alt_uom_conv = filter(lambda d: d.uom == "_Test UOM 1", item.uoms)
+		self.assertEqual(len(alt_uom_conv), 1)
+		self.assertEqual(alt_uom_conv[0].conversion_factor, 0.2)
+
+		frappe.delete_doc_if_exists("Item", "_Test Item With Contents UOM 2")
+		item2 = frappe.copy_doc(item)
+		item2.item_code = "_Test Item With Contents UOM 2"
+		item2.item_name = "_Test Item With Contents UOM 2"
+
+		item2.insert()
+		conv_row = filter(lambda d: d.from_uom == "_Test UOM" and d.to_uom == "_Test UOM 1", item2.uom_conversion_graph)
+		self.assertEqual(len(conv_row), 1)
+		conv_row[0].from_qty = 1
+		conv_row[0].to_qty = 2
+		item2.save()
+		self.assertEqual(item2.alt_uom_size, 2)
 
 	def test_item_variant_by_manufacturer(self):
 		fields = [{'field_name': 'description'}, {'field_name': 'variant_based_on'}]
