@@ -346,7 +346,7 @@ def filter_pricing_rules(args, pricing_rules):
 	if len(pricing_rules) > 1:
 		rate_or_discount = list(set([d.rate_or_discount for d in pricing_rules]))
 		if len(rate_or_discount) == 1 and rate_or_discount[0] == "Discount Percentage":
-			pricing_rules = filter(lambda x: x.for_price_list==args.price_list, pricing_rules) \
+			pricing_rules = list(filter(lambda x: x.for_price_list==args.price_list, pricing_rules)) \
 				or pricing_rules
 
 	if len(pricing_rules) > 1 and not args.for_shopping_cart:
@@ -369,7 +369,7 @@ def apply_internal_priority(pricing_rules, field_set, args):
 	filtered_rules = []
 	for field in field_set:
 		if args.get(field):
-			filtered_rules = filter(lambda x: x[field]==args[field], pricing_rules)
+			filtered_rules = list(filter(lambda x: x[field]==args[field], pricing_rules))
 			if filtered_rules: break
 
 	return filtered_rules or pricing_rules

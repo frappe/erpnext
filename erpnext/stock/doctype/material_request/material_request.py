@@ -81,9 +81,9 @@ class MaterialRequest(BuyingController):
 
 	def set_title(self):
 		'''Set title as comma separated list of items'''
-		items = ', '.join([d.item_name for d in self.items][:4])
-
-		self.title = _('{0} for {1}'.format(self.material_request_type, items))[:100]
+		if not self.title:
+			items = ', '.join([d.item_name for d in self.items][:3])
+			self.title = _('{0} Request for {1}').format(self.material_request_type, items)[:100]
 
 	def on_submit(self):
 		# frappe.db.set(self, 'status', 'Submitted')
