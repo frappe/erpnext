@@ -116,9 +116,9 @@ class Analytics(object):
 
 		entity_name_field = "{0} as entity_name, ".format(entity_name_field) if entity_name_field else ""
 		if include_sales_person:
-			value_field = "i.{} * sp.allocated_percentage / 100".format(frappe.db.escape(self.filters.value_field))
+			value_field = "i.{} * sp.allocated_percentage / 100".format(self.get_value_fieldname())
 		else:
-			value_field = "i.{}".format(frappe.db.escape(self.filters.value_field))
+			value_field = "i.{}".format(self.get_value_fieldname())
 
 		self.entries = frappe.db.sql("""
 			select
@@ -148,6 +148,16 @@ class Analytics(object):
 		if entity_name_field:
 			for d in self.entries:
 				self.entity_names.setdefault(d.entity, d.entity_name)
+
+	def get_value_fieldname(self):
+		filter_to_field = {
+			"Net Amount": "base_net_amount",
+			"Amount": "base_amount",
+			"Stock Qty": "stock_qty",
+			"Contents Qty": "alt_uom_qty",
+			"Transaction Qty": "qty"
+		}
+		return filter_to_field.get(self.filters.value_field, "base_net_amount")
 
 	def get_conditions(self):
 		conditions = []
