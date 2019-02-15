@@ -524,6 +524,8 @@ def make_purchase_invoice(supplier, source_name, target_doc=None):
 		target.discount_amount = 0.0
 		target.update_stock = 1
 
+		target.tax_id, target.tax_ntn_cnic = frappe.get_value("Supplier", supplier, ['tax_id', 'tax_ntn_cnic'])
+
 		if target.get('taxes_and_charges'): target.taxes_and_charges = ""
 		if target.get('taxes'): target.taxes = []
 		default_tax = get_default_taxes_and_charges("Purchase Taxes and Charges Template", company=target.company)
