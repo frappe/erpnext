@@ -33,7 +33,7 @@ class Issue(Document):
 			clear(self.doctype, self.name)
 
 	def on_update(self):
-		# create the communication email and remove the description
+		# Add a communication in the issue timeline
 		if self.flags.create_communication and self.via_customer_portal:
 			self.create_communication()
 			self.flags.communication_created = None
@@ -183,14 +183,8 @@ def update_issue(contact, method):
 
 @frappe.whitelist()
 def make_task(source_name, target_doc=None):
-	def set_missing_values(source, target):
-		if not target.project:
-			target.project = frappe.db.get_value("Project", {"customer": source.customer})
-
-	doclist = get_mapped_doc("Issue", source_name, {
+	return get_mapped_doc("Issue", source_name, {
 		"Issue": {
 			"doctype": "Task"
 		}
-	}, target_doc, set_missing_values)
-
-	return doclist
+	}, target_doc)
