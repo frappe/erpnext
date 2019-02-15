@@ -52,6 +52,13 @@ class JournalEntry(AccountsController):
 		self.update_loan()
 		self.update_inter_company_jv()
 
+	def before_print(self):
+		gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Journal Entry",
+			"voucher_no": self.name} ,
+			fields=["account", "party_type", "party", "debit", "credit", "remarks"]
+		)
+		self.gl = gl_entries
+
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
 

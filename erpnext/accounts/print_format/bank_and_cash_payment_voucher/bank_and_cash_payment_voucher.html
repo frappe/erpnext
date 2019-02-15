@@ -1,0 +1,82 @@
+{%- from "templates/print_formats/standard_macros.html" import add_header -%}
+<style>
+    .table-bordered td.top-bottom {border-top: none !important;border-bottom: none !important;}
+    .table-bordered td.right{border-right: none !important;}
+    .table-bordered td.left{border-left: none !important;}
+
+
+</style>
+<div class="page-break">
+    {%- if not doc.get("print_heading") and not doc.get("select_print_heading")
+        and doc.set("select_print_heading", _("Payment Entry")) -%}{%- endif -%}
+    {{ add_header(0, 1, doc, letter_head, no_letterhead, print_settings) }}
+    <div class="row margin-bottom">
+            <div class="col-sm-6">
+                <table>
+                <tr><td><strong>Voucher No: </strong></td><td>{{ doc.name }}</td></tr>
+                </table>
+            </div>
+            <div>
+                <table>
+                    <tr><td><strong>Date: </strong></td><td>{{ frappe.utils.formatdate(doc.creation) }}</td></tr>
+                </table>
+            </div>
+    </div>
+    <div class="margin-top">
+        <table class="table table-bordered table-condensed">
+            <tr>
+                <th>Account</th>
+                <th>Party Type</th>
+                <th>Party</th>
+                <th>Amount</th>
+            </tr>
+            <tr>
+                    <td class="top-bottom" colspan="5"><strong>Credit</strong></td>
+            </tr>
+            {% set total_credit = 0 -%}
+            {% for entries in doc.gl %}
+            {% if entries.debit == 0.0 %}
+            <tr>
+                <td class="right top-bottom">{{ entries.account }}</td>
+                <td class="right left top-bottom">{{ entries.party_type }}</td>
+                <td class="right left top-bottom">{{ entries.party }}</td>
+                <td class="left top-bottom">{{ entries.credit }}</td>
+                {% set total_credit = total_credit + entries.credit -%}
+            </tr>
+            <tr>
+                <td class="top-bottom" colspan="4"><strong> Narration </strong><br>{{ entries.remarks }}</td>
+            </tr>
+            <tr>
+                    <td class="right" colspan="3"><strong>Total (credit) </strong></td>
+                    <td class="left" >{{total_credit}}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+            <tr>
+                    <td class="top-bottom" colspan="4"> </td>
+            </tr>
+            <tr>
+                    <td class="top-bottom" colspan="5"><strong>Debit</strong></td>
+            </tr>
+            {% set total_debit = 0 -%}
+            {% for entries in doc.gl %}
+            {% if entries.credit == 0.0 %}
+            <tr>
+                <td class="right top-bottom">{{ entries.account }}</td>
+                <td class="right left top-bottom">{{ entries.party_type }}</td>
+                <td class="right left top-bottom">{{ entries.party }}</td>
+                {% set total_debit = total_debit + entries.debit -%}
+                <td class="left top-bottom">{{ entries.debit }}</td>
+            </tr>
+            <tr>
+                <td class="top-bottom"colspan="4"><strong> Narration </strong><br>{{ entries.remarks }}</td>
+            </tr>
+            <tr>
+                    <td class="right" colspan="3" ><strong>Total (debit) </strong></td>
+                    <td class="left" >{{total_debit}}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </table>
+    <div>
+</div>
