@@ -922,7 +922,7 @@ def set_balance_in_account_currency(gl_dict, account_currency=None, conversion_r
 
 
 def get_advance_journal_entries(party_type, party, party_account, order_doctype,
-		order_list=None, include_unallocated=True, against_all_orders=False, against_account=None, limit=1000):
+		order_list=None, include_unallocated=True, against_all_orders=False, against_account=None, limit=None):
 	journal_entries = []
 	if erpnext.get_party_account_type(party_type) == "Receivable":
 		dr_or_cr = "credit_in_account_currency"
@@ -932,6 +932,8 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 		dr_or_cr = "debit_in_account_currency"
 		bal_dr_or_cr = "gle_je.debit_in_account_currency - gle_je.credit_in_account_currency"
 		payment_dr_or_cr = "gle_payment.credit_in_account_currency - gle_payment.debit_in_account_currency"
+
+	limit_cond = "limit %(limit)s" if limit else ""
 
 	# JVs against order documents
 	if order_list or against_all_orders:
@@ -956,16 +958,17 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 				and {dr_or_cr} > 0 and jea.reference_type = '{order_doctype}' and je.docstatus = 1
 				{order_condition} {against_account_condition}
 			order by je.posting_date
-			limit %(limit)s""".format(
+			{limit_cond}""".format(
 				dr_or_cr=dr_or_cr,
 				order_doctype=order_doctype,
 				order_condition=order_condition,
-				against_account_condition=against_account_condition
+				against_account_condition=against_account_condition,
+				limit_cond=limit_cond
 			), {
 			"party_type": party_type,
 			"party": party,
 			"account": party_account,
-			"limit": limit or 1000
+			"limit": limit
 			}, as_dict=1)
 
 	# Unallocated payment JVs
@@ -997,15 +1000,16 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 		group by gle_je.voucher_no
 		having amount > 0.005 {against_account_condition}
 		order by gle_je.posting_date
-		limit %(limit)s""".format(
+		{limit_cond}""".format(
 			bal_dr_or_cr=bal_dr_or_cr,
 			payment_dr_or_cr=payment_dr_or_cr,
-			against_account_condition=against_account_condition
+			against_account_condition=against_account_condition,
+			limit_cond=limit_cond
 		), {
 			"party_type": party_type,
 			"party": party,
 			"account": party_account,
-			"limit": limit or 1000
+			"limit": limit
 		}, as_dict=True)
 
 	return list(journal_entries)

@@ -683,7 +683,7 @@ def get_held_invoices(party_type, party):
 	return held_invoices
 
 
-def get_outstanding_invoices(party_type, party, account, condition=None, negative_invoices=False, limit=1000):
+def get_outstanding_invoices(party_type, party, account, condition=None, negative_invoices=False, limit=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
@@ -695,6 +695,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, negativ
 		payment_dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 
 	held_invoices = get_held_invoices(party_type, party)
+	limit_cond = "limit %(limit)s" if limit else ""
 
 	invoice_list = frappe.db.sql("""
 		select
@@ -707,12 +708,12 @@ def get_outstanding_invoices(party_type, party, account, condition=None, negativ
 			{condition}
 		group by voucher_type, voucher_no
 		order by posting_date, name
-		limit %(limit)s
-	""".format(dr_or_cr=dr_or_cr, condition=condition or ""), {
+		{limit_cond}
+	""".format(dr_or_cr=dr_or_cr, condition=condition or "", limit_cond=limit_cond), {
 		"party_type": party_type,
 		"party": party,
 		"account": account,
-		"limit": limit or 1000
+		"limit": limit
 	}, as_dict=True)
 
 	payment_entries = frappe.db.sql("""
