@@ -19,7 +19,6 @@ frappe.ui.form.on('Employee Advance', {
 				filters: {
 					"root_type": "Asset",
 					"is_group": 0,
-					"account_type": "Payable",
 					"company": frm.doc.company
 				}
 			};
