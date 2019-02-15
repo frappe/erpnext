@@ -345,13 +345,14 @@ def set_tax_withholding_category(company):
 	if company and tds_account:
 		accounts = [dict(company=company, account=tds_account)]
 
-	fiscal_year = get_fiscal_year(today(), company=accounts[0].get('company'))[0]
+	fiscal_year = get_fiscal_year(today(), company=company)[0]
 	docs = get_tds_details(accounts, fiscal_year)
 
 	for d in docs:
 		try:
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_permissions = True
+			doc.flags.ignore_mandatory = True
 			doc.insert()
 		except frappe.DuplicateEntryError:
 			doc = frappe.get_doc("Tax Withholding Category", d.get("name"))

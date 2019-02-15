@@ -16,6 +16,9 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 
 from six import string_types, iteritems
 
+sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
+purchase_doctypes = ['Material Request', 'Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
+
 @frappe.whitelist()
 def get_item_details(args):
 	"""
@@ -232,7 +235,7 @@ def get_basic_details(args, item):
 
 	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not args.uom:
-		if args.get('doctype') in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']:
+		if args.get('doctype') in sales_doctypes:
 			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
 		elif (args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']) or \
 			(args.get('doctype') == 'Material Request' and args.get('material_request_type') == 'Purchase'):
@@ -283,14 +286,15 @@ def get_basic_details(args, item):
 		out.conversion_factor = 1.0
 	else:
 		out.conversion_factor = args.conversion_factor or \
-			get_conversion_factor(item.item_code, args.uom).get("conversion_factor")
+			get_conversion_factor(item.name, args.uom).get("conversion_factor")
 
 	args.conversion_factor = out.conversion_factor
 	out.stock_qty = out.qty * out.conversion_factor
 
 	# calculate last purchase rate
-	from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
-	out.last_purchase_rate = item_last_purchase_rate(args.name, args.conversion_rate, item.item_code, out.conversion_factor)
+	if args.get('doctype') in purchase_doctypes:
+		from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
+		out.last_purchase_rate = item_last_purchase_rate(args.name, args.conversion_rate, item.name, out.conversion_factor)
 
 	# if default specified in item is for another company, fetch from company
 	for d in [

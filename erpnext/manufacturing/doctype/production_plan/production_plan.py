@@ -276,8 +276,8 @@ class ProductionPlan(Document):
 				item_dict[(d.item_code, d.material_request_item, d.warehouse)] = item_details
 			else:
 				item_details.update({
-					"qty":flt(item_dict.get((d.item_code, d.sales_order, d.warehouse),{})
-						.get("qty")) + flt(d.planned_qty)
+					"qty": flt(item_dict.get((d.item_code, d.sales_order, d.warehouse),{})
+						.get("qty")) + (flt(d.planned_qty) - flt(d.ordered_qty))
 				})
 				item_dict[(d.item_code, d.sales_order, d.warehouse)] = item_details
 
