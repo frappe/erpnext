@@ -20,9 +20,9 @@ def execute():
 				parent, SUM(qty) as qty
 			FROM
 				`tab{0} Item`
-			where parenttype = %s
+			where parenttype = '{0}'
 			GROUP BY parent
-		'''.format(doctype), doctype, as_dict = True)
+		'''.format(doctype), as_dict = True)
 
 		# Query to update total_qty might become too big, Update in batches
 		# batch_size is chosen arbitrarily, Don't try too hard to reason about it
