@@ -324,13 +324,12 @@ class StatusUpdater(Document):
 
 			# Update the status field
 			if args.get('status_field'):
-				if args.get("target_parent_field") < 0.001:
+				target_parent_field_value = frappe.db.get_value(args.get("target_parent_dt"), args.get("name"), args.get("target_parent_field"))
+
+				if target_parent_field_value < 0.001:
 					status = 'Not '
 				else:
-					if args.get("target_parent_field") >= 99.999999:
-						status = 'Fully '
-					else:
-						status = 'Partly '
+					status = 'Fully ' if target_parent_field_value >= 99.999999 else 'Partly '
 
 				status += args.get("keyword")
 				frappe.db.set_value(args.get("target_parent_dt"), args.get("name"), args.get("status_field"), status, update_modified=update_modified)
