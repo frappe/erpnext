@@ -971,6 +971,8 @@ def make_sales_order(customer, source_name, target_doc=None):
 		target.additional_discount_percentage = 0.0
 		target.discount_amount = 0.0
 
+		target.tax_id, target.tax_ntn_cnic = frappe.get_value("Customer", customer, ['tax_id', 'tax_ntn_cnic'])
+
 		if target.get('taxes_and_charges'): target.taxes_and_charges = ""
 		if target.get('taxes'): target.taxes = []
 		default_tax = get_default_taxes_and_charges("Sales Taxes and Charges Template", company=target.company)
