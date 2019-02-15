@@ -15,6 +15,7 @@ def execute():
     if not frappe.get_all('Pricing Rule', limit=1):
         return
 
+    frappe.reload_doc('accounts', 'doctype', 'pricing_rule_detail')
     doctypes = {'Supplier Quotation': 'buying', 'Purchase Order': 'buying', 'Purchase Invoice': 'accounts',
         'Purchase Receipt': 'stock', 'Quotation': 'selling', 'Sales Order': 'selling',
         'Sales Invoice': 'accounts', 'Delivery Note': 'stock'}

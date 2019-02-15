@@ -201,6 +201,9 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
                     pricing_rules = apply_internal_priority(pricing_rules, field_set, args)
                     break
 
+    if pricing_rules and not isinstance(pricing_rules, list):
+        pricing_rules = list(pricing_rules)
+
     if len(pricing_rules) > 1:
         rate_or_discount = list(set([d.rate_or_discount for d in pricing_rules]))
         if len(rate_or_discount) == 1 and rate_or_discount[0] == "Discount Percentage":
@@ -357,11 +360,11 @@ def validate_pricing_rules(doc):
 def validate_pricing_rule_on_items(doc, item_row):
     i=0
     for d in get_applied_pricing_rules(doc, item_row):
-        if i == 0:
+        pr_doc = frappe.get_doc('Pricing Rule', d)
+
+        if i == 0 and not pr_doc.validate_applied_rule:
             for field in ['discount_percentage', 'discount_amount', 'rate']:
                 item_row.set(field, 0)
-
-        pr_doc = frappe.get_doc('Pricing Rule', d)
 
         if pr_doc.get('apply_on') == 'Tramsaction': continue
 
@@ -437,7 +440,10 @@ def apply_pricing_rule(doc, pr_doc, item_row):
         for field in ['discount_percentage', 'discount_amount', 'rate']:
             if not pr_doc.get(field): continue
 
-            sum_of_rules_field = item_row.get(field) + pr_doc.get(field)
+            if pr_doc.validate_applied_rule:
+                sum_of_rules_field = pr_doc.get(field)
+            else:
+                sum_of_rules_field = item_row.get(field) + pr_doc.get(field)
 
             if pr_doc.validate_applied_rule and item_row.get(field) < sum_of_rules_field:
                 frappe.msgprint(_("Row {0}: user has not applied rule on the item {1}")

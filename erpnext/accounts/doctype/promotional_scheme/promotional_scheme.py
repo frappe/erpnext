@@ -28,7 +28,6 @@ class PromotionalScheme(Document):
 			or self.product_discount_slabs):
 			frappe.throw(_("Price or product discount slabs are required"))
 
-
 	def on_update(self):
 		data = frappe.get_all('Pricing Rule', fields = ["promotional_scheme_id", "name"],
 			filters = {'promotional_scheme': self.name}) or {}

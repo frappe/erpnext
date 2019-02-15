@@ -332,22 +332,29 @@ def make_pricing_rule(doctype, docname):
 	return doc
 
 @frappe.whitelist()
-def get_free_items(pricing_rules):
+def get_free_items(pricing_rules, item_row):
+	if isinstance(item_row, string_types):
+		item_row = json.loads(item_row)
+
 	free_items = []
 	pricing_rules = list(set(pricing_rules.split(',')))
 
 	for d in pricing_rules:
 		pr_doc = frappe.get_doc('Pricing Rule', d)
-		if pr_doc.price_or_product_discount == 'Product' and pr_doc.free_item:
-			doc = frappe.get_doc('Item', pr_doc.free_item)
+		if pr_doc.price_or_product_discount == 'Product':
+			item = (item_row.get('item_code') if pr_doc.same_item
+				else pr_doc.free_item)
+			if not item: return free_items
+
+			doc = frappe.get_doc('Item', item)
 
 			free_items.append({
-				'item_code': pr_doc.free_item,
+				'item_code': item,
 				'item_name': doc.item_name,
 				'description': doc.description,
 				'qty': pr_doc.free_qty,
 				'uom': pr_doc.free_item_uom,
-				'rate': pr_doc.free_item_rate,
+				'rate': pr_doc.free_item_rate or 0,
 				'is_free_item': 1
 			})
 

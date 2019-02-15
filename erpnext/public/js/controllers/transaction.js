@@ -1282,7 +1282,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			frappe.call({
 				method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.get_free_items",
 				args: {
-					pricing_rules: item.pricing_rules
+					pricing_rules: item.pricing_rules,
+					item_row: item
 				},
 				callback: function(r) {
 					let items = [];
@@ -1295,6 +1296,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					if(r.message && r.message.length) {
 						r.message.forEach(d => {
 							// If free item is already exists
+
 							if(d.item_code in items && d.is_free_item) {
 								child = items[d.item_code];
 							} else {
