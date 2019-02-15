@@ -700,15 +700,14 @@ class Item(WebsiteGenerator):
                         frappe.db.get_single_value('Item Variant Settings', 'do_not_update_variants'):
 			return
 		if self.has_variants:
-			updated = []
 			variants = frappe.db.get_all("Item", fields=["item_code"], filters={"variant_of": self.name})
-			for d in variants:
-				variant = frappe.get_doc("Item", d)
-				copy_attributes_to_variant(self, variant)
-				variant.save()
-				updated.append(d.item_code)
-			if updated:
-				frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
+			if variants:
+				if len(variants) <= 30:
+					update_variants(variants, self, publish_progress=False)
+					frappe.msgprint(_("Item Variants updated"))
+				else:
+					frappe.enqueue("erpnext.stock.doctype.item.item.update_variants",
+						variants=variants, template=self, now=frappe.flags.in_test, timeout=600)
 
 	def validate_has_variants(self):
 		if not self.has_variants and frappe.db.get_value("Item", self.name, "has_variants"):
@@ -997,3 +996,13 @@ def get_item_attribute(parent, attribute_value=''):
 
 	return frappe.get_all("Item Attribute Value", fields = ["attribute_value"],
 		filters = {'parent': parent, 'attribute_value': ("like", "%%%s%%" % attribute_value)})
+
+def update_variants(variants, template, publish_progress=True):
+	count=0
+	for d in variants:
+		variant = frappe.get_doc("Item", d)
+		copy_attributes_to_variant(template, variant)
+		variant.save()
+		count+=1
+		if publish_progress:
+				frappe.publish_progress(count*100/len(variants), title = _("Updating Variants..."))
