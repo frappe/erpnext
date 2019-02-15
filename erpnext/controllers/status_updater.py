@@ -289,7 +289,7 @@ class StatusUpdater(Document):
 					`tab%(target_dt)s`
 				WHERE
 					parent="%(name)s"
-			""", args)[0][0]
+			""" % args)[0][0]
 
 			# Since the target field in the parent is always a percentage, we assume it to
 			# be 100% if the reference field total is zero, thereby avoiding ZeroDivisionError
@@ -310,19 +310,18 @@ class StatusUpdater(Document):
 						`tab%(target_dt)s`
 					WHERE
 						parent="%(name)s"
-				""", args)[0][0]
+				""" % args)[0][0]
 
 			frappe.db.set_value(args.get("target_parent_dt"), args.get("name"), args.get("target_parent_field"), target_field_value, update_modified=update_modified)
 
 			# Update the status field
 			if args.get('status_field'):
-				if args.get("target_parent_field") < 0.001:
+				target_parent_field_value = frappe.db.get_value(args.get("target_parent_dt"), args.get("name"), args.get("target_parent_field"))
+
+				if target_parent_field_value < 0.001:
 					status = 'Not '
 				else:
-					if args.get("target_parent_field") >= 99.999999:
-						status = 'Fully '
-					else:
-						status = 'Partly '
+					status = 'Fully ' if target_parent_field_value >= 99.999999 else 'Partly '
 
 				status += args.get("keyword")
 				frappe.db.set_value(args.get("target_parent_dt"), args.get("name"), args.get("status_field"), status, update_modified=update_modified)
