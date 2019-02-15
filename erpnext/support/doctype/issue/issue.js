@@ -3,13 +3,13 @@ frappe.ui.form.on("Issue", {
 		frm.email_field = "raised_by";
 	},
 
-	refresh: function(frm) {
+	refresh: function (frm) {
 		frm.add_custom_button(__("Task"), function () {
 			frappe.set_route("List", "Task", { "issue": frm.doc.name });
 		}, __("View"));
 
-		if(frm.doc.status!=="Closed") {
-			frm.add_custom_button(__("Close"), function() {
+		if (frm.doc.status !== "Closed") {
+			frm.add_custom_button(__("Close"), function () {
 				frm.set_value("status", "Closed");
 				frm.save();
 			});
@@ -21,7 +21,7 @@ frappe.ui.form.on("Issue", {
 				});
 			}, __("Make"));
 		} else {
-			frm.add_custom_button(__("Reopen"), function() {
+			frm.add_custom_button(__("Reopen"), function () {
 				frm.set_value("status", "Open");
 				frm.save();
 			});
