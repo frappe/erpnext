@@ -101,7 +101,7 @@ def get_conditions(filters):
 		frappe.throw(_("'From Date' is required"))
 
 	if filters.get("to_date"):
-		conditions += " and sle.posting_date <= '%s'" % frappe.db.escape(filters.get("to_date"))
+		conditions += " and sle.posting_date <= %s" % frappe.db.escape(filters.get("to_date"))
 	else:
 		frappe.throw(_("'To Date' is required"))
 
@@ -119,7 +119,7 @@ def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
 	if items:
 		item_conditions_sql = ' and sle.item_code in ({})'\
-			.format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items]))
+			.format(', '.join([frappe.db.escape(i, percent=False) for i in items]))
 
 	conditions = get_conditions(filters)
 
@@ -130,7 +130,7 @@ def get_stock_ledger_entries(filters, items):
 		from
 			`tabStock Ledger Entry` sle force index (posting_sort_index)
 		where sle.docstatus < 2 %s %s
-		order by sle.posting_date, sle.posting_time, sle.name""" %
+		order by sle.posting_date, sle.posting_time, sle.creation""" %
 		(item_conditions_sql, conditions), as_dict=1)
 
 def get_item_warehouse_map(filters, sle):
@@ -253,7 +253,7 @@ def get_item_reorder_details(items):
 			select parent, warehouse, warehouse_reorder_qty, warehouse_reorder_level
 			from `tabItem Reorder`
 			where parent in ({0})
-		""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])), as_dict=1)
+		""".format(', '.join([frappe.db.escape(i, percent=False) for i in items])), as_dict=1)
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
 

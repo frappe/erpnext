@@ -568,7 +568,7 @@ def get_outstanding_reference_documents(args):
 	# Get positive outstanding sales /purchase invoices/ Fees
 	condition = ""
 	if args.get("voucher_type") and args.get("voucher_no"):
-		condition = " and voucher_type='{0}' and voucher_no='{1}'"\
+		condition = " and voucher_type={0} and voucher_no={1}"\
 			.format(frappe.db.escape(args["voucher_type"]), frappe.db.escape(args["voucher_no"]))
 
 	# Add cost center condition

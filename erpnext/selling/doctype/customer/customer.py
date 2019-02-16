@@ -83,7 +83,7 @@ class Customer(TransactionBase):
 	def update_customer_groups(self):
 		ignore_doctypes = ["Lead", "Opportunity", "POS Profile", "Tax Rule", "Pricing Rule"]
 		if frappe.flags.customer_group_changed:
-			update_linked_doctypes('Customer', frappe.db.escape(self.name), 'Customer Group',
+			update_linked_doctypes('Customer', self.name, 'Customer Group',
 				self.customer_group, ignore_doctypes)
 
 	def create_primary_contact(self):

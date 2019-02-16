@@ -67,7 +67,7 @@ def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
 	if items:
 		item_conditions_sql = 'and sle.item_code in ({})'\
-			.format(', '.join(['"' + frappe.db.escape(i) + '"' for i in items]))
+			.format(', '.join([frappe.db.escape(i) for i in items]))
 
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
 			item_code, warehouse, actual_qty, qty_after_transaction, incoming_rate, valuation_rate,
@@ -77,7 +77,7 @@ def get_stock_ledger_entries(filters, items):
 			posting_date between %(from_date)s and %(to_date)s
 			{sle_conditions}
 			{item_conditions_sql}
-			order by posting_date asc, posting_time asc, name asc"""\
+			order by posting_date asc, posting_time asc, creation asc"""\
 		.format(
 			sle_conditions=get_sle_conditions(filters),
 			item_conditions_sql = item_conditions_sql

@@ -761,7 +761,7 @@ def validate_item_type(doc, fieldname, message):
 	if not items:
 		return
 
-	item_list = ", ".join(["'%s'" % frappe.db.escape(d) for d in items])
+	item_list = ", ".join(["%s" % frappe.db.escape(d) for d in items])
 
 	invalid_items = [d[0] for d in frappe.db.sql("""
 		select item_code from tabItem where name in ({0}) and {1}=0

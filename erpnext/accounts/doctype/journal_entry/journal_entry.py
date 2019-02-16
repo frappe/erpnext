@@ -807,7 +807,7 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 		from `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail
 		where jv_detail.parent = jv.name and jv_detail.account = %s and ifnull(jv_detail.party, '') = %s
 		and (jv_detail.reference_type is null or jv_detail.reference_type = '')
-		and jv.docstatus = 1 and jv.`{0}` like %s order by jv.name desc limit %s, %s""".format(frappe.db.escape(searchfield)),
+		and jv.docstatus = 1 and jv.`{0}` like %s order by jv.name desc limit %s, %s""".format(searchfield),
 		(filters.get("account"), cstr(filters.get("party")), "%{0}%".format(txt), start, page_len))
 
 

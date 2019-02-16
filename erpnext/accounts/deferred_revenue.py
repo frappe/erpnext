@@ -29,7 +29,7 @@ def validate_service_stop_date(doc):
 			if date_diff(item.service_stop_date, item.service_end_date) > 0:
 				frappe.throw(_("Service Stop Date cannot be after Service End Date"))
 
-		if old_stop_dates and old_stop_dates.get(item.name) and item.service_stop_date!=old_stop_dates[item.name]:
+		if old_stop_dates and old_stop_dates.get(item.name) and item.service_stop_date!=old_stop_dates.get(item.name):
 			frappe.throw(_("Cannot change Service Stop Date for item in row {0}".format(item.idx)))
 
 def convert_deferred_expense_to_expense(start_date=None, end_date=None):
@@ -60,7 +60,7 @@ def get_booking_dates(doc, item, start_date=None, end_date=None):
 	deferred_account = "deferred_revenue_account" if doc.doctype=="Sales Invoice" else "deferred_expense_account"
 	last_gl_entry, skip = False, False
 
-	booking_end_date = getdate(add_days(today(), -1)) if not end_date else end_date
+	booking_end_date = getdate(add_days(today(), -1) if not end_date else end_date)
 	if booking_end_date < item.service_start_date or \
 		(item.service_stop_date and booking_end_date.month > item.service_stop_date.month):
 		return None, None, None, True
@@ -71,7 +71,7 @@ def get_booking_dates(doc, item, start_date=None, end_date=None):
 		last_gl_entry = True
 		booking_end_date = item.service_stop_date
 
-	booking_start_date = getdate(add_months(today(), -1)) if not start_date else start_date
+	booking_start_date = getdate(add_months(today(), -1) if not start_date else start_date)
 	booking_start_date = booking_start_date \
 		if booking_start_date > item.service_start_date else item.service_start_date
 
@@ -113,7 +113,6 @@ def calculate_amount_and_base_amount(doc, item, last_gl_entry, total_days, total
 			group by voucher_detail_no
 		'''.format(total_credit_debit, total_credit_debit_currency),
 			(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name), as_dict=True)
-
 		already_booked_amount = gl_entries_details[0].total_credit if gl_entries_details else 0
 		base_amount = flt(item.base_net_amount - already_booked_amount, item.precision("base_net_amount"))
 		if account_currency==doc.company_currency:
@@ -140,7 +139,7 @@ def book_deferred_income_or_expense(doc, start_date=None, end_date=None):
 			get_booking_dates(doc, item, start_date, end_date)
 
 		if skip: continue
-		total_days = date_diff(item.service_end_date, item.service_start_date)
+		total_days = date_diff(item.service_end_date, item.service_start_date) + 1
 		total_booking_days = date_diff(booking_end_date, booking_start_date) + 1
 
 		account_currency = get_account_currency(item.expense_account)
@@ -179,6 +178,10 @@ def book_deferred_income_or_expense(doc, start_date=None, end_date=None):
 				'project': project
 			}, account_currency)
 		)
-
 	if gl_entries:
-		make_gl_entries(gl_entries, cancel=(doc.docstatus == 2), merge_entries=True)
+		try:
+			make_gl_entries(gl_entries, cancel=(doc.docstatus == 2), merge_entries=True)
+			frappe.db.commit()
+		except:
+			frappe.db.rollback()
+			frappe.log_error(message = frappe.get_traceback(), title = _("Error while processing deferred accounting for {0}").format(doc.name))
