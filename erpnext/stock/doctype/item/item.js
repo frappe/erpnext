@@ -126,7 +126,7 @@ frappe.ui.form.on("Item", {
 	image: function() {
 		refresh_field("image_view");
 	},
-	
+
 	is_customer_provided_item: function(frm) {
 		frm.toggle_reqd('customer', frm.doc.is_customer_provided_item ? 1:0);
 	},
@@ -180,6 +180,10 @@ frappe.ui.form.on("Item", {
 		if (frm.doc.default_warehouse && !frm.doc.website_warehouse){
 			frm.set_value("website_warehouse", frm.doc.default_warehouse);
 		}
+	},
+
+	set_meta_tags(frm) {
+		frappe.utils.set_meta_tag(frm.doc.route);
 	}
 });
 

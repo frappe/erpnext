@@ -433,8 +433,6 @@ class Item(WebsiteGenerator):
 					context.disabled_attributes.setdefault(attr.attribute, []).append(combination[-1])
 
 	def set_metatags(self, context):
-		from frappe.website.doctype.website_meta_tag.website_meta_tag import set_metatags
-
 		context.metatags = frappe._dict({})
 
 		safe_description = frappe.utils.to_markdown(self.description)
@@ -454,9 +452,6 @@ class Item(WebsiteGenerator):
 
 		context.metatags['og:type'] = 'product'
 		context.metatags['og:site_name'] = 'ERPNext'
-
-		# set meta tags from child table
-		context = set_metatags(self.meta_tags, context)
 
 	def add_default_uom_in_conversion_factor_table(self):
 		uom_conv_list = [d.uom for d in self.get("uoms")]

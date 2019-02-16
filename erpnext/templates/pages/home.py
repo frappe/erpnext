@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint
-from frappe.website.doctype.website_meta_tag.website_meta_tag import set_metatags
 
 no_cache = 1
 no_sitemap = 1
@@ -19,8 +18,6 @@ def get_context(context):
 
 	context.title = homepage.title or homepage.company
 	context.homepage = homepage
-
-	context = set_metatags(homepage.meta_tags, context)
 
 	context.blogs = frappe.get_all('Blog Post',
 		fields=['title', 'blogger', 'blog_intro', 'route'],

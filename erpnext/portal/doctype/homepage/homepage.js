@@ -11,7 +11,9 @@ frappe.ui.form.on('Homepage', {
 	},
 
 	refresh: function(frm) {
-
+		frm.add_custom_button(__('Set Meta Tags'), () => {
+			frappe.utils.set_meta_tag('home');
+		});
 	},
 });
 
