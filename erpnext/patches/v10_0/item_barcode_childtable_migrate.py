@@ -7,10 +7,12 @@ import frappe
 
 
 def execute():
-	items_barcode = frappe.get_all('Item', ['name', 'barcode'], { 'barcode': ('!=', '') })
-
-	frappe.reload_doc("stock", "doctype", "item")
 	frappe.reload_doc("stock", "doctype", "item_barcode")
+
+	items_barcode = frappe.get_all('Item', ['name', 'barcode'], { 'barcode': ('!=', '') })
+	frappe.reload_doc("stock", "doctype", "item")
+
+
 
 	for item in items_barcode:
 		barcode = item.barcode.strip()
