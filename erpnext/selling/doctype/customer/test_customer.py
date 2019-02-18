@@ -116,7 +116,9 @@ class TestCustomer(unittest.TestCase):
 
 	def test_rename(self):
 		# delete communication linked to these 2 customers
-		for name in ("_Test Customer 1", "_Test Customer 1 Renamed"):
+
+		new_name = "_Test Customer 1 Renamed"
+		for name in ("_Test Customer 1", new_name):
 			frappe.db.sql("""delete from `tabComment`
 				where reference_doctype=%s and reference_name=%s""",
 				("Customer", name))
@@ -125,20 +127,23 @@ class TestCustomer(unittest.TestCase):
 		comment = frappe.get_doc("Customer", "_Test Customer 1").add_comment("Comment", "Test Comment for Rename")
 
 		# rename
-		frappe.rename_doc("Customer", "_Test Customer 1", "_Test Customer 1 Renamed")
+		frappe.rename_doc("Customer", "_Test Customer 1", new_name)
 
 		# check if customer renamed
-		self.assertTrue(frappe.db.exists("Customer", "_Test Customer 1 Renamed"))
+		self.assertTrue(frappe.db.exists("Customer", new_name))
 		self.assertFalse(frappe.db.exists("Customer", "_Test Customer 1"))
 
 		# test that comment gets linked to renamed doc
 		self.assertEqual(frappe.db.get_value("Comment", {
 			"reference_doctype": "Customer",
-			"reference_name": "_Test Customer 1 Renamed"
+			"reference_name": new_name,
+			"content": "Test Comment for Rename"
 		}), comment.name)
 
 		# rename back to original
-		frappe.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
+		frappe.rename_doc("Customer", new_name, "_Test Customer 1")
+
+		frappe.db.rollback()
 
 	def test_freezed_customer(self):
 		make_test_records("Item")
