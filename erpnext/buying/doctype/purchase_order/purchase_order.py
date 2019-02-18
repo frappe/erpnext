@@ -183,7 +183,7 @@ class PurchaseOrder(BuyingController):
 	def check_modified_date(self):
 		mod_db = frappe.db.sql("select modified from `tabPurchase Order` where name = %s",
 			self.name)
-		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.modified)))
+		date_diff = frappe.db.sql("select '%s' - '%s' " % (mod_db[0][0], cstr(self.modified)))
 
 		if date_diff and date_diff[0][0]:
 			msgprint(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name),
@@ -296,7 +296,10 @@ class PurchaseOrder(BuyingController):
 		for item in self.items:
 			received_qty += item.received_qty
 			total_qty += item.qty
-		self.db_set("per_received", flt(received_qty/total_qty) * 100, update_modified=False)
+		if total_qty:
+			self.db_set("per_received", flt(received_qty/total_qty) * 100, update_modified=False)
+		else:
+			self.db_set("per_received", 0, update_modified=False)
 
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor= 1.0):
 	"""get last purchase rate for an item"""

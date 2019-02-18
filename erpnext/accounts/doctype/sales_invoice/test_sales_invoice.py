@@ -381,6 +381,63 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEqual(si.grand_total, 5474.0)
 
+	def test_tax_calculation_with_item_tax_template(self):
+		si = create_sales_invoice(qty=84, rate=4.6, do_not_save=True)
+		item_row = si.get("items")[0]
+
+		add_items = [
+			(54, '_Test Account Excise Duty @ 12'),
+			(288, '_Test Account Excise Duty @ 15'),
+			(144, '_Test Account Excise Duty @ 20'),
+			(430, '_Test Item Tax Template 1')
+		]
+		for qty, item_tax_template in add_items:
+			item_row_copy = copy.deepcopy(item_row)
+			item_row_copy.qty = qty
+			item_row_copy.item_tax_template = item_tax_template
+			si.append("items", item_row_copy)
+
+		si.append("taxes", {
+			"account_head": "_Test Account Excise Duty - _TC",
+			"charge_type": "On Net Total",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Excise Duty",
+			"doctype": "Sales Taxes and Charges",
+			"rate": 11
+		})
+		si.append("taxes", {
+			"account_head": "_Test Account Education Cess - _TC",
+			"charge_type": "On Net Total",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Education Cess",
+			"doctype": "Sales Taxes and Charges",
+			"rate": 0
+		})
+		si.append("taxes", {
+			"account_head": "_Test Account S&H Education Cess - _TC",
+			"charge_type": "On Net Total",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "S&H Education Cess",
+			"doctype": "Sales Taxes and Charges",
+			"rate": 3
+		})
+		si.insert()
+
+		self.assertEqual(si.net_total, 4600)
+
+		self.assertEqual(si.get("taxes")[0].tax_amount, 502.41)
+		self.assertEqual(si.get("taxes")[0].total, 5102.41)
+
+		self.assertEqual(si.get("taxes")[1].tax_amount, 197.80)
+		self.assertEqual(si.get("taxes")[1].total, 5300.21)
+
+		self.assertEqual(si.get("taxes")[2].tax_amount, 375.36)
+		self.assertEqual(si.get("taxes")[2].total, 5675.57)
+
+		self.assertEqual(si.grand_total, 5675.57)
+		self.assertEqual(si.rounding_adjustment, 0.43)
+		self.assertEqual(si.rounded_total, 5676.0)
+
 	def test_tax_calculation_with_multiple_items_and_discount(self):
 		si = create_sales_invoice(qty=1, rate=75, do_not_save=True)
 		item_row = si.get("items")[0]
@@ -729,7 +786,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# check gl entries
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc, debit asc""", si.name, as_dict=1)
+			order by account asc, debit asc, credit asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 
 		stock_in_hand = get_inventory_account('_Test Company')
@@ -762,7 +819,7 @@ class TestSalesInvoice(unittest.TestCase):
 		set_perpetual_inventory(0)
 
 		frappe.db.sql("delete from `tabPOS Profile`")
-	
+
 	def test_pos_si_without_payment(self):
 		set_perpetual_inventory()
 		make_pos_profile()

@@ -41,13 +41,13 @@ frappe.ui.form.on("Timesheet", {
 	refresh: function(frm) {
 		if(frm.doc.docstatus==1) {
 			if(frm.doc.per_billed < 100 && frm.doc.total_billable_hours && frm.doc.total_billable_hours > frm.doc.total_billed_hours){
-				frm.add_custom_button(__("Make Sales Invoice"), function() { frm.trigger("make_invoice") },
-					"fa fa-file-alt");
+				frm.add_custom_button(__('Create Sales Invoice'), function() { frm.trigger("make_invoice") },
+					"fa fa-file-text");
 			}
 
 			if(!frm.doc.salary_slip && frm.doc.employee){
-				frm.add_custom_button(__("Make Salary Slip"), function() { frm.trigger("make_salary_slip") },
-					"fa fa-file-alt");
+				frm.add_custom_button(__('Create Salary Slip'), function() { frm.trigger("make_salary_slip") },
+					"fa fa-file-text");
 			}
 		}
 
@@ -106,7 +106,7 @@ frappe.ui.form.on("Timesheet", {
 			]
 		});
 
-		dialog.set_primary_action(__("Make Sales Invoice"), () => {
+		dialog.set_primary_action(__('Create Sales Invoice'), () => {
 			var args = dialog.get_values();
 			if(!args) return;
 			dialog.hide();

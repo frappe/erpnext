@@ -22,7 +22,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		invoices = []
 
 		# create invoices for lower than single threshold tax rate
-		for _ in xrange(2):
+		for _ in range(2):
 			pi = create_purchase_invoice(supplier = "Test TDS Supplier")
 			pi.submit()
 			invoices.append(pi)

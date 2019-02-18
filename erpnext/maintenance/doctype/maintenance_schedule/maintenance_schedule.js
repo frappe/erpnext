@@ -44,13 +44,13 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 					});
 				}, __("Get items from"));
 		} else if (this.frm.doc.docstatus === 1) {
-			this.frm.add_custom_button(__("Make Maintenance Visit"), function() {
+			this.frm.add_custom_button(__('Create Maintenance Visit'), function() {
 				frappe.model.open_mapped_doc({
 					method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
 					source_name: me.frm.doc.name,
 					frm: me.frm
-				})
-			}, __("Make"));
+				});
+			}, __('Create'));
 		}
 	},
 

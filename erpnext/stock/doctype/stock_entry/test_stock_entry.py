@@ -27,7 +27,7 @@ def get_sle(**args):
 		values.append(value)
 
 	return frappe.db.sql("""select * from `tabStock Ledger Entry` %s
-		order by timestamp(posting_date, posting_time) desc, name desc limit 1"""% condition,
+		order by timestamp(posting_date, posting_time) desc, creation desc limit 1"""% condition,
 		values, as_dict=1)
 
 class TestStockEntry(unittest.TestCase):
@@ -562,7 +562,7 @@ class TestStockEntry(unittest.TestCase):
 		for d in stock_entry.get("items"):
 			if d.item_code != "_Test FG Item 2":
 				rm_cost += flt(d.amount)
-		fg_cost = filter(lambda x: x.item_code=="_Test FG Item 2", stock_entry.get("items"))[0].amount
+		fg_cost = list(filter(lambda x: x.item_code=="_Test FG Item 2", stock_entry.get("items")))[0].amount
 		self.assertEqual(fg_cost,
 			flt(rm_cost + bom_operation_cost + work_order.additional_operating_cost, 2))
 
@@ -719,6 +719,13 @@ class TestStockEntry(unittest.TestCase):
 		stock_entry = frappe.get_doc(_make_stock_entry(work_order.name, "Material Consumption for Manufacture", 2))
 		for d in stock_entry.get('items'):
 			self.assertEqual(item_quantity.get(d.item_code), d.qty)
+
+	def test_customer_provided_parts_se(self):
+		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
+		se = make_stock_entry(item_code='CUST-0987', purporse = 'Material Receipt', qty=4, to_warehouse = "_Test Warehouse - _TC")
+		self.assertEqual(se.get("items")[0].allow_zero_valuation_rate, 1)
+		self.assertEqual(se.get("items")[0].amount, 0)
+
 
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])
