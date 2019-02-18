@@ -504,7 +504,7 @@ def add_department_leaves(events, start, end, employee, company):
 	add_leaves(events, start, end, match_conditions=match_conditions)
 
 def add_leaves(events, start, end, match_conditions=None):
-	query = """select name, from_date, to_date, employee_name, half_day,color,description,
+	query = """select name, from_date, to_date, employee_name, half_day, color, description,
 		status, employee, docstatus
 		from `tabLeave Application` where
 		from_date <= %(end)s and to_date >= %(start)s <= to_date
