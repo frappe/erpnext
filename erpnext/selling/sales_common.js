@@ -373,7 +373,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	*/
 	set_batch_number: function(cdt, cdn) {
 		const doc = frappe.get_doc(cdt, cdn);
-		if (doc && doc.has_batch_no && !doc.batch_no) {
+		if (doc && doc.has_batch_no && flt(doc.qty)!==0) {
 			this._set_batch_number(doc);
 		}
 	},
