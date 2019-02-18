@@ -307,29 +307,4 @@ def get_data():
 				},
 			]
 		},
-		{
-			"label": _("Service Level Agreement"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Employee Group",
-					"description": _("Support Team."),
-				},
-				{
-					"type": "doctype",
-					"name": "Service Level",
-					"description": _("Service Level."),
-				},
-				{
-					"type": "doctype",
-					"name": "Support Contract",
-					"description": _("Support Contract."),
-				},
-				{
-					"type": "doctype",
-					"name": "Service Level Agreement",
-					"description": _("Service Level Agreement."),
-				}
-			]
-		},
 	]
