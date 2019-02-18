@@ -65,18 +65,47 @@ class Project(Document):
 			return frappe.get_all("Task", "*", filters, order_by="exp_start_date asc")
 
 	def validate(self):
-		self.validate_project_name()
 		self.validate_weights()
 		self.sync_tasks()
 		self.tasks = []
 		self.load_tasks()
+		if not self.is_new():
+			self.copy_from_template()
 		self.validate_dates()
 		self.send_welcome_email()
 		self.update_percent_complete()
 
-	def validate_project_name(self):
-		if self.get("__islocal") and frappe.db.exists("Project", self.project_name):
-			frappe.throw(_("Project {0} already exists").format(frappe.safe_decode(self.project_name)))
+	def copy_from_template(self):
+		'''
+		Copy tasks from template
+		'''
+		if self.project_template and not len(self.tasks or []):
+
+			# has a template, and no loaded tasks, so lets create
+			if not self.expected_start_date:
+				# project starts today
+				self.expected_start_date = today()
+
+			template = frappe.get_doc('Project Template', self.project_template)
+
+			if not self.project_type:
+				self.project_type = template.project_type
+
+			# create tasks from template
+			for task in template.tasks:
+				frappe.get_doc(dict(
+					doctype = 'Task',
+					subject = task.subject,
+					project = self.name,
+					status = 'Open',
+					exp_start_date = add_days(self.expected_start_date, task.start),
+					exp_end_date = add_days(self.expected_start_date, task.start + task.duration),
+					description = task.description,
+					task_weight = task.task_weight
+				)).insert()
+
+			# reload tasks after project
+			self.load_tasks()
 
 	def validate_dates(self):
 		if self.tasks:
@@ -201,6 +230,7 @@ class Project(Document):
 		self.save(ignore_permissions=True)
 
 	def after_insert(self):
+		self.copy_from_template()
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
