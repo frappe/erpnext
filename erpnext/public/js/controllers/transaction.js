@@ -1090,10 +1090,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			var item_list = [];
 
 			$.each(this.frm.doc["items"] || [], function(i, d) {
-				if (d.item_code) {
+				if (d.item_code && !d.is_free_item) {
 					item_list.push({
 						"doctype": d.doctype,
 						"name": d.name,
+						"item_code": d.item_code,
 						"pricing_rules": d.pricing_rules,
 						"parenttype": d.parenttype,
 						"parent": d.parent
@@ -1105,6 +1106,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				args: { item_list: item_list },
 				callback: function(r) {
 					if (!r.exc && r.message) {
+						r.message.forEach(row_item => {
+							me.update_free_items(row_item);
+						});
 						me._set_values_for_item_list(r.message);
 						me.calculate_taxes_and_totals();
 						if(me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on");
@@ -1297,7 +1301,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						r.message.forEach(d => {
 							// If free item is already exists
 
-							if(d.item_code in items && d.is_free_item) {
+							if(d.item_code in items &&
+								d.is_free_item && items[d.item_code].is_free_item) {
 								child = items[d.item_code];
 							} else {
 								child = frappe.model.add_child(me.frm.doc, item.doctype, "items");
@@ -1316,7 +1321,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			var items = [];
 
 			me.frm.doc.items.forEach(d => {
-				if(d.item_code != item.remove_free_item) {
+				if(d.item_code != item.remove_free_item || !d.is_free_item) {
 					items.push(d);
 				}
 			});

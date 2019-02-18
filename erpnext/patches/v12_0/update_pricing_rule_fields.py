@@ -50,9 +50,6 @@ def execute():
 
     frappe.reload_doc('accounts', 'doctype', 'pricing_rule')
 
-    frappe.db.sql(""" UPDATE `tabPricing Rule`
-        set apply_on_price_list_rate = 1, price_or_product_discount = 'Price'""")
-
     for doctype, apply_on in {'Apply Rule On Item Code': 'Item Code',
         'Apply Rule On Item Group': 'Item Group', 'Apply Rule On Brand': 'Brand'}.items():
         frappe.reload_doc('accounts', 'doctype', frappe.scrub(doctype))

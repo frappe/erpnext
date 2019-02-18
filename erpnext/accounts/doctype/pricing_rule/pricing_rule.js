@@ -114,6 +114,16 @@ frappe.ui.form.on('Pricing Rule', {
 				}
 			};
 		};
+
+		['items', 'item_groups', 'brands'].forEach(d => {
+			frm.fields_dict[d].grid.get_field('uom').get_query = function(doc, cdt, cdn){
+				var row = locals[cdt][cdn];
+				return {
+					query:"erpnext.accounts.doctype.pricing_rule.pricing_rule.get_item_uoms",
+					filters: {'value': row[frappe.scrub(doc.apply_on)], apply_on: doc.apply_on}
+				}
+			};
+		})
 	},
 
 	onload: function(frm) {
@@ -192,6 +202,8 @@ frappe.ui.form.on('Pricing Rule', {
 		set_field_options("pricing_rule_help", help_content);
 		frm.events.set_options_for_applicable_for(frm);
 		frm.trigger("toggle_reqd_apply_on");
+
+		frm.get_query
 	},
 
 	apply_on: function(frm) {

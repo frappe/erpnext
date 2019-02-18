@@ -8,15 +8,19 @@ import frappe
 import json
 import copy
 from frappe import throw, _
-from frappe.utils import flt, cint
+from frappe.utils import flt, cint, getdate
 
 from frappe.model.document import Document
 
 from six import string_types
 
+apply_on_dict = {"Item Code": "items",
+	"Item Group": "item_groups", "Brand": "brands"}
+
 class PricingRule(Document):
 	def validate(self):
 		self.validate_mandatory()
+		self.validate_duplicate_apply_on()
 		self.validate_applicable_for_selling_or_buying()
 		self.validate_min_max_amt()
 		self.validate_min_max_qty()
@@ -24,12 +28,19 @@ class PricingRule(Document):
 		self.validate_rate_or_discount()
 		self.validate_max_discount()
 		self.validate_price_list_with_currency()
+		self.validate_dates()
 
 		if not self.margin_type: self.margin_rate_or_amount = 0.0
 
+	def validate_duplicate_apply_on(self):
+		field = apply_on_dict.get(self.apply_on)
+		values = [d.get(frappe.scrub(self.apply_on)) for d in self.get(field)]
+
+		if len(values) != len(set(values)):
+			frappe.throw(_("Duplicate {0} found in the table").format(self.apply_on))
+
 	def validate_mandatory(self):
-		for apply_on, field in {"Item Code": "items",
-			"Item Group": "item_groups", "Brand": "Brands"}.items():
+		for apply_on, field in apply_on_dict.items():
 			if self.apply_on == apply_on and len(self.get(field) or []) < 1:
 				throw(_("{0} is not added in the table").format(apply_on), frappe.MandatoryError)
 
@@ -67,10 +78,19 @@ class PricingRule(Document):
 				if f!=fieldname:
 					self.set(f, None)
 
+		if self.mixed_conditions and self.get("same_item"):
+			self.same_item = 0
+
 	def validate_rate_or_discount(self):
 		for field in ["Rate"]:
 			if flt(self.get(frappe.scrub(field))) < 0:
 				throw(_("{0} can not be negative").format(field))
+
+		if self.price_or_product_discount == 'Product' and not self.free_item:
+			if self.mixed_conditions:
+				frappe.throw(_("Free item code is not selected"))
+			else:
+				self.same_item = 1
 
 	def validate_max_discount(self):
 		if self.rate_or_discount == "Discount Percentage" and self.items:
@@ -84,6 +104,13 @@ class PricingRule(Document):
 			price_list_currency = frappe.db.get_value("Price List", self.for_price_list, "currency", True)
 			if not self.currency == price_list_currency:
 				throw(_("Currency should be same as Price List Currency: {0}").format(price_list_currency))
+
+	def validate_dates(self):
+		if self.is_cumulative and not (self.valid_from and self.valid_upto):
+			frappe.throw(_("Valid from and valid upto fields are mandatory for the cumulative"))
+
+		if self.valid_from and self.valid_upto and getdate(self.valid_from) > getdate(self.valid_upto):
+			frappe.throw(_("Valid from date must be less than valid upto date"))
 
 #--------------------------------------------------------------------------------
 
@@ -168,7 +195,8 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
 
 	if args.ignore_pricing_rule or not args.item_code:
 		if frappe.db.exists(args.doctype, args.name) and args.get("pricing_rules"):
-			item_details = remove_pricing_rule_for_item(args.get("pricing_rules"), item_details)
+			item_details = remove_pricing_rule_for_item(args.get("pricing_rules"),
+				item_details, args.get('item_code'))
 		return item_details
 
 	if not (args.item_group and args.brand):
@@ -222,7 +250,8 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
 			doc.append('pricing_rules', rule)
 
 	elif args.get("pricing_rules"):
-		item_details = remove_pricing_rule_for_item(args.get("pricing_rules"), item_details)
+		item_details = remove_pricing_rule_for_item(args.get("pricing_rules"),
+			item_details, args.get('item_code'))
 
 	return item_details
 
@@ -258,12 +287,12 @@ def apply_price_discount_pricing_rule(pricing_rule, item_details, args):
 		if pricing_rule.rate_or_discount != apply_on: continue
 
 		field = frappe.scrub(apply_on)
-		if pricing_rule.apply_on_price_list_rate:
-			item_details[field] += (pricing_rule.get(field, 0)
-				if pricing_rule else args.get(field, 0))
-		else:
+		if pricing_rule.apply_discount_on_rate:
 			discount_field = "{0}_on_rate".format(field)
 			item_details[discount_field].append(pricing_rule.get(field, 0))
+		else:
+			item_details[field] += (pricing_rule.get(field, 0)
+				if pricing_rule else args.get(field, 0))
 
 def set_discount_amount(rate, item_details):
 	for field in ['discount_percentage_on_rate', 'discount_amount_on_rate']:
@@ -273,7 +302,7 @@ def set_discount_amount(rate, item_details):
 			rate -= dis_amount
 			item_details.rate = rate
 
-def remove_pricing_rule_for_item(pricing_rules, item_details):
+def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
 	for d in pricing_rules.split(','):
 		if not d: continue
 		pricing_rule = frappe.get_doc('Pricing Rule', d)
@@ -290,7 +319,8 @@ def remove_pricing_rule_for_item(pricing_rules, item_details):
 				item_details.margin_rate_or_amount = 0.0
 				item_details.margin_type = None
 		elif pricing_rule.get('free_item'):
-			item_details.remove_free_item = pricing_rule.get('free_item')
+			item_details.remove_free_item = (item_code if pricing_rule.get('same_item')
+				else pricing_rule.get('free_item'))
 
 	item_details.pricing_rules = ''
 
@@ -304,7 +334,9 @@ def remove_pricing_rules(item_list):
 	out = []
 	for item in item_list:
 		item = frappe._dict(item)
-		out.append(remove_pricing_rule_for_item(item.get("pricing_rules"), item))
+		if item.get('pricing_rules'):
+			out.append(remove_pricing_rule_for_item(item.get("pricing_rules"),
+				item, item.item_code))
 
 	return out
 
@@ -359,3 +391,15 @@ def get_free_items(pricing_rules, item_row):
 			})
 
 	return free_items
+
+def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
+	items = [filters.get('value')]
+	if filters.get('apply_on') != 'Item Code':
+		field = frappe.scrub(filters.get('apply_on'))
+
+		items = frappe.db.sql_list("""select name
+			from `tabItem` where {0} = %s""".format(field), filters.get('value'))
+
+	return frappe.get_all('UOM Conversion Detail',
+		filters = {'parent': ('in', items), 'uom': ("like", "{0}%".format(txt))},
+		fields = ["distinct uom"], as_list=1)

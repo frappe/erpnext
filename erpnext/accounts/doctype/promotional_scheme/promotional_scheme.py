@@ -17,10 +17,10 @@ pricing_rule_fields = ['apply_on', 'mixed_conditions', 'is_cumulative', 'other_i
 other_fields = ['min_qty', 'max_qty', 'min_amt', 'max_amt', 'priority',
 	'warehouse', 'validate_applied_rule']
 
-price_discount_fields = ['rate_or_discount', 'apply_discount_on', 'apply_on_price_list_rate',
+price_discount_fields = ['rate_or_discount', 'apply_discount_on', 'apply_discount_on_rate',
 	'rate', 'discount_amount', 'discount_percentage']
 
-product_discount_fields = ['free_item', 'free_qty', 'free_item_uom', 'free_item_rate']
+product_discount_fields = ['free_item', 'free_qty', 'free_item_uom', 'free_item_rate', 'same_item']
 
 class PromotionalScheme(Document):
 	def validate(self):
