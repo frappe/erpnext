@@ -97,7 +97,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Setup"),
+			"label": _("Settings"),
 			"items": [
 				{
 					"type": "doctype",
