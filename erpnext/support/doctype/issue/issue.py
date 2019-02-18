@@ -125,10 +125,9 @@ class Issue(Document):
 
 def calculate_support_day(now_datetime=None, time=None, time_period=None, support_days=None, holidays=None, week=None):
 	now_datetime, add_days, hours, end_time = now_datetime, 0, 0, None
-	"""
-		Time is primarily calculated in days so if time_period is Days then loop is iterated, if time_period is Weeks then time is multiplied by 7 to convert
-		it to days and if time_period is Hours then time is passed to calculate time to calculate_support_time function
-	"""
+	#	Time is primarily calculated in days so if time_period is Days then loop is iterated, if time_period is Weeks then time is multiplied by 7 to convert
+	#	it to days and if time_period is Hours then time is passed to calculate time to calculate_support_time function
+
 	if time_period == 'Hour':
 		time, hours = 0, time
 	elif time_period == 'Week':
@@ -157,17 +156,16 @@ def calculate_support_day(now_datetime=None, time=None, time_period=None, suppor
 
 def calculate_support_time(time=None, hours=None, support_days=None, holidays=None, week=None):
 	time_difference, time_added_flag, time_set_flag = 0, 0, 0
-	"""
-		Loop starts counting from current weekday and iterates till
-		time_set_flag is set indicating the time has been calculated.
-	"""
+	#	Loop starts counting from current weekday and iterates till
+	#	time_set_flag is set indicating the time has been calculated.
+
 	while time_set_flag != 1:
 		for count, weekday in enumerate(week):
-			"""
-				Initially time_added_flag is zero and the code will only start
-				executing if today and weekday is the same and keep executing
-				henceforth as time_add is incremented.
-			"""
+
+			#	Initially time_added_flag is zero and the code will only start
+			#	executing if today and weekday is the same and keep executing
+			#	henceforth as time_add is incremented.
+
 			if count >= (time.date()).weekday() or time_added_flag != 0:
 				for support_day in support_days:
 					if weekday == support_day[0] and time_set_flag != 1:
@@ -198,15 +196,15 @@ def calculate_support_time(time=None, hours=None, support_days=None, holidays=No
 							else:
 								time_difference = hours * 3600
 								time_added_flag = 1
-						"""
-							Checks if date is present in the holiday list
-						"""
+
+						#	Checks if date is present in the holiday list
+
 						if time.date() in holidays:
 							continue
-						"""
-							Time is checked after every calculation whether time is between start and end time for the day to be sure if
-							calculated time is between start and end time fo the particular day
-						"""
+
+						#	Time is checked after every calculation whether time is between start and end time for the day to be sure if
+						#	calculated time is between start and end time fo the particular day
+
 						if time.time() <= end_time and time.time() >= start_time:
 							time_set_flag = 1
 							break
