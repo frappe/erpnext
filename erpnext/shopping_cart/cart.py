@@ -66,7 +66,7 @@ def place_order():
 	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))
 	for item in sales_order.get("items"):
 		item.reserved_warehouse, is_stock_item = frappe.db.get_value("Item",
-			item.item_code, ["website_warehouse", "is_stock_item"]) or None, None
+			item.item_code, ["website_warehouse", "is_stock_item"])
 
 		if is_stock_item:
 			item_stock = get_qty_in_stock(item.item_code, "website_warehouse")
@@ -303,9 +303,10 @@ def set_taxes(quotation, cart_settings):
 
 	customer_group = frappe.db.get_value("Customer", quotation.customer, "customer_group")
 
-	quotation.taxes_and_charges = set_taxes(quotation.customer, "Customer", \
-		quotation.transaction_date, quotation.company, customer_group, None, \
-		quotation.customer_address, quotation.shipping_address_name, 1)
+	quotation.taxes_and_charges = set_taxes(quotation.customer, "Customer",
+		quotation.transaction_date, quotation.company, customer_group=customer_group, supplier_group=None,
+		tax_category=quotation.tax_category, billing_address=quotation.customer_address,
+		shipping_address=quotation.shipping_address_name, use_for_shopping_cart=1)
 #
 # 	# clear table
 	quotation.set("taxes", [])

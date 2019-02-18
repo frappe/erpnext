@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe
 
 def execute():
@@ -18,9 +19,10 @@ def execute():
 			SELECT
 				parent, SUM(qty) as qty
 			FROM
-				`tab%s Item`
+				`tab{0} Item`
+			where parenttype = '{0}'
 			GROUP BY parent
-		''' % (doctype), as_dict = True)
+		'''.format(doctype), as_dict = True)
 
 		# Query to update total_qty might become too big, Update in batches
 		# batch_size is chosen arbitrarily, Don't try too hard to reason about it

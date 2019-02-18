@@ -302,6 +302,9 @@ def has_duplicate_serial_no(sn, sle):
 	if sn.warehouse:
 		return True
 
+	if sn.company != sle.company:
+		return False
+
 	status = False
 	if sn.purchase_document_no:
 		if sle.voucher_type in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"] and \
@@ -357,6 +360,7 @@ def auto_make_serial_nos(args):
 			sr.warehouse = args.get('warehouse') if args.get('actual_qty', 0) > 0 else None
 			sr.batch_no = args.get('batch_no')
 			sr.location = args.get('location')
+			sr.company = args.get('company')
 			if sr.sales_order and args.get('voucher_type') == "Stock Entry" \
 				and not args.get('actual_qty', 0) > 0:
 				sr.sales_order = None
