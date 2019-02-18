@@ -172,9 +172,6 @@ def make_material_request(source_name, target_doc=None):
 	doclist = get_mapped_doc("Job Card", source_name, {
 		"Job Card": {
 			"doctype": "Material Request",
-			"validation": {
-				"docstatus": ["=", 1]
-			},
 			"field_map": {
 				"name": "job_card",
 			},
@@ -206,9 +203,6 @@ def make_stock_entry(source_name, target_doc=None):
 	doclist = get_mapped_doc("Job Card", source_name, {
 		"Job Card": {
 			"doctype": "Stock Entry",
-			"validation": {
-				"docstatus": ["=", 1]
-			},
 			"field_map": {
 				"name": "job_card",
 				"for_quantity": "fg_completed_qty"
