@@ -51,8 +51,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		if (doc.docstatus == 1 && doc.outstanding_amount!=0
 			&& !(cint(doc.is_return) && doc.return_against)) {
 			cur_frm.add_custom_button(__('Payment'),
-				this.make_payment_entry, __("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+				this.make_payment_entry, __('Create'));
+			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 
 		if(doc.docstatus==1 && !doc.is_return) {
@@ -65,8 +65,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
 				cur_frm.add_custom_button(__('Return / Credit Note'),
-					this.make_sales_return, __("Make"));
-				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+					this.make_sales_return, __('Create'));
+				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
 
 			if(cint(doc.update_stock)!=1) {
@@ -79,20 +79,20 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 				if(!from_delivery_note && !is_delivered_by_supplier) {
 					cur_frm.add_custom_button(__('Delivery'),
-						cur_frm.cscript['Make Delivery Note'], __("Make"));
+						cur_frm.cscript['Make Delivery Note'], __('Create'));
 				}
 			}
 
 			if (doc.outstanding_amount>0 && !cint(doc.is_return)) {
 				cur_frm.add_custom_button(__('Payment Request'), function() {
 					me.make_payment_request();
-				}, __("Make"));
+				}, __('Create'));
 			}
 
 			if(!doc.auto_repeat) {
 				cur_frm.add_custom_button(__('Subscription'), function() {
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
-				}, __("Make"))
+				}, __('Create'))
 			}
 		}
 
@@ -112,7 +112,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				if (internal == 1 && disabled == 0) {
 					me.frm.add_custom_button("Inter Company Invoice", function() {
 						me.make_inter_company_invoice();
-					}, __("Make"));
+					}, __('Create'));
 				}
 			});
 		}

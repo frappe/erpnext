@@ -16,6 +16,9 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 
 from six import string_types, iteritems
 
+sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
+purchase_doctypes = ['Material Request', 'Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
+
 @frappe.whitelist()
 def get_item_details(args):
 	"""
@@ -44,6 +47,10 @@ def get_item_details(args):
 	validate_item_details(args, item)
 
 	out = get_basic_details(args, item)
+
+	get_item_tax_template(args, item, out)
+	out["item_tax_rate"] = get_item_tax_map(args.company, args.get("item_tax_template") if out.get("item_tax_template") is None \
+		else out.get("item_tax_template"), as_json=True)
 
 	get_party_item_code(args, item, out)
 
@@ -228,7 +235,7 @@ def get_basic_details(args, item):
 
 	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not args.uom:
-		if args.get('doctype') in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']:
+		if args.get('doctype') in sales_doctypes:
 			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
 		elif (args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']) or \
 			(args.get('doctype') == 'Material Request' and args.get('material_request_type') == 'Purchase'):
@@ -248,12 +255,10 @@ def get_basic_details(args, item):
 		'has_serial_no': item.has_serial_no,
 		'has_batch_no': item.has_batch_no,
 		"batch_no": None,
-		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in
-			item.get("taxes")))),
 		"uom": args.uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
-		"qty": args.qty or 1.0,
-		"stock_qty": args.qty or 1.0,
+		"qty": flt(args.qty) or 1.0,
+		"stock_qty": flt(args.qty) or 1.0,
 		"price_list_rate": 0.0,
 		"base_price_list_rate": 0.0,
 		"rate": 0.0,
@@ -281,14 +286,15 @@ def get_basic_details(args, item):
 		out.conversion_factor = 1.0
 	else:
 		out.conversion_factor = args.conversion_factor or \
-			get_conversion_factor(item.item_code, args.uom).get("conversion_factor")
+			get_conversion_factor(item.name, args.uom).get("conversion_factor")
 
 	args.conversion_factor = out.conversion_factor
 	out.stock_qty = out.qty * out.conversion_factor
 
 	# calculate last purchase rate
-	from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
-	out.last_purchase_rate = item_last_purchase_rate(args.name, args.conversion_rate, item.item_code, out.conversion_factor)
+	if args.get('doctype') in purchase_doctypes:
+		from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
+		out.last_purchase_rate = item_last_purchase_rate(args.name, args.conversion_rate, item.name, out.conversion_factor)
 
 	# if default specified in item is for another company, fetch from company
 	for d in [
@@ -303,6 +309,59 @@ def get_basic_details(args, item):
 		out[fieldname] = item.get(fieldname)
 
 	return out
+
+@frappe.whitelist()
+def get_item_tax_info(company, tax_category, item_codes):
+	out = {}
+	if isinstance(item_codes, string_types):
+		item_codes = json.loads(item_codes)
+
+	for item_code in item_codes:
+		if not item_code or item_code in out:
+			continue
+		out[item_code] = {}
+		item = frappe.get_cached_doc("Item", item_code)
+		get_item_tax_template({"tax_category": tax_category}, item, out[item_code])
+		out[item_code]["item_tax_rate"] = get_item_tax_map(company, out[item_code].get("item_tax_template"), as_json=True)
+
+	return out
+
+def get_item_tax_template(args, item, out):
+	"""
+		args = {
+			"tax_category": None
+			"item_tax_template": None
+		}
+	"""
+	item_tax_template = args.get("item_tax_template")
+
+	if not item_tax_template:
+		item_tax_template = _get_item_tax_template(args, item.taxes, out)
+
+	if not item_tax_template:
+		item_group = item.item_group
+		while item_group and not item_tax_template:
+			item_group_doc = frappe.get_cached_doc("Item Group", item_group)
+			item_tax_template = _get_item_tax_template(args, item_group_doc.taxes, out)
+			item_group = item_group_doc.parent_item_group
+
+def _get_item_tax_template(args, taxes, out):
+	for tax in taxes:
+		if cstr(tax.tax_category) == cstr(args.get("tax_category")):
+			out["item_tax_template"] = tax.item_tax_template
+			return tax.item_tax_template
+	return None
+
+@frappe.whitelist()
+def get_item_tax_map(company, item_tax_template, as_json=True):
+	item_tax_map = {}
+	if item_tax_template:
+		template = frappe.get_cached_doc("Item Tax Template", item_tax_template)
+		for d in template.taxes:
+			if frappe.get_cached_value("Account", d.tax_type, "company") == company:
+				item_tax_map[d.tax_type] = d.tax_rate
+
+	return json.dumps(item_tax_map) if as_json else item_tax_map
 
 @frappe.whitelist()
 def calculate_service_end_date(args, item=None):

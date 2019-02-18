@@ -1,6 +1,6 @@
 {% macro show_card(card) %}
-<div style="width: 50%; float:left; min-height: 80px; padding-top: 20px;">
-    <h6 style="color: {{ text_muted }}; font-size: 12px; margin-bottom: 0px; margin-top: 0px;">{{ _(card.label) }}
+<div style="width: 49%; display:inline-block; vertical-align: top; min-height: 80px; padding-top: 20px;">
+    <h6 style="color: {{ text_muted }}; font-size: 12px; margin-bottom: 0px; margin-top: 0px;">{{ card.label }}
     {% if card.count %}
     <span class="badge">({{ card.count }})</span>
     {% endif %}</h6>
@@ -180,5 +180,80 @@
     <br>
 </div>
 {% endif %}
-
+    
+<!-- Purchase Order Items Overdue -->    
+{% if purchase_orders_items_overdue_list %}
+<h4 style="{{ section_head }}" class="text-center">{{ _("Purchase Order Items not received on time") }}</h4>
+<div>
+    <div style="background-color: #fafbfc;">
+        <hr>
+        <table style="width: 100%;">
+            <tr>
+                <th style="width: 40%;">
+                    <span style="padding: 3px 7px; margin-right: 7px; font-weight: bold; {{ link_css }}">Item Code</span>
+                </th>
+                <th style="width: 20%; text-align: right">
+                    <span style="padding: 3px 7px; margin-right: 7px; font-weight: bold; {{ link_css }}">Quantity</span>
+                </th>
+                <th style="width: 20%; text-align: right">
+                    <span style="padding: 3px 7px; margin-right: 7px; font-weight: bold; {{ link_css }}">Rate</span>
+                </th>
+                <th style="width: 20%; text-align: right">
+                    <span style="padding: 3px 7px; margin-right: 7px; font-weight: bold; {{ link_css }}">Amount</span>
+                </th>
+            </tr>
+        </table>
+        <hr>
+    </div>
+    <div>
+    {% for po in purchase_order_list %}
+        <div style="{{ line_item }}">
+            <table style="width: 100%;">
+                <tr>
+                    <th>
+                        <span style="padding: 3px 7px; margin-right: 7px; font-weight: bold;">{{ po.po }}</span>
+                    </th>
+                </tr>
+                <tr>
+                    <td>
+                    {% for t in purchase_orders_items_overdue_list %}
+                        {% if t.parent == po.po %}
+                            <div >
+                                <table style="width: 100%;">
+                                    <tr>
+                                        <td style="padding-left: 7px;">
+                                            <a style="width: 40%; {{ link_css }}" href="{{ t.link }}">{{ _(t.item_code) }}</a>
+                                        </td>
+                                        <td style="width: 20%; text-align: right">
+                                            <span style="{{ label_css }}">
+                                                {{ t.missing_qty }}
+                                            </span>
+                                        </td>
+                                        <td style="width: 20%; text-align: right">
+                                            <span style="{{ label_css }}">
+                                                {{ t.rate }}
+                                            </span>
+                                        </td>
+                                        <td style="width: 20%; text-align: right">
+                                            <span style="{{ label_css }}">
+                                                {{ t.amount }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+<div class="text-center">
+    <br><br><span class="text-danger">Please take necessary action</span>
+</div>
+{% endif %}    
+    
 </div>
