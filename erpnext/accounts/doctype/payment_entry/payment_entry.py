@@ -75,7 +75,6 @@ class PaymentEntry(AccountsController):
 			"voucher_no": self.name} ,
 			fields=["account", "party_type", "party", "debit", "credit", "remarks"]
 		)
-		print(gl_entries)
 		self.gl = gl_entries
 
 	def on_cancel(self):
