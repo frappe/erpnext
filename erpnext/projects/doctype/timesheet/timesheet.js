@@ -18,7 +18,7 @@ frappe.ui.form.on("Timesheet", {
 			return{
 				filters: {
 					'project': child.project,
-					'status': ["!=", "Closed"]
+					'status': ["!=", "Cancelled"]
 				}
 			};
 		};
@@ -31,22 +31,15 @@ frappe.ui.form.on("Timesheet", {
 			};
 		};
 
-		// set employee (and company) to the one that's currently logged in
-		const options = { user_id: frappe.session.user };
-		const fields = ['name', 'company'];
-		frappe.db.get_value('Employee', options, fields).then(({ message }) => {
-			if (message){
-				// there is an employee with the currently logged in user_id
-				frm.fields_dict['employee'].set_value(message.name);
-				frm.fields_dict['company'].set_value(message.company);
-			}
-		});
+		set_employee_and_company(frm);
 	},
 
 	onload: function(frm){
 		if (frm.doc.__islocal && frm.doc.time_logs) {
 			calculate_time_and_amount(frm);
 		}
+
+		set_employee_and_company(frm);
 	},
 
 	refresh: function(frm) {
@@ -305,4 +298,17 @@ var calculate_time_and_amount = function(frm) {
 	frm.set_value("total_hours", total_working_hr);
 	frm.set_value("total_billable_amount", total_billable_amount);
 	frm.set_value("total_costing_amount", total_costing_amount);
+};
+
+// set employee (and company) to the one that's currently logged in
+const set_employee_and_company = function(frm) {
+	const options = { user_id: frappe.session.user };
+	const fields = ['name', 'company'];
+	frappe.db.get_value('Employee', options, fields).then(({ message }) => {
+		if (message) {
+			// there is an employee with the currently logged in user_id
+			frm.fields_dict['employee'].set_value(message.name);
+			frm.fields_dict['company'].set_value(message.company);
+		}
+	});
 };

@@ -7,6 +7,16 @@ def get_data():
 	return [
 		# Modules
 		{
+			"module_name": "Getting Started",
+			"category": "Modules",
+			"label": _("Getting Started"),
+			"color": "#1abc9c",
+			"icon": "fa fa-check-square-o",
+			"type": "module",
+			"hidden": 1,
+			"description": "Dive into the basics for your organisation's needs."
+		},
+		{
 			"module_name": "Accounting",
 			"category": "Modules",
 			"label": _("Accounting"),
@@ -14,7 +24,7 @@ def get_data():
 			"icon": "octicon octicon-repo",
 			"type": "module",
 			"hidden": 1,
-			"description": "Accounts, Billing, Payments, Cost Center and Budgeting."
+			"description": "Accounts, billing, payments, cost center and budgeting."
 		},
 		{
 			"module_name": "Selling",
@@ -24,7 +34,7 @@ def get_data():
 			"icon": "octicon octicon-tag",
 			"type": "module",
 			"hidden": 1,
-			"description": "All things Sales, Customer and Products."
+			"description": "Sales orders, quotations, customers and items."
 		},
 		{
 			"module_name": "Buying",
@@ -34,7 +44,7 @@ def get_data():
 			"icon": "octicon octicon-briefcase",
 			"type": "module",
 			"hidden": 1,
-			"description": "Purchasing, Suppliers and Products."
+			"description": "Purchasing, suppliers, material requests, and items."
 		},
 		{
 			"module_name": "Stock",
@@ -44,7 +54,7 @@ def get_data():
 			"icon": "octicon octicon-package",
 			"type": "module",
 			"hidden": 1,
-			"description": "Track Stock Transactions, Reports, and Serialized Items and Batches."
+			"description": "Stock transactions, reports, serial numbers and batches."
 		},
 		{
 			"module_name": "Assets",
@@ -54,7 +64,7 @@ def get_data():
 			"icon": "octicon octicon-database",
 			"hidden": 1,
 			"type": "module",
-			"description": "Asset Maintainance and Tools."
+			"description": "Asset movement, maintainance and tools."
 		},
 		{
 			"module_name": "Projects",
@@ -74,7 +84,17 @@ def get_data():
 			"icon": "octicon octicon-broadcast",
 			"type": "module",
 			"hidden": 1,
-			"description": "Everything in your sales pipeline, from Leads to Customers, to Support."
+			"description": "Sales pipeline, leads, opportunities and customers."
+		},
+		{
+			"module_name": "Help Desk",
+			"category": "Modules",
+			"label": _("Help Desk"),
+			"color": "#1abc9c",
+			"icon": "fa fa-check-square-o",
+			"type": "module",
+			"hidden": 1,
+			"description": "User interactions, support issues and knowledge base."
 		},
 		{
 			"module_name": "HR",
@@ -84,7 +104,7 @@ def get_data():
 			"icon": "octicon octicon-organization",
 			"type": "module",
 			"hidden": 1,
-			"description": "Employee Lifecycle, Payroll, Shifts and Leaves."
+			"description": "Employees, attendance, payroll, leaves and shifts."
 		},
 		{
 			"module_name": "Quality Management",
@@ -94,7 +114,7 @@ def get_data():
 			"icon": "fa fa-check-square-o",
 			"type": "module",
 			"hidden": 1,
-			"description": "Volunteers, Memberships, Grants and Chapters."
+			"description": "Quality goals, procedures, reviews and action."
 		},
 
 
@@ -107,7 +127,7 @@ def get_data():
 			"icon": "octicon octicon-tools",
 			"type": "module",
 			"hidden": 1,
-			"description": "Streamline your production with BOMS, Work Orders and Timesheets."
+			"description": "BOMS, work orders, operations, and timesheets."
 		},
 		{
 			"module_name": "Retail",
@@ -117,7 +137,7 @@ def get_data():
 			"icon": "octicon octicon-credit-card",
 			"type": "module",
 			"hidden": 1,
-			"description": "Point of Sale, Cashier Closing and Loyalty Programs."
+			"description": "Point of Sale and cashier closing."
 		},
 		{
 			"module_name": "Education",
@@ -127,7 +147,7 @@ def get_data():
 			"icon": "octicon octicon-mortar-board",
 			"type": "module",
 			"hidden": 1,
-			"description": "Manage Student Admissions, Fees, Subjects and Score Reports."
+			"description": "Student admissions, fees, courses and scores."
 		},
 
 		{
@@ -138,7 +158,7 @@ def get_data():
 			"icon": "fa fa-heartbeat",
 			"type": "module",
 			"hidden": 1,
-			"description": "Patients appointments, procedures and tests, with diagnosis reports and drug prescriptions."
+			"description": "Patient appointments, procedures and tests."
 		},
 		{
 			"module_name": "Agriculture",
@@ -148,7 +168,7 @@ def get_data():
 			"icon": "octicon octicon-globe",
 			"type": "module",
 			"hidden": 1,
-			"description": "Crop Cycles, Land Areas and Soil and Plant Analysis."
+			"description": "Crop cycles, land areas, soil and plant analysis."
 		},
 		{
 			"module_name": "Hotels",
@@ -158,7 +178,7 @@ def get_data():
 			"icon": "fa fa-bed",
 			"type": "module",
 			"hidden": 1,
-			"description": "Manage Hotel Rooms, Pricing, Reservation and Amenities."
+			"description": "Hotel rooms, pricing, reservation and amenities."
 		},
 
 		{
@@ -169,7 +189,7 @@ def get_data():
 			"icon": "octicon octicon-heart",
 			"type": "module",
 			"hidden": 1,
-			"description": "Make benefiting others easier with Volunteers, Memberships, Grants and Chapters."
+			"description": "Volunteers, memberships, grants and chapters."
 		},
 		{
 			"module_name": "Restaurant",
@@ -191,7 +211,6 @@ def get_data():
 			"label": _("Learn"),
 			"color": "#FF888B",
 			"icon": "octicon octicon-device-camera-video",
-			"type": "module",
 			"is_help": True,
 			"description": "Explore Help Articles and Videos."
 		},
@@ -204,6 +223,6 @@ def get_data():
 			"link": '#marketplace/home',
 			"color": '#FF4136',
 			'standard': 1,
-			"description": "Publish items to other ERPNext users and start a conversation."
+			"description": "Publish items to other ERPNext users."
 		},
 	]
