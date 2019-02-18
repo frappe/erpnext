@@ -66,19 +66,14 @@ def execute(filters=None):
 def get_revenue(data, period_list, revenue_type):
 
 	if revenue_type == 'gross':
-		gross = [item for item in data if item['include_in_gross']==1 or item['is_group']==1]
-		gross, status = remove_parent_with_no_child(gross, period_list)
-		while status == "data to be removed":
-			gross, status = remove_parent_with_no_child(gross, period_list)
-		gross = adjust_account(gross, period_list)
-		return copy.deepcopy(gross)
+		revenue = [item for item in data if item['include_in_gross']==1 or item['is_group']==1]
 	elif revenue_type == 'non_gross':
-		non_gross = [item for item in data if item['include_in_gross']==0 or item['is_group']==1]
-		non_gross, status = remove_parent_with_no_child(non_gross, period_list)
-		while status == "data to be removed":
-			non_gross, status = remove_parent_with_no_child(non_gross, period_list)
-		non_gross = adjust_account(non_gross, period_list)
-		return copy.deepcopy(non_gross)
+		revenue = [item for item in data if item['include_in_gross']==0 or item['is_group']==1]
+	revenue, status = remove_parent_with_no_child(revenue, period_list)
+	while status == "data to be removed":
+		revenue, status = remove_parent_with_no_child(revenue, period_list)
+	revenue = adjust_account(revenue, period_list)
+	return copy.deepcopy(revenue)
 
 def remove_parent_with_no_child(data, period_list):
 	status = "nothing to remove"
