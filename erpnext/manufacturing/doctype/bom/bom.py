@@ -183,7 +183,7 @@ class BOM(WebsiteGenerator):
 					args = frappe._dict({
 						"doctype": "BOM",
 						"price_list": self.buying_price_list,
-						"qty": arg.get("qty"),
+						"qty": arg.get("qty") or 1,
 						"uom": arg.get("uom") or arg.get("stock_uom"),
 						"stock_uom": arg.get("stock_uom"),
 						"transaction_type": "buying",
