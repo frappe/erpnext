@@ -22,6 +22,8 @@ def execute():
 	frappe.reload_doc('stock', 'doctype', 'purchase_receipt_item')
 	frappe.reload_doc('accounts', 'doctype', 'purchase_invoice')
 	frappe.reload_doc('accounts', 'doctype', 'purchase_invoice_item')
+	frappe.reload_doc('accounts', 'doctype', 'sales_taxes_and_charges')
+	frappe.reload_doc('accounts', 'doctype', 'purchase_taxes_and_charges')
 
 	doctypes = [
 		'Sales Order', 'Delivery Note', 'Sales Invoice',
@@ -29,15 +31,15 @@ def execute():
 		'Quotation', 'Supplier Quotation'
 	]
 
-	new_fields = [
+	new_item_fields = [
 		'tax_exclusive_price_list_rate',
 		'tax_exclusive_rate',
 		'tax_exclusive_amount',
 		'tax_exclusive_discount_amount',
 		'tax_exclusive_rate_with_margin'
 	]
-	new_fields += ['base_' + f for f in new_fields]
-	new_fields = set(new_fields)
+	new_item_fields += ['base_' + f for f in new_item_fields]
+	new_item_fields = set(new_item_fields)
 
 	# Calculate and update database
 	for dt in doctypes:
@@ -54,7 +56,10 @@ def execute():
 
 			for item in doc.items:
 				item_fields = set([f.fieldname for f in item.meta.fields])
-				fields_to_update = list(new_fields.intersection(item_fields))
+				fields_to_update = list(new_item_fields.intersection(item_fields))
 				values_to_update = [item.get(f) for f in fields_to_update]
 				update_dict = dict(zip(fields_to_update, values_to_update))
 				frappe.db.set_value(dt + " Item", item.name, update_dict, None, update_modified=False)
+
+			for tax in doc.taxes:
+				frappe.db.set_value(tax.doctype, tax.name, "total_before_discount_amount", tax.total_before_discount_amount)
