@@ -24,7 +24,6 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_
 	unlink_inter_company_invoice
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
-from pprint import pprint
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
