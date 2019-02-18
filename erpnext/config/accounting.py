@@ -108,7 +108,7 @@ def get_data():
 
 		},
 		{
-			"label": _("Setup"),
+			"label": _("Settings"),
 			"icon": "fa fa-cog",
 			"items": [
 				{
@@ -174,7 +174,6 @@ def get_data():
 					"name": "General Ledger",
 					"doctype": "GL Entry",
 					"is_query_report": True,
-					"onboard": 1,
 				},
 				{
 					"type": "report",
