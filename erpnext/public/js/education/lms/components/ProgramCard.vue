@@ -1,5 +1,5 @@
 <template>
-    <div class='card-deck mt-5'>
+<div class='margin'>
     <div class="card">
         <img v-if="program.hero_image" :src="program.hero_image" style='height: 150px; width: auto'>
         <div class='card-body'>
@@ -78,5 +78,15 @@ export default {
     }
     a.btn-secondary {
         color: white !important;
+    }
+
+    .card {
+        border: 1px solid #ebeff2;
+        border-radius: 3px;
+        padding: 5px 15px 5px 15px;
+    }
+
+    .margin {
+        margin-top: 15px;
     }
 </style>
