@@ -1,6 +1,6 @@
 <template>
 <section class='top-section'>
-	<div class='container'>
+	<div>
 		<h1 v-html="title"></h1>
 		<ul class="list-group">
 		</ul>

@@ -1,6 +1,6 @@
 <template>
 <section>
-		<div class='container'>
+		<div>
 			<div class="row">
 				<div class="col-sm-3 text-center">
 					<span class="sidebar-standard-image" title="Lorem Ipsum">

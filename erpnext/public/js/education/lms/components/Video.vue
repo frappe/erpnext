@@ -1,7 +1,7 @@
 <template>
 <div>
     <section class='video-top-section video-section-bg'>
-    <div class='container'>
+    <div>
         <div class="embed-responsive embed-responsive-16by9">
             <iframe class="embed-responsive-item" :src="'https://www.youtube.com/embed/' + contentData.url" allowfullscreen></iframe>
         </div>
@@ -21,7 +21,7 @@
     </div>
 </section>
 <section class="video-description-section">
-    <div class='container'>
+    <div>
         <div class="content" :html="contentData.description">
         </div>
         <div class="text-right hidden">

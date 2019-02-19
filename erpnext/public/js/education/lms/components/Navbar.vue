@@ -1,6 +1,6 @@
 <template>
     <nav class="navbar navbar-expand-lg navbar-light">
-        <div class="container">
+        <div>
             <router-link tag="a" :class="'navbar-brand'" :to="{name: 'home'}">
                 <span>{{ portal.title }}</span>
             </router-link>

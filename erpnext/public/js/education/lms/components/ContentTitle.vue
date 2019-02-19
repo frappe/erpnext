@@ -1,6 +1,6 @@
 <template>
     <section class='article-top-section video-section-bg'>
-        <div class='container'>
+        <div>
             <div class="row">
                 <div class="col-md-8">
                     <h2>{{ title }}</h2>

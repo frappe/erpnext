@@ -1,6 +1,6 @@
 <template>
 	<section :class='sectionType'>
-	<div class='container'>
+	<div>
 		<h3 class='text-center' v-html="title"></h3>
 		<p class='lead text-center' v-html="description"></p>
 		<slot name="card-list-slot"></slot>
