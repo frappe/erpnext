@@ -1,6 +1,5 @@
 <template>
 	<div id="lms-root">
-		<navbar></navbar>
 	<router-view :key="$route.fullPath"></router-view>
 	</div>
 </template>
