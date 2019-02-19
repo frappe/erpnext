@@ -6,8 +6,8 @@
 <Indirizzo>{{ address.address_line1 }}</Indirizzo>
 <CAP>{{ address.pincode }}</CAP>
 <Comune>{{ address.city }}</Comune>
-{%- if address.state %}
-<Provincia>{{ address.state }}</Provincia>
+{%- if address.state_code %}
+<Provincia>{{ address.state_code }}</Provincia>
 {%- endif %}
 <Nazione>{{ address.country_code|upper }}</Nazione>
 {%- endmacro %}
