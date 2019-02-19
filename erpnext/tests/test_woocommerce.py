@@ -1,4 +1,5 @@
-import unittest, frappe, requests, os, time
+from __future__ import unicode_literals
+import unittest, frappe, requests, os, time, erpnext
 from erpnext.erpnext_integrations.connectors.woocommerce_connection import order
 
 class TestWoocommerce(unittest.TestCase):

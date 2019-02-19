@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from __future__ import unicode_literals
 import frappe
 import erpnext
 from frappe.utils import flt, nowdate, add_days, cint
@@ -138,7 +139,7 @@ def create_material_request(material_requests):
 					if request_type == 'Purchase':
 						uom = item.purchase_uom or item.stock_uom
 						if uom != item.stock_uom:
-							conversion_factor = frappe.db.get_value("UOM Conversion Detail", 
+							conversion_factor = frappe.db.get_value("UOM Conversion Detail",
 								{'parent': item.name, 'uom': uom}, 'conversion_factor') or 1.0
 
 					mr.append("items", {

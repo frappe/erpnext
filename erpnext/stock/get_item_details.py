@@ -16,6 +16,9 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 
 from six import string_types, iteritems
 
+sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
+purchase_doctypes = ['Material Request', 'Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
+
 @frappe.whitelist()
 def get_item_details(args):
 	"""
@@ -228,7 +231,7 @@ def get_basic_details(args, item):
 
 	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not args.uom:
-		if args.get('doctype') in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']:
+		if args.get('doctype') in sales_doctypes:
 			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
 		elif (args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']) or \
 			(args.get('doctype') == 'Material Request' and args.get('material_request_type') == 'Purchase'):
@@ -281,14 +284,15 @@ def get_basic_details(args, item):
 		out.conversion_factor = 1.0
 	else:
 		out.conversion_factor = args.conversion_factor or \
-			get_conversion_factor(item.item_code, args.uom).get("conversion_factor")
+			get_conversion_factor(item.name, args.uom).get("conversion_factor")
 
 	args.conversion_factor = out.conversion_factor
 	out.stock_qty = out.qty * out.conversion_factor
 
 	# calculate last purchase rate
-	from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
-	out.last_purchase_rate = item_last_purchase_rate(args.name, args.conversion_rate, item.item_code, out.conversion_factor)
+	if args.get('doctype') in purchase_doctypes:
+		from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
+		out.last_purchase_rate = item_last_purchase_rate(args.name, args.conversion_rate, item.name, out.conversion_factor)
 
 	# if default specified in item is for another company, fetch from company
 	for d in [
@@ -424,7 +428,7 @@ def insert_item_price(args):
 				frappe.msgprint(_("Item Price added for {0} in Price List {1}").format(args.item_code,
 					args.price_list), alert=True)
 
-def get_item_price(args, item_code):
+def get_item_price(args, item_code, ignore_party=False):
 	"""
 		Get name, price_list_rate from Item Price based on conditions
 			Check if the Derised qty is within the increment of the packing list.
@@ -434,16 +438,18 @@ def get_item_price(args, item_code):
 	"""
 
 	args['item_code'] = item_code
-	conditions = "where (customer is null or customer = '') and (supplier is null or supplier = '')"
-	if args.get("customer"):
-		conditions = "where customer=%(customer)s"
 
-	if args.get("supplier"):
-		conditions = "where supplier=%(supplier)s"
-
-	conditions += """ and item_code=%(item_code)s
+	conditions = """where item_code=%(item_code)s
 		and price_list=%(price_list)s
 		and ifnull(uom, '') in ('', %(uom)s)"""
+
+	if not ignore_party:
+		if args.get("customer"):
+			conditions += " and customer=%(customer)s"
+		elif args.get("supplier"):
+			conditions += " and supplier=%(supplier)s"
+		else:
+			conditions += " and (customer is null or customer = '') and (supplier is null or supplier = '')"
 
 	if args.get('min_qty'):
 		conditions += " and ifnull(min_qty, 0) <= %(min_qty)s"
@@ -490,10 +496,10 @@ def get_price_list_rate_for(args, item_code):
 		for field in ["customer", "supplier", "min_qty"]:
 			del item_price_args[field]
 
-		general_price_list_rate = get_item_price(item_price_args, item_code)
+		general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=args.get("ignore_party"))
 		if not general_price_list_rate and args.get("uom") != args.get("stock_uom"):
 			item_price_args["args"] = args.get("stock_uom")
-			general_price_list_rate = get_item_price(item_price_args, item_code)
+			general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=args.get("ignore_party"))
 
 		if general_price_list_rate:
 			item_price_data = general_price_list_rate

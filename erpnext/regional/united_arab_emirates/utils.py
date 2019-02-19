@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from frappe.utils import flt
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
 

@@ -94,6 +94,8 @@ class AccountsController(TransactionBase):
 			if self.is_return:
 				self.validate_qty()
 
+		validate_regional(self)
+
 	def validate_invoice_documents_schedule(self):
 		self.validate_payment_schedule_dates()
 		self.set_due_date()
@@ -263,6 +265,9 @@ class AccountsController(TransactionBase):
 
 								if item_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
+
+					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
+						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
 
 					if ret.get("pricing_rule"):
 						# if user changed the discount percentage then set user's discount percentage ?
@@ -1129,3 +1134,15 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
 	p_doctype.update_blanket_order()
 	p_doctype.update_billing_percentage()
 	p_doctype.set_status()
+
+@erpnext.allow_regional
+def validate_regional(doc):
+	pass
+
+@erpnext.allow_regional
+def on_submit_regional(doc):
+	pass
+
+@erpnext.allow_regional
+def on_cancel_regional(doc):
+	pass

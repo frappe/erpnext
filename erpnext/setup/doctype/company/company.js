@@ -206,6 +206,8 @@ erpnext.company.setup_queries = function(frm) {
 		["default_payroll_payable_account", {"root_type": "Liability"}],
 		["round_off_account", {"root_type": "Expense"}],
 		["write_off_account", {"root_type": "Expense"}],
+		["discount_allowed_account", {"root_type": "Expense"}],
+		["discount_received_account", {"root_type": "Income"}],
 		["exchange_gain_loss_account", {"root_type": "Expense"}],
 		["unrealized_exchange_gain_loss_account", {"root_type": "Expense"}],
 		["accumulated_depreciation_account",

@@ -24,6 +24,7 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from erpnext.controllers.accounts_controller import on_submit_regional, on_cancel_regional
 
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 
@@ -198,6 +199,8 @@ class SalesInvoice(SellingController):
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_submit")
 
+		on_submit_regional(self)
+
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
@@ -252,6 +255,8 @@ class SalesInvoice(SellingController):
 
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_cancel")
+
+		on_cancel_regional(self)
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -398,10 +403,15 @@ class SalesInvoice(SellingController):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',
-				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account', 'company_address',
+				'company', 'select_print_heading', 'cash_bank_account', 'company_address',
 				'write_off_account', 'write_off_cost_center', 'apply_discount_on'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
+
+			customer_price_list = frappe.get_value("Customer", self.customer, 'default_price_list')
+
+			if not customer_price_list:
+				self.set('selling_price_list', pos.get('selling_price_list'))
 
 			if not for_validate:
 				self.update_stock = cint(pos.get("update_stock"))

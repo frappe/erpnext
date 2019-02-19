@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe, re
 from frappe import _
 from frappe.utils import cstr, flt, date_diff, getdate

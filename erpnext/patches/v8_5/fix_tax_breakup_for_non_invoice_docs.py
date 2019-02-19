@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe
 from erpnext.regional.india.setup import make_custom_fields
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_html

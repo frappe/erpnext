@@ -21,12 +21,11 @@
                         +</button>
                 </span>
 			</div>
-		</span>    	
+		</span>
 	</div>
     <div class="col-sm-2 col-xs-3 text-right col-amount">
         {{ d.get_formatted("amount") }}
-        <p class="text-muted small item-rate">{{
-            _("Rate: {0}").format(d.get_formatted("rate")) }}</p>
+        <p class="text-muted small item-rate">{{ _("Rate") }}&nbsp;{{ d.get_formatted("rate") }}</p>
     </div>
 </div>
 {% endfor %}

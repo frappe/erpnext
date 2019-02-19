@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
+from __future__ import unicode_literals
 
 import json
 
@@ -55,6 +54,7 @@ def get_pos_data():
 		'barcode_data': get_barcode_data(items_list),
 		'tax_data': get_item_tax_data(),
 		'price_list_data': get_price_list_data(doc.selling_price_list),
+		'customer_wise_price_list': get_customer_wise_price_list(),
 		'bin_data': get_bin_data(pos_profile),
 		'pricing_rules': get_pricing_rule_data(doc),
 		'print_template': print_template,
@@ -328,15 +328,32 @@ def get_price_list_data(selling_price_list):
 
 	return itemwise_price_list
 
+def get_customer_wise_price_list():
+	customer_wise_price = {}
+	customer_price_list_mapping = frappe._dict(frappe.get_all('Customer',fields = ['default_price_list', 'name'], as_list=1))
+
+	price_lists = frappe.db.sql(""" Select ifnull(price_list_rate, 0) as price_list_rate,
+		item_code, price_list from `tabItem Price` """, as_dict=1)
+
+	for item in price_lists:
+		if item.price_list and customer_price_list_mapping.get(item.price_list):
+
+			customer_wise_price.setdefault(customer_price_list_mapping.get(item.price_list),{}).setdefault(
+				item.item_code, item.price_list_rate
+			)
+
+	return customer_wise_price
 
 def get_bin_data(pos_profile):
 	itemwise_bin_data = {}
 	cond = "1=1"
 	if pos_profile.get('warehouse'):
-		cond = "warehouse = '{0}'".format(pos_profile.get('warehouse'))
+		cond = "warehouse = %(warehouse)s"
 
 	bin_data = frappe.db.sql(""" select item_code, warehouse, actual_qty from `tabBin`
-		where actual_qty > 0 and {cond}""".format(cond=cond), as_dict=1)
+		where actual_qty > 0 and {cond}""".format(cond=cond), {
+			'warehouse': frappe.db.escape(pos_profile.get('warehouse'))
+		}, as_dict=1)
 
 	for bins in bin_data:
 		if bins.item_code not in itemwise_bin_data:

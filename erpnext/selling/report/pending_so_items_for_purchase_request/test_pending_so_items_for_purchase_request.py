@@ -1,6 +1,7 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from __future__ import unicode_literals
 import unittest
 from frappe.utils import nowdate, add_months
 from erpnext.selling.report.pending_so_items_for_purchase_request.pending_so_items_for_purchase_request\
