@@ -237,12 +237,14 @@ class Project(Document):
 	def update_percent_complete(self):
 		if not self.tasks: return
 		total = frappe.db.sql("""select count(name) from tabTask where project=%s""", self.name)[0][0]
+
 		if not total and self.percent_complete:
 			self.percent_complete = 0
+
 		if (self.percent_complete_method == "Task Completion" and total > 0) or (
 			not self.percent_complete_method and total > 0):
 			completed = frappe.db.sql("""select count(name) from tabTask where
-				project=%s and status in ('Closed', 'Cancelled')""", self.name)[0][0]
+				project=%s and status in ('Cancelled', 'Completed')""", self.name)[0][0]
 			self.percent_complete = flt(flt(completed) / total * 100, 2)
 
 		if (self.percent_complete_method == "Task Progress" and total > 0):
@@ -253,15 +255,21 @@ class Project(Document):
 		if (self.percent_complete_method == "Task Weight" and total > 0):
 			weight_sum = frappe.db.sql("""select sum(task_weight) from tabTask where
 				project=%s""", self.name)[0][0]
-			weighted_progress = frappe.db.sql("""select progress,task_weight from tabTask where
+			weighted_progress = frappe.db.sql("""select progress, task_weight from tabTask where
 				project=%s""", self.name, as_dict=1)
 			pct_complete = 0
 			for row in weighted_progress:
 				pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
 			self.percent_complete = flt(flt(pct_complete), 2)
+
+		# don't update status if it is cancelled
+		if self.status == 'Cancelled':
+			return
+
 		if self.percent_complete == 100:
 			self.status = "Completed"
-		elif not self.status == "Cancelled":
+
+		else:
 			self.status = "Open"
 
 	def update_costing(self):
@@ -623,3 +631,21 @@ def create_kanban_board_if_not_exists(project):
 		quick_kanban_board('Task', project, 'status')
 
 	return True
+
+@frappe.whitelist()
+def set_project_status(project, status):
+	'''
+	set status for project and all related tasks
+	'''
+	if not status in ('Completed', 'Cancelled'):
+		frappe.throw('Status must be Cancelled or Completed')
+
+	project = frappe.get_doc('Project', project)
+	frappe.has_permission(doc = project, throw = True)
+
+	for task in frappe.get_all('Task', dict(project = project.name)):
+		frappe.db.set_value('Task', task.name, 'status', status)
+
+	project.status = status
+	project.save()
+
