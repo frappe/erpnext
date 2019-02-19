@@ -6,6 +6,7 @@ from erpnext.controllers.taxes_and_totals import get_itemised_tax
 from frappe import _
 from frappe.utils.file_manager import save_file, remove_file
 from frappe.desk.form.load import get_attachments
+from erpnext.regional.italy import state_codes
 
 
 def update_itemised_tax_data(doc):
@@ -283,3 +284,10 @@ def get_progressive_name_and_number(doc):
 	progressive_number = progressive_name.split("_")[1]
 
 	return progressive_name, progressive_number
+
+def validate_address(doc, method):
+	if not (hasattr(doc, "state_code") and doc.country in ["Italy", "Italia", "Italian Republic", "Repubblica Italiana"]):
+		return
+
+	state_codes_lower = {key.lower():value for key,value in state_codes.items()}
+	doc.state_code = state_codes_lower.get(doc.get('state','').lower())
