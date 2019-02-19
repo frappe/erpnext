@@ -7,20 +7,25 @@ import frappe
 
 
 def execute():
-	items_barcode = frappe.get_all('Item', ['name', 'barcode'], { 'barcode': ('!=', '') })
-
-	frappe.reload_doc("stock", "doctype", "item")
 	frappe.reload_doc("stock", "doctype", "item_barcode")
+
+	items_barcode = frappe.get_all('Item', ['name', 'barcode'], { 'barcode': ('!=', '') })
+	frappe.reload_doc("stock", "doctype", "item")
+
+
 
 	for item in items_barcode:
 		barcode = item.barcode.strip()
 
 		if barcode and '<' not in barcode:
-			frappe.get_doc({
-				'idx': 0,
-				'doctype': 'Item Barcode',
-				'barcode': barcode,
-				'parenttype': 'Item',
-				'parent': item.name,
-				'parentfield': 'barcodes'
-			}).insert()
+			try:
+				frappe.get_doc({
+					'idx': 0,
+					'doctype': 'Item Barcode',
+					'barcode': barcode,
+					'parenttype': 'Item',
+					'parent': item.name,
+					'parentfield': 'barcodes'
+				}).insert()
+			except frappe.DuplicateEntryError:
+				continue
