@@ -210,7 +210,7 @@ doc_events = {
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	'Address': {
-		'validate': 'erpnext.regional.india.utils.validate_gstin_for_india'
+		'validate': ['erpnext.regional.india.utils.validate_gstin_for_india', 'erpnext.regional.italy.utils.validate_address']
 	},
 	('Sales Invoice', 'Purchase Invoice', 'Delivery Note'): {
 		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
@@ -301,5 +301,11 @@ regional_overrides = {
 	},
 	'Saudi Arabia': {
 		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data'
+	},
+	'Italy': {
+		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.italy.utils.update_itemised_tax_data',
+		'erpnext.controllers.accounts_controller.validate_regional': 'erpnext.regional.italy.utils.sales_invoice_validate',
+		'erpnext.controllers.accounts_controller.on_submit_regional': 'erpnext.regional.italy.utils.sales_invoice_on_submit',
+		'erpnext.controllers.accounts_controller.on_cancel_regional': 'erpnext.regional.italy.utils.sales_invoice_on_cancel'
 	}
 }
