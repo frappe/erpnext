@@ -169,9 +169,9 @@ default_roles = [
 	{'role': 'Student', 'doctype':'Student', 'email_field': 'student_email_id'},
 ]
 
-role_home_page = {
-	"LMS User": "/lms"
-}
+# role_home_page = {
+# 	"LMS User": "/lms"
+# }
 
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",

@@ -5,7 +5,7 @@
     </TopSection>
 	<CardList :title="'Featured Programs'" :description="'Master ERPNext'" :sectionType="'section-padding section-bg'">
         <ProgramCard slot="card-list-slot" v-for="item in featuredPrograms" :key="item.program.name" :program="item.program" :enrolled="item.is_enrolled"/>
-        <AButton slot="list-bottom" :type="'primary'" :size="'lg'" :route="'List/Program'">View All</AButton>
+        <AButton slot="list-bottom" :type="'primary'" :size="'md'" :route="'List/Program'">View All</AButton>
     </CardList>
 </div>
 </template>
