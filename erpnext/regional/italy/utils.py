@@ -1,5 +1,7 @@
+from __future__ import unicode_literals
+
 import frappe, json, os
-from frappe.utils import flt
+from frappe.utils import flt, cstr
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
 from frappe import _
 from frappe.utils.file_manager import save_file, remove_file
@@ -66,7 +68,8 @@ def prepare_invoice(invoice, progressive_number):
 	else:
 		invoice.transmission_format_code = "FPR12"
 
-	tax_data = get_invoice_summary(invoice.items, invoice.taxes)
+	invoice.e_invoice_items = [item for item in invoice.items]
+	tax_data = get_invoice_summary(invoice.e_invoice_items, invoice.taxes)
 	invoice.tax_data = tax_data
 
 	#Check if stamp duty (Bollo) of 2 EUR exists.
@@ -74,8 +77,8 @@ def prepare_invoice(invoice, progressive_number):
 	if stamp_duty_charge_row:
 		invoice.stamp_duty = stamp_duty_charge_row.tax_amount
 
-	for item in invoice.items:
-		if item.tax_rate == 0.0:
+	for item in invoice.e_invoice_items:
+		if item.tax_rate == 0.0 and item.tax_amount == 0.0:
 			item.tax_exemption_reason = tax_data["0.0"]["tax_exemption_reason"]
 
 	return invoice
@@ -121,12 +124,34 @@ def get_invoice_summary(items, taxes):
 		if tax.charge_type == "Actual":
 			continue
 
+		#Charges to appear as items in the e-invoice.
+		if tax.charge_type in ["On Previous Row Total", "On Previous Row Amount"]:
+			reference_row = next((row for row in taxes if row.idx == int(tax.row_id or 0)), None)
+			if reference_row:
+				items.append(
+					frappe._dict(
+						idx=len(items)+1,
+						item_code=reference_row.description,
+						item_name=reference_row.description,
+						rate=reference_row.tax_amount,
+						qty=1.0,
+						amount=reference_row.tax_amount,
+						stock_uom=frappe.db.get_single_value("Stock Settings", "stock_uom") or _("Nos"),
+						tax_rate=tax.rate,
+						tax_amount=(reference_row.tax_amount * tax.rate) / 100,
+						net_amount=reference_row.tax_amount,
+						taxable_amount=reference_row.tax_amount,
+						item_tax_rate="{}",
+						charges=True
+					)
+				)
+
 		#Check item tax rates if tax rate is zero.
 		if tax.rate == 0:
 			for item in items:
 				item_tax_rate = json.loads(item.item_tax_rate)
 				if tax.account_head in item_tax_rate:
-					key = str(item_tax_rate[tax.account_head])
+					key = cstr(item_tax_rate[tax.account_head])
 					summary_data.setdefault(key, {"tax_amount": 0.0, "taxable_amount": 0.0, "tax_exemption_reason": "", "tax_exemption_law": ""})
 					summary_data[key]["tax_amount"] += item.tax_amount
 					summary_data[key]["taxable_amount"] += item.net_amount
@@ -141,10 +166,16 @@ def get_invoice_summary(items, taxes):
 		else:
 			item_wise_tax_detail = json.loads(tax.item_wise_tax_detail)
 			for rate_item in [tax_item for tax_item in item_wise_tax_detail.items() if tax_item[1][0] == tax.rate]:
-				key = str(tax.rate)
+				key = cstr(tax.rate)
 				if not summary_data.get(key): summary_data.setdefault(key, {"tax_amount": 0.0, "taxable_amount": 0.0})
 				summary_data[key]["tax_amount"] += rate_item[1][1]
 				summary_data[key]["taxable_amount"] += sum([item.net_amount for item in items if item.item_code == rate_item[0]])
+
+			for item in items:
+				key = cstr(tax.rate)
+				if item.get("charges"):
+					if not summary_data.get(key): summary_data.setdefault(key, {"taxable_amount": 0.0})
+					summary_data[key]["taxable_amount"] += item.taxable_amount
 
 	return summary_data
 
@@ -195,6 +226,9 @@ def sales_invoice_on_submit(doc):
 		for schedule in doc.payment_schedule:
 			if not schedule.mode_of_payment:
 				frappe.throw(_("Row {0}: Please set the Mode of Payment in Payment Schedule".format(schedule.idx)),
+					title=_("E-Invoicing Information Missing"))
+			elif not frappe.db.get_value("Mode of Payment", schedule.mode_of_payment, "mode_of_payment_code"):
+				frappe.throw(_("Row {0}: Please set the correct code on Mode of Payment {1}".format(schedule.idx, schedule.mode_of_payment)),
 					title=_("E-Invoicing Information Missing"))
 
 	prepare_and_attach_invoice(doc)
