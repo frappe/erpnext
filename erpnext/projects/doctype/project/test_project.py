@@ -14,8 +14,8 @@ class TestProject(unittest.TestCase):
 	def test_project_with_template(self):
 		template = get_project_template()
 
-		frappe.db.sql('delete from tabTask where project = "Test Project with Template"')
-		frappe.delete_doc('Project', 'Test Project with Template')
+		# frappe.db.sql('delete from tabTask where project = "Test Project with Template"')
+		# frappe.delete_doc('Project', 'Test Project with Template')
 
 		project = frappe.get_doc(dict(
 			doctype = 'Project',
