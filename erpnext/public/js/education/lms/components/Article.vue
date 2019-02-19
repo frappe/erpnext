@@ -4,7 +4,7 @@
         <slot></slot>
     </ContentTitle>
     <section class="article-content-section">
-        <div class='container'>
+        <div>
             <div class="content" v-html="contentData.content"></div>
             <div class="text-right">
             </div>

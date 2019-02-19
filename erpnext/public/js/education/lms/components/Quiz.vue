@@ -1,6 +1,6 @@
 <template>
 	<section class="quiz-section">
-    <div class='container'>
+    <div>
         <div class="row">
             <div class="col-md-8">
                 <h2>{{ content }}</h2>
