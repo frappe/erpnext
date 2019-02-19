@@ -47,7 +47,7 @@ def _get_pricing_rules(apply_on, args, values):
     conditions = item_variant_condition = item_conditions = ""
     values[apply_on_field] = args.get(apply_on_field)
     if apply_on_field in ['item_code', 'brand']:
-        item_conditions = "{child_doc}.{apply_on_field}= %({apply_on_field})s".format(child_doc=child_doc, 
+        item_conditions = "{child_doc}.{apply_on_field}= %({apply_on_field})s".format(child_doc=child_doc,
             apply_on_field = apply_on_field)
 
         if apply_on_field == 'item_code':
@@ -62,6 +62,8 @@ def _get_pricing_rules(apply_on, args, values):
 
     conditions += get_other_conditions(conditions, values, args)
     warehouse_conditions = _get_tree_conditions(args, "Warehouse", '`tabPricing Rule`')
+    if warehouse_conditions:
+        warehouse_conditions = " and {0}".format(warehouse_conditions)
 
     if not args.price_list: args.price_list = None
 
@@ -71,11 +73,11 @@ def _get_pricing_rules(apply_on, args, values):
     pricing_rules = frappe.db.sql("""select `tabPricing Rule`.*,
             {child_doc}.{apply_on_field}, {child_doc}.uom
         from `tabPricing Rule`, {child_doc}
-		where ({item_conditions} or (`tabPricing Rule`.apply_rule_on_other is not null 
+		where ({item_conditions} or (`tabPricing Rule`.apply_rule_on_other is not null
             and `tabPricing Rule`.{apply_on_field}=%({apply_on_field})s))
             and {child_doc}.parent = `tabPricing Rule`.name
 			and `tabPricing Rule`.disable = 0 and
-            `tabPricing Rule`.{transaction_type} = 1 and {warehouse_cond} {conditions}
+            `tabPricing Rule`.{transaction_type} = 1 {warehouse_cond} {conditions}
 		order by `tabPricing Rule`.priority desc,
             `tabPricing Rule`.name desc""".format(
             child_doc = child_doc,
@@ -94,7 +96,7 @@ def apply_multiple_pricing_rules(pricing_rules):
 
     if not apply_multiple_rule: return False
 
-    if (apply_multiple_rule 
+    if (apply_multiple_rule
         and len(apply_multiple_rule) == len(pricing_rules)):
         return True
 
@@ -232,7 +234,7 @@ def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
         if (flt(qty) >= (flt(rule.min_qty) * conversion_factor)
             and (flt(qty)<= (rule.max_qty * conversion_factor) if rule.max_qty else True)):
             status = True
-        
+
         # if user has created item price against the transaction UOM
         if rule.get("uom") == args.get("uom"):
             conversion_factor = 1.0
@@ -306,7 +308,7 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=[]):
     date_field = ('transaction_date'
         if doc.get('transaction_date') else 'posting_date')
 
-    child_doctype = '{0} Item'.format(doctype) 
+    child_doctype = '{0} Item'.format(doctype)
     apply_on = frappe.scrub(pr_doc.get('apply_on'))
 
     values = [pr_doc.valid_from, pr_doc.valid_upto]
@@ -350,7 +352,7 @@ def validate_pricing_rules(doc):
 
     if not doc.pricing_rules: return
 
-    for d in doc.items: 
+    for d in doc.items:
         validate_pricing_rule_on_items(doc, d)
 
     doc.calculate_taxes_and_totals()
