@@ -133,7 +133,9 @@ def make_custom_fields(update=True):
         'Address': [
             dict(fieldname='country_code', label='Country Code',
 			    fieldtype='Data', insert_after='country', print_hide=1, read_only=1,
-                fetch_from="country.code")
+                fetch_from="country.code"),
+            dict(fieldname='state_code', label='State Code',
+			    fieldtype='Data', insert_after='state', print_hide=1)
         ]
     }
 
