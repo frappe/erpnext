@@ -13,15 +13,17 @@ class ServiceLevelAgreement(Document):
 		if self.default_service_level_agreement:
 			doc = frappe.get_list("Service Level Agreement", filters=[{"default_service_level_agreement": "1"}])
 			if doc:
-				frappe.throw(_("There can't be two Default Service Level Agreements"))
+				frappe.throw(_("There can't be two Default Service Level Agreements."))
 
 	def validate(self):
 		if not self.default_service_level_agreement:
+			if not (self.start_date and self.end_date):
+				frappe.throw(_("Enter Start and End Date for the Agreement."))
 			if self.start_date >= self.end_date:
-				frappe.throw(_("Start Date of contract can't be greater than or equal to End Date"))
+				frappe.throw(_("Start Date of Agreement can't be greater than or equal to End Date."))
 
 def check_agreement_status():
-	service_level_agreements = frappe.get_list("Service Level Agreement", filters={"agreement_status": "Active"})
+	service_level_agreements = frappe.get_list("Service Level Agreement", filters=[{"agreement_status": "Active"},{"default_service_level_agreement": "0"}])
 	service_level_agreements.reverse()
 	for service_level_agreement in service_level_agreements:
 		service_level_agreement = frappe.get_doc("Service Level Agreement", service_level_agreement)
