@@ -100,9 +100,12 @@ class Issue(Document):
 
 	def before_insert(self):
 		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
-		service_level_agreement = frappe.get_list("Service Level Agreement", filters=[{"customer": self.customer, "agreement_status": "Active"}], fields=["name", "service_level", "holiday_list", "priority"], limit=1)
-		if not service_level_agreement:
-			service_level_agreement = frappe.get_list("Service Level Agreement", filters=[{"default_service_level_agreement": "1"}], fields=["name", "service_level", "holiday_list", "priority"], limit=1)
+		service_level_agreement = frappe.get_list("Service Level Agreement",
+			filters=[{"agreement_status": "Active"}],
+			or_filters=[{'customer': self.customer},{"default_service_level_agreement": "1"}],
+			fields=["name", "service_level", "holiday_list", "priority"],
+			order_by='customer DESC',
+			limit=1)
 		if service_level_agreement:
 			self.service_level_agreement = service_level_agreement[0].name
 			self.priority = service_level_agreement[0].priority
@@ -110,17 +113,17 @@ class Issue(Document):
 			support_days = [[service.workday, str(service.start_time), str(service.end_time)] for service in service_level.support_and_resolution]
 			holiday_list = frappe.get_doc("Holiday List", service_level_agreement[0].holiday_list)
 			holidays = [holiday.holiday_date for holiday in holiday_list.holidays]
-			time, add_days, now_datetime = 0, 0, utils.now_datetime()
-			while time != 1:
+			sla_time_set, add_days, now_datetime = 0, 0, utils.now_datetime()
+			while sla_time_set != 1:
 				for count, weekday in enumerate(week):
 					if count >= (getdate()).weekday() or add_days != 0:
-						if time != 1:
+						if sla_time_set != 1:
 							for service in service_level.support_and_resolution:
 								if service.workday == weekday:
 									now_datetime += timedelta(days=add_days)
 									self.response_by, self.time_to_respond = calculate_support_day(now_datetime=now_datetime, time=int(service_level.response_time), time_period=service_level.response_time_period, support_days=support_days, holidays=holidays, week=week)
 									self.resolution_by, self.time_to_resolve = calculate_support_day(now_datetime=now_datetime, time=int(service_level.resolution_time), time_period=service_level.resolution_time_period, support_days=support_days, holidays=holidays, week=week)
-									time = 1
+									sla_time_set = 1
 							add_days += 1
 
 def calculate_support_day(now_datetime=None, time=None, time_period=None, support_days=None, holidays=None, week=None):
@@ -275,8 +278,7 @@ def update_issue(contact, method):
 	frappe.db.sql("""UPDATE `tabIssue` set contact='' where contact=%s""", contact.name)
 
 def update_support_timer():
-	issues = frappe.get_list("Issue", filters={"status": "Open"})
-	issues.reverse()
+	issues = frappe.get_list("Issue", filters={"status": "Open"}, order_by="creation DESC")
 	for issue in issues:
 		issue = frappe.get_doc("Issue", issue.name)
 		if float(issue.time_to_respond) > 0 and not issue.first_responded_on:
