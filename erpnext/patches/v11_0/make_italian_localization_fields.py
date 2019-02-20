@@ -8,21 +8,21 @@ import frappe
 
 
 def execute():
+	company = frappe.get_all('Company', filters = {'country': 'Italy'})
+	if not company:
+		return
 
-    company = frappe.get_all('Company', filters = {'country': 'Italy'})
-    if not company:
-      return
+	frappe.reload_doc('regional', 'report', 'electronic_invoice_register')
+	make_custom_fields()
+	setup_report()
 
-    make_custom_fields()
-    setup_report()
+	# Set state codes
+	condition = ""
+	for state, code in state_codes.items():
+		condition += " when '{0}' then '{1}'".format(frappe.db.escape(state), frappe.db.escape(code))
 
-    # Set state codes
-    condition = ""
-    for state, code in state_codes.items():
-      condition += " when '{0}' then '{1}'".format(frappe.db.escape(state), frappe.db.escape(code))
-
-    if condition:
-      frappe.db.sql("""
-        UPDATE tabAddress set state_code = (case state {condition} end)
-        WHERE country in ('Italy', 'Italia', 'Italian Republic', 'Repubblica Italiana')
-      """.format(condition=condition))
+	if condition:
+		frappe.db.sql("""
+			UPDATE tabAddress set state_code = (case state {condition} end)
+			WHERE country in ('Italy', 'Italia', 'Italian Republic', 'Repubblica Italiana')
+		""".format(condition=condition))

@@ -183,6 +183,9 @@ def get_invoice_summary(items, taxes):
 #Preflight for successful e-invoice export.
 def sales_invoice_validate(doc):
 	#Validate company
+	if doc.doctype != 'Sales Invoice':
+		return
+
 	if not doc.company_address:
 		frappe.throw(_("Please set an Address on the Company '%s'" % doc.company), title=_("E-Invoicing Information Missing"))
 	else:
@@ -219,8 +222,12 @@ def sales_invoice_validate(doc):
 
 
 #Ensure payment details are valid for e-invoice.
-def sales_invoice_on_submit(doc):
+def sales_invoice_on_submit(doc, method):
 	#Validate payment details
+	if get_company_country(doc.company) not in ['Italy',
+		'Italia', 'Italian Republic', 'Repubblica Italiana']:
+		return
+
 	if not len(doc.payment_schedule):
 		frappe.throw(_("Please set the Payment Schedule"), title=_("E-Invoicing Information Missing"))
 	else:
@@ -244,9 +251,16 @@ def prepare_and_attach_invoice(doc):
 	save_file(xml_filename, invoice_xml, dt=doc.doctype, dn=doc.name, is_private=True)
 
 #Delete e-invoice attachment on cancel.
-def sales_invoice_on_cancel(doc):
+def sales_invoice_on_cancel(doc, method):
+	if get_company_country(doc.company) not in ['Italy',
+		'Italia', 'Italian Republic', 'Repubblica Italiana']:
+		return
+
 	for attachment in get_e_invoice_attachments(doc):
 		remove_file(attachment.name, attached_to_doctype=doc.doctype, attached_to_name=doc.name)
+
+def get_company_country(company):
+	return frappe.get_cached_value('Company', company, 'country')
 
 def get_e_invoice_attachments(invoice):
 	out = []
