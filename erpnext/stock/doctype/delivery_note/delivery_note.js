@@ -148,6 +148,21 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 						})
 					}, __("Get items from"));
 			}
+
+			if (doc.docstatus == 0) {
+				var item_childtable = me.frm.fields_dict["items"].$wrapper;
+				var grid_buttons = $(item_childtable).find(".grid-buttons");
+				if (!$(grid_buttons).find(".update-qty-from-availability").length) {
+					$(grid_buttons).append(`
+						<button class="update-qty-from-availability btn btn-xs btn-default" style="margin-left: 4px;">
+							${__("Update Qty from Availability")}
+						</button>
+					`)
+				}
+				$(grid_buttons).find(".update-qty-from-availability").off().click(function() {
+					me.update_item_qty_from_availability();
+				});
+			}
 		}
 
 		if (doc.docstatus==1) {
@@ -213,6 +228,39 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_delivery_trip",
 			frm: this.frm
 		})
+	},
+
+	update_item_qty_from_availability: function() {
+		var me = this;
+		var items = [];
+		$.each(me.frm.doc.items || [], function(i, d) {
+			items.push({
+				name: d.name,
+				item_code: d.item_code,
+				warehouse: d.warehouse,
+				stock_qty: d.stock_qty,
+				conversion_factor: d.conversion_factor
+			});
+		});
+
+		if(items.length) {
+			frappe.call({
+				method: "erpnext.stock.doctype.delivery_note.delivery_note.update_item_qty_from_availability",
+				args: {
+					"items": items
+				},
+				freeze: true,
+				callback: function(r) {
+					if(!r.exc) {
+						$.each(r.message || {}, function(cdn, row) {
+							$.each(row || {}, function(fieldname, value) {
+								frappe.model.set_value("Delivery Note Item", cdn, fieldname, value);
+							});
+						});
+					}
+				}
+			});
+		}
 	},
 
 	tc_name: function() {
