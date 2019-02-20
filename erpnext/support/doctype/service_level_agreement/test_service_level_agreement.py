@@ -36,9 +36,9 @@ def make_service_level_agreement():
 		"employee_group": "_Test Employee Group",
 		"start_date": frappe.utils.getdate(),
 		"end_date": frappe.utils.add_to_date(frappe.utils.getdate(), days=100),
-		"response_time": "5",
+		"response_time": 5,
 		"response_time_period": "Hour",
-		"resolution_time": "2",
+		"resolution_time": 2,
 		"resolution_time_period": "Day",
 	})
 	service_level_agreement_exists = frappe.db.exists("Service Level Agreement", "Service Level Agreement: _Test Customer")
