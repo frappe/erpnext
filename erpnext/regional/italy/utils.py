@@ -183,6 +183,9 @@ def get_invoice_summary(items, taxes):
 #Preflight for successful e-invoice export.
 def sales_invoice_validate(doc):
 	#Validate company
+	if doc.doctype != 'Sales Invoice':
+		return
+
 	if not doc.company_address:
 		frappe.throw(_("Please set an Address on the Company '%s'" % doc.company), title=_("E-Invoicing Information Missing"))
 	else:
