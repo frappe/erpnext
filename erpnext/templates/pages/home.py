@@ -16,7 +16,8 @@ def get_context(context):
 		if route:
 			item.route = '/' + route
 
-	context.title = homepage.title or homepage.company
+	homepage.title = homepage.title or homepage.company
+	context.title = homepage.title
 	context.homepage = homepage
 
 	context.blogs = frappe.get_all('Blog Post',
