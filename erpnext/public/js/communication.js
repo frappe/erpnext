@@ -61,21 +61,6 @@ frappe.ui.form.on("Communication", {
 		})
 	},
 
-	auto_make_issue_from_communication: (frm) => {
-		return frappe.call({
-			method: "frappe.email.inbox.make_issue_from_communication",
-			args: {
-				communication: frm.doc.name
-			},
-			freeze: true,
-			callback: (r) => {
-				if(r.message) {
-					frm.reload_doc()
-				}
-			}
-		})
-	},
-
 	make_opportunity_from_communication: (frm) => {
 		return frappe.call({
 			method: "frappe.email.inbox.make_opportunity_from_communication",
