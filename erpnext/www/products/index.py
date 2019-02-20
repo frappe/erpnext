@@ -13,7 +13,7 @@ def get_context(context):
 
 	context.items = get_products_for_website(field_filters, attribute_filters, search)
 
-	product_settings = frappe.get_cached_doc('Products Settings')
+	product_settings = get_product_settings()
 	context.field_filters = get_field_filter_data() \
 		if product_settings.enable_field_filters else []
 
@@ -27,7 +27,7 @@ def get_context(context):
 
 
 def get_field_filter_data():
-	product_settings = frappe.get_cached_doc('Products Settings')
+	product_settings = get_product_settings()
 	filter_fields = [row.fieldname for row in product_settings.filter_fields]
 
 	meta = frappe.get_meta('Item')
@@ -52,7 +52,7 @@ def get_field_filter_data():
 
 
 def get_attribute_filter_data():
-	product_settings = frappe.get_cached_doc('Products Settings')
+	product_settings = get_product_settings()
 	attributes = [row.attribute for row in product_settings.filter_attributes]
 	attribute_docs = [
 		frappe.get_doc('Item Attribute', attribute) for attribute in attributes
@@ -328,7 +328,7 @@ def get_items_by_fields(field_filters):
 
 def get_items(filters=None, search=None):
 	start = frappe.form_dict.start or 0
-	products_settings = frappe.get_cached_doc('Products Settings')
+	products_settings = get_product_settings()
 	page_length = products_settings.products_per_page
 
 	filters = filters or []
@@ -436,3 +436,8 @@ def get_html_for_items(items):
 			'item': item
 		}))
 	return html
+
+def get_product_settings():
+	doc = frappe.get_cached_doc('Products Settings')
+	doc.products_per_page = doc.products_per_page or 20
+	return doc
