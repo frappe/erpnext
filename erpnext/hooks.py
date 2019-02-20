@@ -210,7 +210,7 @@ doc_events = {
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	'Address': {
-		'validate': ['erpnext.regional.india.utils.validate_gstin_for_india', 'erpnext.regional.italy.utils.validate_address']
+		'validate': ['erpnext.regional.india.utils.validate_gstin_for_india', 'erpnext.regional.italy.utils.set_state_code']
 	},
 	('Sales Invoice', 'Purchase Invoice', 'Delivery Note'): {
 		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
