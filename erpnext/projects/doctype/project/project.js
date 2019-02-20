@@ -95,8 +95,8 @@ frappe.ui.form.on("Project", {
 	set_status: function(frm, status) {
 		frappe.confirm(__('Set Project and all Tasks to status {0}?', [status.bold()]), () => {
 			frappe.xcall('erpnext.projects.doctype.project.project.set_project_status',
-				{project: frm.doc.name, status: status}).then((r) => { /* page will auto reload */ });
-		})
+				{project: frm.doc.name, status: status}).then(() => { /* page will auto reload */ });
+		});
 	},
 
 	tasks_refresh: function (frm) {

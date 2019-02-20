@@ -83,11 +83,11 @@ class TestTask(unittest.TestCase):
 
 		# assignment should be
 		task.load_from_db()
-		task.status = "Closed"
+		task.status = "Completed"
 		task.save()
 		todo = get_owner_and_status()
 		self.assertEqual(todo.owner, "test@example.com")
-		self.assertEqual(todo.status, "Closed")
+		self.assertEqual(todo.status, "Completed")
 
 	def test_overdue(self):
 		task = create_task("Testing Overdue", add_days(nowdate(), -10), add_days(nowdate(), -5))
