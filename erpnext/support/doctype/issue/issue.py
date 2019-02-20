@@ -121,8 +121,8 @@ class Issue(Document):
 							for service in service_level.support_and_resolution:
 								if service.workday == weekday:
 									now_datetime += timedelta(days=add_days)
-									self.response_by, self.time_to_respond = calculate_support_day(now_datetime=now_datetime, time=int(service_level.response_time), time_period=service_level.response_time_period, support_days=support_days, holidays=holidays, week=week)
-									self.resolution_by, self.time_to_resolve = calculate_support_day(now_datetime=now_datetime, time=int(service_level.resolution_time), time_period=service_level.resolution_time_period, support_days=support_days, holidays=holidays, week=week)
+									self.response_by, self.time_to_respond = calculate_support_day(now_datetime=now_datetime, time=service_level.response_time, time_period=service_level.response_time_period, support_days=support_days, holidays=holidays, week=week)
+									self.resolution_by, self.time_to_resolve = calculate_support_day(now_datetime=now_datetime, time=service_level.resolution_time, time_period=service_level.resolution_time_period, support_days=support_days, holidays=holidays, week=week)
 									sla_time_set = 1
 							add_days += 1
 
@@ -281,12 +281,12 @@ def update_support_timer():
 	issues = frappe.get_list("Issue", filters={"status": "Open"}, order_by="creation DESC")
 	for issue in issues:
 		issue = frappe.get_doc("Issue", issue.name)
-		if float(issue.time_to_respond) > 0 and not issue.first_responded_on:
+		if issue.time_to_respond > 0 and not issue.first_responded_on:
 			issue.time_to_respond = round(time_diff_in_hours(issue.response_by, now_datetime()), 2)
-		if float(issue.time_to_resolve) > 0:
+		if issue.time_to_resolve > 0:
 			issue.time_to_resolve = round(time_diff_in_hours(issue.resolution_by, now_datetime()), 2)
 
-		if float(issue.time_to_respond) < 0 or float(issue.time_to_resolve) < 0:
+		if issue.time_to_respond < 0 or issue.time_to_resolve < 0:
 			issue.agreement_status = "Failed"
 		else:
 			issue.agreement_status = "Fulfilled"
