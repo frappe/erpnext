@@ -1138,11 +1138,3 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
 @erpnext.allow_regional
 def validate_regional(doc):
 	pass
-
-@erpnext.allow_regional
-def on_submit_regional(doc):
-	pass
-
-@erpnext.allow_regional
-def on_cancel_regional(doc):
-	pass
