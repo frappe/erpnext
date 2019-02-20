@@ -558,7 +558,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 		this.frm.set_indicator_formatter('item_code',
 			function(doc) {
-				if (!doc.s_warehouse | doc.docstatus==1) {
+				if (!doc.s_warehouse | doc.docstatus===1) {
 					return 'blue';
 				} else {
 					return (doc.qty<=doc.actual_qty) ? "green" : "orange"
