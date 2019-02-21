@@ -577,7 +577,6 @@ erpnext.patches.v11_0.drop_column_max_days_allowed
 erpnext.patches.v11_0.change_healthcare_desktop_icons
 erpnext.patches.v10_0.update_user_image_in_employee
 erpnext.patches.v11_0.item_uom_conversion_table
-erpnext.patches.saif.def_warehouse_to_set_warehouse
 erpnext.patches.v10_0.repost_gle_for_purchase_receipts_with_rejected_items
 erpnext.patches.v10_0.allow_operators_in_supplier_scorecard
 erpnext.patches.v11_0.update_delivery_trip_status
