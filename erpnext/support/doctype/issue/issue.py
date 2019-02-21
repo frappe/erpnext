@@ -132,7 +132,8 @@ class Issue(Document):
 
 def calculate_support_day(now_datetime=None, time=None, time_period=None, support_days=None, holidays=None, week=None):
 	now_datetime, add_days, hours, end_time = now_datetime, 0, 0, None
-	#	time variable contains the number of days to be looped tilled.
+	#	time variable contains the number of days to be looped.
+	#	if time is zero next function is called to calculate time
 
 	if time_period == 'Hour':
 		time, hours = 0, time
