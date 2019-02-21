@@ -20,6 +20,12 @@ def get_context(context):
 	context.title = homepage.title
 	context.homepage = homepage
 
+	if homepage.slideshow:
+		doc = frappe.get_doc('Website Slideshow', homepage.slideshow)
+		context.slideshow = homepage.slideshow
+		context.slideshow_header = doc.header
+		context.slides = doc.slideshow_items
+
 	context.blogs = frappe.get_all('Blog Post',
 		fields=['title', 'blogger', 'blog_intro', 'route'],
 		filters={
