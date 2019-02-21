@@ -7,7 +7,7 @@ import json
 from frappe import _
 from frappe import utils
 from frappe.model.document import Document
-from frappe.utils import now, time_diff_in_hours, now_datetime, getdate
+from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_weekdays
 from datetime import datetime, timedelta
 from frappe.utils.user import is_website_user
 
@@ -99,7 +99,7 @@ class Issue(Document):
 		return replicated_issue.name
 
 	def before_insert(self):
-		week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday', 'Saturday', 'Sunday']
+		week = get_weekdays()
 		service_level_agreement = frappe.get_list("Service Level Agreement",
 			filters=[{"agreement_status": "Active"}],
 			or_filters=[{'customer': self.customer},{"default_service_level_agreement": "1"}],

@@ -7,11 +7,12 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from datetime import datetime
+from frappe.utils import get_weekdays
 
 class ServiceLevel(Document):
 
 	def validate(self):
-		week = ["Monday",  "Tuesday",  "Wednesday",  "Thursday", "Friday", "Saturday", "Sunday"]
+		week = get_weekdays()
 		indexes = []
 		for support_and_resolution in self.support_and_resolution:
 			indexes.append(week.index(support_and_resolution.workday))
