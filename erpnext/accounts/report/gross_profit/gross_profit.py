@@ -135,9 +135,9 @@ class GrossProfitGenerator(object):
 				row.buying_rate, row.base_rate = 0.0, 0.0
 
 			# calculate gross profit
-			row.gross_profit = row.base_amount - row.buying_amount
+			row.gross_profit = flt(row.base_amount - row.buying_amount, 3)
 			if row.base_amount:
-				row.gross_profit_percent = (row.gross_profit / row.base_amount) * 100.0
+				row.gross_profit_percent = flt((row.gross_profit / row.base_amount) * 100.0, 3)
 			else:
 				row.gross_profit_percent = 0.0
 
@@ -174,8 +174,8 @@ class GrossProfitGenerator(object):
 						self.grouped_data.append(row)
 
 	def set_average_rate(self, new_row):
-		new_row.gross_profit = new_row.base_amount - new_row.buying_amount
-		new_row.gross_profit_percent = ((new_row.gross_profit / new_row.base_amount) * 100.0) \
+		new_row.gross_profit = flt(new_row.base_amount - new_row.buying_amount,3)
+		new_row.gross_profit_percent = flt(((new_row.gross_profit / new_row.base_amount) * 100.0),3) \
 			if new_row.base_amount else 0
 		new_row.buying_rate = (new_row.buying_amount / new_row.qty) if new_row.qty else 0
 		new_row.base_rate = (new_row.base_amount / new_row.qty) if new_row.qty else 0
