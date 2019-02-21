@@ -201,7 +201,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					get_query: function() {
 						var filters = {
 							docstatus: 1,
-							company: me.frm.doc.company
+							company: me.frm.doc.company,
+							is_return: 0
 						};
 						if(me.frm.doc.customer) filters["customer"] = me.frm.doc.customer;
 						return {
