@@ -300,6 +300,9 @@ def get_progressive_name_and_number(doc):
 	return progressive_name, progressive_number
 
 def set_state_code(doc, method):
+	if not doc.get('state'):
+		return
+
 	if not (hasattr(doc, "state_code") and doc.country in ["Italy", "Italia", "Italian Republic", "Repubblica Italiana"]):
 		return
 
