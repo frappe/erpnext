@@ -472,10 +472,58 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	},
 
 	make_delivery_note: function() {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
-			frm: me.frm
-		})
+		var me = this;
+
+		var warehouses = [...new Set(me.frm.doc.items
+			.filter(d => Math.abs(d.delivered_qty) < Math.abs(d.qty) && d.delivered_by_supplier!=1)
+			.map(d => d.warehouse))];
+
+		if (warehouses.length > 1) {
+			var dialog = new frappe.ui.Dialog({
+				title: __("Select Warehouse"),
+				fields: [
+					{
+						"fieldtype": "Select",
+						"label": __("Warehouse"),
+						"fieldname": "warehouse",
+						"options": warehouses.join("\n"),
+						"default": warehouses[0]
+					},
+					{
+						"fieldtype": "Button",
+						"label": __("Make Delivery Note"),
+						"fieldname": "make_delivery_note",
+						"cssClass": "btn-primary"
+					},
+				]
+			});
+
+			dialog.fields_dict.make_delivery_note.$input.click(function() {
+				var args = dialog.get_values();
+				dialog.hide();
+				return frappe.call({
+					type: "GET",
+					method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
+					args: {
+						"source_name": me.frm.doc.name,
+						"warehouse": args.warehouse
+					},
+					freeze: true,
+					callback: function(r) {
+						if(!r.exc) {
+							frappe.model.sync(r.message);
+							frappe.set_route("Form", r.message.doctype, r.message.name);
+						}
+					}
+				})
+			});
+			dialog.show();
+		} else {
+			frappe.model.open_mapped_doc({
+				method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
+				frm: me.frm
+			})
+		}
 	},
 
 	make_sales_invoice: function() {

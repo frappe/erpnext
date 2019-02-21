@@ -551,12 +551,15 @@ def make_project(source_name, target_doc=None):
 	return doc
 
 @frappe.whitelist()
-def make_delivery_note(source_name, target_doc=None):
+def make_delivery_note(source_name, target_doc=None, warehouse=None):
 	def set_missing_values(source, target):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
+
+		if warehouse:
+			target.set_warehouse = warehouse
 
 		# set company address
 		target.update(get_company_address(target.company))
@@ -591,7 +594,7 @@ def make_delivery_note(source_name, target_doc=None):
 				"parent": "against_sales_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
+			"condition": lambda doc: (not warehouse or doc.warehouse == warehouse) and abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
