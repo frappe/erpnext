@@ -109,11 +109,15 @@ class Issue(Document):
 		if service_level_agreement:
 			self.service_level_agreement = service_level_agreement[0].name
 			self.priority = service_level_agreement[0].priority
+
 			service_level = frappe.get_doc("Service Level", service_level_agreement[0].service_level)
 			support_days = [[service.workday, str(service.start_time), str(service.end_time)] for service in service_level.support_and_resolution]
+
 			holiday_list = frappe.get_doc("Holiday List", service_level_agreement[0].holiday_list)
 			holidays = [holiday.holiday_date for holiday in holiday_list.holidays]
+
 			sla_time_set, add_days, now_datetime = 0, 0, utils.now_datetime()
+
 			while sla_time_set != 1:
 				for count, weekday in enumerate(week):
 					if count >= (getdate()).weekday() or add_days != 0:
@@ -165,29 +169,36 @@ def calculate_support_time(time=None, hours=None, support_days=None, holidays=No
 		for count, weekday in enumerate(week):
 
 			if count >= (time.date()).weekday() or time_added_flag != 0:
+
 				for support_day in support_days:
 					if weekday == support_day[0] and time_set_flag != 1:
 						start_time, end_time = datetime.strptime(support_day[1], '%H:%M:%S').time(), datetime.strptime(support_day[2], '%H:%M:%S').time()
-						# If the time is between start and end time then hours is added and then conditions are checked to avoid addition of extra day
+						#	If the time is between start and end time then hours is added and then conditions are checked to avoid addition of extra day
 						if time.time() <= end_time and time.time() >= start_time and hours and time_added_flag == 0:
 							time += timedelta(hours=hours)
 							time_added_flag = 1
+
 						if time_difference:
 							time = datetime.combine(time.date(), start_time)
 							time += timedelta(seconds=time_difference)
+
 						if time.time() <= start_time:
 							if time_added_flag == 1:
-								# If first day of the week then previous day is the last item of the list
+								#	If first day of the week then previous day is the last item of the list
+								#	containing support for mentioned days
 								if support_days.index(support_day) == 0:
 									prev_day_end_time = support_days[len(support_days)-1][2]
 								else:
 									prev_day_end_time = support_days[support_days.index(support_day)][2]
+
 								time_difference = (time - datetime.combine(time.date()-timedelta(days=1), datetime.strptime(prev_day_end_time, '%H:%M:%S').time())).total_seconds()
-								time -= timedelta(days=1)	# Time is reduced by one day as one day is calculated extra
+								#	Time is reduced by one day as one day is calculated extra
+								time -= timedelta(days=1)
 							else:
 								time = datetime.combine(time.date(), start_time)
 								time += timedelta(hours=hours)
 								time_added_flag = 1
+
 						elif time.time() >= end_time:
 							if time_added_flag == 1:
 								time_difference = (time - datetime.combine(time.date(), end_time)).total_seconds()
@@ -200,12 +211,13 @@ def calculate_support_time(time=None, hours=None, support_days=None, holidays=No
 						if time.date() in holidays:
 							continue
 
-						#	Time is checked after every calculation whether time is between start and end time for the day to be sure if
-						#	calculated time is between start and end time fo the particular day
+						#	Time is checked after every calculation whether
+						#	time is between start and end time for the day
 
 						if time.time() <= end_time and time.time() >= start_time:
 							time_set_flag = 1
 							break
+
 				if time_set_flag != 1:
 					time += timedelta(days=1)
 	return time
