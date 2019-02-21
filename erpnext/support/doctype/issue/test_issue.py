@@ -5,25 +5,31 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from erpnext.support.doctype.service_level_agreement.test_service_level_agreement import make_service_level_agreement
+from frappe.utils import now_datetime
+from datetime import timedelta
 
 class TestIssue(unittest.TestCase):
 
 	def test_issue(self):
 		make_service_level_agreement()
-		test_make_issue = make_issue()
-		test_get_issue = get_issue()
-		self.assertEquals(test_make_issue, test_get_issue)
+		issue_name = frappe.utils.random_string(6)
+		test_make_issue = make_issue(issue_name)
+		test_get_issue = get_issue(issue_name)
+		self.assertEquals(test_make_issue.name, test_get_issue.name)
+		self.assertEquals(test_make_issue.response_by.date(), now_datetime().date()+timedelta(days=1))
+		self.assertEquals(test_make_issue.resolution_by.date(), now_datetime().date()+timedelta(days=1))
 
-def make_issue():
+def make_issue(issue_name):
 	issue = frappe.get_doc({
 		"doctype": "Issue",
-		"name": "_Test Issue 1",
-		"subject": "Test Support",
+		"name": issue_name,
+		"subject": issue_name,
 		"raised_by": "test@example.com",
 		"customer": "_Test Customer"
 	}).insert()
-	return issue.name
+	return issue
 
-def get_issue():
-	issue = frappe.get_list("Issue", filters={"subject": "Test Support"}, limit=1)
-	return issue[0].name
+def get_issue(issue_name):
+	issues = frappe.get_list("Issue", filters={"subject": issue_name}, limit=1)
+	issue = frappe.get_doc("Issue", issues[0].name)
+	return issue

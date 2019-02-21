@@ -128,8 +128,7 @@ class Issue(Document):
 
 def calculate_support_day(now_datetime=None, time=None, time_period=None, support_days=None, holidays=None, week=None):
 	now_datetime, add_days, hours, end_time = now_datetime, 0, 0, None
-	#	Time is primarily calculated in days so if time_period is Days then loop is iterated, if time_period is Weeks then time is multiplied by 7 to convert
-	#	it to days and if time_period is Hours then time is passed to calculate time to calculate_support_time function
+	#	time variable contains the number of days to be looped tilled.
 
 	if time_period == 'Hour':
 		time, hours = 0, time
@@ -164,10 +163,6 @@ def calculate_support_time(time=None, hours=None, support_days=None, holidays=No
 
 	while time_set_flag != 1:
 		for count, weekday in enumerate(week):
-
-			#	Initially time_added_flag is zero and the code will only start
-			#	executing if today and weekday is the same and keep executing
-			#	henceforth as time_add is incremented.
 
 			if count >= (time.date()).weekday() or time_added_flag != 0:
 				for support_day in support_days:

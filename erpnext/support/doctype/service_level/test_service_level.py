@@ -24,73 +24,45 @@ def make_service_level():
 		"holiday_list": "_Test Holiday List",
 		"priority": "Medium",
 		"employee_group": employee_group,
-		"response_time": 5,
-		"response_time_period": "Hour",
-		"resolution_time": 2,
+		"response_time": 1,
+		"response_time_period": "Day",
+		"resolution_time": 1,
 		"resolution_time_period": "Day",
 		"support_and_resolution": [
 			{
 				"workday": "Monday",
 				"start_time": "10:00:00",
 				"end_time": "18:00:00",
-				"response_time": 5,
-				"response_time_period": "Hour",
-				"resolution_time": 2,
-				"resolution_time_period": "Day"
 			},
 			{
 				"workday": "Tuesday",
 				"start_time": "10:00:00",
 				"end_time": "18:00:00",
-				"response_time": 5,
-				"response_time_period": "Hour",
-				"resolution_time": 2,
-				"resolution_time_period": "Day"
 			},
 			{
 				"workday": "Wednesday",
 				"start_time": "10:00:00",
 				"end_time": "18:00:00",
-				"response_time": 5,
-				"response_time_period": "Hour",
-				"resolution_time": 2,
-				"resolution_time_period": "Day"
 			},
 			{
 				"workday": "Thursday",
 				"start_time": "10:00:00",
 				"end_time": "18:00:00",
-				"response_time": 5,
-				"response_time_period": "Hour",
-				"resolution_time": 2,
-				"resolution_time_period": "Day"
 			},
 			{
 				"workday": "Friday",
 				"start_time": "10:00:00",
 				"end_time": "18:00:00",
-				"response_time": 5,
-				"response_time_period": "Hour",
-				"resolution_time": 2,
-				"resolution_time_period": "Day"
 			},
 			{
 				"workday": "Saturday",
 				"start_time": "10:00:00",
 				"end_time": "18:00:00",
-				"response_time": 5,
-				"response_time_period": "Hour",
-				"resolution_time": 2,
-				"resolution_time_period": "Day"
 			},
 			{
 				"workday": "Sunday",
 				"start_time": "10:00:00",
 				"end_time": "18:00:00",
-				"response_time": 5,
-				"response_time_period": "Hour",
-				"resolution_time": 2,
-				"resolution_time_period": "Day"
 			}
 		]
 	})
