@@ -92,6 +92,11 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.frm.toggle_display("packing_list", packing_list_exists ? true : false);
 		}
 		this.toggle_editable_price_list_rate();
+
+		var me = this;
+		$.each(this.frm.doc.items || [], function(item, i) {
+			me.set_qty_color_based_on_availability(item);
+		});
 	},
 
 	customer: function() {
@@ -220,10 +225,23 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 							me.set_batch_number(cdt, cdn);
 							me.batch_no(doc, cdt, cdn);
 						}
+						me.set_qty_color_based_on_availability(item);
 					}
 				});
 			}
 		})
+	},
+
+	set_qty_color_based_on_availability: function(item) {
+		if (!in_list(['Sales Order', 'Delivery Note'], this.frm.doc.doctype) || !item)
+			return;
+
+		var warn = this.frm.doc.docstatus === 0 && item.item_code && item.qty > item.actual_qty && item.warehouse;
+		var grid_row = this.frm.get_field("items").grid.get_grid_row(item.name);
+		if (grid_row) {
+			$("[data-fieldname='actual_qty'], [data-fieldname='qty']", grid_row.wrapper)
+				.css("color", warn ? "red" : "inherit");
+		}
 	},
 
 	toggle_editable_price_list_rate: function() {

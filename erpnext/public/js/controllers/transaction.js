@@ -475,7 +475,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 										});
 									}
 								},
-								() => me.conversion_factor(doc, cdt, cdn, true)
+								() => me.conversion_factor(doc, cdt, cdn, true),
+								() => me.set_qty_color_based_on_availability(frappe.get_doc(cdt, cdn))
 							]);
 						}
 					}
@@ -914,6 +915,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	qty: function(doc, cdt, cdn) {
 		this.conversion_factor(doc, cdt, cdn, true);
 		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
+		this.set_qty_color_based_on_availability(frappe.get_doc(cdt, cdn));
 	},
 
 	service_stop_date: function(frm, cdt, cdn) {
