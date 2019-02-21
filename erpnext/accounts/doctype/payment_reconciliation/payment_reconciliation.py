@@ -83,7 +83,10 @@ class PaymentReconciliation(Document):
 		condition = self.check_condition()
 
 		non_reconciled_invoices = get_outstanding_invoices(self.party_type, self.party,
-			self.receivable_payable_account, condition=condition, limit=self.limit)
+			self.receivable_payable_account, condition=condition)
+
+		if self.limit:
+			non_reconciled_invoices = non_reconciled_invoices[:self.limit]
 
 		self.add_invoice_entries(non_reconciled_invoices)
 
