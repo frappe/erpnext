@@ -29,20 +29,20 @@ def make_service_level_agreement():
 		customer = frappe.get_doc("Customer", "_Test Customer")
 	service_level_agreement = frappe.get_doc({
 		"doctype": "Service Level Agreement",
-		"name": "Test SLA",
+		"name": "_Test Service Level Agreement",
 		"customer": customer.customer_name,
 		"service_level": "_Test Service Level",
-		"holiday_list": "_Test Holiday List",
+		"holiday_list": "__Test Holiday List",
 		"priority": "Medium",
 		"employee_group": "_Test Employee Group",
 		"start_date": frappe.utils.getdate(),
 		"end_date": frappe.utils.add_to_date(frappe.utils.getdate(), days=100),
 		"response_time": 1,
 		"response_time_period": "Day",
-		"resolution_time": 1,
+		"resolution_time": 3,
 		"resolution_time_period": "Day",
 	})
-	service_level_agreement_exists = frappe.db.exists("Service Level Agreement", "Test SLA")
+	service_level_agreement_exists = frappe.db.exists("Service Level Agreement", "_Test Service Level Agreement")
 	if not service_level_agreement_exists:
 		service_level_agreement.insert()
 		return service_level_agreement.name
@@ -50,5 +50,5 @@ def make_service_level_agreement():
 		return service_level_agreement_exists
 
 def get_service_level_agreement():
-	service_level_agreement = frappe.db.exists("Service Level Agreement", "Test SLA")
+	service_level_agreement = frappe.db.exists("Service Level Agreement", "_Test Service Level Agreement")
 	return service_level_agreement

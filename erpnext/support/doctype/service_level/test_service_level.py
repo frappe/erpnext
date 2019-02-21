@@ -3,7 +3,9 @@
 # See license.txt
 from __future__ import unicode_literals
 from erpnext.hr.doctype.employee_group.test_employee_group import make_employee_group
-from erpnext.hr.doctype.holiday_list.test_holiday_list import make_holiday_list
+from frappe.utils import now_datetime
+import datetime
+from datetime import timedelta
 
 import frappe
 import unittest
@@ -21,12 +23,12 @@ def make_service_level():
 	service_level = frappe.get_doc({
 		"doctype": "Service Level",
 		"service_level": "_Test Service Level",
-		"holiday_list": "_Test Holiday List",
+		"holiday_list": "__Test Holiday List",
 		"priority": "Medium",
 		"employee_group": employee_group,
 		"response_time": 1,
 		"response_time_period": "Day",
-		"resolution_time": 1,
+		"resolution_time": 3,
 		"resolution_time_period": "Day",
 		"support_and_resolution": [
 			{
@@ -76,3 +78,28 @@ def make_service_level():
 def get_service_level():
 	service_level = frappe.db.exists("Service Level", "_Test Service Level")
 	return service_level
+
+def make_holiday_list():
+	holiday_list_exist = frappe.db.exists("Holiday List", "__Test Holiday List")
+	if not holiday_list_exist:
+		now = datetime.datetime.now()
+		holiday_list = frappe.get_doc({
+			"doctype": "Holiday List",
+			"holiday_list_name": "__Test Holiday List",
+			"from_date": str(now.year) + "-01-01",
+			"to_date": str(now.year) + "-12-31",
+			"holidays": [
+				{
+					"description": "Test Holiday 1",
+					"holiday_date": now_datetime().date()+timedelta(days=1)
+				},
+				{
+					"description": "Test Holiday 2",
+					"holiday_date": now_datetime().date()+timedelta(days=3)
+				},
+				{
+					"description": "Test Holiday 3",
+					"holiday_date": now_datetime().date()+timedelta(days=7)
+				},
+			]
+		}).insert()
