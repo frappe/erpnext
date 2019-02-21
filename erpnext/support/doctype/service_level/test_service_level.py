@@ -26,7 +26,7 @@ def make_service_level():
 		"holiday_list": "__Test Holiday List",
 		"priority": "Medium",
 		"employee_group": employee_group,
-		"response_time": 1,
+		"response_time": 2,
 		"response_time_period": "Day",
 		"resolution_time": 3,
 		"resolution_time_period": "Day",

@@ -37,7 +37,7 @@ def make_service_level_agreement():
 		"employee_group": "_Test Employee Group",
 		"start_date": frappe.utils.getdate(),
 		"end_date": frappe.utils.add_to_date(frappe.utils.getdate(), days=100),
-		"response_time": 1,
+		"response_time": 2,
 		"response_time_period": "Day",
 		"resolution_time": 3,
 		"resolution_time_period": "Day",

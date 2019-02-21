@@ -16,7 +16,7 @@ class TestIssue(unittest.TestCase):
 		test_make_issue = make_issue(issue_name)
 		test_get_issue = get_issue(issue_name)
 		self.assertEquals(test_make_issue.name, test_get_issue.name)
-		self.assertEquals(test_make_issue.response_by.date(), now_datetime().date()+timedelta(days=1))
+		self.assertEquals(test_make_issue.response_by.date(), now_datetime().date()+timedelta(days=3))
 		self.assertEquals(test_make_issue.resolution_by.date(), now_datetime().date()+timedelta(days=5))
 
 def make_issue(issue_name):
