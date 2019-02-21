@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, erpnext, json
 from frappe import _, scrub, ValidationError
 from frappe.utils import flt, comma_or, nowdate, getdate
-from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on
+from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on, get_allow_cost_center_in_entry_of_bs_account
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.setup.utils import get_exchange_rate
@@ -564,8 +564,8 @@ def get_outstanding_reference_documents(args):
 			.format(frappe.db.escape(args["voucher_type"]), frappe.db.escape(args["voucher_no"]))
 
 	# Add cost center condition
-	if args.get("cost_center"):
-		condition += " and cost_center='%s'" % args.get("cost_center")
+	if args.get("cost_center") and get_allow_cost_center_in_entry_of_bs_account():
+			condition += " and cost_center='%s'" % args.get("cost_center")
 
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
 		args.get("party_account"), condition=condition)
