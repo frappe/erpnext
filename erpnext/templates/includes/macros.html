@@ -8,12 +8,8 @@
 {% endmacro %}
 
 {% macro product_image(website_image, css_class="") %}
-    <div class="product-image border text-center rounded {% if not website_image -%} missing-image {%- endif %} {{ css_class }}">
-    	{% if website_image -%}
-			<a href="{{ frappe.utils.quoted(website_image) }}">
-				<img itemprop="image" src="{{ frappe.utils.quoted(website_image) | abs_url }}">
-			</a>
-    	{%- endif %}
+    <div class="border text-center rounded h-100 {{ css_class }}">
+		<img itemprop="image" class="website-image h-100 w-100" src="{{ frappe.utils.quoted(website_image or 'no-image.jpg') | abs_url }}" style="max-height: 30rem;">
     </div>
 {% endmacro %}
 

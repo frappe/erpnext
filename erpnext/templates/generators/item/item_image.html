@@ -38,6 +38,10 @@
 </div>
 </div>
 <style>
+	.website-image {
+		cursor: pointer;
+	}
+
 	.image-zoom-view {
 		position: fixed;
 		top: 0;
@@ -72,9 +76,9 @@
 	frappe.ready(() => {
 		const $zoom_wrapper = $('.image-zoom-view');
 
-		$('.product-image').on('click', (e) => {
+		$('.website-image').on('click', (e) => {
 			e.preventDefault();
-			const $img = $(e.target).find('img').addBack('img');
+			const $img = $(e.target);
 			const src = $img.prop('src');
 			if (!src) return;
 			show_preview(src);
