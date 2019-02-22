@@ -80,8 +80,8 @@ def get_service_level():
 	return service_level
 
 def make_holiday_list():
-	holiday_list_exist = frappe.db.exists("Holiday List", "__Test Holiday List")
-	if not holiday_list_exist:
+	holiday_list = frappe.db.exists("Holiday List", "__Test Holiday List")
+	if not holiday_list:
 		now = datetime.datetime.now()
 		holiday_list = frappe.get_doc({
 			"doctype": "Holiday List",
