@@ -4,7 +4,7 @@ frappe.ui.form.on("Employee Attendance Tool", {
 	},
 	
 	onload: function(frm) {
-		frm.doc.department = frm.doc.branch = frm.doc.company = "All";
+		frm.doc.department = frm.doc.branch = frm.doc.company = frm.doc.holiday_list = "All";
 		frm.set_value("date", frappe.datetime.get_today());
 		erpnext.employee_attendance_tool.load_employees(frm);
 	},
@@ -23,6 +23,10 @@ frappe.ui.form.on("Employee Attendance Tool", {
 
 	company: function(frm) {
 		erpnext.employee_attendance_tool.load_employees(frm);
+	},
+
+	holiday_list: function(frm) {
+		erpnext.employee_attendance_tool.load_employees(frm);
 	}
 	
 });
@@ -37,7 +41,8 @@ erpnext.employee_attendance_tool = {
 					date: frm.doc.date,
 					department: frm.doc.department,
 					branch: frm.doc.branch,
-					company: frm.doc.company
+					company: frm.doc.company,
+					holiday_list: frm.doc.holiday_list
 				},
 				callback: function(r) {
 					if(r.message['unmarked'].length > 0) {
