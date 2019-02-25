@@ -35,7 +35,7 @@ class PaymentTermsTemplate(Document):
 			term_info = (term.credit_days, term.due_date_based_on)
 			if term_info in terms:
 				frappe.msgprint(
-					_('The Payment Term at row {0} is possibly a duplicate.').format(term.idx),
+					_('The Payment Term at row {0} is possibly a duplicate. Cannot have duplicate entries of credit dates and Due Date Based On.').format(term.idx),
 					raise_exception=1, indicator='red'
 				)
 			else:
