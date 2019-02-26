@@ -161,7 +161,7 @@ class GrossProfitGenerator(object):
 						new_row.qty += row.qty
 						new_row.buying_amount += flt(row.buying_amount, currency_precision)
 						new_row.base_amount += flt(row.base_amount, currency_precision)
-				new_row = self.set_average_rate(new_row, currency_precision, float_precision)
+				new_row = set_average_rate(new_row, currency_precision, float_precision)
 				self.grouped_data.append(new_row)
 			else:
 				for i, row in enumerate(self.grouped[key]):
@@ -173,16 +173,8 @@ class GrossProfitGenerator(object):
 							row.base_amount += flt(returned_item_row.base_amount, currency_precision)
 						row.buying_amount = flt(row.qty * row.buying_rate, currency_precision)
 					if row.qty or row.base_amount:
-						row = self.set_average_rate(row, currency_precision, float_precision)
+						row = set_average_rate(row, currency_precision, float_precision)
 						self.grouped_data.append(row)
-
-	def set_average_rate(self, new_row, currency_precision, float_precision):
-		new_row.gross_profit = flt(new_row.base_amount - new_row.buying_amount, currency_precision)
-		new_row.gross_profit_percent = flt(((new_row.gross_profit / new_row.base_amount) * 100.0), currency_precision) \
-			if new_row.base_amount else 0
-		new_row.buying_rate = flt(new_row.buying_amount / new_row.qty, float_precision) if new_row.qty else 0
-		new_row.base_rate = flt(new_row.base_amount / new_row.qty, float_precision) if new_row.qty else 0
-		return new_row
 
 	def get_returned_invoice_items(self):
 		returned_invoices = frappe.db.sql("""
@@ -352,3 +344,11 @@ class GrossProfitGenerator(object):
 	def load_non_stock_items(self):
 		self.non_stock_items = frappe.db.sql_list("""select name from tabItem
 			where is_stock_item=0""")
+
+def set_average_rate(new_row, currency_precision, float_precision):
+		new_row.gross_profit = flt(new_row.base_amount - new_row.buying_amount, currency_precision)
+		new_row.gross_profit_percent = flt(((new_row.gross_profit / new_row.base_amount) * 100.0), currency_precision) \
+			if new_row.base_amount else 0
+		new_row.buying_rate = flt(new_row.buying_amount / new_row.qty, float_precision) if new_row.qty else 0
+		new_row.base_rate = flt(new_row.base_amount / new_row.qty, float_precision) if new_row.qty else 0
+		return new_row
