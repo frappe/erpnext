@@ -9,7 +9,7 @@
                     Content
                     <ul class="mb-0 mt-1">
                         <li v-for="content in topic.topic_content" :key="content.name">
-                            <router-link v-if="isLogin" tag="a" :class="'text-muted'" :to="{name: 'content', params:{program_name: program_name, topic:topic.name, course: course, type:content.content_type, content: content.content} }">
+                            <router-link v-if="isLogin" tag="a" :class="'text-muted'" :to="{name: 'content', params:{program_name: program_name, topic:topic.name, course_name: course_name, type:content.content_type, content: content.content} }">
                                 <span style="padding-right: 0.4em"></span>{{ content.content }}
                             </router-link>
                             <div v-else><span style="padding-right: 0.4em"></span>{{ content.content }}</div>
@@ -35,7 +35,7 @@
 import AButton from './Button.vue';
 
 export default {
-    props: ['topic', 'course', 'program_name'],
+    props: ['topic', 'course_name', 'program_name'],
     name: "TopicCard",
     data() {
         return {
@@ -51,7 +51,7 @@ export default {
     computed: {
         firstContentRoute() {
             if(lms.store.checkLogin()){
-                return `${this.program_name}/${this.course.name}/${this.courseMeta.content_type}/${this.courseMeta.content}`
+                return `${this.program_name}/${this.course}/${this.courseMeta.content_type}/${this.courseMeta.content}`
             }
             else {
                 return {}
@@ -93,8 +93,9 @@ export default {
             if(content_type == 'Quiz') return 'fa fa-question-circle-o'
         },
         getCourseMeta() {
-			return lms.call('get_course_meta', {
-                    course_name: this.course.name,
+			return lms.call('get_topic_meta', {
+                    topic_name: this.topic.topic_name,
+                    course_name: this.course_name,
                     program_name: this.program_name
 				})
         },

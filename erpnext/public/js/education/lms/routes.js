@@ -24,7 +24,7 @@ const routes = [{
 	},
 	{
 		name: 'content',
-		path: '/Program/:program_name/:course/:topic/:type/:content',
+		path: '/Program/:program_name/:course_name/:topic/:type/:content',
 		component: ContentPage,
 		props: true,
 		beforeEnter: (to, from, next) => {
