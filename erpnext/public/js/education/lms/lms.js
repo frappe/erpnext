@@ -9,9 +9,8 @@ import './call';
 Vue.use(VueRouter)
 
 var store = {
-	isLogin: false,
 	enrolledPrograms: [],
-	enrolledCourses: {}
+	enrolledCourses: []
 }
 
 frappe.ready(() => {
