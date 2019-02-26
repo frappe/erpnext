@@ -8,14 +8,8 @@
             </router-link>
             <div v-html="program.description"></div>
         </div>
-        <div class='card-footer text-right'>
-            <!-- <a class='video-btn btn btn-secondary btn-sm' data-toggle="modal" data-src=" insert jinja stuff here " data-target="#myModal">Watch Intro</a>&nbsp;&nbsp; -->
-            <a-button
-                    v-if="enrolled"
-                    type="primary"
-                    size="sm"
-                    :route="programPageRoute"
-                >
+        <div class='text-right p-3'>
+            <a-button v-if="enrolled" type="primary" size="sm" :route="programPageRoute">
                     {{ buttonName }}
             </a-button>
             <a v-else-if="isLogin" class='btn btn-secondary btn-sm' @click="enroll()">{{ enrollButton }}</a>
@@ -31,7 +25,7 @@ export default {
     name: "ProgramCard",
     data() {
     	return {
-            isLogin: lms.store.isLogin,
+            isLogin: frappe.is_user_logged_in(),
             enrollButton: 'Enroll Now',
             programRoute: { name: 'program', params: { program_name: this.program.name }}
     	};
@@ -53,7 +47,7 @@ export default {
     computed: {
         buttonName() {
                 if(this.enrolled){
-                    return "Start Course"
+                    return "Explore Program"
                 }
                 else {
                     return "Enroll"
@@ -75,18 +69,9 @@ export default {
 <style lang="css" scoped>
     a {
         text-decoration: none;
+        color: black;
     }
     a.btn-secondary {
         color: white !important;
-    }
-
-    .card {
-        border: 1px solid #ebeff2;
-        border-radius: 3px;
-        padding: 5px 15px 5px 15px;
-    }
-
-    .margin {
-        margin-top: 15px;
     }
 </style>
