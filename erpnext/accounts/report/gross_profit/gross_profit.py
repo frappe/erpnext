@@ -106,14 +106,14 @@ class GrossProfitGenerator(object):
 		self.grouped = {}
 		self.grouped_data = []
 
-		currency_precision = cint(frappe.db.get_default("currency_precision")) or 3
-		float_precision = cint(frappe.db.get_default("float_precision")) or 2
+		self.currency_precision = cint(frappe.db.get_default("currency_precision")) or 3
+		self.float_precision = cint(frappe.db.get_default("float_precision")) or 2
 
 		for row in self.si_list:
 			if self.skip_row(row, self.product_bundles):
 				continue
 
-			row.base_amount = flt(row.base_net_amount, currency_precision)
+			row.base_amount = flt(row.base_net_amount, self.currency_precision)
 
 			product_bundles = []
 			if row.update_stock:
@@ -132,15 +132,15 @@ class GrossProfitGenerator(object):
 
 			# get buying rate
 			if row.qty:
-				row.buying_rate = flt(row.buying_amount / row.qty, float_precision)
-				row.base_rate = flt(row.base_amount / row.qty, float_precision)
+				row.buying_rate = flt(row.buying_amount / row.qty, self.float_precision)
+				row.base_rate = flt(row.base_amount / row.qty, self.float_precision)
 			else:
 				row.buying_rate, row.base_rate = 0.0, 0.0
 
 			# calculate gross profit
-			row.gross_profit = flt(row.base_amount - row.buying_amount, currency_precision)
+			row.gross_profit = flt(row.base_amount - row.buying_amount, self.currency_precision)
 			if row.base_amount:
-				row.gross_profit_percent = flt((row.gross_profit / row.base_amount) * 100.0, currency_precision)
+				row.gross_profit_percent = flt((row.gross_profit / row.base_amount) * 100.0, self.currency_precision)
 			else:
 				row.gross_profit_percent = 0.0
 
@@ -148,9 +148,9 @@ class GrossProfitGenerator(object):
 			self.grouped.setdefault(row.get(scrub(self.filters.group_by)), []).append(row)
 
 		if self.grouped:
-			self.get_average_rate_based_on_group_by(currency_precision, float_precision)
+			self.get_average_rate_based_on_group_by()
 
-	def get_average_rate_based_on_group_by(self, currency_precision, float_precision):
+	def get_average_rate_based_on_group_by(self):
 		# sum buying / selling totals for group
 		for key in list(self.grouped):
 			if self.filters.get("group_by") != "Invoice":
@@ -159,9 +159,9 @@ class GrossProfitGenerator(object):
 						new_row = row
 					else:
 						new_row.qty += row.qty
-						new_row.buying_amount += flt(row.buying_amount, currency_precision)
-						new_row.base_amount += flt(row.base_amount, currency_precision)
-				new_row = set_average_rate(new_row, currency_precision, float_precision)
+						new_row.buying_amount += flt(row.buying_amount, self.currency_precision)
+						new_row.base_amount += flt(row.base_amount, self.currency_precision)
+				new_row = self.set_average_rate(new_row)
 				self.grouped_data.append(new_row)
 			else:
 				for i, row in enumerate(self.grouped[key]):
@@ -170,11 +170,20 @@ class GrossProfitGenerator(object):
 						returned_item_rows = self.returned_invoices[row.parent][row.item_code]
 						for returned_item_row in returned_item_rows:
 							row.qty += returned_item_row.qty
-							row.base_amount += flt(returned_item_row.base_amount, currency_precision)
-						row.buying_amount = flt(row.qty * row.buying_rate, currency_precision)
+							row.base_amount += flt(returned_item_row.base_amount, self.currency_precision)
+						row.buying_amount = flt(row.qty * row.buying_rate, self.currency_precision)
 					if row.qty or row.base_amount:
-						row = set_average_rate(row, currency_precision, float_precision)
+						row = self.set_average_rate(row)
 						self.grouped_data.append(row)
+
+	def set_average_rate(self, new_row):
+		new_row.gross_profit = flt(new_row.base_amount - new_row.buying_amount, self.currency_precision)
+		new_row.gross_profit_percent = flt(((new_row.gross_profit / new_row.base_amount) * 100.0), self.currency_precision) \
+			if new_row.base_amount else 0
+		new_row.buying_rate = flt(new_row.buying_amount / new_row.qty, self.float_precision) if new_row.qty else 0
+		new_row.base_rate = flt(new_row.base_amount / new_row.qty, self.float_precision) if new_row.qty else 0
+
+		return new_row
 
 	def get_returned_invoice_items(self):
 		returned_invoices = frappe.db.sql("""
@@ -344,11 +353,3 @@ class GrossProfitGenerator(object):
 	def load_non_stock_items(self):
 		self.non_stock_items = frappe.db.sql_list("""select name from tabItem
 			where is_stock_item=0""")
-
-def set_average_rate(new_row, currency_precision, float_precision):
-		new_row.gross_profit = flt(new_row.base_amount - new_row.buying_amount, currency_precision)
-		new_row.gross_profit_percent = flt(((new_row.gross_profit / new_row.base_amount) * 100.0), currency_precision) \
-			if new_row.base_amount else 0
-		new_row.buying_rate = flt(new_row.buying_amount / new_row.qty, float_precision) if new_row.qty else 0
-		new_row.base_rate = flt(new_row.base_amount / new_row.qty, float_precision) if new_row.qty else 0
-		return new_row
