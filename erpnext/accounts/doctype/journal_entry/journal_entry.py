@@ -940,7 +940,7 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
 	company_currency = erpnext.get_company_currency(company)
-	account_details = frappe.db.get_value("Account", account, ["account_type", "account_currency"], as_dict=1)
+	account_details = frappe.db.get_value("Account", account, ["account_type", "account_currency", "party_type"], as_dict=1)
 
 	if not account_details:
 		return
@@ -955,9 +955,9 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 	elif account in letter_of_credit_accounts:
 		party_type = "Letter of Credit"
 	elif account_details.account_type == "Receivable":
-		party_type = "Customer"
+		party_type = account_details.party_type or "Customer"
 	elif account_details.account_type == "Payable":
-		party_type = "Supplier"
+		party_type = account_details.party_type or "Supplier"
 	else:
 		party_type = ""
 

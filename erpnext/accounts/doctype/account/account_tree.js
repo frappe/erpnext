@@ -37,6 +37,8 @@ frappe.treeview_settings["Account"] = {
 		},
 		{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate'),
 			depends_on: 'eval:doc.is_group==0&&doc.account_type=="Tax"'},
+		{fieldtype:'Link', fieldname:'party_type', label:__('Default Party Type'), options:"Party Type",
+			depends_on: 'eval:doc.is_group==0&&(doc.account_type=="Receivable" || doc.account_type=="Payable")'},
 		{fieldtype:'Link', fieldname:'account_currency', label:__('Currency'), options:"Currency",
 			description: __("Optional. Sets company's default currency, if not specified.")}
 	],
