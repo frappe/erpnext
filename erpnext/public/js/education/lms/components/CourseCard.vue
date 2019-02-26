@@ -7,7 +7,7 @@
                 <span class="course-list text-muted" id="getting-started">
                     Topics
                     <ul class="mb-0 mt-1">
-                        <li v-for="topic in course.course_topic" :key="topic.name">
+                        <li v-for="topic in course.topics" :key="topic.name">
                             <div><span style="padding-right: 0.4em"></span>{{ topic.topic_name }}</div>
                         </li>
                     </ul>
