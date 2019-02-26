@@ -1,45 +1,45 @@
 <template>
 <div>
-	<TopSection v-bind:title="program.program_name" v-bind:description="program.description">
+	<TopSection v-bind:title="course.course_name" v-bind:description="course.description">
     </TopSection>
 	<CardList :title="'Courses'" :description="''" :sectionType="'section-padding section-bg'">
-        <CourseCard slot="card-list-slot" v-for="course in courseData" :course="course" :program_name="program_name" :key="course.name"/>
+        <TopicCard slot="card-list-slot" v-for="topic in topicData" :topic="topic" :course="course.course_name" :program_name="program_name" :key="topic.name"/>
     </CardList>
 </div>
 </template>
 <script>
 import TopSection from "../components/TopSection.vue"
 import CardList from "../components/CardList.vue"
-import CourseCard from "../components/CourseCard.vue"
+import TopicCard from "../components/TopicCard.vue"
 
 
 export default {
-	props: ['program_name'],
+	props: ['program_name','course_name'],
     name: "CoursePage",
     components: {
 		TopSection,
 		CardList,
-		CourseCard
+		TopicCard
 	},
 	data() {
 		return {
-			program: {},
-			courseData: [],
+			course: {},
+			topicData: [],
 		}
 	},
 	mounted() {
-		this.getProgramDetails().then(data => this.program = data);
-		this.getCourses().then(data => this.courseData = data);
+		this.getCourseDetails().then(data => this.course = data);
+		this.getTopics().then(data => this.topicData = data);
 	},
 	methods: {
-		getProgramDetails() {
-			return lms.call('get_program_details', {
-				program_name: this.program_name
+		getCourseDetails() {
+			return lms.call('get_course_details', {
+				course_name: this.course_name
 			});
 		},
-		getCourses() {
-			return lms.call('get_courses', {
-				program_name: this.program_name
+		getTopics() {
+			return lms.call('get_topics', {
+				course_name: this.course_name
 			})
 		}
 	}
