@@ -1,6 +1,6 @@
 <template>
-    <button v-if="isLoggedIn" class='btn btn-primary btn-lg' @click="primaryAction()">{{ buttonName }}</button>
-	<a v-else class='btn btn-primary btn-lg' href="/login#signup">{{ buttonName }}</a>
+    <button v-if="isLoggedIn" class='btn btn-primary btn-md' @click="primaryAction()">{{ buttonName }}</button>
+	<a v-else class='btn btn-primary btn-md' href="/login#signup">{{ buttonName }}</a>
 </template>
 <script>
 export default {
