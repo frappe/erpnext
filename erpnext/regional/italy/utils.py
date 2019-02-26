@@ -191,6 +191,13 @@ def sales_invoice_validate(doc):
 	else:
 		validate_address(doc.company_address, "Company")
 
+	company_fiscal_regime = frappe.get_cached_value("Company", doc.company, 'fiscal_regime')
+	if not company_fiscal_regime:
+		frappe.throw(_("Fiscal Regime is mandatory, kindly set the fiscal regime in the company {0}")
+			.format(doc.company))
+	else:
+		doc.company_fiscal_regime = company_fiscal_regime
+
 	if not doc.company_tax_id and not doc.company_fiscal_code:
 		frappe.throw(_("Please set either the Tax ID or Fiscal Code on Company '%s'" % doc.company), title=_("E-Invoicing Information Missing"))
 
@@ -220,6 +227,10 @@ def sales_invoice_validate(doc):
 				frappe.throw(_("Row {0}: Please set at Tax Exemption Reason in Sales Taxes and Charges".format(row.idx)),
 					title=_("E-Invoicing Information Missing"))
 
+	for schedule in doc.payment_schedule:
+		if schedule.mode_of_payment and not schedule.mode_of_payment_code:
+			schedule.mode_of_payment_code = frappe.get_cached_value('Mode of Payment',
+				schedule.mode_of_payment, 'mode_of_payment_code')
 
 #Ensure payment details are valid for e-invoice.
 def sales_invoice_on_submit(doc, method):
@@ -246,6 +257,7 @@ def prepare_and_attach_invoice(doc):
 
 	invoice = prepare_invoice(doc, progressive_number)
 	invoice_xml = frappe.render_template('erpnext/regional/italy/e-invoice.xml', context={"doc": invoice}, is_path=True)
+	invoice_xml = invoice_xml.replace("&", "&amp;")
 
 	xml_filename = progressive_name + ".xml"
 	save_file(xml_filename, invoice_xml, dt=doc.doctype, dn=doc.name, is_private=True)
@@ -268,7 +280,7 @@ def get_e_invoice_attachments(invoice):
 	company_tax_id = invoice.company_tax_id if invoice.company_tax_id.startswith("IT") else "IT" + invoice.company_tax_id
 
 	for attachment in attachments:
-		if attachment.file_name.startswith(company_tax_id) and attachment.file_name.endswith(".xml"):
+		if attachment.file_name and attachment.file_name.startswith(company_tax_id) and attachment.file_name.endswith(".xml"):
 			out.append(attachment)
 
 	return out
