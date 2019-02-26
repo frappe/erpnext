@@ -18,7 +18,7 @@ const routes = [{
 	},
 	{
 		name: 'course',
-		path: '/Program/:program_name/:course/',
+		path: '/Program/:program_name/:course_name/',
 		component: CoursePage,
 		props: true,
 	},
