@@ -4,15 +4,15 @@
     <div class='card-body'>
         <div class="row">
             <div class="course-details col-xs-8 col-sm-9 col-md-10">
-                <h5 class="card-title">{{ course.course_name }}</h5>
+                <h5 class="card-title">{{ topic.topic_name }}</h5>
                 <span class="course-list text-muted" id="getting-started">
-                    Topics
+                    Content
                     <ul class="mb-0 mt-1">
-                        <li v-for="topic in course.course_topic" :key="topic.name">
-                            <router-link v-if="isLogin" tag="a" :class="'text-muted'" :to="{name: 'course', params:{program_name: program_name, topic:topic.topic, course: course.name} }">
-                                <span style="padding-right: 0.4em"></span>{{ topic.topic_name }}
+                        <li v-for="content in topic.topic_content" :key="content.name">
+                            <router-link v-if="isLogin" tag="a" :class="'text-muted'" :to="{name: 'content', params:{program_name: program_name, topic:topic.name, course: course, type:content.content_type, content: content.content} }">
+                                <span style="padding-right: 0.4em"></span>{{ content.content }}
                             </router-link>
-                            <div v-else><span style="padding-right: 0.4em"></span>{{ topic.topic_name }}</div>
+                            <div v-else><span style="padding-right: 0.4em"></span>{{ content.content }}</div>
                         </li>
                     </ul>
                 </span>
@@ -35,8 +35,8 @@
 import AButton from './Button.vue';
 
 export default {
-    props: ['course', 'program_name'],
-    name: "CourseCard",
+    props: ['topic', 'course', 'program_name'],
+    name: "TopicCard",
     data() {
         return {
             courseMeta: {}
@@ -111,6 +111,7 @@ export default {
     li {
         list-style-type: none;
         padding: 0;
+    }
 
     .fa {
         font-size: 0.8em;
