@@ -28,7 +28,8 @@ const routes = [{
 		component: ContentPage,
 		props: true,
 		beforeEnter: (to, from, next) => {
-			if (lms.store.checkProgramEnrollment(this.program_name)) {
+			console.log(from.params.program_name)
+			if (lms.store.checkProgramEnrollment(from.params.program_name)) {
 				next()
 			} else {
 				next({
