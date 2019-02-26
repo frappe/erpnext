@@ -106,7 +106,6 @@ def evaluate_quiz(enrollment, quiz_response, quiz_name):
 	"""LMS Function: Evaluates a simple multiple choice quiz.
 	:param quiz_response: contains user selected choices for a quiz in the form of a string formatted as a dictionary. The function uses `json.loads()` to convert it to a python dictionary.
 	"""
-	
 	import json
 	quiz_response = json.loads(quiz_response)
 	quiz = frappe.get_doc("Quiz", quiz_name)
@@ -149,7 +148,7 @@ def enroll_in_program(program_name):
 	program_enrollment = student.enroll_in_program(program_name)
 	return program_name
 
-# Academty Activity 
+# Academty Activity
 @frappe.whitelist()
 def add_activity(course, content_type, content):
 	enrollment = utils.get_course_enrollment(course)
@@ -170,8 +169,8 @@ def add_activity(course, content_type, content):
 def get_course_meta(course_name, program_name):
 	"""
 	Return the porgress of a course in a program as well as the content to continue from.
-		:param course_name: 
-		:param program_name: 
+		:param course_name:
+		:param program_name:
 	"""
 	course_enrollment = utils.get_course_enrollment(course_name)
 	program_enrollment = utils.get_program_enrollment(program_name)
@@ -189,7 +188,7 @@ def get_course_meta(course_name, program_name):
 	elif count < len(progress):
 		next_item = next(item for item in progress if item['is_complete']==False)
 		return {'flag':'Continue', 'content_type': next_item['content_type'], 'content': next_item['content']}
-	
+
 @frappe.whitelist()
 def get_program_progress(program_name):
 	import math
@@ -239,3 +238,19 @@ def get_quiz_progress(program_name):
 		quiz_meta.name = program_name
 		quiz_meta.program = program.program_name
 		return quiz_meta
+
+
+@frappe.whitelist(allow_guest=True)
+def get_course_details(course_name):
+	try:
+		course = frappe.get_doc('Course', course_name)
+		return course
+	except:
+		return None
+
+# Functions to get program & course details
+@frappe.whitelist(allow_guest=True)
+def get_topics(course_name):
+	course = frappe.get_doc('Course', course_name)
+	topics = course.get_topics()
+	return topics
