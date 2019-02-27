@@ -138,7 +138,7 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 	elif time_period == 'Week':
 		allotted_days *= 7
 
-	expected_time_is_set = 1 if allotted_days == 0 and time_period in ['Days', 'Weeks'] else 0
+	expected_time_is_set = 1 if allotted_days == 0 and time_period in ['Day', 'Week'] else 0
 
 	support_days = {}
 	for service in service_level.support_and_resolution:
