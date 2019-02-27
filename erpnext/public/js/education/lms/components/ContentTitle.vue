@@ -5,7 +5,8 @@
                 <div class="col-md-8">
                     <h2>{{ title }}</h2>
                     <span v-if="typeof author !== 'undefined' || author !== null" class="text-muted">
-                        Published on {{ publishDate }}, by {{ author }}
+                        <span v-if="publishDate">Published on {{ publishDate }}</span>
+                        <span v-if="author">— {{ author }}</span>
                     </span>
                 </div>
                 <div class="col-md-4 text-right">
@@ -21,11 +22,6 @@
 export default {
     props: ['title', 'publishDate', 'author'],
     name: 'ContentTitle',
-    data() {
-        return {
-
-        };
-    },
 };
 </script>
 
