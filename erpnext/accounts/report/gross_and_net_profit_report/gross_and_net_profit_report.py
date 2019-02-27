@@ -69,6 +69,7 @@ def get_revenue(data, period_list, revenue_type):
 		revenue = [item for item in data if item['include_in_gross']==1 or item['is_group']==1]
 	elif revenue_type == 'non_gross':
 		revenue = [item for item in data if item['include_in_gross']==0 or item['is_group']==1]
+
 	revenue, status = remove_parent_with_no_child(revenue, period_list)
 	while status == "data to be removed":
 		revenue, status = remove_parent_with_no_child(revenue, period_list)
