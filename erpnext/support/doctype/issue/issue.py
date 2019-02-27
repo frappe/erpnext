@@ -117,21 +117,28 @@ class Issue(Document):
 		self.resolution_by = get_expected_time_for('response', service_level, start_date_time)
 		self.resolution_by = get_expected_time_for('resolution', service_level, start_date_time)
 
-def get_expected_time_for(_type, service_level, start_date_time):
+def get_expected_time_for(parameter, service_level, start_date_time):
 	current_date_time = start_date_time
 	expected_time = current_date_time
 
 	# lets assume response time is in days by default
-	allotted_days = service_level.response_time
-	response_time_period = service_level.response_time_period
+	if parameter == 'response':
+		allotted_days = service_level['response_time']
+		time_period = service_level['response_time_period']
+	elif parameter == 'resolution':
+		allotted_days = service_level['resolution_time']
+		time_period = service_level['resolution_time_period']
+	else:
+		frappe.throw('{} parameter is invalid'.format(parameter))
+
 	allotted_hours = 0
-	if response_time_period == 'Hour':
+	if time_period == 'Hour':
 		allotted_hours = allotted_days
 		allotted_days = 0
-	elif response_time_period == 'Week':
+	elif time_period == 'Week':
 		allotted_days *= 7
 
-	response_time_is_set = 1 if allotted_days == 0 and response_time_period in ['Days', 'Weeks'] else 0
+	expected_time_is_set = 1 if allotted_days == 0 and time_period in ['Days', 'Weeks'] else 0
 
 	support_days = {}
 	for service in service_level.support_and_resolution:
@@ -143,7 +150,7 @@ def get_expected_time_for(_type, service_level, start_date_time):
 	holidays = get_holidays(service_level.holiday_list)
 	weekdays = get_weekdays()
 
-	while not response_time_is_set:
+	while not expected_time_is_set:
 		current_weekday = weekdays[current_date_time.weekday()]
 
 		if not is_holiday(current_date_time, holidays) and current_weekday in support_days:
@@ -154,18 +161,18 @@ def get_expected_time_for(_type, service_level, start_date_time):
 			# no time left for support today
 			if time_left_today < 0: pass
 
-			elif response_time_period == 'Hour':
+			elif time_period == 'Hour':
 				if time_left_today >= allotted_hours:
 					expected_time = datetime.combine(current_date_time.date(), start_time)
 					expected_time = add_to_date(expected_time, hours=allotted_hours)
-					response_time_is_set = 1
+					expected_time_is_set = 1
 				else:
 					# set end of today
 					allotted_hours = allotted_hours - time_left_today
 			else:
 				allotted_days -= 1
-				response_time_is_set = allotted_days <= 0
-				if response_time_is_set:
+				expected_time_is_set = allotted_days <= 0
+				if expected_time_is_set:
 					expected_time = datetime.combine(current_date_time.date(), end_time)
 
 		current_date_time = add_to_date(getdate(current_date_time), days=1)
