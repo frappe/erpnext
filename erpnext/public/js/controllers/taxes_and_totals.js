@@ -243,10 +243,12 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	calculate_net_total: function() {
 		var me = this;
 		this.frm.doc.total_qty = this.frm.doc.total = this.frm.doc.base_total = this.frm.doc.net_total = this.frm.doc.base_net_total = 0.0;
+		this.frm.doc.total_alt_uom_qty = 0;
 		this.frm.doc.base_tax_exclusive_total = this.frm.doc.tax_exclusive_total = 0.0;
 
 		$.each(this.frm.doc["items"] || [], function(i, item) {
 			me.frm.doc.total_qty += item.qty;
+			me.frm.doc.total_alt_uom_qty += item.alt_uom_qty;
 
 			me.frm.doc.total += item.amount;
 			me.frm.doc.base_total += item.base_amount;
