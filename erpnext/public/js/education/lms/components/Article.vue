@@ -31,7 +31,10 @@ export default {
     },
     methods: {
         getContent() {
-            return frappe.db.get_doc(this.type, this.content)
+            return lms.call('get_content', {
+                type: this.type,
+                content: this.content
+            })
         }
     },
     components: {
