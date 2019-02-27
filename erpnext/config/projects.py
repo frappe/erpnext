@@ -30,14 +30,19 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Project Update",
-					"description": _("Project Update."),
-					"dependencies": ["Project"],
+					"name": "Project Template",
+					"description": _("Make project from a template."),
 				},
 				{
 					"type": "doctype",
 					"name": "Project Type",
 					"description": _("Define Project type."),
+				},
+				{
+					"type": "doctype",
+					"name": "Project Update",
+					"description": _("Project Update."),
+					"dependencies": ["Project"],
 				},
 			]
 		},

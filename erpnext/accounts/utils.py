@@ -615,7 +615,7 @@ def get_held_invoices(party_type, party):
 	return held_invoices
 
 
-def get_outstanding_invoices(party_type, party, account, condition=None, limit=1000):
+def get_outstanding_invoices(party_type, party, account, condition=None, limit=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
@@ -628,7 +628,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, limit=1
 
 	invoice = 'Sales Invoice' if erpnext.get_party_account_type(party_type) == 'Receivable' else 'Purchase Invoice'
 	held_invoices = get_held_invoices(party_type, party)
-	limit_cond = "limit %s" % (limit or 1000)
+	limit_cond = "limit %s" % limit if limit else ""
 
 	invoice_list = frappe.db.sql("""
 		select
