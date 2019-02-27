@@ -51,7 +51,7 @@ export default {
     computed: {
         firstContentRoute() {
             if(lms.store.checkLogin()){
-                return `${this.program_name}/${this.course}/${this.courseMeta.content_type}/${this.courseMeta.content}`
+                return `/Program/${this.program_name}/${this.course_name}/${this.topic.name}/${this.courseMeta.content_type}/${this.courseMeta.content}`
             }
             else {
                 return {}
