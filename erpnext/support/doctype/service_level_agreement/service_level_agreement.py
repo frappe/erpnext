@@ -30,3 +30,13 @@ def check_agreement_status():
 		if service_level_agreement.end_date < frappe.utils.getdate():
 			service_level_agreement.agreement_status = "Expired"
 		service_level_agreement.save()
+
+def get_active_service_level_agreement_for(customer):
+	agreement = frappe.get_list("Service Level Agreement",
+		filters=[{"agreement_status": "Active"}],
+		or_filters=[{'customer': customer},{"default_service_level_agreement": "1"}],
+		fields=["name", "service_level", "holiday_list", "priority"],
+		order_by='customer DESC',
+		limit=1)
+
+	return agreement[0] if agreement else None

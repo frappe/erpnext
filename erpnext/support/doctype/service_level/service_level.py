@@ -17,7 +17,8 @@ class ServiceLevel(Document):
 		for support_and_resolution in self.support_and_resolution:
 			indexes.append(week.index(support_and_resolution.workday))
 			support_and_resolution.idx = week.index(support_and_resolution.workday) + 1
-			start_time, end_time = datetime.strptime(support_and_resolution.start_time, '%H:%M:%S').time(), datetime.strptime(support_and_resolution.end_time, '%H:%M:%S').time()
+			start_time, end_time = (datetime.strptime(support_and_resolution.start_time, '%H:%M:%S').time(),
+				datetime.strptime(support_and_resolution.end_time, '%H:%M:%S').time())
 			if start_time > end_time:
 				frappe.throw(_("Start Time can't be greater than End Time for "+ support_and_resolution.workday +"."))
 		if not len(set(indexes)) == len(indexes):
