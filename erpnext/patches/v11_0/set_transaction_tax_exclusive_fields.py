@@ -62,7 +62,7 @@ def execute():
 			doc = frappe.get_doc(dt, dn)
 			calculate_taxes_and_totals(doc)
 
-			values_to_update = [doc.get(f) for f in new_item_fields]
+			values_to_update = [doc.get(f) for f in new_transaction_fields]
 			update_dict = dict(zip(new_transaction_fields, values_to_update))
 			frappe.db.set_value(dt, doc.name, update_dict, None, update_modified=False)
 
