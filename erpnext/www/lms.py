@@ -281,3 +281,10 @@ def get_topics(course_name):
 	course = frappe.get_doc('Course', course_name)
 	topics = course.get_topics()
 	return topics
+
+@frappe.whitelist()
+def get_content(type, content):
+	try:
+		return frappe.get_doc(type, content)
+	except:
+		return None
