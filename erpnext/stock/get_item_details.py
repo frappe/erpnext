@@ -521,12 +521,15 @@ def check_packing_list(price_list_rate_name, desired_qty, item_code):
 		:param qty: Derised Qt
 	"""
 
+	flag = True
 	item_price = frappe.get_doc("Item Price", price_list_rate_name)
 	if desired_qty and item_price.packing_unit:
 		packing_increment = desired_qty % item_price.packing_unit
 
-		if packing_increment == 0:
-			return True
+		if packing_increment != 0:
+			flag = False
+
+	return flag
 
 def validate_price_list(args):
 	if args.get("price_list"):
