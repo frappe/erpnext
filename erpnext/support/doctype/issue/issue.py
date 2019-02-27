@@ -7,7 +7,7 @@ import json
 from frappe import _
 from frappe import utils
 from frappe.model.document import Document
-from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_weekdays, add_to_date, today
+from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_weekdays, add_to_date, today, get_time
 from datetime import datetime, timedelta
 from frappe.utils.user import is_website_user
 from ..service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
@@ -114,7 +114,7 @@ class Issue(Document):
 
 		start_date_time = now_datetime()
 
-		self.resolution_by = get_expected_time_for('response', service_level, start_date_time)
+		self.response_by = get_expected_time_for('response', service_level, start_date_time)
 		self.resolution_by = get_expected_time_for('resolution', service_level, start_date_time)
 
 def get_expected_time_for(parameter, service_level, start_date_time):
@@ -123,11 +123,11 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 
 	# lets assume response time is in days by default
 	if parameter == 'response':
-		allotted_days = service_level['response_time']
-		time_period = service_level['response_time_period']
+		allotted_days = service_level.response_time
+		time_period = service_level.response_time_period
 	elif parameter == 'resolution':
-		allotted_days = service_level['resolution_time']
-		time_period = service_level['resolution_time_period']
+		allotted_days = service_level.resolution_time
+		time_period = service_level.resolution_time_period
 	else:
 		frappe.throw('{} parameter is invalid'.format(parameter))
 
@@ -142,10 +142,10 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 
 	support_days = {}
 	for service in service_level.support_and_resolution:
-		support_days[service.weekday] = {
+		support_days[service.workday] = frappe._dict({
 			'start_time': service.start_time,
 			'end_time': service.end_time,
-		}
+		})
 
 	holidays = get_holidays(service_level.holiday_list)
 	weekdays = get_weekdays()
@@ -160,10 +160,9 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 
 			# no time left for support today
 			if time_left_today < 0: pass
-
 			elif time_period == 'Hour':
 				if time_left_today >= allotted_hours:
-					expected_time = datetime.combine(current_date_time.date(), start_time)
+					expected_time = datetime.combine(getdate(current_date_time), get_time(start_time))
 					expected_time = add_to_date(expected_time, hours=allotted_hours)
 					expected_time_is_set = 1
 				else:
@@ -173,10 +172,12 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 				allotted_days -= 1
 				expected_time_is_set = allotted_days <= 0
 				if expected_time_is_set:
-					expected_time = datetime.combine(current_date_time.date(), end_time)
+					expected_time = datetime.combine(getdate(current_date_time), get_time(end_time))
+
+		else:
+			print('skipping -------->', current_date_time, is_holiday(current_date_time, holidays), current_weekday in support_days)
 
 		current_date_time = add_to_date(getdate(current_date_time), days=1)
-
 	return expected_time
 
 def get_list_context(context=None):
