@@ -22,10 +22,16 @@ def execute():
 
 	# Calculate and update database
 	for dt in doctypes:
-		docnames = frappe.get_all(dt)
-
 		frappe.db.sql("""
 			update `tab{dt} Item`
 			set alt_uom_size = 1, alt_uom_qty = stock_qty
 			where ifnull(alt_uom, '') = ''
+		""".format(dt=dt))
+
+		frappe.db.sql("""
+			update `tab{dt}` m
+			set total_alt_uom_qty = (
+				select sum(d.alt_uom_qty)
+				from `tab{dt} Item` d where d.parent = m.name and d.parenttype = '{dt}'
+			)
 		""".format(dt=dt))
