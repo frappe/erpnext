@@ -12,7 +12,7 @@ import Video from "../components/Video.vue"
 import ContentNavigation from "../components/ContentNavigation.vue"
 
 export default {
-	props:['program_name', 'course', 'type', 'content'],
+	props:['program_name', 'course_name', 'topic', 'type', 'content'],
 	name: "ContentPage",
 	data() {
 		return{
@@ -41,12 +41,11 @@ export default {
 	},
 	methods: {
 		getNextContent(){
-			window.t = this
 			return lms.call("get_next_content",
 				{
-					content: this.content,
-					content_type: this.type,
-					course: this.course
+					current_content: this.content,
+					current_content_type: this.type,
+					topic: this.topic,
 			  	}
 			);
 		}
