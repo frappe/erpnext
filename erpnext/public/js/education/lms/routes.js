@@ -27,9 +27,8 @@ const routes = [{
 		path: '/Program/:program_name/:course_name/:topic/:type/:content',
 		component: ContentPage,
 		props: true,
-		beforeEnter: (to, from, next) => {
-			console.log(from.params.program_name)
-			if (lms.store.checkProgramEnrollment(from.params.program_name)) {
+		beforeRouteUpdate (to, from, next) {
+			if (lms.store.checkProgramEnrollment(to.params.program_name)) {
 				next()
 			} else {
 				next({
