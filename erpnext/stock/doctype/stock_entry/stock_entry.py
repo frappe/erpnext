@@ -293,8 +293,9 @@ class StockEntry(StockController):
 			total_completed_qty = flt(self.fg_completed_qty) + flt(prod_order.produced_qty)
 			completed_qty = d.completed_qty + (allowance_percentage/100 * d.completed_qty)
 			if total_completed_qty > flt(completed_qty):
-				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order # {3}. Please update operation status via Time Logs")
-					.format(d.idx, d.operation, total_completed_qty, self.work_order), OperationsNotCompleteError)
+				job_card = frappe.db.get_value('Job Card', {'operation_id': d.name}, 'name')
+				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order # {3}. Please update operation status via Job Card # {4}")
+					.format(d.idx, d.operation, total_completed_qty, self.work_order, job_card), OperationsNotCompleteError)
 
 	def check_duplicate_entry_for_work_order(self):
 		other_ste = [t[0] for t in frappe.db.get_values("Stock Entry",  {
@@ -914,6 +915,11 @@ class StockEntry(StockController):
 				filters={'parent': self.work_order, 'item_code': item_code},
 				fields=["required_qty", "consumed_qty"]
 				)
+			if not req_items:
+				frappe.msgprint(_("Did not found transfered item {0} in Work Order {1}, the item not added in Stock Entry")
+					.format(item_code, self.work_order))
+				continue
+
 			req_qty = flt(req_items[0].required_qty)
 			req_qty_each = flt(req_qty / manufacturing_qty)
 			consumed_qty = flt(req_items[0].consumed_qty)

@@ -20,7 +20,7 @@ class SalaryStructureAssignment(Document):
 
 		if self.from_date:
 			if frappe.db.exists("Salary Structure Assignment", {"employee": self.employee, "from_date": self.from_date, "docstatus": 1}):
-				frappe.throw("Salary Structure Assignment for Employee already exists")
+				frappe.throw(_("Salary Structure Assignment for Employee already exists"), DuplicateAssignment)
 
 			if joining_date and getdate(self.from_date) < joining_date:
 				frappe.throw(_("From Date {0} cannot be before employee's joining Date {1}")
