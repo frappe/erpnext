@@ -11,7 +11,7 @@ from erpnext.stock.doctype.item_price.item_price import ItemPriceDuplicateItem
 
 class TestItemPrice(unittest.TestCase):
 	def setUp(self):
-		frappe.db.sql("delete from `tabItem Price`")		
+		frappe.db.sql("delete from `tabItem Price`")
 		make_test_records_for_doctype("Item Price", force=True)
 
 	def test_duplicate_item(self):
