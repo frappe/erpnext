@@ -74,4 +74,4 @@ def execute():
 				frappe.db.set_value(dt + " Item", item.name, update_dict, None, update_modified=False)
 
 			for tax in doc.taxes:
-				frappe.db.set_value(tax.doctype, tax.name, "total_before_discount_amount", tax.total_before_discount_amount)
+				frappe.db.set_value(tax.doctype, tax.name, "displayed_total", tax.displayed_total)

@@ -300,7 +300,7 @@ class calculate_taxes_and_totals(object):
 					self.set_cumulative_total(i, tax)
 
 					self._set_in_company_currency(tax,
-						["total", "total_before_discount_amount", "tax_amount", "tax_amount_after_discount_amount"])
+						["total", "displayed_total", "tax_amount", "tax_amount_after_discount_amount"])
 
 					# adjust Discount Amount loss in last tax iteration
 					if i == (len(self.doc.get("taxes")) - 1) and self.discount_amount_applied \
@@ -326,12 +326,20 @@ class calculate_taxes_and_totals(object):
 
 		if row_idx == 0:
 			tax.total = flt(self.doc.net_total + tax_amount, tax.precision("total"))
-			tax.total_before_discount_amount = flt(self.doc.tax_exclusive_total + tax_amount_before_discount,
-				tax.precision("total_before_discount_amount"))
+
+			if self.doc.apply_discount_on == "Grand Total":
+				tax.displayed_total = flt(self.doc.tax_exclusive_total + tax_amount_before_discount,
+					tax.precision("displayed_total"))
+			else:
+				tax.displayed_total = tax.total
 		else:
 			tax.total = flt(self.doc.get("taxes")[row_idx-1].total + tax_amount, tax.precision("total"))
-			tax.total_before_discount_amount = flt(self.doc.get("taxes")[row_idx-1].total_before_discount_amount + tax_amount_before_discount,
-				tax.precision("total_before_discount_amount"))
+
+			if self.doc.apply_discount_on == "Grand Total":
+				tax.displayed_total = flt(self.doc.get("taxes")[row_idx-1].displayed_total + tax_amount_before_discount,
+					tax.precision("displayed_total"))
+			else:
+				tax.displayed_total = tax.total
 
 	def get_current_tax_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)

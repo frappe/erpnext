@@ -360,7 +360,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					me.set_cumulative_total(i, tax);
 
 					me.set_in_company_currency(tax,
-						["total", "total_before_discount_amount", "tax_amount", "tax_amount_after_discount_amount"]);
+						["total", "displayed_total", "tax_amount", "tax_amount_after_discount_amount"]);
 
 					// adjust Discount Amount loss in last tax iteration
 					if ((i == me.frm.doc["taxes"].length - 1) && me.discount_amount_applied
@@ -388,12 +388,22 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		if(row_idx==0) {
 			tax.total = flt(this.frm.doc.net_total + tax_amount, precision("total", tax));
-			tax.total_before_discount_amount = flt(this.frm.doc.tax_exclusive_total + tax_amount_before_discount,
-				precision("total_before_discount_amount", tax))
+
+			if (this.frm.doc.apply_discount_on == "Grand Total") {
+				tax.displayed_total = flt(this.frm.doc.tax_exclusive_total + tax_amount_before_discount,
+					precision("displayed_total", tax));
+			} else {
+				tax.displayed_total = tax.total;
+			}
 		} else {
 			tax.total = flt(this.frm.doc["taxes"][row_idx-1].total + tax_amount, precision("total", tax));
-			tax.total_before_discount_amount = flt(this.frm.doc["taxes"][row_idx-1].total_before_discount_amount + tax_amount_before_discount,
-				precision("total_before_discount_amount", tax))
+
+			if (this.frm.doc.apply_discount_on == "Grand Total") {
+				tax.displayed_total = flt(this.frm.doc["taxes"][row_idx - 1].displayed_total + tax_amount_before_discount,
+					precision("displayed_total", tax))
+			} else {
+				tax.displayed_total = tax.total;
+			}
 		}
 	},
 
