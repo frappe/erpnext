@@ -7,7 +7,7 @@ import json
 from frappe import _
 from frappe import utils
 from frappe.model.document import Document
-from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_weekdays, add_to_date, now_date
+from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_weekdays, add_to_date, today
 from datetime import datetime, timedelta
 from frappe.utils.user import is_website_user
 from ..service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
@@ -154,7 +154,7 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 		current_weekday = weekdays[current_date_time.weekday()]
 
 		if not is_holiday(current_date_time, holidays) and current_weekday in support_days:
-			start_time = current_date_time if getdate(current_date_time) == now_date() else support_days[current_weekday].start_time
+			start_time = current_date_time if getdate(current_date_time) == today() else support_days[current_weekday].start_time
 			end_time = support_days[current_weekday].end_time
 			time_left_today = time_diff_in_hours(end_time, start_time)
 
