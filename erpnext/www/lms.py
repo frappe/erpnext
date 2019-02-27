@@ -77,7 +77,6 @@ def get_next_content(current_content, current_content_type, topic):
 	content_list = [{'content_type':item.doctype, 'content':item.name} for item in topic.get_contents()]
 	current_index = content_list.index({'content': current_content, 'content_type': current_content_type})
 	try:
-		# print(content_list[current_index + 1])
 		return content_list[current_index + 1]
 	except IndexError:
 		return None
