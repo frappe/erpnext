@@ -15,7 +15,7 @@ def execute(filters=None):
 	item_details = get_item_details()
 	data = []
 
-	company_currency = get_company_currency(filters["company"])
+	company_currency = get_company_currency(filters.get("company"))
 
 	for d in entries:
 		if d.stock_qty > 0 or filters.get('show_return_entries', 0):
