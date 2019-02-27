@@ -28,7 +28,7 @@ class WoocommerceSettings(Document):
 
 				if not frappe.get_value("Custom Field",{"name":i[0]}) or not frappe.get_value("Custom Field",{"name":i[1]}):
 					create_custom_field_id_and_check_status = True
-					break;
+					break
 
 
 			if create_custom_field_id_and_check_status:

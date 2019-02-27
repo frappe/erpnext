@@ -5,7 +5,7 @@ import frappe
 import unittest
 from frappe.utils import getdate, nowdate, add_days
 
-from erpnext.projects.doctype.task.task import CircularReferenceError, EndDateCannotBeGreaterThanProjectEndDateError
+from erpnext.projects.doctype.task.task import CircularReferenceError
 
 class TestTask(unittest.TestCase):
 	def test_circular_reference(self):
@@ -96,15 +96,6 @@ class TestTask(unittest.TestCase):
 		set_tasks_as_overdue()
 
 		self.assertEqual(frappe.db.get_value("Task", task.name, "status"), "Overdue")
-
-	def test_end_date_validation(self):
-		task_end = create_task("Testing_Enddate_validation", add_days(nowdate(), 35), add_days(nowdate(), 45), save=False)
-		pro = frappe.get_doc("Project", task_end.project)
-		pro.expected_end_date = add_days(nowdate(), 40)
-		pro.save()
-		self.assertRaises(EndDateCannotBeGreaterThanProjectEndDateError, task_end.save)
-
-
 
 def create_task(subject, start=None, end=None, depends_on=None, project=None, save=True):
 	if not frappe.db.exists("Task", subject):
