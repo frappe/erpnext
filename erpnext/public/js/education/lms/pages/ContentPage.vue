@@ -64,11 +64,6 @@ export default {
 	display: none;
 }
 
-.video-top-section {
-	padding-top: 3rem !important;
-	padding-bottom: 1rem !important;
-}
-
 .video-description-section {
 	padding-top: 0em !important;
 }
