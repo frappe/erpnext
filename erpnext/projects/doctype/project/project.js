@@ -17,6 +17,7 @@ frappe.ui.form.on("Project", {
 		);
 	},
 
+
 	onload: function (frm) {
 		var so = frappe.meta.get_docfield("Project", "sales_order");
 		so.get_route_options_for_new_doc = function (field) {
@@ -76,7 +77,28 @@ frappe.ui.form.on("Project", {
 
 			frm.trigger('show_dashboard');
 		}
+		frm.events.set_buttons(frm);
 	},
+
+	set_buttons: function(frm) {
+		if (!frm.is_new()) {
+			frm.add_custom_button(__('Completed'), () => {
+				frm.events.set_status(frm, 'Completed');
+			}, __('Set Status'));
+
+			frm.add_custom_button(__('Cancelled'), () => {
+				frm.events.set_status(frm, 'Cancelled');
+			}, __('Set Status'));
+		}
+	},
+
+	set_status: function(frm, status) {
+		frappe.confirm(__('Set Project and all Tasks to status {0}?', [status.bold()]), () => {
+			frappe.xcall('erpnext.projects.doctype.project.project.set_project_status',
+				{project: frm.doc.name, status: status}).then(() => { /* page will auto reload */ });
+		});
+	},
+
 	tasks_refresh: function (frm) {
 		var grid = frm.get_field('tasks').grid;
 		grid.wrapper.find('select[data-fieldname="status"]').each(function () {
