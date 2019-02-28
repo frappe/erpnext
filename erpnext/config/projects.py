@@ -22,7 +22,7 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"route": "List/Task/Gantt",
+					"route": "#List/Task/Gantt",
 					"doctype": "Task",
 					"name": "Gantt Chart",
 					"description": _("Gantt chart of all tasks."),
