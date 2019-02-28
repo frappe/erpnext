@@ -99,7 +99,7 @@ class Issue(Document):
 			doc.save(ignore_permissions=True)
 		return replicated_issue.name
 
-	def before_insert(self):
+	def after_insert(self):
 		self.set_response_and_resolution_time()
 
 	def set_response_and_resolution_time(self):
@@ -112,7 +112,7 @@ class Issue(Document):
 
 		service_level = frappe.get_doc("Service Level", service_level_agreement.service_level)
 
-		start_date_time = now_datetime()
+		start_date_time = self.creation or now_datetime()
 
 		self.response_by = get_expected_time_for('response', service_level, start_date_time)
 		self.resolution_by = get_expected_time_for('resolution', service_level, start_date_time)
