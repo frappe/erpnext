@@ -278,7 +278,7 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Item Shortage Report",
-					"route": "Report/Bin/Item Shortage Report",
+					"route": "#Report/Bin/Item Shortage Report",
 					"doctype": "Purchase Receipt"
 				},
 				{
