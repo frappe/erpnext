@@ -39,11 +39,11 @@ export default {
     name: "TopicCard",
     data() {
         return {
-            courseMeta: {}
+            topicMeta: {}
         }
     },
     mounted() {
-        if(lms.store.checkLogin()) this.getCourseMeta().then(data => this.courseMeta = data)
+        if(lms.store.checkLogin()) this.getTopicMeta().then(data => this.topicMeta = data)
     },
     components: {
         AButton
@@ -51,7 +51,7 @@ export default {
     computed: {
         firstContentRoute() {
             if(lms.store.checkLogin()){
-                return `/Program/${this.program_name}/${this.course_name}/${this.topic.name}/${this.courseMeta.content_type}/${this.courseMeta.content}`
+                return `/Program/${this.program_name}/${this.course_name}/${this.topic.name}/${this.topicMeta.content_type}/${this.topicMeta.content}`
             }
             else {
                 return {}
@@ -59,13 +59,13 @@ export default {
         },
         buttonType() {
             if(lms.store.checkProgramEnrollment(this.program_name)){
-                if (this.courseMeta.flag == "Start Course" ){
+                if (this.topicMeta.flag == "Start Topic" ){
                 return "primary"
                 }
-                else if (this.courseMeta.flag == "Completed" ) {
+                else if (this.topicMeta.flag == "Completed" ) {
                     return "success"
                 }
-                else if (this.courseMeta.flag == "Continue" ) {
+                else if (this.topicMeta.flag == "Continue" ) {
                     return "info"
                 }
             }
@@ -75,11 +75,11 @@ export default {
         },
         isLogin() {
             // return lms.store.checkProgramEnrollment(this.program_name)
-            return true
+            return lms.store.checkLogin()
         },
         buttonName() {
             if(lms.store.checkLogin()){
-                return this.courseMeta.flag
+                return this.topicMeta.flag
             }
             else {
                 return "Enroll"
@@ -92,11 +92,10 @@ export default {
             if(content_type == 'Article') return 'fa fa-file-text-o'
             if(content_type == 'Quiz') return 'fa fa-question-circle-o'
         },
-        getCourseMeta() {
+        getTopicMeta() {
 			return lms.call('get_topic_meta', {
-                    topic_name: this.topic.topic_name,
+                    topic_name: this.topic.name,
                     course_name: this.course_name,
-                    program_name: this.program_name
 				})
         },
     }

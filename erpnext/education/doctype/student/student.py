@@ -41,8 +41,8 @@ class Student(Document):
 
 	def after_insert(self):
 		self.create_student()
-		
-	def create_student(self):	
+
+	def create_student(self):
 		"""Create a website user for student creation if not already exists"""
 		if self.user == None:
 			student_user = frappe.get_doc({
@@ -100,7 +100,6 @@ class Student(Document):
 				status, score, result = check_quiz_completion(content, course_enrollment_name)
 				progress.append({'content': content.name, 'content_type': content.doctype, 'is_complete': status, 'score': score, 'result': result})
 		return progress
-	
 
 	def enroll_in_program(self, program_name):
 		enrollment = frappe.get_doc({
