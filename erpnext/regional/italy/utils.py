@@ -189,7 +189,7 @@ def sales_invoice_validate(doc):
 	if not doc.company_address:
 		frappe.throw(_("Please set an Address on the Company '%s'" % doc.company), title=_("E-Invoicing Information Missing"))
 	else:
-		validate_address(doc.company_address, "Company")
+		validate_address(doc.company_address)
 
 	company_fiscal_regime = frappe.get_cached_value("Company", doc.company, 'fiscal_regime')
 	if not company_fiscal_regime:
@@ -217,7 +217,7 @@ def sales_invoice_validate(doc):
 	if not doc.customer_address:
 	 	frappe.throw(_("Please set the Customer Address"), title=_("E-Invoicing Information Missing"))
 	else:
-		validate_address(doc.customer_address, "Customer")
+		validate_address(doc.customer_address)
 
 	if not len(doc.taxes):
 		frappe.throw(_("Please set at least one row in the Taxes and Charges Table"), title=_("E-Invoicing Information Missing"))
@@ -294,13 +294,14 @@ def get_e_invoice_attachments(invoice):
 
 	return out
 
-def validate_address(address_name, address_context):
-	pincode, city = frappe.db.get_value("Address", address_name, ["pincode", "city"])
-	if not pincode:
-		frappe.throw(_("Please set pin code on %s Address" % address_context), title=_("E-Invoicing Information Missing"))
-	if not city:
-		frappe.throw(_("Please set city on %s Address" % address_context), title=_("E-Invoicing Information Missing"))
+def validate_address(address_name):
+	fields = ["pincode", "city", "country_code"]
+	data = frappe.get_cached_value("Address", address_name, fields, as_dict=1) or {}
 
+	for field in fields:
+		if not data.get(field):
+			frappe.throw(_("Please set {0} for address {1}".format(field.replace('-',''), address_name)),
+				title=_("E-Invoicing Information Missing"))
 
 def get_unamended_name(doc):
 	attributes = ["naming_series", "amended_from"]
@@ -321,6 +322,9 @@ def get_progressive_name_and_number(doc):
 	return progressive_name, progressive_number
 
 def set_state_code(doc, method):
+	if doc.get('country_code'):
+		doc.country_code = doc.country_code.upper()
+
 	if not doc.get('state'):
 		return
 
