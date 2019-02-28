@@ -1,6 +1,6 @@
 <template>
 <section>
-		<div>
+		<div class="py-5">
 			<div class="row">
 				<div class="col-sm-3 text-center">
 					<span class="sidebar-standard-image" title="Lorem Ipsum">
@@ -72,18 +72,20 @@ export default {
 };
 </script>
 <style scoped>
-	.edit-button{
-		position:absolute;
-		top:0;
-		right:0;
+	.edit-button {
+		position: absolute;
+		top: 0;
+		right: 0;
 	}
+
 	.standard-image {
 		font-size: 72px;
 		border-radius: 6px;
 	}
+
 	ul {
-        list-style-type: none;
-        padding: 0;
+		list-style-type: none;
+		padding: 0;
 		margin: 0
-    }
+	}
 </style>

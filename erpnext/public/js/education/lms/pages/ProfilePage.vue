@@ -7,7 +7,7 @@
 	<CardList :title="'Quiz Attempts'" :description="''" :sectionType="'section-padding section'">
         <ScoreCard slot="card-list-slot" v-for="program in enrolledPrograms" :program="program" :key="program"/>
     </CardList>
-	
+
 </div>
 </template>
 <script>
@@ -24,9 +24,9 @@ export default {
         AButton: Button,
 		TopSection,
 		CardList,
-		ProfileInfo,		
+		ProfileInfo,
 		ProgressCard,
-		ScoreCard		
+		ScoreCard
 	},
 	data() {
 		return {
