@@ -2,7 +2,7 @@
 <section>
 		<div class="py-5">
 			<div class="row">
-				<div class="col-sm-3 text-center">
+				<!-- <div class="col-sm-3 text-center">
 					<span class="sidebar-standard-image" title="Lorem Ipsum">
 						<span v-if="avatar" class="avatar-frame" :style="avatarStyle">
 						</span>
@@ -10,8 +10,8 @@
 							{{ abbr }}
 						</div>
 					</span>
-				</div>
-				<div class="col-sm-9">
+				</div> -->
+				<div class="col-sm-12">
 					<div>
 						<h3>{{ fullName }}</h3>
 						<ul>
@@ -35,7 +35,7 @@
 							</li>
 						</ul>
 					</div>
-					<a href="/update-profile" class="edit-button text-muted"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+					<a href="/update-profile" class="edit-button text-muted">Edit Profile</a>
 				</div>
 			</div>
 			<div ></div>
