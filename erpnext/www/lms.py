@@ -189,26 +189,19 @@ def get_course_meta(course_name, program_name):
 		return {'flag':'Continue', 'content_type': next_item['content_type'], 'content': next_item['content']}
 
 @frappe.whitelist()
-def get_topic_meta(topic_name, course_name, program_name):
+def get_topic_meta(topic_name, course_name):
 	"""
 	Return the porgress of a course in a program as well as the content to continue from.
 		:param topic_name:
 		:param course_name:
-		:param program_name:
 	"""
-	print(locals())
 	course_enrollment = utils.get_course_enrollment(course_name)
-	program_enrollment = utils.get_program_enrollment(program_name)
 	student = frappe.get_doc("Student", utils.get_current_student())
-	if not program_enrollment:
-		return None
-	if not course_enrollment:
-		utils.enroll_in_course(course_name, program_name)
-	progress = course_enrollment.get_progress(student)
-	print(progress)
+	topic = frappe.get_doc("Topic", topic_name)
+	progress = student.get_topic_progress(course_enrollment.name, topic)
 	count = sum([activity['is_complete'] for activity in progress])
 	if count == 0:
-		return {'flag':'Start Course', 'content_type': progress[0]['content_type'], 'content': progress[0]['content']}
+		return {'flag':'Start Topic', 'content_type': progress[0]['content_type'], 'content': progress[0]['content']}
 	elif count == len(progress):
 		return {'flag':'Completed', 'content_type': progress[0]['content_type'], 'content': progress[0]['content']}
 	elif count < len(progress):
