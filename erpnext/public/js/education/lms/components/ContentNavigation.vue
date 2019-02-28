@@ -2,7 +2,7 @@
 	<div class="nav-buttons">
 		<button class='btn btn-outline-secondary' @click="$router.go(-1)">Back</button>
 		<button v-if="nextContent" class='btn btn-primary' @click="goNext()">Next</button>
-		<button v-else class='btn btn-primary' @click="finish()">Finish Course</button>
+		<button v-else class='btn btn-primary' @click="finish()">Finish Topic</button>
 	</div>
 </template>
 
@@ -18,7 +18,7 @@ export default {
 					{
 						course: this.$route.params.course_name,
 						content_type: this.$route.params.type,
-						content: this.$route.params.content
+						content: this.$route.params.content,
 					}
 				)
 			}
@@ -29,8 +29,7 @@ export default {
 		},
 		finish() {
 			this.addActivity()
-			this.$router.push({ name: 'program', params: { program_name: this.$route.params.program_name}})
-			//
+			this.$router.push({ name: 'course', params: { program_name: this.$route.params.program_name, course_name: this.$route.params.course_name}})
 			lms.trigger('course-completed', course_name);
 		}
 	}
