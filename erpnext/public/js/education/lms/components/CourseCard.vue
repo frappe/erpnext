@@ -14,12 +14,12 @@
                 </span>
             </div>
             <div class='course-buttons text-center col-xs-4 col-sm-3 col-md-2'>
-                <a-button
-                    :type="'primary'"
+                <a-button v-if="isLogin"
+                    :type="buttonType"
                     size="sm btn-block"
                     :route="courseRoute"
                 >
-                    View Course
+                    {{ buttonName }}
                 </a-button>
             </div>
         </div>
@@ -36,9 +36,52 @@ export default {
     components: {
         AButton
     },
+    data() {
+        return {
+            courseMeta: {},
+        }
+    },
+    mounted() {
+        if(lms.store.checkLogin()) this.getCourseMeta().then(data => this.courseMeta = data)
+    },
     computed: {
         courseRoute() {
             return `${this.program_name}/${this.course.name}`
+        },
+        buttonType() {
+            if(lms.store.checkProgramEnrollment(this.program_name)){
+                if (this.courseMeta.flag == "Start Course" ){
+                return "primary"
+                }
+                else if (this.courseMeta.flag == "Completed" ) {
+                    return "success"
+                }
+                else if (this.courseMeta.flag == "Continue" ) {
+                    return "info"
+                }
+            }
+            else {
+                return " hidden"
+            }
+        },
+        isLogin() {
+            return lms.store.checkLogin()
+        },
+        buttonName() {
+            if(lms.store.checkLogin()){
+                return this.courseMeta.flag
+            }
+            else {
+                return "Enroll"
+            }
+        }
+    },
+    methods: {
+        getCourseMeta() {
+			return lms.call('get_course_meta', {
+                    course_name: this.course.name,
+                    program_name: this.program_name
+				})
         },
     }
 };
