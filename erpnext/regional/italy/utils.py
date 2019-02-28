@@ -4,7 +4,7 @@ import frappe, json, os
 from frappe.utils import flt, cstr
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
 from frappe import _
-from frappe.utils.file_manager import save_file, remove_file
+from frappe.core.doctype.file.file import remove_file
 from frappe.desk.form.load import get_attachments
 from erpnext.regional.italy import state_codes
 
@@ -183,10 +183,20 @@ def get_invoice_summary(items, taxes):
 #Preflight for successful e-invoice export.
 def sales_invoice_validate(doc):
 	#Validate company
+	if doc.doctype != 'Sales Invoice':
+		return
+
 	if not doc.company_address:
 		frappe.throw(_("Please set an Address on the Company '%s'" % doc.company), title=_("E-Invoicing Information Missing"))
 	else:
 		validate_address(doc.company_address, "Company")
+
+	company_fiscal_regime = frappe.get_cached_value("Company", doc.company, 'fiscal_regime')
+	if not company_fiscal_regime:
+		frappe.throw(_("Fiscal Regime is mandatory, kindly set the fiscal regime in the company {0}")
+			.format(doc.company))
+	else:
+		doc.company_fiscal_regime = company_fiscal_regime
 
 	if not doc.company_tax_id and not doc.company_fiscal_code:
 		frappe.throw(_("Please set either the Tax ID or Fiscal Code on Company '%s'" % doc.company), title=_("E-Invoicing Information Missing"))
@@ -217,10 +227,18 @@ def sales_invoice_validate(doc):
 				frappe.throw(_("Row {0}: Please set at Tax Exemption Reason in Sales Taxes and Charges".format(row.idx)),
 					title=_("E-Invoicing Information Missing"))
 
+	for schedule in doc.payment_schedule:
+		if schedule.mode_of_payment and not schedule.mode_of_payment_code:
+			schedule.mode_of_payment_code = frappe.get_cached_value('Mode of Payment',
+				schedule.mode_of_payment, 'mode_of_payment_code')
 
 #Ensure payment details are valid for e-invoice.
-def sales_invoice_on_submit(doc):
+def sales_invoice_on_submit(doc, method):
 	#Validate payment details
+	if get_company_country(doc.company) not in ['Italy',
+		'Italia', 'Italian Republic', 'Repubblica Italiana']:
+		return
+
 	if not len(doc.payment_schedule):
 		frappe.throw(_("Please set the Payment Schedule"), title=_("E-Invoicing Information Missing"))
 	else:
@@ -239,14 +257,31 @@ def prepare_and_attach_invoice(doc):
 
 	invoice = prepare_invoice(doc, progressive_number)
 	invoice_xml = frappe.render_template('erpnext/regional/italy/e-invoice.xml', context={"doc": invoice}, is_path=True)
+	invoice_xml = invoice_xml.replace("&", "&amp;")
 
 	xml_filename = progressive_name + ".xml"
-	save_file(xml_filename, invoice_xml, dt=doc.doctype, dn=doc.name, is_private=True)
+
+	_file = frappe.get_doc({
+		"doctype": "File",
+		"file_name": xml_filename,
+		"attached_to_doctype": doc.doctype,
+		"attached_to_name": doc.name,
+		"is_private": True,
+		"content": invoice_xml
+	})
+	_file.save()
 
 #Delete e-invoice attachment on cancel.
-def sales_invoice_on_cancel(doc):
+def sales_invoice_on_cancel(doc, method):
+	if get_company_country(doc.company) not in ['Italy',
+		'Italia', 'Italian Republic', 'Repubblica Italiana']:
+		return
+
 	for attachment in get_e_invoice_attachments(doc):
 		remove_file(attachment.name, attached_to_doctype=doc.doctype, attached_to_name=doc.name)
+
+def get_company_country(company):
+	return frappe.get_cached_value('Company', company, 'country')
 
 def get_e_invoice_attachments(invoice):
 	out = []
@@ -254,7 +289,7 @@ def get_e_invoice_attachments(invoice):
 	company_tax_id = invoice.company_tax_id if invoice.company_tax_id.startswith("IT") else "IT" + invoice.company_tax_id
 
 	for attachment in attachments:
-		if attachment.file_name.startswith(company_tax_id) and attachment.file_name.endswith(".xml"):
+		if attachment.file_name and attachment.file_name.startswith(company_tax_id) and attachment.file_name.endswith(".xml"):
 			out.append(attachment)
 
 	return out
@@ -285,7 +320,10 @@ def get_progressive_name_and_number(doc):
 
 	return progressive_name, progressive_number
 
-def validate_address(doc, method):
+def set_state_code(doc, method):
+	if not doc.get('state'):
+		return
+
 	if not (hasattr(doc, "state_code") and doc.country in ["Italy", "Italia", "Italian Republic", "Repubblica Italiana"]):
 		return
 
