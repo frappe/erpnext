@@ -73,9 +73,9 @@ export default {
 		submitQuiz() {
 			lms.call("evaluate_quiz",
 				{
-                    enrollment: lms.store.enrolledCourses[this.$route.params.course],
 					quiz_response: this.quizResponse,
-                    quiz_name: this.content
+                    quiz_name: this.content,
+                    course: this.$route.params.course_name
 				}
             ).then(data => {
                 this.score = data,
