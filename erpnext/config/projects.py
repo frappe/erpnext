@@ -16,7 +16,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Task",
-					"route": "List/Task",
+					"route": "#List/Task",
 					"description": _("Project activity / task."),
 					"onboard": 1,
 				},
