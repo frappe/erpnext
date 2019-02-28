@@ -151,8 +151,7 @@ class calculate_taxes_and_totals(object):
 				item.cumulated_tax_fraction += tax.tax_fraction_for_current_item
 
 			if item.cumulated_tax_fraction and not self.discount_amount_applied:
-				item.tax_exclusive_price_list_rate = flt(item.tax_exclusive_price_list_rate / (1 + item.cumulated_tax_fraction),
-					item.precision("tax_exclusive_price_list_rate"))
+				item.tax_exclusive_price_list_rate = flt(item.tax_exclusive_price_list_rate / (1 + item.cumulated_tax_fraction))
 
 				item.tax_exclusive_amount = flt(item.amount / (1 + item.cumulated_tax_fraction))
 				item.tax_exclusive_rate = (item.tax_exclusive_amount / item.qty) if item.qty \
@@ -178,6 +177,8 @@ class calculate_taxes_and_totals(object):
 
 				item.discount_percentage = flt(item.discount_percentage,
 					item.precision("discount_percentage"))
+				item.tax_exclusive_price_list_rate = flt(item.tax_exclusive_price_list_rate,
+					item.precision("tax_exclusive_price_list_rate"))
 
 				self._set_in_company_currency(item, ["net_rate", "net_amount",
 					"tax_exclusive_price_list_rate", "tax_exclusive_rate", "tax_exclusive_amount",
