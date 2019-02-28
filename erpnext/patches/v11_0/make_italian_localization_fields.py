@@ -22,7 +22,9 @@ def execute():
 		condition += " when '{0}' then '{1}'".format(frappe.db.escape(state), frappe.db.escape(code))
 
 	if condition:
-		frappe.db.sql("""
-			UPDATE tabAddress set state_code = (case state {condition} end)
-			WHERE country in ('Italy', 'Italia', 'Italian Republic', 'Repubblica Italiana')
-		""".format(condition=condition))
+		condition = "state_code = (case state {0} end),".format(condition)
+
+	frappe.db.sql("""
+		UPDATE tabAddress set {condition} country_code = UPPER(ifnull((select code
+			from `tabCountry` where name = `tabAddress`.country), ''))
+	""".format(condition=condition))
