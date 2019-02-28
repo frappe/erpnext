@@ -16,7 +16,7 @@ export default {
 				console.log("Adding Activity")
 				lms.call("add_activity",
 					{
-						course: this.$route.params.course,
+						course: this.$route.params.course_name,
 						content_type: this.$route.params.type,
 						content: this.$route.params.content
 					}
@@ -25,7 +25,7 @@ export default {
 		},
 		goNext() {
 			this.addActivity()
-			this.$router.push({ name: 'content', params: { course: this.$route.params.course, type:this.nextContentType, content:this.nextContent }})
+			this.$router.push({ name: 'content', params: { course: this.$route.params.course_name, type:this.nextContentType, content:this.nextContent }})
 		},
 		finish() {
 			this.addActivity()
