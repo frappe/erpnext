@@ -199,6 +199,8 @@ def get_topic_meta(topic_name, course_name):
 	student = frappe.get_doc("Student", utils.get_current_student())
 	topic = frappe.get_doc("Topic", topic_name)
 	progress = student.get_topic_progress(course_enrollment.name, topic)
+	if not progress:
+		return { 'flag':'Start Topic', 'content_type': None, 'content': None }
 	count = sum([activity['is_complete'] for activity in progress])
 	if count == 0:
 		return {'flag':'Start Topic', 'content_type': progress[0]['content_type'], 'content': progress[0]['content']}
