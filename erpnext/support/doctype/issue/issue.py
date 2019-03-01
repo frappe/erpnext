@@ -7,7 +7,7 @@ import json
 from frappe import _
 from frappe import utils
 from frappe.model.document import Document
-from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_weekdays, add_to_date, today, get_time
+from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_weekdays, add_to_date, today, get_time, get_datetime
 from datetime import datetime, timedelta
 from frappe.utils.user import is_website_user
 from ..service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
@@ -112,7 +112,7 @@ class Issue(Document):
 
 		service_level = frappe.get_doc("Service Level", service_level_agreement.service_level)
 
-		start_date_time = self.creation or now_datetime()
+		start_date_time = get_datetime(self.creation) or now_datetime()
 
 		self.response_by = get_expected_time_for('response', service_level, start_date_time)
 		self.resolution_by = get_expected_time_for('resolution', service_level, start_date_time)
@@ -152,10 +152,15 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 
 	while not expected_time_is_set:
 		current_weekday = weekdays[current_date_time.weekday()]
+		print("----------------------------------------")
+		print(allotted_days)
+		print("current_weekday  " + str(current_weekday))
 
 		if not is_holiday(current_date_time, holidays) and current_weekday in support_days:
-			start_time = current_date_time if getdate(current_date_time) == today() else support_days[current_weekday].start_time
+			print("----current_weekday  " + str(current_weekday))
+			start_time = current_date_time - datetime(current_date_time.year, current_date_time.month, current_date_time.day) if getdate(current_date_time) == getdate(today()) else support_days[current_weekday].start_time
 			end_time = support_days[current_weekday].end_time
+
 			time_left_today = time_diff_in_hours(end_time, start_time)
 
 			# no time left for support today
@@ -174,11 +179,12 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 				if expected_time_is_set:
 					expected_time = datetime.combine(getdate(current_date_time), get_time(end_time))
 
-		else:
-			print('skipping -------->', current_date_time, is_holiday(current_date_time, holidays), current_weekday in support_days)
-
+		print(current_date_time)
 		current_date_time = add_to_date(getdate(current_date_time), days=1)
-	return expected_time
+		print(str(allotted_days) + "-------------" + str(current_date_time))
+		print("----------------------------------------")
+
+	return
 
 def get_list_context(context=None):
 	return {

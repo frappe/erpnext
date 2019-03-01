@@ -19,13 +19,19 @@ class TestIssue(unittest.TestCase):
 		self.assertEquals(test_make_issue.response_by.date(), now_datetime().date()+timedelta(days=3))
 		self.assertEquals(test_make_issue.resolution_by.date(), now_datetime().date()+timedelta(days=5))
 
+
+
+
+
+
 def make_issue(issue_name):
 	issue = frappe.get_doc({
 		"doctype": "Issue",
 		"name": issue_name,
 		"subject": issue_name,
 		"raised_by": "test@example.com",
-		"customer": "_Test Customer"
+		"customer": "_Test Customer",
+		"creation": "2019-03-01 10:00:00"
 	}).insert()
 	return issue
 
@@ -33,3 +39,5 @@ def get_issue(issue_name):
 	issues = frappe.get_list("Issue", filters={"subject": issue_name}, limit=1)
 	issue = frappe.get_doc("Issue", issues[0].name)
 	return issue
+
+
