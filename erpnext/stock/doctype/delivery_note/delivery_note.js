@@ -140,7 +140,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 							},
 							get_query_filters: {
 								docstatus: 1,
-								status: ["!=", "Closed"],
+								status: ["not in", ["Closed", "On Hold"]],
 								per_delivered: ["<", 99.99],
 								company: me.frm.doc.company,
 								project: me.frm.doc.project || undefined,
