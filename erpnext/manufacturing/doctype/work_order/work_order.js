@@ -32,6 +32,14 @@ frappe.ui.form.on("Work Order", {
 			}
 		});
 
+		frm.set_query("sales_order", function() {
+			return {
+				filters: {
+					"status": ["not in", ["Closed", "On Hold"]]
+				}
+			}
+		});
+
 		frm.set_query("fg_warehouse", function() {
 			return {
 				filters: {
