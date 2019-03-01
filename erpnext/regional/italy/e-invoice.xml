@@ -199,7 +199,15 @@
         <ModalitaPagamento>{{ payment_term.mode_of_payment_code.split("-")[0] }}</ModalitaPagamento>
         <DataScadenzaPagamento>{{ payment_term.due_date }}</DataScadenzaPagamento>
         <ImportoPagamento>{{ format_float(payment_term.payment_amount) }}</ImportoPagamento>
-        {%- if payment_term.bank_account_iban %}<IBAN>{{ payment_term.bank_account_iban }}</IBAN>{%- endif %}
+        <IstitutoFinanziario>{{ payment_term.bank_account_name }}</IstitutoFinanziario>
+        {%- if payment_term.bank_account_iban %}
+          <IBAN>{{ payment_term.bank_account_iban }}</IBAN>
+          <ABI>{{ payment_term.bank_account_iban[5:10] }}</ABI>
+          <CAB>{{ payment_term.bank_account_iban[10:15] }}</CAB>
+        {%- endif %}
+        {%- if payment_term.bank_account_swift_number %}
+          <BIC>{{ payment_term.bank_account_swift_number }}</BIC>
+        {%- endif %}
       </DettaglioPagamento>
       {%- endfor %}
     </DatiPagamento>
