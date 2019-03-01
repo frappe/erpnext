@@ -10,6 +10,7 @@ import zipfile
 import frappe
 from frappe.model.document import Document
 from bs4 import BeautifulSoup as bs
+from  erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
 
 PRIMARY_ACCOUNT = "Primary"
 
@@ -19,6 +20,15 @@ class TallyMigration(Document):
 		self.tally_company = company
 		self.erpnext_company = company
 		self.status = "Preprocessed"
+
+		coa_file = frappe.get_doc({
+			"doctype": "File",
+			"file_name": "COA.json",
+			"attached_to_doctype": self.doctype,
+			"attached_to_name": self.name,
+			"content": json.dumps(chart_of_accounts_tree)
+		}).insert()
+		self.chart_of_accounts = coa_file.file_url
 		self.save()
 
 	def _process_master_data(self):
@@ -120,7 +130,19 @@ class TallyMigration(Document):
 		frappe.enqueue_doc(self.doctype, self.name, "_preprocess")
 
 	def start_import(self):
-		pass
+		def create_company_and_coa(coa_file_url):
+			coa_file = frappe.get_doc("File", {"file_url": coa_file_url})
+			frappe.local.flags.ignore_chart_of_accounts = True
+			company = frappe.get_doc({
+				"doctype": "Company",
+				"company_name": self.erpnext_company,
+				"default_currency": "INR",
+			}).insert()
+			frappe.local.flags.ignore_chart_of_accounts = False
+			create_charts(company.name, json.loads(coa_file.get_content()))
+
+		create_company_and_coa(self.chart_of_accounts)
+
 
 def sanitize(string):
 	return re.sub("&#4;", "", string)
