@@ -252,15 +252,29 @@ def sales_invoice_on_submit(doc, method):
 
 	prepare_and_attach_invoice(doc)
 
-def prepare_and_attach_invoice(doc):
-	progressive_name, progressive_number = get_progressive_name_and_number(doc)
+def prepare_and_attach_invoice(doc, replace=False):
+	progressive_name, progressive_number = get_progressive_name_and_number(doc, replace)
 
 	invoice = prepare_invoice(doc, progressive_number)
 	invoice_xml = frappe.render_template('erpnext/regional/italy/e-invoice.xml', context={"doc": invoice}, is_path=True)
 	invoice_xml = invoice_xml.replace("&", "&amp;")
 
 	xml_filename = progressive_name + ".xml"
-	save_file(xml_filename, invoice_xml, dt=doc.doctype, dn=doc.name, is_private=True)
+	return save_file(xml_filename, invoice_xml, dt=doc.doctype, dn=doc.name, is_private=True)
+
+@frappe.whitelist()
+def generate_single_invoice(docname):
+	doc = frappe.get_doc("Sales Invoice", docname)
+
+	e_invoice = prepare_and_attach_invoice(doc, True)
+
+	content = None
+	with open(frappe.get_site_path('private', 'files', e_invoice.file_name), "r") as f:
+		content = f.read()
+
+	frappe.local.response.filename = e_invoice.file_name
+	frappe.local.response.filecontent = content
+	frappe.local.response.type = "download"
 
 #Delete e-invoice attachment on cancel.
 def sales_invoice_on_cancel(doc, method):
@@ -305,7 +319,13 @@ def get_unamended_name(doc):
 	else:
 		return doc.name
 
-def get_progressive_name_and_number(doc):
+def get_progressive_name_and_number(doc, replace=False):
+	if replace:
+		for attachment in get_e_invoice_attachments(doc):
+			remove_file(attachment.name, attached_to_doctype=doc.doctype, attached_to_name=doc.name)
+			filename = attachment.file_name.split(".xml")[0]
+			return filename, filename.split("_")[1]
+
 	company_tax_id = doc.company_tax_id if doc.company_tax_id.startswith("IT") else "IT" + doc.company_tax_id
 	progressive_name = frappe.model.naming.make_autoname(company_tax_id + "_.#####")
 	progressive_number = progressive_name.split("_")[1]
