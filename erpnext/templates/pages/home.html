@@ -65,9 +65,9 @@
 	{% endif %}
 
 	{% for section in homepage_sections %}
-	{% if section.custom_html %}
+	{% if section.section_based_on == 'Custom HTML' and section.custom_html %}
 		{{ section.section_html }}
-	{% else %}
+	{% elif section.section_based_on == 'Cards' %}
 	<section class="container my-5">
 		<h3>{{ section.name }}</h3>
 
