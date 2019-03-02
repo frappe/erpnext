@@ -1,14 +1,22 @@
-<div class="media p-3 mb-3 border rounded">
-	<a href="{{ item.route }}" class="no-underline">
-		<img class="website-image-medium" src="{{ item.image or 'no-image.jpg' }}" alt="{{ item.item_name }}">
-	</a>
-	<div class="media-body ml-3">
-		<h5 class="mt-0">
-			<a class="text-dark" href="{{ item.route }}">
-				{{ item.item_name }}
-			</a>
-		</h5>
-		<p>{{ item.description }}</p>
-		<a href="{{ item.route }}" class="btn btn-sm btn-light">{{ _('More details') }}</a>
+<div class="card mb-3">
+	<div class="row no-gutters">
+		<div class="col-md-3">
+			<div class="card-body">
+				<a class="no-underline" href="{{ item.route }}">
+					<img class="website-image" src="{{ item.website_image or item.image or 'no-image.jpg' }}" alt="{{ item.item_name }}">
+				</a>
+			</div>
+		</div>
+		<div class="col-md-9">
+			<div class="card-body">
+				<h5 class="card-title">
+					<a class="text-dark" href="{{ item.route }}">
+						{{ item.item_name }}
+					</a>
+				</h5>
+				<p class="card-text">{{ item.description }}</p>
+				<a href="{{ item.route }}" class="btn btn-sm btn-light">{{ _('More details') }}</a>
+			</div>
+		</div>
 	</div>
 </div>
