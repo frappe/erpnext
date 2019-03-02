@@ -43,3 +43,9 @@ def execute():
 				from `tab{dt} Item` d where d.parent = m.name and d.parenttype = '{dt}'
 			)
 		""".format(dt=dt))
+
+	frappe.db.sql("""
+		update `tabStock Entry Detail`
+		set alt_uom_size = 1, alt_uom_qty = transfer_qty
+		where ifnull(alt_uom, '') = ''
+	""")
