@@ -72,6 +72,15 @@ def make_customer():
 
 def make_company():
 
+	if frappe.db.exists("Company", "_Test Company GST"):
+		return
+	company = frappe.new_doc("Company")
+	company.company_name = "_Test Company GST"
+	company.abbr = "_GST"
+	company.default_currency = "INR"
+	company.country = "India"
+	company.insert()
+
 	if not frappe.db.exists('Address', '_Test Address-Billing'):
 		address = frappe.get_doc({
 			"address_line1": "_Test Address Line 1",
@@ -94,15 +103,6 @@ def make_company():
 		})
 
 		address.save()
-
-	if frappe.db.exists("Company", "_Test Company GST"):
-		return
-	company = frappe.new_doc("Company")
-	company.company_name = "_Test Company GST"
-	company.abbr = "_GST"
-	company.default_currency = "INR"
-	company.country = "India"
-	company.insert()
 
 def set_account_heads():
 
