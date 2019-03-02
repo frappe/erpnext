@@ -20,6 +20,10 @@ def get_context(context):
 	context.title = homepage.title
 	context.homepage = homepage
 
+	context.metatags = context.metatags or frappe._dict({})
+	context.metatags.image = homepage.hero_image or None
+	context.metatags.description = homepage.description or None
+
 	if homepage.slideshow:
 		doc = frappe.get_doc('Website Slideshow', homepage.slideshow)
 		context.slideshow = homepage.slideshow
