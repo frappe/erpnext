@@ -107,20 +107,56 @@
 		</tr>
 		<tr>
 			<td>Suppliies made to Composition Taxable Persons</td>
-			<td></td>
-			<td></td>
-			<td></td>
+			<td>
+				{% for row in data.inter_sup.unreg_details %}
+					{% if row %}
+						{{ row.pos }}<br>
+					{% endif %}
+				{% endfor %}
+			</td>
+			<td>
+				{% for row in data.inter_sup.unreg_details %}
+					{% if row %}
+						{{ row.txval }}<br>
+					{% endif %}
+				{% endfor %}
+			</td>
+			<td>
+				{% for row in data.inter_sup.unreg_details %}
+					{% if row %}
+						{{ row.iamt }}<br>
+					{% endif %}
+				{% endfor %}
+			</td>
 		</tr>
 		<tr>
 			<td>Supplies made to UIN holders</td>
-			<td></td>
-			<td></td>
-			<td></td>
+			<td>
+				{% for row in data.inter_sup.unreg_details %}
+					{% if row %}
+						{{ row.pos }}<br>
+					{% endif %}
+				{% endfor %}
+			</td>
+			<td>
+				{% for row in data.inter_sup.unreg_details %}
+					{% if row %}
+						{{ row.txval }}<br>
+					{% endif %}
+				{% endfor %}
+			</td>
+			<td>
+				{% for row in data.inter_sup.unreg_details %}
+					{% if row %}
+						{{ row.iamt }}<br>
+					{% endif %}
+				{% endfor %}
+			</td>
 		</tr>
 	</tbody>
 </table>
 
-<h5>4. &nbsp&nbspEligible ITC</h5>
+<h5>4. &nbsp Eligible ITC</h5>
 <table class="table table-bordered">
 		<thead>
 			<tr>
@@ -211,17 +247,17 @@
 			</tr>
 			<tr>
 				<td>&nbsp (1) As per section 17(5)</td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
+				<td>{{ data.itc_elg.itc_inelg[0].iamt }}</td>
+				<td>{{ data.itc_elg.itc_inelg[0].camt }}</td>
+				<td>{{ data.itc_elg.itc_inelg[0].samt }}</td>
+				<td>{{ data.itc_elg.itc_inelg[0].csamt }}</td>
 			</tr>
 			<tr>
 				<td>&nbsp (2) Others</td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
+				<td>{{ data.itc_elg.itc_inelg[1].iamt }}</td>
+				<td>{{ data.itc_elg.itc_inelg[1].camt }}</td>
+				<td>{{ data.itc_elg.itc_inelg[1].samt }}</td>
+				<td>{{ data.itc_elg.itc_inelg[1].csamt }}</td>
 			</tr>
 		</tbody>
 	</table>
@@ -238,8 +274,13 @@
 		<tbody>
 			<tr>
 				<td>From a supplier under composition scheme, Exempt and Nil rated</td>
-				<td></td>
-				<td></td>
+				<td>{{ data.inward_sup.isup_details[0].inter }}</td>
+				<td>{{ data.inward_sup.isup_details[0].intra }}</td>
+			</tr>
+			<tr>
+				<td>Non GST Inward Supplies</td>
+				<td>{{ data.inward_sup.isup_details[1].inter }}</td>
+				<td>{{ data.inward_sup.isup_details[1].intra }}</td>
 			</tr>
 		</tbody>
 	</table>
