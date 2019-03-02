@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import json
 import re
+import traceback
 import zipfile
 import frappe
 from frappe.model.document import Document
@@ -17,6 +18,7 @@ PRIMARY_ACCOUNT = "Primary"
 class TallyMigration(Document):
 	def _preprocess(self):
 		company, chart_of_accounts_tree, customers, suppliers = self._process_master_data()
+		parties, addresses = self._process_parties(customers, suppliers)
 		self.tally_company = company
 		self.erpnext_company = company
 		self.status = "Preprocessed"
@@ -29,6 +31,25 @@ class TallyMigration(Document):
 			"content": json.dumps(chart_of_accounts_tree)
 		}).insert()
 		self.chart_of_accounts = coa_file.file_url
+
+		parties_file = frappe.get_doc({
+			"doctype": "File",
+			"file_name": "Parties.json",
+			"attached_to_doctype": self.doctype,
+			"attached_to_name": self.name,
+			"content": json.dumps(parties)
+		}).insert()
+		self.parties = parties_file.file_url
+
+		addresses_file = frappe.get_doc({
+			"doctype": "File",
+			"file_name": "Addresses.json",
+			"attached_to_doctype": self.doctype,
+			"attached_to_name": self.name,
+			"content": json.dumps(addresses)
+		}).insert()
+		self.addresses = addresses_file.file_url
+
 		self.save()
 
 	def _process_master_data(self):
@@ -93,6 +114,7 @@ class TallyMigration(Document):
 			for parent, account, is_group in accounts:
 				children.setdefault(parent, set()).add(account)
 				parents.setdefault(account, set()).add(parent)
+				parents[account].update(parents.get(parent, []))
 			return children, parents
 
 		def remove_parties(parents, children, group_set):
@@ -105,7 +127,7 @@ class TallyMigration(Document):
 				elif self.tally_debtors_account in parents[account]:
 					children.pop(account, None)
 					if account not in group_set:
-							suppliers.add(account)
+						suppliers.add(account)
 			return children, customers, suppliers
 
 		def traverse(tree, children, accounts, roots, group_set):
@@ -126,10 +148,63 @@ class TallyMigration(Document):
 
 		return company, chart_of_accounts_tree, customer_names, supplier_names
 
+	def _process_parties(self, customers, suppliers):
+		def get_master_collection(master_data):
+			master_file = frappe.get_doc("File", {"file_url": master_data})
+
+			with zipfile.ZipFile(master_file.get_full_path()) as zf:
+				content = zf.read(zf.namelist()[0]).decode("utf-16")
+
+			master = bs(sanitize(emptify(content)), "xml")
+			collection = master.BODY.IMPORTDATA.REQUESTDATA
+			return collection
+
+		def get_parties_addresses(collection, customers, suppliers):
+			parties, addresses = [], []
+			for account in collection.find_all("LEDGER"):
+				party_type = None
+				if account.NAME.string in customers:
+					party_type = "Customer"
+					parties.append({
+						"doctype": party_type,
+						"customer_name": account.NAME.string,
+						"tax_id": account.INCOMETAXNUMBER.string if account.INCOMETAXNUMBER else None,
+						"customer_group": "All Customer Groups",
+						"territory": "All Territories",
+						"customer_type": "Individual",
+					})
+				elif account.NAME.string in suppliers:
+					party_type = "Supplier"
+					parties.append({
+						"doctype": party_type,
+						"supplier_name": account.NAME.string,
+						"pan": account.INCOMETAXNUMBER.string if account.INCOMETAXNUMBER else None,
+						"supplier_group": "All Supplier Groups",
+						"supplier_type": "Individual",
+					})
+				if party_type:
+					address = "\n".join([a.string for a in account.find_all("ADDRESS")[:2]])
+					addresses.append({
+						"doctype": "Address",
+						"address_line1": address[:140].strip(),
+						"address_line2": address[140:].strip(),
+						"country": account.COUNTRYNAME.string if account.COUNTRYNAME else None,
+						"state": account.STATENAME.string if account.STATENAME else None,
+						"gst_state": account.STATENAME.string if account.STATENAME else None,
+						"pin_code": account.PINCODE.string if account.PINCODE else None,
+						"gstin": account.PARTYGSTIN.string if account.PARTYGSTIN else None,
+						"links": [{"link_doctype": party_type, "link_name": account["NAME"]}],
+					})
+			return parties, addresses
+
+		collection = get_master_collection(self.master_data)
+		parties, addresses = get_parties_addresses(collection, customers, suppliers)
+		return parties, addresses
+
 	def preprocess(self):
 		frappe.enqueue_doc(self.doctype, self.name, "_preprocess")
 
-	def start_import(self):
+	def _start_import(self):
 		def create_company_and_coa(coa_file_url):
 			coa_file = frappe.get_doc("File", {"file_url": coa_file_url})
 			frappe.local.flags.ignore_chart_of_accounts = True
@@ -141,8 +216,30 @@ class TallyMigration(Document):
 			frappe.local.flags.ignore_chart_of_accounts = False
 			create_charts(company.name, json.loads(coa_file.get_content()))
 
-		create_company_and_coa(self.chart_of_accounts)
+		def create_parties_addresses(parties_file_url, addresses_file_url):
+			parties_file = frappe.get_doc("File", {"file_url": parties_file_url})
+			for party in json.loads(parties_file.get_content()):
+				try:
+					frappe.get_doc(party).insert()
+				except:
+					log(party)
+			addresses_file = frappe.get_doc("File", {"file_url": addresses_file_url})
+			for address in json.loads(addresses_file.get_content()):
+				try:
+					frappe.get_doc(address).insert(ignore_mandatory=True)
+				except:
+					log(address)
 
+		create_company_and_coa(self.chart_of_accounts)
+		create_parties_addresses(self.parties, self.addresses)
+
+	def start_import(self):
+		frappe.enqueue_doc(self.doctype, self.name, "_start_import")
+
+
+def log(data=None):
+	message = json.dumps({"data": data, "exception": traceback.format_exc()}, indent=4)
+	frappe.log_error(title="Tally Migration Error", message=message)
 
 def sanitize(string):
 	return re.sub("&#4;", "", string)
