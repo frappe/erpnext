@@ -189,9 +189,11 @@ class TallyMigration(Document):
 						"address_line1": address[:140].strip(),
 						"address_line2": address[140:].strip(),
 						"country": account.COUNTRYNAME.string if account.COUNTRYNAME else None,
-						"state": account.STATENAME.string if account.STATENAME else None,
-						"gst_state": account.STATENAME.string if account.STATENAME else None,
+						"state": account.LEDSTATENAME.string if account.LEDSTATENAME else None,
+						"gst_state": account.LEDSTATENAME.string if account.LEDSTATENAME else None,
 						"pin_code": account.PINCODE.string if account.PINCODE else None,
+						"mobile": account.LEDGERPHONE.string if account.LEDGERPHONE else None,
+						"phone": account.LEDGERPHONE.string if account.LEDGERPHONE else None,
 						"gstin": account.PARTYGSTIN.string if account.PARTYGSTIN else None,
 						"links": [{"link_doctype": party_type, "link_name": account["NAME"]}],
 					})
