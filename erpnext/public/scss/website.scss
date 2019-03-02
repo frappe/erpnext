@@ -8,17 +8,9 @@
 	margin-right: 1rem;
 }
 
-.product-image.no-image {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	font-size: 3rem;
-	color: var(--gray);
-	background: $light;
-}
-
-.product-image a {
-	text-decoration: none;
+.product-image img {
+	min-height: 20rem;
+	max-height: 30rem;
 }
 
 .filter-options {

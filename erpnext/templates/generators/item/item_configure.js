@@ -243,6 +243,7 @@ function set_continue_configuration() {
 
 frappe.ready(() => {
 	const $btn_configure = $('.btn-configure');
+	if (!$btn_configure.length) return;
 	const { itemCode, itemName } = $btn_configure.data();
 
 	set_continue_configuration();
