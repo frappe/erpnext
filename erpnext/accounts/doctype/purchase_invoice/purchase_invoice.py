@@ -52,6 +52,7 @@ class PurchaseInvoice(BuyingController):
 		}]
 
 	def onload(self):
+		super(PurchaseInvoice, self).onload()
 		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
 		self.set_onload("supplier_tds", supplier_tds)
 
