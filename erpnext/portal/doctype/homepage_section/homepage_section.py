@@ -5,6 +5,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils import cint
 
 class HomepageSection(Document):
-	pass
+	@property
+	def column_value(self):
+		return cint(12 / cint(self.no_of_columns or 3))

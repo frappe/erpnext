@@ -20,9 +20,8 @@ def get_context(context):
 	context.title = homepage.title
 	context.homepage = homepage
 
-	context.metatags = context.metatags or frappe._dict({})
-	context.metatags.image = homepage.hero_image or None
-	context.metatags.description = homepage.description or None
+	if homepage.hero_section_based_on == 'Homepage Section' and homepage.hero_section:
+		homepage.hero_section_doc = frappe.get_doc('Homepage Section', homepage.hero_section)
 
 	if homepage.slideshow:
 		doc = frappe.get_doc('Website Slideshow', homepage.slideshow)
@@ -39,12 +38,16 @@ def get_context(context):
 		limit=3
 	)
 
-	context.email = frappe.db.get_single_value('Contact Us Settings', 'email_id')
-	context.phone = frappe.db.get_single_value('Contact Us Settings', 'phone')
-	context.explore_link = '/products'
-
-	homepage_sections = frappe.get_all('Homepage Section', order_by='section_order asc')
+	# filter out homepage section which is used as hero section
+	homepage_hero_section = homepage.hero_section_based_on == 'Homepage Section' and homepage.hero_section
+	homepage_sections = frappe.get_all('Homepage Section',
+		filters=[['name', '!=', homepage_hero_section]] if homepage_hero_section else None,
+		order_by='section_order asc'
+	)
 	context.homepage_sections = [frappe.get_doc('Homepage Section', name) for name in homepage_sections]
 
-	for section in context.homepage_sections:
-		section.column_value = cint(12 / cint(section.no_of_columns or 3))
+	context.metatags = context.metatags or frappe._dict({})
+	context.metatags.image = homepage.hero_image or None
+	context.metatags.description = homepage.description or None
+
+	context.explore_link = '/products'
