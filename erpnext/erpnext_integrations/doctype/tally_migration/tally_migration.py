@@ -19,6 +19,7 @@ class TallyMigration(Document):
 	def _preprocess(self):
 		company, chart_of_accounts_tree, customers, suppliers = self._process_master_data()
 		parties, addresses = self._process_parties(customers, suppliers)
+		items, uoms = self._process_stock_items()
 		self.tally_company = company
 		self.erpnext_company = company
 		self.status = "Preprocessed"
@@ -50,18 +51,38 @@ class TallyMigration(Document):
 		}).insert()
 		self.addresses = addresses_file.file_url
 
+		uoms_file = frappe.get_doc({
+			"doctype": "File",
+			"file_name": "UOMs.json",
+			"attached_to_doctype": self.doctype,
+			"attached_to_name": self.name,
+			"content": json.dumps(uoms)
+		}).insert()
+		self.uoms = uoms_file.file_url
+
+		items_file = frappe.get_doc({
+			"doctype": "File",
+			"file_name": "Items.json",
+			"attached_to_doctype": self.doctype,
+			"attached_to_name": self.name,
+			"content": json.dumps(items)
+		}).insert()
+		self.items = items_file.file_url
+
+
 		self.save()
 
+	def get_master_collection(self):
+		master_file = frappe.get_doc("File", {"file_url": self.master_data})
+
+		with zipfile.ZipFile(master_file.get_full_path()) as zf:
+			content = zf.read(zf.namelist()[0]).decode("utf-16")
+
+		master = bs(sanitize(emptify(content)), "xml")
+		collection = master.BODY.IMPORTDATA.REQUESTDATA
+		return collection
+
 	def _process_master_data(self):
-		def get_master_collection(master_data):
-			master_file = frappe.get_doc("File", {"file_url": master_data})
-
-			with zipfile.ZipFile(master_file.get_full_path()) as zf:
-				content = zf.read(zf.namelist()[0]).decode("utf-16")
-
-			master = bs(sanitize(emptify(content)), "xml")
-			collection = master.BODY.IMPORTDATA.REQUESTDATA
-			return collection
 
 		def get_company_name(collection):
 			return collection.find_all("REMOTECMPINFO.LIST")[0].REMOTECMPNAME.string
@@ -141,7 +162,7 @@ class TallyMigration(Document):
 					tree[account] = {}
 			return tree
 
-		collection = get_master_collection(self.master_data)
+		collection = self.get_master_collection()
 
 		company = get_company_name(collection)
 		chart_of_accounts_tree, customer_names, supplier_names = get_coa_customers_suppliers(collection)
@@ -149,16 +170,6 @@ class TallyMigration(Document):
 		return company, chart_of_accounts_tree, customer_names, supplier_names
 
 	def _process_parties(self, customers, suppliers):
-		def get_master_collection(master_data):
-			master_file = frappe.get_doc("File", {"file_url": master_data})
-
-			with zipfile.ZipFile(master_file.get_full_path()) as zf:
-				content = zf.read(zf.namelist()[0]).decode("utf-16")
-
-			master = bs(sanitize(emptify(content)), "xml")
-			collection = master.BODY.IMPORTDATA.REQUESTDATA
-			return collection
-
 		def get_parties_addresses(collection, customers, suppliers):
 			parties, addresses = [], []
 			for account in collection.find_all("LEDGER"):
@@ -199,9 +210,28 @@ class TallyMigration(Document):
 					})
 			return parties, addresses
 
-		collection = get_master_collection(self.master_data)
+		collection = self.get_master_collection()
 		parties, addresses = get_parties_addresses(collection, customers, suppliers)
 		return parties, addresses
+
+	def _process_stock_items(self):
+		collection = self.get_master_collection()
+		uoms = []
+		for uom in collection.find_all("UNIT"):
+			uoms.append({"doctype": "UOM", "uom_name": uom.NAME.string})
+
+		items = []
+		for item in collection.find_all("STOCKITEM"):
+			hsn_code = item.find_all("GSTDETAILS.LIST")[0].HSNCODE
+			items.append({
+				"doctype": "Item",
+				"item_code" : item.NAME.string,
+				"stock_uom": item.BASEUNITS.string,
+				"gst_hsn_code": hsn_code.string if hsn_code else None,
+				"is_stock_item": 0,
+				"item_group": "All Item Groups",
+			})
+		return items, uoms
 
 	def preprocess(self):
 		frappe.enqueue_doc(self.doctype, self.name, "_preprocess")
@@ -232,8 +262,24 @@ class TallyMigration(Document):
 				except:
 					log(address)
 
+		def create_items_uoms(items_file_url, uoms_file_url):
+			uoms_file = frappe.get_doc("File", {"file_url": uoms_file_url})
+			for uom in json.loads(uoms_file.get_content()):
+				try:
+					frappe.get_doc(uom).insert()
+				except:
+					log(uom)
+
+			items_file = frappe.get_doc("File", {"file_url": items_file_url})
+			for item in json.loads(items_file.get_content()):
+				try:
+					frappe.get_doc(item).insert()
+				except:
+					log(item)
+
 		create_company_and_coa(self.chart_of_accounts)
 		create_parties_addresses(self.parties, self.addresses)
+		create_items_uoms(self.items, self.uoms)
 
 	def start_import(self):
 		frappe.enqueue_doc(self.doctype, self.name, "_start_import")
