@@ -94,6 +94,12 @@ def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
 		fieldtype='Data', fetch_from='item_code.gst_hsn_code', insert_after='description',
 		allow_on_submit=1, print_hide=1)
+	nil_rated_exempt = dict(fieldname='is_nil_exempt', label='Is nil rated or exempted',
+		fieldtype='Check', fetch_from='item_code.is_nil_exempt', insert_after='gst_hsn_code',
+		print_hide=1)
+	is_non_gst = dict(fieldname='is_non_gst', label='Is Non GST',
+		fieldtype='Check', fetch_from='item_code.is_non_gst', insert_after='is_nil_exempt',
+		print_hide=1)
 	invoice_gst_fields = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
 			insert_after='language', print_hide=1, collapsible=1),
@@ -105,15 +111,15 @@ def make_custom_fields(update=True):
 			options='Y\nN', default='N'),
 		dict(fieldname='export_type', label='Export Type',
 			fieldtype='Select', insert_after='gst_category', print_hide=1,
-			depends_on='eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.invoice_type)',
+			depends_on='eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
 			options='\nWith Payment of Tax\nWithout Payment of Tax'),
 		dict(fieldname='ecommerce_gstin', label='E-commerce GSTIN',
 			fieldtype='Data', insert_after='export_type', print_hide=1),
-		dict(fieldname='gst_col_break', fieldtype='Column Break', insert_after='ecommerce_gstin'),
 		dict(fieldname='reason_for_issuing_document', label='Reason For Issuing document',
-			fieldtype='Select', insert_after='gst_col_break', print_hide=1,
+			fieldtype='Select', insert_after='ecommerce_gstin', print_hide=1,
 			depends_on='eval:doc.is_return==1',
-			options='\n01-Sales Return\n02-Post Sale Discount\n03-Deficiency in services\n04-Correction in Invoice\n05-Change in POS\n06-Finalization of Provisional assessment\n07-Others')
+			options='\n01-Sales Return\n02-Post Sale Discount\n03-Deficiency in services\n04-Correction in Invoice\n05-Change in POS\n06-Finalization of Provisional assessment\n07-Others'),
+		dict(fieldname='gst_col_break', fieldtype='Column Break', insert_after='reason_for_issuing_document')
 	]
 
 	purchase_invoice_gst_fields = [
@@ -133,7 +139,7 @@ def make_custom_fields(update=True):
 
 	purchase_invoice_itc_fields = [
 			dict(fieldname='eligibility_for_itc', label='Eligibility For ITC',
-				fieldtype='Select', insert_after='reason_for_issuing_document', print_hide=1,
+				fieldtype='Select', insert_after='gst_col_break', print_hide=1,
 				options='Input Service Distributor\nImport Of Service\nImport Of Capital Goods\nIneligible\nOther', default="Ineligible"),
 			dict(fieldname='itc_integrated_tax', label='Availed ITC Integrated Tax',
 				fieldtype='Data', insert_after='eligibility_for_itc', print_hide=1),
@@ -166,13 +172,13 @@ def make_custom_fields(update=True):
 	sales_invoice_shipping_fields = [
 			dict(fieldname='port_code', label='Port Code',
 				fieldtype='Data', insert_after='reason_for_issuing_document', print_hide=1,
-				depends_on="eval:doc.invoice_type=='Export' "),
+				depends_on="eval:doc.gst_category=='Overseas' "),
 			dict(fieldname='shipping_bill_number', label=' Shipping Bill Number',
 				fieldtype='Data', insert_after='port_code', print_hide=1,
-				depends_on="eval:doc.invoice_type=='Export' "),
+				depends_on="eval:doc.gst_category=='Overseas' "),
 			dict(fieldname='shipping_bill_date', label='Shipping Bill Date',
 				fieldtype='Date', insert_after='shipping_bill_number', print_hide=1,
-				depends_on="eval:doc.invoice_type=='Export' ")
+				depends_on="eval:doc.gst_category=='Overseas' ")
 		]
 
 	inter_state_gst_field = [
@@ -237,15 +243,19 @@ def make_custom_fields(update=True):
 		'Item': [
 			dict(fieldname='gst_hsn_code', label='HSN/SAC',
 				fieldtype='Link', options='GST HSN Code', insert_after='item_group'),
+			dict(fieldname='is_nil_exempt', label='Is nil rated or exempted',
+				fieldtype='Check', insert_after='gst_hsn_code'),
+			dict(fieldname='is_non_gst', label='Is Non GST ',
+				fieldtype='Check', insert_after='is_nil_exempt')
 		],
-		'Quotation Item': [hsn_sac_field],
-		'Supplier Quotation Item': [hsn_sac_field],
-		'Sales Order Item': [hsn_sac_field],
-		'Delivery Note Item': [hsn_sac_field],
-		'Sales Invoice Item': [hsn_sac_field],
-		'Purchase Order Item': [hsn_sac_field],
-		'Purchase Receipt Item': [hsn_sac_field],
-		'Purchase Invoice Item': [hsn_sac_field],
+		'Quotation Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Supplier Quotation Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Sales Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Delivery Note Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Sales Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Purchase Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Purchase Receipt Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Purchase Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Employee': [
 			dict(fieldname='ifsc_code', label='IFSC Code',
 				fieldtype='Data', insert_after='bank_ac_no', print_hide=1,
@@ -310,7 +320,7 @@ def make_custom_fields(update=True):
 				'label': 'GST Category',
 				'fieldtype': 'Select',
 				'insert_after': 'gst_transporter_id',
-				'options': 'Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas',
+				'options': 'Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nUIN Holders',
 				'default': 'Unregistered'
 			}
 		],
@@ -320,12 +330,11 @@ def make_custom_fields(update=True):
 				'label': 'GST Category',
 				'fieldtype': 'Select',
 				'insert_after': 'customer_type',
-				'options': 'Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export',
+				'options': 'Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
 				'default': 'Unregistered'
 			}
 		]
 	}
-
 	create_custom_fields(custom_fields, ignore_validate = frappe.flags.in_patch, update=update)
 
 def make_fixtures(company=None):
