@@ -436,12 +436,16 @@ def get_company_gst_details(address):
 
 def get_account_heads(company):
 
-	return frappe.get_all("GST Account",
+	account_heads =  frappe.get_all("GST Account",
 		fields=["cgst_account", "sgst_account", "igst_account", "cess_account"],
 		filters={
 			"company":company
-		})[0]
+		})
 
+	if account_heads:
+		return account_heads[0]
+	else:
+		frappe.throw("Please set account heads in GST Settings for Compnay {0}".format(company))
 
 @frappe.whitelist()
 def view_report(name):
