@@ -21,6 +21,7 @@ def execute():
 	frappe.reload_doc('stock', 'doctype', 'purchase_receipt_item')
 	frappe.reload_doc('accounts', 'doctype', 'purchase_invoice')
 	frappe.reload_doc('accounts', 'doctype', 'purchase_invoice_item')
+	frappe.reload_doc('stock', 'doctype', 'stock_entry_detail')
 
 	doctypes = [
 		'Sales Order', 'Delivery Note', 'Sales Invoice',
