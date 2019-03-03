@@ -7,6 +7,7 @@ import frappe
 import unittest
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.stock.doctype.item.test_item import make_item
 import json
 
 class TestGSTR3BReport(unittest.TestCase):
@@ -17,10 +18,10 @@ class TestGSTR3BReport(unittest.TestCase):
 		frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company GST'")
 
 		make_company()
+		make_item("Milk", properties = {"is_nil_exempt": 1})
 		set_account_heads()
 		make_customers()
 		make_suppliers()
-		make_items()
 		make_sales_invoice()
 		create_purchase_invoices()
 
@@ -155,19 +156,6 @@ def create_purchase_invoices():
 		)
 
 	pi1.submit()
-
-
-def make_items():
-
-	if not frappe.get_doc("Item", "Milk"):
-		item = frappe.get_doc({
-			"doctype": "Item",
-			"item_code": "Milk",
-			"item_name": "Milk",
-			"description": "Milk",
-			"item_group": "Products",
-			"is_nil_exempt": 1
-		}).insert()
 
 def make_suppliers():
 
