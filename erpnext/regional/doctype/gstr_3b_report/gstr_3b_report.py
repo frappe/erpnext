@@ -8,12 +8,15 @@ from frappe.model.document import Document
 import json
 from six import iteritems
 from frappe.utils import flt, getdate
+from erpnext.regional.india import state_numbers
 
 class GSTR3BReport(Document):
 	def before_save(self):
+
 		self.get_data()
 
 	def get_data(self):
+
 		self.report_dict = {
 			"gstin": "",
 			"ret_period": "",
@@ -146,6 +149,8 @@ class GSTR3BReport(Document):
 		self.set_inter_state_supply(inter_state_supplies)
 		self.set_inward_nil_exempt(inward_nil_exempt)
 
+		self.missing_field_invoices = get_missing_field_invoices(self.month, self.year)
+
 		self.json_output = frappe.as_json(self.report_dict)
 
 	def set_inward_nil_exempt(self, inward_nil_exempt):
@@ -161,7 +166,7 @@ class GSTR3BReport(Document):
 			'IMPG': 'Import Of Capital Goods',
 			'IMPS': 'Import Of Service',
 			'ISD': 'Input Service Distributor',
-			'OTH': 'Others'
+			'OTH': 'Other'
 		}
 
 		net_itc = self.report_dict["itc_elg"]["itc_net"]
@@ -184,10 +189,10 @@ class GSTR3BReport(Document):
 			d["csamt"] = flt(itc_details.get((itc_type_map.get(d["ty"]), reverse_charge), {}).get("itc_csamt"))
 			net_itc["csamt"] += d["csamt"]
 
-		self.report_dict["itc_elg"]["itc_inelg"][1]["iamt"] = flt(itc_details.get(('Ineligible','N'), {}).get("itc_iamt"))
-		self.report_dict["itc_elg"]["itc_inelg"][1]["camt"] = flt(itc_details.get(('Ineligible','N'), {}).get("itc_camt"))
-		self.report_dict["itc_elg"]["itc_inelg"][1]["samt"] = flt(itc_details.get(('Ineligible','N'), {}).get("itc_samt"))
-		self.report_dict["itc_elg"]["itc_inelg"][1]["csamt"] = flt(itc_details.get(('Ineligible','N'), {}).get("itc_csamt"))
+		self.report_dict["itc_elg"]["itc_inelg"][1]["iamt"] = flt(itc_details.get(("Ineligible","N"), {}).get("itc_iamt"))
+		self.report_dict["itc_elg"]["itc_inelg"][1]["camt"] = flt(itc_details.get(("Ineligible","N"), {}).get("itc_camt"))
+		self.report_dict["itc_elg"]["itc_inelg"][1]["samt"] = flt(itc_details.get(("Ineligible","N"), {}).get("itc_samt"))
+		self.report_dict["itc_elg"]["itc_inelg"][1]["csamt"] = flt(itc_details.get(("Ineligible","N"), {}).get("itc_csamt"))
 
 	def prepare_data(self, doctype, tax_details, supply_type, supply_category, gst_category_list, reverse_charge="N"):
 
@@ -235,45 +240,7 @@ def get_total_taxable_value(doctype, month, year, reverse_charge):
 
 def get_state_code(state):
 
-	state_code = {
-		"Jammu & Kashmir": "01",
-		"Himachal Pradesh": "02",
-		"Punjab": "03",
-		"Chandigarh": "04",
-		"Uttarakhand": "05",
-		"Haryana": "06",
-		"Delhi": "07",
-		"Rajasthan": "08",
-		"Uttar Pradesh": "09",
-		"Bihar": "10",
-		"Sikkim": "11",
-		"Arunachal Pradesh": "12",
-		"Nagaland": "13",
-		"Manipur": "14",
-		"Mizoram": "15",
-		"Tripura": "16",
-		"Meghalaya": "17",
-		"Assam": "18",
-		"West Bengal": "19",
-		"Jharkhand": "20",
-		"Orissa": "21",
-		"Chhattisgarh": "22",
-		"Madhya Pradesh": "23",
-		"Gujarat": "24",
-		"Daman & Diu": "25",
-		"Dadra & Nagar Haveli": "26",
-		"Maharashtra": "27",
-		"Andhra Pradesh": "28",
-		"Karnataka": "29",
-		"Goa": "30",
-		"Lakshadweep": "31",
-		"Kerala": "32",
-		"Tamil Nadu": "33",
-		"Puducherry": "34",
-		"Andaman & Nicobar Islands": "35",
-		"Telengana": "36",
-		"Andrapradesh(New)": "37"
-	}.get(state)
+	state_code = state_numbers[state]
 
 	return state_code
 
@@ -446,6 +413,24 @@ def get_account_heads(company):
 		return account_heads[0]
 	else:
 		frappe.throw("Please set account heads in GST Settings for Compnay {0}".format(company))
+
+def get_missing_field_invoices(month, year):
+
+	month_no = get_period(month)
+
+	missing_field_invoices = []
+
+	for doctype in ["Sales Invoice", "Purchase Invoice"]:
+		docnames = frappe.db.sql("""
+			select name from `tab{doctype}`
+			where docstatus = 1 and month(posting_date) = %s and year(posting_date) = %s
+			and place_of_supply IS NULL
+		""".format(doctype = doctype), (month_no, year), as_dict=1) #nosec
+
+		for d in docnames:
+			missing_field_invoices.append(d.name)
+
+	return ",".join(missing_field_invoices)
 
 @frappe.whitelist()
 def view_report(name):
