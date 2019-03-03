@@ -128,13 +128,27 @@
 <div class="row">
 	<div class="col-12">
 		{% if frappe.form_dict.start|int > 0 %}
-		<a class="btn btn-outline-secondary" href="/{{ pathname }}?start={{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</a>
+		<button class="btn btn-outline-secondary btn-prev" data-start="{{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</button>
 		{% endif %}
 		{% if items|length >= page_length %}
-		<a class="btn btn-outline-secondary" href="/{{ pathname }}?start={{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</a>
+		<button class="btn btn-outline-secondary btn-next" data-start="{{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</button>
 		{% endif %}
 	</div>
 </div>
+
+<script>
+	frappe.ready(() => {
+		$('.btn-prev, .btn-next').click((e) => {
+			const $btn = $(e.target);
+			$btn.prop('disabled', true);
+			const start = $btn.data('start');
+			let query_params = frappe.utils.get_query_params();
+			query_params.start = start;
+			let path = window.location.pathname + '?' + frappe.utils.get_url_from_dict(query_params);
+			window.location.href = path;
+		});
+	});
+</script>
 
 {% endblock %}
 

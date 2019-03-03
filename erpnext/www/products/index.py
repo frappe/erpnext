@@ -336,79 +336,84 @@ def get_items(filters=None, search=None):
 	if isinstance(filters, dict):
 		filters = [['Item', fieldname, '=', value] for fieldname, value in filters.items()]
 
-	or_filters = None
-
+	show_in_website_condition = ''
 	if products_settings.only_search_item_templates:
-		filters.append(['Item', 'has_variants', '=', 1])
-		filters.append(['Item', 'show_in_website', '=', 1])
+		show_in_website_condition = get_conditions({'show_in_website': 1 }, 'and')
+	else:
+		show_in_website_condition = get_conditions([
+			['show_in_website', '=', 1],
+			['show_variant_in_website', '=', 1]
+		], 'or')
 
+	search_condition = ''
 	if search:
 		search = '%{}%'.format(search)
-		or_filters = {
-			'name': ['like', search],
-			'item_name': ['like', search],
-			'description': ['like', search],
-			'item_group': ['like', search]
-		}
+		or_filters = [
+			['name', 'like', search],
+			['item_name', 'like', search],
+			['description', 'like', search],
+			['item_group', 'like', search]
+		]
+		search_condition = get_conditions(or_filters, 'or')
 
-	return frappe.get_all('Item',
-		fields=['name', 'item_name', 'image', 'route', 'description'],
-		filters=filters,
-		or_filters=or_filters,
-		start=start,
-		page_length=page_length,
-		group_by='name',
-		order_by='weightage desc'
+	filter_condition = get_conditions(filters, 'and')
+
+	where_conditions = ' and '.join(
+		[condition for condition in [show_in_website_condition, search_condition, filter_condition] if condition]
 	)
 
+	left_joins = []
+	for f in filters:
+		if len(f) == 4 and f[0] != 'Item':
+			left_joins.append(f[0])
 
-def nested_filters():
-	sql_string = parse_nested_filters('Item',
-		['and', [
-			['has_variant', '=', 1],
-			['show_in_website', '=', 0],
-			['or', [
-				['variant_of', '=', 'test'],
-				['item_group', '=', 'product'],
-				['and', [
-					['item_code', '>', 'hello'],
-					['item_code', '<', 'test']
-				]]
-			]]
-		]]
-	)
+	left_join = ' '.join(['LEFT JOIN `tab{0}` on (`tab{0}`.parent = `tabItem`.name)'.format(l) for l in left_joins])
 
-	print(sql_string)
+	results = frappe.db.sql('''
+		SELECT
+			`tabItem`.`name`, `tabItem`.`item_name`,
+			`tabItem`.`website_image`, `tabItem`.`image`,
+			`tabItem`.`web_long_description`, `tabItem`.`description`,
+			`tabItem`.`route`
+		FROM
+			`tabItem`
+		{left_join}
+		WHERE
+			{where_conditions}
+		GROUP BY
+			`tabItem`.`name`
+		ORDER BY
+			`tabItem`.`weightage` DESC
+		LIMIT
+			{page_length}
+		OFFSET
+			{start}
+	'''.format(
+			where_conditions=where_conditions,
+			start=start,
+			page_length=page_length,
+			left_join=left_join
+		)
+	, as_dict=1)
 
-def parse_nested_filters(doctype, nested_filters, operator=None):
+	for r in results:
+		r.description = r.web_long_description or r.description
+		r.image = r.website_image or r.image
 
-	filter_string = ''
-
-	if operator:
-		simple_filters = [f for f in nested_filters if len(f) > 2]
-		nested_filters = [f for f in nested_filters if len(f) == 2]
-
-		simple_conditions = get_conditions(doctype, simple_filters)
-		nested_conditions = [parse_nested_filters(doctype, f) for f in nested_filters]
-
-		filter_string += '(' + (' ' + operator + ' ').join(simple_conditions + nested_conditions) + ')'
-		return filter_string
-
-	for val in nested_filters:
-		if isinstance(val, frappe.string_types):
-			operator = val
-		else:
-			filter_string = parse_nested_filters(doctype, val, operator)
-
-	return filter_string
+	return results
 
 
-def get_conditions(doctype, filter_list):
+def get_conditions(filter_list, and_or='and'):
 	from frappe.model.db_query import DatabaseQuery
 
+	if not filter_list:
+		return ''
+
 	conditions = []
-	DatabaseQuery(doctype).build_filter_conditions(filter_list, conditions)
-	return conditions
+	DatabaseQuery('Item').build_filter_conditions(filter_list, conditions, ignore_permissions=True)
+	join_by = ' {0} '.format(and_or)
+
+	return '(' + join_by.join(conditions) + ')'
 
 # utilities
 
