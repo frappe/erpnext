@@ -91,6 +91,20 @@
 	{% endif %}
 </div>
 
+<div class="row mt-5">
+	<div class="col-12">
+		{% if cart_settings.enable_checkout %}
+		<a href="/orders">
+			{{ _('See past orders') }}
+		</a>
+		{% else %}
+		<a href="/quotations">
+			{{ _('See past quotations') }}
+		</a>
+		{% endif %}
+	</div>
+</div>
+
 {% endblock %}
 
 {% block base_scripts %}
