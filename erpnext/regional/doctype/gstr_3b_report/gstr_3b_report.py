@@ -240,7 +240,7 @@ def get_total_taxable_value(doctype, month, year, reverse_charge):
 
 def get_state_code(state):
 
-	state_code = state_numbers[state]
+	state_code = state_numbers.get(state)
 
 	return state_code
 
