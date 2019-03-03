@@ -357,7 +357,8 @@ def get_items(filters=None, search=None):
 		or_filters=or_filters,
 		start=start,
 		page_length=page_length,
-		group_by='name'
+		group_by='name',
+		order_by='weightage desc'
 	)
 
 
