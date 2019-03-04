@@ -30,7 +30,7 @@ def make_service_level():
 		"employee_group": employee_group,
 		"response_time": 4,
 		"response_time_period": "Hour",
-		"resolution_time": 4,
+		"resolution_time": 6,
 		"resolution_time_period": "Hour",
 		"support_and_resolution": [
 			{

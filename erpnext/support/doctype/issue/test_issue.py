@@ -11,66 +11,39 @@ from datetime import timedelta
 
 class TestIssue(unittest.TestCase):
 
-	def test_issue(self):
+	def test_response_time_and_resolution_time_based_on_different_sla(self):
 		make_service_level_agreement()
 
-		creation = now_datetime()
-		creation_time = datetime.datetime.combine(creation.date(), datetime.time(12, 0, 0))
+		creation = "2019-03-04 12:00:00"
 
-		issue = make_issue_with_SLA(creation_time)
-		test_get_issue = get_issue(issue.name)
+		# make issue with customer specific SLA
+		issue = make_issue(creation, '_Test Customer')
 
-		self.assertEquals(issue.response_by.date(), now_datetime().date()+timedelta(days=3))
-		self.assertEquals(issue.resolution_by.date(), now_datetime().date()+timedelta(days=5))
+		self.assertEquals(issue.response_by, datetime.datetime(2019, 3, 7, 18, 0))
+		self.assertEquals(issue.resolution_by, datetime.datetime(2019, 3, 9, 18, 0))
 
-		creation_time = datetime.datetime.combine(creation.date(), datetime.time(12, 0, 0))
-		issue = make_issue_with_default_SLA_same_day(creation_time)
-		test_get_issue = get_issue(issue.name)
+		# make issue with default SLA
+		issue = make_issue(creation)
 
-		self.assertEquals(issue.response_by.date(), now_datetime().date())
-		self.assertEquals(issue.resolution_by.date(), now_datetime().date())
+		self.assertEquals(issue.response_by, datetime.datetime(2019, 3, 4, 16, 0))
+		self.assertEquals(issue.resolution_by, datetime.datetime(2019, 3, 4, 18, 0))
 
-		creation_time = datetime.datetime.combine(creation.date(), datetime.time(17, 0, 0))
-		issue = make_issue_with_default_SLA_next_day(creation_time)
-		test_get_issue = get_issue(issue.name)
+		creation = "2019-03-04 14:00:00"
+		# make issue with default SLA next day
+		issue = make_issue(creation)
 
-		self.assertEquals(issue.response_by.date(), now_datetime().date()+timedelta(days=2))
-		self.assertEquals(issue.resolution_by.date(), now_datetime().date()+timedelta(days=2))
+		self.assertEquals(issue.response_by, datetime.datetime(2019, 3, 4, 18, 0))
+		self.assertEquals(issue.resolution_by, datetime.datetime(2019, 3, 6, 12, 0))
 
-def make_issue_with_SLA(creation):
+
+def make_issue(creation, customer=None):
 
 	issue = frappe.get_doc({
 		"doctype": "Issue",
 		"subject": "Issue 1",
-		"raised_by": "test@example.com",
-		"customer": "_Test Customer",
-		"creation": creation
-	}).insert()
-
-	return issue
-
-def make_issue_with_default_SLA_same_day(creation):
-
-	issue = frappe.get_doc({
-		"doctype": "Issue",
-		"subject": "Issue 2",
+		"customer": customer,
 		"raised_by": "test@example.com",
 		"creation": creation
 	}).insert()
 
 	return issue
-
-def make_issue_with_default_SLA_next_day(creation):
-
-	issue = frappe.get_doc({
-		"doctype": "Issue",
-		"subject": "Issue 3",
-		"raised_by": "test@example.com",
-		"creation": creation
-	}).insert()
-
-	return issue
-
-def get_issue(name):
-	issue = frappe.get_list("Issue", fields={'name', 'response_by', 'resolution_by'}, filters={'name': name},limit=1)
-	return issue[0]
