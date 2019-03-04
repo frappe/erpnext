@@ -119,7 +119,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Selling Settings",
 					"description": _("Default settings for selling transactions."),
-					"onboard": 1,
+					"settings": 1,
 				},
 				{
 					"type": "doctype",

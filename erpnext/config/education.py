@@ -8,7 +8,8 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Student"
+					"name": "Student",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
@@ -181,7 +182,8 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Course"
+					"name": "Course",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
@@ -189,11 +191,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Instructor"
+					"name": "Instructor",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
-					"name": "Room"
+					"name": "Room",
+					"onboard": 1,
 				}
 			]
 		},
@@ -210,7 +214,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Grading Scale"
+					"name": "Grading Scale",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
