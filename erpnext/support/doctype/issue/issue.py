@@ -166,7 +166,6 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 			# no time left for support today
 			if time_left_today < 0: pass
 			elif time_period == 'Hour':
-				print(allotted_hours)
 				if time_left_today >= allotted_hours:
 					expected_time = datetime.combine(getdate(current_date_time), get_time(start_time))
 					expected_time = add_to_date(expected_time, hours=allotted_hours)
