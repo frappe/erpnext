@@ -280,12 +280,23 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 
 	filtered_items_count = len(filtered_items)
 
+	# get product info if exact match
+	from erpnext.shopping_cart.product_info import get_product_info_for_website
+	if exact_match:
+		data = get_product_info_for_website(exact_match[0])
+		product_info = data.product_info
+		if not data.cart_settings.show_price:
+			product_info = None
+	else:
+		product_info = None
+
 	return {
 		'next_attribute': next_attribute,
 		'valid_options_for_attributes': valid_options_for_attributes,
 		'filtered_items_count': filtered_items_count,
 		'filtered_items': filtered_items if filtered_items_count < 10 else [],
-		'exact_match': exact_match
+		'exact_match': exact_match,
+		'product_info': product_info
 	}
 
 

@@ -46,7 +46,7 @@ class ItemConfigure {
 			field.$wrapper.find('.help-box').append($a);
 		});
 
-		this.append_alert_box();
+		this.append_status_area();
 		this.dialog.show();
 
 		this.dialog.set_values(JSON.parse(localStorage.getItem(this.get_cache_key())));
@@ -55,11 +55,11 @@ class ItemConfigure {
 	}
 
 	on_attribute_selection(e) {
-		this.hande_range_values(e);
+		this.handle_range_values(e);
 
 		const values = this.dialog.get_values();
 		if (Object.keys(values).length === 0) {
-			this.dialog.$item_status.addClass('hidden').removeClass('d-flex');
+			this.clear_status();
 			localStorage.removeItem(this.get_cache_key());
 			return;
 		}
@@ -68,8 +68,7 @@ class ItemConfigure {
 		localStorage.setItem(this.get_cache_key(), JSON.stringify(values));
 
 		// show
-		this.dialog.$item_status.addClass('d-flex').removeClass('hidden');
-		this.dialog.$item_status.text(__('Loading...'));
+		this.set_loading_status();
 
 		this.get_next_attribute_and_values(values)
 			.then(data => {
@@ -77,7 +76,7 @@ class ItemConfigure {
 					valid_options_for_attributes,
 				} = data;
 
-				this.dialog.$item_status.html(this.get_alert_message(data));
+				this.set_item_found_status(data);
 
 				for (let attribute in valid_options_for_attributes) {
 					const valid_options = valid_options_for_attributes[attribute];
@@ -93,7 +92,7 @@ class ItemConfigure {
 			});
 	}
 
-	hande_range_values(e) {
+	handle_range_values(e) {
 		if (!e) return;
 		const changed_fieldname = $(e.target).data('fieldname');
 		const changed_field = this.dialog.get_field(changed_fieldname);
@@ -144,62 +143,96 @@ class ItemConfigure {
 		}
 	}
 
-	get_alert_message({ filtered_items_count, filtered_items, exact_match }) {
+	set_loading_status() {
+		this.dialog.$status_area.html(`
+			<div class="alert alert-warning d-flex justify-content-between align-items-center" role="alert">
+				${__('Loading...')}
+			</div>
+		`);
+	}
+
+	set_item_found_status(data) {
+		const html = this.get_html_for_item_found(data);
+		this.dialog.$status_area.html(html);
+	}
+
+	clear_status() {
+		this.dialog.$status_area.empty();
+	}
+
+	get_html_for_item_found({ filtered_items_count, filtered_items, exact_match, product_info }) {
 		const exact_match_message = __('1 exact match.');
 		const one_item = exact_match.length === 1 ?
 			exact_match[0] :
 			filtered_items_count === 1 ?
 			filtered_items[0] : '';
 
-		const action_buttons = one_item ? `
-			<div class="d-flex align-items-center">
-			<a href class="btn-clear-values d-inline-block mr-3">
-				${__('Clear values')}
-			</a>
-			<button class="btn btn-primary btn-add-to-cart" data-item-code="${one_item}">
-				${__('Add to cart')}
-			</button>
+		const item_add_to_cart = one_item ? `
+			<div class="alert alert-success d-flex justify-content-between align-items-center" role="alert">
+				<div>
+					<div>${one_item} ${product_info ? '(' + product_info.price.formatted_price_sales_uom + ')' : ''}</div>
+				</div>
+				<a href data-action="btn_add_to_cart" data-item-code="${one_item}">
+					${__('Add to cart')}
+				</a>
 			</div>
-		` : `
-			<a href class="btn-clear-values">
-				${__('Clear values')}
-			</a>
-		`;
+		`: '';
 
 		const items_found = filtered_items_count === 1 ?
 			__('{0} item found.', [filtered_items_count]) :
 			__('{0} items found.', [filtered_items_count]);
 
+		const item_found_status = `
+			<div class="alert alert-warning d-flex justify-content-between align-items-center" role="alert">
+				<span>
+					${exact_match.length === 1 ? '' : items_found}
+					${exact_match.length === 1 ? `<span>${exact_match_message}</span>` : ''}
+				</span>
+				<a href data-action="btn_clear_values">
+					${__('Clear values')}
+				</a>
+			</div>
+		`;
+
 		return `
-			<span>
-				${exact_match.length === 1 ? '' : items_found}
-				${exact_match.length === 1 ? `<span>${exact_match_message}</span>` : ''}
-			</span>
-			${action_buttons}
+			${item_add_to_cart}
+			${item_found_status}
 		`;
 	}
 
-	append_alert_box() {
-		const $alert = $(`<div class="alert alert-warning d-flex justify-content-between align-items-center" role="alert"></div>`);
-		$alert.on('click', '.btn-add-to-cart', (e) => {
-			if (frappe.session.user !== 'Guest') {
-				localStorage.removeItem(this.get_cache_key());
-			}
-			const item_code = $(e.currentTarget).data('item-code');
-			erpnext.shopping_cart.update_cart({
-				item_code,
-				qty: 1
-			});
-			this.dialog.hide();
+	btn_add_to_cart(e) {
+		if (frappe.session.user !== 'Guest') {
+			localStorage.removeItem(this.get_cache_key());
+		}
+		const item_code = $(e.currentTarget).data('item-code');
+		erpnext.shopping_cart.update_cart({
+			item_code,
+			qty: 1
 		});
-		$alert.on('click', '.btn-clear-values', (e) => {
+		this.dialog.hide();
+	}
+
+	btn_clear_values(e) {
+		this.dialog.fields_list.forEach(f => {
+			f.df.options = f.df.options.map(option => {
+				option.disabled = false
+				return option
+			});
+		});
+		this.dialog.clear();
+		this.on_attribute_selection();
+	}
+
+	append_status_area() {
+		this.dialog.$status_area = $('<div class="status-area">');
+		this.dialog.$wrapper.find('.modal-body').prepend(this.dialog.$status_area);
+		this.dialog.$wrapper.on('click', '[data-action]', (e) => {
 			e.preventDefault();
-			this.dialog.clear();
-			this.on_attribute_selection();
-		})
-		$alert.addClass('hidden').removeClass('d-flex');
-		this.dialog.$item_status = $alert;
-		this.dialog.$wrapper.find('.modal-body').prepend($alert);
+			const $target = $(e.currentTarget);
+			const action = $target.data('action');
+			const method = this[action];
+			method.call(this, [e]);
+		});
 		this.dialog.$body.css({ maxHeight: '75vh', overflow: 'auto', overflowX: 'hidden' });
 	}
 
