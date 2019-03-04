@@ -129,27 +129,27 @@ class GSTR3BReport(Document):
 			}
 		}
 
-		gst_details = get_company_gst_details(self.company_address)
+		gst_details = self.get_company_gst_details()
 		self.report_dict["gstin"] = gst_details.get("gstin")
 		self.report_dict["ret_period"] = get_period(self.month, with_year=True)
+		self.month_no = get_period(self.month)
+		self.account_heads = self.get_account_heads()
 
-		self.account_heads = get_account_heads(self.company)
-
-		outward_supply_tax_amounts = get_tax_amounts("Sales Invoice", self.month, self.year)
-		inward_supply_tax_amounts = get_tax_amounts("Purchase Invoice", self.month, self.year, reverse_charge="Y")
-		itc_details = get_itc_details()
-		inter_state_supplies = get_inter_state_supplies(gst_details.gst_state, self.month, self.year)
-		inward_nil_exempt = get_inward_nil_exempt(gst_details.gst_state, self.month, self.year)
+		outward_supply_tax_amounts = self.get_tax_amounts("Sales Invoice")
+		inward_supply_tax_amounts = self.get_tax_amounts("Purchase Invoice", reverse_charge="Y")
+		itc_details = self.get_itc_details()
+		inter_state_supplies = self.get_inter_state_supplies(gst_details.gst_state)
+		inward_nil_exempt = self.get_inward_nil_exempt(gst_details.gst_state)
 
 		self.prepare_data("Sales Invoice", outward_supply_tax_amounts, "sup_details", "osup_det", ["Registered Regular"])
 		self.prepare_data("Sales Invoice", outward_supply_tax_amounts, "sup_details", "osup_zero", ["SEZ", "Deemed Export", "Overseas"])
 		self.prepare_data("Purchase Invoice", inward_supply_tax_amounts, "sup_details", "isup_rev", ["Registered Regular"], reverse_charge="Y")
-		self.report_dict["sup_details"]["osup_nil_exmp"]["txval"] = flt(get_nil_rated_supply_value(self.month, self.year))
+		self.report_dict["sup_details"]["osup_nil_exmp"]["txval"] = flt(self.get_nil_rated_supply_value())
 		self.set_itc_details(itc_details)
 		self.set_inter_state_supply(inter_state_supplies)
 		self.set_inward_nil_exempt(inward_nil_exempt)
 
-		self.missing_field_invoices = get_missing_field_invoices(self.month, self.year)
+		self.missing_field_invoices = self.get_missing_field_invoices()
 
 		self.json_output = frappe.as_json(self.report_dict)
 
@@ -203,7 +203,7 @@ class GSTR3BReport(Document):
 			'igst_account': 'iamt'
 		}
 
-		total_taxable_value = get_total_taxable_value(doctype, self.month, self.year, reverse_charge)
+		total_taxable_value = self.get_total_taxable_value(doctype, reverse_charge)
 
 		for gst_category in gst_category_list:
 			for k, v in iteritems(account_map):
@@ -225,146 +225,182 @@ class GSTR3BReport(Document):
 		for d in inter_state_supply.get("UIN Holders", []):
 			self.report_dict["inter_sup"]["uin_details"].append(d)
 
-def get_total_taxable_value(doctype, month, year, reverse_charge):
+	def get_total_taxable_value(self, doctype, reverse_charge):
 
-	month_no = get_period(month)
+		return frappe._dict(frappe.db.sql("""
+			select gst_category, sum(grand_total) as total
+			from `tab{doctype}`
+			where docstatus = 1 and month(posting_date) = %s
+			and year(posting_date) = %s and reverse_charge = %s
+			and company = %s
+			group by gst_category
+			""" #nosec
+			.format(doctype = doctype), (self.month_no, self.year, reverse_charge, self.company)))
 
-	return frappe._dict(frappe.db.sql("""
-		select gst_category, sum(grand_total) as total
-		from `tab{doctype}`
-		where docstatus = 1 and month(posting_date) = %s
-		and year(posting_date) = %s and reverse_charge = %s
-		group by gst_category
-		""" #nosec
-		.format(doctype = doctype), (month_no, year, reverse_charge)))
+	def get_itc_details(self, reverse_charge='N'):
+
+		itc_amount = frappe.db.sql("""
+			select sum(itc_integrated_tax) as itc_iamt, sum(itc_central_tax) as itc_camt,
+			sum(itc_state_tax) as itc_samt, sum(itc_cess_amount) as itc_csamt, eligibility_for_itc,
+			reverse_charge from `tabPurchase Invoice`
+			where docstatus = 1 and month(posting_date) = %s and year(posting_date) = %s
+			and company = %s
+			group by eligibility_for_itc, reverse_charge""",
+			(self.month_no, self.year, self.company), as_dict=1)
+
+		itc_details = {}
+
+		for d in itc_amount:
+			itc_details.setdefault((d.eligibility_for_itc, d.reverse_charge),{
+				"itc_iamt": d.itc_iamt,
+				"itc_camt": d.itc_camt,
+				"itc_samt": d.itc_samt,
+				"itc_csamt": d.itc_csamt
+			})
+
+		return itc_details
+
+	def get_nil_rated_supply_value(self):
+
+		return frappe.db.sql("""
+			select sum(i.base_amount) as total from
+			`tabSales Invoice Item` i, `tabSales Invoice` s
+			where s.docstatus = 1 and i.parent = s.name and i.is_nil_exempt = 1
+			and month(s.posting_date) = %s and year(s.posting_date) = %s and s.company = %s""",
+			(self.month_no, self.year, self.company), as_dict=1)[0].total
+
+	def get_inter_state_supplies(self, state):
+
+		inter_state_supply = frappe.db.sql(""" select sum(s.grand_total) as total, t.tax_amount, a.gst_state, s.gst_category
+			from `tabSales Invoice` s, `tabSales Taxes and Charges` t, `tabAddress` a
+			where t.parent = s.name and s.customer_address = a.name and
+			s.docstatus = 1 and month(s.posting_date) = %s and year(s.posting_date) = %s and
+			a.gst_state <> %s and s.company = %s and
+			s.gst_category in ('Unregistered', 'Registered Composition', 'UIN Holders')
+			group by s.gst_category, a.state""", (self.month_no, self.year, state, self.company), as_dict=1)
+
+		inter_state_supply_details = {}
+
+		for d in inter_state_supply:
+			inter_state_supply_details.setdefault(
+				d.gst_category, []
+			)
+
+			inter_state_supply_details[d.gst_category].append({
+				"pos": get_state_code(d.gst_state),
+				"txval": d.total,
+				"iamt": d.tax_amount
+			})
+
+		return inter_state_supply_details
+
+	def get_inward_nil_exempt(self, state):
+
+		inward_nil_exempt = frappe.db.sql(""" select a.gst_state, sum(i.base_amount) as base_amount,
+			i.is_nil_exempt, i.is_non_gst from `tabPurchase Invoice` p , `tabPurchase Invoice Item` i, `tabAddress` a
+			where p.docstatus = 1 and p.name = i.parent and p.supplier_address = a.name
+			and i.is_nil_exempt = 1 or i.is_non_gst = 1 and
+			month(p.posting_date) = %s and year(p.posting_date) = %s and p.company = %s
+			group by a.gst_state """, (self.month_no, self.year, self.company), as_dict=1)
+
+		inward_nil_exempt_details = {
+			"gst": {
+				"intra": 0.0,
+				"inter": 0.0
+			},
+			"non_gst": {
+				"intra": 0.0,
+				"inter": 0.0
+			}
+		}
+
+		for d in inward_nil_exempt:
+			if d.is_nil_exempt == 1 and state == d.gst_state:
+				inward_nil_exempt_details["gst"]["intra"] += d.base_amount
+			elif d.is_nil_exempt == 1 and state != d.gst_state:
+				inward_nil_exempt_details["gst"]["inter"] += d.base_amount
+			elif d.is_non_gst == 1 and state == d.gst_state:
+				inward_nil_exempt_details["non_gst"]["inter"] += d.base_amount
+			elif d.is_non_gst == 1 and state != d.gst_state:
+				inward_nil_exempt_details["non_gst"]["intra"] += d.base_amount
+
+		return inward_nil_exempt_details
+
+	def get_tax_amounts(self, doctype, reverse_charge="N"):
+
+		if doctype == "Sales Invoice":
+			tax_template = 'Sales Taxes and Charges'
+		elif doctype == "Purchase Invoice":
+			tax_template = 'Purchase Taxes and Charges'
+
+		tax_amounts = frappe.db.sql("""
+			select s.gst_category, sum(t.tax_amount) as tax_amount, t.account_head
+			from `tab{doctype}` s , `tab{template}` t
+			where s.docstatus = 1 and t.parent = s.name and s.reverse_charge = %s
+			and month(s.posting_date) = %s and year(s.posting_date) = %s and s.company = %s
+			group by t.account_head, s.gst_category
+			""" #nosec
+			.format(doctype=doctype, template=tax_template),
+			(reverse_charge, self.month_no, self.year, self.company), as_dict=1)
+
+		tax_details = {}
+
+		for d in tax_amounts:
+			tax_details.setdefault(
+				(d.account_head,d.gst_category),{
+					"amount": d.get("tax_amount"),
+				}
+			)
+
+		return tax_details
+
+	def get_company_gst_details(self):
+
+		gst_details =  frappe.get_all("Address",
+			fields=["gstin", "gst_state", "gst_state_number"],
+			filters={
+				"name":self.company_address
+			})
+
+		if gst_details:
+			return gst_details[0]
+		else:
+			frappe.throw("Please enter GSTIN and state for the Company Address {0}".format(self.company_address))
+
+	def get_account_heads(self):
+
+		account_heads =  frappe.get_all("GST Account",
+			fields=["cgst_account", "sgst_account", "igst_account", "cess_account"],
+			filters={
+				"company":self.company
+			})
+
+		if account_heads:
+			return account_heads[0]
+		else:
+			frappe.throw("Please set account heads in GST Settings for Compnay {0}".format(self.company))
+
+	def get_missing_field_invoices(self):
+
+		missing_field_invoices = []
+
+		for doctype in ["Sales Invoice", "Purchase Invoice"]:
+			docnames = frappe.db.sql("""
+				select name from `tab{doctype}`
+				where docstatus = 1 and month(posting_date) = %s and year(posting_date) = %s
+				and company = %s and place_of_supply IS NULL
+			""".format(doctype = doctype), (self.month_no, self.year, self.company), as_dict=1) #nosec
+
+			for d in docnames:
+				missing_field_invoices.append(d.name)
+
+		return ",".join(missing_field_invoices)
 
 def get_state_code(state):
 
 	state_code = state_numbers.get(state)
 
 	return state_code
-
-def get_itc_details(reverse_charge='N'):
-
-	itc_amount = frappe.db.sql("""
-		select sum(itc_integrated_tax) as itc_iamt, sum(itc_central_tax) as itc_camt,
-		sum(itc_state_tax) as itc_samt, sum(itc_cess_amount) as itc_csamt, eligibility_for_itc,
-		reverse_charge
-		from `tabPurchase Invoice`
-		where docstatus = 1
-		group by eligibility_for_itc, reverse_charge""", as_dict=1)
-
-	itc_details = {}
-
-	for d in itc_amount:
-		itc_details.setdefault((d.eligibility_for_itc, d.reverse_charge),{
-			"itc_iamt": d.itc_iamt,
-			"itc_camt": d.itc_camt,
-			"itc_samt": d.itc_samt,
-			"itc_csamt": d.itc_csamt
-		})
-
-	return itc_details
-
-def get_nil_rated_supply_value(month, year):
-
-	month_no = get_period(month)
-
-	return frappe.db.sql("""
-		select sum(base_amount) as total from
-		`tabSales Invoice Item` i, `tabSales Invoice` s
-		where s.docstatus = 1 and i.parent = s.name and i.is_nil_exempt = 1
-		and month(s.posting_date) = %s and year(s.posting_date) = %s""", (month_no, year), as_dict=1)[0].total
-
-def get_inter_state_supplies(state, month, year):
-
-	month_no = get_period(month)
-
-	inter_state_supply = frappe.db.sql(""" select sum(s.grand_total) as total, t.tax_amount, a.gst_state, s.gst_category
-		from `tabSales Invoice` s, `tabSales Taxes and Charges` t, `tabAddress` a
-		where t.parent = s.name and s.customer_address = a.name and
-		s.docstatus = 1 and month(s.posting_date) = %s and year(s.posting_date) = %s and
-		a.gst_state <> %s and
-		s.gst_category in ('Unregistered', 'Registered Composition', 'UIN Holders')
-		group by s.gst_category, a.state""", (month_no, year, state), as_dict=1)
-
-	inter_state_supply_details = {}
-
-	for d in inter_state_supply:
-		inter_state_supply_details.setdefault(
-			d.gst_category, []
-		)
-
-		inter_state_supply_details[d.gst_category].append({
-			"pos": get_state_code(d.gst_state),
-			"txval": d.total,
-			"iamt": d.tax_amount
-		})
-
-	return inter_state_supply_details
-
-def get_inward_nil_exempt(state, month, year):
-
-	month_no = get_period(month)
-
-	inward_nil_exempt = frappe.db.sql(""" select a.gst_state, sum(i.base_amount) as base_amount,
-		i.is_nil_exempt, i.is_non_gst from `tabPurchase Invoice` p , `tabPurchase Invoice Item` i, `tabAddress` a
-		where p.docstatus = 1 and p.name = i.parent and p.supplier_address = a.name
-		and i.is_nil_exempt = 1 or i.is_non_gst = 1 and
-		month(posting_date) = %s and year(posting_date) = %s
-		group by a.gst_state """, (month_no, year), as_dict=1)
-
-	inward_nil_exempt_details = {
-		"gst": {
-			"intra": 0.0,
-			"inter": 0.0
-		},
-		"non_gst": {
-			"intra": 0.0,
-			"inter": 0.0
-		}
-	}
-
-	for d in inward_nil_exempt:
-		if d.is_nil_exempt == 1 and state == d.gst_state:
-			inward_nil_exempt_details["gst"]["intra"] += d.base_amount
-		elif d.is_nil_exempt == 1 and state != d.gst_state:
-			inward_nil_exempt_details["gst"]["inter"] += d.base_amount
-		elif d.is_non_gst == 1 and state == d.gst_state:
-			inward_nil_exempt_details["non_gst"]["inter"] += d.base_amount
-		elif d.is_non_gst == 1 and state != d.gst_state:
-			inward_nil_exempt_details["non_gst"]["intra"] += d.base_amount
-
-	return inward_nil_exempt_details
-
-def get_tax_amounts(doctype, month, year, reverse_charge="N"):
-
-	month_no = get_period(month)
-
-	if doctype == "Sales Invoice":
-		tax_template = 'Sales Taxes and Charges'
-	elif doctype == "Purchase Invoice":
-		tax_template = 'Purchase Taxes and Charges'
-
-	tax_amounts = frappe.db.sql("""
-		select s.gst_category, sum(t.tax_amount) as tax_amount, t.account_head
-		from `tab{doctype}` s , `tab{template}` t
-		where s.docstatus = 1 and t.parent = s.name and s.reverse_charge = %s
-		and month(s.posting_date) = %s and year(s.posting_date) = %s
-		group by t.account_head, s.gst_category
-		""" #nosec
-		.format(doctype=doctype, template=tax_template), (reverse_charge, month_no, year), as_dict=1)
-
-	tax_details = {}
-
-	for d in tax_amounts:
-		tax_details.setdefault(
-			(d.account_head,d.gst_category),{
-				"amount": d.get("tax_amount"),
-			}
-		)
-
-	return tax_details
 
 def get_period(month, with_year=False):
 
@@ -388,49 +424,6 @@ def get_period(month, with_year=False):
 	else:
 		return month_no
 
-def get_company_gst_details(address):
-
-	gst_details =  frappe.get_all("Address",
-		fields=["gstin", "gst_state", "gst_state_number"],
-		filters={
-			"name":address
-		})
-
-	if gst_details:
-		return gst_details[0]
-	else:
-		frappe.throw("Please enter GSTIN and state for the Company Address {0}".format(address))
-
-def get_account_heads(company):
-
-	account_heads =  frappe.get_all("GST Account",
-		fields=["cgst_account", "sgst_account", "igst_account", "cess_account"],
-		filters={
-			"company":company
-		})
-
-	if account_heads:
-		return account_heads[0]
-	else:
-		frappe.throw("Please set account heads in GST Settings for Compnay {0}".format(company))
-
-def get_missing_field_invoices(month, year):
-
-	month_no = get_period(month)
-
-	missing_field_invoices = []
-
-	for doctype in ["Sales Invoice", "Purchase Invoice"]:
-		docnames = frappe.db.sql("""
-			select name from `tab{doctype}`
-			where docstatus = 1 and month(posting_date) = %s and year(posting_date) = %s
-			and place_of_supply IS NULL
-		""".format(doctype = doctype), (month_no, year), as_dict=1) #nosec
-
-		for d in docnames:
-			missing_field_invoices.append(d.name)
-
-	return ",".join(missing_field_invoices)
 
 @frappe.whitelist()
 def view_report(name):
