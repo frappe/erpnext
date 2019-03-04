@@ -206,7 +206,7 @@ class SalesInvoice(SellingController):
 		self.update_time_sheet(None)
 
 	def before_print(self):
-		self.gl = frappe.get_list("GL Entry",filters={"voucher_type": "Sales Invoice",
+		self.gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Sales Invoice",
 			"voucher_no": self.name} ,
 			fields=["account", "party_type", "party", "debit", "credit"]
 		)

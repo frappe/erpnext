@@ -73,7 +73,7 @@
                 <th>Credit Amount</th>
                 <th>Debit Amount</th>
             </tr>
-            {% for entries in doc.gl %}
+            {% for entries in doc.gl_entries %}
             <tr>
                 <td>{{ loop.index }}</td>
                 <td>{{ entries.account }}</td>
