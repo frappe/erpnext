@@ -73,3 +73,22 @@ class ItemVariantsCacheManager:
 		frappe.cache().hset('item_attribute_value_map', parent_item_code, item_attribute_value_map)
 		frappe.cache().hset('item_variants_data', parent_item_code, item_variants_data)
 		frappe.cache().hset('optional_attributes', parent_item_code, optional_attributes)
+
+	def clear_cache(self):
+		keys = ['attribute_value_item_map', 'item_attribute_value_map', 'item_variants_data', 'optional_attributes']
+
+		for key in keys:
+			frappe.cache().hdel(key, self.item_code)
+
+
+def build_cache(item_code):
+	frappe.cache().hset('item_cache_build_in_progress', item_code, 1)
+	print('ItemVariantsCacheManager: Building cache for', item_code)
+	i = ItemVariantsCacheManager(item_code)
+	i.build_cache()
+	frappe.cache().hset('item_cache_build_in_progress', item_code, 0)
+
+def enqueue_build_cache(item_code):
+	if frappe.cache().hget('item_cache_build_in_progress', item_code):
+		return
+	frappe.enqueue(build_cache, item_code=item_code, queue='short')

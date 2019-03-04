@@ -957,6 +957,22 @@ def invalidate_cache_for_item(doc):
 	if doc.get("old_item_group") and doc.get("old_item_group") != doc.item_group:
 		invalidate_cache_for(doc, doc.old_item_group)
 
+	invalidate_item_variants_cache_for_website(doc)
+
+
+def invalidate_item_variants_cache_for_website(doc):
+	from erpnext.www.products.item_variants_cache import ItemVariantsCacheManager
+
+	item_code = None
+	if doc.has_variants and doc.show_in_website:
+		item_code = doc.name
+	elif doc.variant_of and frappe.db.get_value('Item', doc.variant_of, 'show_in_website'):
+		item_code = doc.variant_of
+
+	if item_code:
+		item_cache = ItemVariantsCacheManager(item_code)
+		item_cache.clear_cache()
+
 
 def check_stock_uom_with_bin(item, stock_uom):
 	if stock_uom == frappe.db.get_value("Item", item, "stock_uom"):
