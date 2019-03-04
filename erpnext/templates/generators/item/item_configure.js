@@ -20,7 +20,7 @@ class ItemConfigure {
 					return {
 						label: v,
 						value: v
-					}
+					};
 				}),
 				change: (e) => {
 					this.on_attribute_selection(e);
@@ -164,7 +164,7 @@ class ItemConfigure {
 		const exact_match_message = __('1 exact match.');
 		const one_item = exact_match.length === 1 ?
 			exact_match[0] :
-				filtered_items_count === 1 ?
+			filtered_items_count === 1 ?
 				filtered_items[0] : '';
 
 		const item_add_to_cart = one_item ? `
