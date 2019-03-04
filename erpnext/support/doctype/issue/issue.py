@@ -114,12 +114,12 @@ class Issue(Document):
 
 		start_date_time = get_datetime(self.creation) or now_datetime()
 
-		self.response_by, self.time_to_respond = get_expected_time_for('response', service_level, start_date_time, self.creation)
-		self.resolution_by, self.time_to_resolve = get_expected_time_for('resolution', service_level, start_date_time, self.creation)
+		self.response_by, self.time_to_respond = get_expected_time_for('response', service_level, start_date_time)
+		self.resolution_by, self.time_to_resolve = get_expected_time_for('resolution', service_level, start_date_time)
 
 		self.save(ignore_permissions=True)
 
-def get_expected_time_for(parameter, service_level, start_date_time, creation):
+def get_expected_time_for(parameter, service_level, start_date_time):
 	current_date_time = start_date_time
 	expected_time = current_date_time
 	start_time = None
@@ -181,7 +181,7 @@ def get_expected_time_for(parameter, service_level, start_date_time, creation):
 		current_date_time = datetime.combine(getdate(current_date_time), get_time(end_time))
 	else:
 		current_date_time = expected_time
-	return current_date_time, round(time_diff_in_hours(current_date_time, creation), 2)
+	return current_date_time, round(time_diff_in_hours(current_date_time, start_date_time), 2)
 
 def get_list_context(context=None):
 	return {

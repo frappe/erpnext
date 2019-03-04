@@ -32,6 +32,43 @@ def make_service_level_agreement():
 		"response_time_period": "Hour",
 		"resolution_time": 4,
 		"resolution_time_period": "Hour",
+		"support_and_resolution": [
+			{
+				"workday": "Monday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Tuesday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Wednesday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Thursday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Friday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Saturday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Sunday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			}
+		]
 	})
 
 	default_service_level_agreement_exists = frappe.db.exists("Service Level Agreement", "__Test Service Level Agreement")
@@ -65,6 +102,43 @@ def make_service_level_agreement():
 		"response_time_period": "Day",
 		"resolution_time": 3,
 		"resolution_time_period": "Day",
+		"support_and_resolution": [
+			{
+				"workday": "Monday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Tuesday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Wednesday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Thursday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Friday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Saturday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Sunday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			}
+		]
 	})
 
 	service_level_agreement_exists = frappe.db.exists("Service Level Agreement", "_Test Service Level Agreement")
