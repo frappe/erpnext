@@ -54,7 +54,7 @@ class PurchaseInvoice(BuyingController):
 			self.release_date = ''
 
 	def before_print(self):
-		self.gl = frappe.get_list("GL Entry",filters={"voucher_type": "Purchase Invoice",
+		self.gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Purchase Invoice",
 			"voucher_no": self.name} ,
 			fields=["account", "party_type", "party", "debit", "credit"]
 		)

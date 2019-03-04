@@ -53,7 +53,7 @@ class JournalEntry(AccountsController):
 		self.update_inter_company_jv()
 
 	def before_print(self):
-		self.gl = frappe.get_list("GL Entry",filters={"voucher_type": "Journal Entry",
+		self.gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Journal Entry",
 			"voucher_no": self.name} ,
 			fields=["account", "party_type", "party", "debit", "credit", "remarks"]
 		)

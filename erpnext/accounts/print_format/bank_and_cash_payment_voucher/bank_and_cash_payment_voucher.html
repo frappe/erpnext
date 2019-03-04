@@ -34,7 +34,7 @@
                     <td class="top-bottom" colspan="5"><strong>Credit</strong></td>
             </tr>
             {% set total_credit = 0 -%}
-            {% for entries in doc.gl %}
+            {% for entries in doc.gl_entries %}
             {% if entries.debit == 0.0 %}
             <tr>
                 <td class="right top-bottom">{{ entries.account }}</td>
@@ -59,7 +59,7 @@
                     <td class="top-bottom" colspan="5"><strong>Debit</strong></td>
             </tr>
             {% set total_debit = 0 -%}
-            {% for entries in doc.gl %}
+            {% for entries in doc.gl_entries %}
             {% if entries.credit == 0.0 %}
             <tr>
                 <td class="right top-bottom">{{ entries.account }}</td>
