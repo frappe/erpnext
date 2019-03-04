@@ -71,11 +71,10 @@ class PaymentEntry(AccountsController):
 		self.update_expense_claim()
 
 	def before_print(self):
-		gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Payment Entry",
+		self.gl = frappe.get_list("GL Entry",filters={"voucher_type": "Payment Entry",
 			"voucher_no": self.name} ,
 			fields=["account", "party_type", "party", "debit", "credit", "remarks"]
 		)
-		self.gl = gl_entries
 
 	def on_cancel(self):
 		self.setup_party_account_field()
