@@ -15,13 +15,9 @@
 			{% include "templates/generators/item/item_details.html" %}
 		</div>
 
-		<div class="row">
-			{% include "templates/generators/item/item_specifications.html" %}
-		</div>
+		{% include "templates/generators/item/item_specifications.html" %}
 
-		{% if doc.website_content %}
-		{{ doc.website_content }}
-		{% endif %}
+		{{ doc.website_content or '' }}
 	</div>
 </div>
 {% endblock %}
