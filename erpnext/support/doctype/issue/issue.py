@@ -114,12 +114,16 @@ class Issue(Document):
 
 		start_date_time = get_datetime(self.creation) or now_datetime()
 
-		self.response_by = get_expected_time_for('response', service_level, start_date_time)
-		self.resolution_by = get_expected_time_for('resolution', service_level, start_date_time)
+		self.response_by, self.time_to_respond = get_expected_time_for('response', service_level, start_date_time)
+		self.resolution_by, self.time_to_resolve = get_expected_time_for('resolution', service_level, start_date_time)
+
+		self.save(ignore_permissions=True)
 
 def get_expected_time_for(parameter, service_level, start_date_time):
 	current_date_time = start_date_time
 	expected_time = current_date_time
+	start_time = None
+	end_time = None
 
 	# lets assume response time is in days by default
 	if parameter == 'response':
@@ -152,12 +156,8 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 
 	while not expected_time_is_set:
 		current_weekday = weekdays[current_date_time.weekday()]
-		print("----------------------------------------")
-		print(allotted_days)
-		print("current_weekday  " + str(current_weekday))
 
 		if not is_holiday(current_date_time, holidays) and current_weekday in support_days:
-			print("----current_weekday  " + str(current_weekday))
 			start_time = current_date_time - datetime(current_date_time.year, current_date_time.month, current_date_time.day) if getdate(current_date_time) == getdate(today()) else support_days[current_weekday].start_time
 			end_time = support_days[current_weekday].end_time
 
@@ -166,6 +166,7 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 			# no time left for support today
 			if time_left_today < 0: pass
 			elif time_period == 'Hour':
+				print(allotted_hours)
 				if time_left_today >= allotted_hours:
 					expected_time = datetime.combine(getdate(current_date_time), get_time(start_time))
 					expected_time = add_to_date(expected_time, hours=allotted_hours)
@@ -176,15 +177,12 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 			else:
 				allotted_days -= 1
 				expected_time_is_set = allotted_days <= 0
-				if expected_time_is_set:
-					expected_time = datetime.combine(getdate(current_date_time), get_time(end_time))
 
-		print(current_date_time)
 		current_date_time = add_to_date(getdate(current_date_time), days=1)
-		print(str(allotted_days) + "-------------" + str(current_date_time))
-		print("----------------------------------------")
+		if end_time and time_period != 'Hour':
+			current_date_time = datetime.combine(getdate(current_date_time), get_time(end_time))
 
-	return
+	return current_date_time, round(time_diff_in_hours(current_date_time, utils.now_datetime()), 2)
 
 def get_list_context(context=None):
 	return {

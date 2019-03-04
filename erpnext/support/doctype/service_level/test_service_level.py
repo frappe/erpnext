@@ -20,6 +20,61 @@ class TestServiceLevel(unittest.TestCase):
 def make_service_level():
 	employee_group = make_employee_group()
 	make_holiday_list()
+
+	# Default Service Level Agreement
+	default_service_level = frappe.get_doc({
+		"doctype": "Service Level",
+		"service_level": "__Test Service Level",
+		"holiday_list": "__Test Holiday List",
+		"priority": "Medium",
+		"employee_group": employee_group,
+		"response_time": 4,
+		"response_time_period": "Hour",
+		"resolution_time": 4,
+		"resolution_time_period": "Hour",
+		"support_and_resolution": [
+			{
+				"workday": "Monday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Tuesday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Wednesday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Thursday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Friday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Saturday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			},
+			{
+				"workday": "Sunday",
+				"start_time": "10:00:00",
+				"end_time": "18:00:00",
+			}
+		]
+	})
+
+	default_service_level_exists = frappe.db.exists("Service Level", "__Test Service Level")
+	if not default_service_level_exists:
+		default_service_level.insert()
+
 	service_level = frappe.get_doc({
 		"doctype": "Service Level",
 		"service_level": "_Test Service Level",
