@@ -141,20 +141,20 @@ def make_holiday_list():
 		holiday_list = frappe.get_doc({
 			"doctype": "Holiday List",
 			"holiday_list_name": "__Test Holiday List",
-			"from_date": str(now.year) + "-01-01",
-			"to_date": str(now.year) + "-12-31",
+			"from_date": "2019-01-01",
+			"to_date": "2019-12-31",
 			"holidays": [
 				{
 					"description": "Test Holiday 1",
-					"holiday_date": now_datetime().date()+timedelta(days=1)
+					"holiday_date": "2019-03-05"
 				},
 				{
 					"description": "Test Holiday 2",
-					"holiday_date": now_datetime().date()+timedelta(days=3)
+					"holiday_date": "2019-03-07"
 				},
 				{
 					"description": "Test Holiday 3",
-					"holiday_date": now_datetime().date()+timedelta(days=7)
+					"holiday_date": "2019-02-11"
 				},
 			]
 		}).insert()
