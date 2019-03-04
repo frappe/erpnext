@@ -38,7 +38,7 @@ def make_payment_entry_to_irs_1099_supplier():
     pe.company = "_Test Company"
     pe.posting_date = "2016-01-10"
     pe.paid_from = "_Test Bank USD - _TC"
-    pe.paid_to = "_Test Bank - _TC"
+    pe.paid_to = "_Test Payable USD - _TC"
     pe.paid_amount = 100
     pe.received_amount = 100
     pe.reference_no = "For IRS 1099 testing"
