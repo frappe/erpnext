@@ -14,9 +14,3 @@ class Topic(Document):
 		except Exception as e:
 			return None
 		return content_data
-
-	def get_first_content(self):
-		return self.get_contents()[0]
-
-	def get_last_content(self):
-		return self.get_contents()[-1]
