@@ -72,7 +72,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 				limit=context.page_length + 1, search=frappe.form_dict.get("search")),
 			"parents": get_parent_item_groups(self.parent_item_group),
 			"title": self.name,
-			"products_as_list": cint(frappe.db.get_single_value('Website Settings', 'products_as_list'))
+			"products_as_list": cint(frappe.db.get_single_value('Products Settings', 'products_as_list'))
 		})
 
 		if self.slideshow:

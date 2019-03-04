@@ -348,7 +348,7 @@ def get_items(filters=None, search=None):
 		filters = [['Item', fieldname, '=', value] for fieldname, value in filters.items()]
 
 	show_in_website_condition = ''
-	if products_settings.only_search_item_templates:
+	if products_settings.hide_variants:
 		show_in_website_condition = get_conditions({'show_in_website': 1 }, 'and')
 	else:
 		show_in_website_condition = get_conditions([
