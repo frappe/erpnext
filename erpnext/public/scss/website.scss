@@ -1,13 +1,5 @@
 @import "frappe/public/scss/variables";
 
-.products-list .product-image {
-	display: inline-block;
-	width: 160px;
-	height: 160px;
-	object-fit: contain;
-	margin-right: 1rem;
-}
-
 .product-image img {
 	min-height: 20rem;
 	max-height: 30rem;
