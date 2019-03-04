@@ -79,10 +79,10 @@ def get_revenue(data, period_list, revenue_type):
 def remove_parent_with_no_child(data, period_list):
 	status = "nothing to remove"
 	for parent in data:
-		if 'is_group' in parent and parent["is_group"] == 1:
+		if 'is_group' in parent and parent.get("is_group") == 1:
 			have_child = False
 			for child in data:
-				if 'parent_account' in child  and child["parent_account"] == parent["account"]:
+				if 'parent_account' in child  and child.get("parent_account") == parent.get("account"):
 					have_child = True
 					break
 
@@ -116,8 +116,6 @@ def set_total(node, value, complete_list, totals):
 
 def get_profit(gross_income, gross_expense, period_list, company, profit_type, currency=None, consolidated=False):
 
-	total = 0
-
 	profit_loss = {
 		"account_name": "'" + _(profit_type) + "'",
 		"account": "'" + _(profit_type) + "'",
@@ -134,14 +132,10 @@ def get_profit(gross_income, gross_expense, period_list, company, profit_type, c
 		if profit_loss[key]:
 			has_value=True
 
-		total += flt(profit_loss[key])
-		profit_loss['total'] = total
-
 	if has_value:
 		return profit_loss
 
 def get_net_profit(non_gross_income, gross_income, gross_expense, non_gross_expense, period_list, company, currency=None, consolidated=False):
-	total = 0
 	profit_loss = {
 		"account_name": "'" + _("Net Profit") + "'",
 		"account": "'" + _("Net Profit") + "'",
@@ -159,9 +153,6 @@ def get_net_profit(non_gross_income, gross_income, gross_expense, non_gross_expe
 
 		if profit_loss[key]:
 			has_value=True
-
-		total += flt(profit_loss[key])
-		profit_loss['total'] = total
 
 	if has_value:
 		return profit_loss
