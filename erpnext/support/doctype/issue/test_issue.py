@@ -19,21 +19,21 @@ class TestIssue(unittest.TestCase):
 
 		issue = make_issue_with_SLA(creation_time)
 		test_get_issue = get_issue(issue.name)
-		print(test_get_issue)
+
 		self.assertEquals(issue.response_by.date(), now_datetime().date()+timedelta(days=3))
 		self.assertEquals(issue.resolution_by.date(), now_datetime().date()+timedelta(days=5))
 
 		creation_time = datetime.datetime.combine(creation.date(), datetime.time(12, 0, 0))
 		issue = make_issue_with_default_SLA_same_day(creation_time)
 		test_get_issue = get_issue(issue.name)
-		print(test_get_issue)
+
 		self.assertEquals(issue.response_by.date(), now_datetime().date())
 		self.assertEquals(issue.resolution_by.date(), now_datetime().date())
 
-		creation_time = datetime.datetime.combine(creation.date(), datetime.time(5, 0, 0))
+		creation_time = datetime.datetime.combine(creation.date(), datetime.time(17, 0, 0))
 		issue = make_issue_with_default_SLA_next_day(creation_time)
 		test_get_issue = get_issue(issue.name)
-		print(test_get_issue)
+
 		self.assertEquals(issue.response_by.date(), now_datetime().date()+timedelta(days=2))
 		self.assertEquals(issue.resolution_by.date(), now_datetime().date()+timedelta(days=2))
 

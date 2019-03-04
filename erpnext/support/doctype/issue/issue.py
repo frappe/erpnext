@@ -114,12 +114,12 @@ class Issue(Document):
 
 		start_date_time = get_datetime(self.creation) or now_datetime()
 
-		self.response_by, self.time_to_respond = get_expected_time_for('response', service_level, start_date_time)
-		self.resolution_by, self.time_to_resolve = get_expected_time_for('resolution', service_level, start_date_time)
+		self.response_by, self.time_to_respond = get_expected_time_for('response', service_level, start_date_time, self.creation)
+		self.resolution_by, self.time_to_resolve = get_expected_time_for('resolution', service_level, start_date_time, self.creation)
 
 		self.save(ignore_permissions=True)
 
-def get_expected_time_for(parameter, service_level, start_date_time):
+def get_expected_time_for(parameter, service_level, start_date_time, creation):
 	current_date_time = start_date_time
 	expected_time = current_date_time
 	start_time = None
@@ -160,7 +160,6 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 		if not is_holiday(current_date_time, holidays) and current_weekday in support_days:
 			start_time = current_date_time - datetime(current_date_time.year, current_date_time.month, current_date_time.day) if getdate(current_date_time) == getdate(today()) else support_days[current_weekday].start_time
 			end_time = support_days[current_weekday].end_time
-
 			time_left_today = time_diff_in_hours(end_time, start_time)
 
 			# no time left for support today
@@ -171,17 +170,18 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 					expected_time = add_to_date(expected_time, hours=allotted_hours)
 					expected_time_is_set = 1
 				else:
-					# set end of today
 					allotted_hours = allotted_hours - time_left_today
 			else:
 				allotted_days -= 1
 				expected_time_is_set = allotted_days <= 0
 
 		current_date_time = add_to_date(getdate(current_date_time), days=1)
-		if end_time and time_period != 'Hour':
-			current_date_time = datetime.combine(getdate(current_date_time), get_time(end_time))
 
-	return current_date_time, round(time_diff_in_hours(current_date_time, utils.now_datetime()), 2)
+	if end_time and time_period != 'Hour':
+		current_date_time = datetime.combine(getdate(current_date_time), get_time(end_time))
+	else:
+		current_date_time = expected_time
+	return current_date_time, round(time_diff_in_hours(current_date_time, creation), 2)
 
 def get_list_context(context=None):
 	return {
