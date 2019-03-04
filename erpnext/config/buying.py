@@ -84,7 +84,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Buying Settings",
-					"onboard": 1,
+					"settings": 1,
 					"description": _("Default settings for buying transactions.")
 				},
 				{
