@@ -9,10 +9,6 @@ from erpnext.regional.report.irs_1099.irs_1099 import execute as execute_1099_re
 class TestUnitedStates(unittest.TestCase):
     def test_irs_1099_custom_field(self):
 
-        frappe.db.sql("delete from `tabGL Entry` where party='_US 1099 Test Supplier'")
-        frappe.db.sql("delete from `tabGL Entry` where against='_US 1099 Test Supplier'")
-        frappe.db.sql("delete from `tabPayment Entry` where party='_US 1099 Test Supplier'")
-
         if not frappe.db.exists("Supplier", "_US 1099 Test Supplier"):
             doc = frappe.new_doc("Supplier")
             doc.supplier_name = "_US 1099 Test Supplier"
@@ -39,6 +35,11 @@ class TestUnitedStates(unittest.TestCase):
 
 
 def make_payment_entry_to_irs_1099_supplier():
+
+    frappe.db.sql("delete from `tabGL Entry` where party='_US 1099 Test Supplier'")
+    frappe.db.sql("delete from `tabGL Entry` where against='_US 1099 Test Supplier'")
+    frappe.db.sql("delete from `tabPayment Entry` where party='_US 1099 Test Supplier'")
+
     pe = frappe.new_doc("Payment Entry")
     pe.payment_type = "Pay"
     pe.company = "_Test Company"
