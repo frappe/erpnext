@@ -26,9 +26,9 @@ def execute(filters=None):
 	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 
 
-	gross_income = get_revenue(income, period_list, 'gross')
+	gross_income = get_revenue(income, period_list)
 
-	gross_expense = get_revenue(expense, period_list, 'gross')
+	gross_expense = get_revenue(expense, period_list)
 
 	if(len(gross_income)==0 and len(gross_expense)== 0):
 		data.append({"account_name": "'" + _("Nothing is included in gross") + "'",
@@ -49,11 +49,11 @@ def execute(filters=None):
 	gross_profit = get_profit(gross_income, gross_expense, period_list, filters.company, 'Gross Profit',filters.presentation_currency)
 	data.append(gross_profit)
 
-	non_gross_income = get_revenue(income, period_list, 'non_gross')
+	non_gross_income = get_revenue(income, period_list, 0)
 	data.append({})
 	data.extend(non_gross_income or [])
 
-	non_gross_expense = get_revenue(expense, period_list, 'non_gross')
+	non_gross_expense = get_revenue(expense, period_list, 0)
 	data.append({})
 	data.extend(non_gross_expense or [])
 
@@ -63,21 +63,17 @@ def execute(filters=None):
 
 	return columns, data
 
-def get_revenue(data, period_list, revenue_type):
+def get_revenue(data, period_list, include_in_gross=1):
+	revenue = [item for item in data if item['include_in_gross']==include_in_gross or item['is_group']==1]
 
-	if revenue_type == 'gross':
-		revenue = [item for item in data if item['include_in_gross']==1 or item['is_group']==1]
-	elif revenue_type == 'non_gross':
-		revenue = [item for item in data if item['include_in_gross']==0 or item['is_group']==1]
-
-	revenue, status = remove_parent_with_no_child(revenue, period_list)
-	while status == "data to be removed":
-		revenue, status = remove_parent_with_no_child(revenue, period_list)
+	data_to_be_removed =True
+	while data_to_be_removed:
+		revenue, data_to_be_removed = remove_parent_with_no_child(revenue, period_list)
 	revenue = adjust_account(revenue, period_list)
 	return copy.deepcopy(revenue)
 
 def remove_parent_with_no_child(data, period_list):
-	status = "nothing to remove"
+	data_to_be_removed = False
 	for parent in data:
 		if 'is_group' in parent and parent.get("is_group") == 1:
 			have_child = False
@@ -87,10 +83,10 @@ def remove_parent_with_no_child(data, period_list):
 					break
 
 			if not have_child:
-				status = "data to be removed"
+				data_to_be_removed = True
 				data.remove(parent)
 
-	return data, status
+	return data, data_to_be_removed
 
 def adjust_account(data, period_list, consolidated= False):
 	leaf_nodes = [item for item in data if item['is_group'] == 0]
@@ -127,7 +123,7 @@ def get_profit(gross_income, gross_expense, period_list, company, profit_type, c
 
 	for period in period_list:
 		key = period if consolidated else period.key
-		profit_loss[key] = flt(gross_income[0][key] if len(gross_income) else 0) - flt(gross_expense[0][key] if len(gross_expense) else 0)
+		profit_loss[key] = flt(gross_income[0].get(key, 0)) - flt(gross_expense[0].get(key, 0))
 
 		if profit_loss[key]:
 			has_value=True
@@ -147,8 +143,8 @@ def get_net_profit(non_gross_income, gross_income, gross_expense, non_gross_expe
 
 	for period in period_list:
 		key = period if consolidated else period.key
-		total_income = flt(gross_income[0][key] if len(gross_income) else 0) + flt(non_gross_income[0][key] if len(non_gross_income) else 0)
-		total_expense = flt(gross_expense[0][key] if len(gross_expense) else 0) + flt(non_gross_expense[0][key] if len(non_gross_expense) else 0)
+		total_income = flt(gross_income[0].get(key, 0)) + flt(non_gross_income[0].get(key, 0))
+		total_expense = flt(gross_expense[0].get(key, 0)) + flt(non_gross_expense[0].get(key, 0))
 		profit_loss[key] = flt(total_income) - flt(total_expense)
 
 		if profit_loss[key]:
