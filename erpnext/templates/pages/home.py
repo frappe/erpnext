@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint
 
 no_cache = 1
 no_sitemap = 1

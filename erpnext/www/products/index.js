@@ -59,14 +59,13 @@ $(() => {
 				$('.page_content input').prop('disabled', true);
 				this.get_items_with_filters()
 					.then(html => {
-						$('.products-list').html(html)
+						$('.products-list').html(html);
 					})
 					.then(data => {
 						$('.page_content input').prop('disabled', false);
 						return data;
 					})
 					.catch(e => {
-						console.log(e);
 						$('.page_content input').prop('disabled', false);
 					});
 			}, 1000));
@@ -82,12 +81,12 @@ $(() => {
 					// Enter
 					const value = e.target.value;
 					if (value) {
-						window.location.search = 'search=' + e.target.value
+						window.location.search = 'search=' + e.target.value;
 					} else {
-						window.location.search = ''
+						window.location.search = '';
 					}
 				}
-			})
+			});
 		}
 
 		restore_filters_state() {
@@ -99,7 +98,7 @@ $(() => {
 				for (let fieldname in field_filters) {
 					const values = field_filters[fieldname];
 					const selector = values.map(value => {
-						return `input[data-filter-name="${fieldname}"][data-filter-value="${value}"]`
+						return `input[data-filter-name="${fieldname}"][data-filter-value="${value}"]`;
 					}).join(',');
 					$(selector).prop('checked', true);
 				}
@@ -143,7 +142,7 @@ $(() => {
 		for (let key in object) {
 			const value = object[key];
 			if (value) {
-				url.append(key, value)
+				url.append(key, value);
 			}
 		}
 		return url.toString();

@@ -1,4 +1,3 @@
-import json
 import frappe
 from .item_variants_cache import ItemVariantsCacheManager
 

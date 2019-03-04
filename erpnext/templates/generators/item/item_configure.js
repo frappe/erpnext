@@ -25,7 +25,7 @@ class ItemConfigure {
 				change: (e) => {
 					this.on_attribute_selection(e);
 				}
-			}
+			};
 		});
 
 		this.dialog = new frappe.ui.Dialog({
@@ -110,7 +110,7 @@ class ItemConfigure {
 						placeholder: __('Enter value betweeen {0} and {1}', [numbers[0], numbers[1]]),
 						input_class: 'mt-3',
 						change() {
-							const value = control.get_value()
+							const value = control.get_value();
 							if (!(value <= numbers[1] && value >= numbers[0])) {
 								//
 							}
@@ -164,8 +164,8 @@ class ItemConfigure {
 		const exact_match_message = __('1 exact match.');
 		const one_item = exact_match.length === 1 ?
 			exact_match[0] :
-			filtered_items_count === 1 ?
-			filtered_items[0] : '';
+				filtered_items_count === 1 ?
+				filtered_items[0] : '';
 
 		const item_add_to_cart = one_item ? `
 			<div class="alert alert-success d-flex justify-content-between align-items-center" role="alert">
@@ -212,11 +212,11 @@ class ItemConfigure {
 		this.dialog.hide();
 	}
 
-	btn_clear_values(e) {
+	btn_clear_values() {
 		this.dialog.fields_list.forEach(f => {
 			f.df.options = f.df.options.map(option => {
-				option.disabled = false
-				return option
+				option.disabled = false;
+				return option;
 			});
 		});
 		this.dialog.clear();
@@ -281,7 +281,7 @@ frappe.ready(() => {
 
 	set_continue_configuration();
 
-	$btn_configure.on('click', (e) => {
+	$btn_configure.on('click', () => {
 		$btn_configure.prop('disabled', true);
 		new ItemConfigure(itemCode, itemName);
 	});

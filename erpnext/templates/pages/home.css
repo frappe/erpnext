@@ -1,3 +1,4 @@
+/* csslint ignore:start */
 {% if homepage.hero_image %}
 .hero-image {
 	background-image: url("{{ homepage.hero_image }}");
@@ -5,3 +6,4 @@
 	padding: 10rem 0;
 }
 {% endif %}
+/* csslint ignore:end */
