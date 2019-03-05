@@ -3,8 +3,10 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
+from frappe import _, scrub
 from erpnext.stock.utils import update_included_uom_in_report
+from collections import OrderedDict
+from six import iteritems
 
 def execute(filters=None):
 	include_uom = filters.get("include_uom")
@@ -12,7 +14,8 @@ def execute(filters=None):
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
-	opening_row = get_opening_balance(filters, columns)
+	voucher_party_details = get_voucher_party_details(sl_entries)
+	opening_row = get_opening_balance(filters.item_code, filters.warehouse, filters.from_date)
 
 	data = []
 	conversion_factors = []
@@ -21,18 +24,39 @@ def execute(filters=None):
 
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
+		party_detail = voucher_party_details.get(sle.voucher_no, frappe._dict())
 
-		data.append([sle.date, sle.item_code, item_detail.item_name, item_detail.item_group,
-			item_detail.brand, item_detail.description, sle.warehouse,
-			item_detail.stock_uom, sle.actual_qty, sle.qty_after_transaction,
-			(sle.incoming_rate if sle.actual_qty > 0 else 0.0),
-			sle.valuation_rate, sle.stock_value, sle.voucher_type, sle.voucher_no,
-			sle.batch_no, sle.serial_no, sle.project, sle.company])
+		row = frappe._dict({
+			"date": sle.date,
+			"item_code": sle.item_code,
+			"item_name": item_detail.item_name,
+			"item_group": item_detail.item_group,
+			"brand": item_detail.brand,
+			"description": item_detail.description,
+			"warehouse": sle.warehouse,
+			"party_type": party_detail.party_type,
+			"party": party_detail.party,
+			"stock_uom": item_detail.stock_uom,
+			"actual_qty": sle.actual_qty,
+			"qty_after_transaction": sle.qty_after_transaction,
+			"incoming_rate": (sle.incoming_rate if sle.actual_qty > 0 else None),
+			"valuation_rate": sle.valuation_rate,
+			"stock_value": sle.stock_value,
+			"voucher_type": sle.voucher_type,
+			"voucher_no": sle.voucher_no,
+			"batch_no": sle.batch_no,
+			"serial_no": sle.serial_no,
+			"project": sle.project,
+			"company": sle.company
+		})
+		data.append(row)
 
 		if include_uom:
 			conversion_factors.append(item_detail.conversion_factor)
 
 	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
+
+	data = get_grouped_data(filters, columns, data)
 	return columns, data
 
 def get_columns():
@@ -44,6 +68,8 @@ def get_columns():
 		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100},
 		{"label": _("Description"), "fieldname": "description", "width": 200},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
+		{"label": _("Party Type"), "fieldname": "party_type", "fieldtype": "Data", "width": 80},
+		{"label": _("Party"), "fieldname": "party", "fieldtype": "Dynamic Link", "options": "party_type", "width": 100},
 		{"label": _("Stock UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 100},
 		{"label": _("Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 50, "convertible": "qty"},
 		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 100, "convertible": "qty"},
@@ -129,6 +155,35 @@ def get_item_details(items, sl_entries, include_uom):
 
 	return item_details
 
+def get_voucher_party_details(sl_entries):
+	voucher_party_type = {
+		"Delivery Note": "Customer",
+		"Sales Invoice": "Customer",
+		"Purchase Receipt": "Supplier",
+		"Purchase Invoice": "Supplier"
+	}
+	voucher_map = {}
+	for d in sl_entries:
+		if d.voucher_type in voucher_party_type:
+			voucher_map.setdefault(d.voucher_type, set()).add(d.voucher_no)
+
+	voucher_party_details = frappe._dict()
+	for voucher_type, vouchers in iteritems(voucher_map):
+		data = frappe.db.sql("""
+			select name, {field}
+			from `tab{dt}`
+			where name in ({dns})
+		""".format(
+			field=scrub(voucher_party_type[voucher_type]),
+			dt=voucher_type,
+			dns=", ".join(["%s"] * len(vouchers))
+		), list(vouchers))
+
+		for d in data:
+			voucher_party_details[d[0]] = frappe._dict({"party_type": voucher_party_type[voucher_type], "party": d[1]})
+
+	return voucher_party_details
+
 def get_sle_conditions(filters):
 	conditions = []
 	if filters.get("warehouse"):
@@ -144,23 +199,61 @@ def get_sle_conditions(filters):
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
-def get_opening_balance(filters, columns):
-	if not (filters.item_code and filters.warehouse and filters.from_date):
+def get_opening_balance(item_code, warehouse, from_date):
+	if not (item_code and warehouse and from_date):
 		return
 
 	from erpnext.stock.stock_ledger import get_previous_sle
 	last_entry = get_previous_sle({
-		"item_code": filters.item_code,
-		"warehouse_condition": get_warehouse_condition(filters.warehouse),
-		"posting_date": filters.from_date,
+		"item_code": item_code,
+		"warehouse_condition": get_warehouse_condition(warehouse),
+		"posting_date": from_date,
 		"posting_time": "00:00:00"
 	})
-	row = [""]*len(columns)
-	row[1] = _("'Opening'")
-	for i, v in ((9, 'qty_after_transaction'), (11, 'valuation_rate'), (12, 'stock_value')):
-			row[i] = last_entry.get(v, 0)
+	row = frappe._dict()
+	row["item_code"] = _("'Opening'")
+	for f in ('qty_after_transaction', 'valuation_rate', 'stock_value'):
+		row[f] = last_entry.get(f, 0)
 
 	return row
+
+def get_grouped_data(filters, columns, data):
+	if not filters.get("group_by") or filters.get("group_by") == "Ungrouped":
+		return data
+
+	group_field = filters.get("group_by").replace("Group by ", "")
+	group_fieldnames = [scrub(group_field)]
+	if group_fieldnames[0] == "item":
+		group_fieldnames[0] = "item_code"
+	elif group_fieldnames[0] == "item_warehouse":
+		group_fieldnames[0] = "item_code"
+		group_fieldnames.append("warehouse")
+
+	group_rows = OrderedDict()
+	for row in data:
+		group = []
+		for f in group_fieldnames:
+			group.append(row.get(f))
+		group = tuple(group)
+
+		group_rows.setdefault(group, [])
+		group_rows[group].append(row)
+
+	out = []
+	for group, rows in iteritems(group_rows):
+		group_header = {}
+		if group_fieldnames == ['item_code', 'warehouse'] and filters.from_date:
+			group_header = get_opening_balance(group[0], group[1], filters.from_date)
+			group_header['description'] = _("Opening")
+
+		for f, v in zip(group_fieldnames, group):
+			group_header[f] = v
+
+		out.append(group_header)
+		out += rows
+		out.append({})
+
+	return out
 
 def get_warehouse_condition(warehouse):
 	warehouse_details = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"], as_dict=1)
