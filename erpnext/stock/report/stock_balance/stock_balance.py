@@ -33,6 +33,7 @@ def execute(filters=None):
 	for (company, item, warehouse) in sorted(iwb_map):
 		if item_map.get(item):
 			qty_dict = iwb_map[(company, item, warehouse)]
+			alt_uom_size = item_map[item]["alt_uom_size"] if filters.qty_field == "Contents Qty" and item_map[item]["alt_uom"] else 1.0
 			item_reorder_level = 0
 			item_reorder_qty = 0
 			if item + warehouse in item_reorder_detail_map:
@@ -42,14 +43,20 @@ def execute(filters=None):
 			report_data = [item, item_map[item]["item_name"],
 				item_map[item]["item_group"],
 				item_map[item]["brand"],
-				item_map[item]["description"], warehouse,
-				item_map[item]["stock_uom"], qty_dict.opening_qty,
-				qty_dict.opening_val, qty_dict.in_qty,
-				qty_dict.in_val, qty_dict.out_qty,
-				qty_dict.out_val, qty_dict.bal_qty,
-				qty_dict.bal_val, qty_dict.val_rate,
-				item_reorder_level,
-				item_reorder_qty,
+				item_map[item]["description"],
+				warehouse,
+				item_map[item]["alt_uom"] or item_map[item]["stock_uom"] if filters.qty_field == "Contents Qty" else item_map[item]["stock_uom"],
+				qty_dict.opening_qty * alt_uom_size,
+				qty_dict.opening_val,
+				qty_dict.in_qty * alt_uom_size,
+				qty_dict.in_val,
+				qty_dict.out_qty * alt_uom_size,
+				qty_dict.out_val,
+				qty_dict.bal_qty * alt_uom_size,
+				qty_dict.bal_val,
+				qty_dict.val_rate / alt_uom_size,
+				item_reorder_level * alt_uom_size,
+				item_reorder_qty * alt_uom_size,
 				company
 			]
 
@@ -78,7 +85,7 @@ def get_columns():
 		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 90},
 		{"label": _("Description"), "fieldname": "description", "width": 140},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
-		{"label": _("Stock UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 90},
+		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 70},
 		{"label": _("Opening Qty"), "fieldname": "opening_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Opening Value"), "fieldname": "opening_val", "fieldtype": "Float", "width": 110},
 		{"label": _("In Qty"), "fieldname": "in_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
@@ -228,7 +235,8 @@ def get_item_details(items, sle, filters):
 	item_codes = ', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])
 	res = frappe.db.sql("""
 		select
-			item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom {cf_field}
+			item.name, item.item_name, item.description, item.item_group, item.brand,
+			item.stock_uom, item.alt_uom, item.alt_uom_size {cf_field}
 		from
 			`tabItem` item
 			{cf_join}
