@@ -161,7 +161,9 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
 							// hold
 							this.frm.add_custom_button(__('Hold'),
-								function() { me.update_status('Hold', 'On Hold') }, __("Status"))
+								function() { 
+									me.sales_order_on_hold();	
+								}, __("Status"))
 							// close
 							this.frm.add_custom_button(__('Close'),
 								function() { me.close_sales_order() }, __("Status"))
@@ -569,6 +571,37 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			})
 		});
 		dialog.show();
+	},
+	sales_order_on_hold: function(){
+		var me = this;
+		var d = new frappe.ui.Dialog({
+			title: __('Reason for Hold'),
+			fields: [
+				{
+					"fieldname": "reason_for_hold",
+					"fieldtype": "Text",
+					"reqd": 1,
+				}
+			],
+			primary_action: function() {
+				var data = d.get_values();
+				frappe.call({
+					method: "erpnext.selling.doctype.sales_order.sales_order.update_reason_for_hold",
+					args: {
+						data: data.reason_for_hold,
+						name: me.frm.doc.name
+					},
+					callback: function(r) {
+						if(!r.exc) {
+							me.frm.set_value("reason_for_hold", data.reason_for_hold);
+							me.update_status('Hold', 'On Hold')
+							d.hide();
+						}
+					}
+				});
+			}
+		});
+		d.show();
 	},
 	close_sales_order: function(){
 		this.frm.cscript.update_status("Close", "Closed")
