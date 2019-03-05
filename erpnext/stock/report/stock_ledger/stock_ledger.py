@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
-from erpnext.stock.utils import update_included_uom_in_report
+from erpnext.stock.utils import update_included_uom_in_dict_report
 from collections import OrderedDict
 from six import iteritems
 
@@ -54,7 +54,7 @@ def execute(filters=None):
 		if include_uom:
 			conversion_factors.append(item_detail.conversion_factor)
 
-	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
+	update_included_uom_in_dict_report(columns, data, include_uom, conversion_factors)
 
 	data = get_grouped_data(filters, columns, data)
 	return columns, data
