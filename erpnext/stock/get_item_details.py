@@ -490,7 +490,7 @@ def get_price_list_rate_for(args, item_code):
 	price_list_rate = get_item_price(item_price_args, item_code)
 	if price_list_rate:
 		desired_qty = args.get("qty")
-		if check_packing_list(price_list_rate[0][0], desired_qty, item_code):
+		if desired_qty and check_packing_list(price_list_rate[0][0], desired_qty, item_code):
 			item_price_data = price_list_rate
 	else:
 		for field in ["customer", "supplier", "min_qty"]:
@@ -521,12 +521,15 @@ def check_packing_list(price_list_rate_name, desired_qty, item_code):
 		:param qty: Derised Qt
 	"""
 
+	flag = True
 	item_price = frappe.get_doc("Item Price", price_list_rate_name)
-	if desired_qty and item_price.packing_unit:
+	if item_price.packing_unit:
 		packing_increment = desired_qty % item_price.packing_unit
 
-		if packing_increment == 0:
-			return True
+		if packing_increment != 0:
+			flag = False
+
+	return flag
 
 def validate_price_list(args):
 	if args.get("price_list"):
