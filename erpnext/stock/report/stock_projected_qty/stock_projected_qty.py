@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, today
-from erpnext.stock.utils import update_included_uom_in_report
+from erpnext.stock.utils import update_included_uom_in_list_report
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
@@ -54,7 +54,7 @@ def execute(filters=None):
 		if include_uom:
 			conversion_factors.append(item.conversion_factor)
 
-	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
+	update_included_uom_in_list_report(columns, data, include_uom, conversion_factors)
 	return columns, data
 
 def get_columns():

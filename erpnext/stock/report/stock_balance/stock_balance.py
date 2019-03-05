@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, cint, getdate, now
-from erpnext.stock.utils import update_included_uom_in_report
+from erpnext.stock.utils import update_included_uom_in_list_report
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 
 from six import iteritems
@@ -65,7 +65,7 @@ def execute(filters=None):
 	if filters.get('show_variant_attributes', 0) == 1:
 		columns += ["{}:Data:100".format(i) for i in get_variants_attributes()]
 
-	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
+	update_included_uom_in_list_report(columns, data, include_uom, conversion_factors)
 	return columns, data
 
 def get_columns():
