@@ -170,7 +170,7 @@ class ItemConfigure {
 		const item_add_to_cart = one_item ? `
 			<div class="alert alert-success d-flex justify-content-between align-items-center" role="alert">
 				<div>
-					<div>${one_item} ${product_info ? '(' + product_info.price.formatted_price_sales_uom + ')' : ''}</div>
+					<div>${one_item} ${product_info && product_info.price ? '(' + product_info.price.formatted_price_sales_uom + ')' : ''}</div>
 				</div>
 				<a href data-action="btn_add_to_cart" data-item-code="${one_item}">
 					${__('Add to cart')}
