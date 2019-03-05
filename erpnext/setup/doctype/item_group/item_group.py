@@ -187,7 +187,7 @@ def get_group_item_count(item_group):
 def get_parent_item_groups(item_group_name):
 	base_parents = [
 		{"name": frappe._("Home"), "route":"/"},
-		{"name": frappe._("Products"), "route":"/products"},
+		{"name": frappe._("All Products"), "route":"/all-products"},
 	]
 	if not item_group_name:
 		return base_parents

@@ -119,7 +119,7 @@ def get_products_html_for_website(field_filters=None, attribute_filters=None):
 	html = ''.join(get_html_for_items(items))
 
 	if not items:
-		html = frappe.render_template('erpnext/www/products/not_found.html', {})
+		html = frappe.render_template('erpnext/www/all-products/not_found.html', {})
 
 	return html
 
@@ -448,7 +448,7 @@ def get_item_attributes(item_code):
 def get_html_for_items(items):
 	html = []
 	for item in items:
-		html.append(frappe.render_template('erpnext/www/products/item_row.html', {
+		html.append(frappe.render_template('erpnext/www/all-products/item_row.html', {
 			'item': item
 		}))
 	return html

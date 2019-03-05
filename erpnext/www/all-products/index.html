@@ -34,16 +34,16 @@
 	<div class="col-12 order-2 col-md-8 order-md-1 products-list">
 		{% if items %}
 			{% for item in items %}
-				{% include "erpnext/www/products/item_row.html" %}
+				{% include "erpnext/www/all-products/item_row.html" %}
 			{% endfor %}
 		{% else %}
-			{% include "erpnext/www/products/not_found.html" %}
+			{% include "erpnext/www/all-products/not_found.html" %}
 		{% endif %}
 	</div>
 	<div class="col-12 order-1 col-md-4 order-md-2">
 
 		{% if frappe.form_dict.start or frappe.form_dict.field_filters or frappe.form_dict.search %}
-		<a class="mb-3 d-inline-block" href="/products">{{ _('Clear filters') }}</a>
+		<a class="mb-3 d-inline-block" href="/all-products">{{ _('Clear filters') }}</a>
 		{% endif  %}
 
 		<div class="collapse d-md-block" id="product-filters">
