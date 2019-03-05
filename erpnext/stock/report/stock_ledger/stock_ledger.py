@@ -25,6 +25,7 @@ def execute(filters=None):
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
 		party_detail = voucher_party_details.get(sle.voucher_no, frappe._dict())
+		alt_uom_size = item_detail.alt_uom_size if filters.qty_field == "Contents Qty" and item_detail.alt_uom else 1.0
 
 		row = frappe._dict({
 			"date": sle.date,
@@ -36,11 +37,11 @@ def execute(filters=None):
 			"warehouse": sle.warehouse,
 			"party_type": party_detail.party_type,
 			"party": party_detail.party,
-			"stock_uom": item_detail.stock_uom,
-			"actual_qty": sle.actual_qty,
-			"qty_after_transaction": sle.qty_after_transaction,
-			"incoming_rate": (sle.incoming_rate if sle.actual_qty > 0 else None),
-			"valuation_rate": sle.valuation_rate,
+			"uom": item_detail.alt_uom or item_detail.stock_uom if filters.qty_field == "Contents Qty" else item_detail.stock_uom,
+			"actual_qty": sle.actual_qty * alt_uom_size,
+			"qty_after_transaction": sle.qty_after_transaction * alt_uom_size,
+			"incoming_rate": (sle.incoming_rate / alt_uom_size if sle.actual_qty > 0 else None),
+			"valuation_rate": sle.valuation_rate / alt_uom_size,
 			"stock_value": sle.stock_value,
 			"voucher_type": sle.voucher_type,
 			"voucher_no": sle.voucher_no,
@@ -70,7 +71,7 @@ def get_columns():
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
 		{"label": _("Party Type"), "fieldname": "party_type", "fieldtype": "Data", "width": 80},
 		{"label": _("Party"), "fieldname": "party", "fieldtype": "Dynamic Link", "options": "party_type", "width": 100},
-		{"label": _("Stock UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 100},
+		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 70},
 		{"label": _("Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 50, "convertible": "qty"},
 		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Incoming Rate"), "fieldname": "incoming_rate", "fieldtype": "Currency", "width": 110,
@@ -142,7 +143,8 @@ def get_item_details(items, sl_entries, include_uom):
 	item_codes = ', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])
 	res = frappe.db.sql("""
 		select
-			item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom {cf_field}
+			item.name, item.item_name, item.description, item.item_group, item.brand,
+			item.stock_uom, item.alt_uom, item.alt_uom_size {cf_field}
 		from
 			`tabItem` item
 			{cf_join}

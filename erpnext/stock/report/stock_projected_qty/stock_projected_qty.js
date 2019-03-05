@@ -11,6 +11,13 @@ frappe.query_reports["Stock Projected Qty"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
+			"fieldname":"qty_field",
+			"label": __("Stock Qty or Contents Qty"),
+			"fieldtype": "Select",
+			"options": "Stock Qty\nContents Qty",
+			"default": "Stock Qty"
+		},
+		{
 			"fieldname":"warehouse",
 			"label": __("Warehouse"),
 			"fieldtype": "Link",

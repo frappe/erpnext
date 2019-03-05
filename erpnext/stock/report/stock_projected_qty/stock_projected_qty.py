@@ -37,6 +37,8 @@ def execute(filters=None):
 		elif filters.company and filters.company != company:
 			continue
 
+		alt_uom_size = item.alt_uom_size if filters.qty_field == "Contents Qty" and item.alt_uom else 1.0
+
 		re_order_level = re_order_qty = 0
 
 		for d in item.get("reorder_levels"):
@@ -47,9 +49,19 @@ def execute(filters=None):
 		shortage_qty = re_order_level - flt(bin.projected_qty) if (re_order_level or re_order_qty) else 0
 
 		data.append([item.name, item.item_name, item.description, item.item_group, item.brand, bin.warehouse,
-			item.stock_uom, bin.actual_qty, bin.planned_qty, bin.indented_qty, bin.ordered_qty,
-			bin.reserved_qty, bin.reserved_qty_for_production, bin.reserved_qty_for_sub_contract,
-			bin.projected_qty, re_order_level, re_order_qty, shortage_qty])
+			item.alt_uom or item.stock_uom if filters.qty_field == "Contents Qty" else item.stock_uom,
+			bin.actual_qty * alt_uom_size,
+			bin.planned_qty * alt_uom_size,
+			bin.indented_qty * alt_uom_size,
+			bin.ordered_qty * alt_uom_size,
+			bin.reserved_qty * alt_uom_size,
+			bin.reserved_qty_for_production * alt_uom_size,
+			bin.reserved_qty_for_sub_contract * alt_uom_size,
+			bin.projected_qty * alt_uom_size,
+			re_order_level * alt_uom_size,
+			re_order_qty * alt_uom_size,
+			shortage_qty * alt_uom_size
+		])
 
 		if include_uom:
 			conversion_factors.append(item.conversion_factor)
@@ -65,7 +77,7 @@ def get_columns():
 		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
 		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 120},
-		{"label": _("UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 100},
+		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 70},
 		{"label": _("Actual Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Planned Qty"), "fieldname": "planned_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Requested Qty"), "fieldname": "indented_qty", "fieldtype": "Float", "width": 110, "convertible": "qty"},
@@ -115,7 +127,8 @@ def get_item_map(item_code, include_uom):
 		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%(include_uom)s"
 
 	items = frappe.db.sql("""
-		select item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom{cf_field}
+		select item.name, item.item_name, item.description, item.item_group, item.brand,
+		item.stock_uom, item.alt_uom, item.alt_uom_size {cf_field}
 		from `tabItem` item
 		{cf_join}
 		where item.is_stock_item = 1

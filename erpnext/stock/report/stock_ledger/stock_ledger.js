@@ -12,6 +12,13 @@ frappe.query_reports["Stock Ledger"] = {
 			"reqd": 1
 		},
 		{
+			"fieldname":"qty_field",
+			"label": __("Stock Qty or Contents Qty"),
+			"fieldtype": "Select",
+			"options": "Stock Qty\nContents Qty",
+			"default": "Stock Qty"
+		},
+		{
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
