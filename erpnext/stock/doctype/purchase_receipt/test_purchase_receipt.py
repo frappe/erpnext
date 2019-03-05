@@ -206,9 +206,11 @@ class TestPurchaseReceipt(unittest.TestCase):
 		item_code = "_Test Purchase Return For Multi-UOM"
 		if not frappe.db.exists('Item', item_code):
 			item = make_item(item_code, {'stock_uom': 'Box'})
-			row = item.append('uoms', {
-				'uom': 'Unit',
-				'conversion_factor': 0.1
+			row = item.append('uom_conversion_graph', {
+				'from_qty': 1,
+				'from_uom': 'Unit',
+				'to_qty': 0.1, # conversion factor
+				'to_uom': item.stock_uom
 			})
 			row.db_update()
 
@@ -403,6 +405,44 @@ class TestPurchaseReceipt(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 		set_perpetual_inventory(0, pr.company)
+
+	def test_make_purchase_invoice_from_pr_for_returned_qty(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order, create_pr_against_po
+
+		po = create_purchase_order()
+		pr = create_pr_against_po(po.name)
+
+		pr1 = make_purchase_receipt(is_return=1, return_against=pr.name, qty=-1, do_not_submit=True)
+		pr1.items[0].purchase_order = po.name
+		pr1.items[0].purchase_order_item = po.items[0].name
+		pr1.submit()
+
+		pi = make_purchase_invoice(pr.name)
+		self.assertEquals(pi.items[0].qty, 3)
+
+	def test_make_purchase_invoice_from_dn_with_returned_qty_against_dn(self):
+		pr1 = make_purchase_receipt(qty=8, do_not_submit=True)
+		pr1.append("items", {
+			"item_code": "_Test Item",
+			"warehouse": "_Test Warehouse - _TC",
+			"qty": 1,
+			"received_qty": 1,
+			"rate": 100,
+			"conversion_factor": 1.0,
+		})
+		pr1.submit()
+
+		pi1 = make_purchase_invoice(pr1.name)
+		pi1.items[0].qty = 4
+		pi1.items.pop(1)
+		pi1.save()
+		pi1.submit()
+
+		make_purchase_receipt(is_return=1, return_against=pr1.name, qty=-2)
+
+		pi2 = make_purchase_invoice(pr1.name)
+		self.assertEquals(pi2.items[0].qty, 2)
+		self.assertEquals(pi2.items[1].qty, 1)
 
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit, cost_center

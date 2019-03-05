@@ -228,9 +228,11 @@ class TestPricingRule(unittest.TestCase):
 		if not frappe.db.get_value('UOM Conversion Detail',
 			{'parent': '_Test Item', 'uom': 'box'}):
 			item = frappe.get_doc('Item', '_Test Item')
-			item.append('uoms', {
-				'uom': 'Box',
-				'conversion_factor': 5
+			item.append('uom_conversion_graph', {
+				'from_qty': 1,
+				'from_uom': 'Box',
+				'to_qty': 5, # conversion factor
+				'to_uom': item.stock_uom
 			})
 			item.save(ignore_permissions=True)
 

@@ -131,6 +131,10 @@ class StockEntry(StockController):
 			item.transfer_qty = flt(flt(item.qty) * flt(item.conversion_factor),
 				self.precision("transfer_qty", item))
 
+			if not item.alt_uom:
+				item.alt_uom_size = 1.0
+			item.alt_uom_qty = flt(flt(item.qty) * flt(item.conversion_factor) * flt(item.alt_uom_size), item.precision("alt_uom_qty"))
+
 	def update_cost_in_project(self):
 		if self.project:
 			amount = frappe.db.sql(""" select ifnull(sum(sed.amount), 0)
@@ -293,8 +297,9 @@ class StockEntry(StockController):
 			total_completed_qty = flt(self.fg_completed_qty) + flt(prod_order.produced_qty)
 			completed_qty = d.completed_qty + (allowance_percentage/100 * d.completed_qty)
 			if total_completed_qty > flt(completed_qty):
-				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order # {3}. Please update operation status via Time Logs")
-					.format(d.idx, d.operation, total_completed_qty, self.work_order), OperationsNotCompleteError)
+				job_card = frappe.db.get_value('Job Card', {'operation_id': d.name}, 'name')
+				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order # {3}. Please update operation status via Job Card # {4}")
+					.format(d.idx, d.operation, total_completed_qty, self.work_order, job_card), OperationsNotCompleteError)
 
 	def check_duplicate_entry_for_work_order(self):
 		other_ste = [t[0] for t in frappe.db.get_values("Stock Entry",  {
@@ -619,7 +624,8 @@ class StockEntry(StockController):
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select i.name, i.stock_uom, i.description, i.image, i.item_name, i.item_group,
 				i.has_batch_no, i.sample_quantity, i.has_serial_no,
-				id.expense_account, id.buying_cost_center
+				id.expense_account, id.buying_cost_center,
+				i.alt_uom, i.alt_uom_size
 			from `tabItem` i LEFT JOIN `tabItem Default` id ON i.name=id.parent and id.company=%s
 			where i.name=%s
 				and i.disabled=0
@@ -674,6 +680,11 @@ class StockEntry(StockController):
 		if (args.get('s_warehouse', None) and args.get('qty') and
 			ret.get('has_batch_no') and not args.get('batch_no')):
 			args.batch_no = get_batch_no(args['item_code'], args['s_warehouse'], args['qty'])
+
+		# Contents UOM
+		ret.alt_uom = item.alt_uom
+		ret.alt_uom_size = item.alt_uom_size if item.alt_uom else 1.0
+		ret.alt_uom_qty = flt(ret.transfer_qty) * flt(ret.alt_uom_size)
 
 		return ret
 

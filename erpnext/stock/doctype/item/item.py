@@ -36,6 +36,10 @@ class InvalidBarcode(frappe.ValidationError):
 	pass
 
 
+class ConflictingConversionFactors(frappe.ValidationError):
+	pass
+
+
 class Item(WebsiteGenerator):
 	website = frappe._dict(
 		page_title_field="item_name",
@@ -105,7 +109,8 @@ class Item(WebsiteGenerator):
 
 		self.validate_uom()
 		self.validate_description()
-		self.add_default_uom_in_conversion_factor_table()
+		self.add_alt_uom_in_conversion_table()
+		self.compute_uom_conversion_factors()
 		self.validate_conversion_factor()
 		self.validate_item_type()
 		self.check_for_active_boms()
@@ -422,19 +427,132 @@ class Item(WebsiteGenerator):
 				if not find_variant(combination):
 					context.disabled_attributes.setdefault(attr.attribute, []).append(combination[-1])
 
-	def add_default_uom_in_conversion_factor_table(self):
-		uom_conv_list = [d.uom for d in self.get("uoms")]
-		if self.stock_uom not in uom_conv_list:
-			ch = self.append('uoms', {})
-			ch.uom = self.stock_uom
-			ch.conversion_factor = 1
+	def compute_uom_conversion_factors(self):
+		# Modified version of https://www.geeksforgeeks.org/find-paths-given-source-destination/
+		class Graph:
+			def __init__(self, vertices):
+				from collections import defaultdict
+				self.V = vertices
+				self.graph = defaultdict(list)
 
-		to_remove = []
-		for d in self.get("uoms"):
-			if d.conversion_factor == 1 and d.uom != self.stock_uom:
-				to_remove.append(d)
+			def add_edge(self, src, dest, weight):
+				self.graph[src].append((dest, weight))
 
-		[self.remove(d) for d in to_remove]
+			def get_all_paths_util(self, src, d, visited, path, all_paths, weight):
+				# Mark the current node as visited and store in path
+				visited[src] = True
+				path.append((src, weight))
+
+				# If current vertex is same as destination, then print current path[]
+				if src == d:
+					all_paths.append(path[:])
+				else:  # If current vertex is not destination Recur for all the vertices adjacent to this vertex
+					for i, weight in self.graph[src]:
+						if not visited[i]:
+							self.get_all_paths_util(i, d, visited, path, all_paths, weight)
+
+				# Remove current vertex from path[] and mark it as unvisited
+				path.pop()
+				visited[src] = False
+
+			def get_all_paths(self, s, d):
+				visited = [False] * self.V
+				all_paths = []
+				path = []
+				self.get_all_paths_util(s, d, visited, path, all_paths, 1.0)
+				return all_paths
+
+		# Get list of all UOMs, stock UOM being index 0
+		uoms = [self.stock_uom]
+		for d in self.uom_conversion_graph:
+			if not d.from_qty:
+				frappe.throw(_("Row {0}: UOM Conversion From Qty cannot be 0").format(d.idx))
+			if not d.to_qty:
+				frappe.throw(_("Row {0}: UOM Conversion To Qty cannot be 0").format(d.idx))
+			if d.from_uom == d.to_uom:
+				frappe.throw(_("Row {0}: From UOM and To UOM must not be the same").format(d.idx))
+
+			predefined_conv_factor = get_uom_conv_factor(d.from_uom, d.to_uom)
+			if predefined_conv_factor:
+				input_conv_factor = flt(d.to_qty) / flt(d.from_qty)
+				if abs(predefined_conv_factor - input_conv_factor) > 0.1/10**self.precision("conversion_factor", "uoms"):
+					frappe.msgprint("Row {0}: Setting conversion quantities from {1} to {2} from UOM Conversion Factor"
+						.format(d.idx, d.from_uom, d.to_uom), alert=True)
+					if abs(predefined_conv_factor) >= 1:
+						d.from_qty = 1
+						d.to_qty = flt(predefined_conv_factor, self.precision("to_qty", "uom_conversion_graph"))
+					else:
+						d.from_qty = flt(1/flt(predefined_conv_factor), self.precision("from_qty", "uom_conversion_graph"))
+						d.to_qty = 1
+
+			if d.from_uom not in uoms:
+				uoms.append(d.from_uom)
+			if d.to_uom not in uoms:
+				uoms.append(d.to_uom)
+
+		# Create a graph of UOMs
+		graph = Graph(len(uoms))
+		for d in self.uom_conversion_graph:
+			src = uoms.index(d.from_uom)
+			dest = uoms.index(d.to_uom)
+			w = flt(d.from_qty) / flt(d.to_qty)
+			graph.add_edge(src, dest, 1/w)
+			graph.add_edge(dest, src, w)
+
+		# Get paths from all UOMs to stock UOM
+		conv_factors = []
+		for i in range(1, len(uoms)):
+			uom = uoms[i]
+			paths = graph.get_all_paths(i, 0)
+			if not paths:
+				frappe.throw(_("No conversion factor can be found from {0} to {1}").format(uom, self.stock_uom))
+
+			# calculate the net conversion factor for each uom considering all paths
+			weights = [1] * len(paths)
+			for i, path in enumerate(paths):
+				for d in path:
+					weights[i] *= d[1]
+
+			# if there are multiple paths, make sure their conversion_factors are the same
+			conv = weights[0]
+			for w in weights:
+				if abs(w-conv) > 0.1/10**self.precision("conversion_factor", "uoms"):
+					frappe.throw(_("Multiple conversion factors found from {0} to {1}")
+						.format(uom, self.stock_uom), ConflictingConversionFactors)
+
+			if not conv:
+				frappe.throw(_("Conversion factor for UOM {0} is 0").format(uom))
+
+			conv_factors.append({
+				"uom": uom,
+				"conversion_factor": conv
+			})
+
+		# Set Stock UOM's conversion_factor 1
+		if self.stock_uom not in [d['uom'] for d in conv_factors]:
+			conv_factors.append({
+				"uom": self.stock_uom,
+				"conversion_factor": 1.0
+			})
+
+		# Only update conversion factors if something has changed
+		old_conv_factors = [{"uom": d.uom, "conversion_factor": d.conversion_factor} for d in self.uoms]
+		if cmp(conv_factors, old_conv_factors) != 0:
+			self.set("uoms", [])
+			for d in conv_factors:
+				self.append("uoms", d)
+
+	def add_alt_uom_in_conversion_table(self):
+		uom_conv_list = [(d.from_uom, d.to_uom) for d in self.get("uom_conversion_graph")]
+		if self.alt_uom and self.alt_uom != self.stock_uom \
+				and (self.stock_uom, self.alt_uom) not in uom_conv_list and (self.alt_uom, self.stock_uom) not in uom_conv_list:
+			if not flt(self.alt_uom_size):
+				frappe.throw(_("Container Size is invalid"))
+			ch = self.append('uom_conversion_graph', {})
+			ch.from_qty = 1.0
+			ch.from_uom = self.stock_uom
+			ch.to_qty = flt(self.alt_uom_size)
+			ch.to_uom = self.alt_uom
 
 	def update_template_tables(self):
 		template = frappe.get_doc("Item", self.variant_of)
@@ -463,7 +581,10 @@ class Item(WebsiteGenerator):
 
 			if d.uom and cstr(d.uom) == cstr(self.stock_uom) and flt(d.conversion_factor) != 1:
 				frappe.throw(
-					_("Conversion factor for default Unit of Measure must be 1 in row {0}").format(d.idx))
+					_("Conversion factor for default Unit of Measure must be 1"))
+
+			if self.alt_uom and d.uom == self.alt_uom:
+				self.alt_uom_size = flt(1/flt(d.conversion_factor), self.precision("alt_uom_size"))
 
 	def validate_item_type(self):
 		if self.has_serial_no == 1 and self.is_stock_item == 0 and not self.is_fixed_asset:
@@ -700,15 +821,14 @@ class Item(WebsiteGenerator):
                         frappe.db.get_single_value('Item Variant Settings', 'do_not_update_variants'):
 			return
 		if self.has_variants:
-			updated = []
 			variants = frappe.db.get_all("Item", fields=["item_code"], filters={"variant_of": self.name})
-			for d in variants:
-				variant = frappe.get_doc("Item", d)
-				copy_attributes_to_variant(self, variant)
-				variant.save()
-				updated.append(d.item_code)
-			if updated:
-				frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
+			if variants:
+				if len(variants) <= 30:
+					update_variants(variants, self, publish_progress=False)
+					frappe.msgprint(_("Item Variants updated"))
+				else:
+					frappe.enqueue("erpnext.stock.doctype.item.item.update_variants",
+						variants=variants, template=self, now=frappe.flags.in_test, timeout=600)
 
 	def validate_has_variants(self):
 		if not self.has_variants and frappe.db.get_value("Item", self.name, "has_variants"):
@@ -749,13 +869,20 @@ class Item(WebsiteGenerator):
 			template_uom = frappe.db.get_value("Item", self.variant_of, "stock_uom")
 			if template_uom != self.stock_uom:
 				frappe.throw(_("Default Unit of Measure for Variant '{0}' must be same as in Template '{1}'")
-                                    .format(self.stock_uom, template_uom))
+					.format(self.stock_uom, template_uom))
+
+		if self.alt_uom == self.stock_uom:
+			self.alt_uom = ""
+		if not self.alt_uom:
+			self.alt_uom_size = 1
 
 	def validate_uom_conversion_factor(self):
 		if self.uoms:
 			for d in self.uoms:
 				value = get_uom_conv_factor(d.uom, self.stock_uom)
-				if value:
+				if value and abs(value - d.conversion_factor) > 0.1/10**self.precision("conversion_factor", "uoms"):
+					frappe.msgprint("Setting conversion factor for UOM {0} from UOM Conversion Factor Master as {1}"
+						.format(d.uom, value), alert=True)
 					d.conversion_factor = value
 
 	def validate_attributes(self):
@@ -997,3 +1124,13 @@ def get_item_attribute(parent, attribute_value=''):
 
 	return frappe.get_all("Item Attribute Value", fields = ["attribute_value"],
 		filters = {'parent': parent, 'attribute_value': ("like", "%%%s%%" % attribute_value)})
+
+def update_variants(variants, template, publish_progress=True):
+	count=0
+	for d in variants:
+		variant = frappe.get_doc("Item", d)
+		copy_attributes_to_variant(template, variant)
+		variant.save()
+		count+=1
+		if publish_progress:
+				frappe.publish_progress(count*100/len(variants), title = _("Updating Variants..."))
