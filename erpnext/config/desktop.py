@@ -14,7 +14,6 @@ def get_data():
 			"icon": "fa fa-check-square-o",
 			"type": "module",
 			"disable_after_onboard": 1,
-			"shortcuts": ["Import Data", "Letter Head", "Email Account", "Item", "Customer"],
 			"description": "Dive into the basics for your organisation's needs.",
 			"onboard_present": 1
 		},
@@ -25,7 +24,6 @@ def get_data():
 			"color": "#3498db",
 			"icon": "octicon octicon-repo",
 			"type": "module",
-			"shortcuts": ["Item", "Customer", "Supplier", "General Ledger", "Sales Invoice"],
 			"description": "Accounts, billing, payments, cost center and budgeting."
 		},
 		{
@@ -35,7 +33,6 @@ def get_data():
 			"color": "#1abc9c",
 			"icon": "octicon octicon-tag",
 			"type": "module",
-			"shortcuts": ["Quotation", "Sales Order", "Sales Analytics", "Customer"],
 			"description": "Sales orders, quotations, customers and items."
 		},
 		{
@@ -45,7 +42,6 @@ def get_data():
 			"color": "#c0392b",
 			"icon": "octicon octicon-briefcase",
 			"type": "module",
-			"shortcuts": ["Purchase Order", "Items and Pricing", "Settings", "Supplier"],
 			"description": "Purchasing, suppliers, material requests, and items."
 		},
 		{
@@ -55,7 +51,6 @@ def get_data():
 			"color": "#f39c12",
 			"icon": "octicon octicon-package",
 			"type": "module",
-			"shortcuts": ["Transactions", "Stock Reports", "Settings"],
 			"description": "Stock transactions, reports, serial numbers and batches."
 		},
 		{
@@ -65,7 +60,6 @@ def get_data():
 			"color": "#4286f4",
 			"icon": "octicon octicon-database",
 			"type": "module",
-			"shortcuts": ["Assets", "Maintanence", "Reports"],
 			"description": "Asset movement, maintainance and tools."
 		},
 		{
@@ -75,7 +69,6 @@ def get_data():
 			"color": "#8e44ad",
 			"icon": "octicon octicon-rocket",
 			"type": "module",
-			"shortcuts": ["Projects", "Time Tracking", "Reports"],
 			"description": "Updates, Timesheets and Activities."
 		},
 		{
@@ -85,7 +78,6 @@ def get_data():
 			"color": "#EF4DB6",
 			"icon": "octicon octicon-broadcast",
 			"type": "module",
-			"shortcuts": ["Sales Pipeline", "Reports", "Settings"],
 			"description": "Sales pipeline, leads, opportunities and customers."
 		},
 		{
@@ -95,7 +87,6 @@ def get_data():
 			"color": "#1abc9c",
 			"icon": "fa fa-check-square-o",
 			"type": "module",
-			"shortcuts": ["Issues", "Warranty", "Reports"],
 			"description": "User interactions, support issues and knowledge base."
 		},
 		{
@@ -105,7 +96,6 @@ def get_data():
 			"color": "#2ecc71",
 			"icon": "octicon octicon-organization",
 			"type": "module",
-			"shortcuts": ["Employee and Attendance", "Payroll", "Settings"],
 			"description": "Employees, attendance, payroll, leaves and shifts."
 		},
 		{
@@ -115,7 +105,6 @@ def get_data():
 			"color": "#1abc9c",
 			"icon": "fa fa-check-square-o",
 			"type": "module",
-			"shortcuts": ["Goal and Procedure", "Review and Action"],
 			"description": "Quality goals, procedures, reviews and action."
 		},
 
