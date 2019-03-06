@@ -961,7 +961,7 @@ def invalidate_cache_for_item(doc):
 
 
 def invalidate_item_variants_cache_for_website(doc):
-	from erpnext.www.products.item_variants_cache import ItemVariantsCacheManager
+	from erpnext.portal.product_configurator.item_variants_cache import ItemVariantsCacheManager
 
 	item_code = None
 	if doc.has_variants and doc.show_in_website:
