@@ -100,28 +100,37 @@ class Student(Document):
 		return progress
 
 	def enroll_in_program(self, program_name):
-		enrollment = frappe.get_doc({
-				"doctype": "Program Enrollment",
-				"student": self.name,
-				"academic_year": frappe.get_last_doc("Academic Year").name,
-				"program": program_name,
-				"enrollment_date": frappe.utils.datetime.datetime.now()
-			})
-		enrollment.save(ignore_permissions=True)
-		enrollment.submit()
-		frappe.db.commit()
-		return enrollment
+		try:
+			enrollment = frappe.get_doc({
+					"doctype": "Program Enrollment",
+					"student": self.name,
+					"academic_year": frappe.get_last_doc("Academic Year").name,
+					"program": program_name,
+					"enrollment_date": frappe.utils.datetime.datetime.now()
+				})
+			enrollment.save(ignore_permissions=True)
+		except frappe.exceptions.ValidationError:
+			enrollment_name = frappe.get_list("Program Enrollment", filters={"student": self.name, "Program": program_name})[0].name
+			return frappe.get_doc("Program Enrollment", enrollment_name)
+		else:
+			enrollment.submit()
+			return enrollment
 
 	def enroll_in_course(self, course_name, program_enrollment, enrollment_date=frappe.utils.datetime.datetime.now()):
-		enrollment = frappe.get_doc({
-				"doctype": "Course Enrollment",
-				"student": self.name,
-				"course": course_name,
-				"program_enrollment": program_enrollment,
-				"enrollment_date": enrollment_date
-			})
-		enrollment.save(ignore_permissions=True)
-		frappe.db.commit()
+		try:
+			enrollment = frappe.get_doc({
+					"doctype": "Course Enrollment",
+					"student": self.name,
+					"course": course_name,
+					"program_enrollment": program_enrollment,
+					"enrollment_date": enrollment_date
+				})
+			enrollment.save(ignore_permissions=True)
+		except frappe.exceptions.ValidationError:
+			enrollment_name = frappe.get_list("Program Enrollment", filters={"student": self.name, "course": course_name, "program_enrollment": program_enrollment})[0].name
+			return frappe.get_doc("Program Enrollment", enrollment_name)
+		else:
+			return enrollment
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
