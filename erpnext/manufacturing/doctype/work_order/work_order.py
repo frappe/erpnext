@@ -56,6 +56,7 @@ class WorkOrder(Document):
 
 	def validate_sales_order(self):
 		if self.sales_order:
+			self.check_sales_order_on_hold_or_close()
 			so = frappe.db.sql("""
 				select so.name, so_item.delivery_date, so.project
 				from `tabSales Order` so
@@ -90,6 +91,11 @@ class WorkOrder(Document):
 					self.validate_work_order_against_so()
 			else:
 				frappe.throw(_("Sales Order {0} is not valid").format(self.sales_order))
+
+	def check_sales_order_on_hold_or_close(self):
+		status = frappe.db.get_value("Sales Order", self.sales_order, "status")
+		if status in ("Closed", "On Hold"):
+			frappe.throw(_("Sales Order {0} is {1}").format(self.sales_order, status))
 
 	def set_default_warehouse(self):
 		if not self.wip_warehouse:
