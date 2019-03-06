@@ -55,7 +55,12 @@ class ItemConfigure {
 	}
 
 	on_attribute_selection(e) {
-		this.handle_range_values(e);
+		if (e) {
+			const changed_fieldname = $(e.target).data('fieldname');
+			this.show_range_input_if_applicable(changed_fieldname);
+		} else {
+			this.show_range_input_for_all_fields();
+		}
 
 		const values = this.dialog.get_values();
 		if (Object.keys(values).length === 0) {
@@ -92,36 +97,57 @@ class ItemConfigure {
 			});
 	}
 
-	handle_range_values(e) {
-		if (!e) return;
-		const changed_fieldname = $(e.target).data('fieldname');
-		const changed_field = this.dialog.get_field(changed_fieldname);
+	show_range_input_for_all_fields() {
+		this.dialog.fields.forEach(f => {
+			this.show_range_input_if_applicable(f.fieldname);
+		});
+	}
+
+	show_range_input_if_applicable(fieldname) {
+		const changed_field = this.dialog.get_field(fieldname);
 		const changed_value = changed_field.get_value();
 		if (changed_value && changed_value.includes(' to ')) {
 			// possible range input
 			let numbers = changed_value.split(' to ');
 			numbers = numbers.map(number => parseFloat(number));
+
 			if (!numbers.some(n => isNaN(n))) {
-				numbers.sort();
-				const parent = $('<div>').insertBefore(changed_field.$input_wrapper.find('.help-box'));
+				numbers.sort((a, b) => a - b);
+				if (changed_field.$input_wrapper.find('.range-selector').length) {
+					return;
+				}
+				const parent = $('<div class="range-selector">')
+					.insertBefore(changed_field.$input_wrapper.find('.help-box'));
 				const control = frappe.ui.form.make_control({
 					df: {
 						fieldtype: 'Int',
-						placeholder: __('Enter value betweeen {0} and {1}', [numbers[0], numbers[1]]),
-						input_class: 'mt-3',
-						change() {
+						label: __('Enter value betweeen {0} and {1}', [numbers[0], numbers[1]]),
+						change: () => {
 							const value = control.get_value();
-							if (!(value <= numbers[1] && value >= numbers[0])) {
-								//
+							if (value < numbers[0] || value > numbers[1]) {
+								control.$wrapper.addClass('was-validated');
+								control.set_description(
+									__('Value must be between {0} and {1}', [numbers[0], numbers[1]]));
+								control.$input[0].setCustomValidity('error');
+							} else {
+								control.$wrapper.removeClass('was-validated');
+								control.set_description('');
+								control.$input[0].setCustomValidity('');
+								this.update_range_values(fieldname, value);
 							}
 						}
 					},
-					only_input: true,
 					render_input: true,
 					parent
 				});
+				control.$wrapper.addClass('mt-3');
 			}
 		}
+	}
+
+	update_range_values(attribute, range_value) {
+		this.range_values = this.range_values || {};
+		this.range_values[attribute] = range_value;
 	}
 
 	show_remaining_optional_attributes() {
@@ -205,8 +231,12 @@ class ItemConfigure {
 			localStorage.removeItem(this.get_cache_key());
 		}
 		const item_code = $(e.currentTarget).data('item-code');
+		const additional_notes = Object.keys(this.range_values).map(attribute => {
+			return `${attribute}: ${this.range_values[attribute]}`;
+		}).join('\n');
 		erpnext.shopping_cart.update_cart({
 			item_code,
+			additional_notes,
 			qty: 1
 		});
 		this.dialog.hide();
@@ -231,7 +261,7 @@ class ItemConfigure {
 			const $target = $(e.currentTarget);
 			const action = $target.data('action');
 			const method = this[action];
-			method.call(this, [e]);
+			method.call(this, e);
 		});
 		this.dialog.$body.css({ maxHeight: '75vh', overflow: 'auto', overflowX: 'hidden' });
 	}
