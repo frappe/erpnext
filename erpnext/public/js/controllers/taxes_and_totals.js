@@ -397,13 +397,13 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			if (this.frm.doc.is_pos && this.frm.doc.is_return) {
 				$.each(this.frm.doc['payments'] || [], function (index, data) {
 					if (payment_status) {
-						data.amount = me.frm.doc.base_grand_total;
+						data.amount = me.frm.doc.grand_total;
 						data.base_amount = flt(data.amount * me.frm.doc.conversion_rate, precision("base_amount"));
 						payment_status = false;
 					}
 				});
-				this.frm.doc.paid_amount = flt(me.frm.doc.base_grand_total, precision("paid_amount"));
-				this.frm.doc.base_paid_amount = flt(me.frm.doc.base_grand_total, precision("base_paid_amount"));
+				this.frm.doc.paid_amount = flt(me.frm.doc.grand_total, precision("paid_amount"));
+				this.frm.doc.base_paid_amount = flt(me.frm.doc.grand_total, precision("base_paid_amount"));
 			}
 		} else {
 			// other charges added/deducted
