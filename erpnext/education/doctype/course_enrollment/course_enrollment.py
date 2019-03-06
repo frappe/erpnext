@@ -21,3 +21,12 @@ class CourseEnrollment(Document):
 		for topic in topics:
 				progress.append(student.get_topic_progress(self.name, topic))
 		return reduce(lambda x,y: x+y, progress) # Flatten out the List
+
+	def validate_duplication(self):
+		enrollment = frappe.get_all("Course Enrollment", filters={
+			"student": self.student,
+			"course": self.course,
+			"program_enrollment": self.program_enrollment
+		})
+		if enrollment:
+			frappe.throw(_("Student is already enrolled."))
