@@ -577,6 +577,7 @@ class TestSalesOrder(unittest.TestCase):
 				"description": item.get("description")
 			})
 			so_item_name[item.get("sales_order_item")]= item.get("pending_qty")
+		print(po_items)
 		make_work_orders(json.dumps({"items":po_items}), so.name, so.company)
 
 		# Check if Work Orders were raised
