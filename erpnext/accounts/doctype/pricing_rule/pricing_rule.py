@@ -178,7 +178,7 @@ def get_serial_no_for_item(args):
 def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
 	from erpnext.accounts.doctype.pricing_rule.utils import get_pricing_rules
 
-	if (args.get('is_free_item') or 
+	if (args.get('is_free_item') or
 		args.get("parenttype") == "Material Request"): return {}
 
 	item_details = frappe._dict({
@@ -260,6 +260,7 @@ def get_pricing_rule_details(args, pricing_rule):
 		'pricing_rule': pricing_rule.name,
 		'rate_or_discount': pricing_rule.rate_or_discount,
 		'margin_type': pricing_rule.margin_type,
+		'item_code': pricing_rule.item_code,
 		'child_docname': args.get('child_docname')
 	})
 

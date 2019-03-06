@@ -15,10 +15,10 @@ pricing_rule_fields = ['apply_on', 'mixed_conditions', 'is_cumulative', 'other_i
 	'supplier_group', 'company', 'currency']
 
 other_fields = ['min_qty', 'max_qty', 'min_amt', 'max_amt', 'priority',
-	'warehouse', 'validate_applied_rule']
+	'warehouse']
 
 price_discount_fields = ['rate_or_discount', 'apply_discount_on', 'apply_discount_on_rate',
-	'rate', 'discount_amount', 'discount_percentage']
+	'rate', 'discount_amount', 'discount_percentage', 'validate_applied_rule']
 
 product_discount_fields = ['free_item', 'free_qty', 'free_item_uom', 'free_item_rate', 'same_item']
 
@@ -77,7 +77,7 @@ def _get_pricing_rules(doc, child_doc, discount_fields, rules = {}):
 			pr = frappe.get_doc('Pricing Rule', rules.get(d.name))
 		else:
 			pr = frappe.new_doc("Pricing Rule")
-			pr.title = make_autoname(doc.name + "-.####")
+			pr.title = d.rule_description
 
 		pr.update(args)
 		for field in (other_fields + discount_fields):

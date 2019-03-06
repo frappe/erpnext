@@ -359,8 +359,8 @@ def validate_pricing_rules(doc):
 
 def validate_pricing_rule_on_items(doc, item_row):
     value = 0
-    for d in get_applied_pricing_rules(doc, item_row):
-        pr_doc = frappe.get_doc('Pricing Rule', d)
+    for pr_row in get_applied_pricing_rules(doc, item_row):
+        pr_doc = frappe.get_doc('Pricing Rule', pr_row.pricing_rule)
 
         if pr_doc.get('apply_on') == 'Transaction': continue
 
@@ -371,7 +371,7 @@ def validate_pricing_rule_on_items(doc, item_row):
                 if not pr_doc.get(field): continue
 
                 value += pr_doc.get(field)
-            apply_pricing_rule(doc, pr_doc, item_row, value)
+            apply_pricing_rule(doc, pr_doc, pr_row, item_row, value)
 
 def validate_pricing_rule_on_transactions(doc):
     conditions = "apply_on = 'Transaction'"
@@ -406,7 +406,7 @@ def validate_pricing_rule_on_transactions(doc):
                 apply_pricing_rule_for_free_items(doc, d)
 
 def get_applied_pricing_rules(doc, item_row):
-    return [d.pricing_rule for d in doc.pricing_rules
+    return [d for d in doc.pricing_rules
         if d.child_docname == item_row.name]
 
 def apply_pricing_rule_for_free_items(doc, pricing_rule):
@@ -426,7 +426,7 @@ def apply_pricing_rule_for_free_items(doc, pricing_rule):
 
             doc.set_missing_values()
 
-def apply_pricing_rule(doc, pr_doc, item_row, value):
+def apply_pricing_rule(doc, pr_doc, pr_row, item_row, value):
     apply_on = frappe.scrub(pr_doc.get('apply_on'))
     items = (get_pricing_rule_items(pr_doc)
         if pr_doc.mixed_conditions else [item_row.get(apply_on)])
@@ -435,6 +435,7 @@ def apply_pricing_rule(doc, pr_doc, item_row, value):
         apply_on = frappe.scrub(pr_doc.apply_rule_on_other)
         items = [pr_doc.get(apply_on)]
 
+    rule_applied = 1
     if item_row.get(apply_on) in items:
         for field in ['discount_percentage', 'discount_amount', 'rate']:
             if not pr_doc.get(field): continue
@@ -442,8 +443,11 @@ def apply_pricing_rule(doc, pr_doc, item_row, value):
             if not pr_doc.validate_applied_rule:
                 item_row.set(field, value)
             elif item_row.get(field) < value:
-                frappe.msgprint(_("Row {0}: user has not applied rule on the item {1}")
-                    .format(item_row.idx, item_row.item_code))
+                rule_applied = 0
+                frappe.msgprint(_("Row {0}: user has not applied rule <b>{1}</b> on the item <b>{2}</b>")
+                    .format(item_row.idx, pr_doc.title, item_row.item_code))
+
+            pr_row.rule_applied = rule_applied
 
 def get_pricing_rule_items(pr_doc):
     apply_on = frappe.scrub(pr_doc.get('apply_on'))
