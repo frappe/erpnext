@@ -40,11 +40,11 @@ class Student(Document):
 			frappe.throw(_("Student {0} exist against student applicant {1}").format(student[0][0], self.student_applicant))
 
 	def after_insert(self):
-		self.create_student()
+		self.create_student_user()
 
-	def create_student(self):
+	def create_student_user(self):
 		"""Create a website user for student creation if not already exists"""
-		if self.user == None:
+		if not frappe.db.exists("User", self.student_email_id)
 			student_user = frappe.get_doc({
 				'doctype':'User',
 				'first_name': self.first_name,
@@ -56,8 +56,6 @@ class Student(Document):
 				})
 			student_user.add_roles("Student", "LMS User")
 			student_user.save()
-			self.user = student_user.name
-			self.save()
 			update_password_link = student_user.reset_password()
 
 	def update_applicant_status(self):
