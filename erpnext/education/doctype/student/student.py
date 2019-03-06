@@ -44,7 +44,7 @@ class Student(Document):
 
 	def create_student_user(self):
 		"""Create a website user for student creation if not already exists"""
-		if not frappe.db.exists("User", self.student_email_id)
+		if not frappe.db.exists("User", self.student_email_id):
 			student_user = frappe.get_doc({
 				'doctype':'User',
 				'first_name': self.first_name,
