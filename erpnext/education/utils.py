@@ -99,7 +99,7 @@ def get_course_enrollment(course_name):
 	except:
 		return None
 
-def create_student():
+def create_student_from_current_user():
 	user = frappe.get_doc("User", frappe.session.user)
 	student = frappe.get_doc({
 		"doctype": "Student",
@@ -141,11 +141,3 @@ def check_quiz_completion(quiz, enrollment_name):
 		if result == 'Pass':
 			status = True
 	return status, score, result
-
-# def get_home_page(user):
-# 	print("----------------------------------------------------------------------")
-# 	print("Let's do a lot of magic")
-# 	if get_current_student():
-# 		return 'lms#/Profile'
-# 	else:
-# 		return None
