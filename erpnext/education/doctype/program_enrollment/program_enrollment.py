@@ -16,12 +16,12 @@ class ProgramEnrollment(Document):
 			self.student_name = frappe.db.get_value("Student", self.student, "title")
 		if not self.courses:
 			self.extend("courses", self.get_courses())
-	
+
 	def on_submit(self):
 		self.update_student_joining_date()
 		self.make_fee_records()
 		self.create_course_enrollments()
-	
+
 	def validate_duplication(self):
 		enrollment = frappe.get_all("Program Enrollment", filters={
 			"student": self.student,
@@ -32,11 +32,11 @@ class ProgramEnrollment(Document):
 		})
 		if enrollment:
 			frappe.throw(_("Student is already enrolled."))
-	
+
 	def update_student_joining_date(self):
 		date = frappe.db.sql("select min(enrollment_date) from `tabProgram Enrollment` where student= %s", self.student)
 		frappe.db.set_value("Student", self.student, "joining_date", date)
-		
+
 	def make_fee_records(self):
 		from erpnext.education.api import get_fee_components
 		fee_list = []
@@ -55,7 +55,7 @@ class ProgramEnrollment(Document):
 					"program_enrollment": self.name,
 					"components": fee_components
 				})
-				
+
 				fees.save()
 				fees.submit()
 				fee_list.append(fees.name)
@@ -73,7 +73,7 @@ class ProgramEnrollment(Document):
 		course_list = [course.course for course in program.get_all_children()]
 		for course_name in course_list:
 			student.enroll_in_course(course_name=course_name, program_enrollment=self.name)
-		
+
 @frappe.whitelist()
 def get_program_courses(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get('program'):
@@ -109,11 +109,11 @@ def get_students(doctype, txt, searchfield, start, page_len, filters):
 
 	return frappe.db.sql("""select
 			name, title from tabStudent
-		where 
+		where
 			name not in (%s)
-		and 
+		and
 			`%s` LIKE %s
-		order by 
+		order by
 			idx desc, name
 		limit %s, %s"""%(
 			", ".join(['%s']*len(students)), searchfield, "%s", "%s", "%s"),
