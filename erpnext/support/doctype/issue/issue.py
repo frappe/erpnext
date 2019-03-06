@@ -159,7 +159,7 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 		current_weekday = weekdays[current_date_time.weekday()]
 
 		if not is_holiday(current_date_time, holidays) and current_weekday in support_days:
-			start_time = current_date_time - datetime(current_date_time.year, current_date_time.month, current_date_time.day) if getdate(current_date_time) == getdate(today()) else support_days[current_weekday].start_time
+			start_time = current_date_time - datetime(current_date_time.year, current_date_time.month, current_date_time.day) if getdate(current_date_time) == getdate(start_date_time) else support_days[current_weekday].start_time
 			end_time = support_days[current_weekday].end_time
 			time_left_today = time_diff_in_hours(end_time, start_time)
 
@@ -176,7 +176,7 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 				allotted_days -= 1
 				expected_time_is_set = allotted_days <= 0
 
-		current_date_time = add_to_date(getdate(current_date_time), days=1)
+		current_date_time = add_to_date(current_date_time, days=1)
 
 	if end_time and time_period != 'Hour':
 		current_date_time = datetime.combine(getdate(current_date_time), get_time(end_time))
