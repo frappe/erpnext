@@ -143,7 +143,7 @@ def add_quiz_activity(enrollment, quiz_name, result_data, score, status):
 @frappe.whitelist()
 def enroll_in_program(program_name):
 	if(not utils.get_current_student()):
-		utils.create_student()
+		utils.create_student_from_current_user()
 	student = frappe.get_doc("Student", utils.get_current_student())
 	program_enrollment = student.enroll_in_program(program_name)
 	return program_name
