@@ -10,8 +10,15 @@ import unittest
 # test_records = frappe.get_test_records('Program')
 
 class TestProgram(unittest.TestCase):
-	pass
+	def setUp(self):
+		make_program_and_linked_courses("_Test Program 1", ["_Test Course 1", "_Test Course 2"])
 
+	def test_get_course_list(self):
+		program = frappe.get_doc("Program", "_Test Program 1")
+		course = program.get_course_list()
+		self.assertEqual(course[0].name, "_Test Course 1")
+		self.assertEqual(course[1].name, "_Test Course 2")
+		frappe.db.rollback()
 
 def make_program(name):
 	program = frappe.get_doc({
@@ -33,5 +40,5 @@ def make_program_and_linked_courses(program_name, course_name_list):
 	for course in course_list:
 		program.append("courses", {"course": course})
 	program.save()
-	return program.name
+	return program
 
