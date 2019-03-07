@@ -33,7 +33,7 @@ class Asset(AccountsController):
 		self.validate_in_use_date()
 		self.set_status()
 		self.update_stock_movement()
-		if not self.booked_fixed_asset:
+		if not self.booked_fixed_asset and not is_cwip_accounting_disabled():
 			self.make_gl_entries()
 
 	def on_cancel(self):
@@ -71,14 +71,15 @@ class Asset(AccountsController):
 		if not flt(self.gross_purchase_amount):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
 
-		if not self.is_existing_asset and not (self.purchase_receipt or self.purchase_invoice):
-			frappe.throw(_("Please create purchase receipt or purchase invoice for the item {0}").
-				format(self.item_code))
+		if not is_cwip_accounting_disabled():
+			if not self.is_existing_asset and not (self.purchase_receipt or self.purchase_invoice):
+				frappe.throw(_("Please create purchase receipt or purchase invoice for the item {0}").
+					format(self.item_code))
 
-		if (not self.purchase_receipt and self.purchase_invoice
-			and not frappe.db.get_value('Purchase Invoice', self.purchase_invoice, 'update_stock')):
-			frappe.throw(_("Update stock must be enable for the purchase invoice {0}").
-				format(self.purchase_invoice))
+			if (not self.purchase_receipt and self.purchase_invoice
+				and not frappe.db.get_value('Purchase Invoice', self.purchase_invoice, 'update_stock')):
+				frappe.throw(_("Update stock must be enable for the purchase invoice {0}").
+					format(self.purchase_invoice))
 
 		if not self.calculate_depreciation:
 			return
@@ -404,6 +405,9 @@ def update_maintenance_status():
 			asset.set_status('Out of Order')
 
 def make_post_gl_entry():
+	if is_cwip_accounting_disabled():
+		return
+
 	assets = frappe.db.sql_list(""" select name from `tabAsset`
 		where ifnull(booked_fixed_asset, 0) = 0 and available_for_use_date = %s""", nowdate())
 
@@ -551,3 +555,6 @@ def make_journal_entry(asset_name):
 	})
 
 	return je
+
+def is_cwip_accounting_disabled():
+	return cint(frappe.db.get_single_value("Asset Settings", "disable_cwip_accounting"))
