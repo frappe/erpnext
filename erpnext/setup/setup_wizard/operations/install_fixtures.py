@@ -252,7 +252,7 @@ def install(country=None):
 	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records
 	make_default_records()
 
-	make_records(records, True)
+	make_records(records)
 
 	set_more_defaults()
 
@@ -366,7 +366,7 @@ def install_company(args):
 		}
 	]
 
-	make_records(records, True)
+	make_records(records)
 
 
 def install_post_company_fixtures(args=None):
@@ -474,7 +474,7 @@ def install_defaults(args=None):
 		},
 	]
 
-	make_records(records, True)
+	make_records(records)
 
 
 def get_fy_details(fy_start_date, fy_end_date):

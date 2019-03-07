@@ -4679,7 +4679,7 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 1, 
-   "collapsible_depends_on": "remarks", 
+   "collapsible_depends_on": "", 
    "columns": 0, 
    "depends_on": "customer", 
    "fieldname": "more_information", 
