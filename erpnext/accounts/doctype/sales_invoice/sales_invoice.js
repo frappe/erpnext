@@ -556,6 +556,14 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.add_fetch('payment_term', 'invoice_portion', 'invoice_portion');
 		frm.add_fetch('payment_term', 'description', 'description');
 
+		frm.set_query("account_for_change_amount", function() {
+			return {
+				filters: {
+					account_type: ['in', ["Cash", "Bank"]]
+				}
+			};
+		});
+
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Sales Return',
