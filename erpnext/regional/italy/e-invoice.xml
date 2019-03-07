@@ -127,22 +127,46 @@
           <ImportoBollo>{{ format_float(doc.stamp_duty) }}</ImportoBollo>
         </DatiBollo>
         {%- endif %}
-        <ImportoTotaleDocumento>{{ format_float(doc.grand_total) }}</ImportoTotaleDocumento>
+        {%- if doc.discount_amount %}
+          <ScontoMaggiorazione>
+            {%- if doc.discount_amount > 0.0 %}
+              <Tipo>SC</Tipo>
+            {%- else %}
+              <Tipo>MG</Tipo>
+            {%- endif %}
+            {%- if doc.additional_discount_percentage > 0.0 %}
+              <Percentuale>{{ format_float(doc.additional_discount_percentage) }}</Percentuale>
+            {%- endif %}
+            <Importo>{{ format_float(doc.discount_amount) }}</Importo>
+          </ScontoMaggiorazione>
+        {%- endif %}
+        <ImportoTotaleDocumento>{{ format_float(doc.rounded_total or doc.grand_total) }}</ImportoTotaleDocumento>
         <Causale>VENDITA</Causale>
       </DatiGeneraliDocumento>
-      {%- if doc.po_no %}
-      <DatiOrdineAcquisto>
-        <IdDocumento>{{ doc.po_no }}</IdDocumento>
-        {%- if doc.po_date %}
-        <Data>{{ doc.po_date }}</Data>
+      {%- for row in doc.e_invoice_items %}
+        {%- if row.customer_po_no %}
+          <DatiOrdineAcquisto>
+              <IdDocumento>{{ row.customer_po_no }}</IdDocumento>
+              {%- if row.customer_po_date %}
+                <Data>{{ row.customer_po_date }}</Data>
+              {%- endif %}
+          </DatiOrdineAcquisto>
         {%- endif %}
-      </DatiOrdineAcquisto>
-      {%- endif %}
+      {%- endfor %}
       {%- if doc.is_return and doc.return_against_unamended %}
       <DatiFattureCollegate>
         <IdDocumento>{{ doc.return_against_unamended }}</IdDocumento>
       </DatiFattureCollegate>
       {%- endif %}
+      {%- for row in doc.e_invoice_items %}
+        {%- if row.delivery_note %}
+          <DatiDDT>
+              <NumeroDDT>{{ row.delivery_note }}</NumeroDDT>
+              <DataDDT>{{ frappe.db.get_value('Delivery Note', row.delivery_note, 'posting_date') }}</DataDDT>
+              <RiferimentoNumeroLinea>{{ row.idx }}</RiferimentoNumeroLinea>
+          </DatiDDT>
+        {%- endif %}
+      {%- endfor %}
       {%- if doc.shipping_address_data %}
       <DatiTrasporto>
       <IndirizzoResa>
@@ -198,7 +222,9 @@
         <ModalitaPagamento>{{ payment_term.mode_of_payment_code.split("-")[0] }}</ModalitaPagamento>
         <DataScadenzaPagamento>{{ payment_term.due_date }}</DataScadenzaPagamento>
         <ImportoPagamento>{{ format_float(payment_term.payment_amount) }}</ImportoPagamento>
-        <IstitutoFinanziario>{{ payment_term.bank_account_name }}</IstitutoFinanziario>
+        {%- if payment_term.bank_account_name %}
+          <IstitutoFinanziario>{{ payment_term.bank_account_name }}</IstitutoFinanziario>
+        {%- endif %}
         {%- if payment_term.bank_account_iban %}
           <IBAN>{{ payment_term.bank_account_iban }}</IBAN>
           <ABI>{{ payment_term.bank_account_iban[5:10] }}</ABI>
