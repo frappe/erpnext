@@ -271,6 +271,11 @@ frappe.ui.form.on('Stock Entry', {
 		const item = locals[cdt][cdn];
 		item.transfer_qty = flt(item.qty) * flt(item.conversion_factor);
 
+		if (!item.alt_uom) {
+			item.alt_uom_size = 1.0;
+		}
+		item.alt_uom_qty = flt(flt(item.transfer_qty) * flt(item.alt_uom_size), precision("alt_uom_qty", item));
+
 		const args = {
 			'item_code'			: item.item_code,
 			'posting_date'		: frm.doc.posting_date,

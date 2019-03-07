@@ -405,7 +405,7 @@ class BuyingController(StockController):
 			if d.meta.get_field("alt_uom_qty"):
 				if not d.alt_uom:
 					d.alt_uom_size = 1.0
-				d.alt_uom_qty = flt(d.stock_qty) * flt(d.alt_uom_size)
+				d.alt_uom_qty = flt(flt(d.stock_qty) * flt(d.alt_uom_size), d.precision("alt_uom_qty"))
 
 	def validate_purchase_return(self):
 		for d in self.get("items"):
