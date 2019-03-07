@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+from six import text_type
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -60,7 +61,7 @@ def _make_naming_series_key(prefix):
 	:param prefix: Naming series prefix gotten from Stock Settings
 	:return: The derived key. If no prefix is given, an empty string is returned
 	"""
-	if not unicode(prefix):
+	if not text_type(prefix):
 		return ''
 	else:
 		return prefix.upper() + '.#####'
@@ -86,7 +87,7 @@ class Batch(Document):
 	def autoname(self):
 		"""Generate random ID for batch if not specified"""
 		if not self.batch_id:
-			create_new_batch, batch_number_series = frappe.db.get_value('Item', self.item, 
+			create_new_batch, batch_number_series = frappe.db.get_value('Item', self.item,
 				['create_new_batch', 'batch_number_series'])
 
 			if create_new_batch:

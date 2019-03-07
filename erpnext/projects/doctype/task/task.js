@@ -49,9 +49,9 @@ frappe.ui.form.on("Task", {
 				}
 
 				if(frm.perm[0].write) {
-					if(frm.doc.status!=="Closed" && frm.doc.status!=="Cancelled") {
-						frm.add_custom_button(__("Close"), function() {
-							frm.set_value("status", "Closed");
+					if(frm.doc.status!=="Completed" && frm.doc.status!=="Cancelled") {
+						frm.add_custom_button(__("Completed"), function() {
+							frm.set_value("status", "Completed");
 							frm.save();
 						});
 					} else {

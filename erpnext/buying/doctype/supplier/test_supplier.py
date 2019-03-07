@@ -90,3 +90,33 @@ class TestSupplier(unittest.TestCase):
         supplier.country = 'Greece'
         supplier.save()
         self.assertEqual(supplier.country, "Greece")
+
+    def test_party_details_tax_category(self):
+        from erpnext.accounts.party import get_party_details
+
+        frappe.delete_doc_if_exists("Address", "_Test Address With Tax Category-Billing")
+
+        # Tax Category without Address
+        details = get_party_details("_Test Supplier With Tax Category", party_type="Supplier")
+        self.assertEqual(details.tax_category, "_Test Tax Category 1")
+
+        address = frappe.get_doc(dict(
+            doctype='Address',
+            address_title='_Test Address With Tax Category',
+            tax_category='_Test Tax Category 2',
+            address_type='Billing',
+            address_line1='Station Road',
+            city='_Test City',
+            country='India',
+            links=[dict(
+                link_doctype='Supplier',
+                link_name='_Test Supplier With Tax Category'
+            )]
+        )).insert()
+
+        # Tax Category with Address
+        details = get_party_details("_Test Supplier With Tax Category", party_type="Supplier")
+        self.assertEqual(details.tax_category, "_Test Tax Category 2")
+
+        # Rollback
+        address.delete()
