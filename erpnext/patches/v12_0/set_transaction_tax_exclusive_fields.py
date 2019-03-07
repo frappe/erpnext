@@ -31,12 +31,25 @@ def execute():
 		'Quotation', 'Supplier Quotation'
 	]
 
+	new_transaction_fields = [
+		'total_before_discount',
+		'tax_exclusive_total_before_discount',
+		'total_discount',
+		'tax_exclusive_total_discount',
+	]
+	new_transaction_fields += ['base_' + f for f in new_transaction_fields]
+	new_transaction_fields = set(new_transaction_fields)
+
 	new_item_fields = [
 		'tax_exclusive_price_list_rate',
 		'tax_exclusive_rate',
 		'tax_exclusive_amount',
 		'tax_exclusive_discount_amount',
-		'tax_exclusive_rate_with_margin'
+		'tax_exclusive_rate_with_margin',
+		'amount_before_discount',
+		'tax_exclusive_amount_before_discount',
+		'total_discount',
+		'tax_exclusive_total_discount',
 	]
 	new_item_fields += ['base_' + f for f in new_item_fields]
 	new_item_fields = set(new_item_fields)
@@ -49,10 +62,9 @@ def execute():
 			doc = frappe.get_doc(dt, dn)
 			calculate_taxes_and_totals(doc)
 
-			frappe.db.set_value(dt, doc.name, {
-				"tax_exclusive_total": doc.tax_exclusive_total,
-				"base_tax_exclusive_total": doc.base_tax_exclusive_total
-			}, None, update_modified=False)
+			values_to_update = [doc.get(f) for f in new_transaction_fields]
+			update_dict = dict(zip(new_transaction_fields, values_to_update))
+			frappe.db.set_value(dt, doc.name, update_dict, None, update_modified=False)
 
 			for item in doc.items:
 				item_fields = set([f.fieldname for f in item.meta.fields])
@@ -62,4 +74,4 @@ def execute():
 				frappe.db.set_value(dt + " Item", item.name, update_dict, None, update_modified=False)
 
 			for tax in doc.taxes:
-				frappe.db.set_value(tax.doctype, tax.name, "total_before_discount_amount", tax.total_before_discount_amount)
+				frappe.db.set_value(tax.doctype, tax.name, "displayed_total", tax.displayed_total)
