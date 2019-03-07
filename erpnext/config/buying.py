@@ -50,7 +50,7 @@ def get_data():
 					"name": "Item Price",
 					"description": _("Multiple Item prices."),
 					"onboard": 1,
-					"route": "Report/Item Price"
+					"route": "#Report/Item Price"
 				},
 				{
 					"type": "doctype",
@@ -78,13 +78,13 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Setup"),
+			"label": _("Settings"),
 			"icon": "fa fa-cog",
 			"items": [
 				{
 					"type": "doctype",
 					"name": "Buying Settings",
-					"onboard": 1,
+					"settings": 1,
 					"description": _("Default settings for buying transactions.")
 				},
 				{

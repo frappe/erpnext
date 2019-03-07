@@ -83,7 +83,7 @@ class TestTask(unittest.TestCase):
 
 		# assignment should be
 		task.load_from_db()
-		task.status = "Closed"
+		task.status = "Completed"
 		task.save()
 		todo = get_owner_and_status()
 		self.assertEqual(todo.owner, "test@example.com")
