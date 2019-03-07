@@ -65,18 +65,47 @@ class Project(Document):
 			return frappe.get_all("Task", "*", filters, order_by="exp_start_date asc")
 
 	def validate(self):
-		self.validate_project_name()
 		self.validate_weights()
 		self.sync_tasks()
 		self.tasks = []
 		self.load_tasks()
+		if not self.is_new():
+			self.copy_from_template()
 		self.validate_dates()
 		self.send_welcome_email()
 		self.update_percent_complete()
 
-	def validate_project_name(self):
-		if self.get("__islocal") and frappe.db.exists("Project", self.project_name):
-			frappe.throw(_("Project {0} already exists").format(frappe.safe_decode(self.project_name)))
+	def copy_from_template(self):
+		'''
+		Copy tasks from template
+		'''
+		if self.project_template and not len(self.tasks or []):
+
+			# has a template, and no loaded tasks, so lets create
+			if not self.expected_start_date:
+				# project starts today
+				self.expected_start_date = today()
+
+			template = frappe.get_doc('Project Template', self.project_template)
+
+			if not self.project_type:
+				self.project_type = template.project_type
+
+			# create tasks from template
+			for task in template.tasks:
+				frappe.get_doc(dict(
+					doctype = 'Task',
+					subject = task.subject,
+					project = self.name,
+					status = 'Open',
+					exp_start_date = add_days(self.expected_start_date, task.start),
+					exp_end_date = add_days(self.expected_start_date, task.start + task.duration),
+					description = task.description,
+					task_weight = task.task_weight
+				)).insert()
+
+			# reload tasks after project
+			self.load_tasks()
 
 	def validate_dates(self):
 		if self.tasks:
@@ -201,18 +230,21 @@ class Project(Document):
 		self.save(ignore_permissions=True)
 
 	def after_insert(self):
+		self.copy_from_template()
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
 	def update_percent_complete(self):
 		if not self.tasks: return
 		total = frappe.db.sql("""select count(name) from tabTask where project=%s""", self.name)[0][0]
+
 		if not total and self.percent_complete:
 			self.percent_complete = 0
+
 		if (self.percent_complete_method == "Task Completion" and total > 0) or (
 			not self.percent_complete_method and total > 0):
 			completed = frappe.db.sql("""select count(name) from tabTask where
-				project=%s and status in ('Closed', 'Cancelled')""", self.name)[0][0]
+				project=%s and status in ('Cancelled', 'Completed')""", self.name)[0][0]
 			self.percent_complete = flt(flt(completed) / total * 100, 2)
 
 		if (self.percent_complete_method == "Task Progress" and total > 0):
@@ -223,15 +255,21 @@ class Project(Document):
 		if (self.percent_complete_method == "Task Weight" and total > 0):
 			weight_sum = frappe.db.sql("""select sum(task_weight) from tabTask where
 				project=%s""", self.name)[0][0]
-			weighted_progress = frappe.db.sql("""select progress,task_weight from tabTask where
+			weighted_progress = frappe.db.sql("""select progress, task_weight from tabTask where
 				project=%s""", self.name, as_dict=1)
 			pct_complete = 0
 			for row in weighted_progress:
 				pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
 			self.percent_complete = flt(flt(pct_complete), 2)
+
+		# don't update status if it is cancelled
+		if self.status == 'Cancelled':
+			return
+
 		if self.percent_complete == 100:
 			self.status = "Completed"
-		elif not self.status == "Cancelled":
+
+		else:
 			self.status = "Open"
 
 	def update_costing(self):
@@ -593,3 +631,21 @@ def create_kanban_board_if_not_exists(project):
 		quick_kanban_board('Task', project, 'status')
 
 	return True
+
+@frappe.whitelist()
+def set_project_status(project, status):
+	'''
+	set status for project and all related tasks
+	'''
+	if not status in ('Completed', 'Cancelled'):
+		frappe.throw('Status must be Cancelled or Completed')
+
+	project = frappe.get_doc('Project', project)
+	frappe.has_permission(doc = project, throw = True)
+
+	for task in frappe.get_all('Task', dict(project = project.name)):
+		frappe.db.set_value('Task', task.name, 'status', status)
+
+	project.status = status
+	project.save()
+

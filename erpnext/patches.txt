@@ -487,7 +487,6 @@ erpnext.patches.v10_0.update_assessment_plan
 erpnext.patches.v10_0.update_assessment_result
 erpnext.patches.v10_0.set_default_payment_terms_based_on_company
 erpnext.patches.v10_0.update_sales_order_link_to_purchase_order
-erpnext.patches.v10_0.item_barcode_childtable_migrate
 erpnext.patches.v10_0.rename_price_to_rate_in_pricing_rule
 erpnext.patches.v10_0.set_currency_in_pricing_rule
 erpnext.patches.v10_0.set_b2c_limit
@@ -574,6 +573,7 @@ erpnext.patches.v11_0.drop_column_max_days_allowed
 erpnext.patches.v10_0.update_user_image_in_employee
 erpnext.patches.v10_0.repost_gle_for_purchase_receipts_with_rejected_items
 erpnext.patches.v10_0.allow_operators_in_supplier_scorecard
+erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019
 erpnext.patches.v11_0.update_delivery_trip_status
 erpnext.patches.v11_0.set_missing_gst_hsn_code
 erpnext.patches.v11_0.rename_bom_wo_fields
@@ -582,5 +582,9 @@ erpnext.patches.v11_0.renamed_from_to_fields_in_project
 erpnext.patches.v11_0.add_permissions_in_gst_settings
 erpnext.patches.v11_1.setup_guardian_role
 execute:frappe.delete_doc('DocType', 'Notification Control')
+erpnext.patches.v11_0.remove_barcodes_field_from_copy_fields_to_variants
+erpnext.patches.v12_0.set_task_status
+erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019
+erpnext.patches.v11_0.make_italian_localization_fields # 01-03-2019
 erpnext.patches.v12_0.move_item_tax_to_item_tax_template
 erpnext.patches.v12_0.set_transaction_tax_exclusive_fields
