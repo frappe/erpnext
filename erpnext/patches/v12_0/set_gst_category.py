@@ -21,7 +21,7 @@ def execute():
 			}
 
 			for old, new in update_map.items():
-				frappe.db.sql("UPDATE `tab{doctype}` SET gst_category = %s where invoice_type = %s".format(doctype=doctype), (old, new)) #nosec
+				frappe.db.sql("UPDATE `tab{doctype}` SET gst_category = %s where invoice_type = %s".format(doctype=doctype), (new, old)) #nosec
 
 	frappe.delete_doc('Custom Field', 'Sales Invoice-invoice_type')
 	frappe.delete_doc('Custom Field', 'Purchase Invoice-invoice_type')
