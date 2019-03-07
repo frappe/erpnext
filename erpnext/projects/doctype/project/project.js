@@ -9,7 +9,7 @@ frappe.ui.form.on("Project", {
 					indicator = 'red';
 				} else if (doc.status == 'Cancelled') {
 					indicator = 'dark grey';
-				} else if (doc.status == 'Closed') {
+				} else if (doc.status == 'Completed') {
 					indicator = 'green';
 				}
 				return indicator;
