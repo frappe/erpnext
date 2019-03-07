@@ -1,7 +1,7 @@
 {
  "allow_copy": 0,
  "allow_events_in_timeline": 0,
- "allow_guest_to_view": 0,
+ "allow_guest_to_view": 1,
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:item_code",
@@ -4235,7 +4235,7 @@
    "unique": 0
   }
  ],
- "has_web_view": 0,
+ "has_web_view": 1,
  "hide_heading": 0,
  "hide_toolbar": 0,
  "icon": "fa fa-tag",
@@ -4247,7 +4247,7 @@
  "issingle": 0,
  "istable": 0,
  "max_attachments": 1,
- "modified": "2019-03-04 21:59:52.422702",
+ "modified": "2019-03-07 20:19:13.870374",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
