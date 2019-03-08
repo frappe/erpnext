@@ -37,7 +37,7 @@ def execute():
 
 	if has_gst_fields:
 		for old, new in itc_update_map.items():
-			frappe.db.sql("UPDATE `tabPurchase Invoice` SET eligibility_for_itc = %s where eligibility_for_itc = %s ", (old, new))
+			frappe.db.sql("UPDATE `tabPurchase Invoice` SET eligibility_for_itc = %s where eligibility_for_itc = %s ", (new, old))
 
 
 
