@@ -126,7 +126,7 @@ def get_label(periodicity, from_date, to_date):
 def get_data(
 		company, root_type, balance_must_be, period_list, filters=None,
 		accumulated_values=1, only_current_fiscal_year=True, ignore_closing_entries=False,
-		ignore_accumulated_values_for_fy=False):
+		ignore_accumulated_values_for_fy=False , total = True):
 
 	accounts = get_accounts(company, root_type)
 	if not accounts:
@@ -154,7 +154,7 @@ def get_data(
 	out = prepare_data(accounts, balance_must_be, period_list, company_currency)
 	out = filter_out_zero_value_rows(out, parent_children_map)
 
-	if out:
+	if out and total:
 		add_total_row(out, root_type, balance_must_be, period_list, company_currency)
 
 	return out
@@ -218,6 +218,9 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 			"year_start_date": year_start_date,
 			"year_end_date": year_end_date,
 			"currency": company_currency,
+			"include_in_gross": d.include_in_gross,
+			"account_type": d.account_type,
+			"is_group": d.is_group,
 			"opening_balance": d.get("opening_balance", 0.0) * (1 if balance_must_be=="Debit" else -1),
 			"account_name": ('%s - %s' %(_(d.account_number), _(d.account_name))
 				if d.account_number else _(d.account_name))
@@ -285,7 +288,7 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 
 def get_accounts(company, root_type):
 	return frappe.db.sql("""
-		select name, account_number, parent_account, lft, rgt, root_type, report_type, account_name
+		select name, account_number, parent_account, lft, rgt, root_type, report_type, account_name, include_in_gross, account_type, is_group, lft, rgt
 		from `tabAccount`
 		where company=%s and root_type=%s order by lft""", (company, root_type), as_dict=True)
 
