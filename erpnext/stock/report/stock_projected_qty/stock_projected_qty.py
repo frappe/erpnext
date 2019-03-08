@@ -48,7 +48,7 @@ def execute(filters=None):
 
 		shortage_qty = re_order_level - flt(bin.projected_qty) if (re_order_level or re_order_qty) else 0
 
-		data.append([item.name, item.item_name, item.description, item.item_group, item.brand, bin.warehouse,
+		data.append([item.name, item.item_group, item.brand, bin.warehouse,
 			item.alt_uom or item.stock_uom if filters.qty_field == "Contents Qty" else item.stock_uom,
 			bin.actual_qty * alt_uom_size,
 			bin.planned_qty * alt_uom_size,
@@ -71,9 +71,7 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 140},
-		{"label": _("Item Name"), "fieldname": "item_name", "width": 100},
-		{"label": _("Description"), "fieldname": "description", "width": 200},
+		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 150},
 		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
 		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 120},
