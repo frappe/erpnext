@@ -126,7 +126,7 @@ class LeaveApplication(Document):
 
 				if attendance_name:
 					# update existing attendance, change absent to on leave
-					doc = frappe.get_doc('Attendance', attendance_date)
+					doc = frappe.get_doc('Attendance', attendance_name)
 					if doc.status != status:
 						doc.db_set('status', status)
 						doc.db_set('leave_type', self.leave_type)
