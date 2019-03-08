@@ -51,6 +51,7 @@ class JournalEntry(AccountsController):
 		self.update_expense_claim()
 		self.update_loan()
 		self.update_inter_company_jv()
+		self.update_invoice_discounting()
 
 	def before_print(self):
 		self.gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Journal Entry",
@@ -85,6 +86,18 @@ class JournalEntry(AccountsController):
 		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:
 			frappe.db.set_value("Journal Entry", self.inter_company_journal_entry_reference,\
 				"inter_company_journal_entry_reference", self.name)
+
+	def update_invoice_discounting(self):
+		invoice_discounting_list = [d.reference_name for d in self.accounts if d.reference_type=="Invoice Discounting"]
+		for inv_disc in invoice_discounting_list:
+			short_term_loan_account = frappe.db.get_value("Invoice Discounting", inv_disc, "short_term_loan")
+			for d in self.accounts:
+				if d.account == short_term_loan_account and d.reference_name == inv_disc:
+					if d.credit > 0:
+						status = "Disbursed"
+					elif d.debit > 0:
+						status = "Settled"
+					frappe.db.set_value("Invoice Discounting", inv_disc, "status", status)
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
@@ -693,7 +706,7 @@ def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_cur
 	ref_doc = frappe.get_doc(dt, dn)
 	if dt == "Sales Invoice":
 		party_type = "Customer"
-		party_account = ref_doc.debit_to
+		party_account = get_party_account_based_on_invoice_discounting(dn) or ref_doc.debit_to
 	else:
 		party_type = "Supplier"
 		party_account = ref_doc.credit_to
@@ -720,6 +733,22 @@ def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_cur
 		"journal_entry": journal_entry
 	})
 
+def get_party_account_based_on_invoice_discounting(sales_invoice):
+	party_account = None
+	invoice_discounting = frappe.db.sql("""
+		select par.accounts_receivable_discounted, par.accounts_receivable_unpaid, par.status
+		from `tabInvoice Discounting` par, `tabDiscounted Invoice` ch
+		where par.name=ch.parent
+			and par.docstatus=1
+			and ch.sales_invoice = %s
+	""", (sales_invoice), as_dict=1)
+	if invoice_discounting:
+		if invoice_discounting[0].status == "Disbursed":
+			party_account = invoice_discounting[0].accounts_receivable_discounted
+		elif invoice_discounting[0].status == "Settled":
+			party_account = invoice_discounting[0].accounts_receivable_unpaid
+
+	return party_account
 
 def get_payment_entry(ref_doc, args):
 	cost_center = ref_doc.get("cost_center") or frappe.get_cached_value('Company',  ref_doc.company,  "cost_center")
