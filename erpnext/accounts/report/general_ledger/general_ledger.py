@@ -251,7 +251,7 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 		data += entries
 
 	# totals
-	data.append(totals.total)
+	# data.append(totals.total)
 
 	# closing
 	data.append(totals.closing)
