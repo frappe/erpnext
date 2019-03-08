@@ -120,7 +120,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 		if(doc.docstatus == 1 && doc.status != "Closed") {
 			if(flt(doc.per_received, 2) < 100 && allow_receipt) {
-				cur_frm.add_custom_button(__('Receipt'), this.make_purchase_receipt, __("Make"));
+				cur_frm.add_custom_button(__('Receipt'), this.make_purchase_receipt, __('Create'));
 
 				if(doc.is_subcontracted==="Yes") {
 					cur_frm.add_custom_button(__('Material to Supplier'),
@@ -130,24 +130,24 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 			if(flt(doc.per_billed, 2) < 100)
 				cur_frm.add_custom_button(__('Invoice'),
-					this.make_purchase_invoice, __("Make"));
+					this.make_purchase_invoice, __('Create'));
 
 			if(flt(doc.per_billed)==0 && doc.status != "Delivered") {
-				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __("Make"));
+				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __('Create'));
 			}
 
 			if(!doc.auto_repeat) {
 				cur_frm.add_custom_button(__('Subscription'), function() {
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
-				}, __("Make"))
+				}, __('Create'))
 			}
 
 			if(flt(doc.per_billed)==0) {
 				this.frm.add_custom_button(__('Payment Request'),
-					function() { me.make_payment_request() }, __("Make"));
+					function() { me.make_payment_request() }, __('Create'));
 			}
 
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 	},
 

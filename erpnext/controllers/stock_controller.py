@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.utils import cint, flt, cstr
-from frappe import msgprint, _
+from frappe import _
 import frappe.defaults
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
@@ -14,6 +14,7 @@ from erpnext.stock import get_warehouse_account_map
 
 class QualityInspectionRequiredError(frappe.ValidationError): pass
 class QualityInspectionRejectedError(frappe.ValidationError): pass
+class QualityInspectionNotSubmittedError(frappe.ValidationError): pass
 
 class StockController(AccountsController):
 	def validate(self):
@@ -338,18 +339,20 @@ class StockController(AccountsController):
 				qa_required = True
 			elif self.doctype == "Stock Entry" and not d.quality_inspection and d.t_warehouse:
 				qa_required = True
+			if self.docstatus == 1 and d.quality_inspection:
+				qa_doc = frappe.get_doc("Quality Inspection", d.quality_inspection)
+				if qa_doc.docstatus == 0:
+					link = frappe.utils.get_link_to_form('Quality Inspection', d.quality_inspection)
+					frappe.throw(_("Quality Inspection: {0} is not submitted for the item: {1} in row {2}").format(link, d.item_code, d.idx), QualityInspectionNotSubmittedError)
 
-			if qa_required:
+				qa_failed = any([r.status=="Rejected" for r in qa_doc.readings])
+				if qa_failed:
+					frappe.throw(_("Row {0}: Quality Inspection rejected for item {1}")
+						.format(d.idx, d.item_code), QualityInspectionRejectedError)
+			elif qa_required :
 				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
 				if self.docstatus==1:
 					raise QualityInspectionRequiredError
-			elif self.docstatus == 1:
-				if d.quality_inspection:
-					qa_doc = frappe.get_doc("Quality Inspection", d.quality_inspection)
-					qa_failed = any([r.status=="Rejected" for r in qa_doc.readings])
-					if qa_failed:
-						frappe.throw(_("Row {0}: Quality Inspection rejected for item {1}")
-							.format(d.idx, d.item_code), QualityInspectionRejectedError)
 
 
 	def update_blanket_order(self):
@@ -413,7 +416,7 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
 		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) {condition}
-		order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""".format(condition=condition),
+		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc""".format(condition=condition),
 		tuple([posting_date, posting_time] + values), as_dict=True):
 			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
 

@@ -1137,7 +1137,6 @@ apps/erpnext/erpnext/stock/doctype/item/item.py +290,Asset Category is mandatory
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +146,No records found in the Payment table,לא נמצא רשומות בטבלת התשלום
 apps/erpnext/erpnext/education/utils.py +19,This {0} conflicts with {1} for {2} {3},{0} זו מתנגשת עם {1} עבור {2} {3}
 DocType: Student Attendance Tool,Students HTML,HTML סטודנטים
-DocType: POS Profile,Apply Discount,חל הנחה
 DocType: Employee External Work History,Total Experience,"ניסיון סה""כ"
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +300,Packing Slip(s) cancelled,Slip אריזה (ים) בוטל
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +90,Cash Flow from Investing,תזרים מזומנים מהשקעות
@@ -1158,7 +1157,7 @@ apps/erpnext/erpnext/accounts/doctype/cheque_print_template/cheque_print_templat
 DocType: Landed Cost Voucher,Landed Cost Help,עזרה עלות נחתה
 DocType: Purchase Invoice,Select Shipping Address,כתובת משלוח בחר
 DocType: Leave Block List,Block Holidays on important days.,חגים בלוק בימים חשובים.
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +137,Accounts Receivable Summary,חשבונות חייבים סיכום
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +142,Accounts Receivable Summary,חשבונות חייבים סיכום
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +218,Please set User ID field in an Employee record to set Employee Role,אנא הגדר שדה זיהוי משתמש בשיא לעובדים להגדיר תפקיד העובד
 DocType: UOM,UOM Name,שם של אוני 'מישגן
 apps/erpnext/erpnext/selling/report/sales_person_commission_summary/sales_person_commission_summary.py +87,Contribution Amount,סכום תרומה
@@ -1217,7 +1216,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +35,Pay
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +27,Cost of Issued Items,עלות פריטים הונפק
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +534,Quantity must not be more than {0},כמות לא חייבת להיות יותר מ {0}
 apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +120,Previous Financial Year is not closed,קודם שנת הכספים אינה סגורה
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +69,Age (Days),גיל (ימים)
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +84,Age (Days),גיל (ימים)
 DocType: Quotation Item,Quotation Item,פריט ציטוט
 DocType: Account,Account Name,שם חשבון
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +536,From Date cannot be greater than To Date,מתאריך לא יכול להיות גדול יותר מאשר תאריך
@@ -2660,7 +2659,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 DocType: Timesheet,Employee Detail,פרט לעובדים
 apps/erpnext/erpnext/config/website.py +11,Settings for website homepage,הגדרות עבור הבית של האתר
 DocType: Job Offer,Awaiting Response,ממתין לתגובה
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +83,Above,מעל
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +98,Above,מעל
 apps/erpnext/erpnext/controllers/item_variant.py +323,Invalid attribute {0} {1},מאפיין לא חוקי {0} {1}
 DocType: Salary Slip,Earning & Deduction,השתכרות וניכוי
 DocType: Amazon MWS Settings,Region,אזור
@@ -2790,7 +2789,7 @@ apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +95,Row # {0}: Ser
 DocType: Purchase Taxes and Charges,Item Wise Tax Detail,פריט Detail המס וייז
 apps/erpnext/erpnext/public/js/setup_wizard.js +71,Institute Abbreviation,קיצור המכון
 ,Item-wise Price List Rate,שערי רשימת פריט המחיר חכם
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1157,Supplier Quotation,הצעת מחיר של ספק
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1156,Supplier Quotation,הצעת מחיר של ספק
 DocType: Quotation,In Words will be visible once you save the Quotation.,במילים יהיו גלוי לאחר שתשמרו את הצעת המחיר.
 apps/erpnext/erpnext/stock/doctype/item/item.py +523,Barcode {0} already used in Item {1},ברקוד {0} כבר השתמש בפריט {1}
 apps/erpnext/erpnext/config/selling.py +86,Rules for adding shipping costs.,כללים להוספת עלויות משלוח.

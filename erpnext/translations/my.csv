@@ -2276,7 +2276,6 @@ DocType: Fee Validity,Fee Validity,အခကြေးငွေသက်တမ်
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +146,No records found in the Payment table,ထိုငွေပေးချေမှုရမည့် table ထဲမှာတွေ့ရှိမရှိပါမှတ်တမ်းများ
 apps/erpnext/erpnext/education/utils.py +19,This {0} conflicts with {1} for {2} {3},ဒီ {2} {3} ဘို့ {1} နှင့်အတူ {0} ပဋိပက္ခများကို
 DocType: Student Attendance Tool,Students HTML,ကျောင်းသားများက HTML
-DocType: POS Profile,Apply Discount,လျှော့ Apply
 DocType: GST HSN Code,GST HSN Code,GST HSN Code ကို
 DocType: Employee External Work History,Total Experience,စုစုပေါင်းအတွေ့အကြုံ
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +70,Open Projects,ပွင့်လင်းစီမံကိန်းများ
@@ -2321,7 +2320,7 @@ DocType: Timesheet Detail,Expected Hrs,မျှော်လင့်ထား�
 apps/erpnext/erpnext/config/non_profit.py +28,Memebership Details,Memebership အသေးစိတ်
 DocType: Leave Block List,Block Holidays on important days.,အရေးကြီးသောရက်အားလပ်ရက်ပိတ်ဆို့။
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +194,Please input all required Result Value(s),အားလုံးလိုအပ်သောရလဒ် Value ကို (s) ကို input ကိုနှစ်သက်သော
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +137,Accounts Receivable Summary,Accounts ကို receiver အကျဉ်းချုပ်
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +142,Accounts Receivable Summary,Accounts ကို receiver အကျဉ်းချုပ်
 DocType: POS Closing Voucher,Linked Invoices,ဆက်နွယ်နေငွေတောင်းခံလွှာ
 DocType: Loan,Monthly Repayment Amount,လစဉ်ပြန်ဆပ်ငွေပမာဏ
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html +9,Opening Invoices,ဖွင့်လှစ်ငွေတောင်းခံလွှာ
@@ -2445,7 +2444,7 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +534,Quantit
 DocType: Travel Request Costing,Funded Amount,ရန်ပုံငွေပမာဏ
 apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +120,Previous Financial Year is not closed,ယခင်ဘဏ္ဍာရေးတစ်နှစ်တာပိတ်လိုက်သည်မဟုတ်
 DocType: Practitioner Schedule,Practitioner Schedule,Practitioner ဇယား
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +69,Age (Days),အသက်အရွယ် (နေ့ရက်များ)
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +84,Age (Days),အသက်အရွယ် (နေ့ရက်များ)
 DocType: Instructor,EDU-INS-.YYYY.-,EDU တွင်-ins-.YYYY.-
 DocType: Additional Salary,Additional Salary,အပိုဆောင်းလစာ
 DocType: Quotation Item,Quotation Item,စျေးနှုန်း Item
@@ -2976,7 +2975,7 @@ DocType: Journal Entry,Accounts Receivable,ငွေစာရင်းရရန�
 DocType: Travel Itinerary,Meal Preference,မုန့်ညက်ဦးစားပေးမှု
 ,Supplier-Wise Sales Analytics,ပေးသွင်း-ပညာရှိအရောင်း Analytics
 DocType: Purchase Invoice,Availed ITC Central Tax,ရရှိနိုင်ပါ ITC ဗဟိုအခွန်
-DocType: POS Profile,Company Address Name,ကုမ္ပဏီလိပ်စာအမည်
+DocType: Sales Invoice,Company Address Name,ကုမ္ပဏီလိပ်စာအမည်
 DocType: Work Order,Use Multi-Level BOM,Multi-Level BOM ကိုသုံးပါ
 DocType: Bank Reconciliation,Include Reconciled Entries,ပြန်. Entries Include
 DocType: Course,"Parent Course (Leave blank, if this isn't part of Parent Course)","မိဘသင်တန်းအမှတ်စဥ် (ဒီမိဘသင်တန်း၏အစိတ်အပိုင်းမပါလျှင်, အလွတ် Leave)"
@@ -2991,7 +2990,7 @@ DocType: Woocommerce Settings,Enable Sync,Sync ကို Enable
 DocType: Tax Withholding Rate,Single Transaction Threshold,လူပျိုငွေသွင်းငွေထုတ် Threshold
 DocType: Lab Test Template,This value is updated in the Default Sales Price List.,ဤသည်တန်ဖိုးပုံမှန်အရောင်းစျေးနှုန်းစာရင်းအတွက် updated ဖြစ်ပါတယ်။
 DocType: Email Digest,New Expenses,နယူးကုန်ကျစရိတ်
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +114,PDC/LC Amount,ကောင်စီ / LC ငွေပမာဏ
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +123,PDC/LC Amount,ကောင်စီ / LC ငွေပမာဏ
 DocType: Shareholder,Shareholder,အစုစပ်ပါဝင်သူ
 DocType: Purchase Invoice,Additional Discount Amount,အပိုဆောင်းလျှော့ငွေပမာဏ
 DocType: Cash Flow Mapper,Position,ရာထူး
@@ -3587,7 +3586,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +19,Employee Transfer cannot be submitted before Transfer Date ,ဝန်ထမ်းလွှဲပြောင်းလွှဲပြောင်းနေ့စွဲမတိုင်မီတင်သွင်းမရနိုင်
 DocType: Certification Application,USD,အမေရိကန်ဒေါ်လာ
 apps/erpnext/erpnext/hotels/doctype/hotel_room_reservation/hotel_room_reservation.js +7,Make Invoice,ပြေစာလုပ်ပါ
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +121,Remaining Balance,ကျန်ရှိသောလက်ကျန်ငွေ
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Remaining Balance,ကျန်ရှိသောလက်ကျန်ငွေ
 DocType: Selling Settings,Auto close Opportunity after 15 days,15 ရက်အကြာမှာအော်တိုနီးစပ်အခွင့်အလမ်း
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +83,Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.,အရစ်ကျအမိန့်ကြောင့် {1} တစ် scorecard ရပ်တည်မှုမှ {0} ဘို့ခွင့်ပြုမထားပေ။
 apps/erpnext/erpnext/stock/doctype/item/item.py +529,Barcode {0} is not a valid {1} code,ဘားကုဒ် {0} ခိုင်လုံသော {1} ကုဒ်မဟုတ်ပါဘူး
@@ -3906,7 +3905,7 @@ DocType: Email Digest,Sales Orders to Bill,ဘီလ်မှအရောင်�
 DocType: Price List,Price List Master,စျေးနှုန်း List ကိုမဟာ
 DocType: GST Account,CESS Account,အခွန်အကောင့်
 DocType: Sales Person,All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,အားလုံးသည်အရောင်းငွေကြေးကိစ္စရှင်းလင်းမှုမျိုးစုံ ** အရောင်း Persons ဆန့်ကျင် tagged နိုင်ပါတယ် ** သင်ပစ်မှတ် ထား. စောင့်ကြည့်နိုင်အောင်။
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1185,Link to Material Request,ပစ္စည်းတောင်းဆိုခြင်းမှ Link ကို
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1184,Link to Material Request,ပစ္စည်းတောင်းဆိုခြင်းမှ Link ကို
 apps/erpnext/erpnext/templates/pages/help.html +35,Forum Activity,ဖိုရမ်လှုပ်ရှားမှု
 ,S.O. No.,SO အမှတ်
 DocType: Bank Statement Transaction Settings Item,Bank Statement Transaction Settings Item,ဘဏ်ဖော်ပြချက်ငွေသွင်းငွေထုတ်က Settings Item
@@ -4968,7 +4967,6 @@ apps/erpnext/erpnext/patches/v11_0/rename_supplier_type_to_supplier_group.py +27
 DocType: Employee Boarding Activity,Required for Employee Creation,ထမ်းဖန်ဆင်းခြင်းများအတွက်လိုအပ်သော
 apps/erpnext/erpnext/accounts/doctype/account/account.py +214,Account Number {0} already used in account {1},အကောင့်နံပါတ် {0} ပြီးသားအကောင့် {1} များတွင်အသုံးပြု
 DocType: GoCardless Mandate,Mandate,လုပ်ပိုင်ခွင့်အာဏာ
-DocType: POS Profile,POS Profile Name,POS ကိုယ်ရေးဖိုင်အမည်
 DocType: Hotel Room Reservation,Booked,ကြိုတင်ဘွတ်ကင်
 DocType: Detected Disease,Tasks Created,Created လုပ်ငန်းများ
 DocType: Purchase Invoice Item,Rate,rate
@@ -5018,7 +5016,7 @@ apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py 
 DocType: Fiscal Year,Year Name,တစ်နှစ်တာအမည်
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +323,There are more holidays than working days this month.,ယခုလအလုပ်လုပ်ရက်ပတ်လုံးထက်ပိုပြီးအားလပ်ရက်ရှိပါသည်။
 apps/erpnext/erpnext/controllers/buying_controller.py +772,Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master,အောက်ပါပစ္စည်းများ {0} {1} ကို item အဖြစ်မှတ်သားကြသည်မဟုတ်။ သငျသညျက၎င်း၏ Item မာစတာထံမှ {1} ကို item အဖြစ်သူတို့ကိုဖွင့်နိုင်ပါသည်
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +108,PDC/LC Ref,ကောင်စီ / LC Ref
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +117,PDC/LC Ref,ကောင်စီ / LC Ref
 DocType: Production Plan Item,Product Bundle Item,ထုတ်ကုန်ပစ္စည်း Bundle ကို Item
 DocType: Sales Partner,Sales Partner Name,အရောင်း Partner အမည်
 apps/erpnext/erpnext/hooks.py +148,Request for Quotations,ကိုးကားချက်များတောင်းခံ
@@ -5381,7 +5379,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html +9,Used Leaves,တပတ်ရစ်အရွက်
 DocType: Job Offer,Awaiting Response,စောင့်ဆိုင်းတုန့်ပြန်
 DocType: Course Schedule,EDU-CSH-.YYYY.-,EDU တွင်-CSH-.YYYY.-
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +83,Above,အထက်
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +98,Above,အထက်
 DocType: Support Search Source,Link Options,link ကို Options ကို
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1557,Total Amount {0},စုစုပေါင်းငွေပမာဏ {0}
 apps/erpnext/erpnext/controllers/item_variant.py +323,Invalid attribute {0} {1},မှားနေသော attribute ကို {0} {1}
@@ -5436,7 +5434,6 @@ DocType: Program Enrollment Tool,Get Students From,ကနေကျောင်�
 apps/erpnext/erpnext/config/learn.py +263,Publish Items on Website,ဝက်ဘ်ဆိုက်ပေါ်တွင်ပစ္စည်းများ Publish
 apps/erpnext/erpnext/utilities/activation.py +126,Group your students in batches,သုတ်ထဲမှာ Group မှသင့်ရဲ့ကျောင်းသားများအတွက်
 DocType: Authorization Rule,Authorization Rule,authorization Rule
-DocType: POS Profile,Offline POS Section,အော့ဖ်လိုင်း POS ပုဒ်မ
 DocType: Sales Invoice,Terms and Conditions Details,စည်းကမ်းသတ်မှတ်ချက်များအသေးစိတ်ကို
 apps/erpnext/erpnext/templates/generators/item.html +118,Specifications,သတ်မှတ်ချက်များ
 DocType: Sales Taxes and Charges Template,Sales Taxes and Charges Template,အရောင်းအခွန်နှင့်စွပ်စွဲချက် Template:
@@ -5622,7 +5619,7 @@ DocType: Purchase Taxes and Charges,Item Wise Tax Detail,item ပညာရှိ
 DocType: Employee Onboarding,Job Offer,ယောဘသည်ကမ်းလှမ်းချက်
 apps/erpnext/erpnext/public/js/setup_wizard.js +71,Institute Abbreviation,Institute မှအတိုကောက်
 ,Item-wise Price List Rate,item ပညာစျေးနှုန်း List ကို Rate
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1157,Supplier Quotation,ပေးသွင်းစျေးနှုန်း
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1156,Supplier Quotation,ပေးသွင်းစျေးနှုန်း
 DocType: Quotation,In Words will be visible once you save the Quotation.,သင်စျေးနှုန်းကိုကယ်တင်တစ်ချိန်ကစကားမြင်နိုင်ပါလိမ့်မည်။
 apps/erpnext/erpnext/utilities/transaction_base.py +169,Quantity ({0}) cannot be a fraction in row {1},အရေအတွက် ({0}) တန်း {1} အတွက်အစိတ်အပိုင်းမဖွစျနိုငျ
 apps/erpnext/erpnext/utilities/transaction_base.py +169,Quantity ({0}) cannot be a fraction in row {1},အရေအတွက် ({0}) တန်း {1} အတွက်အစိတ်အပိုင်းမဖွစျနိုငျ
@@ -5635,7 +5632,7 @@ apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_repo
 DocType: Item,Opening Stock,စတော့အိတ်ဖွင့်လှစ်
 apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +20,Customer is required,customer လိုအပ်သည်
 DocType: Lab Test,Result Date,ရလဒ်နေ့စွဲ
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +102,PDC/LC Date,ကောင်စီ / LC နေ့စွဲ
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +129,PDC/LC Date,ကောင်စီ / LC နေ့စွဲ
 DocType: Purchase Order,To Receive,လက်ခံမှ
 DocType: Leave Period,Holiday List for Optional Leave,မလုပ်မဖြစ်ခွင့်များအတွက်အားလပ်ရက်များစာရင်း
 apps/erpnext/erpnext/utilities/user_progress.py +252,user@example.com,user@example.com
@@ -5993,7 +5990,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +82,This Item is a Variant of {0
 DocType: Workstation,per hour,တစ်နာရီကို
 DocType: Blanket Order,Purchasing,ယ်ယူခြင်း
 DocType: Announcement,Announcement,အသိပေးကြေငြာခြင်း
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Customer LPO,ဖောက်သည် LPO
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +139,Customer LPO,ဖောက်သည် LPO
 DocType: Education Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.","ကျောင်းသားအုပ်စုအခြေစိုက်အသုတ်လိုက်အဘို့, ကျောင်းသားအသုတ်လိုက်အစီအစဉ်ကျောင်းအပ်ထံမှတိုင်းကျောင်းသားများအတွက်အတည်ပြုလိမ့်မည်။"
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +51,Warehouse can not be deleted as stock ledger entry exists for this warehouse.,စတော့ရှယ်ယာလယ်ဂျာ entry ကိုဒီကိုဂိုဒေါင်သည်တည်ရှိအဖြစ်ဂိုဒေါင်ဖျက်ပြီးမရနိုင်ပါ။
 apps/erpnext/erpnext/public/js/setup_wizard.js +25,Distribution,ဖြန့်ဝေ
@@ -6690,7 +6687,7 @@ apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_sta
 DocType: Appraisal,Total Score (Out of 5),(5 ထဲက) စုစုပေါင်းရမှတ်
 DocType: Student Attendance Tool,Batch,batch
 DocType: Support Search Source,Query Route String,query လမ်းကြောင်း့ String
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1173,Update rate as per last purchase,နောက်ဆုံးဝယ်ယူနှုန်းအဖြစ်နှုန်းကိုအပ်ဒိတ်လုပ်ပါ
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1172,Update rate as per last purchase,နောက်ဆုံးဝယ်ယူနှုန်းအဖြစ်နှုန်းကိုအပ်ဒိတ်လုပ်ပါ
 DocType: Donor,Donor Type,အလှူရှင်အမျိုးအစား
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +710,Auto repeat document updated,အော်တိုထပ်စာရွက်စာတမ်း updated
 apps/erpnext/erpnext/stock/doctype/item/item.js +29,Balance,ချိန်ခွင်လျှာ

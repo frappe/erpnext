@@ -12,6 +12,7 @@ from frappe.utils.nestedset import NestedSet
 
 
 class CircularReferenceError(frappe.ValidationError): pass
+class EndDateCannotBeGreaterThanProjectEndDateError(frappe.ValidationError): pass
 
 class Task(NestedSet):
 	nsm_parent_field = 'parent_task'
@@ -44,9 +45,9 @@ class Task(NestedSet):
 			frappe.throw(_("'Actual Start Date' can not be greater than 'Actual End Date'"))
 
 	def validate_status(self):
-		if self.status!=self.get_db_value("status") and self.status == "Closed":
+		if self.status!=self.get_db_value("status") and self.status == "Completed":
 			for d in self.depends_on:
-				if frappe.db.get_value("Task", d.task, "status") != "Closed":
+				if frappe.db.get_value("Task", d.task, "status") != "Completed":
 					frappe.throw(_("Cannot close task as its dependant task {0} is not closed.").format(d.task))
 
 			from frappe.desk.form.assign_to import clear
@@ -55,6 +56,12 @@ class Task(NestedSet):
 	def validate_progress(self):
 		if (self.progress or 0) > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
+
+		if self.progress == 100:
+			self.status = 'Completed'
+
+		if self.status == 'Completed':
+			self.progress = 100
 
 	def update_depends_on(self):
 		depends_on_tasks = self.depends_on_tasks or ""
@@ -75,7 +82,7 @@ class Task(NestedSet):
 		self.populate_depends_on()
 
 	def unassign_todo(self):
-		if self.status == "Closed" or self.status == "Cancelled":
+		if self.status in ("Completed", "Cancelled"):
 			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
 
@@ -192,7 +199,7 @@ def set_tasks_as_overdue():
 	frappe.db.sql("""update tabTask set `status`='Overdue'
 		where exp_end_date is not null
 		and exp_end_date < CURDATE()
-		and `status` not in ('Closed', 'Cancelled')""")
+		and `status` not in ('Completed', 'Cancelled')""")
 
 @frappe.whitelist()
 def get_children(doctype, parent, task=None, project=None, is_root=False):

@@ -2274,7 +2274,6 @@ DocType: Fee Validity,Fee Validity,صلاحية الرسوم
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +146,No records found in the Payment table,لم يتم العثور على أية سجلات في جدول الدفعات
 apps/erpnext/erpnext/education/utils.py +19,This {0} conflicts with {1} for {2} {3},هذا {0} يتعارض مع {1} عن {2} {3}
 DocType: Student Attendance Tool,Students HTML,طلاب HTML
-DocType: POS Profile,Apply Discount,تطبيق تخفيض
 DocType: GST HSN Code,GST HSN Code,غست هسن كود
 DocType: Employee External Work History,Total Experience,مجموع الخبرة
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +70,Open Projects,مشاريع مفتوحة
@@ -2319,7 +2318,7 @@ DocType: Timesheet Detail,Expected Hrs,الساعات المتوقعة
 apps/erpnext/erpnext/config/non_profit.py +28,Memebership Details,تفاصيل العضوية
 DocType: Leave Block List,Block Holidays on important days.,حظر الاجازات في الايام المهمة
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +194,Please input all required Result Value(s),يرجى إدخال جميع قيم النتائج المطلوبة
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +137,Accounts Receivable Summary,ملخص الحسابات المدينة
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +142,Accounts Receivable Summary,ملخص الحسابات المدينة
 DocType: POS Closing Voucher,Linked Invoices,الفواتير المرتبطة
 DocType: Loan,Monthly Repayment Amount,قيمة السداد الشهري
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html +9,Opening Invoices,فتح الفواتير
@@ -2442,7 +2441,7 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +534,Quantit
 DocType: Travel Request Costing,Funded Amount,مبلغ التمويل
 apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +120,Previous Financial Year is not closed,السنة المالية السابقة ليست مغلقة
 DocType: Practitioner Schedule,Practitioner Schedule,جدول ممارس
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +69,Age (Days),العمر (أيام)
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +84,Age (Days),العمر (أيام)
 DocType: Instructor,EDU-INS-.YYYY.-,EDU-INS-.YYYY.-
 DocType: Additional Salary,Additional Salary,راتب إضافي
 DocType: Quotation Item,Quotation Item,بند المناقصة
@@ -2965,7 +2964,7 @@ DocType: Journal Entry,Accounts Receivable,حسابات القبض
 DocType: Travel Itinerary,Meal Preference,تفضيل الوجبة
 ,Supplier-Wise Sales Analytics,المورد حكيم المبيعات تحليلات
 DocType: Purchase Invoice,Availed ITC Central Tax,الاستفادة من الضرائب المركزية لمركز التجارة الدولية
-DocType: POS Profile,Company Address Name,اسم عنوان الشركة
+DocType: Sales Invoice,Company Address Name,اسم عنوان الشركة
 DocType: Work Order,Use Multi-Level BOM,استخدام متعدد المستويات BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,تضمن القيود التي تم تسويتها
 DocType: Course,"Parent Course (Leave blank, if this isn't part of Parent Course)",دورة الأم (ترك فارغة، إذا لم يكن هذا جزءا من دورة الآباء)
@@ -2979,7 +2978,7 @@ DocType: Woocommerce Settings,Enable Sync,تمكين المزامنة
 DocType: Tax Withholding Rate,Single Transaction Threshold,عتبة معاملة واحدة
 DocType: Lab Test Template,This value is updated in the Default Sales Price List.,يتم تحديث هذه القيمة في قائمة أسعار المبيعات الافتراضية.
 DocType: Email Digest,New Expenses,مصاريف او نفقات جديدة
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +114,PDC/LC Amount,بك / لك المبلغ
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +123,PDC/LC Amount,بك / لك المبلغ
 DocType: Shareholder,Shareholder,المساهم
 DocType: Purchase Invoice,Additional Discount Amount,مقدار الخصم الاضافي
 DocType: Cash Flow Mapper,Position,موضع
@@ -3570,7 +3569,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +19,Employee Transfer cannot be submitted before Transfer Date ,لا يمكن تقديم نقل الموظف قبل تاريخ النقل
 DocType: Certification Application,USD,دولار أمريكي
 apps/erpnext/erpnext/hotels/doctype/hotel_room_reservation/hotel_room_reservation.js +7,Make Invoice,جعل الفاتورة
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +121,Remaining Balance,الرصيد المتبقي
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Remaining Balance,الرصيد المتبقي
 DocType: Selling Settings,Auto close Opportunity after 15 days,اغلاق تلاقائي للفرص بعد 15 يوما
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +83,Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.,لا يسمح بأوامر الشراء {0} بسبب وضع بطاقة النقاط {1}.
 apps/erpnext/erpnext/stock/doctype/item/item.py +529,Barcode {0} is not a valid {1} code,الباركود {0} ليس رمز {1} صالحا
@@ -3907,7 +3906,7 @@ DocType: Email Digest,Sales Orders to Bill,أوامر المبيعات إلى ا
 DocType: Price List,Price List Master,قائمة الأسعار ماستر
 DocType: GST Account,CESS Account,سيس حساب
 DocType: Sales Person,All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,جميع معاملات البيع يمكن ان تكون مشارة لعدة ** موظفين مبيعات** بحيث يمكنك تعيين و مراقبة اهداف البيع المحددة
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1185,Link to Material Request,رابط لطلب المواد
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1184,Link to Material Request,رابط لطلب المواد
 apps/erpnext/erpnext/templates/pages/help.html +35,Forum Activity,نشاط المنتدى
 ,S.O. No.,S.O. رقم
 DocType: Bank Statement Transaction Settings Item,Bank Statement Transaction Settings Item,عنصر إعدادات معاملات بيان البنك
@@ -4969,7 +4968,6 @@ apps/erpnext/erpnext/patches/v11_0/rename_supplier_type_to_supplier_group.py +27
 DocType: Employee Boarding Activity,Required for Employee Creation,مطلوب لإنشاء موظف
 apps/erpnext/erpnext/accounts/doctype/account/account.py +214,Account Number {0} already used in account {1},رقم الحساب {0} بالفعل مستخدم في الحساب {1}
 DocType: GoCardless Mandate,Mandate,تفويض
-DocType: POS Profile,POS Profile Name,بوس اسم الملف الشخصي
 DocType: Hotel Room Reservation,Booked,حجز
 DocType: Detected Disease,Tasks Created,المهام التي تم إنشاؤها
 DocType: Purchase Invoice Item,Rate,معدل
@@ -5019,7 +5017,7 @@ apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py 
 DocType: Fiscal Year,Year Name,اسم العام
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +323,There are more holidays than working days this month.,هناك عطلات أكثر من أيام العمل في هذا الشهر.
 apps/erpnext/erpnext/controllers/buying_controller.py +772,Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master,العناصر التالية {0} غير مميزة كعنصر {1}. يمكنك تمكينها كـ عنصر {1} من العنصر الرئيسي الخاص بها
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +108,PDC/LC Ref,بك / لك المرجع
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +117,PDC/LC Ref,بك / لك المرجع
 DocType: Production Plan Item,Product Bundle Item,المنتج حزمة البند
 DocType: Sales Partner,Sales Partner Name,اسم المندوب
 apps/erpnext/erpnext/hooks.py +148,Request for Quotations,طلب عروض مسعره
@@ -5375,7 +5373,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html +9,Used Leaves,مغادرات مستخدمة
 DocType: Job Offer,Awaiting Response,انتظار الرد
 DocType: Course Schedule,EDU-CSH-.YYYY.-,EDU-CSH-.YYYY.-
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +83,Above,فوق
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +98,Above,فوق
 DocType: Support Search Source,Link Options,خيارات الارتباط
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1557,Total Amount {0},إجمالي المبلغ {0}
 apps/erpnext/erpnext/controllers/item_variant.py +323,Invalid attribute {0} {1},خاصية غير صالحة {0} {1}
@@ -5427,7 +5425,6 @@ DocType: Program Enrollment Tool,Get Students From,الحصول على الطل�
 apps/erpnext/erpnext/config/learn.py +263,Publish Items on Website,نشر عناصر على الموقع
 apps/erpnext/erpnext/utilities/activation.py +126,Group your students in batches,مجموعة الطلاب على دفعات
 DocType: Authorization Rule,Authorization Rule,قاعدة الترخيص
-DocType: POS Profile,Offline POS Section,قسم نقطة البيع دون اتصال
 DocType: Sales Invoice,Terms and Conditions Details,تفاصيل الشروط والأحكام
 apps/erpnext/erpnext/templates/generators/item.html +118,Specifications,مواصفات
 DocType: Sales Taxes and Charges Template,Sales Taxes and Charges Template,قالب الضرائب والرسوم على المبيعات
@@ -5613,7 +5610,7 @@ DocType: Purchase Taxes and Charges,Item Wise Tax Detail,الحكيم البند
 DocType: Employee Onboarding,Job Offer,عرض عمل
 apps/erpnext/erpnext/public/js/setup_wizard.js +71,Institute Abbreviation,اختصار المؤسسة
 ,Item-wise Price List Rate,معدل قائمة الأسعار للصنف
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1157,Supplier Quotation,اقتباس المورد
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1156,Supplier Quotation,اقتباس المورد
 DocType: Quotation,In Words will be visible once you save the Quotation.,وبعبارة تكون مرئية بمجرد حفظ اقتباس.
 apps/erpnext/erpnext/utilities/transaction_base.py +169,Quantity ({0}) cannot be a fraction in row {1},الكمية ({0}) لا يمكن أن تكون جزءا من الصف {1}
 DocType: Contract,Unsigned,غير موقعة
@@ -5625,7 +5622,7 @@ apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_repo
 DocType: Item,Opening Stock,مخزون أول المدة
 apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +20,Customer is required,العميل مطلوب
 DocType: Lab Test,Result Date,تاريخ النتيجة
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +102,PDC/LC Date,بك / لك التاريخ
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +129,PDC/LC Date,بك / لك التاريخ
 DocType: Purchase Order,To Receive,تلقي
 DocType: Leave Period,Holiday List for Optional Leave,قائمة العطلة للإجازة الاختيارية
 apps/erpnext/erpnext/utilities/user_progress.py +252,user@example.com,user@example.com
@@ -5985,7 +5982,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +82,This Item is a Variant of {0
 DocType: Workstation,per hour,كل ساعة
 DocType: Blanket Order,Purchasing,المشتريات
 DocType: Announcement,Announcement,إعلان
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Customer LPO,العميل لبو
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +139,Customer LPO,العميل لبو
 DocType: Education Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.",بالنسبة لمجموعة الطالب القائمة على الدفعة، سيتم التحقق من الدفعة الطالب لكل طالب من تسجيل البرنامج.
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +51,Warehouse can not be deleted as stock ledger entry exists for this warehouse.,مستودع لا يمكن حذف كما يوجد مدخل الأسهم دفتر الأستاذ لهذا المستودع.
 apps/erpnext/erpnext/public/js/setup_wizard.js +25,Distribution,توزيع
@@ -6676,7 +6673,7 @@ apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_sta
 DocType: Appraisal,Total Score (Out of 5),مجموع نقاط (من 5)
 DocType: Student Attendance Tool,Batch,باتش
 DocType: Support Search Source,Query Route String,سلسلة مسار الاستعلام
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1173,Update rate as per last purchase,معدل التحديث حسب آخر عملية شراء
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1172,Update rate as per last purchase,معدل التحديث حسب آخر عملية شراء
 DocType: Donor,Donor Type,نوع المانح
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +710,Auto repeat document updated,السيارات تكرار الوثيقة المحدثة
 apps/erpnext/erpnext/stock/doctype/item/item.js +29,Balance,الرصيد

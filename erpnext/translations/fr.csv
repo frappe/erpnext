@@ -2274,7 +2274,6 @@ DocType: Fee Validity,Fee Validity,Validité des Honoraires
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +146,No records found in the Payment table,Aucun enregistrement trouvé dans la table Paiement
 apps/erpnext/erpnext/education/utils.py +19,This {0} conflicts with {1} for {2} {3},Ce {0} est en conflit avec {1} pour {2} {3}
 DocType: Student Attendance Tool,Students HTML,HTML Étudiants
-DocType: POS Profile,Apply Discount,Appliquer Réduction
 DocType: GST HSN Code,GST HSN Code,Code GST HSN
 DocType: Employee External Work History,Total Experience,Expérience Totale
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +70,Open Projects,Projets ouverts
@@ -2319,7 +2318,7 @@ DocType: Timesheet Detail,Expected Hrs,Heures prévues
 apps/erpnext/erpnext/config/non_profit.py +28,Memebership Details,Détails de l'adhésion
 DocType: Leave Block List,Block Holidays on important days.,Bloquer les Vacances sur les jours importants.
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +194,Please input all required Result Value(s),Veuillez entrer toutes les valeurs de résultat requises
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +137,Accounts Receivable Summary,Résumé des Comptes Débiteurs
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +142,Accounts Receivable Summary,Résumé des Comptes Débiteurs
 DocType: POS Closing Voucher,Linked Invoices,Factures liées
 DocType: Loan,Monthly Repayment Amount,Montant du Remboursement Mensuel
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html +9,Opening Invoices,Ouverture des factures
@@ -2442,7 +2441,7 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +534,Quantit
 DocType: Travel Request Costing,Funded Amount,Montant financé
 apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +120,Previous Financial Year is not closed,L’Exercice Financier Précédent n’est pas fermé
 DocType: Practitioner Schedule,Practitioner Schedule,Calendrier des praticiens
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +69,Age (Days),Âge (Jours)
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +84,Age (Days),Âge (Jours)
 DocType: Instructor,EDU-INS-.YYYY.-,EDU-INS-YYYY.-
 DocType: Additional Salary,Additional Salary,Salaire supplémentaire
 DocType: Quotation Item,Quotation Item,Article du Devis
@@ -2965,7 +2964,7 @@ DocType: Journal Entry,Accounts Receivable,Comptes Débiteurs
 DocType: Travel Itinerary,Meal Preference,Préférence pour le repas
 ,Supplier-Wise Sales Analytics,Analyse des Ventes par Fournisseur
 DocType: Purchase Invoice,Availed ITC Central Tax,Taxe centrale ITC utilisée
-DocType: POS Profile,Company Address Name,Nom de l'Adresse de la Société
+DocType: Sales Invoice,Company Address Name,Nom de l'Adresse de la Société
 DocType: Work Order,Use Multi-Level BOM,Utiliser LDM à Plusieurs Niveaux
 DocType: Bank Reconciliation,Include Reconciled Entries,Inclure les Écritures Réconciliées
 DocType: Course,"Parent Course (Leave blank, if this isn't part of Parent Course)","Cours Parent (Laisser vide, si cela ne fait pas partie du Cours Parent)"
@@ -2979,7 +2978,7 @@ DocType: Woocommerce Settings,Enable Sync,Activer la synchronisation
 DocType: Tax Withholding Rate,Single Transaction Threshold,Seuil de transaction unique
 DocType: Lab Test Template,This value is updated in the Default Sales Price List.,Cette valeur est mise à jour dans la liste de prix de vente par défaut.
 DocType: Email Digest,New Expenses,Nouvelles Charges
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +114,PDC/LC Amount,Montant des chèques post-datés / Lettres de crédit
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +123,PDC/LC Amount,Montant des chèques post-datés / Lettres de crédit
 DocType: Shareholder,Shareholder,Actionnaire
 DocType: Purchase Invoice,Additional Discount Amount,Montant de la Remise Supplémentaire
 DocType: Cash Flow Mapper,Position,Position
@@ -3568,7 +3567,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +19,Employee Transfer cannot be submitted before Transfer Date ,Le transfert ne peut pas être soumis avant la date de transfert
 DocType: Certification Application,USD,USD
 apps/erpnext/erpnext/hotels/doctype/hotel_room_reservation/hotel_room_reservation.js +7,Make Invoice,Faire une Facture
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +121,Remaining Balance,Solde restant
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Remaining Balance,Solde restant
 DocType: Selling Settings,Auto close Opportunity after 15 days,Fermer automatiquement les Opportunités après 15 jours
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +83,Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.,Les Bons de Commande ne sont pas autorisés pour {0} en raison d'une note sur la fiche d'évaluation de {1}.
 apps/erpnext/erpnext/stock/doctype/item/item.py +529,Barcode {0} is not a valid {1} code,Le code-barres {0} n'est pas un code {1} valide
@@ -3904,7 +3903,7 @@ DocType: Email Digest,Sales Orders to Bill,Commandes de vente à facture
 DocType: Price List,Price List Master,Données de Base des Listes de Prix
 DocType: GST Account,CESS Account,Compte CESS
 DocType: Sales Person,All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,Toutes les Transactions de Vente peuvent être assignées à plusieurs **Commerciaux** pour configurer et surveiller les objectifs.
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1185,Link to Material Request,Lien vers la demande de matériel
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1184,Link to Material Request,Lien vers la demande de matériel
 apps/erpnext/erpnext/templates/pages/help.html +35,Forum Activity,Activité du forum
 ,S.O. No.,S.O. N°.
 DocType: Bank Statement Transaction Settings Item,Bank Statement Transaction Settings Item,Paramètre de transaction bancaire
@@ -4966,7 +4965,6 @@ apps/erpnext/erpnext/patches/v11_0/rename_supplier_type_to_supplier_group.py +27
 DocType: Employee Boarding Activity,Required for Employee Creation,Obligatoire pour la création d&#39;un employé
 apps/erpnext/erpnext/accounts/doctype/account/account.py +214,Account Number {0} already used in account {1},Numéro de compte {0} déjà utilisé dans le compte {1}
 DocType: GoCardless Mandate,Mandate,Mandat
-DocType: POS Profile,POS Profile Name,Nom du profil PDV
 DocType: Hotel Room Reservation,Booked,Réservé
 DocType: Detected Disease,Tasks Created,Tâches créées
 DocType: Purchase Invoice Item,Rate,Taux
@@ -5016,7 +5014,7 @@ apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py 
 DocType: Fiscal Year,Year Name,Nom de l'Année
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +323,There are more holidays than working days this month.,Il y a plus de vacances que de jours travaillés ce mois-ci.
 apps/erpnext/erpnext/controllers/buying_controller.py +772,Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master,Les éléments suivants {0} ne sont pas marqués comme {1} élément. Vous pouvez les activer en tant qu&#39;élément {1} à partir de sa fiche article.
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +108,PDC/LC Ref,Référence des chèques post-datés / Lettres de crédit
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +117,PDC/LC Ref,Référence des chèques post-datés / Lettres de crédit
 DocType: Production Plan Item,Product Bundle Item,Article d'un Ensemble de Produits
 DocType: Sales Partner,Sales Partner Name,Nom du Partenaire de Vente
 apps/erpnext/erpnext/hooks.py +148,Request for Quotations,Appel d’Offres
@@ -5372,7 +5370,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html +9,Used Leaves,Congés utilisés
 DocType: Job Offer,Awaiting Response,Attente de Réponse
 DocType: Course Schedule,EDU-CSH-.YYYY.-,EDU-CSH-.AAAA.-
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +83,Above,Au-dessus
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +98,Above,Au-dessus
 DocType: Support Search Source,Link Options,Options du lien
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1557,Total Amount {0},Montant Total {0}
 apps/erpnext/erpnext/controllers/item_variant.py +323,Invalid attribute {0} {1},Attribut invalide {0} {1}
@@ -5424,7 +5422,6 @@ DocType: Program Enrollment Tool,Get Students From,Obtenir les Étudiants De
 apps/erpnext/erpnext/config/learn.py +263,Publish Items on Website,Publier les Articles sur le Site Web
 apps/erpnext/erpnext/utilities/activation.py +126,Group your students in batches,Regrouper vos étudiants en lots
 DocType: Authorization Rule,Authorization Rule,Règle d'Autorisation
-DocType: POS Profile,Offline POS Section,Section PDV Hors Ligne
 DocType: Sales Invoice,Terms and Conditions Details,Détails des Termes et Conditions
 apps/erpnext/erpnext/templates/generators/item.html +118,Specifications,Caractéristiques
 DocType: Sales Taxes and Charges Template,Sales Taxes and Charges Template,Modèle de Taxes et Frais de Vente
@@ -5609,7 +5606,7 @@ DocType: Purchase Taxes and Charges,Item Wise Tax Detail,Détail des Taxes par A
 DocType: Employee Onboarding,Job Offer,Offre d&#39;emploi
 apps/erpnext/erpnext/public/js/setup_wizard.js +71,Institute Abbreviation,Abréviation de l'Institut
 ,Item-wise Price List Rate,Taux de la Liste des Prix par Article
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1157,Supplier Quotation,Devis Fournisseur
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1156,Supplier Quotation,Devis Fournisseur
 DocType: Quotation,In Words will be visible once you save the Quotation.,En Toutes Lettres. Sera visible une fois que vous enregistrerez le Devis.
 apps/erpnext/erpnext/utilities/transaction_base.py +169,Quantity ({0}) cannot be a fraction in row {1},La quantité ({0}) ne peut pas être une fraction dans la ligne {1}
 DocType: Contract,Unsigned,Non signé
@@ -5621,7 +5618,7 @@ apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_repo
 DocType: Item,Opening Stock,Stock d'Ouverture
 apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +20,Customer is required,Client est requis
 DocType: Lab Test,Result Date,Date de Résultat
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +102,PDC/LC Date,Date des chèques post-datés / Lettres de crédit
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +129,PDC/LC Date,Date des chèques post-datés / Lettres de crédit
 DocType: Purchase Order,To Receive,À Recevoir
 DocType: Leave Period,Holiday List for Optional Leave,Liste de jours fériés pour congé facultatif
 apps/erpnext/erpnext/utilities/user_progress.py +252,user@example.com,utilisateur@exemple.com
@@ -5977,7 +5974,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +82,This Item is a Variant of {0
 DocType: Workstation,per hour,par heure
 DocType: Blanket Order,Purchasing,Achat
 DocType: Announcement,Announcement,Annonce
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Customer LPO,Commande client locale
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +139,Customer LPO,Commande client locale
 DocType: Education Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.","Pour un groupe étudiant basé sur un lot, le lot étudiant sera validé pour chaque élève inscrit au programme."
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +51,Warehouse can not be deleted as stock ledger entry exists for this warehouse.,L'entrepôt ne peut pas être supprimé car une écriture existe dans le Livre d'Inventaire pour cet entrepôt.
 apps/erpnext/erpnext/public/js/setup_wizard.js +25,Distribution,Distribution
@@ -6666,7 +6663,7 @@ apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_sta
 DocType: Appraisal,Total Score (Out of 5),Score Total (sur 5)
 DocType: Student Attendance Tool,Batch,Lot
 DocType: Support Search Source,Query Route String,Chaîne de caractères du lien de requête
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1173,Update rate as per last purchase,Taux de mise à jour selon le dernier achat
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1172,Update rate as per last purchase,Taux de mise à jour selon le dernier achat
 DocType: Donor,Donor Type,Type de donneur
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +710,Auto repeat document updated,Document de répétition automatique mis à jour
 apps/erpnext/erpnext/stock/doctype/item/item.js +29,Balance,Solde

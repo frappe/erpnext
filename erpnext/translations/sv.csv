@@ -89,7 +89,7 @@ apps/erpnext/erpnext/config/healthcare.py +8,Consultation,Samråd
 DocType: Accounts Settings,Show Payment Schedule in Print,Visa betalningsplan i utskrift
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.py +21,Sales and Returns,Försäljning och Returer
 apps/erpnext/erpnext/stock/doctype/item/item.js +58,Show Variants,Visar varianter
-DocType: Academic Term,Academic Term,Akademisk termin
+DocType: Academic Term,Academic Term,Akademisk - termin
 DocType: Employee Tax Exemption Sub Category,Employee Tax Exemption Sub Category,Arbetsgivarskattebefrielse underkategori
 apps/erpnext/erpnext/projects/doctype/project/project_dashboard.py +14,Material,Material
 apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py +61,"Maximum benefit of employee {0} exceeds {1} by the sum {2} of benefit application pro-rata component\
@@ -356,7 +356,7 @@ DocType: Patient Medical Record,HLC-PMR-.YYYY.-,HLC-PMR-.YYYY.-
 DocType: Drug Prescription,Interval,Intervall
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +211,Preference,Preferens
 DocType: Supplier,Individual,Individuell
-DocType: Academic Term,Academics User,akademiker Användar
+DocType: Academic Term,Academics User,Akademisk - användare
 DocType: Cheque Print Template,Amount In Figure,Belopp I figur
 DocType: Loan Application,Loan Info,Loan info
 apps/erpnext/erpnext/config/maintenance.py +12,Plan for maintenance visits.,Planer för underhållsbesök.
@@ -847,7 +847,7 @@ DocType: Student Report Generation Tool,Show Marks,Visa betyg
 DocType: Support Settings,Get Latest Query,Hämta senaste frågan
 DocType: Quotation,Rate at which Price list currency is converted to company's base currency,I takt med vilket Prislistans valuta omvandlas till företagets basvaluta
 apps/erpnext/erpnext/setup/doctype/company/company.py +74,Account {0} does not belong to company: {1},Kontot {0} tillhör inte företaget: {1}
-apps/erpnext/erpnext/setup/doctype/company/company.py +56,Abbreviation already used for another company,Förkortningen har redan används för ett annat företag
+apps/erpnext/erpnext/setup/doctype/company/company.py +56,Abbreviation already used for another company,Förkortningen används redan för ett annat företag
 DocType: Selling Settings,Default Customer Group,Standard Kundgrupp
 DocType: Employee,IFSC Code,IFSC-kod
 DocType: Global Defaults,"If disable, 'Rounded Total' field will not be visible in any transaction","Om inaktiverad ""Rundad Totalt fältet inte syns i någon transaktion"
@@ -952,7 +952,7 @@ DocType: Amazon MWS Settings,AWS Access Key ID,AWS Access Key ID
 DocType: Employee Tax Exemption Declaration,Monthly House Rent,Månadshyreshus
 DocType: Purchase Order Item,Billed Amt,Fakturerat ant.
 DocType: Training Result Employee,Training Result Employee,Utbildning Resultat anställd
-DocType: Warehouse,A logical Warehouse against which stock entries are made.,En aktuell lagerlokal mot vilken lagernoteringar görs.
+DocType: Warehouse,A logical Warehouse against which stock entries are made.,Ett logiskt lager mot vilken lagerposter görs.
 apps/erpnext/erpnext/hr/doctype/loan/loan.js +134,Principal Amount,Kapitalbelopp
 DocType: Loan Application,Total Payable Interest,Totalt betalas ränta
 apps/erpnext/erpnext/education/doctype/fee_schedule/fee_schedule.js +58,Total Outstanding: {0},Totalt utestående: {0}
@@ -1122,7 +1122,7 @@ apps/erpnext/erpnext/non_profit/doctype/membership/membership.py +38,You can onl
 DocType: Shopping Cart Settings,Show Stock Availability,Visa lager tillgänglighet
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +519,Set {0} in asset category {1} or company {2},Ange {0} i tillgångskategori {1} eller företag {2}
 DocType: Location,Longitude,Longitud
-,Absent Student Report,Frånvarorapport Student
+,Absent Student Report,Frånvarorapport student
 DocType: Crop,Crop Spacing UOM,Beskära Spacing UOM
 DocType: Loyalty Program,Single Tier Program,Single Tier Program
 DocType: Accounts Settings,Only select if you have setup Cash Flow Mapper documents,Välj bara om du har inställningar för Cash Flow Mapper-dokument
@@ -1265,7 +1265,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +221,Need
 DocType: Asset Repair,Downtime,Driftstopp
 DocType: Account,Liability,Ansvar
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +228,Sanctioned Amount cannot be greater than Claim Amount in Row {0}.,Sanktionerade Belopp kan inte vara större än fordringsbelopp i raden {0}.
-apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html +14,Academic Term: ,Academic Term:
+apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html +14,Academic Term: ,Akademisk - termin:
 DocType: Salary Component,Do not include in total,Inkludera inte totalt
 DocType: Company,Default Cost of Goods Sold Account,Standardkostnad Konto Sålda Varor
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +1287,Sample quantity {0} cannot be more than received quantity {1},Provkvantitet {0} kan inte vara mer än mottagen kvantitet {1}
@@ -1591,7 +1591,7 @@ DocType: Healthcare Settings,Appointment Reminder,Avtal påminnelse
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +550,Please enter Account for Change Amount,Ange konto för förändring Belopp
 DocType: Program Enrollment Tool Student,Student Batch Name,Elev batchnamn
 DocType: Holiday List,Holiday List Name,Semester Listnamn
-DocType: Repayment Schedule,Balance Loan Amount,Balans Lånebelopp
+DocType: Repayment Schedule,Balance Loan Amount,Balans lånebelopp
 apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.js +132,Added to details,Tillagt till detaljer
 apps/erpnext/erpnext/education/doctype/course_scheduling_tool/course_scheduling_tool.js +14,Schedule Course,schema Course
 DocType: Budget,Applicable on Material Request,Gäller på materialförfrågan
@@ -2196,7 +2196,7 @@ Used for Taxes and Charges",Skatte detalj tabell hämtas från punkt mästare so
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +171,Employee cannot report to himself.,Anställd kan inte anmäla sig själv.
 DocType: Leave Type,Max Leaves Allowed,Max löv tillåtet
 DocType: Account,"If the account is frozen, entries are allowed to restricted users.","Om kontot är fruset, är poster endast tillgängligt för begränsade användare."
-DocType: Email Digest,Bank Balance,BANKTILLGODOHAVANDE
+DocType: Email Digest,Bank Balance,Banksaldo
 apps/erpnext/erpnext/accounts/party.py +269,Accounting Entry for {0}: {1} can only be made in currency: {2},Kontering för {0}: {1} kan endast göras i valuta: {2}
 DocType: HR Settings,Leave Approver Mandatory In Leave Application,Lämna godkännare Obligatorisk i lämnaransökan
 DocType: Job Opening,"Job profile, qualifications required etc.","Jobb profil, kvalifikationer som krävs osv"
@@ -2273,7 +2273,6 @@ DocType: Fee Validity,Fee Validity,Avgift Giltighet
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +146,No records found in the Payment table,Inga träffar i betalningstabellen
 apps/erpnext/erpnext/education/utils.py +19,This {0} conflicts with {1} for {2} {3},Detta {0} konflikter med {1} för {2} {3}
 DocType: Student Attendance Tool,Students HTML,studenter HTML
-DocType: POS Profile,Apply Discount,Applicera rabatt
 DocType: GST HSN Code,GST HSN Code,GST HSN-kod
 DocType: Employee External Work History,Total Experience,Total Experience
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +70,Open Projects,öppna projekt
@@ -2318,7 +2317,7 @@ DocType: Timesheet Detail,Expected Hrs,Förväntad tid
 apps/erpnext/erpnext/config/non_profit.py +28,Memebership Details,Memebership Detaljer
 DocType: Leave Block List,Block Holidays on important days.,Block Semester på viktiga dagar.
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +194,Please input all required Result Value(s),Vänligen ange alla nödvändiga resultatvärden (er)
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +137,Accounts Receivable Summary,Kundfordringar Sammanfattning
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +142,Accounts Receivable Summary,Kundfordringar Sammanfattning
 DocType: POS Closing Voucher,Linked Invoices,Länkade fakturor
 DocType: Loan,Monthly Repayment Amount,Månatliga återbetalningen belopp
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html +9,Opening Invoices,Öppna fakturor
@@ -2442,7 +2441,7 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +534,Quantit
 DocType: Travel Request Costing,Funded Amount,Finansierat belopp
 apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +120,Previous Financial Year is not closed,Föregående räkenskapsperiod inte stängd
 DocType: Practitioner Schedule,Practitioner Schedule,Utövare Schema
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +69,Age (Days),Ålder (dagar)
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +84,Age (Days),Ålder (dagar)
 DocType: Instructor,EDU-INS-.YYYY.-,EDU-INS-.YYYY.-
 DocType: Additional Salary,Additional Salary,Ytterligare lön
 DocType: Quotation Item,Quotation Item,Offert Artikel
@@ -2485,7 +2484,7 @@ apps/erpnext/erpnext/hr/doctype/vehicle/vehicle_dashboard.py +5,This is based on
 apps/erpnext/erpnext/hr/doctype/additional_salary/additional_salary.py +21,Payroll date can not be less than employee's joining date,Lönedatum kan inte vara mindre än anställdes anslutningsdatum
 apps/erpnext/erpnext/accounts/doctype/payment_order/payment_order.py +87,{0} {1} created,{0} {1} skapad
 apps/erpnext/erpnext/hr/doctype/job_opening/job_opening.py +46,"Job Openings for designation {0} already open \
-					or hiring completed as per Staffing Plan {1}",Arbetsöppningar för beteckning {0} redan öppen \ eller anställning slutförd enligt personalplan {1}
+					or hiring completed as per Staffing Plan {1}",Jobbmöjligheten för beteckning {0} redan öppen \ eller anställning slutförd enligt anställningsplan {1}
 DocType: Vital Signs,Constipated,toppad
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +118,Against Supplier Invoice {0} dated {1},Mot leverantörsfakturor {0} den {1}
 DocType: Customer,Default Price List,Standard Prislista
@@ -2600,11 +2599,11 @@ DocType: Healthcare Settings,Collect Fee for Patient Registration,Samla avgift f
 apps/erpnext/erpnext/stock/doctype/item/item.py +737,Cannot change Attributes after stock transaction. Make a new Item and transfer stock to the new Item,Kan inte ändra attribut efter aktiehandel. Skapa ett nytt objekt och överför lagret till det nya objektet
 DocType: Course Assessment Criteria,Weightage,Vikt
 DocType: Purchase Invoice,Tax Breakup,Skatteavbrott
-DocType: Employee,Joining Details,Ansluta Detaljer
+DocType: Employee,Joining Details,Registreringsuppgifter
 DocType: Member,Non Profit Member,Icke vinstmedlem
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +67,{0} {1}: Cost Center is required for 'Profit and Loss' account {2}. Please set up a default Cost Center for the Company.,"{0} {1}: Kostnadsställe krävs för ""Resultaträkning"" konto {2}. Ange ett standardkostnadsställe för bolaget."
 DocType: Payment Schedule,Payment Term,Betalningsvillkor
-apps/erpnext/erpnext/selling/doctype/customer/customer.py +175,A Customer Group exists with same name please change the Customer name or rename the Customer Group,"En Kundgrupp finns med samma namn, vänligen ändra Kundens namn eller döp om Kundgruppen"
+apps/erpnext/erpnext/selling/doctype/customer/customer.py +175,A Customer Group exists with same name please change the Customer name or rename the Customer Group,En kundgrupp finns redan med samma namn. Vänligen ändra kundens namn eller byt namn på kundgruppen
 DocType: Location,Area,Område
 apps/erpnext/erpnext/public/js/templates/contact_list.html +37,New Contact,Ny kontakt
 DocType: Company,Company Description,Företagsbeskrivning
@@ -2722,7 +2721,7 @@ DocType: Material Request Plan Item,Actual Qty,Faktiska Antal
 DocType: Sales Invoice Item,References,Referenser
 DocType: Quality Inspection Reading,Reading 10,Avläsning 10
 apps/erpnext/erpnext/assets/doctype/asset_movement/asset_movement.py +48,Serial nos {0} does not belongs to the location {1},Serienummer {0} hör inte till platsen {1}
-DocType: Item,Barcodes,streck~~POS=TRUNC
+DocType: Item,Barcodes,Streckkoder
 DocType: Hub Tracked Item,Hub Node,Nav Nod
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +78,You have entered duplicate items. Please rectify and try again.,Du har angett dubbletter. Vänligen rätta och försök igen.
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +92,Associate,Associate
@@ -2856,7 +2855,7 @@ DocType: Asset,Sold,Såld
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +230,Please click on 'Generate Schedule' to fetch Serial No added for Item {0},"Klicka på ""Skapa schema"" för att hämta Löpnummer inlagt för artikel {0}"
 DocType: Account,Frozen,Fryst
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py +382,Vehicle Type,fordonstyp
-DocType: Sales Invoice Payment,Base Amount (Company Currency),Basbelopp (Company valuta)
+DocType: Sales Invoice Payment,Base Amount (Company Currency),Basbelopp (företagets valuta)
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1002,Raw Materials,Råmaterial
 DocType: Payment Reconciliation Payment,Reference Row,referens Row
 DocType: Installation Note,Installation Time,Installationstid
@@ -2902,7 +2901,7 @@ DocType: Discussion,Discussion,Diskussion
 DocType: Payment Entry,Transaction ID,Transaktions ID
 DocType: Payroll Entry,Deduct Tax For Unsubmitted Tax Exemption Proof,Avdragsskatt för ej inlämnad skattebefrielse bevis
 DocType: Volunteer,Anytime,när som helst
-DocType: Bank Account,Bank Account No,bankkontonummer
+DocType: Bank Account,Bank Account No,Bankkontonummer
 DocType: Employee Tax Exemption Proof Submission,Employee Tax Exemption Proof Submission,Anmälan om anställningsskattbefrielse
 DocType: Patient,Surgical History,Kirurgisk historia
 DocType: Bank Statement Settings Item,Mapped Header,Mapped Header
@@ -2972,7 +2971,7 @@ DocType: Journal Entry,Accounts Receivable,Kundreskontra
 DocType: Travel Itinerary,Meal Preference,matpreferens
 ,Supplier-Wise Sales Analytics,Leverantör-Wise Sales Analytics
 DocType: Purchase Invoice,Availed ITC Central Tax,Utnyttjade ITC Central Tax
-DocType: POS Profile,Company Address Name,Företagets adressnamn
+DocType: Sales Invoice,Company Address Name,Företagets adressnamn
 DocType: Work Order,Use Multi-Level BOM,Använd Multi-Level BOM
 DocType: Bank Reconciliation,Include Reconciled Entries,Inkludera avstämnignsanteckningar
 DocType: Course,"Parent Course (Leave blank, if this isn't part of Parent Course)",Föräldrarkurs (lämna tomt om detta inte ingår i föräldrakursen)
@@ -2987,7 +2986,7 @@ DocType: Woocommerce Settings,Enable Sync,Aktivera synkronisering
 DocType: Tax Withholding Rate,Single Transaction Threshold,Enda transaktionströskel
 DocType: Lab Test Template,This value is updated in the Default Sales Price List.,Detta värde uppdateras i standardförsäljningsprislistan.
 DocType: Email Digest,New Expenses,nya kostnader
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +114,PDC/LC Amount,PDC / LC-belopp
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +123,PDC/LC Amount,PDC / LC-belopp
 DocType: Shareholder,Shareholder,Aktieägare
 DocType: Purchase Invoice,Additional Discount Amount,Ytterligare rabatt Belopp
 DocType: Cash Flow Mapper,Position,Placera
@@ -2998,7 +2997,7 @@ apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py
 			amount",Maximal nytta av anställd {0} överstiger {1} med summan {2} av tidigare hävdat \ belopp
 apps/erpnext/erpnext/controllers/accounts_controller.py +671,"Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.","Rad # {0}: Antal måste vara en, som objektet är en anläggningstillgång. Använd separat rad för flera st."
 DocType: Leave Block List Allow,Leave Block List Allow,Lämna Block List Tillåt
-apps/erpnext/erpnext/setup/doctype/company/company.py +349,Abbr can not be blank or space,Förkortning kan inte vara tomt
+apps/erpnext/erpnext/setup/doctype/company/company.py +349,Abbr can not be blank or space,Förkortning kan inte vara tomt eller mellanslag
 DocType: Patient Medical Record,Patient Medical Record,Patient Medical Record
 apps/erpnext/erpnext/accounts/doctype/account/account.js +67,Group to Non-Group,Grupp till icke-Group
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +50,Sports,Sport
@@ -3238,7 +3237,7 @@ apps/erpnext/erpnext/accounts/report/tds_payable_monthly/tds_payable_monthly.py 
 apps/erpnext/erpnext/config/buying.py +155,Templates of supplier scorecard variables.,Mallar med leverantörsspecifika variabler.
 DocType: Job Offer Term,Offer Term,Erbjudandet Villkor
 DocType: Asset,Quality Manager,Kvalitetsansvarig
-DocType: Job Applicant,Job Opening,Arbetsöppning
+DocType: Job Applicant,Job Opening,Jobbmöjlighet
 DocType: Payment Reconciliation,Payment Reconciliation,Betalning Avstämning
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +153,Please select Incharge Person's name,Välj Ansvariges namn
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +51,Technology,Teknik
@@ -3351,6 +3350,7 @@ DocType: Manufacturing Settings,Capacity Planning,Kapacitetsplanering
 DocType: Supplier Quotation,Rounding Adjustment (Company Currency,Avrundningsjustering (Företagsvaluta
 DocType: Asset,Policy number,Försäkringsnummer
 apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py +43,'From Date' is required,&quot;Från datum&quot; krävs
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +419,Assign to Employees,Tilldela till anställda
 DocType: Journal Entry,Reference Number,Referensnummer
 DocType: Employee,New Workplace,Ny Arbetsplats
 DocType: Retention Bonus,Retention Bonus,Retention Bonus
@@ -3549,7 +3549,7 @@ apps/erpnext/erpnext/education/doctype/fee_schedule/fee_schedule.js +56,Total Co
 DocType: Purchase Receipt,Get Current Stock,Få Nuvarande lager
 DocType: Purchase Invoice,ineligible,berättigade
 apps/erpnext/erpnext/config/manufacturing.py +46,Tree of Bill of Materials,Tree of Bill of Materials
-DocType: Student,Joining Date,Inträdesdatum
+DocType: Student,Joining Date,Registreringsdatum
 ,Employees working on a holiday,Anställda som arbetar på en semester
 ,TDS Computation Summary,TDS-beräkningsöversikt
 DocType: Share Balance,Current State,Nuvarande tillstånd
@@ -3584,7 +3584,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +19,Employee Transfer cannot be submitted before Transfer Date ,Anställningsöverföring kan inte lämnas in före överlämningsdatum
 DocType: Certification Application,USD,USD
 apps/erpnext/erpnext/hotels/doctype/hotel_room_reservation/hotel_room_reservation.js +7,Make Invoice,Skapa Faktura
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +121,Remaining Balance,Återstående balans
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Remaining Balance,Återstående balans
 DocType: Selling Settings,Auto close Opportunity after 15 days,Stäng automatiskt Affärsmöjlighet efter 15 dagar
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +83,Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.,Inköpsorder är inte tillåtna för {0} på grund av ett scorecard med {1}.
 apps/erpnext/erpnext/stock/doctype/item/item.py +529,Barcode {0} is not a valid {1} code,Streckkoden {0} är inte en giltig {1} kod
@@ -3595,7 +3595,7 @@ apps/erpnext/erpnext/hr/doctype/employee/employee.py +141,Contract End Date must
 DocType: Driver,Driver,Förare
 DocType: Vital Signs,Nutrition Values,Näringsvärden
 DocType: Lab Test Template,Is billable,Är fakturerbar
-DocType: Sales Partner,A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,En tredjepartsdistributör / bonusagent / affiliate / återförsäljare som säljer företagets produkter för en provision.
+DocType: Sales Partner,A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,En tredjepartsdistributör/återförsäljare/kommissionär/influencer som säljer företagets produkter mot provision.
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +412,{0} against Purchase Order {1},{0} mot beställning {1}
 DocType: Patient,Patient Demographics,Patient Demographics
 DocType: Task,Actual Start Date (via Time Sheet),Faktiska startdatum (via Tidrapportering)
@@ -3766,6 +3766,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py +5
 DocType: Account,Income Account,Inkomst konto
 DocType: Payment Request,Amount in customer's currency,Belopp i kundens valuta
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +880,Delivery,Leverans
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +109,Assigning Structures...,Tilldelandestrukturer...
 DocType: Stock Reconciliation Item,Current Qty,Aktuellt Antal
 DocType: Restaurant Menu,Restaurant Menu,Restaurangmeny
 apps/erpnext/erpnext/public/js/event.js +23,Add Suppliers,Lägg till leverantörer
@@ -3903,7 +3904,7 @@ DocType: Email Digest,Sales Orders to Bill,Försäljningsorder till Bill
 DocType: Price List,Price List Master,Huvudprislista
 DocType: GST Account,CESS Account,CESS-konto
 DocType: Sales Person,All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,Alla försäljningstransaktioner kan märkas mot flera ** säljare ** så att du kan ställa in och övervaka mål.
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1185,Link to Material Request,Länk till materialförfrågan
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1184,Link to Material Request,Länk till materialförfrågan
 apps/erpnext/erpnext/templates/pages/help.html +35,Forum Activity,Forumaktivitet
 ,S.O. No.,SÅ Nej
 DocType: Bank Statement Transaction Settings Item,Bank Statement Transaction Settings Item,Bankräkning Transaktionsinställningsobjekt
@@ -4211,7 +4212,7 @@ apps/erpnext/erpnext/assets/doctype/asset/asset.py +80,Update stock must be enab
 apps/erpnext/erpnext/stock/get_item_details.py +405,Item Price updated for {0} in Price List {1},Artikel Pris uppdaterad för {0} i prislista {1}
 DocType: Salary Structure,Salary breakup based on Earning and Deduction.,Lön upplösning baserat på inkomster och avdrag.
 apps/erpnext/erpnext/accounts/doctype/account/account.py +135,Account with child nodes cannot be converted to ledger,Konto med underordnade noder kan inte omvandlas till liggaren
-DocType: Purchase Invoice Item,Accepted Warehouse,Godkänt Lager
+DocType: Purchase Invoice Item,Accepted Warehouse,Godkänt lager
 DocType: Bank Reconciliation Detail,Posting Date,Bokningsdatum
 DocType: Item,Valuation Method,Värderingsmetod
 apps/erpnext/erpnext/accounts/doctype/loyalty_program/loyalty_program.js +30,One customer can be part of only single Loyalty Program.,En kund kan vara en del av ett enda lojalitetsprogram.
@@ -4476,7 +4477,7 @@ DocType: Purchase Invoice,GST Details,GST-detaljer
 apps/erpnext/erpnext/healthcare/doctype/healthcare_practitioner/healthcare_practitioner_dashboard.py +6,This is based on transactions against this Healthcare Practitioner.,Detta bygger på transaktioner mot denna vårdgivare.
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +156,Email sent to supplier {0},E-post som skickas till leverantören {0}
 DocType: Item,Default Sales Unit of Measure,Standardförsäljningsenhet av åtgärd
-apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html +12,Academic Year: ,Akademiskt år:
+apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html +12,Academic Year: ,Akademisk - år:
 DocType: Inpatient Record,Admission Schedule Date,Datum för tillträde
 DocType: Subscription,Past Due Date,Förfallodagen
 apps/erpnext/erpnext/stock/doctype/item_alternative/item_alternative.py +19,Not allow to set alternative item for the item {0},Tillåt inte att ange alternativ objekt för objektet {0}
@@ -4494,7 +4495,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +187,{0} not found for Item {1},{0} hittades inte för objekt {1}
 apps/erpnext/erpnext/utilities/user_progress.py +197,Go to Courses,Gå till kurser
 DocType: Accounts Settings,Show Inclusive Tax In Print,Visa inklusiv skatt i tryck
-apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py +17,"Bank Account, From Date and To Date are Mandatory","Bankkonto, från datum till datum är obligatoriskt"
+apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py +17,"Bank Account, From Date and To Date are Mandatory","Bankkonto, från-datum och till-datum är obligatoriska"
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.js +29,Message Sent,Meddelande Skickat
 apps/erpnext/erpnext/accounts/doctype/account/account.py +105,Account with child nodes cannot be set as ledger,Konto med underordnade noder kan inte ställas in som huvudbok
 DocType: C-Form,II,II
@@ -4703,7 +4704,7 @@ DocType: Asset Value Adjustment,Current Asset Value,Nuvarande tillgångsvärde
 DocType: QuickBooks Migrator,Quickbooks Company ID,QuickBooks företags-ID
 DocType: Travel Request,Travel Funding,Resefinansiering
 DocType: Loan Application,Required by Date,Krävs Datum
-DocType: Crop Cycle,A link to all the Locations in which the Crop is growing,En länk till alla de platser där grödan växer
+DocType: Crop Cycle,A link to all the Locations in which the Crop is growing,En länk till alla platser där grödor växer
 DocType: Lead,Lead Owner,Prospekt ägaren
 DocType: Production Plan,Sales Orders Detail,Försäljningsorder detalj
 DocType: Bin,Requested Quantity,begärda Kvantitet
@@ -4938,7 +4939,7 @@ apps/erpnext/erpnext/setup/doctype/company/company.js +109,Please re-type compan
 apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +50,Total Outstanding Amt,Totalt Utestående Amt
 DocType: Journal Entry,Printing Settings,Utskriftsinställningar
 DocType: Employee Advance,Advance Account,Förskottskonto
-DocType: Job Offer,Job Offer Terms,Arbetsvillkor
+DocType: Job Offer,Job Offer Terms,Villkor för erbjudandet
 DocType: Sales Invoice,Include Payment (POS),Inkluderar Betalning (POS)
 DocType: Shopify Settings,eg: frappe.myshopify.com,t.ex. frappe.myshopify.com
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +324,Total Debit must be equal to Total Credit. The difference is {0},Totalt Betal måste vara lika med de sammanlagda kredit. Skillnaden är {0}
@@ -4965,7 +4966,6 @@ apps/erpnext/erpnext/patches/v11_0/rename_supplier_type_to_supplier_group.py +27
 DocType: Employee Boarding Activity,Required for Employee Creation,Krävs för anställningsskapande
 apps/erpnext/erpnext/accounts/doctype/account/account.py +214,Account Number {0} already used in account {1},Kontonummer {0} som redan används i konto {1}
 DocType: GoCardless Mandate,Mandate,Mandat
-DocType: POS Profile,POS Profile Name,POS-profilnamn
 DocType: Hotel Room Reservation,Booked,bokade
 DocType: Detected Disease,Tasks Created,Uppgifter skapade
 DocType: Purchase Invoice Item,Rate,Betygsätt
@@ -5015,7 +5015,7 @@ apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py 
 DocType: Fiscal Year,Year Name,År namn
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +323,There are more holidays than working days this month.,Det finns mer semester än arbetsdagar denna månad.
 apps/erpnext/erpnext/controllers/buying_controller.py +772,Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master,Följande poster {0} är inte markerade som {1} objekt. Du kan aktivera dem som {1} -objekt från dess objektmastern
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +108,PDC/LC Ref,PDC / LC Ref
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +117,PDC/LC Ref,PDC / LC Ref
 DocType: Production Plan Item,Product Bundle Item,Produktpaket Punkt
 DocType: Sales Partner,Sales Partner Name,Försäljnings Partner Namn
 apps/erpnext/erpnext/hooks.py +148,Request for Quotations,Begäran om Citat
@@ -5378,7 +5378,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html +9,Used Leaves,Använda löv
 DocType: Job Offer,Awaiting Response,Väntar på svar
 DocType: Course Schedule,EDU-CSH-.YYYY.-,EDU-CSH-.YYYY.-
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +83,Above,Ovan
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +98,Above,Ovan
 DocType: Support Search Source,Link Options,Länkalternativ
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1557,Total Amount {0},Summa belopp {0}
 apps/erpnext/erpnext/controllers/item_variant.py +323,Invalid attribute {0} {1},Ogiltig attribut {0} {1}
@@ -5433,7 +5433,6 @@ DocType: Program Enrollment Tool,Get Students From,Få studenter från
 apps/erpnext/erpnext/config/learn.py +263,Publish Items on Website,Publicera artiklar på webbplatsen
 apps/erpnext/erpnext/utilities/activation.py +126,Group your students in batches,Grupp dina elever i omgångar
 DocType: Authorization Rule,Authorization Rule,Auktoriseringsregel
-DocType: POS Profile,Offline POS Section,Offline POS-sektion
 DocType: Sales Invoice,Terms and Conditions Details,Villkor Detaljer
 apps/erpnext/erpnext/templates/generators/item.html +118,Specifications,Specifikationer
 DocType: Sales Taxes and Charges Template,Sales Taxes and Charges Template,Försäljnings Skatter och avgifter Mall
@@ -5518,7 +5517,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +866,Return
 DocType: Stock Settings,Auto insert Price List rate if missing,Diskinmatning Prislista ränta om saknas
 apps/erpnext/erpnext/public/js/controllers/transaction.js +322, does not exist!,existerar inte!
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +137,Total Paid Amount,Sammanlagda belopp som betalats
-DocType: GST Settings,B2C Limit,B2C Limit
+DocType: GST Settings,B2C Limit,B2C begränsning
 DocType: Job Card,Transferred Qty,Överfört Antal
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Navigera
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +141,Planning,Planering
@@ -5532,7 +5531,7 @@ apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +290,Quantity should be gr
 DocType: Journal Entry,Cash Entry,Kontantinlägg
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse_tree.js +17,Child nodes can be only created under 'Group' type nodes,Underordnade noder kan endast skapas under &quot;grupp&quot; typ noder
 DocType: Attendance Request,Half Day Date,Halvdag Datum
-DocType: Academic Year,Academic Year Name,Läsåret Namn
+DocType: Academic Year,Academic Year Name,Akademisk - läsårets namn
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +1182,{0} not allowed to transact with {1}. Please change the Company.,{0} får inte göra transaktioner med {1}. Vänligen ändra företag.
 DocType: Sales Partner,Contact Desc,Kontakt Desc
 DocType: Email Digest,Send regular summary reports via Email.,Skicka regelbundna sammanfattande rapporter via e-post.
@@ -5617,10 +5616,10 @@ DocType: Assessment Plan,Assessment Name,bedömning Namn
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +107,Show PDC in Print,Visa PDC i Print
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +95,Row # {0}: Serial No is mandatory,Rad # {0}: Löpnummer är obligatorisk
 DocType: Purchase Taxes and Charges,Item Wise Tax Detail,Produktvis Skatte Detalj
-DocType: Employee Onboarding,Job Offer,Jobb erbjudande
+DocType: Employee Onboarding,Job Offer,Jobberbjudande
 apps/erpnext/erpnext/public/js/setup_wizard.js +71,Institute Abbreviation,Institute Förkortning
 ,Item-wise Price List Rate,Produktvis Prislistavärde
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1157,Supplier Quotation,Leverantör Offert
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1156,Supplier Quotation,Leverantör Offert
 DocType: Quotation,In Words will be visible once you save the Quotation.,I Ord kommer att synas när du sparar offerten.
 apps/erpnext/erpnext/utilities/transaction_base.py +169,Quantity ({0}) cannot be a fraction in row {1},Kvantitet ({0}) kan inte vara en fraktion i rad {1}
 apps/erpnext/erpnext/utilities/transaction_base.py +169,Quantity ({0}) cannot be a fraction in row {1},Kvantitet ({0}) kan inte vara en fraktion i rad {1}
@@ -5633,7 +5632,7 @@ apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_repo
 DocType: Item,Opening Stock,ingående lager
 apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +20,Customer is required,Kunden är obligatoriskt
 DocType: Lab Test,Result Date,Resultatdatum
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +102,PDC/LC Date,PDC / LC-datum
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +129,PDC/LC Date,PDC / LC-datum
 DocType: Purchase Order,To Receive,Att Motta
 DocType: Leave Period,Holiday List for Optional Leave,Semesterlista för valfritt semester
 apps/erpnext/erpnext/utilities/user_progress.py +252,user@example.com,user@example.com
@@ -5680,7 +5679,7 @@ apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +6
 apps/erpnext/erpnext/config/learn.py +229,Human Resource,Personal administration
 DocType: Payment Reconciliation Payment,Payment Reconciliation Payment,Betalning Avstämning Betalning
 DocType: Disease,Treatment Task,Behandlingsuppgift
-DocType: Payment Order Reference,Bank Account Details,Bankkonto detaljer
+DocType: Payment Order Reference,Bank Account Details,Bankkontouppgifter
 DocType: Purchase Order Item,Blanket Order,Blankett Order
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +39,Tax Assets,Skattefordringar
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +631,Production Order has been {0},Produktionsorder har varit {0}
@@ -5737,7 +5736,7 @@ apps/erpnext/erpnext/stock/utils.py +149,Item {0} ignored since it is not a stoc
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +23,"To not apply Pricing Rule in a particular transaction, all applicable Pricing Rules should be disabled.","För att inte tillämpa prissättning regel i en viss transaktion, bör alla tillämpliga prissättning regler inaktiveras."
 DocType: Payment Term,Day(s) after the end of the invoice month,Dag (er) efter fakturamånadens slut
 DocType: Assessment Group,Parent Assessment Group,Parent Assessment Group
-apps/erpnext/erpnext/hr/doctype/job_opening/job_opening.py +54,Jobs,jobb
+apps/erpnext/erpnext/hr/doctype/job_opening/job_opening.py +54,Jobs,Jobb
 ,Sales Order Trends,Försäljningsorder Trender
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +51,The 'From Package No.' field must neither be empty nor it's value less than 1.,&quot;Från paketnummer&quot; Fältet får inte vara tomt eller det är värdet mindre än 1.
 DocType: Employee,Held On,Höll På
@@ -5842,7 +5841,7 @@ apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +118,"Asset {0} cannot
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +93,Cheques Required,Kontroller krävs
 DocType: Task,Total Expense Claim (via Expense Claim),Totalkostnadskrav (via utgiftsräkning)
 apps/erpnext/erpnext/hr/doctype/employee_attendance_tool/employee_attendance_tool.js +177,Mark Absent,Mark Frånvarande
-DocType: Job Applicant Source,Job Applicant Source,Jobbsökande Källa
+DocType: Job Applicant Source,Job Applicant Source,Jobbsökande källa
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py +328,IGST Amount,IGST-belopp
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +41,Failed to setup company,Misslyckades med att konfigurera företaget
 DocType: Asset Repair,Asset Repair,Asset Repair
@@ -5992,7 +5991,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +82,This Item is a Variant of {0
 DocType: Workstation,per hour,per timme
 DocType: Blanket Order,Purchasing,Köp av
 DocType: Announcement,Announcement,Meddelande
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Customer LPO,Kund LPO
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +139,Customer LPO,Kund LPO
 DocType: Education Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.",För gruppbaserad studentgrupp kommer studentenbatchen att valideras för varje student från programansökan.
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +51,Warehouse can not be deleted as stock ledger entry exists for this warehouse.,Lager kan inte tas bort som lagrets huvudbok  existerar för det här lagret.
 apps/erpnext/erpnext/public/js/setup_wizard.js +25,Distribution,Fördelning
@@ -6064,7 +6063,7 @@ apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invo
 DocType: Customer,Customer Primary Contact,Kund Primärkontakt
 DocType: Project Task,View Task,Se uppgifter
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py +22,Opp/Lead %,Opp / Lead%
-DocType: Bank Guarantee,Bank Account Info,Bankkontoinfo
+DocType: Bank Guarantee,Bank Account Info,Bankkontoinformation
 DocType: Bank Guarantee,Bank Guarantee Type,Bankgaranti Typ
 DocType: Payment Schedule,Invoice Portion,Fakturahandel
 ,Asset Depreciations and Balances,Asset Avskrivningar och saldon
@@ -6075,7 +6074,7 @@ DocType: Email Digest,Add/Remove Recipients,Lägg till / ta bort mottagare
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.js +19,"To set this Fiscal Year as Default, click on 'Set as Default'","För att ställa denna verksamhetsåret som standard, klicka på &quot;Ange som standard&quot;"
 apps/erpnext/erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py +130,Amount of TDS Deducted,Beloppet av TDS dras av
 DocType: Production Plan,Include Subcontracted Items,Inkludera underleverantörer
-apps/erpnext/erpnext/projects/doctype/project/project.py +281,Join,Ansluta sig
+apps/erpnext/erpnext/projects/doctype/project/project.py +281,Join,Gå med
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py +81,Shortage Qty,Brist Antal
 apps/erpnext/erpnext/stock/doctype/item/item.py +792,Item variant {0} exists with same attributes,Punkt variant {0} finns med samma attribut
 DocType: Loan,Repay from Salary,Repay från Lön
@@ -6687,7 +6686,7 @@ apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_sta
 DocType: Appraisal,Total Score (Out of 5),Totalt Betyg (Out of 5)
 DocType: Student Attendance Tool,Batch,Batch
 DocType: Support Search Source,Query Route String,Query Route String
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1173,Update rate as per last purchase,Uppdateringsfrekvens enligt senaste köp
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1172,Update rate as per last purchase,Uppdateringsfrekvens enligt senaste köp
 DocType: Donor,Donor Type,Givartyp
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +710,Auto repeat document updated,Automatisk upprepa dokument uppdaterad
 apps/erpnext/erpnext/stock/doctype/item/item.js +29,Balance,Balans
@@ -6804,7 +6803,7 @@ DocType: Sales Partner Type,Sales Partner Type,Försäljningspartner typ
 DocType: Shopify Webhook Detail,Webhook ID,Webhook ID
 apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.py +64,Invoice Created,Faktura skapad
 DocType: Asset,Out of Order,Trasig
-DocType: Purchase Receipt Item,Accepted Quantity,Godkänd Kvantitet
+DocType: Purchase Receipt Item,Accepted Quantity,Godkänd kvantitet
 DocType: Projects Settings,Ignore Workstation Time Overlap,Ignorera överlappning av arbetsstationen
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +302,Please set a default Holiday List for Employee {0} or Company {1},Vänligen ange ett standardkalender för anställd {0} eller Company {1}
 apps/erpnext/erpnext/accounts/party.py +30,{0}: {1} does not exists,{0}: {1} existerar inte

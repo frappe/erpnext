@@ -32,6 +32,15 @@ class ReceivablePayableReport(object):
 
 		columns += [_(args.get("party_type")) + ":Link/" + args.get("party_type") + ":200"]
 
+		if args.get("party_type") == 'Customer':
+			columns.append({
+				"label": _("Customer Contact"),
+				"fieldtype": "Link",
+				"fieldname": "contact",
+				"options":"Contact",
+				"width": 100
+			})
+
 		if party_naming_by == "Naming Series":
 			columns += [args.get("party_type") + " Name::110"]
 
@@ -181,7 +190,7 @@ class ReceivablePayableReport(object):
 			dn_details = get_dn_details(args.get("party_type"), voucher_nos)
 			self.voucher_details = get_voucher_details(args.get("party_type"), voucher_nos, dn_details)
 
-		if self.filters.based_on_payment_terms:
+		if self.filters.based_on_payment_terms and gl_entries_data:
 			self.payment_term_map = self.get_payment_term_detail(voucher_nos)
 
 		for gle in gl_entries_data:
@@ -281,6 +290,9 @@ class ReceivablePayableReport(object):
 		# customer / supplier name
 		if party_naming_by == "Naming Series":
 			row += [self.get_party_name(gle.party_type, gle.party)]
+
+		if args.get("party_type") == 'Customer':
+			row += [self.get_customer_contact(gle.party_type, gle.party)]
 
 		# get due date
 		if not due_date:
@@ -407,6 +419,9 @@ class ReceivablePayableReport(object):
 	def get_party_name(self, party_type, party_name):
 		return self.get_party_map(party_type).get(party_name, {}).get("customer_name" if party_type == "Customer" else "supplier_name") or ""
 
+	def get_customer_contact(self, party_type, party_name):
+		return self.get_party_map(party_type).get(party_name, {}).get("customer_primary_contact")
+
 	def get_territory(self, party_name):
 		return self.get_party_map("Customer").get(party_name, {}).get("territory") or ""
 
@@ -419,7 +434,7 @@ class ReceivablePayableReport(object):
 	def get_party_map(self, party_type):
 		if not hasattr(self, "party_map"):
 			if party_type == "Customer":
-				select_fields = "name, customer_name, territory, customer_group"
+				select_fields = "name, customer_name, territory, customer_group, customer_primary_contact"
 			elif party_type == "Supplier":
 				select_fields = "name, supplier_name, supplier_group"
 
@@ -480,6 +495,7 @@ class ReceivablePayableReport(object):
 			values.append(self.filters.get(party_type_field))
 
 		if party_type_field=="customer":
+			account_type = "Receivable"
 			if self.filters.get("customer_group"):
 				lft, rgt = frappe.db.get_value("Customer Group",
 					self.filters.get("customer_group"), ["lft", "rgt"])
@@ -514,11 +530,17 @@ class ReceivablePayableReport(object):
 						or (steam.parent = against_voucher and steam.parenttype = against_voucher_type)
 						or (steam.parent = party and steam.parenttype = 'Customer')))""".format(lft, rgt))
 
-		if party_type_field=="supplier":
+		elif party_type_field=="supplier":
+			account_type = "Payable"
 			if self.filters.get("supplier_group"):
 				conditions.append("""party in (select name from tabSupplier
 					where supplier_group=%s)""")
 				values.append(self.filters.get("supplier_group"))
+
+		accounts = [d.name for d in frappe.get_all("Account",
+			filters={"account_type": account_type, "company": self.filters.company})]
+		conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
+		values += accounts
 
 		return " and ".join(conditions), values
 

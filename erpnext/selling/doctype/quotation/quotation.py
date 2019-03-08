@@ -32,7 +32,7 @@ class Quotation(SellingController):
 		self.validate_valid_till()
 		if self.items:
 			self.with_items = 1
-			
+
 	def validate_valid_till(self):
 		if self.valid_till and self.valid_till < self.transaction_date:
 			frappe.throw(_("Valid till date cannot be before transaction date"))
@@ -70,12 +70,20 @@ class Quotation(SellingController):
 		opp.status = None
 		opp.set_status(update=True)
 
-	def declare_order_lost(self, reason):
+	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_sales_order():
 			frappe.db.set(self, 'status', 'Lost')
-			frappe.db.set(self, 'order_lost_reason', reason)
+
+			if detailed_reason:
+				frappe.db.set(self, 'order_lost_reason', detailed_reason)
+
+			for reason in lost_reasons_list:
+				self.append('lost_reasons', reason)
+
 			self.update_opportunity()
 			self.update_lead()
+			self.save()
+
 		else:
 			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
 
@@ -209,7 +217,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			}
 		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
-	return doclist	
+	return doclist
 
 def _make_customer(source_name, ignore_permissions=False):
 	quotation = frappe.db.get_value("Quotation", source_name, ["lead", "order_type", "customer"])

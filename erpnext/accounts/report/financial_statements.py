@@ -213,7 +213,7 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 		total = 0
 		row = frappe._dict({
 			"account": _(d.name),
-			"parent_account": _(d.parent_account),
+			"parent_account": _(d.parent_account) if d.parent_account else '',
 			"indent": flt(d.indent),
 			"year_start_date": year_start_date,
 			"year_end_date": year_end_date,
@@ -270,7 +270,7 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 			for period in period_list:
 				total_row.setdefault(period.key, 0.0)
 				total_row[period.key] += row.get(period.key, 0.0)
-				row[period.key] = 0.0
+				row[period.key] = row.get(period.key, 0.0)
 
 			total_row.setdefault("total", 0.0)
 			total_row["total"] += flt(row["total"])

@@ -29,18 +29,3 @@ def create_feedback():
 def get_feedback():
 	feedback = frappe.get_list("Customer Feedback", limit=1)
 	return feedback[0]
-
-#def create_feedback_template():
-#	template = frappe.get_doc({
-#		"doctype": "Customer Feedback Template",
-#		"template": "_Test Customer Feedback Template",
-#		"scope": "Company",
-#		"feedback_parameter": [
-#			{
-#				"parameter": "_Test Customer Feedback Template Parameter",
-#			}
-#		]
-#	})
-#	template_exist = frappe.get_list("Customer Feedback Template", filters={"template": ""+ template.template +""}, fields=["name"])
-#	if len(template_exist) == 0:
-#		template.insert()

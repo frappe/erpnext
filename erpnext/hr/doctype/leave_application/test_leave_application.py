@@ -457,7 +457,7 @@ def get_leave_period():
 		return frappe.get_doc(dict(
 				name = 'Test Leave Period',
 				doctype = 'Leave Period',
-				from_date = "{0}-01-01".format(now_datetime().year),
+				from_date = "{0}-12-01".format(now_datetime().year - 1),
 				to_date = "{0}-12-31".format(now_datetime().year),
 				company = "_Test Company",
 				is_active = 1

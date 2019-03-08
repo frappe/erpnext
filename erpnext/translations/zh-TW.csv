@@ -2090,7 +2090,6 @@ DocType: Fee Validity,Fee Validity,費用有效期
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +146,No records found in the Payment table,沒有在支付表中找到記錄
 apps/erpnext/erpnext/education/utils.py +19,This {0} conflicts with {1} for {2} {3},此{0}衝突{1}在{2} {3}
 DocType: Student Attendance Tool,Students HTML,學生HTML
-DocType: POS Profile,Apply Discount,應用折扣
 DocType: GST HSN Code,GST HSN Code,GST HSN代碼
 DocType: Employee External Work History,Total Experience,總經驗
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +70,Open Projects,打開項目
@@ -2131,7 +2130,7 @@ DocType: Timesheet Detail,Expected Hrs,預計的小時數
 apps/erpnext/erpnext/config/non_profit.py +28,Memebership Details,Memebership細節
 DocType: Leave Block List,Block Holidays on important days.,重要的日子中封鎖假期。
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +194,Please input all required Result Value(s),請輸入所有必需的結果值（s）
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +137,Accounts Receivable Summary,應收賬款匯總
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js +142,Accounts Receivable Summary,應收賬款匯總
 DocType: POS Closing Voucher,Linked Invoices,鏈接的發票
 DocType: Loan,Monthly Repayment Amount,每月還款額
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html +9,Opening Invoices,打開發票
@@ -2242,7 +2241,7 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js +534,Quantit
 DocType: Travel Request Costing,Funded Amount,資助金額
 apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +120,Previous Financial Year is not closed,上一財政年度未關閉
 DocType: Practitioner Schedule,Practitioner Schedule,從業者時間表
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +69,Age (Days),時間（天）
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +84,Age (Days),時間（天）
 DocType: Additional Salary,Additional Salary,額外的薪水
 DocType: Quotation Item,Quotation Item,產品報價
 DocType: Customer,Customer POS Id,客戶POS ID
@@ -2730,7 +2729,7 @@ apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +112,Total 
 DocType: Journal Entry,Accounts Receivable,應收帳款
 ,Supplier-Wise Sales Analytics,供應商相關的銷售分析
 DocType: Purchase Invoice,Availed ITC Central Tax,有效的ITC中央稅收
-DocType: POS Profile,Company Address Name,公司地址名稱
+DocType: Sales Invoice,Company Address Name,公司地址名稱
 DocType: Work Order,Use Multi-Level BOM,採用多級物料清單
 DocType: Bank Reconciliation,Include Reconciled Entries,包括對賬項目
 DocType: Course,"Parent Course (Leave blank, if this isn't part of Parent Course)",家長課程（如果不是家長課程的一部分，請留空）
@@ -2745,7 +2744,7 @@ DocType: Woocommerce Settings,Enable Sync,啟用同步
 DocType: Tax Withholding Rate,Single Transaction Threshold,單一交易閾值
 DocType: Lab Test Template,This value is updated in the Default Sales Price List.,該值在默認銷售價格表中更新。
 DocType: Email Digest,New Expenses,新的費用
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +114,PDC/LC Amount,PDC / LC金額
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +123,PDC/LC Amount,PDC / LC金額
 DocType: Shareholder,Shareholder,股東
 DocType: Purchase Invoice,Additional Discount Amount,額外的折扣金額
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +1803,Get Items from Prescriptions,從Prescriptions獲取物品
@@ -3290,7 +3289,7 @@ DocType: Travel Request,Domestic,國內
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js +853,Please supply the specified items at the best possible rates,請在提供最好的利率規定的項目
 apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py +19,Employee Transfer cannot be submitted before Transfer Date ,員工轉移無法在轉移日期前提交
 apps/erpnext/erpnext/hotels/doctype/hotel_room_reservation/hotel_room_reservation.js +7,Make Invoice,製作發票
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +121,Remaining Balance,保持平衡
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Remaining Balance,保持平衡
 DocType: Selling Settings,Auto close Opportunity after 15 days,15天之後自動關閉商機
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +83,Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.,由於{1}的記分卡，{0}不允許採購訂單。
 apps/erpnext/erpnext/stock/doctype/item/item.py +529,Barcode {0} is not a valid {1} code,條形碼{0}不是有效的{1}代碼
@@ -3609,7 +3608,7 @@ DocType: Email Digest,Sales Orders to Bill,比爾的銷售訂單
 DocType: Price List,Price List Master,價格表主檔
 DocType: GST Account,CESS Account,CESS帳戶
 DocType: Sales Person,All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,所有的銷售交易，可以用來標記針對多個**銷售**的人，這樣你可以設置和監控目標。
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1185,Link to Material Request,鏈接到材料請求
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1184,Link to Material Request,鏈接到材料請求
 apps/erpnext/erpnext/templates/pages/help.html +35,Forum Activity,論壇活動
 ,S.O. No.,SO號
 DocType: Bank Statement Transaction Settings Item,Bank Statement Transaction Settings Item,銀行對賬單交易設置項目
@@ -4604,7 +4603,6 @@ DocType: Purchase Invoice,Price List Exchange Rate,價目表匯率
 apps/erpnext/erpnext/patches/v11_0/rename_supplier_type_to_supplier_group.py +27,All Supplier Groups,所有供應商組織
 DocType: Employee Boarding Activity,Required for Employee Creation,員工創建需要
 apps/erpnext/erpnext/accounts/doctype/account/account.py +214,Account Number {0} already used in account {1},已在帳戶{1}中使用的帳號{0}
-DocType: POS Profile,POS Profile Name,POS配置文件名稱
 DocType: Hotel Room Reservation,Booked,預訂
 DocType: Detected Disease,Tasks Created,創建的任務
 DocType: Purchase Invoice Item,Rate,單價
@@ -4653,7 +4651,7 @@ apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py 
 DocType: Fiscal Year,Year Name,年結名稱
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +323,There are more holidays than working days this month.,還有比這個月工作日更多的假期。
 apps/erpnext/erpnext/controllers/buying_controller.py +772,Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master,以下項{0}未標記為{1}項。您可以從項目主文件中將它們作為{1}項啟用
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +108,PDC/LC Ref,PDC / LC參考
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +117,PDC/LC Ref,PDC / LC參考
 DocType: Production Plan Item,Product Bundle Item,產品包項目
 DocType: Sales Partner,Sales Partner Name,銷售合作夥伴名稱
 apps/erpnext/erpnext/hooks.py +148,Request for Quotations,索取報價
@@ -5038,7 +5036,6 @@ DocType: Program Enrollment Tool,Get Students From,讓學生從
 apps/erpnext/erpnext/config/learn.py +263,Publish Items on Website,公佈於網頁上的項目
 apps/erpnext/erpnext/utilities/activation.py +126,Group your students in batches,一群學生在分批
 DocType: Authorization Rule,Authorization Rule,授權規則
-DocType: POS Profile,Offline POS Section,離線POS部分
 DocType: Sales Invoice,Terms and Conditions Details,條款及細則詳情
 apps/erpnext/erpnext/templates/generators/item.html +118,Specifications,產品規格
 DocType: Sales Taxes and Charges Template,Sales Taxes and Charges Template,營業稅金及費用套版
@@ -5209,7 +5206,7 @@ DocType: Purchase Taxes and Charges,Item Wise Tax Detail,項目智者稅制明�
 DocType: Employee Onboarding,Job Offer,工作機會
 apps/erpnext/erpnext/public/js/setup_wizard.js +71,Institute Abbreviation,研究所縮寫
 ,Item-wise Price List Rate,全部項目的價格表
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1157,Supplier Quotation,供應商報價
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1156,Supplier Quotation,供應商報價
 DocType: Quotation,In Words will be visible once you save the Quotation.,報價一被儲存，就會顯示出來。
 apps/erpnext/erpnext/utilities/transaction_base.py +169,Quantity ({0}) cannot be a fraction in row {1},數量（{0}）不能是行{1}中的分數
 apps/erpnext/erpnext/utilities/transaction_base.py +169,Quantity ({0}) cannot be a fraction in row {1},數量（{0}）不能是行{1}中的分數
@@ -5221,7 +5218,7 @@ apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_repo
 DocType: Item,Opening Stock,打開股票
 apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +20,Customer is required,客戶是必需的
 DocType: Lab Test,Result Date,結果日期
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +102,PDC/LC Date,PDC / LC日期
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +129,PDC/LC Date,PDC / LC日期
 DocType: Purchase Order,To Receive,接受
 DocType: Leave Period,Holiday List for Optional Leave,可選假期的假期列表
 DocType: Asset,Asset Owner,資產所有者
@@ -5552,7 +5549,7 @@ apps/erpnext/erpnext/healthcare/doctype/inpatient_record/inpatient_record.py +12
 apps/erpnext/erpnext/stock/doctype/item/item.js +82,This Item is a Variant of {0} (Template).,此項目是{0}（模板）的變體。
 DocType: Workstation,per hour,每小時
 DocType: Blanket Order,Purchasing,購買
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +130,Customer LPO,客戶LPO
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +139,Customer LPO,客戶LPO
 DocType: Education Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.",對於基於批次的學生組，學生批次將由課程註冊中的每位學生進行驗證。
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +51,Warehouse can not be deleted as stock ledger entry exists for this warehouse.,這個倉庫不能被刪除，因為庫存分錄帳尚存在。
 DocType: Journal Entry Account,Loan,貸款
@@ -6195,7 +6192,7 @@ apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_sta
 DocType: Appraisal,Total Score (Out of 5),總分（滿分5分）
 DocType: Student Attendance Tool,Batch,批量
 DocType: Support Search Source,Query Route String,查詢路由字符串
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1173,Update rate as per last purchase,根據上次購買更新率
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +1172,Update rate as per last purchase,根據上次購買更新率
 DocType: Donor,Donor Type,捐助者類型
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +710,Auto repeat document updated,自動重複文件更新
 apps/erpnext/erpnext/stock/doctype/item/item.js +29,Balance,餘額

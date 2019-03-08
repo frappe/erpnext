@@ -27,7 +27,7 @@ def get_sle(**args):
 		values.append(value)
 
 	return frappe.db.sql("""select * from `tabStock Ledger Entry` %s
-		order by timestamp(posting_date, posting_time) desc, name desc limit 1"""% condition,
+		order by timestamp(posting_date, posting_time) desc, creation desc limit 1"""% condition,
 		values, as_dict=1)
 
 class TestStockEntry(unittest.TestCase):
@@ -562,7 +562,7 @@ class TestStockEntry(unittest.TestCase):
 		for d in stock_entry.get("items"):
 			if d.item_code != "_Test FG Item 2":
 				rm_cost += flt(d.amount)
-		fg_cost = filter(lambda x: x.item_code=="_Test FG Item 2", stock_entry.get("items"))[0].amount
+		fg_cost = list(filter(lambda x: x.item_code=="_Test FG Item 2", stock_entry.get("items")))[0].amount
 		self.assertEqual(fg_cost,
 			flt(rm_cost + bom_operation_cost + work_order.additional_operating_cost, 2))
 

@@ -54,6 +54,9 @@ class EmployeeBoardingController(Document):
 					where parenttype='User' and role=%s''', activity.role)
 				users = users + user_list
 
+				if "Administrator" in users:
+					users.remove("Administrator")
+
 			# assign the task the users
 			if users:
 				self.assign_task_to_users(task, set(users))

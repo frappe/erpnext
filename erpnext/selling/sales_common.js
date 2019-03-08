@@ -103,10 +103,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	customer_address: function() {
 		erpnext.utils.get_address_display(this.frm, "customer_address");
+		erpnext.utils.set_taxes_from_address(this.frm, "customer_address", "customer_address", "shipping_address_name");
 	},
 
 	shipping_address_name: function() {
 		erpnext.utils.get_address_display(this.frm, "shipping_address_name", "shipping_address");
+		erpnext.utils.set_taxes_from_address(this.frm, "shipping_address_name", "customer_address", "shipping_address_name");
 	},
 
 	sales_partner: function() {
@@ -184,7 +186,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.calculate_incentive(sales_person);
 			refresh_field(["allocated_percentage", "allocated_amount", "commission_rate","incentives"], sales_person.name,
 				sales_person.parentfield);
-		}	
+		}
 	},
 
 	sales_person: function(doc, cdt, cdn) {
@@ -396,7 +398,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		if (doc.auto_repeat) {
 			frappe.call({
 				method:"frappe.desk.doctype.auto_repeat.auto_repeat.update_reference",
-				args:{ 
+				args:{
 					docname: doc.auto_repeat,
 					reference:doc.name
 				},
@@ -430,5 +432,44 @@ frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
 				}
 			})
 		}
+	}
+})
+
+frappe.ui.form.on(cur_frm.doctype, {
+	set_as_lost_dialog: function(frm) {
+		var dialog = new frappe.ui.Dialog({
+			title: __("Set as Lost"),
+			fields: [
+				{"fieldtype": "Table MultiSelect",
+				"label": __("Lost Reasons"),
+				"fieldname": "lost_reason",
+				"options": "Lost Reason Detail",
+				"reqd": 1},
+
+				{"fieldtype": "Text", "label": __("Detailed Reason"), "fieldname": "detailed_reason"},
+			],
+			primary_action: function() {
+				var values = dialog.get_values();
+				var reasons = values["lost_reason"];
+				var detailed_reason = values["detailed_reason"];
+
+				frm.call({
+					doc: frm.doc,
+					method: 'declare_enquiry_lost',
+					args: {
+						'lost_reasons_list': reasons,
+						'detailed_reason': detailed_reason
+					},
+					callback: function(r) {
+						dialog.hide();
+						frm.reload_doc();
+					},
+				});
+				refresh_field("lost_reason");
+			},
+			primary_action_label: __('Declare Lost')
+		});
+
+		dialog.show();
 	}
 })

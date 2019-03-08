@@ -40,7 +40,7 @@ frappe.ui.form.on("Journal Entry", {
 		erpnext.journal_entry.toggle_fields_based_on_currency(frm);
 
 		if ((frm.doc.voucher_type == "Inter Company Journal Entry") && (frm.doc.docstatus == 1) && (!frm.doc.inter_company_journal_entry_reference)) {
-			frm.add_custom_button(__("Make Inter Company Journal Entry"),
+			frm.add_custom_button(__("Create Inter Company Journal Entry"),
 				function() {
 					frm.trigger("make_inter_company_journal_entry");
 				}
@@ -68,7 +68,7 @@ frappe.ui.form.on("Journal Entry", {
 				}
 			],
 		});
-		d.set_primary_action(__("Make"), function() {
+		d.set_primary_action(__('Create'), function() {
 			d.hide();
 			var args = d.get_values();
 			frappe.call({
@@ -92,10 +92,10 @@ frappe.ui.form.on("Journal Entry", {
 	multi_currency: function(frm) {
 		erpnext.journal_entry.toggle_fields_based_on_currency(frm);
 	},
-	
+
 	posting_date: function(frm) {
 		if(!frm.doc.multi_currency || !frm.doc.posting_date) return;
-		
+
 		$.each(frm.doc.accounts || [], function(i, row) {
 			erpnext.journal_entry.set_exchange_rate(frm, row.doctype, row.name);
 		})
@@ -205,6 +205,13 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				};
 			}
 
+			// payroll entry
+			if(jvd.reference_type==="Payroll Entry") {
+				return {
+					query: "erpnext.hr.doctype.payroll_entry.payroll_entry.get_payroll_entries_for_jv",
+				};
+			}
+
 			var out = {
 				filters: [
 					[jvd.reference_type, "docstatus", "=", 1]
@@ -227,10 +234,18 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 				out.filters.push([jvd.reference_type, "per_billed", "<", 100]);
 			}
-
+			
 			if(jvd.party_type && jvd.party) {
-				out.filters.push([jvd.reference_type,
-					(jvd.reference_type.indexOf("Sales")===0 ? "customer" : "supplier"), "=", jvd.party]);
+				var party_field = "";
+				if(jvd.reference_type.indexOf("Sales")===0) {
+					var party_field = "customer";
+				} else if (jvd.reference_type.indexOf("Purchase")===0) {
+					var party_field = "supplier";
+				}
+
+				if (party_field) {
+					out.filters.push([jvd.reference_type, party_field, "=", jvd.party]);
+				}
 			}
 
 			return out;
@@ -367,7 +382,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 		});
 		refresh_field("accounts");
 	}
-	
+
 	if((!(doc.accounts || []).length) || ((doc.accounts || []).length==1 && !doc.accounts[0].account)) {
 		if(in_list(["Bank Entry", "Cash Entry"], doc.voucher_type)) {
 			return frappe.call({
@@ -427,7 +442,7 @@ frappe.ui.form.on("Journal Entry Account", {
 	account: function(frm, dt, dn) {
 		erpnext.journal_entry.set_account_balance(frm, dt, dn);
 	},
-	
+
 	debit_in_account_currency: function(frm, cdt, cdn) {
 		erpnext.journal_entry.set_exchange_rate(frm, cdt, cdn);
 	},

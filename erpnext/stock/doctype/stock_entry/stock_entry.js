@@ -95,7 +95,7 @@ frappe.ui.form.on('Stock Entry', {
 	refresh: function(frm) {
 		if(!frm.doc.docstatus) {
 			frm.trigger('validate_purpose_consumption');
-			frm.add_custom_button(__('Make Material Request'), function() {
+			frm.add_custom_button(__('Create Material Request'), function() {
 				frappe.model.with_doctype('Material Request', function() {
 					var mr = frappe.model.get_new_doc('Material Request');
 					var items = frm.get_field('items').grid.get_selected_children();
@@ -184,7 +184,7 @@ frappe.ui.form.on('Stock Entry', {
 		}
 
 		if(frm.doc.docstatus==1 && frm.doc.purpose == "Material Receipt" && frm.get_sum('items', 			'sample_quantity')) {
-			frm.add_custom_button(__('Make Sample Retention Stock Entry'), function () {
+			frm.add_custom_button(__('Create Sample Retention Stock Entry'), function () {
 				frm.trigger("make_retention_stock_entry");
 			});
 		}
@@ -710,7 +710,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				excise = locals['Journal Entry'][excise];
 				excise.voucher_type = 'Excise Entry';
 				frappe.set_route('Form', 'Journal Entry', excise.name);
-			}, __("Make"));
+			}, __('Create'));
 	},
 
 	items_add: function(doc, cdt, cdn) {

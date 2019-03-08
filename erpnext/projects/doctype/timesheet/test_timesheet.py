@@ -186,6 +186,8 @@ def make_salary_structure_for_timesheet(employee):
 
 	if not frappe.db.get_value("Salary Structure Assignment",
 		{'employee':employee, 'docstatus': 1}):
+			frappe.db.set_value('Employee', employee, 'date_of_joining',
+				add_months(nowdate(), -5))
 			create_salary_structure_assignment(employee, salary_structure.name)
 
 	return salary_structure

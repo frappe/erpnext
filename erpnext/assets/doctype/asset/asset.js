@@ -31,7 +31,7 @@ frappe.ui.form.on('Asset', {
 				}
 			};
 		});
-		
+
 		frm.set_query("cost_center", function() {
 			return {
 				"filters": {
@@ -81,26 +81,26 @@ frappe.ui.form.on('Asset', {
 			if (frm.doc.status=='Submitted' && !frm.doc.is_existing_asset && !frm.doc.purchase_invoice) {
 				frm.add_custom_button(__("Purchase Invoice"), function() {
 					frm.trigger("make_purchase_invoice");
-				}, __("Make"));
+				}, __('Create'));
 			}
 			if (frm.doc.maintenance_required && !frm.doc.maintenance_schedule) {
 				frm.add_custom_button(__("Asset Maintenance"), function() {
 					frm.trigger("create_asset_maintenance");
-				}, __("Make"));
+				}, __('Create'));
 			}
 			if (frm.doc.status != 'Fully Depreciated') {
 				frm.add_custom_button(__("Asset Value Adjustment"), function() {
 					frm.trigger("create_asset_adjustment");
-				}, __("Make"));
+				}, __('Create'));
 			}
 
 			if (!frm.doc.calculate_depreciation) {
 				frm.add_custom_button(__("Depreciation Entry"), function() {
 					frm.trigger("make_journal_entry");
-				}, __("Make"));
+				}, __('Create'));
 			}
 
-			frm.page.set_inner_btn_group_as_primary(__("Make"));
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
 			frm.trigger("setup_chart");
 		}
 

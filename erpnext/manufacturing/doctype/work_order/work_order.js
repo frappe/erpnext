@@ -115,6 +115,7 @@ frappe.ui.form.on("Work Order", {
 		if (frm.doc.docstatus === 1
 			&& frm.doc.operations && frm.doc.operations.length
 			&& frm.doc.qty != frm.doc.material_transferred_for_manufacturing) {
+
 			const not_completed = frm.doc.operations.filter(d => {
 				if(d.status != 'Completed') {
 					return true;
@@ -122,7 +123,7 @@ frappe.ui.form.on("Work Order", {
 			});
 
 			if(not_completed && not_completed.length) {
-				frm.add_custom_button(__('Make Job Card'), () => {
+				frm.add_custom_button(__('Create Job Card'), () => {
 					frm.trigger("make_job_card")
 				}).addClass('btn-primary');
 			}
@@ -148,7 +149,7 @@ frappe.ui.form.on("Work Order", {
 
 		if (frm.doc.status == "Completed" &&
 			frm.doc.__onload.backflush_raw_materials_based_on == "Material Transferred for Manufacture") {
-			frm.add_custom_button(__("Make BOM"), () => {
+			frm.add_custom_button(__('Create BOM'), () => {
 				frm.trigger("make_bom");
 			});
 		}
@@ -349,7 +350,8 @@ frappe.ui.form.on("Work Order", {
 	before_submit: function(frm) {
 		frm.toggle_reqd(["fg_warehouse", "wip_warehouse"], true);
 		frm.fields_dict.required_items.grid.toggle_reqd("source_warehouse", true);
-		frm.toggle_reqd("transfer_material_against", frm.doc.operations);
+		frm.toggle_reqd("transfer_material_against",
+			frm.doc.operations && frm.doc.operations.length > 0);
 		frm.fields_dict.operations.grid.toggle_reqd("workstation", frm.doc.operations);
 	},
 
@@ -554,7 +556,7 @@ erpnext.work_order = {
 					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 				}
 			});
-		}, __("Select Quantity"), __("Make"));
+		}, __("Select Quantity"), __('Create'));
 	},
 
 	make_consumption_se: function(frm, backflush_raw_materials_based_on) {

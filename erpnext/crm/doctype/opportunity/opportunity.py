@@ -91,10 +91,18 @@ class Opportunity(TransactionBase):
 			self.enquiry_from = "Lead"
 			self.lead = lead_name
 
-	def declare_enquiry_lost(self,arg):
+	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_active_quotation():
 			frappe.db.set(self, 'status', 'Lost')
-			frappe.db.set(self, 'order_lost_reason', arg)
+
+			if detailed_reason:
+				frappe.db.set(self, 'order_lost_reason', detailed_reason)
+
+			for reason in lost_reasons_list:
+				self.append('lost_reasons', reason)
+
+			self.save()
+
 		else:
 			frappe.throw(_("Cannot declare as lost, because Quotation has been made."))
 

@@ -95,6 +95,8 @@ frappe.ui.form.on('Payroll Entry', {
 	},
 
 	setup: function (frm) {
+		frm.add_fetch('company', 'cost_center', 'cost_center');
+
 		frm.set_query("payment_account", function () {
 			var account_types = ["Bank", "Cash"];
 			return {
