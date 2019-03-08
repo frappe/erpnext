@@ -17,11 +17,11 @@ def get_data():
 			},
 			{
 				'label': _('Sales'),
-				'items': ['Sales Order', 'Delivery Note', 'Sales Invoice']
+				'items': ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
 			},
 			{
 				'label': _('Purchase'),
-				'items': ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
+				'items': ['Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 			},
 		]
 	}
