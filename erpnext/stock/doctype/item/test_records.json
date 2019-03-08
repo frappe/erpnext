@@ -309,7 +309,8 @@
        "warehouse_reorder_level": 20,
        "warehouse_reorder_qty": 20
       }
-  ]
+  ],
+  "show_in_website": 1
  },
  {
   "description": "_Test Item 1",
