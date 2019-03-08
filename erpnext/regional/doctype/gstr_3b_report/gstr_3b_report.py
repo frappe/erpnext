@@ -166,7 +166,7 @@ class GSTR3BReport(Document):
 			'IMPG': 'Import Of Capital Goods',
 			'IMPS': 'Import Of Service',
 			'ISD': 'Input Service Distributor',
-			'OTH': 'Other'
+			'OTH': 'All Other ITC'
 		}
 
 		net_itc = self.report_dict["itc_elg"]["itc_net"]

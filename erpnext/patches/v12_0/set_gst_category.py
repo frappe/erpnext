@@ -28,16 +28,16 @@ def execute():
 
 	itc_update_map = {
 		"ineligible": "Ineligible",
-		"input service": "Import Of Service",
+		"input service": "Input Service Distributor",
 		"capital goods": "Import Of Capital Goods",
-		"input": "Input Service Distributor"
+		"input": "All Other ITC"
 	}
 
 	has_gst_fields = frappe.db.has_column('Purchase Invoice','eligibility_for_itc')
 
 	if has_gst_fields:
 		for old, new in itc_update_map.items():
-			frappe.db.sql("UPDATE `tabPurchase Invoice` SET eligibility_for_itc = replace(eligibility_for_itc, %s, %s)", (old, new))
+			frappe.db.sql("UPDATE `tabPurchase Invoice` SET eligibility_for_itc = %s where eligibility_for_itc = %s ", (old, new))
 
 
 
