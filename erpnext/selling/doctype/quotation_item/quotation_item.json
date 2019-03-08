@@ -762,7 +762,7 @@
    "no_copy": 0, 
    "options": "currency", 
    "permlevel": 0, 
-   "precision": "2", 
+   "precision": "", 
    "print_hide": 1, 
    "print_hide_if_no_value": 0, 
    "read_only": 1, 
