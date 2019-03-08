@@ -58,6 +58,7 @@
 					<input type="text" class="form-control form-control-sm mb-2 product-filter-filter"/>
 					{% endif %}
 
+					{% if values %}
 					<div class="filter-options">
 						{% for value in values %}
 						<div class="custom-control custom-checkbox" data-value="{{ value }}">
@@ -73,6 +74,9 @@
 						</div>
 						{% endfor %}
 					</div>
+					{% else %}
+					<i class="text-muted">{{ _('No values') }}</i>
+					{% endif %}
 				</div>
 			{% endfor %}
 
@@ -85,6 +89,7 @@
 					<input type="text" class="form-control form-control-sm mb-2 product-filter-filter"/>
 					{% endif %}
 
+					{% if attribute.item_attribute_values %}
 					<div class="filter-options">
 						{% for attr_value in attribute.item_attribute_values %}
 						<div class="custom-control custom-checkbox" data-value="{{ value }}">
@@ -101,6 +106,9 @@
 						</div>
 						{% endfor %}
 					</div>
+					{% else %}
+					<i class="text-muted">{{ _('No values') }}</i>
+					{% endif %}
 				</div>
 			{% endfor %}
 		</div>
