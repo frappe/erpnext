@@ -276,13 +276,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	scan_barcode: function() {
 		let scan_barcode_field = this.frm.fields_dict["scan_barcode"];
 
-		let show_description = function(idx, item_code, exist=null) {
-			if(exist) {
-				scan_barcode_field.set_new_description(__('Row : ') + idx + ' ' +
-					item_code + __(' Qty increased by 1'));
+		let show_description = function(idx, exist = null) {
+			if (exist) {
+				scan_barcode_field.set_new_description(__('Row #{0}: Qty increased by 1', [idx]));
 			} else {
-				scan_barcode_field.set_new_description(__('New row : ') + idx + ' ' +
-					item_code + __('  Created'));
+				scan_barcode_field.set_new_description(__('Row #{0}: Item added', [idx]));
 			}
 		}
 
@@ -291,38 +289,46 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				method: "erpnext.selling.page.point_of_sale.point_of_sale.search_serial_or_batch_or_barcode_number",
 				args: { search_value: this.frm.doc.scan_barcode }
 			}).then(r => {
+				const data = r && r.message;
+				if (!data) {
+					scan_barcode_field.set_new_description(__('Cannot find Item with this barcode'));
+					return;
+				}
 
-				if(r && r.message && r.message.item_code) {
-					let child = "";
-					let add_row_index = -1;
-					let cur_grid= this.frm.fields_dict["items"].grid;
+				let cur_grid = this.frm.fields_dict.items.grid;
 
-					this.frm.doc.items.map(d => {
-						if(d.item_code==r.message.item_code){
-							add_row_index = d.idx;
-							return;
-						} else if(!d.item_code && add_row_index==-1) {
-							add_row_index = d.idx;
-						}
-					});
+				let row_to_modify = null;
+				const existing_item_row = this.frm.doc.items.find(d => d.item_code === data.item_code);
+				const blank_item_row = this.frm.doc.items.find(d => !d.item_code);
 
-					if(add_row_index == -1) {
-						child = frappe.model.add_child(this.frm.doc, cur_grid.doctype, "items", add_row_index);
-					} else {
-						child = cur_grid.get_grid_row(add_row_index-1).doc;
+				if (existing_item_row) {
+					row_to_modify = existing_item_row;
+				} else if (blank_item_row) {
+					row_to_modify = blank_item_row;
+				}
+
+				if (!row_to_modify) {
+					// add new row
+					row_to_modify = frappe.model.add_child(this.frm.doc, cur_grid.doctype, 'items');
+				}
+
+				show_description(row_to_modify.idx, row_to_modify.item_code);
+
+				this.frm.from_barcode = true;
+				frappe.model.set_value(row_to_modify.doctype, row_to_modify.name, {
+					item_code: data.item_code,
+					qty: (row_to_modify.qty || 0) + 1
+				});
+
+				['serial_no', 'batch_no', 'barcode'].forEach(field => {
+					if (data[field] && frappe.meta.has_field(row_to_modify.doctype, field)) {
+						frappe.model.set_value(row_to_modify.doctype,
+							row_to_modify.name, field, data[field]);
 					}
-					show_description(child.idx, r.message.item_code, child.item_code);
+				});
 
-					frappe.model.set_value(child.doctype, child.name, {
-						"item_code": r.message.item_code,
-						"qty": (child.qty || 0) + 1
-					});
-				}
-				else{
-					scan_barcode_field.set_new_description(this.frm.doc.scan_barcode +__(' does not exist!'));
-				}
+				scan_barcode_field.set_value('');
 			});
-			scan_barcode_field.set_value("");
 		}
 		return false;
 	},
@@ -385,10 +391,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			// barcode cleared, remove item
 			d.item_code = "";
 		}
-		this.item_code(doc, cdt, cdn, true);
+
+		this.frm.from_barcode = true;
+		this.item_code(doc, cdt, cdn);
 	},
 
-	item_code: function(doc, cdt, cdn, from_barcode) {
+	item_code: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 		var update_stock = 0, show_batch_dialog = 0;
@@ -401,9 +409,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			show_batch_dialog = 1;
 		}
 		// clear barcode if setting item (else barcode will take priority)
-		if(!from_barcode) {
+		if(!this.frm.from_barcode) {
 			item.barcode = null;
 		}
+
+		this.frm.from_barcode = false;
 		if(item.item_code || item.barcode || item.serial_no) {
 			if(!this.validate_company_and_party()) {
 				this.frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
