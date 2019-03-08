@@ -23,7 +23,7 @@ def get_data():
 					"name": "Quality Procedure",
 					"icon": "fa fa-sitemap",
 					"label": _("Tree of Procedures"),
-					"route": "Tree/Quality Procedure",
+					"route": "#Tree/Quality Procedure",
 					"description": _("Tree of Quality Procedures."),
 				},
 			]
