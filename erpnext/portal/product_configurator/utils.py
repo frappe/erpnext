@@ -55,11 +55,7 @@ def get_products_for_website(field_filters=None, attribute_filters=None, search=
 
 	if attribute_filters:
 		item_codes = get_item_codes_by_attributes(attribute_filters)
-
-		items_by_attributes = get_items({
-			'name': ['in', item_codes],
-			'show_variant_in_website': 1
-		})
+		items_by_attributes = get_items([['name', 'in', item_codes]])
 
 	if field_filters:
 		items_by_fields = get_items_by_fields(field_filters)
@@ -100,24 +96,6 @@ def get_products_html_for_website(field_filters=None, attribute_filters=None):
 	return html
 
 
-@frappe.whitelist(allow_guest=True)
-def get_items_by_attributes(attribute_filters, template_item_code=None):
-	attribute_filters = frappe.parse_json(attribute_filters)
-
-	for attribute, value in attribute_filters.items():
-		attribute_filters[attribute] = [value]
-
-	item_codes = get_item_codes_by_attributes(attribute_filters, template_item_code)
-	# items = get_items({
-	# 	'name': ['in', item_codes]
-	# })
-
-	return item_codes
-
-	# return ''.join(get_html_for_items(items))
-
-
-@frappe.whitelist(allow_guest=True)
 def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 	items = []
 
@@ -139,15 +117,6 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 			query_values.append(template_item_code)
 		else:
 			variant_of_query = ''
-
-		# query = '''
-		# 	select
-		# 		parent
-		# 	from `tabItem Variant Attribute`
-		# 	where
-		# 		 {variant_query}
-		# 	group by parent
-		# '''.format(where=where, variant_query=variant_query)
 
 		query = '''
 			SELECT
@@ -173,8 +142,6 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 			ORDER BY
 				NULL
 		'''.format(attribute_query=attribute_query, variant_of_query=variant_of_query)
-
-		print(query)
 
 		item_codes = set([r[0] for r in frappe.db.sql(query, query_values)])
 		items.append(item_codes)
