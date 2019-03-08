@@ -131,7 +131,7 @@ def _make_test_records(verbose):
 
 		# related to Account Inventory Integration
 		["_Test Account Stock In Hand", "Current Assets", 0, None, None],
-		
+
 		# fixed asset depreciation
 		["_Test Fixed Asset", "Current Assets", 0, "Fixed Asset", None],
 		["_Test Accumulated Depreciations", "Current Assets", 0, None, None],
@@ -168,13 +168,17 @@ def get_inventory_account(company, warehouse=None):
 	return account
 
 def create_account(**kwargs):
-	account = frappe.get_doc(dict(
-		doctype = "Account",
-		account_name = kwargs.get('account_name'),
-		account_type = kwargs.get('account_type'),
-		parent_account = kwargs.get('parent_account'),
-		company = kwargs.get('company')
-	))
-	
-	account.save()
+	try:
+		account = frappe.get_doc(dict(
+			doctype = "Account",
+			account_name = kwargs.get('account_name'),
+			account_type = kwargs.get('account_type'),
+			parent_account = kwargs.get('parent_account'),
+			company = kwargs.get('company') or "_Test Company"
+		))
+
+		account.save()
+	except frappe.DuplicateEntryError:
+		pass
+
 	return account.name
