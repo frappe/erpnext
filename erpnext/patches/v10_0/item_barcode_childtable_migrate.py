@@ -27,5 +27,5 @@ def execute():
 					'parent': item.name,
 					'parentfield': 'barcodes'
 				}).insert()
-			except frappe.DuplicateEntryError:
+			except (frappe.DuplicateEntryError, frappe.UniqueValidationError):
 				continue

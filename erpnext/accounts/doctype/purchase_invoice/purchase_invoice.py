@@ -54,6 +54,12 @@ class PurchaseInvoice(BuyingController):
 		if not self.on_hold:
 			self.release_date = ''
 
+	def before_print(self):
+		self.gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Purchase Invoice",
+			"voucher_no": self.name} ,
+			fields=["account", "party_type", "party", "debit", "credit"]
+		)
+
 	def invoice_is_blocked(self):
 		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))
 
