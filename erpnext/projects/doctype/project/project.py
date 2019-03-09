@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+import frappe.defaults
 from six import iteritems
 from email_reply_parser import EmailReplyParser
 from frappe.utils import (flt, getdate, get_url, now,
@@ -12,6 +13,7 @@ from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
 from erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group import is_holiday_today
+from frappe.model.naming import set_name_by_naming_series
 from frappe.model.document import Document
 
 class Project(Document):
@@ -32,6 +34,13 @@ class Project(Document):
 
 	def __setup__(self):
 		self.onload()
+
+	def autoname(self):
+		project_naming_by = frappe.defaults.get_global_default('project_naming_by')
+		if project_naming_by == 'Naming Series':
+			set_name_by_naming_series(self)
+		else:
+			self.name = self.project_name
 
 	def load_tasks(self):
 		"""Load `tasks` from the database"""
@@ -65,7 +74,6 @@ class Project(Document):
 			return frappe.get_all("Task", "*", filters, order_by="exp_start_date asc")
 
 	def validate(self):
-		self.validate_project_name()
 		self.validate_weights()
 		self.sync_tasks()
 		self.tasks = []
@@ -73,10 +81,6 @@ class Project(Document):
 		self.validate_dates()
 		self.send_welcome_email()
 		self.update_percent_complete()
-
-	def validate_project_name(self):
-		if self.get("__islocal") and frappe.db.exists("Project", self.project_name):
-			frappe.throw(_("Project {0} already exists").format(frappe.safe_decode(self.project_name)))
 
 	def validate_dates(self):
 		if self.tasks:
