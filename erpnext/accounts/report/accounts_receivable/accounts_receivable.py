@@ -384,7 +384,7 @@ class ReceivablePayableReport(object):
 			
 			# advance amount with returned invoice without any ref
 			(gle.against_voucher and gle.against_voucher==gle.voucher_no) or
-			
+
 			# against sales order/purchase order
 			(gle.against_voucher_type in ["Sales Order", "Purchase Order"]) or
 
