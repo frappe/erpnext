@@ -209,7 +209,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				"item_code": row.doc.item_code,
 				"description": row.doc.description,
 				"item_serial_no": row.doc.serial_no ? row.doc.serial_no.split("\n")[0] : null,
-				"batch_no": row.doc.batch_no
+				"batch_no": row.doc.batch_no,
+				"project": inspection_type == "Incoming" ? row.doc.project : me.frm.doc.project
 			}
 		}
 

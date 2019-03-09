@@ -17,7 +17,7 @@ def get_data():
 			},
 			{
 				'label': _('Work Done'),
-				'items': ['Timesheet', 'Maintenance Visit']
+				'items': ['Timesheet', 'Maintenance Visit', 'Quality Inspection']
 			},
 			{
 				'label': _('Expenses'),
