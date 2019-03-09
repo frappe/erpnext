@@ -46,12 +46,19 @@ class PurchaseInvoice(BuyingController):
 		}]
 
 	def onload(self):
+		super(PurchaseInvoice, self).onload()
 		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
 		self.set_onload("supplier_tds", supplier_tds)
 
 	def before_save(self):
 		if not self.on_hold:
 			self.release_date = ''
+
+	def before_print(self):
+		self.gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Purchase Invoice",
+			"voucher_no": self.name} ,
+			fields=["account", "party_type", "party", "debit", "credit"]
+		)
 
 	def invoice_is_blocked(self):
 		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))

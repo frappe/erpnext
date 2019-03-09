@@ -314,14 +314,21 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 				show_description(row_to_modify.idx, row_to_modify.item_code);
 
+				this.frm.from_barcode = true;
 				frappe.model.set_value(row_to_modify.doctype, row_to_modify.name, {
 					item_code: data.item_code,
 					qty: (row_to_modify.qty || 0) + 1
 				});
 
-				this.frm.refresh_field('items');
+				['serial_no', 'batch_no', 'barcode'].forEach(field => {
+					if (data[field] && frappe.meta.has_field(row_to_modify.doctype, field)) {
+						frappe.model.set_value(row_to_modify.doctype,
+							row_to_modify.name, field, data[field]);
+					}
+				});
+
+				scan_barcode_field.set_value('');
 			});
-			scan_barcode_field.set_value('');
 		}
 		return false;
 	},
@@ -384,10 +391,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			// barcode cleared, remove item
 			d.item_code = "";
 		}
-		this.item_code(doc, cdt, cdn, true);
+
+		this.frm.from_barcode = true;
+		this.item_code(doc, cdt, cdn);
 	},
 
-	item_code: function(doc, cdt, cdn, from_barcode) {
+	item_code: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 		var update_stock = 0, show_batch_dialog = 0;
@@ -400,9 +409,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			show_batch_dialog = 1;
 		}
 		// clear barcode if setting item (else barcode will take priority)
-		if(!from_barcode) {
+		if(!this.frm.from_barcode) {
 			item.barcode = null;
 		}
+
+		this.frm.from_barcode = false;
 		if(item.item_code || item.barcode || item.serial_no) {
 			if(!this.validate_company_and_party()) {
 				this.frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
