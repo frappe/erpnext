@@ -236,6 +236,7 @@ class LandedCostVoucher(AccountsController):
 					"debit_in_account_currency": tax.amount,
 					"against": self.party,
 					"cost_center": tax.cost_center,
+					"project": self.project,
 					"remarks": remarks
 				})
 			)
@@ -256,12 +257,13 @@ def get_landed_cost_voucher(dt, dn):
 
 	lcv = frappe.new_doc("Landed Cost Voucher")
 	lcv.company = doc.company
+	lcv.project = doc.set_project
 	lcv.append("purchase_receipts", {
 		"receipt_document_type": dt,
 		"receipt_document": dn,
 		"supplier": doc.supplier,
 		"posting_date": doc.posting_date,
-		"grand_total": doc.base_grand_total
+		"grand_total": doc.base_grand_total,
 	})
 
 	if doc.get("letter_of_credit"):
