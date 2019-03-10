@@ -3,7 +3,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+import frappe
+import erpnext
+from erpnext.controllers.status_updater import StatusUpdater
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate
@@ -11,7 +13,7 @@ from frappe.utils import flt, nowdate
 class EmployeeAdvanceOverPayment(frappe.ValidationError):
 	pass
 
-class EmployeeAdvance(Document):
+class EmployeeAdvance(StatusUpdater):
 	def onload(self):
 		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings',
 			'make_payment_via_journal_entry')
@@ -22,19 +24,6 @@ class EmployeeAdvance(Document):
 
 	def on_cancel(self):
 		self.set_status()
-
-	def set_status(self):
-		if self.docstatus == 0:
-			self.status = "Draft"
-		if self.docstatus == 1:
-			if self.claimed_amount and flt(self.claimed_amount) == flt(self.paid_amount):
-				self.status = "Claimed"
-			elif self.paid_amount and self.advance_amount == flt(self.paid_amount):
-				self.status = "Paid"
-			else:
-				self.status = "Unpaid"
-		elif self.docstatus == 2:
-			self.status = "Cancelled"
 
 	def validate_employee_advance_account(self):
 		company_currency = erpnext.get_company_currency(self.company)
@@ -58,19 +47,17 @@ class EmployeeAdvance(Document):
 				EmployeeAdvanceOverPayment)
 
 		self.db_set("paid_amount", paid_amount)
-		self.set_status()
-		frappe.db.set_value("Employee Advance", self.name , "status", self.status)
-
+		self.set_status(update=True)
 
 	def update_claimed_amount(self):
 		claimed_amount = frappe.db.sql("""
 			select sum(ifnull(allocated_amount, 0))
 			from `tabExpense Claim Advance`
-			where employee_advance = %s and docstatus=1 and allocated_amount > 0
+			where employee_advance = %s and docstatus=1
 		""", self.name)[0][0] or 0
 
-		if claimed_amount:
-			frappe.db.set_value("Employee Advance", self.name, "claimed_amount", flt(claimed_amount))
+		self.db_set("claimed_amount", flt(claimed_amount))
+		self.set_status(update=True)
 
 @frappe.whitelist()
 def get_due_advance_amount(employee, posting_date):

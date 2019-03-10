@@ -40,7 +40,6 @@ cur_frm.add_fetch('expense_type','description','description');
 cur_frm.cscript.onload = function(doc) {
 	if (doc.__islocal) {
 		cur_frm.set_value("posting_date", frappe.datetime.get_today());
-		cur_frm.cscript.clear_sanctioned(doc);
 	}
 
 	cur_frm.fields_dict.employee.get_query = function() {
@@ -48,16 +47,6 @@ cur_frm.cscript.onload = function(doc) {
 			query: "erpnext.controllers.queries.employee_query"
 		};
 	};
-};
-
-cur_frm.cscript.clear_sanctioned = function(doc) {
-	var val = doc.expenses || [];
-	for(var i = 0; i<val.length; i++){
-		val[i].sanctioned_amount ='';
-	}
-
-	doc.total_sanctioned_amount = '';
-	refresh_many(['sanctioned_amount', 'total_sanctioned_amount']);
 };
 
 cur_frm.cscript.refresh = function(doc) {

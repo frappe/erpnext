@@ -511,7 +511,8 @@ class PaymentEntry(AccountsController):
 						"against": self.party or self.paid_from,
 						"debit_in_account_currency": d.amount,
 						"debit": d.amount,
-						"cost_center": d.cost_center
+						"cost_center": d.cost_center,
+						"project": self.project
 					})
 				)
 
@@ -888,6 +889,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.payment_type = payment_type
 	pe.company = doc.company
 	pe.cost_center = doc.get("cost_center")
+	pe.project = doc.get("project") or doc.get("set_project")
 	pe.posting_date = nowdate()
 	pe.mode_of_payment = doc.get("mode_of_payment")
 	pe.party_type = party_type

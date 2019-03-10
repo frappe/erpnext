@@ -138,8 +138,8 @@ class ExpenseClaim(AccountsController):
 					"against": ",".join([d.default_account for d in self.expenses]),
 					"party_type": "Employee",
 					"party": self.employee,
-					"against_voucher_type": self.doctype,
-					"against_voucher": self.name
+					"against_voucher_type": "Employee Advance",
+					"against_voucher": data.employee_advance
 				})
 			)
 
@@ -308,26 +308,25 @@ def get_advances(employee, advance_id=None):
 
 
 @frappe.whitelist()
-def get_expense_claim(
-	employee_name, company, employee_advance_name, posting_date, paid_amount, claimed_amount):
-	default_payable_account = frappe.get_cached_value('Company',  company,  "default_payable_account")
-	default_cost_center = frappe.get_cached_value('Company',  company,  'cost_center')
+def get_expense_claim(dt, dn):
+	doc = frappe.get_doc(dt, dn)
+	default_payable_account = frappe.get_cached_value('Company',  doc.company,  "default_payable_account")
+	default_cost_center = frappe.get_cached_value('Company',  doc.company,  'cost_center')
 
 	expense_claim = frappe.new_doc('Expense Claim')
-	expense_claim.company = company
-	expense_claim.employee = employee_name
-	expense_claim.payable_account = default_payable_account
-	expense_claim.cost_center = default_cost_center
-	expense_claim.is_paid = 1 if flt(paid_amount) else 0
-	expense_claim.append(
-		'advances',
-		{
-			'employee_advance': employee_advance_name,
-			'posting_date': posting_date,
-			'advance_paid': flt(paid_amount),
-			'unclaimed_amount': flt(paid_amount) - flt(claimed_amount),
-			'allocated_amount': flt(paid_amount) - flt(claimed_amount)
-		}
-	)
+	expense_claim.company = doc.company
+	expense_claim.employee = doc.get("employee")
+	expense_claim.payable_account = doc.get("advance_account") or default_payable_account
+	expense_claim.cost_center = doc.get("cost_center") or default_cost_center
+	expense_claim.project = doc.get("project")
+	expense_claim.task = doc.get("task")
+	# expense_claim.is_paid = 1 if flt(paid_amount) else 0
+	expense_claim.append('advances', {
+		'employee_advance': doc.name,
+		'posting_date': doc.posting_date,
+		'advance_paid': flt(doc.paid_amount),
+		'unclaimed_amount': flt(doc.paid_amount) - flt(doc.claimed_amount),
+		'allocated_amount': flt(doc.paid_amount) - flt(doc.claimed_amount)
+	})
 
 	return expense_claim

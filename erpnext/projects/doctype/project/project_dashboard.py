@@ -21,7 +21,7 @@ def get_data():
 			},
 			{
 				'label': _('Expenses'),
-				'items': ['Expense Claim']
+				'items': ['Employee Advance', 'Expense Claim', 'Landed Cost Voucher']
 			},
 			{
 				'label': _('Sales'),
@@ -29,7 +29,11 @@ def get_data():
 			},
 			{
 				'label': _('Purchase'),
-				'items': ['Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Landed Cost Voucher']
+				'items': ['Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
+			},
+			{
+				'label': _('Payment'),
+				'items': ['Payment Entry', 'Journal Entry']
 			},
 		]
 	}

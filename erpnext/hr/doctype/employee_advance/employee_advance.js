@@ -26,6 +26,7 @@ frappe.ui.form.on('Employee Advance', {
 	},
 
 	refresh: function(frm) {
+		erpnext.hide_company();
 		if (frm.doc.docstatus===1
 			&& (flt(frm.doc.paid_amount) < flt(frm.doc.advance_amount))
 			&& frappe.model.can_create("Payment Entry")) {
@@ -69,15 +70,11 @@ frappe.ui.form.on('Employee Advance', {
 		return frappe.call({
 			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim",
 			args: {
-				"employee_name": frm.doc.employee,
-				"company": frm.doc.company,
-				"employee_advance_name": frm.doc.name,
-				"posting_date": frm.doc.posting_date,
-				"paid_amount": frm.doc.paid_amount,
-				"claimed_amount": frm.doc.claimed_amount
+				"dt": frm.doc.doctype,
+				"dn": frm.doc.name
 			},
 			callback: function(r) {
-				const doclist = frappe.model.sync(r.message);
+				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});

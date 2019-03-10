@@ -164,10 +164,16 @@ def check_freezing_date(posting_date, adv_adj=False):
 def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party, on_cancel=False):
 	# Update outstanding amt on against voucher
 	if voucher_type in ["Sales Invoice", "Purchase Invoice", "Landed Cost Voucher", "Fees"]:
-		bal = get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account)
-		ref_doc = frappe.get_doc(voucher_type, voucher_no)
-		ref_doc.db_set('outstanding_amount', bal)
-		ref_doc.set_status(update=True)
+		fieldname = "outstanding_amount"
+	elif voucher_type == "Employee Advance":
+		fieldname = "balance_amount"
+	else:
+		return
+
+	bal = get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account)
+	ref_doc = frappe.get_doc(voucher_type, voucher_no)
+	ref_doc.db_set(fieldname, bal)
+	ref_doc.set_status(update=True)
 
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.db.get_value("Account", account, "freeze_account")
