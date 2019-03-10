@@ -231,7 +231,7 @@ class ItemConfigure {
 			localStorage.removeItem(this.get_cache_key());
 		}
 		const item_code = $(e.currentTarget).data('item-code');
-		const additional_notes = Object.keys(this.range_values).map(attribute => {
+		const additional_notes = Object.keys(this.range_values || {}).map(attribute => {
 			return `${attribute}: ${this.range_values[attribute]}`;
 		}).join('\n');
 		erpnext.shopping_cart.update_cart({
