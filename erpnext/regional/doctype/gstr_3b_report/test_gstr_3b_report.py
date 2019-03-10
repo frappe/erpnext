@@ -139,7 +139,7 @@ def create_purchase_invoices():
 			do_not_save=1,
 		)
 
-	pi.eligibility_for_itc = "Other"
+	pi.eligibility_for_itc = "All Other ITC"
 	pi.itc_integrated_tax = 25
 
 	pi.submit()
