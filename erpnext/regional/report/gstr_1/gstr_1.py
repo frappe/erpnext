@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, json, os
+import frappe, json
 from frappe import _
 from frappe.utils import flt, formatdate, now_datetime, getdate
 from datetime import date
@@ -510,7 +510,7 @@ def get_json():
 
 	fp = "%02d%s" % (now_datetime().month, now_datetime().year)
 
-	gst_json = {"gstin": "", "fp": "", "version": "GST2.2.9",
+	gst_json = {"gstin": "", "version": "GST2.2.9",
 		"hash": "hash", "gstin": gstin, "fp": fp}
 
 	res = {}
@@ -585,7 +585,7 @@ def get_export_json(res):
 		exp_item, inv = {"exp_typ": exp_type, "inv": []}, []
 
 		for row in res[exp_type]:
-			inv_item = get_basic_invoice_rowetail(row)
+			inv_item = get_basic_invoice_detail(row)
 			inv_item["itms"] = [{
 				"txval": flt(row["taxable_value"], 2),
 				"rt": row["rate"] or 0,
