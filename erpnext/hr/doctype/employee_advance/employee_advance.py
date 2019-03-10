@@ -43,7 +43,7 @@ class EmployeeAdvance(StatusUpdater):
 		""", (self.name, self.employee), as_dict=1)[0].paid_amount
 
 		if flt(paid_amount) > self.advance_amount:
-			frappe.throw(_("Row {0}# Paid Amount cannot be greater than requested advance amount"),
+			frappe.throw(_("Row #{0} Paid Amount cannot be greater than requested advance amount"),
 				EmployeeAdvanceOverPayment)
 
 		self.db_set("paid_amount", paid_amount)
