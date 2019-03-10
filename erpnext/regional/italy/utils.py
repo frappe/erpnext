@@ -353,4 +353,7 @@ def set_state_code(doc, method):
 		return
 
 	state_codes_lower = {key.lower():value for key,value in state_codes.items()}
-	doc.state_code = state_codes_lower.get(doc.get('state','').lower())
+
+	state = doc.get('state','').lower()
+	if state_codes_lower.get(state):
+		doc.state_code = state_codes_lower.get(state)

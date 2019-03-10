@@ -6,7 +6,7 @@ import frappe
 from frappe import _, scrub
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.controllers.queries import get_match_cond
-from frappe.utils import flt
+from frappe.utils import flt, cint
 
 
 def execute(filters=None):
@@ -106,11 +106,14 @@ class GrossProfitGenerator(object):
 		self.grouped = {}
 		self.grouped_data = []
 
+		self.currency_precision = cint(frappe.db.get_default("currency_precision")) or 3
+		self.float_precision = cint(frappe.db.get_default("float_precision")) or 2
+
 		for row in self.si_list:
 			if self.skip_row(row, self.product_bundles):
 				continue
 
-			row.base_amount = flt(row.base_net_amount)
+			row.base_amount = flt(row.base_net_amount, self.currency_precision)
 
 			product_bundles = []
 			if row.update_stock:
@@ -129,15 +132,15 @@ class GrossProfitGenerator(object):
 
 			# get buying rate
 			if row.qty:
-				row.buying_rate = row.buying_amount / row.qty
-				row.base_rate = row.base_amount / row.qty
+				row.buying_rate = flt(row.buying_amount / row.qty, self.float_precision)
+				row.base_rate = flt(row.base_amount / row.qty, self.float_precision)
 			else:
 				row.buying_rate, row.base_rate = 0.0, 0.0
 
 			# calculate gross profit
-			row.gross_profit = flt(row.base_amount - row.buying_amount, 3)
+			row.gross_profit = flt(row.base_amount - row.buying_amount, self.currency_precision)
 			if row.base_amount:
-				row.gross_profit_percent = flt((row.gross_profit / row.base_amount) * 100.0, 3)
+				row.gross_profit_percent = flt((row.gross_profit / row.base_amount) * 100.0, self.currency_precision)
 			else:
 				row.gross_profit_percent = 0.0
 
@@ -156,8 +159,8 @@ class GrossProfitGenerator(object):
 						new_row = row
 					else:
 						new_row.qty += row.qty
-						new_row.buying_amount += row.buying_amount
-						new_row.base_amount += row.base_amount
+						new_row.buying_amount += flt(row.buying_amount, self.currency_precision)
+						new_row.base_amount += flt(row.base_amount, self.currency_precision)
 				new_row = self.set_average_rate(new_row)
 				self.grouped_data.append(new_row)
 			else:
@@ -167,18 +170,19 @@ class GrossProfitGenerator(object):
 						returned_item_rows = self.returned_invoices[row.parent][row.item_code]
 						for returned_item_row in returned_item_rows:
 							row.qty += returned_item_row.qty
-							row.base_amount += returned_item_row.base_amount
-						row.buying_amount = row.qty * row.buying_rate
+							row.base_amount += flt(returned_item_row.base_amount, self.currency_precision)
+						row.buying_amount = flt(row.qty * row.buying_rate, self.currency_precision)
 					if row.qty or row.base_amount:
 						row = self.set_average_rate(row)
 						self.grouped_data.append(row)
 
 	def set_average_rate(self, new_row):
-		new_row.gross_profit = flt(new_row.base_amount - new_row.buying_amount,3)
-		new_row.gross_profit_percent = flt(((new_row.gross_profit / new_row.base_amount) * 100.0),3) \
+		new_row.gross_profit = flt(new_row.base_amount - new_row.buying_amount, self.currency_precision)
+		new_row.gross_profit_percent = flt(((new_row.gross_profit / new_row.base_amount) * 100.0), self.currency_precision) \
 			if new_row.base_amount else 0
-		new_row.buying_rate = (new_row.buying_amount / new_row.qty) if new_row.qty else 0
-		new_row.base_rate = (new_row.base_amount / new_row.qty) if new_row.qty else 0
+		new_row.buying_rate = flt(new_row.buying_amount / new_row.qty, self.float_precision) if new_row.qty else 0
+		new_row.base_rate = flt(new_row.base_amount / new_row.qty, self.float_precision) if new_row.qty else 0
+
 		return new_row
 
 	def get_returned_invoice_items(self):
