@@ -381,7 +381,7 @@ class ReceivablePayableReport(object):
 		return (
 			# advance
 			(not gle.against_voucher) or
-			
+
 			# advance amount with returned invoice without any ref
 			(gle.against_voucher and gle.against_voucher==gle.voucher_no) or
 
