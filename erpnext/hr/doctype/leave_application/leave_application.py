@@ -515,12 +515,7 @@ def add_leaves(events, start, end, filter_conditions=None):
 		if match_conditions:
 			conditions.append(match_conditions)
 
-<<<<<<< HEAD
-def add_leaves(events, start, end, match_conditions=None):
-	query = """select name, from_date, to_date, employee_name, half_day,color,description,
-=======
 	query = """select name, from_date, to_date, employee_name, half_day,
->>>>>>> 703a5974784659ea5c8fedf08bb735b21443f524
 		status, employee, docstatus
 		from `tabLeave Application` where
 		from_date <= %(end)s and to_date >= %(start)s <= to_date
