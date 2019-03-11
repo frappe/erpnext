@@ -301,6 +301,10 @@ class PurchaseOrder(BuyingController):
 		else:
 			self.db_set("per_received", 0, update_modified=False)
 
+@frappe.whitelist()
+def update_reason_for_hold(name, data):
+	frappe.db.set_value('Purchase Order', name, 'reason_for_hold', data)
+
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor= 1.0):
 	"""get last purchase rate for an item"""
 
