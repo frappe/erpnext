@@ -241,7 +241,7 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 				data += acc_dict.entries
 
 				# totals
-				data.append(acc_dict.totals.total)
+				# data.append(acc_dict.totals.total)
 
 				# closing
 				if filters.get("group_by") != _("Group by Voucher"):
