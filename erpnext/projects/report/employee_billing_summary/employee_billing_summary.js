@@ -22,6 +22,5 @@ frappe.query_reports["Employee Billing Summary"] = {
 			fieldtype: "Date",
 			default: frappe.datetime.add_days(frappe.datetime.get_today(), 30)
 		},
-
 	]
 }

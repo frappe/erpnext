@@ -8,8 +8,6 @@ from frappe.utils import time_diff_in_hours
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
-	print(filters)
-
 	columns = get_columns()
 
 	data = get_data(filters)
@@ -85,7 +83,8 @@ def get_data(filters):
 
 			total_hours = 0
 			total_billable_hours = 0
-			print("-------------------------------------------->>>>>>>")
+			total_amount = 0
+
 			for time in timesheet_details:
 				time_start = time.from_time
 				time_end = frappe.utils.add_to_date(time.from_time, hours=time.hours)
@@ -94,26 +93,28 @@ def get_data(filters):
 				to_date = frappe.utils.get_datetime(filters.to_date)
 
 				if time_start <= from_date and time_end <= to_date:
-					total_hours += abs(time_diff_in_hours(time_end, from_date))
-					print(from_date, time_end)
-					print("case 1", entries.name,time_diff_in_hours(time_end, from_date))
+					total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(time, time_end, from_date, total_hours, total_billable_hours, total_amount)
 				elif time_start >= from_date and time_end >= to_date:
-					total_hours += abs(time_diff_in_hours(to_date, time_start))
-					print(time_start, to_date)
-					print("case 2", entries.name,time_diff_in_hours(to_date, time_start))
+					total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(time, to_date, time_start, total_hours, total_billable_hours, total_amount)
 				elif time_start >= from_date and time_end <= to_date:
-					total_hours = entries.total_hours
-					print("case 3 all set", entries.name)
+					total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(time, time_end, time_start, total_hours, total_billable_hours, total_amount)
 
-			print(total_hours)
-			print("-------------------------------------------->>>>>>>")
 			row = {
 				"employee": entries.employee,
 				"employee_name": entries.employee_name,
 				"timesheet": entries.name,
-				"total_billable_hours": entries.total_billable_hours,
-				"total_hours": entries.total_hours,
-				"amount": 1
+				"total_billable_hours": total_billable_hours,
+				"total_hours": total_hours,
+				"amount": total_amount
 			}
+
 			data.append(row)
 	return data
+
+def get_billable_and_total_hours(time, end, start, total_hours, total_billable_hours, total_amount):
+	total_hours += abs(time_diff_in_hours(end, start))
+	if time.billable:
+		total_billable_hours += abs(time_diff_in_hours(end, start))
+		total_amount += total_billable_hours * time.billing_rate
+
+	return total_hours, total_billable_hours, total_amount
