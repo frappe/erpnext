@@ -34,7 +34,7 @@ class InvoiceDiscounting(AccountsController):
 		if self.docstatus == 1:
 			self.status = "Sanctioned"
 		elif self.docstatus == 2:
-			self.status: "Cancelled"
+			self.status = "Cancelled"
 
 	def make_gl_entries(self):
 		company_currency = frappe.get_cached_value('Company',  self.company, "default_currency")
