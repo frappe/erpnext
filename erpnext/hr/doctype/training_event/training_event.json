@@ -214,7 +214,7 @@
    "label": "Level", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "\nBeginner\nExpert\nAdvance", 
+   "options": "\nBeginner\nIntermediate\nAdvance", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
