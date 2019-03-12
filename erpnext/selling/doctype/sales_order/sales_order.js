@@ -162,7 +162,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							// hold
 							this.frm.add_custom_button(__('Hold'),
 								function() { 
-									me.sales_order_on_hold();	
+									me.hold_sales_order();	
 								}, __("Status"))
 							// close
 							this.frm.add_custom_button(__('Close'),
@@ -176,8 +176,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							function() { me.make_delivery_note_based_on_delivery_date(); }, __('Create'));
 						this.frm.add_custom_button(__('Work Order'),
 							function() { me.make_work_order() }, __('Create'));
-
-						this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 					}
 
 					// sales invoice
@@ -228,6 +226,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					this.frm.add_custom_button(__('Payment'),
 						function() { me.make_payment_entry() }, __('Create'));
 				}
+				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
 		}
 
@@ -572,7 +571,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		});
 		dialog.show();
 	},
-	sales_order_on_hold: function(){
+	hold_sales_order: function(){
 		var me = this;
 		var d = new frappe.ui.Dialog({
 			title: __('Reason for Hold'),
@@ -586,14 +585,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			primary_action: function() {
 				var data = d.get_values();
 				frappe.call({
-					method: "erpnext.selling.doctype.sales_order.sales_order.update_reason_for_hold",
+					method: "frappe.desk.form.utils.add_comment",
 					args: {
-						data: data.reason_for_hold,
-						name: me.frm.doc.name
+						reference_doctype: me.frm.doctype,
+						reference_name: me.frm.docname,
+						content: __('Reason for hold: ')+data.reason_for_hold,
+						comment_email: frappe.session.user
 					},
 					callback: function(r) {
 						if(!r.exc) {
-							me.frm.set_value("reason_for_hold", data.reason_for_hold);
 							me.update_status('Hold', 'On Hold')
 							d.hide();
 						}

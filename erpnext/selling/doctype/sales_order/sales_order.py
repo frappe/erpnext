@@ -960,7 +960,3 @@ def make_raw_material_request(items, company, sales_order, project=None):
 	material_request.run_method("set_missing_values")
 	material_request.submit()
 	return material_request
-
-@frappe.whitelist()
-def update_reason_for_hold(name, data):
-	frappe.db.set_value('Sales Order', name, 'reason_for_hold', data)
