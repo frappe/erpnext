@@ -213,9 +213,10 @@ class GSTR3BReport(Document):
 						self.report_dict[supply_type][supply_category][account_map.get(account_type)] += \
 							flt(tax_details.get((account_name, gst_category), {}).get("amount"))
 
-						txval -= self.report_dict.get(supply_type, {}).get(supply_category, {}).get(account_map.get(account_type), 0)
+		for k, v in account_map:
+			txval -= self.report_dict.get(supply_type, {}).get(supply_category, {}).get(v, 0)
 
-			self.report_dict[supply_type][supply_category]["txval"] += flt(txval)
+		self.report_dict[supply_type][supply_category]["txval"] = flt(txval)
 
 	def set_inter_state_supply(self, inter_state_supply):
 
