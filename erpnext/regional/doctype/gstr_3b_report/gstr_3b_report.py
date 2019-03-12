@@ -208,12 +208,12 @@ class GSTR3BReport(Document):
 		for gst_category in gst_category_list:
 			txval = total_taxable_value.get(gst_category,0)
 			for account_head in self.account_heads:
-				for k, v in iteritems(account_map):
-					if v in self.report_dict.get(supply_type).get(supply_category):
-						self.report_dict[supply_type][supply_category][v] += \
-							flt(tax_details.get((account_head.get(k), gst_category), {}).get("amount"))
+				for account_type, account_name in iteritems(account_head):
+					if account_map.get(account_type) in self.report_dict.get(supply_type).get(supply_category):
+						self.report_dict[supply_type][supply_category][account_map.get(account_type)] += \
+							flt(tax_details.get((account_name, gst_category), {}).get("amount"))
 
-					txval -= self.report_dict.get(supply_type, {}).get(supply_category, {}).get(v, 0)
+						txval -= self.report_dict.get(supply_type, {}).get(supply_category, {}).get(account_map.get(account_type), 0)
 
 			self.report_dict[supply_type][supply_category]["txval"] += flt(txval)
 
