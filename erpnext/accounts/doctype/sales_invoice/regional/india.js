@@ -13,7 +13,7 @@ frappe.ui.form.on("Sales Invoice", {
 				filters: {
 					'transporter': doc.transporter
 				}
-			}
+			};
 		});
 	},
 
