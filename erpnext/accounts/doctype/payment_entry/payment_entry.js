@@ -80,7 +80,7 @@ frappe.ui.form.on('Payment Entry', {
 			} else if (frm.doc.party_type=="Letter of Credit") {
 				var doctypes = ["Purchase Invoice", "Landed Cost Voucher", "Journal Entry"];
 			} else if (frm.doc.party_type=="Employee") {
-				var doctypes = ["Expense Claim", "Journal Entry"];
+				var doctypes = ["Expense Claim", "Journal Entry", "Employee Advance"];
 			} else if (frm.doc.party_type=="Student") {
 				var doctypes = ["Fees"];
 			} else {

@@ -593,7 +593,12 @@ def get_outstanding_reference_documents(args):
 		orders_to_be_billed = get_orders_to_be_billed(args.get("posting_date"),args.get("party_type"),
 			args.get("party"), party_account_currency, company_currency)
 
-	return outstanding_invoices + orders_to_be_billed
+	outstanding_employee_advances = []
+	if args.get("party_type") == "Employee":
+		outstanding_employee_advances = get_oustanding_employee_advances(args.get("party"), args.get("party_account"),
+			is_return=negative_invoices)
+
+	return outstanding_invoices + orders_to_be_billed + outstanding_employee_advances
 
 
 def get_orders_to_be_billed(posting_date, party_type, party, party_account_currency, company_currency, cost_center=None):
@@ -645,6 +650,28 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 		order_list.append(d)
 
 	return order_list
+
+def get_oustanding_employee_advances(employee, account, is_return):
+	if is_return:
+		advances = frappe.db.sql("""
+			select
+				posting_date, 'Employee Advance' as voucher_type, name as voucher_no,
+				paid_amount as invoice_amount, balance_amount as outstanding_amount
+			from `tabEmployee Advance`
+			where advance_account = %s and employee = %s and balance_amount < 0
+			order by posting_date, name
+		""", [account, employee], as_dict=1)
+	else:
+		advances = frappe.db.sql("""
+			select
+				posting_date, 'Employee Advance' as voucher_type, name as voucher_no,
+				advance_amount as invoice_amount, advance_amount - paid_amount as outstanding_amount
+			from `tabEmployee Advance`
+			where advance_account = %s and employee = %s and paid_amount < advance_amount
+			order by posting_date, name
+		""", [account, employee], as_dict=1)
+
+	return advances or []
 
 def get_negative_outstanding_invoices(party_type, party, party_account, party_account_currency, company_currency, cost_center=None):
 	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
