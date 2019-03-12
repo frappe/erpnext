@@ -232,7 +232,7 @@ class PurchaseOrder(BuyingController):
 		if self.is_subcontracted == "Yes":
 			self.update_reserved_qty_for_subcontract()
 
-		self.check_for_closed_status()
+		self.check_on_hold_or_closed_status()
 
 		frappe.db.set(self,'status','Cancelled')
 
