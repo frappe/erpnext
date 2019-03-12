@@ -450,14 +450,15 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			primary_action: function() {
 				var data = d.get_values();
 				frappe.call({
-					method: "erpnext.buying.doctype.purchase_order.purchase_order.update_reason_for_hold",
+					method: "frappe.desk.form.utils.add_comment",
 					args: {
-						data: data.reason_for_hold,
-						name: me.frm.doc.name
+						reference_doctype: me.frm.doctype,
+						reference_name: me.frm.docname,
+						content: __('Reason for hold:')+data.reason_for_hold,
+						comment_email: frappe.session.user
 					},
 					callback: function(r) {
 						if(!r.exc) {
-							me.frm.set_value("reason_for_hold", data.reason_for_hold);
 							me.update_status('Hold', 'On Hold')
 							d.hide();
 						}
