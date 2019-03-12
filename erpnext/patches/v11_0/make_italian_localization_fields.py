@@ -28,3 +28,10 @@ def execute():
 			from `tabCountry` where name = `tabAddress`.country), ''))
 			where country_code is null and state_code is null
 	""".format(condition=condition))
+
+	frappe.db.sql("""
+		UPDATE `tabSales Invoice Item` si, `tabSales Order` so
+			set si.customer_po_no = so.po_no, si.customer_po_date = so.po_date
+		WHERE
+			si.sales_order = so.name and so.po_no is not null
+	""")

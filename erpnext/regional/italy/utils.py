@@ -82,6 +82,14 @@ def prepare_invoice(invoice, progressive_number):
 		if item.tax_rate == 0.0 and item.tax_amount == 0.0:
 			item.tax_exemption_reason = tax_data["0.0"]["tax_exemption_reason"]
 
+	customer_po_data = {}
+	for d in invoice.e_invoice_items:
+		if (d.customer_po_no and d.customer_po_date
+			and d.customer_po_no not in customer_po_data):
+			customer_po_data[d.customer_po_no] = d.customer_po_date
+
+	invoice.customer_po_data = customer_po_data
+
 	return invoice
 
 def get_conditions(filters):
@@ -267,13 +275,18 @@ def prepare_and_attach_invoice(doc, replace=False):
 def generate_single_invoice(docname):
 	doc = frappe.get_doc("Sales Invoice", docname)
 
+
 	e_invoice = prepare_and_attach_invoice(doc, True)
 
+	return e_invoice.file_name
+
+@frappe.whitelist()
+def download_e_invoice_file(file_name):
 	content = None
-	with open(frappe.get_site_path('private', 'files', e_invoice.file_name), "r") as f:
+	with open(frappe.get_site_path('private', 'files', file_name), "r") as f:
 		content = f.read()
 
-	frappe.local.response.filename = e_invoice.file_name
+	frappe.local.response.filename = file_name
 	frappe.local.response.filecontent = content
 	frappe.local.response.type = "download"
 
