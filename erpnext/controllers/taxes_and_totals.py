@@ -630,7 +630,8 @@ def get_itemised_tax(taxes):
 
 				itemised_tax[item_code][tax.description] = frappe._dict(dict(
 					tax_rate = tax_rate,
-					tax_amount = tax_amount
+					tax_amount = tax_amount,
+					tax_account = tax.account_head
 				))
 
 	return itemised_tax
