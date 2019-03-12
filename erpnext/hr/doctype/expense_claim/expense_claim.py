@@ -111,7 +111,7 @@ class ExpenseClaim(AccountsController):
 					"account": self.payable_account,
 					"credit": payable_amount,
 					"credit_in_account_currency": payable_amount,
-					"against": ",".join([d.default_account for d in self.expenses]),
+					"against": ", ".join(set([d.default_account for d in self.expenses])),
 					"party_type": "Employee",
 					"party": self.employee
 				})
@@ -135,7 +135,7 @@ class ExpenseClaim(AccountsController):
 					"account": data.advance_account,
 					"credit": data.allocated_amount,
 					"credit_in_account_currency": data.allocated_amount,
-					"against": ",".join([d.default_account for d in self.expenses]),
+					"against": ", ".join(set([d.default_account for d in self.expenses])),
 					"party_type": "Employee",
 					"party": self.employee,
 					"against_voucher_type": "Employee Advance",
