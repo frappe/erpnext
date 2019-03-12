@@ -33,20 +33,21 @@ class EmployeeAdvance(StatusUpdater):
 				.format(company_currency))
 
 	def set_total_advance_paid(self):
-		paid_amount = frappe.db.sql("""
-			select ifnull(sum(debit_in_account_currency), 0) as paid_amount
+		payments = frappe.db.sql("""
+			select ifnull(sum(debit), 0) as paid_amount, ifnull(sum(credit), 0) as returned_amount
 			from `tabGL Entry`
 			where against_voucher_type = 'Employee Advance'
 				and against_voucher = %s
 				and party_type = 'Employee'
 				and party = %s
-		""", (self.name, self.employee), as_dict=1)[0].paid_amount
+				and voucher_type in ('Payment Entry', 'Journal Entry')
+		""", (self.name, self.employee), as_dict=1)[0]
 
-		if flt(paid_amount) > self.advance_amount:
-			frappe.throw(_("Row #{0} Paid Amount cannot be greater than requested advance amount"),
-				EmployeeAdvanceOverPayment)
+		if flt(payments.paid_amount) > self.advance_amount:
+			frappe.throw(_("Paid Amount cannot be greater than requested advance amount"), EmployeeAdvanceOverPayment)
 
-		self.db_set("paid_amount", paid_amount)
+		self.db_set("paid_amount", payments.paid_amount)
+		self.db_set("returned_amount", payments.returned_amount)
 		self.set_status(update=True)
 
 	def update_claimed_amount(self):

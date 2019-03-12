@@ -891,7 +891,8 @@ frappe.ui.form.on('Payment Entry Reference', {
 						frm.doc.paid_from_account_currency : frm.doc.paid_to_account_currency,
 					party_type: frm.doc.party_type,
 					party: frm.doc.party,
-					account: frm.doc.payment_type=="Receive" ? frm.doc.paid_from : frm.doc.paid_to
+					account: frm.doc.payment_type=="Receive" ? frm.doc.paid_from : frm.doc.paid_to,
+					payment_type: frm.doc.payment_type
 				},
 				callback: function(r, rt) {
 					if(r.message) {
