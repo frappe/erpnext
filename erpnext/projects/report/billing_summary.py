@@ -7,7 +7,6 @@ import frappe
 from frappe import _
 from frappe.utils import time_diff_in_hours
 
-
 def get_columns():
 	return [
 		{
@@ -53,7 +52,6 @@ def get_columns():
 
 def get_data(filters):
 	data = []
-
 	record = get_records(filters)
 
 	for entries in record:
@@ -61,27 +59,20 @@ def get_data(filters):
 		total_billable_hours = 0
 		total_amount = 0
 		entries_exists = False
-
 		timesheet_details = get_timesheet_details(filters, entries.name)
-
 		for activity in timesheet_details:
-
 			entries_exists = True
-
 			time_start = activity.from_time
 			time_end = frappe.utils.add_to_date(activity.from_time, hours=activity.hours)
-
 			from_date = frappe.utils.get_datetime(filters.from_date)
 			to_date = frappe.utils.get_datetime(filters.to_date)
 
 			if time_start <= from_date and time_end <= to_date:
 				total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(activity,
 					time_end, from_date, total_hours, total_billable_hours, total_amount)
-
 			elif time_start >= from_date and time_end >= to_date:
 				total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(activity,
 					to_date, time_start, total_hours, total_billable_hours, total_amount)
-
 			elif time_start >= from_date and time_end <= to_date:
 				total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(activity,
 					time_end, time_start, total_hours, total_billable_hours, total_amount)
@@ -102,28 +93,15 @@ def get_data(filters):
 	return data
 
 def get_records(filters):
-	if "employee" in filters:
-		return frappe.db.sql('''SELECT
-				employee, employee_name, name, total_billable_hours, total_hours, total_billable_amount
-			FROM
-				`tabTimesheet`
-			WHERE
-				employee = %s and (start_date <= %s and end_date >= %s)''',
-				(filters.employee, filters.to_date, filters.from_date),
-			as_dict=1
-		)
+	record_filters = [
+			["start_date", "<=", filters.to_date],
+			["end_date", ">=", filters.from_date]
+		]
 
-	elif "project" in filters:
-		return frappe.db.sql('''SELECT
-				employee, employee_name, name, total_billable_hours, total_hours, total_billable_amount
-			FROM
-				`tabTimesheet`
-			WHERE
-				start_date <= %s and end_date >= %s''',(filters.to_date, filters.from_date),
-			as_dict=1
-		)
-	else:
-		return {}
+	if "employee" in filters:
+		record_filters.append(["employee", "=", filters.employee])
+
+	return frappe.get_all("Timesheet", filters=record_filters, fields=[" * "] )
 
 def get_billable_and_total_hours(activity, end, start, total_hours, total_billable_hours, total_amount):
 	total_hours += abs(time_diff_in_hours(end, start))
