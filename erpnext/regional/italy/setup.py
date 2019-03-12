@@ -32,14 +32,14 @@ def make_custom_fields(update=True):
 		dict(fieldname='customer_po_no', label='Customer PO No',
 			fieldtype='Data', insert_after='customer_po_details',
 			fetch_from = 'sales_order.po_no',
-			print_hide=1, allow_on_submit=1, fetch_if_empty= 1, read_only=1),
+			print_hide=1, allow_on_submit=1, fetch_if_empty= 1, read_only=1, no_copy=1),
 		dict(fieldname='customer_po_clm_brk', label='',
 			fieldtype='Column Break', insert_after='customer_po_no',
 			print_hide=1, read_only=1),
 		dict(fieldname='customer_po_date', label='Customer PO Date',
 			fieldtype='Date', insert_after='customer_po_clm_brk',
 			fetch_from = 'sales_order.po_date',
-			print_hide=1, allow_on_submit=1, fetch_if_empty= 1, read_only=1)
+			print_hide=1, allow_on_submit=1, fetch_if_empty= 1, read_only=1, no_copy=1)
 	]
 
 	custom_fields = {
