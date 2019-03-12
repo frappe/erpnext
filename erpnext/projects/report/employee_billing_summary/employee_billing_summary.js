@@ -9,18 +9,21 @@ frappe.query_reports["Employee Billing Summary"] = {
 			label: __("Employee"),
 			fieldtype: "Link",
 			options: "Employee",
+			reqd: 1
 		},
 		{
 			fieldname:"from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
-			default: frappe.datetime.get_today()
+			default: frappe.datetime.get_today(),
+			reqd: 1
 		},
 		{
 			fieldname:"to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			default: frappe.datetime.add_days(frappe.datetime.get_today(), 30)
+			default: frappe.datetime.add_days(frappe.datetime.get_today(), 30),
+			reqd: 1
 		},
 	]
 }
