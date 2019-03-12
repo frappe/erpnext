@@ -120,6 +120,15 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(pi.doctype, "Purchase Invoice")
 		self.assertEqual(len(pi.get("items", [])), 1)
 
+	def test_purchase_order_on_hold(self):
+		po = create_purchase_order(item_code="_Test Product Bundle Item")
+		po.db_set('Status', "On Hold")
+		pi = make_purchase_invoice(po.name)
+		pr = make_purchase_receipt(po.name)
+		self.assertRaises(frappe.ValidationError, pr.submit)
+		self.assertRaises(frappe.ValidationError, pi.submit)
+
+
 	def test_make_purchase_invoice_with_terms(self):
 		po = create_purchase_order(do_not_save=True)
 
