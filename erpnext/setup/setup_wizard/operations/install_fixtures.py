@@ -82,6 +82,17 @@ def install(country=None):
 		{'doctype': 'Employment Type', 'employee_type_name': _('Intern')},
 		{'doctype': 'Employment Type', 'employee_type_name': _('Apprentice')},
 
+
+		# Stock Entry Type
+		{'doctype': 'Stock Entry Type', 'name': 'Material Issue', 'purpose': 'Material Issue'},
+		{'doctype': 'Stock Entry Type', 'name': 'Material Receipt', 'purpose': 'Material Receipt'},
+		{'doctype': 'Stock Entry Type', 'name': 'Material Transfer', 'purpose': 'Material Transfer'},
+		{'doctype': 'Stock Entry Type', 'name': 'Manufacture', 'purpose': 'Manufacture'},
+		{'doctype': 'Stock Entry Type', 'name': 'Repack', 'purpose': 'Repack'},
+		{'doctype': 'Stock Entry Type', 'name': 'Subcontract', 'purpose': 'Subcontract'},
+		{'doctype': 'Stock Entry Type', 'name': 'Material Transfer for Manufacture', 'purpose': 'Material Transfer for Manufacture'},
+		{'doctype': 'Stock Entry Type', 'name': 'Material Consumption for Manufacture', 'purpose': 'Material Consumption for Manufacture'},
+
 		# Designation
 		{'doctype': 'Designation', 'designation_name': _('CEO')},
 		{'doctype': 'Designation', 'designation_name': _('Manager')},
