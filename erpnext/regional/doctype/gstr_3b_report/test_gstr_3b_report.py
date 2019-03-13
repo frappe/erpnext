@@ -44,7 +44,7 @@ class TestGSTR3BReport(unittest.TestCase):
 		self.assertEqual(output["inter_sup"]["unreg_details"][0]["iamt"], 18),
 		self.assertEqual(output["sup_details"]["osup_nil_exmp"]["txval"], 100),
 		self.assertEqual(output["inward_sup"]["isup_details"][0]["inter"], 250)
-		self.assertEqual(output["itc_elg"]["itc_avl"][4]["iamt"], 25)
+		self.assertEqual(output["itc_elg"]["itc_avl"][4]["iamt"], 45)
 
 def make_sales_invoice():
 	si = create_sales_invoice(company="_Test Company GST",
@@ -140,7 +140,14 @@ def create_purchase_invoices():
 		)
 
 	pi.eligibility_for_itc = "All Other ITC"
-	pi.itc_integrated_tax = 25
+
+	pi.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "IGST - _GST",
+			"cost_center": "Main - _GST",
+			"description": "IGST @ 18.0",
+			"rate": 18
+		})
 
 	pi.submit()
 
