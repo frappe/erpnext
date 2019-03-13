@@ -70,7 +70,7 @@ def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
 		return [_("Item"), _("Taxable Amount")] + tax_accounts
 
 def get_itemised_tax_breakup_data(doc, account_wise=False):
-	itemised_tax = get_itemised_tax(doc.taxes)
+	itemised_tax = get_itemised_tax(doc.taxes, with_tax_account=account_wise)
 
 	itemised_taxable_amount = get_itemised_taxable_amount(doc.items)
 

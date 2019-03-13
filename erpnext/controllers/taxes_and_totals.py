@@ -608,7 +608,7 @@ def get_itemised_tax_breakup_data(doc):
 
 	return itemised_tax, itemised_taxable_amount
 
-def get_itemised_tax(taxes):
+def get_itemised_tax(taxes, with_tax_account=False):
 	itemised_tax = {}
 	for tax in taxes:
 		if getattr(tax, "category", None) and tax.category=="Valuation":
@@ -630,9 +630,11 @@ def get_itemised_tax(taxes):
 
 				itemised_tax[item_code][tax.description] = frappe._dict(dict(
 					tax_rate = tax_rate,
-					tax_amount = tax_amount,
-					tax_account = tax.account_head
+					tax_amount = tax_amount
 				))
+
+				if with_tax_account:
+					itemised_tax[item_code][tax.description].tax_account = tax.account_head
 
 	return itemised_tax
 

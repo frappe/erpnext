@@ -27,7 +27,7 @@ frappe.listview_settings['Sales Invoice'].onload = function (doclist) {
 			frappe.msgprint(__("Please enable pop-ups")); return;
 		}
 
-	}
+	};
 
 	doclist.page.add_actions_menu_item(__('Generate e-Way Bill JSON'), action, false);
 };

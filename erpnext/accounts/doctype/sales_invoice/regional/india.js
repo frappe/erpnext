@@ -5,7 +5,7 @@ frappe.ui.form.on("Sales Invoice", {
 				filters: {
 					'is_transporter': 1
 				}
-			}
+			};
 		});
 
 		frm.set_query('driver', function(doc) {
