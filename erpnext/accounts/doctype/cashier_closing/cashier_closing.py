@@ -17,20 +17,18 @@ class CashierClosing(Document):
 		self.make_calculations()
 
 	def get_outstanding(self):
-		values = frappe.db.sql("""
-			select sum(outstanding_amount)
-			from `tabSales Invoice`
-			where posting_date=%s and posting_time>=%s and posting_time<=%s and owner=%s
-		""", (self.date, self.from_time, self.time, self.user))
-		self.outstanding_amount = flt(values[0][0] if values else 0)
+		values = frappe.db.sql("select outstanding_amount from `tabSales Invoice` where posting_date=%s and posting_time>=%s and posting_time<=%s and owner=%s", (self.date, self.from_time, self.time, self.user))
+		self.outstanding_amount = 0.00
+		for i in values :
+			self.outstanding_amount += i[0]
 			
 	def make_calculations(self):
 		total = 0.00
 		for i in self.payments:
-			total += flt(i.amount)
+			total += i.amount
 
-		self.net_amount = total + self.outstanding_amount + self.expense - self.custody
+		self.net_amount = total + self.outstanding_amount + self.expense - self.custody + self.returns
 
 	def validate_time(self):
 		if self.from_time >= self.time:
-			frappe.throw(_("From Time Should Be Less Than To Time"))	
+			frappe.throw(_("From Time Should Be Less Than To Time"))
