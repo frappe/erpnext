@@ -7,10 +7,31 @@ import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 def execute():
-    company = frappe.get_cached_value("Company", {'country': 'India'}, 'name')
-    if not company:
-        return
+    create_stock_entry_types()
 
+    company = frappe.get_cached_value("Company", {'country': 'India'}, 'name')
+    if company:
+        pass
+        # add_gst_hsn_code_field()
+
+def create_stock_entry_types():
+    frappe.reload_doc('stock', 'doctype', 'stock_entry_type')
+
+    for purpose in ["Material Issue", "Material Receipt", "Material Transfer",
+        "Material Transfer for Manufacture", "Material Consumption for Manufacture", "Manufacture",
+        "Repack", "Subcontract"]:
+        ste_type = frappe.get_doc({
+            'doctype': 'Stock Entry Type',
+            'name': purpose,
+            'purpose': purpose
+        })
+
+        try:
+            ste_type.insert()
+        except frappe.DuplicateEntryError:
+            pass
+
+def add_gst_hsn_code_field():
     custom_fields = {
         'Stock Entry Detail': [dict(fieldname='gst_hsn_code', label='HSN/SAC',
             fieldtype='Data', fetch_from='item_code.gst_hsn_code',

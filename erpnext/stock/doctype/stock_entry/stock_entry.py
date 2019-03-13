@@ -478,6 +478,11 @@ class StockEntry(StockController):
 		if self.purpose not in ['Manufacture', 'Repack']:
 			self.total_amount = sum([flt(item.amount) for item in self.get("items")])
 
+	def set_stock_entry_type(self):
+		if not self.stock_entry_type and self.purpose:
+			self.stock_entry_type = frappe.get_cached_value('Stock Entry Type',
+				{'purpose': self.purpose}, 'name')
+
 	def validate_purchase_order(self):
 		"""Throw exception if more raw material is transferred against Purchase Order than in
 		the raw materials supplied table"""
@@ -1138,6 +1143,7 @@ def move_sample_to_retention_warehouse(company, items):
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.company = company
 	stock_entry.purpose = "Material Transfer"
+	stock_entry.set_stock_entry_type()
 	for item in items:
 		if item.get('sample_quantity') and item.get('batch_no'):
 			sample_quantity = validate_sample_quantity(item.get('item_code'), item.get('sample_quantity'),
