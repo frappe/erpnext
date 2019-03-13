@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe import _
-from frappe.utils import flt, getdate, nowdate
+from frappe.utils import flt, getdate, nowdate, add_days
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 
@@ -14,6 +14,10 @@ class InvoiceDiscounting(AccountsController):
 		self.validate_mandatory()
 		self.calculate_total_amount()
 		self.set_status()
+		self.set_end_date()
+
+	def set_end_date(self):
+		self.loan_end_date = add_days(self.loan_start_date, self.loan_period)
 
 	def validate_mandatory(self):
 		if self.docstatus == 1 and not (self.loan_start_date and self.loan_period):
