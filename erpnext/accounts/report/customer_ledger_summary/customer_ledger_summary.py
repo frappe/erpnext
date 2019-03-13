@@ -190,7 +190,7 @@ class PartyLedgerSummaryReport(object):
 				gle.docstatus < 2 and gle.party_type=%(party_type)s and ifnull(gle.party, '') != ''
 				and gle.posting_date <= %(to_date)s {conditions}
 			order by gle.posting_date
-		""".format(join=join, join_field=join_field, conditions=conditions), self.filters, as_dict=True, debug=True)
+		""".format(join=join, join_field=join_field, conditions=conditions), self.filters, as_dict=True)
 
 	def prepare_conditions(self):
 		conditions = [""]
