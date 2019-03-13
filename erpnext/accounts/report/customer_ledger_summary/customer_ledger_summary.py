@@ -171,6 +171,7 @@ class PartyLedgerSummaryReport(object):
 
 	def get_gl_entries(self):
 		conditions = self.prepare_conditions()
+		print(conditions)
 		join = join_field = ""
 		if self.filters.party_type == "Customer":
 			join_field = ", p.customer_name as party_name"
@@ -189,13 +190,13 @@ class PartyLedgerSummaryReport(object):
 				gle.docstatus < 2 and gle.party_type=%(party_type)s and ifnull(gle.party, '') != ''
 				and gle.posting_date <= %(to_date)s {conditions}
 			order by gle.posting_date
-		""".format(join=join, join_field=join_field, conditions=conditions), self.filters, as_dict=True)
+		""".format(join=join, join_field=join_field, conditions=conditions), self.filters, as_dict=True, debug=True)
 
 	def prepare_conditions(self):
 		conditions = [""]
 
 		if self.filters.company:
-			conditions.append("company=%(company)s")
+			conditions.append("gle.company=%(company)s")
 
 		self.filters.company_finance_book = erpnext.get_default_finance_book(self.filters.company)
 
