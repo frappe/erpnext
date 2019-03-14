@@ -15,7 +15,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 from erpnext.stock.doctype.item.test_item import set_item_variant_settings, make_item_variant, create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
-from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse
+from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse, make_stock_in_entry
 
 from six import iteritems
 
@@ -660,6 +660,7 @@ class TestStockEntry(unittest.TestCase):
 			"cost_center": "_Test Cost Center - _TC",
 			"sample_quantity": 4
 		})
+		receipt_entry.set_stock_entry_type()
 		receipt_entry.insert()
 		receipt_entry.submit()
 
@@ -676,6 +677,7 @@ class TestStockEntry(unittest.TestCase):
 			"cost_center": "_Test Cost Center - _TC",
 			"batch_no": receipt_entry.get("items")[0].batch_no
 		})
+		retention_entry.set_stock_entry_type()
 		retention_entry.insert()
 		retention_entry.submit()
 
@@ -742,6 +744,33 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual(se.get("items")[0].allow_zero_valuation_rate, 1)
 		self.assertEqual(se.get("items")[0].amount, 0)
 
+	def test_goods_in_transit(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		warehouse = "_Test Warehouse FG 1 - _TC"
+
+		if not frappe.db.exists('Warehouse', warehouse):
+			create_warehouse("_Test Warehouse FG 1")
+
+		outward_entry = make_stock_entry(item_code="_Test Item",
+			purpose="Stock Out",
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC", qty=50, basic_rate=100)
+
+		inward_entry1 = make_stock_in_entry(outward_entry.name)
+		inward_entry1.items[0].t_warehouse = warehouse
+		inward_entry1.items[0].qty = 25
+		inward_entry1.submit()
+
+		doc = frappe.get_doc('Stock Entry', outward_entry.name)
+		self.assertEqual(doc.per_transferred, 50)
+
+		inward_entry2 = make_stock_in_entry(outward_entry.name)
+		inward_entry2.items[0].t_warehouse = warehouse
+		inward_entry2.items[0].qty = 25
+		inward_entry2.submit()
+
+		doc = frappe.get_doc('Stock Entry', outward_entry.name)
+		self.assertEqual(doc.per_transferred, 100)
 
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])

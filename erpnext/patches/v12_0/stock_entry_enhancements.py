@@ -16,6 +16,7 @@ def execute():
 
 def create_stock_entry_types():
     frappe.reload_doc('stock', 'doctype', 'stock_entry_type')
+    frappe.reload_doc('stock', 'doctype', 'stock_entry')
 
     for purpose in ["Material Issue", "Material Receipt", "Material Transfer",
         "Material Transfer for Manufacture", "Material Consumption for Manufacture", "Manufacture",
