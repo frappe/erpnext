@@ -40,6 +40,7 @@ class TestStudent(unittest.TestCase):
 		course_enrollments = student.get_all_course_enrollments()
 		self.assertTrue("_Test Course 1" in course_enrollments.keys())
 		self.assertTrue("_Test Course 2" in course_enrollments.keys())
+		frappe.db.rollback()
 
 def create_student(student_dict):
 	student = get_student(student_dict['email'])
