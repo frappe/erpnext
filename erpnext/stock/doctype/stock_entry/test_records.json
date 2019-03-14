@@ -18,6 +18,7 @@
     "uom": "_Test UOM"
    }
   ],
+  "stock_entry_type": "Material Receipt",
   "purpose": "Material Receipt"
  },
 
@@ -42,7 +43,8 @@
    }
   ],
   "posting_date": "2013-01-25",
-  "purpose": "Material Issue"
+  "purpose": "Material Issue",
+  "stock_entry_type": "Material Issue"
  },
 
 
@@ -67,7 +69,8 @@
    }
   ],
   "posting_date": "2013-01-25",
-  "purpose": "Material Transfer"
+  "purpose": "Material Transfer",
+  "stock_entry_type": "Material Transfer"
  },
 
 
@@ -104,6 +107,7 @@
     "uom": "_Test UOM"
    }
   ],
-  "purpose": "Repack"
+  "purpose": "Repack",
+  "stock_entry_type": "Repack"
  }
 ]
