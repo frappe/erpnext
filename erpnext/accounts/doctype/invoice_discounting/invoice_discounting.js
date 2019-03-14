@@ -3,14 +3,14 @@
 
 frappe.ui.form.on('Invoice Discounting', {
 	setup: (frm) => {
-		frm.set_query("sales_invoice", "invoices", (doc, cdt, cdn) => {
+		frm.set_query("sales_invoice", "invoices", (doc) => {
 			return {
 				"filters": {
 					"docstatus": 1,
 					"company": doc.company,
 					"outstanding_amount": [">", 0]
 				}
-			}
+			};
 		});
 
 		frm.events.filter_accounts("bank_account", frm, {"account_type": "Bank"});
@@ -35,13 +35,13 @@ frappe.ui.form.on('Invoice Discounting', {
 	refresh: (frm) => {
 		frm.events.show_general_ledger(frm);
 
-		if(frm.doc.docstatus == 0) {
+		if(frm.doc.docstatus === 0) {
 			frm.add_custom_button(__('Get Invoices'), function() {
 				frm.events.get_invoices(frm);
 			});
 		}
 
-		if(frm.doc.docstatus==1 && frm.doc.status != "Settled") {
+		if(frm.doc.docstatus === 1 && frm.doc.status !== "Settled") {
 			if(frm.doc.status == "Sanctioned") {
 				frm.add_custom_button(__('Disburse Loan'), function() {
 					frm.events.create_disbursement_entry(frm);
@@ -131,7 +131,7 @@ frappe.ui.form.on('Invoice Discounting', {
 							$.each(r.message, function(i, v) {
 								let row = frm.add_child("invoices");
 								$.extend(row, v);
-							})
+							});
 							refresh_field("invoices");
 						}
 					}
@@ -148,11 +148,10 @@ frappe.ui.form.on('Invoice Discounting', {
 			doc: frm.doc,
 			callback: function(r) {
 				if(!r.exc){
-					var doc = frappe.model.sync(r.message);
 					frappe.set_route("Form", r.message.doctype, r.message.name);
 				}
 			}
-		})
+		});
 
 	},
 
@@ -162,11 +161,10 @@ frappe.ui.form.on('Invoice Discounting', {
 			doc: frm.doc,
 			callback: function(r) {
 				if(!r.exc){
-					var doc = frappe.model.sync(r.message);
 					frappe.set_route("Form", r.message.doctype, r.message.name);
 				}
 			}
-		})
+		});
 
 	},
 
@@ -187,10 +185,10 @@ frappe.ui.form.on('Invoice Discounting', {
 });
 
 frappe.ui.form.on('Discounted Invoice', {
-	sales_invoice: (frm, cdt, cdn) => {
+	sales_invoice: (frm) => {
 		frm.events.calculate_total_amount(frm);
 	},
-	invoices_remove: (frm, cdt, cdn) => {
+	invoices_remove: (frm) => {
 		frm.events.calculate_total_amount(frm);
 	}
 });
