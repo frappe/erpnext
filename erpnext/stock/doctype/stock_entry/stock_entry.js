@@ -184,6 +184,23 @@ frappe.ui.form.on('Stock Entry', {
 					}
 				})
 			}, __("Get items from"));
+
+			frm.add_custom_button(__('Material Request'), function() {
+				erpnext.utils.map_current_doc({
+					method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
+					source_doctype: "Material Request",
+					target: frm,
+					date_field: "schedule_date",
+					setters: {
+						company: frm.doc.company,
+					},
+					get_query_filters: {
+						docstatus: 1,
+						material_request_type: "Material Transfer",
+						status: ['!=', 'Transferred']
+					}
+				})
+			}, __("Get items from"));
 		}
 		if (frm.doc.docstatus===0 && frm.doc.purpose == "Material Issue") {
 			frm.add_custom_button(__('Expired Batches'), function() {
