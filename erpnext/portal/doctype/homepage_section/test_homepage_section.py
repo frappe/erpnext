@@ -46,7 +46,6 @@ class TestHomepageSection(unittest.TestCase):
 		self.assertEqual(cards[1].find(class_='website-image-lazy')['data-src'], 'test.jpg')
 
 		# cleanup
-		frappe.set_user('Administrator')
 		frappe.db.rollback()
 
 	def test_homepage_section_custom_html(self):
@@ -57,7 +56,6 @@ class TestHomepageSection(unittest.TestCase):
 			'section_html': '<div class="custom-section">My custom html</div>',
 		}).insert()
 
-		frappe.set_user('Guest')
 		set_request(method='GET', path='home')
 		response = render()
 
@@ -73,5 +71,4 @@ class TestHomepageSection(unittest.TestCase):
 		self.assertEqual(homepage_section.text, 'My custom html')
 
 		# cleanup
-		frappe.set_user('Administrator')
 		frappe.db.rollback()

@@ -23,7 +23,6 @@ class TestProductConfigurator(unittest.TestCase):
 		products_settings.append('filter_fields', {'fieldname': 'stock_uom'})
 		products_settings.save()
 
-		frappe.set_user('Guest')
 		html = get_html_for_route('all-products')
 
 		soup = BeautifulSoup(html, 'html.parser')
