@@ -3,11 +3,13 @@
 # See license.txt
 from __future__ import unicode_literals
 from erpnext.education.doctype.course.test_course import make_course
+from erpnext.education.doctype.topic.test_topic import make_topic_and_linked_content
+from erpnext.education.doctype.course.test_course import make_course_and_linked_topic
 
 import frappe
 import unittest
 
-# test_records = frappe.get_test_records('Program')
+test_data = frappe.get_test_records('Program')
 
 class TestProgram(unittest.TestCase):
 	def setUp(self):
@@ -42,3 +44,15 @@ def make_program_and_linked_courses(program_name, course_name_list):
 	program.save()
 	return program
 
+def setup_program():
+	topic_list = [course['topic'] for course in test_data['course']]
+	for topic in topic_list[0]:
+		make_topic_and_linked_content(topic['topic_name'], topic['content'])
+
+	all_courses_list = [{'course': course['course_name'], 'topic': [topic['topic_name'] for topic in course['topic']]} for course in test_data['course']] # returns [{'course': 'Applied Math', 'topic': ['Trignometry', 'Geometry']}]
+	for course in all_courses_list:
+		make_course_and_linked_topic(course['course'], course['topic'])
+
+	course_list = [course['course_name'] for course in test_data['course']]
+	program = make_program_and_linked_courses(test_data['program_name'], course_list)
+	return program

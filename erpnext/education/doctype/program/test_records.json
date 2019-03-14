@@ -1,12 +1,27 @@
-[
-	{
-		"program_name": "_Test Program",
-		"program_code": "_TP1",
-		"program_abbreviation": "TP1"
-	},
-	{
-		"program_name": "_Test Program 2",
-		"program_code": "_TP2",
-		"program_abbreviation": "TP2"
-	}
-]
+{
+	"program_name": "_Test Program",
+	"course": [{
+		"course_name": "_Test Course 1",
+		"topic": [{
+				"topic_name": "_Test Topic 1-1",
+				"content": [{
+					"type": "Article",
+					"name": "_Test Article 1-1"
+				}, {
+					"type": "Article",
+					"name": "_Test Article 1-2"
+				}]
+			},
+			{
+				"topic_name": "_Test Topic 1-2",
+				"content": [{
+					"type": "Article",
+					"name": "_Test Article 1-3"
+				}, {
+					"type": "Article",
+					"name": "_Test Article 1-4"
+				}]
+			}
+		]
+	}]
+}
