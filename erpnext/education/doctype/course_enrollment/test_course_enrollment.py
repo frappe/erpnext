@@ -9,8 +9,8 @@ import unittest
 
 from erpnext.education.doctype.student.test_student import create_student
 from erpnext.education.doctype.student.test_student import get_student
-
 from erpnext.education.doctype.program.test_program import setup_program
+from erpnext.education.doctype.course_activity.test_course_activity import make_course_activity
 
 class TestCourseEnrollment(unittest.TestCase):
 	def setUp(self):
@@ -31,16 +31,4 @@ class TestCourseEnrollment(unittest.TestCase):
 		frappe.db.rollback()
 
 
-def make_course_activity(enrollment, content_type, content):
-	activity = frappe.get_all("Course Activity", filters={'enrollment': enrollment, 'content_type': content_type, 'content': content})
-	try:
-		activity = frappe.get_doc("Course Activity", activity[0]['name'])
-	except (IndexError, frappe.DoesNotExistError):
-		activity = frappe.get_doc({
-			"doctype": "Course Activity",
-			"enrollment": enrollment,
-			"content_type": content_type,
-			"content": content,
-			"activity_date": frappe.utils.datetime.datetime.now()
-		}).insert()
-	return activity
+
