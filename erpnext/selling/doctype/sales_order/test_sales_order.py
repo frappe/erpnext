@@ -573,7 +573,8 @@ class TestSalesOrder(unittest.TestCase):
 				"item_code": item.get("item_code"),
 				"pending_qty": item.get("pending_qty"),
 				"sales_order_item": item.get("sales_order_item"),
-				"bom": item.get("bom")
+				"bom": item.get("bom"),
+				"description": item.get("description")
 			})
 			so_item_name[item.get("sales_order_item")]= item.get("pending_qty")
 		make_work_orders(json.dumps({"items":po_items}), so.name, so.company)
