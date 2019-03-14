@@ -43,7 +43,7 @@ class ExpenseClaim(AccountsController):
 		paid_amount = flt(self.total_amount_reimbursed) + flt(self.total_advance_amount)
 		precision = self.precision("total_sanctioned_amount")
 		if (self.is_paid or (flt(self.total_sanctioned_amount) > 0
-			and flt(self.total_sanctioned_amount, precision) ==  flt(paid_amount, precision))) \
+			and flt(self.total_sanctioned_amount, precision) == flt(paid_amount, precision))) \
 			and self.docstatus == 1 and self.approval_status == 'Approved':
 				self.status = "Paid"
 		elif flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
@@ -200,14 +200,14 @@ class ExpenseClaim(AccountsController):
 		self.total_advance_amount = 0
 		for d in self.get("advances"):
 			ref_doc = frappe.db.get_value("Employee Advance", d.employee_advance,
-				["posting_date", "paid_amount", "claimed_amount", "advance_account"], as_dict=1)
+				["posting_date", "paid_amount", "balance_amount", "advance_account"], as_dict=1)
 			d.posting_date = ref_doc.posting_date
 			d.advance_account = ref_doc.advance_account
 			d.advance_paid = ref_doc.paid_amount
-			d.unclaimed_amount = flt(ref_doc.paid_amount) - flt(ref_doc.claimed_amount)
+			d.unclaimed_amount = -flt(ref_doc.balance_amount)
 
 			if d.allocated_amount and flt(d.allocated_amount) > flt(d.unclaimed_amount):
-				frappe.throw(_("Row {0}# Allocated amount {1} cannot be greater than unclaimed amount {2}")
+				frappe.throw(_("Row #{0} Allocated amount {1} cannot be greater than unclaimed amount {2}")
 					.format(d.idx, d.allocated_amount, d.unclaimed_amount))
 
 			self.total_advance_amount += flt(d.allocated_amount)
@@ -300,7 +300,7 @@ def get_advances(employee, advance_id=None):
 
 	return frappe.db.sql("""
 		select 
-			name, posting_date, paid_amount, claimed_amount, advance_account
+			name, posting_date, paid_amount, balance_amount, advance_account
 		from 
 			`tabEmployee Advance`
 		where {0}
@@ -325,8 +325,8 @@ def get_expense_claim(dt, dn):
 		'employee_advance': doc.name,
 		'posting_date': doc.posting_date,
 		'advance_paid': flt(doc.paid_amount),
-		'unclaimed_amount': flt(doc.paid_amount) - flt(doc.claimed_amount),
-		'allocated_amount': flt(doc.paid_amount) - flt(doc.claimed_amount)
+		'unclaimed_amount': -flt(doc.balance_amount),
+		'allocated_amount': -flt(doc.balance_amount)
 	})
 
 	return expense_claim

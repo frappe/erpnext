@@ -132,8 +132,7 @@ frappe.ui.form.on("Expense Claim", {
 				filters: [
 					['docstatus', '=', 1],
 					['employee', '=', doc.employee],
-					['paid_amount', '>', 0],
-					['paid_amount', '>', 'claimed_amount']
+					['balance_amount', '<', 0]
 				]
 			};
 		});
@@ -179,7 +178,7 @@ frappe.ui.form.on("Expense Claim", {
 		}
 
 		if (frm.doc.docstatus===1
-				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
+				&& (flt(frm.doc.total_amount_reimbursed) + flt(frm.doc.total_advance_amount) < flt(frm.doc.total_sanctioned_amount))
 				&& frappe.model.can_create("Payment Entry")) {
 			frm.add_custom_button(__('Payment'),
 				function() { frm.events.make_payment_entry(frm); }, __("Make"));
@@ -262,8 +261,8 @@ frappe.ui.form.on("Expense Claim", {
 							row.posting_date = d.posting_date;
 							row.advance_account = d.advance_account;
 							row.advance_paid = d.paid_amount;
-							row.unclaimed_amount = flt(d.paid_amount) - flt(d.claimed_amount);
-							row.allocated_amount = flt(d.paid_amount) - flt(d.claimed_amount);
+							row.unclaimed_amount = -flt(d.balance_amount);
+							row.allocated_amount = -flt(d.balance_amount);
 						});
 						refresh_field("advances");
 					}
@@ -312,8 +311,8 @@ frappe.ui.form.on("Expense Claim Advance", {
 						child.posting_date = r.message[0].posting_date;
 						child.advance_account = r.message[0].advance_account;
 						child.advance_paid = r.message[0].paid_amount;
-						child.unclaimed_amount = flt(r.message[0].paid_amount) - flt(r.message[0].claimed_amount);
-						child.allocated_amount = flt(r.message[0].paid_amount) - flt(r.message[0].claimed_amount);
+						child.unclaimed_amount = -flt(r.message[0].balance_amount);
+						child.allocated_amount = -flt(r.message[0].balance_amount);
 						refresh_field("advances");
 					}
 				}

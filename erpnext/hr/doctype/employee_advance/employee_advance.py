@@ -40,7 +40,7 @@ class EmployeeAdvance(StatusUpdater):
 				and against_voucher = %s
 				and party_type = 'Employee'
 				and party = %s
-				and voucher_type not in ('Expense Claim', 'Purchase Invoice')
+				and voucher_type != 'Expense Claim'
 		""", (self.name, self.employee), as_dict=1)[0]
 
 		if flt(payments.paid_amount) > self.advance_amount:
