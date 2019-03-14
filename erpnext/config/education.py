@@ -189,6 +189,7 @@ def get_data():
 					"name": "Program",
 				},
 				{
+					"type": "doctype",
 					"name": "Course",
 					"onboard": 1,
 				},
@@ -201,6 +202,7 @@ def get_data():
 					"name": "Topic",
 				},
 				{
+					"type": "doctype",
 					"name": "Instructor",
 					"onboard": 1,
 				},
