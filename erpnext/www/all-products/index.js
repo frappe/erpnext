@@ -53,7 +53,7 @@ $(() => {
 				const query_string = get_query_string({
 					field_filters: JSON.stringify(if_key_exists(this.field_filters)),
 					attribute_filters: JSON.stringify(if_key_exists(this.attribute_filters)),
-				})
+				});
 				window.history.pushState('filters', '', '/all-products?' + query_string);
 
 				$('.page_content input').prop('disabled', true);
@@ -65,7 +65,7 @@ $(() => {
 						$('.page_content input').prop('disabled', false);
 						return data;
 					})
-					.catch(e => {
+					.catch(() => {
 						$('.page_content input').prop('disabled', false);
 					});
 			}, 1000));
@@ -109,7 +109,7 @@ $(() => {
 				for (let attribute in attribute_filters) {
 					const values = attribute_filters[attribute];
 					const selector = values.map(value => {
-						return `input[data-attribute-name="${attribute}"][data-attribute-value="${value}"]`
+						return `input[data-attribute-name="${attribute}"][data-attribute-value="${value}"]`;
 					}).join(',');
 					$(selector).prop('checked', true);
 				}
