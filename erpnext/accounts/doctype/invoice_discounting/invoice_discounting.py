@@ -103,7 +103,6 @@ class InvoiceDiscounting(AccountsController):
 			"reference_type": "Invoice Discounting",
 			"reference_name": self.name
 		})
-
 		for d in self.invoices:
 			je.append("accounts", {
 				"account": self.accounts_receivable_discounted,
@@ -123,7 +122,7 @@ class InvoiceDiscounting(AccountsController):
 				"party": d.customer
 			})
 
-		return je.as_dict()
+		return je
 
 	def close_loan(self):
 		je = frappe.new_doc("Journal Entry")
@@ -163,7 +162,7 @@ class InvoiceDiscounting(AccountsController):
 					"party": d.customer
 				})
 
-		return je.as_dict()
+		return je
 
 @frappe.whitelist()
 def get_invoices(filters):
