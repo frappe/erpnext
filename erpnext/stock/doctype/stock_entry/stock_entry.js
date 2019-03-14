@@ -14,6 +14,16 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		});
 
+		frm.set_query('outward_stock_entry', function() {
+			return {
+				filters: [
+					['Stock Entry', 'docstatus', '=', 1],
+					['Stock Entry', 'per_transferred', '<','100'],
+					['Stock Entry', 'purpose', '=', 'Stock Out']
+				]
+			}
+		});
+
 		frappe.db.get_value('Stock Settings', {name: 'Stock Settings'}, 'sample_retention_warehouse', (r) => {
 			if (r.sample_retention_warehouse) {
 				var filters = [
@@ -92,6 +102,16 @@ frappe.ui.form.on('Stock Entry', {
 		});
 	},
 
+	outward_stock_entry: function(frm) {
+		frappe.call({
+			doc: frm.doc,
+			method: "set_items_for_stock_in",
+			callback: function(r) {
+				refresh_field('items');
+			}
+		});
+	},
+
 	refresh: function(frm) {
 		if(!frm.doc.docstatus) {
 			frm.trigger('validate_purpose_consumption');
@@ -137,6 +157,16 @@ frappe.ui.form.on('Stock Entry', {
 					})
 				});
 			}
+		}
+
+		if (frm.doc.docstatus === 1
+			&& frm.doc.purpose == 'Stock Out') {
+			frm.add_custom_button(__('Make Stock In Entry'), function() {
+				frappe.model.open_mapped_doc({
+					method: "erpnext.stock.doctype.stock_entry.stock_entry.make_stock_in_entry",
+					frm: frm
+				})
+			});
 		}
 
 		if (frm.doc.docstatus===0) {
@@ -457,6 +487,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 				'voucher_no'		: d.name,
 				'allow_zero_valuation': 1,
 			};
+
 			return frappe.call({
 				doc: frm.doc,
 				method: "get_item_details",
@@ -721,8 +752,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
 	},
 
-	source_mandatory: ["Material Issue", "Material Transfer", "Subcontract", "Material Transfer for Manufacture"],
-	target_mandatory: ["Material Receipt", "Material Transfer", "Subcontract", "Material Transfer for Manufacture"],
+	source_mandatory: ["Material Issue", "Material Transfer", "Subcontract",
+		"Material Transfer for Manufacture", "Stock Out", "Stock In"],
+	target_mandatory: ["Material Receipt", "Material Transfer", "Subcontract",
+		"Material Transfer for Manufacture", "Stock Out", "Stock In"],
 
 	from_warehouse: function(doc) {
 		var me = this;
@@ -787,6 +820,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			doc.purpose!='Material Issue');
 
 		this.frm.fields_dict["items"].grid.set_column_disp("additional_cost", doc.purpose!='Material Issue');
+		this.frm.toggle_reqd("outward_stock_entry",
+			doc.purpose == 'Stock In' ? 1: 0);
 	},
 
 	supplier: function(doc) {
