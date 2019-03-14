@@ -17,15 +17,17 @@ class CashierClosing(Document):
 		self.make_calculations()
 
 	def get_outstanding(self):
-		values = frappe.db.sql("select outstanding_amount from `tabSales Invoice` where posting_date=%s and posting_time>=%s and posting_time<=%s and owner=%s", (self.date, self.from_time, self.time, self.user))
-		self.outstanding_amount = 0.00
-		for i in values :
-			self.outstanding_amount += i[0]
+		values = frappe.db.sql("""
+			select sum(outstanding_amount)
+			from `tabSales Invoice`
+			where posting_date=%s and posting_time>=%s and posting_time<=%s and owner=%s
+		""", (self.date, self.from_time, self.time, self.user))
+		self.outstanding_amount = flt(values[0][0] if values else 0)
 			
 	def make_calculations(self):
 		total = 0.00
 		for i in self.payments:
-			total += i.amount
+			total += flt(i.amount)
 
 		self.net_amount = total + self.outstanding_amount + self.expense - self.custody + self.returns
 
