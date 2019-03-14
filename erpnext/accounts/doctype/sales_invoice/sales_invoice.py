@@ -205,6 +205,12 @@ class SalesInvoice(SellingController):
 	def before_cancel(self):
 		self.update_time_sheet(None)
 
+	def before_print(self):
+		self.gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Sales Invoice",
+			"voucher_no": self.name} ,
+			fields=["account", "party_type", "party", "debit", "credit"]
+		)
+
 	def on_cancel(self):
 		self.check_close_sales_order("sales_order")
 
@@ -523,8 +529,8 @@ class SalesInvoice(SellingController):
 
 	def validate_pos(self):
 		if self.is_return:
-			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(self.grand_total) < \
-				1/(10**(self.precision("grand_total") + 1)):
+			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(self.grand_total) > \
+				1.0/(10.0**(self.precision("grand_total") + 1.0)):
 					frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
 	def validate_item_code(self):
@@ -1012,9 +1018,10 @@ class SalesInvoice(SellingController):
 			for serial_no in item.serial_no.split("\n"):
 				sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
 				if sales_invoice and self.name != sales_invoice:
-					frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
-						serial_no, sales_invoice
-					)))
+					sales_invoice_company = frappe.db.get_value("Sales Invoice", sales_invoice, "company")
+					if sales_invoice_company == self.company:
+						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}"
+							.format(serial_no, sales_invoice)))
 
 	def update_project(self):
 		if self.project:
