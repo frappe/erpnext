@@ -100,15 +100,15 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			if(!in_list(["Closed", "Delivered"], doc.status)) {
 				if (this.frm.has_perm("submit")) {
 					if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) {
-						cur_frm.add_custom_button(__('Close'), this.close_purchase_order, __("Status"));
 						if (doc.status != "On Hold") {
 							cur_frm.add_custom_button(__('Hold'),
-								function() {
-									me.hold_purchase_order();
-								}, __("Status"));
+							function() {
+								me.hold_purchase_order();
+							}, __("Status"));
 						} else{
 							cur_frm.add_custom_button(__('Resume'), this.unhold_purchase_order, __("Status"));
 						}
+						cur_frm.add_custom_button(__('Close'), this.close_purchase_order, __("Status"));
 					}
 				}
 
