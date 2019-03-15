@@ -140,7 +140,7 @@ def make_custom_fields(update=True):
 	purchase_invoice_itc_fields = [
 			dict(fieldname='eligibility_for_itc', label='Eligibility For ITC',
 				fieldtype='Select', insert_after='gst_col_break', print_hide=1,
-				options='Input Service Distributor\nImport Of Service\nImport Of Capital Goods\nIneligible\nAll Other ITC', default="Ineligible"),
+				options='Input Service Distributor\nImport Of Service\nImport Of Capital Goods\nIneligible\nAll Other ITC', default="All Other ITC"),
 			dict(fieldname='itc_integrated_tax', label='Availed ITC Integrated Tax',
 				fieldtype='Data', insert_after='eligibility_for_itc', print_hide=1),
 			dict(fieldname='itc_central_tax', label='Availed ITC Central Tax',

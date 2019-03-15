@@ -18,7 +18,7 @@ class TestGSTR3BReport(unittest.TestCase):
 		frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company GST'")
 
 		make_company()
-		make_item("Milk", properties = {"is_nil_exempt": 1})
+		make_item("Milk", properties = {"is_nil_exempt": 1, "standard_rate": 0.000000})
 		set_account_heads()
 		make_customers()
 		make_suppliers()
