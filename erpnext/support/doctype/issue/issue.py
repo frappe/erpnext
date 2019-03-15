@@ -7,20 +7,24 @@ import json
 from frappe import _
 
 from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
 from frappe.utils import now
 from frappe.utils.user import is_website_user
 
 sender_field = "raised_by"
+
 
 class Issue(Document):
 	def get_feed(self):
 		return "{0}: {1}".format(_(self.status), self.subject)
 
 	def validate(self):
-		if (self.get("__islocal") and self.via_customer_portal):
+		if self.is_new() and self.via_customer_portal:
 			self.flags.create_communication = True
+
 		if not self.raised_by:
 			self.raised_by = frappe.session.user
+
 		self.update_status()
 		self.set_lead_contact(self.raised_by)
 
@@ -29,17 +33,19 @@ class Issue(Document):
 			clear(self.doctype, self.name)
 
 	def on_update(self):
-		# create the communication email and remove the description
-		if (self.flags.create_communication and self.via_customer_portal):
+		# Add a communication in the issue timeline
+		if self.flags.create_communication and self.via_customer_portal:
 			self.create_communication()
 			self.flags.communication_created = None
 
 	def set_lead_contact(self, email_id):
 		import email.utils
+
 		email_id = email.utils.parseaddr(email_id)[1]
 		if email_id:
 			if not self.lead:
 				self.lead = frappe.db.get_value("Lead", {"email_id": email_id})
+
 			if not self.contact and not self.customer:
 				self.contact = frappe.db.get_value("Contact", {"email_id": email_id})
 
@@ -79,23 +85,29 @@ class Issue(Document):
 		communication.ignore_mandatory = True
 		communication.save()
 
-		self.db_set("description", "")
-
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
 		from copy import deepcopy
+
 		replicated_issue = deepcopy(self)
 		replicated_issue.subject = subject
 		frappe.get_doc(replicated_issue).insert()
+
 		# Replicate linked Communications
-		# todo get all communications in timeline before this, and modify them to append them to new doc
+		# TODO: get all communications in timeline before this, and modify them to append them to new doc
 		comm_to_split_from = frappe.get_doc("Communication", communication_id)
-		communications = frappe.get_all("Communication", filters={"reference_name": comm_to_split_from.reference_name, "reference_doctype": "Issue", "creation": ('>=', comm_to_split_from.creation)})
+		communications = frappe.get_all("Communication",
+			filters={"reference_doctype": "Issue",
+				"reference_name": comm_to_split_from.reference_name,
+				"creation": ('>=', comm_to_split_from.creation)})
+
 		for communication in communications:
 			doc = frappe.get_doc("Communication", communication.name)
 			doc.reference_name = replicated_issue.name
 			doc.save(ignore_permissions=True)
+
 		return replicated_issue.name
+
 
 def get_list_context(context=None):
 	return {
@@ -107,11 +119,14 @@ def get_list_context(context=None):
 		'no_breadcrumbs': True
 	}
 
+
 def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by=None):
 	from frappe.www.list import get_list
+
 	user = frappe.session.user
 	contact = frappe.db.get_value('Contact', {'user': user}, 'name')
 	customer = None
+
 	if contact:
 		contact_doc = frappe.get_doc('Contact', contact)
 		customer = contact_doc.get_link_for('Customer')
@@ -124,14 +139,23 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 
 	return get_list(doctype, txt, filters, limit_start, limit_page_length, ignore_permissions=ignore_permissions)
 
+
+@frappe.whitelist()
+def set_multiple_status(names, status):
+	names = json.loads(names)
+	for name in names:
+		set_status(name, status)
+
+
 @frappe.whitelist()
 def set_status(name, status):
 	st = frappe.get_doc("Issue", name)
 	st.status = status
 	st.save()
 
+
 def auto_close_tickets():
-	""" auto close the replied support tickets after 7 days """
+	"""Auto-close replied support tickets after 7 days"""
 	auto_close_after_days = frappe.db.get_value("Support Settings", "Support Settings", "close_issue_after_days") or 7
 
 	issues = frappe.db.sql(""" select name from tabIssue where status='Replied' and
@@ -144,11 +168,6 @@ def auto_close_tickets():
 		doc.flags.ignore_mandatory = True
 		doc.save()
 
-@frappe.whitelist()
-def set_multiple_status(names, status):
-	names = json.loads(names)
-	for name in names:
-		set_status(name, status)
 
 def has_website_permission(doc, ptype, user, verbose=False):
 	from erpnext.controllers.website_list_for_contact import has_website_permission
@@ -160,3 +179,12 @@ def has_website_permission(doc, ptype, user, verbose=False):
 def update_issue(contact, method):
 	"""Called when Contact is deleted"""
 	frappe.db.sql("""UPDATE `tabIssue` set contact='' where contact=%s""", contact.name)
+
+
+@frappe.whitelist()
+def make_task(source_name, target_doc=None):
+	return get_mapped_doc("Issue", source_name, {
+		"Issue": {
+			"doctype": "Task"
+		}
+	}, target_doc)
