@@ -62,6 +62,7 @@ class StockEntry(StockController):
 		self.validate_inspection()
 		self.validate_fg_completed_qty()
 		self.set_job_card_data()
+		self.set_purpose_for_stock_entry()
 
 		if not self.from_bom:
 			self.fg_completed_qty = 0.0
@@ -486,9 +487,14 @@ class StockEntry(StockController):
 			self.total_amount = sum([flt(item.amount) for item in self.get("items")])
 
 	def set_stock_entry_type(self):
-		if not self.stock_entry_type and self.purpose:
+		if self.purpose:
 			self.stock_entry_type = frappe.get_cached_value('Stock Entry Type',
 				{'purpose': self.purpose}, 'name')
+
+	def set_purpose_for_stock_entry(self):
+		if self.stock_entry_type and not self.purpose:
+			self.purpose = frappe.get_cached_value('Stock Entry Type',
+				self.stock_entry_type, 'purpose')
 
 	def validate_purchase_order(self):
 		"""Throw exception if more raw material is transferred against Purchase Order than in
@@ -1248,12 +1254,10 @@ def move_sample_to_retention_warehouse(company, items):
 	if stock_entry.get('items'):
 		return stock_entry.as_dict()
 
-
 @frappe.whitelist()
 def make_stock_in_entry(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.purpose = 'Stock In'
-		target.stock_entry_type = ''
 		target.set_stock_entry_type()
 
 	def update_item(source_doc, target_doc, source_parent):

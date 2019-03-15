@@ -92,6 +92,8 @@ def install(country=None):
 		{'doctype': 'Stock Entry Type', 'name': 'Subcontract', 'purpose': 'Subcontract'},
 		{'doctype': 'Stock Entry Type', 'name': 'Material Transfer for Manufacture', 'purpose': 'Material Transfer for Manufacture'},
 		{'doctype': 'Stock Entry Type', 'name': 'Material Consumption for Manufacture', 'purpose': 'Material Consumption for Manufacture'},
+		{'doctype': 'Stock Entry Type', 'name': 'Stock Out', 'purpose': 'Stock Out'},
+		{'doctype': 'Stock Entry Type', 'name': 'Stock In', 'purpose': 'Stock In'},
 
 		# Designation
 		{'doctype': 'Designation', 'designation_name': _('CEO')},

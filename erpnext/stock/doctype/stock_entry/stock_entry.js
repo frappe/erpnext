@@ -106,7 +106,7 @@ frappe.ui.form.on('Stock Entry', {
 		frappe.call({
 			doc: frm.doc,
 			method: "set_items_for_stock_in",
-			callback: function(r) {
+			callback: function() {
 				refresh_field('items');
 			}
 		});

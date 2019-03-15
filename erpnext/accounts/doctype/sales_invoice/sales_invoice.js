@@ -89,7 +89,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}, __('Create'));
 			}
 
-			if (doc.docstatus == 1) {
+			if (doc.docstatus === 1) {
 				cur_frm.add_custom_button(__('Maintenance Schedule'), function () {
 					cur_frm.cscript.make_maintenance_schedule();
 				}, __('Create'));
