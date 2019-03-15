@@ -1,6 +1,40 @@
 frappe.ui.form.on("Issue", {
 	onload: function(frm) {
 		frm.email_field = "raised_by";
+
+		var element_respond = 	'<div class="frappe-control input-max-width" data-fieldtype="Float" data-fieldname="time_to_respond">'+
+									'<div class="form-group">'+
+										'<div class="clearfix">'+
+											'<label class="control-label" style="padding-right: 0px;">'+
+												'Time to Respond'+
+											'</label>'+
+										"</div>"+
+										'<div class="control-input-wrapper">'+
+											'<div class="control-input" style="display: none;"></div>'+
+											'<div class="control-value like-disabled-input" style="">'+ frappe.datetime.comment_when(frm.doc.response_by) +'</div>'+
+												'<p class="help-box small text-muted hidden-xs"></p>'+
+										'</div>'+
+									'</div>'+
+								'</div>'
+		var insert_after = $('div[data-fieldname="customer"]');
+		$(element_respond).insertAfter(insert_after);
+
+		var element_resolve = 	'<div class="frappe-control input-max-width" data-fieldtype="Float" data-fieldname="time_to_resolve" title="time_to_resolve">'+
+									'<div class="form-group">'+
+										'<div class="clearfix">'+
+											'<label class="control-label" style="padding-right: 0px;">'+
+												'Time to Resolve'+
+											'</label>'+
+										'</div>'+
+										'<div class="control-input-wrapper">'+
+											'<div class="control-input" style="display: none;"></div>'+
+											'<div class="control-value like-disabled-input" style="">'+ frappe.datetime.comment_when(frm.doc.resolution_by) +'</div>'+
+											'<p class="help-box small text-muted hidden-xs"></p>'+
+										'</div>'+
+									'</div>'+
+								'</div>';
+		var insert_after = $('div[data-fieldname="email_account"]');
+		$(element_resolve).insertAfter(insert_after);
 	},
 
 	refresh: function(frm) {
@@ -37,7 +71,7 @@ frappe.ui.form.on("Issue", {
 		if (!frm.timeline.wrapper.find('.btn-split-issue').length) {
 			let split_issue = __("Split Issue")
 			$(`<button class="btn btn-xs btn-link btn-add-to-kb text-muted hidden-xs btn-split-issue pull-right" style="display:inline-block; margin-right: 15px">
-				${split_issue} 
+				${split_issue}
 			</button>`)
 				.appendTo(frm.timeline.wrapper.find('.comment-header .asset-details:not([data-communication-type="Comment"])'))
 			if (!frm.timeline.wrapper.data("split-issue-event-attached")){
