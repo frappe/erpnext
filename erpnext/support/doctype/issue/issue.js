@@ -11,7 +11,7 @@ frappe.ui.form.on("Issue", {
 										"</div>"+
 										'<div class="control-input-wrapper">'+
 											'<div class="control-input" style="display: none;"></div>'+
-											'<div class="control-value like-disabled-input" style="">'+ frappe.datetime.comment_when(frm.doc.response_by) +'</div>'+
+											'<div class="control-value like-disabled-input" style="">'+ comment_when(frm.doc.response_by, true) +'</div>'+
 												'<p class="help-box small text-muted hidden-xs"></p>'+
 										'</div>'+
 									'</div>'+
@@ -28,7 +28,7 @@ frappe.ui.form.on("Issue", {
 										'</div>'+
 										'<div class="control-input-wrapper">'+
 											'<div class="control-input" style="display: none;"></div>'+
-											'<div class="control-value like-disabled-input" style="">'+ frappe.datetime.comment_when(frm.doc.resolution_by) +'</div>'+
+											'<div class="control-value like-disabled-input" style="">'+ comment_when(frm.doc.resolution_by, true) +'</div>'+
 											'<p class="help-box small text-muted hidden-xs"></p>'+
 										'</div>'+
 									'</div>'+
@@ -37,14 +37,21 @@ frappe.ui.form.on("Issue", {
 		$(element_resolve).insertAfter(insert_after);
 	},
 
-	refresh: function(frm) {
-		if(frm.doc.status!=="Closed") {
-			frm.add_custom_button(__("Close"), function() {
+	refresh: function (frm) {
+		if (frm.doc.status !== "Closed") {
+			frm.add_custom_button(__("Close"), function () {
 				frm.set_value("status", "Closed");
 				frm.save();
 			});
+
+			frm.add_custom_button(__("Task"), function () {
+				frappe.model.open_mapped_doc({
+					method: "erpnext.support.doctype.issue.issue.make_task",
+					frm: frm
+				});
+			}, __("Make"));
 		} else {
-			frm.add_custom_button(__("Reopen"), function() {
+			frm.add_custom_button(__("Reopen"), function () {
 				frm.set_value("status", "Open");
 				frm.save();
 			});
