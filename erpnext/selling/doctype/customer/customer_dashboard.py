@@ -23,6 +23,8 @@ def get_data():
 			{
 				'label': _('Service Level Agreement'),
 				'items': ['Service Level Agreement']
+			},
+			{
 				'label': _('Payments'),
 				'items': ['Payment Entry']
 			},

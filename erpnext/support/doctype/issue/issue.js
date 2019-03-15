@@ -1,40 +1,8 @@
 frappe.ui.form.on("Issue", {
 	onload: function(frm) {
 		frm.email_field = "raised_by";
-
-		var element_respond = 	'<div class="frappe-control input-max-width" data-fieldtype="Float" data-fieldname="time_to_respond">'+
-									'<div class="form-group">'+
-										'<div class="clearfix">'+
-											'<label class="control-label" style="padding-right: 0px;">'+
-												'Time to Respond'+
-											'</label>'+
-										"</div>"+
-										'<div class="control-input-wrapper">'+
-											'<div class="control-input" style="display: none;"></div>'+
-											'<div class="control-value like-disabled-input" style="">'+ comment_when(frm.doc.response_by, true) +'</div>'+
-												'<p class="help-box small text-muted hidden-xs"></p>'+
-										'</div>'+
-									'</div>'+
-								'</div>'
-		var insert_after = $('div[data-fieldname="customer"]');
-		$(element_respond).insertAfter(insert_after);
-
-		var element_resolve = 	'<div class="frappe-control input-max-width" data-fieldtype="Float" data-fieldname="time_to_resolve" title="time_to_resolve">'+
-									'<div class="form-group">'+
-										'<div class="clearfix">'+
-											'<label class="control-label" style="padding-right: 0px;">'+
-												'Time to Resolve'+
-											'</label>'+
-										'</div>'+
-										'<div class="control-input-wrapper">'+
-											'<div class="control-input" style="display: none;"></div>'+
-											'<div class="control-value like-disabled-input" style="">'+ comment_when(frm.doc.resolution_by, true) +'</div>'+
-											'<p class="help-box small text-muted hidden-xs"></p>'+
-										'</div>'+
-									'</div>'+
-								'</div>';
-		var insert_after = $('div[data-fieldname="email_account"]');
-		$(element_resolve).insertAfter(insert_after);
+		console.log("this.set_time_to_resolve_and_response()");
+		this.set_time_to_resolve_and_response();
 	},
 
 	refresh: function (frm) {
@@ -108,5 +76,35 @@ frappe.ui.form.on("Issue", {
 				frm.timeline.wrapper.data("split-issue-event-attached", true)
 			}
 		}
+	},
+	set_time_to_resolve_and_response: function(frm) {
+		const customer = $('div[data-fieldname="customer"]');
+		const email_account = $('div[data-fieldname="email_account"]');
+
+		const time_to_respond = $(this.get_time_left_element(__('Time To Respond'), frm.doc.response_by));
+		const time_to_resolve = $(this.get_time_left_element(__('Time To Resolve'), frm.doc.resolve_by));
+
+		time_to_respond.insertAfter(customer);
+		time_to_resolve.insertAfter(email_account);
+	},
+	get_time_left_element(label, timestamp) {
+		return `
+			<div class="frappe-control input-max-width">
+			<div class="form-group">
+				<div class="clearfix">
+				<label class="control-label" style="padding-right: 0px;">
+					${label}
+				</label>
+				</div>
+				<div class="control-input-wrapper">
+				<div class="control-value like-disabled-input">${this.get_time_left(timestamp)}</div>
+				</div>
+			</div>
+			</div>
+		`;
+	},
+	get_time_left(timestamp) {
+		const diff = moment(timestamp).diff(moment());
+		return diff >= 44500 ? moment.duration().humanize() : 0;
 	}
 });
