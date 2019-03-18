@@ -274,7 +274,7 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 	outstanding_based_on_gle = frappe.db.sql("""
 		select sum(debit) - sum(credit)
 		from `tabGL Entry` where party_type = 'Customer'
-		and party = %s and company=%s {0}""".format(cond), (customer, company), debug=1)
+		and party = %s and company=%s {0}""".format(cond), (customer, company))
 
 	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
 
