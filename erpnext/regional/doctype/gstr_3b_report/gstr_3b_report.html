@@ -10,26 +10,26 @@
 
 </style>
 <div>
-	<h3 class="text-center">{{ _("GSTR3B-Form")}}</h3>
-	<h5>{{_("GSTIN")}}: &nbsp {{ data.gstin }}</h5>
-	<h5>{{_("Period")}}: &nbsp {{ data.ret_period }}</h5>
+	<h3 class="text-center">{{ __("GSTR3B-Form")}}</h3>
+	<h5>{{__("GSTIN")}}: &nbsp {{ data.gstin }}</h5>
+	<h5>{{__("Period")}}: &nbsp {{ data.ret_period }}</h5>
 </div>
 
-<h5>3.1&nbsp&nbsp{{_("Details of Outward Supplies and inward supplies liable to reverse charge")}}</h5>
+<h5>3.1&nbsp&nbsp{{__("Details of Outward Supplies and inward supplies liable to reverse charge")}}</h5>
 <table class="table table-bordered">
 	<thead>
 		<tr>
-			<th>{{_("Nature Of Supplies")}}</th>
-			<th>{{_("Total Taxable value")}}</th>
-			<th>{{_("Integrated Tax")}}</th>
-			<th>{{_("Central Tax")}}</th>
-			<th>{{_("State/UT Tax")}}</th>
-			<th>{{_("Cess")}}</th>
+			<th>{{__("Nature Of Supplies")}}</th>
+			<th>{{__("Total Taxable value")}}</th>
+			<th>{{__("Integrated Tax")}}</th>
+			<th>{{__("Central Tax")}}</th>
+			<th>{{__("State/UT Tax")}}</th>
+			<th>{{__("Cess")}}</th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr>
-			<td>(a) {{_("Outward taxable supplies(other than zero rated, nil rated and exempted")}}</td>
+			<td>(a) {{__("Outward taxable supplies(other than zero rated, nil rated and exempted")}}</td>
 			<td class="right">{{ data.sup_details.osup_det.txval }}</td>
 			<td class="right">{{ data.sup_details.osup_det.iamt }}</td>
 			<td class="right">{{ data.sup_details.osup_det.camt }}</td>
@@ -37,7 +37,7 @@
 			<td class="right">{{ data.sup_details.osup_det.csamt }}</td>
 		</tr>
 		<tr>
-			<td>(b) {{_("Outward taxable supplies(zero rated)")}}</td>
+			<td>(b) {{__("Outward taxable supplies(zero rated)")}}</td>
 			<td class="right">{{ data.sup_details.osup_zero.txval }}</td>
 			<td class="right">{{ data.sup_details.osup_zero.iamt }}</td>
 			<td class="disabled"></td>
@@ -45,14 +45,14 @@
 			<td class="right">{{ data.sup_details.osup_zero.csamt }}</td>
 		</tr>
 		<tr>
-			<td>(b) {{_("Other outward supplies(Nil rated,Exempted)")}}</td>
+			<td>(b) {{__("Other outward supplies(Nil rated,Exempted)")}}</td>
 			<td class="right">{{ data.sup_details.osup_nil_exmp.txval }}</td>
 			<td class="disabled"></td>
 			<td class="disabled"></td>
 			<td class="disabled"></td>
 			<td class="disabled"></td>
 		<tr>
-			<td>(d) {{_("Inward Supplies(liable to reverse charge")}}</td>
+			<td>(d) {{__("Inward Supplies(liable to reverse charge")}}</td>
 			<td class="right">{{ data.sup_details.isup_rev.txval }}</td>
 			<td class="right">{{ data.sup_details.isup_rev.iamt }}</td>
 			<td class="right">{{ data.sup_details.isup_rev.camt }}</td>
@@ -60,7 +60,7 @@
 			<td class="right">{{ data.sup_details.isup_rev.csamt }}</td>
 		</tr>
 		<tr>
-			<td>(e) {{_("Non-GST outward supplies")}}</td>
+			<td>(e) {{__("Non-GST outward supplies")}}</td>
 			<td class="right">{{ data.sup_details.osup_nongst.txval }}</td>
 			<td class="disabled"></td>
 			<td class="disabled"></td>
@@ -71,21 +71,21 @@
 </table>
 
 <h5>
-	3.2&nbsp&nbsp{{_("Of the supplies shown in 3.1 (a) above, details of inter-State supplies made to unregisterd
+	3.2&nbsp&nbsp{{__("Of the supplies shown in 3.1 (a) above, details of inter-State supplies made to unregisterd
 	persons, composition taxable persons and UIN holders")}}
 </h5>
 <table class="table table-bordered">
 	<thead>
 		<tr>
 			<th></th>
-			<th>{{_("Place Of Supply (State/UT)")}}</th>
-			<th>{{_("Total Taxable Value")}}</th>
-			<th>{{_("Amount of Integrated Tax")}}</th>
+			<th>{{__("Place Of Supply (State/UT)")}}</th>
+			<th>{{__("Total Taxable Value")}}</th>
+			<th>{{__("Amount of Integrated Tax")}}</th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr>
-			<td>{{_("Supplies made to Unregistered Persons")}}</td>
+			<td>{{__("Supplies made to Unregistered Persons")}}</td>
 			<td class="right">
 				{% for row in data.inter_sup.unreg_details %}
 					{% if row %}
@@ -109,7 +109,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td>{{_("Suppliies made to Composition Taxable Persons")}}</td>
+			<td>{{__("Suppliies made to Composition Taxable Persons")}}</td>
 			<td class="right">
 				{% for row in data.inter_sup.unreg_details %}
 					{% if row %}
@@ -133,7 +133,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td>{{_("Supplies made to UIN holders")}}</td>
+			<td>{{__("Supplies made to UIN holders")}}</td>
 			<td class="right">
 				{% for row in data.inter_sup.unreg_details %}
 					{% if row %}
@@ -159,7 +159,7 @@
 	</tbody>
 </table>
 
-<h5>4. &nbsp {{_("Eligible ITC")}}</h5>
+<h5>4. &nbsp {{__("Eligible ITC")}}</h5>
 <table class="table table-bordered">
 		<thead>
 			<tr>
@@ -172,91 +172,91 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td><b>(A) {{_("ITC Available (whether in full op part)")}}</b></td>
+				<td><b>(A) {{__("ITC Available (whether in full op part)")}}</b></td>
 				<td></td>
 				<td></td>
 				<td></td>
 				<td></td>
 			</tr>
 			<tr>
-				<td>&nbsp (1) {{_("Import of goods")}} </td>
+				<td>&nbsp (1) {{__("Import of goods")}} </td>
 				<td class="right">{{ data.itc_elg.itc_avl[0].iamt }}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[0].camt }}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[0].samt }}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[0].csamt }}</td>
 			</tr>
 			<tr>
-				<td>&nbsp (2) {{_("Import of services")}}</td>
+				<td>&nbsp (2) {{__("Import of services")}}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[1].iamt }}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[1].camt }}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[1].samt }}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[1].csamt }}</td>
 			</tr>
 			<tr>
-				<td>&nbsp (3) {{_("Inward supplies liable to reverse charge (other than 1 & 2 above)")}}</td>
+				<td>&nbsp (3) {{__("Inward supplies liable to reverse charge (other than 1 & 2 above)")}}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[2].iamt }}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[2].camt }}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[2].samt }}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[2].csamt }}</td>
 			</tr>
 			<tr>
-				<td>&nbsp (4) {{_("Inward supplies from ISD")}}</td>
+				<td>&nbsp (4) {{__("Inward supplies from ISD")}}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[3].iamt }}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[3].camt }}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[3].samt }}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[3].csamt }}</td>
 			</tr>
 			<tr>
-				<td>&nbsp (5) {{_("All other ITC")}}</td>
+				<td>&nbsp (5) {{__("All other ITC")}}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[4].iamt }}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[4].camt }}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[4].samt }}</td>
 				<td class="right">{{ data.itc_elg.itc_avl[4].csamt }}</td>
 			</tr>
 			<tr>
-				<td><b>(B) {{_("ITC Reversed")}}</b></td>
+				<td><b>(B) {{__("ITC Reversed")}}</b></td>
 				<td></td>
 				<td></td>
 				<td></td>
 				<td></td>
 			</tr>
 			<tr>
-				<td>&nbsp (1) {{_("As per rules 42 & 43 of CGST Rules")}}</td>
+				<td>&nbsp (1) {{__("As per rules 42 & 43 of CGST Rules")}}</td>
 				<td></td>
 				<td></td>
 				<td></td>
 				<td></td>
 			</tr>
 			<tr>
-				<td>&nbsp (2) {{_("Others")}}</td>
+				<td>&nbsp (2) {{__("Others")}}</td>
 				<td></td>
 				<td></td>
 				<td></td>
 				<td></td>
 			</tr>
 			<tr>
-				<td><b>(C) {{_("Net ITC Available(A) - (B)")}}</b></td>
+				<td><b>(C) {{__("Net ITC Available(A) - (B)")}}</b></td>
 				<td class="right">{{ data.itc_elg.itc_net.iamt }}</td>
 				<td class="right">{{ data.itc_elg.itc_net.camt }}</td>
 				<td class="right">{{ data.itc_elg.itc_net.samt }}</td>
 				<td class="right">{{ data.itc_elg.itc_net.csamt }}</td>
 			</tr>
 			<tr>
-				<td><b>(D) {{_("Ineligible ITC")}}</b></td>
+				<td><b>(D) {{__("Ineligible ITC")}}</b></td>
 				<td></td>
 				<td></td>
 				<td></td>
 				<td></td>
 			</tr>
 			<tr>
-				<td>&nbsp (1) {{_("As per section 17(5)")}}</td>
+				<td>&nbsp (1) {{__("As per section 17(5)")}}</td>
 				<td class="right">{{ data.itc_elg.itc_inelg[0].iamt }}</td>
 				<td class="right">{{ data.itc_elg.itc_inelg[0].camt }}</td>
 				<td class="right">{{ data.itc_elg.itc_inelg[0].samt }}</td>
 				<td class="right">{{ data.itc_elg.itc_inelg[0].csamt }}</td>
 			</tr>
 			<tr>
-				<td>&nbsp (2) {{_("Others")}}</td>
+				<td>&nbsp (2) {{__("Others")}}</td>
 				<td class="right">{{ data.itc_elg.itc_inelg[1].iamt }}</td>
 				<td class="right">{{ data.itc_elg.itc_inelg[1].camt }}</td>
 				<td class="right">{{ data.itc_elg.itc_inelg[1].samt }}</td>
@@ -265,23 +265,23 @@
 		</tbody>
 	</table>
 
-<h5>5. &nbsp&nbsp {{_("Values of exempt, nil rated and non-GST inward supplies")}}</h5>
+<h5>5. &nbsp&nbsp {{__("Values of exempt, nil rated and non-GST inward supplies")}}</h5>
 <table class="table table-bordered">
 	<thead>
 		<tr>
-			<th>{{_("Nature of Supplies")}}</th>
-			<th>{{_("Inter-State Supplies")}}</th>
-			<th>{{_("Intra-State Supplies")}}</th>
+			<th>{{__("Nature of Supplies")}}</th>
+			<th>{{__("Inter-State Supplies")}}</th>
+			<th>{{__("Intra-State Supplies")}}</th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr>
-			<td>{{_("From a supplier under composition scheme, Exempt and Nil rated")}}</td>
+			<td>{{__("From a supplier under composition scheme, Exempt and Nil rated")}}</td>
 			<td class="right">{{ data.inward_sup.isup_details[0].inter }}</td>
 			<td class="right">{{ data.inward_sup.isup_details[0].intra }}</td>
 		</tr>
 		<tr>
-			<td>{{_("Non GST Inward Supplies")}}</td>
+			<td>{{__("Non GST Inward Supplies")}}</td>
 			<td class="right">{{ data.inward_sup.isup_details[1].inter }}</td>
 			<td class="right">{{ data.inward_sup.isup_details[1].intra }}</td>
 		</tr>
