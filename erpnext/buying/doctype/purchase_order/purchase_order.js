@@ -25,6 +25,9 @@ frappe.ui.form.on("Purchase Order", {
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 
+		frm.set_indicator_formatter('pricing_rule',
+			function(doc) { return (doc.rule_applied) ? "green" : "red" })
+
 		frm.set_query("blanket_order", "items", function() {
 			return {
 				filters: {
