@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import (cstr, validate_email_add, cint, comma_and, has_gravatar, now, getdate, nowdate)
+from frappe.utils import (cstr, validate_email_address, cint, comma_and, has_gravatar, now, getdate, nowdate)
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
@@ -38,7 +38,7 @@ class Lead(SellingController):
 
 		if self.email_id:
 			if not self.flags.ignore_email_validation:
-				validate_email_add(self.email_id, True)
+				validate_email_address(self.email_id, True)
 
 			if self.email_id == self.lead_owner:
 				frappe.throw(_("Lead Owner cannot be same as the Lead"))
