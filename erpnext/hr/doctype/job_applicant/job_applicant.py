@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 from frappe.model.document import Document
 import frappe
 from frappe import _
-from frappe.utils import comma_and, validate_email_add
+from frappe.utils import comma_and, validate_email_address
 
 sender_field = "email_id"
 
@@ -28,7 +28,7 @@ class JobApplicant(Document):
 	def validate(self):
 		self.check_email_id_is_unique()
 		if self.email_id:
-			validate_email_add(self.email_id, True)
+			validate_email_address(self.email_id, True)
 
 		if not self.applicant_name and self.email_id:
 			guess = self.email_id.split('@')[0]
