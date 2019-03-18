@@ -31,8 +31,10 @@ def get_portal_details():
 	"""
 	Returns portal details from Education Settings Doctype. This contains the Title and Description for LMS amoung other things.
 	"""
+	from erpnext import get_default_company
+
 	settings = frappe.get_doc("Education Settings")
-	title = settings.portal_title
+	title = settings.portal_title or get_default_company()
 	description = settings.description
 	return dict(title=title, description=description)
 
