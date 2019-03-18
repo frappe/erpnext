@@ -35,7 +35,7 @@ def get_data():
 				},
 			]
 		},
-				{
+		{
 			"label": _("Service Level Agreement"),
 			"items": [
 				{
