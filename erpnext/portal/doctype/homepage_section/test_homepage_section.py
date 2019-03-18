@@ -11,18 +11,20 @@ from frappe.website.render import render
 
 class TestHomepageSection(unittest.TestCase):
 	def test_homepage_section_card(self):
-		frappe.get_doc({
-			'doctype': 'Homepage Section',
-			'name': 'Card Section',
-			'section_based_on': 'Cards',
-			'section_cards': [
-				{'title': 'Card 1', 'subtitle': 'Subtitle 1', 'content': 'This is test card 1', 'route': '/card-1'},
-				{'title': 'Card 2', 'subtitle': 'Subtitle 2', 'content': 'This is test card 2', 'image': 'test.jpg'},
-			],
-			'no_of_columns': 3
-		}).insert()
+		try:
+			frappe.get_doc({
+				'doctype': 'Homepage Section',
+				'name': 'Card Section',
+				'section_based_on': 'Cards',
+				'section_cards': [
+					{'title': 'Card 1', 'subtitle': 'Subtitle 1', 'content': 'This is test card 1', 'route': '/card-1'},
+					{'title': 'Card 2', 'subtitle': 'Subtitle 2', 'content': 'This is test card 2', 'image': 'test.jpg'},
+				],
+				'no_of_columns': 3
+			}).insert()
+		except frappe.DuplicateEntryError:
+			pass
 
-		frappe.set_user('Guest')
 		set_request(method='GET', path='home')
 		response = render()
 
@@ -32,9 +34,9 @@ class TestHomepageSection(unittest.TestCase):
 
 		soup = BeautifulSoup(html, 'html.parser')
 		sections = soup.find('main').find_all('section')
-		self.assertEqual(len(sections), 2)
+		self.assertEqual(len(sections), 3)
 
-		homepage_section = sections[1]
+		homepage_section = sections[2]
 		self.assertEqual(homepage_section.h3.text, 'Card Section')
 
 		cards = homepage_section.find_all(class_="card")

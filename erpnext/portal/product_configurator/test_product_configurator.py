@@ -33,7 +33,11 @@ class TestProductConfigurator(unittest.TestCase):
 		items_with_item_group = frappe.get_all('Item', {'item_group': '_Test Item Group Desktops', 'show_in_website': 1})
 		variants_with_item_group = frappe.get_all('Item', {'item_group': '_Test Item Group Desktops', 'show_variant_in_website': 1})
 
-		html = get_html_for_route('all-products?field_filters={"item_group":["_Test Item Group Desktops"]}')
+		# mock query params
+		frappe.form_dict = frappe._dict({
+			'field_filters': '{"item_group":["_Test Item Group Desktops"]}'
+		})
+		html = get_html_for_route('all-products')
 		soup = BeautifulSoup(html, 'html.parser')
 		products_list = soup.find(class_='products-list')
 		items = products_list.find_all(class_='card')

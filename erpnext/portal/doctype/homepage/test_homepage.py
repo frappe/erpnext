@@ -10,7 +10,6 @@ from frappe.website.render import render
 
 class TestHomepage(unittest.TestCase):
 	def test_homepage_load(self):
-		frappe.set_user('Guest')
 		set_request(method='GET', path='home')
 		response = render()
 
