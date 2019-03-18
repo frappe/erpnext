@@ -195,10 +195,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Course"
-				},
-				{
-					"type": "doctype",
 					"name": "Topic",
 				},
 				{
