@@ -8,7 +8,6 @@ from frappe.model.document import Document
 
 class Quiz(Document):
 
-
 	def validate_quiz_attempts(self, enrollment, quiz_name):
 		print(enrollment, quiz_name)
 		if self.max_attempts > 0:
@@ -17,10 +16,6 @@ class Quiz(Document):
 					frappe.throw('Maximum attempts reached!')
 			except:
 				pass
-
-
-	def get_quiz(self):
-		pass
 
 
 	def evaluate(self, response_dict, quiz_name):
