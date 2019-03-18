@@ -248,21 +248,15 @@ frappe.ui.form.on("Expense Claim", {
 		frappe.model.clear_table(frm.doc, "advances");
 		if (frm.doc.employee) {
 			return frappe.call({
-				method: "erpnext.hr.doctype.expense_claim.expense_claim.get_advances",
+				method: "erpnext.hr.doctype.employee_advance.employee_advance.get_outstanding_advances",
 				args: {
 					employee: frm.doc.employee
 				},
 				callback: function(r, rt) {
-
 					if(r.message) {
 						$.each(r.message, function(i, d) {
 							var row = frappe.model.add_child(frm.doc, "Expense Claim Advance", "advances");
-							row.employee_advance = d.name;
-							row.posting_date = d.posting_date;
-							row.advance_account = d.advance_account;
-							row.advance_paid = d.paid_amount;
-							row.unclaimed_amount = -flt(d.balance_amount);
-							row.allocated_amount = -flt(d.balance_amount);
+							Object.assign(row, d);
 						});
 						refresh_field("advances");
 					}
@@ -293,30 +287,25 @@ frappe.ui.form.on("Expense Claim Detail", {
 frappe.ui.form.on("Expense Claim Advance", {
 	employee_advance: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		if(!frm.doc.employee){
-			frappe.msgprint(__('Select an employee to get the employee advance.'));
-			frm.doc.advances = [];
-			refresh_field("advances");
-		}
-		else {
-			return frappe.call({
-				method: "erpnext.hr.doctype.expense_claim.expense_claim.get_advances",
-				args: {
-					employee: frm.doc.employee,
-					advance_id: child.employee_advance
-				},
-				callback: function(r, rt) {
-					if(r.message) {
-						child.employee_advance = r.message[0].name;
-						child.posting_date = r.message[0].posting_date;
-						child.advance_account = r.message[0].advance_account;
-						child.advance_paid = r.message[0].paid_amount;
-						child.unclaimed_amount = -flt(r.message[0].balance_amount);
-						child.allocated_amount = -flt(r.message[0].balance_amount);
-						refresh_field("advances");
+		if (child.employee_advance) {
+			if(!frm.doc.employee) {
+				frappe.msgprint(__('Select an employee to get the employee advance.'));
+				frm.doc.advances = [];
+				refresh_field("advances");
+			} else {
+				return frappe.call({
+					method: "erpnext.hr.doctype.employee_advance.employee_advance.get_advance_details",
+					args: {
+						employee_advance: child.employee_advance
+					},
+					callback: function(r, rt) {
+						if(r.message) {
+							Object.assign(child, r.message);
+							refresh_field("advances");
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 	}
 });
