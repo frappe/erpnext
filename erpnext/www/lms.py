@@ -180,7 +180,7 @@ def get_course_meta(course_name, program_name):
 	if not program_enrollment:
 		return None
 	if not course_enrollment:
-		utils.enroll_in_course(course_name, program_name)
+		course_enrollment = utils.enroll_in_course(course_name, program_name)
 	progress = course_enrollment.get_progress(student)
 	count = sum([activity['is_complete'] for activity in progress])
 	if count == 0:

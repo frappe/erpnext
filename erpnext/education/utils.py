@@ -115,7 +115,7 @@ def create_student_from_current_user():
 def enroll_in_course(course_name, program_name):
 	student_id = get_current_student()
 	student = frappe.get_doc("Student", student_id)
-	student.enroll_in_course(course_name=course_name, program_enrollment=get_program_enrollment(program_name))
+	return student.enroll_in_course(course_name=course_name, program_enrollment=get_program_enrollment(program_name))
 
 def check_activity_exists(enrollment, content_type, content):
 	activity = frappe.get_all("Course Activity", filters={'enrollment': enrollment, 'content_type': content_type, 'content': content})
