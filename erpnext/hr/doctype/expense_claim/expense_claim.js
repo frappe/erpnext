@@ -13,7 +13,7 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 			return;
 		}
 
-		if(!d.expense_type) {
+		if(!d.expense_type || cint(d.requires_purchase_invoice)) {
 			return;
 		}
 		return frappe.call({
@@ -25,6 +25,32 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 			callback: function(r) {
 				if (r.message) {
 					d.default_account = r.message.account;
+				}
+			}
+		});
+	},
+
+	purchase_invoice: function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if(!doc.company) {
+			d.expense_type = "";
+			frappe.msgprint(__("Please set the Company"));
+			this.frm.refresh_fields();
+			return;
+		}
+
+		if(!d.purchase_invoice) {
+			return;
+		}
+		return frappe.call({
+			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_purchase_invoice_details",
+			args: {
+				"purchase_invoice": d.purchase_invoice
+			},
+			callback: function(r) {
+				if (r.message) {
+					d.default_account = r.message.account;
+					d.supplier = r.message.supplier;
 				}
 			}
 		});

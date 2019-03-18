@@ -4,10 +4,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import get_fullname, flt, cstr
-from frappe.model.document import Document
+from frappe.utils import flt, cstr, cint
 from erpnext.hr.utils import set_employee_name
-from erpnext.accounts.party import get_party_account
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.controllers.accounts_controller import AccountsController
@@ -27,6 +25,7 @@ class ExpenseClaim(AccountsController):
 		self.calculate_total_amount()
 		set_employee_name(self)
 		self.set_expense_account(validate=True)
+		self.validate_purchase_invoices(validate=True)
 		self.set_payable_account()
 		self.set_cost_center()
 		self.set_status()
@@ -63,6 +62,7 @@ class ExpenseClaim(AccountsController):
 		if self.approval_status=="Draft":
 			frappe.throw(_("""Approval Status must be 'Approved' or 'Rejected'"""))
 
+		self.validate_purchase_invoices()
 		self.update_task_and_project()
 		self.make_gl_entries()
 
@@ -74,8 +74,7 @@ class ExpenseClaim(AccountsController):
 
 	def on_cancel(self):
 		self.update_task_and_project()
-		if self.payable_account:
-			self.make_gl_entries(cancel=True)
+		self.make_gl_entries(cancel=True)
 
 		if self.is_paid:
 			update_reimbursed_amount(self)
@@ -125,7 +124,11 @@ class ExpenseClaim(AccountsController):
 					"debit": data.sanctioned_amount,
 					"debit_in_account_currency": data.sanctioned_amount,
 					"against": self.employee,
-					"cost_center": self.cost_center
+					"cost_center": self.cost_center,
+					"party_type": "Supplier" if data.requires_purchase_invoice else "",
+					"party": data.supplier if data.requires_purchase_invoice else "",
+					"against_voucher_type": "Purchase Invoice" if data.requires_purchase_invoice else "",
+					"against_voucher": data.purchase_invoice if data.requires_purchase_invoice else "",
 				})
 			)
 
@@ -174,7 +177,8 @@ class ExpenseClaim(AccountsController):
 		if not self.cost_center:
 			frappe.throw(_("Cost center is required to book an expense claim"))
 
-		if not self.payable_account:
+		payable_amount = flt(self.total_sanctioned_amount) - flt(self.total_advance_amount)
+		if payable_amount and not self.payable_account:
 			frappe.throw(_("Please set default payable account for the company {0}").format(getlink("Company",self.company)))
 
 		if self.is_paid:
@@ -227,8 +231,29 @@ class ExpenseClaim(AccountsController):
 
 	def set_expense_account(self, validate=False):
 		for expense in self.expenses:
-			if not expense.default_account or not validate:
+			if not cint(expense.requires_purchase_invoice) and not expense.default_account or not validate:
 				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
+
+	def validate_purchase_invoices(self, validate=False):
+		for expense in self.expenses:
+			if cint(expense.requires_purchase_invoice):
+				if not expense.purchase_invoice:
+					frappe.throw(_("Row #{0}: Purchase Invoice must be selected for Expense Claim Type {1}")
+						.format(expense.idx, expense.expense_type))
+				if not expense.default_account or expense.supplier or not validate:
+					details = get_purchase_invoice_details(expense.purchase_invoice)
+					expense.default_account = details.account
+					expense.supplier = details.supplier
+				if not validate:
+					pi = frappe.db.get_value("Purchase Invoice", expense.purchase_invoice, ["docstatus", "outstanding_amount"], as_dict=1)
+					if pi.docstatus != 1:
+						frappe.throw(_("Row #{0}: Purchase Invoice {1} is not submitted.").format(expense.idx, expense.purchase_invoice))
+					if flt(expense.sanctioned_amount) > flt(pi.outstanding_amount):
+						frappe.throw(_("Row #{0}: Sanctioned Amount cannot be greater than the Outstanding Amount {1} of Purchase Invoice {2}")
+							.format(expense.idx, pi.outstanding_amount, expense.purchase_invoice))
+			else:
+				expense.purchase_invoice = ""
+				expense.supplier = ""
 
 def update_reimbursed_amount(doc):
 	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt 
@@ -290,6 +315,17 @@ def get_expense_claim_account(expense_claim_type, company):
 	return {
 		"account": account
 	}
+
+@frappe.whitelist()
+def get_purchase_invoice_details(purchase_invoice):
+	details = frappe.db.get_value("Purchase Invoice", purchase_invoice, ["supplier", "credit_to"], as_dict=1)
+	if not details:
+		frappe.throw(_("Invalid Purchase Invoice {0}").format(purchase_invoice))
+
+	return frappe._dict({
+		"account": details.credit_to,
+		"supplier": details.supplier
+	})
 
 
 @frappe.whitelist()
