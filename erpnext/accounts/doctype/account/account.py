@@ -116,6 +116,8 @@ class Account(NestedSet):
 				doc.update({"company": company, "account_currency": None,
 					"parent": acc_name_map[company], "parent_account": acc_name_map[company]})
 				doc.save()
+				frappe.msgprint(_("Account {0} is added in the child company {1}")
+					.format(doc.name, company))
 
 	def validate_group_or_ledger(self):
 		if self.get("__islocal"):
