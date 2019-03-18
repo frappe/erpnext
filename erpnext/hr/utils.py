@@ -260,7 +260,7 @@ def allocate_earned_leaves():
 		fields=["name", "max_leaves_allowed", "earned_leave_frequency", "rounding"],
 		filters={'is_earned_leave' : 1})
 	today = getdate()
-	divide_by_frequency = {"Yearly": 1, "Quarterly": 4, "Monthly": 12}
+	divide_by_frequency = {"Yearly": 1, "Half-Yearly": 6, "Quarterly": 4, "Monthly": 12}
 	if e_leave_types:
 		for e_leave_type in e_leave_types:
 			leave_allocations = frappe.db.sql("""select name, employee, from_date, to_date from `tabLeave Allocation` where '{0}'
@@ -296,6 +296,9 @@ def check_frequency_hit(from_date, to_date, frequency):
 	months = rd.months
 	if frequency == "Quarterly":
 		if not months % 3:
+			return True
+	elif frequency == "Half-Yearly":
+		if not months % 6:
 			return True
 	elif frequency == "Yearly":
 		if not months % 12:
