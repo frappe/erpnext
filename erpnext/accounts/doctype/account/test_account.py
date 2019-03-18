@@ -97,6 +97,19 @@ class TestAccount(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, merge_account, "Capital Stock - _TC",\
 			"Softwares - _TC", doc.is_group, doc.root_type, doc.company)
 
+	def test_account_sync(self):
+		del frappe.local.flags["ignore_root_company_validation"]
+		acc = frappe.new_doc("Account")
+		acc.account_name = "Test Sync Account"
+		acc.parent_account = "Temporary Accounts - _TC3"
+		acc.company = "_Test Company 3"
+		acc.insert()
+
+		acc_tc_4 = frappe.db.get_value('Account', {'account_name': "Test Sync Account", "company": "_Test Company 4"})
+		acc_tc_5 = frappe.db.get_value('Account', {'account_name': "Test Sync Account", "company": "_Test Company 5"})
+		self.assertEqual(acc_tc_4, "Test Sync Account - _TC4")
+		self.assertEqual(acc_tc_5, "Test Sync Account - _TC5")
+
 def _make_test_records(verbose):
 	from frappe.test_runner import make_test_objects
 
