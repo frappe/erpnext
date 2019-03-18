@@ -45,14 +45,14 @@ def get_featured_programs():
 		featured_list = [utils.get_program(program['name']) for program in featured_program_names]
 		return featured_list
 	else:
-		return None
+		return get_all_programs()[:2]
 
 @frappe.whitelist(allow_guest=True)
 def get_all_programs():
 	program_names = frappe.get_all("Program", filters={"is_published": True})
 	if program_names:
-		featured_list = [utils.get_program(program['name']) for program in program_names]
-		return featured_list
+		program_list = [utils.get_program(program['name']) for program in program_names]
+		return program_list
 	else:
 		return None
 
