@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, cstr
 from frappe import throw, _
-from frappe.utils.nestedset import NestedSet
+from frappe.utils.nestedset import NestedSet, get_ancestors_of, get_descendants_of
 
 class RootNotEditable(frappe.ValidationError): pass
 class BalanceMismatchError(frappe.ValidationError): pass
@@ -41,6 +41,7 @@ class Account(NestedSet):
 		self.validate_frozen_accounts_modifier()
 		self.validate_balance_must_be_debit_or_credit()
 		self.validate_account_currency()
+		self.validate_root_company_and_sync_account_to_children()
 
 	def validate_parent(self):
 		"""Fetch Parent Details and validate parent account"""
@@ -89,6 +90,34 @@ class Account(NestedSet):
 
 		if not self.parent_account and not self.is_group:
 			frappe.throw(_("Root Account must be a group"))
+
+	def validate_root_company_and_sync_account_to_children(self):
+		# ignore validation while creating new compnay or while syncing to child companies
+		if frappe.local.flags.ignore_root_company_validation or self.flags.ignore_root_company_validation:
+			return
+
+		ancestors = get_root_company(self.company)
+		if ancestors:
+			frappe.throw(_("Please add the account to root level Company - %s" % ancestors[0]))
+		else:
+			descendants = get_descendants_of('Company', self.company)
+			if not descendants: return
+
+			acc_name_map = {}
+			acc_name = frappe.db.get_value('Account', self.parent_account, "account_name")
+			for d in frappe.db.get_values('Account',
+				{"company": ["in", descendants], "account_name": acc_name},
+				["company", "name"], as_dict=True):
+				acc_name_map[d["company"]] = d["name"]
+
+			for company in descendants:
+				doc = frappe.copy_doc(self)
+				doc.flags.ignore_root_company_validation = True
+				doc.update({"company": company, "account_currency": None,
+					"parent": acc_name_map[company], "parent_account": acc_name_map[company]})
+				doc.save()
+				frappe.msgprint(_("Account {0} is added in the child company {1}")
+					.format(doc.name, company))
 
 	def validate_group_or_ledger(self):
 		if self.get("__islocal"):
@@ -250,3 +279,9 @@ def merge_account(old, new, is_group, root_type, company):
 	frappe.rename_doc("Account", old, new, merge=1, ignore_permissions=1)
 
 	return new
+
+@frappe.whitelist()
+def get_root_company(company):
+	# return the topmost company in the hierarchy
+	ancestors = get_ancestors_of('Company', company, "lft asc")
+	return [ancestors[0]] if ancestors else []
