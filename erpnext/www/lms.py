@@ -110,7 +110,6 @@ def evaluate_quiz(course, quiz_response, quiz_name):
 	import json
 	quiz_response = json.loads(quiz_response)
 	quiz = frappe.get_doc("Quiz", quiz_name)
-	enrollment = utils.get_course_enrollment(course).name
 	answers, score, status = quiz.evaluate(quiz_response, quiz_name)
 
 	result = {k: ('Correct' if v else 'Wrong') for k,v in answers.items()}
@@ -124,12 +123,14 @@ def evaluate_quiz(course, quiz_response, quiz_name):
 		except:
 			item['selected_option'] = "Unattempted"
 		result_data.append(item)
-	# result_data = [{'question': key, 'selected_option': frappe.get_value('Options', quiz_response[key], 'option'), 'quiz_result': result[key]} for key in answers]
 
-	add_quiz_activity(enrollment, quiz_name, result_data, score, status)
+	add_quiz_activity(course, quiz_name, result_data, score, status)
 	return(score)
 
-def add_quiz_activity(enrollment, quiz_name, result_data, score, status):
+def add_quiz_activity(course, quiz_name, result_data, score, status):
+	if not utils.get_current_student():
+		return None
+	enrollment = utils.get_course_enrollment(course).name
 	quiz_activity = frappe.get_doc({
 		"doctype": "Quiz Activity",
 		"enrollment": enrollment,
@@ -153,6 +154,8 @@ def enroll_in_program(program_name):
 # Academty Activity
 @frappe.whitelist()
 def add_activity(course, content_type, content):
+	if not utils.get_current_student():
+		return
 	enrollment = utils.get_course_enrollment(course)
 	if(utils.check_activity_exists(enrollment.name, content_type, content)):
 		pass
@@ -174,6 +177,8 @@ def get_course_meta(course_name, program_name):
 		:param course_name:
 		:param program_name:
 	"""
+	if not utils.get_current_student():
+		return {'flag':'Start Course' }
 	course_enrollment = utils.get_course_enrollment(course_name)
 	program_enrollment = utils.get_program_enrollment(program_name)
 	student = frappe.get_doc("Student", utils.get_current_student())
@@ -184,12 +189,12 @@ def get_course_meta(course_name, program_name):
 	progress = course_enrollment.get_progress(student)
 	count = sum([activity['is_complete'] for activity in progress])
 	if count == 0:
-		return {'flag':'Start Course', 'content_type': progress[0]['content_type'], 'content': progress[0]['content']}
+		return {'flag':'Start Course'}
 	elif count == len(progress):
-		return {'flag':'Completed', 'content_type': progress[0]['content_type'], 'content': progress[0]['content']}
+		return {'flag':'Completed'}
 	elif count < len(progress):
 		next_item = next(item for item in progress if item['is_complete']==False)
-		return {'flag':'Continue', 'content_type': next_item['content_type'], 'content': next_item['content']}
+		return {'flag':'Continue'}
 
 @frappe.whitelist()
 def get_topic_meta(topic_name, course_name):
@@ -198,9 +203,15 @@ def get_topic_meta(topic_name, course_name):
 		:param topic_name:
 		:param course_name:
 	"""
+	topic = frappe.get_doc("Topic", topic_name)
+	if not utils.get_current_student():
+		topic_content = topic.get_all_children()
+		if topic_content:
+			return {'flag':'Start Course', 'content_type': topic_content[0].content_type, 'content': topic_content[0].content}
+		else:
+			return None
 	course_enrollment = utils.get_course_enrollment(course_name)
 	student = frappe.get_doc("Student", utils.get_current_student())
-	topic = frappe.get_doc("Topic", topic_name)
 	progress = student.get_topic_progress(course_enrollment.name, topic)
 	if not progress:
 		return { 'flag':'Start Topic', 'content_type': None, 'content': None }
