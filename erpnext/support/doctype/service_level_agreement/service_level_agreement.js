@@ -12,10 +12,7 @@ frappe.ui.form.on('Service Level Agreement', {
 			},
 			callback: function(data){
 				for (var i = 0; i < data.message.support_and_resolution.length; i++){
-					frm.add_child("support_and_resolution");
-					frm.fields_dict.support_and_resolution.get_value()[i].workday = data.message.support_and_resolution[i].workday;
-					frm.fields_dict.support_and_resolution.get_value()[i].start_time = data.message.support_and_resolution[i].start_time;
-					frm.fields_dict.support_and_resolution.get_value()[i].end_time = data.message.support_and_resolution[i].end_time;
+					frm.add_child("support_and_resolution", data.message.support_and_resolution[i]);
 				}
 				frm.refresh();
 			}
