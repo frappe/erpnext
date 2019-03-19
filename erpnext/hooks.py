@@ -22,7 +22,8 @@ web_include_css = "assets/css/erpnext-web.css"
 
 doctype_js = {
 	"Communication": "public/js/communication.js",
-	"Event": "public/js/event.js"
+	"Event": "public/js/event.js",
+	"Website Theme": "public/js/website_theme.js"
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"

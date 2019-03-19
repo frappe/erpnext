@@ -1,24 +1,32 @@
 {% if doc.taxes %}
-<div class="row tax-net-total-row">
-    <div class="col-xs-6 text-right">{{ _("Net Total") }}</div>
-    <div class="col-xs-6 text-right">
-        {{ doc.get_formatted("net_total") }}</div>
-</div>
+<tr>
+	<td class="text-right" colspan="2">
+		{{ _("Net Total") }}
+	</td>
+	<td class="text-right">
+		{{ doc.get_formatted("net_total") }}
+	</td>
+</tr>
 {% endif %}
+
 {% for d in doc.taxes %}
 {% if d.base_tax_amount > 0 %}
-<div class="row tax-row">
-    <div class="col-xs-6 text-right">{{ d.description }}</div>
-    <div class="col-xs-6 text-right">
-        {{ d.get_formatted("base_tax_amount") }}</div>
-</div>
+<tr>
+	<td class="text-right" colspan="2">
+		{{ d.description }}
+	</td>
+	<td class="text-right">
+		{{ d.get_formatted("base_tax_amount") }}
+	</td>
+</tr>
 {% endif %}
 {% endfor %}
-<div class="row tax-grand-total-row">
-    <div class="col-xs-6 text-right text-uppercase h6 text-muted">{{ _("Grand Total") }}</div>
-    <div class="col-xs-6 text-right">
-        <span class="tax-grand-total bold">
-            {{ doc.get_formatted("grand_total") }}
-        </span>
-    </div>
-</div>
+
+<tr>
+	<th class="text-right" colspan="2">
+		{{ _("Grand Total") }}
+	</th>
+	<th class="text-right">
+		{{ doc.get_formatted("grand_total") }}
+	</th>
+</tr>
