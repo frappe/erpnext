@@ -5,11 +5,13 @@ from __future__ import unicode_literals
 import frappe
 import json
 from frappe import _
-
+from frappe import utils
 from frappe.model.document import Document
+from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_weekdays, add_to_date, today, get_time, get_datetime
+from datetime import datetime, timedelta
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import now
 from frappe.utils.user import is_website_user
+from ..service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
 
 sender_field = "raised_by"
 
@@ -108,6 +110,91 @@ class Issue(Document):
 
 		return replicated_issue.name
 
+	def before_insert(self):
+		self.set_response_and_resolution_time()
+
+	def set_response_and_resolution_time(self):
+		service_level_agreement = get_active_service_level_agreement_for(self.customer)
+		if service_level_agreement:
+			self.service_level_agreement = service_level_agreement.name
+			self.priority = service_level_agreement.priority
+
+		if not self.service_level_agreement: return
+
+		service_level = frappe.get_doc("Service Level", service_level_agreement.service_level)
+
+		if not self.creation:
+			self.creation = now_datetime()
+
+		start_date_time = get_datetime(self.creation)
+
+		self.response_by, self.time_to_respond = get_expected_time_for('response', service_level, start_date_time)
+		self.resolution_by, self.time_to_resolve = get_expected_time_for('resolution', service_level, start_date_time)
+
+def get_expected_time_for(parameter, service_level, start_date_time):
+	current_date_time = start_date_time
+	expected_time = current_date_time
+	start_time = None
+	end_time = None
+
+	# lets assume response time is in days by default
+	if parameter == 'response':
+		allotted_days = service_level.response_time
+		time_period = service_level.response_time_period
+	elif parameter == 'resolution':
+		allotted_days = service_level.resolution_time
+		time_period = service_level.resolution_time_period
+	else:
+		frappe.throw(_("{0} parameter is invalid".format(parameter)))
+
+	allotted_hours = 0
+	if time_period == 'Hour':
+		allotted_hours = allotted_days
+		allotted_days = 0
+	elif time_period == 'Week':
+		allotted_days *= 7
+
+	expected_time_is_set = 1 if allotted_days == 0 and time_period in ['Day', 'Week'] else 0
+
+	support_days = {}
+	for service in service_level.support_and_resolution:
+		support_days[service.workday] = frappe._dict({
+			'start_time': service.start_time,
+			'end_time': service.end_time,
+		})
+
+	holidays = get_holidays(service_level.holiday_list)
+	weekdays = get_weekdays()
+
+	while not expected_time_is_set:
+		current_weekday = weekdays[current_date_time.weekday()]
+
+		if not is_holiday(current_date_time, holidays) and current_weekday in support_days:
+			start_time = current_date_time - datetime(current_date_time.year, current_date_time.month, current_date_time.day) if getdate(current_date_time) == getdate(start_date_time) else support_days[current_weekday].start_time
+			end_time = support_days[current_weekday].end_time
+			time_left_today = time_diff_in_hours(end_time, start_time)
+
+			# no time left for support today
+			if time_left_today < 0: pass
+			elif time_period == 'Hour':
+				if time_left_today >= allotted_hours:
+					expected_time = datetime.combine(getdate(current_date_time), get_time(start_time))
+					expected_time = add_to_date(expected_time, hours=allotted_hours)
+					expected_time_is_set = 1
+				else:
+					allotted_hours = allotted_hours - time_left_today
+			else:
+				allotted_days -= 1
+				expected_time_is_set = allotted_days <= 0
+
+		current_date_time = add_to_date(current_date_time, days=1)
+
+	if end_time and time_period != 'Hour':
+		current_date_time = datetime.combine(getdate(current_date_time), get_time(end_time))
+	else:
+		current_date_time = expected_time
+
+	return current_date_time, round(time_diff_in_hours(current_date_time, start_date_time), 2)
 
 def get_list_context(context=None):
 	return {
@@ -168,18 +255,35 @@ def auto_close_tickets():
 		doc.flags.ignore_mandatory = True
 		doc.save()
 
-
 def has_website_permission(doc, ptype, user, verbose=False):
 	from erpnext.controllers.website_list_for_contact import has_website_permission
 	permission_based_on_customer = has_website_permission(doc, ptype, user, verbose)
 
 	return permission_based_on_customer or doc.raised_by==user
 
-
 def update_issue(contact, method):
 	"""Called when Contact is deleted"""
 	frappe.db.sql("""UPDATE `tabIssue` set contact='' where contact=%s""", contact.name)
 
+def update_support_timer():
+	issues = frappe.get_list("Issue", filters={"status": "Open"}, order_by="creation DESC")
+	for issue in issues:
+		issue = frappe.get_doc("Issue", issue.name)
+
+		if round(time_diff_in_hours(issue.response_by, now_datetime()), 2) < 0 or round(time_diff_in_hours(issue.resolution_by, now_datetime()), 2) < 0:
+			issue.agreement_status = "Failed"
+		else:
+			issue.agreement_status = "Fulfilled"
+		issue.save()
+
+
+def get_holidays(holiday_list_name):
+	holiday_list = frappe.get_cached_doc("Holiday List", holiday_list_name)
+	holidays = [holiday.holiday_date for holiday in holiday_list.holidays]
+	return holidays
+
+def is_holiday(date, holidays):
+	return getdate(date) in holidays
 
 @frappe.whitelist()
 def make_task(source_name, target_doc=None):

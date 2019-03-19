@@ -21,6 +21,10 @@ def get_data():
 				'items': ['Sales Order', 'Delivery Note', 'Sales Invoice']
 			},
 			{
+				'label': _('Service Level Agreement'),
+				'items': ['Service Level Agreement']
+			},
+			{
 				'label': _('Payments'),
 				'items': ['Payment Entry']
 			},
