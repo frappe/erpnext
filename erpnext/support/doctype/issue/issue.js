@@ -79,8 +79,9 @@ frappe.ui.form.on("Issue", {
 });
 
 function set_time_to_resolve_and_response(frm) {
-	const customer = $('div[data-fieldname="customer"]');
-	const email_account = $('div[data-fieldname="email_account"]');
+
+	const customer = frm.fields_dict['customer'].$wrapper;
+	const email_account = frm.fields_dict['email_account'].$wrapper;
 
 	const time_to_respond = $(get_time_left_element(__('Time To Respond'), frm.doc.response_by));
 	const time_to_resolve = $(get_time_left_element(__('Time To Resolve'), frm.doc.resolve_by));
@@ -91,17 +92,17 @@ function set_time_to_resolve_and_response(frm) {
 
 function get_time_left_element(label, timestamp) {
 	return `
-		<div class="frappe-control input-max-width">
-		<div class="form-group">
-			<div class="clearfix">
-			<label class="control-label" style="padding-right: 0px;">
-				${label}
-			</label>
+		<div class="frappe-control input-max-width" data-field_name="${label.replace(/ /g, "_").toLowerCase()}">
+			<div class="form-group">
+				<div class="clearfix">
+					<label class="control-label" style="padding-right: 0px;">
+						${label}
+					</label>
+				</div>
+				<div class="control-input-wrapper">
+					<div class="control-value like-disabled-input">${get_time_left(timestamp)}</div>
+				</div>
 			</div>
-			<div class="control-input-wrapper">
-			<div class="control-value like-disabled-input">${get_time_left(timestamp)}</div>
-			</div>
-		</div>
 		</div>
 	`;
 }
