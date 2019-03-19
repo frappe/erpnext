@@ -145,7 +145,7 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 		allotted_days = service_level.resolution_time
 		time_period = service_level.resolution_time_period
 	else:
-		frappe.throw(__("{0} parameter is invalid".format(parameter)))
+		frappe.throw(_("{0} parameter is invalid".format(parameter)))
 
 	allotted_hours = 0
 	if time_period == 'Hour':
