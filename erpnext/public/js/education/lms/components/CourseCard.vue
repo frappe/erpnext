@@ -14,7 +14,7 @@
                 </span>
             </div>
             <div class='course-buttons text-center col-xs-4 col-sm-3 col-md-2'>
-                <a-button v-if="isLogin"
+                <a-button
                     :type="buttonType"
                     size="sm btn-block"
                     :route="courseRoute"
@@ -61,18 +61,18 @@ export default {
                 }
             }
             else {
-                return " hidden"
+                return "info"
             }
         },
         isLogin() {
             return lms.store.checkLogin()
         },
         buttonName() {
-            if(lms.store.checkLogin()){
+            if(lms.store.checkProgramEnrollment(this.program_name)){
                 return this.courseMeta.flag
             }
             else {
-                return "Enroll"
+                return "Explore"
             }
         }
     },

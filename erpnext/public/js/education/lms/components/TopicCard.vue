@@ -70,7 +70,7 @@ export default {
                 }
             }
             else {
-                return " hidden"
+                return "info"
             }
         },
         isLogin() {
@@ -78,11 +78,11 @@ export default {
             return lms.store.checkLogin()
         },
         buttonName() {
-            if(lms.store.checkLogin()){
+            if(lms.store.checkProgramEnrollment(this.program_name)){
                 return this.topicMeta.flag
             }
             else {
-                return "Enroll"
+                return "Explore"
             }
         }
     },
