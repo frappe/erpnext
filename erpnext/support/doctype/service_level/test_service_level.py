@@ -11,11 +11,7 @@ import frappe
 import unittest
 
 class TestServiceLevel(unittest.TestCase):
-
-	def test_service_level(self):
-		test_make_service_level = make_service_level()
-		test_get_service_level = get_service_level()
-		self.assertEquals(test_make_service_level, test_get_service_level)
+	pass
 
 def make_service_level():
 	employee_group = make_employee_group()

@@ -8,11 +8,7 @@ import unittest
 from erpnext.support.doctype.service_level.test_service_level import make_service_level
 
 class TestServiceLevelAgreement(unittest.TestCase):
-
-	def test_service_level_agreement(self):
-		test_make_service_level_agreement = make_service_level_agreement()
-		test_get_service_level_agreement = get_service_level_agreement()
-		self.assertEquals(test_make_service_level_agreement, test_get_service_level_agreement)
+	pass
 
 def make_service_level_agreement():
 	make_service_level()
