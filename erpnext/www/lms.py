@@ -96,7 +96,7 @@ def get_quiz_with_answers(quiz_name):
 def get_quiz_without_answers(quiz_name):
 	try:
 		quiz = frappe.get_doc("Quiz", quiz_name).get_questions()
-		quiz_output = [{'name':question.name, 'question':question.question, 'options':[{'name': option.name, 'option':option.option} for option in question.options]} for question in quiz]
+		quiz_output = [{'name':question.name, 'question':question.question, 'type': question.type, 'options':[{'name': option.name, 'option':option.option} for option in question.options]} for question in quiz]
 		return quiz_output
 	except:
 		frappe.throw("Quiz {0} does not exist".format(quiz_name))

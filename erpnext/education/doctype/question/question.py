@@ -14,20 +14,20 @@ class Question(Document):
 		self.check_minimum_one_correct_answer()
 
 	def check_at_least_one_option(self):
-		if len(self.get_all_children()) <= 1:
+		if len(self.options) <= 1:
 			frappe.throw(_("A question must have more than one options"))
 		else:
 			pass
 
 	def check_minimum_one_correct_answer(self):
-		correct_options = [question.is_correct for question in self.get_all_children()]
+		correct_options = [option.is_correct for option in self.options]
 		if bool(sum(correct_options)):
 			pass
 		else:
 			frappe.throw(_("A qustion must have at least one correct options"))
 
 	def get_answer(self):
-		options = self.get_all_children()
+		options = self.options
 		answers = [item.name for item in options if item.is_correct == True]
 		if len(answers) == 0:
 			frappe.throw("No correct answer is set for {0}".format(self.name))

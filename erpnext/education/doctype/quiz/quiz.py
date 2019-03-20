@@ -40,7 +40,13 @@ class Quiz(Document):
 	def get_questions(self):
 		quiz_question = self.get_all_children()
 		if quiz_question:
-			questions = [frappe.get_doc('Question', question.question_link) for question in quiz_question]
+			questions = [frappe.get_doc('Question', question.question_link).as_dict() for question in quiz_question]
+			for question in questions:
+				correct_options = [option.is_correct for option in question.options]
+				if sum(correct_options) > 1:
+					question['type'] = "MultipleChoice"
+				else:
+					question['type'] = "SingleChoice"
 			return questions
 		else:
 			return None

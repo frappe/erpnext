@@ -10,7 +10,7 @@
             <hr>
             <div id="quiz" :name="content">
                 <div id="quiz-body">
-					<QuizSingleChoice v-for="question in quizData" :key="question.name" :question="question" @updateResponse="updateResponse"/>
+					<component v-for="question in quizData" :key="question.name" v-bind:is="question.type" :question="question" @updateResponse="updateResponse"></component>
                 </div>
                 <div class="mt-3">
                     <div>
@@ -40,6 +40,8 @@
 
 <script>
 import QuizSingleChoice from "./Quiz/QuizSingleChoice.vue"
+import QuizMultipleChoice from "./Quiz/QuizMultipleChoice.vue"
+
 export default {
 	props: ['content', 'type'],
 	name: 'Quiz',
@@ -57,7 +59,8 @@ export default {
     	});
     },
     components: {
-    	QuizSingleChoice,
+    	'SingleChoice': QuizSingleChoice,
+        'MultipleChoice': QuizMultipleChoice
     },
     methods: {
         getQuizWithoutAnswers() {
@@ -68,7 +71,18 @@ export default {
     	    )
         },
 		updateResponse(res) {
-			this.quizResponse[res.question] = (res.option)
+            if (res.type == 'SingleChoice') {
+                this.quizResponse[res.question] = (res.option)
+            }
+            if (res.type == 'MultipleChoice') {
+                if (!this.quizResponse[res.question]) {
+                    this.quizResponse[res.question] = [res.option]
+                }
+                else {
+                    this.quizResponse[res.question].push(res.option)
+                }
+            }
+            console.log(this.quizResponse)
 		},
 		submitQuiz() {
 			lms.call("evaluate_quiz",
@@ -83,7 +97,17 @@ export default {
                 this.quizResponse = null
 			});
 		}
-	}
+	},
+    computed: {
+      currentComponent: function() {
+        if(this.quizData.type === "MultipleChoice") {
+            return 'QuizMultipleChoice'
+        }
+        else {
+            return 'QuizSingleChoice'
+        }
+      },
+    },
 };
 </script>
 
