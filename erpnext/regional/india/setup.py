@@ -100,26 +100,41 @@ def make_custom_fields(update=True):
 	is_non_gst = dict(fieldname='is_non_gst', label='Is Non GST',
 		fieldtype='Check', fetch_from='item_code.is_non_gst', insert_after='is_nil_exempt',
 		print_hide=1)
-	invoice_gst_fields = [
+
+	purchase_invoice_gst_category = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
 			insert_after='language', print_hide=1, collapsible=1),
+		dict(fieldname='gst_category', label='GST Category',
+			fieldtype='Data', insert_after='gst_section', print_hide=1,
+			fetch_from='supplier.gst_category')
+	]
+
+	sales_invoice_gst_category = [
+		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
+			insert_after='language', print_hide=1, collapsible=1),
+		dict(fieldname='gst_category', label='GST Category',
+			fieldtype='Data', insert_after='gst_section', print_hide=1,
+			fetch_from='customer.gst_category')
+	]
+
+	invoice_gst_fields = [
 		dict(fieldname='invoice_copy', label='Invoice Copy',
-			fieldtype='Select', insert_after='gst_section', print_hide=1, allow_on_submit=1,
+			fieldtype='Select', insert_after='gst_category', print_hide=1, allow_on_submit=1,
 			options='Original for Recipient\nDuplicate for Transporter\nDuplicate for Supplier\nTriplicate for Supplier'),
 		dict(fieldname='reverse_charge', label='Reverse Charge',
 			fieldtype='Select', insert_after='invoice_copy', print_hide=1,
 			options='Y\nN', default='N'),
 		dict(fieldname='export_type', label='Export Type',
-			fieldtype='Select', insert_after='gst_category', print_hide=1,
+			fieldtype='Select', insert_after='reverse_charge', print_hide=1,
 			depends_on='eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
 			options='\nWith Payment of Tax\nWithout Payment of Tax'),
 		dict(fieldname='ecommerce_gstin', label='E-commerce GSTIN',
 			fieldtype='Data', insert_after='export_type', print_hide=1),
+		dict(fieldname='gst_col_break', fieldtype='Column Break', insert_after='ecommerce_gstin'),
 		dict(fieldname='reason_for_issuing_document', label='Reason For Issuing document',
-			fieldtype='Select', insert_after='ecommerce_gstin', print_hide=1,
+			fieldtype='Select', insert_after='gst_col_break', print_hide=1,
 			depends_on='eval:doc.is_return==1',
-			options='\n01-Sales Return\n02-Post Sale Discount\n03-Deficiency in services\n04-Correction in Invoice\n05-Change in POS\n06-Finalization of Provisional assessment\n07-Others'),
-		dict(fieldname='gst_col_break', fieldtype='Column Break', insert_after='reason_for_issuing_document')
+			options='\n01-Sales Return\n02-Post Sale Discount\n03-Deficiency in services\n04-Correction in Invoice\n05-Change in POS\n06-Finalization of Provisional assessment\n07-Others')
 	]
 
 	purchase_invoice_gst_fields = [
@@ -132,14 +147,11 @@ def make_custom_fields(update=True):
 			dict(fieldname='place_of_supply', label='Place of Supply',
 				fieldtype='Data', insert_after='shipping_address',
 				print_hide=1, read_only=0),
-			dict(fieldname='gst_category', label='GST Category',
-				fieldtype='Data', insert_after='reverse_charge', print_hide=1,
-				fetch_from='supplier.gst_category'),
 		]
 
 	purchase_invoice_itc_fields = [
 			dict(fieldname='eligibility_for_itc', label='Eligibility For ITC',
-				fieldtype='Select', insert_after='gst_col_break', print_hide=1,
+				fieldtype='Select', insert_after='reason_for_issuing_document', print_hide=1,
 				options='Input Service Distributor\nImport Of Service\nImport Of Capital Goods\nIneligible\nAll Other ITC', default="All Other ITC"),
 			dict(fieldname='itc_integrated_tax', label='Availed ITC Integrated Tax',
 				fieldtype='Data', insert_after='eligibility_for_itc', print_hide=1),
@@ -164,9 +176,6 @@ def make_custom_fields(update=True):
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='company_address',
 				fetch_from='company_address.gstin', print_hide=1),
-			dict(fieldname='gst_category', label='GST Category',
-				fieldtype='Data', insert_after='reverse_charge', print_hide=1,
-				fetch_from='customer.gst_category'),
 		]
 
 	sales_invoice_shipping_fields = [
@@ -178,7 +187,7 @@ def make_custom_fields(update=True):
 				depends_on="eval:doc.gst_category=='Overseas' "),
 			dict(fieldname='shipping_bill_date', label='Shipping Bill Date',
 				fieldtype='Date', insert_after='shipping_bill_number', print_hide=1,
-				depends_on="eval:doc.gst_category=='Overseas' ")
+				depends_on="eval:doc.gst_category=='Overseas' "),
 		]
 
 	inter_state_gst_field = [
@@ -232,12 +241,12 @@ def make_custom_fields(update=True):
 			dict(fieldname='gst_state_number', label='GST State Number',
 				fieldtype='Data', insert_after='gst_state', read_only=1),
 		],
-		'Purchase Invoice': invoice_gst_fields + purchase_invoice_gst_fields + purchase_invoice_itc_fields,
-		'Purchase Order': purchase_invoice_gst_fields[:-1],
-		'Purchase Receipt': purchase_invoice_gst_fields[:-1],
-		'Sales Invoice': invoice_gst_fields + sales_invoice_gst_fields + sales_invoice_shipping_fields,
-		'Delivery Note': sales_invoice_gst_fields[:-1] + ewaybill_fields + sales_invoice_shipping_fields,
-		'Sales Order': sales_invoice_gst_fields[:-1],
+		'Purchase Invoice': purchase_invoice_gst_category + invoice_gst_fields + purchase_invoice_itc_fields + purchase_invoice_gst_fields,
+		'Purchase Order': purchase_invoice_gst_fields,
+		'Purchase Receipt': purchase_invoice_gst_fields,
+		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields,
+		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields,
+		'Sales Order': sales_invoice_gst_fields,
 		'Sales Taxes and Charges Template': inter_state_gst_field,
 		'Purchase Taxes and Charges Template': inter_state_gst_field,
 		'Item': [
@@ -335,7 +344,7 @@ def make_custom_fields(update=True):
 			}
 		]
 	}
-	create_custom_fields(custom_fields, ignore_validate = frappe.flags.in_patch, update=update)
+	create_custom_fields(custom_fields, update=update)
 
 def make_fixtures(company=None):
 	docs = []
