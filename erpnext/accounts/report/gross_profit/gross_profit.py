@@ -125,10 +125,11 @@ class GrossProfitGenerator(object):
 
 			# get buying amount
 			if row.item_code in product_bundles:
-				row.buying_amount = self.get_buying_amount_from_product_bundle(row,
-					product_bundles[row.item_code])
+				row.buying_amount = flt(self.get_buying_amount_from_product_bundle(row,
+					product_bundles[row.item_code]), self.currency_precision)
 			else:
-				row.buying_amount = self.get_buying_amount(row, row.item_code)
+				row.buying_amount = flt(self.get_buying_amount(row, row.item_code),
+					self.currency_precision)
 
 			# get buying rate
 			if row.qty:
@@ -215,7 +216,7 @@ class GrossProfitGenerator(object):
 			if packed_item.get("parent_detail_docname")==row.item_row:
 				buying_amount += self.get_buying_amount(row, packed_item.item_code)
 
-		return buying_amount
+		return flt(buying_amount, self.currency_precision)
 
 	def get_buying_amount(self, row, item_code):
 		# IMP NOTE
