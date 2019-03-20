@@ -405,7 +405,7 @@ class SalesInvoice(SellingController):
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',
 				'company', 'select_print_heading', 'cash_bank_account', 'company_address',
-				'write_off_account', 'write_off_cost_center', 'apply_discount_on'):
+				'write_off_account', 'write_off_cost_center', 'apply_discount_on', 'cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
 
