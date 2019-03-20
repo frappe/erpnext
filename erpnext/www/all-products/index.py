@@ -2,6 +2,8 @@ import frappe
 from erpnext.portal.product_configurator.utils import (get_products_for_website, get_product_settings,
 	get_field_filter_data, get_attribute_filter_data)
 
+sitemap = 1
+
 def get_context(context):
 
 	if frappe.form_dict:
