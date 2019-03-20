@@ -20,6 +20,7 @@ class StaffingPlan(Document):
 		self.total_estimated_budget = 0
 
 		for detail in self.get("staffing_details"):
+			self.set_vacancies(detail)
 			self.validate_overlap(detail)
 			self.validate_with_subsidiary_plans(detail)
 			self.validate_with_parent_plan(detail)
@@ -38,6 +39,15 @@ class StaffingPlan(Document):
 				else: detail.total_estimated_cost = 0
 			else: detail.vacancies = detail.number_of_positions = detail.total_estimated_cost = 0
 			self.total_estimated_budget += detail.total_estimated_cost
+
+	def set_vacancies(self, row):
+		if not row.vacancies:
+			current_openings = 0
+			for field in ['current_count', 'current_openings']:
+				if row.get(field):
+					current_openings += row.get(field)
+
+			row.vacancies = row.number_of_positions - current_openings
 
 	def validate_overlap(self, staffing_plan_detail):
 		# Validate if any submitted Staffing Plan exist for any Designations in this plan
