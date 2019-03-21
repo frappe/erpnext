@@ -59,7 +59,22 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				);
 			}
 		}
+		frappe.ui.form.on("Purchase Invoice Item", {
+		    item_code: function(frm, cdt, cdn) {
+			if(cur_frm.doc.apply_tds == 1){
+				$.each(cur_frm.doc.items || [], function(i, item) {
+				item.tax_withhold = 1;
+			 	});
+				refresh_field("items");
+			}else{
+				$.each(cur_frm.doc.items || [], function(i, item) {
+					item.tax_withhold = 0;
+				});
+				refresh_field("items"); 
+			}//END OF ELSE
 
+		   }//END OF ITEM CODE
+		});//END OF FRAPPE
 		if(doc.docstatus == 1 && doc.outstanding_amount != 0
 			&& !(doc.is_return && doc.return_against)) {
 			this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __('Create'));
