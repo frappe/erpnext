@@ -591,3 +591,4 @@ erpnext.patches.v12_0.add_item_name_in_work_orders
 erpnext.patches.v12_0.update_pricing_rule_fields
 erpnext.patches.v11_1.make_job_card_time_logs
 erpnext.patches.v12_0.rename_pricing_rule_child_doctypes
+erpnext.patches.v12_0.move_target_distribution_from_parent_to_child
