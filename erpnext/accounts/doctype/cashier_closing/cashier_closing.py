@@ -33,4 +33,4 @@ class CashierClosing(Document):
 
 	def validate_time(self):
 		if self.from_time >= self.time:
-			frappe.throw(_("From Time Should Be Less Than To Time"))	
+			frappe.throw(_("From Time Should Be Less Than To Time"))

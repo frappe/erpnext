@@ -13,7 +13,7 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import check_for_closed_status
-from erpnext.assets.doctype.asset.asset import get_asset_account
+from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
 from six import iteritems
 
 form_grid_templates = {
@@ -258,7 +258,8 @@ class PurchaseReceipt(BuyingController):
 					d.rejected_warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(d.warehouse)
 
-		self.get_asset_gl_entry(gl_entries)
+		if not is_cwip_accounting_disabled():
+			self.get_asset_gl_entry(gl_entries)
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("taxes"):
