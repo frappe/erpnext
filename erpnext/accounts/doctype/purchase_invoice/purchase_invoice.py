@@ -861,22 +861,21 @@ class PurchaseInvoice(BuyingController):
 			return
 
 		accounts = []
-		for d in self.taxes:
-			if d.account_head == tax_withholding_details.get("account_head"):
-				d.update(tax_withholding_details)
-			accounts.append(d.account_head)
+		for tax_with in tax_withholding_details:
+			for d in self.taxes:
+				if d.name == tax_with["name"]:
+					d.update(tax_with)
+				accounts.append(d.name)
+			if not accounts or tax_with["name"] not in accounts:
+				self.append("taxes",tax_with)
+	
+			to_remove = [d for d in self.taxes
+				if not d.tax_amount and d.account_head == tax_with["account_head"]]
+			for d in to_remove:
+				self.remove(d)
 
-		if not accounts or tax_withholding_details.get("account_head") not in accounts:
-			self.append("taxes", tax_withholding_details)
-
-		to_remove = [d for d in self.taxes
-			if not d.tax_amount and d.account_head == tax_withholding_details.get("account_head")]
-
-		for d in to_remove:
-			self.remove(d)
-
-		# calculate totals again after applying TDS
-		self.calculate_taxes_and_totals()
+			# calculate totals again after applying TDS
+			self.calculate_taxes_and_totals()
 
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):
