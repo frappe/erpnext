@@ -131,7 +131,7 @@ class GSTR3BReport(Document):
 
 		self.gst_details = self.get_company_gst_details()
 		self.report_dict["gstin"] = self.gst_details.get("gstin")
-		self.report_dict["ret_period"] = get_period(self.month, with_year=True)
+		self.report_dict["ret_period"] = get_period(self.month, self.year)
 		self.month_no = get_period(self.month)
 		self.account_heads = self.get_account_heads()
 
@@ -180,16 +180,16 @@ class GSTR3BReport(Document):
 			for account_head in self.account_heads:
 
 				d["iamt"] = flt(itc_details.get((itc_type_map.get(d["ty"]), reverse_charge, account_head.get('igst_account')), {}).get("amount"), 2)
-				net_itc["iamt"] += d["iamt"]
+				net_itc["iamt"] += flt(d["iamt"], 2)
 
 				d["camt"] = flt(itc_details.get((itc_type_map.get(d["ty"]), reverse_charge, account_head.get('cgst_account')), {}).get("amount"), 2)
-				net_itc["camt"] += d["camt"]
+				net_itc["camt"] += flt(d["camt"], 2)
 
 				d["samt"] = flt(itc_details.get((itc_type_map.get(d["ty"]), reverse_charge, account_head.get('sgst_account')), {}).get("amount"), 2)
-				net_itc["samt"] += d["samt"]
+				net_itc["samt"] += flt(d["samt"], 2)
 
 				d["csamt"] = flt(itc_details.get((itc_type_map.get(d["ty"]), reverse_charge, account_head.get('cess_account')), {}).get("amount"), 2)
-				net_itc["csamt"] += d["csamt"]
+				net_itc["csamt"] += flt(d["csamt"], 2)
 
 		for account_head in self.account_heads:
 
@@ -420,7 +420,7 @@ def get_state_code(state):
 
 	return state_code
 
-def get_period(month, with_year=False):
+def get_period(month, year=None):
 
 	month_no = {
 		"January": 1,
@@ -437,8 +437,8 @@ def get_period(month, with_year=False):
 		"December": 12
 	}.get(month)
 
-	if with_year:
-		return str(month_no).zfill(2) + str(getdate().year)
+	if year:
+		return str(month_no).zfill(2) + str(year)
 	else:
 		return month_no
 
