@@ -69,7 +69,12 @@ frappe.ui.form.on("Project", {
 	},
 
 	refresh: function (frm) {
-		erpnext.toggle_naming_series();
+		if (frappe.defaults.get_default("project_naming_by")!="Naming Series") {
+			frm.toggle_display("naming_series", false);
+		} else {
+			erpnext.toggle_naming_series();
+		}
+
 		if (frm.doc.__islocal) {
 			frm.web_link && frm.web_link.remove();
 		} else {
