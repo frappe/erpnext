@@ -26,10 +26,10 @@ class Gstr2Report(Gstr1Report):
 			place_of_supply,
 			ecommerce_gstin,
 			reverse_charge,
-			invoice_type,
+			gst_category,
 			return_against,
 			is_return,
-			invoice_type,
+			gst_category,
 			export_type,
 			reason_for_issuing_document,
 			eligibility_for_itc,
@@ -82,7 +82,7 @@ class Gstr2Report(Gstr1Report):
 					conditions += opts[1]
 
 		if self.filters.get("type_of_business") ==  "B2B":
-			conditions += "and ifnull(invoice_type, '') != 'Export' and is_return != 1 "
+			conditions += "and ifnull(gst_category, '') != 'Overseas' and is_return != 1 "
 
 		elif self.filters.get("type_of_business") ==  "CDNR":
 			conditions += """ and is_return = 1 """
@@ -200,7 +200,7 @@ class Gstr2Report(Gstr1Report):
 					"width": 80
 				},
 				{
-					"fieldname": "invoice_type",
+					"fieldname": "gst_category",
 					"label": "Invoice Type",
 					"fieldtype": "Data",
 					"width": 80
