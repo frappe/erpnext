@@ -41,10 +41,10 @@ def get_product_info_for_website(item_code):
 			if item:
 				product_info["qty"] = item[0].qty
 
-	return {
+	return frappe._dict({
 		"product_info": product_info,
 		"cart_settings": cart_settings
-	}
+	})
 
 def set_product_info_for_website(item):
 	"""set product price uom for website"""
