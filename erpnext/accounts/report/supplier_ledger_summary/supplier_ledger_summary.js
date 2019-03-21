@@ -35,9 +35,9 @@ frappe.query_reports["Supplier Ledger Summary"] = {
 		},
 		{
 			"fieldname":"party",
-			"label": __("Customer"),
+			"label": __("Supplier"),
 			"fieldtype": "Link",
-			"options": "Customer",
+			"options": "Supplier",
 			on_change: () => {
 				var party = frappe.query_report.get_filter_value('party');
 				if (party) {

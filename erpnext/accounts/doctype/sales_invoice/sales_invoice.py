@@ -24,7 +24,6 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
-from erpnext.controllers.accounts_controller import on_submit_regional, on_cancel_regional
 
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 
@@ -199,14 +198,18 @@ class SalesInvoice(SellingController):
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_submit")
 
-		on_submit_regional(self)
-
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 
 	def before_cancel(self):
 		self.update_time_sheet(None)
+
+	def before_print(self):
+		self.gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Sales Invoice",
+			"voucher_no": self.name} ,
+			fields=["account", "party_type", "party", "debit", "credit"]
+		)
 
 	def on_cancel(self):
 		self.check_close_sales_order("sales_order")
@@ -255,8 +258,6 @@ class SalesInvoice(SellingController):
 
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_cancel")
-
-		on_cancel_regional(self)
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -404,7 +405,7 @@ class SalesInvoice(SellingController):
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',
 				'company', 'select_print_heading', 'cash_bank_account', 'company_address',
-				'write_off_account', 'write_off_cost_center', 'apply_discount_on'):
+				'write_off_account', 'write_off_cost_center', 'apply_discount_on', 'cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
 
@@ -528,8 +529,8 @@ class SalesInvoice(SellingController):
 
 	def validate_pos(self):
 		if self.is_return:
-			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(self.grand_total) < \
-				1/(10**(self.precision("grand_total") + 1)):
+			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(self.grand_total) > \
+				1.0/(10.0**(self.precision("grand_total") + 1.0)):
 					frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
 	def validate_item_code(self):
@@ -1017,9 +1018,10 @@ class SalesInvoice(SellingController):
 			for serial_no in item.serial_no.split("\n"):
 				sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
 				if sales_invoice and self.name != sales_invoice:
-					frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
-						serial_no, sales_invoice
-					)))
+					sales_invoice_company = frappe.db.get_value("Sales Invoice", sales_invoice, "company")
+					if sales_invoice_company == self.company:
+						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}"
+							.format(serial_no, sales_invoice)))
 
 	def update_project(self):
 		if self.project:
