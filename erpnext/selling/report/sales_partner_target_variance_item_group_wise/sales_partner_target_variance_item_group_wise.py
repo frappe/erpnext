@@ -8,5 +8,5 @@ from erpnext.selling.report.sales_partner_target_variance_item_group_wise.item_g
 def execute(filters=None):
 	data = []
 
-	return get_data_column(filters, "Territory")
+	return get_data_column(filters, "Sales Partner")
 
