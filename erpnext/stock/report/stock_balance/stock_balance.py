@@ -40,10 +40,9 @@ def execute(filters=None):
 				item_reorder_level = item_reorder_detail_map[item + warehouse]["warehouse_reorder_level"]
 				item_reorder_qty = item_reorder_detail_map[item + warehouse]["warehouse_reorder_qty"]
 
-			report_data = [item, item_map[item]["item_name"],
+			report_data = [item_map[item]["item_name"],
 				item_map[item]["item_group"],
 				item_map[item]["brand"],
-				item_map[item]["description"],
 				warehouse,
 				item_map[item]["alt_uom"] or item_map[item]["stock_uom"] if filters.qty_field == "Contents Qty" else item_map[item]["stock_uom"],
 				qty_dict.opening_qty * alt_uom_size,
