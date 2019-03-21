@@ -17,7 +17,7 @@ frappe.ui.form.on("Company", {
 			}
 		});
 
-		frm.set_query("parent_company", function(){
+		frm.set_query("parent_company", function() {
 			return {
 				filters: {"is_group": 1}
 			}
@@ -277,3 +277,4 @@ var disbale_coa_fields = function(frm, bool=true) {
 	frm.set_df_property("chart_of_accounts", "read_only", bool);
 	frm.set_df_property("existing_company", "read_only", bool);
 }
+

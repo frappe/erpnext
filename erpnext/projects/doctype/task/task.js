@@ -35,23 +35,10 @@ frappe.ui.form.on("Task", {
 			}
 
 			if(!doc.__islocal) {
-				if(frappe.model.can_read("Timesheet")) {
-					frm.add_custom_button(__("Timesheet"), function() {
-						frappe.route_options = {"project": doc.project, "task": doc.name}
-						frappe.set_route("List", "Timesheet");
-					}, __("View"), true);
-				}
-				if(frappe.model.can_read("Expense Claim")) {
-					frm.add_custom_button(__("Expense Claims"), function() {
-						frappe.route_options = {"project": doc.project, "task": doc.name}
-						frappe.set_route("List", "Expense Claim");
-					}, __("View"), true);
-				}
-
 				if(frm.perm[0].write) {
-					if(frm.doc.status!=="Closed" && frm.doc.status!=="Cancelled") {
-						frm.add_custom_button(__("Close"), function() {
-							frm.set_value("status", "Closed");
+					if(frm.doc.status!=="Completed" && frm.doc.status!=="Cancelled") {
+						frm.add_custom_button(__("Completed"), function() {
+							frm.set_value("status", "Completed");
 							frm.save();
 						});
 					} else {

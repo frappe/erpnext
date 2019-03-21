@@ -561,7 +561,7 @@
    "label": "Earned Leave Frequency",
    "length": 0,
    "no_copy": 0,
-   "options": "Monthly\nQuarterly\nYearly",
+   "options": "Monthly\nQuarterly\nHalf-Yearly\nYearly",
    "permlevel": 0,
    "precision": "",
    "print_hide": 0,

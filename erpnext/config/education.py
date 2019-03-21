@@ -8,7 +8,8 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Student"
+					"name": "Student",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
@@ -168,7 +169,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Course Schedule",
-					"route": "List/Course Schedule/Calendar"
+					"route": "#List/Course Schedule/Calendar"
 				},
 				{
 					"type": "doctype",
@@ -181,7 +182,8 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Course"
+					"name": "Course",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
@@ -189,16 +191,18 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Instructor"
+					"name": "Instructor",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
-					"name": "Room"
+					"name": "Room",
+					"onboard": 1,
 				}
 			]
 		},
 		{
-			"label": _("Setup"),
+			"label": _("Settings"),
 			"items": [
 				{
 					"type": "doctype",
@@ -210,7 +214,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Grading Scale"
+					"name": "Grading Scale",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",

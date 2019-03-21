@@ -13,7 +13,7 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import check_for_closed_status
-from erpnext.assets.doctype.asset.asset import get_asset_account
+from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
 from six import iteritems
 
 form_grid_templates = {
@@ -258,7 +258,8 @@ class PurchaseReceipt(BuyingController):
 					d.rejected_warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(d.warehouse)
 
-		self.get_asset_gl_entry(gl_entries)
+		if not is_cwip_accounting_disabled():
+			self.get_asset_gl_entry(gl_entries)
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("taxes"):
@@ -405,6 +406,11 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
+	doc = frappe.get_doc('Purchase Receipt', source_name)
+	purchase_orders = [d.purchase_order for d in doc.items]
+	returned_qty_map_against_po = get_returned_qty_map_against_po(purchase_orders)
+	returned_qty_map_against_pr = get_returned_qty_map_against_pr(source_name)
+
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
@@ -417,7 +423,23 @@ def make_purchase_invoice(source_name, target_doc=None):
 		doc.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
+		target_doc.qty, returned_qty = get_pending_qty(source_doc)
+		if not source_doc.purchase_order_item:
+			returned_qty_map_against_pr[source_doc.item_code] = returned_qty
+
+	def get_pending_qty(item_row):
+		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0) \
+			- returned_qty_map_against_po.get(item_row.purchase_order_item, 0)
+		returned_qty = flt(returned_qty_map_against_pr.get(item_row.item_code, 0))
+		if not item_row.purchase_order_item:
+			if returned_qty >= pending_qty:
+				pending_qty = 0
+				returned_qty -= pending_qty
+			else:
+				pending_qty -= returned_qty
+				returned_qty = 0
+		return pending_qty, returned_qty
+
 
 	doclist = get_mapped_doc("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {
@@ -440,7 +462,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"asset": "asset",
 			},
 			"postprocess": update_item,
-			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
+			"filter": lambda d: get_pending_qty(d)[0]<=0
 		},
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",
@@ -461,6 +483,31 @@ def get_invoiced_qty_map(purchase_receipt):
 			invoiced_qty_map[pr_detail] += qty
 
 	return invoiced_qty_map
+
+def get_returned_qty_map_against_po(purchase_orders):
+	"""returns a map: {so_detail: returned_qty}"""
+	returned_qty_map = {}
+
+	for name, returned_qty in frappe.get_all('Purchase Order Item', fields = ["name", "returned_qty"],
+		filters = {'parent': ('in', purchase_orders), 'docstatus': 1}, as_list=1):
+		if not returned_qty_map.get(name):
+				returned_qty_map[name] = 0
+		returned_qty_map[name] += returned_qty
+
+	return returned_qty_map
+
+def get_returned_qty_map_against_pr(purchase_receipt):
+	"""returns a map: {so_detail: returned_qty}"""
+	returned_qty_map = frappe._dict(frappe.db.sql("""select pr_item.item_code, sum(abs(pr_item.qty)) as qty
+		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
+		where pr.name = pr_item.parent
+			and pr.docstatus = 1
+			and pr.is_return = 1
+			and pr.return_against = %s
+		group by pr_item.item_code
+	""", purchase_receipt))
+
+	return returned_qty_map
 
 @frappe.whitelist()
 def make_purchase_return(source_name, target_doc=None):

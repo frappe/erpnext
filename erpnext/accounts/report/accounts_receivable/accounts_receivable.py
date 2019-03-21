@@ -495,6 +495,7 @@ class ReceivablePayableReport(object):
 			values.append(self.filters.get(party_type_field))
 
 		if party_type_field=="customer":
+			account_type = "Receivable"
 			if self.filters.get("customer_group"):
 				lft, rgt = frappe.db.get_value("Customer Group",
 					self.filters.get("customer_group"), ["lft", "rgt"])
@@ -529,11 +530,24 @@ class ReceivablePayableReport(object):
 						or (steam.parent = against_voucher and steam.parenttype = against_voucher_type)
 						or (steam.parent = party and steam.parenttype = 'Customer')))""".format(lft, rgt))
 
-		if party_type_field=="supplier":
+		elif party_type_field=="supplier":
+			account_type = "Payable"
 			if self.filters.get("supplier_group"):
 				conditions.append("""party in (select name from tabSupplier
 					where supplier_group=%s)""")
 				values.append(self.filters.get("supplier_group"))
+
+		if self.filters.get("cost_center"):
+			lft, rgt = frappe.get_cached_value("Cost Center",
+				self.filters.get("cost_center"), ['lft', 'rgt'])
+
+			conditions.append("""cost_center in (select name from `tabCost Center` where
+				lft >= {0} and rgt <= {1})""".format(lft, rgt))
+
+		accounts = [d.name for d in frappe.get_all("Account",
+			filters={"account_type": account_type, "company": self.filters.company})]
+		conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
+		values += accounts
 
 		return " and ".join(conditions), values
 

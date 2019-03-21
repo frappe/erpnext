@@ -157,6 +157,8 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 	# return warehouses
 	for wh in warehouses:
 		wh["balance"] = get_stock_value_from_bin(warehouse=wh.value)
+		if company:
+			wh["company_currency"] = frappe.db.get_value('Company', company, 'default_currency')
 	return warehouses
 
 @frappe.whitelist()
@@ -173,3 +175,9 @@ def add_node():
 def convert_to_group_or_ledger():
 	args = frappe.form_dict
 	return frappe.get_doc("Warehouse", args.docname).convert_to_group_or_ledger()
+
+def get_child_warehouses(warehouse):
+	p_warehouse = frappe.get_doc("Warehouse", warehouse)
+
+	return frappe.db.sql_list("""select name from `tabWarehouse`
+		where lft >= %s and rgt =< %s""", (p_warehouse.lft, p_warehouse.rgt))
