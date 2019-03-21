@@ -7,8 +7,7 @@ from frappe import _
 from frappe.utils import flt, fmt_money, getdate, formatdate
 from frappe.model.document import Document
 from erpnext.accounts.party import validate_party_gle_currency, validate_party_frozen_disabled
-from erpnext.accounts.utils import get_account_currency
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounts.utils import get_account_currency, get_balance_on_voucher, get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency
 
 exclude_from_linked_with = True
@@ -26,7 +25,7 @@ class GLEntry(Document):
 			self.validate_party()
 			self.validate_currency()
 
-	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes', from_repost=False):
+	def on_update_with_args(self, adv_adj, from_repost=False):
 		if not from_repost:
 			self.validate_account_details(adv_adj)
 			check_freezing_date(self.posting_date, adv_adj)
@@ -34,25 +33,28 @@ class GLEntry(Document):
 		validate_frozen_account(self.account, adv_adj)
 		validate_balance_type(self.account, adv_adj)
 
-		# Update outstanding amt on against voucher
-		if self.against_voucher_type in ['Journal Entry', 'Sales Invoice', 'Purchase Invoice', 'Fees'] \
-			and self.against_voucher and update_outstanding == 'Yes' and not from_repost:
-				update_outstanding_amt(self.account, self.party_type, self.party, self.against_voucher_type,
-					self.against_voucher)
-
 	def check_mandatory(self):
 		mandatory = ['account','voucher_type','voucher_no','company']
 		for k in mandatory:
 			if not self.get(k):
 				frappe.throw(_("{0} is required").format(_(self.meta.get_label(k))))
 
+		if self.party and not self.party_type:
+			frappe.throw(_("Party is set but Party Type is not provided"))
+		if self.party_type and not self.party:
+			frappe.throw(_("Party Type is set but Party is not provided"))
+		if self.against_voucher and not self.against_voucher_type:
+			frappe.throw(_("Against Voucher is set but Against Voucher Type is not provided"))
+		if self.against_voucher_type and not self.against_voucher:
+			frappe.throw(_("Against Voucher is set but Against Voucher Type is not provided"))
+
 		account_type = frappe.db.get_value("Account", self.account, "account_type")
 		if not (self.party_type and self.party):
 			if account_type == "Receivable":
-				frappe.throw(_("{0} {1}: Customer is required against Receivable account {2}")
+				frappe.throw(_("{0} {1}: Party is required against Receivable account {2}")
 					.format(self.voucher_type, self.voucher_no, self.account))
 			elif account_type == "Payable":
-				frappe.throw(_("{0} {1}: Supplier is required against Payable account {2}")
+				frappe.throw(_("{0} {1}: Party is required against Payable account {2}")
 					.format(self.voucher_type, self.voucher_no, self.account))
 
 		# Zero value transaction is not allowed
@@ -159,47 +161,19 @@ def check_freezing_date(posting_date, adv_adj=False):
 					and not frozen_accounts_modifier in frappe.get_roles():
 				frappe.throw(_("You are not authorized to add or update entries before {0}").format(formatdate(acc_frozen_upto)))
 
-def update_outstanding_amt(account, party_type, party, against_voucher_type, against_voucher, on_cancel=False):
-	if party_type and party:
-		party_condition = " and party_type='{0}' and party='{1}'"\
-			.format(frappe.db.escape(party_type), frappe.db.escape(party))
-	else:
-		party_condition = ""
-
-	# get final outstanding amt
-	bal = flt(frappe.db.sql("""
-		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
-		from `tabGL Entry`
-		where against_voucher_type=%s and against_voucher=%s
-		and account = %s {0}""".format(party_condition),
-		(against_voucher_type, against_voucher, account))[0][0] or 0.0)
-
-	if against_voucher_type == 'Purchase Invoice':
-		bal = -bal
-	elif against_voucher_type == "Journal Entry":
-		against_voucher_amount = flt(frappe.db.sql("""
-			select sum(debit_in_account_currency) - sum(credit_in_account_currency)
-			from `tabGL Entry` where voucher_type = 'Journal Entry' and voucher_no = %s
-			and account = %s and (against_voucher is null or against_voucher='') {0}"""
-			.format(party_condition), (against_voucher, account))[0][0])
-
-		if not against_voucher_amount:
-			frappe.throw(_("Against Journal Entry {0} is already adjusted against some other voucher")
-				.format(against_voucher))
-
-		bal = against_voucher_amount + bal
-		if against_voucher_amount < 0:
-			bal = -bal
-
-		# Validation : Outstanding can not be negative for JV
-		if bal < 0 and not on_cancel:
-			frappe.throw(_("Outstanding for {0} cannot be less than zero ({1})").format(against_voucher, fmt_money(bal)))
-
+def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party, on_cancel=False):
 	# Update outstanding amt on against voucher
-	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
-		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
-		ref_doc.db_set('outstanding_amount', bal)
-		ref_doc.set_status(update=True)
+	if voucher_type in ["Sales Invoice", "Purchase Invoice", "Landed Cost Voucher", "Fees"]:
+		fieldname = "outstanding_amount"
+	elif voucher_type == "Employee Advance":
+		fieldname = "balance_amount"
+	else:
+		return
+
+	bal = get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account)
+	ref_doc = frappe.get_doc(voucher_type, voucher_no)
+	ref_doc.db_set(fieldname, bal)
+	ref_doc.set_status(update=True)
 
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.db.get_value("Account", account, "freeze_account")

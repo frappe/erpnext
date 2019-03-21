@@ -848,6 +848,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_sales_invoice_with_advance(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
 			import test_records as jv_test_records
+		from erpnext.accounts.utils import get_balance_on_voucher
 
 		jv = frappe.copy_doc(jv_test_records[0])
 		jv.insert()
@@ -858,7 +859,6 @@ class TestSalesInvoice(unittest.TestCase):
 			"doctype": "Sales Invoice Advance",
 			"reference_type": "Journal Entry",
 			"reference_name": jv.name,
-			"reference_row": jv.get("accounts")[0].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
 			"remarks": jv.remark
@@ -873,12 +873,20 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where reference_name=%s and credit_in_account_currency=300""", si.name))
 
-		self.assertEqual(si.outstanding_amount, 262.0)
+		self.assertEqual(si.outstanding_amount,
+			262.0)
+		self.assertEqual(get_balance_on_voucher(si.doctype, si.name, "Customer", si.customer, si.debit_to),
+			262.0)
+		self.assertEqual(get_balance_on_voucher(jv.doctype, jv.name, "Customer", si.customer, si.debit_to),
+			-100.0)
 
 		si.cancel()
 
-		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
+		self.assertFalse(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where reference_name=%s""", si.name))
+
+		self.assertEqual(get_balance_on_voucher(jv.doctype, jv.name, "Customer", si.customer, si.debit_to),
+			-400.0)
 
 	def test_serialized(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
@@ -1144,7 +1152,6 @@ class TestSalesInvoice(unittest.TestCase):
 			import test_records as jv_test_records
 
 		jv = frappe.copy_doc(jv_test_records[0])
-		jv.accounts[0].is_advance = 'Yes'
 		jv.insert()
 		jv.submit()
 
@@ -1153,7 +1160,6 @@ class TestSalesInvoice(unittest.TestCase):
 			"doctype": "Sales Invoice Advance",
 			"reference_type": "Journal Entry",
 			"reference_name": jv.name,
-			"reference_row": jv.get("accounts")[0].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
 			"remarks": jv.remark
@@ -1431,10 +1437,10 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_credit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from erpnext.accounts.utils import get_balance_on_voucher
 		si = create_sales_invoice(item_code = "_Test Item", qty = (5 * -1), rate=500, is_return = 1)
 
-		outstanding_amount = get_outstanding_amount(si.doctype,
-			si.name, "Debtors - _TC", si.customer, "Customer")
+		outstanding_amount = get_balance_on_voucher(si.doctype, si.name, "Customer", si.customer, "Debtors - _TC")
 
 		self.assertEqual(si.outstanding_amount, outstanding_amount)
 
@@ -1599,16 +1605,3 @@ def create_sales_invoice_against_cost_center(**args):
 
 test_dependencies = ["Journal Entry", "Contact", "Address"]
 test_records = frappe.get_test_records('Sales Invoice')
-
-def get_outstanding_amount(against_voucher_type, against_voucher, account, party, party_type):
-	bal = flt(frappe.db.sql("""
-		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
-		from `tabGL Entry`
-		where against_voucher_type=%s and against_voucher=%s
-		and account = %s and party = %s and party_type = %s""",
-		(against_voucher_type, against_voucher, account, party, party_type))[0][0] or 0.0)
-
-	if against_voucher_type == 'Purchase Invoice':
-		bal = bal * -1
-
-	return bal

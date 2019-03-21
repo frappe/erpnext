@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import json
-from frappe import _, throw
+from frappe import _, throw, scrub
 from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day, nowdate
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
@@ -40,16 +40,24 @@ class AccountsController(TransactionBase):
 				self.set_payment_schedule()
 
 	def ensure_supplier_is_not_blocked(self):
-		is_supplier_payment = self.doctype == 'Payment Entry' and self.party_type == 'Supplier'
-		is_buying_invoice = self.doctype in ['Purchase Invoice', 'Purchase Order']
-		supplier = None
-		supplier_name = None
+		supplier, supplier_name = None, None
+		is_buying_invoice, is_supplier_payment = False, False
 
-		if is_buying_invoice or is_supplier_payment:
-			supplier_name = self.supplier if is_buying_invoice else self.party
+		if self.doctype == 'Payment Entry' and self.party_type == 'Supplier':
+			supplier_name = self.party
+			is_supplier_payment = True
+			supplier = frappe.get_doc('Supplier', supplier_name)
+		elif self.doctype in ['Purchase Invoice', 'Purchase Order']:
+			supplier_name = self.supplier
+			is_buying_invoice = True
+		elif self.doctype == 'Landed Cost Voucher' and self.party_type == 'Supplier':
+			supplier_name = self.party
+			is_buying_invoice = True
+
+		if supplier_name:
 			supplier = frappe.get_doc('Supplier', supplier_name)
 
-		if supplier and supplier_name and supplier.on_hold:
+		if supplier and supplier.on_hold:
 			if (is_buying_invoice and supplier.hold_type in ['All', 'Invoices']) or \
 					(is_supplier_payment and supplier.hold_type in ['All', 'Payments']):
 				if not supplier.release_date or getdate(nowdate()) <= supplier.release_date:
@@ -87,12 +95,13 @@ class AccountsController(TransactionBase):
 		if self.doctype == 'Purchase Invoice':
 			self.validate_paid_amount()
 
-		if self.doctype in ['Purchase Invoice', 'Sales Invoice']:
-			if cint(self.allocate_advances_automatically):
-				self.set_advances()
+		if self.doctype in ['Purchase Invoice', 'Sales Invoice', 'Landed Cost Voucher'] and cint(self.allocate_advances_automatically):
+			self.set_advances()
 
-			if self.is_return:
+		if self.doctype in ['Purchase Invoice', 'Sales Invoice'] and self.is_return:
 				self.validate_qty()
+
+		validate_regional(self)
 
 	def validate_invoice_documents_schedule(self):
 		self.validate_payment_schedule_dates()
@@ -248,6 +257,7 @@ class AccountsController(TransactionBase):
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
 					ret = get_item_details(args)
+
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (item.get(fieldname) is None or fieldname in force_item_fields):
@@ -434,22 +444,28 @@ class AccountsController(TransactionBase):
 			party_account = self.debit_to
 			party_type = "Customer"
 			party = self.customer
-			amount_field = "credit_in_account_currency"
 			order_field = "sales_order"
 			order_doctype = "Sales Order"
-		else:
+		elif self.doctype == "Purchase Invoice":
 			party_account = self.credit_to
-			party_type = "Supplier"
-			party = self.supplier
-			amount_field = "debit_in_account_currency"
+			party_type = "Letter of Credit" if self.letter_of_credit else "Supplier"
+			party = self.letter_of_credit if self.letter_of_credit else self.supplier
 			order_field = "purchase_order"
 			order_doctype = "Purchase Order"
+		else:
+			party_account = self.credit_to
+			party_type = self.party_type
+			party = self.party
+			order_field = None
+			order_doctype = None
 
-		order_list = list(set([d.get(order_field)
-							   for d in self.get("items") if d.get(order_field)]))
+		if order_field:
+			order_list = list(set([d.get(order_field) for d in self.get("items") if d.get(order_field)]))
+		else:
+			order_list = []
 
 		journal_entries = get_advance_journal_entries(party_type, party, party_account,
-													  amount_field, order_doctype, order_list, include_unallocated)
+													  order_doctype, order_list, include_unallocated)
 
 		payment_entries = get_advance_payment_entries(party_type, party, party_account,
 													  order_doctype, order_list, include_unallocated)
@@ -499,11 +515,29 @@ class AccountsController(TransactionBase):
 			party = self.customer
 			party_account = self.debit_to
 			dr_or_cr = "credit_in_account_currency"
-		else:
-			party_type = "Supplier"
-			party = self.supplier
+		elif self.doctype == "Purchase Invoice":
+			party_type = "Letter of Credit" if self.letter_of_credit else "Supplier"
+			party = self.letter_of_credit if self.letter_of_credit else self.supplier
 			party_account = self.credit_to
 			dr_or_cr = "debit_in_account_currency"
+		else:
+			party_type = self.party_type
+			party = self.party
+			party_account = self.credit_to
+			dr_or_cr = "debit_in_account_currency"
+
+		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
+			invoice_amounts = {
+				'exchange_rate': (self.conversion_rate
+								  if self.party_account_currency != self.company_currency else 1),
+				'grand_total': (self.base_grand_total
+								if self.party_account_currency == self.company_currency else self.grand_total)
+			}
+		else:
+			invoice_amounts = {
+				'exchange_rate': 1,
+				'grand_total': self.grand_total
+			}
 
 		lst = []
 		for d in self.get('advances'):
@@ -517,16 +551,12 @@ class AccountsController(TransactionBase):
 					'account': party_account,
 					'party_type': party_type,
 					'party': party,
-					'is_advance': 'Yes',
 					'dr_or_cr': dr_or_cr,
 					'unadjusted_amount': flt(d.advance_amount),
 					'allocated_amount': flt(d.allocated_amount),
-					'exchange_rate': (self.conversion_rate
-									  if self.party_account_currency != self.company_currency else 1),
-					'grand_total': (self.base_grand_total
-									if self.party_account_currency == self.company_currency else self.grand_total),
 					'outstanding_amount': self.outstanding_amount
 				})
+				args.update(invoice_amounts)
 				lst.append(args)
 
 		if lst:
@@ -633,7 +663,14 @@ class AccountsController(TransactionBase):
 		party_type, party = self.get_party()
 		validate_party_frozen_disabled(party_type, party)
 
+		billing_party_type, billing_party = self.get_billing_party()
+		if (billing_party_type, billing_party) != (party_type, party):
+			validate_party_frozen_disabled(billing_party_type, billing_party)
+
 	def get_party(self):
+		if self.doctype == "Landed Cost Voucher":
+			return self.get("party_type"), self.get("party")
+
 		party_type = None
 		if self.doctype in ("Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
 			party_type = 'Customer'
@@ -647,13 +684,19 @@ class AccountsController(TransactionBase):
 		elif self.meta.get_field("supplier"):
 			party_type = "Supplier"
 
-		party = self.get(party_type.lower()) if party_type else None
+		party = self.get(scrub(party_type)) if party_type else None
 
 		return party_type, party
 
+	def get_billing_party(self):
+		if self.get("letter_of_credit"):
+			return "Letter of Credit", self.get("letter_of_credit")
+		else:
+			return self.get_party()
+
 	def validate_currency(self):
 		if self.get("currency"):
-			party_type, party = self.get_party()
+			party_type, party = self.get_billing_party()
 			if party_type and party:
 				party_account_currency = get_party_account_currency(party_type, party, self.company)
 
@@ -923,49 +966,116 @@ def set_balance_in_account_currency(gl_dict, account_currency=None, conversion_r
 			else flt(gl_dict.credit / conversion_rate, 2)
 
 
-def get_advance_journal_entries(party_type, party, party_account, amount_field,
-								order_doctype, order_list, include_unallocated=True):
-	dr_or_cr = "credit_in_account_currency" if party_type == "Customer" else "debit_in_account_currency"
+def get_advance_journal_entries(party_type, party, party_account, order_doctype,
+		order_list=None, include_unallocated=True, against_all_orders=False, against_account=None, limit=None):
+	journal_entries = []
+	if erpnext.get_party_account_type(party_type) == "Receivable":
+		dr_or_cr = "credit_in_account_currency"
+		bal_dr_or_cr = "gle_je.credit_in_account_currency - gle_je.debit_in_account_currency"
+		payment_dr_or_cr = "gle_payment.debit_in_account_currency - gle_payment.credit_in_account_currency"
+	else:
+		dr_or_cr = "debit_in_account_currency"
+		bal_dr_or_cr = "gle_je.debit_in_account_currency - gle_je.credit_in_account_currency"
+		payment_dr_or_cr = "gle_payment.credit_in_account_currency - gle_payment.debit_in_account_currency"
 
-	conditions = []
+	limit_cond = "limit %(limit)s" if limit else ""
+
+	# JVs against order documents
+	if order_list or against_all_orders:
+		if order_list:
+			order_condition = "and ifnull(jea.reference_name, '') in ('{0}')" \
+				.format("', '".join([frappe.db.escape(d) for d in order_list]))
+		else:
+			order_condition = "and ifnull(jea.reference_name, '') != ''"
+
+		against_account_condition = "and jea.against_account like '%%{0}%%'".format(frappe.db.escape(against_account)) \
+			if against_account else ""
+
+		journal_entries += frappe.db.sql("""
+			select
+				"Journal Entry" as reference_type, je.name as reference_name, je.remark as remarks,
+				jea.{dr_or_cr} as amount, jea.name as reference_row, jea.reference_name as against_order
+			from
+				`tabJournal Entry` je, `tabJournal Entry Account` jea
+			where
+				je.name = jea.parent and jea.account = %(account)s
+				and jea.party_type = %(party_type)s and jea.party = %(party)s
+				and {dr_or_cr} > 0 and jea.reference_type = '{order_doctype}' and je.docstatus = 1
+				{order_condition} {against_account_condition}
+			order by je.posting_date
+			{limit_cond}""".format(
+				dr_or_cr=dr_or_cr,
+				order_doctype=order_doctype,
+				order_condition=order_condition,
+				against_account_condition=against_account_condition,
+				limit_cond=limit_cond
+			), {
+			"party_type": party_type,
+			"party": party,
+			"account": party_account,
+			"limit": limit
+			}, as_dict=1)
+
+	# Unallocated payment JVs
 	if include_unallocated:
-		conditions.append("ifnull(t2.reference_name, '')=''")
+		against_account_condition = ""
+		if against_account:
+			against_account_condition = "and GROUP_CONCAT(gle_je.against) like '%%{0}%%'".format(frappe.db.escape(against_account))
 
-	if order_list:
-		order_condition = ', '.join(['%s'] * len(order_list))
-		conditions.append(" (t2.reference_type = '{0}' and ifnull(t2.reference_name, '') in ({1}))" \
-						  .format(order_doctype, order_condition))
-
-	reference_condition = " and (" + " or ".join(conditions) + ")" if conditions else ""
-
-	journal_entries = frappe.db.sql("""
+		journal_entries += frappe.db.sql("""
 		select
-			"Journal Entry" as reference_type, t1.name as reference_name,
-			t1.remark as remarks, t2.{0} as amount, t2.name as reference_row,
-			t2.reference_name as against_order
-		from
-			`tabJournal Entry` t1, `tabJournal Entry Account` t2
+			gle_je.voucher_type as reference_type, je.name as reference_name, je.remark as remarks,
+			ifnull(sum({bal_dr_or_cr}), 0) - (
+				select ifnull(sum({payment_dr_or_cr}), 0)
+				from `tabGL Entry` gle_payment
+				where
+					gle_payment.against_voucher_type = gle_je.voucher_type
+					and gle_payment.against_voucher = gle_je.voucher_no
+					and gle_payment.party_type = gle_je.party_type
+					and gle_payment.party = gle_je.party
+					and gle_payment.account = gle_je.account
+					and abs({payment_dr_or_cr}) > 0
+			) as amount
+		from `tabGL Entry` gle_je
+		inner join `tabJournal Entry` je on je.name = gle_je.voucher_no
 		where
-			t1.name = t2.parent and t2.account = %s
-			and t2.party_type = %s and t2.party = %s
-			and t2.is_advance = 'Yes' and t1.docstatus = 1
-			and {1} > 0 {2}
-		order by t1.posting_date""".format(amount_field, dr_or_cr, reference_condition),
-									[party_account, party_type, party] + order_list, as_dict=1)
+			gle_je.party_type = %(party_type)s and gle_je.party = %(party)s and gle_je.account = %(account)s
+			and gle_je.voucher_type = 'Journal Entry' and (gle_je.against_voucher = '' or gle_je.against_voucher is null)
+			and abs({bal_dr_or_cr}) > 0
+		group by gle_je.voucher_no
+		having amount > 0.005 {against_account_condition}
+		order by gle_je.posting_date
+		{limit_cond}""".format(
+			bal_dr_or_cr=bal_dr_or_cr,
+			payment_dr_or_cr=payment_dr_or_cr,
+			against_account_condition=against_account_condition,
+			limit_cond=limit_cond
+		), {
+			"party_type": party_type,
+			"party": party,
+			"account": party_account,
+			"limit": limit
+		}, as_dict=True)
 
 	return list(journal_entries)
 
 
 def get_advance_payment_entries(party_type, party, party_account, order_doctype,
-		order_list=None, include_unallocated=True, against_all_orders=False, limit=1000):
-	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
-	payment_type = "Receive" if party_type == "Customer" else "Pay"
+		order_list=None, include_unallocated=True, against_all_orders=False, against_account=None, limit=1000):
 	payment_entries_against_order, unallocated_payment_entries = [], []
-	limit_cond = "limit %s" % (limit or 1000)
+	party_account_type = erpnext.get_party_account_type(party_type)
+	party_account_field = "paid_from" if party_account_type == "Receivable" else "paid_to"
+	against_account_field = "paid_to" if party_account_type == "Receivable" else "paid_from"
+	payment_type = "Receive" if party_account_type == "Receivable" else "Pay"
+
+	against_account_condition = ""
+	if against_account:
+		against_account_condition = "and pe.{against_account_field} = {against_account}".format(
+			against_account_field=against_account_field, against_account=frappe.db.escape(against_account))
 
 	if order_list or against_all_orders:
 		if order_list:
-			reference_condition = " and t2.reference_name in ({0})" \
+			reference_condition = " and pref.reference_name in ({0})" \
 				.format(', '.join(['%s'] * len(order_list)))
 		else:
 			reference_condition = ""
@@ -973,29 +1083,37 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 
 		payment_entries_against_order = frappe.db.sql("""
 			select
-				"Payment Entry" as reference_type, t1.name as reference_name,
-				t1.remarks, t2.allocated_amount as amount, t2.name as reference_row,
-				t2.reference_name as against_order, t1.posting_date
-			from `tabPayment Entry` t1, `tabPayment Entry Reference` t2
+				"Payment Entry" as reference_type, pe.name as reference_name,
+				pe.remarks, pref.allocated_amount as amount, pref.name as reference_row,
+				pref.reference_name as against_order, pe.posting_date
+			from `tabPayment Entry` pe, `tabPayment Entry Reference` pref
 			where
-				t1.name = t2.parent and t1.{0} = %s and t1.payment_type = %s
-				and t1.party_type = %s and t1.party = %s and t1.docstatus = 1
-				and t2.reference_doctype = %s {1}
-			order by t1.posting_date {2}
-		""".format(party_account_field, reference_condition, limit_cond),
-													  [party_account, payment_type, party_type, party,
-													   order_doctype] + order_list, as_dict=1)
+				pe.name = pref.parent and pe.{party_account_field} = %s and pe.payment_type = %s
+				and pe.party_type = %s and pe.party = %s and pe.docstatus = 1
+				and pref.reference_doctype = %s
+				{reference_condition} {against_account_condition}
+			order by pe.posting_date
+			limit %s
+		""".format(
+			party_account_field=party_account_field,
+			reference_condition=reference_condition,
+			against_account_condition=against_account_condition
+		), [party_account, payment_type, party_type, party, order_doctype] + order_list + [limit or 1000], as_dict=1)
 
 	if include_unallocated:
 		unallocated_payment_entries = frappe.db.sql("""
-				select "Payment Entry" as reference_type, name as reference_name,
-				remarks, unallocated_amount as amount
-				from `tabPayment Entry`
-				where
-					{0} = %s and party_type = %s and party = %s and payment_type = %s
-					and docstatus = 1 and unallocated_amount > 0
-				order by posting_date {1}
-			""".format(party_account_field, limit_cond), (party_account, party_type, party, payment_type), as_dict=1)
+			select "Payment Entry" as reference_type, name as reference_name, remarks, unallocated_amount as amount
+			from `tabPayment Entry` pe
+			where
+				{party_account_field} = %s and party_type = %s and party = %s and payment_type = %s
+				and docstatus = 1 and unallocated_amount > 0
+				{against_account_condition}
+			order by posting_date
+			limit %s
+		""".format(
+			party_account_field=party_account_field,
+			against_account_condition=against_account_condition
+		), [party_account, party_type, party, payment_type, limit or 1000], as_dict=1)
 
 	return list(payment_entries_against_order) + list(unallocated_payment_entries)
 
@@ -1132,3 +1250,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
 	p_doctype.update_blanket_order()
 	p_doctype.update_billing_percentage()
 	p_doctype.set_status()
+
+@erpnext.allow_regional
+def validate_regional(doc):
+	pass

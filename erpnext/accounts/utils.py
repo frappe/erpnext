@@ -180,6 +180,24 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		# if bal is None, return 0
 		return flt(bal)
 
+def get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account, dr_or_cr=None):
+	if not dr_or_cr:
+		if erpnext.get_party_account_type(party_type) == 'Receivable':
+			dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
+		else:
+			dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
+
+	res = frappe.db.sql("""
+		select ifnull(sum({dr_or_cr}), 0)
+		from `tabGL Entry`
+		where party_type=%(party_type)s and party=%(party)s and account=%(account)s
+			and ((voucher_type=%(voucher_type)s and voucher_no=%(voucher_no)s and (against_voucher is null or against_voucher=''))
+				or (against_voucher_type=%(voucher_type)s and against_voucher=%(voucher_no)s))
+	""".format(dr_or_cr=dr_or_cr),
+	{"voucher_type": voucher_type, "voucher_no": voucher_no, "party_type": party_type, "party": party, "account": account})
+
+	return flt(res[0][0]) if res else 0.0
+
 def get_count_on(account, fieldname, date):
 	cond = []
 	if date:
@@ -341,26 +359,42 @@ def check_if_advance_entry_modified(args):
 	"""
 	ret = None
 	if args.voucher_type == "Journal Entry":
-		ret = frappe.db.sql("""
-			select t2.{dr_or_cr} from `tabJournal Entry` t1, `tabJournal Entry Account` t2
-			where t1.name = t2.parent and t2.account = %(account)s
-			and t2.party_type = %(party_type)s and t2.party = %(party)s
-			and (t2.reference_type is null or t2.reference_type in ("", "Sales Order", "Purchase Order"))
-			and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
-			and t1.docstatus=1 """.format(dr_or_cr = args.get("dr_or_cr")), args)
+		if args.voucher_detail_no:
+			ret = frappe.db.sql("""select je.name
+				from `tabJournal Entry` je, `tabJournal Entry Account` jea
+				where
+					je.name = jea.parent and jea.account = %(account)s and je.docstatus=1
+					and je.name = %(voucher_no)s and jea.name = %(voucher_detail_no)s
+					and jea.party_type = %(party_type)s and jea.party = %(party)s
+					and ifnull(jea.reference_type, '') in ('', 'Sales Order', 'Purchase Order')
+					and jea.{dr_or_cr} = %(unadjusted_amount)s""".format(dr_or_cr=args.dr_or_cr), args)
+		else:
+			if erpnext.get_party_account_type(args.party_type) == 'Receivable':
+				dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
+			else:
+				dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
+
+			ret = frappe.db.sql("""
+				select sum({dr_or_cr}) as outstanding_amount
+				from `tabGL Entry`
+				where
+				((voucher_type='Journal Entry' and voucher_no=%(voucher_no)s and (against_voucher is null or against_voucher=''))
+					or (against_voucher_type='Journal Entry' and against_voucher=%(voucher_no)s))
+				and party_type=%(party_type)s and party=%(party)s and account=%(account)s
+				having outstanding_amount=%(unadjusted_amount)s""".format(dr_or_cr=dr_or_cr), args)
 	else:
 		party_account_field = ("paid_from"
 			if erpnext.get_party_account_type(args.party_type) == 'Receivable' else "paid_to")
 
 		if args.voucher_detail_no:
-			ret = frappe.db.sql("""select t1.name
-				from `tabPayment Entry` t1, `tabPayment Entry Reference` t2
+			ret = frappe.db.sql("""select pe.name
+				from `tabPayment Entry` pe, `tabPayment Entry Reference` pref
 				where
-					t1.name = t2.parent and t1.docstatus = 1
-					and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
-					and t1.party_type = %(party_type)s and t1.party = %(party)s and t1.{0} = %(account)s
-					and t2.reference_doctype in ("", "Sales Order", "Purchase Order")
-					and t2.allocated_amount = %(unadjusted_amount)s
+					pe.name = pref.parent and pe.docstatus = 1
+					and pe.name = %(voucher_no)s and pref.name = %(voucher_detail_no)s
+					and pe.party_type = %(party_type)s and pe.party = %(party)s and pe.{0} = %(account)s
+					and pref.reference_doctype in ('Sales Order', 'Purchase Order')
+					and pref.allocated_amount = %(unadjusted_amount)s
 			""".format(party_account_field), args)
 		else:
 			ret = frappe.db.sql("""select name from `tabPayment Entry`
@@ -379,58 +413,82 @@ def validate_allocated_amount(args):
 	elif args.get("allocated_amount") > args.get("unadjusted_amount"):
 		throw(_("Allocated amount can not greater than unadjusted amount"))
 
-def update_reference_in_journal_entry(d, jv_obj):
+def update_reference_in_journal_entry(d, jv_doc):
 	"""
 		Updates against document, if partial amount splits into rows
 	"""
-	jv_detail = jv_obj.get("accounts", {"name": d["voucher_detail_no"]})[0]
-	jv_detail.set(d["dr_or_cr"], d["allocated_amount"])
-	jv_detail.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit',
-		d["allocated_amount"]*flt(jv_detail.exchange_rate))
+	rows_to_reconcile = []
+	if d.get("voucher_detail_no"):
+		rows_to_reconcile.append(jv_doc.get("accounts", {"name": d["voucher_detail_no"]})[0])
+	else:
+		rows_to_reconcile += jv_doc.get("accounts", {
+			"reference_type": None,
+			"reference_name": None,
+			"party_type": d["party_type"],
+			"party": d["party"],
+			"account": d["account"]
+		})
 
-	original_reference_type = jv_detail.reference_type
-	original_reference_name = jv_detail.reference_name
+	to_update_advance_amount = []
+	amt_allocated = 0.0
+	for jv_detail in rows_to_reconcile:
+		amt_allocatable = min(jv_detail.get(d["dr_or_cr"]), d["allocated_amount"] - amt_allocated)
+		original_dr_or_cr = jv_detail.get(d["dr_or_cr"])
+		original_reference_type = jv_detail.reference_type
+		original_reference_name = jv_detail.reference_name
 
-	jv_detail.set("reference_type", d["against_voucher_type"])
-	jv_detail.set("reference_name", d["against_voucher"])
+		if original_reference_type in ("Sales Order", "Purchase Order", "Employee Advance"):
+			to_update_advance_amount.append((original_reference_type, original_reference_name))
 
-	if d['allocated_amount'] < d['unadjusted_amount']:
-		jvd = frappe.db.sql("""
-			select cost_center, balance, against_account, is_advance,
-				account_type, exchange_rate, account_currency
-			from `tabJournal Entry Account` where name = %s
-		""", d['voucher_detail_no'], as_dict=True)
+		jv_detail.set(d["dr_or_cr"], amt_allocatable)
+		jv_detail.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit',
+			amt_allocatable*flt(jv_detail.exchange_rate))
 
-		amount_in_account_currency = flt(d['unadjusted_amount']) - flt(d['allocated_amount'])
-		amount_in_company_currency = amount_in_account_currency * flt(jvd[0]['exchange_rate'])
+		jv_detail.set("reference_type", d["against_voucher_type"])
+		jv_detail.set("reference_name", d["against_voucher"])
 
-		# new entry with balance amount
-		ch = jv_obj.append("accounts")
-		ch.account = d['account']
-		ch.account_type = jvd[0]['account_type']
-		ch.account_currency = jvd[0]['account_currency']
-		ch.exchange_rate = jvd[0]['exchange_rate']
-		ch.party_type = d["party_type"]
-		ch.party = d["party"]
-		ch.cost_center = cstr(jvd[0]["cost_center"])
-		ch.balance = flt(jvd[0]["balance"])
+		if amt_allocatable < original_dr_or_cr:
+			jvd = frappe.db.sql("""
+				select cost_center, balance, against_account, account_type, exchange_rate, account_currency
+				from `tabJournal Entry Account` where name = %s
+			""", jv_detail.name, as_dict=True)
 
-		ch.set(d['dr_or_cr'], amount_in_account_currency)
-		ch.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit', amount_in_company_currency)
+			amount_in_account_currency = flt(original_dr_or_cr) - flt(amt_allocatable)
+			amount_in_company_currency = amount_in_account_currency * flt(jvd[0]['exchange_rate'])
 
-		ch.set('credit_in_account_currency' if d['dr_or_cr']== 'debit_in_account_currency'
-			else 'debit_in_account_currency', 0)
-		ch.set('credit' if d['dr_or_cr']== 'debit_in_account_currency' else 'debit', 0)
+			# new entry with balance amount
+			ch = jv_doc.append("accounts")
+			ch.account = d['account']
+			ch.account_type = jvd[0]['account_type']
+			ch.account_currency = jvd[0]['account_currency']
+			ch.exchange_rate = jvd[0]['exchange_rate']
+			ch.party_type = d["party_type"]
+			ch.party = d["party"]
+			ch.cost_center = cstr(jvd[0]["cost_center"])
+			ch.balance = flt(jvd[0]["balance"])
 
-		ch.against_account = cstr(jvd[0]["against_account"])
-		ch.reference_type = original_reference_type
-		ch.reference_name = original_reference_name
-		ch.is_advance = cstr(jvd[0]["is_advance"])
-		ch.docstatus = 1
+			ch.set(d['dr_or_cr'], amount_in_account_currency)
+			ch.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit', amount_in_company_currency)
+
+			ch.set('credit_in_account_currency' if d['dr_or_cr']== 'debit_in_account_currency'
+				else 'debit_in_account_currency', 0)
+			ch.set('credit' if d['dr_or_cr']== 'debit_in_account_currency' else 'debit', 0)
+
+			ch.against_account = cstr(jvd[0]["against_account"])
+			ch.reference_type = original_reference_type
+			ch.reference_name = original_reference_name
+			ch.docstatus = 1
+
+		amt_allocated += amt_allocatable
+		if abs(amt_allocated - d["allocated_amount"]) < (1.0 / (10**(jv_detail.precision(d['dr_or_cr'])))):
+			break
 
 	# will work as update after submit
-	jv_obj.flags.ignore_validate_update_after_submit = True
-	jv_obj.save(ignore_permissions=True)
+	jv_doc.flags.ignore_validate_update_after_submit = True
+	jv_doc.save(ignore_permissions=True)
+
+	for dn, dt in set(to_update_advance_amount):
+		frappe.get_doc(dn, dt).set_total_advance_paid()
 
 def update_reference_in_payment_entry(d, payment_entry):
 	reference_details = {
@@ -442,10 +500,15 @@ def update_reference_in_payment_entry(d, payment_entry):
 		"exchange_rate": d.exchange_rate
 	}
 
+	to_update_advance_amount = []
+
 	if d.voucher_detail_no:
 		existing_row = payment_entry.get("references", {"name": d["voucher_detail_no"]})[0]
 		original_row = existing_row.as_dict().copy()
 		existing_row.update(reference_details)
+
+		if original_row.reference_doctype in ("Sales Order", "Purchase Order", "Employee Advance"):
+			to_update_advance_amount.append((original_row.reference_doctype, original_row.reference_name))
 
 		if d.allocated_amount < original_row.allocated_amount:
 			new_row = payment_entry.append("references")
@@ -464,6 +527,9 @@ def update_reference_in_payment_entry(d, payment_entry):
 	payment_entry.set_missing_values()
 	payment_entry.set_amounts()
 	payment_entry.save(ignore_permissions=True)
+
+	for dn, dt in set(to_update_advance_amount):
+		frappe.get_doc(dn, dt).set_total_advance_paid()
 
 def unlink_ref_doc_from_payment_entries(ref_doc):
 	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name)
@@ -493,7 +559,8 @@ def remove_ref_doc_link_from_jv(ref_type, ref_no):
 			where reference_type=%s and reference_name=%s
 			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
 
-		frappe.msgprint(_("Journal Entries {0} are un-linked".format("\n".join(linked_jv))))
+		msg_jv_list = ["<a href='#Form/Journal Entry/{0}'>{0}</a>".format(jv) for jv in list(set(linked_jv))]
+		frappe.msgprint(_("Journal Entries {0} are un-linked").format(", ".join(msg_jv_list)))
 
 def remove_ref_doc_link_from_pe(ref_type, ref_no):
 	linked_pe = frappe.db.sql_list("""select parent from `tabPayment Entry Reference`
@@ -516,7 +583,8 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 				where name=%s""", (pe_doc.total_allocated_amount, pe_doc.base_total_allocated_amount,
 					pe_doc.unallocated_amount, now(), frappe.session.user, pe))
 
-		frappe.msgprint(_("Payment Entries {0} are un-linked".format("\n".join(linked_pe))))
+		msg_pe_list = ["<a href='#Form/Payment Entry/{0}'>{0}</a>".format(jv) for jv in list(set(linked_pe))]
+		frappe.msgprint(_("Payment Entries {0} are un-linked").format(", ".join(msg_pe_list)))
 
 @frappe.whitelist()
 def get_company_default(company, fieldname):
@@ -603,7 +671,7 @@ def get_held_invoices(party_type, party):
 	"""
 	Returns a list of names Purchase Invoices for the given party that are on hold
 	"""
-	held_invoices = None
+	held_invoices = []
 
 	if party_type == 'Supplier':
 		held_invoices = frappe.db.sql(
@@ -615,7 +683,7 @@ def get_held_invoices(party_type, party):
 	return held_invoices
 
 
-def get_outstanding_invoices(party_type, party, account, condition=None, limit=1000):
+def get_outstanding_invoices(party_type, party, account, condition=None, negative_invoices=False, limit=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
@@ -626,9 +694,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, limit=1
 		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 		payment_dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 
-	invoice = 'Sales Invoice' if erpnext.get_party_account_type(party_type) == 'Receivable' else 'Purchase Invoice'
 	held_invoices = get_held_invoices(party_type, party)
-	limit_cond = "limit %s" % (limit or 1000)
+	limit_cond = "limit %(limit)s" if limit else ""
 
 	invoice_list = frappe.db.sql("""
 		select
@@ -636,31 +703,26 @@ def get_outstanding_invoices(party_type, party, account, condition=None, limit=1
 		from
 			`tabGL Entry`
 		where
-			party_type = %(party_type)s and party = %(party)s
-			and account = %(account)s and {dr_or_cr} > 0
+			party_type = %(party_type)s and party = %(party)s and account = %(account)s
+			and (against_voucher = '' or against_voucher is null) and voucher_type != 'Payment Entry'
 			{condition}
-			and ((voucher_type = 'Journal Entry'
-					and (against_voucher = '' or against_voucher is null))
-				or (voucher_type not in ('Journal Entry', 'Payment Entry')))
 		group by voucher_type, voucher_no
-		order by posting_date, name {limit_cond}""".format(
-			dr_or_cr=dr_or_cr,
-			invoice = invoice,
-			condition=condition or "",
-			limit_cond = limit_cond
-		), {
-			"party_type": party_type,
-			"party": party,
-			"account": account,
-		}, as_dict=True)
+		order by posting_date, name
+		{limit_cond}
+	""".format(dr_or_cr=dr_or_cr, condition=condition or "", limit_cond=limit_cond), {
+		"party_type": party_type,
+		"party": party,
+		"account": account,
+		"limit": limit
+	}, as_dict=True)
 
 	payment_entries = frappe.db.sql("""
-		select against_voucher_type, against_voucher,
-			ifnull(sum({payment_dr_or_cr}), 0) as payment_amount
-		from `tabGL Entry`
-		where party_type = %(party_type)s and party = %(party)s
-			and account = %(account)s
-			and {payment_dr_or_cr} > 0
+		select
+			against_voucher_type, against_voucher, ifnull(sum({payment_dr_or_cr}), 0) as payment_amount
+		from
+			`tabGL Entry`
+		where
+			party_type = %(party_type)s and party = %(party)s and account = %(account)s
 			and against_voucher is not null and against_voucher != ''
 		group by against_voucher_type, against_voucher
 	""".format(payment_dr_or_cr=payment_dr_or_cr), {
@@ -676,7 +738,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, limit=1
 	for d in invoice_list:
 		payment_amount = pe_map.get((d.voucher_type, d.voucher_no), 0)
 		outstanding_amount = flt(d.invoice_amount - payment_amount, precision)
-		if outstanding_amount > 0.5 / (10**precision):
+		diff = -outstanding_amount if negative_invoices else outstanding_amount
+		if diff > 0.5 / (10**precision):
 			if not d.voucher_type == "Purchase Invoice" or d.voucher_no not in held_invoices:
 				due_date = frappe.db.get_value(
 					d.voucher_type, d.voucher_no, "posting_date" if party_type == "Employee" else "due_date")

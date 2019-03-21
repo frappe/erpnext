@@ -172,6 +172,7 @@ def install(country=None):
 
 		{'doctype': "Party Type", "party_type": "Customer", "account_type": "Receivable"},
 		{'doctype': "Party Type", "party_type": "Supplier", "account_type": "Payable"},
+		{'doctype': "Party Type", "party_type": "Letter of Credit", "account_type": "Payable"},
 		{'doctype': "Party Type", "party_type": "Employee", "account_type": "Payable"},
 		{'doctype': "Party Type", "party_type": "Member", "account_type": "Receivable"},
 		{'doctype': "Party Type", "party_type": "Shareholder", "account_type": "Payable"},

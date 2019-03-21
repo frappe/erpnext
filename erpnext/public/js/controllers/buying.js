@@ -12,6 +12,15 @@ cur_frm.email_field = "contact_email";
 erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	setup: function() {
 		this._super();
+
+		frappe.ui.form.on(this.frm.doctype + " Item", {
+			items_add: function(frm, cdt, cdn) {
+				var item = frappe.get_doc(cdt, cdn);
+				if(!item.project && frm.doc.set_project) {
+					item.project = frm.doc.set_project;
+				}
+			}
+		});
 	},
 
 	onload: function() {
@@ -198,6 +207,15 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 	},
 
+	set_project: function() {
+		var me = this;
+		if(this.frm.doc.set_project) {
+			$.each(this.frm.doc.items || [], function(i, item) {
+				frappe.model.set_value(me.frm.doctype + " Item", item.name, "project", me.frm.doc.set_project);
+			});
+		}
+	},
+
 	project: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		if(item.project) {
@@ -236,6 +254,20 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	tc_name: function() {
 		this.get_terms();
+	},
+
+	make_landed_cost_voucher: function() {
+		return frappe.call({
+			method: "erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher.get_landed_cost_voucher",
+			args: {
+				"dt": cur_frm.doc.doctype,
+				"dn": cur_frm.doc.name
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
 	},
 
 	link_to_mrs: function() {

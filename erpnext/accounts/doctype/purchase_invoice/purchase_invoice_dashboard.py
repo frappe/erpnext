@@ -19,7 +19,7 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Payment'),
-				'items': ['Payment Entry', 'Payment Request', 'Journal Entry']
+				'items': ['Payment Entry', 'Payment Request', 'Journal Entry', 'Expense Claim']
 			},
 			{
 				'label': _('Reference'),

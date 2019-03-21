@@ -337,6 +337,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def test_purchase_invoice_with_advance(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
 			import test_records as jv_test_records
+		from erpnext.accounts.utils import get_balance_on_voucher
 
 		jv = frappe.copy_doc(jv_test_records[1])
 		jv.insert()
@@ -347,7 +348,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.append("advances", {
 			"reference_type": "Journal Entry",
 			"reference_name": jv.name,
-			"reference_row": jv.get("accounts")[0].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
 			"remarks": jv.remark
@@ -359,10 +359,15 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.disable_rounded_total = 0
 		pi.get("payment_schedule")[0].payment_amount = 1512.0
 		pi.save()
-		self.assertEqual(pi.outstanding_amount, 1212.0)
-
 		pi.submit()
 		pi.load_from_db()
+
+		self.assertEqual(pi.outstanding_amount,
+			1212.0)
+		self.assertEqual(get_balance_on_voucher(pi.doctype, pi.name, "Supplier", pi.supplier, pi.credit_to),
+			1212.0)
+		self.assertEqual(get_balance_on_voucher(jv.doctype, jv.name, "Supplier", pi.supplier, pi.credit_to),
+			-100.0)
 
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where reference_type='Purchase Invoice'
@@ -372,6 +377,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertFalse(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where reference_type='Purchase Invoice' and reference_name=%s""", pi.name))
+
+		self.assertEqual(get_balance_on_voucher(jv.doctype, jv.name, "Supplier", pi.supplier, pi.credit_to),
+			-400.0)
 
 	def test_invoice_with_advance_and_multi_payment_terms(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
@@ -386,7 +394,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.append("advances", {
 			"reference_type": "Journal Entry",
 			"reference_name": jv.name,
-			"reference_row": jv.get("accounts")[0].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
 			"remarks": jv.remark
@@ -640,7 +647,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 			import test_records as jv_test_records
 
 		jv = frappe.copy_doc(jv_test_records[1])
-		jv.accounts[0].is_advance = 'Yes'
 		jv.insert()
 		jv.submit()
 
@@ -648,7 +654,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.append("advances", {
 			"reference_type": "Journal Entry",
 			"reference_name": jv.name,
-			"reference_row": jv.get("accounts")[0].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
 			"remarks": jv.remark
@@ -767,12 +772,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 	def test_debit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import get_outstanding_amount
+		from erpnext.accounts.utils import get_balance_on_voucher
 
 		pi = make_purchase_invoice(item_code = "_Test Item", qty = (5 * -1), rate=500, is_return = 1)
 
-		outstanding_amount = get_outstanding_amount(pi.doctype,
-			pi.name, "Creditors - _TC", pi.supplier, "Supplier")
+		outstanding_amount = get_balance_on_voucher(pi.doctype, pi.name, "Supplier", pi.supplier, "Creditors - _TC")
 
 		self.assertEqual(pi.outstanding_amount, outstanding_amount)
 

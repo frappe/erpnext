@@ -86,20 +86,33 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 
 	round_off_debit_credit(gl_map)
 
+	vouchers_for_balance_update = set()
 	for entry in gl_map:
-		make_entry(entry, adv_adj, update_outstanding, from_repost)
+		make_entry(entry, adv_adj, from_repost)
 
 		# check against budget
 		if not from_repost:
 			validate_expense_against_budget(entry)
 
-def make_entry(args, adv_adj, update_outstanding, from_repost=False):
+		if update_outstanding and not from_repost and entry.get("party_type") and entry.get("party"):
+			if entry.get("against_voucher_type") and entry.get("against_voucher"):
+				vouchers_for_balance_update.add((entry.get("against_voucher_type"), entry.get("against_voucher"),
+					entry.get("account"), entry.get("party_type"), entry.get("party")))
+			else:
+				vouchers_for_balance_update.add((entry.get("voucher_type"), entry.get("voucher_no"),
+					entry.get("account"), entry.get("party_type"), entry.get("party")))
+
+	from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
+	for voucher_type, voucher_no, account, party_type, party in vouchers_for_balance_update:
+		update_outstanding_amt(voucher_type, voucher_no, account, party_type, party)
+
+def make_entry(args, adv_adj, from_repost=False):
 	args.update({"doctype": "GL Entry"})
 	gle = frappe.get_doc(args)
 	gle.flags.ignore_permissions = 1
 	gle.flags.from_repost = from_repost
 	gle.insert()
-	gle.run_method("on_update_with_args", adv_adj, update_outstanding, from_repost)
+	gle.run_method("on_update_with_args", adv_adj, from_repost)
 	gle.submit()
 
 def validate_account_for_perpetual_inventory(gl_map):
@@ -201,12 +214,20 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 	frappe.db.sql("""delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s""",
 		(voucher_type or gl_entries[0]["voucher_type"], voucher_no or gl_entries[0]["voucher_no"]))
 
+	vouchers_for_balance_update = set()
 	for entry in gl_entries:
 		validate_frozen_account(entry["account"], adv_adj)
 		validate_balance_type(entry["account"], adv_adj)
 		if not adv_adj:
 			validate_expense_against_budget(entry)
 
-		if entry.get("against_voucher") and update_outstanding == 'Yes' and not adv_adj:
-			update_outstanding_amt(entry["account"], entry.get("party_type"), entry.get("party"), entry.get("against_voucher_type"),
-				entry.get("against_voucher"), on_cancel=True)
+		if update_outstanding and not adv_adj and entry.get("party_type") and entry.get("party"):
+			if entry.get("against_voucher_type") and entry.get("against_voucher"):
+				vouchers_for_balance_update.add((entry.get("against_voucher_type"), entry.get("against_voucher"),
+					entry.get("account"), entry.get("party_type"), entry.get("party")))
+			else:
+				vouchers_for_balance_update.add((entry.get("voucher_type"), entry.get("voucher_no"),
+					entry.get("account"), entry.get("party_type"), entry.get("party")))
+
+	for voucher_type, voucher_no, account, party_type, party in vouchers_for_balance_update:
+		update_outstanding_amt(voucher_type, voucher_no, account, party_type, party, on_cancel=True)

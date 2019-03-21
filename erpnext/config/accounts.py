@@ -75,6 +75,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name":"Letter of Credit",
+					"description": _("Letter of Credit database.")
+				},
+				{
+					"type": "doctype",
 					"name": "Item",
 				}
 			]

@@ -95,6 +95,21 @@ status_map = {
 		["Ordered", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
 		["Transferred", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Transfer'"],
 		["Issued", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue'"]
+	],
+	"Landed Cost Voucher": [
+		["Draft", None],
+		["Submitted", "eval:self.docstatus==1"],
+		["Paid", "eval:self.outstanding_amount <= 0 and self.docstatus==1"],
+		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
+		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
+		["Cancelled", "eval:self.docstatus==2"],
+	],
+	"Employee Advance": [
+		["Draft", None],
+		["Unpaid", "eval:self.docstatus==1"],
+		["Unclaimed", "eval:self.paid_amount and self.paid_amount == self.advance_amount and self.docstatus==1"],
+		["Claimed", "eval:self.paid_amount and self.balance_amount == 0 and self.docstatus==1"],
+		["Cancelled", "eval:self.docstatus==2"],
 	]
 }
 

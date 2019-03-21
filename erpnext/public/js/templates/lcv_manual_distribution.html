@@ -1,0 +1,38 @@
+<div style="overflow-x: auto;">
+	<table class="table table-bordered table-hover" style="margin:0;">
+		<thead>
+			<tr>
+				<th>{%= __("Items") %}</th>
+				{% for key in account_heads %}
+					<th class="text-center">{{ key }}</th>
+				{% } %}
+				<th>{%= __("Total") %}</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for(var row = 0; row < rows.length; ++row) { %}
+				<tr>
+					<td>{%= items[row] %}</td>
+					{% for(var col = 0; col < rows[row].length; ++col) { %}
+						{% if editable %}
+							<td style="padding:2px;vertical-align:middle;">
+								<input type="text" class="form-control" style="text-align:right;" placeholder="{%= account_heads[col] %}"
+									   value="{%= rows[row][col] %}" data-row="{%= row %}" data-account="{%= account_heads[col] %}" />
+							</td>
+						{% else %}
+							<td style="vertical-align:middle;text-align:right;">{%= rows[row][col] %}</td>
+						{% endif %}
+					{% } %}
+					<td style="vertical-align:middle;text-align:right;" data-row="{%= row %}" data-account="total">{%= row_totals[row] %}</td>
+				</tr>
+			{% } %}
+			<tr>
+				<td>{%= __("Total") %}</td>
+				{% for(var col = 0; col < col_totals.length; ++col) { %}
+					<td style="text-align:right;" data-row="total" data-account="{%= account_heads[col] %}">{%= col_totals[col] %}</td>
+				{% } %}
+				<td></td>
+			</tr>
+		</tbody>
+	</table>
+</div>

@@ -7,4 +7,10 @@ import frappe
 from frappe.model.document import Document
 
 class ProjectsSettings(Document):
-	pass
+	def validate(self):
+		for key in ["project_naming_by"]:
+				frappe.db.set_default(key, self.get(key, ""))
+
+		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
+		set_by_naming_series("Project", "project_name",
+			self.get("project_naming_by") == "Naming Series", hide_name_field=False)

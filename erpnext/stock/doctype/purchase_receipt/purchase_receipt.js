@@ -9,7 +9,8 @@ frappe.ui.form.on("Purchase Receipt", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
 			'Stock Entry': 'Return',
-			'Purchase Invoice': 'Invoice'
+			'Purchase Invoice': 'Invoice',
+			'Landed Cost Voucher': 'Landed Cost Voucher'
 		}
 
 		frm.set_query("asset", "items", function() {
@@ -113,6 +114,8 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 						erpnext.utils.make_subscription(me.frm.doc.doctype, me.frm.doc.name)
 					}, __("Make"))
 				}
+
+				cur_frm.add_custom_button(__('Landed Cost Voucher'), this.make_landed_cost_voucher, __("Make"));
 
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 			}

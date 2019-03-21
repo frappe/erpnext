@@ -166,7 +166,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		});
 
 		frappe.ui.form.on('Sales Invoice', 'selling_price_list', (frm) => {
-			if(this.items) {
+			if(this.items && frm.doc.pos_profile) {
 				this.items.reset_items();
 			}
 		})
