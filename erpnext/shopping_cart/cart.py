@@ -45,7 +45,8 @@ def get_cart_quotation(doc=None):
 			for address in addresses],
 		"billing_addresses": [{"name": address.name, "display": address.display}
 			for address in addresses],
-		"shipping_rules": get_applicable_shipping_rules(party)
+		"shipping_rules": get_applicable_shipping_rules(party),
+		"cart_settings": frappe.get_cached_doc("Shopping Cart Settings")
 	}
 
 @frappe.whitelist()
@@ -83,7 +84,14 @@ def place_order():
 	return sales_order.name
 
 @frappe.whitelist()
-def update_cart(item_code, qty, with_items=False):
+def request_for_quotation():
+	quotation = _get_cart_quotation()
+	quotation.flags.ignore_permissions = True
+	quotation.submit()
+	return quotation.name
+
+@frappe.whitelist()
+def update_cart(item_code, qty, additional_notes=None, with_items=False):
 	quotation = _get_cart_quotation()
 
 	empty_card = False
@@ -101,10 +109,12 @@ def update_cart(item_code, qty, with_items=False):
 			quotation.append("items", {
 				"doctype": "Quotation Item",
 				"item_code": item_code,
-				"qty": qty
+				"qty": qty,
+				"additional_notes": additional_notes
 			})
 		else:
 			quotation_items[0].qty = qty
+			quotation_items[0].additional_notes = additional_notes
 
 	apply_cart_settings(quotation=quotation)
 
@@ -139,6 +149,45 @@ def get_shopping_cart_menu(context=None):
 		context = get_cart_quotation()
 
 	return frappe.render_template('templates/includes/cart/cart_dropdown.html', context)
+
+
+@frappe.whitelist()
+def add_new_address(doc):
+	doc = frappe.parse_json(doc)
+	doc.update({
+		'doctype': 'Address'
+	})
+	address = frappe.get_doc(doc)
+	address.save(ignore_permissions=True)
+
+	return address
+
+@frappe.whitelist(allow_guest=True)
+def create_lead_for_item_inquiry(lead, subject, message):
+	lead = frappe.parse_json(lead)
+	lead_doc = frappe.new_doc('Lead')
+	lead_doc.update(lead)
+	lead_doc.set('lead_owner', '')
+
+	try:
+		lead_doc.save(ignore_permissions=True)
+	except frappe.exceptions.DuplicateEntryError:
+		frappe.clear_messages()
+		lead_doc = frappe.get_doc('Lead', {'email_id': lead['email_id']})
+
+	lead_doc.add_comment('Comment', text='''
+		<div>
+			<h5>{subject}</h5>
+			<p>{message}</p>
+		</div>
+	'''.format(subject=subject, message=message))
+
+	return lead_doc
+
+
+@frappe.whitelist()
+def get_terms_and_conditions(terms_name):
+	return frappe.db.get_value('Terms and Conditions', terms_name, 'terms')
 
 @frappe.whitelist()
 def update_cart_address(address_fieldname, address_name):

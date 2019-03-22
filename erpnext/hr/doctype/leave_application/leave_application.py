@@ -117,28 +117,29 @@ class LeaveApplication(Document):
 
 	def update_attendance(self):
 		if self.status == "Approved":
-			attendance = frappe.db.sql("""select name from `tabAttendance` where employee = %s\
-				and (attendance_date between %s and %s) and docstatus < 2""",(self.employee, self.from_date, self.to_date), as_dict=1)
+			for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
+				date = dt.strftime("%Y-%m-%d")
+				status = "Half Day" if date == self.half_day_date else "On Leave"
 
-			if attendance:
-				for d in attendance:
-					doc = frappe.get_doc("Attendance", d.name)
-					if getdate(self.half_day_date) == doc.attendance_date:
-						status = "Half Day"
-					else:
-						status = "On Leave"
-					frappe.db.sql("""update `tabAttendance` set status = %s, leave_type = %s\
-						where name = %s""",(status, self.leave_type, d.name))
+				attendance_name = frappe.db.exists('Attendance', dict(employee = self.employee,
+					attenance_date = date, docstatus = ('!=', 2)))
 
-			elif getdate(self.to_date) <= getdate(nowdate()):
-				for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
-					date = dt.strftime("%Y-%m-%d")
+				if attendance_name:
+					# update existing attendance, change absent to on leave
+					doc = frappe.get_doc('Attendance', attendance_name)
+					if doc.status != status:
+						doc.db_set('status', status)
+						doc.db_set('leave_type', self.leave_type)
+						doc.db_set('leave_application', self.name)
+				else:
+					# make new attendance and submit it
 					doc = frappe.new_doc("Attendance")
 					doc.employee = self.employee
 					doc.attendance_date = date
 					doc.company = self.company
 					doc.leave_type = self.leave_type
-					doc.status = "Half Day" if date == self.half_day_date else "On Leave"
+					doc.leave_application = self.name
+					doc.status = status
 					doc.flags.ignore_validate = True
 					doc.insert(ignore_permissions=True)
 					doc.submit()
@@ -505,8 +506,6 @@ def add_department_leaves(events, start, end, employee, company):
 def add_leaves(events, start, end, filter_conditions=None):
 	conditions = []
 
-	if filter_conditions:
-		conditions.append(filter_conditions)
 
 	if not cint(frappe.db.get_value("HR Settings", None, "show_leaves_of_all_department_members_in_calendar")):
 		from frappe.desk.reportview import build_match_conditions
@@ -520,10 +519,13 @@ def add_leaves(events, start, end, filter_conditions=None):
 		from `tabLeave Application` where
 		from_date <= %(end)s and to_date >= %(start)s <= to_date
 		and docstatus < 2
-		and status!="Rejected" """
+		and status!='Rejected' """
 
 	if conditions:
 		query += ' and ' + ' and '.join(conditions)
+
+	if filter_conditions:
+		query += filter_conditions
 
 	for d in frappe.db.sql(query, {"start":start, "end": end}, as_dict=True):
 		e = {

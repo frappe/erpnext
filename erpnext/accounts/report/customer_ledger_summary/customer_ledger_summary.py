@@ -195,7 +195,7 @@ class PartyLedgerSummaryReport(object):
 		conditions = [""]
 
 		if self.filters.company:
-			conditions.append("company=%(company)s")
+			conditions.append("gle.company=%(company)s")
 
 		self.filters.company_finance_book = erpnext.get_default_finance_book(self.filters.company)
 
