@@ -96,11 +96,12 @@ def build_forest(data):
 
 	charts_map, paths = {}, []
 	for i in data:
-		account_name, _, is_group, account_type, root_type = i
+		account_name, _, account_number, is_group, account_type, root_type = i
 		charts_map[account_name] = {}
 		if is_group: charts_map[account_name]["is_group"] = is_group
 		if account_type: charts_map[account_name]["account_type"] = account_type
 		if root_type: charts_map[account_name]["root_type"] = root_type
+		if account_number: charts_map[account_name]["account_number"] = account_number
 		path = return_parent(data, account_name)[::-1]
 		paths.append(path) # List of path is created
 
@@ -114,7 +115,7 @@ def build_forest(data):
 @frappe.whitelist()
 def download_template():
 	data = frappe._dict(frappe.local.form_dict)
-	fields = ["Account Name", "Parent Account", "Is Group", "Account Type", "Root Type"]
+	fields = ["Account Name", "Parent Account", "Account Number", "Is Group", "Account Type", "Root Type"]
 	writer = UnicodeWriter()
 
 	writer.writerow([_('Chart of Accounts Template')])
