@@ -543,6 +543,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.get("taxes")[6].tax_amount = 2
 
 		si.insert()
+		print(si.name)
 
 		expected_values = [
 			{

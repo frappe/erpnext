@@ -4,13 +4,38 @@ frappe.treeview_settings["Account"] = {
 	breadcrumbs: "Accounts",
 	title: __("Chart Of Accounts"),
 	get_tree_root: false,
-	filters: [{
-		fieldname: "company",
-		fieldtype:"Select",
-		options: erpnext.utils.get_tree_options("company"),
-		label: __("Company"),
-		default: erpnext.utils.get_tree_default("company")
-	}],
+	filters: [
+		{
+			fieldname: "company",
+			fieldtype:"Select",
+			options: erpnext.utils.get_tree_options("company"),
+			label: __("Company"),
+			default: erpnext.utils.get_tree_default("company"),
+			on_change: function() {
+				var me = frappe.treeview_settings['Account'].treeview;
+				var company = me.page.fields_dict.company.get_value();
+				frappe.call({
+					method: "erpnext.accounts.doctype.account.account.get_root_company",
+					args: {
+						company: company,
+					},
+					callback: function(r) {
+						if(r.message) {
+							let root_company = r.message.length ? r.message[0] : "";
+							me.page.fields_dict.root_company.set_value(root_company);
+						}
+					}
+				});
+			}
+		},
+		{
+			fieldname: "root_company",
+			fieldtype:"Data",
+			label: __("Root Company"),
+			hidden: true,
+			disable_onchange: true
+		}
+	],
 	root_label: "Accounts",
 	get_tree_nodes: 'erpnext.accounts.utils.get_children',
 	add_tree_node: 'erpnext.accounts.utils.add_ac',
@@ -42,8 +67,8 @@ frappe.treeview_settings["Account"] = {
 	],
 	ignore_fields:["parent_account"],
 	onload: function(treeview) {
-		frappe.treeview_settings['Account'].page = {};
-		$.extend(frappe.treeview_settings['Account'].page, treeview.page);
+		frappe.treeview_settings['Account'].treeview = {};
+		$.extend(frappe.treeview_settings['Account'].treeview, treeview);
 		function get_company() {
 			return treeview.page.fields_dict.company.get_value();
 		}
@@ -78,6 +103,18 @@ frappe.treeview_settings["Account"] = {
 		}
 
 	},
+	post_render: function(treeview) {
+		frappe.treeview_settings['Account'].treeview["tree"] = treeview.tree;
+		treeview.page.set_primary_action(__("New"), function() {
+			let root_company = treeview.page.fields_dict.root_company.get_value();
+
+			if(root_company) {
+				frappe.throw(__("Please add the account to root level Company - ") + root_company);
+			} else {
+				treeview.new_node();
+			}
+		}, "octicon octicon-plus");
+	},
 	onrender: function(node) {
 		if(frappe.boot.user.can_read.indexOf("GL Entry") !== -1){
 			var dr_or_cr = node.data.balance < 0 ? "Cr" : "Dr";
@@ -94,6 +131,19 @@ frappe.treeview_settings["Account"] = {
 	},
 	toolbar: [
 		{
+			label:__("Add Child"),
+			condition: function(node) {
+				return frappe.boot.user.can_create.indexOf("Account") !== -1 &&
+				!frappe.treeview_settings['Account'].treeview.page.fields_dict.root_company.get_value() &&
+					node.expandable && !node.hide_add;
+			},
+			click: function() {
+				var me = frappe.treeview_settings['Account'].treeview;
+				me.new_node();
+			},
+			btnClass: "hidden-xs"
+		},
+		{
 			condition: function(node) {
 				return !node.root && frappe.boot.user.can_read.indexOf("GL Entry") !== -1
 			},
@@ -103,7 +153,7 @@ frappe.treeview_settings["Account"] = {
 					"account": node.label,
 					"from_date": frappe.sys_defaults.year_start_date,
 					"to_date": frappe.sys_defaults.year_end_date,
-					"company": frappe.treeview_settings['Account'].page.fields_dict.company.get_value()
+					"company": frappe.treeview_settings['Account'].treeview.page.fields_dict.company.get_value()
 				};
 				frappe.set_route("query-report", "General Ledger");
 			},

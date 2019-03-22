@@ -282,6 +282,10 @@ class WorkOrder(Document):
 			total_bundle_qty = frappe.db.sql(""" select sum(qty) from
 				`tabProduct Bundle Item` where parent = %s""", (frappe.db.escape(self.product_bundle_item)))[0][0]
 
+			if not total_bundle_qty:
+				# product bundle is 0 (product bundle allows 0 qty for items)
+				total_bundle_qty = 1
+
 		cond = "product_bundle_item = %s" if self.product_bundle_item else "production_item = %s"
 
 		qty = frappe.db.sql(""" select sum(qty) from
@@ -564,11 +568,10 @@ def get_item_details(item, project = None):
 			frappe.throw(_("Default BOM for {0} not found").format(item))
 
 	bom_data = frappe.db.get_value('BOM', res['bom_no'],
-		['project', 'allow_alternative_item', 'transfer_material_against'], as_dict=1)
+		['project', 'allow_alternative_item', 'transfer_material_against', 'item_name'], as_dict=1)
 
-	res['project'] = project or bom_data.project
-	res['allow_alternative_item'] = bom_data.allow_alternative_item
-	res['transfer_material_against'] = bom_data.transfer_material_against
+	res['project'] = project or bom_data.pop("project")
+	res.update(bom_data)
 	res.update(check_if_scrap_warehouse_mandatory(res["bom_no"]))
 
 	return res

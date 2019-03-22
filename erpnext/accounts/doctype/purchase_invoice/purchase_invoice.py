@@ -8,6 +8,7 @@ from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate
 from frappe import _, throw
 import frappe.defaults
 
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
@@ -16,7 +17,7 @@ from erpnext.stock import get_warehouse_account_map
 from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, delete_gl_entries
 from erpnext.buying.utils import check_for_closed_status
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
-from erpnext.assets.doctype.asset.asset import get_asset_account
+from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
 from frappe.model.mapper import get_mapped_doc
 from six import iteritems
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_invoice,\
@@ -52,6 +53,12 @@ class PurchaseInvoice(BuyingController):
 	def before_save(self):
 		if not self.on_hold:
 			self.release_date = ''
+
+	def before_print(self):
+		self.gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Purchase Invoice",
+			"voucher_no": self.name} ,
+			fields=["account", "party_type", "party", "debit", "credit"]
+		)
 
 	def invoice_is_blocked(self):
 		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))
@@ -244,6 +251,13 @@ class PurchaseInvoice(BuyingController):
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
 					item.expense_account = stock_not_billed_account
+			elif item.is_fixed_asset and is_cwip_accounting_disabled():
+				if not item.asset:
+					frappe.throw(_("Row {0}: asset is required for item {1}")
+						.format(item.idx, item.item_code))
+
+				item.expense_account = get_asset_category_account(item.asset, 'fixed_asset_account',
+					company = self.company)
 			elif item.is_fixed_asset and item.pr_detail:
 				item.expense_account = asset_received_but_not_billed
 			elif not item.expense_account and for_validate:
@@ -382,7 +396,9 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_item_gl_entries(gl_entries)
-		self.get_asset_gl_entry(gl_entries)
+		if not is_cwip_accounting_disabled():
+			self.get_asset_gl_entry(gl_entries)
+
 		self.make_tax_gl_entries(gl_entries)
 
 		gl_entries = merge_similar_entries(gl_entries)
@@ -474,7 +490,7 @@ class PurchaseInvoice(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.rm_supp_cost)
 						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
-				elif not item.is_fixed_asset:
+				elif not item.is_fixed_asset or (item.is_fixed_asset and is_cwip_accounting_disabled()):
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": item.expense_account if not item.enable_deferred_expense else item.deferred_expense_account,
@@ -519,7 +535,7 @@ class PurchaseInvoice(BuyingController):
 				base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
 
 				if (not item.expense_account or frappe.db.get_value('Account',
-					item.expense_account, 'account_type') != 'Asset Received But Not Billed'):
+					item.expense_account, 'account_type') not in ['Asset Received But Not Billed', 'Fixed Asset']):
 					arbnb_account = self.get_company_default("asset_received_but_not_billed")
 					item.expense_account = arbnb_account
 
