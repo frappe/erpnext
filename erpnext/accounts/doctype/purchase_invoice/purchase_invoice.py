@@ -865,13 +865,15 @@ class PurchaseInvoice(BuyingController):
 			for d in self.taxes:
 				if d.name == tax_with["name"]:
 					d.update(tax_with)
+				
 				accounts.append(d.name)
 			if not accounts or tax_with["name"] not in accounts:
 				self.append("taxes",tax_with)
-	
+				
 			to_remove = [d for d in self.taxes
-				if not d.tax_amount and d.account_head == tax_with["account_head"]]
+				if not d.tax_amount and d.name == tax_with["name"]]
 			for d in to_remove:
+				
 				self.remove(d)
 
 			# calculate totals again after applying TDS
