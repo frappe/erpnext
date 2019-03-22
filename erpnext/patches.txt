@@ -587,5 +587,6 @@ erpnext.patches.v12_0.set_gst_category
 erpnext.patches.v11_0.remove_barcodes_field_from_copy_fields_to_variants
 erpnext.patches.v12_0.set_task_status
 erpnext.patches.v11_0.make_italian_localization_fields # 01-03-2019
+erpnext.patches.v12_0.add_item_name_in_work_orders
 erpnext.patches.v12_0.update_pricing_rule_fields
 erpnext.patches.v11_1.make_job_card_time_logs
