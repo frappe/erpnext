@@ -369,7 +369,7 @@ class PaymentEntry(AccountsController):
 
 	def set_title(self):
 		if self.payment_type in ("Receive", "Pay"):
-			self.title = self.party
+			self.title = self.party_name or self.party
 		else:
 			self.title = self.paid_from + " - " + self.paid_to
 
