@@ -552,4 +552,19 @@ frappe.ui.form.on("Purchase Invoice", {
 		}
 		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
 	}
+	apply_tds: function(frm) {
+		if(cur_frm.doc.apply_tds == 1){
+				console.log("apply_tds entered.........");
+				$.each(cur_frm.doc.items || [], function(i, item) {
+				item.tax_withhold = 1;
+			 	});
+				refresh_field("items"); 
+			}else{
+				console.log("apply_tds entered.....else....");
+				$.each(cur_frm.doc.items || [], function(i, item) {
+					item.tax_withhold = 0;
+				});
+				refresh_field("items"); 
+			}//END OF ELSE
+	}//End of apply_tds function
 })
