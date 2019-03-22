@@ -16,6 +16,7 @@ def get_party_tax_withholding_details(ref_doc):
 #	tax_withholding_category = frappe.db.get_value('Supplier', ref_doc.supplier, 'tax_withholding_category')
 	tax_withholding_category = ""
 	tax_row = []
+	tax_data = []
 	tax_withholding_category_item = get_unique_tax_withholding_category(ref_doc.items)
 	for key, value in tax_withholding_category_item.iteritems():
 		tax_withholding_category = value.tax_withholding_category
@@ -28,9 +29,8 @@ def get_party_tax_withholding_details(ref_doc):
 			frappe.throw(_('Please set associated account in Tax Withholding Category {0} against Company {1}')
 				.format(tax_withholding_category, ref_doc.company))
 		tds_amount = get_tds_amount(tax_withholding_category,net_amount,ref_doc, tax_details, fy)
-		tax_row = get_tax_row(tax_details, tds_amount)
-		
-	return tax_row
+		tax_data.append(tax_row)
+	return tax_data
 
 def get_tax_withholding_details(tax_withholding_category, fiscal_year, company):
 	tax_withholding = frappe.get_doc("Tax Withholding Category", tax_withholding_category)
@@ -59,8 +59,7 @@ def get_tax_withholding_rates(tax_withholding, fiscal_year):
 	frappe.throw(_("No Tax Withholding data found for the current Fiscal Year."))
 
 def get_tax_row(tax_details, tds_amount):
-	tax_withhold_list = []
-	tax_withhold_list={
+	return {
 		"category": "Total",
 		"add_deduct_tax": "Deduct",
 		"charge_type": "Actual",
@@ -69,9 +68,6 @@ def get_tax_row(tax_details, tds_amount):
 		"tax_amount": tds_amount,
 		"name":tax_details.name
 	}
-	
-	tax_data.append(tax_withhold_list)
-	return tax_data
 
 def get_tds_amount(tax_withholding_category,net_amount,ref_doc, tax_details, fiscal_year_details):
 	fiscal_year, year_start_date, year_end_date = fiscal_year_details
