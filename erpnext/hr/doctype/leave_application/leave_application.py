@@ -405,7 +405,7 @@ def get_total_allocated_leaves(employee, leave_type, date):
 	leave_allocation_records = frappe.db.sql("""
 		select total_leaves_allocated
 		from `tabLeave Allocation`
-		where %s between from_date and to_date and docstatus=1 and leave_type='{0}' {1}""".format(leave_type, conditions), (date), as_dict=1)
+		where %s between from_date and to_date and docstatus=1 and leave_type='%s' {0}""".format(conditions), (date), (leave_type), as_dict=1)
 
 	return flt(leave_allocation_records[0]['total_leaves_allocated']) if leave_allocation_records else flt(0)
 
