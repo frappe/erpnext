@@ -75,11 +75,11 @@ def clear_payment_entry(transaction, payment_entry, gl_entry):
 		clear_simple_entry(amount_cleared, amount_to_be_cleared, payment_entry, transaction)
 
 def clear_simple_entry(amount_cleared, amount_to_be_cleared, payment_entry, transaction):
-	if amount_cleared == amount_to_be_cleared:
+	if amount_cleared >= amount_to_be_cleared:
 		frappe.db.set_value(payment_entry.doctype, payment_entry.name, "clearance_date", transaction.date)
 
 def clear_sales_invoice(amount_cleared, amount_to_be_cleared, payment_entry, transaction):
-	if amount_cleared == amount_to_be_cleared:
+	if amount_cleared >= amount_to_be_cleared:
 		frappe.db.set_value("Sales Invoice Payment", dict(parenttype=payment_entry.doctype,
 			parent=payment_entry.name), "clearance_date", transaction.date)
 
