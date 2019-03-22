@@ -564,6 +564,10 @@ def get_data():
 				"is_query_report": True
 			},
 			{
+				"type": "doctype",
+				"name": "GSTR 3B Report",
+			},
+			{
 				"type": "report",
 				"name": "GST Sales Register",
 				"is_query_report": True

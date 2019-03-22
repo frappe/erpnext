@@ -21,9 +21,10 @@ def execute(filters=None):
 		row = []
 
 		outstanding_amt = get_customer_outstanding(d.name, filters.get("company"),
-			ignore_outstanding_sales_order=d.bypass_credit_limit_check_at_sales_order)
+			ignore_outstanding_sales_order=d.bypass_credit_limit_check_at_sales_order,
+			cost_center=filters.get("cost_center"))
 
-		credit_limit = get_credit_limit(d.name, filters.get("company"))		
+		credit_limit = get_credit_limit(d.name, filters.get("company"))
 
 		bal = flt(credit_limit) - flt(outstanding_amt)
 

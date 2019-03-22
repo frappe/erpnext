@@ -180,6 +180,10 @@ frappe.ui.form.on("Item", {
 		if (frm.doc.default_warehouse && !frm.doc.website_warehouse){
 			frm.set_value("website_warehouse", frm.doc.default_warehouse);
 		}
+	},
+
+	set_meta_tags(frm) {
+		frappe.utils.set_meta_tag(frm.doc.route);
 	}
 });
 
