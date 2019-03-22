@@ -35,5 +35,9 @@ def get_data():
 				'label': _('Payment'),
 				'items': ['Payment Entry', 'Journal Entry']
 			},
+			{
+				'label': _('Reference'),
+				'items': ['Warranty Claim']
+			},
 		]
 	}
