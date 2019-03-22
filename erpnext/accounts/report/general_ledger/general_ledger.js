@@ -140,7 +140,8 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname": "voucher_filter_method",
 			"label": __("Voucher No Filter Method"),
 			"fieldtype": "Select",
-			"options": "\nPosted By Voucher\nPosted Against Voucher\nPosted By and Against Voucher",
+			"options": "Posted By Voucher\nPosted Against Voucher\nPosted By and Against Voucher",
+			"default": "Posted By Voucher",
 		},
 		{
 			"fieldname": "reference_no",
