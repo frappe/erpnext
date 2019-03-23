@@ -12,6 +12,15 @@ cur_frm.email_field = "contact_email";
 erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	setup: function() {
 		this._super();
+
+		frappe.ui.form.on(this.frm.doctype + " Item", {
+			items_add: function(frm, cdt, cdn) {
+				var item = frappe.get_doc(cdt, cdn);
+				if(!item.project && frm.doc.set_project) {
+					item.project = frm.doc.set_project;
+				}
+			}
+		});
 	},
 
 	onload: function() {
@@ -195,6 +204,15 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 					item_code: item.item_code,
 					warehouse: item.warehouse
 				}
+			});
+		}
+	},
+
+	set_project: function() {
+		var me = this;
+		if(this.frm.doc.set_project) {
+			$.each(this.frm.doc.items || [], function(i, item) {
+				frappe.model.set_value(me.frm.doctype + " Item", item.name, "project", me.frm.doc.set_project);
 			});
 		}
 	},

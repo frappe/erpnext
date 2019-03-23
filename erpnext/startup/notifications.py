@@ -30,7 +30,10 @@ def get_notification_config():
 			},
 			"Payment Entry": {"docstatus": 0},
 			"Leave Application": {"docstatus": 0},
-			"Expense Claim": {"docstatus": 0},
+			"Expense Claim": {
+				"status": ("in", ("Unpaid", "Draft")),
+				"docstatus": ("<", 2)
+			},
 			"Job Applicant": {"status": "Open"},
 			"Delivery Note": {
 				"status": ("not in", ("Completed", "Closed")),
@@ -56,6 +59,11 @@ def get_notification_config():
 			"BOM": {"docstatus": 0},
 
 			"Timesheet": {"status": "Draft"},
+
+			"Employee Advance": {
+				"status": ("!=", "Claimed"),
+				"docstatus": ("<", 2)
+			},
 
 			"Lab Test": {"docstatus": 0},
 			"Sample Collection": {"docstatus": 0},

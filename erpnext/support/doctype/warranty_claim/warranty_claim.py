@@ -59,11 +59,11 @@ def make_maintenance_visit(source_name, target_doc=None):
 		}, target_doc)
 
 		source_doc = frappe.get_doc("Warranty Claim", source_name)
-		if source_doc.get("item_code"):
-			table_map = {
-				"doctype": "Maintenance Visit Purpose",
-				"postprocess": _update_links
-			}
-			map_child_doc(source_doc, target_doc, table_map, source_doc)
+
+		table_map = {
+			"doctype": "Maintenance Visit Purpose",
+			"postprocess": _update_links
+		}
+		map_child_doc(source_doc, target_doc, table_map, source_doc)
 
 		return target_doc

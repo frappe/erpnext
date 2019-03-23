@@ -60,15 +60,21 @@ frappe.ui.form.on("Project", {
 
 			frm.add_custom_button(__("Kanban Board"), () => {
 				frappe.call('erpnext.projects.doctype.project.project.create_kanban_board_if_not_exists', {
-					project: frm.doc.project_name
+					project: frm.doc.name
 				}).then(() => {
-					frappe.set_route('List', 'Task', 'Kanban', frm.doc.project_name);
+					frappe.set_route('List', 'Task', 'Kanban', frm.doc.name);
 				});
 			});
 		}
 	},
 
 	refresh: function (frm) {
+		if (frappe.defaults.get_default("project_naming_by")!="Naming Series") {
+			frm.toggle_display("naming_series", false);
+		} else {
+			erpnext.toggle_naming_series();
+		}
+
 		if (frm.doc.__islocal) {
 			frm.web_link && frm.web_link.remove();
 		} else {
@@ -101,7 +107,7 @@ frappe.ui.form.on("Project Task", {
 
 	edit_timesheet: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		frappe.route_options = {"project": frm.doc.project_name, "task": child.task_id};
+		frappe.route_options = {"project": frm.doc.name, "task": child.task_id};
 		frappe.set_route("List", "Timesheet");
 	},
 
@@ -110,7 +116,7 @@ frappe.ui.form.on("Project Task", {
 		frappe.model.with_doctype('Timesheet', function() {
 			var doc = frappe.model.get_new_doc('Timesheet');
 			var row = frappe.model.add_child(doc, 'time_logs');
-			row.project = frm.doc.project_name;
+			row.project = frm.doc.name;
 			row.task = child.task_id;
 			frappe.set_route('Form', doc.doctype, doc.name);
 		})

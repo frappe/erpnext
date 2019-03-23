@@ -103,6 +103,13 @@ status_map = {
 		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
 		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
+	],
+	"Employee Advance": [
+		["Draft", None],
+		["Unpaid", "eval:self.docstatus==1"],
+		["Unclaimed", "eval:self.paid_amount and self.paid_amount == self.advance_amount and self.docstatus==1"],
+		["Claimed", "eval:self.paid_amount and self.balance_amount == 0 and self.docstatus==1"],
+		["Cancelled", "eval:self.docstatus==2"],
 	]
 }
 

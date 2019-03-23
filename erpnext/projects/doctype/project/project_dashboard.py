@@ -9,19 +9,35 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Project'),
-				'items': ['Task', 'Timesheet', 'Expense Claim', 'Issue' , 'Project Update']
+				'items': ['Task', 'Issue', 'Project Update']
 			},
 			{
 				'label': _('Material'),
 				'items': ['Material Request', 'BOM', 'Stock Entry']
 			},
 			{
+				'label': _('Work Done'),
+				'items': ['Timesheet', 'Maintenance Visit', 'Quality Inspection']
+			},
+			{
+				'label': _('Expenses'),
+				'items': ['Employee Advance', 'Expense Claim', 'Landed Cost Voucher']
+			},
+			{
 				'label': _('Sales'),
-				'items': ['Sales Order', 'Delivery Note', 'Sales Invoice']
+				'items': ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
 			},
 			{
 				'label': _('Purchase'),
-				'items': ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
+				'items': ['Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
+			},
+			{
+				'label': _('Payment'),
+				'items': ['Payment Entry', 'Journal Entry']
+			},
+			{
+				'label': _('Reference'),
+				'items': ['Warranty Claim']
 			},
 		]
 	}

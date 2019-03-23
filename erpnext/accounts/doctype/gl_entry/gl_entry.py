@@ -68,10 +68,10 @@ class GLEntry(Document):
 				frappe.throw(_("{0} {1}: Cost Center is required for 'Profit and Loss' account {2}. Please set up a default Cost Center for the Company.")
 					.format(self.voucher_type, self.voucher_no, self.account))
 		else:
-			from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account
+			from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account, get_allow_project_in_entry_of_bs_account
 			if not get_allow_cost_center_in_entry_of_bs_account() and self.cost_center:
 				self.cost_center = None
-			if self.project:
+			if not get_allow_project_in_entry_of_bs_account() and self.project:
 				self.project = None
 
 	def check_pl_account(self):
@@ -165,10 +165,16 @@ def check_freezing_date(posting_date, adv_adj=False):
 def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party, on_cancel=False):
 	# Update outstanding amt on against voucher
 	if voucher_type in ["Sales Invoice", "Purchase Invoice", "Landed Cost Voucher", "Fees"]:
-		bal = get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account)
-		ref_doc = frappe.get_doc(voucher_type, voucher_no)
-		ref_doc.db_set('outstanding_amount', bal)
-		ref_doc.set_status(update=True)
+		fieldname = "outstanding_amount"
+	elif voucher_type == "Employee Advance":
+		fieldname = "balance_amount"
+	else:
+		return
+
+	bal = get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account)
+	ref_doc = frappe.get_doc(voucher_type, voucher_no)
+	ref_doc.db_set(fieldname, bal)
+	ref_doc.set_status(update=True)
 
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.db.get_value("Account", account, "freeze_account")

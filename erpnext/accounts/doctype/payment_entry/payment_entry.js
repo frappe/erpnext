@@ -80,7 +80,7 @@ frappe.ui.form.on('Payment Entry', {
 			} else if (frm.doc.party_type=="Letter of Credit") {
 				var doctypes = ["Purchase Invoice", "Landed Cost Voucher", "Journal Entry"];
 			} else if (frm.doc.party_type=="Employee") {
-				var doctypes = ["Expense Claim", "Journal Entry"];
+				var doctypes = ["Expense Claim", "Journal Entry", "Employee Advance"];
 			} else if (frm.doc.party_type=="Student") {
 				var doctypes = ["Fees"];
 			} else {
@@ -891,7 +891,8 @@ frappe.ui.form.on('Payment Entry Reference', {
 						frm.doc.paid_from_account_currency : frm.doc.paid_to_account_currency,
 					party_type: frm.doc.party_type,
 					party: frm.doc.party,
-					account: frm.doc.payment_type=="Receive" ? frm.doc.paid_from : frm.doc.paid_to
+					account: frm.doc.payment_type=="Receive" ? frm.doc.paid_from : frm.doc.paid_to,
+					payment_type: frm.doc.payment_type
 				},
 				callback: function(r, rt) {
 					if(r.message) {
