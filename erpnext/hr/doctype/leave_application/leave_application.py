@@ -400,12 +400,18 @@ def get_leave_balance_on(employee, leave_type, date, allocation_records=None, do
 	return flt(allocation.total_leaves_allocated) - (flt(leaves_taken) + flt(leaves_encashed))
 
 def get_total_allocated_leaves(employee, leave_type, date):
-	conditions = ("and employee='%s'" % employee) if employee else ""
-
 	leave_allocation_records = frappe.db.sql("""
 		select total_leaves_allocated
 		from `tabLeave Allocation`
-		where %s between from_date and to_date and docstatus=1 and leave_type='%s' {0}""".format(conditions), (date, leave_type), as_dict=1)
+		where %(date)s between from_date and to_date
+			and docstatus=1
+			and leave_type=%(leave_type)s
+			and employee=%(employee)s
+		""",{
+			"date": date,
+			"leave_type": leave_type,
+			"employee": employee
+		}, as_dict=1)
 
 	return flt(leave_allocation_records[0]['total_leaves_allocated']) if leave_allocation_records else flt(0)
 
