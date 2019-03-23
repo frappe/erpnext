@@ -68,10 +68,10 @@ class GLEntry(Document):
 				frappe.throw(_("{0} {1}: Cost Center is required for 'Profit and Loss' account {2}. Please set up a default Cost Center for the Company.")
 					.format(self.voucher_type, self.voucher_no, self.account))
 		else:
-			from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account
+			from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account, get_allow_project_in_entry_of_bs_account
 			if not get_allow_cost_center_in_entry_of_bs_account() and self.cost_center:
 				self.cost_center = None
-			if self.project:
+			if not get_allow_project_in_entry_of_bs_account() and self.project:
 				self.project = None
 
 	def check_pl_account(self):
