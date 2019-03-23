@@ -30,7 +30,10 @@ def get_notification_config():
 			},
 			"Payment Entry": {"docstatus": 0},
 			"Leave Application": {"docstatus": 0},
-			"Expense Claim": {"docstatus": 0},
+			"Expense Claim": {
+				"status": ("in", ("Unpaid", "Draft")),
+				"docstatus": ("<", 2)
+			},
 			"Job Applicant": {"status": "Open"},
 			"Delivery Note": {
 				"status": ("not in", ("Completed", "Closed")),
