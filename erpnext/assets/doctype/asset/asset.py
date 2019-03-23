@@ -256,7 +256,7 @@ class Asset(AccountsController):
 	def get_depreciation_amount(self, depreciable_value, total_number_of_depreciations, row):
 		percentage_value = 100.0 if row.depreciation_method == 'Written Down Value' else 200.0
 
-		factor = percentage_value /  total_number_of_depreciations
+		factor = percentage_value /  cint(total_number_of_depreciations)
 		depreciation_amount = flt(depreciable_value * factor / 100, 0)
 
 		value_after_depreciation = flt(depreciable_value) - depreciation_amount
@@ -276,7 +276,7 @@ class Asset(AccountsController):
 				flt(row.expected_value_after_useful_life)) / (cint(row.total_number_of_depreciations) -
 				cint(self.number_of_depreciations_booked)) * prorata_temporis
 		else:
-			depreciation_amount = self.get_depreciation_amount(depreciable_value, row)
+			depreciation_amount = self.get_depreciation_amount(depreciable_value, row.total_number_of_depreciations, row)
 
 		return depreciation_amount
 
