@@ -134,6 +134,7 @@ def get_invoice_summary(items, taxes):
 						idx=len(items)+1,
 						item_code=reference_row.description,
 						item_name=reference_row.description,
+						description=reference_row.description,
 						rate=reference_row.tax_amount,
 						qty=1.0,
 						amount=reference_row.tax_amount,

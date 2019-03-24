@@ -87,8 +87,8 @@ def get_gl_entries(filters):
 			left join `tabPurchase Invoice` pur on gl.voucher_no = pur.name
 			left join `tabJournal Entry` jnl on gl.voucher_no = jnl.name
 			left join `tabPayment Entry` pay on gl.voucher_no = pay.name
-			left join `tabCustomer` cus on gl.party = cus.customer_name
-			left join `tabSupplier` sup on gl.party = sup.supplier_name
+			left join `tabCustomer` cus on gl.party = cus.name
+			left join `tabSupplier` sup on gl.party = sup.name
 		where gl.company=%(company)s and gl.fiscal_year=%(fiscal_year)s
 		{group_by_condition}
 		order by GlPostDate, voucher_no"""\
