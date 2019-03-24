@@ -166,7 +166,7 @@ class Task(NestedSet):
 		self.update_nsm_model()
 
 	def update_status(self):
-		if self.status not in ('Cancelled', 'Completed'):
+		if self.status not in ('Cancelled', 'Completed') and self.exp_end_date:
 			from datetime import datetime
 			if self.exp_end_date < datetime.now().date():
 				self.date = 'Overdue'
