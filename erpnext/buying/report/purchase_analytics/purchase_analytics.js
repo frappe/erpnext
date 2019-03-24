@@ -8,7 +8,7 @@ frappe.query_reports["Purchase Analytics"] = {
 			fieldname: "tree_type",
 			label: __("Tree Type"),
 			fieldtype: "Select",
-			options: ["Supplier Group","Supplier","Supplier-Item","Item Group","Item","Brand"],
+			options: ["Supplier Group","Supplier","Item Group","Item","Brand"],
 			default: "Supplier",
 			reqd: 1
 		},

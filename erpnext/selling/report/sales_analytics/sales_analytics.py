@@ -14,7 +14,6 @@ def execute(filters=None):
 class Analytics(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
-		self.with_items = False
 		self.date_field = 'transaction_date' \
 			if self.filters.doctype in ['Sales Order', 'Purchase Order'] else 'posting_date'
 		self.months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -28,13 +27,12 @@ class Analytics(object):
 		return self.columns, self.data , None, self.chart
 
 	def get_columns(self):
-		tree_dt = self.filters.tree_type
 		self.columns = [{
-			"label": _(self.filters.tree_type.replace("-Item", "")),
-			"options": self.filters.tree_type.replace("-Item", ""),
+			"label": _(self.filters.tree_type),
+			"options": self.filters.tree_type,
 			"fieldname": "entity",
 			"fieldtype": "Link",
-			"width": 200
+			"width": 140
 		}]
 
 		show_name = False
@@ -52,7 +50,7 @@ class Analytics(object):
 				"label": _(self.filters.tree_type + " Name"),
 				"fieldname": "entity_name",
 				"fieldtype": "Data",
-				"width": 200
+				"width": 140
 			})
 
 		self.columns.append({
@@ -73,13 +71,11 @@ class Analytics(object):
 			})
 
 	def get_data(self):
-		if self.filters.tree_type in ['Customer', 'Customer-Item']:
-			self.with_items = self.filters.tree_type == 'Customer-Item'
+		if self.filters.tree_type == 'Customer':
 			self.get_entries("s.customer", "s.customer_name")
 			self.get_rows()
 
-		if self.filters.tree_type in ['Supplier', 'Supplier-Item']:
-			self.with_items = self.filters.tree_type == 'Supplier-Item'
+		if self.filters.tree_type == 'Supplier':
 			self.get_entries("s.supplier", "s.supplier_name")
 			self.get_rows()
 
@@ -127,7 +123,6 @@ class Analytics(object):
 		self.entries = frappe.db.sql("""
 			select
 				{entity_field} as entity,
-				i.item_code,
 				{entity_name_field}
 				{value_field} as value_field,
 				s.{date_field}
@@ -233,21 +228,6 @@ class Analytics(object):
 			row["total"] = total
 			self.data.append(row)
 
-			if self.with_items:
-				for item_code, period_data in iteritems(self.entity_item_periodic_data[entity]):
-					row_item = {
-						"entity": item_code,
-						"indent": 2
-					}
-					total_item = 0
-					for end_date in self.periodic_daterange:
-						period = self.get_period(end_date)
-						amount = flt(period_data.get(period, 0.0))
-						row_item[scrub(period)] = amount
-						total_item += amount
-					row_item["total"] = total_item
-					self.data.append(row_item)
-
 	def get_rows_by_group(self):
 		self.get_periodic_data()
 		out = []
@@ -272,16 +252,11 @@ class Analytics(object):
 
 	def get_periodic_data(self):
 		self.entity_periodic_data = frappe._dict()
-		self.entity_item_periodic_data = frappe._dict()
 
 		for d in self.entries:
 			period = self.get_period(d.get(self.date_field))
 			self.entity_periodic_data.setdefault(d.entity, frappe._dict()).setdefault(period, 0.0)
 			self.entity_periodic_data[d.entity][period] += flt(d.value_field)
-
-			if self.with_items:
-				self.entity_item_periodic_data.setdefault(d.entity, frappe._dict()).setdefault(d.item_code, frappe._dict()).setdefault(period, 0.0)
-				self.entity_item_periodic_data[d.entity][d.item_code][period] += flt(d.value_field)
 
 	def get_period(self, posting_date):
 		if self.filters.range == 'Weekly':
