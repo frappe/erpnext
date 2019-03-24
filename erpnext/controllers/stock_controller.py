@@ -108,6 +108,11 @@ class StockController(AccountsController):
 		sle.stock_value = flt(sle.qty_after_transaction) * flt(sle.valuation_rate)
 		sle.stock_value_difference = flt(sle.actual_qty) * flt(sle.valuation_rate)
 
+		incoming_rate_field = ""
+		if flt(sle.actual_qty) > 0:
+			sle.incoming_rate = sle.valuation_rate
+			incoming_rate_field = ", incoming_rate = %(incoming_rate)s"
+
 		if sle.name:
 			frappe.db.sql("""
 				update
@@ -116,8 +121,10 @@ class StockController(AccountsController):
 					stock_value = %(stock_value)s,
 					valuation_rate = %(valuation_rate)s,
 					stock_value_difference = %(stock_value_difference)s
+					{0}
 				where
-					name = %(name)s""", (sle))
+					name = %(name)s
+			""".format(incoming_rate_field), sle)
 
 		return sle
 
