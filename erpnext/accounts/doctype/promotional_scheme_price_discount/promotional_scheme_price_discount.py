@@ -6,5 +6,5 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
-class PriceDiscountSlab(Document):
+class PromotionalSchemePriceDiscount(Document):
 	pass
