@@ -1,7 +1,8 @@
-// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-// License: GNU General Public License v3. See license.txt
+// Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
+// For license information, please see license.txt
+/* eslint-disable */
 
-frappe.query_reports["Territory Target Variance Item Group-Wise"] = {
+frappe.query_reports["Sales Partner Target Variance based on Item Group"] = {
 	"filters": [
 		{
 			fieldname:"company",

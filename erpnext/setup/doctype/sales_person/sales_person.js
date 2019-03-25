@@ -18,7 +18,7 @@ frappe.ui.form.on('Sales Person', {
 					'fiscal_year': row.fiscal_year
 				}
 			}
-		}
+		};
 	}
 });
 

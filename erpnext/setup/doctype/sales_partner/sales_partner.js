@@ -23,6 +23,6 @@ frappe.ui.form.on('Sales Partner', {
 					'fiscal_year': row.fiscal_year
 				}
 			}
-		}
+		};
 	}
 });
