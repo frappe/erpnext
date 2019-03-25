@@ -11,16 +11,14 @@ from frappe.utils import getdate, date_diff
 class AdditionalSalary(Document):
 	def validate(self):
 		self.validate_dates()
-		if self.amount <= 0:
-			frappe.throw(_("Amount should be greater than zero."))
+		if self.amount < 0:
+			frappe.throw(_("Amount should not be less than zero."))
 
 	def validate_dates(self):
  		date_of_joining, relieving_date = frappe.db.get_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
  		if date_of_joining and getdate(self.payroll_date) < getdate(date_of_joining):
  			frappe.throw(_("Payroll date can not be less than employee's joining date"))
- 		elif relieving_date and getdate(self.payroll_date) > getdate(relieving_date):
- 			frappe.throw(_("To date can not greater than employee's relieving date"))
 
 	def get_amount(self, sal_start_date, sal_end_date):
 		start_date = getdate(sal_start_date)

@@ -577,12 +577,17 @@ erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019
 erpnext.patches.v11_0.update_delivery_trip_status
 erpnext.patches.v11_0.set_missing_gst_hsn_code
 erpnext.patches.v11_0.rename_bom_wo_fields
+erpnext.patches.v12_0.set_default_homepage_type
 erpnext.patches.v11_0.rename_additional_salary_component_additional_salary
 erpnext.patches.v11_0.renamed_from_to_fields_in_project
 erpnext.patches.v11_0.add_permissions_in_gst_settings
 erpnext.patches.v11_1.setup_guardian_role
 execute:frappe.delete_doc('DocType', 'Notification Control')
+erpnext.patches.v12_0.set_gst_category
 erpnext.patches.v11_0.remove_barcodes_field_from_copy_fields_to_variants
 erpnext.patches.v12_0.set_task_status
-erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019
 erpnext.patches.v11_0.make_italian_localization_fields # 01-03-2019
+erpnext.patches.v12_0.add_item_name_in_work_orders
+erpnext.patches.v12_0.update_pricing_rule_fields
+erpnext.patches.v11_1.make_job_card_time_logs
+erpnext.patches.v12_0.rename_pricing_rule_child_doctypes

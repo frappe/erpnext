@@ -9,7 +9,7 @@ frappe.listview_settings['Task'] = {
 			listview.call_for_selected_items(method, {"status": "Open"});
 		});
 
-		listview.page.add_menu_item(__("Set as Closed"), function() {
+		listview.page.add_menu_item(__("Set as Completed"), function() {
 			listview.call_for_selected_items(method, {"status": "Completed"});
 		});
 	},

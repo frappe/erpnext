@@ -26,7 +26,7 @@ def execute(filters=None):
 			s.supplier_group as "supplier_group",
 			gl.party AS "supplier",
 			s.tax_id as "tax_id",
-			SUM(gl.debit) AS "payments"
+			SUM(gl.debit_in_account_currency) AS "payments"
 		FROM
 			`tabGL Entry` gl INNER JOIN `tabSupplier` s
 		WHERE

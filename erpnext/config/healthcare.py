@@ -76,11 +76,13 @@ def get_data():
 					"type": "doctype",
 					"name": "Patient",
 					"label": _("Patient"),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Healthcare Practitioner",
 					"label": _("Healthcare Practitioner"),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
@@ -96,6 +98,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Medical Code",
 					"label": _("Medical Code"),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
@@ -112,6 +115,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Healthcare Settings",
 					"label": _("Healthcare Settings"),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
