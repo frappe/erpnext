@@ -83,7 +83,7 @@ class calculate_taxes_and_totals(object):
 				item.net_rate = item.rate
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 				item.net_amount = item.amount
-				item.total_discount = item.amount_before_discount - item.amount
+				item.total_discount = flt(item.amount_before_discount - item.amount, item.precision("total_discount"))
 
 				item.tax_exclusive_price_list_rate = item.price_list_rate
 				item.tax_exclusive_rate = item.rate
@@ -152,26 +152,24 @@ class calculate_taxes_and_totals(object):
 
 			if item.cumulated_tax_fraction and not self.discount_amount_applied:
 				rate_before_discount = flt(item.tax_exclusive_price_list_rate / (1 + item.cumulated_tax_fraction))
-				item.tax_exclusive_price_list_rate = flt(rate_before_discount, item.precision("tax_exclusive_price_list_rate"))
+				item.tax_exclusive_price_list_rate = flt(rate_before_discount)
 
 				item.tax_exclusive_amount = flt(item.amount / (1 + item.cumulated_tax_fraction))
 				item.tax_exclusive_rate = (item.tax_exclusive_amount / item.qty) if item.qty \
 					else (item.rate / (1 + item.cumulated_tax_fraction))
-				item.tax_exclusive_rate = flt(item.tax_exclusive_rate, item.precision("tax_exclusive_rate"))
 
 				if has_margin_field and flt(item.tax_exclusive_rate_with_margin) > 0:
 					rate_before_discount = item.tax_exclusive_rate_with_margin / (1 + item.cumulated_tax_fraction)
-					item.tax_exclusive_rate_with_margin = flt(rate_before_discount,
-						item.precision("tax_exclusive_rate_with_margin"))
-					item.base_tax_exclusive_rate_with_margin = flt(item.tax_exclusive_rate_with_margin * self.doc.conversion_rate,
-						item.precision("base_tax_exclusive_rate_with_margin"))
+					item.tax_exclusive_rate_with_margin = flt(rate_before_discount)
+					item.base_tax_exclusive_rate_with_margin = flt(item.tax_exclusive_rate_with_margin * self.doc.conversion_rate)
 					item.tax_exclusive_discount_amount = flt(item.tax_exclusive_rate_with_margin - item.tax_exclusive_rate)
 				elif flt(item.tax_exclusive_price_list_rate) > 0:
 					item.tax_exclusive_discount_amount = flt(item.tax_exclusive_price_list_rate - item.tax_exclusive_rate)
 
 				item.tax_exclusive_amount_before_discount = flt(rate_before_discount * item.qty,
 					item.precision("tax_exclusive_amount_before_discount"))
-				item.tax_exclusive_total_discount = item.tax_exclusive_amount_before_discount - item.tax_exclusive_amount
+				item.tax_exclusive_total_discount = flt(item.tax_exclusive_amount_before_discount - item.tax_exclusive_amount,
+					item.precision("tax_exclusive_total_discount"))
 
 				item.net_amount = flt(item.amount / (1 + item.cumulated_tax_fraction))
 				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate")) if item.qty else 0.0
@@ -249,7 +247,9 @@ class calculate_taxes_and_totals(object):
 
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total",
 			"tax_exclusive_total", "base_tax_exclusive_total",
-			"total_before_discount", "total_discount", "base_total_before_discount", "base_total_discount"])
+			"total_before_discount", "total_discount", "base_total_before_discount", "base_total_discount",
+			"tax_exclusive_total_before_discount", "tax_exclusive_total_discount",
+			"base_tax_exclusive_total_before_discount", "base_tax_exclusive_total_discount"])
 
 		if self.doc.doctype == 'Sales Invoice' and self.doc.is_pos:
 			self.doc.pos_total_qty = self.doc.total_qty

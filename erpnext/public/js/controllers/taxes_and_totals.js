@@ -104,7 +104,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				item.net_rate = item.rate;
 				item.amount = flt(item.rate * item.qty, precision("amount", item));
 				item.net_amount = item.amount;
-				item.total_discount = item.amount_before_discount - item.amount;
+				item.total_discount = flt(item.amount_before_discount - item.amount, precision("total_discount", item));
 
 				item.tax_exclusive_price_list_rate = item.price_list_rate;
 				item.tax_exclusive_rate = item.rate;
@@ -191,20 +191,17 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 			if(item.cumulated_tax_fraction && !me.discount_amount_applied) {
 				var rate_before_discount = flt(item.tax_exclusive_price_list_rate / (1 + item.cumulated_tax_fraction));
-				item.tax_exclusive_price_list_rate = flt(rate_before_discount, precision("tax_exclusive_price_list_rate", item));
+				item.tax_exclusive_price_list_rate = flt(rate_before_discount);
 
 				item.tax_exclusive_amount = flt(item.amount / (1 + item.cumulated_tax_fraction));
 				item.tax_exclusive_rate = item.qty ? (item.tax_exclusive_amount / item.qty)
 					: (item.rate / (1 + item.cumulated_tax_fraction));
-				item.tax_exclusive_rate = flt(item.tax_exclusive_rate, precision("tax_exclusive_rate", item));
 
 				var has_margin_field = frappe.meta.has_field(item.doctype, 'margin_type');
 				if(has_margin_field && flt(item.tax_exclusive_rate_with_margin) > 0) {
 					rate_before_discount = item.tax_exclusive_rate_with_margin / (1 + item.cumulated_tax_fraction);
-					item.tax_exclusive_rate_with_margin = flt(rate_before_discount,
-						precision("tax_exclusive_rate_with_margin", item));
-					item.base_tax_exclusive_rate_with_margin = flt(item.tax_exclusive_rate_with_margin * me.frm.doc.conversion_rate,
-						precision("base_tax_exclusive_rate_with_margin", item));
+					item.tax_exclusive_rate_with_margin = flt(rate_before_discount);
+					item.base_tax_exclusive_rate_with_margin = flt(item.tax_exclusive_rate_with_margin * me.frm.doc.conversion_rate);
 					item.tax_exclusive_discount_amount = flt(item.tax_exclusive_rate_with_margin - item.tax_exclusive_rate);
 				} else if(flt(item.tax_exclusive_price_list_rate) > 0) {
 					item.tax_exclusive_discount_amount = flt(item.tax_exclusive_price_list_rate - item.tax_exclusive_rate);
@@ -212,7 +209,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 				item.tax_exclusive_amount_before_discount = flt(rate_before_discount * item.qty,
 					precision("tax_exclusive_amount_before_discount", item));
-				item.tax_exclusive_total_discount = item.tax_exclusive_amount_before_discount - item.tax_exclusive_amount;
+				item.tax_exclusive_total_discount = flt(item.tax_exclusive_amount_before_discount - item.tax_exclusive_amount,
+					precision("tax_exclusive_total_discount", item));
 
 				item.net_amount = flt(item.amount / (1 + item.cumulated_tax_fraction));
 				item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
@@ -290,7 +288,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total",
 			"tax_exclusive_total", "base_tax_exclusive_total",
-			"total_before_discount", "total_discount", "base_total_before_discount", "base_total_discount"]);
+			"total_before_discount", "total_discount", "base_total_before_discount", "base_total_discount",
+			"tax_exclusive_total_before_discount", "tax_exclusive_total_discount",
+			"base_tax_exclusive_total_before_discount", "base_tax_exclusive_total_discount"]);
 	},
 
 	calculate_taxes: function() {
