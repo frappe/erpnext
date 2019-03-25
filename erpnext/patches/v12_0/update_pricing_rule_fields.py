@@ -29,7 +29,7 @@ def execute():
         child_doctype = doctype + ' Item'
 
         frappe.db.sql(""" UPDATE `tab{child_doctype}` SET pricing_rules = pricing_rule
-            WHERE docstatus < 2 and pricing_rule is not null and pricing_rule != '' 
+            WHERE docstatus < 2 and pricing_rule is not null and pricing_rule != ''
         """.format(child_doctype= child_doctype))
 
         data = frappe.db.sql(""" SELECT pricing_rule, name, parent,
@@ -43,15 +43,15 @@ def execute():
                 d.creation, d.modified, d.docstatus, d.modified_by, d.owner, frappe.generate_hash("", 10)))
 
         if values:
-            frappe.db.sql(""" INSERT INTO 
-                `tabPricing Rule Detail` (`pricing_rule`, `child_docname`, `parent`, `parentfield`, `parenttype`, 
+            frappe.db.sql(""" INSERT INTO
+                `tabPricing Rule Detail` (`pricing_rule`, `child_docname`, `parent`, `parentfield`, `parenttype`,
                 `creation`, `modified`, `docstatus`, `modified_by`, `owner`, `name`)
             VALUES {values} """.format(values=', '.join(['%s'] * len(values))), tuple(values))
 
     frappe.reload_doc('accounts', 'doctype', 'pricing_rule')
 
-    for doctype, apply_on in {'Apply Rule On Item Code': 'Item Code',
-        'Apply Rule On Item Group': 'Item Group', 'Apply Rule On Brand': 'Brand'}.items():
+    for doctype, apply_on in {'Pricing Rule Item Code': 'Item Code',
+        'Pricing Rule Item Group': 'Item Group', 'Pricing Rule Brand': 'Brand'}.items():
         frappe.reload_doc('accounts', 'doctype', frappe.scrub(doctype))
 
         field = frappe.scrub(apply_on)
@@ -64,8 +64,8 @@ def execute():
                 d.creation, d.modified, d.owner, d.modified_by, frappe.generate_hash("", 10)))
 
         if values:
-            frappe.db.sql(""" INSERT INTO 
+            frappe.db.sql(""" INSERT INTO
                 `tab{doctype}` ({field}, parent, parentfield, parenttype, creation, modified,
                     owner, modified_by, name)
-            VALUES {values} """.format(doctype=doctype, 
-                field=field, values=', '.join(['%s'] * len(values))), tuple(values), debug=1)
+            VALUES {values} """.format(doctype=doctype,
+                field=field, values=', '.join(['%s'] * len(values))), tuple(values))
