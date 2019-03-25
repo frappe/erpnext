@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Sales Partner Target Variance Item Group-Wise"] = {
+frappe.query_reports["Territory Target Variance Based On Item Group"] = {
 	"filters": [
 		{
 			fieldname:"company",

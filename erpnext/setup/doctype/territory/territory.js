@@ -10,9 +10,9 @@ frappe.ui.form.on("Territory", {
 					'fiscal_year': row.fiscal_year
 				}
 			}
-		}
+		};
 	}
-})
+});
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.cscript.set_root_readonly(doc);
