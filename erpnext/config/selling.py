@@ -215,6 +215,12 @@ def get_data():
 					"name": "Sales Order Trends",
 					"doctype": "Sales Order"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Details",
+					"doctype": "Sales Order"
+				},
 			]
 		},
 		{
