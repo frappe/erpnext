@@ -240,6 +240,12 @@ class SellingController(StockController):
 		return frappe.db.sql("""select name from `tabProduct Bundle`
 			where new_item_code=%s and docstatus != 2""", item_code)
 
+	def is_product_bundle_with_stock_item(self, item_code):
+		"""Returns true if product bundle has stock item"""
+		ret = len(frappe.db.sql("""select i.name from tabItem i, `tabProduct Bundle` pb, `tabProduct Bundle Item` pbi
+			where pb.new_item_code = %s and pbi.parent = pb.name and i.name = pbi.item_code and i.is_stock_item = 1""", item_code))
+		return ret
+
 	def get_already_delivered_qty(self, current_docname, so, so_detail):
 		delivered_via_dn = frappe.db.sql("""select sum(qty) from `tabDelivery Note Item`
 			where so_detail = %s and docstatus = 1

@@ -113,6 +113,8 @@ class SalesInvoice(SellingController):
 			self.update_current_stock()
 			self.validate_delivery_note()
 
+		self.validate_update_stock_mandatory()
+
 		# validate service stop date to lie in between start and end date
 		validate_service_stop_date(self)
 
@@ -570,6 +572,18 @@ class SalesInvoice(SellingController):
 		for d in self.get("items"):
 			if d.delivery_note:
 				msgprint(_("Stock cannot be updated against Delivery Note {0}").format(d.delivery_note), raise_exception=1)
+
+	def validate_update_stock_mandatory(self):
+		if not cint(self.update_stock) and not cint(frappe.db.get_single_value("Accounts Settings", "allow_invoicing_without_updating_stock")):
+			packed_items = []
+			for p in self.get('packed_items'):
+				packed_items.append(p.parent_detail_docname)
+
+			for d in self.items:
+				is_stock_item = frappe.get_cached_value("Item", d.item_code, "is_stock_item")\
+					or self.is_product_bundle_with_stock_item(d.item_code)
+				if d.item_code and not d.delivery_note and is_stock_item:
+					frappe.throw(_("'Update Stock' must be enabled for stock items if Sales Invoice is not made from Delivery Note."))
 
 	def validate_write_off_account(self):
 		if flt(self.write_off_amount) and not self.write_off_account:

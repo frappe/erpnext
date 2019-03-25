@@ -86,6 +86,8 @@ class PurchaseInvoice(BuyingController):
 			self.pr_required()
 			self.validate_supplier_invoice()
 
+		self.validate_update_stock_mandatory()
+
 		# validate cash purchase
 		if (self.is_paid == 1):
 			self.validate_cash()
@@ -376,6 +378,12 @@ class PurchaseInvoice(BuyingController):
 				if item.purchase_receipt:
 					frappe.throw(_("Stock cannot be updated against Purchase Receipt {0}")
 						.format(item.purchase_receipt))
+
+	def validate_update_stock_mandatory(self):
+		if not cint(self.update_stock) and not cint(frappe.db.get_single_value("Accounts Settings", "allow_invoicing_without_updating_stock")):
+			for d in self.items:
+				if d.item_code and not d.purchase_receipt and frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
+					frappe.throw(_("'Update Stock' must be enabled for stock items if Purchase Invoice is not made from Purchase Receipt."))
 
 	def before_submit(self):
 		self.check_valuation_amounts_with_previous_doc()
