@@ -302,6 +302,19 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertEqual(len(ste.additional_costs), 1)
 		self.assertEqual(ste.total_additional_costs, 1000)
 
+	def test_job_card(self):
+		data = frappe.get_cached_value('BOM',
+			{'docstatus': 1, 'with_operations': 1, 'company': '_Test Company'}, ['name', 'item'])
+
+		if data:
+			bom, bom_item = data
+
+			bom_doc = frappe.get_doc('BOM', bom)
+			work_order = make_wo_order_test_record(item=bom_item, qty=1, bom_no=bom)
+
+			job_cards = frappe.get_all('Job Card', filters = {'work_order': work_order})
+			self.assertEqual(len(job_cards), len(bom_doc.operations))
+
 	def test_work_order_with_non_transfer_item(self):
 		items = {'Finished Good Transfer Item': 1, '_Test FG Item': 1, '_Test FG Item 1': 0}
 		for item, allow_transfer in items.items():
@@ -346,7 +359,7 @@ def make_wo_order_test_record(**args):
 
 	wo_order = frappe.new_doc("Work Order")
 	wo_order.production_item = args.production_item or args.item or args.item_code or "_Test FG Item"
-	wo_order.bom_no = frappe.db.get_value("BOM", {"item": wo_order.production_item,
+	wo_order.bom_no = args.bom_no or frappe.db.get_value("BOM", {"item": wo_order.production_item,
 		"is_active": 1, "is_default": 1})
 	wo_order.qty = args.qty or 10
 	wo_order.wip_warehouse = args.wip_warehouse or "_Test Warehouse - _TC"

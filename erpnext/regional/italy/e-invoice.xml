@@ -95,13 +95,12 @@
             <Cognome>{{ doc.customer_data.last_name }}</Cognome>
           </Anagrafica>
         {%- else %}
-          {%- if doc.customer_data.is_public_administration %}
-          <CodiceFiscale>{{ doc.customer_data.fiscal_code }}</CodiceFiscale>
-          {%- else %}
           <IdFiscaleIVA>
             <IdPaese>{{ doc.customer_address_data.country_code }}</IdPaese>
             <IdCodice>{{ doc.tax_id | replace("IT","") }}</IdCodice>
           </IdFiscaleIVA>
+          {%- if doc.customer_data.fiscal_code %}
+          <CodiceFiscale>{{ doc.customer_data.fiscal_code }}</CodiceFiscale>
           {%- endif %}
           <Anagrafica>
             <Denominazione>{{ doc.customer_name }}</Denominazione>

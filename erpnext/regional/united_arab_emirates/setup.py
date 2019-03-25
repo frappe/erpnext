@@ -28,24 +28,24 @@ def make_custom_fields():
 	purchase_invoice_fields = [
 			dict(fieldname='company_trn', label='Company TRN',
 				fieldtype='Read Only', insert_after='shipping_address',
-				options='company.tax_id', print_hide=1),
+				fetch_from='company.tax_id', print_hide=1),
 			dict(fieldname='supplier_name_in_arabic', label='Supplier Name in Arabic',
 				fieldtype='Read Only', insert_after='supplier_name',
-				options='supplier.supplier_name_in_arabic', print_hide=1)
+				fetch_from='supplier.supplier_name_in_arabic', print_hide=1)
 		]
 
 	sales_invoice_fields = [
 			dict(fieldname='company_trn', label='Company TRN',
 				fieldtype='Read Only', insert_after='company_address',
-				options='company.tax_id', print_hide=1),
+				fetch_from='company.tax_id', print_hide=1),
 			dict(fieldname='customer_name_in_arabic', label='Customer Name in Arabic',
 				fieldtype='Read Only', insert_after='customer_name',
-				options='customer.customer_name_in_arabic', print_hide=1),
+				fetch_from='customer.customer_name_in_arabic', print_hide=1),
 		]
 
 	invoice_item_fields = [
 		dict(fieldname='tax_code', label='Tax Code',
-			fieldtype='Read Only', options='item_code.tax_code', insert_after='description',
+			fieldtype='Read Only', fetch_from='item_code.tax_code', insert_after='description',
 			allow_on_submit=1, print_hide=1),
 		dict(fieldname='tax_rate', label='Tax Rate',
 			fieldtype='Float', insert_after='tax_code',
