@@ -120,7 +120,7 @@ class SalesPurchaseDetailsReport(object):
 			{
 				"label": _("Total Tax Amount"),
 				"fieldtype": "Currency",
-				"fieldname": "tax_total_amount",
+				"fieldname": "total_tax_amount",
 				"options": "currency",
 				"width": 120
 			},
@@ -144,6 +144,16 @@ class SalesPurchaseDetailsReport(object):
 					"width": 120
 				},
 			]
+
+		columns += [
+			{
+				"label": _("Grand Total"),
+				"fieldtype": "Currency",
+				"fieldname": "grand_total",
+				"options": "currency",
+				"width": 120
+			},
+		]
 
 		if self.filters.party_type == "Customer":
 			columns += [
@@ -190,29 +200,30 @@ class SalesPurchaseDetailsReport(object):
 
 	def get_data(self):
 		self.get_entries()
+		self.get_itemsed_taxes()
 		self.build_tree()
 
 		data = []
 		self.total_row["indent"] = 0
 		self.total_row["_collapsed"] = True
-		set_row_average_fields(self.total_row, self.tax_columns)
+		self.postprocess_row(self.total_row)
 		data.append(self.total_row)
 
 		for party, docs in iteritems(self.tree):
 			party_row = self.party_totals[party]
-			set_row_average_fields(party_row, self.tax_columns)
+			self.postprocess_row(party_row)
 			party_row["indent"] = 1
 			data.append(party_row)
 
 			for docname, items_uoms in iteritems(docs):
 				doc_row = self.doc_totals[docname]
-				set_row_average_fields(doc_row, self.tax_columns)
+				self.postprocess_row(doc_row)
 				doc_row["indent"] = 2
 				data.append(doc_row)
 
 				for item_code, uom in items_uoms:
 					item_row = self.doc_item_uom_totals[(docname, item_code, uom)]
-					set_row_average_fields(item_row, self.tax_columns)
+					self.postprocess_row(item_row)
 					item_row["indent"] = 3
 					data.append(item_row)
 
@@ -221,14 +232,12 @@ class SalesPurchaseDetailsReport(object):
 	def build_tree(self):
 		# Totals Row Template
 		total_fields = ['qty', 'base_net_amount', 'base_amount']
-		tax_amount_fields = ["tax_" + scrub(tax) for tax in self.tax_columns]
-		tax_rate_fields = ["tax_" + scrub(tax) + "_rate" for tax in self.tax_columns]
-		totals_template = {"currency": self.company_currency, "tax_total_amount": 0.0}
+		totals_template = {"currency": self.company_currency}
 		for f in total_fields:
 			totals_template[f] = 0.0
-		for f in tax_amount_fields + tax_rate_fields:
+		for f in self.tax_amount_fields + self.tax_rate_fields:
 			totals_template[f] = 0.0
-		for f in tax_rate_fields:
+		for f in self.tax_rate_fields:
 			totals_template[f+"_count"] = 0
 
 		# Containers
@@ -316,17 +325,13 @@ class SalesPurchaseDetailsReport(object):
 				item_row[f] += d[f]
 				self.total_row[f] += d[f]
 
-			for f, tax in zip(tax_amount_fields, self.tax_columns):
+			for f, tax in zip(self.tax_amount_fields, self.tax_columns):
 				tax_amount = self.itemsed_tax.get(d.name, {}).get(tax, {}).get("tax_amount", 0.0)
 				party_row[f] += tax_amount
-				party_row["tax_total_amount"] += tax_amount
 				doc_row[f] += tax_amount
-				doc_row["tax_total_amount"] += tax_amount
 				item_row[f] += tax_amount
-				item_row["tax_total_amount"] += tax_amount
 				self.total_row[f] += tax_amount
-				self.total_row["tax_total_amount"] += tax_amount
-			for f, tax in zip(tax_rate_fields, self.tax_columns):
+			for f, tax in zip(self.tax_rate_fields, self.tax_columns):
 				tax_rate = self.itemsed_tax.get(d.name, {}).get(tax, {}).get("tax_rate", 0.0)
 				if tax_rate:
 					party_row[f] += tax_rate
@@ -422,11 +427,40 @@ class SalesPurchaseDetailsReport(object):
 			for d in additional_customer_info:
 				self.additional_customer_info[d.customer] = d
 
+	def get_itemsed_taxes(self):
 		if self.entries:
 			self.itemsed_tax, self.tax_columns = get_tax_accounts(self.entries, [], self.company_currency, self.filters.doctype,
 				"Sales Taxes and Charges" if self.filters.party_type == "Customer" else "Purchase Taxes and Charges")
+			self.tax_amount_fields = ["tax_" + scrub(tax) for tax in self.tax_columns]
+			self.tax_rate_fields = ["tax_" + scrub(tax) + "_rate" for tax in self.tax_columns]
 		else:
 			self.itemsed_tax, self.tax_columns = {}, []
+			self.tax_amount_fields, self.tax_rate_fields = [], []
+
+	def postprocess_row(self, row):
+		# Calculate rate
+		rate_fields = [
+			('base_net_rate', 'base_net_amount'),
+			('base_rate', 'base_amount')
+		]
+		if flt(row['qty']):
+			for target, source in rate_fields:
+				row[target] = flt(row[source]) / flt(row['qty'])
+
+		# Calculate total taxes and grand total
+		row["total_tax_amount"] = 0.0
+		for f in self.tax_amount_fields:
+			row["total_tax_amount"] += row[f]
+
+		row["grand_total"] = row["base_net_amount"] + row["total_tax_amount"]
+
+		# Calculate tax rates by averaging
+		for f in self.tax_rate_fields:
+			row[f] = row.get(f, 0.0)
+			if row[f + "_count"]:
+				row[f] /= row[f + "_count"]
+
+			del row[f + "_count"]
 
 	def get_qty_fieldname(self):
 		filter_to_field = {
@@ -477,25 +511,6 @@ class SalesPurchaseDetailsReport(object):
 					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
 
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
-
-def set_row_average_fields(row, tax_columns):
-	if not flt(row['qty']):
-		return
-
-	fields = [
-		('base_net_rate', 'base_net_amount'),
-		('base_rate', 'base_amount')
-	]
-	for target, source in fields:
-		row[target] = flt(row[source]) / flt(row['qty'])
-
-	tax_rate_fields = ["tax_" + scrub(tax) + "_rate" for tax in tax_columns]
-	for f in tax_rate_fields:
-		row[f] = row.get(f, 0.0)
-		if row[f+"_count"]:
-			row[f] /= row[f+"_count"]
-
-		del row[f+"_count"]
 
 def execute(filters=None):
 	return SalesPurchaseDetailsReport(filters).run("Customer")
