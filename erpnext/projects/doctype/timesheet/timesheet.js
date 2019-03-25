@@ -307,8 +307,8 @@ const set_employee_and_company = function(frm) {
 	frappe.db.get_value('Employee', options, fields).then(({ message }) => {
 		if (message) {
 			// there is an employee with the currently logged in user_id
-			frm.fields_dict['employee'].set_value(message.name);
-			frm.fields_dict['company'].set_value(message.company);
+			frm.set_value("employee", message.name);
+			frm.set_value("company", message.company);
 		}
 	});
 };
