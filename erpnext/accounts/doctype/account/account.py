@@ -96,12 +96,12 @@ class Account(NestedSet):
 		if frappe.local.flags.ignore_root_company_validation or self.flags.ignore_root_company_validation:
 			return
 
+		if frappe.get_value("Company", self.company, "ignore_root_company_validation"):
+			return
+
 		ancestors = get_root_company(self.company)
 		if ancestors:
-			account = frappe.db.exists("Account", {"company": ancestors[0], "account_name": self.account_name})
-
-			if not account:
-				frappe.throw(_("Please add the account to root level Company - %s" % ancestors[0]))
+			frappe.throw(_("Please add the account to root level Company - %s" % ancestors[0]))
 		else:
 			descendants = get_descendants_of('Company', self.company)
 			if not descendants: return
