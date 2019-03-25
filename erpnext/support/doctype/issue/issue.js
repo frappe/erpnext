@@ -1,7 +1,9 @@
 frappe.ui.form.on("Issue", {
 	onload: function(frm) {
 		frm.email_field = "raised_by";
-		set_time_to_resolve_and_response(frm);
+		if(typeof frm.doc.service_level_agreement !== 'undefined'){
+			set_time_to_resolve_and_response(frm);
+		}
 	},
 
 	refresh: function (frm) {
@@ -84,7 +86,7 @@ function set_time_to_resolve_and_response(frm) {
 	const email_account = frm.fields_dict['email_account'].$wrapper;
 
 	const time_to_respond = $(get_time_left_element(__('Time To Respond'), frm.doc.response_by));
-	const time_to_resolve = $(get_time_left_element(__('Time To Resolve'), frm.doc.resolve_by));
+	const time_to_resolve = $(get_time_left_element(__('Time To Resolve'), frm.doc.resolution_by));
 
 	time_to_respond.insertAfter(customer);
 	time_to_resolve.insertAfter(email_account);
@@ -109,5 +111,5 @@ function get_time_left_element(label, timestamp) {
 
 function get_time_left(timestamp) {
 	const diff = moment(timestamp).diff(moment());
-	return diff >= 44500 ? moment.duration().humanize() : 0;
+	return diff >= 44500 ? moment.duration(diff).humanize() : 0;
 }
