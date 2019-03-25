@@ -1,15 +1,16 @@
+# coding: utf-8
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import format_datetime
+from frappe import DoesNotExistError
 from frappe import _
-import re
 
 
 def execute(filters=None):
-	validate_filters(filters, account_details)
+	validate_filters(filters)
 	filters = set_account_currency(filters)
 
-	columns = get_columns(filters)
+	columns = get_columns()
 	result = get_result(filters)
 
 	return columns, result
@@ -29,7 +30,7 @@ def set_account_currency(filters):
 	return filters
 
 
-def get_columns(filters):
+def get_columns():
 	columns = [
 		{
 			"label": "Umsatz (ohne Soll/Haben-Kz)",
@@ -63,7 +64,7 @@ def get_columns(filters):
 
 def get_result(filters):
 	gl_entries = get_gl_entries(filters)
-	result = get_result_as_list(gl_entries, filters)
+	result = get_result_as_list(gl_entries)
 	return result
 
 
@@ -128,12 +129,8 @@ def get_gl_entries(filters):
 	return gl_entries
 
 
-def get_result_as_list(data, filters):
+def get_result_as_list(data):
 	result = []
-
-	company_currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
-	accounts = frappe.get_all("Account", filters={"Company": filters.company}, 
-		fields=["name", "account_number"])
 
 	for d in data:
 		if d.get("debit"):
@@ -144,7 +141,7 @@ def get_result_as_list(data, filters):
 			kennzeichen = 'H'
 		else:
 			amount = 0.0
-			kennzeihen = ''
+			kennzeichen = ''
 
 		umsatz = '{:.2f}'.format(amount).replace(".", ",")
 
@@ -161,7 +158,7 @@ def get_result_as_list(data, filters):
 	return result
 
 
-def get_account_number(name)
+def get_account_number(name):
 	try:
 		acc = frappe.get_doc("Account", name)
 		return acc.account_number
