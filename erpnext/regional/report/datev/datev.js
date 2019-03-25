@@ -1,7 +1,4 @@
-// Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
-// For license information, please see license.txt
-
-frappe.query_reports["Fichier des Ecritures Comptables [FEC]"] = {
+frappe.query_reports["DATEV"] = {
 	"filters": [
 		{
 			"fieldname": "company",
@@ -40,6 +37,7 @@ let downloadify = function (query_report) {
 		args: {
 			data: result,
 			filename: title
+			// , dialect: 'DATEV'
 		}
 	});
 };

@@ -1,6 +1,3 @@
-# Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
-# For license information, please see license.txt
-
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import format_datetime
@@ -162,6 +159,7 @@ def get_result_as_list(data, filters):
 		result.append(row)
 
 	return result
+
 
 def get_account_number(name)
 	try:
