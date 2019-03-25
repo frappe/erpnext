@@ -9,8 +9,8 @@ from unidecode import unidecode
 from six import iteritems
 from frappe.utils.nestedset import rebuild_tree
 
-def create_charts(company, chart_template=None, existing_company=None):
-	chart = get_chart(chart_template, existing_company)
+def create_charts(company, chart_template=None, existing_company=None, custom_chart=None):
+	chart = custom_chart or get_chart(chart_template, existing_company)
 	if chart:
 		accounts = []
 
@@ -40,7 +40,7 @@ def create_charts(company, chart_template=None, existing_company=None):
 						"report_type": report_type,
 						"account_number": account_number,
 						"account_type": child.get("account_type"),
-						"account_currency": frappe.db.get_value('Company',  company,  "default_currency"),
+						"account_currency": child.get('account_currency') or frappe.db.get_value('Company',  company,  "default_currency"),
 						"tax_rate": child.get("tax_rate")
 					})
 
@@ -207,9 +207,9 @@ def validate_bank_account(coa, bank_account):
 	return (bank_account in accounts)
 
 @frappe.whitelist()
-def build_tree_from_json(chart_template):
+def build_tree_from_json(chart_template, chart_data=None):
 	''' get chart template from its folder and parse the json to be rendered as tree '''
-	chart = get_chart(chart_template)
+	chart = chart_data or get_chart(chart_template)
 
 	# if no template selected, return as it is
 	if not chart:

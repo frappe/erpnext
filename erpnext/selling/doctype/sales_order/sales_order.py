@@ -385,6 +385,7 @@ class SalesOrder(SellingController):
 						items.append(dict(
 							name= i.name,
 							item_code= i.item_code,
+							description= i.description,
 							bom = bom,
 							warehouse = i.warehouse,
 							pending_qty = pending_qty,
@@ -395,6 +396,7 @@ class SalesOrder(SellingController):
 						items.append(dict(
 							name= i.name,
 							item_code= i.item_code,
+							description= i.description,
 							bom = '',
 							warehouse = i.warehouse,
 							pending_qty = pending_qty,
@@ -898,7 +900,8 @@ def make_work_orders(items, sales_order, company, project=None):
 			sales_order=sales_order,
 			sales_order_item=i['sales_order_item'],
 			project=project,
-			fg_warehouse=i['warehouse']
+			fg_warehouse=i['warehouse'],
+			description=i['description']
 		)).insert()
 		work_order.set_work_order_operations()
 		work_order.save()
