@@ -139,6 +139,12 @@ def get_data():
 					"name": "Purchase Order Trends",
 					"doctype": "Purchase Order"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Purchase Details",
+					"doctype": "Purchase Order"
+				},
 			]
 		},
 		{
