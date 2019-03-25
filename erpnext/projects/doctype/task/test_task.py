@@ -104,7 +104,7 @@ def create_task(subject, start=None, end=None, depends_on=None, project=None, sa
 		task.subject = subject
 		task.exp_start_date = start or nowdate()
 		task.exp_end_date = end or nowdate()
-		# task.project = project or "_Test Project"
+		task.project = project or "_Test Project"
 		if save:
 			task.save()
 	else:
