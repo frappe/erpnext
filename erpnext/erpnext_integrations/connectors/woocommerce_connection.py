@@ -7,6 +7,7 @@ from frappe import _
 
 def verify_request():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
+	print (woocommerce_settings.secret)
 	sig = base64.b64encode(
 		hmac.new(
 			woocommerce_settings.secret.encode('utf8'),
