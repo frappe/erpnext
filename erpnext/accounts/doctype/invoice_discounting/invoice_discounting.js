@@ -148,7 +148,8 @@ frappe.ui.form.on('Invoice Discounting', {
 			doc: frm.doc,
 			callback: function(r) {
 				if(!r.exc){
-					frappe.set_route("Form", r.message.doctype, r.message.name);
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 				}
 			}
 		});
@@ -161,7 +162,8 @@ frappe.ui.form.on('Invoice Discounting', {
 			doc: frm.doc,
 			callback: function(r) {
 				if(!r.exc){
-					frappe.set_route("Form", r.message.doctype, r.message.name);
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 				}
 			}
 		});
