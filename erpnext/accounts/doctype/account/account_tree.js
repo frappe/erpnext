@@ -25,8 +25,8 @@ frappe.treeview_settings["Account"] = {
 							me.page.fields_dict.root_company.set_value(root_company);
 
 							frappe.db.get_value("Company", {"name": company}, "ignore_root_company_validation", (r) => {
-								 frappe.flags.ignore_root_company_validation = r.ignore_root_company_validation;
-							})
+								frappe.flags.ignore_root_company_validation = r.ignore_root_company_validation;
+							});
 						}
 					}
 				});
