@@ -3,6 +3,12 @@ from __future__ import unicode_literals
 import frappe, base64, hashlib, hmac, json
 import datetime
 from frappe import _
+# ==============this code added==================================================================:
+import sys
+sys.path.append("pycharm-debug.egg")
+import pydevd
+pydevd.settrace('gamaraan.go.ro', port=12345, stdoutToServer=True, stderrToServer=True)
+# ================================================================================================
 
 
 def verify_request():
@@ -24,6 +30,7 @@ def verify_request():
 
 @frappe.whitelist(allow_guest=True)
 def order(data=None):
+	# pdb.set_trace()
 	if not data:
 		verify_request()
 
