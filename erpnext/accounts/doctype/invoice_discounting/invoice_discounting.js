@@ -129,6 +129,7 @@ frappe.ui.form.on('Invoice Discounting', {
 						if(!r.exc) {
 							d.hide();
 							$.each(r.message, function(i, v) {
+								frm.doc.invoices = frm.doc.invoices.filter(row => row.sales_invoice);
 								let row = frm.add_child("invoices");
 								$.extend(row, v);
 							});
