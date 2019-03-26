@@ -93,8 +93,9 @@ function set_time_to_resolve_and_response(frm) {
 }
 
 function get_time_left_element(label, timestamp) {
+	$('.'+ label.replace(/ /g, "_").toLowerCase() +'').remove();
 	return `
-		<div class="frappe-control input-max-width" data-field_name="${label.replace(/ /g, "_").toLowerCase()}">
+		<div class="frappe-control input-max-width `+ label.replace(/ /g, "_").toLowerCase() +`" data-field_name="${label.replace(/ /g, "_").toLowerCase()}">
 			<div class="form-group">
 				<div class="clearfix">
 					<label class="control-label" style="padding-right: 0px;">
