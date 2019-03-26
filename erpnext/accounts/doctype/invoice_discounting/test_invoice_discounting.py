@@ -18,6 +18,7 @@ class TestInvoiceDiscounting(unittest.TestCase):
 		self.short_term_loan = create_account(account_name="_Test Short Term Loan", parent_account = "Source of Funds (Liabilities) - _TC")
 		self.bank_account = create_account(account_name="_Test Bank 2", parent_account = "Bank Accounts - _TC" )
 		self.bank_charges_account = create_account(account_name="_Test Bank Charges Account", parent_account = "Expenses - _TC")
+		frappe.db.set_value("Company", "_Test Company", "default_bank_account", self.bank_account)
 
 	def test_total_amount(self):
 		inv1 = create_sales_invoice(rate=200)
@@ -189,7 +190,7 @@ class TestInvoiceDiscounting(unittest.TestCase):
 
 		self.assertEqual(je_on_payment.accounts[0].account, self.ar_discounted)
 		self.assertEqual(je_on_payment.accounts[0].credit_in_account_currency, flt(inv.outstanding_amount))
-		#self.assertEqual(je_on_payment.accounts[0].account, self.bank_account)
+		self.assertEqual(je_on_payment.accounts[1].account, self.bank_account)
 		self.assertEqual(je_on_payment.accounts[1].debit_in_account_currency, flt(inv.outstanding_amount))
 
 	def test_make_payment_before_after_period(self):
@@ -219,7 +220,7 @@ class TestInvoiceDiscounting(unittest.TestCase):
 
 		self.assertEqual(je_on_payment.accounts[0].account, self.ar_unpaid)
 		self.assertEqual(je_on_payment.accounts[0].credit_in_account_currency, flt(inv.outstanding_amount))
-		#self.assertEqual(je_on_payment.accounts[0].account, self.bank_account)
+		self.assertEqual(je_on_payment.accounts[1].account, self.bank_account)
 		self.assertEqual(je_on_payment.accounts[1].debit_in_account_currency, flt(inv.outstanding_amount))
 
 
