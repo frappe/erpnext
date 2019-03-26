@@ -752,7 +752,7 @@ class TestStockEntry(unittest.TestCase):
 			create_warehouse("_Test Warehouse FG 1")
 
 		outward_entry = make_stock_entry(item_code="_Test Item",
-			purpose="Stock Out",
+			purpose="Send to Warehouse",
 			source="_Test Warehouse - _TC",
 			target="_Test Warehouse 1 - _TC", qty=50, basic_rate=100)
 
