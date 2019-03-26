@@ -24,8 +24,8 @@ frappe.treeview_settings["Account"] = {
 							let root_company = r.message.length ? r.message[0] : "";
 							me.page.fields_dict.root_company.set_value(root_company);
 
-							frappe.db.get_value("Company", {"name": company}, "ignore_root_company_validation", (r) => {
-								frappe.flags.ignore_root_company_validation = r.ignore_root_company_validation;
+							frappe.db.get_value("Company", {"name": company}, "allow_account_creation_against_child_company", (r) => {
+								frappe.flags.ignore_root_company_validation = r.allow_account_creation_against_child_company;
 							});
 						}
 					}
