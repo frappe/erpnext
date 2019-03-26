@@ -444,7 +444,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 		item_wh = get_item_details(items)
 
 		stock_entry = frappe.new_doc("Stock Entry")
-		stock_entry.purpose = "Subcontract"
+		stock_entry.purpose = "Send to Subcontractor"
 		stock_entry.purchase_order = purchase_order.name
 		stock_entry.supplier = purchase_order.supplier
 		stock_entry.supplier_name = purchase_order.supplier_name

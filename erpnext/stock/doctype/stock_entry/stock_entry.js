@@ -49,7 +49,7 @@ frappe.ui.form.on('Stock Entry', {
 			if(!item.item_code) {
 				frappe.throw(__("Please enter Item Code to get Batch Number"));
 			} else {
-				if (in_list(["Material Transfer for Manufacture", "Manufacture", "Repack", "Subcontract"], doc.purpose)) {
+				if (in_list(["Material Transfer for Manufacture", "Manufacture", "Repack", "Send to Subcontractor"], doc.purpose)) {
 					var filters = {
 						'item_code': item.item_code,
 						'posting_date': frm.doc.posting_date || frappe.datetime.nowdate()
@@ -781,9 +781,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
 	},
 
-	source_mandatory: ["Material Issue", "Material Transfer", "Subcontract",
+	source_mandatory: ["Material Issue", "Material Transfer", "Send to Subcontractor",
 		"Material Transfer for Manufacture", "Send to Warehouse", "Receive at Warehouse"],
-	target_mandatory: ["Material Receipt", "Material Transfer", "Subcontract",
+	target_mandatory: ["Material Receipt", "Material Transfer", "Send to Subcontractor",
 		"Material Transfer for Manufacture", "Send to Warehouse", "Receive at Warehouse"],
 
 	from_warehouse: function(doc) {
@@ -831,7 +831,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 		this.frm.cscript.toggle_enable_bom();
 
-		if (doc.purpose == 'Subcontract') {
+		if (doc.purpose == 'Send to Subcontractor') {
 			doc.customer = doc.customer_name = doc.customer_address =
 				doc.delivery_note_no = doc.sales_invoice_no = null;
 		} else {
