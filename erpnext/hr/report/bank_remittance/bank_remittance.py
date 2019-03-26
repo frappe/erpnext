@@ -9,8 +9,9 @@ def execute(filters=None):
 	columns = [
 		{
 			"label": _("Payroll Number"),
-			"fieldtype": "Data",
+			"fieldtype": "Link",
 			"fieldname": "payroll_no",
+			"options": "Payroll Entry",
 			"width": 150
 		},
 		{
@@ -28,8 +29,9 @@ def execute(filters=None):
 		},
 		{
 			"label": _("Employee Name"),
-			"fieldtype": "data",
+			"fieldtype": "Link",
 			"fieldname": "employee_name",
+			"options": "Employee",
 			"width": 200
 		},
 		{
@@ -78,27 +80,28 @@ def get_report_data(filters):
 		filters = {"parent": entry.name},
 		fields=["*"]
 		)
-		for details in employee_details:
-			payment_date = frappe.db.get_value("Salary Slip", {
-				"payroll_entry": entry.name,
-				"Employee": details.employee
-			}, "modified")
-			amount_to_pay = frappe.db.get_value("Salary Slip", {
-				"payroll_entry": entry.name,
-				"Employee": details.employee
-			}, "net_pay")
-			row = {
-				"payroll_no": entry.name,
-				"debit_account": frappe.db.get_value("Bank Account", {"account": entry.payment_account}, "bank_account_no", debug = 1),
-				"payment_date": frappe.utils.formatdate(payment_date.strftime('%Y-%m-%d')),
-				"bank_name": frappe.db.get_value("Employee", details.employee, "bank_name"),
-				"employee_account_no": frappe.db.get_value("Employee", details.employee, "bank_ac_no"),
-				"bank_code": frappe.db.get_value("Employee", details.employee, "ifsc_code"),
-				"employee_name": details.employee+": " + details.employee_name,
-				"currency": frappe.get_cached_value('Company', filters.company,  'default_currency'),
-				"amount": amount_to_pay,
-			}
+		if frappe.db.get_value("Account", entry.payment_account, "account_type") == "Bank" :
+			for details in employee_details:
+				payment_date = frappe.db.get_value("Salary Slip", {
+					"payroll_entry": entry.name,
+					"Employee": details.employee
+				}, "modified")
+				amount_to_pay = frappe.db.get_value("Salary Slip", {
+					"payroll_entry": entry.name,
+					"Employee": details.employee
+				}, "net_pay")
+				row = {
+					"payroll_no": entry.name,
+					"debit_account": frappe.db.get_value("Bank Account", {"account": entry.payment_account}, "bank_account_no", debug = 1),
+					"payment_date": frappe.utils.formatdate(payment_date.strftime('%Y-%m-%d')),
+					"bank_name": frappe.db.get_value("Employee", details.employee, "bank_name"),
+					"employee_account_no": frappe.db.get_value("Employee", details.employee, "bank_ac_no"),
+					"bank_code": frappe.db.get_value("Employee", details.employee, "ifsc_code"),
+					"employee_name": details.employee+": " + details.employee_name,
+					"currency": frappe.get_cached_value('Company', filters.company,  'default_currency'),
+					"amount": amount_to_pay,
+				}
 
-			data.append(row)
+				data.append(row)
 
 	return data
