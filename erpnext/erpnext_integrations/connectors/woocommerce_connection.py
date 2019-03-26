@@ -4,10 +4,9 @@ import frappe, base64, hashlib, hmac, json
 import datetime
 from frappe import _
 
-@frappe.whitelist(allow_guest=True, xss_safe=False)
+
 def verify_request():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
-	print (woocommerce_settings.secret)
 	sig = base64.b64encode(
 		hmac.new(
 			woocommerce_settings.secret.encode('utf8'),
@@ -23,12 +22,9 @@ def verify_request():
 	frappe.set_user(woocommerce_settings.modified_by)
 
 
-@frappe.whitelist(allow_guest=True, xss_safe=False)
+@frappe.whitelist(allow_guest=True)
 def order(data=None):
-	print ("Web order received")
-	# pdb.set_trace()
-	if not data:
-		print (data)
+	if data:
 		verify_request()
 
 	if frappe.request and frappe.request.data:
