@@ -19,7 +19,7 @@ def create_stock_entry_types():
 
 	for purpose in ["Material Issue", "Material Receipt", "Material Transfer",
 		"Material Transfer for Manufacture", "Material Consumption for Manufacture", "Manufacture",
-		"Repack", "Subcontract", "Send to Warehouse", "Receive at Warehouse"]:
+		"Repack", "Send to Subcontractor", "Send to Warehouse", "Receive at Warehouse"]:
 
 		ste_type = frappe.get_doc({
 			'doctype': 'Stock Entry Type',
@@ -32,6 +32,7 @@ def create_stock_entry_types():
 		except frappe.DuplicateEntryError:
 			pass
 
+	frappe.db.sql(" UPDATE `tabStock Entry` set purpose = 'Send to Subcontractor' where purpose = 'Subcontract'")
 	frappe.db.sql(" UPDATE `tabStock Entry` set stock_entry_type = purpose ")
 
 def add_gst_hsn_code_field():
