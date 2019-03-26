@@ -124,7 +124,7 @@ class StockEntry(StockController):
 	def validate_purpose(self):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer",
 			"Material Transfer for Manufacture", "Manufacture", "Repack", "Subcontract",
-			"Material Consumption for Manufacture", "Stock Out", "Stock In"]
+			"Material Consumption for Manufacture", "Send to Warehouse", "Receive at Warehouse"]
 
 		if self.purpose not in valid_purposes:
 			frappe.throw(_("Purpose must be one of {0}").format(comma_or(valid_purposes)))
@@ -228,10 +228,10 @@ class StockEntry(StockController):
 		"""perform various (sometimes conditional) validations on warehouse"""
 
 		source_mandatory = ["Material Issue", "Material Transfer", "Subcontract", "Material Transfer for Manufacture",
-			"Material Consumption for Manufacture", "Stock Out", "Stock In"]
+			"Material Consumption for Manufacture", "Send to Warehouse", "Receive at Warehouse"]
 
 		target_mandatory = ["Material Receipt", "Material Transfer", "Subcontract",
-			"Material Transfer for Manufacture", "Stock Out", "Stock In"]
+			"Material Transfer for Manufacture", "Send to Warehouse", "Receive at Warehouse"]
 
 		validate_for_manufacture_repack = any([d.bom_no for d in self.get("items")])
 
@@ -705,8 +705,8 @@ class StockEntry(StockController):
 	def set_items_for_stock_in(self):
 		self.items = []
 
-		if self.outward_stock_entry and self.purpose == 'Stock In':
-			doc = frappe.get_doc('Stock Entry', self.outward_stock_entry)
+		if self.outgoing_stock_entry and self.purpose == 'Receive at Warehouse':
+			doc = frappe.get_doc('Stock Entry', self.outgoing_stock_entry)
 
 			if doc.per_transferred == 100:
 				frappe.throw(_("Goods are already received against the outward entry {0}")
@@ -1173,7 +1173,7 @@ class StockEntry(StockController):
 						 to fullfill Sales Order {2}.").format(item.item_code, sr, sales_order))
 
 	def update_transferred_qty(self):
-		if self.purpose == 'Stock In':
+		if self.purpose == 'Receive at Warehouse':
 			stock_entries = {}
 			stock_entries_child_list = []
 			for d in self.items:
@@ -1257,7 +1257,7 @@ def move_sample_to_retention_warehouse(company, items):
 @frappe.whitelist()
 def make_stock_in_entry(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		target.purpose = 'Stock In'
+		target.purpose = 'Receive at Warehouse'
 		target.set_stock_entry_type()
 
 	def update_item(source_doc, target_doc, source_parent):
@@ -1269,7 +1269,7 @@ def make_stock_in_entry(source_name, target_doc=None):
 		"Stock Entry": {
 			"doctype": "Stock Entry",
 			"field_map": {
-				"name": "outward_stock_entry"
+				"name": "outgoing_stock_entry"
 			},
 			"validation": {
 				"docstatus": ["=", 1]
