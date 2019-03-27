@@ -568,6 +568,7 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 	stock_entry.bom_no = production_order.bom_no
 	stock_entry.use_multi_level_bom = production_order.use_multi_level_bom
 	stock_entry.fg_completed_qty = qty or (flt(production_order.qty) - flt(production_order.produced_qty))
+	stock_entry.set_stock_entry_type()
 
 	if purpose=="Material Transfer for Manufacture":
 		stock_entry.to_warehouse = wip_warehouse

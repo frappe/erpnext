@@ -11,44 +11,56 @@ from frappe.model.document import Document
 
 class JobCard(Document):
 	def validate(self):
-		self.validate_actual_dates()
-		self.set_time_in_mins()
+		self.validate_time_logs()
 		self.set_status()
 
-	def validate_actual_dates(self):
-		if get_datetime(self.actual_start_date) > get_datetime(self.actual_end_date):
-			frappe.throw(_("Actual start date must be less than actual end date"))
+	def validate_time_logs(self):
+		self.total_completed_qty = 0.0
+		self.total_time_in_mins = 0.0
 
-		if not (self.employee and self.actual_start_date and self.actual_end_date):
-			return
+		for d in self.get('time_logs'):
+			if get_datetime(d.from_time) > get_datetime(d.to_time):
+				frappe.throw(_("Row {0}: From time must be less than to time").format(d.idx))
 
-		data = frappe.db.sql(""" select name from `tabJob Card`
-			where
-				((%(actual_start_date)s > actual_start_date and %(actual_start_date)s < actual_end_date) or
-				(%(actual_end_date)s > actual_start_date and %(actual_end_date)s < actual_end_date) or
-				(%(actual_start_date)s <= actual_start_date and %(actual_end_date)s >= actual_end_date)) and
-				name != %(name)s and employee = %(employee)s and docstatus =1
-		""", {
-			'actual_start_date': self.actual_start_date,
-			'actual_end_date': self.actual_end_date,
-			'employee': self.employee,
-			'name': self.name
-		}, as_dict=1)
+			data = self.get_overlap_for(d)
+			if data:
+				frappe.throw(_("Row {0}: From Time and To Time of {1} is overlapping with {2}")
+					.format(d.idx, self.name, data.name))
 
-		if data:
-			frappe.throw(_("Start date and end date is overlapping with the job card <a href='#Form/Job Card/{0}'>{1}</a>")
-				.format(data[0].name, data[0].name))
+			if d.from_time and d.to_time:
+				d.time_in_mins = time_diff_in_hours(d.to_time, d.from_time) * 60
+				self.total_time_in_mins += d.time_in_mins
 
-	def set_time_in_mins(self):
-		if self.actual_start_date and self.actual_end_date:
-			self.time_in_mins = time_diff_in_hours(self.actual_end_date, self.actual_start_date) * 60
+			if d.completed_qty:
+				self.total_completed_qty += d.completed_qty
+
+	def get_overlap_for(self, args):
+		existing = frappe.db.sql("""select jc.name as name from
+			`tabJob Card Time Log` jctl, `tabJob Card` jc where jctl.parent = jc.name and
+			(
+				(%(from_time)s > jctl.from_time and %(from_time)s < jctl.to_time) or
+				(%(to_time)s > jctl.from_time and %(to_time)s < jctl.to_time) or
+				(%(from_time)s <= jctl.from_time and %(to_time)s >= jctl.to_time))
+			and jctl.name!=%(name)s
+			and jc.name!=%(parent)s
+			and jc.docstatus < 2
+			and jc.employee = %(employee)s """,
+			{
+				"from_time": args.from_time,
+				"to_time": args.to_time,
+				"name": args.name or "No Name",
+				"parent": args.parent or "No Name",
+				"employee": self.employee
+			}, as_dict=True)
+
+		return existing[0] if existing else None
 
 	def get_required_items(self):
 		if not self.get('work_order'):
 			return
 
 		doc = frappe.get_doc('Work Order', self.get('work_order'))
-		if doc.transfer_material_against == 'Work Order' and doc.skip_transfer:
+		if doc.transfer_material_against == 'Work Order' or doc.skip_transfer:
 			return
 
 		for d in doc.required_items:
@@ -67,36 +79,51 @@ class JobCard(Document):
 				})
 
 	def on_submit(self):
-		self.validate_dates()
+		self.validate_job_card()
 		self.update_work_order()
 		self.set_transferred_qty()
-
-	def validate_dates(self):
-		if not self.actual_start_date and not self.actual_end_date:
-			frappe.throw(_("Actual start date and actual end date is mandatory"))
 
 	def on_cancel(self):
 		self.update_work_order()
 		self.set_transferred_qty()
 
+	def validate_job_card(self):
+		if not self.time_logs:
+			frappe.throw(_("Time logs are required for job card {0}").format(self.name))
+
+		if self.total_completed_qty <= 0.0:
+			frappe.throw(_("Total completed qty must be greater than zero"))
+
+		if self.total_completed_qty > self.for_quantity:
+			frappe.throw(_("Total completed qty can not be greater than for quantity"))
+
 	def update_work_order(self):
 		if not self.work_order:
 			return
 
-		data = frappe.db.get_value("Job Card", {'docstatus': 1, 'operation_id': self.operation_id},
-			['sum(time_in_mins)', 'min(actual_start_date)', 'max(actual_end_date)', 'sum(for_quantity)'])
+		for_quantity, time_in_mins = 0, 0
+		from_time_list, to_time_list = [], []
 
-		if data:
-			time_in_mins, actual_start_date, actual_end_date, for_quantity = data
 
+		for d in frappe.get_all('Job Card',
+			filters = {'docstatus': 1, 'operation_id': self.operation_id}):
+			doc = frappe.get_doc('Job Card', d.name)
+
+			for_quantity += doc.total_completed_qty
+			time_in_mins += doc.total_time_in_mins
+			for time_log in doc.time_logs:
+				from_time_list.append(time_log.from_time)
+				to_time_list.append(time_log.to_time)
+
+		if for_quantity:
 			wo = frappe.get_doc('Work Order', self.work_order)
 
 			for data in wo.operations:
 				if data.name == self.operation_id:
 					data.completed_qty = for_quantity
 					data.actual_operation_time = time_in_mins
-					data.actual_start_time = actual_start_date
-					data.actual_end_time = actual_end_date
+					data.actual_start_time = min(from_time_list)
+					data.actual_end_time = max(to_time_list)
 
 			wo.flags.ignore_validate_update_after_submit = True
 			wo.update_operation_status()
@@ -132,9 +159,11 @@ class JobCard(Document):
 						break
 
 				if completed:
-					job_cards = frappe.get_all('Job Card', filters = {'work_order': self.work_order, 
+					job_cards = frappe.get_all('Job Card', filters = {'work_order': self.work_order,
 						'docstatus': ('!=', 2)}, fields = 'sum(transferred_qty) as qty', group_by='operation_id')
-					qty = min([d.qty for d in job_cards])
+
+					if job_cards:
+						qty = min([d.qty for d in job_cards])
 
 			doc.db_set('material_transferred_for_manufacturing', qty)
 
@@ -147,7 +176,7 @@ class JobCard(Document):
 			2: "Cancelled"
 		}[self.docstatus or 0]
 
-		if self.actual_start_date:
+		if self.time_logs:
 			self.status = 'Work In Progress'
 
 		if (self.docstatus == 1 and

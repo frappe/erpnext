@@ -298,7 +298,7 @@ def get_data():
 				{
 					"type": "help",
 					"label": _("Sales Order to Payment"),
-					"youtube_id": "7AMq4lqkN4A"
+					"youtube_id": "1eP90MWoDQM"
 				},
 				{
 					"type": "help",

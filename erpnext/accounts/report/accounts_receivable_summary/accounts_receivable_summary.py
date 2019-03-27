@@ -144,9 +144,10 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				row += [self.get_party_name(args.get("party_type"), party)]
 
 			row += [partywise_advance_amount.get(party, 0)]
+			paid_amt = flt(party_dict.paid_amt - partywise_advance_amount.get(party, 0))
 
 			row += [
-				party_dict.invoiced_amt, party_dict.paid_amt, party_dict.credit_amt, party_dict.outstanding_amt,
+				party_dict.invoiced_amt, paid_amt, party_dict.credit_amt, party_dict.outstanding_amt,
 				party_dict.range1, party_dict.range2, party_dict.range3, party_dict.range4,
 			]
 
@@ -205,7 +206,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 		cols += ["invoiced_amt", "paid_amt", "credit_amt",
 		"outstanding_amt", "age", "range1", "range2", "range3", "range4", "currency", "pdc/lc_date", "pdc/lc_ref",
-		"pdc/lc_amount", "remaining_balance"]
+		"pdc/lc_amount"]
 
 		if args.get("party_type") == "Supplier":
 			cols += ["supplier_group", "remarks"]

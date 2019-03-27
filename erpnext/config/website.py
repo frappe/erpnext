@@ -13,6 +13,16 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Homepage Section",
+					"description": _("Add cards or custom sections on homepage"),
+				},
+				{
+					"type": "doctype",
+					"name": "Products Settings",
+					"description": _("Settings for website product listing"),
+				},
+				{
+					"type": "doctype",
 					"name": "Shopping Cart Settings",
 					"label": _("Shopping Cart Settings"),
 					"description": _("Settings for online shopping cart such as shipping rules, price list etc."),
