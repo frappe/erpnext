@@ -169,8 +169,8 @@ class Task(NestedSet):
 		if self.status not in ('Cancelled', 'Completed') and self.exp_end_date:
 			from datetime import datetime
 			if self.exp_end_date < datetime.now().date():
-				self.status = 'Overdue'
-				self.save()
+				self.db_set('status', 'Overdue')
+				self.update_project()
 
 @frappe.whitelist()
 def check_if_child_exists(name):
