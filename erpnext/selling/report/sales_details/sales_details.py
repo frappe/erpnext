@@ -35,35 +35,20 @@ class SalesPurchaseDetailsReport(object):
 		return columns, data
 
 	def get_columns(self):
-		show_name = False
-		if self.filters.tree_type == "Customer":
-			if frappe.defaults.get_global_default('cust_master_name') == "Naming Series":
-				show_name = True
-		if self.filters.tree_type == "Supplier":
-			if frappe.defaults.get_global_default('supp_master_name') == "Naming Series":
-				show_name = True
-		if frappe.defaults.get_global_default('item_naming_by') == "Naming Series":
-			show_name = True
-
 		columns = [
 			{
 				"label": _("Reference"),
 				"fieldtype": "Dynamic Link",
-				"fieldname": "docname",
+				"fieldname": "reference",
 				"options": "doctype",
-				"width": 400
-			}
-		]
-
-		if show_name:
-			columns.append({
+				"width": 300
+			},
+			{
 				"label": _("Name"),
 				"fieldtype": "Data",
-				"fieldname": "name",
+				"fieldname": "reference_name",
 				"width": 150
-			})
-
-		columns += [
+			},
 			{
 				"label": _("Type"),
 				"fieldtype": "Data",
@@ -245,7 +230,7 @@ class SalesPurchaseDetailsReport(object):
 		self.party_totals = {}
 		self.doc_totals = {}
 		self.doc_item_uom_totals = {}
-		self.total_row = {"docname": _("'Total'")}
+		self.total_row = {"reference": _("'Total'")}
 		self.total_row.update(totals_template)
 
 		# Build tree and group totals
@@ -268,8 +253,8 @@ class SalesPurchaseDetailsReport(object):
 				party_row = self.party_totals[d.party] = totals_template.copy()
 				party_row.update({
 					"doctype": self.filters.party_type,
-					"docname": d.party,
-					"name": d.party_name,
+					"reference": d.party,
+					"reference_name": d.party_name,
 					"group": d.party_group,
 					"group_doctype": d.party_group_dt
 				})
@@ -288,7 +273,7 @@ class SalesPurchaseDetailsReport(object):
 				doc_row.update({
 					"date": d.date,
 					"doctype": self.filters.doctype,
-					"docname": d.parent
+					"reference": d.parent
 				})
 				if self.filters.party_type == "Customer":
 					doc_row.update({
@@ -304,8 +289,8 @@ class SalesPurchaseDetailsReport(object):
 				item_row.update({
 					"date": d.date,
 					"doctype": "Item",
-					"docname": d.item_code,
-					"name": d.item_name,
+					"reference": d.item_code,
+					"reference_name": d.item_name,
 					"uom": d.uom,
 					"group": d.item_group,
 					"group_doctype": "Item Group",
