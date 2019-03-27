@@ -40,7 +40,6 @@ def execute(filters=None):
 			"uom": item_detail.alt_uom or item_detail.stock_uom if filters.qty_field == "Contents Qty" else item_detail.stock_uom,
 			"actual_qty": sle.actual_qty * alt_uom_size,
 			"qty_after_transaction": sle.qty_after_transaction * alt_uom_size,
-			"incoming_rate": (sle.incoming_rate / alt_uom_size if sle.actual_qty > 0 else None),
 			"valuation_rate": sle.valuation_rate / alt_uom_size,
 			"stock_value": sle.stock_value,
 			"voucher_type": sle.voucher_type,
@@ -50,6 +49,12 @@ def execute(filters=None):
 			"project": sle.project,
 			"company": sle.company
 		})
+		if sle.actual_qty:
+			if sle.actual_qty > 0:
+				row['transaction_rate'] = sle.incoming_rate
+			else:
+				row['transaction_rate'] = sle.stock_value_difference / sle.actual_qty
+			row['transaction_rate'] /= alt_uom_size
 		data.append(row)
 
 		if include_uom:
@@ -76,7 +81,7 @@ def get_columns():
 		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 50},
 		{"label": _("Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 60, "convertible": "qty"},
 		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 90, "convertible": "qty"},
-		{"label": _("Incoming Rate"), "fieldname": "incoming_rate", "fieldtype": "Currency", "width": 110,
+		{"label": _("Transaction Rate"), "fieldname": "transaction_rate", "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency", "convertible": "rate"},
 		{"label": _("Valuation Rate"), "fieldname": "valuation_rate", "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency", "convertible": "rate"},
@@ -98,7 +103,7 @@ def get_stock_ledger_entries(filters, items):
 
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
 			item_code, warehouse, actual_qty, qty_after_transaction, incoming_rate, valuation_rate,
-			stock_value, voucher_type, voucher_no, batch_no, serial_no, company, project
+			stock_value, voucher_type, voucher_no, batch_no, serial_no, company, project, stock_value_difference
 		from `tabStock Ledger Entry` sle
 		where company = %(company)s and
 			posting_date between %(from_date)s and %(to_date)s
