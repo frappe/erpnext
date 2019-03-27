@@ -39,7 +39,6 @@ def execute(filters=None):
 			"stock_uom": item_detail.stock_uom,
 			"actual_qty": sle.actual_qty,
 			"qty_after_transaction": sle.qty_after_transaction,
-			"incoming_rate": (sle.incoming_rate if sle.actual_qty > 0 else None),
 			"valuation_rate": sle.valuation_rate,
 			"stock_value": sle.stock_value,
 			"voucher_type": sle.voucher_type,
@@ -49,6 +48,11 @@ def execute(filters=None):
 			"project": sle.project,
 			"company": sle.company
 		})
+		if sle.actual_qty:
+			if sle.actual_qty > 0:
+				row['transaction_rate'] = sle.incoming_rate
+			else:
+				row['transaction_rate'] = sle.stock_value_difference / sle.actual_qty
 		data.append(row)
 
 		if include_uom:
@@ -62,25 +66,25 @@ def execute(filters=None):
 def get_columns():
 	columns = [
 		{"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 95},
-		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 130},
+		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
+		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 100},
+		{"label": _("Party Type"), "fieldname": "party_type", "fieldtype": "Data", "width": 80},
+		{"label": _("Party"), "fieldname": "party", "fieldtype": "Dynamic Link", "options": "party_type", "width": 100},
+		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 150},
 		{"label": _("Item Name"), "fieldname": "item_name", "width": 100},
 		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
 		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100},
 		{"label": _("Description"), "fieldname": "description", "width": 200},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
-		{"label": _("Party Type"), "fieldname": "party_type", "fieldtype": "Data", "width": 80},
-		{"label": _("Party"), "fieldname": "party", "fieldtype": "Dynamic Link", "options": "party_type", "width": 100},
-		{"label": _("Stock UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 100},
-		{"label": _("Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 50, "convertible": "qty"},
-		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Incoming Rate"), "fieldname": "incoming_rate", "fieldtype": "Currency", "width": 110,
+		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 50},
+		{"label": _("Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 60, "convertible": "qty"},
+		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 90, "convertible": "qty"},
+		{"label": _("Transaction Rate"), "fieldname": "transaction_rate", "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency", "convertible": "rate"},
 		{"label": _("Valuation Rate"), "fieldname": "valuation_rate", "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency", "convertible": "rate"},
 		{"label": _("Balance Value"), "fieldname": "stock_value", "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency"},
-		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
-		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 100},
 		{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 100},
 		{"label": _("Serial #"), "fieldname": "serial_no", "fieldtype": "Link", "options": "Serial No", "width": 100},
 		{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
@@ -97,7 +101,7 @@ def get_stock_ledger_entries(filters, items):
 
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
 			item_code, warehouse, actual_qty, qty_after_transaction, incoming_rate, valuation_rate,
-			stock_value, voucher_type, voucher_no, batch_no, serial_no, company, project
+			stock_value, voucher_type, voucher_no, batch_no, serial_no, company, project, stock_value_difference
 		from `tabStock Ledger Entry` sle
 		where company = %(company)s and
 			posting_date between %(from_date)s and %(to_date)s
@@ -199,19 +203,19 @@ def get_sle_conditions(filters):
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
-def get_opening_balance(item_code, warehouse, from_date):
+def get_opening_balance(item_code, warehouse, from_date, from_time="00:00:00"):
 	if not (item_code and warehouse and from_date):
-		return
+		return frappe._dict()
 
 	from erpnext.stock.stock_ledger import get_previous_sle
 	last_entry = get_previous_sle({
 		"item_code": item_code,
 		"warehouse_condition": get_warehouse_condition(warehouse),
 		"posting_date": from_date,
-		"posting_time": "00:00:00"
+		"posting_time": from_time
 	})
 	row = frappe._dict()
-	row["item_code"] = _("'Opening'")
+	row["voucher_type"] = _("Opening")
 	for f in ('qty_after_transaction', 'valuation_rate', 'stock_value'):
 		row[f] = last_entry.get(f, 0)
 
@@ -243,8 +247,9 @@ def get_grouped_data(filters, columns, data):
 	for group, rows in iteritems(group_rows):
 		group_header = {}
 		if group_fieldnames == ['item_code', 'warehouse'] and filters.from_date:
-			group_header = get_opening_balance(group[0], group[1], filters.from_date)
-			group_header['description'] = _("Opening")
+			opening_datetime = frappe.utils.get_datetime(rows[0].date)
+			opening_datetime -= opening_datetime.resolution
+			group_header = get_opening_balance(group[0], group[1], opening_datetime.date(), opening_datetime.time())
 
 		for f, v in zip(group_fieldnames, group):
 			group_header[f] = v
