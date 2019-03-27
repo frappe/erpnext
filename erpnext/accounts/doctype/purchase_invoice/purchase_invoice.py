@@ -991,18 +991,14 @@ def make_stock_entry(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_sales_order(customer, source_name, target_doc=None):
+	from erpnext.controllers.accounts_controller import get_taxes_and_charges
+	from frappe.model.utils import get_fetch_values
+
 	def set_missing_values(source, target):
 		target.customer = customer
-		target.apply_discount_on = ""
-		target.additional_discount_percentage = 0.0
-		target.discount_amount = 0.0
 
+		target.update(get_fetch_values("Sales Order", 'customer', target.customer))
 		target.tax_id, target.tax_ntn_cnic = frappe.get_value("Customer", customer, ['tax_id', 'tax_ntn_cnic'])
-
-		if target.get('taxes_and_charges'): target.taxes_and_charges = ""
-		if target.get('taxes'): target.taxes = []
-		default_tax = get_default_taxes_and_charges("Sales Taxes and Charges Template", company=target.company)
-		target.update(default_tax)
 
 		default_price_list = frappe.get_value("Customer", customer, "default_price_list")
 		if default_price_list:
@@ -1018,11 +1014,17 @@ def make_sales_order(customer, source_name, target_doc=None):
 				d = target.append("sales_team")
 				d.update(sales_person)
 
-		if target.get('payment_terms_template'): target.payment_terms_template = ""
-		if target.get('address_display'): target.address_display = ""
-		if target.get('shipping_address'): target.shipping_address = ""
+		for item in target.items:
+			item.delivery_date = target.delivery_date
 
 		target.run_method("set_missing_values")
+
+		if target.taxes_and_charges:
+			target.set("taxes", get_taxes_and_charges("Sales Taxes and Charges Template", target.taxes_and_charges))
+		else:
+			default_tax = get_default_taxes_and_charges("Sales Taxes and Charges Template", company=target.company)
+			target.update(default_tax)
+
 		target.run_method("calculate_taxes_and_totals")
 
 		# workaround for get_item_details not setting the base_rate hence not calculating the correct gross profit
@@ -1039,7 +1041,23 @@ def make_sales_order(customer, source_name, target_doc=None):
 			"doctype": "Sales Order",
 			"validation": {
 				"docstatus": ["=", 1]
-			}
+			},
+			"field_no_map": [
+				"address_display",
+				"shipping_address",
+				"shipping_address_name",
+				"contact_display",
+				"contact_mobile",
+				"contact_email",
+				"contact_person",
+				"taxes_and_charges",
+				"taxes",
+				"payment_terms_template",
+				"payment_schedule",
+				"apply_discount_on",
+				"additional_discount_percentage",
+				"discount_amount"
+			],
 		},
 		"Purchase Invoice Item": {
 			"doctype": "Sales Order Item",
