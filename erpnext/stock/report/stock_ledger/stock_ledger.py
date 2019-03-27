@@ -14,7 +14,6 @@ def execute(filters=None):
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
-	voucher_party_details = get_voucher_party_details(sl_entries)
 	opening_row = get_opening_balance(filters.item_code, filters.warehouse, filters.from_date)
 
 	data = []
@@ -24,7 +23,6 @@ def execute(filters=None):
 
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
-		party_detail = voucher_party_details.get(sle.voucher_no, frappe._dict())
 		alt_uom_size = item_detail.alt_uom_size if filters.qty_field == "Contents Qty" and item_detail.alt_uom else 1.0
 
 		row = frappe._dict({
@@ -35,8 +33,8 @@ def execute(filters=None):
 			"brand": item_detail.brand,
 			"description": item_detail.description,
 			"warehouse": sle.warehouse,
-			"party_type": party_detail.party_type,
-			"party": party_detail.party,
+			"party_type": sle.party_type,
+			"party": sle.party,
 			"uom": item_detail.alt_uom or item_detail.stock_uom if filters.qty_field == "Contents Qty" else item_detail.stock_uom,
 			"actual_qty": sle.actual_qty * alt_uom_size,
 			"qty_after_transaction": sle.qty_after_transaction * alt_uom_size,
@@ -103,7 +101,8 @@ def get_stock_ledger_entries(filters, items):
 
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
 			item_code, warehouse, actual_qty, qty_after_transaction, incoming_rate, valuation_rate,
-			stock_value, voucher_type, voucher_no, batch_no, serial_no, company, project, stock_value_difference
+			stock_value, voucher_type, voucher_no, batch_no, serial_no, company, project, stock_value_difference,
+			party_type, party
 		from `tabStock Ledger Entry` sle
 		where company = %(company)s and
 			posting_date between %(from_date)s and %(to_date)s
@@ -162,35 +161,6 @@ def get_item_details(items, sl_entries, include_uom):
 
 	return item_details
 
-def get_voucher_party_details(sl_entries):
-	voucher_party_type = {
-		"Delivery Note": "Customer",
-		"Sales Invoice": "Customer",
-		"Purchase Receipt": "Supplier",
-		"Purchase Invoice": "Supplier"
-	}
-	voucher_map = {}
-	for d in sl_entries:
-		if d.voucher_type in voucher_party_type:
-			voucher_map.setdefault(d.voucher_type, set()).add(d.voucher_no)
-
-	voucher_party_details = frappe._dict()
-	for voucher_type, vouchers in iteritems(voucher_map):
-		data = frappe.db.sql("""
-			select name, {field}
-			from `tab{dt}`
-			where name in ({dns})
-		""".format(
-			field=scrub(voucher_party_type[voucher_type]),
-			dt=voucher_type,
-			dns=", ".join(["%s"] * len(vouchers))
-		), list(vouchers))
-
-		for d in data:
-			voucher_party_details[d[0]] = frappe._dict({"party_type": voucher_party_type[voucher_type], "party": d[1]})
-
-	return voucher_party_details
-
 def get_sle_conditions(filters):
 	conditions = []
 	if filters.get("warehouse"):
@@ -203,6 +173,10 @@ def get_sle_conditions(filters):
 		conditions.append("batch_no=%(batch_no)s")
 	if filters.get("project"):
 		conditions.append("project=%(project)s")
+	if filters.get("party_type"):
+		conditions.append("party_type=%(party_type)s")
+	if filters.get("party"):
+		conditions.append("party=%(party)s")
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
