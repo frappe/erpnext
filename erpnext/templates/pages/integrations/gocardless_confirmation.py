@@ -6,7 +6,6 @@ from frappe import _
 from erpnext.erpnext_integrations.doctype.gocardless_settings.gocardless_settings import gocardless_initialization, get_gateway_controller
 
 no_cache = 1
-no_sitemap = 1
 
 expected_keys = ('redirect_flow_id', 'reference_doctype', 'reference_docname')
 

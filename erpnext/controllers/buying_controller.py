@@ -729,7 +729,7 @@ def get_subcontracted_raw_materials_from_se(purchase_orders):
 			sed.stock_uom, sed.subcontracted_item as main_item_code, sed.serial_no, sed.batch_no
 		from `tabStock Entry` se,`tabStock Entry Detail` sed
 		where
-			se.name = sed.parent and se.docstatus=1 and se.purpose='Subcontract'
+			se.name = sed.parent and se.docstatus=1 and se.purpose='Send to Subcontractor'
 			and se.purchase_order in (%s) and ifnull(sed.t_warehouse, '') != ''
 		group by sed.item_code, sed.t_warehouse
 	""" % (','.join(['%s'] * len(purchase_orders))), tuple(purchase_orders), as_dict=1)
