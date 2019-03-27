@@ -16,45 +16,20 @@ export default {
         }
     },
     mounted() {
-        // if(this.isLoggedIn && this.$route.name == 'program'){
-        //         this.getContinueData().then( data => {
-        //             this.nextContent = data.content,
-        //             this.nextContentType = data.content_type,
-        //             this.nextCourse = data.course
-        //         })
-        // }
         this.computeButtons()
     },
     methods: {
         computeButtons(){
             if(this.isLoggedIn){
-                if(lms.store.enrolledPrograms.includes(this.$route.params.program_name)){
-                    if(this.$route.name == 'home'){
-                        this.buttonName = 'Explore Courses'
-                    }
-                    // else if(this.$route.name == 'program'){
-                    //     this.buttonName = 'Start Course'
-                    // }
-                }
-                else {
-                    this.buttonName = 'Enroll Now'
-                }
+                    this.buttonName = 'Explore Programs'
             }
             else{
                 this.buttonName = 'Sign Up'
             }
         },
-        // getContinueData() {
-        //     lms.call({
-        //             method: "get_continue_data",
-        //             args: {
-        //                 program_name: this.$route.params.program_name
-        //             }
-        //         })
-        // },
         primaryAction() {
             if(this.$route.name == 'home'){
-                return
+                this.$router.push('List/Program');
             }
             else if(this.$route.name == 'program' && lms.store.enrolledPrograms.includes(this.$route.params.program_name)){
                 this.$router.push({ name: 'content', params: { program_name: this.$route.params.program_name, course: this.nextCourse, type: this.nextContentType, content: this.nextContent}})
