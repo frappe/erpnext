@@ -9,7 +9,6 @@ from frappe.model.document import Document
 class Quiz(Document):
 
 	def validate_quiz_attempts(self, enrollment, quiz_name):
-		print(enrollment, quiz_name)
 		if self.max_attempts > 0:
 			try:
 				if len(frappe.get_all("Quiz Activity", {'enrollment': enrollment.name, 'quiz': quiz_name})) >= self.max_attempts:
@@ -20,12 +19,15 @@ class Quiz(Document):
 
 	def evaluate(self, response_dict, quiz_name):
 		# self.validate_quiz_attempts(enrollment, quiz_name)
-		self.get_questions()
-		answers = {q.name:q.get_answer() for q in self.get_questions()}
+		questions = [frappe.get_doc('Question', question.question_link) for question in self.question]
+		answers = {q.name:q.get_answer() for q in questions}
 		correct_answers = {}
 		for key in answers:
 			try:
-				result = (response_dict[key] == answers[key])
+				if isinstance(response_dict[key], list):
+					result = compare_list_elementwise(response_dict[key], answers[key])
+				else:
+					result = (response_dict[key] == answers[key])
 			except:
 				result = False
 			correct_answers[key] = result
@@ -50,4 +52,13 @@ class Quiz(Document):
 			return questions
 		else:
 			return None
+
+def compare_list_elementwise(*args):
+	try:
+		if all(len(args[0]) == len(_arg) for _arg in args[1:]):
+			return all(all([element in (item) for element in args[0]]) for item in args[1:])
+		else:
+			return False
+	except TypeError:
+		frappe.throw("Compare List function takes on list arguments")
 
