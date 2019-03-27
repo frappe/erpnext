@@ -48,10 +48,11 @@ def execute(filters=None):
 			"project": sle.project,
 			"company": sle.company
 		})
-		if sle.actual_qty > 0:
-			row['incoming_rate'] = sle.incoming_rate
-		elif sle.actual_qty:
-			row['outgoing_rate'] = sle.stock_value_difference / sle.actual_qty
+		if sle.actual_qty:
+			if sle.actual_qty > 0:
+				row['transaction_rate'] = sle.incoming_rate
+			else:
+				row['transaction_rate'] = sle.stock_value_difference / sle.actual_qty
 		data.append(row)
 
 		if include_uom:
@@ -78,11 +79,9 @@ def get_columns():
 		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 50},
 		{"label": _("Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 60, "convertible": "qty"},
 		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 90, "convertible": "qty"},
-		{"label": _("Incoming Rate"), "fieldname": "incoming_rate", "fieldtype": "Currency", "width": 110,
+		{"label": _("Transaction Rate"), "fieldname": "transaction_rate", "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency", "convertible": "rate"},
-		{"label": _("Outgoing Rate"), "fieldname": "outgoing_rate", "fieldtype": "Currency", "width": 100,
-			"options": "Company:company:default_currency", "convertible": "rate"},
-		{"label": _("Valuation Rate"), "fieldname": "valuation_rate", "fieldtype": "Currency", "width": 100,
+		{"label": _("Valuation Rate"), "fieldname": "valuation_rate", "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency", "convertible": "rate"},
 		{"label": _("Balance Value"), "fieldname": "stock_value", "fieldtype": "Currency", "width": 110,
 			"options": "Company:company:default_currency"},
