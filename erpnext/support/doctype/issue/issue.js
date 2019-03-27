@@ -1,7 +1,7 @@
 frappe.ui.form.on("Issue", {
 	onload: function(frm) {
 		frm.email_field = "raised_by";
-		if(frm.doc.service_level_agreement){
+		if (frm.doc.service_level_agreement) {
 			set_time_to_resolve_and_response(frm);
 		}
 	},
