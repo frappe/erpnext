@@ -9,7 +9,7 @@
             <div v-html="program.description"></div>
         </div>
         <div class='text-right p-3'>
-            <a-button v-if="enrolled" type="primary" size="sm" :route="programPageRoute">
+            <a-button v-if="enrolled" type="dark" size="sm" :route="programPageRoute">
                     {{ buttonName }}
             </a-button>
             <a v-else-if="isLogin" class='btn btn-secondary btn-sm' @click="enroll()">{{ enrollButton }}</a>
@@ -46,12 +46,12 @@ export default {
     },
     computed: {
         buttonName() {
-                if(this.enrolled){
-                    return "Explore Program"
-                }
-                else {
-                    return "Enroll"
-                }
+            if(this.enrolled){
+                return "Explore Program"
+            }
+            else {
+                return "Enroll"
+            }
         },
         programPageRoute() {
             return this.programRoute
