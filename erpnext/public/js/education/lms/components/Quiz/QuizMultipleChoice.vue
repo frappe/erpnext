@@ -3,7 +3,7 @@
     <h5>{{ question.question }}</h5>
     <div class="options ml-2">
         <div v-for="option in question.options" :key="option.name" class="form-check pb-1">
-            <input class="form-check-input" type="checkbox" :name="question.name" :id="option.name" :value="option.name" @change="emitResponse(question.name, option.name)">
+            <input v-model="checked" class="form-check-input" type="checkbox" :name="question.name" :id="option.name" :value="option.name" @change="emitResponse(question.name, option.name)">
             <label class="form-check-label" :for="option.name">
                 {{ option.option }}
             </label>
@@ -16,9 +16,15 @@
 export default {
 	props: ['question'],
 	name: 'QuizSingleChoice',
+    data() {
+        return {
+            checked: []
+        }
+    },
 	methods: {
 		emitResponse(q, o) {
-			this.$emit('updateResponse', {'question':q , 'option': o, 'type': this.question.type})
+            console.log(this.checked)
+			this.$emit('updateResponse', {'question':q , 'option': this.checked, 'type': this.question.type})
 		}
 	}
 };

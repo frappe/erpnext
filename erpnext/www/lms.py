@@ -119,7 +119,10 @@ def evaluate_quiz(course, quiz_response, quiz_name):
 		item['question'] = key
 		item['quiz_result'] = result[key]
 		try:
-			item['selected_option'] = frappe.get_value('Options', quiz_response[key], 'option')
+			if isinstance(quiz_response[key], list):
+				item['selected_option'] = ', '.join(frappe.get_value('Options', res, 'option') for res in quiz_response[key])
+			else:
+				item['selected_option'] = frappe.get_value('Options', quiz_response[key], 'option')
 		except:
 			item['selected_option'] = "Unattempted"
 		result_data.append(item)
@@ -139,9 +142,7 @@ def add_quiz_activity(course, quiz_name, result_data, score, status):
 		"result": result_data,
 		"score": score,
 		"status": status
-		})
-	quiz_activity.save()
-	frappe.db.commit()
+		}).insert()
 
 @frappe.whitelist()
 def enroll_in_program(program_name):

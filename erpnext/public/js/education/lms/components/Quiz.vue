@@ -71,18 +71,7 @@ export default {
     	    )
         },
 		updateResponse(res) {
-            if (res.type == 'SingleChoice') {
-                this.quizResponse[res.question] = (res.option)
-            }
-            if (res.type == 'MultipleChoice') {
-                if (!this.quizResponse[res.question]) {
-                    this.quizResponse[res.question] = [res.option]
-                }
-                else {
-                    this.quizResponse[res.question].push(res.option)
-                }
-            }
-            console.log(this.quizResponse)
+            this.quizResponse[res.question] = res.option
 		},
 		submitQuiz() {
 			lms.call("evaluate_quiz",
