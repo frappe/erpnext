@@ -114,10 +114,7 @@ def get_payroll_entry(accounts, filters):
 	if filters.from_date:
 		payroll_filter.append(('posting_date', '>', filters.from_date))
 
-	entries = frappe.get_list("Payroll Entry",
-		filters = payroll_filter,
-		fields = ["name", "payment_account"]
-	)
+	entries = get_record("Payroll Entry", payroll_filter, ["name", "payment_account"])
 
 	p = list(map(lambda x: {k:v for k, v in x.items() if k == 'payment_account'}, entries))
 	payment_accounts = ', '.join(map(str, [l['payment_account'] for l in p if 'payment_account' in l]))
@@ -127,11 +124,8 @@ def get_payroll_entry(accounts, filters):
 def get_salary_slips(payroll_entries):
 	d = list(map(lambda x: {k:v for k, v in x.items() if k == 'name'}, payroll_entries))
 	payroll = ', '.join(map(str, [l['name'] for l in d if 'name' in l]))
-	salary_slips = frappe.get_all("Salary Slip",
-	filters=[
-		("payroll_entry", "IN", payroll)
-	],
-	fields = ["modified", "net_pay", "bank_name", "bank_account_no", "payroll_entry", "employee", "employee_name", "status"]
+	salary_slips = get_record("Salary Slip", [("payroll_entry", "IN", payroll)],
+		fields = ["modified", "net_pay", "bank_name", "bank_account_no", "payroll_entry", "employee", "employee_name", "status"]
 	)
 
 	# appending company debit accounts
@@ -145,13 +139,7 @@ def get_salary_slips(payroll_entries):
 def get_emp_bank_ifsc_code(salary_slips):
 	d = list(map(lambda x: {k:v for k, v in x.items() if k == 'employee'}, salary_slips))
 	emp_names = ', '.join(map(str, [l['employee'] for l in d if 'employee' in l]))
-	ifsc_codes = frappe.get_all("Employee",
-		filters=[
-			("name", "IN", emp_names)
-		],
-		fields=["ifsc_code", "name"]
-	)
-	print("->"*20)
+	ifsc_codes = get_record("Employee", [("name", "IN", emp_names)], ["ifsc_code", "name"])
 	for slip in salary_slips:
 		for code in ifsc_codes:
 			if code.name == slip.employee:
@@ -160,18 +148,16 @@ def get_emp_bank_ifsc_code(salary_slips):
 	return salary_slips
 
 def get_company_account(payment_accounts ,payroll_entries):
-	company_accounts = frappe.get_all("Bank Account",
-		filters=[
-			("account", "IN", payment_accounts)
-		],
-		fields=["account", "bank_account_no"]
-	)
+	company_accounts = get_record("Bank Account", [("account", "IN", payment_accounts)], ["account", "bank_account_no"])
 	for acc in company_accounts:
 		for entry in payroll_entries:
 			if acc.account == entry.payment_account:
 				entry["company_account"] = acc.bank_account_no
 
 	return payroll_entries
+
+def get_record(doctype, filter, fields):
+	return frappe.get_all(doctype, filters=filter, fields=fields)
 
 
 
