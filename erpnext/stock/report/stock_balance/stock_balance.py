@@ -15,8 +15,11 @@ def execute(filters=None):
 
 	validate_filters(filters)
 
+	show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
+	show_amounts = not show_amounts_role or show_amounts_role in frappe.get_roles()
+
 	include_uom = filters.get("include_uom")
-	columns = get_columns()
+	columns = get_columns(show_amounts)
 	items = get_items(filters)
 	sle = get_stock_ledger_entries(filters, items)
 
@@ -49,18 +52,22 @@ def execute(filters=None):
 				"warehouse": warehouse,
 				"uom": item_map[item]["alt_uom"] or item_map[item]["stock_uom"] if filters.qty_field == "Contents Qty" else item_map[item]["stock_uom"],
 				"opening_qty": qty_dict.opening_qty * alt_uom_size,
-				"opening_val": qty_dict.opening_val,
 				"in_qty": qty_dict.in_qty * alt_uom_size,
-				"in_val": qty_dict.in_val,
 				"out_qty": qty_dict.out_qty * alt_uom_size,
-				"out_val": qty_dict.out_val,
 				"bal_qty": qty_dict.bal_qty * alt_uom_size,
-				"bal_val": qty_dict.bal_val,
-				"val_rate": qty_dict.val_rate / alt_uom_size,
 				"reorder_level": item_reorder_level * alt_uom_size,
 				"reorder_qty": item_reorder_qty * alt_uom_size,
 				"company": company
 			}
+
+			if show_amounts:
+				report_data.update({
+					"opening_val": qty_dict.opening_val,
+					"in_val": qty_dict.in_val,
+					"out_val": qty_dict.out_val,
+					"bal_val": qty_dict.bal_val,
+					"val_rate": qty_dict.val_rate / alt_uom_size,
+				})
 
 			if filters.get('show_variant_attributes', 0) == 1:
 				for i, v in enumerate(get_variants_attributes()):
@@ -78,7 +85,7 @@ def execute(filters=None):
 	update_included_uom_in_dict_report(columns, data, include_uom, conversion_factors)
 	return columns, data
 
-def get_columns():
+def get_columns(show_amounts=True):
 	"""return columns"""
 
 	columns = [
@@ -90,18 +97,21 @@ def get_columns():
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
 		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 70},
 		{"label": _("Opening Qty"), "fieldname": "opening_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Opening Value"), "fieldname": "opening_val", "fieldtype": "Float", "width": 110},
+		{"label": _("Opening Value"), "fieldname": "opening_val", "fieldtype": "Float", "width": 110, "is_value": True},
 		{"label": _("In Qty"), "fieldname": "in_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
-		{"label": _("In Value"), "fieldname": "in_val", "fieldtype": "Float", "width": 80},
+		{"label": _("In Value"), "fieldname": "in_val", "fieldtype": "Float", "width": 80, "is_value": True},
 		{"label": _("Out Qty"), "fieldname": "out_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
-		{"label": _("Out Value"), "fieldname": "out_val", "fieldtype": "Float", "width": 80},
+		{"label": _("Out Value"), "fieldname": "out_val", "fieldtype": "Float", "width": 80, "is_value": True},
 		{"label": _("Balance Qty"), "fieldname": "bal_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Balance Value"), "fieldname": "bal_val", "fieldtype": "Currency", "width": 100},
-		{"label": _("Valuation Rate"), "fieldname": "val_rate", "fieldtype": "Currency", "width": 90, "convertible": "rate"},
+		{"label": _("Balance Value"), "fieldname": "bal_val", "fieldtype": "Currency", "width": 100, "is_value": True},
+		{"label": _("Valuation Rate"), "fieldname": "val_rate", "fieldtype": "Currency", "width": 90, "convertible": "rate", "is_value": True},
 		{"label": _("Reorder Level"), "fieldname": "reorder_level", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Reorder Qty"), "fieldname": "reorder_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 100}
 	]
+
+	if not show_amounts:
+		columns = filter(lambda d: not d.get("is_value"), columns)
 
 	return columns
 
