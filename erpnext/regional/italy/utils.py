@@ -82,6 +82,14 @@ def prepare_invoice(invoice, progressive_number):
 		if item.tax_rate == 0.0 and item.tax_amount == 0.0:
 			item.tax_exemption_reason = tax_data["0.0"]["tax_exemption_reason"]
 
+	customer_po_data = {}
+	for d in invoice.e_invoice_items:
+		if (d.customer_po_no and d.customer_po_date
+			and d.customer_po_no not in customer_po_data):
+			customer_po_data[d.customer_po_no] = d.customer_po_date
+
+	invoice.customer_po_data = customer_po_data
+
 	return invoice
 
 def get_conditions(filters):
@@ -134,6 +142,7 @@ def get_invoice_summary(items, taxes):
 						idx=len(items)+1,
 						item_code=reference_row.description,
 						item_name=reference_row.description,
+						description=reference_row.description,
 						rate=reference_row.tax_amount,
 						qty=1.0,
 						amount=reference_row.tax_amount,
@@ -198,19 +207,25 @@ def sales_invoice_validate(doc):
 	else:
 		doc.company_fiscal_regime = company_fiscal_regime
 
+	doc.company_tax_id = frappe.get_cached_value("Company", doc.company, 'tax_id')
+	doc.company_fiscal_code = frappe.get_cached_value("Company", doc.company, 'fiscal_code')
 	if not doc.company_tax_id and not doc.company_fiscal_code:
 		frappe.throw(_("Please set either the Tax ID or Fiscal Code on Company '%s'" % doc.company), title=_("E-Invoicing Information Missing"))
 
 	#Validate customer details
-	customer_type, is_public_administration = frappe.db.get_value("Customer", doc.customer, ["customer_type", "is_public_administration"])
-	if customer_type == _("Individual"):
+	customer = frappe.get_doc("Customer", doc.customer)
+
+	if customer.customer_type == _("Individual"):
+		doc.customer_fiscal_code = customer.fiscal_code
 		if not doc.customer_fiscal_code:
 			frappe.throw(_("Please set Fiscal Code for the customer '%s'" % doc.customer), title=_("E-Invoicing Information Missing"))
 	else:
-		if is_public_administration:
+		if customer.is_public_administration:
+			doc.customer_fiscal_code = customer.fiscal_code
 			if not doc.customer_fiscal_code:
 				frappe.throw(_("Please set Fiscal Code for the public administration '%s'" % doc.customer), title=_("E-Invoicing Information Missing"))
 		else:
+			doc.tax_id = customer.tax_id
 			if not doc.tax_id:
 				frappe.throw(_("Please set Tax ID for the customer '%s'" % doc.customer), title=_("E-Invoicing Information Missing"))
 
@@ -266,13 +281,18 @@ def prepare_and_attach_invoice(doc, replace=False):
 def generate_single_invoice(docname):
 	doc = frappe.get_doc("Sales Invoice", docname)
 
+
 	e_invoice = prepare_and_attach_invoice(doc, True)
 
+	return e_invoice.file_name
+
+@frappe.whitelist()
+def download_e_invoice_file(file_name):
 	content = None
-	with open(frappe.get_site_path('private', 'files', e_invoice.file_name), "r") as f:
+	with open(frappe.get_site_path('private', 'files', file_name), "r") as f:
 		content = f.read()
 
-	frappe.local.response.filename = e_invoice.file_name
+	frappe.local.response.filename = file_name
 	frappe.local.response.filecontent = content
 	frappe.local.response.type = "download"
 
