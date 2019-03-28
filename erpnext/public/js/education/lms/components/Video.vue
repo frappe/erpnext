@@ -2,9 +2,7 @@
 <div>
     <section class='video-top-section video-section-bg'>
     <div>
-        <div class="embed-responsive embed-responsive-16by9">
-            <iframe class="embed-responsive-item" :src="'https://www.youtube.com/embed/' + videoID" allowfullscreen></iframe>
-        </div>
+        <youtube-player :url="contentData.url"/>
         <div class="mt-3 row">
             <div class="col-md-8">
                 <h2>{{ contentData.name }}</h2>
@@ -37,19 +35,22 @@
 </div>
 </template>
 <script>
+import YoutubePlayer from './YoutubePlayer.vue'
+
 export default {
 	props: ['content', 'type'],
 	name: 'Video',
 	data() {
     	return {
             contentData: '',
-            videoID: '',
     	}
+    },
+    components: {
+        YoutubePlayer
     },
     mounted() {
         this.getContent()
             .then(data => this.contentData = data)
-            .then((contentData) => this.videoID = this.getVideoID(this.contentData.url))
     },
     methods: {
         getContent() {
@@ -57,19 +58,6 @@ export default {
                 type: this.type,
                 content: this.content
             })
-        },
-        getVideoID(link) {
-            if (!Array.prototype.last){
-                Array.prototype.last = function(){
-                    return this[this.length - 1];
-                };
-            };
-            if (link.includes('v=')){
-                return link.split('v=')[1].split('&')[0]
-            }
-            else if (link.includes('youtu.be')) {
-                return link.split('/').last().split('?')[0]
-            }
         }
     }
 };
