@@ -203,15 +203,19 @@ def sales_invoice_validate(doc):
 		frappe.throw(_("Please set either the Tax ID or Fiscal Code on Company '%s'" % doc.company), title=_("E-Invoicing Information Missing"))
 
 	#Validate customer details
-	customer_type, is_public_administration = frappe.db.get_value("Customer", doc.customer, ["customer_type", "is_public_administration"])
-	if customer_type == _("Individual"):
+	customer = frappe.get_doc("Customer", doc.customer)
+
+	if customer.customer_type == _("Individual"):
+		doc.customer_fiscal_code = customer.fiscal_code
 		if not doc.customer_fiscal_code:
 			frappe.throw(_("Please set Fiscal Code for the customer '%s'" % doc.customer), title=_("E-Invoicing Information Missing"))
 	else:
-		if is_public_administration:
+		if customer.is_public_administration:
+			doc.customer_fiscal_code = customer.fiscal_code
 			if not doc.customer_fiscal_code:
 				frappe.throw(_("Please set Fiscal Code for the public administration '%s'" % doc.customer), title=_("E-Invoicing Information Missing"))
 		else:
+			doc.tax_id = customer.tax_id
 			if not doc.tax_id:
 				frappe.throw(_("Please set Tax ID for the customer '%s'" % doc.customer), title=_("E-Invoicing Information Missing"))
 
