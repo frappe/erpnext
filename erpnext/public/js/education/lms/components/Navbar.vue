@@ -1,52 +1,53 @@
 <template>
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <div>
-            <router-link tag="a" :class="'navbar-brand'" :to="{name: 'home'}">
-                <span>{{ portal.title }}</span>
-            </router-link>
-            <button class="navbar-toggler mr-3" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+<nav class="navbar navbar-light bg-white navbar-expand-lg sticky-top shadow-sm">
+    <div class="container">
+        <a class="navbar-brand" href="/lms">
+            <span>{{ portal.title }}</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-            <div class="collapse navbar-collapse mx-3" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
-                </ul>
-                <ul class="navbar-nav ml-auto justify-content-end">
-                    <!-- post login tools -->
-                    <li class="nav-item dropdown hide" id="website-post-login" data-label="website-post-login" style="display: none">
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
 
+                <li class="nav-item">
+                    <a class="nav-link" href="lms#/List/Program">
+                        All Programs
+                    </a>
+                </li>
 
-                    <li v-if="isLogin" class="nav-item dropdown" id="website-post-login" data-label="website-post-login"
-                        style="">
-                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                            <span class="user-image-wrapper"><span class="avatar avatar-small" :title="fullName">
-                                    <span class="avatar-frame" :style="avatarStyle"
-                                        :title="fullName"></span>
-                                </span></span>
-                            <span class="full-name">{{ fullName }}</span>
-                            <b class="caret"></b>
-                        </a>
-                        <div class="dropdown-menu" role="menu">
-                            <router-link tag="a" :class="'dropdown-item'" :to="{name: 'profile'}">
-                                My Profile
-                            </router-link>
-                            <router-link tag="a" :class="'dropdown-item'" :to="{name: 'logout'}">
-                                Logout
-                            </router-link>
-                        </div>
-                    </li>
-                    <li v-else class="nav-item">
-                        <router-link tag="a" :class="'nav-link'" :to="{name: 'login'}">
-                            Login
-                        </router-link>
-                    </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/lms#/Profile">
+                        Profile
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <!-- post login tools -->
+                <li class="nav-item dropdown logged-in" id="website-post-login" data-label="website-post-login">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        <span class="user-image-wrapper">
+                            <span class="avatar avatar-small" :title="fullName">
+                                    <span class="avatar-frame" :style="avatarStyle" :title="fullName"></span>
+                            </span>
+                        </span>
+                        <span class="full-name">{{ fullName }}</span>
+                        <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                        <a class="dropdown-item" href="/me" rel="nofollow"> My Account </a>
+                        <a class="dropdown-item" href="/?cmd=web_logout" rel="nofollow"> Logout </a>
+                    </ul>
+                </li>
 
-                    <li class="nav-item btn-login-area" style="display: none;"><a class="nav-link" href="/login">Login</a></li>
-                </ul>
-            </div>
+                <li class="nav-item">
+                    <a class="nav-link btn-login-area" href="/login" style="display: none;">Login</a>
+                </li>
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
 </template>
 <script>
 export default {
