@@ -9,7 +9,7 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				<youtube-player :url="video" :allowfullscreen="'false'"/>
+				<youtube-player :url="video"/>
 			</div>
 			</div>
 		</div>
