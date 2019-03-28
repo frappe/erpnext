@@ -1,6 +1,11 @@
 <template>
 	<div id="lms-root">
-	<router-view :key="$route.fullPath"></router-view>
+		<navbar></navbar>
+		<main class="container my-5">
+			<div class="page_content">
+				<router-view :key="$route.fullPath"></router-view>
+			</div>
+		</main>
 	</div>
 </template>
 <script>

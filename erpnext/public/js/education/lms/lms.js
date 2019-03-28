@@ -13,6 +13,9 @@ var store = {
 	enrolledCourses: []
 }
 
+// let profile_page = `<a class="dropdown-item" href="/lms#/Profile" rel="nofollow"> LMS Profile </a>`
+// document.querySelector('#website-post-login > ul').innerHTML += profile_page
+
 frappe.ready(() => {
 	frappe.provide('lms')
 	// frappe.utils.make_event_emitter(lms);
