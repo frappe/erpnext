@@ -504,7 +504,7 @@ class JournalEntry(AccountsController):
 				)
 
 		if gl_map:
-			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj)
+			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj, merge_entries=False)
 
 	def get_balance(self):
 		if not self.get('accounts'):
