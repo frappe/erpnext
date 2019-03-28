@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, cint, getdate, now
-from erpnext.stock.utils import update_included_uom_in_list_report
+from erpnext.stock.utils import update_included_uom_in_dict_report
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 
 from six import iteritems
@@ -40,29 +40,31 @@ def execute(filters=None):
 				item_reorder_level = item_reorder_detail_map[item + warehouse]["warehouse_reorder_level"]
 				item_reorder_qty = item_reorder_detail_map[item + warehouse]["warehouse_reorder_qty"]
 
-			report_data = [item, item_map[item]["item_name"],
-				item_map[item]["item_group"],
-				item_map[item]["brand"],
-				item_map[item]["description"],
-				warehouse,
-				item_map[item]["alt_uom"] or item_map[item]["stock_uom"] if filters.qty_field == "Contents Qty" else item_map[item]["stock_uom"],
-				qty_dict.opening_qty * alt_uom_size,
-				qty_dict.opening_val,
-				qty_dict.in_qty * alt_uom_size,
-				qty_dict.in_val,
-				qty_dict.out_qty * alt_uom_size,
-				qty_dict.out_val,
-				qty_dict.bal_qty * alt_uom_size,
-				qty_dict.bal_val,
-				qty_dict.val_rate / alt_uom_size,
-				item_reorder_level * alt_uom_size,
-				item_reorder_qty * alt_uom_size,
-				company
-			]
+			report_data = {
+				"item_code": item,
+				"item_name": item_map[item]["item_name"],
+				"item_group": item_map[item]["item_group"],
+				"brand": item_map[item]["brand"],
+				"description": item_map[item]["description"],
+				"warehouse": warehouse,
+				"uom": item_map[item]["alt_uom"] or item_map[item]["stock_uom"] if filters.qty_field == "Contents Qty" else item_map[item]["stock_uom"],
+				"opening_qty": qty_dict.opening_qty * alt_uom_size,
+				"opening_val": qty_dict.opening_val,
+				"in_qty": qty_dict.in_qty * alt_uom_size,
+				"in_val": qty_dict.in_val,
+				"out_qty": qty_dict.out_qty * alt_uom_size,
+				"out_val": qty_dict.out_val,
+				"bal_qty": qty_dict.bal_qty * alt_uom_size,
+				"bal_val": qty_dict.bal_val,
+				"val_rate": qty_dict.val_rate / alt_uom_size,
+				"reorder_level": item_reorder_level * alt_uom_size,
+				"reorder_qty": item_reorder_qty * alt_uom_size,
+				"company": company
+			}
 
 			if filters.get('show_variant_attributes', 0) == 1:
-				variants_attributes = get_variants_attributes()
-				report_data += [item_map[item].get(i) for i in variants_attributes]
+				for i, v in enumerate(get_variants_attributes()):
+					report_data["variant_{}".format(i)] = item_map[item].get(v)
 
 			if include_uom:
 				conversion_factors.append(item_map[item].conversion_factor)
@@ -70,9 +72,10 @@ def execute(filters=None):
 			data.append(report_data)
 
 	if filters.get('show_variant_attributes', 0) == 1:
-		columns += ["{}:Data:100".format(i) for i in get_variants_attributes()]
+		for i, v in enumerate(get_variants_attributes()):
+			columns.append({"label": v, "fieldname": "variant_{}".format(i), "fieldtype": "Data", "width": 100, "is_variant_attribute": True}),
 
-	update_included_uom_in_list_report(columns, data, include_uom, conversion_factors)
+	update_included_uom_in_dict_report(columns, data, include_uom, conversion_factors)
 	return columns, data
 
 def get_columns():
