@@ -46,6 +46,9 @@ class JournalEntry(AccountsController):
 			self.title = self.get_title()
 
 	def before_submit(self):
+		if self.entry_type == 'Opening Entry':
+			self.is_opening = 'Yes'
+
 		self.validate_cheque_info()
 		self.create_remarks()
 
