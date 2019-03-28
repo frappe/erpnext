@@ -42,7 +42,7 @@ def _get_pricing_rules(apply_on, args, values):
 
     if not args.get(apply_on_field): return []
 
-    child_doc = '`tabApply Rule On {0}`'.format(apply_on)
+    child_doc = '`tabPricing Rule {0}`'.format(apply_on)
 
     conditions = item_variant_condition = item_conditions = ""
     values[apply_on_field] = args.get(apply_on_field)
