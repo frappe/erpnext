@@ -14,6 +14,12 @@ from erpnext.stock.get_item_details import get_conversion_factor
 
 class MultiplePricingRuleConflict(frappe.ValidationError): pass
 
+apply_on_table = {
+    'Item Code': 'items',
+    'Item Group': 'item_groups',
+    'Brand': 'brands'
+}
+
 def get_pricing_rules(args, doc=None):
     pricing_rules = []
     values =  {}
@@ -490,4 +496,7 @@ def apply_pricing_rule(doc, pr_doc, pr_row, item_row, value):
 
 def get_pricing_rule_items(pr_doc):
     apply_on = frappe.scrub(pr_doc.get('apply_on'))
-    return [item.get(apply_on) for item in pr_doc.items] or []
+
+    pricing_rule_apply_on = apply_on_table.get(pr_doc.get('apply_on'))
+
+    return [item.get(apply_on) for item in pr_doc.get(pricing_rule_apply_on)] or []
