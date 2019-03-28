@@ -6,19 +6,29 @@
 <script type="text/javascript">
 	export default {
 		name: 'YoutubePlayer',
-		props: ['url', 'allowfullscreen'],
-		computed: {
-			videoID() {
+		props: ['url'],
+		data() {
+			return {
+				videoID: ''
+			}
+		},
+		watch: {
+			url() {
+				this.videoID = this.getVideoID(this.url)
+			}
+		},
+		methods: {
+			getVideoID(link) {
 				if (!Array.prototype.last){
 					Array.prototype.last = function(){
 						return this[this.length - 1];
 					};
 				};
-				if (this.url.includes('v=')){
-					return this.url.split('v=')[1].split('&')[0]
+				if (link.includes('v=')){
+					return link.split('v=')[1].split('&')[0]
 				}
-				else if (this.url.includes('youtu.be')) {
-					return this.url.split('/').last().split('?')[0]
+				else if (link.includes('youtu.be')) {
+					return link.split('/').last().split('?')[0]
 				}
 		    }
 		}
