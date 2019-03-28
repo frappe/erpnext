@@ -1,5 +1,5 @@
 <template>
-    <div class='card-deck mt-3'>
+    <div v-if="quizData" class='card-deck mt-3'>
         <div class="card">
             <div class='card-body'>
                 <div class="row">
