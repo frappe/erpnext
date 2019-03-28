@@ -5,7 +5,6 @@ frappe.ui.form.on('Letter of Credit', {
 	refresh: function(frm) {
 		frm.set_df_property("naming_prefix", "read_only", !frm.is_new());
 		frm.set_df_property("letter_of_credit_number", "read_only", !frm.is_new());
-		frm.set_df_property("reference_text", "read_only", !frm.is_new());
 
 		if (!frm.is_new()) {
 			frm.add_custom_button(__('Update Name'), function () {
@@ -31,18 +30,11 @@ frappe.ui.form.on('Letter of Credit', {
 					"reqd": 1,
 					"default": frm.doc.letter_of_credit_number
 				},
-				{
-					"label": "Reference Text",
-					"fieldname": "reference_text",
-					"fieldtype": "Data",
-					"default": frm.doc.reference_text
-				},
 			],
 			primary_action: function() {
 				var data = d.get_values();
 				if(data.naming_prefix === frm.doc.naming_prefix
-					&& data.letter_of_credit_number === frm.doc.letter_of_credit_number
-					&& data.reference_text === frm.doc.reference_text)
+					&& data.letter_of_credit_number === frm.doc.letter_of_credit_number)
 				{
 					d.hide();
 					return;
@@ -53,8 +45,7 @@ frappe.ui.form.on('Letter of Credit', {
 					args: {
 						name: frm.doc.name,
 						naming_prefix: data.naming_prefix,
-						letter_of_credit_number: data.letter_of_credit_number,
-						reference_text: data.reference_text
+						letter_of_credit_number: data.letter_of_credit_number
 					},
 					callback: function(r) {
 						if(!r.exc) {
@@ -63,7 +54,6 @@ frappe.ui.form.on('Letter of Credit', {
 							} else {
 								frm.set_value("naming_prefix", data.naming_prefix);
 								frm.set_value("letter_of_credit_number", data.letter_of_credit_number);
-								frm.set_value("reference_text", data.reference_text);
 							}
 							d.hide();
 						}
