@@ -417,7 +417,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 					if(r.message) {
 						update_jv_details(doc, r.message);
 					}
-					cur_frm.set_value("is_opening", "Yes")
+					// cur_frm.set_value("is_opening", "Yes")
 				}
 			})
 		}
