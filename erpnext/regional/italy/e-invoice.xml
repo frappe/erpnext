@@ -162,7 +162,7 @@
         <Descrizione>{{ html2text(item.description or '') or item.item_name }}</Descrizione>
         <Quantita>{{ format_float(item.qty) }}</Quantita>
         <UnitaMisura>{{ item.stock_uom }}</UnitaMisura>
-        <PrezzoUnitario>{{ format_float(item.price_list_rate or item.rate) }}</PrezzoUnitario>
+        <PrezzoUnitario>{{ format_float(item.rate) }}</PrezzoUnitario>
         {{ render_discount_or_margin(item) }}
         <PrezzoTotale>{{ format_float(item.amount) }}</PrezzoTotale>
         <AliquotaIVA>{{ format_float(item.tax_rate) }}</AliquotaIVA>
