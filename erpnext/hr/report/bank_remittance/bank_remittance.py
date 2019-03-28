@@ -3,6 +3,8 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils import formatdate
+import itertools
 from frappe import _
 
 def execute(filters=None):
@@ -23,7 +25,7 @@ def execute(filters=None):
 		},
 		{
 			"label": _("Payment Date"),
-			"fieldtype": "data",
+			"fieldtype": "Data",
 			"fieldname": "payment_date",
 			"width": 100
 		},
@@ -48,13 +50,13 @@ def execute(filters=None):
 		},
 		{
 			"label": _("IFSC Code"),
-			"fieldtype": "data",
+			"fieldtype": "Data",
 			"fieldname": "bank_code",
 			"width": 100
 		},
 		{
 			"label": _("Currency"),
-			"fieldtype": "data",
+			"fieldtype": "Data",
 			"fieldname": "currency",
 			"width": 50
 		},
@@ -66,42 +68,112 @@ def execute(filters=None):
 			"width": 100
 		}
 	]
-	data = get_report_data(filters)
-
-	return columns, data
-
-
-def get_report_data(filters):
 	data = []
-	entries = frappe.get_all("Payroll Entry", fields=[" * "] )
-	for entry in entries:
-		employee_details = frappe.get_list(
-		"Payroll Employee Detail",
-		filters = {"parent": entry.name},
-		fields=["*"]
-		)
-		if frappe.db.get_value("Account", entry.payment_account, "account_type") == "Bank" :
-			for details in employee_details:
-				payment_date = frappe.db.get_value("Salary Slip", {
-					"payroll_entry": entry.name,
-					"Employee": details.employee
-				}, "modified")
-				amount_to_pay = frappe.db.get_value("Salary Slip", {
-					"payroll_entry": entry.name,
-					"Employee": details.employee
-				}, "net_pay")
-				row = {
-					"payroll_no": entry.name,
-					"debit_account": frappe.db.get_value("Bank Account", {"account": entry.payment_account}, "bank_account_no", debug = 1),
-					"payment_date": frappe.utils.formatdate(payment_date.strftime('%Y-%m-%d')),
-					"bank_name": frappe.db.get_value("Employee", details.employee, "bank_name"),
-					"employee_account_no": frappe.db.get_value("Employee", details.employee, "bank_ac_no"),
-					"bank_code": frappe.db.get_value("Employee", details.employee, "ifsc_code"),
-					"employee_name": details.employee+": " + details.employee_name,
-					"currency": frappe.get_cached_value('Company', filters.company,  'default_currency'),
-					"amount": amount_to_pay,
+
+	accounts = get_account()
+	payroll_entries = get_payroll_entry(accounts, filters)
+	salary_slips = get_salary_slips(payroll_entries)
+	get_emp_bank_ifsc_code(salary_slips)
+
+	for salary in salary_slips:
+		if salary.bank_name and salary.bank_account_no and salary.debit_acc_no and salary.status in ["Submitted", "Paid"]:
+			row = {
+					"payroll_no": salary.payroll_entry,
+					"debit_account": salary.debit_acc_no,
+					"payment_date": frappe.utils.formatdate(salary.modified.strftime('%Y-%m-%d')),
+					"bank_name":salary.bank_name,
+					"employee_account_no":salary.bank_account_no,
+					"bank_code": salary.ifsc_code,
+					"employee_name": salary.employee+": " + salary.employee_name,
+					"currency": frappe.get_cached_value('Company', filters.company, 'default_currency'),
+					"amount": salary.net_pay,
 				}
 
-				data.append(row)
+			data.append(row)
+	return columns, data
 
-	return data
+def get_account():
+	accounts = frappe.get_all("Account",
+	filters={
+		"account_type": "Bank"
+	}, as_list =1)
+
+	return accounts
+
+def get_payroll_entry(accounts, filters):
+	accounts = list(itertools.chain(*accounts))
+	accounts = ', '.join(map(str, accounts))
+	payroll_filter = [
+			('payment_account', 'IN', accounts),
+			('number_of_employees', '>', 0),
+			('Company', '=', filters.company)
+		]
+	if filters.to_date:
+		payroll_filter.append(('posting_date', '<', filters.to_date))
+
+	if filters.from_date:
+		payroll_filter.append(('posting_date', '>', filters.from_date))
+
+	entries = frappe.get_list("Payroll Entry",
+		filters = payroll_filter,
+		fields = ["name", "payment_account"]
+	)
+
+	p = list(map(lambda x: {k:v for k, v in x.items() if k == 'payment_account'}, entries))
+	payment_accounts = ', '.join(map(str, [l['payment_account'] for l in p if 'payment_account' in l]))
+	get_company_account(payment_accounts, entries)
+	return entries
+
+def get_salary_slips(payroll_entries):
+	d = list(map(lambda x: {k:v for k, v in x.items() if k == 'name'}, payroll_entries))
+	payroll = ', '.join(map(str, [l['name'] for l in d if 'name' in l]))
+	salary_slips = frappe.get_all("Salary Slip",
+	filters=[
+		("payroll_entry", "IN", payroll)
+	],
+	fields = ["modified", "net_pay", "bank_name", "bank_account_no", "payroll_entry", "employee", "employee_name", "status"]
+	)
+
+	# appending company debit accounts
+	for slip in salary_slips:
+		for entry in payroll_entries:
+			if slip.payroll_entry == entry.name:
+				slip["debit_acc_no"] = entry.company_account
+
+	return salary_slips
+
+def get_emp_bank_ifsc_code(salary_slips):
+	d = list(map(lambda x: {k:v for k, v in x.items() if k == 'employee'}, salary_slips))
+	emp_names = ', '.join(map(str, [l['employee'] for l in d if 'employee' in l]))
+	ifsc_codes = frappe.get_all("Employee",
+		filters=[
+			("name", "IN", emp_names)
+		],
+		fields=["ifsc_code", "name"]
+	)
+	print("->"*20)
+	for slip in salary_slips:
+		for code in ifsc_codes:
+			if code.name == slip.employee:
+				slip["ifsc_code"] = code.ifsc_code
+
+	return salary_slips
+
+def get_company_account(payment_accounts ,payroll_entries):
+	company_accounts = frappe.get_all("Bank Account",
+		filters=[
+			("account", "IN", payment_accounts)
+		],
+		fields=["account", "bank_account_no"]
+	)
+	for acc in company_accounts:
+		for entry in payroll_entries:
+			if acc.account == entry.payment_account:
+				entry["company_account"] = acc.bank_account_no
+
+	return payroll_entries
+
+
+
+
+
