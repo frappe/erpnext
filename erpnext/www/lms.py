@@ -241,10 +241,16 @@ def get_program_progress(program_name):
 			if meta['flag'] == "Completed":
 				is_complete = True
 			progress.append({'course_name': course.course_name, 'name': course.course, 'is_complete': is_complete})
+
 		program_meta['progress'] = progress
 		program_meta['name'] = program_name
 		program_meta['program'] = program.program_name
-		program_meta['percentage'] = math.ceil((sum([item['is_complete'] for item in progress] * 100)/len(progress)))
+
+		try:
+			program_meta['percentage'] = math.ceil((sum([item['is_complete'] for item in progress] * 100)/len(progress)))
+		except ZeroDivisionError:
+			program_meta['percentage'] = 0
+
 		return program_meta
 
 @frappe.whitelist()
@@ -270,6 +276,8 @@ def get_quiz_progress(program_name):
 				if progress_item['content_type'] == "Quiz":
 					progress_item['course'] = course.course_name
 					progress_list.append(progress_item)
+		if not progress_list:
+			return None
 		quiz_meta.quiz_attempt = progress_list
 		quiz_meta.name = program_name
 		quiz_meta.program = program.program_name
