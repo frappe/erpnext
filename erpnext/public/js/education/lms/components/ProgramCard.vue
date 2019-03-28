@@ -9,17 +9,20 @@
             <div v-html="program.description"></div>
         </div>
         <div class='text-right p-3'>
+            <button class='btn btn-secondary btn-sm' data-toggle="modal" data-target="#videoModal">Watch Intro</button>
             <a-button v-if="enrolled" type="dark" size="sm" :route="programPageRoute">
-                    {{ buttonName }}
+                {{ buttonName }}
             </a-button>
             <a v-else-if="isLogin" class='btn btn-secondary btn-sm' @click="enroll()">{{ enrollButton }}</a>
             <a v-else class='btn btn-secondary btn-sm' href="/login#signup">Sign Up</a>
         </div>
+        <VideoModal :title="program.program_name" :video="program.intro_video"/>
     </div>
 </div>
 </template>
 <script>
 import AButton from './Button.vue';
+import VideoModal from './VideoModal.vue';
 export default {
     props: ['program', 'enrolled'],
     name: "ProgramCard",
@@ -38,7 +41,6 @@ export default {
             lms.call('enroll_in_program', {
                 program_name: this.program.name,
             }).then(data => {
-                console.log(data)
                 lms.store.updateEnrolledPrograms()
                 this.$router.push(this.programRoute)
             })
@@ -61,7 +63,8 @@ export default {
         }
     },
     components: {
-        AButton
+        AButton,
+        VideoModal
     }
 };
 </script>
