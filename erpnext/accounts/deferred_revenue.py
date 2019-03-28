@@ -139,8 +139,7 @@ def calculate_amount(doc, item, last_gl_entry, total_days, total_booking_days, a
 def book_deferred_income_or_expense(doc, posting_date=None):
 	enable_check = "enable_deferred_revenue" \
 		if doc.doctype=="Sales Invoice" else "enable_deferred_expense"
-	last_gl_entry = False
-	end_date = None
+
 	def _book_deferred_revenue_or_expense(item):
 		start_date, end_date, last_gl_entry = get_booking_dates(doc, item, posting_date=posting_date)
 		if not (start_date and end_date): return
