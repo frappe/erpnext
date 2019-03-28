@@ -136,7 +136,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		data = []
 
 		partywise_total = self.get_partywise_total(party_naming_by, args)
-		partywise_advance_amount = get_partywise_advanced_payment_amount(args.get("party_type")) or {}
+		partywise_advance_amount = get_partywise_advanced_payment_amount(args.get("party_type"),
+			self.filters.get("report_date")) or {}
 
 		for party, party_dict in iteritems(partywise_total):
 			row = frappe._dict({"party": party})
