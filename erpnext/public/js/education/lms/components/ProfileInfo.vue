@@ -28,9 +28,10 @@
 							<li class="row">
 								<div class="col-md-3 col-sm-4 pr-0 text-muted">Programs Enrolled:</div>
 								<div class="col-md-9 col-sm-8">
-									<ul>
+									<ul v-if="enrolledPrograms">
 										<li v-for="program in enrolledPrograms" :key="program">{{ program }}</li>
 									</ul>
+									<span v-else>None</span>
 								</div>
 							</li>
 						</ul>
