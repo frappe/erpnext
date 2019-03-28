@@ -60,10 +60,16 @@
         <table>
                 <tr><td><strong>Tax and Charges: </strong></td><td>{{doc.taxes_and_charges}}</td></tr>
                 {% for tax in doc.taxes %}
-                <tr><td><strong>{{ tax.account_head }}: </strong></td><td>{{ tax.tax_amount_after_discount_amount }}</td></tr>
+                {% if tax.tax_amount_after_discount_amount!= 0 %}
+                    <tr><td><strong>{{ tax.account_head }}: </strong></td><td>{{ tax.tax_amount_after_discount_amount }}</td></tr>
+                {% endif %}
                 {% endfor %}
+                {% if doc.taxes_and_charges_added!= 0 %}
                 <tr><td><strong> Taxes and Charges Added: </strong></td><td>{{ doc.taxes_and_charges_added }}</td></tr>
+                {% endif %}
+                {% if doc.taxes_and_charges_deducted!= 0 %}
                 <tr><td><strong> Taxes and Charges Deducted: </strong></td><td>{{ doc.taxes_and_charges_deducted }}</td></tr>
+                {% endif %}
                 <tr><td><strong> Total Taxes and Charges: </strong></td><td>{{ doc.total_taxes_and_charges }}</td></tr>
                 <tr><td><strong> Net Payable: </strong></td><td>{{ doc.grand_total }}</td></tr>
             </table>
@@ -76,8 +82,8 @@
                 <th>Account</th>
                 <th>Party Type</th>
                 <th>Party</th>
-                <th>Credit Amount</th>
                 <th>Debit Amount</th>
+                <th>Credit Amount</th>
             </tr>
             {% for entries in doc.gl_entries %}
             <tr>
@@ -85,8 +91,8 @@
                 <td>{{ entries.account }}</td>
                 <td>{{ entries.party_type }}</td>
                 <td>{{ entries.party }}</td>
-                <td>{{ entries.credit }}</td>
                 <td>{{ entries.debit }}</td>
+                <td>{{ entries.credit }}</td>
             </tr>
             {% endfor %}
             <tr>

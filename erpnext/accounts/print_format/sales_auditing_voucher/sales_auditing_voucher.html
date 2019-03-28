@@ -70,8 +70,8 @@
                 <th>Account</th>
                 <th>Party Type</th>
                 <th>Party</th>
-                <th>Credit Amount</th>
                 <th>Debit Amount</th>
+                <th>Credit Amount</th>
             </tr>
             {% for entries in doc.gl_entries %}
             <tr>
@@ -79,8 +79,8 @@
                 <td>{{ entries.account }}</td>
                 <td>{{ entries.party_type }}</td>
                 <td>{{ entries.party }}</td>
-                <td>{{ entries.credit }}</td>
                 <td>{{ entries.debit }}</td>
+                <td>{{ entries.credit }}</td>
             </tr>
             {% endfor %}
             <tr>
