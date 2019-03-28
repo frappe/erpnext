@@ -1,7 +1,7 @@
 <template>
 <div class='margin'>
     <div class="card">
-        <img v-if="program.hero_image" :src="program.hero_image" style='height: 150px; width: auto'>
+        <div class="card-hero-img" v-if="program.hero_image" v-bind:style="{ 'background-image': 'url(' + image + ')' }"></div>
         <div class='card-body'>
             <router-link :to="'/Program/' + program.name">
                 <h5 class='card-title'>{{ program.program_name }}</h5>
@@ -30,10 +30,9 @@ export default {
     	return {
             isLogin: frappe.is_user_logged_in(),
             enrollButton: 'Enroll Now',
-            programRoute: { name: 'program', params: { program_name: this.program.name }}
+            programRoute: { name: 'program', params: { program_name: this.program.name }},
+            image: "'" + this.program.hero_image + "'"
     	};
-    },
-    created() {
     },
     methods: {
         enroll() {
@@ -76,5 +75,10 @@ export default {
     }
     a.btn-secondary {
         color: white !important;
+    }
+
+    div.card-hero-img {
+        height: 220px;
+        background-position: center
     }
 </style>
