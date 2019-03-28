@@ -2,15 +2,6 @@
 <section>
 		<div class="py-5">
 			<div class="row">
-				<!-- <div class="col-sm-3 text-center">
-					<span class="sidebar-standard-image" title="Lorem Ipsum">
-						<span v-if="avatar" class="avatar-frame" :style="avatarStyle">
-						</span>
-						<div v-else class="standard-image" style="background-color: #fafbfc;">
-							{{ abbr }}
-						</div>
-					</span>
-				</div> -->
 				<div class="col-sm-12">
 					<div>
 						<h3>{{ fullName }}</h3>
@@ -23,8 +14,6 @@
 								<div class="col-md-3 col-sm-4 pr-0 text-muted">Date of Joining:</div>
 								<div class="col-md-9 col-sm-8">{{ joiningDate }}</div>
 							</li>
-							<!-- <li><span class="text-muted">Date of Joining: </span>3rd July 2018</li> -->
-							<!-- <li><span class="text-muted">Programs Enrolled: </span>ERPNext Certified Professional 2018</li> -->
 							<li class="row">
 								<div class="col-md-3 col-sm-4 pr-0 text-muted">Programs Enrolled:</div>
 								<div class="col-md-9 col-sm-8">
