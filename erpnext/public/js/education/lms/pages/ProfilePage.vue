@@ -1,12 +1,17 @@
 <template>
 <div>
 	<ProfileInfo :enrolledPrograms="enrolledPrograms"></ProfileInfo>
-	<CardList :title="'Your Progress'" :description="''" :sectionType="'section-padding section-bg'">
-        <ProgressCard slot="card-list-slot" v-for="program in enrolledPrograms" :program="program" :key="program"/>
-    </CardList>
-	<CardList :title="'Quiz Attempts'" :description="''" :sectionType="'section-padding section'">
-        <ScoreCard slot="card-list-slot" v-for="program in enrolledPrograms" :program="program" :key="program"/>
-    </CardList>
+	<div v-if="enrolledPrograms">
+		<CardList :title="'Your Progress'" :description="''" :sectionType="'section-padding section-bg'">
+	        <ProgressCard slot="card-list-slot" v-for="program in enrolledPrograms" :program="program" :key="program"/>
+	    </CardList>
+		<CardList :title="'Quiz Attempts'" :description="''" :sectionType="'section-padding section'">
+	        <ScoreCard slot="card-list-slot" v-for="program in enrolledPrograms" :program="program" :key="program"/>
+	    </CardList>
+	</div>
+	<div v-else>
+		You haven't enrolled in any programs yet.
+	</div>
 
 </div>
 </template>
