@@ -9,7 +9,7 @@
             <div v-html="program.description"></div>
         </div>
         <div class='text-right p-3'>
-            <button class='btn btn-secondary btn-sm' data-toggle="modal" data-target="#videoModal">Watch Intro</button>
+            <button class='btn btn-secondary btn-sm text-white' data-toggle="modal" data-target="#videoModal">Watch Intro</button>
             <a-button v-if="enrolled" type="dark" size="sm" :route="programPageRoute">
                 {{ buttonName }}
             </a-button>
