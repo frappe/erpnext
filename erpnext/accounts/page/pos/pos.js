@@ -333,6 +333,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		this.frm = {}
 		this.load_data(true);
+		this.frm.doc.offline_pos_name = '';
 		this.setup();
 		this.set_default_customer()
 	},
@@ -345,7 +346,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		if (load_doc) {
 			this.frm.doc = JSON.parse(localStorage.getItem('doc'));
-			this.frm.doc.offline_pos_name = null;
 		}
 
 		$.each(this.meta, function (i, data) {
@@ -641,7 +641,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.list_customers_btn.toggleClass("view_customer");
 			me.pos_bill.show();
 			me.list_customers_btn.show();
-			me.frm.doc.offline_pos_name = $(this).parents().attr('invoice-name')
+			me.frm.doc.offline_pos_name = $(this).parents().attr('invoice-name');
 			me.edit_record();
 		})
 
@@ -984,7 +984,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		}
 
 		if(!this.customer_doc.fields_dict.customer_pos_id.value) {
-			this.customer_doc.set_value("customer_pos_id", $.now())
+			this.customer_doc.set_value("customer_pos_id", frappe.datetime.now_datetime())
 		}
 	},
 
@@ -1686,10 +1686,18 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	create_invoice: function () {
 		var me = this;
+		var existing_pos_list = [];
 		var invoice_data = {};
 		this.si_docs = this.get_doc_from_localstorage();
 
-		if (this.frm.doc.offline_pos_name) {
+		if(this.si_docs) {
+			this.si_docs.forEach((row) => {
+				existing_pos_list.push(Object.keys(row));
+			});
+		}
+
+		if (this.frm.doc.offline_pos_name
+			&& in_list(existing_pos_list, this.frm.doc.offline_pos_name)) {
 			this.update_invoice()
 			//to retrieve and set the default payment
 			invoice_data[this.frm.doc.offline_pos_name] = this.frm.doc;
@@ -1698,8 +1706,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 			this.frm.doc.paid_amount = this.frm.doc.net_total
 			this.frm.doc.outstanding_amount = 0
-		} else {
-			this.frm.doc.offline_pos_name = $.now();
+		} else if(!this.frm.doc.offline_pos_name) {
+			this.frm.doc.offline_pos_name = frappe.datetime.now_datetime();
 			this.frm.doc.posting_date = frappe.datetime.get_today();
 			this.frm.doc.posting_time = frappe.datetime.now_time();
 			this.frm.doc.pos_total_qty = this.frm.doc.qty_total;

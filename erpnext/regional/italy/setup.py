@@ -26,6 +26,22 @@ def make_custom_fields(update=True):
 			print_hide=1, hidden=1, read_only=1, options="currency")
 	]
 
+	customer_po_fields = [
+		dict(fieldname='customer_po_details', label='Customer PO',
+			fieldtype='Section Break', insert_after='image'),
+		dict(fieldname='customer_po_no', label='Customer PO No',
+			fieldtype='Data', insert_after='customer_po_details',
+			fetch_from = 'sales_order.po_no',
+			print_hide=1, allow_on_submit=1, fetch_if_empty= 1, read_only=1, no_copy=1),
+		dict(fieldname='customer_po_clm_brk', label='',
+			fieldtype='Column Break', insert_after='customer_po_no',
+			print_hide=1, read_only=1),
+		dict(fieldname='customer_po_date', label='Customer PO Date',
+			fieldtype='Date', insert_after='customer_po_clm_brk',
+			fetch_from = 'sales_order.po_date',
+			print_hide=1, allow_on_submit=1, fetch_if_empty= 1, read_only=1, no_copy=1)
+	]
+
 	custom_fields = {
 		'Company': [
 			dict(fieldname='sb_e_invoicing', label='E-Invoicing',
@@ -128,7 +144,7 @@ def make_custom_fields(update=True):
 		'Purchase Invoice Item': invoice_item_fields,
 		'Sales Order Item': invoice_item_fields,
 		'Delivery Note Item': invoice_item_fields,
-		'Sales Invoice Item': invoice_item_fields,
+		'Sales Invoice Item': invoice_item_fields + customer_po_fields,
 		'Quotation Item': invoice_item_fields,
 		'Purchase Order Item': invoice_item_fields,
 		'Purchase Receipt Item': invoice_item_fields,
