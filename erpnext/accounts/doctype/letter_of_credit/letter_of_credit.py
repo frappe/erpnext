@@ -9,7 +9,7 @@ from frappe import _
 
 class LetterofCredit(Document):
 	def autoname(self):
-		self.name = get_letter_of_credit_autoname(self.naming_prefix, self.letter_of_credit_number, self.reference_text)
+		self.name = get_letter_of_credit_autoname(self.naming_prefix, self.letter_of_credit_number)
 
 	def get_default_letter_of_credit_account(self):
 		default_letter_of_credit_account = frappe.get_cached_value('Company',
@@ -21,24 +21,20 @@ class LetterofCredit(Document):
 
 		return default_letter_of_credit_account
 
-def get_letter_of_credit_autoname(naming_prefix, letter_of_credit_number, reference_text=None):
-	if reference_text:
-		return "{0}{1} ({2})".format(naming_prefix, letter_of_credit_number, reference_text)
-	else:
+def get_letter_of_credit_autoname(naming_prefix, letter_of_credit_number):
 		return "{0}{1}".format(naming_prefix, letter_of_credit_number)
 
 @frappe.whitelist()
-def update_name(name, naming_prefix, letter_of_credit_number, reference_text):
+def update_name(name, naming_prefix, letter_of_credit_number):
 	if not frappe.db.exists("Letter of Credit", name):
 		return
 
 	frappe.db.set_value("Letter of Credit", name, {
 		"naming_prefix": naming_prefix,
-		"letter_of_credit_number": letter_of_credit_number,
-		"reference_text": reference_text
+		"letter_of_credit_number": letter_of_credit_number
 	}, None)
 
-	new_name = get_letter_of_credit_autoname(naming_prefix, letter_of_credit_number, reference_text)
+	new_name = get_letter_of_credit_autoname(naming_prefix, letter_of_credit_number)
 	if name != new_name:
 		frappe.rename_doc("Letter of Credit", name, new_name, ignore_permissions=1)
 		return new_name
