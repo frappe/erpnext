@@ -255,8 +255,12 @@ def get_program_progress(program_name):
 
 @frappe.whitelist()
 def get_joining_date():
-	student = frappe.get_doc("Student", utils.get_current_student())
-	return student.joining_date
+	current_student = utils.get_current_student()
+	if(current_student):
+		student = frappe.get_doc("Student", current_student)
+		return student.joining_date
+	else:
+		return None
 
 @frappe.whitelist()
 def get_quiz_progress(program_name):

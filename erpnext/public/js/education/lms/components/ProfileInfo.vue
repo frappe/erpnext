@@ -10,7 +10,7 @@
 								<div class="col-md-3 col-sm-4 pr-0 text-muted">Email:</div>
 								<div class="col-md-9 col-sm-8">{{ email }}</div>
 							</li>
-							<li class="row">
+							<li v-if="joiningDate" class="row">
 								<div class="col-md-3 col-sm-4 pr-0 text-muted">Date of Joining:</div>
 								<div class="col-md-9 col-sm-8">{{ joiningDate }}</div>
 							</li>
@@ -43,11 +43,15 @@ export default {
 			fullName: frappe.full_name,
 			abbr: frappe.get_abbr(frappe.get_cookie("full_name")),
 			email: frappe.session.user,
-			joiningDate: 'fetching...'
+			joiningDate: ''
 		}
 	},
 	mounted(){
-		this.getJoiningDate().then(data => this.joiningDate = lms.moment(String(data)).format('D MMMM YYYY'))
+		this.getJoiningDate().then(data => {
+			if(data) {
+				this.joiningDate = lms.moment(String(data)).format('D MMMM YYYY')
+			}
+		})
 	},
 	computed: {
 		avatarStyle() {
