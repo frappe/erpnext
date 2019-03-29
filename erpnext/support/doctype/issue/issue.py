@@ -65,9 +65,19 @@ class Issue(Document):
 			self.first_responded_on = now()
 		if self.status=="Closed" and status !="Closed":
 			self.resolution_date = now()
+			self.update_agreement_status()
 		if self.status=="Open" and status !="Open":
 			# if no date, it should be set as None and not a blank string "", as per mysql strict config
 			self.resolution_date = None
+
+	def update_agreement_status(self):
+		current_time = frappe.flags.current_time or now_datetime()
+		if self.service_level_agreement:
+			if (round(time_diff_in_hours(self.response_by, current_time), 2) < 0
+				or round(time_diff_in_hours(self.resolution_by, current_time), 2) < 0):
+				self.agreement_status = "Failed"
+			else:
+				self.agreement_status = "Fulfilled"
 
 	def create_communication(self):
 		communication = frappe.new_doc("Communication")
@@ -264,18 +274,6 @@ def has_website_permission(doc, ptype, user, verbose=False):
 def update_issue(contact, method):
 	"""Called when Contact is deleted"""
 	frappe.db.sql("""UPDATE `tabIssue` set contact='' where contact=%s""", contact.name)
-
-def update_support_timer():
-	issues = frappe.get_list("Issue", filters={"status": "Open"}, order_by="creation DESC")
-	for issue in issues:
-		issue = frappe.get_doc("Issue", issue.name)
-
-		if round(time_diff_in_hours(issue.response_by, now_datetime()), 2) < 0 or round(time_diff_in_hours(issue.resolution_by, now_datetime()), 2) < 0:
-			issue.agreement_status = "Failed"
-		else:
-			issue.agreement_status = "Fulfilled"
-		issue.save()
-
 
 def get_holidays(holiday_list_name):
 	holiday_list = frappe.get_cached_doc("Holiday List", holiday_list_name)
