@@ -594,4 +594,4 @@ erpnext.patches.v12_0.rename_pricing_rule_child_doctypes
 erpnext.patches.v12_0.move_target_distribution_from_parent_to_child
 erpnext.patches.v12_0.stock_entry_enhancements
 erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019
-
+erpnext.patches.v12_0.move_item_tax_to_item_tax_template
