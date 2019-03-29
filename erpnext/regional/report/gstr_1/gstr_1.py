@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import flt, formatdate, now_datetime, getdate
 from datetime import date
 from six import iteritems
+from erpnext.regional.doctype.gstr_3b_report.gstr_3b_report import get_period
 
 def execute(filters=None):
 	return Gstr1Report(filters).run()
@@ -518,7 +519,7 @@ def get_json():
 	report_name = data["report_name"]
 	gstin = get_company_gstin_number(filters["company"])
 
-	fp = "%02d%s" % (now_datetime().month, now_datetime().year)
+	fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
 
 	gst_json = {"gstin": "", "version": "GST2.2.9",
 		"hash": "hash", "gstin": gstin, "fp": fp}
