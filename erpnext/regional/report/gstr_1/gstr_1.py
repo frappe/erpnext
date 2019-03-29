@@ -516,7 +516,7 @@ def get_json():
 	res = {}
 	if filters["type_of_business"] == "B2B":
 		for item in report_data:
-			res.setdefault(item["customer_gstin"], []).append(item)
+			res.setdefault(item["customer_gstin"], {}).setdefault(item["invoice_number"],[]).append(item)
 
 		out = get_b2b_json(res, gstin)
 		gst_json["b2b"] = out
@@ -536,21 +536,22 @@ def get_json():
 	download_json_file(report_name, filters["type_of_business"], gst_json)
 
 def get_b2b_json(res, gstin):
-	inv_type, out = {"Regular": "R", "Deemed Export": "DE", "URD": "URD", "SEZ": "SEZ"}, []
-
+	inv_type, out = {"Registered Regular": "R", "Deemed Export": "DE", "URD": "URD", "SEZ": "SEZ"}, []
 	for gst_in in res:
 		b2b_item, inv = {"ctin": gst_in, "inv": []}, []
 		if not gst_in: continue
 
-		for row in res[gst_in]:
-			inv_item = get_basic_invoice_detail(row)
-			inv_item["pos"] = "%02d" % int(row["place_of_supply"].split('-')[0])
-			inv_item["rchrg"] = row["reverse_charge"]
-			inv_item["inv_typ"] = inv_type[row["invoice_type"]]
+		for number, invoice in iteritems(res[gst_in]):
+			inv_item = get_basic_invoice_detail(invoice[0])
+			inv_item["pos"] = "%02d" % int(invoice[0]["place_of_supply"].split('-')[0])
+			inv_item["rchrg"] = invoice[0]["reverse_charge"]
+			inv_item["inv_typ"] = inv_type.get(invoice[0].get("gst_category", ""),"")
 
 			if inv_item["pos"]=="00": continue
+			inv_item["itms"] = []
 
-			inv_item["itms"] = [get_rate_and_tax_details(row, gstin)]
+			for item in invoice:
+				inv_item["itms"].append(get_rate_and_tax_details(item, gstin))
 
 			inv.append(inv_item)
 
