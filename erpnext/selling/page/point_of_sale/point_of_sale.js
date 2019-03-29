@@ -251,7 +251,15 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		frappe.flags.hide_serial_batch_dialog = true;
 
 		frappe.run_serially([
-			() => this.frm.script_manager.trigger('item_code', item.doctype, item.name),
+			() => {
+				this.frm.script_manager.trigger('item_code', item.doctype, item.name)
+					.then(() => {
+						this.frm.script_manager.trigger('qty', item.doctype, item.name)
+							.then(() => {
+								this.update_cart_data(item);
+							});
+					});
+			},
 			() => {
 				const show_dialog = item.has_serial_no || item.has_batch_no;
 
@@ -261,9 +269,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					(item.has_serial_no) || (item.actual_batch_qty != item.actual_qty)) ) {
 					// check has serial no/batch no and update cart
 					this.select_batch_and_serial_no(item);
-				} else {
-					// update cart
-					this.update_cart_data(item);
 				}
 			}
 		]);
