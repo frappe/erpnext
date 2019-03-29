@@ -3,8 +3,15 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 
 from frappe.model.document import Document
 
 class LeaveType(Document):
-	pass
+	def validate(self):
+		if self.is_carry_forward:
+			self.validate_carry_forward()
+
+	def validate_carry_forward(self):
+		if (self.carry_forward_leave_expiry <1 or self.carry_forward_leave_expiry > 365):
+			frappe.throw(_('Invalid entry!! Carried forward days need to expire within a year'))
