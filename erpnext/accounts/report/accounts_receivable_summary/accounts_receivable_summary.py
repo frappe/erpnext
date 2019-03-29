@@ -146,6 +146,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 			row += [partywise_advance_amount.get(party, 0)]
 
+			paid_amt = 0
 			if party_dict.paid_amt > 0:
 				paid_amt = flt(party_dict.paid_amt - partywise_advance_amount.get(party, 0))
 
