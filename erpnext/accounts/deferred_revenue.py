@@ -92,9 +92,9 @@ def get_booking_dates(doc, item, posting_date=None):
 	if end_date >= item.service_end_date:
 		end_date = item.service_end_date
 		last_gl_entry = True
- 	elif item.service_stop_date and end_date >= item.service_stop_date:
-		 end_date = item.service_stop_date
-		 last_gl_entry = True
+	elif item.service_stop_date and end_date >= item.service_stop_date:
+		end_date = item.service_stop_date
+		last_gl_entry = True
 
 	if end_date > getdate(posting_date):
 		end_date = posting_date
