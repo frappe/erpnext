@@ -80,7 +80,7 @@ class BankReconciliation(Document):
 		for d in entries:
 			row = self.append('payment_entries', {})
 
-			amount = d.get('debit', 0) - d.get('credit', 0)
+			amount = flt(d.get('debit', 0)) - flt(d.get('credit', 0))
 
 			formatted_amount = fmt_money(abs(amount), 2, d.account_currency)
 			d.amount = formatted_amount + " " + (_("Dr") if amount > 0 else _("Cr"))
