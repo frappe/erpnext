@@ -23,6 +23,10 @@ frappe.treeview_settings["Account"] = {
 						if(r.message) {
 							let root_company = r.message.length ? r.message[0] : "";
 							me.page.fields_dict.root_company.set_value(root_company);
+
+							frappe.db.get_value("Company", {"name": company}, "allow_account_creation_against_child_company", (r) => {
+								frappe.flags.ignore_root_company_validation = r.allow_account_creation_against_child_company;
+							});
 						}
 					}
 				});
@@ -133,9 +137,10 @@ frappe.treeview_settings["Account"] = {
 		{
 			label:__("Add Child"),
 			condition: function(node) {
-				return frappe.boot.user.can_create.indexOf("Account") !== -1 &&
-				!frappe.treeview_settings['Account'].treeview.page.fields_dict.root_company.get_value() &&
-					node.expandable && !node.hide_add;
+				return frappe.boot.user.can_create.indexOf("Account") !== -1
+					&& (!frappe.treeview_settings['Account'].treeview.page.fields_dict.root_company.get_value()
+					|| frappe.flags.ignore_root_company_validation)
+					&& node.expandable && !node.hide_add;
 			},
 			click: function() {
 				var me = frappe.treeview_settings['Account'].treeview;

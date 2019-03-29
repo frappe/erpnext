@@ -241,8 +241,7 @@ scheduler_events = {
 		"erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_settings.schedule_get_order_details",
 		"erpnext.accounts.doctype.gl_entry.gl_entry.rename_gle_sle_docs",
 		"erpnext.projects.doctype.project.project.hourly_reminder",
-		"erpnext.projects.doctype.project.project.collect_project_status",
-		"erpnext.support.doctype.issue.issue.update_support_timer",
+		"erpnext.projects.doctype.project.project.collect_project_status"
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
