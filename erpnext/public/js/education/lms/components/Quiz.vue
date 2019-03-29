@@ -10,21 +10,21 @@
             <hr>
             <div id="quiz" :name="content">
                 <div id="quiz-body">
-					<component v-for="question in quizData" :key="question.name" v-bind:is="question.type" :question="question" @updateResponse="updateResponse"></component>
+					<component v-for="question in quizData" :key="question.name" v-bind:is="question.type" :question="question" @updateResponse="updateResponse" :isDisabled="isDisabled"></component>
                 </div>
                 <div class="mt-3">
                     <div>
-                        <div v-if="submitted" id="post-quiz-actions" class="row">
+                        <div v-if="isDisabled || submitted" id="post-quiz-actions" class="row">
                             <div class="col-md-8 text-left">
-                                <h3>Your Score: <span id="result">{{ score }}</span></h3>
+                                <span v-html="message"></span>
                             </div>
                             <div class="col-md-4 text-right">
-                            	<slot></slot>
+                                <slot></slot>
                             </div>
                         </div>
                         <div v-else id="quiz-actions" class="text-right">
-                            <button class='btn btn-outline-secondary' type="reset">Reset</button>
-                            <button class='btn btn-primary' @click="submitQuiz" type="button">Submit</button>
+                            <button class='btn btn-outline-secondary' type="reset" :disabled="isDisabled">Reset</button>
+                            <button class='btn btn-primary' @click="submitQuiz" type="button" :disabled="isDisabled">Submit</button>
                         </div>
                     </div>
                 </div>
@@ -50,12 +50,16 @@ export default {
     		quizData: '',
     		quizResponse: {},
             score: '',
-            submitted: false
+            submitted: false,
+            isDisabled: false,
+            quizStatus: {},
     	}
     },
     mounted() {
     	this.getQuizWithoutAnswers().then(data => {
-    			this.quizData = data
+    		this.quizData = data.quizData
+            this.quizStatus = data.status
+            this.isDisabled = data.status.is_complete
     	});
     },
     components: {
@@ -67,6 +71,7 @@ export default {
             return lms.call("get_quiz_without_answers",
                 {
                     quiz_name: this.content,
+                    course_name: this.$route.params.course_name
                 }
     	    )
         },
@@ -81,8 +86,8 @@ export default {
                     course: this.$route.params.course_name
 				}
             ).then(data => {
-                this.score = data,
-                this.submitted = true,
+                this.score = data
+                this.submitted = true
                 this.quizResponse = null
 			});
 		}
@@ -96,6 +101,16 @@ export default {
             return 'QuizSingleChoice'
         }
       },
+      message: function() {
+        if(this.submitted) {
+            return '<h3>Your Score: <span id="result">'+ this.score +'</span></h3>'
+        }
+        let message = '<h4>You have exhausted all attempts for this quiz.</h4>'
+        if(this.quizStatus.result == 'Pass') {
+            message = "<h4>You have successfully completed this quiz.</h4>Score: " + this.quizStatus.score
+        }
+        return message
+      }
     },
 };
 </script>
