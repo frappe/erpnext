@@ -38,7 +38,7 @@ class Gstr1Report(object):
 			shipping_bill_date,
 			reason_for_issuing_document
 		"""
-		self.customer_type = "Company" if self.filters.get("type_of_business") ==  "B2B" else "Individual"
+		# self.customer_type = "Company" if self.filters.get("type_of_business") ==  "B2B" else "Individual"
 
 	def run(self):
 		self.get_columns()
@@ -113,9 +113,14 @@ class Gstr1Report(object):
 				if self.filters.get(opts[0]):
 					conditions += opts[1]
 
-		customers = frappe.get_all("Customer", filters={"customer_type": self.customer_type})
+		# customers = frappe.get_all("Customer", filters={"customer_type": self.customer_type})
 
 		if self.filters.get("type_of_business") ==  "B2B":
+			customers = frappe.get_all("Customer",
+				filters={
+					"gst_category": ["in", ["Registered Regular", "Deemed Export", "SEZ"]]
+			})
+
 			conditions += """ and ifnull(gst_category, '') != 'Overseas' and is_return != 1
 				and customer in ({0})""".format(", ".join([frappe.db.escape(c.name) for c in customers]))
 
@@ -123,6 +128,11 @@ class Gstr1Report(object):
 			b2c_limit = frappe.db.get_single_value('GST Settings', 'b2c_limit')
 			if not b2c_limit:
 				frappe.throw(_("Please set B2C Limit in GST Settings."))
+
+		customers = frappe.get_all("Customer",
+			filters={
+				"gst_category": ["in", ["Unregistered"]]
+		})
 
 		if self.filters.get("type_of_business") ==  "B2C Large":
 			conditions += """ and SUBSTR(place_of_supply, 1, 2) != SUBSTR(company_gstin, 1, 2)
