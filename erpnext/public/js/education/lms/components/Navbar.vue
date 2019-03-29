@@ -25,7 +25,7 @@
             </ul>
             <ul class="navbar-nav ml-auto">
                 <!-- post login tools -->
-                <li class="nav-item dropdown logged-in" id="website-post-login" data-label="website-post-login">
+                <li v-if="isLogin" class="nav-item dropdown logged-in" id="website-post-login" data-label="website-post-login">
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                         <span class="user-image-wrapper">
                             <span class="avatar avatar-small" :title="fullName">
@@ -41,8 +41,8 @@
                     </ul>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link btn-login-area" href="/login" style="display: none;">Login</a>
+                <li v-else class="nav-item">
+                    <a class="nav-link btn-login-area" href="/login">Login</a>
                 </li>
             </ul>
         </div>
