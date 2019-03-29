@@ -135,7 +135,7 @@ def check_content_completion(content_name, content_type, enrollment_name):
 
 def check_quiz_completion(quiz, enrollment_name):
 	attempts = frappe.get_all("Quiz Activity", filters={'enrollment': enrollment_name, 'quiz': quiz.name}, fields=["name", "activity_date", "score", "status"])
-	status = bool(len(attempts) == quiz.max_attempts)
+	status = False if quiz.max_attempts == 0 else bool(len(attempts) == quiz.max_attempts)
 	score = None
 	result = None
 	if attempts:

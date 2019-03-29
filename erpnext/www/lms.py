@@ -93,14 +93,19 @@ def get_quiz_with_answers(quiz_name):
 		return None
 
 @frappe.whitelist()
-def get_quiz_without_answers(quiz_name):
+def get_quiz_without_answers(quiz_name, course_name):
 	try:
-		quiz = frappe.get_doc("Quiz", quiz_name).get_questions()
-		quiz_output = [{'name':question.name, 'question':question.question, 'type': question.type, 'options':[{'name': option.name, 'option':option.option} for option in question.options]} for question in quiz]
-		return quiz_output
+		quiz = frappe.get_doc("Quiz", quiz_name)
+		questions = quiz.get_questions()
 	except:
 		frappe.throw("Quiz {0} does not exist".format(quiz_name))
 		return None
+
+	enrollment = utils.get_course_enrollment(course_name).name
+	quiz_status = {}
+	quiz_status['is_complete'], quiz_status['score'], quiz_status['result']  = utils.check_quiz_completion(quiz, enrollment)
+	quiz_output = [{'name':question.name, 'question':question.question, 'type': question.type, 'options':[{'name': option.name, 'option':option.option} for option in question.options]} for question in questions]
+	return { 'quizData': quiz_output, 'status': quiz_status}
 
 @frappe.whitelist()
 def evaluate_quiz(course, quiz_response, quiz_name):
