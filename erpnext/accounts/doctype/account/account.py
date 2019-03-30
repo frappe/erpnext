@@ -112,6 +112,8 @@ class Account(NestedSet):
 				["company", "name"], as_dict=True):
 				acc_name_map[d["company"]] = d["name"]
 
+			if not acc_name_map: return
+
 			for company in descendants:
 				doc = frappe.copy_doc(self)
 				doc.flags.ignore_root_company_validation = True
