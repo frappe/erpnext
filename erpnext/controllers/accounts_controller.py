@@ -552,6 +552,17 @@ class AccountsController(TransactionBase):
 			from erpnext.accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
 
+	def on_cancel(self):
+		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
+
+		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
+			if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
+				unlink_ref_doc_from_payment_entries(self)
+
+		elif self.doctype in ["Sales Order", "Purchase Order"]:
+			if frappe.db.get_single_value('Accounts Settings', 'unlink_advance_payment_on_cancellation_of_order'):
+				unlink_ref_doc_from_payment_entries(self)
+
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
 		from erpnext.controllers.status_updater import get_tolerance_for
 		item_tolerance = {}
