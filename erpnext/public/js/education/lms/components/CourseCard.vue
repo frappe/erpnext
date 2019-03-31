@@ -1,8 +1,11 @@
 <template>
-<div class="card mt-3" data-list="getting-started">
-    <div class='card-body'>
-        <div class="row">
-            <div class="course-details col-xs-8 col-sm-9 col-md-10">
+    <div class="mt-3 col-md-4 col-sm-12">
+        <div class="card h-100">
+            <div class="card-hero-img" v-if="course.hero_image" v-bind:style="{ 'background-image': 'url(' + image + ')' }"></div>
+            <div v-else class="card-image-wrapper">
+                <div class="image-body">{{ course.course_name }}</div>
+            </div>
+            <div class='card-body'>
                 <h5 class="card-title">{{ course.course_name }}</h5>
                 <span class="course-list text-muted" id="getting-started">
                     Topics
@@ -13,18 +16,19 @@
                     </ul>
                 </span>
             </div>
-            <div class='course-buttons text-center col-xs-4 col-sm-3 col-md-2'>
-                <a-button
-                    :type="buttonType"
-                    size="sm btn-block"
-                    :route="courseRoute"
-                >
-                    {{ buttonName }}
-                </a-button>
+            <div class='text-right p-3'>
+                <div class='course-buttons text-center'>
+                    <a-button
+                        :type="buttonType"
+                        size="sm btn-block"
+                        :route="courseRoute"
+                    >
+                        {{ buttonName }}
+                    </a-button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </template>
 
 <script>
@@ -88,9 +92,31 @@ export default {
 </script>
 
 <style scoped>
-    @media only screen and (max-width: 576px) {
-        .course-buttons {
-            margin-top: 1em;
-        }
+    .course-buttons {
+        margin-bottom: 1em;
+    }
+
+    div.card-hero-img {
+        height: 220px;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-color: rgb(250, 251, 252);
+    }
+
+    .card-image-wrapper {
+        display: flex;
+        overflow: hidden;
+        height: 220px;
+        background-color: rgb(250, 251, 252);
+    }
+
+    .image-body {
+        align-self: center;
+        color: #d1d8dd;
+        font-size: 24px;
+        font-weight: 600;
+        line-height: 1;
+        padding: 20px;
     }
 </style>
