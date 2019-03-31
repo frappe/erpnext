@@ -1,13 +1,16 @@
 <template>
-<div class='mt-3'>
-    <div class="card">
-        <div class="card-hero-img" v-if="program.hero_image" v-bind:style="{ 'background-image': 'url(' + image + ')' }"></div>
-        <div class='card-body'>
-            <router-link :to="'/Program/' + program.name">
+<div class='mt-3 col-md-4 col-sm-12'>
+    <div class="card h-100">
+        <router-link :to="'/Program/' + program.name">
+            <div class="card-hero-img" v-if="program.hero_image" v-bind:style="{ 'background-image': 'url(' + image + ')' }"></div>
+            <div v-else class="card-image-wrapper">
+                <div class="image-body">{{ program.program_name }}</div>
+            </div>
+            <div class='card-body'>
                 <h5 class='card-title'>{{ program.program_name }}</h5>
-            </router-link>
-            <div v-html="program.description"></div>
-        </div>
+                <div>{{ program.description.substring(0,200) }}...</div>
+            </div>
+        </router-link>
         <div class='text-right p-3'>
             <button v-if="program.intro_video" class='btn btn-secondary btn-sm text-white' data-toggle="modal" data-target="#videoModal">Watch Intro</button>
             <a-button v-if="enrolled" type="dark" size="sm" :route="programPageRoute">
@@ -79,6 +82,25 @@ export default {
 
     div.card-hero-img {
         height: 220px;
-        background-position: center
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-color: rgb(250, 251, 252);
+    }
+
+    .card-image-wrapper {
+        display: flex;
+        overflow: hidden;
+        height: 220px;
+        background-color: rgb(250, 251, 252);
+    }
+
+    .image-body {
+        align-self: center;
+        color: #d1d8dd;
+        font-size: 24px;
+        font-weight: 600;
+        line-height: 1;
+        padding: 20px;
     }
 </style>

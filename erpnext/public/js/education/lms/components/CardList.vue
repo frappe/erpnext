@@ -1,12 +1,12 @@
 <template>
 	<section class="featured-products-section" :class='sectionType'>
 	<h5 class='featured-heading' v-html="title"></h5>
-	<div class="featured-products">
+	<div class="featured-products row">
 		<!-- <p class='lead text-center' v-html="description"></p> -->
 		<slot name="card-list-slot"></slot>
-		<div class='mt-4 text-center'>
-			<slot name="list-bottom"></slot>
-		</div>
+	</div>
+	<div class='mt-4 text-center'>
+		<slot name="list-bottom"></slot>
 	</div>
 </section>
 </template>
