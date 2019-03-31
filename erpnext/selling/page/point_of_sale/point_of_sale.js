@@ -233,9 +233,13 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			} else {
 				this.update_item_in_frm(item, field, value)
 					.then(() => {
-						// update cart
-						this.update_cart_data(item);
-						this.set_form_action();
+						this.frm.doc.items.forEach(item_row => {
+							// update cart
+							frappe.run_serially([
+								() => this.update_cart_data(item_row),
+								() => this.set_form_action()
+							]);
+						});
 					});
 			}
 			return;
@@ -256,7 +260,9 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					.then(() => {
 						this.frm.script_manager.trigger('qty', item.doctype, item.name)
 							.then(() => {
-								this.update_cart_data(item);
+								this.frm.doc.items.forEach(item => {
+									this.update_cart_data(item);
+								});
 							});
 					});
 			},
