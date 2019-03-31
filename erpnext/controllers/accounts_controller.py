@@ -282,7 +282,7 @@ class AccountsController(TransactionBase):
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
 
-					if ret.get("pricing_rules"):
+					if ret.get("pricing_rules") and not ret.get("validate_applied_rule", 0):
 						# if user changed the discount percentage then set user's discount percentage ?
 						item.set("pricing_rules", ret.get("pricing_rules"))
 						item.set("discount_percentage", ret.get("discount_percentage"))
