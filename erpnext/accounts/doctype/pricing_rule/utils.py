@@ -4,10 +4,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
-import json
-import copy
+import frappe, copy, json
 from frappe import throw, _
+from six import string_types
 from frappe.utils import flt, cint, get_datetime
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -39,7 +38,9 @@ def get_pricing_rules(args, doc=None):
 			if pricing_rule:
 				rules.append(pricing_rule)
 	else:
-		rules.append(filter_pricing_rules(args, pricing_rules, doc))
+		pricing_rule = filter_pricing_rules(args, pricing_rules, doc)
+		if pricing_rule:
+			rules.append(pricing_rule)
 
 	return rules
 
@@ -175,7 +176,7 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 		pr_doc = frappe.get_doc('Pricing Rule', pricing_rules[0].name)
 
 		if pricing_rules[0].mixed_conditions and doc:
-			stock_qty, amount = get_qty_and_rate_for_mixed_conditions(doc, pr_doc)
+			stock_qty, amount = get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args)
 
 		elif pricing_rules[0].is_cumulative:
 			items = [args.get(frappe.scrub(pr_doc.get('apply_on')))]
@@ -314,7 +315,7 @@ def apply_internal_priority(pricing_rules, field_set, args):
 
 	return filtered_rules or pricing_rules
 
-def get_qty_and_rate_for_mixed_conditions(doc, pr_doc):
+def get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args):
 	sum_qty, sum_amt = [0, 0]
 	items = get_pricing_rule_items(pr_doc) or []
 	apply_on = frappe.scrub(pr_doc.get('apply_on'))
@@ -324,8 +325,12 @@ def get_qty_and_rate_for_mixed_conditions(doc, pr_doc):
 			if row.get(apply_on) not in items: continue
 
 			if pr_doc.mixed_conditions:
-				sum_qty += row.stock_qty
-				sum_amt += row.amount
+				amt = args.get('qty') * args.get("price_list_rate")
+				if args.get("item_code") != row.get("item_code"):
+					amt = row.get('qty') * row.get("price_list_rate")
+
+				sum_qty += row.get("stock_qty") or args.get("stock_qty")
+				sum_amt += amt
 
 		if pr_doc.is_cumulative:
 			data = get_qty_amount_data_for_cumulative(pr_doc, doc, items)
@@ -340,8 +345,8 @@ def get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules):
 	for d in get_pricing_rule_items(pr_doc):
 		for row in doc.items:
 			if d == row.get(frappe.scrub(pr_doc.apply_on)):
-				pricing_rules = filter_pricing_rules_for_qty_amount(row.stock_qty,
-					row.amount, pricing_rules, row)
+				pricing_rules = filter_pricing_rules_for_qty_amount(row.get("stock_qty"),
+					row.get("amount"), pricing_rules, row)
 
 				if pricing_rules and pricing_rules[0]:
 					return pricing_rules
@@ -395,17 +400,15 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=[]):
 def validate_pricing_rules(doc):
 	validate_pricing_rule_on_transactions(doc)
 
-	if not doc.pricing_rules: return
-
 	for d in doc.items:
 		validate_pricing_rule_on_items(doc, d)
 
 	doc.calculate_taxes_and_totals()
 
-def validate_pricing_rule_on_items(doc, item_row):
+def validate_pricing_rule_on_items(doc, item_row, do_not_validate = False):
 	value = 0
-	for pr_row in get_applied_pricing_rules(doc, item_row):
-		pr_doc = frappe.get_doc('Pricing Rule', pr_row.pricing_rule)
+	for pricing_rule in get_applied_pricing_rules(doc, item_row):
+		pr_doc = frappe.get_doc('Pricing Rule', pricing_rule)
 
 		if pr_doc.get('apply_on') == 'Transaction': continue
 
@@ -416,7 +419,7 @@ def validate_pricing_rule_on_items(doc, item_row):
 				if not pr_doc.get(field): continue
 
 				value += pr_doc.get(field)
-			apply_pricing_rule(doc, pr_doc, pr_row, item_row, value)
+			apply_pricing_rule(doc, pr_doc, item_row, value, do_not_validate)
 
 def validate_pricing_rule_on_transactions(doc):
 	conditions = "apply_on = 'Transaction'"
@@ -451,8 +454,8 @@ def validate_pricing_rule_on_transactions(doc):
 				apply_pricing_rule_for_free_items(doc, d)
 
 def get_applied_pricing_rules(doc, item_row):
-	return [d for d in doc.pricing_rules
-		if d.child_docname == item_row.name]
+	return (item_row.get("pricing_rules").split(',')
+		if item_row.get("pricing_rules") else [])
 
 def apply_pricing_rule_for_free_items(doc, pricing_rule):
 	if pricing_rule.get('free_item'):
@@ -471,7 +474,37 @@ def apply_pricing_rule_for_free_items(doc, pricing_rule):
 
 			doc.set_missing_values()
 
-def apply_pricing_rule(doc, pr_doc, pr_row, item_row, value):
+def apply_pricing_rule(doc, pr_doc, item_row, value, do_not_validate=False):
+	apply_on, items = get_apply_on_and_items(pr_doc, item_row)
+
+	rule_applied = {}
+
+	for item in doc.get("items"):
+		if not item.pricing_rules:
+			item.pricing_rules = item_row.pricing_rules
+
+		if item.get(apply_on) in items:
+			for field in ['discount_percentage', 'discount_amount', 'rate']:
+				if not pr_doc.get(field): continue
+
+				key = (item.name, item.pricing_rules)
+				if not pr_doc.validate_applied_rule:
+					rule_applied[key] = 1
+					item.set(field, value)
+				elif item.get(field) < value:
+					if not do_not_validate and item.idx == item_row.idx:
+						rule_applied[key] = 0
+						frappe.msgprint(_("Row {0}: user has not applied rule <b>{1}</b> on the item <b>{2}</b>")
+							.format(item.idx, pr_doc.title, item.item_code))
+
+	if rule_applied and doc.pricing_rules:
+		for d in doc.pricing_rules:
+			key = (d.child_docname, d.pricing_rule)
+			if key in rule_applied:
+				d.rule_applied = 1
+
+def get_apply_on_and_items(pr_doc, item_row):
+	# for mixed or other items conditions
 	apply_on = frappe.scrub(pr_doc.get('apply_on'))
 	items = (get_pricing_rule_items(pr_doc)
 		if pr_doc.mixed_conditions else [item_row.get(apply_on)])
@@ -480,19 +513,7 @@ def apply_pricing_rule(doc, pr_doc, pr_row, item_row, value):
 		apply_on = frappe.scrub(pr_doc.apply_rule_on_other)
 		items = [pr_doc.get(apply_on)]
 
-	rule_applied = 1
-	if item_row.get(apply_on) in items:
-		for field in ['discount_percentage', 'discount_amount', 'rate']:
-			if not pr_doc.get(field): continue
-
-			if not pr_doc.validate_applied_rule:
-				item_row.set(field, value)
-			elif item_row.get(field) < value:
-				rule_applied = 0
-				frappe.msgprint(_("Row {0}: user has not applied rule <b>{1}</b> on the item <b>{2}</b>")
-					.format(item_row.idx, pr_doc.title, item_row.item_code))
-
-			pr_row.rule_applied = rule_applied
+	return apply_on, items
 
 def get_pricing_rule_items(pr_doc):
 	apply_on = frappe.scrub(pr_doc.get('apply_on'))
@@ -500,3 +521,14 @@ def get_pricing_rule_items(pr_doc):
 	pricing_rule_apply_on = apply_on_table.get(pr_doc.get('apply_on'))
 
 	return [item.get(apply_on) for item in pr_doc.get(pricing_rule_apply_on)] or []
+
+@frappe.whitelist()
+def validate_pricing_rule_for_different_cond(doc):
+	if isinstance(doc, string_types):
+		doc = json.loads(doc)
+
+	doc = frappe.get_doc(doc)
+	for d in doc.get("items"):
+		validate_pricing_rule_on_items(doc, d, True)
+
+	return doc
