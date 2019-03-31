@@ -449,7 +449,8 @@ def update_reference_in_journal_entry(d, jv_doc):
 
 		if amt_allocatable < original_dr_or_cr:
 			jvd = frappe.db.sql("""
-				select cost_center, balance, against_account, account_type, exchange_rate, account_currency
+				select cost_center, balance, against_account, account_type, exchange_rate, account_currency,
+					project, cheque_no, cheque_date, user_remark
 				from `tabJournal Entry Account` where name = %s
 			""", jv_detail.name, as_dict=True)
 
@@ -458,6 +459,14 @@ def update_reference_in_journal_entry(d, jv_doc):
 
 			# new entry with balance amount
 			ch = jv_doc.append("accounts")
+
+			# insert it in between
+			new_idx = jv_detail.idx + 1
+			for row in jv_doc.accounts:
+				if row.idx >= new_idx:
+					row.idx += 1
+			ch.idx = new_idx
+
 			ch.account = d['account']
 			ch.account_type = jvd[0]['account_type']
 			ch.account_currency = jvd[0]['account_currency']
@@ -465,7 +474,11 @@ def update_reference_in_journal_entry(d, jv_doc):
 			ch.party_type = d["party_type"]
 			ch.party = d["party"]
 			ch.cost_center = cstr(jvd[0]["cost_center"])
+			ch.project = jvd[0]["project"]
 			ch.balance = flt(jvd[0]["balance"])
+			ch.cheque_no = jvd[0]["cheque_no"]
+			ch.cheque_date = jvd[0]["cheque_date"]
+			ch.user_remark = jvd[0]["user_remark"]
 
 			ch.set(d['dr_or_cr'], amount_in_account_currency)
 			ch.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit', amount_in_company_currency)

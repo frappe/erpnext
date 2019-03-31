@@ -1524,7 +1524,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				method: "set_advances",
 				doc: this.frm.doc,
 				callback: function(r, rt) {
-					refresh_field("advances");
+					this.calculate_taxes_and_totals();
 				}
 			})
 		}
