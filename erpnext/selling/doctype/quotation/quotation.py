@@ -97,6 +97,8 @@ class Quotation(SellingController):
 		self.update_lead()
 
 	def on_cancel(self):
+		super(Quotation, self).on_cancel()
+
 		#update enquiry status
 		self.set_status(update=True)
 		self.update_opportunity()
