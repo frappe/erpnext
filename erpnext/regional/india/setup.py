@@ -395,7 +395,9 @@ def set_tax_withholding_category(company):
 			doc.insert()
 		except frappe.DuplicateEntryError:
 			doc = frappe.get_doc("Tax Withholding Category", d.get("name"))
-			doc.append("accounts", accounts[0])
+
+			if accounts:
+				doc.append("accounts", accounts[0])
 
 			# if fiscal year don't match with any of the already entered data, append rate row
 			fy_exist = [k for k in doc.get('rates') if k.get('fiscal_year')==fiscal_year]
