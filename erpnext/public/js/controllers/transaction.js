@@ -160,8 +160,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		if(frappe.meta.get_docfield(this.frm.doc.doctype, "pricing_rules")) {
-			this.frm.set_indicator_formatter('pricing_rule',
-				function(doc) { return (doc.rule_applied) ? "green" : "red" });
+			this.frm.set_indicator_formatter('pricing_rule', function(doc) {
+				return (doc.rule_applied) ? "green" : "red";
+			});
 		}
 	},
 	onload: function() {
