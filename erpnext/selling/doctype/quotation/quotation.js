@@ -8,7 +8,16 @@ frappe.ui.form.on('Quotation', {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
 			'Sales Order': 'Make Sales Order'
-		}
+		},
+
+		frm.set_query("quotation_to", function() {
+			return{
+				"filters": {
+					"name": ["in", ["Customer", "Lead"]],
+				}
+			}
+		});
+
 	},
 
 	refresh: function(frm) {
@@ -97,23 +106,29 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 	},
 
-	quotation_to: function() {
-		var me = this;
-		if (this.frm.doc.quotation_to == "Lead") {
-			this.frm.set_value("customer", null);
-			this.frm.set_value("contact_person", null);
-		} else if (this.frm.doc.quotation_to == "Customer") {
-			this.frm.set_value("lead", null);
+	quotation_to: function(frm) {
+		this.set_dynamic_field_label();
+		this.toggle_reqd_lead_customer();
+	},
+
+	set_dynamic_field_label: function(){
+		if (this.frm.doc.quotation_to == "Customer")
+		{
+			this.frm.set_df_property("customer_lead", "label", "Customer");
 		}
 
-		this.toggle_reqd_lead_customer();
+		if (this.frm.doc.quotation_to == "Lead")
+		{
+			this.frm.set_df_property("customer_lead", "label", "Lead");
+
+			this.frm.fields_dict.customer_lead.get_query = function() {
+				return{	query: "erpnext.controllers.queries.lead_query" }
+			}
+		}
 	},
 
 	toggle_reqd_lead_customer: function() {
 		var me = this;
-
-		this.frm.toggle_reqd("lead", this.frm.doc.quotation_to == "Lead");
-		this.frm.toggle_reqd("customer", this.frm.doc.quotation_to == "Customer");
 
 		// to overwrite the customer_filter trigger from queries.js
 		this.frm.set_query('customer_address', erpnext.queries.address_query);
@@ -162,10 +177,6 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 });
 
 cur_frm.script_manager.make(erpnext.selling.QuotationController);
-
-cur_frm.fields_dict.lead.get_query = function(doc,cdt,cdn) {
-	return{	query: "erpnext.controllers.queries.lead_query" }
-}
 
 cur_frm.cscript['Make Sales Order'] = function() {
 	frappe.model.open_mapped_doc({
