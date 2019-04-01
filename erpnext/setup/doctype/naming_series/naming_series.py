@@ -32,6 +32,7 @@ class NamingSeries(Document):
 				continue
 
 			if options:
+				options = get_naming_series_options(d)
 				prefixes = prefixes + "\n" + options
 		prefixes.replace("\n\n", "\n")
 		prefixes = prefixes.split("\n")
@@ -213,3 +214,35 @@ def get_default_naming_series(doctype):
 			NamingSeriesNotSetError)
 	else:
 		return out
+
+def get_naming_series_options(doctype):
+	meta = frappe.get_meta(doctype)
+	options = meta.get_field("naming_series").options.split("\n")	
+	options_list = []
+
+	fields = [d.fieldname for d in meta.fields]
+
+	for option in options:
+		flag = False
+		parts = option.split('.')
+
+		if parts[-1] == "#" * len(parts[-1]):
+			del parts[-1]
+
+		naming_str = parse_naming_series(parts)
+
+		for part in parts:
+			if part in fields:
+				flag = True
+				data = frappe.db.sql_list("select distinct {field} from `tab{doctype}` where {field} is not NULL".format(field=part, doctype=doctype))
+
+				for value in data:
+					series = naming_str.replace(part, value)
+
+					if frappe.db.get_value("Series", series, 'name', order_by='name'):
+						options_list.append(series)
+		else:
+			if not flag:
+				options_list.append(option)
+
+	return "\n".join(options_list)
