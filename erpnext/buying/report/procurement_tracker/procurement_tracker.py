@@ -149,13 +149,22 @@ def get_data():
 		SELECT
 			po_item.item_code,
 			po_item.item_name,
+			po_item.cost_center,
+			po_item.project,
+			po_item.warehouse,
+			po_item.material_request,
 			po_item.description,
+			po_item.stock_uom,
+			po_item.qty,
+			po_item.net_amount,
+			po_item.base_amount,
+			po_item.schedule_date,
+			po_item.expected_delivery_date,
 			po.name,
 			po.transaction_date,
-			po.customer,
-			po.territory,
-			sum(po_item.qty) as net_qty,
-			po.company
+			po.supplier,
+			po.status,
+			po.owner
 		FROM `tabPurchase Order` po, `tabPurchase Order Item` po_item
 		WHERE
 			po.docstatus = 1
@@ -164,4 +173,14 @@ def get_data():
 		GROUP BY
 			po.name,po_item.item_code
 		""", as_dict = 1)
-	return data
+
+	mr_records = frappe._dict(frappe.db.sql("""
+		SELECT
+			name,
+			transaction_date
+		FROM `tabMaterial Request`
+		WHERE
+			per_ordered = 100
+			and docstatus = 1
+		"""))
+	return purchase_order_entry
