@@ -497,8 +497,8 @@ def apply_pricing_rule(doc, pr_doc, item_row, value, do_not_validate=False):
 						frappe.msgprint(_("Row {0}: user has not applied rule <b>{1}</b> on the item <b>{2}</b>")
 							.format(item.idx, pr_doc.title, item.item_code))
 
-	if rule_applied and doc.pricing_rules:
-		for d in doc.pricing_rules:
+	if rule_applied and doc.get("pricing_rules"):
+		for d in doc.get("pricing_rules"):
 			key = (d.child_docname, d.pricing_rule)
 			if key in rule_applied:
 				d.rule_applied = 1
