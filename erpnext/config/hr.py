@@ -296,6 +296,10 @@ def get_data():
 					"name": "Loan Application",
 					"dependencies": ["Employee"]
 				},
+				{
+					"type": "doctype",
+					"name": "Loan"
+				}
 			]
 		},
 		{
