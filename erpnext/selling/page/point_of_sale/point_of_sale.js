@@ -234,15 +234,20 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				this.update_item_in_frm(item, field, value)
 					.then(() => {
 						frappe.dom.unfreeze();
-						let items = this.frm.doc.items.map(item => item.idx);
-						if (items && items.length > 0 && items.indexOf(item.idx)) {
-							this.frm.doc.items.forEach(item_row => {
-								// update cart
-								this.on_qty_change(item_row);
-							});
-						} else {
-							this.on_qty_change(item);
-						}
+						frappe.run_serially([
+							() => {
+								let items = this.frm.doc.items.map(item => item.name);
+								if (items && items.length > 0 && items.includes(item.name)) {
+									this.frm.doc.items.forEach(item_row => {
+										// update cart
+										this.on_qty_change(item_row);
+									});
+								} else {
+									this.on_qty_change(item);
+								}
+							},
+							() => this.post_qty_change(item)
+						]);
 					});
 			}
 			return;
@@ -263,9 +268,20 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					.then(() => {
 						this.frm.script_manager.trigger('qty', item.doctype, item.name)
 							.then(() => {
-								this.frm.doc.items.forEach(item => {
-									this.update_cart_data(item);
-								});
+								frappe.run_serially([
+									() => {
+										let items = this.frm.doc.items.map(i => i.name);
+										if (items && items.length > 0 && items.includes(item.name)) {
+											this.frm.doc.items.forEach(item_row => {
+												// update cart
+												this.on_qty_change(item_row);
+											});
+										} else {
+											this.on_qty_change(item);
+										}
+									},
+									() => this.post_qty_change(item)
+								]);
 							});
 					});
 			},
@@ -286,8 +302,15 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	on_qty_change(item) {
 		frappe.run_serially([
 			() => this.update_cart_data(item),
-			() => this.set_form_action()
 		]);
+	}
+
+	post_qty_change(item) {
+		this.cart.update_taxes_and_totals();
+		this.cart.update_grand_total();
+		this.cart.update_qty_total();
+		this.cart.scroll_to_item(item.item_code);
+		this.set_form_action();
 	}
 
 	select_batch_and_serial_no(row) {
@@ -304,7 +327,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 									frappe.model.clear_doc(item.doctype, item.name);
 								}
 							},
-							() => this.update_cart_data(item)
+							() => this.update_cart_data(item),
+							() => this.post_qty_change(item)
 						]);
 					});
 			})
@@ -321,9 +345,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	update_cart_data(item) {
 		this.cart.add_item(item);
-		this.cart.update_taxes_and_totals();
-		this.cart.update_grand_total();
-		this.cart.update_qty_total();
 		frappe.dom.unfreeze();
 	}
 
@@ -974,7 +995,6 @@ class POSCart {
 			$item.appendTo(this.$cart_items);
 		}
 		this.highlight_item(item.item_code);
-		this.scroll_to_item(item.item_code);
 	}
 
 	update_item(item) {
