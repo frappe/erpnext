@@ -56,7 +56,7 @@ class GLEntry(Document):
 					.format(self.voucher_type, self.voucher_no, self.account))
 
 		# Zero value transaction is not allowed
-		if not (flt(self.debit) or flt(self.credit)):
+		if not (flt(self.debit, self.precision("debit")) or flt(self.credit, self.precision("credit"))):
 			frappe.throw(_("{0} {1}: Either debit or credit amount is required for {2}")
 				.format(self.voucher_type, self.voucher_no, self.account))
 
@@ -216,17 +216,23 @@ def validate_frozen_account(account, adv_adj=None):
 def update_against_account(voucher_type, voucher_no):
 	entries = frappe.db.get_all("GL Entry",
 		filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
-		fields=["name", "party", "against", "debit", "credit", "account"])
+		fields=["name", "party", "against", "debit", "credit", "account", "company"])
+
+	if not entries:
+		return
+	company_currency = erpnext.get_company_currency(entries[0].company)
+	precision = get_field_precision(frappe.get_meta("GL Entry")
+			.get_field("debit"), company_currency)
 
 	accounts_debited, accounts_credited = [], []
 	for d in entries:
-		if flt(d.debit > 0): accounts_debited.append(d.party or d.account)
-		if flt(d.credit) > 0: accounts_credited.append(d.party or d.account)
+		if flt(d.debit, precision) > 0: accounts_debited.append(d.party or d.account)
+		if flt(d.credit, precision) > 0: accounts_credited.append(d.party or d.account)
 
 	for d in entries:
-		if flt(d.debit > 0):
+		if flt(d.debit, precision) > 0:
 			new_against = ", ".join(list(set(accounts_credited)))
-		if flt(d.credit > 0):
+		if flt(d.credit, precision) > 0:
 			new_against = ", ".join(list(set(accounts_debited)))
 
 		if d.against != new_against:
