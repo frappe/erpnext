@@ -233,13 +233,16 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			} else {
 				this.update_item_in_frm(item, field, value)
 					.then(() => {
-						this.frm.doc.items.forEach(item_row => {
-							// update cart
-							frappe.run_serially([
-								() => this.update_cart_data(item_row),
-								() => this.set_form_action()
-							]);
-						});
+						frappe.dom.unfreeze();
+						let items = this.frm.doc.items.map(item => item.idx);
+						if (items && items.length > 0 && items.indexOf(item.idx)) {
+							this.frm.doc.items.forEach(item_row => {
+								// update cart
+								this.on_qty_change(item_row);
+							});
+						} else {
+							this.on_qty_change(item);
+						}
 					});
 			}
 			return;
@@ -277,6 +280,13 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					this.select_batch_and_serial_no(item);
 				}
 			}
+		]);
+	}
+
+	on_qty_change(item) {
+		frappe.run_serially([
+			() => this.update_cart_data(item),
+			() => this.set_form_action()
 		]);
 	}
 
