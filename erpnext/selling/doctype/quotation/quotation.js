@@ -26,6 +26,8 @@ frappe.ui.form.on('Quotation', {
 
 	quotation_to: function(frm) {
 		frm.trigger("set_label");
+		frm.trigger("set_dynamic_field_label");
+		frm.trigger("toggle_reqd_lead_customer");
 	},
 
 	set_label: function(frm) {
@@ -107,15 +109,11 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 	},
 
-	quotation_to: function(frm) {
-		this.set_dynamic_field_label();
-		this.toggle_reqd_lead_customer();
-	},
-
 	set_dynamic_field_label: function(){
 		if (this.frm.doc.quotation_to == "Customer")
 		{
 			this.frm.set_df_property("customer_lead", "label", "Customer");
+			this.frm.fields_dict.customer_lead.get_query = null;
 		}
 
 		if (this.frm.doc.quotation_to == "Lead")

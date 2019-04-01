@@ -28,7 +28,7 @@ class Quotation(SellingController):
 		self.update_opportunity()
 		self.validate_order_type()
 		self.validate_uom_is_integer("stock_uom", "qty")
-		self.validate_quotation_to()
+		# self.validate_quotation_to()
 		self.validate_valid_till()
 		if self.items:
 			self.with_items = 1
@@ -43,16 +43,16 @@ class Quotation(SellingController):
 	def validate_order_type(self):
 		super(Quotation, self).validate_order_type()
 
-	def validate_quotation_to(self):
-		if self.customer:
-			self.quotation_to = "Customer"
-			self.lead = None
-		elif self.lead:
-			self.quotation_to = "Lead"
+	# def validate_quotation_to(self):
+	# 	if self.customer:
+	# 		self.quotation_to = "Customer"
+	# 		self.lead = None
+	# 	elif self.lead:
+	# 		self.quotation_to = "Lead"
 
 	def update_lead(self):
-		if self.lead:
-			frappe.get_doc("Lead", self.lead).set_status(update=True)
+		if self.quotation_to == "Lead":
+			frappe.get_doc("Lead", self.customer_lead).set_status(update=True)
 
 	def update_opportunity(self):
 		for opportunity in list(set([d.prevdoc_docname for d in self.get("items")])):
