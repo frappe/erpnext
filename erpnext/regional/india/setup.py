@@ -105,16 +105,18 @@ def make_custom_fields(update=True):
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
 			insert_after='language', print_hide=1, collapsible=1),
 		dict(fieldname='gst_category', label='GST Category',
-			fieldtype='Data', insert_after='gst_section', print_hide=1,
-			fetch_from='supplier.gst_category')
+			fieldtype='Select', insert_after='gst_section', print_hide=1,
+			options='Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nUIN Holders',
+			fetch_from='supplier.gst_category', fetch_if_empty=1)
 	]
 
 	sales_invoice_gst_category = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
 			insert_after='language', print_hide=1, collapsible=1),
 		dict(fieldname='gst_category', label='GST Category',
-			fieldtype='Data', insert_after='gst_section', print_hide=1,
-			fetch_from='customer.gst_category')
+			fieldtype='Select', insert_after='gst_section', print_hide=1,
+			options='Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
+			fetch_from='customer.gst_category', fetch_if_empty=1)
 	]
 
 	invoice_gst_fields = [
