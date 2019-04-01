@@ -180,7 +180,8 @@ def make_custom_fields():
 		'Sales Invoice Item': [hsn_sac_field],
 		'Purchase Order Item': [hsn_sac_field],
 		'Purchase Receipt Item': [hsn_sac_field],
-		'Purchase Invoice Item': [hsn_sac_field]
+		'Purchase Invoice Item': [hsn_sac_field],
+		'Material Request Item': [hsn_sac_field]
 	}
 
 	create_custom_fields(custom_fields)
