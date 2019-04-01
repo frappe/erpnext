@@ -859,6 +859,9 @@ class Item(WebsiteGenerator):
 					d.conversion_factor = value
 
 	def validate_attributes(self):
+		if not self.variant_based_on:
+			self.variant_based_on = 'Item Attribute'
+
 		if (self.has_variants or self.variant_of) and self.variant_based_on == 'Item Attribute':
 			attributes = []
 			if not self.attributes:
@@ -881,7 +884,7 @@ class Item(WebsiteGenerator):
 			variant = get_variant(self.variant_of, args, self.name)
 			if variant:
 				frappe.throw(_("Item variant {0} exists with same attributes")
-                                    .format(variant), ItemVariantExistsError)
+					.format(variant), ItemVariantExistsError)
 
 			validate_item_variant_attributes(self, args)
 
