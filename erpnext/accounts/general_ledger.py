@@ -143,7 +143,6 @@ def make_round_off_gle(gl_map, debit_credit_diff):
 	round_off_gle = frappe._dict()
 	for d in gl_map:
 		if d.account == round_off_account:
-			round_off_gle = d
 			if d.debit_in_account_currency:
 				debit_credit_diff -= flt(d.debit_in_account_currency)
 			else:
@@ -155,20 +154,19 @@ def make_round_off_gle(gl_map, debit_credit_diff):
 			"posting_date", "remarks", "is_opening"]:
 				round_off_gle[k] = gl_map[0][k]
 
-	round_off_gle.update({
-		"account": round_off_account,
-		"debit_in_account_currency": abs(debit_credit_diff) if debit_credit_diff < 0 else 0,
-		"credit_in_account_currency": debit_credit_diff if debit_credit_diff > 0 else 0,
-		"debit": abs(debit_credit_diff) if debit_credit_diff < 0 else 0,
-		"credit": debit_credit_diff if debit_credit_diff > 0 else 0,
-		"cost_center": round_off_cost_center,
-		"party_type": None,
-		"party": None,
-		"against_voucher_type": None,
-		"against_voucher": None
-	})
-
 	if not round_off_account_exists:
+		round_off_gle.update({
+			"account": round_off_account,
+			"debit_in_account_currency": abs(debit_credit_diff) if debit_credit_diff < 0 else 0,
+			"credit_in_account_currency": debit_credit_diff if debit_credit_diff > 0 else 0,
+			"debit": abs(debit_credit_diff) if debit_credit_diff < 0 else 0,
+			"credit": debit_credit_diff if debit_credit_diff > 0 else 0,
+			"cost_center": round_off_cost_center,
+			"party_type": None,
+			"party": None,
+			"against_voucher_type": None,
+			"against_voucher": None
+		})
 		gl_map.append(round_off_gle)
 
 def get_round_off_account_and_cost_center(company):
