@@ -1341,12 +1341,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	get_advances: function() {
+		var me = this;
 		if(!this.frm.is_return) {
 			return this.frm.call({
 				method: "set_advances",
 				doc: this.frm.doc,
 				callback: function(r, rt) {
-					this.calculate_taxes_and_totals();
+					me.calculate_taxes_and_totals();
 				}
 			})
 		}

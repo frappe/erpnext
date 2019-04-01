@@ -416,8 +416,8 @@ class AccountsController(TransactionBase):
 			if d.against_order:
 				allocated_amount = flt(d.amount)
 			else:
-				if self.get("party_account_currency") and self.get("company_currency")\
-					and self.get("party_account_currency") == self.get("company_currency"):
+				if self.party_account_currency and self.company_currency\
+					and self.party_account_currency == self.company_currency:
 					amount = self.get("base_rounded_total") or self.get("base_grand_total")
 				else:
 					amount = self.get("rounded_total") or self.get("grand_total")
