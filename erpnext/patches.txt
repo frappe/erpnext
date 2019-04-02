@@ -580,6 +580,7 @@ erpnext.patches.v10_0.allow_operators_in_supplier_scorecard
 erpnext.patches.v11_0.update_delivery_trip_status
 erpnext.patches.v11_0.set_missing_gst_hsn_code
 erpnext.patches.v11_0.unset_against_voucher_in_receivable_payable_gl_entry
+erpnext.patches.v11_0.set_transaction_tax_exclusive_fields
 erpnext.patches.v11_0.rename_bom_wo_fields
 erpnext.patches.v11_0.rename_additional_salary_component_additional_salary
 erpnext.patches.v11_0.renamed_from_to_fields_in_project
