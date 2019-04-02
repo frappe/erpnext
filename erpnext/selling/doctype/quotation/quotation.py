@@ -43,7 +43,7 @@ class Quotation(SellingController):
 		super(Quotation, self).validate_order_type()
 
 	def update_lead(self):
-		if self.quotation_to == "Lead":
+		if self.quotation_to == "Lead" and self.customer_lead:
 			frappe.get_doc("Lead", self.customer_lead).set_status(update=True)
 
 	def update_opportunity(self):

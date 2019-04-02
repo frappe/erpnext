@@ -6,5 +6,5 @@ import frappe
 
 def execute():
 
-	frappe.db.dql(""" UPDATE `tabQuotation` set customer_lead = lead WHERE quotation_to = 'Lead' """)
-	frappe.db.dql(""" UPDATE `tabQuotation` set customer_lead = customer WHERE quotation_to = 'Customer' """)
+	frappe.db.sql(""" UPDATE `tabQuotation` set customer_lead = lead WHERE quotation_to = 'Lead' """)
+	frappe.db.sql(""" UPDATE `tabQuotation` set customer_lead = customer WHERE quotation_to = 'Customer' """)

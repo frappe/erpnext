@@ -22,11 +22,11 @@ frappe.ui.form.on('Quotation', {
 
 	refresh: function(frm) {
 		frm.trigger("set_label");
+		frm.trigger("set_dynamic_field_label");
 	},
 
 	quotation_to: function(frm) {
 		frm.trigger("set_label");
-		frm.trigger("set_dynamic_field_label");
 		frm.trigger("toggle_reqd_lead_customer");
 	},
 
