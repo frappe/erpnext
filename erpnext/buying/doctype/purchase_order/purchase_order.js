@@ -36,7 +36,7 @@ frappe.ui.form.on("Purchase Order", {
 	},
 
 	refresh: function(frm) {
-		if(frm.doc.docstatus == 1 && frm.doc.status != 'Closed' 
+		if(frm.doc.docstatus == 1 && frm.doc.status != 'Closed'
 			&& flt(frm.doc.per_received) < 100 && flt(frm.doc.per_billed) < 100) {
 			frm.add_custom_button(__('Update Items'), () => {
 				erpnext.utils.update_child_items({
@@ -432,7 +432,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		}
 	},
 
-	unhold_purchase_order: function(){		
+	unhold_purchase_order: function(){
 		cur_frm.cscript.update_status("Resume", "Draft")
 	},
 
@@ -454,7 +454,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					args: {
 						reference_doctype: me.frm.doctype,
 						reference_name: me.frm.docname,
-						content: __('Reason for hold:')+data.reason_for_hold,
+						content: __('Reason for hold: ')+data.reason_for_hold,
 						comment_email: frappe.session.user
 					},
 					callback: function(r) {
