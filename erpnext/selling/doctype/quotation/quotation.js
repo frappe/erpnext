@@ -39,16 +39,10 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
 		var me = this;
 		this._super(doc, dt, dn);
-		// if(doc.customer && !doc.quotation_to)
-		// 	doc.quotation_to = "Customer";
-		// else if(doc.lead && !doc.quotation_to)
-		// 	doc.quotation_to = "Lead";
 
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
-		// doctype = doc.quotation_to == 'Customer' ? 'Customer':'Lead';
-		// frappe.dynamic_link = {doc: this.frm.doc, fieldname: doctype.toLowerCase(), doctype: doctype}
 
 		var me = this;
 
@@ -130,6 +124,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		var me = this;
 
 		// to overwrite the customer_filter trigger from queries.js
+		this.frm.toggle_reqd("customer_lead", this.frm.doc.quotation_to);
 		this.frm.set_query('customer_address', erpnext.queries.address_query);
 		this.frm.set_query('shipping_address_name', erpnext.queries.address_query);
 	},
