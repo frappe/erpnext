@@ -441,7 +441,7 @@ class Item(WebsiteGenerator):
 
 		# add item taxes from template
 		for d in template.get("taxes"):
-			self.append("taxes", {"tax_type": d.tax_type, "tax_rate": d.tax_rate})
+			self.append("taxes", {"item_tax_template": d.item_tax_template})
 
 		# copy re-order table if empty
 		if not self.get("reorder_levels"):
@@ -490,17 +490,11 @@ class Item(WebsiteGenerator):
 		"""Check whether Tax Rate is not entered twice for same Tax Type"""
 		check_list = []
 		for d in self.get('taxes'):
-			if d.tax_type:
-				account_type = frappe.db.get_value("Account", d.tax_type, "account_type")
-
-				if account_type not in ['Tax', 'Chargeable', 'Income Account', 'Expense Account']:
-					frappe.throw(
-						_("Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable").format(d.idx))
+			if d.item_tax_template:
+				if d.item_tax_template in check_list:
+					frappe.throw(_("{0} entered twice in Item Tax").format(d.item_tax_template))
 				else:
-					if d.tax_type in check_list:
-						frappe.throw(_("{0} entered twice in Item Tax").format(d.tax_type))
-					else:
-						check_list.append(d.tax_type)
+					check_list.append(d.item_tax_template)
 
 	def validate_barcode(self):
 		from stdnum import ean

@@ -39,5 +39,11 @@
     "company": "_Test Company",
     "account": "_Test Payable USD - _TC"
   }]
+ },
+ {
+  "doctype": "Supplier",
+  "supplier_name": "_Test Supplier With Tax Category",
+  "supplier_group": "_Test Supplier Group",
+  "tax_category": "_Test Tax Category 1"
  }
 ]

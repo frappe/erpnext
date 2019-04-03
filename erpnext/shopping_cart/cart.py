@@ -303,9 +303,10 @@ def set_taxes(quotation, cart_settings):
 
 	customer_group = frappe.db.get_value("Customer", quotation.customer, "customer_group")
 
-	quotation.taxes_and_charges = set_taxes(quotation.customer, "Customer", \
-		quotation.transaction_date, quotation.company, customer_group, None, \
-		quotation.customer_address, quotation.shipping_address_name, 1)
+	quotation.taxes_and_charges = set_taxes(quotation.customer, "Customer",
+		quotation.transaction_date, quotation.company, customer_group=customer_group, supplier_group=None,
+		tax_category=quotation.tax_category, billing_address=quotation.customer_address,
+		shipping_address=quotation.shipping_address_name, use_for_shopping_cart=1)
 #
 # 	# clear table
 	quotation.set("taxes", [])
