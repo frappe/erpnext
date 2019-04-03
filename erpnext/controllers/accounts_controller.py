@@ -427,6 +427,7 @@ class AccountsController(TransactionBase):
 		"""Returns list of advances against Account, Party, Reference"""
 
 		res = self.get_advance_entries()
+		company_currency = erpnext.get_company_currency(self.company)
 
 		self.set("advances", [])
 		advance_allocated = 0
@@ -434,13 +435,13 @@ class AccountsController(TransactionBase):
 			if d.against_order:
 				allocated_amount = flt(d.amount)
 			else:
-				if self.get("party_account_currency") and self.get("company_currency")\
-					and self.get("party_account_currency") == self.get("company_currency"):
+				if self.get("party_account_currency")\
+					and self.get("party_account_currency") == company_currency:
 					amount = self.get("base_rounded_total") or self.get("base_grand_total")
 				else:
 					amount = self.get("rounded_total") or self.get("grand_total")
 
-				allocated_amount = min(amount - advance_allocated, d.amount)
+				allocated_amount = min(flt(amount) - advance_allocated, d.amount)
 			advance_allocated += flt(allocated_amount)
 
 			self.append("advances", {
