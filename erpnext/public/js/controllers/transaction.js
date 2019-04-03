@@ -53,6 +53,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			cur_frm.cscript.calculate_taxes_and_totals();
 		});
 
+		frappe.ui.form.on(this.frm.cscript.tax_table, "base_tax_amount", function(frm, cdt, cdn) {
+			if (flt(frm.doc.conversion_rate)>0.0) {
+				var tax = locals[cdt][cdn];
+				tax.tax_amount = flt(tax.base_tax_amount) / flt(frm.doc.conversion_rate);
+				cur_frm.cscript.calculate_taxes_and_totals();
+			}
+		});
+
 		frappe.ui.form.on(this.frm.cscript.tax_table, "row_id", function(frm, cdt, cdn) {
 			cur_frm.cscript.calculate_taxes_and_totals();
 		});
@@ -67,6 +75,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				cur_frm.cscript.set_dynamic_labels();
 				cur_frm.cscript.calculate_taxes_and_totals();
 			}
+		});
+
+		frappe.ui.form.on(this.frm.doctype, "calculate_tax_on_company_currency", function(frm, cdt, cdn) {
+			cur_frm.cscript.calculate_taxes_and_totals();
 		});
 
 		frappe.ui.form.on(this.frm.doctype, "apply_discount_on", function(frm) {
@@ -742,10 +754,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		if(flt(this.frm.doc.conversion_rate)>0.0) {
+			if (cint(this.frm.doc.calculate_tax_on_company_currency)) {
+				this.set_actual_charges_based_on_company_currency();
+			}
+
 			if(this.frm.doc.ignore_pricing_rule) {
 				this.calculate_taxes_and_totals();
 			} else if (!this.in_apply_price_list){
-				this.set_actual_charges_based_on_currency();
+				if (!cint(this.frm.doc.calculate_tax_on_company_currency)) {
+					this.set_actual_charges_based_on_currency();
+				}
 				this.apply_price_list();
 			}
 
@@ -778,6 +796,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if(d.charge_type == "Actual") {
 				frappe.model.set_value(d.doctype, d.name, "tax_amount",
 					flt(d.tax_amount) / flt(me.frm.doc.conversion_rate));
+			}
+		});
+	},
+
+	set_actual_charges_based_on_company_currency: function() {
+		var me = this;
+		$.each(this.frm.doc.taxes || [], function(i, d) {
+			if(d.charge_type == "Actual") {
+				d.tax_amount = flt(d.base_tax_amount) / flt(me.frm.doc.conversion_rate);
 			}
 		});
 	},

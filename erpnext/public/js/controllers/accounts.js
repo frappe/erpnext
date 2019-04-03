@@ -274,6 +274,7 @@ erpnext.taxes.set_conditional_mandatory_rate_or_amount = function(grid_row) {
 	if(grid_row) {
 		if(grid_row.doc.charge_type==="Actual") {
 			grid_row.toggle_editable("tax_amount", true);
+			grid_row.toggle_editable("base_tax_amount", true);
 			grid_row.toggle_reqd("tax_amount", true);
 			grid_row.toggle_editable("rate", false);
 			grid_row.toggle_reqd("rate", false);
@@ -281,6 +282,7 @@ erpnext.taxes.set_conditional_mandatory_rate_or_amount = function(grid_row) {
 			grid_row.toggle_editable("rate", true);
 			grid_row.toggle_reqd("rate", true);
 			grid_row.toggle_editable("tax_amount", false);
+			grid_row.toggle_editable("base_tax_amount", false);
 			grid_row.toggle_reqd("tax_amount", false);
 		}
 	}
