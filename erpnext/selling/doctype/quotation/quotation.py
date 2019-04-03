@@ -205,8 +205,8 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 
 def _make_customer(source_name, ignore_permissions=False):
 	quotation = frappe.db.get_value("Quotation", source_name, ["order_type", "customer_lead"])
-	if quotation and quotation[0] and not quotation[2]:
-		lead_name = quotation[0]
+	if quotation and quotation[1]:
+		lead_name = quotation[1]
 		customer_name = frappe.db.get_value("Customer", {"lead_name": lead_name},
 			["name", "customer_name"], as_dict=True)
 		if not customer_name:
