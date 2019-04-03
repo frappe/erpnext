@@ -697,8 +697,11 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 
 	account_currency = get_account_currency(party_account)
 	account_balance = get_balance_on(party_account, date, cost_center=cost_center)
-	_party_name = "title" if party_type in ["Student", "Letter of Credit", "Shareholder"] else scrub(party_type) + "_name"
-	party_name = frappe.db.get_value(party_type, party, _party_name)
+	_party_name = "title" if party_type in ["Student", "Shareholder"] else scrub(party_type) + "_name"
+	if party_type == "Letter of Credit":
+		party_name = party
+	else:
+		party_name = frappe.db.get_value(party_type, party, _party_name)
 	party_balance = get_balance_on(party_type=party_type, party=party, cost_center=cost_center)
 	if party_type in ["Customer", "Supplier"]:
 		bank_account = get_party_bank_account(party_type, party)
