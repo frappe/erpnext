@@ -231,8 +231,8 @@ def make_quotation(source_name, target_doc=None):
 		quotation = frappe.get_doc(target)
 
 		company_currency = frappe.get_cached_value('Company',  quotation.company,  "default_currency")
-		party_account_currency = get_party_account_currency("Customer", quotation.customer,
-			quotation.company) if quotation.customer else company_currency
+		party_account_currency = get_party_account_currency("Customer", quotation.customer_lead,
+			quotation.company) if quotation.customer_lead else company_currency
 
 		quotation.currency = party_account_currency or company_currency
 

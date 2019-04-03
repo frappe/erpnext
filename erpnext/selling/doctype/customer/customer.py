@@ -104,9 +104,8 @@ class Customer(TransactionBase):
 		if self.lead_name:
 			frappe.db.set_value('Lead', self.lead_name, 'status', 'Converted', update_modified=False)
 
-			for doctype in ('Opportunity', 'Quotation'):
-				for d in frappe.get_all(doctype, {'lead': self.lead_name}):
-					frappe.db.set_value(doctype, d.name, 'customer', self.name, update_modified=False)
+		for d in frappe.get_all('Opportunity', {'lead': self.lead_name}):
+			frappe.db.set_value('Opportunity', d.name, 'customer', self.name, update_modified=False)
 
 	def create_lead_address_contact(self):
 		if self.lead_name:
