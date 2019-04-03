@@ -419,6 +419,10 @@ def make_purchase_invoice(source_name, target_doc=None):
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",
 			"add_if_empty": True
+		},
+		"Payment Schedule": {
+			"doctype": "Payment Schedule",
+			"add_if_empty": True
 		}
 	}, target_doc, postprocess)
 
