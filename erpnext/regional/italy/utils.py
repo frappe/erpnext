@@ -4,6 +4,7 @@ import frappe, json, os
 from frappe.utils import flt, cstr
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
 from frappe import _
+from six import string_types
 from frappe.utils.file_manager import save_file, remove_file
 from frappe.desk.form.load import get_attachments
 from erpnext.regional.italy import state_codes
@@ -151,7 +152,7 @@ def get_invoice_summary(items, taxes):
 						tax_amount=(reference_row.tax_amount * tax.rate) / 100,
 						net_amount=reference_row.tax_amount,
 						taxable_amount=reference_row.tax_amount,
-						item_tax_rate="{}",
+						item_tax_rate={tax.account_head: tax.rate},
 						charges=True
 					)
 				)
@@ -159,10 +160,16 @@ def get_invoice_summary(items, taxes):
 		#Check item tax rates if tax rate is zero.
 		if tax.rate == 0:
 			for item in items:
-				item_tax_rate = json.loads(item.item_tax_rate)
-				if tax.account_head in item_tax_rate:
+				item_tax_rate = item.item_tax_rate
+				if isinstance(item.item_tax_rate, string_types):
+					item_tax_rate = json.loads(item.item_tax_rate)
+
+				if item_tax_rate and tax.account_head in item_tax_rate:
 					key = cstr(item_tax_rate[tax.account_head])
-					summary_data.setdefault(key, {"tax_amount": 0.0, "taxable_amount": 0.0, "tax_exemption_reason": "", "tax_exemption_law": ""})
+					if key not in summary_data:
+						summary_data.setdefault(key, {"tax_amount": 0.0, "taxable_amount": 0.0,
+							"tax_exemption_reason": "", "tax_exemption_law": ""})
+
 					summary_data[key]["tax_amount"] += item.tax_amount
 					summary_data[key]["taxable_amount"] += item.net_amount
 					if key == "0.0":
