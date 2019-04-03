@@ -425,6 +425,7 @@ class AccountsController(TransactionBase):
 		"""Returns list of advances against Account, Party, Reference"""
 
 		res = self.get_advance_entries()
+		company_currency = erpnext.get_company_currency(self.company)
 
 		self.set("advances", [])
 		advance_allocated = 0
@@ -432,13 +433,13 @@ class AccountsController(TransactionBase):
 			if d.against_order:
 				allocated_amount = flt(d.amount)
 			else:
-				if self.party_account_currency and self.company_currency\
-					and self.party_account_currency == self.company_currency:
+				if self.get("party_account_currency")\
+					and self.get("party_account_currency") == company_currency:
 					amount = self.get("base_rounded_total") or self.get("base_grand_total")
 				else:
 					amount = self.get("rounded_total") or self.get("grand_total")
 
-				allocated_amount = min(amount - advance_allocated, d.amount)
+				allocated_amount = min(flt(amount) - advance_allocated, d.amount)
 			advance_allocated += flt(allocated_amount)
 
 			self.append("advances", {
@@ -866,6 +867,8 @@ class AccountsController(TransactionBase):
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
 
 	def is_rounded_total_disabled(self):
+		if self.meta.get_field("calculate_tax_on_company_currency") and cint(self.get("calculate_tax_on_company_currency")):
+			return True
 		if self.meta.get_field("disable_rounded_total"):
 			return self.disable_rounded_total
 		else:
