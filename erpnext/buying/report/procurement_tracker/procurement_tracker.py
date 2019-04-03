@@ -168,8 +168,8 @@ def get_data():
 		FROM `tabPurchase Order` po, `tabPurchase Order Item` po_item
 		WHERE
 			po.docstatus = 1
-			and po.name = po_item.parent
-			and po.status not in  ("Closed","Completed","Cancelled")
+			AND po.name = po_item.parent
+			AND po.status not in  ("Closed","Completed","Cancelled")
 		GROUP BY
 			po.name,po_item.item_code
 		""", as_dict = 1)
@@ -181,6 +181,32 @@ def get_data():
 		FROM `tabMaterial Request`
 		WHERE
 			per_ordered = 100
-			and docstatus = 1
+			AND docstatus = 1
 		"""))
+
+	supplier_quotation_records = frappe._dict(frappe.db.sql("""
+		SELECT
+			name,
+			base_amount
+		FROM `tabSupplier Quotation Item`
+		WHERE
+			per_ordered = 100
+			AND docstatus = 1
+		"""))
+
+	budget_records = frappe.db.sql("""
+		SELECT
+			budget.name,
+			budget.project,
+			budget.cost_center,
+			budget_account.account,
+			budget_account.budget_amount
+		FROM `tabBudget` budget, `tabBudget Account` budget_account
+		WHERE
+			budget.project IS NOT NULL
+			AND budget.name = budget_account.parent
+			AND budget.cost_center IS NOT NULL
+			AND budget.docstatus = 1
+		""", as_dict = 1)
+
 	return purchase_order_entry
