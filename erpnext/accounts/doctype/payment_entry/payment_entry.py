@@ -783,6 +783,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 
 		if reference_doctype in ("Sales Invoice", "Purchase Invoice"):
 			outstanding_amount = ref_doc.get("outstanding_amount")
+			bill_no = ref_doc.get("bill_no")
 		elif reference_doctype == "Expense Claim":
 			outstanding_amount = flt(ref_doc.get("total_sanctioned_amount")) \
 				- flt(ref_doc.get("total_amount+reimbursed")) - flt(ref_doc.get("total_advance_amount"))
@@ -799,7 +800,8 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		"due_date": ref_doc.get("due_date"),
 		"total_amount": total_amount,
 		"outstanding_amount": outstanding_amount,
-		"exchange_rate": exchange_rate
+		"exchange_rate": exchange_rate,
+		"bill_no": bill_no
 	})
 
 
