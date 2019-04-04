@@ -1472,16 +1472,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"master_name": this.frm.doc.taxes_and_charges
 				},
 				callback: function(r) {
-					if(!r.exc) {
-						if (me.frm.doc.shipping_rule && me.frm.doc.taxes) {
-							for (let tax of r.message) {
-								me.frm.add_child("taxes", tax);
-							}
+					if (!r.exc) {
+						me.frm.set_value("taxes", r.message);
 
-							refresh_field("taxes");
+						if (me.frm.doc.shipping_rule) {
+							me.frm.script_manager.trigger("shipping_rule");
 						} else {
-							me.frm.set_value("taxes", r.message);
 							me.calculate_taxes_and_totals();
+						}
 					}
 				}
 			});
