@@ -1049,7 +1049,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"base_grand_total", "base_rounded_total", "base_in_words", "base_discount_amount",
 			"base_paid_amount", "base_write_off_amount", "base_operating_cost", "base_raw_material_cost",
 			"base_total_cost", "base_scrap_material_cost", "base_rounding_adjustment",
-			"base_total_before_discount", "base_total_discount"],
+			"base_total_before_discount", "base_total_discount", "calculate_tax_on_company_currency"],
 		this.frm.doc.currency != company_currency);
 
 		this.frm.toggle_display(["plc_conversion_rate", "price_list_currency"],
