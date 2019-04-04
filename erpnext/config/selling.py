@@ -29,6 +29,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Sales Invoice",
+					"description": _("Invoices for Costumers."),
+					"onboard": 1,
+					"dependencies": ["Item", "Customer"],
+				},
+				{
+					"type": "doctype",
 					"name": "Sales Partner",
 					"description": _("Manage Sales Partners."),
 					"dependencies": ["Item"],
