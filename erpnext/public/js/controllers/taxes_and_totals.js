@@ -151,7 +151,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				"tax_amount_for_current_item", "grand_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"];
 
-			if (cstr(tax.charge_type) != "Actual" &&
+			if (cstr(tax.charge_type) != "Actual" && cstr(tax.charge_type) != "Weighted Distribution" &&
 				!(me.discount_amount_applied && me.frm.doc.apply_discount_on=="Grand Total")) {
 				tax_fields.push("tax_amount");
 			}
@@ -310,10 +310,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		var me = this;
 		this.frm.doc.rounding_adjustment = 0;
 		var actual_tax_dict = {};
+		var weighted_distrubution_tax_on_net_total = {};
 
 		// maintain actual tax rate based on idx
 		$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-			if (tax.charge_type == "Actual") {
+			if (tax.charge_type == "Actual" || tax.charge_type == "Weighted Distribution") {
 				if (me.should_round_transaction_currency()) {
 					actual_tax_dict[tax.idx] = flt(tax.tax_amount, precision("tax_amount", tax));
 				} else {
@@ -322,14 +323,29 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			}
 		});
 
+		// Tax on Net Total for Weighted Distribution
+		$.each(this.frm.doc["items"] || [], function(n, item) {
+			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
+
+			$.each(me.frm.doc["taxes"] || [], function (i, tax) {
+				if (tax.charge_type == "Weighted Distribution") {
+					if (!weighted_distrubution_tax_on_net_total[tax.idx]) {
+						weighted_distrubution_tax_on_net_total[tax.idx] = 0.0;
+					}
+					var tax_rate = me._get_tax_rate(tax, item_tax_map);
+					weighted_distrubution_tax_on_net_total[tax.idx] += (tax_rate / 100) * item.net_amount;
+				}
+			});
+		});
+
 		$.each(this.frm.doc["items"] || [], function(n, item) {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
 			$.each(me.frm.doc["taxes"] || [], function(i, tax) {
 				// tax_amount represents the amount of tax for the current step
-				var current_tax_amount = me.get_current_tax_amount(item, tax, item_tax_map);
+				var current_tax_amount = me.get_current_tax_amount(item, tax, item_tax_map, weighted_distrubution_tax_on_net_total);
 
 				// Adjust divisional loss to the last item
-				if (tax.charge_type == "Actual") {
+				if (tax.charge_type == "Actual" || tax.charge_type == "Weighted Distribution") {
 					actual_tax_dict[tax.idx] -= current_tax_amount;
 					if (n == me.frm.doc["items"].length - 1) {
 						current_tax_amount += actual_tax_dict[tax.idx];
@@ -337,7 +353,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				}
 
 				// accumulate tax amount into tax.tax_amount
-				if (tax.charge_type != "Actual" &&
+				if (tax.charge_type != "Actual" && tax.charge_type != "Weighted Distribution" &&
 					!(me.discount_amount_applied && me.frm.doc.apply_discount_on=="Grand Total")) {
 					tax.tax_amount += current_tax_amount;
 				}
@@ -430,21 +446,23 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		return item_tax_rate ? JSON.parse(item_tax_rate) : {};
 	},
 
-	get_current_tax_amount: function(item, tax, item_tax_map) {
+	get_current_tax_amount: function(item, tax, item_tax_map, weighted_distrubution_tax_on_net_total) {
 		var tax_rate = this._get_tax_rate(tax, item_tax_map);
 		var current_tax_amount = 0.0;
 
-		if(tax.charge_type == "Actual") {
+		if(tax.charge_type == "Actual" || tax.charge_type == "Weighted Distribution") {
 			// distribute the tax amount proportionally to each item row
-			var actual;
-			if (this.should_round_transaction_currency()) {
-				actual = flt(tax.tax_amount, precision("tax_amount", tax));
-			} else {
-				actual = tax.tax_amount;
-			}
+			var actual = this.should_round_transaction_currency() ?
+				flt(tax.tax_amount, precision("tax_amount", tax)) : flt(tax.tax_amount);
 
-			current_tax_amount = this.frm.doc.net_total ?
-				((item.net_amount / this.frm.doc.net_total) * actual) : 0.0;
+			if (tax.charge_type == "Actual" || !weighted_distrubution_tax_on_net_total[tax.idx]) {
+				current_tax_amount = this.frm.doc.net_total ?
+					((item.net_amount / this.frm.doc.net_total) * actual) : 0.0;
+			} else {
+				var tax_on_net_amount = (tax_rate / 100.0) * item.net_amount;
+				var tax_on_net_total = weighted_distrubution_tax_on_net_total[tax.idx];
+				current_tax_amount = actual * (tax_on_net_amount / tax_on_net_total);
+			}
 
 		} else if(tax.charge_type == "On Net Total") {
 			current_tax_amount = (tax_rate / 100.0) * item.net_amount;
@@ -674,7 +692,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			var actual_taxes_dict = {};
 
 			$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-				if (tax.charge_type == "Actual") {
+				if (tax.charge_type == "Actual" || tax.charge_type == "Weighted Distribution") {
 					var tax_amount = (tax.category == "Valuation") ? 0.0 : tax.tax_amount;
 					tax_amount *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
 					actual_taxes_dict[tax.idx] = tax_amount;
