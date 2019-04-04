@@ -1473,11 +1473,19 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				},
 				callback: function(r) {
 					if(!r.exc) {
-						if(me.frm.doc.shipping_rule && me.frm.doc.taxes) {
+						if (me.frm.doc.shipping_rule && me.frm.doc.taxes) {
 							for (let tax of r.message) {
+								// Stupid hack to avoid tax duplication
+								for (let current_tax of me.frm.doc.taxes) {
+									if (tax.charge_type == current_tax.charge_type &&
+										tax.account_head == current_tax.account_head &&
+										tax.description == current_tax.description) {
+										me.frm.doc.taxes.splice(current_tax.idx - 1, 1)
+									}
+								}
+
 								me.frm.add_child("taxes", tax);
 							}
-
 							refresh_field("taxes");
 						} else {
 							me.frm.set_value("taxes", r.message);
