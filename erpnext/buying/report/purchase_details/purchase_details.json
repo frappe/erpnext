@@ -8,7 +8,7 @@
  "idx": 0, 
  "is_standard": "Yes", 
  "letter_head": "Techno Automotive Refinish", 
- "modified": "2019-03-25 15:25:54.566163", 
+ "modified": "2019-04-05 01:29:09.306270", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Details", 
@@ -19,10 +19,10 @@
  "report_type": "Script Report", 
  "roles": [
   {
-   "role": "Purchase User"
+   "role": "Accounts User"
   }, 
   {
-   "role": "Accounts User"
+   "role": "Purchase Manager"
   }
  ]
 }
