@@ -562,7 +562,7 @@ class Item(WebsiteGenerator):
 			if d.get("warehouse") and d.get("warehouse") not in warehouse:
 				warehouse += [d.get("warehouse")]
 			else:
-				frappe.throw(_("Row {0}: An Reorder entry already exists for this warehouse {1}")
+				frappe.throw(_("Row {0}: A Reorder entry already exists for the warehouse {1}")
 									.format(d.idx, d.warehouse), DuplicateReorderRows)
 
 			if d.warehouse_reorder_level and not d.warehouse_reorder_qty:
