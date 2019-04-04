@@ -758,10 +758,13 @@ class Item(WebsiteGenerator):
 					d.conversion_factor = value
 
 	def validate_attributes(self):
+		if not (self.has_variants or self.variant_of):
+			return
+
 		if not self.variant_based_on:
 			self.variant_based_on = 'Item Attribute'
 
-		if (self.has_variants or self.variant_of) and self.variant_based_on == 'Item Attribute':
+		if self.variant_based_on == 'Item Attribute':
 			attributes = []
 			if not self.attributes:
 				frappe.throw(_("Attribute table is mandatory"))
