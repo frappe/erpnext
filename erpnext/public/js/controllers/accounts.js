@@ -174,7 +174,7 @@ cur_frm.cscript.validate_taxes_and_charges = function(cdt, cdn) {
 		msg = __("Please select Charge Type first");
 		d.row_id = "";
 		d.rate = d.tax_amount = 0.0;
-	} else if((d.charge_type == 'Actual' || d.charge_type == 'On Net Total') && d.row_id) {
+	} else if((d.charge_type == 'Actual' || d.charge_type == 'Weighted Distribution' || d.charge_type == 'On Net Total') && d.row_id) {
 		msg = __("Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'");
 		d.row_id = "";
 	} else if((d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') && d.row_id) {
@@ -199,7 +199,7 @@ cur_frm.cscript.validate_taxes_and_charges = function(cdt, cdn) {
 
 cur_frm.cscript.validate_inclusive_tax = function(tax) {
 	var actual_type_error = function() {
-		var msg = __("Actual type tax cannot be included in Item rate in row {0}", [tax.idx])
+		var msg = __("Actual or Weighted Distribution type tax cannot be included in Item rate in row {0}", [tax.idx])
 		frappe.throw(msg);
 	};
 
@@ -210,7 +210,7 @@ cur_frm.cscript.validate_inclusive_tax = function(tax) {
 	};
 
 	if(cint(tax.included_in_print_rate)) {
-		if(tax.charge_type == "Actual") {
+		if(tax.charge_type == "Actual" || tax.charge_type == "Weighted Distribution") {
 			// inclusive tax cannot be of type Actual
 			actual_type_error();
 		} else if(tax.charge_type == "On Previous Row Amount" &&
@@ -272,12 +272,12 @@ if(!erpnext.taxes.flags[cur_frm.cscript.tax_table]) {
 
 erpnext.taxes.set_conditional_mandatory_rate_or_amount = function(grid_row) {
 	if(grid_row) {
-		if(grid_row.doc.charge_type==="Actual") {
+		if(grid_row.doc.charge_type==="Actual" || grid_row.doc.charge_type==="Weighted Distribution") {
 			grid_row.toggle_editable("tax_amount", true);
 			grid_row.toggle_editable("base_tax_amount", true);
 			grid_row.toggle_reqd("tax_amount", true);
-			grid_row.toggle_editable("rate", false);
-			grid_row.toggle_reqd("rate", false);
+			grid_row.toggle_editable("rate", grid_row.doc.charge_type==="Weighted Distribution");
+			grid_row.toggle_reqd("rate", grid_row.doc.charge_type==="Weighted Distribution");
 		} else {
 			grid_row.toggle_editable("rate", true);
 			grid_row.toggle_reqd("rate", true);

@@ -124,7 +124,7 @@ class calculate_taxes_and_totals(object):
 				"tax_amount_for_current_item", "grand_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
 
-			if tax.charge_type != "Actual" and \
+			if tax.charge_type not in ["Actual", "Weighted Distribution"] and \
 				not (self.discount_amount_applied and self.doc.apply_discount_on=="Grand Total"):
 					tax_fields.append("tax_amount")
 
@@ -270,22 +270,32 @@ class calculate_taxes_and_totals(object):
 		# maintain actual tax rate based on idx
 		actual_tax_dict = dict([[tax.idx,
 			flt(tax.tax_amount, tax.precision("tax_amount")) if self.should_round_transaction_currency() else tax.tax_amount]
-			for tax in self.doc.get("taxes") if tax.charge_type == "Actual"])
+			for tax in self.doc.get("taxes") if tax.charge_type in ["Actual", "Weighted Distribution"]])
+
+		# Tax on Net Total for Weighted Distribution
+		weighted_distrubution_tax_on_net_total = {}
+		for n, item in enumerate(self.doc.get("items")):
+			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
+			for i, tax in enumerate(self.doc.get("taxes")):
+				if tax.charge_type == "Weighted Distribution":
+					weighted_distrubution_tax_on_net_total.setdefault(tax.idx, 0.0)
+					tax_rate = self._get_tax_rate(tax, item_tax_map)
+					weighted_distrubution_tax_on_net_total[tax.idx] += (tax_rate / 100) * item.net_amount
 
 		for n, item in enumerate(self.doc.get("items")):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
 			for i, tax in enumerate(self.doc.get("taxes")):
 				# tax_amount represents the amount of tax for the current step
-				current_tax_amount = self.get_current_tax_amount(item, tax, item_tax_map)
+				current_tax_amount = self.get_current_tax_amount(item, tax, item_tax_map, weighted_distrubution_tax_on_net_total)
 
 				# Adjust divisional loss to the last item
-				if tax.charge_type == "Actual":
+				if tax.charge_type in ["Actual", "Weighted Distribution"]:
 					actual_tax_dict[tax.idx] -= current_tax_amount
 					if n == len(self.doc.get("items")) - 1:
 						current_tax_amount += actual_tax_dict[tax.idx]
 
 				# accumulate tax amount into tax.tax_amount
-				if tax.charge_type != "Actual" and \
+				if tax.charge_type not in ["Actual", "Weighted Distribution"] and \
 					not (self.discount_amount_applied and self.doc.apply_discount_on=="Grand Total"):
 						tax.tax_amount += current_tax_amount
 
@@ -356,18 +366,21 @@ class calculate_taxes_and_totals(object):
 			tax.total = flt(tax.total, tax.precision("total"))
 			tax.displayed_total = flt(tax.displayed_total, tax.precision("displayed_total"))
 
-	def get_current_tax_amount(self, item, tax, item_tax_map):
+	def get_current_tax_amount(self, item, tax, item_tax_map, weighted_distrubution_tax_on_net_total):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)
 		current_tax_amount = 0.0
 
-		if tax.charge_type == "Actual":
+		if tax.charge_type in ["Actual", "Weighted Distribution"]:
 			# distribute the tax amount proportionally to each item row
-			if self.should_round_transaction_currency():
-				actual = flt(tax.tax_amount, tax.precision("tax_amount"))
-			else:
-				actual = tax.tax_amount
+			actual = flt(tax.tax_amount, tax.precision("tax_amount")) if self.should_round_transaction_currency()\
+				else tax.tax_amount
 
-			current_tax_amount = item.net_amount*actual / self.doc.net_total if self.doc.net_total else 0.0
+			if tax.charge_type == "Actual" or not weighted_distrubution_tax_on_net_total.get(tax.idx):
+				current_tax_amount = item.net_amount*actual / self.doc.net_total if self.doc.net_total else 0.0
+			else:
+				tax_on_net_amount = (tax_rate / 100.0) * item.net_amount
+				tax_on_net_total = weighted_distrubution_tax_on_net_total.get(tax.idx)
+				current_tax_amount = actual * (tax_on_net_amount / tax_on_net_total)
 
 		elif tax.charge_type == "On Net Total":
 			current_tax_amount = (tax_rate / 100.0) * item.net_amount
@@ -524,7 +537,7 @@ class calculate_taxes_and_totals(object):
 			actual_taxes_dict = {}
 
 			for tax in self.doc.get("taxes"):
-				if tax.charge_type == "Actual":
+				if tax.charge_type in ["Actual", "Weighted Distribution"]:
 					tax_amount = self.get_tax_amount_if_for_valuation_or_deduction(tax.tax_amount, tax)
 					actual_taxes_dict.setdefault(tax.idx, tax_amount)
 				elif tax.row_id in actual_taxes_dict:

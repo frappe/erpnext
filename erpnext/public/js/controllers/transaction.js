@@ -832,7 +832,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	set_actual_charges_based_on_company_currency: function() {
 		var me = this;
 		$.each(this.frm.doc.taxes || [], function(i, d) {
-			if(d.charge_type == "Actual") {
+			if(d.charge_type == "Actual" || d.charge_type == "Weighted Distribution") {
 				d.tax_amount = flt(d.base_tax_amount) / flt(me.frm.doc.conversion_rate);
 			}
 		});
