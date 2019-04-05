@@ -36,7 +36,7 @@ frappe.ui.form.on("Purchase Order", {
 	},
 
 	refresh: function(frm) {
-		if(frm.doc.docstatus == 1 && frm.doc.status != 'Closed'
+		if(frm.doc.docstatus === 1 && frm.doc.status !== 'Closed'
 			&& flt(frm.doc.per_received) < 100 && flt(frm.doc.per_billed) < 100) {
 			frm.add_custom_button(__('Update Items'), () => {
 				erpnext.utils.update_child_items({
