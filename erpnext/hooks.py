@@ -152,7 +152,6 @@ standard_portal_menu_items = [
 	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "role":"Customer"},
 	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
 	{"title": _("Timesheets"), "route": "/timesheets", "reference_doctype": "Timesheet", "role":"Customer"},
-	{"title": _("Timesheets"), "route": "/timesheets", "reference_doctype": "Timesheet", "role":"Customer"},
 	{"title": _("Lab Test"), "route": "/lab-test", "reference_doctype": "Lab Test", "role":"Patient"},
 	{"title": _("Prescription"), "route": "/prescription", "reference_doctype": "Patient Encounter", "role":"Patient"},
 	{"title": _("Patient Appointment"), "route": "/patient-appointments", "reference_doctype": "Patient Appointment", "role":"Patient"},

@@ -488,16 +488,15 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	setup_company() {
-		this.company = frappe.sys_defaults.company;
 		return new Promise(resolve => {
-			if(!this.company) {
+			if(!frappe.sys_defaults.company) {
 				frappe.prompt({fieldname:"company", options: "Company", fieldtype:"Link",
 					label: __("Select Company"), reqd: 1}, (data) => {
 						this.company = data.company;
 						resolve(this.company);
 				}, __("Select Company"));
 			} else {
-				resolve(this.company);
+				resolve();
 			}
 		})
 	}
@@ -551,7 +550,9 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	set_pos_profile_data() {
-		this.frm.doc.company = this.company;
+		if (this.company) {
+			this.frm.doc.company = this.company;
+		}
 
 		return new Promise(resolve => {
 			return this.frm.call({
@@ -1247,7 +1248,10 @@ class POSItems {
 			clearTimeout(this.last_search);
 			this.last_search = setTimeout(() => {
 				const search_term = e.target.value;
-				this.filter_items({ search_term });
+				const item_group = this.item_group_field ?
+					this.item_group_field.get_value() : '';
+
+				this.filter_items({ search_term:search_term,  item_group: item_group});
 			}, 300);
 		});
 
