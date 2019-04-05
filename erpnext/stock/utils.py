@@ -56,7 +56,7 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 
 	if item_code:
 		values.append(item_code)
-		condition.append(" AND item_code = %s")
+		condition += " AND item_code = %s"
 
 	stock_ledger_entries = frappe.db.sql("""
 		SELECT item_code, stock_value, name, warehouse
