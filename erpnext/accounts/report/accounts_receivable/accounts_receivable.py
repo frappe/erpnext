@@ -537,6 +537,13 @@ class ReceivablePayableReport(object):
 					where supplier_group=%s)""")
 				values.append(self.filters.get("supplier_group"))
 
+		if self.filters.get("cost_center"):
+			lft, rgt = frappe.get_cached_value("Cost Center",
+				self.filters.get("cost_center"), ['lft', 'rgt'])
+
+			conditions.append("""cost_center in (select name from `tabCost Center` where
+				lft >= {0} and rgt <= {1})""".format(lft, rgt))
+
 		accounts = [d.name for d in frappe.get_all("Account",
 			filters={"account_type": account_type, "company": self.filters.company})]
 		conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))

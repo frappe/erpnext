@@ -22,7 +22,8 @@ web_include_css = "assets/css/erpnext-web.css"
 
 doctype_js = {
 	"Communication": "public/js/communication.js",
-	"Event": "public/js/event.js"
+	"Event": "public/js/event.js",
+	"Website Theme": "public/js/website_theme.js"
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"
@@ -151,7 +152,6 @@ standard_portal_menu_items = [
 	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "role":"Customer"},
 	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
 	{"title": _("Timesheets"), "route": "/timesheets", "reference_doctype": "Timesheet", "role":"Customer"},
-	{"title": _("Timesheets"), "route": "/timesheets", "reference_doctype": "Timesheet", "role":"Customer"},
 	{"title": _("Lab Test"), "route": "/lab-test", "reference_doctype": "Lab Test", "role":"Patient"},
 	{"title": _("Prescription"), "route": "/prescription", "reference_doctype": "Patient Encounter", "role":"Patient"},
 	{"title": _("Patient Appointment"), "route": "/patient-appointments", "reference_doctype": "Patient Appointment", "role":"Patient"},
@@ -261,7 +261,8 @@ scheduler_events = {
 		"erpnext.crm.doctype.contract.contract.update_status_for_contracts",
 		"erpnext.projects.doctype.project.project.update_project_sales_billing",
 		"erpnext.projects.doctype.project.project.send_project_status_email_to_users",
-		"erpnext.quality_management.doctype.quality_review.quality_review.review"
+		"erpnext.quality_management.doctype.quality_review.quality_review.review",
+		"erpnext.support.doctype.service_level_agreement.service_level_agreement.check_agreement_status"
 	],
 	"daily_long": [
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"
@@ -319,3 +320,15 @@ regional_overrides = {
 		'erpnext.controllers.accounts_controller.validate_regional': 'erpnext.regional.italy.utils.sales_invoice_validate',
 	}
 }
+user_privacy_documents = [
+	{
+		'doctype': 'Lead',
+		'match_field': 'email_id',
+		'personal_fields': ['phone', 'mobile_no', 'fax', 'website', 'lead_name'],
+	},
+	{
+		'doctype': 'Opportunity',
+		'match_field': 'contact_email',
+		'personal_fields': ['contact_mobile', 'contact_display', 'customer_name'],
+	}
+]
