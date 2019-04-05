@@ -121,6 +121,7 @@ class Item(WebsiteGenerator):
 		self.validate_asset_exists_for_serialized_asset()
 		self.validate_attributes()
 		self.validate_variant_attributes()
+		self.validate_variant_based_on_change()
 		self.validate_website_image()
 		self.make_thumbnail()
 		self.validate_fixed_asset()
@@ -726,6 +727,11 @@ class Item(WebsiteGenerator):
 					frappe.throw(
 						_('Cannot change Attributes after stock transaction. Make a new Item and transfer stock to the new Item'))
 
+	def validate_variant_based_on_change(self):
+		if self.variant_of or (self.has_variants and frappe.get_all("Item", {"variant_of": self.name})):
+			if self.variant_based_on != frappe.db.get_value("Item", self.name, "variant_based_on"):
+				frappe.throw(_("Variant Based On cannot be changed"))
+
 	def validate_asset_exists_for_serialized_asset(self):
 		if (not self.get("__islocal") and self.asset_exists() and
 			cint(self.has_serial_no) != cint(frappe.db.get_value('Item', self.name, 'has_serial_no'))):
@@ -758,10 +764,13 @@ class Item(WebsiteGenerator):
 					d.conversion_factor = value
 
 	def validate_attributes(self):
+		if not (self.has_variants or self.variant_of):
+			return
+
 		if not self.variant_based_on:
 			self.variant_based_on = 'Item Attribute'
 
-		if (self.has_variants or self.variant_of) and self.variant_based_on == 'Item Attribute':
+		if self.variant_based_on == 'Item Attribute':
 			attributes = []
 			if not self.attributes:
 				frappe.throw(_("Attribute table is mandatory"))
