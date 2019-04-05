@@ -110,7 +110,7 @@ class calculate_taxes_and_totals(object):
 
 	def should_round_transaction_currency(self):
 		company_currency = erpnext.get_company_currency(self.doc.company)
-		return not cint(self.doc.calculate_tax_on_company_currency)\
+		return not cint(self.doc.get("calculate_tax_on_company_currency"))\
 			or not self.doc.currency or self.doc.currency == company_currency
 
 	def initialize_taxes(self):
@@ -696,13 +696,13 @@ def get_itemised_tax_breakup_html(doc):
 	# get tax breakup data
 	itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(doc)
 
-	if cint(doc.calculate_tax_on_company_currency):
+	if cint(doc.get("calculate_tax_on_company_currency")):
 		currency = erpnext.get_company_currency(doc.company)
 		conversion_rate = 1.0
 		for k in itemised_taxable_amount.keys():
 			itemised_taxable_amount[k] = itemised_taxable_amount[k] * doc.conversion_rate
 	else:
-		currency = doc.curency
+		currency = doc.currency
 		conversion_rate = doc.conversion_rate
 
 	get_rounded_tax_amount(itemised_tax, doc.precision("tax_amount", "taxes"))
