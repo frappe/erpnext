@@ -62,11 +62,18 @@ class LeaveAllocation(Document):
 		if flt(self.new_leaves_allocated) % 0.5:
 			frappe.throw(_("Leaves must be allocated in multiples of 0.5"), ValueMultiplierError)
 
-	def validate_allocation_overlap(self):
+	def validate_allocation_overlap(self, carry_forward=0):
 		leave_allocation = frappe.db.sql("""
-			select name from `tabLeave Allocation`
-			where employee=%s and leave_type=%s and docstatus=1
-			and to_date >= %s and from_date <= %s""",
+			SELECT
+				name
+			FROM `tabLeave Allocation`
+			WHERE
+				employee=%s
+				AND leave_type=%s
+				AND docstatus=1
+				AND is_carry_forward={0}
+				AND to_date >= %s
+				AND from_date <= %s""".format(carry_forward),
 			(self.employee, self.leave_type, self.from_date, self.to_date))
 
 		if leave_allocation:
@@ -111,6 +118,11 @@ class LeaveAllocation(Document):
 			else:
 				frappe.throw(_("Total allocated leaves {0} cannot be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken), LessAllocationError)
 
+	def set_carry_forward_leaves(self):
+		self.validate_allocation_overlap(carry_forward=1)
+		self.old_leaves_allocated = get_carry_forwarded_leaves(self.employee, self.leave_type,
+			self.from_date, self.is_carry_forward)
+
 def get_leave_allocation_for_period(employee, leave_type, from_date, to_date):
 	leave_allocated = 0
 	leave_allocations = frappe.db.sql("""
@@ -135,17 +147,25 @@ def get_leave_allocation_for_period(employee, leave_type, from_date, to_date):
 	return leave_allocated
 
 @frappe.whitelist()
-def get_carry_forwarded_leaves(employee, leave_type, date, carry_forward=None):
+def get_carry_forwarded_leaves(employee, leave_type, date, is_carry_forward=None):
 	carry_forwarded_leaves = 0
 
-	if carry_forward:
+	if is_carry_forward:
 		validate_carry_forward(leave_type)
 
 		previous_allocation = frappe.db.sql("""
-			select name, from_date, to_date, total_leaves_allocated
-			from `tabLeave Allocation`
-			where employee=%s and leave_type=%s and docstatus=1 and to_date < %s
-			order by to_date desc limit 1
+			SELECT
+				name,
+				from_date,
+				to_date,
+				total_leaves_allocated
+			FROM `tabLeave Allocation`
+			WHERE
+				employee=%s
+				AND leave_type=%s
+				AND docstatus=1
+				AND to_date < %s
+			ORDER BY to_date desc limit 1
 		""", (employee, leave_type, date), as_dict=1)
 		if previous_allocation:
 			leaves_taken = get_approved_leaves_for_period(employee, leave_type,
