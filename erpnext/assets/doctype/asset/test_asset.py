@@ -9,6 +9,7 @@ from frappe.utils import cstr, nowdate, getdate, flt, get_last_day, add_days, ad
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset, restore_asset
 from erpnext.assets.doctype.asset.asset import make_sales_invoice, make_purchase_invoice
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice as make_invoice
 
 class TestAsset(unittest.TestCase):
 	def setUp(self):
@@ -67,6 +68,17 @@ class TestAsset(unittest.TestCase):
 
 		self.assertFalse(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Purchase Invoice", "voucher_no": pi.name}))
+
+	def test_is_fixed_asset_set(self):
+		doc = frappe.new_doc('Purchase Invoice')
+		doc.supplier = '_Test Supplier'
+		doc.append('items', {
+			'item_code': 'Macbook Pro',
+			'qty': 1
+		})
+
+		doc.set_missing_values()
+		self.assertEquals(doc.items[0].is_fixed_asset, 1)
 
 
 	def test_schedule_for_straight_line_method(self):
@@ -493,6 +505,15 @@ class TestAsset(unittest.TestCase):
 			order by account""", asset_doc.name)
 
 		self.assertEqual(gle, expected_gle)
+
+	def test_expense_head(self):
+		pr = make_purchase_receipt(item_code="Macbook Pro",
+			qty=2, rate=200000.0, location="Test Location")
+
+		doc = make_invoice(pr.name)
+
+		self.assertEquals('Asset Received But Not Billed - _TC', doc.items[0].expense_account)
+
 
 def create_asset_data():
 	if not frappe.db.exists("Asset Category", "Computers"):

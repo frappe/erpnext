@@ -16,10 +16,11 @@ import copy
 class BankStatementTransactionEntry(Document):
 	def autoname(self):
 		self.name = self.bank_account + "-" + self.from_date + "-" + self.to_date
-		mapper_name = self.bank + "-Statement-Settings"
-		if not frappe.db.exists("Bank Statement Settings", mapper_name):
-			self.create_settings(self.bank)
-		self.bank_settings = mapper_name
+		if self.bank:
+			mapper_name = self.bank + "-Statement-Settings"
+			if not frappe.db.exists("Bank Statement Settings", mapper_name):
+				self.create_settings(self.bank)
+			self.bank_settings = mapper_name
 
 	def create_settings(self, bank):
 		mapper = frappe.new_doc("Bank Statement Settings")

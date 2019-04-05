@@ -52,6 +52,12 @@ frappe.query_reports["Stock Balance"] = {
 			"options": "Warehouse"
 		},
 		{
+			"fieldname":"include_uom",
+			"label": __("Include UOM"),
+			"fieldtype": "Link",
+			"options": "UOM"
+		},
+		{
 			"fieldname": "show_variant_attributes",
 			"label": __("Show Variant Attributes"),
 			"fieldtype": "Check"

@@ -287,6 +287,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "depends_on": "eval:!doc.organization_lead",
    "fieldname": "gender", 
    "fieldtype": "Link", 
    "hidden": 0, 

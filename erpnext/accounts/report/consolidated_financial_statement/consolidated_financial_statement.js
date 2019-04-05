@@ -43,6 +43,13 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 			"reqd": 1
 		},
 		{
+			"fieldname": "presentation_currency",
+			"label": __("Currency"),
+			"fieldtype": "Select",
+			"options": erpnext.get_presentation_currency_list(),
+			"default": frappe.defaults.get_user_default("Currency")
+		},
+		{
 			"fieldname":"accumulated_in_group_company",
 			"label": __("Accumulated Values in Group Company"),
 			"fieldtype": "Check",

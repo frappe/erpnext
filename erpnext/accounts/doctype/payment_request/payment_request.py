@@ -123,7 +123,7 @@ class PaymentRequest(Document):
 			"reference_doctype": "Payment Request",
 			"reference_docname": self.name,
 			"payer_email": self.email_to or frappe.session.user,
-			"payer_name": data.customer_name,
+			"payer_name": frappe.safe_encode(data.customer_name),
 			"order_id": self.name,
 			"currency": self.currency
 		})
@@ -214,9 +214,10 @@ class PaymentRequest(Document):
 
 	def check_if_payment_entry_exists(self):
 		if self.status == "Paid":
-			payment_entry = frappe.db.sql_list("""select parent from `tabPayment Entry Reference`
-				where reference_name=%s""", self.reference_name)
-			if payment_entry:
+			if frappe.get_all("Payment Entry Reference",
+				filters={"reference_name": self.reference_name, "docstatus": ["<", 2]},
+				fields=["parent"],
+				limit=1):
 				frappe.throw(_("Payment Entry already exists"), title=_('Error'))
 
 	def make_communication_entry(self):

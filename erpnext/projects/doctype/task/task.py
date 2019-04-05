@@ -2,13 +2,17 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
 
-from frappe.utils import getdate, date_diff, add_days, cstr
+import json
+
+import frappe
 from frappe import _, throw
+from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate
 from frappe.utils.nestedset import NestedSet
 
+
 class CircularReferenceError(frappe.ValidationError): pass
+class EndDateCannotBeGreaterThanProjectEndDateError(frappe.ValidationError): pass
 
 class Task(NestedSet):
 	nsm_parent_field = 'parent_task'
@@ -155,10 +159,19 @@ class Task(NestedSet):
 
 		self.update_nsm_model()
 
+	def update_status(self):
+		if self.status not in ('Cancelled', 'Closed') and self.exp_end_date:
+			from datetime import datetime
+			if self.exp_end_date < datetime.now().date():
+				self.db_set('status', 'Overdue')
+				self.update_project()
+
 @frappe.whitelist()
 def check_if_child_exists(name):
-	return frappe.db.sql("""select name from `tabTask`
-		where parent_task = %s""", name)
+	child_tasks = frappe.get_all("Task", filters={"parent_task": name})
+	child_tasks = [get_link_to_form("Task", task.name) for task in child_tasks]
+	return child_tasks
+
 
 def get_project(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
@@ -180,10 +193,9 @@ def set_multiple_status(names, status):
 		task.save()
 
 def set_tasks_as_overdue():
-	frappe.db.sql("""update tabTask set `status`='Overdue'
-		where exp_end_date is not null
-		and exp_end_date < CURDATE()
-		and `status` not in ('Closed', 'Cancelled')""")
+	tasks = frappe.get_all("Task", filters={'status':['not in',['Cancelled', 'Closed']]})
+	for task in tasks:
+		frappe.get_doc("Task", task.name).update_status()
 
 @frappe.whitelist()
 def get_children(doctype, parent, task=None, project=None, is_root=False):

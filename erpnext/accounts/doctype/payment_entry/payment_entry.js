@@ -284,7 +284,12 @@ frappe.ui.form.on('Payment Entry', {
 							() => frm.events.get_outstanding_documents(frm),
 							() => frm.events.hide_unhide_fields(frm),
 							() => frm.events.set_dynamic_labels(frm),
-							() => { frm.set_party_account_based_on_party = false; }
+							() => {
+								frm.set_party_account_based_on_party = false;
+								if (r.message.bank_account) {
+									frm.set_value("bank_account", r.message.bank_account);
+								}
+							}
 						]);
 					}
 				}
@@ -807,21 +812,50 @@ frappe.ui.form.on('Payment Entry', {
 						var write_off_row = $.map(frm.doc["deductions"] || [], function(t) {
 							return t.account==r.message[account] ? t : null; });
 
-						if (!write_off_row.length) {
-							var row = frm.add_child("deductions");
+						var row = [];
+
+						var difference_amount = flt(frm.doc.difference_amount,
+							precision("difference_amount"));
+
+						if (!write_off_row.length && difference_amount) {
+							row = frm.add_child("deductions");
 							row.account = r.message[account];
 							row.cost_center = r.message["cost_center"];
 						} else {
-							var row = write_off_row[0];
+							row = write_off_row[0];
 						}
 
-						row.amount = flt(row.amount) + flt(frm.doc.difference_amount);
+						if (row) {
+							row.amount = flt(row.amount) + difference_amount;
+						} else {
+							frappe.msgprint(__("No gain or loss in the exchange rate"))
+						}
+
 						refresh_field("deductions");
 
 						frm.events.set_unallocated_amount(frm);
 					}
 				}
 			})
+		}
+	},
+
+	bank_account: function(frm) {
+		const field = frm.doc.payment_type == "Pay" ? "paid_from":"paid_to";
+		if (frm.doc.bank_account && in_list(['Pay', 'Receive'], frm.doc.payment_type)) {
+			frappe.call({
+				method: "erpnext.accounts.doctype.bank_account.bank_account.get_bank_account_details",
+				args: {
+					bank_account: frm.doc.bank_account
+				},
+				callback: function(r) {
+					if (r.message) {
+						frm.set_value(field, r.message.account);
+						frm.set_value('bank', r.message.bank);
+						frm.set_value('bank_account_no', r.message.bank_account_no);
+					}
+				}
+			});
 		}
 	}
 });

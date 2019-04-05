@@ -9,7 +9,7 @@ from frappe import _
 import json
 from datetime import timedelta
 from erpnext.controllers.queries import get_match_cond
-from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint
+from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, date_diff, add_to_date
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.workstation.workstation import (check_if_within_operating_hours,
 	WorkstationHolidayError)
@@ -27,6 +27,7 @@ class Timesheet(Document):
 		self.set_status()
 		self.validate_dates()
 		self.validate_time_logs()
+		self.calculate_std_hours()
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
@@ -92,6 +93,17 @@ class Timesheet(Document):
 			if start_date and end_date:
 				self.start_date = getdate(start_date)
 				self.end_date = getdate(end_date)
+
+	def calculate_std_hours(self):
+		std_working_hours = frappe.get_value("Company", self.company, 'standard_working_hours')
+
+		for time in self.time_logs:
+			if time.from_time and time.to_time:
+				if flt(std_working_hours) > 0:
+					time.hours = flt(std_working_hours) * date_diff(time.to_time, time.from_time)
+				else:
+					if not time.hours:
+						time.hours = time_diff_in_hours(time.to_time, time.from_time)
 
 	def before_cancel(self):
 		self.set_status()

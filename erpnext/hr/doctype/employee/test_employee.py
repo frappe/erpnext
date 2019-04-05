@@ -7,6 +7,7 @@ import frappe
 import erpnext
 import unittest
 import frappe.utils
+from erpnext.hr.doctype.employee.employee import EmployeeLeftValidationError
 
 test_records = frappe.get_test_records('Employee')
 
@@ -30,8 +31,19 @@ class TestEmployee(unittest.TestCase):
 		send_birthday_reminders()
 
 		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
-		self.assertTrue("Subject: Birthday Reminder for {0}".format(employee.employee_name) \
-			in email_queue[0].message)
+		self.assertTrue("Subject: Birthday Reminder" in email_queue[0].message)
+
+	def test_employee_status_left(self):
+		employee1 = make_employee("test_employee_1@company.com")
+		employee2 = make_employee("test_employee_2@company.com")
+		employee1_doc = frappe.get_doc("Employee", employee1)
+		employee2_doc = frappe.get_doc("Employee", employee2)
+		employee2_doc.reload()
+		employee2_doc.reports_to = employee1_doc.name
+		employee2_doc.save()
+		employee1_doc.reload()
+		employee1_doc.status = 'Left'
+		self.assertRaises(EmployeeLeftValidationError, employee1_doc.save)
 
 def make_employee(user):
 	if not frappe.db.get_value("User", user):

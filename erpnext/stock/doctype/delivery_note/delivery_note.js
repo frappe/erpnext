@@ -22,6 +22,9 @@ frappe.ui.form.on("Delivery Note", {
 				return (doc.docstatus==1 || doc.qty<=doc.actual_qty) ? "green" : "orange"
 			})
 
+		erpnext.queries.setup_queries(frm, "Warehouse", function() {
+			return erpnext.queries.warehouse(frm.doc);
+		});
 		erpnext.queries.setup_warehouse_query(frm);
 
 		frm.set_query('project', function(doc) {
@@ -221,6 +224,10 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		erpnext.setup_serial_no();
 	},
 
+	packed_items_on_form_rendered: function(doc, grid_row) {
+		erpnext.setup_serial_no();
+	},
+
 	close_delivery_note: function(doc){
 		this.update_status("Closed")
 	},
@@ -273,13 +280,13 @@ erpnext.stock.delivery_note.set_print_hide = function(doc, cdt, cdn){
 	var dn_item_fields = frappe.meta.docfield_map['Delivery Note Item'];
 	var dn_fields_copy = dn_fields;
 	var dn_item_fields_copy = dn_item_fields;
-
 	if (doc.print_without_amount) {
 		dn_fields['currency'].print_hide = 1;
 		dn_item_fields['rate'].print_hide = 1;
 		dn_item_fields['discount_percentage'].print_hide = 1;
 		dn_item_fields['price_list_rate'].print_hide = 1;
 		dn_item_fields['amount'].print_hide = 1;
+		dn_item_fields['discount_amount'].print_hide = 1;
 		dn_fields['taxes'].print_hide = 1;
 	} else {
 		if (dn_fields_copy['currency'].print_hide != 1)
@@ -288,6 +295,8 @@ erpnext.stock.delivery_note.set_print_hide = function(doc, cdt, cdn){
 			dn_item_fields['rate'].print_hide = 0;
 		if (dn_item_fields_copy['amount'].print_hide != 1)
 			dn_item_fields['amount'].print_hide = 0;
+		if (dn_item_fields_copy['discount_amount'].print_hide != 1)
+			dn_item_fields['discount_amount'].print_hide = 0;
 		if (dn_fields_copy['taxes'].print_hide != 1)
 			dn_fields['taxes'].print_hide = 0;
 	}

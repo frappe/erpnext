@@ -32,7 +32,7 @@ def execute():
 				'user': user,
 				'default': 1
 			})
-			_doc.pos_profile_name = user + ' - ' + _doc.company
+
 			_doc.flags.ignore_validate  = True
 			_doc.flags.ignore_mandatory = True
 			_doc.save()

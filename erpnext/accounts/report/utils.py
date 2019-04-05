@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe
 from erpnext import get_company_currency, get_default_company
 from erpnext.setup.utils import get_exchange_rate
@@ -103,7 +104,7 @@ def convert_to_presentation_currency(gl_entries, currency_info):
 		credit_in_account_currency = flt(entry['credit_in_account_currency'])
 		account_currency = entry['account_currency']
 
-		if account_currency != presentation_currency or (account_currency == presentation_currency and not is_p_or_l_account(account)):
+		if account_currency != presentation_currency:
 			value = debit or credit
 
 			date = currency_info['report_date'] if not is_p_or_l_account(account) else entry['posting_date']

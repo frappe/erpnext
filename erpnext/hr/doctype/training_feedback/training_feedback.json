@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_events_in_timeline": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
@@ -383,7 +384,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-08-21 16:15:34.125368", 
+ "modified": "2019-01-30 11:28:13.849860", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Training Feedback", 

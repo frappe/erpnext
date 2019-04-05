@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe, erpnext
 from frappe import _, msgprint, scrub
-from frappe.defaults import get_user_permissions
+from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
 from frappe.utils import (add_days, getdate, formatdate, date_diff,
 	add_years, get_timestamp, nowdate, flt, add_months, get_last_day)
@@ -14,7 +14,7 @@ from frappe.contacts.doctype.address.address import (get_address_display,
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext import get_default_currency, get_company_currency
+from erpnext import get_company_currency
 
 from six import iteritems
 
@@ -22,18 +22,20 @@ class DuplicatePartyAccountError(frappe.ValidationError): pass
 
 @frappe.whitelist()
 def get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None,
-	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True, party_address=None, shipping_address=None):
+	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True,
+	party_address=None, shipping_address=None, pos_profile=None):
 
 	if not party:
 		return {}
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 	return _get_party_details(party, account, party_type,
-		company, posting_date, bill_date, price_list, currency, doctype, ignore_permissions, fetch_payment_terms_template, party_address, shipping_address)
+		company, posting_date, bill_date, price_list, currency, doctype, ignore_permissions,
+		fetch_payment_terms_template, party_address, shipping_address, pos_profile)
 
 def _get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None,
 	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False,
-	fetch_payment_terms_template=True, party_address=None, shipping_address=None):
+	fetch_payment_terms_template=True, party_address=None, shipping_address=None, pos_profile=None):
 
 	out = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype))
 	party = out[party_type.lower()]
@@ -49,7 +51,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	set_address_details(out, party, party_type, doctype, company, party_address, shipping_address)
 	set_contact_details(out, party, party_type)
 	set_other_values(out, party, party_type)
-	set_price_list(out, party, party_type, price_list)
+	set_price_list(out, party, party_type, price_list, pos_profile)
 
 	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_type)
 
@@ -72,7 +74,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 
 	return out
 
-def set_address_details(out, party, party_type, doctype=None, company=None, party_address=None, shipping_address=None):  
+def set_address_details(out, party, party_type, doctype=None, company=None, party_address=None, shipping_address=None):
 	billing_address_field = "customer_address" if party_type == "Lead" \
 		else party_type.lower() + "_address"
 	out[billing_address_field] = party_address or get_default_address(party_type, party.name)
@@ -149,15 +151,20 @@ def get_default_price_list(party):
 
 	return None
 
-def set_price_list(out, party, party_type, given_price_list):
+def set_price_list(out, party, party_type, given_price_list, pos=None):
 	# price list
-	price_list = filter(None, get_user_permissions()
-		.get("Price List", {})
-		.get("docs", []))
-	price_list = list(price_list)
+	price_list = get_permitted_documents('Price List')
 
 	if price_list:
 		price_list = price_list[0]
+	elif pos and party_type == 'Customer':
+		customer_price_list = frappe.get_value('Customer', party.name, 'default_price_list')
+
+		if customer_price_list:
+			price_list = customer_price_list
+		else:
+			pos_price_list = frappe.get_value('POS Profile', pos, 'selling_price_list')
+			price_list = pos_price_list or given_price_list
 	else:
 		price_list = get_default_price_list(party) or given_price_list
 
@@ -335,7 +342,7 @@ def get_due_date_from_template(template_name, posting_date, bill_date):
 
 def validate_due_date(posting_date, due_date, party_type, party, company=None, bill_date=None, template_name=None):
 	if getdate(due_date) < getdate(posting_date):
-		frappe.throw(_("Due Date cannot be before Posting Date"))
+		frappe.throw(_("Due Date cannot be before Posting / Supplier Invoice Date"))
 	else:
 		if not template_name: return
 
@@ -457,40 +464,86 @@ def get_timeline_data(doctype, name):
 
 	return out
 
-def get_dashboard_info(party_type, party):
+def get_dashboard_info(party_type, party, loyalty_program=None):
 	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
-	company = frappe.db.get_default("company") or frappe.get_all("Company")[0].name
-	party_account_currency = get_party_account_currency(party_type, party, company)
-	company_default_currency = get_default_currency() \
-		or frappe.get_cached_value('Company',  company,  'default_currency')
-
-	if party_account_currency==company_default_currency:
-		total_field = "base_grand_total"
-	else:
-		total_field = "grand_total"
 
 	doctype = "Sales Invoice" if party_type=="Customer" else "Purchase Invoice"
 
-	billing_this_year = frappe.db.sql("""
-		select sum({0})
-		from `tab{1}`
-		where {2}=%s and docstatus=1 and posting_date between %s and %s
-	""".format(total_field, doctype, party_type.lower()),
-	(party, current_fiscal_year.year_start_date, current_fiscal_year.year_end_date))
+	companies = frappe.get_all(doctype, filters={
+		'docstatus': 1,
+		party_type.lower(): party
+	}, distinct=1, fields=['company'])
 
-	total_unpaid = frappe.db.sql("""
-		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
+	company_wise_info = []
+
+	company_wise_grand_total = frappe.get_all(doctype,
+		filters={
+			'docstatus': 1,
+			party_type.lower(): party,
+			'posting_date': ('between', [current_fiscal_year.year_start_date, current_fiscal_year.year_end_date])
+			},
+			group_by="company",
+			fields=["company", "sum(grand_total) as grand_total", "sum(base_grand_total) as base_grand_total"]
+		)
+
+	loyalty_point_details = []
+
+	if party_type == "Customer":
+		loyalty_point_details = frappe._dict(frappe.get_all("Loyalty Point Entry",
+			filters={
+				'customer': party,
+				'expiry_date': ('>=', getdate()),
+				},
+				group_by="company",
+				fields=["company", "sum(loyalty_points) as loyalty_points"],
+				as_list =1
+			))
+
+	company_wise_billing_this_year = frappe._dict()
+
+	for d in company_wise_grand_total:
+		company_wise_billing_this_year.setdefault(
+			d.company,{
+				"grand_total": d.grand_total,
+				"base_grand_total": d.base_grand_total
+			})
+
+
+	company_wise_total_unpaid = frappe._dict(frappe.db.sql("""
+		select company, sum(debit_in_account_currency) - sum(credit_in_account_currency)
 		from `tabGL Entry`
-		where party_type = %s and party=%s""", (party_type, party))
+		where party_type = %s and party=%s
+		group by company""", (party_type, party)))
 
-	info = {}
-	info["billing_this_year"] = flt(billing_this_year[0][0]) if billing_this_year else 0
-	info["currency"] = party_account_currency
-	info["total_unpaid"] = flt(total_unpaid[0][0]) if total_unpaid else 0
-	if party_type == "Supplier":
-		info["total_unpaid"] = -1 * info["total_unpaid"]
+	for d in companies:
+		company_default_currency = frappe.db.get_value("Company", d.company, 'default_currency')
+		party_account_currency = get_party_account_currency(party_type, party, d.company)
 
-	return info
+		if party_account_currency==company_default_currency:
+			billing_this_year = flt(company_wise_billing_this_year.get(d.company,{}).get("base_grand_total"))
+		else:
+			billing_this_year = flt(company_wise_billing_this_year.get(d.company,{}).get("grand_total"))
+
+		total_unpaid = flt(company_wise_total_unpaid.get(d.company))
+
+		if loyalty_point_details:
+			loyalty_points = loyalty_point_details.get(d.company)
+
+		info = {}
+		info["billing_this_year"] = flt(billing_this_year) if billing_this_year else 0
+		info["currency"] = party_account_currency
+		info["total_unpaid"] = flt(total_unpaid) if total_unpaid else 0
+		info["company"] = d.company
+
+		if party_type == "Customer" and loyalty_point_details:
+			info["loyalty_points"] = loyalty_points
+
+		if party_type == "Supplier":
+			info["total_unpaid"] = -1 * info["total_unpaid"]
+
+		company_wise_info.append(info)
+
+	return company_wise_info
 
 def get_party_shipping_address(doctype, name):
 	"""
@@ -510,7 +563,7 @@ def get_party_shipping_address(doctype, name):
 		'dl.link_doctype=%s '
 		'and dl.link_name=%s '
 		'and dl.parenttype="Address" '
-		'and '
+		'and ifnull(ta.disabled, 0) = 0 and'
 		'(ta.address_type="Shipping" or ta.is_shipping_address=1) '
 		'order by ta.is_shipping_address desc, ta.address_type desc limit 1',
 		(doctype, name)
@@ -519,3 +572,18 @@ def get_party_shipping_address(doctype, name):
 		return out[0][0]
 	else:
 		return ''
+
+def get_partywise_advanced_payment_amount(party_type, posting_date = None):
+	cond = "1=1"
+	if posting_date:
+		cond = "posting_date <= '{0}'".format(posting_date)
+
+	data = frappe.db.sql(""" SELECT party, sum({0}) as amount
+		FROM `tabGL Entry`
+		WHERE
+			party_type = %s and against_voucher is null
+			and {1} GROUP BY party"""
+		.format(("credit") if party_type == "Customer" else "debit", cond) , party_type)
+
+	if data:
+		return frappe._dict(data)

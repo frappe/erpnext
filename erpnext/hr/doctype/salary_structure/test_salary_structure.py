@@ -71,6 +71,19 @@ class TestSalaryStructure(unittest.TestCase):
 		for row in salary_structure.deductions:
 			self.assertFalse(("\n" in row.formula) or ("\n" in row.condition))
 
+	def test_salary_structures_assignment(self):
+		salary_structure = make_salary_structure("Salary Structure Sample", "Monthly")
+		employee = "test_assign_stucture@salary.com"
+		employee_doc_name = make_employee(employee)
+		# clear the already assigned stuctures
+		frappe.db.sql('''delete from `tabSalary Structure Assignment` where employee=%s and salary_structure=%s ''',
+					  ("test_assign_stucture@salary.com",salary_structure.name))
+		#test structure_assignment
+		salary_structure.assign_salary_structure(employee=employee_doc_name,from_date='2013-01-01',base=5000,variable=200)
+		salary_structure_assignment = frappe.get_doc("Salary Structure Assignment",{'employee':employee_doc_name, 'from_date':'2013-01-01'})
+		self.assertEqual(salary_structure_assignment.docstatus, 1)
+		self.assertEqual(salary_structure_assignment.base, 5000)
+		self.assertEqual(salary_structure_assignment.variable, 200)
 
 def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None, test_tax=False):
 	if test_tax:

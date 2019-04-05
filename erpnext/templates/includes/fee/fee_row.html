@@ -5,13 +5,13 @@
 				{{ doc.program }}
 			</div>
 			<div class="col-xs-2">
-				{{ doc.get_formatted("total_amount") }}
+				{{ frappe.utils.fmt_money(doc.grand_total, currency=doc.currency) }}
 			</div>
 			<div class="col-xs-2">
-				{{ doc.get_formatted("paid_amount") }}
+				{{ frappe.utils.fmt_money(doc.paid_amount, currency=doc.currency) }}
 			</div>
 			<div class="col-xs-2">
-				{{ doc.get_formatted("outstanding_amount") }}
+				{{ frappe.utils.fmt_money(doc.outstanding_amount, currency=doc.currency) }}
 			</div>
 		</div>
 	</a>

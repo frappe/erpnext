@@ -85,7 +85,7 @@ frappe.ui.form.on('Material Request', {
 
 				// stop
 				frm.add_custom_button(__('Stop'),
-					() => frm.events.update_status(frm, 'Stop'));
+					() => frm.events.update_status(frm, 'Stopped'));
 
 			}
 		}
@@ -102,7 +102,7 @@ frappe.ui.form.on('Material Request', {
 
 	update_status: function(frm, stop_status) {
 		frappe.call({
-			method: 'erpnext.stock.material_request.material_request.update_status',
+			method: 'erpnext.stock.doctype.material_request.material_request.update_status',
 			args: { name: frm.doc.name, status: stop_status },
 			callback(r) {
 				if (!r.exc) {

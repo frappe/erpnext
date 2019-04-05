@@ -18,14 +18,13 @@ class GLEntry(Document):
 		self.flags.ignore_submit_comment = True
 		self.check_mandatory()
 		self.validate_and_set_fiscal_year()
+		self.pl_must_have_cost_center()
+		self.validate_cost_center()
 
 		if not self.flags.from_repost:
-			self.pl_must_have_cost_center()
 			self.check_pl_account()
-			self.validate_cost_center()
 			self.validate_party()
 			self.validate_currency()
-
 
 	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes', from_repost=False):
 		if not from_repost:
@@ -75,7 +74,8 @@ class GLEntry(Document):
 
 	def check_pl_account(self):
 		if self.is_opening=='Yes' and \
-				frappe.db.get_value("Account", self.account, "report_type")=="Profit and Loss":
+				frappe.db.get_value("Account", self.account, "report_type")=="Profit and Loss" and \
+				self.voucher_type not in ['Purchase Invoice', 'Sales Invoice']:
 			frappe.throw(_("{0} {1}: 'Profit and Loss' type account {2} not allowed in Opening Entry")
 				.format(self.voucher_type, self.voucher_no, self.account))
 

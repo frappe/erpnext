@@ -56,7 +56,7 @@ def work():
 	if random.random() < 0.5:
 		make_payment_entries("Purchase Invoice", "Accounts Payable")
 
-	if random.random() < 0.1:
+	if random.random() < 0.4:
 		#make payment request against sales invoice
 		sales_invoice_name = get_random("Sales Invoice", filters={"docstatus": 1})
 		if sales_invoice_name:

@@ -120,28 +120,3 @@ frappe.ui.form.on("Project Task", {
 		frm.trigger('tasks_refresh');
 	},
 });
-
-frappe.ui.form.on("Project", "validate", function (frm) {
-	if (frm.doc.collect_progress == 1) {
-		frappe.call({
-			method: "erpnext.projects.doctype.project.project.times_check",
-			args: {
-				"from1": frm.doc.from,
-				"to": frm.doc.to,
-				"first_email": frm.doc.first_email,
-				"second_email": frm.doc.second_email,
-				"daily_time_to_send": frm.doc.daily_time_to_send,
-				"weekly_time_to_send": frm.doc.weekly_time_to_send
-
-			},
-			callback: function (r) {
-				frm.set_value("from", r.message.from1);
-				frm.set_value("to", r.message.to);
-				frm.set_value("first_email", r.message.first_email);
-				frm.set_value("second_email", r.message.second_email);
-				frm.set_value("daily_time_to_send", r.message.daily_time_to_send);
-				frm.set_value("weekly_time_to_send", r.message.weekly_time_to_send);
-			}
-		});
-	}
-});

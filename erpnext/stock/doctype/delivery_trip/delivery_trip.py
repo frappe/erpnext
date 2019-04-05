@@ -10,17 +10,64 @@ import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.document import Document
-from frappe.utils import get_datetime, get_link_to_form, cstr
+from frappe.utils import cint, get_datetime, get_link_to_form
 
 
 class DeliveryTrip(Document):
+	def __init__(self, *args, **kwargs):
+		super(DeliveryTrip, self).__init__(*args, **kwargs)
+
+		# Google Maps returns distances in meters by default
+		self.default_distance_uom = frappe.db.get_single_value("Global Defaults", "default_distance_unit") or "Meter"
+		self.uom_conversion_factor = frappe.db.get_value("UOM Conversion Factor",
+														{"from_uom": "Meter", "to_uom": self.default_distance_uom},
+														"value")
+
+	def validate(self):
+		self.validate_stop_addresses()
+
 	def on_submit(self):
+		self.update_status()
 		self.update_delivery_notes()
 
+	def on_update_after_submit(self):
+		self.update_status()
+
 	def on_cancel(self):
+		self.update_status()
 		self.update_delivery_notes(delete=True)
 
+	def validate_stop_addresses(self):
+		for stop in self.delivery_stops:
+			if not stop.customer_address:
+				stop.customer_address = get_address_display(frappe.get_doc("Address", stop.address).as_dict())
+
+	def update_status(self):
+		status = {
+			0: "Draft",
+			1: "Scheduled",
+			2: "Cancelled"
+		}[self.docstatus]
+
+		if self.docstatus == 1:
+			visited_stops = [stop.visited for stop in self.delivery_stops]
+			if all(visited_stops):
+				status = "Completed"
+			elif any(visited_stops):
+				status = "In Transit"
+
+		self.db_set("status", status)
+
 	def update_delivery_notes(self, delete=False):
+		"""
+		Update all connected Delivery Notes with Delivery Trip details
+		(Driver, Vehicle, etc.). If `delete` is `True`, then details
+		are removed.
+
+		Args:
+			delete (bool, optional): Defaults to `False`. `True` if driver details need to be emptied, else `False`.
+		"""
+
 		delivery_notes = list(set([stop.delivery_note for stop in self.delivery_stops if stop.delivery_note]))
 
 		update_fields = {
@@ -28,7 +75,7 @@ class DeliveryTrip(Document):
 			"driver_name": self.driver_name,
 			"vehicle_no": self.vehicle,
 			"lr_no": self.name,
-			"lr_date": self.date
+			"lr_date": self.departure_time
 		}
 
 		for delivery_note in delivery_notes:
@@ -44,58 +91,175 @@ class DeliveryTrip(Document):
 		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
 		frappe.msgprint(_("Delivery Notes {0} updated".format(", ".join(delivery_notes))))
 
+	def process_route(self, optimize):
+		"""
+		Estimate the arrival times for each stop in the Delivery Trip.
+		If `optimize` is True, the stops will be re-arranged, based
+		on the optimized order, before estimating the arrival times.
+
+		Args:
+			optimize (bool): True if route needs to be optimized, else False
+		"""
+
+		if not frappe.db.get_single_value("Google Maps Settings", "enabled"):
+			frappe.throw(_("Cannot process route, since Google Maps Settings is disabled."))
+
+		departure_datetime = get_datetime(self.departure_time)
+		route_list = self.form_route_list(optimize)
+
+		# For locks, maintain idx count while looping through route list
+		idx = 0
+		for route in route_list:
+			directions = get_directions(route, optimize)
+
+			if directions:
+				if optimize and len(directions.get("waypoint_order")) > 1:
+					self.rearrange_stops(directions.get("waypoint_order"), start=idx)
+
+				# Avoid estimating last leg back to the home address
+				legs = directions.get("legs")[:-1] if route == route_list[-1] else directions.get("legs")
+
+				# Google Maps returns the legs in the optimized order
+				for leg in legs:
+					delivery_stop = self.delivery_stops[idx]
+
+					delivery_stop.lat, delivery_stop.lng = leg.get("end_location", {}).values()
+					delivery_stop.uom = self.default_distance_uom
+					distance = leg.get("distance", {}).get("value", 0.0)  # in meters
+					delivery_stop.distance = distance * self.uom_conversion_factor
+
+					duration = leg.get("duration", {}).get("value", 0)
+					estimated_arrival = departure_datetime + datetime.timedelta(seconds=duration)
+					delivery_stop.estimated_arrival = estimated_arrival
+
+					stop_delay = frappe.db.get_single_value("Delivery Settings", "stop_delay")
+					departure_datetime = estimated_arrival + datetime.timedelta(minutes=cint(stop_delay))
+					idx += 1
+
+				# Include last leg in the final distance calculation
+				self.uom = self.default_distance_uom
+				total_distance = sum([leg.get("distance", {}).get("value", 0.0)
+											for leg in directions.get("legs")])  # in meters
+				self.total_distance = total_distance * self.uom_conversion_factor
+			else:
+				idx += len(route) - 1
+
+		self.save()
+
+	def form_route_list(self, optimize):
+		"""
+		Form a list of address routes based on the delivery stops. If locks
+		are present, and the routes need to be optimized, then they will be
+		split into sublists at the specified lock position(s).
+
+		Args:
+			optimize (bool): `True` if route needs to be optimized, else `False`
+
+		Returns:
+			(list of list of str): List of address routes split at locks, if optimize is `True`
+		"""
+
+		settings = frappe.get_single("Google Maps Settings")
+		home_address = get_address_display(frappe.get_doc("Address", settings.home_address).as_dict())
+
+		route_list = []
+		# Initialize first leg with origin as the home address
+		leg = [home_address]
+
+		for stop in self.delivery_stops:
+			leg.append(stop.customer_address)
+
+			if optimize and stop.lock:
+				route_list.append(leg)
+				leg = [stop.customer_address]
+
+		# For last leg, append home address as the destination
+		# only if lock isn't on the final stop
+		if len(leg) > 1:
+			leg.append(home_address)
+			route_list.append(leg)
+
+		route_list = [[sanitize_address(address) for address in route] for route in route_list]
+
+		return route_list
+
+	def rearrange_stops(self, optimized_order, start):
+		"""
+		Re-arrange delivery stops based on order optimized
+		for vehicle routing problems.
+
+		Args:
+			optimized_order (list of int): The index-based optimized order of the route
+			start (int): The index at which to start the rearrangement
+		"""
+
+		stops_order = []
+
+		# Child table idx starts at 1
+		for new_idx, old_idx in enumerate(optimized_order, 1):
+			new_idx = start + new_idx
+			old_idx = start + old_idx
+
+			self.delivery_stops[old_idx].idx = new_idx
+			stops_order.append(self.delivery_stops[old_idx])
+
+		self.delivery_stops[start:start + len(stops_order)] = stops_order
+
+
+@frappe.whitelist()
+def get_contact_and_address(name):
+	out = frappe._dict()
+
+	get_default_contact(out, name)
+	get_default_address(out, name)
+
+	return out
 
 
 def get_default_contact(out, name):
 	contact_persons = frappe.db.sql(
 		"""
-			select parent,
-				(select is_primary_contact from tabContact c where c.name = dl.parent)
-				as is_primary_contact
-			from
+			SELECT parent,
+				(SELECT is_primary_contact FROM tabContact c WHERE c.name = dl.parent) AS is_primary_contact
+			FROM
 				`tabDynamic Link` dl
-			where
-				dl.link_doctype="Customer" and
-				dl.link_name=%s and
-				dl.parenttype = 'Contact'
+			WHERE
+				dl.link_doctype="Customer"
+				AND dl.link_name=%s
+				AND dl.parenttype = "Contact"
 		""", (name), as_dict=1)
 
 	if contact_persons:
 		for out.contact_person in contact_persons:
 			if out.contact_person.is_primary_contact:
 				return out.contact_person
+
 		out.contact_person = contact_persons[0]
+
 		return out.contact_person
-	else:
-		return None
+
 
 def get_default_address(out, name):
 	shipping_addresses = frappe.db.sql(
 		"""
-			select parent,
-				(select is_shipping_address from tabAddress a where a.name=dl.parent) as is_shipping_address
-			from `tabDynamic Link` dl
-			where link_doctype="Customer"
-				and link_name=%s
-				and parenttype = 'Address'
+			SELECT parent,
+				(SELECT is_shipping_address FROM tabAddress a WHERE a.name=dl.parent) AS is_shipping_address
+			FROM
+				`tabDynamic Link` dl
+			WHERE
+				dl.link_doctype="Customer"
+				AND dl.link_name=%s
+				AND dl.parenttype = "Address"
 		""", (name), as_dict=1)
 
 	if shipping_addresses:
 		for out.shipping_address in shipping_addresses:
 			if out.shipping_address.is_shipping_address:
 				return out.shipping_address
+
 		out.shipping_address = shipping_addresses[0]
+
 		return out.shipping_address
-	else:
-		return None
-
-
-@frappe.whitelist()
-def get_contact_and_address(name):
-	out = frappe._dict()
-	get_default_contact(out, name)
-	get_default_address(out, name)
-	return out
 
 
 @frappe.whitelist()
@@ -103,67 +267,83 @@ def get_contact_display(contact):
 	contact_info = frappe.db.get_value(
 		"Contact", contact,
 		["first_name", "last_name", "phone", "mobile_no"],
-	as_dict=1)
+		as_dict=1)
+
 	contact_info.html = """ <b>%(first_name)s %(last_name)s</b> <br> %(phone)s <br> %(mobile_no)s""" % {
 		"first_name": contact_info.first_name,
 		"last_name": contact_info.last_name or "",
 		"phone": contact_info.phone or "",
-		"mobile_no": contact_info.mobile_no or "",
+		"mobile_no": contact_info.mobile_no or ""
 	}
+
 	return contact_info.html
 
 
-def process_route(name, optimize):
-	doc = frappe.get_doc("Delivery Trip", name)
-	settings = frappe.get_single("Google Maps Settings")
-	gmaps_client = settings.get_client()
+@frappe.whitelist()
+def optimize_route(delivery_trip):
+	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
+	delivery_trip.process_route(optimize=True)
 
-	if not settings.enabled:
-		frappe.throw(_("Google Maps integration is not enabled"))
 
-	home_address = get_address_display(frappe.get_doc("Address", settings.home_address).as_dict())
-	address_list = []
+@frappe.whitelist()
+def get_arrival_times(delivery_trip):
+	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
+	delivery_trip.process_route(optimize=False)
 
-	for stop in doc.delivery_stops:
-		address_list.append(stop.customer_address)
 
-	# Cannot add datetime.date to datetime.timedelta
-	departure_datetime = get_datetime(doc.date) + doc.departure_time
+def sanitize_address(address):
+	"""
+	Remove HTML breaks in a given address
 
-	try:
-		directions = gmaps_client.directions(origin=home_address,
-					destination=home_address, waypoints=address_list,
-					optimize_waypoints=optimize, departure_time=departure_datetime)
-	except Exception as e:
-		frappe.throw((e.message))
+	Args:
+		address (str): Address to be sanitized
 
-	if not directions:
+	Returns:
+		(str): Sanitized address
+	"""
+
+	if not address:
 		return
 
-	directions = directions[0]
-	duration = 0
+	address = address.split('<br>')
 
-	# Google Maps returns the optimized order of the waypoints that were sent
-	for idx, order in enumerate(directions.get("waypoint_order")):
-		# We accordingly rearrange the rows
-		doc.delivery_stops[order].idx = idx + 1
-		# Google Maps returns the "legs" in the optimized order, so we loop through it
-		duration += directions.get("legs")[idx].get("duration").get("value")
-		arrival_datetime = departure_datetime + datetime.timedelta(seconds=duration)
-		doc.delivery_stops[order].estimated_arrival = arrival_datetime
-
-	doc.save()
-	frappe.db.commit()
+	# Only get the first 3 blocks of the address
+	return ', '.join(address[:3])
 
 
-@frappe.whitelist()
-def optimize_route(name):
-	process_route(name, optimize=True)
+def get_directions(route, optimize):
+	"""
+	Retrieve map directions for a given route and departure time.
+	If optimize is `True`, Google Maps will return an optimized
+	order for the intermediate waypoints.
 
+	NOTE: Google's API does take an additional `departure_time` key,
+	but it only works for routes without any waypoints.
 
-@frappe.whitelist()
-def get_arrival_times(name):
-	process_route(name, optimize=False)
+	Args:
+		route (list of str): Route addresses (origin -> waypoint(s), if any -> destination)
+		optimize (bool): `True` if route needs to be optimized, else `False`
+
+	Returns:
+		(dict): Route legs and, if `optimize` is `True`, optimized waypoint order
+	"""
+
+	settings = frappe.get_single("Google Maps Settings")
+	maps_client = settings.get_client()
+
+	directions_data = {
+		"origin": route[0],
+		"destination": route[-1],
+		"waypoints": route[1: -1],
+		"optimize_waypoints": optimize
+	}
+
+	try:
+		directions = maps_client.directions(**directions_data)
+	except Exception as e:
+		frappe.throw(_(e.message))
+
+	return directions[0] if directions else False
 
 
 @frappe.whitelist()
@@ -171,10 +351,6 @@ def notify_customers(delivery_trip):
 	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
 
 	context = delivery_trip.as_dict()
-	context.update({
-		"departure_time": cstr(context.get("departure_time")),
-		"estimated_arrival": cstr(context.get("estimated_arrival"))
-	})
 
 	if delivery_trip.driver:
 		context.update(frappe.db.get_value("Driver", delivery_trip.driver, "cell_number", as_dict=1))

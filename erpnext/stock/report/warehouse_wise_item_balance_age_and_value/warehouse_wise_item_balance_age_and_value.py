@@ -8,7 +8,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, cint, getdate
-from erpnext.stock.report.stock_balance.stock_balance import get_item_details, get_item_reorder_details, get_item_warehouse_map
+from erpnext.stock.report.stock_balance.stock_balance import (get_item_details,
+	get_item_reorder_details, get_item_warehouse_map, get_items, get_stock_ledger_entries)
 from erpnext.stock.report.stock_ageing.stock_ageing import get_fifo_queue, get_average_age
 from six import iteritems
 
@@ -18,8 +19,12 @@ def execute(filters=None):
 	validate_filters(filters)
 
 	columns = get_columns(filters)
-	item_map = get_item_details(filters)
-	iwb_map = get_item_warehouse_map(filters)
+
+	items = get_items(filters)
+	sle = get_stock_ledger_entries(filters, items)
+
+	item_map = get_item_details(items, sle, filters)
+	iwb_map = get_item_warehouse_map(filters, sle)
 	warehouse_list = get_warehouse_list(filters)
 	item_ageing = get_fifo_queue(filters)
 	data = []
@@ -27,6 +32,8 @@ def execute(filters=None):
 	item_value = {}
 
 	for (company, item, warehouse) in sorted(iwb_map):
+		if not item_map.get(item):  continue
+
 		row = []
 		qty_dict = iwb_map[(company, item, warehouse)]
 		item_balance.setdefault((item, item_map[item]["item_group"]), [])
@@ -42,6 +49,8 @@ def execute(filters=None):
 
 	# sum bal_qty by item
 	for (item, item_group), wh_balance in iteritems(item_balance):
+		if not item_ageing.get(item):  continue
+
 		total_stock_value = sum(item_value[(item, item_group)])
 		row = [item, item_group, total_stock_value]
 
@@ -85,11 +94,10 @@ def validate_filters(filters):
 		filters["company"] = frappe.defaults.get_user_default("Company")
 
 def get_warehouse_list(filters):
-	from frappe.defaults import get_user_permissions
+	from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
+
 	condition = ''
-	user_permitted_warehouse = filter(None, get_user_permissions()
-		.get("Warehouse", {})
-		.get("docs", []))
+	user_permitted_warehouse = get_permitted_documents('Warehouse')
 	value = ()
 	if user_permitted_warehouse:
 		condition = "and name in %s"

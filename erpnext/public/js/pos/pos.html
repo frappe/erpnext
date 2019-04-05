@@ -82,7 +82,7 @@
 						{% for(var j=i*3; j
 						<(i+1)*3; j++) { %} <button type="button" class="btn btn-default numeric-keypad" val="{{j+1}}">{{j+1}}</button>
 							{% } %}
-							<button type="button" {% if((!allow_user_to_edit_rate && chartData[i] == __("Price")) || (!allow_user_to_edit_discount && chartData[i] == __("Disc"))) { %} disabled {% } %} id="pos-item-{{ chartData[i].toLowerCase() }}" class="btn text-center btn-default numeric-keypad pos-operation">{{ __(chartData[i]) }}</button>
+							<button type="button" {% if((!allow_user_to_edit_rate && __(chartData[i]) == __("Price")) || (!allow_user_to_edit_discount && __(chartData[i]) == __("Disc"))) { %} disabled {% } %} id="pos-item-{{ chartData[i].toLowerCase() }}" class="btn text-center btn-default numeric-keypad pos-operation">{{ __(chartData[i]) }}</button>
 				</div>
 				{% } %}
 				<div class="row text-right">

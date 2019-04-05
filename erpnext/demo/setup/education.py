@@ -1,5 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
+from __future__ import unicode_literals
 
 import frappe, json
 from frappe.utils.make_random import get_random
@@ -162,7 +163,7 @@ def make_assessment_groups():
 
 def get_json_path(doctype):
 		return frappe.get_app_path('erpnext', 'demo', 'data', frappe.scrub(doctype) + '.json')
-		
+
 def weighted_choice(weights):
 	totals = []
 	running_total = 0

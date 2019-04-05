@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
+
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
+from __future__ import unicode_literals
 
 import re
 from past.builtins import cmp
@@ -124,7 +126,7 @@ def get_label(periodicity, from_date, to_date):
 def get_data(
 		company, root_type, balance_must_be, period_list, filters=None,
 		accumulated_values=1, only_current_fiscal_year=True, ignore_closing_entries=False,
-		ignore_accumulated_values_for_fy=False):
+		ignore_accumulated_values_for_fy=False , total = True):
 
 	accounts = get_accounts(company, root_type)
 	if not accounts:
@@ -152,7 +154,7 @@ def get_data(
 	out = prepare_data(accounts, balance_must_be, period_list, company_currency)
 	out = filter_out_zero_value_rows(out, parent_children_map)
 
-	if out:
+	if out and total:
 		add_total_row(out, root_type, balance_must_be, period_list, company_currency)
 
 	return out
@@ -211,11 +213,14 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 		total = 0
 		row = frappe._dict({
 			"account": _(d.name),
-			"parent_account": _(d.parent_account),
+			"parent_account": _(d.parent_account) if d.parent_account else '',
 			"indent": flt(d.indent),
 			"year_start_date": year_start_date,
 			"year_end_date": year_end_date,
 			"currency": company_currency,
+			"include_in_gross": d.include_in_gross,
+			"account_type": d.account_type,
+			"is_group": d.is_group,
 			"opening_balance": d.get("opening_balance", 0.0) * (1 if balance_must_be=="Debit" else -1),
 			"account_name": ('%s - %s' %(_(d.account_number), _(d.account_name))
 				if d.account_number else _(d.account_name))
@@ -268,7 +273,7 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 			for period in period_list:
 				total_row.setdefault(period.key, 0.0)
 				total_row[period.key] += row.get(period.key, 0.0)
-				row[period.key] = 0.0
+				row[period.key] = row.get(period.key, 0.0)
 
 			total_row.setdefault("total", 0.0)
 			total_row["total"] += flt(row["total"])
@@ -283,7 +288,7 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 
 def get_accounts(company, root_type):
 	return frappe.db.sql("""
-		select name, account_number, parent_account, lft, rgt, root_type, report_type, account_name
+		select name, account_number, parent_account, lft, rgt, root_type, report_type, account_name, include_in_gross, account_type, is_group, lft, rgt
 		from `tabAccount`
 		where company=%s and root_type=%s order by lft""", (company, root_type), as_dict=True)
 
@@ -339,19 +344,20 @@ def set_gl_entries_by_account(
 
 	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 
+	accounts = frappe.db.sql_list("""select name from `tabAccount`
+		where lft >= %s and rgt <= %s""", (root_lft, root_rgt))
+	additional_conditions += " and account in ('{}')"\
+		.format("', '".join([frappe.db.escape(d) for d in accounts]))
+
 	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
 		where company=%(company)s
 		{additional_conditions}
 		and posting_date <= %(to_date)s
-		and account in (select name from `tabAccount`
-			where lft >= %(lft)s and rgt <= %(rgt)s)
 		order by account, posting_date""".format(additional_conditions=additional_conditions),
 		{
 			"company": company,
 			"from_date": from_date,
 			"to_date": to_date,
-			"lft": root_lft,
-			"rgt": root_rgt,
 			"cost_center": filters.cost_center,
 			"project": filters.project
 		},
@@ -378,8 +384,8 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	if filters:
 		if filters.get("project"):
 			if not isinstance(filters.get("project"), list):
-				projects = str(filters.get("project")).strip()
-				filters.project = [d.strip() for d in projects.split(',') if d]
+				projects = frappe.safe_encode(filters.get("project"))
+				filters.project = [d.strip() for d in projects.strip().split(',') if d]
 			additional_conditions.append("project in %(project)s")
 
 		if filters.get("cost_center"):
@@ -399,7 +405,7 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 
 def get_cost_centers_with_children(cost_centers):
 	if not isinstance(cost_centers, list):
-		cost_centers = [d.strip() for d in str(cost_centers).strip().split(',') if d]
+		cost_centers = [d.strip() for d in cost_centers.strip().split(',') if d]
 
 	all_cost_centers = []
 	for d in cost_centers:

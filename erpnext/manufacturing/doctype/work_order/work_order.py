@@ -191,7 +191,7 @@ class WorkOrder(Document):
 		for purpose, fieldname in (("Manufacture", "produced_qty"),
 			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")):
 			if (purpose == 'Material Transfer for Manufacture' and
-				self.operations and self.transfer_material_against_job_card):
+				self.operations and self.transfer_material_against == 'Job Card'):
 				continue
 
 			qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
@@ -281,6 +281,10 @@ class WorkOrder(Document):
 		if self.product_bundle_item:
 			total_bundle_qty = frappe.db.sql(""" select sum(qty) from
 				`tabProduct Bundle Item` where parent = %s""", (frappe.db.escape(self.product_bundle_item)))[0][0]
+
+			if not total_bundle_qty:
+				# product bundle is 0 (product bundle allows 0 qty for items)
+				total_bundle_qty = 1
 
 		cond = "product_bundle_item = %s" if self.product_bundle_item else "production_item = %s"
 
@@ -448,7 +452,9 @@ class WorkOrder(Document):
 					if item_dict.get(d.item_code):
 						d.required_qty = item_dict.get(d.item_code).get("qty")
 			else:
-				for item in sorted(item_dict.values(), key=lambda d: d['idx']):
+				# Attribute a big number (999) to idx for sorting putpose in case idx is NULL
+				# For instance in BOM Explosion Item child table, the items coming from sub assembly items
+				for item in sorted(item_dict.values(), key=lambda d: d['idx'] or 9999):
 					self.append('required_items', {
 						'operation': item.operation,
 						'item_code': item.item_code,
@@ -457,7 +463,7 @@ class WorkOrder(Document):
 						'allow_alternative_item': item.allow_alternative_item,
 						'required_qty': item.qty,
 						'source_warehouse': item.source_warehouse or item.default_warehouse,
-						'allow_transfer_for_manufacture': item.allow_transfer_for_manufacture
+						'include_item_in_manufacturing': item.include_item_in_manufacturing
 					})
 
 			self.set_available_qty()
@@ -562,11 +568,11 @@ def get_item_details(item, project = None):
 			frappe.throw(_("Default BOM for {0} not found").format(item))
 
 	bom_data = frappe.db.get_value('BOM', res['bom_no'],
-		['project', 'allow_alternative_item', 'transfer_material_against_job_card'], as_dict=1)
+		['project', 'allow_alternative_item', 'transfer_material_against'], as_dict=1)
 
 	res['project'] = project or bom_data.project
 	res['allow_alternative_item'] = bom_data.allow_alternative_item
-	res['transfer_material_against_job_card'] = bom_data.transfer_material_against_job_card
+	res['transfer_material_against'] = bom_data.transfer_material_against
 	res.update(check_if_scrap_warehouse_mandatory(res["bom_no"]))
 
 	return res
@@ -680,7 +686,7 @@ def create_job_card(work_order, row, qty=0, auto_create=False):
 		'wip_warehouse': work_order.wip_warehouse
 	})
 
-	if work_order.transfer_material_against_job_card and not work_order.skip_transfer:
+	if work_order.transfer_material_against == 'Job Card' and not work_order.skip_transfer:
 		doc.get_required_items()
 
 	if auto_create:

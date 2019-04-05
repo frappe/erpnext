@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
+from __future__ import unicode_literals
 
 import json
 
@@ -55,6 +54,7 @@ def get_pos_data():
 		'barcode_data': get_barcode_data(items_list),
 		'tax_data': get_item_tax_data(),
 		'price_list_data': get_price_list_data(doc.selling_price_list),
+		'customer_wise_price_list': get_customer_wise_price_list(),
 		'bin_data': get_bin_data(pos_profile),
 		'pricing_rules': get_pricing_rule_data(doc),
 		'print_template': print_template,
@@ -165,9 +165,12 @@ def get_items_list(pos_profile, company):
 		select
 			i.name, i.item_code, i.item_name, i.description, i.item_group, i.has_batch_no,
 			i.has_serial_no, i.is_stock_item, i.brand, i.stock_uom, i.image,
-			id.expense_account, id.selling_cost_center, id.default_warehouse
+			id.expense_account, id.selling_cost_center, id.default_warehouse,
+			i.sales_uom, c.conversion_factor
 		from
-			`tabItem` i LEFT JOIN `tabItem Default` id ON id.parent = i.name and id.company = %s
+			`tabItem` i
+		left join `tabItem Default` id on id.parent = i.name and id.company = %s
+		left join `tabUOM Conversion Detail` c on i.name = c.parent and i.sales_uom = c.uom
 		where
 			i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1
 			{cond}
@@ -247,10 +250,12 @@ def get_serial_no_data(pos_profile, company):
 
 	cond = "1=1"
 	if pos_profile.get('update_stock') and pos_profile.get('warehouse'):
-		cond = "warehouse = '{0}'".format(pos_profile.get('warehouse'))
+		cond = "warehouse = %(warehouse)s"
 
-	serial_nos = frappe.db.sql("""select name, warehouse, item_code from `tabSerial No` where {0}
-				and company = %(company)s """.format(cond), {'company': company}, as_dict=1)
+	serial_nos = frappe.db.sql("""select name, warehouse, item_code
+		from `tabSerial No` where {0} and company = %(company)s """.format(cond),{
+			'company': company, 'warehouse': frappe.db.escape(pos_profile.get('warehouse'))
+		}, as_dict=1)
 
 	itemwise_serial_no = {}
 	for sn in serial_nos:
@@ -323,15 +328,32 @@ def get_price_list_data(selling_price_list):
 
 	return itemwise_price_list
 
+def get_customer_wise_price_list():
+	customer_wise_price = {}
+	customer_price_list_mapping = frappe._dict(frappe.get_all('Customer',fields = ['default_price_list', 'name'], as_list=1))
+
+	price_lists = frappe.db.sql(""" Select ifnull(price_list_rate, 0) as price_list_rate,
+		item_code, price_list from `tabItem Price` """, as_dict=1)
+
+	for item in price_lists:
+		if item.price_list and customer_price_list_mapping.get(item.price_list):
+
+			customer_wise_price.setdefault(customer_price_list_mapping.get(item.price_list),{}).setdefault(
+				item.item_code, item.price_list_rate
+			)
+
+	return customer_wise_price
 
 def get_bin_data(pos_profile):
 	itemwise_bin_data = {}
 	cond = "1=1"
 	if pos_profile.get('warehouse'):
-		cond = "warehouse = '{0}'".format(pos_profile.get('warehouse'))
+		cond = "warehouse = %(warehouse)s"
 
 	bin_data = frappe.db.sql(""" select item_code, warehouse, actual_qty from `tabBin`
-		where actual_qty > 0 and {cond}""".format(cond=cond), as_dict=1)
+		where actual_qty > 0 and {cond}""".format(cond=cond), {
+			'warehouse': frappe.db.escape(pos_profile.get('warehouse'))
+		}, as_dict=1)
 
 	for bins in bin_data:
 		if bins.item_code not in itemwise_bin_data:
@@ -534,6 +556,7 @@ def validate_item(doc):
 			item_doc.item_name = item.get('item_name')
 			item_doc.description = item.get('description')
 			item_doc.stock_uom = item.get('stock_uom')
+			item_doc.uom = item.get('uom')
 			item_doc.item_group = item.get('item_group')
 			item_doc.append('item_defaults', {
 				"company": doc.get("company"),

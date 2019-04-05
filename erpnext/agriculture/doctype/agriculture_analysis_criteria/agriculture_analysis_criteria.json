@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_events_in_timeline": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
@@ -15,6 +16,7 @@
  "fields": [
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -41,10 +43,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "unique": 0
+   "translatable": 0, 
+   "unique": 1
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -71,10 +75,12 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -102,6 +108,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0, 
    "unique": 0
   }
  ], 
@@ -115,7 +122,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-12-25 22:26:28.797375", 
+ "modified": "2018-11-04 03:27:36.678832", 
  "modified_by": "Administrator", 
  "module": "Agriculture", 
  "name": "Agriculture Analysis Criteria", 
@@ -124,7 +131,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 
@@ -144,7 +150,6 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
@@ -166,10 +171,12 @@
  "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
+ "restrict_to_domain": "Agriculture", 
  "show_name_in_global_search": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

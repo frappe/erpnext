@@ -57,6 +57,8 @@ class AccountsController(TransactionBase):
 						_('{0} is blocked so this transaction cannot proceed'.format(supplier_name)), raise_exception=1)
 
 	def validate(self):
+
+		self.validate_qty_is_not_zero()
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 
@@ -92,6 +94,8 @@ class AccountsController(TransactionBase):
 			if self.is_return:
 				self.validate_qty()
 
+		validate_regional(self)
+
 	def validate_invoice_documents_schedule(self):
 		self.validate_payment_schedule_dates()
 		self.set_due_date()
@@ -112,10 +116,23 @@ class AccountsController(TransactionBase):
 			self.validate_non_invoice_documents_schedule()
 
 	def before_print(self):
+		if self.doctype in ['Journal Entry', 'Payment Entry', 'Sales Invoice', 'Purchase Invoice']:
+			self.gl_entries = frappe.get_list("GL Entry", filters={
+				"voucher_type": self.doctype,
+				"voucher_no": self.name
+			}, fields=["account", "party_type", "party", "debit", "credit", "remarks"])
+
 		if self.doctype in ['Purchase Order', 'Sales Order', 'Sales Invoice', 'Purchase Invoice',
 							'Supplier Quotation', 'Purchase Receipt', 'Delivery Note', 'Quotation']:
 			if self.get("group_same_items"):
 				self.group_similar_items()
+
+			df = self.meta.get_field("discount_amount")
+			if self.get("discount_amount") and hasattr(self, "taxes") and not len(self.taxes):
+				df.set("print_hide", 0)
+				self.discount_amount = -self.discount_amount
+			else:
+				df.set("print_hide", 1)
 
 	def validate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
@@ -172,7 +189,7 @@ class AccountsController(TransactionBase):
 			validate_due_date(self.posting_date, self.due_date,
 				"Customer", self.customer, self.company, self.payment_terms_template)
 		elif self.doctype == "Purchase Invoice":
-			validate_due_date(self.posting_date, self.due_date,
+			validate_due_date(self.bill_date or self.posting_date, self.due_date,
 				"Supplier", self.supplier, self.company, self.bill_date, self.payment_terms_template)
 
 	def set_price_list_currency(self, buying_or_selling):
@@ -239,7 +256,6 @@ class AccountsController(TransactionBase):
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
 					ret = get_item_details(args)
-
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (item.get(fieldname) is None or fieldname in force_item_fields):
@@ -256,11 +272,15 @@ class AccountsController(TransactionBase):
 								if item_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
 
+					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
+						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
+
 					if ret.get("pricing_rule"):
 						# if user changed the discount percentage then set user's discount percentage ?
+						item.set("pricing_rule", ret.get("pricing_rule"))
 						item.set("discount_percentage", ret.get("discount_percentage"))
-						if ret.get("pricing_rule_for") == "Price":
-							item.set("pricing_list_rate", ret.get("pricing_list_rate"))
+						if ret.get("pricing_rule_for") == "Rate":
+							item.set("price_list_rate", ret.get("price_list_rate"))
 
 						if item.price_list_rate:
 							item.rate = flt(item.price_list_rate *
@@ -352,6 +372,11 @@ class AccountsController(TransactionBase):
 
 		return gl_dict
 
+	def validate_qty_is_not_zero(self):
+		for item in self.items:
+			if not item.qty:
+				frappe.throw("Item quantity can not be zero")
+
 	def validate_account_currency(self, account, account_currency=None):
 		valid_currency = [self.company_currency]
 		if self.get("currency") and self.currency != self.company_currency:
@@ -398,7 +423,8 @@ class AccountsController(TransactionBase):
 			if d.against_order:
 				allocated_amount = flt(d.amount)
 			else:
-				allocated_amount = min(self.grand_total - advance_allocated, d.amount)
+				amount = self.rounded_total or self.grand_total
+				allocated_amount = min(amount - advance_allocated, d.amount)
 			advance_allocated += flt(allocated_amount)
 
 			self.append("advances", {
@@ -589,13 +615,14 @@ class AccountsController(TransactionBase):
 								advance.account_currency)
 
 			if advance.account_currency == self.currency:
-				order_total = self.grand_total
-				formatted_order_total = fmt_money(order_total, precision=self.precision("grand_total"),
-												  currency=advance.account_currency)
+				order_total = self.get("rounded_total") or self.grand_total
+				precision = "rounded_total" if self.get("rounded_total") else "grand_total"
 			else:
-				order_total = self.base_grand_total
-				formatted_order_total = fmt_money(order_total, precision=self.precision("base_grand_total"),
-												  currency=advance.account_currency)
+				order_total = self.get("base_rounded_total") or self.base_grand_total
+				precision = "base_rounded_total" if self.get("base_rounded_total") else "base_grand_total"
+
+			formatted_order_total = fmt_money(order_total, precision=self.precision(precision),
+											  currency=advance.account_currency)
 
 			if self.currency == self.company_currency and advance_paid > order_total:
 				frappe.throw(_("Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2})")
@@ -937,11 +964,12 @@ def get_advance_journal_entries(party_type, party, party_account, amount_field,
 	return list(journal_entries)
 
 
-def get_advance_payment_entries(party_type, party, party_account,
-								order_doctype, order_list=None, include_unallocated=True, against_all_orders=False):
+def get_advance_payment_entries(party_type, party, party_account, order_doctype,
+		order_list=None, include_unallocated=True, against_all_orders=False, limit=1000):
 	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
 	payment_type = "Receive" if party_type == "Customer" else "Pay"
 	payment_entries_against_order, unallocated_payment_entries = [], []
+	limit_cond = "limit %s" % (limit or 1000)
 
 	if order_list or against_all_orders:
 		if order_list:
@@ -961,8 +989,8 @@ def get_advance_payment_entries(party_type, party, party_account,
 				t1.name = t2.parent and t1.{0} = %s and t1.payment_type = %s
 				and t1.party_type = %s and t1.party = %s and t1.docstatus = 1
 				and t2.reference_doctype = %s {1}
-			order by t1.posting_date
-		""".format(party_account_field, reference_condition),
+			order by t1.posting_date {2}
+		""".format(party_account_field, reference_condition, limit_cond),
 													  [party_account, payment_type, party_type, party,
 													   order_doctype] + order_list, as_dict=1)
 
@@ -974,8 +1002,8 @@ def get_advance_payment_entries(party_type, party, party_account,
 				where
 					{0} = %s and party_type = %s and party = %s and payment_type = %s
 					and docstatus = 1 and unallocated_amount > 0
-				order by posting_date
-			""".format(party_account_field), (party_account, party_type, party, payment_type), as_dict=1)
+				order by posting_date {1}
+			""".format(party_account_field, limit_cond), (party_account, party_type, party, payment_type), as_dict=1)
 
 	return list(payment_entries_against_order) + list(unallocated_payment_entries)
 
@@ -1058,6 +1086,13 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
 	data = json.loads(trans_items)
 	for d in data:
 		child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
+
+		if parent_doctype == "Sales Order" and flt(d.get("qty")) < child_item.delivered_qty:
+			frappe.throw(_("Cannot set quantity less than delivered quantity"))
+
+		if parent_doctype == "Purchase Order" and flt(d.get("qty")) < child_item.received_qty:
+			frappe.throw(_("Cannot set quantity less than received quantity"))
+
 		child_item.qty = flt(d.get("qty"))
 
 		if child_item.billed_amt > (flt(d.get("rate")) * flt(d.get("qty"))):
@@ -1105,3 +1140,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
 	p_doctype.update_blanket_order()
 	p_doctype.update_billing_percentage()
 	p_doctype.set_status()
+
+@erpnext.allow_regional
+def validate_regional(doc):
+	pass

@@ -6,7 +6,7 @@ import frappe
 import json
 
 def get_context(context):
-	project_user = frappe.db.get_value("Project User", {"parent": frappe.form_dict.project, "user": frappe.session.user} , "user")
+	project_user = frappe.db.get_value("Project User", {"parent": frappe.form_dict.project, "user": frappe.session.user} , ["user", "view_attachments"], as_dict= True)
 	if not project_user or frappe.session.user == 'Guest': 
 		raise frappe.PermissionError
 		
@@ -22,6 +22,8 @@ def get_context(context):
 	project.timesheets = get_timesheets(project.name, start=0,
 		search=frappe.form_dict.get("search"))
 
+	if project_user.view_attachments:
+		project.attachments = get_attachments(project.name)
 
 	context.doc = project
 
@@ -92,3 +94,6 @@ def get_timesheet_html(project, start=0):
 	return frappe.render_template("erpnext/templates/includes/projects/project_timesheets.html",
 		{"doc": {"timesheets": get_timesheets(project, start)}}, is_path=True)
 
+def get_attachments(project):
+	return frappe.get_all('File', filters= {"attached_to_name": project, "attached_to_doctype": 'Project', "is_private":0},
+		fields=['file_name','file_url', 'file_size'])

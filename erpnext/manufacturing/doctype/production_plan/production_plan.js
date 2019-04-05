@@ -104,13 +104,26 @@ frappe.ui.form.on('Production Plan', {
 			}
 		});
 	},
-	
+
 	get_items_for_mr: function(frm) {
 		frappe.call({
-			method: "get_items_for_material_requests",
+			method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_items_for_material_requests",
 			freeze: true,
-			doc: frm.doc,
-			callback: function() {
+			args: {doc: frm.doc},
+			callback: function(r) {
+				if(r.message) {
+					frm.set_value('mr_items', []);
+					$.each(r.message, function(i, d) {
+						var item = frm.add_child('mr_items');
+						item.actual_qty = d.actual_qty;
+						item.item_code = d.item_code;
+						item.item_name = d.item_name;
+						item.min_order_qty = d.min_order_qty;
+						item.quantity = d.quantity;
+						item.sales_order = d.sales_order;
+						item.warehouse = d.warehouse;
+					});
+				}
 				refresh_field('mr_items');
 			}
 		});

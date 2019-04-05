@@ -6,7 +6,6 @@
     </p>
 
 [![Build Status](https://travis-ci.com/frappe/erpnext.png)](https://travis-ci.com/frappe/erpnext)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/frappe/erpnext?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
 [![Open Source Helpers](https://www.codetriage.com/frappe/erpnext/badges/users.svg)](https://www.codetriage.com/frappe/erpnext)
 [![Coverage Status](https://coveralls.io/repos/github/frappe/erpnext/badge.svg?branch=develop)](https://coveralls.io/github/frappe/erpnext?branch=develop)
 
@@ -18,7 +17,7 @@ Includes: Accounting, Inventory, Manufacturing, CRM, Sales, Purchase, Project Ma
 
 ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web app framework in Python & JavaScript.
 
-- [User Guide](https://erpnext.org/docs/user)
+- [User Guide](https://erpnext.com/docs/user)
 - [Discussion Forum](https://discuss.erpnext.com/)
 
 ---

@@ -67,17 +67,19 @@ class ExchangeRateRevaluation(Document):
 				and account_currency != %s
 			order by name""",(self.company, company_currency))
 
-		account_details = frappe.db.sql("""
-			select 
-				account, party_type, party, account_currency,
-				sum(debit_in_account_currency) - sum(credit_in_account_currency) as balance_in_account_currency,
-				sum(debit) - sum(credit) as balance
-			from `tabGL Entry`
-			where account in (%s)
-			group by account, party_type, party
-			having sum(debit) != sum(credit)
-			order by account
-		""" % ', '.join(['%s']*len(accounts)), tuple(accounts), as_dict=1)
+		account_details = []
+		if accounts:
+			account_details = frappe.db.sql("""
+				select
+					account, party_type, party, account_currency,
+					sum(debit_in_account_currency) - sum(credit_in_account_currency) as balance_in_account_currency,
+					sum(debit) - sum(credit) as balance
+				from `tabGL Entry`
+				where account in (%s)
+				group by account, party_type, party
+				having sum(debit) != sum(credit)
+				order by account
+			""" % ', '.join(['%s']*len(accounts)), tuple(accounts), as_dict=1)
 
 		return account_details
 

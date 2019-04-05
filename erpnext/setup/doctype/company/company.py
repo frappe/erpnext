@@ -39,6 +39,7 @@ class Company(NestedSet):
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
 		self.check_country_change()
+		self.set_chart_of_accounts()
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -94,10 +95,13 @@ class Company(NestedSet):
 
 		if frappe.flags.country_change:
 			install_country_fixtures(self.name)
+			self.create_default_tax_template()
+
+
 
 		if not frappe.db.get_value("Department", {"company": self.name}):
 			from erpnext.setup.setup_wizard.operations.install_fixtures import install_post_company_fixtures
-			install_post_company_fixtures(self.name)
+			install_post_company_fixtures(frappe._dict({'company_name': self.name}))
 
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
@@ -138,6 +142,7 @@ class Company(NestedSet):
 
 	def create_default_accounts(self):
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
+		frappe.local.flags.ignore_root_company_validation = True
 		create_charts(self.name, self.chart_of_accounts, self.existing_company)
 
 		frappe.db.set(self, "default_receivable_account", frappe.db.get_value("Account",
@@ -169,6 +174,12 @@ class Company(NestedSet):
 		if not self.get('__islocal') and \
 			self.country != frappe.get_cached_value('Company',  self.name,  'country'):
 			frappe.flags.country_change = True
+
+	def set_chart_of_accounts(self):
+		''' If parent company is set, chart of accounts will be based on that company '''
+		if self.parent_company:
+			self.create_chart_of_accounts_based_on = "Existing Company"
+			self.existing_company = self.parent_company
 
 	def set_default_accounts(self):
 		self._set_default_account("default_cash_account", "Cash")
@@ -336,6 +347,9 @@ class Company(NestedSet):
 		frappe.db.sql("delete from tabDepartment where company=%s", self.name)
 		frappe.db.sql("delete from `tabTax Withholding Account` where company=%s", self.name)
 
+		frappe.db.sql("delete from `tabSales Taxes and Charges Template` where company=%s", self.name)
+		frappe.db.sql("delete from `tabPurchase Taxes and Charges Template` where company=%s", self.name)
+
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
 	kwargs = dict(company=company, old=old, new=new)
@@ -363,7 +377,8 @@ def replace_abbr(company, old, new):
 		for d in doc:
 			_rename_record(d)
 
-	for dt in ["Warehouse", "Account", "Cost Center"]:
+	for dt in ["Warehouse", "Account", "Cost Center", "Department", "Location",
+			"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
 		_rename_records(dt)
 		frappe.db.commit()
 

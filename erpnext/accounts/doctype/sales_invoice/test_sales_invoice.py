@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
@@ -14,8 +14,9 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from frappe.model.naming import make_autoname
-from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
+from erpnext.stock.doctype.item.test_item import create_item
 from six import iteritems
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -375,7 +376,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 
 		self.assertEqual(si.net_total, 4600)
-		
+
 		self.assertEqual(si.get("taxes")[0].tax_amount, 874.0)
 		self.assertEqual(si.get("taxes")[0].total, 5474.0)
 
@@ -405,12 +406,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEqual(si.total, 975)
 		self.assertEqual(si.net_total, 900)
-		
+
 		self.assertEqual(si.get("taxes")[0].tax_amount, 216.0)
 		self.assertEqual(si.get("taxes")[0].total, 1116.0)
 
 		self.assertEqual(si.grand_total, 1116.0)
-		
+
 	def test_inclusive_rate_validations(self):
 		si = frappe.copy_doc(test_records[2])
 		for i, tax in enumerate(si.get("taxes")):
@@ -552,7 +553,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(si.grand_total, 1215.90)
 		self.assertEqual(si.rounding_adjustment, 0.01)
 		self.assertEqual(si.base_rounding_adjustment, 0.50)
-		
+
 
 	def test_outstanding(self):
 		w = self.make()
@@ -763,6 +764,20 @@ class TestSalesInvoice(unittest.TestCase):
 
 		frappe.db.sql("delete from `tabPOS Profile`")
 
+	def test_pos_si_without_payment(self):
+		set_perpetual_inventory()
+		make_pos_profile()
+
+		pos = copy.deepcopy(test_records[1])
+		pos["is_pos"] = 1
+		pos["update_stock"] = 1
+
+		si = frappe.copy_doc(pos)
+		si.insert()
+
+		# Check that the invoice cannot be submitted without payments
+		self.assertRaises(frappe.ValidationError, si.submit)
+
 	def test_sales_invoice_gl_entry_with_perpetual_inventory_no_item_code(self):
 		set_perpetual_inventory()
 
@@ -923,7 +938,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertRaises(SerialNoWarehouseError, si.submit)
 
 	def test_serial_numbers_against_delivery_note(self):
-		""" 
+		"""
 			check if the sales invoice item serial numbers and the delivery note items
 			serial numbers are same
 		"""
@@ -1238,7 +1253,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_item_wise_tax_breakup_india(self):
 		frappe.flags.country = "India"
-		
+
 		si = self.create_si_to_test_tax_breakup()
 		itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(si)
 
@@ -1256,12 +1271,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEqual(itemised_tax, expected_itemised_tax)
 		self.assertEqual(itemised_taxable_amount, expected_itemised_taxable_amount)
-		
+
 		frappe.flags.country = None
 
 	def test_item_wise_tax_breakup_outside_india(self):
 		frappe.flags.country = "United States"
-		
+
 		si = self.create_si_to_test_tax_breakup()
 
 		itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(si)
@@ -1287,7 +1302,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEqual(itemised_tax, expected_itemised_tax)
 		self.assertEqual(itemised_taxable_amount, expected_itemised_taxable_amount)
-		
+
 		frappe.flags.country = None
 
 	def create_si_to_test_tax_breakup(self):
@@ -1375,7 +1390,7 @@ class TestSalesInvoice(unittest.TestCase):
 		shipping_rule = create_shipping_rule(shipping_rule_type = "Selling", shipping_rule_name = "Shipping Rule - Sales Invoice Test")
 
 		si = frappe.copy_doc(test_records[2])
-		
+
 		si.shipping_rule = shipping_rule.name
 		si.insert()
 
@@ -1392,14 +1407,14 @@ class TestSalesInvoice(unittest.TestCase):
 			"cost_center": shipping_rule.cost_center,
 			"tax_amount": shipping_amount,
 			"description": shipping_rule.name
-		}	
+		}
 		si.append("taxes", shipping_charge)
 		si.save()
 
 		self.assertEqual(si.net_total, 1250)
 
 		self.assertEqual(si.total_taxes_and_charges, 577.05)
-		self.assertEqual(si.grand_total, 1827.05)		
+		self.assertEqual(si.grand_total, 1827.05)
 
 	def test_create_invoice_without_terms(self):
 		si = create_sales_invoice(do_not_save=1)
@@ -1496,10 +1511,60 @@ class TestSalesInvoice(unittest.TestCase):
 
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
-		
+
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
 		accounts_settings.save()
 
+	def test_deferred_revenue(self):
+		deferred_account = create_account(account_name="Deferred Revenue",
+			parent_account="Current Liabilities - _TC", company="_Test Company")
+
+		item = create_item("_Test Item for Deferred Accounting")
+		item.enable_deferred_revenue = 1
+		item.deferred_revenue_account = deferred_account
+		item.no_of_months = 12
+		item.save()
+
+		si = create_sales_invoice(item=item.name, posting_date="2019-01-10", do_not_submit=True)
+		si.items[0].enable_deferred_revenue = 1
+		si.items[0].service_start_date = "2019-01-10"
+		si.items[0].service_end_date = "2019-03-15"
+		si.items[0].deferred_revenue_account = deferred_account
+		si.save()
+		si.submit()
+
+		from erpnext.accounts.deferred_revenue import convert_deferred_revenue_to_income
+		convert_deferred_revenue_to_income(start_date="2019-01-01", end_date="2019-01-31")
+
+		expected_gle = [
+			[deferred_account, 33.85, 0.0, "2019-01-31"],
+			["Sales - _TC", 0.0, 33.85, "2019-01-31"]
+		]
+
+		self.check_gl_entries(si.name, expected_gle, "2019-01-10")
+
+		convert_deferred_revenue_to_income(start_date="2019-01-01", end_date="2019-03-31")
+
+		expected_gle = [
+			[deferred_account, 43.08, 0.0, "2019-02-28"],
+			["Sales - _TC", 0.0, 43.08, "2019-02-28"],
+			[deferred_account, 23.07, 0.0, "2019-03-15"],
+			["Sales - _TC", 0.0, 23.07, "2019-03-15"]
+		]
+
+		self.check_gl_entries(si.name, expected_gle, "2019-01-31")
+
+	def check_gl_entries(self, voucher_no, expected_gle, posting_date):
+		gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
+			from `tabGL Entry`
+			where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
+			order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_gle[i][0], gle.account)
+			self.assertEqual(expected_gle[i][1], gle.debit)
+			self.assertEqual(expected_gle[i][2], gle.credit)
+			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
@@ -1524,9 +1589,9 @@ def create_sales_invoice(**args):
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": args.qty or 1,
 		"rate": args.rate or 100,
-		"income_account": "Sales - _TC",
-		"expense_account": "Cost of Goods Sold - _TC",
-		"cost_center": "_Test Cost Center - _TC",
+		"income_account": args.income_account or "Sales - _TC",
+		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
+		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no
 	})
 

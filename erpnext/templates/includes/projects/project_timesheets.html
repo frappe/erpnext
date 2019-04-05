@@ -2,16 +2,16 @@
 <div class='timesheet'>
 	<a class="no-decoration timesheet-link {{ timesheet.css_seen }}" href="/timesheet/{{ timesheet.info.name}}">
 		<div class='row project-item'>
-			<div class='col-xs-9'>
+			<div class='col-xs-10'>
 				<span class="indicator {{ "blue" if timesheet.info.status=="Submitted" else "red" if timesheet.info.status=="Draft" else "darkgrey" }}" title="{{ timesheet.info.status }}"  > {{ timesheet.info.name }} </span> 
 				<div class="small text-muted item-timestamp">
 				{{ _("From") }} {{ frappe.format_date(timesheet.from_time) }} {{ _("to") }} {{ frappe.format_date(timesheet.to_time) }}
 			</div>
 			</div>
-				<div class='col-xs-1 gravatar-top'>
-				<span class="avatar avatar-small" title="{{ timesheet.info.modified_by }}"> <img src="{{ timesheet.info.user_image }}"></span>
+				<div class='col-xs-1' style="margin-right:-30px;">
+				<span class="avatar avatar-small" title="{{ timesheet.info.modified_by }}"> <img src="{{ timesheet.info.user_image }}" style="display:flex;"></span>
 			</div> 
-			<div class='col-xs-2'>
+			<div class='col-xs-1'>
 				<span class="pull-right list-comment-count small {{ "text-extra-muted" if timesheet.comment_count==0 else "text-muted" }}">
 				<i class="octicon octicon-comment-discussion"></i>
 				{{ timesheet.info.comment_count }}

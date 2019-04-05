@@ -74,7 +74,7 @@ class DeliveryNote(SellingController):
 		item_meta = frappe.get_meta("Delivery Note Item")
 		print_hide_fields = {
 			"parent": ["grand_total", "rounded_total", "in_words", "currency", "total", "taxes"],
-			"items": ["rate", "amount", "price_list_rate", "discount_percentage"]
+			"items": ["rate", "amount", "discount_amount", "price_list_rate", "discount_percentage"]
 		}
 
 		for key, fieldname in print_hide_fields.items():
@@ -391,8 +391,37 @@ def get_invoiced_qty_map(delivery_note):
 
 	return invoiced_qty_map
 
+def get_returned_qty_map_against_so(sales_orders):
+	"""returns a map: {so_detail: returned_qty}"""
+	returned_qty_map = {}
+
+	for name, returned_qty in frappe.get_all('Sales Order Item', fields = ["name", "returned_qty"],
+		filters = {'parent': ('in', sales_orders), 'docstatus': 1}, as_list=1):
+		if not returned_qty_map.get(name):
+				returned_qty_map[name] = 0
+		returned_qty_map[name] += returned_qty
+
+	return returned_qty_map
+
+def get_returned_qty_map_against_dn(delivery_note):
+	"""returns a map: {so_detail: returned_qty}"""
+	returned_qty_map = frappe._dict(frappe.db.sql("""select dn_item.item_code, sum(abs(dn_item.qty)) as qty
+		from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
+		where dn.name = dn_item.parent
+			and dn.docstatus = 1
+			and dn.is_return = 1
+			and dn.return_against = %s
+		group by dn_item.item_code
+	""", delivery_note))
+
+	return returned_qty_map
+
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
+	doc = frappe.get_doc('Delivery Note', source_name)
+	sales_orders = [d.against_sales_order for d in doc.items]
+	returned_qty_map_against_so = get_returned_qty_map_against_so(sales_orders)
+	returned_qty_map_against_dn = get_returned_qty_map_against_dn(source_name)
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
@@ -412,10 +441,25 @@ def make_sales_invoice(source_name, target_doc=None):
 			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
 
 	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
+		target_doc.qty, returned_qty = get_pending_qty(source_doc)
+		if not source_doc.so_detail:
+			returned_qty_map_against_dn[source_doc.item_code] = returned_qty
+
 		if source_doc.serial_no and source_parent.per_billed > 0:
 			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
 				target_doc.qty, source_parent.name)
+
+	def get_pending_qty(item_row):
+		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0) - returned_qty_map_against_so.get(item_row.so_detail, 0)
+		returned_qty = flt(returned_qty_map_against_dn.get(item_row.item_code, 0))
+		if not item_row.so_detail:
+			if returned_qty >= pending_qty:
+				pending_qty = 0
+				returned_qty -= pending_qty
+			else:
+				pending_qty -= returned_qty
+				returned_qty = 0
+		return pending_qty, returned_qty
 
 	doc = get_mapped_doc("Delivery Note", source_name, 	{
 		"Delivery Note": {
@@ -435,7 +479,7 @@ def make_sales_invoice(source_name, target_doc=None):
 				"cost_center": "cost_center"
 			},
 			"postprocess": update_item,
-			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
+			"filter": lambda d: get_pending_qty(d)[0]<=0
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",

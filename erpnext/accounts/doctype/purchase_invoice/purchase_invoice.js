@@ -9,9 +9,12 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		this.setup_posting_date_time_check();
 		this._super(doc);
 
-		// formatter for material request item
-		this.frm.set_indicator_formatter('item_code',
-			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
+		// formatter for purchase invoice item
+		if(this.frm.doc.update_stock) {
+			this.frm.set_indicator_formatter('item_code', function(doc) {
+				return (doc.qty<=doc.received_qty) ? "green" : "orange";
+			});
+		}
 	},
 	onload: function() {
 		this._super();
@@ -507,6 +510,15 @@ frappe.ui.form.on("Purchase Invoice", {
 				}
 			}
 		}
+
+		frm.set_query("cost_center", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0
+				}
+			};
+		});
 	},
 
 	onload: function(frm) {
@@ -514,25 +526,9 @@ frappe.ui.form.on("Purchase Invoice", {
 			me.frm.set_df_property("apply_tds", "read_only", 1);
 		}
 
-		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
-			frm.set_query(field, "items", function() {
-				return {
-					filters: [
-						["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
-						["Warehouse", "is_group", "=", 0]
-					]
-				}
-			})
-		})
-
-		frm.set_query("supplier_warehouse", function() {
-			return {
-				filters: [
-					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
-					["Warehouse", "is_group", "=", 0]
-				]
-			}
-		})
+		erpnext.queries.setup_queries(frm, "Warehouse", function() {
+			return erpnext.queries.warehouse(frm.doc);
+		});
 	},
 
 	is_subcontracted: function(frm) {

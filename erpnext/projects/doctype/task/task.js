@@ -80,15 +80,15 @@ frappe.ui.form.on("Task", {
 		}
 	},
 
-	is_group: function(frm) {
+	is_group: function (frm) {
 		frappe.call({
-			method:"erpnext.projects.doctype.task.task.check_if_child_exists",
+			method: "erpnext.projects.doctype.task.task.check_if_child_exists",
 			args: {
 				name: frm.doc.name
 			},
-			callback: function(r){
-				if(r.message){
-					frappe.msgprint(__('Cannot convert it to non-group. Child Tasks exist.'));
+			callback: function (r) {
+				if (r.message.length > 0) {
+					frappe.msgprint(__(`Cannot convert it to non-group. The following child Tasks exist: ${r.message.join(", ")}.`));
 					frm.reload_doc();
 				}
 			}

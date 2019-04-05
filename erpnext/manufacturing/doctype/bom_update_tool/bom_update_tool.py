@@ -62,7 +62,7 @@ class BOMUpdateTool(Document):
 			bom_list.append(d[0])
 			self.get_parent_boms(d[0], bom_list)
 
-		return bom_list
+		return list(set(bom_list))
 
 @frappe.whitelist()
 def enqueue_replace_bom(args):

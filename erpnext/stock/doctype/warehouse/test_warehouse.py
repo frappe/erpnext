@@ -8,6 +8,7 @@ from erpnext import set_perpetual_inventory
 from frappe.test_runner import make_test_records
 from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
 
+import erpnext
 import frappe
 import unittest
 test_records = frappe.get_test_records('Warehouse')
@@ -90,19 +91,28 @@ class TestWarehouse(unittest.TestCase):
 		self.assertTrue(frappe.db.get_value("Warehouse",
 			filters={"account": "Test Warehouse for Merging 2 - _TC"}))
 
-def create_warehouse(warehouse_name):
-	if not frappe.db.exists("Warehouse", warehouse_name + " - _TC"):
+def create_warehouse(warehouse_name, properties=None, company=None):
+	if not company:
+		company = "_Test Company"
+
+	warehouse_id = erpnext.encode_company_abbr(warehouse_name, company)
+	if not frappe.db.exists("Warehouse", warehouse_id):
 		w = frappe.new_doc("Warehouse")
 		w.warehouse_name = warehouse_name
 		w.parent_warehouse = "_Test Warehouse Group - _TC"
-		w.company = "_Test Company"
+		w.company = company
 		make_account_for_warehouse(warehouse_name, w)
-		w.account = warehouse_name + " - _TC"
+		w.account = warehouse_id
+		if properties:
+			w.update(properties)
 		w.save()
+		return w.name
+	else:
+		return warehouse_id
 
 def make_account_for_warehouse(warehouse_name, warehouse_obj):
 	if not frappe.db.exists("Account", warehouse_name + " - _TC"):
-		parent_account = frappe.db.get_value('Account', 
+		parent_account = frappe.db.get_value('Account',
 			{'company': warehouse_obj.company, 'is_group':1, 'account_type': 'Stock'},'name')
 		account = create_account(account_name=warehouse_name, \
 				account_type="Stock", parent_account= parent_account, company=warehouse_obj.company)

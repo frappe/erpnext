@@ -5,20 +5,24 @@ from __future__ import unicode_literals
 
 import frappe, os, json
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from frappe.permissions import add_permission
+from frappe.permissions import add_permission, update_permission_property
 from erpnext.regional.india import states
 from erpnext.accounts.utils import get_fiscal_year
 from frappe.utils import today
 
 def setup(company=None, patch=True):
+	setup_company_independent_fixtures()
+	if not patch:
+		update_address_template()
+		make_fixtures(company)
+
+# TODO: for all countries
+def setup_company_independent_fixtures():
 	make_custom_fields()
 	add_permissions()
 	add_custom_roles_for_reports()
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', now=frappe.flags.in_test)
 	add_print_formats()
-	if not patch:
-		update_address_template()
-		make_fixtures(company)
 
 def update_address_template():
 	with open(os.path.join(os.path.dirname(__file__), 'address_template.html'), 'r') as f:
@@ -75,6 +79,9 @@ def add_custom_roles_for_reports():
 def add_permissions():
 	for doctype in ('GST HSN Code', 'GST Settings'):
 		add_permission(doctype, 'All', 0)
+		add_permission(doctype, 'Accounts Manager', 0)
+		update_permission_property(doctype, 'Accounts Manager', 0, 'write', 1)
+		update_permission_property(doctype, 'Accounts Manager', 0, 'create', 1)
 
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
@@ -85,7 +92,7 @@ def add_print_formats():
 
 def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
-		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description',
+		fieldtype='Data', fetch_from='item_code.gst_hsn_code', insert_after='description',
 		allow_on_submit=1, print_hide=1)
 	invoice_gst_fields = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
@@ -122,6 +129,9 @@ def make_custom_fields(update=True):
 			dict(fieldname='place_of_supply', label='Place of Supply',
 				fieldtype='Data', insert_after='shipping_address',
 				print_hide=1, read_only=0),
+		]
+
+	purchase_invoice_itc_fields = [
 			dict(fieldname='eligibility_for_itc', label='Eligibility For ITC',
 				fieldtype='Select', insert_after='reason_for_issuing_document', print_hide=1,
 				options='input\ninput service\ncapital goods\nineligible', default="ineligible"),
@@ -148,6 +158,9 @@ def make_custom_fields(update=True):
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='company_address',
 				fetch_from='company_address.gstin', print_hide=1),
+		]
+
+	sales_invoice_shipping_fields = [
 			dict(fieldname='port_code', label='Port Code',
 				fieldtype='Data', insert_after='reason_for_issuing_document', print_hide=1,
 				depends_on="eval:doc.invoice_type=='Export' "),
@@ -210,9 +223,12 @@ def make_custom_fields(update=True):
 			dict(fieldname='gst_state_number', label='GST State Number',
 				fieldtype='Data', insert_after='gst_state', read_only=1),
 		],
-		'Purchase Invoice': invoice_gst_fields + purchase_invoice_gst_fields,
-		'Sales Invoice': invoice_gst_fields + sales_invoice_gst_fields,
-		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields,
+		'Purchase Invoice': invoice_gst_fields + purchase_invoice_gst_fields + purchase_invoice_itc_fields,
+		'Purchase Order': purchase_invoice_gst_fields,
+		'Purchase Receipt': purchase_invoice_gst_fields,
+		'Sales Invoice': invoice_gst_fields + sales_invoice_gst_fields + sales_invoice_shipping_fields,
+		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields,
+		'Sales Order': sales_invoice_gst_fields,
 		'Sales Taxes and Charges Template': inter_state_gst_field,
 		'Purchase Taxes and Charges Template': inter_state_gst_field,
 		'Item': [
@@ -329,13 +345,14 @@ def set_tax_withholding_category(company):
 	if company and tds_account:
 		accounts = [dict(company=company, account=tds_account)]
 
-	fiscal_year = get_fiscal_year(today(), company=accounts[0].get('company'))[0]
+	fiscal_year = get_fiscal_year(today(), company=company)[0]
 	docs = get_tds_details(accounts, fiscal_year)
 
 	for d in docs:
 		try:
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_permissions = True
+			doc.flags.ignore_mandatory = True
 			doc.insert()
 		except frappe.DuplicateEntryError:
 			doc = frappe.get_doc("Tax Withholding Category", d.get("name"))
@@ -350,12 +367,17 @@ def set_tax_withholding_category(company):
 
 def set_tds_account(docs, company):
 	abbr = frappe.get_value("Company", company, "abbr")
-	docs.extend([
-		{
-			"doctype": "Account", "account_name": "TDS Payable", "account_type": "Tax",
-			"parent_account": "Duties and Taxes - {0}".format(abbr), "company": company
-		}
-	])
+	parent_account = frappe.db.get_value("Account", filters = {"account_name": "Duties and Taxes", "company": company})
+	if parent_account:
+		docs.extend([
+			{
+				"doctype": "Account",
+				"account_name": "TDS Payable",
+				"account_type": "Tax",
+				"parent_account": parent_account,
+				"company": company
+			}
+		])
 
 def get_tds_details(accounts, fiscal_year):
 	# bootstrap default tax withholding sections

@@ -54,6 +54,9 @@ class EmployeeBoardingController(Document):
 					where parenttype='User' and role=%s''', activity.role)
 				users = users + user_list
 
+				if "Administrator" in users:
+					users.remove("Administrator")
+
 			# assign the task the users
 			if users:
 				self.assign_task_to_users(task, set(users))
@@ -178,7 +181,8 @@ def validate_overlap(doc, from_date, to_date, company = None):
 		}, as_dict = 1)
 
 	if overlap_doc:
-		exists_for = doc.employee
+		if doc.get("employee"):
+			exists_for = doc.employee
 		if company:
 			exists_for = company
 		throw_overlap_error(doc, exists_for, overlap_doc[0].name, from_date, to_date)

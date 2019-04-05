@@ -11,8 +11,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.selling.doctype.sales_order.sales_order import make_work_orders
 from erpnext.controllers.accounts_controller import update_child_qty_rate
 import json
-
-
+from erpnext.selling.doctype.sales_order.sales_order import make_raw_material_request
 class TestSalesOrder(unittest.TestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
@@ -287,6 +286,9 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 3)
 
+		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 2, 'docname': so.items[0].name}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Sales Order', trans_item, so.name)
+
 	def test_warehouse_user(self):
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
@@ -327,9 +329,8 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertRaises(frappe.CancelledLinkError, dn.submit)
 
 	def test_service_type_product_bundle(self):
-		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-
+		from erpnext.stock.doctype.item.test_item import make_item
 		make_item("_Test Service Product Bundle", {"is_stock_item": 0})
 		make_item("_Test Service Product Bundle Item 1", {"is_stock_item": 0})
 		make_item("_Test Service Product Bundle Item 2", {"is_stock_item": 0})
@@ -343,9 +344,8 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertTrue("_Test Service Product Bundle Item 2" in [d.item_code for d in so.packed_items])
 
 	def test_mix_type_product_bundle(self):
-		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-
+		from erpnext.stock.doctype.item.test_item import make_item
 		make_item("_Test Mix Product Bundle", {"is_stock_item": 0})
 		make_item("_Test Mix Product Bundle Item 1", {"is_stock_item": 1})
 		make_item("_Test Mix Product Bundle Item 2", {"is_stock_item": 0})
@@ -388,11 +388,10 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_drop_shipping(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order_for_drop_shipment
-		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
-
+		from erpnext.stock.doctype.item.test_item import make_item
 		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "delivered_by_supplier": 1})
 
 		dn_item = make_item("_Test Regular Item", {"is_stock_item": 1})
@@ -574,7 +573,8 @@ class TestSalesOrder(unittest.TestCase):
 				"item_code": item.get("item_code"),
 				"pending_qty": item.get("pending_qty"),
 				"sales_order_item": item.get("sales_order_item"),
-				"bom": item.get("bom")
+				"bom": item.get("bom"),
+				"description": item.get("description")
 			})
 			so_item_name[item.get("sales_order_item")]= item.get("pending_qty")
 		make_work_orders(json.dumps({"items":po_items}), so.name, so.company)
@@ -585,8 +585,8 @@ class TestSalesOrder(unittest.TestCase):
 			self.assertEquals(wo_qty[0][0], so_item_name.get(item))
 
 	def test_serial_no_based_delivery(self):
-		from erpnext.stock.doctype.item.test_item import make_item
 		frappe.set_value("Stock Settings", None, "automatically_set_serial_nos_based_on_fifo", 1)
+		from erpnext.stock.doctype.item.test_item import make_item
 		item = make_item("_Reserved_Serialized_Item", {"is_stock_item": 1,
 					"maintain_stock": 1,
 					"has_serial_no": 1,
@@ -685,12 +685,62 @@ class TestSalesOrder(unittest.TestCase):
 		se.cancel()
 		self.assertFalse(frappe.db.exists("Serial No", {"sales_order": so.name}))
 
+	def test_request_for_raw_materials(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		item = make_item("_Test Finished Item", {"is_stock_item": 1,
+			"maintain_stock": 1,
+			"valuation_rate": 500,
+			"item_defaults": [
+				{
+					"default_warehouse": "_Test Warehouse - _TC",
+					"company": "_Test Company"
+				}]
+			})
+		make_item("_Test Raw Item A", {"maintain_stock": 1,
+					"valuation_rate": 100,
+					"item_defaults": [
+						{
+							"default_warehouse": "_Test Warehouse - _TC",
+							"company": "_Test Company"
+						}]
+					})
+		make_item("_Test Raw Item B", {"maintain_stock": 1,
+					"valuation_rate": 200,
+					"item_defaults": [
+						{
+							"default_warehouse": "_Test Warehouse - _TC",
+							"company": "_Test Company"
+						}]
+					})
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		make_bom(item=item.item_code, rate=1000,
+			raw_materials = ['_Test Raw Item A', '_Test Raw Item B'])
+
+		so = make_sales_order(**{
+			"item_list": [{
+				"item_code": item.item_code,
+				"qty": 1,
+				"rate":1000
+			}]
+		})
+		so.submit()
+		mr_dict = frappe._dict()
+		items = so.get_work_order_items(1)
+		mr_dict['items'] = items
+		mr_dict['include_exploded_items'] = 0
+		mr_dict['ignore_existing_ordered_qty'] = 1
+		make_raw_material_request(mr_dict, so.company, so.name)
+		mr = frappe.db.sql("""select name from `tabMaterial Request` ORDER BY creation DESC LIMIT 1""", as_dict=1)[0]
+		mr_doc = frappe.get_doc('Material Request',mr.get('name'))
+		self.assertEqual(mr_doc.items[0].sales_order, so.name)
+
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
 	args = frappe._dict(args)
 	if args.transaction_date:
 		so.transaction_date = args.transaction_date
 
+	so.set_warehouse = "" # no need to test set_warehouse permission since it only affects the client
 	so.company = args.company or "_Test Company"
 	so.customer = args.customer or "_Test Customer"
 	so.currency = args.currency or "INR"

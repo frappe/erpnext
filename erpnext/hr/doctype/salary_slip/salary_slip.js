@@ -177,7 +177,7 @@ var calculate_earning_total = function(doc, dt, dn, reset_amount) {
 		if(cint(tbl[i].depends_on_lwp) == 1) {
 			tbl[i].amount =  Math.round(tbl[i].default_amount)*(flt(doc.payment_days) /
 				cint(doc.total_working_days)*100)/100;
-		} else if(reset_amount) {
+		} else if(reset_amount && tbl[i].default_amount) {
 			tbl[i].amount = tbl[i].default_amount;
 		}
 		if(!tbl[i].do_not_include_in_total) {
@@ -198,7 +198,7 @@ var calculate_ded_total = function(doc, dt, dn, reset_amount) {
 	for(var i = 0; i < tbl.length; i++){
 		if(cint(tbl[i].depends_on_lwp) == 1) {
 			tbl[i].amount = Math.round(tbl[i].default_amount)*(flt(doc.payment_days)/cint(doc.total_working_days)*100)/100;
-		} else if(reset_amount) {
+		} else if(reset_amount && tbl[i].default_amount) {
 			tbl[i].amount = tbl[i].default_amount;
 		}
 		if(!tbl[i].do_not_include_in_total) {

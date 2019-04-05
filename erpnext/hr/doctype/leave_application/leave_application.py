@@ -187,13 +187,12 @@ class LeaveApplication(Document):
 			self.total_leave_days = get_number_of_leave_days(self.employee, self.leave_type,
 				self.from_date, self.to_date, self.half_day, self.half_day_date)
 
-			if self.total_leave_days == 0:
+			if self.total_leave_days <= 0:
 				frappe.throw(_("The day(s) on which you are applying for leave are holidays. You need not apply for leave."))
 
 			if not is_lwp(self.leave_type):
-				self.leave_balance = get_leave_balance_on(self.employee, self.leave_type, self.from_date,
+				self.leave_balance = get_leave_balance_on(self.employee, self.leave_type, self.from_date, docname=self.name,
 					consider_all_leaves_in_the_allocation_period=True)
-
 				if self.status != "Rejected" and self.leave_balance < self.total_leave_days:
 					if frappe.db.get_value("Leave Type", self.leave_type, "allow_negative"):
 						frappe.msgprint(_("Note: There is not enough leave balance for Leave Type {0}")
@@ -385,26 +384,37 @@ def get_leave_details(employee, date):
 	return ret
 
 @frappe.whitelist()
-def get_leave_balance_on(employee, leave_type, date, allocation_records=None,
+def get_leave_balance_on(employee, leave_type, date, allocation_records=None, docname=None,
 		consider_all_leaves_in_the_allocation_period=False, consider_encashed_leaves=True):
+
 	if allocation_records == None:
 		allocation_records = get_leave_allocation_records(date, employee).get(employee, frappe._dict())
-
 	allocation = allocation_records.get(leave_type, frappe._dict())
-
 	if consider_all_leaves_in_the_allocation_period:
 		date = allocation.to_date
-	leaves_taken = get_leaves_for_period(employee, leave_type, allocation.from_date, date, status="Approved")
-
+	leaves_taken = get_leaves_for_period(employee, leave_type, allocation.from_date, date, status="Approved", docname=docname)
 	leaves_encashed = 0
 	if frappe.db.get_value("Leave Type", leave_type, 'allow_encashment') and consider_encashed_leaves:
 		leaves_encashed = flt(allocation.total_leaves_encashed)
 
 	return flt(allocation.total_leaves_allocated) - (flt(leaves_taken) + flt(leaves_encashed))
 
-def get_leaves_for_period(employee, leave_type, from_date, to_date, status):
+def get_total_allocated_leaves(employee, leave_type, date):
+	filters= {
+		'from_date': ['<=', date],
+		'to_date': ['>=', date],
+		'docstatus': 1,
+		'leave_type': leave_type,
+		'employee': employee
+	}
+
+	leave_allocation_records = frappe.db.get_all('Leave Allocation', filters=filters, fields=['total_leaves_allocated'])
+
+	return flt(leave_allocation_records[0]['total_leaves_allocated']) if leave_allocation_records else flt(0)
+
+def get_leaves_for_period(employee, leave_type, from_date, to_date, status, docname=None):
 	leave_applications = frappe.db.sql("""
-		select employee, leave_type, from_date, to_date, total_leave_days
+		select name, employee, leave_type, from_date, to_date, total_leave_days
 		from `tabLeave Application`
 		where employee=%(employee)s and leave_type=%(leave_type)s
 			and status = %(status)s and docstatus != 2
@@ -418,9 +428,10 @@ def get_leaves_for_period(employee, leave_type, from_date, to_date, status):
 		"status": status,
 		"leave_type": leave_type
 	}, as_dict=1)
-
 	leave_days = 0
 	for leave_app in leave_applications:
+		if docname and leave_app.name == docname:
+			continue
 		if leave_app.from_date >= getdate(from_date) and leave_app.to_date <= getdate(to_date):
 			leave_days += leave_app.total_leave_days
 		else:
@@ -450,7 +461,6 @@ def get_leave_allocation_records(date, employee=None):
 			"total_leaves_allocated": d.total_leaves_allocated,
 			"total_leaves_encashed":d.total_leaves_encashed
 		}))
-
 	return allocated_leaves
 
 @frappe.whitelist()
@@ -490,7 +500,6 @@ def get_events(start, end, filters=None):
 
 	add_block_dates(events, start, end, employee, company)
 	add_holidays(events, start, end, employee, company)
-
 	return events
 
 def add_department_leaves(events, start, end, employee, company):
@@ -503,19 +512,32 @@ def add_department_leaves(events, start, end, employee, company):
 	department_employees = frappe.db.sql_list("""select name from tabEmployee where department=%s
 		and company=%s""", (department, company))
 
-	match_conditions = "and employee in (\"%s\")" % '", "'.join(department_employees)
-	add_leaves(events, start, end, match_conditions=match_conditions)
+	filter_conditions = "employee in (\"%s\")" % '", "'.join(department_employees)
+	add_leaves(events, start, end, filter_conditions=filter_conditions)
 
-def add_leaves(events, start, end, match_conditions=None):
+def add_leaves(events, start, end, filter_conditions=None):
+	conditions = []
+
+
+	if not cint(frappe.db.get_value("HR Settings", None, "show_leaves_of_all_department_members_in_calendar")):
+		from frappe.desk.reportview import build_match_conditions
+		match_conditions = build_match_conditions("Leave Application")
+
+		if match_conditions:
+			conditions.append(match_conditions)
+
 	query = """select name, from_date, to_date, employee_name, half_day,
 		status, employee, docstatus
 		from `tabLeave Application` where
 		from_date <= %(end)s and to_date >= %(start)s <= to_date
 		and docstatus < 2
-		and status!="Rejected" """
+		and status!='Rejected' """
 
-	if match_conditions:
-		query += match_conditions
+	if conditions:
+		query += ' and ' + ' and '.join(conditions)
+
+	if filter_conditions:
+		query += filter_conditions
 
 	for d in frappe.db.sql(query, {"start":start, "end": end}, as_dict=True):
 		e = {

@@ -206,7 +206,7 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 
 }
 
-frappe.ui.form.on("Quotation Item", "items_on_form_rendered", function(frm, cdt, cdn) {
+frappe.ui.form.on("Quotation Item", "items_on_form_rendered", "packed_items_on_form_rendered", function(frm, cdt, cdn) {
 	// enable tax_amount field if Actual
 })
 

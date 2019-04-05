@@ -32,6 +32,10 @@ class StockExistsForTemplate(frappe.ValidationError):
 	pass
 
 
+class InvalidBarcode(frappe.ValidationError):
+	pass
+
+
 class Item(WebsiteGenerator):
 	website = frappe._dict(
 		page_title_field="item_name",
@@ -122,6 +126,7 @@ class Item(WebsiteGenerator):
 		self.validate_fixed_asset()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
+		self.validate_item_defaults()
 		self.update_defaults_from_item_group()
 
 		if not self.get("__islocal"):
@@ -501,19 +506,19 @@ class Item(WebsiteGenerator):
 		from stdnum import ean
 		if len(self.barcodes) > 0:
 			for item_barcode in self.barcodes:
-				options = frappe.get_meta("Item Barcode").get_options("barcode_type").split()
+				options = frappe.get_meta("Item Barcode").get_options("barcode_type").split('\n')
 				if item_barcode.barcode:
 					duplicate = frappe.db.sql(
 						"""select parent from `tabItem Barcode` where barcode = %s and parent != %s""", (item_barcode.barcode, self.name))
 					if duplicate:
 						frappe.throw(_("Barcode {0} already used in Item {1}").format(
-							item_barcode.barcode, duplicate[0][0]))
+							item_barcode.barcode, duplicate[0][0]), frappe.DuplicateEntryError)
 
 					item_barcode.barcode_type = "" if item_barcode.barcode_type not in options else item_barcode.barcode_type
-					if item_barcode.barcode_type:
+					if item_barcode.barcode_type and item_barcode.barcode_type.upper() in ('EAN', 'UPC-A', 'EAN-13', 'EAN-8'):
 						if not ean.is_valid(item_barcode.barcode):
 							frappe.throw(_("Barcode {0} is not a valid {1} code").format(
-								item_barcode.barcode, item_barcode.barcode_type))
+								item_barcode.barcode, item_barcode.barcode_type), InvalidBarcode)
 
 	def validate_warehouse_for_reorder(self):
 		'''Validate Reorder level table for duplicate and conditional mandatory'''
@@ -663,6 +668,12 @@ class Item(WebsiteGenerator):
 					template_item.flags.ignore_permissions = True
 					template_item.save()
 
+	def validate_item_defaults(self):
+		companies = list(set([row.company for row in self.item_defaults]))
+
+		if len(companies) != len(self.item_defaults):
+			frappe.throw(_("Cannot set multiple Item Defaults for a company."))
+
 	def update_defaults_from_item_group(self):
 		"""Get defaults from Item Group"""
 		if self.item_group and not self.item_defaults:
@@ -689,15 +700,14 @@ class Item(WebsiteGenerator):
                         frappe.db.get_single_value('Item Variant Settings', 'do_not_update_variants'):
 			return
 		if self.has_variants:
-			updated = []
 			variants = frappe.db.get_all("Item", fields=["item_code"], filters={"variant_of": self.name})
-			for d in variants:
-				variant = frappe.get_doc("Item", d)
-				copy_attributes_to_variant(self, variant)
-				variant.save()
-				updated.append(d.item_code)
-			if updated:
-				frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
+			if variants:
+				if len(variants) <= 30:
+					update_variants(variants, self, publish_progress=False)
+					frappe.msgprint(_("Item Variants updated"))
+				else:
+					frappe.enqueue("erpnext.stock.doctype.item.item.update_variants",
+						variants=variants, template=self, now=frappe.flags.in_test, timeout=600)
 
 	def validate_has_variants(self):
 		if not self.has_variants and frappe.db.get_value("Item", self.name, "has_variants"):
@@ -748,6 +758,9 @@ class Item(WebsiteGenerator):
 					d.conversion_factor = value
 
 	def validate_attributes(self):
+		if not self.variant_based_on:
+			self.variant_based_on = 'Item Attribute'
+
 		if (self.has_variants or self.variant_of) and self.variant_based_on == 'Item Attribute':
 			attributes = []
 			if not self.attributes:
@@ -770,7 +783,7 @@ class Item(WebsiteGenerator):
 			variant = get_variant(self.variant_of, args, self.name)
 			if variant:
 				frappe.throw(_("Item variant {0} exists with same attributes")
-                                    .format(variant), ItemVariantExistsError)
+					.format(variant), ItemVariantExistsError)
 
 			validate_item_variant_attributes(self, args)
 
@@ -986,3 +999,13 @@ def get_item_attribute(parent, attribute_value=''):
 
 	return frappe.get_all("Item Attribute Value", fields = ["attribute_value"],
 		filters = {'parent': parent, 'attribute_value': ("like", "%%%s%%" % attribute_value)})
+
+def update_variants(variants, template, publish_progress=True):
+	count=0
+	for d in variants:
+		variant = frappe.get_doc("Item", d)
+		copy_attributes_to_variant(template, variant)
+		variant.save()
+		count+=1
+		if publish_progress:
+				frappe.publish_progress(count*100/len(variants), title = _("Updating Variants..."))

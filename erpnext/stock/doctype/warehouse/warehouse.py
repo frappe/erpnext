@@ -22,10 +22,11 @@ class Warehouse(NestedSet):
 
 	def onload(self):
 		'''load account name for General Ledger Report'''
-		account = self.account or get_warehouse_account(self)
+		if self.company and cint(frappe.db.get_value("Company", self.company, "enable_perpetual_inventory")):
+			account = self.account or get_warehouse_account(self)
 
-		if account:
-			self.set_onload('account', account)
+			if account:
+				self.set_onload('account', account)
 		load_address_and_contact(self)
 
 
@@ -156,6 +157,8 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 	# return warehouses
 	for wh in warehouses:
 		wh["balance"] = get_stock_value_from_bin(warehouse=wh.value)
+		if company:
+			wh["company_currency"] = frappe.db.get_value('Company', company, 'default_currency')
 	return warehouses
 
 @frappe.whitelist()

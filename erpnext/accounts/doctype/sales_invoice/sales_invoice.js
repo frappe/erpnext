@@ -201,7 +201,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					get_query: function() {
 						var filters = {
 							docstatus: 1,
-							company: me.frm.doc.company
+							company: me.frm.doc.company,
+							is_return: 0
 						};
 						if(me.frm.doc.customer) filters["customer"] = me.frm.doc.customer;
 						return {
@@ -217,6 +218,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.get_terms();
 	},
 	customer: function() {
+		if (this.frm.doc.is_pos){
+			var pos_profile = this.frm.doc.pos_profile;
+		}
 		var me = this;
 		if(this.frm.updating_party_details) return;
 		erpnext.utils.get_party_details(this.frm,
@@ -226,6 +230,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				party_type: "Customer",
 				account: this.frm.doc.debit_to,
 				price_list: this.frm.doc.selling_price_list,
+				pos_profile: pos_profile
 			}, function() {
 				me.apply_pricing_rule();
 			});
@@ -310,6 +315,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	items_on_form_rendered: function() {
+		erpnext.setup_serial_no();
+	},
+
+	packed_items_on_form_rendered: function(doc, grid_row) {
 		erpnext.setup_serial_no();
 	},
 
@@ -548,6 +557,23 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.add_fetch('payment_term', 'invoice_portion', 'invoice_portion');
 		frm.add_fetch('payment_term', 'description', 'description');
 
+		frm.set_query("account_for_change_amount", function() {
+			return {
+				filters: {
+					account_type: ['in', ["Cash", "Bank"]]
+				}
+			};
+		});
+
+		frm.set_query("cost_center", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0
+				}
+			};
+		});
+
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Sales Return',
@@ -586,7 +612,7 @@ frappe.ui.form.on('Sales Invoice', {
 
 		frm.set_query('company_address', function(doc) {
 			if(!doc.company) {
-				frappe.throw(_('Please set Company'));
+				frappe.throw(__('Please set Company'));
 			}
 
 			return {
@@ -940,7 +966,9 @@ var set_primary_action= function(frm, dialog, $results, invoice_healthcare_servi
 	dialog.set_primary_action(__('Add'), function() {
 		let checked_values = get_checked_values($results);
 		if(checked_values.length > 0){
-			frm.set_value("patient", dialog.fields_dict.patient.input.value);
+			if(invoice_healthcare_services) {
+				frm.set_value("patient", dialog.fields_dict.patient.input.value);
+			}
 			frm.set_value("items", []);
 			add_to_item_line(frm, checked_values, invoice_healthcare_services);
 			dialog.hide();

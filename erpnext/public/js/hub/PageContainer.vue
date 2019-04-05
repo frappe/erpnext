@@ -1,6 +1,6 @@
 <template>
 	<div class="hub-page-container">
-		<component :is="current_page"></component>
+		<component :is="current_page.component" :key="current_page.key"></component>
 	</div>
 </template>
 
@@ -10,14 +10,15 @@ import Home from './pages/Home.vue';
 import Search from './pages/Search.vue';
 import Category from './pages/Category.vue';
 import SavedItems from './pages/SavedItems.vue';
+import FeaturedItems from './pages/FeaturedItems.vue';
 import PublishedItems from './pages/PublishedItems.vue';
 import Item from './pages/Item.vue';
 import Seller from './pages/Seller.vue';
+import SellerItems from './pages/SellerItems.vue';
 import Publish from './pages/Publish.vue';
 import Buying from './pages/Buying.vue';
 import Selling from './pages/Selling.vue';
 import Messages from './pages/Messages.vue';
-import Profile from './pages/Profile.vue';
 import NotFound from './pages/NotFound.vue';
 
 function get_route_map() {
@@ -27,11 +28,13 @@ function get_route_map() {
 		'marketplace/category/:category': Category,
 		'marketplace/item/:item': Item,
 		'marketplace/seller/:seller': Seller,
+		'marketplace/seller/:seller/items': SellerItems,
 		'marketplace/not-found': NotFound,
 	}
 	const registered_routes = {
-		'marketplace/profile': Profile,
+		'marketplace/profile': Seller,
 		'marketplace/saved-items': SavedItems,
+		'marketplace/featured-items': FeaturedItems,
 		'marketplace/publish': Publish,
 		'marketplace/published-items': PublishedItems,
 		'marketplace/buying': Buying,
@@ -100,10 +103,16 @@ export default {
 			}
 
 			if (!route) {
-				return NotFound;
+				return {
+					key: 'not-found',
+					component: NotFound
+				};
 			}
 
-			return route_map[route];
+			return {
+				key: curr_route,
+				component: route_map[route]
+			}
 		}
 	}
 }

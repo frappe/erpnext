@@ -91,6 +91,7 @@ class PurchaseOrder(BuyingController):
 		self.party_account_currency = get_party_account_currency("Supplier", self.supplier, self.company)
 
 	def validate_minimum_order_qty(self):
+		if not self.get("items"): return
 		items = list(set([d.item_code for d in self.get("items")]))
 
 		itemwise_min_order_qty = frappe._dict(frappe.db.sql("""select name, min_order_qty
@@ -387,9 +388,10 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 		item = get_item_defaults(target.item_code, source_parent.company)
 		item_group = get_item_group_defaults(target.item_code, source_parent.company)
-		target.cost_center = frappe.db.get_value("Project", obj.project, "cost_center") \
-			or item.get("buying_cost_center") \
-			or item_group.get("buying_cost_center")
+		target.cost_center = (obj.cost_center
+			or frappe.db.get_value("Project", obj.project, "cost_center")
+			or item.get("buying_cost_center")
+			or item_group.get("buying_cost_center"))
 
 	doc = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {
@@ -455,7 +457,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 					items_dict = {
 						rm_item_code: {
 							"item_name": rm_item_data["item_name"],
-							"description": item_wh[rm_item_code].get('description'),
+							"description": item_wh.get(rm_item_code, {}).get('description', ""),
 							'qty': rm_item_data["qty"],
 							'from_warehouse': rm_item_data["warehouse"],
 							'stock_uom': rm_item_data["stock_uom"],

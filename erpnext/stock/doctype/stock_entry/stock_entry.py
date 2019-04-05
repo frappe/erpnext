@@ -293,8 +293,9 @@ class StockEntry(StockController):
 			total_completed_qty = flt(self.fg_completed_qty) + flt(prod_order.produced_qty)
 			completed_qty = d.completed_qty + (allowance_percentage/100 * d.completed_qty)
 			if total_completed_qty > flt(completed_qty):
-				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order # {3}. Please update operation status via Time Logs")
-					.format(d.idx, d.operation, total_completed_qty, self.work_order), OperationsNotCompleteError)
+				job_card = frappe.db.get_value('Job Card', {'operation_id': d.name}, 'name')
+				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order # {3}. Please update operation status via Job Card # {4}")
+					.format(d.idx, d.operation, total_completed_qty, self.work_order, job_card), OperationsNotCompleteError)
 
 	def check_duplicate_entry_for_work_order(self):
 		other_ste = [t[0] for t in frappe.db.get_values("Stock Entry",  {
@@ -605,7 +606,7 @@ class StockEntry(StockController):
 
 		if self.job_card:
 			job_doc = frappe.get_doc('Job Card', self.job_card)
-			job_doc.set_transferred_qty()
+			job_doc.set_transferred_qty(update_status=True)
 
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
@@ -634,19 +635,19 @@ class StockEntry(StockController):
 
 		ret = frappe._dict({
 			'uom'			      	: item.stock_uom,
-			'stock_uom'			  	: item.stock_uom,
+			'stock_uom'			: item.stock_uom,
 			'description'		  	: item.description,
-			'image'					: item.image,
+			'image'				: item.image,
 			'item_name' 		  	: item.item_name,
 			'expense_account'		: args.get("expense_account"),
 			'cost_center'			: get_default_cost_center(args, item, item_group_defaults),
-			'qty'					: 0,
-			'transfer_qty'			: 0,
+			'qty'				: args.get("qty"),
+			'transfer_qty'			: args.get('qty'),
 			'conversion_factor'		: 1,
-			'batch_no'				: '',
+			'batch_no'			: '',
 			'actual_qty'			: 0,
 			'basic_rate'			: 0,
-			'serial_no'				: '',
+			'serial_no'			: '',
 			'has_serial_no'			: item.has_serial_no,
 			'has_batch_no'			: item.has_batch_no,
 			'sample_quantity'		: item.sample_quantity
@@ -801,7 +802,7 @@ class StockEntry(StockController):
 
 		# item dict = { item_code: {qty, description, stock_uom} }
 		item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=qty,
-			fetch_exploded = self.use_multi_level_bom)
+			fetch_exploded = self.use_multi_level_bom, fetch_qty_in_stock_uom=False)
 
 		used_alternative_items = get_used_alternative_items(work_order = self.work_order)
 		for item in itervalues(item_dict):
@@ -914,6 +915,11 @@ class StockEntry(StockController):
 				filters={'parent': self.work_order, 'item_code': item_code},
 				fields=["required_qty", "consumed_qty"]
 				)
+			if not req_items:
+				frappe.msgprint(_("Did not found transfered item {0} in Work Order {1}, the item not added in Stock Entry")
+					.format(item_code, self.work_order))
+				continue
+
 			req_qty = flt(req_items[0].required_qty)
 			req_qty_each = flt(req_qty / manufacturing_qty)
 			consumed_qty = flt(req_items[0].consumed_qty)
@@ -999,7 +1005,7 @@ class StockEntry(StockController):
 
 		for d in pro_order.get("required_items"):
 			if (flt(d.required_qty) > flt(d.transferred_qty) and
-				(d.allow_transfer_for_manufacture or self.purpose != "Material Transfer for Manufacture")):
+				(d.include_item_in_manufacturing or self.purpose != "Material Transfer for Manufacture")):
 				item_row = d.as_dict()
 				if d.source_warehouse and not frappe.db.get_value("Warehouse", d.source_warehouse, "is_group"):
 					item_row["from_warehouse"] = d.source_warehouse
@@ -1025,7 +1031,7 @@ class StockEntry(StockController):
 			se_child.item_code = item_dict[d].get('item_code') or cstr(d)
 			se_child.item_name = item_dict[d]["item_name"]
 			se_child.description = item_dict[d]["description"]
-			se_child.uom = stock_uom
+			se_child.uom = item_dict[d]["uom"] if item_dict[d].get("uom") else stock_uom
 			se_child.stock_uom = stock_uom
 			se_child.qty = flt(item_dict[d]["qty"], se_child.precision("qty"))
 			se_child.expense_account = item_dict[d].get("expense_account") or expense_account
@@ -1043,8 +1049,9 @@ class StockEntry(StockController):
 				se_child.t_warehouse = self.to_warehouse
 
 			# in stock uom
-			se_child.transfer_qty = flt(item_dict[d]["qty"], se_child.precision("qty"))
-			se_child.conversion_factor = 1.00
+			se_child.conversion_factor = flt(item_dict[d].get("conversion_factor")) or 1
+			se_child.transfer_qty = flt(item_dict[d]["qty"]*se_child.conversion_factor, se_child.precision("qty"))
+
 
 			# to be assigned for finished item
 			se_child.bom_no = bom_no
