@@ -531,6 +531,8 @@ class BuyingController(StockController):
 		update_last_purchase_rate(self, is_submit = 1)
 
 	def on_cancel(self):
+		super(BuyingController, self).on_cancel()
+
 		if self.get('is_return'):
 			return
 
