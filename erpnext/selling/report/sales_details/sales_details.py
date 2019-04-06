@@ -35,32 +35,66 @@ class SalesPurchaseDetailsReport(object):
 		return columns, data
 
 	def get_columns(self):
-		columns = [
-			{
-				"label": _("Reference"),
-				"fieldtype": "Dynamic Link",
-				"fieldname": "reference",
-				"options": "doctype",
-				"width": 300
-			},
-			{
-				"label": _("Name"),
-				"fieldtype": "Data",
-				"fieldname": "reference_name",
-				"width": 150
-			},
-			{
-				"label": _("Type"),
-				"fieldtype": "Data",
-				"fieldname": "doctype",
-				"width": 110
-			},
-			{
-				"label": _("Date"),
-				"fieldtype": "Date",
-				"fieldname": "date",
-				"width": 80
-			},
+		if self.filters.view == "Tree":
+			columns = [
+				{
+					"label": _("Reference"),
+					"fieldtype": "Dynamic Link",
+					"fieldname": "reference",
+					"options": "doctype",
+					"width": 300
+				},
+				{
+					"label": _("Name"),
+					"fieldtype": "Data",
+					"fieldname": "reference_name",
+					"width": 150
+				},
+				{
+					"label": _("Type"),
+					"fieldtype": "Data",
+					"fieldname": "doctype",
+					"width": 110
+				},
+				{
+					"label": _("Date"),
+					"fieldtype": "Date",
+					"fieldname": "date",
+					"width": 80
+				},
+			]
+		else:
+			columns = [
+				{
+					"label": _("Date"),
+					"fieldtype": "Date",
+					"fieldname": "date",
+					"width": 80
+				},
+				{
+					"label": _("Voucher No"),
+					"fieldtype": "Link",
+					"fieldname": "voucher_no",
+					"options": self.filters.doctype,
+					"width": 140
+				},
+				{
+					"label": _(self.filters.party_type),
+					"fieldtype": "Link",
+					"fieldname": "party",
+					"options": self.filters.party_type,
+					"width": 150
+				},
+				{
+					"label": _("Item"),
+					"fieldtype": "Link",
+					"fieldname": "item_code",
+					"options": "Item",
+					"width": 150
+				},
+			]
+
+		columns += [
 			{
 				"label": _("UOM"),
 				"fieldtype": "Link",
@@ -78,67 +112,65 @@ class SalesPurchaseDetailsReport(object):
 				"label": _("Net Rate"),
 				"fieldtype": "Currency",
 				"fieldname": "base_net_rate",
-				"options": "currency",
+				"options": "Company:company:default_currency",
 				"width": 120
 			},
 			{
 				"label": _("Net Amount"),
 				"fieldtype": "Currency",
 				"fieldname": "base_net_amount",
-				"options": "currency",
+				"options": "Company:company:default_currency",
 				"width": 120
 			},
 			{
 				"label": _("Rate"),
 				"fieldtype": "Currency",
 				"fieldname": "base_rate",
-				"options": "currency",
+				"options": "Company:company:default_currency",
 				"width": 120
 			},
 			{
 				"label": _("Amount"),
 				"fieldtype": "Currency",
 				"fieldname": "base_amount",
-				"options": "currency",
+				"options": "Company:company:default_currency",
 				"width": 120
 			},
 			{
-				"label": _("Total Tax Amount"),
+				"label": _("Taxes and Charges"),
 				"fieldtype": "Currency",
 				"fieldname": "total_tax_amount",
-				"options": "currency",
+				"options": "Company:company:default_currency",
 				"width": 120
 			},
-		]
-
-		for tax_description in self.tax_columns:
-			amount_field = "tax_" + scrub(tax_description)
-			rate_field = amount_field + "_rate"
-			columns += [
-				{
-					"label": _(tax_description) + " (%)",
-					"fieldtype": "Percent",
-					"fieldname": rate_field,
-					"width": 60
-				},
-				{
-					"label": _(tax_description),
-					"fieldtype": "Currency",
-					"fieldname": amount_field,
-					"options": "currency",
-					"width": 120
-				},
-			]
-
-		columns += [
 			{
 				"label": _("Grand Total"),
 				"fieldtype": "Currency",
 				"fieldname": "grand_total",
-				"options": "currency",
+				"options": "Company:company:default_currency",
 				"width": 120
 			},
 		]
+
+		if self.filters.include_taxes:
+			for tax_description in self.tax_columns:
+				amount_field = "tax_" + scrub(tax_description)
+				rate_field = amount_field + "_rate"
+				columns += [
+					{
+						"label": _(tax_description) + " (%)",
+						"fieldtype": "Percent",
+						"fieldname": rate_field,
+						"width": 60
+					},
+					{
+						"label": _(tax_description),
+						"fieldtype": "Currency",
+						"fieldname": amount_field,
+						"options": "Company:company:default_currency",
+						"width": 120
+					},
+				]
 
 		if self.filters.party_type == "Customer":
 			columns += [
@@ -172,49 +204,48 @@ class SalesPurchaseDetailsReport(object):
 				"options": "Brand",
 				"width": 100
 			},
-			{
-				"label": _("Currency"),
-				"fieldtype": "Link",
-				"fieldname": "currency",
-				"options": "Currency",
-				"width": 50
-			},
 		]
 
 		return columns
 
 	def get_data(self):
 		self.get_entries()
-		self.get_itemsed_taxes()
-		self.build_tree()
+		self.get_itemised_taxes()
+		self.prepare_data()
 
 		data = []
-		self.total_row["indent"] = 0
-		self.total_row["_collapsed"] = True
-		self.postprocess_row(self.total_row)
-		data.append(self.total_row)
 
-		for party, docs in iteritems(self.tree):
-			party_row = self.party_totals[party]
-			self.postprocess_row(party_row)
-			party_row["indent"] = 1
-			data.append(party_row)
+		if self.filters.view == "Tree":
+			self.total_row["indent"] = 0
+			self.total_row["_collapsed"] = True
+			self.postprocess_row(self.total_row)
 
-			for docname, items_uoms in iteritems(docs):
-				doc_row = self.doc_totals[docname]
-				self.postprocess_row(doc_row)
-				doc_row["indent"] = 2
-				data.append(doc_row)
+			data.append(self.total_row)
+			for party, docs in iteritems(self.tree):
+				party_row = self.party_totals[party]
+				self.postprocess_row(party_row)
+				party_row["indent"] = 1
+				data.append(party_row)
 
-				for item_code, uom in items_uoms:
-					item_row = self.doc_item_uom_totals[(docname, item_code, uom)]
-					self.postprocess_row(item_row)
-					item_row["indent"] = 3
-					data.append(item_row)
+				for docname, items_uoms in iteritems(docs):
+					doc_row = self.doc_totals[docname]
+					self.postprocess_row(doc_row)
+					doc_row["indent"] = 2
+					data.append(doc_row)
+
+					for item_code, uom in items_uoms:
+						item_row = self.doc_item_uom_totals[(docname, item_code, uom)]
+						self.postprocess_row(item_row)
+						item_row["indent"] = 3
+						data.append(item_row)
+		else:
+			for item in self.item_list:
+				self.postprocess_row(item)
+			data = self.item_list
 
 		return data
 
-	def build_tree(self):
+	def prepare_data(self):
 		# Totals Row Template
 		total_fields = ['qty', 'base_net_amount', 'base_amount']
 		totals_template = {"currency": self.company_currency}
@@ -227,6 +258,7 @@ class SalesPurchaseDetailsReport(object):
 
 		# Containers
 		self.tree = OrderedDict()
+		self.item_list = []
 		self.party_totals = {}
 		self.doc_totals = {}
 		self.doc_item_uom_totals = {}
@@ -243,90 +275,111 @@ class SalesPurchaseDetailsReport(object):
 			else:
 				d.uom = d.stock_uom
 
-			# Add tree nodes if not already there
-			self.tree.setdefault(d.party, OrderedDict())\
-				.setdefault(d.parent, set())\
-				.add((d.item_code, d.uom))
+			if self.filters.view == "Tree":
+				# Add tree nodes if not already there
+				self.tree.setdefault(d.party, OrderedDict())\
+					.setdefault(d.parent, set())\
+					.add((d.item_code, d.uom))
 
-			# Party total row
-			if d.party not in self.party_totals:
-				party_row = self.party_totals[d.party] = totals_template.copy()
-				party_row.update({
-					"doctype": self.filters.party_type,
-					"reference": d.party,
-					"reference_name": d.party_name,
-					"group": d.party_group,
-					"group_doctype": d.party_group_dt
-				})
-				if self.filters.party_type == "Customer":
-					details = self.additional_customer_info.get(d.party, frappe._dict())
+				# Party total row
+				if d.party not in self.party_totals:
+					party_row = self.party_totals[d.party] = totals_template.copy()
 					party_row.update({
-						"sales_person": details.sales_person,
-						"territory": details.territory
+						"doctype": self.filters.party_type,
+						"reference": d.party,
+						"reference_name": d.party_name,
+						"group": d.party_group,
+						"group_doctype": d.party_group_dt
 					})
-			else:
-				party_row = self.party_totals[d.party]
+					if self.filters.party_type == "Customer":
+						details = self.additional_customer_info.get(d.party, frappe._dict())
+						party_row.update({
+							"sales_person": details.sales_person,
+							"territory": details.territory
+						})
+				else:
+					party_row = self.party_totals[d.party]
 
-			# Document total row
-			if d.parent not in self.doc_totals:
-				doc_row = self.doc_totals[d.parent] = totals_template.copy()
-				doc_row.update({
-					"date": d.date,
-					"doctype": self.filters.doctype,
-					"reference": d.parent
-				})
-				if self.filters.party_type == "Customer":
+				# Document total row
+				if d.parent not in self.doc_totals:
+					doc_row = self.doc_totals[d.parent] = totals_template.copy()
 					doc_row.update({
-						"sales_person": d.sales_person,
-						"territory": d.territory
+						"date": d.date,
+						"doctype": self.filters.doctype,
+						"reference": d.parent
 					})
-			else:
-				doc_row = self.doc_totals[d.parent]
+					if self.filters.party_type == "Customer":
+						doc_row.update({
+							"sales_person": d.sales_person,
+							"territory": d.territory
+						})
+				else:
+					doc_row = self.doc_totals[d.parent]
 
 			# Doc-Item-UOM row
 			if (d.parent, d.item_code, d.uom) not in self.doc_item_uom_totals:
 				item_row = self.doc_item_uom_totals[(d.parent, d.item_code, d.uom)] = totals_template.copy()
 				item_row.update({
 					"date": d.date,
-					"doctype": "Item",
-					"reference": d.item_code,
-					"reference_name": d.item_name,
 					"uom": d.uom,
 					"group": d.item_group,
 					"group_doctype": "Item Group",
 					"brand": d.brand
 				})
+				if self.filters.view == "Tree":
+					item_row.update({
+						"doctype": "Item",
+						"reference": d.item_code,
+						"reference_name": d.item_name,
+					})
+				else:
+					item_row.update({
+						"voucher_no": d.parent,
+						"party": d.party,
+						"party_name": d.party_name,
+						"item_code": d.item_code,
+						"item_name": d.item_name
+					})
+
 				if self.filters.party_type == "Customer":
 					item_row.update({
 						"sales_person": d.sales_person,
 						"territory": d.territory
 					})
+
+				if self.filters.view != "Tree":
+					self.item_list.append(item_row)
+
 			else:
 				item_row = self.doc_item_uom_totals[(d.parent, d.item_code, d.uom)]
 
+			# Group totals
 			for f in total_fields:
-				party_row[f] += d[f]
-				doc_row[f] += d[f]
 				item_row[f] += d[f]
-				self.total_row[f] += d[f]
+				if self.filters.view == "Tree":
+					party_row[f] += d[f]
+					doc_row[f] += d[f]
+					self.total_row[f] += d[f]
 
 			for f, tax in zip(self.tax_amount_fields, self.tax_columns):
-				tax_amount = self.itemsed_tax.get(d.name, {}).get(tax, {}).get("tax_amount", 0.0)
-				party_row[f] += tax_amount
-				doc_row[f] += tax_amount
+				tax_amount = self.itemised_tax.get(d.name, {}).get(tax, {}).get("tax_amount", 0.0)
 				item_row[f] += tax_amount
-				self.total_row[f] += tax_amount
+				if self.filters.view == "Tree":
+					doc_row[f] += tax_amount
+					party_row[f] += tax_amount
+					self.total_row[f] += tax_amount
 			for f, tax in zip(self.tax_rate_fields, self.tax_columns):
-				tax_rate = self.itemsed_tax.get(d.name, {}).get(tax, {}).get("tax_rate", 0.0)
+				tax_rate = self.itemised_tax.get(d.name, {}).get(tax, {}).get("tax_rate", 0.0)
 				if tax_rate:
-					party_row[f] += tax_rate
-					party_row[f+"_count"] += 1
-					doc_row[f] += tax_rate
-					doc_row[f+"_count"] += 1
 					item_row[f] += tax_rate
 					item_row[f+"_count"] += 1
-					self.total_row[f] += tax_rate
-					self.total_row[f+"_count"] += 1
+					if self.filters.view == "Tree":
+						doc_row[f] += tax_rate
+						doc_row[f+"_count"] += 1
+						party_row[f] += tax_rate
+						party_row[f+"_count"] += 1
+						self.total_row[f] += tax_rate
+						self.total_row[f+"_count"] += 1
 
 	def get_entries(self):
 		party_field = scrub(self.filters.party_type)
@@ -366,7 +419,7 @@ class SalesPurchaseDetailsReport(object):
 				and s.{date_field} between %(from_date)s and %(to_date)s
 				{sales_person_condition} {supplier_condition} {is_opening_condition} {filter_conditions}
 			group by s.name, i.name
-			order by s.{date_field}
+			order by s.{date_field}, s.{party_field}, s.name, i.item_code
 		""".format(
 			party_field=party_field,
 			party_name_field=party_name_field,
@@ -384,7 +437,7 @@ class SalesPurchaseDetailsReport(object):
 			filter_conditions=filter_conditions
 		), self.filters, as_dict=1)
 
-		if self.filters.party_type == "Customer":
+		if self.filters.party_type == "Customer" and self.filters.view == "Tree":
 			additional_customer_info = frappe.db.sql("""
 				select
 					s.customer, GROUP_CONCAT(DISTINCT s.territory SEPARATOR ', ') as territory
@@ -412,14 +465,14 @@ class SalesPurchaseDetailsReport(object):
 			for d in additional_customer_info:
 				self.additional_customer_info[d.customer] = d
 
-	def get_itemsed_taxes(self):
+	def get_itemised_taxes(self):
 		if self.entries:
-			self.itemsed_tax, self.tax_columns = get_tax_accounts(self.entries, [], self.company_currency, self.filters.doctype,
+			self.itemised_tax, self.tax_columns = get_tax_accounts(self.entries, [], self.company_currency, self.filters.doctype,
 				"Sales Taxes and Charges" if self.filters.party_type == "Customer" else "Purchase Taxes and Charges")
 			self.tax_amount_fields = ["tax_" + scrub(tax) for tax in self.tax_columns]
 			self.tax_rate_fields = ["tax_" + scrub(tax) + "_rate" for tax in self.tax_columns]
 		else:
-			self.itemsed_tax, self.tax_columns = {}, []
+			self.itemised_tax, self.tax_columns = {}, []
 			self.tax_amount_fields, self.tax_rate_fields = [], []
 
 	def postprocess_row(self, row):
