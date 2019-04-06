@@ -13,17 +13,11 @@ frappe.query_reports["Sales Details"] = {
 			reqd: 1
 		},
 		{
-			fieldname: "from_date",
-			label: __("From Date"),
-			fieldtype: "Date",
-			default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
-			reqd: 1
-		},
-		{
-			fieldname: "to_date",
-			label: __("To Date"),
-			fieldtype: "Date",
-			default: frappe.datetime.get_today(),
+			fieldname: "view",
+			label: __("View Type"),
+			fieldtype: "Select",
+			options: ["Tree", "List"],
+			default: "Tree",
 			reqd: 1
 		},
 		{
@@ -40,6 +34,20 @@ frappe.query_reports["Sales Details"] = {
 			fieldtype: "Select",
 			options: ["Stock Qty", "Contents Qty", "Transaction Qty"],
 			default: "Stock Qty",
+			reqd: 1
+		},
+		{
+			fieldname: "from_date",
+			label: __("From Date"),
+			fieldtype: "Date",
+			default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
+			reqd: 1
+		},
+		{
+			fieldname: "to_date",
+			label: __("To Date"),
+			fieldtype: "Date",
+			default: frappe.datetime.get_today(),
 			reqd: 1
 		},
 		{
@@ -83,7 +91,12 @@ frappe.query_reports["Sales Details"] = {
 			label: __("Sales Person"),
 			fieldtype: "Link",
 			options: "Sales Person"
-		}
+		},
+		{
+			fieldname: "include_taxes",
+			label: __("Include Taxes"),
+			fieldtype: "Check"
+		},
 	],
 }
 
