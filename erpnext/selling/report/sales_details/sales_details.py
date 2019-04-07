@@ -41,19 +41,13 @@ class SalesPurchaseDetailsReport(object):
 					"label": _("Reference"),
 					"fieldtype": "Dynamic Link",
 					"fieldname": "reference",
-					"options": "doctype",
+					"options": "doc_type",
 					"width": 300
-				},
-				{
-					"label": _("Name"),
-					"fieldtype": "Data",
-					"fieldname": "reference_name",
-					"width": 150
 				},
 				{
 					"label": _("Type"),
 					"fieldtype": "Data",
-					"fieldname": "doctype",
+					"fieldname": "doc_type",
 					"width": 110
 				},
 				{
@@ -119,20 +113,6 @@ class SalesPurchaseDetailsReport(object):
 				"label": _("Net Amount"),
 				"fieldtype": "Currency",
 				"fieldname": "base_net_amount",
-				"options": "Company:company:default_currency",
-				"width": 120
-			},
-			{
-				"label": _("Rate"),
-				"fieldtype": "Currency",
-				"fieldname": "base_rate",
-				"options": "Company:company:default_currency",
-				"width": 120
-			},
-			{
-				"label": _("Amount"),
-				"fieldtype": "Currency",
-				"fieldname": "base_amount",
 				"options": "Company:company:default_currency",
 				"width": 120
 			},
@@ -285,9 +265,10 @@ class SalesPurchaseDetailsReport(object):
 				if d.party not in self.party_totals:
 					party_row = self.party_totals[d.party] = totals_template.copy()
 					party_row.update({
-						"doctype": self.filters.party_type,
+						"doc_type": self.filters.party_type,
 						"reference": d.party,
-						"reference_name": d.party_name,
+						scrub(self.filters.party_type) + "_name": d.party_name,
+						"party_name": d.party_name,
 						"group": d.party_group,
 						"group_doctype": d.party_group_dt
 					})
@@ -305,7 +286,7 @@ class SalesPurchaseDetailsReport(object):
 					doc_row = self.doc_totals[d.parent] = totals_template.copy()
 					doc_row.update({
 						"date": d.date,
-						"doctype": self.filters.doctype,
+						"doc_type": self.filters.doctype,
 						"reference": d.parent
 					})
 					if self.filters.party_type == "Customer":
@@ -328,15 +309,16 @@ class SalesPurchaseDetailsReport(object):
 				})
 				if self.filters.view == "Tree":
 					item_row.update({
-						"doctype": "Item",
+						"doc_type": "Item",
 						"reference": d.item_code,
-						"reference_name": d.item_name,
+						"item_name": d.item_name,
 					})
 				else:
 					item_row.update({
 						"voucher_no": d.parent,
 						"party": d.party,
 						"party_name": d.party_name,
+						scrub(self.filters.party_type) + "_name": d.party_name,
 						"item_code": d.item_code,
 						"item_name": d.item_name
 					})
