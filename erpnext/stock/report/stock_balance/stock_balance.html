@@ -1,0 +1,61 @@
+<style>
+@media screen {
+	.print-format {
+		padding: 8mm;
+	}
+}
+
+.print-format {
+	font-size: 8pt;
+}
+.print-format td, .print-format th {
+	vertical-align: middle !important;
+}
+</style>
+
+<h2 class="text-center" style="margin-top:0;">{%= __("Stock Balance") %}</h2>
+
+<h5 class="text-center">
+	{%= frappe.datetime.str_to_user(filters.from_date) %}
+	{%= __("to") %}
+	{%= frappe.datetime.str_to_user(filters.to_date) %}
+</h5>
+
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th class="text-center">{%= __("Item") %}</th>
+			<th class="text-center">{%= __("Warehouse") %}</th>
+			<th class="text-center">{%= __("UOM") %}</th>
+			<th class="text-center">{%= __("Opening Qty") %}</th>
+			<th class="text-center">{%= __("In Qty") %}</th>
+			<th class="text-center">{%= __("Out Qty") %}</th>
+			<th class="text-center">{%= __("Balance Qty") %}</th>
+			<th class="text-center">{%= __("Purchase Qty") %}</th>
+			<th class="text-center">{%= __("Sales Qty") %}</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+			<tr>
+				<td>
+                    <a href="#Form/Item/{%= data[i].item_code %}" target="_blank">{%= data[i].item_code %}</a>
+					{% if(data[i].item_name && data[i].item_name != data[i].item_code) { %}
+					<br />data[i].item_name
+					{% } %}
+				</td>
+
+				<td><a href="#Form/Warehouse/{%= data[i].warehouse %}" target="_blank">{%= (data[i].warehouse || " - ").split(" - ")[0] %}</a></td>
+
+                <td class="text-center">{%= data[i].uom %}</td>
+                <td class="text-right text-nowrap">{%= format_number(data[i].opening_qty) %}</td>
+                <td class="text-right text-nowrap">{%= format_number(data[i].in_qty) %}</td>
+                <td class="text-right text-nowrap">{%= format_number(data[i].out_qty) %}</td>
+                <td class="text-right text-nowrap">{%= format_number(data[i].bal_qty) %}</td>
+                <td class="text-right text-nowrap">{%= format_number(data[i].purchase_qty) %}</td>
+                <td class="text-right text-nowrap">{%= format_number(data[i].sales_qty) %}</td>
+			</tr>
+		{% } %}
+	</tbody>
+</table>
+<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
