@@ -265,6 +265,7 @@ def make_custom_fields(update=True):
 		'Purchase Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Purchase Receipt Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Purchase Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Material Request Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Employee': [
 			dict(fieldname='ifsc_code', label='IFSC Code',
 				fieldtype='Data', insert_after='bank_ac_no', print_hide=1,

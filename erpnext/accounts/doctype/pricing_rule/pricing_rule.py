@@ -119,7 +119,7 @@ class PricingRule(Document):
 #--------------------------------------------------------------------------------
 
 @frappe.whitelist()
-def apply_pricing_rule(args):
+def apply_pricing_rule(args, doc=None):
 	"""
 		args = {
 			"items": [{"doctype": "", "name": "", "item_code": "", "brand": "", "item_group": ""}, ...],
@@ -139,6 +139,7 @@ def apply_pricing_rule(args):
 			"ignore_pricing_rule": "something"
 		}
 	"""
+
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
@@ -161,10 +162,11 @@ def apply_pricing_rule(args):
 	for item in item_list:
 		args_copy = copy.deepcopy(args)
 		args_copy.update(item)
-		data = get_pricing_rule_for_item(args_copy, item.get('price_list_rate'))
+		data = get_pricing_rule_for_item(args_copy, item.get('price_list_rate'), doc=doc)
 		out.append(data)
-		if set_serial_nos_based_on_fifo and not args.get('is_return'):
-			out.append(get_serial_no_for_item(args_copy))
+		if not item.get("serial_no") and set_serial_nos_based_on_fifo and not args.get('is_return'):
+			out[0].update(get_serial_no_for_item(args_copy))
+
 	return out
 
 def get_serial_no_for_item(args):
@@ -181,6 +183,12 @@ def get_serial_no_for_item(args):
 
 def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
 	from erpnext.accounts.doctype.pricing_rule.utils import get_pricing_rules
+
+	if isinstance(doc, string_types):
+		doc = json.loads(doc)
+
+	if doc:
+		doc = frappe.get_doc(doc)
 
 	if (args.get('is_free_item') or
 		args.get("parenttype") == "Material Request"): return {}
@@ -227,10 +235,10 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
 	if pricing_rules:
 		rules = []
 
-		item_details.discount_percentage = 0
-		item_details.discount_amount = 0
 		for pricing_rule in pricing_rules:
 			if not pricing_rule or pricing_rule.get('suggestion'): continue
+
+			item_details.validate_applied_rule = pricing_rule.get("validate_applied_rule", 0)
 
 			rules.append(get_pricing_rule_details(args, pricing_rule))
 			if pricing_rule.mixed_conditions or pricing_rule.apply_rule_on_other:
@@ -243,8 +251,8 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
 		item_details.has_pricing_rule = 1
 
 		# if discount is applied on the rate and not on price list rate
-		if price_list_rate:
-			set_discount_amount(price_list_rate, item_details)
+		# if price_list_rate:
+		# 	set_discount_amount(price_list_rate, item_details)
 
 		item_details.pricing_rules = ','.join([d.pricing_rule for d in rules])
 
@@ -264,7 +272,7 @@ def get_pricing_rule_details(args, pricing_rule):
 		'pricing_rule': pricing_rule.name,
 		'rate_or_discount': pricing_rule.rate_or_discount,
 		'margin_type': pricing_rule.margin_type,
-		'item_code': pricing_rule.item_code,
+		'item_code': pricing_rule.item_code or args.get("item_code"),
 		'child_docname': args.get('child_docname')
 	})
 
@@ -296,6 +304,9 @@ def apply_price_discount_pricing_rule(pricing_rule, item_details, args):
 			discount_field = "{0}_on_rate".format(field)
 			item_details[discount_field].append(pricing_rule.get(field, 0))
 		else:
+			if field not in item_details:
+				item_details.setdefault(field, 0)
+
 			item_details[field] += (pricing_rule.get(field, 0)
 				if pricing_rule else args.get(field, 0))
 
@@ -308,6 +319,7 @@ def set_discount_amount(rate, item_details):
 			item_details.rate = rate
 
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
+	from erpnext.accounts.doctype.pricing_rule.utils import get_apply_on_and_items
 	for d in pricing_rules.split(','):
 		if not d: continue
 		pricing_rule = frappe.get_doc('Pricing Rule', d)
@@ -326,6 +338,11 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
 		elif pricing_rule.get('free_item'):
 			item_details.remove_free_item = (item_code if pricing_rule.get('same_item')
 				else pricing_rule.get('free_item'))
+
+		if pricing_rule.get("mixed_conditions") or pricing_rule.get("apply_rule_on_other"):
+			apply_on, items = get_apply_on_and_items(pricing_rule, item_details)
+			item_details.apply_on = apply_on
+			item_details.applied_on_items = ','.join(items)
 
 	item_details.pricing_rules = ''
 
@@ -367,35 +384,6 @@ def make_pricing_rule(doctype, docname):
 	doc.buying = 1 if doctype == "Supplier" else 0
 
 	return doc
-
-@frappe.whitelist()
-def get_free_items(pricing_rules, item_row):
-	if isinstance(item_row, string_types):
-		item_row = json.loads(item_row)
-
-	free_items = []
-	pricing_rules = list(set(pricing_rules.split(',')))
-
-	for d in pricing_rules:
-		pr_doc = frappe.get_doc('Pricing Rule', d)
-		if pr_doc.price_or_product_discount == 'Product':
-			item = (item_row.get('item_code') if pr_doc.same_item
-				else pr_doc.free_item)
-			if not item: return free_items
-
-			doc = frappe.get_doc('Item', item)
-
-			free_items.append({
-				'item_code': item,
-				'item_name': doc.item_name,
-				'description': doc.description,
-				'qty': pr_doc.free_qty,
-				'uom': pr_doc.free_item_uom,
-				'rate': pr_doc.free_item_rate or 0,
-				'is_free_item': 1
-			})
-
-	return free_items
 
 def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
 	items = [filters.get('value')]

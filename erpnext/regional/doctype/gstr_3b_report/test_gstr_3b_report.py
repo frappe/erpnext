@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
+from frappe.utils import getdate
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.stock.doctype.item.test_item import make_item
@@ -12,10 +13,27 @@ import json
 
 class TestGSTR3BReport(unittest.TestCase):
 	def test_gstr_3b_report(self):
+
+		month_number_mapping = {
+			1: "January",
+			2: "February",
+			3: "March",
+			4: "April",
+			5: "May",
+			6: "June",
+			7: "July",
+			8: "August",
+			9: "September",
+			10: "October",
+			11: "November",
+			12: "December"
+		}
+
 		frappe.set_user("Administrator")
 
 		frappe.db.sql("delete from `tabSales Invoice` where company='_Test Company GST'")
 		frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company GST'")
+		frappe.db.sql("delete from `tabGSTR 3B Report` where company='_Test Company GST'")
 
 		make_company()
 		make_item("Milk", properties = {"is_nil_exempt": 1, "standard_rate": 0.000000})
@@ -33,8 +51,8 @@ class TestGSTR3BReport(unittest.TestCase):
 				"doctype": "GSTR 3B Report",
 				"company": "_Test Company GST",
 				"company_address": "_Test Address-Billing",
-				"year": "2019",
-				"month": "March"
+				"year": getdate().year,
+				"month": month_number_mapping.get(getdate().month)
 			}).insert()
 
 		output = json.loads(report.json_output)
@@ -55,7 +73,6 @@ def make_sales_invoice():
 			income_account = 'Sales - _GST',
 			expense_account = 'Cost of Goods Sold - _GST',
 			cost_center = 'Main - _GST',
-			posting_date = '2019-03-10',
 			do_not_save=1
 		)
 
@@ -77,7 +94,6 @@ def make_sales_invoice():
 			income_account = 'Sales - _GST',
 			expense_account = 'Cost of Goods Sold - _GST',
 			cost_center = 'Main - _GST',
-			posting_date = '2019-03-10',
 			do_not_save=1
 		)
 
@@ -99,7 +115,6 @@ def make_sales_invoice():
 			income_account = 'Sales - _GST',
 			expense_account = 'Cost of Goods Sold - _GST',
 			cost_center = 'Main - _GST',
-			posting_date = '2019-03-10',
 			do_not_save=1
 		)
 
@@ -122,7 +137,6 @@ def make_sales_invoice():
 			income_account = 'Sales - _GST',
 			expense_account = 'Cost of Goods Sold - _GST',
 			cost_center = 'Main - _GST',
-			posting_date = '2019-03-10',
 			do_not_save=1
 		)
 	si3.submit()
@@ -135,7 +149,6 @@ def create_purchase_invoices():
 			currency = 'INR',
 			warehouse = 'Finished Goods - _GST',
 			cost_center = 'Main - _GST',
-			posting_date = '2019-03-10',
 			do_not_save=1,
 		)
 
@@ -157,7 +170,6 @@ def create_purchase_invoices():
 			currency = 'INR',
 			warehouse = 'Finished Goods - _GST',
 			cost_center = 'Main - _GST',
-			posting_date = '2019-03-10',
 			item = "Milk",
 			do_not_save=1
 		)

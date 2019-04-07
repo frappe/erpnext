@@ -315,7 +315,7 @@ def make_pricing_rule(**args):
 
 
 def delete_existing_pricing_rules():
-	for doctype in ["Pricing Rule", "Apply Rule On Item Code",
-		"Apply Rule On Item Group", "Apply Rule On Brand"]:
+	for doctype in ["Pricing Rule", "Pricing Rule Item Code",
+		"Pricing Rule Item Group", "Pricing Rule Brand"]:
 
 		frappe.db.sql("delete from `tab{0}`".format(doctype))

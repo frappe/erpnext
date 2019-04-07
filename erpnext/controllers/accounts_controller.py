@@ -119,6 +119,12 @@ class AccountsController(TransactionBase):
 			self.validate_non_invoice_documents_schedule()
 
 	def before_print(self):
+		if self.doctype in ['Journal Entry', 'Payment Entry', 'Sales Invoice', 'Purchase Invoice']:
+			self.gl_entries = frappe.get_list("GL Entry", filters={
+				"voucher_type": self.doctype,
+				"voucher_no": self.name
+			}, fields=["account", "party_type", "party", "debit", "credit", "remarks"])
+
 		if self.doctype in ['Purchase Order', 'Sales Order', 'Sales Invoice', 'Purchase Invoice',
 							'Supplier Quotation', 'Purchase Receipt', 'Delivery Note', 'Quotation']:
 			if self.get("group_same_items"):
@@ -276,7 +282,7 @@ class AccountsController(TransactionBase):
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
 
-					if ret.get("pricing_rules"):
+					if ret.get("pricing_rules") and not ret.get("validate_applied_rule", 0):
 						# if user changed the discount percentage then set user's discount percentage ?
 						item.set("pricing_rules", ret.get("pricing_rules"))
 						item.set("discount_percentage", ret.get("discount_percentage"))
@@ -545,6 +551,19 @@ class AccountsController(TransactionBase):
 		if lst:
 			from erpnext.accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
+
+	def on_cancel(self):
+		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
+
+		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
+			if self.is_return: return
+
+			if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
+				unlink_ref_doc_from_payment_entries(self)
+
+		elif self.doctype in ["Sales Order", "Purchase Order"]:
+			if frappe.db.get_single_value('Accounts Settings', 'unlink_advance_payment_on_cancelation_of_order'):
+				unlink_ref_doc_from_payment_entries(self)
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
 		from erpnext.controllers.status_updater import get_tolerance_for
