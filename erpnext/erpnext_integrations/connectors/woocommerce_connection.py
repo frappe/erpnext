@@ -22,24 +22,20 @@ def verify_request():
 	frappe.set_user(woocommerce_settings.modified_by)
 
 @frappe.whitelist(allow_guest=True)
-def order(data=None):
-	if not data:
-		verify_request()
+def order():
+	if frappe.flags.woocomm_test_order_data:
+		fd = frappe.flags.woocomm_test_order_data
+		event = "created"
 
-	if frappe.request and frappe.request.data:
+	elif frappe.request and frappe.request.data:
+		verify_request()
 		fd = json.loads(frappe.request.data)
-	elif data:
-		fd = data
+		event = frappe.get_request_header("X-Wc-Webhook-Event")
+
 	else:
 		return "success"
 
-	if not data:
-		event = frappe.get_request_header("X-Wc-Webhook-Event")
-	else:
-		event = "created"
-
 	if event == "created":
-
 		raw_billing_data = fd.get("billing")
 		customer_woo_com_email = raw_billing_data.get("email")
 
@@ -100,7 +96,7 @@ def order(data=None):
 				"item_name": found_item.item_name,
 				"description": found_item.item_name,
 				"delivery_date":order_delivery_date,
-				"uom": "Nos",
+				"uom": _("Nos"),
 				"qty": item.get("quantity"),
 				"rate": item.get("price"),
 				"warehouse": "Stores" + " - " + company_abbr
@@ -189,6 +185,7 @@ def link_item(item_data,item_status):
 	item.item_code = "woocommerce - " + str(item_data.get("product_id"))
 	item.woocommerce_id = str(item_data.get("product_id"))
 	item.item_group = "WooCommerce Products"
+	item.stock_uom = _("Nos")
 	item.save()
 	frappe.db.commit()
 
