@@ -725,7 +725,7 @@ class Item(WebsiteGenerator):
 						_('Cannot change Attributes after stock transaction. Make a new Item and transfer stock to the new Item'))
 
 	def validate_variant_based_on_change(self):
-		if self.variant_of or (self.has_variants and frappe.get_all("Item", {"variant_of": self.name})):
+		if not self.is_new() and (self.variant_of or (self.has_variants and frappe.get_all("Item", {"variant_of": self.name}))):
 			if self.variant_based_on != frappe.db.get_value("Item", self.name, "variant_based_on"):
 				frappe.throw(_("Variant Based On cannot be changed"))
 
