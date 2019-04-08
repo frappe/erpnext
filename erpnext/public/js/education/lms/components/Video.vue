@@ -1,6 +1,6 @@
 <template>
 <div>
-    <section class='video-top-section video-section-bg'>
+    <section class='mt-2'>
     <div>
         <youtube-player :url="contentData.url"/>
         <div class="mt-3 row">

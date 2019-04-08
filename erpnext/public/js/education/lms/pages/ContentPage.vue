@@ -1,5 +1,6 @@
 <template>
 	<div>
+		<breadcrumb/>
 		<component v-bind:is="currentComponent" :content="content" :type="type">
 			<ContentNavigation :nextContent="nextContent" :nextContentType="nextContentType"/>
 		</component>
@@ -10,6 +11,7 @@ import Article from "../components/Article.vue"
 import Quiz from "../components/Quiz.vue"
 import Video from "../components/Video.vue"
 import ContentNavigation from "../components/ContentNavigation.vue"
+import Breadcrumb from "../components/Breadcrumb.vue"
 
 export default {
 	props:['program_name', 'course_name', 'topic', 'type', 'content'],
@@ -54,7 +56,8 @@ export default {
 		Article,
 		Video,
 		Quiz,
-		ContentNavigation
+		ContentNavigation,
+		Breadcrumb
 	}
 };
 </script>
