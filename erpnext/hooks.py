@@ -27,8 +27,6 @@ doctype_js = {
 
 welcome_email = "erpnext.setup.utils.welcome_email"
 
-connect = "erpnext.check_branch_compatibility_with_frappe"
-
 # setup wizard
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
