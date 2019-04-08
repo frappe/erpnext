@@ -42,11 +42,13 @@ def create_variant_with_tables(item, args):
 	return variant
 
 def make_item_variant():
-	frappe.delete_doc_if_exists("Item", "_Test Variant Item-S", force=1)
-	variant = create_variant_with_tables("_Test Variant Item", '{"Test Size": "Small"}')
-	variant.item_code = "_Test Variant Item-S"
-	variant.item_name = "_Test Variant Item-S"
-	variant.save()
+	if frappe.db.exists("Item", "_Test Variant Item-S"):
+		variant = frappe.get_doc("Item", "_Test Variant Item-S")
+	else:
+		variant = create_variant_with_tables("_Test Variant Item", '{"Test Size": "Small"}')
+		variant.item_code = "_Test Variant Item-S"
+		variant.item_name = "_Test Variant Item-S"
+		variant.save()
 	return variant
 
 def make_quality_inspection_template():
