@@ -2,8 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
+from frappe.model.meta import get_field_precision
 from frappe.utils import flt, get_datetime, format_datetime
 
 class StockOverReturnError(frappe.ValidationError): pass
@@ -116,6 +117,10 @@ def validate_quantity(doc, args, ref, valid_items, already_returned_items):
 
 	already_returned_data = already_returned_items.get(args.item_code) or {}
 
+	company_currency = erpnext.get_company_currency(doc.company)
+	stock_qty_precision = get_field_precision(frappe.get_meta(doc.doctype + " Item")
+			.get_field("stock_qty"), company_currency)
+
 	for column in fields:
 		returned_qty = flt(already_returned_data.get(column, 0)) if len(already_returned_data) > 0 else 0
 
@@ -126,7 +131,7 @@ def validate_quantity(doc, args, ref, valid_items, already_returned_items):
 			reference_qty = ref.get(column) * ref.get("conversion_factor", 1.0)
 			current_stock_qty = args.get(column) * args.get("conversion_factor", 1.0)
 
-		max_returnable_qty = flt(reference_qty) - returned_qty
+		max_returnable_qty = flt(reference_qty, stock_qty_precision) - returned_qty
 		label = column.replace('_', ' ').title()
 
 		if reference_qty:
@@ -135,7 +140,7 @@ def validate_quantity(doc, args, ref, valid_items, already_returned_items):
 			elif returned_qty >= reference_qty and args.get(column):
 				frappe.throw(_("Item {0} has already been returned")
 					.format(args.item_code), StockOverReturnError)
-			elif abs(current_stock_qty) > max_returnable_qty:
+			elif abs(flt(current_stock_qty, stock_qty_precision)) > max_returnable_qty:
 				frappe.throw(_("Row # {0}: Cannot return more than {1} for Item {2}")
 					.format(args.idx, max_returnable_qty, args.item_code), StockOverReturnError)
 
