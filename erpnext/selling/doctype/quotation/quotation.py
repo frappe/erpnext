@@ -132,8 +132,8 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 
 	def set_missing_values(source, target):
 		if customer:
-			target.customer = customer.name
-			target.customer_name = customer.customer_name
+			target.customer = customer
+			target.customer_name = customer
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
@@ -179,8 +179,8 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 
 	def set_missing_values(source, target):
 		if customer:
-			target.customer = customer.name
-			target.customer_name = customer.customer_name
+			target.customer = customer
+			target.customer_name = customer
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
@@ -214,8 +214,8 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	return doclist
 
 def _make_customer(source_name, ignore_permissions=False):
-	quotation = frappe.db.get_value("Quotation", source_name, ["order_type", "customer_lead"])
-	if quotation and quotation[1]:
+	quotation = frappe.db.get_value("Quotation", source_name, ["order_type", "customer_lead", "customer_name"])
+	if quotation and quotation[1] and not quotation[2]:
 		lead_name = quotation[1]
 		customer_name = frappe.db.get_value("Customer", {"lead_name": lead_name},
 			["name", "customer_name"], as_dict=True)
@@ -244,3 +244,5 @@ def _make_customer(source_name, ignore_permissions=False):
 				frappe.throw(_("Please create Customer from Lead {0}").format(lead_name))
 		else:
 			return customer_name
+	else:
+		return quotation[2]
