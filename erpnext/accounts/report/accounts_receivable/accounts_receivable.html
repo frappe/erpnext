@@ -112,8 +112,8 @@
 	<thead>
 		<tr>
 			{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
-				<th style="width: 7%">{%= __("Date") %}</th>
-				<th style="width: 7%">{%= __("Age (Days)") %}</th>
+				<th style="width: 9%">{%= __("Date") %}</th>
+				<th style="width: 3%">{%= __("Age (Days)") %}</th>
 				<th style="width: 13%">{%= __("Reference") %}</th>
 				{% if(report.report_name === "Accounts Receivable") { %}
 				<th style="width: 10%">{%= __("Sales Person") %}</th>
