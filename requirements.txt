@@ -7,3 +7,4 @@ braintree
 gocardless_pro
 woocommerce
 pandas
+pycups
