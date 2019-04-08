@@ -12,11 +12,11 @@
             </div>
         </router-link>
         <div class='text-right p-3'>
-            <button v-if="program.intro_video" class='btn btn-secondary btn-sm text-white' data-toggle="modal" data-target="#videoModal">Watch Intro</button>
+            <button v-if="program.intro_video" class='btn btn-light btn-sm' data-toggle="modal" data-target="#videoModal">Watch Intro</button>
             <a-button v-if="enrolled" type="dark" size="sm" :route="programPageRoute">
                 {{ buttonName }}
             </a-button>
-            <a v-else-if="isLogin" class='btn btn-secondary btn-sm' @click="enroll()">{{ enrollButton }}</a>
+            <button v-else-if="isLogin" class='btn btn-dark btn-sm' @click="enroll()">{{ enrollButton }}</button>
             <a v-else class='btn btn-secondary btn-sm' href="/login#signup">Sign Up</a>
         </div>
         <VideoModal v-if="program.intro_video" :title="program.program_name" :video="program.intro_video"/>

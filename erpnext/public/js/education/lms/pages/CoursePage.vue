@@ -1,5 +1,6 @@
 <template>
 <div>
+	<breadcrumb></breadcrumb>
 	<TopSection v-bind:title="course.course_name" v-bind:description="course.description">
     </TopSection>
 	<CardList :title="'Topics'" :description="''" :sectionType="'section-padding section-bg'">
@@ -11,7 +12,7 @@
 import TopSection from "../components/TopSection.vue"
 import CardList from "../components/CardList.vue"
 import TopicCard from "../components/TopicCard.vue"
-
+import Breadcrumb from "../components/Breadcrumb.vue"
 
 export default {
 	props: ['program_name','course_name'],
@@ -19,7 +20,8 @@ export default {
     components: {
 		TopSection,
 		CardList,
-		TopicCard
+		TopicCard,
+		Breadcrumb
 	},
 	data() {
 		return {
