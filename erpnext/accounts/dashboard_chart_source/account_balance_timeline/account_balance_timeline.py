@@ -48,7 +48,7 @@ def build_result(account, dates, gl_entries):
 	# get balances in debit
 	for entry in gl_entries:
 
-		# find the date index after the posting date
+		# entry date is after the current pointer, so move the pointer forward
 		while getdate(entry.posting_date) > result[date_index][0]:
 			date_index += 1
 
@@ -63,13 +63,15 @@ def build_result(account, dates, gl_entries):
 
 def get_gl_entries(account, to_date):
 	child_accounts = get_descendants_of('Account', account, ignore_permissions=True)
+	child_accounts.append(account)
 
 	return frappe.db.get_all('GL Entry',
 		fields = ['posting_date', 'debit', 'credit'],
 		filters = [
 			dict(posting_date = ('<', to_date)),
 			dict(account = ('in', child_accounts))
-		])
+		],
+		order_by = 'posting_date asc')
 
 def get_from_date_from_timespan(timespan):
 	days = months = years = 0
