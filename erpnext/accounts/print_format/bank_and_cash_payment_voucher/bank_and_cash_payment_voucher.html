@@ -12,12 +12,12 @@
         and doc.set("select_print_heading", _("Payment Entry")) -%}{%- endif -%}
     {{ add_header(0, 1, doc, letter_head, no_letterhead, print_settings) }}
     <div class="row margin-bottom">
-            <div class="col-sm-6">
+            <div class="col-xs-6">
                 <table>
                 <tr><td><strong>Voucher No: </strong></td><td>{{ doc.name }}</td></tr>
                 </table>
             </div>
-            <div>
+            <div class="col-xs-6">
                 <table>
                     <tr><td><strong>Date: </strong></td><td>{{ frappe.utils.formatdate(doc.creation) }}</td></tr>
                 </table>
