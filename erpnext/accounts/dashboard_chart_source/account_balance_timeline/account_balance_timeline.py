@@ -41,6 +41,7 @@ def get(filters=None):
 
 def build_result(account, dates, gl_entries):
 	result = [[getdate(date), 0.0] for date in dates]
+	root_type = frappe.db.get_value('Account', account, 'root_type')
 
 	# start with the first date
 	date_index = 0
@@ -55,9 +56,15 @@ def build_result(account, dates, gl_entries):
 		result[date_index][1] += entry.debit - entry.credit
 
 	# if account type is credit, switch balances
-	if frappe.db.get_value('Account', account, 'root_type') not in ('Asset', 'Expense'):
+	if root_type not in ('Asset', 'Expense'):
 		for r in result:
 			r[1] = -1 * r[1]
+
+	# for balance sheet accounts, the totals are cumulative
+	if root_type in ('Asset', 'Liability', 'Equity'):
+		for i, r in enumerate(result):
+			if i < 0:
+				r[1] = r[1] + result[i-1][1]
 
 	return result
 
