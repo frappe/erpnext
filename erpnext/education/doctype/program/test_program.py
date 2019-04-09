@@ -9,7 +9,33 @@ from erpnext.education.doctype.course.test_course import make_course_and_linked_
 import frappe
 import unittest
 
-test_data = frappe.get_test_records('Program')
+test_data = {
+	"program_name": "_Test Program",
+	"course": [{
+		"course_name": "_Test Course 1",
+		"topic": [{
+				"topic_name": "_Test Topic 1-1",
+				"content": [{
+					"type": "Article",
+					"name": "_Test Article 1-1"
+				}, {
+					"type": "Article",
+					"name": "_Test Article 1-2"
+				}]
+			},
+			{
+				"topic_name": "_Test Topic 1-2",
+				"content": [{
+					"type": "Article",
+					"name": "_Test Article 1-3"
+				}, {
+					"type": "Article",
+					"name": "_Test Article 1-4"
+				}]
+			}
+		]
+	}]
+}
 
 class TestProgram(unittest.TestCase):
 	def setUp(self):
