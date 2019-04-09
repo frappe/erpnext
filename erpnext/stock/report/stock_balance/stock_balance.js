@@ -65,6 +65,11 @@ frappe.query_reports["Stock Balance"] = {
 			"options": "UOM"
 		},
 		{
+			"fieldname": "consolidated",
+			"label": __("Consolidated Values"),
+			"fieldtype": "Check"
+		},
+		{
 			"fieldname": "show_variant_attributes",
 			"label": __("Show Variant Attributes"),
 			"fieldtype": "Check"
