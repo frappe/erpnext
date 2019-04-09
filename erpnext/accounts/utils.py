@@ -544,14 +544,14 @@ def fix_total_debit_credit():
 				(dr_or_cr, dr_or_cr, '%s', '%s', '%s', dr_or_cr),
 				(d.diff, d.voucher_type, d.voucher_no))
 
-def get_stock_and_account_difference(account_list=None, posting_date=None):
+def get_stock_and_account_difference(account_list=None, posting_date=None, company=None):
 	from erpnext.stock.utils import get_stock_value_on
 	from erpnext.stock import get_warehouse_account_map
 
 	if not posting_date: posting_date = nowdate()
 
 	difference = {}
-	warehouse_account = get_warehouse_account_map()
+	warehouse_account = get_warehouse_account_map(company)
 
 	for warehouse, account_data in iteritems(warehouse_account):
 		if account_data.get('account') in account_list:

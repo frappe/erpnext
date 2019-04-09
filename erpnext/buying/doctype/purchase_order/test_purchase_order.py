@@ -465,6 +465,33 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(se_items, supplied_items)
 		update_backflush_based_on("BOM")
 
+	def test_advance_payment_entry_unlink_against_purchase_order(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		frappe.db.set_value("Accounts Settings", "Accounts Settings",
+			"unlink_advance_payment_on_cancelation_of_order", 1)
+
+		po_doc = create_purchase_order()
+
+		pe = get_payment_entry("Purchase Order", po_doc.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = po_doc.currency
+		pe.paid_to_account_currency = po_doc.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = po_doc.grand_total
+		pe.save(ignore_permissions=True)
+		pe.submit()
+
+		po_doc = frappe.get_doc('Purchase Order', po_doc.name)
+		po_doc.cancel()
+
+		pe_doc = frappe.get_doc('Payment Entry', pe.name)
+		pe_doc.cancel()
+
+		frappe.db.set_value("Accounts Settings", "Accounts Settings",
+			"unlink_advance_payment_on_cancelation_of_order", 0)
+
 def make_subcontracted_item(item_code):
 	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 

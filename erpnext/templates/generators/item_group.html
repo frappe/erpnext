@@ -9,29 +9,32 @@
 		{% include "templates/includes/slideshow.html" %}
 		{% endif %}
 		{% if description %}<!-- description -->
-		<div itemprop="description">{{ description or ""}}</div>
+		<div class="mb-3" itemprop="description">{{ description or ""}}</div>
 		{% endif %}
 	</div>
-	<div>
-		{% if items %}
-		<div id="search-list" {% if not products_as_list -%} class="row" {%- endif %}>
-			{% for i in range(0, page_length) %}
-				{% if items[i] %}
-					{{ items[i] }}
+	<div class="row">
+		<div class="col-md-8">
+			{% if items %}
+			<div id="search-list">
+				{% for i in range(0, page_length) %}
+					{% if items[i] %}
+						{%- set item = items[i] %}
+						{% include "erpnext/www/all-products/item_row.html" %}
+					{% endif %}
+				{% endfor %}
+			</div>
+			<div class="item-group-nav-buttons">
+				{% if frappe.form_dict.start|int > 0 %}
+				<a class="btn btn-outline-secondary" href="/{{ pathname }}?start={{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</a>
 				{% endif %}
-			{% endfor %}
-		</div>
-		<div class="text-center item-group-nav-buttons">
-			{% if frappe.form_dict.start|int > 0 %}
-			<a class="btn btn-default" href="/{{ pathname }}?start={{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</a>
-			{% endif %}
-			{% if items|length > page_length %}
-			<a class="btn btn-default" href="/{{ pathname }}?start={{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</a>
-			{% endif %}
-		</div>
-		{% else %}
+				{% if items|length > page_length %}
+				<a class="btn btn-outline-secondary" href="/{{ pathname }}?start={{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</a>
+				{% endif %}
+			</div>
+			{% else %}
 			<div class="text-muted">{{ _("No items listed") }}.</div>
-		{% endif %}
+			{% endif %}
+		</div>
 	</div>
 </div>
 {% endblock %}
