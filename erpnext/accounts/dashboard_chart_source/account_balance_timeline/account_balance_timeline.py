@@ -2,10 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-from itertools import groupby
-from operator import itemgetter
 import frappe
-from frappe.core.page.dashboard.dashboard import cache_source
+from frappe.core.page.dashboard.dashboard import cache_source, get_from_date_from_timespan
 from frappe.utils import add_to_date, date_diff, getdate, nowdate
 from erpnext.accounts.report.general_ledger.general_ledger import execute
 
@@ -13,9 +11,11 @@ from frappe.utils.nestedset import get_descendants_of
 
 @frappe.whitelist()
 @cache_source
-def get(filters=None):
-	timespan = filters.get("timespan")
-	timegrain = filters.get("timegrain")
+def get(chart_name=None, filters=None):
+	chart = frappe.get_doc('Dashboard Chart', chart_name)
+	timespan = chart.timespan
+	timegrain = chart.time_interval
+
 	account = filters.get("account")
 	company = filters.get("company")
 
@@ -80,19 +80,6 @@ def get_gl_entries(account, to_date):
 		],
 		order_by = 'posting_date asc')
 
-def get_from_date_from_timespan(timespan):
-	days = months = years = 0
-	if "Last Week" == timespan:
-		days = -7
-	if "Last Month" == timespan:
-		months = -1
-	elif "Last Quarter" == timespan:
-		months = -3
-	elif "Last Year" == timespan:
-		years = -1
-	return add_to_date(None, years=years, months=months, days=days,
-		as_string=True, as_datetime=True)
-
 def get_dates_from_timegrain(from_date, to_date, timegrain):
 	days = months = years = 0
 	if "Daily" == timegrain:
@@ -105,6 +92,6 @@ def get_dates_from_timegrain(from_date, to_date, timegrain):
 		months = 3
 
 	dates = [from_date]
-	while dates[-1] <= to_date:
+	while getdate(dates[-1]) <= getdate(to_date):
 		dates.append(add_to_date(dates[-1], years=years, months=months, days=days))
 	return dates
