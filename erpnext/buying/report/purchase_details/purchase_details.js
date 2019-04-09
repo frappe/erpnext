@@ -86,9 +86,5 @@ frappe.query_reports["Purchase Details"] = {
 			fieldtype: "Check"
 		},
 	],
-	after_datatable_render: function(datatable_obj) {
-		if(frappe.query_report.get_filter_value('view') == "Tree") {
-			datatable_obj.rowmanager.collapseAllNodes();
-		}
-	},
+	"initial_depth": 1
 }

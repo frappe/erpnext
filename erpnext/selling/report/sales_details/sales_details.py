@@ -197,7 +197,6 @@ class SalesPurchaseDetailsReport(object):
 
 		if self.filters.view == "Tree":
 			self.total_row["indent"] = 0
-			self.total_row["_collapsed"] = True
 			self.postprocess_row(self.total_row)
 
 			data.append(self.total_row)
