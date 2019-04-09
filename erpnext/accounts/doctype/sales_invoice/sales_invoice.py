@@ -205,18 +205,11 @@ class SalesInvoice(SellingController):
 	def before_cancel(self):
 		self.update_time_sheet(None)
 
-	def before_print(self):
-		self.gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Sales Invoice",
-			"voucher_no": self.name} ,
-			fields=["account", "party_type", "party", "debit", "credit"]
-		)
 
 	def on_cancel(self):
-		self.check_sales_order_on_hold_or_close("sales_order")
+		super(SalesInvoice, self).on_cancel()
 
-		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
-		if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
-			unlink_ref_doc_from_payment_entries(self)
+		self.check_sales_order_on_hold_or_close("sales_order")
 
 		if self.is_return and not self.update_billed_amount_in_sales_order:
 			# NOTE status updating bypassed for is_return
@@ -1229,6 +1222,22 @@ def get_bank_cash_account(mode_of_payment, company):
 	return {
 		"account": account
 	}
+
+@frappe.whitelist()
+def make_maintenance_schedule(source_name, target_doc=None):
+	doclist = get_mapped_doc("Sales Invoice", source_name, 	{
+		"Sales Invoice": {
+			"doctype": "Maintenance Schedule",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Sales Invoice Item": {
+			"doctype": "Maintenance Schedule Item",
+		},
+	}, target_doc)
+
+	return doclist
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):

@@ -177,7 +177,7 @@ class DeliveryNote(SellingController):
 					frappe.msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
 					chk_dupl_itm.append(f)
-			#Customer Provided parts will have zero valuation rate		
+			#Customer Provided parts will have zero valuation rate
 			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
 				d.allow_zero_valuation_rate = 1
 
@@ -223,6 +223,8 @@ class DeliveryNote(SellingController):
 		self.make_gl_entries()
 
 	def on_cancel(self):
+		super(DeliveryNote, self).on_cancel()
+
 		self.check_sales_order_on_hold_or_close("against_sales_order")
 		self.check_next_docstatus()
 

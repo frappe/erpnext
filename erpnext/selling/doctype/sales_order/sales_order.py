@@ -183,6 +183,8 @@ class SalesOrder(SellingController):
 		self.update_blanket_order()
 
 	def on_cancel(self):
+		super(SalesOrder, self).on_cancel()
+
 		# Cannot cancel closed SO
 		if self.status == 'Closed':
 			frappe.throw(_("Closed order cannot be cancelled. Unclose to cancel."))

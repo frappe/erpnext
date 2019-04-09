@@ -631,6 +631,7 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 			additional_costs = get_additional_costs(work_order, fg_qty=stock_entry.fg_completed_qty)
 			stock_entry.set("additional_costs", additional_costs)
 
+	stock_entry.set_stock_entry_type()
 	stock_entry.get_items()
 	return stock_entry.as_dict()
 
