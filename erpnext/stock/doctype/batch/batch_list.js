@@ -1,12 +1,18 @@
 frappe.listview_settings['Batch'] = {
-	add_fields: ["item", "expiry_date"],
-	get_indicator: function(doc) {
-		if(doc.expiry_date && frappe.datetime.get_diff(doc.expiry_date, frappe.datetime.nowdate()) <= 0) {
-			return [__("Expired"), "red", "expiry_date,>=,Today"]
-		} else if(doc.expiry_date) {
-			return [__("Not Expired"), "green", "expiry_date,<,Today"]
+	add_fields: ["item", "expiry_date", "batch_qty"],
+	get_indicator: function (doc) {
+		if (!doc.batch_qty) {
+			return ["Empty", "darkgrey", "batch_qty,=,0"];
 		} else {
-			return ["Not Set", "darkgrey", ""];
-		}
+			if (doc.expiry_date) {
+				if (frappe.datetime.get_diff(doc.expiry_date, frappe.datetime.nowdate()) <= 0) {
+					return [__("Expired"), "red", "expiry_date,>=,Today|batch_qty,>,0"]
+				} else {
+					return [__("Not Expired"), "green", "expiry_date,<,Today|batch_qty,>,0"]
+				}
+			} else {
+				return ["Active", "green", "batch_qty,>,0"];
+			};
+		};
 	}
 };
