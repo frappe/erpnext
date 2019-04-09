@@ -5,6 +5,7 @@ from frappe.utils import flt, cstr
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
 from frappe import _
 from frappe.core.doctype.file.file import remove_file
+from six import string_types
 from frappe.desk.form.load import get_attachments
 from erpnext.regional.italy import state_codes
 
@@ -82,6 +83,14 @@ def prepare_invoice(invoice, progressive_number):
 		if item.tax_rate == 0.0 and item.tax_amount == 0.0:
 			item.tax_exemption_reason = tax_data["0.0"]["tax_exemption_reason"]
 
+	customer_po_data = {}
+	for d in invoice.e_invoice_items:
+		if (d.customer_po_no and d.customer_po_date
+			and d.customer_po_no not in customer_po_data):
+			customer_po_data[d.customer_po_no] = d.customer_po_date
+
+	invoice.customer_po_data = customer_po_data
+
 	return invoice
 
 def get_conditions(filters):
@@ -134,6 +143,7 @@ def get_invoice_summary(items, taxes):
 						idx=len(items)+1,
 						item_code=reference_row.description,
 						item_name=reference_row.description,
+						description=reference_row.description,
 						rate=reference_row.tax_amount,
 						qty=1.0,
 						amount=reference_row.tax_amount,
@@ -142,7 +152,7 @@ def get_invoice_summary(items, taxes):
 						tax_amount=(reference_row.tax_amount * tax.rate) / 100,
 						net_amount=reference_row.tax_amount,
 						taxable_amount=reference_row.tax_amount,
-						item_tax_rate="{}",
+						item_tax_rate={tax.account_head: tax.rate},
 						charges=True
 					)
 				)
@@ -150,10 +160,16 @@ def get_invoice_summary(items, taxes):
 		#Check item tax rates if tax rate is zero.
 		if tax.rate == 0:
 			for item in items:
-				item_tax_rate = json.loads(item.item_tax_rate)
-				if tax.account_head in item_tax_rate:
+				item_tax_rate = item.item_tax_rate
+				if isinstance(item.item_tax_rate, string_types):
+					item_tax_rate = json.loads(item.item_tax_rate)
+
+				if item_tax_rate and tax.account_head in item_tax_rate:
 					key = cstr(item_tax_rate[tax.account_head])
-					summary_data.setdefault(key, {"tax_amount": 0.0, "taxable_amount": 0.0, "tax_exemption_reason": "", "tax_exemption_law": ""})
+					if key not in summary_data:
+						summary_data.setdefault(key, {"tax_amount": 0.0, "taxable_amount": 0.0,
+							"tax_exemption_reason": "", "tax_exemption_law": ""})
+
 					summary_data[key]["tax_amount"] += item.tax_amount
 					summary_data[key]["taxable_amount"] += item.net_amount
 					if key == "0.0":
@@ -198,19 +214,25 @@ def sales_invoice_validate(doc):
 	else:
 		doc.company_fiscal_regime = company_fiscal_regime
 
+	doc.company_tax_id = frappe.get_cached_value("Company", doc.company, 'tax_id')
+	doc.company_fiscal_code = frappe.get_cached_value("Company", doc.company, 'fiscal_code')
 	if not doc.company_tax_id and not doc.company_fiscal_code:
 		frappe.throw(_("Please set either the Tax ID or Fiscal Code on Company '%s'" % doc.company), title=_("E-Invoicing Information Missing"))
 
 	#Validate customer details
-	customer_type, is_public_administration = frappe.db.get_value("Customer", doc.customer, ["customer_type", "is_public_administration"])
-	if customer_type == _("Individual"):
+	customer = frappe.get_doc("Customer", doc.customer)
+
+	if customer.customer_type == _("Individual"):
+		doc.customer_fiscal_code = customer.fiscal_code
 		if not doc.customer_fiscal_code:
 			frappe.throw(_("Please set Fiscal Code for the customer '%s'" % doc.customer), title=_("E-Invoicing Information Missing"))
 	else:
-		if is_public_administration:
+		if customer.is_public_administration:
+			doc.customer_fiscal_code = customer.fiscal_code
 			if not doc.customer_fiscal_code:
 				frappe.throw(_("Please set Fiscal Code for the public administration '%s'" % doc.customer), title=_("E-Invoicing Information Missing"))
 		else:
+			doc.tax_id = customer.tax_id
 			if not doc.tax_id:
 				frappe.throw(_("Please set Tax ID for the customer '%s'" % doc.customer), title=_("E-Invoicing Information Missing"))
 
@@ -276,13 +298,18 @@ def prepare_and_attach_invoice(doc, replace=False):
 def generate_single_invoice(docname):
 	doc = frappe.get_doc("Sales Invoice", docname)
 
+
 	e_invoice = prepare_and_attach_invoice(doc, True)
 
+	return e_invoice.file_name
+
+@frappe.whitelist()
+def download_e_invoice_file(file_name):
 	content = None
-	with open(frappe.get_site_path('private', 'files', e_invoice.file_name), "r") as f:
+	with open(frappe.get_site_path('private', 'files', file_name), "r") as f:
 		content = f.read()
 
-	frappe.local.response.filename = e_invoice.file_name
+	frappe.local.response.filename = file_name
 	frappe.local.response.filecontent = content
 	frappe.local.response.type = "download"
 

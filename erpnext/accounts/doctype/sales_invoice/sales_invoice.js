@@ -89,6 +89,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}, __('Create'));
 			}
 
+			if (doc.docstatus === 1) {
+				cur_frm.add_custom_button(__('Maintenance Schedule'), function () {
+					cur_frm.cscript.make_maintenance_schedule();
+				}, __('Create'));
+			}
+
 			if(!doc.auto_repeat) {
 				cur_frm.add_custom_button(__('Subscription'), function() {
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
@@ -116,6 +122,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			});
 		}
+	},
+
+	make_maintenance_schedule: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_maintenance_schedule",
+			frm: cur_frm
+		})
 	},
 
 	on_submit: function(doc, dt, dn) {
@@ -560,6 +573,15 @@ frappe.ui.form.on('Sales Invoice', {
 			return {
 				filters: {
 					account_type: ['in', ["Cash", "Bank"]]
+				}
+			};
+		});
+
+		frm.set_query("cost_center", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0
 				}
 			};
 		});

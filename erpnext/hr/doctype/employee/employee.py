@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, validate_email_add, today, add_years, format_datetime
+from frappe.utils import getdate, validate_email_address, today, add_years, format_datetime
 from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
 from frappe.permissions import add_user_permission, remove_user_permission, \
@@ -142,9 +142,9 @@ class Employee(NestedSet):
 
 	def validate_email(self):
 		if self.company_email:
-			validate_email_add(self.company_email, True)
+			validate_email_address(self.company_email, True)
 		if self.personal_email:
-			validate_email_add(self.personal_email, True)
+			validate_email_address(self.personal_email, True)
 
 	def validate_status(self):
 		if self.status == 'Left':

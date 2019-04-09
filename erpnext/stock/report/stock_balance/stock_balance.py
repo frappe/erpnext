@@ -43,11 +43,11 @@ def execute(filters=None):
 				item_map[item]["item_group"],
 				item_map[item]["brand"],
 				item_map[item]["description"], warehouse,
-				item_map[item]["stock_uom"], qty_dict.opening_qty,
+				item_map[item]["stock_uom"], qty_dict.bal_qty,
+				qty_dict.bal_val, qty_dict.opening_qty,
 				qty_dict.opening_val, qty_dict.in_qty,
 				qty_dict.in_val, qty_dict.out_qty,
-				qty_dict.out_val, qty_dict.bal_qty,
-				qty_dict.bal_val, qty_dict.val_rate,
+				qty_dict.out_val, qty_dict.val_rate,
 				item_reorder_level,
 				item_reorder_qty,
 				company
@@ -79,14 +79,14 @@ def get_columns():
 		{"label": _("Description"), "fieldname": "description", "width": 140},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
 		{"label": _("Stock UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 90},
+		{"label": _("Balance Qty"), "fieldname": "bal_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
+		{"label": _("Balance Value"), "fieldname": "bal_val", "fieldtype": "Currency", "width": 100},
 		{"label": _("Opening Qty"), "fieldname": "opening_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Opening Value"), "fieldname": "opening_val", "fieldtype": "Float", "width": 110},
 		{"label": _("In Qty"), "fieldname": "in_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("In Value"), "fieldname": "in_val", "fieldtype": "Float", "width": 80},
 		{"label": _("Out Qty"), "fieldname": "out_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Out Value"), "fieldname": "out_val", "fieldtype": "Float", "width": 80},
-		{"label": _("Balance Qty"), "fieldname": "bal_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Balance Value"), "fieldname": "bal_val", "fieldtype": "Currency", "width": 100},
 		{"label": _("Valuation Rate"), "fieldname": "val_rate", "fieldtype": "Currency", "width": 90, "convertible": "rate"},
 		{"label": _("Reorder Level"), "fieldname": "reorder_level", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Reorder Qty"), "fieldname": "reorder_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
@@ -225,16 +225,15 @@ def get_item_details(items, sle, filters):
 		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom='%s'" \
 			% frappe.db.escape(filters.get("include_uom"))
 
-	item_codes = ', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])
 	res = frappe.db.sql("""
 		select
-			item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom {cf_field}
+			item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom %s
 		from
 			`tabItem` item
-			{cf_join}
+			%s
 		where
-			item.name in ({item_codes}) and ifnull(item.disabled, 0) = 0
-	""".format(cf_field=cf_field, cf_join=cf_join, item_codes=item_codes), as_dict=1)
+			item.name in (%s) and ifnull(item.disabled, 0) = 0
+	""" % (cf_field, cf_join, ','.join(['%s'] *len(items))), items, as_dict=1)
 
 	for item in res:
 		item_details.setdefault(item.name, item)

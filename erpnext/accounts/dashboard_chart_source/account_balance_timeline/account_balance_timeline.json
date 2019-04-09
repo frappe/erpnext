@@ -1,0 +1,13 @@
+{
+ "config": "{\n    \"method_path\": \"erpnext.accounts.dashboard_chart_source.account_balance_timeline.account_balance_timeline.get\",\n\t\"filters\": [\n\t\t{\n\t\t\t\"fieldname\": \"company\",\n\t\t\t\"label\": \"Company\",\n\t\t\t\"fieldtype\": \"Link\",\n\t\t\t\"options\": \"Company\",\n\t\t\t\"reqd\": 1\n\t\t},\n\t\t{\n\t\t\t\"fieldname\": \"account\",\n\t\t\t\"label\": \"Account\",\n\t\t\t\"fieldtype\": \"Link\",\n\t\t\t\"options\": \"Account\",\n\t\t\t\"reqd\": 1\n\t\t},\n\t\t{\n\t\t\t\"fieldname\": \"timespan\",\n\t\t\t\"label\": \"Period\",\n\t\t\t\"fieldtype\": \"Select\",\n\t\t\t\"options\": [\n\t\t\t\t{\"value\": \"Last Year\", \"label\": \"Last Year\"},\n\t\t\t\t{\"value\": \"Last Quarter\", \"label\": \"Last Quarter\"},\n\t\t\t\t{\"value\": \"Last Month\", \"label\": \"Last Month\"},\n\t\t\t\t{\"value\": \"Last Week\", \"label\": \"Last Week\"}\n\t\t\t],\n\t\t\t\"reqd\": 1\n\t\t},\n\t\t{\n\t\t\t\"fieldname\": \"timegrain\",\n\t\t\t\"label\": \"Periodicity\",\n\t\t\t\"fieldtype\": \"Select\",\n\t\t\t\"options\": [\n\t\t\t\t{\"value\": \"Quarterly\", \"label\": \"Quarterly\"},\n\t\t\t\t{\"value\": \"Monthly\", \"label\": \"Monthly\"},\n\t\t\t\t{\"value\": \"Weekly\", \"label\": \"Weekly\"},\n\t\t\t\t{\"value\": \"Daily\", \"label\": \"Daily\"}\n\t\t\t],\n\t\t\t\"reqd\": 1\n\t\t}\n\t],\n\t\"is_time_series\": true\n}\n",
+ "creation": "2019-02-06 07:57:10.377718",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart Source",
+ "idx": 0,
+ "modified": "2019-03-15 16:14:26.505986",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Account Balance Timeline",
+ "owner": "Administrator",
+ "source_name": "Account Balance Timeline"
+}
