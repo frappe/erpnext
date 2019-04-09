@@ -13,7 +13,7 @@ class Quiz(Document):
 			try:
 				if len(frappe.get_all("Quiz Activity", {'enrollment': enrollment.name, 'quiz': quiz_name})) >= self.max_attempts:
 					frappe.throw('Maximum attempts reached!')
-			except:
+			except Exception as e:
 				pass
 
 

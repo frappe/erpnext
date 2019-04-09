@@ -50,7 +50,7 @@ const routes = [{
 	name: 'signup',
 	path: '/Signup',
 	beforeEnter(to, from, next) {
-		window.location = window.location.origin.toString() + '/login#signup'
+		window.location = window.location.origin.toString() + '/login#signup';
 	},
 	component: Home,
 	props: true
@@ -59,7 +59,7 @@ const routes = [{
 	name: 'login',
 	path: '/Login',
 	beforeEnter(to, from, next) {
-		window.location = window.location.origin.toString() + '/login#login'
+		window.location = window.location.origin.toString() + '/login#login';
 	},
 	component: Home,
 	props: true
@@ -68,7 +68,7 @@ const routes = [{
 	name: 'logout',
 	path: '/Logout',
 	beforeEnter(to, from, next) {
-		window.location = window.location.origin.toString() + '/?cmd=web_logout'
+		window.location = window.location.origin.toString() + '/?cmd=web_logout';
 	},
 	component: Home,
 	props: true
@@ -82,9 +82,9 @@ const routes = [{
 		if (!lms.store.checkLogin()) {
 			next({
 				name: 'home'
-			})
+			});
 		} else {
-			next()
+			next();
 		}
 	}
 }];
