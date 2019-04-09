@@ -70,11 +70,6 @@ class PaymentEntry(AccountsController):
 		self.update_advance_paid()
 		self.update_expense_claim()
 
-	def before_print(self):
-		self.gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Payment Entry",
-			"voucher_no": self.name} ,
-			fields=["account", "party_type", "party", "debit", "credit", "remarks"]
-		)
 
 	def on_cancel(self):
 		self.setup_party_account_field()
@@ -754,7 +749,7 @@ def get_outstanding_on_journal_entry(name):
 
 @frappe.whitelist()
 def get_reference_details(reference_doctype, reference_name, party_account_currency):
-	total_amount = outstanding_amount = exchange_rate = None
+	total_amount = outstanding_amount = exchange_rate = bill_no = None
 	ref_doc = frappe.get_doc(reference_doctype, reference_name)
 	company_currency = ref_doc.get("company_currency") or erpnext.get_company_currency(ref_doc.company)
 
@@ -788,6 +783,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 
 		if reference_doctype in ("Sales Invoice", "Purchase Invoice"):
 			outstanding_amount = ref_doc.get("outstanding_amount")
+			bill_no = ref_doc.get("bill_no")
 		elif reference_doctype == "Expense Claim":
 			outstanding_amount = flt(ref_doc.get("total_sanctioned_amount")) \
 				- flt(ref_doc.get("total_amount+reimbursed")) - flt(ref_doc.get("total_advance_amount"))
@@ -804,7 +800,8 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		"due_date": ref_doc.get("due_date"),
 		"total_amount": total_amount,
 		"outstanding_amount": outstanding_amount,
-		"exchange_rate": exchange_rate
+		"exchange_rate": exchange_rate,
+		"bill_no": bill_no
 	})
 
 

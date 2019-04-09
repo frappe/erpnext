@@ -55,11 +55,6 @@ class PurchaseInvoice(BuyingController):
 		if not self.on_hold:
 			self.release_date = ''
 
-	def before_print(self):
-		self.gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Purchase Invoice",
-			"voucher_no": self.name} ,
-			fields=["account", "party_type", "party", "debit", "credit"]
-		)
 
 	def invoice_is_blocked(self):
 		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))
@@ -770,10 +765,6 @@ class PurchaseInvoice(BuyingController):
 		self.update_status_updater_args()
 
 		if not self.is_return:
-			from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
-			if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
-				unlink_ref_doc_from_payment_entries(self)
-
 			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 			self.update_billing_status_in_pr()
