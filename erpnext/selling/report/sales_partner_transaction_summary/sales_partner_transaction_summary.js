@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Sales Partner-wise Transaction Summary"] = {
+frappe.query_reports["Sales Partner Transaction Summary"] = {
 	"filters": [
 		{
 			fieldname: "sales_partner",
