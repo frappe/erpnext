@@ -22,7 +22,7 @@ frappe.query_reports["Project Billing Summary"] = {
 			fieldname:"to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			default: frappe.datetime.month_start(),
+			default: frappe.datetime.add_days(frappe.datetime.month_start(),-1),
 			reqd: 1
 		},
 	]

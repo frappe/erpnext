@@ -71,7 +71,7 @@ def get_data(filters):
 			from_date = frappe.utils.get_datetime(filters.from_date)
 			to_date = frappe.utils.get_datetime(filters.to_date)
 
-			if time_start <= from_date and time_end <= to_date:
+			if time_start <= from_date and time_end >= from_date:
 				total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(activity,
 					time_end, from_date, total_hours, total_billable_hours, total_amount)
 
