@@ -44,7 +44,7 @@ def get_columns():
 		},
 		{
 			"label": _("Amount"),
-			"fieldtype": "Float",
+			"fieldtype": "Currency",
 			"fieldname": "amount",
 			"width": 100
 		}
