@@ -33,7 +33,7 @@ frappe.ui.form.on("Sales Order", {
 		})
 	},
 	refresh: function(frm) {
-		if(frm.doc.docstatus == 1 && frm.doc.status != 'Closed' 
+		if(frm.doc.docstatus === 1 && frm.doc.status !== 'Closed'
 			&& flt(frm.doc.per_delivered) < 100 && flt(frm.doc.per_billed) < 100) {
 			frm.add_custom_button(__('Update Items'), () => {
 				erpnext.utils.update_child_items({
@@ -135,8 +135,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				   }, __("Status"));
 			   }
 		    }
-			if(doc.status != 'Closed') {
-				if(doc.status != 'On Hold') {
+			if(doc.status !== 'Closed') {
+				if(doc.status !== 'On Hold') {
 					for (var i in this.frm.doc.items) {
 						var item = this.frm.doc.items[i];
 						if(item.delivered_by_supplier === 1 || item.supplier){
@@ -161,8 +161,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
 							// hold
 							this.frm.add_custom_button(__('Hold'),
-								function() { 
-									me.hold_sales_order();	
+								function() {
+									me.hold_sales_order();
 								}, __("Status"))
 							// close
 							this.frm.add_custom_button(__('Close'),
