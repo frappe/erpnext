@@ -29,7 +29,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	batch_no = data.get("batch_no") if data.get("batch_no") else ""
 	barcode = data.get("barcode") if data.get("barcode") else ""
 
-	item_code, condition = get_conditions(item_code, serial_no, batch_no, barcode)
+	condition = get_conditions(item_code, serial_no, batch_no, barcode)
 
 	if pos_profile:
 		condition += get_item_group_condition(pos_profile)
@@ -86,7 +86,6 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 		        	and {condition} limit {start}, {page_length}""".format
 				(start=start,page_length=page_length,lft=lft, 	rgt=rgt, condition=condition),
 			{
-				'item_code': item_code,
 				'price_list': price_list,
 				'warehouse': warehouse
 			} , as_dict=1)
@@ -133,12 +132,10 @@ def search_serial_or_batch_or_barcode_number(search_value):
 
 def get_conditions(item_code, serial_no, batch_no, barcode):
 	if serial_no or batch_no or barcode:
-		return frappe.db.escape(item_code), "i.name = %(item_code)s"
+		return "i.name = {0}".format(frappe.db.escape(item_code))
 
-	condition = """(i.name like %(item_code)s
-			or i.item_name like %(item_code)s)"""
-
-	return frappe.db.escape('%' + item_code + '%'), condition
+	return """(i.name like {item_code}
+		or i.item_name like {item_code})""".format(item_code = frappe.db.escape('%' + item_code + '%'))
 
 def get_item_group_condition(pos_profile):
 	cond = "and 1=1"
