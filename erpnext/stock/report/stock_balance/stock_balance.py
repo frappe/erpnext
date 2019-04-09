@@ -10,6 +10,16 @@ from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condit
 
 from six import iteritems
 
+template = frappe._dict({
+	"opening_qty": 0.0, "opening_val": 0.0,
+	"in_qty": 0.0, "in_val": 0.0,
+	"purchase_qty": 0.0, "purchase_val": 0.0,
+	"out_qty": 0.0, "out_val": 0.0,
+	"sales_qty": 0.0, "sales_val": 0.0,
+	"bal_qty": 0.0, "bal_val": 0.0,
+	"val_rate": 0.0
+})
+
 def execute(filters=None):
 	if not filters: filters = {}
 
@@ -19,7 +29,7 @@ def execute(filters=None):
 	show_amounts = not show_amounts_role or show_amounts_role in frappe.get_roles()
 
 	include_uom = filters.get("include_uom")
-	columns = get_columns(show_amounts)
+	columns = get_columns(filters, show_amounts)
 	items = get_items(filters)
 	sle = get_stock_ledger_entries(filters, items)
 
@@ -89,7 +99,7 @@ def execute(filters=None):
 	update_included_uom_in_dict_report(columns, data, include_uom, conversion_factors)
 	return columns, data
 
-def get_columns(show_amounts=True):
+def get_columns(filters, show_amounts=True):
 	"""return columns"""
 
 	columns = [
@@ -118,6 +128,9 @@ def get_columns(show_amounts=True):
 
 	if not show_amounts:
 		columns = filter(lambda d: not d.get("is_value"), columns)
+
+	if cint(filters.consolidated):
+		columns = filter(lambda d: d.get('fieldname') not in ['warehouse', 'company'], columns)
 
 	return columns
 
@@ -167,15 +180,7 @@ def get_item_warehouse_map(filters, sle):
 	for d in sle:
 		key = (d.company, d.item_code, d.warehouse)
 		if key not in iwb_map:
-			iwb_map[key] = frappe._dict({
-				"opening_qty": 0.0, "opening_val": 0.0,
-				"in_qty": 0.0, "in_val": 0.0,
-				"purchase_qty": 0.0, "purchase_val": 0.0,
-				"out_qty": 0.0, "out_val": 0.0,
-				"sales_qty": 0.0, "sales_val": 0.0,
-				"bal_qty": 0.0, "bal_val": 0.0,
-				"val_rate": 0.0
-			})
+			iwb_map[key] = frappe._dict(template.copy())
 
 		qty_dict = iwb_map[(d.company, d.item_code, d.warehouse)]
 
@@ -211,6 +216,9 @@ def get_item_warehouse_map(filters, sle):
 
 	iwb_map = filter_items_with_no_transactions(iwb_map)
 
+	if cint(filters.consolidated):
+		iwb_map = consolidate_values(iwb_map)
+
 	return iwb_map
 
 def filter_items_with_no_transactions(iwb_map):
@@ -229,6 +237,22 @@ def filter_items_with_no_transactions(iwb_map):
 			iwb_map.pop((company, item, warehouse))
 
 	return iwb_map
+
+def consolidate_values(iwb_map):
+	item_map = frappe._dict()
+
+	for (company, item, warehouse), qty_dict in iteritems(iwb_map):
+		key = ("", item, "")
+		if key not in item_map:
+			item_map[key] = frappe._dict(template.copy())
+
+		for k, value in iteritems(qty_dict):
+			item_map[key][k] += value
+
+	for k, qty_dict in iteritems(item_map):
+		qty_dict.val_rate = qty_dict.bal_val / qty_dict.bal_qty if qty_dict.bal_qty else 0.0
+
+	return item_map
 
 def get_items(filters):
 	conditions = []
