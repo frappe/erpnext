@@ -33,7 +33,6 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEqual(quotation.quotation_to, "Customer")
 		self.assertEqual(quotation.contact_person,
 			frappe.db.get_value("Contact", dict(email_id="test_cart_user@example.com")))
-		self.assertEqual(quotation.customer_lead, None)
 		self.assertEqual(quotation.contact_email, frappe.session.user)
 
 		return quotation
