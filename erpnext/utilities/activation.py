@@ -62,7 +62,6 @@ def get_level():
 		{"Sales Invoice": frappe.db.count('Sales Invoice')},
 		{"BOM": frappe.db.count('BOM')},
 		{"Quotation": frappe.db.count('Quotation')},
-		{"Lead": frappe.db.count('Lead')},
 		{"Payment Entry": frappe.db.count('Payment Entry')},
 		{"Journal Entry": frappe.db.count('Journal Entry')},
 		{"Stock Entry": frappe.db.count('Stock Entry')},
