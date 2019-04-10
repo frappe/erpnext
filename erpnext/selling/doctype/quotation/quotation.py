@@ -132,8 +132,8 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 
 	def set_missing_values(source, target):
 		if customer:
-			target.customer = customer
-			target.customer_name = customer
+			target.customer = customer.name
+			target.customer_name = customer.customer_name
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
@@ -179,8 +179,8 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 
 	def set_missing_values(source, target):
 		if customer:
-			target.customer = customer
-			target.customer_name = customer
+			target.customer = customer.name
+			target.customer_name = customer.customer_name
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
@@ -245,4 +245,4 @@ def _make_customer(source_name, ignore_permissions=False):
 		else:
 			return customer_name
 	else:
-		return quotation[2]
+		return frappe.get_doc("Customer",quotation[2])

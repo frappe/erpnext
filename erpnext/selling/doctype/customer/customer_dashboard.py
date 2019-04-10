@@ -10,6 +10,7 @@ def get_data():
 		'fieldname': 'customer',
 		'non_standard_fieldnames': {
 			'Payment Entry': 'party_name'
+			'Quotation': 'customer_lead'
 		},
 		'transactions': [
 			{
