@@ -11,6 +11,7 @@ import unittest
 
 test_data = {
 	"program_name": "_Test Program",
+	"description": "_Test Program",
 	"course": [{
 		"course_name": "_Test Course 1",
 		"topic": [{
