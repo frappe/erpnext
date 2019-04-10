@@ -54,6 +54,7 @@ def make_program(name):
 		"doctype": "Program",
 		"program_name": name,
 		"program_code": name,
+		"description": "_test description"
 		"is_published": True,
 		"is_featured": True,
 	}).insert()
