@@ -1,14 +1,16 @@
-# Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Revaluesoft S.A.E
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+from __future__ import unicode_literals, division
 import frappe
 from frappe import _
 from frappe.utils import flt, cint, getdate, now
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 
+
 def execute(filters=None):
-	if not filters: filters = {}
+	if not filters:
+		filters = {}
 
 	validate_filters(filters)
 
@@ -31,28 +33,30 @@ def execute(filters=None):
 			item_reorder_level = 0
 			item_reorder_qty = 0
 			if item + warehouse in item_reorder_detail_map:
-				item_reorder_level = item_reorder_detail_map[item + warehouse]["warehouse_reorder_level"]
-				item_reorder_qty = item_reorder_detail_map[item + warehouse]["warehouse_reorder_qty"]
+				item_reorder_level = item_reorder_detail_map[item +
+                                                 warehouse]["warehouse_reorder_level"]
+				item_reorder_qty = item_reorder_detail_map[item +
+                                               warehouse]["warehouse_reorder_qty"]
 
 			report_data = [item, item_map[item]["item_name"],
-				item_map[item]["item_group"],
-				item_map[item]["brand"],
-				item_map[item]["description"], warehouse,
-				item_map[item]["stock_uom"], qty_dict.opening_qty,
-				qty_dict.opening_val, qty_dict.in_qty,
-				qty_dict.in_val, qty_dict.out_qty,
-				qty_dict.out_val, qty_dict.bal_qty,
-				qty_dict.bal_val, qty_dict.val_rate,
-				item_map[item]["purchase_uom"],
-				item_map[item]["purchase_uom_conversion_factor"],
-				qty_dict.bal_qty_p,
-				item_map[item]["sales_uom"],
-				item_map[item]["sales_uom_conversion_factor"],
-				qty_dict.bal_qty_s,
-				item_reorder_level,
-				item_reorder_qty,
-				company
-			]
+                            item_map[item]["item_group"],
+                            item_map[item]["brand"],
+                            item_map[item]["description"], warehouse,
+                            item_map[item]["stock_uom"], qty_dict.opening_qty,
+                            qty_dict.opening_val, qty_dict.in_qty,
+                            qty_dict.in_val, qty_dict.out_qty,
+                            qty_dict.out_val, qty_dict.bal_qty,
+                            qty_dict.bal_val, qty_dict.val_rate,
+                            item_map[item]["purchase_uom"],
+                            item_map[item]["purchase_uom_conversion_factor"],
+                            qty_dict.bal_qty_p,
+                            item_map[item]["sales_uom"],
+                            item_map[item]["sales_uom_conversion_factor"],
+                            qty_dict.bal_qty_s,
+                            item_reorder_level,
+                            item_reorder_qty,
+                            company
+                  ]
 
 			if filters.get('show_variant_attributes', 0) == 1:
 				variants_attributes = get_variants_attributes()
@@ -64,6 +68,7 @@ def execute(filters=None):
 		columns += ["{}:Data:100".format(i) for i in get_variants_attributes()]
 
 	return columns, data
+
 
 def get_columns():
 	"""return columns"""
@@ -98,25 +103,28 @@ def get_columns():
 
 	return columns
 
+
 def get_conditions(filters):
 	conditions = ""
 	if not filters.get("from_date"):
 		frappe.throw(_("'From Date' is required"))
 
 	if filters.get("to_date"):
-		conditions += " and sle.posting_date <= '%s'" % frappe.db.escape(filters.get("to_date"))
+		conditions += " and sle.posting_date <= '%s'" % frappe.db.escape(
+			filters.get("to_date"))
 	else:
 		frappe.throw(_("'To Date' is required"))
 
 	if filters.get("warehouse"):
 		warehouse_details = frappe.db.get_value("Warehouse",
-			filters.get("warehouse"), ["lft", "rgt"], as_dict=1)
+                                          filters.get("warehouse"), ["lft", "rgt"], as_dict=1)
 		if warehouse_details:
 			conditions += " and exists (select name from `tabWarehouse` wh \
-				where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)"%(warehouse_details.lft,
-				warehouse_details.rgt)
+				where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)" % (warehouse_details.lft,
+                                                                         warehouse_details.rgt)
 
 	return conditions
+
 
 def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
@@ -130,12 +138,12 @@ def get_stock_ledger_entries(filters, items):
 		select
 			sle.item_code, warehouse, sle.posting_date, sle.actual_qty, sle.valuation_rate,
 			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference,
-			(SELECT uomc.conversion_factor
+			(SELECT IFNULL(uomc.conversion_factor,0)
              FROM `tabUOM Conversion Detail` uomc,`tabItem` itm
              WHERE uomc.parent = sle.item_code
                 AND itm.name = sle.item_code
                 AND uomc.uom = itm.purchase_uom) purchase_uom_conversion_factor,
-            (SELECT uomc.conversion_factor
+            (SELECT IFNULL(uomc.conversion_factor,0)
              FROM `tabUOM Conversion Detail` uomc, `tabItem` itm
              WHERE uomc.parent = sle.item_code
                 AND itm.name = sle.item_code
@@ -144,7 +152,8 @@ def get_stock_ledger_entries(filters, items):
 			`tabStock Ledger Entry` sle force index (posting_sort_index)
 		where sle.docstatus < 2 %s %s
 		order by sle.posting_date, sle.posting_time, sle.name""" %
-		(item_conditions_sql, conditions), as_dict=1)
+                      (item_conditions_sql, conditions), as_dict=1)
+
 
 def get_item_warehouse_map(filters, sle):
 	iwb_map = {}
@@ -188,21 +197,27 @@ def get_item_warehouse_map(filters, sle):
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
 
-	if d.purchase_uom_conversion_factor is None:
+		if qty_dict.bal_qty == 0.00:
+			qty_dict.bal_val = 0
+
+		if d.purchase_uom_conversion_factor is None:
 		   qty_dict.bal_qty_p = 0
 		elif d.purchase_uom_conversion_factor != 0:
 			qty_dict.bal_qty_p = qty_dict.bal_qty / d.purchase_uom_conversion_factor
-		else: qty_dict.bal_qty_p = 0
+		else:
+			qty_dict.bal_qty_p = 0
 
-	if d.sales_uom_conversion_factor is None:
+		if d.sales_uom_conversion_factor is None:
 		   qty_dict.bal_qty_s = 0
 		elif d.sales_uom_conversion_factor != 0:
 		   qty_dict.bal_qty_s = qty_dict.bal_qty / d.sales_uom_conversion_factor
-		else: qty_dict.bal_qty_s = 0
-		
+		else:
+			qty_dict.bal_qty_s = 0
+
 	iwb_map = filter_items_with_no_transactions(iwb_map)
 
 	return iwb_map
+
 
 def filter_items_with_no_transactions(iwb_map):
 	for (company, item, warehouse) in sorted(iwb_map):
@@ -221,6 +236,7 @@ def filter_items_with_no_transactions(iwb_map):
 
 	return iwb_map
 
+
 def get_items(filters):
 	conditions = []
 	if filters.get("item_code"):
@@ -234,8 +250,9 @@ def get_items(filters):
 	items = []
 	if conditions:
 		items = frappe.db.sql_list("""select name from `tabItem` item where {}"""
-			.format(" and ".join(conditions)), filters)
+                             .format(" and ".join(conditions)), filters)
 	return items
+
 
 def get_item_details(items, sle, filters):
 	item_details = {}
@@ -245,12 +262,12 @@ def get_item_details(items, sle, filters):
 	if items:
 		for item in frappe.db.sql("""
 			select name, item_name, description, item_group, brand, stock_uom ,  purchase_uom ,
-			(SELECT uomc.conversion_factor
+			(SELECT IFNULL(uomc.conversion_factor,0)
               FROM `tabUOM Conversion Detail` uomc
              WHERE uomc.parent = itm.name
                 AND uomc.uom = purchase_uom ) purchase_uom_conversion_factor,
 			 sales_uom ,
-			 (SELECT uomc.conversion_factor
+			(SELECT IFNULL(uomc.conversion_factor,0)
                FROM `tabUOM Conversion Detail` uomc
               WHERE uomc.parent = itm.name
                 AND uomc.uom = sales_uom ) sales_uom_conversion_factor
@@ -261,9 +278,11 @@ def get_item_details(items, sle, filters):
 
 	if filters.get('show_variant_attributes', 0) == 1:
 		variant_values = get_variant_values_for(item_details.keys())
-		item_details = {k: v.update(variant_values.get(k, {})) for k, v in item_details.iteritems()}
+		item_details = {k: v.update(variant_values.get(k, {}))
+                  for k, v in item_details.iteritems()}
 
 	return item_details
+
 
 def get_item_reorder_details(items):
 	item_reorder_details = frappe._dict()
@@ -277,15 +296,19 @@ def get_item_reorder_details(items):
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
 
+
 def validate_filters(filters):
 	if not (filters.get("item_code") or filters.get("warehouse")):
-		sle_count = flt(frappe.db.sql("""select count(name) from `tabStock Ledger Entry`""")[0][0])
+		sle_count = flt(frappe.db.sql(
+			"""select count(name) from `tabStock Ledger Entry`""")[0][0])
 		if sle_count > 500000:
 			frappe.throw(_("Please set filter based on Item or Warehouse"))
+
 
 def get_variants_attributes():
 	'''Return all item variant attributes.'''
 	return [i.name for i in frappe.get_all('Item Attribute')]
+
 
 def get_variant_values_for(items):
 	'''Returns variant values for items.'''
@@ -294,6 +317,7 @@ def get_variant_values_for(items):
 		from `tabItem Variant Attribute` where parent in (%s)
 		''' % ", ".join(["%s"] * len(items)), tuple(items), as_dict=1):
 			attribute_map.setdefault(attr['parent'], {})
-			attribute_map[attr['parent']].update({attr['attribute']: attr['attribute_value']})
+			attribute_map[attr['parent']].update(
+				{attr['attribute']: attr['attribute_value']})
 
 	return attribute_map

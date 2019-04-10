@@ -42,7 +42,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Stock Balance Multi-UOM",
+					"name": "Stock Balance Defaults UOM",
 					"doctype": "Stock Ledger Entry"
 				},
 				{
