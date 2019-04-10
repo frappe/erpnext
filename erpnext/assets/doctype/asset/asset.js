@@ -299,13 +299,9 @@ frappe.ui.form.on('Asset', {
 	set_depreciation_rate: function(frm, row) {
 		if (row.total_number_of_depreciations && row.frequency_of_depreciation) {
 			frappe.call({
-				method: "erpnext.assets.doctype.asset.asset.get_depreciation_rate",
-				args: {
-					args: row,
-					asset_cost: frm.doc.gross_purchase_amount,
-					number_of_depreciations_booked: frm.doc.is_existing_asset ?
-						frm.doc.number_of_depreciations_booked : 0
-				},
+				method: "get_depreciation_rate",
+				doc: frm.doc,
+				args: row,
 				callback: function(r) {
 					if (r.message) {
 						frappe.model.set_value(row.doctype, row.name, "rate_of_depreciation", r.message);

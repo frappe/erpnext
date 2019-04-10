@@ -101,9 +101,7 @@ class Asset(AccountsController):
 
 	def set_depreciation_rate(self):
 		for d in self.get("finance_books"):
-			if not d.rate_of_depreciation:
-				d.rate_of_depreciation = get_depreciation_rate(d, self.gross_purchase_amount,
-					self.number_of_depreciations_booked)
+			d.rate_of_depreciation = self.get_depreciation_rate(d)
 
 	def make_depreciation_schedule(self):
 		depreciation_method = [d.depreciation_method for d in self.finance_books]
@@ -405,6 +403,32 @@ class Asset(AccountsController):
 			make_gl_entries(gl_entries)
 			self.db_set('booked_fixed_asset', 1)
 
+	def get_depreciation_rate(self, args):
+		if isinstance(args, string_types):
+			args = json.loads(args)
+
+		number_of_depreciations_booked = 0
+		if self.is_existing_asset:
+			number_of_depreciations_booked = self.number_of_depreciations_booked
+
+		float_precision = cint(frappe.db.get_default("float_precision")) or 2
+		tot_no_of_depreciation = flt(args.get("total_number_of_depreciations")) - flt(number_of_depreciations_booked)
+
+		if args.get("depreciation_method") in ["Straight Line", "Manual"]:
+			return 1.0 / tot_no_of_depreciation
+
+		if args.get("depreciation_method") == 'Double Declining Balance':
+			return 200.0 / args.get("total_number_of_depreciations")
+
+		if args.get("depreciation_method") == "Written Down Value" and not args.get("rate_of_depreciation"):
+			no_of_years = flt(args.get("total_number_of_depreciations") * flt(args.get("frequency_of_depreciation"))) / 12
+			value = flt(args.get("expected_value_after_useful_life")) / flt(self.gross_purchase_amount)
+
+			# square root of flt(salvage_value) / flt(asset_cost)
+			depreciation_rate = math.pow(value, 1.0/flt(no_of_years, 2))
+
+			return 100 * (1 - flt(depreciation_rate, float_precision))
+
 def update_maintenance_status():
 	assets = frappe.get_all('Asset', filters = {'docstatus': 1, 'maintenance_required': 1})
 
@@ -568,25 +592,3 @@ def make_journal_entry(asset_name):
 
 def is_cwip_accounting_disabled():
 	return cint(frappe.db.get_single_value("Asset Settings", "disable_cwip_accounting"))
-
-@frappe.whitelist()
-def get_depreciation_rate(args, asset_cost, number_of_depreciations_booked=0):
-	if isinstance(args, string_types):
-		args = json.loads(args)
-
-	float_precision = cint(frappe.db.get_default("float_precision")) or 2
-
-	if args.get("depreciation_method") == 'Double Declining Balance':
-		return 200.0 / flt(args.get("total_number_of_depreciations"))
-
-	if args.get("depreciation_method") in ["Straight Line", "Manual"]:
-		return 1.0 / (flt(args.get("total_number_of_depreciations")) - flt(number_of_depreciations_booked))
-
-	if args.get("depreciation_method") == "Written Down Value":
-		no_of_years = flt(flt(args.get("total_number_of_depreciations")) * flt(args.get("frequency_of_depreciation"))) / 12
-		value = flt(args.get("expected_value_after_useful_life")) / flt(asset_cost)
-
-		# square root of flt(salvage_value) / flt(asset_cost)
-		depreciation_rate = math.pow(value, 1.0/flt(no_of_years, 2))
-
-		return 100 * (1 - flt(depreciation_rate, float_precision))
