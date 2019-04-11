@@ -606,11 +606,14 @@ def get_pos_profile_item_details(company, args, pos_profile=None, update_data=Fa
 
 @frappe.whitelist()
 def get_pos_profile(company, pos_profile=None, user=None):
-	if pos_profile:
-		return frappe.get_cached_doc('POS Profile', pos_profile)
+	if pos_profile: return frappe.get_cached_doc('POS Profile', pos_profile)
 
 	if not user:
 		user = frappe.session['user']
+
+	condition = "pfu.user = %(user)s AND pfu.default=1"
+	if user and company:
+		condition = "pfu.user = %(user)s AND pf.company = %(company)s AND pfu.default=1"
 
 	pos_profile = frappe.db.sql("""SELECT pf.*
 		FROM
@@ -618,15 +621,23 @@ def get_pos_profile(company, pos_profile=None, user=None):
 		ON
 				pf.name = pfu.parent
 		WHERE
-			(
-				(pfu.user = %(user)s AND pf.company = %(company)s AND pfu.default=1)
-				OR (pfu.user = %(user)s AND pfu.default=1)
-				OR (ifnull(pfu.user, '') = '' AND pf.company = %(company)s)
-			) AND pf.disabled = 0
-	""", {
+			{cond} AND pf.disabled = 0
+	""".format(cond = condition), {
 		'user': user,
 		'company': company
 	}, as_dict=1)
+
+	if not pos_profile and company:
+		pos_profile = frappe.db.sql("""SELECT pf.*
+			FROM
+				`tabPOS Profile` pf LEFT JOIN `tabPOS Profile User` pfu
+			ON
+					pf.name = pfu.parent
+			WHERE
+				pf.company = %(company)s AND pf.disabled = 0
+		""", {
+			'company': company
+		}, as_dict=1)
 
 	return pos_profile and pos_profile[0] or None
 

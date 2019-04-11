@@ -205,11 +205,6 @@ class SalesInvoice(SellingController):
 	def before_cancel(self):
 		self.update_time_sheet(None)
 
-	def before_print(self):
-		self.gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Sales Invoice",
-			"voucher_no": self.name} ,
-			fields=["account", "party_type", "party", "debit", "credit"]
-		)
 
 	def on_cancel(self):
 		self.check_close_sales_order("sales_order")
