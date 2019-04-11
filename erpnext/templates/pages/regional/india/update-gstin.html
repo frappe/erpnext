@@ -32,7 +32,7 @@
 	<p class='text-muted'>Please update your GSTIN for us to issue correct tax invoice</p>
 	<form method='GET' action='/regional/india/update-gstin.html'>
 		<input type='hidden' value='{{ party.name }}' name='party'>
-		{% for address in party.__onload.addr_list %}
+		{% for address in party.get_onload('addr_list') %}
 		<div class='bordered' style='max-width: 300px; margin-bottom: 15px;'>
 			{{ address.display }}
 			<p><input type='text' class='form-control'

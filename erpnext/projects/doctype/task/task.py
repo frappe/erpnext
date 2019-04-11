@@ -159,6 +159,13 @@ class Task(NestedSet):
 
 		self.update_nsm_model()
 
+	def update_status(self):
+		if self.status not in ('Cancelled', 'Closed') and self.exp_end_date:
+			from datetime import datetime
+			if self.exp_end_date < datetime.now().date():
+				self.db_set('status', 'Overdue')
+				self.update_project()
+
 @frappe.whitelist()
 def check_if_child_exists(name):
 	child_tasks = frappe.get_all("Task", filters={"parent_task": name})
@@ -186,10 +193,9 @@ def set_multiple_status(names, status):
 		task.save()
 
 def set_tasks_as_overdue():
-	frappe.db.sql("""update tabTask set `status`='Overdue'
-		where exp_end_date is not null
-		and exp_end_date < CURDATE()
-		and `status` not in ('Closed', 'Cancelled')""")
+	tasks = frappe.get_all("Task", filters={'status':['not in',['Cancelled', 'Closed']]})
+	for task in tasks:
+		frappe.get_doc("Task", task.name).update_status()
 
 @frappe.whitelist()
 def get_children(doctype, parent, task=None, project=None, is_root=False):

@@ -205,11 +205,6 @@ class SalesInvoice(SellingController):
 	def before_cancel(self):
 		self.update_time_sheet(None)
 
-	def before_print(self):
-		self.gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Sales Invoice",
-			"voucher_no": self.name} ,
-			fields=["account", "party_type", "party", "debit", "credit"]
-		)
 
 	def on_cancel(self):
 		self.check_close_sales_order("sales_order")
@@ -695,7 +690,8 @@ class SalesInvoice(SellingController):
 			if repost_future_gle and cint(self.update_stock) \
 				and cint(auto_accounting_for_stock):
 					items, warehouses = self.get_items_and_warehouses()
-					update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items)
+					update_gl_entries_after(self.posting_date, self.posting_time,
+						warehouses, items, company = self.company)
 		elif self.docstatus == 2 and cint(self.update_stock) \
 			and cint(auto_accounting_for_stock):
 				from erpnext.accounts.general_ledger import delete_gl_entries
