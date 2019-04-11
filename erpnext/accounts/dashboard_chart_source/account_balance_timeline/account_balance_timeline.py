@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, json
 from frappe.core.page.dashboard.dashboard import cache_source, get_from_date_from_timespan
 from frappe.utils import add_to_date, date_diff, getdate, nowdate
 from erpnext.accounts.report.general_ledger.general_ledger import execute
@@ -11,16 +11,19 @@ from frappe.utils.nestedset import get_descendants_of
 
 @frappe.whitelist()
 @cache_source
-def get(chart_name=None, filters=None):
+def get(chart_name=None, from_date = None, to_date = None):
 	chart = frappe.get_doc('Dashboard Chart', chart_name)
 	timespan = chart.timespan
 	timegrain = chart.time_interval
+	filters = json.loads(chart.filters_json)
 
 	account = filters.get("account")
 	company = filters.get("company")
 
-	from_date = get_from_date_from_timespan(timespan)
-	to_date = nowdate()
+	if not from_date:
+		from_date = get_from_date_from_timespan(to_date, timespan)
+	if not to_date:
+		to_date = nowdate()
 
 	# fetch dates to plot
 	dates = get_dates_from_timegrain(from_date, to_date, timegrain)
