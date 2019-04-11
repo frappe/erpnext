@@ -380,7 +380,7 @@ def replace_abbr(company, old, new):
 		for d in doc:
 			_rename_record(d)
 
-	for dt in ["Warehouse", "Account", "Cost Center", "Department", "Location",
+	for dt in ["Warehouse", "Account", "Cost Center", "Department",
 			"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
 		_rename_records(dt)
 		frappe.db.commit()
