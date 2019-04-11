@@ -552,7 +552,6 @@
    "bold": 0,
    "collapsible": 0,
    "columns": 0,
-   "default": "Nos",
    "description": "This is the default UOM used for items and Sales orders. The fallback UOM is \"Nos\".",
    "fetch_if_empty": 0,
    "fieldname": "uom",
