@@ -232,6 +232,13 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	party_type: function(frm) {
+
+		let party_types = Object.keys(frappe.boot.party_account_types);
+		if(frm.doc.party_type && !party_types.includes(frm.doc.party_type)){
+			frm.set_value("party_type", "");
+			frappe.throw(__("Party can only be one of "+ party_types.join(", ")));
+		}
+
 		if(frm.doc.party) {
 			$.each(["party", "party_balance", "paid_from", "paid_to",
 				"paid_from_account_currency", "paid_from_account_balance",

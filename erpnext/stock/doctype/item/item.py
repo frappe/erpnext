@@ -49,9 +49,6 @@ class Item(WebsiteGenerator):
 
 		self.set_onload('stock_exists', self.stock_ledger_created())
 		self.set_asset_naming_series()
-		if self.is_fixed_asset:
-			asset = self.asset_exists()
-			self.set_onload("asset_exists", True if asset else False)
 
 	def set_asset_naming_series(self):
 		if not hasattr(self, '_asset_naming_series'):
@@ -120,6 +117,7 @@ class Item(WebsiteGenerator):
 		self.validate_stock_exists_for_template_item()
 		self.validate_attributes()
 		self.validate_variant_attributes()
+		self.validate_variant_based_on_change()
 		self.validate_website_image()
 		self.make_thumbnail()
 		self.validate_fixed_asset()
@@ -127,6 +125,7 @@ class Item(WebsiteGenerator):
 		self.validate_uom_conversion_factor()
 		self.validate_item_defaults()
 		self.validate_customer_provided_part()
+		self.update_defaults_from_item_group()
 		self.validate_stock_for_has_batch_and_has_serial()
 
 		if not self.get("__islocal"):
@@ -759,11 +758,10 @@ class Item(WebsiteGenerator):
 					frappe.throw(
 						_('Cannot change Attributes after stock transaction. Make a new Item and transfer stock to the new Item'))
 
-	def asset_exists(self):
-		if not hasattr(self, '_asset_created'):
-			self._asset_created = frappe.db.get_all("Asset",
-				filters={"item_code": self.name, "docstatus": 1}, limit=1)
-		return self._asset_created
+	def validate_variant_based_on_change(self):
+		if not self.is_new() and (self.variant_of or (self.has_variants and frappe.get_all("Item", {"variant_of": self.name}))):
+			if self.variant_based_on != frappe.db.get_value("Item", self.name, "variant_based_on"):
+				frappe.throw(_("Variant Based On cannot be changed"))
 
 	def validate_uom(self):
 		if not self.get("__islocal"):
@@ -785,10 +783,13 @@ class Item(WebsiteGenerator):
 					d.conversion_factor = value
 
 	def validate_attributes(self):
+		if not (self.has_variants or self.variant_of):
+			return
+
 		if not self.variant_based_on:
 			self.variant_based_on = 'Item Attribute'
 
-		if (self.has_variants or self.variant_of) and self.variant_based_on == 'Item Attribute':
+		if self.variant_based_on == 'Item Attribute':
 			attributes = []
 			if not self.attributes:
 				frappe.throw(_("Attribute table is mandatory"))
