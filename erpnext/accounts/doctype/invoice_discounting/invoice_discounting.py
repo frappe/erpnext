@@ -21,7 +21,7 @@ class InvoiceDiscounting(AccountsController):
 
 	def validate_mandatory(self):
 		if not (self.loan_start_date and self.loan_period):
-			frappe.throw(_("Loan Start Date and Loan Period are mandatory to submit the Invoice Discounting"))
+			frappe.throw(_("Loan Start Date and Loan Period are mandatory to save the Invoice Discounting"))
 
 	def calculate_total_amount(self):
 		self.total_amount = sum([flt(d.outstanding_amount) for d in self.invoices])
