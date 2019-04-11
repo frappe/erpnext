@@ -242,6 +242,13 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1)
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), existing_reserved_qty_item2)
 
+	def test_sales_order_on_hold(self):
+		so = make_sales_order(item_code="_Test Product Bundle Item")
+		so.db_set('Status', "On Hold")
+		si = make_sales_invoice(so.name)
+		self.assertRaises(frappe.ValidationError, create_dn_against_so, so.name)
+		self.assertRaises(frappe.ValidationError, si.submit)
+
 	def test_reserved_qty_for_over_delivery_with_packing_list(self):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
 		make_stock_entry(item="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, rate=100)

@@ -62,6 +62,7 @@ class MaterialRequest(BuyingController):
 		super(MaterialRequest, self).validate()
 
 		self.validate_schedule_date()
+		self.check_for_on_hold_or_closed_status('Sales Order', 'sales_order')
 		self.validate_uom_is_integer("uom", "qty")
 
 		if not self.status:
@@ -101,6 +102,7 @@ class MaterialRequest(BuyingController):
 	def before_cancel(self):
 		# if MRQ is already closed, no point saving the document
 		check_on_hold_or_closed_status(self.doctype, self.name)
+
 		self.set_status(update=True, status='Cancelled')
 
 	def check_modified_date(self):
