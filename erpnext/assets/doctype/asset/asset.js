@@ -31,7 +31,7 @@ frappe.ui.form.on('Asset', {
 				}
 			};
 		});
-		
+
 		frm.set_query("cost_center", function() {
 			return {
 				"filters": {
@@ -206,12 +206,10 @@ frappe.ui.form.on('Asset', {
 		erpnext.asset.set_accululated_depreciation(frm);
 	},
 
-	depreciation_method: function(frm) {
-		frm.events.make_schedules_editable(frm);
-	},
-
 	make_schedules_editable: function(frm) {
-		var is_editable = frm.doc.depreciation_method==="Manual" ? true : false;
+		var is_editable = frm.doc.finance_books.filter(d => d.depreciation_method == "Manual").length > 0
+			? true : false;
+
 		frm.toggle_enable("schedules", is_editable);
 		frm.fields_dict["schedules"].grid.toggle_enable("schedule_date", is_editable);
 		frm.fields_dict["schedules"].grid.toggle_enable("depreciation_amount", is_editable);
@@ -296,6 +294,44 @@ frappe.ui.form.on('Asset', {
 		})
 
 		frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
+	},
+
+	set_depreciation_rate: function(frm, row) {
+		if (row.total_number_of_depreciations && row.frequency_of_depreciation) {
+			frappe.call({
+				method: "get_depreciation_rate",
+				doc: frm.doc,
+				args: row,
+				callback: function(r) {
+					if (r.message) {
+						frappe.model.set_value(row.doctype, row.name, "rate_of_depreciation", r.message);
+					}
+				}
+			});
+		}
+	}
+});
+
+frappe.ui.form.on('Asset Finance Book', {
+	depreciation_method: function(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		frm.events.set_depreciation_rate(frm, row);
+		frm.events.make_schedules_editable(frm);
+	},
+
+	expected_value_after_useful_life: function(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		frm.events.set_depreciation_rate(frm, row);
+	},
+
+	frequency_of_depreciation: function(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		frm.events.set_depreciation_rate(frm, row);
+	},
+
+	total_number_of_depreciations: function(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		frm.events.set_depreciation_rate(frm, row);
 	}
 });
 

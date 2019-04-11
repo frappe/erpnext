@@ -97,6 +97,19 @@ class TestAccount(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, merge_account, "Capital Stock - _TC",\
 			"Softwares - _TC", doc.is_group, doc.root_type, doc.company)
 
+	def test_account_sync(self):
+		del frappe.local.flags["ignore_root_company_validation"]
+		acc = frappe.new_doc("Account")
+		acc.account_name = "Test Sync Account"
+		acc.parent_account = "Temporary Accounts - _TC3"
+		acc.company = "_Test Company 3"
+		acc.insert()
+
+		acc_tc_4 = frappe.db.get_value('Account', {'account_name': "Test Sync Account", "company": "_Test Company 4"})
+		acc_tc_5 = frappe.db.get_value('Account', {'account_name': "Test Sync Account", "company": "_Test Company 5"})
+		self.assertEqual(acc_tc_4, "Test Sync Account - _TC4")
+		self.assertEqual(acc_tc_5, "Test Sync Account - _TC5")
+
 def _make_test_records(verbose):
 	from frappe.test_runner import make_test_objects
 
@@ -131,7 +144,7 @@ def _make_test_records(verbose):
 
 		# related to Account Inventory Integration
 		["_Test Account Stock In Hand", "Current Assets", 0, None, None],
-		
+
 		# fixed asset depreciation
 		["_Test Fixed Asset", "Current Assets", 0, "Fixed Asset", None],
 		["_Test Accumulated Depreciations", "Current Assets", 0, None, None],
@@ -168,13 +181,17 @@ def get_inventory_account(company, warehouse=None):
 	return account
 
 def create_account(**kwargs):
-	account = frappe.get_doc(dict(
-		doctype = "Account",
-		account_name = kwargs.get('account_name'),
-		account_type = kwargs.get('account_type'),
-		parent_account = kwargs.get('parent_account'),
-		company = kwargs.get('company')
-	))
-	
-	account.save()
-	return account.name
+	account = frappe.db.get_value("Account", filters={"account_name": kwargs.get("account_name"), "company": kwargs.get("company")})
+	if account:
+		return account
+	else:
+		account = frappe.get_doc(dict(
+			doctype = "Account",
+			account_name = kwargs.get('account_name'),
+			account_type = kwargs.get('account_type'),
+			parent_account = kwargs.get('parent_account'),
+			company = kwargs.get('company')
+		))
+
+		account.save()
+		return account.name

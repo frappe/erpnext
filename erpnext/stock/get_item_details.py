@@ -490,7 +490,7 @@ def get_price_list_rate_for(args, item_code):
 	price_list_rate = get_item_price(item_price_args, item_code)
 	if price_list_rate:
 		desired_qty = args.get("qty")
-		if check_packing_list(price_list_rate[0][0], desired_qty, item_code):
+		if desired_qty and check_packing_list(price_list_rate[0][0], desired_qty, item_code):
 			item_price_data = price_list_rate
 	else:
 		for field in ["customer", "supplier", "min_qty"]:
@@ -521,12 +521,15 @@ def check_packing_list(price_list_rate_name, desired_qty, item_code):
 		:param qty: Derised Qt
 	"""
 
+	flag = True
 	item_price = frappe.get_doc("Item Price", price_list_rate_name)
-	if desired_qty and item_price.packing_unit:
+	if item_price.packing_unit:
 		packing_increment = desired_qty % item_price.packing_unit
 
-		if packing_increment == 0:
-			return True
+		if packing_increment != 0:
+			flag = False
+
+	return flag
 
 def validate_price_list(args):
 	if args.get("price_list"):
@@ -603,11 +606,14 @@ def get_pos_profile_item_details(company, args, pos_profile=None, update_data=Fa
 
 @frappe.whitelist()
 def get_pos_profile(company, pos_profile=None, user=None):
-	if pos_profile:
-		return frappe.get_cached_doc('POS Profile', pos_profile)
+	if pos_profile: return frappe.get_cached_doc('POS Profile', pos_profile)
 
 	if not user:
 		user = frappe.session['user']
+
+	condition = "pfu.user = %(user)s AND pfu.default=1"
+	if user and company:
+		condition = "pfu.user = %(user)s AND pf.company = %(company)s AND pfu.default=1"
 
 	pos_profile = frappe.db.sql("""SELECT pf.*
 		FROM
@@ -615,15 +621,23 @@ def get_pos_profile(company, pos_profile=None, user=None):
 		ON
 				pf.name = pfu.parent
 		WHERE
-			(
-				(pfu.user = %(user)s AND pf.company = %(company)s AND pfu.default=1)
-				OR (pfu.user = %(user)s AND pfu.default=1)
-				OR (ifnull(pfu.user, '') = '' AND pf.company = %(company)s)
-			) AND pf.disabled = 0
-	""", {
+			{cond} AND pf.disabled = 0
+	""".format(cond = condition), {
 		'user': user,
 		'company': company
 	}, as_dict=1)
+
+	if not pos_profile and company:
+		pos_profile = frappe.db.sql("""SELECT pf.*
+			FROM
+				`tabPOS Profile` pf LEFT JOIN `tabPOS Profile User` pfu
+			ON
+					pf.name = pfu.parent
+			WHERE
+				pf.company = %(company)s AND pf.disabled = 0
+		""", {
+			'company': company
+		}, as_dict=1)
 
 	return pos_profile and pos_profile[0] or None
 
