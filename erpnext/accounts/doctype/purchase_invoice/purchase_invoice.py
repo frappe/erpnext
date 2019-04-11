@@ -16,7 +16,7 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_bille
 from erpnext.stock import get_warehouse_account_map
 from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, delete_gl_entries
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
-from erpnext.buying.utils import check_for_closed_status
+from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
 from frappe.model.mapper import get_mapped_doc
@@ -89,7 +89,7 @@ class PurchaseInvoice(BuyingController):
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
-		self.check_for_closed_status()
+		self.check_on_hold_or_closed_status()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
@@ -152,13 +152,13 @@ class PurchaseInvoice(BuyingController):
 
 		self.party_account_currency = account.account_currency
 
-	def check_for_closed_status(self):
+	def check_on_hold_or_closed_status(self):
 		check_list = []
 
 		for d in self.get('items'):
 			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
 				check_list.append(d.purchase_order)
-				check_for_closed_status('Purchase Order', d.purchase_order)
+				check_on_hold_or_closed_status('Purchase Order', d.purchase_order)
 
 	def validate_with_previous_doc(self):
 		super(PurchaseInvoice, self).validate_with_previous_doc({
@@ -760,7 +760,7 @@ class PurchaseInvoice(BuyingController):
 	def on_cancel(self):
 		super(PurchaseInvoice, self).on_cancel()
 
-		self.check_for_closed_status()
+		self.check_on_hold_or_closed_status()
 
 		self.update_status_updater_args()
 
