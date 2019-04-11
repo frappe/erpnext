@@ -136,7 +136,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 		partywise_total = self.get_partywise_total(party_naming_by, args)
 
-		partywise_advance_amount = get_partywise_advanced_payment_amount(args.get("party_type")) or {}
+		partywise_advance_amount = get_partywise_advanced_payment_amount(args.get("party_type"),
+			self.filters.get("report_date")) or {}
 		for party, party_dict in iteritems(partywise_total):
 			row = [party]
 
@@ -145,8 +146,12 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 			row += [partywise_advance_amount.get(party, 0)]
 
+			paid_amt = 0
+			if party_dict.paid_amt > 0:
+				paid_amt = flt(party_dict.paid_amt - partywise_advance_amount.get(party, 0))
+
 			row += [
-				party_dict.invoiced_amt, party_dict.paid_amt, party_dict.credit_amt, party_dict.outstanding_amt,
+				party_dict.invoiced_amt, paid_amt, party_dict.credit_amt, party_dict.outstanding_amt,
 				party_dict.range1, party_dict.range2, party_dict.range3, party_dict.range4,
 			]
 
@@ -205,7 +210,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 		cols += ["invoiced_amt", "paid_amt", "credit_amt",
 		"outstanding_amt", "age", "range1", "range2", "range3", "range4", "currency", "pdc/lc_date", "pdc/lc_ref",
-		"pdc/lc_amount", "remaining_balance"]
+		"pdc/lc_amount"]
 
 		if args.get("party_type") == "Supplier":
 			cols += ["supplier_group", "remarks"]

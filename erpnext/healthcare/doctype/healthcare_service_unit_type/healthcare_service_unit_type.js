@@ -49,7 +49,7 @@ frappe.ui.form.on('Healthcare Service Unit Type', {
 var disable = function(frm){
 	var doc = frm.doc;
 	frappe.call({
-		method: 		"erpnext.healthcare.doctype.healthcare_service_unit_type.healthcare_service_unit_type.disable_enable",
+		method: "erpnext.healthcare.doctype.healthcare_service_unit_type.healthcare_service_unit_type.disable_enable",
 		args: {status: 1, doc_name: doc.name, item: doc.item, is_billable: doc.is_billable},
 		callback: function(){
 			cur_frm.reload_doc();
@@ -60,7 +60,7 @@ var disable = function(frm){
 var enable = function(frm){
 	var doc = frm.doc;
 	frappe.call({
-		method: 		"erpnext.healthcare.doctype.healthcare_service_unit_type.healthcare_service_unit_type.disable_enable",
+		method: "erpnext.healthcare.doctype.healthcare_service_unit_type.healthcare_service_unit_type.disable_enable",
 		args: {status: 0, doc_name: doc.name, item: doc.item, is_billable: doc.is_billable},
 		callback: function(){
 			cur_frm.reload_doc();
