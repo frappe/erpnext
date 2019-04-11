@@ -134,6 +134,13 @@ def get_columns(filters):
 			"width": 300
 		},
 		{
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Link",
+			"options": "Currency",
+			"hidden": 1
+		},
+		{
 			"fieldname": "income",
 			"label": _("Income"),
 			"fieldtype": "Currency",
@@ -153,13 +160,6 @@ def get_columns(filters):
 			"fieldtype": "Currency",
 			"options": "currency",
 			"width": 120
-		},
-		{
-			"fieldname": "currency",
-			"label": _("Currency"),
-			"fieldtype": "Link",
-			"options": "Currency",
-			"hidden": 1
 		}
 	]
 

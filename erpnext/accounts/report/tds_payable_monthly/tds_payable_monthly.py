@@ -55,12 +55,15 @@ def get_result(filters):
 		supplier = supplier_map[d]
 
 		tds_doc = tds_docs[supplier.tax_withholding_category]
-		account = [i.account for i in tds_doc.accounts if i.company == filters.company][0]
+		account_list = [i.account for i in tds_doc.accounts if i.company == filters.company]
+
+		if account_list:
+			account = account_list[0]
 
 		for k in gle_map[d]:
 			if k.party == supplier_map[d] and k.credit > 0:
 				total_amount_credited += k.credit
-			elif k.account == account and k.credit > 0:
+			elif account_list and k.account == account and k.credit > 0:
 				tds_deducted = k.credit
 				total_amount_credited += k.credit
 

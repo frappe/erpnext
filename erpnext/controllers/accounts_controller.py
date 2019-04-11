@@ -94,6 +94,8 @@ class AccountsController(TransactionBase):
 			if self.is_return:
 				self.validate_qty()
 
+		validate_regional(self)
+
 	def validate_invoice_documents_schedule(self):
 		self.validate_payment_schedule_dates()
 		self.set_due_date()
@@ -114,6 +116,12 @@ class AccountsController(TransactionBase):
 			self.validate_non_invoice_documents_schedule()
 
 	def before_print(self):
+		if self.doctype in ['Journal Entry', 'Payment Entry', 'Sales Invoice', 'Purchase Invoice']:
+			self.gl_entries = frappe.get_list("GL Entry", filters={
+				"voucher_type": self.doctype,
+				"voucher_no": self.name
+			}, fields=["account", "party_type", "party", "debit", "credit", "remarks"])
+
 		if self.doctype in ['Purchase Order', 'Sales Order', 'Sales Invoice', 'Purchase Invoice',
 							'Supplier Quotation', 'Purchase Receipt', 'Delivery Note', 'Quotation']:
 			if self.get("group_same_items"):
@@ -1132,3 +1140,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
 	p_doctype.update_blanket_order()
 	p_doctype.update_billing_percentage()
 	p_doctype.set_status()
+
+@erpnext.allow_regional
+def validate_regional(doc):
+	pass

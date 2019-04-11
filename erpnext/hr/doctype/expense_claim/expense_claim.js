@@ -35,6 +35,7 @@ $.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}))
 
 cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('employee','employee_name','employee_name');
+cur_frm.add_fetch('expense_type','description','description');
 
 cur_frm.cscript.onload = function(doc) {
 	if (doc.__islocal) {
