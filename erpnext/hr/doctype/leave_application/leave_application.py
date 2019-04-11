@@ -399,6 +399,19 @@ def get_leave_balance_on(employee, leave_type, date, allocation_records=None, do
 
 	return flt(allocation.total_leaves_allocated) - (flt(leaves_taken) + flt(leaves_encashed))
 
+def get_total_allocated_leaves(employee, leave_type, date):
+	filters= {
+		'from_date': ['<=', date],
+		'to_date': ['>=', date],
+		'docstatus': 1,
+		'leave_type': leave_type,
+		'employee': employee
+	}
+
+	leave_allocation_records = frappe.db.get_all('Leave Allocation', filters=filters, fields=['total_leaves_allocated'])
+
+	return flt(leave_allocation_records[0]['total_leaves_allocated']) if leave_allocation_records else flt(0)
+
 def get_leaves_for_period(employee, leave_type, from_date, to_date, status, docname=None):
 	leave_applications = frappe.db.sql("""
 		select name, employee, leave_type, from_date, to_date, total_leave_days
@@ -487,7 +500,6 @@ def get_events(start, end, filters=None):
 
 	add_block_dates(events, start, end, employee, company)
 	add_holidays(events, start, end, employee, company)
-
 	return events
 
 def add_department_leaves(events, start, end, employee, company):
@@ -500,19 +512,32 @@ def add_department_leaves(events, start, end, employee, company):
 	department_employees = frappe.db.sql_list("""select name from tabEmployee where department=%s
 		and company=%s""", (department, company))
 
-	match_conditions = "and employee in (\"%s\")" % '", "'.join(department_employees)
-	add_leaves(events, start, end, match_conditions=match_conditions)
+	filter_conditions = " and employee in (\"%s\")" % '", "'.join(department_employees)
+	add_leaves(events, start, end, filter_conditions=filter_conditions)
 
-def add_leaves(events, start, end, match_conditions=None):
+def add_leaves(events, start, end, filter_conditions=None):
+	conditions = []
+
+
+	if not cint(frappe.db.get_value("HR Settings", None, "show_leaves_of_all_department_members_in_calendar")):
+		from frappe.desk.reportview import build_match_conditions
+		match_conditions = build_match_conditions("Leave Application")
+
+		if match_conditions:
+			conditions.append(match_conditions)
+
 	query = """select name, from_date, to_date, employee_name, half_day,
 		status, employee, docstatus
 		from `tabLeave Application` where
 		from_date <= %(end)s and to_date >= %(start)s <= to_date
 		and docstatus < 2
-		and status!="Rejected" """
+		and status!='Rejected' """
 
-	if match_conditions:
-		query += match_conditions
+	if conditions:
+		query += ' and ' + ' and '.join(conditions)
+
+	if filter_conditions:
+		query += filter_conditions
 
 	for d in frappe.db.sql(query, {"start":start, "end": end}, as_dict=True):
 		e = {
