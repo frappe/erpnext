@@ -244,6 +244,10 @@ def make_return_doc(doctype, source_name, target_doc=None):
 				doc.paid_amount = -1 * source.paid_amount
 				doc.base_paid_amount = -1 * source.base_paid_amount
 
+		if doc.get("is_return") and hasattr(doc, "packed_items"):
+			for d in doc.get("packed_items"):
+				d.qty = d.qty * -1
+
 		doc.discount_amount = -1 * source.discount_amount
 		doc.run_method("calculate_taxes_and_totals")
 
