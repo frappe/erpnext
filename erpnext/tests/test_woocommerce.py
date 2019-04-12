@@ -20,6 +20,7 @@ class TestWoocommerce(unittest.TestCase):
 			woo_settings.enable_sync = 1
 			woo_settings.tax_account = "Sales Expenses - W"
 			woo_settings.f_n_f_account = "Expenses - W"
+			woo_settings.creation_user = "Administrator"
 			woo_settings.save(ignore_permissions=True)
 
 	def test_sales_order_for_woocommerece(self):
