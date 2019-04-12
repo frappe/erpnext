@@ -89,10 +89,9 @@ class Issue(Document):
 			"subject": self.subject,
 			"sender": self.raised_by,
 			"content": self.description,
-			"status": "Linked",
-			"reference_doctype": "Issue",
-			"reference_name": self.name
+			"status": "Linked"
 		})
+		communication.add_link("Issue", self.name)
 		communication.ignore_permissions = True
 		communication.ignore_mandatory = True
 		communication.save()
@@ -108,15 +107,20 @@ class Issue(Document):
 		# Replicate linked Communications
 		# TODO: get all communications in timeline before this, and modify them to append them to new doc
 		comm_to_split_from = frappe.get_doc("Communication", communication_id)
-		communications = frappe.get_all("Communication",
-			filters={"reference_doctype": "Issue",
-				"reference_name": comm_to_split_from.reference_name,
-				"creation": ('>=', comm_to_split_from.creation)})
 
-		for communication in communications:
-			doc = frappe.get_doc("Communication", communication.name)
-			doc.reference_name = replicated_issue.name
-			doc.save(ignore_permissions=True)
+		links = comm_to_split_from.get_links("Issue", self.name)
+
+		for link in links:
+			communications = frappe.get_all("Dynamic Link",
+				filters={"link_doctype": "Issue",
+					"link_name": link.link_name,
+					"creation": ('>=', comm_to_split_from.creation)},
+				fields=["parent"])
+
+			for communication in communications:
+				doc = frappe.get_doc("Communication", communication.parent)
+				doc.add_link("Communication", replicated_issue.name)
+				doc.save(ignore_permissions=True)
 
 		return replicated_issue.name
 
