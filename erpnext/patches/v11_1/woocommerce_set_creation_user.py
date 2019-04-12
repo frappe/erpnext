@@ -2,7 +2,9 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	woocommerce_settings = frappe.get_single("Woocommerce Settings")
-	if woocommerce_settings.enable_sync:
-		woocommerce_settings.creation_user = woocommerce_settings.modified_by
-		woocommerce_settings.save()
+	woocommerce_setting_enable_sync = frappe.db.sql("SELECT t.value FROM tabSingles t WHERE doctype = 'Woocommerce Settings' AND field = 'enable_sync'",  as_dict=True)
+	if len(woocommerce_setting_enable_sync) and woocommerce_setting_enable_sync[0].value == '1':
+		frappe.db.sql("""UPDATE tabSingles
+					SET value = (SELECT t.value FROM tabSingles t WHERE doctype = 'Woocommerce Settings' AND field = 'modified_by')
+					WHERE doctype = 'Woocommerce Settings'
+					AND field = 'creation_user';""")
