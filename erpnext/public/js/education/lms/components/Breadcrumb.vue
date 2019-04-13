@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<span v-for="(route, index) in routeData">
-			<a href="route.route">{{ route.label }}</a><span> / </span>
+			<router-link :to="route.route">{{ route.label }}</router-link><span> / </span>
 		</span>
 	</div>
 </template>
