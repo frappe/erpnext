@@ -17,7 +17,7 @@ from erpnext.stock.get_item_details import get_item_details
 from six import iteritems
 
 test_ignore = ["BOM"]
-test_dependencies = ["Warehouse", "Item Group"]
+test_dependencies = ["Warehouse", "Item Group", "Brand"]
 
 def make_item(item_code, properties=None):
 	if frappe.db.exists("Item", item_code):
@@ -393,3 +393,6 @@ def create_item(item_code, is_stock_item=None, valuation_rate=0, warehouse=None,
 			"company": "_Test Company"
 		})
 		item.save()
+	else:
+		item = frappe.get_doc("Item", item_code)
+	return item
