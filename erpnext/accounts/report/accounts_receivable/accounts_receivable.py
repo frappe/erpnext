@@ -545,6 +545,12 @@ class ReceivablePayableReport(object):
 				else:
 					credit_note_amount += amount
 
+		# for stand alone credit/debit note
+		if gle.voucher_no in return_entries and flt(gle.get(reverse_dr_or_cr)) - flt(gle.get(dr_or_cr) > 0):
+			amount = flt(gle.get(reverse_dr_or_cr), self.currency_precision) - flt(gle.get(dr_or_cr), self.currency_precision)
+			credit_note_amount += amount
+			payment_amount -= amount
+
 		outstanding_amount = (flt((flt(gle.get(dr_or_cr), self.currency_precision)
 			- flt(gle.get(reverse_dr_or_cr), self.currency_precision)
 			- payment_amount - credit_note_amount), self.currency_precision))
