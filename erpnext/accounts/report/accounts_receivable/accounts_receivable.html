@@ -8,7 +8,7 @@
 .print-format {
 	font-size: 8.0pt !important;
 }
-.print-format td {
+.print-format td, .print-format th {
 	vertical-align:middle !important;
 }
 </style>
@@ -208,34 +208,20 @@
 						<td style="text-align: right">{%= format_currency(data[i][("remaining_balance")], data[i]["currency"]) %}</td>
 					{% } %}
 				{% } else { %}
-					<td></td>
-					{% if(!filters.show_pdc_in_print) { %}
-					<td></td>
-					{% } %}
-					{% if(report.report_name === "Accounts Receivable") { %}
-					<td></td>
-					{% } %}
-					<td></td>
-
 					{% if($.isEmptyObject(data[i])) { %}
-						<td></td>
-						<td></td>
-						{% if(!filters.show_pdc_in_print) { %}
-							<td></td>
-							<td></td>
-						{% } %}
-						<td></td>
+						{% var colspan = 5 %}
+						{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person_in_print) { colspan++; } %}
+						{% if(!filters.show_pdc_in_print) { colspan += 3; } %}
 						{% if(filters.show_pdc_in_print) { %}
-							{% if(report.report_name === "Accounts Receivable") { %}
-								<td></td>
-							{% } %}
-							<td></td>
-							<td></td>
-							<td></td>
-							<td></td>
+							{% colspan += 3; %}
+							{% if(report.report_name === "Accounts Receivable") { colspan++; } %}
 						{% } %}
+						<td colspan="{%= colspan %}"></td>
 					{% } else { %}
-						<td style="text-align: right"><b>{%= __("Total") %}</b></td>
+						{% var colspan = 3 %}
+						{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person_in_print) { colspan++; } %}
+						{% if(!filters.show_pdc_in_print) { colspan++; } %}
+						<td colspan="{%= colspan %}" style="text-align: right"><b>{%= __("Total") %}</b></td>
 						<td style="text-align: right">
 							{%= format_currency(data[i]["invoiced_amount"], data[i]["currency"] ) %}</td>
 
