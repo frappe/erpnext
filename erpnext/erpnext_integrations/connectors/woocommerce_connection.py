@@ -1,6 +1,10 @@
 
 from __future__ import unicode_literals
-import frappe, base64, hashlib, hmac, json
+import frappe
+import base64
+import hashlib
+import hmac
+import json
 import datetime
 from frappe import _
 
@@ -133,7 +137,7 @@ def order(data=None):
 
 		placed_order_date = created_date[0]
 		raw_date = datetime.datetime.strptime(placed_order_date, "%Y-%m-%d")
-		raw_delivery_date = frappe.utils.add_to_date(raw_date, days = 7)
+		raw_delivery_date = frappe.utils.add_to_date(raw_date, days=7)
 		order_delivery_date_str = raw_delivery_date.strftime('%Y-%m-%d')
 		order_delivery_date = str(order_delivery_date_str)
 
@@ -162,7 +166,7 @@ def order(data=None):
 				"warehouse": "Stores" + " - " + company_abbr
 				})
 
-			add_tax_details(new_sales_order,ordered_items_tax, "Ordered Item tax", 0)
+			add_tax_details(new_sales_order, ordered_items_tax, "Ordered Item tax", 0)
 
 		# shipping_details = fd.get("shipping_lines") # used for detailed order
 		shipping_total = fd.get("shipping_total")
@@ -178,8 +182,9 @@ def order(data=None):
 
 def link_customer_and_address(raw_billing_data, customer_status):
 	old_name = None
-	customer_woo_com_email = None
+	customer = None
 	address = None
+	customer_woo_com_email = None
 
 	if customer_status == 0:
 		# create
@@ -188,14 +193,10 @@ def link_customer_and_address(raw_billing_data, customer_status):
 	elif customer_status == 1:
 		# Edit
 		customer_woo_com_email = raw_billing_data.get("email")
-		customer = frappe.get_doc("Customer",{"woocommerce_email": customer_woo_com_email})
+		customer = frappe.get_doc("Customer", {"woocommerce_email": customer_woo_com_email})
 		old_name = customer.customer_name
-	else:
-		# create
-		customer = frappe.new_doc("Customer")
-		address = frappe.new_doc("Address")
 
-	full_name = str(raw_billing_data.get("first_name"))+ " "+str(raw_billing_data.get("last_name"))
+	full_name = str(raw_billing_data.get("first_name")) + " "+str(raw_billing_data.get("last_name"))
 	customer.customer_name = full_name
 	customer.woocommerce_email = str(raw_billing_data.get("email"))
 	customer.save()
@@ -246,7 +247,7 @@ def link_item(item_data, item_status, is_item=False, is_product=False):
 		# Create Item
 		item = frappe.new_doc("Item")
 
-	if item_status == 1:
+	elif item_status == 1:
 		# Edit Item
 		if is_item:
 			item_woo_com_id = item_data.get("product_id")
@@ -279,7 +280,7 @@ def add_tax_details(sales_order, price, desc, status):
 		account_head_type = woocommerce_settings.f_n_f_account
 
 	sales_order.append("taxes", {
-							"charge_type":"Actual",
+							"charge_type": "Actual",
 							"account_head": account_head_type,
 							"tax_amount": price,
 							"description": desc
