@@ -20,14 +20,6 @@ frappe.ui.form.on("Opportunity", {
 			}
 		});
 	},
-	// customer: function(frm) {
-	// 	frm.trigger('set_contact_link');
-	// 	erpnext.utils.get_party_details(frm);
-	// },
-
-	// lead: function(frm) {
-	// 	frm.trigger('set_contact_link');
-	// },
 
 	with_items: function(frm) {
 		frm.trigger('toggle_mandatory');
@@ -47,7 +39,6 @@ frappe.ui.form.on("Opportunity", {
 	refresh: function(frm) {
 		var doc = frm.doc;
 		// frm.events.enquiry_from(frm);
-		// frm.trigger('set_contact_link');
 		frm.trigger('toggle_mandatory');
 		frm.trigger("set_dynamic_field_label");
 		erpnext.toggle_naming_series();
@@ -85,13 +76,6 @@ frappe.ui.form.on("Opportunity", {
 		}
 	},
 
-	// set_contact_link: function(frm) {
-	// 	if(frm.doc.customer) {
-	// 		frappe.dynamic_link = {doc: frm.doc, fieldname: 'customer', doctype: 'Customer'}
-	// 	} else if(frm.doc.lead) {
-	// 		frappe.dynamic_link = {doc: frm.doc, fieldname: 'lead', doctype: 'Lead'}
-	// 	}
-	// },
 	set_dynamic_field_label: function(frm){
 		if (frm.doc.opportunity_from == "Customer")
 		{
@@ -119,10 +103,6 @@ frappe.ui.form.on("Opportunity", {
 // TODO commonify this code
 erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 	onload: function() {
-		// if(!this.frm.doc.enquiry_from && this.frm.doc.customer)
-		// 	this.frm.doc.enquiry_from = "Customer";
-		// if(!this.frm.doc.enquiry_from && this.frm.doc.lead)
-		// 	this.frm.doc.enquiry_from = "Lead";
 
 		if(!this.frm.doc.status)
 			set_multiple(this.frm.doc.doctype, this.frm.doc.name, { status:'Open' });
@@ -170,7 +150,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 $.extend(cur_frm.cscript, new erpnext.crm.Opportunity({frm: cur_frm}));
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
-	if(doc.opportunity_from == 'Lead' && doc.lead)
+	if(doc.opportunity_from == 'Lead' && doc.customer_lead)
 		cur_frm.cscript.lead(doc, cdt, cdn);
 }
 
