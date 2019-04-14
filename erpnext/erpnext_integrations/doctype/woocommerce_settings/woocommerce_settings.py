@@ -65,7 +65,7 @@ class WoocommerceSettings(Document):
 			if not frappe.get_value("Item Group",{"name": "WooCommerce Products"}):
 				item_group = frappe.new_doc("Item Group")
 				item_group.item_group_name = "WooCommerce Products"
-				item_group.parent_item_group = "All Item Groups"
+				item_group.parent_item_group = _("All Item Groups")
 				item_group.save()
 
 

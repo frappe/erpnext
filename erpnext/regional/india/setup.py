@@ -93,7 +93,7 @@ def add_print_formats():
 def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
 		fieldtype='Data', fetch_from='item_code.gst_hsn_code', insert_after='description',
-		allow_on_submit=1, print_hide=1)
+		allow_on_submit=1, print_hide=1, fetch_if_empty=1)
 	invoice_gst_fields = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
 			insert_after='language', print_hide=1, collapsible=1),
@@ -243,6 +243,7 @@ def make_custom_fields(update=True):
 		'Purchase Order Item': [hsn_sac_field],
 		'Purchase Receipt Item': [hsn_sac_field],
 		'Purchase Invoice Item': [hsn_sac_field],
+		'Material Request Item': [hsn_sac_field],
 		'Employee': [
 			dict(fieldname='ifsc_code', label='IFSC Code',
 				fieldtype='Data', insert_after='bank_ac_no', print_hide=1,
