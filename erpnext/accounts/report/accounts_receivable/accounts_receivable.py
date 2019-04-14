@@ -285,7 +285,7 @@ class ReceivablePayableReport(object):
 			self.payment_term_map = self.get_payment_term_detail(voucher_nos)
 
 		for gle in gl_entries_data:
-			if self.is_receivable_or_payable(gle, self.dr_or_cr, future_vouchers):
+			if self.is_receivable_or_payable(gle, self.dr_or_cr, future_vouchers) and self.is_in_cost_center(gle):
 				outstanding_amount, credit_note_amount, payment_amount = self.get_outstanding_amount(
 					gle,self.filters.report_date, self.dr_or_cr, return_entries)
 
@@ -529,6 +529,19 @@ class ReceivablePayableReport(object):
 			((gle.against_voucher_type, gle.against_voucher) in future_vouchers)
 		)
 
+	def is_in_cost_center(self, gle):
+		if self.filters.get("cost_center"):
+			if gle.get("cost_center_lft") and gle.get("cost_center_rgt"):
+				if not self.filters.get("cost_center_lft") or not self.filters.get("cost_center_rgt"):
+					self.filters["cost_center_lft"], self.filters["cost_center_rgt"] = frappe.get_value("Cost Center",
+						self.filters.get("cost_center"), ["lft", "rgt"])
+
+				return gle.cost_center_lft >= self.filters.cost_center_lft and gle.cost_center_rgt <= self.filters.cost_center_rgt
+			else:
+				return False
+		else:
+			return True
+
 	def get_return_entries(self, party_type):
 		doctype = "Sales Invoice" if party_type=="Customer" else "Purchase Invoice"
 		return [d.name for d in frappe.get_all(doctype, filters={"is_return": 1, "docstatus": 1})]
@@ -606,27 +619,37 @@ class ReceivablePayableReport(object):
 		conditions, values = self.prepare_conditions(party_type)
 
 		if self.filters.get(scrub(party_type)):
-			select_fields = "sum(debit_in_account_currency) as debit, sum(credit_in_account_currency) as credit"
+			select_fields = "sum(gle.debit_in_account_currency) as debit, sum(gle.credit_in_account_currency) as credit"
 		else:
-			select_fields = "sum(debit) as debit, sum(credit) as credit"
+			select_fields = "sum(gle.debit) as debit, sum(gle.credit) as credit"
+
+		if self.filters.get("cost_center"):
+			cost_center_fields = ", cc.lft as cost_center_lft, cc.rgt as cost_center_rgt"
+			cost_center_join = "left join `tabCost Center` cc on cc.name = gle.cost_center"
+		else:
+			cost_center_fields = cost_center_join = ""
 
 		if date and not for_future:
-			conditions += " and posting_date <= '%s'" % date
+			conditions += " and gle.posting_date <= '%s'" % date
 
 		if date and for_future:
-			conditions += " and posting_date > '%s'" % date
+			conditions += " and gle.posting_date > '%s'" % date
 
 		self.gl_entries = frappe.db.sql("""
 			select
-				name, posting_date, account, party_type, party, voucher_type, voucher_no,
-				against_voucher_type, against_voucher, account_currency, remarks, {0}
+				gle.name, gle.posting_date, gle.account, gle.party_type, gle.party, gle.voucher_type, gle.voucher_no,
+				gle.against_voucher_type, gle.against_voucher, gle.account_currency, gle.remarks, gle.cost_center,
+				{select_fields} {cost_center_fields}
 			from
-				`tabGL Entry`
+				`tabGL Entry` gle {cost_center_join}
 			where
-				docstatus < 2 and party_type=%s and (party is not null and party != '') {1}
-				group by voucher_type, voucher_no, against_voucher_type, against_voucher, party
-				order by posting_date, party"""
-			.format(select_fields, conditions), values, as_dict=True)
+				gle.docstatus < 2 and gle.party_type=%s and (gle.party is not null and gle.party != '') {conditions}
+				group by gle.voucher_type, gle.voucher_no, gle.against_voucher_type, gle.against_voucher, gle.party
+				order by gle.posting_date, gle.party""".format(
+			select_fields=select_fields,
+			cost_center_fields=cost_center_fields,
+			cost_center_join=cost_center_join,
+			conditions=conditions), values, as_dict=True)
 
 		return self.gl_entries
 
@@ -637,20 +660,20 @@ class ReceivablePayableReport(object):
 		party_type_field = scrub(party_type)
 
 		if self.filters.company:
-			conditions.append("company=%s")
+			conditions.append("gle.company=%s")
 			values.append(self.filters.company)
 
 		company_finance_book = erpnext.get_default_finance_book(self.filters.company)
 
 		if not self.filters.finance_book or (self.filters.finance_book == company_finance_book):
-			conditions.append("ifnull(finance_book,'') in (%s, '')")
+			conditions.append("ifnull(gle.finance_book,'') in (%s, '')")
 			values.append(company_finance_book)
 		elif self.filters.finance_book:
-			conditions.append("ifnull(finance_book,'') = %s")
+			conditions.append("ifnull(gle.finance_book,'') = %s")
 			values.append(self.filters.finance_book)
 
 		if self.filters.get(party_type_field):
-			conditions.append("party=%s")
+			conditions.append("gle.party=%s")
 			values.append(self.filters.get(party_type_field))
 
 		if party_type_field=="customer":
@@ -659,7 +682,7 @@ class ReceivablePayableReport(object):
 				lft, rgt = frappe.db.get_value("Customer Group",
 					self.filters.get("customer_group"), ["lft", "rgt"])
 
-				conditions.append("""party in (select name from tabCustomer
+				conditions.append("""gle.party in (select name from tabCustomer
 					where exists(select name from `tabCustomer Group` where lft >= {0} and rgt <= {1}
 						and name=tabCustomer.customer_group))""".format(lft, rgt))
 
@@ -667,16 +690,16 @@ class ReceivablePayableReport(object):
 				lft, rgt = frappe.db.get_value("Territory",
 					self.filters.get("territory"), ["lft", "rgt"])
 
-				conditions.append("""party in (select name from tabCustomer
+				conditions.append("""gle.party in (select name from tabCustomer
 					where exists(select name from `tabTerritory` where lft >= {0} and rgt <= {1}
 						and name=tabCustomer.territory))""".format(lft, rgt))
 
 			if self.filters.get("payment_terms_template"):
-				conditions.append("party in (select name from tabCustomer where payment_terms=%s)")
+				conditions.append("gle.party in (select name from tabCustomer where payment_terms=%s)")
 				values.append(self.filters.get("payment_terms_template"))
 
 			if self.filters.get("sales_partner"):
-				conditions.append("party in (select name from tabCustomer where default_sales_partner=%s)")
+				conditions.append("gle.party in (select name from tabCustomer where default_sales_partner=%s)")
 				values.append(self.filters.get("sales_partner"))
 
 			if self.filters.get("sales_person"):
@@ -692,13 +715,13 @@ class ReceivablePayableReport(object):
 		elif party_type_field=="supplier":
 			account_type = "Payable"
 			if self.filters.get("supplier_group"):
-				conditions.append("""party in (select name from tabSupplier
+				conditions.append("""gle.party in (select name from tabSupplier
 					where supplier_group=%s)""")
 				values.append(self.filters.get("supplier_group"))
 
 		accounts = [d.name for d in frappe.get_all("Account",
 			filters={"account_type": account_type, "company": self.filters.company})]
-		conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
+		conditions.append("gle.account in (%s)" % ','.join(['%s'] *len(accounts)))
 		values += accounts
 
 		return " and ".join(conditions), values
