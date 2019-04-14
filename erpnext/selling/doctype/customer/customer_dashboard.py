@@ -9,8 +9,9 @@ def get_data():
 		'heatmap_message': _('This is based on transactions against this Customer. See timeline below for details'),
 		'fieldname': 'customer',
 		'non_standard_fieldnames': {
-			'Payment Entry': 'party_name'
-			'Quotation': 'customer_lead'
+			'Payment Entry': 'party_name',
+			'Quotation': 'customer_lead',
+			'Opportunity': 'customer_lead'
 		},
 		'transactions': [
 			{

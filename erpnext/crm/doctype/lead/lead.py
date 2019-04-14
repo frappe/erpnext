@@ -90,7 +90,7 @@ class Lead(SellingController):
 		return frappe.db.get_value("Customer", {"lead_name": self.name})
 
 	def has_opportunity(self):
-		return frappe.db.get_value("Opportunity", {"lead": self.name, "status": ["!=", "Lost"]})
+		return frappe.db.get_value("Opportunity", {"customer_lead": self.name, "status": ["!=", "Lost"]})
 
 	def has_quotation(self):
 		return frappe.db.get_value("Quotation", {
