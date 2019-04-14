@@ -24,8 +24,37 @@ def verify_request():
 
 
 @frappe.whitelist(allow_guest=True)
+def client(data=None):
+	fd = None
+	if data:
+		verify_request()
+		if frappe.request and frappe.request.data:
+			fd = json.loads(frappe.request.data)
+	elif data:
+		fd = data
+	else:
+		return "success"
+
+	if not data:
+		event = frappe.get_request_header("X-Wc-Webhook-Event")
+	else:
+		event = "created"
+
+	if event == "created":
+		raw_billing_data = fd.get("billing")
+		customer_woo_com_email = raw_billing_data.get("email")
+
+		if frappe.get_value("Customer", {"woocommerce_email": customer_woo_com_email}):
+			# Edit
+			link_customer_and_address(raw_billing_data, 1)
+		else:
+			# Create
+			link_customer_and_address(raw_billing_data, 0)
+
+
+@frappe.whitelist(allow_guest=True)
 def item(data=None):
-	print data
+	fd = None
 	if data:
 		verify_request()
 		if frappe.request and frappe.request.data:
@@ -42,7 +71,6 @@ def item(data=None):
 
 	if event == "created":
 		item = fd
-		print("Item id ", item.get("id"), ", name ", item.get("name"))
 		item_woo_com_id = item.get("id")
 		if frappe.get_value("Item", {"woocommerce_id": item_woo_com_id}):
 			# Edit
@@ -75,10 +103,10 @@ def order(data=None):
 
 		if frappe.get_value("Customer", {"woocommerce_email": customer_woo_com_email}):
 			# Edit
-			link_customer_and_address(raw_billing_data,1)
+			link_customer_and_address(raw_billing_data, 1)
 		else:
 			# Create
-			link_customer_and_address(raw_billing_data,0)
+			link_customer_and_address(raw_billing_data, 0)
 
 		items_list = fd.get("line_items")
 		for item in items_list:
@@ -134,14 +162,14 @@ def order(data=None):
 				"warehouse": "Stores" + " - " + company_abbr
 				})
 
-			add_tax_details(new_sales_order,ordered_items_tax, "Ordered Item tax",0)
+			add_tax_details(new_sales_order,ordered_items_tax, "Ordered Item tax", 0)
 
 		# shipping_details = fd.get("shipping_lines") # used for detailed order
 		shipping_total = fd.get("shipping_total")
 		shipping_tax = fd.get("shipping_tax")
 
-		add_tax_details(new_sales_order,shipping_tax,"Shipping Tax", 1)
-		add_tax_details(new_sales_order,shipping_total,"Shipping Total", 1)
+		add_tax_details(new_sales_order, shipping_tax, "Shipping Tax", 1)
+		add_tax_details(new_sales_order, shipping_total, "Shipping Total", 1)
 
 		new_sales_order.submit()
 
@@ -149,17 +177,23 @@ def order(data=None):
 
 
 def link_customer_and_address(raw_billing_data, customer_status):
+	old_name = None
+	customer_woo_com_email = None
+	address = None
 
 	if customer_status == 0:
 		# create
 		customer = frappe.new_doc("Customer")
 		address = frappe.new_doc("Address")
-
-	if customer_status == 1:
+	elif customer_status == 1:
 		# Edit
 		customer_woo_com_email = raw_billing_data.get("email")
 		customer = frappe.get_doc("Customer",{"woocommerce_email": customer_woo_com_email})
 		old_name = customer.customer_name
+	else:
+		# create
+		customer = frappe.new_doc("Customer")
+		address = frappe.new_doc("Address")
 
 	full_name = str(raw_billing_data.get("first_name"))+ " "+str(raw_billing_data.get("last_name"))
 	customer.customer_name = full_name
@@ -169,17 +203,17 @@ def link_customer_and_address(raw_billing_data, customer_status):
 
 	if customer_status == 1:
 		frappe.rename_doc("Customer", old_name, full_name)
-		address = frappe.get_doc("Address",{"woocommerce_email":customer_woo_com_email})
-		customer = frappe.get_doc("Customer",{"woocommerce_email": customer_woo_com_email})
+		address = frappe.get_doc("Address", {"woocommerce_email": customer_woo_com_email})
+		customer = frappe.get_doc("Customer", {"woocommerce_email": customer_woo_com_email})
 
 	address.address_line1 = raw_billing_data.get("address_1", "Not Provided")
 	address.address_line2 = raw_billing_data.get("address_2", "Not Provided")
 	address.city = raw_billing_data.get("city", "Not Provided")
 	address.woocommerce_email = str(raw_billing_data.get("email"))
 	address.address_type = "Shipping"
-	address.country = frappe.get_value("Country", filters={"code":raw_billing_data.get("country", "IN").lower()})
-	address.state =  raw_billing_data.get("state")
-	address.pincode =  str(raw_billing_data.get("postcode"))
+	address.country = frappe.get_value("Country", filters={"code": raw_billing_data.get("country", "IN").lower()})
+	address.state = raw_billing_data.get("state")
+	address.pincode = str(raw_billing_data.get("postcode"))
 	address.phone = str(raw_billing_data.get("phone"))
 	address.email_id = str(raw_billing_data.get("email"))
 
@@ -193,7 +227,7 @@ def link_customer_and_address(raw_billing_data, customer_status):
 
 	if customer_status == 1:
 
-		address = frappe.get_doc("Address",{"woocommerce_email": customer_woo_com_email})
+		address = frappe.get_doc("Address", {"woocommerce_email": customer_woo_com_email})
 		old_address_title = address.name
 		new_address_title = customer.customer_name+"-billing"
 		address.address_title = customer.customer_name
@@ -205,6 +239,9 @@ def link_customer_and_address(raw_billing_data, customer_status):
 
 
 def link_item(item_data, item_status, is_item=False, is_product=False):
+	item_woo_com_id = None
+	item = None
+
 	if item_status == 0:
 		# Create Item
 		item = frappe.new_doc("Item")
@@ -230,7 +267,7 @@ def link_item(item_data, item_status, is_item=False, is_product=False):
 
 
 def add_tax_details(sales_order, price, desc, status):
-
+	account_head_type = None
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 
 	if status == 0:
