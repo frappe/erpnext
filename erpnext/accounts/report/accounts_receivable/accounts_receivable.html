@@ -186,17 +186,21 @@
 					</td>
 					{% } %}
 
-					<td style="text-align: right">
-						{%= format_currency(data[i]["invoiced_amount"], data[i]["currency"]) %}</td>
+					<td style="text-align: right">{% if (data[i]["invoiced_amount"] != null) { %}
+						{%= format_currency(data[i]["invoiced_amount"], data[i]["currency"]) %}
+                    {% } %}</td>
 
 					{% if(!filters.show_pdc_in_print) { %}
-						<td style="text-align: right">
-							{%= format_currency(data[i]["paid_amount"], data[i]["currency"]) %}</td>
-						<td style="text-align: right">
-							{%= format_currency(data[i]["return_amount"], data[i]["currency"])  %}</td>
+						<td style="text-align: right">{% if (data[i]["paid_amount"] != null) { %}
+							{%= format_currency(data[i]["paid_amount"], data[i]["currency"]) %}
+                        {% } %}</td>
+						<td style="text-align: right">{% if (data[i]["return_amount"] != null) { %}
+							{%= format_currency(data[i]["return_amount"], data[i]["currency"])  %}
+                        {% } %}</td>
 					{% } %}
-					<td style="text-align: right">
-						{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}</td>
+					<td style="text-align: right">{% if (data[i]["outstanding_amount"] != null) { %}
+						{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}
+                    {% } %}</td>
 
 					{% if(filters.show_pdc_in_print) { %}
 						{% if(report.report_name === "Accounts Receivable") { %}
@@ -204,8 +208,12 @@
 								{%= data[i]["po_no"] %}</td>
 						{% } %}
 						<td style="text-align: right">{%= data[i][("pdc/lc_ref")] %}</td>
-						<td style="text-align: right">{%= format_currency(data[i][("pdc/lc_amount")], data[i]["currency"]) %}</td>
-						<td style="text-align: right">{%= format_currency(data[i][("remaining_balance")], data[i]["currency"]) %}</td>
+						<td style="text-align: right">{% if (data[i]["pdc/lc_amount"] != null) { %}
+                            {%= format_currency(data[i][("pdc/lc_amount")], data[i]["currency"]) %}
+                        {% } %}</td>
+						<td style="text-align: right">{% if (data[i]["remaining_balance"] != null) { %}
+                            {%= format_currency(data[i][("remaining_balance")], data[i]["currency"]) %}
+                        {% } %}</td>
 					{% } %}
 				{% } else { %}
 					{% if($.isEmptyObject(data[i])) { %}
