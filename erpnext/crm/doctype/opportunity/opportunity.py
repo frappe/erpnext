@@ -15,8 +15,8 @@ sender_field = "contact_email"
 
 class Opportunity(TransactionBase):
 	def after_insert(self):
-		if self.lead:
-			frappe.get_doc("Lead", self.lead).set_status(update=True)
+		if self.opportunity_from == "Lead":
+			frappe.get_doc("Lead", self.customer_lead).set_status(update=True)
 
 	def validate(self):
 		self._prev = frappe._dict({
@@ -28,7 +28,7 @@ class Opportunity(TransactionBase):
 
 		self.make_new_lead_if_required()
 
-		if not self.enquiry_from:
+		if not self.opportunity_from:
 			frappe.throw(_("Opportunity From field is mandatory"))
 
 		self.validate_item_details()
@@ -44,7 +44,7 @@ class Opportunity(TransactionBase):
 
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""
-		if not (self.lead or self.customer) and self.contact_email:
+		if not self.customer_lead and self.contact_email:
 			# check if customer is already created agains the self.contact_email
 			customer = frappe.db.sql("""select
 				distinct `tabDynamic Link`.link_name as customer
@@ -60,8 +60,8 @@ class Opportunity(TransactionBase):
 					`tabDynamic Link`.link_doctype='Customer'
 			""".format(self.contact_email), as_dict=True)
 			if customer and customer[0].customer:
-				self.customer = customer[0].customer
-				self.enquiry_from = "Customer"
+				self.customer_lead = customer[0].customer
+				self.opportunity_from = "Customer"
 				return
 
 			lead_name = frappe.db.get_value("Lead", {"email_id": self.contact_email})
@@ -88,8 +88,8 @@ class Opportunity(TransactionBase):
 				lead.insert(ignore_permissions=True)
 				lead_name = lead.name
 
-			self.enquiry_from = "Lead"
-			self.lead = lead_name
+			self.opportunity_from = "Lead"
+			self.customer_lead = lead_name
 
 	def declare_enquiry_lost(self,arg):
 		if not self.has_active_quotation():
@@ -136,10 +136,10 @@ class Opportunity(TransactionBase):
 			return True
 
 	def validate_cust_name(self):
-		if self.customer:
-			self.customer_name = frappe.db.get_value("Customer", self.customer, "customer_name")
-		elif self.lead:
-			lead_name, company_name = frappe.db.get_value("Lead", self.lead, ["lead_name", "company_name"])
+		if self.customer_lead and self.opportunity_from == 'Customer':
+			self.customer_name = frappe.db.get_value("Customer", self.customer_lead, "customer_name")
+		elif self.customer_lead and self.opportunity_from == 'Lead':
+			lead_name, company_name = frappe.db.get_value("Lead", self.customer_lead, ["lead_name", "company_name"])
 			self.customer_name = company_name or lead_name
 
 	def on_update(self):
@@ -152,16 +152,16 @@ class Opportunity(TransactionBase):
 		opts.description = ""
 		opts.contact_date = self.contact_date
 
-		if self.customer:
+		if self.customer_lead and self.opportunity_from == 'Customer':
 			if self.contact_person:
 				opts.description = 'Contact '+cstr(self.contact_person)
 			else:
-				opts.description = 'Contact customer '+cstr(self.customer)
-		elif self.lead:
+				opts.description = 'Contact customer '+cstr(self.customer_lead)
+		elif self.customer_lead and self.opportunity_from == 'Lead':
 			if self.contact_display:
 				opts.description = 'Contact '+cstr(self.contact_display)
 			else:
-				opts.description = 'Contact lead '+cstr(self.lead)
+				opts.description = 'Contact lead '+cstr(self.customer_lead)
 
 		opts.subject = opts.description
 		opts.description += '. By : ' + cstr(self.contact_by)
@@ -187,16 +187,13 @@ class Opportunity(TransactionBase):
 				if not d.get(key): d.set(key, item.get(key))
 
 	def validate_lead_cust(self):
-		if self.enquiry_from == 'Lead':
-			if not self.lead:
+		if self.opportunity_from == 'Lead':
+			if not self.customer_lead:
 				frappe.throw(_("Lead must be set if Opportunity is made from Lead"))
-			else:
-				self.customer = None
-		elif self.enquiry_from == 'Customer':
-			if not self.customer:
+		elif self.opportunity_from == 'Customer':
+			if not self.customer_lead:
 				msgprint(_("Customer is mandatory if 'Opportunity From' is selected as Customer"), raise_exception=1)
-			else:
-				self.lead = None
+
 
 @frappe.whitelist()
 def get_item_details(item_code):

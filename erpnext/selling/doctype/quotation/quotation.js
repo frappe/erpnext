@@ -28,6 +28,7 @@ frappe.ui.form.on('Quotation', {
 	quotation_to: function(frm) {
 		frm.trigger("set_label");
 		frm.trigger("toggle_reqd_lead_customer");
+		frm.trigger("set_dynamic_field_label");
 	},
 
 	set_label: function(frm) {
