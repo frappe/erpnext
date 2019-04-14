@@ -441,7 +441,7 @@ class SalarySlip(TransactionBase):
 	def calculate_net_pay(self):
 		if self.salary_structure:
 			self.calculate_component_amounts()
-		
+
 		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 		precision = frappe.defaults.get_global_default("currency_precision")
 		self.total_deduction = 0
@@ -452,10 +452,10 @@ class SalarySlip(TransactionBase):
 
 		self.set_loan_repayment()
 
-		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
+		self.net_pay = (flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))) * flt(self.payment_days / self.total_working_days)
 		self.rounded_total = rounded(self.net_pay,
 			self.precision("net_pay") if disable_rounded_total else 0)
-		
+
 		if self.net_pay < 0:
 			frappe.throw(_("Net Pay cannnot be negative"))
 

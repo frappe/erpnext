@@ -5,21 +5,21 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from erpnext.hr.doctype.leave_application.leave_application \
-	import get_leave_allocation_records, get_leave_balance_on, get_approved_leaves_for_period
+	import get_leave_allocation_records, get_leave_balance_on, get_approved_leaves_for_period, get_total_allocated_leaves
 
 
 def execute(filters=None):
 	leave_types = frappe.db.sql_list("select name from `tabLeave Type` order by name asc")
-	
+
 	columns = get_columns(leave_types)
 	data = get_data(filters, leave_types)
-	
+
 	return columns, data
-	
+
 def get_columns(leave_types):
 	columns = [
-		_("Employee") + ":Link/Employee:150", 
-		_("Employee Name") + "::200", 
+		_("Employee") + ":Link/Employee:150",
+		_("Employee Name") + "::200",
 		_("Department") +"::150"
 	]
 
@@ -27,18 +27,18 @@ def get_columns(leave_types):
 		columns.append(_(leave_type) + " " + _("Opening") + ":Float:160")
 		columns.append(_(leave_type) + " " + _("Taken") + ":Float:160")
 		columns.append(_(leave_type) + " " + _("Balance") + ":Float:160")
-	
+
 	return columns
-	
+
 def get_data(filters, leave_types):
 	user = frappe.session.user
 	allocation_records_based_on_to_date = get_leave_allocation_records(filters.to_date)
 	allocation_records_based_on_from_date = get_leave_allocation_records(filters.from_date)
 
-	active_employees = frappe.get_all("Employee", 
-		filters = { "status": "Active", "company": filters.company}, 
+	active_employees = frappe.get_all("Employee",
+		filters = { "status": "Active", "company": filters.company},
 		fields = ["name", "employee_name", "department", "user_id"])
-	
+
 	data = []
 	for employee in active_employees:
 		leave_approvers = get_approvers(employee.department)
@@ -51,8 +51,7 @@ def get_data(filters, leave_types):
 					filters.from_date, filters.to_date)
 
 				# opening balance
-				opening = get_leave_balance_on(employee.name, leave_type, filters.from_date,
-					allocation_records_based_on_from_date.get(employee.name, frappe._dict()))
+				opening = get_total_allocated_leaves(employee.name, leave_type, filters.to_date)
 
 				# closing balance
 				closing = get_leave_balance_on(employee.name, leave_type, filters.to_date,
@@ -61,7 +60,7 @@ def get_data(filters, leave_types):
 				row += [opening, leaves_taken, closing]
 
 			data.append(row)
-		
+
 	return data
 
 def get_approvers(department):
