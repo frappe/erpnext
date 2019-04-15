@@ -960,11 +960,11 @@ def get_advance_journal_entries(party_type, party, party_account, amount_field,
 
 
 def get_advance_payment_entries(party_type, party, party_account, order_doctype,
-		order_list=None, include_unallocated=True, against_all_orders=False, limit=1000):
+		order_list=None, include_unallocated=True, against_all_orders=False, limit=None):
 	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
 	payment_type = "Receive" if party_type == "Customer" else "Pay"
 	payment_entries_against_order, unallocated_payment_entries = [], []
-	limit_cond = "limit %s" % (limit or 1000)
+	limit_cond = "limit %s" % limit if limit else ""
 
 	if order_list or against_all_orders:
 		if order_list:
