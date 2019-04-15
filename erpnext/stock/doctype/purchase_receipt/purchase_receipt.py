@@ -12,7 +12,7 @@ from frappe.utils import getdate
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
-from erpnext.buying.utils import check_for_closed_status
+from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
 from six import iteritems
 
@@ -62,7 +62,7 @@ class PurchaseReceipt(BuyingController):
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 
-		self.check_for_closed_status()
+		self.check_on_hold_or_closed_status()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
@@ -103,13 +103,13 @@ class PurchaseReceipt(BuyingController):
 		return po_qty, po_warehouse
 
 	# Check for Closed status
-	def check_for_closed_status(self):
+	def check_on_hold_or_closed_status(self):
 		check_list =[]
 		for d in self.get('items'):
 			if (d.meta.get_field('purchase_order') and d.purchase_order
 				and d.purchase_order not in check_list):
 				check_list.append(d.purchase_order)
-				check_for_closed_status('Purchase Order', d.purchase_order)
+				check_on_hold_or_closed_status('Purchase Order', d.purchase_order)
 
 	# on submit
 	def on_submit(self):
@@ -147,7 +147,7 @@ class PurchaseReceipt(BuyingController):
 	def on_cancel(self):
 		super(PurchaseReceipt, self).on_cancel()
 
-		self.check_for_closed_status()
+		self.check_on_hold_or_closed_status()
 		# Check if Purchase Invoice has been submitted against current Purchase Order
 		submitted = frappe.db.sql("""select t1.name
 			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2

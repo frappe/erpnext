@@ -1,10 +1,11 @@
 {%- from "templates/print_formats/standard_macros.html" import add_header -%}
-<div class="page-break">
+<div>
+    {% set gl = frappe.get_list(doctype="GL Entry",  fields=["account", "party_type", "party", "debit", "credit", "remarks"], filters={"voucher_type": doc.doctype, "voucher_no": doc.name}) %}
     {%- if not doc.get("print_heading") and not doc.get("select_print_heading")
         and doc.set("select_print_heading", _("Sales Invoice")) -%}{%- endif -%}
     {{ add_header(0, 1, doc, letter_head, no_letterhead, print_settings) }}
     <div class="row margin-bottom">
-        <div class="col-sm-6">
+        <div class="col-xs-6">
             <table>
             <tr><td><strong>Customer Name: </strong></td><td>{{ doc.customer }}</td></tr>
             <tr><td><strong>Due Date: </strong></td><td>{{ frappe.utils.formatdate(doc.due_date) }}</td></tr>
@@ -13,7 +14,7 @@
             <tr><td><strong>Mobile no: </strong> </td><td>{{doc.contact_mobile}}</td></tr>
             </table>
         </div>
-        <div>
+        <div class="col-xs-6">
             <table>
                 <tr><td><strong>Voucher No: </strong></td><td>{{ doc.name }}</td></tr>
                 <tr><td><strong>Date: </strong></td><td>{{ frappe.utils.formatdate(doc.creation) }}</td></tr>
@@ -45,18 +46,20 @@
         </table>
     </div>
     <div class="row margin-bottom">
-        <div class="col-sm-6">
+        <div class="col-xs-6">
             <table>
             <tr><td><strong>Total Quantity: </strong></td><td>{{ doc.total_qty }}</td></tr>
             <tr><td><strong>Total: </strong></td><td>{{doc.total}}</td></tr>
             <tr><td><strong>Net Weight: </strong></td><td>{{ doc.total_net_weight }}</td></tr>
         </table>
     </div>
-    <div>
+    <div class="col-xs-6">
         <table>
                 <tr><td><strong>Tax and Charges: </strong></td><td>{{doc.taxes_and_charges}}</td></tr>
                 {% for tax in doc.taxes %}
-                <tr><td><strong>{{ tax.account_head }}: </strong></td><td>{{ tax.tax_amount_after_discount_amount }}</td></tr>
+                    {% if tax.tax_amount_after_discount_amount!= 0 %}
+                        <tr><td><strong>{{ tax.account_head }}: </strong></td><td>{{ tax.tax_amount_after_discount_amount }}</td></tr>
+                    {% endif %}
                 {% endfor %}
                 <tr><td><strong> Total Taxes and Charges: </strong></td><td>{{ doc.total_taxes_and_charges }}</td></tr>
                 <tr><td><strong> Net Payable: </strong></td><td>{{ doc.grand_total }}</td></tr>
@@ -70,17 +73,17 @@
                 <th>Account</th>
                 <th>Party Type</th>
                 <th>Party</th>
-                <th>Credit Amount</th>
                 <th>Debit Amount</th>
+                <th>Credit Amount</th>
             </tr>
-            {% for entries in doc.gl_entries %}
+            {% for entries in gl %}
             <tr>
                 <td>{{ loop.index }}</td>
                 <td>{{ entries.account }}</td>
                 <td>{{ entries.party_type }}</td>
                 <td>{{ entries.party }}</td>
-                <td>{{ entries.credit }}</td>
                 <td>{{ entries.debit }}</td>
+                <td>{{ entries.credit }}</td>
             </tr>
             {% endfor %}
             <tr>
