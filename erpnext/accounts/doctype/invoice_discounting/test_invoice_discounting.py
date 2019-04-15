@@ -12,12 +12,12 @@ from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_payment_entry_against_invoice
 class TestInvoiceDiscounting(unittest.TestCase):
 	def setUp(self):
-		self.ar_credit = create_account(account_name="_Test Accounts Receivable Credit", parent_account = "Accounts Receivable - _TC")
-		self.ar_discounted = create_account(account_name="_Test Accounts Receivable Discounted", parent_account = "Accounts Receivable - _TC")
-		self.ar_unpaid = create_account(account_name="_Test Accounts Receivable Unpaid", parent_account = "Accounts Receivable - _TC")
-		self.short_term_loan = create_account(account_name="_Test Short Term Loan", parent_account = "Source of Funds (Liabilities) - _TC")
-		self.bank_account = create_account(account_name="_Test Bank 2", parent_account = "Bank Accounts - _TC" )
-		self.bank_charges_account = create_account(account_name="_Test Bank Charges Account", parent_account = "Expenses - _TC")
+		self.ar_credit = create_account(account_name="_Test Accounts Receivable Credit", parent_account = "Accounts Receivable - _TC", company="_Test Company")
+		self.ar_discounted = create_account(account_name="_Test Accounts Receivable Discounted", parent_account = "Accounts Receivable - _TC", company="_Test Company")
+		self.ar_unpaid = create_account(account_name="_Test Accounts Receivable Unpaid", parent_account = "Accounts Receivable - _TC", company="_Test Company")
+		self.short_term_loan = create_account(account_name="_Test Short Term Loan", parent_account = "Source of Funds (Liabilities) - _TC", company="_Test Company")
+		self.bank_account = create_account(account_name="_Test Bank 2", parent_account = "Bank Accounts - _TC", company="_Test Company")
+		self.bank_charges_account = create_account(account_name="_Test Bank Charges Account", parent_account = "Expenses - _TC", company="_Test Company")
 		frappe.db.set_value("Company", "_Test Company", "default_bank_account", self.bank_account)
 
 	def test_total_amount(self):
@@ -104,8 +104,10 @@ class TestInvoiceDiscounting(unittest.TestCase):
 		je.submit()
 
 		inv_disc.reload()
-
 		self.assertEqual(inv_disc.status, "Disbursed")
+
+		inv.reload()
+		self.assertEqual(inv.outstanding_amount, 500)
 
 	def test_on_close_after_loan_period(self):
 		inv = create_sales_invoice(rate=600)
@@ -186,12 +188,20 @@ class TestInvoiceDiscounting(unittest.TestCase):
 		je.posting_date = nowdate()
 		je.submit()
 
-		je_on_payment = get_payment_entry_against_invoice("Sales Invoice", inv.name)
+		je_on_payment = frappe.get_doc(get_payment_entry_against_invoice("Sales Invoice", inv.name))
+		je_on_payment.posting_date = nowdate()
+		je_on_payment.cheque_no = "126981"
+		je_on_payment.cheque_date = nowdate()
+		je_on_payment.save()
+		je_on_payment.submit()
 
 		self.assertEqual(je_on_payment.accounts[0].account, self.ar_discounted)
 		self.assertEqual(je_on_payment.accounts[0].credit_in_account_currency, flt(inv.outstanding_amount))
 		self.assertEqual(je_on_payment.accounts[1].account, self.bank_account)
 		self.assertEqual(je_on_payment.accounts[1].debit_in_account_currency, flt(inv.outstanding_amount))
+
+		inv.reload()
+		self.assertEqual(inv.outstanding_amount, 0)
 
 	def test_make_payment_before_after_period(self):
 		#it has problem
@@ -216,12 +226,19 @@ class TestInvoiceDiscounting(unittest.TestCase):
 		je.posting_date = nowdate()
 		je.submit()
 
-		je_on_payment = get_payment_entry_against_invoice("Sales Invoice", inv.name)
+		je_on_payment = frappe.get_doc(get_payment_entry_against_invoice("Sales Invoice", inv.name))
+		je_on_payment.posting_date = nowdate()
+		je_on_payment.cheque_no = "126981"
+		je_on_payment.cheque_date = nowdate()
+		je_on_payment.submit()
 
 		self.assertEqual(je_on_payment.accounts[0].account, self.ar_unpaid)
 		self.assertEqual(je_on_payment.accounts[0].credit_in_account_currency, flt(inv.outstanding_amount))
 		self.assertEqual(je_on_payment.accounts[1].account, self.bank_account)
 		self.assertEqual(je_on_payment.accounts[1].debit_in_account_currency, flt(inv.outstanding_amount))
+
+		inv.reload()
+		self.assertEqual(inv.outstanding_amount, 0)
 
 
 def create_invoice_discounting(invoices, **args):

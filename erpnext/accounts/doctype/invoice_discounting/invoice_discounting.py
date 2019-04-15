@@ -17,10 +17,11 @@ class InvoiceDiscounting(AccountsController):
 		self.set_end_date()
 
 	def set_end_date(self):
-		self.loan_end_date = add_days(self.loan_start_date, self.loan_period)
+		if self.loan_start_date and self.loan_period:
+			self.loan_end_date = add_days(self.loan_start_date, self.loan_period)
 
 	def validate_mandatory(self):
-		if not (self.loan_start_date and self.loan_period):
+		if self.docstatus == 1 and not (self.loan_start_date and self.loan_period):
 			frappe.throw(_("Loan Start Date and Loan Period are mandatory to save the Invoice Discounting"))
 
 	def calculate_total_amount(self):
