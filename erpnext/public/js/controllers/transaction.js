@@ -473,6 +473,18 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	set_qty_color_based_on_availability: function(item) {
+		if (!in_list(['Sales Order', 'Delivery Note'], this.frm.doc.doctype) || !item)
+			return;
+
+		var warn = this.frm.doc.docstatus === 0 && item.item_code && item.qty > item.actual_qty && item.warehouse;
+		var grid_row = this.frm.get_field("items").grid.get_grid_row(item.name);
+		if (grid_row) {
+			$("[data-fieldname='actual_qty'], [data-fieldname='qty']", grid_row.wrapper)
+				.css("color", warn ? "red" : "inherit");
+		}
+	},
+
 	serial_no: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
