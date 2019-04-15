@@ -306,7 +306,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("items", row, ["income_account", "cost_center"]);
+		this.frm.script_manager.copy_from_first_row("items", row, ["income_account"]);
 	},
 
 	set_dynamic_labels: function() {
@@ -511,10 +511,6 @@ cur_frm.cscript.income_account = function(doc, cdt, cdn) {
 
 cur_frm.cscript.expense_account = function(doc, cdt, cdn) {
 	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "expense_account");
-}
-
-cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
-	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "cost_center");
 }
 
 cur_frm.set_query("debit_to", function(doc) {

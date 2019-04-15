@@ -127,6 +127,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				if(!item.warehouse && frm.doc.set_warehouse) {
 					item.warehouse = frm.doc.set_warehouse;
 				}
+				if(!item.cost_center && frm.doc.cost_center) {
+					item.cost_center = frm.doc.cost_center;
+				}
 			}
 		});
 
@@ -1703,6 +1706,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(this.frm.doc.set_warehouse) {
 			$.each(this.frm.doc.items || [], function(i, item) {
 				frappe.model.set_value(me.frm.doctype + " Item", item.name, "warehouse", me.frm.doc.set_warehouse);
+			});
+		}
+	},
+
+	cost_center: function () {
+		var me = this;
+		if(this.frm.doc.cost_center) {
+			$.each(this.frm.doc.items || [], function(i, item) {
+				frappe.model.set_value(me.frm.doctype + " Item", item.name, "cost_center", me.frm.doc.cost_center);
 			});
 		}
 	}
