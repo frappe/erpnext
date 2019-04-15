@@ -22,7 +22,7 @@ def reconcile(bank_transaction, payment_doctype, payment_name):
 		frappe.throw(_("This bank transaction is already fully reconciled"))
 
 	if transaction.credit > 0 and gl_entry.credit > 0:
-		frappe.throw(_("The selected payment entry should be linked with a debitor bank transaction"))
+		frappe.throw(_("The selected payment entry should be linked with a debtor bank transaction"))
 
 	if transaction.debit > 0 and gl_entry.debit > 0:
 		frappe.throw(_("The selected payment entry should be linked with a creditor bank transaction"))
@@ -59,27 +59,18 @@ def clear_payment_entry(transaction, payment_entry, gl_entry):
 	amount_cleared = (flt(linked_bank_transactions[0].credit) - flt(linked_bank_transactions[0].debit))
 	amount_to_be_cleared = (flt(gl_entry.debit) - flt(gl_entry.credit))
 
-	if payment_entry.doctype == "Payment Entry":
-		clear_simple_entry(amount_cleared, amount_to_be_cleared, payment_entry, transaction)
-
-	elif payment_entry.doctype == "Journal Entry":
+	if payment_entry.doctype in ("Payment Entry", "Journal Entry", "Purchase Invoice", "Expense Claim"):
 		clear_simple_entry(amount_cleared, amount_to_be_cleared, payment_entry, transaction)
 
 	elif payment_entry.doctype == "Sales Invoice":
 		clear_sales_invoice(amount_cleared, amount_to_be_cleared, payment_entry, transaction)
 
-	elif payment_entry.doctype == "Purchase Invoice":
-		clear_simple_entry(amount_cleared, amount_to_be_cleared, payment_entry, transaction)
-
-	elif payment_entry.doctype == "Expense Claim":
-		clear_simple_entry(amount_cleared, amount_to_be_cleared, payment_entry, transaction)
-
 def clear_simple_entry(amount_cleared, amount_to_be_cleared, payment_entry, transaction):
-	if amount_cleared == amount_to_be_cleared:
+	if amount_cleared >= amount_to_be_cleared:
 		frappe.db.set_value(payment_entry.doctype, payment_entry.name, "clearance_date", transaction.date)
 
 def clear_sales_invoice(amount_cleared, amount_to_be_cleared, payment_entry, transaction):
-	if amount_cleared == amount_to_be_cleared:
+	if amount_cleared >= amount_to_be_cleared:
 		frappe.db.set_value("Sales Invoice Payment", dict(parenttype=payment_entry.doctype,
 			parent=payment_entry.name), "clearance_date", transaction.date)
 
@@ -180,16 +171,33 @@ def check_matching_amount(bank_account, company, transaction):
 		sales_invoices = []
 
 	if transaction.debit > 0:
-		purchase_invoices = frappe.get_all("Purchase Invoice", fields=["'Purchase Invoice' as doctype", "name", "paid_amount",
-			"supplier as party", "posting_date", "currency"], filters=[["paid_amount", "like", "{0}%".format(amount)],
-			["docstatus", "=", "1"], ["is_paid", "=", "1"], ["ifnull(clearance_date, '')", "=", ""], ["cash_bank_account", "=", "{0}".format(bank_account)]])
+		purchase_invoices = frappe.get_all("Purchase Invoice",
+			fields = ["'Purchase Invoice' as doctype", "name", "paid_amount", "supplier as party", "posting_date", "currency"],
+			filters=[
+				["paid_amount", "like", "{0}%".format(amount)],
+				["docstatus", "=", "1"],
+				["is_paid", "=", "1"],
+				["ifnull(clearance_date, '')", "=", ""],
+				["cash_bank_account", "=", "{0}".format(bank_account)]
+			]
+		)
 
-		mode_of_payments = [x["parent"] for x in frappe.db.get_list("Mode of Payment Account", filters={"default_account": bank_account}, fields=["parent"])]
+		mode_of_payments = [x["parent"] for x in frappe.db.get_list("Mode of Payment Account",
+			filters={"default_account": bank_account}, fields=["parent"])]
+
 		company_currency = get_company_currency(company)
 
-		expense_claims = frappe.get_all("Expense Claim", fields=["'Expense Claim' as doctype", "name", "total_sanctioned_amount as paid_amount",
-			"employee as party", "posting_date", "'{0}' as currency".format(company_currency)], filters=[["total_sanctioned_amount", "like", "{0}%".format(amount)],
-			["docstatus", "=", "1"], ["is_paid", "=", "1"], ["ifnull(clearance_date, '')", "=", ""], ["mode_of_payment", "in", "{0}".format(tuple(mode_of_payments))]])
+		expense_claims = frappe.get_all("Expense Claim",
+			fields=["'Expense Claim' as doctype", "name", "total_sanctioned_amount as paid_amount",
+				"employee as party", "posting_date", "'{0}' as currency".format(company_currency)],
+			filters=[
+				["total_sanctioned_amount", "like", "{0}%".format(amount)],
+				["docstatus", "=", "1"],
+				["is_paid", "=", "1"],
+				["ifnull(clearance_date, '')", "=", ""],
+				["mode_of_payment", "in", "{0}".format(tuple(mode_of_payments))]
+			]
+		)
 	else:
 		purchase_invoices = expense_claims = []
 
@@ -286,12 +294,40 @@ def get_matching_transactions_payments(description_matching):
 	else:
 		return []
 
+def payment_entry_query(doctype, txt, searchfield, start, page_len, filters):
+	account = frappe.db.get_value("Bank Account", filters.get("bank_account"), "account")
+	if not account:
+		return
+
+	return frappe.db.sql("""
+		SELECT
+			name, party, paid_amount, received_amount, reference_no
+		FROM
+			`tabPayment Entry`
+		WHERE
+			(clearance_date is null or clearance_date='0000-00-00')
+			AND (paid_from = %(account)s or paid_to = %(account)s)
+			AND (name like %(txt)s or party like %(txt)s)
+			AND docstatus = 1
+		ORDER BY
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999), name
+		LIMIT
+			%(start)s, %(page_len)s""",
+		{
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len,
+			'account': account
+		}
+	)
+
 def journal_entry_query(doctype, txt, searchfield, start, page_len, filters):
 	account = frappe.db.get_value("Bank Account", filters.get("bank_account"), "account")
 
 	return frappe.db.sql("""
 		SELECT
-			jea.parent, je.pay_to_recd_from, 
+			jea.parent, je.pay_to_recd_from,
 			if(jea.debit_in_account_currency > 0, jea.debit_in_account_currency, jea.credit_in_account_currency)
 		FROM
 			`tabJournal Entry Account` as jea
