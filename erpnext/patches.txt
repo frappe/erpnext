@@ -596,3 +596,4 @@ erpnext.patches.v12_0.stock_entry_enhancements
 erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019
 erpnext.patches.v12_0.move_item_tax_to_item_tax_template
 erpnext.patches.v11_1.set_variant_based_on
+erpnext.patches.v11_1.woocommerce_set_creation_user
