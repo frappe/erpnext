@@ -118,7 +118,7 @@ class Batch(Document):
 			frappe.throw(_("The selected item cannot have Batch"))
 
 	def calculate_batch_qty(self):
-		self.batch_qty = frappe.db.get_value("Stock Ledger Entry", {"batch_no": self.batch_id}, "sum(actual_qty)")
+		self.batch_qty = frappe.db.get_value("Stock Ledger Entry", {"docstatus": 1, "batch_no": self.batch_id}, "sum(actual_qty)")
 
 	def before_save(self):
 		has_expiry_date, shelf_life_in_days = frappe.db.get_value('Item', self.item, ['has_expiry_date', 'shelf_life_in_days'])
