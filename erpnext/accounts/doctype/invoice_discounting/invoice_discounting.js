@@ -9,7 +9,7 @@ frappe.ui.form.on('Invoice Discounting', {
 					"docstatus": 1,
 					"company": doc.company,
 					"outstanding_amount": [">", 0]
-				}
+				},
 			};
 		});
 
