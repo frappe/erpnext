@@ -20,8 +20,7 @@ class DeliveryTrip(Document):
 		# Google Maps returns distances in meters by default
 		self.default_distance_uom = frappe.db.get_single_value("Global Defaults", "default_distance_unit") or "Meter"
 		self.uom_conversion_factor = frappe.db.get_value("UOM Conversion Factor",
-														{"from_uom": "Meter", "to_uom": self.default_distance_uom},
-														"value")
+			{"from_uom": "Meter", "to_uom": self.default_distance_uom}, "value")
 
 	def validate(self):
 		self.validate_stop_addresses()
@@ -139,7 +138,7 @@ class DeliveryTrip(Document):
 				# Include last leg in the final distance calculation
 				self.uom = self.default_distance_uom
 				total_distance = sum([leg.get("distance", {}).get("value", 0.0)
-											for leg in directions.get("legs")])  # in meters
+					for leg in directions.get("legs")])  # in meters
 				self.total_distance = total_distance * self.uom_conversion_factor
 			else:
 				idx += len(route) - 1
@@ -358,8 +357,12 @@ def notify_customers(delivery_trip):
 	email_recipients = []
 
 	for stop in delivery_trip.delivery_stops:
-		contact_info = frappe.db.get_value("Contact", stop.contact,
-											["first_name", "last_name", "email_id", "gender"], as_dict=1)
+		contact_info = frappe.db.get_value("Contact", stop.contact, ["first_name", "last_name", "email_id"], as_dict=1)
+
+		context.update({"items": []})
+		if stop.delivery_note:
+			items = frappe.get_all("Delivery Note Item", filters={"parent": stop.delivery_note, "docstatus": 1}, fields=["*"])
+			context.update({"items": items})
 
 		if contact_info and contact_info.email_id:
 			context.update(stop.as_dict())
@@ -369,9 +372,9 @@ def notify_customers(delivery_trip):
 			dispatch_template = frappe.get_doc("Email Template", dispatch_template_name)
 
 			frappe.sendmail(recipients=contact_info.email_id,
-							subject=dispatch_template.subject,
-							message=frappe.render_template(dispatch_template.response, context),
-							attachments=get_attachments(stop))
+				subject=dispatch_template.subject,
+				message=frappe.render_template(dispatch_template.response, context),
+				attachments=get_attachments(stop))
 
 			stop.db_set("email_sent_to", contact_info.email_id)
 			email_recipients.append(contact_info.email_id)
@@ -388,9 +391,7 @@ def get_attachments(delivery_stop):
 		return []
 
 	dispatch_attachment = frappe.db.get_single_value("Delivery Settings", "dispatch_attachment")
-	attachments = frappe.attach_print("Delivery Note",
-										delivery_stop.delivery_note,
-										file_name="Delivery Note",
-										print_format=dispatch_attachment)
+	attachments = frappe.attach_print("Delivery Note", delivery_stop.delivery_note,
+		file_name="Delivery Note", print_format=dispatch_attachment)
 
 	return [attachments]
