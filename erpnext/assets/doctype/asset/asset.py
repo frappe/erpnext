@@ -3,8 +3,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+import frappe, erpnext, math, json
 from frappe import _
+from six import string_types
 from frappe.utils import flt, add_months, cint, nowdate, getdate, today, date_diff
 from frappe.model.document import Document
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
@@ -20,6 +21,7 @@ class Asset(AccountsController):
 		self.validate_item()
 		self.set_missing_values()
 		if self.calculate_depreciation:
+			self.set_depreciation_rate()
 			self.make_depreciation_schedule()
 			self.set_accumulated_depreciation()
 		else:
@@ -89,17 +91,22 @@ class Asset(AccountsController):
 		if self.is_existing_asset:
 			return
 
-		date =  nowdate()
 		docname = self.purchase_receipt or self.purchase_invoice
 		if docname:
 			doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'
 			date = frappe.db.get_value(doctype, docname, 'posting_date')
 
-		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(date):
+		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(self.purchase_date):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
 
+	def set_depreciation_rate(self):
+		for d in self.get("finance_books"):
+			d.rate_of_depreciation = self.get_depreciation_rate(d)
+
 	def make_depreciation_schedule(self):
-		if self.depreciation_method != 'Manual':
+		depreciation_method = [d.depreciation_method for d in self.finance_books]
+
+		if 'Manual' not in depreciation_method:
 			self.schedules = []
 
 		if not self.get("schedules") and self.available_for_use_date:
@@ -254,14 +261,16 @@ class Asset(AccountsController):
 		return flt(self.get('finance_books')[cint(idx)-1].value_after_depreciation)
 
 	def get_depreciation_amount(self, depreciable_value, total_number_of_depreciations, row):
-		percentage_value = 100.0 if row.depreciation_method == 'Written Down Value' else 200.0
+		if row.depreciation_method in ["Straight Line", "Manual"]:
+			amt = (flt(self.gross_purchase_amount) - flt(row.expected_value_after_useful_life) -
+				flt(self.opening_accumulated_depreciation))
 
-		factor = percentage_value /  cint(total_number_of_depreciations)
-		depreciation_amount = flt(depreciable_value * factor / 100, 0)
-
-		value_after_depreciation = flt(depreciable_value) - depreciation_amount
-		if value_after_depreciation < flt(row.expected_value_after_useful_life):
-			depreciation_amount = flt(depreciable_value) - flt(row.expected_value_after_useful_life)
+			depreciation_amount = amt * row.rate_of_depreciation
+		else:
+			depreciation_amount = flt(depreciable_value) * (flt(row.rate_of_depreciation) / 100)
+			value_after_depreciation = flt(depreciable_value) - depreciation_amount
+			if value_after_depreciation < flt(row.expected_value_after_useful_life):
+				depreciation_amount = flt(depreciable_value) - flt(row.expected_value_after_useful_life)
 
 		return depreciation_amount
 
@@ -394,6 +403,32 @@ class Asset(AccountsController):
 			make_gl_entries(gl_entries)
 			self.db_set('booked_fixed_asset', 1)
 
+	def get_depreciation_rate(self, args):
+		if isinstance(args, string_types):
+			args = json.loads(args)
+
+		number_of_depreciations_booked = 0
+		if self.is_existing_asset:
+			number_of_depreciations_booked = self.number_of_depreciations_booked
+
+		float_precision = cint(frappe.db.get_default("float_precision")) or 2
+		tot_no_of_depreciation = flt(args.get("total_number_of_depreciations")) - flt(number_of_depreciations_booked)
+
+		if args.get("depreciation_method") in ["Straight Line", "Manual"]:
+			return 1.0 / tot_no_of_depreciation
+
+		if args.get("depreciation_method") == 'Double Declining Balance':
+			return 200.0 / args.get("total_number_of_depreciations")
+
+		if args.get("depreciation_method") == "Written Down Value" and not args.get("rate_of_depreciation"):
+			no_of_years = flt(args.get("total_number_of_depreciations") * flt(args.get("frequency_of_depreciation"))) / 12
+			value = flt(args.get("expected_value_after_useful_life")) / flt(self.gross_purchase_amount)
+
+			# square root of flt(salvage_value) / flt(asset_cost)
+			depreciation_rate = math.pow(value, 1.0/flt(no_of_years, 2))
+
+			return 100 * (1 - flt(depreciation_rate, float_precision))
+
 def update_maintenance_status():
 	assets = frappe.get_all('Asset', filters = {'docstatus': 1, 'maintenance_required': 1})
 
@@ -480,7 +515,6 @@ def create_asset_adjustment(asset, asset_category, company):
 
 @frappe.whitelist()
 def transfer_asset(args):
-	import json
 	args = json.loads(args)
 
 	if args.get('serial_no'):
