@@ -30,8 +30,9 @@ class AccountsController(TransactionBase):
 		return self.__company_currency
 
 	def onload(self):
-		self.get("__onload").make_payment_via_journal_entry \
-			= frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
+		if self.get("__onload"):
+			self.get("__onload").make_payment_via_journal_entry \
+				= frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
 
 		if self.is_new():
 			relevant_docs = ("Quotation", "Purchase Order", "Sales Order",
@@ -116,12 +117,6 @@ class AccountsController(TransactionBase):
 			self.validate_non_invoice_documents_schedule()
 
 	def before_print(self):
-		if self.doctype in ['Journal Entry', 'Payment Entry', 'Sales Invoice', 'Purchase Invoice']:
-			self.gl_entries = frappe.get_list("GL Entry", filters={
-				"voucher_type": self.doctype,
-				"voucher_no": self.name
-			}, fields=["account", "party_type", "party", "debit", "credit", "remarks"])
-
 		if self.doctype in ['Purchase Order', 'Sales Order', 'Sales Invoice', 'Purchase Invoice',
 							'Supplier Quotation', 'Purchase Receipt', 'Delivery Note', 'Quotation']:
 			if self.get("group_same_items"):
