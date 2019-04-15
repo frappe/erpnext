@@ -51,7 +51,9 @@ def get_cart_quotation(doc=None):
 @frappe.whitelist()
 def place_order():
 	quotation = _get_cart_quotation()
-	quotation.company = frappe.db.get_value("Shopping Cart Settings", None, "company")
+	cart_settings = frappe.db.get_value("Shopping Cart Settings", None,
+		["company", "allow_items_not_in_stock"], as_dict=1)
+	quotation.company = cart_settings.company
 	if not quotation.get("customer_address"):
 		throw(_("{0} is required").format(_(quotation.meta.get_label("customer_address"))))
 
@@ -64,14 +66,16 @@ def place_order():
 
 	from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))
-	for item in sales_order.get("items"):
-		item.reserved_warehouse, is_stock_item = frappe.db.get_value("Item",
-			item.item_code, ["website_warehouse", "is_stock_item"])
 
-		if is_stock_item:
-			item_stock = get_qty_in_stock(item.item_code, "website_warehouse")
-			if item.qty > item_stock.stock_qty[0][0]:
-				throw(_("Only {0} in stock for item {1}").format(item_stock.stock_qty[0][0], item.item_code))
+	if not cart_settings.allow_items_not_in_stock:
+		for item in sales_order.get("items"):
+			item.reserved_warehouse, is_stock_item = frappe.db.get_value("Item",
+				item.item_code, ["website_warehouse", "is_stock_item"])
+
+			if is_stock_item:
+				item_stock = get_qty_in_stock(item.item_code, "website_warehouse")
+				if item.qty > item_stock.stock_qty[0][0]:
+					throw(_("Only {0} in stock for item {1}").format(item_stock.stock_qty[0][0], item.item_code))
 
 	sales_order.flags.ignore_permissions = True
 	sales_order.insert()
