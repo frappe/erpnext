@@ -46,7 +46,7 @@ class Opportunity(TransactionBase):
 
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""
-		if not self.customer_lead and self.contact_email:
+		if not self.customer_lead and self.contact_email:		#nosec
 			# check if customer is already created agains the self.contact_email
 			customer = frappe.db.sql("""select
 				distinct `tabDynamic Link`.link_name as customer
