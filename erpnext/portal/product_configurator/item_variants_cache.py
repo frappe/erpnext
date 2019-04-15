@@ -39,6 +39,19 @@ class ItemVariantsCacheManager:
 
 		return frappe.cache().hget('optional_attributes', self.item_code)
 
+	def get_ordered_attribute_values(self):
+		val = frappe.cache().get_value('ordered_attribute_values_map')
+		if val: return val
+
+		all_attribute_values = frappe.db.get_all('Item Attribute Value',
+			['attribute_value', 'idx', 'parent'], order_by='idx asc')
+
+		ordered_attribute_values_map = frappe._dict({})
+		for d in all_attribute_values:
+			ordered_attribute_values_map.setdefault(d.parent, []).append(d.attribute_value)
+
+		frappe.cache().set_value('ordered_attribute_values_map', ordered_attribute_values_map)
+		return ordered_attribute_values_map
 
 	def build_cache(self):
 		parent_item_code = self.item_code
