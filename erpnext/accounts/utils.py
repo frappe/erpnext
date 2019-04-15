@@ -544,14 +544,14 @@ def fix_total_debit_credit():
 				(dr_or_cr, dr_or_cr, '%s', '%s', '%s', dr_or_cr),
 				(d.diff, d.voucher_type, d.voucher_no))
 
-def get_stock_and_account_difference(account_list=None, posting_date=None):
+def get_stock_and_account_difference(account_list=None, posting_date=None, company=None):
 	from erpnext.stock.utils import get_stock_value_on
 	from erpnext.stock import get_warehouse_account_map
 
 	if not posting_date: posting_date = nowdate()
 
 	difference = {}
-	warehouse_account = get_warehouse_account_map()
+	warehouse_account = get_warehouse_account_map(company)
 
 	for warehouse, account_data in iteritems(warehouse_account):
 		if account_data.get('account') in account_list:
@@ -615,7 +615,7 @@ def get_held_invoices(party_type, party):
 	return held_invoices
 
 
-def get_outstanding_invoices(party_type, party, account, condition=None, limit=None):
+def get_outstanding_invoices(party_type, party, account, condition=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
@@ -628,7 +628,6 @@ def get_outstanding_invoices(party_type, party, account, condition=None, limit=N
 
 	invoice = 'Sales Invoice' if erpnext.get_party_account_type(party_type) == 'Receivable' else 'Purchase Invoice'
 	held_invoices = get_held_invoices(party_type, party)
-	limit_cond = "limit %s" % limit if limit else ""
 
 	invoice_list = frappe.db.sql("""
 		select
@@ -643,11 +642,10 @@ def get_outstanding_invoices(party_type, party, account, condition=None, limit=N
 					and (against_voucher = '' or against_voucher is null))
 				or (voucher_type not in ('Journal Entry', 'Payment Entry')))
 		group by voucher_type, voucher_no
-		order by posting_date, name {limit_cond}""".format(
+		order by posting_date, name""".format(
 			dr_or_cr=dr_or_cr,
 			invoice = invoice,
-			condition=condition or "",
-			limit_cond = limit_cond
+			condition=condition or ""
 		), {
 			"party_type": party_type,
 			"party": party,

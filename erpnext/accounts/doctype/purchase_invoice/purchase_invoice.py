@@ -55,11 +55,6 @@ class PurchaseInvoice(BuyingController):
 		if not self.on_hold:
 			self.release_date = ''
 
-	def before_print(self):
-		self.gl_entries = frappe.get_list("GL Entry",filters={"voucher_type": "Purchase Invoice",
-			"voucher_no": self.name} ,
-			fields=["account", "party_type", "party", "debit", "credit"]
-		)
 
 	def invoice_is_blocked(self):
 		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))
@@ -223,7 +218,7 @@ class PurchaseInvoice(BuyingController):
 			self.validate_item_code()
 			self.validate_warehouse()
 			if auto_accounting_for_stock:
-				warehouse_account = get_warehouse_account_map()
+				warehouse_account = get_warehouse_account_map(self.company)
 
 		for item in self.get("items"):
 			# in case of auto inventory accounting,
@@ -374,7 +369,8 @@ class PurchaseInvoice(BuyingController):
 			if repost_future_gle and cint(self.update_stock) and self.auto_accounting_for_stock:
 				from erpnext.controllers.stock_controller import update_gl_entries_after
 				items, warehouses = self.get_items_and_warehouses()
-				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items)
+				update_gl_entries_after(self.posting_date, self.posting_time,
+					warehouses, items, company = self.company)
 
 		elif self.docstatus == 2 and cint(self.update_stock) and self.auto_accounting_for_stock:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
@@ -433,7 +429,7 @@ class PurchaseInvoice(BuyingController):
 		stock_items = self.get_stock_items()
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 		if self.update_stock and self.auto_accounting_for_stock:
-			warehouse_account = get_warehouse_account_map()
+			warehouse_account = get_warehouse_account_map(self.company)
 
 		voucher_wise_stock_value = {}
 		if self.update_stock:
@@ -793,9 +789,8 @@ class PurchaseInvoice(BuyingController):
 		for d in self.items:
 			if d.project and d.project not in project_list:
 				project = frappe.get_doc("Project", d.project)
-				project.flags.dont_sync_tasks = True
 				project.update_purchase_costing()
-				project.save()
+				project.db_update()
 				project_list.append(d.project)
 
 	def validate_supplier_invoice(self):

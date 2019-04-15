@@ -468,7 +468,7 @@ cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function(
 
 cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
-	if(d.idx == 1 && d.cost_center){
+	if(d.cost_center){
 		var cl = doc.items || [];
 		for(var i = 0; i < cl.length; i++){
 			if(!cl[i].cost_center) cl[i].cost_center = d.cost_center;
@@ -510,11 +510,25 @@ frappe.ui.form.on("Purchase Invoice", {
 				}
 			}
 		}
+
+		frm.set_query("cost_center", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0
+				}
+			};
+		});
 	},
 
 	onload: function(frm) {
-		if(frm.doc.__onload && !frm.doc.__onload.supplier_tds) {
-			me.frm.set_df_property("apply_tds", "read_only", 1);
+		if(frm.doc.__onload) {
+			if(frm.doc.supplier) {
+				frm.doc.apply_tds = frm.doc.__onload.supplier_tds ? 1 : 0;
+			}
+			if(!frm.doc.__onload.supplier_tds) {
+				frm.set_df_property("apply_tds", "read_only", 1);
+			}
 		}
 
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
