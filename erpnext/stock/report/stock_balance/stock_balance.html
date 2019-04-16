@@ -25,7 +25,9 @@
 	<thead>
 		<tr>
 			<th class="text-center">{%= __("Item") %}</th>
+			{% if(!cint(filters.consolidated)) { %}
 			<th class="text-center">{%= __("Warehouse") %}</th>
+			{% } %}
 			<th class="text-center">{%= __("UOM") %}</th>
 			<th class="text-center">{%= __("Opening Qty") %}</th>
 			<th class="text-center">{%= __("In Qty") %}</th>
@@ -45,7 +47,9 @@
 					{% } %}
 				</td>
 
+				{% if(!cint(filters.consolidated)) { %}
 				<td><a href="#Form/Warehouse/{%= data[i].warehouse %}" target="_blank">{%= (data[i].warehouse || " - ").split(" - ")[0] %}</a></td>
+				{% } %}
 
                 <td class="text-center">{%= data[i].uom %}</td>
                 <td class="text-right text-nowrap">{%= format_number(data[i].opening_qty) %}</td>
