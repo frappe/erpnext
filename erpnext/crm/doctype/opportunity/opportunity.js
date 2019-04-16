@@ -37,9 +37,8 @@ frappe.ui.form.on("Opportunity", {
 
 	refresh: function(frm) {
 		var doc = frm.doc;
-		// frm.events.enquiry_from(frm);
+		frm.events.opportunity_from(frm);
 		frm.trigger('toggle_mandatory');
-		frm.trigger("set_dynamic_field_label");
 		erpnext.toggle_naming_series();
 
 		if(!doc.__islocal && doc.status!=="Lost") {

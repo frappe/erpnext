@@ -28,7 +28,7 @@ def make_opportunity(buyer_name, email_id):
 		lead.save(ignore_permissions=True)
 
 	o = frappe.new_doc("Opportunity")
-	o.enquiry_from = "Lead"
+	o.opportunity_from = "Lead"
 	o.lead = frappe.get_all("Lead", filters={"email_id": email_id}, fields = ["name"])[0]["name"]
 	o.save(ignore_permissions=True)
 

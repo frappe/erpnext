@@ -44,7 +44,7 @@ class Opportunity(TransactionBase):
 
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""
-		if not self.customer_lead and self.contact_email:		#nosec
+		if (not self.get("customer_lead")) and self.contact_email:
 			# check if customer is already created agains the self.contact_email
 			customer = frappe.db.sql("""select
 				distinct `tabDynamic Link`.link_name as customer
@@ -242,7 +242,7 @@ def make_quotation(source_name, target_doc=None):
 		"Opportunity": {
 			"doctype": "Quotation",
 			"field_map": {
-				"enquiry_from": "quotation_to",
+				"opportunity_from": "quotation_to",
 				"opportunity_type": "order_type",
 				"name": "enq_no",
 			}

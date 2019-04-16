@@ -56,7 +56,7 @@ def work(domain="Manufacturing"):
 def make_opportunity(domain):
 	b = frappe.get_doc({
 		"doctype": "Opportunity",
-		"enquiry_from": "Customer",
+		"opportunity_from": "Customer",
 		"customer": get_random("Customer"),
 		"opportunity_type": "Sales",
 		"with_items": 1,
