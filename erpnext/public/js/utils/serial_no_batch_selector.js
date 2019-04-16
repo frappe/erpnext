@@ -2,15 +2,13 @@
 erpnext.SerialNoBatchSelector = Class.extend({
 	init: function(opts, show_dialog) {
 		$.extend(this, opts);
-		this.show_dialog = show_dialog;
+		this.show_dialog = show_dialog
 		// frm, item, warehouse_details, has_batch, oldest
 		let d = this.item;
-
-		// Don't show dialog if batch no or serial no already set
 		if(d && d.has_batch_no && (!d.batch_no || this.show_dialog)) {
 			this.has_batch = 1;
 			this.setup();
-		} else if(d && d.has_serial_no && (!d.serial_no || this.show_dialog)) {
+		} else if(d && d.has_serial_no && !(this.show_dialog == false)) {
 			this.has_batch = 0;
 			this.setup();
 		}
@@ -78,10 +76,11 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				hidden: me.has_batch ? 1 : 0,
 				label: __('Fetch based on FIFO'),
 				click: (e) => {
+					let qty = this.dialog.fields_dict.qty.get_value()
 					let numbers = frappe.call({
 						method: "erpnext.stock.doctype.serial_no.serial_no.auto_fetch_serial_number",
 						args: {
-							qty: this.dialog.fields_dict.qty.get_value(),
+							qty: qty,
 							item_code: me.item_code,
 							warehouse: me.warehouse_details.name
 						}
@@ -89,10 +88,13 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 					numbers.then((data) => {
 						let auto_fetched_serial_numbers = data.message;
+						records_length = auto_fetched_serial_numbers.length
+						if(records_length < qty) {
+							frappe.msgprint(`Fetched only ${records_length} serial numbers`)
+						}
 						let serial_no_list_field = this.dialog.fields_dict.serial_no;
 						numbers = auto_fetched_serial_numbers.join('\n');
 						serial_no_list_field.set_value(numbers);
-						// auto_fetch_qty_field.set_value("");
 					})
 				}
 			}
@@ -110,6 +112,10 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			title: title,
 			fields: fields
 		});
+
+		if (this.item.serial_no) {
+			this.dialog.fields_dict.serial_no.set_value(this.item.serial_no)
+		}
 
 		this.dialog.set_primary_action(__('Insert'), function() {
 			me.values = me.dialog.get_values();
