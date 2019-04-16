@@ -28,7 +28,7 @@ def verify_request():
 
 
 @frappe.whitelist(allow_guest=True)
-def order(data=None):
+def order():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 
 	if frappe.flags.woocomm_test_order_data:
@@ -38,7 +38,6 @@ def order(data=None):
 		verify_request()
 		fd = json.loads(frappe.request.data)
 		event = frappe.get_request_header("X-Wc-Webhook-Event")
-
 	else:
 		return "success"
 
@@ -122,21 +121,16 @@ def order(data=None):
 
 
 @frappe.whitelist(allow_guest=True)
-def client(data=None):
-	fd = None
-	if data:
+def client():
+	if frappe.flags.woocomm_test_order_data:
+		fd = frappe.flags.woocomm_test_order_data
+		event = "created"
+	elif frappe.request and frappe.request.data:
 		verify_request()
-		if frappe.request and frappe.request.data:
-			fd = json.loads(frappe.request.data)
-	elif data:
-		fd = data
-	else:
-		return "success"
-
-	if not data:
+		fd = json.loads(frappe.request.data)
 		event = frappe.get_request_header("X-Wc-Webhook-Event")
 	else:
-		event = "created"
+		return "success"
 
 	if event == "created":
 		raw_billing_data = fd.get("billing")
@@ -151,21 +145,16 @@ def client(data=None):
 
 
 @frappe.whitelist(allow_guest=True)
-def item(data=None):
-	fd = None
-	if data:
+def item():
+	if frappe.flags.woocomm_test_order_data:
+		fd = frappe.flags.woocomm_test_order_data
+		event = "created"
+	elif frappe.request and frappe.request.data:
 		verify_request()
-		if frappe.request and frappe.request.data:
-			fd = json.loads(frappe.request.data)
-	elif data:
-		fd = data
-	else:
-		return "success"
-
-	if not data:
+		fd = json.loads(frappe.request.data)
 		event = frappe.get_request_header("X-Wc-Webhook-Event")
 	else:
-		event = "created"
+		return "success"
 
 	if event == "created":
 		item = fd
