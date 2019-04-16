@@ -33,5 +33,6 @@ class AccountsSettings(Document):
 
 	def enable_fields_for_cost_center_settings(self):
 		show_field = 0 if cint(self.allow_cost_center_in_entry_of_bs_account) else 1
-		for doctype in ("Sales Invoice", "Purchase Invoice", "Payment Entry"):
-			make_property_setter(doctype, "cost_center", "hidden", show_field, "Check")
+		for doctype in ("Delivery Note", "Sales Invoice", "Purchase Receipt", "Purchase Invoice", "Payment Entry"):
+			if frappe.get_meta(doctype).has_field("cost_center"):
+				make_property_setter(doctype, "cost_center", "hidden", show_field, "Check")
