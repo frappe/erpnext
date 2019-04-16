@@ -67,7 +67,7 @@ def build_result(account, dates, gl_entries):
 	if root_type in ('Asset', 'Liability', 'Equity'):
 		for i, r in enumerate(result):
 			if i > 0:
-				r[i][1] = r[i][1] + result[i-1][1]
+				r[1] = r[1] + result[i-1][1]
 
 	return result
 
