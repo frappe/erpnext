@@ -160,9 +160,9 @@ class TestAsset(unittest.TestCase):
 		asset.save()
 
 		expected_schedules = [
-			["2020-06-06", 66667.0, 66667.0],
-			["2021-04-06", 22222.0, 88889.0],
-			["2022-02-06", 1111.0, 90000.0]
+			["2020-06-06", 66666.67, 66666.67],
+			["2021-04-06", 22222.22, 88888.89],
+			["2022-02-06", 1111.11, 90000.0]
 		]
 
 		schedules = [[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
@@ -192,8 +192,8 @@ class TestAsset(unittest.TestCase):
 		asset.save()
 
 		expected_schedules = [
-			["2020-06-06", 33333.0, 83333.0],
-			["2021-04-06", 6667.0, 90000.0]
+			["2020-06-06", 33333.33, 83333.33],
+			["2021-04-06", 6666.67, 90000.0]
 		]
 
 		schedules = [[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
@@ -209,7 +209,7 @@ class TestAsset(unittest.TestCase):
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
 		asset = frappe.get_doc('Asset', asset_name)
 		asset.calculate_depreciation = 1
-		asset.purchase_date = '2020-06-06'
+		asset.purchase_date = '2020-01-30'
 		asset.is_existing_asset = 0
 		asset.available_for_use_date = "2020-01-30"
 		asset.append("finance_books", {
@@ -244,7 +244,7 @@ class TestAsset(unittest.TestCase):
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
 		asset = frappe.get_doc('Asset', asset_name)
 		asset.calculate_depreciation = 1
-		asset.purchase_date = '2020-06-06'
+		asset.purchase_date = '2020-01-30'
 		asset.available_for_use_date = "2020-01-30"
 		asset.append("finance_books", {
 			"expected_value_after_useful_life": 10000,
@@ -276,6 +276,37 @@ class TestAsset(unittest.TestCase):
 
 		self.assertEqual(gle, expected_gle)
 		self.assertEqual(asset.get("value_after_depreciation"), 0)
+
+	def test_depreciation_entry_for_wdv(self):
+		pr = make_purchase_receipt(item_code="Macbook Pro",
+			qty=1, rate=8000.0, location="Test Location")
+
+		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
+		asset = frappe.get_doc('Asset', asset_name)
+		asset.calculate_depreciation = 1
+		asset.available_for_use_date = '2030-06-06'
+		asset.purchase_date = '2030-06-06'
+		asset.append("finance_books", {
+			"expected_value_after_useful_life": 1000,
+			"depreciation_method": "Written Down Value",
+			"total_number_of_depreciations": 3,
+			"frequency_of_depreciation": 12,
+			"depreciation_start_date": "2030-12-31"
+		})
+		asset.save(ignore_permissions=True)
+
+		self.assertEqual(asset.finance_books[0].rate_of_depreciation, 50.0)
+
+		expected_schedules = [
+			["2030-12-31", 4000.0, 4000.0],
+			["2031-12-31", 2000.0, 6000.0],
+			["2032-12-31", 1000.0, 7000.0],
+		]
+
+		schedules = [[cstr(d.schedule_date), flt(d.depreciation_amount, 2), flt(d.accumulated_depreciation_amount, 2)]
+			for d in asset.get("schedules")]
+
+		self.assertEqual(schedules, expected_schedules)
 
 	def test_depreciation_entry_cancellation(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",

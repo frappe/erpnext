@@ -122,3 +122,9 @@ def generate_secret():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 	woocommerce_settings.secret = frappe.generate_hash()
 	woocommerce_settings.save()
+
+@frappe.whitelist()
+def get_series():
+	return {
+		"sales_order_series" : frappe.get_meta("Sales Order").get_options("naming_series") or "SO-WOO-",
+	}

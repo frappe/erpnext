@@ -135,7 +135,7 @@ class NamingSeries(Document):
 
 	def validate_series_name(self, n):
 		import re
-		if not re.match("^[\w\- /.#]*$", n, re.UNICODE):
+		if not (re.match("^[\w\- /.#]*$", n, re.UNICODE) or re.match("\{(.*?)\}", n, re.UNICODE)):
 			throw(_('Special Characters except "-", "#", "." and "/" not allowed in naming series'))
 
 	def get_options(self, arg=None):

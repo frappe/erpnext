@@ -81,6 +81,14 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Item",
+				},
+				{
+					"type": "doctype",
+					"name": "Bank",
+				},
+				{
+					"type": "doctype",
+					"name": "Bank Account",
 				}
 			]
 		},
@@ -139,6 +147,12 @@ def get_data():
 					"label": _("Update Bank Transaction Dates"),
 					"name": "Bank Reconciliation",
 					"description": _("Update bank payment dates with journals.")
+				},
+				{
+					"type": "page",
+					"label": _("Reconcile payments and bank transactions"),
+					"name": "bank-reconciliation",
+					"description": _("Link bank transactions with payments.")
 				},
 				{
 					"type": "doctype",

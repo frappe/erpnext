@@ -684,7 +684,7 @@ def get_held_invoices(party_type, party):
 	"""
 	Returns a list of names Purchase Invoices for the given party that are on hold
 	"""
-	held_invoices = []
+	held_invoices = None
 
 	if party_type == 'Supplier':
 		held_invoices = frappe.db.sql(
@@ -696,7 +696,7 @@ def get_held_invoices(party_type, party):
 	return held_invoices
 
 
-def get_outstanding_invoices(party_type, party, account, condition=None, negative_invoices=False, limit=None):
+def get_outstanding_invoices(party_type, party, account, condition=None, negative_invoices=False):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
@@ -708,7 +708,6 @@ def get_outstanding_invoices(party_type, party, account, condition=None, negativ
 		payment_dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 
 	held_invoices = get_held_invoices(party_type, party)
-	limit_cond = "limit %(limit)s" if limit else ""
 
 	invoice_list = frappe.db.sql("""
 		select
@@ -721,12 +720,10 @@ def get_outstanding_invoices(party_type, party, account, condition=None, negativ
 			{condition}
 		group by voucher_type, voucher_no
 		order by posting_date, name
-		{limit_cond}
-	""".format(dr_or_cr=dr_or_cr, condition=condition or "", limit_cond=limit_cond), {
+	""".format(dr_or_cr=dr_or_cr, condition=condition or ""), {
 		"party_type": party_type,
 		"party": party,
-		"account": account,
-		"limit": limit
+		"account": account
 	}, as_dict=True)
 
 	payment_entries = frappe.db.sql("""
