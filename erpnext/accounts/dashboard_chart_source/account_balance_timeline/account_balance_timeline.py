@@ -20,10 +20,10 @@ def get(chart_name=None, from_date = None, to_date = None):
 	account = filters.get("account")
 	company = filters.get("company")
 
-	if not from_date:
-		from_date = get_from_date_from_timespan(to_date, timespan)
 	if not to_date:
 		to_date = nowdate()
+	if not from_date:
+		from_date = get_from_date_from_timespan(to_date, timespan)
 
 	# fetch dates to plot
 	dates = get_dates_from_timegrain(from_date, to_date, timegrain)
@@ -66,8 +66,8 @@ def build_result(account, dates, gl_entries):
 	# for balance sheet accounts, the totals are cumulative
 	if root_type in ('Asset', 'Liability', 'Equity'):
 		for i, r in enumerate(result):
-			if i < 0:
-				r[1] = r[1] + result[i-1][1]
+			if i > 0:
+				r[i][1] = r[i][1] + result[i-1][1]
 
 	return result
 
