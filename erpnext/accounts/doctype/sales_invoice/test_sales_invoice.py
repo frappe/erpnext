@@ -855,6 +855,7 @@ class TestSalesInvoice(unittest.TestCase):
 		jv.submit()
 
 		si = frappe.copy_doc(test_records[0])
+		si.allocate_advances_automatically = 0
 		si.append("advances", {
 			"doctype": "Sales Invoice Advance",
 			"reference_type": "Journal Entry",
@@ -1361,7 +1362,7 @@ class TestSalesInvoice(unittest.TestCase):
 				"included_in_print_rate": 1
 			})
 		si.save()
-
+		si.submit()
 		self.assertEqual(si.net_total, 19453.13)
 		self.assertEqual(si.grand_total, 24900)
 		self.assertEqual(si.total_taxes_and_charges, 5446.88)
@@ -1372,6 +1373,50 @@ class TestSalesInvoice(unittest.TestCase):
 			["_Test Account Service Tax - _TC", 0.0, 5446.88],
 			["Sales - _TC", 0.0, 19453.13],
 			["Round Off - _TC", 0.01, 0.0]
+		])
+
+		gl_entries = frappe.db.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", si.name, as_dict=1)
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account][0], gle.account)
+			self.assertEqual(expected_values[gle.account][1], gle.debit)
+			self.assertEqual(expected_values[gle.account][2], gle.credit)
+
+	def test_rounding_adjustment_2(self):
+		si = create_sales_invoice(rate=400, do_not_save=True)
+		for rate in [400, 600, 100]:
+			si.append("items", {
+				"item_code": "_Test Item",
+				"gst_hsn_code": "999800",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"rate": rate,
+				"income_account": "Sales - _TC",
+				"cost_center": "_Test Cost Center - _TC"
+			})
+		for tax_account in ["_Test Account VAT - _TC", "_Test Account Service Tax - _TC"]:
+			si.append("taxes", {
+				"charge_type": "On Net Total",
+				"account_head": tax_account,
+				"description": tax_account,
+				"rate": 9,
+				"cost_center": "_Test Cost Center - _TC",
+				"included_in_print_rate": 1
+			})
+		si.save()
+		si.submit()
+		self.assertEqual(si.net_total, 1271.19)
+		self.assertEqual(si.grand_total, 1500)
+		self.assertEqual(si.total_taxes_and_charges, 228.82)
+		self.assertEqual(si.rounding_adjustment, -0.01)
+
+		expected_values = dict((d[0], d) for d in [
+			[si.debit_to, 1500, 0.0],
+			["_Test Account Service Tax - _TC", 0.0, 114.41],
+			["_Test Account VAT - _TC", 0.0, 114.41],
+			["Sales - _TC", 0.0, 1271.18]
 		])
 
 		gl_entries = frappe.db.sql("""select account, debit, credit

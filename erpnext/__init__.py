@@ -5,7 +5,7 @@ import frappe
 from erpnext.hooks import regional_overrides
 from frappe.utils import getdate
 
-__version__ = '11.1.20'
+__version__ = '11.1.21'
 
 def get_default_company(user=None):
 	'''Get default company for user'''
@@ -145,14 +145,3 @@ def is_member():
 	if last_membership and getdate(last_membership.to_date) > getdate():
 		return True
 	return False
-
-def check_branch_compatibility_with_frappe():
-	from frappe.utils.change_log import get_versions
-	versions = get_versions()
-	frappe_branch = versions["frappe"]["branch"]
-	erpnext_branch = versions["erpnext"]["branch"]
-
-	if frappe_branch in ("hotfix", "master") and erpnext_branch == "develop":
-		raise frappe.IncompatibleApp("Frappe is on branch: {} and ERPNext is on branch: {}".format(frappe_branch, erpnext_branch))
-	if erpnext_branch in ("hotfix", "master") and frappe_branch == "develop":
-		raise frappe.IncompatibleApp("Frappe is on branch: {} and ERPNext is on branch: {}".format(frappe_branch, erpnext_branch))
