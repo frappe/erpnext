@@ -88,14 +88,14 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 					numbers.then((data) => {
 						let auto_fetched_serial_numbers = data.message;
-						records_length = auto_fetched_serial_numbers.length
+						records_length = auto_fetched_serial_numbers.length;
 						if(records_length < qty) {
-							frappe.msgprint(`Fetched only ${records_length} serial numbers`)
+							frappe.msgprint(`Fetched only ${records_length} serial numbers.`);
 						}
 						let serial_no_list_field = this.dialog.fields_dict.serial_no;
 						numbers = auto_fetched_serial_numbers.join('\n');
 						serial_no_list_field.set_value(numbers);
-					})
+					});
 				}
 			}
 		];

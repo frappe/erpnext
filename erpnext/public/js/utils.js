@@ -58,9 +58,9 @@ $.extend(erpnext, {
 				.css({"margin-bottom": "10px", "margin-top": "10px"})
 				.appendTo(grid_row.grid_form.fields_dict.serial_no.$wrapper));
 
-		var me = this
+		var me = this;
 		$btn.on("click", function() {
-			me.show_serial_batch_selector(grid_row.frm, grid_row.doc)
+			me.show_serial_batch_selector(grid_row.frm, grid_row.doc);
 		});
 	}
 });
