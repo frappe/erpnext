@@ -77,6 +77,9 @@ def execute(filters=None):
 				"company": company
 			}
 
+			if item_map[item]["alt_uom"]:
+				report_data["alt_uom_size"] = item_map[item]["alt_uom_size"]
+
 			if show_amounts:
 				report_data.update({
 					"opening_val": qty_dict.opening_val,
@@ -113,6 +116,7 @@ def get_columns(filters, show_amounts=True):
 		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 90},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
 		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 50},
+		{"label": _("Size"), "fieldname": "alt_uom_size", "fieldtype": "Float", "width": 50},
 		{"label": _("Opening Qty"), "fieldname": "opening_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Opening Value"), "fieldname": "opening_val", "fieldtype": "Currency", "width": 110, "is_value": True},
 		{"label": _("In Qty"), "fieldname": "in_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},

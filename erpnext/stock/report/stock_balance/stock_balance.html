@@ -27,6 +27,7 @@
 			<th class="text-center">{%= __("Item") %}</th>
 			<th class="text-center">{%= __("Warehouse") %}</th>
 			<th class="text-center">{%= __("UOM") %}</th>
+			<th class="text-center">{%= __("Size") %}</th>
 			<th class="text-center">{%= __("Opening Qty") %}</th>
 			<th class="text-center">{%= __("In Qty") %}</th>
 			<th class="text-center">{%= __("Out Qty") %}</th>
@@ -48,6 +49,7 @@
 				<td><a href="#Form/Warehouse/{%= data[i].warehouse %}" target="_blank">{%= (data[i].warehouse || " - ").split(" - ")[0] %}</a></td>
 
                 <td class="text-center">{%= data[i].uom %}</td>
+                <td class="text-right text-nowrap">{% if (data[i].alt_uom_size != null) { %}{%= format_number(data[i].alt_uom_size) %}{% } %}</td>
                 <td class="text-right text-nowrap">{%= format_number(data[i].opening_qty) %}</td>
                 <td class="text-right text-nowrap">{%= format_number(data[i].in_qty) %}</td>
                 <td class="text-right text-nowrap">{%= format_number(data[i].out_qty) %}</td>
