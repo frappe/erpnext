@@ -459,3 +459,18 @@ def get_delivery_note_serial_no(item_code, qty, delivery_note):
 		serial_nos = '\n'.join(dn_serial_nos)
 
 	return serial_nos
+
+@frappe.whitelist()
+def auto_fetch_serial_number(qty, item_code, warehouse):
+	serial_numbers = frappe.db.sql_list("""select name from `tabSerial No`
+		where
+			item_code = %(item_code)s
+			and warehouse = %(warehouse)s
+			and delivery_document_no is null
+			and sales_invoice is null
+		limit {0}""".format(cint(qty)), {
+		'item_code': item_code,
+		'warehouse': warehouse
+	})
+
+	return serial_numbers
