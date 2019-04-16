@@ -77,19 +77,20 @@ class StockController(AccountsController):
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse]["account"],
 							"against": item_row.expense_account,
-							"cost_center": item_row.cost_center,
+							"cost_center": item_row.cost_center or self.get("cost_center"),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(sle.stock_value_difference, 2),
+							"project": item_row.get("project") or self.get("project") or self.get("set_project")
 						}, warehouse_account[sle.warehouse]["account_currency"]))
 
 						# to target warehouse / expense account
 						gl_list.append(self.get_gl_dict({
 							"account": item_row.expense_account,
 							"against": warehouse_account[sle.warehouse]["account"],
-							"cost_center": item_row.cost_center,
+							"cost_center": item_row.cost_center or self.get("cost_center"),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, 2),
-							"project": item_row.get("project") or self.get("project")
+							"project": item_row.get("project") or self.get("project") or self.get("set_project")
 						}))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
@@ -140,7 +141,7 @@ class StockController(AccountsController):
 					if default_expense_account and not d.get("expense_account"):
 						d.expense_account = default_expense_account
 					if default_cost_center and not d.get("cost_center"):
-						d.cost_center = default_cost_center
+						d.cost_center = self.get("cost_center") or default_cost_center
 
 			return details
 
@@ -229,7 +230,7 @@ class StockController(AccountsController):
 						"account": stock_adjustment_account,
 						"against": account,
 						"credit": diff,
-						"cost_center": cost_center or None,
+						"cost_center": self.get("cost_center") or cost_center,
 						"remarks": "Adjustment Accounting Entry for Stock",
 					}),
 				])
@@ -248,7 +249,7 @@ class StockController(AccountsController):
 			if self.doctype not in ("Purchase Receipt", "Purchase Invoice", "Stock Reconciliation", "Stock Entry") and not is_expense_account:
 				frappe.throw(_("Expense / Difference account ({0}) must be a 'Profit or Loss' account")
 					.format(item.get("expense_account")))
-			if is_expense_account and not item.get("cost_center"):
+			if is_expense_account and not item.get("cost_center") and not self.get("cost_center"):
 				frappe.throw(_("{0} {1}: Cost Center is mandatory for Item {2}").format(
 					_(self.doctype), self.name, item.get("item_code")))
 
