@@ -221,7 +221,8 @@ def get_item_warehouse_map(filters, sle):
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
 
-	iwb_map = filter_items_with_no_transactions(iwb_map)
+	if cint(filters.filter_item_without_transactions):
+		iwb_map = filter_items_with_no_transactions(iwb_map)
 
 	if cint(filters.consolidated):
 		iwb_map = consolidate_values(iwb_map)
