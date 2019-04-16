@@ -47,27 +47,7 @@ def get_level():
 	if frappe.db.sql('select name from tabUser where last_login > date_sub(now(), interval 2 day) limit 1'):
 		activation_level += 1
 
-	level = {"activation_level": 10, "sales_data": [
-		{"Item": frappe.db.count('Item')},
-		{"Sales Order": frappe.db.count('Sales Order')},
-		{"Purchase Order": frappe.db.count('Purchase Order')},
-		{"Employee": frappe.db.count('Employee')},
-		{"Lead": frappe.db.count('Lead')},
-		{"Payment Entry": frappe.db.count('Payment Entry')},
-		{"Communication": frappe.db.count('Communication')},
-		{"User": frappe.db.count('User')},
-		{"Student": frappe.db.count('Student')},
-		{"Instructor": frappe.db.count('Instructor')},
-		{"Sales Invoice": frappe.db.count('Sales Invoice')},
-		{"BOM": frappe.db.count('BOM')},
-		{"Quotation": frappe.db.count('Quotation')},
-		{"Lead": frappe.db.count('Lead')},
-		{"Payment Entry": frappe.db.count('Payment Entry')},
-		{"Journal Entry": frappe.db.count('Journal Entry')},
-		{"Stock Entry": frappe.db.count('Stock Entry')},
-	]}
-
-	return level
+	return activation_level
 
 def get_help_messages():
 	'''Returns help messages to be shown on Desktop'''
