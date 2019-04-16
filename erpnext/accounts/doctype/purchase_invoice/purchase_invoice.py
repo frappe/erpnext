@@ -542,7 +542,7 @@ class PurchaseInvoice(BuyingController):
 							"against": billing_party,
 							"debit": warehouse_debit_amount,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"cost_center": item.cost_center,
+							"cost_center": item.cost_center or self.cost_center,
 							"project": item.project
 						}, account_currency)
 					)
@@ -552,7 +552,7 @@ class PurchaseInvoice(BuyingController):
 						gl_entries.append(self.get_gl_dict({
 							"account": expenses_included_in_valuation,
 							"against": item.expense_account,
-							"cost_center": item.cost_center,
+							"cost_center": item.cost_center or self.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.landed_cost_voucher_amount),
 							"project": item.project
@@ -723,7 +723,7 @@ class PurchaseInvoice(BuyingController):
 						dr_or_cr + "_in_account_currency": tax.base_tax_amount_after_discount_amount \
 							if account_currency==self.company_currency \
 							else tax.tax_amount_after_discount_amount,
-						"cost_center": tax.cost_center
+						"cost_center": tax.cost_center or self.cost_center
 					}, account_currency)
 				)
 			# accumulate valuation tax

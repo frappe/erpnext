@@ -782,7 +782,7 @@ class SalesInvoice(SellingController):
 						"credit_in_account_currency": (flt(tax.base_tax_amount_after_discount_amount,
 							tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
 							flt(tax.tax_amount_after_discount_amount, tax.precision("tax_amount_after_discount_amount"))),
-						"cost_center": tax.cost_center
+						"cost_center": tax.cost_center or self.cost_center
 					}, account_currency)
 				)
 
@@ -810,7 +810,7 @@ class SalesInvoice(SellingController):
 							"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
 								if account_currency==self.company_currency
 								else flt(item.net_amount, item.precision("net_amount"))),
-							"cost_center": item.cost_center
+							"cost_center": item.cost_center or self.cost_center
 						}, account_currency)
 					)
 
