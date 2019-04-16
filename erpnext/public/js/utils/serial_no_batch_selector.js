@@ -2,7 +2,7 @@
 erpnext.SerialNoBatchSelector = Class.extend({
 	init: function(opts, show_dialog) {
 		$.extend(this, opts);
-		this.show_dialog = show_dialog
+		this.show_dialog = show_dialog;
 		// frm, item, warehouse_details, has_batch, oldest
 		let d = this.item;
 		if(d && d.has_batch_no && (!d.batch_no || this.show_dialog)) {
@@ -76,7 +76,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				hidden: me.has_batch ? 1 : 0,
 				label: __('Fetch based on FIFO'),
 				click: (e) => {
-					let qty = this.dialog.fields_dict.qty.get_value()
+					let qty = this.dialog.fields_dict.qty.get_value();
 					let numbers = frappe.call({
 						method: "erpnext.stock.doctype.serial_no.serial_no.auto_fetch_serial_number",
 						args: {
@@ -88,7 +88,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 					numbers.then((data) => {
 						let auto_fetched_serial_numbers = data.message;
-						records_length = auto_fetched_serial_numbers.length;
+						let records_length = auto_fetched_serial_numbers.length;
 						if(records_length < qty) {
 							frappe.msgprint(`Fetched only ${records_length} serial numbers.`);
 						}
@@ -114,7 +114,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		});
 
 		if (this.item.serial_no) {
-			this.dialog.fields_dict.serial_no.set_value(this.item.serial_no)
+			this.dialog.fields_dict.serial_no.set_value(this.item.serial_no);
 		}
 
 		this.dialog.set_primary_action(__('Insert'), function() {
