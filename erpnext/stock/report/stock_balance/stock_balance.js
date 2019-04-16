@@ -65,6 +65,12 @@ frappe.query_reports["Stock Balance"] = {
 			"options": "UOM"
 		},
 		{
+			"fieldname": "filter_item_without_transactions",
+			"label": __("Filter Items Without Transactons"),
+			"fieldtype": "Check",
+			"default": 1
+		},
+		{
 			"fieldname": "consolidated",
 			"label": __("Consolidated Values"),
 			"fieldtype": "Check"
