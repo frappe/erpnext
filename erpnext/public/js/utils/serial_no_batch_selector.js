@@ -76,7 +76,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				fieldname: 'auto_fetch_button',
 				fieldtype:'Button',
 				hidden: me.has_batch ? 1 : 0,
-				label: __('Fetch Serial Numbers based on FIFO'),
+				label: __('Fetch based on FIFO'),
 				click: (e) => {
 					let numbers = frappe.call({
 						method: "erpnext.stock.doctype.serial_no.serial_no.auto_fetch_serial_number",
@@ -367,10 +367,10 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		var me = this;
 		this.serial_list = [];
 		return [
-			{fieldtype: 'Section Break', label: __('Serial No')},
+			{fieldtype: 'Section Break', label: __('Serial Numbers')},
 			{
 				fieldtype: 'Link', fieldname: 'serial_no_select', options: 'Serial No',
-				label: __('Select to add serial no.'),
+				label: __('Select to add Serial Number.'),
 				get_query: function() {
 					return { filters: {item_code: me.item_code, warehouse: me.warehouse_details.name}};
 				},
