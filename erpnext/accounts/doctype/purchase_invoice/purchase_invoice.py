@@ -567,7 +567,7 @@ class PurchaseInvoice(BuyingController):
 						gl_entries.append(self.get_gl_dict({
 							"account": supplier_warehouse_account,
 							"against": item.expense_account,
-							"cost_center": item.cost_center,
+							"cost_center": item.cost_center or self.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.rm_supp_cost)
 						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
@@ -580,7 +580,7 @@ class PurchaseInvoice(BuyingController):
 							"debit_in_account_currency": (flt(item.base_net_amount,
 								item.precision("base_net_amount")) if account_currency==self.company_currency
 								else flt(item.net_amount, item.precision("net_amount"))),
-							"cost_center": item.cost_center,
+							"cost_center": item.cost_center or self.cost_center,
 							"project": item.project
 						}, account_currency)
 					)
@@ -630,7 +630,7 @@ class PurchaseInvoice(BuyingController):
 						"debit": base_asset_amount,
 						"debit_in_account_currency": (base_asset_amount
 							if asset_rbnb_currency == self.company_currency else asset_amount),
-						"cost_center": item.cost_center
+						"cost_center": item.cost_center or self.cost_center
 					}))
 
 					if item.item_tax_amount:
@@ -639,7 +639,7 @@ class PurchaseInvoice(BuyingController):
 							"account": eiiav_account,
 							"against": billing_party,
 							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-							"cost_center": item.cost_center,
+							"cost_center": item.cost_center or self.cost_center,
 							"credit": item.item_tax_amount,
 							"credit_in_account_currency": (item.item_tax_amount
 								if asset_eiiav_currency == self.company_currency else
@@ -666,7 +666,7 @@ class PurchaseInvoice(BuyingController):
 							"account": eiiav_account,
 							"against": billing_party,
 							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-							"cost_center": item.cost_center,
+							"cost_center": item.cost_center or self.cost_center,
 							"credit": item.item_tax_amount,
 							"credit_in_account_currency": (item.item_tax_amount
 								if asset_eiiav_currency == self.company_currency else
@@ -696,7 +696,7 @@ class PurchaseInvoice(BuyingController):
 					"against": item.expense_account,
 					"debit": stock_adjustment_amt,
 					"remarks": self.get("remarks") or _("Stock Adjustment"),
-					"cost_center": item.cost_center,
+					"cost_center": item.cost_center or self.cost_center,
 					"project": item.project
 				}, account_currency)
 			)
@@ -728,10 +728,10 @@ class PurchaseInvoice(BuyingController):
 				)
 			# accumulate valuation tax
 			if self.is_opening == "No" and tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
-				if self.auto_accounting_for_stock and not tax.cost_center:
+				if self.auto_accounting_for_stock and not tax.cost_center and not self.cost_center:
 					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
-				valuation_tax.setdefault(tax.cost_center, 0)
-				valuation_tax[tax.cost_center] += \
+				valuation_tax.setdefault(tax.cost_center or self.cost_center, 0)
+				valuation_tax[tax.cost_center or self.cost_center] += \
 					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.base_tax_amount_after_discount_amount)
 
 		if self.is_opening == "No" and self.negative_expense_to_be_booked and valuation_tax:
