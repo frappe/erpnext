@@ -21,6 +21,13 @@ frappe.ui.form.on("Opportunity", {
 		});
 	},
 
+	customer_lead: function(frm) {
+		if (frm.doc.opportunity_from == "Customer") {
+			frm.trigger('set_contact_link');
+			erpnext.utils.get_party_details(frm);
+		}
+	},
+
 	with_items: function(frm) {
 		frm.trigger('toggle_mandatory');
 	},
@@ -72,6 +79,14 @@ frappe.ui.form.on("Opportunity", {
 					frm.save();
 				});
 			}
+		}
+	},
+
+	set_contact_link: function(frm) {
+		if(frm.doc.opportunity_from == "Customer" && frm.doc.customer_lead) {
+			frappe.dynamic_link = {doc: frm.doc, fieldname: 'customer', doctype: 'Customer'}
+		} else if(frm.doc.opportunity_from == "Lead" && frm.doc.customer_lead) {
+			frappe.dynamic_link = {doc: frm.doc, fieldname: 'lead', doctype: 'Lead'}
 		}
 	},
 
