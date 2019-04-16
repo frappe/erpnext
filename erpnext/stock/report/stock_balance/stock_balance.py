@@ -18,6 +18,11 @@ def execute(filters=None):
 	include_uom = filters.get("include_uom")
 	columns = get_columns()
 	items = get_items(filters)
+
+	# if no items in filter found return
+	if isinstance(items, list) and not items:
+		return columns, []
+
 	sle = get_stock_ledger_entries(filters, items)
 
 	# if no stock ledger entry found return
@@ -215,7 +220,7 @@ def get_items(filters):
 		if filters.get("item_group"):
 			conditions.append(get_item_group_condition(filters.get("item_group")))
 
-	items = []
+	items = None
 	if conditions:
 		items = frappe.db.sql_list("""select name from `tabItem` item where {}"""
 			.format(" and ".join(conditions)), filters)
