@@ -23,8 +23,101 @@ def verify_request():
 		frappe.get_request_header("X-Wc-Webhook-Signature") and \
 		not sig == bytes(frappe.get_request_header("X-Wc-Webhook-Signature").encode()):
 			frappe.throw(_("Unverified Webhook Data"))
-	frappe.set_user(woocommerce_settings.modified_by)
+	frappe.set_user(woocommerce_settings.creation_user)
 	print ("Request verified successfully")
+
+
+@frappe.whitelist(allow_guest=True)
+def order(data=None):
+	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
+
+	if frappe.flags.woocomm_test_order_data:
+		fd = frappe.flags.woocomm_test_order_data
+		event = "created"
+	elif frappe.request and frappe.request.data:
+		verify_request()
+		fd = json.loads(frappe.request.data)
+		event = frappe.get_request_header("X-Wc-Webhook-Event")
+	else:
+		return "success"
+
+	if event == "created":
+		raw_billing_data = fd.get("billing")
+		customer_woo_com_email = raw_billing_data.get("email")
+
+		if frappe.get_value("Customer", {"woocommerce_email": customer_woo_com_email}):
+			# Edit
+			link_customer_and_address(raw_billing_data, 1)
+		else:
+			# Create
+			link_customer_and_address(raw_billing_data, 0)
+
+		items_list = fd.get("line_items")
+		for item in items_list:
+			item_woo_com_id = item.get("product_id")
+
+			if frappe.get_value("Item", {"woocommerce_id": item_woo_com_id}):
+				# Edit
+				link_item(item, 1, True, False)
+			else:
+				# Create
+				link_item(item, 0, True, False)
+
+		customer_name = raw_billing_data.get("first_name") + " " + raw_billing_data.get("last_name")
+
+		new_sales_order = frappe.new_doc("Sales Order")
+		new_sales_order.customer = customer_name
+
+		created_date = fd.get("date_created").split("T")
+		new_sales_order.transaction_date = created_date[0]
+
+		new_sales_order.po_no = fd.get("id")
+		new_sales_order.woocommerce_id = fd.get("id")
+		new_sales_order.naming_series = woocommerce_settings.sales_order_series or "SO-WOO-"
+
+		placed_order_date = created_date[0]
+		raw_date = datetime.datetime.strptime(placed_order_date, "%Y-%m-%d")
+		raw_delivery_date = frappe.utils.add_to_date(raw_date, days=7)
+		order_delivery_date_str = raw_delivery_date.strftime('%Y-%m-%d')
+		order_delivery_date = str(order_delivery_date_str)
+
+		new_sales_order.delivery_date = order_delivery_date
+		default_set_company = frappe.get_doc("Global Defaults")
+		company = raw_billing_data.get("company") or default_set_company.default_company
+		found_company = frappe.get_doc("Company", {"name": company})
+		company_abbr = found_company.abbr
+
+		new_sales_order.company = company
+
+		for item in items_list:
+			woocomm_item_id = item.get("product_id")
+			found_item = frappe.get_doc("Item", {"woocommerce_id": woocomm_item_id})
+
+			ordered_items_tax = item.get("total_tax")
+
+			new_sales_order.append("items", {
+				"item_code": found_item.item_code,
+				"item_name": found_item.item_name,
+				"description": found_item.item_name,
+				"delivery_date": order_delivery_date,
+				"uom": woocommerce_settings.uom or _("Nos"),
+				"qty": item.get("quantity"),
+				"rate": item.get("price"),
+				"warehouse": woocommerce_settings.warehouse or "Stores" + " - " + company_abbr
+				})
+
+			add_tax_details(new_sales_order, ordered_items_tax, "Ordered Item tax", 0)
+
+		# shipping_details = fd.get("shipping_lines") # used for detailed order
+		shipping_total = fd.get("shipping_total")
+		shipping_tax = fd.get("shipping_tax")
+
+		add_tax_details(new_sales_order, shipping_tax, "Shipping Tax", 1)
+		add_tax_details(new_sales_order, shipping_total, "Shipping Total", 1)
+
+		new_sales_order.submit()
+
+		frappe.db.commit()
 
 
 @frappe.whitelist(allow_guest=True)
@@ -69,7 +162,7 @@ def item(data=None):
 		return "success"
 
 	if not data:
-			event = frappe.get_request_header("X-Wc-Webhook-Event")
+		event = frappe.get_request_header("X-Wc-Webhook-Event")
 	else:
 		event = "created"
 
@@ -82,102 +175,6 @@ def item(data=None):
 		else:
 			# Create
 			link_item(item, 0, False, True)
-
-
-@frappe.whitelist(allow_guest=True)
-def order(data=None):
-	if data:
-		verify_request()
-
-	if frappe.request and frappe.request.data:
-		fd = json.loads(frappe.request.data)
-	elif data:
-		fd = data
-	else:
-		return "success"
-
-	if not data:
-		event = frappe.get_request_header("X-Wc-Webhook-Event")
-	else:
-		event = "created"
-
-	if event == "created":
-		raw_billing_data = fd.get("billing")
-		customer_woo_com_email = raw_billing_data.get("email")
-
-		if frappe.get_value("Customer", {"woocommerce_email": customer_woo_com_email}):
-			# Edit
-			link_customer_and_address(raw_billing_data, 1)
-		else:
-			# Create
-			link_customer_and_address(raw_billing_data, 0)
-
-		items_list = fd.get("line_items")
-		for item in items_list:
-			item_woo_com_id = item.get("product_id")
-
-			if frappe.get_value("Item", {"woocommerce_id": item_woo_com_id}):
-				# Edit
-				link_item(item, 1, True, False)
-			else:
-				# Create
-				link_item(item, 0, True, False)
-
-		customer_name = raw_billing_data.get("first_name") + " " + raw_billing_data.get("last_name")
-
-		new_sales_order = frappe.new_doc("Sales Order")
-		new_sales_order.customer = customer_name
-
-		created_date = fd.get("date_created").split("T")
-		new_sales_order.transaction_date = created_date[0]
-
-		new_sales_order.po_no = fd.get("id")
-		new_sales_order.woocommerce_id = fd.get("id")
-		new_sales_order.naming_series = "SO-"
-
-		placed_order_date = created_date[0]
-		raw_date = datetime.datetime.strptime(placed_order_date, "%Y-%m-%d")
-		raw_delivery_date = frappe.utils.add_to_date(raw_date, days=7)
-		order_delivery_date_str = raw_delivery_date.strftime('%Y-%m-%d')
-		order_delivery_date = str(order_delivery_date_str)
-
-		new_sales_order.delivery_date = order_delivery_date
-		default_set_company = frappe.get_doc("Global Defaults")
-		company = raw_billing_data.get("company") or default_set_company.default_company
-		found_company = frappe.get_doc("Company", {"name": company})
-		company_abbr = found_company.abbr
-
-		new_sales_order.company = company
-
-		for item in items_list:
-			woocomm_item_id = item.get("product_id")
-			found_item = frappe.get_doc("Item", {"woocommerce_id": woocomm_item_id})
-
-			ordered_items_tax = item.get("total_tax")
-
-			new_sales_order.append("items", {
-				"item_code": found_item.item_code,
-				"item_name": found_item.item_name,
-				"description": found_item.item_name,
-				"delivery_date": order_delivery_date,
-				"uom": "Nos",
-				"qty": item.get("quantity"),
-				"rate": item.get("price"),
-				"warehouse": "Stores" + " - " + company_abbr
-				})
-
-			add_tax_details(new_sales_order, ordered_items_tax, "Ordered Item tax", 0)
-
-		# shipping_details = fd.get("shipping_lines") # used for detailed order
-		shipping_total = fd.get("shipping_total")
-		shipping_tax = fd.get("shipping_tax")
-
-		add_tax_details(new_sales_order, shipping_tax, "Shipping Tax", 1)
-		add_tax_details(new_sales_order, shipping_total, "Shipping Total", 1)
-
-		new_sales_order.submit()
-
-		frappe.db.commit()
 
 
 def link_customer_and_address(raw_billing_data, customer_status):
@@ -240,6 +237,7 @@ def link_customer_and_address(raw_billing_data, customer_status):
 
 
 def link_item(item_data, item_status, is_item=False, is_product=False):
+	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 	item_woo_com_id = None
 	item = None
 
@@ -263,6 +261,7 @@ def link_item(item_data, item_status, is_item=False, is_product=False):
 		item.item_code = "woocommerce - " + str(item_data.get("id"))
 		item.woocommerce_id = str(item_data.get("id"))
 	item.item_group = "WooCommerce Products"
+	item.stock_uom = woocommerce_settings.uom or _("Nos")
 	item.save()
 	frappe.db.commit()
 
