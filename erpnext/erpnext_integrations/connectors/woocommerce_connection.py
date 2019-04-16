@@ -38,6 +38,7 @@ def order(data=None):
 		verify_request()
 		fd = json.loads(frappe.request.data)
 		event = frappe.get_request_header("X-Wc-Webhook-Event")
+
 	else:
 		return "success"
 

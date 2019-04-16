@@ -536,8 +536,12 @@ class PaymentEntry(AccountsController):
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args):
+
 	if isinstance(args, string_types):
 		args = json.loads(args)
+
+	if args.get('party_type') == 'Member':
+			return
 
 	# confirm that Supplier is not blocked
 	if args.get('party_type') == 'Supplier':
