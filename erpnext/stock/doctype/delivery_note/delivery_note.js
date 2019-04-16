@@ -103,8 +103,6 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		this._super();
 
 		if ((!doc.is_return) && (doc.status!="Closed" || doc.is_new())) {
-			this.frm.items = [];
-			this.frm.refresh();
 			if (this.frm.doc.docstatus===0) {
 				this.frm.add_custom_button(__('Sales Order'),
 					function() {
