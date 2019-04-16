@@ -535,7 +535,7 @@ class PaymentEntry(AccountsController):
 						"against": self.party or self.paid_from,
 						"debit_in_account_currency": d.amount,
 						"debit": d.amount,
-						"cost_center": d.cost_center,
+						"cost_center": d.cost_center or self.cost_center,
 						"project": self.project,
 						"reference_no": self.reference_no,
 						"reference_date": self.reference_date,
