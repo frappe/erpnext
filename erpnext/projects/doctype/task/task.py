@@ -7,7 +7,7 @@ import json
 
 import frappe
 from frappe import _, throw
-from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate
+from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate, nowdate
 from frappe.utils.nestedset import NestedSet
 
 
@@ -44,14 +44,31 @@ class Task(NestedSet):
 		if self.act_start_date and self.act_end_date and getdate(self.act_start_date) > getdate(self.act_end_date):
 			frappe.throw(_("'Actual Start Date' can not be greater than 'Actual End Date'"))
 
+	def set_status(self, status):
+		# called from bulk closing of tasks
+		if self.status == 'Completed':
+			self.update_completion()
+
+		# update values in database
+		self.db_update()
+
 	def validate_status(self):
 		if self.status!=self.get_db_value("status") and self.status == "Completed":
 			for d in self.depends_on:
 				if frappe.db.get_value("Task", d.task, "status") != "Completed":
 					frappe.throw(_("Cannot close task as its dependant task {0} is not closed.").format(d.task))
 
-			from frappe.desk.form.assign_to import clear
-			clear(self.doctype, self.name)
+			self.update_completion()
+
+	def update_completion(self):
+		self.act_end_date = nowdate()
+
+		from frappe.desk.form import assign_to
+		assignments = assign_to.get(dict(doctype=self.doctype, name=self.name))
+		if assignments:
+			# set completed by as owner
+			self.completed_by = assignments[0].owner
+			assign_to.clear(self.doctype, self.name)
 
 	def validate_progress(self):
 		if (self.progress or 0) > 100:
@@ -78,13 +95,7 @@ class Task(NestedSet):
 		self.check_recursion()
 		self.reschedule_dependent_tasks()
 		self.update_project()
-		self.unassign_todo()
 		self.populate_depends_on()
-
-	def unassign_todo(self):
-		if self.status in ("Completed", "Cancelled"):
-			from frappe.desk.form.assign_to import clear
-			clear(self.doctype, self.name)
 
 	def update_total_expense_claim(self):
 		self.total_expense_claim = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim`

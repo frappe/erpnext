@@ -644,7 +644,7 @@ def set_project_status(project, status):
 	frappe.has_permission(doc = project, throw = True)
 
 	for task in frappe.get_all('Task', dict(project = project.name)):
-		frappe.db.set_value('Task', task.name, 'status', status)
+		frappe.get_doc('Task', task.name).set_status(status)
 
 	project.status = status
 	project.save()
