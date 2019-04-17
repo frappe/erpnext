@@ -276,7 +276,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		pi = make_purchase_invoice(po.name)
 
-		self.assertTrue(pi.get('payment_schedule'))
+		self.assertFalse(pi.get('payment_schedule'))
 
 	def test_terms_copied(self):
 		po = create_purchase_order(do_not_save=1)
@@ -294,6 +294,10 @@ class TestPurchaseOrder(unittest.TestCase):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item Home Desktop 100",
 			qty=20, basic_rate=100)
+		make_stock_entry(target="_Test Warehouse 1 - _TC", item_code="_Test Item",
+			qty=30, basic_rate=100)
+		make_stock_entry(target="_Test Warehouse 1 - _TC", item_code="_Test Item Home Desktop 100",
+			qty=30, basic_rate=100)
 
 		bin1 = frappe.db.get_value("Bin",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
