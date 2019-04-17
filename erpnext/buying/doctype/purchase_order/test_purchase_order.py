@@ -344,8 +344,8 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		self.assertEquals(bin5.reserved_qty_for_sub_contract, bin2.reserved_qty_for_sub_contract - 6)
 
-		_termsmake_stock_entry(target="_Test Warehouse 1 - _TC", item_code="_Test Item",
-		_terms	qty=40, basic_rate=100)
+		make_stock_entry(target="_Test Warehouse 1 - _TC", item_code="_Test Item",
+			qty=40, basic_rate=100)
 		make_stock_entry(target="_Test Warehouse 1 - _TC", item_code="_Test Item Home Desktop 100",
 			qty=40, basic_rate=100)
 

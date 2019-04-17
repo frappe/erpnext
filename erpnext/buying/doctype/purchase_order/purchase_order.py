@@ -424,9 +424,9 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 	if frappe.get_single("Fetch Payment Terms").fetch_payment_terms == 1:
 		fields["Payment Schedule"] = {
-										"doctype": "Payment Schedule",
-										"add_if_empty": True
-									}
+			"doctype": "Payment Schedule",
+			"add_if_empty": True
+		}
 
 	doc = get_mapped_doc("Purchase Order", source_name,	fields, target_doc, postprocess)
 
