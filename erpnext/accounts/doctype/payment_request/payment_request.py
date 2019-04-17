@@ -228,7 +228,7 @@ class PaymentRequest(Document):
 			"content": self.get_message(),
 			"sent_or_received": "Sent"
 		})
-		comm.add_link(self.reference_doctype, self.reference_name)
+		comm.add_link(link_doctype=self.reference_doctype, link_name=self.reference_name, no_save=True)
 		comm.insert(ignore_permissions=True)
 
 	def get_payment_success_url(self):

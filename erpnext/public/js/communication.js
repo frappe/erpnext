@@ -8,7 +8,14 @@ frappe.ui.form.on("Communication", {
 
 	setup_custom_buttons: (frm) => {
 		let confirm_msg = "Are you sure you want to create {0} from this email";
-		if(frm.doc.reference_doctype !== "Issue") {
+		var issue_counter = 0;
+		for(var idx in frm.doc.dynamic_link) {
+			let dynamic_link = frm.doc.dynamic_link[idx];
+			if(dynamic_link.link_doctype === "Issue") {
+				issue_counter += 1
+			}
+		}
+		if(issue_counter == 0){
 			frm.add_custom_button(__("Issue"), () => {
 				frappe.confirm(__(confirm_msg, [__("Issue")]), () => {
 					frm.trigger('make_issue_from_communication');
@@ -16,7 +23,7 @@ frappe.ui.form.on("Communication", {
 			}, "Make");
 		}
 
-		if(!in_list(["Lead", "Opportunity"], frm.doc.reference_doctype)) {
+		if(!in_list(["Lead", "Opportunity"], frm.doc.dynamic_link)) {
 			frm.add_custom_button(__("Lead"), () => {
 				frappe.confirm(__(confirm_msg, [__("Lead")]), () => {
 					frm.trigger('make_lead_from_communication');

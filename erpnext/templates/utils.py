@@ -51,7 +51,7 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 		"sender": sender,
 		"sent_or_received": "Received",
 	})
-	comm.add_link("Opportunity", opportunity.name)
+	comm.add_link(link_doctype="Opportunity", link_name=opportunity.name, no_save=True)
 	comm.insert(ignore_permissions=True)
 
 	return "okay"
