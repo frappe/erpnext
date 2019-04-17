@@ -297,13 +297,7 @@ def get_data():
 					"name": "C-Form",
 					"description": _("C-Form records"),
 					"country": "India"
-				},
-				{
-					"type": "doctype",
-					"name": "Fetch Payment Terms",
-					"label": _("Fetch Payment Terms"),
-					"description": _("Fetch Payment Terms")
-				},
+				}
 			]
 		},
 		{

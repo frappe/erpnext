@@ -419,7 +419,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 		}
 	}
 
-	if frappe.get_single("Fetch Payment Terms").fetch_payment_terms == 1:
+	if frappe.get_single("Accounts Settings").automatically_fetch_payment_terms == 1:
 		fields["Payment Schedule"] = {
 			"doctype": "Payment Schedule",
 			"add_if_empty": True
