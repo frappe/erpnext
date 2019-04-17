@@ -14,6 +14,8 @@ class WoocommerceSettings(Document):
 		self.validate_settings()
 		self.create_delete_custom_fields()
 		self.create_webhook_url()
+		self.create_webhook_client_url()
+		self.create_webhook_item_url()
 
 	def create_delete_custom_fields(self):
 		if self.enable_sync:
@@ -116,6 +118,38 @@ class WoocommerceSettings(Document):
 
 		delivery_url = server_url + endpoint
 		self.endpoint = delivery_url
+
+	def create_webhook_client_url(self):
+		endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.client"
+
+		try:
+			url = frappe.request.url
+		except RuntimeError:
+			# for CI Test to work
+			url = "http://localhost:8000"
+
+		server_url = '{uri.scheme}://{uri.netloc}'.format(
+			uri=urlparse(url)
+		)
+
+		delivery_url = server_url + endpoint
+		self.client_endpoint = delivery_url
+
+	def create_webhook_item_url(self):
+		endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.item"
+
+		try:
+			url = frappe.request.url
+		except RuntimeError:
+			# for CI Test to work
+			url = "http://localhost:8000"
+
+		server_url = '{uri.scheme}://{uri.netloc}'.format(
+			uri=urlparse(url)
+		)
+
+		delivery_url = server_url + endpoint
+		self.item_endpoint = delivery_url
 
 @frappe.whitelist()
 def generate_secret():
