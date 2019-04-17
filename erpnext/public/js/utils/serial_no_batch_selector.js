@@ -75,7 +75,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				fieldtype:'Button',
 				hidden: me.has_batch ? 1 : 0,
 				label: __('Fetch based on FIFO'),
-				click: (e) => {
+				click: () => {
 					let qty = this.dialog.fields_dict.qty.get_value();
 					let numbers = frappe.call({
 						method: "erpnext.stock.doctype.serial_no.serial_no.auto_fetch_serial_number",
