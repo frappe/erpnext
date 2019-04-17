@@ -30,9 +30,8 @@ class AccountsController(TransactionBase):
 		return self.__company_currency
 
 	def onload(self):
-		if self.get("__onload"):
-			self.get("__onload").make_payment_via_journal_entry \
-				= frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
+		self.set_onload("make_payment_via_journal_entry",
+			frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry'))
 
 		if self.is_new():
 			relevant_docs = ("Quotation", "Purchase Order", "Sales Order",
