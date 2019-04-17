@@ -454,7 +454,7 @@ class SalarySlip(TransactionBase):
 
 		self.net_pay = 0
 		if self.total_working_days:
-			self.net_pay = (flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))) * flt(self.payment_days / self.total_working_days)
+			self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
 
 		self.rounded_total = rounded(self.net_pay,
 			self.precision("net_pay") if disable_rounded_total else 0)
