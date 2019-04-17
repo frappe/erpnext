@@ -1022,9 +1022,8 @@ class SalesInvoice(SellingController):
 	def update_project(self):
 		if self.project:
 			project = frappe.get_doc("Project", self.project)
-			project.flags.dont_sync_tasks = True
 			project.update_billed_amount()
-			project.save()
+			project.db_update()
 
 
 	def verify_payment_amount_is_positive(self):
