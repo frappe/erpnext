@@ -17,6 +17,8 @@ from erpnext.accounts.party import get_party_account_currency
 from six import string_types
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.selling.doctype.sales_order.sales_order import validate_inter_company_party, update_linked_order,\
+	unlink_inter_company_order
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -56,6 +58,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_bom_for_subcontracting_items()
 		self.create_raw_materials_supplied("supplied_items")
 		self.set_received_qty_for_drop_ship_items()
+		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_order_reference)
 
 	def validate_with_previous_doc(self):
 		super(PurchaseOrder, self).validate_with_previous_doc({
@@ -219,6 +222,7 @@ class PurchaseOrder(BuyingController):
 
 		self.update_blanket_order()
 
+		update_linked_order(self.doctype, self.name, self.inter_company_order_reference)
 
 	def on_cancel(self):
 		super(PurchaseOrder, self).on_cancel()
@@ -244,6 +248,7 @@ class PurchaseOrder(BuyingController):
 
 		self.update_blanket_order()
 
+		unlink_inter_company_order(self.doctype, self.name, self.inter_company_order_reference)
 
 	def on_update(self):
 		pass
@@ -490,3 +495,9 @@ def update_status(status, name):
 	po = frappe.get_doc("Purchase Order", name)
 	po.update_status(status)
 	po.update_delivered_qty_in_sales_order()
+
+@frappe.whitelist()
+def make_inter_company_sales_order(source_name, target_doc=None):
+	from erpnext.selling.doctype.sales_order.sales_order import make_inter_company_order
+	return make_inter_company_order("Purchase Order", source_name, target_doc)
+
