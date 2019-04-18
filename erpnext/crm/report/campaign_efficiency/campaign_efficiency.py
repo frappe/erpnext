@@ -7,21 +7,66 @@ from frappe import _
 
 def execute(filters=None):
 	columns, data = [], []
-	columns=get_columns()
-	data=get_lead_data(filters, "Campaign Name")
+	columns=get_columns("Campaign Name")
+	data=get_lead_data(filters or {}, "Campaign Name")
 	return columns, data
 	
-def get_columns():
+def get_columns(based_on):
 	return [
-		_("Campaign Name") + ":data:130", 
-		_("Lead Count") + ":Int:80",
-		_("Opp Count") + ":Int:80",
-		_("Quot Count") + ":Int:80", 
-		_("Order Count") + ":Int:100",
-		_("Order Value") + ":Float:100",
-		_("Opp/Lead %") + ":Float:100",
-		_("Quot/Lead %") + ":Float:100",
-		_("Order/Quot %") + ":Float:100"
+		{
+			"fieldname": frappe.scrub(based_on),
+			"label": _(based_on),
+			"fieldtype": "Data",
+			"width": 150
+		},
+		{
+			"fieldname": "lead_count",
+			"label": _("Lead Count"),
+			"fieldtype": "Int",
+			"width": 80
+		},
+		{
+			"fieldname": "opp_count",
+			"label": _("Opp Count"),
+			"fieldtype": "Int",
+			"width": 80
+		},
+		{
+			"fieldname": "quot_count",
+			"label": _("Quot Count"),
+			"fieldtype": "Int",
+			"width": 80
+		},
+		{
+			"fieldname": "order_count",
+			"label": _("Order Count"),
+			"fieldtype": "Int",
+			"width": 100
+		},
+		{
+			"fieldname": "order_value",
+			"label": _("Order Value"),
+			"fieldtype": "Float",
+			"width": 100
+		},
+		{
+			"fieldname": "opp_lead",
+			"label": _("Opp/Lead %"),
+			"fieldtype": "Float",
+			"width": 100
+		},
+		{
+			"fieldname": "quot_lead",
+			"label": _("Quot/Lead %"),
+			"fieldtype": "Float",
+			"width": 100
+		},
+		{
+			"fieldname": "order_quot",
+			"label": _("Order/Quot %"),
+			"fieldtype": "Float",
+			"width": 100
+		}
 	]
 	
 def get_lead_data(filters, based_on):
@@ -41,18 +86,18 @@ def get_lead_data(filters, based_on):
 	data = []
 	for based_on_value, leads in lead_map.items():
 		row = {
-			based_on: based_on_value,
-			"Lead Count": len(leads)
+			based_on_field: based_on_value,
+			"lead_count": len(leads)
 		}
-		row["Quot Count"]= get_lead_quotation_count(leads)
-		row["Opp Count"] = get_lead_opp_count(leads)
-		row["Order Count"] = get_quotation_ordered_count(leads)
-		row["Order Value"] = get_order_amount(leads)
+		row["quot_count"]= get_lead_quotation_count(leads)
+		row["opp_count"] = get_lead_opp_count(leads)
+		row["order_count"] = get_quotation_ordered_count(leads)
+		row["order_value"] = get_order_amount(leads) or 0
 		
-		row["Opp/Lead %"] = row["Opp Count"] / row["Lead Count"] * 100
-		row["Quot/Lead %"] = row["Quot Count"] / row["Lead Count"] * 100
+		row["opp_lead"] = row["opp_count"] / (row["lead_count"] or 1) * 100
+		row["quot_lead"] = row["quot_count"] / (row["lead_count"] or 1) * 100
 		
-		row["Order/Quot %"] = row["Order Count"] / (row["Quot Count"] or 1) * 100
+		row["order_quot"] = row["order_count"] / (row["quot_count"] or 1) * 100
 			
 		data.append(row)
 		
