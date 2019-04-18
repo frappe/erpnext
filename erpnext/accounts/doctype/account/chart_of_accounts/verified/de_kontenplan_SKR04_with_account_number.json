@@ -795,6 +795,7 @@
                     },
                     "Kasse (Gruppe)": {
                         "is_group": 1,
+                        "account_type": "Cash",
                         "Kasse": {
                             "account_number": "1600",
                             "account_type": "Cash"
@@ -840,6 +841,7 @@
                     },
                     "Bank (Gruppe)": {
                         "is_group": 1,
+                        "account_type": "Bank",
                         "Bank": {
                             "account_number": "1800",
                             "account_type": "Bank"
@@ -1822,9 +1824,14 @@
         "2 - Herstellungskosten der zur Erzielung der Umsatzerl\u00f6se erbrachten Leistungen": {
             "root_type": "Expense",
             "is_group": 1,
-            "Herstellungskosten": {
-                "account_number": "6990",
-                "account_type": "Cost of Goods Sold"
+            "Herstellungskosten (Gruppe)": {
+                "Herstellungskosten": {
+                    "account_number": "6990",
+                    "account_type": "Cost of Goods Sold"
+                },
+                "Herstellungskosten: Schwund": {
+                    "account_type": "Stock Adjustment"
+                }
             },
             "Aufwendungen f. Roh-, Hilfs- und Betriebsstoffe und f. bezogene Waren": {
                 "account_number": "5000",
@@ -3603,13 +3610,17 @@
                 "account_number": "7694"
             }
         },
-        "Debitoren" : {
+        "Debitoren": {
             "root_type": "Asset",
             "is_group": 1
         },
-        "Kreditoren" : {
+        "Kreditoren": {
             "root_type": "Liability",
-            "is_group": 1
+            "is_group": 1,
+            "Wareneingangs-­Verrechnungskonto" : {
+                "account_number": "70001",
+                "account_type": "Stock Received But Not Billed"
+            }
         }
     }
 }
