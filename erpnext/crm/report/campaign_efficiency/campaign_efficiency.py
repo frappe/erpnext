@@ -94,10 +94,10 @@ def get_lead_data(filters, based_on):
 		row["order_count"] = get_quotation_ordered_count(leads)
 		row["order_value"] = get_order_amount(leads) or 0
 		
-		row["opp_lead"] = row["opp_count"] / (row["lead_count"] or 1) * 100
-		row["quot_lead"] = row["quot_count"] / (row["lead_count"] or 1) * 100
+		row["opp_lead"] = flt(row["opp_count"]) / flt(row["lead_count"] or 1.0) * 100.0
+		row["quot_lead"] = flt(row["quot_count"]) / flt(row["lead_count"] or 1.0) * 100.0
 		
-		row["order_quot"] = row["order_count"] / (row["quot_count"] or 1) * 100
+		row["order_quot"] = flt(row["order_count"]) / flt(row["quot_count"] or 1.0) * 100.0
 			
 		data.append(row)
 		
