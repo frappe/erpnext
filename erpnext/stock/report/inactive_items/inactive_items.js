@@ -5,18 +5,6 @@
 frappe.query_reports["Inactive Items"] = {
 	"filters": [
 		{
-			fieldname: "territory",
-			label: __("Territory"),
-			fieldtype: "Link",
-			options: "Territory"
-		},
-		{
-			fieldname: "customer",
-			label: __("Customer"),
-			fieldtype: "Link",
-			options: "Customer"
-		},
-		{
 			fieldname: "item",
 			label: __("Item"),
 			fieldtype: "Link",
@@ -27,6 +15,13 @@ frappe.query_reports["Inactive Items"] = {
 			label: __("Item Group"),
 			fieldtype: "Link",
 			options: "Item Group"
+		},
+		{
+			fieldname: "based_on",
+			label: __("Based On"),
+			fieldtype: "Select",
+			options: "Sales Order\nSales Invoice",
+			default: "Sales Order"
 		},
 		{
 			fieldname: "days",
