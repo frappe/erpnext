@@ -190,9 +190,11 @@ def get_invoices(filters):
 			customer,
 			posting_date,
 			outstanding_amount
-		from `tabSales Invoice`
+		from `tabSales Invoice` si
 		where
 			docstatus = 1
 			and outstanding_amount > 0
 			%s
+			and not exists(select di.name from `tabDiscounted Invoice` di
+				where di.docstatus=1 and di.sales_invoice=si.name)
 	""" % where_condition, filters, as_dict=1)
