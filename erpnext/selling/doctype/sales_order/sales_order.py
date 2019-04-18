@@ -42,6 +42,7 @@ class SalesOrder(SellingController):
 		self.validate_warehouse()
 		self.validate_drop_ship()
 		self.validate_serial_no_based_delivery()
+		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_order_reference)
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
@@ -182,6 +183,8 @@ class SalesOrder(SellingController):
 
 		self.update_blanket_order()
 
+		update_linked_order(self.doctype, self.name, self.inter_company_order_reference)
+
 	def on_cancel(self):
 		super(SalesOrder, self).on_cancel()
 
@@ -197,6 +200,8 @@ class SalesOrder(SellingController):
 		frappe.db.set(self, 'status', 'Cancelled')
 
 		self.update_blanket_order()
+
+		unlink_inter_company_order(self.doctype, self.name, self.inter_company_order_reference)
 
 	def update_project(self):
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') != "Each Transaction":
@@ -454,6 +459,42 @@ class SalesOrder(SellingController):
 				frappe.throw(_("Cannot ensure delivery by Serial No as \
 				Item {0} is added with and without Ensure Delivery by \
 				Serial No.").format(item.item_code))
+
+def validate_inter_company_party(doctype, party, company, inter_company_order_reference):
+	if doctype == "Sales Order":
+		partytype, ref_partytype, internal = "Customer", "Supplier", "is_internal_customer"
+		ref_doc =  "Purchase Order"
+	else:
+		partytype, ref_partytype, internal = "Supplier", "Customer", "is_internal_supplier"
+		ref_doc =  "Sales Order"
+
+	if inter_company_order_reference:
+		doc = frappe.get_doc(ref_doc, inter_company_order_reference)
+		ref_party = doc.supplier if doctype == "Sales Order" else doc.customer
+		if not frappe.db.get_value(partytype, {"represents_company": doc.company}, "name") == party:
+			frappe.throw(_("Invalid {0} for Inter Company Order.").format(partytype))
+		if not frappe.get_cached_value(ref_partytype, ref_party, "represents_company") == company:
+			frappe.throw(_("Invalid Company for Inter Company Order."))
+
+	elif frappe.db.get_value(partytype, {"name": party, internal: 1}, "name") == party:
+		companies = frappe.db.sql("""select company from `tabAllowed To Transact With`
+			where parenttype = '{0}' and parent = '{1}'""".format(partytype, party), as_list = 1)
+		companies = [d[0] for d in companies]
+		if not company in companies:
+			frappe.throw(_("{0} not allowed to transact with {1}. Please change the Company.").format(partytype, company))
+
+def update_linked_order(doctype, name, inter_company_order_reference):
+	if inter_company_order_reference:
+		frappe.db.set_value(doctype, inter_company_order_reference,\
+			"inter_company_order_reference", name)
+
+def unlink_inter_company_order(doctype, name, inter_company_order_reference):
+	ref_doc = "Purchase Order" if doctype == "Sales Order" else "Sales Order"
+	if inter_company_order_reference:
+		frappe.db.set_value(doctype, name,\
+			"inter_company_order_reference", "")
+		frappe.db.set_value(ref_doc, inter_company_order_reference,\
+			"inter_company_order_reference", "")
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -971,3 +1012,87 @@ def make_raw_material_request(items, company, sales_order, project=None):
 	material_request.run_method("set_missing_values")
 	material_request.submit()
 	return material_request
+
+def get_inter_company_details(doc, doctype):
+	if doctype == "Sales Order":
+		party = frappe.db.get_value("Supplier", {"disabled": 0, "is_internal_supplier": 1, "represents_company": doc.company}, "name")
+		company = frappe.get_cached_value("Customer", doc.customer, "represents_company")
+	else:
+		party = frappe.db.get_value("Customer", {"disabled": 0, "is_internal_customer": 1, "represents_company": doc.company}, "name")
+		company = frappe.get_cached_value("Supplier", doc.supplier, "represents_company")
+
+	return {
+		"party": party,
+		"company": company
+	}
+
+def validate_inter_company_order(doc, doctype):
+
+	details = get_inter_company_details(doc, doctype)
+	price_list = doc.selling_price_list if doctype == "Sales Order" else doc.buying_price_list
+	valid_price_list = frappe.db.get_value("Price List", {"name": price_list, "buying": 1, "selling": 1})
+	if not valid_price_list:
+		frappe.throw(_("Selected Price List should have buying and selling fields checked."))
+
+	party = details.get("party")
+	if not party:
+		partytype = "Supplier" if doctype == "Sales Order" else "Customer"
+		frappe.throw(_("No {0} found for Inter Company Transactions.").format(partytype))
+
+	company = details.get("company")
+	default_currency = frappe.get_cached_value('Company',  company,  "default_currency")
+	if default_currency != doc.currency:
+		frappe.throw(_("Company currencies of both the companies should match for Inter Company Transactions."))
+
+	return
+
+@frappe.whitelist()
+def make_inter_company_purchase_order(source_name, target_doc=None):
+	return make_inter_company_order("Sales Order", source_name, target_doc)
+
+def make_inter_company_order(doctype, source_name, target_doc=None):
+	if doctype == "Sales Order":
+		source_doc = frappe.get_doc("Sales Order", source_name)
+		target_doctype = "Purchase Order"
+	else:
+		source_doc = frappe.get_doc("Purchase Order", source_name)
+		target_doctype = "Sales Order"
+
+	validate_inter_company_order(source_doc, doctype)
+	details = get_inter_company_details(source_doc, doctype)
+
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
+
+	def update_details(source_doc, target_doc, source_parent):
+		target_doc.inter_company_order_reference = source_doc.name
+		if target_doc.doctype == "Purchase Order":
+			target_doc.company = details.get("company")
+			target_doc.supplier = details.get("party")
+			target_doc.buying_price_list = source_doc.selling_price_list
+		else:
+			target_doc.company = details.get("company")
+			target_doc.customer = details.get("party")
+			target_doc.selling_price_list = source_doc.buying_price_list
+
+	doclist = get_mapped_doc(doctype, source_name,	{
+		doctype: {
+			"doctype": target_doctype,
+			"postprocess": update_details,
+			"field_no_map": [
+				"taxes_and_charges"
+			]
+		},
+		doctype +" Item": {
+			"doctype": target_doctype + " Item",
+			"field_no_map": [
+				"income_account",
+				"expense_account",
+				"cost_center",
+				"warehouse"
+			]
+		}
+
+	}, target_doc, set_missing_values)
+
+	return doclist
