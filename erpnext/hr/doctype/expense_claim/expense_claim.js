@@ -288,11 +288,7 @@ frappe.ui.form.on("Expense Claim Detail", {
 	claim_amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		var doc = frm.doc;
-
-		if(!child.sanctioned_amount){
-			frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.claim_amount);
-		}
-
+		frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.claim_amount);
 		cur_frm.cscript.calculate_total(doc,cdt,cdn);
 	},
 

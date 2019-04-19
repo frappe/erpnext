@@ -33,7 +33,8 @@ frappe.ui.form.on("Sales Order", {
 		})
 	},
 	refresh: function(frm) {
-		if(frm.doc.docstatus == 1 && frm.doc.status == 'To Deliver and Bill') {
+		if(frm.doc.docstatus === 1 && frm.doc.status !== 'Closed'
+			&& flt(frm.doc.per_delivered) < 100 && flt(frm.doc.per_billed) < 100) {
 			frm.add_custom_button(__('Update Items'), () => {
 				erpnext.utils.update_child_items({
 					frm: frm,
@@ -114,103 +115,102 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		var allow_delivery = false;
 
 		if(doc.docstatus==1) {
-			if(doc.status != 'Closed') {
+			if(this.frm.has_perm("submit")) {
+				if(doc.status === 'On Hold') {
+				   // un-hold
+				   this.frm.add_custom_button(__('Resume'), function() {
+					   me.frm.cscript.update_status('Resume', 'Draft')
+				   }, __("Status"));
 
-				for (var i in this.frm.doc.items) {
-					var item = this.frm.doc.items[i];
-					if(item.delivered_by_supplier === 1 || item.supplier){
-						if(item.qty > flt(item.ordered_qty)
-							&& item.qty > flt(item.delivered_qty)) {
-							allow_purchase = true;
+				   if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
+					   // close
+					   this.frm.add_custom_button(__('Close'), () => this.close_sales_order(), __("Status"))
+				   }
+				}
+			   	else if(doc.status === 'Closed') {
+				   // un-close
+				   this.frm.add_custom_button(__('Re-open'), function() {
+					   me.frm.cscript.update_status('Re-open', 'Draft')
+				   }, __("Status"));
+			   }
+		    }
+			if(doc.status !== 'Closed') {
+				if(doc.status !== 'On Hold') {
+					for (var i in this.frm.doc.items) {
+						var item = this.frm.doc.items[i];
+						if(item.delivered_by_supplier === 1 || item.supplier){
+							if(item.qty > flt(item.ordered_qty)
+								&& item.qty > flt(item.delivered_qty)) {
+								allow_purchase = true;
+							}
+						}
+
+						if (item.delivered_by_supplier===0) {
+							if(item.qty > flt(item.delivered_qty)) {
+								allow_delivery = true;
+							}
+						}
+
+						if (allow_delivery && allow_purchase) {
+							break;
 						}
 					}
 
-					if (item.delivered_by_supplier===0) {
-						if(item.qty > flt(item.delivered_qty)) {
-							allow_delivery = true;
+					if (this.frm.has_perm("submit")) {
+						if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
+							// hold
+							this.frm.add_custom_button(__('Hold'), () => this.hold_sales_order(), __("Status"))
+							// close
+							this.frm.add_custom_button(__('Close'), () => this.close_sales_order(), __("Status"))
 						}
 					}
 
-					if (allow_delivery && allow_purchase) {
-						break;
+					// delivery note
+					if(flt(doc.per_delivered, 6) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
+						this.frm.add_custom_button(__('Delivery'), () => this.make_delivery_note_based_on_delivery_date(), __('Create'));
+						this.frm.add_custom_button(__('Work Order'), () => this.make_work_order(), __('Create'));
+					}
+
+					// sales invoice
+					if(flt(doc.per_billed, 6) < 100) {
+						this.frm.add_custom_button(__('Invoice'), () => me.make_sales_invoice(), __('Create'));
+					}
+
+					// material request
+					if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1
+						&& flt(doc.per_delivered, 6) < 100) {
+						this.frm.add_custom_button(__('Material Request'), () => this.make_material_request(), __('Create'));
+						this.frm.add_custom_button(__('Request for Raw Materials'), () => this.make_raw_material_request(), __('Create'));
+					}
+
+					// make purchase order
+					if(flt(doc.per_delivered, 6) < 100 && allow_purchase) {
+						this.frm.add_custom_button(__('Purchase Order'), () => this.make_purchase_order(), __('Create'));
+					}
+					// maintenance
+					if(flt(doc.per_delivered, 2) < 100 &&
+							["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
+						this.frm.add_custom_button(__('Maintenance Visit'), () => this.make_maintenance_visit(), __('Create'));
+						this.frm.add_custom_button(__('Maintenance Schedule'), () => this.make_maintenance_schedule(), __('Create'));
+					}
+
+					// project
+					if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
+							this.frm.add_custom_button(__('Project'), () => this.make_project(), __('Create'));
+					}
+
+					if(!doc.auto_repeat) {
+						this.frm.add_custom_button(__('Subscription'), function() {
+							erpnext.utils.make_subscription(doc.doctype, doc.name)
+						}, __('Create'))
 					}
 				}
-
-				if (this.frm.has_perm("submit")) {
-					// close
-					if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
-						this.frm.add_custom_button(__('Close'),
-							function() { me.close_sales_order() }, __("Status"))
-					}
-				}
-
-				// delivery note
-				if(flt(doc.per_delivered, 6) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
-					this.frm.add_custom_button(__('Delivery'),
-						function() { me.make_delivery_note_based_on_delivery_date(); }, __('Create'));
-					this.frm.add_custom_button(__('Work Order'),
-						function() { me.make_work_order() }, __('Create'));
-
-					this.frm.page.set_inner_btn_group_as_primary(__('Create'));
-				}
-
-				// sales invoice
-				if(flt(doc.per_billed, 6) < 100) {
-					this.frm.add_custom_button(__('Invoice'),
-						function() { me.make_sales_invoice() }, __('Create'));
-				}
-
-				// material request
-				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1
-					&& flt(doc.per_delivered, 6) < 100) {
-					this.frm.add_custom_button(__('Material Request'),
-						function() { me.make_material_request() }, __('Create'));
-					this.frm.add_custom_button(__('Request for Raw Materials'),
-						function() { me.make_raw_material_request() }, __('Create'));
-				}
-
-				// make purchase order
-				if(flt(doc.per_delivered, 6) < 100 && allow_purchase) {
-					this.frm.add_custom_button(__('Purchase Order'),
-						function() { me.make_purchase_order() }, __('Create'));
-				}
-
 				// payment request
 				if(flt(doc.per_billed)==0) {
-					this.frm.add_custom_button(__('Payment Request'),
-						function() { me.make_payment_request() }, __('Create'));
-					this.frm.add_custom_button(__('Payment'),
-						function() { me.make_payment_entry() }, __('Create'));
+					this.frm.add_custom_button(__('Payment Request'), () => this.make_payment_request(), __('Create'));
+					this.frm.add_custom_button(__('Payment'), () => this.make_payment_entry(), __('Create'));
 				}
-
-				// maintenance
-				if(flt(doc.per_delivered, 2) < 100 &&
-						["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
-					this.frm.add_custom_button(__('Maintenance Visit'),
-						function() { me.make_maintenance_visit() }, __('Create'));
-					this.frm.add_custom_button(__('Maintenance Schedule'),
-						function() { me.make_maintenance_schedule() }, __('Create'));
-				}
-
-				// project
-				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
-						this.frm.add_custom_button(__('Project'),
-							function() { me.make_project() }, __('Create'));
-				}
-
-				if(!doc.auto_repeat) {
-					this.frm.add_custom_button(__('Subscription'), function() {
-						erpnext.utils.make_subscription(doc.doctype, doc.name)
-					}, __('Create'))
-				}
-
-			} else {
-				if (this.frm.has_perm("submit")) {
-					// un-close
-					this.frm.add_custom_button(__('Re-open'), function() {
-						me.frm.cscript.update_status('Re-open', 'Draft')
-					}, __("Status"));
-				}
+				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
 		}
 
@@ -365,6 +365,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				fields: [
 					{fieldtype:'Read Only', fieldname:'item_code',
 						label: __('Item Code'), in_list_view:1},
+					{fieldtype:'Link', fieldname:'warehouse', options: 'Warehouse',
+						label: __('For Warehouse'), in_list_view:1},
 					{fieldtype:'Link', fieldname:'bom', options: 'BOM', reqd: 1,
 						label: __('BOM'), in_list_view:1, get_query: function(doc) {
 							return {filters: {item: doc.item_code}};
@@ -372,8 +374,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					},
 					{fieldtype:'Float', fieldname:'required_qty', reqd: 1,
 						label: __('Qty'), in_list_view:1},
-					{fieldtype:'Link', fieldname:'for_warehouse', options: 'Warehouse',
-						label: __('For Warehouse')}
 				],
 				data: r.message,
 				get_data: function() {
@@ -554,6 +554,38 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			})
 		});
 		dialog.show();
+	},
+	hold_sales_order: function(){
+		var me = this;
+		var d = new frappe.ui.Dialog({
+			title: __('Reason for Hold'),
+			fields: [
+				{
+					"fieldname": "reason_for_hold",
+					"fieldtype": "Text",
+					"reqd": 1,
+				}
+			],
+			primary_action: function() {
+				var data = d.get_values();
+				frappe.call({
+					method: "frappe.desk.form.utils.add_comment",
+					args: {
+						reference_doctype: me.frm.doctype,
+						reference_name: me.frm.docname,
+						content: __('Reason for hold: ')+data.reason_for_hold,
+						comment_email: frappe.session.user
+					},
+					callback: function(r) {
+						if(!r.exc) {
+							me.update_status('Hold', 'On Hold')
+							d.hide();
+						}
+					}
+				});
+			}
+		});
+		d.show();
 	},
 	close_sales_order: function(){
 		this.frm.cscript.update_status("Close", "Closed")

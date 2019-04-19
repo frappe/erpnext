@@ -345,6 +345,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi = frappe.copy_doc(test_records[0])
 		pi.disable_rounded_total = 1
+		pi.allocate_advances_automatically = 0
 		pi.append("advances", {
 			"reference_type": "Journal Entry",
 			"reference_name": jv.name,
@@ -391,6 +392,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi = frappe.copy_doc(test_records[0])
 		pi.disable_rounded_total = 1
+		pi.allocate_advances_automatically = 0
 		pi.append("advances", {
 			"reference_type": "Journal Entry",
 			"reference_name": jv.name,

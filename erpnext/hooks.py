@@ -74,7 +74,7 @@ website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
 
 website_context = {
 	"favicon": 	"/assets/erpnext/images/favicon.png",
-	"splash_image": "/assets/erpnext/images/erp-icon.svg"
+	"splash_image": "/assets/erpnext/images/erpnext-12.svg"
 }
 
 website_route_rules = [
@@ -151,7 +151,6 @@ standard_portal_menu_items = [
 	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note", "role":"Customer"},
 	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "role":"Customer"},
 	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
-	{"title": _("Timesheets"), "route": "/timesheets", "reference_doctype": "Timesheet", "role":"Customer"},
 	{"title": _("Timesheets"), "route": "/timesheets", "reference_doctype": "Timesheet", "role":"Customer"},
 	{"title": _("Lab Test"), "route": "/lab-test", "reference_doctype": "Lab Test", "role":"Patient"},
 	{"title": _("Prescription"), "route": "/prescription", "reference_doctype": "Patient Encounter", "role":"Patient"},

@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import is_website_user
 from ..service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
+from erpnext.crm.doctype.opportunity.opportunity import assign_to_user
 
 sender_field = "raised_by"
 
@@ -39,6 +40,9 @@ class Issue(Document):
 		if self.flags.create_communication and self.via_customer_portal:
 			self.create_communication()
 			self.flags.communication_created = None
+
+		# assign to customer account manager or lead owner
+		assign_to_user(self, 'subject')
 
 	def set_lead_contact(self, email_id):
 		import email.utils

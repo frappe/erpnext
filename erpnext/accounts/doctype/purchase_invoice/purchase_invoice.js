@@ -96,7 +96,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 					},
 					get_query_filters: {
 						docstatus: 1,
-						status: ["!=", "Closed"],
+						status: ["not in", ["Closed", "On Hold"]],
 						per_billed: ["<", 99.99],
 						company: me.frm.doc.company
 					}
@@ -468,7 +468,7 @@ cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function(
 
 cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
-	if(d.idx == 1 && d.cost_center){
+	if(d.cost_center){
 		var cl = doc.items || [];
 		for(var i = 0; i < cl.length; i++){
 			if(!cl[i].cost_center) cl[i].cost_center = d.cost_center;
