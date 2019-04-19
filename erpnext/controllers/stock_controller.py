@@ -352,10 +352,11 @@ class StockController(AccountsController):
 						.format(d.idx, d.item_code), QualityInspectionRejectedError)
 			elif qa_required :
 				action = frappe.get_doc('Stock Settings').action_if_quality_inspection_is_not_submitted
-				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
 				if self.docstatus==1 and (action == 'Stop'):
-					raise QualityInspectionRequiredError
-
+					frappe.throw(_("Quality Inspection required for Item {0} to submit").format(frappe.bold(d.item_code)),
+						exc=QualityInspectionRequiredError)
+				else:
+					frappe.msgprint(_("Create Quality Inspection for Item {0}").format(frappe.bold(d.item_code)))
 
 	def update_blanket_order(self):
 		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
