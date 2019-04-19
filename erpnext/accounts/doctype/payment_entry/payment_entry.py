@@ -827,7 +827,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 
 	# party account
 	if dt == "Sales Invoice":
-		party_account = get_party_account_based_on_invoice_discounting(dn) or ref_doc.debit_to
+		party_account = get_party_account_based_on_invoice_discounting(dn) or doc.debit_to
 	elif dt == "Purchase Invoice":
 		party_account = doc.credit_to
 	elif dt == "Fees":
