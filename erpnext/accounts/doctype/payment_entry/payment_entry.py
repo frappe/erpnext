@@ -72,15 +72,13 @@ class PaymentEntry(AccountsController):
 		self.update_expense_claim()
 		self.update_reference_details()
 
-
 	def on_cancel(self):
 		self.setup_party_account_field()
 		self.make_gl_entries(cancel=1)
-		self.update_reference_details()
 		self.update_advance_paid()
 		self.update_expense_claim()
-		self.delink_advance_entry_references()
 		self.update_reference_details()
+		self.delink_advance_entry_references()
 
 	def validate_duplicate_entry(self):
 		reference_names = []
@@ -731,7 +729,7 @@ def get_company_defaults(company):
 
 @frappe.whitelist()
 def get_reference_details(reference_doctype, reference_name, party_account_currency, party_type, party, account):
-	total_amount = outstanding_amount = exchange_rate = bill_no = None
+	total_amount = outstanding_amount = bill_no = None
 	exchange_rate = 1
 
 	ref_doc = frappe.get_doc(reference_doctype, reference_name)
