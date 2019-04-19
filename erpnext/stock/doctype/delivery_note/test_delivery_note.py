@@ -636,7 +636,7 @@ class TestDeliveryNote(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 		set_perpetual_inventory(0, company)
-	
+
 	def test_make_sales_invoice_from_dn_for_returned_qty(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
@@ -654,6 +654,33 @@ class TestDeliveryNote(unittest.TestCase):
 
 		si = make_sales_invoice(dn.name)
 		self.assertEquals(si.items[0].qty, 1)
+
+	def test_make_sales_invoice_from_dn_with_returned_qty_duplicate_items(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+
+		dn = create_delivery_note(qty=8, do_not_submit=True)
+		dn.append("items", {
+			"item_code": "_Test Item",
+			"warehouse": "_Test Warehouse - _TC",
+			"qty": 1,
+			"rate": 100,
+			"conversion_factor": 1.0,
+			"expense_account": "Cost of Goods Sold - _TC",
+			"cost_center": "_Test Cost Center - _TC"
+		})
+		dn.submit()
+
+		si1 = make_sales_invoice(dn.name)
+		si1.items[0].qty = 4
+		si1.items.pop(1)
+		si1.save()
+		si1.submit()
+
+		create_delivery_note(is_return=1, return_against=dn.name, qty=-2)
+
+		si2 = make_sales_invoice(dn.name)
+		self.assertEquals(si2.items[0].qty, 2)
+		self.assertEquals(si2.items[1].qty, 1)
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

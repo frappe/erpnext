@@ -30,8 +30,9 @@ class AccountsController(TransactionBase):
 		return self.__company_currency
 
 	def onload(self):
-		self.get("__onload").make_payment_via_journal_entry \
-			= frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
+		if self.get("__onload"):
+			self.get("__onload").make_payment_via_journal_entry \
+				= frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
 
 		if self.is_new():
 			relevant_docs = ("Quotation", "Purchase Order", "Sales Order",
@@ -93,6 +94,8 @@ class AccountsController(TransactionBase):
 
 			if self.is_return:
 				self.validate_qty()
+
+		validate_regional(self)
 
 	def validate_invoice_documents_schedule(self):
 		self.validate_payment_schedule_dates()
@@ -1022,12 +1025,13 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 
 
 def get_advance_payment_entries(party_type, party, party_account, order_doctype,
-		order_list=None, include_unallocated=True, against_all_orders=False, against_account=None, limit=1000):
+		order_list=None, include_unallocated=True, against_all_orders=False, against_account=None, limit=None):
 	payment_entries_against_order, unallocated_payment_entries = [], []
 	party_account_type = erpnext.get_party_account_type(party_type)
 	party_account_field = "paid_from" if party_account_type == "Receivable" else "paid_to"
 	against_account_field = "paid_to" if party_account_type == "Receivable" else "paid_from"
 	payment_type = "Receive" if party_account_type == "Receivable" else "Pay"
+	limit_cond = "limit %s" % limit if limit else ""
 
 	against_account_condition = ""
 	if against_account:
@@ -1054,12 +1058,13 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 				and pref.reference_doctype = %s
 				{reference_condition} {against_account_condition}
 			order by pe.posting_date
-			limit %s
+			{limit_cond}
 		""".format(
 			party_account_field=party_account_field,
 			reference_condition=reference_condition,
-			against_account_condition=against_account_condition
-		), [party_account, payment_type, party_type, party, order_doctype] + order_list + [limit or 1000], as_dict=1)
+			against_account_condition=against_account_condition,
+			limit_cond=limit_cond
+		), [party_account, payment_type, party_type, party, order_doctype] + order_list, as_dict=1)
 
 	if include_unallocated:
 		unallocated_payment_entries = frappe.db.sql("""
@@ -1070,11 +1075,12 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 				and docstatus = 1 and unallocated_amount > 0
 				{against_account_condition}
 			order by posting_date
-			limit %s
+			{limit_cond}
 		""".format(
 			party_account_field=party_account_field,
-			against_account_condition=against_account_condition
-		), [party_account, party_type, party, payment_type, limit or 1000], as_dict=1)
+			against_account_condition=against_account_condition,
+			limit_cond=limit_cond
+		), [party_account, party_type, party, payment_type], as_dict=1)
 
 	return list(payment_entries_against_order) + list(unallocated_payment_entries)
 
@@ -1211,3 +1217,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
 	p_doctype.update_blanket_order()
 	p_doctype.update_billing_percentage()
 	p_doctype.set_status()
+
+@erpnext.allow_regional
+def validate_regional(doc):
+	pass

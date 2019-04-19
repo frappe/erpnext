@@ -13,7 +13,7 @@ class PaymentReconciliation(Document):
 	def get_unreconciled_entries(self):
 		self.get_nonreconciled_payment_entries()
 		self.get_invoice_entries()
-		
+
 	def get_nonreconciled_payment_entries(self):
 		self.check_mandatory_to_fetch()
 
@@ -38,7 +38,10 @@ class PaymentReconciliation(Document):
 		condition = self.check_condition()
 
 		non_reconciled_invoices = get_outstanding_invoices(self.party_type, self.party,
-			self.receivable_payable_account, condition=condition, limit=self.limit)
+			self.receivable_payable_account, condition=condition)
+
+		if self.limit:
+			non_reconciled_invoices = non_reconciled_invoices[:self.limit]
 
 		self.add_invoice_entries(non_reconciled_invoices)
 
@@ -64,7 +67,7 @@ class PaymentReconciliation(Document):
 		self.validate_invoice()
 		dr_or_cr = ("credit_in_account_currency"
 			if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit_in_account_currency")
-			
+
 		lst = []
 		for e in self.get('payments'):
 			if e.invoice_number and e.allocated_amount:
@@ -81,11 +84,11 @@ class PaymentReconciliation(Document):
 					'unadjusted_amount' : flt(e.amount),
 					'allocated_amount' : flt(e.allocated_amount)
 				}))
-				
+
 		if lst:
 			from erpnext.accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
-			
+
 			msgprint(_("Successfully Reconciled"))
 			self.get_unreconciled_entries()
 

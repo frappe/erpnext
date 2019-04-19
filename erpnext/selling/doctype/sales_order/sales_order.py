@@ -202,9 +202,8 @@ class SalesOrder(SellingController):
 
 		if self.project:
 			project = frappe.get_doc("Project", self.project)
-			project.flags.dont_sync_tasks = True
 			project.update_sales_amount()
-			project.save()
+			project.db_update()
 
 	def check_credit_limit(self):
 		# if bypass credit limit check is set to true (1) at sales order level,
@@ -388,6 +387,7 @@ class SalesOrder(SellingController):
 						items.append(dict(
 							name= i.name,
 							item_code= i.item_code,
+							description= i.description,
 							bom = bom,
 							warehouse = i.warehouse,
 							pending_qty = pending_qty,
@@ -398,6 +398,7 @@ class SalesOrder(SellingController):
 						items.append(dict(
 							name= i.name,
 							item_code= i.item_code,
+							description= i.description,
 							bom = '',
 							warehouse = i.warehouse,
 							pending_qty = pending_qty,
@@ -610,7 +611,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	def postprocess(source, target):
 		set_missing_values(source, target)
 		#Get the advance paid Journal Entries in Sales Invoice Advance
-		target.set_advances()
+		if target.get("allocate_advances_automatically"):
+			target.set_advances()
 
 	def set_missing_values(source, target):
 		target.is_pos = 0
@@ -901,7 +903,8 @@ def make_work_orders(items, sales_order, company, project=None):
 			sales_order=sales_order,
 			sales_order_item=i['sales_order_item'],
 			project=project,
-			fg_warehouse=i['warehouse']
+			fg_warehouse=i['warehouse'],
+			description=i['description']
 		)).insert()
 		work_order.set_work_order_operations()
 		work_order.save()

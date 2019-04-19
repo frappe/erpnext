@@ -35,6 +35,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Amazon MWS Settings",
 					"description": _("Connect Amazon with ERPNext"),
+				},
+				{
+					"type": "doctype",
+					"name": "Plaid Settings",
+					"description": _("Connect your bank accounts to ERPNext"),
 				}
 			]
 		}

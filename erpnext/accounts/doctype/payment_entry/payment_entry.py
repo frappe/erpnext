@@ -6,7 +6,8 @@ from __future__ import unicode_literals
 import frappe, erpnext, json
 from frappe import _, scrub, ValidationError
 from frappe.utils import flt, comma_or, nowdate, getdate
-from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on, get_balance_on_voucher
+from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on, get_balance_on_voucher, \
+	get_allow_cost_center_in_entry_of_bs_account
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account, \
 	get_average_party_exchange_rate_on_journal_entry
@@ -70,6 +71,7 @@ class PaymentEntry(AccountsController):
 		self.update_advance_paid()
 		self.update_expense_claim()
 		self.update_reference_details()
+
 
 	def on_cancel(self):
 		self.setup_party_account_field()
@@ -535,6 +537,9 @@ def get_outstanding_reference_documents(args):
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
+	if args.get('party_type') == 'Member':
+			return
+
 	# confirm that Supplier is not blocked
 	if args.get('party_type') == 'Supplier':
 		supplier_status = get_supplier_block_status(args['party'])
@@ -555,7 +560,7 @@ def get_outstanding_reference_documents(args):
 			.format(frappe.db.escape(args["voucher_type"]), frappe.db.escape(args["voucher_no"]))
 
 	# Add cost center condition
-	if args.get("cost_center"):
+	if args.get("cost_center") and get_allow_cost_center_in_entry_of_bs_account():
 		condition += " and cost_center='%s'" % args.get("cost_center")
 
 	negative_invoices = False
@@ -726,7 +731,7 @@ def get_company_defaults(company):
 
 @frappe.whitelist()
 def get_reference_details(reference_doctype, reference_name, party_account_currency, party_type, party, account):
-	total_amount = outstanding_amount = None
+	total_amount = outstanding_amount = exchange_rate = bill_no = None
 	exchange_rate = 1
 
 	ref_doc = frappe.get_doc(reference_doctype, reference_name)
@@ -762,6 +767,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 
 		if reference_doctype in ("Sales Invoice", "Purchase Invoice"):
 			outstanding_amount = ref_doc.get("outstanding_amount")
+			bill_no = ref_doc.get("bill_no")
 		elif reference_doctype == "Expense Claim":
 			outstanding_amount = flt(ref_doc.get("total_sanctioned_amount")) \
 				- flt(ref_doc.get("total_amount+reimbursed")) - flt(ref_doc.get("total_advance_amount"))
@@ -778,7 +784,8 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		"due_date": ref_doc.get("due_date"),
 		"total_amount": total_amount,
 		"outstanding_amount": outstanding_amount,
-		"exchange_rate": exchange_rate
+		"exchange_rate": exchange_rate,
+		"bill_no": bill_no
 	})
 
 

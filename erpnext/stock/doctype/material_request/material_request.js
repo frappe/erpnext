@@ -85,7 +85,7 @@ frappe.ui.form.on('Material Request', {
 
 				// stop
 				frm.add_custom_button(__('Stop'),
-					() => frm.events.update_status(frm, 'Stop'));
+					() => frm.events.update_status(frm, 'Stopped'));
 
 			}
 		}
