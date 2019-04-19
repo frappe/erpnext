@@ -145,23 +145,25 @@ class InvoiceDiscounting(AccountsController):
 
 		if getdate(self.loan_end_date) > getdate(nowdate()):
 			for d in self.invoices:
-				je.append("accounts", {
-					"account": self.accounts_receivable_discounted,
-					"credit_in_account_currency": flt(d.outstanding_amount),
-					"reference_type": "Invoice Discounting",
-					"reference_name": self.name,
-					"party_type": "Customer",
-					"party": d.customer
-				})
+				outstanding_amount = frappe.db.get_value("Sales Invoice", d.sales_invoice, "outstanding_amount")
+				if flt(outstanding_amount) > 0:
+					je.append("accounts", {
+						"account": self.accounts_receivable_discounted,
+						"credit_in_account_currency": flt(outstanding_amount),
+						"reference_type": "Invoice Discounting",
+						"reference_name": self.name,
+						"party_type": "Customer",
+						"party": d.customer
+					})
 
-				je.append("accounts", {
-					"account": self.accounts_receivable_unpaid,
-					"debit_in_account_currency": flt(d.outstanding_amount),
-					"reference_type": "Invoice Discounting",
-					"reference_name": self.name,
-					"party_type": "Customer",
-					"party": d.customer
-				})
+					je.append("accounts", {
+						"account": self.accounts_receivable_unpaid,
+						"debit_in_account_currency": flt(outstanding_amount),
+						"reference_type": "Invoice Discounting",
+						"reference_name": self.name,
+						"party_type": "Customer",
+						"party": d.customer
+					})
 
 		return je
 
