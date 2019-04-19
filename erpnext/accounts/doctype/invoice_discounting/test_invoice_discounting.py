@@ -122,23 +122,26 @@ class TestInvoiceDiscounting(unittest.TestCase):
 			period=60
 			)
 
-		inv_disc.create_disbursement_entry()
-		je = inv_disc.close_loan()
+		je1 = inv_disc.create_disbursement_entry()
+		je1.posting_date = nowdate()
+		je1.submit()
 
-		self.assertEqual(je.accounts[0].account, self.short_term_loan)
-		self.assertEqual(je.accounts[0].debit_in_account_currency, flt(inv_disc.total_amount))
+		je2 = inv_disc.close_loan()
 
-		self.assertEqual(je.accounts[1].account, self.bank_account)
-		self.assertEqual(je.accounts[1].credit_in_account_currency, flt(inv_disc.total_amount))
+		self.assertEqual(je2.accounts[0].account, self.short_term_loan)
+		self.assertEqual(je2.accounts[0].debit_in_account_currency, flt(inv_disc.total_amount))
 
-		self.assertEqual(je.accounts[2].account, self.ar_discounted)
-		self.assertEqual(je.accounts[2].credit_in_account_currency, flt(inv.outstanding_amount))
+		self.assertEqual(je2.accounts[1].account, self.bank_account)
+		self.assertEqual(je2.accounts[1].credit_in_account_currency, flt(inv_disc.total_amount))
 
-		self.assertEqual(je.accounts[3].account, self.ar_unpaid)
-		self.assertEqual(je.accounts[3].debit_in_account_currency, flt(inv.outstanding_amount))
+		self.assertEqual(je2.accounts[2].account, self.ar_discounted)
+		self.assertEqual(je2.accounts[2].credit_in_account_currency, flt(inv.outstanding_amount))
 
-		je.posting_date = nowdate()
-		je.submit()
+		self.assertEqual(je2.accounts[3].account, self.ar_unpaid)
+		self.assertEqual(je2.accounts[3].debit_in_account_currency, flt(inv.outstanding_amount))
+
+		je2.posting_date = nowdate()
+		je2.submit()
 		inv_disc.reload()
 
 		self.assertEqual(inv_disc.status, "Settled")
@@ -154,19 +157,21 @@ class TestInvoiceDiscounting(unittest.TestCase):
 			bank_account=self.bank_account,
 			start=add_days(nowdate(), -80),
 			period=60
-			)
+		)
 
-		inv_disc.create_disbursement_entry()
-		je = inv_disc.close_loan()
+		je1 = inv_disc.create_disbursement_entry()
+		je1.posting_date = nowdate()
+		je1.submit()
 
-		je.posting_date = nowdate()
-		je.submit()
+		je2 = inv_disc.close_loan()
+		je2.posting_date = nowdate()
+		je2.submit()
 
-		self.assertEqual(je.accounts[0].account, self.short_term_loan)
-		self.assertEqual(je.accounts[0].debit_in_account_currency, flt(inv_disc.total_amount))
+		self.assertEqual(je2.accounts[0].account, self.short_term_loan)
+		self.assertEqual(je2.accounts[0].debit_in_account_currency, flt(inv_disc.total_amount))
 
-		self.assertEqual(je.accounts[1].account, self.bank_account)
-		self.assertEqual(je.accounts[1].credit_in_account_currency, flt(inv_disc.total_amount))
+		self.assertEqual(je2.accounts[1].account, self.bank_account)
+		self.assertEqual(je2.accounts[1].credit_in_account_currency, flt(inv_disc.total_amount))
 
 		inv_disc.reload()
 
