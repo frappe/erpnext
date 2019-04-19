@@ -591,4 +591,8 @@ erpnext.patches.v11_0.make_italian_localization_fields # 26-03-2019
 erpnext.patches.v11_1.make_job_card_time_logs
 erpnext.patches.v11_1.set_variant_based_on
 erpnext.patches.v11_1.woocommerce_set_creation_user
+<<<<<<< HEAD
 erpnext.patches.v11_1.set_salary_details_submitable
+=======
+erpnext.patches.v11_1.set_default_action_for_quality_inspection
+>>>>>>> feat: added action on quality inspection
