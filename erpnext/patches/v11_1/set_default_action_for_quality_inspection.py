@@ -5,4 +5,6 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-    frappe.get_doc('Stock Settings').action_if_quality_inspection_is_not_submitted = "Stop"
+    stock_settings = frappe.get_doc('Stock Settings')
+    stock_settings.action_if_quality_inspection_is_not_submitted = "Stop"
+    stock_settings.save()
