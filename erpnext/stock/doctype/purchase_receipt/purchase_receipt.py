@@ -31,7 +31,7 @@ class PurchaseReceipt(BuyingController):
 			'target_parent_dt': 'Purchase Order',
 			'target_parent_field': 'per_received',
 			'target_ref_field': 'qty',
-			'source_field': 'qty',
+			'source_field': 'received_qty',
 			'percent_join_field': 'purchase_order',
 			'overflow_type': 'receipt'
 		},
