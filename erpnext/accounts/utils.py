@@ -696,7 +696,7 @@ def get_held_invoices(party_type, party):
 	return held_invoices
 
 
-def get_outstanding_invoices(party_type, party, account, condition=None, negative_invoices=False, limit=None):
+def get_outstanding_invoices(party_type, party, account, condition=None, include_negative_outstanding=False, limit=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
@@ -751,7 +751,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, negativ
 	for d in invoice_list:
 		payment_amount = pe_map.get((d.voucher_type, d.voucher_no), 0)
 		outstanding_amount = flt(d.invoice_amount - payment_amount, precision)
-		diff = -outstanding_amount if negative_invoices else outstanding_amount
+		diff = abs(outstanding_amount) if include_negative_outstanding else outstanding_amount
 		if diff > 0.5 / (10**precision):
 			if not d.voucher_type == "Purchase Invoice" or d.voucher_no not in held_invoices:
 				due_date = frappe.db.get_value(
@@ -769,7 +769,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, negativ
 					})
 				)
 
-	outstanding_invoices = sorted(outstanding_invoices, key=lambda k: k['due_date'] or getdate(nowdate()))
+	outstanding_invoices = sorted(outstanding_invoices, key=lambda k: (k['outstanding_amount'] > 0, k['due_date'] or getdate(nowdate())))
 	return outstanding_invoices
 
 
