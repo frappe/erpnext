@@ -56,10 +56,12 @@ class PaymentEntry(AccountsController):
 		self.validate_payment_against_negative_invoice()
 		self.validate_transaction_reference()
 		self.set_title()
-		self.set_remarks()
 		self.validate_duplicate_entry()
 		self.validate_allocated_amount()
 		self.ensure_supplier_is_not_blocked()
+
+	def before_submit(self):
+		self.set_remarks()
 
 	def on_submit(self):
 		self.setup_party_account_field()
@@ -436,7 +438,7 @@ class PaymentEntry(AccountsController):
 				"cost_center": self.cost_center,
 				"reference_no": self.reference_no,
 				"reference_date": self.reference_date,
-				"remarks": _("Note: {0}").format(self.user_remark) if self.user_remark else ""
+				"remarks": _("Note: {0}").format(self.user_remark) if self.user_remark else self.remarks
 			})
 
 			dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
@@ -447,7 +449,7 @@ class PaymentEntry(AccountsController):
 					r.append(d.user_remark)
 				if self.user_remark:
 					r.append(_("Note: {0}").format(self.user_remark))
-				remarks = "\n".join(r)
+				remarks = "\n".join(r) if r else self.remarks
 
 				gle = party_gl_dict.copy()
 				gle.update({
@@ -491,7 +493,7 @@ class PaymentEntry(AccountsController):
 					"cost_center": self.cost_center,
 					"reference_no": self.reference_no,
 					"reference_date": self.reference_date,
-					"remarks": _("Note: {0}").format(self.user_remark) if self.user_remark else ""
+					"remarks": _("Note: {0}").format(self.user_remark) if self.user_remark else self.remarks
 				})
 			)
 		if self.payment_type in ("Receive", "Internal Transfer"):
@@ -505,7 +507,7 @@ class PaymentEntry(AccountsController):
 					"cost_center": self.cost_center,
 					"reference_no": self.reference_no,
 					"reference_date": self.reference_date,
-					"remarks": _("Note: {0}").format(self.user_remark) if self.user_remark else ""
+					"remarks": _("Note: {0}").format(self.user_remark) if self.user_remark else self.remarks
 				})
 			)
 
@@ -521,7 +523,7 @@ class PaymentEntry(AccountsController):
 					r.append(d.user_remark)
 				if self.user_remark:
 					r.append(_("Note: {0}").format(self.user_remark))
-				remarks = "\n".join(r)
+				remarks = "\n".join(r) if r else self.remarks
 
 				gl_entries.append(
 					self.get_gl_dict({
