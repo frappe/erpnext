@@ -169,7 +169,13 @@ def get_conditions(filters):
 		conditions.append("cost_center in %(cost_center)s")
 
 	if filters.get("voucher_no"):
-		conditions.append("voucher_no=%(voucher_no)s")
+		voucher_filter_method = filters.get("voucher_filter_method")
+		if voucher_filter_method == "Posted Against Voucher":
+			conditions.append("against_voucher=%(voucher_no)s")
+		elif voucher_filter_method == "Posted By and Against Voucher":
+			conditions.append("voucher_no=%(voucher_no)s or against_voucher=%(voucher_no)s")
+		else:
+			conditions.append("voucher_no=%(voucher_no)s")
 
 	if filters.get("against_voucher"):
 		conditions.append("against_voucher=%(against_voucher)s")
