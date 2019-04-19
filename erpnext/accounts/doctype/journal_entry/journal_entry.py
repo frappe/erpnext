@@ -10,6 +10,7 @@ from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.hr.doctype.loan.loan import update_disbursement_status, update_total_amount_paid
+from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_party_account_based_on_invoice_discounting
 
 from six import string_types, iteritems
 
@@ -746,23 +747,6 @@ def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_cur
 		"bank_account": bank_account,
 		"journal_entry": journal_entry
 	})
-
-def get_party_account_based_on_invoice_discounting(sales_invoice):
-	party_account = None
-	invoice_discounting = frappe.db.sql("""
-		select par.accounts_receivable_discounted, par.accounts_receivable_unpaid, par.status
-		from `tabInvoice Discounting` par, `tabDiscounted Invoice` ch
-		where par.name=ch.parent
-			and par.docstatus=1
-			and ch.sales_invoice = %s
-	""", (sales_invoice), as_dict=1)
-	if invoice_discounting:
-		if invoice_discounting[0].status == "Disbursed":
-			party_account = invoice_discounting[0].accounts_receivable_discounted
-		elif invoice_discounting[0].status == "Settled":
-			party_account = invoice_discounting[0].accounts_receivable_unpaid
-
-	return party_account
 
 def get_payment_entry(ref_doc, args):
 	cost_center = ref_doc.get("cost_center") or frappe.get_cached_value('Company',  ref_doc.company,  "cost_center")
