@@ -563,14 +563,14 @@ def get_outstanding_reference_documents(args):
 	if args.get("cost_center") and get_allow_cost_center_in_entry_of_bs_account():
 		condition += " and cost_center='%s'" % args.get("cost_center")
 
-	negative_invoices = False
+	include_orders = False
 	party_account_type = erpnext.get_party_account_type(args.get("party_type"))
 	if (args.get("payment_type") == "Receive" and party_account_type == "Payable") \
 			or (args.get("payment_type") == "Pay" and party_account_type == "Receivable"):
-		negative_invoices = True
+		include_orders = True
 
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
-		args.get("party_account"), condition=condition, negative_invoices=negative_invoices)
+		args.get("party_account"), condition=condition, include_negative_outstanding=True)
 
 	for d in outstanding_invoices:
 		d["exchange_rate"] = 1
@@ -585,7 +585,7 @@ def get_outstanding_reference_documents(args):
 
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
 	orders_to_be_billed = []
-	if not negative_invoices:
+	if not include_orders:
 		orders_to_be_billed = get_orders_to_be_billed(args.get("posting_date"),args.get("party_type"),
 			args.get("party"), party_account_currency, company_currency)
 
