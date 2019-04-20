@@ -187,14 +187,20 @@ def get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account,
 		else:
 			dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 
+	if isinstance(account, list):
+		account = [frappe.db.escape(d) for d in account]
+		account_condition = "account in ({0})".format(", ".join(account))
+	else:
+		account_condition = "account = {0}".format(frappe.db.escape(account))
+
 	res = frappe.db.sql("""
 		select ifnull(sum({dr_or_cr}), 0)
 		from `tabGL Entry`
-		where party_type=%(party_type)s and party=%(party)s and account=%(account)s
+		where party_type=%(party_type)s and party=%(party)s and {account_condition}
 			and ((voucher_type=%(voucher_type)s and voucher_no=%(voucher_no)s and (against_voucher is null or against_voucher=''))
 				or (against_voucher_type=%(voucher_type)s and against_voucher=%(voucher_no)s))
-	""".format(dr_or_cr=dr_or_cr),
-	{"voucher_type": voucher_type, "voucher_no": voucher_no, "party_type": party_type, "party": party, "account": account})
+	""".format(dr_or_cr=dr_or_cr, account_condition=account_condition),
+	{"voucher_type": voucher_type, "voucher_no": voucher_no, "party_type": party_type, "party": party})
 
 	return flt(res[0][0]) if res else 0.0
 
