@@ -7,66 +7,30 @@ import frappe, erpnext
 from frappe import _
 
 def get_level():
+
 	activation_level = 0
+	sales_data = []
+	doctypes = {"Item": 5, "Customer": 5, "Sales Order": 2, "Sales Invoice": 2, "Purchase Order": 2, "Employee": 3, "Lead": 3, "Quotation": 3
+					"Payment Entry": 2, "User": 5, "Student": 5, "Instructor": 5, "BOM": 3, "Journal Entry": 3, "Stock Entry": 3}
+	for doctype, min_count in iteritems(doctypes):
+		count = frappe.db.count(doctype)
+		if count > min_count:
+			activation_level += 1
+		sales_data.append({doctype: count})
+
 	if frappe.db.get_single_value('System Settings', 'setup_complete'):
-		activation_level = 1
-
-	if frappe.db.count('Item') > 5:
 		activation_level += 1
 
-	if frappe.db.count('Customer') > 5:
+	communication_number = frappe.db.count('Communication', dict(communication_medium='Email'))
+	if communication_number > 10:
 		activation_level += 1
-
-	if frappe.db.count('Sales Order') > 2:
-		activation_level += 1
-
-	if frappe.db.count('Purchase Order') > 2:
-		activation_level += 1
-
-	if frappe.db.count('Employee') > 3:
-		activation_level += 1
-
-	if frappe.db.count('Lead') > 3:
-		activation_level += 1
-
-	if frappe.db.count('Payment Entry') > 2:
-		activation_level += 1
-
-	if frappe.db.count('Communication', dict(communication_medium='Email')) > 10:
-		activation_level += 1
-
-	if frappe.db.count('User') > 5:
-		activation_level += 1
-
-	if frappe.db.count('Student') > 5:
-		activation_level += 1
-
-	if frappe.db.count('Instructor') > 5:
-		activation_level += 1
+	sales_data.append({"Communication": communication_number})
 
 	# recent login
 	if frappe.db.sql('select name from tabUser where last_login > date_sub(now(), interval 2 day) limit 1'):
 		activation_level += 1
 
-	level = {"activation_level": 10, "sales_data": [
-		{"Item": frappe.db.count('Item')},
-		{"Sales Order": frappe.db.count('Sales Order')},
-		{"Purchase Order": frappe.db.count('Purchase Order')},
-		{"Employee": frappe.db.count('Employee')},
-		{"Lead": frappe.db.count('Lead')},
-		{"Payment Entry": frappe.db.count('Payment Entry')},
-		{"Communication": frappe.db.count('Communication')},
-		{"User": frappe.db.count('User')},
-		{"Student": frappe.db.count('Student')},
-		{"Instructor": frappe.db.count('Instructor')},
-		{"Sales Invoice": frappe.db.count('Sales Invoice')},
-		{"BOM": frappe.db.count('BOM')},
-		{"Quotation": frappe.db.count('Quotation')},
-		{"Lead": frappe.db.count('Lead')},
-		{"Payment Entry": frappe.db.count('Payment Entry')},
-		{"Journal Entry": frappe.db.count('Journal Entry')},
-		{"Stock Entry": frappe.db.count('Stock Entry')},
-	]}
+	level = {"activation_level": activation_level, "sales_data": sales_data}
 
 	return level
 
