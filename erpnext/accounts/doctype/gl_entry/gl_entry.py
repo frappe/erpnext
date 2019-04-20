@@ -11,6 +11,7 @@ from frappe.model.meta import get_field_precision
 from erpnext.accounts.party import validate_party_gle_currency, validate_party_frozen_disabled
 from erpnext.accounts.utils import get_account_currency, get_balance_on_voucher, get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_all_sales_invoice_receivable_accounts
 
 exclude_from_linked_with = True
 class GLEntry(Document):
@@ -173,6 +174,11 @@ def check_freezing_date(posting_date, adv_adj=False):
 def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party, on_cancel=False):
 	# Update outstanding amt on against voucher
 	if voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
+		if voucher_type == "Sales Invoice":
+			receivable_accounts = get_all_sales_invoice_receivable_accounts(voucher_no)
+			if receivable_accounts:
+				account = list(set([account] + receivable_accounts))
+
 		bal = get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account)
 		ref_doc = frappe.get_doc(voucher_type, voucher_no)
 		ref_doc.db_set('outstanding_amount', bal)
