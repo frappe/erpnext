@@ -234,6 +234,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"label": _("Invoice Discounting"),
+					"name": "Invoice Discounting",
+				},
+				{
+					"type": "doctype",
 					"label": _("Bank Statement Transaction Entry List"),
 					"name": "Bank Statement Transaction Entry",
 					"route": "#List/Bank Statement Transaction Entry",

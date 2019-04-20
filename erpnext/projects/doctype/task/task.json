@@ -1458,7 +1458,7 @@
  "quick_entry": 0,
  "read_only": 0,
  "search_fields": "subject",
- "show_name_in_global_search": 0,
+ "show_name_in_global_search": 1,
  "sort_order": "DESC",
  "timeline_field": "project",
  "title_field": "subject",
