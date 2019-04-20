@@ -227,12 +227,18 @@ class GSTR3BReport(Document):
 
 		for d in inter_state_supply.get("Unregistered", []):
 			self.report_dict["inter_sup"]["unreg_details"].append(d)
+			self.report_dict["sup_details"]["osup_det"]["txval"] += d["txval"]
+			self.report_dict["sup_details"]["osup_det"]["iamt"] += d["iamt"]
 
 		for d in inter_state_supply.get("Registered Composition", []):
 			self.report_dict["inter_sup"]["comp_details"].append(d)
+			self.report_dict["sup_details"]["osup_det"]["txval"] += d["txval"]
+			self.report_dict["sup_details"]["osup_det"]["iamt"] += d["iamt"]
 
 		for d in inter_state_supply.get("UIN Holders", []):
 			self.report_dict["inter_sup"]["uin_details"].append(d)
+			self.report_dict["sup_details"]["osup_det"]["txval"] += d["txval"]
+			self.report_dict["sup_details"]["osup_det"]["iamt"] += d["iamt"]
 
 	def get_total_taxable_value(self, doctype, reverse_charge):
 
@@ -296,7 +302,7 @@ class GSTR3BReport(Document):
 
 			inter_state_supply_details[d.gst_category].append({
 				"pos": get_state_code(d.gst_state),
-				"txval": d.total,
+				"txval": d.total - d.tax_amount,
 				"iamt": d.tax_amount
 			})
 
