@@ -290,7 +290,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				args: { search_value: this.frm.doc.scan_barcode }
 			}).then(r => {
 				const data = r && r.message;
-				if (!data) {
+				if (!data || Object.keys(data).length === 0) {
 					scan_barcode_field.set_new_description(__('Cannot find Item with this barcode'));
 					return;
 				}

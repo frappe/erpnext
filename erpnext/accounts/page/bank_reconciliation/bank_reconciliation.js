@@ -32,7 +32,6 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 			fieldname: 'company',
 			options: "Company",
 			onchange: function() {
-				console.log(this.value)
 				if (this.value) {
 					me.company = this.value;
 				} else {

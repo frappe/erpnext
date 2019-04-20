@@ -9,6 +9,7 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import get_party_account_currency
+from frappe.email.inbox import link_communication_to_document
 
 subject_field = "title"
 sender_field = "contact_email"
@@ -321,3 +322,24 @@ def auto_close_opportunity():
 		doc.flags.ignore_permissions = True
 		doc.flags.ignore_mandatory = True
 		doc.save()
+
+@frappe.whitelist()
+def make_opportunity_from_communication(communication, ignore_communication_links=False):
+	from erpnext.crm.doctype.lead.lead import make_lead_from_communication
+	doc = frappe.get_doc("Communication", communication)
+
+	lead = doc.reference_name if doc.reference_doctype == "Lead" else None
+	if not lead:
+		lead = make_lead_from_communication(communication, ignore_communication_links=True)
+
+	enquiry_from = "Lead"
+
+	opportunity = frappe.get_doc({
+		"doctype": "Opportunity",
+		"enquiry_from": enquiry_from,
+		"lead": lead
+	}).insert(ignore_permissions=True)
+
+	link_communication_to_document(doc, "Opportunity", opportunity.name, ignore_communication_links)
+
+	return opportunity.name
