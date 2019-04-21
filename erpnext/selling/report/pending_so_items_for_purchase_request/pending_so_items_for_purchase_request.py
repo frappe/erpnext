@@ -47,9 +47,8 @@ def get_columns():
 		},
 		{
 			"label": _("Material Request"),
-			"options": "Material Request",
 			"fieldname": "material_request",
-			"fieldtype": "Link",
+			"fieldtype": "Data",
 			"width": 140
 		},
 		{
@@ -116,33 +115,43 @@ def get_data():
 		{"sales_order_item": ("!=",""), "docstatus": 1},
 		["parent", "qty", "sales_order", "item_code"])
 
-	grouped_records = {}
+	materials_request_dict = {}
 
 	for record in mr_records:
-		grouped_records.setdefault(record.sales_order, []).append(record)
+		key = (record.sales_order, record.item_code)
+		if key not in materials_request_dict:
+			materials_request_dict.setdefault(key, {
+				'qty': 0,
+				'material_requests': [record.parent]
+			})
+
+		details = materials_request_dict.get(key)
+		details['qty'] += record.qty
+
+		if record.parent not in details.get('material_requests'):
+			details['material_requests'].append(record.parent)
 
 	pending_so=[]
 	for so in sales_order_entry:
 		# fetch all the material request records for a sales order item
-		mr_list = grouped_records.get(so.name) or [{}]
-		mr_item_record = ([mr for mr in mr_list if mr.get('item_code') == so.item_code] or [{}])
+		key = (so.name, so.item_code)
+		materials_request = materials_request_dict.get(key) or {}
 
-		for mr in mr_item_record:
-			# check for pending sales order
-			if cint(so.net_qty) > cint(mr.get('qty')):
-				so_record = {
-					"item_code": so.item_code,
-					"item_name": so.item_name,
-					"description": so.description,
-					"sales_order_no": so.name,
-					"date": so.transaction_date,
-					"material_request": cstr(mr.get('parent')),
-					"customer": so.customer,
-					"territory": so.territory,
-					"so_qty": so.net_qty,
-					"requested_qty": cint(mr.get('qty')),
-					"pending_qty": so.net_qty - cint(mr.get('qty')),
-					"company": so.company
-				}
-				pending_so.append(so_record)
+		# check for pending sales order
+		if cint(so.net_qty) > cint(materials_request.get('qty')):
+			so_record = {
+				"item_code": so.item_code,
+				"item_name": so.item_name,
+				"description": so.description,
+				"sales_order_no": so.name,
+				"date": so.transaction_date,
+				"material_request": ','.join(materials_request.get('material_requests', [])),
+				"customer": so.customer,
+				"territory": so.territory,
+				"so_qty": so.net_qty,
+				"requested_qty": cint(materials_request.get('qty')),
+				"pending_qty": so.net_qty - cint(materials_request.get('qty')),
+				"company": so.company
+			}
+			pending_so.append(so_record)
 	return pending_so

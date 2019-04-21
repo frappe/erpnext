@@ -29,19 +29,12 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 			});
 	},
 
-	show_upload: function() {
-		var me = this;
+	show_upload() {
 		var $wrapper = $(cur_frm.fields_dict.upload_html.wrapper).empty();
-
-		// upload
-		frappe.upload.make({
-			parent: $wrapper,
-			args: {
-				method: 'erpnext.hr.doctype.upload_attendance.upload_attendance.upload'
-			},
-			no_socketio: true,
-			sample_url: "e.g. http://example.com/somefile.csv",
-			callback: function(attachment, r) {
+		new frappe.ui.FileUploader({
+			wrapper: $wrapper,
+			method: 'erpnext.hr.doctype.upload_attendance.upload_attendance.upload',
+			on_success(file_doc, r) {
 				var $log_wrapper = $(cur_frm.fields_dict.import_log.wrapper).empty();
 
 				if(!r.messages) r.messages = [];
@@ -59,10 +52,10 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 					});
 
 					r.messages = ["<h4 style='color:red'>"+__("Import Failed!")+"</h4>"]
-						.concat(r.messages)
+						.concat(r.messages);
 				} else {
-					r.messages = ["<h4 style='color:green'>"+__("Import Successful!")+"</h4>"].
-						concat(r.message.messages)
+					r.messages = ["<h4 style='color:green'>"+__("Import Successful!")+"</h4>"]
+						.concat(r.message.messages);
 				}
 
 				$.each(r.messages, function(i, v) {
@@ -79,11 +72,7 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 				});
 			}
 		});
-
-		// rename button
-		$wrapper.find('form input[type="submit"]')
-			.attr('value', 'Upload and Import')
-	}
+	},
 })
 
 cur_frm.cscript = new erpnext.hr.AttendanceControlPanel({frm: cur_frm});
