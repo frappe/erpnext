@@ -3,9 +3,10 @@
 
 from __future__ import unicode_literals
 import frappe, json
-from frappe.core.page.dashboard.dashboard import cache_source, get_from_date_from_timespan
-from frappe.utils import add_to_date, date_diff, getdate, nowdate
+from frappe.utils import add_to_date, date_diff, getdate, nowdate, get_last_day
 from erpnext.accounts.report.general_ledger.general_ledger import execute
+from frappe.core.page.dashboard.dashboard import cache_source, get_from_date_from_timespan
+from frappe.desk.doctype.dashboard_chart.dashboard_chart import get_period_ending
 
 from frappe.utils.nestedset import get_descendants_of
 
@@ -23,13 +24,14 @@ def get(chart_name=None, from_date = None, to_date = None):
 	if not to_date:
 		to_date = nowdate()
 	if not from_date:
-		from_date = get_from_date_from_timespan(to_date, timespan)
+		if timegrain in ('Monthly', 'Quarterly'):
+			from_date = get_from_date_from_timespan(to_date, timespan)
 
 	# fetch dates to plot
 	dates = get_dates_from_timegrain(from_date, to_date, timegrain)
 
 	# get all the entries for this account and its descendants
-	gl_entries = get_gl_entries(account, to_date)
+	gl_entries = get_gl_entries(account, get_period_ending(to_date, timegrain))
 
 	# compile balance values
 	result = build_result(account, dates, gl_entries)
@@ -94,7 +96,8 @@ def get_dates_from_timegrain(from_date, to_date, timegrain):
 	elif "Quarterly" == timegrain:
 		months = 3
 
-	dates = [from_date]
-	while getdate(dates[-1]) <= getdate(to_date):
-		dates.append(add_to_date(dates[-1], years=years, months=months, days=days))
+	dates = [get_period_ending(from_date, timegrain)]
+	while getdate(dates[-1]) < getdate(to_date):
+		date = get_period_ending(add_to_date(dates[-1], years=years, months=months, days=days), timegrain)
+		dates.append(date)
 	return dates
