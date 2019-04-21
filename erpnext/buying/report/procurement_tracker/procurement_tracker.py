@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cint,cstr
 
 def execute(filters=None):
 	columns = get_columns()
@@ -14,21 +13,22 @@ def execute(filters=None):
 def get_columns():
 	columns = [
 		{
-			"label": _("Date Requisition Received in Procurement "),
-			"fieldname": "date_requisition_received_in_procurement",
+			"label": _("Material Request Date"),
+			"fieldname": "material_request_date",
 			"fieldtype": "Date",
 			"width": 140
 		},
 		{
-			"label": _("Date Requisition was Raised"),
-			"fieldname": "date_requisition_was_raised",
-			"fieldtype": "Date",
-			"width": 140
-		},
-		{
-			"label": _("Sector/Project"),
+			"label": _("Cost Center"),
 			"options": "Cost Center",
-			"fieldname": "sector/project",
+			"fieldname": "cost_center",
+			"fieldtype": "Link",
+			"width": 140
+		},
+		{
+			"label": _("Project"),
+			"options": "Project",
+			"fieldname": "project",
 			"fieldtype": "Link",
 			"width": 140
 		},
@@ -47,16 +47,16 @@ def get_columns():
 			"width": 140
 		},
 		{
-			"label": _("Budget Code"),
-			"options": "Budget",
-			"fieldname": "budget_code",
+			"label": _("Material Request No"),
+			"options": "Material Request",
+			"fieldname": "material_request_no",
 			"fieldtype": "Link",
 			"width": 140
 		},
 		{
-			"label": _("Requisition Line"),
-			"options": "Item",
-			"fieldname": "requisition_line",
+			"label": _("Budget Code"),
+			"options": "Budget",
+			"fieldname": "budget_code",
 			"fieldtype": "Link",
 			"width": 140
 		},
@@ -119,13 +119,13 @@ def get_columns():
 		},
 		{
 			"label": _("Purchase Order Amount"),
-			"fieldname": "purchase_order_amount",
+			"fieldname": "purchase_order_amt",
 			"fieldtype": "Float",
 			"width": 140
 		},
 		{
-			"label": _("Purchase Order Amount(USD)"),
-			"fieldname": "purchase_order_amount_usd",
+			"label": _("Purchase Order Amount(Company Currency)"),
+			"fieldname": "purchase_order_amt_usd",
 			"fieldtype": "Float",
 			"width": 140
 		},
@@ -147,20 +147,19 @@ def get_columns():
 def get_data():
 	purchase_order_entry = frappe.db.sql("""
 		SELECT
-			po_item.item_code,
-			po_item.item_name,
+			po_item.name,
+			po_item.parent,
 			po_item.cost_center,
 			po_item.project,
 			po_item.warehouse,
 			po_item.material_request,
+			po_item.material_request_item,
 			po_item.description,
 			po_item.stock_uom,
 			po_item.qty,
-			po_item.net_amount,
+			po_item.amount,
 			po_item.base_amount,
 			po_item.schedule_date,
-			po_item.expected_delivery_date,
-			po.name,
 			po.transaction_date,
 			po.supplier,
 			po.status,
@@ -172,41 +171,72 @@ def get_data():
 			AND po.status not in  ("Closed","Completed","Cancelled")
 		GROUP BY
 			po.name,po_item.item_code
-		""", as_dict = 1)
+		""", as_dict=1)
 
-	mr_records = frappe._dict(frappe.db.sql("""
+	mr_details = frappe.db.sql("""
 		SELECT
-			name,
-			transaction_date
-		FROM `tabMaterial Request`
+			mr.transaction_date,
+			mr_item.name,
+			mr_item.parent,
+			mr_item.amount
+		FROM `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
 		WHERE
-			per_ordered = 100
-			AND docstatus = 1
-		"""))
+			per_ordered > 0
+			AND mr.name = mr_item.parent
+			AND mr.docstatus = 1
+		""", as_dict=1)
 
-	supplier_quotation_records = frappe._dict(frappe.db.sql("""
+	pi_records = frappe._dict(frappe.db.sql("""
 		SELECT
-			name,
+			po_detail,
 			base_amount
-		FROM `tabSupplier Quotation Item`
+		FROM `tabPurchase Invoice Item`
 		WHERE
-			per_ordered = 100
-			AND docstatus = 1
+			docstatus=1
+			AND po_detail IS NOT NULL
 		"""))
 
-	budget_records = frappe.db.sql("""
+	pr_records = frappe._dict(frappe.db.sql("""
 		SELECT
-			budget.name,
-			budget.project,
-			budget.cost_center,
-			budget_account.account,
-			budget_account.budget_amount
-		FROM `tabBudget` budget, `tabBudget Account` budget_account
+			pr_item.purchase_order_item,
+			pr.posting_date
+		FROM `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item
 		WHERE
-			budget.project IS NOT NULL
-			AND budget.name = budget_account.parent
-			AND budget.cost_center IS NOT NULL
-			AND budget.docstatus = 1
-		""", as_dict = 1)
+			pr.docstatus=1
+			AND pr.name=pr_item.parent
+			AND pr_item.purchase_order_item IS NOT NULL
+		"""))
 
-	return purchase_order_entry
+
+	mr_records = {}
+	for record in mr_details:
+		mr_records.setdefault(record.name, []).append(frappe._dict(record))
+
+	procurement_record=[]
+	for po in purchase_order_entry:
+		# fetch material records linked to the purchase order item
+		mr_record = mr_records.get(po.material_request_item, [{}])[0]
+
+		procurement_detail = {
+			"material_request_date": mr_record.get('transaction_date', ''),
+			"cost_center": po.cost_center,
+			"project": po.project,
+			"requesting_site": po.warehouse,
+			"requestor": po.owner,
+			"material_request_no": po.material_request,
+			"description": po.description,
+			"quantity": po.qty,
+			"unit_of_measurement": po.stock_uom,
+			"status": po.status,
+			"purchase_order_date": po.transaction_date,
+			"purchase_order": po.parent,
+			"supplier": po.supplier,
+			"estimated_cost": mr_record.get('amount'),
+			"actual_cost": pi_records.get(po.name, ''),
+			"purchase_order_amt": po.amount,
+			"purchase_order_amt_in_company_currency": po.base_amount,
+			"expected_delivery_date": po.schedule_date,
+			"actual_delivery_date": pr_records.get(po.name, {})
+		}
+		procurement_record.append(procurement_detail)
+	return procurement_record
