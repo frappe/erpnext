@@ -4,10 +4,9 @@
 from __future__ import unicode_literals
 import unittest
 from frappe.utils import nowdate, add_months
-from apps.erpnext.erpnext.buying.report.procurement_tracker.procurement_tracker import execute
+from erpnext.buying.report.procurement_tracker.procurement_tracker import execute
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
-from erpnext.accounts.doctype.budget.test_budget import make_budget
 
 class TestProcurementTracker(unittest.TestCase):
 	def test_result_for_procurement_tracker(self):
