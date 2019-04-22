@@ -365,6 +365,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				fields: [
 					{fieldtype:'Read Only', fieldname:'item_code',
 						label: __('Item Code'), in_list_view:1},
+					{fieldtype:'Link', fieldname:'warehouse', options: 'Warehouse',
+						label: __('For Warehouse'), in_list_view:1},
 					{fieldtype:'Link', fieldname:'bom', options: 'BOM', reqd: 1,
 						label: __('BOM'), in_list_view:1, get_query: function(doc) {
 							return {filters: {item: doc.item_code}};
@@ -372,8 +374,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					},
 					{fieldtype:'Float', fieldname:'required_qty', reqd: 1,
 						label: __('Qty'), in_list_view:1},
-					{fieldtype:'Link', fieldname:'for_warehouse', options: 'Warehouse',
-						label: __('For Warehouse')}
 				],
 				data: r.message,
 				get_data: function() {

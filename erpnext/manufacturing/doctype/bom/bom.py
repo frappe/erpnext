@@ -682,6 +682,9 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 		frappe.msgprint(_('Please select a BOM'))
 		return
 
+	if parent:
+		frappe.form_dict.parent = parent
+
 	if frappe.form_dict.parent:
 		bom_doc = frappe.get_doc("BOM", frappe.form_dict.parent)
 		frappe.has_permission("BOM", doc=bom_doc, throw=True)
@@ -694,7 +697,7 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 		item_names = tuple(d.get('item_code') for d in bom_items)
 
 		items = frappe.get_list('Item',
-			fields=['image', 'description', 'name'],
+			fields=['image', 'description', 'name', 'stock_uom', 'item_name'],
 			filters=[['name', 'in', item_names]]) # to get only required item dicts
 
 		for bom_item in bom_items:
