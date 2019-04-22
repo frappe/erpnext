@@ -989,7 +989,7 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 				and {dr_or_cr} > 0 and jea.reference_type = '{order_doctype}' and je.docstatus = 1
 				{order_condition} {against_account_condition}
 			order by je.posting_date
-			{limit_cond}""".format(
+			{limit_cond}""".format(  # nosec
 				dr_or_cr=dr_or_cr,
 				order_doctype=order_doctype,
 				order_condition=order_condition,
