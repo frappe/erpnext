@@ -7,5 +7,3 @@ def execute():
 		set sd.docstatus=1
 		where ss.name=sd.parent and ss.docstatus=1 and sd.parenttype='Salary Structure'
 	""")
-	
-

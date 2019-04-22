@@ -113,7 +113,7 @@ def get_max_benefits(employee, on_date):
 def get_max_benefits_remaining(employee, on_date, payroll_period):
 	max_benefits = get_max_benefits(employee, on_date)
 	if max_benefits and max_benefits > 0:
-		have_depends_on_lwp = False
+		have_depends_on_payment_days = False
 		per_day_amount_total = 0
 		payroll_period_days = get_payroll_period_days(on_date, on_date, employee)[0]
 		payroll_period_obj = frappe.get_doc("Payroll Period", payroll_period)
@@ -122,22 +122,22 @@ def get_max_benefits_remaining(employee, on_date, payroll_period):
 		prev_sal_slip_flexi_total = get_sal_slip_total_benefit_given(employee, payroll_period_obj)
 
 		if prev_sal_slip_flexi_total > 0:
-			# Check salary structure hold depends_on_lwp component
+			# Check salary structure hold depends_on_payment_days component
 			# If yes then find the amount per day of each component and find the sum
 			sal_struct_name = get_assigned_salary_structure(employee, on_date)
 			if sal_struct_name:
 				sal_struct = frappe.get_doc("Salary Structure", sal_struct_name)
 				for sal_struct_row in sal_struct.get("earnings"):
 					salary_component = frappe.get_doc("Salary Component", sal_struct_row.salary_component)
-					if salary_component.depends_on_lwp == 1 and salary_component.pay_against_benefit_claim != 1:
-						have_depends_on_lwp = True
+					if salary_component.depends_on_payment_days == 1 and salary_component.pay_against_benefit_claim != 1:
+						have_depends_on_payment_days = True
 						benefit_amount = get_benefit_pro_rata_ratio_amount(sal_struct, salary_component.max_benefit_amount)
 						amount_per_day = benefit_amount / payroll_period_days
 						per_day_amount_total += amount_per_day
 
 			# Then the sum multiply with the no of lwp in that period
 			# Include that amount to the prev_sal_slip_flexi_total to get the actual
-			if have_depends_on_lwp and per_day_amount_total > 0:
+			if have_depends_on_payment_days and per_day_amount_total > 0:
 				holidays = get_holidays_for_employee(employee, payroll_period_obj.start_date, on_date)
 				working_days = date_diff(on_date, payroll_period_obj.start_date) + 1
 				leave_days = calculate_lwp(employee, payroll_period_obj.start_date, holidays, working_days)
@@ -185,7 +185,7 @@ def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal
 		'payroll_period': payroll_period
 	})
 
-	if frappe.db.get_value("Salary Component", struct_row.salary_component, "depends_on_lwp") != 1:
+	if frappe.db.get_value("Salary Component", struct_row.salary_component, "depends_on_payment_days") != 1:
 		if frequency == "Monthly" and actual_payroll_days in range(360, 370):
 			period_length = 1
 			period_factor = 12
