@@ -68,7 +68,7 @@ def get_current_student():
 		student_id = frappe.get_all("Student", {"student_email_id": email}, ["name"])[0].name
 		return frappe.get_doc("Student", student_id)
 	except (IndexError, frappe.DoesNotExistError):
-		frappe.throw(_("Student with email {0} does not exist.".format(email)))
+		return None
 
 def check_super_access():
 	current_user = frappe.get_doc('User', frappe.session.user)
@@ -83,7 +83,7 @@ def get_program_enrollment(program_name):
 	if not student:
 		return None
 	else:
-		enrollment = frappe.get_all("Program Enrollment", filters={'student':student, 'program': program_name})
+		enrollment = frappe.get_all("Program Enrollment", filters={'student':student.name, 'program': program_name})
 		if enrollment:
 			return enrollment[0].name
 		else:
@@ -96,7 +96,7 @@ def get_program_and_enrollment_status(program_name):
 
 def get_course_enrollment(course_name):
 	student = get_current_student()
-	enrollment_name = frappe.get_all("Course Enrollment", filters={'student': student, 'course':course_name})
+	enrollment_name = frappe.get_all("Course Enrollment", filters={'student': student.name, 'course':course_name})
 	try:
 		name = enrollment_name[0].name
 		enrollment = frappe.get_doc("Course Enrollment", name)
@@ -118,8 +118,7 @@ def create_student_from_current_user():
 	return student
 
 def enroll_in_course(course_name, program_name):
-	student_id = get_current_student()
-	student = frappe.get_doc("Student", student_id)
+	student = get_current_student()
 	return student.enroll_in_course(course_name=course_name, program_enrollment=get_program_enrollment(program_name))
 
 def check_activity_exists(enrollment, content_type, content):
