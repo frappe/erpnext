@@ -525,6 +525,9 @@ class ReceivablePayableReport(object):
 			# sales invoice/purchase invoice
 			(gle.against_voucher==gle.voucher_no and gle.get(dr_or_cr) > 0) or
 
+			# standalone credit notes
+			(gle.against_voucher==gle.voucher_no and gle.voucher_no in return_entries and not return_entries.get(gle.voucher_no)) or
+
 			# entries adjusted with future vouchers
 			((gle.against_voucher_type, gle.against_voucher) in future_vouchers)
 		)
