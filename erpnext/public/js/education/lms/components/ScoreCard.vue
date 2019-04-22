@@ -44,7 +44,7 @@ export default {
     },
     methods: {
        getQuizProgress() {
-			return lms.call('get_quiz_progress', {
+			return lms.call('get_quiz_progress_of_program', {
                     program_name: this.program
 				})
         },

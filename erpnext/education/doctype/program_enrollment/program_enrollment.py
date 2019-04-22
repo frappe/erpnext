@@ -8,6 +8,7 @@ from frappe import msgprint, _
 from frappe.model.document import Document
 from frappe.desk.reportview import get_match_cond, get_filters_cond
 from frappe.utils import comma_and
+import erpnext.www.lms as lms
 
 class ProgramEnrollment(Document):
 	def validate(self):
@@ -73,6 +74,50 @@ class ProgramEnrollment(Document):
 		course_list = [course.course for course in program.get_all_children()]
 		for course_name in course_list:
 			student.enroll_in_course(course_name=course_name, program_enrollment=self.name)
+
+	def get_all_course_enrollments(self):
+		course_enrollment_names = frappe.get_list("Course Enrollment", filters={'program_enrollment': self.name})
+		return [frappe.get_doc('Course Enrollment', course_enrollment.name) for course_enrollment in course_enrollment_names]
+
+	def get_quiz_progress(self):
+		student = frappe.get_doc("Student", self.student)
+		quiz_progress = frappe._dict()
+		progress_list = []
+		for course_enrollment in self.get_all_course_enrollments():
+			course_progress = course_enrollment.get_progress(student)
+			for progress_item in course_progress:
+				if progress_item['content_type'] == "Quiz":
+					progress_item['course'] = course_enrollment.course
+					progress_list.append(progress_item)
+		if not progress_list:
+			return None
+		quiz_progress.quiz_attempt = progress_list
+		quiz_progress.name = self.program
+		quiz_progress.program = self.program
+		return quiz_progress
+
+	def get_program_progress(self):
+		import math
+		program = frappe.get_doc("Program", self.program)
+		program_progress = {}
+		progress = []
+		for course in program.get_all_children():
+			course_progress = lms.get_student_course_details(course.course, self.program)
+			is_complete = False
+			if course_progress['flag'] == "Completed":
+				is_complete = True
+			progress.append({'course_name': course.course_name, 'name': course.course, 'is_complete': is_complete})
+
+		program_progress['progress'] = progress
+		program_progress['name'] = self.program
+		program_progress['program'] = frappe.get_value("Program", self.program, 'program_name')
+
+		try:
+			program_progress['percentage'] = math.ceil((sum([item['is_complete'] for item in progress] * 100)/len(progress)))
+		except ZeroDivisionError:
+			program_progress['percentage'] = 0
+
+		return program_progress
 
 @frappe.whitelist()
 def get_program_courses(doctype, txt, searchfield, start, page_len, filters):
