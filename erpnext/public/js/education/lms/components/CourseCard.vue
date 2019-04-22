@@ -9,18 +9,21 @@
                 <h5 class="card-title">{{ course.course_name }}</h5>
                 <span class="course-list text-muted" id="getting-started">
                     Topics
-                    <ul class="mb-0 mt-1">
+                    <ul class="mb-0 mt-1" style="padding-left: 1.5em;">
                         <li v-for="topic in course.topics" :key="topic.name">
-                            <div><span style="padding-right: 0.4em"></span>{{ topic.topic_name }}</div>
+                            <div>{{ topic.topic_name }}</div>
                         </li>
                     </ul>
                 </span>
             </div>
-            <div class='text-right p-3'>
-                <div class='course-buttons text-center'>
+            <div class='p-3' style="display: flex; justify-content: space-between;">
+                <div>
+                    <span v-if="complete"><i class="mr-2 text-success fa fa-check-circle" aria-hidden="true"></i>Course Complete</span>
+                </div>
+                <div class='text-right'>
                     <a-button
-                        :type="buttonType"
-                        size="sm btn-block"
+                        :type="'primary'"
+                        size="sm"
                         :route="courseRoute"
                     >
                         {{ buttonName }}
@@ -42,30 +45,27 @@ export default {
     },
     data() {
         return {
-            courseMeta: {},
+            courseDetails: {},
         }
     },
     mounted() {
-        if(lms.store.checkLogin()) this.getCourseMeta().then(data => this.courseMeta = data)
+        if(lms.store.checkLogin()) this.getCourseDetails().then(data => this.courseDetails = data)
     },
     computed: {
         courseRoute() {
             return `${this.program_name}/${this.course.name}`
         },
-        buttonType() {
+        complete() {
             if(lms.store.checkProgramEnrollment(this.program_name)){
-                if (this.courseMeta.flag == "Start Course" ){
-                return "primary"
+                if (this.courseDetails.flag === "Completed" ) {
+                    return true
                 }
-                else if (this.courseMeta.flag == "Completed" ) {
-                    return "success"
-                }
-                else if (this.courseMeta.flag == "Continue" ) {
-                    return "info"
+                else {
+                    return false
                 }
             }
             else {
-                return "info"
+                return false
             }
         },
         isLogin() {
@@ -73,7 +73,7 @@ export default {
         },
         buttonName() {
             if(lms.store.checkProgramEnrollment(this.program_name)){
-                return this.courseMeta.flag
+                return "Start Course"
             }
             else {
                 return "Explore"
@@ -81,7 +81,7 @@ export default {
         }
     },
     methods: {
-        getCourseMeta() {
+        getCourseDetails() {
 			return lms.call('get_student_course_details', {
                     course_name: this.course.name,
                     program_name: this.program_name
@@ -90,33 +90,3 @@ export default {
     }
 };
 </script>
-
-<style scoped>
-    .course-buttons {
-        margin-bottom: 1em;
-    }
-
-    div.card-hero-img {
-        height: 220px;
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-color: rgb(250, 251, 252);
-    }
-
-    .card-image-wrapper {
-        display: flex;
-        overflow: hidden;
-        height: 220px;
-        background-color: rgb(250, 251, 252);
-    }
-
-    .image-body {
-        align-self: center;
-        color: #d1d8dd;
-        font-size: 24px;
-        font-weight: 600;
-        line-height: 1;
-        padding: 20px;
-    }
-</style>

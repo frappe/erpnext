@@ -3,12 +3,12 @@
     <div class="card h-100">
         <router-link :to="'/Program/' + program.name">
             <div class="card-hero-img" v-if="program.hero_image" v-bind:style="{ 'background-image': 'url(' + image + ')' }"></div>
-            <div v-else class="card-image-wrapper">
+            <div v-else class="card-image-wrapper text-center">
                 <div class="image-body">{{ program.program_name }}</div>
             </div>
             <div class='card-body'>
                 <h5 class='card-title'>{{ program.program_name }}</h5>
-                <div>{{ program.description.substring(0,200) }}...</div>
+                <div class="text-muted">{{ program.description.substring(0,200) }}...</div>
             </div>
         </router-link>
         <div class='text-right p-3'>
@@ -78,29 +78,5 @@ export default {
     }
     a.btn-secondary {
         color: white !important;
-    }
-
-    div.card-hero-img {
-        height: 220px;
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-color: rgb(250, 251, 252);
-    }
-
-    .card-image-wrapper {
-        display: flex;
-        overflow: hidden;
-        height: 220px;
-        background-color: rgb(250, 251, 252);
-    }
-
-    .image-body {
-        align-self: center;
-        color: #d1d8dd;
-        font-size: 24px;
-        font-weight: 600;
-        line-height: 1;
-        padding: 20px;
     }
 </style>
