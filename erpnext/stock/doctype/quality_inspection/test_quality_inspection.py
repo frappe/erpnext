@@ -17,7 +17,7 @@ class TestQualityInspection(unittest.TestCase):
 		frappe.db.set_value("Item", "_Test Item with QA", "inspection_required_before_delivery", 1)
 
 	def test_qa_for_delivery(self):
-		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True, allow_zero_valuation=True)
 		self.assertRaises(QualityInspectionRequiredError, dn.submit)
 
 		qa = create_quality_inspection(reference_type="Delivery Note", reference_name=dn.name, status="Rejected", submit=True)
@@ -29,8 +29,8 @@ class TestQualityInspection(unittest.TestCase):
 		dn.submit()
 
 	def test_qa_not_submit(self):
-		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
-		qa = create_quality_inspection(reference_type="Delivery Note", reference_name=dn.name, submit = False)
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True, allow_zero_valuation=True)
+		qa = create_quality_inspection(reference_type="Delivery Note", reference_name=dn.name, submit=False)
 		dn.items[0].quality_inspection = qa.name
 		self.assertRaises(QualityInspectionNotSubmittedError, dn.submit)
 
