@@ -31,3 +31,46 @@ class CourseEnrollment(Document):
 		})
 		if enrollment:
 			frappe.throw(_("Student is already enrolled."))
+
+	def add_quiz_activity(self, quiz_name, quiz_response,answers, score, status):
+		result = {k: ('Correct' if v else 'Wrong') for k,v in answers.items()}
+		result_data = []
+		for key in answers:
+			item = {}
+			item['question'] = key
+			item['quiz_result'] = result[key]
+			try:
+				if isinstance(quiz_response[key], list):
+					item['selected_option'] = ', '.join(frappe.get_value('Options', res, 'option') for res in quiz_response[key])
+				else:
+					item['selected_option'] = frappe.get_value('Options', quiz_response[key], 'option')
+			except KeyError:
+				item['selected_option'] = "Unattempted"
+			result_data.append(item)
+
+		quiz_activity = frappe.get_doc({
+			"doctype": "Quiz Activity",
+			"enrollment": self.name,
+			"quiz": quiz_name,
+			"activity_date": frappe.utils.datetime.datetime.now(),
+			"result": result_data,
+			"score": score,
+			"status": status
+			}).insert()
+
+	def add_activity(self, content_type, content):
+		if check_activity_exists(self.name, content_type, content):
+			pass
+		else:
+			activity = frappe.get_doc({
+				"doctype": "Course Activity",
+				"enrollment": self.name,
+				"content_type": content_type,
+				"content": content,
+				"activity_date": frappe.utils.datetime.datetime.now()
+				})
+			activity.insert()
+
+def check_activity_exists(enrollment, content_type, content):
+	activity = frappe.get_all("Course Activity", filters={'enrollment': enrollment, 'content_type': content_type, 'content': content})
+	return bool(activity)

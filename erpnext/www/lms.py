@@ -107,38 +107,13 @@ def evaluate_quiz(course, quiz_response, quiz_name):
 	quiz_response = json.loads(quiz_response)
 	quiz = frappe.get_doc("Quiz", quiz_name)
 	answers, score, status = quiz.evaluate(quiz_response, quiz_name)
+	print(answers)
 
-	result = {k: ('Correct' if v else 'Wrong') for k,v in answers.items()}
-	result_data = []
-	for key in answers:
-		item = {}
-		item['question'] = key
-		item['quiz_result'] = result[key]
-		try:
-			if isinstance(quiz_response[key], list):
-				item['selected_option'] = ', '.join(frappe.get_value('Options', res, 'option') for res in quiz_response[key])
-			else:
-				item['selected_option'] = frappe.get_value('Options', quiz_response[key], 'option')
-		except:
-			item['selected_option'] = "Unattempted"
-		result_data.append(item)
+	course_enrollment = utils.get_course_enrollment(course)
+	if course_enrollment:
+		course_enrollment.add_quiz_activity(quiz_name, quiz_response, answers, score, status)
 
-	add_quiz_activity(course, quiz_name, result_data, score, status)
-	return(score)
-
-def add_quiz_activity(course, quiz_name, result_data, score, status):
-	if not utils.get_current_student():
-		return None
-	enrollment = utils.get_course_enrollment(course).name
-	quiz_activity = frappe.get_doc({
-		"doctype": "Quiz Activity",
-		"enrollment": enrollment,
-		"quiz": quiz_name,
-		"activity_date": frappe.utils.datetime.datetime.now(),
-		"result": result_data,
-		"score": score,
-		"status": status
-		}).insert()
+	return score
 
 @frappe.whitelist()
 def enroll_in_program(program_name):
@@ -148,24 +123,13 @@ def enroll_in_program(program_name):
 	program_enrollment = student.enroll_in_program(program_name)
 	return program_name
 
-# Academty Activity
+# Academdy Activity
 @frappe.whitelist()
 def add_activity(course, content_type, content):
 	if not utils.get_current_student():
 		return
 	enrollment = utils.get_course_enrollment(course)
-	if(utils.check_activity_exists(enrollment.name, content_type, content)):
-		pass
-	else:
-		activity = frappe.get_doc({
-			"doctype": "Course Activity",
-			"enrollment": enrollment.name,
-			"content_type": content_type,
-			"content": content,
-			"activity_date": frappe.utils.datetime.datetime.now()
-			})
-		activity.save()
-		frappe.db.commit()
+	enrollment.add_activity(content_type, content)
 
 @frappe.whitelist()
 def get_student_course_details(course_name, program_name):

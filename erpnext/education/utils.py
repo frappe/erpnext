@@ -121,10 +121,6 @@ def enroll_in_course(course_name, program_name):
 	student = get_current_student()
 	return student.enroll_in_course(course_name=course_name, program_enrollment=get_program_enrollment(program_name))
 
-def check_activity_exists(enrollment, content_type, content):
-	activity = frappe.get_all("Course Activity", filters={'enrollment': enrollment, 'content_type': content_type, 'content': content})
-	return bool(activity)
-
 def check_content_completion(content_name, content_type, enrollment_name):
 	activity = frappe.get_all("Course Activity", filters={'enrollment': enrollment_name, 'content_type': content_type, 'content': content_name})
 	if activity:
