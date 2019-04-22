@@ -82,7 +82,7 @@ export default {
     },
     methods: {
         getCourseMeta() {
-			return lms.call('get_course_meta', {
+			return lms.call('get_student_course_details', {
                     course_name: this.course.name,
                     program_name: this.program_name
 				})

@@ -169,7 +169,7 @@ def add_activity(course, content_type, content):
 		frappe.db.commit()
 
 @frappe.whitelist()
-def get_course_meta(course_name, program_name):
+def get_student_course_details(course_name, program_name):
 	"""
 	Return the porgress of a course in a program as well as the content to continue from.
 		:param course_name:
@@ -233,7 +233,7 @@ def get_program_progress(program_name):
 	else:
 		progress = []
 		for course in program.get_all_children():
-			meta = get_course_meta(course.course, program_name)
+			meta = get_student_course_details(course.course, program_name)
 			is_complete = False
 			if meta['flag'] == "Completed":
 				is_complete = True
