@@ -602,12 +602,11 @@ class SalarySlip(TransactionBase):
 			annual_earning = taxable_earning["taxable_earning"] * period_factor
 			exemption_amount = 0
 			if frappe.db.exists("Employee Tax Exemption Declaration", {"employee": self.employee,
-			"payroll_period": payroll_period.name, "docstatus": 1}):
+					"payroll_period": payroll_period.name, "docstatus": 1}):
 				exemption_amount = frappe.db.get_value("Employee Tax Exemption Declaration",
 					{"employee": self.employee, "payroll_period": payroll_period.name, "docstatus": 1},
 					"total_exemption_amount")
 			annual_taxable_earning = annual_earning - exemption_amount
-
 		if self.deduct_tax_for_unclaimed_employee_benefits or self.deduct_tax_for_unsubmitted_tax_exemption_proof:
 			tax_detail = self.get_tax_paid_in_period(payroll_period, tax_component)
 			if tax_detail:
@@ -773,13 +772,21 @@ class SalarySlip(TransactionBase):
 
 	def get_period_factor(self, period_start, period_end, start_date=None, end_date=None):
 		# TODO if both deduct checked update the factor to make tax consistent
+		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee, ["date_of_joining", "relieving_date"])
+		if getdate(joining_date) > getdate(period_start):
+			period_start = joining_date
+		if relieving_date and getdate(relieving_date) < getdate(period_end):
+			period_end = relieving_date
+
 		payroll_days = date_diff(period_end, period_start) + 1
 		if start_date and end_date:
 			salary_days = date_diff(end_date, start_date) + 1
 			return flt(payroll_days)/flt(salary_days)
+
 		# if period configured for a year and monthly frequency return 12 to make tax calc consistent
 		if 360 <= payroll_days <= 370 and self.payroll_frequency == "Monthly":
 			return 12
+
 		salary_days = date_diff(self.end_date, self.start_date) + 1
 		return flt(payroll_days)/flt(salary_days)
 
