@@ -18,7 +18,7 @@ class SalaryStructure(Document):
 		self.validate_max_benefits_with_flexi()
 
 	def set_missing_values(self):
-		overwritten_fields = ["depends_on_lwp", "variable_based_on_taxable_salary", "is_tax_applicable", "is_flexible_benefit"]
+		overwritten_fields = ["depends_on_payment_days", "variable_based_on_taxable_salary", "is_tax_applicable", "is_flexible_benefit"]
 		overwritten_fields_if_missing = ["amount_based_on_formula", "formula", "amount"]
 		for table in ["earnings", "deductions"]:
 			for d in self.get(table):
@@ -126,7 +126,7 @@ def create_salary_structures_assignment(employee, salary_structure, from_date, b
 
 def get_existing_assignments(employees, salary_structure,from_date):
 	salary_structures_assignments = frappe.db.sql_list("""
-		select distinct employee from `tabSalary Structure Assignment` 
+		select distinct employee from `tabSalary Structure Assignment`
 		where salary_structure=%s and employee in (%s)
 		and from_date=%s and docstatus=1
 	""" % ('%s', ', '.join(['%s']*len(employees)),'%s'), [salary_structure] + employees+[from_date])
