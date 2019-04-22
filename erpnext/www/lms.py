@@ -195,7 +195,7 @@ def get_student_course_details(course_name, program_name):
 		return {'flag':'Continue'}
 
 @frappe.whitelist()
-def get_topic_meta(topic_name, course_name):
+def get_student_topic_details(topic_name, course_name):
 	"""
 	Return the porgress of a course in a program as well as the content to continue from.
 		:param topic_name:

@@ -97,7 +97,7 @@ export default {
             if(content_type == 'Quiz') return 'fa fa-question-circle-o'
         },
         getTopicMeta() {
-			return lms.call('get_topic_meta', {
+			return lms.call('get_student_topic_details', {
                     topic_name: this.topic.name,
                     course_name: this.course_name,
 				})
