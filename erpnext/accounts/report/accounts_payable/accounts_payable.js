@@ -100,7 +100,7 @@ frappe.query_reports["Accounts Payable"] = {
 					const me = this;
 					values = values.filter((d, i) => {
 						let idx = me.bodyRenderer.visibleRowIndices[i];
-						return me.datamanager.getData(idx).posting_date
+						return me.datamanager.getData(idx).posting_date;
 					});
 					let type = column.column.fieldname == "age" ? "mean" : null;
 					return frappe.utils.report_column_total(values, column, type);
