@@ -199,7 +199,7 @@ def get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account,
 		where party_type=%(party_type)s and party=%(party)s and {account_condition}
 			and ((voucher_type=%(voucher_type)s and voucher_no=%(voucher_no)s and (against_voucher is null or against_voucher=''))
 				or (against_voucher_type=%(voucher_type)s and against_voucher=%(voucher_no)s))
-	""".format(dr_or_cr=dr_or_cr, account_condition=account_condition),
+	""".format(dr_or_cr=dr_or_cr, account_condition=account_condition),  # nosec
 	{"voucher_type": voucher_type, "voucher_no": voucher_no, "party_type": party_type, "party": party})
 
 	return flt(res[0][0]) if res else 0.0
@@ -373,7 +373,7 @@ def check_if_advance_entry_modified(args):
 					and je.name = %(voucher_no)s and jea.name = %(voucher_detail_no)s
 					and jea.party_type = %(party_type)s and jea.party = %(party)s
 					and ifnull(jea.reference_type, '') in ('', 'Sales Order', 'Purchase Order')
-					and jea.{dr_or_cr} = %(unadjusted_amount)s""".format(dr_or_cr=args.dr_or_cr), args)
+					and jea.{dr_or_cr} = %(unadjusted_amount)s""".format(dr_or_cr=args.dr_or_cr), args)  # nosec
 		else:
 			if erpnext.get_party_account_type(args.party_type) == 'Receivable':
 				dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
@@ -387,7 +387,7 @@ def check_if_advance_entry_modified(args):
 				((voucher_type='Journal Entry' and voucher_no=%(voucher_no)s and (against_voucher is null or against_voucher=''))
 					or (against_voucher_type='Journal Entry' and against_voucher=%(voucher_no)s))
 				and party_type=%(party_type)s and party=%(party)s and account=%(account)s
-				having outstanding_amount=%(unadjusted_amount)s""".format(dr_or_cr=dr_or_cr), args)
+				having outstanding_amount=%(unadjusted_amount)s""".format(dr_or_cr=dr_or_cr), args)  # nosec
 	else:
 		party_account_field = ("paid_from"
 			if erpnext.get_party_account_type(args.party_type) == 'Receivable' else "paid_to")
@@ -726,7 +726,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, include
 		group by voucher_type, voucher_no
 		order by posting_date, name
 		{limit_cond}
-	""".format(dr_or_cr=dr_or_cr, condition=condition or "", limit_cond=limit_cond), {
+	""".format(dr_or_cr=dr_or_cr, condition=condition or "", limit_cond=limit_cond), {  # nosec
 		"party_type": party_type,
 		"party": party,
 		"account": account,

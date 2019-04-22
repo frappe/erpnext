@@ -1032,7 +1032,7 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 		group by gle_je.voucher_no
 		having amount > 0.005 {against_account_condition}
 		order by gle_je.posting_date
-		{limit_cond}""".format(
+		{limit_cond}""".format(  # nosec
 			bal_dr_or_cr=bal_dr_or_cr,
 			payment_dr_or_cr=payment_dr_or_cr,
 			against_account_condition=against_account_condition,
@@ -1071,7 +1071,7 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 
 		payment_entries_against_order = frappe.db.sql("""
 			select
-				"Payment Entry" as reference_type, pe.name as reference_name,
+				'Payment Entry' as reference_type, pe.name as reference_name,
 				pe.remarks, pref.allocated_amount as amount, pref.name as reference_row,
 				pref.reference_name as against_order, pe.posting_date
 			from `tabPayment Entry` pe, `tabPayment Entry Reference` pref
@@ -1082,7 +1082,7 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 				{reference_condition} {against_account_condition}
 			order by pe.posting_date
 			limit %s
-		""".format(
+		""".format(  # nosec
 			party_account_field=party_account_field,
 			reference_condition=reference_condition,
 			against_account_condition=against_account_condition
@@ -1090,7 +1090,7 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 
 	if include_unallocated:
 		unallocated_payment_entries = frappe.db.sql("""
-			select "Payment Entry" as reference_type, name as reference_name, remarks, unallocated_amount as amount
+			select 'Payment Entry' as reference_type, name as reference_name, remarks, unallocated_amount as amount
 			from `tabPayment Entry` pe
 			where
 				{party_account_field} = %s and party_type = %s and party = %s and payment_type = %s
@@ -1098,7 +1098,7 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 				{against_account_condition}
 			order by posting_date
 			limit %s
-		""".format(
+		""".format(  # nosec
 			party_account_field=party_account_field,
 			against_account_condition=against_account_condition
 		), [party_account, party_type, party, payment_type, limit or 1000], as_dict=1)

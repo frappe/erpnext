@@ -16,4 +16,4 @@ def execute():
 			set against_voucher = '', against_voucher_type = ''
 			where voucher_type = '{dt}' and against_voucher_type = voucher_type and against_voucher = voucher_no
 				and {dr_or_cr} > 0
-		""".format(dt=dt, dr_or_cr=dr_or_cr))
+		""".format(dt=dt, dr_or_cr=dr_or_cr))  # nosec
