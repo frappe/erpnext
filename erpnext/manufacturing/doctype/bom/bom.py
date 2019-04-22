@@ -201,7 +201,7 @@ class BOM(WebsiteGenerator):
 
 				if not rate:
 					if self.rm_cost_as_per == "Price List":
-						frappe.msgprint(_("Price not found for item {0} and price list {1}")
+						frappe.msgprint(_("Price not found for item {0} in price list {1}")
 							.format(arg["item_code"], self.buying_price_list), alert=True)
 					else:
 						frappe.msgprint(_("{0} not found for item {1}")

@@ -487,13 +487,8 @@ class ReceivablePayableReport(object):
 			conditions.append("company=%s")
 			values.append(self.filters.company)
 
-		company_finance_book = erpnext.get_default_finance_book(self.filters.company)
-
-		if not self.filters.finance_book or (self.filters.finance_book == company_finance_book):
+		if self.filters.finance_book:
 			conditions.append("ifnull(finance_book,'') in (%s, '')")
-			values.append(company_finance_book)
-		elif self.filters.finance_book:
-			conditions.append("ifnull(finance_book,'') = %s")
 			values.append(self.filters.finance_book)
 
 		if self.filters.get(party_type_field):
