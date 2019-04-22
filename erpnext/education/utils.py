@@ -66,9 +66,9 @@ def get_current_student():
 		return None
 	try:
 		student_id = frappe.get_all("Student", {"student_email_id": email}, ["name"])[0].name
-		return student_id
-	except IndexError:
-		return None
+		return frappe.get_doc("Student", student_id)
+	except (IndexError, frappe.DoesNotExistError):
+		frappe.throw(_("Student with email {0} does not exist.".format(email)))
 
 def check_super_access():
 	current_user = frappe.get_doc('User', frappe.session.user)
