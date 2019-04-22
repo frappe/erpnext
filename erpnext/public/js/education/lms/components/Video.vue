@@ -2,7 +2,6 @@
 <div>
     <section class='mt-2'>
     <div>
-        <youtube-player :url="contentData.url"/>
         <div class="mt-3 row">
             <div class="col-md-8">
                 <h2>{{ contentData.name }}</h2>
@@ -12,15 +11,16 @@
                 </span>
             </div>
             <div class="col-md-4 text-right">
-                    <slot></slot>
+                <slot></slot>
             </div>
         </div>
+        <youtube-player :url="contentData.url" class="mt-3"/>
         <hr>
     </div>
 </section>
 <section class="video-description-section">
     <div>
-        <div class="content" :html="contentData.description">
+        <div class="content" v-html="contentData.description">
         </div>
         <div class="text-right hidden">
             <a class='btn btn-outline-secondary' href="/classrooms/module">Previous</a>
