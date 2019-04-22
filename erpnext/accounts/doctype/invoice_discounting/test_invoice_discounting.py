@@ -122,26 +122,61 @@ class TestInvoiceDiscounting(unittest.TestCase):
 			period=60
 			)
 
-		inv_disc.create_disbursement_entry()
-		je = inv_disc.close_loan()
+		je1 = inv_disc.create_disbursement_entry()
+		je1.posting_date = nowdate()
+		je1.submit()
 
-		self.assertEqual(je.accounts[0].account, self.short_term_loan)
-		self.assertEqual(je.accounts[0].debit_in_account_currency, flt(inv_disc.total_amount))
+		je2 = inv_disc.close_loan()
 
-		self.assertEqual(je.accounts[1].account, self.bank_account)
-		self.assertEqual(je.accounts[1].credit_in_account_currency, flt(inv_disc.total_amount))
+		self.assertEqual(je2.accounts[0].account, self.short_term_loan)
+		self.assertEqual(je2.accounts[0].debit_in_account_currency, flt(inv_disc.total_amount))
 
-		self.assertEqual(je.accounts[2].account, self.ar_discounted)
-		self.assertEqual(je.accounts[2].credit_in_account_currency, flt(inv.outstanding_amount))
+		self.assertEqual(je2.accounts[1].account, self.bank_account)
+		self.assertEqual(je2.accounts[1].credit_in_account_currency, flt(inv_disc.total_amount))
 
-		self.assertEqual(je.accounts[3].account, self.ar_unpaid)
-		self.assertEqual(je.accounts[3].debit_in_account_currency, flt(inv.outstanding_amount))
+		self.assertEqual(je2.accounts[2].account, self.ar_discounted)
+		self.assertEqual(je2.accounts[2].credit_in_account_currency, flt(inv.outstanding_amount))
 
-		je.posting_date = nowdate()
-		je.submit()
+		self.assertEqual(je2.accounts[3].account, self.ar_unpaid)
+		self.assertEqual(je2.accounts[3].debit_in_account_currency, flt(inv.outstanding_amount))
+
+		je2.posting_date = nowdate()
+		je2.submit()
 		inv_disc.reload()
 
 		self.assertEqual(inv_disc.status, "Settled")
+
+	def test_on_close_after_loan_period_after_inv_payment(self):
+		inv = create_sales_invoice(rate=600)
+		inv_disc = create_invoice_discounting([inv.name],
+			accounts_receivable_credit=self.ar_credit,
+			accounts_receivable_discounted=self.ar_discounted,
+			accounts_receivable_unpaid=self.ar_unpaid,
+			short_term_loan=self.short_term_loan,
+			bank_charges_account=self.bank_charges_account,
+			bank_account=self.bank_account,
+			start=nowdate(),
+			period=60
+			)
+
+		je1 = inv_disc.create_disbursement_entry()
+		je1.posting_date = nowdate()
+		je1.submit()
+
+		je_on_payment = frappe.get_doc(get_payment_entry_against_invoice("Sales Invoice", inv.name))
+		je_on_payment.posting_date = nowdate()
+		je_on_payment.cheque_no = "126981"
+		je_on_payment.cheque_date = nowdate()
+		je_on_payment.save()
+		je_on_payment.submit()
+
+		je2 = inv_disc.close_loan()
+
+		self.assertEqual(je2.accounts[0].account, self.short_term_loan)
+		self.assertEqual(je2.accounts[0].debit_in_account_currency, flt(inv_disc.total_amount))
+
+		self.assertEqual(je2.accounts[1].account, self.bank_account)
+		self.assertEqual(je2.accounts[1].credit_in_account_currency, flt(inv_disc.total_amount))
 
 	def test_on_close_before_loan_period(self):
 		inv = create_sales_invoice(rate=700)
@@ -154,23 +189,21 @@ class TestInvoiceDiscounting(unittest.TestCase):
 			bank_account=self.bank_account,
 			start=add_days(nowdate(), -80),
 			period=60
-			)
+		)
 
-		inv_disc.create_disbursement_entry()
-		je = inv_disc.close_loan()
+		je1 = inv_disc.create_disbursement_entry()
+		je1.posting_date = nowdate()
+		je1.submit()
 
-		je.posting_date = nowdate()
-		je.submit()
+		je2 = inv_disc.close_loan()
+		je2.posting_date = nowdate()
+		je2.submit()
 
-		self.assertEqual(je.accounts[0].account, self.short_term_loan)
-		self.assertEqual(je.accounts[0].debit_in_account_currency, flt(inv_disc.total_amount))
+		self.assertEqual(je2.accounts[0].account, self.short_term_loan)
+		self.assertEqual(je2.accounts[0].debit_in_account_currency, flt(inv_disc.total_amount))
 
-		self.assertEqual(je.accounts[1].account, self.bank_account)
-		self.assertEqual(je.accounts[1].credit_in_account_currency, flt(inv_disc.total_amount))
-
-		inv_disc.reload()
-
-		self.assertEqual(inv_disc.status, "Settled")
+		self.assertEqual(je2.accounts[1].account, self.bank_account)
+		self.assertEqual(je2.accounts[1].credit_in_account_currency, flt(inv_disc.total_amount))
 
 	def test_make_payment_before_loan_period(self):
 		#it has problem
