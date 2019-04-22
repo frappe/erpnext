@@ -34,7 +34,7 @@ def get_portal_details():
 def get_featured_programs():
 	featured_program_names = frappe.get_all("Program", filters={"is_published": True, "is_featured": True})
 	if featured_program_names:
-		featured_list = [utils.get_program(program['name']) for program in featured_program_names]
+		featured_list = [utils.get_program_and_enrollment_status(program['name']) for program in featured_program_names]
 		return featured_list
 	else:
 		return get_all_programs()[:2]
@@ -43,18 +43,15 @@ def get_featured_programs():
 def get_all_programs():
 	program_names = frappe.get_all("Program", filters={"is_published": True})
 	if program_names:
-		program_list = [utils.get_program(program['name']) for program in program_names]
+		program_list = [utils.get_program_and_enrollment_status(program['name']) for program in program_names]
 		return program_list
-	else:
-		return None
 
 @frappe.whitelist(allow_guest=True)
-def get_program_details(program_name):
+def get_program(program_name):
 	try:
-		program = frappe.get_doc('Program', program_name)
-		return program
-	except:
-		return None
+		return frappe.get_doc('Program', program_name)
+	except frappe.DoesNotExistError:
+		frappe.throw(_("Program {0} does not exist.".format(program_name)))
 
 # Functions to get program & course details
 @frappe.whitelist(allow_guest=True)

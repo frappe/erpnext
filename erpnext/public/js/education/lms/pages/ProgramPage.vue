@@ -35,7 +35,7 @@ export default {
 	},
 	methods: {
 		getProgramDetails() {
-			return lms.call('get_program_details', {
+			return lms.call('get_program', {
 				program_name: this.program_name
 			});
 		},
