@@ -478,7 +478,7 @@ def validate_inter_company_party(doctype, party, company, inter_company_order_re
 
 	elif frappe.db.get_value(partytype, {"name": party, internal: 1}, "name") == party:
 		companies = frappe.db.sql("""select company from `tabAllowed To Transact With`
-			where parenttype = '{0}' and parent = '{1}'""".format(partytype, party), as_list = 1)
+			where parenttype = '{0}' and parent = '{1}'""".format(partytype, party), as_list = 1) #nosec
 		companies = [d[0] for d in companies]
 		if not company in companies:
 			frappe.throw(_("{0} not allowed to transact with {1}. Please change the Company.").format(partytype, company))
@@ -805,6 +805,7 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier=None, target
 		target.apply_discount_on = ""
 		target.additional_discount_percentage = 0.0
 		target.discount_amount = 0.0
+		target.inter_company_order_reference = ""
 
 		default_price_list = frappe.get_value("Supplier", supplier, "default_price_list")
 		if default_price_list:

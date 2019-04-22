@@ -139,13 +139,13 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						}, __('Create'))
 					}
 
-					if (doc.docstatus == 1 && !doc.inter_company_order_reference) {
+					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
 						let me = this;
 						frappe.model.with_doc("Supplier", me.frm.doc.supplier, () => {
 							let supplier = frappe.model.get_doc("Supplier", me.frm.doc.supplier);
 							let internal = supplier.is_internal_supplier;
 							let disabled = supplier.disabled;
-							if (internal == 1 && disabled == 0) {
+							if (internal === 1 && disabled === 0) {
 								me.frm.add_custom_button("Inter Company Order", function() {
 									me.make_inter_company_order(me.frm);
 								}, __('Create'));
