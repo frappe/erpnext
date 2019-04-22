@@ -13,6 +13,9 @@ class BankAccount(Document):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
 
+	def autoname(self):
+		self.name = self.account_name + " - " + self.bank
+
 	def on_trash(self):
 		delete_contact_and_address('BankAccount', self.name)
 

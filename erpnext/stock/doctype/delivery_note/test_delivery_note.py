@@ -655,7 +655,7 @@ class TestDeliveryNote(unittest.TestCase):
 		si = make_sales_invoice(dn.name)
 		self.assertEquals(si.items[0].qty, 1)
 
-	def test_make_sales_invoice_from_dn_with_returned_qty_against_dn(self):
+	def test_make_sales_invoice_from_dn_with_returned_qty_duplicate_items(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 
 		dn = create_delivery_note(qty=8, do_not_submit=True)
