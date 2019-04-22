@@ -65,7 +65,7 @@ class WoocommerceSettings(Document):
 			if not frappe.get_value("Item Group",{"name": "WooCommerce Products"}):
 				item_group = frappe.new_doc("Item Group")
 				item_group.item_group_name = "WooCommerce Products"
-				item_group.parent_item_group = "All Item Groups"
+				item_group.parent_item_group = _("All Item Groups")
 				item_group.save()
 
 
@@ -122,3 +122,9 @@ def generate_secret():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 	woocommerce_settings.secret = frappe.generate_hash()
 	woocommerce_settings.save()
+
+@frappe.whitelist()
+def get_series():
+	return {
+		"sales_order_series" : frappe.get_meta("Sales Order").get_options("naming_series") or "SO-WOO-",
+	}

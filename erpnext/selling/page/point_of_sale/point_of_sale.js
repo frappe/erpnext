@@ -54,13 +54,37 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				this.prepare_menu();
 				this.set_online_status();
 			},
-			() => this.setup_company(),
 			() => this.make_new_invoice(),
+			() => {
+				if(!this.frm.doc.company) {
+					this.setup_company()
+						.then((company) => {
+							this.frm.doc.company = company;
+							this.get_pos_profile();
+						});
+				}
+			},
 			() => {
 				frappe.dom.unfreeze();
 			},
 			() => this.page.set_title(__('Point of Sale'))
 		]);
+	}
+
+	get_pos_profile() {
+		return frappe.xcall("erpnext.stock.get_item_details.get_pos_profile",
+			{'company': this.frm.doc.company})
+			.then((r) => {
+				if(r) {
+					this.frm.doc.pos_profile = r.name;
+					this.set_pos_profile_data()
+						.then(() => {
+							this.on_change_pos_profile();
+						});
+				} else {
+					this.raise_exception_for_pos_profile();
+				}
+		});
 	}
 
 	set_online_status() {
@@ -75,6 +99,11 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				}
 			}
 		});
+	}
+
+	raise_exception_for_pos_profile() {
+		setTimeout(() => frappe.set_route('List', 'POS Profile'), 2000);
+		frappe.throw(__("POS Profile is required to use Point-of-Sale"));
 	}
 
 	prepare_dom() {
@@ -233,9 +262,21 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			} else {
 				this.update_item_in_frm(item, field, value)
 					.then(() => {
-						// update cart
-						this.update_cart_data(item);
-						this.set_form_action();
+						frappe.dom.unfreeze();
+						frappe.run_serially([
+							() => {
+								let items = this.frm.doc.items.map(item => item.name);
+								if (items && items.length > 0 && items.includes(item.name)) {
+									this.frm.doc.items.forEach(item_row => {
+										// update cart
+										this.on_qty_change(item_row);
+									});
+								} else {
+									this.on_qty_change(item);
+								}
+							},
+							() => this.post_qty_change(item)
+						]);
 					});
 			}
 			return;
@@ -251,7 +292,28 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		frappe.flags.hide_serial_batch_dialog = true;
 
 		frappe.run_serially([
-			() => this.frm.script_manager.trigger('item_code', item.doctype, item.name),
+			() => {
+				this.frm.script_manager.trigger('item_code', item.doctype, item.name)
+					.then(() => {
+						this.frm.script_manager.trigger('qty', item.doctype, item.name)
+							.then(() => {
+								frappe.run_serially([
+									() => {
+										let items = this.frm.doc.items.map(i => i.name);
+										if (items && items.length > 0 && items.includes(item.name)) {
+											this.frm.doc.items.forEach(item_row => {
+												// update cart
+												this.on_qty_change(item_row);
+											});
+										} else {
+											this.on_qty_change(item);
+										}
+									},
+									() => this.post_qty_change(item)
+								]);
+							});
+					});
+			},
 			() => {
 				const show_dialog = item.has_serial_no || item.has_batch_no;
 
@@ -261,12 +323,23 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					(item.has_serial_no) || (item.actual_batch_qty != item.actual_qty)) ) {
 					// check has serial no/batch no and update cart
 					this.select_batch_and_serial_no(item);
-				} else {
-					// update cart
-					this.update_cart_data(item);
 				}
 			}
 		]);
+	}
+
+	on_qty_change(item) {
+		frappe.run_serially([
+			() => this.update_cart_data(item),
+		]);
+	}
+
+	post_qty_change(item) {
+		this.cart.update_taxes_and_totals();
+		this.cart.update_grand_total();
+		this.cart.update_qty_total();
+		this.cart.scroll_to_item(item.item_code);
+		this.set_form_action();
 	}
 
 	select_batch_and_serial_no(row) {
@@ -283,7 +356,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 									frappe.model.clear_doc(item.doctype, item.name);
 								}
 							},
-							() => this.update_cart_data(item)
+							() => this.update_cart_data(item),
+							() => this.post_qty_change(item)
 						]);
 					});
 			})
@@ -300,9 +374,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	update_cart_data(item) {
 		this.cart.add_item(item);
-		this.cart.update_taxes_and_totals();
-		this.cart.update_grand_total();
-		this.cart.update_qty_total();
 		frappe.dom.unfreeze();
 	}
 
@@ -446,16 +517,15 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	setup_company() {
-		this.company = frappe.sys_defaults.company;
 		return new Promise(resolve => {
-			if(!this.company) {
+			if(!this.frm.doc.company) {
 				frappe.prompt({fieldname:"company", options: "Company", fieldtype:"Link",
 					label: __("Select Company"), reqd: 1}, (data) => {
 						this.company = data.company;
 						resolve(this.company);
 				}, __("Select Company"));
 			} else {
-				resolve(this.company);
+				resolve();
 			}
 		})
 	}
@@ -488,6 +558,10 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		return new Promise(resolve => {
 			if (this.frm) {
 				this.frm = get_frm(this.frm);
+				if(this.company) {
+					this.frm.doc.company = this.company;
+				}
+
 				resolve();
 			} else {
 				frappe.model.with_doctype(doctype, () => {
@@ -504,12 +578,19 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			frm.refresh(name);
 			frm.doc.items = [];
 			frm.doc.is_pos = 1;
+
 			return frm;
 		}
 	}
 
 	set_pos_profile_data() {
-		this.frm.doc.company = this.company;
+		if (this.company) {
+			this.frm.doc.company = this.company;
+		}
+
+		if (!this.frm.doc.company) {
+			return;
+		}
 
 		return new Promise(resolve => {
 			return this.frm.call({
@@ -519,8 +600,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				if(!r.exc) {
 					if (!this.frm.doc.pos_profile) {
 						frappe.dom.unfreeze();
-						setTimeout(() => frappe.set_route('List', 'POS Profile'), 2000);
-						frappe.throw(__("POS Profile is required to use Point-of-Sale"));
+						this.raise_exception_for_pos_profile();
 					}
 					this.frm.script_manager.trigger("update_stock");
 					frappe.model.set_default_values(this.frm.doc);
@@ -953,7 +1033,6 @@ class POSCart {
 			$item.appendTo(this.$cart_items);
 		}
 		this.highlight_item(item.item_code);
-		this.scroll_to_item(item.item_code);
 	}
 
 	update_item(item) {
@@ -1206,7 +1285,10 @@ class POSItems {
 			clearTimeout(this.last_search);
 			this.last_search = setTimeout(() => {
 				const search_term = e.target.value;
-				this.filter_items({ search_term });
+				const item_group = this.item_group_field ?
+					this.item_group_field.get_value() : '';
+
+				this.filter_items({ search_term:search_term,  item_group: item_group});
 			}, 300);
 		});
 

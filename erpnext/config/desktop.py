@@ -81,9 +81,9 @@ def get_data():
 			"description": "Sales pipeline, leads, opportunities and customers."
 		},
 		{
-			"module_name": "Help Desk",
+			"module_name": "Support",
 			"category": "Modules",
-			"label": _("Help Desk"),
+			"label": _("Support"),
 			"color": "#1abc9c",
 			"icon": "fa fa-check-square-o",
 			"type": "module",
