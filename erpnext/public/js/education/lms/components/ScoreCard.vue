@@ -1,28 +1,29 @@
 <template>
-    <div v-if="quizData" class='card-deck mt-3'>
-        <div class="card">
+    <div v-if="quizData" class='mt-3 col-md-4 col-sm-12'>
+        <div class="card h-100">
             <div class='card-body'>
-                <div class="row">
-                    <div class="course-details col-xs-7 col-sm-8 col-md-9">
-                        <div class="course-details">
-                            <h5 class='card-title'>{{ quizData.program }}</h5>
-                            <div v-for="attempt in quizData.quiz_attempt" :key="attempt.content" class="course-list" id="getting-started">
-                                <div><b>{{ attempt.content }}</b>
-                                <span v-if="attempt.is_complete">- {{ attempt.score }} - {{attempt.result }}</span>
-                                <span v-else>- Unattempted</span>
-                                </div>
-                            </div>
-                        </div>
+                <h5 class='card-title'>{{ quizData.program }}</h5>
+                <div v-for="attempt in quizData.quiz_attempt" :key="attempt.content" class="course-list" id="getting-started">
+                    <div>
+                        {{ attempt.content }}
+                        <ul v-if="attempt.is_complete">
+                            <li><span class="text-muted">Score: </span>{{ attempt.score }}</li>
+                            <li><span class="text-muted">Status: </span>{{attempt.result }}</li>
+                        </ul>
+                        <span v-else>- Unattempted</span>
                     </div>
-                    <div class='course-buttons text-center col-xs-5 col-sm-4 col-md-3'>
-                        <a-button
+                </div>
+            </div>
+            <div class='p-3' style="display: flex; justify-content: space-between;">
+                <div></div>
+                <div class='text-right'>
+                    <a-button
                             :type="'primary'"
                             size="sm btn-block"
                             :route="programRoute"
                         >
                             Go To Program
                         </a-button>
-                    </div>
                 </div>
             </div>
         </div>

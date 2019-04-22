@@ -1,15 +1,13 @@
 <template>
-    <div class='card-deck mt-3'>
-    <div class="card">
-        <div class='card-body'>
-            <div class="row">
-            <div class="course-details col-xs-7 col-sm-8 col-md-9">
+    <div class='mt-3 col-md-4 col-sm-12'>
+        <div class="card h-100">
+            <div class='card-body'>
                 <router-link :to="'/Program/' + programData.name">
                     <h5 class='card-title'>{{ programData.program }}</h5>
                 </router-link>
                 <span class="course-list text-muted" id="getting-started">
                     Courses
-                    <ul class="mb-0 mt-1">
+                    <ul class="mb-0 mt-1 list-unstyled" style="padding-left: 1.5em;">
                         <li v-for="item in programData.progress" :key="item.name">
                             <span v-if="item.is_complete"><i class="text-success fa fa-check-circle" aria-hidden="true"></i></span>
                             <span v-else><i class="text-secondary fa fa-circle-o" aria-hidden="true"></i></span>
@@ -18,19 +16,20 @@
                     </ul>
                 </span>
             </div>
-            <div class='course-buttons text-center col-xs-5 col-sm-4 col-md-3'>
-                <a-button
-                    :type="buttonType"
-                    size="sm btn-block"
-                    :route="programRoute"
-                >
-                    {{ buttonName }}
-                </a-button>
+            <div class='p-3' style="display: flex; justify-content: space-between;">
+                <div></div>
+                <div class='text-right'>
+                    <a-button
+                        :type="buttonType"
+                        size="sm btn-block"
+                        :route="programRoute"
+                    >
+                        {{ buttonName }}
+                    </a-button>
+                </div>
             </div>
         </div>
-        </div>
     </div>
-</div>
 </template>
 <script>
 import AButton from './Button.vue';
@@ -82,10 +81,6 @@ export default {
 };
 </script>
 <style scoped>
-    li {
-        list-style-type: none;
-        padding: 0;
-    }
 
 	a {
 		text-decoration: none;

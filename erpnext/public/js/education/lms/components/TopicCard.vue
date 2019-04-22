@@ -10,25 +10,28 @@
                 <h5 class="card-title">{{ topic.topic_name }}</h5>
                 <span class="course-list text-muted" id="getting-started">
                     Content
-                    <ul class="mb-0 mt-1">
+                    <ul class="mb-0 mt-1" style="padding-left: 1.5em;">
                         <li v-for="content in topic.topic_content" :key="content.name">
                             <router-link v-if="isLogin" tag="a" :class="'text-muted'" :to="{name: 'content', params:{program_name: program_name, topic:topic.name, course_name: course_name, type:content.content_type, content: content.content} }">
-                                <span style="padding-right: 0.4em"></span>{{ content.content }}
+                                {{ content.content }}
                             </router-link>
                             <div v-else><span style="padding-right: 0.4em"></span>{{ content.content }}</div>
                         </li>
                     </ul>
                 </span>
             </div>
-            <div v-if="isLogin" class='text-right p-3'>
-                <div class='course-buttons text-center'>
+            <div v-if="isLogin" class='p-3' style="display: flex; justify-content: space-between;">
+                <div>
+                    <span v-if="complete"><i class="mr-2 text-success fa fa-check-circle" aria-hidden="true"></i>Course Complete</span>
+                </div>
+                <div class='text-right'>
                     <a-button
-                        :type="buttonType"
-                        size="sm btn-block"
-                        :route="firstContentRoute"
-                    >
-                        {{ buttonName }}
-                    </a-button>
+                    :type="'primary'"
+                    size="sm"
+                    :route="firstContentRoute"
+                >
+                    {{ buttonName }}
+                </a-button>
                 </div>
             </div>
         </div>
@@ -43,11 +46,11 @@ export default {
     name: "TopicCard",
     data() {
         return {
-            topicMeta: {}
+            topicDetails: {}
         }
     },
     mounted() {
-        if(lms.store.checkLogin()) this.getTopicMeta().then(data => this.topicMeta = data)
+        if(lms.store.checkLogin()) this.gettopicDetails().then(data => this.topicDetails = data)
     },
     components: {
         AButton
@@ -55,26 +58,23 @@ export default {
     computed: {
         firstContentRoute() {
             if(lms.store.checkLogin()){
-                return `/Program/${this.program_name}/${this.course_name}/${this.topic.name}/${this.topicMeta.content_type}/${this.topicMeta.content}`
+                return `/Program/${this.program_name}/${this.course_name}/${this.topic.name}/${this.topicDetails.content_type}/${this.topicDetails.content}`
             }
             else {
                 return {}
             }
         },
-        buttonType() {
+        complete() {
             if(lms.store.checkProgramEnrollment(this.program_name)){
-                if (this.topicMeta.flag == "Start Topic" ){
-                return "primary"
+                if (this.topicDetails.flag === "Completed" ) {
+                    return true
                 }
-                else if (this.topicMeta.flag == "Completed" ) {
-                    return "success"
-                }
-                else if (this.topicMeta.flag == "Continue" ) {
-                    return "info"
+                else {
+                    return false
                 }
             }
             else {
-                return "info"
+                return false
             }
         },
         isLogin() {
@@ -83,7 +83,12 @@ export default {
         },
         buttonName() {
             if(lms.store.checkProgramEnrollment(this.program_name)){
-                return this.topicMeta.flag
+                if (this.topicDetails.flag == 'Continue'){
+                    return 'Continue'
+                }
+                else {
+                    return 'Start Topic'
+                }
             }
             else {
                 return "Explore"
@@ -96,7 +101,7 @@ export default {
             if(content_type == 'Article') return 'fa fa-file-text-o'
             if(content_type == 'Quiz') return 'fa fa-question-circle-o'
         },
-        getTopicMeta() {
+        gettopicDetails() {
 			return lms.call('get_student_topic_details', {
                     topic_name: this.topic.name,
                     course_name: this.course_name,
@@ -105,33 +110,3 @@ export default {
     }
 };
 </script>
-
-<style scoped>
-    .course-buttons {
-        margin-bottom: 1em;
-    }
-
-    div.card-hero-img {
-        height: 220px;
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-color: rgb(250, 251, 252);
-    }
-
-    .card-image-wrapper {
-        display: flex;
-        overflow: hidden;
-        height: 220px;
-        background-color: rgb(250, 251, 252);
-    }
-
-    .image-body {
-        align-self: center;
-        color: #d1d8dd;
-        font-size: 24px;
-        font-weight: 600;
-        line-height: 1;
-        padding: 20px;
-    }
-</style>
