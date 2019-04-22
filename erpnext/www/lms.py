@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import erpnext.education.utils as utils
 import frappe
+from frappe import _
 
 # LMS Utils to Update State for Vue Store
 @frappe.whitelist()
