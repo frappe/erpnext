@@ -82,7 +82,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Payment Term",
 					"description": _("Payment Terms based on conditions")
-				}
+				},
 
 				# Reports
 				{
