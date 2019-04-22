@@ -5,4 +5,4 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-    frappe.db.sql(""" Delete from `tabPage` where name='bom-browser' """)
+    frappe.delete_doc_if_exists('Page', 'bom-browser')
