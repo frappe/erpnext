@@ -705,7 +705,7 @@ def create_delivery_note(**args):
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no,
 		"target_warehouse": args.target_warehouse,
-		"allow_zero_valuation": cint(args.allow_zero_valuation)
+		"allow_zero_valuation_rate": cint(args.allow_zero_valuation)
 	})
 
 	if not args.do_not_save:
