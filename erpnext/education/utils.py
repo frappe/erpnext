@@ -89,7 +89,7 @@ def get_program_enrollment(program_name):
 		else:
 			return None
 
-def get_program(program_name):
+def get_program_and_enrollment_status(program_name):
 	program = frappe.get_doc('Program', program_name)
 	is_enrolled = bool(get_program_enrollment(program_name)) or check_super_access()
 	return {'program': program, 'is_enrolled': is_enrolled}
