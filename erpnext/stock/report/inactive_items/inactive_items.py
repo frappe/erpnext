@@ -117,7 +117,7 @@ def get_sales_details(filters):
 		DATEDIFF(CURDATE(), {date_field}) as days_since_last_order
 		from `tab{doctype}` s, `tab{doctype} Item` si
 		where s.name = si.parent and s.docstatus = 1
-		group by si.name order by days_since_last_order """
+		group by si.name order by days_since_last_order """ #nosec
 		.format(date_field = date_field, doctype = filters['based_on']), as_dict=1)
 
 	for d in sales_data:
