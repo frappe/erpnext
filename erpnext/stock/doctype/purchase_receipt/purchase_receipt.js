@@ -88,7 +88,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 							},
 							get_query_filters: {
 								docstatus: 1,
-								status: ["!=", "Closed"],
+								status: ["not in", ["Closed", "On Hold"]],
 								per_received: ["<", 99.99],
 								company: me.frm.doc.company
 							}

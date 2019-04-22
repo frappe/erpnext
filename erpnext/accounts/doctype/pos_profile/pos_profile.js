@@ -33,6 +33,14 @@ frappe.ui.form.on('POS Profile', {
 			};
 		});
 
+		frm.set_query("account_for_change_amount", function() {
+			return {
+				filters: {
+					account_type: ['in', ["Cash", "Bank"]]
+				}
+			};
+		});
+
 		frm.set_query("print_format", function() {
 			return { filters: { doc_type: "Sales Invoice", print_format_type: "Js"} };
 		});
