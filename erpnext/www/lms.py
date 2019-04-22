@@ -91,15 +91,17 @@ def get_quiz_without_answers(quiz_name, course_name):
 		return None
 
 	enrollment = utils.get_course_enrollment(course_name).name
-	quiz_status = {}
-	quiz_status['is_complete'], quiz_status['score'], quiz_status['result']  = utils.check_quiz_completion(quiz, enrollment)
+	quiz_progress = {}
+	quiz_progress['is_complete'], quiz_progress['score'], quiz_progress['result']  = utils.check_quiz_completion(quiz, enrollment)
 	quiz_output = [{'name':question.name, 'question':question.question, 'type': question.type, 'options':[{'name': option.name, 'option':option.option} for option in question.options]} for question in questions]
-	return { 'quizData': quiz_output, 'status': quiz_status}
+	return { 'quizData': quiz_output, 'status': quiz_progress}
 
 @frappe.whitelist()
 def evaluate_quiz(course, quiz_response, quiz_name):
 	"""LMS Function: Evaluates a simple multiple choice quiz.
+	:param course: name of the course
 	:param quiz_response: contains user selected choices for a quiz in the form of a string formatted as a dictionary. The function uses `json.loads()` to convert it to a python dictionary.
+	:param quiz_name: Name of the quiz attempted
 	"""
 	import json
 	quiz_response = json.loads(quiz_response)

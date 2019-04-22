@@ -20,7 +20,7 @@ class CourseEnrollment(Document):
 		topics = course.get_topics()
 		progress = []
 		for topic in topics:
-				progress.append(student.get_topic_progress(self.name, topic))
+			progress.append(student.get_topic_progress(self.name, topic))
 		return reduce(lambda x,y: x+y, progress) # Flatten out the List
 
 	def validate_duplication(self):
