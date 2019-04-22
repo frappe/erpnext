@@ -195,31 +195,11 @@ def get_student_topic_details(topic_name, course_name):
 
 @frappe.whitelist()
 def get_program_progress(program_name):
-	import math
-	program = frappe.get_doc("Program", program_name)
-	program_enrollment = utils.get_program_enrollment(program_name)
-	program_progress = {}
+	program_enrollment = frappe.get_doc("Program Enrollment", utils.get_program_enrollment(program_name))
 	if not program_enrollment:
 		return None
 	else:
-		progress = []
-		for course in program.get_all_children():
-			course_progress = get_student_course_details(course.course, program_name)
-			is_complete = False
-			if course_progress['flag'] == "Completed":
-				is_complete = True
-			progress.append({'course_name': course.course_name, 'name': course.course, 'is_complete': is_complete})
-
-		program_progress['progress'] = progress
-		program_progress['name'] = program_name
-		program_progress['program'] = program.program_name
-
-		try:
-			program_progress['percentage'] = math.ceil((sum([item['is_complete'] for item in progress] * 100)/len(progress)))
-		except ZeroDivisionError:
-			program_progress['percentage'] = 0
-
-		return program_progress
+		return program_enrollment.get_program_progress()
 
 @frappe.whitelist()
 def get_joining_date():
@@ -228,28 +208,12 @@ def get_joining_date():
 		return student.joining_date
 
 @frappe.whitelist()
-def get_quiz_progress(program_name):
-	program = frappe.get_doc("Program", program_name)
-	program_enrollment = utils.get_program_enrollment(program_name)
-	quiz_progress = frappe._dict()
-	student = utils.get_current_student()
+def get_quiz_progress_of_program(program_name):
+	program_enrollment = frappe.get_doc("Program Enrollment", utils.get_program_enrollment(program_name))
 	if not program_enrollment:
 		return None
 	else:
-		progress_list = []
-		for course in program.get_all_children():
-			course_enrollment = utils.get_course_enrollment(course.course)
-			course_progress = course_enrollment.get_progress(student)
-			for progress_item in course_progress:
-				if progress_item['content_type'] == "Quiz":
-					progress_item['course'] = course.course_name
-					progress_list.append(progress_item)
-		if not progress_list:
-			return None
-		quiz_progress.quiz_attempt = progress_list
-		quiz_progress.name = program_name
-		quiz_progress.program = program.program_name
-		return quiz_progress
+		return program_enrollment.get_quiz_progress()
 
 
 @frappe.whitelist(allow_guest=True)
