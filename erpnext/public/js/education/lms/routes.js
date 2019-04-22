@@ -29,14 +29,14 @@ const routes = [{
 	props: true,
 	beforeRouteUpdate (to, from, next) {
 		if (lms.store.checkProgramEnrollment(to.params.program_name)) {
-			next()
+			next();
 		} else {
 			next({
 				name: 'program',
 				params: {
 					program_name: to.params.program_name
 				}
-			})
+			});
 		}
 	}
 },

@@ -35,7 +35,7 @@ frappe.ready(() => {
 				if(this.checkLogin()) {
 					lms.call("get_all_course_enrollments").then(data => {
 						this.enrolledCourses = data;
-					})
+					});
 				}
 			},
 			checkLogin() {
@@ -50,18 +50,18 @@ frappe.ready(() => {
 				if(this.checkLogin()){
 					if(this.enrolledPrograms) {
 						if(this.enrolledPrograms.includes(programName)) {
-							return true
+							return true;
 						}
 						else {
-							return false
+							return false;
 						}
 					}
 					else {
-						return false
+						return false;
 					}
 				}
 				else {
-					return false
+					return false;
 				}
 			}
 		}
@@ -72,11 +72,10 @@ frappe.ready(() => {
 		template: "<lms-root/>",
 		components: { lmsRoot },
 		mounted() {
-			lms.store.updateState()
+			lms.store.updateState();
 		}
 	});
 	lms.view.$router.afterEach((to, from) => {
-		window.scrollTo(0,0)
+		window.scrollTo(0,0);
 	});
-	lms.debug = true
 });
