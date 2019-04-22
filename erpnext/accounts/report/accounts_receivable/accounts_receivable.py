@@ -651,7 +651,7 @@ class ReceivablePayableReport(object):
 			where
 				gle.docstatus < 2 and gle.party_type=%s and (gle.party is not null and gle.party != '') {conditions}
 				group by gle.voucher_type, gle.voucher_no, gle.against_voucher_type, gle.against_voucher, gle.party
-				order by gle.posting_date, gle.party""".format(
+				order by gle.posting_date, gle.party""".format(  # nosec
 			select_fields=select_fields,
 			cost_center_fields=cost_center_fields,
 			cost_center_join=cost_center_join,
