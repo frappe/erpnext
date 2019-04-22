@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils import flt
+from six.moves import reduce
 
 class BankTransaction(Document):
 	def after_insert(self):

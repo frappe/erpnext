@@ -27,6 +27,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Payment Entry",
 					"description": _("Bank/Cash transactions against party or for internal transfer")
+				},
+				{
+					"type": "doctype",
+					"name": "Payment Term",
+					"description": _("Payment Terms based on conditions")
 				}
 			]
 
@@ -283,6 +288,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Currency Exchange",
 					"description": _("Currency exchange rate master.")
+				},
+				{
+					"type": "doctype",
+					"name": "Exchange Rate Revaluation",
+					"description": _("Exchange Rate Revaluation master.")
 				},
 				{
 					"type": "doctype",

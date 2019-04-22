@@ -6,7 +6,7 @@ import unittest
 import frappe
 import frappe.defaults
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from frappe.utils import flt, add_days, nowdate
+from frappe.utils import flt, add_days, nowdate, getdate
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.buying.doctype.purchase_order.purchase_order import (make_purchase_receipt, make_purchase_invoice, make_rm_stock_entry as make_subcontract_transfer_entry)
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
@@ -133,9 +133,9 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.submit()
 
 		self.assertEqual(po.payment_schedule[0].payment_amount, 2500.0)
-		self.assertEqual(po.payment_schedule[0].due_date, po.transaction_date)
+		self.assertEqual(getdate(po.payment_schedule[0].due_date), getdate(po.transaction_date))
 		self.assertEqual(po.payment_schedule[1].payment_amount, 2500.0)
-		self.assertEqual(po.payment_schedule[1].due_date, add_days(po.transaction_date, 30))
+		self.assertEqual(getdate(po.payment_schedule[1].due_date), add_days(getdate(po.transaction_date), 30))
 		pi = make_purchase_invoice(po.name)
 		pi.save()
 
@@ -143,9 +143,9 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(len(pi.get("items", [])), 1)
 
 		self.assertEqual(pi.payment_schedule[0].payment_amount, 2500.0)
-		self.assertEqual(pi.payment_schedule[0].due_date, po.transaction_date)
+		self.assertEqual(getdate(pi.payment_schedule[0].due_date), getdate(po.transaction_date))
 		self.assertEqual(pi.payment_schedule[1].payment_amount, 2500.0)
-		self.assertEqual(pi.payment_schedule[1].due_date, add_days(po.transaction_date, 30))
+		self.assertEqual(getdate(pi.payment_schedule[1].due_date), add_days(getdate(po.transaction_date), 30))
 
 	def test_subcontracting(self):
 		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
@@ -294,6 +294,10 @@ class TestPurchaseOrder(unittest.TestCase):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item Home Desktop 100",
 			qty=20, basic_rate=100)
+		make_stock_entry(target="_Test Warehouse 1 - _TC", item_code="_Test Item",
+			qty=30, basic_rate=100)
+		make_stock_entry(target="_Test Warehouse 1 - _TC", item_code="_Test Item Home Desktop 100",
+			qty=30, basic_rate=100)
 
 		bin1 = frappe.db.get_value("Bin",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
