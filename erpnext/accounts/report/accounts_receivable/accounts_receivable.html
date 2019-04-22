@@ -107,8 +107,8 @@
 	<thead>
 		<tr>
 			{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
-				<th style="width: 9%">{%= __("Date") %}</th>
-				<th style="width: 5%">{%= __("Age (Days)") %}</th>
+				<th style="width: 10%">{%= __("Date") %}</th>
+				<th style="width: 4%">{%= __("Age (Days)") %}</th>
 
 				{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person_in_print) { %}
 					<th style="width: 16%">{%= __("Reference") %}</th>
@@ -206,7 +206,7 @@
 					{% if(!filters.show_pdc_in_print) { %}
 					<td></td>
 					{% } %}
-					{% if(report.report_name === "Accounts Receivable") { %}
+					{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person_in_print) { %}
 					<td></td>
 					{% } %}
 					<td></td>
