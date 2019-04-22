@@ -418,7 +418,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pi = make_purchase_invoice(pr.name)
 		self.assertEquals(pi.items[0].qty, 3)
 
-	def test_make_purchase_invoice_from_dn_with_returned_qty_against_dn(self):
+	def test_make_purchase_invoice_from_pr_with_returned_qty_duplicate_items(self):
 		pr1 = make_purchase_receipt(qty=8, do_not_submit=True)
 		pr1.append("items", {
 			"item_code": "_Test Item",

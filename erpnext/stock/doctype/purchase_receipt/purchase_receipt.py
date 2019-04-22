@@ -407,10 +407,7 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 def make_purchase_invoice(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	doc = frappe.get_doc('Purchase Receipt', source_name)
-	purchase_orders = [d.purchase_order for d in doc.items]
-	returned_qty_map_against_po = get_returned_qty_map_against_po(purchase_orders)
-	returned_qty_map_against_pr = get_returned_qty_map_against_pr(source_name)
-
+	returned_qty_map = get_returned_qty_map(source_name)
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
@@ -419,19 +416,18 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 		doc = frappe.get_doc(target)
 		doc.ignore_pricing_rule = 1
+		doc.run_method("onload")
 		doc.run_method("set_missing_values")
 		doc.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty, returned_qty = get_pending_qty(source_doc)
-		if not source_doc.purchase_order_item:
-			returned_qty_map_against_pr[source_doc.item_code] = returned_qty
+		returned_qty_map[source_doc.item_code] = returned_qty
 
 	def get_pending_qty(item_row):
-		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0) \
-			- returned_qty_map_against_po.get(item_row.purchase_order_item, 0)
-		returned_qty = flt(returned_qty_map_against_pr.get(item_row.item_code, 0))
-		if not item_row.purchase_order_item:
+		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0)
+		returned_qty = flt(returned_qty_map.get(item_row.item_code, 0))
+		if returned_qty:
 			if returned_qty >= pending_qty:
 				pending_qty = 0
 				returned_qty -= pending_qty
@@ -484,19 +480,7 @@ def get_invoiced_qty_map(purchase_receipt):
 
 	return invoiced_qty_map
 
-def get_returned_qty_map_against_po(purchase_orders):
-	"""returns a map: {so_detail: returned_qty}"""
-	returned_qty_map = {}
-
-	for name, returned_qty in frappe.get_all('Purchase Order Item', fields = ["name", "returned_qty"],
-		filters = {'parent': ('in', purchase_orders), 'docstatus': 1}, as_list=1):
-		if not returned_qty_map.get(name):
-				returned_qty_map[name] = 0
-		returned_qty_map[name] += returned_qty
-
-	return returned_qty_map
-
-def get_returned_qty_map_against_pr(purchase_receipt):
+def get_returned_qty_map(purchase_receipt):
 	"""returns a map: {so_detail: returned_qty}"""
 	returned_qty_map = frappe._dict(frappe.db.sql("""select pr_item.item_code, sum(abs(pr_item.qty)) as qty
 		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
