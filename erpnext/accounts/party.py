@@ -583,7 +583,7 @@ def get_partywise_advanced_payment_amount(party_type, posting_date=None):
 		FROM `tabGL Entry`
 		WHERE party_type = %(party_type)s and ifnull(against_voucher, '') = '' and {advance_condition} {date_condition}
 		GROUP BY party
-	""".format(dr_or_cr=dr_or_cr, advance_condition=advance_condition, date_condition=date_condition),
+	""".format(dr_or_cr=dr_or_cr, advance_condition=advance_condition, date_condition=date_condition),  # nosec
 		{"party_type": party_type, "posting_date": posting_date})
 
 	return frappe._dict(data or {})
