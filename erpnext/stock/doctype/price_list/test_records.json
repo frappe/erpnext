@@ -4,7 +4,6 @@
         "currency": "INR",
         "doctype": "Price List",
         "enabled": 1,
-        "price_not_uom_dependant": 1,
         "price_list_name": "_Test Price List",
         "selling": 1
     },
