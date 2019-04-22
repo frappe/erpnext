@@ -139,7 +139,7 @@ def get_items(filters):
 
 	if filters.get("item"):
 		filters_dict.update({
-			"name": filtesr["item"]
+			"name": filters["item"]
 		})
 
 	items = frappe.get_all("Item", fields=["name", "item_group", "item_name"], filters=filters_dict, order_by="name")
