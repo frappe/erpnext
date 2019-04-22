@@ -291,13 +291,15 @@ def get_course_details(course_name):
 # Functions to get program & course details
 @frappe.whitelist(allow_guest=True)
 def get_topics(course_name):
-	course = frappe.get_doc('Course', course_name)
-	topics = course.get_topics()
-	return topics
+	try:
+		course = frappe.get_doc('Course', course_name)
+		return course.get_topics()
+	except frappe.DoesNotExistError:
+		frappe.throw(_("Course {0} does not exist.".format(course_name)))
 
 @frappe.whitelist()
-def get_content(type, content):
+def get_content(content_type, content):
 	try:
-		return frappe.get_doc(type, content)
-	except:
-		return None
+		return frappe.get_doc(content_type, content)
+	except frappe.DoesNotExistError:
+		frappe.throw(_("{0} {1} does not exist.".format(content_type, content)))
