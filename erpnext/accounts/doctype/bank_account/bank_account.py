@@ -21,7 +21,8 @@ class BankAccount(Document):
 
 	def validate(self):
 		self.validate_company()
-		if self.validate_iban:
+
+		if self.iban:
 			self.validate_iban()
 
 	def validate_company(self):
