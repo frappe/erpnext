@@ -28,6 +28,12 @@ class TestBankAccount(unittest.TestCase):
 
 		bank_account = frappe.get_doc({'doctype':'Bank Account'})
 
+		try:
+			bank_account.validate_iban()
+		except AttributeError:
+			msg = _('BankAccount.validate_iban() failed for empty IBAN')
+			self.fail(msg=msg)
+
 		for iban in valid_ibans:
 			bank_account.iban = iban
 			try:
