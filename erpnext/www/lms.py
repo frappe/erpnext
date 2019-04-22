@@ -90,6 +90,10 @@ def get_quiz_without_answers(quiz_name, course_name):
 		frappe.throw("Quiz {0} does not exist".format(quiz_name))
 		return None
 
+	if utils.check_super_access():
+		quiz_output = [{'name':question.name, 'question':question.question, 'type': question.type, 'options':[{'name': option.name, 'option':option.option} for option in question.options]} for question in questions]
+		return { 'quizData': quiz_output, 'status': None}
+
 	enrollment = utils.get_course_enrollment(course_name).name
 	quiz_progress = {}
 	quiz_progress['is_complete'], quiz_progress['score'], quiz_progress['result']  = utils.check_quiz_completion(quiz, enrollment)
@@ -141,12 +145,16 @@ def get_student_course_details(course_name, program_name):
 	student = utils.get_current_student()
 	if not student:
 		return {'flag':'Start Course' }
+
 	course_enrollment = utils.get_course_enrollment(course_name)
 	program_enrollment = utils.get_program_enrollment(program_name)
+
 	if not program_enrollment:
 		return None
+
 	if not course_enrollment:
 		course_enrollment = utils.enroll_in_course(course_name, program_name)
+
 	progress = course_enrollment.get_progress(student)
 	count = sum([activity['is_complete'] for activity in progress])
 	if count == 0:
