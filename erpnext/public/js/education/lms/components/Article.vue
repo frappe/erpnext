@@ -32,7 +32,7 @@ export default {
     methods: {
         getContent() {
             return lms.call('get_content', {
-                type: this.type,
+                content_type: this.type,
                 content: this.content
             })
         }
