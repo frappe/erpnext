@@ -8,22 +8,14 @@ def get_program_enrollments():
 	student = utils.get_current_student()
 	if student == None:
 		return None
-	try:
-		student = frappe.get_doc("Student", student)
-		return student.get_program_enrollments()
-	except:
-		return None
+	return student.get_program_enrollments()
 
 @frappe.whitelist()
 def get_all_course_enrollments():
 	student = utils.get_current_student()
 	if student == None:
 		return None
-	try:
-		student = frappe.get_doc("Student", student)
-		return student.get_all_course_enrollments()
-	except:
-		return None
+	return student.get_all_course_enrollments()
 
 # Vue Client Functions
 @frappe.whitelist(allow_guest=True)
@@ -151,9 +143,9 @@ def add_quiz_activity(course, quiz_name, result_data, score, status):
 
 @frappe.whitelist()
 def enroll_in_program(program_name):
-	if(not utils.get_current_student()):
+	student = utils.get_current_student()
+	if not student:
 		utils.create_student_from_current_user()
-	student = frappe.get_doc("Student", utils.get_current_student())
 	program_enrollment = student.enroll_in_program(program_name)
 	return program_name
 
@@ -183,11 +175,11 @@ def get_course_meta(course_name, program_name):
 		:param course_name:
 		:param program_name:
 	"""
-	if not utils.get_current_student():
+	student = utils.get_current_student()
+	if not student:
 		return {'flag':'Start Course' }
 	course_enrollment = utils.get_course_enrollment(course_name)
 	program_enrollment = utils.get_program_enrollment(program_name)
-	student = frappe.get_doc("Student", utils.get_current_student())
 	if not program_enrollment:
 		return None
 	if not course_enrollment:
@@ -210,14 +202,14 @@ def get_topic_meta(topic_name, course_name):
 		:param course_name:
 	"""
 	topic = frappe.get_doc("Topic", topic_name)
-	if not utils.get_current_student():
+	student = utils.get_current_student()
+	if not student:
 		topic_content = topic.get_all_children()
 		if topic_content:
 			return {'flag':'Start Course', 'content_type': topic_content[0].content_type, 'content': topic_content[0].content}
 		else:
 			return None
 	course_enrollment = utils.get_course_enrollment(course_name)
-	student = frappe.get_doc("Student", utils.get_current_student())
 	progress = student.get_topic_progress(course_enrollment.name, topic)
 	if not progress:
 		return { 'flag':'Start Topic', 'content_type': None, 'content': None }
@@ -261,8 +253,7 @@ def get_program_progress(program_name):
 @frappe.whitelist()
 def get_joining_date():
 	current_student = utils.get_current_student()
-	if(current_student):
-		student = frappe.get_doc("Student", current_student)
+	if current_student:
 		return student.joining_date
 	else:
 		return None
@@ -272,7 +263,7 @@ def get_quiz_progress(program_name):
 	program = frappe.get_doc("Program", program_name)
 	program_enrollment = utils.get_program_enrollment(program_name)
 	quiz_meta = frappe._dict()
-	student = frappe.get_doc("Student", utils.get_current_student())
+	student = utils.get_current_student()
 	if not program_enrollment:
 		return None
 	else:
@@ -281,7 +272,6 @@ def get_quiz_progress(program_name):
 			course_enrollment = utils.get_course_enrollment(course.course)
 			meta = course_enrollment.get_progress(student)
 			for progress_item in meta:
-				# if progress_item['content_type'] == "Quiz" and progress_item['is_complete'] == True:
 				if progress_item['content_type'] == "Quiz":
 					progress_item['course'] = course.course_name
 					progress_list.append(progress_item)
