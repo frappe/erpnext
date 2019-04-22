@@ -283,7 +283,7 @@ def get_quiz_progress(program_name):
 @frappe.whitelist(allow_guest=True)
 def get_course_details(course_name):
 	try:
-		course = sfrappe.get_doc('Course', course_name)
+		course = frappe.get_doc('Course', course_name)
 		return course
 	except:
 		return None
