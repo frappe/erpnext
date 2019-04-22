@@ -119,7 +119,7 @@ def evaluate_quiz(course, quiz_response, quiz_name):
 def enroll_in_program(program_name):
 	student = utils.get_current_student()
 	if not student:
-		utils.create_student_from_current_user()
+		student = utils.create_student_from_current_user()
 	program_enrollment = student.enroll_in_program(program_name)
 	return program_name
 
@@ -215,11 +215,9 @@ def get_program_progress(program_name):
 
 @frappe.whitelist()
 def get_joining_date():
-	current_student = utils.get_current_student()
-	if current_student:
+	student = utils.get_current_student()
+	if student:
 		return student.joining_date
-	else:
-		return None
 
 @frappe.whitelist()
 def get_quiz_progress(program_name):

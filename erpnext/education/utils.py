@@ -96,6 +96,8 @@ def get_program_and_enrollment_status(program_name):
 
 def get_course_enrollment(course_name):
 	student = get_current_student()
+	if not student:
+		return None
 	enrollment_name = frappe.get_all("Course Enrollment", filters={'student': student.name, 'course':course_name})
 	try:
 		name = enrollment_name[0].name
@@ -114,7 +116,6 @@ def create_student_from_current_user():
 		"user": frappe.session.user
 		})
 	student.save(ignore_permissions=True)
-	frappe.db.commit()
 	return student
 
 def enroll_in_course(course_name, program_name):
