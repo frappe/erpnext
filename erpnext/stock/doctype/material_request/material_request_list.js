@@ -1,5 +1,5 @@
 frappe.listview_settings['Material Request'] = {
-	add_fields: ["material_request_type", "status", "per_ordered"],
+	add_fields: ["material_request_type", "status", "per_ordered", "per_received"],
 	get_indicator: function(doc) {
 		if(doc.status=="Stopped") {
 			return [__("Stopped"), "red", "status,=,Stopped"];
