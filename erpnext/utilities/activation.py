@@ -4,6 +4,7 @@
 import frappe, erpnext
 
 from frappe import _
+from six import iteritems
 
 def get_level():
 
