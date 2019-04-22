@@ -27,21 +27,20 @@ def get_columns():
 			"fieldtype": "Link",
 			"label": _("Item Group"),
 			"options": "Item Group",
-			"width": 100
+			"width": 150
 		},
 		{
 			"fieldname": "item_name",
 			"fieldtype": "Link",
 			"options": "Item",
 			"label": "Item",
-			"width": 100
+			"width": 150
 		},
 		{
-			"fieldname": "Item Name",
-			"fieldtype": "Link",
+			"fieldname": "item_name",
+			"fieldtype": "Data",
 			"label": _("Item Name"),
-			"options": "Item",
-			"width": 100
+			"width": 150
 		},
 
 		{
@@ -143,7 +142,7 @@ def get_items(filters):
 			"name": filtesr["item"]
 		})
 
-	items = frappe.get_all("Item", fields=["name", "item_group", "item_name"], filters=filters_dict)
+	items = frappe.get_all("Item", fields=["name", "item_group", "item_name"], filters=filters_dict, order_by="name")
 
 	return items
 
