@@ -21,35 +21,25 @@ class LeaveAllocation(Document):
 		self.validate_lwp()
 		self.validate_allocation_overlap()
 		self.validate_back_dated_allocation()
-		if not self.carry_forward:
-			self.validate_new_leaves_allocated_value()
-		self.validate_leave_allocation_days()
-		self.set_total_leaves_allocated()
 		self.validate_total_leaves_allocated()
 		set_employee_name(self)
-
-	def on_update(self):
-		if self.carry_forward:
-			self.set_carry_forward_leaves()
+		self.validate_leaves_allocated_value()
+		self.validate_leave_allocation_days()
+		self.set_total_leaves_allocated()
 
 	def validate_leave_allocation_days(self):
-		company = frappe.db.get_value("Employee", self.employee, "company")
-		leave_period = get_leave_period(self.from_date, self.to_date, company)
-		max_leaves_allowed = frappe.db.get_value("Leave Type", self.leave_type, "max_leaves_allowed")
-		if max_leaves_allowed > 0:
-			leave_allocated = 0
-			if leave_period:
-				leave_allocated = get_leave_allocation_for_period(self.employee, self.leave_type, leave_period[0].from_date, leave_period[0].to_date)
-			leave_allocated += self.new_leaves_allocated
-			if leave_allocated > max_leaves_allowed:
-				frappe.throw(_("Total allocated leaves are more days than maximum allocation of {0} leave type for employee {1} in the period")\
-				.format(self.leave_type, self.employee))
+		new_leaves = self.new_leaves_allocate if not self.carry_forward else self.carry_forwarded_leaves
+		max_leaves, leaves_allocated = self.get_max_leaves_with_leaves_allocated_for_leave_type(flt(new_leaves))
+
+		if leave_allocated > max_leaves:
+			frappe.throw(_("Total allocated leaves are more days than maximum allocation of {0} leave type for employee {1} in the period")\
+			.format(self.leave_type, self.employee))
 
 	def on_update_after_submit(self):
 		self.validate_new_leaves_allocated_value()
 		self.set_total_leaves_allocated()
 
-		frappe.db.set(self,'total_leaves_allocated',flt(self.total_leaves_allocated))
+		frappe.db.set(self,'total_leaves_allocated', flt(self.total_leaves_allocated))
 
 		self.validate_against_leave_applications()
 
@@ -61,7 +51,7 @@ class LeaveAllocation(Document):
 		if frappe.db.get_value("Leave Type", self.leave_type, "is_lwp"):
 			frappe.throw(_("Leave Type {0} cannot be allocated since it is leave without pay").format(self.leave_type))
 
-	def validate_new_leaves_allocated_value(self):
+	def validate_leaves_allocated_value(self):
 		"""validate that leave allocation is in multiples of 0.5"""
 		if flt(self.new_leaves_allocated) % 0.5:
 			frappe.throw(_("Leaves must be allocated in multiples of 0.5"), ValueMultiplierError)
@@ -98,8 +88,11 @@ class LeaveAllocation(Document):
 					BackDatedAllocationError)
 
 	def set_total_leaves_allocated(self):
-
-		self.total_leaves_allocated = flt(self.new_leaves_allocated)
+		if self.carry_forward:
+			self.set_carry_forwarded_leaves()
+			self.total_leaves_allocated = flt(self.carry_forwarded_leaves)
+		else:
+			self.total_leaves_allocated = flt(self.new_leaves_allocated)
 
 		if not self.total_leaves_allocated and not frappe.db.get_value("Leave Type", self.leave_type, "is_earned_leave")\
 			and not frappe.db.get_value("Leave Type", self.leave_type, "is_compensatory"):
@@ -121,27 +114,28 @@ class LeaveAllocation(Document):
 			else:
 				frappe.throw(_("Total allocated leaves {0} cannot be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken), LessAllocationError)
 
-	def set_carry_forward_leaves(self):
-
-		leaves_allocated
-		# check number of days to expire, ignore expiry for default value
+	def set_carry_forwarded_leaves(self):
+		# check number of days to expire, ignore expiry for default value 0
 		expiry_days = frappe.db.get_value("Leave Type",
 			filters={"leave_type": leave_type, "is_carry_forward": 1},
 			fieldname="carry_forward_leave_expiry")
 
-		max_leaves_allowed = frappe.db.get_value("Leave Type", self.leave_type, "max_leaves_allowed")
+		self.carry_forwarded_leaves = get_carry_forwarded_leaves(self.employee, self.leave_type, self.from_date, expiry_days)
+		max_leaves, leaves_allocated = self.get_max_leaves_with_leaves_allocated_for_leave_type(self.carry_forwarded_leaves)
+		if leaves_allocated > max_leaves:
+			self.carry_forwarded_leaves = max_leaves - (leaves_allocated - self.carry_forwarded_leaves)
+
+	def get_max_leaves_with_leaves_allocated_for_leave_type(self, new_leaves):
+		''' compare new leaves allocated with max leaves '''
+		company = frappe.db.get_value("Employee", self.employee, "company")
 		leave_period = get_leave_period(self.from_date, self.to_date, company)
-		if leave_period:
-			leave_allocated = get_leave_allocation_for_period(self.employee, self.leave_type, leave_period[0].from_date, leave_period[0].to_date)
-
-		carry_forwarded_leaves = get_carry_forwarded_leaves(self.employee, self.leave_type,
-			self.from_date, expiry_days)
-		leaves_allocated += carry_forwarded_leaves
-
-		if leaves_allocated > max_leaves_allowed:
-			self.total_leaves_allocated = max_leaves_allowed - leaves_allocated
-		else:
-			self.total_leaves_allocated = carry_forwarded_leaves
+		max_leaves_allowed = frappe.db.get_value("Leave Type", self.leave_type, "max_leaves_allowed")
+		if max_leaves_allowed > 0:
+			leave_allocated = 0
+			if leave_period:
+				leave_allocated = get_leave_allocation_for_period(self.employee, self.leave_type, leave_period[0].from_date, leave_period[0].to_date)
+			leave_allocated += new_leaves
+		return max_leaves_allowed, leaves_allocated
 
 def get_leave_allocation_for_period(employee, leave_type, from_date, to_date):
 	leave_allocated = 0
