@@ -116,10 +116,10 @@ def upload():
 	if not frappe.has_permission("Attendance", "create"):
 		raise frappe.PermissionError
 
-	from frappe.utils.csvutils import read_csv_content_from_uploaded_file
+	from frappe.utils.csvutils import read_csv_content
 	from frappe.modules import scrub
 
-	rows = read_csv_content_from_uploaded_file()
+	rows = read_csv_content(frappe.local.uploaded_file)
 	rows = list(filter(lambda x: x and any(x), rows))
 	if not rows:
 		msg = [_("Please select a csv file")]

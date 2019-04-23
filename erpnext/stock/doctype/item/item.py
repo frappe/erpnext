@@ -801,7 +801,7 @@ class Item(WebsiteGenerator):
 					attributes.append(d.attribute)
 
 	def validate_variant_attributes(self):
-		if self.variant_of and self.variant_based_on == 'Item Attribute':
+		if self.is_new() and self.variant_of and self.variant_based_on == 'Item Attribute':
 			args = {}
 			for d in self.attributes:
 				if cstr(d.attribute_value).strip() == '':
@@ -1062,3 +1062,7 @@ def update_variants(variants, template, publish_progress=True):
 		count+=1
 		if publish_progress:
 				frappe.publish_progress(count*100/len(variants), title = _("Updating Variants..."))
+
+def on_doctype_update():
+	# since route is a Text column, it needs a length for indexing
+	frappe.db.add_index("Item", ["route(500)"])
