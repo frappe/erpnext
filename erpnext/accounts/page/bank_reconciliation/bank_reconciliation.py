@@ -33,10 +33,12 @@ def reconcile(bank_transaction, payment_doctype, payment_name):
 	return 'reconciled'
 
 def add_payment_to_transaction(transaction, payment_entry, gl_entry):
+	gl_amount, transaction_amount = (gl_entry.credit, transaction.debit) if gl_entry.credit > 0 else (gl_entry.debit, transaction.credit)
+	allocated_amount = gl_amount if gl_amount <= transaction_amount else transaction_amount
 	transaction.append("payment_entries", {
 		"payment_document": payment_entry.doctype,
 		"payment_entry": payment_entry.name,
-		"allocated_amount": gl_entry.credit if gl_entry.credit > 0 else gl_entry.debit
+		"allocated_amount": allocated_amount
 	})
 	transaction.save()
 
@@ -274,7 +276,7 @@ def check_amount_vs_description(amount_matching, description_matching):
 						result.append(am_match)
 						continue
 
-				if hasattr(am_match, "reference_no") and hasattr(des_match, "reference_no"):
+				if "reference_no" in am_match and "reference_no" in des_match:
 					if difflib.SequenceMatcher(lambda x: x == " ", am_match["reference_no"], des_match["reference_no"]).ratio() > 70:
 						if am_match not in result:
 							result.append(am_match)
