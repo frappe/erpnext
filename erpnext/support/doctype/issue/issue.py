@@ -91,7 +91,7 @@ class Issue(Document):
 			"content": self.description,
 			"status": "Linked"
 		})
-		communication.add_link(link_doctype="Issue", link_name=self.name, no_save=True)
+		communication.add_link(link_doctype="Issue", link_name=self.name)
 		communication.ignore_permissions = True
 		communication.ignore_mandatory = True
 		communication.save()
@@ -119,7 +119,7 @@ class Issue(Document):
 
 			for communication in communications:
 				doc = frappe.get_doc("Communication", communication.parent)
-				doc.add_link(link_doctype="Communication", link_name=replicated_issue.name, no_save=True)
+				doc.add_link(link_doctype="Communication", link_name=replicated_issue.name)
 				doc.save(ignore_permissions=True)
 
 		return replicated_issue.name
