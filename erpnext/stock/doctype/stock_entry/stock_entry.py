@@ -77,7 +77,6 @@ class StockEntry(StockController):
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
 
 	def on_submit(self):
-
 		self.update_stock_ledger()
 
 		update_serial_nos_after_submit(self, "items")
@@ -1136,14 +1135,24 @@ class StockEntry(StockController):
 			select rm_item_code, reserve_warehouse
 			from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
 			where po.name = poitemsup.parent
-			and po.name = %s""", self.purchase_order))
+			and po.name = %s """, self.purchase_order))
+
+		transfered_qty = {}
 
 		#Update reserved sub contracted quantity in bin based on Supplied Item Details
 		for d in self.get("items"):
 			item_code = d.get('original_item') or d.get('item_code')
+			transfered_qty[item_code] = d.qty
 			reserve_warehouse = item_wh.get(item_code)
 			stock_bin = get_bin(item_code, reserve_warehouse)
 			stock_bin.update_reserved_qty_for_sub_contracting()
+
+		po = frappe.get_doc("Purchase Order", self.purchase_order)
+
+		for items in po.supplied_items:
+			items.transfered_qty = items.transfered_qty + transfered_qty.get(items.rm_item_code)
+
+		po.submit()
 
 	def update_so_in_serial_number(self):
 		so_name, item_code = frappe.db.get_value("Work Order", self.work_order, ["sales_order", "production_item"])
