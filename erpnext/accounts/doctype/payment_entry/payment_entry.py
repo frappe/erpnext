@@ -14,6 +14,7 @@ from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account, get_bank_account_details
 from erpnext.controllers.accounts_controller import AccountsController, get_supplier_block_status
+from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_party_account_based_on_invoice_discounting
 
 from six import string_types, iteritems
 
@@ -237,7 +238,7 @@ class PaymentEntry(AccountsController):
 
 					if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Expense Claim", "Fees"):
 						if self.party_type == "Customer":
-							ref_party_account = ref_doc.debit_to
+							ref_party_account = get_party_account_based_on_invoice_discounting(d.reference_name) or ref_doc.debit_to
 						elif self.party_type == "Student":
 							ref_party_account = ref_doc.receivable_account
 						elif self.party_type=="Supplier":
@@ -536,8 +537,12 @@ class PaymentEntry(AccountsController):
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args):
+
 	if isinstance(args, string_types):
 		args = json.loads(args)
+
+	if args.get('party_type') == 'Member':
+		return
 
 	# confirm that Supplier is not blocked
 	if args.get('party_type') == 'Supplier':
@@ -822,7 +827,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 
 	# party account
 	if dt == "Sales Invoice":
-		party_account = doc.debit_to
+		party_account = get_party_account_based_on_invoice_discounting(dn) or doc.debit_to
 	elif dt == "Purchase Invoice":
 		party_account = doc.credit_to
 	elif dt == "Fees":

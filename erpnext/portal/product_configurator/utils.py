@@ -167,8 +167,13 @@ def get_attributes_and_values(item_code):
 		if attribute in attribute_list:
 			valid_options.setdefault(attribute, set()).add(attribute_value)
 
+	# build attribute values in idx order
+	ordered_attribute_value_map = item_cache.get_ordered_attribute_values()
 	for attr in attributes:
-		attr['values'] = valid_options.get(attr.attribute, [])
+		valid_attribute_values = valid_options.get(attr.attribute, [])
+		ordered_values = ordered_attribute_value_map.get(attr.attribute, [])
+		attr['values'] = [v for v in ordered_values if v in valid_attribute_values]
+		attr['values'] = valid_attribute_values
 
 	return attributes
 

@@ -9,6 +9,8 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import get_party_account_currency
+from frappe.desk.form import assign_to
+from frappe.email.inbox import link_communication_to_document
 
 subject_field = "title"
 sender_field = "contact_email"
@@ -152,6 +154,9 @@ class Opportunity(TransactionBase):
 
 	def on_update(self):
 		self.add_calendar_event()
+
+		# assign to customer account manager or lead owner
+		assign_to_user(self, subject_field)
 
 	def add_calendar_event(self, opts=None, force=False):
 		if not opts:
@@ -329,3 +334,39 @@ def auto_close_opportunity():
 		doc.flags.ignore_permissions = True
 		doc.flags.ignore_mandatory = True
 		doc.save()
+
+def assign_to_user(doc, subject_field):
+	assign_user = None
+	if doc.customer:
+		assign_user = frappe.db.get_value('Customer', doc.customer, 'account_manager')
+	elif doc.lead:
+		assign_user = frappe.db.get_value('Lead', doc.lead, 'lead_owner')
+
+	if assign_user and assign_user != 'Administrator':
+		if not assign_to.get(dict(doctype = doc.doctype, name = doc.name)):
+			assign_to.add({
+				"assign_to": assign_user,
+				"doctype": doc.doctype,
+				"name": doc.name,
+				"description": doc.get(subject_field)
+			})
+@frappe.whitelist()
+def make_opportunity_from_communication(communication, ignore_communication_links=False):
+	from erpnext.crm.doctype.lead.lead import make_lead_from_communication
+	doc = frappe.get_doc("Communication", communication)
+
+	lead = doc.reference_name if doc.reference_doctype == "Lead" else None
+	if not lead:
+		lead = make_lead_from_communication(communication, ignore_communication_links=True)
+
+	enquiry_from = "Lead"
+
+	opportunity = frappe.get_doc({
+		"doctype": "Opportunity",
+		"enquiry_from": enquiry_from,
+		"lead": lead
+	}).insert(ignore_permissions=True)
+
+	link_communication_to_document(doc, "Opportunity", opportunity.name, ignore_communication_links)
+
+	return opportunity.name
