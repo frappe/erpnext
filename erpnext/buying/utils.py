@@ -73,10 +73,10 @@ def validate_for_items(doc):
 		not cint(frappe.db.get_single_value("Buying Settings", "allow_multiple_items") or 0):
 		frappe.throw(_("Same item cannot be entered multiple times."))
 
-def check_for_closed_status(doctype, docname):
+def check_on_hold_or_closed_status(doctype, docname):
 	status = frappe.db.get_value(doctype, docname, "status")
 
-	if status == "Closed":
+	if status in ("Closed", "On Hold"):
 		frappe.throw(_("{0} {1} status is {2}").format(doctype, docname, status), frappe.InvalidStatusError)
 
 @frappe.whitelist()

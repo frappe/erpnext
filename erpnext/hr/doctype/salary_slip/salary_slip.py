@@ -131,11 +131,12 @@ class SalarySlip(TransactionBase):
 		for d in self.get(key):
 			if d.salary_component == struct_row.salary_component:
 				component_row = d
+
 		if not component_row:
 			self.append(key, {
 				'amount': amount,
 				'default_amount': amount,
-				'depends_on_lwp' : struct_row.depends_on_lwp,
+				'depends_on_payment_days' : struct_row.depends_on_payment_days,
 				'salary_component' : struct_row.salary_component,
 				'abbr' : struct_row.abbr,
 				'do_not_include_in_total' : struct_row.do_not_include_in_total,
@@ -147,12 +148,11 @@ class SalarySlip(TransactionBase):
 				'tax_on_additional_salary': additional_tax
 			})
 		else:
-			if overwrite:
-				component_row.default_amount = amount
-				component_row.amount = amount
-			else:
-				component_row.default_amount += amount
-				component_row.amount = component_row.default_amount
+			if not overwrite:
+				amount += struct_row.get("default_amount", 0)
+
+			component_row.default_amount = amount
+			component_row.amount = amount
 
 			component_row.tax_on_flexible_benefit = benefit_tax
 			component_row.tax_on_additional_salary = additional_tax
@@ -418,7 +418,7 @@ class SalarySlip(TransactionBase):
 
 		for d in self.get(component_type):
 			if (self.salary_structure and
-				cint(d.depends_on_lwp) and
+				cint(d.depends_on_payment_days) and
 				(not
 				    self.salary_slip_based_on_timesheet or
 					getdate(self.start_date) < joining_date or
@@ -431,7 +431,7 @@ class SalarySlip(TransactionBase):
 				)
 
 			elif not self.payment_days and not self.salary_slip_based_on_timesheet and \
-				cint(d.depends_on_lwp):
+				cint(d.depends_on_payment_days):
 				d.amount = 0
 			elif not d.amount:
 				d.amount = d.default_amount
@@ -454,7 +454,7 @@ class SalarySlip(TransactionBase):
 
 		self.net_pay = 0
 		if self.total_working_days:
-			self.net_pay = (flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))) * flt(self.payment_days / self.total_working_days)
+			self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
 
 		self.rounded_total = rounded(self.net_pay,
 			self.precision("net_pay") if disable_rounded_total else 0)
@@ -787,7 +787,7 @@ class SalarySlip(TransactionBase):
 		component = frappe.get_doc("Salary Component", salary_component)
 		# Data for update_component_row
 		struct_row = {}
-		struct_row['depends_on_lwp'] = component.depends_on_lwp
+		struct_row['depends_on_payment_days'] = component.depends_on_payment_days
 		struct_row['salary_component'] = component.name
 		struct_row['abbr'] = component.salary_component_abbr
 		struct_row['do_not_include_in_total'] = component.do_not_include_in_total

@@ -13,7 +13,7 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
-from erpnext.buying.utils import check_for_closed_status, validate_for_items
+from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.stock.doctype.item.item import get_item_defaults
 
 from six import string_types
@@ -62,6 +62,7 @@ class MaterialRequest(BuyingController):
 		super(MaterialRequest, self).validate()
 
 		self.validate_schedule_date()
+		self.check_for_on_hold_or_closed_status('Sales Order', 'sales_order')
 		self.validate_uom_is_integer("uom", "qty")
 
 		if not self.status:
@@ -100,7 +101,8 @@ class MaterialRequest(BuyingController):
 
 	def before_cancel(self):
 		# if MRQ is already closed, no point saving the document
-		check_for_closed_status(self.doctype, self.name)
+		check_on_hold_or_closed_status(self.doctype, self.name)
+
 		self.set_status(update=True, status='Cancelled')
 
 	def check_modified_date(self):

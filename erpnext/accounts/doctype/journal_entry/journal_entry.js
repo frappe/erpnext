@@ -6,6 +6,10 @@ frappe.provide("erpnext.journal_entry");
 
 
 frappe.ui.form.on("Journal Entry", {
+	setup: function(frm) {
+		frm.add_fetch("bank_account_no", "account", "account");
+	},
+
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
 		frm.cscript.voucher_type(frm.doc);
@@ -234,7 +238,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 				out.filters.push([jvd.reference_type, "per_billed", "<", 100]);
 			}
-			
+
 			if(jvd.party_type && jvd.party) {
 				var party_field = "";
 				if(jvd.reference_type.indexOf("Sales")===0) {
