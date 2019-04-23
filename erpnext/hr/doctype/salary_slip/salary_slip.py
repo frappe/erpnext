@@ -167,7 +167,7 @@ class SalarySlip(TransactionBase):
 			if d.amount_based_on_formula:
 				formula = d.formula.strip() if d.formula else None
 				if formula:
-					amount = frappe.safe_eval(formula, self.whitelisted_globals, data)
+					amount = rounded(frappe.safe_eval(formula, self.whitelisted_globals, data))
 			if amount:
 				data[d.abbr] = amount
 
@@ -736,22 +736,24 @@ class SalarySlip(TransactionBase):
 		# less paid taxes
 		if args.get("pro_rata_tax_paid"):
 			tax_amount -= args.get("pro_rata_tax_paid")
+		tax_amount = rounded(tax_amount)
 		struct_row = self.get_salary_slip_row(args.get("tax_component"))
 		return [struct_row, tax_amount, benefit_tax, additional_tax]
 
-	def calculate_tax_by_tax_slab(self, payroll_period, annual_earning):
+	def calculate_tax_by_tax_slab(self, payroll_period, annual_taxable_earning):
 		payroll_period_obj = frappe.get_doc("Payroll Period", payroll_period)
 		data = self.get_data_for_eval()
+		data.update({"annual_taxable_earning": annual_taxable_earning})
 		taxable_amount = 0
 		for slab in payroll_period_obj.taxable_salary_slabs:
 			if slab.condition and not self.eval_tax_slab_condition(slab.condition, data):
 				continue
-			if not slab.to_amount and annual_earning > slab.from_amount:
-				taxable_amount += (annual_earning - slab.from_amount) * slab.percent_deduction *.01
+			if not slab.to_amount and annual_taxable_earning > slab.from_amount:
+				taxable_amount += (annual_taxable_earning - slab.from_amount) * slab.percent_deduction *.01
 				continue
-			if annual_earning > slab.from_amount and annual_earning < slab.to_amount:
-				taxable_amount += (annual_earning - slab.from_amount) * slab.percent_deduction *.01
-			elif annual_earning > slab.from_amount and annual_earning > slab.to_amount:
+			if annual_taxable_earning > slab.from_amount and annual_taxable_earning < slab.to_amount:
+				taxable_amount += (annual_taxable_earning - slab.from_amount) * slab.percent_deduction *.01
+			elif annual_taxable_earning > slab.from_amount and annual_taxable_earning > slab.to_amount:
 				taxable_amount += (slab.to_amount - slab.from_amount) * slab.percent_deduction * .01
 		return taxable_amount
 
