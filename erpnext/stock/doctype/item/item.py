@@ -90,8 +90,6 @@ class Item(WebsiteGenerator):
 			self.set_opening_stock()
 
 	def validate(self):
-		self.get_doc_before_save()
-
 		super(Item, self).validate()
 
 		if not self.item_name:
