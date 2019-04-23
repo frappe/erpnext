@@ -131,11 +131,12 @@ class SalarySlip(TransactionBase):
 		for d in self.get(key):
 			if d.salary_component == struct_row.salary_component:
 				component_row = d
+
 		if not component_row:
 			self.append(key, {
 				'amount': amount,
 				'default_amount': amount,
-				'depends_on_lwp' : struct_row.depends_on_lwp,
+				'depends_on_payment_days' : struct_row.depends_on_payment_days,
 				'salary_component' : struct_row.salary_component,
 				'abbr' : struct_row.abbr,
 				'do_not_include_in_total' : struct_row.do_not_include_in_total,
@@ -147,12 +148,11 @@ class SalarySlip(TransactionBase):
 				'tax_on_additional_salary': additional_tax
 			})
 		else:
-			if overwrite:
-				component_row.default_amount = amount
-				component_row.amount = amount
-			else:
-				component_row.default_amount += amount
-				component_row.amount = component_row.default_amount
+			if not overwrite:
+				amount += struct_row.get("default_amount", 0)
+
+			component_row.default_amount = amount
+			component_row.amount = amount
 
 			component_row.tax_on_flexible_benefit = benefit_tax
 			component_row.tax_on_additional_salary = additional_tax
@@ -418,7 +418,7 @@ class SalarySlip(TransactionBase):
 
 		for d in self.get(component_type):
 			if (self.salary_structure and
-				cint(d.depends_on_lwp) and
+				cint(d.depends_on_payment_days) and
 				(not
 				    self.salary_slip_based_on_timesheet or
 					getdate(self.start_date) < joining_date or
@@ -431,7 +431,7 @@ class SalarySlip(TransactionBase):
 				)
 
 			elif not self.payment_days and not self.salary_slip_based_on_timesheet and \
-				cint(d.depends_on_lwp):
+				cint(d.depends_on_payment_days):
 				d.amount = 0
 			elif not d.amount:
 				d.amount = d.default_amount
@@ -441,7 +441,7 @@ class SalarySlip(TransactionBase):
 	def calculate_net_pay(self):
 		if self.salary_structure:
 			self.calculate_component_amounts()
-		
+
 		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 		precision = frappe.defaults.get_global_default("currency_precision")
 		self.total_deduction = 0
@@ -455,7 +455,7 @@ class SalarySlip(TransactionBase):
 		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
 		self.rounded_total = rounded(self.net_pay,
 			self.precision("net_pay") if disable_rounded_total else 0)
-		
+
 		if self.net_pay < 0:
 			frappe.throw(_("Net Pay cannnot be negative"))
 
@@ -599,12 +599,11 @@ class SalarySlip(TransactionBase):
 			annual_earning = taxable_earning["taxable_earning"] * period_factor
 			exemption_amount = 0
 			if frappe.db.exists("Employee Tax Exemption Declaration", {"employee": self.employee,
-			"payroll_period": payroll_period.name, "docstatus": 1}):
+					"payroll_period": payroll_period.name, "docstatus": 1}):
 				exemption_amount = frappe.db.get_value("Employee Tax Exemption Declaration",
 					{"employee": self.employee, "payroll_period": payroll_period.name, "docstatus": 1},
 					"total_exemption_amount")
 			annual_taxable_earning = annual_earning - exemption_amount
-
 		if self.deduct_tax_for_unclaimed_employee_benefits or self.deduct_tax_for_unsubmitted_tax_exemption_proof:
 			tax_detail = self.get_tax_paid_in_period(payroll_period, tax_component)
 			if tax_detail:
@@ -770,13 +769,21 @@ class SalarySlip(TransactionBase):
 
 	def get_period_factor(self, period_start, period_end, start_date=None, end_date=None):
 		# TODO if both deduct checked update the factor to make tax consistent
+		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee, ["date_of_joining", "relieving_date"])
+		if getdate(joining_date) > getdate(period_start):
+			period_start = joining_date
+		if relieving_date and getdate(relieving_date) < getdate(period_end):
+			period_end = relieving_date
+
 		payroll_days = date_diff(period_end, period_start) + 1
 		if start_date and end_date:
 			salary_days = date_diff(end_date, start_date) + 1
 			return flt(payroll_days)/flt(salary_days)
+
 		# if period configured for a year and monthly frequency return 12 to make tax calc consistent
 		if 360 <= payroll_days <= 370 and self.payroll_frequency == "Monthly":
 			return 12
+
 		salary_days = date_diff(self.end_date, self.start_date) + 1
 		return flt(payroll_days)/flt(salary_days)
 
@@ -784,7 +791,7 @@ class SalarySlip(TransactionBase):
 		component = frappe.get_doc("Salary Component", salary_component)
 		# Data for update_component_row
 		struct_row = {}
-		struct_row['depends_on_lwp'] = component.depends_on_lwp
+		struct_row['depends_on_payment_days'] = component.depends_on_payment_days
 		struct_row['salary_component'] = component.name
 		struct_row['abbr'] = component.salary_component_abbr
 		struct_row['do_not_include_in_total'] = component.do_not_include_in_total
