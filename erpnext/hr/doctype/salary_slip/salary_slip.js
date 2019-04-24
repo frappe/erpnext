@@ -132,9 +132,6 @@ var get_emp_and_leave_details = function(doc, dt, dn) {
 	});
 }
 
-cur_frm.cscript.employee = function(doc,dt,dn){
-	get_emp_and_leave_details(doc, dt, dn);
-}
 
 cur_frm.cscript.leave_without_pay = function(doc,dt,dn){
 	if (doc.employee && doc.start_date && doc.end_date) {
@@ -160,7 +157,7 @@ cur_frm.cscript.amount = function(doc,dt,dn){
 	calculate_all(doc, dt, dn);
 }
 
-cur_frm.cscript.depends_on_lwp = function(doc,dt,dn){
+cur_frm.cscript.depends_on_payment_days = function(doc,dt,dn){
 	calculate_earning_total(doc, dt, dn, true);
 	calculate_ded_total(doc, dt, dn, true);
 	calculate_net_pay(doc, dt, dn);
@@ -174,7 +171,7 @@ var calculate_earning_total = function(doc, dt, dn, reset_amount) {
 	var tbl = doc.earnings || [];
 	var total_earn = 0;
 	for(var i = 0; i < tbl.length; i++){
-		if(cint(tbl[i].depends_on_lwp) == 1) {
+		if(cint(tbl[i].depends_on_payment_days) == 1) {
 			tbl[i].amount =  Math.round(tbl[i].default_amount)*(flt(doc.payment_days) /
 				cint(doc.total_working_days)*100)/100;
 		} else if(reset_amount && tbl[i].default_amount) {
@@ -196,7 +193,7 @@ var calculate_ded_total = function(doc, dt, dn, reset_amount) {
 	var tbl = doc.deductions || [];
 	var total_ded = 0;
 	for(var i = 0; i < tbl.length; i++){
-		if(cint(tbl[i].depends_on_lwp) == 1) {
+		if(cint(tbl[i].depends_on_payment_days) == 1) {
 			tbl[i].amount = Math.round(tbl[i].default_amount)*(flt(doc.payment_days)/cint(doc.total_working_days)*100)/100;
 		} else if(reset_amount && tbl[i].default_amount) {
 			tbl[i].amount = tbl[i].default_amount;
@@ -209,16 +206,12 @@ var calculate_ded_total = function(doc, dt, dn, reset_amount) {
 	refresh_many(['deductions', 'total_deduction']);
 }
 
-// Calculate net payable amount
-// ------------------------------------------------------------------------
 var calculate_net_pay = function(doc, dt, dn) {
 	doc.net_pay = flt(doc.gross_pay) - flt(doc.total_deduction);
 	doc.rounded_total = Math.round(doc.net_pay);
 	refresh_many(['net_pay', 'rounded_total']);
 }
 
-// validate
-// ------------------------------------------------------------------------
 cur_frm.cscript.validate = function(doc, dt, dn) {
 	calculate_all(doc, dt, dn);
 }
