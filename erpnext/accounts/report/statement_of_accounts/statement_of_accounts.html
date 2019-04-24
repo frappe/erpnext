@@ -1,0 +1,168 @@
+
+<h2 class="text-center" style="font-size: 12px">{%= __("Statement of Account") %}</h2>
+<h4 class="text-center" style="font-size: 12px">{%= (filters.party || filters.account) && ((filters.party || filters.account) + ", ")  || "" %} {%= filters.company %}</h4>
+<h5 class="text-center" style="font-size: 12px">
+	{%= dateutil.str_to_user(filters.from_date) %}
+	{%= __("to") %}
+	{%= dateutil.str_to_user(filters.to_date) %}
+</h5>
+<hr>
+
+<!-- LOOKUP CUSTOMER INFO -->
+
+{% for(var i=0, l=data.length; i<l; i++) { %}
+{% if(data[i][__("**CUSTOMER INFO**")] == "br") { %}
+{% var customer_name = data[i][__("#Customer Name")] %}
+{% var customer_address = data[i][__("#Customer Address")] %}
+{% var date_now = data[i][__("#Date")] %}
+{% var currency = data[i][__("#Currency")] %}
+{% var credit_days = data[i][__("#Credit Days Based On")] %}
+{% var tax_id = data[i][__("#Tax ID")] %}
+{% } %}
+{% } %}
+
+
+<!--<div><h1>STATEMENT OF ACCOUNT</h1></div>-->
+
+<table width="100%">
+	<tr>
+		<td width="75%">
+<table border="0" width="100%">
+<tr>
+
+	</tr>
+
+	<tr>
+		<td width="25%" style="font-size: 12px"><b>Customer Name</b></td>
+		<td width="75%" style="font-size: 12px">{%=customer_name %}</td>
+		<!--<td width="10%">Date</td>
+		<td width="10%">123</td>-->
+	</tr>
+
+	<tr>
+		<td rowspan="2" style="font-size: 12px"><b>Address</b></td>
+		<td rowspan="2" style="font-size: 12px">{%=customer_address %}</td>
+		<!--<td>Term</td>
+		<td>TT N Days</td>-->
+	</tr>
+	<tr>
+		<!--<td>Currency</td>
+		<td>USD</td>-->
+	</tr>
+	</table>
+</td>
+		<td width="25%">
+<table border="0" width="100%">
+<tr>
+
+	</tr>
+
+	<tr>
+		<td width="50%" style="font-size: 12px"><b>Date</b></td>
+		<td width="50%" style="font-size: 12px">{%=date_now %}</td>
+	</tr>
+
+	<tr>
+		<td style="font-size: 12px"><b>Term</b></td>
+		<td style="font-size: 12px">{%=credit_days %}</td>
+	</tr>
+	<tr>
+		<td style="font-size: 12px"><b>Currency</b></td>
+		<td style="font-size: 12px">{%=currency %}</td>
+	</tr>
+	<tr>
+		<td style="font-size: 12px"><b>Tax ID</b></td>
+		<td style="font-size: 12px">{%=tax_id %}</td>
+	</tr>
+	</table>
+	</td>
+	</tr>
+</table>
+
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th style="width: 15%;font-size: 12px">{%= __("Date") %}</th>
+			<th style="width: 15%;font-size: 12px">{%= __("Ref") %}</th>
+			<th style="width: 40%;font-size: 12px">{%= __("Party") %}</th>
+			<th style="width: 15%;font-size: 12px">{%= __("Debit") %}</th>
+			<th style="width: 15%;font-size: 12px">{%= __("Credit") %}</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for(var i=0, l=data.length; i < l; i++) { %}
+			<tr>
+			{% if(data[i][__("Posting Date")]) { %}
+				<td style="font-size: 12px">{%= dateutil.str_to_user(data[i][__("Posting Date")]) %}</td>
+				<td style="font-size: 12px">{%= data[i][__("Voucher Type")] %}
+					<br>{%= data[i][__("Voucher No")] %}</td>
+				<td style="font-size: 12px">
+					{% if(!(filters.party || filters.account)) { %}
+						{%= data[i][__("Party")] || data[i][__("Account")] %}
+						<br>
+					{% } %}
+
+					{{ __("Against") }}: {%= data[i][__("Against Account")] %}
+					<br>{%= __("Remarks") %}: {%= data[i][__("Remarks")] %}</td>
+				<td style="text-align: right;font-size: 12px">{%= format_currency(data[i][__("Debit")],currency) %}</td>
+				<td style="text-align: right;font-size: 12px">{%= format_currency(data[i][__("Credit")],currency) %}</td>
+			{% } else if (frappe.format(data[i][__("Account")], {fieldtype: "Link"}) && data[i][__("Account")] && format_currency(data[i][__("Debit")],currency) && data[i][__("Account")] && format_currency(data[i][__("Credit")],currency)) { %}
+				<td></td>
+				<td></td>
+				<td style="font-size: 12px"><b>{%= frappe.format(data[i][__("Account")], {fieldtype: "Link"}) || "&nbsp;" %}</b></td>
+				<td style="text-align: right;font-size: 12px">
+					{%= data[i][__("Account")] && format_currency(data[i][__("Debit")],currency) %}</td>
+				<td style="text-align: right;font-size: 12px">
+					{%= data[i][__("Account")] && format_currency(data[i][__("Credit")],currency) %}</td>
+			{% } %}
+			</tr>
+		{% } %}
+	</tbody>
+</table>
+
+<table class="table table-bordered" width="100%">
+{% var count = 0 %}
+{% for(var i=0, l=data.length; i< l; i++) { %}
+{% if(data[i][__("**BREAK**")] == "br") { %}
+	{% if (count==0) %}
+	{% count += 1 %}
+	<tr>
+		<th style="font-size: 12px">Age (Days)</th>
+	</tr>
+	<tr>
+		<th style="font-size: 12px">
+			0-30
+		</th>
+		<th style="font-size: 12px">
+			31-60
+		</th >
+		<th style="font-size: 12px">
+			61-90
+		</th>
+		<th style="font-size: 12px">
+			91-Above
+		</th>
+	</tr>
+	{% } %}
+<tr>
+	<td style="font-size: 12px">
+		{%= format_currency(data[i][__("0-30**")],currency) %}
+	</td>
+	<td style="font-size: 12px">
+		{%= format_currency(data[i][__("31-60**")],currency) %}
+	</td>
+	<td style="font-size: 12px">
+		{%= format_currency(data[i][__("61-90**")],currency) %}
+	</td>
+	<td style="font-size: 12px">
+		{%= format_currency(data[i][__("91-Above**")],currency) %}
+	</td>
+</tr>
+
+{% } %}
+{% } %}
+
+</table>
+
+
+<p class="text-right text-muted" style="font-size: 12px">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
