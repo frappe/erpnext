@@ -55,4 +55,4 @@ frappe.query_reports["Product Bundle Balance"] = {
 		}
 		return value;
 	}
-}
+};

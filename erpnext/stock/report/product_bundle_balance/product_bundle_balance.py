@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, getdate, now
+from frappe.utils import flt
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from six import iteritems
 
@@ -97,7 +97,7 @@ def get_items(filters):
 		from `tabItem` item
 		inner join `tabProduct Bundle` pb on pb.new_item_code = item.name
 		where ifnull(item.disabled, 0) = 0 {0}
-	""".format(conditions), filters, as_dict=1)
+	""".format(conditions), filters, as_dict=1)  # nosec
 
 	parent_items = []
 	for d in parent_item_details:
@@ -113,7 +113,7 @@ def get_items(filters):
 			inner join `tabProduct Bundle` pb on pb.name = pbi.parent
 			inner join `tabItem` item on item.name = pbi.item_code
 			where pb.new_item_code in ({0})
-		""".format(", ".join(["%s"] * len(parent_items))), parent_items, as_dict=1)
+		""".format(", ".join(["%s"] * len(parent_items))), parent_items, as_dict=1)  # nosec
 	else:
 		child_item_details = []
 
@@ -153,7 +153,7 @@ def get_stock_ledger_entries(filters, items):
 		left join `tabStock Ledger Entry` sle2 on
 			sle.item_code = sle2.item_code and sle.warehouse = sle2.warehouse
 			and (sle.posting_date, sle.posting_time, sle.name) < (sle2.posting_date, sle2.posting_time, sle2.name)
-		where sle2.name is null and sle.docstatus < 2 %s %s""" % (item_conditions_sql, conditions), as_dict=1)
+		where sle2.name is null and sle.docstatus < 2 %s %s""" % (item_conditions_sql, conditions), as_dict=1)  # nosec
 
 
 def get_parent_item_conditions(filters):
@@ -182,6 +182,6 @@ def get_sle_conditions(filters):
 		warehouse_details = frappe.db.get_value("Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1)
 		if warehouse_details:
 			conditions += " and exists (select name from `tabWarehouse` wh \
-				where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)" % (warehouse_details.lft, warehouse_details.rgt)
+				where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)" % (warehouse_details.lft, warehouse_details.rgt)  # nosec
 
 	return conditions
