@@ -22,7 +22,6 @@ erpnext.integrations.plaidLink = class plaidLink {
 		frappe.xcall('erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.plaid_configuration')
 			.then(result => {
 				if (result !== "disabled") {
-					console.log(result)
 					if (result.plaid_env == undefined || result.plaid_public_key == undefined) {
 						frappe.throw(__("Please add valid Plaid api keys in site_config.json first"));
 					}
