@@ -44,8 +44,16 @@ class LeaveAllocation(Document):
 		self.validate_against_leave_applications()
 
 	def validate_period(self):
-		if date_diff(self.to_date, self.from_date) <= 0:
+		allocation_period = date_diff(self.to_date, self.from_date)
+
+		if allocation_period <= 0:
 			frappe.throw(_("To date cannot be before from date"))
+
+		# check if the allocation period is more than the expiry allows for carry forwarded allocation
+		if self.carry_forward:
+			expiry_days = get_days_to_expiry_for_leave_type(self.leave_type)
+			if allocation_period > expiry_days:
+				frappe.throw(_("Leave allocation period cannot be more than the expiry days allocated"))
 
 	def validate_lwp(self):
 		if frappe.db.get_value("Leave Type", self.leave_type, "is_lwp"):
@@ -115,13 +123,10 @@ class LeaveAllocation(Document):
 				frappe.throw(_("Total allocated leaves {0} cannot be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken), LessAllocationError)
 
 	def set_carry_forwarded_leaves(self):
-		# check number of days to expire, ignore expiry for default value 0
-		expiry_days = frappe.db.get_value("Leave Type",
-			filters={"leave_type": leave_type, "is_carry_forward": 1},
-			fieldname="carry_forward_leave_expiry")
+		self.carry_forwarded_leaves = get_carry_forwarded_leaves(self.employee, self.leave_type, self.from_date)
 
-		self.carry_forwarded_leaves = get_carry_forwarded_leaves(self.employee, self.leave_type, self.from_date, expiry_days)
 		max_leaves, leaves_allocated = self.get_max_leaves_with_leaves_allocated_for_leave_type(self.carry_forwarded_leaves)
+
 		if leaves_allocated > max_leaves:
 			self.carry_forwarded_leaves = max_leaves - (leaves_allocated - self.carry_forwarded_leaves)
 
@@ -168,9 +173,10 @@ def get_leave_allocation_for_period(employee, leave_type, from_date, to_date):
 	return leave_allocated
 
 @frappe.whitelist()
-def get_carry_forwarded_leaves(employee, leave_type, date, expiry_days):
+def get_carry_forwarded_leaves(employee, leave_type, date):
+	''' Calculates carry forwarded days based on previous unused leave allocations '''
 	carry_forwarded_leaves = 0
-
+	expiry_days = get_days_to_expiry_for_leave_type(leave_type)
 	validate_carry_forward(leave_type)
 	filters = {
 		"employee": employee,
@@ -179,6 +185,8 @@ def get_carry_forwarded_leaves(employee, leave_type, date, expiry_days):
 		"to_date": ("<", date)
 	}
 	limit = 1
+
+	# check number of days to expire, ignore expiry for default value 0
 	if expiry_days:
 		filters.update(carry_forward=0)
 		limit = 2
@@ -196,6 +204,14 @@ def get_carry_forwarded_leaves(employee, leave_type, date, expiry_days):
 		carry_forwarded_leaves = flt(previous_allocation[0].total_leaves_allocated) - flt(leaves_taken)
 
 	return carry_forwarded_leaves
+
+def get_days_to_expiry_for_leave_type(leave_type):
+	''' returns days to expiry for a provided leave type '''
+	expiry_days = frappe.db.get_value("Leave Type",
+		filters={"leave_type": leave_type, "is_carry_forward": 1},
+		fieldname="carry_forward_leave_expiry")
+
+
 
 def validate_carry_forward(leave_type):
 	if not frappe.db.get_value("Leave Type", leave_type, "is_carry_forward"):
