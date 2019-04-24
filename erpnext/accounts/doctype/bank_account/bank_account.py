@@ -21,9 +21,7 @@ class BankAccount(Document):
 
 	def validate(self):
 		self.validate_company()
-
-		if self.iban:
-			self.validate_iban()
+		self.validate_iban()
 
 	def validate_company(self):
 		if self.is_company_account and not self.company:
@@ -33,6 +31,10 @@ class BankAccount(Document):
 		'''
 		Algorithm: https://en.wikipedia.org/wiki/International_Bank_Account_Number#Validating_the_IBAN
 		'''
+		# IBAN field is optional
+		if not self.iban:
+			return
+
 		def encode_char(c):
 			# Position in the alphabet (A=1, B=2, ...) plus nine
 			return str(9 + ord(c) - 64)
