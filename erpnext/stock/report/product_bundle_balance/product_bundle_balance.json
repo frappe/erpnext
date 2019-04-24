@@ -1,0 +1,62 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2019-03-06 01:40:35.418304", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2019-03-06 01:40:35.418304", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Product Bundle Balance", 
+ "owner": "Administrator", 
+ "ref_doctype": "Stock Ledger Entry", 
+ "report_name": "Product Bundle Balance", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  }, 
+  {
+   "role": "Stock User"
+  }, 
+  {
+   "role": "Warehouse Incharge TS"
+  }, 
+  {
+   "role": "Delivery Officer TS"
+  }, 
+  {
+   "role": "System Manager"
+  }, 
+  {
+   "role": "Manager Accounts TS"
+  }, 
+  {
+   "role": "Director TS"
+  }, 
+  {
+   "role": "Delivery Manager TS"
+  }, 
+  {
+   "role": "Single Director TS"
+  }, 
+  {
+   "role": "Return Officer TS"
+  }, 
+  {
+   "role": "Cashier HO TS"
+  }, 
+  {
+   "role": "Display Incharge TS"
+  }, 
+  {
+   "role": "Purchase Manager TS"
+  }, 
+  {
+   "role": "Sales Director TS"
+  }
+ ]
+}
