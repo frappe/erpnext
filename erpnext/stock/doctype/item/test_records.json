@@ -298,7 +298,7 @@
   }],
   "attributes": [
    {
-    "attribute": "Test Size",
+    "attribute": "Test Size"
    }
   ],
   "apply_warehouse_wise_reorder_level": 1,
