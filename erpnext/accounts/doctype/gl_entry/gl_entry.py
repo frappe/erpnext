@@ -175,13 +175,20 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 	else:
 		party_condition = ""
 
+	if against_voucher_type == "Sales Invoice":
+		party_account = frappe.db.get_value(against_voucher_type, against_voucher, "debit_to")
+		account_condition = "and account in ({0}, {1})".format(frappe.db.escape(account), frappe.db.escape(party_account))
+	else:
+		account_condition = " and account = {0}".format(frappe.db.escape(account))
+
 	# get final outstanding amt
 	bal = flt(frappe.db.sql("""
 		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
 		from `tabGL Entry`
 		where against_voucher_type=%s and against_voucher=%s
-		and account = %s {0}""".format(party_condition),
-		(against_voucher_type, against_voucher, account))[0][0] or 0.0)
+		and voucher_type != 'Invoice Discounting'
+		{0} {1}""".format(party_condition, account_condition),
+		(against_voucher_type, against_voucher))[0][0] or 0.0)
 
 	if against_voucher_type == 'Purchase Invoice':
 		bal = -bal

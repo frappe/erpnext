@@ -81,7 +81,7 @@ class SalesInvoice(SellingController):
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
-		self.check_close_sales_order("sales_order")
+		self.check_sales_order_on_hold_or_close("sales_order")
 		self.validate_debit_to_acc()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
 		self.add_remarks()
@@ -209,7 +209,7 @@ class SalesInvoice(SellingController):
 	def on_cancel(self):
 		super(SalesInvoice, self).on_cancel()
 
-		self.check_close_sales_order("sales_order")
+		self.check_sales_order_on_hold_or_close("sales_order")
 
 		if self.is_return and not self.update_billed_amount_in_sales_order:
 			# NOTE status updating bypassed for is_return
