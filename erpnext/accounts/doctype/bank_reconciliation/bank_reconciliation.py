@@ -27,8 +27,8 @@ class BankReconciliation(Document):
 
 		journal_entries = frappe.db.sql("""
 			select
-				"Journal Entry" as payment_document, t1.name as payment_entry, 
-				"Journal Entry Account" as payment_detail_dt, t2.name as payment_detail_dn,
+				'Journal Entry' as payment_document, t1.name as payment_entry,
+				'Journal Entry Account' as payment_detail_dt, t2.name as payment_detail_dn,
 				t2.cheque_no as cheque_number, t2.cheque_date,
 				t2.debit_in_account_currency as debit, t2.credit_in_account_currency as credit, 
 				t1.posting_date, t2.against_account, t2.clearance_date, t2.account_currency 
@@ -39,14 +39,14 @@ class BankReconciliation(Document):
 				and t1.posting_date >= %s and t1.posting_date <= %s
 				and ifnull(t1.is_opening, 'No') = 'No' {0} {1}
 			order by t1.posting_date ASC, t1.name DESC
-		""".format(condition.format("t2."), account_cond), (self.bank_account, self.from_date, self.to_date), as_dict=1)
+		""".format(condition.format("t2."), account_cond), (self.bank_account, self.from_date, self.to_date), as_dict=1)  # nosec
 
 		if self.bank_account_no:
 			condition = " and bank_account = %(bank_account_no)s"
 
 		payment_entries = frappe.db.sql("""
 			select
-				"Payment Entry" as payment_document, name as payment_entry,
+				'Payment Entry' as payment_document, name as payment_entry,
 				reference_no as cheque_number, reference_date as cheque_date,
 				if(paid_from=%(account)s, paid_amount, 0) as credit,
 				if(paid_from=%(account)s, 0, received_amount) as debit,
@@ -58,15 +58,15 @@ class BankReconciliation(Document):
 				and posting_date >= %(from)s and posting_date <= %(to)s {0}
 			order by
 				posting_date ASC, name DESC
-		""".format(condition.format("")),
-		        {"account":self.bank_account, "from":self.from_date,
-				"to":self.to_date, "bank_account_no": self.bank_account_no}, as_dict=1)
+		""".format(condition.format("")),  # nosec
+				{"account":self.bank_account, "from": self.from_date,
+				"to": self.to_date, "bank_account_no": self.bank_account_no}, as_dict=1)
 
 		pos_entries = []
 		if self.include_pos_transactions:
 			pos_entries = frappe.db.sql("""
 				select
-					"Sales Invoice Payment" as payment_document, sip.name as payment_entry, sip.amount as debit,
+					'Sales Invoice Payment' as payment_document, sip.name as payment_entry, sip.amount as debit,
 					si.posting_date, si.debit_to as against_account, sip.clearance_date,
 					account.account_currency, 0 as credit
 				from `tabSales Invoice Payment` sip, `tabSales Invoice` si, `tabAccount` account
@@ -75,8 +75,8 @@ class BankReconciliation(Document):
 					and account.name = sip.account and si.posting_date >= %(from)s and si.posting_date <= %(to)s {0}
 				order by
 					si.posting_date ASC, si.name DESC
-			""".format(condition.format("sip.")),
-			        {"account":self.bank_account, "from":self.from_date, "to":self.to_date}, as_dict=1)
+			""".format(condition.format("sip.")),  # nosec
+				{"account":self.bank_account, "from":self.from_date, "to":self.to_date}, as_dict=1)
 
 		entries = sorted(list(payment_entries)+list(journal_entries+list(pos_entries)),
 			key=lambda k: k['posting_date'] or getdate(nowdate()))
