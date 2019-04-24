@@ -208,12 +208,8 @@ def get_conditions(filters):
 				or (steam.parent = against_voucher and steam.parenttype = against_voucher_type)
 				or (steam.parent = party and steam.parenttype = 'Customer')))""".format(lft, rgt))
 
-	company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
-	if not filters.get("finance_book") or (filters.get("finance_book") == company_finance_book):
-		filters['finance_book'] = company_finance_book
+	if filters.get("finance_book"):
 		conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
-	elif filters.get("finance_book"):
-		conditions.append("ifnull(finance_book, '') = %(finance_book)s")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")

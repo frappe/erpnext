@@ -38,7 +38,6 @@ class Gstr1Report(object):
 			shipping_bill_date,
 			reason_for_issuing_document
 		"""
-		self.customer_type = "Company" if self.filters.get("type_of_business") ==  "B2B" else "Individual"
 
 	def run(self):
 		self.get_columns()
@@ -54,18 +53,50 @@ class Gstr1Report(object):
 		return self.columns, self.data
 
 	def get_data(self):
+
+		if self.filters.get("type_of_business") ==  "B2C Small":
+			self.get_b2cs_data()
+		else:
+			for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
+				invoice_details = self.invoices.get(inv)
+				for rate, items in items_based_on_rate.items():
+					row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, items)
+
+					if self.filters.get("type_of_business") ==  "CDNR":
+						row.append("Y" if invoice_details.posting_date <= date(2017, 7, 1) else "N")
+						row.append("C" if invoice_details.return_against else "R")
+
+					self.data.append(row)
+
+	def get_b2cs_data(self):
+		b2cs_output = {}
+
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 			invoice_details = self.invoices.get(inv)
+
 			for rate, items in items_based_on_rate.items():
-				row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, items)
-				if self.filters.get("type_of_business") ==  "B2C Small":
-					row.append("E" if invoice_details.ecommerce_gstin else "OE")
+				place_of_supply = invoice_details.get("place_of_supply")
+				ecommerce_gstin =  invoice_details.get("ecommerce_gstin")
 
-				if self.filters.get("type_of_business") ==  "CDNR":
-					row.append("Y" if invoice_details.posting_date <= date(2017, 7, 1) else "N")
-					row.append("C" if invoice_details.return_against else "R")
+				b2cs_output.setdefault((rate, place_of_supply, ecommerce_gstin),{
+					"place_of_supply": "",
+					"ecommerce_gstin": "",
+					"rate": "",
+					"taxable_value": 0,
+					"cess_amount": 0,
+					"type": 0
+				})
 
-				self.data.append(row)
+				row = b2cs_output.get((rate, place_of_supply, ecommerce_gstin))
+				row["place_of_supply"] = place_of_supply
+				row["ecommerce_gstin"] = ecommerce_gstin
+				row["rate"] = rate
+				row["taxable_value"] += sum([abs(net_amount)
+					for item_code, net_amount in self.invoice_items.get(inv).items() if item_code in items])
+				row["type"] = "E" if ecommerce_gstin else "OE"
+
+		for key, value in iteritems(b2cs_output):
+			self.data.append(value)
 
 	def get_row_data_for_invoice(self, invoice, invoice_details, tax_rate, items):
 		row = []
@@ -113,7 +144,7 @@ class Gstr1Report(object):
 				if self.filters.get(opts[0]):
 					conditions += opts[1]
 
-		customers = frappe.get_all("Customer", filters={"customer_type": self.customer_type})
+		customers = frappe.get_all("Customer", filters={"disabled": 0})
 
 		if self.filters.get("type_of_business") ==  "B2B":
 			conditions += """ and ifnull(invoice_type, '') != 'Export' and is_return != 1
