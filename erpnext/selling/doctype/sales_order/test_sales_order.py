@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, add_days
+from frappe.utils import flt, add_days, nowdate
 import frappe.permissions
 import unittest
 from erpnext.selling.doctype.sales_order.sales_order \
@@ -12,7 +12,6 @@ from erpnext.selling.doctype.sales_order.sales_order import make_work_orders
 from erpnext.controllers.accounts_controller import update_child_qty_rate
 import json
 from erpnext.selling.doctype.sales_order.sales_order import make_raw_material_request
-
 
 class TestSalesOrder(unittest.TestCase):
 	def tearDown(self):
@@ -242,6 +241,13 @@ class TestSalesOrder(unittest.TestCase):
 		so.cancel()
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1)
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), existing_reserved_qty_item2)
+
+	def test_sales_order_on_hold(self):
+		so = make_sales_order(item_code="_Test Product Bundle Item")
+		so.db_set('Status', "On Hold")
+		si = make_sales_invoice(so.name)
+		self.assertRaises(frappe.ValidationError, create_dn_against_so, so.name)
+		self.assertRaises(frappe.ValidationError, si.submit)
 
 	def test_reserved_qty_for_over_delivery_with_packing_list(self):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
@@ -702,6 +708,28 @@ class TestSalesOrder(unittest.TestCase):
 		se.load_from_db()
 		se.cancel()
 		self.assertFalse(frappe.db.exists("Serial No", {"sales_order": so.name}))
+
+	def test_advance_payment_entry_unlink_against_sales_order(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		frappe.db.set_value("Accounts Settings", "Accounts Settings",
+			"unlink_advance_payment_on_cancelation_of_order", 0)
+
+		so = make_sales_order()
+
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = so.currency
+		pe.paid_to_account_currency = so.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = so.grand_total
+		pe.save(ignore_permissions=True)
+		pe.submit()
+
+		so_doc = frappe.get_doc('Sales Order', so.name)
+
+		self.assertRaises(frappe.LinkExistsError, so_doc.cancel)
 
 	def test_request_for_raw_materials(self):
 		from erpnext.stock.doctype.item.test_item import make_item

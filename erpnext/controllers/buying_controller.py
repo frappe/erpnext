@@ -442,6 +442,13 @@ class BuyingController(StockController):
 				frappe.throw(_("Row #{0}: {1} can not be negative for item {2}".format(item_row['idx'],
 					frappe.get_meta(item_row.doctype).get_label(fieldname), item_row['item_code'])))
 
+	def check_for_on_hold_or_closed_status(self, ref_doctype, ref_fieldname):
+		for d in self.get("items"):
+			if d.get(ref_fieldname):
+				status = frappe.db.get_value(ref_doctype, d.get(ref_fieldname), "status")
+				if status in ("Closed", "On Hold"):
+					frappe.throw(_("{0} {1} is {2}").format(ref_doctype,d.get(ref_fieldname), status))
+
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
 		self.update_ordered_and_reserved_qty()
 
@@ -531,6 +538,8 @@ class BuyingController(StockController):
 		update_last_purchase_rate(self, is_submit = 1)
 
 	def on_cancel(self):
+		super(BuyingController, self).on_cancel()
+
 		if self.get('is_return'):
 			return
 
