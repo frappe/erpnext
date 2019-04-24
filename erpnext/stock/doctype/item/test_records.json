@@ -297,9 +297,9 @@
     "income_account": "Sales - _TC"
   }],
   "attributes": [
-	  {
-	  	"attribute": "Test Size"
-	  }
+   {
+    "attribute": "Test Size",
+   }
   ],
   "apply_warehouse_wise_reorder_level": 1,
   "reorder_levels": [
@@ -335,7 +335,7 @@
   }],
   "reorder_levels": [
    {
-	"warehouse_group": "_Test Warehouse Group - _TC",
+    "warehouse_group": "_Test Warehouse Group - _TC",
     "material_request_type": "Purchase",
     "warehouse": "_Test Warehouse Group-C1 - _TC",
     "warehouse_reorder_level": 20,
