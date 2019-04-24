@@ -1027,7 +1027,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.frm.toggle_display(["plc_conversion_rate", "price_list_currency"],
 			this.frm.doc.price_list_currency != company_currency);
 
-		var show_exclusive = (cur_frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length;
+		var show_exclusive = (cur_frm.doc.taxes || []).filter(d => d.included_in_print_rate===1).length;
 
 		$.each(["tax_exclusive_total", "tax_exclusive_total_before_discount",
 			"tax_exclusive_total_discount"], function(i, fname) {
