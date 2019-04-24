@@ -401,7 +401,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 			if (this.frm.doc.apply_discount_on == "Grand Total") {
 				tax.displayed_total = flt(this.frm.doc["taxes"][row_idx - 1].displayed_total + tax_amount_before_discount,
-					precision("displayed_total", tax))
+					precision("displayed_total", tax));
 			} else {
 				tax.displayed_total = tax.total;
 			}
