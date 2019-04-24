@@ -170,7 +170,7 @@ def get_last_payroll_period_benefits(employee, sal_slip_start_date, sal_slip_end
 						amount += current_claimed_amount
 						struct_row = {}
 						salary_components_dict = {}
-						struct_row['depends_on_lwp'] = salary_component.depends_on_lwp
+						struct_row['depends_on_payment_days'] = salary_component.depends_on_payment_days
 						struct_row['salary_component'] = salary_component.name
 						struct_row['abbr'] = salary_component.salary_component_abbr
 						struct_row['do_not_include_in_total'] = salary_component.do_not_include_in_total
