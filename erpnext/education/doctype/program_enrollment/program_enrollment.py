@@ -8,6 +8,7 @@ from frappe import msgprint, _
 from frappe.model.document import Document
 from frappe.desk.reportview import get_match_cond, get_filters_cond
 from frappe.utils import comma_and
+import erpnext.www.lms as lms
 
 class ProgramEnrollment(Document):
 	def validate(self):
@@ -16,11 +17,12 @@ class ProgramEnrollment(Document):
 			self.student_name = frappe.db.get_value("Student", self.student, "title")
 		if not self.courses:
 			self.extend("courses", self.get_courses())
-	
+
 	def on_submit(self):
 		self.update_student_joining_date()
 		self.make_fee_records()
-	
+		self.create_course_enrollments()
+
 	def validate_duplication(self):
 		enrollment = frappe.get_all("Program Enrollment", filters={
 			"student": self.student,
@@ -31,11 +33,11 @@ class ProgramEnrollment(Document):
 		})
 		if enrollment:
 			frappe.throw(_("Student is already enrolled."))
-	
+
 	def update_student_joining_date(self):
 		date = frappe.db.sql("select min(enrollment_date) from `tabProgram Enrollment` where student= %s", self.student)
 		frappe.db.set_value("Student", self.student, "joining_date", date)
-		
+
 	def make_fee_records(self):
 		from erpnext.education.api import get_fee_components
 		fee_list = []
@@ -54,7 +56,7 @@ class ProgramEnrollment(Document):
 					"program_enrollment": self.name,
 					"components": fee_components
 				})
-				
+
 				fees.save()
 				fees.submit()
 				fee_list.append(fees.name)
@@ -66,6 +68,56 @@ class ProgramEnrollment(Document):
 	def get_courses(self):
 		return frappe.db.sql('''select course, course_name from `tabProgram Course` where parent = %s and required = 1''', (self.program), as_dict=1)
 
+	def create_course_enrollments(self):
+		student = frappe.get_doc("Student", self.student)
+		program = frappe.get_doc("Program", self.program)
+		course_list = [course.course for course in program.get_all_children()]
+		for course_name in course_list:
+			student.enroll_in_course(course_name=course_name, program_enrollment=self.name)
+
+	def get_all_course_enrollments(self):
+		course_enrollment_names = frappe.get_list("Course Enrollment", filters={'program_enrollment': self.name})
+		return [frappe.get_doc('Course Enrollment', course_enrollment.name) for course_enrollment in course_enrollment_names]
+
+	def get_quiz_progress(self):
+		student = frappe.get_doc("Student", self.student)
+		quiz_progress = frappe._dict()
+		progress_list = []
+		for course_enrollment in self.get_all_course_enrollments():
+			course_progress = course_enrollment.get_progress(student)
+			for progress_item in course_progress:
+				if progress_item['content_type'] == "Quiz":
+					progress_item['course'] = course_enrollment.course
+					progress_list.append(progress_item)
+		if not progress_list:
+			return None
+		quiz_progress.quiz_attempt = progress_list
+		quiz_progress.name = self.program
+		quiz_progress.program = self.program
+		return quiz_progress
+
+	def get_program_progress(self):
+		import math
+		program = frappe.get_doc("Program", self.program)
+		program_progress = {}
+		progress = []
+		for course in program.get_all_children():
+			course_progress = lms.get_student_course_details(course.course, self.program)
+			is_complete = False
+			if course_progress['flag'] == "Completed":
+				is_complete = True
+			progress.append({'course_name': course.course_name, 'name': course.course, 'is_complete': is_complete})
+
+		program_progress['progress'] = progress
+		program_progress['name'] = self.program
+		program_progress['program'] = frappe.get_value("Program", self.program, 'program_name')
+
+		try:
+			program_progress['percentage'] = math.ceil((sum([item['is_complete'] for item in progress] * 100)/len(progress)))
+		except ZeroDivisionError:
+			program_progress['percentage'] = 0
+
+		return program_progress
 
 @frappe.whitelist()
 def get_program_courses(doctype, txt, searchfield, start, page_len, filters):
@@ -102,11 +154,11 @@ def get_students(doctype, txt, searchfield, start, page_len, filters):
 
 	return frappe.db.sql("""select
 			name, title from tabStudent
-		where 
+		where
 			name not in (%s)
-		and 
+		and
 			`%s` LIKE %s
-		order by 
+		order by
 			idx desc, name
 		limit %s, %s"""%(
 			", ".join(['%s']*len(students)), searchfield, "%s", "%s", "%s"),
