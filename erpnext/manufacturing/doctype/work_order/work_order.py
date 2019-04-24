@@ -56,6 +56,7 @@ class WorkOrder(Document):
 
 	def validate_sales_order(self):
 		if self.sales_order:
+			self.check_sales_order_on_hold_or_close()
 			so = frappe.db.sql("""
 				select so.name, so_item.delivery_date, so.project
 				from `tabSales Order` so
@@ -90,6 +91,11 @@ class WorkOrder(Document):
 					self.validate_work_order_against_so()
 			else:
 				frappe.throw(_("Sales Order {0} is not valid").format(self.sales_order))
+
+	def check_sales_order_on_hold_or_close(self):
+		status = frappe.db.get_value("Sales Order", self.sales_order, "status")
+		if status in ("Closed", "On Hold"):
+			frappe.throw(_("Sales Order {0} is {1}").format(self.sales_order, status))
 
 	def set_default_warehouse(self):
 		if not self.wip_warehouse:
@@ -281,6 +287,10 @@ class WorkOrder(Document):
 		if self.product_bundle_item:
 			total_bundle_qty = frappe.db.sql(""" select sum(qty) from
 				`tabProduct Bundle Item` where parent = %s""", (frappe.db.escape(self.product_bundle_item)))[0][0]
+
+			if not total_bundle_qty:
+				# product bundle is 0 (product bundle allows 0 qty for items)
+				total_bundle_qty = 1
 
 		cond = "product_bundle_item = %s" if self.product_bundle_item else "production_item = %s"
 
@@ -564,11 +574,10 @@ def get_item_details(item, project = None):
 			frappe.throw(_("Default BOM for {0} not found").format(item))
 
 	bom_data = frappe.db.get_value('BOM', res['bom_no'],
-		['project', 'allow_alternative_item', 'transfer_material_against'], as_dict=1)
+		['project', 'allow_alternative_item', 'transfer_material_against', 'item_name'], as_dict=1)
 
-	res['project'] = project or bom_data.project
-	res['allow_alternative_item'] = bom_data.allow_alternative_item
-	res['transfer_material_against'] = bom_data.transfer_material_against
+	res['project'] = project or bom_data.pop("project")
+	res.update(bom_data)
 	res.update(check_if_scrap_warehouse_mandatory(res["bom_no"]))
 
 	return res
@@ -622,6 +631,7 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 			additional_costs = get_additional_costs(work_order, fg_qty=stock_entry.fg_completed_qty)
 			stock_entry.set("additional_costs", additional_costs)
 
+	stock_entry.set_stock_entry_type()
 	stock_entry.get_items()
 	return stock_entry.as_dict()
 

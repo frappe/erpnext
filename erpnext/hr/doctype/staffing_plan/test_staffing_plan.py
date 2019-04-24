@@ -18,7 +18,7 @@ class TestStaffingPlan(unittest.TestCase):
 		if frappe.db.exists("Staffing Plan", "Test"):
 			return
 		staffing_plan = frappe.new_doc("Staffing Plan")
-		staffing_plan.company = "_Test Company 3"
+		staffing_plan.company = "_Test Company 10"
 		staffing_plan.name = "Test"
 		staffing_plan.from_date = nowdate()
 		staffing_plan.to_date = add_days(nowdate(), 10)
@@ -67,7 +67,7 @@ class TestStaffingPlan(unittest.TestCase):
 		if frappe.db.exists("Staffing Plan", "Test 1"):
 			return
 		staffing_plan = frappe.new_doc("Staffing Plan")
-		staffing_plan.company = "_Test Company 3"
+		staffing_plan.company = "_Test Company 10"
 		staffing_plan.name = "Test 1"
 		staffing_plan.from_date = nowdate()
 		staffing_plan.to_date = add_days(nowdate(), 10)
@@ -85,11 +85,11 @@ def _set_up():
 	make_company()
 
 def make_company():
-	if frappe.db.exists("Company", "_Test Company 3"):
+	if frappe.db.exists("Company", "_Test Company 10"):
 		return
 	company = frappe.new_doc("Company")
-	company.company_name = "_Test Company 3"
-	company.abbr = "_TC3"
+	company.company_name = "_Test Company 10"
+	company.abbr = "_TC10"
 	company.parent_company = "_Test Company"
 	company.default_currency = "INR"
 	company.country = "India"

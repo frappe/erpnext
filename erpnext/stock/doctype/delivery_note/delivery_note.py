@@ -103,7 +103,7 @@ class DeliveryNote(SellingController):
 		self.set_status()
 		self.so_required()
 		self.validate_proj_cust()
-		self.check_close_sales_order("against_sales_order")
+		self.check_sales_order_on_hold_or_close("against_sales_order")
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
@@ -177,7 +177,7 @@ class DeliveryNote(SellingController):
 					frappe.msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
 					chk_dupl_itm.append(f)
-			#Customer Provided parts will have zero valuation rate		
+			#Customer Provided parts will have zero valuation rate
 			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
 				d.allow_zero_valuation_rate = 1
 
@@ -223,7 +223,9 @@ class DeliveryNote(SellingController):
 		self.make_gl_entries()
 
 	def on_cancel(self):
-		self.check_close_sales_order("against_sales_order")
+		super(DeliveryNote, self).on_cancel()
+
+		self.check_sales_order_on_hold_or_close("against_sales_order")
 		self.check_next_docstatus()
 
 		self.update_prevdoc_status()
@@ -394,19 +396,7 @@ def get_invoiced_qty_map(delivery_note):
 
 	return invoiced_qty_map
 
-def get_returned_qty_map_against_so(sales_orders):
-	"""returns a map: {so_detail: returned_qty}"""
-	returned_qty_map = {}
-
-	for name, returned_qty in frappe.get_all('Sales Order Item', fields = ["name", "returned_qty"],
-		filters = {'parent': ('in', sales_orders), 'docstatus': 1}, as_list=1):
-		if not returned_qty_map.get(name):
-				returned_qty_map[name] = 0
-		returned_qty_map[name] += returned_qty
-
-	return returned_qty_map
-
-def get_returned_qty_map_against_dn(delivery_note):
+def get_returned_qty_map(delivery_note):
 	"""returns a map: {so_detail: returned_qty}"""
 	returned_qty_map = frappe._dict(frappe.db.sql("""select dn_item.item_code, sum(abs(dn_item.qty)) as qty
 		from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
@@ -422,9 +412,7 @@ def get_returned_qty_map_against_dn(delivery_note):
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
 	doc = frappe.get_doc('Delivery Note', source_name)
-	sales_orders = [d.against_sales_order for d in doc.items]
-	returned_qty_map_against_so = get_returned_qty_map_against_so(sales_orders)
-	returned_qty_map_against_dn = get_returned_qty_map_against_dn(source_name)
+	returned_qty_map = get_returned_qty_map(source_name)
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
@@ -445,17 +433,16 @@ def make_sales_invoice(source_name, target_doc=None):
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty, returned_qty = get_pending_qty(source_doc)
-		if not source_doc.so_detail:
-			returned_qty_map_against_dn[source_doc.item_code] = returned_qty
+		returned_qty_map[source_doc.item_code] = returned_qty
 
 		if source_doc.serial_no and source_parent.per_billed > 0:
 			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
 				target_doc.qty, source_parent.name)
 
 	def get_pending_qty(item_row):
-		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0) - returned_qty_map_against_so.get(item_row.so_detail, 0)
-		returned_qty = flt(returned_qty_map_against_dn.get(item_row.item_code, 0))
-		if not item_row.so_detail:
+		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0)
+		returned_qty = flt(returned_qty_map.get(item_row.item_code, 0))
+		if returned_qty:
 			if returned_qty >= pending_qty:
 				pending_qty = 0
 				returned_qty -= pending_qty
@@ -464,7 +451,7 @@ def make_sales_invoice(source_name, target_doc=None):
 				returned_qty = 0
 		return pending_qty, returned_qty
 
-	doc = get_mapped_doc("Delivery Note", source_name, 	{
+	doc = get_mapped_doc("Delivery Note", source_name, {
 		"Delivery Note": {
 			"doctype": "Sales Invoice",
 			"validation": {
@@ -482,7 +469,7 @@ def make_sales_invoice(source_name, target_doc=None):
 				"cost_center": "cost_center"
 			},
 			"postprocess": update_item,
-			"filter": lambda d: get_pending_qty(d)[0]<=0
+			"filter": lambda d: get_pending_qty(d)[0] <= 0 if not doc.get("is_return") else get_pending_qty(d)[0] > 0
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",

@@ -162,6 +162,8 @@ def create_item_code(amazon_item_json, sku):
 		igroup.parent_item_group =  mws_settings.item_group
 		igroup.insert()
 
+	item.append("item_defaults", {'company':mws_settings.company})
+
 	item.insert(ignore_permissions=True)
 	create_item_price(amazon_item_json, item.item_code)
 
@@ -213,7 +215,7 @@ def get_orders(after_date):
 			fulfillment_channels=["MFN", "AFN"],
 			lastupdatedafter=after_date,
 			orderstatus=statuses,
-			max_results='20')
+			max_results='50')
 
 		while True:
 			orders_list = []
@@ -432,8 +434,8 @@ def get_order_items(market_place_order_id):
 	return final_order_items
 
 def get_item_code(order_item):
-	asin = order_item.ASIN
-	item_code = frappe.db.get_value("Item", {"amazon_item_code": asin}, "item_code")
+	sku = order_item.SellerSKU
+	item_code = frappe.db.get_value("Item", {"item_code": sku}, "item_code")
 	if item_code:
 		return item_code
 
@@ -451,11 +453,16 @@ def get_charges_and_fees(market_place_order_id):
 			shipment_item_list = return_as_list(shipment_event.ShipmentEvent.ShipmentItemList.ShipmentItem)
 
 			for shipment_item in shipment_item_list:
-				charges = return_as_list(shipment_item.ItemChargeList.ChargeComponent)
-				fees = return_as_list(shipment_item.ItemFeeList.FeeComponent)
+				charges, fees = []
+
+				if 'ItemChargeList' in shipment_item.keys():
+					charges = return_as_list(shipment_item.ItemChargeList.ChargeComponent)
+
+				if 'ItemFeeList' in shipment_item.keys():
+					fees = return_as_list(shipment_item.ItemFeeList.FeeComponent)
 
 				for charge in charges:
-					if(charge.ChargeType != "Principal"):
+					if(charge.ChargeType != "Principal") and float(charge.ChargeAmount.CurrencyAmount) != 0:
 						charge_account = get_account(charge.ChargeType)
 						charges_fees.get("charges").append({
 							"charge_type":"Actual",
@@ -465,13 +472,14 @@ def get_charges_and_fees(market_place_order_id):
 							})
 
 				for fee in fees:
-					fee_account = get_account(fee.FeeType)
-					charges_fees.get("fees").append({
-						"charge_type":"Actual",
-						"account_head": fee_account,
-						"tax_amount": fee.FeeAmount.CurrencyAmount,
-						"description": fee.FeeType + " for " + shipment_item.SellerSKU
-						})
+					if float(fee.FeeAmount.CurrencyAmount) != 0:
+						fee_account = get_account(fee.FeeType)
+						charges_fees.get("fees").append({
+							"charge_type":"Actual",
+							"account_head": fee_account,
+							"tax_amount": fee.FeeAmount.CurrencyAmount,
+							"description": fee.FeeType + " for " + shipment_item.SellerSKU
+							})
 
 	return charges_fees
 
