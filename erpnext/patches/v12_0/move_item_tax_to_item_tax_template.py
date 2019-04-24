@@ -3,6 +3,8 @@ import json
 from six import iteritems
 
 def execute():
+	if "tax_type" not in frappe.db.get_table_columns("Item Tax"):
+		return
 	old_item_taxes = {}
 	item_tax_templates = {}
 	rename_template_to_untitled = []
@@ -40,7 +42,7 @@ def execute():
 		item.set("taxes", [])
 		item.append("taxes", {"item_tax_template": item_tax_template_name, "tax_category": ""})
 		item.save()
-	
+
 	doctypes = [
 		'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',
 		'Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice'

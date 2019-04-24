@@ -111,21 +111,21 @@
 		<tr>
 			<td>{{__("Suppliies made to Composition Taxable Persons")}}</td>
 			<td class="right">
-				{% for row in data.inter_sup.unreg_details %}
+				{% for row in data.inter_sup.comp_details %}
 					{% if row %}
 						{{ row.pos }}<br>
 					{% endif %}
 				{% endfor %}
 			</td>
 			<td class="right">
-				{% for row in data.inter_sup.unreg_details %}
+				{% for row in data.inter_sup.comp_details %}
 					{% if row %}
 						{{ flt(row.txval, 2) }}<br>
 					{% endif %}
 				{% endfor %}
 			</td>
 			<td class="right">
-				{% for row in data.inter_sup.unreg_details %}
+				{% for row in data.inter_sup.comp_details %}
 					{% if row %}
 						{{ flt(row.iamt, 2) }}<br>
 					{% endif %}
@@ -135,21 +135,21 @@
 		<tr>
 			<td>{{__("Supplies made to UIN holders")}}</td>
 			<td class="right">
-				{% for row in data.inter_sup.unreg_details %}
+				{% for row in data.inter_sup.uin_details %}
 					{% if row %}
 						{{ row.pos }}<br>
 					{% endif %}
 				{% endfor %}
 			</td>
 			<td class="right">
-				{% for row in data.inter_sup.unreg_details %}
+				{% for row in data.inter_sup.uin_details %}
 					{% if row %}
 						{{ flt(row.txval, 2) }}<br>
 					{% endif %}
 				{% endfor %}
 			</td>
 			<td class="right">
-				{% for row in data.inter_sup.unreg_details %}
+				{% for row in data.inter_sup.uin_details %}
 					{% if row %}
 						{{ flt(row.iamt, 2) }}<br>
 					{% endif %}

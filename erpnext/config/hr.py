@@ -289,6 +289,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Expense Claim",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
 					"name": "Loan Type",
 				},
 				{
@@ -296,6 +301,10 @@ def get_data():
 					"name": "Loan Application",
 					"dependencies": ["Employee"]
 				},
+				{
+					"type": "doctype",
+					"name": "Loan"
+				}
 			]
 		},
 		{

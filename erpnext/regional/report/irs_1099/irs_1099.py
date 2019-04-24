@@ -97,9 +97,7 @@ def irs_1099_print(filters):
 		row["recipient_street_address"], row["recipient_city_state"] = get_street_address_html("Supplier", row.supplier)
 		row["payments"] = fmt_money(row["payments"], precision=0, currency="USD")
 		frappe._dict(row)
-		print(row)
 		pdf = get_pdf(render_template(template, row), output=output if output else None)
-		print(pdf)
 	frappe.local.response.filename = filters.fiscal_year + " " + filters.company + " IRS 1099 Forms"
 	frappe.local.response.filecontent = read_multi_pdf(output)
 	frappe.local.response.type = "download"

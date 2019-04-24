@@ -93,7 +93,7 @@ def add_print_formats():
 def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
 		fieldtype='Data', fetch_from='item_code.gst_hsn_code', insert_after='description',
-		allow_on_submit=1, print_hide=1)
+		allow_on_submit=1, print_hide=1, fetch_if_empty=1)
 	nil_rated_exempt = dict(fieldname='is_nil_exempt', label='Is nil rated or exempted',
 		fieldtype='Check', fetch_from='item_code.is_nil_exempt', insert_after='gst_hsn_code',
 		print_hide=1)
@@ -265,6 +265,7 @@ def make_custom_fields(update=True):
 		'Purchase Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Purchase Receipt Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Purchase Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Material Request Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Employee': [
 			dict(fieldname='ifsc_code', label='IFSC Code',
 				fieldtype='Data', insert_after='bank_ac_no', print_hide=1,
