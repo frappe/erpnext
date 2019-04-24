@@ -260,12 +260,21 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 			throw(_("Please contact to the user who have Sales Master Manager {0} role")
 				.format(" / " + credit_controller if credit_controller else ""))
 
-def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False):
+def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
 	# Outstanding based on GL Entries
+
+	cond = ""
+	if cost_center:
+		lft, rgt = frappe.get_cached_value("Cost Center",
+			cost_center, ['lft', 'rgt'])
+
+		cond = """ and cost_center in (select name from `tabCost Center` where
+			lft >= {0} and rgt <= {1})""".format(lft, rgt)
+
 	outstanding_based_on_gle = frappe.db.sql("""
 		select sum(debit) - sum(credit)
-		from `tabGL Entry`
-		where party_type = 'Customer' and party = %s and company=%s""", (customer, company))
+		from `tabGL Entry` where party_type = 'Customer'
+		and party = %s and company=%s {0}""".format(cond), (customer, company))
 
 	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
 

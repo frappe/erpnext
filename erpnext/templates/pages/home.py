@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 
 no_cache = 1
-no_sitemap = 1
 
 def get_context(context):
 	homepage = frappe.get_doc('Homepage')
@@ -15,15 +14,38 @@ def get_context(context):
 		if route:
 			item.route = '/' + route
 
-	context.title = homepage.title or homepage.company
-
-	# show atleast 3 products
-	if len(homepage.products) < 3:
-		for i in range(3 - len(homepage.products)):
-			homepage.append('products', {
-				'item_code': 'product-{0}'.format(i),
-				'item_name': frappe._('Product {0}').format(i),
-				'route': '#'
-			})
-
+	homepage.title = homepage.title or homepage.company
+	context.title = homepage.title
 	context.homepage = homepage
+
+	if homepage.hero_section_based_on == 'Homepage Section' and homepage.hero_section:
+		homepage.hero_section_doc = frappe.get_doc('Homepage Section', homepage.hero_section)
+
+	if homepage.slideshow:
+		doc = frappe.get_doc('Website Slideshow', homepage.slideshow)
+		context.slideshow = homepage.slideshow
+		context.slideshow_header = doc.header
+		context.slides = doc.slideshow_items
+
+	context.blogs = frappe.get_all('Blog Post',
+		fields=['title', 'blogger', 'blog_intro', 'route'],
+		filters={
+			'published': 1
+		},
+		order_by='modified desc',
+		limit=3
+	)
+
+	# filter out homepage section which is used as hero section
+	homepage_hero_section = homepage.hero_section_based_on == 'Homepage Section' and homepage.hero_section
+	homepage_sections = frappe.get_all('Homepage Section',
+		filters=[['name', '!=', homepage_hero_section]] if homepage_hero_section else None,
+		order_by='section_order asc'
+	)
+	context.homepage_sections = [frappe.get_doc('Homepage Section', name) for name in homepage_sections]
+
+	context.metatags = context.metatags or frappe._dict({})
+	context.metatags.image = homepage.hero_image or None
+	context.metatags.description = homepage.description or None
+
+	context.explore_link = '/all-products'
