@@ -127,6 +127,6 @@ def create_carry_forward_leaves_allocation(employee, leave_type, leave_type_deta
 	allocation.to_date = add_days(leave_period.from_date, leave_type_details.carry_forward_leave_expiry) if not leave_type_details.carry_forward_leave_expiry else leave_period.to_date
 	allocation.leave_period = leave_period.name
 	allocation.carry_forward = carry_forward_leaves
-	allocation.carry_forwarded_leaves = get_carry_forwarded_leaves(employee, leave_type, leave_period.from_date, leave_type_details.carry_forward_leave_expiry)
+	allocation.carry_forwarded_leaves = get_carry_forwarded_leaves(employee, leave_type, leave_period.from_date)
 	allocation.save(ignore_permissions=True)
 	allocation.submit()
