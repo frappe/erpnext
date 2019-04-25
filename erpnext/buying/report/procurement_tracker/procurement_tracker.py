@@ -19,6 +19,13 @@ def get_columns():
 			"width": 140
 		},
 		{
+			"label": _("Material Request No"),
+			"options": "Material Request",
+			"fieldname": "material_request_no",
+			"fieldtype": "Link",
+			"width": 140
+		},
+		{
 			"label": _("Cost Center"),
 			"options": "Cost Center",
 			"fieldname": "cost_center",
@@ -43,13 +50,6 @@ def get_columns():
 			"label": _("Requestor"),
 			"options": "Employee",
 			"fieldname": "requestor",
-			"fieldtype": "Link",
-			"width": 140
-		},
-		{
-			"label": _("Material Request No"),
-			"options": "Material Request",
-			"fieldname": "material_request_no",
 			"fieldtype": "Link",
 			"width": 140
 		},
@@ -145,74 +145,14 @@ def get_columns():
 	return columns
 
 def get_data():
-	purchase_order_entry = frappe.db.sql("""
-		SELECT
-			po_item.name,
-			po_item.parent,
-			po_item.cost_center,
-			po_item.project,
-			po_item.warehouse,
-			po_item.material_request,
-			po_item.material_request_item,
-			po_item.description,
-			po_item.stock_uom,
-			po_item.qty,
-			po_item.amount,
-			po_item.base_amount,
-			po_item.schedule_date,
-			po.transaction_date,
-			po.supplier,
-			po.status,
-			po.owner
-		FROM `tabPurchase Order` po, `tabPurchase Order Item` po_item
-		WHERE
-			po.docstatus = 1
-			AND po.name = po_item.parent
-			AND po.status not in  ("Closed","Completed","Cancelled")
-		GROUP BY
-			po.name,po_item.item_code
-		""", as_dict=1)
-
-	mr_details = frappe.db.sql("""
-		SELECT
-			mr.transaction_date,
-			mr_item.name,
-			mr_item.parent,
-			mr_item.amount
-		FROM `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
-		WHERE
-			per_ordered > 0
-			AND mr.name = mr_item.parent
-			AND mr.docstatus = 1
-		""", as_dict=1)
-
-	pi_records = frappe._dict(frappe.db.sql("""
-		SELECT
-			po_detail,
-			base_amount
-		FROM `tabPurchase Invoice Item`
-		WHERE
-			docstatus=1
-			AND po_detail IS NOT NULL
-		"""))
-
-	pr_records = frappe._dict(frappe.db.sql("""
-		SELECT
-			pr_item.purchase_order_item,
-			pr.posting_date
-		FROM `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item
-		WHERE
-			pr.docstatus=1
-			AND pr.name=pr_item.parent
-			AND pr_item.purchase_order_item IS NOT NULL
-		"""))
-
-
-	mr_records = {}
-	for record in mr_details:
-		mr_records.setdefault(record.name, []).append(frappe._dict(record))
+	purchase_order_entry = get_po_entries()
+	mr_records, procurement_record_against_mr = get_mapped_mr_details()
+	pr_records = get_mapped_pr_records()
+	pi_records = get_mapped_pi_records()
 
 	procurement_record=[]
+	if procurement_record_against_mr:
+		procurement_record += procurement_record_against_mr
 	for po in purchase_order_entry:
 		# fetch material records linked to the purchase order item
 		mr_record = mr_records.get(po.material_request_item, [{}])[0]
@@ -240,3 +180,84 @@ def get_data():
 		}
 		procurement_record.append(procurement_detail)
 	return procurement_record
+
+def get_mapped_mr_details():
+	mr_records = {}
+	mr_details = frappe.db.sql("""
+		SELECT
+			mr.transaction_date,
+			mr.per_ordered,
+			mr_item.name,
+			mr_item.parent,
+			mr_item.amount
+		FROM `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
+		WHERE
+			mr.per_ordered>=0
+			AND mr.name=mr_item.parent
+			AND mr.docstatus=1
+		""", as_dict=1)
+
+	procurement_record_against_mr = []
+	for record in mr_details:
+		if record.per_ordered:
+			mr_records.setdefault(record.name, []).append(frappe._dict(record))
+		else:
+			procurement_record_details = dict(
+				material_request_date=record.transaction_date,
+				material_request_no=record.parent,
+				estimated_cost=record.amount
+			)
+		procurement_record_against_mr.append(procurement_record_details)
+	return mr_records, procurement_record_against_mr
+
+def get_mapped_pi_records():
+	return frappe._dict(frappe.db.sql("""
+		SELECT
+			po_detail,
+			base_amount
+		FROM `tabPurchase Invoice Item`
+		WHERE
+			docstatus=1
+			AND po_detail IS NOT NULL
+		"""))
+
+def get_mapped_pr_records():
+	return frappe._dict(frappe.db.sql("""
+		SELECT
+			pr_item.purchase_order_item,
+			pr.posting_date
+		FROM `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item
+		WHERE
+			pr.docstatus=1
+			AND pr.name=pr_item.parent
+			AND pr_item.purchase_order_item IS NOT NULL
+		"""))
+
+def get_po_entries():
+	return frappe.db.sql("""
+		SELECT
+			po_item.name,
+			po_item.parent,
+			po_item.cost_center,
+			po_item.project,
+			po_item.warehouse,
+			po_item.material_request,
+			po_item.material_request_item,
+			po_item.description,
+			po_item.stock_uom,
+			po_item.qty,
+			po_item.amount,
+			po_item.base_amount,
+			po_item.schedule_date,
+			po.transaction_date,
+			po.supplier,
+			po.status,
+			po.owner
+		FROM `tabPurchase Order` po, `tabPurchase Order Item` po_item
+		WHERE
+			po.docstatus = 1
+			AND po.name = po_item.parent
+			AND po.status not in  ("Closed","Completed","Cancelled")
+		GROUP BY
+			po.name,po_item.item_code
+		""", as_dict=1)
