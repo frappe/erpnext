@@ -64,23 +64,24 @@ class calculate_taxes_and_totals(object):
 						(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
 					item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
 				elif item.discount_amount and item.price_list_rate:
-					item.rate =  item.price_list_rate - item.discount_amount
+					item.rate = item.price_list_rate - item.discount_amount
 
 				has_margin_field = item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']
 
 				if has_margin_field:
 					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
 
+					if flt(item.rate_with_margin) > 0:
+						item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
+						item.discount_amount = item.rate_with_margin - item.rate
+				elif flt(item.price_list_rate) > 0 and not item.discount_amount:
+					item.discount_amount = item.price_list_rate - item.rate
+
 				if has_margin_field and flt(item.rate_with_margin) > 0:
-					item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
-					item.discount_amount = item.rate_with_margin - item.rate
 					item.amount_before_discount = flt(item.rate_with_margin * item.qty, item.precision("amount_before_discount"))
 				elif flt(item.price_list_rate) > 0:
-					item.discount_amount = item.price_list_rate - item.rate
 					item.amount_before_discount = flt(item.price_list_rate * item.qty, item.precision("amount_before_discount"))
 				else:
-					item.discount_amount = 0
-					item.discount_percentage = 0
 					item.amount_before_discount = flt(item.rate * item.qty, item.precision("amount_before_discount"))
 
 				item.net_rate = item.rate
