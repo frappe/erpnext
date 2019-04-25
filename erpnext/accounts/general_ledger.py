@@ -135,9 +135,9 @@ def round_off_debit_credit(gl_map):
 			.format(gl_map[0].voucher_type, gl_map[0].voucher_no, debit_credit_diff))
 
 	elif abs(debit_credit_diff) >= (1.0 / (10**precision)):
-		make_round_off_gle(gl_map, debit_credit_diff)
+		make_round_off_gle(gl_map, debit_credit_diff, precision)
 
-def make_round_off_gle(gl_map, debit_credit_diff):
+def make_round_off_gle(gl_map, debit_credit_diff, precision):
 	round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(gl_map[0].company)
 	round_off_account_exists = False
 	round_off_gle = frappe._dict()
@@ -149,6 +149,10 @@ def make_round_off_gle(gl_map, debit_credit_diff):
 			else:
 				debit_credit_diff += flt(d.credit_in_account_currency)
 			round_off_account_exists = True
+
+	if round_off_account_exists and abs(debit_credit_diff) <= (1.0 / (10**precision)):
+		gl_map.remove(round_off_gle)
+		return
 
 	if not round_off_gle:
 		for k in ["voucher_type", "voucher_no", "company",
