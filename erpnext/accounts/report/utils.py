@@ -112,13 +112,15 @@ def convert_to_presentation_currency(gl_entries, currency_info):
 
 			if entry.get('debit'):
 				entry['debit'] = converted_value
-			else:
+
+			if entry.get('credit'):
 				entry['credit'] = converted_value
 
 		elif account_currency == presentation_currency:
 			if entry.get('debit'):
 				entry['debit'] = debit_in_account_currency
-			else:
+
+			if entry.get('credit'):
 				entry['credit'] = credit_in_account_currency
 
 		converted_gl_list.append(entry)

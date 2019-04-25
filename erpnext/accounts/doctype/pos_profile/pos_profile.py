@@ -155,7 +155,6 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 def set_default_profile(pos_profile, company):
 	modified = now()
 	user = frappe.session.user
-	company = frappe.db.escape(company)
 
 	if pos_profile and company:
 		frappe.db.sql(""" update `tabPOS Profile User` pfu, `tabPOS Profile` pf

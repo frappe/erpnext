@@ -183,6 +183,8 @@ class SalesOrder(SellingController):
 		self.update_blanket_order()
 
 	def on_cancel(self):
+		super(SalesOrder, self).on_cancel()
+
 		# Cannot cancel closed SO
 		if self.status == 'Closed':
 			frappe.throw(_("Closed order cannot be cancelled. Unclose to cancel."))
@@ -385,6 +387,7 @@ class SalesOrder(SellingController):
 						items.append(dict(
 							name= i.name,
 							item_code= i.item_code,
+							description= i.description,
 							bom = bom,
 							warehouse = i.warehouse,
 							pending_qty = pending_qty,
@@ -395,6 +398,7 @@ class SalesOrder(SellingController):
 						items.append(dict(
 							name= i.name,
 							item_code= i.item_code,
+							description= i.description,
 							bom = '',
 							warehouse = i.warehouse,
 							pending_qty = pending_qty,
@@ -607,7 +611,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	def postprocess(source, target):
 		set_missing_values(source, target)
 		#Get the advance paid Journal Entries in Sales Invoice Advance
-		target.set_advances()
+		if target.get("allocate_advances_automatically"):
+			target.set_advances()
 
 	def set_missing_values(source, target):
 		target.is_pos = 0
@@ -898,7 +903,8 @@ def make_work_orders(items, sales_order, company, project=None):
 			sales_order=sales_order,
 			sales_order_item=i['sales_order_item'],
 			project=project,
-			fg_warehouse=i['warehouse']
+			fg_warehouse=i['warehouse'],
+			description=i['description']
 		)).insert()
 		work_order.set_work_order_operations()
 		work_order.save()
@@ -931,7 +937,12 @@ def make_raw_material_request(items, company, sales_order, project=None):
 		item["ignore_existing_ordered_qty"] = items.get('ignore_existing_ordered_qty')
 		item["include_raw_materials_from_sales_order"] = items.get('include_raw_materials_from_sales_order')
 
-	raw_materials = get_items_for_material_requests(items, sales_order, company)
+	items.update({
+		'company': company,
+		'sales_order': sales_order
+	})
+
+	raw_materials = get_items_for_material_requests(items)
 	if not raw_materials:
 		frappe.msgprint(_("Material Request not created, as quantity for Raw Materials already available."))
 		return

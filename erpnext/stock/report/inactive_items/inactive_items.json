@@ -1,0 +1,31 @@
+{
+ "add_total_row": 0, 
+ "creation": "2019-04-16 16:05:00.647308", 
+ "disable_prepared_report": 0, 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "letter_head": "Test Letter Head 1", 
+ "modified": "2019-04-16 16:06:33.630043", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Inactive Items", 
+ "owner": "Administrator", 
+ "prepared_report": 0, 
+ "ref_doctype": "Sales Invoice", 
+ "report_name": "Inactive Items", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Accounts User"
+  }, 
+  {
+   "role": "Accounts Manager"
+  }, 
+  {
+   "role": "Auditor"
+  }
+ ]
+}

@@ -32,6 +32,14 @@ frappe.ui.form.on("Work Order", {
 			}
 		});
 
+		frm.set_query("sales_order", function() {
+			return {
+				filters: {
+					"status": ["not in", ["Closed", "On Hold"]]
+				}
+			}
+		});
+
 		frm.set_query("fg_warehouse", function() {
 			return {
 				filters: {
@@ -303,8 +311,9 @@ frappe.ui.form.on("Work Order", {
 						frm.set_value('sales_order', "");
 						frm.trigger('set_sales_order');
 						erpnext.in_production_item_onchange = true;
-						$.each(["description", "stock_uom", "project", "bom_no",
-							"allow_alternative_item", "transfer_material_against"], function(i, field) {
+
+						$.each(["description", "stock_uom", "project", "bom_no", "allow_alternative_item",
+							"transfer_material_against", "item_name"], function(i, field) {
 							frm.set_value(field, r.message[field]);
 						});
 
