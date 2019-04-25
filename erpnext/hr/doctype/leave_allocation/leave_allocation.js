@@ -34,34 +34,31 @@ frappe.ui.form.on("Leave Allocation", {
 	},
 
 	carry_forwarded_leaves: function(frm) {
-		frm.set_value("total_leaves_allocated",
-			flt(frm.doc.carry_forwarded_leaves) + flt(frm.doc.new_leaves_allocated));
+		frm.set_value("total_leaves_allocated", flt(frm.doc.carry_forwarded_leaves));
 	},
 
 	new_leaves_allocated: function(frm) {
-		frm.set_value("total_leaves_allocated",
-			flt(frm.doc.carry_forwarded_leaves) + flt(frm.doc.new_leaves_allocated));
+		frm.set_value("total_leaves_allocated", flt(frm.doc.new_leaves_allocated));
 	},
 
 	calculate_total_leaves_allocated: function(frm) {
-		if (cint(frm.doc.carry_forward) == 1 && frm.doc.leave_type && frm.doc.employee) {
+		if (cint(frm.doc.carry_forward) === 1 && frm.doc.leave_type && frm.doc.employee) {
 			return frappe.call({
 				method: "erpnext.hr.doctype.leave_allocation.leave_allocation.get_carry_forwarded_leaves",
 				args: {
 					"employee": frm.doc.employee,
-					"date": frm.doc.from_date,
 					"leave_type": frm.doc.leave_type,
-					"carry_forward": frm.doc.carry_forward
+					"date": frm.doc.from_date,
 				},
 				callback: function(r) {
 					if (!r.exc && r.message) {
+						frm.set_value("new_leaves_allocated", 0);
 						frm.set_value('carry_forwarded_leaves', r.message);
-						frm.set_value("total_leaves_allocated",
-							flt(r.message) + flt(frm.doc.new_leaves_allocated));
+						frm.set_value("total_leaves_allocated", flt(r.message));
 					}
 				}
 			})
-		} else if (cint(frm.doc.carry_forward) == 0) {
+		} else if (cint(frm.doc.carry_forward) === 0) {
 			frm.set_value("carry_forwarded_leaves", 0);
 			frm.set_value("total_leaves_allocated", flt(frm.doc.new_leaves_allocated));
 		}
