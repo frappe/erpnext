@@ -21,8 +21,8 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
 from frappe.model.mapper import get_mapped_doc
 from six import iteritems
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_invoice,\
-	unlink_inter_company_invoice
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
+	unlink_inter_company_doc
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 
@@ -348,7 +348,7 @@ class PurchaseInvoice(BuyingController):
 		self.make_gl_entries()
 
 		self.update_project()
-		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
+		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if not self.grand_total:
@@ -778,7 +778,7 @@ class PurchaseInvoice(BuyingController):
 		self.update_project()
 		frappe.db.set(self, 'status', 'Cancelled')
 
-		unlink_inter_company_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
+		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
 	def update_project(self):
 		project_list = []
@@ -917,5 +917,5 @@ def block_invoice(name, hold_comment):
 
 @frappe.whitelist()
 def make_inter_company_sales_invoice(source_name, target_doc=None):
-	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_invoice
-	return make_inter_company_invoice("Purchase Invoice", source_name, target_doc)
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
+	return make_inter_company_transaction("Purchase Invoice", source_name, target_doc)

@@ -18,6 +18,7 @@ from erpnext.accounts.doctype.account.test_account import get_inventory_account,
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.stock.doctype.item.test_item import create_item
 from six import iteritems
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
 		w = frappe.copy_doc(test_records[0])
@@ -1624,6 +1625,61 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_gle[i][1], gle.debit)
 			self.assertEqual(expected_gle[i][2], gle.credit)
 			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+
+	def test_inter_company_transaction(self):
+
+		if not frappe.db.exists("Customer", "_Test Internal Customer"):
+			customer = frappe.get_doc({
+				"customer_group": "_Test Customer Group",
+				"customer_name": "_Test Internal Customer",
+				"customer_type": "Individual",
+				"doctype": "Customer",
+				"territory": "_Test Territory",
+				"is_internal_customer": 1,
+				"represents_company": "_Test Company 1"
+			})
+
+			customer.append("companies", {
+				"company": "Wind Power LLC"
+			})
+
+			customer.insert()
+
+		if not frappe.db.exists("Supplier", "_Test Internal Supplier"):
+			supplier = frappe.get_doc({
+				"supplier_group": "_Test Supplier Group",
+				"supplier_name": "_Test Internal Supplier",
+				"doctype": "Supplier",
+				"is_internal_supplier": 1,
+				"represents_company": "Wind Power LLC"
+			})
+
+			supplier.append("companies", {
+				"company": "_Test Company 1"
+			})
+
+			supplier.insert()
+
+		si = create_sales_invoice(
+			company = "Wind Power LLC",
+			customer = "_Test Internal Customer",
+			debit_to = "Debtors - WP",
+			warehouse = "Stores - WP",
+			income_account = "Sales - WP",
+			expense_account = "Cost of Goods Sold - WP",
+			cost_center = "Main - WP",
+			currency = "USD",
+			do_not_save = 1
+		)
+
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.submit()
+
+		target_doc = make_inter_company_transaction("Sales Invoice", si.name)
+		target_doc.submit()
+
+		self.assertEqual(target_doc.company, "_Test Company 1")
+		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
