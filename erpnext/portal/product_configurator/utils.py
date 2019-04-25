@@ -173,7 +173,6 @@ def get_attributes_and_values(item_code):
 		valid_attribute_values = valid_options.get(attr.attribute, [])
 		ordered_values = ordered_attribute_value_map.get(attr.attribute, [])
 		attr['values'] = [v for v in ordered_values if v in valid_attribute_values]
-		attr['values'] = valid_attribute_values
 
 	return attributes
 
