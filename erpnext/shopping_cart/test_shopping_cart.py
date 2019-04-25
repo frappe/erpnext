@@ -43,7 +43,7 @@ class TestShoppingCart(unittest.TestCase):
 		# test if quotation with customer is fetched
 		quotation = _get_cart_quotation()
 		self.assertEqual(quotation.quotation_to, "Customer")
-		self.assertEqual(quotation.customer_lead, "_Test Customer")
+		self.assertEqual(quotation.party_name, "_Test Customer")
 		self.assertEqual(quotation.contact_email, frappe.session.user)
 
 		return quotation
@@ -121,7 +121,7 @@ class TestShoppingCart(unittest.TestCase):
 			"doctype": "Quotation",
 			"quotation_to": "Customer",
 			"order_type": "Shopping Cart",
-			"customer_lead": get_party(frappe.session.user).name,
+			"party_name": get_party(frappe.session.user).name,
 			"docstatus": 0,
 			"contact_email": frappe.session.user,
 			"selling_price_list": "_Test Price List Rest of the World",

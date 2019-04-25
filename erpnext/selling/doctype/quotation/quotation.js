@@ -109,15 +109,15 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	set_dynamic_field_label: function(){
 		if (this.frm.doc.quotation_to == "Customer")
 		{
-			this.frm.set_df_property("customer_lead", "label", "Customer");
-			this.frm.fields_dict.customer_lead.get_query = null;
+			this.frm.set_df_property("party_name", "label", "Customer");
+			this.frm.fields_dict.party_name.get_query = null;
 		}
 
 		if (this.frm.doc.quotation_to == "Lead")
 		{
-			this.frm.set_df_property("customer_lead", "label", "Lead");
+			this.frm.set_df_property("party_name", "label", "Lead");
 
-			this.frm.fields_dict.customer_lead.get_query = function() {
+			this.frm.fields_dict.party_name.get_query = function() {
 				return{	query: "erpnext.controllers.queries.lead_query" }
 			}
 		}
@@ -127,7 +127,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		var me = this;
 
 		// to overwrite the customer_filter trigger from queries.js
-		this.frm.toggle_reqd("customer_lead", this.frm.doc.quotation_to);
+		this.frm.toggle_reqd("party_name", this.frm.doc.quotation_to);
 		this.frm.set_query('customer_address', erpnext.queries.address_query);
 		this.frm.set_query('shipping_address_name', erpnext.queries.address_query);
 	},

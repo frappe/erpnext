@@ -43,8 +43,8 @@ class Quotation(SellingController):
 		super(Quotation, self).validate_order_type()
 
 	def update_lead(self):
-		if self.quotation_to == "Lead" and self.customer_lead:
-			frappe.get_doc("Lead", self.customer_lead).set_status(update=True)
+		if self.quotation_to == "Lead" and self.party_name:
+			frappe.get_doc("Lead", self.party_name).set_status(update=True)
 
 	def update_opportunity(self):
 		for opportunity in list(set([d.prevdoc_docname for d in self.get("items")])):
@@ -214,7 +214,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	return doclist
 
 def _make_customer(source_name, ignore_permissions=False):
-	quotation = frappe.db.get_value("Quotation", source_name, ["order_type", "customer_lead", "customer_name"])
+	quotation = frappe.db.get_value("Quotation", source_name, ["order_type", "party_name", "customer_name"])
 	if quotation and quotation[1] and not quotation[2]:
 		lead_name = quotation[1]
 		customer_name = frappe.db.get_value("Customer", {"lead_name": lead_name},
