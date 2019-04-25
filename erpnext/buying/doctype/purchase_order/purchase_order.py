@@ -17,8 +17,8 @@ from erpnext.accounts.party import get_party_account_currency
 from six import string_types
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.selling.doctype.sales_order.sales_order import validate_inter_company_party, update_linked_order,\
-	unlink_inter_company_order
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
+	unlink_inter_company_doc
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -222,7 +222,7 @@ class PurchaseOrder(BuyingController):
 
 		self.update_blanket_order()
 
-		update_linked_order(self.doctype, self.name, self.inter_company_order_reference)
+		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
 
 	def on_cancel(self):
 		super(PurchaseOrder, self).on_cancel()
@@ -248,7 +248,7 @@ class PurchaseOrder(BuyingController):
 
 		self.update_blanket_order()
 
-		unlink_inter_company_order(self.doctype, self.name, self.inter_company_order_reference)
+		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
 
 	def on_update(self):
 		pass
@@ -498,6 +498,6 @@ def update_status(status, name):
 
 @frappe.whitelist()
 def make_inter_company_sales_order(source_name, target_doc=None):
-	from erpnext.selling.doctype.sales_order.sales_order import make_inter_company_order
-	return make_inter_company_order("Purchase Order", source_name, target_doc)
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
+	return make_inter_company_transaction("Purchase Order", source_name, target_doc)
 
