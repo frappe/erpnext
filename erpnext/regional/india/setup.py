@@ -262,18 +262,18 @@ def make_custom_fields(update=True):
 		'Employee Tax Exemption Declaration':[
 			dict(fieldname='hra_section', label='HRA Exemption',
 				fieldtype='Section Break', insert_after='declarations'),
-			dict(fieldname='salary_structure_hra', label='HRA as per Salary Structure',
-				fieldtype='Currency', insert_after='hra_section', read_only=1),
 			dict(fieldname='monthly_house_rent', label='Monthly House Rent',
-				fieldtype='Currency', insert_after='salary_structure_hra'),
+				fieldtype='Currency', insert_after='hra_section'),
 			dict(fieldname='rented_in_metro_city', label='Rented in Metro City',
-				fieldtype='Check', insert_after='monthly_house_rent'),
+				fieldtype='Check', insert_after='monthly_house_rent', depends_on='monthly_house_rent'),
+			dict(fieldname='salary_structure_hra', label='HRA as per Salary Structure',
+				fieldtype='Currency', insert_after='rented_in_metro_city', read_only=1, depends_on='monthly_house_rent'),
 			dict(fieldname='hra_column_break', fieldtype='Column Break',
-				insert_after='rented_in_metro_city'),
+				insert_after='salary_structure_hra', depends_on='monthly_house_rent'),
 			dict(fieldname='annual_hra_exemption', label='Annual HRA Exemption',
-				fieldtype='Currency', insert_after='hra_column_break', read_only=1),
+				fieldtype='Currency', insert_after='hra_column_break', read_only=1, depends_on='monthly_house_rent'),
 			dict(fieldname='monthly_hra_exemption', label='Monthly HRA Exemption',
-				fieldtype='Currency', insert_after='annual_hra_exemption', read_only=1)
+				fieldtype='Currency', insert_after='annual_hra_exemption', read_only=1, depends_on='monthly_house_rent')
 		],
 		'Employee Tax Exemption Proof Submission': [
 			dict(fieldname='hra_section', label='HRA Exemption',
@@ -281,19 +281,19 @@ def make_custom_fields(update=True):
 			dict(fieldname='house_rent_payment_amount', label='House Rent Payment Amount',
 				fieldtype='Currency', insert_after='hra_section'),
 			dict(fieldname='rented_in_metro_city', label='Rented in Metro City',
-				fieldtype='Check', insert_after='house_rent_payment_amount'),
+				fieldtype='Check', insert_after='house_rent_payment_amount', depends_on='house_rent_payment_amount'),
 			dict(fieldname='rented_from_date', label='Rented From Date',
-				fieldtype='Date', insert_after='rented_in_metro_city'),
+				fieldtype='Date', insert_after='rented_in_metro_city', depends_on='house_rent_payment_amount'),
 			dict(fieldname='rented_to_date', label='Rented To Date',
-				fieldtype='Date', insert_after='rented_from_date'),
+				fieldtype='Date', insert_after='rented_from_date', depends_on='house_rent_payment_amount'),
 			dict(fieldname='hra_column_break', fieldtype='Column Break',
-				insert_after='rented_to_date'),
+				insert_after='rented_to_date', depends_on='house_rent_payment_amount'),
 			dict(fieldname='monthly_house_rent', label='Monthly House Rent',
-				fieldtype='Currency', insert_after='hra_column_break', read_only=1),
+				fieldtype='Currency', insert_after='hra_column_break', read_only=1, depends_on='house_rent_payment_amount'),
 			dict(fieldname='monthly_hra_exemption', label='Monthly Eligible Amount',
-				fieldtype='Currency', insert_after='monthly_house_rent', read_only=1),
+				fieldtype='Currency', insert_after='monthly_house_rent', read_only=1, depends_on='house_rent_payment_amount'),
 			dict(fieldname='total_eligible_hra_exemption', label='Total Eligible HRA Exemption',
-				fieldtype='Currency', insert_after='monthly_hra_exemption', read_only=1)
+				fieldtype='Currency', insert_after='monthly_hra_exemption', read_only=1, depends_on='house_rent_payment_amount')
 		],
 		'Supplier': [
 			{
