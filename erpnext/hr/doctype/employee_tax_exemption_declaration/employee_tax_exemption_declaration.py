@@ -41,7 +41,7 @@ class EmployeeTaxExemptionDeclaration(Document):
 
 	def calculate_hra_exemption(self):
 		self.salary_structure_hra, self.annual_hra_exemption, self.monthly_hra_exemption = 0, 0, 0
-		if self.monthly_house_rent:
+		if self.get("monthly_house_rent"):
 			hra_exemption = calculate_annual_eligible_hra_exemption(self)
 			if hra_exemption:
 				self.total_exemption_amount += hra_exemption["annual_exemption"]
