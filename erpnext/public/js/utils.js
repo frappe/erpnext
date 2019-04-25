@@ -58,43 +58,9 @@ $.extend(erpnext, {
 				.css({"margin-bottom": "10px", "margin-top": "10px"})
 				.appendTo(grid_row.grid_form.fields_dict.serial_no.$wrapper));
 
+		var me = this;
 		$btn.on("click", function() {
-			var d = new frappe.ui.Dialog({
-				title: __("Add Serial No"),
-				fields: [
-					{
-						"fieldtype": "Link",
-						"fieldname": "serial_no",
-						"options": "Serial No",
-						"label": __("Serial No"),
-						"get_query": function () {
-							return {
-								filters: {
-									item_code:grid_row.doc.item_code,
-									warehouse:cur_frm.doc.is_return ? null : grid_row.doc.warehouse
-								}
-							}
-						}
-					},
-					{
-						"fieldtype": "Button",
-						"fieldname": "add",
-						"label": __("Add")
-					}
-				]
-			});
-
-			d.get_input("add").on("click", function() {
-				var serial_no = d.get_value("serial_no");
-				if(serial_no) {
-					var val = (grid_row.doc.serial_no || "").split("\n").concat([serial_no]).join("\n");
-					grid_row.grid_form.fields_dict.serial_no.set_model_value(val.trim());
-				}
-				d.hide();
-				return false;
-			});
-
-			d.show();
+			me.show_serial_batch_selector(grid_row.frm, grid_row.doc);
 		});
 	}
 });
