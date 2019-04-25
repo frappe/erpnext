@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import frappe, re
 from frappe import _
-from frappe.utils import cstr, flt, date_diff, getdate, nowdate
+from frappe.utils import cstr, flt, date_diff, nowdate
 from erpnext.regional.india import states, state_numbers
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
@@ -231,12 +231,17 @@ def validate_house_rent_dates(doc):
 		select name
 		from `tabEmployee Tax Exemption Proof Submission`
 		where
-			docstatus=1 and employee='{0}' and payroll_period='{1}'
-			and (rented_from_date between '{2}' and '{3}' or rented_to_date between '{2}' and '{3}')
-	""".format(doc.employee, doc.payroll_period, doc.rented_from_date, doc.rented_to_date))
+			docstatus=1 and employee=%(employee)s and payroll_period=%(payroll_period)s
+			and (rented_from_date between %(from_date)s and %(to_date)s or rented_to_date between %(from_date)s and %(to_date)s)
+	""", {
+		"employee": doc.employee,
+		"payroll_period": doc.payroll_period,
+		"from_date": doc.rented_from_date,
+		"to_date": doc.rented_to_date
+	})
 
 	if proofs:
-		frappe.throw(_("House rent paid days overlap with {0}").format(proofs[0][0]))
+		frappe.throw(_("House rent paid days overlapping with {0}").format(proofs[0][0]))
 
 def calculate_hra_exemption_for_period(doc):
 	monthly_rent, eligible_hra = 0, 0
