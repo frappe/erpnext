@@ -35,7 +35,7 @@ def execute():
 			update `tab{dt} Item`
 			set alt_uom_size = 1, alt_uom_qty = stock_qty
 			where ifnull(alt_uom, '') = ''
-		""".format(dt=dt))
+		""".format(dt=dt))  # nosec
 
 		frappe.db.sql("""
 			update `tab{dt}` m
@@ -43,7 +43,7 @@ def execute():
 				select sum(d.alt_uom_qty)
 				from `tab{dt} Item` d where d.parent = m.name and d.parenttype = '{dt}'
 			)
-		""".format(dt=dt))
+		""".format(dt=dt))  # nosec
 
 	frappe.db.sql("""
 		update `tabStock Entry Detail`
