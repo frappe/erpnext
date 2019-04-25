@@ -3,7 +3,7 @@
 		"company": "_Test Company",
 		"conversion_rate": 1.0,
 		"currency": "INR",
-		"customer_lead": "_Test Customer",
+		"party_name": "_Test Customer",
 		"customer_group": "_Test Customer Group",
 		"customer_name": "_Test Customer",
 		"doctype": "Quotation",

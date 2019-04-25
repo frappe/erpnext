@@ -203,15 +203,15 @@ class TestQuotation(unittest.TestCase):
 
 test_records = frappe.get_test_records('Quotation')
 
-def get_quotation_dict(customer_lead=None, item_code=None):
-	if not customer_lead:
-		customer_lead = '_Test Customer'
+def get_quotation_dict(party_name=None, item_code=None):
+	if not party_name:
+		party_name = '_Test Customer'
 	if not item_code:
 		item_code = '_Test Item'
 
 	return {
 		'doctype': 'Quotation',
-		'customer_lead': customer_lead,
+		'party_name': party_name,
 		'items': [
 			{
 				'item_code': item_code,
@@ -229,7 +229,7 @@ def make_quotation(**args):
 		qo.transaction_date = args.transaction_date
 
 	qo.company = args.company or "_Test Company"
-	qo.customer_lead = args.customer_lead or "_Test Customer"
+	qo.party_name = args.party_name or "_Test Customer"
 	qo.currency = args.currency or "INR"
 	if args.selling_price_list:
 		qo.selling_price_list = args.selling_price_list
