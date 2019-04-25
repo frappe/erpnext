@@ -131,7 +131,7 @@ class Analytics(object):
 			where i.parent = s.name and s.docstatus = 1 {sales_person_condition} {supplier_condition}
 				and s.company = %(company)s and s.{date_field} between %(from_date)s and %(to_date)s
 				{is_opening_condition} {filter_conditions}
-		""".format(
+		""".format(  # nosec
 			entity_field=entity_field,
 			entity_name_field=entity_name_field,
 			value_field=value_field,
@@ -197,7 +197,7 @@ class Analytics(object):
 		if self.filters.get("sales_person"):
 			lft, rgt = frappe.db.get_value("Sales Person", self.filters.sales_person, ["lft", "rgt"])
 			conditions.append("""sp.sales_person in (select name from `tabSales Person`
-					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))  # nosec
 
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
