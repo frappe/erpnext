@@ -192,7 +192,7 @@ class Analytics(object):
 		if self.filters.get("territory"):
 			lft, rgt = frappe.db.get_value("Territory", self.filters.territory, ["lft", "rgt"])
 			conditions.append("""s.territory in (select name from `tabTerritory`
-					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))  # nosec
 
 		if self.filters.get("sales_person"):
 			lft, rgt = frappe.db.get_value("Sales Person", self.filters.sales_person, ["lft", "rgt"])
