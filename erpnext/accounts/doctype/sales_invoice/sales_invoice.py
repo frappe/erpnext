@@ -81,7 +81,7 @@ class SalesInvoice(SellingController):
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
-		self.check_close_sales_order("sales_order")
+		self.check_sales_order_on_hold_or_close("sales_order")
 		self.validate_debit_to_acc()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
 		self.add_remarks()
@@ -205,12 +205,11 @@ class SalesInvoice(SellingController):
 	def before_cancel(self):
 		self.update_time_sheet(None)
 
-	def on_cancel(self):
-		self.check_close_sales_order("sales_order")
 
-		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
-		if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
-			unlink_ref_doc_from_payment_entries(self)
+	def on_cancel(self):
+		super(SalesInvoice, self).on_cancel()
+
+		self.check_sales_order_on_hold_or_close("sales_order")
 
 		if self.is_return and not self.update_billed_amount_in_sales_order:
 			# NOTE status updating bypassed for is_return
@@ -399,7 +398,7 @@ class SalesInvoice(SellingController):
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',
 				'company', 'select_print_heading', 'cash_bank_account', 'company_address',
-				'write_off_account', 'write_off_cost_center', 'apply_discount_on'):
+				'write_off_account', 'write_off_cost_center', 'apply_discount_on', 'cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
 
@@ -523,8 +522,8 @@ class SalesInvoice(SellingController):
 
 	def validate_pos(self):
 		if self.is_return:
-			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(self.grand_total) < \
-				1/(10**(self.precision("grand_total") + 1)):
+			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(self.grand_total) > \
+				1.0/(10.0**(self.precision("grand_total") + 1.0)):
 					frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
 	def validate_item_code(self):
@@ -689,7 +688,8 @@ class SalesInvoice(SellingController):
 			if repost_future_gle and cint(self.update_stock) \
 				and cint(auto_accounting_for_stock):
 					items, warehouses = self.get_items_and_warehouses()
-					update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items)
+					update_gl_entries_after(self.posting_date, self.posting_time,
+						warehouses, items, company = self.company)
 		elif self.docstatus == 2 and cint(self.update_stock) \
 			and cint(auto_accounting_for_stock):
 				from erpnext.accounts.general_ledger import delete_gl_entries
@@ -1222,6 +1222,22 @@ def get_bank_cash_account(mode_of_payment, company):
 	return {
 		"account": account
 	}
+
+@frappe.whitelist()
+def make_maintenance_schedule(source_name, target_doc=None):
+	doclist = get_mapped_doc("Sales Invoice", source_name, 	{
+		"Sales Invoice": {
+			"doctype": "Maintenance Schedule",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Sales Invoice Item": {
+			"doctype": "Maintenance Schedule Item",
+		},
+	}, target_doc)
+
+	return doclist
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):

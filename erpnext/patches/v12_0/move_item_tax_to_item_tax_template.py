@@ -3,6 +3,8 @@ import json
 from six import iteritems
 
 def execute():
+	if "tax_type" not in frappe.db.get_table_columns("Item Tax"):
+		return
 	old_item_taxes = {}
 	item_tax_templates = {}
 	rename_template_to_untitled = []
@@ -11,19 +13,19 @@ def execute():
 		old_item_taxes.setdefault(d.item_code, [])
 		old_item_taxes[d.item_code].append(d)
 
-	frappe.reload_doc("accounts", "doctype", "item_tax_template_detail")
-	frappe.reload_doc("accounts", "doctype", "item_tax_template")
-	frappe.reload_doc("stock", "doctype", "item")
-	frappe.reload_doc("stock", "doctype", "item_tax")
-	frappe.reload_doc("selling", "doctype", "quotation_item")
-	frappe.reload_doc("selling", "doctype", "sales_order_item")
-	frappe.reload_doc("stock", "doctype", "delivery_note_item")
-	frappe.reload_doc("accounts", "doctype", "sales_invoice_item")
-	frappe.reload_doc("buying", "doctype", "supplier_quotation_item")
-	frappe.reload_doc("buying", "doctype", "purchase_order_item")
-	frappe.reload_doc("stock", "doctype", "purchase_receipt_item")
-	frappe.reload_doc("accounts", "doctype", "purchase_invoice_item")
-	frappe.reload_doc("accounts", "doctype", "accounts_settings")
+	frappe.reload_doc("accounts", "doctype", "item_tax_template_detail", force=1)
+	frappe.reload_doc("accounts", "doctype", "item_tax_template", force=1)
+	frappe.reload_doc("stock", "doctype", "item", force=1)
+	frappe.reload_doc("stock", "doctype", "item_tax", force=1)
+	frappe.reload_doc("selling", "doctype", "quotation_item", force=1)
+	frappe.reload_doc("selling", "doctype", "sales_order_item", force=1)
+	frappe.reload_doc("stock", "doctype", "delivery_note_item", force=1)
+	frappe.reload_doc("accounts", "doctype", "sales_invoice_item", force=1)
+	frappe.reload_doc("buying", "doctype", "supplier_quotation_item", force=1)
+	frappe.reload_doc("buying", "doctype", "purchase_order_item", force=1)
+	frappe.reload_doc("stock", "doctype", "purchase_receipt_item", force=1)
+	frappe.reload_doc("accounts", "doctype", "purchase_invoice_item", force=1)
+	frappe.reload_doc("accounts", "doctype", "accounts_settings", force=1)
 
 	# for each item that have item tax rates
 	for item_code in old_item_taxes.keys():
@@ -40,7 +42,7 @@ def execute():
 		item.set("taxes", [])
 		item.append("taxes", {"item_tax_template": item_tax_template_name, "tax_category": ""})
 		item.save()
-	
+
 	doctypes = [
 		'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',
 		'Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice'
@@ -75,6 +77,21 @@ def get_item_tax_template(item_tax_templates, rename_template_to_untitled, item_
 	item_tax_template = frappe.new_doc("Item Tax Template")
 	item_tax_template.title = "{}--{}".format(parent, item_code) if parent else "Item-{}".format(item_code)
 	for tax_type, tax_rate in iteritems(item_tax_map):
+		if not frappe.db.exists("Account", tax_type):
+			parts = tax_type.strip().split(" - ")
+			account_name = " - ".join(parts[:-1])
+			company = frappe.db.get_value("Company", filters={"abbr": parts[-1]})
+			parent_account = frappe.db.get_value("Account",
+				filters={"account_type": "Tax", "root_type": "Liability", "is_group": 0}, fieldname="parent_account")
+
+			frappe.get_doc({
+				"doctype": "Account",
+				"account_name": account_name,
+				"company": company,
+				"account_type": "Tax",
+				"parent_account": parent_account
+			}).insert()
+
 		item_tax_template.append("taxes", {"tax_type": tax_type, "tax_rate": tax_rate})
 		item_tax_templates.setdefault(item_tax_template.title, {})
 		item_tax_templates[item_tax_template.title][tax_type] = tax_rate
