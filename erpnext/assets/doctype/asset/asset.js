@@ -296,6 +296,12 @@ frappe.ui.form.on('Asset', {
 		frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
 	},
 
+	gross_purchase_amount: function(frm) {
+		frm.doc.finance_books.forEach(d => {
+			frm.events.set_depreciation_rate(frm, d);
+		})
+	},
+
 	set_depreciation_rate: function(frm, row) {
 		if (row.total_number_of_depreciations && row.frequency_of_depreciation) {
 			frappe.call({
