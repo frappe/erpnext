@@ -830,7 +830,7 @@
    "precision": "",
    "print_hide": 0,
    "print_hide_if_no_value": 0,
-   "read_only": 1,
+   "read_only": 0,
    "remember_last_selected_value": 0,
    "report_hide": 0,
    "reqd": 0,
