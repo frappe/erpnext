@@ -19,19 +19,19 @@ class LeaveAllocation(Document):
 	def validate(self):
 		self.validate_period()
 		self.validate_lwp()
+		set_employee_name(self)
+		self.set_total_leaves_allocated()
 		self.validate_allocation_overlap()
 		self.validate_back_dated_allocation()
 		self.validate_total_leaves_allocated()
-		set_employee_name(self)
 		self.validate_leaves_allocated_value()
 		self.validate_leave_allocation_days()
-		self.set_total_leaves_allocated()
 
 	def validate_leave_allocation_days(self):
-		new_leaves = self.new_leaves_allocate if not self.carry_forward else self.carry_forwarded_leaves
+		new_leaves = self.new_leaves_allocated if not self.carry_forward else self.carry_forwarded_leaves
 		max_leaves, leaves_allocated = self.get_max_leaves_with_leaves_allocated_for_leave_type(flt(new_leaves))
 
-		if leave_allocated > max_leaves:
+		if leaves_allocated > max_leaves:
 			frappe.throw(_("Total allocated leaves are more days than maximum allocation of {0} leave type for employee {1} in the period")\
 			.format(self.leave_type, self.employee))
 
@@ -52,8 +52,9 @@ class LeaveAllocation(Document):
 		# check if the allocation period is more than the expiry allows for carry forwarded allocation
 		if self.carry_forward:
 			expiry_days = get_days_to_expiry_for_leave_type(self.leave_type)
-			if allocation_period > expiry_days:
-				frappe.throw(_("Leave allocation period cannot be more than the expiry days allocated"))
+
+			if allocation_period > flt(expiry_days) and expiry_days:
+				frappe.throw(_("Leave allocation period cannot exceed carry forward expiry limit"))
 
 	def validate_lwp(self):
 		if frappe.db.get_value("Leave Type", self.leave_type, "is_lwp"):
@@ -109,7 +110,7 @@ class LeaveAllocation(Document):
 	def validate_total_leaves_allocated(self):
 		# Adding a day to include To Date in the difference
 		date_difference = date_diff(self.to_date, self.from_date) + 1
-		if date_difference < self.total_leaves_allocated:
+		if date_difference < flt(self.total_leaves_allocated):
 			frappe.throw(_("Total allocated leaves are more than days in the period"), OverAllocationError)
 
 	def validate_against_leave_applications(self):
@@ -133,13 +134,13 @@ class LeaveAllocation(Document):
 	def get_max_leaves_with_leaves_allocated_for_leave_type(self, new_leaves):
 		''' compare new leaves allocated with max leaves '''
 		company = frappe.db.get_value("Employee", self.employee, "company")
+		leaves_allocated = 0
 		leave_period = get_leave_period(self.from_date, self.to_date, company)
 		max_leaves_allowed = frappe.db.get_value("Leave Type", self.leave_type, "max_leaves_allowed")
 		if max_leaves_allowed > 0:
-			leave_allocated = 0
 			if leave_period:
-				leave_allocated = get_leave_allocation_for_period(self.employee, self.leave_type, leave_period[0].from_date, leave_period[0].to_date)
-			leave_allocated += new_leaves
+				leaves_allocated = get_leave_allocation_for_period(self.employee, self.leave_type, leave_period[0].from_date, leave_period[0].to_date)
+			leaves_allocated += new_leaves
 		return max_leaves_allowed, leaves_allocated
 
 def get_leave_allocation_for_period(employee, leave_type, from_date, to_date):
@@ -184,12 +185,12 @@ def get_carry_forwarded_leaves(employee, leave_type, date):
 		"docstatus": 1,
 		"to_date": ("<", date)
 	}
-	limit = 1
+	limit = 2
 
 	# check number of days to expire, ignore expiry for default value 0
 	if expiry_days:
 		filters.update(carry_forward=0)
-		limit = 2
+		limit = 1
 
 	previous_allocation = frappe.get_all("Leave Allocation",
 		filters=filters,
@@ -207,11 +208,9 @@ def get_carry_forwarded_leaves(employee, leave_type, date):
 
 def get_days_to_expiry_for_leave_type(leave_type):
 	''' returns days to expiry for a provided leave type '''
-	expiry_days = frappe.db.get_value("Leave Type",
-		filters={"leave_type": leave_type, "is_carry_forward": 1},
+	return frappe.db.get_value("Leave Type",
+		filters={"leave_type_name": leave_type, "is_carry_forward": 1},
 		fieldname="carry_forward_leave_expiry")
-
-
 
 def validate_carry_forward(leave_type):
 	if not frappe.db.get_value("Leave Type", leave_type, "is_carry_forward"):

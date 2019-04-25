@@ -15,6 +15,6 @@ class LeaveType(Document):
 			self.validate_carry_forward()
 
 	def validate_carry_forward(self):
-		max_days = 366 if calendar.isleap(datetime.now().year) else 365
+		max_days = 367 if calendar.isleap(datetime.now().year) else 366
 		if not (0 <= self.carry_forward_leave_expiry <= max_days):
 			frappe.throw(_('Invalid entry!! Carried forward days need to expire within a year'))
