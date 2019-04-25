@@ -168,7 +168,7 @@ class Analytics(object):
 		if self.filters.get("customer_group"):
 			lft, rgt = frappe.db.get_value("Customer Group", self.filters.customer_group, ["lft", "rgt"])
 			conditions.append("""s.customer_group in (select name from `tabCustomer Group`
-					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))  # nosec
 
 		if self.filters.get("supplier"):
 			conditions.append("s.supplier=%(supplier)s")
@@ -176,7 +176,7 @@ class Analytics(object):
 		if self.filters.get("supplier_group"):
 			lft, rgt = frappe.db.get_value("Supplier Group", self.filters.supplier_group, ["lft", "rgt"])
 			conditions.append("""sup.supplier_group in (select name from `tabSupplier Group`
-					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))  # nosec
 
 		if self.filters.get("item_code"):
 			conditions.append("i.item_code=%(item_code)s")
@@ -184,7 +184,7 @@ class Analytics(object):
 		if self.filters.get("item_group"):
 			lft, rgt = frappe.db.get_value("Item Group", self.filters.item_group, ["lft", "rgt"])
 			conditions.append("""i.item_group in (select name from `tabItem Group`
-					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))  # nosec
 
 		if self.filters.get("brand"):
 			conditions.append("i.brand=%(brand)s")
@@ -320,7 +320,7 @@ class Analytics(object):
 
 		self.group_entries = frappe.db.sql("""select name, lft, rgt , {parent} as parent
 			from `tab{tree}` order by lft"""
-			.format(tree=self.filters.tree_type, parent=parent), as_dict=1)
+			.format(tree=self.filters.tree_type, parent=parent), as_dict=1)  # nosec
 
 		for d in self.group_entries:
 			if d.parent:
