@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-import itertools
 
 def execute(filters=None):
 	data = []
@@ -23,7 +22,7 @@ def get_columns():
 		},
 		{
 			"label": _("Date"),
-			"fieldtype": "date",
+			"fieldtype": "Date",
 			"fieldname": "date",
 			"hidden": 1,
 			"width": 150
@@ -37,25 +36,25 @@ def get_columns():
 		},
 		{
 			"label": _("Item Code"),
-			"fieldtype": "data",
+			"fieldtype": "Data",
 			"fieldname": "rm_item_code",
 			"width": 100
 		},
 		{
 			"label": _("Required Quantity"),
-			"fieldtype": "float",
+			"fieldtype": "Float",
 			"fieldname": "r_qty",
 			"width": 100
 		},
 		{
 			"label": _("Transferred Quantity"),
-			"fieldtype": "float",
+			"fieldtype": "Float",
 			"fieldname": "t_qty",
 			"width": 100
 		},
 		{
 			"label": _("Pending Quantity"),
-			"fieldtype": "float",
+			"fieldtype": "Float",
 			"fieldname": "p_qty",
 			"width": 100
 		}
@@ -66,12 +65,9 @@ def get_data(data, filters):
 	po_name = list(map(lambda x: {k:v for k, v in x.items() if k == 'name'}, po ))
 	sub_items = get_purchase_order_item_supplied(po_name)
 
-	from pprint import pprint
-
 	for item in sub_items:
 		for order in po:
-			print(order)
-			if order.name == item.parent:
+			if order.name == item.parent and item.transfered_qty < item.required_qty:
 				row ={
 					'purchase_order': item.parent,
 					'date': order.transaction_date,
@@ -84,7 +80,14 @@ def get_data(data, filters):
 				data.append(row)
 
 def get_po(filters):
-	return frappe.get_all("Purchase Order", filters={"is_subcontracted": "Yes", "supplier": filters.supplier }, fields=["name", "transaction_date", "supplier"])
+	record_filters = [
+			["is_subcontracted", "=", "Yes"],
+			["supplier", "=", filters.supplier],
+			["transaction_date", "<=", filters.to_date],
+			["transaction_date", ">=", filters.from_date],
+			["docstatus", "=", 1]
+		]
+	return frappe.get_all("Purchase Order", filters=record_filters, fields=["name", "transaction_date", "supplier"])
 
 def get_purchase_order_item_supplied(po):
 	po = ', '.join(map(str, [l['name'] for l in po if 'name' in l]))
