@@ -32,7 +32,6 @@ class Opportunity(TransactionBase):
 
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
-		self.validate_lead_cust()
 		self.validate_cust_name()
 
 		if not self.title:
