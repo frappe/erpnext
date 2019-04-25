@@ -17,7 +17,7 @@ class EmployeeTaxExemptionProofSubmission(Document):
 		self.calculate_hra_exemption()
 
 	def set_total_actual_amount(self):
-		self.total_actual_amount = flt(self.house_rent_payment_amount)
+		self.total_actual_amount = flt(self.get("house_rent_payment_amount"))
 		for d in self.tax_exemption_proofs:
 			self.total_actual_amount += flt(d.amount)
 
