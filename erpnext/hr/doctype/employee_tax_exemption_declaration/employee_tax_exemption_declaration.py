@@ -21,12 +21,13 @@ class EmployeeTaxExemptionDeclaration(Document):
 		self.calculate_hra_exemption()
 
 	def validate_duplicate(self):
-		duplicate = frappe.db.exists({
-			"doctype": "Employee Tax Exemption Declaration",
-			"employee": self.employee,
-			"payroll_period": self.payroll_period,
-			"name": ["!=", self.name]
-		})
+		duplicate = frappe.db.get_value("Employee Tax Exemption Declaration",
+			filters = {
+				"employee": self.employee,
+				"payroll_period": self.payroll_period,
+				"name": ["!=", self.name]
+			}
+		)
 		if duplicate:
 			frappe.throw(_("Duplicate Tax Declaration of {0} for period {1}")
 				.format(self.employee, self.payroll_period), DuplicateDeclarationError)
