@@ -255,23 +255,13 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEqual(so.items[0].discount_percentage, 17.5)
 		self.assertEqual(so.items[0].rate, 82.5)
 
-		try:
-			# Without pricing rule
-			so = make_sales_order(item_code="_Test Item", qty=2, uom="Box", do_not_submit=True)
-			so.items[0].price_list_rate = 100
-			so.submit()
-			so = frappe.get_doc('Sales Order', so.name)
-			self.assertEqual(so.items[0].discount_percentage, 0)
-			self.assertEqual(so.items[0].rate, 100)
-		except:
-			print("===============================================")
-			print("===============================================")
-			print("===============================================")
-			print(frappe.as_json(so, indent=4))
-			print("===============================================")
-			print("===============================================")
-			print("===============================================")
-			raise
+		# Without pricing rule
+		so = make_sales_order(item_code="_Test Item", qty=2, uom="Box", do_not_submit=True)
+		so.items[0].price_list_rate = 100
+		so.submit()
+		so = frappe.get_doc('Sales Order', so.name)
+		self.assertEqual(so.items[0].discount_percentage, 0)
+		self.assertEqual(so.items[0].rate, 100)
 
 	def test_pricing_rule_with_margin_and_discount(self):
 		frappe.delete_doc_if_exists('Pricing Rule', '_Test Pricing Rule')
