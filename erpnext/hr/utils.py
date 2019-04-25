@@ -226,7 +226,6 @@ def validate_tax_declaration(declarations):
 		subcategories.append(d.exemption_sub_category)
 
 def get_total_exemption_amount(declarations):
-	exemption_category = list(set([d.exemption_category for d in declarations]))
 	exemptions = frappe._dict()
 	for d in declarations:
 		exemptions.setdefault(d.exemption_category, frappe._dict())
