@@ -38,6 +38,11 @@ class StockLedgerEntry(Document):
 		self.check_stock_frozen_date()
 		self.actual_amt_check()
 
+		if self.batch_no:
+			batch = frappe.get_doc("Batch", self.batch_no)
+			batch.calculate_batch_qty()
+			batch.save()
+
 		if not self.get("via_landed_cost_voucher"):
 			from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
 			process_serial_no(self)
@@ -139,4 +144,3 @@ def on_doctype_update():
 
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
 	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
-
