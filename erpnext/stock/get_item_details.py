@@ -431,7 +431,7 @@ def insert_item_price(args):
 def get_item_price(args, item_code, ignore_party=False):
 	"""
 		Get name, price_list_rate from Item Price based on conditions
-			Check if the Derised qty is within the increment of the packing list.
+			Check if the desired qty is within the increment of the packing list.
 		:param args: dict (or frappe._dict) with mandatory fields price_list, uom
 			optional fields min_qty, transaction_date, customer, supplier
 		:param item_code: str, Item Doctype field item_code
@@ -469,11 +469,11 @@ def get_price_list_rate_for(args, item_code):
 		for min_qty 9 and min_qty 20. It returns Item Price Rate for qty 9 as
 		the best fit in the range of avaliable min_qtyies
 
-        :param customer: link to Customer DocType
-        :param supplier: link to Supplier DocType
+		:param customer: link to Customer DocType
+		:param supplier: link to Supplier DocType
 		:param price_list: str (Standard Buying or Standard Selling)
 		:param item_code: str, Item Doctype field item_code
-		:param qty: Derised Qty
+		:param qty: Desired Qty
 		:param transaction_date: Date of the price
 	"""
 	item_price_args = {
@@ -498,7 +498,7 @@ def get_price_list_rate_for(args, item_code):
 
 		general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=args.get("ignore_party"))
 		if not general_price_list_rate and args.get("uom") != args.get("stock_uom"):
-			item_price_args["args"] = args.get("stock_uom")
+			item_price_args["uom"] = args.get("stock_uom")
 			general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=args.get("ignore_party"))
 
 		if general_price_list_rate:
@@ -514,11 +514,11 @@ def get_price_list_rate_for(args, item_code):
 
 def check_packing_list(price_list_rate_name, desired_qty, item_code):
 	"""
-		Check if the Derised qty is within the increment of the packing list.
+		Check if the desired qty is within the increment of the packing list.
 		:param price_list_rate_name: Name of Item Price
-        :param desired_qty: Derised Qt
+		:param desired_qty: Desired Qt
 		:param item_code: str, Item Doctype field item_code
-		:param qty: Derised Qt
+		:param qty: Desired Qt
 	"""
 
 	flag = True
