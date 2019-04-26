@@ -23,10 +23,10 @@ const update_clearance_date = (frm, cdt, cdn) => {
 	if (frm.doc.docstatus === 1) {
 		frappe.xcall('erpnext.accounts.doctype.bank_transaction.bank_transaction.unclear_reference_payment',
 			{doctype: cdt, docname: cdn})
-		.then(e => {
-			if (e == "success") {
-				frappe.show_alert({message:__("Document {0} successfully uncleared", [e]), indicator:'green'});
-			}
-		})
+			.then(e => {
+				if (e == "success") {
+					frappe.show_alert({message:__("Document {0} successfully uncleared", [e]), indicator:'green'});
+				}
+		});
 	}
-}
+};
