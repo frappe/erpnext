@@ -359,7 +359,8 @@ def set_gl_entries_by_account(
 			"from_date": from_date,
 			"to_date": to_date,
 			"cost_center": filters.cost_center,
-			"project": filters.project
+			"project": filters.project,
+			"finance_book": filters.get("finance_book")
 		},
 		as_dict=True)
 
