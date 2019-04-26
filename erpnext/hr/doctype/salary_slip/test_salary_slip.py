@@ -13,7 +13,8 @@ from frappe.utils import getdate, nowdate, add_days, add_months, flt, get_first_
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.hr.doctype.payroll_entry.payroll_entry import get_month_details
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.hr.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration import create_payroll_period, create_exemption_category
+from erpnext.hr.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration \
+	import create_payroll_period, create_exemption_category
 
 class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
@@ -36,8 +37,10 @@ class TestSalarySlip(unittest.TestCase):
 		no_of_days = self.get_no_of_days()
 		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 1)
 		make_employee("test_employee@salary.com")
-		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", None)
-		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "status", "Active")
+		frappe.db.set_value("Employee", frappe.get_value("Employee",
+			{"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", None)
+		frappe.db.set_value("Employee", frappe.get_value("Employee",
+			{"employee_name":"test_employee@salary.com"}, "name"), "status", "Active")
 		ss = make_employee_salary_slip("test_employee@salary.com", "Monthly")
 
 		self.assertEqual(ss.total_working_days, no_of_days[0])
@@ -53,8 +56,10 @@ class TestSalarySlip(unittest.TestCase):
 		no_of_days = self.get_no_of_days()
 		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
 		make_employee("test_employee@salary.com")
-		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", None)
-		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "status", "Active")
+		frappe.db.set_value("Employee", frappe.get_value("Employee",
+			{"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", None)
+		frappe.db.set_value("Employee", frappe.get_value("Employee",
+			{"employee_name":"test_employee@salary.com"}, "name"), "status", "Active")
 		ss = make_employee_salary_slip("test_employee@salary.com", "Monthly")
 
 		self.assertEqual(ss.total_working_days, no_of_days[0] - no_of_days[1])
@@ -100,16 +105,21 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.payment_days, (no_of_days[0] - getdate(date_of_joining).day + 1))
 
 		# set relieving date in the same month
-		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "date_of_joining", (add_days(nowdate(),-60)))
-		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", relieving_date)
-		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "status", "Left")
+		frappe.db.set_value("Employee",frappe.get_value("Employee",
+			{"employee_name":"test_employee@salary.com"}, "name"), "date_of_joining", (add_days(nowdate(),-60)))
+		frappe.db.set_value("Employee", frappe.get_value("Employee",
+			{"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", relieving_date)
+		frappe.db.set_value("Employee", frappe.get_value("Employee",
+			{"employee_name":"test_employee@salary.com"}, "name"), "status", "Left")
 		ss.save()
 
 		self.assertEqual(ss.total_working_days, no_of_days[0])
 		self.assertEqual(ss.payment_days, getdate(relieving_date).day)
 
-		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", None)
-		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "status", "Active")
+		frappe.db.set_value("Employee", frappe.get_value("Employee",
+			{"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", None)
+		frappe.db.set_value("Employee", frappe.get_value("Employee",
+			{"employee_name":"test_employee@salary.com"}, "name"), "status", "Active")
 
 	def test_employee_salary_slip_read_permission(self):
 		make_employee("test_employee@salary.com")
@@ -168,17 +178,22 @@ class TestSalarySlip(unittest.TestCase):
 
 	def test_tax_for_payroll_period(self):
 		data = {}
-		# test the impact of tax exemption declaration, tax exemption proof submission and deduct check boxes in annual tax calculation
+		# test the impact of tax exemption declaration, tax exemption proof submission
+		# and deduct check boxes in annual tax calculation
 		# as per assigned salary structure 40500 in monthly salary so 236000*5/100/12
 		frappe.db.sql("""delete from `tabPayroll Period`""")
 		frappe.db.sql("""delete from `tabSalary Component`""")
 		payroll_period = create_payroll_period()
 		create_tax_slab(payroll_period)
 		employee = make_employee("test_tax@salary.slip")
-		delete_docs = ["Salary Slip", "Additional Salary",
-						"Employee Tax Exemption Declaration",
-						"Employee Tax Exemption Proof Submission",
-						"Employee Benefit Claim", "Salary Structure Assignment"]
+		delete_docs = [
+			"Salary Slip",
+			"Additional Salary",
+			"Employee Tax Exemption Declaration",
+			"Employee Tax Exemption Proof Submission",
+			"Employee Benefit Claim",
+			"Salary Structure Assignment"
+		]
 		for doc in delete_docs:
 			frappe.db.sql("delete from `tab%s` where employee='%s'" % (doc, employee))
 
@@ -298,12 +313,11 @@ def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
 
 	if not salary_slip:
 		salary_slip = make_salary_slip(salary_structure_doc.name, employee = employee)
-		salary_slip.employee_name = frappe.get_value("Employee", {"name":frappe.db.get_value("Employee", {"user_id": user})}, "employee_name")
+		salary_slip.employee_name = frappe.get_value("Employee",
+			{"name":frappe.db.get_value("Employee", {"user_id": user})}, "employee_name")
 		salary_slip.payroll_frequency = payroll_frequency
 		salary_slip.posting_date = nowdate()
 		salary_slip.insert()
-		# salary_slip.submit()
-		# salary_slip = salary_slip.name
 
 	return salary_slip
 
@@ -338,99 +352,99 @@ def create_account(company):
 	salary_account = frappe.db.get_value("Account", "Salary - " + frappe.get_cached_value('Company',  company,  'abbr'))
 	if not salary_account:
 		frappe.get_doc({
-		"doctype": "Account",
-		"account_name": "Salary",
-		"parent_account": "Indirect Expenses - " + frappe.get_cached_value('Company',  company,  'abbr'),
-		"company": company
+			"doctype": "Account",
+			"account_name": "Salary",
+			"parent_account": "Indirect Expenses - " + frappe.get_cached_value('Company',  company,  'abbr'),
+			"company": company
 		}).insert()
 	return salary_account
 
 def make_earning_salary_component(setup=False, test_tax=False):
 	data = [
+		{
+			"salary_component": 'Basic Salary',
+			"abbr":'BS',
+			"condition": 'base > 10000',
+			"formula": 'base*.5',
+			"type": "Earning",
+			"amount_based_on_formula": 1
+		},
+		{
+			"salary_component": 'HRA',
+			"abbr":'H',
+			"amount": 3000,
+			"type": "Earning"
+		},
+		{
+			"salary_component": 'Special Allowance',
+			"abbr":'SA',
+			"condition": 'H < 10000',
+			"formula": 'BS*.5',
+			"type": "Earning",
+			"amount_based_on_formula": 1
+		},
+		{
+			"salary_component": "Leave Encashment",
+			"abbr": 'LE',
+			"is_additional_component": 1,
+			"type": "Earning"
+		}
+	]
+	if test_tax:
+		data.extend([
 			{
-				"salary_component": 'Basic Salary',
-				"abbr":'BS',
-				"condition": 'base > 10000',
-				"formula": 'base*.5',
+				"salary_component": "Leave Travel Allowance",
+				"abbr": 'B',
+				"is_flexible_benefit": 1,
 				"type": "Earning",
-				"amount_based_on_formula": 1
+				"pay_against_benefit_claim": 1,
+				"max_benefit_amount": 100000
 			},
 			{
-				"salary_component": 'HRA',
-				"abbr":'H',
-				"amount": 3000,
-				"type": "Earning"
-			},
-			{
-				"salary_component": 'Special Allowance',
-				"abbr":'SA',
-				"condition": 'H < 10000',
-				"formula": 'BS*.5',
+				"salary_component": "Medical Allowance",
+				"abbr": 'B',
+				"is_flexible_benefit": 1,
+				"pay_against_benefit_claim": 0,
 				"type": "Earning",
-				"amount_based_on_formula": 1
+				"max_benefit_amount": 15000
 			},
 			{
-				"salary_component": "Leave Encashment",
-				"abbr": 'LE',
+				"salary_component": "Perfomance Bonus",
+				"abbr": 'B',
 				"is_additional_component": 1,
 				"type": "Earning"
 			}
-		]
-	if test_tax:
-		data.extend([
-						{
-							"salary_component": "Leave Travel Allowance",
-							"abbr": 'B',
-							"is_flexible_benefit": 1,
-							"type": "Earning",
-							"pay_against_benefit_claim": 1,
-							"max_benefit_amount": 100000
-						},
-						{
-							"salary_component": "Medical Allowance",
-							"abbr": 'B',
-							"is_flexible_benefit": 1,
-							"pay_against_benefit_claim": 0,
-							"type": "Earning",
-							"max_benefit_amount": 15000
-						},
-						{
-							"salary_component": "Perfomance Bonus",
-							"abbr": 'B',
-							"is_additional_component": 1,
-							"type": "Earning"
-						}
-					])
+		])
 	if setup or test_tax:
 		make_salary_component(data, test_tax)
 	data.append({
-					"salary_component": 'Basic Salary',
-					"abbr":'BS',
-					"condition": 'base < 10000',
-					"formula": 'base*.2',
-					"type": "Earning",
-					"amount_based_on_formula": 1
-				})
+		"salary_component": 'Basic Salary',
+		"abbr":'BS',
+		"condition": 'base < 10000',
+		"formula": 'base*.2',
+		"type": "Earning",
+		"amount_based_on_formula": 1
+	})
 	return data
 
 def make_deduction_salary_component(setup=False, test_tax=False):
 	data =  [
-				{
-					"salary_component": 'Professional Tax',
-					"abbr":'PT',
-					"condition": 'base > 10000',
-					"formula": 'base*.1',
-					"type": "Deduction",
-					"amount_based_on_formula": 1
-				},
-				{
-					"salary_component": 'TDS',
-					"abbr":'T',
-					"formula": 'base*.1',
-					"type": "Deduction",
-					"amount_based_on_formula": 1
-				}
-			]
+		{
+			"salary_component": 'Professional Tax',
+			"abbr":'PT',
+			"condition": 'base > 10000',
+			"formula": 'base*.1',
+			"type": "Deduction",
+			"amount_based_on_formula": 1
+		},
+		{
+			"salary_component": 'TDS',
+			"abbr":'T',
+			"formula": 'base*.1',
+			"type": "Deduction",
+			"amount_based_on_formula": 1
+		}
+	]
 	if not test_tax:
 		data.append({
 			"salary_component": 'TDS',
@@ -453,48 +467,63 @@ def get_tax_paid_in_period(employee):
 
 def create_exemption_declaration(employee, payroll_period):
 	create_exemption_category()
-	declaration = frappe.get_doc({"doctype": "Employee Tax Exemption Declaration",
-									"employee": employee,
-									"payroll_period": payroll_period,
-									"company": erpnext.get_default_company()})
-	declaration.append("declarations", {"exemption_sub_category": "_Test Sub Category",
-							"exemption_category": "_Test Category",
-							"amount": 100000})
+	declaration = frappe.get_doc({
+		"doctype": "Employee Tax Exemption Declaration",
+		"employee": employee,
+		"payroll_period": payroll_period,
+		"company": erpnext.get_default_company()
+	})
+	declaration.append("declarations", {
+		"exemption_sub_category": "_Test Sub Category",
+		"exemption_category": "_Test Category",
+		"amount": 100000
+	})
 	declaration.submit()
 
 def create_proof_submission(employee, payroll_period, amount):
 	submission_date = add_months(payroll_period.start_date, random.randint(0, 11))
-	proof_submission = frappe.get_doc({"doctype": "Employee Tax Exemption Proof Submission",
-									"employee": employee,
-									"payroll_period": payroll_period.name,
-									"submission_date": submission_date})
-	proof_submission.append("tax_exemption_proofs", {"exemption_sub_category": "_Test Sub Category",
-				"exemption_category": "_Test Category", "type_of_proof": "Test", "amount": amount})
+	proof_submission = frappe.get_doc({
+		"doctype": "Employee Tax Exemption Proof Submission",
+		"employee": employee,
+		"payroll_period": payroll_period.name,
+		"submission_date": submission_date
+	})
+	proof_submission.append("tax_exemption_proofs", {
+		"exemption_sub_category": "_Test Sub Category",
+		"exemption_category": "_Test Category",
+		"type_of_proof": "Test", "amount": amount
+	})
 	proof_submission.submit()
 	return submission_date
 
 def create_benefit_claim(employee, payroll_period, amount, component):
 	claim_date = add_months(payroll_period.start_date, random.randint(0, 11))
-	frappe.get_doc({"doctype": "Employee Benefit Claim", "employee": employee,
-		"claimed_amount": amount, "claim_date": claim_date, "earning_component":
-		component}).submit()
+	frappe.get_doc({
+		"doctype": "Employee Benefit Claim",
+		"employee": employee,
+		"claimed_amount": amount,
+		"claim_date": claim_date,
+		"earning_component": component
+	}).submit()
 	return claim_date
 
 def create_tax_slab(payroll_period):
-	data = [{
-				"from_amount": 250000,
-				"to_amount": 500000,
-				"percent_deduction": 5
-			},
-			{
-				"from_amount": 500000,
-				"to_amount": 1000000,
-				"percent_deduction": 20
-			},
-			{
-				"from_amount": 1000000,
-				"percent_deduction": 30
-			}]
+	data = [
+		{
+			"from_amount": 250000,
+			"to_amount": 500000,
+			"percent_deduction": 5
+		},
+		{
+			"from_amount": 500000,
+			"to_amount": 1000000,
+			"percent_deduction": 20
+		},
+		{
+			"from_amount": 1000000,
+			"percent_deduction": 30
+		}
+	]
 	payroll_period.taxable_salary_slabs = []
 	for item in data:
 		payroll_period.append("taxable_salary_slabs", item)
@@ -526,9 +555,13 @@ def create_salary_slips_for_payroll_period(employee, salary_structure, payroll_p
 
 def create_additional_salary(employee, payroll_period, amount):
 	salary_date = add_months(payroll_period.start_date, random.randint(0, 11))
-	frappe.get_doc({"doctype": "Additional Salary", "employee": employee,
-					"company": erpnext.get_default_company(),
-					"salary_component": "Perfomance Bonus",
-					"payroll_date": salary_date,
-					"amount": amount, "type": "Earning"}).submit()
+	frappe.get_doc({
+		"doctype": "Additional Salary",
+		"employee": employee,
+		"company": erpnext.get_default_company(),
+		"salary_component": "Perfomance Bonus",
+		"payroll_date": salary_date,
+		"amount": amount,
+		"type": "Earning"
+	}).submit()
 	return salary_date
