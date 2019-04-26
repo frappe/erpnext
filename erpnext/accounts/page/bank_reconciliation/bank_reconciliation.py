@@ -28,7 +28,6 @@ def reconcile(bank_transaction, payment_doctype, payment_name):
 		frappe.throw(_("The selected payment entry should be linked with a creditor bank transaction"))
 
 	add_payment_to_transaction(transaction, payment_entry, gl_entry)
-	#clear_payment_entry(transaction, payment_entry, gl_entry)
 
 	return 'reconciled'
 
