@@ -351,6 +351,8 @@ class SalesPurchaseDetailsReport(object):
 					self.total_row[f] += tax_amount
 			for f, tax in zip(self.tax_rate_fields, self.tax_columns):
 				tax_rate = self.itemised_tax.get(d.name, {}).get(tax, {}).get("tax_rate", 0.0)
+				if tax_rate == "NA":
+					tax_rate = 0.0
 				if tax_rate:
 					item_row[f] += tax_rate
 					item_row[f+"_count"] += 1
