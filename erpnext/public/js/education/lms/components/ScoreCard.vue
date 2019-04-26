@@ -1,5 +1,5 @@
 <template>
-    <div v-if="quizData" class='mt-3 col-md-4 col-sm-12'>
+    <div v-if="quizData" class='py-3 col-md-4 col-sm-12'>
         <div class="card h-100">
             <div class='card-body'>
                 <h5 class='card-title'>{{ quizData.program }}</h5>
