@@ -72,6 +72,17 @@ class SalesPurchaseDetailsReport(object):
 					"options": self.filters.doctype,
 					"width": 140
 				},
+			]
+
+			if self.filters.doctype == "Sales Invoice":
+				columns.append({
+					"label": _("Inv #"),
+					"fieldtype": "Int",
+					"fieldname": "stin",
+					"width": 60
+				})
+
+			columns += [
 				{
 					"label": _(self.filters.party_type),
 					"fieldtype": "Link",
@@ -321,6 +332,8 @@ class SalesPurchaseDetailsReport(object):
 						"item_code": d.item_code,
 						"item_name": d.item_name
 					})
+					if self.filters.doctype == "Sales Invoice":
+						item_row['stin'] = d.stin
 
 				if self.filters.party_type == "Customer":
 					item_row.update({
@@ -381,6 +394,8 @@ class SalesPurchaseDetailsReport(object):
 		party_group_field = ", s.customer_group as party_group, 'Customer Group' as party_group_dt" if self.filters.party_type == "Customer"\
 			else ", sup.supplier_group as party_group, 'Supplier Group' as party_group_dt"
 
+		stin_field = ", s.stin" if self.filters.doctype == "Sales Invoice" else ""
+
 		is_opening_condition = "and s.is_opening != 'Yes'" if self.filters.doctype in ['Sales Invoice', 'Purchase Invoice']\
 			else ""
 
@@ -396,6 +411,7 @@ class SalesPurchaseDetailsReport(object):
 				i.base_net_amount, i.base_amount,
 				i.brand, i.item_group
 				{party_group_field} {sales_person_field} {territory_field}
+				{stin_field}
 			from 
 				`tab{doctype} Item` i, `tab{doctype}` s {sales_person_table} {supplier_table}
 			where i.parent = s.name and s.docstatus = 1 and s.company = %(company)s
@@ -416,6 +432,7 @@ class SalesPurchaseDetailsReport(object):
 			sales_person_condition=sales_person_condition,
 			supplier_table=supplier_table,
 			supplier_condition=supplier_condition,
+			stin_field=stin_field,
 			is_opening_condition=is_opening_condition,
 			filter_conditions=filter_conditions
 		), self.filters, as_dict=1)
