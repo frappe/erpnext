@@ -156,7 +156,6 @@ def get_data():
 	for po in purchase_order_entry:
 		# fetch material records linked to the purchase order item
 		mr_record = mr_records.get(po.material_request_item, [{}])[0]
-
 		procurement_detail = {
 			"material_request_date": mr_record.get('transaction_date', ''),
 			"cost_center": po.cost_center,
@@ -172,11 +171,11 @@ def get_data():
 			"purchase_order": po.parent,
 			"supplier": po.supplier,
 			"estimated_cost": mr_record.get('amount'),
-			"actual_cost": pi_records.get(po.name, ''),
+			"actual_cost": pi_records.get(po.name),
 			"purchase_order_amt": po.amount,
 			"purchase_order_amt_in_company_currency": po.base_amount,
 			"expected_delivery_date": po.schedule_date,
-			"actual_delivery_date": pr_records.get(po.name, {})
+			"actual_delivery_date": pr_records.get(po.name)
 		}
 		procurement_record.append(procurement_detail)
 	return procurement_record
@@ -207,7 +206,7 @@ def get_mapped_mr_details():
 				material_request_no=record.parent,
 				estimated_cost=record.amount
 			)
-		procurement_record_against_mr.append(procurement_record_details)
+			procurement_record_against_mr.append(procurement_record_details)
 	return mr_records, procurement_record_against_mr
 
 def get_mapped_pi_records():
