@@ -27,6 +27,6 @@ const update_clearance_date = (frm, cdt, cdn) => {
 				if (e == "success") {
 					frappe.show_alert({message:__("Document {0} successfully uncleared", [e]), indicator:'green'});
 				}
-		});
+			});
 	}
 };
