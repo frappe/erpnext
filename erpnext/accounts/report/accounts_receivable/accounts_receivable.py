@@ -7,6 +7,7 @@ from frappe import _, scrub
 from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr
 from collections import OrderedDict
 from six import iteritems
+from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account
 
 class ReceivablePayableReport(object):
 	def __init__(self, filters=None):
@@ -240,6 +241,15 @@ class ReceivablePayableReport(object):
 				}
 			]
 
+		if get_allow_cost_center_in_entry_of_bs_account():
+			columns.append({
+				"label": _("Cost Center"),
+				"fieldtype": "Link",
+				"fieldname": "cost_center",
+				"options": "Cost Center",
+				"width": 100
+			})
+
 		if args.get("party_type") == 'Customer':
 			columns.append({
 				"label": _("Customer Contact"),
@@ -427,6 +437,8 @@ class ReceivablePayableReport(object):
 		row["voucher_type"] = gle.voucher_type
 		row["voucher_no"] = gle.voucher_no
 		row["due_date"] = due_date
+
+		row["cost_center"] = gle.cost_center
 
 		# get supplier bill details
 		if args.get("party_type") == "Supplier":
