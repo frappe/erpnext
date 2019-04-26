@@ -40,9 +40,8 @@ class BankTransaction(StatusUpdater):
 
 	def clear_linked_payment_entries(self):
 		for payment_entry in self.payment_entries:
-			allocated_amount = self.get_total_allocated_amount(payment_entry)
-			print(allocated_amount)
-			paid_amount = self.get_paid_amount(payment_entry)
+			allocated_amount = get_total_allocated_amount(payment_entry)
+			paid_amount = get_paid_amount(payment_entry)
 
 			if paid_amount and allocated_amount:
 				if  flt(allocated_amount[0]["allocated_amount"]) > flt(paid_amount):
@@ -54,41 +53,41 @@ class BankTransaction(StatusUpdater):
 					elif payment_entry.payment_document == "Sales Invoice":
 						self.clear_sales_invoice(payment_entry)
 
-	def get_total_allocated_amount(self, payment_entry):
-		return frappe.db.sql("""
-			SELECT
-				SUM(btp.allocated_amount) as allocated_amount,
-				bt.name
-			FROM
-				`tabBank Transaction Payments` as btp
-			LEFT JOIN
-				`tabBank Transaction` bt ON bt.name=btp.parent
-			WHERE
-				btp.payment_document = %s
-			AND
-				btp.payment_entry = %s
-			AND
-				bt.docstatus = 1""", (payment_entry.payment_document, payment_entry.payment_entry), as_dict=True)
-
-	def get_paid_amount(self, payment_entry):
-		if payment_entry.payment_document in ["Payment Entry", "Sales Invoice", "Purchase Invoice"]:
-			return frappe.db.get_value(payment_entry.payment_document, payment_entry.payment_entry, "paid_amount")
-
-		elif payment_entry.payment_document == "Journal Entry":
-			return frappe.db.get_value(payment_entry.payment_document, payment_entry.payment_entry, "total_credit")
-
-		elif payment_entry.payment_document == "Expense Claim":
-			return frappe.db.get_value(payment_entry.payment_document, payment_entry.payment_entry, "total_amount_reimbursed")
-
-		else:
-			frappe.throw("Please reconcile {0}: {1} manually".format(payment_entry.payment_document, payment_entry.payment_entry))
-
 	def clear_simple_entry(self, payment_entry):
 		frappe.db.set_value(payment_entry.payment_document, payment_entry.payment_entry, "clearance_date", self.date)
 
 	def clear_sales_invoice(self, payment_entry):
 		frappe.db.set_value("Sales Invoice Payment", dict(parenttype=payment_entry.payment_document,
 			parent=payment_entry.payment_entry), "clearance_date", self.date)
+
+def get_total_allocated_amount(payment_entry):
+	return frappe.db.sql("""
+		SELECT
+			SUM(btp.allocated_amount) as allocated_amount,
+			bt.name
+		FROM
+			`tabBank Transaction Payments` as btp
+		LEFT JOIN
+			`tabBank Transaction` bt ON bt.name=btp.parent
+		WHERE
+			btp.payment_document = %s
+		AND
+			btp.payment_entry = %s
+		AND
+			bt.docstatus = 1""", (payment_entry.payment_document, payment_entry.payment_entry), as_dict=True)
+
+def get_paid_amount(payment_entry):
+	if payment_entry.payment_document in ["Payment Entry", "Sales Invoice", "Purchase Invoice"]:
+		return frappe.db.get_value(payment_entry.payment_document, payment_entry.payment_entry, "paid_amount")
+
+	elif payment_entry.payment_document == "Journal Entry":
+		return frappe.db.get_value(payment_entry.payment_document, payment_entry.payment_entry, "total_credit")
+
+	elif payment_entry.payment_document == "Expense Claim":
+		return frappe.db.get_value(payment_entry.payment_document, payment_entry.payment_entry, "total_amount_reimbursed")
+
+	else:
+		frappe.throw("Please reconcile {0}: {1} manually".format(payment_entry.payment_document, payment_entry.payment_entry))
 
 @frappe.whitelist()
 def unclear_reference_payment(doctype, docname):
