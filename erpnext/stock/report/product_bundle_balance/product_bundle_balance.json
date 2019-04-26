@@ -17,46 +17,7 @@
  "report_type": "Script Report", 
  "roles": [
   {
-   "role": "Accounts Manager"
-  }, 
-  {
    "role": "Stock User"
-  }, 
-  {
-   "role": "Warehouse Incharge TS"
-  }, 
-  {
-   "role": "Delivery Officer TS"
-  }, 
-  {
-   "role": "System Manager"
-  }, 
-  {
-   "role": "Manager Accounts TS"
-  }, 
-  {
-   "role": "Director TS"
-  }, 
-  {
-   "role": "Delivery Manager TS"
-  }, 
-  {
-   "role": "Single Director TS"
-  }, 
-  {
-   "role": "Return Officer TS"
-  }, 
-  {
-   "role": "Cashier HO TS"
-  }, 
-  {
-   "role": "Display Incharge TS"
-  }, 
-  {
-   "role": "Purchase Manager TS"
-  }, 
-  {
-   "role": "Sales Director TS"
   }
  ]
 }

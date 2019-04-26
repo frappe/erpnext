@@ -21,7 +21,7 @@ frappe.query_reports["Product Bundle Balance"] = {
 				return {
 					query: "erpnext.controllers.queries.item_query",
 					filters: {"is_stock_item": 0}
-				}
+				};
 			}
 		},
 		{
