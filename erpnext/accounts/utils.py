@@ -191,7 +191,7 @@ def get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account,
 		account = ["'{0}'".format(frappe.db.escape(d)) for d in account]
 		account_condition = "account in ({0})".format(", ".join(account))
 	else:
-		account_condition = "account = {0}".format(frappe.db.escape(account))
+		account_condition = "account = '{0}'".format(frappe.db.escape(account))
 
 	res = frappe.db.sql("""
 		select ifnull(sum({dr_or_cr}), 0)
