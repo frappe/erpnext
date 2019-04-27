@@ -60,11 +60,7 @@ def _make_naming_series_key(prefix):
 	:param prefix: Naming series prefix gotten from Stock Settings
 	:return: The derived key. If no prefix is given, an empty string is returned
 	"""
-	try:
-  		basestring
-	except NameError:
-  		basestring = str
-	if not isinstance(prefix, basestring):
+	if not unicode(prefix):
 		return ''
 	else:
 		return prefix.upper() + '.#####'
@@ -90,7 +86,7 @@ class Batch(Document):
 	def autoname(self):
 		"""Generate random ID for batch if not specified"""
 		if not self.batch_id:
-			create_new_batch, batch_number_series = frappe.db.get_value('Item', self.item,
+			create_new_batch, batch_number_series = frappe.db.get_value('Item', self.item, 
 				['create_new_batch', 'batch_number_series'])
 
 			if create_new_batch:
