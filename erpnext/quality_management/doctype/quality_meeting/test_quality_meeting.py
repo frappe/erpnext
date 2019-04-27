@@ -10,22 +10,20 @@ class TestQualityMeeting(unittest.TestCase):
 	def test_quality_meeting(self):
 		test_create_meeting = create_meeting()
 		test_get_meeting = get_meeting()
-		self.assertEquals(test_create_meeting.name, test_get_meeting.name)
+		self.assertEquals(test_create_meeting, test_get_meeting)
 
 def create_meeting():
 	meeting = frappe.get_doc({
 		"doctype": "Quality Meeting",
-		"scope": "Company",
-		"status": "Close",
-		"date": ""+ frappe.as_unicode(frappe.utils.nowdate()) +""
+		"date": frappe.utils.today(),
+		"status": "Open"
 	})
-	meeting_exist = frappe.get_list("Quality Meeting", filters={"date": ""+ meeting.date +""}, fields=["name"], limit=1)
-	if len(meeting_exist) == 0:
+	meeting_exist = frappe.db.get_value("Quality Meeting", {"date": frappe.utils.today()}, "name")
+	if not meeting_exist:
 		meeting.insert()
-		return meeting
+		return meeting.name
 	else:
-		return meeting_exist[0]
+		return meeting_exist
 
 def get_meeting():
-	meeting = frappe.get_list("Quality Meeting", limit=1)
-	return meeting[0]
+	return frappe.db.get_value("Quality Meeting", {"date": frappe.utils.today()}, "name")

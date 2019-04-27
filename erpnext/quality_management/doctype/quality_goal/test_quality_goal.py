@@ -20,10 +20,7 @@ def create_goal():
 	goal = frappe.get_doc({
 		"doctype": "Quality Goal",
 		"goal": "_Test Quality Goal",
-		"revision": "1",
-		"procedure": "_Test Quality Procedure",
-		"frequency": "Daily",
-		"measureable": "Yes",
+		"procedure": "PRC-_Test Quality Procedure",
 		"objective": [
 			{
 				"objective": "_Test Quality Objective",
@@ -32,22 +29,21 @@ def create_goal():
 			}
 		]
 	})
-	goal_exist = frappe.db.exists("Quality Goal", ""+ goal.goal +"")
+	goal_exist = frappe.db.get_value("Quality Goal", "GOAL-_Test Quality Goal")
 	if not goal_exist:
-		goal.insert()
-		return goal.goal
+		goal.insert(ignore_permissions=True)
+		return goal.name
 	else:
 		return goal_exist
 
 def get_goal():
-	goal = frappe.db.exists("Quality Goal", "_Test Quality Goal")
-	return goal
+	return frappe.db.get_value("Quality Goal", "GOAL-_Test Quality Goal")
 
 def create_unit():
 	unit = frappe.get_doc({
 		"doctype": "UOM",
 		"uom_name": "_Test UOM",
 	})
-	unit_exist = frappe.db.exists("UOM", ""+ unit.uom_name +"")
+	unit_exist = frappe.db.exists("UOM", unit.uom_name)
 	if not unit_exist:
 		unit.insert()

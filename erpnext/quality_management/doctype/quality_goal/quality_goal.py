@@ -4,7 +4,14 @@
 
 from __future__ import unicode_literals
 from frappe.model.document import Document
+from frappe.utils import today
 
 class QualityGoal(Document):
-	pass
 
+	def after_insert(self):
+		if self.is_new:
+			self.revision = 0
+		else:
+			self.revision += 1
+
+		self.revised_on = today()

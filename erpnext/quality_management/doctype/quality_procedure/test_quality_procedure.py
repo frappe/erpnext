@@ -11,47 +11,46 @@ class TestQualityProcedure(unittest.TestCase):
 		test_create_procedure = create_procedure()
 		test_create_nested_procedure = create_nested_procedure()
 		test_get_procedure, test_get_nested_procedure = get_procedure()
-		self.assertEquals(test_create_procedure, test_get_procedure.name)
-		self.assertEquals(test_create_nested_procedure, test_get_nested_procedure.name)
-		self.assertEquals(test_get_nested_procedure.name, test_get_procedure.parent_quality_procedure)
+		print(test_create_procedure, test_create_nested_procedure)
+		print(test_get_procedure, test_get_nested_procedure)
+		self.assertEquals(test_create_procedure, test_get_procedure)
+		self.assertEquals(test_create_nested_procedure, test_get_nested_procedure)
 
 def create_procedure():
 	procedure = frappe.get_doc({
 		"doctype": "Quality Procedure",
-		"procedure": "_Test Quality Procedure",
-		"procedure_step": [
+		"procedure_name": "_Test Quality Procedure",
+		"procedures": [
 			{
-				"procedure": "Step",
-				"step": "_Test Quality Procedure Table",
+				"procedure": "_Test PRocedure Step 1",
 			}
 		]
 	})
-	procedure_exist = frappe.db.exists("Quality Procedure",""+ procedure.procedure +"")
+	procedure_exist = frappe.db.get_value("Quality Procedure", {"procedure_name": procedure.procedure_name}, "name")
 	if not procedure_exist:
-		procedure.insert()
-		return procedure.procedure
+		procedure.insert(ignore_permissions=True)
+		return procedure.name
 	else:
 		return procedure_exist
 
 def create_nested_procedure():
+	procedure = create_procedure()
 	nested_procedure = frappe.get_doc({
 		"doctype": "Quality Procedure",
-		"procedure": "_Test Nested Quality Procedure",
-		"procedure_step": [
+		"procedure_name": "_Test Nested Quality Procedure",
+		"procedures": [
 			{
-				"procedure": "Procedure",
-				"procedure_name": "_Test Quality Procedure",
+				"procedure_link": procedure,
 			}
 		]
 	})
-	nested_procedure_exist = frappe.db.exists("Quality Procedure",""+ nested_procedure.procedure +"")
+	nested_procedure_exist = frappe.db.get_value("Quality Procedure", {"procedure_name": nested_procedure.procedure_name}, "name")
 	if not nested_procedure_exist:
-		nested_procedure.insert()
-		return nested_procedure.procedure
+		nested_procedure.insert(ignore_permissions=True)
+		return nested_procedure.name
 	else:
 		return nested_procedure_exist
 
 def get_procedure():
-	procedure = frappe.get_all("Quality Procedure", filters={"procedure": "_Test Quality Procedure"}, fields=["name", "parent_quality_procedure"], limit=1)
-	nested_procedure = frappe.get_all("Quality Procedure",  filters={"procedure": "_Test Nested Quality Procedure"}, fields=["name", "parent_quality_procedure"], limit=1)
-	return procedure[0], nested_procedure[0]
+	return frappe.db.get_value("Quality Procedure", "PRC-_Test Quality Procedure"), \
+		frappe.db.get_value("Quality Procedure", "PRC-_Test Nested Quality Procedure")

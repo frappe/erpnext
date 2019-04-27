@@ -1,7 +1,7 @@
-// Copyright (c) 2018, Frappe and contributors
+// Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Customer Feedback', {
+frappe.ui.form.on('Quality Feedback', {
 	onload: function(frm){
 		frm.set_value("date", frappe.datetime.get_today());
 		$(".grid-add-row").hide();
@@ -13,11 +13,11 @@ frappe.ui.form.on('Customer Feedback', {
 			frappe.call({
 				"method": "frappe.client.get",
 				args: {
-					doctype: "Customer Feedback Template",
+					doctype: "Quality Feedback Template",
 					name: frm.doc.template
 				},
 				callback: function (data) {
-					for (var i = 0; i < data.message.feedback_parameter.length; i++ ){
+					for (var i = 0; i < data.message.feedback_parameter.length; i++){
 						frm.add_child("feedback");
 						frm.fields_dict.feedback.get_value()[i].parameter = data.message.feedback_parameter[i].parameter;
 					}

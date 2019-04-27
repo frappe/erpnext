@@ -6,13 +6,4 @@ from __future__ import unicode_literals
 from frappe.model.document import Document
 
 class QualityMeeting(Document):
-	def validate(self):
-		problem = ''
-		for data in self.minutes:
-			if data.status == 'Open':
-				problem = 'set'
-
-		if problem == 'set':
-			self.status = 'Open'
-		else:
-			self.status = 'Close'
+	pass

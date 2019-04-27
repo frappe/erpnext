@@ -1,0 +1,53 @@
+{
+ "autoname": "format:{####}",
+ "creation": "2019-04-27 00:42:31.985898",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "objective",
+  "cb_00",
+  "target",
+  "unit"
+ ],
+ "fields": [
+  {
+   "fetch_from": "goal.objective",
+   "fieldname": "objective",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Objective",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_00",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "target",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Target",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit",
+   "options": "UOM",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-04-27 00:42:31.985898",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Goal Objective",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

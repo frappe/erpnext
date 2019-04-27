@@ -1,0 +1,64 @@
+{
+ "creation": "2019-04-26 22:58:04.677932",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "type",
+  "cb_00",
+  "review",
+  "action",
+  "sb_00",
+  "minute"
+ ],
+ "fields": [
+  {
+   "depends_on": "eval: doc.type == 'Quality Review'",
+   "fieldname": "review",
+   "fieldtype": "Link",
+   "label": "Review",
+   "options": "Quality Review"
+  },
+  {
+   "fieldname": "cb_00",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.type == 'Quality Action'",
+   "fieldname": "action",
+   "fieldtype": "Link",
+   "label": "Action",
+   "options": "Quality Action"
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "minute",
+   "fieldtype": "Long Text",
+   "in_list_view": 1,
+   "label": "Minute"
+  },
+  {
+   "default": "Quality Review",
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "Quality Review\nQuality Action",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-04-26 23:03:35.055747",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Meeting Minutes",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
