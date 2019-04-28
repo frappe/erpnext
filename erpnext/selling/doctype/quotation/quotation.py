@@ -28,11 +28,10 @@ class Quotation(SellingController):
 		self.update_opportunity()
 		self.validate_order_type()
 		self.validate_uom_is_integer("stock_uom", "qty")
-		self.validate_quotation_to()
 		self.validate_valid_till()
 		if self.items:
 			self.with_items = 1
-			
+
 	def validate_valid_till(self):
 		if self.valid_till and self.valid_till < self.transaction_date:
 			frappe.throw(_("Valid till date cannot be before transaction date"))
@@ -43,16 +42,9 @@ class Quotation(SellingController):
 	def validate_order_type(self):
 		super(Quotation, self).validate_order_type()
 
-	def validate_quotation_to(self):
-		if self.customer:
-			self.quotation_to = "Customer"
-			self.lead = None
-		elif self.lead:
-			self.quotation_to = "Lead"
-
 	def update_lead(self):
-		if self.lead:
-			frappe.get_doc("Lead", self.lead).set_status(update=True)
+		if self.quotation_to == "Lead" and self.party_name:
+			frappe.get_doc("Lead", self.party_name).set_status(update=True)
 
 	def update_opportunity(self):
 		for opportunity in list(set([d.prevdoc_docname for d in self.get("items")])):
@@ -209,12 +201,12 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			}
 		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
-	return doclist	
+	return doclist
 
 def _make_customer(source_name, ignore_permissions=False):
-	quotation = frappe.db.get_value("Quotation", source_name, ["lead", "order_type", "customer"])
-	if quotation and quotation[0] and not quotation[2]:
-		lead_name = quotation[0]
+	quotation = frappe.db.get_value("Quotation", source_name, ["order_type", "party_name", "customer_name"])
+	if quotation and quotation[1] and not quotation[2]:
+		lead_name = quotation[1]
 		customer_name = frappe.db.get_value("Customer", {"lead_name": lead_name},
 			["name", "customer_name"], as_dict=True)
 		if not customer_name:
@@ -242,3 +234,5 @@ def _make_customer(source_name, ignore_permissions=False):
 				frappe.throw(_("Please create Customer from Lead {0}").format(lead_name))
 		else:
 			return customer_name
+	else:
+		return frappe.get_doc("Customer",quotation[2])
