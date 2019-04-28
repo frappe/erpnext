@@ -632,6 +632,10 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
+	limit_cond = ''
+	if limit:
+		limit_cond = " limit {}".format(limit)
+
 	if erpnext.get_party_account_type(party_type) == 'Receivable':
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 		payment_dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
@@ -673,11 +677,11 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 			and account = %(account)s
 			and {payment_dr_or_cr} > 0
 			and against_voucher is not null and against_voucher != ''
-		group by against_voucher_type, against_voucher
-	""".format(payment_dr_or_cr=payment_dr_or_cr), {
+		group by against_voucher_type, against_voucher {limit_cond}
+	""".format(payment_dr_or_cr=payment_dr_or_cr, limit_cond= limit_cond), {
 		"party_type": party_type,
 		"party": party,
-		"account": account,
+		"account": account
 	}, as_dict=True)
 
 	pe_map = frappe._dict()

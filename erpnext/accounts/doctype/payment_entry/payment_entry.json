@@ -325,19 +325,17 @@
    "reqd": 1
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "references",
+   "collapsible": 0,
+   "collapsible_depends_on": "",
    "depends_on": "eval:(doc.party && doc.paid_from && doc.paid_to && doc.paid_amount && doc.received_amount)",
    "fieldname": "section_break_14",
    "fieldtype": "Section Break",
    "label": "Reference"
   },
   {
-   "default": "1",
-   "depends_on": "eval:in_list(['Pay', 'Receive'], doc.payment_type)",
-   "fieldname": "allocate_payment_amount",
-   "fieldtype": "Check",
-   "label": "Allocate Payment Amount"
+   "fieldname": "get_outstanding_invoice",
+   "fieldtype": "Button",
+   "label": "Get Outstanding Invoice"
   },
   {
    "fieldname": "references",
