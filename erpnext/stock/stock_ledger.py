@@ -157,7 +157,11 @@ class update_entries_after(object):
 		if sle.serial_no:
 			self.get_serialized_values(sle)
 			self.qty_after_transaction += flt(sle.actual_qty)
+			if sle.voucher_type == "Stock Reconciliation":
+				self.qty_after_transaction = sle.qty_after_transaction
+
 			self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
+			frappe.errprint([self.stock_value, self.qty_after_transaction, self.valuation_rate])
 		else:
 			if sle.voucher_type=="Stock Reconciliation":
 				# assert
@@ -177,6 +181,7 @@ class update_entries_after(object):
 
 		# rounding as per precision
 		self.stock_value = flt(self.stock_value, self.precision)
+		frappe.errprint([self.stock_value, self.qty_after_transaction, self.valuation_rate, "wefjlk"])
 
 		if self.prev_stock_value < 0 and self.stock_value >= 0 and sle.voucher_type != 'Stock Reconciliation':
 			stock_value_difference = sle.actual_qty * self.valuation_rate
@@ -419,6 +424,9 @@ def get_stock_ledger_entries(previous_sle, operator=None, order="desc", limit=No
 		conditions += " and warehouse = %(warehouse)s"
 	elif previous_sle.get("warehouse_condition"):
 		conditions += " and " + previous_sle.get("warehouse_condition")
+
+	if previous_sle.get("serial_no"):
+		conditions += " and serial_no like {}".format(frappe.db.escape('%{0}%'.format(previous_sle.get("serial_no"))))
 
 	if not previous_sle.get("posting_date"):
 		previous_sle["posting_date"] = "1900-01-01"
