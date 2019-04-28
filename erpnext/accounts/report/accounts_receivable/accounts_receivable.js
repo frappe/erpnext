@@ -141,7 +141,7 @@ frappe.query_reports["Accounts Receivable"] = {
 		},
 		{
 			"fieldname":"tax_id",
-			"label": __("Tax Id"),
+			"label": __("NTN"),
 			"fieldtype": "Data",
 			"hidden": 1
 		},

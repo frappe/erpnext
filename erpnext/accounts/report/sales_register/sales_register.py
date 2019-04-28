@@ -90,7 +90,7 @@ def get_columns(invoice_list, additional_table_columns):
 
 	columns +=[
 		_("Customer Group") + ":Link/Customer Group:120", _("Territory") + ":Link/Territory:80",
-		_("Tax Id") + "::80", _("Receivable Account") + ":Link/Account:120", _("Mode of Payment") + "::120",
+		_("NTN") + "::80", _("Receivable Account") + ":Link/Account:120", _("Mode of Payment") + "::120",
 		_("Project") +":Link/Project:80", _("Owner") + "::150", _("Remarks") + "::150",
 		_("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100",
 		_("Cost Center") + ":Link/Cost Center:100", _("Warehouse") + ":Link/Warehouse:100",
