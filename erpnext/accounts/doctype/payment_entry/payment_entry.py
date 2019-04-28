@@ -574,8 +574,8 @@ def get_outstanding_reference_documents(args):
 	# Get negative outstanding sales /purchase invoices
 	negative_outstanding_invoices = []
 	if args.get("party_type") not in ["Student", "Employee"] and not args.get("voucher_no"):
-		negative_outstanding_invoices = get_negative_outstanding_invoices(args.get("party_type"),
-			args.get("party"), args.get("party_account"), party_account_currency, company_currency)
+		negative_outstanding_invoices = get_negative_outstanding_invoices(args.get("party_type"), args.get("party"),
+			args.get("party_account"), args.get("company"), party_account_currency, company_currency)
 
 	# Get positive outstanding sales /purchase invoices/ Fees
 	condition = ""
@@ -585,10 +585,16 @@ def get_outstanding_reference_documents(args):
 
 	# Add cost center condition
 	if args.get("cost_center") and get_allow_cost_center_in_entry_of_bs_account():
-			condition += " and cost_center='%s'" % args.get("cost_center")
+		condition += " and cost_center='%s'" % args.get("cost_center")
+
+	if args.get("from_date") and args.get("to_date"):
+		condition += " and posting_date between '{0}' and '{1}'".format(args.get("from_date"), args.get("to_date"))
+
+	if args.get("company"):
+		condition += " and company = '{0}'".format(frappe.db.escape(args.get("company")))
 
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
-		args.get("party_account"), condition=condition)
+		args.get("party_account"), condition=condition, limit=100)
 
 	for d in outstanding_invoices:
 		d["exchange_rate"] = 1
@@ -606,12 +612,13 @@ def get_outstanding_reference_documents(args):
 	orders_to_be_billed = []
 	if (args.get("party_type") != "Student"):
 		orders_to_be_billed =  get_orders_to_be_billed(args.get("posting_date"),args.get("party_type"),
-			args.get("party"), party_account_currency, company_currency)
+			args.get("party"), args.get("company"), party_account_currency, company_currency)
 
 	return negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 
 
-def get_orders_to_be_billed(posting_date, party_type, party, party_account_currency, company_currency, cost_center=None):
+def get_orders_to_be_billed(posting_date, party_type, party,
+	company, party_account_currency, company_currency, cost_center=None):
 	if party_type == "Customer":
 		voucher_type = 'Sales Order'
 	elif party_type == "Supplier":
@@ -641,6 +648,7 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 			where
 				{party_type} = %s
 				and docstatus = 1
+				and company = %s
 				and ifnull(status, "") != "Closed"
 				and {ref_field} > advance_paid
 				and abs(100 - per_billed) > 0.01
@@ -652,7 +660,7 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 			"voucher_type": voucher_type,
 			"party_type": scrub(party_type),
 			"condition": condition
-		}), party, as_dict=True)
+		}), (party, company), as_dict=True)
 
 	order_list = []
 	for d in orders:
@@ -663,7 +671,8 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 
 	return order_list
 
-def get_negative_outstanding_invoices(party_type, party, party_account, party_account_currency, company_currency, cost_center=None):
+def get_negative_outstanding_invoices(party_type, party, party_account,
+	company, party_account_currency, company_currency, cost_center=None):
 	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
 	supplier_condition = ""
 	if voucher_type == "Purchase Invoice":
@@ -684,7 +693,8 @@ def get_negative_outstanding_invoices(party_type, party, party_account, party_ac
 		from
 			`tab{voucher_type}`
 		where
-			{party_type} = %s and {party_account} = %s and docstatus = 1 and outstanding_amount < 0
+			{party_type} = %s and {party_account} = %s and docstatus = 1 and
+			company = %s and outstanding_amount < 0
 			{supplier_condition}
 		order by
 			posting_date, name
@@ -696,7 +706,7 @@ def get_negative_outstanding_invoices(party_type, party, party_account, party_ac
 			"party_type": scrub(party_type),
 			"party_account": "debit_to" if party_type == "Customer" else "credit_to",
 			"cost_center": cost_center
-		}), (party, party_account), as_dict=True)
+		}), (party, party_account, company), as_dict=True)
 
 
 @frappe.whitelist()
