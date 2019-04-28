@@ -32,7 +32,7 @@ frappe.ui.form.on("Sales Invoice", {
 				if (!w) {
 					frappe.msgprint(__("Please enable pop-ups")); return;
 				}
-			});
+			}, __("Make"));
 		}
 	}
 });

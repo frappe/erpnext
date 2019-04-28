@@ -432,7 +432,7 @@ def make_custom_fields(update=True):
 		]
 	}
 
-	create_custom_fields(custom_fields, ignore_validate = frappe.flags.in_patch, update=update)
+	create_custom_fields(custom_fields, update=update)
 
 def make_fixtures(company=None):
 	docs = []

@@ -244,8 +244,7 @@ def calculate_hra_exemption_for_period(doc):
 		return exemptions
 
 
-@frappe.whitelist()
-def generate_ewb_json(dt, dn):
+def get_ewb_data(dt, dn):
 	if dt != 'Sales Invoice':
 		frappe.throw(_('e-Way Bill JSON can only be generated from Sales Invoice'))
 
@@ -254,26 +253,8 @@ def generate_ewb_json(dt, dn):
 	ewaybills = []
 	for doc_name in dn:
 		doc = frappe.get_doc(dt, doc_name)
-		if doc.docstatus != 1:
-			frappe.throw(_('e-Way Bill JSON can only be generated from submitted document'))
 
-		if doc.is_return:
-			frappe.throw(_('e-Way Bill JSON cannot be generated for Sales Return as of now'))
-
-		if doc.ewaybill:
-			frappe.throw(_('e-Way Bill already exists for this document'))
-
-		reqd_fields = ['company_gstin', 'company_address', 'customer_address',
-			'shipping_address_name', 'mode_of_transport', 'distance']
-
-		for fieldname in reqd_fields:
-			if not doc.get(fieldname):
-				frappe.throw(_('{} is required to generate e-Way Bill JSON'.format(
-					doc.meta.get_label(fieldname)
-				)))
-
-		if len(doc.company_gstin) < 15:
-			frappe.throw(_('You must be a registered supplier to generate e-Way Bill'))
+		validate_sales_invoice(doc)
 
 		data = frappe._dict({
 			"transporterId": "",
@@ -294,110 +275,21 @@ def generate_ewb_json(dt, dn):
 		data.docDate = frappe.utils.formatdate(doc.posting_date, 'dd/mm/yyyy')
 
 		company_address = frappe.get_doc('Address', doc.company_address)
-		data.fromPincode = validate_pincode(company_address.pincode, 'Company Address')
-		data.fromStateCode = data.actualFromStateCode = validate_state_code(
-			company_address.gst_state_number, 'Company Address')
-
 		billing_address = frappe.get_doc('Address', doc.customer_address)
-		if not doc.billing_address_gstin or len(doc.billing_address_gstin) < 15:
-			data.toGstin = 'URP'
-			set_gst_state_and_state_number(billing_address)
-		else:
-			data.toGstin = doc.billing_address_gstin
 
-		data.toPincode = validate_pincode(billing_address.pincode, 'Customer Address')
-		data.toStateCode = validate_state_code(billing_address.gst_state_number, 'Customer Address')
+		shipping_address = frappe.get_doc('Address', doc.shipping_address_name)
 
-		if doc.customer_address != doc.shipping_address_name:
-			data.transType = 2
-			shipping_address = frappe.get_doc('Address', doc.shipping_address_name)
-			set_gst_state_and_state_number(shipping_address)
-			data.actualToStateCode = validate_state_code(shipping_address.gst_state_number, 'Shipping Address')
-		else:
-			data.transType = 1
-			data.actualToStateCode = data.toStateCode
-			shipping_address = billing_address
+		data = get_address_details(data, doc, company_address, billing_address)
 
 		data.itemList = []
 		data.totalValue = doc.total
-		for attr in ['cgstValue', 'sgstValue', 'igstValue', 'cessValue', 'OthValue']:
-			data[attr] = 0
 
-		gst_accounts = get_gst_accounts(doc.company, account_wise=True)
-		tax_map = {
-			'sgst_account': ['sgstRate', 'sgstValue'],
-			'cgst_account': ['cgstRate', 'cgstValue'],
-			'igst_account': ['igstRate', 'igstValue'],
-			'cess_account': ['cessRate', 'cessValue']
-		}
-		item_data_attrs = ['sgstRate', 'cgstRate', 'igstRate', 'cessRate', 'cessNonAdvol']
-		hsn_wise_charges, hsn_taxable_amount = get_itemised_tax_breakup_data(doc, account_wise=True)
-		for hsn_code, taxable_amount in hsn_taxable_amount.items():
-			item_data = frappe._dict()
-			if not hsn_code:
-				frappe.throw(_('GST HSN Code does not exist for one or more items'))
-			item_data.hsnCode = int(hsn_code)
-			item_data.taxableAmount = taxable_amount
-			item_data.qtyUnit = ""
-			for attr in item_data_attrs:
-				item_data[attr] = 0
-
-			for account, tax_detail in hsn_wise_charges.get(hsn_code, {}).items():
-				account_type = gst_accounts.get(account, '')
-				for tax_acc, attrs in tax_map.items():
-					if account_type == tax_acc:
-						item_data[attrs[0]] = tax_detail.get('tax_rate')
-						data[attrs[1]] += tax_detail.get('tax_amount')
-						break
-				else:
-					data.OthValue += tax_detail.get('tax_amount')
-
-			data.itemList.append(item_data)
+		data = get_item_list(data, doc)
 
 		disable_rounded = frappe.db.get_single_value('Global Defaults', 'disable_rounded_total')
 		data.totInvValue = doc.grand_total if disable_rounded else doc.rounded_total
 
-		if doc.distance > 4000:
-			frappe.throw(_('Distance cannot be greater than 4000 kms'))
-
-		data.transDistance = round(doc.distance)
-
-		transport_modes = {
-			'Road': 1,
-			'Rail': 2,
-			'Air': 3,
-			'Ship': 4
-		}
-
-		vehicle_types = {
-			'Regular': 'R',
-			'Over Dimensional Cargo (ODC)': 'O'
-		}
-
-		data.transMode = transport_modes.get(doc.mode_of_transport)
-
-		if doc.mode_of_transport == 'Road':
-			if not doc.gst_transporter_id and not doc.vehicle_no:
-				frappe.throw(_('Either GST Transporter ID or Vehicle No is required if Mode of Transport is Road'))
-			if doc.vehicle_no:
-				data.vehicleNo = doc.vehicle_no.replace(' ', '')
-			if not doc.gst_vehicle_type:
-				frappe.throw(_('Vehicle Type is required if Mode of Transport is Road'))
-			else:
-				data.vehicleType = vehicle_types.get(doc.gst_vehicle_type)
-		else:
-			if not doc.lr_no or not doc.lr_date:
-				frappe.throw(_('Transport Receipt No and Date are mandatory for your chosen Mode of Transport'))
-
-		if doc.lr_no:
-			data.transDocNo = doc.lr_no
-
-		if doc.lr_date:
-			data.transDocDate = frappe.utils.formatdate(doc.lr_date, 'dd/mm/yyyy')
-
-		if doc.gst_transporter_id:
-			validate_gstin_check_digit(doc.gst_transporter_id, label='GST Transporter ID')
-			data.transporterId  = doc.gst_transporter_id
+		data = get_transport_details(data, doc)
 
 		fields = {
 			"/. -": {
@@ -431,13 +323,154 @@ def generate_ewb_json(dt, dn):
 		'billLists': ewaybills
 	}
 
+	return data
+
+@frappe.whitelist()
+def generate_ewb_json(dt, dn):
+
+	data = get_ewb_data(dt, dn)
+
 	frappe.local.response.filecontent = json.dumps(data, indent=4, sort_keys=True)
 	frappe.local.response.type = 'download'
 
-	if len(ewaybills) > 1:
+	if len(data['billLists']) > 1:
 		doc_name = 'Bulk'
+	else:
+		doc_name = dn
 
 	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(doc_name, frappe.utils.random_string(5))
+
+
+def get_address_details(data, doc, company_address, billing_address):
+	data.fromPincode = validate_pincode(company_address.pincode, 'Company Address')
+	data.fromStateCode = data.actualFromStateCode = validate_state_code(
+		company_address.gst_state_number, 'Company Address')
+
+	if not doc.billing_address_gstin or len(doc.billing_address_gstin) < 15:
+		data.toGstin = 'URP'
+		set_gst_state_and_state_number(billing_address)
+	else:
+		data.toGstin = doc.billing_address_gstin
+
+	data.toPincode = validate_pincode(billing_address.pincode, 'Customer Address')
+	data.toStateCode = validate_state_code(billing_address.gst_state_number, 'Customer Address')
+
+	if doc.customer_address != doc.shipping_address_name:
+		data.transType = 2
+		shipping_address = frappe.get_doc('Address', doc.shipping_address_name)
+		set_gst_state_and_state_number(shipping_address)
+		data.actualToStateCode = validate_state_code(shipping_address.gst_state_number, 'Shipping Address')
+	else:
+		data.transType = 1
+		data.actualToStateCode = data.toStateCode
+		shipping_address = billing_address
+
+	return data
+
+def get_item_list(data, doc):
+	for attr in ['cgstValue', 'sgstValue', 'igstValue', 'cessValue', 'OthValue']:
+		data[attr] = 0
+
+	gst_accounts = get_gst_accounts(doc.company, account_wise=True)
+	tax_map = {
+		'sgst_account': ['sgstRate', 'sgstValue'],
+		'cgst_account': ['cgstRate', 'cgstValue'],
+		'igst_account': ['igstRate', 'igstValue'],
+		'cess_account': ['cessRate', 'cessValue']
+	}
+	item_data_attrs = ['sgstRate', 'cgstRate', 'igstRate', 'cessRate', 'cessNonAdvol']
+	hsn_wise_charges, hsn_taxable_amount = get_itemised_tax_breakup_data(doc, account_wise=True)
+	for hsn_code, taxable_amount in hsn_taxable_amount.items():
+		item_data = frappe._dict()
+		if not hsn_code:
+			frappe.throw(_('GST HSN Code does not exist for one or more items'))
+		item_data.hsnCode = int(hsn_code)
+		item_data.taxableAmount = taxable_amount
+		item_data.qtyUnit = ""
+		for attr in item_data_attrs:
+			item_data[attr] = 0
+
+		for account, tax_detail in hsn_wise_charges.get(hsn_code, {}).items():
+			account_type = gst_accounts.get(account, '')
+			for tax_acc, attrs in tax_map.items():
+				if account_type == tax_acc:
+					item_data[attrs[0]] = tax_detail.get('tax_rate')
+					data[attrs[1]] += tax_detail.get('tax_amount')
+					break
+			else:
+				data.OthValue += tax_detail.get('tax_amount')
+
+		data.itemList.append(item_data)
+
+	return data
+
+def validate_sales_invoice(doc):
+	if doc.docstatus != 1:
+		frappe.throw(_('e-Way Bill JSON can only be generated from submitted document'))
+
+	if doc.is_return:
+		frappe.throw(_('e-Way Bill JSON cannot be generated for Sales Return as of now'))
+
+	if doc.ewaybill:
+		frappe.throw(_('e-Way Bill already exists for this document'))
+
+	reqd_fields = ['company_gstin', 'company_address', 'customer_address',
+		'shipping_address_name', 'mode_of_transport', 'distance']
+
+	for fieldname in reqd_fields:
+		if not doc.get(fieldname):
+			frappe.throw(_('{} is required to generate e-Way Bill JSON'.format(
+				doc.meta.get_label(fieldname)
+			)))
+
+	if len(doc.company_gstin) < 15:
+		frappe.throw(_('You must be a registered supplier to generate e-Way Bill'))
+
+def get_transport_details(data, doc):
+	if doc.distance > 4000:
+		frappe.throw(_('Distance cannot be greater than 4000 kms'))
+
+	data.transDistance = round(doc.distance)
+
+	transport_modes = {
+		'Road': 1,
+		'Rail': 2,
+		'Air': 3,
+		'Ship': 4
+	}
+
+	vehicle_types = {
+		'Regular': 'R',
+		'Over Dimensional Cargo (ODC)': 'O'
+	}
+
+	data.transMode = transport_modes.get(doc.mode_of_transport)
+
+	if doc.mode_of_transport == 'Road':
+		if not doc.gst_transporter_id and not doc.vehicle_no:
+			frappe.throw(_('Either GST Transporter ID or Vehicle No is required if Mode of Transport is Road'))
+		if doc.vehicle_no:
+			data.vehicleNo = doc.vehicle_no.replace(' ', '')
+		if not doc.gst_vehicle_type:
+			frappe.throw(_('Vehicle Type is required if Mode of Transport is Road'))
+		else:
+			data.vehicleType = vehicle_types.get(doc.gst_vehicle_type)
+	else:
+		if not doc.lr_no or not doc.lr_date:
+			frappe.throw(_('Transport Receipt No and Date are mandatory for your chosen Mode of Transport'))
+
+	if doc.lr_no:
+		data.transDocNo = doc.lr_no
+
+	if doc.lr_date:
+		data.transDocDate = frappe.utils.formatdate(doc.lr_date, 'dd/mm/yyyy')
+
+	if doc.gst_transporter_id:
+		validate_gstin_check_digit(doc.gst_transporter_id, label='GST Transporter ID')
+		data.transporterId  = doc.gst_transporter_id
+
+	return data
+
 
 def validate_pincode(pincode, address):
 	pin_not_found = "Pin Code doesn't exist for {}"
