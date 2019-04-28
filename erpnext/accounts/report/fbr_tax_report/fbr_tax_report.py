@@ -82,22 +82,22 @@ class FBRInvoiceWiseTaxes(object):
 				"width": 110
 			},
 			{
-				"label": _("NTN/CNIC"),
+				"label": _("NTN"),
 				"fieldtype": "Data",
-				"fieldname": "tax_ntn_cnic",
+				"fieldname": "tax_id",
+				"width": 100
+			},
+			{
+				"label": _("CNIC"),
+				"fieldtype": "Data",
+				"fieldname": "tax_cnic",
 				"width": 120
 			},
 			{
 				"label": _("STRN"),
 				"fieldtype": "Data",
-				"fieldname": "tax_id",
+				"fieldname": "tax_strn",
 				"width": 120
-			},
-			{
-				"label": _("Tax Category"),
-				"fieldtype": "Data",
-				"fieldname": "tax_category",
-				"width": 150
 			}
 		]
 		for (description, rate) in self.tax_columns:
@@ -110,7 +110,7 @@ class FBRInvoiceWiseTaxes(object):
 			})
 
 		if self.filters.detail_by == "Customer":
-			fieldnames = ['party', 'party_name', 'tax_ntn_cnic', 'tax_id', 'tax_category', 'base_net_total', 'base_grand_total']
+			fieldnames = ['party', 'party_name', 'tax_id', 'tax_cnic', 'tax_strn', 'base_net_total', 'base_grand_total']
 			for (description, rate) in self.tax_columns:
 				fieldnames.append(get_tax_fieldname(description, rate))
 			fieldnames += ['base_total_taxes_and_charges']
@@ -118,7 +118,7 @@ class FBRInvoiceWiseTaxes(object):
 			fieldnames = ['posting_date', 'invoice', 'stin', 'base_net_total', 'base_grand_total']
 			for (description, rate) in self.tax_columns:
 				fieldnames.append(get_tax_fieldname(description, rate))
-			fieldnames += ['base_total_taxes_and_charges', 'party', 'party_name', 'tax_ntn_cnic', 'tax_id', 'tax_category']
+			fieldnames += ['base_total_taxes_and_charges', 'party', 'party_name', 'tax_id', 'tax_cnic', 'tax_strn']
 
 		columns = [list(filter(lambda d: d['fieldname'] == f, all_columns))[0] for f in fieldnames]
 
@@ -133,7 +133,7 @@ class FBRInvoiceWiseTaxes(object):
 		self.invoices = frappe.db.sql("""
 			select
 				i.name as invoice, i.posting_date, i.base_net_total, i.base_grand_total, i.base_total_taxes_and_charges,
-				i.customer as party, i.customer_name as party_name, c.tax_ntn_cnic, c.tax_id, c.tax_category, i.stin
+				i.customer as party, i.customer_name as party_name, c.tax_id, c.tax_cnic, c.tax_strn, i.stin
 			from `tabSales Invoice` i
 			left join `tabCustomer` c on c.name = i.customer
 			where i.docstatus = 1 and i.company = %(company)s and i.posting_date between %(from_date)s and %(to_date)s
@@ -143,13 +143,16 @@ class FBRInvoiceWiseTaxes(object):
 
 		invoice_names = [d.invoice for d in self.invoices]
 
-		taxes = frappe.db.sql("""
-			select
-				parent as invoice, description, rate, sum(base_tax_amount_after_discount_amount) as amount
-			from `tabSales Taxes and Charges`
-			where parent in ({0}) and abs(base_tax_amount_after_discount_amount) > 0
-			group by parent, description, rate
-		""".format(", ".join(['%s'] * len(invoice_names))), invoice_names, as_dict=1)
+		if invoice_names:
+			taxes = frappe.db.sql("""
+				select
+					parent as invoice, description, rate, sum(base_tax_amount_after_discount_amount) as amount
+				from `tabSales Taxes and Charges`
+				where parent in ({0}) and abs(base_tax_amount_after_discount_amount) > 0
+				group by parent, description, rate
+			""".format(", ".join(['%s'] * len(invoice_names))), invoice_names, as_dict=1)
+		else:
+			taxes = []
 
 		self.tax_map = frappe._dict()
 		self.tax_columns = []
@@ -169,7 +172,7 @@ class FBRInvoiceWiseTaxes(object):
 		# Customer aggregates
 		self.customer_aggregate = frappe._dict()
 		if self.filters.detail_by == "Customer":
-			party_fields = ['party', 'tax_ntn_cnic', 'tax_id', 'tax_category']
+			party_fields = ['party', 'tax_id', 'tax_cnic', 'tax_strn']
 			aggregate_fields = ['base_net_total', 'base_grand_total', 'base_total_taxes_and_charges']
 			for (description, rate) in self.tax_columns:
 				aggregate_fields.append(get_tax_fieldname(description, rate))
