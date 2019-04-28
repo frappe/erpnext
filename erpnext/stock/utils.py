@@ -277,3 +277,7 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 					new_row.append(None)
 
 		result[row_idx] = new_row
+
+def get_available_serial_nos(item_code, warehouse):
+	return frappe.get_all("Serial No", filters = {'item_code': item_code,
+		'warehouse': warehouse, 'delivery_document_no': ''}) or []
