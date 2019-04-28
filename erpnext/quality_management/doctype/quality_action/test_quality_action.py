@@ -33,7 +33,7 @@ def create_action(review=None):
 	})
 	action_exist = frappe.db.get_value("Quality Action", {"review": review}, "name")
 	if not action_exist:
-		action.insert(ignore_permission=True)
+		action.insert(ignore_permissions=True)
 		return action.name
 	else:
 		return action_exist

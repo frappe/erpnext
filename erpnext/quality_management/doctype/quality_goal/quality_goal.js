@@ -33,7 +33,7 @@ frappe.ui.form.on('Quality Goal', {
 						}).then(() =>{
 							review.clear();
 							review.enable_primary_action();
-						})
+						});
 					}
 				});
 				review.show();
