@@ -130,4 +130,14 @@ frappe.ui.form.on("Customer", {
 			if (total > 100) frappe.throw(__("Total contribution percentage can't exceed 100"));
 		}
 	},
+
+	tax_id: function(frm) {
+		erpnext.utils.format_ntn(frm, "tax_id");
+	},
+	tax_cnic: function(frm) {
+		erpnext.utils.format_cnic(frm, "tax_cnic");
+	},
+	tax_strn: function(frm) {
+		erpnext.utils.format_strn(frm, "tax_strn");
+	},
 });

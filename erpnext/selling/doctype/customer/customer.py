@@ -54,6 +54,9 @@ class Customer(TransactionBase):
 		self.set_loyalty_program()
 		self.check_customer_group_change()
 
+		from erpnext.accounts.party import validate_ntn_cnic_strn
+		validate_ntn_cnic_strn(self.tax_id, self.tax_cnic, self.tax_strn)
+
 		# set loyalty program tier
 		if frappe.db.exists('Customer', self.name):
 			customer = frappe.get_doc('Customer', self.name)
