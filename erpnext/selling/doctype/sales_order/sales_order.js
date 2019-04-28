@@ -13,8 +13,6 @@ frappe.ui.form.on("Sales Order", {
 			'Project': 'Project',
 			'Purchase Invoice': 'Purchase Invoice'
 		}
-		frm.add_fetch('customer', 'tax_id', 'tax_id');
-		frm.add_fetch('customer', 'tax_ntn_cnic', 'tax_ntn_cnic');
 
 		// formatter for material request item
 		frm.set_indicator_formatter('item_code',
