@@ -6,11 +6,11 @@ import frappe
 from frappe import _
 
 def execute(filters=None):
-	columns = get_columns()
-	data = get_data()
+	columns = get_columns(filters)
+	data = get_data(filters)
 	return columns, data
 
-def get_columns():
+def get_columns(filters):
 	columns = [
 		{
 			"label": _("Material Request Date"),
@@ -144,9 +144,22 @@ def get_columns():
 	]
 	return columns
 
-def get_data():
-	purchase_order_entry = get_po_entries()
-	mr_records, procurement_record_against_mr = get_mapped_mr_details()
+def get_conditions(filters):
+	conditions = ""
+
+	if filters.get("company"):
+		conditions += " AND company='%s'"% filters.get('company')
+	if filters.get("cost_center") or filters.get("project"):
+		conditions += """
+			AND (cost_center='%s'
+			OR project='%s')
+			"""% (filters.get('cost_center'), filters.get('project'))
+	return conditions
+
+def get_data(filters):
+	conditions = get_conditions(filters)
+	purchase_order_entry = get_po_entries(conditions)
+	mr_records, procurement_record_against_mr = get_mapped_mr_details(conditions)
 	pr_records = get_mapped_pr_records()
 	pi_records = get_mapped_pi_records()
 
@@ -157,7 +170,7 @@ def get_data():
 		# fetch material records linked to the purchase order item
 		mr_record = mr_records.get(po.material_request_item, [{}])[0]
 		procurement_detail = {
-			"material_request_date": mr_record.get('transaction_date', ''),
+			"material_request_date": mr_record.get('transaction_date'),
 			"cost_center": po.cost_center,
 			"project": po.project,
 			"requesting_site": po.warehouse,
@@ -180,7 +193,7 @@ def get_data():
 		procurement_record.append(procurement_detail)
 	return procurement_record
 
-def get_mapped_mr_details():
+def get_mapped_mr_details(conditions):
 	mr_records = {}
 	mr_details = frappe.db.sql("""
 		SELECT
@@ -194,7 +207,8 @@ def get_mapped_mr_details():
 			mr.per_ordered>=0
 			AND mr.name=mr_item.parent
 			AND mr.docstatus=1
-		""", as_dict=1)
+			{conditions}
+		""".format(conditions=conditions), as_dict=1) #nosec
 
 	procurement_record_against_mr = []
 	for record in mr_details:
@@ -232,7 +246,7 @@ def get_mapped_pr_records():
 			AND pr_item.purchase_order_item IS NOT NULL
 		"""))
 
-def get_po_entries():
+def get_po_entries(conditions):
 	return frappe.db.sql("""
 		SELECT
 			po_item.name,
@@ -257,6 +271,7 @@ def get_po_entries():
 			po.docstatus = 1
 			AND po.name = po_item.parent
 			AND po.status not in  ("Closed","Completed","Cancelled")
+			{conditions}
 		GROUP BY
 			po.name,po_item.item_code
-		""", as_dict=1)
+		""".format(conditions=conditions), as_dict=1) #nosec
