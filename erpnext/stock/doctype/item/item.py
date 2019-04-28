@@ -90,8 +90,6 @@ class Item(WebsiteGenerator):
 			self.set_opening_stock()
 
 	def validate(self):
-		self.get_doc_before_save()
-
 		super(Item, self).validate()
 
 		if not self.item_name:
@@ -1062,3 +1060,7 @@ def update_variants(variants, template, publish_progress=True):
 		count+=1
 		if publish_progress:
 				frappe.publish_progress(count*100/len(variants), title = _("Updating Variants..."))
+
+def on_doctype_update():
+	# since route is a Text column, it needs a length for indexing
+	frappe.db.add_index("Item", ["route(500)"])

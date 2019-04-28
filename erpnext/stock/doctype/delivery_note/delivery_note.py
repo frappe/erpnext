@@ -412,7 +412,6 @@ def get_returned_qty_map(delivery_note):
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
 	doc = frappe.get_doc('Delivery Note', source_name)
-	sales_orders = [d.against_sales_order for d in doc.items]
 	returned_qty_map = get_returned_qty_map(source_name)
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
@@ -452,7 +451,7 @@ def make_sales_invoice(source_name, target_doc=None):
 				returned_qty = 0
 		return pending_qty, returned_qty
 
-	doc = get_mapped_doc("Delivery Note", source_name, 	{
+	doc = get_mapped_doc("Delivery Note", source_name, {
 		"Delivery Note": {
 			"doctype": "Sales Invoice",
 			"validation": {
@@ -470,7 +469,7 @@ def make_sales_invoice(source_name, target_doc=None):
 				"cost_center": "cost_center"
 			},
 			"postprocess": update_item,
-			"filter": lambda d: get_pending_qty(d)[0]<=0
+			"filter": lambda d: get_pending_qty(d)[0] <= 0 if not doc.get("is_return") else get_pending_qty(d)[0] > 0
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",

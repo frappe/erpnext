@@ -11,6 +11,7 @@ app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
+
 develop_version = '12.x.x-develop'
 
 error_report_email = "support@erpnext.com"
@@ -74,7 +75,7 @@ website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
 
 website_context = {
 	"favicon": 	"/assets/erpnext/images/favicon.png",
-	"splash_image": "/assets/erpnext/images/erpnext-12.svg"
+	"splash_image": "/assets/erpnext/images/erp-icon.svg"
 }
 
 website_route_rules = [

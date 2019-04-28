@@ -145,23 +145,25 @@ class InvoiceDiscounting(AccountsController):
 
 		if getdate(self.loan_end_date) > getdate(nowdate()):
 			for d in self.invoices:
-				je.append("accounts", {
-					"account": self.accounts_receivable_discounted,
-					"credit_in_account_currency": flt(d.outstanding_amount),
-					"reference_type": "Invoice Discounting",
-					"reference_name": self.name,
-					"party_type": "Customer",
-					"party": d.customer
-				})
+				outstanding_amount = frappe.db.get_value("Sales Invoice", d.sales_invoice, "outstanding_amount")
+				if flt(outstanding_amount) > 0:
+					je.append("accounts", {
+						"account": self.accounts_receivable_discounted,
+						"credit_in_account_currency": flt(outstanding_amount),
+						"reference_type": "Invoice Discounting",
+						"reference_name": self.name,
+						"party_type": "Customer",
+						"party": d.customer
+					})
 
-				je.append("accounts", {
-					"account": self.accounts_receivable_unpaid,
-					"debit_in_account_currency": flt(d.outstanding_amount),
-					"reference_type": "Invoice Discounting",
-					"reference_name": self.name,
-					"party_type": "Customer",
-					"party": d.customer
-				})
+					je.append("accounts", {
+						"account": self.accounts_receivable_unpaid,
+						"debit_in_account_currency": flt(outstanding_amount),
+						"reference_type": "Invoice Discounting",
+						"reference_name": self.name,
+						"party_type": "Customer",
+						"party": d.customer
+					})
 
 		return je
 
@@ -190,9 +192,28 @@ def get_invoices(filters):
 			customer,
 			posting_date,
 			outstanding_amount
-		from `tabSales Invoice`
+		from `tabSales Invoice` si
 		where
 			docstatus = 1
 			and outstanding_amount > 0
 			%s
+			and not exists(select di.name from `tabDiscounted Invoice` di
+				where di.docstatus=1 and di.sales_invoice=si.name)
 	""" % where_condition, filters, as_dict=1)
+
+def get_party_account_based_on_invoice_discounting(sales_invoice):
+	party_account = None
+	invoice_discounting = frappe.db.sql("""
+		select par.accounts_receivable_discounted, par.accounts_receivable_unpaid, par.status
+		from `tabInvoice Discounting` par, `tabDiscounted Invoice` ch
+		where par.name=ch.parent
+			and par.docstatus=1
+			and ch.sales_invoice = %s
+	""", (sales_invoice), as_dict=1)
+	if invoice_discounting:
+		if invoice_discounting[0].status == "Disbursed":
+			party_account = invoice_discounting[0].accounts_receivable_discounted
+		elif invoice_discounting[0].status == "Settled":
+			party_account = invoice_discounting[0].accounts_receivable_unpaid
+
+	return party_account

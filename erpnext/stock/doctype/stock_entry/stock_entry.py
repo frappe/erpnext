@@ -35,7 +35,7 @@ form_grid_templates = {
 
 class StockEntry(StockController):
 	def get_feed(self):
-		return _("From {0} to {1}").format(self.from_warehouse, self.to_warehouse)
+		return self.stock_entry_type
 
 	def onload(self):
 		for item in self.get("items"):
