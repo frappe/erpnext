@@ -877,7 +877,7 @@ def make_sales_order(customer, source_name, target_doc=None):
 		target.customer = customer
 
 		target.update(get_fetch_values("Sales Order", 'customer', target.customer))
-		target.tax_id, target.tax_ntn_cnic = frappe.get_value("Customer", customer, ['tax_id', 'tax_ntn_cnic'])
+		target.tax_id, target.tax_cnic, target.tax_strn = frappe.get_value("Customer", customer, ['tax_id', 'tax_cnic', 'tax_strn'])
 
 		default_price_list = frappe.get_value("Customer", customer, "default_price_list")
 		if default_price_list:
