@@ -88,8 +88,7 @@ class AccountsController(TransactionBase):
 			self.validate_paid_amount()
 
 		if self.doctype in ['Purchase Invoice', 'Sales Invoice']:
-			pos_check_field = "is_pos" if self.doctype=="Sales Invoice" else "is_paid"
-			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
+			if cint(self.allocate_advances_automatically):
 				self.set_advances()
 
 			if self.is_return:
@@ -368,6 +367,8 @@ class AccountsController(TransactionBase):
 		return gl_dict
 
 	def validate_qty_is_not_zero(self):
+		if frappe.db.get_single_value('Accounts Settings', 'allow_zero_item_quantity'):
+			return
 		for item in self.items:
 			if not item.qty:
 				frappe.throw("Item quantity can not be zero")
