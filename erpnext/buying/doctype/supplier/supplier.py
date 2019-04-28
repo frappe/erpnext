@@ -48,6 +48,9 @@ class Supplier(TransactionBase):
 			if not self.naming_series:
 				msgprint(_("Series is mandatory"), raise_exception=1)
 
+		from erpnext.accounts.party import validate_ntn_cnic_strn
+		validate_ntn_cnic_strn(self.tax_id, self.tax_cnic, self.tax_strn)
+
 		validate_party_accounts(self)
 
 	def on_trash(self):

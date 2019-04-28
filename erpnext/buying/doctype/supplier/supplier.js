@@ -65,5 +65,15 @@ frappe.ui.form.on("Supplier", {
 		else {
 			frm.toggle_reqd("represents_company", false);
 		}
-	}
+	},
+
+	tax_id: function(frm) {
+		erpnext.utils.format_ntn(frm, "tax_id");
+	},
+	tax_cnic: function(frm) {
+		erpnext.utils.format_cnic(frm, "tax_cnic");
+	},
+	tax_strn: function(frm) {
+		erpnext.utils.format_strn(frm, "tax_strn");
+	},
 });

@@ -454,6 +454,19 @@ def validate_party_frozen_disabled(party_type, party_name):
 			if frappe.db.get_value("Employee", party_name, "status") == "Left":
 				frappe.msgprint(_("{0} {1} is not active").format(party_type, party_name), alert=True)
 
+def validate_ntn_cnic_strn(ntn=None, cnic=None, strn=None):
+	import re
+	cnic_regex = re.compile(r'^.....-.......-.$')
+	ntn_regex = re.compile(r'^.......-.$')
+	strn_regex = re.compile(r'^..-..-....-...-..$')
+
+	if ntn and not ntn_regex.match(ntn):
+		frappe.throw(_("Invalid NTN. NTN must be in the format #######-#"))
+	if cnic and not cnic_regex.match(cnic):
+		frappe.throw(_("Invalid CNIC. CNIC must be in the format #####-#######-#"))
+	if strn and not strn_regex.match(strn):
+		frappe.throw(_("Invalid STRN. STRN must be in the format ##-##-####-###-##"))
+
 def get_timeline_data(doctype, name):
 	'''returns timeline data for the past one year'''
 	from frappe.desk.form.load import get_communication_data
