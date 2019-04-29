@@ -204,7 +204,7 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "FBR Tax Report",
+					"name": "FBR Sales Tax Report",
 					"doctype": "Sales Invoice",
 					"is_query_report": True
 				},
