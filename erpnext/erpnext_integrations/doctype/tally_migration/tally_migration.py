@@ -165,7 +165,7 @@ class TallyMigration(Document):
 						"supplier_type": "Individual",
 					})
 				if party_type:
-					address = "\n".join([a.string for a in account.find_all("ADDRESS")[:2]])
+					address = "\n".join([a.string for a in account.find_all("ADDRESS")])
 					addresses.append({
 						"doctype": "Address",
 						"address_line1": address[:140].strip(),
