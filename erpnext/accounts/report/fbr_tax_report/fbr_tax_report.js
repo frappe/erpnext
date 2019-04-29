@@ -13,14 +13,6 @@ frappe.query_reports["FBR Tax Report"] = {
 			reqd: 1
 		},
 		{
-			fieldname: "detail_by",
-			label: __("Detail By"),
-			fieldtype: "Select",
-			options: "Sales Invoice\nCustomer",
-			default: "Sales Invoice",
-			reqd: 1
-		},
-		{
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
@@ -39,6 +31,11 @@ frappe.query_reports["FBR Tax Report"] = {
 			label: __("Customer"),
 			fieldtype: "Link",
 			options: "Customer"
+		},
+		{
+			fieldname: "for_export",
+			label: __("For Export"),
+			fieldtype: "Check",
 		},
 	]
 };

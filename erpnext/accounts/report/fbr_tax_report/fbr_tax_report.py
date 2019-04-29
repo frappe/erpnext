@@ -4,13 +4,17 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
-from frappe.utils import getdate, nowdate, flt
+from frappe.utils import getdate, nowdate, flt, cint
 
 class FBRInvoiceWiseTaxes(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 		self.filters.from_date = getdate(self.filters.from_date or nowdate())
 		self.filters.to_date = getdate(self.filters.to_date or nowdate())
+
+		self.filters.sales_tax_account = frappe.get_cached_value('Company', self.filters.company, "sales_tax_account")
+		self.filters.extra_tax_account = frappe.get_cached_value('Company', self.filters.company, "extra_tax_account")
+		self.filters.further_tax_account = frappe.get_cached_value('Company', self.filters.company, "further_tax_account")
 
 		if not self.filters.get("company"):
 			self.filters["company"] = frappe.db.get_single_value('Global Defaults', 'default_company')
@@ -27,19 +31,58 @@ class FBRInvoiceWiseTaxes(object):
 		return columns, data
 
 	def get_columns(self):
-		all_columns = [
+		columns = [
 			{
-				"label": _("Date"),
-				"fieldtype": "Date",
-				"fieldname": "posting_date",
-				"width": 80
+				"label": _("Buyer NTN"),
+				"fieldtype": "Data",
+				"fieldname": "tax_id",
+				"width": 70
+			},
+			{
+				"label": _("Buyer CNIC"),
+				"fieldtype": "Data",
+				"fieldname": "tax_cnic",
+				"width": 110
+			},
+			{
+				"label": _("Buyer Name"),
+				"fieldtype": "Link",
+				"fieldname": "party",
+				"options": self.filters.party_type,
+				"width": 200
+			},
+			{
+				"label": _("Buyer Name"),
+				"fieldtype": "Data",
+				"fieldname": "party_name",
+				"width": 110
+			},
+			{
+				"label": _("Buyer Type"),
+				"fieldtype": "Data",
+				"fieldname": "tax_strn",
+				"width": 90
+			},
+			{
+				"label": _("Province"),
+				"fieldtype": "Data",
+				"fieldname": "state",
+				"width": 90
+			},
+			{
+				"label": _("Document Type"),
+				"fieldtype": "Data",
+				"fieldname": "document_type",
+				"width": 50,
+				"hide_for_view": 1
 			},
 			{
 				"label": _("Sales Invoice"),
 				"fieldtype": "Link",
 				"fieldname": "invoice",
 				"options": "Sales Invoice",
-				"width": 120
+				"width": 90,
+				"hide_for_export": 1
 			},
 			{
 				"label": _("Inv #"),
@@ -48,82 +91,116 @@ class FBRInvoiceWiseTaxes(object):
 				"width": 60
 			},
 			{
+				"label": _("Date"),
+				"fieldtype": "Date",
+				"fieldname": "posting_date",
+				"width": 80
+			},
+			{
+				"label": _("HS Code"),
+				"fieldtype": "Data",
+				"fieldname": "hscode",
+				"width": 80,
+				"hide_for_view": 1
+			},
+			{
+				"label": _("Sale Type"),
+				"fieldtype": "Data",
+				"fieldname": "sale_type",
+				"width": 80,
+				"hide_for_view": 1
+			},
+			{
+				"label": _("Rate"),
+				"fieldtype": "Float",
+				"fieldname": "rate",
+				"width": 50
+			},
+			{
+				"label": _("Description"),
+				"fieldtype": "Data",
+				"fieldname": "description",
+				"width": 80
+			},
+			{
+				"label": _("Quantity"),
+				"fieldtype": "Data",
+				"fieldname": "qty",
+				"width": 80,
+				"hide_for_view": 1
+			},
+			{
+				"label": _("UOM"),
+				"fieldtype": "Data",
+				"fieldname": "uom",
+				"width": 80,
+				"hide_for_view": 1
+			},
+			{
 				"label": _("Net Total"),
 				"fieldtype": "Currency",
 				"fieldname": "base_net_total",
 				"options": "Company:company:default_currency",
-				"width": 120
+				"width": 110
+			},
+			{
+				"label": _("Sales Tax"),
+				"fieldtype": "Currency",
+				"fieldname": "sales_tax",
+				"options": "Company:company:default_currency",
+				"width": 110
+			},
+			{
+				"label": _("Extra Tax"),
+				"fieldtype": "Currency",
+				"fieldname": "extra_tax",
+				"options": "Company:company:default_currency",
+				"width": 110
+			},
+			{
+				"label": _("ST Withheld at Source"),
+				"fieldtype": "Data",
+				"fieldname": "withheld_amount",
+				"width": 80,
+				"hide_for_view": 1
+			},
+			{
+				"label": _("SRO No. / Schedule No."),
+				"fieldtype": "Data",
+				"fieldname": "sro_no",
+				"width": 80,
+				"hide_for_view": 1
+			},
+			{
+				"label": _("Item Sr. No."),
+				"fieldtype": "Data",
+				"fieldname": "item_sr_no",
+				"width": 80,
+				"hide_for_view": 1
+			},
+			{
+				"label": _("Further Tax"),
+				"fieldtype": "Currency",
+				"fieldname": "further_tax",
+				"options": "Company:company:default_currency",
+				"width": 110
 			},
 			{
 				"label": _("Grand Total"),
 				"fieldtype": "Currency",
 				"fieldname": "base_grand_total",
 				"options": "Company:company:default_currency",
-				"width": 120
-			},
-			{
-				"label": _("Total Taxes"),
-				"fieldtype": "Currency",
-				"fieldname": "base_total_taxes_and_charges",
-				"options": "Company:company:default_currency",
-				"width": 120
-			},
-			{
-				"label": _(self.filters.party_type),
-				"fieldtype": "Link",
-				"fieldname": "party",
-				"options": self.filters.party_type,
-				"width": 200
-			},
-			{
-				"label": _(self.filters.party_type + "Name"),
-				"fieldtype": "Data",
-				"fieldname": "party_name",
 				"width": 110
 			},
-			{
-				"label": _("NTN"),
-				"fieldtype": "Data",
-				"fieldname": "tax_id",
-				"width": 100
-			},
-			{
-				"label": _("CNIC"),
-				"fieldtype": "Data",
-				"fieldname": "tax_cnic",
-				"width": 120
-			},
-			{
-				"label": _("STRN"),
-				"fieldtype": "Data",
-				"fieldname": "tax_strn",
-				"width": 120
-			}
 		]
-		for (description, rate) in self.tax_columns:
-			all_columns.append({
-				"label": _(get_tax_label(description, rate)),
-				"fieldtype": "Currency",
-				"fieldname": get_tax_fieldname(description, rate),
-				"options": "Company:company:default_currency",
-				"width": 120
-			})
-
-		if self.filters.detail_by == "Customer":
-			fieldnames = ['party', 'party_name', 'tax_id', 'tax_cnic', 'tax_strn', 'base_net_total', 'base_grand_total']
-			for (description, rate) in self.tax_columns:
-				fieldnames.append(get_tax_fieldname(description, rate))
-			fieldnames += ['base_total_taxes_and_charges']
-		else:
-			fieldnames = ['posting_date', 'invoice', 'stin', 'base_net_total', 'base_grand_total']
-			for (description, rate) in self.tax_columns:
-				fieldnames.append(get_tax_fieldname(description, rate))
-			fieldnames += ['base_total_taxes_and_charges', 'party', 'party_name', 'tax_id', 'tax_cnic', 'tax_strn']
-
-		columns = [list(filter(lambda d: d['fieldname'] == f, all_columns))[0] for f in fieldnames]
 
 		if self.party_naming_by != "Naming Series":
 			columns = filter(lambda d: d['fieldname'] != 'party_name', columns)
+
+		if cint(self.filters.for_export):
+			columns = filter(lambda d: not d.get("hide_for_export"), columns)
+		else:
+			columns = filter(lambda d: not d.get("hide_for_view"), columns)
 
 		return columns
 
@@ -132,78 +209,64 @@ class FBRInvoiceWiseTaxes(object):
 
 		self.invoices = frappe.db.sql("""
 			select
-				i.name as invoice, i.posting_date, i.base_net_total, i.base_grand_total, i.base_total_taxes_and_charges,
-				i.customer as party, i.customer_name as party_name, c.tax_id, c.tax_cnic, c.tax_strn, i.stin
+				i.name as invoice, i.stin, i.posting_date, i.base_net_total, i.base_grand_total, addr.state,
+				i.customer as party, i.customer_name as party_name, c.tax_id, c.tax_cnic, c.tax_strn,
+				cc.tax_description as description
 			from `tabSales Invoice` i
 			left join `tabCustomer` c on c.name = i.customer
+			left join `tabAddress` addr on addr.name = i.customer_address
+			left join `tabCost Center` cc on cc.name = i.cost_center
 			where i.docstatus = 1 and i.company = %(company)s and i.posting_date between %(from_date)s and %(to_date)s
-				and abs(i.base_total_taxes_and_charges) > 0 {0}
-			order by i.posting_date, i.name
+				and ifnull(i.stin, 0) != 0 {0}
+			order by i.posting_date, i.stin
 		""".format(conditions), self.filters, as_dict=1)
 
-		invoice_names = [d.invoice for d in self.invoices]
+		invoices_map = {}
+		for d in self.invoices:
+			d.sales_tax = 0
+			d.extra_tax = 0
+			d.further_tax = 0
+			d.tax_strn = "Registered" if d.tax_strn else "Unregistered"
+			d.sale_type = " Goods at standard rate (default)"
+			d.document_type = "SI"
+			invoices_map[d.invoice] = d
 
-		if invoice_names:
+		tax_accounts = []
+		if self.filters.sales_tax_account:
+			tax_accounts.append(self.filters.sales_tax_account)
+		if self.filters.extra_tax_account:
+			tax_accounts.append(self.filters.extra_tax_account)
+		if self.filters.further_tax_account:
+			tax_accounts.append(self.filters.further_tax_account)
+
+		if invoices_map and tax_accounts:
 			taxes = frappe.db.sql("""
 				select
-					parent as invoice, description, rate, sum(base_tax_amount_after_discount_amount) as amount
+					parent as invoice, rate, sum(base_tax_amount_after_discount_amount) as amount, account_head
 				from `tabSales Taxes and Charges`
-				where parent in ({0}) and abs(base_tax_amount_after_discount_amount) > 0
-				group by parent, description, rate
-			""".format(", ".join(['%s'] * len(invoice_names))), invoice_names, as_dict=1)
+				where parent in ({0}) and account_head in ({1})
+					and abs(base_tax_amount_after_discount_amount) > 0
+				group by parent, account_head
+			""".format(", ".join(['%s'] * len(invoices_map.keys())), ", ".join(['%s'] * len(tax_accounts))),
+				invoices_map.keys() + tax_accounts, as_dict=1)
 		else:
 			taxes = []
 
-		self.tax_map = frappe._dict()
-		self.tax_columns = []
 		for tax in taxes:
-			tax_column = (tax.description, flt(tax.rate))
-			self.tax_map.setdefault(tax.invoice, frappe._dict())[tax_column] = tax.amount
-			if tax_column not in self.tax_columns:
-				self.tax_columns.append(tax_column)
+			tax_field = ''
+			if tax.account_head == self.filters.sales_tax_account:
+				tax_field = 'sales_tax'
+				invoices_map[tax.invoice]['rate'] = tax.rate
+			elif tax.account_head == self.filters.extra_tax_account:
+				tax_field = 'extra_tax'
+			elif tax.account_head == self.filters.further_tax_account:
+				tax_field = 'further_tax'
 
-		self.tax_columns = sorted(self.tax_columns, key=lambda d: d[1], reverse=True)
+			if tax_field:
+				invoices_map[tax.invoice][tax_field] += flt(tax.amount)
 
-		for d in self.invoices:
-			for (description, rate) in self.tax_columns:
-				fieldname = get_tax_fieldname(description, rate)
-				d[fieldname] = flt(self.tax_map.get(d.invoice, frappe._dict()).get((description, rate)))
+		return self.invoices
 
-		# Customer aggregates
-		self.customer_aggregate = frappe._dict()
-		if self.filters.detail_by == "Customer":
-			party_fields = ['party', 'tax_id', 'tax_cnic', 'tax_strn']
-			aggregate_fields = ['base_net_total', 'base_grand_total', 'base_total_taxes_and_charges']
-			for (description, rate) in self.tax_columns:
-				aggregate_fields.append(get_tax_fieldname(description, rate))
-
-			customer_row_template = frappe._dict()
-			for f in aggregate_fields:
-				customer_row_template[f] = 0.0
-
-			for d in self.invoices:
-				if d.party not in self.customer_aggregate:
-					self.customer_aggregate[d.party] = customer_row_template.copy()
-					for f in party_fields:
-						self.customer_aggregate[d.party][f] = d[f]
-
-				for f in aggregate_fields:
-					self.customer_aggregate[d.party][f] += d[f]
-
-			return self.customer_aggregate.values()
-		else:
-			return self.invoices
-
-
-def get_tax_fieldname(description, rate):
-	return "tax_{0}_{1}".format(scrub(description), scrub(frappe.format(flt(rate))))
-
-
-def get_tax_label(description, rate):
-	if rate:
-		return "{0} ({1}%)".format(description, frappe.format(flt(rate)))
-	else:
-		return description
 
 def execute(filters=None):
 	args = {
