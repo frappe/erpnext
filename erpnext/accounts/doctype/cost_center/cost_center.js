@@ -34,7 +34,7 @@ frappe.ui.form.on('Cost Center', {
 
 		frm.events.hide_unhide_group_ledger(frm);
 
-		frm.toggle_display('sb1', doc.is_group==0)
+		frm.toggle_display('sb1', doc.is_group==0);
 		frm.set_intro(intro_txt);
 
 		if(!frm.doc.__islocal) {
