@@ -1,0 +1,2666 @@
+{
+    "country_code": "lb", 
+    "name": "Lebanon - Chart of Account", 
+    "tree": {
+        "Equity And Long Term Debts": {
+            "Capital": {
+                "Capital (For Company Or For Persons)": {
+                    "Subscribed Capital (Uncalled)": {"account_number": "10110"}, 
+                    "Subscribed Capital (Called And Unpaid)": {"account_number": "10120"},
+                    "Subscribed Capital (Called And Paid Up)": {"account_number": "10130"},
+					"account_number": "101"
+                    }, 
+                "Premiums Related To The Capital": {
+                    "Issue Premiums": {"account_number": "10210"}, 
+                    "Merger Premiums": {"account_number": "10220"}, 
+                    "Contributions Premiums": {"account_number": "10230"}, 
+                    "Premium Of Converting Debenture Loans To Shares": {"account_number": "10240"},
+					"account_number": "102"
+                },
+                "Revalution Variances": {
+                    "Revalution Variances Of Unamortizable Fixed Assets": {"account_number": "10310"},
+                    "Revaluation Variances Of Amortizable Fixed Assets": {"account_number": "10350"},
+					"account_number": "103"
+                }, 
+                "Owners Current Account": {
+                    "Owner Current Account": {"account_number": "10910"},
+                    "Profit Brought Forward": {"account_number": "10920"},
+					"Loss Brought Forward": {"account_number": "10930"},
+					"account_number": "109"
+                },
+				"account_number": "10"
+			},            
+            "Reserves": {
+                "Legal Reserve": {"account_number": "111"}, 
+                "Statutory And Contractual Reserves": {"account_number": "112"},
+				"Other Reserves": {"account_number": "119"},
+				"account_number": "11"
+            }, 
+            "Brought Forward Results": {
+                "Creditor Brought Forward": {
+					"Profit Brought Forward": {"account_number": "12110"},
+					"Adjustment On Profit Brought Forward": {"account_number": "12120"},
+					"account_number": "121"
+				}, 
+                "Debtor Brought Forward": {
+					"Loss Brought Forward": {"account_number": "12510"},
+					"Adjustment On Loss Brought Forward": {"account_number": "12520"},
+					"account_number": "125"
+				},
+				"account_number": "12"
+            }, 
+            "Net Result Of The Financial Period (Profit Or Loss)": {
+                "Gross Trade Margin": {"account_number": "131"},
+				"Value Added": {"account_number": "132"},
+				"Gross Trading Operating Margin": {"account_number": "133"},
+				"Operating Result (Prior To Fin. Income And Expenditures)": {"account_number": "134"},
+				"Result Before Taxation": {"account_number": "135"},
+				"Non Operating Result": {"account_number": "136"},
+				"Result Of The Period - Profits": {
+					"Result Of The Period Profit": {"account_number": "13811"},
+					"Re-Evalution Profit": {"account_number": "13813"},
+					"account_number": "138"
+				},
+                "Result Of The Period - Losses": {"account_number": "139"},
+				"account_number": "13"
+            }, 
+            "Investment Subsidies": {
+                "Investment Subsidies Received": {
+                    "Investment Subsidies Received From Partners": {"account_number": "14111"},
+					"account_number": "141"
+                },
+				"Investment Subsidies Transfered To Results": {"account_number": "145"},
+				"account_number": "14"
+            }, 
+            "Provisions For Contingencies And Charges": {
+                "Provisions For Contingencies": {
+                    "Provisions For Litigation And Sundry Contingencies": {"account_number": "15110"},
+                    "Provisions In Respect Of Guarantees Given To Customers": {"account_number": "15120"},
+                    "Provisions For Losses On Exchange": {"account_number": "15130"},
+                    "Provisions For Losses On Future Transactions": {"account_number": "15140"},
+                    "Provisions For Fines And Penalties": {"account_number": "15150"},
+                    "Provision for other risks -Nontaxable": {"account_number": "15180"},
+					"Provision for other risks -taxable": {"account_number": "15190"},
+					"account_number": "151"
+                }, 
+                "Provisions For Charges": {
+					"Provisions For Deferred Charges": {"account_number": "15510"},
+					"Provisions For Deferred Charges": {"account_number": "15520"},
+					"Provisions For Deferred Charges": {"account_number": "15530"},
+					"Provisions For Deferred Charges": {"account_number": "15540"},
+					"Provisions For Deferred Charges": {"account_number": "15550"},
+					"Provisions For Deferred Charges": {"account_number": "15560"},
+					"Provisions For Deferred Charges": {"account_number": "15570"},
+					"Provisions For Deferred Charges": {"account_number": "15590"},
+					"account_number": "155"
+				},
+				"account_number": "15"
+            }, 
+            "Long And Medium Term Debts": {
+                "Loans Against Debenture": {"account_number": "161"}, 
+                "Loans From Financial Institutions": {"account_number": "162"},
+                "Sundry Loans And Debts": {
+					"Notes Payable Resulting From The Purchase Of The Entreprise": {"account_number": "16810"},
+					"Deposits And Guarantees": {"account_number": "16820"},
+					"Advances From The Government": {"account_number": "16830"},
+					"Capitalized Life Annuities": {"account_number": "16840"},
+					"Other Medium And Long Term Debts": {"account_number": "16890"},
+					"account_number": "168"
+                },
+				"account_number": "16"
+            }, 
+            "Accounts With Affiliated Companies": {
+                "Branches And Join Ventures Accounts": {
+					"Balance Brought Forward": {"account_number": "18110"},
+					"Balance Brought Forward": {"account_number": "18150"},
+					"account_number": "181"
+				},
+                "Money And Services Swaped Between Branches (Charges)": {"account_number": "186"},
+                "Money And Services Swaped Between Branches (Income)": {"account_number": "187"},
+				"account_number": "18"
+            }, 
+
+	    "account_number": "1",
+            "root_type": "Equity"
+        }, 
+        "Accounts Of Fixed Assets": {
+             "Intangible Fixed Assets": {
+                "Business Concern (Keymoney, Goodwill, Clients ...)": {
+                    "Paid Business Concern (Keymoney, Goodwill, Clients ...)": {
+                        "account_type": "Fixed Asset",
+						"account_number": "2111"
+                    }, 
+                    "Unpaid Business Concern (Keymoney, Goodwill, Clients ...)": {
+                        "account_type": "Fixed Asset",
+						"account_number": "2112"
+                    },
+					"account_number": "211"
+                }, 
+                "Establishment Expenses": {
+                    "account_type": "Fixed Asset",
+					"account_number": "212"
+                }, 
+                "Research And Development Expenses": {
+                        "account_type": "Fixed Asset",
+						"account_number": "213"
+                }, 
+                "Patents, Licenses, Trade Marks And Similars": {
+                    "account_type": "Fixed Asset",
+					"account_number": "214"
+                }, 
+                "Other Intangible Fixed Assets": {
+					"Other Intangible Fixed Assets": {
+					"account_type": "Fixed Asset",
+					"account_number": "21910"
+					},
+					"Advance Payments On Account Of Intangible Fixed Assets": {
+					"account_type": "Fixed Asset",
+					"account_number": "21980"
+					},
+					"account_number": "219"
+                },
+				"account_number": "21"
+            }, 
+            "Tangible Fixed Assets": {
+				"Land": {
+					"Naked Land": {
+					"account_type": "Fixed Asset",
+					"account_number": "22110"
+					},
+					"Built Lands (Real Estate Complexes )": {
+					"account_type": "Fixed Asset",
+					"account_number": "22120"
+					},
+					"Extractive Land Sites (Mines And Quarris)": {
+					"account_type": "Fixed Asset",
+					"account_number": "22130"
+					},
+					"Land Development And Reclamation": {
+					"account_type": "Fixed Asset",
+					"account_number": "22140"
+					},
+					"account_type": "Fixed Asset",
+					"account_number": "221"			
+				},
+				"Construction": {
+					"Buildings": {
+					"account_type": "Fixed Asset",
+					"account_number": "22310"
+					},
+					"General Installation And Lessehold Improvements": {
+					"account_type": "Fixed Asset",
+					"account_number": "22320"
+					},
+					"Infrastructure Works (Dams, Airport Runways)": {
+					"account_type": "Fixed Asset",
+					"account_number": "22330"
+					},
+					"Construction On Lessehold Land": {
+					"account_type": "Fixed Asset",
+					"account_number": "22340"
+					},
+					"account_number": "223"
+				},
+				"Technical Installations And Industrial Tools": {
+					"Specialized Installations": {
+					"account_type": "Fixed Asset",
+					"account_number": "22410"
+					},
+					"Specific Installations": {
+					"account_type": "Fixed Asset",
+					"account_number": "22420"
+					},
+					"Industrial Equipment": {
+					"account_type": "Fixed Asset",
+					"account_number": "22430"
+					},
+					"Industrial Tools": {
+					"account_type": "Fixed Asset",
+					"account_number": "22440"
+					},
+					"account_number": "224"
+				},
+				"Transportation Equipment": {"account_number": "225"},
+				"Other Tangible Fixed Assets": {
+					"General Installations And Other Improvements": {
+						"account_type": "Fixed Asset",
+						"account_number": "22610"
+					},
+					"Office And Computer Equipment": {
+						"account_type": "Fixed Asset",
+						"account_number": "22620"
+					},
+					"Furniture": {
+						"account_type": "Fixed Asset",
+						"account_number": "22630"
+					},
+					"Agricultural Investments": {
+						"account_type": "Fixed Asset",
+						"account_number": "22640"
+					},
+					"Reusable Packing Material": {
+						"account_type": "Fixed Asset",
+						"account_number": "22650"
+					},
+					"Other Tangible Fixed Assets": {
+						"account_type": "Fixed Asset",
+						"account_number": "22690"
+					},				
+					"account_number": "226"
+				},
+				"Tangible Fixed Assets In Progress": {
+					"Land": {
+						"account_type": "Fixed Asset",
+						"account_number": "22710"
+					},
+					"Buildings": {
+						"account_type": "Fixed Asset",
+						"account_number": "22730"
+					},
+					"Technical Installations, Industrial Equipment And Tools": {
+						"account_type": "Fixed Asset",
+						"account_number": "22740"
+					},
+					"Transportation Equipment": {
+						"account_type": "Fixed Asset",
+						"account_number": "22750"
+					},
+					"Other Tangible Fixed Assets": {
+						"account_type": "Fixed Asset",
+						"account_number": "22750"
+					},
+					"account_number": "227"
+				},
+				"Tangible Fixed Assets In Progress": {
+					"account_type": "Fixed Asset",
+					"account_number": "228"	
+				},				
+				"account_number": "22"
+			},						
+            "Financial Fixed Assets": {
+                "Equity Participations": {
+					"account_type": "Fixed Asset",
+					"account_number": "251"
+                },
+                "Receivables Related To Equity Participations": {
+					"Local Equity Participations": {
+						"account_type": "Fixed Asset",
+						"account_number": "25210"
+					},
+					"Foreign Equity Participations": {
+						"account_type": "Fixed Asset",
+						"account_number": "25220"
+					},
+					"account_number": "252"
+                },
+                "Other Blocked Securities": {
+					"Ownership Rights (Minor Participations)": {
+						"account_type": "Fixed Asset",
+						"account_number": "25310"
+					},
+					"Debenture Loans (Bonds And Debentures)": {
+						"account_type": "Fixed Asset",
+						"account_number": "25350"
+					},
+					"account_number": "253"
+                },
+                "Long And Medium Term Loans": {
+					"Loans To Partners": {
+						"account_type": "Fixed Asset",
+						"account_number": "25510"
+					},
+					"Loans To Employees": {
+						"account_type": "Fixed Asset",
+						"account_number": "25520"
+					},
+					"Other Loans": {
+						"account_type": "Fixed Asset",
+						"account_number": "25580"
+					},				
+					"account_number": "255"
+				},
+                "Other Blocked Long Term Receivables": {
+					"account_type": "Fixed Asset",
+					"account_number": "259"
+			    },
+				"account_number": "25"
+			},
+            "Variances Of Revaluation Of Assets": {
+                "Variances Of Revaluation Of Unamortizable Assets": {
+                    "Variation Of Reval. For GoodWill And Keymoney (Paid Value)": {
+                        "account_type": "Fixed Asset",
+						"account_number": "27100"
+                    }, 
+                    "Variation Of Reval. For Goodwill And Keymoney (UnPaid Value)": {
+                        "account_type": "Fixed Asset",
+						"account_number": "27110"
+                    },
+                    "Variation Of Reval. Establishment Expenses": {
+                        "account_type": "Fixed Asset",
+						"account_number": "27120"
+                    },
+                    "Variation Of Reval. Dev. And Research Expenses": {
+                        "account_type": "Fixed Asset",
+						"account_number": "27130"
+                    },
+                    "Variation Of Reval. Licenses, Diplomes And Trade Marks": {
+                        "account_type": "Fixed Asset",
+						"account_number": "27140"
+                    },
+                    "Variation Of Equity Participations": {
+						"Variation Of Local Equity Participations": {
+							"account_type": "Fixed Asset",
+							"account_number": "27151"
+						},
+						"Variation Of Forgein Equity Paticipations": {
+							"account_type": "Fixed Asset",
+							"account_number": "27152"
+						},
+						"Variation Of Ownership Rights (Minor Participations)": {
+							"account_type": "Fixed Asset",
+							"account_number": "27153"
+						},
+						"Variation Of Debenture Loans (Bonds And Debentures)": {
+							"account_type": "Fixed Asset",
+							"account_number": "27154"
+						},
+						"Variation Of Loans To Partners": {
+							"account_type": "Fixed Asset",
+							"account_number": "27155"
+						},
+						"Variation Of Loans To Employees": {
+							"account_type": "Fixed Asset",
+							"account_number": "27156"
+						},
+						"Variation Of Other Loans": {
+							"account_type": "Fixed Asset",
+							"account_number": "27157"
+						},
+						"Variation Of Other Blocked Long Term Receivables": {
+							"account_type": "Fixed Asset",
+							"account_number": "27159"
+						},
+						"account_number": "27150"
+                    },
+					"Variation Of Reval. Other Intangible F/A": {
+						"account_type": "Fixed Asset",
+						"account_number": "27190"
+					},					
+					"account_number": "271"
+                },
+				"Variation Of Reval. Naked Land": {
+					"account_type": "Fixed Asset",
+					"account_number": "27220"
+				},
+				"Variations Of Revaluation Of Amortizable Assets": {
+					"Variation Of Reval. Build Land": {
+						"account_type": "Fixed Asset",
+						"account_number": "27500"
+					},
+					"Variation Of Reval. Extractive Land Sites (Mines, Quarris)": {
+						"account_type": "Fixed Asset",
+						"account_number": "27510"
+					},
+					"Variation Of Transportation Equipment": {
+						"account_type": "Fixed Asset",
+						"account_number": "27525"
+					},
+					"Variation Of Reval. Buildings": {
+						"account_type": "Fixed Asset",
+						"account_number": "27531"
+					},
+					"Variation Of Reval. General Inst. And Lessehold Improv.": {
+						"account_type": "Fixed Asset",
+						"account_number": "27532"
+					},
+					"Variation Of Reval. Infrastructure Works (Dams Airport)": {
+						"account_type": "Fixed Asset",
+						"account_number": "27533"
+					},
+					"Variation Of Reval. Construction On Leasehold Land": {
+						"account_type": "Fixed Asset",
+						"account_number": "27534"
+					},
+					"Variation Of Reval. Land Dev. And Reclamation": {
+						"account_type": "Fixed Asset",
+						"account_number": "27540"
+					},
+					"Specialized Installations": {
+						"account_type": "Fixed Asset",
+						"account_number": "27541"
+					},
+					"Specific Installations": {
+						"account_type": "Fixed Asset",
+						"account_number": "27542"
+					},
+					"Industrial Equipment": {
+						"account_type": "Fixed Asset",
+						"account_number": "27543"
+					},
+					"Industrial Tools": {
+						"account_type": "Fixed Asset",
+						"account_number": "27544"
+					},
+					"Variation Of Reval. General Instal. And Other Improvements": {
+						"account_type": "Fixed Asset",
+						"account_number": "27561"
+					},
+					"Variation Of Reval. Office And Computer Equipments": {
+						"account_type": "Fixed Asset",
+						"account_number": "27562"
+					},
+					"Variation Of Reval. Furniture": {
+						"account_type": "Fixed Asset",
+						"account_number": "27563"
+					},
+					"Variation Of Reval. Agriculture Investments": {
+						"account_type": "Fixed Asset",
+						"account_number": "27564"
+					},
+					"Variation Of Reval. Reusable Packing Materials": {
+						"account_type": "Fixed Asset",
+						"account_number": "27565"
+					},
+					"Variation Of Reval. Of Other Tangible Fixed Assets": {
+						"account_type": "Fixed Asset",
+						"account_number": "27569"
+					},
+					"Variation Of Reval. Tangible Fixed Assets In Progress": {
+						"account_type": "Fixed Asset",
+						"account_number": "27571"
+					},
+					"Variation Of Buildings In Progress": {
+						"account_type": "Fixed Asset",
+						"account_number": "27573"
+					},
+					"Variation Of Technical Installations, Industrial Equipment A": {
+						"account_type": "Fixed Asset",
+						"account_number": "27574"
+					},
+					"Variation Of Transportation Equipment In Progress": {
+						"account_type": "Fixed Asset",
+						"account_number": "27575"
+					},
+					"Variation Of Other Tangible Fixed Assets": {
+						"account_type": "Fixed Asset",
+						"account_number": "27576"
+					},				
+					"account_number": "275"
+				},
+				"account_number": "27"
+            },
+            "Depreciation Of Fixed Assets": {
+                "Amortization Of The Business Concen (Goodwill)": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "280"
+                }, 
+                "Amortization Of Other Intangible Fixed Assets": {
+                    "Paid Business Concern (Keymoney, Goodwill, Clients ...)": {
+                        "account_type": "Accumulated Depreciation",
+						"account_number": "28100"
+                    }, 
+                    "Unpaid Business Concern (Keymoney, Goodwill, Clients ...)": {
+                        "account_type": "Accumulated Depreciation",
+						"account_number": "28110"
+                    }, 
+                    "Establishment Expenses": {
+                        "account_type": "Accumulated Depreciation",
+						"account_number": "28120"
+                    }, 
+                    "Research And Development Expenses": {
+                        "account_type": "Accumulated Depreciation",
+						"account_number": "28130"
+                    }, 
+                    "Patents, Licenses And Similar Values": {
+                        "account_type": "Accumulated Depreciation",
+						"account_number": "28140"
+                    },
+                    "Other Intangible Fixed Assets": {
+                        "account_type": "Accumulated Depreciation",
+						"account_number": "28190"
+                    },
+					"account_number": "281"
+				},
+                "Depreciation Of Tangible Fixed Assets": {
+					"Build Land": {
+                        "account_type": "Accumulated Depreciation",					
+						"account_number": "28210"
+					},
+					"Extractive Land Sites (Mines, Quarries ...)": {
+                        "account_type": "Accumulated Depreciation",					
+						"account_number": "28220"
+					},
+					"Building": {
+                        "account_type": "Accumulated Depreciation",					
+						"account_number": "28231"
+					},
+					"General Installations And Lessehold Improvements": {
+                        "account_type": "Accumulated Depreciation",					
+						"account_number": "28232"
+					},
+					"Infrastructures Works (Dams, Airport ...)": {
+                        "account_type": "Accumulated Depreciation",					
+						"account_number": "28233"
+					},
+					"Construction On Leaehold Land": {
+                        "account_type": "Accumulated Depreciation",					
+						"account_number": "28234"
+					},
+					"Specialized Installations": {
+                        "account_type": "Accumulated Depreciation",					
+						"account_number": "28241"
+					},
+					"Specific Installations": {
+                        "account_type": "Accumulated Depreciation",					
+						"account_number": "28242"
+					},
+					"Industrial Equipment": {
+                        "account_type": "Accumulated Depreciation",					
+						"account_number": "28243"
+					},
+					"Industrial Tools": {
+                        "account_type": "Accumulated Depreciation",					
+						"account_number": "28244"
+					},
+					"Transportation Equipment": {
+                        "account_type": "Accumulated Depreciation",					
+						"account_number": "28250"
+					},
+					"Other Tangible Fixed Assets": {
+                        "account_type": "Accumulated Depreciation",			
+						"account_number": "28260"
+					},
+					"General Installations And Others Improvements": {
+                        "account_type": "Accumulated Depreciation",
+						"account_number": "28261"
+					},
+					"Office Equipment": {
+                        "account_type": "Accumulated Depreciation",
+						"account_number": "28262"
+					},
+					"Furnitures And Fixtures": {
+                        "account_type": "Accumulated Depreciation",
+						"account_number": "28263"
+					},
+					"Agricultural Investments": {
+                        "account_type": "Accumulated Depreciation",
+						"account_number": "28264"
+					},
+					"Reusable Packing Material": {
+                        "account_type": "Accumulated Depreciation",
+						"account_number": "28265"
+					},
+					"Other Tangible Fixed Assets": {
+                        "account_type": "Accumulated Depreciation",
+						"account_number": "28269"
+					},
+					"account_number": "282"
+				},
+                "Depreciation Of Paid Goodwell And Keymoney - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28310"				
+				},
+                "Unpaid Business Concern (Keymoney, Goodwill, Clients ...)": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28320"				
+				},
+                "Establishment Expenses - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28410"
+				},
+                "Research And Development Expenses - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28420"
+				},
+                "Patents, Licenses And Similar Values - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28430"
+				},
+                "Other Intangible Fixed Assets - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28490"
+				},
+                "Build Land - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28510"
+				},
+                "Extractive Land Sites (Mines, Quarries ...) - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28520"
+				},
+                "Building - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28531"
+				},
+                "General Installations And Lessehold Improvements - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28532"
+				},
+                "Infrastructures Works (Dams, Airport ...)": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28533"
+				},
+                "Construction On Leasehold Land - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28534"
+				},
+                "Specialized Installations": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28541"
+				},
+                "Specific Installations": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28542"
+				},
+                "Industrial Equipment": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28543"
+				},
+                "Industrial Tools": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28544"
+				},
+                "Transportation Equipment - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28550"
+				},
+                "General Installations And Others Improvements - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28561"
+				},
+                "Office Equipment - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28562"
+				},
+                "Furnitures And Fixtures - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28563"
+				},
+                "Agricultural Investments - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28564"
+				},
+                "Reusable Packing Material - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28565"
+				},
+                "Other Tangible Fixed Assets - additional": {
+					"account_type": "Accumulated Depreciation",
+					"account_number": "28569"
+				},
+				"account_number": "28"
+			}, 
+            "Provision For The Dimunition In Value Of Fixed Assets": {
+                "Provisions For The Dimunition In Value Of Fixed Assets": {
+					"account_number": "290"
+                },
+                "Provisions For The Dimunition In Value Of Intangible F/A": {
+                    "Trade Marks And Similar Values": {
+						"account_number": "29110"
+                    },
+                    "Trade Marks And Similar Values": {
+						"account_number": "29190"
+                    },
+					"account_number": "291"
+                },
+                "Provisions For Dimunition In Value Of Tangible Fixed Assets": {
+                    "Land (Other Than Extractive Land Sites)": {
+						"account_number": "29210"
+                    },
+                    "Other Tangible Fixed Assets": {
+						"account_number": "29260"
+                    },
+					"account_number": "292"
+                },
+                "Provisions For Dimunition In Value Of Financial Fixed Assets": {
+                    "Equity Participations": {
+						"account_number": "29510"
+                    },
+                    "Receivables Related To Equity Participations": {
+						"account_number": "29520"
+                    },
+                    "Other Blocked Securities": {
+						"account_number": "29530"
+                    },
+                    "Long And Medium Term Loans": {
+						"account_number": "29550"
+                    },
+                    "Other Blocked Long Term Receivables": {
+						"account_number": "29590"
+                    },					
+					"account_number": "295"
+                },
+				"account_number": "29"
+            }, 
+			"account_number": "2",
+			"root_type": "Asset"
+        }, 
+        "Inventory And Goods": {
+            "Raw Materials And Consumable Goods": {
+                "Raw Materials": {
+                    "account_type": "Stock",
+					"account_number": "311"
+				},
+                "Other Consumable Supplies And Materials": {
+                    "account_type": "Stock",
+					"account_number": "315"
+				},
+				"account_number": "31"
+			},
+            "Goods In Process (Goods, Words And Services)": {
+                "Products In Process": {
+                    "Raw Materials In Process": {
+						"account_type": "Stock",
+						"account_number": "33110"
+					},
+                    "Consumable Goods In Process": {
+						"account_type": "Stock",
+						"account_number": "33120"
+					},
+                    "Manpower In Process": {
+						"account_number": "33130"
+					},
+					"account_number": "331"
+                },
+                "Works In Progress": {
+					"account_number": "332"
+                },
+                "Studies In Progress": {
+					"account_number": "335"
+                },
+                "Services In Progress": {
+					"account_number": "336"
+                },
+				"account_number": "33"
+			},
+            "Products": {
+                "Semi-Finished Goods": {
+					"account_type": "Stock",
+					"account_number": "351"
+                }, 
+                "Manufactured Goods": {
+                    "Manufactured Raw Material": {
+                        "account_type": "Stock",
+						"account_number": "35510"
+                    }, 
+                    "Manufactured Consumable Goods": {
+                        "account_type": "Stock",
+						"account_number": "35520"
+                    },
+                    "Manufactured Manpower": {
+                        "account_type": "Stock",
+						"account_number": "35530"
+                    },
+					"account_number": "355",
+                    "account_type": "Stock"
+                },
+                "Production Scrap": {
+                    "account_type": "Stock",
+					"account_number": "358"
+                },
+				"account_number": "35",
+                "account_type": "Stock"
+            },
+            "Merchandise For Sale": {
+                "account_type": "Stock",
+				"account_number": "37"
+            },
+            "Provisions For Dim. In Value Of Inv. And Goods In Process": {
+                "Provisions For Dim In Value Of Raw Mat. And Cons Goods": {
+					"account_number": "391"
+                },
+                "Provisions For Diminution In Value Of Products In Process": {
+					"account_number": "393"
+				}, 
+                "Provisions For Diminution In Value Of Stocked Products": {
+					"account_number": "395"
+                },
+                "Provisions For Diminution In Value Of Inventory": {
+					"account_number": "397"
+				},
+				"account_number": "39"
+			},
+			"account_number": "3",
+            "root_type": "Asset"
+        },
+        "Receivables And Payables (Active)": {
+            "Suppliers (Active)": {
+				"Advance Payments On Account Of Operational Supplies": {
+					"account_number": "409",
+					"account_type": "Receivable"
+				},
+				"account_number": "40"
+			}, 
+            "Debtors (Customers) (Active)": {
+                "Invoices": {
+                    "Ordinary Clients": {
+                        "account_type": "Receivable",
+						"account_number": "41110"
+                    }, 
+                    "Doubtful Clients": {
+                        "account_type": "Receivable",
+						"account_number": "41150"
+                    },
+                    "Discounts And Allowances": {
+						"account_number": "41190",
+						"account_type": "Receivable"
+                    },
+					"account_number": "411",
+                    "account_type": "Receivable"
+                }, 
+                "Notes Receivable (Clients)": {
+					"account_number": "413",
+					"account_type": "Receivable"
+                }, 
+                "Advances On Unbilled Works": {
+					"account_number": "415",
+					"account_type": "Receivable"
+                }, 
+                "Invoices Under Preparation": {
+					"account_number": "418",
+                    "account_type": "Receivable"
+                },
+				"account_number": "41",
+                "account_type": "Receivable"
+            },
+            "Personnel (Active)": {
+				"Personnel's Accounts Receivable": {
+					"Advances And Payments": {
+						"account_number": "42810",
+						"account_type": "Receivable"
+					},
+					"Retentions": {
+						"account_number": "42820",
+						"account_type": "Receivable"
+					},
+					"account_number": "428",
+					"account_type": "Receivable"
+				},
+				"account_number": "42",
+				"account_type": "Receivable"
+            }, 
+            "Govt And Public Institutions (Active)": {
+				"Value Added Tax": {
+					"VAT on Used Purchase For Only Operations That Allow The Right Of Deduction": {
+						"account_type": "Tax",
+						"account_number": "44210"
+					},
+					"VAT on Used Purchase For Only Operations That Allow The Right Of Return": {
+						"account_type": "Tax",
+						"account_number": "44211"
+					},
+					"VAT ": {
+						"account_type": "Tax",					
+						"account_number": "44212"
+					},
+					"VAT ": {
+						"account_type": "Tax",					
+						"account_number": "44213"
+					},				
+					"VAT ": {
+						"account_type": "Tax",
+						"account_number": "44214"
+					},
+					"VAT For Purchase That is not Possible to Specify its Usage Destination": {
+						"account_type": "Tax",
+						"account_number": "44215"
+					},
+					"Paid VAT on Used Burdens For Operations That Allow The Right of Deduction": {
+						"account_type": "Tax",
+						"account_number": "44216"
+					},
+					"Paid VAT on Used Burdens For Operations That Allow The Right of Recover": {
+						"account_type": "Tax",
+						"account_number": "44217"
+					},
+					"Paid VAT on Used Burdens That is not Possible to Specify its Usage Destination": {
+						"account_type": "Tax",
+						"account_number": "44218"
+					},
+					"Paid VAT on Advanced Payments For Investment Orders Account": {
+						"account_type": "Tax",
+						"account_number": "44219"
+					},
+					"Returnable VAT on Purchase - Clause 59": {
+						"account_type": "Tax",
+						"account_number": "44221"
+					},					
+					"Partially Returnable VAT on Purchase - Clause 59": {
+						"account_type": "Tax",
+						"account_number": "44222"
+					},
+					"Returnable VAT on Fix Asset Purchase - Clause 59": {
+						"account_type": "Tax",
+						"account_number": "44223"
+					},					
+					"VAT ": {
+						"account_type": "Tax",
+						"account_number": "44224"
+					},
+					"Returnable VAT on Burdens - Clause 59": {
+						"account_type": "Tax",
+						"account_number": "44225"
+					},
+					"Partially Returnable VAT on Burdens - Clause 59 ": {
+						"account_type": "Tax",
+						"account_number": "44226"
+					},
+					"Circulated Returnable VAT": {
+						"account_number": "44252",
+						"account_type": "Receivable"
+					},
+					"Value Added Tax on Deductible Purchase": {
+						"account_type": "Tax",
+						"account_number": "44261"
+						
+					},
+					"Value Added Tax on Partially Deductible Purchase": {
+						"account_type": "Tax",
+						"account_number": "44262"
+					},
+					"Value Added Tax on Deductible Fixed Assets Purchase": {
+						"account_type": "Tax",
+						"account_number": "44263"
+					},
+					"VAT on Partially Deductible Fixed Asset Purchase": {
+						"account_type": "Tax",
+						"account_number": "44264"
+					},
+					"VAT on Burdens that is Deductible": {
+						"account_type": "Tax",
+						"account_number": "44265"
+					},
+					"Value Added Tax/goods & Other Services Purchase": {
+						"account_type": "Tax",
+						"account_number": "44266"
+					},
+					"Value Added Tax/ Brought Forward To Collect": {
+						"account_type": "Tax",
+						"account_number": "44267"
+					},
+					"VAT": {
+						"account_type": "Tax",
+						"account_number": "44268"
+					},
+					"Payment On Account (minimum tax system companies)": {
+						"VAT": {
+							"account_type": "Tax",
+							"account_number": "44281100"
+						},
+						"VAT": {
+							"account_type": "Tax",
+							"account_number": "44281200"
+						},
+						"account_number": "44281",
+						"account_type": "Receivable"
+					},
+					"Returnable VAT - Quarter Return": {
+						"account_number": "44291",
+						"account_type": "Receivable"
+					},
+					"Returnable VAT - Half Yearly Return": {
+						"account_number": "44292",
+						"account_type": "Receivable"
+					},
+					"Returnable VAT - Yearly Return": {
+						"account_number": "44293",
+						"account_type": "Receivable"
+					},
+					"Returnable VAT - Clause 59": {
+						"account_number": "44294",
+						"account_type": "Receivable"
+					},
+					"account_number": "442",
+					"account_type": "Receivable"
+				},
+                "Govt And Public Institutions Accounts Receivable": {
+                    "Subsidies Receivable": {
+						"account_type": "Receivable",
+						"account_number": "44910"
+					},
+                    "Other Receivables (Gov't And Public Institutions)": {
+						"account_type": "Receivable",
+						"account_number": "44970"
+					},
+                    "Accrued Revenues Not Collected": {
+						"account_type": "Receivable",
+						"account_number": "44980"
+					},
+					"account_number": "449"
+                },
+				"account_number": "44"
+            }, 
+            "Partners (Active)": {
+                "Partners Current Account (Active)": {
+                    "Subsidiary Companies": {
+						"account_number": "45112"
+                    },
+                    "Partners Withdrawal": {
+						"account_number": "45155"
+                    },
+                    "Joint Ventures": {
+						"account_number": "45180"
+                    },					
+					"account_number": "451"
+                },
+                "Shareholders Receivable": {
+					"Subscribed And Uncalled Capital": {
+						"account_number": "45910"
+					},
+					"Subscribed Capital Called And Unpaid": {
+						"account_number": "45920"
+					},
+					"Loss Brought Forward": {
+						"account_number": "45970"
+					},
+					"account_number": "459"
+				},
+				"account_number": "45"
+            },
+            "Miscellaneous Accounts Receivable And Payable (Active)": {
+                "Misc. Accounts Receivables - Operating": {
+					"Accounts Receivables - For Consignments And Containers": {
+						"account_number": "46810"
+					},
+					"Other Misc. Receivables - Operational": {
+						"account_number": "46890"
+					},
+					"account_number": "468"
+				}, 
+                "Misc. Receivables - Non Operating": {
+                    "Acc. Receivables On F/A Disposal And Sale Of Placement Sec": {
+						"account_number": "46910"
+					},
+                    "Other Misc. Receivables - Non Operational": {
+						"account_number": "46990"
+					},					
+					"account_number": "469"
+                },
+				"account_number": "46"
+			}, 
+            "Pre-payments And Accruals (Active)": {
+                "Deferred Charges To Be Distributed": {
+					"Pre-operation Expenses": {
+						"account_number": "47110",
+						"account_type": "Temporary"
+					},
+					"Major Repairs For Amortization": {
+						"account_number": "47120",
+						"account_type": "Temporary"
+					},
+					"Debenture And Bonds Premiums": {
+						"account_number": "47130",
+						"account_type": "Temporary"
+					},
+					"Other Deferred Charges": {
+						"account_number": "47190",
+						"account_type": "Temporary"
+					},
+					"account_number": "471",
+					"account_type": "Temporary"
+				},
+				"Deferred Charges Previously Calculated": {
+					"account_number": "472"
+				},
+				"account_number": "47"
+            }, 
+            "Transitory And Regularization Account (Active)": {
+                "Periodical Allocation Of Expenses": {
+					"account_type": "Temporary",
+					"account_number": "481"
+                },
+				"account_number": "48"
+            }, 
+            "Provisions For Diminution In Value": {
+                "Provision For Diminution In Value Of Receivables (Clients)": {
+					"account_number": "491"
+				},
+                "Provision For Diminution In Value Of Partners Accounts": {
+					"account_number": "495"
+                }, 
+                "Provision For Diminution In Values Of Misc. Receivable": {
+                    "Misc. Receivables - Operational": {
+						"account_number": "49680"
+					}, 
+                    "Misc. Receivables - Non Operational": {
+						"account_number": "49690"
+					},
+					"account_number": "496"
+                },
+				"account_number": "49"
+			},
+			"account_number": "4",
+            "root_type": "Asset"
+		},  
+        "4 - Receivables And Payables (Passive)": {
+            "40 - Suppliers (Passive)": {
+                "Accounts Payables (Suppliers)": {
+                    "Invoices": {
+						"account_number": "40110",
+						"account_type": "Payable"
+                    }, 
+                    "Notes Payable": {
+						"account_number": "40150",
+						"account_type": "Payable"
+                    },
+                    "Invoices Not Received Yet": {
+						"account_number": "40180",
+						"account_type": "Stock Received But Not Billed"
+                    },
+                    "Earned Discounts And Allowances": {
+						"account_number": "40190",
+						"account_type": "Payable"
+                    },					
+					"account_number": "401",
+                    "account_type": "Payable"
+                }, 
+                "Fixed Assets Suppliers": {
+					"Invoices": {
+						"account_number": "40310",
+						"account_type": "Payable"
+					},
+					"Notes Payables": {
+						"account_number": "40350",
+						"account_type": "Payable"
+					},
+					"Invoices Not Received Yet": {
+						"account_number": "40380",
+						"account_type": "Stock Received But Not Billed"
+					},
+					"Earned Discount And Allowances": {
+						"account_number": "40390",
+						"account_type": "Payable"
+					},
+					"account_number": "403",
+					"account_type": "Payable"
+                }, 
+                "account_type": "Payable"
+            }, 
+            "41 - Debtors (Customers) (Passive)": {
+                "Advances And Payments On Account For Orders Under Execution": {
+					"account_number": "419"
+                }
+            }, 
+            "42 - Personnel (Passive)": {
+                "Payments Due To Personnel": {
+					"Basic Salary": {
+						"account_number": "42101"
+					},
+					"Representation Fees": {
+						"account_number": "42102"
+					},
+					"Bonus, Commission, Overtime, Paid Vacation": {
+						"account_number": "42103"
+					},
+					"Wife Allowances": {
+						"account_number": "42104"
+					},
+					"Child Allowances": {
+						"account_number": "42105"
+					},
+					"Transportation": {
+						"account_number": "42106"
+					},
+					"Car Allocation": {
+						"account_number": "42107"
+					},
+					"Resident Allocation": {
+						"account_number": "42108"
+					},
+					"Food Allocation": {
+						"account_number": "42109"
+					},
+					"Clothes Allocation": {
+						"account_number": "42110"
+					},
+					"Cash Allocation": {
+						"account_number": "42111"
+					},
+					"Insurance Premium": {
+						"account_number": "42112"
+					},
+					"Schooling Expenses": {
+						"account_number": "42113"
+					},
+					"Marriage Grant": {
+						"account_number": "42114"
+					},
+					"Birth Grant": {
+						"account_number": "42115"
+					},
+					"Sickness Assistance": {
+						"account_number": "42116"
+					},
+					"Death Assistance": {
+						"account_number": "42117"
+					},
+					"Other Grant": {
+						"account_number": "42118"
+					},
+					"account_number": "421"
+				}
+            },
+            "Social Security (Passive)": {
+                "Accounts Payable To Social Security": {
+                    "Benefits Payable": {
+						"account_number": "43110"
+					},
+                    "Personnel Benefits Payable To Social Security": {
+						"account_number": "43111"
+					},
+                    "Notes Payable - Social Security": {
+						"account_number": "43150"
+					},
+                    "Charges To Be Accrued For (Social Security)": {
+						"account_number": "43180"
+					},
+					"account_number": "431"
+                },
+				"Accounts Receivable From Social Security": {
+					"Wife Social Security Benefits": {
+						"account_number": "43810"
+					},
+					"Children Social Security Benefits": {
+						"account_number": "43820"
+					},
+					"account_number": "438"
+				},
+				"account_number": "43"
+            }, 
+            "44 - Govt And Public Institutions (Passive)": {
+                "Taxes Due (Operational)": {
+                    "Taxes Due (Operational)": {
+						"account_number": "44110"
+					},
+                    "Notes Payable (Taxes And Duties)": {
+						"account_number": "44150"
+					},
+                    "Other Taxes To Be Accrued": {
+						"account_number": "44180"
+					},
+					"account_number": "441"
+                },
+                "442 - Value Added Tax": {
+					"Value Added Tax To Be Paid": {
+						"account_number": "44251"
+					},
+					"Collected VAT on Money Delivery Operation": {
+						"account_number": "44270"
+					},
+					"Collected VAT on Services": {
+						"account_number": "44271"
+					},
+					"Collected VAT on Cash Money Delivery Operation": {
+						"account_number": "44272"
+					},
+					"Collected VAT on Cash Services": {
+						"account_number": "44273"
+					},
+					"Collected VAT on Delivery of Jewelery Operations (Real Profit Tax)": {
+						"account_number": "44274"
+					},
+					"Collected VAT on Delivery of Money for Tourist": {
+						"account_number": "44275"
+					},
+					"Collected VAT on Delivery of Money and Services for Self": {
+						"account_number": "44276"
+					},
+					"Collected VAT on Due Amounts for Non Residents": {
+						"account_number": "44277"
+					},
+					"Collected VAT on Selling Fixed Asset": {
+						"account_number": "44278"
+					},
+					"Collected VAT on Orders At Implementation": {
+						"account_number": "44279"
+					},
+					"Creditable Settlement VAT": {
+						"Creditable Settlement VAT on Advances": {
+							"account_number": "44282100"
+						},
+						"Creditable Settlement VAT on Other Accounts": {
+							"account_number": "44282200"
+						},
+						"account_number": "44282"
+					}
+				},				
+                "Tax Due (Non Operational)": {
+					"Taxes On Profit": {
+						"account_number": "44310"
+					},
+					"Taxes On Improvements Profit": {
+						"account_number": "44311"
+					},
+					"Tax On Transfer Capital": {
+						"account_number": "44312"
+					},
+					"Tax Due On Salaries": {
+						"account_number": "44313"
+					},
+					"account_number": "443"
+				}, 
+                "Govt And Public Institutions Other Accounts Payable (Passive)": {
+					"account_number": "445"
+                }
+            }, 
+            "45 - Partners (Passive)": {
+				"451 - Partners Current Account (Passive)": {
+					"Holding Company": {
+						"account_number": "45111"
+					},
+					"Affiliated Companies": {
+						"account_number": "45113"
+					},
+					"Multi-Group Companies": {
+						"account_number": "45114"
+					},
+					"Partners Advances": {
+						"account_number": "45150"
+					}
+				},
+				"Dividends Payable (Passive)": {
+                    "Other Distributions": {
+						"account_number": "45390"
+					},
+					"account_number": "453"
+                }, 
+				"Other Partners Payables": {
+                    "Contribution To The Company's Capital": {
+						"account_number": "45510"
+					},
+                    "Reimbursement Of Company's Capital": {
+						"account_number": "45520"
+					},
+                    "Profit Brought Forward": {
+						"account_number": "45570"
+					},
+					"account_number": "455"
+                }
+			},
+            "46 - Miscellaneous Accounts Receivable And Payable (Passive)": {
+                "Misc.operating Accounts Payable": {
+					"Accounts Payable For Consignments And Containers": {
+						"account_number": "46110"
+					},
+					"Other Payables": {
+						"account_number": "46190"
+					},
+					"account_number": "461"
+                },
+				"Installments On Financial Fixed Assets": {
+					"Uncalled Equity Participation": {
+						"account_number": "46310"
+					},
+					"Other Blocked Securities (Uncalled)": {
+						"account_number": "46330"
+					},
+					"account_number": "463"
+				},
+				"Misc. Accounts Payable Non Operating": {
+					"Payables On Acquisition Of Security Placements": {
+						"account_number": "46510"
+					},
+					"Debentures": {
+						"account_number": "46520"
+					},
+					"Installments On Acquisition Of Security Placements": {
+						"account_number": "46530"
+					},
+					"Other Misc. Payables Non Operating": {
+						"account_number": "46590"
+					},
+					"account_number": "465"
+				}
+            },
+            "47 - Prepayments And Accruals (Passive)": {
+                "Accrued Income": {
+					"account_number": "473"
+                },
+                "Expenses To Be Paid": {
+					"account_number": "474"
+                }
+            }, 
+            "48 - Transitory And Regularization Account (Passive)": {
+                "Periodical Allocation Of Income": {
+					"account_number": "482"
+				}
+            }, 
+            "root_type": "Liability"
+        }, 
+        "Financial Accounts": {
+            "Security Placements": {
+                "Purchases Of The Company Own Shares": {
+					"account_number": "501"
+				}, 
+                "Property Rights Related To Notes": {
+					"account_number": "502"
+                }, 
+                "Debentures And Bonds": {
+					"account_number": "505"
+				}, 
+                "Liabilities Rights Related To Notes": {
+					"account_number": "506"
+                },
+				"account_number": "50"            
+			}, 
+            "Financial Institutions": {
+                "Cheques And Coupon For Collection": {
+					"account_number": "511"
+                }, 
+                "Banks": {
+                    "Banks Current Account": {
+						"account_number": "51210",
+						"account_type": "Bank"
+                    },
+                    "Banks Over Draft": {
+						"account_number": "51220",
+						"account_type": "Bank"
+                    },
+                    "L/C": {
+						"account_number": "51230",
+						"account_type": "Bank"
+                    },
+                    "Guarantees": {
+						"account_number": "51240",
+						"account_type": "Bank"
+                    }, 
+                    "Deposits": {
+						"account_number": "51250",
+						"account_type": "Bank"
+                    },
+                    "Banks Notes Payable": {
+						"account_number": "51260",
+						"account_type": "Bank"
+                    },
+					"account_number": "512",
+                    "account_type": "Bank"
+				}, 
+                "Financial Institutions": {
+					"account_number": "519",
+                    "account_type": "Bank"					
+                },
+				"account_number": "51",
+                "account_type": "Bank"				
+            }, 
+            "Cash": {
+                "Cash": {
+                    "Cash L.L.": {
+						"account_number": "53101",
+						"account_type": "Cash"
+                    }, 
+                    "Cash $": {
+						"account_number": "53102",
+						"account_type": "Cash"
+                    }, 
+                    "Petty Cash L.L": {
+						"account_number": "53111",
+						"account_type": "Cash"
+                    }, 
+                    "Petty Cash $": {
+						"account_number": "53112",
+						"account_type": "Cash"
+                    }, 
+					"account_number": "531",
+                    "account_type": "Cash"
+                }, 
+                "Checks Returned": {
+					"account_number": "532",
+					"account_type": "Cash"
+                }, 
+                "Checks In Hand": {
+					"account_number": "533",
+					"account_type": "Cash"
+                }, 
+                "Bills Returned": {
+					"account_number": "534",
+					"account_type": "Cash"
+                }, 
+                "Checks for collection": {
+					"account_number": "535",
+					"account_type": "Cash"
+                }, 
+				"account_number": "53",
+                "account_type": "Cash"
+            }, 
+            "Intercompany Transfers": {
+				"account_number": "58",
+				"is_group": 1
+            }, 
+            "Provision For Dimunition In Value Of Security Placements": {
+				"account_number": "59",
+				"is_group": 1
+            }, 
+			"account_number": "5",
+            "root_type": "Asset"
+        }, 
+        "Expenditure": {
+            "Purchase And Variation Of Inventory": {
+                "Purchases": {
+                    "Goods": {
+						"account_number": "60110",
+						"account_type": "Cost of Goods Sold"
+						
+                    },
+                    "Purchases From Unknown People": {
+						"account_number": "60111",
+						"account_type": "Cost of Goods Sold"
+						
+                    },
+                    "Purchase From Non Resident Suppliers": {
+						"account_number": "60119",
+						"account_type": "Cost of Goods Sold"
+						
+                    },
+                    "Purchases Containers And Packing Materials": {
+						"account_number": "60120",
+						"account_type": "Expenses Included In Valuation"
+                    },
+                    "Freight": {
+						"account_number": "60181",
+						"account_type": "Expenses Included In Valuation"
+                    },
+                    "Commissions": {
+						"account_number": "60182",
+						"account_type": "Expenses Included In Valuation"
+                    },
+                    "Insurance On Freight": {
+						"account_number": "60183",
+						"account_type": "Expenses Included In Valuation"
+                    },
+                    "Clearing Expenses": {
+						"account_number": "60184",
+						"account_type": "Expenses Included In Valuation"
+                    },
+                    "Customs Charges": {
+						"account_number": "60185",
+						"account_type": "Expenses Included In Valuation"
+                    },
+                    "Discount And Allowances Earned": {
+						"account_number": "60190",
+						"account_type": "Chargeable"
+                    },
+					"account_number": "601",
+                    "account_type": "Cost of Goods Sold"
+                },
+                "Variation Of Inventory": {
+					"Opening Stock Or Stock Received": {
+						"account_number": "60510",
+						"account_type": "Stock Adjustment"						
+					},
+					"Closing Stock or Cost of Goods Sold": {
+						"account_number": "60520",
+						"account_type": "Stock Adjustment"						
+					},					
+					"account_number": "605",
+					"account_type": "Stock Adjustment"
+                },
+				"account_number": "60"	
+            }, 
+            "Purchases Raw Materials And Consumables": {
+                "Raw Materials And Consumables Purchases For Commercial": {
+					"Purchasing Raw Materials": {
+						"account_number": "61110"
+					},
+					"A. Raw Materials Purchases": {
+						"account_number": "61111"
+					},
+					"B. Raw Materials Purchases": {
+						"account_number": "61112"
+					},
+					"Purchases Raw Materials From The Resident Suppliers": {
+						"account_number": "61119"
+					},
+					"Consumables Purchases": {
+						"account_number": "61120"
+					},
+					"Fuel And Gas": {
+						"account_number": "61121"
+					},
+					"Maintenance Products": {
+						"account_number": "61122"
+					},
+					"Workshop And Factory Supplies": {
+						"account_number": "61123"
+					},
+					"Stores Supplies": {
+						"account_number": "61124"
+					},
+					"Office Supplies": {
+						"account_number": "61125"
+					},
+					"Water And Electricity Expenses": {
+						"account_number": "61126"
+					},
+					"Unreturnable Containers": {
+						"account_number": "61131"
+					},
+					"Returnable Containers": {
+						"account_number": "61132"
+					},
+					"Other Containers": {
+						"account_number": "61133"
+					},
+					"Transport And Freight": {
+						"account_number": "61181"
+					},
+					"Commissions And Brokerage": {
+						"account_number": "61182"
+					},
+					"Insurance On Freight": {
+						"account_number": "61183"
+					},
+					"Clearing Charges": {
+						"account_number": "61184"
+					},
+					"Customs Charges": {
+						"account_number": "61185"
+					},
+					"Different": {
+						"account_number": "61189"
+					},
+					"Discount And Allowances Earned (Detailed)": {
+						"account_number": "61190"
+					},
+					"account_number": "611"
+				},
+                "Raw Materials And Consumable Purchases For Industries": {
+					"Raw Materials Purchases": {
+						"account_number": "61210"
+					},
+					"A. Raw Materials Purchases": {
+						"account_number": "61211"
+					},
+					"B. Raw Materials Purchases": {
+						"account_number": "61212"
+					},
+					"Raw Materials Purchase from non-residents": {
+						"account_number": "61219"
+					},
+					"Consumables Purchases": {
+						"account_number": "61220"
+					},
+					"Fuel And Gaz": {
+						"account_number": "61221"
+					},
+					"Maintenance Products": {
+						"account_number": "61222"
+					},
+					"Workshop And Factory Supplies": {
+						"account_number": "61223"
+					},
+					"Stores Supplies": {
+						"account_number": "61224"
+					},
+                    "Office Supplies": {
+						"account_number": "61225"
+					},
+                    "Containers And Packing Materials": {
+						"account_number": "61230"
+					},
+                    "None returnable Containers": {
+						"account_number": "61231"
+					},
+                    "Returnable Containers": {
+						"account_number": "61232"
+					},
+                    "Other Containers": {
+						"account_number": "61233"
+					},
+                    "Expenses Connected To Raw Materials And Consumable": {
+						"account_number": "61280"
+					},
+                    "Transport And Freight": {
+						"account_number": "61281",
+						"account_type": "Chargeable"
+					},
+                    "Commissions And Brokerage": {
+						"account_number": "61282"
+					},
+                    "Insurance On Freight": {
+						"account_number": "61283"
+					},
+                    "Clearing Charges": {
+						"account_number": "61284",
+						"account_type": "Chargeable"						
+					},
+                    "Customs Charges": {
+						"account_number": "61285",
+						"account_type": "Chargeable"						
+					},
+                    "Different": {
+						"account_number": "61289"
+					},
+					"account_number": "612"
+                }, 
+                "Variation Of Raw Materials And Consumable Inventory": {
+                    "Opening Stock (Commercial) Or Goods Received": {
+						"account_number": "61511"
+					}, 
+                    "Opening Stock (Industries) Or Goods Received": {
+						"account_number": "61512"
+					},
+					"Ending Stock (Commercial) Or Cost of Goods Used": {
+						"account_number": "61521"
+					},
+					"Ending Stock (Industries) Or Cost of Goods Used": {
+						"account_number": "61522"
+					},
+					"Cost of Works": {
+						"account_number": "61523"
+					},
+					"Cost of Services Execution": {
+						"account_number": "61524"
+					},
+					"account_number": "615"
+                },
+				"account_number": "61"				
+            }, 
+            "Other Charges And Disbursements": {
+                "Purchases From Sub Contractors": {
+                    "Sub Contractor A": {
+						"account_number": "62110"
+					}, 
+                    "Sub Contractor B": {
+						"account_number": "62120"
+					},
+                    "Discount And Allowances In Purchases From Sub Contractors": {
+						"account_number": "62190"
+					},
+					"account_number": "621"
+                }, 
+                "Leasing And Patents Cost": {
+                    "Leasing On Materials": {
+						"account_number": "62510"
+					}, 
+                    "Leasing On Property": {
+						"account_number": "62520"
+					},
+                    "Royalties": {
+						"account_number": "62530"
+					},
+                    "Licenses": {
+						"account_number": "62540"
+					},
+                    "Diplomas": {
+						"account_number": "62550"
+					},
+                    "Trade Marks": {
+						"account_number": "62560"
+					},
+                    "Procedures": {
+						"account_number": "62570"
+					},
+                    "Similar Values And Rights": {
+						"account_number": "62580"
+					},
+					"account_number": "625"
+                }, 
+                "External Services": {
+					"Transportation Of Assets": {
+						"account_number": "62611"
+					},
+					"Personnel Collective Transportation": {
+						"account_number": "62612"
+					},
+					"Postage, Telephone And Telecommunications": {
+						"account_number": "62615"
+					},
+					"Maintenance And Repairs": {
+						"account_number": "62620"
+					},
+					"Rents": {
+						"account_number": "62631"
+					},
+					"Other Related Charges": {
+						"account_number": "62632"
+					},
+					"Entertainment": {
+						"account_number": "62641"
+					},
+					"Travel And Transport": {
+						"account_number": "62642"
+					},
+					"Legal Representation Expenses": {
+						"Board Of Directors": {
+							"account_number": "62644001"
+						},
+						"Senior Staff And Manager": {
+							"account_number": "62644002"
+						},
+						"account_number": "62644"
+					},
+					"Additional Representation Expenses": {
+						"Board Of Directors": {
+							"account_number": "62645001"
+						},
+						"Senior Staff Manager": {
+							"account_number": "62645002"
+						},
+						"account_number": "62645"
+					},
+					"Others": {
+						"Uniforms": {
+							"account_number": "62649001"
+						},
+						"account_number": "62649"
+					},
+					"Temporary Personnel": {
+						"account_number": "62651"
+					},
+					"Agent's/paid Commissions": {
+						"account_number": "62652"
+					},
+					"Fees Non Taxable": {
+						"account_number": "62653"
+					},
+					"Fees Taxable As Works": {
+						"account_number": "62654"
+					},
+					"Fees Taxable As Services": {
+						"account_number": "62655"
+					},
+					"Cut Wages": {
+						"account_number": "62656"
+					},
+					"Documentations": {
+						"account_number": "62662"
+					},
+					"Studies And Research": {
+						"account_number": "62670"
+					},
+					"Insurance Premiums": {
+						"account_number": "62680"
+					},
+					"Medical Care": {
+						"account_number": "62691"
+					},
+					"Financial Fees And Expenses (On Securities And Notes)": {
+						"account_number": "62692"
+					},
+					"Advertising Expenses": {
+						"account_number": "62693"
+					},
+					"Owner Expenses": {
+						"account_number": "62698"
+					},
+					"Other Expenses": {
+						"account_number": "62699"
+					},
+					"account_number": "626"
+				},
+				"account_number": "62"
+            },
+            "Personnel Charges": {
+                "Salaries And Wages": {
+                    "Salaries And Wages": {
+						"account_number": "63110"
+					}, 
+                    "Wages": {
+						"account_number": "63120"
+					},
+                    "Sickness Share of the Insured": {
+						"account_number": "63130"
+					},
+                    "Discount on Salary": {
+						"account_number": "63131"
+					},					
+                    "Fixed Commission": {
+						"account_number": "63140"
+					},
+                    "Paid Vacation": {
+						"account_number": "63150"
+					},
+                    "Manager Remunerations (Voting Rights)": {
+						"account_number": "63160"
+					},
+                    "Partners Salaries": {
+						"account_number": "63161"
+					},
+                    "Directors Remuneration": {
+						"account_number": "63170"
+					},
+                    "Owner Remuneration": {
+						"account_number": "63171"
+					},
+                    "Over time": {
+						"account_number": "63180"
+					},
+					"account_number": "631"
+                },
+                "Social Security": {
+                    "Nssf Expenses": {
+						"account_number": "63510"
+                    }, 
+                    "Transportation Of Board Of Directors": {
+						"account_number": "63521"
+					},
+                    "Transportation Of Employees": {
+						"account_number": "63522"
+					},
+                    "Transportation Of Owner": {
+						"account_number": "63523"
+                    },
+                    "Transportation Of Partners": {
+						"account_number": "63524"
+                    },
+                    "Car Allocation": {
+						"account_number": "63525"
+                    },
+                    "Schooling Expenses": {
+						"account_number": "63530"
+                    },
+                    "Specialization Grant": {
+						"account_number": "63531"
+                    },
+                    "Training And Development": {
+						"account_number": "63532"
+                    },
+                    "Staff Inssurance Expenses": {
+						"account_number": "63540"
+                    },
+                    "Managers Insurance": {
+						"account_number": "63541"
+                    },
+                    "Partners Insurance": {
+						"account_number": "63542"
+                    },
+                    "Board Of Directors Insurance": {
+						"account_number": "63543"
+                    },
+                    "Owners Insurance": {
+						"account_number": "63544"
+                    },
+                    "Additional End Of Services Expenses": {
+						"account_number": "63550"
+                    },
+                    "Residence Allocation": {
+						"account_number": "63590"
+                    },
+                    "Food Allocation": {
+						"account_number": "63591"
+                    },
+                    "Clothes Allocation": {
+						"account_number": "63592"
+                    },
+                    "Cash Allocation": {
+						"account_number": "63593"
+                    },
+                    "Marriage Grant": {
+						"account_number": "63594"
+                    },
+                    "Birth Grant": {
+						"account_number": "63595"
+                    },
+                    "Sickness Assistance": {
+						"account_number": "63596"
+                    },
+                    "Death Assistance": {
+						"account_number": "63597"
+                    },
+                    "Other Un-Taxable Benefits or Grants": {
+						"account_number": "63598"
+                    },
+                    "Other Taxable Benefits Or Grants": {
+						"account_number": "63599"
+                    },				
+					"account_number": "635"
+                }, 
+				"account_number": "63"
+			},
+            "Fees And Taxes": {
+                "Income Tax On Salaries And Remunerations": {
+                    "Tax On Wages And Salaries": {
+						"account_number": "64110"
+					}, 
+                    "Tax On Non Resident": {
+						"account_number": "64120"
+					}, 
+                    "Tax For Cut Wages": {
+						"account_number": "64130"
+					},
+					"account_number": "641"
+				},
+				"Municipal Tax": {
+					"account_number": "642"
+				},
+				"Value Added Tax": {
+					"account_number": "643"
+				},
+				"Registration Fees": {
+					"account_number": "644"
+				},
+                "Other Taxes": {
+                    "Cut Tax On Tax Declaration": {
+						"account_number": "64510"
+					}, 
+                    "Income Tax On Transfered Capitals": {
+						"account_number": "64520"
+					},
+                    "Tax On Board Of Directors Allowance": {
+						"account_number": "64521"
+					},
+                    "Tax On Attendance Of Shareholders Board Of Directors": {
+						"account_number": "64522"
+					},
+                    "Tax On Interest Received From Others": {
+						"account_number": "64523"
+					},
+                    "Tax On Interest 5% (Already Paid)": {
+						"account_number": "64524"
+					},
+                    "Tax On Real Establishment For Leasing Bld.": {
+						"account_number": "64531"
+					},
+                    "Tax On Real Establishment For Non Leasing Bld.": {
+						"account_number": "64532"
+					},
+					"account_number": "645"
+				},
+				"account_number": "64"
+			}, 
+            "Amortization, Depreciation And Provisions (Operational)": {
+                "Depreciation And Amortization": {
+                    "Intangible Assets": {
+						"account_number": "65110",
+						"account_type": "Depreciation"
+					}, 
+                    "Fixed Assets": {
+						"account_number": "65120",
+						"account_type": "Depreciation"
+					},
+                    "Amortization Of Differed Charges": {
+						"account_number": "65150",
+						"account_type": "Depreciation"
+					},
+					"account_number": "651"
+				}, 
+                "Provisions": {
+                    "Provisions For Diminution In Value Of Intangible Fixed Asset": {
+						"account_number": "65510",
+						"account_type": "Depreciation"
+					},
+                    "Provisions For Diminution In Value Of Tangible Fixed Assets": {
+						"account_number": "65520",
+						"account_type": "Depreciation"
+					},
+                    "Provisions For Diminution In Value Of Inventory And Goods": {
+						"account_number": "65530",
+						"account_type": "Depreciation"
+					},
+                    "Provisions For Diminution In Value Of Debts": {
+						"account_number": "65540",
+						"account_type": "Depreciation"
+					},
+                    "Prov. For Risks And Charges For Loss Of Bad Debts.": {
+						"account_number": "65551",
+						"account_type": "Depreciation"
+					},
+                    "Prov. For Risks And Charges For End Of Service Indemnity": {
+						"account_number": "65552",
+						"account_type": "Depreciation"
+					},
+                    "Prov. For Risks And Charges For Retirement": {
+						"account_number": "65553",
+						"account_type": "Depreciation"
+					},
+                    "Prov. For Risks And Charges For Work Accident": {
+						"account_number": "65554",
+						"account_type": "Depreciation"
+					},
+                    "Provision For Expenses": {
+						"account_number": "65590",
+						"account_type": "Depreciation"
+					},
+					"account_number": "655"
+                }, 
+				"account_number": "65"
+			},
+            "Other Operating Charges": {
+                "Other Operating Charges": {
+                    "Attendance Allowance Of Board Of Directors": {
+						"account_number": "66111"
+                    }, 
+                    "Allowance Exp. For Board Of Directors": {
+						"account_number": "66112"
+					},
+                    "Attendance Allowance Of Shareholders And Board Of Directors": {
+						"account_number": "66113"
+					},
+                    "Losses On Irrecoverable Operating Receivables": {
+						"account_number": "66120"
+					},
+                    "Losses of damaged inventory": {
+						"account_number": "66190"
+					},
+					"account_number": "661"
+				},
+                "Loss On Joint Venture": {
+					"Loss On Joint Venture For Local Sharing": {
+						"account_number": "66510"
+					},
+					"Loss On Joint Venture For Foreign Sharing": {
+						"account_number": "66520"
+					},				
+					"account_number": "665"
+				}, 
+                "Difference In Changes In Accounting Policy": {
+					"account_number": "666",
+					"account_type": "Round Off"
+                },
+				"account_number": "66"
+            }, 
+            "Financial Charges": {
+                "Interest": {
+                    "Interest - Accounts Payable And Loans": {
+						"account_number": "67310"
+					},
+                    "Interest - Guaranteed Debenture And Bonds": {
+						"account_number": "67330"
+					},
+                    "Interest Paid To Partners & Owner": {
+						"Legal Interest Paid To Partners": {
+							"account_number": "67341001"
+						},
+						"Additional Interest Paid To Partners": {
+							"account_number": "67341002"
+						},						
+						"account_number": "67341"
+					},
+                    "Interest Paid To Institutions": {
+						"Legal Interest Paid To Institutions": {
+							"account_number": "67342001"
+						},
+						"Additional Interest Paid To Institutions": {
+							"account_number": "67342002"
+						},
+						"account_number": "67342"
+					},
+                    "Interest Paid To Individuals": {
+						"Legal Interest Paid To Individual": {
+							"account_number": "67343001"
+						},
+						"Additional Interest Paid To Individual": {
+							"account_number": "67343002"
+						},
+						"account_number": "67343"
+					},
+                    "Positive Rounding": {
+						"account_number": "67344"
+					},
+                    "Discount Paid": {
+						"account_number": "67350"
+					},
+                    "Interest - Banks And Financial Institutions": {
+						"account_number": "67360"
+					},
+                    "Interest Paid To Borrowers": {
+						"account_number": "67370"
+					},
+                    "Banks Charges": {
+						"account_number": "67380"
+					},
+                    "Stamps On Financial Contracts": {
+						"account_number": "67381"
+					},
+					"account_number": "673"
+				},
+                "Negative Exchange Differences": {
+                    "Normal Operations": {
+						"account_number": "67510"
+					},
+                    "Capital Operations": {
+						"account_number": "67520"
+					},
+					"account_number": "675"
+                }, 
+                "Net Charges On Disposal Of Securities Placements": {
+					"account_number": "676"
+				},
+                "Amortization And Provisions On Financial Charges": {
+                    "Amortization Of Reimbursement Premiums": {
+						"account_number": "67910"
+					},
+                    "Provision For Diminution In Value Of Financial Fixed Assets": {
+						"account_number": "67920"
+					},
+                    "Provision For Diminution In Value Of Securities Placements": {
+						"account_number": "67940"
+					},
+                    "Provision For Risks And Financial Charges": {
+						"account_number": "67950"
+					},
+					"account_number": "679"
+				},
+				"account_number": "67"
+			},
+            "Non Operating Charges": {
+                "Net Book Value Of Fixed Assets Disposed Of": {
+                    "Intangible Fixed Assets": {
+						"account_number": "68110"
+                    }, 
+                    "Tangible Fixed Assets": {
+						"account_number": "68120"
+                    },
+                    "Financial Fixed Assets": {
+						"account_number": "68150"
+                    },
+					"account_number": "681"
+                },
+				"Other Charges - Non Operating": {
+					"Gifts": {
+						"account_number": "68510"
+					},
+					"Donations For Institutions And Individuals": {
+						"account_number": "68511"
+					},
+					"Subsidies Granted": {
+						"account_number": "68512"
+					},
+					"Fines And Penalties": {
+						"account_number": "68513"
+					},
+					"Penalties On Contracts": {
+						"account_number": "68514"
+					},
+					"Irrecoverable Receivables": {
+						"account_number": "68515"
+					},
+					"Other Administrative Operations": {
+						"account_number": "68516"
+					},
+					"Donations And Tips For Ministries And General Institutions": {
+						"account_number": "68517"
+					},
+					"Tips And Donations For Non Profitable Institutions": {
+						"account_number": "68518"
+					},
+					"Expenses Of the Operations on capital": {
+						"account_number": "68550"
+					},
+					"Price Indexing": {
+						"account_number": "68551"
+					},
+					"Reimbursement Allowances": {
+						"account_number": "68552"
+					},
+					"Purchases Of The Company Own Shares And Notes": {
+						"account_number": "68553"
+					},
+					"account_number": "685"
+				},
+                "Exceptional Losses": {
+					"account_number": "686"
+                }, 
+                "Depreciation And Provisions Non Operating": {
+                    "Exceptional Depreciation Of Fixed Assets": {
+						"account_number": "68910",
+						"account_type": "Depreciation"
+                    }, 
+                    "Provision For Exceptional Diminution In Prices (non taxable)": {
+						"account_number": "68920",
+						"account_type": "Depreciation"
+                    }, 
+                    "Provision For Exceptional Diminution In Prices (taxable)": {
+						"account_number": "68921",
+						"account_type": "Depreciation"
+                    }, 
+                    "Adjustment On Accumulated Depreciation": {
+						"account_number": "68930",
+						"account_type": "Depreciation"
+                    }, 
+                    "Provision For Risks And Charges Non Operational": {
+						"account_number": "68950"
+                    }, 
+					"account_number": "689",
+					"account_type": "Depreciation"
+                }, 
+				"account_number": "68"
+            },
+            "Income Tax On Profits": {
+                "Irrecoverable Income Tax On Profits": {
+					"Irrecoverable Income Tax On Profits": {
+						"account_number": "69311"
+					},
+					"account_number": "693"
+				},
+                "Tax On Improvements Profit": {
+					"account_number": "694"
+				},
+				"account_number": "69"
+            }, 
+			"account_number": "6",
+            "root_type": "Expense"
+        },
+        "Income": {
+            "Sales Of Goods": {
+                "Invoices": {
+                    "Sales": {
+						"account_number": "70121"
+					},
+                    "Parties": {
+						"account_number": "70171"
+					},
+                    "Restaurant": {
+						"account_number": "70181"
+					},
+                    "CoffeeShop": {
+						"account_number": "70191"
+					},
+					"account_number": "701"
+				}, 
+                "Discount And Allowances Allowed": {
+					"account_number": "709"
+                },
+				"account_number": "70"
+			}, 
+            "Sales Of Production": {
+                "Sales Of Production": {
+					"Sales of manufactured Goods": {
+						"account_number": "71111"
+					}, 
+                    "Sales Of By-Products Items": {
+						"account_number": "71121"
+					},
+                    "Sales Of Scrap": {
+						"account_number": "71131"
+					},
+					"account_number": "711"
+				},
+                "Works": {
+					"Maintenance": {
+						"account_number": "71210"
+					},
+					"account_number": "712"
+				},
+				"Services": {
+					"Services": {
+						"Residence Income": {
+							"account_number": "71319001"
+						},
+						"Restaurant Income": {
+							"account_number": "71319002"
+						},
+						"Coffee shop Income": {
+							"account_number": "71319003"
+						},
+						"Parties and Occasions": {
+							"account_number": "71319004"
+						},
+						"Others": {
+							"account_number": "71319009"
+						},
+						"account_number": "71319"
+					},	
+                    "Studies": {
+						"account_number": "71320"
+                    },
+                    "Residence": {
+						"account_number": "71391"
+                    },
+                    "Occasions": {
+						"account_number": "71396"
+                    },
+                    "Others": {
+						"account_number": "71398"
+                    },
+                    "Others": {
+						"account_number": "71399"
+                    },
+					"account_number": "713"
+                },
+				"Proceeds From Ancillary Activities": {
+					"account_number": "717"
+				},
+				"Rental Proceeds": {
+					"account_number": "718"
+				},
+				"Rental Proceeds": {
+					"Production": {
+						"account_number": "71911"
+					},
+					"Discounts on Works": {
+						"account_number": "71921"
+					},
+					"Discounts on Works": {
+						"account_number": "71931"
+					},
+					"Discounts on Works": {
+						"account_number": "71970"
+					},
+					"account_number": "719"
+				},
+				"account_number": "71"
+			}, 
+            "Production (Variation)": {
+                "Works In Process (Variation)": {
+					"Production In Process": {
+						"account_number": "72110"
+					},
+					"Work In Progress": {
+						"account_number": "72120"
+					},
+					"account_number": "721"
+				},
+                "Studies And Services In Progress (Variation)": {
+					"Studies In Progress": {
+						"account_number": "72250"
+					},
+					"Services In Progress": {
+						"account_number": "72260"
+					},
+					"account_number": "722"
+				},
+				"Produced Items (Variations)": {
+					"By Products Items": {
+						"account_number": "72510"
+					},
+					"Manufactured Goods": {
+						"account_number": "72550"
+					},
+					"Scrap": {
+						"account_number": "72580"
+					},
+					"account_number": "725"
+				},
+				"account_number": "72"
+            },
+            "Production Of Fixed Assets": {
+				"Production Of Fixed Assets": {
+					"account_number": "731"
+				},
+				"Tangible Fixed Assets": {
+					"account_number": "732"
+				},
+				"account_number": "73"
+			},	
+            "Operating Subsidies": {
+				"Related To Products": {
+					"account_number": "741"
+				},
+				"Related To Production": {
+					"account_number": "742"
+				},
+				"account_number": "74"
+            },
+            "Provisions Write-Back": {
+                "Write-Back of Prov.For Dim In Value Of F/A": {
+					"account_number": "752"
+				},
+                "Write-Back of Prov For Dimunition In Value Of Current Assets": {
+					"account_number": "753"
+				},
+				"account_number": "75"
+            }, 
+            "Other Operating Income": {
+                "Ordinary Incomes": {
+                    "Royalties, Patents, Licenses, Trade Marks, Know-How": {
+						"account_number": "76110"
+					},
+                    "Rent Income From Buildings Not Destinated For The Activity": {
+						"account_number": "76120"
+					},
+                    "Director's Attendance Fees And Allowances": {
+						"account_number": "76130"
+					},
+                    "Allocation Of Operating Expenses": {
+						"account_number": "76190"
+					},
+                    "Difference On Inventory": {
+						"account_number": "76191"
+					},
+					"account_number": "761"
+                }, 
+                "Joint Venture Income": {
+					"Net Transfers Of Allocated Charges": {
+						"account_number": "76510"
+					},
+					"Net Attributions Of Income": {
+						"account_number": "76550"
+					},
+					"Net Income For Local Sharing": {
+						"account_number": "76551"
+					},
+					"Net Income For Foreign Sharing": {
+						"account_number": "76552"
+					},
+					"account_number": "765"
+				},
+				"account_number": "76"
+            }, 
+            "Financial Revenues": {
+                "Revenues Of Equity Participations": {
+                    "Dividends": {
+						"account_number": "77110"
+					},
+                    "Revenue From Other Equity Participations": {
+						"account_number": "77160"
+					},					
+                    "Revenue From Receivables Related To Equity Participation": {
+						"account_number": "77170"
+					},
+					"account_number": "771"
+                }, 
+                "Revenue From Other Assets": {
+					"Revenue From Securities Placements": {
+						"account_number": "77210"
+					},
+					"Revenue From Blocked Securities": {
+						"account_number": "77230"
+					},
+					"Revenue From Blocked Receivable": {
+						"account_number": "77250"
+					},
+					"Revenue From Blocked Receivable": {
+						"account_number": "77250"
+					},
+					"Revenue From Commercial Receivables": {
+						"account_number": "77260"
+					},
+					"Revenue From Misc. Receivables": {
+						"account_number": "77270"
+					},
+					"Revenue From Insurance Co. (Allocation)": {
+						"account_number": "77290"
+					},
+					"account_number": "772"
+				},
+                "Interest And Similar Revenues": {
+					"Revenue On Loans Granted": {
+						"account_number": "77310"
+					},
+					"Revenue Of Bank Interest On Current Or Blocked Accounts": {
+						"account_number": "77320"
+					},
+					"Earned Discount And Allowances": {
+						"account_number": "77330"
+					},
+					"Negative Roundings": {
+						"account_number": "77344"
+					},
+					"account_number": "773"
+				},
+                "Foreign Currencies Positive Difference": {
+                    "Current Operations": {
+						"account_number": "77510"
+					},
+                    "Capital Operations": {
+						"account_number": "77550"
+					},
+					"account_number": "775"
+                }, 
+                "Other Financial Income": {
+                    "Net Income On Sale Of Security Placement": {
+						"account_number": "77810"
+					}, 
+                    "Allocation Of Financial Charges": {
+						"account_number": "77890"
+					},
+					"account_number": "778"
+				},
+                "Write-Back Of Financial Provisions": {
+                    "Write-Back Of Provisions For Dimunition Of Values": {
+						"account_number": "77930"
+					}, 
+                    "Write-Back Of Provisions For Risks": {
+						"account_number": "77950"
+					},
+                    "Write-Back Of Provisions For Charges": {
+						"account_number": "77951"
+					},
+					"account_number": "779"
+				},
+				"account_number": "77"				
+            }, 
+            "Non Operating Revenues": {
+                "Revenues From Fixed Assets Disposals": {
+                    "Intangible Fixed Assets": {
+						"account_number": "78110"
+                    },
+                    "Tangible Fixed Assets": {
+						"account_number": "78120"
+                    },
+                    "Financial Fixed Assets": {
+						"account_number": "78150"
+                    },
+					"account_number": "781"
+                },
+				"Investment Subsidies Transfered To Profit And Loss": {
+					"account_number": "782"
+				},
+				"Revenue On Exceptional Operation": {
+					"account_number": "786"
+				},
+				"Misc. Income Non Operating": {
+					"Exceptional Revenue On Ordinary Operation": {
+						"account_number": "78810"
+					},
+					"Profit For Evaluation Of Assets": {
+						"account_number": "78881"
+					},
+					"Profit For Evaluation Of Assets Unspecified": {
+						"account_number": "78882"
+					},
+					"Allocation Of Exceptional Charges": {
+						"account_number": "78890"
+					},
+					"account_number": "788"
+				},
+				"Write-Back Of Non Operating Provisions": {
+					"Write-Back Of Provision For Dimunition In Values": {
+						"account_number": "78910"
+					},
+					"Write-Back Of Provision Of Risks": {
+						"account_number": "78950"
+					},
+					"Write-Back Of Prov. Of Charges": {
+						"account_number": "78951"
+					},
+					"account_number": "789"
+				},
+				"account_number": "78"
+            }, 
+			"account_number": "7",
+            "root_type": "Income"
+        }
+    }
+}
