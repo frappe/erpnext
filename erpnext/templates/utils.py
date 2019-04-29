@@ -28,7 +28,7 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 
 	opportunity = frappe.get_doc(dict(
 		doctype ='Opportunity',
-		enquiry_from = 'Customer' if customer else 'Lead',
+		opportunity_from = 'Customer' if customer else 'Lead',
 		status = 'Open',
 		title = subject,
 		contact_email = sender,

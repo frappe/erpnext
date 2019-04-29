@@ -151,10 +151,10 @@ def get_opening_balance(filters, columns):
 		"posting_date": filters.from_date,
 		"posting_time": "00:00:00"
 	})
-	row = [""]*len(columns)
-	row[1] = _("'Opening'")
-	for i, v in ((9, 'qty_after_transaction'), (11, 'valuation_rate'), (12, 'stock_value')):
-			row[i] = last_entry.get(v, 0)
+	row = {}
+	row["item_code"] = _("'Opening'")
+	for dummy, v in ((9, 'qty_after_transaction'), (11, 'valuation_rate'), (12, 'stock_value')):
+			row[v] = last_entry.get(v, 0)
 
 	return row
 

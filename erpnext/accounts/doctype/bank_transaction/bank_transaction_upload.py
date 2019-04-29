@@ -45,15 +45,19 @@ def create_bank_entries(columns, data, bank_account):
 			fields.update({key: d[int(value)-1]})
 
 
-		bank_transaction = frappe.get_doc({
-			"doctype": "Bank Transaction"
-		})
-		bank_transaction.update(fields)
-		bank_transaction.date = getdate(parse_date(bank_transaction.date))
-		bank_transaction.bank_account = bank_account
-		bank_transaction.insert()
-		bank_transaction.submit()
-		count = count + 1
+		try:
+			bank_transaction = frappe.get_doc({
+				"doctype": "Bank Transaction"
+			})
+			bank_transaction.update(fields)
+			bank_transaction.date = getdate(parse_date(bank_transaction.date))
+			bank_transaction.bank_account = bank_account
+			bank_transaction.insert()
+			bank_transaction.submit()
+			count = count + 1
+		except Exception as e:
+			frappe.throw(e)
+			frappe.log_error(frappe.get_traceback())
 
 	return count
 

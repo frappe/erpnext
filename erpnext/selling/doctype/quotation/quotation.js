@@ -8,15 +8,27 @@ frappe.ui.form.on('Quotation', {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
 			'Sales Order': 'Make Sales Order'
-		}
+		},
+
+		frm.set_query("quotation_to", function() {
+			return{
+				"filters": {
+					"name": ["in", ["Customer", "Lead"]],
+				}
+			}
+		});
+
 	},
 
 	refresh: function(frm) {
 		frm.trigger("set_label");
+		frm.trigger("set_dynamic_field_label");
 	},
 
 	quotation_to: function(frm) {
 		frm.trigger("set_label");
+		frm.trigger("toggle_reqd_lead_customer");
+		frm.trigger("set_dynamic_field_label");
 	},
 
 	set_label: function(frm) {
@@ -28,10 +40,6 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
 		var me = this;
 		this._super(doc, dt, dn);
-		if(doc.customer && !doc.quotation_to)
-			doc.quotation_to = "Customer";
-		else if(doc.lead && !doc.quotation_to)
-			doc.quotation_to = "Lead";
 
 	},
 	refresh: function(doc, dt, dn) {
@@ -97,25 +105,28 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 	},
 
-	quotation_to: function() {
-		var me = this;
-		if (this.frm.doc.quotation_to == "Lead") {
-			this.frm.set_value("customer", null);
-			this.frm.set_value("contact_person", null);
-		} else if (this.frm.doc.quotation_to == "Customer") {
-			this.frm.set_value("lead", null);
+	set_dynamic_field_label: function(){
+		if (this.frm.doc.quotation_to == "Customer")
+		{
+			this.frm.set_df_property("party_name", "label", "Customer");
+			this.frm.fields_dict.party_name.get_query = null;
 		}
 
-		this.toggle_reqd_lead_customer();
+		if (this.frm.doc.quotation_to == "Lead")
+		{
+			this.frm.set_df_property("party_name", "label", "Lead");
+
+			this.frm.fields_dict.party_name.get_query = function() {
+				return{	query: "erpnext.controllers.queries.lead_query" }
+			}
+		}
 	},
 
 	toggle_reqd_lead_customer: function() {
 		var me = this;
 
-		this.frm.toggle_reqd("lead", this.frm.doc.quotation_to == "Lead");
-		this.frm.toggle_reqd("customer", this.frm.doc.quotation_to == "Customer");
-
 		// to overwrite the customer_filter trigger from queries.js
+		this.frm.toggle_reqd("party_name", this.frm.doc.quotation_to);
 		this.frm.set_query('customer_address', erpnext.queries.address_query);
 		this.frm.set_query('shipping_address_name', erpnext.queries.address_query);
 	},
@@ -162,10 +173,6 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 });
 
 cur_frm.script_manager.make(erpnext.selling.QuotationController);
-
-cur_frm.fields_dict.lead.get_query = function(doc,cdt,cdn) {
-	return{	query: "erpnext.controllers.queries.lead_query" }
-}
 
 cur_frm.cscript['Make Sales Order'] = function() {
 	frappe.model.open_mapped_doc({

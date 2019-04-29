@@ -590,5 +590,8 @@ erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019
 erpnext.patches.v11_0.make_italian_localization_fields # 26-03-2019
 erpnext.patches.v11_1.make_job_card_time_logs
 erpnext.patches.v11_1.set_variant_based_on
+erpnext.patches.v11_1.move_customer_lead_to_dynamic_column
 erpnext.patches.v11_1.woocommerce_set_creation_user
-erpnext.patches.v11_1.set_salary_details_submitable
+erpnext.patches.v11_1.delete_bom_browser
+erpnext.patches.v11_1.set_salary_details_submittable
+erpnext.patches.v11_1.rename_depends_on_lwp
