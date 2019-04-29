@@ -74,7 +74,7 @@ class Project(Document):
 		self.load_tasks()
 		self.validate_dates()
 		self.send_welcome_email()
-		self.update_percent_complete()
+		self.update_percent_complete(from_validate=True)
 
 	def validate_project_name(self):
 		if self.get("__islocal") and frappe.db.exists("Project", self.project_name):
@@ -198,7 +198,7 @@ class Project(Document):
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
-	def update_percent_complete(self):
+	def update_percent_complete(self, from_validate=False):
 		if not self.tasks: return
 		total = frappe.db.sql("""select count(name) from tabTask where project=%s""", self.name)[0][0]
 		if not total and self.percent_complete:
@@ -227,7 +227,9 @@ class Project(Document):
 			self.status = "Completed"
 		elif not self.status == "Cancelled":
 			self.status = "Open"
-		self.db_update()
+
+		if not from_validate:
+			self.db_update()
 
 	def update_costing(self):
 		from_time_sheet = frappe.db.sql("""select
