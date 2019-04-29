@@ -1199,6 +1199,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"qty": d.qty,
 					"stock_qty": d.stock_qty,
 					"uom": d.uom,
+					"stock_uom": d.stock_uom,
 					"parenttype": d.parenttype,
 					"parent": d.parent,
 					"pricing_rules": d.pricing_rules,
