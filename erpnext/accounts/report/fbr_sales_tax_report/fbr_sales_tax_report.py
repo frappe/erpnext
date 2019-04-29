@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _, scrub
+from frappe import _
 from frappe.utils import getdate, nowdate, flt, cint
 
 class FBRInvoiceWiseTaxes(object):
@@ -12,12 +12,12 @@ class FBRInvoiceWiseTaxes(object):
 		self.filters.from_date = getdate(self.filters.from_date or nowdate())
 		self.filters.to_date = getdate(self.filters.to_date or nowdate())
 
+		if not self.filters.get("company"):
+			self.filters["company"] = frappe.db.get_single_value('Global Defaults', 'default_company')
+
 		self.filters.sales_tax_account = frappe.get_cached_value('Company', self.filters.company, "sales_tax_account")
 		self.filters.extra_tax_account = frappe.get_cached_value('Company', self.filters.company, "extra_tax_account")
 		self.filters.further_tax_account = frappe.get_cached_value('Company', self.filters.company, "further_tax_account")
-
-		if not self.filters.get("company"):
-			self.filters["company"] = frappe.db.get_single_value('Global Defaults', 'default_company')
 
 	def run(self, args):
 		if self.filters.from_date > self.filters.to_date:
