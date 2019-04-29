@@ -106,7 +106,7 @@ class Bin(Document):
 				`tabStock Entry` se, `tabStock Entry Detail` sed, `tabPurchase Order` po
 			where
 				se.docstatus=1
-				and se.purpose='Subcontract'
+				and se.purpose='Send to Subcontractor'
 				and ifnull(se.purchase_order, '') !=''
 				and (sed.item_code = %(item)s or sed.original_item = %(item)s)
 				and se.name = sed.parent

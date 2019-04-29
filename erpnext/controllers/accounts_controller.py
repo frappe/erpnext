@@ -89,7 +89,8 @@ class AccountsController(TransactionBase):
 			self.validate_paid_amount()
 
 		if self.doctype in ['Purchase Invoice', 'Sales Invoice']:
-			if cint(self.allocate_advances_automatically):
+			pos_check_field = "is_pos" if self.doctype=="Sales Invoice" else "is_paid"
+			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
 				self.set_advances()
 
 			if self.is_return:
@@ -276,7 +277,7 @@ class AccountsController(TransactionBase):
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
 
-					if ret.get("pricing_rules"):
+					if ret.get("pricing_rules") and not ret.get("validate_applied_rule", 0):
 						# if user changed the discount percentage then set user's discount percentage ?
 						item.set("pricing_rules", ret.get("pricing_rules"))
 						item.set("discount_percentage", ret.get("discount_percentage"))
@@ -545,6 +546,19 @@ class AccountsController(TransactionBase):
 		if lst:
 			from erpnext.accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
+
+	def on_cancel(self):
+		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
+
+		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
+			if self.is_return: return
+
+			if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
+				unlink_ref_doc_from_payment_entries(self)
+
+		elif self.doctype in ["Sales Order", "Purchase Order"]:
+			if frappe.db.get_single_value('Accounts Settings', 'unlink_advance_payment_on_cancelation_of_order'):
+				unlink_ref_doc_from_payment_entries(self)
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
 		from erpnext.controllers.status_updater import get_tolerance_for

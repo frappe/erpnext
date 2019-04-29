@@ -14,9 +14,11 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from frappe.model.naming import make_autoname
-from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
+from erpnext.stock.doctype.item.test_item import create_item
 from six import iteritems
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
 		w = frappe.copy_doc(test_records[0])
@@ -912,6 +914,7 @@ class TestSalesInvoice(unittest.TestCase):
 		jv.submit()
 
 		si = frappe.copy_doc(test_records[0])
+		si.allocate_advances_automatically = 0
 		si.append("advances", {
 			"doctype": "Sales Invoice Advance",
 			"reference_type": "Journal Entry",
@@ -1572,6 +1575,111 @@ class TestSalesInvoice(unittest.TestCase):
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
 		accounts_settings.save()
 
+	def test_deferred_revenue(self):
+		deferred_account = create_account(account_name="Deferred Revenue",
+			parent_account="Current Liabilities - _TC", company="_Test Company")
+
+		item = create_item("_Test Item for Deferred Accounting")
+		item.enable_deferred_revenue = 1
+		item.deferred_revenue_account = deferred_account
+		item.no_of_months = 12
+		item.save()
+
+		si = create_sales_invoice(item=item.name, posting_date="2019-01-10", do_not_submit=True)
+		si.items[0].enable_deferred_revenue = 1
+		si.items[0].service_start_date = "2019-01-10"
+		si.items[0].service_end_date = "2019-03-15"
+		si.items[0].deferred_revenue_account = deferred_account
+		si.save()
+		si.submit()
+
+		from erpnext.accounts.deferred_revenue import convert_deferred_revenue_to_income
+		convert_deferred_revenue_to_income(start_date="2019-01-01", end_date="2019-01-31")
+
+		expected_gle = [
+			[deferred_account, 33.85, 0.0, "2019-01-31"],
+			["Sales - _TC", 0.0, 33.85, "2019-01-31"]
+		]
+
+		self.check_gl_entries(si.name, expected_gle, "2019-01-10")
+
+		convert_deferred_revenue_to_income(start_date="2019-01-01", end_date="2019-03-31")
+
+		expected_gle = [
+			[deferred_account, 43.08, 0.0, "2019-02-28"],
+			["Sales - _TC", 0.0, 43.08, "2019-02-28"],
+			[deferred_account, 23.07, 0.0, "2019-03-15"],
+			["Sales - _TC", 0.0, 23.07, "2019-03-15"]
+		]
+
+		self.check_gl_entries(si.name, expected_gle, "2019-01-31")
+
+	def check_gl_entries(self, voucher_no, expected_gle, posting_date):
+		gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
+			from `tabGL Entry`
+			where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
+			order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_gle[i][0], gle.account)
+			self.assertEqual(expected_gle[i][1], gle.debit)
+			self.assertEqual(expected_gle[i][2], gle.credit)
+			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+
+	def test_inter_company_transaction(self):
+
+		if not frappe.db.exists("Customer", "_Test Internal Customer"):
+			customer = frappe.get_doc({
+				"customer_group": "_Test Customer Group",
+				"customer_name": "_Test Internal Customer",
+				"customer_type": "Individual",
+				"doctype": "Customer",
+				"territory": "_Test Territory",
+				"is_internal_customer": 1,
+				"represents_company": "_Test Company 1"
+			})
+
+			customer.append("companies", {
+				"company": "Wind Power LLC"
+			})
+
+			customer.insert()
+
+		if not frappe.db.exists("Supplier", "_Test Internal Supplier"):
+			supplier = frappe.get_doc({
+				"supplier_group": "_Test Supplier Group",
+				"supplier_name": "_Test Internal Supplier",
+				"doctype": "Supplier",
+				"is_internal_supplier": 1,
+				"represents_company": "Wind Power LLC"
+			})
+
+			supplier.append("companies", {
+				"company": "_Test Company 1"
+			})
+
+			supplier.insert()
+
+		si = create_sales_invoice(
+			company = "Wind Power LLC",
+			customer = "_Test Internal Customer",
+			debit_to = "Debtors - WP",
+			warehouse = "Stores - WP",
+			income_account = "Sales - WP",
+			expense_account = "Cost of Goods Sold - WP",
+			cost_center = "Main - WP",
+			currency = "USD",
+			do_not_save = 1
+		)
+
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.submit()
+
+		target_doc = make_inter_company_transaction("Sales Invoice", si.name)
+		target_doc.submit()
+
+		self.assertEqual(target_doc.company, "_Test Company 1")
+		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")

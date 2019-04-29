@@ -5,6 +5,9 @@ frappe.listview_settings['Sales Order'] = {
 		if (doc.status === "Closed") {
 			return [__("Closed"), "green", "status,=,Closed"];
 
+		} else if (doc.status === "On Hold") {
+			// on hold
+			return [__("On Hold"), "orange", "status,=,On Hold"];
 		} else if (doc.order_type !== "Maintenance"
 			&& flt(doc.per_delivered, 6) < 100 && frappe.datetime.get_diff(doc.delivery_date) < 0) {
 			// not delivered & overdue

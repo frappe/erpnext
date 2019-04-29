@@ -97,8 +97,6 @@ class Company(NestedSet):
 			install_country_fixtures(self.name)
 			self.create_default_tax_template()
 
-
-
 		if not frappe.db.get_value("Department", {"company": self.name}):
 			from erpnext.setup.setup_wizard.operations.install_fixtures import install_post_company_fixtures
 			install_post_company_fixtures(frappe._dict({'company_name': self.name}))
@@ -335,6 +333,11 @@ class Company(NestedSet):
 			where doctype='Global Defaults' and field='default_company'
 			and value=%s""", self.name)
 
+		# reset default company
+		frappe.db.sql("""update `tabSingles` set value=""
+			where doctype='Chart of Accounts Importer' and field='company'
+			and value=%s""", self.name)
+
 		# delete BOMs
 		boms = frappe.db.sql_list("select name from tabBOM where company=%s", self.name)
 		if boms:
@@ -369,7 +372,7 @@ def replace_abbr(company, old, new):
 	def _rename_record(doc):
 		parts = doc[0].rsplit(" - ", 1)
 		if len(parts) == 1 or parts[1].lower() == old.lower():
-			frappe.rename_doc(dt, doc[0], parts[0] + " - " + new)
+			frappe.rename_doc(dt, doc[0], parts[0] + " - " + new, force=True)
 
 	def _rename_records(dt):
 		# rename is expensive so let's be economical with memory usage
@@ -377,7 +380,7 @@ def replace_abbr(company, old, new):
 		for d in doc:
 			_rename_record(d)
 
-	for dt in ["Warehouse", "Account", "Cost Center", "Department", "Location",
+	for dt in ["Warehouse", "Account", "Cost Center", "Department",
 			"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
 		_rename_records(dt)
 		frappe.db.commit()

@@ -10,7 +10,7 @@ from frappe import _
 class Course(Document):
 	def validate(self):
 		self.validate_assessment_criteria()
-	
+
 	def validate_assessment_criteria(self):
 		if self.assessment_criteria:
 			total_weightage = 0
@@ -18,3 +18,11 @@ class Course(Document):
 				total_weightage += criteria.weightage or 0
 			if total_weightage != 100:
 				frappe.throw(_("Total Weightage of all Assessment Criteria must be 100%"))
+
+	def get_topics(self):
+		try:
+			topic_list = self.get_all_children()
+			topic_data = [frappe.get_doc("Topic", topic.topic) for topic in topic_list]
+		except frappe.DoesNotExistError:
+			return None
+		return topic_data

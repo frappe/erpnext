@@ -89,6 +89,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}, __('Create'));
 			}
 
+			if (doc.docstatus === 1) {
+				cur_frm.add_custom_button(__('Maintenance Schedule'), function () {
+					cur_frm.cscript.make_maintenance_schedule();
+				}, __('Create'));
+			}
+
 			if(!doc.auto_repeat) {
 				cur_frm.add_custom_button(__('Subscription'), function() {
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
@@ -116,6 +122,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			});
 		}
+	},
+
+	make_maintenance_schedule: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_maintenance_schedule",
+			frm: cur_frm
+		})
 	},
 
 	on_submit: function(doc, dt, dn) {
@@ -158,7 +171,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					},
 					get_query_filters: {
 						docstatus: 1,
-						status: ["!=", "Closed"],
+						status: ["not in", ["Closed", "On Hold"]],
 						per_billed: ["<", 99.99],
 						company: me.frm.doc.company
 					}
@@ -356,6 +369,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 	set_pos_data: function() {
 		if(this.frm.doc.is_pos) {
+			this.frm.set_value("allocate_advances_automatically", 0);
 			if(!this.frm.doc.company) {
 				this.frm.set_value("is_pos", 0);
 				frappe.msgprint(__("Please specify Company to proceed"));

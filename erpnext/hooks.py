@@ -11,6 +11,7 @@ app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
+
 develop_version = '12.x.x-develop'
 
 error_report_email = "support@erpnext.com"
@@ -153,7 +154,6 @@ standard_portal_menu_items = [
 	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "role":"Customer"},
 	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
 	{"title": _("Timesheets"), "route": "/timesheets", "reference_doctype": "Timesheet", "role":"Customer"},
-	{"title": _("Timesheets"), "route": "/timesheets", "reference_doctype": "Timesheet", "role":"Customer"},
 	{"title": _("Lab Test"), "route": "/lab-test", "reference_doctype": "Lab Test", "role":"Patient"},
 	{"title": _("Prescription"), "route": "/prescription", "reference_doctype": "Patient Encounter", "role":"Patient"},
 	{"title": _("Patient Appointment"), "route": "/patient-appointments", "reference_doctype": "Patient Appointment", "role":"Patient"},
@@ -242,8 +242,7 @@ scheduler_events = {
 		"erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_settings.schedule_get_order_details",
 		"erpnext.accounts.doctype.gl_entry.gl_entry.rename_gle_sle_docs",
 		"erpnext.projects.doctype.project.project.hourly_reminder",
-		"erpnext.projects.doctype.project.project.collect_project_status",
-		"erpnext.support.doctype.issue.issue.update_support_timer",
+		"erpnext.projects.doctype.project.project.collect_project_status"
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
