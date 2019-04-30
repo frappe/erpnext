@@ -10,11 +10,11 @@
  "modified": "2019-04-26 13:47:48.876321", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
- "name": "FBR Tax Report",
+ "name": "FBR Sales Tax Report",
  "owner": "Administrator", 
  "prepared_report": 0, 
  "ref_doctype": "Sales Invoice", 
- "report_name": "FBR Tax Report",
+ "report_name": "FBR Sales Tax Report",
  "report_type": "Script Report", 
  "roles": [
   {
