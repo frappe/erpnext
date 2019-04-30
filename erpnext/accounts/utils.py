@@ -482,8 +482,6 @@ def update_reference_in_journal_entry(d, jv_doc):
 			ch.cost_center = cstr(jvd[0]["cost_center"])
 			ch.project = jvd[0]["project"]
 			ch.balance = flt(jvd[0]["balance"])
-			ch.cheque_no = jvd[0]["cheque_no"]
-			ch.cheque_date = jvd[0]["cheque_date"]
 			ch.user_remark = jvd[0]["user_remark"]
 
 			ch.set(d['dr_or_cr'], amount_in_account_currency)
