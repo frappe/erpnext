@@ -2,31 +2,36 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-from itertools import groupby
-from operator import itemgetter
-import frappe
-from frappe.core.page.dashboard.dashboard import cache_source
-from frappe.utils import add_to_date, date_diff, getdate, nowdate
+import frappe, json
+from frappe.utils import add_to_date, date_diff, getdate, nowdate, get_last_day
 from erpnext.accounts.report.general_ledger.general_ledger import execute
+from frappe.core.page.dashboard.dashboard import cache_source, get_from_date_from_timespan
+from frappe.desk.doctype.dashboard_chart.dashboard_chart import get_period_ending
 
 from frappe.utils.nestedset import get_descendants_of
 
 @frappe.whitelist()
 @cache_source
-def get(filters=None):
-	timespan = filters.get("timespan")
-	timegrain = filters.get("timegrain")
+def get(chart_name=None, from_date = None, to_date = None):
+	chart = frappe.get_doc('Dashboard Chart', chart_name)
+	timespan = chart.timespan
+	timegrain = chart.time_interval
+	filters = json.loads(chart.filters_json)
+
 	account = filters.get("account")
 	company = filters.get("company")
 
-	from_date = get_from_date_from_timespan(timespan)
-	to_date = nowdate()
+	if not to_date:
+		to_date = nowdate()
+	if not from_date:
+		if timegrain in ('Monthly', 'Quarterly'):
+			from_date = get_from_date_from_timespan(to_date, timespan)
 
 	# fetch dates to plot
 	dates = get_dates_from_timegrain(from_date, to_date, timegrain)
 
 	# get all the entries for this account and its descendants
-	gl_entries = get_gl_entries(account, to_date)
+	gl_entries = get_gl_entries(account, get_period_ending(to_date, timegrain))
 
 	# compile balance values
 	result = build_result(account, dates, gl_entries)
@@ -63,7 +68,7 @@ def build_result(account, dates, gl_entries):
 	# for balance sheet accounts, the totals are cumulative
 	if root_type in ('Asset', 'Liability', 'Equity'):
 		for i, r in enumerate(result):
-			if i < 0:
+			if i > 0:
 				r[1] = r[1] + result[i-1][1]
 
 	return result
@@ -80,19 +85,6 @@ def get_gl_entries(account, to_date):
 		],
 		order_by = 'posting_date asc')
 
-def get_from_date_from_timespan(timespan):
-	days = months = years = 0
-	if "Last Week" == timespan:
-		days = -7
-	if "Last Month" == timespan:
-		months = -1
-	elif "Last Quarter" == timespan:
-		months = -3
-	elif "Last Year" == timespan:
-		years = -1
-	return add_to_date(None, years=years, months=months, days=days,
-		as_string=True, as_datetime=True)
-
 def get_dates_from_timegrain(from_date, to_date, timegrain):
 	days = months = years = 0
 	if "Daily" == timegrain:
@@ -104,7 +96,8 @@ def get_dates_from_timegrain(from_date, to_date, timegrain):
 	elif "Quarterly" == timegrain:
 		months = 3
 
-	dates = [from_date]
-	while dates[-1] <= to_date:
-		dates.append(add_to_date(dates[-1], years=years, months=months, days=days))
+	dates = [get_period_ending(from_date, timegrain)]
+	while getdate(dates[-1]) < getdate(to_date):
+		date = get_period_ending(add_to_date(dates[-1], years=years, months=months, days=days), timegrain)
+		dates.append(date)
 	return dates
