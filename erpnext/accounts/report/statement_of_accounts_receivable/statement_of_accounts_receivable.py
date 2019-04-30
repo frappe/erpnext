@@ -21,8 +21,6 @@ class StatementOfAccountsReceivable(object):
         data = self.get_data(party_naming_by, args)
         chart = self.get_chart_data(columns, data)
 
-        print "GET ACCOUNTS RECIEVABLE"
-
         final_data = [[]]
 
         if data:
@@ -35,8 +33,6 @@ class StatementOfAccountsReceivable(object):
                     final_data[0].append(None)
 
             for x in data:
-                print("XXXXXXXXXXXXXXXXXXXXXXXXXXx")
-                print(x[9])
                 final_data[0][9] += x[9] #0-30
                 final_data[0][10] += x[10] #31-60
                 final_data[0][11] += x[11] #61-90
@@ -66,9 +62,7 @@ class StatementOfAccountsReceivable(object):
         for label in ("Invoiced Amount**", "Paid Amount**", "Outstanding Amount**"):
             columns.append({
                 "label": label,
-                #"fieldtype": "Currency",
                 "fieldtype":"Float",
-                #"options": "currency",
                 "width": 120
             })
 
@@ -117,7 +111,6 @@ class StatementOfAccountsReceivable(object):
 
         future_vouchers = self.get_entries_after(self.filters.report_date, args.get("party_type"))
 
-        #company_currency = frappe.db.get_value("Company", self.filters.get("company"), "default_currency")
         company_currency = frappe.db.get_value("Customer", self.filters.get("party"), "default_currency")
 
         data = []
@@ -155,17 +148,10 @@ class StatementOfAccountsReceivable(object):
                     entry_date = due_date if self.filters.ageing_based_on == "Due Date" else gle.posting_date
                     row += get_ageing_data(cint(self.filters.range1), cint(self.filters.range2),
                                            cint(self.filters.range3), self.age_as_on, entry_date, outstanding_amount)
-                    print("ROOOOOOOOOOOW")
-                    print(row)
                     # issue 6371-Ageing buckets should not have amounts if due date is not reached
                     if self.filters.ageing_based_on == "Due Date" and getdate(due_date) > getdate(
                             self.filters.report_date):
                         row[-1] = row[-2] = row[-3] = row[-4] = 0
-
-                    #if self.filters.get(scrub(args.get("party_type"))):
-                    #    row.append(gle.account_currency)
-                    #else:
-                    #    row.append(company_currency)
 
                     # customer territory / supplier type
                     if args.get("party_type") == "Customer":
@@ -255,8 +241,6 @@ class StatementOfAccountsReceivable(object):
         if not hasattr(self, "gl_entries"):
             conditions, values = self.prepare_conditions(party_type)
 
-            #select_fields = "sum(debit_in_account_currency) as debit," \
-            #                "sum(credit_in_account_currency) as credit"
 
             select_fields = """sum(debit_in_account_currency) as debit,
             	sum(credit_in_account_currency) as credit""" \

@@ -8,7 +8,6 @@ from frappe import _
 from erpnext.accounts.utils import get_account_currency
 from datetime import datetime
 
-# from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
 from erpnext.accounts.report.statement_of_accounts_receivable.statement_of_accounts_receivable import StatementOfAccountsReceivable
 
 
@@ -70,24 +69,16 @@ def execute(filters=None):
 
     customer_sql = frappe.db.sql("""SELECT * FROM `tabCustomer` WHERE customer_name=%s LIMIT 1""",
                                  filters.get("party"),as_dict=True)
-    print "CUSTOMER SQL"
-    print customer_sql
 
-    # customer_row.append(frappe.utils.nowdate())  # #DATE
-    #dt = frappe.utils.nowdate()
     dt = datetime.strptime(frappe.utils.nowdate(), '%Y-%m-%d').strftime('%d-%m-%Y')
-    # print '{0}/{1}/{2:02}'.format(dt.month, dt.day, dt.year % 100)
-    #customer_row.append(dt)
 
     if customer_sql:
 
         customer_row.append("br")
-        # get_dynamic_link_for_address = frappe.db.sql("SELECT parent FROM `tabDynamic Link` where link_name =  ")
         if customer_sql[0].customer_primary_address:
             address_doc = frappe.get_doc("Address", customer_sql[0].customer_primary_address)
 
         customer_row.append(filters.get("party"))  # #Customer Name
-        # customer_row.append(customer_doc.address)
 
         customer_full_address = ""
 
@@ -116,7 +107,6 @@ def execute(filters=None):
             customer_row.append("")
         customer_row.append(dt)  # #DATE
 
-        # customer_row.append(filters.get("currency")) # #CURRENCY
         customer_row.append(frappe.db.get_value("Customer", filters.party, "default_currency"))
 
         if filters.get("party"):
@@ -134,15 +124,12 @@ def execute(filters=None):
 
         customer_data.append(customer_row)  # ADD ROW TO BE RETURNED
     else:
-        print("BEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
         if filters.get("party"):
             customer_row.append("br")
 
             customer_row.append(filters.get("party"))  # #Customer Name
 
-            # customer_row.append(filters.get("currency")) # #CURRENCY
 
-            print("MAO LAGEEEEH")
             if filters.get("party"):
                 customer_doc = frappe.get_doc("Customer" if filters.get("party_type") == "Customer" else "Supplier", filters.party)
                 if customer_doc.primary_address:
@@ -189,12 +176,6 @@ def execute(filters=None):
             customer_data.append(customer_row)  # ADD ROW TO BE RETURNED
 
     data_combine = res + res2 + customer_data
-    # column_details = [
-    #     {"label": "0-30**", 'width': 120, "fieldname": "30", "fieldtype": "float"},
-    # ]
-    # test = []
-    #data_combine.append({'30': 259541.68})
-    print("WHAAAAAAAAAAAAAAAAAT")
     return columns_combine, data_combine
 
 
@@ -259,10 +240,6 @@ def get_columns(filters):
         _("Debit") + ":Float:100",
         _("Credit") + ":Float:100"
     ]
-    #columns = []
-
-    print "GET COLUMNS"
-    print filters
 
     """if filters.get("show_in_account_currency"):
         columns += [
@@ -477,9 +454,7 @@ def get_balance_row(label, balance, balance_in_account_currency=None):
 def get_result_as_list(data, filters):
     result = []
     for d in data:
-        row = [d.get("posting_date"), d.get("account")
-               # , d.get("debit"), d.get("credit")
-               ]
+        row = [d.get("posting_date"), d.get("account")]
 
         if filters.get("show_in_account_currency"):
             row += [d.get("debit_in_account_currency"), d.get("credit_in_account_currency")]
