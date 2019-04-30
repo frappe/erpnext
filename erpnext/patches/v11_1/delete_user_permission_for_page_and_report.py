@@ -5,4 +5,4 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.db.sql("""delete from `tabDocType` where name='User Permission For Page And Report'""")
+	frappe.delete_doc("DocType", "User Permission For Page And Report")
