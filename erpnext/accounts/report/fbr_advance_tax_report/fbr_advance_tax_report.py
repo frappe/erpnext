@@ -85,7 +85,7 @@ class FBRInvoiceWiseTaxes(object):
 				"label": _("TaxPayer_Business_Name"),
 				"fieldtype": "Data",
 				"fieldname": "business_name",
-				"width": 50,
+				"width": 100,
 			},
 			{
 				"label": _("Taxable_Amount"),
@@ -103,6 +103,14 @@ class FBRInvoiceWiseTaxes(object):
 			},
 		]
 
+		if not cint(self.filters.for_export):
+			columns.append({
+				"label": _("Average Rate"),
+				"fieldtype": "Float",
+				"fieldname": "rate",
+				"width": 100
+			})
+
 		if self.party_naming_by != "Naming Series":
 			columns = filter(lambda d: d['fieldname'] != 'party_name', columns)
 
@@ -111,7 +119,7 @@ class FBRInvoiceWiseTaxes(object):
 	def get_data(self):
 		taxes = frappe.db.sql("""
 			select
-				i.name as invoice, i.customer as party, t.account_head, t.charge_type, t.row_id, t.idx,
+				i.name as invoice, i.customer as party, t.account_head, t.charge_type, t.row_id, t.idx, t.rate,
 				t.base_tax_amount_after_discount_amount as tax_amount, t.base_total, i.base_net_total
 			from `tabSales Taxes and Charges` t
 			inner join `tabSales Invoice` i on i.name = t.parent
@@ -160,14 +168,23 @@ class FBRInvoiceWiseTaxes(object):
 				tax.taxable_amount = tax.base_net_total
 
 			row = customer_rows.setdefault(tax.party, frappe._dict({
-				"party": tax.party, "taxable_amount": 0, "tax_amount": 0
+				"party": tax.party, "taxable_amount": 0, "tax_amount": 0, "rate": 0, "rate_count": 0
 			}))
-			row.taxable_amount += tax.taxable_amount
-			row.tax_amount += tax.tax_amount
+			row.taxable_amount += flt(tax.taxable_amount)
+			row.tax_amount += flt(tax.tax_amount)
+			if tax.rate:
+				row.rate += flt(tax.rate)
+				row.rate_count += 1
 
 		customer_details = self.get_customer_details(customer_rows.keys())
 		for d in customer_rows.values():
 			d.update(customer_details.get(d.party, {}))
+
+			if d.rate_count:
+				d.rate /= d.rate_count
+				del d['rate_count']
+
+				d.business_name = d.party
 
 		return sorted(customer_rows.values(), key=lambda d: d.party)
 
