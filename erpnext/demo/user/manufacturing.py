@@ -102,10 +102,18 @@ def submit_job_cards():
 
 	for operation in work_order.operations:
 		job = job_map[operation.operation]
-		job.actual_start_date = start_date
+		job_time_log = frappe.new_doc("Job Card Time Log")
+		job_time_log.from_time = start_date
 		minutes = operation.get("time_in_mins")
-		random_minutes = random.randint(int(minutes/2), minutes)
-		job.actual_end_date = job.actual_start_date + timedelta(minutes=random_minutes)
-		start_date = job.actual_end_date
-		job.save()
+		job_time_log.time_in_mins = random.randint(int(minutes/2), minutes)
+		job_time_log.to_time = job_time_log.from_time + \
+					timedelta(minutes=job_time_log.time_in_mins)
+		job_time_log.parent = job.name
+		job_time_log.parenttype = 'Job Card'
+		job_time_log.parentfield = 'time_logs'
+		job_time_log.completed_qty = work_order.qty
+		job_time_log.save(ignore_permissions=True)
+		job.time_logs.append(job_time_log)
+		job.save(ignore_permissions=True)
 		job.submit()
+		start_date = job_time_log.to_time

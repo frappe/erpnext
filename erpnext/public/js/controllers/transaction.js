@@ -23,6 +23,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				} else {
 					item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0,
 						precision("discount_percentage", item));
+					item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
 					item.margin_type = '';
 					item.margin_rate_or_amount = 0;
 					item.rate_with_margin = 0;
@@ -1199,6 +1200,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"qty": d.qty,
 					"stock_qty": d.stock_qty,
 					"uom": d.uom,
+					"stock_uom": d.stock_uom,
 					"parenttype": d.parenttype,
 					"parent": d.parent,
 					"pricing_rules": d.pricing_rules,

@@ -1,10 +1,11 @@
 from __future__ import unicode_literals
 import frappe
+from frappe.utils import cint
 
 def execute():
-	woocommerce_setting_enable_sync = frappe.db.sql("SELECT t.value FROM tabSingles t WHERE doctype = 'Woocommerce Settings' AND field = 'enable_sync'",  as_dict=True)
-	if len(woocommerce_setting_enable_sync) and woocommerce_setting_enable_sync[0].value == '1':
-		frappe.db.sql("""UPDATE tabSingles
-					SET value = (SELECT t.value FROM tabSingles t WHERE doctype = 'Woocommerce Settings' AND field = 'modified_by')
-					WHERE doctype = 'Woocommerce Settings'
-					AND field = 'creation_user';""")
+	frappe.reload_doc("erpnext_integrations", "doctype","woocommerce_settings")
+	doc = frappe.get_doc("Woocommerce Settings")
+
+	if cint(doc.enable_sync):
+		doc.creation_user = doc.modified_by
+		doc.save(ignore_permissions=True)
