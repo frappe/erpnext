@@ -587,14 +587,21 @@ def get_outstanding_reference_documents(args):
 	if args.get("cost_center") and get_allow_cost_center_in_entry_of_bs_account():
 		condition += " and cost_center='%s'" % args.get("cost_center")
 
-	if args.get("from_date") and args.get("to_date"):
-		condition += " and posting_date between '{0}' and '{1}'".format(args.get("from_date"), args.get("to_date"))
+	date_fields_dict = {
+		'posting_date': ['from_posting_date', 'to_posting_date'],
+		'due_date': ['from_due_date', 'to_due_date']
+	}
+
+	for fieldname, date_fields in date_fields_dict.items():
+		if args.get(date_fields[0]) and args.get(date_fields[1]):
+			condition += " and {0} between '{1}' and '{2}'".format(fieldname,
+				args.get(date_fields[0]), args.get(date_fields[1]))
 
 	if args.get("company"):
-		condition += " and company = '{0}'".format(frappe.db.escape(args.get("company")))
+		condition += " and company = {0}".format(frappe.db.escape(args.get("company")))
 
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
-		args.get("party_account"), condition=condition, limit=100)
+		args.get("party_account"), filters=args, condition=condition, limit=100)
 
 	for d in outstanding_invoices:
 		d["exchange_rate"] = 1
@@ -612,13 +619,19 @@ def get_outstanding_reference_documents(args):
 	orders_to_be_billed = []
 	if (args.get("party_type") != "Student"):
 		orders_to_be_billed =  get_orders_to_be_billed(args.get("posting_date"),args.get("party_type"),
-			args.get("party"), args.get("company"), party_account_currency, company_currency)
+			args.get("party"), args.get("company"), party_account_currency, company_currency, filters=args)
 
-	return negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
+	data = negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
+
+	if not data:
+		frappe.msgprint(_("No outstanding invoices found for the {0} <b>{1}</b>.")
+			.format(args.get("party_type").lower(), args.get("party")))
+
+	return data
 
 
 def get_orders_to_be_billed(posting_date, party_type, party,
-	company, party_account_currency, company_currency, cost_center=None):
+	company, party_account_currency, company_currency, cost_center=None, filters=None):
 	if party_type == "Customer":
 		voucher_type = 'Sales Order'
 	elif party_type == "Supplier":
@@ -664,6 +677,10 @@ def get_orders_to_be_billed(posting_date, party_type, party,
 
 	order_list = []
 	for d in orders:
+		if not (d.outstanding_amount >= filters.get("outstanding_amt_greater_than")
+			and d.outstanding_amount <= filters.get("outstanding_amt_less_than")):
+			continue
+
 		d["voucher_type"] = voucher_type
 		# This assumes that the exchange rate required is the one in the SO
 		d["exchange_rate"] = get_exchange_rate(party_account_currency, company_currency, posting_date)
@@ -934,7 +951,6 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.paid_to_account_currency = party_account_currency if payment_type=="Pay" else bank.account_currency
 	pe.paid_amount = paid_amount
 	pe.received_amount = received_amount
-	pe.allocate_payment_amount = 1
 	pe.letter_head = doc.get("letter_head")
 
 	if pe.party_type in ["Customer", "Supplier"]:
