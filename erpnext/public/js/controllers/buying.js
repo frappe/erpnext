@@ -147,6 +147,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 
 	discount_amount: function(doc, cdt, cdn) {
+		var item = frappe.get_doc(cdt, cdn);
+		item.discount_percentage = 0.0;
 		this.price_list_rate(doc, cdt, cdn);
 	},
 
