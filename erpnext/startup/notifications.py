@@ -52,6 +52,9 @@ def get_notification_config():
 				"status": ("not in", ("Completed", "Closed")),
 				"docstatus": ("<", 2)
 			},
+			"Landed Cost Voucher": {
+				"status": ("in", ("Unpaid", "Overdue", "Draft"))
+			},
 			"Work Order": { "status": ("in", ("Draft", "Not Started", "In Process")) },
 			"BOM": {"docstatus": 0},
 
