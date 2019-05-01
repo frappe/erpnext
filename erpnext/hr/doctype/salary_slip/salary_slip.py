@@ -574,8 +574,8 @@ class SalarySlip(TransactionBase):
 
 	def calculate_variable_tax(self, tax_component, payroll_period):
 		annual_taxable_earning, period_factor = 0, 0
-		pro_rata_tax_paid, additional_tax_paid,  benefit_tax_paid = 0, 0, 0
-		unclaimed_earning, unclaimed_benefit, additional_income = 0, 0, 0
+		pro_rata_tax_paid, additional_tax_paid,  benefit_tax_paid = 0.0, 0.0, 0.0
+		unclaimed_earning, unclaimed_benefit, additional_income = 0.0, 0.0, 0.0
 
 		# get taxable_earning, additional_income in this slip
 		taxable_earning = self.get_taxable_earnings()
@@ -687,7 +687,7 @@ class SalarySlip(TransactionBase):
 				"from_date": from_date,
 				"to_date": self.start_date
 			})
-		return sum_additional_earning[0][0] if sum_additional_earning else 0
+		return flt(sum_additional_earning[0][0]) if sum_additional_earning else 0
 
 	def get_tax_paid_in_period(self, payroll_period, tax_component, only_total=False):
 		# find total_tax_paid, tax paid for benefit, additional_salary
