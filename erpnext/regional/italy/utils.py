@@ -292,7 +292,7 @@ def prepare_and_attach_invoice(doc, replace=False):
 		"content": invoice_xml
 	})
 	_file.save()
-	return file
+	return _file
 
 @frappe.whitelist()
 def generate_single_invoice(docname):
