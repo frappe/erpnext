@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import frappe, re
 from frappe import _
-from frappe.utils import cstr, flt, date_diff, getdate
+from frappe.utils import cstr, flt, date_diff, nowdate
 from erpnext.regional.india import states, state_numbers
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
@@ -144,24 +144,40 @@ def get_regional_address_details(out, doctype, company):
 def calculate_annual_eligible_hra_exemption(doc):
 	basic_component = frappe.get_cached_value('Company',  doc.company,  "basic_component")
 	hra_component = frappe.get_cached_value('Company',  doc.company,  "hra_component")
+	if not (basic_component and hra_component):
+		frappe.throw(_("Please mention Basic and HRA component in Company"))
+
 	annual_exemption, monthly_exemption, hra_amount = 0, 0, 0
 	if hra_component and basic_component:
-		assignment = get_salary_assignment(doc.employee, getdate())
-		if assignment and frappe.db.exists("Salary Detail", {
-			"parent": assignment.salary_structure,
-			"salary_component": hra_component, "parentfield": "earnings"}):
-			basic_amount, hra_amount = get_component_amt_from_salary_slip(doc.employee,
-				assignment.salary_structure, basic_component, hra_component)
-			if hra_amount:
-				if doc.monthly_house_rent:
-					annual_exemption = calculate_hra_exemption(assignment.salary_structure,
-									basic_amount, hra_amount, doc.monthly_house_rent,
-									doc.rented_in_metro_city)
-					if annual_exemption > 0:
-						monthly_exemption = annual_exemption / 12
-					else:
-						annual_exemption = 0
-	return {"hra_amount": hra_amount, "annual_exemption": annual_exemption, "monthly_exemption": monthly_exemption}
+		assignment = get_salary_assignment(doc.employee, nowdate())
+
+		if assignment:
+			hra_component_exists = frappe.db.exists("Salary Detail", {
+				"parent": assignment.salary_structure,
+				"salary_component": hra_component,
+				"parentfield": "earnings",
+				"parenttype": "Salary Structure"
+			})
+			if hra_component_exists:
+				basic_amount, hra_amount = get_component_amt_from_salary_slip(doc.employee,
+					assignment.salary_structure, basic_component, hra_component)
+				if hra_amount:
+					if doc.monthly_house_rent:
+						annual_exemption = calculate_hra_exemption(assignment.salary_structure,
+							basic_amount, hra_amount, doc.monthly_house_rent,
+							doc.rented_in_metro_city)
+						if annual_exemption > 0:
+							monthly_exemption = annual_exemption / 12
+						else:
+							annual_exemption = 0
+		elif doc.docstatus == 1:
+			frappe.throw(_("Salary Structure must be submitted before submission of Tax Ememption Declaration"))
+
+	return frappe._dict({
+		"hra_amount": hra_amount,
+		"annual_exemption": annual_exemption,
+		"monthly_exemption": monthly_exemption
+	})
 
 def get_component_amt_from_salary_slip(employee, salary_structure, basic_component, hra_component):
 	salary_slip = make_salary_slip(salary_structure, employee=employee)
@@ -181,8 +197,10 @@ def calculate_hra_exemption(salary_structure, basic, monthly_hra, monthly_house_
 	frequency = frappe.get_value("Salary Structure", salary_structure, "payroll_frequency")
 	# case 1: The actual amount allotted by the employer as the HRA.
 	exemptions.append(get_annual_component_pay(frequency, monthly_hra))
+
 	actual_annual_rent = monthly_house_rent * 12
 	annual_basic = get_annual_component_pay(frequency, basic)
+
 	# case 2: Actual rent paid less 10% of the basic salary.
 	exemptions.append(flt(actual_annual_rent) - flt(annual_basic * 0.1))
 	# case 3: 50% of the basic salary, if the employee is staying in a metro city (40% for a non-metro city).
@@ -205,15 +223,25 @@ def get_annual_component_pay(frequency, amount):
 def validate_house_rent_dates(doc):
 	if not doc.rented_to_date or not doc.rented_from_date:
 		frappe.throw(_("House rented dates required for exemption calculation"))
+
 	if date_diff(doc.rented_to_date, doc.rented_from_date) < 14:
 		frappe.throw(_("House rented dates should be atleast 15 days apart"))
-	proofs = frappe.db.sql("""select name from `tabEmployee Tax Exemption Proof Submission`
-		where docstatus=1 and employee='{0}' and payroll_period='{1}' and
-		(rented_from_date between '{2}' and '{3}' or rented_to_date between
-		'{2}' and '{3}')""".format(doc.employee, doc.payroll_period,
-		doc.rented_from_date, doc.rented_to_date))
+
+	proofs = frappe.db.sql("""
+		select name
+		from `tabEmployee Tax Exemption Proof Submission`
+		where
+			docstatus=1 and employee=%(employee)s and payroll_period=%(payroll_period)s
+			and (rented_from_date between %(from_date)s and %(to_date)s or rented_to_date between %(from_date)s and %(to_date)s)
+	""", {
+		"employee": doc.employee,
+		"payroll_period": doc.payroll_period,
+		"from_date": doc.rented_from_date,
+		"to_date": doc.rented_to_date
+	})
+
 	if proofs:
-		frappe.throw(_("House rent paid days overlap with {0}").format(proofs[0][0]))
+		frappe.throw(_("House rent paid days overlapping with {0}").format(proofs[0][0]))
 
 def calculate_hra_exemption_for_period(doc):
 	monthly_rent, eligible_hra = 0, 0
