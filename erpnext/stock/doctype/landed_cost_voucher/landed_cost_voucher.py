@@ -41,14 +41,15 @@ class LandedCostVoucher(AccountsController):
 	def get_referenced_taxes(self):
 		if self.credit_to and self.party:
 			self.set("taxes", [])
-			tax_amounts = frappe.db.sql(
-				"""select je.reference_account as account_head, sum(ge.debit - ge.credit) as amount
+			tax_amounts = frappe.db.sql("""
+				select je.reference_account as account_head, sum(ge.debit - ge.credit) as amount
 				from `tabGL Entry` as ge, `tabJournal Entry` as je
 				where
 					ge.account=%s and ge.party_type=%s and ge.party=%s
 					and ge.voucher_type='Journal Entry' and ge.voucher_no=je.name
 					and je.reference_account is not null and je.reference_account != ''
-				group by je.reference_account""", [self.credit_to, self.party_type, self.party], as_dict=True)
+				group by je.reference_account
+			""", [self.credit_to, self.party_type, self.party], as_dict=True)
 
 			balance = get_balance_on(party_type=self.party_type, party=self.party, company=self.company)
 
@@ -72,12 +73,15 @@ class LandedCostVoucher(AccountsController):
 				else:
 					po_detail_field = "purchase_order_item"
 
-				pr_items = frappe.db.sql("""select pr_item.item_code, pr_item.item_name, pr_item.total_weight,
-					pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.amount, pr_item.name,
-					pr_item.{po_detail_field}, pr_item.purchase_order, pr_item.cost_center
-					from `tab{doctype} Item` pr_item where parent = %s
-					and exists(select name from tabItem where name = pr_item.item_code and is_stock_item = 1)
-					""".format(doctype=pr.receipt_document_type, po_detail_field=po_detail_field),
+				pr_items = frappe.db.sql("""
+					select
+						pr_item.item_code, pr_item.item_name, pr_item.total_weight,
+						pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.amount, pr_item.name,
+						pr_item.{po_detail_field}, pr_item.purchase_order, pr_item.cost_center
+					from `tab{doctype} Item` pr_item
+					inner join tabItem i on i.name = pr_item.item_code and i.is_stock_item = 1
+					where pr_item.parent = %s
+				""".format(doctype=pr.receipt_document_type, po_detail_field=po_detail_field),
 					pr.receipt_document, as_dict=True)
 
 				for d in pr_items:
