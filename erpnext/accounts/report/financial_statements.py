@@ -334,6 +334,9 @@ def sort_accounts(accounts, is_root=False, key="name"):
 			if re.split('\W+', a[key])[0].isdigit():
 				# if chart of accounts is numbered, then sort by number
 				return cmp(a[key], b[key])
+			else:
+				# common, this should be alphabetic otherwise!
+				return cmp(a[key], b[key])
 		return 1
 
 	accounts.sort(key = functools.cmp_to_key(compare_accounts))
