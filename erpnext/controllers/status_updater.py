@@ -99,7 +99,7 @@ status_map = {
 	"Landed Cost Voucher": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
-		["Paid", "eval:self.outstanding_amount <= 0 and self.docstatus==1"],
+		["Paid", "eval:self.grand_total and self.outstanding_amount <= 0 and self.docstatus==1"],
 		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
 		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
