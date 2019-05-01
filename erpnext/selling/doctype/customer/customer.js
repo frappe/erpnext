@@ -124,10 +124,5 @@ frappe.ui.form.on("Customer", {
 	validate: function(frm) {
 		if(frm.doc.lead_name) frappe.model.clear_doc("Lead", frm.doc.lead_name);
 
-		var total = 0;
-		for (var idx in frm.doc.sales_team) {
-			total += frm.doc.sales_team[idx].allocated_percentage;
-			if (total > 100) frappe.throw(__("Total contribution percentage can't exceed 100"));
-		}
 	},
 });
