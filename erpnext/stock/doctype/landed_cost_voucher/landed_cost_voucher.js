@@ -220,9 +220,18 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			return flt(adv.allocated_amount, precision("allocated_amount", adv));
 		}));
 
-		this.frm.set_value("grand_total", flt(total, precision("grand_total")));
-		this.frm.set_value("total_advance", flt(total_allocated_amount, "total_advance"));
-		this.frm.set_value("outstanding_amount", flt(total - total_allocated_amount, "outstanding_amount"));
+		this.frm.set_value("total_taxes_and_charges", flt(total, precision("total_taxes_and_charges")));
+
+		if (this.frm.doc.party) {
+			this.frm.set_value("grand_total", flt(this.frm.doc.total_taxes_and_charges, precision("grand_total")));
+			this.frm.set_value("total_advance", flt(total_allocated_amount, "total_advance"));
+		} else {
+			this.frm.set_value("grand_total", 0);
+			this.frm.set_value("total_advance", 0);
+		}
+
+		this.frm.set_value("outstanding_amount", flt(this.frm.doc.grand_total - total_allocated_amount,
+			"outstanding_amount"));
 	},
 
 	set_applicable_charges_for_item: function() {
@@ -246,7 +255,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 				var based_on = tax.distribution_criteria.toLowerCase();
 
 				if (based_on == "manual") {
-					manual_account_heads.add(tax.account_head);
+					manual_account_heads.add(cstr(tax.account_head));
 				} else {
 					if(!totals[based_on]) {
 						frappe.throw(__("Cannot distribute by {0} because total {1} is 0", [based_on, based_on]));
@@ -317,7 +326,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		});
 		Object.keys(tax_account_totals).forEach(function(account_head) {
 			var currency = erpnext.get_currency(me.frm.doc.company);
-			var digits = precision("grand_total");
+			var digits = precision("total_taxes_and_charges");
 			var diff = flt(tax_account_totals[account_head]) - flt(item_totals[account_head]);
 			diff = flt(diff, digits);
 
@@ -494,21 +503,26 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 	party: function() {
 		var me = this;
-		if(me.frm.doc.party && me.frm.doc.company) {
-			return frappe.call({
-				method: "erpnext.accounts.party.get_party_account",
-				args: {
-					company: me.frm.doc.company,
-					party_type: me.frm.doc.party_type,
-					party: me.frm.doc.party
-				},
-				callback: function(r) {
-					if(!r.exc && r.message) {
-						me.frm.set_value("credit_to", r.message);
-					}
+		frappe.run_serially([
+			() => {
+				if(me.frm.doc.party && me.frm.doc.company) {
+					return frappe.call({
+						method: "erpnext.accounts.party.get_party_account",
+						args: {
+							company: me.frm.doc.company,
+							party_type: me.frm.doc.party_type,
+							party: me.frm.doc.party
+						},
+						callback: function(r) {
+							if(!r.exc && r.message) {
+								me.frm.set_value("credit_to", r.message);
+							}
+						}
+					});
 				}
-			});
-		}
+			},
+			() => me.calculate_taxes_and_totals()
+		]);
 	},
 });
 

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
-from frappe.utils import flt, cint
+from frappe.utils import flt
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
@@ -19,6 +19,7 @@ class LandedCostVoucher(AccountsController):
 		self.check_mandatory()
 		self.validate_credit_to_account()
 		self.validate_purchase_receipts()
+		self.clear_advances_table_if_not_payable()
 		self.clear_unallocated_advances("Landed Cost Voucher Advance", "advances")
 		self.calculates_taxes_and_totals()
 		self.set_status()
@@ -99,6 +100,13 @@ class LandedCostVoucher(AccountsController):
 						item.purchase_invoice_item = d.name
 
 	def check_mandatory(self):
+		if self.party:
+			if not self.credit_to:
+				frappe.throw(_("Credit To is mandatory when Payable To is selected"))
+			for d in self.taxes:
+				if not d.account_head:
+					frappe.throw(_("Row #{0}: Tax/Charge Account Head is mandatory when Payable To is selected").format(d.idx))
+
 		if not self.get("purchase_receipts"):
 			frappe.throw(_("Please enter Receipt Document"))
 
@@ -135,11 +143,19 @@ class LandedCostVoucher(AccountsController):
 				frappe.throw(_("Item Row {0}: Cost center is not set for item {1}")
 					.format(item.idx, item.item_code))
 
+	def clear_advances_table_if_not_payable(self):
+		if not self.party:
+			self.advances = []
+			self.allocate_advances_automatically = 0
+
 	def validate_applicable_charges_for_item(self):
+		if not self.total_taxes_and_charges:
+			frappe.throw(_("Total Taxes and Charges can not be 0"))
+
 		total_applicable_charges = sum([flt(d.applicable_charges) for d in self.get("items")])
 
 		precision = self.precision("applicable_charges", "items")
-		diff = flt(self.grand_total) - flt(total_applicable_charges)
+		diff = flt(self.total_taxes_and_charges) - flt(total_applicable_charges)
 		diff = flt(diff, precision)
 
 		if abs(diff) < (2.0 / (10**precision)):
@@ -148,26 +164,32 @@ class LandedCostVoucher(AccountsController):
 			frappe.throw(_("Total Applicable Charges in Purchase Receipt Items table must be same as Total Taxes and Charges"))
 
 	def validate_credit_to_account(self):
-		account = frappe.db.get_value("Account", self.credit_to,
-			["account_type", "report_type"], as_dict=True)
+		if self.credit_to:
+			account = frappe.db.get_value("Account", self.credit_to,
+				["account_type", "report_type"], as_dict=True)
 
-		if account.report_type != "Balance Sheet":
-			frappe.throw(_("Credit To account must be a Balance Sheet account"))
+			if account.report_type != "Balance Sheet":
+				frappe.throw(_("Credit To account must be a Balance Sheet account"))
 
-		if account.account_type != "Payable":
-			frappe.throw(_("Credit To account must be a Payable account"))
+			if account.account_type != "Payable":
+				frappe.throw(_("Credit To account must be a Payable account"))
 
 	def calculates_taxes_and_totals(self):
 		total_taxes = sum([flt(d.amount, d.precision("amount")) for d in self.get("taxes")])
-		self.grand_total = flt(total_taxes, self.precision("grand_total"))
+		self.total_taxes_and_charges = flt(total_taxes, self.precision("total_taxes_and_charges"))
 
-		total_allocated = sum([flt(d.allocated_amount, d.precision("allocated_amount")) for d in self.get("advances")])
-		self.total_advance = flt(total_allocated, self.precision("total_advance"))
+		if self.party:
+			self.grand_total = flt(self.total_taxes_and_charges, self.precision("grand_total"))
+			total_allocated = sum([flt(d.allocated_amount, d.precision("allocated_amount")) for d in self.get("advances")])
+			self.total_advance = flt(total_allocated, self.precision("total_advance"))
+		else:
+			self.total_advance = 0
+			self.grand_total = 0
 
-		if self.grand_total > 0 and self.total_advance > self.grand_total:
+		if self.grand_total >= 0 and self.total_advance > self.grand_total:
 			frappe.throw(_("Advance amount cannot be greater than {0}").format(self.grand_total))
 
-		self.outstanding_amount = self.grand_total - self.total_advance
+		self.outstanding_amount = flt(self.grand_total - self.total_advance, self.precision("outstanding_amount"))
 
 	def update_landed_cost(self):
 		for d in self.get("purchase_receipts"):
@@ -202,8 +224,10 @@ class LandedCostVoucher(AccountsController):
 			make_gl_entries(gl_entries, cancel)
 
 	def get_gl_entries(self):
-		gl_entry = []
+		if not self.party:
+			return []
 
+		gl_entry = []
 		payable_amount = flt(self.grand_total)
 
 		# payable entry
