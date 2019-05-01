@@ -100,7 +100,6 @@ class ItemVariantsCacheManager:
 
 def build_cache(item_code):
 	frappe.cache().hset('item_cache_build_in_progress', item_code, 1)
-	print('ItemVariantsCacheManager: Building cache for', item_code)
 	i = ItemVariantsCacheManager(item_code)
 	i.build_cache()
 	frappe.cache().hset('item_cache_build_in_progress', item_code, 0)
