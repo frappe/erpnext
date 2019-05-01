@@ -3,6 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+from functools import reduce
 import frappe, csv
 from frappe import _
 from frappe.utils import cstr
