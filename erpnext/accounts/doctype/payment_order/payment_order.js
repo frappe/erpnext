@@ -7,6 +7,9 @@ frappe.ui.form.on('Payment Order', {
 			frm.add_custom_button(__('Payment Request'), function() {
 				frm.trigger("get_from_payment_request");
 			}, __("Get from"));
+			frm.add_custom_button(__('Payment Entry'), function() {
+				frm.trigger("get_from_payment_entry");
+			}, __("Get from"));
 		}
 
 		// payment Entry
@@ -16,6 +19,22 @@ frappe.ui.form.on('Payment Order', {
 					frm.trigger("make_payment_records");
 				});
 		}
+	},
+
+	get_from_payment_entry: function(frm) {
+		erpnext.utils.map_current_doc({
+			method: "erpnext.accounts.doctype.payment_entry.payment_entry.make_payment_order",
+			source_doctype: "Payment Entry",
+			target: frm,
+			date_field: "posting_date",
+			setters: {
+				party: frm.doc.supplier || ""
+			},
+			get_query_filters: {
+				bank: frm.doc.bank,
+				docstatus: 1,
+			}
+		});
 	},
 
 	get_from_payment_request: function(frm) {

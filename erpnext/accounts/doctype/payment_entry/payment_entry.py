@@ -967,3 +967,23 @@ def get_party_and_account_balance(company, date, paid_from=None, paid_to=None, p
 		"paid_from_account_balance": get_balance_on(paid_from, date, cost_center=cost_center),
 		"paid_to_account_balance": get_balance_on(paid_to, date=date, cost_center=cost_center)
 	})
+
+@frappe.whitelist()
+def make_payment_order(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.append('references', {
+			'amount': source.base_paid_amount,
+			'supplier': source.party,
+			'payment_request': source_name,
+			'mode_of_payment': source.mode_of_payment,
+			'bank_account': source.bank_account,
+			'account': source.account
+		})
+
+	doclist = get_mapped_doc("Payment Request", source_name,	{
+		"Payment Request": {
+			"doctype": "Payment Order",
+		}
+	}, target_doc, set_missing_values)
+
+	return doclist
