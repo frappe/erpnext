@@ -45,7 +45,7 @@ before_script:
   - sleep 10
 
 script:
-  - $TRAVIS_BUILD_DIR/travis/run-tests.sh
+  - bash $TRAVIS_BUILD_DIR/travis/run-tests.sh
 
 after_script:
   - coveralls -b apps/erpnext -d ../../sites/.coverage
