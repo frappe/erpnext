@@ -88,7 +88,8 @@ class AccountsController(TransactionBase):
 			self.validate_paid_amount()
 
 		if self.doctype in ['Purchase Invoice', 'Sales Invoice']:
-			if cint(self.allocate_advances_automatically):
+			pos_check_field = "is_pos" if self.doctype=="Sales Invoice" else "is_paid"
+			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
 				self.set_advances()
 
 			if self.is_return:
