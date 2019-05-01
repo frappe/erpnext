@@ -106,7 +106,7 @@ def make_custom_fields(update=True):
 			insert_after='language', print_hide=1, collapsible=1),
 		dict(fieldname='gst_category', label='GST Category',
 			fieldtype='Select', insert_after='gst_section', print_hide=1,
-			options='Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nUIN Holders',
+			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nUIN Holders',
 			fetch_from='supplier.gst_category', fetch_if_empty=1)
 	]
 
@@ -115,7 +115,7 @@ def make_custom_fields(update=True):
 			insert_after='language', print_hide=1, collapsible=1),
 		dict(fieldname='gst_category', label='GST Category',
 			fieldtype='Select', insert_after='gst_section', print_hide=1,
-			options='Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
+			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
 			fetch_from='customer.gst_category', fetch_if_empty=1)
 	]
 
