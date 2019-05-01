@@ -167,13 +167,17 @@ def get_attributes_and_values(item_code):
 		if attribute in attribute_list:
 			valid_options.setdefault(attribute, set()).add(attribute_value)
 
+	item_attribute_values = frappe.db.get_all('Item Attribute Value',
+		['parent', 'attribute_value', 'idx'], order_by='parent asc, idx asc')
+	ordered_attribute_value_map = frappe._dict()
+	for iv in item_attribute_values:
+		ordered_attribute_value_map.setdefault(iv.parent, []).append(iv.attribute_value)
+
 	# build attribute values in idx order
-	ordered_attribute_value_map = item_cache.get_ordered_attribute_values()
 	for attr in attributes:
 		valid_attribute_values = valid_options.get(attr.attribute, [])
 		ordered_values = ordered_attribute_value_map.get(attr.attribute, [])
 		attr['values'] = [v for v in ordered_values if v in valid_attribute_values]
-		attr['values'] = valid_attribute_values
 
 	return attributes
 

@@ -99,8 +99,6 @@ def get_employee_doj_map():
 					employee,
 					date_of_joining
 				FROM `tabEmployee`
-				WHERE
-					`status`='Active'
 				"""))
 
 def get_ss_earning_map(salary_slips):

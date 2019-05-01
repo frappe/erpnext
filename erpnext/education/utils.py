@@ -2,7 +2,7 @@
 # Copyright (c) 2015, Frappe Technologies and contributors
 # For lice
 
-from __future__ import unicode_literals
+from __future__ import unicode_literals, division
 import frappe
 from frappe import _
 
@@ -10,19 +10,19 @@ class OverlapError(frappe.ValidationError): pass
 
 def validate_overlap_for(doc, doctype, fieldname, value=None):
 	"""Checks overlap for specified field.
-	
-	:param fieldname: Checks Overlap for this field 
+
+	:param fieldname: Checks Overlap for this field
 	"""
-	
+
 	existing = get_overlap_for(doc, doctype, fieldname, value)
 	if existing:
 		frappe.throw(_("This {0} conflicts with {1} for {2} {3}").format(doc.doctype, existing.name,
 			doc.meta.get_label(fieldname) if not value else fieldname , value or doc.get(fieldname)), OverlapError)
-	
+
 def get_overlap_for(doc, doctype, fieldname, value=None):
 	"""Returns overlaping document for specified field.
-	
-	:param fieldname: Checks Overlap for this field 
+
+	:param fieldname: Checks Overlap for this field
 	"""
 
 	existing = frappe.db.sql("""select name, from_time, to_time from `tab{0}`
@@ -42,7 +42,8 @@ def get_overlap_for(doc, doctype, fieldname, value=None):
 		}, as_dict=True)
 
 	return existing[0] if existing else None
-	
+
+
 def validate_duplicate_student(students):
 	unique_students= []
 	for stud in students:
@@ -51,3 +52,93 @@ def validate_duplicate_student(students):
 				.format(stud.student, stud.student_name, unique_students.index(stud.student)+1, stud.idx))
 		else:
 			unique_students.append(stud.student)
+
+		return None
+
+# LMS Utils
+def get_current_student():
+	"""
+	Returns student user name, example EDU-STU-2018-00001 (Based on the naming series).
+	Takes email from from frappe.session.user
+	"""
+	email = frappe.session.user
+	if email in ('Administrator', 'Guest'):
+		return None
+	try:
+		student_id = frappe.get_all("Student", {"student_email_id": email}, ["name"])[0].name
+		return frappe.get_doc("Student", student_id)
+	except (IndexError, frappe.DoesNotExistError):
+		return None
+
+def check_super_access():
+	current_user = frappe.get_doc('User', frappe.session.user)
+	roles = set([role.role for role in current_user.roles])
+	return bool(roles & {'Administrator', 'Instructor', 'Education Manager', 'System Manager', 'Academic User'})
+
+def get_program_enrollment(program_name):
+	"""
+	Function to get program enrollments for a particular student for a program
+	"""
+	student = get_current_student()
+	if not student:
+		return None
+	else:
+		enrollment = frappe.get_all("Program Enrollment", filters={'student':student.name, 'program': program_name})
+		if enrollment:
+			return enrollment[0].name
+		else:
+			return None
+
+def get_program_and_enrollment_status(program_name):
+	program = frappe.get_doc('Program', program_name)
+	is_enrolled = bool(get_program_enrollment(program_name)) or check_super_access()
+	return {'program': program, 'is_enrolled': is_enrolled}
+
+def get_course_enrollment(course_name):
+	student = get_current_student()
+	if not student:
+		return None
+	enrollment_name = frappe.get_all("Course Enrollment", filters={'student': student.name, 'course':course_name})
+	try:
+		name = enrollment_name[0].name
+		enrollment = frappe.get_doc("Course Enrollment", name)
+		return enrollment
+	except:
+		return None
+
+def create_student_from_current_user():
+	user = frappe.get_doc("User", frappe.session.user)
+	student = frappe.get_doc({
+		"doctype": "Student",
+		"first_name": user.first_name,
+		"last_name": user.last_name,
+		"student_email_id": user.email,
+		"user": frappe.session.user
+		})
+	student.save(ignore_permissions=True)
+	return student
+
+def enroll_in_course(course_name, program_name):
+	student = get_current_student()
+	return student.enroll_in_course(course_name=course_name, program_enrollment=get_program_enrollment(program_name))
+
+def check_content_completion(content_name, content_type, enrollment_name):
+	activity = frappe.get_all("Course Activity", filters={'enrollment': enrollment_name, 'content_type': content_type, 'content': content_name})
+	if activity:
+		return True
+	else:
+		return False
+
+def check_quiz_completion(quiz, enrollment_name):
+	attempts = frappe.get_all("Quiz Activity", filters={'enrollment': enrollment_name, 'quiz': quiz.name}, fields=["name", "activity_date", "score", "status"])
+	status = False if quiz.max_attempts == 0 else bool(len(attempts) == quiz.max_attempts)
+	score = None
+	result = None
+	if attempts:
+		if quiz.grading_basis == 'Last Highest Score':
+			attempts = sorted(attempts, key = lambda i: int(i.score), reverse=True)
+		score = attempts[0]['score']
+		result = attempts[0]['status']
+		if result == 'Pass':
+			status = True
+	return status, score, result
