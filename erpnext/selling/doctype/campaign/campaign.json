@@ -58,7 +58,8 @@
    "in_list_view": 1,
    "label": "Status",
    "options": "\nPlanned\nIn Progress\nCompleted\nCancelled",
-   "reqd": 1
+   "reqd": 1,
+   "default": "Planned"
   },
   {
    "fieldname": "from_date",
