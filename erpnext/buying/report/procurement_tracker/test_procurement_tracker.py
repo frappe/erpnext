@@ -12,7 +12,6 @@ from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_r
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 class TestProcurementTracker(unittest.TestCase):
-	maxDiff = None
 	def test_result_for_procurement_tracker(self):
 		filters = {
 			'company': '_Test Procurement Company',
@@ -60,8 +59,8 @@ class TestProcurementTracker(unittest.TestCase):
 			"supplier": "_Test Supplier",
 			"estimated_cost": 0.0,
 			"actual_cost": None,
-			"purchase_order_amt": 0.0,
-			"purchase_order_amt_in_company_currency": 0.0,
+			"purchase_order_amt": 5000.0,
+			"purchase_order_amt_in_company_currency": 300000.0,
 			"expected_delivery_date": date_obj,
 			"actual_delivery_date": date_obj
 		}
