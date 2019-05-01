@@ -162,6 +162,8 @@ $.extend(shopping_cart, {
 						.html(msg || frappe._("Something went wrong!"))
 						.toggle(true);
 				} else {
+					$('.cart-container table').hide();
+					$(btn).hide();
 					window.location.href = '/orders/' + encodeURIComponent(r.message);
 				}
 			}
@@ -185,6 +187,8 @@ $.extend(shopping_cart, {
 						.html(msg || frappe._("Something went wrong!"))
 						.toggle(true);
 				} else {
+					$('.cart-container table').hide();
+					$(btn).hide();
 					window.location.href = '/quotations/' + encodeURIComponent(r.message);
 				}
 			}
