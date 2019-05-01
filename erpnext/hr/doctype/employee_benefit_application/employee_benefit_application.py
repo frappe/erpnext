@@ -177,9 +177,12 @@ def get_benefit_component_amount(employee, start_date, end_date, struct_row, sal
 
 	# Considering there is only one application for a year
 	benefit_application_name = frappe.db.sql("""
-	select name from `tabEmployee Benefit Application`
-	where payroll_period=%(payroll_period)s and employee=%(employee)s
-	and docstatus = 1
+		select name
+		from `tabEmployee Benefit Application`
+		where
+			payroll_period=%(payroll_period)s
+			and employee=%(employee)s
+			and docstatus = 1
 	""", {
 		'employee': employee,
 		'payroll_period': payroll_period
@@ -209,7 +212,8 @@ def get_benefit_pro_rata_ratio_amount(sal_struct, component_max):
 	total_pro_rata_max = 0
 	benefit_amount = 0
 	for sal_struct_row in sal_struct.get("earnings"):
-		pay_against_benefit_claim, max_benefit_amount = frappe.db.get_value("Salary Component", sal_struct_row.salary_component, ["pay_against_benefit_claim", "max_benefit_amount"])
+		pay_against_benefit_claim, max_benefit_amount = frappe.db.get_value("Salary Component",
+			sal_struct_row.salary_component, ["pay_against_benefit_claim", "max_benefit_amount"])
 		if sal_struct_row.is_flexible_benefit == 1 and pay_against_benefit_claim != 1:
 			total_pro_rata_max += max_benefit_amount
 	if total_pro_rata_max > 0:
