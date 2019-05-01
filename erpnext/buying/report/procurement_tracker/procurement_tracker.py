@@ -54,13 +54,6 @@ def get_columns(filters):
 			"width": 140
 		},
 		{
-			"label": _("Budget Code"),
-			"options": "Budget",
-			"fieldname": "budget_code",
-			"fieldtype": "Link",
-			"width": 140
-		},
-		{
 			"label": _("Description"),
 			"fieldname": "description",
 			"fieldtype": "Data",
