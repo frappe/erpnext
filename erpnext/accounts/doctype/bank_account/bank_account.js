@@ -12,6 +12,11 @@ frappe.ui.form.on('Bank Account', {
 				}
 			};
 		});
+		frm.set_query("party_type", function() {
+			return {
+				query: "erpnext.setup.doctype.party_type.party_type.get_party_type",
+			};
+		});
 	},
 	refresh: function(frm) {
 		frappe.dynamic_link = { doc: frm.doc, fieldname: 'name', doctype: 'Bank Account' }
