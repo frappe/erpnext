@@ -506,7 +506,7 @@ var validate_sample_quantity = function(frm, cdt, cdn) {
 	}
 };
 
-frappe.ui.form.on('Landed Cost Taxes and Charges', {
+frappe.ui.form.on('Stock Entry Taxes and Charges', {
 	amount: function(frm) {
 		frm.events.calculate_amount(frm);
 	}

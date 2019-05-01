@@ -143,7 +143,7 @@ class StockEntry(StockController):
 			amount = amount[0][0] if amount else 0
 			additional_costs = frappe.db.sql(""" select ifnull(sum(sed.amount), 0)
 				from
-					`tabStock Entry` se, `tabLanded Cost Taxes and Charges` sed
+					`tabStock Entry` se, `tabStock Entry Taxes and Charges` sed
 				where
 					se.docstatus = 1 and se.project = %s and sed.parent = se.name
 					and se.purpose = 'Manufacture'""", self.project, as_list=1)

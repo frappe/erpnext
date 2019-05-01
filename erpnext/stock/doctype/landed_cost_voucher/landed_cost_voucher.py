@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
-from frappe.utils import flt, cint
+from frappe.utils import flt
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
