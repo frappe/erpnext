@@ -6,8 +6,8 @@ python:
   - "3.6"
 
 env:
-  - TEST_TYPE=Server Side Test
-  - TEST_TYPE=Patch Test
+  - TEST_TYPE="Server Side Test"
+  - TEST_TYPE="Patch Test"
 
 services:
   - mysql
