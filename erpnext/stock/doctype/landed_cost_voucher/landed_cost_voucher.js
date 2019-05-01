@@ -143,7 +143,6 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 							tax.account_head = d.account_head;
 							tax.amount = d.amount;
 						});
-						me.frm.refresh_field("taxes");
 						me.update_manual_distribution();
 						me.calculate_taxes_and_totals();
 					}
@@ -186,14 +185,14 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 	get_items_from_purchase_receipts: function() {
 		var me = this;
-		if(!this.frm.doc.purchase_receipts.length) {
+		if(!me.frm.doc.purchase_receipts.length) {
 			frappe.msgprint(__("Please enter Purchase Receipt first"));
 		} else {
 			return me.frm.call({
 				doc: me.frm.doc,
 				method: "get_items_from_purchase_receipts",
 				callback: function() {
-					me.frm.refresh_field("items");
+					me.frm.refresh_fields();
 					me.update_manual_distribution();
 				}
 			});
@@ -208,30 +207,40 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		this.calculate_taxes_and_totals();
 	},
 
-	calculate_taxes_and_totals: function() {
-		var total = 0.0;
+	weight: function(frm) {
+		this.calculate_taxes_and_totals();
+	},
 
-		$.each(this.frm.doc.taxes || [], function(i, d) {
-			d.amount = flt(d.amount, precision("amount", d));
-			total += flt(d.amount);
+	calculate_taxes_and_totals: function() {
+		var me = this;
+
+		var item_total_fields = ['qty', 'amount', 'weight'];
+		$.each(item_total_fields || [], function(i, f) {
+			me.frm.doc['total_' + f] = flt(frappe.utils.sum((me.frm.doc.items || []).map(d => flt(d[f]))),
+				precision('total_' + f));
 		});
 
-		var total_allocated_amount = frappe.utils.sum($.map(this.frm.doc["advances"] || [], function(adv) {
+		me.frm.doc.total_taxes_and_charges = 0.0;
+		$.each(me.frm.doc.taxes || [], function(i, d) {
+			d.amount = flt(d.amount, precision("amount", d));
+			me.frm.doc.total_taxes_and_charges += d.amount;
+		});
+		me.frm.doc.total_taxes_and_charges = flt(me.frm.doc.total_taxes_and_charges, precision("total_taxes_and_charges"));
+
+		var total_allocated_amount = frappe.utils.sum($.map(me.frm.doc["advances"] || [], function(adv) {
 			return flt(adv.allocated_amount, precision("allocated_amount", adv));
 		}));
 
-		this.frm.set_value("total_taxes_and_charges", flt(total, precision("total_taxes_and_charges")));
-
-		if (this.frm.doc.party) {
-			this.frm.set_value("grand_total", flt(this.frm.doc.total_taxes_and_charges, precision("grand_total")));
-			this.frm.set_value("total_advance", flt(total_allocated_amount, "total_advance"));
+		if (me.frm.doc.party) {
+			me.frm.grand_total = flt(me.frm.doc.total_taxes_and_charges, precision("grand_total"));
+			me.frm.total_advance = flt(total_allocated_amount, "total_advance");
 		} else {
-			this.frm.set_value("grand_total", 0);
-			this.frm.set_value("total_advance", 0);
+			me.frm.grand_total = 0;
+			me.frm.total_advance = 0;
 		}
+		me.frm.outstanding_amount = flt(me.frm.doc.grand_total - total_allocated_amount, "outstanding_amount");
 
-		this.frm.set_value("outstanding_amount", flt(this.frm.doc.grand_total - total_allocated_amount,
-			"outstanding_amount"));
+		me.frm.refresh_fields();
 	},
 
 	set_applicable_charges_for_item: function() {
@@ -365,6 +374,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 	items_remove: function() {
 		this.update_manual_distribution();
+		this.calculate_taxes_and_totals();
 	},
 	items_move: function() {
 		this.update_manual_distribution();
