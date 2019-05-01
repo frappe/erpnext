@@ -62,7 +62,7 @@ class ItemVariantsCacheManager:
 
 		item_variants_data = frappe.db.get_all('Item Variant Attribute',
 			{'variant_of': parent_item_code}, ['parent', 'attribute', 'attribute_value'],
-			order_by='parent',
+			order_by='name',
 			as_list=1
 		)
 
