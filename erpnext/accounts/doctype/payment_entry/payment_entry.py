@@ -572,14 +572,21 @@ def get_outstanding_reference_documents(args):
 	if args.get("cost_center") and get_allow_cost_center_in_entry_of_bs_account():
 		condition += " and cost_center='%s'" % args.get("cost_center")
 
-	if args.get("from_date") and args.get("to_date"):
-		condition += " and posting_date between '{0}' and '{1}'".format(args.get("from_date"), args.get("to_date"))
+	date_fields_dict = {
+		'posting_date': ['from_posting_date', 'to_posting_date'],
+		'due_date': ['from_due_date', 'to_due_date']
+	}
+
+	for fieldname, date_fields in date_fields_dict.items():
+		if args.get(date_fields[0]) and args.get(date_fields[1]):
+			condition += " and {0} between '{1}' and '{2}'".format(fieldname,
+				args.get(date_fields[0]), args.get(date_fields[1]))
 
 	if args.get("company"):
 		condition += " and company = '{0}'".format(frappe.db.escape(args.get("company")))
 
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
-		args.get("party_account"), condition=condition, limit=100)
+		args.get("party_account"), filters=args, condition=condition, limit=100)
 
 	for d in outstanding_invoices:
 		d["exchange_rate"] = 1
@@ -919,7 +926,6 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.paid_to_account_currency = party_account_currency if payment_type=="Pay" else bank.account_currency
 	pe.paid_amount = paid_amount
 	pe.received_amount = received_amount
-	pe.allocate_payment_amount = 1
 	pe.letter_head = doc.get("letter_head")
 
 	if pe.party_type in ["Customer", "Supplier"]:

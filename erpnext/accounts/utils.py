@@ -615,13 +615,12 @@ def get_held_invoices(party_type, party):
 	return held_invoices
 
 
-def get_outstanding_invoices(party_type, party, account, condition=None, limit=0):
+def get_outstanding_invoices(party_type, party, account, filters=None, condition=None, limit=0):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
 	limit_cond = ''
-	if limit:
-		limit_cond = " limit {}".format(limit)
+	if limit: limit_cond = " limit {}".format(limit)
 
 	if erpnext.get_party_account_type(party_type) == 'Receivable':
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
@@ -635,7 +634,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, limit=0
 
 	invoice_list = frappe.db.sql("""
 		select
-			voucher_no, voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount
+			voucher_no, voucher_type, posting_date, due_date,
+			ifnull(sum({dr_or_cr}), 0) as invoice_amount
 		from
 			`tabGL Entry`
 		where
@@ -665,8 +665,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, limit=0
 			and account = %(account)s
 			and {payment_dr_or_cr} > 0
 			and against_voucher is not null and against_voucher != ''
-		group by against_voucher_type, against_voucher {limit_cond}
-	""".format(payment_dr_or_cr=payment_dr_or_cr, limit_cond= limit_cond), {
+		group by against_voucher_type, against_voucher
+	""".format(payment_dr_or_cr=payment_dr_or_cr), {
 		"party_type": party_type,
 		"party": party,
 		"account": account
@@ -680,10 +680,12 @@ def get_outstanding_invoices(party_type, party, account, condition=None, limit=0
 		payment_amount = pe_map.get((d.voucher_type, d.voucher_no), 0)
 		outstanding_amount = flt(d.invoice_amount - payment_amount, precision)
 		if outstanding_amount > 0.5 / (10**precision):
-			if not d.voucher_type == "Purchase Invoice" or d.voucher_no not in held_invoices:
-				due_date = frappe.db.get_value(
-					d.voucher_type, d.voucher_no, "posting_date" if party_type == "Employee" else "due_date")
+			if filters.get("outstanding_amt_greater_than") and not (
+				outstanding_amount >= filters.get("outstanding_amt_greater_than") and
+				outstanding_amount <= filters.get("outstanding_amt_less_than")):
+				continue
 
+			if not d.voucher_type == "Purchase Invoice" or d.voucher_no not in held_invoices:
 				outstanding_invoices.append(
 					frappe._dict({
 						'voucher_no': d.voucher_no,
@@ -692,7 +694,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, limit=0
 						'invoice_amount': flt(d.invoice_amount),
 						'payment_amount': payment_amount,
 						'outstanding_amount': outstanding_amount,
-						'due_date': due_date
+						'due_date': d.due_date
 					})
 				)
 

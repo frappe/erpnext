@@ -734,6 +734,7 @@ class SalesInvoice(SellingController):
 					"account": self.debit_to,
 					"party_type": "Customer",
 					"party": self.customer,
+					"due_date": self.due_date,
 					"against": self.against_income_account,
 					"debit": grand_total_in_company_currency,
 					"debit_in_account_currency": grand_total_in_company_currency \
