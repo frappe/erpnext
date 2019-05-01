@@ -21,13 +21,12 @@ class LandedCostVoucher(AccountsController):
 		self.validate_purchase_receipts()
 		self.clear_advances_table_if_not_payable()
 		self.clear_unallocated_advances("Landed Cost Voucher Advance", "advances")
-		self.calculates_taxes_and_totals()
+		self.calculates_taxes_and_totals(for_validate=True)
 		self.set_status()
 
-	def before_submit(self):
-		self.validate_applicable_charges_for_item()
-
 	def on_submit(self):
+		self.calculates_taxes_and_totals()
+		self.validate_applicable_charges_for_item()
 		self.update_against_document_in_jv()
 		self.update_landed_cost()
 		self.make_gl_entries()
@@ -98,6 +97,8 @@ class LandedCostVoucher(AccountsController):
 					elif pr.receipt_document_type == "Purchase Invoice":
 						item.purchase_invoice = pr.receipt_document
 						item.purchase_invoice_item = d.name
+
+		self.calculates_taxes_and_totals(for_validate=True)
 
 	def check_mandatory(self):
 		if self.party:
@@ -174,9 +175,13 @@ class LandedCostVoucher(AccountsController):
 			if account.account_type != "Payable":
 				frappe.throw(_("Credit To account must be a Payable account"))
 
-	def calculates_taxes_and_totals(self):
-		total_taxes = sum([flt(d.amount, d.precision("amount")) for d in self.get("taxes")])
-		self.total_taxes_and_charges = flt(total_taxes, self.precision("total_taxes_and_charges"))
+	def calculates_taxes_and_totals(self, for_validate=False):
+		item_total_fields = ['qty', 'amount', 'weight']
+		for f in item_total_fields:
+			self.set('total_' + f, flt(sum([flt(d.get(f)) for d in self.get("items")]), self.precision('total_' + f)))
+
+		self.total_taxes_and_charges = sum([flt(d.amount, d.precision("amount")) for d in self.get("taxes")])
+		self.total_taxes_and_charges = flt(self.total_taxes_and_charges, self.precision("total_taxes_and_charges"))
 
 		if self.party:
 			self.grand_total = flt(self.total_taxes_and_charges, self.precision("grand_total"))
@@ -186,7 +191,7 @@ class LandedCostVoucher(AccountsController):
 			self.total_advance = 0
 			self.grand_total = 0
 
-		if self.grand_total >= 0 and self.total_advance > self.grand_total:
+		if not for_validate and self.grand_total >= 0 and self.total_advance > self.grand_total:
 			frappe.throw(_("Advance amount cannot be greater than {0}").format(self.grand_total))
 
 		self.outstanding_amount = flt(self.grand_total - self.total_advance, self.precision("outstanding_amount"))
