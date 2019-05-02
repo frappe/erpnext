@@ -127,12 +127,22 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 		// to overwrite the customer_filter trigger from queries.js
 		this.frm.toggle_reqd("party_name", this.frm.doc.quotation_to);
-		this.frm.set_query('customer_address', erpnext.queries.address_query);
-		this.frm.set_query('shipping_address_name', erpnext.queries.address_query);
+		this.frm.set_query('customer_address', this.address_query);
+		this.frm.set_query('shipping_address_name', this.address_query);
 	},
 
 	tc_name: function() {
 		this.get_terms();
+	},
+
+	address_query: function(doc) {
+		return {
+			query: 'frappe.contacts.doctype.address.address.address_query',
+			filters: {
+				link_doctype: frappe.dynamic_link.doctype,
+				link_name: doc.party_name
+			}
+		};
 	},
 
 	validate_company_and_party: function(party_field) {
