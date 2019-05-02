@@ -157,7 +157,6 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
 	# postprocess: fetch shipping address, set missing values
-
 	return doclist
 
 @frappe.whitelist()
@@ -204,11 +203,13 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	return doclist
 
 def _make_customer(source_name, ignore_permissions=False):
-	quotation = frappe.db.get_value("Quotation", source_name, ["order_type", "party_name", "customer_name"])
-	if quotation and quotation[1] and not quotation[2]:
+	quotation = frappe.db.get_value("Quotation", source_name, ["order_type", "party_name", "quotation_to"])
+
+	if quotation and quotation[2] == 'Lead':
 		lead_name = quotation[1]
 		customer_name = frappe.db.get_value("Customer", {"lead_name": lead_name},
 			["name", "customer_name"], as_dict=True)
+
 		if not customer_name:
 			from erpnext.crm.doctype.lead.lead import _make_customer
 			customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
@@ -235,4 +236,4 @@ def _make_customer(source_name, ignore_permissions=False):
 		else:
 			return customer_name
 	else:
-		return frappe.get_doc("Customer",quotation[2])
+		return frappe.get_doc("Customer",quotation[1])
