@@ -138,7 +138,7 @@ class LandedCostVoucher(AccountsController):
 			if item.purchase_receipt:
 				if item.purchase_receipt not in receipt_documents:
 					frappe.throw(_("Item Row {0}: {1} {2} does not exist in above '{3}' table")
-						.format(item.idx, "Purchase Receipt", item.purchase_receipt), "Purchase Receipts")
+						.format(item.idx, "Purchase Receipt", item.purchase_receipt, "Purchase Receipts"))
 			elif item.purchase_invoice:
 				if item.purchase_invoice not in receipt_documents:
 					frappe.throw(_("Item Row {0}: {1} {2} does not exist in above '{3}' table")

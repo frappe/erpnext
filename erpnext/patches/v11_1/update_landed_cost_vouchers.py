@@ -5,16 +5,16 @@ from frappe.model.utils.rename_field import rename_field
 def execute():
 	# Move Landed Cost Taxes and Charges in Stock Entry to Stock Entry Taxes and Charges
 	frappe.db.sql("""
-		create table `tabStock Entry Taxes and Charges`
+		create table if not exists `tabStock Entry Taxes and Charges`
 		as select * from `tabLanded Cost Taxes and Charges`
 		where parenttype='Stock Entry'
 	""")
 	frappe.db.sql("delete from `tabLanded Cost Taxes and Charges` where parenttype='Stock Entry'")
 
 	# Rename LCV fields
-	frappe.reload_doc('stock', 'doctype', 'landed_cost_voucher')
-	frappe.reload_doc('stock', 'doctype', 'landed_cost_taxes_and_charges')
-	frappe.reload_doc('stock', 'doctype', 'landed_cost_item')
+	frappe.reload_doc('stock', 'doctype', 'landed_cost_voucher', force=1)
+	frappe.reload_doc('stock', 'doctype', 'landed_cost_taxes_and_charges', force=1)
+	frappe.reload_doc('stock', 'doctype', 'landed_cost_item', force=1)
 
 	# Landed Cost Taxes and Charges table description to remarks
 	rename_field("Landed Cost Taxes and Charges", "description", "remarks")

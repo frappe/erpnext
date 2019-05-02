@@ -29,7 +29,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 				}
 			};
 
-		this.frm.fields_dict["credit_to"].get_query = function() {
+		this.frm.set_query("credit_to", function() {
 			return {
 				filters: {
 					'account_type': 'Payable',
@@ -38,7 +38,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 					'account_currency': erpnext.get_currency(me.frm.doc.company)
 				}
 			};
-		};
+		});
 
 		this.frm.set_query("cost_center", "items", function() {
 			return {
@@ -246,35 +246,30 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	set_applicable_charges_for_item: function() {
 		var me = this;
 		if(me.frm.doc.items.length) {
-			var totals = {
-				'amount': 0.0,
-				'qty': 0.0,
-				'weight': 0.0
-			};
-			$.each(me.frm.doc.items || [], function(i, item) {
-				totals.amount += flt(item.amount);
-				totals.qty += flt(item.qty);
-				totals.weight += flt(item.weight);
+			var totals = {};
+			var item_total_fields = ['qty', 'amount', 'weight'];
+			$.each(item_total_fields || [], function(i, f) {
+				totals[f] = flt(frappe.utils.sum((me.frm.doc.items || []).map(d => flt(d[f]))));
 			});
 
 			var charges_map = [];
 			var manual_account_heads = new Set;
 			var idx = 0;
 			$.each(me.frm.doc.taxes || [], function(i, tax) {
-				var based_on = tax.distribution_criteria.toLowerCase();
+				var based_on = frappe.scrub(tax.distribution_criteria);
 
 				if (based_on == "manual") {
 					manual_account_heads.add(cstr(tax.account_head));
 				} else {
 					if(!totals[based_on]) {
-						frappe.throw(__("Cannot distribute by {0} because total {1} is 0", [based_on, based_on]));
+						frappe.throw(__("Cannot distribute by {0} because total {0} is 0", [tax.distribution_criteria]));
 					}
 
 					charges_map[idx] = [];
 					$.each(me.frm.doc.items || [], function(iItem, item) {
 						charges_map[idx][iItem] = flt(tax.amount) * flt(item[based_on]) / flt(totals[based_on]);
 						if(!item[based_on])
-							frappe.msgprint(__("Item #{0} has 0 {1}", [item.idx, based_on]))
+							frappe.msgprint(__("Item #{0} has 0 {1}", [item.idx, tax.distribution_criteria]))
 					});
 					++idx;
 				}
