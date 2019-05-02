@@ -48,7 +48,7 @@ class Task(NestedSet):
 		if self.status!=self.get_db_value("status") and self.status == "Completed":
 			for d in self.depends_on:
 				if frappe.db.get_value("Task", d.task, "status") != "Completed":
-					frappe.throw(_("Cannot close task as its dependant task {0} is not closed.").format(d.task))
+					frappe.throw(_("Cannot close task {0} as its dependant task {1} is not closed.").format(frappe.bold(self.name), frappe.bold(d.task)))
 
 			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
