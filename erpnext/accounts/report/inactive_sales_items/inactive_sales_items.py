@@ -145,4 +145,3 @@ def get_items(filters):
 	items = frappe.get_all("Item", fields=["name", "item_group", "item_name"], filters=filters_dict, order_by="name")
 
 	return items
-
