@@ -123,8 +123,10 @@ class LandedCostVoucher(AccountsController):
 
 		for d in self.get("purchase_receipts"):
 			docstatus = frappe.db.get_value(d.receipt_document_type, d.receipt_document, "docstatus")
+			if docstatus is None:
+				frappe.throw(_("Row #{0}: {1} {2} does not exist").format(d.idx, d.receipt_document_type, d.receipt_document))
 			if docstatus != 1:
-				frappe.throw(_("Receipt document must be submitted"))
+				frappe.throw(_("Row #{0}: {1} {2} must be submitted").format(d.idx, d.receipt_document_type, d.receipt_document))
 
 			receipt_documents.append(d.receipt_document)
 
