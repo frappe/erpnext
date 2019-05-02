@@ -6,7 +6,7 @@ QUnit.test("test: opportunity", function (assert) {
 		() => frappe.timeout(1),
 		() => frappe.click_button('New'),
 		() => frappe.timeout(1),
-		() => cur_frm.set_value('enquiry_from', 'Customer'),
+		() => cur_frm.set_value('opportunity_from', 'Customer'),
 		() => cur_frm.set_value('customer', 'Test Customer 1'),
 
 		// check items

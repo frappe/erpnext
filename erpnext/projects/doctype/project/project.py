@@ -30,11 +30,13 @@ class Project(Document):
 
 		self.update_costing()
 
-	def __setup__(self):
+	def before_print(self):
 		self.onload()
 
 	def load_tasks(self):
 		"""Load `tasks` from the database"""
+		project_task_custom_fields = frappe.get_all("Custom Field", {"dt": "Project Task"}, "fieldname")
+
 		self.tasks = []
 		for task in self.get_tasks():
 			task_map = {
@@ -47,7 +49,7 @@ class Project(Document):
 				"task_weight": task.task_weight
 			}
 
-			self.map_custom_fields(task, task_map)
+			self.map_custom_fields(task, task_map, project_task_custom_fields)
 
 			self.append("tasks", task_map)
 
@@ -72,7 +74,7 @@ class Project(Document):
 		self.load_tasks()
 		self.validate_dates()
 		self.send_welcome_email()
-		self.update_percent_complete()
+		self.update_percent_complete(from_validate=True)
 
 	def validate_project_name(self):
 		if self.get("__islocal") and frappe.db.exists("Project", self.project_name):
@@ -149,7 +151,7 @@ class Project(Document):
 					"task_weight": t.task_weight
 				})
 
-				self.map_custom_fields(t, task)
+				self.map_custom_fields(t, task, custom_fields)
 
 				task.flags.ignore_links = True
 				task.flags.from_project = True
@@ -173,10 +175,6 @@ class Project(Document):
 		for t in frappe.get_all("Task", ["name"], {"project": self.name, "name": ("not in", task_names)}):
 			self.deleted_task_list.append(t.name)
 
-	def update_costing_and_percentage_complete(self):
-		self.update_percent_complete()
-		self.update_costing()
-
 	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data: return True
 
@@ -186,10 +184,8 @@ class Project(Document):
 			if row.get(field) != d.get(field):
 				return True
 
-	def map_custom_fields(self, source, target):
-		project_task_custom_fields = frappe.get_all("Custom Field", {"dt": "Project Task"}, "fieldname")
-
-		for field in project_task_custom_fields:
+	def map_custom_fields(self, source, target, custom_fields):
+		for field in custom_fields:
 			target.update({
 				field.fieldname: source.get(field.fieldname)
 			})
@@ -197,14 +193,12 @@ class Project(Document):
 	def update_project(self):
 		self.update_percent_complete()
 		self.update_costing()
-		self.flags.dont_sync_tasks = True
-		self.save(ignore_permissions=True)
 
 	def after_insert(self):
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
-	def update_percent_complete(self):
+	def update_percent_complete(self, from_validate=False):
 		if not self.tasks: return
 		total = frappe.db.sql("""select count(name) from tabTask where project=%s""", self.name)[0][0]
 		if not total and self.percent_complete:
@@ -234,6 +228,9 @@ class Project(Document):
 		elif not self.status == "Cancelled":
 			self.status = "Open"
 
+		if not from_validate:
+			self.db_update()
+
 	def update_costing(self):
 		from_time_sheet = frappe.db.sql("""select
 			sum(costing_amount) as costing_amount,
@@ -260,6 +257,7 @@ class Project(Document):
 		self.update_sales_amount()
 		self.update_billed_amount()
 		self.calculate_gross_margin()
+		self.db_update()
 
 	def calculate_gross_margin(self):
 		expense_amount = (flt(self.total_costing_amount) + flt(self.total_expense_claim)
@@ -313,7 +311,7 @@ class Project(Document):
 	def on_update(self):
 		self.delete_task()
 		self.load_tasks()
-		self.update_costing_and_percentage_complete()
+		self.update_project()
 		self.update_dependencies_on_duplicated_project()
 
 	def delete_task(self):

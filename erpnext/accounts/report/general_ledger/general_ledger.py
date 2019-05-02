@@ -53,7 +53,7 @@ def validate_filters(filters, account_details):
 		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
 
 	if (filters.get("voucher_no")
-		and filters.get("group_by") in [_('Group by Voucher'), _('Group by Voucher (Consolidated)')]):
+		and filters.get("group_by") in [_('Group by Voucher')]):
 		frappe.throw(_("Can not filter based on Voucher No, if grouped by Voucher"))
 
 	if filters.from_date > filters.to_date:
@@ -186,12 +186,8 @@ def get_conditions(filters):
 	if filters.get("project"):
 		conditions.append("project in %(project)s")
 
-	company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
-	if not filters.get("finance_book") or (filters.get("finance_book") == company_finance_book):
-		filters['finance_book'] = company_finance_book
+	if filters.get("finance_book"):
 		conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
-	elif filters.get("finance_book"):
-		conditions.append("ifnull(finance_book, '') = %(finance_book)s")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")

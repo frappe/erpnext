@@ -112,13 +112,15 @@ def convert_to_presentation_currency(gl_entries, currency_info):
 
 			if entry.get('debit'):
 				entry['debit'] = converted_value
-			else:
+
+			if entry.get('credit'):
 				entry['credit'] = converted_value
 
 		elif account_currency == presentation_currency:
 			if entry.get('debit'):
 				entry['debit'] = debit_in_account_currency
-			else:
+
+			if entry.get('credit'):
 				entry['credit'] = credit_in_account_currency
 
 		converted_gl_list.append(entry)
@@ -133,3 +135,22 @@ def get_appropriate_company(filters):
 		company = get_default_company()
 
 	return company
+
+@frappe.whitelist()
+def get_invoiced_item_gross_margin(sales_invoice=None, item_code=None, company=None):
+	from erpnext.accounts.report.gross_profit.gross_profit import GrossProfitGenerator
+
+	sales_invoice = sales_invoice or frappe.form_dict.get('sales_invoice')
+	item_code = item_code or frappe.form_dict.get('item_code')
+	company = company or frappe.get_cached_value("Sales Invoice", sales_invoice, 'company')
+
+	filters = {
+		'sales_invoice': sales_invoice,
+		'item_code': item_code,
+		'company': company,
+		'group_by': 'Invoice'
+	}
+
+	gross_profit_data = GrossProfitGenerator(filters)
+
+	return gross_profit_data.grouped_data

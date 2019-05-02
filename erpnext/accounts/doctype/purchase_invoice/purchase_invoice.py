@@ -8,6 +8,7 @@ from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate
 from frappe import _, throw
 import frappe.defaults
 
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
@@ -17,7 +18,7 @@ from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entri
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.buying.utils import check_for_closed_status
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
-from erpnext.assets.doctype.asset.asset import get_asset_account
+from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
 from frappe.model.mapper import get_mapped_doc
 from six import iteritems
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_invoice,\
@@ -46,12 +47,14 @@ class PurchaseInvoice(BuyingController):
 		}]
 
 	def onload(self):
+		super(PurchaseInvoice, self).onload()
 		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
 		self.set_onload("supplier_tds", supplier_tds)
 
 	def before_save(self):
 		if not self.on_hold:
 			self.release_date = ''
+
 
 	def invoice_is_blocked(self):
 		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))
@@ -215,7 +218,7 @@ class PurchaseInvoice(BuyingController):
 			self.validate_item_code()
 			self.validate_warehouse()
 			if auto_accounting_for_stock:
-				warehouse_account = get_warehouse_account_map()
+				warehouse_account = get_warehouse_account_map(self.company)
 
 		for item in self.get("items"):
 			# in case of auto inventory accounting,
@@ -231,6 +234,13 @@ class PurchaseInvoice(BuyingController):
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
 					item.expense_account = stock_not_billed_account
+			elif item.is_fixed_asset and is_cwip_accounting_disabled():
+				if not item.asset:
+					frappe.throw(_("Row {0}: asset is required for item {1}")
+						.format(item.idx, item.item_code))
+
+				item.expense_account = get_asset_category_account(item.asset, 'fixed_asset_account',
+					company = self.company)
 			elif item.is_fixed_asset and item.pr_detail:
 				item.expense_account = asset_received_but_not_billed
 			elif not item.expense_account and for_validate:
@@ -359,7 +369,8 @@ class PurchaseInvoice(BuyingController):
 			if repost_future_gle and cint(self.update_stock) and self.auto_accounting_for_stock:
 				from erpnext.controllers.stock_controller import update_gl_entries_after
 				items, warehouses = self.get_items_and_warehouses()
-				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items)
+				update_gl_entries_after(self.posting_date, self.posting_time,
+					warehouses, items, company = self.company)
 
 		elif self.docstatus == 2 and cint(self.update_stock) and self.auto_accounting_for_stock:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
@@ -376,7 +387,9 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_item_gl_entries(gl_entries)
-		self.get_asset_gl_entry(gl_entries)
+		if not is_cwip_accounting_disabled():
+			self.get_asset_gl_entry(gl_entries)
+
 		self.make_tax_gl_entries(gl_entries)
 
 		gl_entries = merge_similar_entries(gl_entries)
@@ -416,7 +429,7 @@ class PurchaseInvoice(BuyingController):
 		stock_items = self.get_stock_items()
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 		if self.update_stock and self.auto_accounting_for_stock:
-			warehouse_account = get_warehouse_account_map()
+			warehouse_account = get_warehouse_account_map(self.company)
 
 		voucher_wise_stock_value = {}
 		if self.update_stock:
@@ -468,7 +481,7 @@ class PurchaseInvoice(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.rm_supp_cost)
 						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
-				elif not item.is_fixed_asset:
+				elif not item.is_fixed_asset or (item.is_fixed_asset and is_cwip_accounting_disabled()):
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": item.expense_account if not item.enable_deferred_expense else item.deferred_expense_account,
@@ -513,7 +526,7 @@ class PurchaseInvoice(BuyingController):
 				base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
 
 				if (not item.expense_account or frappe.db.get_value('Account',
-					item.expense_account, 'account_type') != 'Asset Received But Not Billed'):
+					item.expense_account, 'account_type') not in ['Asset Received But Not Billed', 'Fixed Asset']):
 					arbnb_account = self.get_company_default("asset_received_but_not_billed")
 					item.expense_account = arbnb_account
 
@@ -776,9 +789,8 @@ class PurchaseInvoice(BuyingController):
 		for d in self.items:
 			if d.project and d.project not in project_list:
 				project = frappe.get_doc("Project", d.project)
-				project.flags.dont_sync_tasks = True
 				project.update_purchase_costing()
-				project.save()
+				project.db_update()
 				project_list.append(d.project)
 
 	def validate_supplier_invoice(self):
