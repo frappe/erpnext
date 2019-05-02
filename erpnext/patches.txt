@@ -601,3 +601,4 @@ erpnext.patches.v11_1.set_salary_details_submittable
 erpnext.patches.v11_1.rename_depends_on_lwp
 erpnext.patches.v11_1.move_customer_lead_to_dynamic_column
 execute:frappe.delete_doc("Report", "Inactive Items")
+erpnext.patches.v11_1.set_missing_title_for_quotation
