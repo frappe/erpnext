@@ -52,6 +52,10 @@ def get_columns():
 
 def get_data(filters):
 	data = []
+	if(filters.from_date > filters.to_date):
+		frappe.msgprint(_(" From Date can not be greater than To Date"))
+		return data
+
 	record = get_records(filters)
 
 	for entries in record:
@@ -68,13 +72,16 @@ def get_data(filters):
 			from_date = frappe.utils.get_datetime(filters.from_date)
 			to_date = frappe.utils.get_datetime(filters.to_date)
 
+			if from_date == to_date:
+				from_date = frappe.utils.add_to_date(from_date, days=1, seconds=-1)
+
 			if time_start <= from_date and time_end >= from_date:
 				total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(activity,
 					time_end, from_date, total_hours, total_billable_hours, total_amount)
 			elif time_start <= to_date and time_end >= to_date:
 				total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(activity,
 					to_date, time_start, total_hours, total_billable_hours, total_amount)
-			elif time_start >= from_date and time_end <= to_date:
+			else:
 				total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(activity,
 					time_end, time_start, total_hours, total_billable_hours, total_amount)
 
