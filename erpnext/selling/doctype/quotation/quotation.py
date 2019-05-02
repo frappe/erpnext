@@ -252,5 +252,5 @@ def _make_customer(source_name, ignore_permissions=False):
 				frappe.throw(_("Please create Customer from Lead {0}").format(lead_name))
 		else:
 			return customer_name
-	else:
-		return frappe.get_doc("Customer",quotation[2])
+	elif quotation and quotation[1]:
+		return frappe.get_doc("Customer",quotation[1])
