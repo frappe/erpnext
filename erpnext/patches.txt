@@ -595,3 +595,4 @@ erpnext.patches.v11_1.woocommerce_set_creation_user
 erpnext.patches.v11_1.delete_bom_browser
 erpnext.patches.v11_1.set_salary_details_submittable
 erpnext.patches.v11_1.rename_depends_on_lwp
+erpnext.patches.v11_1.set_missing_title_for_quotation
