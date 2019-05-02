@@ -1,7 +1,7 @@
 import frappe
 
 def execute():
-	'''update customer_name from Customer document if quotation_to is set to Customer '''
+	# update customer_name from Customer document if quotation_to is set to Customer
 	frappe.db.sql('''
 		update tabQuotation, tabCustomer
 		set
@@ -13,7 +13,7 @@ def execute():
 			and tabQuotation.quotation_to = 'Customer'
 	''')
 
-	'''update customer_name from Lead document if quotation_to is set to Lead '''
+	# update customer_name from Lead document if quotation_to is set to Lead
 
 	frappe.db.sql('''
 		update tabQuotation, tabLead
