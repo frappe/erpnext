@@ -52,17 +52,19 @@ def get_columns():
 
 def get_data(filters):
 	data = []
+	if(filters.from_date > filters.to_date):
+		frappe.msgprint(_(" From Date can not be greater than To Date"))
+		return data
+
 	record = get_records(filters)
 
-	billable_hours_worked = 0
-	hours_worked = 0
-	working_cost = 0
 	for entries in record:
 		total_hours = 0
 		total_billable_hours = 0
 		total_amount = 0
 		entries_exists = False
 		timesheet_details = get_timesheet_details(filters, entries.name)
+
 		for activity in timesheet_details:
 			entries_exists = True
 			time_start = activity.from_time
@@ -70,27 +72,18 @@ def get_data(filters):
 			from_date = frappe.utils.get_datetime(filters.from_date)
 			to_date = frappe.utils.get_datetime(filters.to_date)
 
+			if from_date == to_date:
+				from_date = frappe.utils.add_to_date(from_date, days=1, seconds=-1)
+
 			if time_start <= from_date and time_end >= from_date:
 				total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(activity,
 					time_end, from_date, total_hours, total_billable_hours, total_amount)
-
-				billable_hours_worked += total_billable_hours
-				hours_worked += total_hours
-				working_cost += total_amount
-			elif time_start >= from_date and time_end >= to_date:
+			elif time_start <= to_date and time_end >= to_date:
 				total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(activity,
 					to_date, time_start, total_hours, total_billable_hours, total_amount)
-
-				billable_hours_worked += total_billable_hours
-				hours_worked += total_hours
-				working_cost += total_amount
-			elif time_start >= from_date and time_end <= to_date:
+			else:
 				total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(activity,
 					time_end, time_start, total_hours, total_billable_hours, total_amount)
-
-				billable_hours_worked += total_billable_hours
-				hours_worked += total_hours
-				working_cost += total_amount
 
 		row = {
 			"employee": entries.employee,
@@ -100,18 +93,9 @@ def get_data(filters):
 			"total_hours": total_hours,
 			"amount": total_amount
 		}
-
 		if entries_exists:
 			data.append(row)
 			entries_exists = False
-
-	total = {
-		"total_billable_hours": billable_hours_worked,
-		"total_hours": hours_worked,
-		"amount": working_cost
-	}
-	if billable_hours_worked !=0 or hours_worked !=0 or working_cost !=0:
-		data.append(total)
 	return data
 
 def get_records(filters):
