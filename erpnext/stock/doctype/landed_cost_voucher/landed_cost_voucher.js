@@ -65,21 +65,9 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		this.frm.add_fetch("receipt_document", "base_grand_total", "grand_total");
 	},
 
-	before_submit: function() {
-		this.validate_manual_distribution_totals();
-
-		var manual_taxes_cols = new Set;
-		$.each(me.frm.doc.taxes || [], function(i, tax) {
-			if(tax.distribution_criteria == "Manual" && tax.account_head) {
-				manual_taxes_cols.add(tax.account_head);
-			}
-		});
-	},
-
 	validate: function() {
 		this.update_manual_distribution_json();
 		this.calculate_taxes_and_totals();
-		this.set_applicable_charges_for_item();
 	},
 
 	refresh: function(doc) {
@@ -147,8 +135,8 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 							tax.account_head = d.account_head;
 							tax.amount = d.amount;
 						});
-						me.update_manual_distribution();
 						me.calculate_taxes_and_totals();
+						me.update_manual_distribution();
 					}
 				}
 			});
@@ -196,9 +184,9 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 				doc: me.frm.doc,
 				method: "get_items_from_purchase_receipts",
 				callback: function() {
-					me.frm.refresh_fields();
 					me.update_manual_distribution();
-					me.frm.set_dirty();
+					me.calculate_taxes_and_totals();
+					me.frm.dirty();
 				}
 			});
 		}
@@ -250,27 +238,28 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 		var grand_total = me.frm.doc.party_account_currency == me.frm.doc.currency ? me.frm.doc.grand_total : me.frm.doc.base_grand_total;
 		me.frm.doc.outstanding_amount = flt(grand_total - me.frm.doc.total_advance, "outstanding_amount");
-		debugger;
+
+		me.distribute_applicable_charges_for_item();
 
 		me.frm.refresh_fields();
 	},
 
-	set_applicable_charges_for_item: function() {
+	distribute_applicable_charges_for_item: function() {
 		var me = this;
-		if(me.frm.doc.items.length) {
-			var totals = {};
-			var item_total_fields = ['qty', 'amount', 'weight'];
-			$.each(item_total_fields || [], function(i, f) {
-				totals[f] = flt(frappe.utils.sum((me.frm.doc.items || []).map(d => flt(d[f]))));
-			});
+		var totals = {};
+		var item_total_fields = ['qty', 'amount', 'weight'];
+		$.each(item_total_fields || [], function(i, f) {
+			totals[f] = flt(frappe.utils.sum((me.frm.doc.items || []).map(d => flt(d[f]))));
+		});
 
-			var charges_map = [];
-			var manual_account_heads = new Set;
-			var idx = 0;
-			$.each(me.frm.doc.taxes || [], function(i, tax) {
+		var charges_map = [];
+		var manual_account_heads = new Set;
+		var idx = 0;
+		$.each(me.frm.doc.taxes || [], function(i, tax) {
+			if (tax.amount) {
 				var based_on = frappe.scrub(tax.distribution_criteria);
 
-				if (based_on == "manual") {
+				if(based_on == "manual") {
 					manual_account_heads.add(cstr(tax.account_head));
 				} else {
 					if(!totals[based_on]) {
@@ -278,23 +267,20 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 					}
 
 					charges_map[idx] = [];
-					$.each(me.frm.doc.items || [], function(iItem, item) {
-						charges_map[idx][iItem] = flt(tax.amount) * flt(item[based_on]) / flt(totals[based_on]);
-						if(!item[based_on])
-							frappe.msgprint(__("Item #{0} has 0 {1}", [item.idx, tax.distribution_criteria]))
+					$.each(me.frm.doc.items || [], function(item_idx, item) {
+						charges_map[idx][item_idx] = flt(tax.amount) * flt(item[based_on]) / flt(totals[based_on]);
 					});
 					++idx;
 				}
-			});
+			}
+		});
 
-			if(manual_account_heads.size)
-				me.validate_manual_distribution_totals();
-
-			var accumulated_taxes = 0.0;
-			$.each(me.frm.doc.items || [], function(iItem, item) {
+		var accumulated_taxes = 0.0;
+		$.each(me.frm.doc.items || [], function(item_idx, item) {
+			if (item.item_code) {
 				var item_total_tax = 0.0;
-				for (var i = 0; i < charges_map.length; ++i) {
-					item_total_tax += charges_map[i][iItem];
+				for(var i = 0; i < charges_map.length; ++i) {
+					item_total_tax += charges_map[i][item_idx];
 				}
 
 				Object.keys(item.manual_distribution_data).forEach(function(account_head) {
@@ -305,58 +291,15 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 				item.applicable_charges = flt(item_total_tax, precision("applicable_charges", item));
 				accumulated_taxes += item.applicable_charges;
-			});
+			}
+		});
 
-			/*if (accumulated_taxes != me.frm.doc.grand_total) {
-				var diff = me.frm.doc.grand_total - flt(accumulated_taxes);
-				me.frm.doc.items.slice(-1)[0].applicable_charges += diff;
-			}*/
-
-			refresh_field("items");
+		if (accumulated_taxes != me.frm.doc.total_taxes_and_charges) {
+			var diff = me.frm.doc.total_taxes_and_charges - accumulated_taxes;
+			me.frm.doc.items.slice(-1)[0].applicable_charges += diff;
 		}
-	},
 
-	validate_manual_distribution_totals: function() {
-		var me = this;
-		var tax_account_totals = {};
-		var item_totals = {};
-
-		$.each(me.frm.doc.taxes || [], function(i, tax) {
-			if(tax.distribution_criteria == "Manual" && tax.account_head) {
-				if(!tax_account_totals.hasOwnProperty(tax.account_head)) {
-					tax_account_totals[tax.account_head] = 0.0;
-					item_totals[tax.account_head] = 0.0;
-				}
-				tax_account_totals[tax.account_head] += flt(tax.amount);
-			}
-		});
-
-		$.each(me.frm.doc.items || [], function(i, item) {
-			if(item.item_code) {
-				Object.keys(item.manual_distribution_data).forEach(function(account_head) {
-					if(item_totals.hasOwnProperty(account_head)) {
-						item_totals[account_head] += flt(item.manual_distribution_data[account_head]);
-					}
-				});
-			}
-		});
-		Object.keys(tax_account_totals).forEach(function(account_head) {
-			var currency = erpnext.get_currency(me.frm.doc.company);
-			var digits = precision("total_taxes_and_charges");
-			var diff = flt(tax_account_totals[account_head]) - flt(item_totals[account_head]);
-			diff = flt(diff, digits);
-
-			if(Math.abs(diff) < (2.0 / (10**digits))) {
-				var last = me.frm.doc.items.length - 1;
-				me.frm.doc.items[last].manual_distribution_data[account_head] += diff;
-				me.update_item_manual_distribution_json(last);
-			}
-			else {
-				frappe.msgprint(__("Tax amount for {} ({}) does not match the total in the manual distribution table ({})",
-					[account_head, format_currency(tax_account_totals[account_head], currency, precision), format_currency(item_totals[account_head], currency, precision)]));
-				frappe.validated = false;
-			}
-		});
+		refresh_field("items");
 	},
 
 	distribution_criteria: function() {
