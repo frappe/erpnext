@@ -74,14 +74,16 @@ class AccountsController(TransactionBase):
 
 		self.validate_date_with_fiscal_year()
 
-		if self.meta.get_field("currency") and self.doctype != "Landed Cost Voucher":
+		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
 
 			if not self.meta.get_field("is_return") or not self.is_return:
 				self.validate_value("base_grand_total", ">=", 0)
 
 			validate_return(self)
-			self.set_total_in_words()
+
+			if self.meta.get_field("in_words") or self.meta.get_field("base_in_words"):
+				self.set_total_in_words()
 
 		self.validate_all_documents_schedule()
 
