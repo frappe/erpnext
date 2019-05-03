@@ -17,5 +17,16 @@ frappe.ui.form.on('Service Level Agreement', {
 				frm.refresh();
 			}
 		});
-	}
+	},
+
+	customer: function(frm) {
+		frm.doc.service_level_agreement_name = null;
+		frm.doc.service_level_agreement_name = frm.doc.priority + ': ' + frm.doc.customer;
+	},
+
+	default_service_level_agreement: function(frm) {
+		frm.doc.service_level_agreement_name = null;
+		frm.doc.service_level_agreement_name = frm.doc.priority + ': Default Service Level Agreement';
+	},
+
 });
