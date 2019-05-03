@@ -5,4 +5,6 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.db.sql("""DELETE FROM `tabDocType` where name = 'Scheduling Tool'""")
+	if frappe.db.exists("DocType", "Scheduling Tool"):
+		frappe.db.sql("""DELETE FROM `tabDocType` where name = 'Scheduling Tool'""")
+		frappe.db.sql("""DROP TABLE IF EXISTS `tabScheduling Tool`""")
