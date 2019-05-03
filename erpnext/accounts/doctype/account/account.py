@@ -105,20 +105,27 @@ class Account(NestedSet):
 			descendants = get_descendants_of('Company', self.company)
 			if not descendants: return
 
-			acc_name_map = {}
-			acc_name = frappe.db.get_value('Account', self.parent_account, "account_name")
+			parent_acc_name_map = {}
+			parent_acc_name = frappe.db.get_value('Account', self.parent_account, "account_name")
 			for d in frappe.db.get_values('Account',
-				{"company": ["in", descendants], "account_name": acc_name},
+				{"company": ["in", descendants], "account_name": parent_acc_name},
 				["company", "name"], as_dict=True):
-				acc_name_map[d["company"]] = d["name"]
+				parent_acc_name_map[d["company"]] = d["name"]
 
-			if not acc_name_map: return
+			if not parent_acc_name_map: return
 
 			for company in descendants:
+				if not parent_acc_name_map.get(company):
+					frappe.throw(_("While creating account for child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA")
+						.format(company, parent_acc_name))
+
 				doc = frappe.copy_doc(self)
 				doc.flags.ignore_root_company_validation = True
-				doc.update({"company": company, "account_currency": None,
-					"parent": acc_name_map[company], "parent_account": acc_name_map[company]})
+				doc.update({
+					"company": company,
+					"account_currency": None,
+					"parent_account": parent_acc_name_map[company]
+				})
 				doc.save()
 				frappe.msgprint(_("Account {0} is added in the child company {1}")
 					.format(doc.name, company))

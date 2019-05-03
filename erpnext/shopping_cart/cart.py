@@ -196,7 +196,7 @@ def _get_cart_quotation(party=None):
 		party = get_party()
 
 	quotation = frappe.get_all("Quotation", fields=["name"], filters=
-		{party.doctype.lower(): party.name, "order_type": "Shopping Cart", "docstatus": 0},
+		{"party_name": party.name, "order_type": "Shopping Cart", "docstatus": 0},
 		order_by="modified desc", limit_page_length=1)
 
 	if quotation:
@@ -211,7 +211,7 @@ def _get_cart_quotation(party=None):
 			"status": "Draft",
 			"docstatus": 0,
 			"__islocal": 1,
-			(party.doctype.lower()): party.name
+			"party_name": party.name
 		})
 
 		qdoc.contact_person = frappe.db.get_value("Contact", {"email_id": frappe.session.user})
@@ -291,9 +291,9 @@ def _set_price_list(quotation, cart_settings):
 
 	# check if customer price list exists
 	selling_price_list = None
-	if quotation.customer:
+	if quotation.party_name:
 		from erpnext.accounts.party import get_default_price_list
-		selling_price_list = get_default_price_list(frappe.get_doc("Customer", quotation.customer))
+		selling_price_list = get_default_price_list(frappe.get_doc("Customer", quotation.party_name))
 
 	# else check for territory based price list
 	if not selling_price_list:
@@ -305,9 +305,9 @@ def set_taxes(quotation, cart_settings):
 	"""set taxes based on billing territory"""
 	from erpnext.accounts.party import set_taxes
 
-	customer_group = frappe.db.get_value("Customer", quotation.customer, "customer_group")
+	customer_group = frappe.db.get_value("Customer", quotation.party_name, "customer_group")
 
-	quotation.taxes_and_charges = set_taxes(quotation.customer, "Customer", \
+	quotation.taxes_and_charges = set_taxes(quotation.party_name, "Customer", \
 		quotation.transaction_date, quotation.company, customer_group, None, \
 		quotation.customer_address, quotation.shipping_address_name, 1)
 #

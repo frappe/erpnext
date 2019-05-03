@@ -31,7 +31,7 @@ class PurchaseReceipt(BuyingController):
 			'target_parent_dt': 'Purchase Order',
 			'target_parent_field': 'per_received',
 			'target_ref_field': 'qty',
-			'source_field': 'qty',
+			'source_field': 'received_qty',
 			'percent_join_field': 'purchase_order',
 			'overflow_type': 'receipt'
 		},
@@ -458,7 +458,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"asset": "asset",
 			},
 			"postprocess": update_item,
-			"filter": lambda d: get_pending_qty(d)[0]<=0
+			"filter": lambda d: get_pending_qty(d)[0] <= 0 if not doc.get("is_return") else get_pending_qty(d)[0] > 0
 		},
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",

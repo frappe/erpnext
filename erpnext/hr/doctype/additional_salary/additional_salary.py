@@ -51,7 +51,7 @@ def get_additional_salary_component(employee, start_date, end_date):
 	for d in additional_components:
 		component = frappe.get_doc("Salary Component", d.salary_component)
 		struct_row = {'salary_component': d.salary_component}
-		for field in ["depends_on_lwp", "abbr", "is_tax_applicable", "variable_based_on_taxable_salary", "is_additional_component"]:
+		for field in ["depends_on_payment_days", "abbr", "is_tax_applicable", "variable_based_on_taxable_salary", "is_additional_component"]:
 			struct_row[field] = component.get(field)
 
 		additional_components_list.append({

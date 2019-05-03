@@ -28,51 +28,18 @@ def reconcile(bank_transaction, payment_doctype, payment_name):
 		frappe.throw(_("The selected payment entry should be linked with a creditor bank transaction"))
 
 	add_payment_to_transaction(transaction, payment_entry, gl_entry)
-	clear_payment_entry(transaction, payment_entry, gl_entry)
 
 	return 'reconciled'
 
 def add_payment_to_transaction(transaction, payment_entry, gl_entry):
+	gl_amount, transaction_amount = (gl_entry.credit, transaction.debit) if gl_entry.credit > 0 else (gl_entry.debit, transaction.credit)
+	allocated_amount = gl_amount if gl_amount <= transaction_amount else transaction_amount
 	transaction.append("payment_entries", {
 		"payment_document": payment_entry.doctype,
 		"payment_entry": payment_entry.name,
-		"allocated_amount": gl_entry.credit if gl_entry.credit > 0 else gl_entry.debit
+		"allocated_amount": allocated_amount
 	})
 	transaction.save()
-
-def clear_payment_entry(transaction, payment_entry, gl_entry):
-	linked_bank_transactions = frappe.db.sql("""
-		SELECT
-			bt.credit, bt.debit
-		FROM
-			`tabBank Transaction Payments` as btp
-		LEFT JOIN
-			`tabBank Transaction` as bt on btp.parent=bt.name
-		WHERE
-			btp.payment_document = %s
-		AND
-			btp.payment_entry = %s
-		AND
-			bt.docstatus = 1
-	""", (payment_entry.doctype, payment_entry.name), as_dict=True)
-
-	amount_cleared = (flt(linked_bank_transactions[0].credit) - flt(linked_bank_transactions[0].debit))
-	amount_to_be_cleared = (flt(gl_entry.debit) - flt(gl_entry.credit))
-
-	if payment_entry.doctype in ("Payment Entry", "Journal Entry", "Purchase Invoice", "Expense Claim"):
-		clear_simple_entry(amount_cleared, amount_to_be_cleared, payment_entry, transaction)
-
-	elif payment_entry.doctype == "Sales Invoice":
-		clear_sales_invoice(amount_cleared, amount_to_be_cleared, payment_entry, transaction)
-
-def clear_simple_entry(amount_cleared, amount_to_be_cleared, payment_entry, transaction):
-	if amount_cleared >= amount_to_be_cleared:
-		frappe.db.set_value(payment_entry.doctype, payment_entry.name, "clearance_date", transaction.date)
-
-def clear_sales_invoice(amount_cleared, amount_to_be_cleared, payment_entry, transaction):
-	if amount_cleared >= amount_to_be_cleared:
-		frappe.db.set_value("Sales Invoice Payment", dict(parenttype=payment_entry.doctype,
-			parent=payment_entry.name), "clearance_date", transaction.date)
 
 @frappe.whitelist()
 def get_linked_payments(bank_transaction):
@@ -248,7 +215,7 @@ def get_matching_descriptions_data(company, transaction):
 		if key == "Payment Entry":
 			data.extend(frappe.get_all("Payment Entry", filters=[["name", "in", value]], fields=["'Payment Entry' as doctype", "posting_date", "party", "reference_no", "reference_date", "paid_amount", "paid_to_account_currency as currency"]))
 		if key == "Journal Entry":
-			journal_entries = frappe.get_all("Journal Entry", filters=[["name", "in", value]], fields=["name", "'Journal Entry' as doctype", "posting_date", "paid_to_recd_from as party", "cheque_no as reference_no", "cheque_date as reference_date", "total_credit as paid_amount"])
+			journal_entries = frappe.get_all("Journal Entry", filters=[["name", "in", value]], fields=["name", "'Journal Entry' as doctype", "posting_date", "pay_to_recd_from as party", "cheque_no as reference_no", "cheque_date as reference_date", "total_credit as paid_amount"])
 			for journal_entry in journal_entries:
 				journal_entry_accounts = frappe.get_all("Journal Entry Account", filters={"parenttype": journal_entry["doctype"], "parent": journal_entry["name"]}, fields=["account_currency"])
 				journal_entry["currency"] = journal_entry_accounts[0]["account_currency"] if journal_entry_accounts else company_currency
@@ -274,7 +241,7 @@ def check_amount_vs_description(amount_matching, description_matching):
 						result.append(am_match)
 						continue
 
-				if hasattr(am_match, "reference_no") and hasattr(des_match, "reference_no"):
+				if "reference_no" in am_match and "reference_no" in des_match:
 					if difflib.SequenceMatcher(lambda x: x == " ", am_match["reference_no"], des_match["reference_no"]).ratio() > 70:
 						if am_match not in result:
 							result.append(am_match)
