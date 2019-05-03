@@ -142,11 +142,19 @@ def get_conditions(filters):
 
 	if filters.get("company"):
 		conditions += " AND company='%s'"% filters.get('company')
+
 	if filters.get("cost_center") or filters.get("project"):
 		conditions += """
 			AND (cost_center='%s'
 			OR project='%s')
 			"""% (filters.get('cost_center'), filters.get('project'))
+
+	if filters.get("from_date"):
+		conditions.append("transaction_date>=%s", filters.get('from_date'))
+
+	if filters.get("to_date"):
+		conditions.append("transaction_date<=%s", filters.get('to_date')
+
 	return conditions
 
 def get_data(filters):
