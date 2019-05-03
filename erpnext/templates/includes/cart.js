@@ -162,8 +162,9 @@ $.extend(shopping_cart, {
 						.html(msg || frappe._("Something went wrong!"))
 						.toggle(true);
 				} else {
-					window.open('/orders/' + encodeURIComponent(r.message), '_blank');
-					window.location.reload();
+					$('.cart-container table').hide();
+					$(btn).hide();
+					window.location.href = '/orders/' + encodeURIComponent(r.message);
 				}
 			}
 		});
@@ -186,8 +187,9 @@ $.extend(shopping_cart, {
 						.html(msg || frappe._("Something went wrong!"))
 						.toggle(true);
 				} else {
-					window.open('/printview?doctype=Quotation&name=' + r.message, '_blank');
-					window.location.reload();
+					$('.cart-container table').hide();
+					$(btn).hide();
+					window.location.href = '/quotations/' + encodeURIComponent(r.message);
 				}
 			}
 		});

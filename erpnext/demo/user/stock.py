@@ -73,13 +73,13 @@ def make_stock_reconciliation():
 		stock_reco = frappe.new_doc("Stock Reconciliation")
 		stock_reco.posting_date = frappe.flags.current_date
 		stock_reco.company = erpnext.get_default_company()
-		stock_reco.get_items_for("Stores - WP")
+		stock_reco.get_items_for("Stores - WPL")
 		if stock_reco.items:
 			for item in stock_reco.items:
 				if item.qty:
 					item.qty = item.qty - round(random.randint(1, item.qty))
 			try:
-				stock_reco.insert()
+				stock_reco.insert(ignore_permissions=True)
 				stock_reco.submit()
 				frappe.db.commit()
 			except OpeningEntryAccountError:
