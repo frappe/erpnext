@@ -19,9 +19,9 @@ def execute():
 
 			frappe.db.sql("""
 				update
-					`tabDynamic Link`
+					tabCommunication
 				set
-					link_doctype = "Timesheet", link_name = %(timesheet)s
+					reference_doctype = "Timesheet", reference_name = %(timesheet)s
 				where
-					link_doctype = "Time Log" and link_name = %(timelog)s
+					reference_doctype = "Time Log" and reference_name = %(timelog)s
 			""", {'timesheet': data.name, 'timelog': data.timelogname}, auto_commit=1)
