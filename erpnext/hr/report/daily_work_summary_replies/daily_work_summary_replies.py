@@ -41,13 +41,18 @@ def get_data(filters):
 		fields=["name"],
 		filters=[["creation","Between", filters.range]])
 	daily_summary_emails = [d.get('name') for d in daily_summary_emails]
-	replies = frappe.get_all('Communication',
-			fields=['content', 'text_content', 'sender'],
-			filters=[['reference_doctype','=', 'Daily Work Summary'],
-				['reference_name', 'in', daily_summary_emails],
-				['communication_type', '=', 'Communication'],
-				['sent_or_received', '=', 'Received']],
-			order_by='creation asc')
+
+	replies = frappe.db.sql("""
+			select `tabCommunication`.content, `tabCommunication`.text_content, `tabCommunication`.sender
+			from `tabCommunication`
+			inner join `tabDynamic Link`
+			on `tabCommunication`.name=`tabDynamic Link`.parent where
+			`tabDynamic Link`.link_doctype in {0} and
+			`tabCommunication`.communication_type='Communication' and
+			`tabCommunication`.sent_or_received='Received'
+			order by `tabCommunication`.creation asc
+		""".format(daily_summary_emails), as_dict=True, debug=True)
+
 	data = []
 	total = len(daily_summary_emails)
 	for user in get_user_emails_from_group(filters.group):

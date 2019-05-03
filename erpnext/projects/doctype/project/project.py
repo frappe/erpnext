@@ -547,13 +547,17 @@ def send_project_update_email_to_users(project):
 def collect_project_status():
 	for data in frappe.get_all("Project Update",
 		{'date': today(), 'sent': 0}):
-		replies = frappe.get_all('Communication',
-			fields=['content', 'text_content', 'sender'],
-			filters=dict(reference_doctype="Project Update",
-				reference_name=data.name,
-				communication_type='Communication',
-				sent_or_received='Received'),
-			order_by='creation asc')
+		replies = frappe.db.sql("""
+			select `tabCommunication`.content, `tabCommunication`.text_content, `tabCommunication`.sender
+			from `tabCommunication`
+			inner join `tabDynamic Link`
+			on `tabCommunication`.name=`tabDynamic Link`.parent where
+			`tabDynamic Link`.link_doctype='Project Update' and
+			`tabDynamic Link`.link_name='{0}' and
+			`tabCommunication`.communication_type='Communication' and
+			`tabCommunication`.sent_or_received='Received'
+			order by `tabCommunication`.creation asc
+		""".format(data.name), as_dict=True)
 
 		for d in replies:
 			doc = frappe.get_doc("Project Update", data.name)

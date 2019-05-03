@@ -540,8 +540,8 @@ def make_email_queue(email_queue):
 		attachments = [frappe.attach_print('Sales Invoice', name, print_format=print_format)]
 
 		make(subject=data.get('subject'), content=data.get('content'), recipients=data.get('recipients'),
-                    sender=sender, attachments=attachments, send_email=True,
-                    doctype='Sales Invoice', name=name)
+					sender=sender, attachments=attachments, send_email=True,
+					doctype='Sales Invoice', name=name)
 		name_list.append(key)
 
 	return name_list

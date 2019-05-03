@@ -35,22 +35,20 @@ def get_data(filters):
 
 	for lead in frappe.get_all('Lead', fields = ['name', 'lead_name', 'company_name'], filters=lead_filters):
 		data = frappe.db.sql("""
-			select 
-				`tabCommunication`.reference_doctype, `tabCommunication`.reference_name, 
+			select
+				`tabDynamic Link`.link_doctype, `tabDynamic Link`.link_name,
 				`tabCommunication`.content, `tabCommunication`.communication_date
-			from 
+			from
 				(
-					(select name, lead from `tabOpportunity` where lead = %(lead)s)
-				union 
-					(select name, lead from `tabQuotation` where lead = %(lead)s)
-				union
-					(select name, lead from `tabIssue` where lead = %(lead)s and status!='Closed')
-				union
+					(select name, lead from `tabOpportunity` where lead = %(lead)s) union
+					(select name, lead from `tabQuotation` where lead = %(lead)s) union
+					(select name, lead from `tabIssue` where lead = %(lead)s and status!='Closed') union
 					(select %(lead)s, %(lead)s)
 				)
-				as ref_document, `tabCommunication`
+			as ref_document, `tabCommunication` inner join `tabDynamic Link`
+			on `tabCommunication`.name = `tabDynamic Link`.parent
 			where
-				`tabCommunication`.reference_name = ref_document.name and
+				`tabDynamic Link`.link_name = ref_document.name and
 				`tabCommunication`.sent_or_received = 'Received'
 			order by
 				ref_document.lead, `tabCommunication`.creation desc limit %(limit)s""",

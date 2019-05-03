@@ -46,13 +46,17 @@ class DailyWorkSummary(Document):
 		dws_group = frappe.get_doc('Daily Work Summary Group',
 			self.daily_work_summary_group)
 
-		replies = frappe.get_all('Communication',
-			fields=['content', 'text_content', 'sender'],
-			filters=dict(reference_doctype=self.doctype,
-				reference_name=self.name,
-				communication_type='Communication',
-				sent_or_received='Received'),
-			order_by='creation asc')
+		replies = frappe.db.sql("""
+				select `tabCommunication`.content, `tabCommunication`.text_content, `tabCommunication`.sender
+				from `tabCommunication`
+				inner join `tabDynamic Link`
+				on `tabCommunication`.name=`tabDynamic Link`.parent where
+				`tabDynamic Link`.link_doctype='{0}' and
+				`tabDynamic Link`.link_name='{1}' and
+				`tabCommunication`.communication_type='Communication' and
+				`tabCommunication`.sent_or_received='Received'
+				order by `tabCommunication`.creation asc
+			""".format(self.doctype, self.name), as_dict=True)
 
 		did_not_reply = self.email_sent_to.split()
 
