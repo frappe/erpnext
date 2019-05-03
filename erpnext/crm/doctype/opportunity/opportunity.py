@@ -154,6 +154,14 @@ class Opportunity(TransactionBase):
 		# assign to customer account manager or lead owner
 		assign_to_user(self, subject_field)
 
+	def get_account_owner(self):
+		account_owner = None
+		if self.party_name and self.opportunity_from == 'Customer':
+			account_owner = frappe.db.get_value("Customer", self.party_name, "account_manager")
+		elif self.party_name and self.opportunity_from == 'Lead':
+			account_owner = frappe.db.get_value('Lead', self.party_name, 'lead_owner')
+		return account_owner
+
 	def add_calendar_event(self, opts=None, force=False):
 		if not opts:
 			opts = frappe._dict()
@@ -324,11 +332,7 @@ def auto_close_opportunity():
 		doc.save()
 
 def assign_to_user(doc, subject_field):
-	assign_user = None
-	if doc.customer:
-		assign_user = frappe.db.get_value('Customer', doc.customer, 'account_manager')
-	elif doc.lead:
-		assign_user = frappe.db.get_value('Lead', doc.lead, 'lead_owner')
+	assign_user = doc.get_account_owner()
 
 	if assign_user and assign_user != 'Administrator':
 		if not assign_to.get(dict(doctype = doc.doctype, name = doc.name)):
@@ -338,6 +342,7 @@ def assign_to_user(doc, subject_field):
 				"name": doc.name,
 				"description": doc.get(subject_field)
 			})
+
 @frappe.whitelist()
 def make_opportunity_from_communication(communication, ignore_communication_links=False):
 	from erpnext.crm.doctype.lead.lead import make_lead_from_communication

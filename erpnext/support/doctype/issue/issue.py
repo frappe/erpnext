@@ -64,6 +64,14 @@ class Issue(Document):
 				self.company = frappe.db.get_value("Lead", self.lead, "company") or \
 					frappe.db.get_default("Company")
 
+	def get_account_owner(self):
+		account_owner = None
+		if doc.customer:
+			account_owner = frappe.db.get_value('Customer', self.customer, 'account_manager')
+		elif doc.lead:
+			account_owner = frappe.db.get_value('Lead', self.lead, 'lead_owner')
+		return account_owner
+
 	def update_status(self):
 		status = frappe.db.get_value("Issue", self.name, "status")
 		if self.status!="Open" and status =="Open" and not self.first_responded_on:
