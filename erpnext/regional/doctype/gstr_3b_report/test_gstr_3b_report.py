@@ -11,6 +11,8 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make
 from erpnext.stock.doctype.item.test_item import make_item
 import json
 
+test_dependencies = ["Territory", "Customer Group", "Supplier Group", "Item"]
+
 class TestGSTR3BReport(unittest.TestCase):
 	def test_gstr_3b_report(self):
 
@@ -57,7 +59,7 @@ class TestGSTR3BReport(unittest.TestCase):
 
 		output = json.loads(report.json_output)
 
-		self.assertEqual(output["sup_details"]["osup_det"]["iamt"], 18),
+		self.assertEqual(output["sup_details"]["osup_det"]["iamt"], 36),
 		self.assertEqual(output["sup_details"]["osup_zero"]["iamt"], 18),
 		self.assertEqual(output["inter_sup"]["unreg_details"][0]["iamt"], 18),
 		self.assertEqual(output["sup_details"]["osup_nil_exmp"]["txval"], 100),
@@ -388,5 +390,3 @@ def set_account_heads():
 		})
 
 		gst_settings.save()
-
-

@@ -11,6 +11,7 @@ app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
+
 develop_version = '12.x.x-develop'
 
 error_report_email = "support@erpnext.com"
@@ -23,7 +24,8 @@ web_include_css = "assets/css/erpnext-web.css"
 doctype_js = {
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
-	"Website Theme": "public/js/website_theme.js"
+	"Website Theme": "public/js/website_theme.js",
+	"Newsletter": "public/js/newsletter.js"
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"
@@ -74,7 +76,7 @@ website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
 
 website_context = {
 	"favicon": 	"/assets/erpnext/images/favicon.png",
-	"splash_image": "/assets/erpnext/images/erpnext-12.svg"
+	"splash_image": "/assets/erpnext/images/erp-icon.svg"
 }
 
 website_route_rules = [
@@ -267,7 +269,7 @@ scheduler_events = {
 	"daily_long": [
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"
 	],
-	"monthly": [
+	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.convert_deferred_revenue_to_income",
 		"erpnext.accounts.deferred_revenue.convert_deferred_expense_to_expense",
 		"erpnext.hr.utils.allocate_earned_leaves"

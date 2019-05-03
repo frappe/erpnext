@@ -204,6 +204,20 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							erpnext.utils.make_subscription(doc.doctype, doc.name)
 						}, __('Create'))
 					}
+
+					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
+						let me = this;
+						frappe.model.with_doc("Customer", me.frm.doc.customer, () => {
+							let customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
+							let internal = customer.is_internal_customer;
+							let disabled = customer.disabled;
+							if (internal === 1 && disabled === 0) {
+								me.frm.add_custom_button("Inter Company Order", function() {
+									me.make_inter_company_order();
+								}, __('Create'));
+							}
+						});
+					}
 				}
 				// payment request
 				if(flt(doc.per_billed)==0) {
@@ -365,6 +379,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				fields: [
 					{fieldtype:'Read Only', fieldname:'item_code',
 						label: __('Item Code'), in_list_view:1},
+					{fieldtype:'Link', fieldname:'warehouse', options: 'Warehouse',
+						label: __('For Warehouse'), in_list_view:1},
 					{fieldtype:'Link', fieldname:'bom', options: 'BOM', reqd: 1,
 						label: __('BOM'), in_list_view:1, get_query: function(doc) {
 							return {filters: {item: doc.item_code}};
@@ -372,8 +388,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					},
 					{fieldtype:'Float', fieldname:'required_qty', reqd: 1,
 						label: __('Qty'), in_list_view:1},
-					{fieldtype:'Link', fieldname:'for_warehouse', options: 'Warehouse',
-						label: __('For Warehouse')}
 				],
 				data: r.message,
 				get_data: function() {
@@ -498,6 +512,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_project",
 			frm: this.frm
 		})
+	},
+
+	make_inter_company_order: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_inter_company_purchase_order",
+			frm: this.frm
+		});
 	},
 
 	make_maintenance_visit: function() {
