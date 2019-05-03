@@ -239,7 +239,10 @@ class PaymentEntry(AccountsController):
 					ref_doc = frappe.get_doc(d.reference_doctype, d.reference_name)
 
 					if d.reference_doctype != "Journal Entry":
-						if self.party != ref_doc.get(scrub(self.party_type)):
+						party_field = "party" if d.reference_doctype=="Landed Cost Voucher" else scrub(self.party_type)
+						party_type_field = "party_type" if d.reference_doctype=="Landed Cost Voucher" else ""
+
+						if self.party != ref_doc.get(party_field) or (party_type_field and self.party_type != ref_doc.get(party_type_field)):
 							frappe.throw(_("{0} {1} is not associated with {2} {3}")
 								.format(d.reference_doctype, d.reference_name, self.party_type, self.party))
 					else:
@@ -753,7 +756,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		outstanding_amount = ref_doc.get("outstanding_amount")
 	elif reference_doctype == "Landed Cost Voucher":
 		total_amount = ref_doc.get("total_taxes_and_charges")
-		exchange_rate = 1
+		exchange_rate = ref_doc.get("conversion_rate")
 		outstanding_amount = ref_doc.get("outstanding_amount")
 	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
 		total_amount = ref_doc.get("total_amount")

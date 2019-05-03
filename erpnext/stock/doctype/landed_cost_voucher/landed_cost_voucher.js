@@ -83,6 +83,10 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 
 	refresh: function(doc) {
+		erpnext.toggle_naming_series();
+		erpnext.hide_company();
+		this.set_dynamic_labels();
+
 		this.show_general_ledger();
 
 		if (doc.docstatus===1 && doc.outstanding_amount != 0 && frappe.model.can_create("Payment Entry")) {
@@ -194,6 +198,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 				callback: function() {
 					me.frm.refresh_fields();
 					me.update_manual_distribution();
+					me.frm.set_dirty();
 				}
 			});
 		}
@@ -220,25 +225,32 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 				precision('total_' + f));
 		});
 
-		me.frm.doc.total_taxes_and_charges = 0.0;
+		me.frm.doc.total_taxes_and_charges = 0;
 		$.each(me.frm.doc.taxes || [], function(i, d) {
 			d.amount = flt(d.amount, precision("amount", d));
+			d.base_amount = flt(d.amount * me.frm.doc.conversion_rate, precision("base_amount", d));
 			me.frm.doc.total_taxes_and_charges += d.amount;
 		});
 		me.frm.doc.total_taxes_and_charges = flt(me.frm.doc.total_taxes_and_charges, precision("total_taxes_and_charges"));
+		me.frm.doc.base_total_taxes_and_charges = flt(me.frm.doc.total_taxes_and_charges * me.frm.doc.conversion_rate, precision("base_total_taxes_and_charges"));
 
 		var total_allocated_amount = frappe.utils.sum($.map(me.frm.doc["advances"] || [], function(adv) {
 			return flt(adv.allocated_amount, precision("allocated_amount", adv));
 		}));
 
 		if (me.frm.doc.party) {
-			me.frm.grand_total = flt(me.frm.doc.total_taxes_and_charges, precision("grand_total"));
-			me.frm.total_advance = flt(total_allocated_amount, "total_advance");
+			me.frm.doc.grand_total = flt(me.frm.doc.total_taxes_and_charges, precision("grand_total"));
+			me.frm.doc.base_grand_total = flt(me.frm.doc.grand_total * me.frm.doc.conversion_rate, precision("base_grand_total"));
+			me.frm.doc.total_advance = flt(total_allocated_amount, precision("total_advance"));
 		} else {
-			me.frm.grand_total = 0;
-			me.frm.total_advance = 0;
+			me.frm.doc.grand_total = 0;
+			me.frm.doc.base_grand_total = 0;
+			me.frm.doc.total_advance = 0;
 		}
-		me.frm.outstanding_amount = flt(me.frm.doc.grand_total - total_allocated_amount, "outstanding_amount");
+
+		var grand_total = me.frm.doc.party_account_currency == me.frm.doc.currency ? me.frm.doc.grand_total : me.frm.doc.base_grand_total;
+		me.frm.doc.outstanding_amount = flt(grand_total - me.frm.doc.total_advance, "outstanding_amount");
+		debugger;
 
 		me.frm.refresh_fields();
 	},
@@ -516,7 +528,8 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 						args: {
 							company: me.frm.doc.company,
 							party_type: me.frm.doc.party_type,
-							party: me.frm.doc.party
+							party: me.frm.doc.party,
+							include_currency: true
 						},
 						callback: function(r) {
 							if(!r.exc && r.message) {
@@ -526,8 +539,124 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 					});
 				}
 			},
-			() => me.calculate_taxes_and_totals()
+			() => {
+				if (me.frm.doc.party_type == "Supplier") {
+					me.frm.call({
+						method: "frappe.client.get_value",
+						args: {
+							doctype: "Supplier",
+							fieldname: "default_currency",
+							filters: {name: me.frm.doc.party},
+						},
+						callback: function(r, rt) {
+							if(r.message) {
+								me.frm.set_value("currency", r.message.default_currency);
+								me.set_dynamic_labels();
+							}
+						}
+					});
+				} else {
+					me.frm.set_value("currency", me.get_company_currency());
+					me.set_dynamic_labels();
+				}
+			}
 		]);
+	},
+
+	get_company_currency: function() {
+		return erpnext.get_currency(this.frm.doc.company);
+	},
+
+	set_dynamic_labels: function() {
+		var company_currency = this.get_company_currency();
+
+		this.frm.set_currency_labels(["base_total_taxes_and_charges", "base_grand_total"], company_currency);
+		this.frm.set_currency_labels(["total_taxes_and_charges", "grand_total"], this.frm.doc.currency);
+		this.frm.set_currency_labels(["outstanding_amount", "total_advance"], this.frm.doc.party_account_currency);
+		this.frm.set_currency_labels(["base_amount"], company_currency, "taxes");
+		this.frm.set_currency_labels(["amount"], this.frm.doc.currency, "taxes");
+		this.frm.set_currency_labels(["advance_amount", "allocated_amount"], this.frm.doc.party_account_currency, "advances");
+
+		cur_frm.set_df_property("conversion_rate", "description", "1 " + this.frm.doc.currency
+			+ " = [?] " + company_currency);
+
+		this.frm.toggle_display(["conversion_rate", "base_total_taxes_and_charges"], this.frm.doc.currency != company_currency);
+		this.frm.fields_dict["taxes"].grid.set_column_disp("base_amount", this.frm.doc.currency != company_currency);
+
+		this.frm.refresh_fields();
+	},
+
+	currency: function() {
+		var transaction_date = this.frm.doc.transaction_date || this.frm.doc.posting_date;
+		var me = this;
+		var company_currency = this.get_company_currency();
+		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency) {
+			this.get_exchange_rate(transaction_date, this.frm.doc.currency, company_currency,
+				function(exchange_rate) {
+					me.frm.set_value("conversion_rate", exchange_rate);
+				});
+		} else {
+			this.conversion_rate();
+		}
+	},
+
+	conversion_rate: function() {
+		if(this.frm.doc.currency === this.get_company_currency()) {
+			this.frm.doc.conversion_rate = 1.0;
+		}
+
+		if(flt(this.frm.doc.conversion_rate) > 0.0) {
+			this.calculate_taxes_and_totals();
+		}
+
+		// Make read only if Accounts Settings doesn't allow stale rates
+		this.frm.set_df_property("conversion_rate", "read_only", erpnext.stale_rate_allowed() ? 0 : 1);
+	},
+
+	company: function() {
+		var company_currency = this.get_company_currency();
+		if (!this.frm.doc.currency) {
+			this.frm.set_value("currency", company_currency);
+		} else {
+			this.currency();
+		}
+		this.set_dynamic_labels();
+	},
+
+	credit_to: function() {
+		var me = this;
+		if(this.frm.doc.credit_to) {
+			me.frm.call({
+				method: "frappe.client.get_value",
+				args: {
+					doctype: "Account",
+					fieldname: "account_currency",
+					filters: { name: me.frm.doc.credit_to },
+				},
+				callback: function(r, rt) {
+					if(r.message) {
+						me.frm.set_value("party_account_currency", r.message.account_currency);
+						me.set_dynamic_labels();
+					}
+				}
+			});
+		}
+	},
+
+	get_exchange_rate: function(transaction_date, from_currency, to_currency, callback) {
+		if (!transaction_date || !from_currency || !to_currency) return;
+		return frappe.call({
+			method: "erpnext.setup.utils.get_exchange_rate",
+			args: {
+				transaction_date: transaction_date,
+				from_currency: from_currency,
+				to_currency: to_currency,
+				args: "for_buying"
+			},
+			callback: function(r) {
+				callback(flt(r.message));
+			}
+		});
 	},
 });
 

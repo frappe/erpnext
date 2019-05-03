@@ -9,6 +9,7 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.utils import get_balance_on
+from erpnext.accounts.doctype.account.account import get_account_currency
 
 class LandedCostVoucher(AccountsController):
 	def __init__(self, *args, **kwargs):
@@ -21,7 +22,7 @@ class LandedCostVoucher(AccountsController):
 		self.validate_purchase_receipts()
 		self.clear_advances_table_if_not_payable()
 		self.clear_unallocated_advances("Landed Cost Voucher Advance", "advances")
-		self.calculates_taxes_and_totals(for_validate=True)
+		self.calculates_taxes_and_totals()
 		self.set_status()
 
 	def on_submit(self):
@@ -102,7 +103,7 @@ class LandedCostVoucher(AccountsController):
 						item.purchase_invoice = pr.receipt_document
 						item.purchase_invoice_item = d.name
 
-		self.calculates_taxes_and_totals(for_validate=True)
+		self.calculates_taxes_and_totals()
 
 	def check_mandatory(self):
 		if self.party:
@@ -175,32 +176,43 @@ class LandedCostVoucher(AccountsController):
 			account = frappe.db.get_value("Account", self.credit_to,
 				["account_type", "report_type"], as_dict=True)
 
+			self.party_account_currency = get_account_currency(self.credit_to)
+
 			if account.report_type != "Balance Sheet":
 				frappe.throw(_("Credit To account must be a Balance Sheet account"))
 
 			if account.account_type != "Payable":
 				frappe.throw(_("Credit To account must be a Payable account"))
 
-	def calculates_taxes_and_totals(self, for_validate=False):
+	def calculates_taxes_and_totals(self):
 		item_total_fields = ['qty', 'amount', 'weight']
 		for f in item_total_fields:
 			self.set('total_' + f, flt(sum([flt(d.get(f)) for d in self.get("items")]), self.precision('total_' + f)))
 
-		self.total_taxes_and_charges = sum([flt(d.amount, d.precision("amount")) for d in self.get("taxes")])
+		self.total_taxes_and_charges = 0
+		for d in self.taxes:
+			d.amount = flt(d.amount, d.precision("amount"))
+			d.base_amount = flt(d.amount * self.conversion_rate, d.precision("base_amount"))
+			self.total_taxes_and_charges += d.amount
 		self.total_taxes_and_charges = flt(self.total_taxes_and_charges, self.precision("total_taxes_and_charges"))
+		self.base_total_taxes_and_charges = flt(self.total_taxes_and_charges * self.conversion_rate, self.precision("base_total_taxes_and_charges"))
+
+		total_allocated = sum([flt(d.allocated_amount, d.precision("allocated_amount")) for d in self.get("advances")])
 
 		if self.party:
 			self.grand_total = flt(self.total_taxes_and_charges, self.precision("grand_total"))
-			total_allocated = sum([flt(d.allocated_amount, d.precision("allocated_amount")) for d in self.get("advances")])
+			self.base_grand_total = flt(self.grand_total * self.conversion_rate, self.precision("base_grand_total"))
 			self.total_advance = flt(total_allocated, self.precision("total_advance"))
 		else:
-			self.total_advance = 0
 			self.grand_total = 0
+			self.base_grand_total = 0
+			self.total_advance = 0
 
-		if not for_validate and self.grand_total >= 0 and self.total_advance > self.grand_total:
-			frappe.throw(_("Advance amount cannot be greater than {0}").format(self.grand_total))
+		grand_total = self.grand_total if self.party_account_currency == self.currency else self.base_grand_total
+		if grand_total >= 0 and self.total_advance > grand_total:
+			frappe.throw(_("Advance amount cannot be greater than {0}").format(grand_total))
 
-		self.outstanding_amount = flt(self.grand_total - self.total_advance, self.precision("outstanding_amount"))
+		self.outstanding_amount = flt(grand_total - self.total_advance, self.precision("outstanding_amount"))
 
 	def update_landed_cost(self):
 		for d in self.get("purchase_receipts"):
@@ -239,20 +251,22 @@ class LandedCostVoucher(AccountsController):
 			return []
 
 		gl_entry = []
-		payable_amount = flt(self.grand_total)
 
 		# payable entry
-		if payable_amount:
+		if self.grand_total:
+			grand_total_in_company_currency = flt(self.grand_total * self.conversion_rate,
+				self.precision("grand_total"))
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": self.credit_to,
-					"credit": payable_amount,
-					"credit_in_account_currency": payable_amount,
+					"credit": grand_total_in_company_currency,
+					"credit_in_account_currency": grand_total_in_company_currency \
+						if self.party_account_currency==self.company_currency else self.grand_total,
 					"against": ", ".join(set([d.account_head for d in self.taxes])),
 					"party_type": self.party_type,
 					"party": self.party,
 					"remarks": "Note: {0}".format(self.remarks) if self.remarks else ""
-				})
+				}, self.party_account_currency)
 			)
 
 		# expense entries
@@ -264,15 +278,18 @@ class LandedCostVoucher(AccountsController):
 				r.append("Note: {0}".format(self.remarks))
 			remarks = "\n".join(r)
 
+			account_currency = get_account_currency(tax.account_head)
+
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": tax.account_head,
-					"debit": tax.amount,
-					"debit_in_account_currency": tax.amount,
+					"debit": tax.base_amount,
+					"debit_in_account_currency": tax.base_amount \
+						if account_currency == self.company_currency else tax.amount,
 					"against": self.party,
 					"cost_center": tax.cost_center,
 					"remarks": remarks
-				})
+				}, account_currency)
 			)
 
 		return gl_entry

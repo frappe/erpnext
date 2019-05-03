@@ -74,7 +74,7 @@ class AccountsController(TransactionBase):
 
 		self.validate_date_with_fiscal_year()
 
-		if self.meta.get_field("currency"):
+		if self.meta.get_field("currency") and self.doctype != "Landed Cost Voucher":
 			self.calculate_taxes_and_totals()
 
 			if not self.meta.get_field("is_return") or not self.is_return:

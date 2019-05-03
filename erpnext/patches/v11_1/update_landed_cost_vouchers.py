@@ -19,20 +19,22 @@ def execute():
 	# Landed Cost Taxes and Charges table description to remarks
 	rename_field("Landed Cost Taxes and Charges", "description", "remarks")
 
-	# Landed Cost distribution criteria from LCV to Taxes table
+	# Landed Cost distribution criteria from LCV to Taxes table and base_amount
 	frappe.db.sql("""
 		update `tabLanded Cost Taxes and Charges` t
 		inner join `tabLanded Cost Voucher` v on v.name = t.parent
-		set t.distribution_criteria = v.distribute_charges_based_on
+		set t.distribution_criteria = v.distribute_charges_based_on, t.base_amount = t.amount
 	""")
 
-	# Landed Cost Voucher status
+	# Landed Cost Voucher status and empty values
 	frappe.db.sql("""
 		update `tabLanded Cost Voucher` set status = (case
 			when docstatus=0 then 'Draft'
 			when docstatus=1 then 'Submitted'
 			when docstatus=2 then 'Cancelled'
-		end)
+		end),
+		base_total_taxes_and_charges=total_taxes_and_charges,
+		base_grand_total=0, grand_total=0, outstanding_amount=0, total_advance=0
 	""")
 
 	# Landed Cost Item table
