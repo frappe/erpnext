@@ -970,20 +970,28 @@ def get_party_and_account_balance(company, date, paid_from=None, paid_to=None, p
 
 @frappe.whitelist()
 def make_payment_order(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	def set_missing_values(source, target):
-		target.append('references', {
-			'amount': source.base_paid_amount,
-			'supplier': source.party,
-			'payment_request': source_name,
-			'mode_of_payment': source.mode_of_payment,
-			'bank_account': source.bank_account,
-			'account': source.account
-		})
+		pass
 
-	doclist = get_mapped_doc("Payment Request", source_name,	{
-		"Payment Request": {
+	def update_item(source_doc, target_doc, source_parent):
+		target_doc.bank_account = source_parent.bank_account
+		target_doc.amount = source_parent.base_paid_amount
+		target_doc.account = source_parent.paid_to or source_parent.paid_from
+		target_doc.payment_entry = source_doc.name
+		target_doc.supplier = source_doc.party
+		target_doc.mode_of_payment = source_doc.mode_of_payment
+
+
+	doclist = get_mapped_doc("Payment Entry", source_name,	{
+		"Payment Entry": {
 			"doctype": "Payment Order",
-		}
+		},
+		"Payment Entry Reference": {
+			"doctype": "Payment Order Reference",
+			"postprocess": update_item
+		},
+
 	}, target_doc, set_missing_values)
 
 	return doclist
