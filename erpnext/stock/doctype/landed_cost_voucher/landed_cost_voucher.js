@@ -458,6 +458,8 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 					row_total += flt($(this).val());
 				});
 				$("td[data-row=total][data-account='" + account + "']", me.frm.fields_dict.manual_tax_distribution.wrapper).text(row_total);
+
+				me.calculate_taxes_and_totals();
 			});
 		}
 	},

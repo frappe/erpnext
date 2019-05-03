@@ -185,7 +185,7 @@ class LandedCostVoucher(AccountsController):
 				tax_account_totals[tax.account_head] += flt(tax.amount)
 
 		for item in self.items:
-			item_manual_distribution = item.manual_distribution_data or {}
+			item_manual_distribution = item.manual_distribution or {}
 			if isinstance(item_manual_distribution, string_types):
 				item_manual_distribution = json.loads(item_manual_distribution)
 
@@ -279,8 +279,8 @@ class LandedCostVoucher(AccountsController):
 			for row_charge in charges_map:
 				item_total_tax += row_charge[item_idx]
 
-			item_manual_distribution = item.manual_distribution_data or {}
-			if isinstance(item.manual_distribution_data, string_types):
+			item_manual_distribution = item.manual_distribution or {}
+			if isinstance(item.manual_distribution, string_types):
 				item_manual_distribution = json.loads(item_manual_distribution)
 
 			for account_head in item_manual_distribution.keys():
