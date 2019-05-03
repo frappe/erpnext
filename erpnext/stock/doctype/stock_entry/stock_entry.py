@@ -1068,7 +1068,7 @@ class StockEntry(StockController):
 						frappe.MappingMismatchError)
 
 	def validate_batch(self):
-		if self.purpose in ["Material Transfer for Manufacture", "Manufacture", "Repack", "Subcontract", "Material Issue"]:
+		if self.purpose in ["Material Transfer for Manufacture", "Manufacture", "Repack", "Subcontract"]:
 			for item in self.get("items"):
 				if item.batch_no:
 					disabled = frappe.db.get_value("Batch", item.batch_no, "disabled")
