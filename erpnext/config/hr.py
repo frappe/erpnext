@@ -20,6 +20,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Employee Group",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
 					"name": "Attendance",
 					"onboard": 1,
 					"dependencies": ["Employee"]

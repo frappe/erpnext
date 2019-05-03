@@ -16,6 +16,9 @@ class ServiceLevelAgreement(Document):
 				frappe.throw(_("A Default Service Level Agreement already exists."))
 
 	def validate(self):
+		if not frm.doc.customer and not frm.doc.default_service_level_agreement:
+			frappe.throw(_("Select a Customer or set as Default Service Level Agreement."))
+
 		if not self.default_service_level_agreement:
 			if not (self.start_date and self.end_date):
 				frappe.throw(_("Enter Start and End Date for the Agreement."))
