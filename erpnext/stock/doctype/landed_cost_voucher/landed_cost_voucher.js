@@ -544,6 +544,10 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		}
 	},
 
+	posting_date: function() {
+		this.currency();
+	},
+
 	conversion_rate: function() {
 		if(this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.doc.conversion_rate = 1.0;
