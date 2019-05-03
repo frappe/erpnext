@@ -66,9 +66,9 @@ class Issue(Document):
 
 	def get_account_owner(self):
 		account_owner = None
-		if doc.customer:
+		if self.customer:
 			account_owner = frappe.db.get_value('Customer', self.customer, 'account_manager')
-		elif doc.lead:
+		elif self.lead:
 			account_owner = frappe.db.get_value('Lead', self.lead, 'lead_owner')
 		return account_owner
 
