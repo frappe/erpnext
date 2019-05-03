@@ -150,11 +150,10 @@ def get_conditions(filters):
 			"""% (filters.get('cost_center'), filters.get('project'))
 
 	if filters.get("from_date"):
-		conditions.append("transaction_date>=%s", filters.get('from_date'))
+		conditions.append("AND transaction_date>=%s", filters.get('from_date'))
 
 	if filters.get("to_date"):
-		conditions.append("transaction_date<=%s", filters.get('to_date')
-
+		conditions.append("AND transaction_date<=%s", filters.get('to_date')
 	return conditions
 
 def get_data(filters):
@@ -227,12 +226,12 @@ def get_mapped_mr_details(conditions):
 def get_mapped_pi_records():
 	return frappe._dict(frappe.db.sql("""
 		SELECT
-			po_detail,
-			base_amount
-		FROM `tabPurchase Invoice Item`
+			pi_item.po_detail,
+			pi_item.base_amount
+		FROM `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pi_item
 		WHERE
-			docstatus=1
-			AND po_detail IS NOT NULL
+			pi.docstatus=1
+			AND pi_item.po_detail IS NOT NULL
 		"""))
 
 def get_mapped_pr_records():
@@ -245,6 +244,7 @@ def get_mapped_pr_records():
 			pr.docstatus=1
 			AND pr.name=pr_item.parent
 			AND pr_item.purchase_order_item IS NOT NULL
+			AND pr.status not in  ("Closed","Completed","Cancelled")
 		"""))
 
 def get_po_entries(conditions):
