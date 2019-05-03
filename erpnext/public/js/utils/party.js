@@ -103,7 +103,7 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field, 
 erpnext.utils.set_taxes = function(frm, address_field, display_field, is_your_company_address) {
 	if(frappe.meta.get_docfield(frm.doc.doctype, "taxes") && !is_your_company_address) {
 		if(!erpnext.utils.validate_mandatory(frm, "Lead/Customer/Supplier",
-			frm.doc.customer || frm.doc.supplier || frm.doc.lead, address_field)) {
+			frm.doc.customer || frm.doc.supplier || frm.doc.lead || frm.doc.party_name , address_field)) {
 			return;
 		}
 
@@ -125,6 +125,9 @@ erpnext.utils.set_taxes = function(frm, address_field, display_field, is_your_co
 	} else if (frm.doc.supplier) {
 		party_type = 'Supplier';
 		party = frm.doc.supplier;
+	} else if (frm.doc.quotation_to){
+		party_type = frm.doc.quotation_to;
+		party = frm.doc.party_name;
 	}
 
 	frappe.call({

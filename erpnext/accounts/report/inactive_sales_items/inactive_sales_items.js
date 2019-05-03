@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Inactive Items"] = {
+frappe.query_reports["Inactive Sales Items"] = {
 	"filters": [
 		{
 			fieldname: "item",

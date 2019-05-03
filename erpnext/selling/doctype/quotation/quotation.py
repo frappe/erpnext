@@ -29,6 +29,7 @@ class Quotation(SellingController):
 		self.validate_order_type()
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_valid_till()
+		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
 
@@ -45,6 +46,13 @@ class Quotation(SellingController):
 	def update_lead(self):
 		if self.quotation_to == "Lead" and self.party_name:
 			frappe.get_doc("Lead", self.party_name).set_status(update=True)
+
+	def set_customer_name(self):
+		if self.party_name and self.quotation_to == 'Customer':
+			self.customer_name = frappe.db.get_value("Customer", self.party_name, "customer_name")
+		elif self.party_name and self.quotation_to == 'Lead':
+			lead_name, company_name = frappe.db.get_value("Lead", self.party_name, ["lead_name", "company_name"])
+			self.customer_name = company_name or lead_name
 
 	def update_opportunity(self):
 		for opportunity in list(set([d.prevdoc_docname for d in self.get("items")])):
@@ -234,5 +242,5 @@ def _make_customer(source_name, ignore_permissions=False):
 				frappe.throw(_("Please create Customer from Lead {0}").format(lead_name))
 		else:
 			return customer_name
-	else:
-		return frappe.get_doc("Customer",quotation[2])
+	elif quotation and quotation[1]:
+		return frappe.get_doc("Customer",quotation[1])
