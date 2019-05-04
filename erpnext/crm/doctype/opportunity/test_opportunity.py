@@ -41,8 +41,7 @@ class TestOpportunity(unittest.TestCase):
 
 		self.assertTrue(opp_doc.party_name)
 		self.assertEqual(opp_doc.opportunity_from, "Lead")
-		self.assertEqual(frappe.db.get_value("Lead", opp_doc.party_name, "email_id"),
-			'new.opportunity@example.com')
+		self.assertEqual(frappe.db.get_value("Lead", opp_doc.party_name, "email_id"), new_lead_email_id)
 
 		# create new customer and create new contact against 'new.opportunity@example.com'
 		customer = make_customer(opp_doc.party_name).insert(ignore_permissions=True)
