@@ -12,4 +12,4 @@ def execute():
             req = frappe.get_doc('Travel Request', travel_request)
             req.submit()
         except Exception:
-            print(tr)
+            print(travel_request)
