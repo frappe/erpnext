@@ -11,7 +11,11 @@ frappe.ui.form.on('Service Level Agreement', {
 				name: frm.doc.service_level
 			},
 			callback: function(data){
-				for (var i = 0; i < data.message.support_and_resolution.length; i++){
+				console.log(data);
+				for (var i in data.message.priority){
+					frm.add_child("priority", data.message.priority[i]);
+				}
+				for (var i in data.message.support_and_resolution){
 					frm.add_child("support_and_resolution", data.message.support_and_resolution[i]);
 				}
 				frm.refresh();
@@ -19,14 +23,24 @@ frappe.ui.form.on('Service Level Agreement', {
 		});
 	},
 
-	customer: function(frm) {
+	validate: function(frm) {
 		frm.doc.service_level_agreement_name = null;
-		frm.doc.service_level_agreement_name = frm.doc.priority + ': ' + frm.doc.customer;
+		var sla_name = 'Default Service Level Agreement';
+		if (frm.doc.customer){
+			sla_name = frm.doc.customer;
+		}
+		frm.doc.service_level_agreement_name = sla_name;
 	},
 
-	default_service_level_agreement: function(frm) {
-		frm.doc.service_level_agreement_name = null;
-		frm.doc.service_level_agreement_name = frm.doc.priority + ': Default Service Level Agreement';
-	},
-
+	priority: function(frm) {
+		if (!frm.doc.__is_local) {
+			frappe.call({
+				"method": "erpnext.support.service_level_agreement.service_level_agreement.get_active_service_level_agreement_for",
+				"args": {
+					"customer": frm.doc.customer,
+					"priority": frm.doc.priority
+				}
+			})
+		}
+	}
 });
