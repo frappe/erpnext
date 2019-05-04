@@ -81,7 +81,9 @@ class AccountsController(TransactionBase):
 				self.validate_value("base_grand_total", ">=", 0)
 
 			validate_return(self)
-			self.set_total_in_words()
+
+			if self.meta.get_field("in_words") or self.meta.get_field("base_in_words"):
+				self.set_total_in_words()
 
 		self.validate_all_documents_schedule()
 
