@@ -164,12 +164,9 @@ class LandedCostVoucher(AccountsController):
 		total_applicable_charges = sum([flt(d.applicable_charges) for d in self.get("items")])
 
 		precision = self.precision("applicable_charges", "items")
-		diff = flt(self.total_taxes_and_charges) - flt(total_applicable_charges)
-		diff = flt(diff, precision)
+		diff = flt(self.base_total_taxes_and_charges) - flt(total_applicable_charges)
 
-		if abs(diff) < (2.0 / (10**precision)):
-			self.items[-1].applicable_charges += diff
-		else:
+		if abs(diff) > (2.0 / (10**precision)):
 			frappe.throw(_("Total Applicable Charges in Purchase Receipt Items table must be same as Total Taxes and Charges"))
 
 	def validate_manual_distribution_totals(self):
@@ -268,7 +265,7 @@ class LandedCostVoucher(AccountsController):
 
 				charges_map.append([])
 				for item in self.items:
-					charges_map[-1].append(flt(tax.amount) * flt(item.get(based_on)) / flt(totals.get(based_on)))
+					charges_map[-1].append(flt(tax.base_amount) * flt(item.get(based_on)) / flt(totals.get(based_on)))
 
 		if manual_account_heads:
 			self.validate_manual_distribution_totals()
@@ -285,13 +282,13 @@ class LandedCostVoucher(AccountsController):
 
 			for account_head in item_manual_distribution.keys():
 				if account_head in manual_account_heads:
-					item_total_tax += flt(item_manual_distribution[account_head])
+					item_total_tax += flt(item_manual_distribution[account_head]) * flt(self.conversion_rate)
 
-			item.applicable_charges = flt(item_total_tax, item.precision("applicable_charges"));
+			item.applicable_charges = item_total_tax
 			accumulated_taxes += item.applicable_charges
 
-		if accumulated_taxes != self.total_taxes_and_charges:
-			diff = self.total_taxes_and_charges - accumulated_taxes
+		if accumulated_taxes != self.base_total_taxes_and_charges:
+			diff = self.base_total_taxes_and_charges - accumulated_taxes
 			self.items[-1].applicable_charges += diff
 
 	def update_landed_cost(self):

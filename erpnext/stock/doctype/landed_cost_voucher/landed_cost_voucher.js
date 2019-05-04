@@ -256,7 +256,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		var manual_account_heads = new Set;
 		var idx = 0;
 		$.each(me.frm.doc.taxes || [], function(i, tax) {
-			if (tax.amount) {
+			if (tax.base_amount) {
 				var based_on = frappe.scrub(tax.distribution_criteria);
 
 				if(based_on == "manual") {
@@ -268,7 +268,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 					charges_map[idx] = [];
 					$.each(me.frm.doc.items || [], function(item_idx, item) {
-						charges_map[idx][item_idx] = flt(tax.amount) * flt(item[based_on]) / flt(totals[based_on]);
+						charges_map[idx][item_idx] = flt(tax.base_amount) * flt(item[based_on]) / flt(totals[based_on]);
 					});
 					++idx;
 				}
@@ -285,17 +285,17 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 				Object.keys(item.manual_distribution_data).forEach(function(account_head) {
 					if(manual_account_heads.has(account_head)) {
-						item_total_tax += flt(item.manual_distribution_data[account_head]);
+						item_total_tax += flt(item.manual_distribution_data[account_head]) * flt(me.frm.doc.conversion_rate);
 					}
 				});
 
-				item.applicable_charges = flt(item_total_tax, precision("applicable_charges", item));
+				item.applicable_charges = item_total_tax;
 				accumulated_taxes += item.applicable_charges;
 			}
 		});
 
-		if (accumulated_taxes != me.frm.doc.total_taxes_and_charges) {
-			var diff = me.frm.doc.total_taxes_and_charges - accumulated_taxes;
+		if (accumulated_taxes != me.frm.doc.base_total_taxes_and_charges) {
+			var diff = me.frm.doc.base_total_taxes_and_charges - accumulated_taxes;
 			me.frm.doc.items.slice(-1)[0].applicable_charges += diff;
 		}
 
