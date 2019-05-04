@@ -11,7 +11,6 @@
   "holiday_list",
   "column_break_2",
   "service_level",
-  "priority",
   "employee_group",
   "agreement_details_section",
   "start_date",
@@ -19,11 +18,7 @@
   "column_break_7",
   "end_date",
   "response_and_resolution_time_section",
-  "response_time",
-  "resolution_time",
-  "column_break_16",
-  "response_time_period",
-  "resolution_time_period",
+  "priority",
   "support_and_resolution_section_break",
   "support_and_resolution"
  ],
@@ -66,11 +61,9 @@
   },
   {
    "fieldname": "priority",
-   "fieldtype": "Select",
+   "fieldtype": "Table",
    "label": "Priority",
-   "options": "Low\nMedium\nHigh",
-   "reqd": 1,
-   "set_only_once": 1
+   "options": "Service Level Priority"
   },
   {
    "fetch_from": "service_level.employee_group",
@@ -113,41 +106,10 @@
    "label": "End Date"
   },
   {
+   "collapsible": 1,
    "fieldname": "response_and_resolution_time_section",
    "fieldtype": "Section Break",
    "label": "Response and Resolution Time"
-  },
-  {
-   "fetch_from": "service_level.response_time",
-   "fieldname": "response_time",
-   "fieldtype": "Int",
-   "label": "Response Time",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "service_level.resolution_time",
-   "fieldname": "resolution_time",
-   "fieldtype": "Int",
-   "label": "Resolution Time",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_16",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "service_level.response_time_period",
-   "fieldname": "response_time_period",
-   "fieldtype": "Data",
-   "label": "Response Time Period",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "service_level.resolution_time_period",
-   "fieldname": "resolution_time_period",
-   "fieldtype": "Data",
-   "label": "Resolution Time Period",
-   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -170,7 +132,7 @@
    "unique": 1
   }
  ],
- "modified": "2019-05-03 01:50:47.135540",
+ "modified": "2019-05-04 13:11:21.373147",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",

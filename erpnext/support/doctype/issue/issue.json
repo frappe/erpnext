@@ -14,12 +14,12 @@
   "raised_by",
   "cb00",
   "status",
-  "service_level_agreement",
   "priority",
   "issue_type",
   "sb_details",
   "description",
   "service_level_section",
+  "service_level_agreement",
   "response_by",
   "cb",
   "agreement_status",
@@ -115,8 +115,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Priority",
-   "options": "Low\nMedium\nHigh",
-   "reqd": 1
+   "options": "Low\nMedium\nHigh"
   },
   {
    "fieldname": "issue_type",
@@ -151,7 +150,8 @@
    "fieldname": "service_level_agreement",
    "fieldtype": "Link",
    "label": "Service Level Agreement",
-   "options": "Service Level Agreement"
+   "options": "Service Level Agreement",
+   "read_only": 1
   },
   {
    "fieldname": "response_by",
@@ -321,7 +321,7 @@
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2019-05-03 11:11:50.495619",
+ "modified": "2019-05-03 14:36:19.117560",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
