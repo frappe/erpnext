@@ -14,24 +14,24 @@ def execute():
 			"priorities": [
 				{
 					"priority": "Low",
-					"response_time": service_level.response_time,
-					"response_time_period": service_level.response_time_period,
-					"resolution_time": service_level.resolution_time,
-					"resolution_time_period": service_level.resolution_time_period,
+					"response_time": doc.response_time,
+					"response_time_period": doc.response_time_period,
+					"resolution_time": doc.resolution_time,
+					"resolution_time_period": doc.resolution_time_period,
 				},
 				{
 					"priority": "Medium",
-					"response_time": service_level.response_time,
-					"response_time_period": service_level.response_time_period,
-					"resolution_time": service_level.resolution_time,
-					"resolution_time_period": service_level.resolution_time_period,
+					"response_time": doc.response_time,
+					"response_time_period": doc.response_time_period,
+					"resolution_time": doc.resolution_time,
+					"resolution_time_period": doc.resolution_time_period,
 				},
 				{
 					"priority": "High",
-					"response_time": service_level.response_time,
-					"response_time_period": service_level.response_time_period,
-					"resolution_time": service_level.resolution_time,
-					"resolution_time_period": service_level.resolution_time_period,
+					"response_time": doc.response_time,
+					"response_time_period": doc.response_time_period,
+					"resolution_time": doc.resolution_time,
+					"resolution_time_period": doc.resolution_time_period,
 				}
 			]
 		})
@@ -43,24 +43,24 @@ def execute():
 			"priorities": [
 				{
 					"priority": "Low",
-					"response_time": service_level_agreement.response_time,
-					"response_time_period": service_level_agreement.response_time_period,
-					"resolution_time": service_level_agreement.resolution_time,
-					"resolution_time_period": service_level_agreement.resolution_time_period,
+					"response_time": doc.response_time,
+					"response_time_period": doc.response_time_period,
+					"resolution_time": doc.resolution_time,
+					"resolution_time_period": doc.resolution_time_period,
 				},
 				{
 					"priority": "Medium",
-					"response_time": service_level_agreement.response_time,
-					"response_time_period": service_level_agreement.response_time_period,
-					"resolution_time": service_level_agreement.resolution_time,
-					"resolution_time_period": service_level_agreement.resolution_time_period,
+					"response_time": doc.response_time,
+					"response_time_period": doc.response_time_period,
+					"resolution_time": doc.resolution_time,
+					"resolution_time_period": doc.resolution_time_period,
 				},
 				{
 					"priority": "High",
-					"response_time": service_level_agreement.response_time,
-					"response_time_period": service_level_agreement.response_time_period,
-					"resolution_time": service_level_agreement.resolution_time,
-					"resolution_time_period": service_level_agreement.resolution_time_period,
+					"response_time": doc.response_time,
+					"response_time_period": doc.response_time_period,
+					"resolution_time": doc.resolution_time,
+					"resolution_time_period": doc.resolution_time_period,
 				},
 			]
 		})
