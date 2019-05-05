@@ -41,21 +41,23 @@ def check_agreement_status():
 @frappe.whitelist()
 def get_active_service_level_agreement_for(customer, priority):
 
-	agreement = frappe.db.sql("""
-			select `tabService Level Agreement`.name, `tabService Level Agreement`.service_level,
-			`tabService Level Agreement`.holiday_list
-			from `tabService Level Agreement`
-			inner join `tabService Level Priority`
-			on `tabService Level Agreement`.name=`tabService Level Priority`.parent where
-			(
-				`tabService Level Agreement`.customer='{0}' and
-				`tabService Level Agreement`.agreement_status='Active' and
-				`tabService Level Priority`.priority='{1}'
-			) or
-			(
-				`tabService Level Agreement`.default_service_level_agreement='1'
-			)
-			 limit 1
-		""".format(customer, priority), as_dict=True)
+	agreement = frappe.db.sql("""select `tabService Level Agreement`.name, `tabService Level Agreement`.service_level,
+		`tabService Level Agreement`.holiday_list
+		from `tabService Level Agreement`
+		inner join `tabService Level Priority`
+		on `tabService Level Agreement`.name=`tabService Level Priority`.parent where
+		(
+			`tabService Level Agreement`.customer='%(customer)s' and
+			`tabService Level Agreement`.agreement_status='Active' and
+			`tabService Level Priority`.priority='%(priority)s'
+		) or
+		(
+			`tabService Level Agreement`.default_service_level_agreement='1'
+		)
+		 limit 1""",
+		{
+			"customer": customer,
+			"priority": priority
+		}, as_dict=True)
 
 	return agreement[0] if agreement else None
