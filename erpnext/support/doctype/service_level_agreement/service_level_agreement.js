@@ -11,11 +11,16 @@ frappe.ui.form.on('Service Level Agreement', {
 				name: frm.doc.service_level
 			},
 			callback: function(data){
-				for (var i in data.message.priorities){
-					frm.add_child("priorities", data.message.priorities[i]);
-				}
-				for (var i in data.message.support_and_resolution){
-					frm.add_child("support_and_resolution", data.message.support_and_resolution[i]);
+				let count = Math.max(data.message.priorities.length, data.message.support_and_resolution.length);
+				let i = 0;
+				while (i < count){
+					if (data.message.priorities[i]) {
+						frm.add_child("priorities", data.message.priorities[i]);
+					}
+					if (data.message.support_and_resolution[i]) {
+						frm.add_child("support_and_resolution", data.message.support_and_resolution[i]);
+					}
+					i++;
 				}
 				frm.refresh();
 			}

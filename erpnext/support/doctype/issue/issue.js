@@ -33,7 +33,7 @@ frappe.ui.form.on("Issue", {
 			frm.call('change_sla_priority', {
 				"priority": frm.doc.priority
 			}).then(() => {
-				frm.refresh()
+				frm.refresh();
 			});
 		}
 	},
@@ -116,6 +116,5 @@ function get_time_left(timestamp) {
 	if (diff_display == '00:00') {
 		indicator = "red";
 	}
-	return {"diff_display": diff_display,
-			"indicator": indicator};
+	return {"diff_display": diff_display, "indicator": indicator};
 }
