@@ -5,58 +5,34 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	service_levels = frappe.get_list("Service Level")
-	for service_level in service_levels:
-		doc = frappe.get_doc("Service Level", service_level.name)
-		doc.append("priority",
-			{
-				"priority": "Low",
-				"response_time": doc.response_time,
-				"response_time_period": doc.resolution_time_period,
-				"resolution_time": doc.resolution_time,
-				"resolution_time_period": doc.resolution_time_period,
-			},
-			{
-				"priority": "Medium",
-				"response_time": doc.response_time,
-				"response_time_period": doc.resolution_time_period,
-				"resolution_time": doc.resolution_time,
-				"resolution_time_period": doc.resolution_time_period,
-			},
-			{
-				"priority": "High",
-				"response_time": doc.response_time,
-				"response_time_period": doc.resolution_time_period,
-				"resolution_time": doc.resolution_time,
-				"resolution_time_period": doc.resolution_time_period,
-			}
-		)
-		doc.save(ignore_permissions=True)
+	priorities = ["Low", "Medium", "High"]
 
-	service_level_agreements = frappe.get_list("Service Level Agreement")
+	service_levels = frappe.get_list("Service Level",
+		fields=["name", "priority", "response_time", "response_time_period", "resolution_time", "resolution_time_period"])
+	for service_level in service_levels:
+		for value in priorities:
+			doc = frappe.get_doc({
+				"doctype": "Service Level Priority",
+				"parent": service_level.name,
+				"parenttype": "Service Level",
+				"priority": value,
+				"response_time": service_level.response_time,
+				"response_time_period": service_level.response_time_period,
+				"resolution_time": service_level.resolution_time,
+				"resolution_time_period": service_level.resolution_time_period,
+			}).insert(ignore_permissions=True)
+
+	service_level_agreements = frappe.get_list("Service Level Agreement",
+		fields=["name", "priority", "response_time", "response_time_period", "resolution_time", "resolution_time_period"])
 	for service_level_agreement in service_level_agreements:
-		doc = frappe.get_doc("Service Level Agreement", service_level_agreement.name)
-		doc.append("priority",
-			{
-				"priority": "Low",
-				"response_time": doc.response_time,
-				"response_time_period": doc.resolution_time_period,
-				"resolution_time": doc.resolution_time,
-				"resolution_time_period": doc.resolution_time_period,
-			},
-			{
-				"priority": "Medium",
-				"response_time": doc.response_time,
-				"response_time_period": doc.resolution_time_period,
-				"resolution_time": doc.resolution_time,
-				"resolution_time_period": doc.resolution_time_period,
-			},
-			{
-				"priority": "High",
-				"response_time": doc.response_time,
-				"response_time_period": doc.resolution_time_period,
-				"resolution_time": doc.resolution_time,
-				"resolution_time_period": doc.resolution_time_period,
-			}
-		)
-		doc.save(ignore_permissions=True)
+		for value in priorities:
+			doc = frappe.get_doc({
+				"doctype": "Service Level Priority",
+				"parent": service_level_agreement.name,
+				"parenttype": "Service Level Agreement",
+				"priority": value,
+				"response_time": service_level_agreement.response_time,
+				"response_time_period": service_level_agreement.response_time_period,
+				"resolution_time": service_level_agreement.resolution_time,
+				"resolution_time_period": service_level_agreement.resolution_time_period,
+			}).insert(ignore_permissions=True)
