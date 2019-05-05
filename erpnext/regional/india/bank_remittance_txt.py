@@ -18,7 +18,7 @@ def create_bank_remittance_txt(name):
     no_of_records = len(payment_order.get("references"))
     total_amount = reduce(lambda x, y: x.get("amount") + y.get("amount"), payment_order.get("references"))
 
-    header = get_header_row(payment_order)
+    header, file_name = get_header_row(payment_order)
     batch = get_batch_row(payment_order, no_of_records, total_amount)
 
     detail = []
@@ -28,12 +28,12 @@ def create_bank_remittance_txt(name):
     trailer = get_trailer_row(no_of_records, total_amount)
     detail_records = "\n".join(detail)
 
-    return "\n".join([header, batch , detail_records, trailer])
+    return "\n".join([header, batch , detail_records, trailer]), file_name
 
 @frappe.whitelist()
 def generate_report(name):
-    data = create_bank_remittance_txt(name)
-    file_name = generate_file_name(name)
+    data, file_name = create_bank_remittance_txt(name)
+
     f = frappe.get_doc({
         'doctype': 'File',
         'file_name': file_name+'.txt',
@@ -45,18 +45,18 @@ def generate_report(name):
     f.save()
     download_file(f.file_url)
 
-def generate_file_name(name):
+def generate_file_name(name, date):
     ''' generate file name with format (account_code)_mmdd_(payment_order_no) '''
-    return name
+    return date.strftime("%m%d")+sanitize_to_alphanumeric(name)
 
 def get_header_row(doc):
     client_code = "ELECTROLAB"
-    file_name = generate_file_name(doc.name)
+    file_name = generate_file_name(doc.name, doc.posting_date)
     header = ["H"]
     header.append(cstr(client_code)[:20])
     header += [''] * 3
     header.append(cstr(file_name)[:20])
-    return "~".join(header)
+    return "~".join(header), file_name
 
 def get_batch_row(doc, no_of_records, total_amount):
     product_code = "VENPAY"
@@ -78,7 +78,7 @@ def get_detail_row(ref_doc, payment_date):
         'parenttype':'Address',
         'parent': ('like', '%-Billing')
         },'parent')
-    supplier_billing_address = frappe.get_doc('Address', addr_link)
+    supplier_billing_address = frappe.get_cached_doc('Address', addr_link)
     detail = OrderedDict(
         record_identifier='D',
         payment_ref_no=sanitize_to_alphanumeric(ref_doc.payment_entry),

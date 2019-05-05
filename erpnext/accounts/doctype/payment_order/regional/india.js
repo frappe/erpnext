@@ -11,7 +11,7 @@ frappe.ui.form.on('Payment Order', {
         return frappe.call({
             method: "erpnext.regional.india.bank_remittance_txt.generate_report",
             args: {
-                name: frm.doc.name,
+                name: frm.doc.name
             },
             freeze: true,
             callback: function(r) {
