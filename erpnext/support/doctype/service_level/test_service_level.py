@@ -22,12 +22,30 @@ def make_service_level():
 		"doctype": "Service Level",
 		"service_level": "__Test Service Level",
 		"holiday_list": "__Test Holiday List",
-		"priority": "Medium",
 		"employee_group": employee_group,
-		"response_time": 4,
-		"response_time_period": "Hour",
-		"resolution_time": 6,
-		"resolution_time_period": "Hour",
+		"priorities": [
+			{
+				"priority": "Low",
+				"response_time": 4,
+				"response_time_period": "Hour",
+				"resolution_time": 6,
+				"resolution_time_period": "Hour",
+			},
+			{
+				"priority": "Medium",
+				"response_time": 4,
+				"response_time_period": "Hour",
+				"resolution_time": 6,
+				"resolution_time_period": "Hour",
+			},
+			{
+				"priority": "High",
+				"response_time": 4,
+				"response_time_period": "Hour",
+				"resolution_time": 6,
+				"resolution_time_period": "Hour",
+			}
+		],
 		"support_and_resolution": [
 			{
 				"workday": "Monday",
@@ -75,12 +93,30 @@ def make_service_level():
 		"doctype": "Service Level",
 		"service_level": "_Test Service Level",
 		"holiday_list": "__Test Holiday List",
-		"priority": "Medium",
 		"employee_group": employee_group,
-		"response_time": 2,
-		"response_time_period": "Day",
-		"resolution_time": 3,
-		"resolution_time_period": "Day",
+		"priorities": [
+			{
+				"priority": "Low",
+				"response_time": 2,
+				"response_time_period": "Day",
+				"resolution_time": 3,
+				"resolution_time_period": "Day",
+			},
+			{
+				"priority": "Medium",
+				"response_time": 2,
+				"response_time_period": "Day",
+				"resolution_time": 3,
+				"resolution_time_period": "Day",
+			},
+			{
+				"priority": "High",
+				"response_time": 2,
+				"response_time_period": "Day",
+				"resolution_time": 3,
+				"resolution_time_period": "Day",
+			}
+		],
 		"support_and_resolution": [
 			{
 				"workday": "Monday",

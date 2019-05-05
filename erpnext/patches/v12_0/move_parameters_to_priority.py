@@ -11,7 +11,7 @@ def execute():
 	for service_level in service_levels:
 		doc = frappe.get_doc("Service Level", service_level)
 		doc.update({
-			"priority": [
+			"priorities": [
 				{
 					"priority": "Low",
 					"response_time": service_level.response_time,
@@ -40,7 +40,7 @@ def execute():
 	for service_level_agreement in service_level_agreements:
 		doc = frappe.get_doc("Service Level Agreement", service_level_agreement)
 		doc.update({
-			"priority": [
+			"priorities": [
 				{
 					"priority": "Low",
 					"response_time": service_level_agreement.response_time,

@@ -68,6 +68,6 @@ def make_issue(creation=None, customer=None):
 		"customer": customer,
 		"raised_by": "test@example.com",
 		"creation": creation
-	}).insert()
+	}).insert(ignore_permissions=True)
 
 	return issue
