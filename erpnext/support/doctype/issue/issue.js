@@ -1,12 +1,13 @@
 frappe.ui.form.on("Issue", {
 	onload: function(frm) {
 		frm.email_field = "raised_by";
-		if (frm.doc.service_level_agreement) {
-			set_time_to_resolve_and_response(frm);
-		}
 	},
 
 	refresh: function (frm) {
+		if (frm.doc.service_level_agreement) {
+			set_time_to_resolve_and_response(frm);
+		}
+
 		if (frm.doc.status !== "Closed") {
 			frm.add_custom_button(__("Close"), function () {
 				frm.set_value("status", "Closed");
@@ -23,6 +24,16 @@ frappe.ui.form.on("Issue", {
 			frm.add_custom_button(__("Reopen"), function () {
 				frm.set_value("status", "Open");
 				frm.save();
+			});
+		}
+	},
+
+	priority: function(frm) {
+		if (frm.doc.service_level_agreement) {
+			frm.call('change_sla_priority', {
+				"priority": frm.doc.priority
+			}).then(() => {
+				frm.refresh()
 			});
 		}
 	},
@@ -81,36 +92,30 @@ frappe.ui.form.on("Issue", {
 });
 
 function set_time_to_resolve_and_response(frm) {
+	frm.dashboard.clear_headline();
 
-	const customer = frm.fields_dict['customer'].$wrapper;
-	const email_account = frm.fields_dict['email_account'].$wrapper;
+	var time_to_respond = get_time_left(frm.doc.response_by);
+	var time_to_resolve = get_time_left(frm.doc.resolution_by);
 
-	const time_to_respond = $(get_time_left_element(__('Time To Respond'), frm.doc.response_by));
-	const time_to_resolve = $(get_time_left_element(__('Time To Resolve'), frm.doc.resolution_by));
-
-	time_to_respond.insertAfter(customer);
-	time_to_resolve.insertAfter(email_account);
-}
-
-function get_time_left_element(label, timestamp) {
-	$('.'+ frappe.scrub(label) +'').remove();
-	return `
-		<div class="frappe-control input-max-width `+ frappe.scrub(label) +`" data-field_name="`+ frappe.scrub(label) +`">
-			<div class="form-group">
-				<div class="clearfix">
-					<label class="control-label" style="padding-right: 0px;">
-						${label}
-					</label>
-				</div>
-				<div class="control-input-wrapper">
-					<div class="control-value like-disabled-input">${get_time_left(timestamp)}</div>
-				</div>
-			</div>
-		</div>
-	`;
+	frm.dashboard.set_headline_alert(
+		'<div class="row">' +
+			'<div class="col-xs-6">' +
+				'<span class="indicator whitespace-nowrap '+ time_to_respond.indicator +'"><span class="hidden-xs">Time to Respond: '+ time_to_respond.diff_display +'</span></span> ' +
+			'</div>' +
+			'<div class="col-xs-6">' +
+				'<span class="indicator whitespace-nowrap '+ time_to_resolve.indicator +'"><span class="hidden-xs">Time to Resolve: '+ time_to_resolve.diff_display +'</span></span> ' +
+			'</div>' +
+		'</div>'
+	);
 }
 
 function get_time_left(timestamp) {
 	const diff = moment(timestamp).diff(moment());
-	return diff >= 44500 ? moment.duration(diff).humanize() : 0;
+	const diff_display = diff >= 44500 ? moment.duration(diff).humanize() : moment(0, 'seconds').format('HH:mm');
+	var indicator = "green";
+	if (diff_display == '00:00') {
+		indicator = "red";
+	}
+	return {"diff_display": diff_display,
+			"indicator": indicator};
 }
