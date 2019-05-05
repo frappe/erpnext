@@ -27,6 +27,7 @@
    "depends_on": "eval: !doc.default_service_level_agreement",
    "fieldname": "customer",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Customer",
    "options": "Customer",
    "set_only_once": 1
@@ -35,6 +36,7 @@
    "depends_on": "eval: !doc.customer",
    "fieldname": "default_service_level_agreement",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Default Service Level Agreement",
    "set_only_once": 1
   },
@@ -121,8 +123,7 @@
    "fieldname": "support_and_resolution",
    "fieldtype": "Table",
    "label": "Support and Resolution",
-   "options": "Service Day",
-   "read_only": 1
+   "options": "Service Day"
   },
   {
    "fieldname": "service_level_agreement_name",
@@ -132,7 +133,7 @@
    "unique": 1
   }
  ],
- "modified": "2019-05-04 13:11:21.373147",
+ "modified": "2019-05-05 12:17:02.793287",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",

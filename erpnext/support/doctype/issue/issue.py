@@ -150,6 +150,11 @@ class Issue(Document):
 		self.response_by = get_expected_time_for(parameter='response', service_level=priority, start_date_time=start_date_time)
 		self.resolution_by = get_expected_time_for(parameter='resolution', service_level=priority, start_date_time=start_date_time)
 
+	@frappe.whitelist()
+	def change_sla_priority(self, priority):
+		self.set_response_and_resolution_time(priority=priority)
+		self.save(ignore_permissions=True)
+
 def get_expected_time_for(parameter, service_level, start_date_time):
 	current_date_time = start_date_time
 	expected_time = current_date_time
