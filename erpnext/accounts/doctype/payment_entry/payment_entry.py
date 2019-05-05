@@ -979,8 +979,8 @@ def make_payment_order(source_name, target_doc=None):
 		target_doc.amount = source_parent.base_paid_amount
 		target_doc.account = source_parent.paid_to
 		target_doc.payment_entry = source_doc.name
-		target_doc.supplier = source_doc.party
-		target_doc.mode_of_payment = source_doc.mode_of_payment
+		target_doc.supplier = source_parent.party
+		target_doc.mode_of_payment = source_parent.mode_of_payment
 
 
 	doclist = get_mapped_doc("Payment Entry", source_name,	{
