@@ -19,8 +19,10 @@ class ServiceLevelAgreement(Document):
 		else:
 			if not (self.start_date and self.end_date):
 				frappe.throw(_("Enter Start and End Date for the Agreement."))
+
 			if self.start_date >= self.end_date:
 				frappe.throw(_("Start Date of Agreement can't be greater than or equal to End Date."))
+
 			if self.end_date < frappe.utils.getdate():
 				frappe.throw(_("End Date of Agreement can't be less than today."))
 
@@ -54,8 +56,6 @@ def get_active_service_level_agreement_for(customer, priority):
 				`tabService Level Agreement`.default_service_level_agreement='1'
 			)
 			 limit 1
-		""".format(customer, priority), as_dict=True, debug=True)
-
-	print(agreement)
+		""".format(customer, priority), as_dict=True)
 
 	return agreement[0] if agreement else None
