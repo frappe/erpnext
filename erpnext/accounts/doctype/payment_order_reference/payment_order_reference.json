@@ -25,7 +25,8 @@
    "in_list_view": 1,
    "label": "Type",
    "options": "DocType",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "reference_name",
@@ -33,14 +34,16 @@
    "in_list_view": 1,
    "label": "Name",
    "options": "reference_doctype",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "column_break_4",
@@ -109,7 +112,7 @@
   }
  ],
  "istable": 1,
- "modified": "2019-05-03 17:28:01.648394",
+ "modified": "2019-05-05 22:23:32.723766",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Order Reference",
