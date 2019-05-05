@@ -1,5 +1,5 @@
 {
- "autoname": "field:sla_name",
+ "autoname": "format:SLA-{sla_name}",
  "creation": "2018-12-26 21:08:15.448812",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -133,7 +133,7 @@
    "unique": 1
   }
  ],
- "modified": "2019-05-05 20:24:57.557178",
+ "modified": "2019-05-06 00:31:06.167762",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
