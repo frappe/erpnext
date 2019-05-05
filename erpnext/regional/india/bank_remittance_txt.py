@@ -10,6 +10,7 @@ from functools import reduce
 import re
 import datetime
 from collections import OrderedDict
+from frappe.core.doctype.file.file import download_file
 
 def create_bank_remittance_txt(name):
     payment_order = frappe.get_doc("Payment Order", name)
@@ -22,25 +23,27 @@ def create_bank_remittance_txt(name):
 
     detail = []
     for ref_doc in payment_order.get("references"):
-        detail.append(get_detail_row(ref_doc, format_date(doc.posting_date))
+        detail += get_detail_row(ref_doc, format_date(payment_order.posting_date))
 
     trailer = get_trailer_row(no_of_records, total_amount)
-
     detail_records = "\n".join(detail)
 
-    return "~".join([header, batch , detail_records, trailer])
+    return "\n".join([header, batch , detail_records, trailer])
 
 @frappe.whitelist()
-def generate_report_and_get_url(name):
+def generate_report(name):
     data = create_bank_remittance_txt(name)
     file_name = generate_file_name(name)
     f = frappe.get_doc({
         'doctype': 'File',
         'file_name': file_name+'.txt',
         'content': data,
+        "attached_to_doctype": 'Payment Order',
+        "attached_to_name": name,
         'is_private': True
     })
     f.save()
+    download_file(f.file_url)
 
 def generate_file_name(name):
     ''' generate file name with format (account_code)_mmdd_(payment_order_no) '''
@@ -79,7 +82,7 @@ def get_detail_row(ref_doc, payment_date):
     detail = OrderedDict(
         record_identifier='D',
         payment_ref_no=sanitize_to_alphanumeric(ref_doc.payment_entry),
-        payment_type=ref_doc.mode_of_payment[:10],
+        payment_type=cstr(payment_entry.mode_of_payment)[:10],
         amount=str(ref_doc.amount)[:13],
         payment_date=payment_date,
         instrument_date=payment_date,
@@ -92,19 +95,19 @@ def get_detail_row(ref_doc, payment_date):
         beneficiary_code='',
         beneficiary_name=sanitize_to_alphanumeric(payment_entry.party)[:160],
         beneficiary_bank=sanitize_to_alphanumeric(supplier_bank_details.bank)[:10],
-        beneficiary_branch_ifsc_code=supplier_bank_details.branch_code,
+        beneficiary_branch_code=cstr(supplier_bank_details.branch_code),
         beneficiary_acc_no=supplier_bank_details.bank_account_no,
         location=supplier_billing_address.city,
         print_location=supplier_billing_address.city,
-        beneficiary_address_1=supplier_billing_address.address_line1,
-        beneficiary_address_2=supplier_billing_address.address_line2,
+        beneficiary_address_1=cstr(supplier_billing_address.address_line1)[:50],
+        beneficiary_address_2=cstr(supplier_billing_address.address_line2)[:50],
         beneficiary_address_3='',
         beneficiary_address_4='',
         beneficiary_address_5='',
-        beneficiary_city=supplier_billing_address.address_line1,
-        beneficiary_zipcode=supplier_billing_address.pincode,
+        beneficiary_city=supplier_billing_address.city,
+        beneficiary_zipcode=cstr(supplier_billing_address.pincode),
         beneficiary_state=supplier_billing_address.state,
-        beneficiary_email=supplier_billing_address.email_address,
+        beneficiary_email=supplier_billing_address.email_id,
         beneficiary_mobile=supplier_billing_address.phone,
         payment_details_1='',
         payment_details_2='',
@@ -112,10 +115,26 @@ def get_detail_row(ref_doc, payment_date):
         payment_details_4='',
         delivery_mode=''
     )
-    return "~".join(list(detail.values()))
+    detail_record = ["~".join(list(detail.values()))]
+    detail_record += get_advice_rows(payment_entry)
+    return detail_record
 
-def get_advice_row(doc):
-    advice = ['A']
+def get_advice_rows(payment_entry):
+    payment_entry_date = payment_entry.posting_date.strftime("%b%y%d%m").upper()
+    mode_of_payment = payment_entry.mode_of_payment
+    advice_rows = []
+    for record in payment_entry.references:
+        advice = ['E']
+        advice.append(cstr(mode_of_payment))
+        advice.append(cstr(record.total_amount))
+        advice.append('')
+        advice.append(cstr(record.outstanding_amount))
+        advice.append(sanitize_to_alphanumeric(record.reference_name))
+        advice.append(format_date(record.due_date))
+        advice.append(payment_entry_date)
+        advice += ['']*3
+        advice_rows.append("~".join(advice))
+    return advice_rows
 
 def get_trailer_row(no_of_records, total_amount):
     trailer = ["T"]
