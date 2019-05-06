@@ -387,6 +387,7 @@ def get_address_details(data, doc, company_address, billing_address):
 		data.transType = 2
 		shipping_address = frappe.get_doc('Address', doc.shipping_address_name)
 		set_gst_state_and_state_number(shipping_address)
+		data.toPincode = validate_pincode(shipping_address.pincode, 'Shipping Address')
 		data.actualToStateCode = validate_state_code(shipping_address.gst_state_number, 'Shipping Address')
 	else:
 		data.transType = 1
@@ -430,6 +431,10 @@ def get_item_list(data, doc):
 
 		data.itemList.append(item_data)
 
+		# Tax amounts rounded to 2 decimals to avoid exceeding max character limit
+		for attr in ['sgstValue', 'cgstValue', 'igstValue', 'cessValue']:
+			data[attr] = flt(data[attr], 2)
+
 	return data
 
 def validate_sales_invoice(doc):
@@ -458,7 +463,7 @@ def get_transport_details(data, doc):
 	if doc.distance > 4000:
 		frappe.throw(_('Distance cannot be greater than 4000 kms'))
 
-	data.transDistance = round(doc.distance)
+	data.transDistance = int(round(doc.distance))
 
 	transport_modes = {
 		'Road': 1,
