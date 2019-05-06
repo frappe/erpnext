@@ -128,8 +128,8 @@ class Issue(Document):
 	def before_insert(self):
 		self.set_response_and_resolution_time(priority=self.priority)
 
-	def set_response_and_resolution_time(self, priority=None):
-		service_level_agreement = get_active_service_level_agreement_for(self.customer, priority)
+	def set_response_and_resolution_time(self, priority):
+		service_level_agreement = get_active_service_level_agreement_for(priority=priority, customer=self.customer)
 		if service_level_agreement:
 			self.service_level_agreement = service_level_agreement.name
 		else:

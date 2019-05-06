@@ -70,7 +70,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: !doc.default_service_level_agreement",
    "fieldname": "agreement_details_section",
    "fieldtype": "Section Break",
    "label": "Agreement Details"
@@ -83,7 +82,6 @@
   },
   {
    "default": "Active",
-   "depends_on": "eval: !doc.default_service_level_agreement",
    "fieldname": "agreement_status",
    "fieldtype": "Select",
    "label": "Agreement Status",
@@ -133,7 +131,7 @@
    "unique": 1
   }
  ],
- "modified": "2019-05-06 00:31:06.167762",
+ "modified": "2019-05-06 22:00:44.623128",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",

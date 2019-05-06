@@ -85,7 +85,7 @@ def make_service_level_agreement():
 		]
 	})
 
-	default_service_level_agreement_exists = frappe.db.exists("Service Level Agreement", "Default Service Level Agreement")
+	default_service_level_agreement_exists = frappe.db.exists("Service Level Agreement", "SLA-Default Service Level Agreement")
 	if not default_service_level_agreement_exists:
 		default_service_level_agreement.insert(ignore_permissions=True)
 
@@ -172,7 +172,7 @@ def make_service_level_agreement():
 		]
 	})
 
-	service_level_agreement_exists = frappe.db.exists("Service Level Agreement", "_Test Service Level Agreement")
+	service_level_agreement_exists = frappe.db.exists("Service Level Agreement", "SLA-_Test Service Level Agreement")
 	if not service_level_agreement_exists:
 		service_level_agreement.insert(ignore_permissions=True)
 		return service_level_agreement.name
@@ -180,5 +180,5 @@ def make_service_level_agreement():
 		return service_level_agreement_exists
 
 def get_service_level_agreement():
-	service_level_agreement = frappe.db.exists("Service Level Agreement", "_Test Service Level Agreement")
+	service_level_agreement = frappe.db.exists("Service Level Agreement", "SLA-_Test Service Level Agreement")
 	return service_level_agreement
