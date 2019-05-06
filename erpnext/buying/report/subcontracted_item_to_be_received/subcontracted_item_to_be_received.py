@@ -52,7 +52,7 @@ def get_columns():
 		{
 			"label": _("Required Quantity"),
 			"fieldtype": "Float",
-			"fieldname": "r_qty",
+			"fieldname": "required_qty",
 			"width": 100
 		},
 		{
@@ -64,7 +64,7 @@ def get_columns():
 		{
 			"label": _("Pending Quantity"),
 			"fieldtype": "Float",
-			"fieldname": "p_qty",
+			"fieldname": "pending_qty",
 			"width": 100
 		}
 	]
@@ -72,7 +72,6 @@ def get_columns():
 def get_data(data, filters):
 	po = get_po(filters)
 	po_name = [v.name for v in po]
-	print(po_name)
 	sub_items = get_purchase_order_item_supplied(po_name)
 	for item in sub_items:
 		for order in po:
@@ -83,9 +82,9 @@ def get_data(data, filters):
 					'supplier': order.supplier,
 					'fg_item_code': item.item_code,
 					'item_name': item.item_name,
-					'r_qty': item.qty,
+					'required_qty': item.qty,
 					'received_qty':item.received_qty,
-					'p_qty':item.qty - item.received_qty
+					'pending_qty':item.qty - item.received_qty
 				}
 				data.append(row)
 
