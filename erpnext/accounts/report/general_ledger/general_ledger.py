@@ -127,13 +127,15 @@ def get_gl_entries(filters):
 		order_by_statement = "order by posting_date, voucher_type, voucher_no"
 
 	if filters.get("group_by") == _("Group by Voucher (Consolidated)"):
-		group_by_statement = "group by voucher_type, voucher_no, account, cost_center, against_voucher_type, party_type, party"
-		select_fields = """, sum(debit) as debit, sum(credit) as credit,
-			sum(debit_in_account_currency) as debit_in_account_currency,
-			sum(credit_in_account_currency) as credit_in_account_currency,
+		group_by_statement = "group by voucher_type, voucher_no, account, cost_center, party_type, party"
+		select_fields = """,
+			if(sum(debit-credit) > 0, sum(debit-credit), 0) as debit,
+			if(sum(debit-credit) < 0, -sum(debit-credit), 0) as credit,
+			if(sum(debit_in_account_currency-credit_in_account_currency) > 0, sum(debit_in_account_currency-credit_in_account_currency), 0) as debit_in_account_currency,
+			if(sum(debit_in_account_currency-credit_in_account_currency) < 0, -sum(debit_in_account_currency-credit_in_account_currency), 0) as credit_in_account_currency,
 			GROUP_CONCAT(DISTINCT reference_no SEPARATOR ', ') as reference_no,
 			min(reference_date) as reference_date,
-			GROUP_CONCAT(against_voucher SEPARATOR ', ') as against_voucher"""
+			GROUP_CONCAT(DISTINCT against_voucher SEPARATOR ', ') as against_voucher"""
 
 	gl_entries = frappe.db.sql(
 		"""
