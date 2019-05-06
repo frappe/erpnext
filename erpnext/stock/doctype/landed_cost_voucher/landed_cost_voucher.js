@@ -34,8 +34,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 				filters: {
 					'account_type': 'Payable',
 					'is_group': 0,
-					'company': me.frm.doc.company,
-					'account_currency': erpnext.get_currency(me.frm.doc.company)
+					'company': me.frm.doc.company
 				}
 			};
 		});

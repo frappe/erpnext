@@ -28,13 +28,15 @@ def execute():
 
 	# Landed Cost Voucher status and empty values
 	frappe.db.sql("""
-		update `tabLanded Cost Voucher` set status = (case
-			when docstatus=0 then 'Draft'
-			when docstatus=1 then 'Submitted'
-			when docstatus=2 then 'Cancelled'
+		update `tabLanded Cost Voucher` lcv
+		left join `tabCompany` c on c.name = lcv.company
+		set lcv.status = (case
+			when lcv.docstatus=0 then 'Draft'
+			when lcv.docstatus=1 then 'Submitted'
+			when lcv.docstatus=2 then 'Cancelled'
 		end),
-		base_total_taxes_and_charges=total_taxes_and_charges,
-		base_grand_total=0, grand_total=0, outstanding_amount=0, total_advance=0
+		lcv.base_total_taxes_and_charges = lcv.total_taxes_and_charges, lcv.currency=c.default_currency,
+		lcv.base_grand_total=0, lcv.grand_total=0, lcv.outstanding_amount=0, lcv.total_advance=0, lcv.conversion_rate=1.0
 	""")
 
 	# Landed Cost Item table
