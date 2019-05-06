@@ -100,7 +100,8 @@ def get_transferred_quantity(po_name):
 	stock_entries = get_stock_entry(po_name)
 	stock_entries_detail = get_stock_entry_detail([v.name for v in stock_entries])
 	po_transferred_qty_map = {}
-
+	from pprint import pprint
+	pprint(stock_entries)
 	for entry in stock_entries:
 		for details in stock_entries_detail:
 			if details.parent == entry.name:
@@ -115,6 +116,7 @@ def get_transferred_quantity(po_name):
 
 
 def get_stock_entry(po):
+	print(po)
 	return frappe.get_all("Stock Entry", filters=[
 			('purchase_order', 'IN', po),
 			('stock_entry_type', '=', 'Send to Subcontractor'),
