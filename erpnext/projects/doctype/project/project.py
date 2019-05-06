@@ -75,6 +75,7 @@ class Project(Document):
 		self.validate_dates()
 		self.send_welcome_email()
 		self.update_percent_complete(from_validate=True)
+		self.validate_task_status()
 
 	def validate_project_name(self):
 		if self.get("__islocal") and frappe.db.exists("Project", self.project_name):
@@ -102,6 +103,11 @@ class Project(Document):
 		if self.expected_start_date and self.expected_end_date:
 			if getdate(self.expected_end_date) < getdate(self.expected_start_date):
 				frappe.throw(_("Expected End Date can not be less than Expected Start Date"))
+
+	def validate_task_status(self):
+		if self.status == 'Cancelled':
+			for task in self.tasks:
+				task.status = 'Cancelled'
 
 	def validate_weights(self):
 		for task in self.tasks:
