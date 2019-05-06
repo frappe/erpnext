@@ -21,7 +21,7 @@ def get_data(start=0):
 			"limit": limit,
 		}, as_dict=True)
 
-	for d in data:
+	for d in replies:
 		d.sender_name = frappe.db.get_value("Employee", {"user_id": d.sender},
 			"employee_name") or d.sender
 		if d.text_content:

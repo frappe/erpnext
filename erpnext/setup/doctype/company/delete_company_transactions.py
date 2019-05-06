@@ -107,6 +107,12 @@ def delete_lead_addresses(company_name):
 
 def delete_communications(doctype, company_name, company_fieldname):
 		frappe.db.sql("""
-			DELETE FROM `tabCommunication` WHERE reference_doctype = %s AND
-			EXISTS (SELECT name FROM `tab{0}` WHERE {1} = %s AND `tabCommunication`.reference_name = name)
-			""".format(doctype, company_fieldname), (doctype, company_name))
+			delete from `tabCommunication`
+			inner join `tabDynamic Link` on `tabCommunication`.name=`tabDynamic Link`.parent
+			where `tabDynamic Link`.link_doctype = %s and
+			exists (select `{0}`.name from `tab{1}` where {2} = %s and
+				( 	select `tabCommunication`.name from `tabCommunication`
+					inner join `tabDynamic Link` on
+					`tabCommunication`.name=`tabDynamic Link`.parent
+					where `tabDynamic Link`.link_name = `{3}`.name))
+			""".format(doctype, doctype, company_fieldname, doctype), (doctype, company_name))
