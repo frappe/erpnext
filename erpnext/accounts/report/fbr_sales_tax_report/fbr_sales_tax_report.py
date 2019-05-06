@@ -92,7 +92,7 @@ class FBRInvoiceWiseTaxes(object):
 			},
 			{
 				"label": _("Date"),
-				"fieldtype": "Date",
+				"fieldtype": "Data",
 				"fieldname": "posting_date",
 				"width": 80
 			},
@@ -209,7 +209,8 @@ class FBRInvoiceWiseTaxes(object):
 
 		self.invoices = frappe.db.sql("""
 			select
-				i.name as invoice, i.stin, i.posting_date, i.base_net_total, i.base_grand_total, addr.state,
+				i.name as invoice, i.stin, DATE_FORMAT(i.posting_date, '%%d/%%m/%%Y') as posting_date,
+				i.base_net_total, i.base_grand_total, addr.state,
 				i.customer as party, i.customer_name as party_name, c.tax_id, c.tax_cnic, c.tax_strn,
 				cc.tax_description as description
 			from `tabSales Invoice` i
