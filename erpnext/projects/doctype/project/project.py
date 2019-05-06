@@ -35,6 +35,9 @@ class Project(Document):
 
 	def load_tasks(self):
 		"""Load `tasks` from the database"""
+		if frappe.flags.in_import:
+			return
+
 		self.tasks = []
 		for task in self.get_tasks():
 			task_map = {
