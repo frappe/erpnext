@@ -109,6 +109,18 @@ frappe.ui.form.on("Project", {
 			}
 		});
 	},
+
+	status: function(frm) {
+		if (frm.doc.status === 'Cancelled') {
+			frappe.confirm(__('Set tasks in this project as cancelled?'), () => {
+				frm.doc.tasks = frm.doc.tasks.map(task => {
+					task.status = 'Cancelled';
+					return task;
+				});
+				frm.refresh_field('tasks');
+			});
+		}
+	}
 });
 
 frappe.ui.form.on("Project Task", {
