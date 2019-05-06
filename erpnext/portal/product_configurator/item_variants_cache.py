@@ -97,6 +97,10 @@ class ItemVariantsCacheManager:
 		for key in keys:
 			frappe.cache().hdel(key, self.item_code)
 
+	def rebuild_cache(self):
+		self.clear_cache()
+		enqueue_build_cache(self.item_code)
+
 
 def build_cache(item_code):
 	frappe.cache().hset('item_cache_build_in_progress', item_code, 1)
