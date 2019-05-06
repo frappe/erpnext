@@ -521,14 +521,17 @@ class SalarySlip(TransactionBase):
 	def email_salary_slip(self):
 		receiver = frappe.db.get_value("Employee", self.employee, "prefered_email")
 		hr_settings = frappe.get_single("HR Settings")
+		message = "Please see attachment"
 		password = None
 		if hr_settings.encrypt_salary_slips_in_emails:
 			password = generate_password_for_pdf(hr_settings.password_policy, self.employee)
+			message += """<br>Note: Your salary slip is password protected,
+				the password to unlock the PDF is of the format {0}. """.format(hr_settings.password_policy)
 
 		if receiver:
 			email_args = {
 				"recipients": [receiver],
-				"message": _("Please see attachment"),
+				"message": _(message),
 				"subject": 'Salary Slip - from {0} to {1}'.format(self.start_date, self.end_date),
 				"attachments": [frappe.attach_print(self.doctype, self.name, file_name=self.name, password=password)],
 				"reference_doctype": self.doctype,
