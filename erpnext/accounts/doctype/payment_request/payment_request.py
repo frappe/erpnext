@@ -427,6 +427,7 @@ def get_subscription_details(reference_doctype, reference_name):
 def make_payment_order(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	def set_missing_values(source, target):
+		target.payment_order_type = "Payment Request"
 		target.append('references', {
 			'reference_doctype': source.reference_doctype,
 			'reference_name': source.reference_name,
