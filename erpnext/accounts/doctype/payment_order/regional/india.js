@@ -1,6 +1,6 @@
 frappe.ui.form.on('Payment Order', {
 	refresh: function(frm) {
-        if (frm.doc.docstatus==1) {
+        if (frm.doc.docstatus==1 && frm.doc.payment_order_type==='Payment Request') {
             frm.add_custom_button(__('Generate Text File'),
 				function() {
 					frm.trigger("generate_text_and_download_file");
