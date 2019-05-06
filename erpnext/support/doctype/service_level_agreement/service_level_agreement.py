@@ -14,7 +14,7 @@ class ServiceLevelAgreement(Document):
 			frappe.throw(_("Select a Customer or set as Default Service Level Agreement."))
 
 		if self.default_service_level_agreement:
-			if frappe.db.exists("Service Level Agreement", {"default_service_level_agreement": "1"}):
+			if frappe.db.exists("Service Level Agreement", {"default_service_level_agreement": "1", "name": ["!=", self.name]}):
 				frappe.throw(_("A Default Service Level Agreement already exists."))
 		else:
 			if not (self.start_date and self.end_date):
@@ -31,33 +31,23 @@ def check_agreement_status():
 		{"agreement_status": "Active"},
 		{"default_service_level_agreement": 0}
 	])
-	service_level_agreements.reverse()
+
 	for service_level_agreement in service_level_agreements:
 		service_level_agreement = frappe.get_doc("Service Level Agreement", service_level_agreement)
+
 		if service_level_agreement.end_date < frappe.utils.getdate():
-			service_level_agreement.agreement_status = "Expired"
-		service_level_agreement.save()
+			frappe.db.set_value("Service Level Agreement", service_level_agreement.name,
+				"agreement_status", "Expired")
 
 @frappe.whitelist()
-def get_active_service_level_agreement_for(customer, priority):
+def get_active_service_level_agreement_for(priority, customer=None):
 
-	agreement = frappe.db.sql("""select `tabService Level Agreement`.name, `tabService Level Agreement`.service_level,
-		`tabService Level Agreement`.holiday_list
-		from `tabService Level Agreement`
-		inner join `tabService Level Priority`
-		on `tabService Level Agreement`.name=`tabService Level Priority`.parent where
-		(
-			`tabService Level Agreement`.customer='%(customer)s' and
-			`tabService Level Agreement`.agreement_status='Active' and
-			`tabService Level Priority`.priority='%(priority)s'
-		) or
-		(
-			`tabService Level Agreement`.default_service_level_agreement='1'
-		)
-		 limit 1""",
-		{
-			"customer": customer,
-			"priority": priority
-		}, as_dict=True)
+	if customer and frappe.db.exists("Service Level Agreement", {"customer": customer}):
+		or_filter = {"customer": customer}
+	else:
+		or_filter = {"default_service_level_agreement": 1}
+
+	agreement = frappe.get_list("Service Level Agreement", filters={"agreement_status": "Active"},
+		or_filters=or_filter, fields=["name", "service_level"])
 
 	return agreement[0] if agreement else None
