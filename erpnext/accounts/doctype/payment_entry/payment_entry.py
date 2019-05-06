@@ -972,7 +972,7 @@ def get_party_and_account_balance(company, date, paid_from=None, paid_to=None, p
 def make_payment_order(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	def set_missing_values(source, target):
-		pass
+		target.payment_order_type = "Payment Entry"
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.bank_account = source_parent.bank_account
