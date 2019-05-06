@@ -100,8 +100,15 @@ class PaymentEntry(AccountsController):
 
 	def validate_allocated_amount(self):
 		for d in self.get("references"):
-			if flt(d.allocated_amount) > flt(d.outstanding_amount) \
-					or (flt(d.outstanding_amount) < 0 and flt(d.allocated_amount) < flt(d.outstanding_amount)):
+			invalid = False
+			if flt(d.outstanding_amount) >= 0:
+				if flt(d.allocated_amount) > flt(d.outstanding_amount):
+					invalid = True
+			else:
+				if flt(d.allocated_amount) < flt(d.outstanding_amount):
+					invalid = True
+
+			if invalid:
 				frappe.throw(_("Row #{0}: Allocated Amount of {1} against {2} is greater than its Outstanding Amount {3}.")
 					.format(d.idx, flt(d.allocated_amount), d.reference_name, flt(d.outstanding_amount)))
 
@@ -261,7 +268,11 @@ class PaymentEntry(AccountsController):
 			frappe.throw(_("Row #{0}: Journal Entry {1} does not have account {2} or is already matched against a voucher")
 				.format(d.idx, d.reference_name, self.party_account))
 		else:
-			dr_or_cr = "debit" if self.payment_type == "Receive" else "credit"
+			if self.payment_type == "Receive":
+				dr_or_cr = "debit" if d.allocated_amount >= 0 else "credit"
+			else:
+				dr_or_cr = "credit" if d.allocated_amount >= 0 else "debit"
+
 			valid = False
 			for jvd in je_accounts:
 				if flt(jvd[dr_or_cr]) > 0:
