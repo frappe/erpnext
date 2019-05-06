@@ -150,10 +150,10 @@ def get_conditions(filters):
 			"""% (filters.get('cost_center'), filters.get('project'))
 
 	if filters.get("from_date"):
-		conditions.append("AND transaction_date>=%s", filters.get('from_date'))
+		conditions += "AND transaction_date>=%s"% filters.get('from_date')
 
 	if filters.get("to_date"):
-		conditions.append("AND transaction_date<=%s", filters.get('to_date')
+		conditions += "AND transaction_date<=%s"% filters.get('to_date')
 	return conditions
 
 def get_data(filters):
@@ -162,6 +162,7 @@ def get_data(filters):
 	mr_records, procurement_record_against_mr = get_mapped_mr_details(conditions)
 	pr_records = get_mapped_pr_records()
 	pi_records = get_mapped_pi_records()
+	print(pi_records)
 
 	procurement_record=[]
 	if procurement_record_against_mr:
@@ -228,9 +229,12 @@ def get_mapped_pi_records():
 		SELECT
 			pi_item.po_detail,
 			pi_item.base_amount
-		FROM `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pi_item
+		FROM `tabPurchase Invoice Item` as pi_item
+		INNER JOIN `tabPurchase Order` as po
+		ON pi_item.`purchase_order` = po.`name`
 		WHERE
-			pi.docstatus=1
+			pi_item.docstatus = 1
+			AND po.status not in ("Closed","Completed","Cancelled")
 			AND pi_item.po_detail IS NOT NULL
 		"""))
 
