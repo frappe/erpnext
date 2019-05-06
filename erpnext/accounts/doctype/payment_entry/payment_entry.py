@@ -82,6 +82,53 @@ class PaymentEntry(AccountsController):
 		self.update_reference_details()
 		self.delink_advance_entry_references()
 
+	def before_print(self):
+		from frappe.utils import cstr
+		from collections import OrderedDict
+
+		super(PaymentEntry, self).before_print()
+		gles = frappe.db.sql("""
+			select
+				account, remarks, party_type, party, debit, credit,
+				against_voucher, against_voucher_type, reference_no, reference_date
+			from `tabGL Entry`
+			where voucher_type = %s and voucher_no = %s
+		""", [self.doctype, self.name], as_dict=1)
+
+		grouped_gles = OrderedDict()
+
+		for gle in gles:
+			gle.remarks = gle.remarks.replace("Note: " + self.user_remark, "").strip()
+			group = grouped_gles.setdefault((cstr(gle.account), cstr(gle.party_type), cstr(gle.party), cstr(gle.remarks), cstr(gle.reference_no), cstr(gle.reference_date)), frappe._dict({
+				"account": cstr(gle.account),
+				"party_type": cstr(gle.party_type),
+				"party": cstr(gle.party),
+				"remarks": cstr(gle.remarks),
+				"reference_no": cstr(gle.reference_no),
+				"reference_date": cstr(gle.reference_date),
+				"sum": 0, "against_voucher_set": set(), "against_voucher": []
+			}))
+			group.sum += flt(gle.debit) - flt(gle.credit)
+			if gle.against_voucher_type and gle.against_voucher:
+				group.against_voucher_set.add((cstr(gle.against_voucher_type), cstr(gle.against_voucher)))
+
+		for d in grouped_gles.values():
+			d.debit = d.sum if d.sum > 0 else 0
+			d.credit = -d.sum if d.sum < 0 else 0
+
+			for against_voucher_type, against_voucher in d.against_voucher_set:
+				amended_from = frappe.db.get_value(against_voucher_type, against_voucher, "amended_from")
+				if not amended_from:
+					d.against_voucher.append(against_voucher)
+				else:
+					d.against_voucher.append(against_voucher[:against_voucher.rfind('-')])
+
+			d.against_voucher = ", ".join(d.against_voucher or [])
+
+		self.gles = grouped_gles.values()
+		self.total_debit = sum([d.debit for d in self.gles])
+		self.total_credit = sum([d.credit for d in self.gles])
+
 	def validate_duplicate_entry(self):
 		reference_names = []
 		for d in self.get("references"):
