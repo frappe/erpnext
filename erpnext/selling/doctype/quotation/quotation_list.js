@@ -8,7 +8,7 @@ frappe.listview_settings['Quotation'] = {
 				"filters": {
 					"name": ["in", ["Customer", "Lead"]],
 				}
-			}
+			};
 		};
 	},
 	get_indicator: function(doc) {
