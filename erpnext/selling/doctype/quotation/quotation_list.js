@@ -9,7 +9,7 @@ frappe.listview_settings['Quotation'] = {
 					"name": ["in", ["Customer", "Lead"]],
 				}
 			}
-		}
+		};
 	},
 	get_indicator: function(doc) {
 		if(doc.status==="Submitted") {
