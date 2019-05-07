@@ -78,8 +78,9 @@ class Issue(Document):
 	def update_agreement_status(self):
 		current_time = frappe.flags.current_time or now_datetime()
 		if self.service_level_agreement and self.agreement_status == "Ongoing":
-			if (round(time_diff_in_hours(self.response_by, current_time), 2) < 0 or
-				round(time_diff_in_hours(self.resolution_by, current_time), 2) < 0):
+			response_time_diff = round(time_diff_in_hours(self.response_by, current_time), 2)
+			resolution_time_diff = round(time_diff_in_hours(self.resolution_by, current_time), 2)
+			if response_time_diff < 0 or resolution_time_diff < 0:
 				self.agreement_status = "Failed"
 			else:
 				self.agreement_status = "Fulfilled"
@@ -225,8 +226,9 @@ def set_service_level_agreement_status():
 	for issue in issues:
 		doc = frappe.get_doc("Issue", issue.name)
 		if self.service_level_agreement and self.agreement_status == "Ongoing":
-			if (round(time_diff_in_hours(self.response_by, now_datetime()), 2) < 0 or
-				round(time_diff_in_hours(self.resolution_by, now_datetime()), 2) < 0):
+			response_time_diff = round(time_diff_in_hours(self.response_by, now_datetime()), 2)
+			resolution_time_diff = round(time_diff_in_hours(self.resolution_by, now_datetime()), 2)
+			if response_time_diff < 0 or resolution_time_diff < 0:
 				frappe.db.set_value("Issue", doc.name, "agreement_status", "Failed")
 			else:
 				frappe.db.set_value("Issue", doc.name, "agreement_status", "Fulfilled")
