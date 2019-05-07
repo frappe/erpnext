@@ -12,10 +12,10 @@ frappe.ui.form.on("Communication", {
 		for(var idx in frm.doc.dynamic_link) {
 			let dynamic_link = frm.doc.dynamic_link[idx];
 			if(dynamic_link.link_doctype === "Issue") {
-				issue_counter += 1
+				issue_counter += 1;
 			}
 		}
-		if(issue_counter == 0){
+		if(issue_counter !== 0){
 			frm.add_custom_button(__("Issue"), () => {
 				frappe.confirm(__(confirm_msg, [__("Issue")]), () => {
 					frm.trigger('make_issue_from_communication');
