@@ -107,25 +107,22 @@ class Issue(Document):
 
 		replicated_issue = deepcopy(self)
 		replicated_issue.subject = subject
-		frappe.get_doc(replicated_issue).insert()
+		frappe.get_doc(replicated_issue).insert(ignore_permissions=True)
 
 		# Replicate linked Communications
 		# TODO: get all communications in timeline before this, and modify them to append them to new doc
 		comm_to_split_from = frappe.get_doc("Communication", communication_id)
+		comm_link = comm_to_split_from.get_links("Issue", self.name)
 
-		links = comm_to_split_from.get_links("Issue", self.name)
+		links= frappe.get_list("Dynamic Link", filters={
+			"link_doctype": "Issue",
+			"link_name": comm_link[0].link_name,
+			"creation": [">=", comm_to_split_from.creation]
+		}, fields=["parent"])
 
 		for link in links:
-			communications = frappe.get_all("Dynamic Link",
-				filters={"link_doctype": "Issue",
-					"link_name": link.link_name,
-					"creation": ('>=', comm_to_split_from.creation)},
-				fields=["parent"])
-
-			for communication in communications:
-				doc = frappe.get_doc("Communication", communication.parent)
-				doc.add_link(link_doctype="Communication", link_name=replicated_issue.name)
-				doc.save(ignore_permissions=True)
+			doc = frappe.get_doc("Communication", link.parent)
+			doc.add_link(link_doctype="Issue", link_name=replicated_issue.name, autosave=True)
 
 		return replicated_issue.name
 
