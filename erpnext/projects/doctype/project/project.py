@@ -553,11 +553,13 @@ def collect_project_status():
 			inner join `tabDynamic Link`
 			on `tabCommunication`.name=`tabDynamic Link`.parent where
 			`tabDynamic Link`.link_doctype='Project Update' and
-			`tabDynamic Link`.link_name='{0}' and
+			`tabDynamic Link`.link_name='%(name)s' and
 			`tabCommunication`.communication_type='Communication' and
 			`tabCommunication`.sent_or_received='Received'
 			order by `tabCommunication`.creation asc
-		""".format(data.name), as_dict=True)
+		""",{
+				"name": data.name
+			}, as_dict=True)
 
 		for d in replies:
 			doc = frappe.get_doc("Project Update", data.name)

@@ -13,8 +13,10 @@ def get_context(context):
 			from `tabCommunication`
 			inner join `tabDynamic Link`
 			on `tabCommunication`.name=`tabDynamic Link`.parent where
-			`tabDynamic Link`.link_name='{0}' and
+			`tabDynamic Link`.link_name='%(name)s' and
 			`tabCommunication`.comment_type='comment'
-		""".format(task.name), as_dict=True)
+		""",{
+				"name": task.name
+			}, as_dict=True)
 
 	context.doc = task

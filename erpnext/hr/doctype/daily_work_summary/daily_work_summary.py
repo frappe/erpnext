@@ -51,12 +51,15 @@ class DailyWorkSummary(Document):
 				from `tabCommunication`
 				inner join `tabDynamic Link`
 				on `tabCommunication`.name=`tabDynamic Link`.parent where
-				`tabDynamic Link`.link_doctype='{0}' and
-				`tabDynamic Link`.link_name='{1}' and
+				`tabDynamic Link`.link_doctype='%(doctype)s' and
+				`tabDynamic Link`.link_name='%(name)s' and
 				`tabCommunication`.communication_type='Communication' and
 				`tabCommunication`.sent_or_received='Received'
 				order by `tabCommunication`.creation asc
-			""".format(self.doctype, self.name), as_dict=True)
+			""",{
+					"doctype": self.doctype,
+					"name": self.name
+				}, as_dict=True)
 
 		did_not_reply = self.email_sent_to.split()
 

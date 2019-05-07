@@ -47,11 +47,13 @@ def get_data(filters):
 			from `tabCommunication`
 			inner join `tabDynamic Link`
 			on `tabCommunication`.name=`tabDynamic Link`.parent where
-			`tabDynamic Link`.link_doctype in {0} and
+			`tabDynamic Link`.link_doctype in %(daily_summary_emails)s and
 			`tabCommunication`.communication_type='Communication' and
 			`tabCommunication`.sent_or_received='Received'
 			order by `tabCommunication`.creation asc
-		""".format(daily_summary_emails), as_dict=True, debug=True)
+		""",{
+				"daily_summary_emails": daily_summary_emails
+			}, as_dict=True, debug=True)
 
 	data = []
 	total = len(daily_summary_emails)
