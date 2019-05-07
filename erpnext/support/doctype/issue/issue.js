@@ -33,6 +33,7 @@ frappe.ui.form.on("Issue", {
 			frm.call('change_sla_priority', {
 				"priority": frm.doc.priority
 			}).then(() => {
+				frappe.msgprint(__("Issue Priority changed to {0}.", [frm.doc.priority]))
 				frm.refresh();
 			});
 		}
