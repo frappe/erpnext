@@ -8,9 +8,10 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 		method = "erpnext.accounts.party.get_party_details";
 	}
 	if(!args) {
-		if(frm.doctype != "Purchase Order" && frm.doc.customer) {
+		if((frm.doctype != "Purchase Order" && frm.doc.customer)
+			|| (frm.doc.party_name && in_list(['Quotation', 'Opportunity'], frm.doc.doctype))) {
 			args = {
-				party: frm.doc.customer,
+				party: frm.doc.customer || frm.doc.party_name,
 				party_type: "Customer",
 				price_list: frm.doc.selling_price_list
 			};
