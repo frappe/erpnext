@@ -102,7 +102,7 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 	for attribute, values in attribute_filters.items():
 		attribute_values = values
 
-		if isinstance(attribute_values, frappe.string_types):
+		if not isinstance(attribute_values, list):
 			attribute_values = [attribute_values]
 
 		if not attribute_values: continue
