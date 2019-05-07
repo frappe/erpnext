@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-import itertools
 
 def execute(filters=None):
 	if filters.from_date >= filters.to_date:
@@ -67,19 +66,23 @@ def get_columns():
 def get_data(data, filters):
 	po = get_po(filters)
 	po_transferred_qty_map = frappe._dict(get_transferred_quantity([v.name for v in po]))
+
 	sub_items = get_purchase_order_item_supplied([v.name for v in po])
 
 	for order in po:
 		for item in sub_items:
-			if order.name == item.parent and item.required_qty != po_transferred_qty_map.get(order.name).get(item.rm_item_code):
+			if order.name == item.parent and order.name in po_transferred_qty_map and \
+				item.required_qty != po_transferred_qty_map.get(order.name).get(item.rm_item_code):
+				transferred_qty = po_transferred_qty_map.get(order.name).get(item.rm_item_code) \
+				if po_transferred_qty_map.get(order.name).get(item.rm_item_code) else 0
 				row ={
 					'purchase_order': item.parent,
 					'date': order.transaction_date,
 					'supplier': order.supplier,
 					'rm_item_code': item.rm_item_code,
 					'r_qty': item.required_qty,
-					't_qty':po_transferred_qty_map.get(order.name).get(item.rm_item_code),
-					'p_qty':item.required_qty - po_transferred_qty_map.get(order.name).get(item.rm_item_code)
+					't_qty':transferred_qty,
+					'p_qty':item.required_qty - transferred_qty
 				}
 
 				data.append(row)
@@ -100,8 +103,8 @@ def get_transferred_quantity(po_name):
 	stock_entries = get_stock_entry(po_name)
 	stock_entries_detail = get_stock_entry_detail([v.name for v in stock_entries])
 	po_transferred_qty_map = {}
-	from pprint import pprint
-	pprint(stock_entries)
+
+
 	for entry in stock_entries:
 		for details in stock_entries_detail:
 			if details.parent == entry.name:
@@ -116,7 +119,6 @@ def get_transferred_quantity(po_name):
 
 
 def get_stock_entry(po):
-	print(po)
 	return frappe.get_all("Stock Entry", filters=[
 			('purchase_order', 'IN', po),
 			('stock_entry_type', '=', 'Send to Subcontractor'),
