@@ -48,18 +48,6 @@ class TestIssue(unittest.TestCase):
 
 		self.assertEqual(issue.agreement_status, 'Fulfilled')
 
-		issue.status = 'Open'
-		issue.save()
-
-		frappe.flags.current_time = datetime.datetime(2019, 3, 5, 12, 0)
-
-		issue.status = 'Closed'
-		issue.save()
-
-		self.assertEqual(issue.agreement_status, 'Failed')
-
-
-
 def make_issue(creation=None, customer=None):
 
 	issue = frappe.get_doc({

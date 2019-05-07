@@ -30,11 +30,9 @@ def check_agreement_status():
 	service_level_agreements = frappe.get_list("Service Level Agreement", filters=[
 		{"agreement_status": "Active"},
 		{"default_service_level_agreement": 0}
-	])
+	], fields=["name", "end_date"])
 
 	for service_level_agreement in service_level_agreements:
-		service_level_agreement = frappe.get_doc("Service Level Agreement", service_level_agreement)
-
 		if service_level_agreement.end_date < frappe.utils.getdate():
 			frappe.db.set_value("Service Level Agreement", service_level_agreement.name,
 				"agreement_status", "Expired")
