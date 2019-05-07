@@ -331,8 +331,8 @@ class LeaveApplication(Document):
 				if not args.notify == "employee":
 					contact = frappe.get_doc('User', contact).email or contact
 
-			sender      	    = dict()
-			sender['email']     = frappe.get_doc('User', frappe.session.user).email
+			sender = dict()
+			sender['email'] = frappe.get_doc('User', frappe.session.user).email
 			sender['full_name'] = frappe.utils.get_fullname(sender['email'])
 
 			try:

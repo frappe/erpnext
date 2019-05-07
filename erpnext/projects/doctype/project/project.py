@@ -539,8 +539,8 @@ def send_project_update_email_to_users(project):
 	frappe.sendmail(recipients=get_users_email(doc),
 		message=doc.message,
 		subject=_(subject),
-		reference_doctype=project_update.doctype,
-		reference_name=project_update.name,
+		link_doctype=project_update.doctype,
+		link_name=project_update.name,
 		reply_to=incoming_email_account
 	)
 
@@ -595,8 +595,8 @@ def send_project_status_email_to_users():
 			template='daily_project_summary',
 			args=args,
 			subject=_("Daily Project Summary for {0}").format(d.name),
-			reference_doctype="Project Update",
-			reference_name=d.name)
+			link_doctype="Project Update",
+			link_name=d.name)
 
 		doc.db_set('sent', 1)
 

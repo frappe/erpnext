@@ -60,8 +60,8 @@ class EmailDigest(Document):
 						recipients=user_id,
 						subject=_("{0} Digest").format(self.frequency),
 						message=msg_for_this_recipient,
-						reference_doctype = self.doctype,
-						reference_name = self.name,
+						link_doctype = self.doctype,
+						link_name = self.name,
 						unsubscribe_message = _("Unsubscribe from this Email Digest"))
 
 		frappe.set_user(original_user)

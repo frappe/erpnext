@@ -24,8 +24,8 @@ class DailyWorkSummary(Document):
 		frappe.sendmail(recipients=emails,
 			message=dws_group.message,
 			subject=dws_group.subject,
-			reference_doctype=self.doctype,
-			reference_name=self.name,
+			link_doctype=self.doctype,
+			link_name=self.name,
 			reply_to=incoming_email_account)
 
 	def send_summary(self):
@@ -36,8 +36,8 @@ class DailyWorkSummary(Document):
 			template='daily_work_summary',
 			args=args,
 			subject=_(self.daily_work_summary_group),
-			reference_doctype=self.doctype,
-			reference_name=self.name)
+			link_doctype=self.doctype,
+			link_name=self.name)
 
 		self.db_set('status', 'Sent')
 

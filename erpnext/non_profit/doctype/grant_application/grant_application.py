@@ -46,8 +46,8 @@ def send_grant_review_emails(grant_application):
 		sender=frappe.session.user,
 		subject='Grant Application for {0}'.format(grant.applicant_name),
 		message='<p> Please Review this grant application</p><br>' + url,
-		reference_doctype=grant.doctype,
-		reference_name=grant.name
+		link_doctype=grant.doctype,
+		link_name=grant.name
 	)
 
 	grant.status = 'In Progress'
