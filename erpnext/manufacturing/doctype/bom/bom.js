@@ -5,11 +5,6 @@ frappe.provide("erpnext.bom");
 
 frappe.ui.form.on("BOM", {
 	setup: function(frm) {
-		frm.add_fetch("item", "description", "description");
-		frm.add_fetch("item", "image", "image");
-		frm.add_fetch("item", "item_name", "item_name");
-		frm.add_fetch("item", "stock_uom", "uom");
-
 		frm.set_query("bom_no", "items", function() {
 			return {
 				filters: {
@@ -414,7 +409,3 @@ frappe.ui.form.on("BOM", "with_operations", function(frm) {
 	}
 	toggle_operations(frm);
 });
-
-cur_frm.cscript.image = function() {
-	refresh_field("image_view");
-};

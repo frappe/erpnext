@@ -186,7 +186,7 @@ def link_item(item_data,item_status):
 	item.item_name = str(item_data.get("name"))
 	item.item_code = "woocommerce - " + str(item_data.get("product_id"))
 	item.woocommerce_id = str(item_data.get("product_id"))
-	item.item_group = "WooCommerce Products"
+	item.item_group = _("WooCommerce Products")
 	item.stock_uom = woocommerce_settings.uom or _("Nos")
 	item.save()
 	frappe.db.commit()
