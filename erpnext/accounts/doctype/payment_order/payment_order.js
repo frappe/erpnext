@@ -2,6 +2,15 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Payment Order', {
+	setup: function(frm) {
+		frm.set_query("company_bank_account", function() {
+			return {
+				filters: {
+					"is_company_account":1
+				}
+			}
+		});
+	},
 	refresh: function(frm) {
 		if (frm.doc.docstatus == 0) {
 			frm.add_custom_button(__('Payment Request'), function() {

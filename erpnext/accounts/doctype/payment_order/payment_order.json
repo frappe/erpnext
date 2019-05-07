@@ -12,7 +12,7 @@
   "column_break_2",
   "posting_date",
   "bank",
-  "bank_account",
+  "company_bank_account",
   "section_break_5",
   "references",
   "amended_from"
@@ -81,20 +81,20 @@
    "read_only": 1
   },
   {
-   "fieldname": "bank_account",
-   "fieldtype": "Link",
-   "label": "Bank Account",
-   "options": "Bank Account"
-  },
-  {
    "fieldname": "payment_order_type",
    "fieldtype": "Select",
    "label": "Payment Order Type",
    "options": "\nPayment Request\nPayment Entry"
+  },
+  {
+   "fieldname": "company_bank_account",
+   "fieldtype": "Link",
+   "label": "Company Bank Account",
+   "options": "Bank Account"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-06 16:40:11.397341",
+ "modified": "2019-05-06 19:57:03.661653",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Order",
