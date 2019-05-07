@@ -225,9 +225,9 @@ def set_service_level_agreement_status():
 	issues = frappe.get_list("Issue", filters={"status": "Open", "agreement_status": "Ongoing"})
 	for issue in issues:
 		doc = frappe.get_doc("Issue", issue.name)
-		if self.service_level_agreement and self.agreement_status == "Ongoing":
-			response_time_diff = round(time_diff_in_hours(self.response_by, now_datetime()), 2)
-			resolution_time_diff = round(time_diff_in_hours(self.resolution_by, now_datetime()), 2)
+		if doc.service_level_agreement and doc.agreement_status == "Ongoing":
+			response_time_diff = round(time_diff_in_hours(doc.response_by, now_datetime()), 2)
+			resolution_time_diff = round(time_diff_in_hours(doc.resolution_by, now_datetime()), 2)
 			if response_time_diff < 0 or resolution_time_diff < 0:
 				frappe.db.set_value("Issue", doc.name, "agreement_status", "Failed")
 			else:
