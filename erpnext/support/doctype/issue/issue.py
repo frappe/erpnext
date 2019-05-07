@@ -77,9 +77,9 @@ class Issue(Document):
 
 	def update_agreement_status(self):
 		current_time = frappe.flags.current_time or now_datetime()
-		if self.service_level_agreement:
-			if (round(time_diff_in_hours(self.response_by, current_time), 2) < 0
-				or round(time_diff_in_hours(self.resolution_by, current_time), 2) < 0):
+		if self.service_level_agreement and self.agreement_status == "Ongoing":
+			if (round(time_diff_in_hours(self.response_by, current_time), 2) < 0 or
+				round(time_diff_in_hours(self.resolution_by, current_time), 2) < 0):
 				self.agreement_status = "Failed"
 			else:
 				self.agreement_status = "Fulfilled"
@@ -219,6 +219,17 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 		current_date_time = expected_time
 
 	return current_date_time
+
+def set_service_level_agreement_status():
+	issues = frappe.get_list("Issue", filters={"status": "Open", "agreement_status": "Ongoing"})
+	for issue in issues:
+		doc = frappe.get_doc("Issue", issue.name)
+		if self.service_level_agreement and self.agreement_status == "Ongoing":
+			if (round(time_diff_in_hours(self.response_by, now_datetime()), 2) < 0 or
+				round(time_diff_in_hours(self.resolution_by, now_datetime()), 2) < 0):
+				frappe.db.set_value("Issue", doc.name, "agreement_status", "Failed")
+			else:
+				frappe.db.set_value("Issue", doc.name, "agreement_status", "Fulfilled")
 
 def get_list_context(context=None):
 	return {
