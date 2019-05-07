@@ -260,7 +260,8 @@ def get_items_with_selected_attributes(item_code, selected_attributes):
 
 	items = []
 	for attribute, value in selected_attributes.items():
-		items.append(set(attribute_value_item_map[(attribute, value)]))
+		filtered_items = attribute_value_item_map.get((attribute, value), [])
+		items.append(set(filtered_items))
 
 	return set.intersection(*items)
 
