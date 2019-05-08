@@ -112,11 +112,10 @@ class Issue(Document):
 		# Replicate linked Communications
 		# TODO: get all communications in timeline before this, and modify them to append them to new doc
 		comm_to_split_from = frappe.get_doc("Communication", communication_id)
-		comm_link = comm_to_split_from.get_links("Issue", self.name)
 
 		links= frappe.get_list("Dynamic Link", filters={
 			"link_doctype": "Issue",
-			"link_name": comm_link[0].link_name,
+			"link_name": self.name,
 			"creation": [">=", comm_to_split_from.creation]
 		}, fields=["parent"])
 
