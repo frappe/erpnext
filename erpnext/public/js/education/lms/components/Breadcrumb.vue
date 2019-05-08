@@ -1,8 +1,15 @@
 <template>
 	<div>
-		<span v-for="(route, index) in routeData">
-			<router-link :to="route.route">{{ route.label }}</router-link><span> / </span>
-		</span>
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb">
+				<li v-for="(route, index) in routeData" class="breadcrumb-item active" aria-current="page">
+					<router-link v-if="index != routeData.length - 1" :to="route.route">
+						{{ route.label }}
+					</router-link>
+					<span v-else>{{ route.label }}</span>
+				</li>
+			</ol>
+		</nav>
 	</div>
 </template>
 <script type="text/javascript">
