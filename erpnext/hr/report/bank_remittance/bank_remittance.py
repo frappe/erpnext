@@ -97,12 +97,10 @@ def get_account():
 	filters={
 		"account_type": "Bank"
 	}, as_list =1)
-
 	return accounts
 
 def get_payroll_entry(accounts, filters):
 	accounts = list(itertools.chain(*accounts))
-	accounts = ', '.join(map(str, accounts))
 	payroll_filter = [
 			('payment_account', 'IN', accounts),
 			('number_of_employees', '>', 0),
@@ -116,14 +114,12 @@ def get_payroll_entry(accounts, filters):
 
 	entries = get_record("Payroll Entry", payroll_filter, ["name", "payment_account"])
 
-	p = list(map(lambda x: {k:v for k, v in x.items() if k == 'payment_account'}, entries))
-	payment_accounts = ', '.join(map(str, [l['payment_account'] for l in p if 'payment_account' in l]))
+	payment_accounts = [d.payment_account for d in entries]
 	get_company_account(payment_accounts, entries)
 	return entries
 
 def get_salary_slips(payroll_entries):
-	d = list(map(lambda x: {k:v for k, v in x.items() if k == 'name'}, payroll_entries))
-	payroll = ', '.join(map(str, [l['name'] for l in d if 'name' in l]))
+	payroll  = [d.name for d in payroll_entries]
 	salary_slips = get_record("Salary Slip", [("payroll_entry", "IN", payroll)],
 		fields = ["modified", "net_pay", "bank_name", "bank_account_no", "payroll_entry", "employee", "employee_name", "status"]
 	)
@@ -136,45 +132,30 @@ def get_salary_slips(payroll_entries):
 	for slip in salary_slips:
 		slip["debit_acc_no"] = payroll_entry_map[slip.payroll_entry]['company_account']
 
-
-		'''for entry in payroll_entries:
-			if slip.payroll_entry == entry.name:
-				slip["debit_acc_no"] = entry.company_account'''
-
 	return salary_slips
 
 def get_emp_bank_ifsc_code(salary_slips):
-	d = list(map(lambda x: {k:v for k, v in x.items() if k == 'employee'}, salary_slips))
-	emp_names = ', '.join(map(str, [l['employee'] for l in d if 'employee' in l]))
+
+	emp_names = [d.employee for d in salary_slips]
 	ifsc_codes = get_record("Employee", [("name", "IN", emp_names)], ["ifsc_code", "name"])
 
 	ifsc_codes_map = {}
 	for code in ifsc_codes:
-		ifsc_codes_map[codes.name] = code
+		ifsc_codes_map[code.name] = code
 
 	for slip in salary_slips:
 		slip["ifsc_code"] = ifsc_codes_map[code.name]['ifsc_code']
-
-		'''for code in ifsc_codes:
-			if code.name == slip.employee:
-				slip["ifsc_code"] = code.ifsc_code'''
 
 	return salary_slips
 
 def get_company_account(payment_accounts ,payroll_entries):
 	company_accounts = get_record("Bank Account", [("account", "IN", payment_accounts)], ["account", "bank_account_no"])
-
 	company_accounts_map = {}
 	for acc in company_accounts:
 		company_accounts_map[acc.account] = acc
 
-for entry in payroll_entries:
-	entry["company_account"] = company_accounts_map[entry.payment_account]['bank_account_no']
-
-	'''for acc in company_accounts:
-		for entry in payroll_entries:
-			if acc.account == entry.payment_account:
-				entry["company_account"] = acc.bank_account_no'''
+	for entry in payroll_entries:
+		entry["company_account"] = company_accounts_map[entry.payment_account]['bank_account_no']
 
 	return payroll_entries
 
