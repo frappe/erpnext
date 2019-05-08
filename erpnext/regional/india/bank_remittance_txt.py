@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils import cint,cstr, today
-from functools import reduce
 import re
 import datetime
 from collections import OrderedDict
@@ -16,23 +15,23 @@ def create_bank_remittance_txt(name):
 	payment_order = frappe.get_doc("Payment Order", name)
 
 	no_of_records = len(payment_order.get("references"))
-	total_amount = reduce(lambda x, y: x.get("amount") + y.get("amount"), payment_order.get("references"))
+	total_amount = sum(entry.get("amount") for entry in payment_order.get("references"))
 
-	product_code, client_code = frappe.db.get_value("Company",
+	product_code, client_code, company_email = frappe.db.get_value("Company",
 		filters={'name' : payment_order.company},
-		fieldname=['product_code', 'client_code'])
+		fieldname=['product_code', 'client_code', 'email'])
 
 	header, file_name = get_header_row(payment_order, client_code)
 	batch = get_batch_row(payment_order, no_of_records, total_amount, product_code)
 
 	detail = []
 	for ref_doc in payment_order.get("references"):
-		detail += get_detail_row(ref_doc, format_date(payment_order.posting_date))
+		detail += get_detail_row(ref_doc, payment_order, company_email)
 
 	trailer = get_trailer_row(no_of_records, total_amount)
 	detail_records = "\n".join(detail)
 
-	return "\n".join([header, batch , detail_records, trailer]), file_name
+	return "\n".join([header, batch, detail_records, trailer]), file_name
 
 @frappe.whitelist()
 def generate_report(name):
@@ -47,15 +46,19 @@ def generate_report(name):
 		'is_private': True
 	})
 	f.save()
-	download_file(f.file_url)
+	return {
+		'file_url': f.file_url,
+		'file_name': file_name
+	}
 
-def generate_file_name(name, date):
+def generate_file_name(name, company_account, date):
 	''' generate file name with format (account_code)_mmdd_(payment_order_no) '''
-	return '_'+date.strftime("%m%d")+sanitize_data(name, '_')+'.txt'
+	bank, acc_no = frappe.db.get_value("Bank Account", {"name": company_account}, ['bank', 'bank_account_no'])
+	return bank[:1]+str(acc_no)[-4:]+'_'+date.strftime("%m%d")+sanitize_data(name, '')[4:]+'.txt'
 
 def get_header_row(doc, client_code):
 	''' Returns header row and generated file name '''
-	file_name = generate_file_name(doc.name, doc.posting_date)
+	file_name = generate_file_name(doc.name, doc.company_bank_account, doc.posting_date)
 	header = ["H"]
 	header.append(cstr(client_code)[:20])
 	header += [''] * 3
@@ -64,54 +67,61 @@ def get_header_row(doc, client_code):
 
 def get_batch_row(doc, no_of_records, total_amount, product_code):
 	batch = ["B"]
-	batch.append(cstr(no_of_records)[:5]) # 5
-	batch.append(cstr(total_amount)[:17]) #amt 17.2
+	batch.append(cstr(no_of_records)[:5])
+	batch.append(cstr(format(total_amount, '0.2f'))[:17])
 	batch.append(sanitize_data(doc.name, '_')[:20])
 	batch.append(format_date(doc.posting_date))
 	batch.append(product_code[:20])
 	return "~".join(batch)
 
-def get_detail_row(ref_doc, payment_date):
+def get_detail_row(ref_doc, payment_entry, company_email):
+
+	payment_date = format_date(payment_entry.posting_date)
 	payment_entry = frappe.get_cached_doc('Payment Entry', ref_doc.payment_entry)
 	supplier_bank_details = frappe.get_cached_doc('Bank Account', ref_doc.bank_account)
+	company_bank_acc_no = frappe.db.get_value("Bank Account", {'name': payment_entry.bank_account}, ['bank_account_no'])
+
 	addr_link = frappe.db.get_value('Dynamic Link',
 		{
 		'link_doctype': 'Supplier',
 		'link_name': 'Sample Supplier',
 		'parenttype':'Address',
 		'parent': ('like', '%-Billing')
-		},'parent')
+		}, 'parent')
+
 	supplier_billing_address = frappe.get_cached_doc('Address', addr_link)
+	email = ', '.join(filter(None, [supplier_billing_address.email_id, company_email]))
+
 	detail = OrderedDict(
 		record_identifier='D',
 		payment_ref_no=sanitize_data(ref_doc.payment_entry),
 		payment_type=cstr(payment_entry.mode_of_payment)[:10],
-		amount=str(ref_doc.amount)[:13],
+		amount=str(format(ref_doc.amount, '.2f'))[:13],
 		payment_date=payment_date,
 		instrument_date=payment_date,
 		instrument_number='',
-		dr_account_no_client=str(payment_entry.bank_account_no)[:20],
+		dr_account_no_client=str(company_bank_acc_no)[:20],
 		dr_description='',
 		dr_ref_no='',
 		cr_ref_no='',
 		bank_code_indicator='M',
 		beneficiary_code='',
 		beneficiary_name=sanitize_data(payment_entry.party, ' ')[:160],
-		beneficiary_bank=sanitize_data(supplier_bank_details.bank, ' ')[:10],
+		beneficiary_bank=sanitize_data(supplier_bank_details.bank)[:10],
 		beneficiary_branch_code=cstr(supplier_bank_details.branch_code),
 		beneficiary_acc_no=supplier_bank_details.bank_account_no,
 		location='',
 		print_location='',
-		beneficiary_address_1=cstr(supplier_billing_address.address_line1)[:50],
-		beneficiary_address_2=cstr(supplier_billing_address.address_line2)[:50],
+		beneficiary_address_1=sanitize_data(cstr(supplier_billing_address.address_line1), ' ')[:50],
+		beneficiary_address_2=sanitize_data(cstr(supplier_billing_address.address_line2), ' ')[:50],
 		beneficiary_address_3='',
 		beneficiary_address_4='',
 		beneficiary_address_5='',
-		beneficiary_city=supplier_billing_address.city,
-		beneficiary_zipcode=cstr(supplier_billing_address.pincode),
-		beneficiary_state=supplier_billing_address.state,
-		beneficiary_email=supplier_billing_address.email_id,
-		beneficiary_mobile=supplier_billing_address.phone,
+		beneficiary_city=supplier_billing_address.city[:20],
+		beneficiary_zipcode=cstr(supplier_billing_address.pincode)[:6],
+		beneficiary_state=supplier_billing_address.state[:20],
+		beneficiary_email=cstr(email)[:255],
+		beneficiary_mobile=cstr(supplier_billing_address.phone),
 		payment_details_1='',
 		payment_details_2='',
 		payment_details_3='',
@@ -119,6 +129,7 @@ def get_detail_row(ref_doc, payment_date):
 		delivery_mode=''
 	)
 	detail_record = ["~".join(list(detail.values()))]
+
 	detail_record += get_advice_rows(payment_entry)
 	return detail_record
 
@@ -136,15 +147,14 @@ def get_advice_rows(payment_entry):
 		advice.append(record.reference_name)
 		advice.append(format_date(record.due_date))
 		advice.append(payment_entry_date)
-		advice += ['']*3
 		advice_rows.append("~".join(advice))
 	return advice_rows
 
 def get_trailer_row(no_of_records, total_amount):
 	''' Returns trailer row '''
 	trailer = ["T"]
-	trailer.append(cstr(no_of_records)[:5]) # 5
-	trailer.append(cstr(total_amount)[:17]) # 17.2
+	trailer.append(cstr(no_of_records)[:5])
+	trailer.append(cstr(format(total_amount, '.2f'))[:17])
 	return "~".join(trailer)
 
 def sanitize_data(val, replace_str=''):
