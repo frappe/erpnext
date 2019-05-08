@@ -464,7 +464,8 @@ def get_timeline_data(doctype, name):
 	group_by='group by date(creation)'
 
 	data = get_communication_data(doctype, name,
-		fields=fields, after=after, group_by=group_by, as_dict=False)
+		fields='date(`tabCommunication`.creation), count(`tabCommunication`.name)', # avoid ambiguous error for communication
+		after=after, group_by=group_by, as_dict=False)
 
 	# fetch and append data from Activity Log
 	data += frappe.db.sql("""select {fields}
