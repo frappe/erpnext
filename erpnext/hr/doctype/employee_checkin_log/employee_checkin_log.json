@@ -1,0 +1,126 @@
+{
+ "allow_import": 1,
+ "autoname": "EMP-CHECKIN-.MM.-.YYYY.-.######",
+ "creation": "2019-04-25 10:17:11.225671",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "employee_name",
+  "log_type",
+  "column_break_4",
+  "time",
+  "device_id",
+  "attendance_marked",
+  "entry_grace_period_consequence",
+  "exit_grace_period_consequence"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Now",
+   "fieldname": "time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "device_id",
+   "fieldtype": "Data",
+   "label": "Location / Device ID"
+  },
+  {
+   "fieldname": "attendance_marked",
+   "fieldtype": "Link",
+   "label": "Attendance Marked",
+   "options": "Attendance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "entry_grace_period_consequence",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Entry Grace Period Consequence"
+  },
+  {
+   "fieldname": "exit_grace_period_consequence",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Exit Grace Period Consequence"
+  },
+  {
+   "fieldname": "log_type",
+   "fieldtype": "Select",
+   "label": "Log Type",
+   "options": "\nIN\nOUT"
+  }
+ ],
+ "modified": "2019-05-08 11:07:56.885960",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Employee Checkin Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "track_changes": 1
+}
