@@ -31,6 +31,10 @@ frappe.ui.form.on('Payment Order', {
 	},
 
 	get_from_payment_entry: function(frm) {
+		// remove if first row is empty
+		if (!frm.doc.references[0].reference_name) {
+			frm.doc.references = [];
+		}
 		erpnext.utils.map_current_doc({
 			method: "erpnext.accounts.doctype.payment_entry.payment_entry.make_payment_order",
 			source_doctype: "Payment Entry",
@@ -42,11 +46,16 @@ frappe.ui.form.on('Payment Order', {
 			get_query_filters: {
 				bank: frm.doc.bank,
 				docstatus: 1,
+				status: ["=", "Initiated"],
 			}
 		});
 	},
 
 	get_from_payment_request: function(frm) {
+		// remove if first row is empty
+		if (!frm.doc.references[0].reference_name) {
+			frm.doc.references = [];
+		}
 		erpnext.utils.map_current_doc({
 			method: "erpnext.accounts.doctype.payment_request.payment_request.make_payment_order",
 			source_doctype: "Payment Request",
