@@ -60,6 +60,10 @@ class Customer(TransactionBase):
 			if self.loyalty_program == customer.loyalty_program and not self.loyalty_program_tier:
 				self.loyalty_program_tier = customer.loyalty_program_tier
 
+		if self.sales_team:
+			if sum([member.allocated_percentage for member in self.sales_team]) != 100:
+				frappe.throw(_("Total contribution percentage should be equal to 100"))
+
 	def check_customer_group_change(self):
 		frappe.flags.customer_group_changed = False
 
