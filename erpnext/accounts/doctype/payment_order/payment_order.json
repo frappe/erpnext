@@ -11,7 +11,7 @@
   "party",
   "column_break_2",
   "posting_date",
-  "bank",
+  "company_bank",
   "company_bank_account",
   "section_break_5",
   "references",
@@ -23,6 +23,7 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
+   "no_copy": 1,
    "options": "PMO-",
    "reqd": 1
   },
@@ -34,6 +35,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval: doc.payment_order_type=='Payment Request';",
    "fieldname": "party",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -50,14 +52,6 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Posting Date"
-  },
-  {
-   "fetch_from": "Company.default_bank",
-   "fieldname": "bank",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Bank",
-   "options": "Bank"
   },
   {
    "fieldname": "section_break_5",
@@ -84,17 +78,27 @@
    "fieldname": "payment_order_type",
    "fieldtype": "Select",
    "label": "Payment Order Type",
-   "options": "\nPayment Request\nPayment Entry"
+   "options": "\nPayment Request\nPayment Entry",
+   "reqd": 1
   },
   {
    "fieldname": "company_bank_account",
    "fieldtype": "Link",
    "label": "Company Bank Account",
-   "options": "Bank Account"
+   "options": "Bank Account",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "company_bank_account.bank",
+   "fieldname": "company_bank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bank",
+   "options": "Bank"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-06 19:57:03.661653",
+ "modified": "2019-05-08 16:00:09.027739",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Order",
