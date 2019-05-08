@@ -1,5 +1,5 @@
 <template>
-    <div class='mt-3 col-md-4 col-sm-12'>
+    <div class='py-3 col-md-4 col-sm-12'>
         <div class="card h-100">
             <div class='card-body'>
                 <router-link :to="'/Program/' + programData.name">

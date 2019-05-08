@@ -1,5 +1,5 @@
 <template>
-<div class='mt-3 col-md-4 col-sm-12'>
+<div class='py-3 col-md-4 col-sm-12'>
     <div class="card h-100">
         <router-link :to="'/Program/' + program.name">
             <div class="card-hero-img" v-if="program.hero_image" v-bind:style="{ 'background-image': 'url(' + image + ')' }"></div>
