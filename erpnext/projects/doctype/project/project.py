@@ -318,7 +318,8 @@ class Project(Document):
 		if not self.get('deleted_task_list'): return
 
 		for d in self.get('deleted_task_list'):
-			frappe.delete_doc("Task", d)
+			# unlink project
+			frappe.db.set_value('Task', d, 'project', '')
 
 		self.deleted_task_list = []
 

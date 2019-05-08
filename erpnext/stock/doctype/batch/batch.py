@@ -9,6 +9,7 @@ from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.utils import flt, cint
 from frappe.utils.jinja import render_template
 from frappe.utils.data import add_days
+from six import string_types
 
 class UnableToSelectBatchError(frappe.ValidationError):
 	pass
@@ -60,7 +61,7 @@ def _make_naming_series_key(prefix):
 	:param prefix: Naming series prefix gotten from Stock Settings
 	:return: The derived key. If no prefix is given, an empty string is returned
 	"""
-	if not unicode(prefix):
+	if not isinstance(prefix, string_types):
 		return ''
 	else:
 		return prefix.upper() + '.#####'
@@ -86,7 +87,7 @@ class Batch(Document):
 	def autoname(self):
 		"""Generate random ID for batch if not specified"""
 		if not self.batch_id:
-			create_new_batch, batch_number_series = frappe.db.get_value('Item', self.item, 
+			create_new_batch, batch_number_series = frappe.db.get_value('Item', self.item,
 				['create_new_batch', 'batch_number_series'])
 
 			if create_new_batch:
