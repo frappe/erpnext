@@ -16,7 +16,7 @@
   "middle_name",
   "last_name",
   "employee_name",
-  "biometric_id",
+  "biometric_rf_id",
   "image",
   "column_break1",
   "company",
@@ -749,7 +749,7 @@
    "label": "Old Parent"
   },
   {
-   "fieldname": "biometric_id",
+   "fieldname": "biometric_rf_id",
    "fieldtype": "Data",
    "label": "Biometric/RF tag ID ",
    "no_copy": 1,
@@ -759,7 +759,7 @@
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2019-05-08 10:53:50.897464",
+ "modified": "2019-05-08 14:32:06.443825",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

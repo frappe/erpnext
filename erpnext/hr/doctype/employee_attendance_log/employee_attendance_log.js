@@ -1,7 +1,7 @@
 // Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Employee Checkin Log', {
+frappe.ui.form.on('Employee Attendance Log', {
 	// refresh: function(frm) {
 
 	// }

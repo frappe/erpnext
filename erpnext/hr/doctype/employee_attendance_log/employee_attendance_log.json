@@ -1,6 +1,6 @@
 {
  "allow_import": 1,
- "autoname": "EMP-CHECKIN-.MM.-.YYYY.-.######",
+ "autoname": "EMP-ATT-LOG-.MM.-.YYYY.-.######",
  "creation": "2019-04-25 10:17:11.225671",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -74,10 +74,10 @@
    "options": "\nIN\nOUT"
   }
  ],
- "modified": "2019-05-08 11:07:56.885960",
+ "modified": "2019-05-08 14:10:22.468252",
  "modified_by": "Administrator",
  "module": "HR",
- "name": "Employee Checkin Log",
+ "name": "Employee Attendance Log",
  "owner": "Administrator",
  "permissions": [
   {
