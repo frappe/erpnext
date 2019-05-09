@@ -22,9 +22,9 @@ frappe.query_reports["DATEV"] = {
 		}
 	],
 	onload: function(query_report) {
-		query_report.export_report = function() {
+		query_report.page.add_inner_button("Download DATEV Export", () => {
 			const filters = JSON.stringify(query_report.get_values());
 			window.open(`/api/method/erpnext.regional.report.datev.datev.download_datev_csv?filters=${filters}`);
-		};
+		});
 	}
 };
