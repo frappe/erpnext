@@ -369,7 +369,9 @@ def make_purchase_receipt(source_name, target_doc=None):
 			"field_map": {
 				"name": "purchase_order_item",
 				"parent": "purchase_order",
-				"bom": "bom"
+				"bom": "bom",
+				"material_request": "material_request",
+				"material_request_item": "material_request_item"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
@@ -403,7 +405,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 			or item.get("buying_cost_center")
 			or item_group.get("buying_cost_center"))
 
-	doc = get_mapped_doc("Purchase Order", source_name,	{
+	fields = {
 		"Purchase Order": {
 			"doctype": "Purchase Invoice",
 			"field_map": {
@@ -426,8 +428,16 @@ def make_purchase_invoice(source_name, target_doc=None):
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",
 			"add_if_empty": True
+		},
+	}
+
+	if frappe.get_single("Accounts Settings").automatically_fetch_payment_terms == 1:
+		fields["Payment Schedule"] = {
+			"doctype": "Payment Schedule",
+			"add_if_empty": True
 		}
-	}, target_doc, postprocess)
+
+	doc = get_mapped_doc("Purchase Order", source_name,	fields, target_doc, postprocess)
 
 	return doc
 
