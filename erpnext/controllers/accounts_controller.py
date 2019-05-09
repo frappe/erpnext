@@ -237,6 +237,10 @@ class AccountsController(TransactionBase):
 				document_type = "{} Item".format(self.doctype)
 				parent_dict.update({"document_type": document_type})
 
+                        # To fix the problems cause by renaming 'customer' to 'party_name- in selling docs
+                        if not parent_dict.get("customer") and parent_dict.get("party_name"):
+                                parent_dict.update({"customer": parent_dict.get("party_name")})
+
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
