@@ -1,0 +1,99 @@
+{
+ "creation": "2019-05-09 15:47:39.760406",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "employee_name",
+  "leave_type",
+  "transaction_type",
+  "transaction_name",
+  "leaves",
+  "from_date",
+  "to_date",
+  "is_carry_forward",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name"
+  },
+  {
+   "fieldname": "leave_type",
+   "fieldtype": "Link",
+   "label": "Leave Type",
+   "options": "Leave Type"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Leave Ledger Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Link",
+   "label": "Transaction Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "transaction_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Transaction Name",
+   "options": "transaction_type"
+  },
+  {
+   "fieldname": "leaves",
+   "fieldtype": "Int",
+   "label": "Leaves"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "is_carry_forward",
+   "fieldtype": "Check",
+   "label": "Is Carry Forward"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2019-05-09 15:54:52.834794",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Leave Ledger Entry",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "ASC"
+}
