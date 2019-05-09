@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-# import frappe
+import frappe
 from frappe.model.document import Document
 from frappe.utils import add_days
 
@@ -17,10 +17,9 @@ def create_leave_ledger_entry(ref_doc, submit=True):
 		employee_name=ref_doc.employee_name,
 		leave_type=ref_doc.leave_type,
 		from_date=ref_doc.from_date,
-		transaction_document_type=ref_doc.doctype,
-		transaction_document_name=ref_doc.name
+		transaction_type=ref_doc.doctype,
+		transaction_name=ref_doc.name
 	)
-
 	if ref_doc.carry_forwarded_leaves:
 		expiry_days = frappe.db.get_value("Leave Type", ref_doc.leave_type, "carry_forward_leave_expiry")
 
@@ -29,11 +28,11 @@ def create_leave_ledger_entry(ref_doc, submit=True):
 			to_date=add_days(ref_doc.from_date, expiry_days) if expiry_days else ref_doc.to_date,
 			is_carry_forward=1
 		))
-		frappe.get_doc(ledger).insert()
+		frappe.get_doc(ledger).submit()
 
 	ledger.update(dict(
 		leaves=ref_doc.new_leaves_allocated * 1 if submit else -1,
 		to_date=ref_doc.to_date,
 		is_carry_forward=0
 	))
-	frappe.get_doc(ledger).insert()
+	frappe.get_doc(ledger).submit()
