@@ -19,6 +19,7 @@ class QualityInspectionNotSubmittedError(frappe.ValidationError): pass
 class StockController(AccountsController):
 	def validate(self):
 		super(StockController, self).validate()
+		print(self)
 		self.validate_inspection()
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
