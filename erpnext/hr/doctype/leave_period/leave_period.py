@@ -114,22 +114,7 @@ def create_leave_allocation(employee, leave_type, new_leaves_allocated, leave_ty
 	allocation.leave_period = leave_period.name
 	if carry_forward_leaves:
 		if leave_type_details.get(leave_type).is_carry_forward:
-			create_carry_forward_leaves_allocation(employee, leave_type, leave_type_details, leave_period, carry_forward_leaves)
-	allocation.save(ignore_permissions=True)
+			allocation.carry_forward = carry_forward_leaves
+	allocation.save(ignore_permissions = True)
 	allocation.submit()
 	return allocation.name
-
-def create_carry_forward_leaves_allocation(employee, leave_type, leave_type_details, leave_period, carry_forward_leaves):
-	carry_forwarded_leaves = get_carry_forwarded_leaves(employee, leave_type, leave_period.from_date)
-	if not carry_forwarded_leaves:
-		return
-	allocation = frappe.new_doc("Leave Allocation")
-	allocation.employee = employee
-	allocation.leave_type = leave_type
-	allocation.from_date = leave_period.from_date
-	allocation.to_date = add_days(leave_period.from_date, leave_type_details.carry_forward_leave_expiry) if not leave_type_details.carry_forward_leave_expiry else leave_period.to_date
-	allocation.leave_period = leave_period.name
-	allocation.carry_forward = carry_forward_leaves
-	allocation.carry_forwarded_leaves = carry_forwarded_leaves
-	allocation.save(ignore_permissions=True)
-	allocation.submit()
