@@ -5,6 +5,7 @@ from six import string_types
 import frappe
 from frappe.utils import format_datetime
 from frappe import _
+import pandas as pd
 
 
 def execute(filters=None):
@@ -19,35 +20,38 @@ def validate_filters(filters):
 	if not filters.get('company'):
 		frappe.throw(_('{0} is mandatory').format(_('Company')))
 
-	if not filters.get('fiscal_year'):
-		frappe.throw(_('{0} is mandatory').format(_('Fiscal Year')))
+	if not filters.get('from_date'):
+		frappe.throw(_('{0} is mandatory').format(_('From Date')))
+
+	if not filters.get('to_date'):
+		frappe.throw(_('{0} is mandatory').format(_('To Date')))
 
 
 def get_columns():
 	columns = [
 		{
 			"label": "Umsatz (ohne Soll/Haben-Kz)",
-			"fieldname": "umsatz",
+			"fieldname": "Umsatz (ohne Soll/Haben-Kz)",
 			"fieldtype": "Currency",
 		},
 		{
 			"label": "Soll/Haben-Kennzeichen",
-			"fieldname": "soll_haben_kennzeichen",
+			"fieldname": "Soll/Haben-Kennzeichen",
 			"fieldtype": "Data",
 		},
 		{
 			"label": "Kontonummer",
-			"fieldname": "kontonummer",
+			"fieldname": "Kontonummer",
 			"fieldtype": "Data",
 		},
 		{
 			"label": "Gegenkonto (ohne BU-Schlüssel)",
-			"fieldname": "gegenkonto_nummer",
+			"fieldname": "Gegenkonto (ohne BU-Schlüssel)",
 			"fieldtype": "Data",
 		},
 		{
 			"label": "Belegdatum",
-			"fieldname": "belegdatum",
+			"fieldname": "Belegdatum",
 			"fieldtype": "Date",
 		}
 	]
@@ -59,11 +63,11 @@ def get_gl_entries(filters, as_dict):
 	gl_entries = frappe.db.sql("""
 		select
 
-			case gl.debit when 0 then gl.credit else gl.debit end as Umsatz,
-			case gl.debit when 0 then 'H' else 'S' end as Kennzeichen,
-			coalesce(acc.account_number, acc_pa.account_number) as Kontonummer,
-			coalesce(acc_against.account_number, acc_against_pa.account_number) as Gegenkonto,
-			gl.posting_date as Belegdatum
+			case gl.debit when 0 then gl.credit else gl.debit end as 'Umsatz (ohne Soll/Haben-Kz)',
+			case gl.debit when 0 then 'H' else 'S' end as 'Soll/Haben-Kennzeichen',
+			coalesce(acc.account_number, acc_pa.account_number) as 'Kontonummer',
+			coalesce(acc_against.account_number, acc_against_pa.account_number) as 'Gegenkonto (ohne BU-Schlüssel)',
+			gl.posting_date as 'Belegdatum'
 
 		from `tabGL Entry` gl
 
@@ -87,36 +91,121 @@ def get_gl_entries(filters, as_dict):
 			left join `tabAccount` acc_against_pa 
 			on pa.account = acc_against_pa.name
 
-		where gl.company=%(company)s and gl.fiscal_year=%(fiscal_year)s
-		order by 'Belegdatum:Date', voucher_no""", filters, as_dict=as_dict)
+		where gl.company = %(company)s 
+		and DATE(gl.posting_date) >= %(from_date)s
+		and DATE(gl.posting_date) <= %(to_date)s
+		order by 'Belegdatum', gl.voucher_no""", filters, as_dict=as_dict)
 
 	return gl_entries
 
 
 def get_datev_csv(data):
-	title_row = [
+	columns = [
+		# Umsatz
 		"Umsatz (ohne Soll/Haben-Kz)",
 		"Soll/Haben-Kennzeichen",
+		"WKZ Umsatz",
+		"Kurs",
+		"Basis-Umsatz",
+		"WKZ Basis-Umsatz",
+		# Konto/Gegenkonto
 		"Kontonummer",
 		"Gegenkonto (ohne BU-Schlüssel)",
-		"Belegdatum"
+		"BU-Schlüssel",
+		# Datum
+		"Belegdatum",
+		# Belegfelder
+		"Belegfeld 1",
+		"Belegfeld 2",
+		# Weitere Felder
+		"Skonto",
+		"Buchungstext",
+		# OPOS-Informationen
+		"Postensperre",
+		"Diverse Adressnummer",
+		"Geschäftspartnerbank",
+		"Sachverhalt",
+		"Zinssperre",
+		# Digitaler Beleg
+		"Beleglink",
+		# Kostenrechnung
+		"Kost 1 - Kostenstelle",
+		"Kost 2 - Kostenstelle",
+		"Kost-Menge",
+		# Steuerrechnung
+		"EU-Land u. UStID",
+		"EU-Steuersatz",
+		"Abw. Versteuerungsart",
+		# L+L Sachverhalt
+		"Sachverhalt L+L",
+		"FunktionsergänzungL+L",
+		# Mengenfelder LuF
+		"Stück",
+		"Gewicht",
+		# Forderungsart
+		"Zahlweise",
+		"Forderungsart",
+		"Veranlagungsjahr",
+		"Zugeordnete Fälligkeit",
+		# Weitere Felder
+		"Skontotyp",
+		# Anzahlungen
+		"Auftragsnummer",
+		"Buchungstyp",
+		"USt-Schlüssel (Anzahlungen)",
+		"EU-Land (Anzahlungen)",
+		"Sachverhalt L+L (Anzahlungen)",
+		"EU-Steuersatz (Anzahlungen)",
+		"Erlöskonto (Anzahlungen)",
+		# Stapelinformationen
+		"Herkunft-Kz",
+		# Technische Identifikation
+		"Buchungs GUID",
+		# Kostenrechnung
+		"Kost-Datum",
+		# OPOS-Informationen
+		"SEPA-Mandatsreferenz",
+		"Skontosperre",
+		# Gesellschafter und Sonderbilanzsachverhalt
+		"Gesellschaftername",
+		"Beteiligtennummer",
+		"Identifikationsnummer",
+		"Zeichnernummer",
+		# OPOS-Informationen
+		"Postensperre bis",
+		# Gesellschafter und Sonderbilanzsachverhalt
+		"Bezeichnung SoBil-Sachverhalt",
+		"Kennzeichen SoBil-Buchung",
+		# Stapelinformationen
+		"Festschreibung",
+		# Datum
+		"Leistungsdatum",
+		"Datum Zuord. Steuerperiode",
+		# OPOS-Informationen
+		"Fälligkeit",
+		# Konto/Gegenkonto
+		"Generalumkehr (GU)",
+		# Steuersatz für Steuerschlüssel
+		"Steuersatz",
+		"Land"
 	]
 
-	result = ['"' + '";"'.join(title_row) + '"']
-	result += [
-		';'.join(
-			[
-				'{:.2f}'.format(d.get('Umsatz')).replace('.', ','),
-				'"{}"'.format(d.get('Kennzeichen')),
-				d.get('Kontonummer'),
-				# Can be empty, if there are no debtor / creditor accounts
-				d.get('Gegenkonto') or '',
-				format_datetime(d.get('Belegdatum'), 'ddMMyyyy')
-			]
-		) for d in data
-	]
+	empty_df = pd.DataFrame(columns=columns)
 
-	return b'\r\n'.join(result).encode(encoding='latin_1')
+	data_df = pd.DataFrame.from_records(data)
+	data_df["Belegdatum"] = pd.to_datetime(data_df["Belegdatum"])
+
+	result = empty_df.append(data_df)
+
+	return result.to_csv(
+		sep=b';',
+		decimal=',',
+		encoding='latin_1',
+		date_format='%d%m',
+		line_terminator=b'\r\n',
+		index=False,
+		columns=columns
+	)
 
 
 @frappe.whitelist()

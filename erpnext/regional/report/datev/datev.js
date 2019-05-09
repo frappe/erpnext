@@ -9,11 +9,15 @@ frappe.query_reports["DATEV"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname": "fiscal_year",
-			"label": __("Fiscal Year"),
-			"fieldtype": "Link",
-			"options": "Fiscal Year",
-			"default": frappe.defaults.get_user_default("fiscal_year"),
+			"fieldname": "from_date",
+			"label": __("From Date"),
+			"fieldtype": "Date",
+			"reqd": 1
+		},
+		{
+			"fieldname": "to_date",
+			"label": __("To Date"),
+			"fieldtype": "Date",
 			"reqd": 1
 		}
 	],
