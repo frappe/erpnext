@@ -191,7 +191,7 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 		frappe.xcall('erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.create_bank_entries',
 			{columns: this.datatable.datamanager.columns, data: this.datatable.datamanager.data, bank_account: me.parent.bank_account}
 		).then((result) => {
-			let result_title = __("{0} bank transaction(s) created", [result])
+			let result_title = result.errors == 0 ? __("{0} bank transaction(s) created", [result.success]) : __("{0} bank transaction(s) created and {1} errors", [result.success, result.errors])
 			let result_msg = `
 				<div class="flex justify-center align-center text-muted" style="height: 50vh; display: flex;">
 					<h5 class="text-muted">${result_title}</h5>
@@ -199,7 +199,11 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 			me.parent.page.clear_primary_action();
 			me.parent.$main_section.empty();
 			me.parent.$main_section.append(result_msg);
-			frappe.show_alert({message:__("All bank transactions have been created"), indicator:'green'});
+			if (result.errors == 0) {
+				frappe.show_alert({message:__("All bank transactions have been created"), indicator:'green'});
+			} else {
+				frappe.show_alert({message:__("Please check the error log for details about the import errors"), indicator:'red'});
+			}
 		})
 	}
 }
@@ -530,11 +534,13 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 			.then(doc => {
 				let displayed_docs = []
 				if (dt === "Payment Entry") {
-					doc.currency = doc.payment_type == "Receive" ? doc.paid_to_account_currency : doc.paid_from_account_currency;
-					displayed_docs.push(doc);
+					payment.currency = doc.payment_type == "Receive" ? doc.paid_to_account_currency : doc.paid_from_account_currency;
+					payment.doctype = dt
+					displayed_docs.push(payment);
 				} else if (dt === "Journal Entry") {
 					doc.accounts.forEach(payment => {
 						if (payment.account === me.gl_account) {
+							payment.doctype = dt;
 							payment.posting_date = doc.posting_date;
 							payment.party = doc.pay_to_recd_from;
 							payment.reference_no = doc.cheque_no;
@@ -548,6 +554,7 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 				} else if (dt === "Sales Invoice") {
 					doc.payments.forEach(payment => {
 						if (payment.clearance_date === null || payment.clearance_date === "") {
+							payment.doctype = dt;
 							payment.posting_date = doc.posting_date;
 							payment.party = doc.customer;
 							payment.reference_no = doc.remarks;

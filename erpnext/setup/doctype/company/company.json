@@ -22,7 +22,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "details", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -47,7 +46,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -55,7 +54,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "company_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -81,7 +79,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 1
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -90,7 +88,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "description": "", 
-   "fetch_if_empty": 0, 
    "fieldname": "abbr", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -116,7 +113,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -124,8 +121,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "depends_on": "eval:!doc.__islocal && in_list(frappe.user_roles, \"System Manager\")", 
-   "fetch_if_empty": 0, 
+   "depends_on": "eval:!doc.__islocal && in_list(frappe.user_roles,  \"System Manager\")", 
    "fieldname": "change_abbr", 
    "fieldtype": "Button", 
    "hidden": 0, 
@@ -149,7 +145,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -157,7 +153,6 @@
    "bold": 1, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "is_group", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -182,7 +177,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -190,7 +185,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "default_finance_book", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -216,7 +210,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -224,7 +218,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "cb0", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -247,7 +240,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -255,7 +248,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "domain", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -280,7 +272,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -288,7 +280,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "parent_company", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -314,7 +305,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -322,7 +313,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "sb_about", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -347,7 +337,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -355,7 +345,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "company_logo", 
    "fieldtype": "Attach Image", 
    "hidden": 0, 
@@ -380,7 +369,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -388,7 +377,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "company_description", 
    "fieldtype": "Text Editor", 
    "hidden": 0, 
@@ -413,7 +401,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -421,7 +409,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "sales_settings", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -446,7 +433,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -454,7 +441,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "sales_monthly_history", 
    "fieldtype": "Small Text", 
    "hidden": 1, 
@@ -479,7 +465,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -487,7 +473,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "transactions_annual_history", 
    "fieldtype": "Code", 
    "hidden": 1, 
@@ -512,7 +497,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -520,7 +505,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "monthly_sales_target", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -546,7 +530,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -554,7 +538,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "column_break_goals", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -578,7 +561,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -586,7 +569,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "total_monthly_sales", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -612,7 +594,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -620,7 +602,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "charts_section", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -644,7 +625,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -652,7 +633,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "default_currency", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -677,7 +657,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -685,7 +665,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "default_letter_head", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -711,7 +690,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -719,7 +698,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "default_holiday_list", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -745,7 +723,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -753,7 +731,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "standard_working_hours", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -778,7 +755,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -786,7 +763,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "default_terms", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -811,7 +787,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -819,7 +795,39 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
+   "fieldname": "default_warehouse_for_sales_return", 
+   "fieldtype": "Link", 
+   "hidden": 0, 
+   "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
+   "in_list_view": 1, 
+   "in_standard_filter": 0, 
+   "label": "Default warehouse for Sales Return", 
+   "length": 0, 
+   "no_copy": 0, 
+   "options": "Warehouse", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 0, 
+   "print_hide_if_no_value": 0, 
+   "read_only": 0, 
+   "remember_last_selected_value": 0, 
+   "report_hide": 0, 
+   "reqd": 0, 
+   "search_index": 0, 
+   "set_only_once": 0, 
+   "translatable": 0, 
+   "unique": 0
+  },
+  {
+   "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
+   "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
+   "columns": 0, 
    "fieldname": "column_break_10", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -843,7 +851,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -851,7 +859,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "country", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -876,7 +883,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -884,7 +891,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "create_chart_of_accounts_based_on", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -910,7 +916,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -919,7 +925,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:doc.create_chart_of_accounts_based_on===\"Standard Template\"", 
-   "fetch_if_empty": 0, 
    "fieldname": "chart_of_accounts", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -945,7 +950,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -954,7 +959,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:doc.create_chart_of_accounts_based_on===\"Existing Company\"", 
-   "fetch_if_empty": 0, 
    "fieldname": "existing_company", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -980,7 +984,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -988,7 +992,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "tax_id", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -1013,7 +1016,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1021,7 +1024,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "date_of_establishment", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -1046,7 +1048,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1054,7 +1056,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "default_settings", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -1079,7 +1080,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1088,7 +1089,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:!doc.__islocal", 
-   "fetch_if_empty": 0, 
    "fieldname": "default_bank_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1115,7 +1115,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1124,7 +1124,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:!doc.__islocal", 
-   "fetch_if_empty": 0, 
    "fieldname": "default_cash_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1149,7 +1148,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1158,7 +1157,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:!doc.__islocal", 
-   "fetch_if_empty": 0, 
    "fieldname": "default_receivable_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1185,7 +1183,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1193,7 +1191,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "round_off_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1219,7 +1216,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1227,7 +1224,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "round_off_cost_center", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1253,7 +1249,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1261,7 +1257,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "write_off_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1287,7 +1282,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1295,7 +1290,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "discount_allowed_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1321,7 +1315,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1329,7 +1323,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "discount_received_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1355,7 +1348,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1363,7 +1356,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "exchange_gain_loss_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1389,7 +1381,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1397,7 +1389,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "unrealized_exchange_gain_loss_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1423,7 +1414,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1431,7 +1422,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "column_break0", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -1456,41 +1446,7 @@
    "translatable": 0, 
    "unique": 0, 
    "width": "50%"
-  }, 
-  {
-   "allow_bulk_edit": 0, 
-   "allow_in_quick_entry": 0, 
-   "allow_on_submit": 0, 
-   "bold": 0, 
-   "collapsible": 0, 
-   "columns": 0, 
-   "depends_on": "eval:doc.parent_company", 
-   "fetch_if_empty": 0, 
-   "fieldname": "allow_account_creation_against_child_company", 
-   "fieldtype": "Check", 
-   "hidden": 0, 
-   "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
-   "in_filter": 0, 
-   "in_global_search": 0, 
-   "in_list_view": 0, 
-   "in_standard_filter": 0, 
-   "label": "Allow Account Creation Against Child Company", 
-   "length": 0, 
-   "no_copy": 0, 
-   "permlevel": 0, 
-   "precision": "", 
-   "print_hide": 0, 
-   "print_hide_if_no_value": 0, 
-   "read_only": 0, 
-   "remember_last_selected_value": 0, 
-   "report_hide": 0, 
-   "reqd": 0, 
-   "search_index": 0, 
-   "set_only_once": 0, 
-   "translatable": 0, 
-   "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1499,7 +1455,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:!doc.__islocal", 
-   "fetch_if_empty": 0, 
    "fieldname": "default_payable_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1526,7 +1481,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1534,7 +1489,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "default_employee_advance_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1560,7 +1514,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1569,7 +1523,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:!doc.__islocal", 
-   "fetch_if_empty": 0, 
    "fieldname": "default_expense_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1594,7 +1547,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1603,7 +1556,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:!doc.__islocal", 
-   "fetch_if_empty": 0, 
    "fieldname": "default_income_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1628,7 +1580,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1637,7 +1589,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:!doc.__islocal", 
-   "fetch_if_empty": 0, 
    "fieldname": "default_deferred_revenue_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1663,7 +1614,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1672,7 +1623,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:!doc.__islocal", 
-   "fetch_if_empty": 0, 
    "fieldname": "default_deferred_expense_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1698,7 +1648,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1707,7 +1657,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:!doc.__islocal", 
-   "fetch_if_empty": 0, 
    "fieldname": "default_payroll_payable_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1733,7 +1682,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1742,7 +1691,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:!doc.__islocal", 
-   "fetch_if_empty": 0, 
    "fieldname": "default_expense_claim_payable_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1768,7 +1716,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1776,7 +1724,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "section_break_22", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -1800,7 +1747,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1809,7 +1756,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:!doc.__islocal", 
-   "fetch_if_empty": 0, 
    "fieldname": "cost_center", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1834,7 +1780,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1842,7 +1788,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "column_break_26", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -1866,7 +1811,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1875,7 +1820,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:!doc.__islocal", 
-   "fetch_if_empty": 0, 
    "fieldname": "credit_limit", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -1902,7 +1846,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1911,7 +1855,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "", 
-   "fetch_if_empty": 0, 
    "fieldname": "payment_terms", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1937,7 +1880,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1946,7 +1889,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:!doc.__islocal", 
-   "fetch_if_empty": 0, 
    "fieldname": "auto_accounting_for_stock_settings", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -1970,7 +1912,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -1979,7 +1921,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "default": "1", 
-   "fetch_if_empty": 0, 
    "fieldname": "enable_perpetual_inventory", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -2004,7 +1945,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2012,7 +1953,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "default_inventory_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -2038,7 +1978,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2046,7 +1986,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "stock_adjustment_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -2071,7 +2010,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2079,7 +2018,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "column_break_32", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -2103,7 +2041,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2111,7 +2049,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "stock_received_but_not_billed", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -2136,7 +2073,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2144,7 +2081,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "expenses_included_in_valuation", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -2169,7 +2105,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2177,7 +2113,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "fixed_asset_depreciation_settings", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -2202,7 +2137,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2210,7 +2145,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "accumulated_depreciation_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -2236,7 +2170,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2244,7 +2178,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "depreciation_expense_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -2270,7 +2203,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2278,7 +2211,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "series_for_depreciation_entry", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -2303,7 +2235,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2311,7 +2243,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "expenses_included_in_asset_valuation", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -2337,7 +2268,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2345,7 +2276,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "column_break_40", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -2369,7 +2299,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2377,7 +2307,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "disposal_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -2403,7 +2332,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2411,7 +2340,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "depreciation_cost_center", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -2437,7 +2365,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2445,7 +2373,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "capital_work_in_progress_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -2471,7 +2398,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2479,7 +2406,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "asset_received_but_not_billed", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -2505,7 +2431,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2513,7 +2439,6 @@
    "bold": 0, 
    "collapsible": 1, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "budget_detail", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -2538,7 +2463,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2546,7 +2471,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "exception_budget_approver_role", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -2572,7 +2496,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2581,7 +2505,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "description": "For reference only.", 
-   "fetch_if_empty": 0, 
    "fieldname": "company_info", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -2605,7 +2528,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2613,7 +2536,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "date_of_incorporation", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -2638,7 +2560,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2646,7 +2568,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "address_html", 
    "fieldtype": "HTML", 
    "hidden": 0, 
@@ -2670,7 +2591,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2678,7 +2599,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "column_break1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -2703,7 +2623,7 @@
    "translatable": 0, 
    "unique": 0, 
    "width": "50%"
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2712,7 +2632,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "depends_on": "eval:doc.date_of_incorporation", 
-   "fetch_if_empty": 0, 
    "fieldname": "date_of_commencement", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -2737,7 +2656,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2745,7 +2664,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "phone_no", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -2772,7 +2690,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2780,7 +2698,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "fax", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -2807,7 +2724,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2815,7 +2732,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "email", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -2842,7 +2758,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2850,7 +2766,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "website", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -2876,7 +2791,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2885,7 +2800,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "description": "", 
-   "fetch_if_empty": 0, 
    "fieldname": "registration_info", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -2911,7 +2825,7 @@
    "translatable": 0, 
    "unique": 0, 
    "width": "50%"
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2920,7 +2834,6 @@
    "collapsible": 0, 
    "columns": 0, 
    "description": "Company registration numbers for your reference. Tax numbers etc.", 
-   "fetch_if_empty": 0, 
    "fieldname": "registration_details", 
    "fieldtype": "Code", 
    "hidden": 0, 
@@ -2946,7 +2859,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2954,7 +2867,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "delete_company_transactions", 
    "fieldtype": "Button", 
    "hidden": 0, 
@@ -2979,7 +2891,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -2987,7 +2899,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "lft", 
    "fieldtype": "Int", 
    "hidden": 1, 
@@ -3012,7 +2923,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -3020,7 +2931,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "rgt", 
    "fieldtype": "Int", 
    "hidden": 1, 
@@ -3045,7 +2955,7 @@
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -3053,7 +2963,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fetch_if_empty": 0, 
    "fieldname": "old_parent", 
    "fieldtype": "Data", 
    "hidden": 1, 
@@ -3093,7 +3002,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2019-03-26 17:15:50.390548", 
+ "modified": "2019-02-26 13:24:55.386120", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 
@@ -3117,7 +3026,7 @@
    "share": 1, 
    "submit": 0, 
    "write": 1
-  }, 
+  },
   {
    "amend": 0, 
    "cancel": 0, 
@@ -3136,7 +3045,7 @@
    "share": 0, 
    "submit": 0, 
    "write": 0
-  }, 
+  },
   {
    "amend": 0, 
    "cancel": 0, 
@@ -3155,7 +3064,7 @@
    "share": 0, 
    "submit": 0, 
    "write": 0
-  }, 
+  },
   {
    "amend": 0, 
    "cancel": 0, 
@@ -3174,7 +3083,7 @@
    "share": 0, 
    "submit": 0, 
    "write": 0
-  }, 
+  },
   {
    "amend": 0, 
    "cancel": 0, 
@@ -3193,7 +3102,7 @@
    "share": 0, 
    "submit": 0, 
    "write": 0
-  }, 
+  },
   {
    "amend": 0, 
    "cancel": 0, 
@@ -3212,7 +3121,7 @@
    "share": 0, 
    "submit": 0, 
    "write": 0
-  }, 
+  },
   {
    "amend": 0, 
    "cancel": 0, 
