@@ -585,7 +585,7 @@ $.extend(erpnext.item, {
 				"label": row.attribute,
 				"fieldname": row.attribute,
 				"fieldtype": fieldtype,
-				"reqd": 1,
+				"reqd": 0,
 				"description": desc
 			})
 		}
@@ -600,6 +600,7 @@ $.extend(erpnext.item, {
 			if(!args) return;
 			frappe.call({
 				method:"erpnext.controllers.item_variant.get_variant",
+				btn: d.get_primary_btn(),
 				args: {
 					"template": frm.doc.name,
 					"args": d.get_values()

@@ -800,10 +800,12 @@ class Item(WebsiteGenerator):
 
 	def validate_variant_attributes(self):
 		if self.is_new() and self.variant_of and self.variant_based_on == 'Item Attribute':
+			# remove attributes with no attribute_value set
+			self.attributes = [d for d in self.attributes if cstr(d.attribute_value).strip()]
+
 			args = {}
-			for d in self.attributes:
-				if cstr(d.attribute_value).strip() == '':
-					frappe.throw(_("Please specify Attribute Value for attribute {0}").format(d.attribute))
+			for i, d in enumerate(self.attributes):
+				d.idx = i + 1
 				args[d.attribute] = d.attribute_value
 
 			variant = get_variant(self.variant_of, args, self.name)
