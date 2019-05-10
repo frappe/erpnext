@@ -39,7 +39,9 @@ def add_payment_to_transaction(transaction, payment_entry, gl_entry):
 		"payment_entry": payment_entry.name,
 		"allocated_amount": allocated_amount
 	})
+
 	transaction.save()
+	transaction.update_allocations()
 
 @frappe.whitelist()
 def get_linked_payments(bank_transaction):
