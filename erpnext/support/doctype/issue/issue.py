@@ -71,8 +71,8 @@ class Issue(Document):
 
 		if self.status=="Closed" and status !="Closed":
 			self.resolution_date = now()
-			if not frappe.db.get_value("Issue", self.name, "agreement_fulfilled") == "Ongoing":
-				self.set_service_level_agreement_variance(issue=self.name)
+			if frappe.db.get_value("Issue", self.name, "agreement_fulfilled") == "Ongoing":
+				set_service_level_agreement_variance(issue=self.name)
 				self.update_agreement_status()
 
 		if self.status=="Open" and status !="Open":
