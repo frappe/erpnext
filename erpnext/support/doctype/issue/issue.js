@@ -5,7 +5,7 @@ frappe.ui.form.on("Issue", {
 
 	refresh: function (frm) {
 
-		if (frm.doc.status !== "Closed") {
+		if (frm.doc.status !== "Closed" && frm.doc.agreement_fulfilled === "Ongoing") {
 			if (frm.doc.service_level_agreement) {
 				set_time_to_resolve_and_response(frm);
 			}
@@ -25,14 +25,14 @@ frappe.ui.form.on("Issue", {
 			if (frm.doc.service_level_agreement) {
 				frm.dashboard.clear_headline();
 
-				let agreement_status = (frm.doc.agreement_status == "Fulfilled") ?
+				let agreement_fulfilled = (frm.doc.agreement_fulfilled == "Fulfilled") ?
 						{"indicator": "green", "msg": "Service Level Agreement has been fulfilled"} :
 						{"indicator": "red", "msg": "Service Level Agreement Failed"};
 
 					frm.dashboard.set_headline_alert(
 					'<div class="row">' +
 						'<div class="col-xs-12">' +
-							'<span class="indicator whitespace-nowrap '+ agreement_status.indicator +'"><span class="hidden-xs">'+ agreement_status.msg +'</span></span> ' +
+							'<span class="indicator whitespace-nowrap '+ agreement_fulfilled.indicator +'"><span class="hidden-xs">'+ agreement_fulfilled.msg +'</span></span> ' +
 						'</div>' +
 					'</div>'
 				);
@@ -112,8 +112,8 @@ frappe.ui.form.on("Issue", {
 function set_time_to_resolve_and_response(frm) {
 	frm.dashboard.clear_headline();
 
-	var time_to_respond = get_time_left(frm.doc.response_by, frm.doc.agreement_status);
-	var time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_status);
+	var time_to_respond = get_time_left(frm.doc.response_by, frm.doc.agreement_fulfilled);
+	var time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_fulfilled);
 
 	frm.dashboard.set_headline_alert(
 		'<div class="row">' +
@@ -127,9 +127,9 @@ function set_time_to_resolve_and_response(frm) {
 	);
 }
 
-function get_time_left(timestamp, agreement_status) {
+function get_time_left(timestamp, agreement_fulfilled) {
 	const diff = moment(timestamp).diff(moment());
 	const diff_display = diff >= 44500 ? moment.duration(diff).humanize() : moment(0, 'seconds').format('HH:mm');
-	let indicator = (diff_display == '00:00' && agreement_status != "Fulfilled") ? "red" : "green";
+	let indicator = (diff_display == '00:00' && agreement_fulfilled != "Fulfilled") ? "red" : "green";
 	return {"diff_display": diff_display, "indicator": indicator};
 }
