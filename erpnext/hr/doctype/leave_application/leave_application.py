@@ -10,6 +10,7 @@ from erpnext.hr.utils import set_employee_name, get_leave_period
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import daterange
+from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
 
 class LeaveDayBlockedError(frappe.ValidationError): pass
 class OverlapError(frappe.ValidationError): pass
@@ -50,6 +51,7 @@ class LeaveApplication(Document):
 
 		# notify leave applier about approval
 		self.notify_employee()
+		self.create_leave_ledger_entry()
 		self.reload()
 
 	def on_cancel(self):
@@ -57,6 +59,7 @@ class LeaveApplication(Document):
 		# notify leave applier about cancellation
 		self.notify_employee()
 		self.cancel_attendance()
+		self.create_leave_ledger_entry(submit=False)
 
 	def validate_applicable_after(self):
 		if self.leave_type:
@@ -346,6 +349,14 @@ class LeaveApplication(Document):
 			except frappe.OutgoingEmailError:
 				pass
 
+	def create_leave_ledger_entry(self, submit=True):
+		args = dict(
+			leaves=self.total_leave_days * -1 if submit else 1,
+			to_date=self.to_date,
+			is_carry_forward=0
+		)
+		create_leave_ledger_entry(self, args)
+
 @frappe.whitelist()
 def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day = None, half_day_date = None):
 	number_of_days = 0
@@ -383,6 +394,16 @@ def get_leave_details(employee, date):
 	}
 
 	return ret
+
+@frappe.whitelist()
+def get_leave_balance(employee, leave_type, date):
+	leave_records = frappe.get_all("Leave Ledger Entry",
+	filters={'Employee':employee,
+	'leave_type':leave_type,
+	'to_date':("<=", date)},
+	fields=['leaves'])
+
+	return sum(record.get("leaves") for record in leave_records)
 
 @frappe.whitelist()
 def get_leave_balance_on(employee, leave_type, date, allocation_records=None, docname=None,

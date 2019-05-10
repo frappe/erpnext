@@ -42,10 +42,10 @@ class LeaveAllocation(Document):
 				.format(self.leave_type, self.employee))
 
 	def on_submit(self):
-		create_leave_ledger_entry(self)
+		self.create_leave_ledger_entry()
 
-	def on_cancel(self):
-		create_leave_ledger_entry(self)
+	# def before_cancel(self):
+	# 	self.create_leave_ledger_entry(submit=False)
 
 	def on_update_after_submit(self):
 		self.validate_new_leaves_allocated_value()
@@ -117,6 +117,24 @@ class LeaveAllocation(Document):
 				frappe.msgprint(_("Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken))
 			else:
 				frappe.throw(_("Total allocated leaves {0} cannot be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken), LessAllocationError)
+
+	def create_leave_ledger_entry(self, submit=True):
+		if self.carry_forwarded_leaves:
+			expiry_days = frappe.db.get_value("Leave Type", self.leave_type, "carry_forward_leave_expiry")
+
+			args = dict(
+				leaves=self.carry_forwarded_leaves * 1 if submit else -1,
+				to_date=add_days(self.from_date, expiry_days) if expiry_days else self.to_date,
+				is_carry_forward=1
+			)
+			create_leave_ledger_entry(self, args)
+
+		args = dict(
+			leaves=self.new_leaves_allocated * 1 if submit else -1,
+			to_date=self.to_date,
+			is_carry_forward=0
+		)
+		create_leave_ledger_entry(self, args)
 
 def get_leave_allocation_for_period(employee, leave_type, from_date, to_date):
 	leave_allocated = 0
