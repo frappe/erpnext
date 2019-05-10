@@ -471,6 +471,7 @@ def allow_to_make_project_update(project, time, frequency):
 	data = frappe.db.sql(""" SELECT name from `tabProject Update`
 		WHERE project = %s and date = %s """, (project, today()))
 
+	# len(data) > 1 condition is checked for twicely frequency
 	if data and (frequency in ['Daily', 'Weekly'] or len(data) > 1):
 		return False
 
