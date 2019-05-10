@@ -39,7 +39,7 @@ def get_columns():
 
 def get_item_details():
 	item_map = {}
-	for item in frappe.db.sql("""SELECT name, item_name, description, stock_uom 
+	for item in frappe.db.sql("""SELECT name, item_name, description, stock_uom
 								from `tabItem`""", as_dict=1):
 		item_map.setdefault(item.name, item)
 	return item_map
