@@ -13,28 +13,27 @@ def execute(filters=None):
 	item_map = get_item_details()
 	data = []
 	for sbom, warehouse in iwq_map.items():
-			total = 0
-			total_qty = 0
+		total = 0
+		total_qty = 0
+		
+		for wh, item_qty in warehouse.items():
+			total += 1
+			row = [sbom, item_map.get(sbom).item_name, item_map.get(sbom).description, 
+					item_map.get(sbom).stock_uom, wh]
+			available_qty = item_qty
+			total_qty += flt(available_qty)
+			row += [available_qty]
 			
-			for wh, item_qty in warehouse.items():
-					total += 1
-					row = [sbom, item_map.get(sbom).item_name, item_map.get(sbom).description, 
-							item_map.get(sbom).stock_uom, wh]
-					available_qty = item_qty
-					total_qty += flt(available_qty)
-					row += [available_qty]
-					
-					if available_qty:
-							data.append(row)
-							if (total == len(warehouse)):
-									row = ["", "", "Total", "", "", total_qty]
-									data.append(row)
-
+			if available_qty:
+				data.append(row)
+				if (total == len(warehouse)):
+					row = ["", "", "Total", "", "", total_qty]
+					data.append(row)
 	return columns, data
 		
 def get_columns():
 	columns = ["Item Code:Link/Item:100", "Item Name::100", "Description::120", \
-					"UOM:Link/UOM:80", "Warehouse:Link/Warehouse:100", "Quantity::100"]
+				"UOM:Link/UOM:80", "Warehouse:Link/Warehouse:100", "Quantity::100"]
 
 	return columns
 
@@ -42,7 +41,7 @@ def get_item_details():
 	item_map = {}
 	for item in frappe.db.sql("""SELECT name, item_name, description, stock_uom 
 								from `tabItem`""", as_dict=1):
-					item_map.setdefault(item.name, item)
+		item_map.setdefault(item.name, item)
 	return item_map
 
 def get_item_warehouse_quantity_map():
@@ -72,8 +71,8 @@ def get_item_warehouse_quantity_map():
 	last_sbom = ""
 	sbom_map = {}
 	for line in result:
-			if line.get("parent") != last_sbom:
-					last_sbom = line.get("parent")
-					actual_dict = sbom_map.setdefault(last_sbom, {})
-			actual_dict.setdefault(line.get("warehouse"), line.get("qty"))
+		if line.get("parent") != last_sbom:
+			last_sbom = line.get("parent")
+			actual_dict = sbom_map.setdefault(last_sbom, {})
+		actual_dict.setdefault(line.get("warehouse"), line.get("qty"))
 	return sbom_map
