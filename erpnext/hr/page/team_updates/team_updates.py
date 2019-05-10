@@ -8,11 +8,14 @@ def get_data(start=0):
 	#frappe.only_for('Employee', 'System Manager')
 	limit = 40
 	data = frappe.db.sql("""
-			select `tabCommunication`.content, `tabCommunication`.text_content, `tabCommunication`.sender, `tabCommunication`.creation
+			select `tabCommunication`.content,
+					`tabCommunication`.text_content,
+					`tabCommunication`.sender,
+					`tabCommunication`.creation
 			from `tabCommunication`
-			inner join `tabDynamic Link`
-			on `tabCommunication`.name=`tabDynamic Link`.parent where
-			`tabDynamic Link`.link_doctype='Daily Work Summary'
+				inner join `tabDynamic Link`
+					on `tabCommunication`.name=`tabDynamic Link`.parent
+			where `tabDynamic Link`.link_doctype='Daily Work Summary'
 			order by `tabCommunication`.creation desc
 			limit %(start)s, %(limit)s
 		""",

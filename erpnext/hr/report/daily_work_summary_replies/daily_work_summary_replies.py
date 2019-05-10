@@ -43,13 +43,16 @@ def get_data(filters):
 	daily_summary_emails = [d.get('name') for d in daily_summary_emails]
 
 	replies = frappe.db.sql("""
-			select `tabCommunication`.content, `tabCommunication`.text_content, `tabCommunication`.sender
+			select `tabCommunication`.content,
+					`tabCommunication`.text_content,
+					`tabCommunication`.sender
 			from `tabCommunication`
-			inner join `tabDynamic Link`
-			on `tabCommunication`.name=`tabDynamic Link`.parent where
-			`tabDynamic Link`.link_doctype in %(daily_summary_emails)s and
-			`tabCommunication`.communication_type='Communication' and
-			`tabCommunication`.sent_or_received='Received'
+				inner join `tabDynamic Link`
+					on `tabCommunication`.name=`tabDynamic Link`.parent
+			where `tabDynamic Link`.link_doctype = 'Daily Work Summary'
+					and `tabDynamic Link`.link_name in %(daily_summary_emails)s
+					and `tabCommunication`.communication_type='Communication'
+					and `tabCommunication`.sent_or_received='Received'
 			order by `tabCommunication`.creation asc
 		""",{
 				"daily_summary_emails": daily_summary_emails

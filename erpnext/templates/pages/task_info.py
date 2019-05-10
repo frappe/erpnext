@@ -9,12 +9,14 @@ def get_context(context):
 	task = frappe.get_doc('Task', frappe.form_dict.task)
 
 	context.comments = frappe.db.sql("""
-			select `tabCommunication`.subject, `tabCommunication`.sender_full_name, `tabCommunication`.communication_date
+			select `tabCommunication`.subject,
+					`tabCommunication`.sender_full_name,
+					`tabCommunication`.communication_date
 			from `tabCommunication`
-			inner join `tabDynamic Link`
-			on `tabCommunication`.name=`tabDynamic Link`.parent where
-			`tabDynamic Link`.link_name='%(name)s' and
-			`tabCommunication`.comment_type='comment'
+				inner join `tabDynamic Link`
+					on `tabCommunication`.name=`tabDynamic Link`.parent
+			where `tabDynamic Link`.link_name='%(name)s'
+				and `tabCommunication`.comment_type='comment'
 		""",{
 				"name": task.name
 			}, as_dict=True)

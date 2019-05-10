@@ -40,9 +40,12 @@ def get_data(filters):
 				`tabCommunication`.content, `tabCommunication`.communication_date
 			from
 				(
-					(select name, lead from `tabOpportunity` where lead = %(lead)s) union
-					(select name, lead from `tabQuotation` where lead = %(lead)s) union
-					(select name, lead from `tabIssue` where lead = %(lead)s and status!='Closed') union
+					(select name, lead from `tabOpportunity` where lead = %(lead)s)
+				union
+					(select name, lead from `tabQuotation` where lead = %(lead)s)
+				union
+					(select name, lead from `tabIssue` where lead = %(lead)s and status!='Closed')
+				union
 					(select %(lead)s, %(lead)s)
 				)
 			as ref_document, `tabCommunication` inner join `tabDynamic Link`

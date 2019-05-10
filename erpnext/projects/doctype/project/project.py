@@ -552,14 +552,16 @@ def collect_project_status():
 	for data in frappe.get_all("Project Update",
 		{'date': today(), 'sent': 0}):
 		replies = frappe.db.sql("""
-			select `tabCommunication`.content, `tabCommunication`.text_content, `tabCommunication`.sender
+			select `tabCommunication`.content,
+					`tabCommunication`.text_content,
+					`tabCommunication`.sender
 			from `tabCommunication`
-			inner join `tabDynamic Link`
-			on `tabCommunication`.name=`tabDynamic Link`.parent where
-			`tabDynamic Link`.link_doctype='Project Update' and
-			`tabDynamic Link`.link_name='%(name)s' and
-			`tabCommunication`.communication_type='Communication' and
-			`tabCommunication`.sent_or_received='Received'
+				inner join `tabDynamic Link`
+					on `tabCommunication`.name=`tabDynamic Link`.parent
+			where `tabDynamic Link`.link_doctype='Project Update'
+				and `tabDynamic Link`.link_name='%(name)s'
+				and `tabCommunication`.communication_type='Communication'
+				and `tabCommunication`.sent_or_received='Received'
 			order by `tabCommunication`.creation asc
 		""",{
 				"name": data.name
