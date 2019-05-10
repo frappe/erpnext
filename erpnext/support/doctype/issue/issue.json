@@ -21,9 +21,11 @@
   "service_level_section",
   "service_level_agreement",
   "response_by",
+  "response_by_variance",
   "cb",
-  "agreement_status",
+  "agreement_fulfilled",
   "resolution_by",
+  "resolution_by_variance",
   "response",
   "mins_to_first_response",
   "first_responded_on",
@@ -164,14 +166,6 @@
    "fieldname": "cb",
    "fieldtype": "Column Break",
    "options": "fa fa-pushpin",
-   "read_only": 1
-  },
-  {
-   "default": "Ongoing",
-   "fieldname": "agreement_status",
-   "fieldtype": "Select",
-   "label": "Agreement Status",
-   "options": "Ongoing\nFulfilled\nFailed",
    "read_only": 1
   },
   {
@@ -317,11 +311,33 @@
    "fieldname": "via_customer_portal",
    "fieldtype": "Check",
    "label": "Via Customer Portal"
+  },
+  {
+   "default": "Ongoing",
+   "fieldname": "agreement_fulfilled",
+   "fieldtype": "Select",
+   "label": "Agreement Fulfilled",
+   "options": "Ongoing\nFulfilled\nFailed",
+   "read_only": 1
+  },
+  {
+   "description": "in hours",
+   "fieldname": "response_by_variance",
+   "fieldtype": "Int",
+   "label": "Response By Variance",
+   "read_only": 1
+  },
+  {
+   "description": "in hours",
+   "fieldname": "resolution_by_variance",
+   "fieldtype": "Int",
+   "label": "Resolution By Variance",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2019-05-03 14:36:19.117560",
+ "modified": "2019-05-10 22:31:09.391044",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
