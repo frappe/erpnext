@@ -79,6 +79,7 @@
    "fieldtype": "Select",
    "label": "Payment Order Type",
    "options": "\nPayment Request\nPayment Entry",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -98,7 +99,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-08 16:00:09.027739",
+ "modified": "2019-05-09 13:57:12.974008",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Order",
