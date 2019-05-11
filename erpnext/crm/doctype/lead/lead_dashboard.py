@@ -5,8 +5,8 @@ def get_data():
 	return {
 		'fieldname': 'lead',
 		'non_standard_fieldnames': {
-			'Quotation': 'party_name',
-			'Opportunity': 'party_name'
+			'Quotation': 'customer_name',
+			'Opportunity': 'customer_name'
 		},
 		'transactions': [
 			{
