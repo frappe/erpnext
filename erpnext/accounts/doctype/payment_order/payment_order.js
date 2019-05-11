@@ -16,25 +16,44 @@ frappe.ui.form.on('Payment Order', {
 			frm.add_custom_button(__('Payment Request'), function() {
 				frm.trigger("get_from_payment_request");
 			}, __("Get from"));
+
 			frm.add_custom_button(__('Payment Entry'), function() {
 				frm.trigger("get_from_payment_entry");
 			}, __("Get from"));
+
+			frm.trigger('remove_button');
 		}
 
 		// payment Entry
 		if (frm.doc.docstatus===1 && frm.doc.payment_order_type==='Payment Request') {
 			frm.add_custom_button(__('Create Payment Entries'),
-				function() {
-					frm.trigger("make_payment_records");
-				});
+			function() {
+				frm.trigger("make_payment_records");
+			});
+		}
+	},
+
+	remove_row_if_empty: function(frm) {
+		// remove if first row is empty
+		if (frm.doc.references.length > 0 && !frm.doc.references[0].reference_name) {
+			frm.doc.references = [];
+		}
+	},
+
+	remove_button: function(frm) {
+		let label = ["Payment Request", "Payment Entry"]
+
+		if (frm.doc.references.length > 0 && frm.doc.payment_order_type) {
+			label = label.reduce(x => {
+				x!= frm.doc.payment_order_type;
+				return x;
+			});
+			frm.remove_custom_button(label, "Get from");
 		}
 	},
 
 	get_from_payment_entry: function(frm) {
-		// remove if first row is empty
-		if (!frm.doc.references[0].reference_name) {
-			frm.doc.references = [];
-		}
+		frm.trigger("remove_row_if_empty");
 		erpnext.utils.map_current_doc({
 			method: "erpnext.accounts.doctype.payment_entry.payment_entry.make_payment_order",
 			source_doctype: "Payment Entry",
@@ -52,10 +71,7 @@ frappe.ui.form.on('Payment Order', {
 	},
 
 	get_from_payment_request: function(frm) {
-		// remove if first row is empty
-		if (!frm.doc.references[0].reference_name) {
-			frm.doc.references = [];
-		}
+		frm.trigger("remove_row_if_empty")
 		erpnext.utils.map_current_doc({
 			method: "erpnext.accounts.doctype.payment_request.payment_request.make_payment_order",
 			source_doctype: "Payment Request",
@@ -116,5 +132,4 @@ frappe.ui.form.on('Payment Order', {
 
 		dialog.show();
 	},
-
 });
