@@ -90,7 +90,7 @@ def get_detail_row(ref_doc, payment_entry, company_email):
 		}, 'parent')
 
 	supplier_billing_address = frappe.get_cached_doc('Address', addr_link)
-	email = ', '.join(filter(None, [supplier_billing_address.email_id, company_email]))
+	email = ','.join(filter(None, [supplier_billing_address.email_id, company_email]))
 
 	detail = OrderedDict(
 		record_identifier='D',
