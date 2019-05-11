@@ -16,7 +16,7 @@ frappe.ui.form.on("Communication", {
 				issue_counter = true;
 			}
 			if(!in_list(["Lead", "Opportunity"], dynamic_link.link_doctype)) {
-				lead_opportunity_counter = true
+				lead_opportunity_counter = true;
 			}
 		}
 		if(issue_counter){
