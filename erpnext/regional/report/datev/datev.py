@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import json
 from six import string_types
 import frappe
-from frappe.utils import format_datetime
 from frappe import _
 import pandas as pd
 
