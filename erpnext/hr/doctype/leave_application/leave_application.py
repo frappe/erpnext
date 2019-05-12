@@ -350,12 +350,12 @@ class LeaveApplication(Document):
 				pass
 
 	def create_leave_ledger_entry(self, submit=True):
-		args = dict(
-			leaves=self.total_leave_days * -1 if submit else 1,
+		args = frappe._dict(
+			leaves=self.total_leave_days,
 			to_date=self.to_date,
 			is_carry_forward=0
 		)
-		create_leave_ledger_entry(self, args)
+		create_leave_ledger_entry(self, args, submit)
 
 @frappe.whitelist()
 def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day = None, half_day_date = None):
