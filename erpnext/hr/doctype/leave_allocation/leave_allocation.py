@@ -44,8 +44,8 @@ class LeaveAllocation(Document):
 	def on_submit(self):
 		self.create_leave_ledger_entry()
 
-	# def before_cancel(self):
-	# 	self.create_leave_ledger_entry(submit=False)
+	def on_cancel(self):
+		self.create_leave_ledger_entry(submit=False)
 
 	def on_update_after_submit(self):
 		self.validate_new_leaves_allocated_value()
@@ -123,14 +123,14 @@ class LeaveAllocation(Document):
 			expiry_days = frappe.db.get_value("Leave Type", self.leave_type, "carry_forward_leave_expiry")
 
 			args = dict(
-				leaves=self.carry_forwarded_leaves * 1 if submit else -1,
+				leaves=self.carry_forwarded_leaves,
 				to_date=add_days(self.from_date, expiry_days) if expiry_days else self.to_date,
 				is_carry_forward=1
 			)
-			create_leave_ledger_entry(self, args)
+			create_leave_ledger_entry(self, args, submit)
 
 		args = dict(
-			leaves=self.new_leaves_allocated * 1 if submit else -1,
+			leaves=self.new_leaves_allocated,
 			to_date=self.to_date,
 			is_carry_forward=0
 		)
