@@ -6,12 +6,12 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from frappe.utils import add_days
+from frappe.utils import add_days, today
 
 class LeaveLedgerEntry(Document):
 	pass
 
-def create_leave_ledger_entry(ref_doc, args, submit):
+def create_leave_ledger_entry(ref_doc, args, submit=True):
 	ledger = frappe._dict(
 		doctype='Leave Ledger Entry',
 		employee=ref_doc.employee,
@@ -48,3 +48,26 @@ def delete_ledger_entry(ledger):
 	else:
 		frappe.throw(_("Leave allocation %s is linked with leave application %s"
 			% (ledger_entry, ', '.join(leave_application_records))))
+
+def check_expired_allocation():
+	''' Checks for expired allocation by comparing to_date with current_date and
+		based on that creates an expiry ledger entry '''
+	expired_allocation = frappe.db.get_all("Leave Ledger Allocation",
+		filters={
+			'to_date': today(),
+			'transaction_type': 'Leave Allocation'
+		},
+		fields=['name', 'transaction_name'])
+
+	if expired_allocation:
+		create_expiry_ledger_entry(expired_allocation)
+
+def create_expiry_ledger_entry(expired_allocation):
+	for allocation in expired_allocation:
+		ledger_entry = frappe.get_doc('Leave Ledger Entry', allocation.name)
+		args = {
+			'leaves': -ledger_entry.leaves,
+			'to_date': '',
+			'is_carry_forward': ledger_entry.is_carry_forward
+		}
+		create_leave_ledger_entry(ledger_entry, args)
