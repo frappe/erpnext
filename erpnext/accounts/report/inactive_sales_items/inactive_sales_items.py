@@ -80,10 +80,10 @@ def get_data(filters):
 	for territory in territories:
 		for item in items:
 			row = {
-					"territory": territory.name,
-					"item_group": item.item_group,
-					"item": item.name,
-					"item_name": item.item_name
+				"territory": territory.name,
+				"item_group": item.item_group,
+				"item": item.name,
+				"item_name": item.item_name
 			}
 
 			if sales_invoice_data.get((territory.name,item.name)):
