@@ -34,12 +34,15 @@ def delete_ledger_entry(ledger):
 		{'transaction_name': ledger.transaction_name},
 		['name', 'creation']
 		)
-	leave_application_records = frappe.get_all("Leave Ledger Entry",
-		filters={
-			'transaction_type': 'Leave Application',
-			'creation_date': (">", creation_date)
-		},
-		fields=['transaction_type'])
+
+	leave_application_records = []
+	if ledger.transaction_type == "Leave Allocation":
+		leave_application_records = frappe.get_all("Leave Ledger Entry",
+			filters={
+				'transaction_type': 'Leave Application',
+				'creation_date': (">", creation_date)
+			},
+			fields=['transaction_type'])
 	if not leave_application_records:
 		frappe.delete_doc("Leave Ledger Entry", ledger_entry)
 	else:
