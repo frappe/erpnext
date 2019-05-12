@@ -35,6 +35,13 @@ def get_data():
 					"hide_count": True,
 					"dependencies": ["Employee"]
 				},
+								{
+					"type": "doctype",
+					"name": "Employee Attendance Log",
+					"hide_count": True,
+					"onboard": 1,
+					"dependencies": ["Employee"]
+				},
 			]
 		},
 		{

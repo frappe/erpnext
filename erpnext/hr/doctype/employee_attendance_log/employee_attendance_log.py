@@ -9,7 +9,9 @@ from frappe.model.document import Document
 from frappe import _
 
 class EmployeeAttendanceLog(Document):
-	pass
+	def validate(self):
+		if frappe.db.exists('Employee Attendance Log', {'employee': self.employee, 'time': self.time}):
+			frappe.throw('This log already exists for this employee.')
 
 
 @frappe.whitelist()
@@ -37,6 +39,7 @@ def add_log_based_on_biometric_rf_id(biometric_rf_id, timestamp, device_id=None,
 	doc.time = timestamp
 	doc.device_id = device_id
 	doc.log_type = log_type
-	doc.save()
-
+	doc.insert()
+	frappe.db.commit()
+	
 	return doc
