@@ -4,6 +4,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "document_type",
   "label",
   "fieldname"
  ],
@@ -13,19 +14,25 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Label",
-   "reqd": 1,
    "unique": 1
   },
   {
    "fieldname": "fieldname",
    "fieldtype": "Data",
    "label": "Fieldname"
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Link",
+   "label": "Document Type",
+   "options": "DocType",
+   "reqd": 1
   }
  ],
- "modified": "2019-05-04 18:59:14.969008",
+ "modified": "2019-05-09 15:30:55.339917",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Dimension",
+ "name": "Accounting Dimension",
  "owner": "Administrator",
  "permissions": [
   {

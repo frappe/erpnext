@@ -6,5 +6,5 @@ from __future__ import unicode_literals
 # import frappe
 import unittest
 
-class TestDimension(unittest.TestCase):
+class TestAccountingDimension(unittest.TestCase):
 	pass

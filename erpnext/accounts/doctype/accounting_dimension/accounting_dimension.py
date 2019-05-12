@@ -8,22 +8,26 @@ from frappe.model.document import Document
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe import scrub
+from frappe.utils import cstr
 
-class Dimension(Document):
+class AccountingDimension(Document):
 
 	def before_insert(self):
-		self.set_fieldname()
-		self.make_dimension_in_accounting_doctypes()
+		self.set_fieldname_and_label()
+		self.make_accounting_dimension_in_accounting_doctypes()
 
 	def on_trash(self):
-		self.delete_dimension()
+		self.delete_accounting_dimension()
 
-	def set_fieldname(self):
+	def set_fieldname_and_label(self):
+		if not self.label:
+			self.label = cstr(self.document_type)
+
 		if not self.fieldname:
 			self.fieldname = scrub(self.label)
 
-	def make_dimension_in_accounting_doctypes(self):
-		last_created_dimension = get_last_created_dimension()
+	def make_accounting_dimension_in_accounting_doctypes(self):
+		last_created_accounting_dimension = get_last_created_accounting_dimension()
 
 		doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "BOM", "Sales Order", "Purchase Order",
 			"Stock Entry", "Budget", "Payroll Entry", "Delivery Note"]
@@ -31,14 +35,15 @@ class Dimension(Document):
 		df = {
 			"fieldname": self.fieldname,
 			"label": self.label,
-			"fieldtype": "Data",
-			"insert_after": last_created_dimension if last_created_dimension else "project"
+			"fieldtype": "Link",
+			"options": self.document_type,
+			"insert_after": last_created_accounting_dimension if last_created_accounting_dimension else "project"
 		}
 
 		for doctype in doclist:
 			create_custom_field(doctype, df)
 
-	def delete_dimension(self):
+	def delete_accounting_dimension(self):
 		doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "BOM", "Sales Order", "Purchase Order",
 			"Stock Entry", "Budget", "Payroll Entry", "Delivery Note"]
 
@@ -58,8 +63,13 @@ class Dimension(Document):
 			frappe.clear_cache(doctype=doc)
 
 
-def get_last_created_dimension():
-	last_created_dimension = frappe.db.sql("select fieldname, max(creation) from `tabDimension`", as_dict=1)
+def get_last_created_accounting_dimension():
+	last_created_accounting_dimension = frappe.db.sql("select fieldname, max(creation) from `tabAccounting Dimension`", as_dict=1)
 
-	if last_created_dimension[0]:
-		return last_created_dimension[0].fieldname
+	if last_created_accounting_dimension[0]:
+		return last_created_accounting_dimension[0].fieldname
+
+def get_accounting_dimensions():
+	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["fieldname"])
+
+	return [d.fieldname for d in accounting_dimensions]

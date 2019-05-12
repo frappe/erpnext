@@ -214,3 +214,24 @@ frappe.query_reports["General Ledger"] = {
 		}
 	]
 }
+
+let dimension_filters = get_dimension_filters();
+
+dimension_filters.then((dimensions) => {
+	dimensions.forEach((dimension) => {
+		frappe.query_reports["General Ledger"].filters.push({
+			"fieldname": dimension["fieldname"],
+			"label": __(dimension["label"]),
+			"fieldtype": "Link",
+			"options": dimension["document_type"]
+		});
+	});
+});
+
+async function get_dimension_filters() {
+	let dimensions = await frappe.db.get_list('Accounting Dimension', {
+		fields: ['label', 'fieldname', 'document_type'],
+	});
+
+	return dimensions;
+}
