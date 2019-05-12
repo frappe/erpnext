@@ -1,6 +1,6 @@
 {
     "country_code": "de", 
-    "name": "Germany - Kontenplan SKR04", 
+    "name": "SKR04 ohne Kontonummern", 
     "tree": {
         "Bilanz - Aktiva": {
             "Anlageverm\u00f6gen": {
@@ -1383,8 +1383,7 @@
                     "Sonstige Zinsen und \u00e4hnliche Ertr\u00e4ge 1": {
                         "Diskontertr\u00e4ge": {}, 
                         "Diskontertr\u00e4ge aus verbundenen Unternehmen": {}, 
-                        "Laufende Ertr\u00e4ge aus Anteilen an Kapitalgesellschaften 100% / 50% steuerfrei": {}, 
-                        "Laufende Ertr\u00e4ge aus Anteilen an Kapitalgesellschaften 100% / 50% steuerfrei": {}, 
+                        "Laufende Ertr\u00e4ge aus Anteilen an Kapitalgesellschaften 100% / 50% steuerfrei": {},
                         "Sonstige Zinsen und \u00e4hnliche Ertr\u00e4ge 2": {}, 
                         "Sonstige Zinsen und \u00e4hnliche Ertr\u00e4ge aus verbundenen Unternehmen": {}, 
                         "Sonstige Zinsertr\u00e4ge": {}, 

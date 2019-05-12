@@ -160,7 +160,7 @@ class PaymentEntry(AccountsController):
 					d.reference_name, self.party_account_currency)
 
 				for field, value in iteritems(ref_details):
-					if not d.get(field) or force:
+					if field == 'exchange_rate' or not d.get(field) or force:
 						d.set(field, value)
 
 	def validate_payment_type(self):
@@ -536,8 +536,12 @@ class PaymentEntry(AccountsController):
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args):
+
 	if isinstance(args, string_types):
 		args = json.loads(args)
+
+	if args.get('party_type') == 'Member':
+			return
 
 	# confirm that Supplier is not blocked
 	if args.get('party_type') == 'Supplier':

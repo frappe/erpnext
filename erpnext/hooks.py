@@ -229,6 +229,7 @@ scheduler_events = {
 		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails',
 		"erpnext.accounts.doctype.subscription.subscription.process_all",
 		"erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_settings.schedule_get_order_details",
+		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
 		"erpnext.projects.doctype.project.project.hourly_reminder",
 		"erpnext.projects.doctype.project.project.collect_project_status"
 	],
@@ -255,7 +256,7 @@ scheduler_events = {
 	"daily_long": [
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"
 	],
-	"monthly": [
+	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.convert_deferred_revenue_to_income",
 		"erpnext.accounts.deferred_revenue.convert_deferred_expense_to_expense",
 		"erpnext.hr.utils.allocate_earned_leaves"

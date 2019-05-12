@@ -359,7 +359,8 @@ def set_gl_entries_by_account(
 			"from_date": from_date,
 			"to_date": to_date,
 			"cost_center": filters.cost_center,
-			"project": filters.project
+			"project": filters.project,
+			"finance_book": filters.get("finance_book")
 		},
 		as_dict=True)
 
@@ -392,14 +393,8 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 			filters.cost_center = get_cost_centers_with_children(filters.cost_center)
 			additional_conditions.append("cost_center in %(cost_center)s")
 
-		company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
-
-		if not filters.get('finance_book') or (filters.get('finance_book') == company_finance_book):
-			additional_conditions.append("ifnull(finance_book, '') in ('%s', '')" %
-				frappe.db.escape(company_finance_book))
-		elif filters.get("finance_book"):
-			additional_conditions.append("ifnull(finance_book, '') = '%s' " %
-				frappe.db.escape(filters.get("finance_book")))
+		if filters.get("finance_book"):
+			additional_conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 

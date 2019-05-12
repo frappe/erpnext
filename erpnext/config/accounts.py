@@ -27,6 +27,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Payment Entry",
 					"description": _("Bank/Cash transactions against party or for internal transfer")
+				},
+				{
+					"type": "doctype",
+					"name": "Payment Term",
+					"description": _("Payment Terms based on conditions")
 				}
 			]
 
@@ -76,6 +81,14 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Item",
+				},
+				{
+					"type": "doctype",
+					"name": "Bank",
+				},
+				{
+					"type": "doctype",
+					"name": "Bank Account",
 				}
 			]
 		},
@@ -134,6 +147,12 @@ def get_data():
 					"label": _("Update Bank Transaction Dates"),
 					"name": "Bank Reconciliation",
 					"description": _("Update bank payment dates with journals.")
+				},
+				{
+					"type": "page",
+					"label": _("Reconcile payments and bank transactions"),
+					"name": "bank-reconciliation",
+					"description": _("Link bank transactions with payments.")
 				},
 				{
 					"type": "doctype",
@@ -269,6 +288,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Currency Exchange",
 					"description": _("Currency exchange rate master.")
+				},
+				{
+					"type": "doctype",
+					"name": "Exchange Rate Revaluation",
+					"description": _("Exchange Rate Revaluation master.")
 				},
 				{
 					"type": "doctype",
