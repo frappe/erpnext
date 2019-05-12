@@ -63,7 +63,7 @@ erpnext.financial_statements = {
 };
 
 function get_filters(){
-	return [
+	let filters = [
 		{
 			"fieldname":"company",
 			"label": __("Company"),
@@ -149,4 +149,27 @@ function get_filters(){
 			"options": erpnext.get_presentation_currency_list()
 		}
 	]
+
+	let dimension_filters = get_dimension_filters()
+
+	dimension_filters.then((dimensions) => {
+		dimensions.forEach((dimension) => {
+			filters.push({
+				"fieldname": dimension["fieldname"],
+				"label": __(dimension["label"]),
+				"fieldtype": "Link",
+				"options": dimension["document_type"]
+			});
+		});
+	});
+
+	return filters;
+}
+
+async function get_dimension_filters() {
+	let dimensions = await frappe.db.get_list('Accounting Dimension', {
+		fields: ['label', 'fieldname', 'document_type'],
+	});
+
+	return dimensions;
 }

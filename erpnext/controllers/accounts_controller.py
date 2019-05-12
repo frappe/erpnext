@@ -16,6 +16,7 @@ from erpnext.accounts.party import get_party_account_currency, validate_party_fr
 from erpnext.accounts.doctype.pricing_rule.utils import validate_pricing_rules
 from erpnext.exceptions import InvalidCurrency
 from six import text_type
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules")
 
@@ -365,6 +366,14 @@ class AccountsController(TransactionBase):
 			'party': None,
 			'project': self.get("project")
 		})
+
+		accounting_dimensions = get_accounting_dimensions()
+		dimension_dict = frappe._dict()
+
+		for dimension in accounting_dimensions:
+			dimension_dict[dimension] = self.get(dimension)
+
+		gl_dict.update(dimension_dict)
 		gl_dict.update(args)
 
 		if not account_currency:
