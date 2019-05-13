@@ -70,8 +70,8 @@ def execute(filters=None):
 	]
 	data = []
 
-	accounts = get_account()
-	payroll_entries = get_payroll_entry(accounts, filters)
+	accounts = get_bank_accounts()
+	payroll_entries = get_payroll_entries(accounts, filters)
 	salary_slips = get_salary_slips(payroll_entries)
 	get_emp_bank_ifsc_code(salary_slips)
 
@@ -81,24 +81,21 @@ def execute(filters=None):
 				"payroll_no": salary.payroll_entry,
 				"debit_account": salary.debit_acc_no,
 				"payment_date": frappe.utils.formatdate(salary.modified.strftime('%Y-%m-%d')),
-				"bank_name":salary.bank_name,
-				"employee_account_no":salary.bank_account_no,
+				"bank_name": salary.bank_name,
+				"employee_account_no": salary.bank_account_no,
 				"bank_code": salary.ifsc_code,
 				"employee_name": salary.employee+": " + salary.employee_name,
 				"currency": frappe.get_cached_value('Company', filters.company, 'default_currency'),
 				"amount": salary.net_pay,
-				}
+			}
 			data.append(row)
 	return columns, data
-def get_account():
-	accounts = get_all("Account",
-		filters={
-			"account_type": "Bank"
-		}, as_list = 1)
+
+def get_bank_accounts():
+	accounts = [d.name for d in get_all("Account", filters={"account_type": "Bank"})]
 	return accounts
 
-def get_payroll_entry(accounts, filters):
-	accounts = list(itertools.chain(*accounts))
+def get_payroll_entries(accounts, filters):
 	payroll_filter = [
 		('payment_account', 'IN', accounts),
 		('number_of_employees', '>', 0),
@@ -110,15 +107,15 @@ def get_payroll_entry(accounts, filters):
 	if filters.from_date:
 		payroll_filter.append(('posting_date', '>', filters.from_date))
 
-	entries = get_record("Payroll Entry", payroll_filter, ["name", "payment_account"])
+	entries = get_all("Payroll Entry", payroll_filter, ["name", "payment_account"])
 
 	payment_accounts = [d.payment_account for d in entries]
-	get_company_account(payment_accounts, entries)
+	set_company_account(payment_accounts, entries)
 	return entries
 
 def get_salary_slips(payroll_entries):
 	payroll  = [d.name for d in payroll_entries]
-	salary_slips = get_record("Salary Slip", [("payroll_entry", "IN", payroll)],
+	salary_slips = get_all("Salary Slip", [("payroll_entry", "IN", payroll)],
 		fields = ["modified", "net_pay", "bank_name", "bank_account_no", "payroll_entry", "employee", "employee_name", "status"]
 	)
 
@@ -133,9 +130,8 @@ def get_salary_slips(payroll_entries):
 	return salary_slips
 
 def get_emp_bank_ifsc_code(salary_slips):
-
 	emp_names = [d.employee for d in salary_slips]
-	ifsc_codes = get_record("Employee", [("name", "IN", emp_names)], ["ifsc_code", "name"])
+	ifsc_codes = get_all("Employee", [("name", "IN", emp_names)], ["ifsc_code", "name"])
 
 	ifsc_codes_map = {}
 	for code in ifsc_codes:
@@ -146,8 +142,8 @@ def get_emp_bank_ifsc_code(salary_slips):
 
 	return salary_slips
 
-def get_company_account(payment_accounts ,payroll_entries):
-	company_accounts = get_record("Bank Account", [("account", "IN", payment_accounts)], ["account", "bank_account_no"])
+def set_company_account(payment_accounts, payroll_entries):
+	company_accounts = get_all("Bank Account", [("account", "in", payment_accounts)], ["account", "bank_account_no"])
 	company_accounts_map = {}
 	for acc in company_accounts:
 		company_accounts_map[acc.account] = acc
@@ -156,6 +152,3 @@ def get_company_account(payment_accounts ,payroll_entries):
 		entry["company_account"] = company_accounts_map[entry.payment_account]['bank_account_no']
 
 	return payroll_entries
-
-def get_record(doctype, filter, fields):
-	return get_all(doctype, filters=filter, fields=fields)
