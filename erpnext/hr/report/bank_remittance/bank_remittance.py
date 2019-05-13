@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import formatdate
 import itertools
-from frappe import _
+from frappe import _, get_all
 
 def execute(filters=None):
 	columns = [
@@ -78,34 +78,32 @@ def execute(filters=None):
 	for salary in salary_slips:
 		if salary.bank_name and salary.bank_account_no and salary.debit_acc_no and salary.status in ["Submitted", "Paid"]:
 			row = {
-					"payroll_no": salary.payroll_entry,
-					"debit_account": salary.debit_acc_no,
-					"payment_date": frappe.utils.formatdate(salary.modified.strftime('%Y-%m-%d')),
-					"bank_name":salary.bank_name,
-					"employee_account_no":salary.bank_account_no,
-					"bank_code": salary.ifsc_code,
-					"employee_name": salary.employee+": " + salary.employee_name,
-					"currency": frappe.get_cached_value('Company', filters.company, 'default_currency'),
-					"amount": salary.net_pay,
+				"payroll_no": salary.payroll_entry,
+				"debit_account": salary.debit_acc_no,
+				"payment_date": frappe.utils.formatdate(salary.modified.strftime('%Y-%m-%d')),
+				"bank_name":salary.bank_name,
+				"employee_account_no":salary.bank_account_no,
+				"bank_code": salary.ifsc_code,
+				"employee_name": salary.employee+": " + salary.employee_name,
+				"currency": frappe.get_cached_value('Company', filters.company, 'default_currency'),
+				"amount": salary.net_pay,
 				}
-
 			data.append(row)
 	return columns, data
-
 def get_account():
-	accounts = frappe.get_all("Account",
-	filters={
-		"account_type": "Bank"
-	}, as_list =1)
+	accounts = get_all("Account",
+		filters={
+			"account_type": "Bank"
+		}, as_list = 1)
 	return accounts
 
 def get_payroll_entry(accounts, filters):
 	accounts = list(itertools.chain(*accounts))
 	payroll_filter = [
-			('payment_account', 'IN', accounts),
-			('number_of_employees', '>', 0),
-			('Company', '=', filters.company)
-		]
+		('payment_account', 'IN', accounts),
+		('number_of_employees', '>', 0),
+		('Company', '=', filters.company)
+	]
 	if filters.to_date:
 		payroll_filter.append(('posting_date', '<', filters.to_date))
 
@@ -160,9 +158,4 @@ def get_company_account(payment_accounts ,payroll_entries):
 	return payroll_entries
 
 def get_record(doctype, filter, fields):
-	return frappe.get_all(doctype, filters=filter, fields=fields)
-
-
-
-
-
+	return get_all(doctype, filters=filter, fields=fields)
