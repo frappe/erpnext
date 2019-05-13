@@ -64,7 +64,9 @@
   "rejected_warehouse",
   "quality_inspection",
   "purchase_order",
+  "material_request",
   "purchase_order_item",
+  "material_request_item",
   "column_break_40",
   "is_fixed_asset",
   "asset",
@@ -753,11 +755,22 @@
    "fieldname": "image_section",
    "fieldtype": "Section Break",
    "label": "Image"
+  },
+  {
+   "fieldname": "material_request",
+   "fieldtype": "Link",
+   "label": "Material Request",
+   "options": "Material Request"
+  },
+  {
+   "fieldname": "material_request_item",
+   "fieldtype": "Data",
+   "label": "Material Request Item"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-01 17:45:17.447900",
+ "modified": "2019-05-08 10:25:27.157675",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
