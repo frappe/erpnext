@@ -167,7 +167,7 @@ def make_quotation(source_name, target_doc=None):
 		{"Lead": {
 			"doctype": "Quotation",
 			"field_map": {
-				"name": "lead"
+				"name": "party_name"
 			}
 		}}, target_doc)
 	target_doc.quotation_to = "Lead"
