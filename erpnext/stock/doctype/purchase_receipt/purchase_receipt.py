@@ -37,6 +37,17 @@ class PurchaseReceipt(BuyingController):
 		},
 		{
 			'source_dt': 'Purchase Receipt Item',
+			'target_dt': 'Material Request Item',
+			'join_field': 'material_request_item',
+			'target_field': 'received_qty',
+			'target_parent_dt': 'Material Request',
+			'target_parent_field': 'per_received',
+			'target_ref_field': 'qty',
+			'source_field': 'qty',
+			'percent_join_field': 'material_request'
+		},
+		{
+			'source_dt': 'Purchase Receipt Item',
 			'target_dt': 'Purchase Order Item',
 			'join_field': 'purchase_order_item',
 			'target_field': 'returned_qty',
