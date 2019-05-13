@@ -12,6 +12,7 @@
   "from_date",
   "to_date",
   "is_carry_forward",
+  "is_expired",
   "amended_from"
  ],
  "fields": [
@@ -72,10 +73,15 @@
    "fieldname": "is_carry_forward",
    "fieldtype": "Check",
    "label": "Is Carry Forward"
+  },
+  {
+   "fieldname": "is_expired",
+   "fieldtype": "Check",
+   "label": "Is Expired"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-09 18:36:07.383714",
+ "modified": "2019-05-13 12:56:45.542495",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Ledger Entry",
