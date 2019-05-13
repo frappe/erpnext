@@ -429,6 +429,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							set_warehouse: me.frm.doc.set_warehouse,
 							warehouse: item.warehouse,
 							customer: me.frm.doc.customer || me.frm.doc.party_name,
+							quotation_to: me.frm.doc.quotation_to,
 							supplier: me.frm.doc.supplier,
 							currency: me.frm.doc.currency,
 							update_stock: update_stock,
