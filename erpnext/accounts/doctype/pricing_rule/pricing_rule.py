@@ -220,7 +220,12 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
 
 	if args.transaction_type=="selling":
 		if args.customer and not (args.customer_group and args.territory):
-			customer = frappe.get_cached_value("Customer", args.customer, ["customer_group", "territory"])
+
+			if args.quotation_to and args.quotation_to != 'Customer':
+				customer = frappe._dict()
+			else:
+				customer = frappe.get_cached_value("Customer", args.customer, ["customer_group", "territory"])
+
 			if customer:
 				args.customer_group, args.territory = customer
 
