@@ -115,7 +115,7 @@ def get_payroll_entries(accounts, filters):
 
 def get_salary_slips(payroll_entries):
 	payroll  = [d.name for d in payroll_entries]
-	salary_slips = get_all("Salary Slip", [("payroll_entry", "IN", payroll)],
+	salary_slips = get_all("Salary Slip", filters = [("payroll_entry", "IN", payroll)],
 		fields = ["modified", "net_pay", "bank_name", "bank_account_no", "payroll_entry", "employee", "employee_name", "status"]
 	)
 
