@@ -130,6 +130,9 @@ def process_args(args):
 
 	args = frappe._dict(args)
 
+	if not frappe.db.exists("Customer", args.customer):
+		args.customer = ''
+
 	if not args.get("price_list"):
 		args.price_list = args.get("selling_price_list") or args.get("buying_price_list")
 
