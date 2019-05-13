@@ -68,27 +68,22 @@ class TestLeaveAllocation(unittest.TestCase):
 		#allocated leave more than period
 		self.assertRaises(frappe.ValidationError, doc.save)
 
-	def test_carry_forward_allocation(self):
+	def test_creation_of_leave_ledger_entry_on_submit(self):
 		frappe.db.sql("delete from `tabLeave Allocation`")
 
-		leave_type = create_leave_type(
-			leave_type_name="_Test Carry Forward",
-			is_carry_forward=1,
-			carry_forward_leave_expiry=366)
-		leave_type.submit()
-
-		leave_allocation = create_leave_allocation(
-			from_date=add_months(nowdate(), -12),
-			to_date=add_days(nowdate(), -1),
-			leave_type=leave_type
-		)
-		leave_allocation.new_leaves_allocated = 10
+		leave_allocation = create_leave_allocation()
 		leave_allocation.submit()
 
-		carry_forward_alloc = create_leave_allocation(leave_type=leave_type)
-		carry_forward_alloc.carry_forward = 1
-		carry_forward_alloc.save()
-		self.assertEquals(carry_forward_alloc.total_leaves_allocated, 10)
+		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', fields='*', filters=dict(transaction_name=leave_allocation.name))
+
+		self.assertEquals(len(leave_ledger_entry), 1)
+		self.assertEquals(leave_ledger_entry[0].employee, leave_allocation.employee)
+		self.assertEquals(leave_ledger_entry[0].leave_type, leave_allocation.leave_type)
+		self.assertEquals(leave_ledger_entry[0].leaves, leave_allocation.new_leaves_allocated)
+
+		# check if leave ledger entry is deleted on cancellation
+		leave_allocation.cancel()
+		self.assertFalse(frappe.db.exists("Leave Ledger Entry", {'transaction_name':leave_allocation.name}))
 
 def create_leave_allocation(**args):
 	args = frappe._dict(args)
@@ -101,6 +96,7 @@ def create_leave_allocation(**args):
 		"employee_name": employee.employee_name,
 		"leave_type": args.leave_type.leave_type_name or "_Test Leave Type",
 		"from_date": args.from_date or nowdate(),
+		"new_leaves_allocated": args.new_leaves_created or 15,
 		"to_date": args.to_date or add_months(nowdate(), 12)
 	})
 	return leave_allocation
