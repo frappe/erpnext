@@ -457,6 +457,28 @@ class TestLeaveApplication(unittest.TestCase):
 		leave_application.submit()
 		self.assertEqual(leave_application.docstatus, 1)
 
+	def test_creation_of_leave_ledger_entry_on_submit(self):
+
+		leave_application = frappe.get_doc(dict(
+			doctype = 'Leave Application',
+			employee = employee.name,
+			leave_type = leave_type_1.name,
+			from_date = nowdate(),
+			to_date = add_days(nowdate(), 4),
+			company = "_Test Company",
+			docstatus = 1,
+            status = "Approved"
+		)).submit()
+		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', fields='*', filters=dict(transaction_name=leave_application.name))
+
+		self.assertEquals(leave_ledger_entry[0].employee, leave_application.employee)
+		self.assertEquals(leave_ledger_entry[0].leave_type, leave_application.leave_type)
+		self.assertEquals(leave_ledger_entry[0].leaves, leave_application.new_leaves_allocated)
+
+		# check if leave ledger entry is deleted on cancellation
+		leave_application.cancel()
+		self.assertFalse(frappe.db.exists("Leave Ledger Entry", {'transaction_name':leave_application.name}))
+
 def make_allocation_record(employee=None, leave_type=None):
 	frappe.db.sql("delete from `tabLeave Allocation`")
 
