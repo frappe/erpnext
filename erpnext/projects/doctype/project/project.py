@@ -442,16 +442,17 @@ def daily_reminder():
 	projects =  get_projects_for_collect_progress("Daily", fields)
 
 	for project in projects:
-		if not check_project_update_exists(project.name, project.get("daily_time_to_send")):
+		if allow_to_make_project_update(project.name, project.get("daily_time_to_send"), "Daily"):
 			send_project_update_email_to_users(project.name)
 
 def twice_daily_reminder():
 	fields = ["first_email", "second_email"]
 	projects =  get_projects_for_collect_progress("Twice Daily", fields)
+	fields.remove("name")
 
 	for project in projects:
 		for d in fields:
-			if not check_project_update_exists(project.name, project.get(d)):
+			if allow_to_make_project_update(project.name, project.get(d), "Twicely"):
 				send_project_update_email_to_users(project.name)
 
 def weekly_reminder():
@@ -463,14 +464,19 @@ def weekly_reminder():
 		if current_day != project.day_to_send:
 			continue
 
-		if not check_project_update_exists(project.name, project.get("weekly_time_to_send")):
+		if allow_to_make_project_update(project.name, project.get("weekly_time_to_send"), "Weekly"):
 			send_project_update_email_to_users(project.name)
 
-def check_project_update_exists(project, time):
+def allow_to_make_project_update(project, time, frequency):
 	data = frappe.db.sql(""" SELECT name from `tabProject Update`
-		WHERE project = %s and date = %s and time >= %s """, (project, today(), time))
+		WHERE project = %s and date = %s """, (project, today()))
 
-	return True if data and data[0][0] else False
+	# len(data) > 1 condition is checked for twicely frequency
+	if data and (frequency in ['Daily', 'Weekly'] or len(data) > 1):
+		return False
+
+	if get_time(nowtime()) >= get_time(time):
+		return True
 
 def get_projects_for_collect_progress(frequency, fields):
 	fields.extend(["name"])
