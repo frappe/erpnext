@@ -197,6 +197,7 @@ class LeaveApplication(Document):
 			if not is_lwp(self.leave_type):
 				self.leave_balance = get_leave_balance_on(self.employee, self.leave_type, self.from_date, docname=self.name,
 					consider_all_leaves_in_the_allocation_period=True)
+
 				if self.status != "Rejected" and self.leave_balance < self.total_leave_days:
 					if frappe.db.get_value("Leave Type", self.leave_type, "allow_negative"):
 						frappe.msgprint(_("Note: There is not enough leave balance for Leave Type {0}")
@@ -350,6 +351,13 @@ class LeaveApplication(Document):
 				pass
 
 	def create_leave_ledger_entry(self, submit=True):
+		# check if there is a carry forwarded allocation expiry between application
+		allocation = frappe.db.get_value('Leave Ledger Entry',
+			filters={
+				'transaction_type': "Leave Allocation",
+				'is_carry_forward': 1,
+				'from_date': self.to_date
+			})
 		args = frappe._dict(
 			leaves=self.total_leave_days,
 			to_date=self.to_date,
@@ -396,30 +404,37 @@ def get_leave_details(employee, date):
 	return ret
 
 @frappe.whitelist()
-def get_leave_balance(employee, leave_type, date):
+def get_leave_balance_on(employee, leave_type, date, allocation_records=None, consider_all_leaves_in_the_allocation_period=False):
+
+	if allocation_records:
+		# leave_balance based on current allocation records
+		allocation = allocation_records.get(leave_type, frappe._dict())
+		from_date = allocation.from_date
+		to_date = allocation.to_date
+	else:
+		# fetched the expired allocation creation date
+		from_date, to_date = frappe.db.get_value('Leave Ledger Entry',
+			filters={
+				'transaction_type': 'Leave Allocation',
+				'employee': employee,
+				'leave_type': leave_type,
+				'is_expired': 0,
+				'is_carry_forward': 0,
+			},
+			fieldname=['from_date', 'to_date'],
+			order_by='to_date DESC')
+
+	if consider_all_leaves_in_the_allocation_period:
+		date = to_date
+
 	leave_records = frappe.get_all("Leave Ledger Entry",
-	filters={'Employee':employee,
-	'leave_type':leave_type,
-	'to_date':("<=", date)},
-	fields=['leaves'])
+		filters={'Employee':employee,
+		'leave_type':leave_type,
+		'to_date':("<=", date),
+		'from_date': from_date},
+		fields=['leaves'])
 
 	return sum(record.get("leaves") for record in leave_records)
-
-@frappe.whitelist()
-def get_leave_balance_on(employee, leave_type, date, allocation_records=None, docname=None,
-		consider_all_leaves_in_the_allocation_period=False, consider_encashed_leaves=True):
-
-	if allocation_records == None:
-		allocation_records = get_leave_allocation_records(date, employee).get(employee, frappe._dict())
-	allocation = allocation_records.get(leave_type, frappe._dict())
-	if consider_all_leaves_in_the_allocation_period:
-		date = allocation.to_date
-	leaves_taken = get_leaves_for_period(employee, leave_type, allocation.from_date, date, status="Approved", docname=docname)
-	leaves_encashed = 0
-	if frappe.db.get_value("Leave Type", leave_type, 'allow_encashment') and consider_encashed_leaves:
-		leaves_encashed = flt(allocation.total_leaves_encashed)
-
-	return flt(allocation.total_leaves_allocated) - (flt(leaves_taken) + flt(leaves_encashed))
 
 def get_total_allocated_leaves(employee, leave_type, date):
 	filters= {
