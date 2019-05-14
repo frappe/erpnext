@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 from frappe.model.document import Document
 from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_max_benefits
 from erpnext.hr.utils import get_previous_claimed_amount

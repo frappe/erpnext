@@ -419,20 +419,21 @@ class SalarySlip(TransactionBase):
 			if d.salary_component == struct_row.salary_component:
 				component_row = d
 
-		if not component_row and amount:
-			self.append(key, {
-				'amount': amount,
-				'default_amount': amount if not struct_row.get("is_additional_component") else 0,
-				'depends_on_payment_days' : struct_row.depends_on_payment_days,
-				'salary_component' : struct_row.salary_component,
-				'abbr' : struct_row.abbr,
-				'do_not_include_in_total' : struct_row.do_not_include_in_total,
-				'is_tax_applicable': struct_row.is_tax_applicable,
-				'is_flexible_benefit': struct_row.is_flexible_benefit,
-				'variable_based_on_taxable_salary': struct_row.variable_based_on_taxable_salary,
-				'deduct_full_tax_on_selected_payroll_date': struct_row.deduct_full_tax_on_selected_payroll_date,
-				'additional_amount': amount if struct_row.get("is_additional_component") else 0
-			})
+		if not component_row:
+			if amount:
+				self.append(key, {
+					'amount': amount,
+					'default_amount': amount if not struct_row.get("is_additional_component") else 0,
+					'depends_on_payment_days' : struct_row.depends_on_payment_days,
+					'salary_component' : struct_row.salary_component,
+					'abbr' : struct_row.abbr,
+					'do_not_include_in_total' : struct_row.do_not_include_in_total,
+					'is_tax_applicable': struct_row.is_tax_applicable,
+					'is_flexible_benefit': struct_row.is_flexible_benefit,
+					'variable_based_on_taxable_salary': struct_row.variable_based_on_taxable_salary,
+					'deduct_full_tax_on_selected_payroll_date': struct_row.deduct_full_tax_on_selected_payroll_date,
+					'additional_amount': amount if struct_row.get("is_additional_component") else 0
+				})
 		else:
 			if struct_row.get("is_additional_component"):
 				if overwrite:
@@ -680,7 +681,8 @@ class SalarySlip(TransactionBase):
 		total = 0.0
 		for d in self.get(component_type):
 			if not d.do_not_include_in_total:
-				total += flt(d.amount, d.precision("amount"))
+				d.amount = flt(d.amount, d.precision("amount"))
+				total += d.amount
 		return total
 
 	def set_component_amounts_based_on_payment_days(self):

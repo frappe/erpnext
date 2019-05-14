@@ -48,9 +48,9 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.earnings[0].amount, 25000)
 		self.assertEqual(ss.earnings[1].amount, 3000)
 		self.assertEqual(ss.deductions[0].amount, 5000)
-		self.assertEqual(ss.deductions[1].amount, 5000)
+		self.assertEqual(ss.deductions[1].amount, 0)
 		self.assertEqual(ss.gross_pay, 40500)
-		self.assertEqual(ss.net_pay, 29918)
+		self.assertEqual(ss.net_pay, 34918)
 
 	def test_salary_slip_with_holidays_excluded(self):
 		no_of_days = self.get_no_of_days()
@@ -68,9 +68,9 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.earnings[0].default_amount, 25000)
 		self.assertEqual(ss.earnings[1].amount, 3000)
 		self.assertEqual(ss.deductions[0].amount, 5000)
-		self.assertEqual(ss.deductions[1].amount, 5000)
+		self.assertEqual(ss.deductions[1].amount, 0)
 		self.assertEqual(ss.gross_pay, 40500)
-		self.assertEqual(ss.net_pay, 29918)
+		self.assertEqual(ss.net_pay, 34918)
 
 	def test_payment_days(self):
 		no_of_days = self.get_no_of_days()
@@ -211,7 +211,7 @@ class TestSalarySlip(unittest.TestCase):
 		tax_paid = get_tax_paid_in_period(employee)
 
 		# total taxable income 586000, 250000 @ 5%, 86000 @ 20% ie. 12500 + 17200
-		annual_tax = 29700
+		annual_tax = 113567.79
 		try:
 			self.assertEqual(tax_paid, annual_tax)
 		except AssertionError:
@@ -250,7 +250,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		# total taxable income 416000, 166000 @ 5% ie. 8300
 		try:
-			self.assertEqual(tax_paid, 8300)
+			self.assertEqual(tax_paid, 88607.79)
 		except AssertionError:
 			print("\nSalary Slip - Tax calculation failed on following case\n", data, "\n")
 			raise
@@ -265,7 +265,7 @@ class TestSalarySlip(unittest.TestCase):
 		# total taxable income 566000, 250000 @ 5%, 66000 @ 20%, 12500 + 13200
 		tax_paid = get_tax_paid_in_period(employee)
 		try:
-			self.assertEqual(tax_paid, 25700)
+			self.assertEqual(tax_paid, 121211.48)
 		except AssertionError:
 			print("\nSalary Slip - Tax calculation failed on following case\n", data, "\n")
 			raise
@@ -365,7 +365,7 @@ def make_earning_salary_component(setup=False, test_tax=False):
 			"salary_component": 'Basic Salary',
 			"abbr":'BS',
 			"condition": 'base > 10000',
-			"formula": 'base*.5',
+			"formula": 'base',
 			"type": "Earning",
 			"amount_based_on_formula": 1
 		},
@@ -397,7 +397,8 @@ def make_earning_salary_component(setup=False, test_tax=False):
 				"is_flexible_benefit": 1,
 				"type": "Earning",
 				"pay_against_benefit_claim": 1,
-				"max_benefit_amount": 100000
+				"max_benefit_amount": 100000,
+				"depends_on_payment_days": 0
 			},
 			{
 				"salary_component": "Medical Allowance",
@@ -440,7 +441,8 @@ def make_deduction_salary_component(setup=False, test_tax=False):
 			"abbr":'T',
 			"formula": 'base*.1',
 			"type": "Deduction",
-			"amount_based_on_formula": 1
+			"amount_based_on_formula": 1,
+			"depends_on_payment_days": 0
 		}
 	]
 	if not test_tax:
@@ -510,21 +512,23 @@ def create_tax_slab(payroll_period):
 		{
 			"from_amount": 250000,
 			"to_amount": 500000,
-			"percent_deduction": 5
+			"percent_deduction": 5.2,
+			"condition": "annual_taxable_earning > 500000"
 		},
 		{
-			"from_amount": 500000,
+			"from_amount": 500001,
 			"to_amount": 1000000,
-			"percent_deduction": 20
+			"percent_deduction": 20.8
 		},
 		{
-			"from_amount": 1000000,
-			"percent_deduction": 30
+			"from_amount": 1000001,
+			"percent_deduction": 31.2
 		}
 	]
 	payroll_period.taxable_salary_slabs = []
 	for item in data:
 		payroll_period.append("taxable_salary_slabs", item)
+	payroll_period.standard_tax_exemption_amount = 52500
 	payroll_period.save()
 
 def create_salary_slips_for_payroll_period(employee, salary_structure, payroll_period, deduct_random=True):
