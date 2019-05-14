@@ -975,7 +975,7 @@ def make_payment_order(source_name, target_doc=None):
 		target.payment_order_type = "Payment Entry"
 
 	def update_item(source_doc, target_doc, source_parent):
-		target_doc.bank_account = source_parent.bank_account
+		target_doc.bank_account = source_parent.party_bank_account
 		target_doc.amount = source_parent.base_paid_amount
 		target_doc.account = source_parent.paid_to
 		target_doc.payment_entry = source_parent.name
