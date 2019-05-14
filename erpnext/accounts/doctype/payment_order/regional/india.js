@@ -15,7 +15,7 @@ frappe.ui.form.on('Payment Order', {
 			freeze: true,
 			callback: function(r) {
 				{
-					frm.refresh();
+					frm.reload_doc();
 					const a = document.createElement('a');
 					let file_obj = r.message;
 					a.href = file_obj.file_url;
