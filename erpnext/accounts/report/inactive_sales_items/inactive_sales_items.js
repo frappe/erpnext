@@ -8,7 +8,8 @@ frappe.query_reports["Inactive Sales Items"] = {
 			fieldname: "territory",
 			label: __("Territory"),
 			fieldtype: "Link",
-			options: "Territory"
+			options: "Territory",
+			reqd: 1,
 		},
 		{
 			fieldname: "item",
