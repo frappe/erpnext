@@ -39,6 +39,7 @@ class TestSalaryStructure(unittest.TestCase):
 			holiday_list.save()
 
 	def test_amount_totals(self):
+		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
 		sal_slip = frappe.get_value("Salary Slip", {"employee_name":"test_employee_2@salary.com"})
 		if not sal_slip:
 			sal_slip = make_employee_salary_slip("test_employee_2@salary.com", "Monthly", "Salary Structure Sample")
@@ -48,9 +49,9 @@ class TestSalaryStructure(unittest.TestCase):
 			self.assertEqual(sal_slip.get("earnings")[2].amount, 25000)
 			self.assertEqual(sal_slip.get("gross_pay"), 78000)
 			self.assertEqual(sal_slip.get("deductions")[0].amount, 5000)
-			self.assertEqual(sal_slip.get("deductions")[1].amount, 3483.97)
-			self.assertEqual(sal_slip.get("total_deduction"), 8483.97)
-			self.assertEqual(sal_slip.get("net_pay"), 69516.03)
+			self.assertEqual(sal_slip.get("deductions")[1].amount, 5000)
+			self.assertEqual(sal_slip.get("total_deduction"), 10000)
+			self.assertEqual(sal_slip.get("net_pay"), 68000)
 
 	def test_whitespaces_in_formula_conditions_fields(self):
 		salary_structure = make_salary_structure("Salary Structure Sample", "Monthly", dont_submit=True)
