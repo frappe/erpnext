@@ -26,8 +26,7 @@ frappe.ui.form.on('Payment Order', {
 
 		// payment Entry
 		if (frm.doc.docstatus===1 && frm.doc.payment_order_type==='Payment Request') {
-			frm.add_custom_button(__('Create Payment Entries'),
-			function() {
+			frm.add_custom_button(__('Create Payment Entries'), function() {
 				frm.trigger("make_payment_records");
 			});
 		}
@@ -43,7 +42,7 @@ frappe.ui.form.on('Payment Order', {
 	remove_button: function(frm) {
 		// remove custom button of order type that is not imported
 
-		let label = ["Payment Request", "Payment Entry"]
+		let label = ["Payment Request", "Payment Entry"];
 
 		if (frm.doc.references.length > 0 && frm.doc.payment_order_type) {
 			label = label.reduce(x => {
@@ -75,7 +74,7 @@ frappe.ui.form.on('Payment Order', {
 	},
 
 	get_from_payment_request: function(frm) {
-		frm.trigger("remove_row_if_empty")
+		frm.trigger("remove_row_if_empty");
 		erpnext.utils.map_current_doc({
 			method: "erpnext.accounts.doctype.payment_request.payment_request.make_payment_order",
 			source_doctype: "Payment Request",
