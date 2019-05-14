@@ -386,7 +386,6 @@ def make_earning_salary_component(setup=False, test_tax=False):
 		{
 			"salary_component": "Leave Encashment",
 			"abbr": 'LE',
-			"is_additional_component": 1,
 			"type": "Earning"
 		}
 	]
@@ -409,9 +408,8 @@ def make_earning_salary_component(setup=False, test_tax=False):
 				"max_benefit_amount": 15000
 			},
 			{
-				"salary_component": "Perfomance Bonus",
+				"salary_component": "Performance Bonus",
 				"abbr": 'B',
-				"is_additional_component": 1,
 				"type": "Earning"
 			}
 		])
@@ -559,7 +557,7 @@ def create_additional_salary(employee, payroll_period, amount):
 		"doctype": "Additional Salary",
 		"employee": employee,
 		"company": erpnext.get_default_company(),
-		"salary_component": "Perfomance Bonus",
+		"salary_component": "Performance Bonus",
 		"payroll_date": salary_date,
 		"amount": amount,
 		"type": "Earning"
