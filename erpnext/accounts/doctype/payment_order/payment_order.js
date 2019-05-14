@@ -41,6 +41,8 @@ frappe.ui.form.on('Payment Order', {
 	},
 
 	remove_button: function(frm) {
+		// remove custom button of order type that is not imported
+
 		let label = ["Payment Request", "Payment Entry"]
 
 		if (frm.doc.references.length > 0 && frm.doc.payment_order_type) {
@@ -65,6 +67,8 @@ frappe.ui.form.on('Payment Order', {
 			get_query_filters: {
 				bank: frm.doc.bank,
 				docstatus: 1,
+				bank_account: frm.doc.company_bank_account,
+				paid_from: frm.doc.account,
 				status: ["=", "Initiated"],
 			}
 		});
