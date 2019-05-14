@@ -21,7 +21,10 @@ class CourseEnrollment(Document):
 		progress = []
 		for topic in topics:
 			progress.append(student.get_topic_progress(self.name, topic))
-		return reduce(lambda x,y: x+y, progress) # Flatten out the List
+		if progress:
+			return reduce(lambda x,y: x+y, progress) # Flatten out the List
+		else:
+			return []
 
 	def validate_duplication(self):
 		enrollment = frappe.get_all("Course Enrollment", filters={

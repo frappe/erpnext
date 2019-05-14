@@ -6,8 +6,7 @@
             <div class="col-md-8">
                 <h2>{{ contentData.name }}</h2>
                 <span class="text-muted">
-                    <i class="octicon octicon-clock" title="Duration"></i> {{ contentData.duration }} Mins
-                    &mdash; Published on {{ contentData.publish_date }}.
+                    <i class="octicon octicon-clock" title="Duration"></i> <span v-if="contentData.duration"> {{ contentData.duration }} Mins &mdash; </span><span v-if="contentData.publish_date"> Published on {{ contentData.publish_date }}. </span>
                 </span>
             </div>
             <div class="col-md-4 text-right">
