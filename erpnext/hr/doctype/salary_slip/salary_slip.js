@@ -112,7 +112,7 @@ frappe.ui.form.on("Salary Slip", {
 	},
 
 	toggle_fields: function(frm) {
-		frm.toggle_display(['hourly_wages', 'timesheets'], cint(frm.doc.salary_slip_based_on_timesheet)==1);
+		frm.toggle_display(['hourly_wages', 'timesheets'], cint(frm.doc.salary_slip_based_on_timesheet)===1);
 
 		frm.toggle_display(['payment_days', 'total_working_days', 'leave_without_pay'],
 			frm.doc.payroll_frequency!="");
@@ -149,7 +149,7 @@ var total_work_hours = function(frm, dt, dn) {
 	var wages_amount = frm.doc.total_working_hours * frm.doc.hour_rate;
 
 	frappe.db.get_value('Salary Structure', {'name': frm.doc.salary_structure}, 'salary_component', (r) => {
-		var gross_pay = 0.0
+		var gross_pay = 0.0;
 		$.each(frm.doc["earnings"], function(i, earning) {
 			if (earning.salary_component == r.salary_component) {
 				earning.amount = wages_amount;
@@ -159,8 +159,8 @@ var total_work_hours = function(frm, dt, dn) {
 		});
 		frm.set_value('gross_pay', gross_pay);
 
-		doc.net_pay = flt(doc.gross_pay) - flt(doc.total_deduction);
-		doc.rounded_total = Math.round(doc.net_pay);
+		frm.doc.net_pay = flt(frm.doc.gross_pay) - flt(frm.doc.total_deduction);
+		frm.doc.rounded_total = Math.round(frm.doc.net_pay);
 		refresh_many(['net_pay', 'rounded_total']);
 	});
 }

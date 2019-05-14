@@ -464,10 +464,9 @@ class SalarySlip(TransactionBase):
 		return self.calculate_variable_tax(payroll_period, tax_component)
 
 	def calculate_variable_tax(self, payroll_period, tax_component):
-		# get total and remaining numbers of sub-period (period for which one salary is processed)
-		depends_on_payment_days = frappe.db.get_value("Salary Component", tax_component, "depends_on_payment_days")
-		total_sub_periods, remaining_sub_periods = get_period_factor(self.employee,
-			self.start_date, self.end_date, self.payroll_frequency, payroll_period, depends_on_payment_days)
+		# get remaining numbers of sub-period (period for which one salary is processed)
+		remaining_sub_periods = get_period_factor(self.employee,
+			self.start_date, self.end_date, self.payroll_frequency, payroll_period)[1]
 
 		# get taxable_earnings, paid_taxes for previous period
 		previous_taxable_earnings = self.get_taxable_earnings_for_prev_period(payroll_period.start_date, self.start_date)
