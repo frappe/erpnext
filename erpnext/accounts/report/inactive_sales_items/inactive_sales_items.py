@@ -96,6 +96,8 @@ def get_data(filters):
 						"qty": item_obj.qty,
 						"days_since_last_order": item_obj.days_since_last_order
 					})
+				else:
+					continue
 
 			data.append(row)
 
