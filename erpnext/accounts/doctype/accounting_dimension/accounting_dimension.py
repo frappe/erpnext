@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe import scrub
 from frappe.utils import cstr
@@ -41,7 +40,25 @@ class AccountingDimension(Document):
 		}
 
 		for doctype in doclist:
-			create_custom_field(doctype, df)
+
+			if doctype == "Budget":
+				df.update({
+					"depends_on": "eval:doc.budget_against == '{0}'".format(self.document_type)
+				})
+
+				create_custom_field(doctype, df)
+
+				property_setter = frappe.db.exists("Property Setter", "Budget-budget_against-options")
+
+				if property_setter:
+				else:
+					frappe.get_doc({
+						"doctype": "Property Setter",
+						"doc_type": "Budget",
+						"fieldname": "budget_against"
+					})
+			else:
+				create_custom_field(doctype, df)
 
 	def delete_accounting_dimension(self):
 		doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "BOM", "Sales Order", "Purchase Order",
