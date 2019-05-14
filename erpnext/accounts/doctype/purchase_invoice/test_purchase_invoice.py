@@ -402,9 +402,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi.save()
 		pi.submit()
-		self.assertEqual(pi.payment_schedule[0].payment_amount, 756.15)
+		self.assertEqual(pi.payment_schedule[0].payment_amount, 606.15)
 		self.assertEqual(pi.payment_schedule[0].due_date, pi.posting_date)
-		self.assertEqual(pi.payment_schedule[1].payment_amount, 756.15)
+		self.assertEqual(pi.payment_schedule[1].payment_amount, 606.15)
 		self.assertEqual(pi.payment_schedule[1].due_date, add_days(pi.posting_date, 30))
 
 		pi.load_from_db()
