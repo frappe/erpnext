@@ -122,7 +122,7 @@ def check_matching_amount(bank_account, company, transaction):
 		""", {
 			'bank_account': bank_account,
 			'txt': '%%%s%%' % amount
-		}, as_dict=True, debug=1)
+		}, as_dict=True)
 
 		frappe.errprint(journal_entries)
 
