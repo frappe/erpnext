@@ -92,7 +92,6 @@ def get_period_factor(employee, start_date, end_date, payroll_frequency, payroll
 
 	if payroll_frequency ==  "Monthly" and not depends_on_payment_days:
 		total_sub_periods = month_diff(payroll_period.end_date, payroll_period.start_date)
-		total_sub_periods_for_employee = month_diff(period_end, period_start)
 		remaining_sub_periods = month_diff(period_end, start_date)
 	else:
 		salary_days = date_diff(end_date, start_date) + 1

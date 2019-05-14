@@ -198,8 +198,8 @@ def get_benefit_component_amount(employee, start_date, end_date, salary_componen
 
 	current_benefit_amount = 0
 	if benefit_amount:
-		total_sub_periods, remaining_sub_periods = \
-			get_period_factor(employee, start_date, end_date, payroll_frequency, payroll_period, depends_on_payment_days)
+		total_sub_periods = get_period_factor(employee,
+			start_date, end_date, payroll_frequency, payroll_period, depends_on_payment_days)[0]
 
 		current_benefit_amount = benefit_amount / total_sub_periods
 
