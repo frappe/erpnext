@@ -19,6 +19,7 @@
   "party_name",
   "column_break_11",
   "bank_account",
+  "party_bank_account",
   "contact_person",
   "contact_email",
   "payment_accounts_section",
@@ -533,21 +534,28 @@
    "print_hide": 1
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "Initiated\nCompleted"
-  },
-  {
    "depends_on": "party",
    "fieldname": "bank_account",
    "fieldtype": "Link",
-   "label": "Bank Account",
+   "label": "Company Bank Account",
    "options": "Bank Account"
+  },
+  {
+   "depends_on": "party",
+   "fieldname": "party_bank_account",
+   "fieldtype": "Link",
+   "label": "Party Bank Account",
+   "options": "Bank Account"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Payment Order Status",
+   "options": "Initiated\nCompleted"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-08 12:35:05.407422",
+ "modified": "2019-05-14 17:00:48.759155",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
