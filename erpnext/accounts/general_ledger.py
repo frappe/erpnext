@@ -113,11 +113,6 @@ def validate_account_for_perpetual_inventory(gl_map):
 
 	stock_value_and_account_balance_difference = get_stock_and_account_difference(account_list=account_list ,company= gl_map[0].company)
 
-	if stock_value_and_account_balance_difference != 0 and gl_map[0].voucher_type != "Journal Entry":
-		frappe.throw(_("Account Balance and Stock Value is Out of sync please Create Journal Entry to Balance")
-			, StockValueAndAccountBalanceIsOutOfSync)
-
-	print("print------->>",stock_value_and_account_balance_difference)
 
 	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)) \
 		and gl_map[0].voucher_type=="Journal Entry":
@@ -125,9 +120,12 @@ def validate_account_for_perpetual_inventory(gl_map):
 			if stock_value_and_account_balance_difference == 0:
 				for entry in gl_map:
 					if entry.account in aii_accounts:
-						print("------->>>", entry.account)
 						frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
 							.format(entry.account), StockAccountInvalidTransaction)
+
+	if stock_value_and_account_balance_difference != 0 and gl_map[0].voucher_type != "Journal Entry":
+		frappe.throw(_("Account Balance and Stock Value is Out of sync please Create Journal Entry to Balance")
+			, StockValueAndAccountBalanceIsOutOfSync)
 
 def round_off_debit_credit(gl_map):
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
