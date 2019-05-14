@@ -1,5 +1,5 @@
 <template>
-	<section class="featured-products-section" :class='sectionType'>
+	<section class="featured-products-section">
 	<h5 class='featured-heading' v-html="title"></h5>
 	<div class="featured-products row">
 		<!-- <p class='lead text-center' v-html="description"></p> -->
@@ -12,7 +12,7 @@
 </template>
 <script>
 export default {
-    props:['title', 'description', 'sectionType'],
+    props:['title', 'description'],
     name: "CardList",
 };
 </script>
