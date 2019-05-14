@@ -215,7 +215,7 @@ frappe.query_reports["General Ledger"] = {
 	]
 }
 
-let dimension_filters = get_dimension_filters();
+let dimension_filters = erpnext.get_dimension_filters();
 
 dimension_filters.then((dimensions) => {
 	dimensions.forEach((dimension) => {
@@ -228,10 +228,3 @@ dimension_filters.then((dimensions) => {
 	});
 });
 
-async function get_dimension_filters() {
-	let dimensions = await frappe.db.get_list('Accounting Dimension', {
-		fields: ['label', 'fieldname', 'document_type'],
-	});
-
-	return dimensions;
-}
