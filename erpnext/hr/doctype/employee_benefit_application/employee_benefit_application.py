@@ -131,7 +131,7 @@ def get_max_benefits_remaining(employee, on_date, payroll_period):
 					salary_component = frappe.get_doc("Salary Component", sal_struct_row.salary_component)
 					if salary_component.depends_on_payment_days == 1 and salary_component.pay_against_benefit_claim != 1:
 						have_depends_on_payment_days = True
-						benefit_amount = get_benefit_pro_rata_ratio_amount(sal_struct, salary_component.max_benefit_amount)
+						benefit_amount = get_benefit_amount_based_on_pro_rata(sal_struct, salary_component.max_benefit_amount)
 						amount_per_day = benefit_amount / payroll_period_days
 						per_day_amount_total += amount_per_day
 
@@ -210,14 +210,14 @@ def get_benefit_amount_based_on_pro_rata(sal_struct, component_max_benefit):
 	benefit_amount = 0
 	for d in sal_struct.get("earnings"):
 		if d.is_flexible_benefit == 1:
-			component = frappe.db.get_value("Salary Component", d.salary_component, ["max_benefit_amount", "pay_against_benefit_claim"])
+			component = frappe.db.get_value("Salary Component", d.salary_component, ["max_benefit_amount", "pay_against_benefit_claim"], as_dict=1)
 			if not component.pay_against_benefit_claim:
 				max_benefits_total += component.max_benefit_amount
 
 	if max_benefits_total > 0:
 		benefit_amount = sal_struct.max_benefits * component.max_benefit_amount / max_benefits_total
-		if benefit_amount > component_max:
-			benefit_amount = component_max
+		if benefit_amount > component_max_benefit:
+			benefit_amount = component_max_benefit
 
 	return benefit_amount
 

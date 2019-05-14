@@ -43,14 +43,14 @@ class TestSalaryStructure(unittest.TestCase):
 		if not sal_slip:
 			sal_slip = make_employee_salary_slip("test_employee_2@salary.com", "Monthly", "Salary Structure Sample")
 			self.assertEqual(sal_slip.get("salary_structure"), 'Salary Structure Sample')
-			self.assertEqual(sal_slip.get("earnings")[0].amount, 25000)
+			self.assertEqual(sal_slip.get("earnings")[0].amount, 50000)
 			self.assertEqual(sal_slip.get("earnings")[1].amount, 3000)
-			self.assertEqual(sal_slip.get("earnings")[2].amount, 12500)
-			self.assertEqual(sal_slip.get("gross_pay"), 40500)
+			self.assertEqual(sal_slip.get("earnings")[2].amount, 25000)
+			self.assertEqual(sal_slip.get("gross_pay"), 78000)
 			self.assertEqual(sal_slip.get("deductions")[0].amount, 5000)
-			self.assertEqual(sal_slip.get("deductions")[1].amount, 5000)
-			self.assertEqual(sal_slip.get("total_deduction"), 10000)
-			self.assertEqual(sal_slip.get("net_pay"), 30500)
+			self.assertEqual(sal_slip.get("deductions")[1].amount, 3483.97)
+			self.assertEqual(sal_slip.get("total_deduction"), 8483.97)
+			self.assertEqual(sal_slip.get("net_pay"), 69516.03)
 
 	def test_whitespaces_in_formula_conditions_fields(self):
 		salary_structure = make_salary_structure("Salary Structure Sample", "Monthly", dont_submit=True)
