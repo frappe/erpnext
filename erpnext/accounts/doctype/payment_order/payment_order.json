@@ -13,6 +13,7 @@
   "posting_date",
   "company_bank",
   "company_bank_account",
+  "account",
   "section_break_5",
   "references",
   "amended_from"
@@ -90,16 +91,24 @@
    "reqd": 1
   },
   {
+   "depends_on": "company_bank_account",
    "fetch_from": "company_bank_account.bank",
    "fieldname": "company_bank",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Bank",
    "options": "Bank"
+  },
+  {
+   "depends_on": "company_bank_account",
+   "fetch_from": "company_bank_account.account",
+   "fieldname": "account",
+   "fieldtype": "Data",
+   "label": "Account"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-09 13:57:12.974008",
+ "modified": "2019-05-14 17:12:24.912666",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Order",
