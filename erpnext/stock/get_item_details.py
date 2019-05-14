@@ -573,6 +573,10 @@ def validate_conversion_rate(args, meta):
 def get_party_item_code(args, item_doc, out):
 	if args.transaction_type=="selling" and args.customer:
 		out.customer_item_code = None
+
+		if args.quotation_to != 'Customer':
+			return
+
 		customer_item_code = item_doc.get("customer_items", {"customer_name": args.customer})
 
 		if customer_item_code:
