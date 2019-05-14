@@ -1,14 +1,14 @@
 <template>
-	<section class="featured-products-section">
-	<h5 class='featured-heading' v-html="title"></h5>
-	<div class="featured-products row">
-		<!-- <p class='lead text-center' v-html="description"></p> -->
-		<slot name="card-list-slot"></slot>
+	<div class="featured-products-section py-3">
+		<h5 class='featured-heading' v-html="title"></h5>
+		<div class="featured-products row">
+			<!-- <p class='lead text-center' v-html="description"></p> -->
+			<slot name="card-list-slot"></slot>
+		</div>
+		<div class='mt-4 text-center'>
+			<slot name="list-bottom"></slot>
+		</div>
 	</div>
-	<div class='mt-4 text-center'>
-		<slot name="list-bottom"></slot>
-	</div>
-</section>
 </template>
 <script>
 export default {

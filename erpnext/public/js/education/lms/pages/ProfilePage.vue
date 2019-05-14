@@ -5,7 +5,7 @@
 		<CardList :title="'Your Progress'" :description="''">
 	        <ProgressCard slot="card-list-slot" v-for="program in enrolledPrograms" :program="program" :key="program"/>
 	    </CardList>
-		<CardList :title="'Quiz Attempts'" :description="''">
+		<CardList :title="''" :description="''">
 	        <ScoreCard slot="card-list-slot" v-for="program in enrolledPrograms" :program="program" :key="program"/>
 	    </CardList>
 	</div>
