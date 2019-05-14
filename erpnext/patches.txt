@@ -592,9 +592,11 @@ erpnext.patches.v11_1.make_job_card_time_logs
 erpnext.patches.v11_1.set_variant_based_on
 erpnext.patches.v11_1.move_customer_lead_to_dynamic_column
 erpnext.patches.v11_1.woocommerce_set_creation_user
+erpnext.patches.v11_1.set_default_action_for_quality_inspection
 erpnext.patches.v11_1.delete_bom_browser
 erpnext.patches.v11_1.set_salary_details_submittable
 erpnext.patches.v11_1.rename_depends_on_lwp
 erpnext.patches.v11_1.set_missing_title_for_quotation
 execute:frappe.delete_doc("Report", "Inactive Items")
 erpnext.patches.v11_1.delete_scheduling_tool
+erpnext.patches.v11_1.update_bank_transaction_status

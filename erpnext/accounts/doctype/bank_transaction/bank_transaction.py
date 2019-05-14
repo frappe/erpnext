@@ -36,6 +36,10 @@ class BankTransaction(StatusUpdater):
 			frappe.db.set_value(self.doctype, self.name, "allocated_amount", 0)
 			frappe.db.set_value(self.doctype, self.name, "unallocated_amount", abs(flt(self.credit) - flt(self.debit)))
 
+		amount = self.debit or self.credit
+		if amount == self.allocated_amount:
+			frappe.db.set_value(self.doctype, self.name, "status", "Reconciled")
+
 		self.reload()
 
 	def clear_linked_payment_entries(self):

@@ -1957,6 +1957,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			}],
 			function(values){
 				me.item_batch_no[me.items[0].item_code] = values.batch;
+				const item = me.frm.doc.items.find(
+					({ item_code }) => item_code === me.items[0].item_code
+				);
+				if (item) {
+					item.batch_no = values.batch;
+				}
 			},
 			__('Select Batch No'))
 		}

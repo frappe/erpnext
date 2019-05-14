@@ -17,5 +17,13 @@ frappe.listview_settings['Opportunity'] = {
 		listview.page.add_menu_item(__("Set as Closed"), function() {
 			listview.call_for_selected_items(method, {"status": "Closed"});
 		});
+
+		listview.page.fields_dict.opportunity_from.get_query = function() {
+			return {
+				"filters": {
+					"name": ["in", ["Customer", "Lead"]],
+				}
+			};
+		};
 	}
 };
