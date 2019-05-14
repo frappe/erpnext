@@ -302,6 +302,12 @@ class GrossProfitGenerator(object):
 			sales_person_cols = ""
 			sales_team_table = ""
 
+		if self.filters.get("sales_invoice"):
+			conditions += " and `tabSales Invoice`.name = %(sales_invoice)s"
+
+		if self.filters.get("item_code"):
+			conditions += " and `tabSales Invoice Item`.item_code = %(item_code)s"
+
 		self.si_list = frappe.db.sql("""
 			select
 				`tabSales Invoice Item`.parenttype, `tabSales Invoice Item`.parent,
