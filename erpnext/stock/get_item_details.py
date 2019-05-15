@@ -306,7 +306,20 @@ def get_basic_details(args, item):
 	for fieldname in ("item_name", "item_group", "barcodes", "brand", "stock_uom"):
 		out[fieldname] = item.get(fieldname)
 
+	child_doctype = args.doctype + ' Item'
+	meta = frappe.get_meta(child_doctype)
+	if meta.get_field("barcode"):
+		update_barcode_value(out)
+
 	return out
+
+def update_barcode_value(out):
+	from erpnext.accounts.doctype.sales_invoice.pos import get_barcode_data
+	barcode_data = get_barcode_data([out])
+
+	# If item has one barcode then update the value of the barcode field
+	if barcode_data and len(barcode_data.get(out.item_code)) == 1:
+		out['barcode'] = barcode_data.get(out.item_code)
 
 @frappe.whitelist()
 def calculate_service_end_date(args, item=None):
