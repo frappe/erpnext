@@ -13,6 +13,8 @@ class AccountingDimension(Document):
 
 	def before_insert(self):
 		self.set_fieldname_and_label()
+
+	def after_insert(self):
 		self.make_accounting_dimension_in_accounting_doctypes()
 
 	def on_trash(self):
@@ -51,12 +53,26 @@ class AccountingDimension(Document):
 				property_setter = frappe.db.exists("Property Setter", "Budget-budget_against-options")
 
 				if property_setter:
+					property_setter_doc = frappe.get_doc("Property Setter", "Budget-budget_against-options")
+					property_setter_doc.doc_type = 'Budget'
+					property_setter_doc.doctype_or_field = "DocField"
+					property_setter_doc.fiel_dname = "budget_against"
+					property_setter_doc.property = "options"
+					property_setter_doc.property_type = "Text"
+					property_setter_doc.value = property_setter_doc.value + "\n" + self.document_type
+					property_setter_doc.save()
+
+					frappe.clear_cache(doctype='Budget')
 				else:
 					frappe.get_doc({
 						"doctype": "Property Setter",
+						"doctype_or_field": "DocField",
 						"doc_type": "Budget",
-						"fieldname": "budget_against"
-					})
+						"field_name": "budget_against",
+						"property": "options",
+						"property_type": "Text",
+						"value": "\nCost Center\nProject\n" + self.document_type
+					}).insert(ignore_permissions=True)
 			else:
 				create_custom_field(doctype, df)
 
@@ -76,9 +92,14 @@ class AccountingDimension(Document):
 			AND doc_type IN (%s)""" %
 			('%s', ', '.join(['%s']* len(doclist))), tuple([self.fieldname] + doclist))
 
+		# budget_against_property = frappe.get_doc("Property Setter", "Budget-budget_against-options")
+		# value_list = budget_against_property.value.split('\n')[3:]
+		# value_list.remove(self.document_type)
+
+		# budget_against_property.value = "\nCost Center\nProject\n" + "\n".join(value_list)
+
 		for doc in doclist:
 			frappe.clear_cache(doctype=doc)
-
 
 def get_last_created_accounting_dimension():
 	last_created_accounting_dimension = frappe.db.sql("select fieldname, max(creation) from `tabAccounting Dimension`", as_dict=1)
