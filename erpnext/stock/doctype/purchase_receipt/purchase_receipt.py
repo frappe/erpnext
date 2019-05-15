@@ -37,6 +37,29 @@ class PurchaseReceipt(BuyingController):
 			'second_join_field': 'po_detail',
 			'percent_join_field': 'purchase_order',
 			'overflow_type': 'receipt'
+		},
+		{
+			'source_dt': 'Purchase Receipt Item',
+			'target_dt': 'Material Request Item',
+			'join_field': 'material_request_item',
+			'target_field': 'received_qty',
+			'target_parent_dt': 'Material Request',
+			'target_parent_field': 'per_received',
+			'target_ref_field': 'qty',
+			'source_field': 'qty',
+			'percent_join_field': 'material_request'
+		},
+		{
+			'source_dt': 'Purchase Receipt Item',
+			'target_dt': 'Purchase Order Item',
+			'join_field': 'purchase_order_item',
+			'target_field': 'returned_qty',
+			'target_parent_dt': 'Purchase Order',
+			# 'target_parent_field': 'per_received',
+			# 'target_ref_field': 'qty',
+			'source_field': '-1 * qty',
+			# 'overflow_type': 'receipt',
+			'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
 		}]
 		if cint(self.is_return):
 			self.status_updater.append({
