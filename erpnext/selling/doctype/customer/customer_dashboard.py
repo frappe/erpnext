@@ -10,6 +10,9 @@ def get_data():
 			'Quotation': 'party_name',
 			'Opportunity': 'party_name'
 		},
+		'dynamic_links': {
+			'party_name': ['Customer', 'quotation_to']
+		},
 		'transactions': [
 			{
 				'label': _('Pre Sales'),
