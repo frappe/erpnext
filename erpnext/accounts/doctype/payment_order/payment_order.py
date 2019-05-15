@@ -21,8 +21,10 @@ class PaymentOrder(Document):
 		if cancel:
 			status = 'Initiated'
 
+		ref_field = "status" if self.payment_order_type == "Payment Request" else "payment_order_status"
+
 		for d in self.references:
-			frappe.db.set_value(self.payment_order_type, d.get(frappe.scrub(self.payment_order_type)), 'status', status)
+			frappe.db.set_value(self.payment_order_type, d.get(frappe.scrub(self.payment_order_type)), ref_field, status)
 
 def get_mop_query(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql(""" select mode_of_payment from `tabPayment Order Reference`
