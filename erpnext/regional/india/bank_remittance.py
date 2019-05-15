@@ -72,7 +72,6 @@ def get_batch_row(doc, no_of_records, total_amount, product_code):
 	batch.append(sanitize_data(doc.name, '_')[:20])
 	batch.append(format_date(doc.posting_date))
 	batch.append(validate_field_size(product_code,"Product Code", 20))
-	print(batch)
 	return "~".join(batch)
 
 def get_detail_row(ref_doc, payment_entry, company_email):
@@ -172,7 +171,7 @@ def validate_amount(val, max_int_size):
 	int_size = len(str(val).split('.')[0])
 
 	if int_size > max_int_size:
-		frappe.throw(_("Amount for a single transaction is more than maximum allowed amount, create a separate payment order by splitting the transactions"))
+		frappe.throw(_("Amount for a single transaction exceeds maximum allowed amount, create a separate payment order by splitting the transactions"))
 
 	return val
 
@@ -182,10 +181,10 @@ def validate_information(obj, attr, max_size):
 		return validate_field_size(getattr(obj, attr), frappe.unscrub(attr), max_size)
 
 	else:
-		frappe.throw(_("%s is mandatory for generating remittance payments, set the field and try again" % attr))
+		frappe.throw(_("{0} is mandatory for generating remittance payments, set the field and try again".format(frappe.unscrub(attr))))
 
 def validate_field_size(val, label, max_size):
 	''' check the size of the val '''
 	if len(cstr(val)) > max_size:
-		frappe.throw("%s field is limited to size %d" % (label, max_size))
+		frappe.throw(_("{0} field is limited to size {1}".format(label, max_size)))
 	return cstr(val)
