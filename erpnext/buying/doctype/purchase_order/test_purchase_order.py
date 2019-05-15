@@ -108,6 +108,69 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(po.get("items")[0].amount, 1400)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 3)
 
+	def test_update_qty(self):
+		po = create_purchase_order()
+
+		make_pr_against_po(po.name, 6)
+
+		po.load_from_db()
+		self.assertEqual(po.get("items")[0].received_qty, 6)
+
+		# Check received_qty after make_purchase_invoice without update_stock checked
+		pi1 = make_purchase_invoice(po.name)
+		pi1.get("items")[0].qty = 6
+		pi1.insert()
+		pi1.submit()
+
+		po.load_from_db()
+		self.assertEqual(po.get("items")[0].received_qty, 6)
+
+		# Check received_qty after make_purchase_invoice with update_stock checked
+		pi2 = make_purchase_invoice(po.name)
+		pi2.set("update_stock", 1)
+		pi2.get("items")[0].qty = 3
+		pi2.insert()
+		pi2.submit()
+
+		po.load_from_db()
+		self.assertEqual(po.get("items")[0].received_qty, 9)
+
+	def test_return_against_purchase_order(self):
+		po = create_purchase_order()
+
+		pr = make_pr_against_po(po.name, 6)
+
+		po.load_from_db()
+		self.assertEqual(po.get("items")[0].received_qty, 6)
+
+		pi2 = make_purchase_invoice(po.name)
+		pi2.set("update_stock", 1)
+		pi2.get("items")[0].qty = 3
+		pi2.insert()
+		pi2.submit()
+
+		po.load_from_db()
+		self.assertEqual(po.get("items")[0].received_qty, 9)
+
+		# Make return purchase receipt, purchase invoice and check quantity
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
+				import make_purchase_receipt as make_purchase_receipt_return
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice \
+				import make_purchase_invoice as make_purchase_invoice_return
+
+		pr1 = make_purchase_receipt_return(is_return=1, return_against=pr.name, qty=-3, do_not_submit=True)
+		pr1.items[0].purchase_order = po.name
+		pr1.items[0].purchase_order_item = po.items[0].name
+		pr1.submit()
+
+		pi1= make_purchase_invoice_return(is_return=1, return_against=pi2.name, qty=-1, update_stock=1, do_not_submit=True)
+		pi1.items[0].purchase_order = po.name
+		pi1.items[0].po_detail = po.items[0].name
+		pi1.submit()
+
+
+		po.load_from_db()
+		self.assertEqual(po.get("items")[0].received_qty, 5)
 
 	def test_make_purchase_invoice(self):
 		po = create_purchase_order(do_not_submit=True)
@@ -468,6 +531,13 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		self.assertEquals(se_items, supplied_items)
 		update_backflush_based_on("BOM")
+
+def make_pr_against_po(po, received_qty=0):
+	pr = make_purchase_receipt(po)
+	pr.get("items")[0].qty = received_qty or 5
+	pr.insert()
+	pr.submit()
+	return pr
 
 def make_subcontracted_item(item_code):
 	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
