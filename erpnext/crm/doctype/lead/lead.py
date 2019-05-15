@@ -102,7 +102,7 @@ class Lead(SellingController):
 
 	def has_lost_quotation(self):
 		return frappe.db.get_value("Quotation", {
-			"lead": self.name,
+			"party_name": self.name,
 			"docstatus": 1,
 			"status": "Lost"
 		})

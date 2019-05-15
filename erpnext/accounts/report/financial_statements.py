@@ -321,7 +321,10 @@ def sort_accounts(accounts, is_root=False, key="name"):
 	"""Sort root types as Asset, Liability, Equity, Income, Expense"""
 
 	def compare_accounts(a, b):
-		if is_root:
+		if re.split('\W+', a[key])[0].isdigit():
+			# if chart of accounts is numbered, then sort by number
+			return cmp(a[key], b[key])
+		elif is_root:
 			if a.report_type != b.report_type and a.report_type == "Balance Sheet":
 				return -1
 			if a.root_type != b.root_type and a.root_type == "Asset":
@@ -330,10 +333,6 @@ def sort_accounts(accounts, is_root=False, key="name"):
 				return -1
 			if a.root_type == "Income" and b.root_type == "Expense":
 				return -1
-		else:
-			if re.split('\W+', a[key])[0].isdigit():
-				# if chart of accounts is numbered, then sort by number
-				return cmp(a[key], b[key])
 		return 1
 
 	accounts.sort(key = functools.cmp_to_key(compare_accounts))
