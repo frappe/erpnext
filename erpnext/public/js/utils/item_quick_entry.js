@@ -390,15 +390,6 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			}
 		})
 
-		if (mandatory.length) {
-			frappe.msgprint({
-				title: __('Missing Values Required'),
-				message: __('Following fields have missing values:') + '<br><br><ul><li>' + mandatory.join('<li>') + '</ul>',
-				indicator: 'orange'
-			});
-			return {};
-		}
-
 		if (this.is_manufacturer) {
 			$.each(this.manufacturer_fields, function(index, field) {
 				attribute[field.fieldname] = me.dialog.fields_dict[field.fieldname].input.value;

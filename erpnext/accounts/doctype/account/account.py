@@ -268,7 +268,7 @@ def update_account_number(name, account_name, account_number=None):
 
 	new_name = get_account_autoname(account_number, account_name, account.company)
 	if name != new_name:
-		frappe.rename_doc("Account", name, new_name, ignore_permissions=1)
+		frappe.rename_doc("Account", name, new_name, force=1)
 		return new_name
 
 @frappe.whitelist()
@@ -287,7 +287,7 @@ def merge_account(old, new, is_group, root_type, company):
 		frappe.db.set_value("Account", new, "parent_account",
 			frappe.db.get_value("Account", old, "parent_account"))
 
-	frappe.rename_doc("Account", old, new, merge=1, ignore_permissions=1)
+	frappe.rename_doc("Account", old, new, merge=1, force=1)
 
 	return new
 

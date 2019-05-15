@@ -7,13 +7,11 @@ from frappe.utils import getdate, add_days, today, cint
 from frappe import _
 
 def execute(filters=None):
-
 	columns = get_columns()
 	data = get_data(filters)
 	return columns, data
 
 def get_columns():
-
 	columns = [
 		{
 			"fieldname": "territory",
@@ -74,39 +72,39 @@ def get_columns():
 
 
 def get_data(filters):
-
 	data = []
 	items = get_items(filters)
+	territories = get_territories(filters)
 	sales_invoice_data = get_sales_details(filters)
 
-	for item in items:
-		if sales_invoice_data.get(item.name):
-			item_obj = sales_invoice_data[item.name]
-			if item_obj.days_since_last_order > cint(filters['days']):
-				row = {
-					"territory": item_obj.territory,
-					"item_group": item_obj.item_group,
-					"item": item_obj.name,
-					"item_name": item_obj.item_name,
-					"customer": item_obj.customer,
-					"last_order_date": item_obj.last_order_date,
-					"qty": item_obj.qty,
-					"days_since_last_order": item_obj.days_since_last_order
-				}
-				data.append(row)
-		else:
+	for territory in territories:
+		for item in items:
 			row = {
+				"territory": territory.name,
 				"item_group": item.item_group,
 				"item": item.name,
 				"item_name": item.item_name
 			}
+
+			if sales_invoice_data.get((territory.name,item.name)):
+				item_obj = sales_invoice_data[(territory.name,item.name)]
+				if item_obj.days_since_last_order > cint(filters['days']):
+					row.update({
+						"territory": item_obj.territory,
+						"customer": item_obj.customer,
+						"last_order_date": item_obj.last_order_date,
+						"qty": item_obj.qty,
+						"days_since_last_order": item_obj.days_since_last_order
+					})
+				else:
+					continue
+
 			data.append(row)
 
 	return data
 
 
 def get_sales_details(filters):
-
 	data = []
 	item_details_map = {}
 
@@ -121,12 +119,21 @@ def get_sales_details(filters):
 		.format(date_field = date_field, doctype = filters['based_on']), as_dict=1)
 
 	for d in sales_data:
-		item_details_map.setdefault(d.item_name, d)
+		item_details_map.setdefault((d.territory,d.item_name), d)
 
 	return item_details_map
 
-def get_items(filters):
+def get_territories(filters):
 
+	filter_dict = {}
+	if filters.get("territory"):
+		filter_dict.update({'name': filters['territory']})
+
+	territories = frappe.get_all("Territory", fields=["name"], filters=filter_dict)
+
+	return territories
+
+def get_items(filters):
 	filters_dict = {
 		"disabled": 0,
 		"is_stock_item": 1
