@@ -10,6 +10,7 @@ from frappe.utils import getdate, nowdate, flt
 from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.leave_application.leave_application import get_leave_balance_on
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
+from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
 
 class LeaveEncashment(Document):
 	def validate(self):
@@ -40,6 +41,8 @@ class LeaveEncashment(Document):
 		frappe.db.set_value("Leave Allocation", self.leave_allocation, "total_leaves_encashed",
 				frappe.db.get_value('Leave Allocation', self.leave_allocation, 'total_leaves_encashed') + self.encashable_days)
 
+		self.create_leave_ledger_entry()
+
 	def on_cancel(self):
 		if self.additional_salary:
 			frappe.get_doc("Additional Salary", self.additional_salary).cancel()
@@ -48,6 +51,7 @@ class LeaveEncashment(Document):
 		if self.leave_allocation:
 			frappe.db.set_value("Leave Allocation", self.leave_allocation, "total_leaves_encashed",
 				frappe.db.get_value('Leave Allocation', self.leave_allocation, 'total_leaves_encashed') - self.encashable_days)
+		self.create_leave_ledger_entry(submit=False)
 
 	def get_leave_details_for_encashment(self):
 		salary_structure = get_assigned_salary_structure(self.employee, self.encashment_date or getdate(nowdate()))
@@ -75,3 +79,11 @@ class LeaveEncashment(Document):
 		and employee= '{2}'""".format(self.encashment_date or getdate(nowdate()), self.leave_type, self.employee))
 
 		return leave_allocation[0][0] if leave_allocation else None
+
+	def create_leave_ledger_entry(self, submit=True):
+		args = frappe._dict(
+			leaves=self.encashable_days * -1,
+			from_date=self.encashment_date,
+			is_carry_forward=0
+		)
+		create_leave_ledger_entry(self, args, submit)
