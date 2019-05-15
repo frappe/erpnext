@@ -154,11 +154,9 @@ def calculate_annual_eligible_hra_exemption(doc):
 	hra_component = frappe.get_cached_value('Company',  doc.company,  "hra_component")
 	if not (basic_component and hra_component):
 		frappe.throw(_("Please mention Basic and HRA component in Company"))
-
 	annual_exemption, monthly_exemption, hra_amount = 0, 0, 0
 	if hra_component and basic_component:
 		assignment = get_salary_assignment(doc.employee, nowdate())
-
 		if assignment:
 			hra_component_exists = frappe.db.exists("Salary Detail", {
 				"parent": assignment.salary_structure,
@@ -166,18 +164,19 @@ def calculate_annual_eligible_hra_exemption(doc):
 				"parentfield": "earnings",
 				"parenttype": "Salary Structure"
 			})
+
 			if hra_component_exists:
 				basic_amount, hra_amount = get_component_amt_from_salary_slip(doc.employee,
 					assignment.salary_structure, basic_component, hra_component)
 				if hra_amount:
 					if doc.monthly_house_rent:
 						annual_exemption = calculate_hra_exemption(assignment.salary_structure,
-							basic_amount, hra_amount, doc.monthly_house_rent,
-							doc.rented_in_metro_city)
+							basic_amount, hra_amount, doc.monthly_house_rent, doc.rented_in_metro_city)
 						if annual_exemption > 0:
 							monthly_exemption = annual_exemption / 12
 						else:
 							annual_exemption = 0
+
 		elif doc.docstatus == 1:
 			frappe.throw(_("Salary Structure must be submitted before submission of Tax Ememption Declaration"))
 
@@ -188,7 +187,7 @@ def calculate_annual_eligible_hra_exemption(doc):
 	})
 
 def get_component_amt_from_salary_slip(employee, salary_structure, basic_component, hra_component):
-	salary_slip = make_salary_slip(salary_structure, employee=employee)
+	salary_slip = make_salary_slip(salary_structure, employee=employee, for_preview=1)
 	basic_amt, hra_amt = 0, 0
 	for earning in salary_slip.earnings:
 		if earning.salary_component == basic_component:

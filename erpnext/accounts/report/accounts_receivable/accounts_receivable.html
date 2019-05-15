@@ -111,10 +111,10 @@
 				<th style="width: 4%">{%= __("Age (Days)") %}</th>
 
 				{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person_in_print) { %}
-					<th style="width: 16%">{%= __("Reference") %}</th>
+					<th style="width: 14%">{%= __("Reference") %}</th>
 					<th style="width: 10%">{%= __("Sales Person") %}</th>
 				{% } else { %}
-					<th style="width: 26%">{%= __("Reference") %}</th>
+					<th style="width: 24%">{%= __("Reference") %}</th>
 				{% } %}
 				{% if(!filters.show_pdc_in_print) { %}
 					<th style="width: 20%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
@@ -127,7 +127,7 @@
 				<th style="width: 10%; text-align: right">{%= __("Outstanding Amount") %}</th>
 				{% if(filters.show_pdc_in_print) { %}
 					{% if(report.report_name === "Accounts Receivable") { %}
-						<th style="width: 10%">{%= __("Customer LPO No.") %}</th>
+						<th style="width: 12%">{%= __("Customer LPO No.") %}</th>
 					{% } %}
 					<th style="width: 10%">{%= __("PDC/LC Ref") %}</th>
 					<th style="width: 10%">{%= __("PDC/LC Amount") %}</th>
