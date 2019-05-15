@@ -66,15 +66,14 @@ class ItemVariantsCacheManager:
 			as_list=1
 		)
 
-		disabled_items = [i.name for i in frappe.db.get_all('Item', {'disabled': 1})]
+		disabled_items = set([i.name for i in frappe.db.get_all('Item', {'disabled': 1})])
 
 		attribute_value_item_map = frappe._dict({})
 		item_attribute_value_map = frappe._dict({})
 
+		item_variants_data = [r for r in item_variants_data if r[0] not in disabled_items]
 		for row in item_variants_data:
 			item_code, attribute, attribute_value = row
-			if item_code in disabled_items:
-				continue
 			# (attr, value) => [item1, item2]
 			attribute_value_item_map.setdefault((attribute, attribute_value), []).append(item_code)
 			# item => {attr1: value1, attr2: value2}
@@ -96,6 +95,10 @@ class ItemVariantsCacheManager:
 
 		for key in keys:
 			frappe.cache().hdel(key, self.item_code)
+
+	def rebuild_cache(self):
+		self.clear_cache()
+		enqueue_build_cache(self.item_code)
 
 
 def build_cache(item_code):
