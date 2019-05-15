@@ -20,34 +20,36 @@ def create_leave_ledger_entry(ref_doc, args, submit=True):
 		employee=ref_doc.employee,
 		employee_name=ref_doc.employee_name,
 		leave_type=ref_doc.leave_type,
-		from_date=ref_doc.from_date,
 		transaction_type=ref_doc.doctype,
 		transaction_name=ref_doc.name,
 	)
 	ledger.update(args)
-
 	if submit:
-		frappe.get_doc(ledger).insert(ignore_permissions=True)
+		frappe.get_doc(ledger).submit()
 	else:
 		delete_ledger_entry(ledger)
 
 def delete_ledger_entry(ledger):
-	''' Delete ledger entry on cancel of leave application/allocation '''
-	ledger_entry, creation_date = frappe.db.get_value("Leave Ledger Entry",
-		{'transaction_name': ledger.transaction_name},
-		['name', 'creation']
-		)
+	''' Delete ledger entry on cancel of leave application/allocation/encashment '''
 
 	leave_application_records = []
+	# prevent deletion when leave application has been created after allocation
 	if ledger.transaction_type == "Leave Allocation":
 		leave_application_records = frappe.get_all("Leave Ledger Entry",
 			filters={
+				'employee': ledger.employee,
+				'leave_type': ledger.leave_type,
 				'transaction_type': 'Leave Application',
-				'creation_date': (">", creation_date)
+				'from_date': (">=", ledger.from_date),
+				'to_date': ('<=', ledger.to_date)
 			},
-			fields=['transaction_type'])
+			fields=['transaction_name'])
+
 	if not leave_application_records:
-		frappe.delete_doc("Leave Ledger Entry", ledger_entry)
+		frappe.db.sql("""DELETE
+			FROM `tabLeave Ledger Entry`
+			WHERE
+				`transaction_name`=%s""", (ledger.transaction_name))
 	else:
 		frappe.throw(_("Leave allocation %s is linked with leave application %s"
 			% (ledger_entry, ', '.join(leave_application_records))))
