@@ -99,9 +99,6 @@ def get_period_factor(employee, start_date, end_date, payroll_frequency, payroll
 		days_in_payroll_period = date_diff(payroll_period.end_date, payroll_period.start_date) + 1
 		total_sub_periods = flt(days_in_payroll_period) / flt(salary_days)
 
-		days_in_payroll_period_for_employee = date_diff(period_end, period_start) + 1
-		total_sub_periods_for_employee = flt(days_in_payroll_period_for_employee) / flt(salary_days)
-
 		remaining_days_in_payroll_period = date_diff(period_end, start_date) + 1
 		remaining_sub_periods = flt(remaining_days_in_payroll_period) / flt(salary_days)
 
