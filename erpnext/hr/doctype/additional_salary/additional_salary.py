@@ -35,7 +35,8 @@ class AdditionalSalary(Document):
 @frappe.whitelist()
 def get_additional_salary_component(employee, start_date, end_date):
 	additional_components = frappe.db.sql("""
-		select salary_component, sum(amount) as amount, overwrite_salary_structure_amount from `tabAdditional Salary`
+		select salary_component, sum(amount) as amount, overwrite_salary_structure_amount, deduct_full_tax_on_selected_payroll_date
+		from `tabAdditional Salary`
 		where employee=%(employee)s
 			and docstatus = 1
 			and payroll_date between %(from_date)s and %(to_date)s
@@ -48,16 +49,20 @@ def get_additional_salary_component(employee, start_date, end_date):
 	}, as_dict=1)
 
 	additional_components_list = []
+	component_fields = ["depends_on_payment_days", "salary_component_abbr", "is_tax_applicable", "variable_based_on_taxable_salary", 'type']
 	for d in additional_components:
-		component = frappe.get_doc("Salary Component", d.salary_component)
-		struct_row = {'salary_component': d.salary_component}
-		for field in ["depends_on_payment_days", "abbr", "is_tax_applicable", "variable_based_on_taxable_salary", "is_additional_component"]:
-			struct_row[field] = component.get(field)
+		struct_row = frappe._dict({'salary_component': d.salary_component})
+		component = frappe.get_all("Salary Component", filters={'name': d.salary_component}, fields=component_fields)
+		if component:
+			struct_row.update(component[0])
 
-		additional_components_list.append({
+		struct_row['deduct_full_tax_on_selected_payroll_date'] = d.deduct_full_tax_on_selected_payroll_date
+		struct_row['is_additional_component'] = 1
+
+		additional_components_list.append(frappe._dict({
 			'amount': d.amount,
-			'type': component.type,
+			'type': component[0].type,
 			'struct_row': struct_row,
-			'overwrite': d.overwrite_salary_structure_amount
-		})
+			'overwrite': d.overwrite_salary_structure_amount,
+		}))
 	return additional_components_list
