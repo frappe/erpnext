@@ -5,8 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr
-from collections import OrderedDict
-from six import iteritems
+from frappe.desk.query_report import group_report_data
 
 class ReceivablePayableReport(object):
 	def __init__(self, filters=None):
@@ -38,9 +37,12 @@ class ReceivablePayableReport(object):
 				"fieldtype": "Link",
 				"fieldname": "party",
 				"options": args.get("party_type"),
-				"width": 200
+				"width": 200 if self.filters.get("group_by", "Ungrouped") == "Ungrouped" else 300
 			}
 		]
+
+		if self.filters.get("group_by", "Ungrouped") != "Ungrouped":
+			columns = list(reversed(columns))
 
 		if party_naming_by == "Naming Series":
 			columns.append({
@@ -327,38 +329,36 @@ class ReceivablePayableReport(object):
 		return data
 
 	def get_grouped_data(self, columns, data):
-		if not self.filters.get("group_by") or self.filters.get("group_by") == "Ungrouped":
+		level1 = self.filters.get("group_by", "").replace("Group by ", "")
+		level2 = self.filters.get("group_by_2", "").replace("Group by ", "")
+		level1_fieldname = "party" if level1 in ['Customer', 'Supplier'] else scrub(level1)
+		level2_fieldname = "party" if level2 in ['Customer', 'Supplier'] else scrub(level2)
+
+		group_by = [None]
+		if level1 and level1 != "Ungrouped":
+			group_by.append(level1_fieldname)
+		if level2 and level2 != "Ungrouped":
+			group_by.append(level2_fieldname)
+
+		if len(group_by) <= 1:
 			return data
 
 		total_fields = [c['fieldname'] for c in columns
 			if c['fieldtype'] in ['Float', 'Currency', 'Int'] and c['fieldname'] != 'age']
-		group_field = self.filters.get("group_by").replace("Group by ", "")
-		group_fieldname = scrub(group_field)
-		group_fieldname = "party" if group_fieldname in ['customer', 'supplier'] else group_fieldname
-		group_rows = OrderedDict()
-		group_totals = {}
-		for row in data:
-			group = row.get(group_fieldname)
-			group_rows.setdefault(group, [])
-			group_rows[group].append(row)
 
-			group_totals.setdefault(group, {})
-			for total_field in total_fields:
-				group_totals[group].setdefault(total_field, 0)
-				group_totals[group][total_field] += row[total_field]
+		def postprocess_group(group_object, grouped_by):
+			group = grouped_by[-1]
+			group_object.totals['party'] = "'{0}: {1}'".format(frappe.unscrub(group.fieldname), group.value) if group.fieldname\
+				else "'Total'"
 
-		out = []
-		for group, rows in iteritems(group_rows):
-			group_totals[group]['party'] = "'Total: {0}'".format(group)
-			if group_fieldname == 'party':
-				group_totals[group]['currency'] = rows[0]['currency']
+			if group.fieldname == 'party':
+				group_object.totals['currency'] = group_object.rows[0].get("currency")
 
-			out.append({"party": "'{0}: {1}'".format(group_field, group)})
-			out += rows
-			out.append(group_totals[group])
-			out.append({})
+				group_object.tax_id = self.party_map.get(group.value, {}).get("tax_id")
+				group_object.payment_terms = self.party_map.get(group.value, {}).get("payment_terms")
+				group_object.credit_limit = self.party_map.get(group.value, {}).get("credit_limit")
 
-		return out
+		return group_report_data(data, group_by, total_fields=total_fields, postprocess_group=postprocess_group)
 
 	def allocate_pdc_amount_in_fifo(self, gle, row_outstanding):
 		pdc_list = self.pdc_details.get((gle.voucher_no, gle.party), [])
@@ -591,14 +591,15 @@ class ReceivablePayableReport(object):
 				party_data = frappe.db.sql("""
 					select
 						p.name, p.customer_name, p.territory, p.customer_group, p.customer_primary_contact,
-						GROUP_CONCAT(steam.sales_person SEPARATOR ', ') as sales_person
+						GROUP_CONCAT(steam.sales_person SEPARATOR ', ') as sales_person,
+						p.payment_terms, p.credit_limit, p.tax_id
 					from `tabCustomer` p
 					left join `tabSales Team` steam on steam.parent = p.name and steam.parenttype = 'Customer'
 					group by p.name
 				""", as_dict=True)
 			elif party_type == "Supplier":
 				party_data = frappe.db.sql("""
-					select p.name, p.supplier_name, p.supplier_group
+					select p.name, p.supplier_name, p.supplier_group, p.tax_id, p.payment_terms
 					from `tabSupplier` p
 				""", as_dict=True)
 			else:

@@ -1,3 +1,5 @@
+{% include "templates/includes/grouped_report_print.html" %}
+
 <style>
 @media screen {
 	.print-format {
@@ -13,19 +15,31 @@
 }
 </style>
 
+{% function print_group(data, group) { %}
 <h2 class="text-center" style="margin-top:0">{%= __(report.report_name) %}</h2>
-<h4 class="text-center">
-	{% if (filters.customer_name) { %}
-		{%= filters.customer_name %}
+
+{% if (filters.customer_name || filters.supplier_name || group.party_name || filters.customer || filters.supplier || group.party) { %}
+	<h4 class="text-center">
+	{% if (filters.customer_name || filters.supplier_name || group.party_name) { %}
+		{%= filters.customer_name || filters.supplier_name || group.party_name %}
 	{% } else { %}
-		{%= filters.customer || filters.supplier %}
+		{%= filters.customer || filters.supplier || group.party %}
 	{% } %}
-</h4>
-<h6 class="text-center">
-		{% if (filters.tax_id) { %}
-		{%= __("Tax Id: ")%}	{%= filters.tax_id %}
-		{% } %}
-</h6>
+	</h4>
+{% } %}
+
+{% if (filters.sales_person || group.sales_person) { %}
+	<h6 class="text-center">
+		{%= __("Sales Person: ")%}{%= filters.sales_person || group.sales_person %}
+	</h6>
+{% } %}
+
+{% if (filters.tax_id || group.tax_id) { %}
+	<h6 class="text-center">
+		{%= __("NTN: ")%}{%= filters.tax_id || group.tax_id %}
+	</h6>
+{% } %}
+
 <h5 class="text-center">
 	{%= __(filters.ageing_based_on) %}
 	{%= __("Until") %}
@@ -34,13 +48,13 @@
 
 <div class="clearfix">
 	<div class="pull-left">
-	{% if(filters.payment_terms) { %}
-		<strong>{%= __("Payment Terms") %}:</strong> {%= filters.payment_terms %}
+	{% if(filters.payment_terms || group.payment_terms) { %}
+		<strong>{%= __("Payment Terms") %}:</strong> {%= filters.payment_terms || group.payment_terms %}
 	{% } %}
 	</div>
 	<div class="pull-right">
-	{% if(filters.credit_limit) { %}
-		<strong>{%= __("Credit Limit") %}:</strong> {%= format_currency(filters.credit_limit) %}
+	{% if(filters.credit_limit || group.credit_limit) { %}
+		<strong>{%= __("Credit Limit") %}:</strong> {%= format_currency(filters.credit_limit || group.credit_limit) %}
 	{% } %}
 	</div>
 </div>
@@ -108,6 +122,7 @@
 	</table>
 	{% } %}
 {% } %}
+
 <table class="table table-bordered">
 	<thead>
 		<tr>
@@ -121,7 +136,7 @@
 					<th style="width: 27%">{%= __("Reference") %}</th>
 				{% } %}
 				{% if(!filters.show_pdc_in_print) { %}
-					<th style="width: 20%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
+					<th style="width: 20%">{%= (filters.customer || filters.supplier || group.party) ? __("Remarks"): __("Party") %}</th>
 				{% } %}
 				<th style="width: 10%; text-align: right">{%= __("Invoiced Amount") %}</th>
 				{% if(!filters.show_pdc_in_print) { %}
@@ -170,7 +185,7 @@
 						{% if(!data[i]["posting_date"]) { %}
 							<strong>{%= data[i]["party"].substr(1, data[i]["party"].length-2) %}</strong>
 						{% } else { %}
-							{% if(!(filters.customer || filters.supplier)) { %}
+							{% if(!(filters.customer || filters.supplier || group.party)) { %}
 								{%= data[i]["party"] %}
 								{% if(data[i]["party_name"] && data[i]["party_name"] != data[i]["party"]) { %}
 									<br>{%= data[i]["party_name"] %}
@@ -179,7 +194,7 @@
 						{% } %}
 						{% if data[i]["remarks"] %}
 						<div>
-							{% if (!filters.customer && !filters.supplier) { %}{%= __("Remarks") %}:{% } %}
+							{% if (!filters.customer && !filters.supplier && !group.party) { %}{%= __("Remarks") %}:{% } %}
 							{%= data[i]["remarks"] %}
 						</div>
 						{% } %}
@@ -275,3 +290,6 @@
 	</tbody>
 </table>
 <p class="text-right text-muted">{{ __("Printed On ") }}{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
+{% } %}
+
+{{ print_report_groups(data, print_group) }}
