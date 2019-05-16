@@ -80,9 +80,16 @@ frappe.query_reports["Accounts Payable"] = {
 		},
 		{
 			"fieldname":"group_by",
-			"label": __("Group By"),
+			"label": __("Group By Level 1"),
 			"fieldtype": "Select",
-			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group",
+			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group\nGroup by Cost Center",
+			"default": "Ungrouped"
+		},
+		{
+			"fieldname":"group_by_2",
+			"label": __("Group By Level 2"),
+			"fieldtype": "Select",
+			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group\nGroup by Cost Center",
 			"default": "Ungrouped"
 		},
 		{
@@ -98,20 +105,5 @@ frappe.query_reports["Accounts Payable"] = {
 			frappe.set_route('query-report', 'Accounts Payable Summary', {company: filters.company});
 		});
 	},
-
-	get_datatable_options(options) {
-		return Object.assign(options, {
-			hooks: {
-				columnTotal: function(values, column) {
-					const me = this;
-					values = values.filter((d, i) => {
-						let idx = me.bodyRenderer.visibleRowIndices[i];
-						return me.datamanager.getData(idx).posting_date;
-					});
-					let type = column.column.fieldname == "age" ? "mean" : null;
-					return frappe.utils.report_column_total(values, column, type);
-				}
-			}
-		});
-	}
+	initial_depth: 1
 }
