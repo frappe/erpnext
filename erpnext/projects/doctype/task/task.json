@@ -216,7 +216,7 @@
   },
   {
    "fieldname": "depends_on_tasks",
-   "fieldtype": "Data",
+   "fieldtype": "Code",
    "hidden": 1,
    "label": "Depends on Tasks",
    "read_only": 1
@@ -351,7 +351,7 @@
  "icon": "fa fa-check",
  "idx": 1,
  "max_attachments": 5,
- "modified": "2019-04-29 14:48:10.204819",
+ "modified": "2019-05-01 13:30:29.458916",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
