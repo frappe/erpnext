@@ -97,7 +97,11 @@ class AccountsController(TransactionBase):
 		if self.doctype == 'Purchase Invoice':
 			self.validate_paid_amount()
 
-		if self.doctype in ['Purchase Invoice', 'Sales Invoice', 'Landed Cost Voucher'] and cint(self.allocate_advances_automatically):
+		if self.doctype in ['Purchase Invoice', 'Sales Invoice']:
+			pos_check_field = "is_pos" if self.doctype=="Sales Invoice" else "is_paid"
+			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
+				self.set_advances()
+		elif self.doctype in ['Landed Cost Voucher'] and cint(self.allocate_advances_automatically):
 			self.set_advances()
 
 		if self.doctype in ['Purchase Invoice', 'Sales Invoice'] and self.is_return:
@@ -812,6 +816,9 @@ class AccountsController(TransactionBase):
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 			grand_total = grand_total - flt(self.write_off_amount)
 
+		if self.get("total_advance"):
+			grand_total -= self.get("total_advance")
+
 		if not self.get("payment_schedule"):
 			if self.get("payment_terms_template"):
 				data = get_payment_terms(self.payment_terms_template, posting_date, grand_total)
@@ -857,6 +864,9 @@ class AccountsController(TransactionBase):
 			total = flt(total, self.precision("grand_total"))
 
 			grand_total = flt(self.get("rounded_total") or self.grand_total, self.precision('grand_total'))
+			if self.get("total_advance"):
+				grand_total -= self.get("total_advance")
+
 			if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 				grand_total = grand_total - flt(self.write_off_amount)
 			if total != grand_total:
