@@ -1,7 +1,8 @@
 {
     "css/erpnext.css": [
         "public/less/erpnext.less",
-        "public/less/hub.less"
+        "public/less/hub.less",
+        "public/less/call_summary.less"
     ],
     "css/marketplace.css": [
         "public/less/hub.less"
@@ -49,7 +50,8 @@
         "public/js/education/student_button.html",
         "public/js/education/assessment_result_tool.html",
         "public/js/hub/hub_factory.js",
-        "public/js/call_summary_dialog.js"
+        "public/js/call_popup/call_summary_dialog.js",
+        "public/js/call_popup/call_summary.html"
     ],
     "js/item-dashboard.min.js": [
         "stock/dashboard/item_dashboard.html",
