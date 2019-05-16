@@ -1166,6 +1166,8 @@ class SalesInvoice(SellingController):
 		self.set_missing_values(for_validate = True)
 
 def validate_inter_company_party(doctype, party, company, inter_company_invoice_reference):
+	if not party:
+		return
 	if doctype == "Sales Invoice":
 		partytype, ref_partytype, internal = "Customer", "Supplier", "is_internal_customer"
 		ref_doc =  "Purchase Invoice"
