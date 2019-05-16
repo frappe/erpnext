@@ -107,8 +107,8 @@ class SalarySlip(TransactionBase):
 				for d in self.get("earnings"):
 					if d.is_flexible_benefit == 1:
 						current_flexi_amount += d.amount
-				last_benefits = get_last_payroll_period_benefits(self.employee, self.start_date, self.end_date,\
-				 current_flexi_amount, payroll_period, self._salary_structure_doc)
+				last_benefits = get_last_payroll_period_benefits(self.employee, self.start_date, self.end_date,
+					current_flexi_amount, payroll_period, self._salary_structure_doc)
 				if last_benefits:
 					for last_benefit in last_benefits:
 						last_benefit = frappe._dict(last_benefit)
@@ -118,7 +118,7 @@ class SalarySlip(TransactionBase):
 	def add_employee_flexi_benefits(self, struct_row):
 		if frappe.db.get_value("Salary Component", struct_row.salary_component, "pay_against_benefit_claim") != 1:
 			benefit_component_amount = get_benefit_component_amount(self.employee, self.start_date, self.end_date, \
-			struct_row, self._salary_structure_doc, self.total_working_days, self.payroll_frequency)
+				struct_row, self._salary_structure_doc, self.total_working_days, self.payroll_frequency)
 			if benefit_component_amount:
 				self.update_component_row(struct_row, benefit_component_amount, "earnings")
 		else:
@@ -418,7 +418,7 @@ class SalarySlip(TransactionBase):
 
 		for d in self.get(component_type):
 			if (self.salary_structure and
-				cint(d.depends_on_payment_days) and
+				cint(d.depends_on_payment_days) and cint(self.total_working_days) and
 				(not
 				    self.salary_slip_based_on_timesheet or
 					getdate(self.start_date) < joining_date or
@@ -520,13 +520,20 @@ class SalarySlip(TransactionBase):
 
 	def email_salary_slip(self):
 		receiver = frappe.db.get_value("Employee", self.employee, "prefered_email")
+		hr_settings = frappe.get_single("HR Settings")
+		message = "Please see attachment"
+		password = None
+		if hr_settings.encrypt_salary_slips_in_emails:
+			password = generate_password_for_pdf(hr_settings.password_policy, self.employee)
+			message += """<br>Note: Your salary slip is password protected,
+				the password to unlock the PDF is of the format {0}. """.format(hr_settings.password_policy)
 
 		if receiver:
 			email_args = {
 				"recipients": [receiver],
-				"message": _("Please see attachment"),
+				"message": _(message),
 				"subject": 'Salary Slip - from {0} to {1}'.format(self.start_date, self.end_date),
-				"attachments": [frappe.attach_print(self.doctype, self.name, file_name=self.name)],
+				"attachments": [frappe.attach_print(self.doctype, self.name, file_name=self.name, password=password)],
 				"reference_doctype": self.doctype,
 				"reference_name": self.name
 				}
@@ -577,8 +584,8 @@ class SalarySlip(TransactionBase):
 
 	def calculate_variable_tax(self, tax_component, payroll_period):
 		annual_taxable_earning, period_factor = 0, 0
-		pro_rata_tax_paid, additional_tax_paid,  benefit_tax_paid = 0, 0, 0
-		unclaimed_earning, unclaimed_benefit, additional_income = 0, 0, 0
+		pro_rata_tax_paid, additional_tax_paid,  benefit_tax_paid = 0.0, 0.0, 0.0
+		unclaimed_earning, unclaimed_benefit, additional_income = 0.0, 0.0, 0.0
 
 		# get taxable_earning, additional_income in this slip
 		taxable_earning = self.get_taxable_earnings()
@@ -593,7 +600,7 @@ class SalarySlip(TransactionBase):
 			unclaimed_earning = self.calculate_unclaimed_taxable_earning(payroll_period, tax_component)
 			earning_in_period = taxable_earning["taxable_earning"] + unclaimed_earning
 			period_factor = self.get_period_factor(payroll_period.start_date, payroll_period.end_date,
-								payroll_period.start_date, self.end_date)
+				payroll_period.start_date, self.end_date)
 			annual_taxable_earning = earning_in_period * period_factor
 			additional_income += self.get_total_additional_income(payroll_period.start_date)
 		else:
@@ -607,6 +614,7 @@ class SalarySlip(TransactionBase):
 					{"employee": self.employee, "payroll_period": payroll_period.name, "docstatus": 1},
 					"total_exemption_amount")
 			annual_taxable_earning = annual_earning - exemption_amount
+
 		if self.deduct_tax_for_unclaimed_employee_benefits or self.deduct_tax_for_unsubmitted_tax_exemption_proof:
 			tax_detail = self.get_tax_paid_in_period(payroll_period, tax_component)
 			if tax_detail:
@@ -616,11 +624,17 @@ class SalarySlip(TransactionBase):
 
 		# add any additional income in this slip
 		additional_income += taxable_earning["additional_income"]
-		args = {"payroll_period": payroll_period.name, "tax_component": tax_component,
-				"annual_taxable_earning": annual_taxable_earning, "period_factor": period_factor,
-				"unclaimed_benefit": unclaimed_benefit, "additional_income": additional_income,
-				"pro_rata_tax_paid": pro_rata_tax_paid, "benefit_tax_paid": benefit_tax_paid,
-				"additional_tax_paid": additional_tax_paid}
+		args = {
+			"payroll_period": payroll_period.name,
+			"tax_component": tax_component,
+			"period_factor": period_factor,
+			"annual_taxable_earning": annual_taxable_earning,
+			"additional_income": additional_income,
+			"unclaimed_benefit": unclaimed_benefit,
+			"pro_rata_tax_paid": pro_rata_tax_paid,
+			"benefit_tax_paid": benefit_tax_paid,
+			"additional_tax_paid": additional_tax_paid
+		}
 		return self.calculate_tax(args)
 
 	def calculate_unclaimed_taxable_benefit(self, payroll_period):
@@ -667,27 +681,49 @@ class SalarySlip(TransactionBase):
 		return total_taxable_earning
 
 	def get_total_additional_income(self, from_date):
-		total_additional_pay = 0
-		sum_additional_earning = frappe.db.sql("""select sum(sd.amount) from `tabSalary Detail` sd join
-					`tabSalary Slip` ss on sd.parent=ss.name where sd.parentfield='earnings'
-					and sd.is_tax_applicable=1 and is_additional_component=1 and is_flexible_benefit=0
-					and ss.docstatus=1 and ss.employee='{0}' and ss.start_date between '{1}' and '{2}'
-					and ss.end_date between '{1}' and '{2}'""".format(self.employee,
-					from_date, self.start_date))
-		if sum_additional_earning and sum_additional_earning[0][0]:
-			total_additional_pay = sum_additional_earning[0][0]
-		return total_additional_pay
+		sum_additional_earning = frappe.db.sql("""
+			select sum(sd.amount)
+			from
+				`tabSalary Detail` sd join `tabSalary Slip` ss on sd.parent=ss.name
+			where
+				sd.parentfield='earnings'
+				and sd.is_tax_applicable=1 and is_additional_component=1
+				and is_flexible_benefit=0 and ss.docstatus=1
+				and ss.employee=%(employee)s
+				and ss.start_date between %(from_date)s and %(to_date)s
+				and ss.end_date between %(from_date)s and %(to_date)s
+			""", {
+				"employee": self.employee,
+				"from_date": from_date,
+				"to_date": self.start_date
+			})
+		return flt(sum_additional_earning[0][0]) if sum_additional_earning else 0
 
 	def get_tax_paid_in_period(self, payroll_period, tax_component, only_total=False):
 		# find total_tax_paid, tax paid for benefit, additional_salary
-		sum_tax_paid = frappe.db.sql("""select sum(sd.amount), sum(tax_on_flexible_benefit),
-			sum(tax_on_additional_salary)  from `tabSalary Detail` sd join `tabSalary Slip`
-			ss on sd.parent=ss.name where sd.parentfield='deductions' and sd.salary_component='{3}'
-			and sd.variable_based_on_taxable_salary=1 and ss.docstatus=1 and ss.employee='{0}'
-			and ss.start_date between '{1}' and '{2}' and ss.end_date between '{1}' and
-			'{2}'""".format(self.employee, payroll_period.start_date, self.start_date, tax_component))
+		sum_tax_paid = frappe.db.sql("""
+			select
+				sum(sd.amount), sum(tax_on_flexible_benefit), sum(tax_on_additional_salary)
+			from
+				`tabSalary Detail` sd join `tabSalary Slip` ss on sd.parent=ss.name
+			where
+				sd.parentfield='deductions' and sd.salary_component=%(salary_component)s
+				and sd.variable_based_on_taxable_salary=1
+				and ss.docstatus=1 and ss.employee=%(employee)s
+				and ss.start_date between %(from_date)s and %(to_date)s
+				and ss.end_date between %(from_date)s and %(to_date)s
+		""", {
+			"salary_component": tax_component,
+			"employee": self.employee,
+			"from_date": payroll_period.start_date,
+			"to_date": self.start_date
+		})
 		if sum_tax_paid and sum_tax_paid[0][0]:
-			return {'total_tax_paid': sum_tax_paid[0][0], 'benefit_tax':sum_tax_paid[0][1], 'additional_tax': sum_tax_paid[0][2]}
+			return {
+				'total_tax_paid': sum_tax_paid[0][0],
+				'benefit_tax':sum_tax_paid[0][1],
+				'additional_tax': sum_tax_paid[0][2]
+			}
 
 	def get_taxable_earnings(self, include_flexi=0, only_flexi=0):
 		taxable_earning = 0
@@ -698,22 +734,22 @@ class SalarySlip(TransactionBase):
 					additional_income += earning.amount
 					continue
 				if only_flexi:
-					if earning.is_tax_applicable and earning.is_flexible_benefit:
+					if earning.is_flexible_benefit:
 						taxable_earning += earning.amount
 					continue
-				if include_flexi:
-					if earning.is_tax_applicable or (earning.is_tax_applicable and earning.is_flexible_benefit):
-						taxable_earning += earning.amount
-				else:
-					if earning.is_tax_applicable and not earning.is_flexible_benefit:
-						taxable_earning += earning.amount
-		return {"taxable_earning": taxable_earning, "additional_income": additional_income}
+				if include_flexi or not earning.is_flexible_benefit:
+					taxable_earning += earning.amount
+		return {
+			"taxable_earning": taxable_earning,
+			"additional_income": additional_income
+		}
 
 	def calculate_tax(self, args):
 		tax_amount, benefit_tax, additional_tax = 0, 0, 0
 		annual_taxable_earning = args.get("annual_taxable_earning")
 		benefit_to_tax = args.get("unclaimed_benefit")
 		additional_income = args.get("additional_income")
+
 		# Get tax calc by period
 		annual_tax = self.calculate_tax_by_tax_slab(args.get("payroll_period"), annual_taxable_earning)
 
@@ -744,8 +780,10 @@ class SalarySlip(TransactionBase):
 
 	def calculate_tax_by_tax_slab(self, payroll_period, annual_taxable_earning):
 		payroll_period_obj = frappe.get_doc("Payroll Period", payroll_period)
+		annual_taxable_earning -= flt(payroll_period_obj.standard_tax_exemption_amount)
 		data = self.get_data_for_eval()
 		data.update({"annual_taxable_earning": annual_taxable_earning})
+
 		taxable_amount = 0
 		for slab in payroll_period_obj.taxable_salary_slabs:
 			if slab.condition and not self.eval_tax_slab_condition(slab.condition, data):
@@ -812,3 +850,7 @@ def unlink_ref_doc_from_salary_slip(ref_no):
 		for ss in linked_ss:
 			ss_doc = frappe.get_doc("Salary Slip", ss)
 			frappe.db.set_value("Salary Slip", ss_doc.name, "journal_entry", "")
+
+def generate_password_for_pdf(policy_template, employee):
+	employee = frappe.get_doc("Employee", employee)
+	return policy_template.format(**employee.as_dict())
