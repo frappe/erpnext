@@ -227,18 +227,18 @@ class GSTR3BReport(Document):
 
 		for d in inter_state_supply.get("Unregistered", []):
 			self.report_dict["inter_sup"]["unreg_details"].append(d)
-			self.report_dict["sup_details"]["osup_det"]["txval"] += d["txval"]
-			self.report_dict["sup_details"]["osup_det"]["iamt"] += d["iamt"]
+			self.report_dict["sup_details"]["osup_det"]["txval"] += flt(d["txval"], 2)
+			self.report_dict["sup_details"]["osup_det"]["iamt"] += flt(d["iamt"], 2)
 
 		for d in inter_state_supply.get("Registered Composition", []):
 			self.report_dict["inter_sup"]["comp_details"].append(d)
-			self.report_dict["sup_details"]["osup_det"]["txval"] += d["txval"]
-			self.report_dict["sup_details"]["osup_det"]["iamt"] += d["iamt"]
+			self.report_dict["sup_details"]["osup_det"]["txval"] += flt(d["txval"], 2)
+			self.report_dict["sup_details"]["osup_det"]["iamt"] += flt(d["iamt"], 2)
 
 		for d in inter_state_supply.get("UIN Holders", []):
 			self.report_dict["inter_sup"]["uin_details"].append(d)
-			self.report_dict["sup_details"]["osup_det"]["txval"] += d["txval"]
-			self.report_dict["sup_details"]["osup_det"]["iamt"] += d["iamt"]
+			self.report_dict["sup_details"]["osup_det"]["txval"] += flt(d["txval"], 2)
+			self.report_dict["sup_details"]["osup_det"]["iamt"] += flt(d["iamt"], 2)
 
 	def get_total_taxable_value(self, doctype, reverse_charge):
 
