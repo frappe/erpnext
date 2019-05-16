@@ -82,14 +82,14 @@ frappe.query_reports["Accounts Payable"] = {
 			"fieldname":"group_by",
 			"label": __("Group By Level 1"),
 			"fieldtype": "Select",
-			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group",
+			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group\nGroup by Cost Center",
 			"default": "Ungrouped"
 		},
 		{
 			"fieldname":"group_by_2",
 			"label": __("Group By Level 2"),
 			"fieldtype": "Select",
-			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group",
+			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group\nGroup by Cost Center",
 			"default": "Ungrouped"
 		},
 		{

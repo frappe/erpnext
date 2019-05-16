@@ -112,14 +112,14 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname":"group_by",
 			"label": __("Group By Level 1"),
 			"fieldtype": "Select",
-			"options": "Ungrouped\nGroup by Customer\nGroup by Customer Group\nGroup by Territory\nGroup by Sales Person",
+			"options": "Ungrouped\nGroup by Customer\nGroup by Customer Group\nGroup by Territory\nGroup by Sales Person\nGroup by Cost Center",
 			"default": "Ungrouped"
 		},
 		{
 			"fieldname":"group_by_2",
 			"label": __("Group By Level 2"),
 			"fieldtype": "Select",
-			"options": "Ungrouped\nGroup by Customer\nGroup by Customer Group\nGroup by Territory\nGroup by Sales Person",
+			"options": "Ungrouped\nGroup by Customer\nGroup by Customer Group\nGroup by Territory\nGroup by Sales Person\nGroup by Cost Center",
 			"default": "Ungrouped"
 		},
 		{
