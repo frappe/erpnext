@@ -82,9 +82,9 @@ frappe.ui.form.on("Opportunity", {
 
 	set_contact_link: function(frm) {
 		if(frm.doc.opportunity_from == "Customer" && frm.doc.party_name) {
-			frappe.dynamic_link = {doc: frm.doc, fieldname: 'customer', doctype: 'Customer'}
+			frappe.dynamic_link = {doc: frm.doc, fieldname: 'party_name', doctype: 'Customer'}
 		} else if(frm.doc.opportunity_from == "Lead" && frm.doc.party_name) {
-			frappe.dynamic_link = {doc: frm.doc, fieldname: 'lead', doctype: 'Lead'}
+			frappe.dynamic_link = {doc: frm.doc, fieldname: 'party_name', doctype: 'Lead'}
 		}
 	},
 
@@ -138,12 +138,14 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			};
 		});
 
-		$.each([["lead", "lead"],
-			["customer", "customer"],
-			["contact_person", "contact_query"]],
-			function(i, opts) {
-				me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
-			});
+		me.frm.set_query('contact_person', erpnext.queries['contact_query'])
+
+		if (me.frm.doc.opportunity_from == "Lead") {
+			me.frm.set_query('party_name', erpnext.queries['lead']);
+		}
+		else if (me.frm.doc.opportunity_from == "Cuatomer") {
+			me.frm.set_query('party_name', erpnext.queries['customer']);
+		}
 	},
 
 	create_quotation: function() {
