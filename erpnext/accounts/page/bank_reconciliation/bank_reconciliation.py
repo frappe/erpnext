@@ -77,7 +77,7 @@ def check_matching_amount(bank_account, company, transaction):
 
 	payment_entries = frappe.get_all("Payment Entry", fields=["'Payment Entry' as doctype", "name", "paid_amount", "payment_type", "reference_no", "reference_date",
 		"party", "party_type", "posting_date", "{0}".format(currency_field)], filters=[["paid_amount", "like", "{0}%".format(amount)],
-		["docstatus", "=", "1"], ["payment_type", "=", payment_type], ["ifnull(clearance_date, '')", "=", ""], ["{0}".format(account_from_to), "=", "{0}".format(bank_account)]])
+		["docstatus", "=", "1"], ["payment_type", "=", [payment_type, "Internal Transfer"]], ["ifnull(clearance_date, '')", "=", ""], ["{0}".format(account_from_to), "=", "{0}".format(bank_account)]])
 
 	if transaction.credit > 0:
 		journal_entries = frappe.db.sql("""
