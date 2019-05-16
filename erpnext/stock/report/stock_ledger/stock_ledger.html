@@ -1,3 +1,5 @@
+{% include "templates/includes/grouped_report_print.html" %}
+
 <style>
 @media screen {
 	.print-format {
@@ -13,6 +15,7 @@
 }
 </style>
 
+{% function print_group(data, group) { %}
 <h2 class="text-center" style="margin-top:0;">{%= __("Stock Ledger") %}</h2>
 <h4 class="text-center">
 	{% if (filters.party) { %}
@@ -84,3 +87,6 @@
 	</tbody>
 </table>
 <p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
+{% } %}
+
+{{ print_report_groups(data, print_group) }}
