@@ -1,6 +1,6 @@
-frappe.call_summary_dialog = class {
+class CallSummaryDialog {
 	constructor(opts) {
-		this.number = '+91234444444';
+		this.number = opts.number;
 		this.make();
 	}
 
@@ -15,10 +15,18 @@ frappe.call_summary_dialog = class {
 			if (!res) {
 				this.$modal_body.html('Unknown Contact');
 			} else {
-				this.$modal_body.html(`${res.first_name}`);
+				this.$modal_body.append(`${frappe.utils.get_form_link('Contact', res.name, true)}`)
 			}
 		});
 		d.show();
 	}
+}
 
-};
+$(document).on('app_ready', function() {
+	frappe.realtime.on('incoming_call', data => {
+		const number = data.CallFrom;
+		frappe.call_summary_dialog = new CallSummaryDialog({
+			number
+		});
+	});
+});
