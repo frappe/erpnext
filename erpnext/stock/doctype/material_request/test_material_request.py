@@ -629,7 +629,8 @@ def make_material_request(**args):
 		"item_code": args.item_code or "_Test Item",
 		"qty": args.qty or 10,
 		"schedule_date": args.schedule_date or today(),
-		"warehouse": args.warehouse or "_Test Warehouse - _TC"
+		"warehouse": args.warehouse or "_Test Warehouse - _TC",
+		"cost_center": args.cost_center or "_Test Cost Center - _TC"
 	})
 	mr.insert()
 	if not args.do_not_submit:

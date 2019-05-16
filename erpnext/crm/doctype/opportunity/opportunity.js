@@ -21,6 +21,17 @@ frappe.ui.form.on("Opportunity", {
 		frm.trigger('set_contact_link');
 	},
 
+	onload_post_render: function(frm) {
+		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
+	},
+
+	party_name: function(frm) {
+		if (frm.doc.opportunity_from == "Customer") {
+			frm.trigger('set_contact_link');
+			erpnext.utils.get_party_details(frm);
+		}
+	},
+
 	with_items: function(frm) {
 		frm.trigger('toggle_mandatory');
 	},
@@ -180,4 +191,3 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 		frm: cur_frm
 	});
 }
-

@@ -38,6 +38,7 @@
   "projected_qty",
   "actual_qty",
   "ordered_qty",
+  "received_qty",
   "accounting_details",
   "expense_account",
   "column_break_35",
@@ -364,11 +365,16 @@
   {
    "fieldname": "section_break_37",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "received_qty",
+   "fieldtype": "Float",
+   "label": "Received Quantity"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-01 17:48:12.361976",
+ "modified": "2019-05-16 17:00:00.056060",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",
