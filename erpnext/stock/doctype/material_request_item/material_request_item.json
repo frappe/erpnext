@@ -368,13 +368,13 @@
   },
   {
    "fieldname": "received_qty",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "label": "Received Quantity"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-08 10:27:25.008801",
+ "modified": "2019-05-16 17:00:00.056060",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",
