@@ -20,6 +20,10 @@ frappe.ui.form.on("Opportunity", {
 		});
 	},
 
+	onload_post_render: function(frm) {
+		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
+	},
+
 	party_name: function(frm) {
 		frm.toggle_display("contact_info", frm.doc.party_name);
 
