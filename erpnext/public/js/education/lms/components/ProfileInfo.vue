@@ -1,36 +1,34 @@
 <template>
-<section>
-		<div class="py-5">
-			<div class="row">
-				<div class="col-sm-12">
-					<div>
-						<h3>{{ fullName }}</h3>
-						<ul>
-							<li class="row">
-								<div class="col-md-3 col-sm-4 pr-0 text-muted">Email:</div>
-								<div class="col-md-9 col-sm-8">{{ email }}</div>
-							</li>
-							<li v-if="joiningDate" class="row">
-								<div class="col-md-3 col-sm-4 pr-0 text-muted">Date of Joining:</div>
-								<div class="col-md-9 col-sm-8">{{ joiningDate }}</div>
-							</li>
-							<li class="row">
-								<div class="col-md-3 col-sm-4 pr-0 text-muted">Programs Enrolled:</div>
-								<div class="col-md-9 col-sm-8">
-									<ul v-if="enrolledPrograms">
-										<li v-for="program in enrolledPrograms" :key="program">{{ program }}</li>
-									</ul>
-									<span v-else>None</span>
-								</div>
-							</li>
-						</ul>
-					</div>
-					<a href="/update-profile" class="edit-button text-muted">Edit Profile</a>
+	<div class="py-5">
+		<div class="row">
+			<div class="col-sm-12">
+				<div>
+					<h3>{{ fullName }}</h3>
+					<ul>
+						<li class="row">
+							<div class="col-md-3 col-sm-4 pr-0 text-muted">Email:</div>
+							<div class="col-md-9 col-sm-8">{{ email }}</div>
+						</li>
+						<li v-if="joiningDate" class="row">
+							<div class="col-md-3 col-sm-4 pr-0 text-muted">Date of Joining:</div>
+							<div class="col-md-9 col-sm-8">{{ joiningDate }}</div>
+						</li>
+						<li class="row">
+							<div class="col-md-3 col-sm-4 pr-0 text-muted">Programs Enrolled:</div>
+							<div class="col-md-9 col-sm-8">
+								<ul v-if="enrolledPrograms">
+									<li v-for="program in enrolledPrograms" :key="program">{{ program }}</li>
+								</ul>
+								<span v-else>None</span>
+							</div>
+						</li>
+					</ul>
 				</div>
+				<a href="/update-profile" class="edit-button text-muted">Edit Profile</a>
 			</div>
-			<div ></div>
 		</div>
-	</section>
+		<div ></div>
+	</div>
 </template>
 <script>
 
