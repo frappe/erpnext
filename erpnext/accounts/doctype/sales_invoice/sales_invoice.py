@@ -502,14 +502,16 @@ class SalesInvoice(SellingController):
 
 	def so_dn_required(self):
 		"""check in manage account if sales order / delivery note required or not."""
+		if self.is_return:
+			return
 		dic = {'Sales Order':['so_required', 'is_pos'],'Delivery Note':['dn_required', 'update_stock']}
 		for i in dic:
 			if frappe.db.get_single_value('Selling Settings', dic[i][0]) == 'Yes':
 				for d in self.get('items'):
-					if frappe.get_cached_value('Item', d.item_code, 'is_stock_item') == 1 \
+					cached_item_code = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
+					if d.item_code and cached_item_code == 1\
 						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1]):
-						if not self.is_return:
-							msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
+						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
 
 	def validate_proj_cust(self):
