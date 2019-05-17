@@ -172,18 +172,20 @@ frappe.ui.form.on('Loan', {
 	},
 
 	mode_of_payment: function (frm) {
-		frappe.call({
-			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
-			args: {
-				"mode_of_payment": frm.doc.mode_of_payment,
-				"company": frm.doc.company
-			},
-			callback: function (r, rt) {
-				if (r.message) {
-					frm.set_value("payment_account", r.message.account);
+		if (frm.doc.mode_of_payment && frm.doc.company) {
+			frappe.call({
+				method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
+				args: {
+					"mode_of_payment": frm.doc.mode_of_payment,
+					"company": frm.doc.company
+				},
+				callback: function (r, rt) {
+					if (r.message) {
+						frm.set_value("payment_account", r.message.account);
+					}
 				}
-			}
-		});
+			});
+		}
 	},
 
 	loan_application: function (frm) {

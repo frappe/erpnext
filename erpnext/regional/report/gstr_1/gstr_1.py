@@ -29,10 +29,10 @@ class Gstr1Report(object):
 			place_of_supply,
 			ecommerce_gstin,
 			reverse_charge,
-			gst_category,
+			invoice_type,
 			return_against,
 			is_return,
-			gst_category,
+			invoice_type,
 			export_type,
 			port_code,
 			shipping_bill_number,
@@ -324,8 +324,8 @@ class Gstr1Report(object):
 					"fieldtype": "Data"
 				},
 				{
-					"fieldname": "gst_category",
-					"label": "GST Category",
+					"fieldname": "invoice_type",
+					"label": "Invoice Type",
 					"fieldtype": "Data"
 				},
 				{
@@ -577,7 +577,7 @@ def get_json():
 	download_json_file(report_name, filters["type_of_business"], gst_json)
 
 def get_b2b_json(res, gstin):
-	inv_type, out = {"Registered Regular": "R", "Deemed Export": "DE", "URD": "URD", "SEZ": "SEZ"}, []
+	inv_type, out = {"Regular": "R", "Deemed Export": "DE", "URD": "URD", "SEZ": "SEZ"}, []
 	for gst_in in res:
 		b2b_item, inv = {"ctin": gst_in, "inv": []}, []
 		if not gst_in: continue
@@ -586,7 +586,7 @@ def get_b2b_json(res, gstin):
 			inv_item = get_basic_invoice_detail(invoice[0])
 			inv_item["pos"] = "%02d" % int(invoice[0]["place_of_supply"].split('-')[0])
 			inv_item["rchrg"] = invoice[0]["reverse_charge"]
-			inv_item["inv_typ"] = inv_type.get(invoice[0].get("gst_category", ""),"")
+			inv_item["inv_typ"] = inv_type.get(invoice[0].get("invoice_type", ""),"")
 
 			if inv_item["pos"]=="00": continue
 			inv_item["itms"] = []

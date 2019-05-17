@@ -31,5 +31,9 @@ frappe.ui.form.on('Blanket Order', {
 				});
 			}).addClass("btn-primary");
 		}
+	},
+
+	onload_post_render: function(frm) {
+		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	}
 });
