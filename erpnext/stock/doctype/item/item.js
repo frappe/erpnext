@@ -376,15 +376,15 @@ $.extend(erpnext.item, {
 		var dialog = new frappe.ui.Dialog({
 			fields: [
 				{
-					fieldtype:'Link',
+					fieldtype: 'Link',
 					fieldname: 'manufacturer',
-					options:'Manufacturer',
-					label:'Manufacturer',
-					reqd:1,
+					options: 'Manufacturer',
+					label: 'Manufacturer',
+					reqd: 1,
 				},
 				{
-					fieldtype:'Data',
-					label:'Manufacturer Part Number',
+					fieldtype: 'Data',
+					label: 'Manufacturer Part Number',
 					fieldname: 'manufacturer_part_no'
 				},
 			]
