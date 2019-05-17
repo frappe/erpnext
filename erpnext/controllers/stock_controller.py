@@ -128,7 +128,7 @@ class StockController(AccountsController):
 			reconciliation_purpose = frappe.db.get_value(self.doctype, self.name, "purpose")
 			is_opening = "Yes" if reconciliation_purpose == "Opening Stock" else "No"
 			details = []
-			for voucher_detail_no, sle in sle_map.items():
+			for voucher_detail_no in sle_map:
 				details.append(frappe._dict({
 					"name": voucher_detail_no,
 					"expense_account": default_expense_account,
