@@ -2,15 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+import frappe
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
-from frappe.utils import getdate, cstr, flt, fmt_money
+from frappe.utils import getdate, cstr, flt, cint
 from frappe import _, _dict
-from collections import OrderedDict
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
-from six import iteritems
+from frappe.desk.query_report import group_report_data
 
 def execute(filters=None):
 	if not filters:
@@ -53,8 +52,8 @@ def validate_filters(filters, account_details):
 		and account_details[filters.account].is_group == 0):
 		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
 
-	if filters.get("voucher_no") and filters.get("group_by") == _('Group by Voucher (Consolidated)'):
-		frappe.throw(_("Can not filter based on Voucher No, if grouped by Voucher (Consolidated)"))
+	if filters.get("voucher_no"):
+		filters.show_detailed_entries = True
 
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
@@ -80,8 +79,8 @@ def validate_party(filters):
 					frappe.throw(_("Invalid {0}: {1}").format(party_type, d))
 
 def set_account_currency(filters):
+	filters["company_currency"] = frappe.get_cached_value('Company',  filters.company,  "default_currency")
 	if filters.get("account") or (filters.get('party') and len(filters.party) == 1):
-		filters["company_currency"] = frappe.get_cached_value('Company',  filters.company,  "default_currency")
 		account_currency = None
 
 		if filters.get("account"):
@@ -97,7 +96,7 @@ def set_account_currency(filters):
 			if gle_currency:
 				account_currency = gle_currency
 			else:
-				account_currency = (None if filters.party_type in ["Employee", "Student", "Shareholder", "Member"] else
+				account_currency = (None if not frappe.get_meta(filters.party_type).has_field('default_currency') else
 					frappe.db.get_value(filters.party_type, filters.party[0], "default_currency"))
 
 		filters["account_currency"] = account_currency or filters.company_currency
@@ -109,9 +108,15 @@ def set_account_currency(filters):
 def get_result(filters, account_details):
 	gl_entries = get_gl_entries(filters)
 
-	data = get_data_with_opening_closing(filters, account_details, gl_entries)
+	group_field = group_by_field(filters.get('group_by'))
+	group_by = [None]
+	if group_field:
+		group_by.append(group_field)
 
-	result = get_result_as_list(data, filters)
+	result = group_report_data(gl_entries, group_by,
+		calculate_totals=lambda rows, grouped_by: calculate_opening_closing(filters, rows, grouped_by),
+		postprocess_group=lambda group_object, grouped_by: postprocess_group(filters, group_object, grouped_by)
+	)
 
 	return result
 
@@ -126,7 +131,7 @@ def get_gl_entries(filters):
 	if filters.get("group_by") == _("Group by Voucher"):
 		order_by_statement = "order by posting_date, voucher_type, voucher_no"
 
-	if filters.get("group_by") == _("Group by Voucher (Consolidated)"):
+	if not cint(filters.get("show_detailed_entries")):
 		group_by_statement = "group by voucher_type, voucher_no, account, cost_center, against_voucher_type, party_type, party"
 		select_fields = """, sum(debit) as debit, sum(credit) as credit,
 			sum(debit_in_account_currency) as debit_in_account_currency,
@@ -195,7 +200,8 @@ def get_conditions(filters):
 	if not (filters.get("account") or filters.get("party") or
 		filters.get("group_by") in ["Group by Account", "Group by Party"]):
 		conditions.append("posting_date >=%(from_date)s")
-		conditions.append("posting_date <=%(to_date)s")
+
+	conditions.append("posting_date <=%(to_date)s")
 
 	if filters.get("project"):
 		conditions.append("project in %(project)s")
@@ -212,44 +218,61 @@ def get_conditions(filters):
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 
-def get_data_with_opening_closing(filters, account_details, gl_entries):
-	data = []
+def calculate_opening_closing(filters, gl_entries, grouped_by):
+	totals = get_totals_dict()
 
-	gle_map = initialize_gle_map(gl_entries, filters)
+	def update_totals_for(key, gle):
+		totals[key].debit += flt(gle.debit)
+		totals[key].credit += flt(gle.credit)
 
-	totals, entries = get_accountwise_gle(filters, gl_entries, gle_map)
+		totals[key].debit_in_account_currency += flt(gle.debit_in_account_currency)
+		totals[key].credit_in_account_currency += flt(gle.credit_in_account_currency)
 
-	# Opening for filtered account
-	data.append(totals.opening)
+	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
+	for gle in gl_entries:
+		if gle.posting_date < from_date or cstr(gle.is_opening) == "Yes":
+			update_totals_for('opening', gle)
+			update_totals_for('closing', gle)
+			gle.to_remove = True
+		elif gle.posting_date <= to_date:
+			update_totals_for('total', gle)
+			update_totals_for('closing', gle)
 
-	if filters.get("group_by") and filters.get("group_by") != _('Group by Voucher (Consolidated)'):
-		for acc, acc_dict in iteritems(gle_map):
-			# acc
-			if acc_dict.entries:
-				# opening
-				data.append({})
-				if filters.get("group_by") != _("Group by Voucher"):
-					data.append(acc_dict.totals.opening)
+	return totals
 
-				data += acc_dict.entries
+def postprocess_group(filters, group_object, grouped_by):
+	group_object.rows = filter(lambda d: not d.get("to_remove"), group_object.rows)
 
-				# totals
-				data.append(acc_dict.totals.total)
+	group = grouped_by[-1]
+	if group_object.rows:
+		if group.fieldname != 'voucher_no':
+			group_object.rows.insert(0, group_object.totals.opening)
 
-				# closing
-				if filters.get("group_by") != _("Group by Voucher"):
-					data.append(acc_dict.totals.closing)
-		data.append({})
-	else:
-		data += entries
+		group_object.rows.append(group_object.totals.total)
 
-	# totals
-	data.append(totals.total)
+		if group.fieldname != 'voucher_no':
+			group_object.rows.append(group_object.totals.closing)
 
-	# closing
-	data.append(totals.closing)
+		balance, balance_in_account_currency = 0, 0
+		inv_details = get_supplier_invoice_details()
 
-	return data
+		for d in group_object.rows:
+			if not d.posting_date:
+				balance = 0
+
+			balance = get_balance(d, balance, 'debit', 'credit')
+			d['balance'] = balance
+
+			d['account_currency'] = filters.account_currency
+			d['currency'] = filters.presentation_currency or filters.company_currency
+			d['bill_no'] = inv_details.get(d.get('against_voucher'), '')
+
+	# Do not show totals as they have already been added as rows
+	del group_object['totals']
+
+def get_balance(row, balance, debit_field, credit_field):
+	balance += (row.get(debit_field, 0) - row.get(credit_field, 0))
+	return balance
 
 def get_totals_dict():
 	def _get_debit_credit_dict(label):
@@ -258,80 +281,25 @@ def get_totals_dict():
 			debit=0.0,
 			credit=0.0,
 			debit_in_account_currency=0.0,
-			credit_in_account_currency=0.0
+			credit_in_account_currency=0.0,
+			_isGroupTotal=True
 		)
 	return _dict(
-		opening = _get_debit_credit_dict(_('Opening')),
-		total = _get_debit_credit_dict(_('Total')),
-		closing = _get_debit_credit_dict(_('Closing (Opening + Total)'))
+		opening=_get_debit_credit_dict(_('Opening')),
+		total=_get_debit_credit_dict(_('Total')),
+		closing=_get_debit_credit_dict(_('Closing (Opening + Total)')),
+		_isGroupTotal=True
 	)
 
 def group_by_field(group_by):
 	if group_by == _('Group by Party'):
 		return 'party'
-	elif group_by in [_('Group by Voucher (Consolidated)'), _('Group by Account')]:
+	elif group_by == _('Group by Account'):
 		return 'account'
-	else:
+	elif group_by == _('Group by Voucher'):
 		return 'voucher_no'
-
-def initialize_gle_map(gl_entries, filters):
-	gle_map = OrderedDict()
-	group_by = group_by_field(filters.get('group_by'))
-
-	for gle in gl_entries:
-		gle_map.setdefault(gle.get(group_by), _dict(totals=get_totals_dict(), entries=[]))
-	return gle_map
-
-
-def get_accountwise_gle(filters, gl_entries, gle_map):
-	totals = get_totals_dict()
-	entries = []
-	group_by = group_by_field(filters.get('group_by'))
-
-	def update_value_in_dict(data, key, gle):
-		data[key].debit += flt(gle.debit)
-		data[key].credit += flt(gle.credit)
-
-		data[key].debit_in_account_currency += flt(gle.debit_in_account_currency)
-		data[key].credit_in_account_currency += flt(gle.credit_in_account_currency)
-
-	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
-	for gle in gl_entries:
-		if gle.posting_date < from_date or cstr(gle.is_opening) == "Yes":
-			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'opening', gle)
-			update_value_in_dict(totals, 'opening', gle)
-
-			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'closing', gle)
-			update_value_in_dict(totals, 'closing', gle)
-
-		elif gle.posting_date <= to_date:
-			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'total', gle)
-			update_value_in_dict(totals, 'total', gle)
-			if filters.get("group_by") and filters.get("group_by") != _('Group by Voucher (Consolidated)'):
-				gle_map[gle.get(group_by)].entries.append(gle)
-			else:
-				entries.append(gle)
-
-			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'closing', gle)
-			update_value_in_dict(totals, 'closing', gle)
-
-	return totals, entries
-
-def get_result_as_list(data, filters):
-	balance, balance_in_account_currency = 0, 0
-	inv_details = get_supplier_invoice_details()
-
-	for d in data:
-		if not d.get('posting_date'):
-			balance, balance_in_account_currency = 0, 0
-
-		balance = get_balance(d, balance, 'debit', 'credit')
-		d['balance'] = balance
-
-		d['account_currency'] = filters.account_currency
-		d['bill_no'] = inv_details.get(d.get('against_voucher'), '')
-
-	return data
+	else:
+		return None
 
 def get_supplier_invoice_details():
 	inv_details = {}
@@ -340,11 +308,6 @@ def get_supplier_invoice_details():
 		inv_details[d.name] = d.bill_no
 
 	return inv_details
-
-def get_balance(row, balance, debit_field, credit_field):
-	balance += (row.get(debit_field, 0) -  row.get(credit_field, 0))
-
-	return balance
 
 def get_columns(filters):
 	if filters.get("presentation_currency"):
@@ -398,18 +361,21 @@ def get_columns(filters):
 			"label": _("Debit ({0})".format(currency)),
 			"fieldname": "debit",
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 100
 		},
 		{
 			"label": _("Credit ({0})".format(currency)),
 			"fieldname": "credit",
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 100
 		},
 		{
 			"label": _("Balance ({0})".format(currency)),
 			"fieldname": "balance",
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
 		},
 		{
