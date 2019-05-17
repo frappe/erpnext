@@ -319,7 +319,7 @@ def update_barcode_value(out):
 
 	# If item has one barcode then update the value of the barcode field
 	if barcode_data and len(barcode_data.get(out.item_code)) == 1:
-		out['barcode'] = barcode_data.get(out.item_code)
+		out['barcode'] = barcode_data.get(out.item_code)[0]
 
 @frappe.whitelist()
 def calculate_service_end_date(args, item=None):
