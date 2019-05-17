@@ -1,6 +1,6 @@
 <template>
 <div>
-    <section class='mt-2'>
+    <div class='mt-2'>
     <div>
         <div class="mt-3 row">
             <div class="col-md-8">
@@ -16,8 +16,8 @@
         <youtube-player :url="contentData.url" class="mt-3"/>
         <hr>
     </div>
-</section>
-<section class="video-description-section">
+</div>
+<div class="video-description-section">
     <div>
         <div class="content" v-html="contentData.description">
         </div>
@@ -30,7 +30,7 @@
                 Mistake</a>
         </div>
     </div>
-</section>
+</div>
 </div>
 </template>
 <script>

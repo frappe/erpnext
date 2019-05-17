@@ -1,0 +1,27 @@
+{
+ "add_total_row": 0,
+ "creation": "2019-05-14 12:06:14.998746",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2019-05-14 12:06:14.998746",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM Items and Scraps",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "BOM",
+ "report_name": "BOM Items and Scraps ",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Manufacturing Manager"
+  },
+  {
+   "role": "Manufacturing User"
+  }
+ ]
+}
