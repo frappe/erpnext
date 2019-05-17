@@ -365,10 +365,18 @@ $.extend(erpnext.item, {
 	show_modal_for_manufacturers: function(frm) {
 		var dialog = new frappe.ui.Dialog({
 			fields: [
-				{fieldtype:'Link', options:'Manufacturer',
-					reqd:1, label:'Manufacturer'},
-				{fieldtype:'Data', label:'Manufacturer Part Number',
-					fieldname: 'manufacturer_part_no'},
+				{
+					fieldtype:'Link',
+					fieldname: 'manufacturer',
+					options:'Manufacturer',
+					label:'Manufacturer',
+					reqd:1,
+				},
+				{
+					fieldtype:'Data',
+					label:'Manufacturer Part Number',
+					fieldname: 'manufacturer_part_no'
+				},
 			]
 		});
 
