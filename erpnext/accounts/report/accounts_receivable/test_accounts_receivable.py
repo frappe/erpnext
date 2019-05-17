@@ -6,6 +6,7 @@ from frappe.utils import today, getdate, add_days
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from six import iteritems
 
 class TestAccountsReceivable(unittest.TestCase):
 	def test_accounts_receivable(self):
@@ -20,26 +21,35 @@ class TestAccountsReceivable(unittest.TestCase):
 		name = make_sales_invoice()
 		report = execute(filters)
 
-		expected_data = [[100,30], [100,50], [100,20]]
+		expected_data = [
+			{'invoice_grand_total': 100, 'invoiced_amount': 30},
+			{'invoice_grand_total': 100, 'invoiced_amount': 50},
+			{'invoice_grand_total': 100, 'invoiced_amount': 20}
+		]
 
-		self.assertEqual(expected_data[0], report[1][0][7:9])
-		self.assertEqual(expected_data[1], report[1][1][7:9])
-		self.assertEqual(expected_data[2], report[1][2][7:9])
+		self.assertEqual(expected_data[0], report[1][0][6:8])
+		self.assertEqual(expected_data[1], report[1][1][6:8])
+		self.assertEqual(expected_data[2], report[1][2][6:8])
 
 		make_payment(name)
 		report = execute(filters)
 
-		expected_data_after_payment = [[100,50], [100,20]]
+		expected_data_after_payment = [
+			{'invoice_grand_total': 100, 'invoiced_amount': 50},
+			{'invoice_grand_total': 100, 'invoiced_amount': 20}
+		]
 
-		self.assertEqual(expected_data_after_payment[0], report[1][0][7:9])
-		self.assertEqual(expected_data_after_payment[1], report[1][1][7:9])
+		self.assertEqual(expected_data_after_payment[0], report[1][0][6:8])
+		self.assertEqual(expected_data_after_payment[1], report[1][1][6:8])
 
 		make_credit_note(name)
 		report = execute(filters)
 
-		expected_data_after_credit_note = [[100,100,30,100,-30]]
+		expected_data_after_credit_note = [
+			{'invoice_grand_total': 100, 'invoiced_amount': 100, 'paid_amount': 30, 'return_amount': 100, 'outstanding_amount': -30}
+		]
 
-		self.assertEqual(expected_data_after_credit_note[0], report[1][0][7:12])
+		self.assertEqual(expected_data_after_credit_note[0], report[1][0][6:11])
 
 
 def make_sales_invoice():

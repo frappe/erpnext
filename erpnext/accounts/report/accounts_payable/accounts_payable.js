@@ -87,6 +87,20 @@ frappe.query_reports["Accounts Payable"] = {
 			"options": "Supplier Group"
 		},
 		{
+			"fieldname":"group_by",
+			"label": __("Group By Level 1"),
+			"fieldtype": "Select",
+			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group",
+			"default": "Ungrouped"
+		},
+		{
+			"fieldname":"group_by_2",
+			"label": __("Group By Level 2"),
+			"fieldtype": "Select",
+			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group",
+			"default": "Ungrouped"
+		},
+		{
 			"fieldname":"tax_id",
 			"label": __("Tax Id"),
 			"fieldtype": "Data",
@@ -98,5 +112,6 @@ frappe.query_reports["Accounts Payable"] = {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Accounts Payable Summary', {company: filters.company});
 		});
-	}
+	},
+	initial_depth: 1
 }

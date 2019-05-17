@@ -76,6 +76,13 @@ frappe.query_reports["Stock Ledger"] = {
 			"label": __("Include UOM"),
 			"fieldtype": "Link",
 			"options": "UOM"
+		},
+		{
+			"fieldname":"group_by",
+			"label": __("Group By"),
+			"fieldtype": "Select",
+			"options": "Ungrouped\nGroup by Item-Warehouse\nGroup by Item\nGroup by Warehouse\nGroup by Item Group\nGroup by Brand\nGroup by Party",
+			"default": "Ungrouped"
 		}
 	]
 }
