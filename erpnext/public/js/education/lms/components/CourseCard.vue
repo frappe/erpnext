@@ -8,12 +8,7 @@
             <div class='card-body'>
                 <h5 class="card-title">{{ course.course_name }}</h5>
                 <span class="course-list text-muted" id="getting-started">
-                    Topics
-                    <ul class="mb-0 mt-1" style="padding-left: 1.5em;">
-                        <li v-for="topic in course.topics" :key="topic.name">
-                            <div>{{ topic.topic_name }}</div>
-                        </li>
-                    </ul>
+                    {{ course.course_intro.substring(0,120) }}
                 </span>
             </div>
             <div class='p-3' style="display: flex; justify-content: space-between;">

@@ -36,7 +36,7 @@ class AssetValueAdjustment(Document):
 		fixed_asset_account, accumulated_depreciation_account, depreciation_expense_account = \
 			get_depreciation_accounts(asset)
 
-		depreciation_cost_center, depreciation_series = frappe.get_cached_value('Company',  asset.company, 
+		depreciation_cost_center, depreciation_series = frappe.get_cached_value('Company',  asset.company,
 			["depreciation_cost_center", "series_for_depreciation_entry"])
 
 		je = frappe.new_doc("Journal Entry")
@@ -75,8 +75,8 @@ class AssetValueAdjustment(Document):
 				rate_per_day = flt(d.value_after_depreciation) / flt(total_days)
 				from_date = self.date
 			else:
-				no_of_depreciations = len([e.name for e in asset.schedules
-					if (cint(s.finance_book_id) == d.idx and not e.journal_entry)])
+				no_of_depreciations = len([s.name for s in asset.schedules
+					if (cint(s.finance_book_id) == d.idx and not s.journal_entry)])
 
 			value_after_depreciation = d.value_after_depreciation
 			for data in asset.schedules:
