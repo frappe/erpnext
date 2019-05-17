@@ -5,22 +5,14 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "user",
-  "date",
+  "email",
   "cb_00",
-  "template",
-  "feedback_section",
+  "date",
+  "sb_00",
+  "rating",
   "feedback"
  ],
  "fields": [
-  {
-   "fieldname": "user",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "User",
-   "options": "User",
-   "reqd": 1
-  },
   {
    "fieldname": "date",
    "fieldtype": "Date",
@@ -29,30 +21,36 @@
    "read_only": 1
   },
   {
-   "fieldname": "template",
-   "fieldtype": "Link",
-   "label": "Template",
-   "options": "Quality Feedback Template",
-   "reqd": 1
-  },
-  {
-   "fieldname": "feedback_section",
-   "fieldtype": "Section Break",
-   "label": "Feedback"
-  },
-  {
    "fetch_from": "template.feedback_values",
    "fieldname": "feedback",
-   "fieldtype": "Table",
-   "label": "feedback",
-   "options": "Quality Feedback Parameter"
+   "fieldtype": "Text Editor",
+   "label": "Feedback"
   },
   {
    "fieldname": "cb_00",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break",
+   "label": "Feedback"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Email",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "rating",
+   "fieldtype": "Select",
+   "label": "Rating",
+   "options": "1\n2\n3\n4\n5"
   }
  ],
- "modified": "2019-04-26 23:36:03.389234",
+ "modified": "2019-05-17 10:33:45.860521",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Feedback",
@@ -67,6 +65,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality Manager",
    "share": 1,
    "write": 1
   }

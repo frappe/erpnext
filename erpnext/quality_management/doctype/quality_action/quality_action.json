@@ -6,9 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "action",
-  "review",
-  "feedback",
-  "status",
+  "document",
   "cb_00",
   "type",
   "date",
@@ -25,33 +23,11 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.type == 'Quality Review'",
-   "fieldname": "review",
-   "fieldtype": "Link",
-   "label": "Review",
-   "options": "Quality Review"
-  },
-  {
-   "depends_on": "eval:doc.type == 'Quality Feedback'",
-   "fieldname": "feedback",
-   "fieldtype": "Link",
-   "label": "Feedback",
-   "options": "Quality Feedback"
-  },
-  {
    "fieldname": "date",
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Date",
    "read_only": 1
-  },
-  {
-   "default": "Open",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Status",
-   "options": "Open\nClosed"
   },
   {
    "fieldname": "cb_00",
@@ -64,7 +40,7 @@
   },
   {
    "fieldname": "action_taken",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "label": "Action Taken",
    "reqd": 1
   },
@@ -75,9 +51,15 @@
    "label": "Type",
    "options": "Quality Review\nQuality Feedback",
    "reqd": 1
+  },
+  {
+   "fieldname": "document",
+   "fieldtype": "Dynamic Link",
+   "label": "Document",
+   "options": "type"
   }
  ],
- "modified": "2019-04-27 00:52:00.355113",
+ "modified": "2019-05-17 09:42:04.759962",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Action",
@@ -92,6 +74,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality Manager",
    "share": 1,
    "write": 1
   }

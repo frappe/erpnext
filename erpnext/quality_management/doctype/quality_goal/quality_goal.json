@@ -40,8 +40,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Procedure",
-   "options": "Quality Procedure",
-   "reqd": 1
+   "options": "Quality Procedure"
   },
   {
    "fieldname": "section_break_8",
@@ -77,7 +76,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2019-04-27 01:24:07.415326",
+ "modified": "2019-05-17 09:34:11.004253",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Goal",
@@ -92,6 +91,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality Manager",
    "share": 1,
    "write": 1
   }

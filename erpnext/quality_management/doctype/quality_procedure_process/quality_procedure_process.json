@@ -3,9 +3,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "procedure_link",
+  "link_procedure",
   "sb_00",
-  "procedure"
+  "process"
  ],
  "fields": [
   {
@@ -13,24 +13,22 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "procedure",
-   "fieldtype": "Text",
+   "fieldname": "process",
+   "fieldtype": "Text Editor",
    "in_list_view": 1,
-   "label": "Procedure Description",
-   "set_only_once": 1
+   "label": "Process"
   },
   {
-   "description": "Select from other Procedures.",
-   "fieldname": "procedure_link",
+   "description": "Link other Procedures.",
+   "fieldname": "link_procedure",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Link Procedure",
-   "options": "Quality Procedure",
-   "set_only_once": 1
+   "options": "Quality Procedure"
   }
  ],
  "istable": 1,
- "modified": "2019-04-27 01:14:32.233837",
+ "modified": "2019-05-17 09:14:32.233837",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Procedure Process",

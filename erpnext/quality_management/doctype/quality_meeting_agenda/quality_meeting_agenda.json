@@ -1,27 +1,27 @@
 {
- "creation": "2019-04-26 23:26:47.340342",
+ "creation": "2019-05-17 01:09:06.190128",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "parameter"
+  "agenda"
  ],
  "fields": [
   {
-   "fieldname": "parameter",
-   "fieldtype": "Data",
+   "fieldname": "agenda",
+   "fieldtype": "Text Editor",
    "in_list_view": 1,
-   "label": "Parameter",
-   "reqd": 1
+   "label": "Agenda"
   }
  ],
  "istable": 1,
- "modified": "2019-04-26 23:26:47.340342",
+ "modified": "2019-05-17 10:19:30.350179",
  "modified_by": "Administrator",
  "module": "Quality Management",
- "name": "Quality Feedback Template Parameter",
+ "name": "Quality Meeting Agenda",
  "owner": "Administrator",
  "permissions": [],
+ "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

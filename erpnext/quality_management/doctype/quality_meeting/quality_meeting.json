@@ -6,8 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "date",
-  "column_break_2",
-  "status",
+  "agenda_break",
+  "agenda",
   "minutes_break",
   "minutes"
  ],
@@ -20,17 +20,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "Open",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "Open\nClosed"
-  },
-  {
    "fieldname": "minutes_break",
    "fieldtype": "Section Break",
    "label": "Minutes"
@@ -40,9 +29,20 @@
    "fieldtype": "Table",
    "label": "Minutes",
    "options": "Quality Meeting Minutes"
+  },
+  {
+   "fieldname": "agenda_break",
+   "fieldtype": "Section Break",
+   "label": "Agenda"
+  },
+  {
+   "fieldname": "agenda",
+   "fieldtype": "Table",
+   "label": "Agenda",
+   "options": "Quality Meeting Agenda"
   }
  ],
- "modified": "2019-04-26 23:51:59.516855",
+ "modified": "2019-05-17 09:34:38.527868",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Meeting",
@@ -57,6 +57,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality Manager",
    "share": 1,
    "write": 1
   }
