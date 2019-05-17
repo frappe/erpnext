@@ -48,7 +48,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 			me.apply_price_list();
 		});
 
-		if(me.frm.doc.quotation_to=="Lead") {
+		if(me.frm.doc.quotation_to=="Lead" && me.frm.doc.party_name) {
 			me.frm.trigger("get_lead_details");
 		}
 	},
