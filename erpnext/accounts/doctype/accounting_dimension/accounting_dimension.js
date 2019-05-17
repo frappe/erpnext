@@ -2,7 +2,9 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Accounting Dimension', {
-	// refresh: function(frm) {
 
-	// }
+	document_type: function(frm){
+		frm.set_value('label', frm.doc.document_type);
+		frm.set_value('fieldname', frappe.scrub(frm.doc.document_type))
+	}
 });

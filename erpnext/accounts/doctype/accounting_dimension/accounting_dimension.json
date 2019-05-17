@@ -6,7 +6,8 @@
  "field_order": [
   "document_type",
   "label",
-  "fieldname"
+  "fieldname",
+  "is_mandatory"
  ],
  "fields": [
   {
@@ -27,9 +28,14 @@
    "label": "Document Type",
    "options": "DocType",
    "reqd": 1
+  },
+  {
+   "fieldname": "is_mandatory",
+   "fieldtype": "Check",
+   "label": "Is Mandatory"
   }
  ],
- "modified": "2019-05-09 15:30:55.339917",
+ "modified": "2019-05-16 13:37:04.240148",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension",

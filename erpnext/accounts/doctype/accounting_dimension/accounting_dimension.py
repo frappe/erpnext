@@ -13,8 +13,6 @@ class AccountingDimension(Document):
 
 	def before_insert(self):
 		self.set_fieldname_and_label()
-
-	def after_insert(self):
 		self.make_accounting_dimension_in_accounting_doctypes()
 
 	def on_trash(self):
@@ -28,20 +26,26 @@ class AccountingDimension(Document):
 			self.fieldname = scrub(self.label)
 
 	def make_accounting_dimension_in_accounting_doctypes(self):
-		last_created_accounting_dimension = get_last_created_accounting_dimension()
 
-		doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "BOM", "Sales Order", "Purchase Order",
-			"Stock Entry", "Budget", "Payroll Entry", "Delivery Note"]
+		doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "BOM", "Sales Order", "Purchase Order", "Asset",
+			"Stock Entry", "Budget", "Payroll Entry", "Delivery Note", "Sales Invoice Item", "Purchase Invoice Item", "Sales Order Item",
+			"Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item", "Purchase Receipt Item",
+			"Purchase Order Item"]
 
-		df = {
-			"fieldname": self.fieldname,
-			"label": self.label,
-			"fieldtype": "Link",
-			"options": self.document_type,
-			"insert_after": last_created_accounting_dimension if last_created_accounting_dimension else "project"
-		}
+		if self.is_mandatory:
+			df.update({
+				"reqd": 1
+			})
 
 		for doctype in doclist:
+
+			df = {
+				"fieldname": self.fieldname,
+				"label": self.label,
+				"fieldtype": "Link",
+				"options": self.document_type,
+				"insert_after": "cost_center"
+			}
 
 			if doctype == "Budget":
 				df.update({
@@ -73,12 +77,16 @@ class AccountingDimension(Document):
 						"property_type": "Text",
 						"value": "\nCost Center\nProject\n" + self.document_type
 					}).insert(ignore_permissions=True)
+				frappe.clear_cache(doctype=doctype)
 			else:
 				create_custom_field(doctype, df)
+				frappe.clear_cache(doctype=doctype)
 
 	def delete_accounting_dimension(self):
-		doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "BOM", "Sales Order", "Purchase Order",
-			"Stock Entry", "Budget", "Payroll Entry", "Delivery Note"]
+		doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "BOM", "Sales Order", "Purchase Order", "Asset",
+			"Stock Entry", "Budget", "Payroll Entry", "Delivery Note", "Sales Invoice Item", "Purchase Invoice Item", "Sales Order Item",
+			"Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item", "Purchase Receipt Item",
+			"Purchase Order Item"]
 
 		frappe.db.sql("""
 			DELETE FROM `tabCustom Field`
@@ -92,20 +100,15 @@ class AccountingDimension(Document):
 			AND doc_type IN (%s)""" %
 			('%s', ', '.join(['%s']* len(doclist))), tuple([self.fieldname] + doclist))
 
-		# budget_against_property = frappe.get_doc("Property Setter", "Budget-budget_against-options")
-		# value_list = budget_against_property.value.split('\n')[3:]
-		# value_list.remove(self.document_type)
+		budget_against_property = frappe.get_doc("Property Setter", "Budget-budget_against-options")
+		value_list = budget_against_property.value.split('\n')[3:]
+		value_list.remove(self.document_type)
 
-		# budget_against_property.value = "\nCost Center\nProject\n" + "\n".join(value_list)
+		budget_against_property.value = "\nCost Center\nProject\n" + "\n".join(value_list)
+		budget_against_property.save()
 
 		for doc in doclist:
 			frappe.clear_cache(doctype=doc)
-
-def get_last_created_accounting_dimension():
-	last_created_accounting_dimension = frappe.db.sql("select fieldname, max(creation) from `tabAccounting Dimension`", as_dict=1)
-
-	if last_created_accounting_dimension[0]:
-		return last_created_accounting_dimension[0].fieldname
 
 def get_accounting_dimensions():
 	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["fieldname"])
