@@ -11,11 +11,6 @@ frappe.ui.form.on("Company", {
 				filters: {"type": "Earning"}
 			}
 		});
-		frm.set_query("arrear_component", function(){
-			return {
-				filters: {"is_additional_component": 1}
-			}
-		});
 
 		frm.set_query("parent_company", function() {
 			return {

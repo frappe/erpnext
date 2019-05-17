@@ -123,5 +123,6 @@ frappe.ui.form.on("Customer", {
 	},
 	validate: function(frm) {
 		if(frm.doc.lead_name) frappe.model.clear_doc("Lead", frm.doc.lead_name);
+
 	},
 });
