@@ -95,4 +95,3 @@ def make_credit_note(docname):
 			cost_center = '_Test Company 2 - _TC2',
 			is_return = 1,
 			return_against = docname)
-
