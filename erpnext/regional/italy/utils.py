@@ -4,8 +4,8 @@ import frappe, json, os
 from frappe.utils import flt, cstr
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
 from frappe import _
+from frappe.core.doctype.file.file import remove_file
 from six import string_types
-from frappe.utils.file_manager import save_file, remove_file
 from frappe.desk.form.load import get_attachments
 from erpnext.regional.italy import state_codes
 
@@ -282,7 +282,17 @@ def prepare_and_attach_invoice(doc, replace=False):
 	invoice_xml = invoice_xml.replace("&", "&amp;")
 
 	xml_filename = progressive_name + ".xml"
-	return save_file(xml_filename, invoice_xml, dt=doc.doctype, dn=doc.name, is_private=True)
+
+	_file = frappe.get_doc({
+		"doctype": "File",
+		"file_name": xml_filename,
+		"attached_to_doctype": doc.doctype,
+		"attached_to_name": doc.name,
+		"is_private": True,
+		"content": invoice_xml
+	})
+	_file.save()
+	return _file
 
 @frappe.whitelist()
 def generate_single_invoice(docname):

@@ -14,7 +14,7 @@ data = {
 		'Student Attendance Tool',
 		'Student Applicant'
 	],
-	'default_portal_role': 'Guardian',
+	'default_portal_role': 'LMS User',
 	'restricted_roles': [
 		'Student',
 		'Instructor',

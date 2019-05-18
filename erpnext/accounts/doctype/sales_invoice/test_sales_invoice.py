@@ -18,6 +18,7 @@ from erpnext.accounts.doctype.account.test_account import get_inventory_account,
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.stock.doctype.item.test_item import create_item
 from six import iteritems
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
 		w = frappe.copy_doc(test_records[0])
@@ -382,6 +383,63 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEqual(si.grand_total, 5474.0)
 
+	def test_tax_calculation_with_item_tax_template(self):
+		si = create_sales_invoice(qty=84, rate=4.6, do_not_save=True)
+		item_row = si.get("items")[0]
+
+		add_items = [
+			(54, '_Test Account Excise Duty @ 12'),
+			(288, '_Test Account Excise Duty @ 15'),
+			(144, '_Test Account Excise Duty @ 20'),
+			(430, '_Test Item Tax Template 1')
+		]
+		for qty, item_tax_template in add_items:
+			item_row_copy = copy.deepcopy(item_row)
+			item_row_copy.qty = qty
+			item_row_copy.item_tax_template = item_tax_template
+			si.append("items", item_row_copy)
+
+		si.append("taxes", {
+			"account_head": "_Test Account Excise Duty - _TC",
+			"charge_type": "On Net Total",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Excise Duty",
+			"doctype": "Sales Taxes and Charges",
+			"rate": 11
+		})
+		si.append("taxes", {
+			"account_head": "_Test Account Education Cess - _TC",
+			"charge_type": "On Net Total",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Education Cess",
+			"doctype": "Sales Taxes and Charges",
+			"rate": 0
+		})
+		si.append("taxes", {
+			"account_head": "_Test Account S&H Education Cess - _TC",
+			"charge_type": "On Net Total",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "S&H Education Cess",
+			"doctype": "Sales Taxes and Charges",
+			"rate": 3
+		})
+		si.insert()
+
+		self.assertEqual(si.net_total, 4600)
+
+		self.assertEqual(si.get("taxes")[0].tax_amount, 502.41)
+		self.assertEqual(si.get("taxes")[0].total, 5102.41)
+
+		self.assertEqual(si.get("taxes")[1].tax_amount, 197.80)
+		self.assertEqual(si.get("taxes")[1].total, 5300.21)
+
+		self.assertEqual(si.get("taxes")[2].tax_amount, 375.36)
+		self.assertEqual(si.get("taxes")[2].total, 5675.57)
+
+		self.assertEqual(si.grand_total, 5675.57)
+		self.assertEqual(si.rounding_adjustment, 0.43)
+		self.assertEqual(si.rounded_total, 5676.0)
+
 	def test_tax_calculation_with_multiple_items_and_discount(self):
 		si = create_sales_invoice(qty=1, rate=75, do_not_save=True)
 		item_row = si.get("items")[0]
@@ -487,6 +545,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.get("taxes")[6].tax_amount = 2
 
 		si.insert()
+		print(si.name)
 
 		expected_values = [
 			{
@@ -730,7 +789,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# check gl entries
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc, debit asc""", si.name, as_dict=1)
+			order by account asc, debit asc, credit asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 
 		stock_in_hand = get_inventory_account('_Test Company')
@@ -855,6 +914,7 @@ class TestSalesInvoice(unittest.TestCase):
 		jv.submit()
 
 		si = frappe.copy_doc(test_records[0])
+		si.allocate_advances_automatically = 0
 		si.append("advances", {
 			"doctype": "Sales Invoice Advance",
 			"reference_type": "Journal Entry",
@@ -1565,6 +1625,61 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_gle[i][1], gle.debit)
 			self.assertEqual(expected_gle[i][2], gle.credit)
 			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+
+	def test_inter_company_transaction(self):
+
+		if not frappe.db.exists("Customer", "_Test Internal Customer"):
+			customer = frappe.get_doc({
+				"customer_group": "_Test Customer Group",
+				"customer_name": "_Test Internal Customer",
+				"customer_type": "Individual",
+				"doctype": "Customer",
+				"territory": "_Test Territory",
+				"is_internal_customer": 1,
+				"represents_company": "_Test Company 1"
+			})
+
+			customer.append("companies", {
+				"company": "Wind Power LLC"
+			})
+
+			customer.insert()
+
+		if not frappe.db.exists("Supplier", "_Test Internal Supplier"):
+			supplier = frappe.get_doc({
+				"supplier_group": "_Test Supplier Group",
+				"supplier_name": "_Test Internal Supplier",
+				"doctype": "Supplier",
+				"is_internal_supplier": 1,
+				"represents_company": "Wind Power LLC"
+			})
+
+			supplier.append("companies", {
+				"company": "_Test Company 1"
+			})
+
+			supplier.insert()
+
+		si = create_sales_invoice(
+			company = "Wind Power LLC",
+			customer = "_Test Internal Customer",
+			debit_to = "Debtors - WP",
+			warehouse = "Stores - WP",
+			income_account = "Sales - WP",
+			expense_account = "Cost of Goods Sold - WP",
+			cost_center = "Main - WP",
+			currency = "USD",
+			do_not_save = 1
+		)
+
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.submit()
+
+		target_doc = make_inter_company_transaction("Sales Invoice", si.name)
+		target_doc.submit()
+
+		self.assertEqual(target_doc.company, "_Test Company 1")
+		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")

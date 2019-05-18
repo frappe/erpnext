@@ -150,7 +150,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 		company_wise_info = get_dashboard_info("Customer", doc.name, doc.loyalty_program)
 
 		for d in company_wise_info:
-			self.assertTrue(d.loyalty_points)
+			self.assertTrue(d.get("loyalty_points"))
 
 def get_points_earned(self):
 	def get_returned_amount():

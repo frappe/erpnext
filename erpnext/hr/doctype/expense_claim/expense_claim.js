@@ -193,7 +193,7 @@ frappe.ui.form.on("Expense Claim", {
 				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
 				&& frappe.model.can_create("Payment Entry")) {
 			frm.add_custom_button(__('Payment'),
-				function() { frm.events.make_payment_entry(frm); }, __("Make"));
+				function() { frm.events.make_payment_entry(frm); }, __('Create'));
 		}
 	},
 
@@ -288,11 +288,7 @@ frappe.ui.form.on("Expense Claim Detail", {
 	claim_amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		var doc = frm.doc;
-
-		if(!child.sanctioned_amount){
-			frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.claim_amount);
-		}
-
+		frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.claim_amount);
 		cur_frm.cscript.calculate_total(doc,cdt,cdn);
 	},
 

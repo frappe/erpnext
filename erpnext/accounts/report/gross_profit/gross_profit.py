@@ -302,6 +302,12 @@ class GrossProfitGenerator(object):
 			sales_person_cols = ""
 			sales_team_table = ""
 
+		if self.filters.get("sales_invoice"):
+			conditions += " and `tabSales Invoice`.name = %(sales_invoice)s"
+
+		if self.filters.get("item_code"):
+			conditions += " and `tabSales Invoice Item`.item_code = %(item_code)s"
+
 		self.si_list = frappe.db.sql("""
 			select
 				`tabSales Invoice Item`.parenttype, `tabSales Invoice Item`.parent,
@@ -334,7 +340,7 @@ class GrossProfitGenerator(object):
 			where company=%(company)s
 			order by
 				item_code desc, warehouse desc, posting_date desc,
-				posting_time desc, name desc""", self.filters, as_dict=True)
+				posting_time desc, creation desc""", self.filters, as_dict=True)
 		self.sle = {}
 		for r in res:
 			if (r.item_code, r.warehouse) not in self.sle:
