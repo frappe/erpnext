@@ -244,11 +244,16 @@ def make_return_doc(doctype, source_name, target_doc=None):
 				doc.paid_amount = -1 * source.paid_amount
 				doc.base_paid_amount = -1 * source.base_paid_amount
 
+		if doc.get("is_return") and hasattr(doc, "packed_items"):
+			for d in doc.get("packed_items"):
+				d.qty = d.qty * -1
+
 		doc.discount_amount = -1 * source.discount_amount
 		doc.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = -1* source_doc.qty
+		default_return_warehouse = frappe.db.get_single_value("Stock Settings", "default_return_warehouse")
 		if doctype == "Purchase Receipt":
 			target_doc.received_qty = -1* source_doc.received_qty
 			target_doc.rejected_qty = -1* source_doc.rejected_qty
@@ -273,6 +278,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.so_detail = source_doc.so_detail
 			target_doc.si_detail = source_doc.si_detail
 			target_doc.expense_account = source_doc.expense_account
+			target_doc.warehouse = default_return_warehouse if default_return_warehouse else source_doc.warehouse
 		elif doctype == "Sales Invoice":
 			target_doc.sales_order = source_doc.sales_order
 			target_doc.delivery_note = source_doc.delivery_note

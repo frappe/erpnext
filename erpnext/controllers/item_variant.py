@@ -119,7 +119,7 @@ def get_attribute_values(item):
 	return frappe.flags.attribute_values, frappe.flags.numeric_values
 
 def find_variant(template, args, variant_item_code=None):
-	conditions = ["""(iv_attribute.attribute="{0}" and iv_attribute.attribute_value="{1}")"""\
+	conditions = ["""(iv_attribute.attribute={0} and iv_attribute.attribute_value={1})"""\
 		.format(frappe.db.escape(key), frappe.db.escape(cstr(value))) for key, value in args.items()]
 
 	conditions = " or ".join(conditions)

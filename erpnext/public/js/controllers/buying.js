@@ -71,12 +71,19 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 
 		this.frm.set_query("item_code", "items", function() {
-			if(me.frm.doc.is_subcontracted == "Yes") {
+			if (me.frm.doc.is_subcontracted == "Yes") {
 				return{
 					query: "erpnext.controllers.queries.item_query",
 					filters:{ 'is_sub_contracted_item': 1 }
 				}
-			} else {
+			}
+			else if (me.frm.doc.material_request_type == "Customer Provided") {
+				return{
+					query: "erpnext.controllers.queries.item_query",
+					filters:{ 'customer': me.frm.doc.customer }
+				}
+			}
+			else {
 				return{
 					query: "erpnext.controllers.queries.item_query",
 					filters: {'is_purchase_item': 1}
@@ -108,6 +115,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	supplier_address: function() {
 		erpnext.utils.get_address_display(this.frm);
+		erpnext.utils.set_taxes_from_address(this.frm, "supplier_address", "supplier_address", "supplier_address");
 	},
 
 	buying_price_list: function() {
@@ -122,13 +130,23 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		if (doc.doctype == "Purchase Order" && item.blanket_order_rate) {
 			item_rate = item.blanket_order_rate;
 		}
-		item.discount_amount = flt(item_rate) * flt(item.discount_percentage) / 100;
+
+		if (item.discount_percentage) {
+			item.discount_amount = flt(item_rate) * flt(item.discount_percentage) / 100;
+		}
+
 		item.rate = flt((item.price_list_rate) - (item.discount_amount), precision('rate', item));
 
 		this.calculate_taxes_and_totals();
 	},
 
 	discount_percentage: function(doc, cdt, cdn) {
+		var item = frappe.get_doc(cdt, cdn);
+		item.discount_amount = 0.0;
+		this.price_list_rate(doc, cdt, cdn);
+	},
+
+	discount_amount: function(doc, cdt, cdn) {
 		this.price_list_rate(doc, cdt, cdn);
 	},
 

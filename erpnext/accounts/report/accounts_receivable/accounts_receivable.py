@@ -634,13 +634,8 @@ class ReceivablePayableReport(object):
 			conditions.append("company=%s")
 			values.append(self.filters.company)
 
-		company_finance_book = erpnext.get_default_finance_book(self.filters.company)
-
-		if not self.filters.finance_book or (self.filters.finance_book == company_finance_book):
+		if self.filters.finance_book:
 			conditions.append("ifnull(finance_book,'') in (%s, '')")
-			values.append(company_finance_book)
-		elif self.filters.finance_book:
-			conditions.append("ifnull(finance_book,'') = %s")
 			values.append(self.filters.finance_book)
 
 		if self.filters.get(party_type_field):
@@ -690,6 +685,13 @@ class ReceivablePayableReport(object):
 					where supplier_group=%s)""")
 				values.append(self.filters.get("supplier_group"))
 
+		if self.filters.get("cost_center"):
+			lft, rgt = frappe.get_cached_value("Cost Center",
+				self.filters.get("cost_center"), ['lft', 'rgt'])
+
+			conditions.append("""cost_center in (select name from `tabCost Center` where
+				lft >= {0} and rgt <= {1})""".format(lft, rgt))
+
 		accounts = [d.name for d in frappe.get_all("Account",
 			filters={"account_type": account_type, "company": self.filters.company})]
 		conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
@@ -718,7 +720,7 @@ class ReceivablePayableReport(object):
 			ps.due_date, ps.payment_amount, ps.description
 			from `tabSales Invoice` si, `tabPayment Schedule` ps
 			where si.name = ps.parent and
-			si.docstatus = 1 and si.company = '%s' and
+			si.docstatus = 1 and si.company = %s and
 			si.name in (%s) order by ps.due_date
 		"""	% (frappe.db.escape(self.filters.company), ','.join(['%s'] *len(voucher_nos))),
 		(tuple(voucher_nos)), as_dict = 1)

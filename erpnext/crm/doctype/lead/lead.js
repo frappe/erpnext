@@ -30,9 +30,9 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		frappe.dynamic_link = {doc: doc, fieldname: 'name', doctype: 'Lead'}
 
 		if(!doc.__islocal && doc.__onload && !doc.__onload.is_customer) {
-			this.frm.add_custom_button(__("Customer"), this.create_customer, __("Make"));
-			this.frm.add_custom_button(__("Opportunity"), this.create_opportunity, __("Make"));
-			this.frm.add_custom_button(__("Quotation"), this.make_quotation, __("Make"));
+			this.frm.add_custom_button(__("Customer"), this.create_customer, __('Create'));
+			this.frm.add_custom_button(__("Opportunity"), this.create_opportunity, __('Create'));
+			this.frm.add_custom_button(__("Quotation"), this.make_quotation, __('Create'));
 		}
 
 		if(!this.frm.doc.__islocal) {

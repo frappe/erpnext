@@ -29,7 +29,7 @@ def validate_service_stop_date(doc):
 			if date_diff(item.service_stop_date, item.service_end_date) > 0:
 				frappe.throw(_("Service Stop Date cannot be after Service End Date"))
 
-		if old_stop_dates and old_stop_dates.get(item.name) and item.service_stop_date!=old_stop_dates[item.name]:
+		if old_stop_dates and old_stop_dates.get(item.name) and item.service_stop_date!=old_stop_dates.get(item.name):
 			frappe.throw(_("Cannot change Service Stop Date for item in row {0}".format(item.idx)))
 
 def convert_deferred_expense_to_expense(start_date=None, end_date=None):
