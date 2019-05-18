@@ -73,6 +73,32 @@ frappe.query_reports["Accounts Payable"] = {
 			"options": "Supplier Group"
 		},
 		{
+			"fieldname":"cost_center",
+			"label": __("Cost Center"),
+			"fieldtype": "Link",
+			"options": "Cost Center"
+		},
+		{
+			"fieldname":"group_by",
+			"label": __("Group By Level 1"),
+			"fieldtype": "Select",
+			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group\nGroup by Cost Center",
+			"default": "Ungrouped"
+		},
+		{
+			"fieldname":"group_by_2",
+			"label": __("Group By Level 2"),
+			"fieldtype": "Select",
+			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group\nGroup by Cost Center",
+			"default": "Ungrouped"
+		},
+		{
+			"fieldname":"mark_overdue_in_print",
+			"label": __("Mark Overdue in Print"),
+			"fieldtype": "Check",
+			on_change: function() { return false; }
+		},
+		{
 			"fieldname":"tax_id",
 			"label": __("Tax Id"),
 			"fieldtype": "Data",
@@ -84,5 +110,6 @@ frappe.query_reports["Accounts Payable"] = {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Accounts Payable Summary', {company: filters.company});
 		});
-	}
+	},
+	initial_depth: 1
 }

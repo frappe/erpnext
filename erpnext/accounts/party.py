@@ -44,7 +44,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 		frappe.throw(_("Not permitted for {0}").format(party), frappe.PermissionError)
 
 	party = frappe.get_doc(party_type, party)
-	currency = party.default_currency if party.default_currency else get_company_currency(company)
+	currency = party.default_currency if party.get("default_currency") else get_company_currency(company)
 
 	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_group)
 	out["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
@@ -140,7 +140,7 @@ def set_other_values(out, party, party_type):
 
 def get_default_price_list(party):
 	"""Return default price list for party (Document object)"""
-	if party.default_price_list:
+	if party.get("default_price_list"):
 		return party.default_price_list
 
 	if party.doctype == "Customer":
@@ -573,17 +573,17 @@ def get_party_shipping_address(doctype, name):
 	else:
 		return ''
 
-def get_partywise_advanced_payment_amount(party_type, posting_date = None):
-	cond = "1=1"
-	if posting_date:
-		cond = "posting_date <= '{0}'".format(posting_date)
+def get_partywise_advanced_payment_amount(party_type, posting_date=None):
+	dr_or_cr = "credit - debit" if party_type == "Customer" else "debit - credit"
+	advance_condition = "{0} > 0".format(dr_or_cr)
+	date_condition = "and posting_date <= %(posting_date)s" if posting_date else ""
 
-	data = frappe.db.sql(""" SELECT party, sum({0}) as amount
+	data = frappe.db.sql("""
+		SELECT party, sum({dr_or_cr}) as amount
 		FROM `tabGL Entry`
-		WHERE
-			party_type = %s and against_voucher is null
-			and {1} GROUP BY party"""
-		.format(("credit") if party_type == "Customer" else "debit", cond) , party_type)
+		WHERE party_type = %(party_type)s and ifnull(against_voucher, '') = '' and {advance_condition} {date_condition}
+		GROUP BY party
+	""".format(dr_or_cr=dr_or_cr, advance_condition=advance_condition, date_condition=date_condition),  # nosec
+		{"party_type": party_type, "posting_date": posting_date})
 
-	if data:
-		return frappe._dict(data)
+	return frappe._dict(data or {})

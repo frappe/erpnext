@@ -103,6 +103,26 @@ frappe.query_reports["Accounts Receivable"] = {
 			"options": "Sales Person"
 		},
 		{
+			"fieldname":"cost_center",
+			"label": __("Cost Center"),
+			"fieldtype": "Link",
+			"options": "Cost Center"
+		},
+		{
+			"fieldname":"group_by",
+			"label": __("Group By Level 1"),
+			"fieldtype": "Select",
+			"options": "Ungrouped\nGroup by Customer\nGroup by Customer Group\nGroup by Territory\nGroup by Sales Person\nGroup by Cost Center",
+			"default": "Ungrouped"
+		},
+		{
+			"fieldname":"group_by_2",
+			"label": __("Group By Level 2"),
+			"fieldtype": "Select",
+			"options": "Ungrouped\nGroup by Customer\nGroup by Customer Group\nGroup by Territory\nGroup by Sales Person\nGroup by Cost Center",
+			"default": "Ungrouped"
+		},
+		{
 			"fieldname":"based_on_payment_terms",
 			"label": __("Based On Payment Terms"),
 			"fieldtype": "Check",
@@ -111,11 +131,19 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname":"show_pdc_in_print",
 			"label": __("Show PDC in Print"),
 			"fieldtype": "Check",
+			on_change: function() { return false; }
+		},
+		{
+			"fieldname":"mark_overdue_in_print",
+			"label": __("Mark Overdue in Print"),
+			"fieldtype": "Check",
+			on_change: function() { return false; }
 		},
 		{
 			"fieldname":"show_sales_person_in_print",
 			"label": __("Show Sales Person in Print"),
 			"fieldtype": "Check",
+			on_change: function() { return false; }
 		},
 		{
 			"fieldname":"tax_id",
@@ -148,5 +176,6 @@ frappe.query_reports["Accounts Receivable"] = {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Accounts Receivable Summary', {company: filters.company});
 		});
-	}
+	},
+	initial_depth: 1
 }
