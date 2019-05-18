@@ -7,7 +7,8 @@
   "document_type",
   "label",
   "fieldname",
-  "is_mandatory"
+  "is_mandatory",
+  "disable"
  ],
  "fields": [
   {
@@ -30,12 +31,19 @@
    "reqd": 1
   },
   {
+   "default": "0",
    "fieldname": "is_mandatory",
    "fieldtype": "Check",
    "label": "Is Mandatory"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable",
+   "fieldtype": "Check",
+   "label": "Disable"
   }
  ],
- "modified": "2019-05-16 13:37:04.240148",
+ "modified": "2019-05-17 20:35:31.014495",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension",
