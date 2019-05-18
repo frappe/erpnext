@@ -64,7 +64,7 @@ class Project(Document):
 					'name': ("not in", self.deleted_task_list)
 				})
 
-			return frappe.get_all("Task", "*", filters, order_by="exp_start_date asc")
+			return frappe.get_all("Task", "*", filters, order_by="exp_start_date asc, status asc")
 
 	def validate(self):
 		self.validate_project_name()
