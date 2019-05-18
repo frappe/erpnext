@@ -8,7 +8,7 @@
             </div>
             <div class='card-body'>
                 <h5 class='card-title'>{{ program.program_name }}</h5>
-                <div class="text-muted">{{ program.description.substring(0,200) }}...</div>
+                <div class="text-muted">{{ program.description.substring(0,120) }}...</div>
             </div>
         </router-link>
         <div class='text-right p-3'>

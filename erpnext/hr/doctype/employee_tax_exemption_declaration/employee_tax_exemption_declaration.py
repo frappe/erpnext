@@ -25,7 +25,8 @@ class EmployeeTaxExemptionDeclaration(Document):
 			filters = {
 				"employee": self.employee,
 				"payroll_period": self.payroll_period,
-				"name": ["!=", self.name]
+				"name": ["!=", self.name],
+				"docstatus": ["!=", 2]
 			}
 		)
 		if duplicate:
