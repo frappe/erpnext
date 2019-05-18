@@ -60,6 +60,10 @@ class Customer(TransactionBase):
 			if self.loyalty_program == customer.loyalty_program and not self.loyalty_program_tier:
 				self.loyalty_program_tier = customer.loyalty_program_tier
 
+		if self.sales_team:
+			if sum([member.allocated_percentage or 0 for member in self.sales_team]) != 100:
+				frappe.throw(_("Total contribution percentage should be equal to 100"))
+
 	def check_customer_group_change(self):
 		frappe.flags.customer_group_changed = False
 
@@ -103,10 +107,6 @@ class Customer(TransactionBase):
 		update Customer link in Quotation, Opportunity'''
 		if self.lead_name:
 			frappe.db.set_value('Lead', self.lead_name, 'status', 'Converted', update_modified=False)
-
-			for doctype in ('Opportunity', 'Quotation'):
-				for d in frappe.get_all(doctype, {'lead': self.lead_name}):
-					frappe.db.set_value(doctype, d.name, 'customer', self.name, update_modified=False)
 
 	def create_lead_address_contact(self):
 		if self.lead_name:

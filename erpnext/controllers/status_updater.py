@@ -34,8 +34,8 @@ status_map = {
 	],
 	"Sales Order": [
 		["Draft", None],
-		["To Deliver and Bill", "eval:self.per_delivered < 100 and self.per_billed < 100 and self.docstatus == 1"],
-		["To Bill", "eval:self.per_delivered == 100 and self.per_billed < 100 and self.docstatus == 1"],
+		["To Deliver and Bill", "eval:self.per_delivered < 100 and self.per_billed < 100 and self.docstatus == 1 and self.order_type in ['Sales', 'Shopping Cart']"],
+		["To Bill", "eval:self.per_delivered == 100 or self.order_type == 'Maintenance' and self.per_billed < 100 and self.docstatus == 1"],
 		["To Deliver", "eval:self.per_delivered < 100 and self.per_billed == 100 and self.docstatus == 1"],
 		["Completed", "eval:self.per_delivered == 100 and self.per_billed == 100 and self.docstatus == 1"],
 		["Completed", "eval:self.order_type == 'Maintenance' and self.per_billed == 100 and self.docstatus == 1"],
@@ -95,6 +95,10 @@ status_map = {
 		["Ordered", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
 		["Transferred", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Transfer'"],
 		["Issued", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue'"]
+	],
+	"Bank Transaction": [
+		["Unreconciled", "eval:self.docstatus == 1 and self.unallocated_amount>0"],
+		["Reconciled", "eval:self.docstatus == 1 and self.unallocated_amount<=0"]
 	]
 }
 
