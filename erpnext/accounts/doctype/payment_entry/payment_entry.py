@@ -507,7 +507,7 @@ class PaymentEntry(AccountsController):
 						"debit_in_account_currency": d.amount,
 						"debit": d.amount,
 						"cost_center": d.cost_center
-					})
+					}, item=d)
 				)
 
 	def update_advance_paid(self):
