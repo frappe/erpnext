@@ -18,7 +18,7 @@ def execute():
 	# Set state codes
 	condition = ""
 	for state, code in state_codes.items():
-		condition += " when '{0}' then '{1}'".format(frappe.db.escape(state), frappe.db.escape(code))
+		condition += " when {0} then {1}".format(frappe.db.escape(state), frappe.db.escape(code))
 
 	if condition:
 		condition = "state_code = (case state {0} end),".format(condition)

@@ -41,6 +41,7 @@ status_map = {
 		["Completed", "eval:self.order_type == 'Maintenance' and self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
+		["On Hold", "eval:self.status=='On Hold'"],
 	],
 	"Sales Invoice": [
 		["Draft", None],
@@ -70,6 +71,7 @@ status_map = {
 		["Completed", "eval:self.per_received == 100 and self.per_billed == 100 and self.docstatus == 1"],
 		["Delivered", "eval:self.status=='Delivered'"],
 		["Cancelled", "eval:self.docstatus==2"],
+		["On Hold", "eval:self.status=='On Hold'"],
 		["Closed", "eval:self.status=='Closed'"],
 	],
 	"Delivery Note": [
@@ -94,7 +96,9 @@ status_map = {
 		["Partially Ordered", "eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1"],
 		["Ordered", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
 		["Transferred", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Transfer'"],
-		["Issued", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue'"]
+		["Issued", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue'"],
+		["Received", "eval:self.status != 'Stopped' and self.per_received == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
+		["Partially Received", "eval:self.status != 'Stopped' and self.per_received > 0 and self.per_received < 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"]
 	]
 }
 
@@ -308,7 +312,7 @@ class StatusUpdater(Document):
 	def _update_modified(self, args, update_modified):
 		args['update_modified'] = ''
 		if update_modified:
-			args['update_modified'] = ', modified = now(), modified_by = "{0}"'\
+			args['update_modified'] = ', modified = now(), modified_by = {0}'\
 				.format(frappe.db.escape(frappe.session.user))
 
 	def update_billing_status_for_zero_amount_refdoc(self, ref_dt):

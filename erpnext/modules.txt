@@ -22,3 +22,4 @@ ERPNext Integrations
 Non Profit
 Hotels
 Hub Node
+Quality Management

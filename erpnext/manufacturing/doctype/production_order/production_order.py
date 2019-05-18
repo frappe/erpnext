@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import json
+from six import text_type
 from frappe import _
 from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate
 from frappe.model.document import Document
@@ -567,6 +568,7 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 	stock_entry.bom_no = production_order.bom_no
 	stock_entry.use_multi_level_bom = production_order.use_multi_level_bom
 	stock_entry.fg_completed_qty = qty or (flt(production_order.qty) - flt(production_order.produced_qty))
+	stock_entry.set_stock_entry_type()
 
 	if purpose=="Material Transfer for Manufacture":
 		stock_entry.to_warehouse = wip_warehouse
@@ -591,10 +593,10 @@ def make_timesheet(production_order, company):
 
 @frappe.whitelist()
 def add_timesheet_detail(timesheet, args):
-	if isinstance(timesheet, unicode):
+	if isinstance(timesheet, text_type):
 		timesheet = frappe.get_doc('Timesheet', timesheet)
 
-	if isinstance(args, unicode):
+	if isinstance(args, text_type):
 		args = json.loads(args)
 
 	timesheet.append('time_logs', args)

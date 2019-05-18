@@ -19,7 +19,7 @@ def execute(filters=None):
 	return columns, data, None, chart
 
 def get_columns():
-	columns = [_("License") + ":Link/Vehicle:100", _("Make") + ":data:50",
+	columns = [_("License") + ":Link/Vehicle:100", _('Create') + ":data:50",
 		_("Model") + ":data:50", _("Location") + ":data:100",
 		_("Log") + ":Link/Vehicle Log:100", _("Odometer") + ":Int:80",
 		_("Date") + ":Date:100", _("Fuel Qty") + ":Float:80",
