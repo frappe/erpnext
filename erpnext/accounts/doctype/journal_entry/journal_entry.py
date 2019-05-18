@@ -509,7 +509,7 @@ class JournalEntry(AccountsController):
 						"cost_center": d.cost_center,
 						"project": d.project,
 						"finance_book": self.finance_book
-					})
+					}, item=d)
 				)
 
 		if gl_map:

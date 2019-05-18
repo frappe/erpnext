@@ -339,7 +339,7 @@ class AccountsController(TransactionBase):
 					frappe.throw(_("Row #{0}: Account {1} does not belong to company {2}")
 								 .format(d.idx, d.account_head, self.company))
 
-	def get_gl_dict(self, args, account_currency=None):
+	def get_gl_dict(self, args, account_currency=None, item=None):
 		"""this method populates the common properties of a gl entry record"""
 
 		posting_date = args.get('posting_date') or self.get('posting_date')
@@ -372,6 +372,8 @@ class AccountsController(TransactionBase):
 
 		for dimension in accounting_dimensions:
 			dimension_dict[dimension] = self.get(dimension)
+			if item and item.get(dimension):
+				dimension_dict[dimension] = item.get(dimension)
 
 		gl_dict.update(dimension_dict)
 		gl_dict.update(args)

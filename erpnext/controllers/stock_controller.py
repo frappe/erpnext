@@ -80,7 +80,7 @@ class StockController(AccountsController):
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(sle.stock_value_difference, 2),
-						}, warehouse_account[sle.warehouse]["account_currency"]))
+						}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
 
 						# to target warehouse / expense account
 						gl_list.append(self.get_gl_dict({
@@ -90,7 +90,7 @@ class StockController(AccountsController):
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, 2),
 							"project": item_row.get("project") or self.get("project")
-						}))
+						}, item=item_row))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
 
