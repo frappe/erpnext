@@ -125,7 +125,7 @@ class StockController(AccountsController):
 					{0}
 				where
 					name = %(name)s
-			""".format(incoming_rate_field), sle)
+			""".format(incoming_rate_field), sle)  # nosec
 
 		return sle
 
