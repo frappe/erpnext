@@ -39,6 +39,7 @@ class Company(NestedSet):
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
 		self.check_country_change()
+		self.set_chart_of_accounts()
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -141,6 +142,7 @@ class Company(NestedSet):
 
 	def create_default_accounts(self):
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
+		frappe.local.flags.ignore_root_company_validation = True
 		create_charts(self.name, self.chart_of_accounts, self.existing_company)
 
 		frappe.db.set(self, "default_receivable_account", frappe.db.get_value("Account",
@@ -172,6 +174,12 @@ class Company(NestedSet):
 		if not self.get('__islocal') and \
 			self.country != frappe.get_cached_value('Company',  self.name,  'country'):
 			frappe.flags.country_change = True
+
+	def set_chart_of_accounts(self):
+		''' If parent company is set, chart of accounts will be based on that company '''
+		if self.parent_company:
+			self.create_chart_of_accounts_based_on = "Existing Company"
+			self.existing_company = self.parent_company
 
 	def set_default_accounts(self):
 		self._set_default_account("default_cash_account", "Cash")
@@ -369,7 +377,7 @@ def replace_abbr(company, old, new):
 		for d in doc:
 			_rename_record(d)
 
-	for dt in ["Warehouse", "Account", "Cost Center", "Department", "Location",
+	for dt in ["Warehouse", "Account", "Cost Center", "Department",
 			"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
 		_rename_records(dt)
 		frappe.db.commit()

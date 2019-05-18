@@ -573,15 +573,17 @@ def get_party_shipping_address(doctype, name):
 	else:
 		return ''
 
-def get_partywise_advanced_payment_amount(party_type="Customer"):
-	dr_or_cr = "credit - debit" if party_type == "Customer" else "debit - credit"
-	advance_condition = "{0} > 0".format(dr_or_cr)
+def get_partywise_advanced_payment_amount(party_type, posting_date = None):
+	cond = "1=1"
+	if posting_date:
+		cond = "posting_date <= '{0}'".format(posting_date)
 
-	data = frappe.db.sql("""
-		SELECT party, sum({0}) as amount
+	data = frappe.db.sql(""" SELECT party, sum({0}) as amount
 		FROM `tabGL Entry`
-		WHERE party_type = %s and ifnull(against_voucher, '') = '' and {1}
-		GROUP BY party
-	""".format(dr_or_cr, advance_condition), party_type)
+		WHERE
+			party_type = %s and against_voucher is null
+			and {1} GROUP BY party"""
+		.format(("credit") if party_type == "Customer" else "debit", cond) , party_type)
 
-	return frappe._dict(data or {})
+	if data:
+		return frappe._dict(data)

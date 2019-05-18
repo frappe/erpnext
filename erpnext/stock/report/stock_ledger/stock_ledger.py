@@ -180,7 +180,7 @@ def get_voucher_party_details(sl_entries):
 			select name, {field}
 			from `tab{dt}`
 			where name in ({dns})
-		""".format(
+		""".format(  # nosec
 			field=scrub(voucher_party_type[voucher_type]),
 			dt=voucher_type,
 			dns=", ".join(["%s"] * len(vouchers))
