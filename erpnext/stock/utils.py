@@ -7,7 +7,7 @@ from frappe import _
 import json
 from frappe.utils import flt, cstr, nowdate, nowtime
 
-from six import string_types
+from six import string_types, iteritems
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
 
@@ -247,7 +247,7 @@ def is_group_warehouse(warehouse):
 	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
 		frappe.throw(_("Group node warehouse is not allowed to select for transactions"))
 
-def update_included_uom_in_report(columns, result, include_uom, conversion_factors):
+def update_included_uom_in_list_report(columns, result, include_uom, conversion_factors):
 	if not include_uom or not conversion_factors:
 		return
 
@@ -277,3 +277,28 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 					new_row.append(None)
 
 		result[row_idx] = new_row
+
+
+def update_included_uom_in_dict_report(columns, result, include_uom, conversion_factors):
+	if not include_uom or not conversion_factors:
+		return
+
+	convertible_cols = {}
+	for col_idx in reversed(range(0, len(columns))):
+		col = columns[col_idx]
+		if isinstance(col, dict) and col.get('fieldname') and col.get("convertible") in ['rate', 'qty']:
+			convertible_cols[col['fieldname']] = col['convertible']
+			columns.insert(col_idx+1, col.copy())
+			columns[col_idx+1]['fieldname'] += "_alt"
+			if convertible_cols[col['fieldname']] == 'rate':
+				columns[col_idx+1]['label'] += " (per {})".format(include_uom)
+			else:
+				columns[col_idx+1]['label'] += " ({})".format(include_uom)
+
+	for row_idx, row in enumerate(result):
+		for fieldname, conversion_type in iteritems(convertible_cols):
+			if conversion_factors[row_idx]:
+				if conversion_type == 'rate':
+					row[fieldname + "_alt"] = flt(row.get(fieldname)) * conversion_factors[row_idx]
+				else:
+					row[fieldname + "_alt"] = flt(row.get(fieldname)) / conversion_factors[row_idx]
