@@ -6,10 +6,10 @@ def get_contact_doc(phone_number):
 	contacts = frappe.get_all('Contact', or_filters={
 		'phone': ['like', '%{}'.format(phone_number)],
 		'mobile_no': ['like', '%{}'.format(phone_number)]
-	}, fields=['*'])
+	}, fields=['name'])
 
 	if contacts:
-		return contacts[0]
+		return frappe.get_doc(contacts[0].name)
 
 @frappe.whitelist()
 def get_last_communication(phone_number, customer=None):
