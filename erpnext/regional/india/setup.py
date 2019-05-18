@@ -189,9 +189,10 @@ def make_custom_fields(update=True):
 			'fieldname': 'gst_transporter_id',
 			'label': 'GST Transporter ID',
 			'fieldtype': 'Data',
-			'insert_after': 'transporter_name',
+			'insert_after': 'transporter',
 			'fetch_from': 'transporter.gst_transporter_id',
-			'print_hide': 1
+			'print_hide': 1,
+			'translatable': 0
 		},
 		{
 			'fieldname': 'mode_of_transport',
@@ -199,18 +200,142 @@ def make_custom_fields(update=True):
 			'fieldtype': 'Select',
 			'options': '\nRoad\nAir\nRail\nShip',
 			'default': 'Road',
+			'insert_after': 'transporter_name',
+			'print_hide': 1,
+			'translatable': 0
+		},
+		{
+			'fieldname': 'gst_vehicle_type',
+			'label': 'GST Vehicle Type',
+			'fieldtype': 'Select',
+			'options': 'Regular\nOver Dimensional Cargo (ODC)',
+			'depends_on': 'eval:(doc.mode_of_transport === "Road")',
+			'default': 'Regular',
 			'insert_after': 'lr_date',
+			'print_hide': 1,
+			'translatable': 0
+		}
+	]
+
+	si_ewaybill_fields = [
+		{
+			'fieldname': 'transporter_info',
+ 			'label': 'Transporter Info',
+ 			'fieldtype': 'Section Break',
+ 			'insert_after': 'terms',
+ 			'collapsible': 1,
+ 			'collapsible_depends_on': 'transporter',
+ 			'print_hide': 1
+		},
+		{
+			'fieldname': 'transporter',
+			'label': 'Transporter',
+			'fieldtype': 'Link',
+			'insert_after': 'transporter_info',
+			'options': 'Supplier',
+			'print_hide': 1
+		},
+		{
+			'fieldname': 'gst_transporter_id',
+			'label': 'GST Transporter ID',
+			'fieldtype': 'Data',
+			'insert_after': 'transporter',
+			'fetch_from': 'transporter.gst_transporter_id',
+			'print_hide': 1,
+			'translatable': 0
+		},
+		{
+			'fieldname': 'driver',
+			'label': 'Driver',
+			'fieldtype': 'Link',
+			'insert_after': 'gst_transporter_id',
+			'options': 'Driver',
+			'print_hide': 1
+		},
+		{
+			'fieldname': 'lr_no',
+			'label': 'Transport Receipt No',
+			'fieldtype': 'Data',
+			'insert_after': 'driver',
+			'print_hide': 1,
+			'translatable': 0
+		},
+		{
+			'fieldname': 'vehicle_no',
+			'label': 'Vehicle No',
+			'fieldtype': 'Data',
+			'insert_after': 'lr_no',
+			'print_hide': 1,
+			'translatable': 0
+		},
+		{
+			'fieldname': 'distance',
+			'label': 'Distance (in km)',
+			'fieldtype': 'Float',
+			'insert_after': 'vehicle_no',
+			'print_hide': 1
+		},
+		{
+			'fieldname': 'transporter_col_break',
+			'fieldtype': 'Column Break',
+			'insert_after': 'distance'
+		},
+		{
+			'fieldname': 'transporter_name',
+			'label': 'Transporter Name',
+			'fieldtype': 'Data',
+			'insert_after': 'transporter_col_break',
+			'fetch_from': 'transporter.name',
+			'read_only': 1,
+			'print_hide': 1,
+			'translatable': 0
+		},
+		{
+			'fieldname': 'mode_of_transport',
+			'label': 'Mode of Transport',
+			'fieldtype': 'Select',
+			'options': '\nRoad\nAir\nRail\nShip',
+			'default': 'Road',
+			'insert_after': 'transporter_name',
+			'print_hide': 1,
+			'translatable': 0
+		},
+		{
+			'fieldname': 'driver_name',
+			'label': 'Driver Name',
+			'fieldtype': 'Data',
+			'insert_after': 'mode_of_transport',
+			'fetch_from': 'driver.full_name',
+			'print_hide': 1,
+			'translatable': 0
+		},
+		{
+			'fieldname': 'lr_date',
+			'label': 'Transport Receipt Date',
+			'fieldtype': 'Date',
+			'insert_after': 'driver_name',
+			'default': 'Today',
 			'print_hide': 1
 		},
 		{
 			'fieldname': 'gst_vehicle_type',
 			'label': 'GST Vehicle Type',
 			'fieldtype': 'Select',
-			'options': '\nRegular\nOver Dimensional Cargo (ODC)',
-			'default': 'Regular',
+			'options': 'Regular\nOver Dimensional Cargo (ODC)',
 			'depends_on': 'eval:(doc.mode_of_transport === "Road")',
-			'insert_after': 'mode_of_transport',
-			'print_hide': 1
+			'default': 'Regular',
+			'insert_after': 'lr_date',
+			'print_hide': 1,
+			'translatable': 0
+		},
+		{
+			'fieldname': 'ewaybill',
+			'label': 'e-Way Bill No.',
+			'fieldtype': 'Data',
+			'depends_on': 'eval:(doc.docstatus === 1)',
+			'allow_on_submit': 1,
+			'insert_after': 'project',
+			'translatable': 0
 		}
 	]
 
@@ -226,7 +351,8 @@ def make_custom_fields(update=True):
 		'Purchase Invoice': invoice_gst_fields + purchase_invoice_gst_fields + purchase_invoice_itc_fields,
 		'Purchase Order': purchase_invoice_gst_fields,
 		'Purchase Receipt': purchase_invoice_gst_fields,
-		'Sales Invoice': invoice_gst_fields + sales_invoice_gst_fields + sales_invoice_shipping_fields,
+		'Sales Invoice': (invoice_gst_fields + sales_invoice_gst_fields
+			+ sales_invoice_shipping_fields + si_ewaybill_fields),
 		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields,
 		'Sales Order': sales_invoice_gst_fields,
 		'Sales Taxes and Charges Template': inter_state_gst_field,
@@ -262,18 +388,18 @@ def make_custom_fields(update=True):
 		'Employee Tax Exemption Declaration':[
 			dict(fieldname='hra_section', label='HRA Exemption',
 				fieldtype='Section Break', insert_after='declarations'),
-			dict(fieldname='salary_structure_hra', label='HRA as per Salary Structure',
-				fieldtype='Currency', insert_after='hra_section', read_only=1),
 			dict(fieldname='monthly_house_rent', label='Monthly House Rent',
-				fieldtype='Currency', insert_after='salary_structure_hra'),
+				fieldtype='Currency', insert_after='hra_section'),
 			dict(fieldname='rented_in_metro_city', label='Rented in Metro City',
-				fieldtype='Check', insert_after='monthly_house_rent'),
+				fieldtype='Check', insert_after='monthly_house_rent', depends_on='monthly_house_rent'),
+			dict(fieldname='salary_structure_hra', label='HRA as per Salary Structure',
+				fieldtype='Currency', insert_after='rented_in_metro_city', read_only=1, depends_on='monthly_house_rent'),
 			dict(fieldname='hra_column_break', fieldtype='Column Break',
-				insert_after='rented_in_metro_city'),
+				insert_after='salary_structure_hra', depends_on='monthly_house_rent'),
 			dict(fieldname='annual_hra_exemption', label='Annual HRA Exemption',
-				fieldtype='Currency', insert_after='hra_column_break', read_only=1),
+				fieldtype='Currency', insert_after='hra_column_break', read_only=1, depends_on='monthly_house_rent'),
 			dict(fieldname='monthly_hra_exemption', label='Monthly HRA Exemption',
-				fieldtype='Currency', insert_after='annual_hra_exemption', read_only=1)
+				fieldtype='Currency', insert_after='annual_hra_exemption', read_only=1, depends_on='monthly_house_rent')
 		],
 		'Employee Tax Exemption Proof Submission': [
 			dict(fieldname='hra_section', label='HRA Exemption',
@@ -281,19 +407,19 @@ def make_custom_fields(update=True):
 			dict(fieldname='house_rent_payment_amount', label='House Rent Payment Amount',
 				fieldtype='Currency', insert_after='hra_section'),
 			dict(fieldname='rented_in_metro_city', label='Rented in Metro City',
-				fieldtype='Check', insert_after='house_rent_payment_amount'),
+				fieldtype='Check', insert_after='house_rent_payment_amount', depends_on='house_rent_payment_amount'),
 			dict(fieldname='rented_from_date', label='Rented From Date',
-				fieldtype='Date', insert_after='rented_in_metro_city'),
+				fieldtype='Date', insert_after='rented_in_metro_city', depends_on='house_rent_payment_amount'),
 			dict(fieldname='rented_to_date', label='Rented To Date',
-				fieldtype='Date', insert_after='rented_from_date'),
+				fieldtype='Date', insert_after='rented_from_date', depends_on='house_rent_payment_amount'),
 			dict(fieldname='hra_column_break', fieldtype='Column Break',
-				insert_after='rented_to_date'),
+				insert_after='rented_to_date', depends_on='house_rent_payment_amount'),
 			dict(fieldname='monthly_house_rent', label='Monthly House Rent',
-				fieldtype='Currency', insert_after='hra_column_break', read_only=1),
+				fieldtype='Currency', insert_after='hra_column_break', read_only=1, depends_on='house_rent_payment_amount'),
 			dict(fieldname='monthly_hra_exemption', label='Monthly Eligible Amount',
-				fieldtype='Currency', insert_after='monthly_house_rent', read_only=1),
+				fieldtype='Currency', insert_after='monthly_house_rent', read_only=1, depends_on='house_rent_payment_amount'),
 			dict(fieldname='total_eligible_hra_exemption', label='Total Eligible HRA Exemption',
-				fieldtype='Currency', insert_after='monthly_hra_exemption', read_only=1)
+				fieldtype='Currency', insert_after='monthly_hra_exemption', read_only=1, depends_on='house_rent_payment_amount')
 		],
 		'Supplier': [
 			{
@@ -306,7 +432,7 @@ def make_custom_fields(update=True):
 		]
 	}
 
-	create_custom_fields(custom_fields, ignore_validate = frappe.flags.in_patch, update=update)
+	create_custom_fields(custom_fields, update=update)
 
 def make_fixtures(company=None):
 	docs = []
