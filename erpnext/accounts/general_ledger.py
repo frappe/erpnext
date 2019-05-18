@@ -11,7 +11,6 @@ from erpnext.accounts.doctype.budget.budget import validate_expense_against_budg
 
 
 class StockAccountInvalidTransaction(frappe.ValidationError): pass
-class StockValueAndAccountBalanceIsOutOfSync(frappe.ValidationError):pass
 
 def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, update_outstanding='Yes', from_repost=False):
 	if gl_map:
@@ -124,8 +123,7 @@ def validate_account_for_perpetual_inventory(gl_map):
 							.format(entry.account), StockAccountInvalidTransaction)
 
 	if stock_value_and_account_balance_difference != 0 and gl_map[0].voucher_type != "Journal Entry":
-		frappe.throw(_("Account Balance and Stock Value is Out of sync please Create Journal Entry to Balance")
-			, StockValueAndAccountBalanceIsOutOfSync)
+		frappe.msgprint(_("Account Balance and Stock Value is Out of sync please Create Journal Entry to Balance"))
 
 def round_off_debit_credit(gl_map):
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
