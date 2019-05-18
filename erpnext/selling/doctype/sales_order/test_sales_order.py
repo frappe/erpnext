@@ -757,6 +757,8 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.items[1].alt_uom_size, 1)
 		self.assertEqual(so.items[1].alt_uom_qty, 10)
 
+		self.assertEqual(so.total_alt_uom_qty, 60)
+
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
 	args = frappe._dict(args)
