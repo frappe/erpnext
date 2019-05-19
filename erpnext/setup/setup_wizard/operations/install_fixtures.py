@@ -82,6 +82,19 @@ def install(country=None):
 		{'doctype': 'Employment Type', 'employee_type_name': _('Intern')},
 		{'doctype': 'Employment Type', 'employee_type_name': _('Apprentice')},
 
+
+		# Stock Entry Type
+		{'doctype': 'Stock Entry Type', 'name': 'Material Issue', 'purpose': 'Material Issue'},
+		{'doctype': 'Stock Entry Type', 'name': 'Material Receipt', 'purpose': 'Material Receipt'},
+		{'doctype': 'Stock Entry Type', 'name': 'Material Transfer', 'purpose': 'Material Transfer'},
+		{'doctype': 'Stock Entry Type', 'name': 'Manufacture', 'purpose': 'Manufacture'},
+		{'doctype': 'Stock Entry Type', 'name': 'Repack', 'purpose': 'Repack'},
+		{'doctype': 'Stock Entry Type', 'name': 'Send to Subcontractor', 'purpose': 'Send to Subcontractor'},
+		{'doctype': 'Stock Entry Type', 'name': 'Material Transfer for Manufacture', 'purpose': 'Material Transfer for Manufacture'},
+		{'doctype': 'Stock Entry Type', 'name': 'Material Consumption for Manufacture', 'purpose': 'Material Consumption for Manufacture'},
+		{'doctype': 'Stock Entry Type', 'name': 'Send to Warehouse', 'purpose': 'Send to Warehouse'},
+		{'doctype': 'Stock Entry Type', 'name': 'Receive at Warehouse', 'purpose': 'Receive at Warehouse'},
+
 		# Designation
 		{'doctype': 'Designation', 'designation_name': _('CEO')},
 		{'doctype': 'Designation', 'designation_name': _('Manager')},
@@ -252,7 +265,7 @@ def install(country=None):
 	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records
 	make_default_records()
 
-	make_records(records, True)
+	make_records(records)
 
 	set_more_defaults()
 
@@ -366,7 +379,7 @@ def install_company(args):
 		}
 	]
 
-	make_records(records, True)
+	make_records(records)
 
 
 def install_post_company_fixtures(args=None):
@@ -474,7 +487,7 @@ def install_defaults(args=None):
 		},
 	]
 
-	make_records(records, True)
+	make_records(records)
 
 
 def get_fy_details(fy_start_date, fy_end_date):

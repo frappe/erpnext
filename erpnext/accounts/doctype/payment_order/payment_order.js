@@ -11,10 +11,10 @@ frappe.ui.form.on('Payment Order', {
 
 		// payment Entry
 		if (frm.doc.docstatus==1) {
-			frm.add_custom_button(__('Make Payment Entries'),
-				function() { 
-					frm.trigger("make_payment_records")
-			});
+			frm.add_custom_button(__('Create Payment Entries'),
+				function() {
+					frm.trigger("make_payment_records");
+				});
 		}
 	},
 
@@ -79,5 +79,5 @@ frappe.ui.form.on('Payment Order', {
 
 		dialog.show();
 	},
-	
+
 });

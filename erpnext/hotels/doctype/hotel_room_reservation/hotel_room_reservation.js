@@ -4,7 +4,7 @@
 frappe.ui.form.on('Hotel Room Reservation', {
 	refresh: function(frm) {
 		if(frm.doc.docstatus == 1){
-			frm.add_custom_button(__("Make Invoice"), ()=> {
+			frm.add_custom_button(__('Create Invoice'), ()=> {
 				frm.trigger("make_invoice");
 			});
 		}

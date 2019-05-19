@@ -42,10 +42,10 @@ def create_variant_with_tables(item, args):
 	return variant
 
 def make_item_variant():
-	frappe.delete_doc_if_exists("Item", "_Test Variant Item-S", force=1)
-	variant = create_variant_with_tables("_Test Variant Item", '{"Test Size": "Small"}')
-	variant.item_code = "_Test Variant Item-S"
-	variant.item_name = "_Test Variant Item-S"
+	frappe.delete_doc_if_exists("Item", "_Test Variant Item-XSL", force=1)
+	variant = create_variant_with_tables("_Test Variant Item", '{"Test Size": "Extra Small"}')
+	variant.item_code = "_Test Variant Item-XSL"
+	variant.item_name = "_Test Variant Item-XSL"
 	variant.save()
 	return variant
 
