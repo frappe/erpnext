@@ -17,7 +17,7 @@ class AccountingDimension(Document):
 
 	def before_insert(self):
 		self.set_fieldname_and_label()
-		frappe.enqueue(make_accounting_dimension_in_accounting_doctypes, doc=self)
+		frappe.enqueue(make_dimension_in_accounting_doctypes, doc=self)
 
 	def on_trash(self):
 		frappe.enqueue(delete_accounting_dimension, doc=self)
@@ -29,7 +29,7 @@ class AccountingDimension(Document):
 		if not self.fieldname:
 			self.fieldname = scrub(self.label)
 
-def make_accounting_dimension_in_accounting_doctypes(doc):
+def make_dimension_in_accounting_doctypes(doc):
 	doclist = get_doclist()
 
 	if doc.is_mandatory:
