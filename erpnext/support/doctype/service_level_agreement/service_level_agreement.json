@@ -1,11 +1,11 @@
 {
- "autoname": "format:SLA-{sla_name}",
+ "autoname": "format:SLA-{service_level_agreement_name}",
  "creation": "2018-12-26 21:08:15.448812",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "sla_name",
+  "service_level_agreement_name",
   "customer",
   "default_service_level_agreement",
   "holiday_list",
@@ -17,6 +17,7 @@
   "agreement_status",
   "column_break_7",
   "end_date",
+  "ignore_start_and_end_date",
   "response_and_resolution_time_section",
   "priorities",
   "support_and_resolution_section_break",
@@ -33,6 +34,7 @@
    "set_only_once": 1
   },
   {
+   "default": "0",
    "depends_on": "eval: !doc.customer",
    "fieldname": "default_service_level_agreement",
    "fieldtype": "Check",
@@ -75,7 +77,7 @@
    "label": "Agreement Details"
   },
   {
-   "depends_on": "eval: !doc.default_service_level_agreement",
+   "depends_on": "eval: !doc.default_service_level_agreement && !doc.ignore_start_and_end_date",
    "fieldname": "start_date",
    "fieldtype": "Date",
    "label": "Start Date"
@@ -94,7 +96,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval: !doc.default_service_level_agreement",
+   "depends_on": "eval: !doc.default_service_level_agreement && !doc.ignore_start_and_end_date",
    "fieldname": "end_date",
    "fieldtype": "Date",
    "label": "End Date"
@@ -124,14 +126,21 @@
    "options": "Service Level Priority"
   },
   {
-   "fieldname": "sla_name",
+   "fieldname": "service_level_agreement_name",
    "fieldtype": "Data",
    "label": "Service Level Agreement Name",
-   "read_only": 1,
+   "reqd": 1,
    "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_start_and_end_date",
+   "fieldtype": "Check",
+   "label": "Ignore Start and End Date",
+   "set_only_once": 1
   }
  ],
- "modified": "2019-05-06 22:00:44.623128",
+ "modified": "2019-05-19 09:41:55.498800",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",

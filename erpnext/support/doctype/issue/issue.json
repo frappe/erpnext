@@ -152,8 +152,7 @@
    "fieldname": "service_level_agreement",
    "fieldtype": "Link",
    "label": "Service Level Agreement",
-   "options": "Service Level Agreement",
-   "read_only": 1
+   "options": "Service Level Agreement"
   },
   {
    "fieldname": "response_by",
@@ -308,6 +307,7 @@
    "label": "Attachment"
   },
   {
+   "default": "0",
    "fieldname": "via_customer_portal",
    "fieldtype": "Check",
    "label": "Via Customer Portal"
@@ -316,28 +316,28 @@
    "default": "Ongoing",
    "fieldname": "agreement_fulfilled",
    "fieldtype": "Select",
-   "label": "Agreement Fulfilled",
+   "label": "Service Level Agreement Fulfilled",
    "options": "Ongoing\nFulfilled\nFailed",
    "read_only": 1
   },
   {
    "description": "in hours",
    "fieldname": "response_by_variance",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "label": "Response By Variance",
    "read_only": 1
   },
   {
    "description": "in hours",
    "fieldname": "resolution_by_variance",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "label": "Resolution By Variance",
    "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2019-05-10 22:31:09.391044",
+ "modified": "2019-05-19 11:02:10.962090",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
@@ -357,6 +357,7 @@
  ],
  "quick_entry": 1,
  "search_fields": "status,customer,subject,raised_by",
+ "sort_field": "modified",
  "sort_order": "ASC",
  "timeline_field": "customer",
  "title_field": "subject",
