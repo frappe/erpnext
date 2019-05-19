@@ -26,10 +26,10 @@ frappe.ui.form.on("Issue", {
 				frm.dashboard.clear_headline();
 
 				let agreement_fulfilled = (frm.doc.agreement_fulfilled == "Fulfilled") ?
-						{"indicator": "green", "msg": "Service Level Agreement has been fulfilled"} :
-						{"indicator": "red", "msg": "Service Level Agreement Failed"};
+					{"indicator": "green", "msg": "Service Level Agreement has been fulfilled"} :
+					{"indicator": "red", "msg": "Service Level Agreement Failed"};
 
-					frm.dashboard.set_headline_alert(
+				frm.dashboard.set_headline_alert(
 					'<div class="row">' +
 						'<div class="col-xs-12">' +
 							'<span class="indicator whitespace-nowrap '+ agreement_fulfilled.indicator +'"><span class="hidden-xs">'+ agreement_fulfilled.msg +'</span></span> ' +
@@ -55,7 +55,7 @@ frappe.ui.form.on("Issue", {
 				"priority": frm.doc.priority,
 				"service_level_agreement": frm.doc.service_level_agreement
 			}).then(() => {
-				frappe.msgprint(__("Issue Priority changed to {0}.", [frm.doc.priority]))
+				frappe.msgprint(__("Issue Priority changed to {0}.", [frm.doc.priority]));
 				frm.refresh();
 			});
 		}
@@ -70,7 +70,7 @@ frappe.ui.form.on("Issue", {
 			"priority": frm.doc.priority,
 			"service_level_agreement": frm.doc.service_level_agreement
 		}).then(() => {
-			frappe.msgprint(__("Service Level Agreement changed to {0}.", [frm.doc.service_level_agreement]))
+			frappe.msgprint(__("Service Level Agreement changed to {0}.", [frm.doc.service_level_agreement]));
 			frm.refresh();
 		});
 	},
