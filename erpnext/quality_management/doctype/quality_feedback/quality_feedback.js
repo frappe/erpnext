@@ -3,7 +3,8 @@
 
 frappe.ui.form.on('Quality Feedback', {
 	onload: function(frm){
-		frm.doc.email = frappe.session.user_email;
+		frm.set_value("email", frappe.session.user_email);
+		frm.set_value("date", frappe.datetime.get_today());
 		frm.refresh();
 	},
 });

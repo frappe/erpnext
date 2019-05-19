@@ -5,12 +5,10 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from erpnext.quality_management.doctype.quality_feedback_template.test_quality_feedback_template import create_template
 
 class TestQualityFeedback(unittest.TestCase):
 
 	def test_quality_feedback(self):
-		create_template()
 		test_create_feedback = create_feedback()
 		test_get_feedback = get_feedback()
 		self.assertEquals(test_create_feedback, test_get_feedback)
@@ -27,7 +25,7 @@ def create_feedback():
 	feedback = frappe.get_doc({
 		"doctype": "Quality Feedback",
 		"user": "quality_user@test.com",
-		"template": "TMPL-_Test Quality Feedback Template",
+		"rating": "3",
 		"date": frappe.utils.today()
 	})
 	feedback_exist = frappe.db.get_value("Quality Feedback", {"user": "quality_user@test.com"}, "name")

@@ -20,7 +20,6 @@ def create_goal():
 	goal = frappe.get_doc({
 		"doctype": "Quality Goal",
 		"goal": "_Test Quality Goal",
-		"procedure": "PRC-_Test Quality Procedure",
 		"objective": [
 			{
 				"objective": "_Test Quality Objective",

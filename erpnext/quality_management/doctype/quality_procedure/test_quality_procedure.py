@@ -22,7 +22,7 @@ def create_procedure():
 		"procedure_name": "_Test Quality Procedure",
 		"procedures": [
 			{
-				"procedure": "_Test PRocedure Step 1",
+				"process": "_Test Procedure Step 1",
 			}
 		]
 	})
@@ -40,7 +40,7 @@ def create_nested_procedure():
 		"procedure_name": "_Test Nested Quality Procedure",
 		"procedures": [
 			{
-				"procedure_link": procedure,
+				"link_procedure": procedure,
 			}
 		]
 	})
