@@ -19,8 +19,11 @@ class BankReconciliation(Document):
 
 		condition = ""
 		if not self.include_reconciled_entries:
-			condition = "and (clearance_date is null or clearance_date='0000-00-00')"
+			condition = " and (clearance_date is null or clearance_date='0000-00-00')"
 
+		account_cond = ""
+		if self.bank_account_no:
+			account_cond = " and t2.bank_account_no = {0}".format(frappe.db.escape(self.bank_account_no))
 
 		journal_entries = frappe.db.sql("""
 			select
@@ -33,10 +36,13 @@ class BankReconciliation(Document):
 			where
 				t2.parent = t1.name and t2.account = %s and t1.docstatus=1
 				and t1.posting_date >= %s and t1.posting_date <= %s
-				and ifnull(t1.is_opening, 'No') = 'No' {0}
+				and ifnull(t1.is_opening, 'No') = 'No' {0} {1}
 			group by t2.account, t1.name
 			order by t1.posting_date ASC, t1.name DESC
-		""".format(condition), (self.bank_account, self.from_date, self.to_date), as_dict=1)
+		""".format(condition, account_cond), (self.bank_account, self.from_date, self.to_date), as_dict=1)
+
+		if self.bank_account_no:
+			condition = " and bank_account = %(bank_account_no)s"
 
 		payment_entries = frappe.db.sql("""
 			select
@@ -53,7 +59,8 @@ class BankReconciliation(Document):
 			order by
 				posting_date ASC, name DESC
 		""".format(condition),
-		        {"account":self.bank_account, "from":self.from_date, "to":self.to_date}, as_dict=1)
+		        {"account":self.bank_account, "from":self.from_date,
+				"to":self.to_date, "bank_account_no": self.bank_account_no}, as_dict=1)
 
 		pos_entries = []
 		if self.include_pos_transactions:

@@ -45,9 +45,9 @@ class Task(NestedSet):
 			frappe.throw(_("'Actual Start Date' can not be greater than 'Actual End Date'"))
 
 	def validate_status(self):
-		if self.status!=self.get_db_value("status") and self.status == "Closed":
+		if self.status!=self.get_db_value("status") and self.status == "Completed":
 			for d in self.depends_on:
-				if frappe.db.get_value("Task", d.task, "status") != "Closed":
+				if frappe.db.get_value("Task", d.task, "status") != "Completed":
 					frappe.throw(_("Cannot close task as its dependant task {0} is not closed.").format(d.task))
 
 			from frappe.desk.form.assign_to import clear
@@ -56,6 +56,12 @@ class Task(NestedSet):
 	def validate_progress(self):
 		if (self.progress or 0) > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
+
+		if self.progress == 100:
+			self.status = 'Completed'
+
+		if self.status == 'Completed':
+			self.progress = 100
 
 	def update_depends_on(self):
 		depends_on_tasks = self.depends_on_tasks or ""
@@ -76,7 +82,7 @@ class Task(NestedSet):
 		self.populate_depends_on()
 
 	def unassign_todo(self):
-		if self.status == "Closed" or self.status == "Cancelled":
+		if self.status in ("Completed", "Cancelled"):
 			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
 
@@ -160,7 +166,7 @@ class Task(NestedSet):
 		self.update_nsm_model()
 
 	def update_status(self):
-		if self.status not in ('Cancelled', 'Closed') and self.exp_end_date:
+		if self.status not in ('Cancelled', 'Completed') and self.exp_end_date:
 			from datetime import datetime
 			if self.exp_end_date < datetime.now().date():
 				self.db_set('status', 'Overdue')
@@ -176,12 +182,16 @@ def check_if_child_exists(name):
 def get_project(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
 	return frappe.db.sql(""" select name from `tabProject`
-			where %(key)s like "%(txt)s"
+			where %(key)s like %(txt)s
 				%(mcond)s
 			order by name
-			limit %(start)s, %(page_len)s """ % {'key': searchfield,
-			'txt': "%%%s%%" % frappe.db.escape(txt), 'mcond':get_match_cond(doctype),
-			'start': start, 'page_len': page_len})
+			limit %(start)s, %(page_len)s""" % {
+				'key': searchfield,
+				'txt': frappe.db.escape('%' + txt + '%'),
+				'mcond':get_match_cond(doctype),
+				'start': start,
+				'page_len': page_len
+			})
 
 
 @frappe.whitelist()
@@ -193,7 +203,7 @@ def set_multiple_status(names, status):
 		task.save()
 
 def set_tasks_as_overdue():
-	tasks = frappe.get_all("Task", filters={'status':['not in',['Cancelled', 'Closed']]})
+	tasks = frappe.get_all("Task", filters={'status':['not in',['Cancelled', 'Completed']]})
 	for task in tasks:
 		frappe.get_doc("Task", task.name).update_status()
 

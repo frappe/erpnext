@@ -123,7 +123,7 @@ def get_item_map(item_code, include_uom):
 
 	condition = ""
 	if item_code:
-		condition = 'and item_code = "{0}"'.format(frappe.db.escape(item_code, percent=False))
+		condition = 'and item_code = {0}'.format(frappe.db.escape(item_code, percent=False))
 
 	cf_field = cf_join = ""
 	if include_uom:
@@ -145,7 +145,7 @@ def get_item_map(item_code, include_uom):
 
 	condition = ""
 	if item_code:
-		condition = 'where parent="{0}"'.format(frappe.db.escape(item_code, percent=False))
+		condition = 'where parent={0}'.format(frappe.db.escape(item_code, percent=False))
 
 	reorder_levels = frappe._dict()
 	for ir in frappe.db.sql("""select * from `tabItem Reorder` {condition}""".format(condition=condition), as_dict=1):

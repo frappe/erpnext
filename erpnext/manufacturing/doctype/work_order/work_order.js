@@ -32,6 +32,14 @@ frappe.ui.form.on("Work Order", {
 			}
 		});
 
+		frm.set_query("sales_order", function() {
+			return {
+				filters: {
+					"status": ["not in", ["Closed", "On Hold"]]
+				}
+			}
+		});
+
 		frm.set_query("fg_warehouse", function() {
 			return {
 				filters: {
@@ -115,6 +123,7 @@ frappe.ui.form.on("Work Order", {
 		if (frm.doc.docstatus === 1
 			&& frm.doc.operations && frm.doc.operations.length
 			&& frm.doc.qty != frm.doc.material_transferred_for_manufacturing) {
+
 			const not_completed = frm.doc.operations.filter(d => {
 				if(d.status != 'Completed') {
 					return true;
@@ -122,7 +131,7 @@ frappe.ui.form.on("Work Order", {
 			});
 
 			if(not_completed && not_completed.length) {
-				frm.add_custom_button(__('Make Job Card'), () => {
+				frm.add_custom_button(__('Create Job Card'), () => {
 					frm.trigger("make_job_card")
 				}).addClass('btn-primary');
 			}
@@ -148,7 +157,7 @@ frappe.ui.form.on("Work Order", {
 
 		if (frm.doc.status == "Completed" &&
 			frm.doc.__onload.backflush_raw_materials_based_on == "Material Transferred for Manufacture") {
-			frm.add_custom_button(__("Make BOM"), () => {
+			frm.add_custom_button(__('Create BOM'), () => {
 				frm.trigger("make_bom");
 			});
 		}
@@ -302,8 +311,9 @@ frappe.ui.form.on("Work Order", {
 						frm.set_value('sales_order', "");
 						frm.trigger('set_sales_order');
 						erpnext.in_production_item_onchange = true;
-						$.each(["description", "stock_uom", "project", "bom_no",
-							"allow_alternative_item", "transfer_material_against"], function(i, field) {
+
+						$.each(["description", "stock_uom", "project", "bom_no", "allow_alternative_item",
+							"transfer_material_against", "item_name"], function(i, field) {
 							frm.set_value(field, r.message[field]);
 						});
 
@@ -555,7 +565,7 @@ erpnext.work_order = {
 					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 				}
 			});
-		}, __("Select Quantity"), __("Make"));
+		}, __("Select Quantity"), __('Create'));
 	},
 
 	make_consumption_se: function(frm, backflush_raw_materials_based_on) {

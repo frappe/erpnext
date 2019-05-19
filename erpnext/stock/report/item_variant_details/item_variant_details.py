@@ -22,7 +22,7 @@ def get_data(item):
 		frappe.msgprint(_("There isn't any item variant for the selected item"))
 		return []
 	else:
-		variants = ",".join(['"' + frappe.db.escape(variant['name']) + '"' for variant in variant_results])
+		variants = ", ".join([frappe.db.escape(variant['name']) for variant in variant_results])
 
 	order_count_map = get_open_sales_orders_map(variants)
 	stock_details_map = get_stock_details_map(variants)

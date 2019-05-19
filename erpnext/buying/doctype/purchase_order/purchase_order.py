@@ -11,7 +11,7 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
-from erpnext.buying.utils import validate_for_items, check_for_closed_status
+from erpnext.buying.utils import validate_for_items, check_on_hold_or_closed_status
 from erpnext.stock.utils import get_bin
 from erpnext.accounts.party import get_party_account_currency
 from six import string_types
@@ -45,7 +45,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_supplier()
 		self.validate_schedule_date()
 		validate_for_items(self)
-		self.check_for_closed_status()
+		self.check_on_hold_or_closed_status()
 
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
@@ -144,12 +144,12 @@ class PurchaseOrder(BuyingController):
 							= d.rate = d.last_purchase_rate = item_last_purchase_rate
 
 	# Check for Closed status
-	def check_for_closed_status(self):
+	def check_on_hold_or_closed_status(self):
 		check_list =[]
 		for d in self.get('items'):
 			if d.meta.get_field('material_request') and d.material_request and d.material_request not in check_list:
 				check_list.append(d.material_request)
-				check_for_closed_status('Material Request', d.material_request)
+				check_on_hold_or_closed_status('Material Request', d.material_request)
 
 	def update_requested_qty(self):
 		material_request_map = {}
@@ -183,7 +183,7 @@ class PurchaseOrder(BuyingController):
 	def check_modified_date(self):
 		mod_db = frappe.db.sql("select modified from `tabPurchase Order` where name = %s",
 			self.name)
-		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.modified)))
+		date_diff = frappe.db.sql("select '%s' - '%s' " % (mod_db[0][0], cstr(self.modified)))
 
 		if date_diff and date_diff[0][0]:
 			msgprint(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name),
@@ -232,7 +232,7 @@ class PurchaseOrder(BuyingController):
 		if self.is_subcontracted == "Yes":
 			self.update_reserved_qty_for_subcontract()
 
-		self.check_for_closed_status()
+		self.check_on_hold_or_closed_status()
 
 		frappe.db.set(self,'status','Cancelled')
 
@@ -296,7 +296,10 @@ class PurchaseOrder(BuyingController):
 		for item in self.items:
 			received_qty += item.received_qty
 			total_qty += item.qty
-		self.db_set("per_received", flt(received_qty/total_qty) * 100, update_modified=False)
+		if total_qty:
+			self.db_set("per_received", flt(received_qty/total_qty) * 100, update_modified=False)
+		else:
+			self.db_set("per_received", 0, update_modified=False)
 
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor= 1.0):
 	"""get last purchase rate for an item"""
@@ -379,7 +382,9 @@ def make_purchase_invoice(source_name, target_doc=None):
 	def postprocess(source, target):
 		set_missing_values(source, target)
 		#Get the advance paid Journal Entries in Purchase Invoice Advance
-		target.set_advances()
+
+		if target.get("allocate_advances_automatically"):
+			target.set_advances()
 
 	def update_item(obj, target, source_parent):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)
@@ -441,7 +446,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 		item_wh = get_item_details(items)
 
 		stock_entry = frappe.new_doc("Stock Entry")
-		stock_entry.purpose = "Subcontract"
+		stock_entry.purpose = "Send to Subcontractor"
 		stock_entry.purchase_order = purchase_order.name
 		stock_entry.supplier = purchase_order.supplier
 		stock_entry.supplier_name = purchase_order.supplier_name
@@ -449,6 +454,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 		stock_entry.address_display = purchase_order.address_display
 		stock_entry.company = purchase_order.company
 		stock_entry.to_warehouse = purchase_order.supplier_warehouse
+		stock_entry.set_stock_entry_type()
 
 		for item_code in fg_items:
 			for rm_item_data in rm_items_list:

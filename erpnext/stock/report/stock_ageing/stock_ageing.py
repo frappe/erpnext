@@ -9,7 +9,7 @@ from six import iteritems
 
 def execute(filters=None):
 
-	columns = get_columns()
+	columns = get_columns(filters)
 	item_details = get_fifo_queue(filters)
 	to_date = filters["to_date"]
 	data = []
@@ -22,8 +22,16 @@ def execute(filters=None):
 		earliest_age = date_diff(to_date, fifo_queue[0][1])
 		latest_age = date_diff(to_date, fifo_queue[-1][1])
 
-		data.append([item, details.item_name, details.description, details.item_group,
-			details.brand, average_age, earliest_age, latest_age, details.stock_uom])
+		row = [details.name, details.item_name,
+			details.description, details.item_group, details.brand]
+
+		if filters.get("show_ageing_warehouse_wise"):
+			row.append(details.warehouse)
+
+		row.extend([item_dict.get("total_qty"), average_age,
+			earliest_age, latest_age, details.stock_uom])
+
+		data.append(row)
 
 	return columns, data
 
@@ -36,19 +44,27 @@ def get_average_age(fifo_queue, to_date):
 
 	return (age_qty / total_qty) if total_qty else 0.0
 
-def get_columns():
-	return [_("Item Code") + ":Link/Item:100", _("Item Name") + "::100", _("Description") + "::200",
-		_("Item Group") + ":Link/Item Group:100", _("Brand") + ":Link/Brand:100", _("Average Age") + ":Float:100",
-		_("Earliest") + ":Int:80", _("Latest") + ":Int:80", _("UOM") + ":Link/UOM:100"]
+def get_columns(filters):
+	columns = [_("Item Code") + ":Link/Item:100", _("Item Name") + "::100", _("Description") + "::200",
+		_("Item Group") + ":Link/Item Group:100", _("Brand") + ":Link/Brand:100"]
+
+	if filters.get("show_ageing_warehouse_wise"):
+		columns.extend([_("Warehouse") + ":Link/Warehouse:100"])
+
+	columns.extend([_("Available Qty") + ":Float:100", _("Average Age") + ":Float:100",
+		_("Earliest") + ":Int:80", _("Latest") + ":Int:80", _("UOM") + ":Link/UOM:100"])
+
+	return columns
 
 def get_fifo_queue(filters):
 	item_details = {}
 	for d in get_stock_ledger_entries(filters):
-		item_details.setdefault(d.name, {"details": d, "fifo_queue": []})
-		fifo_queue = item_details[d.name]["fifo_queue"]
+		key = (d.name, d.warehouse) if filters.get('show_ageing_warehouse_wise') else d.name
+		item_details.setdefault(key, {"details": d, "fifo_queue": []})
+		fifo_queue = item_details[key]["fifo_queue"]
 
 		if d.voucher_type == "Stock Reconciliation":
-			d.actual_qty = flt(d.qty_after_transaction) - flt(item_details[d.name].get("qty_after_transaction", 0))
+			d.actual_qty = flt(d.qty_after_transaction) - flt(item_details[key].get("qty_after_transaction", 0))
 
 		if d.actual_qty > 0:
 			fifo_queue.append([d.actual_qty, d.posting_date])
@@ -66,14 +82,19 @@ def get_fifo_queue(filters):
 					batch[0] -= qty_to_pop
 					qty_to_pop = 0
 
-		item_details[d.name]["qty_after_transaction"] = d.qty_after_transaction
+		item_details[key]["qty_after_transaction"] = d.qty_after_transaction
+
+		if "total_qty" not in item_details[key]:
+			item_details[key]["total_qty"] = d.actual_qty
+		else:
+			item_details[key]["total_qty"] += d.actual_qty
 
 	return item_details
 
 def get_stock_ledger_entries(filters):
 	return frappe.db.sql("""select
 			item.name, item.item_name, item_group, brand, description, item.stock_uom,
-			actual_qty, posting_date, voucher_type, qty_after_transaction
+			actual_qty, posting_date, voucher_type, qty_after_transaction, warehouse
 		from `tabStock Ledger Entry` sle,
 			(select name, item_name, description, stock_uom, brand, item_group
 				from `tabItem` {item_conditions}) item
@@ -81,7 +102,7 @@ def get_stock_ledger_entries(filters):
 			company = %(company)s and
 			posting_date <= %(to_date)s
 			{sle_conditions}
-			order by posting_date, posting_time, sle.name"""\
+			order by posting_date, posting_time, sle.creation"""\
 		.format(item_conditions=get_item_conditions(filters),
 			sle_conditions=get_sle_conditions(filters)), filters, as_dict=True)
 

@@ -40,7 +40,7 @@ frappe.ui.form.on('Loan', {
 
 	refresh: function (frm) {
 		if (frm.doc.docstatus == 1 && frm.doc.status == "Sanctioned") {
-			frm.add_custom_button(__('Make Disbursement Entry'), function() {
+			frm.add_custom_button(__('Create Disbursement Entry'), function() {
 				frm.trigger("make_jv");
 			})
 		}
@@ -54,7 +54,7 @@ frappe.ui.form.on('Loan', {
 			frm.set_value("total_amount_paid", total_amount_paid);
 ;		}
 		if (frm.doc.docstatus == 1 && frm.doc.repayment_start_date && (frm.doc.applicant_type == 'Member' || frm.doc.repay_from_salary == 0)) {
-			frm.add_custom_button(__('Make Repayment Entry'), function() {
+			frm.add_custom_button(__('Create Repayment Entry'), function() {
 				frm.trigger("make_repayment_entry");
 			})
 		}
@@ -146,7 +146,7 @@ frappe.ui.form.on('Loan', {
 						'payment_date': payment.payment_date,
 						'principal_amount': payment.principal_amount,
 						'interest_amount': payment.interest_amount,
-						'total_payment': payment.total_payment 
+						'total_payment': payment.total_payment
 					});
 					dialog.fields_dict.payments.grid.refresh();
 					$(dialog.wrapper.find(".grid-buttons")).hide();
@@ -157,7 +157,7 @@ frappe.ui.form.on('Loan', {
 		}
 
 		dialog.show()
-		dialog.set_primary_action(__('Make Repayment Entry'), function() {
+		dialog.set_primary_action(__('Create Repayment Entry'), function() {
 			frm.values = dialog.get_values();
 			if(frm.values) {
 				_make_repayment_entry(frm, dialog.fields_dict.payments.grid.get_selected_children());

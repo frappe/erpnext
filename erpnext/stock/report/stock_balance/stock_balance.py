@@ -147,7 +147,7 @@ def get_conditions(filters):
 		frappe.throw(_("'From Date' is required"))
 
 	if filters.get("to_date"):
-		conditions += " and sle.posting_date <= '%s'" % frappe.db.escape(filters.get("to_date"))
+		conditions += " and sle.posting_date <= %s" % frappe.db.escape(filters.get("to_date"))
 	else:
 		frappe.throw(_("'To Date' is required"))
 
@@ -165,7 +165,7 @@ def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
 	if items:
 		item_conditions_sql = ' and sle.item_code in ({})'\
-			.format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items]))
+			.format(', '.join([frappe.db.escape(i, percent=False) for i in items]))
 
 	conditions = get_conditions(filters)
 
@@ -176,7 +176,7 @@ def get_stock_ledger_entries(filters, items):
 		from
 			`tabStock Ledger Entry` sle force index (posting_sort_index)
 		where sle.docstatus < 2 %s %s
-		order by sle.posting_date, sle.posting_time, sle.name""" %
+		order by sle.posting_date, sle.posting_time, sle.creation""" %
 		(item_conditions_sql, conditions), as_dict=1)
 
 def get_item_warehouse_map(filters, sle):
@@ -292,17 +292,16 @@ def get_item_details(items, sle, filters):
 		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom='%s'" \
 			% frappe.db.escape(filters.get("include_uom"))
 
-	item_codes = ', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])
 	res = frappe.db.sql("""
 		select
 			item.name, item.item_name, item.description, item.item_group, item.brand,
 			item.stock_uom, item.alt_uom, item.alt_uom_size {cf_field}
 		from
 			`tabItem` item
-			{cf_join}
+			%s
 		where
-			item.name in ({item_codes}) and ifnull(item.disabled, 0) = 0
-	""".format(cf_field=cf_field, cf_join=cf_join, item_codes=item_codes), as_dict=1)
+			item.name in (%s) and ifnull(item.disabled, 0) = 0
+	""" % (cf_field, cf_join, ','.join(['%s'] *len(items))), items, as_dict=1)
 
 	for item in res:
 		item_details.setdefault(item.name, item)
@@ -321,7 +320,7 @@ def get_item_reorder_details(items):
 			select parent, warehouse, warehouse_reorder_qty, warehouse_reorder_level
 			from `tabItem Reorder`
 			where parent in ({0})
-		""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])), as_dict=1)
+		""".format(', '.join([frappe.db.escape(i, percent=False) for i in items])), as_dict=1)
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
 

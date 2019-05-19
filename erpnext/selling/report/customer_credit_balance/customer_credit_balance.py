@@ -21,17 +21,20 @@ def execute(filters=None):
 		row = []
 
 		outstanding_amt = get_customer_outstanding(d.name, filters.get("company"),
-			ignore_outstanding_sales_order=d.bypass_credit_limit_check_at_sales_order)
+			ignore_outstanding_sales_order=d.bypass_credit_limit_check_at_sales_order,
+			cost_center=filters.get("cost_center"))
 
-		credit_limit = get_credit_limit(d.name, filters.get("company"))		
+		credit_limit = get_credit_limit(d.name, filters.get("company"))
 
 		bal = flt(credit_limit) - flt(outstanding_amt)
 
 		if customer_naming_type == "Naming Series":
 			row = [d.name, d.customer_name, credit_limit, outstanding_amt, bal,
-				d.bypass_credit_limit_check_at_sales_order, d.disabled]
+				d.bypass_credit_limit_check_at_sales_order, d.is_frozen,
+          d.disabled]
 		else:
-			row = [d.name, credit_limit, outstanding_amt, bal, d.bypass_credit_limit_check_at_sales_order, d.disabled]
+			row = [d.name, credit_limit, outstanding_amt, bal,
+          d.bypass_credit_limit_check_at_sales_order, d.is_frozen, d.disabled]
 
 		if credit_limit:
 			data.append(row)
@@ -44,8 +47,9 @@ def get_columns(customer_naming_type):
 		_("Credit Limit") + ":Currency:120",
 		_("Outstanding Amt") + ":Currency:100",
 		_("Credit Balance") + ":Currency:120",
-		_("Bypass credit check at Sales Order ") + ":Check:240",
-		_("Is Disabled ") + ":Check:240"
+		_("Bypass credit check at Sales Order ") + ":Check:80",
+		_("Is Frozen") + ":Check:80",
+		_("Disabled") + ":Check:80",
 	]
 
 	if customer_naming_type == "Naming Series":
@@ -60,5 +64,5 @@ def get_details(filters):
 		conditions += " where name = %(customer)s"
 
 	return frappe.db.sql("""select name, customer_name,
-		bypass_credit_limit_check_at_sales_order,disabled from `tabCustomer` %s
+		bypass_credit_limit_check_at_sales_order, is_frozen, disabled from `tabCustomer` %s
 	""" % conditions, filters, as_dict=1)
