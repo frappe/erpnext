@@ -1,0 +1,74 @@
+{% extends "templates/base.html" %}
+{% block title %}{{ program.program_name }}{% endblock %}
+
+{% block head_include %}
+	<style>
+		div.card-hero-img {
+			height: 220px;
+			background-size: cover;
+			background-repeat: no-repeat;
+			background-position: center;
+			background-color: rgb(250, 251, 252);
+		}
+
+		.card-image-wrapper {
+			display: flex;
+			overflow: hidden;
+			height: 220px;
+			background-color: rgb(250, 251, 252);
+			justify-content: center;
+		}
+
+		.image-body {
+			align-self: center;
+			color: #d1d8dd;
+			font-size: 24px;
+			font-weight: 600;
+			line-height: 1;
+			padding: 20px;
+		}
+	</style>
+{% endblock %}
+
+
+{% macro card(program, is_enrolled) %}
+<div class="col-sm mb-4 text-left">
+	<div class="card">
+		<a href="/lms/program?name={{ program.name }}" class="no-decoration no-underline">
+			{% if program.hero_image %}
+			<div class="card-hero-img" style="background-image: url({{ program.hero_image }})"></div>
+			{% else %}
+			<div class="card-image-wrapper text-center">
+				<div class="image-body">{{ program.program_name }}</div>
+			</div>
+			{% endif %}
+			<div class='card-body'>
+				<h5 class='card-title'>{{ program.program_name }}</h5>
+				<div>{{ program.description }}</div>
+			</div>
+			<div class='card-footer'>
+				<a href='#' class='small'>Watch Intro</a>
+			</div>
+		</a>
+	</div>
+</div>
+{% endmacro %}
+
+{% block content %}
+<section class="top-section ">
+	<div class='container pb-5'>
+		<h1>{{ program.program_name }}</h1>
+		<p class='lead'>{{ program.description }}</p>
+		<p class="mt-4">
+			<a class="btn btn-primary btn-lg" style="width: 170px;" href="/login#signup">Sign Up</a>
+		</p>
+	</div>
+	<div class='container'>
+		<div class="row mt-5">
+			{% for program in all_programs %}
+				{{ card(program.program, program.is_enrolled) }}
+			{% endfor %}
+		</div>
+	</div>
+</section>
+{% endblock %}
