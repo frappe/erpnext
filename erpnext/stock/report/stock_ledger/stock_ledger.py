@@ -9,8 +9,11 @@ from frappe.desk.query_report import group_report_data
 from six import iteritems
 
 def execute(filters=None):
+	show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
+	show_amounts = not show_amounts_role or show_amounts_role in frappe.get_roles()
+
 	include_uom = filters.get("include_uom")
-	columns = get_columns()
+	columns = get_columns(show_amounts)
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
@@ -40,8 +43,6 @@ def execute(filters=None):
 			"uom": item_detail.alt_uom or item_detail.stock_uom if filters.qty_field == "Contents Qty" else item_detail.stock_uom,
 			"actual_qty": sle.actual_qty * alt_uom_size,
 			"qty_after_transaction": sle.qty_after_transaction * alt_uom_size,
-			"valuation_rate": sle.valuation_rate / alt_uom_size,
-			"stock_value": sle.stock_value,
 			"voucher_type": sle.voucher_type,
 			"voucher_no": sle.voucher_no,
 			"batch_no": sle.batch_no,
@@ -49,12 +50,20 @@ def execute(filters=None):
 			"project": sle.project,
 			"company": sle.company
 		})
-		if sle.actual_qty:
-			if sle.actual_qty > 0:
-				row['transaction_rate'] = sle.incoming_rate
-			else:
-				row['transaction_rate'] = sle.stock_value_difference / sle.actual_qty
-			row['transaction_rate'] /= alt_uom_size
+
+		if show_amounts:
+			row.update({
+				"valuation_rate": sle.valuation_rate / alt_uom_size,
+				"stock_value": sle.stock_value
+			})
+
+			if sle.actual_qty:
+				if sle.actual_qty > 0:
+					row['transaction_rate'] = sle.incoming_rate
+				else:
+					row['transaction_rate'] = sle.stock_value_difference / sle.actual_qty
+				row['transaction_rate'] /= alt_uom_size
+
 		data.append(row)
 
 		if include_uom:
@@ -65,7 +74,7 @@ def execute(filters=None):
 	data = get_grouped_data(filters, columns, data)
 	return columns, data
 
-def get_columns():
+def get_columns(show_amounts=True):
 	columns = [
 		{"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 95},
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
@@ -81,12 +90,19 @@ def get_columns():
 		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 50},
 		{"label": _("Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 60, "convertible": "qty"},
 		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 90, "convertible": "qty"},
-		{"label": _("Transaction Rate"), "fieldname": "transaction_rate", "fieldtype": "Currency", "width": 110,
-			"options": "Company:company:default_currency", "convertible": "rate"},
-		{"label": _("Valuation Rate"), "fieldname": "valuation_rate", "fieldtype": "Currency", "width": 110,
-			"options": "Company:company:default_currency", "convertible": "rate"},
-		{"label": _("Balance Value"), "fieldname": "stock_value", "fieldtype": "Currency", "width": 110,
-			"options": "Company:company:default_currency"},
+	]
+
+	if show_amounts:
+		columns += [
+			{"label": _("Transaction Rate"), "fieldname": "transaction_rate", "fieldtype": "Currency", "width": 110,
+				"options": "Company:company:default_currency", "convertible": "rate"},
+			{"label": _("Valuation Rate"), "fieldname": "valuation_rate", "fieldtype": "Currency", "width": 100,
+				"options": "Company:company:default_currency", "convertible": "rate"},
+			{"label": _("Balance Value"), "fieldname": "stock_value", "fieldtype": "Currency", "width": 110,
+				"options": "Company:company:default_currency"},
+		]
+
+	columns += [
 		{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 100},
 		{"label": _("Serial #"), "fieldname": "serial_no", "fieldtype": "Link", "options": "Serial No", "width": 100},
 		{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},

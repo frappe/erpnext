@@ -10,13 +10,26 @@ from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condit
 
 from six import iteritems
 
+template = frappe._dict({
+	"opening_qty": 0.0, "opening_val": 0.0,
+	"in_qty": 0.0, "in_val": 0.0,
+	"purchase_qty": 0.0, "purchase_val": 0.0,
+	"out_qty": 0.0, "out_val": 0.0,
+	"sales_qty": 0.0, "sales_val": 0.0,
+	"bal_qty": 0.0, "bal_val": 0.0,
+	"val_rate": 0.0
+})
+
 def execute(filters=None):
 	if not filters: filters = {}
 
 	validate_filters(filters)
 
+	show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
+	show_amounts = not show_amounts_role or show_amounts_role in frappe.get_roles()
+
 	include_uom = filters.get("include_uom")
-	columns = get_columns()
+	columns = get_columns(filters, show_amounts)
 	items = get_items(filters)
 
 	# if no items in filter found return
@@ -54,18 +67,26 @@ def execute(filters=None):
 				"warehouse": warehouse,
 				"uom": item_map[item]["alt_uom"] or item_map[item]["stock_uom"] if filters.qty_field == "Contents Qty" else item_map[item]["stock_uom"],
 				"opening_qty": qty_dict.opening_qty * alt_uom_size,
-				"opening_val": qty_dict.opening_val,
 				"in_qty": qty_dict.in_qty * alt_uom_size,
-				"in_val": qty_dict.in_val,
+				"purchase_qty": qty_dict.purchase_qty * alt_uom_size,
 				"out_qty": qty_dict.out_qty * alt_uom_size,
-				"out_val": qty_dict.out_val,
+				"sales_qty": qty_dict.sales_qty * alt_uom_size,
 				"bal_qty": qty_dict.bal_qty * alt_uom_size,
-				"bal_val": qty_dict.bal_val,
-				"val_rate": qty_dict.val_rate / alt_uom_size,
 				"reorder_level": item_reorder_level * alt_uom_size,
 				"reorder_qty": item_reorder_qty * alt_uom_size,
 				"company": company
 			}
+
+			if show_amounts:
+				report_data.update({
+					"opening_val": qty_dict.opening_val,
+					"in_val": qty_dict.in_val,
+					"purchase_val": qty_dict.purchase_val,
+					"out_val": qty_dict.out_val,
+					"sales_val": qty_dict.purchase_val,
+					"bal_val": qty_dict.bal_val,
+					"val_rate": qty_dict.val_rate / alt_uom_size,
+				})
 
 			if filters.get('show_variant_attributes', 0) == 1:
 				for i, v in enumerate(get_variants_attributes()):
@@ -83,30 +104,40 @@ def execute(filters=None):
 	update_included_uom_in_dict_report(columns, data, include_uom, conversion_factors)
 	return columns, data
 
-def get_columns():
+def get_columns(filters, show_amounts=True):
 	"""return columns"""
 
 	columns = [
-		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 100},
+		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 200},
 		{"label": _("Item Name"), "fieldname": "item_name", "width": 150},
 		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
 		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 90},
 		{"label": _("Description"), "fieldname": "description", "width": 140},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
-		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 70},
+		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 50},
 		{"label": _("Opening Qty"), "fieldname": "opening_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Opening Value"), "fieldname": "opening_val", "fieldtype": "Float", "width": 110},
-		{"label": _("In Qty"), "fieldname": "in_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
-		{"label": _("In Value"), "fieldname": "in_val", "fieldtype": "Float", "width": 80},
-		{"label": _("Out Qty"), "fieldname": "out_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
-		{"label": _("Out Value"), "fieldname": "out_val", "fieldtype": "Float", "width": 80},
+		{"label": _("Opening Value"), "fieldname": "opening_val", "fieldtype": "Currency", "width": 110, "is_value": True},
+		{"label": _("In Qty"), "fieldname": "in_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
+		{"label": _("In Value"), "fieldname": "in_val", "fieldtype": "Currency", "width": 110, "is_value": True},
+		{"label": _("Out Qty"), "fieldname": "out_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
+		{"label": _("Out Value"), "fieldname": "out_val", "fieldtype": "Currency", "width": 110, "is_value": True},
 		{"label": _("Balance Qty"), "fieldname": "bal_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Balance Value"), "fieldname": "bal_val", "fieldtype": "Currency", "width": 100},
-		{"label": _("Valuation Rate"), "fieldname": "val_rate", "fieldtype": "Currency", "width": 90, "convertible": "rate"},
+		{"label": _("Balance Value"), "fieldname": "bal_val", "fieldtype": "Currency", "width": 110, "is_value": True},
+		{"label": _("Valuation Rate"), "fieldname": "val_rate", "fieldtype": "Currency", "width": 100, "convertible": "rate", "is_value": True},
+		{"label": _("Purchase Qty"), "fieldname": "purchase_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
+		{"label": _("Purchase Value"), "fieldname": "purchase_val", "fieldtype": "Currency", "width": 110, "is_value": True},
+		{"label": _("Sales Qty"), "fieldname": "sales_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
+		{"label": _("Sales Value"), "fieldname": "sales_val", "fieldtype": "Currency", "width": 110, "is_value": True},
 		{"label": _("Reorder Level"), "fieldname": "reorder_level", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Reorder Qty"), "fieldname": "reorder_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 100}
 	]
+
+	if not show_amounts:
+		columns = filter(lambda d: not d.get("is_value"), columns)
+
+	if cint(filters.consolidated):
+		columns = filter(lambda d: d.get('fieldname') not in ['warehouse', 'company'], columns)
 
 	return columns
 
@@ -156,13 +187,7 @@ def get_item_warehouse_map(filters, sle):
 	for d in sle:
 		key = (d.company, d.item_code, d.warehouse)
 		if key not in iwb_map:
-			iwb_map[key] = frappe._dict({
-				"opening_qty": 0.0, "opening_val": 0.0,
-				"in_qty": 0.0, "in_val": 0.0,
-				"out_qty": 0.0, "out_val": 0.0,
-				"bal_qty": 0.0, "bal_val": 0.0,
-				"val_rate": 0.0
-			})
+			iwb_map[key] = frappe._dict(template.copy())
 
 		qty_dict = iwb_map[(d.company, d.item_code, d.warehouse)]
 
@@ -185,11 +210,22 @@ def get_item_warehouse_map(filters, sle):
 				qty_dict.out_qty += abs(qty_diff)
 				qty_dict.out_val += abs(value_diff)
 
+			if d.voucher_type in ["Purchase Receipt", "Purchase Invoice"]:
+				qty_dict.purchase_qty += qty_diff
+				qty_dict.purchase_val += value_diff
+			elif d.voucher_type in ["Delivery Note", "Sales Invoice"]:
+				qty_dict.sales_qty -= qty_diff
+				qty_dict.sales_val -= value_diff
+
 		qty_dict.val_rate = d.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
 
-	iwb_map = filter_items_with_no_transactions(iwb_map)
+	if cint(filters.filter_item_without_transactions):
+		iwb_map = filter_items_with_no_transactions(iwb_map)
+
+	if cint(filters.consolidated):
+		iwb_map = consolidate_values(iwb_map)
 
 	return iwb_map
 
@@ -209,6 +245,22 @@ def filter_items_with_no_transactions(iwb_map):
 			iwb_map.pop((company, item, warehouse))
 
 	return iwb_map
+
+def consolidate_values(iwb_map):
+	item_map = frappe._dict()
+
+	for (company, item, warehouse), qty_dict in iteritems(iwb_map):
+		key = ("", item, "")
+		if key not in item_map:
+			item_map[key] = frappe._dict(template.copy())
+
+		for k, value in iteritems(qty_dict):
+			item_map[key][k] += value
+
+	for k, qty_dict in iteritems(item_map):
+		qty_dict.val_rate = qty_dict.bal_val / qty_dict.bal_qty if qty_dict.bal_qty else 0.0
+
+	return item_map
 
 def get_items(filters):
 	conditions = []
