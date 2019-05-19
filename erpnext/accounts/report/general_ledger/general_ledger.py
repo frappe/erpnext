@@ -255,10 +255,15 @@ def postprocess_group(filters, group_object, grouped_by):
 
 	group = grouped_by[-1]
 	if group_object.rows:
+		if group.fieldname == "party":
+			if group_object.rows[0].party_type == "Customer":
+				customer = frappe.get_cached_doc("Customer", group.value)
+				group_object.sales_person = ", ".join(set([d.sales_person for d in customer.sales_team]))
+
 		if group.fieldname != 'voucher_no':
 			group_object.rows.insert(0, group_object.totals.opening)
 
-		group_object.rows.append(group_object.totals.total)
+		# group_object.rows.append(group_object.totals.total)
 
 		if group.fieldname != 'voucher_no':
 			group_object.rows.append(group_object.totals.closing)

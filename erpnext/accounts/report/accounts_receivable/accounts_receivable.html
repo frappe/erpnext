@@ -34,12 +34,6 @@
 	</h6>
 {% } %}
 
-{% if (filters.tax_id || group.tax_id) { %}
-	<h6 class="text-center">
-		{%= __("NTN: ")%}{%= filters.tax_id || group.tax_id %}
-	</h6>
-{% } %}
-
 <h5 class="text-center">
 	{%= __(filters.ageing_based_on) %}
 	{%= __("Until") %}

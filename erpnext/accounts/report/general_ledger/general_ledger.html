@@ -37,11 +37,11 @@ for(var i=0, l=data.length; i<l; i++) {
 	{% } %}
 </h4>
 
-<h6 class="text-center">
-	{% if (filters.tax_id || group.tax_id) { %}
-	{%= __("NTN: ")%}	{%= filters.tax_id || group.tax_id %}
-	{% } %}
-</h6>
+{% if (filters.sales_person || group.sales_person) { %}
+	<h6 class="text-center">
+		{%= __("Sales Person: ")%}{%= filters.sales_person || group.sales_person %}
+	</h6>
+{% } %}
 
 <h5 class="text-center">
 	{%= frappe.datetime.str_to_user(filters.from_date) %}
