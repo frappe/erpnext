@@ -26,13 +26,4 @@ frappe.ui.form.on('Service Level Agreement', {
 			}
 		});
 	},
-
-	validate: function(frm) {
-		frm.doc.sla_name = null;
-		var sla_name = 'Default Service Level Agreement';
-		if (frm.doc.customer){
-			sla_name = frm.doc.customer;
-		}
-		frm.doc.sla_name = sla_name;
-	},
 });

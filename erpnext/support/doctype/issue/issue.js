@@ -47,13 +47,32 @@ frappe.ui.form.on("Issue", {
 
 	priority: function(frm) {
 		if (frm.doc.service_level_agreement) {
-			frm.call('change_sla_priority', {
-				"priority": frm.doc.priority
+			frappe.show_alert({
+				indicator: 'green',
+				message: __('Changing Priority.')
+			});
+			frm.call('change_service_level_agreement_and_priority', {
+				"priority": frm.doc.priority,
+				"service_level_agreement": frm.doc.service_level_agreement
 			}).then(() => {
 				frappe.msgprint(__("Issue Priority changed to {0}.", [frm.doc.priority]))
 				frm.refresh();
 			});
 		}
+	},
+
+	service_level_agreement: function(frm) {
+		frappe.show_alert({
+			indicator: 'green',
+			message: __('Changing Service Level Agreement.')
+		});
+		frm.call('change_service_level_agreement_and_priority', {
+			"priority": frm.doc.priority,
+			"service_level_agreement": frm.doc.service_level_agreement
+		}).then(() => {
+			frappe.msgprint(__("Service Level Agreement changed to {0}.", [frm.doc.service_level_agreement]))
+			frm.refresh();
+		});
 	},
 
 	timeline_refresh: function(frm) {

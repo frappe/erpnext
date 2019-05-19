@@ -130,12 +130,17 @@ class Issue(Document):
 	def before_insert(self):
 		self.set_response_and_resolution_time(priority=self.priority)
 
-	def set_response_and_resolution_time(self, priority):
-		service_level_agreement = get_active_service_level_agreement_for(priority=priority, customer=self.customer)
-		if service_level_agreement:
-			self.service_level_agreement = service_level_agreement.name
-		else:
+	def set_response_and_resolution_time(self, priority=None, service_level_agreement=None):
+		service_level_agreement = get_active_service_level_agreement_for(priority=priority,
+			customer=self.customer, service_level_agreement=service_level_agreement)
+
+		if not service_level_agreement:
 			return
+
+		if service_level_agreement.customer and self.customer and not service_level_agreement.customer == self.customer:
+			frappe.throw(_("This Service Level Agreement is specific to Customer {0}".format(service_level_agreement.customer)))
+
+		self.service_level_agreement = service_level_agreement.name
 
 		service_level = frappe.get_doc("Service Level", service_level_agreement.service_level)
 		priority = service_level.get_service_level_priority(priority)
@@ -156,8 +161,8 @@ class Issue(Document):
 		self.resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()))
 
 	@frappe.whitelist()
-	def change_sla_priority(self, priority):
-		self.set_response_and_resolution_time(priority=priority)
+	def change_service_level_agreement_and_priority(self, priority, service_level_agreement):
+		self.set_response_and_resolution_time(priority=priority, service_level_agreement=service_level_agreement)
 		self.save(ignore_permissions=True)
 
 def get_expected_time_for(parameter, service_level, start_date_time):
@@ -241,16 +246,18 @@ def set_service_level_agreement_variance(issue=None):
 	filters = {"status": "Open", "agreement_fulfilled": "Ongoing"}
 
 	if issue:
-		filters = {"status": issue}
+		filters = {"name": issue}
 
 	issues = frappe.get_list("Issue", filters=filters)
 	for issue in issues:
 		doc = frappe.get_doc("Issue", issue.name)
-		if not doc.first_responded_on and not doc.agreement_fulfilled == "Ongoing":
-			variance = round(time_diff_in_hours(doc.response_by, now_datetime()))
+		if not doc.first_responded_on:
+			variance = round(time_diff_in_hours(doc.response_by, now_datetime()), 2)
+			print(variance)
 			frappe.db.set_value("Issue", doc.name, "response_by_variance", variance)
-		if not doc.resolution_dateand and not doc.agreement_fulfilled == "Ongoing":
-			variance = round(time_diff_in_hours(self.resolution_by, now_datetime()))
+		if not doc.resolution_date:
+			variance = round(time_diff_in_hours(doc.resolution_by, now_datetime()), 2)
+			print(variance)
 			frappe.db.set_value("Issue", doc.name, "resolution_by_variance", variance)
 
 def get_list_context(context=None):
