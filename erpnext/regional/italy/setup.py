@@ -26,18 +26,34 @@ def make_custom_fields(update=True):
 			print_hide=1, hidden=1, read_only=1, options="currency")
 	]
 
+	customer_po_fields = [
+		dict(fieldname='customer_po_details', label='Customer PO',
+			fieldtype='Section Break', insert_after='image'),
+		dict(fieldname='customer_po_no', label='Customer PO No',
+			fieldtype='Data', insert_after='customer_po_details',
+			fetch_from = 'sales_order.po_no',
+			print_hide=1, allow_on_submit=1, fetch_if_empty= 1, read_only=1, no_copy=1),
+		dict(fieldname='customer_po_clm_brk', label='',
+			fieldtype='Column Break', insert_after='customer_po_no',
+			print_hide=1, read_only=1),
+		dict(fieldname='customer_po_date', label='Customer PO Date',
+			fieldtype='Date', insert_after='customer_po_clm_brk',
+			fetch_from = 'sales_order.po_date',
+			print_hide=1, allow_on_submit=1, fetch_if_empty= 1, read_only=1, no_copy=1)
+	]
+
 	custom_fields = {
 		'Company': [
 			dict(fieldname='sb_e_invoicing', label='E-Invoicing',
 				fieldtype='Section Break', insert_after='date_of_establishment', print_hide=1),
 			dict(fieldname='fiscal_regime', label='Fiscal Regime',
 				fieldtype='Select', insert_after='sb_e_invoicing', print_hide=1,
-				options="\n".join(map(lambda x: x.decode('utf-8'), fiscal_regimes))),
+				options="\n".join(map(lambda x: frappe.safe_decode(x, encoding='utf-8'), fiscal_regimes))),
 			dict(fieldname='fiscal_code', label='Fiscal Code', fieldtype='Data', insert_after='fiscal_regime', print_hide=1,
 				description=_("Applicable if the company is an Individual or a Proprietorship")),
 			dict(fieldname='vat_collectability', label='VAT Collectability',
 				fieldtype='Select', insert_after='fiscal_code', print_hide=1,
-				options="\n".join(map(lambda x: x.decode('utf-8'), vat_collectability_options))),
+				options="\n".join(map(lambda x: frappe.safe_decode(x, encoding='utf-8'), vat_collectability_options))),
 			dict(fieldname='cb_e_invoicing1', fieldtype='Column Break', insert_after='vat_collectability', print_hide=1),
 			dict(fieldname='registrar_office_province', label='Province of the Registrar Office',
 				fieldtype='Data', insert_after='cb_e_invoicing1', print_hide=1, length=2),
@@ -57,7 +73,7 @@ def make_custom_fields(update=True):
 			dict(fieldname='tax_exemption_reason', label='Tax Exemption Reason',
 				fieldtype='Select', insert_after='included_in_print_rate', print_hide=1,
 				depends_on='eval:doc.charge_type!="Actual" && doc.rate==0.0',
-				options="\n" + "\n".join(map(lambda x: x.decode('utf-8'), tax_exemption_reasons))),
+				options="\n" + "\n".join(map(lambda x: frappe.safe_decode(x, encoding='utf-8'), tax_exemption_reasons))),
 			dict(fieldname='tax_exemption_law', label='Tax Exempt Under',
 				fieldtype='Text', insert_after='tax_exemption_reason', print_hide=1,
 				depends_on='eval:doc.charge_type!="Actual" && doc.rate==0.0')
@@ -80,30 +96,33 @@ def make_custom_fields(update=True):
 		'Mode of Payment': [
 			dict(fieldname='mode_of_payment_code', label='Code',
 			fieldtype='Select', insert_after='included_in_print_rate', print_hide=1,
-			options="\n".join(map(lambda x: x.decode('utf-8'), mode_of_payment_codes)))
+			options="\n".join(map(lambda x: frappe.safe_decode(x, encoding='utf-8'), mode_of_payment_codes)))
 		],
 		'Payment Schedule': [
 			dict(fieldname='mode_of_payment_code', label='Code',
 				fieldtype='Select', insert_after='mode_of_payment', print_hide=1,
-				options="\n".join(map(lambda x: x.decode('utf-8'), mode_of_payment_codes)),
+				options="\n".join(map(lambda x: frappe.safe_decode(x, encoding='utf-8'), mode_of_payment_codes)),
 				fetch_from="mode_of_payment.mode_of_payment_code", read_only=1),
 			dict(fieldname='bank_account', label='Bank Account',
 				fieldtype='Link', insert_after='mode_of_payment_code', print_hide=1,
 				options="Bank Account"),
-			dict(fieldname='bank_account_name', label='Bank Account Name',
+			dict(fieldname='bank_account_name', label='Bank Name',
 				fieldtype='Data', insert_after='bank_account', print_hide=1,
-				fetch_from="bank_account.account_name", read_only=1),
+				fetch_from="bank_account.bank", read_only=1),
 			dict(fieldname='bank_account_no', label='Bank Account No',
 				fieldtype='Data', insert_after='bank_account_name', print_hide=1,
 				fetch_from="bank_account.bank_account_no", read_only=1),
 			dict(fieldname='bank_account_iban', label='IBAN',
 				fieldtype='Data', insert_after='bank_account_name', print_hide=1,
 				fetch_from="bank_account.iban", read_only=1),
+			dict(fieldname='bank_account_swift_number', label='Swift Code (BIC)',
+				fieldtype='Data', insert_after='bank_account_iban', print_hide=1,
+				fetch_from="bank_account.swift_number", read_only=1),
 		],
 		"Sales Invoice": [
 			dict(fieldname='vat_collectability', label='VAT Collectability',
 				fieldtype='Select', insert_after='taxes_and_charges', print_hide=1,
-				options="\n".join(map(lambda x: x.decode('utf-8'), vat_collectability_options)),
+				options="\n".join(map(lambda x: frappe.safe_decode(x, encoding='utf-8'), vat_collectability_options)),
 				fetch_from="company.vat_collectability"),
 			dict(fieldname='sb_e_invoicing_reference', label='E-Invoicing',
 				fieldtype='Section Break', insert_after='pos_total_qty', print_hide=1),
@@ -125,14 +144,14 @@ def make_custom_fields(update=True):
 		'Purchase Invoice Item': invoice_item_fields,
 		'Sales Order Item': invoice_item_fields,
 		'Delivery Note Item': invoice_item_fields,
-		'Sales Invoice Item': invoice_item_fields,
+		'Sales Invoice Item': invoice_item_fields + customer_po_fields,
 		'Quotation Item': invoice_item_fields,
 		'Purchase Order Item': invoice_item_fields,
 		'Purchase Receipt Item': invoice_item_fields,
 		'Supplier Quotation Item': invoice_item_fields,
 		'Address': [
 			dict(fieldname='country_code', label='Country Code',
-				fieldtype='Data', insert_after='country', print_hide=1, read_only=1,
+				fieldtype='Data', insert_after='country', print_hide=1, read_only=0,
 				fetch_from="country.code"),
 			dict(fieldname='state_code', label='State Code',
 				fieldtype='Data', insert_after='state', print_hide=1)

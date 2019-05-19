@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
 from erpnext.stock.utils import update_included_uom_in_dict_report
-from collections import OrderedDict
+from frappe.desk.query_report import group_report_data
 from six import iteritems
 
 def execute(filters=None):
@@ -202,40 +202,33 @@ def get_grouped_data(filters, columns, data):
 	if not filters.get("group_by") or filters.get("group_by") == "Ungrouped":
 		return data
 
-	group_field = filters.get("group_by").replace("Group by ", "")
-	group_fieldnames = [scrub(group_field)]
-	if group_fieldnames[0] == "item":
-		group_fieldnames[0] = "item_code"
-	elif group_fieldnames[0] == "item_warehouse":
-		group_fieldnames[0] = "item_code"
-		group_fieldnames.append("warehouse")
+	group_by = []
+	group_by_label = filters.group_by.replace("Group by ", "")
+	if group_by_label == "Item-Warehouse":
+		group_by += ['item_code', 'warehouse']
+	elif group_by_label == "Item":
+		group_by.append('item_code')
+	else:
+		group_by.append(scrub(group_by_label))
 
-	group_rows = OrderedDict()
-	for row in data:
-		group = []
-		for f in group_fieldnames:
-			group.append(row.get(f))
-		group = tuple(group)
+	def postprocess_group(group_object, grouped_by):
+		if len(group_by) != len(grouped_by):
+			return
 
-		group_rows.setdefault(group, [])
-		group_rows[group].append(row)
+		group_header = frappe._dict({})
+		group_fieldnames = map(lambda d: d.fieldname, grouped_by)
+		if len(group_fieldnames) == 2 and 'item_code' in group_fieldnames and 'warehouse' in group_fieldnames and filters.from_date:
+			opening_dt = frappe.utils.get_datetime(group_object.rows[0].date)
+			opening_dt -= opening_dt.resolution
+			group_header = get_opening_balance(group_object.item_code, group_object.warehouse, opening_dt.date(), opening_dt.time())
 
-	out = []
-	for group, rows in iteritems(group_rows):
-		group_header = {}
-		if group_fieldnames == ['item_code', 'warehouse'] and filters.from_date:
-			opening_datetime = frappe.utils.get_datetime(rows[0].date)
-			opening_datetime -= opening_datetime.resolution
-			group_header = get_opening_balance(group[0], group[1], opening_datetime.date(), opening_datetime.time())
+		for group in grouped_by:
+			group_header[group.fieldname] = group.value
 
-		for f, v in zip(group_fieldnames, group):
-			group_header[f] = v
+		group_header._isGroupTotal = True
+		group_object.rows.insert(0, group_header)
 
-		out.append(group_header)
-		out += rows
-		out.append({})
-
-	return out
+	return group_report_data(data, group_by, postprocess_group=postprocess_group)
 
 def get_warehouse_condition(warehouse):
 	warehouse_details = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"], as_dict=1)

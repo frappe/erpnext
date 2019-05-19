@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import flt, today
 from erpnext.stock.utils import update_included_uom_in_list_report
 
+
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	include_uom = filters.get("include_uom")
@@ -30,7 +31,7 @@ def execute(filters=None):
 
 		if filters.brand and filters.brand != item.brand:
 			continue
-			
+
 		elif filters.item_group and filters.item_group != item.item_group:
 			continue
 
@@ -69,6 +70,7 @@ def execute(filters=None):
 	update_included_uom_in_list_report(columns, data, include_uom, conversion_factors)
 	return columns, data
 
+
 def get_columns():
 	return [
 		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 140},
@@ -93,19 +95,20 @@ def get_columns():
 		{"label": _("Shortage Qty"), "fieldname": "shortage_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"}
 	]
 
+
 def get_bin_list(filters):
 	conditions = []
-	
+
 	if filters.item_code:
-		conditions.append("item_code = '%s' "%filters.item_code)
-		
+		conditions.append("item_code = '%s' " % filters.item_code)
+
 	if filters.warehouse:
 		warehouse_details = frappe.db.get_value("Warehouse", filters.warehouse, ["lft", "rgt"], as_dict=1)
 
 		if warehouse_details:
 			conditions.append(" exists (select name from `tabWarehouse` wh \
-				where wh.lft >= %s and wh.rgt <= %s and bin.warehouse = wh.name)"%(warehouse_details.lft,
-				warehouse_details.rgt))
+				where wh.lft >= %s and wh.rgt <= %s and bin.warehouse = wh.name)" % (warehouse_details.lft,
+			warehouse_details.rgt))
 
 	bin_list = frappe.db.sql("""select item_code, warehouse, actual_qty, planned_qty, indented_qty,
 		ordered_qty, reserved_qty, reserved_qty_for_production, reserved_qty_for_sub_contract, projected_qty
@@ -113,6 +116,7 @@ def get_bin_list(filters):
 		""".format(conditions=" where " + " and ".join(conditions) if conditions else ""), as_dict=1)
 
 	return bin_list
+
 
 def get_item_map(item_code, include_uom):
 	"""Optimization: get only the item doc and re_order_levels table"""
@@ -135,7 +139,7 @@ def get_item_map(item_code, include_uom):
 		and item.disabled=0
 		{condition}
 		and (item.end_of_life > %(today)s or item.end_of_life is null or item.end_of_life='0000-00-00')
-		and exists (select name from `tabBin` bin where bin.item_code=item.name)"""\
+		and exists (select name from `tabBin` bin where bin.item_code=item.name)""" \
 		.format(cf_field=cf_field, cf_join=cf_join, condition=condition),
 		{"today": today(), "include_uom": include_uom}, as_dict=True)
 

@@ -573,7 +573,8 @@ class TestSalesOrder(unittest.TestCase):
 				"item_code": item.get("item_code"),
 				"pending_qty": item.get("pending_qty"),
 				"sales_order_item": item.get("sales_order_item"),
-				"bom": item.get("bom")
+				"bom": item.get("bom"),
+				"description": item.get("description")
 			})
 			so_item_name[item.get("sales_order_item")]= item.get("pending_qty")
 		make_work_orders(json.dumps({"items":po_items}), so.name, so.company)
@@ -756,6 +757,8 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertFalse(so.items[1].alt_uom)
 		self.assertEqual(so.items[1].alt_uom_size, 1)
 		self.assertEqual(so.items[1].alt_uom_qty, 10)
+
+		self.assertEqual(so.total_alt_uom_qty, 60)
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")

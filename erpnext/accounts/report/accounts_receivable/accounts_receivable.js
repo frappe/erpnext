@@ -103,11 +103,9 @@ frappe.query_reports["Accounts Receivable"] = {
 			"options": "Sales Person"
 		},
 		{
-			"fieldname":"group_by",
-			"label": __("Group By"),
-			"fieldtype": "Select",
-			"options": "Ungrouped\nGroup by Customer\nGroup by Customer Group\nGroup by Territory\nGroup by Sales Person",
-			"default": "Ungrouped"
+			"fieldname":"based_on_payment_terms",
+			"label": __("Based On Payment Terms"),
+			"fieldtype": "Check",
 		},
 		{
 			"fieldname":"show_pdc_in_print",
@@ -115,8 +113,8 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldtype": "Check",
 		},
 		{
-			"fieldname":"based_on_payment_terms",
-			"label": __("Based On Payment Terms"),
+			"fieldname":"show_sales_person_in_print",
+			"label": __("Show Sales Person in Print"),
 			"fieldtype": "Check",
 		},
 		{
@@ -149,22 +147,6 @@ frappe.query_reports["Accounts Receivable"] = {
 		report.page.add_inner_button(__("Accounts Receivable Summary"), function() {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Accounts Receivable Summary', {company: filters.company});
-		});
-	},
-
-	get_datatable_options(options) {
-		return Object.assign(options, {
-			hooks: {
-				columnTotal: function(values, column) {
-					const me = this;
-					values = values.filter((d, i) => {
-						let idx = me.bodyRenderer.visibleRowIndices[i];
-						return me.datamanager.getData(idx).posting_date
-					});
-					let type = column.column.fieldname == "age" ? "mean" : null;
-					return frappe.utils.report_column_total(values, column, type);
-				}
-			}
 		});
 	}
 }

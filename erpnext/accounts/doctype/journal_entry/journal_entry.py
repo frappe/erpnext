@@ -52,6 +52,7 @@ class JournalEntry(AccountsController):
 		self.update_loan()
 		self.update_inter_company_jv()
 
+
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
 
