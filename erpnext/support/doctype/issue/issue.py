@@ -253,11 +253,9 @@ def set_service_level_agreement_variance(issue=None):
 		doc = frappe.get_doc("Issue", issue.name)
 		if not doc.first_responded_on:
 			variance = round(time_diff_in_hours(doc.response_by, now_datetime()), 2)
-			print(variance)
 			frappe.db.set_value("Issue", doc.name, "response_by_variance", variance)
 		if not doc.resolution_date:
 			variance = round(time_diff_in_hours(doc.resolution_by, now_datetime()), 2)
-			print(variance)
 			frappe.db.set_value("Issue", doc.name, "resolution_by_variance", variance)
 
 def get_list_context(context=None):
