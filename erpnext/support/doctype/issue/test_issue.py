@@ -46,7 +46,7 @@ class TestIssue(unittest.TestCase):
 		issue.status = 'Closed'
 		issue.save()
 
-		self.assertEqual(issue.agreement_status, 'Fulfilled')
+		self.assertEqual(issue.agreement_fulfilled, 'Fulfilled')
 
 def make_issue(creation=None, customer=None):
 
