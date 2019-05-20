@@ -128,6 +128,8 @@ class Issue(Document):
 		return replicated_issue.name
 
 	def before_insert(self):
+		if not self.priority:
+			self.priority = frappe.db.get_value("Issue Priority", {"default_priority": 1})
 		self.set_response_and_resolution_time(priority=self.priority)
 
 	def set_response_and_resolution_time(self, priority=None, service_level_agreement=None):
@@ -153,7 +155,6 @@ class Issue(Document):
 			self.creation = now_datetime()
 
 		start_date_time = get_datetime(self.creation)
-
 		self.response_by = get_expected_time_for(parameter='response', service_level=priority, start_date_time=start_date_time)
 		self.resolution_by = get_expected_time_for(parameter='resolution', service_level=priority, start_date_time=start_date_time)
 

@@ -134,13 +134,14 @@
   },
   {
    "default": "0",
+   "depends_on": "eval: !doc.default_service_level_agreement",
    "fieldname": "ignore_start_and_end_date",
    "fieldtype": "Check",
    "label": "Ignore Start and End Date",
    "set_only_once": 1
   }
  ],
- "modified": "2019-05-19 09:41:55.498800",
+ "modified": "2019-05-20 15:36:00.326471",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
