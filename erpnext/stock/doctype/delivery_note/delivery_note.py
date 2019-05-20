@@ -52,16 +52,20 @@ class DeliveryNote(SellingController):
 			'percent_join_field': 'against_sales_invoice',
 			'overflow_type': 'delivery',
 			'no_tolerance': 1
-		},
-		{
-			'source_dt': 'Delivery Note Item',
-			'target_dt': 'Sales Order Item',
-			'join_field': 'so_detail',
-			'target_field': 'returned_qty',
-			'target_parent_dt': 'Sales Order',
-			'source_field': '-1 * qty',
-			'extra_cond': """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)"""
 		}]
+		if cint(self.is_return):
+			self.status_updater.append({
+				'source_dt': 'Delivery Note Item',
+				'target_dt': 'Sales Order Item',
+				'join_field': 'so_detail',
+				'target_field': 'returned_qty',
+				'target_parent_dt': 'Sales Order',
+				'source_field': '-1 * qty',
+				'second_source_dt': 'Sales Invoice Item',
+				'second_source_field': '-1 * qty',
+				'second_join_field': 'so_detail',
+				'extra_cond': """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)"""
+			})
 
 	def before_print(self):
 		def toggle_print_hide(meta, fieldname):

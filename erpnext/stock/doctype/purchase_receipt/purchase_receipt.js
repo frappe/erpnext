@@ -26,10 +26,6 @@ frappe.ui.form.on("Purchase Receipt", {
 		});
 	},
 
-	onload_post_render: function(frm) {
-		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
-	},
-
 	refresh: function(frm) {
 		if(frm.doc.company) {
 			frm.trigger("toggle_display_account_head");

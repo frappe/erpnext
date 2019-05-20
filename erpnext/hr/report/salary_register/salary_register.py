@@ -35,6 +35,8 @@ def execute(filters=None):
 		for d in ded_types:
 			row.append(ss_ded_map.get(ss.name, {}).get(d))
 
+		row.append(ss.total_loan_repayment)
+
 		row += [ss.total_deduction, ss.net_pay]
 
 		data.append(row)
@@ -67,7 +69,7 @@ def get_columns(salary_slips):
 
 	columns = columns + [(e + ":Currency:120") for e in salary_components[_("Earning")]] + \
 		[_("Gross Pay") + ":Currency:120"] + [(d + ":Currency:120") for d in salary_components[_("Deduction")]] + \
-		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
+		[_("Loan Repayment") + ":Currency:120", _("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
 
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
 
