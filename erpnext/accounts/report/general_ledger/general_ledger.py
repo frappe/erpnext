@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import erpnext
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
 from frappe.utils import getdate, cstr, flt, cint
@@ -212,9 +213,7 @@ def get_conditions(filters):
 		lft, rgt = frappe.db.get_value("Sales Person", filters.get("sales_person"), ["lft", "rgt"])
 		conditions.append("""exists(select name from `tabSales Team` steam where
 			steam.sales_person in (select name from `tabSales Person` where lft >= {0} and rgt <= {1})
-			and ((steam.parent = voucher_no and steam.parenttype = voucher_type)
-				or (steam.parent = against_voucher and steam.parenttype = against_voucher_type)
-				or (steam.parent = party and steam.parenttype = 'Customer')))""".format(lft, rgt))
+			and steam.parent = party and steam.parenttype = party_type)""".format(lft, rgt))
 
 	if filters.get("finance_book"):
 		conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
