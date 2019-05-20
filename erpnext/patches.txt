@@ -602,7 +602,4 @@ erpnext.patches.v11_1.set_salary_details_submittable
 erpnext.patches.v11_1.rename_depends_on_lwp
 execute:frappe.delete_doc("Report", "Inactive Items")
 erpnext.patches.v11_1.delete_scheduling_tool
-execute:frappe.reload_doc('support', 'doctype', 'service_level_priority')
-execute:frappe.reload_doc('support', 'doctype', 'service_level')
-execute:frappe.reload_doc('support', 'doctype', 'service_level_agreement')
-erpnext.patches.v12_0.move_parameters_to_priority
+erpnext.patches.v12_0.make_custom_fields_for_bank_remittance

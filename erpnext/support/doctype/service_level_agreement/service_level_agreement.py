@@ -14,13 +14,13 @@ class ServiceLevelAgreement(Document):
 			if frappe.db.exists("Service Level Agreement", {"default_service_level_agreement": "1", "name": ["!=", self.name]}):
 				frappe.throw(_("A Default Service Level Agreement already exists."))
 		else:
-			if not (self.start_date and self.end_date) and self.ignore_start_and_end_date:
+			if not self.ignore_start_and_end_date and not (self.start_date and self.end_date):
 				frappe.throw(_("Enter Start and End Date for the Agreement."))
 
-			if self.start_date >= self.end_date and self.ignore_start_and_end_date:
+			if not self.ignore_start_and_end_date and self.start_date >= self.end_date:
 				frappe.throw(_("Start Date of Agreement can't be greater than or equal to End Date."))
 
-			if self.end_date < frappe.utils.getdate() and self.ignore_start_and_end_date:
+			if not self.ignore_start_and_end_date and self.end_date < frappe.utils.getdate():
 				frappe.throw(_("End Date of Agreement can't be less than today."))
 
 def check_agreement_status():

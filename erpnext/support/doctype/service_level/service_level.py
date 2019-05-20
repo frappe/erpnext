@@ -12,10 +12,12 @@ from frappe.utils import get_weekdays
 class ServiceLevel(Document):
 
 	def validate(self):
+		self.check_default_priority()
 		self.check_priorities()
 		self.check_support_and_resolution()
 
 	def check_priorities(self):
+		default_priority = []
 		priorities = []
 
 		for priority in self.priorities:
@@ -24,6 +26,7 @@ class ServiceLevel(Document):
 				frappe.throw(_("Set Response Time and Resolution for Priority {0} at index {1}.".format(priority.priority, priority.idx)))
 
 			priorities.append(priority.priority)
+			#priorities.append(priority.priority)
 
 			if priority.response_time_period == "Hour":
 				response = priority.response_time * 0.0416667
@@ -46,11 +49,6 @@ class ServiceLevel(Document):
 		if not len(set(priorities)) == len(priorities):
 			repeated_priority = get_repeated(priorities)
 			frappe.throw(_("Priority {0} has been repeated.".format(repeated_priority)))
-
-		# Check if values for all the priority options is set
-		priority_count = ([field.options for field in frappe.get_meta("Service Level Priority").fields if field.fieldname=='priority'][0]).split("\n")
-		if not len(set(priorities)) == len(priority_count):
-			frappe.throw(_("Set values for all the Priorities {0}.".format(" ".join(priority_count))))
 
 	def check_support_and_resolution(self):
 		week = get_weekdays()
@@ -77,13 +75,16 @@ class ServiceLevel(Document):
 	def get_service_level_priority(self, priority):
 		priority = frappe.get_doc("Service Level Priority", {"priority": priority, "parent": self.name})
 
-		return frappe._dict({
-					"priority": priority.priority,
-					"response_time": priority.response_time,
-					"response_time_period": priority.response_time_period,
-					"resolution_time": priority.resolution_time,
-					"resolution_time_period": priority.resolution_time_period
-				})
+		if priority:
+			return frappe._dict({
+						"priority": priority.priority,
+						"response_time": priority.response_time,
+						"response_time_period": priority.response_time_period,
+						"resolution_time": priority.resolution_time,
+						"resolution_time_period": priority.resolution_time_period
+					})
+		else:
+			frappe.throw(_("Service Level {0} doesn't have Priority {1}.".format(self.name, priority)))
 
 def get_repeated(values):
 	unique_list = []

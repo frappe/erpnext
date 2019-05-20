@@ -112,12 +112,11 @@
    "search_index": 1
   },
   {
-   "default": "Medium",
    "fieldname": "priority",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Priority",
-   "options": "Low\nMedium\nHigh"
+   "options": "Issue Priority"
   },
   {
    "fieldname": "issue_type",
@@ -337,7 +336,7 @@
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2019-05-19 11:02:10.962090",
+ "modified": "2019-05-20 15:19:00.771333",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

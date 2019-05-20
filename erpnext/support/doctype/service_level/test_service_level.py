@@ -3,6 +3,7 @@
 # See license.txt
 from __future__ import unicode_literals
 from erpnext.hr.doctype.employee_group.test_employee_group import make_employee_group
+from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
 from frappe.utils import now_datetime
 import datetime
 from datetime import timedelta
@@ -16,6 +17,7 @@ class TestServiceLevel(unittest.TestCase):
 def make_service_level():
 	employee_group = make_employee_group()
 	make_holiday_list()
+	make_priorities()
 
 	# Default Service Level Agreement
 	default_service_level = frappe.get_doc({
