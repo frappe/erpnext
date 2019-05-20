@@ -1,5 +1,5 @@
 {% extends "templates/base.html" %}
-{% block title %}{{ program.program_name }}{% endblock %}
+{% block title %}{{ course.course_name }}{% endblock %}
 
 {% block head_include %}
 	<style>
@@ -31,20 +31,26 @@
 {% endblock %}
 
 
-{% macro card(course, index, length) %}
+{% macro card(topic, index, length) %}
 <div class="col-sm-{{ 12 if length%3 == 1 and index == 1 else 6 if length%3 == 2 and index in [1,2] else 4}} mb-4 text-left">
 	<div class="card h-100">
-		<a href="/lms/course?name={{ course.name }}" class="no-decoration no-underline">
-			{% if course.hero_image %}
-			<div class="card-hero-img" style="background-image: url({{ course.hero_image }})"></div>
+		<a href="/lms/content?topic={{ topic.name }}&type=Content" class="no-decoration no-underline">
+			{% if topic.hero_image %}
+			<div class="card-hero-img" style="background-image: url({{ topic.hero_image }})"></div>
 			{% else %}
 			<div class="card-image-wrapper text-center">
-				<div class="image-body">{{ course.course_name }}</div>
+				<div class="image-body">{{ topic.topic_name }}</div>
 			</div>
 			{% endif %}
 			<div class='card-body'>
-				<h5 class='card-title'>{{ course.course_name }}</h5>
-				<div>{{ course.course_intro }}</div>
+				<h5 class='card-title'>{{ topic.topic_name }}</h5>
+				<div>
+					<ol class="list-unstyled">
+					{% for content in topic.topic_content %}
+						<li><a class="text-muted" href="/lms/content?topic={{ topic.name }}&type={{ content.content_type }}&content={{ content.content }}">{{ content.content }}</li></a>
+					{% endfor %}
+					</ol>
+				</div>
 			</div>
 		</a>
 	</div>
@@ -54,16 +60,16 @@
 {% block content %}
 <section class="top-section ">
 	<div class='container pb-5'>
-		<h1>{{ program.program_name }}</h1>
-		<p class='lead'>{{ program.description }}</p>
+		<h1>{{ course.course_name }}</h1>
+		<p class='lead'>{{ course.course_intro }}</p>
 		<p class="mt-4">
 			<a class="btn btn-primary btn-lg" style="width: 170px;" href="/login#signup">Sign Up</a>
 		</p>
 	</div>
 	<div class='container'>
 		<div class="row mt-5">
-			{% for course in program.courses %}
-				{{ card(frappe.get_doc("Course", course.course), loop.index, program.courses|length) }}
+			{% for topic in topics %}
+				{{ card(topic.as_dict(), loop.index, topics|length) }}
 			{% endfor %}
 		</div>
 	</div>
