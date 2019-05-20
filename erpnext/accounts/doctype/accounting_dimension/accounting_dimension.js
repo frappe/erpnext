@@ -3,7 +3,13 @@
 
 frappe.ui.form.on('Accounting Dimension', {
 
-	document_type: function(frm){
+	refresh: function(frm) {
+		frm.add_custom_button(__('Show {0} List', [frm.doc.document_type]), function () {
+			frappe.set_route("List", frm.doc.document_type);
+		});
+	},
+
+	document_type: function(frm) {
 		frm.set_value('label', frm.doc.document_type);
 		frm.set_value('fieldname', frappe.scrub(frm.doc.document_type))
 
