@@ -58,11 +58,6 @@ def make_dimension_in_accounting_doctypes(doc):
 
 			if property_setter:
 				property_setter_doc = frappe.get_doc("Property Setter", "Budget-budget_against-options")
-				property_setter_doc.doc_type = 'Budget'
-				property_setter_doc.doctype_or_field = "DocField"
-				property_setter_doc.fiel_dname = "budget_against"
-				property_setter_doc.property = "options"
-				property_setter_doc.property_type = "Text"
 				property_setter_doc.value = property_setter_doc.value + "\n" + doc.document_type
 				property_setter_doc.save()
 
@@ -131,7 +126,6 @@ def get_doclist():
 		"Stock Entry Detail", "Payment Entry Deduction"]
 
 	return doclist
-
 
 def get_accounting_dimensions():
 	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["fieldname"])
