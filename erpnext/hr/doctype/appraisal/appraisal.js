@@ -52,7 +52,7 @@ cur_frm.cscript.score = function(doc,cdt,cdn){
 			refresh_field('score', d.name, 'goals');
 		}
 		var total = flt(d.per_weightage*d.score)/100;
-		d.score_earned = total.toPrecision(2);
+		d.score_earned = total.toPrecision(3);
 		refresh_field('score_earned', d.name, 'goals');
 	}
 	else{
