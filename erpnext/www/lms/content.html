@@ -1,0 +1,136 @@
+{% extends "templates/base.html" %}
+{% block title %}{% endblock %}
+
+{% block head_include %}
+	<style>
+		div.card-hero-img {
+			height: 220px;
+			background-size: cover;
+			background-repeat: no-repeat;
+			background-position: center;
+			background-color: rgb(250, 251, 252);
+		}
+
+		.card-image-wrapper {
+			display: flex;
+			overflow: hidden;
+			height: 220px;
+			background-color: rgb(250, 251, 252);
+			justify-content: center;
+		}
+
+		.image-body {
+			align-self: center;
+			color: #d1d8dd;
+			font-size: 24px;
+			font-weight: 600;
+			line-height: 1;
+			padding: 20px;
+		}
+	</style>
+	<link rel="stylesheet" href="https://cdn.plyr.io/3.5.3/plyr.css" />
+{% endblock %}
+
+{% macro navigation() %}
+<div class="row">
+		<div class="col-md-7">
+			<h1>{{ content.name }}</h1>
+		</div>
+		<div class="col-md-5 text-right">
+			{% if previous %}
+				<a href="/lms/content?course={{ course }}&topic={{ topic }}&type={{ previous.content_type }}&content={{ previous.content }}" class='btn btn-outline-secondary'>Previous</a>
+			{% else %}
+				<a href="/lms/course?name={{ course }}" class='btn btn-outline-secondary'>Back to Course</a>
+			{% endif %}
+
+			{% if next %}
+				<button id="nextButton" onclick="handle('/lms/content?course={{ course }}&topic={{ topic }}&type={{ next.content_type }}&content={{ next.content }}')" class='btn btn-primary' disabled="true">Next</button>
+			{% else %}
+				<button id="nextButton" onclick="handle('/lms/course?name={{ course }}')" class='btn btn-primary' disabled="true">Finish Topic</button>
+			{% endif %}
+		</div>
+	</div>
+{% endmacro %}
+
+{% macro video() %}
+<div class="mb-5">
+	{{ navigation() }}
+	<div class="text-muted">
+		{% if content.duration %}
+			{{ content.duration }} Mins
+		{% endif %}
+
+		{% if content.publish_date and content.duration%}
+			-
+		{% endif %}
+
+		{% if content.publish_date %}
+			Published on {{ content.publish_date.strftime('%d, %b %Y') }}
+		{% endif %}
+	</div>
+</div>
+<div id="player" data-plyr-provider="{{ content.provider|lower }}" data-plyr-embed-id="{{ content.url }}"></div>
+<div class="my-5">
+	{{ content.description }}
+</div>
+
+{% block script %}
+	<script src="https://cdn.plyr.io/3.5.3/plyr.js"></script>
+	<script>
+		const player = new Plyr('#player');
+
+		frappe.ready(() => {
+			next = document.getElementById('nextButton')
+			next.disabled = false;
+		})
+
+		function handle(url) {
+			frappe.call('ping').then((r) => {
+				frappe.call("add_activity",
+					{
+						course: {{ course }},
+						content_type: {{ content_type }},
+						content: {{ content.name }},
+					}
+				)
+			})
+		}
+	</script>
+{% endblock %}
+{% endmacro %}
+
+{% macro article() %}
+<div class="mb-5">
+	{{ navigation() }}
+	<div class="text-muted">
+		{% if content.author or content.publish_date %}
+			Published
+		{% endif %}
+		{% if content.author %}
+			by {{ content.author }}
+		{% endif %}
+		{% if content.publish_date %}
+			on {{ content.publish_date.strftime('%d, %b %Y') }}
+		{% endif %}
+	</div>
+</div>
+<div>
+	{{ content.content }}
+</div>
+{% endmacro %}
+
+{% block content %}
+<section class="section">
+	<div>
+		<div class='container pb-5'>
+			{% if content_type=='Video' %}
+				{{ video() }}
+			{% elif content_type=='Article'%}
+				{{ article() }}
+			{% elif content_type=='Quiz' %}
+				<h2>Quiz: {{ content.name }}</h2>
+			{% endif %}
+		</div>
+	</div>
+</section>
+{% endblock %}
