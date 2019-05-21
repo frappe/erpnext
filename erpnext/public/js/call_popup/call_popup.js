@@ -1,4 +1,4 @@
-class CallSummaryDialog {
+class CallPopup {
 	constructor({ contact, call_payload, last_communication }) {
 		this.number = call_payload.CallFrom;
 		this.contact = contact;
@@ -8,7 +8,6 @@ class CallSummaryDialog {
 
 	make() {
 		this.dialog = new frappe.ui.Dialog({
-			'title': __(`Incoming call from ${this.contact ? this.contact.name : 'Unknown Number'}`),
 			'static': true,
 			'minimizable': true,
 			'fields': [{
@@ -27,38 +26,19 @@ class CallSummaryDialog {
 				'fieldtype': 'Small Text',
 				'label': 'Call Summary',
 				'fieldname': 'call_communication',
-				'default': 'This is not working please helpppp',
-				"placeholder": __("Select or add new customer")
 			}, {
 				'fieldtype': 'Button',
 				'label': 'Submit',
 				'click': () => {
-					frappe.xcall()
+					this.dialog.get_value();
 				}
 			}]
 		});
+		this.set_call_status();
 		this.make_customer_contact();
 		this.dialog.show();
 		this.dialog.get_close_btn().show();
 		this.dialog.header.find('.indicator').removeClass('hidden').addClass('blue');
-	}
-
-	get_dialog_skeleton() {
-		return `
-			<div class="call-summary-body">
-				<div class="customer-info flex">
-				</div>
-				<div class="flex">
-					<div class="last-communication"></div>
-					<div class="call-summary"></div>
-				</div>
-				<hr>
-				<div class="flex">
-					<div class="section-right"></div>
-					<div class="section-left"></div>
-				</div>
-			</div>
-		`;
 	}
 
 	make_customer_contact() {
@@ -100,10 +80,30 @@ class CallSummaryDialog {
 	make_summary_section() {
 		//
 	}
+
+	set_call_status(status) {
+		let title = '';
+		if (status === 'incoming') {
+			if (this.contact) {
+				title = __('Incoming call from {0}', [this.contact.name]);
+			} else {
+				title = __('Incoming call from unknown number');
+			}
+		}
+		this.dialog.set_title(title);
+	}
+
+	update(data) {
+		// pass
+	}
 }
 
 $(document).on('app_ready', function () {
-	frappe.realtime.on('incoming_call', data => {
-		frappe.call_summary_dialog = new CallSummaryDialog(data);
+	frappe.realtime.on('call_update', data => {
+		if (!erpnext.call_popup) {
+			erpnext.call_popup = new CallPopup(data);
+		} else {
+			erpnext.call_popup.update(data);
+		}
 	});
 });
