@@ -1,0 +1,20 @@
+{% macro hero(title, description) %}
+	<div class='container pb-5'>
+		<h1>{{ title}}</h1>
+		<p class='lead' style="max-width: 100%;">{{ description }}</p>
+		<p class="mt-4">
+			<a id="signup" class="btn btn-primary btn-lg" style="width: 170px;" href="/login#signup" hidden=true>Sign Up</a>
+		</p>
+	</div>
+
+{% block script %}
+<script type="text/javascript">
+	frappe.ready(() => {
+		btn = document.getElementById('signup')
+		if(frappe.session.user == 'Guest') {
+			btn.hidden = false;
+		}
+	})
+</script>
+{% endblock %}
+{% endmacro %}
