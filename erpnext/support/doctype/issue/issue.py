@@ -128,9 +128,7 @@ class Issue(Document):
 		return replicated_issue.name
 
 	def before_insert(self):
-		if not self.priority:
-			self.priority = frappe.db.get_value("Issue Priority", {"default_priority": 1})
-		self.set_response_and_resolution_time(priority=self.priority)
+		self.set_response_and_resolution_time()
 
 	def set_response_and_resolution_time(self, priority=None, service_level_agreement=None):
 		service_level_agreement = get_active_service_level_agreement_for(priority=priority,
@@ -143,12 +141,13 @@ class Issue(Document):
 			frappe.throw(_("This Service Level Agreement is specific to Customer {0}".format(service_level_agreement.customer)))
 
 		self.service_level_agreement = service_level_agreement.name
+		self.priority = service_level_agreement.default_priority if not priority else priority
 
-		service_level = frappe.get_doc("Service Level", service_level_agreement.service_level)
-		priority = service_level.get_service_level_priority(priority)
+		service_level_agreement = frappe.get_doc("Service Level Agreement", service_level_agreement.name)
+		priority = service_level_agreement.get_service_level_agreement_priority(self.priority)
 		priority.update({
-			"support_and_resolution": service_level.support_and_resolution,
-			"holiday_list": service_level.holiday_list
+			"support_and_resolution": service_level_agreement.support_and_resolution,
+			"holiday_list": service_level_agreement.holiday_list
 		})
 
 		if not self.creation:
