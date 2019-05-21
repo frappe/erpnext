@@ -1,5 +1,6 @@
 {% extends "templates/base.html" %}
 {% block title %}{{ course.course_name }}{% endblock %}
+{% from "www/lms/macros/hero.html" import hero %}
 
 {% block head_include %}
 	<style>
@@ -34,7 +35,7 @@
 {% macro card(topic, index, length) %}
 <div class="col-sm-{{ 12 if length%3 == 1 and index == 1 else 6 if length%3 == 2 and index in [1,2] else 4}} mb-4 text-left">
 	<div class="card h-100">
-		<a href="/lms/content?topic={{ topic.name }}&type=Content" class="no-decoration no-underline">
+		<a href="/lms/content?course={{ course.name }}&topic={{ topic.name }}&type={{ topic.topic_content[0].content_type }}&content={{ topic.topic_content[0].content }}" class="no-decoration no-underline">
 			{% if topic.hero_image %}
 			<div class="card-hero-img" style="background-image: url({{ topic.hero_image }})"></div>
 			{% else %}
@@ -47,25 +48,28 @@
 				<div>
 					<ol class="list-unstyled">
 					{% for content in topic.topic_content %}
-						<li><a class="text-muted" href="/lms/content?topic={{ topic.name }}&type={{ content.content_type }}&content={{ content.content }}">{{ content.content }}</li></a>
+						<li><a class="text-muted" href="/lms/content?course={{ course.name }}&topic={{ topic.name }}&type={{ content.content_type }}&content={{ content.content }}">{{ content.content }}</li></a>
 					{% endfor %}
 					</ol>
 				</div>
 			</div>
+			{% if index==1 %}
+			<div class='card-footer'>
+				<i class="fa fa-check-circle text-success"></i> Completed
+			</div>
+			{% else %}
+			<div class='card-footer'>
+				<i class="fa fa-circle-o text-warning"></i> In Progress
+			</div>
+			{% endif %}
 		</a>
 	</div>
 </div>
 {% endmacro %}
 
 {% block content %}
-<section class="top-section ">
-	<div class='container pb-5'>
-		<h1>{{ course.course_name }}</h1>
-		<p class='lead'>{{ course.course_intro }}</p>
-		<p class="mt-4">
-			<a class="btn btn-primary btn-lg" style="width: 170px;" href="/login#signup">Sign Up</a>
-		</p>
-	</div>
+<section class="section ">
+	{{ hero(course.course_name, course.course_intro) }}
 	<div class='container'>
 		<div class="row mt-5">
 			{% for topic in topics %}
