@@ -233,6 +233,8 @@ def update_completed_and_requested_qty(stock_entry, method):
 				mr_obj.update_requested_qty(mr_item_rows)
 
 def set_missing_values(source, target_doc):
+	if getdate(target_doc.schedule_date) <  getdate(nowdate()):
+		target_doc.schedule_date = None
 	target_doc.run_method("set_missing_values")
 	target_doc.run_method("calculate_taxes_and_totals")
 
@@ -240,6 +242,8 @@ def update_item(obj, target, source_parent):
 	target.conversion_factor = obj.conversion_factor
 	target.qty = flt(flt(obj.stock_qty) - flt(obj.ordered_qty))/ target.conversion_factor
 	target.stock_qty = (target.qty * target.conversion_factor)
+	if getdate(target.schedule_date) < getdate(nowdate()):
+		target.schedule_date = None
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
