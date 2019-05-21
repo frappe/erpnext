@@ -109,13 +109,14 @@ def set_account_currency(filters):
 def get_result(filters, account_details):
 	gl_entries = get_gl_entries(filters)
 
-	group_field = group_by_field(filters.get('group_by'))
+	group_by_field = get_group_by_field(filters.get('group_by'))
 	group_by = [None]
-	if group_field:
-		group_by.append(group_field)
+	if group_by_field:
+		group_by.append(group_by_field)
 
 	result = group_report_data(gl_entries, group_by,
-		calculate_totals=lambda rows, grouped_by: calculate_opening_closing(filters, rows, grouped_by),
+		calculate_totals=lambda rows, group_field, group_value, grouped_by:
+			calculate_opening_closing(filters, rows, group_field, group_value, grouped_by),
 		postprocess_group=lambda group_object, grouped_by: postprocess_group(filters, group_object, grouped_by)
 	)
 
@@ -128,9 +129,6 @@ def get_gl_entries(filters):
 
 	group_by_statement = ''
 	order_by_statement = "order by posting_date, account"
-
-	if filters.get("group_by") == _("Group by Voucher"):
-		order_by_statement = "order by posting_date, voucher_type, voucher_no"
 
 	if not cint(filters.get("show_detailed_entries")):
 		group_by_statement = "group by voucher_type, voucher_no, account, cost_center, party_type, party"
@@ -191,7 +189,7 @@ def get_conditions(filters):
 	if filters.get("reference_no"):
 		conditions.append("reference_no=%(reference_no)s")
 
-	if filters.get("group_by") == "Group by Party" and not filters.get("party_type"):
+	if filters.get("group_by") == _("Group by Party") and not filters.get("party_type"):
 		conditions.append("party_type in ('Customer', 'Supplier')")
 
 	if filters.get("party_type"):
@@ -201,7 +199,7 @@ def get_conditions(filters):
 		conditions.append("party in %(party)s")
 
 	if not (filters.get("account") or filters.get("party") or
-		filters.get("group_by") in ["Group by Account", "Group by Party"]):
+		filters.get("group_by") in [_("Group by Account"), _("Group by Party")]):
 		conditions.append("posting_date >=%(from_date)s")
 
 	conditions.append("posting_date <=%(to_date)s")
@@ -227,7 +225,7 @@ def get_conditions(filters):
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 
-def calculate_opening_closing(filters, gl_entries, grouped_by):
+def calculate_opening_closing(filters, gl_entries, group_field, group_value, grouped_by):
 	totals = get_totals_dict()
 
 	def update_totals_for(key, gle):
@@ -252,19 +250,18 @@ def calculate_opening_closing(filters, gl_entries, grouped_by):
 def postprocess_group(filters, group_object, grouped_by):
 	group_object.rows = filter(lambda d: not d.get("to_remove"), group_object.rows)
 
-	group = grouped_by[-1]
 	if group_object.rows:
-		if group.fieldname == "party":
+		if 'party' in grouped_by:
 			if group_object.rows[0].party_type == "Customer":
-				customer = frappe.get_cached_doc("Customer", group.value)
+				customer = frappe.get_cached_doc("Customer", grouped_by['party'])
 				group_object.sales_person = ", ".join(set([d.sales_person for d in customer.sales_team]))
 
-		if group.fieldname != 'voucher_no':
+		if 'voucher_no' not in grouped_by:
 			group_object.rows.insert(0, group_object.totals.opening)
 
 		# group_object.rows.append(group_object.totals.total)
 
-		if group.fieldname != 'voucher_no':
+		if 'voucher_no' not in grouped_by:
 			group_object.rows.append(group_object.totals.closing)
 
 		balance, balance_in_account_currency = 0, 0
@@ -296,7 +293,8 @@ def get_totals_dict():
 			credit=0.0,
 			debit_in_account_currency=0.0,
 			credit_in_account_currency=0.0,
-			_isGroupTotal=True
+			_isGroupTotal=True,
+			_bold=True
 		)
 	return _dict(
 		opening=_get_debit_credit_dict(_('Opening')),
@@ -305,13 +303,13 @@ def get_totals_dict():
 		_isGroupTotal=True
 	)
 
-def group_by_field(group_by):
+def get_group_by_field(group_by):
 	if group_by == _('Group by Party'):
-		return 'party'
+		return 'party_type', 'party'
 	elif group_by == _('Group by Account'):
 		return 'account'
 	elif group_by == _('Group by Voucher'):
-		return 'voucher_no'
+		return 'voucher_type', 'voucher_no'
 	else:
 		return None
 
