@@ -181,6 +181,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				// maintenance
 				if(flt(doc.per_delivered, 2) < 100 &&
 						["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
+					this.frm.add_custom_button(__('Delivery'),
+						function() { me.make_delivery_note_based_on_delivery_date(); }, __("Make"));
 					this.frm.add_custom_button(__('Maintenance Visit'),
 						function() { me.make_maintenance_visit() }, __("Make"));
 					this.frm.add_custom_button(__('Maintenance Schedule'),
