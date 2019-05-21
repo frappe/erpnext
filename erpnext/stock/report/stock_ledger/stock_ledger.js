@@ -88,7 +88,7 @@ frappe.query_reports["Stock Ledger"] = {
 			"fieldname":"group_by",
 			"label": __("Group By"),
 			"fieldtype": "Select",
-			"options": "Ungrouped\nGroup by Item-Warehouse\nGroup by Item\nGroup by Warehouse\nGroup by Item Group\nGroup by Brand\nGroup by Party",
+			"options": "Ungrouped\nGroup by Item-Warehouse\nGroup by Item\nGroup by Warehouse\nGroup by Item Group\nGroup by Brand\nGroup by Party\nGroup by Voucher",
 			"default": "Ungrouped"
 		}
 	]
