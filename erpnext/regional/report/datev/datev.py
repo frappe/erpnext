@@ -103,6 +103,7 @@ def get_gl_entries(filters, as_dict):
 			/* Statistisches Konto (Debitoren/Kreditoren) */
 			left join `tabParty Account` pa
 			on gl.against = pa.parent
+			and gl.company = pa.company
 
 			/* Kontonummer */
 			left join `tabAccount` acc 
