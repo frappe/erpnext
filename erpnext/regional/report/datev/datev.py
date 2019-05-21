@@ -52,6 +52,31 @@ def get_columns():
 			"label": "Belegdatum",
 			"fieldname": "Belegdatum",
 			"fieldtype": "Date",
+		},
+		{
+			"label": "Buchungstext",
+			"fieldname": "Buchungstext",
+			"fieldtype": "Text",
+		},
+		{
+			"label": "Beleginfo - Art 1",
+			"fieldname": "Beleginfo - Art 1",
+			"fieldtype": "Data",
+		},
+		{
+			"label": "Beleginfo - Inhalt 1",
+			"fieldname": "Beleginfo - Inhalt 1",
+			"fieldtype": "Data",
+		},
+		{
+			"label": "Beleginfo - Art 2",
+			"fieldname": "Beleginfo - Art 2",
+			"fieldtype": "Data",
+		},
+		{
+			"label": "Beleginfo - Inhalt 2",
+			"fieldname": "Beleginfo - Inhalt 2",
+			"fieldtype": "Data",
 		}
 	]
 
@@ -66,7 +91,12 @@ def get_gl_entries(filters, as_dict):
 			case gl.debit when 0 then 'H' else 'S' end as 'Soll/Haben-Kennzeichen',
 			coalesce(acc.account_number, acc_pa.account_number) as 'Kontonummer',
 			coalesce(acc_against.account_number, acc_against_pa.account_number) as 'Gegenkonto (ohne BU-Schlüssel)',
-			gl.posting_date as 'Belegdatum'
+			gl.posting_date as 'Belegdatum',
+			gl.remarks as 'Buchungstext',
+			gl.voucher_type as 'Beleginfo - Art 1',
+			gl.voucher_no as 'Beleginfo - Inhalt 1',
+			gl.against_voucher_type as 'Beleginfo - Art 2',
+			gl.against_voucher as 'Beleginfo - Inhalt 2'
 
 		from `tabGL Entry` gl
 
@@ -127,6 +157,11 @@ def get_datev_csv(data):
 		"Zinssperre",
 		# Digitaler Beleg
 		"Beleglink",
+		# Beleginfo
+		"Beleginfo - Art 1",
+		"Beleginfo - Inhalt 1",
+		"Beleginfo - Art 2",
+		"Beleginfo - Inhalt 2",
 		# Kostenrechnung
 		"Kost 1 - Kostenstelle",
 		"Kost 2 - Kostenstelle",
