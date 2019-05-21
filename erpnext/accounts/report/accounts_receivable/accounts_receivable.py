@@ -345,10 +345,13 @@ class ReceivablePayableReport(object):
 		level2_fieldname = "party" if level2 in ['Customer', 'Supplier'] else scrub(level2)
 
 		group_by = [None]
+		group_by_labels = {}
 		if level1 and level1 != "Ungrouped":
 			group_by.append(level1_fieldname)
+			group_by_labels[level1_fieldname] = level1
 		if level2 and level2 != "Ungrouped":
 			group_by.append(level2_fieldname)
+			group_by_labels[level2_fieldname] = level2
 
 		if len(group_by) <= 1:
 			return data
@@ -357,18 +360,18 @@ class ReceivablePayableReport(object):
 			if c['fieldtype'] in ['Float', 'Currency', 'Int'] and c['fieldname'] != 'age']
 
 		def postprocess_group(group_object, grouped_by):
-			group = grouped_by[-1]
-			group_object.totals['party'] = "'{0}: {1}'".format(frappe.unscrub(group.fieldname), group.value) if group.fieldname\
-				else "'Total'"
+			group_object.totals['party'] = "'Total'" if not group_object.group_field else\
+				"'{0}: {1}'".format(group_object.group_label, group_object.group_value)
 
-			if group.fieldname == 'party':
+			if group_object.group_field == 'party':
 				group_object.totals['currency'] = group_object.rows[0].get("currency")
 
-				group_object.tax_id = self.party_map.get(group.value, {}).get("tax_id")
-				group_object.payment_terms = self.party_map.get(group.value, {}).get("payment_terms")
-				group_object.credit_limit = self.party_map.get(group.value, {}).get("credit_limit")
+				group_object.tax_id = self.party_map.get(group_object.group_value, {}).get("tax_id")
+				group_object.payment_terms = self.party_map.get(group_object.group_value, {}).get("payment_terms")
+				group_object.credit_limit = self.party_map.get(group_object.group_value, {}).get("credit_limit")
 
-		return group_report_data(data, group_by, total_fields=total_fields, postprocess_group=postprocess_group)
+		return group_report_data(data, group_by, total_fields=total_fields, postprocess_group=postprocess_group,
+			group_by_labels=group_by_labels)
 
 	def allocate_pdc_amount_in_fifo(self, gle, row_outstanding):
 		pdc_list = self.pdc_details.get((gle.voucher_no, gle.party), [])
