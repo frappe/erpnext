@@ -28,14 +28,14 @@
    "fieldtype": "Section Break"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "response_time",
    "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Response Time"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "resolution_time",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -69,11 +69,12 @@
    "default": "0",
    "fieldname": "default_priority",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Default Priority"
   }
  ],
  "istable": 1,
- "modified": "2019-05-20 17:10:43.687547",
+ "modified": "2019-05-21 06:54:42.674377",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Priority",
