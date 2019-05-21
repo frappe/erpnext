@@ -220,17 +220,18 @@ def get_basic_details(args, item):
 	if item.variant_of:
 		item.update_template_tables()
 
-	from frappe.defaults import get_user_default_as_list
-	user_default_warehouse_list = get_user_default_as_list('Warehouse')
-	user_default_warehouse = user_default_warehouse_list[0] \
-		if len(user_default_warehouse_list) == 1 else ""
-
 	item_defaults = get_item_defaults(item.name, args.company)
 	item_group_defaults = get_item_group_defaults(item.name, args.company)
 	brand_defaults = get_brand_defaults(item.name, args.company)
 
-	warehouse = args.get("set_warehouse") or user_default_warehouse or item_defaults.get("default_warehouse") or\
-		item_group_defaults.get("default_warehouse") or brand_defaults.get("default_warehouse") or args.warehouse
+	warehouse = (args.get("set_warehouse") or item_defaults.get("default_warehouse") or
+		item_group_defaults.get("default_warehouse") or brand_defaults.get("default_warehouse") or args.warehouse)
+
+	if not warehouse:
+		defaults = frappe.defaults.get_defaults() or {}
+		if defaults.get("default_warehouse") and frappe.db.exists("Warehouse",
+			{'name': defaults.default_warehouse, 'company': args.company}):
+			warehouse = defaults.default_warehouse
 
 	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
