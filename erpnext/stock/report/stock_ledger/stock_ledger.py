@@ -69,7 +69,7 @@ def execute(filters=None):
 
 	update_included_uom_in_dict_report(columns, data, include_uom, conversion_factors)
 
-	data = get_grouped_data(filters, columns, data)
+	data = get_grouped_data(filters, data)
 	return columns, data
 
 def get_columns(show_amounts=True):
@@ -212,7 +212,7 @@ def get_opening_balance(item_code, warehouse, from_date, from_time="00:00:00"):
 
 	return row
 
-def get_grouped_data(filters, columns, data):
+def get_grouped_data(filters, data):
 	if not filters.get("group_by") or filters.get("group_by") == "Ungrouped":
 		return data
 
@@ -222,23 +222,27 @@ def get_grouped_data(filters, columns, data):
 		group_by += ['item_code', 'warehouse']
 	elif group_by_label == "Item":
 		group_by.append('item_code')
+	elif group_by_label == "Party":
+		group_by += ['party', 'party_type']
+	elif group_by_label == "Voucher":
+		group_by.append(('voucher_no', 'voucher_type'))
 	else:
 		group_by.append(scrub(group_by_label))
 
 	def postprocess_group(group_object, grouped_by):
-		if len(group_by) != len(grouped_by):
+		if group_by_label in ["Item-Warehouse", "Party"] and len(grouped_by) < 2:
 			return
 
 		group_header = frappe._dict({})
-		group_fieldnames = map(lambda d: d.fieldname, grouped_by)
-		if len(group_fieldnames) == 2 and 'item_code' in group_fieldnames and 'warehouse' in group_fieldnames and filters.from_date:
+		if 'item_code' in grouped_by and 'warehouse' in grouped_by and filters.from_date:
 			opening_dt = frappe.utils.get_datetime(group_object.rows[0].date)
 			opening_dt -= opening_dt.resolution
 			group_header = get_opening_balance(group_object.item_code, group_object.warehouse, opening_dt.date(), opening_dt.time())
 
-		for group in grouped_by:
-			group_header[group.fieldname] = group.value
+		for f, g in iteritems(grouped_by):
+			group_header[f] = g
 
+		group_header._bold = True
 		group_header._isGroupTotal = True
 		group_object.rows.insert(0, group_header)
 
