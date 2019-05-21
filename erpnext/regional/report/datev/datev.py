@@ -250,9 +250,10 @@ def download_datev_csv(filters=None):
 	validate_filters(filters)
 	data = get_gl_entries(filters, as_dict=1)
 
-	filename = 'DATEV_Buchungsstapel_{}-{}'.format(
+	filename = 'DATEV_Buchungsstapel_{}-{}_bis_{}'.format(
 		filters.get('company'),
-		filters.get('fiscal_year')
+		filters.get('from_date'),
+		filters.get('to_date')
 	)
 
 	frappe.response['result'] = get_datev_csv(data)
