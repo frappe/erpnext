@@ -281,7 +281,15 @@ def make_custom_fields(update=True):
 			dict(fieldname='hra_component', label='HRA Component',
 				fieldtype='Link', options='Salary Component', insert_after='basic_component'),
 			dict(fieldname='arrear_component', label='Arrear Component',
-				fieldtype='Link', options='Salary Component', insert_after='hra_component')
+				fieldtype='Link', options='Salary Component', insert_after='hra_component'),
+			dict(fieldname='bank_remittance_section', label='Bank Remittance Settings',
+				fieldtype='Section Break', collapsible=1, insert_after='arrear_component'),
+			dict(fieldname='client_code', label='Client Code', fieldtype='Data',
+				insert_after='bank_remittance_section'),
+			dict(fieldname='remittance_column_break', fieldtype='Column Break',
+				insert_after='client_code'),
+			dict(fieldname='product_code', label='Product Code', fieldtype='Data',
+				insert_after='remittance_column_break'),
 		],
 		'Employee Tax Exemption Declaration':[
 			dict(fieldname='hra_section', label='HRA Exemption',
@@ -362,9 +370,9 @@ def make_fixtures(company=None):
 			doc.flags.ignore_permissions = True
 			doc.insert()
 		except frappe.NameError:
-			pass
+			frappe.clear_messages()
 		except frappe.DuplicateEntryError:
-			pass
+			frappe.clear_messages()
 
 	# create records for Tax Withholding Category
 	set_tax_withholding_category(company)
