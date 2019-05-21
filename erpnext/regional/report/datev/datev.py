@@ -225,11 +225,10 @@ def get_datev_csv(data):
 	]
 
 	empty_df = pd.DataFrame(columns=columns)
-
 	data_df = pd.DataFrame.from_records(data)
-	data_df["Belegdatum"] = pd.to_datetime(data_df["Belegdatum"])
 
 	result = empty_df.append(data_df)
+	result["Belegdatum"] = pd.to_datetime(result["Belegdatum"])
 
 	return result.to_csv(
 		sep=b';',
