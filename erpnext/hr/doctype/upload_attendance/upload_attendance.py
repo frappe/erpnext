@@ -117,22 +117,25 @@ def upload():
 		raise frappe.PermissionError
 
 	from frappe.utils.csvutils import read_csv_content
+	rows = read_csv_content(frappe.local.uploaded_file)
+	if not rows:
+		frappe.throw(_("Please select a csv file"))
+	frappe.enqueue(import_attendances, rows=rows, now=True if len(rows) < 200 else False)
+
+def import_attendances(rows):
 	from frappe.modules import scrub
 
-	rows = read_csv_content(frappe.local.uploaded_file)
 	rows = list(filter(lambda x: x and any(x), rows))
-	if not rows:
-		msg = [_("Please select a csv file")]
-		return {"messages": msg, "error": msg}
 	columns = [scrub(f) for f in rows[4]]
 	columns[0] = "name"
 	columns[3] = "attendance_date"
+	rows = rows[5:]
 	ret = []
 	error = False
 
 	from frappe.utils.csvutils import check_record, import_doc
 
-	for i, row in enumerate(rows[5:]):
+	for i, row in enumerate(rows):
 		if not row: continue
 		row_idx = i + 5
 		d = frappe._dict(zip(columns, row))
@@ -144,6 +147,10 @@ def upload():
 		try:
 			check_record(d)
 			ret.append(import_doc(d, "Attendance", 1, row_idx, submit=True))
+			frappe.publish_realtime('import_attendance', dict(
+				progress=i,
+				total=len(rows)
+			))
 		except AttributeError:
 			pass
 		except Exception as e:
@@ -156,4 +163,8 @@ def upload():
 		frappe.db.rollback()
 	else:
 		frappe.db.commit()
-	return {"messages": ret, "error": error}
+
+	frappe.publish_realtime('import_attendance', dict(
+		messages=ret,
+		error=error
+	))
