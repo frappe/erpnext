@@ -1121,7 +1121,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		return {
 			"items": this._get_item_list(item),
 			"customer": me.frm.doc.customer || me.frm.doc.party_name,
-			"quotation_to": me.doc.frm.quotation_to,
+			"quotation_to": me.frm.doc.quotation_to,
 			"customer_group": me.frm.doc.customer_group,
 			"territory": me.frm.doc.territory,
 			"supplier": me.frm.doc.supplier,
