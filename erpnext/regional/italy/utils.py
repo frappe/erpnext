@@ -80,8 +80,7 @@ def prepare_invoice(invoice, progressive_number):
 		invoice.stamp_duty = stamp_duty_charge_row.tax_amount
 
 	for item in invoice.e_invoice_items:
-		if (item.tax_rate == 0.0 and item.tax_amount == 0.0
-			and item.charge_type != 'Actual' and tax_data.get("0.0")):
+		if item.tax_rate == 0.0 and item.tax_amount == 0.0 and tax_data.get("0.0"):
 			item.tax_exemption_reason = tax_data["0.0"]["tax_exemption_reason"]
 
 	customer_po_data = {}
