@@ -8,7 +8,7 @@
             <div class='card-body'>
                 <h5 class="card-title">{{ course.course_name }}</h5>
                 <span class="course-list text-muted" id="getting-started">
-                    {{ course.course_intro }}
+                    {{ course.course_intro.substring(0,120) }}
                 </span>
             </div>
             <div class='p-3' style="display: flex; justify-content: space-between;">
