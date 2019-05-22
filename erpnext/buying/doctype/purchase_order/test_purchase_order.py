@@ -196,7 +196,7 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_purchase_order_on_hold(self):
 		po = create_purchase_order(item_code="_Test Product Bundle Item")
 		po.db_set('Status', "On Hold")
-		pi = make_purchase_invoice(po.name)
+		pi = make_pi_from_po(po.name)
 		pr = make_purchase_receipt(po.name)
 		self.assertRaises(frappe.ValidationError, pr.submit)
 		self.assertRaises(frappe.ValidationError, pi.submit)
