@@ -44,7 +44,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 		frappe.throw(_("Not permitted for {0}").format(party), frappe.PermissionError)
 
 	party = frappe.get_doc(party_type, party)
-	currency = party.default_currency if party.default_currency else get_company_currency(company)
+	currency = party.default_currency if party.get("default_currency") else get_company_currency(company)
 
 	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_group)
 	out["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
@@ -140,7 +140,7 @@ def set_other_values(out, party, party_type):
 
 def get_default_price_list(party):
 	"""Return default price list for party (Document object)"""
-	if party.default_price_list:
+	if party.get("default_price_list"):
 		return party.default_price_list
 
 	if party.doctype == "Customer":

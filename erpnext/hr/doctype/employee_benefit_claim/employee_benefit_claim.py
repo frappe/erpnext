@@ -5,9 +5,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 from frappe.model.document import Document
 from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_max_benefits
-from erpnext.hr.utils import get_payroll_period, get_previous_claimed_amount
+from erpnext.hr.utils import get_previous_claimed_amount
+from erpnext.hr.doctype.payroll_period.payroll_period import get_payroll_period
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
 
 class EmployeeBenefitClaim(Document):
@@ -97,31 +99,28 @@ def get_benefit_pro_rata_ratio_amount(employee, on_date, sal_struct):
 				benefit_amount_total += benefit_amount
 	return benefit_amount_total
 
-def get_benefit_claim_amount(employee, start_date, end_date, salary_component):
-	query = """select claimed_amount from `tabEmployee Benefit Claim`
-	where employee=%(employee)s
-	and docstatus = 1 and pay_against_benefit_claim = 1
+def get_benefit_claim_amount(employee, start_date, end_date, salary_component=None):
+	query = """
+		select sum(claimed_amount)
+		from `tabEmployee Benefit Claim`
+		where
+			employee=%(employee)s
+			and docstatus = 1
+			and pay_against_benefit_claim = 1
+			and claim_date between %(start_date)s and %(end_date)s
 	"""
-	if not start_date:
-		query += "and claim_date <= %(end_date)s"
-	else:
-		query += "and (claim_date between %(start_date)s and %(end_date)s)"
 
 	if salary_component:
-		query += "and earning_component = %(earning_component)s"
+		query += " and earning_component = %(earning_component)s"
 
-	benefit_claim_details = frappe.db.sql(query, {
+	claimed_amount = flt(frappe.db.sql(query, {
 		'employee': employee,
 		'start_date': start_date,
 		'end_date': end_date,
 		'earning_component': salary_component
-	}, as_dict = True)
-	if benefit_claim_details:
-		claimed_amount = 0
-		for claim_detail in benefit_claim_details:
-			claimed_amount += claim_detail.claimed_amount
-		return claimed_amount
-	return False
+	})[0][0])
+
+	return claimed_amount
 
 def get_total_benefit_dispensed(employee, sal_struct, sal_slip_start_date, payroll_period):
 	pro_rata_amount = 0
@@ -140,11 +139,11 @@ def get_total_benefit_dispensed(employee, sal_struct, sal_slip_start_date, payro
 	else:
 		pro_rata_amount = get_benefit_pro_rata_ratio_amount(employee, sal_slip_start_date, sal_struct)
 
-	claimed_amount += get_benefit_claim_amount(employee, payroll_period.start_date, payroll_period.end_date, False)
+	claimed_amount += get_benefit_claim_amount(employee, payroll_period.start_date, payroll_period.end_date)
 
 	return claimed_amount + pro_rata_amount
 
-def get_last_payroll_period_benefits(employee, sal_slip_start_date, sal_slip_end_date, current_flexi_amount, payroll_period,  sal_struct):
+def get_last_payroll_period_benefits(employee, sal_slip_start_date, sal_slip_end_date, payroll_period,  sal_struct):
 	max_benefits = get_max_benefits(employee, payroll_period.end_date)
 	if not max_benefits:
 		max_benefits = 0
