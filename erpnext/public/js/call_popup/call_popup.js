@@ -1,8 +1,7 @@
 class CallPopup {
-	constructor({ contact, call_payload, last_communication }) {
-		this.number = call_payload.CallFrom;
-		this.contact = contact;
-		this.last_communication = last_communication;
+	constructor({ call_from, call_log }) {
+		this.number = call_from;
+		this.call_log = call_log;
 		this.make();
 	}
 
@@ -34,7 +33,7 @@ class CallPopup {
 				}
 			}]
 		});
-		this.set_call_status();
+		this.set_call_status(this.call_log.call_status);
 		this.make_customer_contact();
 		this.dialog.show();
 		this.dialog.get_close_btn().show();
@@ -62,48 +61,37 @@ class CallPopup {
 		}
 	}
 
-	make_last_communication_section() {
-		const last_communication_section = this.body.find('.last-communication');
-		const last_communication = frappe.ui.form.make_control({
-			parent: last_communication_section,
-			df: {
-				fieldtype: "Text",
-				label: "Last Communication",
-				fieldname: "last_communication",
-				'default': 'This is not working please helpppp',
-				"placeholder": __("Select or add new customer")
-			},
-		});
-		last_communication.set_value('This is not working please helpppp');
-	}
-
 	make_summary_section() {
 		//
 	}
 
-	set_call_status(status) {
+	set_call_status() {
 		let title = '';
-		if (status === 'incoming') {
+		if (this.call_log.call_status === 'Incoming') {
 			if (this.contact) {
 				title = __('Incoming call from {0}', [this.contact.name]);
 			} else {
 				title = __('Incoming call from unknown number');
 			}
+		} else {
+			title = __('Call Connected');
 		}
 		this.dialog.set_title(title);
 	}
 
 	update(data) {
-		// pass
+		this.call_log = data.call_log;
+		this.set_call_status();
 	}
 }
 
 $(document).on('app_ready', function () {
-	frappe.realtime.on('call_update', data => {
+	frappe.realtime.on('show_call_popup', data => {
 		if (!erpnext.call_popup) {
 			erpnext.call_popup = new CallPopup(data);
 		} else {
 			erpnext.call_popup.update(data);
+			erpnext.call_popup.dialog.show();
 		}
 	});
 });
