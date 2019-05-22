@@ -47,15 +47,6 @@ class LeaveAllocation(Document):
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
 
-	def on_update_after_submit(self):
-		self.validate_new_leaves_allocated_value()
-		self.set_total_leaves_allocated()
-
-		frappe.db.set(self,'carry_forwarded_leaves', flt(self.carry_forwarded_leaves))
-		frappe.db.set(self,'total_leaves_allocated',flt(self.total_leaves_allocated))
-
-		self.validate_against_leave_applications()
-
 	def validate_period(self):
 		if date_diff(self.to_date, self.from_date) <= 0:
 			frappe.throw(_("To date cannot be before from date"))
@@ -108,16 +99,6 @@ class LeaveAllocation(Document):
 		if date_difference < self.total_leaves_allocated:
 			frappe.throw(_("Total allocated leaves are more than days in the period"), OverAllocationError)
 
-	def validate_against_leave_applications(self):
-		leaves_taken = get_approved_leaves_for_period(self.employee, self.leave_type,
-			self.from_date, self.to_date)
-
-		if flt(leaves_taken) > flt(self.total_leaves_allocated):
-			if frappe.db.get_value("Leave Type", self.leave_type, "allow_negative"):
-				frappe.msgprint(_("Note: Total allocated leaves {0} shouldn't be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken))
-			else:
-				frappe.throw(_("Total allocated leaves {0} cannot be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken), LessAllocationError)
-
 	def create_leave_ledger_entry(self, submit=True):
 		if self.carry_forwarded_leaves:
 			expiry_days = frappe.db.get_value("Leave Type", self.leave_type, "carry_forward_leave_expiry")
@@ -134,7 +115,7 @@ class LeaveAllocation(Document):
 			to_date=self.to_date,
 			is_carry_forward=0
 		)
-		create_leave_ledger_entry(self, args)
+		create_leave_ledger_entry(self, args, submit)
 
 def get_leave_allocation_for_period(employee, leave_type, from_date, to_date):
 	leave_allocated = 0
@@ -161,13 +142,35 @@ def get_leave_allocation_for_period(employee, leave_type, from_date, to_date):
 
 @frappe.whitelist()
 def get_carry_forwarded_leaves(employee, leave_type, date, carry_forward=None):
-	leave_records = frappe.get_all("Leave Ledger Entry",
-		filters={'Employee':employee,
-		'leave_type':leave_type,
-		'to_date':("<=", date)},
-		fields=['leaves'])
+	carry_forwarded_leaves = 0
 
-	return sum(record.get("leaves") for record in leave_records)
+	if carry_forward:
+		validate_carry_forward(leave_type)
+
+		carry_forwarded_leaves =  frappe.db.sql("""
+			SELECT
+				SUM(leaves)
+			FROM `tabLeave Ledger Entry`
+			WHERE
+				employee=%s
+				AND leave_type=%s
+				AND docstatus=1
+				AND	to_date < %s
+				AND name NOT IN (
+					SELECT name
+					from `tabLeave Ledger Entry`
+					WHERE
+						employee=%s
+						AND leave_type=%s
+						AND docstatus=1
+						AND	to_date < %s
+						is_expired=1
+					ORDER BY creation DESC
+				)
+			ORDER BY creation DESC
+		""", (employee, leave_type, date), as_dict=1)
+
+	return carry_forwarded_leaves
 
 def validate_carry_forward(leave_type):
 	if not frappe.db.get_value("Leave Type", leave_type, "is_carry_forward"):
