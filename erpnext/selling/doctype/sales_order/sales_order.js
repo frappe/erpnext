@@ -140,12 +140,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 
 				// delivery note
-				if(flt(doc.per_delivered, 6) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
+				if(flt(doc.per_delivered, 6) < 100 && allow_delivery) {
 					this.frm.add_custom_button(__('Delivery'),
 						function() { me.make_delivery_note_based_on_delivery_date(); }, __("Make"));
-					this.frm.add_custom_button(__('Work Order'),
-						function() { me.make_work_order() }, __("Make"));
 
+					if(["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1){
+						this.frm.add_custom_button(__('Work Order'),
+							function() { me.make_work_order() }, __("Make"));
+
+						}
 					this.frm.page.set_inner_btn_group_as_primary(__("Make"));
 				}
 
