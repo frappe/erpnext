@@ -36,7 +36,7 @@ def order():
 	else:
 		return "success"
 
-	if event == "created":
+	if event in ["created", "Order created"]:
 		raw_billing_data = fd.get("billing")
 		customer_woo_com_email = raw_billing_data.get("email")
 
