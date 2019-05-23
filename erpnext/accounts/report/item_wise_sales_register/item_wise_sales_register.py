@@ -186,9 +186,6 @@ def get_tax_accounts(item_list, columns, company_currency,
 	invoice_item_row = {}
 	itemised_tax = {}
 
-	tax_amount_precision = get_field_precision(frappe.get_meta(tax_doctype).get_field("tax_amount"),
-		currency=company_currency) or 2
-
 	for d in item_list:
 		invoice_item_row.setdefault(d.parent, []).append(d)
 		item_row_map.setdefault(d.parent, {}).setdefault(d.item_code or d.item_name, []).append(d)
@@ -241,9 +238,8 @@ def get_tax_accounts(item_list, columns, company_currency,
 						item_tax_amount = flt((tax_amount * d.base_net_amount) / item_net_amount) \
 							if item_net_amount else 0
 						if item_tax_amount:
-							tax_value = flt(item_tax_amount, tax_amount_precision)
-							tax_value = (tax_value * -1
-								if (doctype == 'Purchase Invoice' and name in deducted_tax) else tax_value)
+							tax_value = (item_tax_amount * -1
+								if (doctype == 'Purchase Invoice' and name in deducted_tax) else item_tax_amount)
 
 							itemised_tax.setdefault(d.name, {})[description] = frappe._dict({
 								"tax_rate": tax_rate,
@@ -256,8 +252,7 @@ def get_tax_accounts(item_list, columns, company_currency,
 			for d in invoice_item_row.get(parent, []):
 				itemised_tax.setdefault(d.name, {})[description] = frappe._dict({
 					"tax_rate": "NA",
-					"tax_amount": flt((tax_amount * d.base_net_amount) / d.base_net_total,
-						tax_amount_precision)
+					"tax_amount": flt((tax_amount * d.base_net_amount) / d.base_net_total)
 				})
 
 	tax_columns.sort()

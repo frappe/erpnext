@@ -9,7 +9,7 @@
 {%- if address.state_code %}
 <Provincia>{{ address.state_code }}</Provincia>
 {%- endif %}
-<Nazione>{{ address.country_code|upper }}</Nazione>
+<Nazione>{{ address.country_code }}</Nazione>
 {%- endmacro %}
 
 {%- macro render_discount_or_margin(item) -%}
@@ -40,7 +40,7 @@
   <FatturaElettronicaHeader>
     <DatiTrasmissione>
       <IdTrasmittente>
-        <IdPaese>{{ doc.company_address_data.country_code|upper or "IT" }}</IdPaese>
+        <IdPaese>{{ doc.company_address_data.country_code }}</IdPaese>
         <IdCodice>{{ doc.company_fiscal_code or doc.company_tax_id | replace("IT","") }}</IdCodice>
       </IdTrasmittente>
       <ProgressivoInvio>{{ doc.progressive_number }}</ProgressivoInvio>
@@ -56,7 +56,7 @@
     <CedentePrestatore>
       <DatiAnagrafici>
         <IdFiscaleIVA>
-          <IdPaese>{{ doc.company_address_data.country_code|upper or "IT"}}</IdPaese>
+          <IdPaese>{{ doc.company_address_data.country_code }}</IdPaese>
           <IdCodice>{{ doc.company_tax_id | replace("IT","") }}</IdCodice>
         </IdFiscaleIVA>
         {%- if doc.company_fiscal_code %}
@@ -99,7 +99,7 @@
           <CodiceFiscale>{{ doc.customer_data.fiscal_code }}</CodiceFiscale>
           {%- else %}
           <IdFiscaleIVA>
-            <IdPaese>{{ doc.customer_address_data.country_code|upper or "IT" }}</IdPaese>
+            <IdPaese>{{ doc.customer_address_data.country_code }}</IdPaese>
             <IdCodice>{{ doc.tax_id | replace("IT","") }}</IdCodice>
           </IdFiscaleIVA>
           {%- endif %}
@@ -160,7 +160,7 @@
           <CodiceTipo>CODICE</CodiceTipo>
           <CodiceValore>{{ item.item_code }}</CodiceValore>
         </CodiceArticolo>
-        <Descrizione>{{ html2text(item.description) or item.item_name }}</Descrizione>
+        <Descrizione>{{ html2text(item.description or '') or item.item_name }}</Descrizione>
         <Quantita>{{ format_float(item.qty) }}</Quantita>
         <UnitaMisura>{{ item.stock_uom }}</UnitaMisura>
         <PrezzoUnitario>{{ format_float(item.price_list_rate or item.rate) }}</PrezzoUnitario>
@@ -199,7 +199,15 @@
         <ModalitaPagamento>{{ payment_term.mode_of_payment_code.split("-")[0] }}</ModalitaPagamento>
         <DataScadenzaPagamento>{{ payment_term.due_date }}</DataScadenzaPagamento>
         <ImportoPagamento>{{ format_float(payment_term.payment_amount) }}</ImportoPagamento>
-        {%- if payment_term.bank_account_iban %}<IBAN>{{ payment_term.bank_account_iban }}</IBAN>{%- endif %}
+        <IstitutoFinanziario>{{ payment_term.bank_account_name }}</IstitutoFinanziario>
+        {%- if payment_term.bank_account_iban %}
+          <IBAN>{{ payment_term.bank_account_iban }}</IBAN>
+          <ABI>{{ payment_term.bank_account_iban[5:10] }}</ABI>
+          <CAB>{{ payment_term.bank_account_iban[10:15] }}</CAB>
+        {%- endif %}
+        {%- if payment_term.bank_account_swift_number %}
+          <BIC>{{ payment_term.bank_account_swift_number }}</BIC>
+        {%- endif %}
       </DettaglioPagamento>
       {%- endfor %}
     </DatiPagamento>

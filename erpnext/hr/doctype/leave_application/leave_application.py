@@ -505,8 +505,6 @@ def add_department_leaves(events, start, end, employee, company):
 def add_leaves(events, start, end, filter_conditions=None):
 	conditions = []
 
-	if filter_conditions:
-		conditions.append(filter_conditions)
 
 	if not cint(frappe.db.get_value("HR Settings", None, "show_leaves_of_all_department_members_in_calendar")):
 		from frappe.desk.reportview import build_match_conditions
@@ -520,10 +518,13 @@ def add_leaves(events, start, end, filter_conditions=None):
 		from `tabLeave Application` where
 		from_date <= %(end)s and to_date >= %(start)s <= to_date
 		and docstatus < 2
-		and status!="Rejected" """
+		and status!='Rejected' """
 
 	if conditions:
 		query += ' and ' + ' and '.join(conditions)
+
+	if filter_conditions:
+		query += filter_conditions
 
 	for d in frappe.db.sql(query, {"start":start, "end": end}, as_dict=True):
 		e = {

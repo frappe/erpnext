@@ -189,7 +189,7 @@ def sales_invoice_validate(doc):
 	if not doc.company_address:
 		frappe.throw(_("Please set an Address on the Company '%s'" % doc.company), title=_("E-Invoicing Information Missing"))
 	else:
-		validate_address(doc.company_address, "Company")
+		validate_address(doc.company_address)
 
 	company_fiscal_regime = frappe.get_cached_value("Company", doc.company, 'fiscal_regime')
 	if not company_fiscal_regime:
@@ -217,7 +217,7 @@ def sales_invoice_validate(doc):
 	if not doc.customer_address:
 	 	frappe.throw(_("Please set the Customer Address"), title=_("E-Invoicing Information Missing"))
 	else:
-		validate_address(doc.customer_address, "Customer")
+		validate_address(doc.customer_address)
 
 	if not len(doc.taxes):
 		frappe.throw(_("Please set at least one row in the Taxes and Charges Table"), title=_("E-Invoicing Information Missing"))
@@ -252,15 +252,29 @@ def sales_invoice_on_submit(doc, method):
 
 	prepare_and_attach_invoice(doc)
 
-def prepare_and_attach_invoice(doc):
-	progressive_name, progressive_number = get_progressive_name_and_number(doc)
+def prepare_and_attach_invoice(doc, replace=False):
+	progressive_name, progressive_number = get_progressive_name_and_number(doc, replace)
 
 	invoice = prepare_invoice(doc, progressive_number)
 	invoice_xml = frappe.render_template('erpnext/regional/italy/e-invoice.xml', context={"doc": invoice}, is_path=True)
 	invoice_xml = invoice_xml.replace("&", "&amp;")
 
 	xml_filename = progressive_name + ".xml"
-	save_file(xml_filename, invoice_xml, dt=doc.doctype, dn=doc.name, is_private=True)
+	return save_file(xml_filename, invoice_xml, dt=doc.doctype, dn=doc.name, is_private=True)
+
+@frappe.whitelist()
+def generate_single_invoice(docname):
+	doc = frappe.get_doc("Sales Invoice", docname)
+
+	e_invoice = prepare_and_attach_invoice(doc, True)
+
+	content = None
+	with open(frappe.get_site_path('private', 'files', e_invoice.file_name), "r") as f:
+		content = f.read()
+
+	frappe.local.response.filename = e_invoice.file_name
+	frappe.local.response.filecontent = content
+	frappe.local.response.type = "download"
 
 #Delete e-invoice attachment on cancel.
 def sales_invoice_on_cancel(doc, method):
@@ -285,13 +299,14 @@ def get_e_invoice_attachments(invoice):
 
 	return out
 
-def validate_address(address_name, address_context):
-	pincode, city = frappe.db.get_value("Address", address_name, ["pincode", "city"])
-	if not pincode:
-		frappe.throw(_("Please set pin code on %s Address" % address_context), title=_("E-Invoicing Information Missing"))
-	if not city:
-		frappe.throw(_("Please set city on %s Address" % address_context), title=_("E-Invoicing Information Missing"))
+def validate_address(address_name):
+	fields = ["pincode", "city", "country_code"]
+	data = frappe.get_cached_value("Address", address_name, fields, as_dict=1) or {}
 
+	for field in fields:
+		if not data.get(field):
+			frappe.throw(_("Please set {0} for address {1}".format(field.replace('-',''), address_name)),
+				title=_("E-Invoicing Information Missing"))
 
 def get_unamended_name(doc):
 	attributes = ["naming_series", "amended_from"]
@@ -304,7 +319,13 @@ def get_unamended_name(doc):
 	else:
 		return doc.name
 
-def get_progressive_name_and_number(doc):
+def get_progressive_name_and_number(doc, replace=False):
+	if replace:
+		for attachment in get_e_invoice_attachments(doc):
+			remove_file(attachment.name, attached_to_doctype=doc.doctype, attached_to_name=doc.name)
+			filename = attachment.file_name.split(".xml")[0]
+			return filename, filename.split("_")[1]
+
 	company_tax_id = doc.company_tax_id if doc.company_tax_id.startswith("IT") else "IT" + doc.company_tax_id
 	progressive_name = frappe.model.naming.make_autoname(company_tax_id + "_.#####")
 	progressive_number = progressive_name.split("_")[1]
@@ -312,6 +333,9 @@ def get_progressive_name_and_number(doc):
 	return progressive_name, progressive_number
 
 def set_state_code(doc, method):
+	if doc.get('country_code'):
+		doc.country_code = doc.country_code.upper()
+
 	if not doc.get('state'):
 		return
 
@@ -319,4 +343,7 @@ def set_state_code(doc, method):
 		return
 
 	state_codes_lower = {key.lower():value for key,value in state_codes.items()}
-	doc.state_code = state_codes_lower.get(doc.get('state','').lower())
+
+	state = doc.get('state','').lower()
+	if state_codes_lower.get(state):
+		doc.state_code = state_codes_lower.get(state)
