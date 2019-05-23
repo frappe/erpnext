@@ -13,14 +13,6 @@ frappe.query_reports["Purchase Details"] = {
 			reqd: 1
 		},
 		{
-			fieldname: "view",
-			label: __("View Type"),
-			fieldtype: "Select",
-			options: ["Tree", "List"],
-			default: "Tree",
-			reqd: 1
-		},
-		{
 			fieldname: "doctype",
 			label: __("Based On"),
 			fieldtype: "Select",
@@ -40,14 +32,14 @@ frappe.query_reports["Purchase Details"] = {
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
-			default: frappe.defaults.get_user_default("year_start_date"),
+			default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
 			reqd: 1
 		},
 		{
-			fieldname:"to_date",
+			fieldname: "to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			default: frappe.defaults.get_user_default("year_end_date"),
+			default: frappe.datetime.get_today(),
 			reqd: 1
 		},
 		{
@@ -79,6 +71,36 @@ frappe.query_reports["Purchase Details"] = {
 			label: __("Brand"),
 			fieldtype: "Link",
 			options: "Brand"
+		},
+		{
+			fieldname: "group_by_1",
+			label: __("Group By Level 1"),
+			fieldtype: "Select",
+			options: ["Ungrouped", "Group by Supplier", "Group by Supplier Group", "Group by Transaction",
+				"Group by Item", "Group by Item Group", "Group by Brand"],
+			default: "Ungrouped"
+		},
+		{
+			fieldname: "group_by_2",
+			label: __("Group By Level 2"),
+			fieldtype: "Select",
+			options: ["Ungrouped", "Group by Supplier", "Group by Supplier Group", "Group by Transaction",
+				"Group by Item", "Group by Item Group", "Group by Brand"],
+			default: "Group by Supplier"
+		},
+		{
+			fieldname: "group_by_3",
+			label: __("Group By Level 3"),
+			fieldtype: "Select",
+			options: ["Ungrouped", "Group by Supplier", "Group by Supplier Group", "Group by Transaction",
+				"Group by Item", "Group by Item Group", "Group by Brand"],
+			default: "Group by Transaction"
+		},
+		{
+			fieldname: "group_same_items",
+			label: __("Group Same Items"),
+			fieldtype: "Check",
+			default: 1
 		},
 		{
 			fieldname: "include_taxes",

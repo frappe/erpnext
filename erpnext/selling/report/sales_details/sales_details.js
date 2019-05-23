@@ -13,14 +13,6 @@ frappe.query_reports["Sales Details"] = {
 			reqd: 1
 		},
 		{
-			fieldname: "view",
-			label: __("View Type"),
-			fieldtype: "Select",
-			options: ["Tree", "List"],
-			default: "Tree",
-			reqd: 1
-		},
-		{
 			fieldname: "doctype",
 			label: __("Based On"),
 			fieldtype: "Select",
@@ -91,6 +83,36 @@ frappe.query_reports["Sales Details"] = {
 			label: __("Sales Person"),
 			fieldtype: "Link",
 			options: "Sales Person"
+		},
+		{
+			fieldname: "group_by_1",
+			label: __("Group By Level 1"),
+			fieldtype: "Select",
+			options: ["Ungrouped", "Group by Customer", "Group by Customer Group", "Group by Transaction",
+				"Group by Item", "Group by Item Group", "Group by Brand", "Group by Territory", "Group by Sales Person"],
+			default: "Ungrouped"
+		},
+		{
+			fieldname: "group_by_2",
+			label: __("Group By Level 2"),
+			fieldtype: "Select",
+			options: ["Ungrouped", "Group by Customer", "Group by Customer Group", "Group by Transaction",
+				"Group by Item", "Group by Item Group", "Group by Brand", "Group by Territory", "Group by Sales Person"],
+			default: "Group by Customer"
+		},
+		{
+			fieldname: "group_by_3",
+			label: __("Group By Level 3"),
+			fieldtype: "Select",
+			options: ["Ungrouped", "Group by Customer", "Group by Customer Group", "Group by Transaction",
+				"Group by Item", "Group by Item Group", "Group by Brand", "Group by Territory", "Group by Sales Person"],
+			default: "Group by Transaction"
+		},
+		{
+			fieldname: "group_same_items",
+			label: __("Group Same Items"),
+			fieldtype: "Check",
+			default: 1
 		},
 		{
 			fieldname: "include_taxes",
