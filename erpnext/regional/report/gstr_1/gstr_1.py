@@ -149,7 +149,8 @@ class Gstr1Report(object):
 
 		if self.filters.get("type_of_business") ==  "B2B":
 			conditions += """ and ifnull(invoice_type, '') != 'Export' and is_return != 1
-				and customer in ('{0}')""".format("', '".join([frappe.db.escape(c.name) for c in customers]))
+				and customer in ('{0}') and (customer_gstin IS NOT NULL OR customer_gstin NOT IN ('', 'NA'))""".\
+					format("', '".join([frappe.db.escape(c.name) for c in customers]))
 
 		if self.filters.get("type_of_business") in ("B2C Large", "B2C Small"):
 			b2c_limit = frappe.db.get_single_value('GST Settings', 'b2c_limit')
