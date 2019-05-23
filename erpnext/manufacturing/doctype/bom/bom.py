@@ -170,13 +170,14 @@ class BOM(WebsiteGenerator):
 			rate = self.get_valuation_rate(arg)
 		elif arg:
 			if arg.get('bom_no') and self.set_rate_of_sub_assembly_item_based_on_bom:
-				rate = self.get_bom_unitcost(arg['bom_no'])
+				rate = self.get_bom_unitcost(arg['bom_no']) * (arg.get("conversion_factor") or 1)
 			else:
 				if self.rm_cost_as_per == 'Valuation Rate':
-					rate = self.get_valuation_rate(arg)
+					rate = self.get_valuation_rate(arg) * (arg.get("conversion_factor") or 1)
 				elif self.rm_cost_as_per == 'Last Purchase Rate':
-					rate = arg.get('last_purchase_rate') \
-						or frappe.db.get_value("Item", arg['item_code'], "last_purchase_rate")
+					rate = (arg.get('last_purchase_rate') \
+						or frappe.db.get_value("Item", arg['item_code'], "last_purchase_rate")) \
+							* (arg.get("conversion_factor") or 1)
 				elif self.rm_cost_as_per == "Price List":
 					if not self.buying_price_list:
 						frappe.throw(_("Please select Price List"))
@@ -189,7 +190,7 @@ class BOM(WebsiteGenerator):
 						"transaction_type": "buying",
 						"company": self.company,
 						"currency": self.currency,
-						"conversion_rate": self.conversion_rate or 1,
+						"conversion_rate": 1, # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
 						"conversion_factor": arg.get("conversion_factor") or 1,
 						"plc_conversion_rate": 1,
 						"ignore_party": True
@@ -207,7 +208,7 @@ class BOM(WebsiteGenerator):
 						frappe.msgprint(_("{0} not found for item {1}")
 							.format(self.rm_cost_as_per, arg["item_code"]), alert=True)
 
-		return flt(rate)
+		return flt(rate) / (self.conversion_rate or 1)
 
 	def update_cost(self, update_parent=True, from_child_bom=False, save=True):
 		if self.docstatus == 2:

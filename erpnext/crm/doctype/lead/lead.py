@@ -110,7 +110,7 @@ class Lead(SellingController):
 	def set_lead_name(self):
 		if not self.lead_name:
 			# Check for leads being created through data import
-			if not self.company_name:
+			if not self.company_name and not self.flags.ignore_mandatory:
 				frappe.throw(_("A Lead requires either a person's name or an organization's name"))
 
 			self.lead_name = self.company_name

@@ -80,6 +80,7 @@ class StockController(AccountsController):
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(sle.stock_value_difference, 2),
+							"is_opening": item_row.get("is_opening"),
 						}, warehouse_account[sle.warehouse]["account_currency"]))
 
 						# to target warehouse / expense account
@@ -89,7 +90,8 @@ class StockController(AccountsController):
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, 2),
-							"project": item_row.get("project") or self.get("project")
+							"project": item_row.get("project") or self.get("project"),
+							"is_opening": item_row.get("is_opening")
 						}))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
@@ -123,8 +125,17 @@ class StockController(AccountsController):
 
 	def get_voucher_details(self, default_expense_account, default_cost_center, sle_map):
 		if self.doctype == "Stock Reconciliation":
-			return [frappe._dict({ "name": voucher_detail_no, "expense_account": default_expense_account,
-				"cost_center": default_cost_center }) for voucher_detail_no, sle in sle_map.items()]
+			reconciliation_purpose = frappe.db.get_value(self.doctype, self.name, "purpose")
+			is_opening = "Yes" if reconciliation_purpose == "Opening Stock" else "No"
+			details = []
+			for voucher_detail_no in sle_map:
+				details.append(frappe._dict({
+					"name": voucher_detail_no,
+					"expense_account": default_expense_account,
+					"cost_center": default_cost_center,
+					"is_opening": is_opening
+				}))
+			return details
 		else:
 			details = self.get("items")
 
