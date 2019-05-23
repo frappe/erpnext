@@ -100,11 +100,14 @@ class ReceivablePayableReport(object):
 			self.filters["range2"] = "60"
 		if not "range3" in self.filters:
 			self.filters["range3"] = "90"
+		if not "range4" in self.filters:
+			self.filters["range4"] = "120"
 
 		for label in ("0-{range1}".format(range1=self.filters["range1"]),
 			"{range1}-{range2}".format(range1=cint(self.filters["range1"])+ 1, range2=self.filters["range2"]),
 			"{range2}-{range3}".format(range2=cint(self.filters["range2"])+ 1, range3=self.filters["range3"]),
-			"{range3}-{above}".format(range3=cint(self.filters["range3"])+ 1, above=_("Above"))):
+			"{range3}-{range4}".format(range3=cint(self.filters["range3"])+ 1, range4=self.filters["range4"]),
+			"{range4}-{above}".format(range4=cint(self.filters["range4"])+ 1, above=_("Above"))):
 				columns.append({
 					"label": label,
 					"fieldname":label,
@@ -328,18 +331,17 @@ class ReceivablePayableReport(object):
 			entry_date = gle.posting_date
 
 		row += get_ageing_data(cint(self.filters.range1), cint(self.filters.range2),
-			cint(self.filters.range3), self.age_as_on, entry_date, outstanding_amount)
-
+			cint(self.filters.range3), cint(self.filters.range4), self.age_as_on, entry_date, outstanding_amount)
 
 		# issue 6371-Ageing buckets should not have amounts if due date is not reached
 		if self.filters.ageing_based_on == "Due Date" \
 				and getdate(due_date) > getdate(self.filters.report_date):
-			row[-1]=row[-2]=row[-3]=row[-4]=0
+			row[-1]=row[-2]=row[-3]=row[-4]=row[-5]=0
 
 		if self.filters.ageing_based_on == "Supplier Invoice Date" \
 				and getdate(bill_date) > getdate(self.filters.report_date):
 
-			row[-1]=row[-2]=row[-3]=row[-4]=0
+			row[-1]=row[-2]=row[-3]=row[-4]=row[-5]=0
 
 		if self.filters.get(scrub(args.get("party_type"))):
 			row.append(gle.account_currency)
@@ -585,13 +587,13 @@ class ReceivablePayableReport(object):
 		return payment_term_map
 
 	def get_chart_data(self, columns, data):
-		ageing_columns = columns[self.ageing_col_idx_start : self.ageing_col_idx_start+4]
+		ageing_columns = columns[self.ageing_col_idx_start : self.ageing_col_idx_start+5]
 
 		rows = []
 		for d in data:
 			rows.append(
 				{
-					'values': d[self.ageing_col_idx_start : self.ageing_col_idx_start+4]
+					'values': d[self.ageing_col_idx_start : self.ageing_col_idx_start+5]
 				}
 			)
 
@@ -610,21 +612,22 @@ def execute(filters=None):
 	}
 	return ReceivablePayableReport(filters).run(args)
 
-def get_ageing_data(first_range, second_range, third_range, age_as_on, entry_date, outstanding_amount):
-	# [0-30, 30-60, 60-90, 90-above]
-	outstanding_range = [0.0, 0.0, 0.0, 0.0]
+def get_ageing_data(first_range, second_range, third_range,
+	fourth_range, age_as_on, entry_date, outstanding_amount):
+	# [0-30, 30-60, 60-90, 90-120, 120-above]
+	outstanding_range = [0.0, 0.0, 0.0, 0.0, 0.0]
 
 	if not (age_as_on and entry_date):
 		return [0] + outstanding_range
 
 	age = (getdate(age_as_on) - getdate(entry_date)).days or 0
 	index = None
-	for i, days in enumerate([first_range, second_range, third_range]):
+	for i, days in enumerate([first_range, second_range, third_range, fourth_range]):
 		if age <= days:
 			index = i
 			break
 
-	if index is None: index = 3
+	if index is None: index = 4
 	outstanding_range[index] = outstanding_amount
 
 	return [age] + outstanding_range
