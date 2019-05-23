@@ -151,7 +151,7 @@ def make_opportunity(source_name, target_doc=None):
 			"field_map": {
 				"campaign_name": "campaign",
 				"doctype": "opportunity_from",
-				"name": "lead",
+				"name": "party_name",
 				"lead_name": "contact_display",
 				"company_name": "customer_name",
 				"email_id": "contact_email",
