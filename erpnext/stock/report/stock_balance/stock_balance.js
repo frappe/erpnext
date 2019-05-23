@@ -52,9 +52,11 @@ frappe.query_reports["Stock Balance"] = {
 			"options": "Warehouse",
 			get_query: () => {
 				var warehouse_type = frappe.query_report.get_filter_value('warehouse_type');
-				return {
-					filters: {
-						'warehouse_type': warehouse_type
+				if(warehouse_type){
+					return {
+						filters: {
+							'warehouse_type': warehouse_type
+						}
 					}
 				}
 			}
