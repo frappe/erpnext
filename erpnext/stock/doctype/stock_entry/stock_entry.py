@@ -238,9 +238,8 @@ class StockEntry(StockController):
 		for d in self.get("items"):
 			if not d.expense_account:
 				frappe.throw(_("Please enter Difference Account"))
-			elif self.is_opening == "Yes" or not frappe.db.sql("""select name from `tabStock Ledger Entry` limit 1"""):
-				if frappe.db.get_value("Account", d.expense_account, "report_type") == "Profit and Loss":
-					frappe.throw(_("Difference Account must be a Asset/Liability type account, since this Stock Entry is an Opening Entry"), OpeningEntryAccountError)
+			elif self.is_opening == "Yes" and frappe.db.get_value("Account", d.expense_account, "report_type") == "Profit and Loss":
+				frappe.throw(_("Difference Account must be a Asset/Liability type account, since this Stock Entry is an Opening Entry"), OpeningEntryAccountError)
 
 	def validate_warehouse(self):
 		"""perform various (sometimes conditional) validations on warehouse"""
