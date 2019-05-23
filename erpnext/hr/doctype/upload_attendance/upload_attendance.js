@@ -42,7 +42,6 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 		var $log_wrapper = $(this.frm.fields_dict.import_log.wrapper).empty();
 
 		frappe.realtime.on('import_attendance', (data) => {
-			console.log(data)
 			if (data.progress) {
 				this.frm.dashboard.show_progress('Import Attendance', data.progress / data.total * 100,
 					__('Importing {0} of {1}', [data.progress, data.total]));
