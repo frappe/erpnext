@@ -1,0 +1,17 @@
+version: 2
+jobs:
+  release:
+    docker:
+      - image: circleci/node:8
+    steps:
+      - checkout
+      - run: npx semantic-release
+
+workflows:
+  version: 2
+  release_github:
+    jobs:
+      - release:
+          filters:
+            branches:
+              only: bloomstack-production
