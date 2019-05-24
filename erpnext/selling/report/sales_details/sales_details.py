@@ -225,6 +225,9 @@ class SalesPurchaseDetailsReport(object):
 			data = group_report_data(data, ("item_code", "uom", "voucher_no"), calculate_totals=self.calculate_group_totals,
 				totals_only=True)
 
+		if len(self.group_by) <= 1:
+			return data
+
 		return group_report_data(data, self.group_by, calculate_totals=self.calculate_group_totals)
 
 	def calculate_group_totals(self, data, group_field, group_value, grouped_by):
@@ -488,7 +491,7 @@ class SalesPurchaseDetailsReport(object):
 				"label": _("Qty"),
 				"fieldtype": "Float",
 				"fieldname": "qty",
-				"width": 90
+				"width": 80
 			},
 		]
 
