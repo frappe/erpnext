@@ -83,6 +83,8 @@ class SalesPurchaseDetailsReport(object):
 		is_opening_condition = "and s.is_opening != 'Yes'" if self.filters.doctype in ['Sales Invoice', 'Purchase Invoice']\
 			else ""
 
+		stin_field = ", s.stin" if self.filters.doctype == "Sales Invoice" else ""
+
 		amount_fields = ", ".join(["i."+f for f in self.amount_fields])
 
 		filter_conditions = self.get_conditions()
@@ -96,6 +98,7 @@ class SalesPurchaseDetailsReport(object):
 				i.uom, i.stock_uom, i.alt_uom,
 				i.brand, i.item_group,
 				{amount_fields} {party_group_field} {sales_person_field} {territory_field}
+				{stin_field}
 			from 
 				`tab{doctype} Item` i, `tab{doctype}` s {sales_person_table} {supplier_table}
 			where i.parent = s.name and s.docstatus = 1 and s.company = %(company)s
@@ -112,6 +115,7 @@ class SalesPurchaseDetailsReport(object):
 			amount_fields=amount_fields,
 			date_field=self.date_field,
 			doctype=self.filters.doctype,
+			stin_field=stin_field,
 			sales_person_field=sales_person_field,
 			sales_person_table=sales_person_table,
 			sales_person_condition=sales_person_condition,
@@ -261,6 +265,7 @@ class SalesPurchaseDetailsReport(object):
 					if f in data[0]:
 						totals[f] = data[0][f]
 				totals['date'] = data[0].get('date')
+				totals['stin'] = data[0].get('stin')
 
 			if 'item_code' in grouped_by:
 				totals['group_doctype'] = "Item Group"
@@ -444,6 +449,17 @@ class SalesPurchaseDetailsReport(object):
 					"options": self.filters.doctype,
 					"width": 140
 				},
+			]
+
+			if self.filters.doctype == "Sales Invoice":
+				columns.append({
+					"label": _("Inv #"),
+					"fieldtype": "Int",
+					"fieldname": "stin",
+					"width": 60
+				})
+
+			columns += [
 				{
 					"label": _(self.filters.party_type),
 					"fieldtype": "Link",
