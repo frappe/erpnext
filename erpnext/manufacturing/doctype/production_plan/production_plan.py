@@ -428,7 +428,7 @@ def download_raw_materials(production_plan):
 				item_list.append(['', '', '', '', bin_dict.get('warehouse'),
 					bin_dict.get('projected_qty'), bin_dict.get('actual_qty')])
 
-	build_csv_response(item_list)
+	build_csv_response(item_list, doc.name)
 
 def get_exploded_items(item_details, company, bom_no, include_non_stock_items, planned_qty=1):
 	for d in frappe.db.sql("""select bei.item_code, item.default_bom as bom,

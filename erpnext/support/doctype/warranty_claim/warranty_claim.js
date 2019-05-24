@@ -93,4 +93,4 @@ cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 			]
 		}
 	}
-}l
+};

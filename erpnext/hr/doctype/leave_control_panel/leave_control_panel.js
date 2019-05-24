@@ -3,11 +3,8 @@
 
 frappe.ui.form.on("Leave Control Panel", {
 	onload: function(frm) {
-		if (!frm.doc.posting_date) {
-			frm.set_value('posting_date', frappe.datetime.get_today());
-		}
-		if (!frm.doc.leave_transaction_type) {
-			frm.set_value('leave_transaction_type', 'Allocation');
+		if (!frm.doc.from_date) {
+			frm.set_value('from_date', frappe.datetime.get_today());
 		}
 	},
 	refresh: function(frm) {
@@ -23,8 +20,5 @@ frappe.ui.form.on("Leave Control Panel", {
 				};
 			});
 		}
-	},
-	allocation_type: function (frm) {
-		frm.set_value('no_of_days', '');
 	}
 });

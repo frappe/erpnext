@@ -11,7 +11,7 @@ frappe.ui.form.on('Appraisal', {
 	},
 	onload: function(frm) {
 		if(!frm.doc.status) {
-			frm.set_value('status', 'Open');
+			frm.set_value('status', 'Draft');
 		}
 	},
 	kra_template: function(frm) {
