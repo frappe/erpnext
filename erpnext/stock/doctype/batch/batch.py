@@ -257,10 +257,10 @@ def get_batches(item_code, warehouse, qty=1, throw=False):
 		'on (`tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no )'
 		'where `tabStock Ledger Entry`.item_code = %s and  `tabStock Ledger Entry`.warehouse = %s '
 		'and (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL)'
-		'group by batch_id '
+		'group by batch_id having qty > 0'
 		'order by `tabBatch`.expiry_date ASC, `tabBatch`.creation ASC',
 		(item_code, warehouse),
-		as_dict=True
+		as_dict=True, debug=1
 	)
 
 	return batches
