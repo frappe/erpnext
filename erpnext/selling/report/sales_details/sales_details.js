@@ -115,8 +115,23 @@ frappe.query_reports["Sales Details"] = {
 			default: 1
 		},
 		{
+			fieldname: "show_basic_values",
+			label: __("Show Basic Values"),
+			fieldtype: "Check"
+		},
+		{
+			fieldname: "show_tax_exclusive_values",
+			label: __("Show Tax Exclusive Values"),
+			fieldtype: "Check"
+		},
+		{
+			fieldname: "show_discount_values",
+			label: __("Show Discount Values"),
+			fieldtype: "Check"
+		},
+		{
 			fieldname: "include_taxes",
-			label: __("Include Taxes"),
+			label: __("Show Detailed Taxes"),
 			fieldtype: "Check"
 		},
 	],
