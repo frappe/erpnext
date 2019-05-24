@@ -37,7 +37,8 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname":"group_by",
 			"label": __("Group by"),
 			"fieldtype": "Select",
-			"options": ["", __("Group by Voucher"), __("Group by Account"), __("Group by Party")]
+			"options": [__("Ungrouped"), __("Group by Voucher"), __("Group by Account"), __("Group by Party")],
+			"default": __("Ungrouped")
 		},
 		{
 			"fieldname": "presentation_currency",
@@ -125,6 +126,12 @@ frappe.query_reports["General Ledger"] = {
 					}
 				}
 			}
+		},
+		{
+			"fieldname":"sales_person",
+			"label": __("Sales Person"),
+			"fieldtype": "Link",
+			"options": "Sales Person",
 		},
 		{
 			"fieldname":"voucher_no",
