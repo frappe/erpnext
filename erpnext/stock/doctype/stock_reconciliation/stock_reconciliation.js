@@ -76,6 +76,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 
 	set_valuation_rate_and_qty: function(frm, cdt, cdn) {
 		var d = frappe.model.get_doc(cdt, cdn);
+
 		if(d.item_code && d.warehouse) {
 			frappe.call({
 				method: "erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_stock_balance_for",
@@ -83,7 +84,8 @@ frappe.ui.form.on("Stock Reconciliation", {
 					item_code: d.item_code,
 					warehouse: d.warehouse,
 					posting_date: frm.doc.posting_date,
-					posting_time: frm.doc.posting_time
+					posting_time: frm.doc.posting_time,
+					batch_no: d.batch_no
 				},
 				callback: function(r) {
 					frappe.model.set_value(cdt, cdn, "qty", r.message.qty);
@@ -152,9 +154,22 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 		frm.events.set_item_code(frm, cdt, cdn);
 	},
 	warehouse: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if (child.batch_no) {
+			frappe.model.set_value(child.cdt, child.cdn, "batch_no", "");
+		}
+
 		frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
 	},
 	item_code: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if (child.batch_no) {
+			frappe.model.set_value(child.cdt, child.cdn, "batch_no", "");
+		}
+
+		frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
+	},
+	batch_no: function(frm, cdt, cdn) {
 		frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
 	},
 	qty: function(frm, cdt, cdn) {

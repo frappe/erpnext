@@ -11,6 +11,7 @@ from erpnext.controllers.stock_controller import StockController
 from erpnext.accounts.utils import get_company_default
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.utils import get_stock_balance, get_incoming_rate, get_available_serial_nos
+from erpnext.stock.doctype.batch.batch import get_batch_qty
 
 class OpeningEntryAccountError(frappe.ValidationError): pass
 class EmptyStockReconciliationItemsError(frappe.ValidationError): pass
@@ -44,7 +45,7 @@ class StockReconciliation(StockController):
 		self.difference_amount = 0.0
 		def _changed(item):
 			item_dict = get_stock_balance_for(item.item_code, item.warehouse,
-				self.posting_date, self.posting_time)
+				self.posting_date, self.posting_time, batch_no=item.batch_no)
 
 			if ((item.qty==None or item.qty==item_dict.get("qty"))
 				and (item.valuation_rate==None or item.valuation_rate==item_dict.get("rate"))):
@@ -90,10 +91,15 @@ class StockReconciliation(StockController):
 
 		for row_num, row in enumerate(self.items):
 			# find duplicates
-			if [row.item_code, row.warehouse] in item_warehouse_combinations:
+			key = [row.item_code, row.warehouse]
+			for field in ['serial_no', 'batch_no']:
+				if row.get(field):
+					key.append(row.get(field))
+
+			if key in item_warehouse_combinations:
 				self.validation_messages.append(_get_msg(row_num, _("Duplicate entry")))
 			else:
-				item_warehouse_combinations.append([row.item_code, row.warehouse])
+				item_warehouse_combinations.append(key)
 
 			self.validate_item(row.item_code, row)
 
@@ -155,8 +161,11 @@ class StockReconciliation(StockController):
 				raise frappe.ValidationError(_("Serial nos are required for serialized item {0}").format(item_code))
 
 			# item managed batch-wise not allowed
-			if item.has_batch_no and not row.batch:
+			if item.has_batch_no and not row.batch_no and not item.create_new_batch:
 				raise frappe.ValidationError(_("Batch no is required for batched item {0}").format(item_code))
+
+			if self._action=="submit" and item.create_new_batch:
+				self.make_batches('warehouse')
 
 			# docstatus should be < 2
 			validate_cancelled_item(item_code, item.docstatus, verbose=0)
@@ -171,7 +180,7 @@ class StockReconciliation(StockController):
 
 		sl_entries = []
 		for row in self.items:
-			if row.serial_no:
+			if row.serial_no or row.batch_no:
 				self.get_sle_for_serialized_items(row, sl_entries)
 			else:
 				previous_sle = get_previous_sle({
@@ -205,14 +214,19 @@ class StockReconciliation(StockController):
 		from erpnext.stock.stock_ledger import get_previous_sle
 
 		# To issue existing serial nos
-		if row.current_serial_no:
+		if row.current_qty and (row.current_serial_no or row.batch_no):
 			args = self.get_sle_for_items(row)
 			args.update({
 				'actual_qty': -1 * row.current_qty,
 				'serial_no': row.current_serial_no,
-				'qty_after_transaction': 0,
+				'batch_no': row.batch_no,
 				'valuation_rate': row.current_valuation_rate
 			})
+
+			if row.current_serial_no:
+				args.update({
+					'qty_after_transaction': 0,
+				})
 
 			sl_entries.append(args)
 
@@ -265,7 +279,7 @@ class StockReconciliation(StockController):
 		if not serial_nos and row.serial_no:
 			serial_nos = get_serial_nos(row.serial_no)
 
-		return frappe._dict({
+		data = frappe._dict({
 			"doctype": "Stock Ledger Entry",
 			"item_code": row.item_code,
 			"warehouse": row.warehouse,
@@ -276,10 +290,15 @@ class StockReconciliation(StockController):
 			"company": self.company,
 			"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
 			"is_cancelled": "No" if self.docstatus != 2 else "Yes",
-			"qty_after_transaction": flt(row.qty, row.precision("qty")),
 			"serial_no": '\n'.join(serial_nos) if serial_nos else '',
+			"batch_no": row.batch_no,
 			"valuation_rate": flt(row.valuation_rate, row.precision("valuation_rate"))
 		})
+
+		if not row.batch_no:
+			data.qty_after_transaction = flt(row.qty, row.precision("qty"))
+
+		return data
 
 	def delete_and_repost_sle(self):
 		"""	Delete Stock Ledger Entries related to this voucher
@@ -295,7 +314,7 @@ class StockReconciliation(StockController):
 
 		sl_entries = []
 		for row in self.items:
-			if row.serial_no:
+			if row.serial_no or row.batch_no:
 				self.get_sle_for_serialized_items(row, sl_entries)
 
 		if sl_entries:
@@ -395,40 +414,50 @@ def get_items(warehouse, posting_date, posting_time, company):
 	return res
 
 @frappe.whitelist()
-def get_stock_balance_for(item_code, warehouse, posting_date, posting_time, with_valuation_rate= True):
+def get_stock_balance_for(item_code, warehouse,
+	posting_date, posting_time, batch_no=None, with_valuation_rate= True):
 	frappe.has_permission("Stock Reconciliation", "write", throw = True)
 
-	has_serial_no = frappe.get_cached_value("Item", item_code, "has_serial_no")
+	item_dict = frappe.db.get_value("Item", item_code,
+		["has_serial_no", "has_batch_no"], as_dict=1)
 
 	serial_nos = ""
-	if has_serial_no:
+	if item_dict.get("has_serial_no"):
 		qty, rate, serial_nos = get_qty_rate_for_serial_nos(item_code,
-			warehouse, posting_date, posting_time)
+			warehouse, posting_date, posting_time, item_dict)
 	else:
 		qty, rate = get_stock_balance(item_code, warehouse,
 			posting_date, posting_time, with_valuation_rate=with_valuation_rate)
 
+	if item_dict.get("has_batch_no"):
+		qty = get_batch_qty(batch_no, warehouse) or 0
+
+	print(qty, rate, batch_no, warehouse)
 	return {
 		'qty': qty,
 		'rate': rate,
 		'serial_nos': serial_nos
 	}
 
-def get_qty_rate_for_serial_nos(item_code, warehouse, posting_date, posting_time):
+def get_qty_rate_for_serial_nos(item_code, warehouse, posting_date, posting_time, item_dict):
+	args = {
+		"item_code": item_code,
+		"warehouse": warehouse,
+		"posting_date": posting_date,
+		"posting_time": posting_time,
+	}
+
 	serial_nos_list = [serial_no.get("name")
 			for serial_no in get_available_serial_nos(item_code, warehouse)]
 
 	qty = len(serial_nos_list)
 	serial_nos = '\n'.join(serial_nos_list)
-
-	rate = get_incoming_rate({
-		"item_code": item_code,
-		"warehouse": warehouse,
-		"posting_date": posting_date,
-		"posting_time": posting_time,
-		"qty": qty,
-		"serial_no":serial_nos,
+	args.update({
+		'qty': qty,
+		"serial_nos": serial_nos
 	})
+
+	rate = get_incoming_rate(args)
 
 	return qty, rate, serial_nos
 
