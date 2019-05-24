@@ -15,7 +15,8 @@ frappe.query_reports["BOM Stock Calculated"] = {
 			"fieldname": "qty_to_make",
 			"label": __("Quantity to Make"),
 			"fieldtype": "Int",
-			"default": "1"
+			"default": "1",
+			"reqd": 1
 		},
 		{
 			"fieldname": "show_exploded_view",
