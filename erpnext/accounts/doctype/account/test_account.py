@@ -142,9 +142,11 @@ def _make_test_records(verbose):
 		["_Test Write Off", "Indirect Expenses", 0, None, None],
 		["_Test Exchange Gain/Loss", "Indirect Expenses", 0, None, None],
 
+		["_Test Account Sales", "Direct Income", 0, None, None],
+
 		# related to Account Inventory Integration
 		["_Test Account Stock In Hand", "Current Assets", 0, None, None],
-		
+
 		# fixed asset depreciation
 		["_Test Fixed Asset", "Current Assets", 0, "Fixed Asset", None],
 		["_Test Accumulated Depreciations", "Current Assets", 0, None, None],
@@ -181,13 +183,17 @@ def get_inventory_account(company, warehouse=None):
 	return account
 
 def create_account(**kwargs):
-	account = frappe.get_doc(dict(
-		doctype = "Account",
-		account_name = kwargs.get('account_name'),
-		account_type = kwargs.get('account_type'),
-		parent_account = kwargs.get('parent_account'),
-		company = kwargs.get('company')
-	))
-	
-	account.save()
-	return account.name
+	account = frappe.db.get_value("Account", filters={"account_name": kwargs.get("account_name"), "company": kwargs.get("company")})
+	if account:
+		return account
+	else:
+		account = frappe.get_doc(dict(
+			doctype = "Account",
+			account_name = kwargs.get('account_name'),
+			account_type = kwargs.get('account_type'),
+			parent_account = kwargs.get('parent_account'),
+			company = kwargs.get('company')
+		))
+
+		account.save()
+		return account.name

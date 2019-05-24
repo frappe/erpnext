@@ -21,7 +21,7 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 
 	refresh: function(frm) {
 		if(frm.doc.docstatus==1) {
-			frm.add_custom_button(__('Make Journal Entry'), function() {
+			frm.add_custom_button(__('Create Journal Entry'), function() {
 				return frm.events.make_jv(frm);
 			});
 		}
@@ -54,7 +54,7 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 			d.gain_loss = flt(d.new_balance_in_base_currency, precision("new_balance_in_base_currency", d)) - flt(d.balance_in_base_currency, precision("balance_in_base_currency", d));
 			total_gain_loss += flt(d.gain_loss, precision("gain_loss", d));
 		});
-		
+
 		frm.set_value("total_gain_loss", flt(total_gain_loss, precision("total_gain_loss")));
 		frm.refresh_fields();
 	},

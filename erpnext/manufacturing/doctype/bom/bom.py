@@ -169,45 +169,48 @@ class BOM(WebsiteGenerator):
 		if arg.get('scrap_items'):
 			rate = self.get_valuation_rate(arg)
 		elif arg:
-			if arg.get('bom_no') and self.set_rate_of_sub_assembly_item_based_on_bom:
-				rate = self.get_bom_unitcost(arg['bom_no'])
-			else:
-				if self.rm_cost_as_per == 'Valuation Rate':
-					rate = self.get_valuation_rate(arg)
-				elif self.rm_cost_as_per == 'Last Purchase Rate':
-					rate = arg.get('last_purchase_rate') \
-						or frappe.db.get_value("Item", arg['item_code'], "last_purchase_rate")
-				elif self.rm_cost_as_per == "Price List":
-					if not self.buying_price_list:
-						frappe.throw(_("Please select Price List"))
-					args = frappe._dict({
-						"doctype": "BOM",
-						"price_list": self.buying_price_list,
-						"qty": arg.get("qty") or 1,
-						"uom": arg.get("uom") or arg.get("stock_uom"),
-						"stock_uom": arg.get("stock_uom"),
-						"transaction_type": "buying",
-						"company": self.company,
-						"currency": self.currency,
-						"conversion_rate": self.conversion_rate or 1,
-						"conversion_factor": arg.get("conversion_factor") or 1,
-						"plc_conversion_rate": 1,
-						"ignore_party": True
-					})
-					item_doc = frappe.get_doc("Item", arg.get("item_code"))
-					out = frappe._dict()
-					get_price_list_rate(args, item_doc, out)
-					rate = out.price_list_rate
+			#Customer Provided parts will have zero rate
+			if not frappe.db.get_value('Item', arg["item_code"], 'is_customer_provided_item'):
+				if arg.get('bom_no') and self.set_rate_of_sub_assembly_item_based_on_bom:
+					rate = self.get_bom_unitcost(arg['bom_no']) * (arg.get("conversion_factor") or 1)
+				else:
+					if self.rm_cost_as_per == 'Valuation Rate':
+						rate = self.get_valuation_rate(arg) * (arg.get("conversion_factor") or 1)
+					elif self.rm_cost_as_per == 'Last Purchase Rate':
+						rate = (arg.get('last_purchase_rate') \
+							or frappe.db.get_value("Item", arg['item_code'], "last_purchase_rate")) \
+								* (arg.get("conversion_factor") or 1)
+					elif self.rm_cost_as_per == "Price List":
+						if not self.buying_price_list:
+							frappe.throw(_("Please select Price List"))
+						args = frappe._dict({
+							"doctype": "BOM",
+							"price_list": self.buying_price_list,
+							"qty": arg.get("qty") or 1,
+							"uom": arg.get("uom") or arg.get("stock_uom"),
+							"stock_uom": arg.get("stock_uom"),
+							"transaction_type": "buying",
+							"company": self.company,
+							"currency": self.currency,
+							"conversion_rate": 1, # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
+							"conversion_factor": arg.get("conversion_factor") or 1,
+							"plc_conversion_rate": 1,
+							"ignore_party": True
+						})
+						item_doc = frappe.get_doc("Item", arg.get("item_code"))
+						out = frappe._dict()
+						get_price_list_rate(args, item_doc, out)
+						rate = out.price_list_rate
 
-				if not rate:
-					if self.rm_cost_as_per == "Price List":
-						frappe.msgprint(_("Price not found for item {0} and price list {1}")
-							.format(arg["item_code"], self.buying_price_list), alert=True)
-					else:
-						frappe.msgprint(_("{0} not found for item {1}")
-							.format(self.rm_cost_as_per, arg["item_code"]), alert=True)
+					if not rate:
+						if self.rm_cost_as_per == "Price List":
+							frappe.msgprint(_("Price not found for item {0} in price list {1}")
+								.format(arg["item_code"], self.buying_price_list), alert=True)
+						else:
+							frappe.msgprint(_("{0} not found for item {1}")
+								.format(self.rm_cost_as_per, arg["item_code"]), alert=True)
 
-		return flt(rate)
+		return flt(rate) / (self.conversion_rate or 1)
 
 	def update_cost(self, update_parent=True, from_child_bom=False, save=True):
 		if self.docstatus == 2:
@@ -275,7 +278,7 @@ class BOM(WebsiteGenerator):
 			last_valuation_rate = frappe.db.sql("""select valuation_rate
 				from `tabStock Ledger Entry`
 				where item_code = %s and valuation_rate > 0
-				order by posting_date desc, posting_time desc, name desc limit 1""", args['item_code'])
+				order by posting_date desc, posting_time desc, creation desc limit 1""", args['item_code'])
 
 			valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
 
@@ -580,7 +583,7 @@ def get_list_context(context):
 	context.title = _("Bill of Materials")
 	# context.introduction = _('Boms')
 
-def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_items=0, include_non_stock_items=False):
+def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_items=0, include_non_stock_items=False, fetch_qty_in_stock_uom=True):
 	item_dict = {}
 
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
@@ -588,7 +591,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				bom_item.item_code,
 				bom_item.idx,
 				item.item_name,
-				sum(bom_item.stock_qty/ifnull(bom.quantity, 1)) * %(qty)s as qty,
+				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * %(qty)s as qty,
 				item.description,
 				item.image,
 				item.stock_uom,
@@ -616,16 +619,18 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 		query = query.format(table="BOM Explosion Item",
 			where_conditions="",
 			is_stock_item=is_stock_item,
+			qty_field="stock_qty",
 			select_columns = """, bom_item.source_warehouse, bom_item.operation, bom_item.include_item_in_manufacturing,
-				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s ) as idx""")
+				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1) as idx""")
 
 		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	elif fetch_scrap_items:
-		query = query.format(table="BOM Scrap Item", where_conditions="", select_columns=", bom_item.idx", is_stock_item=is_stock_item)
+		query = query.format(table="BOM Scrap Item", where_conditions="", select_columns=", bom_item.idx", is_stock_item=is_stock_item, qty_field="stock_qty")
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", where_conditions="", is_stock_item=is_stock_item,
-			select_columns = ", bom_item.source_warehouse, bom_item.idx, bom_item.operation, bom_item.include_item_in_manufacturing")
+			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
+			select_columns = ", bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse, bom_item.idx, bom_item.operation, bom_item.include_item_in_manufacturing")
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 
 	for item in items:
@@ -678,6 +683,9 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 		frappe.msgprint(_('Please select a BOM'))
 		return
 
+	if parent:
+		frappe.form_dict.parent = parent
+
 	if frappe.form_dict.parent:
 		bom_doc = frappe.get_doc("BOM", frappe.form_dict.parent)
 		frappe.has_permission("BOM", doc=bom_doc, throw=True)
@@ -690,7 +698,7 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 		item_names = tuple(d.get('item_code') for d in bom_items)
 
 		items = frappe.get_list('Item',
-			fields=['image', 'description', 'name'],
+			fields=['image', 'description', 'name', 'stock_uom', 'item_name'],
 			filters=[['name', 'in', item_names]]) # to get only required item dicts
 
 		for bom_item in bom_items:

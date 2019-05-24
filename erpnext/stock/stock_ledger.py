@@ -432,7 +432,7 @@ def get_stock_ledger_entries(previous_sle, operator=None, order="desc", limit=No
 		where item_code = %%(item_code)s
 		and ifnull(is_cancelled, 'No')='No'
 		%(conditions)s
-		order by timestamp(posting_date, posting_time) %(order)s, name %(order)s
+		order by timestamp(posting_date, posting_time) %(order)s, creation %(order)s
 		%(limit)s %(for_update)s""" % {
 			"conditions": conditions,
 			"limit": limit or "",
@@ -450,14 +450,14 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 		from `tabStock Ledger Entry`
 		where item_code = %s and warehouse = %s
 		and valuation_rate >= 0
-		order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse))
+		order by posting_date desc, posting_time desc, creation desc limit 1""", (item_code, warehouse))
 
 	if not last_valuation_rate:
 		# Get valuation rate from last sle for the item against any warehouse
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry`
 			where item_code = %s and valuation_rate > 0
-			order by posting_date desc, posting_time desc, name desc limit 1""", item_code)
+			order by posting_date desc, posting_time desc, creation desc limit 1""", item_code)
 
 	if last_valuation_rate:
 		return flt(last_valuation_rate[0][0]) # as there is previous records, it might come with zero rate
