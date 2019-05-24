@@ -8,7 +8,6 @@ from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_r
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.buying.report.subcontracted_item_to_be_received.subcontracted_item_to_be_received import execute
 import frappe, unittest
-from pprint import pprint
 
 class TestSubcontractedItemToBeReceived(unittest.TestCase):
 
