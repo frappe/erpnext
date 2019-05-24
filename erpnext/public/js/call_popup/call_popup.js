@@ -4,8 +4,6 @@ class CallPopup {
 		this.call_log = call_log;
 		this.call_status_method = call_status_method;
 		this.make();
-		this.make_customer_contact();
-		this.setup_call_status_updater();
 	}
 
 	make() {
@@ -16,29 +14,68 @@ class CallPopup {
 				'fieldname': 'customer_info',
 				'fieldtype': 'HTML'
 			}, {
-				'fieldtype': 'Section Break'
+				'label': 'Last Interaction',
+				'fielname': 'last_interaction',
+				'fieldtype': 'Section Break',
+				// 'hidden': true
 			}, {
 				'fieldtype': 'Small Text',
 				'label': "Last Communication",
 				'fieldname': 'last_communication',
-				'read_only': true
 			}, {
-				'fieldtype': 'Column Break'
+				'fieldname': 'last_communication_link',
+				'fieldtype': 'HTML',
+			}, {
+				'fieldtype': 'Small Text',
+				'label': "Last Issue",
+				'fieldname': 'last_issue',
+			}, {
+				'fieldname': 'last_issue_link',
+				'fieldtype': 'HTML',
+			}, {
+				'label': 'Enter Call Summary',
+				'fieldtype': 'Section Break',
 			}, {
 				'fieldtype': 'Small Text',
 				'label': 'Call Summary',
-				'fieldname': 'call_communication',
+				'fieldname': 'call_summary',
+			}, {
+				'label': 'Append To',
+				'fieldtype': 'Select',
+				'fieldname': 'doctype',
+				'options': ['Issue', 'Lead', 'Communication'],
+				'default': this.call_log.doctype
+			}, {
+				'label': 'Document',
+				'fieldtype': 'Dynamic Link',
+				'fieldname': 'docname',
+				'options': 'doctype',
+				'default': this.call_log.name
 			}, {
 				'fieldtype': 'Button',
 				'label': 'Submit',
 				'click': () => {
-					this.dialog.get_value();
+					const values = this.dialog.get_values();
+					frappe.xcall('frappe.desk.form.utils.add_comment', {
+						'reference_doctype': values.doctype,
+						'reference_name': values.docname,
+						'content': `${__('Call Summary')}: ${values.call_summary}`,
+						'comment_email': frappe.session.user
+					}).then(() => {
+						this.dialog.set_value('call_summary', '');
+					});
 				}
 			}]
 		});
 		this.set_call_status(this.call_log.call_status);
-		this.dialog.show();
+		this.make_customer_contact();
 		this.dialog.get_close_btn().show();
+		this.setup_call_status_updater();
+		this.dialog.set_secondary_action(() => {
+			clearInterval(this.updater);
+			this.dialog.hide();
+		});
+		this.dialog.show();
 	}
 
 	make_customer_contact() {
@@ -48,10 +85,16 @@ class CallPopup {
 			'number': this.number
 		}).then(contact_doc => {
 			wrapper.empty();
-			const contact = contact_doc;
+			const contact = this.contact = contact_doc;
 			if (!contact) {
-				wrapper.append('<div>Unknown Contact</div>');
-				wrapper.append(`<a href="#Form/Contact/New Contact?phone=${this.number}">${__('Make New Contact')}</a>`);
+				wrapper.append(`
+					<div class="customer-info">
+						<div>Unknown Number: <b>${this.number}</b></div>
+						<a class="contact-link" href="#Form/Contact/New Contact?phone=${this.number}">
+							${__('Create New Contact')}
+						</a>
+					</div>
+				`);
 			} else {
 				const link = contact.links ? contact.links[0] : null;
 				const contact_link = link ? frappe.utils.get_form_link(link.link_doctype, link.link_name, true): '';
@@ -65,6 +108,7 @@ class CallPopup {
 						</div>
 					</div>
 				`);
+				this.make_last_interaction_section();
 			}
 		});
 	}
@@ -85,6 +129,9 @@ class CallPopup {
 		} else if (call_status === 'missed') {
 			this.set_indicator('red');
 			title = __('Call Missed');
+		} else {
+			this.set_indicator('blue');
+			title = call_status;
 		}
 		this.dialog.set_title(title);
 	}
@@ -95,7 +142,7 @@ class CallPopup {
 	}
 
 	setup_call_status_updater() {
-		this.updater = setInterval(this.get_call_status.bind(this), 2000);
+		this.updater = setInterval(this.get_call_status.bind(this), 20000);
 	}
 
 	get_call_status() {
@@ -113,6 +160,29 @@ class CallPopup {
 		this.dialog.hide();
 		delete erpnext.call_popup;
 		frappe.msgprint('Call Forwarded');
+	}
+
+	make_last_interaction_section() {
+		frappe.xcall('erpnext.crm.doctype.utils.get_last_interaction', {
+			'number': this.number,
+			'reference_doc': this.contact
+		}).then(data => {
+			if (data.last_communication) {
+				const comm = data.last_communication;
+				// this.dialog.set_df_property('last_interaction', 'hidden', false);
+				const comm_field = this.dialog.fields_dict["last_communication"];
+				comm_field.set_value(comm.content);
+				comm_field.$wrapper.append(frappe.utils.get_form_link('Communication', comm.name));
+			}
+
+			if (data.last_issue) {
+				const issue = data.last_issue;
+				// this.dialog.set_df_property('last_interaction', 'hidden', false);
+				const issue_field = this.dialog.fields_dict["last_issue"];
+				issue_field.set_value(issue.subject);
+				issue_field.$wrapper.append(frappe.utils.get_form_link('Issue', issue.name, true));
+			}
+		});
 	}
 }
 
