@@ -145,11 +145,17 @@
 					<th style="width: 10%">{%= __("Remaining Balance") %}</th>
 				{% } %}
 			{% } else { %}
+				{%
+					var range1 = report.columns.find(d => d.fieldname == "range1").label;
+					var range2 = report.columns.find(d => d.fieldname == "range2").label;
+					var range3 = report.columns.find(d => d.fieldname == "range3").label;
+					var range4 = report.columns.find(d => d.fieldname == "range4").label;
+				%}
 				<th style="width: 40%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
-				<th style="width: 15%">{%= __("Total Invoiced Amount") %}</th>
-				<th style="width: 15%">{%= __("Total Paid Amount") %}</th>
-				<th style="width: 15%">{%= report.report_name === "Accounts Receivable Summary" ? __('Credit Note Amount') : __('Debit Note Amount') %}</th>
-				<th style="width: 15%">{%= __("Total Outstanding Amount") %}</th>
+				<th style="width: 15%">{%= __(range1) %}</th>
+				<th style="width: 15%">{%= __(range2) %}</th>
+				<th style="width: 15%">{%= __(range3) %}</th>
+				<th style="width: 15%">{%= __(range4) %}</th>
 			{% } %}
 		</tr>
 	</thead>
@@ -277,10 +283,10 @@
 				{% } else { %}
 					<td><b>{%= __("Total") %}</b></td>
 				{% } %}
-				<td style="text-align: right">{%= format_currency(data[i]["invoiced_amount"], data[i]["currency"]) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i]["paid_amount"], data[i]["currency"]) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i]["return_amount"], data[i]["currency"]) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["range1"], data[i]["currency"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["range2"], data[i]["currency"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["range3"], data[i]["currency"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["range4"], data[i]["currency"]) %}</td>
 			{% } %}
 			</tr>
 		{% } %}
