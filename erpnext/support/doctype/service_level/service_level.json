@@ -7,6 +7,7 @@
  "field_order": [
   "service_level",
   "employee_group",
+  "priorities_list",
   "column_break_2",
   "holiday_list",
   "default_priority",
@@ -73,9 +74,15 @@
    "label": "Default Priority",
    "options": "Issue Priority",
    "read_only": 1
+  },
+  {
+   "fieldname": "priorities_list",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Priorities List"
   }
  ],
- "modified": "2019-05-21 20:53:11.731727",
+ "modified": "2019-05-25 20:18:00.240337",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level",

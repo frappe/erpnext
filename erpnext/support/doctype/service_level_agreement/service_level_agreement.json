@@ -8,8 +8,8 @@
   "service_level_agreement_name",
   "customer",
   "default_service_level_agreement",
-  "ignore_customer_and_default_sla",
   "holiday_list",
+  "priorities_list",
   "column_break_2",
   "service_level",
   "employee_group",
@@ -27,7 +27,7 @@
  ],
  "fields": [
   {
-   "depends_on": "eval: !doc.default_service_level_agreement;\neval: !doc.ignore_customer_and_default_sla;",
+   "depends_on": "eval: !doc.default_service_level_agreement;",
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -37,7 +37,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval: !doc.customer;\neval: !doc.ignore_customer_and_default_sla;",
+   "depends_on": "eval: !doc.customer;",
    "fieldname": "default_service_level_agreement",
    "fieldtype": "Check",
    "in_list_view": 1,
@@ -151,13 +151,14 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "ignore_customer_and_default_sla",
-   "fieldtype": "Check",
-   "label": "Ignore Customer and Default SLA"
+   "fetch_from": "service_level.priorities_list",
+   "fieldname": "priorities_list",
+   "fieldtype": "Text",
+   "hidden": 1,
+   "label": "Priorities List"
   }
  ],
- "modified": "2019-05-21 21:53:12.686806",
+ "modified": "2019-05-25 20:20:41.231834",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
