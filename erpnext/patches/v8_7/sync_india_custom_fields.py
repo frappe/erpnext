@@ -7,6 +7,9 @@ def execute():
 	if not company:
 		return
 
+	frappe.reload_doc('hr', 'doctype', 'payroll_period')
+	frappe.reload_doc('hr', 'doctype', 'employee_tax_exemption_declaration_category')
+	frappe.reload_doc('hr', 'doctype', 'employee_tax_exemption_proof_submission_detail')
 	frappe.reload_doc('hr', 'doctype', 'employee_tax_exemption_declaration')
 	frappe.reload_doc('hr', 'doctype', 'employee_tax_exemption_proof_submission')
 

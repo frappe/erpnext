@@ -21,6 +21,17 @@ frappe.ui.form.on("Opportunity", {
 		frm.trigger('set_contact_link');
 	},
 
+	onload_post_render: function(frm) {
+		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
+	},
+
+	party_name: function(frm) {
+		if (frm.doc.opportunity_from == "Customer") {
+			frm.trigger('set_contact_link');
+			erpnext.utils.get_party_details(frm);
+		}
+	},
+
 	with_items: function(frm) {
 		frm.trigger('toggle_mandatory');
 	},
@@ -104,13 +115,15 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		if(!this.frm.doc.enquiry_from && this.frm.doc.lead)
 			this.frm.doc.enquiry_from = "Lead";
 
-		if(!this.frm.doc.status)
-			set_multiple(this.frm.doc.doctype, this.frm.doc.name, { status:'Open' });
-		if(!this.frm.doc.company && frappe.defaults.get_user_default("Company"))
-			set_multiple(this.frm.doc.doctype, this.frm.doc.name,
-				{ company:frappe.defaults.get_user_default("Company") });
-		if(!this.frm.doc.currency)
-			set_multiple(this.frm.doc.doctype, this.frm.doc.name, { currency:frappe.defaults.get_user_default("Currency") });
+		if(!this.frm.doc.status) {
+			frm.set_value('status', 'Open');
+		}
+		if(!this.frm.doc.company && frappe.defaults.get_user_default("Company")) {
+			frm.set_value('company', frappe.defaults.get_user_default("Company"));
+		}
+		if(!this.frm.doc.currency) {
+			frm.set_value('currency', frappe.defaults.get_user_default("Currency"));
+		}
 
 		this.setup_queries();
 	},
@@ -180,4 +193,3 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 		frm: cur_frm
 	});
 }
-
