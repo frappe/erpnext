@@ -13,6 +13,7 @@ class ServiceLevel(Document):
 
 	def validate(self):
 		self.check_priorities()
+		self.set_priorities()
 		self.check_support_and_resolution()
 
 	def check_priorities(self):
@@ -56,7 +57,18 @@ class ServiceLevel(Document):
 			frappe.throw(_("Select only one Priority as Default."))
 
 		# set default priority from priorities
-		self.default_priority = next(d.priority for d in self.priorities if d.default_priority)
+		try:
+			self.default_priority = next(d.priority for d in self.priorities if d.default_priority)
+		except Exception:
+			frappe.throw(_("Select a Default Priority."))
+
+	def set_priorities(self):
+		priorities = []
+
+		for priority in self.priorities:
+			priorities.append(priority.priority)
+
+		self.priorities_list = ",".join(priorities)
 
 	def check_support_and_resolution(self):
 		week = get_weekdays()
