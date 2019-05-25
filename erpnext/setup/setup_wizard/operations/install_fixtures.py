@@ -363,7 +363,12 @@ def add_sale_stages():
 def install_company(args):
 	records = [
 		# Fiscal Year
-		{ "doctype": "Fiscal Year", 'year': get_fy_details(args.fy_start_date, args.fy_end_date), 'year_start_date': args.fy_start_date, 'year_end_date': args.fy_end_date },
+		{
+			'doctype': "Fiscal Year",
+			'year': get_fy_details(args.fy_start_date, args.fy_end_date),
+			'year_start_date': args.fy_start_date,
+			'year_end_date': args.fy_end_date
+		},
 
 		# Company
 		{

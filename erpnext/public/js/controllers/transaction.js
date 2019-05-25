@@ -267,6 +267,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 		if(frappe.meta.get_docfield(this.frm.doc.doctype + " Item", "item_code")) {
 			this.setup_item_selector();
+			this.frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 		}
 	},
 
