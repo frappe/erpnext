@@ -1,5 +1,3 @@
-{% include "templates/includes/grouped_report_print.html" %}
-
 <style>
 @media screen {
 	.print-format {
@@ -291,4 +289,4 @@
 <p class="text-right text-muted">{{ __("Printed On ") }}{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
 {% } %}
 
-{{ print_report_groups(data, print_group) }}
+{{ frappe.utils.print_report_groups(data, print_group, print_settings.page_break_groups, _p) }}
