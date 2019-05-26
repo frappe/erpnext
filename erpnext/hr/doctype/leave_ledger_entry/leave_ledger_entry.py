@@ -6,13 +6,33 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from frappe.utils import add_days, today
+from frappe.utils import add_days, today, flt
 
 class LeaveLedgerEntry(Document):
 	def validate_entries(self):
-		leave_records = frappe.get_all('Leave Ledger Entry', ['leaves'])
-		if sum(record.get("leaves") for record in leave_records) <0:
+		total_leaves = frappe.get_all('Leave Ledger Entry', ['SUM(leaves)'])
+		if total_leaves < 0:
 			frappe.throw(_("Invalid Ledger Entry"))
+
+	def on_cancel(self):
+		# allow cancellation of expiry leaves
+		if not self.is_expired:
+			frappe.throw(_("Only expired allocation can be cancelled"))
+
+def validate_leave_allocation_against_leave_application(ledger):
+	''' Checks that leave allocation has no leave application against it '''
+	leave_application_records = frappe.get_all("Leave Ledger Entry",
+		filters={
+			'employee': ledger.employee,
+			'leave_type': ledger.leave_type,
+			'transaction_type': 'Leave Application',
+			'from_date': (">=", ledger.from_date),
+			'to_date': ('<=', ledger.to_date)
+		}, fields=['transaction_name'])
+
+	if leave_application_records:
+		frappe.throw(_("Leave allocation %s is linked with leave application %s"
+			% (ledger.transaction_name, ', '.join(leave_application_records))))
 
 def create_leave_ledger_entry(ref_doc, args, submit=True):
 	ledger = frappe._dict(
@@ -22,6 +42,8 @@ def create_leave_ledger_entry(ref_doc, args, submit=True):
 		leave_type=ref_doc.leave_type,
 		transaction_type=ref_doc.doctype,
 		transaction_name=ref_doc.name,
+		is_carry_forward=0,
+		is_expired=0
 	)
 	ledger.update(args)
 	if submit:
@@ -32,67 +54,58 @@ def create_leave_ledger_entry(ref_doc, args, submit=True):
 def delete_ledger_entry(ledger):
 	''' Delete ledger entry on cancel of leave application/allocation/encashment '''
 
-	leave_application_records = []
-	# prevent deletion when leave application has been created after allocation
 	if ledger.transaction_type == "Leave Allocation":
-		leave_application_records = frappe.get_all("Leave Ledger Entry",
+		validate_leave_allocation_against_leave_application(ledger)
+
+	frappe.db.sql("""DELETE
+		FROM `tabLeave Ledger Entry`
+		WHERE
+			`transaction_name`=%s""", (ledger.transaction_name))
+
+def process_expired_allocation():
+	''' Check if a carry forwarded allocation has expired and create a expiry ledger entry '''
+
+	# fetch leave type records that has carry forwarded leaves expiry
+	leave_type_records = frappe.db.get_values("Leave Type", filters={
+			'carry_forward_leave_expiry': (">", 0)
+		}, fieldname=['name'])
+
+	if leave_type_records:
+		leave_type = [record[0] for record in leave_type_records]
+		expired_allocation = frappe.get_all("Leave Ledger Entry",
 			filters={
-				'employee': ledger.employee,
-				'leave_type': ledger.leave_type,
-				'transaction_type': 'Leave Application',
-				'from_date': (">=", ledger.from_date),
-				'to_date': ('<=', ledger.to_date)
-			},
-			fields=['transaction_name'])
-
-	if not leave_application_records:
-		frappe.db.sql("""DELETE
-			FROM `tabLeave Ledger Entry`
-			WHERE
-				`transaction_name`=%s""", (ledger.transaction_name))
-	else:
-		frappe.throw(_("Leave allocation %s is linked with leave application %s"
-			% (ledger_entry, ', '.join(leave_application_records))))
-
-def check_expired_allocation():
-	''' Checks for expired allocation by comparing to_date with current_date and
-		based on that creates an expiry ledger entry '''
-	expired_allocation = frappe.get_all("Leave Ledger Allocation",
-		filters={
-			'to_date': today(),
-			'transaction_type': 'Leave Allocation'
-		},
-		fields=['*'])
+				'to_date': today(),
+				'transaction_type': 'Leave Allocation',
+				'is_carry_forward': 1,
+				'leave_type': ('in', leave_type)
+			}, fields=['leaves', 'to_date', 'employee', 'leave_type'])
 
 	if expired_allocation:
 		create_expiry_ledger_entry(expired_allocation)
 
 def create_expiry_ledger_entry(expired_allocation):
+	''' Create expiry ledger entry for carry forwarded leaves '''
 	for allocation in expired_allocation:
-		filters = {
-				'employee': allocation.employee,
-				'leave_type': allocation.leave_type,
-				'from_date': ('>=', allocation.from_date),
-			}
-		# get only application ledger entries in case of carry forward
-		if allocation.is_carry_forward:
-			filters.update(dict(transaction_type='Leave Application'))
 
-		leave_records = frappe.get_all("Leave Ledger Entry",
-			filters=filters,
-			fields=['leaves'])
-
-		leaves = sum(record.get("leaves") for record in leave_records)
-
-		if allocation.is_carry_forward:
-			leaves = allocation.leaves + leaves
+		leaves_taken = get_leaves_taken(allocation)
+		leaves = flt(allocation.leaves) + flt(leaves_taken)
 
 		if leaves > 0:
 			args = frappe._dict(
 				leaves=allocation.leaves * -1,
-				to_date='',
-				is_carry_forward=allocation.is_carry_forward,
+				to_date=allocation.to_date,
+				is_carry_forward=1,
 				is_expired=1,
 				from_date=allocation.to_date
 			)
 			create_leave_ledger_entry(allocation, args)
+
+def get_leaves_taken(allocation):
+	return frappe.db.get_value("Leave Ledger Entry",
+		filters={
+			'employee': allocation.employee,
+			'leave_type': allocation.leave_type,
+			'from_date': ('>=', allocation.from_date),
+			'to_date': ('<=', allocation.to_date),
+			'transaction_type': 'Leave application'
+		}, fieldname=['SUM(leaves)'])
