@@ -264,7 +264,7 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.update_project_sales_billing",
 		"erpnext.projects.doctype.project.project.send_project_status_email_to_users",
 		"erpnext.quality_management.doctype.quality_review.quality_review.review",
-		"erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry.check_expired_allocation"
+		"erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry.process_expired_allocation"
 		"erpnext.support.doctype.service_level_agreement.service_level_agreement.check_agreement_status"
 	],
 	"daily_long": [
