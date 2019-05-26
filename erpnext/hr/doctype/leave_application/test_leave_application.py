@@ -8,6 +8,8 @@ import unittest
 from erpnext.hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError, NotAnOptionalHoliday, get_leave_balance_on
 from frappe.permissions import clear_user_permissions_for_doctype
 from frappe.utils import add_days, nowdate, now_datetime, getdate
+from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
+from erpnext.hr.doctype.leave_allocation.test_leave_allocation import create_leave_allocation
 
 test_dependencies = ["Leave Allocation", "Leave Block List"]
 
@@ -274,7 +276,7 @@ class TestLeaveApplication(unittest.TestCase):
 		))
 
 		# can only apply on optional holidays
-		self.assertTrue(NotAnOptionalHoliday, leave_application.insert)
+		self.assertRaises(NotAnOptionalHoliday, leave_application.insert)
 
 		leave_application.from_date = today
 		leave_application.to_date = today
@@ -287,6 +289,8 @@ class TestLeaveApplication(unittest.TestCase):
 
 
 	def test_leaves_allowed(self):
+		frappe.db.sql("delete from `tabLeave Allocation`")
+		frappe.db.sql("delete from `tabLeave Ledger Entry`")
 		employee = get_employee()
 		leave_period = get_leave_period()
 		frappe.delete_doc_if_exists("Leave Type", "Test Leave Type", force=1)
@@ -301,7 +305,7 @@ class TestLeaveApplication(unittest.TestCase):
 		allocate_leaves(employee, leave_period, leave_type.name, 5)
 
 		leave_application = frappe.get_doc(dict(
-		doctype = 'Leave Application',
+			doctype = 'Leave Application',
 			employee = employee.name,
 			leave_type = leave_type.name,
 			from_date = date,
@@ -310,15 +314,14 @@ class TestLeaveApplication(unittest.TestCase):
 			docstatus = 1,
             status = "Approved"
 		))
-
-		self.assertTrue(leave_application.insert())
+		leave_application.submit()
 
 		leave_application = frappe.get_doc(dict(
 			doctype = 'Leave Application',
 			employee = employee.name,
 			leave_type = leave_type.name,
 			from_date = add_days(date, 4),
-			to_date = add_days(date, 7),
+			to_date = add_days(date, 8),
 			company = "_Test Company",
 			docstatus = 1,
             status = "Approved"
@@ -458,22 +461,32 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertEqual(leave_application.docstatus, 1)
 
 	def test_creation_of_leave_ledger_entry_on_submit(self):
+		frappe.db.sql("delete from `tabLeave Allocation`")
+		employee = get_employee()
+
+		leave_type = create_leave_type(leave_type_name = 'Test Leave Type 1')
+		leave_type.save()
+
+		leave_allocation = create_leave_allocation(employee=employee.name, employee_name=employee.employee_name,
+			leave_type=leave_type.name)
+		leave_allocation.submit()
 
 		leave_application = frappe.get_doc(dict(
 			doctype = 'Leave Application',
 			employee = employee.name,
-			leave_type = leave_type_1.name,
-			from_date = nowdate(),
+			leave_type = leave_type.name,
+			from_date = add_days(nowdate(), 1),
 			to_date = add_days(nowdate(), 4),
 			company = "_Test Company",
 			docstatus = 1,
             status = "Approved"
-		)).submit()
+		))
+		leave_application.submit()
 		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', fields='*', filters=dict(transaction_name=leave_application.name))
 
 		self.assertEquals(leave_ledger_entry[0].employee, leave_application.employee)
 		self.assertEquals(leave_ledger_entry[0].leave_type, leave_application.leave_type)
-		self.assertEquals(leave_ledger_entry[0].leaves, leave_application.new_leaves_allocated)
+		self.assertEquals(leave_ledger_entry[0].leaves, leave_application.total_leave_days * -1)
 
 		# check if leave ledger entry is deleted on cancellation
 		leave_application.cancel()
