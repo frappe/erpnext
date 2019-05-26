@@ -9,7 +9,6 @@ import datetime
 class QualityReview(Document):
 
 	def get_quality_goal(self, goal):
-		# self.reviews = [:]
 		doc = frappe.get_doc("Quality Goal", goal)
 
 		for objective in doc.objectives:

@@ -10,14 +10,15 @@ class QualityAction(Document):
 
 	def get_document(self, document_type, document_name):
 		doc = frappe.get_doc(document_type, document_name)
+
 		if document_type == "Quality Review":
 			resolutions = [review.objective for review in doc.reviews]
 		else:
-			resolutions = None
+			resolutions = [parameter.feedback for parameter in doc.parameters]
 
 		for idx in range(0, len(resolutions)):
 			self.append("resolutions",
 				{
-					"problem": descriptions[idx]
+					"problem": resolutions[idx]
 				}
 			)
