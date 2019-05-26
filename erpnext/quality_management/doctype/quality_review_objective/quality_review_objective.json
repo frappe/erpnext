@@ -1,0 +1,64 @@
+{
+ "creation": "2019-05-26 15:17:44.796958",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "objective",
+  "cb_00",
+  "target",
+  "uom",
+  "sb_00",
+  "review"
+ ],
+ "fields": [
+  {
+   "fieldname": "objective",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Objective",
+   "read_only": 1
+  },
+  {
+   "fieldname": "target",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Target",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "target_unit",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "review",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Review"
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break",
+   "label": "Review"
+  },
+  {
+   "fieldname": "cb_00",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-05-26 16:14:12.586128",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Review Objective",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

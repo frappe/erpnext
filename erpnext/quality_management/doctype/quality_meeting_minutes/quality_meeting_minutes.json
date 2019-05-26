@@ -1,0 +1,42 @@
+{
+ "creation": "2019-05-26 20:45:26.226428",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "review",
+  "sb_00",
+  "minute"
+ ],
+ "fields": [
+  {
+   "fieldname": "review",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Review",
+   "options": "Quality Review",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "minute",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Minute"
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-05-26 20:48:36.997903",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Meeting Minutes",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -4,8 +4,5 @@
 frappe.ui.form.on('Quality Goal', {
 	refresh: function(frm) {
 		frm.doc.created_by = frappe.session.user;
-		if (!frm.doc.revised_on) {
-			frm.doc.revised_on = frappe.datetime.get_today();
-		}
 	}
 });

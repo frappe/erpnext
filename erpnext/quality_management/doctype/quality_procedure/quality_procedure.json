@@ -5,7 +5,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "procedure_name",
+  "procedure",
   "parent_quality_procedure",
   "is_group",
   "sb_00",
@@ -51,13 +51,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "procedure_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Procedure Name",
-   "reqd": 1
-  },
-  {
    "fieldname": "sb_00",
    "fieldtype": "Section Break",
    "label": "Processes"
@@ -67,9 +60,16 @@
    "fieldtype": "Table",
    "label": "Processes",
    "options": "Quality Procedure Process"
+  },
+  {
+   "fieldname": "procedure",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Procedure",
+   "reqd": 1
   }
  ],
- "modified": "2019-05-26 00:14:28.988345",
+ "modified": "2019-05-26 19:22:10.766563",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Procedure",

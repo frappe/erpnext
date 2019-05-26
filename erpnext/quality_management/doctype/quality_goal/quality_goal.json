@@ -5,25 +5,19 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "goal_name",
-  "created_by",
+  "goal",
   "frequency",
-  "column_break_2",
+  "created_by",
+  "cb_00",
   "procedure",
-  "daily",
-  "weekly",
+  "weekday",
   "date",
-  "department",
-  "section_break_8",
+  "sb_00",
   "revision",
-  "column_break_10",
+  "cb_01",
   "revised_on",
-  "measurable_section",
-  "measurable",
-  "column_break_20",
-  "measurable_display",
-  "section_break_11",
-  "objective"
+  "sb_01",
+  "objectives"
  ],
  "fields": [
   {
@@ -39,11 +33,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Monitoring Frequency",
-   "options": "None\nDaily\nWeekly\nMonthly\nQuarterly\nHalf Yearly\nYearly"
-  },
-  {
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
+   "options": "None\nDaily\nWeekly\nMonthly"
   },
   {
    "fieldname": "procedure",
@@ -53,38 +43,11 @@
    "options": "Quality Procedure"
   },
   {
-   "depends_on": "eval:doc.frequency == 'Daily'",
-   "fieldname": "daily",
-   "fieldtype": "Select",
-   "label": "Day",
-   "options": "Everyday"
-  },
-  {
-   "depends_on": "eval:doc.frequency == 'Weekly'",
-   "fieldname": "weekly",
-   "fieldtype": "Select",
-   "label": "Day",
-   "options": "Monday\nTuesday\nWednesday\nThursday\nFriday\nSaturday"
-  },
-  {
    "depends_on": "eval:doc.frequency == 'Quarterly' || doc.frequency == 'Half Yearly' || doc.frequency == 'Yearly' || doc.frequency == 'Monthly'",
    "fieldname": "date",
    "fieldtype": "Select",
    "label": "Date",
    "options": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29\n30"
-  },
-  {
-   "depends_on": "eval:doc.scope == 'Department'",
-   "fieldname": "department",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Department",
-   "options": "Department"
-  },
-  {
-   "fieldname": "section_break_8",
-   "fieldtype": "Section Break",
-   "label": "Revision and Revised On"
   },
   {
    "default": "0",
@@ -94,10 +57,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "revised_on",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -105,49 +64,45 @@
    "read_only": 1
   },
   {
-   "fieldname": "measurable_section",
-   "fieldtype": "Section Break",
-   "label": "Measurable Goal"
-  },
-  {
-   "default": "Yes",
-   "fieldname": "measurable",
+   "depends_on": "eval:doc.frequency == 'Weekly'",
+   "fieldname": "weekday",
    "fieldtype": "Select",
-   "label": "Measurable Goal",
-   "options": "Yes\nNo"
+   "label": "Weekday",
+   "options": "Monday\nTuesday\nWednesday\nThursday\nFriday\nSaturday"
   },
   {
-   "fieldname": "column_break_20",
+   "fieldname": "cb_00",
    "fieldtype": "Column Break"
   },
   {
-   "default": "Target and Unit are disabled",
-   "depends_on": "eval:doc.measurable == 'No'",
-   "fieldname": "measurable_display",
-   "fieldtype": "Data",
-   "label": "Measurable",
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_11",
+   "fieldname": "sb_00",
    "fieldtype": "Section Break",
-   "label": "Goal Objectives"
+   "label": "Revision and Revised On"
   },
   {
-   "fieldname": "objective",
+   "fieldname": "cb_01",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sb_01",
+   "fieldtype": "Section Break",
+   "label": "Objectives"
+  },
+  {
+   "fieldname": "objectives",
    "fieldtype": "Table",
-   "label": "Objective",
-   "options": "Quality Objective"
+   "label": "Objectives",
+   "options": "Quality Goal Objective"
   },
   {
-   "fieldname": "goal_name",
+   "fieldname": "goal",
    "fieldtype": "Data",
-   "label": "Goal Name",
+   "label": "Goal",
    "reqd": 1,
    "unique": 1
   }
  ],
- "modified": "2019-05-26 00:56:06.367860",
+ "modified": "2019-05-26 19:19:23.600602",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Goal",
