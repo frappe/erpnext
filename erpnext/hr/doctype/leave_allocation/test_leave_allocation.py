@@ -3,6 +3,7 @@ import frappe
 import unittest
 from frappe.utils import nowdate, add_months, getdate, add_days
 from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
+from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import process_expired_allocation
 
 class TestLeaveAllocation(unittest.TestCase):
 	def test_overlapping_allocation(self):
@@ -68,6 +69,65 @@ class TestLeaveAllocation(unittest.TestCase):
 		#allocated leave more than period
 		self.assertRaises(frappe.ValidationError, doc.save)
 
+	def test_carry_forward_calculation(self):
+		frappe.db.sql("delete from `tabLeave Allocation`")
+		frappe.db.sql("delete from `tabLeave Ledger Entry`")
+		leave_type = create_leave_type(leave_type_name="_Test_CF_leave", is_carry_forward=1)
+		leave_type.submit()
+
+		# initial leave allocation
+		leave_allocation = create_leave_allocation(
+			leave_type="_Test_CF_leave",
+			from_date=add_months(nowdate(), -12),
+			to_date=add_months(nowdate(), -1),
+			carry_forward=1)
+		leave_allocation.submit()
+
+		# leave allocation with carry forward from previous allocation
+		leave_allocation_1 = create_leave_allocation(
+			leave_type="_Test_CF_leave",
+			carry_forward=1)
+		leave_allocation_1.submit()
+
+		self.assertEquals(leave_allocation.total_leaves_allocated, leave_allocation_1.carry_forwarded_leaves)
+
+	def test_carry_forward_leaves_expiry(self):
+		frappe.db.sql("delete from `tabLeave Allocation`")
+		frappe.db.sql("delete from `tabLeave Ledger Entry`")
+		leave_type = create_leave_type(
+			leave_type_name="_Test_CF_leave_expiry",
+			is_carry_forward=1,
+			carry_forward_leave_expiry=90)
+		leave_type.submit()
+
+		# initial leave allocation
+		leave_allocation = create_leave_allocation(
+			leave_type="_Test_CF_leave_expiry",
+			from_date=add_months(nowdate(), -24),
+			to_date=add_months(nowdate(), -12),
+			carry_forward=1)
+		leave_allocation.submit()
+
+		leave_allocation = create_leave_allocation(
+			leave_type="_Test_CF_leave_expiry",
+			from_date=add_days(nowdate(), -90),
+			to_date=add_days(nowdate(), 100),
+			carry_forward=1)
+		leave_allocation.submit()
+
+		# expires all the carry forwarded leaves after 90 days
+		process_expired_allocation()
+
+		# leave allocation with carry forward of only new leaves allocated
+		leave_allocation_1 = create_leave_allocation(
+			leave_type="_Test_CF_leave_expiry",
+			carry_forward=1,
+			from_date=add_months(nowdate(), 6),
+			to_date=add_months(nowdate(), 12))
+		leave_allocation_1.submit()
+
+		self.assertEquals(leave_allocation_1.carry_forwarded_leaves, leave_allocation.new_leaves_allocated)
+
 	def test_creation_of_leave_ledger_entry_on_submit(self):
 		frappe.db.sql("delete from `tabLeave Allocation`")
 
@@ -92,11 +152,13 @@ def create_leave_allocation(**args):
 	leave_allocation = frappe.get_doc({
 		"doctype": "Leave Allocation",
 		"__islocal": 1,
-		"employee": employee.name,
-		"employee_name": employee.employee_name,
-		"leave_type": args.leave_type.leave_type_name or "_Test Leave Type",
+		"employee": args.employee or employee.name,
+		"employee_name": args.employee_name or employee.employee_name,
+		"leave_type": args.leave_type or "_Test Leave Type",
 		"from_date": args.from_date or nowdate(),
 		"new_leaves_allocated": args.new_leaves_created or 15,
+		"carry_forward": args.carry_forward or 0,
+		"carry_forwarded_leaves": args.carry_forwarded_leaves or 0,
 		"to_date": args.to_date or add_months(nowdate(), 12)
 	})
 	return leave_allocation
