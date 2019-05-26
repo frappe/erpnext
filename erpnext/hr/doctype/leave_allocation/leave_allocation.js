@@ -66,4 +66,4 @@ frappe.ui.form.on("Leave Allocation", {
 			frm.set_value("total_leaves_allocated", flt(frm.doc.new_leaves_allocated));
 		}
 	}
-})
+});
