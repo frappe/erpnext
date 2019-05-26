@@ -40,7 +40,8 @@
   },
   {
    "fieldname": "sb_00",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Agenda"
   },
   {
    "fieldname": "agenda",
@@ -50,10 +51,11 @@
   },
   {
    "fieldname": "sb_01",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Minutes"
   }
  ],
- "modified": "2019-05-26 20:50:53.337704",
+ "modified": "2019-05-26 22:01:34.262686",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Meeting",

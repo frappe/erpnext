@@ -51,6 +51,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Quality Meeting",
 					"description":_("Quality Meeting"),
+					"onboard": 1,
 				}
 			]
 		},

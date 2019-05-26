@@ -4,19 +4,13 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "review",
+  "document_type",
+  "cb_00",
+  "document_name",
   "sb_00",
   "minute"
  ],
  "fields": [
-  {
-   "fieldname": "review",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Review",
-   "options": "Quality Review",
-   "reqd": 1
-  },
   {
    "fieldname": "sb_00",
    "fieldtype": "Section Break"
@@ -26,10 +20,29 @@
    "fieldtype": "Text Editor",
    "in_list_view": 1,
    "label": "Minute"
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Document Type",
+   "options": "Quality Review\nQuality Action\nQuality Feedback",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_00",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "document_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Document Name",
+   "options": "document_type"
   }
  ],
  "istable": 1,
- "modified": "2019-05-26 20:48:36.997903",
+ "modified": "2019-05-26 22:00:24.833920",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Meeting Minutes",

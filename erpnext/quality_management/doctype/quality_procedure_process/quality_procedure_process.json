@@ -4,7 +4,6 @@
  "engine": "InnoDB",
  "field_order": [
   "process_description",
-  "section_break_2",
   "procedure"
  ],
  "fields": [
@@ -13,10 +12,6 @@
    "fieldtype": "Text Editor",
    "in_list_view": 1,
    "label": "Process Description"
-  },
-  {
-   "fieldname": "section_break_2",
-   "fieldtype": "Section Break"
   },
   {
    "description": "Link existing Quality Procedure.",
@@ -28,7 +23,7 @@
   }
  ],
  "istable": 1,
- "modified": "2019-05-26 00:10:00.248885",
+ "modified": "2019-05-26 22:05:49.007189",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Procedure Process",
