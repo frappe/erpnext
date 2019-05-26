@@ -76,7 +76,9 @@
   "accounting_details",
   "expense_account",
   "column_break_68",
+  "accounting_dimensions_section",
   "cost_center",
+  "dimension_col_break",
   "section_break_72",
   "page_break",
   "item_tax_rate"
@@ -333,6 +335,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "is_free_item",
    "fieldtype": "Check",
    "label": "Is Free Item",
@@ -494,6 +497,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "delivered_by_supplier",
    "fieldtype": "Check",
    "label": "To be delivered to customer",
@@ -640,6 +644,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "fieldname": "page_break",
    "fieldtype": "Check",
    "label": "Page Break",
@@ -657,11 +662,21 @@
   {
    "fieldname": "section_break_72",
    "fieldtype": "Section Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions "
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-01 17:21:24.913429",
+ "modified": "2019-05-25 22:10:32.518941",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
