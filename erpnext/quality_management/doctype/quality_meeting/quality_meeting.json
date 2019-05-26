@@ -1,5 +1,5 @@
 {
- "autoname": "format:QMS-MTN-{date}",
+ "autoname": "format:MTNG-{date}",
  "creation": "2018-10-15 16:25:41.548432",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -55,7 +55,7 @@
    "label": "Minutes"
   }
  ],
- "modified": "2019-05-26 22:01:34.262686",
+ "modified": "2019-05-26 23:12:23.364357",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Meeting",

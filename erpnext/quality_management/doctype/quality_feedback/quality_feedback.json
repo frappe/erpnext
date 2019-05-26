@@ -1,5 +1,5 @@
 {
- "autoname": "format:FDBK-.#####",
+ "autoname": "format:FDBK-{#####}",
  "creation": "2019-05-26 21:23:05.308379",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -42,7 +42,7 @@
    "options": "Quality Feedback Parameter"
   }
  ],
- "modified": "2019-05-26 21:25:18.947171",
+ "modified": "2019-05-26 23:10:01.754654",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Feedback",
@@ -57,6 +57,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
    "share": 1,
    "write": 1
   }

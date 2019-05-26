@@ -1,5 +1,5 @@
 {
- "autoname": "format:QMS-ACTN-{#####}",
+ "autoname": "format:ACTN-{#####}",
  "creation": "2018-10-02 11:40:43.666100",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -88,7 +88,7 @@
    "options": "Quality Action Resolution"
   }
  ],
- "modified": "2019-05-26 20:37:43.853633",
+ "modified": "2019-05-26 23:12:36.050172",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Action",
@@ -103,6 +103,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
    "share": 1,
    "write": 1
   }

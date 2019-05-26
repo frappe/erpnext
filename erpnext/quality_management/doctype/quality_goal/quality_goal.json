@@ -1,5 +1,5 @@
 {
- "autoname": "format:{goal}",
+ "autoname": "format:GOAL-{goal}",
  "creation": "2018-10-02 12:17:41.727541",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -102,7 +102,7 @@
    "unique": 1
   }
  ],
- "modified": "2019-05-26 19:19:23.600602",
+ "modified": "2019-05-26 22:11:36.894381",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Goal",
@@ -117,6 +117,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
    "share": 1,
    "write": 1
   }

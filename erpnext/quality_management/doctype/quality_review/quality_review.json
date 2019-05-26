@@ -1,5 +1,5 @@
 {
- "autoname": "QMS-REV-.#####",
+ "autoname": "format:REV-{#####}",
  "creation": "2018-10-02 11:45:16.301955",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -73,7 +73,7 @@
    "reqd": 1
   }
  ],
- "modified": "2019-05-26 19:51:08.766189",
+ "modified": "2019-05-26 23:12:47.302189",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Review",
@@ -88,6 +88,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
    "share": 1,
    "write": 1
   }
