@@ -67,6 +67,9 @@ $.extend(erpnext, {
 	get_dimension_filters: async function() {
 		let dimensions = await frappe.db.get_list('Accounting Dimension', {
 			fields: ['label', 'fieldname', 'document_type'],
+			filters: {
+				disabled: 0
+			}
 		});
 
 		return dimensions;
