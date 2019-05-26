@@ -6,5 +6,7 @@ from __future__ import unicode_literals
 from frappe.model.document import Document
 
 class QualityGoal(Document):
-	pass
 
+	def validate(self):
+		self.revision += 1
+		self.revised_on = frappe.utils.today()
