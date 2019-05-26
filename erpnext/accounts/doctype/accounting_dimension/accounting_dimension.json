@@ -1,4 +1,6 @@
 {
+ "_comments": "[]",
+ "_liked_by": "[]",
  "autoname": "field:label",
  "creation": "2019-05-04 18:13:37.002352",
  "doctype": "DocType",
@@ -8,25 +10,26 @@
   "label",
   "fieldname",
   "is_mandatory",
-  "disable"
+  "disabled"
  ],
  "fields": [
   {
    "fieldname": "label",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Label",
+   "label": "Dimension Name",
    "unique": 1
   },
   {
    "fieldname": "fieldname",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Fieldname"
   },
   {
    "fieldname": "document_type",
    "fieldtype": "Link",
-   "label": "Document Type",
+   "label": "Reference Document Type",
    "options": "DocType",
    "reqd": 1
   },
@@ -38,12 +41,12 @@
   },
   {
    "default": "0",
-   "fieldname": "disable",
+   "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disable"
   }
  ],
- "modified": "2019-05-17 20:35:31.014495",
+ "modified": "2019-05-25 19:18:11.718209",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension",

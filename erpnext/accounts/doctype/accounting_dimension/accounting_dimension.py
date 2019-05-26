@@ -31,6 +31,7 @@ class AccountingDimension(Document):
 
 def make_dimension_in_accounting_doctypes(doc):
 	doclist = get_doclist()
+	doc_count = len(get_accounting_dimensions())
 
 	if doc.is_mandatory:
 		df.update({
@@ -39,16 +40,22 @@ def make_dimension_in_accounting_doctypes(doc):
 
 	for doctype in doclist:
 
+		if (doc_count + 1) % 2 == 0:
+			insert_after_field = 'dimension_col_break'
+		else:
+			insert_after_field = 'accounting_dimensions_section'
+
 		df = {
 			"fieldname": doc.fieldname,
 			"label": doc.label,
 			"fieldtype": "Link",
 			"options": doc.document_type,
-			"insert_after": "cost_center"
+			"insert_after": insert_after_field
 		}
 
 		if doctype == "Budget":
 			df.update({
+				"insert_after": "cost_center",
 				"depends_on": "eval:doc.budget_against == '{0}'".format(doc.document_type)
 			})
 
@@ -103,7 +110,7 @@ def delete_accounting_dimension(doc):
 		frappe.clear_cache(doctype=doctype)
 
 def disable_dimension(doc):
-	if doc.disable:
+	if doc.disabled:
 		df = {"read_only": 1}
 	else:
 		df = {"read_only": 0}
@@ -123,7 +130,9 @@ def get_doclist():
 	doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "Asset",
 		"Expense Claim", "Stock Entry", "Budget", "Payroll Entry", "Delivery Note", "Sales Invoice Item", "Purchase Invoice Item",
 		"Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item", "Purchase Receipt Item",
-		"Stock Entry Detail", "Payment Entry Deduction"]
+		"Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
+		"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
+		"Travel Request", "Fees", "POS Profile"]
 
 	return doclist
 
