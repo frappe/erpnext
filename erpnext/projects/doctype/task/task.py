@@ -20,11 +20,6 @@ class Task(NestedSet):
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.subject)
 
-	def get_project_details(self):
-		return {
-			"project": self.project
-		}
-
 	def get_customer_details(self):
 		cust = frappe.db.sql("select customer_name from `tabCustomer` where name=%s", self.customer)
 		if cust:
