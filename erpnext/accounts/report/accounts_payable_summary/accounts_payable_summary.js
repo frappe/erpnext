@@ -45,10 +45,31 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			"reqd": 1
 		},
 		{
+			"fieldname":"range4",
+			"label": __("Ageing Range 4"),
+			"fieldtype": "Int",
+			"default": "120",
+			"reqd": 1
+		},
+		{
 			"fieldname":"finance_book",
 			"label": __("Finance Book"),
 			"fieldtype": "Link",
 			"options": "Finance Book"
+		},
+		{
+			"fieldname":"cost_center",
+			"label": __("Cost Center"),
+			"fieldtype": "Link",
+			"options": "Cost Center",
+			get_query: () => {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					filters: {
+						'company': company
+					}
+				}
+			}
 		},
 		{
 			"fieldname":"supplier",

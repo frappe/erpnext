@@ -13,7 +13,7 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
-from erpnext.buying.utils import check_for_closed_status, validate_for_items
+from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.stock.doctype.item.item import get_item_defaults
 
 from six import string_types
@@ -62,6 +62,7 @@ class MaterialRequest(BuyingController):
 		super(MaterialRequest, self).validate()
 
 		self.validate_schedule_date()
+		self.check_for_on_hold_or_closed_status('Sales Order', 'sales_order')
 		self.validate_uom_is_integer("uom", "qty")
 
 		if not self.status:
@@ -70,7 +71,7 @@ class MaterialRequest(BuyingController):
 		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status,
 			["Draft", "Submitted", "Stopped", "Cancelled", "Pending",
-			"Partially Ordered", "Ordered", "Issued", "Transferred"])
+			"Partially Ordered", "Ordered", "Issued", "Transferred", "Received"])
 
 		validate_for_items(self)
 
@@ -100,7 +101,8 @@ class MaterialRequest(BuyingController):
 
 	def before_cancel(self):
 		# if MRQ is already closed, no point saving the document
-		check_for_closed_status(self.doctype, self.name)
+		check_on_hold_or_closed_status(self.doctype, self.name)
+
 		self.set_status(update=True, status='Cancelled')
 
 	def check_modified_date(self):
@@ -154,7 +156,7 @@ class MaterialRequest(BuyingController):
 
 		for d in self.get("items"):
 			if d.name in mr_items:
-				if self.material_request_type in ("Material Issue", "Material Transfer"):
+				if self.material_request_type in ("Material Issue", "Material Transfer", "Customer Provided"):
 					d.ordered_qty =  flt(frappe.db.sql("""select sum(transfer_qty)
 						from `tabStock Entry Detail` where material_request = %s
 						and material_request_item = %s and docstatus = 1""",
@@ -238,6 +240,18 @@ def update_item(obj, target, source_parent):
 	target.conversion_factor = obj.conversion_factor
 	target.qty = flt(flt(obj.stock_qty) - flt(obj.ordered_qty))/ target.conversion_factor
 	target.stock_qty = (target.qty * target.conversion_factor)
+
+def get_list_context(context=None):
+	from erpnext.controllers.website_list_for_contact import get_list_context
+	list_context = get_list_context(context)
+	list_context.update({
+		'show_sidebar': True,
+		'show_search': True,
+		'no_breadcrumbs': True,
+		'title': _('Material Request'),
+	})
+
+	return list_context
 
 @frappe.whitelist()
 def update_status(name, status):
@@ -400,7 +414,7 @@ def make_stock_entry(source_name, target_doc=None):
 		target.transfer_qty = qty * obj.conversion_factor
 		target.conversion_factor = obj.conversion_factor
 
-		if source_parent.material_request_type == "Material Transfer":
+		if source_parent.material_request_type == "Material Transfer" or source_parent.material_request_type == "Customer Provided":
 			target.t_warehouse = obj.warehouse
 		else:
 			target.s_warehouse = obj.warehouse
@@ -410,7 +424,11 @@ def make_stock_entry(source_name, target_doc=None):
 		if source.job_card:
 			target.purpose = 'Material Transfer for Manufacture'
 
+		if source.material_request_type == "Customer Provided":
+			target.purpose = "Material Receipt"
+
 		target.run_method("calculate_rate_and_amount")
+		target.set_stock_entry_type()
 		target.set_job_card_data()
 
 	doclist = get_mapped_doc("Material Request", source_name, {

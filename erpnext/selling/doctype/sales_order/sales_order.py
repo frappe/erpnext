@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, comma_and, cint, nowdate, add_days
+from frappe.utils import cstr, flt, getdate, cint, nowdate, add_days, get_link_to_form
 from frappe import _
 from six import string_types
 from frappe.model.utils import get_fetch_values
@@ -19,6 +19,8 @@ from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
+	unlink_inter_company_doc
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -42,6 +44,7 @@ class SalesOrder(SellingController):
 		self.validate_warehouse()
 		self.validate_drop_ship()
 		self.validate_serial_no_based_delivery()
+		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_order_reference)
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
@@ -182,7 +185,11 @@ class SalesOrder(SellingController):
 
 		self.update_blanket_order()
 
+		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
+
 	def on_cancel(self):
+		super(SalesOrder, self).on_cancel()
+
 		# Cannot cancel closed SO
 		if self.status == 'Closed':
 			frappe.throw(_("Closed order cannot be cancelled. Unclose to cancel."))
@@ -195,6 +202,8 @@ class SalesOrder(SellingController):
 		frappe.db.set(self, 'status', 'Cancelled')
 
 		self.update_blanket_order()
+
+		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
 
 	def update_project(self):
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') != "Each Transaction":
@@ -220,8 +229,9 @@ class SalesOrder(SellingController):
 			where t1.name = t2.parent and t2.against_sales_order = %s and t1.docstatus = 1""", self.name)
 
 		if submit_dn:
+			submit_dn = [get_link_to_form("Delivery Note", dn) for dn in submit_dn]
 			frappe.throw(_("Delivery Notes {0} must be cancelled before cancelling this Sales Order")
-				.format(comma_and(submit_dn)))
+				.format(", ".join(submit_dn)))
 
 		# Checks Sales Invoice
 		submit_rv = frappe.db.sql_list("""select t1.name
@@ -230,8 +240,9 @@ class SalesOrder(SellingController):
 			self.name)
 
 		if submit_rv:
+			submit_rv = [get_link_to_form("Sales Invoice", si) for si in submit_rv]
 			frappe.throw(_("Sales Invoice {0} must be cancelled before cancelling this Sales Order")
-				.format(comma_and(submit_rv)))
+				.format(", ".join(submit_rv)))
 
 		#check maintenance schedule
 		submit_ms = frappe.db.sql_list("""
@@ -240,8 +251,9 @@ class SalesOrder(SellingController):
 			where t2.parent=t1.name and t2.sales_order = %s and t1.docstatus = 1""", self.name)
 
 		if submit_ms:
+			submit_ms = [get_link_to_form("Maintenance Schedule", ms) for ms in submit_ms]
 			frappe.throw(_("Maintenance Schedule {0} must be cancelled before cancelling this Sales Order")
-				.format(comma_and(submit_ms)))
+				.format(", ".join(submit_ms)))
 
 		# check maintenance visit
 		submit_mv = frappe.db.sql_list("""
@@ -250,8 +262,9 @@ class SalesOrder(SellingController):
 			where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1""",self.name)
 
 		if submit_mv:
+			submit_mv = [get_link_to_form("Maintenance Visit", mv) for mv in submit_mv]
 			frappe.throw(_("Maintenance Visit {0} must be cancelled before cancelling this Sales Order")
-				.format(comma_and(submit_mv)))
+				.format(", ".join(submit_mv)))
 
 		# check work order
 		pro_order = frappe.db.sql_list("""
@@ -260,8 +273,9 @@ class SalesOrder(SellingController):
 			where sales_order = %s and docstatus = 1""", self.name)
 
 		if pro_order:
+			pro_order = [get_link_to_form("Work Order", po) for po in pro_order]
 			frappe.throw(_("Work Order {0} must be cancelled before cancelling this Sales Order")
-				.format(comma_and(pro_order)))
+				.format(", ".join(pro_order)))
 
 	def check_modified_date(self):
 		mod_db = frappe.db.get_value("Sales Order", self.name, "modified")
@@ -349,15 +363,7 @@ class SalesOrder(SellingController):
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
-		if self.status == 'Closed':
-			self.indicator_color = "green"
-			self.indicator_title = _("Closed")
-
-		elif self.per_delivered < 100 and getdate(self.delivery_date) < getdate(nowdate()):
-			self.indicator_color = "red"
-			self.indicator_title = _("Overdue")
-
-		elif self.per_billed < 100 and self.per_delivered < 100:
+		if self.per_billed < 100 and self.per_delivered < 100:
 			self.indicator_color = "orange"
 			self.indicator_title = _("Not Paid and Not Delivered")
 
@@ -388,6 +394,7 @@ class SalesOrder(SellingController):
 						items.append(dict(
 							name= i.name,
 							item_code= i.item_code,
+							description= i.description,
 							bom = bom,
 							warehouse = i.warehouse,
 							pending_qty = pending_qty,
@@ -398,6 +405,7 @@ class SalesOrder(SellingController):
 						items.append(dict(
 							name= i.name,
 							item_code= i.item_code,
+							description= i.description,
 							bom = '',
 							warehouse = i.warehouse,
 							pending_qty = pending_qty,
@@ -543,7 +551,7 @@ def make_project(source_name, target_doc=None):
 		"Sales Order Item": {
 			"doctype": "Project Task",
 			"field_map": {
-				"description": "title",
+				"item_code": "title",
 			},
 		}
 	}, target_doc, postprocess)
@@ -610,7 +618,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	def postprocess(source, target):
 		set_missing_values(source, target)
 		#Get the advance paid Journal Entries in Sales Invoice Advance
-		target.set_advances()
+		if target.get("allocate_advances_automatically"):
+			target.set_advances()
 
 	def set_missing_values(source, target):
 		target.is_pos = 0
@@ -762,6 +771,7 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier=None, target
 		target.apply_discount_on = ""
 		target.additional_discount_percentage = 0.0
 		target.discount_amount = 0.0
+		target.inter_company_order_reference = ""
 
 		default_price_list = frappe.get_value("Supplier", supplier, "default_price_list")
 		if default_price_list:
@@ -901,7 +911,8 @@ def make_work_orders(items, sales_order, company, project=None):
 			sales_order=sales_order,
 			sales_order_item=i['sales_order_item'],
 			project=project,
-			fg_warehouse=i['warehouse']
+			fg_warehouse=i['warehouse'],
+			description=i['description']
 		)).insert()
 		work_order.set_work_order_operations()
 		work_order.save()
@@ -934,7 +945,12 @@ def make_raw_material_request(items, company, sales_order, project=None):
 		item["ignore_existing_ordered_qty"] = items.get('ignore_existing_ordered_qty')
 		item["include_raw_materials_from_sales_order"] = items.get('include_raw_materials_from_sales_order')
 
-	raw_materials = get_items_for_material_requests(items, sales_order, company)
+	items.update({
+		'company': company,
+		'sales_order': sales_order
+	})
+
+	raw_materials = get_items_for_material_requests(items)
 	if not raw_materials:
 		frappe.msgprint(_("Material Request not created, as quantity for Raw Materials already available."))
 		return
@@ -963,3 +979,8 @@ def make_raw_material_request(items, company, sales_order, project=None):
 	material_request.run_method("set_missing_values")
 	material_request.submit()
 	return material_request
+
+@frappe.whitelist()
+def make_inter_company_purchase_order(source_name, target_doc=None):
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
+	return make_inter_company_transaction("Sales Order", source_name, target_doc)

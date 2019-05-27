@@ -12,8 +12,8 @@ from frappe.utils import getdate
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
-from erpnext.buying.utils import check_for_closed_status
-from erpnext.assets.doctype.asset.asset import get_asset_account
+from erpnext.buying.utils import check_on_hold_or_closed_status
+from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
 from six import iteritems
 
 form_grid_templates = {
@@ -24,16 +24,30 @@ class PurchaseReceipt(BuyingController):
 	def __init__(self, *args, **kwargs):
 		super(PurchaseReceipt, self).__init__(*args, **kwargs)
 		self.status_updater = [{
-			'source_dt': 'Purchase Receipt Item',
 			'target_dt': 'Purchase Order Item',
 			'join_field': 'purchase_order_item',
 			'target_field': 'received_qty',
 			'target_parent_dt': 'Purchase Order',
 			'target_parent_field': 'per_received',
 			'target_ref_field': 'qty',
-			'source_field': 'qty',
+			'source_dt': 'Purchase Receipt Item',
+			'source_field': 'received_qty',
+			'second_source_dt': 'Purchase Invoice Item',
+			'second_source_field': 'received_qty',
+			'second_join_field': 'po_detail',
 			'percent_join_field': 'purchase_order',
 			'overflow_type': 'receipt'
+		},
+		{
+			'source_dt': 'Purchase Receipt Item',
+			'target_dt': 'Material Request Item',
+			'join_field': 'material_request_item',
+			'target_field': 'received_qty',
+			'target_parent_dt': 'Material Request',
+			'target_parent_field': 'per_received',
+			'target_ref_field': 'qty',
+			'source_field': 'qty',
+			'percent_join_field': 'material_request'
 		},
 		{
 			'source_dt': 'Purchase Receipt Item',
@@ -47,6 +61,18 @@ class PurchaseReceipt(BuyingController):
 			# 'overflow_type': 'receipt',
 			'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
 		}]
+		if cint(self.is_return):
+			self.status_updater.append({
+				'source_dt': 'Purchase Receipt Item',
+				'target_dt': 'Purchase Order Item',
+				'join_field': 'purchase_order_item',
+				'target_field': 'returned_qty',
+				'source_field': '-1 * qty',
+				'second_source_dt': 'Purchase Invoice Item',
+				'second_source_field': '-1 * qty',
+				'second_join_field': 'po_detail',
+				'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
+			})
 
 	def validate(self):
 		self.validate_posting_time()
@@ -62,7 +88,7 @@ class PurchaseReceipt(BuyingController):
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 
-		self.check_for_closed_status()
+		self.check_on_hold_or_closed_status()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
@@ -103,13 +129,13 @@ class PurchaseReceipt(BuyingController):
 		return po_qty, po_warehouse
 
 	# Check for Closed status
-	def check_for_closed_status(self):
+	def check_on_hold_or_closed_status(self):
 		check_list =[]
 		for d in self.get('items'):
 			if (d.meta.get_field('purchase_order') and d.purchase_order
 				and d.purchase_order not in check_list):
 				check_list.append(d.purchase_order)
-				check_for_closed_status('Purchase Order', d.purchase_order)
+				check_on_hold_or_closed_status('Purchase Order', d.purchase_order)
 
 	# on submit
 	def on_submit(self):
@@ -120,12 +146,12 @@ class PurchaseReceipt(BuyingController):
 			self.company, self.base_grand_total)
 
 		self.update_prevdoc_status()
-		if self.per_billed < 100:
+		if flt(self.per_billed) < 100:
 			self.update_billing_status()
 		else:
 			self.status = "Completed"
 
-		
+
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty, reserved_qty_for_subcontract in bin
 		# depends upon updated ordered qty in PO
@@ -147,7 +173,7 @@ class PurchaseReceipt(BuyingController):
 	def on_cancel(self):
 		super(PurchaseReceipt, self).on_cancel()
 
-		self.check_for_closed_status()
+		self.check_on_hold_or_closed_status()
 		# Check if Purchase Invoice has been submitted against current Purchase Order
 		submitted = frappe.db.sql("""select t1.name
 			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
@@ -258,7 +284,8 @@ class PurchaseReceipt(BuyingController):
 					d.rejected_warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(d.warehouse)
 
-		self.get_asset_gl_entry(gl_entries)
+		if not is_cwip_accounting_disabled():
+			self.get_asset_gl_entry(gl_entries)
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("taxes"):
@@ -311,7 +338,7 @@ class PurchaseReceipt(BuyingController):
 				"\n".join(warehouse_with_no_account))
 
 		return process_gl_map(gl_entries)
-		
+
 	def get_asset_gl_entry(self, gl_entries):
 		for d in self.get("items"):
 			if d.is_fixed_asset:
@@ -405,6 +432,8 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
+	doc = frappe.get_doc('Purchase Receipt', source_name)
+	returned_qty_map = get_returned_qty_map(source_name)
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
@@ -417,7 +446,21 @@ def make_purchase_invoice(source_name, target_doc=None):
 		doc.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
+		target_doc.qty, returned_qty = get_pending_qty(source_doc)
+		returned_qty_map[source_doc.item_code] = returned_qty
+
+	def get_pending_qty(item_row):
+		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0)
+		returned_qty = flt(returned_qty_map.get(item_row.item_code, 0))
+		if returned_qty:
+			if returned_qty >= pending_qty:
+				pending_qty = 0
+				returned_qty -= pending_qty
+			else:
+				pending_qty -= returned_qty
+				returned_qty = 0
+		return pending_qty, returned_qty
+
 
 	doclist = get_mapped_doc("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {
@@ -440,7 +483,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"asset": "asset",
 			},
 			"postprocess": update_item,
-			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
+			"filter": lambda d: get_pending_qty(d)[0] <= 0 if not doc.get("is_return") else get_pending_qty(d)[0] > 0
 		},
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",
@@ -461,6 +504,19 @@ def get_invoiced_qty_map(purchase_receipt):
 			invoiced_qty_map[pr_detail] += qty
 
 	return invoiced_qty_map
+
+def get_returned_qty_map(purchase_receipt):
+	"""returns a map: {so_detail: returned_qty}"""
+	returned_qty_map = frappe._dict(frappe.db.sql("""select pr_item.item_code, sum(abs(pr_item.qty)) as qty
+		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
+		where pr.name = pr_item.parent
+			and pr.docstatus = 1
+			and pr.is_return = 1
+			and pr.return_against = %s
+		group by pr_item.item_code
+	""", purchase_receipt))
+
+	return returned_qty_map
 
 @frappe.whitelist()
 def make_purchase_return(source_name, target_doc=None):

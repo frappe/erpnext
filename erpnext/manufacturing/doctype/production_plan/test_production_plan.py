@@ -143,12 +143,27 @@ class TestProductionPlan(unittest.TestCase):
 
 		self.assertEqual(sales_orders, [])
 
+	def test_pp_to_mr_customer_provided(self):
+		#Material Request from Production Plan for Customer Provided
+		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
+		create_item('Production Item CUST')
+		for item, raw_materials in {'Production Item CUST': ['Raw Material Item 1', 'CUST-0987']}.items():
+			if not frappe.db.get_value('BOM', {'item': item}):
+				make_bom(item = item, raw_materials = raw_materials)
+		production_plan = create_production_plan(item_code = 'Production Item CUST')
+		production_plan.make_material_request()
+		material_request = frappe.get_value('Material Request Item', {'production_plan': production_plan.name}, 'parent')
+		mr = frappe.get_doc('Material Request', material_request)
+		self.assertTrue(mr.material_request_type, 'Customer Provided')
+		self.assertTrue(mr.customer, '_Test Customer')
+
 def create_production_plan(**args):
 	args = frappe._dict(args)
 
 	pln = frappe.get_doc({
 		'doctype': 'Production Plan',
 		'company': args.company or '_Test Company',
+		'customer': args.customer or '_Test Customer',
 		'posting_date': nowdate(),
 		'include_non_stock_items': args.include_non_stock_items or 1,
 		'include_subcontracted_items': args.include_subcontracted_items or 1,

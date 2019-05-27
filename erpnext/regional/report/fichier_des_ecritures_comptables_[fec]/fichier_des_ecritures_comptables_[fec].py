@@ -69,26 +69,26 @@ def get_gl_entries(filters):
 
 	gl_entries = frappe.db.sql("""
 		select
-			gl.posting_date as GlPostDate, gl.name as GlName, gl.account, gl.transaction_date, 
+			gl.posting_date as GlPostDate, gl.name as GlName, gl.account, gl.transaction_date,
 			sum(gl.debit) as debit, sum(gl.credit) as credit,
 			sum(gl.debit_in_account_currency) as debitCurr, sum(gl.credit_in_account_currency) as creditCurr,
-			gl.voucher_type, gl.voucher_no, gl.against_voucher_type, 
-			gl.against_voucher, gl.account_currency, gl.against, 
+			gl.voucher_type, gl.voucher_no, gl.against_voucher_type,
+			gl.against_voucher, gl.account_currency, gl.against,
 			gl.party_type, gl.party,
-			inv.name as InvName, inv.title as InvTitle, inv.posting_date as InvPostDate, 
+			inv.name as InvName, inv.title as InvTitle, inv.posting_date as InvPostDate,
 			pur.name as PurName, pur.title as PurTitle, pur.posting_date as PurPostDate,
 			jnl.cheque_no as JnlRef, jnl.posting_date as JnlPostDate, jnl.title as JnlTitle,
 			pay.name as PayName, pay.posting_date as PayPostDate, pay.title as PayTitle,
 			cus.customer_name, cus.name as cusName,
 			sup.supplier_name, sup.name as supName
- 
+
 		from `tabGL Entry` gl
 			left join `tabSales Invoice` inv on gl.voucher_no = inv.name
 			left join `tabPurchase Invoice` pur on gl.voucher_no = pur.name
 			left join `tabJournal Entry` jnl on gl.voucher_no = jnl.name
 			left join `tabPayment Entry` pay on gl.voucher_no = pay.name
-			left join `tabCustomer` cus on gl.party = cus.customer_name
-			left join `tabSupplier` sup on gl.party = sup.supplier_name
+			left join `tabCustomer` cus on gl.party = cus.name
+			left join `tabSupplier` sup on gl.party = sup.name
 		where gl.company=%(company)s and gl.fiscal_year=%(fiscal_year)s
 		{group_by_condition}
 		order by GlPostDate, voucher_no"""\
@@ -118,7 +118,7 @@ def get_result_as_list(data, filters):
 		if account_number[0] is not None:
 			CompteNum =  account_number[0]
 		else:
-			frappe.throw(_("Account number for account {0} is not available.<br> Please setup your Chart of Accounts correctly.").format(account.name))
+			frappe.throw(_("Account number for account {0} is not available.<br> Please setup your Chart of Accounts correctly.").format(d.get("account")))
 
 		if d.get("party_type") == "Customer":
 			CompAuxNum = d.get("cusName")

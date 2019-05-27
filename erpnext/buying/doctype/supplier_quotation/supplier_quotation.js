@@ -18,15 +18,15 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 		this._super();
 		if (this.frm.doc.docstatus === 1) {
 			cur_frm.add_custom_button(__("Purchase Order"), this.make_purchase_order,
-				__("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+				__('Create'));
+			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 			cur_frm.add_custom_button(__("Quotation"), this.make_quotation,
-				__("Make"));
-				
-			if(!this.frm.doc.auto_repeat) {	
+				__('Create'));
+
+			if(!this.frm.doc.auto_repeat) {
 				cur_frm.add_custom_button(__('Subscription'), function() {
 					erpnext.utils.make_subscription(me.frm.doc.doctype, me.frm.doc.name)
-				}, __("Make"))
+				}, __('Create'))
 			}
 		}
 		else if (this.frm.doc.docstatus===0) {

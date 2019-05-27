@@ -49,7 +49,7 @@ def get_bom_stock(filters):
 				where wh.lft >= %s and wh.rgt <= %s and ledger.warehouse = wh.name)" % (warehouse_details.lft,
 				warehouse_details.rgt)
 		else:
-			conditions += " and ledger.warehouse = '%s'" % frappe.db.escape(filters.get("warehouse"))
+			conditions += " and ledger.warehouse = %s" % frappe.db.escape(filters.get("warehouse"))
 
 	else:
 		conditions += ""

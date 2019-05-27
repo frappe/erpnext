@@ -39,6 +39,7 @@ class Company(NestedSet):
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
 		self.check_country_change()
+		self.set_chart_of_accounts()
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -96,8 +97,6 @@ class Company(NestedSet):
 			install_country_fixtures(self.name)
 			self.create_default_tax_template()
 
-
-
 		if not frappe.db.get_value("Department", {"company": self.name}):
 			from erpnext.setup.setup_wizard.operations.install_fixtures import install_post_company_fixtures
 			install_post_company_fixtures(frappe._dict({'company_name': self.name}))
@@ -141,6 +140,7 @@ class Company(NestedSet):
 
 	def create_default_accounts(self):
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
+		frappe.local.flags.ignore_root_company_validation = True
 		create_charts(self.name, self.chart_of_accounts, self.existing_company)
 
 		frappe.db.set(self, "default_receivable_account", frappe.db.get_value("Account",
@@ -172,6 +172,12 @@ class Company(NestedSet):
 		if not self.get('__islocal') and \
 			self.country != frappe.get_cached_value('Company',  self.name,  'country'):
 			frappe.flags.country_change = True
+
+	def set_chart_of_accounts(self):
+		''' If parent company is set, chart of accounts will be based on that company '''
+		if self.parent_company:
+			self.create_chart_of_accounts_based_on = "Existing Company"
+			self.existing_company = self.parent_company
 
 	def set_default_accounts(self):
 		self._set_default_account("default_cash_account", "Cash")
@@ -327,6 +333,11 @@ class Company(NestedSet):
 			where doctype='Global Defaults' and field='default_company'
 			and value=%s""", self.name)
 
+		# reset default company
+		frappe.db.sql("""update `tabSingles` set value=""
+			where doctype='Chart of Accounts Importer' and field='company'
+			and value=%s""", self.name)
+
 		# delete BOMs
 		boms = frappe.db.sql_list("select name from tabBOM where company=%s", self.name)
 		if boms:
@@ -361,7 +372,7 @@ def replace_abbr(company, old, new):
 	def _rename_record(doc):
 		parts = doc[0].rsplit(" - ", 1)
 		if len(parts) == 1 or parts[1].lower() == old.lower():
-			frappe.rename_doc(dt, doc[0], parts[0] + " - " + new)
+			frappe.rename_doc(dt, doc[0], parts[0] + " - " + new, force=True)
 
 	def _rename_records(dt):
 		# rename is expensive so let's be economical with memory usage
@@ -369,7 +380,7 @@ def replace_abbr(company, old, new):
 		for d in doc:
 			_rename_record(d)
 
-	for dt in ["Warehouse", "Account", "Cost Center", "Department", "Location",
+	for dt in ["Warehouse", "Account", "Cost Center", "Department",
 			"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
 		_rename_records(dt)
 		frappe.db.commit()
@@ -395,17 +406,19 @@ def update_company_current_month_sales(company):
 	current_month_year = formatdate(today(), "MM-yyyy")
 
 	results = frappe.db.sql('''
-		select
-			sum(base_grand_total) as total, date_format(posting_date, '%m-%Y') as month_year
-		from
+		SELECT
+			SUM(base_grand_total) AS total,
+			DATE_FORMAT(`posting_date`, '%m-%Y') AS month_year
+		FROM
 			`tabSales Invoice`
-		where
-			date_format(posting_date, '%m-%Y')="{0}"
-			and docstatus = 1
-			and company = "{1}"
-		group by
+		WHERE
+			DATE_FORMAT(`posting_date`, '%m-%Y') = '{current_month_year}'
+			AND docstatus = 1
+			AND company = {company}
+		GROUP BY
 			month_year
-	'''.format(current_month_year, frappe.db.escape(company)), as_dict = True)
+	'''.format(current_month_year=current_month_year, company=frappe.db.escape(company)),
+		as_dict = True)
 
 	monthly_total = results[0]['total'] if len(results) > 0 else 0
 
@@ -415,7 +428,7 @@ def update_company_monthly_sales(company):
 	'''Cache past year monthly sales of every company based on sales invoices'''
 	from frappe.utils.goal import get_monthly_results
 	import json
-	filter_str = "company = '{0}' and status != 'Draft' and docstatus=1".format(frappe.db.escape(company))
+	filter_str = "company = {0} and status != 'Draft' and docstatus=1".format(frappe.db.escape(company))
 	month_to_value_dict = get_monthly_results("Sales Invoice", "base_grand_total",
 		"posting_date", filter_str, "sum")
 
@@ -447,9 +460,9 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 		from
 			`tab{doctype}` comp
 		where
-			ifnull(parent_company, "")="{parent}"
+			ifnull(parent_company, "")={parent}
 		""".format(
-			doctype = frappe.db.escape(doctype),
+			doctype = doctype,
 			parent=frappe.db.escape(parent)
 		), as_dict=1)
 

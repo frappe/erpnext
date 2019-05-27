@@ -99,7 +99,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 
 	cond = []
 	if date:
-		cond.append("posting_date <= '%s'" % frappe.db.escape(cstr(date)))
+		cond.append("posting_date <= %s" % frappe.db.escape(cstr(date)))
 	else:
 		# get balance of all entries that exist
 		date = nowdate()
@@ -127,7 +127,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			)""" % (cc.lft, cc.rgt))
 
 		else:
-			cond.append("""gle.cost_center = "%s" """ % (frappe.db.escape(cost_center, percent=False), ))
+			cond.append("""gle.cost_center = %s """ % (frappe.db.escape(cost_center, percent=False), ))
 
 
 	if account:
@@ -158,14 +158,14 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			if acc.account_currency == frappe.get_cached_value('Company',  acc.company,  "default_currency"):
 				in_account_currency = False
 		else:
-			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account, percent=False), ))
+			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False), ))
 
 	if party_type and party:
-		cond.append("""gle.party_type = "%s" and gle.party = "%s" """ %
+		cond.append("""gle.party_type = %s and gle.party = %s """ %
 			(frappe.db.escape(party_type), frappe.db.escape(party, percent=False)))
 
 	if company:
-		cond.append("""gle.company = "%s" """ % (frappe.db.escape(company, percent=False)))
+		cond.append("""gle.company = %s """ % (frappe.db.escape(company, percent=False)))
 
 	if account or (party_type and party):
 		if in_account_currency:
@@ -183,7 +183,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 def get_count_on(account, fieldname, date):
 	cond = []
 	if date:
-		cond.append("posting_date <= '%s'" % frappe.db.escape(cstr(date)))
+		cond.append("posting_date <= %s" % frappe.db.escape(cstr(date)))
 	else:
 		# get balance of all entries that exist
 		date = nowdate()
@@ -218,7 +218,7 @@ def get_count_on(account, fieldname, date):
 				and ac.lft >= %s and ac.rgt <= %s
 			)""" % (acc.lft, acc.rgt))
 		else:
-			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account, percent=False), ))
+			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False), ))
 
 		entries = frappe.db.sql("""
 			SELECT name, posting_date, account, party_type, party,debit,credit,
@@ -333,6 +333,9 @@ def reconcile_against_document(args):
 		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
 		doc.make_gl_entries(cancel = 0, adv_adj =1)
 
+		if d.voucher_type in ('Payment Entry', 'Journal Entry'):
+			doc.update_expense_claim()
+
 def check_if_advance_entry_modified(args):
 	"""
 		check if there is already a voucher reference
@@ -375,9 +378,9 @@ def check_if_advance_entry_modified(args):
 
 def validate_allocated_amount(args):
 	if args.get("allocated_amount") < 0:
-		throw(_("Allocated amount can not be negative"))
+		throw(_("Allocated amount cannot be negative"))
 	elif args.get("allocated_amount") > args.get("unadjusted_amount"):
-		throw(_("Allocated amount can not greater than unadjusted amount"))
+		throw(_("Allocated amount cannot be greater than unadjusted amount"))
 
 def update_reference_in_journal_entry(d, jv_obj):
 	"""
@@ -544,14 +547,14 @@ def fix_total_debit_credit():
 				(dr_or_cr, dr_or_cr, '%s', '%s', '%s', dr_or_cr),
 				(d.diff, d.voucher_type, d.voucher_no))
 
-def get_stock_and_account_difference(account_list=None, posting_date=None):
+def get_stock_and_account_difference(account_list=None, posting_date=None, company=None):
 	from erpnext.stock.utils import get_stock_value_on
 	from erpnext.stock import get_warehouse_account_map
 
 	if not posting_date: posting_date = nowdate()
 
 	difference = {}
-	warehouse_account = get_warehouse_account_map()
+	warehouse_account = get_warehouse_account_map(company)
 
 	for warehouse, account_data in iteritems(warehouse_account):
 		if account_data.get('account') in account_list:
