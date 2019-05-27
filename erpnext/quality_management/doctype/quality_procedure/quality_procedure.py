@@ -12,7 +12,7 @@ class QualityProcedure(NestedSet):
 
 	def before_save(self):
 		for process in self.processes:
-			if process.procedure and not process.process_description:
+			if process.procedure:
 				doc = frappe.get_doc("Quality Procedure", process.procedure)
 				if doc.parent_quality_procedure:
 					frappe.throw(_("{0} already has a Parent Procedure {1}.".format(process.procedure, doc.parent_quality_procedure)))
