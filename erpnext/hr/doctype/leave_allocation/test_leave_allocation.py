@@ -158,7 +158,6 @@ def create_leave_allocation(**args):
 		"from_date": args.from_date or nowdate(),
 		"new_leaves_allocated": args.new_leaves_created or 15,
 		"carry_forward": args.carry_forward or 0,
-		"carry_forwarded_leaves": args.carry_forwarded_leaves or 0,
 		"to_date": args.to_date or add_months(nowdate(), 12)
 	})
 	return leave_allocation

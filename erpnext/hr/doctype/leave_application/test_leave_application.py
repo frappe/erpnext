@@ -7,7 +7,7 @@ import unittest
 
 from erpnext.hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError, NotAnOptionalHoliday, get_leave_balance_on
 from frappe.permissions import clear_user_permissions_for_doctype
-from frappe.utils import add_days, nowdate, now_datetime, getdate
+from frappe.utils import add_days, nowdate, now_datetime, getdate, add_months
 from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
 from erpnext.hr.doctype.leave_allocation.test_leave_allocation import create_leave_allocation
 
@@ -287,7 +287,6 @@ class TestLeaveApplication(unittest.TestCase):
 		# check leave balance is reduced
 		self.assertEqual(get_leave_balance_on(employee.name, leave_type, today), 9)
 
-
 	def test_leaves_allowed(self):
 		frappe.db.sql("delete from `tabLeave Allocation`")
 		frappe.db.sql("delete from `tabLeave Ledger Entry`")
@@ -404,6 +403,20 @@ class TestLeaveApplication(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, leave_application.insert)
 
+	def test_leave_balance_near_allocaton_expiry(self):
+		frappe.db.sql("delete from `tabLeave Allocation`")
+		frappe.db.sql("delete from `tabLeave Ledger Entry`")
+		employee = get_employee()
+		leave_type = create_leave_type(
+			leave_type_name="_Test_CF_leave_expiry",
+			is_carry_forward=1,
+			carry_forward_leave_expiry=90)
+		leave_type.submit()
+
+		create_carry_forwarded_allocation(employee, leave_type)
+
+		self.assertEqual(get_leave_balance_on(employee.name, leave_type.name, nowdate(), add_days(nowdate(), 8)), 21)
+
 	def test_earned_leave(self):
 		leave_period = get_leave_period()
 		employee = get_employee()
@@ -491,6 +504,59 @@ class TestLeaveApplication(unittest.TestCase):
 		# check if leave ledger entry is deleted on cancellation
 		leave_application.cancel()
 		self.assertFalse(frappe.db.exists("Leave Ledger Entry", {'transaction_name':leave_application.name}))
+
+	def test_ledger_entry_creation_on_intermediate_allocation_expiry(self):
+		frappe.db.sql("delete from `tabLeave Allocation`")
+		frappe.db.sql("delete from `tabLeave Ledger Entry`")
+		employee = get_employee()
+		leave_type = create_leave_type(
+			leave_type_name="_Test_CF_leave_expiry",
+			is_carry_forward=1,
+			carry_forward_leave_expiry=90)
+		leave_type.submit()
+
+		create_carry_forwarded_allocation(employee, leave_type)
+
+		leave_application = frappe.get_doc(dict(
+			doctype = 'Leave Application',
+			employee = employee.name,
+			leave_type = leave_type.name,
+			from_date = add_days(nowdate(), -3),
+			to_date = add_days(nowdate(), 7),
+			company = "_Test Company",
+			docstatus = 1,
+            status = "Approved"
+		))
+		leave_application.submit()
+
+		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', '*', filters=dict(transaction_name=leave_application.name))
+
+		self.assertEquals(len(leave_ledger_entry), 2)
+		self.assertEquals(leave_ledger_entry[0].employee, leave_application.employee)
+		self.assertEquals(leave_ledger_entry[0].leave_type, leave_application.leave_type)
+		self.assertEquals(leave_ledger_entry[0].leaves, -9)
+		self.assertEquals(leave_ledger_entry[1].leaves, -2)
+
+def create_carry_forwarded_allocation(employee, leave_type):
+
+		# initial leave allocation
+		leave_allocation = create_leave_allocation(
+			leave_type="_Test_CF_leave_expiry",
+			employee=employee.name,
+			employee_name=employee.employee_name,
+			from_date=add_months(nowdate(), -24),
+			to_date=add_months(nowdate(), -12),
+			carry_forward=1)
+		leave_allocation.submit()
+
+		leave_allocation = create_leave_allocation(
+			leave_type="_Test_CF_leave_expiry",
+			employee=employee.name,
+			employee_name=employee.employee_name,
+			from_date=add_days(nowdate(), -85),
+			to_date=add_days(nowdate(), 100),
+			carry_forward=1)
+		leave_allocation.submit()
 
 def make_allocation_record(employee=None, leave_type=None):
 	frappe.db.sql("delete from `tabLeave Allocation`")
