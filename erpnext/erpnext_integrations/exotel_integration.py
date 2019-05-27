@@ -12,9 +12,10 @@ def handle_incoming_call(*args, **kwargs):
 	employee_email = kwargs.get('AgentEmail')
 	status = kwargs.get('Status')
 
-	if status == 'free' and get_call_status(kwargs.get('CallSid')) == ['ringing', 'in-progress']:
-		# redirected to other agent number
-		frappe.publish_realtime('terminate_call_popup', user=employee_email)
+	if status == 'free':
+		# call disconnected for agent
+		# "and get_call_status(kwargs.get('CallSid')) in ['in-progress']" - additional check to ensure if the call was redirected
+		frappe.publish_realtime('call_disconnected', user=employee_email)
 		return
 
 	call_log = get_call_log(kwargs)
@@ -29,9 +30,6 @@ def handle_incoming_call(*args, **kwargs):
 	if call_log.call_status in ['ringing', 'in-progress']:
 		frappe.publish_realtime('show_call_popup', data, user=data.agent_email)
 
-def get_last_communication(phone_number, contact):
-	# frappe.get_all('Communication', filter={})
-	return {}
 
 def get_call_log(call_payload):
 	communication = frappe.get_all('Communication', {
