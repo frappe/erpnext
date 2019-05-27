@@ -3,21 +3,21 @@
 
 from __future__ import unicode_literals
 from frappe import _
-from erpnext.stock.report.delayed_order_item_summary.delayed_order_item_summary import DelayedOrderItemSummary
+from erpnext.stock.report.delayed_item_report.delayed_item_report import DelayedItemReport
 
 def execute(filters=None):
 	columns, data = [], []
 
-	columns, data = DelayedOrderSummary(filters).run()
+	columns, data = DelayedOrderReport(filters).run()
 
 	return columns, data
 
-class DelayedOrderSummary(DelayedOrderItemSummary):
+class DelayedOrderReport(DelayedItemReport):
 	def run(self):
 		return self.get_columns(), self.get_data(consolidated=True) or []
 
 	def get_data(self, consolidated=False):
-		data = super(DelayedOrderSummary, self).get_data(consolidated) or []
+		data = super(DelayedOrderReport, self).get_data(consolidated) or []
 
 		so_list = []
 		result = []
@@ -63,8 +63,8 @@ class DelayedOrderSummary(DelayedOrderItemSummary):
 			"width": 100
 		},
 		{
-			"label": _("Delay Days"),
-			"fieldname": "delay_days",
+			"label": _("Delayed Days"),
+			"fieldname": "delayed_days",
 			"fieldtype": "Int",
 			"width": 100
 		},
