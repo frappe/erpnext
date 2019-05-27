@@ -196,6 +196,7 @@
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
+   "in_preview": 1,
    "label": "Task Description",
    "oldfieldname": "description",
    "oldfieldtype": "Text Editor",
@@ -216,7 +217,7 @@
   },
   {
    "fieldname": "depends_on_tasks",
-   "fieldtype": "Data",
+   "fieldtype": "Code",
    "hidden": 1,
    "label": "Depends on Tasks",
    "read_only": 1
@@ -351,7 +352,7 @@
  "icon": "fa fa-check",
  "idx": 1,
  "max_attachments": 5,
- "modified": "2019-04-29 14:48:10.204819",
+ "modified": "2019-05-16 09:51:15.599416",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
@@ -371,6 +372,7 @@
  ],
  "search_fields": "subject",
  "show_name_in_global_search": 1,
+ "show_preview_popup": 1,
  "sort_order": "DESC",
  "timeline_field": "project",
  "title_field": "subject",
