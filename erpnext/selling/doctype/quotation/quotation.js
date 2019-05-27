@@ -47,6 +47,10 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		erpnext.utils.get_party_details(this.frm, null, null, function() {
 			me.apply_price_list();
 		});
+
+		if(me.frm.doc.quotation_to=="Lead" && me.frm.doc.party_name) {
+			me.frm.trigger("get_lead_details");
+		}
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
@@ -87,10 +91,10 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 			this.frm.add_custom_button(__('Opportunity'),
 				function() {
 					var setters = {};
-					if(me.frm.doc.customer) {
-						setters.customer = me.frm.doc.customer || undefined;
-					} else if (me.frm.doc.lead) {
-						setters.lead = me.frm.doc.lead || undefined;
+					if(me.frm.doc.quotation_to == "Customer" && me.frm.doc.party_name) {
+						setters.customer = me.frm.doc.party_name || undefined;
+					} else if (me.frm.doc.quotation_to == "Lead" && me.frm.doc.party_name) {
+						setters.lead = me.frm.doc.party_name || undefined;
 					}
 					erpnext.utils.map_current_doc({
 						method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
@@ -162,16 +166,16 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		}
 	},
 
-	lead: function() {
+	get_lead_details: function() {
 		var me = this;
-		if(!this.frm.doc.lead) {
+		if(!this.frm.doc.quotation_to === "Lead") {
 			return;
 		}
 
 		frappe.call({
 			method: "erpnext.crm.doctype.lead.lead.get_lead_details",
 			args: {
-				'lead': this.frm.doc.lead,
+				'lead': this.frm.doc.party_name,
 				'posting_date': this.frm.doc.transaction_date,
 				'company': this.frm.doc.company,
 			},

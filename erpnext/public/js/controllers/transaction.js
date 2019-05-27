@@ -260,6 +260,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 		if(frappe.meta.get_docfield(this.frm.doc.doctype + " Item", "item_code")) {
 			this.setup_item_selector();
+			this.frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 		}
 	},
 
@@ -429,6 +430,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							set_warehouse: me.frm.doc.set_warehouse,
 							warehouse: item.warehouse,
 							customer: me.frm.doc.customer || me.frm.doc.party_name,
+							quotation_to: me.frm.doc.quotation_to,
 							supplier: me.frm.doc.supplier,
 							currency: me.frm.doc.currency,
 							update_stock: update_stock,
@@ -1119,6 +1121,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		return {
 			"items": this._get_item_list(item),
 			"customer": me.frm.doc.customer || me.frm.doc.party_name,
+			"quotation_to": me.frm.doc.quotation_to,
 			"customer_group": me.frm.doc.customer_group,
 			"territory": me.frm.doc.territory,
 			"supplier": me.frm.doc.supplier,

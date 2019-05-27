@@ -599,3 +599,4 @@ erpnext.patches.v11_1.rename_depends_on_lwp
 erpnext.patches.v11_1.set_missing_title_for_quotation
 execute:frappe.delete_doc("Report", "Inactive Items")
 erpnext.patches.v11_1.delete_scheduling_tool
+erpnext.patches.v11_1.update_bank_transaction_status
