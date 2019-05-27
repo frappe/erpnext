@@ -27,10 +27,7 @@ class LeaveControlPanel(Document):
 		for f in ["from_date", "to_date", "leave_type", "no_of_days"]:
 			if not self.get(f):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(f)))
-
-	def to_date_validation(self):
-		if date_diff(self.to_date, self.from_date) <= 0:
-			return "Invalid period"
+		self.validate_from_to_dates('from_date', 'to_date')
 
 	def allocate_leave(self):
 		self.validate_values()
