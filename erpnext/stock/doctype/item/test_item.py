@@ -4,11 +4,12 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
+import json
 
 from frappe.test_runner import make_test_objects
 from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
 	InvalidItemAttributeValueError, get_variant)
-from erpnext.stock.doctype.item.item import StockExistsForTemplate
+from erpnext.stock.doctype.item.item import StockExistsForTemplate, InvalidBarcode
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from frappe.model.rename_doc import rename_doc
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -17,7 +18,7 @@ from erpnext.stock.get_item_details import get_item_details
 from six import iteritems
 
 test_ignore = ["BOM"]
-test_dependencies = ["Warehouse", "Item Group"]
+test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand"]
 
 def make_item(item_code, properties=None):
 	if frappe.db.exists("Item", item_code):
@@ -76,7 +77,6 @@ class TestItem(unittest.TestCase):
 			"amount": 0.0,
 			"base_amount": 0.0,
 			"batch_no": None,
-			"item_tax_rate": '{}',
 			"uom": "_Test UOM",
 			"conversion_factor": 1.0,
 		}
@@ -101,6 +101,123 @@ class TestItem(unittest.TestCase):
 
 		for key, value in iteritems(to_check):
 			self.assertEqual(value, details.get(key))
+
+	def test_item_tax_template(self):
+		expected_item_tax_template = [
+			{"item_code": "_Test Item With Item Tax Template", "tax_category": "",
+				"item_tax_template": "_Test Account Excise Duty @ 10"},
+			{"item_code": "_Test Item With Item Tax Template", "tax_category": "_Test Tax Category 1",
+				"item_tax_template": "_Test Account Excise Duty @ 12"},
+			{"item_code": "_Test Item With Item Tax Template", "tax_category": "_Test Tax Category 2",
+				"item_tax_template": None},
+
+			{"item_code": "_Test Item Inherit Group Item Tax Template 1", "tax_category": "",
+				"item_tax_template": "_Test Account Excise Duty @ 10"},
+			{"item_code": "_Test Item Inherit Group Item Tax Template 1", "tax_category": "_Test Tax Category 1",
+				"item_tax_template": "_Test Account Excise Duty @ 12"},
+			{"item_code": "_Test Item Inherit Group Item Tax Template 1", "tax_category": "_Test Tax Category 2",
+				"item_tax_template": None},
+
+			{"item_code": "_Test Item Inherit Group Item Tax Template 2", "tax_category": "",
+				"item_tax_template": "_Test Account Excise Duty @ 15"},
+			{"item_code": "_Test Item Inherit Group Item Tax Template 2", "tax_category": "_Test Tax Category 1",
+				"item_tax_template": "_Test Account Excise Duty @ 12"},
+			{"item_code": "_Test Item Inherit Group Item Tax Template 2", "tax_category": "_Test Tax Category 2",
+				"item_tax_template": None},
+
+			{"item_code": "_Test Item Override Group Item Tax Template", "tax_category": "",
+				"item_tax_template": "_Test Account Excise Duty @ 20"},
+			{"item_code": "_Test Item Override Group Item Tax Template", "tax_category": "_Test Tax Category 1",
+				"item_tax_template": "_Test Item Tax Template 1"},
+			{"item_code": "_Test Item Override Group Item Tax Template", "tax_category": "_Test Tax Category 2",
+				"item_tax_template": None},
+		]
+
+		expected_item_tax_map = {
+			None: {},
+			"_Test Account Excise Duty @ 10": {"_Test Account Excise Duty - _TC": 10},
+			"_Test Account Excise Duty @ 12": {"_Test Account Excise Duty - _TC": 12},
+			"_Test Account Excise Duty @ 15": {"_Test Account Excise Duty - _TC": 15},
+			"_Test Account Excise Duty @ 20": {"_Test Account Excise Duty - _TC": 20},
+			"_Test Item Tax Template 1": {"_Test Account Excise Duty - _TC": 5, "_Test Account Education Cess - _TC": 10,
+				"_Test Account S&H Education Cess - _TC": 15}
+		}
+
+		for data in expected_item_tax_template:
+			details = get_item_details({
+				"item_code": data['item_code'],
+				"tax_category": data['tax_category'],
+				"company": "_Test Company",
+				"price_list": "_Test Price List",
+				"currency": "_Test Currency",
+				"doctype": "Sales Order",
+				"conversion_rate": 1,
+				"price_list_currency": "_Test Currency",
+				"plc_conversion_rate": 1,
+				"order_type": "Sales",
+				"customer": "_Test Customer",
+				"conversion_factor": 1,
+				"price_list_uom_dependant": 1,
+				"ignore_pricing_rule": 1
+			})
+
+			self.assertEqual(details.item_tax_template, data['item_tax_template'])
+			self.assertEqual(json.loads(details.item_tax_rate), expected_item_tax_map[details.item_tax_template])
+
+	def test_item_defaults(self):
+		frappe.delete_doc_if_exists("Item", "Test Item With Defaults", force=1)
+		make_item("Test Item With Defaults", {
+			"item_group": "_Test Item Group",
+			"brand": "_Test Brand With Item Defaults",
+			"item_defaults": [{
+				"company": "_Test Company",
+				"default_warehouse": "_Test Warehouse 2 - _TC",  # no override
+				"expense_account": "_Test Account Stock Expenses - _TC",  # override brand default
+				"buying_cost_center": "_Test Write Off Cost Center - _TC",  # override item group default
+			}]
+		})
+
+		sales_item_check = {
+			"item_code": "Test Item With Defaults",
+			"warehouse": "_Test Warehouse 2 - _TC",  # from item
+			"income_account": "_Test Account Sales - _TC",  # from brand
+			"expense_account": "_Test Account Stock Expenses - _TC",  # from item
+			"cost_center": "_Test Cost Center 2 - _TC",  # from item group
+		}
+		sales_item_details = get_item_details({
+			"item_code": "Test Item With Defaults",
+			"company": "_Test Company",
+			"price_list": "_Test Price List",
+			"currency": "_Test Currency",
+			"doctype": "Sales Invoice",
+			"conversion_rate": 1,
+			"price_list_currency": "_Test Currency",
+			"plc_conversion_rate": 1,
+			"customer": "_Test Customer",
+		})
+		for key, value in iteritems(sales_item_check):
+			self.assertEqual(value, sales_item_details.get(key))
+
+		purchase_item_check = {
+			"item_code": "Test Item With Defaults",
+			"warehouse": "_Test Warehouse 2 - _TC",  # from item
+			"expense_account": "_Test Account Stock Expenses - _TC",  # from item
+			"income_account": "_Test Account Sales - _TC",  # from brand
+			"cost_center": "_Test Write Off Cost Center - _TC"  # from item
+		}
+		purchase_item_details = get_item_details({
+			"item_code": "Test Item With Defaults",
+			"company": "_Test Company",
+			"price_list": "_Test Price List",
+			"currency": "_Test Currency",
+			"doctype": "Purchase Invoice",
+			"conversion_rate": 1,
+			"price_list_currency": "_Test Currency",
+			"plc_conversion_rate": 1,
+			"supplier": "_Test Supplier",
+		})
+		for key, value in iteritems(purchase_item_check):
+			self.assertEqual(value, purchase_item_details.get(key))
 
 	def test_item_attribute_change_after_variant(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
@@ -305,6 +422,65 @@ class TestItem(unittest.TestCase):
 			item_doc.has_variants = 1
 			self.assertRaises(StockExistsForTemplate, item_doc.save)
 
+	def test_add_item_barcode(self):
+		# Clean up
+		frappe.db.sql("""delete from `tabItem Barcode`""")
+		item_code = "Test Item Barcode"
+		if frappe.db.exists("Item", item_code):
+			frappe.delete_doc("Item", item_code)
+
+		# Create new item and add barcodes
+		barcode_properties_list = [
+			{
+				"barcode": "0012345678905",
+				"barcode_type": "EAN"
+			},
+			{
+				"barcode": "012345678905",
+				"barcode_type": "UAN"
+			},
+			{
+				"barcode": "ARBITRARY_TEXT",
+			}
+		]
+		create_item(item_code)
+		for barcode_properties in barcode_properties_list:
+			item_doc = frappe.get_doc('Item', item_code)
+			new_barcode = item_doc.append('barcodes')
+			new_barcode.update(barcode_properties)
+			item_doc.save()
+
+		# Check values saved correctly
+		barcodes = frappe.get_list(
+			'Item Barcode',
+			fields=['barcode', 'barcode_type'],
+			filters={'parent': item_code})
+
+		for barcode_properties in barcode_properties_list:
+			barcode_to_find = barcode_properties['barcode']
+			matching_barcodes = [
+				x for x in barcodes
+				if x['barcode'] == barcode_to_find
+			]
+		self.assertEqual(len(matching_barcodes), 1)
+		details = matching_barcodes[0]
+
+		for key, value in iteritems(barcode_properties):
+			self.assertEqual(value, details.get(key))
+
+		# Add barcode again - should cause DuplicateEntryError
+		item_doc = frappe.get_doc('Item', item_code)
+		new_barcode = item_doc.append('barcodes')
+		new_barcode.update(barcode_properties_list[0])
+		self.assertRaises(frappe.DuplicateEntryError, item_doc.save)
+
+		# Add invalid barcode - should cause InvalidBarcode
+		item_doc = frappe.get_doc('Item', item_code)
+		new_barcode = item_doc.append('barcodes')
+		new_barcode.barcode = '9999999999999'
+		new_barcode.barcode_type = 'EAN'
+		self.assertRaises(InvalidBarcode, item_doc.save)
+
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc('Item Variant Settings')
 	doc.set('fields', fields)
@@ -319,7 +495,7 @@ def make_item_variant():
 
 test_records = frappe.get_test_records('Item')
 
-def create_item(item_code, is_stock_item=None, valuation_rate=0, warehouse=None, is_customer_provided_item=None, customer=None, is_purchase_item=None):
+def create_item(item_code, is_stock_item=None, valuation_rate=0, warehouse=None, is_customer_provided_item=None, customer=None, is_purchase_item=None, opening_stock=None):
 	if not frappe.db.exists("Item", item_code):
 		item = frappe.new_doc("Item")
 		item.item_code = item_code
@@ -327,6 +503,7 @@ def create_item(item_code, is_stock_item=None, valuation_rate=0, warehouse=None,
 		item.description = item_code
 		item.item_group = "All Item Groups"
 		item.is_stock_item = is_stock_item or 1
+		item.opening_stock = opening_stock or 0
 		item.valuation_rate = valuation_rate or 0.0
 		item.is_purchase_item = is_purchase_item
 		item.is_customer_provided_item = is_customer_provided_item
@@ -336,4 +513,6 @@ def create_item(item_code, is_stock_item=None, valuation_rate=0, warehouse=None,
 			"company": "_Test Company"
 		})
 		item.save()
-
+	else:
+		item = frappe.get_doc("Item", item_code)
+	return item

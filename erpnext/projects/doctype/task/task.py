@@ -12,17 +12,13 @@ from frappe.utils.nestedset import NestedSet
 
 
 class CircularReferenceError(frappe.ValidationError): pass
+class EndDateCannotBeGreaterThanProjectEndDateError(frappe.ValidationError): pass
 
 class Task(NestedSet):
 	nsm_parent_field = 'parent_task'
 
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.subject)
-
-	def get_project_details(self):
-		return {
-			"project": self.project
-		}
 
 	def get_customer_details(self):
 		cust = frappe.db.sql("select customer_name from `tabCustomer` where name=%s", self.customer)
@@ -44,10 +40,10 @@ class Task(NestedSet):
 			frappe.throw(_("'Actual Start Date' can not be greater than 'Actual End Date'"))
 
 	def validate_status(self):
-		if self.status!=self.get_db_value("status") and self.status == "Closed":
+		if self.status!=self.get_db_value("status") and self.status == "Completed":
 			for d in self.depends_on:
-				if frappe.db.get_value("Task", d.task, "status") != "Closed":
-					frappe.throw(_("Cannot close task as its dependant task {0} is not closed.").format(d.task))
+				if frappe.db.get_value("Task", d.task, "status") != "Completed":
+					frappe.throw(_("Cannot close task {0} as its dependant task {1} is not closed.").format(frappe.bold(self.name), frappe.bold(d.task)))
 
 			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
@@ -55,6 +51,12 @@ class Task(NestedSet):
 	def validate_progress(self):
 		if (self.progress or 0) > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
+
+		if self.progress == 100:
+			self.status = 'Completed'
+
+		if self.status == 'Completed':
+			self.progress = 100
 
 	def update_depends_on(self):
 		depends_on_tasks = self.depends_on_tasks or ""
@@ -75,7 +77,7 @@ class Task(NestedSet):
 		self.populate_depends_on()
 
 	def unassign_todo(self):
-		if self.status == "Closed" or self.status == "Cancelled":
+		if self.status in ("Completed", "Cancelled"):
 			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
 
@@ -98,7 +100,7 @@ class Task(NestedSet):
 
 	def update_project(self):
 		if self.project and not self.flags.from_project:
-			frappe.get_doc("Project", self.project).update_project()
+			frappe.get_cached_doc("Project", self.project).update_project()
 
 	def check_recursion(self):
 		if self.flags.ignore_recursion_check: return
@@ -143,7 +145,7 @@ class Task(NestedSet):
 
 	def populate_depends_on(self):
 		if self.parent_task:
-			parent = frappe.get_doc('Task', self.parent_task)
+			parent = frappe.get_cached_doc('Task', self.parent_task)
 			if not self.name in [row.task for row in parent.depends_on]:
 				parent.append("depends_on", {
 					"doctype": "Task Depends On",
@@ -156,7 +158,21 @@ class Task(NestedSet):
 		if check_if_child_exists(self.name):
 			throw(_("Child Task exists for this Task. You can not delete this Task."))
 
+		if self.project:
+			tasks = frappe.get_doc('Project', self.project).tasks
+			for task in tasks:
+				if task.get('task_id') == self.name:
+					frappe.delete_doc('Project Task', task.name)
+
+
 		self.update_nsm_model()
+
+	def update_status(self):
+		if self.status not in ('Cancelled', 'Completed') and self.exp_end_date:
+			from datetime import datetime
+			if self.exp_end_date < datetime.now().date():
+				self.db_set('status', 'Overdue')
+				self.update_project()
 
 @frappe.whitelist()
 def check_if_child_exists(name):
@@ -189,10 +205,9 @@ def set_multiple_status(names, status):
 		task.save()
 
 def set_tasks_as_overdue():
-	frappe.db.sql("""update tabTask set `status`='Overdue'
-		where exp_end_date is not null
-		and exp_end_date < CURDATE()
-		and `status` not in ('Closed', 'Cancelled')""")
+	tasks = frappe.get_all("Task", filters={'status':['not in',['Cancelled', 'Completed']]})
+	for task in tasks:
+		frappe.get_doc("Task", task.name).update_status()
 
 @frappe.whitelist()
 def get_children(doctype, parent, task=None, project=None, is_root=False):

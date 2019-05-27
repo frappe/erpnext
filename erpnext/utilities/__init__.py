@@ -1,5 +1,5 @@
 ## temp utility
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 import frappe
 from erpnext.utilities.activation import get_level
 from frappe.utils import cstr

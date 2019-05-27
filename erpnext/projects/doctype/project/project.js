@@ -9,13 +9,14 @@ frappe.ui.form.on("Project", {
 					indicator = 'red';
 				} else if (doc.status == 'Cancelled') {
 					indicator = 'dark grey';
-				} else if (doc.status == 'Closed') {
+				} else if (doc.status == 'Completed') {
 					indicator = 'green';
 				}
 				return indicator;
 			}
 		);
 	},
+
 
 	onload: function (frm) {
 		var so = frappe.meta.get_docfield("Project", "sales_order");
@@ -76,7 +77,28 @@ frappe.ui.form.on("Project", {
 
 			frm.trigger('show_dashboard');
 		}
+		frm.events.set_buttons(frm);
 	},
+
+	set_buttons: function(frm) {
+		if (!frm.is_new()) {
+			frm.add_custom_button(__('Completed'), () => {
+				frm.events.set_status(frm, 'Completed');
+			}, __('Set Status'));
+
+			frm.add_custom_button(__('Cancelled'), () => {
+				frm.events.set_status(frm, 'Cancelled');
+			}, __('Set Status'));
+		}
+	},
+
+	set_status: function(frm, status) {
+		frappe.confirm(__('Set Project and all Tasks to status {0}?', [status.bold()]), () => {
+			frappe.xcall('erpnext.projects.doctype.project.project.set_project_status',
+				{project: frm.doc.name, status: status}).then(() => { /* page will auto reload */ });
+		});
+	},
+
 	tasks_refresh: function (frm) {
 		var grid = frm.get_field('tasks').grid;
 		grid.wrapper.find('select[data-fieldname="status"]').each(function () {
@@ -87,6 +109,18 @@ frappe.ui.form.on("Project", {
 			}
 		});
 	},
+
+	status: function(frm) {
+		if (frm.doc.status === 'Cancelled') {
+			frappe.confirm(__('Set tasks in this project as cancelled?'), () => {
+				frm.doc.tasks = frm.doc.tasks.map(task => {
+					task.status = 'Cancelled';
+					return task;
+				});
+				frm.refresh_field('tasks');
+			});
+		}
+	}
 });
 
 frappe.ui.form.on("Project Task", {
@@ -119,29 +153,4 @@ frappe.ui.form.on("Project Task", {
 	status: function(frm, doctype, name) {
 		frm.trigger('tasks_refresh');
 	},
-});
-
-frappe.ui.form.on("Project", "validate", function (frm) {
-	if (frm.doc.collect_progress == 1) {
-		frappe.call({
-			method: "erpnext.projects.doctype.project.project.times_check",
-			args: {
-				"from1": frm.doc.from,
-				"to": frm.doc.to,
-				"first_email": frm.doc.first_email,
-				"second_email": frm.doc.second_email,
-				"daily_time_to_send": frm.doc.daily_time_to_send,
-				"weekly_time_to_send": frm.doc.weekly_time_to_send
-
-			},
-			callback: function (r) {
-				frm.set_value("from", r.message.from1);
-				frm.set_value("to", r.message.to);
-				frm.set_value("first_email", r.message.first_email);
-				frm.set_value("second_email", r.message.second_email);
-				frm.set_value("daily_time_to_send", r.message.daily_time_to_send);
-				frm.set_value("weekly_time_to_send", r.message.weekly_time_to_send);
-			}
-		});
-	}
 });

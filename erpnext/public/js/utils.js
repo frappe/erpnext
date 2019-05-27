@@ -58,43 +58,9 @@ $.extend(erpnext, {
 				.css({"margin-bottom": "10px", "margin-top": "10px"})
 				.appendTo(grid_row.grid_form.fields_dict.serial_no.$wrapper));
 
+		var me = this;
 		$btn.on("click", function() {
-			var d = new frappe.ui.Dialog({
-				title: __("Add Serial No"),
-				fields: [
-					{
-						"fieldtype": "Link",
-						"fieldname": "serial_no",
-						"options": "Serial No",
-						"label": __("Serial No"),
-						"get_query": function () {
-							return {
-								filters: {
-									item_code:grid_row.doc.item_code,
-									warehouse:cur_frm.doc.is_return ? null : grid_row.doc.warehouse
-								}
-							}
-						}
-					},
-					{
-						"fieldtype": "Button",
-						"fieldname": "add",
-						"label": __("Add")
-					}
-				]
-			});
-
-			d.get_input("add").on("click", function() {
-				var serial_no = d.get_value("serial_no");
-				if(serial_no) {
-					var val = (grid_row.doc.serial_no || "").split("\n").concat([serial_no]).join("\n");
-					grid_row.grid_form.fields_dict.serial_no.set_model_value(val.trim());
-				}
-				d.hide();
-				return false;
-			});
-
-			d.show();
+			me.show_serial_batch_selector(grid_row.frm, grid_row.doc);
 		});
 	}
 });
@@ -103,13 +69,52 @@ $.extend(erpnext, {
 $.extend(erpnext.utils, {
 	set_party_dashboard_indicators: function(frm) {
 		if(frm.doc.__onload && frm.doc.__onload.dashboard_info) {
-			var info = frm.doc.__onload.dashboard_info;
-			frm.dashboard.add_indicator(__('Annual Billing: {0}',
-				[format_currency(info.billing_this_year, info.currency)]), 'blue');
-			frm.dashboard.add_indicator(__('Total Unpaid: {0}',
-				[format_currency(info.total_unpaid, info.currency)]),
-				info.total_unpaid ? 'orange' : 'green');
+			var company_wise_info = frm.doc.__onload.dashboard_info;
+			if(company_wise_info.length > 1) {
+				company_wise_info.forEach(function(info) {
+					erpnext.utils.add_indicator_for_multicompany(frm, info);
+				});
+			} else if (company_wise_info.length === 1) {
+				frm.dashboard.add_indicator(__('Annual Billing: {0}',
+					[format_currency(company_wise_info[0].billing_this_year, company_wise_info[0].currency)]), 'blue');
+				frm.dashboard.add_indicator(__('Total Unpaid: {0}',
+					[format_currency(company_wise_info[0].total_unpaid, company_wise_info[0].currency)]),
+				company_wise_info[0].total_unpaid ? 'orange' : 'green');
+
+				if(company_wise_info[0].loyalty_points) {
+					frm.dashboard.add_indicator(__('Loyalty Points: {0}',
+						[company_wise_info[0].loyalty_points]), 'blue');
+				}
+			}
 		}
+	},
+
+	add_indicator_for_multicompany: function(frm, info) {
+		frm.dashboard.stats_area.removeClass('hidden');
+		frm.dashboard.stats_area_row.addClass('flex');
+		frm.dashboard.stats_area_row.css('flex-wrap', 'wrap');
+
+		var color = info.total_unpaid ? 'orange' : 'green';
+
+		var indicator = $('<div class="flex-column col-xs-6">'+
+			'<div style="margin-top:10px"><h6>'+info.company+'</h6></div>'+
+
+			'<div class="badge-link small" style="margin-bottom:10px"><span class="indicator blue">'+
+			'Annual Billing: '+format_currency(info.billing_this_year, info.currency)+'</span></div>'+
+
+			'<div class="badge-link small" style="margin-bottom:10px">'+
+			'<span class="indicator '+color+'">Total Unpaid: '
+			+format_currency(info.total_unpaid, info.currency)+'</span></div>'+
+
+
+			'</div>').appendTo(frm.dashboard.stats_area_row);
+
+		if(info.loyalty_points){
+			$('<div class="badge-link small" style="margin-bottom:10px"><span class="indicator blue">'+
+			'Loyalty Points: '+info.loyalty_points+'</span></div>').appendTo(indicator);
+		}
+
+		return indicator;
 	},
 
 	get_party_name: function(party_type) {
@@ -216,11 +221,16 @@ $.extend(erpnext.utils, {
 		// get valid options for tree based on user permission & locals dict
 		let unscrub_option = frappe.model.unscrub(option);
 		let user_permission = frappe.defaults.get_user_permissions();
+		let options;
+
 		if(user_permission && user_permission[unscrub_option]) {
-			return user_permission[unscrub_option]["docs"];
+			options = user_permission[unscrub_option].map(perm => perm.doc);
 		} else {
-			return $.map(locals[`:${unscrub_option}`], function(c) { return c.name; }).sort();
+			options = $.map(locals[`:${unscrub_option}`], function(c) { return c.name; }).sort();
 		}
+
+		// filter unique values, as there may be multiple user permissions for any value
+		return options.filter((value, index, self) => self.indexOf(value) === index);
 	},
 	get_tree_default: function(option) {
 		// set default for a field based on user permission
@@ -386,15 +396,19 @@ erpnext.utils.select_alternate_items = function(opts) {
 
 erpnext.utils.update_child_items = function(opts) {
 	const frm = opts.frm;
-
+	const cannot_add_row = (typeof opts.cannot_add_row === 'undefined') ? true : opts.cannot_add_row;
+	const child_docname = (typeof opts.cannot_add_row === 'undefined') ? "items" : opts.child_docname;
 	this.data = [];
 	const dialog = new frappe.ui.Dialog({
 		title: __("Update Items"),
 		fields: [
 			{fieldtype:'Section Break', label: __('Items')},
 			{
-				fieldname: "trans_items", fieldtype: "Table", cannot_add_rows: true,
-				in_place_edit: true, data: this.data,
+				fieldname: "trans_items",
+				fieldtype: "Table",
+				cannot_add_rows: cannot_add_row,
+				in_place_edit: true,
+				data: this.data,
 				get_data: () => {
 					return this.data;
 				},
@@ -430,10 +444,12 @@ erpnext.utils.update_child_items = function(opts) {
 			const trans_items = this.get_values()["trans_items"];
 			frappe.call({
 				method: 'erpnext.controllers.accounts_controller.update_child_qty_rate',
+				freeze: true,
 				args: {
 					'parent_doctype': frm.doc.doctype,
 					'trans_items': trans_items,
-					'parent_doctype_name': frm.doc.name
+					'parent_doctype_name': frm.doc.name,
+					'child_docname': child_docname
 				},
 				callback: function() {
 					frm.reload_doc();

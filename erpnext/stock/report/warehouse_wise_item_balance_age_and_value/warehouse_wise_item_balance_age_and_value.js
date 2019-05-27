@@ -10,7 +10,7 @@ frappe.query_reports["Warehouse wise Item Balance Age and Value"] = {
                         "fieldtype": "Date",
                         "width": "80",
                         "reqd": 1,
-                        "default": frappe.sys_defaults.year_start_date,
+                        "default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
                 },
                 {
                         "fieldname":"to_date",

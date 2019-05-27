@@ -2,10 +2,6 @@ from __future__ import unicode_literals
 
 import frappe
 import json
-import io
-import base64
-import os
-import requests
 
 from frappe import _
 from frappe.frappeclient import FrappeClient

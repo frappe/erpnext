@@ -8,7 +8,6 @@ from erpnext.setup.doctype.item_group.item_group import get_item_for_list_in_htm
 from erpnext.shopping_cart.product_info import set_product_info_for_website
 
 no_cache = 1
-no_sitemap = 1
 
 def get_context(context):
 	context.show_search = True
@@ -26,7 +25,6 @@ def get_product_list(search=None, start=0, limit=12):
 		left join tabBin S on I.item_code = S.item_code and I.website_warehouse = S.warehouse
 		where (I.show_in_website = 1)
 			and I.disabled = 0
-			and (I.variant_of is null or I.variant_of='')
 			and (I.end_of_life is null or I.end_of_life='0000-00-00' or I.end_of_life > %(today)s)"""
 
 	# search term condition

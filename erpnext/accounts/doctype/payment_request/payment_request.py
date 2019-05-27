@@ -14,7 +14,6 @@ from frappe.integrations.utils import get_payment_gateway_controller
 from frappe.utils.background_jobs import enqueue
 from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
-from frappe.model.mapper import get_mapped_doc
 
 class PaymentRequest(Document):
 	def validate(self):
@@ -214,9 +213,10 @@ class PaymentRequest(Document):
 
 	def check_if_payment_entry_exists(self):
 		if self.status == "Paid":
-			payment_entry = frappe.db.sql_list("""select parent from `tabPayment Entry Reference`
-				where reference_name=%s""", self.reference_name)
-			if payment_entry:
+			if frappe.get_all("Payment Entry Reference",
+				filters={"reference_name": self.reference_name, "docstatus": ["<", 2]},
+				fields=["parent"],
+				limit=1):
 				frappe.throw(_("Payment Entry already exists"), title=_('Error'))
 
 	def make_communication_entry(self):
@@ -425,7 +425,9 @@ def get_subscription_details(reference_doctype, reference_name):
 
 @frappe.whitelist()
 def make_payment_order(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	def set_missing_values(source, target):
+		target.payment_order_type = "Payment Request"
 		target.append('references', {
 			'reference_doctype': source.reference_doctype,
 			'reference_name': source.reference_name,

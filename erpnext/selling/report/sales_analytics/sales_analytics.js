@@ -67,16 +67,30 @@ frappe.query_reports["Sales Analytics"] = {
 			reqd: 1
 		}
 	],
+	after_datatable_render: function(datatable_obj) {
+		$(datatable_obj.wrapper).find(".dt-row-0").find('input[type=checkbox]').click();
+	},
 	get_datatable_options(options) {
 		return Object.assign(options, {
 			checkboxColumn: true,
 			events: {
 				onCheckRow: function(data) {
 					row_name = data[2].content;
-					length = data.length
-					row_values = data.slice(4,length-1).map(function (column) {
-						return column.content;
-					})
+					length = data.length;
+
+					var tree_type = frappe.query_report.filters[0].value;
+
+					if(tree_type == "Customer" || tree_type == "Item") {
+						row_values = data.slice(4,length-1).map(function (column) {
+							return column.content;
+						})
+					}
+					else {
+						row_values = data.slice(3,length-1).map(function (column) {
+							return column.content;
+						})
+					}
+
 					entry = {
 						'name':row_name,
 						'values':row_values
@@ -106,12 +120,12 @@ frappe.query_reports["Sales Analytics"] = {
 
 					setTimeout(() => {
 						frappe.query_report.chart.update(new_data)
-					},200)
+					}, 500)
 
 
 					setTimeout(() => {
 						frappe.query_report.chart.draw(true);
-					}, 800)
+					}, 1000)
 
 					frappe.query_report.raw_chart_data = new_data;
 				},

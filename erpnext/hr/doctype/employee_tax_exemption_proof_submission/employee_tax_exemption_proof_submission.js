@@ -10,6 +10,7 @@ frappe.ui.form.on('Employee Tax Exemption Proof Submission', {
 				}
 			}
 		});
+
 		frm.set_query('payroll_period', function() {
 			if(frm.doc.employee && frm.doc.company){
 				return {
@@ -21,6 +22,7 @@ frappe.ui.form.on('Employee Tax Exemption Proof Submission', {
 				frappe.msgprint(__("Please select Employee"));
 			}
 		});
+
 		frm.set_query('exemption_sub_category', 'tax_exemption_proofs', function() {
 			return {
 				filters: {
@@ -29,11 +31,28 @@ frappe.ui.form.on('Employee Tax Exemption Proof Submission', {
 			}
 		});
 	},
-	employee: function(frm){
-		if(frm.doc.employee){
-			frm.add_fetch('employee', 'company', 'company');
-		}else{
-			frm.set_value('company', '');
+
+	refresh: function(frm) {
+		if(frm.doc.docstatus === 0) {
+			let filters = {
+				docstatus: 1,
+				company: frm.doc.company
+			};
+			if(frm.doc.employee) filters["employee"] = frm.doc.employee;
+			if(frm.doc.payroll_period) filters["payroll_period"] = frm.doc.payroll_period;
+
+			frm.add_custom_button(__('Get Details From Declaration'), function() {
+				erpnext.utils.map_current_doc({
+					method: "erpnext.hr.doctype.employee_tax_exemption_declaration.employee_tax_exemption_declaration.make_proof_submission",
+					source_doctype: "Employee Tax Exemption Declaration",
+					target: frm,
+					date_field: "creation",
+					setters: {
+						employee: frm.doc.employee || undefined
+					},
+					get_query_filters: filters
+				});
+			});
 		}
 	}
 });

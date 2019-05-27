@@ -10,11 +10,13 @@ def get_data():
 					"type": "doctype",
 					"name": "Issue",
 					"description": _("Support queries from customers."),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Communication",
 					"description": _("Communication log."),
+					"onboard": 1,
 				},
 			]
 		},
@@ -30,6 +32,39 @@ def get_data():
 					"type": "doctype",
 					"name": "Serial No",
 					"description": _("Single unit of an Item."),
+				},
+			]
+		},
+		{
+			"label": _("Service Level Agreement"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Employee Group",
+					"description": _("Support Team."),
+				},
+				{
+					"type": "doctype",
+					"name": "Service Level",
+					"description": _("Service Level."),
+				},
+				{
+					"type": "doctype",
+					"name": "Service Level Agreement",
+					"description": _("Service Level Agreement."),
+				}
+			]
+		},
+		{
+			"label": _("Maintenance"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Maintenance Schedule",
+				},
+				{
+					"type": "doctype",
+					"name": "Maintenance Visit",
 				},
 			]
 		},

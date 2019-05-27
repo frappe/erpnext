@@ -13,7 +13,7 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
-from erpnext.buying.utils import check_for_closed_status, validate_for_items
+from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.stock.doctype.item.item import get_item_defaults
 
 from six import string_types
@@ -62,6 +62,7 @@ class MaterialRequest(BuyingController):
 		super(MaterialRequest, self).validate()
 
 		self.validate_schedule_date()
+		self.check_for_on_hold_or_closed_status('Sales Order', 'sales_order')
 		self.validate_uom_is_integer("uom", "qty")
 
 		if not self.status:
@@ -81,9 +82,9 @@ class MaterialRequest(BuyingController):
 
 	def set_title(self):
 		'''Set title as comma separated list of items'''
-		items = ', '.join([d.item_name for d in self.items][:4])
-
-		self.title = _('{0} for {1}'.format(self.material_request_type, items))[:100]
+		if not self.title:
+			items = ', '.join([d.item_name for d in self.items][:3])
+			self.title = _('{0} Request for {1}').format(self.material_request_type, items)[:100]
 
 	def on_submit(self):
 		# frappe.db.set(self, 'status', 'Submitted')
@@ -100,7 +101,8 @@ class MaterialRequest(BuyingController):
 
 	def before_cancel(self):
 		# if MRQ is already closed, no point saving the document
-		check_for_closed_status(self.doctype, self.name)
+		check_on_hold_or_closed_status(self.doctype, self.name)
+
 		self.set_status(update=True, status='Cancelled')
 
 	def check_modified_date(self):
@@ -426,6 +428,7 @@ def make_stock_entry(source_name, target_doc=None):
 			target.purpose = "Material Receipt"
 
 		target.run_method("calculate_rate_and_amount")
+		target.set_stock_entry_type()
 		target.set_job_card_data()
 
 	doclist = get_mapped_doc("Material Request", source_name, {
@@ -456,31 +459,40 @@ def raise_work_orders(material_request):
 	errors =[]
 	work_orders = []
 	default_wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
+
 	for d in mr.items:
 		if (d.qty - d.ordered_qty) >0:
-			if frappe.db.get_value("BOM", {"item": d.item_code, "is_default": 1}):
+			if frappe.db.exists("BOM", {"item": d.item_code, "is_default": 1}):
 				wo_order = frappe.new_doc("Work Order")
-				wo_order.production_item = d.item_code
-				wo_order.qty = d.qty - d.ordered_qty
-				wo_order.fg_warehouse = d.warehouse
-				wo_order.wip_warehouse = default_wip_warehouse
-				wo_order.description = d.description
-				wo_order.stock_uom = d.stock_uom
-				wo_order.expected_delivery_date = d.schedule_date
-				wo_order.sales_order = d.sales_order
-				wo_order.bom_no = get_item_details(d.item_code).bom_no
-				wo_order.material_request = mr.name
-				wo_order.material_request_item = d.name
-				wo_order.planned_start_date = mr.transaction_date
-				wo_order.company = mr.company
+				wo_order.update({
+					"production_item": d.item_code,
+					"qty": d.qty - d.ordered_qty,
+					"fg_warehouse": d.warehouse,
+					"wip_warehouse": default_wip_warehouse,
+					"description": d.description,
+					"stock_uom": d.stock_uom,
+					"expected_delivery_date": d.schedule_date,
+					"sales_order": d.sales_order,
+					"bom_no": get_item_details(d.item_code).bom_no,
+					"material_request": mr.name,
+					"material_request_item": d.name,
+					"planned_start_date": mr.transaction_date,
+					"company": mr.company
+				})
+
+				wo_order.set_work_order_operations()
 				wo_order.save()
+
 				work_orders.append(wo_order.name)
 			else:
 				errors.append(_("Row {0}: Bill of Materials not found for the Item {1}").format(d.idx, d.item_code))
+
 	if work_orders:
 		message = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
 			(p, p) for p in work_orders]
 		msgprint(_("The following Work Orders were created:") + '\n' + new_line_sep(message))
+
 	if errors:
 		frappe.throw(_("Productions Orders cannot be raised for:") + '\n' + new_line_sep(errors))
+
 	return work_orders

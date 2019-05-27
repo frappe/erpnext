@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import json
-from frappe.utils import getdate, add_days
+from frappe.utils import getdate, add_days, get_time
 from frappe import _
 import datetime
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
@@ -24,9 +24,33 @@ class PatientAppointment(Document):
 			frappe.db.set_value("Patient Appointment", self.name, "status", "Open")
 			self.reload()
 
+	def validate(self):
+		end_time = datetime.datetime.combine(getdate(self.appointment_date), get_time(self.appointment_time)) + datetime.timedelta(minutes=float(self.duration))
+		overlaps = frappe.db.sql("""
+		select
+			name, practitioner, patient, appointment_time, duration
+		from
+			`tabPatient Appointment`
+		where
+			appointment_date=%s and name!=%s and status NOT IN ("Closed", "Cancelled")
+			and (practitioner=%s or patient=%s) and
+			((appointment_time<%s and appointment_time + INTERVAL duration MINUTE>%s) or
+			(appointment_time>%s and appointment_time<%s) or
+			(appointment_time=%s))
+		""", (self.appointment_date, self.name, self.practitioner, self.patient,
+		self.appointment_time, end_time.time(), self.appointment_time, end_time.time(), self.appointment_time))
+
+		if overlaps:
+			frappe.throw(_("""Appointment overlaps with {0}.<br> {1} has appointment scheduled
+			with {2} at {3} having {4} minute(s) duration.""").format(overlaps[0][0], overlaps[0][1], overlaps[0][2], overlaps[0][3], overlaps[0][4]))
+
 	def after_insert(self):
 		if self.procedure_prescription:
 			frappe.db.set_value("Procedure Prescription", self.procedure_prescription, "appointment_booked", True)
+			if self.procedure_template:
+				comments = frappe.db.get_value("Procedure Prescription", self.procedure_prescription, "comments")
+				if comments:
+					frappe.db.set_value("Patient Appointment", self.name, "notes", comments)
 		# Check fee validity exists
 		appointment = self
 		validity_exist = validity_exists(appointment.practitioner, appointment.patient)
@@ -337,11 +361,19 @@ def get_events(start, end, filters=None):
 	from frappe.desk.calendar import get_event_conditions
 	conditions = get_event_conditions("Patient Appointment", filters)
 
-	data = frappe.db.sql("""select name, patient, practitioner, status,
-		duration, timestamp(appointment_date, appointment_time) as
-		'start' from `tabPatient Appointment` where
-		(appointment_date between %(start)s and %(end)s)
-		and docstatus < 2 {conditions}""".format(conditions=conditions),
+	data = frappe.db.sql("""
+		select
+		`tabPatient Appointment`.name, `tabPatient Appointment`.patient,
+		`tabPatient Appointment`.practitioner, `tabPatient Appointment`.status,
+		`tabPatient Appointment`.duration,
+		timestamp(`tabPatient Appointment`.appointment_date, `tabPatient Appointment`.appointment_time) as 'start',
+		`tabAppointment Type`.color
+		from
+		`tabPatient Appointment`
+		left join `tabAppointment Type` on `tabPatient Appointment`.appointment_type=`tabAppointment Type`.name
+		where
+		(`tabPatient Appointment`.appointment_date between %(start)s and %(end)s)
+		and `tabPatient Appointment`.status != 'Cancelled' and `tabPatient Appointment`.docstatus < 2 {conditions}""".format(conditions=conditions),
 		{"start": start, "end": end}, as_dict=True, update={"allDay": 0})
 
 	for item in data:

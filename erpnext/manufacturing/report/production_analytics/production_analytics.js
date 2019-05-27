@@ -39,8 +39,5 @@ frappe.query_reports["Production Analytics"] = {
 			default: "Monthly",
 			reqd: 1
 		}
-	],
-	"formatter": function(value, row, column, data) {
-		return value;
-	}
+	]
 }

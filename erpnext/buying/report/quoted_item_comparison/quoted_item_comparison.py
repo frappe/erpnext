@@ -65,8 +65,8 @@ def get_quantity_list(item):
 	
 	if item:
 		qty_list = frappe.db.sql("""select distinct qty from `tabSupplier Quotation Item`
-			where ifnull(item_code,'')=%s and docstatus < 2""", item, as_dict=1)
-		qty_list.sort(reverse=False)
+			where ifnull(item_code,'')=%s and docstatus < 2 order by qty""", item, as_dict=1)
+
 		for qt in qty_list:
 			col = frappe._dict({
 				"key": str(qt.qty),

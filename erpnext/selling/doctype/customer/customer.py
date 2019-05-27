@@ -23,10 +23,7 @@ class Customer(TransactionBase):
 		self.load_dashboard_info()
 
 	def load_dashboard_info(self):
-		info = get_dashboard_info(self.doctype, self.name)
-		loyalty_point_details = self.get_loyalty_points()
-		if loyalty_point_details and loyalty_point_details.get("loyalty_points"):
-			info["loyalty_point"] = loyalty_point_details.loyalty_points
+		info = get_dashboard_info(self.doctype, self.name, self.loyalty_program)
 		self.set_onload('dashboard_info', info)
 
 	def autoname(self):
@@ -35,11 +32,6 @@ class Customer(TransactionBase):
 			self.name = self.get_customer_name()
 		else:
 			set_name_by_naming_series(self)
-
-	def get_loyalty_points(self):
-		if self.loyalty_program:
-			from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
-			return get_loyalty_details(self.name, self.loyalty_program)
 
 	def get_customer_name(self):
 		if frappe.db.get_value("Customer", self.customer_name):
@@ -67,6 +59,10 @@ class Customer(TransactionBase):
 			customer = frappe.get_doc('Customer', self.name)
 			if self.loyalty_program == customer.loyalty_program and not self.loyalty_program_tier:
 				self.loyalty_program_tier = customer.loyalty_program_tier
+
+		if self.sales_team:
+			if sum([member.allocated_percentage for member in self.sales_team]) != 100:
+				frappe.throw(_("Total contribution percentage should be equal to 100"))
 
 	def check_customer_group_change(self):
 		frappe.flags.customer_group_changed = False
@@ -185,6 +181,11 @@ class Customer(TransactionBase):
 				frappe.throw(_("""New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}""").format(outstanding_amt))
 
 	def on_trash(self):
+		if self.customer_primary_contact:
+			frappe.db.sql("""update `tabCustomer`
+				set customer_primary_contact=null, mobile_no=null, email_id=null
+				where name=%s""", self.name)
+
 		delete_contact_and_address('Customer', self.name)
 		if self.lead_name:
 			frappe.db.sql("update `tabLead` set status='Interested' where name=%s", self.lead_name)
@@ -263,12 +264,21 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 			throw(_("Please contact to the user who have Sales Master Manager {0} role")
 				.format(" / " + credit_controller if credit_controller else ""))
 
-def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False):
+def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
 	# Outstanding based on GL Entries
+
+	cond = ""
+	if cost_center:
+		lft, rgt = frappe.get_cached_value("Cost Center",
+			cost_center, ['lft', 'rgt'])
+
+		cond = """ and cost_center in (select name from `tabCost Center` where
+			lft >= {0} and rgt <= {1})""".format(lft, rgt)
+
 	outstanding_based_on_gle = frappe.db.sql("""
 		select sum(debit) - sum(credit)
-		from `tabGL Entry`
-		where party_type = 'Customer' and party = %s and company=%s""", (customer, company))
+		from `tabGL Entry` where party_type = 'Customer'
+		and party = %s and company=%s {0}""".format(cond), (customer, company))
 
 	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
 

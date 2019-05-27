@@ -7,7 +7,7 @@ import unittest
 
 from erpnext.hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError, NotAnOptionalHoliday, get_leave_balance_on
 from frappe.permissions import clear_user_permissions_for_doctype
-from frappe.utils import add_days, nowdate, now_datetime
+from frappe.utils import add_days, nowdate, now_datetime, getdate
 
 test_dependencies = ["Leave Allocation", "Leave Block List"]
 
@@ -66,6 +66,43 @@ class TestLeaveApplication(unittest.TestCase):
 		application.from_date = "2013-01-01"
 		application.to_date = "2013-01-05"
 		return application
+
+	def test_attendance_creation(self):
+		'''check attendance is automatically created on leave approval'''
+		make_allocation_record()
+		application = self.get_application(_test_records[0])
+		application.status = 'Approved'
+		application.from_date = '2018-01-01'
+		application.to_date = '2018-01-03'
+		application.insert()
+		application.submit()
+
+		attendance = frappe.get_all('Attendance', ['name', 'status', 'attendance_date'], dict(leave_application = application.name))
+
+		# attendance created for all 3 days
+		self.assertEqual(len(attendance), 3)
+
+		# all on leave
+		self.assertTrue(all([d.status == 'On Leave' for d in attendance]))
+
+		# dates
+		dates = [d.attendance_date for d in attendance]
+		for d in ('2018-01-01', '2018-01-02', '2018-01-03'):
+			self.assertTrue(getdate(d) in dates)
+
+	def test_overwrite_attendance(self):
+		# employee marked as absent
+		doc = frappe.new_doc("Attendance")
+		doc.employee = '_T-Employee-00001'
+		doc.attendance_date = '2018-01-01'
+		doc.company = '_Test Company'
+		doc.status = 'Absent'
+		doc.flags.ignore_validate = True
+		doc.insert(ignore_permissions=True)
+		doc.submit()
+
+		# now check if the status has been updated
+		self.test_attendance_creation()
 
 	def test_block_list(self):
 		self._clear_roles()
@@ -428,7 +465,7 @@ def make_allocation_record(employee=None, leave_type=None):
 		"employee": employee or "_T-Employee-00001",
 		"leave_type": leave_type or "_Test Leave Type",
 		"from_date": "2013-01-01",
-		"to_date": "2015-12-31",
+		"to_date": "2019-12-31",
 		"new_leaves_allocated": 30
 	})
 
@@ -457,7 +494,7 @@ def get_leave_period():
 		return frappe.get_doc(dict(
 				name = 'Test Leave Period',
 				doctype = 'Leave Period',
-				from_date = "{0}-01-01".format(now_datetime().year),
+				from_date = "{0}-12-01".format(now_datetime().year - 1),
 				to_date = "{0}-12-31".format(now_datetime().year),
 				company = "_Test Company",
 				is_active = 1

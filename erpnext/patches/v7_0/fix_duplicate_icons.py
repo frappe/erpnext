@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe
 
 from frappe.desk.doctype.desktop_icon.desktop_icon import (sync_desktop_icons,

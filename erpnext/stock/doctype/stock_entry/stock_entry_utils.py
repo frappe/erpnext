@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.utils import cint, flt
 
@@ -123,6 +124,7 @@ def make_stock_entry(**args):
 		'expense_account': args.expense_account
 	})
 
+	s.set_stock_entry_type()
 	if not args.do_not_save:
 		s.insert()
 		if not args.do_not_submit:

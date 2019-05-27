@@ -172,8 +172,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				or tabItem.item_code LIKE %(txt)s
 				or tabItem.item_group LIKE %(txt)s
 				or tabItem.item_name LIKE %(txt)s
-				or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s
-				{description_cond}))
+				or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
+				{description_cond})
 			{fcond} {mcond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
@@ -253,11 +253,13 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 					and return_against in (select name from `tabDelivery Note` where per_billed < 100)
 				)
 			)
-			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc
+			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc limit %(start)s, %(page_len)s
 	""" % {
 		"key": searchfield,
 		"fcond": get_filters_cond(doctype, filters, []),
 		"mcond": get_match_cond(doctype),
+		"start": start,
+		"page_len": page_len,
 		"txt": "%(txt)s"
 	}, {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
 

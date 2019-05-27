@@ -96,6 +96,8 @@ class TestMaterialRequest(unittest.TestCase):
 					}
 				]
 			})
+
+		se.set_stock_entry_type()
 		se.insert()
 		se.submit()
 
@@ -388,6 +390,7 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# check for stopped status of Material Request
 		se = frappe.copy_doc(se_doc)
+		se.set_stock_entry_type()
 		se.insert()
 		mr.update_status('Stopped')
 		self.assertRaises(frappe.InvalidStatusError, se.submit)
@@ -395,6 +398,7 @@ class TestMaterialRequest(unittest.TestCase):
 
 		mr.update_status('Submitted')
 		se = frappe.copy_doc(se_doc)
+		se.set_stock_entry_type()
 		se.insert()
 		se.submit()
 
@@ -528,7 +532,7 @@ class TestMaterialRequest(unittest.TestCase):
 
 		#testing bin requested qty after issuing stock against material request
 		self.assertEqual(_get_requested_qty(), existing_requested_qty)
-		
+
 	def test_material_request_type_manufacture(self):
 		mr = frappe.copy_doc(test_records[1]).insert()
 		mr = frappe.get_doc("Material Request", mr.name)
@@ -541,20 +545,20 @@ class TestMaterialRequest(unittest.TestCase):
 		po = frappe.get_doc("Work Order", prod_order[0])
 		po.wip_warehouse = "_Test Warehouse 1 - _TC"
 		po.submit()
-		
+
 		mr = frappe.get_doc("Material Request", mr.name)
 		self.assertEqual(completed_qty + po.qty, mr.items[0].ordered_qty)
 
 		new_requested_qty = frappe.db.sql("""select indented_qty from `tabBin` where \
 			item_code= %s and warehouse= %s """, (mr.items[0].item_code, mr.items[0].warehouse))[0][0]
-		
+
 		self.assertEqual(requested_qty - po.qty, new_requested_qty)
-		
+
 		po.cancel()
 
 		mr = frappe.get_doc("Material Request", mr.name)
 		self.assertEqual(completed_qty, mr.items[0].ordered_qty)
-		
+
 		new_requested_qty = frappe.db.sql("""select indented_qty from `tabBin` where \
 			item_code= %s and warehouse= %s """, (mr.items[0].item_code, mr.items[0].warehouse))[0][0]
 		self.assertEqual(requested_qty, new_requested_qty)
@@ -625,7 +629,8 @@ def make_material_request(**args):
 		"item_code": args.item_code or "_Test Item",
 		"qty": args.qty or 10,
 		"schedule_date": args.schedule_date or today(),
-		"warehouse": args.warehouse or "_Test Warehouse - _TC"
+		"warehouse": args.warehouse or "_Test Warehouse - _TC",
+		"cost_center": args.cost_center or "_Test Cost Center - _TC"
 	})
 	mr.insert()
 	if not args.do_not_submit:

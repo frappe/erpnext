@@ -3,20 +3,20 @@
 
 from __future__ import unicode_literals
 import frappe
-
-from frappe.utils import flt, getdate, get_url, now
 from frappe import _
-
-from frappe.model.document import Document
+from six import iteritems
+from email_reply_parser import EmailReplyParser
+from frappe.utils import (flt, getdate, get_url, now,
+	nowtime, get_time, today, get_datetime, add_days)
 from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
-import datetime
-
-from six import iteritems
+from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
+from erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group import is_holiday_today
+from frappe.model.document import Document
 
 class Project(Document):
 	def get_feed(self):
-		return '{0}: {1}'.format(_(self.status), self.project_name)
+		return '{0}: {1}'.format(_(self.status), frappe.safe_decode(self.project_name))
 
 	def onload(self):
 		"""Load project tasks for quick view"""
@@ -35,6 +35,9 @@ class Project(Document):
 
 	def load_tasks(self):
 		"""Load `tasks` from the database"""
+		if frappe.flags.in_import:
+			return
+
 		self.tasks = []
 		for task in self.get_tasks():
 			task_map = {
@@ -62,23 +65,70 @@ class Project(Document):
 					'name': ("not in", self.deleted_task_list)
 				})
 
-			return frappe.get_all("Task", "*", filters, order_by="exp_start_date asc")
+			return frappe.get_all("Task", "*", filters, order_by="exp_start_date asc, status asc")
 
 	def validate(self):
-		self.validate_project_name()
-		self.validate_dates()
 		self.validate_weights()
 		self.sync_tasks()
 		self.tasks = []
 		self.load_tasks()
+		if not self.is_new():
+			self.copy_from_template()
+		self.validate_dates()
 		self.send_welcome_email()
 		self.update_percent_complete()
 
-	def validate_project_name(self):
-		if self.get("__islocal") and frappe.db.exists("Project", self.project_name):
-			frappe.throw(_("Project {0} already exists").format(self.project_name))
+	def copy_from_template(self):
+		'''
+		Copy tasks from template
+		'''
+		if self.project_template and not len(self.tasks or []):
+
+			# has a template, and no loaded tasks, so lets create
+			if not self.expected_start_date:
+				# project starts today
+				self.expected_start_date = today()
+
+			template = frappe.get_doc('Project Template', self.project_template)
+
+			if not self.project_type:
+				self.project_type = template.project_type
+
+			# create tasks from template
+			for task in template.tasks:
+				frappe.get_doc(dict(
+					doctype = 'Task',
+					subject = task.subject,
+					project = self.name,
+					status = 'Open',
+					exp_start_date = add_days(self.expected_start_date, task.start),
+					exp_end_date = add_days(self.expected_start_date, task.start + task.duration),
+					description = task.description,
+					task_weight = task.task_weight
+				)).insert()
+
+			# reload tasks after project
+			self.load_tasks()
 
 	def validate_dates(self):
+		if self.tasks:
+			for d in self.tasks:
+				if self.expected_start_date:
+					if d.start_date and getdate(d.start_date) < getdate(self.expected_start_date):
+						frappe.throw(_("Start date of task <b>{0}</b> cannot be less than <b>{1}</b> expected start date <b>{2}</b>")
+							.format(d.title, self.name, self.expected_start_date))
+					if d.end_date and getdate(d.end_date) < getdate(self.expected_start_date):
+						frappe.throw(_("End date of task <b>{0}</b> cannot be less than <b>{1}</b> expected start date <b>{2}</b>")
+							.format(d.title, self.name, self.expected_start_date))
+
+				if self.expected_end_date:
+					if d.start_date and getdate(d.start_date) > getdate(self.expected_end_date):
+						frappe.throw(_("Start date of task <b>{0}</b> cannot be greater than <b>{1}</b> expected end date <b>{2}</b>")
+							.format(d.title, self.name, self.expected_end_date))
+					if d.end_date and getdate(d.end_date) > getdate(self.expected_end_date):
+						frappe.throw(_("End date of task <b>{0}</b> cannot be greater than <b>{1}</b> expected end date <b>{2}</b>")
+							.format(d.title, self.name, self.expected_end_date))
+
 		if self.expected_start_date and self.expected_end_date:
 			if getdate(self.expected_end_date) < getdate(self.expected_start_date):
 				frappe.throw(_("Expected End Date can not be less than Expected Start Date"))
@@ -162,7 +212,7 @@ class Project(Document):
 	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data: return True
 
-		d = existing_task_data.get(row.task_id)
+		d = existing_task_data.get(row.task_id, {})
 
 		for field in fields:
 			if row.get(field) != d.get(field):
@@ -183,18 +233,21 @@ class Project(Document):
 		self.save(ignore_permissions=True)
 
 	def after_insert(self):
+		self.copy_from_template()
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
 	def update_percent_complete(self):
 		if not self.tasks: return
 		total = frappe.db.sql("""select count(name) from tabTask where project=%s""", self.name)[0][0]
+
 		if not total and self.percent_complete:
 			self.percent_complete = 0
+
 		if (self.percent_complete_method == "Task Completion" and total > 0) or (
 			not self.percent_complete_method and total > 0):
 			completed = frappe.db.sql("""select count(name) from tabTask where
-				project=%s and status in ('Closed', 'Cancelled')""", self.name)[0][0]
+				project=%s and status in ('Cancelled', 'Completed')""", self.name)[0][0]
 			self.percent_complete = flt(flt(completed) / total * 100, 2)
 
 		if (self.percent_complete_method == "Task Progress" and total > 0):
@@ -205,15 +258,21 @@ class Project(Document):
 		if (self.percent_complete_method == "Task Weight" and total > 0):
 			weight_sum = frappe.db.sql("""select sum(task_weight) from tabTask where
 				project=%s""", self.name)[0][0]
-			weighted_progress = frappe.db.sql("""select progress,task_weight from tabTask where
+			weighted_progress = frappe.db.sql("""select progress, task_weight from tabTask where
 				project=%s""", self.name, as_dict=1)
 			pct_complete = 0
 			for row in weighted_progress:
 				pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
 			self.percent_complete = flt(flt(pct_complete), 2)
+
+		# don't update status if it is cancelled
+		if self.status == 'Cancelled':
+			return
+
 		if self.percent_complete == 100:
 			self.status = "Completed"
-		elif not self.status == "Cancelled":
+
+		else:
 			self.status = "Open"
 
 	def update_costing(self):
@@ -258,13 +317,13 @@ class Project(Document):
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
 
 	def update_sales_amount(self):
-		total_sales_amount = frappe.db.sql("""select sum(base_grand_total)
+		total_sales_amount = frappe.db.sql("""select sum(base_net_total)
 			from `tabSales Order` where project = %s and docstatus=1""", self.name)
 
 		self.total_sales_amount = total_sales_amount and total_sales_amount[0][0] or 0
 
 	def update_billed_amount(self):
-		total_billed_amount = frappe.db.sql("""select sum(base_grand_total)
+		total_billed_amount = frappe.db.sql("""select sum(base_net_total)
 			from `tabSales Invoice` where project = %s and docstatus=1""", self.name)
 
 		self.total_billed_amount = total_billed_amount and total_billed_amount[0][0] or 0
@@ -302,7 +361,8 @@ class Project(Document):
 		if not self.get('deleted_task_list'): return
 
 		for d in self.get('deleted_task_list'):
-			frappe.delete_doc("Task", d)
+			# unlink project
+			frappe.db.set_value('Task', d, 'project', '')
 
 		self.deleted_task_list = []
 
@@ -406,73 +466,143 @@ def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 def get_cost_center_name(project):
 	return frappe.db.get_value("Project", project, "cost_center")
 
-@frappe.whitelist()
 def hourly_reminder():
-	project = frappe.db.sql("""SELECT `tabProject`.name FROM `tabProject` WHERE `tabProject`.frequency = "Hourly" and (CURTIME() BETWEEN `tabProject`.from and `tabProject`.to) AND `tabProject`.collect_progress = 1 ORDER BY `tabProject`.name;""")
-	create_project_update(project)
+	fields = ["from_time", "to_time"]
+	projects = get_projects_for_collect_progress("Hourly", fields)
 
-@frappe.whitelist()
-def twice_daily_reminder():
-	project = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE (`tabProject`.frequency = "Twice Daily") AND ((`tabProject`.first_email BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE)) OR (`tabProject`.second_email BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE))) AND `tabProject`.collect_progress = 1;""")
-	create_project_update(project)
+	for project in projects:
+		if (get_time(nowtime()) >= get_time(project.from_time) or
+			get_time(nowtime()) <= get_time(project.to_time)):
+			send_project_update_email_to_users(project.name)
 
-@frappe.whitelist()
+def project_status_update_reminder():
+	daily_reminder()
+	twice_daily_reminder()
+	weekly_reminder()
+
 def daily_reminder():
-	project = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE (`tabProject`.frequency = "Daily") AND (`tabProject`.daily_time_to_send BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE)) AND `tabProject`.collect_progress = 1;""")
-	create_project_update(project)
+	fields = ["daily_time_to_send"]
+	projects =  get_projects_for_collect_progress("Daily", fields)
 
-@frappe.whitelist()
-def weekly():
-	today = datetime.datetime.now().strftime("%A")
-	project = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE (`tabProject`.frequency = "Weekly") AND (`tabProject`.day_to_send = %s) AND (`tabProject`.weekly_time_to_send BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE)) AND `tabProject`.collect_progress = 1""", today)
-	create_project_update(project)
+	for project in projects:
+		if allow_to_make_project_update(project.name, project.get("daily_time_to_send"), "Daily"):
+			send_project_update_email_to_users(project.name)
 
-@frappe.whitelist()
-def times_check(from1, to, first_email, second_email, daily_time_to_send, weekly_time_to_send):
-    from1 = datetime.datetime.strptime(from1, "%H:%M:%S.%f")
-    from1 = from1.strftime("%H:00:00")
-    to = datetime.datetime.strptime(to, "%H:%M:%S.%f")
-    to = to.strftime("%H:00:00")
-    first_email = datetime.datetime.strptime(first_email, "%H:%M:%S.%f")
-    first_email = first_email.strftime("%H:00:00")
-    second_email = datetime.datetime.strptime(second_email, "%H:%M:%S.%f")
-    second_email = second_email.strftime("%H:00:00")
-    daily_time_to_send = datetime.datetime.strptime(daily_time_to_send, "%H:%M:%S.%f")
-    daily_time_to_send = daily_time_to_send.strftime("%H:00:00")
-    weekly_time_to_send = datetime.datetime.strptime(weekly_time_to_send, "%H:%M:%S.%f")
-    weekly_time_to_send = weekly_time_to_send.strftime("%H:00:00")
-    return {"from1": from1, "to": to, "first_email": first_email, "second_email": second_email,"daily_time_to_send": daily_time_to_send, "weekly_time_to_send": weekly_time_to_send}
+def twice_daily_reminder():
+	fields = ["first_email", "second_email"]
+	projects =  get_projects_for_collect_progress("Twice Daily", fields)
+	fields.remove("name")
 
+	for project in projects:
+		for d in fields:
+			if allow_to_make_project_update(project.name, project.get(d), "Twicely"):
+				send_project_update_email_to_users(project.name)
 
-#Call this function in order to generate the Project Update for a specific project
-def create_project_update(project):
-	data = []
-	date_today = datetime.date.today()
-	time_now = frappe.utils.now_datetime().strftime('%H:%M:%S')
-	for projects in project:
-		project_update_dict = {
-			"doctype" : "Project Update",
-			"project" : projects[0],
-			"date": date_today,
-			"time": time_now,
-			"naming_series": "UPDATE-.project.-.YY.MM.DD.-"
+def weekly_reminder():
+	fields = ["day_to_send", "weekly_time_to_send"]
+	projects =  get_projects_for_collect_progress("Weekly", fields)
+
+	current_day = get_datetime().strftime("%A")
+	for project in projects:
+		if current_day != project.day_to_send:
+			continue
+
+		if allow_to_make_project_update(project.name, project.get("weekly_time_to_send"), "Weekly"):
+			send_project_update_email_to_users(project.name)
+
+def allow_to_make_project_update(project, time, frequency):
+	data = frappe.db.sql(""" SELECT name from `tabProject Update`
+		WHERE project = %s and date = %s """, (project, today()))
+
+	# len(data) > 1 condition is checked for twicely frequency
+	if data and (frequency in ['Daily', 'Weekly'] or len(data) > 1):
+		return False
+
+	if get_time(nowtime()) >= get_time(time):
+		return True
+
+def get_projects_for_collect_progress(frequency, fields):
+	fields.extend(["name"])
+
+	return frappe.get_all("Project", fields = fields,
+		filters = {'collect_progress': 1, 'frequency': frequency, 'status': 'Open'})
+
+def send_project_update_email_to_users(project):
+	doc = frappe.get_doc('Project', project)
+
+	if is_holiday_today(doc.holiday_list) or not doc.users: return
+
+	project_update = frappe.get_doc({
+		"doctype" : "Project Update",
+		"project" : project,
+		"sent": 0,
+		"date": today(),
+		"time": nowtime(),
+		"naming_series": "UPDATE-.project.-.YY.MM.DD.-",
+	}).insert()
+
+	subject = "For project %s, update your status" % (project)
+
+	incoming_email_account = frappe.db.get_value('Email Account',
+		dict(enable_incoming=1, default_incoming=1), 'email_id')
+
+	frappe.sendmail(recipients=get_users_email(doc),
+		message=doc.message,
+		subject=_(subject),
+		reference_doctype=project_update.doctype,
+		reference_name=project_update.name,
+		reply_to=incoming_email_account
+	)
+
+def collect_project_status():
+	for data in frappe.get_all("Project Update",
+		{'date': today(), 'sent': 0}):
+		replies = frappe.get_all('Communication',
+			fields=['content', 'text_content', 'sender'],
+			filters=dict(reference_doctype="Project Update",
+				reference_name=data.name,
+				communication_type='Communication',
+				sent_or_received='Received'),
+			order_by='creation asc')
+
+		for d in replies:
+			doc = frappe.get_doc("Project Update", data.name)
+			user_data = frappe.db.get_values("User", {"email": d.sender},
+				["full_name", "user_image", "name"], as_dict=True)[0]
+
+			doc.append("users", {
+				'user': user_data.name,
+				'full_name': user_data.full_name,
+				'image': user_data.user_image,
+				'project_status': frappe.utils.md_to_html(
+					EmailReplyParser.parse_reply(d.text_content) or d.content
+				)
+			})
+
+			doc.save(ignore_permissions=True)
+
+def send_project_status_email_to_users():
+	yesterday = add_days(today(), -1)
+
+	for d in frappe.get_all("Project Update",
+		{'date': yesterday, 'sent': 0}):
+		doc = frappe.get_doc("Project Update", d.name)
+
+		project_doc = frappe.get_doc('Project', doc.project)
+
+		args = {
+			"users": doc.users,
+			"title": _("Project Summary for {0}").format(yesterday)
 		}
-		project_update = frappe.get_doc(project_update_dict)
-		project_update.insert()
-		#you can edit your local_host
-		local_host = "http://localhost:8003"
-		project_update_url = "<a class = 'btn btn-primary' href=%s target='_blank'>" % (local_host +"/desk#Form/Project%20Update/" + (project_update.name)) + ("CREATE PROJECT UPDATE" + "</a>")
-		data.append(project_update_url)
 
-		email = frappe.db.sql("""SELECT user from `tabProject User` WHERE parent = %s;""", project[0])
-		for emails in email:
-			frappe.sendmail(
-				recipients=emails,
-				subject=frappe._(projects[0]),
-				header=[frappe._("Please Update your Project Status"), 'blue'],
-				message= project_update_url
-			)
-	return data
+		frappe.sendmail(recipients=get_users_email(project_doc),
+			template='daily_project_summary',
+			args=args,
+			subject=_("Daily Project Summary for {0}").format(d.name),
+			reference_doctype="Project Update",
+			reference_name=d.name)
+
+		doc.db_set('sent', 1)
 
 def update_project_sales_billing():
 	sales_update_frequency = frappe.db.get_single_value("Selling Settings", "sales_update_frequency")
@@ -511,3 +641,21 @@ def create_kanban_board_if_not_exists(project):
 		quick_kanban_board('Task', project, 'status')
 
 	return True
+
+@frappe.whitelist()
+def set_project_status(project, status):
+	'''
+	set status for project and all related tasks
+	'''
+	if not status in ('Completed', 'Cancelled'):
+		frappe.throw('Status must be Cancelled or Completed')
+
+	project = frappe.get_doc('Project', project)
+	frappe.has_permission(doc = project, throw = True)
+
+	for task in frappe.get_all('Task', dict(project = project.name)):
+		frappe.db.set_value('Task', task.name, 'status', status)
+
+	project.status = status
+	project.save()
+

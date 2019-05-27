@@ -4,13 +4,17 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.utils import cint, flt, cstr
-from frappe import msgprint, _
+from frappe import _
 import frappe.defaults
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock import get_warehouse_account_map
+
+class QualityInspectionRequiredError(frappe.ValidationError): pass
+class QualityInspectionRejectedError(frappe.ValidationError): pass
+class QualityInspectionNotSubmittedError(frappe.ValidationError): pass
 
 class StockController(AccountsController):
 	def validate(self):
@@ -22,7 +26,7 @@ class StockController(AccountsController):
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 		if cint(erpnext.is_perpetual_inventory_enabled(self.company)):
-			warehouse_account = get_warehouse_account_map()
+			warehouse_account = get_warehouse_account_map(self.company)
 
 			if self.docstatus==1:
 				if not gl_entries:
@@ -32,7 +36,7 @@ class StockController(AccountsController):
 			if repost_future_gle:
 				items, warehouses = self.get_items_and_warehouses()
 				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items,
-					warehouse_account)
+					warehouse_account, company=self.company)
 		elif self.doctype in ['Purchase Receipt', 'Purchase Invoice'] and self.docstatus == 1:
 			gl_entries = []
 			gl_entries = self.get_asset_gl_entry(gl_entries)
@@ -42,7 +46,7 @@ class StockController(AccountsController):
 			default_cost_center=None):
 
 		if not warehouse_account:
-			warehouse_account = get_warehouse_account_map()
+			warehouse_account = get_warehouse_account_map(self.company)
 
 		sle_map = self.get_stock_ledger_details()
 		voucher_details = self.get_voucher_details(default_expense_account, default_cost_center, sle_map)
@@ -76,6 +80,7 @@ class StockController(AccountsController):
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(sle.stock_value_difference, 2),
+							"is_opening": item_row.get("is_opening"),
 						}, warehouse_account[sle.warehouse]["account_currency"]))
 
 						# to target warehouse / expense account
@@ -85,7 +90,8 @@ class StockController(AccountsController):
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, 2),
-							"project": item_row.get("project") or self.get("project")
+							"project": item_row.get("project") or self.get("project"),
+							"is_opening": item_row.get("is_opening")
 						}))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
@@ -119,8 +125,17 @@ class StockController(AccountsController):
 
 	def get_voucher_details(self, default_expense_account, default_cost_center, sle_map):
 		if self.doctype == "Stock Reconciliation":
-			return [frappe._dict({ "name": voucher_detail_no, "expense_account": default_expense_account,
-				"cost_center": default_cost_center }) for voucher_detail_no, sle in sle_map.items()]
+			reconciliation_purpose = frappe.db.get_value(self.doctype, self.name, "purpose")
+			is_opening = "Yes" if reconciliation_purpose == "Opening Stock" else "No"
+			details = []
+			for voucher_detail_no, sle in sle_map.items():
+				details.append(frappe._dict({
+					"name": voucher_detail_no,
+					"expense_account": default_expense_account,
+					"cost_center": default_cost_center,
+					"is_opening": is_opening
+				}))
+			return details
 		else:
 			details = self.get("items")
 
@@ -195,7 +210,8 @@ class StockController(AccountsController):
 	def make_adjustment_entry(self, expected_gle, voucher_obj):
 		from erpnext.accounts.utils import get_stock_and_account_difference
 		account_list = [d.account for d in expected_gle]
-		acc_diff = get_stock_and_account_difference(account_list, expected_gle[0].posting_date)
+		acc_diff = get_stock_and_account_difference(account_list,
+			expected_gle[0].posting_date, self.company)
 
 		cost_center = self.get_company_default("cost_center")
 		stock_adjustment_account = self.get_company_default("stock_adjustment_account")
@@ -317,7 +333,6 @@ class StockController(AccountsController):
 	def validate_inspection(self):
 		'''Checks if quality inspection is set for Items that require inspection.
 		On submit, throw an exception'''
-
 		inspection_required_fieldname = None
 		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 			inspection_required_fieldname = "inspection_required_before_purchase"
@@ -330,17 +345,27 @@ class StockController(AccountsController):
 				return
 
 		for d in self.get('items'):
-			raise_exception = False
+			qa_required = False
 			if (inspection_required_fieldname and not d.quality_inspection and
 				frappe.db.get_value("Item", d.item_code, inspection_required_fieldname)):
-				raise_exception = True
+				qa_required = True
 			elif self.doctype == "Stock Entry" and not d.quality_inspection and d.t_warehouse:
-				raise_exception = True
+				qa_required = True
+			if self.docstatus == 1 and d.quality_inspection:
+				qa_doc = frappe.get_doc("Quality Inspection", d.quality_inspection)
+				if qa_doc.docstatus == 0:
+					link = frappe.utils.get_link_to_form('Quality Inspection', d.quality_inspection)
+					frappe.throw(_("Quality Inspection: {0} is not submitted for the item: {1} in row {2}").format(link, d.item_code, d.idx), QualityInspectionNotSubmittedError)
 
-			if raise_exception:
+				qa_failed = any([r.status=="Rejected" for r in qa_doc.readings])
+				if qa_failed:
+					frappe.throw(_("Row {0}: Quality Inspection rejected for item {1}")
+						.format(d.idx, d.item_code), QualityInspectionRejectedError)
+			elif qa_required :
 				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
 				if self.docstatus==1:
-					raise frappe.ValidationError
+					raise QualityInspectionRequiredError
+
 
 	def update_blanket_order(self):
 		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
@@ -348,13 +373,13 @@ class StockController(AccountsController):
 			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
-		warehouse_account=None):
+		warehouse_account=None, company=None):
 	def _delete_gl_entries(voucher_type, voucher_no):
 		frappe.db.sql("""delete from `tabGL Entry`
 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 
 	if not warehouse_account:
-		warehouse_account = get_warehouse_account_map()
+		warehouse_account = get_warehouse_account_map(company)
 
 	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time, for_warehouses, for_items)
 	gle = get_voucherwise_gl_entries(future_stock_vouchers, posting_date)
@@ -403,7 +428,7 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
 		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) {condition}
-		order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""".format(condition=condition),
+		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc""".format(condition=condition),
 		tuple([posting_date, posting_time] + values), as_dict=True):
 			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
 

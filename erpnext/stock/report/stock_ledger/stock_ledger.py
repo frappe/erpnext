@@ -77,7 +77,7 @@ def get_stock_ledger_entries(filters, items):
 			posting_date between %(from_date)s and %(to_date)s
 			{sle_conditions}
 			{item_conditions_sql}
-			order by posting_date asc, posting_time asc, name asc"""\
+			order by posting_date asc, posting_time asc, creation asc"""\
 		.format(
 			sle_conditions=get_sle_conditions(filters),
 			item_conditions_sql = item_conditions_sql
@@ -109,17 +109,22 @@ def get_item_details(items, sl_entries, include_uom):
 
 	cf_field = cf_join = ""
 	if include_uom:
-		cf_field = ", ucd.`conversion_factor`"
-		cf_join = "LEFT JOIN `tabUOM Conversion Detail` ucd ON ucd.`parent`=item.`name` and ucd.`uom`=%(include_uom)s"
+		cf_field = ", ucd.conversion_factor"
+		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom='%s'" \
+			% frappe.db.escape(include_uom)
 
-	for item in frappe.db.sql("""
-		SELECT item.`name`, item.`item_name`, item.`description`, item.`item_group`, item.`brand`, item.`stock_uom` {cf_field}
-		FROM `tabItem` item
-		{cf_join}
-		where item.`name` in ({names})
-		""".format(cf_field=cf_field, cf_join=cf_join, names=', '.join([frappe.db.escape(i, percent=False) for i in items])),
-		{"include_uom": include_uom}, as_dict=1):
-			item_details.setdefault(item.name, item)
+	res = frappe.db.sql("""
+		select
+			item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom {cf_field}
+		from
+			`tabItem` item
+			{cf_join}
+		where
+			item.name in ({item_codes})
+	""".format(cf_field=cf_field, cf_join=cf_join, item_codes=','.join(['%s'] *len(items))), items, as_dict=1)
+
+	for item in res:
+		item_details.setdefault(item.name, item)
 
 	return item_details
 
@@ -149,10 +154,10 @@ def get_opening_balance(filters, columns):
 		"posting_date": filters.from_date,
 		"posting_time": "00:00:00"
 	})
-	row = [""]*len(columns)
-	row[1] = _("'Opening'")
-	for i, v in ((9, 'qty_after_transaction'), (11, 'valuation_rate'), (12, 'stock_value')):
-			row[i] = last_entry.get(v, 0)
+	row = {}
+	row["item_code"] = _("'Opening'")
+	for dummy, v in ((9, 'qty_after_transaction'), (11, 'valuation_rate'), (12, 'stock_value')):
+			row[v] = last_entry.get(v, 0)
 
 	return row
 

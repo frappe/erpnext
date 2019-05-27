@@ -31,6 +31,26 @@ class TestQuotation(unittest.TestCase):
 
 		self.assertFalse(sales_order.get('payment_schedule'))
 
+	def test_make_sales_order_with_different_currency(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+
+		quotation = frappe.copy_doc(test_records[0])
+		quotation.transaction_date = nowdate()
+		quotation.valid_till = add_months(quotation.transaction_date, 1)
+		quotation.insert()
+		quotation.submit()
+
+		sales_order = make_sales_order(quotation.name)
+		sales_order.currency = "USD"
+		sales_order.conversion_rate = 20.0
+		sales_order.delivery_date = "2019-01-01"
+		sales_order.naming_series = "_T-Quotation-"
+		sales_order.transaction_date = nowdate()
+		sales_order.insert()
+
+		self.assertEquals(sales_order.currency, "USD")
+		self.assertNotEqual(sales_order.currency, quotation.currency)
+
 	def test_make_sales_order(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 

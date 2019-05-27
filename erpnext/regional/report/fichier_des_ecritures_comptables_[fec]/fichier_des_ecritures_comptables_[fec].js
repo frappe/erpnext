@@ -1,85 +1,75 @@
-// Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
+// Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-/* eslint-disable */
 
 frappe.query_reports["Fichier des Ecritures Comptables [FEC]"] = {
-	"filters": [{
-		"fieldname": "company",
-		"label": __("Company"),
-		"fieldtype": "Link",
-		"options": "Company",
-		"default": frappe.defaults.get_user_default("Company"),
-		"reqd": 1
-	},
-	{
-		"fieldname": "fiscal_year",
-		"label": __("Fiscal Year"),
-		"fieldtype": "Link",
-		"options": "Fiscal Year",
-		"default": frappe.defaults.get_user_default("fiscal_year"),
-		"reqd": 1
-	}],
-
+	"filters": [
+		{
+			"fieldname": "company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+			"default": frappe.defaults.get_user_default("Company"),
+			"reqd": 1
+		},
+		{
+			"fieldname": "fiscal_year",
+			"label": __("Fiscal Year"),
+			"fieldtype": "Link",
+			"options": "Fiscal Year",
+			"default": frappe.defaults.get_user_default("fiscal_year"),
+			"reqd": 1
+		}
+	],
 	onload: function(query_report) {
 		query_report.page.add_inner_button(__("Export"), function() {
-			var fiscal_year = query_report.get_values().fiscal_year;
-			var company = query_report.get_values().company;
+			fec_export(query_report);
+		});
 
-			frappe.call({
-				method: "frappe.client.get_value",
-				args: {
-					'doctype': "Company",
-					'fieldname': ['siren_number'],
-					'filters': {
-						'name': company
-					}
-				},
-				callback: function(data) {
-					var company_data = data.message.siren_number;
-					if (company_data === null || company_data === undefined) {
-						frappe.msgprint(__("Please register the SIREN number in the company information file"))
-					} else {
-						frappe.call({
-							method: "frappe.client.get_value",
-							args: {
-								'doctype': "Fiscal Year",
-								'fieldname': ['year_end_date'],
-								'filters': {
-									'name': fiscal_year
-								}
-							},
-							callback: function(data) {
-								var fy = data.message.year_end_date;
-								var title = company_data + "FEC" + moment(fy).format('YYYYMMDD');
-								var result = $.map(frappe.slickgrid_tools.get_view_data(query_report.columns, query_report.dataView),
-									function(row) {
-										return [row.splice(1)];
-									});
-								downloadify(result, null, title);
-							}
-						});
+		query_report.add_make_chart_button = function() {
+			//
+		};
 
-					}
-				}
+		query_report.export_report = function() {
+			fec_export(query_report);
+		};
+	}
+};
+
+let fec_export = function(query_report) {
+	const fiscal_year = query_report.get_values().fiscal_year;
+	const company = query_report.get_values().company;
+
+	frappe.db.get_value("Company", company, "siren_number", (value) => {
+		const company_data = value.siren_number;
+		if (company_data === null || company_data === undefined) {
+			frappe.msgprint(__("Please register the SIREN number in the company information file"));
+		} else {
+			frappe.db.get_value("Fiscal Year", fiscal_year, "year_end_date", (r) => {
+				const fy = r.year_end_date;
+				const title = company_data + "FEC" + moment(fy).format('YYYYMMDD');
+				const column_row = query_report.columns.map(col => col.label);
+				const column_data = query_report.get_data_for_csv(false);
+				const result = [column_row].concat(column_data);
+				downloadify(result, null, title);
 			});
 
-		});
-	}
-}
+		}
+	});
+};
 
-var downloadify = function(data, roles, title) {
+let downloadify = function(data, roles, title) {
 	if (roles && roles.length && !has_common(roles, roles)) {
 		frappe.msgprint(__("Export not allowed. You need {0} role to export.", [frappe.utils.comma_or(roles)]));
 		return;
 	}
 
-	var filename = title + ".csv";
-	var csv_data = to_tab_csv(data);
-	var a = document.createElement('a');
+	const filename = title + ".txt";
+	let csv_data = to_tab_csv(data);
+	const a = document.createElement('a');
 
 	if ("download" in a) {
 		// Used Blob object, because it can handle large files
-		var blob_object = new Blob([csv_data], {
+		let blob_object = new Blob([csv_data], {
 			type: 'text/csv;charset=UTF-8'
 		});
 		a.href = URL.createObjectURL(blob_object);
@@ -98,8 +88,8 @@ var downloadify = function(data, roles, title) {
 	document.body.removeChild(a);
 };
 
-var to_tab_csv = function(data) {
-	var res = [];
+let to_tab_csv = function(data) {
+	let res = [];
 	$.each(data, function(i, row) {
 		res.push(row.join("\t"));
 	});

@@ -38,6 +38,12 @@ frappe.ui.form.on("Assessment Result", {
 frappe.ui.form.on("Assessment Result Detail", {
 	score: function(frm, cdt, cdn) {
 		var d  = locals[cdt][cdn];
+
+		if(!d.maximum_score || !frm.doc.grading_scale) {
+			d.score = "";
+			frappe.throw(__("Please fill in all the details to generate Assessment Result."));
+		}
+
 		if (d.score > d.maximum_score) {
 			frappe.throw(__("Score cannot be greater than Maximum Score"));
 		}

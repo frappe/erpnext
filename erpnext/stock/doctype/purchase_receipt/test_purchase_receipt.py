@@ -1,8 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
-
+from __future__ import unicode_literals
 import unittest
 import frappe, erpnext
 import frappe.defaults
@@ -352,7 +351,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		set_perpetual_inventory(1, "_Test Company")
 		pr = make_purchase_receipt(cost_center=cost_center)
-		
+
 		stock_in_hand_account = get_inventory_account(pr.company, pr.get("items")[0].warehouse)
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 
@@ -404,6 +403,44 @@ class TestPurchaseReceipt(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 		set_perpetual_inventory(0, pr.company)
+
+	def test_make_purchase_invoice_from_pr_for_returned_qty(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order, create_pr_against_po
+
+		po = create_purchase_order()
+		pr = create_pr_against_po(po.name)
+
+		pr1 = make_purchase_receipt(is_return=1, return_against=pr.name, qty=-1, do_not_submit=True)
+		pr1.items[0].purchase_order = po.name
+		pr1.items[0].purchase_order_item = po.items[0].name
+		pr1.submit()
+
+		pi = make_purchase_invoice(pr.name)
+		self.assertEquals(pi.items[0].qty, 3)
+
+	def test_make_purchase_invoice_from_pr_with_returned_qty_duplicate_items(self):
+		pr1 = make_purchase_receipt(qty=8, do_not_submit=True)
+		pr1.append("items", {
+			"item_code": "_Test Item",
+			"warehouse": "_Test Warehouse - _TC",
+			"qty": 1,
+			"received_qty": 1,
+			"rate": 100,
+			"conversion_factor": 1.0,
+		})
+		pr1.submit()
+
+		pi1 = make_purchase_invoice(pr1.name)
+		pi1.items[0].qty = 4
+		pi1.items.pop(1)
+		pi1.save()
+		pi1.submit()
+
+		make_purchase_receipt(is_return=1, return_against=pr1.name, qty=-2)
+
+		pi2 = make_purchase_invoice(pr1.name)
+		self.assertEquals(pi2.items[0].qty, 2)
+		self.assertEquals(pi2.items[1].qty, 1)
 
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit, cost_center

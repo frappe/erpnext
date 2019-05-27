@@ -59,7 +59,7 @@ def repost_actual_qty(item_code, warehouse, allow_zero_rate=False):
 def get_balance_qty_from_sle(item_code, warehouse):
 	balance_qty = frappe.db.sql("""select qty_after_transaction from `tabStock Ledger Entry`
 		where item_code=%s and warehouse=%s and is_cancelled='No'
-		order by posting_date desc, posting_time desc, name desc
+		order by posting_date desc, posting_time desc, creation desc
 		limit 1""", (item_code, warehouse))
 
 	return flt(balance_qty[0][0]) if balance_qty else 0.0
@@ -235,7 +235,7 @@ def repost_all_stock_vouchers():
 	vouchers = frappe.db.sql("""select distinct voucher_type, voucher_no
 		from `tabStock Ledger Entry` sle
 		where voucher_type != "Serial No" and sle.warehouse in (%s)
-		order by posting_date, posting_time, name""" %
+		order by posting_date, posting_time, creation""" %
 		', '.join(['%s']*len(warehouses_with_account)), tuple(warehouses_with_account))
 
 	rejected = []
@@ -257,7 +257,7 @@ def repost_all_stock_vouchers():
 			doc.update_stock_ledger()
 			doc.make_gl_entries(repost_future_gle=False)
 			frappe.db.commit()
-		except Exception as e:
+		except Exception:
 			print(frappe.get_traceback())
 			rejected.append([voucher_type, voucher_no])
 			frappe.db.rollback()

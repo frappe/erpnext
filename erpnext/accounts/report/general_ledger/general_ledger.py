@@ -25,7 +25,7 @@ def execute(filters=None):
 		account_details.setdefault(acc.name, acc)
 
 	if filters.get('party'):
-		parties = str(filters.get("party")).strip()
+		parties = cstr(filters.get("party")).strip()
 		filters.party = [d.strip() for d in parties.split(',') if d]
 
 	validate_filters(filters, account_details)
@@ -53,18 +53,18 @@ def validate_filters(filters, account_details):
 		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
 
 	if (filters.get("voucher_no")
-		and filters.get("group_by") in [_('Group by Voucher'), _('Group by Voucher (Consolidated)')]):
+		and filters.get("group_by") in [_('Group by Voucher')]):
 		frappe.throw(_("Can not filter based on Voucher No, if grouped by Voucher"))
 
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
 
 	if filters.get('project'):
-		projects = str(filters.get("project")).strip()
+		projects = cstr(filters.get("project")).strip()
 		filters.project = [d.strip() for d in projects.split(',') if d]
 
 	if filters.get('cost_center'):
-		cost_centers = str(filters.get("cost_center")).strip()
+		cost_centers = cstr(filters.get("cost_center")).strip()
 		filters.cost_center = [d.strip() for d in cost_centers.split(',') if d]
 
 
@@ -101,7 +101,7 @@ def set_account_currency(filters):
 					frappe.db.get_value(filters.party_type, filters.party[0], "default_currency"))
 
 		filters["account_currency"] = account_currency or filters.company_currency
-		if filters.account_currency != filters.company_currency:
+		if filters.account_currency != filters.company_currency and not filters.presentation_currency:
 			filters.presentation_currency = filters.account_currency
 
 	return filters
@@ -186,12 +186,8 @@ def get_conditions(filters):
 	if filters.get("project"):
 		conditions.append("project in %(project)s")
 
-	company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
-	if not filters.get("finance_book") or (filters.get("finance_book") == company_finance_book):
-		filters['finance_book'] = company_finance_book
+	if filters.get("finance_book"):
 		conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
-	elif filters.get("finance_book"):
-		conditions.append("ifnull(finance_book, '') = %(finance_book)s")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
@@ -287,7 +283,8 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	for gle in gl_entries:
-		if gle.posting_date < from_date or cstr(gle.is_opening) == "Yes":
+		if (gle.posting_date < from_date or
+			(cstr(gle.is_opening) == "Yes" and not filters.get("show_opening_entries"))):
 			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'opening', gle)
 			update_value_in_dict(totals, 'opening', gle)
 

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 states = [
  '',
  'Andaman and Nicobar Islands',

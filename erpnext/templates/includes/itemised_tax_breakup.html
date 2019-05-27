@@ -16,7 +16,7 @@
 				<tr>
 					<td>{{ item }}</td>
 					<td class='text-right'>
-						{{ frappe.utils.fmt_money(itemised_taxable_amount.get(item), None, currency) }}
+						{{ frappe.utils.fmt_money(itemised_taxable_amount.get(item, 0), None, currency) }}
 					</td>
 					{% for tax_account in tax_accounts %}
 						{% set tax_details = taxes.get(tax_account) %}

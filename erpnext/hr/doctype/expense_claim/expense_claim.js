@@ -35,6 +35,7 @@ $.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}))
 
 cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('employee','employee_name','employee_name');
+cur_frm.add_fetch('expense_type','description','description');
 
 cur_frm.cscript.onload = function(doc) {
 	if (doc.__islocal) {
@@ -192,7 +193,7 @@ frappe.ui.form.on("Expense Claim", {
 				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
 				&& frappe.model.can_create("Payment Entry")) {
 			frm.add_custom_button(__('Payment'),
-				function() { frm.events.make_payment_entry(frm); }, __("Make"));
+				function() { frm.events.make_payment_entry(frm); }, __('Create'));
 		}
 	},
 
@@ -218,7 +219,8 @@ frappe.ui.form.on("Expense Claim", {
 		frm.fields_dict["cost_center"].get_query = function() {
 			return {
 				filters: {
-					"company": frm.doc.company
+					"company": frm.doc.company,
+					"is_group": 0
 				}
 			};
 		};
@@ -229,7 +231,9 @@ frappe.ui.form.on("Expense Claim", {
 			return {
 				filters: {
 					"report_type": "Balance Sheet",
-					"account_type": "Payable"
+					"account_type": "Payable",
+					"company": frm.doc.company,
+					"is_group": 0
 				}
 			};
 		};
@@ -287,11 +291,7 @@ frappe.ui.form.on("Expense Claim Detail", {
 	claim_amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		var doc = frm.doc;
-
-		if(!child.sanctioned_amount){
-			frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.claim_amount);
-		}
-
+		frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.claim_amount);
 		cur_frm.cscript.calculate_total(doc,cdt,cdn);
 	},
 

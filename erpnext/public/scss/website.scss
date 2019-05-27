@@ -1,0 +1,53 @@
+@import "frappe/public/scss/variables";
+
+.product-image img {
+	min-height: 20rem;
+	max-height: 30rem;
+}
+
+.filter-options {
+	max-height: 300px;
+	overflow: auto;
+}
+
+.item-slideshow-image {
+	height: 3rem;
+	width: 3rem;
+	object-fit: contain;
+	padding: 0.5rem;
+	border: 1px solid $border-color;
+	border-radius: 4px;
+	cursor: pointer;
+
+	&:hover, &.active {
+		border-color: $primary;
+	}
+}
+
+.address-card {
+	cursor: pointer;
+	position: relative;
+
+	.check {
+		display: none;
+	}
+
+	&.active {
+		border-color: $primary;
+
+		.check {
+			display: inline-flex;
+		}
+	}
+}
+
+.check {
+	display: inline-flex;
+    padding: 0.25rem;
+    background: $primary;
+    color: white;
+    border-radius: 50%;
+	font-size: 12px;
+	width: 24px;
+	height: 24px;
+}

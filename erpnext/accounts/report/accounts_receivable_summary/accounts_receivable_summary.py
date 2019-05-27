@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
 from frappe.utils import flt
+from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
 
 from six import iteritems
@@ -24,6 +25,12 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		credit_debit_label = "Credit Note Amt" if args.get('party_type') == 'Customer' else "Debit Note Amt"
 
 		columns += [{
+			"label": _("Advance Amount"),
+			"fieldname": "advance_amount",
+			"fieldtype": "Currency",
+			"options": "currency",
+			"width": 100
+		},{
 			"label": _("Total Invoiced Amt"),
 			"fieldname": "total_invoiced_amt",
 			"fieldtype": "Currency",
@@ -75,8 +82,15 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				"width": 160
 			},
 			{
-				"label": _(str(self.filters.range3) + _("-Above")),
-				"fieldname": scrub(str(self.filters.range3) + _("-Above")),
+				"label": _(str(self.filters.range3) + "-" + str(self.filters.range4)),
+				"fieldname": scrub(str(self.filters.range3) + "-" + str(self.filters.range4)),
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 160
+			},
+			{
+				"label": _(str(self.filters.range4) + _("-Above")),
+				"fieldname": scrub(str(self.filters.range4) + _("-Above")),
 				"fieldtype": "Currency",
 				"options": "currency",
 				"width": 160
@@ -97,6 +111,12 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				"fieldtype": "Link",
 				"options": "Customer Group",
 				"width": 80
+			},
+			{
+				"label": _("Sales Person"),
+				"fieldtype": "Data",
+				"fieldname": "sales_person",
+				"width": 120,
 			}]
 
 		if args.get("party_type") == "Supplier":
@@ -123,19 +143,27 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 		partywise_total = self.get_partywise_total(party_naming_by, args)
 
+		partywise_advance_amount = get_partywise_advanced_payment_amount(args.get("party_type"),
+			self.filters.get("report_date")) or {}
 		for party, party_dict in iteritems(partywise_total):
 			row = [party]
 
 			if party_naming_by == "Naming Series":
 				row += [self.get_party_name(args.get("party_type"), party)]
 
+			row += [partywise_advance_amount.get(party, 0)]
+
+			paid_amt = 0
+			if party_dict.paid_amt > 0:
+				paid_amt = flt(party_dict.paid_amt - partywise_advance_amount.get(party, 0))
+
 			row += [
-				party_dict.invoiced_amt, party_dict.paid_amt, party_dict.credit_amt, party_dict.outstanding_amt,
-				party_dict.range1, party_dict.range2, party_dict.range3, party_dict.range4,
+				party_dict.invoiced_amt, paid_amt, party_dict.credit_amt, party_dict.outstanding_amt,
+				party_dict.range1, party_dict.range2, party_dict.range3, party_dict.range4, party_dict.range5
 			]
 
 			if args.get("party_type") == "Customer":
-				row += [self.get_territory(party), self.get_customer_group(party)]
+				row += [self.get_territory(party), self.get_customer_group(party), ", ".join(set(party_dict.sales_person))]
 			if args.get("party_type") == "Supplier":
 				row += [self.get_supplier_group(party)]
 
@@ -156,14 +184,19 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 					"range1": 0,
 					"range2": 0,
 					"range3": 0,
-					"range4": 0
+					"range4": 0,
+					"range5": 0,
+					"sales_person": []
 				})
 			)
 			for k in list(party_total[d.party]):
-				if k != "currency":
+				if k not in ["currency", "sales_person"]:
 					party_total[d.party][k] += flt(d.get(k, 0))
 
 			party_total[d.party].currency = d.currency
+
+			if d.sales_person:
+				party_total[d.party].sales_person.append(d.sales_person)
 
 		return party_total
 
@@ -175,18 +208,22 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		if party_naming_by == "Naming Series":
 			cols += ["party_name"]
 
+		if args.get("party_type") == 'Customer':
+			cols += ["contact"]
+
 		cols += ["voucher_type", "voucher_no", "due_date"]
 
 		if args.get("party_type") == "Supplier":
 			cols += ["bill_no", "bill_date"]
 
 		cols += ["invoiced_amt", "paid_amt", "credit_amt",
-		"outstanding_amt", "age", "range1", "range2", "range3", "range4", "currency"]
+		"outstanding_amt", "age", "range1", "range2", "range3", "range4", "range5", "currency", "pdc/lc_date", "pdc/lc_ref",
+		"pdc/lc_amount"]
 
 		if args.get("party_type") == "Supplier":
 			cols += ["supplier_group", "remarks"]
 		if args.get("party_type") == "Customer":
-			cols += ["territory", "customer_group", "remarks"]
+			cols += ["po_no", "do_no", "territory", "customer_group", "sales_person", "remarks"]
 
 		return self.make_data_dict(cols, voucherwise_data)
 

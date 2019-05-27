@@ -30,6 +30,20 @@ frappe.ui.form.on('Payment Entry', {
 				}
 			}
 		});
+		frm.set_query("party_bank_account", function() {
+			return {
+				filters: {
+					"is_company_account":0
+				}
+			}
+		});
+		frm.set_query("bank_account", function() {
+			return {
+				filters: {
+					"is_company_account":1
+				}
+			}
+		});
 		frm.set_query("contact_person", function() {
 			if (frm.doc.party) {
 				return {
@@ -232,6 +246,13 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	party_type: function(frm) {
+
+		let party_types = Object.keys(frappe.boot.party_account_types);
+		if(frm.doc.party_type && !party_types.includes(frm.doc.party_type)){
+			frm.set_value("party_type", "");
+			frappe.throw(__("Party can only be one of "+ party_types.join(", ")));
+		}
+
 		if(frm.doc.party) {
 			$.each(["party", "party_balance", "paid_from", "paid_to",
 				"paid_from_account_currency", "paid_from_account_balance",
@@ -284,7 +305,12 @@ frappe.ui.form.on('Payment Entry', {
 							() => frm.events.get_outstanding_documents(frm),
 							() => frm.events.hide_unhide_fields(frm),
 							() => frm.events.set_dynamic_labels(frm),
-							() => { frm.set_party_account_based_on_party = false; }
+							() => {
+								frm.set_party_account_based_on_party = false;
+								if (r.message.bank_account) {
+									frm.set_value("bank_account", r.message.bank_account);
+								}
+							}
 						]);
 					}
 				}
@@ -832,6 +858,25 @@ frappe.ui.form.on('Payment Entry', {
 					}
 				}
 			})
+		}
+	},
+
+	bank_account: function(frm) {
+		const field = frm.doc.payment_type == "Pay" ? "paid_from":"paid_to";
+		if (frm.doc.bank_account && in_list(['Pay', 'Receive'], frm.doc.payment_type)) {
+			frappe.call({
+				method: "erpnext.accounts.doctype.bank_account.bank_account.get_bank_account_details",
+				args: {
+					bank_account: frm.doc.bank_account
+				},
+				callback: function(r) {
+					if (r.message) {
+						frm.set_value(field, r.message.account);
+						frm.set_value('bank', r.message.bank);
+						frm.set_value('bank_account_no', r.message.bank_account_no);
+					}
+				}
+			});
 		}
 	}
 });

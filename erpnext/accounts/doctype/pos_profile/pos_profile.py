@@ -127,25 +127,26 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 		'txt': '%%%s%%' % txt
 	}
 
-	pos_profile = frappe.db.sql("""select pf.name, pf.pos_profile_name
+	pos_profile = frappe.db.sql("""select pf.name
 		from
 			`tabPOS Profile` pf, `tabPOS Profile User` pfu
 		where
 			pfu.parent = pf.name and pfu.user = %(user)s and pf.company = %(company)s
-			and (pf.name like %(txt)s or pf.pos_profile_name like %(txt)s)
+			and (pf.name like %(txt)s)
 			and pf.disabled = 0 limit %(start)s, %(page_len)s""", args)
 
 	if not pos_profile:
 		del args['user']
 
-		pos_profile = frappe.db.sql("""select pf.name, pf.pos_profile_name
+		pos_profile = frappe.db.sql("""select pf.name
 			from
 				`tabPOS Profile` pf left join `tabPOS Profile User` pfu
 			on
 				pf.name = pfu.parent
 			where
-				ifnull(pfu.user, '') = '' and pf.company = %(company)s and
-				(pf.name like %(txt)s or pf.pos_profile_name like %(txt)s)
+				ifnull(pfu.user, '') = ''
+				and pf.company = %(company)s
+				and pf.name like %(txt)s
 				and pf.disabled = 0""", args)
 
 	return pos_profile
@@ -154,7 +155,6 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 def set_default_profile(pos_profile, company):
 	modified = now()
 	user = frappe.session.user
-	company = frappe.db.escape(company)
 
 	if pos_profile and company:
 		frappe.db.sql(""" update `tabPOS Profile User` pfu, `tabPOS Profile` pf
