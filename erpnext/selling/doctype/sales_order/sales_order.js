@@ -79,10 +79,6 @@ frappe.ui.form.on("Sales Order", {
 			if(!d.delivery_date) d.delivery_date = frm.doc.delivery_date;
 		});
 		refresh_field("items");
-	},
-
-	onload_post_render: function(frm) {
-		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	}
 });
 
@@ -203,6 +199,20 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						this.frm.add_custom_button(__('Subscription'), function() {
 							erpnext.utils.make_subscription(doc.doctype, doc.name)
 						}, __('Create'))
+					}
+
+					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
+						let me = this;
+						frappe.model.with_doc("Customer", me.frm.doc.customer, () => {
+							let customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
+							let internal = customer.is_internal_customer;
+							let disabled = customer.disabled;
+							if (internal === 1 && disabled === 0) {
+								me.frm.add_custom_button("Inter Company Order", function() {
+									me.make_inter_company_order();
+								}, __('Create'));
+							}
+						});
 					}
 				}
 				// payment request
@@ -498,6 +508,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_project",
 			frm: this.frm
 		})
+	},
+
+	make_inter_company_order: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_inter_company_purchase_order",
+			frm: this.frm
+		});
 	},
 
 	make_maintenance_visit: function() {

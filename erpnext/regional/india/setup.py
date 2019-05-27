@@ -105,16 +105,18 @@ def make_custom_fields(update=True):
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
 			insert_after='language', print_hide=1, collapsible=1),
 		dict(fieldname='gst_category', label='GST Category',
-			fieldtype='Data', insert_after='gst_section', print_hide=1,
-			fetch_from='supplier.gst_category')
+			fieldtype='Select', insert_after='gst_section', print_hide=1,
+			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nUIN Holders',
+			fetch_from='supplier.gst_category', fetch_if_empty=1)
 	]
 
 	sales_invoice_gst_category = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
 			insert_after='language', print_hide=1, collapsible=1),
 		dict(fieldname='gst_category', label='GST Category',
-			fieldtype='Data', insert_after='gst_section', print_hide=1,
-			fetch_from='customer.gst_category')
+			fieldtype='Select', insert_after='gst_section', print_hide=1,
+			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
+			fetch_from='customer.gst_category', fetch_if_empty=1)
 	]
 
 	invoice_gst_fields = [
@@ -279,23 +281,31 @@ def make_custom_fields(update=True):
 			dict(fieldname='hra_component', label='HRA Component',
 				fieldtype='Link', options='Salary Component', insert_after='basic_component'),
 			dict(fieldname='arrear_component', label='Arrear Component',
-				fieldtype='Link', options='Salary Component', insert_after='hra_component')
+				fieldtype='Link', options='Salary Component', insert_after='hra_component'),
+			dict(fieldname='bank_remittance_section', label='Bank Remittance Settings',
+				fieldtype='Section Break', collapsible=1, insert_after='arrear_component'),
+			dict(fieldname='client_code', label='Client Code', fieldtype='Data',
+				insert_after='bank_remittance_section'),
+			dict(fieldname='remittance_column_break', fieldtype='Column Break',
+				insert_after='client_code'),
+			dict(fieldname='product_code', label='Product Code', fieldtype='Data',
+				insert_after='remittance_column_break'),
 		],
 		'Employee Tax Exemption Declaration':[
 			dict(fieldname='hra_section', label='HRA Exemption',
 				fieldtype='Section Break', insert_after='declarations'),
-			dict(fieldname='salary_structure_hra', label='HRA as per Salary Structure',
-				fieldtype='Currency', insert_after='hra_section', read_only=1),
 			dict(fieldname='monthly_house_rent', label='Monthly House Rent',
-				fieldtype='Currency', insert_after='salary_structure_hra'),
+				fieldtype='Currency', insert_after='hra_section'),
 			dict(fieldname='rented_in_metro_city', label='Rented in Metro City',
-				fieldtype='Check', insert_after='monthly_house_rent'),
+				fieldtype='Check', insert_after='monthly_house_rent', depends_on='monthly_house_rent'),
+			dict(fieldname='salary_structure_hra', label='HRA as per Salary Structure',
+				fieldtype='Currency', insert_after='rented_in_metro_city', read_only=1, depends_on='monthly_house_rent'),
 			dict(fieldname='hra_column_break', fieldtype='Column Break',
-				insert_after='rented_in_metro_city'),
+				insert_after='salary_structure_hra', depends_on='monthly_house_rent'),
 			dict(fieldname='annual_hra_exemption', label='Annual HRA Exemption',
-				fieldtype='Currency', insert_after='hra_column_break', read_only=1),
+				fieldtype='Currency', insert_after='hra_column_break', read_only=1, depends_on='monthly_house_rent'),
 			dict(fieldname='monthly_hra_exemption', label='Monthly HRA Exemption',
-				fieldtype='Currency', insert_after='annual_hra_exemption', read_only=1)
+				fieldtype='Currency', insert_after='annual_hra_exemption', read_only=1, depends_on='monthly_house_rent')
 		],
 		'Employee Tax Exemption Proof Submission': [
 			dict(fieldname='hra_section', label='HRA Exemption',
@@ -303,19 +313,19 @@ def make_custom_fields(update=True):
 			dict(fieldname='house_rent_payment_amount', label='House Rent Payment Amount',
 				fieldtype='Currency', insert_after='hra_section'),
 			dict(fieldname='rented_in_metro_city', label='Rented in Metro City',
-				fieldtype='Check', insert_after='house_rent_payment_amount'),
+				fieldtype='Check', insert_after='house_rent_payment_amount', depends_on='house_rent_payment_amount'),
 			dict(fieldname='rented_from_date', label='Rented From Date',
-				fieldtype='Date', insert_after='rented_in_metro_city'),
+				fieldtype='Date', insert_after='rented_in_metro_city', depends_on='house_rent_payment_amount'),
 			dict(fieldname='rented_to_date', label='Rented To Date',
-				fieldtype='Date', insert_after='rented_from_date'),
+				fieldtype='Date', insert_after='rented_from_date', depends_on='house_rent_payment_amount'),
 			dict(fieldname='hra_column_break', fieldtype='Column Break',
-				insert_after='rented_to_date'),
+				insert_after='rented_to_date', depends_on='house_rent_payment_amount'),
 			dict(fieldname='monthly_house_rent', label='Monthly House Rent',
-				fieldtype='Currency', insert_after='hra_column_break', read_only=1),
+				fieldtype='Currency', insert_after='hra_column_break', read_only=1, depends_on='house_rent_payment_amount'),
 			dict(fieldname='monthly_hra_exemption', label='Monthly Eligible Amount',
-				fieldtype='Currency', insert_after='monthly_house_rent', read_only=1),
+				fieldtype='Currency', insert_after='monthly_house_rent', read_only=1, depends_on='house_rent_payment_amount'),
 			dict(fieldname='total_eligible_hra_exemption', label='Total Eligible HRA Exemption',
-				fieldtype='Currency', insert_after='monthly_hra_exemption', read_only=1)
+				fieldtype='Currency', insert_after='monthly_hra_exemption', read_only=1, depends_on='house_rent_payment_amount')
 		],
 		'Supplier': [
 			{
@@ -360,9 +370,9 @@ def make_fixtures(company=None):
 			doc.flags.ignore_permissions = True
 			doc.insert()
 		except frappe.NameError:
-			pass
+			frappe.clear_messages()
 		except frappe.DuplicateEntryError:
-			pass
+			frappe.clear_messages()
 
 	# create records for Tax Withholding Category
 	set_tax_withholding_category(company)

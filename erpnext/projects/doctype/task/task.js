@@ -60,13 +60,6 @@ frappe.ui.form.on("Task", {
 		};
 	},
 
-	project: function(frm) {
-		if(frm.doc.project) {
-			return get_server_fields('get_project_details', '','', frm.doc, frm.doc.doctype,
-				frm.doc.name, 1);
-		}
-	},
-
 	is_group: function (frm) {
 		frappe.call({
 			method: "erpnext.projects.doctype.task.task.check_if_child_exists",

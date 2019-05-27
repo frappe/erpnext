@@ -20,11 +20,6 @@ class Task(NestedSet):
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.subject)
 
-	def get_project_details(self):
-		return {
-			"project": self.project
-		}
-
 	def get_customer_details(self):
 		cust = frappe.db.sql("select customer_name from `tabCustomer` where name=%s", self.customer)
 		if cust:
@@ -48,7 +43,7 @@ class Task(NestedSet):
 		if self.status!=self.get_db_value("status") and self.status == "Completed":
 			for d in self.depends_on:
 				if frappe.db.get_value("Task", d.task, "status") != "Completed":
-					frappe.throw(_("Cannot close task as its dependant task {0} is not closed.").format(d.task))
+					frappe.throw(_("Cannot close task {0} as its dependant task {1} is not closed.").format(frappe.bold(self.name), frappe.bold(d.task)))
 
 			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
@@ -105,7 +100,7 @@ class Task(NestedSet):
 
 	def update_project(self):
 		if self.project and not self.flags.from_project:
-			frappe.get_doc("Project", self.project).update_project()
+			frappe.get_cached_doc("Project", self.project).update_project()
 
 	def check_recursion(self):
 		if self.flags.ignore_recursion_check: return
@@ -150,7 +145,7 @@ class Task(NestedSet):
 
 	def populate_depends_on(self):
 		if self.parent_task:
-			parent = frappe.get_doc('Task', self.parent_task)
+			parent = frappe.get_cached_doc('Task', self.parent_task)
 			if not self.name in [row.task for row in parent.depends_on]:
 				parent.append("depends_on", {
 					"doctype": "Task Depends On",
@@ -162,6 +157,13 @@ class Task(NestedSet):
 	def on_trash(self):
 		if check_if_child_exists(self.name):
 			throw(_("Child Task exists for this Task. You can not delete this Task."))
+
+		if self.project:
+			tasks = frappe.get_doc('Project', self.project).tasks
+			for task in tasks:
+				if task.get('task_id') == self.name:
+					frappe.delete_doc('Project Task', task.name)
+
 
 		self.update_nsm_model()
 

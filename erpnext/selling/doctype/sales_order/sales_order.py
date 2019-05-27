@@ -19,6 +19,8 @@ from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
+	unlink_inter_company_doc
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -42,6 +44,7 @@ class SalesOrder(SellingController):
 		self.validate_warehouse()
 		self.validate_drop_ship()
 		self.validate_serial_no_based_delivery()
+		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_order_reference)
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
@@ -182,6 +185,8 @@ class SalesOrder(SellingController):
 
 		self.update_blanket_order()
 
+		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
+
 	def on_cancel(self):
 		super(SalesOrder, self).on_cancel()
 
@@ -197,6 +202,8 @@ class SalesOrder(SellingController):
 		frappe.db.set(self, 'status', 'Cancelled')
 
 		self.update_blanket_order()
+
+		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
 
 	def update_project(self):
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') != "Each Transaction":
@@ -544,7 +551,7 @@ def make_project(source_name, target_doc=None):
 		"Sales Order Item": {
 			"doctype": "Project Task",
 			"field_map": {
-				"description": "title",
+				"item_code": "title",
 			},
 		}
 	}, target_doc, postprocess)
@@ -764,6 +771,7 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier=None, target
 		target.apply_discount_on = ""
 		target.additional_discount_percentage = 0.0
 		target.discount_amount = 0.0
+		target.inter_company_order_reference = ""
 
 		default_price_list = frappe.get_value("Supplier", supplier, "default_price_list")
 		if default_price_list:
@@ -971,3 +979,8 @@ def make_raw_material_request(items, company, sales_order, project=None):
 	material_request.run_method("set_missing_values")
 	material_request.submit()
 	return material_request
+
+@frappe.whitelist()
+def make_inter_company_purchase_order(source_name, target_doc=None):
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
+	return make_inter_company_transaction("Sales Order", source_name, target_doc)

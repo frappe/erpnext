@@ -220,17 +220,18 @@ def get_basic_details(args, item):
 	if item.variant_of:
 		item.update_template_tables()
 
-	from frappe.defaults import get_user_default_as_list
-	user_default_warehouse_list = get_user_default_as_list('Warehouse')
-	user_default_warehouse = user_default_warehouse_list[0] \
-		if len(user_default_warehouse_list) == 1 else ""
-
 	item_defaults = get_item_defaults(item.name, args.company)
 	item_group_defaults = get_item_group_defaults(item.name, args.company)
 	brand_defaults = get_brand_defaults(item.name, args.company)
 
-	warehouse = args.get("set_warehouse") or user_default_warehouse or item_defaults.get("default_warehouse") or\
-		item_group_defaults.get("default_warehouse") or brand_defaults.get("default_warehouse") or args.warehouse
+	warehouse = (args.get("set_warehouse") or item_defaults.get("default_warehouse") or
+		item_group_defaults.get("default_warehouse") or brand_defaults.get("default_warehouse") or args.warehouse)
+
+	if not warehouse:
+		defaults = frappe.defaults.get_defaults() or {}
+		if defaults.get("default_warehouse") and frappe.db.exists("Warehouse",
+			{'name': defaults.default_warehouse, 'company': args.company}):
+			warehouse = defaults.default_warehouse
 
 	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
@@ -438,7 +439,7 @@ def get_price_list_rate(args, item_doc, out):
 		pl_details = get_price_list_currency_and_exchange_rate(args)
 		args.update(pl_details)
 		validate_price_list(args)
-		if meta.get_field("currency") and args.price_list:
+		if meta.get_field("currency"):
 			validate_conversion_rate(args, meta)
 
 		price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
@@ -492,7 +493,7 @@ def insert_item_price(args):
 def get_item_price(args, item_code, ignore_party=False):
 	"""
 		Get name, price_list_rate from Item Price based on conditions
-			Check if the Derised qty is within the increment of the packing list.
+			Check if the desired qty is within the increment of the packing list.
 		:param args: dict (or frappe._dict) with mandatory fields price_list, uom
 			optional fields min_qty, transaction_date, customer, supplier
 		:param item_code: str, Item Doctype field item_code
@@ -530,11 +531,11 @@ def get_price_list_rate_for(args, item_code):
 		for min_qty 9 and min_qty 20. It returns Item Price Rate for qty 9 as
 		the best fit in the range of avaliable min_qtyies
 
-        :param customer: link to Customer DocType
-        :param supplier: link to Supplier DocType
+		:param customer: link to Customer DocType
+		:param supplier: link to Supplier DocType
 		:param price_list: str (Standard Buying or Standard Selling)
 		:param item_code: str, Item Doctype field item_code
-		:param qty: Derised Qty
+		:param qty: Desired Qty
 		:param transaction_date: Date of the price
 	"""
 	item_price_args = {
@@ -559,7 +560,7 @@ def get_price_list_rate_for(args, item_code):
 
 		general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=args.get("ignore_party"))
 		if not general_price_list_rate and args.get("uom") != args.get("stock_uom"):
-			item_price_args["args"] = args.get("stock_uom")
+			item_price_args["uom"] = args.get("stock_uom")
 			general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=args.get("ignore_party"))
 
 		if general_price_list_rate:
@@ -575,11 +576,11 @@ def get_price_list_rate_for(args, item_code):
 
 def check_packing_list(price_list_rate_name, desired_qty, item_code):
 	"""
-		Check if the Derised qty is within the increment of the packing list.
+		Check if the desired qty is within the increment of the packing list.
 		:param price_list_rate_name: Name of Item Price
-        :param desired_qty: Derised Qt
+		:param desired_qty: Desired Qt
 		:param item_code: str, Item Doctype field item_code
-		:param qty: Derised Qt
+		:param qty: Desired Qt
 	"""
 
 	flag = True
@@ -615,21 +616,22 @@ def validate_conversion_rate(args, meta):
 		get_field_precision(meta.get_field("conversion_rate"),
 			frappe._dict({"fields": args})))
 
-	if (not args.plc_conversion_rate
-		and args.price_list_currency==frappe.db.get_value("Price List", args.price_list, "currency", cache=True)):
-		args.plc_conversion_rate = 1.0
+	if args.price_list:
+		if (not args.plc_conversion_rate
+			and args.price_list_currency==frappe.db.get_value("Price List", args.price_list, "currency", cache=True)):
+			args.plc_conversion_rate = 1.0
 
-	# validate price list currency conversion rate
-	if not args.get("price_list_currency"):
-		throw(_("Price List Currency not selected"))
-	else:
-		validate_conversion_rate(args.price_list_currency, args.plc_conversion_rate,
-			meta.get_label("plc_conversion_rate"), args.company)
+		# validate price list currency conversion rate
+		if not args.get("price_list_currency"):
+			throw(_("Price List Currency not selected"))
+		else:
+			validate_conversion_rate(args.price_list_currency, args.plc_conversion_rate,
+				meta.get_label("plc_conversion_rate"), args.company)
 
-		if meta.get_field("plc_conversion_rate"):
-			args.plc_conversion_rate = flt(args.plc_conversion_rate,
-				get_field_precision(meta.get_field("plc_conversion_rate"),
-				frappe._dict({"fields": args})))
+			if meta.get_field("plc_conversion_rate"):
+				args.plc_conversion_rate = flt(args.plc_conversion_rate,
+					get_field_precision(meta.get_field("plc_conversion_rate"),
+					frappe._dict({"fields": args})))
 
 def get_party_item_code(args, item_doc, out):
 	if args.transaction_type=="selling" and args.customer:

@@ -331,9 +331,8 @@ def sort_accounts(accounts, is_root=False, key="name"):
 			if a.root_type == "Income" and b.root_type == "Expense":
 				return -1
 		else:
-			if re.split('\W+', a[key])[0].isdigit():
-				# if chart of accounts is numbered, then sort by number
-				return cmp(a[key], b[key])
+			# sort by key (number) or name
+			return cmp(a[key], b[key])
 		return 1
 
 	accounts.sort(key = functools.cmp_to_key(compare_accounts))
@@ -359,7 +358,8 @@ def set_gl_entries_by_account(
 			"from_date": from_date,
 			"to_date": to_date,
 			"cost_center": filters.cost_center,
-			"project": filters.project
+			"project": filters.project,
+			"finance_book": filters.get("finance_book")
 		},
 		as_dict=True)
 

@@ -179,7 +179,7 @@ class SalesInvoice(SellingController):
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
 			update_company_current_month_sales(self.company)
 			self.update_project()
-		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
+		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
 		if not self.is_return and self.loyalty_program:
@@ -243,7 +243,7 @@ class SalesInvoice(SellingController):
 			against_si_doc.delete_loyalty_point_entry()
 			against_si_doc.make_loyalty_point_entry()
 
-		unlink_inter_company_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
+		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
 		# Healthcare Service Invoice.
 		domain_settings = frappe.get_doc('Domain Settings')
@@ -254,7 +254,7 @@ class SalesInvoice(SellingController):
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
-			self.status_updater.extend([{
+			self.status_updater.append({
 				'source_dt':'Sales Invoice Item',
 				'target_dt':'Sales Order Item',
 				'target_parent_dt':'Sales Order',
@@ -272,21 +272,20 @@ class SalesInvoice(SellingController):
 				'overflow_type': 'delivery',
 				'extra_cond': """ and exists(select name from `tabSales Invoice`
 					where name=`tabSales Invoice Item`.parent and update_stock = 1)"""
-			},
-			{
-				'source_dt': 'Sales Invoice Item',
-				'target_dt': 'Sales Order Item',
-				'join_field': 'so_detail',
-				'target_field': 'returned_qty',
-				'target_parent_dt': 'Sales Order',
-				# 'target_parent_field': 'per_delivered',
-				# 'target_ref_field': 'qty',
-				'source_field': '-1 * qty',
-				# 'percent_join_field': 'sales_order',
-				# 'overflow_type': 'delivery',
-				'extra_cond': """ and exists (select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent and update_stock=1 and is_return=1)"""
-			}
-		])
+			})
+			if cint(self.is_return):
+				self.status_updater.append({
+					'source_dt': 'Sales Invoice Item',
+					'target_dt': 'Sales Order Item',
+					'join_field': 'so_detail',
+					'target_field': 'returned_qty',
+					'target_parent_dt': 'Sales Order',
+					'source_field': '-1 * qty',
+					'second_source_dt': 'Delivery Note Item',
+					'second_source_field': '-1 * qty',
+					'second_join_field': 'so_detail',
+					'extra_cond': """ and exists (select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent and update_stock=1 and is_return=1)"""
+				})
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
@@ -502,11 +501,14 @@ class SalesInvoice(SellingController):
 
 	def so_dn_required(self):
 		"""check in manage account if sales order / delivery note required or not."""
+		if self.is_return:
+			return
 		dic = {'Sales Order':['so_required', 'is_pos'],'Delivery Note':['dn_required', 'update_stock']}
 		for i in dic:
 			if frappe.db.get_single_value('Selling Settings', dic[i][0]) == 'Yes':
 				for d in self.get('items'):
-					if frappe.get_cached_value('Item', d.item_code, 'is_stock_item') == 1 \
+					is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
+					if d.item_code and is_stock_item == 1\
 						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1]):
 						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
@@ -1165,21 +1167,32 @@ class SalesInvoice(SellingController):
 
 		self.set_missing_values(for_validate = True)
 
-def validate_inter_company_party(doctype, party, company, inter_company_invoice_reference):
-	if doctype == "Sales Invoice":
+def validate_inter_company_party(doctype, party, company, inter_company_reference):
+	if not party:
+		return
+
+	if doctype in ["Sales Invoice", "Sales Order"]:
 		partytype, ref_partytype, internal = "Customer", "Supplier", "is_internal_customer"
-		ref_doc =  "Purchase Invoice"
+
+		if doctype == "Sales Invoice":
+			ref_doc = "Purchase Invoice"
+		else:
+			ref_doc = "Purchase Order"
 	else:
 		partytype, ref_partytype, internal = "Supplier", "Customer", "is_internal_supplier"
-		ref_doc =  "Sales Invoice"
 
-	if inter_company_invoice_reference:
-		doc = frappe.get_doc(ref_doc, inter_company_invoice_reference)
-		ref_party = doc.supplier if doctype == "Sales Invoice" else doc.customer
+		if doctype == "Purchase Invoice":
+			ref_doc = "Sales Invoice"
+		else:
+			ref_doc = "Sales Order"
+
+	if inter_company_reference:
+		doc = frappe.get_doc(ref_doc, inter_company_reference)
+		ref_party = doc.supplier if doctype in ["Sales Invoice", "Sales Order"] else doc.customer
 		if not frappe.db.get_value(partytype, {"represents_company": doc.company}, "name") == party:
-			frappe.throw(_("Invalid {0} for Inter Company Invoice.").format(partytype))
+			frappe.throw(_("Invalid {0} for Inter Company Transaction.").format(partytype))
 		if not frappe.get_cached_value(ref_partytype, ref_party, "represents_company") == company:
-			frappe.throw(_("Invalid Company for Inter Company Invoice."))
+			frappe.throw(_("Invalid Company for Inter Company Transaction."))
 
 	elif frappe.db.get_value(partytype, {"name": party, internal: 1}, "name") == party:
 		companies = frappe.db.sql("""select company from `tabAllowed To Transact With`
@@ -1188,18 +1201,29 @@ def validate_inter_company_party(doctype, party, company, inter_company_invoice_
 		if not company in companies:
 			frappe.throw(_("{0} not allowed to transact with {1}. Please change the Company.").format(partytype, company))
 
-def update_linked_invoice(doctype, name, inter_company_invoice_reference):
-	if inter_company_invoice_reference:
-		frappe.db.set_value(doctype, inter_company_invoice_reference,\
-			"inter_company_invoice_reference", name)
+def update_linked_doc(doctype, name, inter_company_reference):
 
-def unlink_inter_company_invoice(doctype, name, inter_company_invoice_reference):
-	ref_doc = "Purchase Invoice" if doctype == "Sales Invoice" else "Sales Invoice"
-	if inter_company_invoice_reference:
-		frappe.db.set_value(doctype, name,\
-			"inter_company_invoice_reference", "")
-		frappe.db.set_value(ref_doc, inter_company_invoice_reference,\
-			"inter_company_invoice_reference", "")
+	if doctype in ["Sales Invoice", "Purchase Invoice"]:
+		ref_field = "inter_company_invoice_reference"
+	else:
+		ref_field = "inter_company_order_reference"
+
+	if inter_company_reference:
+		frappe.db.set_value(doctype, inter_company_reference,\
+			ref_field, name)
+
+def unlink_inter_company_doc(doctype, name, inter_company_reference):
+
+	if doctype in ["Sales Invoice", "Purchase Invoice"]:
+		ref_doc = "Purchase Invoice" if doctype == "Sales Invoice" else "Sales Invoice"
+		ref_field = "inter_company_invoice_reference"
+	else:
+		ref_doc = "Purchase Order" if doctype == "Sales Order" else "Sales Order"
+		ref_field = "inter_company_order_reference"
+
+	if inter_company_reference:
+		frappe.db.set_value(doctype, name, ref_field, "")
+		frappe.db.set_value(ref_doc, inter_company_reference, ref_field, "")
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -1299,7 +1323,7 @@ def set_account_for_mode_of_payment(self):
 			data.account = get_bank_cash_account(data.mode_of_payment, self.company).get("account")
 
 def get_inter_company_details(doc, doctype):
-	if doctype == "Sales Invoice":
+	if doctype in ["Sales Invoice", "Sales Order"]:
 		party = frappe.db.get_value("Supplier", {"disabled": 0, "is_internal_supplier": 1, "represents_company": doc.company}, "name")
 		company = frappe.get_cached_value("Customer", doc.customer, "represents_company")
 	else:
@@ -1312,21 +1336,21 @@ def get_inter_company_details(doc, doctype):
 	}
 
 
-def validate_inter_company_invoice(doc, doctype):
+def validate_inter_company_transaction(doc, doctype):
 
 	details = get_inter_company_details(doc, doctype)
-	price_list = doc.selling_price_list if doctype == "Sales Invoice" else doc.buying_price_list
+	price_list = doc.selling_price_list if doctype in ["Sales Invoice", "Sales Order"] else doc.buying_price_list
 	valid_price_list = frappe.db.get_value("Price List", {"name": price_list, "buying": 1, "selling": 1})
 	if not valid_price_list:
 		frappe.throw(_("Selected Price List should have buying and selling fields checked."))
 
 	party = details.get("party")
 	if not party:
-		partytype = "Supplier" if doctype == "Sales Invoice" else "Customer"
+		partytype = "Supplier" if doctype in ["Sales Invoice", "Sales Order"] else "Customer"
 		frappe.throw(_("No {0} found for Inter Company Transactions.").format(partytype))
 
 	company = details.get("company")
-	default_currency = frappe.get_cached_value('Company',  company,  "default_currency")
+	default_currency = frappe.get_cached_value('Company', company, "default_currency")
 	if default_currency != doc.currency:
 		frappe.throw(_("Company currencies of both the companies should match for Inter Company Transactions."))
 
@@ -1334,17 +1358,17 @@ def validate_inter_company_invoice(doc, doctype):
 
 @frappe.whitelist()
 def make_inter_company_purchase_invoice(source_name, target_doc=None):
-	return make_inter_company_invoice("Sales Invoice", source_name, target_doc)
+	return make_inter_company_transaction("Sales Invoice", source_name, target_doc)
 
-def make_inter_company_invoice(doctype, source_name, target_doc=None):
-	if doctype == "Sales Invoice":
-		source_doc = frappe.get_doc("Sales Invoice", source_name)
-		target_doctype = "Purchase Invoice"
+def make_inter_company_transaction(doctype, source_name, target_doc=None):
+	if doctype in ["Sales Invoice", "Sales Order"]:
+		source_doc = frappe.get_doc(doctype, source_name)
+		target_doctype = "Purchase Invoice" if doctype == "Sales Invoice" else "Purchase Order"
 	else:
-		source_doc = frappe.get_doc("Purchase Invoice", source_name)
-		target_doctype = "Sales Invoice"
+		source_doc = frappe.get_doc(doctype, source_name)
+		target_doctype = "Sales Invoice" if doctype == "Purchase Invoice" else "Sales Order"
 
-	validate_inter_company_invoice(source_doc, doctype)
+	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
 
 	def set_missing_values(source, target):
@@ -1352,7 +1376,7 @@ def make_inter_company_invoice(doctype, source_name, target_doc=None):
 
 	def update_details(source_doc, target_doc, source_parent):
 		target_doc.inter_company_invoice_reference = source_doc.name
-		if target_doc.doctype == "Purchase Invoice":
+		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
 			target_doc.buying_price_list = source_doc.selling_price_list

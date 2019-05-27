@@ -11,6 +11,7 @@ app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
+
 develop_version = '12.x.x-develop'
 
 error_report_email = "support@erpnext.com"
@@ -23,7 +24,8 @@ web_include_css = "assets/css/erpnext-web.css"
 doctype_js = {
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
-	"Website Theme": "public/js/website_theme.js"
+	"Website Theme": "public/js/website_theme.js",
+	"Newsletter": "public/js/newsletter.js"
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"
@@ -48,7 +50,7 @@ on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
 treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', 'Assessment Group']
 
 # website
-update_website_context = "erpnext.shopping_cart.utils.update_website_context"
+update_website_context = ["erpnext.shopping_cart.utils.update_website_context", "erpnext.education.doctype.education_settings.education_settings.update_website_context"]
 my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
 
 email_append_to = ["Job Applicant", "Lead", "Opportunity", "Issue"]
@@ -267,7 +269,7 @@ scheduler_events = {
 	"daily_long": [
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"
 	],
-	"monthly": [
+	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.convert_deferred_revenue_to_income",
 		"erpnext.accounts.deferred_revenue.convert_deferred_expense_to_expense",
 		"erpnext.hr.utils.allocate_earned_leaves"
