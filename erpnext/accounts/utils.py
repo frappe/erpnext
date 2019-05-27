@@ -333,7 +333,7 @@ def reconcile_against_document(args):
 		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
 		doc.make_gl_entries(cancel = 0, adv_adj =1)
 
-		if d.voucher_type == 'Payment Entry':
+		if d.voucher_type in ('Payment Entry', 'Journal Entry'):
 			doc.update_expense_claim()
 
 def check_if_advance_entry_modified(args):
