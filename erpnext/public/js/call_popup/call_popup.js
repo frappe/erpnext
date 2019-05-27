@@ -73,6 +73,7 @@ class CallPopup {
 		this.make_caller_info_section();
 		this.dialog.get_close_btn().show();
 		this.setup_call_status_updater();
+		this.dialog.$body.addClass('call-popup');
 		this.dialog.set_secondary_action(() => {
 			clearInterval(this.updater);
 			this.dialog.hide();
@@ -123,7 +124,7 @@ class CallPopup {
 	set_call_status(call_status) {
 		let title = '';
 		call_status = call_status || this.call_log.call_status;
-		if (['busy', 'completed'].includes(call_status)) {
+		if (['busy', 'completed'].includes(call_status) || !call_status) {
 			title = __('Incoming call from {0}',
 				[this.contact ? `${this.contact.first_name} ${this.contact.last_name}` : this.caller_number]);
 			this.set_indicator('blue', true);

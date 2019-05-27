@@ -27,11 +27,19 @@ def handle_incoming_call(*args, **kwargs):
 		'call_log': call_log,
 		'call_status_method': 'erpnext.erpnext_integrations.exotel_integration.get_call_status'
 	})
-	if call_log.call_status in ['ringing', 'in-progress']:
-		frappe.publish_realtime('show_call_popup', data, user=data.agent_email)
+
+	frappe.publish_realtime('show_call_popup', data, user=data.agent_email)
+
+@frappe.whitelist(allow_guest=True)
+def handle_end_call(*args, **kwargs):
+	call_log = get_call_log(kwargs)
+	if call_log:
+		call_log.status = 'Closed'
+		call_log.save(ignore_permissions=True)
+		frappe.db.commit()
 
 
-def get_call_log(call_payload):
+def get_call_log(call_payload, create_new_if_not_found=True):
 	communication = frappe.get_all('Communication', {
 		'communication_medium': 'Phone',
 		'call_id': call_payload.get('CallSid'),
@@ -39,7 +47,8 @@ def get_call_log(call_payload):
 
 	if communication:
 		communication = frappe.get_doc('Communication', communication[0].name)
-	else:
+		return communication
+	elif create_new_if_not_found:
 		communication = frappe.new_doc('Communication')
 		communication.subject = frappe._('Call from {}').format(call_payload.get("CallFrom"))
 		communication.communication_medium = 'Phone'
@@ -49,15 +58,11 @@ def get_call_log(call_payload):
 		communication.sent_or_received = 'Received'
 		communication.communication_date = call_payload.get('StartTime')
 		communication.call_id = call_payload.get('CallSid')
-
-	status = get_call_status(communication.call_id)
-	communication.call_status = status or 'failed'
-	communication.status = 'Closed' if status in ['completed', 'failed', 'no-answer'] else 'Open'
-	communication.call_duration = call_payload.get('Duration') if status in ['completed', 'failed', 'no-answer'] else 0
-	communication.content = 'call_payload'
-	communication.save(ignore_permissions=True)
-	frappe.db.commit()
-	return communication
+		communication.status = 'Open'
+		communication.content = frappe._('Call from {}').format(call_payload.get("CallFrom"))
+		communication.save(ignore_permissions=True)
+		frappe.db.commit()
+		return communication
 
 @frappe.whitelist()
 def get_call_status(call_id):
