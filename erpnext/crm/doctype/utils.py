@@ -66,3 +66,13 @@ def get_last_interaction(number, reference_doc):
 		'last_communication': last_communication[0] if last_communication else None,
 		'last_issue': last_issue[0] if last_issue else None
 	}
+
+@frappe.whitelist()
+def add_call_summary(docname, summary):
+	communication = frappe.get_doc('Communication', docname)
+	communication.content = 'Call Summary by {user}: {summary}'.format({
+		'user': frappe.utils.get_fullname(frappe.session.user),
+		'summary': summary
+	})
+	communication.save(ignore_permissions=True)
+
