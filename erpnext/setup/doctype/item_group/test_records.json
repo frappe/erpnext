@@ -69,5 +69,39 @@
   "is_group": 1, 
   "item_group_name": "_Test Item Group D", 
   "parent_item_group": "All Item Groups"
+ },
+ {
+  "doctype": "Item Group",
+  "is_group": 1,
+  "item_group_name": "_Test Item Group Tax Parent",
+  "parent_item_group": "All Item Groups",
+  "taxes": [
+   {
+    "doctype": "Item Tax",
+    "parentfield": "taxes",
+    "item_tax_template": "_Test Account Excise Duty @ 10",
+    "tax_category": ""
+   },
+   {
+    "doctype": "Item Tax",
+    "parentfield": "taxes",
+    "item_tax_template": "_Test Account Excise Duty @ 12",
+    "tax_category": "_Test Tax Category 1"
+   }
+  ]
+ },
+ {
+  "doctype": "Item Group",
+  "is_group": 0,
+  "item_group_name": "_Test Item Group Tax Child Override",
+  "parent_item_group": "_Test Item Group Tax Parent",
+  "taxes": [
+   {
+    "doctype": "Item Tax",
+    "parentfield": "taxes",
+    "item_tax_template": "_Test Account Excise Duty @ 15",
+    "tax_category": ""
+   }
+  ]
  }
 ]

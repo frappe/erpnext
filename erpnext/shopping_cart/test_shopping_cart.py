@@ -107,9 +107,10 @@ class TestShoppingCart(unittest.TestCase):
 
 		from erpnext.accounts.party import set_taxes
 
-		tax_rule_master = set_taxes(quotation.customer, "Customer", \
-			quotation.transaction_date, quotation.company, None, None, \
-			quotation.customer_address, quotation.shipping_address_name, 1)
+		tax_rule_master = set_taxes(quotation.customer, "Customer",
+			quotation.transaction_date, quotation.company, customer_group=None, supplier_group=None,
+			tax_category=quotation.tax_category, billing_address=quotation.customer_address,
+			shipping_address=quotation.shipping_address_name, use_for_shopping_cart=1)
 		self.assertEqual(quotation.taxes_and_charges, tax_rule_master)
 		self.assertEqual(quotation.total_taxes_and_charges, 1000.0)
 

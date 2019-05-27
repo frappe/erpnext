@@ -13,7 +13,7 @@ from frappe.utils import cstr
 class Attendance(Document):
 	def validate_duplicate_record(self):
 		res = frappe.db.sql("""select name from `tabAttendance` where employee = %s and attendance_date = %s
-			and name != %s and docstatus = 1""",
+			and name != %s and docstatus != 2""",
 			(self.employee, self.attendance_date, self.name))
 		if res:
 			frappe.throw(_("Attendance for employee {0} is already marked").format(self.employee))
@@ -40,7 +40,8 @@ class Attendance(Document):
 	def validate_attendance_date(self):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
 
-		if getdate(self.attendance_date) > getdate(nowdate()):
+		# leaves can be marked for future dates
+		if self.status not in ('On Leave', 'Half Day') and getdate(self.attendance_date) > getdate(nowdate()):
 			frappe.throw(_("Attendance can not be marked for future dates"))
 		elif date_of_joining and getdate(self.attendance_date) < getdate(date_of_joining):
 			frappe.throw(_("Attendance date can not be less than employee's joining date"))

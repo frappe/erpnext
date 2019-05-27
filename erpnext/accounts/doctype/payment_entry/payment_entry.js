@@ -30,6 +30,20 @@ frappe.ui.form.on('Payment Entry', {
 				}
 			}
 		});
+		frm.set_query("party_bank_account", function() {
+			return {
+				filters: {
+					"is_company_account":0
+				}
+			}
+		});
+		frm.set_query("bank_account", function() {
+			return {
+				filters: {
+					"is_company_account":1
+				}
+			}
+		});
 		frm.set_query("contact_person", function() {
 			if (frm.doc.party) {
 				return {
@@ -232,6 +246,13 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	party_type: function(frm) {
+
+		let party_types = Object.keys(frappe.boot.party_account_types);
+		if(frm.doc.party_type && !party_types.includes(frm.doc.party_type)){
+			frm.set_value("party_type", "");
+			frappe.throw(__("Party can only be one of "+ party_types.join(", ")));
+		}
+
 		if(frm.doc.party) {
 			$.each(["party", "party_balance", "paid_from", "paid_to",
 				"paid_from_account_currency", "paid_from_account_balance",

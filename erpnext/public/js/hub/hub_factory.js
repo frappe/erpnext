@@ -36,18 +36,3 @@ function is_marketplace_disabled() {
 		method: "erpnext.hub_node.doctype.marketplace_settings.marketplace_settings.is_marketplace_enabled"
 	}).then(r => r.message)
 }
-
-$(document).on('toolbar_setup', () => {
-	$('#toolbar-user .navbar-reload').after(`
-		<li>
-			<a class="marketplace-link" href="#marketplace/home">${__('Marketplace')}
-		</li>
-	`);
-
-	is_marketplace_disabled()
-		.then(disabled => {
-			if (disabled) {
-				$('#toolbar-user .marketplace-link').hide();
-			}
-		});
-});

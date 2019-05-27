@@ -12,5 +12,6 @@ erpnext/docs/current
 *.swo
 __pycache__
 *~
+.idea/
 .vscode/
 node_modules/

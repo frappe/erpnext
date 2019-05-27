@@ -86,20 +86,20 @@ def get_columns(filters):
 			_("Total Variance") + ":Float:80"]
 	else:
 		return columns
-		
+
 def get_cost_centers(filters):
 	cond = "and 1=1"
 	if filters.get("budget_against") == "Cost Center":
 		cond = "order by lft"
 
-	return frappe.db.sql_list("""select name from `tab{tab}` where company=%s 
+	return frappe.db.sql_list("""select name from `tab{tab}` where company=%s
 		{cond}""".format(tab=filters.get("budget_against"), cond=cond), filters.get("company"))
 
 #Get cost center & target details
 def get_cost_center_target_details(filters):
 	cond = ""
 	if filters.get("cost_center"):
-		cond += " and b.cost_center='%s'" % frappe.db.escape(filters.get("cost_center"))
+		cond += " and b.cost_center=%s" % frappe.db.escape(filters.get("cost_center"))
 
 	return frappe.db.sql("""
 			select b.{budget_against} as budget_against, b.monthly_distribution, ba.account, ba.budget_amount,b.fiscal_year
@@ -159,7 +159,7 @@ def get_cost_center_account_month_map(filters):
 
 	for ccd in cost_center_target_details:
 		actual_details = get_actual_details(ccd.budget_against, filters)
-		
+
 		for month_id in range(1, 13):
 			month = datetime.date(2013, month_id, 1).strftime('%B')
 			cam_map.setdefault(ccd.budget_against, {}).setdefault(ccd.account, {}).setdefault(ccd.fiscal_year,{})\
@@ -172,7 +172,7 @@ def get_cost_center_account_month_map(filters):
 				if ccd.monthly_distribution else 100.0/12
 
 			tav_dict.target = flt(ccd.budget_amount) * month_percentage / 100
-			
+
 			for ad in actual_details.get(ccd.account, []):
 				if ad.month_name == month:
 						tav_dict.actual += flt(ad.debit) - flt(ad.credit)

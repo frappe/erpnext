@@ -8,6 +8,7 @@ from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate
 from frappe import _, throw
 import frappe.defaults
 
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
@@ -15,13 +16,13 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_bille
 from erpnext.stock import get_warehouse_account_map
 from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, delete_gl_entries
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
-from erpnext.buying.utils import check_for_closed_status
+from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
-from erpnext.assets.doctype.asset.asset import get_asset_account
+from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
 from frappe.model.mapper import get_mapped_doc
 from six import iteritems
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_invoice,\
-	unlink_inter_company_invoice
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
+	unlink_inter_company_doc
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 
@@ -46,12 +47,14 @@ class PurchaseInvoice(BuyingController):
 		}]
 
 	def onload(self):
+		super(PurchaseInvoice, self).onload()
 		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
 		self.set_onload("supplier_tds", supplier_tds)
 
 	def before_save(self):
 		if not self.on_hold:
 			self.release_date = ''
+
 
 	def invoice_is_blocked(self):
 		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))
@@ -86,7 +89,7 @@ class PurchaseInvoice(BuyingController):
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
-		self.check_for_closed_status()
+		self.check_on_hold_or_closed_status()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
@@ -97,6 +100,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_fixed_asset()
 		self.create_remarks()
 		self.set_status()
+		self.validate_purchase_receipt_if_update_stock()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
 
 	def validate_release_date(self):
@@ -149,13 +153,13 @@ class PurchaseInvoice(BuyingController):
 
 		self.party_account_currency = account.account_currency
 
-	def check_for_closed_status(self):
+	def check_on_hold_or_closed_status(self):
 		check_list = []
 
 		for d in self.get('items'):
 			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
 				check_list.append(d.purchase_order)
-				check_for_closed_status('Purchase Order', d.purchase_order)
+				check_on_hold_or_closed_status('Purchase Order', d.purchase_order)
 
 	def validate_with_previous_doc(self):
 		super(PurchaseInvoice, self).validate_with_previous_doc({
@@ -215,7 +219,7 @@ class PurchaseInvoice(BuyingController):
 			self.validate_item_code()
 			self.validate_warehouse()
 			if auto_accounting_for_stock:
-				warehouse_account = get_warehouse_account_map()
+				warehouse_account = get_warehouse_account_map(self.company)
 
 		for item in self.get("items"):
 			# in case of auto inventory accounting,
@@ -231,6 +235,13 @@ class PurchaseInvoice(BuyingController):
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
 					item.expense_account = stock_not_billed_account
+			elif item.is_fixed_asset and is_cwip_accounting_disabled():
+				if not item.asset:
+					frappe.throw(_("Row {0}: asset is required for item {1}")
+						.format(item.idx, item.item_code))
+
+				item.expense_account = get_asset_category_account(item.asset, 'fixed_asset_account',
+					company = self.company)
 			elif item.is_fixed_asset and item.pr_detail:
 				item.expense_account = asset_received_but_not_billed
 			elif not item.expense_account and for_validate:
@@ -274,7 +285,7 @@ class PurchaseInvoice(BuyingController):
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
-			self.status_updater.extend([{
+			self.status_updater.append({
 				'source_dt': 'Purchase Invoice Item',
 				'target_dt': 'Purchase Order Item',
 				'join_field': 'po_detail',
@@ -282,28 +293,29 @@ class PurchaseInvoice(BuyingController):
 				'target_parent_dt': 'Purchase Order',
 				'target_parent_field': 'per_received',
 				'target_ref_field': 'qty',
-				'source_field': 'qty',
+				'source_field': 'received_qty',
+				'second_source_dt': 'Purchase Receipt Item',
+				'second_source_field': 'received_qty',
+				'second_join_field': 'purchase_order_item',
 				'percent_join_field':'purchase_order',
-				# 'percent_join_field': 'prevdoc_docname',
 				'overflow_type': 'receipt',
 				'extra_cond': """ and exists(select name from `tabPurchase Invoice`
 					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)"""
-			},
-			{
-				'source_dt': 'Purchase Invoice Item',
-				'target_dt': 'Purchase Order Item',
-				'join_field': 'po_detail',
-				'target_field': 'returned_qty',
-				'target_parent_dt': 'Purchase Order',
-				# 'target_parent_field': 'per_received',
-				# 'target_ref_field': 'qty',
-				'source_field': '-1 * qty',
-				# 'percent_join_field': 'prevdoc_docname',
-				# 'overflow_type': 'receipt',
-				'extra_cond': """ and exists (select name from `tabPurchase Invoice`
-					where name=`tabPurchase Invoice Item`.parent and update_stock=1 and is_return=1)"""
-			}
-		])
+			})
+			if cint(self.is_return):
+				self.status_updater.append({
+					'source_dt': 'Purchase Invoice Item',
+					'target_dt': 'Purchase Order Item',
+					'join_field': 'po_detail',
+					'target_field': 'returned_qty',
+					'source_field': '-1 * qty',
+					'second_source_dt': 'Purchase Receipt Item',
+					'second_source_field': '-1 * qty',
+					'second_join_field': 'purchase_order_item',
+					'overflow_type': 'receipt',
+					'extra_cond': """ and exists (select name from `tabPurchase Invoice`
+						where name=`tabPurchase Invoice Item`.parent and update_stock=1 and is_return=1)"""
+				})
 
 	def validate_purchase_receipt_if_update_stock(self):
 		if self.update_stock:
@@ -317,13 +329,13 @@ class PurchaseInvoice(BuyingController):
 
 		self.check_prev_docstatus()
 		self.update_status_updater_args()
+		self.update_prevdoc_status()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
 
 		if not self.is_return:
 			self.update_against_document_in_jv()
-			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 			self.update_billing_status_in_pr()
 
@@ -338,7 +350,7 @@ class PurchaseInvoice(BuyingController):
 		self.make_gl_entries()
 
 		self.update_project()
-		update_linked_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
+		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if not self.grand_total:
@@ -359,7 +371,8 @@ class PurchaseInvoice(BuyingController):
 			if repost_future_gle and cint(self.update_stock) and self.auto_accounting_for_stock:
 				from erpnext.controllers.stock_controller import update_gl_entries_after
 				items, warehouses = self.get_items_and_warehouses()
-				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items)
+				update_gl_entries_after(self.posting_date, self.posting_time,
+					warehouses, items, company = self.company)
 
 		elif self.docstatus == 2 and cint(self.update_stock) and self.auto_accounting_for_stock:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
@@ -376,7 +389,9 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_item_gl_entries(gl_entries)
-		self.get_asset_gl_entry(gl_entries)
+		if not is_cwip_accounting_disabled():
+			self.get_asset_gl_entry(gl_entries)
+
 		self.make_tax_gl_entries(gl_entries)
 
 		gl_entries = merge_similar_entries(gl_entries)
@@ -416,7 +431,7 @@ class PurchaseInvoice(BuyingController):
 		stock_items = self.get_stock_items()
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 		if self.update_stock and self.auto_accounting_for_stock:
-			warehouse_account = get_warehouse_account_map()
+			warehouse_account = get_warehouse_account_map(self.company)
 
 		voucher_wise_stock_value = {}
 		if self.update_stock:
@@ -468,7 +483,7 @@ class PurchaseInvoice(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.rm_supp_cost)
 						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
-				elif not item.is_fixed_asset:
+				elif not item.is_fixed_asset or (item.is_fixed_asset and is_cwip_accounting_disabled()):
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": item.expense_account if not item.enable_deferred_expense else item.deferred_expense_account,
@@ -513,7 +528,7 @@ class PurchaseInvoice(BuyingController):
 				base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
 
 				if (not item.expense_account or frappe.db.get_value('Account',
-					item.expense_account, 'account_type') != 'Asset Received But Not Billed'):
+					item.expense_account, 'account_type') not in ['Asset Received But Not Billed', 'Fixed Asset']):
 					arbnb_account = self.get_company_default("asset_received_but_not_billed")
 					item.expense_account = arbnb_account
 
@@ -747,16 +762,12 @@ class PurchaseInvoice(BuyingController):
 	def on_cancel(self):
 		super(PurchaseInvoice, self).on_cancel()
 
-		self.check_for_closed_status()
+		self.check_on_hold_or_closed_status()
 
 		self.update_status_updater_args()
+		self.update_prevdoc_status()
 
 		if not self.is_return:
-			from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
-			if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
-				unlink_ref_doc_from_payment_entries(self)
-
-			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 			self.update_billing_status_in_pr()
 
@@ -769,7 +780,7 @@ class PurchaseInvoice(BuyingController):
 		self.update_project()
 		frappe.db.set(self, 'status', 'Cancelled')
 
-		unlink_inter_company_invoice(self.doctype, self.name, self.inter_company_invoice_reference)
+		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
 	def update_project(self):
 		project_list = []
@@ -908,5 +919,5 @@ def block_invoice(name, hold_comment):
 
 @frappe.whitelist()
 def make_inter_company_sales_invoice(source_name, target_doc=None):
-	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_invoice
-	return make_inter_company_invoice("Purchase Invoice", source_name, target_doc)
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
+	return make_inter_company_transaction("Purchase Invoice", source_name, target_doc)

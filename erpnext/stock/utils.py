@@ -56,13 +56,13 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 
 	if item_code:
 		values.append(item_code)
-		condition.append(" AND item_code = %s")
+		condition += " AND item_code = %s"
 
 	stock_ledger_entries = frappe.db.sql("""
 		SELECT item_code, stock_value, name, warehouse
 		FROM `tabStock Ledger Entry` sle
 		WHERE posting_date <= %s {0}
-		ORDER BY timestamp(posting_date, posting_time) DESC, name DESC
+		ORDER BY timestamp(posting_date, posting_time) DESC, creation DESC
 	""".format(condition), values, as_dict=1)
 
 	sle_map = {}
