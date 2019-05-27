@@ -17,6 +17,7 @@ class TestLeaveEncashment(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql('''delete from `tabLeave Period`''')
 		frappe.db.sql('''delete from `tabLeave Allocation`''')
+		frappe.db.sql('''delete from `tabLeave Ledger Entry`''')
 		frappe.db.sql('''delete from `tabAdditional Salary`''')
 
 		# create the leave policy
@@ -41,11 +42,11 @@ class TestLeaveEncashment(unittest.TestCase):
 	def test_leave_balance_value_and_amount(self):
 		frappe.db.sql('''delete from `tabLeave Encashment`''')
 		leave_encashment = frappe.get_doc(dict(
-			doctype = 'Leave Encashment',
-			employee = self.employee,
-			leave_type = "_Test Leave Type Encashment",
-			leave_period = self.leave_period.name,
-			payroll_date = today()
+			doctype='Leave Encashment',
+			employee=self.employee,
+			leave_type="_Test Leave Type Encashment",
+			leave_period=self.leave_period.name,
+			payroll_date=today()
 		)).insert()
 
 		self.assertEqual(leave_encashment.leave_balance, 10)
