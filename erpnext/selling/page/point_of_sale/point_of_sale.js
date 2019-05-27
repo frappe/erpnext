@@ -573,7 +573,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 		function get_frm(_frm) {
 			const page = $('<div>');
-			const frm = _frm || new _f.Frm(doctype, page, false);
+			const frm = _frm || new frappe.ui.form.Form(doctype, page, false);
 			const name = frappe.model.make_new_doc_and_get_name(doctype, true);
 			frm.refresh(name);
 			frm.doc.items = [];
