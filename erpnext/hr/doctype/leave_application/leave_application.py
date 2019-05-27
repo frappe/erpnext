@@ -354,7 +354,7 @@ class LeaveApplication(Document):
 			self.to_date, self.from_date)
 
 		if expiry_date:
-			self.create_application_entry_for_expiry(expiry_date)
+			self.create_ledger_entry_for_intermediate_expiry(expiry_date, submit)
 		else:
 			args = dict(
 				leaves=self.total_leave_days * -1,
@@ -363,7 +363,7 @@ class LeaveApplication(Document):
 			)
 			create_leave_ledger_entry(self, args, submit)
 
-	def create_application_entry_for_expiry(self, expiry_date):
+	def create_ledger_entry_for_intermediate_expiry(self, expiry_date, submit):
 		''' splits leave application into two ledger entries to consider expiry '''
 		args = dict(
 			from_date=self.from_date,
