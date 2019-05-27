@@ -19,28 +19,28 @@ class TestQualityAction(unittest.TestCase):
 		create_review()
 		test_create_action = create_action()
 		test_get_action = get_action()
-		self.assertEquals(test_create_action.name, test_get_action.name)
-		self.assertEquals(test_create_action.goal, test_get_action.goal)
+
+		self.assertEquals(test_create_action, test_get_action)
 
 def create_action():
-	review = frappe.get_list("Quality Review", limit=1)
+	review = frappe.db.exists("Quality Review", {"goal": "GOAL-_Test Quality Goal"})
 	action = frappe.get_doc({
-		'doctype': 'Quality Action',
-		'action': 'Corrective',
-		'type': 'Quality Review',
-		'review': ''+ review[0].name +'',
-		'date': ''+ frappe.utils.nowdate() +'',
-		'goal': '_Test Quality Goal',
-		'procedure': '_Test Quality Procedure'
+		"doctype": "Quality Action",
+		"action": "Corrective",
+		"document_type": "Quality Review",
+		"document_name": review,
+		"date": frappe.utils.nowdate(),
+		"goal": "GOAL-_Test Quality Goal",
+		"procedure": "PRC-_Test Quality Procedure"
 	})
-	action_exist = frappe.get_list("Quality Action", filters={"review": ""+ review[0].name +""}, fields=["name", "goal"], limit=1)
-	if len(action_exist) == 0:
+	action_exist = frappe.db.exists("Quality Action", {"review": review})
+
+	if not action_exist:
 		action.insert()
-		return action
+		return action.name
 	else:
-		return action_exist[0]
+		return action_exist
 
 def get_action():
-	review = frappe.get_list("Quality Review", limit=1)
-	action = frappe.get_list("Quality Action", filters={"review": ""+ review[0].name +""}, fields=["name", "goal"], limit=1)
-	return action[0]
+	review = frappe.db.exists("Quality Review", {"goal": "GOAL-_Test Quality Goal"})
+	return frappe.db.exists("Quality Action", {"document_name": review})
