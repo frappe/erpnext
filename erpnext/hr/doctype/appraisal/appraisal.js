@@ -9,12 +9,14 @@ frappe.ui.form.on('Appraisal', {
 			return{	query: "erpnext.controllers.queries.employee_query" }
 		};
 	},
-	onload: function(frm) {
+
+  onload: function(frm) {
 		if(!frm.doc.status) {
 			frm.set_value('status', 'Draft');
 		}
 	},
-	kra_template: function(frm) {
+	
+  kra_template: function(frm) {
 		frm.doc.goals = [];
 		erpnext.utils.map_current_doc({
 			method: "erpnext.hr.doctype.appraisal.appraisal.fetch_appraisal_template",
@@ -22,7 +24,8 @@ frappe.ui.form.on('Appraisal', {
 			frm: frm
 		});
 	},
-	calculate_total: function(frm) {
+	
+  calculate_total: function(frm) {
 		let goals = frm.doc.goals || [];
 		let total =0;
 		for(let i = 0; i<goals.length; i++){
@@ -35,20 +38,17 @@ frappe.ui.form.on('Appraisal', {
 frappe.ui.form.on('Appraisal Goal', {
 	score: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
-		if (d.score){
+		if (d.score) {
 			if (flt(d.score) > 5) {
 				frappe.msgprint(__("Score must be less than or equal to 5"));
 				d.score = 0;
 				refresh_field('score', d.name, 'goals');
 			}
-			var total = flt(d.per_weightage*d.score)/100;
-			d.score_earned = total.toPrecision(2);
-			refresh_field('score_earned', d.name, 'goals');
-		}
-		else{
+			d.score_earned = flt(d.per_weightage*d.score, precision("score_earned", d))/100;
+		} else {
 			d.score_earned = 0;
-			refresh_field('score_earned', d.name, 'goals');
 		}
-		frm.trigger('calculate_total');
+		refresh_field('score_earned', d.name, 'goals');
+    frm.trigger('calculate_total');
 	}
 });
