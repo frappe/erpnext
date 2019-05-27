@@ -6,10 +6,24 @@ frappe.ui.form.on('Quality Review', {
 		frm.set_value("date", frappe.datetime.get_today());
 	},
 	goal: function(frm) {
-		frm.call("get_quality_goal", {
-			"goal": frm.doc.goal,
-		}, () => {
-			frm.refresh();
+		frappe.call({
+			"method": "frappe.client.get",
+			args: {
+				doctype: "Quality Goal",
+				name: frm.doc.goal
+			},
+			callback: function(data){
+				frm.fields_dict.reviews.grid.remove_all();
+				let objectives = data.message.objectives;
+				let i = 0;
+				for (i in objectives){
+					frm.add_child("reviews");
+					frm.fields_dict.reviews.get_value()[i].objective = objectives[i].objective;
+					frm.fields_dict.reviews.get_value()[i].target = objectives[i].target;
+					frm.fields_dict.reviews.get_value()[i].uom = objectives[i].uom;
+				}
+				frm.refresh();
+			}
 		});
 	},
 });

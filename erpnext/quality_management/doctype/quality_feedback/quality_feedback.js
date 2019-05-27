@@ -6,10 +6,20 @@ frappe.ui.form.on('Quality Feedback', {
 		frm.set_value("date", frappe.datetime.get_today());
 	},
 	template: function(frm){
-		frm.call("get_quality_feedback_template", {
-			"template": frm.doc.template
-		}, () => {
-			frm.refresh();
+		frappe.call({
+			"method": "frappe.client.get",
+			args: {
+				doctype: "Quality Feedback Template",
+				name: frm.doc.template
+			},
+			callback: function(data){
+				let i = 0
+				for (i in data.message.parameters){
+					frm.add_child("parameters");
+					frm.fields_dict.parameters.get_value()[i].parameter = data.message.parameters[i].parameter;
+				}
+				frm.refresh();
+			}
 		});
 	}
 });

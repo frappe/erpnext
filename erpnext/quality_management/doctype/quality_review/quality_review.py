@@ -6,19 +6,9 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import datetime
+
 class QualityReview(Document):
-
-	def get_quality_goal(self, goal):
-		doc = frappe.get_doc("Quality Goal", goal)
-
-		for objective in doc.objectives:
-			self.append("reviews",
-				{
-					"objective": objective.objective,
-					"target": objective.target,
-					"uom": objective.uom
-				}
-			)
+	pass
 
 def review():
 	now = datetime.datetime.now()
@@ -40,7 +30,7 @@ def create_review(goal):
 
 	doc = frappe.get_doc({
 		"doctype": "Quality Review",
-		"goal": name,
+		"goal": goal.name,
 		"date": frappe.utils.nowdate()
 	})
 
