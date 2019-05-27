@@ -12,7 +12,14 @@ import frappe
 import unittest
 
 class TestServiceLevel(unittest.TestCase):
-	pass
+
+	def test_service_level(self):
+		test_make_service_level = make_service_level()
+		get_make_service_level = get_service_level()
+
+		self.assertEqual(test_make_service_level.name, get_make_service_level.name)
+		self.assertEqual(test_make_service_level.holiday_list, get_make_service_level.holiday_list)
+		self.assertEqual(test_make_service_level.employee_group, get_make_service_level.employee_group)
 
 def make_service_level():
 	employee_group = make_employee_group()
@@ -36,6 +43,7 @@ def make_service_level():
 			{
 				"priority": "Medium",
 				"response_time": 4,
+				"default_priority": 1,
 				"response_time_period": "Hour",
 				"resolution_time": 6,
 				"resolution_time_period": "Hour",
@@ -107,6 +115,7 @@ def make_service_level():
 			{
 				"priority": "Medium",
 				"response_time": 2,
+				"default_priority": 1,
 				"response_time_period": "Day",
 				"resolution_time": 3,
 				"resolution_time_period": "Day",
@@ -157,16 +166,16 @@ def make_service_level():
 			}
 		]
 	})
-	service_level_exist = frappe.db.exists("Service Level", "_Test Service Level")
+	service_level_exist = frappe.get_doc("Service Level", "_Test Service Level")
+
 	if not service_level_exist:
 		service_level.insert()
-		return service_level.service_level
+		return service_level
 	else:
 		return service_level_exist
 
 def get_service_level():
-	service_level = frappe.db.exists("Service Level", "_Test Service Level")
-	return service_level
+	return frappe.get_doc("Service Level", "_Test Service Level")
 
 def make_holiday_list():
 	holiday_list = frappe.db.exists("Holiday List", "__Test Holiday List")
