@@ -364,32 +364,31 @@ class LeaveApplication(Document):
 			create_leave_ledger_entry(self, args, submit)
 
 	def create_ledger_entry_for_intermediate_expiry(self, expiry_date, submit):
-		''' splits leave application into two ledger entries to consider expiry '''
+		''' splits leave application into two ledger entries to consider expiry of allocation '''
 		args = dict(
 			from_date=self.from_date,
 			to_date=self.to_date,
-			leaves=date_diff(expiry_date, self.from_date) * -1
+			leaves=(date_diff(expiry_date, self.from_date) + 1) * -1
 		)
 		create_leave_ledger_entry(self, args, submit)
+
 		start_date = add_days(expiry_date, 1)
 		args.update(dict(
 			from_date=start_date,
 			to_date=self.to_date,
-			leaves=date_diff(self.to_date, start_date) * -1
+			leaves=date_diff(self.to_date, expiry_date) * -1
 		))
 		create_leave_ledger_entry(self, args, submit)
 
 def get_allocation_expiry(employee, leave_type, to_date, from_date):
-	return frappe.db.sql("""
-		SELECT
-			to_date
-		FROM `tabLeave Ledger Entry`
-		WHERE
-			employee='%s'
-			AND leave_type='%s'
-			AND transaction_type='Leave Allocation'
-			AND (to_date BETWEEN %s AND %s)
-		""" %(employee, leave_type, from_date, to_date), as_dict=1)
+	expiry =  frappe.get_all("Leave Ledger Entry",
+		filters={
+			'employee': employee,
+			'leave_type': leave_type,
+			'transaction_type': 'Leave Allocation',
+			'to_date': ['between', (from_date, to_date)]
+		},fields=['to_date'])
+	return expiry[0]['to_date'] if expiry else None
 
 @frappe.whitelist()
 def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day = None, half_day_date = None):
@@ -452,10 +451,12 @@ def get_remaining_leaves(allocation, leaves_taken, date, expiry):
 		if remaining_leaves > 0:
 			remaining_days = date_diff(end_date, date) + 1
 			remaining_leaves = min(remaining_days, remaining_leaves)
+
 		return remaining_leaves
 
 	if expiry:
 		remaining_leaves = _get_remaining_leaves(allocation.carry_forwarded_leaves, expiry)
+
 		return flt(allocation.new_leaves_allocated) + flt(remaining_leaves)
 	else:
 		return _get_remaining_leaves(allocation.total_leaves_allocated, allocation.to_date)
@@ -543,7 +544,7 @@ def get_leave_allocation_records(date, employee=None):
 			"total_leaves_allocated": d.total_leaves_allocated,
 			"carry_forward": d.carry_forward,
 			"carry_forwarded_leaves": d.carry_forwarded_leaves,
-			"new_leaves": d.new_leaves_allocated,
+			"new_leaves_allocated": d.new_leaves_allocated,
 			"leave_type": d.leave_type
 		}))
 	return allocated_leaves
