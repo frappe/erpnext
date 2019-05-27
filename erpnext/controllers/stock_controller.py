@@ -80,7 +80,7 @@ class StockController(AccountsController):
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(sle.stock_value_difference, 2),
-							"is_opening": item_row.get("is_opening"),
+							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
 						}, warehouse_account[sle.warehouse]["account_currency"]))
 
 						# to target warehouse / expense account
@@ -91,7 +91,7 @@ class StockController(AccountsController):
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, 2),
 							"project": item_row.get("project") or self.get("project"),
-							"is_opening": item_row.get("is_opening")
+							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
 						}))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
