@@ -15,8 +15,8 @@ def make_priorities():
 	insert_priority("High")
 
 def insert_priority(name):
-	frappe.get_doc({
-		"doctype": "Issue Priority",
-		"name": name,
-		"default_priority": 1 if name == "Medium" else 0
-	}).insert(ignore_permissions=True)
+	if not frappe.db.exists("Issue Priority", name):
+		frappe.get_doc({
+			"doctype": "Issue Priority",
+			"name": name
+		}).insert(ignore_permissions=True)

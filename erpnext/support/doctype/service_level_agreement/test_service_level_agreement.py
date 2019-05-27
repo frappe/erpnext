@@ -8,7 +8,14 @@ import unittest
 from erpnext.support.doctype.service_level.test_service_level import make_service_level
 
 class TestServiceLevelAgreement(unittest.TestCase):
-	pass
+
+	def test_service_level_agreement(self):
+		test_make_service_level_agreement = make_service_level_agreement()
+		test_get_service_level_agreement = get_service_level_agreement()
+
+		self.assertEqual(test_make_service_level_agreement.name, test_get_service_level_agreement.name)
+		self.assertEqual(test_make_service_level_agreement.customer, test_get_service_level_agreement.customer)
+		self.assertEqual(test_make_service_level_agreement.default_service_level_agreement, test_get_service_level_agreement.default_service_level_agreement)
 
 def make_service_level_agreement():
 	make_service_level()
@@ -34,6 +41,7 @@ def make_service_level_agreement():
 			{
 				"priority": "Medium",
 				"response_time": 4,
+				"default_priority": 1,
 				"response_time_period": "Hour",
 				"resolution_time": 6,
 				"resolution_time_period": "Hour",
@@ -172,13 +180,14 @@ def make_service_level_agreement():
 		]
 	})
 
-	service_level_agreement_exists = frappe.db.exists("Service Level Agreement", "SLA-_Test Service Level Agreement")
+	service_level_agreement_exists = frappe.get_doc("Service Level Agreement", "SLA-_Test Service Level Agreement")
+
 	if not service_level_agreement_exists:
 		service_level_agreement.insert(ignore_permissions=True)
-		return service_level_agreement.name
+		return service_level_agreement
 	else:
 		return service_level_agreement_exists
 
 def get_service_level_agreement():
-	service_level_agreement = frappe.db.exists("Service Level Agreement", "SLA-_Test Service Level Agreement")
+	service_level_agreement = frappe.get_doc("Service Level Agreement", "SLA-_Test Service Level Agreement")
 	return service_level_agreement
