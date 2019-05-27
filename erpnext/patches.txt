@@ -512,6 +512,7 @@ erpnext.patches.v11_0.rename_employee_loan_to_loan
 erpnext.patches.v11_0.move_leave_approvers_from_employee #13-06-2018
 erpnext.patches.v11_0.update_department_lft_rgt
 erpnext.patches.v11_0.add_default_email_template_for_leave
+execute:frappe.reload_doc("HR", "doctype", "HR Settings")
 erpnext.patches.v11_0.set_default_email_template_in_hr #08-06-2018
 erpnext.patches.v11_0.uom_conversion_data #30-06-2018
 erpnext.patches.v10_0.taxes_issue_with_pos
@@ -603,3 +604,4 @@ erpnext.patches.v11_1.move_customer_lead_to_dynamic_column
 execute:frappe.delete_doc("Report", "Inactive Items")
 erpnext.patches.v11_1.set_missing_title_for_quotation
 erpnext.patches.v11_1.delete_scheduling_tool
+erpnext.patches.v12_0.make_custom_fields_for_bank_remittance
