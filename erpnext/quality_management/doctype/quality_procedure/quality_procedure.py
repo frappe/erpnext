@@ -36,7 +36,7 @@ class QualityProcedure(NestedSet):
 			doc.load_from_db()
 
 			for process in doc.processes:
-				if process.procedure == "Procedure":
+				if process.procedure:
 					flag_is_group = 1
 
 			if flag_is_group == 0:
