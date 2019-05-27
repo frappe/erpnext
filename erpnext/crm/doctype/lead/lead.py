@@ -150,8 +150,8 @@ def make_opportunity(source_name, target_doc=None):
 			"doctype": "Opportunity",
 			"field_map": {
 				"campaign_name": "campaign",
-				"doctype": "enquiry_from",
-				"name": "lead",
+				"doctype": "opportunity_from",
+				"name": "party_name",
 				"lead_name": "contact_display",
 				"company_name": "customer_name",
 				"email_id": "contact_email",
