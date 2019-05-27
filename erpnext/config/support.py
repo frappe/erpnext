@@ -61,6 +61,19 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Maintenance"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Maintenance Schedule",
+				},
+				{
+					"type": "doctype",
+					"name": "Maintenance Visit",
+				},
+			]
+		},
+		{
 			"label": _("Reports"),
 			"icon": "fa fa-list",
 			"items": [
