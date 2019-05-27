@@ -125,9 +125,9 @@ def get_employee_fields_label():
 	fields = []
 	for df in frappe.get_meta("Employee").get("fields"):
 		if df.fieldname in ["salutation", "user_id", "employee_number", "employment_type",
-		"holiday_list", "branch", "department", "designation", "grade",
-		"notice_number_of_days", "reports_to", "leave_policy", "company_email"]:
-			fields.append({"value": df.fieldname, "label": df.label})
+			"holiday_list", "branch", "department", "designation", "grade",
+			"notice_number_of_days", "reports_to", "leave_policy", "company_email"]:
+				fields.append({"value": df.fieldname, "label": df.label})
 	return fields
 
 @frappe.whitelist()
@@ -261,12 +261,6 @@ def get_leave_period(from_date, to_date, company):
 
 	if leave_period:
 		return leave_period
-
-def get_payroll_period(from_date, to_date, company):
-	payroll_period = frappe.db.sql("""select name, start_date, end_date from
-		`tabPayroll Period`
-		where start_date<=%s and end_date>= %s and company=%s""", (from_date, to_date, company), as_dict=1)
-	return payroll_period[0] if payroll_period else None
 
 def allocate_earned_leaves():
 	'''Allocate earned leaves to Employees'''
