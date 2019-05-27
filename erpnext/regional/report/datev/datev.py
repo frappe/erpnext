@@ -1,4 +1,12 @@
 # coding: utf-8
+"""
+Provide a report and downloadable CSV according to the German DATEV format.
+
+- Query report showing only the columns that contain data, formatted nicely for
+  dispay to the user.
+- CSV download functionality `download_datev_csv` that provides a CSV file with
+  all required columns. Used to import the data into the DATEV Software.
+"""
 from __future__ import unicode_literals
 import json
 from six import string_types
@@ -8,6 +16,7 @@ import pandas as pd
 
 
 def execute(filters=None):
+	"""Entry point for frappe."""
 	validate_filters(filters)
 	result = get_gl_entries(filters, as_dict=0)
 	columns = get_columns()
@@ -16,6 +25,7 @@ def execute(filters=None):
 
 
 def validate_filters(filters):
+	"""Make sure all mandatory filters are present."""
 	if not filters.get('company'):
 		frappe.throw(_('{0} is mandatory').format(_('Company')))
 
@@ -27,6 +37,7 @@ def validate_filters(filters):
 
 
 def get_columns():
+	"""Return the list of columns that will be shown in query report."""
 	columns = [
 		{
 			"label": "Umsatz (ohne Soll/Haben-Kz)",
@@ -84,13 +95,31 @@ def get_columns():
 
 
 def get_gl_entries(filters, as_dict):
+	"""
+	Get a list of accounting entries.
+
+	Select GL Entries joined with Account and Party Account in order to get the
+	account numbers. Returns a list of accounting entries.
+
+	Arguments:
+	filters -- dict of filters to be passed to the sql query
+	as_dict -- return as list of dicts [0,1]
+	"""
 	gl_entries = frappe.db.sql("""
 		select
 
+			/* either debit or credit amount; always positive */
 			case gl.debit when 0 then gl.credit else gl.debit end as 'Umsatz (ohne Soll/Haben-Kz)',
+
+			/* 'H' when credit, 'S' when debit */
 			case gl.debit when 0 then 'H' else 'S' end as 'Soll/Haben-Kennzeichen',
+
+			/* account number or, if empty, party account number */
 			coalesce(acc.account_number, acc_pa.account_number) as 'Kontonummer',
+
+			/* against number or, if empty, party against number */
 			coalesce(acc_against.account_number, acc_against_pa.account_number) as 'Gegenkonto (ohne BU-Schlüssel)',
+			
 			gl.posting_date as 'Belegdatum',
 			gl.remarks as 'Buchungstext',
 			gl.voucher_type as 'Beleginfo - Art 1',
@@ -130,7 +159,16 @@ def get_gl_entries(filters, as_dict):
 
 
 def get_datev_csv(data):
+	"""
+	Fill in missing columns and return a CSV in DATEV Format.
+
+	Arguments:
+	data -- array of dictionaries
+	"""
 	columns = [
+		# All possible columns must tbe listed here, because DATEV requires them to
+		# be present in the CSV.
+		# ---
 		# Umsatz
 		"Umsatz (ohne Soll/Haben-Kz)",
 		"Soll/Haben-Kennzeichen",
@@ -159,10 +197,22 @@ def get_datev_csv(data):
 		# Digitaler Beleg
 		"Beleglink",
 		# Beleginfo
-		"Beleginfo - Art 1",
-		"Beleginfo - Inhalt 1",
-		"Beleginfo - Art 2",
-		"Beleginfo - Inhalt 2",
+		"Beleginfo – Art 1",
+		"Beleginfo – Inhalt 1",
+		"Beleginfo – Art 2",
+		"Beleginfo – Inhalt 2",
+		"Beleginfo – Art 3",
+		"Beleginfo – Inhalt 3",
+		"Beleginfo – Art 4",
+		"Beleginfo – Inhalt 4",
+		"Beleginfo – Art 5",
+		"Beleginfo – Inhalt 5",
+		"Beleginfo – Art 6",
+		"Beleginfo – Inhalt 6",
+		"Beleginfo – Art 7",
+		"Beleginfo – Inhalt 7",
+		"Beleginfo – Art 8",
+		"Beleginfo – Inhalt 8",
 		# Kostenrechnung
 		"Kost 1 - Kostenstelle",
 		"Kost 2 - Kostenstelle",
@@ -173,7 +223,52 @@ def get_datev_csv(data):
 		"Abw. Versteuerungsart",
 		# L+L Sachverhalt
 		"Sachverhalt L+L",
-		"FunktionsergänzungL+L",
+		"Funktionsergänzung L+L",
+		# Funktion Steuerschlüssel 49
+		"BU 49 Hauptfunktionstyp",
+		"BU 49 Hauptfunktionsnummer",
+		"BU 49 Funktionsergänzung",
+		# Zusatzinformationen
+		"Zusatzinformation – Art 1",
+		"Zusatzinformation – Inhalt 1",
+		"Zusatzinformation – Art 2",
+		"Zusatzinformation – Inhalt 2",
+		"Zusatzinformation – Art 3",
+		"Zusatzinformation – Inhalt 3",
+		"Zusatzinformation – Art 4",
+		"Zusatzinformation – Inhalt 4",
+		"Zusatzinformation – Art 5",
+		"Zusatzinformation – Inhalt 5",
+		"Zusatzinformation – Art 6",
+		"Zusatzinformation – Inhalt 6",
+		"Zusatzinformation – Art 7",
+		"Zusatzinformation – Inhalt 7",
+		"Zusatzinformation – Art 8",
+		"Zusatzinformation – Inhalt 8",
+		"Zusatzinformation – Art 9",
+		"Zusatzinformation – Inhalt 9",
+		"Zusatzinformation – Art 10",
+		"Zusatzinformation – Inhalt 10",
+		"Zusatzinformation – Art 11",
+		"Zusatzinformation – Inhalt 11",
+		"Zusatzinformation – Art 12",
+		"Zusatzinformation – Inhalt 12",
+		"Zusatzinformation – Art 13",
+		"Zusatzinformation – Inhalt 13",
+		"Zusatzinformation – Art 14",
+		"Zusatzinformation – Inhalt 14",
+		"Zusatzinformation – Art 15",
+		"Zusatzinformation – Inhalt 15",
+		"Zusatzinformation – Art 16",
+		"Zusatzinformation – Inhalt 16",
+		"Zusatzinformation – Art 17",
+		"Zusatzinformation – Inhalt 17",
+		"Zusatzinformation – Art 18",
+		"Zusatzinformation – Inhalt 18",
+		"Zusatzinformation – Art 19",
+		"Zusatzinformation – Inhalt 19",
+		"Zusatzinformation – Art 20",
+		"Zusatzinformation – Inhalt 20",
 		# Mengenfelder LuF
 		"Stück",
 		"Gewicht",
@@ -233,17 +328,34 @@ def get_datev_csv(data):
 
 	return result.to_csv(
 		sep=b';',
+		# European decimal seperator
 		decimal=',',
+		# Windows "ANSI" encoding
 		encoding='latin_1',
+		# format date as DDMM
 		date_format='%d%m',
+		# Windows line terminator
 		line_terminator=b'\r\n',
+		# Do not number rows
 		index=False,
+		# Use all columns defined above
 		columns=columns
 	)
 
 
 @frappe.whitelist()
 def download_datev_csv(filters=None):
+	"""
+	Provide accounting entries for download in DATEV format.
+
+	Validate the filters, get the data, produce the CSV file and provide it for
+	download. Can be called like this:
+
+	GET /api/method/erpnext.regional.report.datev.datev.download_datev_csv
+
+	Arguments / Params:
+	filters -- dict of filters to be passed to the sql query
+	"""
 	if isinstance(filters, string_types):
 		filters = json.loads(filters)
 
