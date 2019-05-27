@@ -105,16 +105,18 @@ def make_custom_fields(update=True):
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
 			insert_after='language', print_hide=1, collapsible=1),
 		dict(fieldname='gst_category', label='GST Category',
-			fieldtype='Data', insert_after='gst_section', print_hide=1,
-			fetch_from='supplier.gst_category')
+			fieldtype='Select', insert_after='gst_section', print_hide=1,
+			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nUIN Holders',
+			fetch_from='supplier.gst_category', fetch_if_empty=1)
 	]
 
 	sales_invoice_gst_category = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
 			insert_after='language', print_hide=1, collapsible=1),
 		dict(fieldname='gst_category', label='GST Category',
-			fieldtype='Data', insert_after='gst_section', print_hide=1,
-			fetch_from='customer.gst_category')
+			fieldtype='Select', insert_after='gst_section', print_hide=1,
+			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
+			fetch_from='customer.gst_category', fetch_if_empty=1)
 	]
 
 	invoice_gst_fields = [
@@ -279,7 +281,15 @@ def make_custom_fields(update=True):
 			dict(fieldname='hra_component', label='HRA Component',
 				fieldtype='Link', options='Salary Component', insert_after='basic_component'),
 			dict(fieldname='arrear_component', label='Arrear Component',
-				fieldtype='Link', options='Salary Component', insert_after='hra_component')
+				fieldtype='Link', options='Salary Component', insert_after='hra_component'),
+			dict(fieldname='bank_remittance_section', label='Bank Remittance Settings',
+				fieldtype='Section Break', collapsible=1, insert_after='arrear_component'),
+			dict(fieldname='client_code', label='Client Code', fieldtype='Data',
+				insert_after='bank_remittance_section'),
+			dict(fieldname='remittance_column_break', fieldtype='Column Break',
+				insert_after='client_code'),
+			dict(fieldname='product_code', label='Product Code', fieldtype='Data',
+				insert_after='remittance_column_break'),
 		],
 		'Employee Tax Exemption Declaration':[
 			dict(fieldname='hra_section', label='HRA Exemption',
@@ -360,9 +370,9 @@ def make_fixtures(company=None):
 			doc.flags.ignore_permissions = True
 			doc.insert()
 		except frappe.NameError:
-			pass
+			frappe.clear_messages()
 		except frappe.DuplicateEntryError:
-			pass
+			frappe.clear_messages()
 
 	# create records for Tax Withholding Category
 	set_tax_withholding_category(company)

@@ -29,10 +29,10 @@ class Gstr1Report(object):
 			place_of_supply,
 			ecommerce_gstin,
 			reverse_charge,
-			gst_category,
+			invoice_type,
 			return_against,
 			is_return,
-			gst_category,
+			invoice_type,
 			export_type,
 			port_code,
 			shipping_bill_number,
@@ -67,7 +67,8 @@ class Gstr1Report(object):
 						row.append("Y" if invoice_details.posting_date <= date(2017, 7, 1) else "N")
 						row.append("C" if invoice_details.return_against else "R")
 
-					self.data.append(row)
+					if taxable_value:
+						self.data.append(row)
 
 	def get_b2cs_data(self):
 		b2cs_output = {}
@@ -113,9 +114,14 @@ class Gstr1Report(object):
 				row.append(export_type)
 			else:
 				row.append(invoice_details.get(fieldname))
+		taxable_value = 0
+		for item_code, net_amount in self.invoice_items.get(invoice).items():
+				if item_code in items:
+					if self.item_tax_rate.get(invoice) and tax_rate == self.item_tax_rate.get(invoice, {}).get(item_code):
+						taxable_value += abs(net_amount)
+					elif not self.item_tax_rate.get(invoice):
+						taxable_value += abs(net_amount)
 
-		taxable_value = sum([abs(net_amount)
-			for item_code, net_amount in self.invoice_items.get(invoice).items() if item_code in items])
 		row += [tax_rate or 0, taxable_value]
 
 		return row, taxable_value
@@ -184,8 +190,10 @@ class Gstr1Report(object):
 
 	def get_invoice_items(self):
 		self.invoice_items = frappe._dict()
+		self.item_tax_rate = frappe._dict()
+
 		items = frappe.db.sql("""
-			select item_code, parent, base_net_amount
+			select item_code, parent, base_net_amount, item_tax_rate
 			from `tab%s Item`
 			where parent in (%s)
 		""" % (self.doctype, ', '.join(['%s']*len(self.invoices))), tuple(self.invoices), as_dict=1)
@@ -195,6 +203,12 @@ class Gstr1Report(object):
 				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code,
 					sum(i.get('base_net_amount', 0) for i in items
 					    if i.item_code == d.item_code and i.parent == d.parent))
+
+				item_tax_rate = json.loads(d.item_tax_rate)
+
+				if item_tax_rate:
+					for account, rate in item_tax_rate.items():
+						self.item_tax_rate.setdefault(d.parent, {}).setdefault(d.item_code, rate)
 
 	def get_items_based_on_tax_rate(self):
 		self.tax_details = frappe.db.sql("""
@@ -324,8 +338,8 @@ class Gstr1Report(object):
 					"fieldtype": "Data"
 				},
 				{
-					"fieldname": "gst_category",
-					"label": "GST Category",
+					"fieldname": "invoice_type",
+					"label": "Invoice Type",
 					"fieldtype": "Data"
 				},
 				{
@@ -577,7 +591,7 @@ def get_json():
 	download_json_file(report_name, filters["type_of_business"], gst_json)
 
 def get_b2b_json(res, gstin):
-	inv_type, out = {"Registered Regular": "R", "Deemed Export": "DE", "URD": "URD", "SEZ": "SEZ"}, []
+	inv_type, out = {"Regular": "R", "Deemed Export": "DE", "URD": "URD", "SEZ": "SEZ"}, []
 	for gst_in in res:
 		b2b_item, inv = {"ctin": gst_in, "inv": []}, []
 		if not gst_in: continue
@@ -586,7 +600,7 @@ def get_b2b_json(res, gstin):
 			inv_item = get_basic_invoice_detail(invoice[0])
 			inv_item["pos"] = "%02d" % int(invoice[0]["place_of_supply"].split('-')[0])
 			inv_item["rchrg"] = invoice[0]["reverse_charge"]
-			inv_item["inv_typ"] = inv_type.get(invoice[0].get("gst_category", ""),"")
+			inv_item["inv_typ"] = inv_type.get(invoice[0].get("invoice_type", ""),"")
 
 			if inv_item["pos"]=="00": continue
 			inv_item["itms"] = []

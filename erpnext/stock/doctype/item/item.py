@@ -723,7 +723,18 @@ class Item(WebsiteGenerator):
 						'income_account': item.income_account
 					})
 			else:
-				self.append("item_defaults", {"company": frappe.defaults.get_defaults().company})
+				warehouse = ''
+				defaults = frappe.defaults.get_defaults() or {}
+
+				# To check default warehouse is belong to the default company
+				if defaults.get("default_warehouse") and frappe.db.exists("Warehouse",
+					{'name': defaults.default_warehouse, 'company': defaults.company}):
+					warehouse = defaults.default_warehouse
+
+				self.append("item_defaults", {
+					"company": defaults.get("company"),
+					"default_warehouse": warehouse
+				})
 
 	def update_variants(self):
 		if self.flags.dont_update_variants or \
@@ -800,10 +811,12 @@ class Item(WebsiteGenerator):
 
 	def validate_variant_attributes(self):
 		if self.is_new() and self.variant_of and self.variant_based_on == 'Item Attribute':
+			# remove attributes with no attribute_value set
+			self.attributes = [d for d in self.attributes if cstr(d.attribute_value).strip()]
+
 			args = {}
-			for d in self.attributes:
-				if cstr(d.attribute_value).strip() == '':
-					frappe.throw(_("Please specify Attribute Value for attribute {0}").format(d.attribute))
+			for i, d in enumerate(self.attributes):
+				d.idx = i + 1
 				args[d.attribute] = d.attribute_value
 
 			variant = get_variant(self.variant_of, args, self.name)
@@ -964,7 +977,7 @@ def invalidate_item_variants_cache_for_website(doc):
 
 	if item_code:
 		item_cache = ItemVariantsCacheManager(item_code)
-		item_cache.clear_cache()
+		item_cache.rebuild_cache()
 
 
 def check_stock_uom_with_bin(item, stock_uom):

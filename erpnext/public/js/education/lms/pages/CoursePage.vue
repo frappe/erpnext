@@ -1,9 +1,9 @@
 <template>
 <div>
 	<breadcrumb></breadcrumb>
-	<TopSection v-bind:title="course.course_name" v-bind:description="course.description">
+	<TopSection v-bind:title="course.course_name" v-bind:description="course.course_intro">
     </TopSection>
-	<CardList :title="'Topics'" :description="''" :sectionType="'section-padding section-bg'">
+	<CardList :title="'Topics'" :description="''">
         <TopicCard slot="card-list-slot" v-for="topic in topicData" :topic="topic" :course_name="course_name" :program_name="program_name" :key="topic.name"/>
     </CardList>
 </div>
