@@ -13,7 +13,7 @@
    "label": "Description"
   }
  ],
- "modified": "2019-05-23 14:30:11.435978",
+ "modified": "2019-05-27 18:35:33.354571",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse Type",
@@ -40,6 +40,18 @@
    "read": 1,
    "report": 1,
    "role": "Item Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
    "share": 1,
    "write": 1
   },
