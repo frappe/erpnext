@@ -17,6 +17,7 @@ class TestLeaveEncashment(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql('''delete from `tabLeave Period`''')
 		frappe.db.sql('''delete from `tabLeave Allocation`''')
+		frappe.db.sql('''delete from `tabAdditional Salary`''')
 
 		# create the leave policy
 		leave_policy = create_leave_policy(
@@ -26,7 +27,9 @@ class TestLeaveEncashment(unittest.TestCase):
 
 		# create employee, salary structure and assignment
 		self.employee = make_employee("test_employee_encashment@example.com")
-		frappe.db.set_value("Employee", "test_employee_encashment@example.com", "leave_policy", leave_policy.name)
+
+		frappe.db.set_value("Employee", self.employee, "leave_policy", leave_policy.name)
+
 		salary_structure = make_salary_structure("Salary Structure for Encashment", "Monthly", self.employee,
 			other_details={"leave_encashment_amount_per_day": 50})
 
@@ -55,11 +58,11 @@ class TestLeaveEncashment(unittest.TestCase):
 	def test_creation_of_leave_ledger_entry_on_submit(self):
 		frappe.db.sql('''delete from `tabLeave Encashment`''')
 		leave_encashment = frappe.get_doc(dict(
-			doctype = 'Leave Encashment',
-			employee = self.employee,
-			leave_type = "_Test Leave Type Encashment",
-			leave_period = self.leave_period.name,
-			payroll_date = today()
+			doctype='Leave Encashment',
+			employee=self.employee,
+			leave_type="_Test Leave Type Encashment",
+			leave_period=self.leave_period.name,
+			payroll_date=today()
 		)).insert()
 
 		leave_encashment.submit()
