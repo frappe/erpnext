@@ -105,10 +105,11 @@ def make_payroll_entry(**args):
 	payroll_entry.company = args.company or erpnext.get_default_company()
 	payroll_entry.start_date = args.start_date or "2016-11-01"
 	payroll_entry.end_date = args.end_date or "2016-11-30"
-	payroll_entry.payment_account = get_payment_account()
+	payroll_entry.payment_account = args.payment_account or get_payment_account()
 	payroll_entry.posting_date = nowdate()
 	payroll_entry.payroll_frequency = "Monthly"
 	payroll_entry.branch = args.branch or None
+	payroll_entry.fill_employee_details()
 	payroll_entry.save()
 	payroll_entry.create_salary_slips()
 	payroll_entry.submit_salary_slips()
