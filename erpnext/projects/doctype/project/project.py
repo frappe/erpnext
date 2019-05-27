@@ -193,10 +193,23 @@ class Project(Document):
 	def update_project(self):
 		self.update_percent_complete()
 		self.update_costing()
+		self.update_dates()
 
 	def after_insert(self):
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
+
+	def update_dates(self):
+		tasks = frappe.get_all("Task", filters={"project": self.name}, fields=["exp_start_date", "exp_end_date", "name"])
+		task_map = {}
+		for task in tasks:
+			task_map[task['name']] = task
+		for project_task in self.tasks:
+			if project_task.task_id == task_map[project_task.task_id]["name"] \
+				and (project_task.start_date != task_map[project_task.task_id]["exp_start_date"]\
+				or project_task.end_date != task_map[project_task.task_id]["exp_end_date"]):
+					project_task.start_date = task_map[project_task.task_id]["exp_start_date"]
+					project_task.end_date = task_map[project_task.task_id]["exp_end_date"]
 
 	def update_percent_complete(self, from_validate=False):
 		if not self.tasks: return

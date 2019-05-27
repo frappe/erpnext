@@ -100,11 +100,6 @@ class Task(NestedSet):
 	def update_project(self):
 		if self.project and not self.flags.from_project:
 			project = frappe.get_doc("Project", self.project)
-			for task in project.tasks:
-				if task.task_id == self.name:
-					task.start_date = self.exp_start_date
-					task.end_date = self.exp_end_date
-
 			project.update_project()
 			project.save()
 
