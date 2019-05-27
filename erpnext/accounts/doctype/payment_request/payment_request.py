@@ -14,7 +14,6 @@ from frappe.integrations.utils import get_payment_gateway_controller
 from frappe.utils.background_jobs import enqueue
 from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
-from frappe.model.mapper import get_mapped_doc
 
 class PaymentRequest(Document):
 	def validate(self):
@@ -426,7 +425,9 @@ def get_subscription_details(reference_doctype, reference_name):
 
 @frappe.whitelist()
 def make_payment_order(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	def set_missing_values(source, target):
+		target.payment_order_type = "Payment Request"
 		target.append('references', {
 			'reference_doctype': source.reference_doctype,
 			'reference_name': source.reference_name,
