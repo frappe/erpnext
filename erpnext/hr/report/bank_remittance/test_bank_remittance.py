@@ -3,8 +3,6 @@ import frappe, unittest
 from erpnext.hr.doctype.payroll_entry.test_payroll_entry import make_payroll_entry
 from frappe.utils import add_to_date, get_datetime, now
 from erpnext.hr.report.bank_remittance.bank_remittance import execute
-from pprint import pprint
-
 
 class TestBankRemittance(unittest.TestCase):
 
@@ -14,8 +12,7 @@ class TestBankRemittance(unittest.TestCase):
 		frappe.db.sql("DELETE FROM `tabSalary Structure Assignment` WHERE `salary_structure` = 'Report_salary_structure';")
 		frappe.db.sql("DELETE FROM `tabBank` WHERE `bank_name` = 'Remittance_Bank';")
 		frappe.db.sql("DELETE FROM `tabBank Account` WHERE `account_name` = 'Test_bank_account_for_remittance';")
-
-
+		frappe.db.sql("DELETE FROM `tabSalary Component` WHERE `salary_component` = '_Test Basic';")
 
 	def test_for_get_salary_transfer_transaction_in_report(self):
 		emp_1 = get_employee("Report_test_Employee_1")
@@ -51,7 +48,7 @@ class TestBankRemittance(unittest.TestCase):
 		self.assertEquals(employee_map[name_str]['bank_name'], 'HDFC')
 		self.assertEquals(employee_map[name_str]['debit_account'], '0987654321')
 		self.assertEquals(employee_map[name_str]['employee_account_no'], '123456789')
-		self.assertEquals(employee_map[name_str]['payroll_no'], 'HR-PRUN-2019-00005')
+		self.assertEquals(employee_map[name_str]['payroll_no'], payroll_entry.name)
 
 def get_employee(emp_name):
 	emp = frappe.new_doc("Employee")
@@ -74,8 +71,20 @@ def get_salary_structure():
 	salary_structure.company = "_Test Company"
 	salary_structure.payroll_frequency = "Monthly"
 
+
+	component = frappe.get_doc({
+		"doctype": "Salary Component",
+		"salary_component": "_Test Basic",
+		"type": "Earning",
+		"is_tax_applicable": 0,
+		"depends_on_payment_days": 0,
+		"is_payable": 1
+	})
+
+	component.insert()
+
 	salary_structure.append("earnings", {
-		"salary_component" : "Basic",
+		"salary_component" : component.name,
 		"amount": 1000
 		})
 
