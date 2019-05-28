@@ -113,6 +113,10 @@ def get_conditions(filters):
 				where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)"%(warehouse_details.lft,
 				warehouse_details.rgt)
 
+	if filters.get("warehouse_type") and not filters.get("warehouse"):
+		conditions += " and exists (select name from `tabWarehouse` wh \
+			where wh.warehouse_type = '%s' and sle.warehouse = wh.name)"%(filters.get("warehouse_type"))
+
 	return conditions
 
 def get_stock_ledger_entries(filters, items):
