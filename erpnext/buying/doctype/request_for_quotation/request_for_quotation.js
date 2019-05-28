@@ -59,18 +59,38 @@ frappe.ui.form.on("Request for Quotation",{
 		var dialog = new frappe.ui.Dialog({
 			title: __("Get Suppliers"),
 			fields: [
-				{	"fieldtype": "Select", "label": __("Get Suppliers By"),
+				{
+					"fieldtype": "Select", "label": __("Get Suppliers By"),
 					"fieldname": "search_type",
-					"options": "Tag\nSupplier Group", "reqd": 1 },
-				{	"fieldtype": "Link", "label": __("Supplier Group"),
+					"options": ["Tag","Supplier Group"],
+					"reqd": 1,
+					onchange() {
+						if(dialog.get_value('search_type') == 'Tag'){
+							frappe.call({
+								method: 'erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_supplier_tag',
+							}).then(r => {
+								dialog.set_df_property("tag", "options", r.message)
+						});
+						}
+					}
+				},
+				{
+					"fieldtype": "Link", "label": __("Supplier Group"),
 					"fieldname": "supplier_group",
-					"options": "Supplier Group",	"reqd": 0,
-					"depends_on": "eval:doc.search_type == 'Supplier Group'"},
-				{	"fieldtype": "Data", "label": __("Tag"),
-					"fieldname": "tag",	"reqd": 0,
-					"depends_on": "eval:doc.search_type == 'Tag'" },
-				{	"fieldtype": "Button", "label": __("Add All Suppliers"),
-					"fieldname": "add_suppliers", "cssClass": "btn-primary"},
+					"options": "Supplier Group",
+					"reqd": 0,
+					"depends_on": "eval:doc.search_type == 'Supplier Group'"
+				},
+				{
+					"fieldtype": "Select", "label": __("Tag"),
+					"fieldname": "tag",
+					"reqd": 0,
+					"depends_on": "eval:doc.search_type == 'Tag'",
+				},
+				{
+					"fieldtype": "Button", "label": __("Add All Suppliers"),
+					"fieldname": "add_suppliers"
+				},
 			]
 		});
 
