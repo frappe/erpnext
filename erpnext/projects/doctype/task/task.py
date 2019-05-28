@@ -108,23 +108,22 @@ class Task(NestedSet):
 			frappe.get_doc("Project", self.project).update_project()
 
 	def update_project_tasks(self):
-		if not self.get("__islocal"):
-			tasks = frappe.db.sql("""SELECT name
-										from `tabProject Task`
-										where task_id = %s and parent != %s""", (self.name, self.project),
-									as_dict=1)
-			for task in tasks:
-				frappe.delete_doc('Project Task', task.get("name"))
+		tasks = frappe.db.sql("""SELECT name
+									from `tabProject Task`
+									where task_id = %s and parent != %s""", (self.name, self.project or ""),
+								as_dict=1)
+		for task in tasks:
+			frappe.delete_doc('Project Task', task.get("name"))
 
-			if not frappe.db.exists("Project Task", {"task_id": self.name, "parent": self.project}):
-				project = frappe.get_doc("Project", self.project)
-				project.append("tasks", {
-					"task_id": self.name, "title": self.subject,
-					"status": self.status, 'description': self.description,
-					"start_date": self.exp_start_date, 'end_date': self.exp_end_date,
-				})
-				project.flags.ignore_validate = True
-				project.save()
+		if self.project and not frappe.db.exists("Project Task", {"task_id": self.name, "parent": self.project}):
+			project = frappe.get_doc("Project", self.project)
+			project.append("tasks", {
+				"task_id": self.name, "title": self.subject,
+				"status": self.status, 'description': self.description,
+				"start_date": self.exp_start_date, 'end_date': self.exp_end_date,
+			})
+			project.flags.ignore_validate = True
+			project.save()
 
 	def check_recursion(self):
 		if self.flags.ignore_recursion_check: return
