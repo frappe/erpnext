@@ -19,12 +19,9 @@ def execute(filters=None):
 	else:
 		cost_centers = get_cost_centers(filters)
 
-	print(cost_centers)
-
 	period_month_ranges = get_period_month_ranges(filters["period"], filters["from_fiscal_year"])
 	cam_map = get_cost_center_account_month_map(filters)
 
-	print(cam_map)
 	data = []
 	for cost_center in cost_centers:
 		cost_center_items = cam_map.get(cost_center)
@@ -159,7 +156,6 @@ def get_actual_details(name, filters):
 def get_cost_center_account_month_map(filters):
 	import datetime
 	cost_center_target_details = get_cost_center_target_details(filters)
-	print(cost_center_target_details)
 	tdd = get_target_distribution_details(filters)
 
 	cam_map = {}
