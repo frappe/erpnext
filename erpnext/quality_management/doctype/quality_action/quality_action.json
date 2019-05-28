@@ -6,11 +6,11 @@
  "engine": "InnoDB",
  "field_order": [
   "corrective_preventive",
-  "document_name",
+  "document_type",
   "goal",
   "cb_00",
-  "document_type",
   "date",
+  "document_name",
   "procedure",
   "status",
   "sb_00",
@@ -60,7 +60,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Document Type",
-   "options": "Quality Review\nCustomer Feedback",
+   "options": "Quality Review\nQuality Feedback",
    "reqd": 1
   },
   {
@@ -88,7 +88,7 @@
    "options": "Quality Action Resolution"
   }
  ],
- "modified": "2019-05-26 23:12:36.050172",
+ "modified": "2019-05-28 13:10:44.092497",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Action",

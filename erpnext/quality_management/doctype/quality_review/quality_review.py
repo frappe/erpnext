@@ -5,17 +5,16 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-import datetime
 
 class QualityReview(Document):
 	pass
 
 def review():
-	now = datetime.datetime.now()
-	day = now.day
-	weekday = now.strftime("%A")
+	day = frappe.utils.getdate().day
+	weekday = frappe.utils.getdate().strftime("%A")
+	month = frappe.utils.getdate().strftime("%B")
 
-	for goal in frappe.get_all("Quality Goal",fields=['name', 'frequency', 'date', 'weekday']):
+	for goal in frappe.get_list("Quality Goal", fields=['name', 'frequency', 'date', 'weekday']):
 		if goal.frequency == 'Daily':
 			create_review(goal.name)
 
@@ -23,19 +22,22 @@ def review():
 			create_review(goal.name)
 
 		elif goal.frequency == 'Monthly' and goal.date == str(day):
-				create_review(goal.name)
+			create_review(goal.name)
+
+		elif goal.frequency == 'Quarterly' and goal.data == str(day) and get_quarter(month):
+			create_review(goal.name)
 
 def create_review(goal):
 	goal = frappe.get_doc("Quality Goal", goal)
 
-	doc = frappe.get_doc({
+	review = frappe.get_doc({
 		"doctype": "Quality Review",
 		"goal": goal.name,
-		"date": frappe.utils.nowdate()
+		"date": frappe.utils.getdate()
 	})
 
 	for objective in goal.objectives:
-		doc.append("reviews",
+		review.append("reviews",
 			{
 				"objective": objective.objective,
 				"target": objective.target,
@@ -43,4 +45,10 @@ def create_review(goal):
 			}
 		)
 
-	doc.insert(ignore_permissions=True)
+	review.insert(ignore_permissions=True)
+
+def get_quarter(month):
+	if month in  ["January", "April", "July", "October"]:
+		return True
+	else:
+		return False

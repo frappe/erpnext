@@ -11,6 +11,7 @@
   "cb_00",
   "procedure",
   "weekday",
+  "quarter",
   "date",
   "sb_00",
   "revision",
@@ -33,7 +34,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Monitoring Frequency",
-   "options": "None\nDaily\nWeekly\nMonthly"
+   "options": "None\nDaily\nWeekly\nMonthly\nQuarterly"
   },
   {
    "fieldname": "procedure",
@@ -43,7 +44,7 @@
    "options": "Quality Procedure"
   },
   {
-   "depends_on": "eval:doc.frequency == 'Quarterly' || doc.frequency == 'Half Yearly' || doc.frequency == 'Yearly' || doc.frequency == 'Monthly'",
+   "depends_on": "eval:doc.frequency == 'Monthly' || doc.frequency == 'Quarterly';",
    "fieldname": "date",
    "fieldtype": "Select",
    "label": "Date",
@@ -64,7 +65,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.frequency == 'Weekly'",
+   "depends_on": "eval:doc.frequency == 'Weekly';",
    "fieldname": "weekday",
    "fieldtype": "Select",
    "label": "Weekday",
@@ -100,9 +101,18 @@
    "label": "Goal",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "default": "January-April-July-October",
+   "depends_on": "eval:doc.frequency == 'Quarterly';",
+   "fieldname": "quarter",
+   "fieldtype": "Select",
+   "label": "Quarter",
+   "options": "January-April-July-October",
+   "read_only": 1
   }
  ],
- "modified": "2019-05-26 22:11:36.894381",
+ "modified": "2019-05-28 14:49:12.768863",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Goal",
