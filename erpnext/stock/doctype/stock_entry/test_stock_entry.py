@@ -6,8 +6,7 @@ import frappe, unittest
 import frappe.defaults
 from frappe.utils import flt, nowdate, nowtime
 from erpnext.stock.doctype.serial_no.serial_no import *
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
-	import set_perpetual_inventory
+from erpnext import set_perpetual_inventory
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 from erpnext.stock.stock_ledger import get_previous_sle
 from frappe.permissions import add_user_permission, remove_user_permission
@@ -16,6 +15,7 @@ from erpnext.stock.doctype.item.test_item import set_item_variant_settings, make
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
 
 from six import iteritems
 
@@ -719,6 +719,22 @@ class TestStockEntry(unittest.TestCase):
 		stock_entry = frappe.get_doc(_make_stock_entry(work_order.name, "Material Consumption for Manufacture", 2))
 		for d in stock_entry.get('items'):
 			self.assertEqual(item_quantity.get(d.item_code), d.qty)
+
+	def test_gle_for_opening_stock_entry(self):
+		set_perpetual_inventory(1)
+
+		mr = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
+			qty=50, basic_rate=100, expense_account="Stock Adjustment - _TC", is_opening="Yes", do_not_save=True)
+
+		self.assertRaises(OpeningEntryAccountError, mr.save)
+
+		mr.items[0].expense_account = "Temporary Opening - _TC"
+		mr.save()
+		mr.submit()
+
+		is_opening = frappe.db.get_value("GL Entry",
+			filters={"voucher_type": "Stock Entry", "voucher_no": mr.name}, fieldname="is_opening")
+		self.assertEqual(is_opening, "Yes")
 
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])
