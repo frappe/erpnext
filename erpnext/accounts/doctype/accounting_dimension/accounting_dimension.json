@@ -9,7 +9,8 @@
   "document_type",
   "label",
   "fieldname",
-  "is_mandatory",
+  "mandatory_for_bs",
+  "mandatory_for_pl",
   "disabled"
  ],
  "fields": [
@@ -35,18 +36,24 @@
   },
   {
    "default": "0",
-   "fieldname": "is_mandatory",
-   "fieldtype": "Check",
-   "label": "Is Mandatory"
-  },
-  {
-   "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disable"
+  },
+  {
+   "default": "0",
+   "fieldname": "mandatory_for_bs",
+   "fieldtype": "Check",
+   "label": "Mandatory For Balance Sheet"
+  },
+  {
+   "default": "0",
+   "fieldname": "mandatory_for_pl",
+   "fieldtype": "Check",
+   "label": "Mandatory For Profit and Loss Account"
   }
  ],
- "modified": "2019-05-25 19:18:11.718209",
+ "modified": "2019-05-27 18:18:17.792726",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension",

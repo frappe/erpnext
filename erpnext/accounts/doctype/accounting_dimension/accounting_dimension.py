@@ -12,9 +12,6 @@ from frappe.utils import cstr
 from frappe.utils.background_jobs import enqueue
 
 class AccountingDimension(Document):
-	def on_update(self):
-		frappe.enqueue(disable_dimension, doc=self)
-
 	def before_insert(self):
 		self.set_fieldname_and_label()
 		frappe.enqueue(make_dimension_in_accounting_doctypes, doc=self)
@@ -32,11 +29,6 @@ class AccountingDimension(Document):
 def make_dimension_in_accounting_doctypes(doc):
 	doclist = get_doclist()
 	doc_count = len(get_accounting_dimensions())
-
-	if doc.is_mandatory:
-		df.update({
-			"reqd": 1
-		})
 
 	for doctype in doclist:
 
@@ -81,7 +73,19 @@ def make_dimension_in_accounting_doctypes(doc):
 				}).insert(ignore_permissions=True)
 			frappe.clear_cache(doctype=doctype)
 		else:
-			create_custom_field(doctype, df)
+			if frappe.db.has_column(doctype, doc.fieldname) and (doc.mandatory_for_pl or doc.mandatory_for_bs):
+				frappe.get_doc({
+					"doctype": "Property Setter",
+					"doctype_or_field": "DocField",
+					"doc_type": doctype,
+					"field_name": doc.fieldname,
+					"property": "hidden",
+					"property_type": "Check",
+					"value": 0
+				}).insert(ignore_permissions=True)
+			else:
+				create_custom_field(doctype, df)
+
 			frappe.clear_cache(doctype=doctype)
 
 def delete_accounting_dimension(doc):
@@ -109,8 +113,14 @@ def delete_accounting_dimension(doc):
 	for doctype in doclist:
 		frappe.clear_cache(doctype=doctype)
 
+@frappe.whitelist()
 def disable_dimension(doc):
-	if doc.disabled:
+	frappe.enqueue(start_dimension_disabling, doc=doc)
+
+def start_dimension_disabling(doc):
+	doc = json.loads(doc)
+
+	if doc.get('disabled'):
 		df = {"read_only": 1}
 	else:
 		df = {"read_only": 0}
@@ -118,7 +128,7 @@ def disable_dimension(doc):
 	doclist = get_doclist()
 
 	for doctype in doclist:
-		field = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": doc.fieldname})
+		field = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": doc.get('fieldname')})
 		if field:
 			custom_field = frappe.get_doc("Custom Field", field)
 			custom_field.update(df)
@@ -136,7 +146,10 @@ def get_doclist():
 
 	return doclist
 
-def get_accounting_dimensions():
-	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["fieldname"])
+def get_accounting_dimensions(as_list=True):
+	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["label", "fieldname", "mandatory_for_pl", "mandatory_for_bs", "disabled"])
 
-	return [d.fieldname for d in accounting_dimensions]
+	if as_list:
+		return [d.fieldname for d in accounting_dimensions]
+	else:
+		return accounting_dimensions
