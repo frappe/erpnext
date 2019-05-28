@@ -9,16 +9,16 @@ let doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry",
 
 let dimension_filters = erpnext.get_dimension_filters();
 
-	doclist.forEach((doctype) => {
-		frappe.ui.form.on(doctype, {
-			onload: function(frm) {
-				dimension_filters.then((dimensions) => {
-					dimensions.forEach((dimension) => {
-						frm.set_query(dimension['fieldname'],{
-							"is_group": 0
-						});
+doclist.forEach((doctype) => {
+	frappe.ui.form.on(doctype, {
+		onload: function(frm) {
+			dimension_filters.then((dimensions) => {
+				dimensions.forEach((dimension) => {
+					frm.set_query(dimension['fieldname'],{
+						"is_group": 0
 					});
 				});
-			}
-		});
-	})
+			});
+		}
+	});
+})
