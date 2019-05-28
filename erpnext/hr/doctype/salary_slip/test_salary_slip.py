@@ -442,7 +442,8 @@ def make_deduction_salary_component(setup=False, test_tax=False):
 			"formula": 'base*.1',
 			"type": "Deduction",
 			"amount_based_on_formula": 1,
-			"depends_on_payment_days": 0
+			"depends_on_payment_days": 0,
+			"variable_based_on_taxable_salary": 1
 		}
 	]
 	if not test_tax:
