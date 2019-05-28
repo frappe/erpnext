@@ -67,7 +67,6 @@ frappe.ui.form.on("Issue", {
 			message: __('Changing Service Level Agreement.')
 		});
 		frm.call('change_service_level_agreement_and_priority', {
-			"priority": frm.doc.priority,
 			"service_level_agreement": frm.doc.service_level_agreement
 		}).then(() => {
 			frappe.msgprint(__("Service Level Agreement changed to {0}.", [frm.doc.service_level_agreement]));
