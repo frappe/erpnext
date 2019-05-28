@@ -21,9 +21,9 @@ frappe.ui.form.on('Quality Action', {
 				} else {
 					for(var i in data.message.parameters) objectives.push(data.message.parameters[i].feedback);
 				}
-				for (var i in objectives){
+				for (var objective in objectives){
 					frm.add_child("resolutions");
-					frm.fields_dict.resolutions.get_value()[i].problem = objectives[i];
+					frm.fields_dict.resolutions.get_value()[objective].problem = objectives[objective];
 				}
 				frm.refresh();
 			}
