@@ -166,13 +166,13 @@ def make_service_level():
 			}
 		]
 	})
-	service_level_exist = frappe.get_doc("Service Level", "_Test Service Level")
+	service_level_exist = frappe.db.exists("Service Level", {"service_level": "_Test Service Level"})
 
 	if not service_level_exist:
 		service_level.insert()
 		return service_level
 	else:
-		return service_level_exist
+		return frappe.get_doc("Service Level", "_Test Service Level")
 
 def get_service_level():
 	return frappe.get_doc("Service Level", "_Test Service Level")
