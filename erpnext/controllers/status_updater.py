@@ -322,7 +322,7 @@ class StatusUpdater(Document):
 		if not ref_docs:
 			return
 
-		zero_amount_refdocs = frappe.db.sql_list(f"""
+		zero_amount_refdocs = frappe.db.sql_list("""
 			SELECT
 				name
 			from
@@ -331,7 +331,7 @@ class StatusUpdater(Document):
 				docstatus = 1
 				and base_net_total = 0
 				and name in %(ref_docs)s
-		""", {
+		""".format(ref_dt=ref_dt), {
 			'ref_docs': ref_docs
 		})
 
