@@ -56,7 +56,7 @@ class TestAccountingDimension(unittest.TestCase):
 
 		gle = frappe.get_doc("GL Entry", {"voucher_no": si.name, "account": "Sales - _TC"})
 
-		self.assertEqual(gle.department, "_Test Department - _TC")
+		self.assertEqual(gle.get('department'), "_Test Department - _TC")
 
 	def test_dimension_against_journal_entry(self):
 		je = make_journal_entry("Sales - _TC", "Sales Expenses - _TC", 500, save=False)
