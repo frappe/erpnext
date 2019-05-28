@@ -8,7 +8,14 @@ import unittest
 from erpnext.support.doctype.service_level.test_service_level import make_service_level
 
 class TestServiceLevelAgreement(unittest.TestCase):
-	pass
+
+	def test_service_level_agreement(self):
+		test_make_service_level_agreement = make_service_level_agreement()
+		test_get_service_level_agreement = get_service_level_agreement()
+
+		self.assertEqual(test_make_service_level_agreement.name, test_get_service_level_agreement.name)
+		self.assertEqual(test_make_service_level_agreement.customer, test_get_service_level_agreement.customer)
+		self.assertEqual(test_make_service_level_agreement.default_service_level_agreement, test_get_service_level_agreement.default_service_level_agreement)
 
 def make_service_level_agreement():
 	make_service_level()
@@ -16,18 +23,37 @@ def make_service_level_agreement():
 	# Default Service Level Agreement
 	default_service_level_agreement = frappe.get_doc({
 		"doctype": "Service Level Agreement",
-		"name": "__Test Service Level Agreement",
+		"service_level_agreement_name": "Default Service Level Agreement",
 		"default_service_level_agreement": 1,
 		"service_level": "__Test Service Level",
 		"holiday_list": "__Test Holiday List",
-		"priority": "Medium",
 		"employee_group": "_Test Employee Group",
 		"start_date": frappe.utils.getdate(),
 		"end_date": frappe.utils.add_to_date(frappe.utils.getdate(), days=100),
-		"response_time": 4,
-		"response_time_period": "Hour",
-		"resolution_time": 6,
-		"resolution_time_period": "Hour",
+		"priorities": [
+			{
+				"priority": "Low",
+				"response_time": 4,
+				"response_time_period": "Hour",
+				"resolution_time": 6,
+				"resolution_time_period": "Hour",
+			},
+			{
+				"priority": "Medium",
+				"response_time": 4,
+				"default_priority": 1,
+				"response_time_period": "Hour",
+				"resolution_time": 6,
+				"resolution_time_period": "Hour",
+			},
+			{
+				"priority": "High",
+				"response_time": 4,
+				"response_time_period": "Hour",
+				"resolution_time": 6,
+				"resolution_time_period": "Hour",
+			}
+		],
 		"support_and_resolution": [
 			{
 				"workday": "Monday",
@@ -67,10 +93,10 @@ def make_service_level_agreement():
 		]
 	})
 
-	default_service_level_agreement_exists = frappe.db.exists("Service Level Agreement", "__Test Service Level Agreement")
-	if not default_service_level_agreement_exists:
-		default_service_level_agreement.insert()
+	default_service_level_agreement_exists = frappe.db.exists("Service Level Agreement", "SLA-Default Service Level Agreement")
 
+	if not default_service_level_agreement_exists:
+		default_service_level_agreement.insert(ignore_permissions=True)
 
 	customer = frappe.get_doc({
 		"doctype": "Customer",
@@ -80,24 +106,42 @@ def make_service_level_agreement():
 		"territory": "Rest Of The World"
 	})
 	if not frappe.db.exists("Customer", "_Test Customer"):
-		customer.insert()
+		customer.insert(ignore_permissions=True)
 	else:
 		customer = frappe.get_doc("Customer", "_Test Customer")
 
 	service_level_agreement = frappe.get_doc({
 		"doctype": "Service Level Agreement",
-		"name": "_Test Service Level Agreement",
+		"service_level_agreement_name": "_Test Service Level Agreement",
 		"customer": customer.customer_name,
 		"service_level": "_Test Service Level",
 		"holiday_list": "__Test Holiday List",
-		"priority": "Medium",
 		"employee_group": "_Test Employee Group",
 		"start_date": frappe.utils.getdate(),
 		"end_date": frappe.utils.add_to_date(frappe.utils.getdate(), days=100),
-		"response_time": 2,
-		"response_time_period": "Day",
-		"resolution_time": 3,
-		"resolution_time_period": "Day",
+		"priorities": [
+			{
+				"priority": "Low",
+				"response_time": 2,
+				"response_time_period": "Day",
+				"resolution_time": 3,
+				"resolution_time_period": "Day",
+			},
+			{
+				"priority": "Medium",
+				"response_time": 2,
+				"response_time_period": "Day",
+				"resolution_time": 3,
+				"resolution_time_period": "Day",
+			},
+			{
+				"priority": "High",
+				"response_time": 2,
+				"response_time_period": "Day",
+				"resolution_time": 3,
+				"resolution_time_period": "Day",
+			}
+		],
 		"support_and_resolution": [
 			{
 				"workday": "Monday",
@@ -137,13 +181,14 @@ def make_service_level_agreement():
 		]
 	})
 
-	service_level_agreement_exists = frappe.db.exists("Service Level Agreement", "_Test Service Level Agreement")
+	service_level_agreement_exists = frappe.db.exists("Service Level Agreement", {"service_level_agreement_name": "_Test Service Level Agreement"})
+
 	if not service_level_agreement_exists:
-		service_level_agreement.insert()
-		return service_level_agreement.name
+		service_level_agreement.insert(ignore_permissions=True)
+		return service_level_agreement
 	else:
-		return service_level_agreement_exists
+		return frappe.get_doc("Service Level Agreement", "SLA-_Test Service Level Agreement")
 
 def get_service_level_agreement():
-	service_level_agreement = frappe.db.exists("Service Level Agreement", "_Test Service Level Agreement")
+	service_level_agreement = frappe.get_doc("Service Level Agreement", "SLA-_Test Service Level Agreement")
 	return service_level_agreement

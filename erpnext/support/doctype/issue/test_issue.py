@@ -46,19 +46,7 @@ class TestIssue(unittest.TestCase):
 		issue.status = 'Closed'
 		issue.save()
 
-		self.assertEqual(issue.agreement_status, 'Fulfilled')
-
-		issue.status = 'Open'
-		issue.save()
-
-		frappe.flags.current_time = datetime.datetime(2019, 3, 5, 12, 0)
-
-		issue.status = 'Closed'
-		issue.save()
-
-		self.assertEqual(issue.agreement_status, 'Failed')
-
-
+		self.assertEqual(issue.agreement_fulfilled, 'Fulfilled')
 
 def make_issue(creation=None, customer=None):
 
@@ -68,6 +56,6 @@ def make_issue(creation=None, customer=None):
 		"customer": customer,
 		"raised_by": "test@example.com",
 		"creation": creation
-	}).insert()
+	}).insert(ignore_permissions=True)
 
 	return issue
