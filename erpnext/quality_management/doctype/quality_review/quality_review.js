@@ -15,8 +15,7 @@ frappe.ui.form.on('Quality Review', {
 			callback: function(data){
 				frm.fields_dict.reviews.grid.remove_all();
 				let objectives = data.message.objectives;
-				let i = 0;
-				for (i in objectives){
+				for (var i in objectives) {
 					frm.add_child("reviews");
 					frm.fields_dict.reviews.get_value()[i].objective = objectives[i].objective;
 					frm.fields_dict.reviews.get_value()[i].target = objectives[i].target;

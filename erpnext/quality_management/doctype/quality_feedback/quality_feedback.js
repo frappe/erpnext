@@ -13,8 +13,8 @@ frappe.ui.form.on('Quality Feedback', {
 				name: frm.doc.template
 			},
 			callback: function(data){
-				let i = 0
-				for (i in data.message.parameters){
+				frm.fields_dict.parameters.grid.remove_all();
+				for (var i in data.message.parameters){
 					frm.add_child("parameters");
 					frm.fields_dict.parameters.get_value()[i].parameter = data.message.parameters[i].parameter;
 				}
