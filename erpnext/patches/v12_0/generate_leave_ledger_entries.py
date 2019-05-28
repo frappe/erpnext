@@ -7,6 +7,7 @@ import frappe
 def execute():
     """ Generates leave ledger entries for leave allocation/application/encashment
         for last allocation """
+    frappe.reload_doc("HR","doctype", "Leave Ledger Entry")
     if frappe.db.a_row_exists("Leave Ledger Entry"):
         return
 
