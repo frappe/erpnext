@@ -377,9 +377,10 @@ class PurchaseReceipt(BuyingController):
 
 	def set_billed_valuation_amounts(self):
 		for d in self.get("items"):
-			data = frappe.db.sql("""select sum(base_net_amount), sum(item_tax_amount), sum(qty)
-				from `tabPurchase Invoice Item`
-				where docstatus = 1 and pr_detail = %s""", d.name)
+			data = frappe.db.sql("""select sum(i.base_net_amount), sum(i.item_tax_amount), sum(i.qty)
+				from `tabPurchase Invoice Item` i
+				inner  join `tabPurchase Invoice` pi on pi.name = i.parent and pi.is_return = 0
+				where pi.docstatus = 1 and i.pr_detail = %s""", d.name)
 			d.billed_net_amount = data[0][0] if data else 0.0
 			d.billed_item_tax_amount = data[0][1] if data else 0.0
 			d.billed_qty = data[0][2] if data else 0.0
