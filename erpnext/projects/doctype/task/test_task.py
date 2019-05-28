@@ -32,18 +32,22 @@ class TestTask(unittest.TestCase):
 	def test_reschedule_dependent_task(self):
 		task1 = create_task("_Test Task 1", nowdate(), add_days(nowdate(), 10))
 
+		task1.reload()
 		task2 = create_task("_Test Task 2", add_days(nowdate(), 11), add_days(nowdate(), 15), task1.name)
 		task2.get("depends_on")[0].project = "_Test Project"
 		task2.save()
 
+		task2.reload()
 		task3 = create_task("_Test Task 3", add_days(nowdate(), 11), add_days(nowdate(), 15), task2.name)
 		task3.get("depends_on")[0].project = "_Test Project"
 		task3.save()
+		task3.reload()
 
 		task1.update({
 			"exp_end_date": add_days(nowdate(), 20)
 		})
 		task1.save()
+		task1.reload()
 
 		self.assertEqual(frappe.db.get_value("Task", task2.name, "exp_start_date"),
 			getdate(add_days(nowdate(), 21)))
