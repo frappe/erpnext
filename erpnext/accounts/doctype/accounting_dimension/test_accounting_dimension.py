@@ -71,8 +71,8 @@ class TestAccountingDimension(unittest.TestCase):
 
 		gle = frappe.get_doc("GL Entry", {"voucher_no": je.name, "account": "Sales - _TC"})
 		gle1 = frappe.get_doc("GL Entry", {"voucher_no": je.name, "account": "Sales Expenses - _TC"})
-		self.assertEqual(gle.department, "_Test Department - _TC")
-		self.assertEqual(gle1.department, "_Test Department - _TC")
+		self.assertEqual(gle.get('department'), "_Test Department - _TC")
+		self.assertEqual(gle1.get('department'), "_Test Department - _TC")
 
 	def test_mandatory(self):
 		si = create_sales_invoice(do_not_save=1)
