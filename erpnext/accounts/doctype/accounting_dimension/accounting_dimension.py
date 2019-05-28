@@ -14,10 +14,16 @@ from frappe.utils.background_jobs import enqueue
 class AccountingDimension(Document):
 	def before_insert(self):
 		self.set_fieldname_and_label()
-		frappe.enqueue(make_dimension_in_accounting_doctypes, doc=self)
+		if frappe.flags.in_test:
+			make_dimension_in_accounting_doctypes(doc=self)
+		else:
+			frappe.enqueue(make_dimension_in_accounting_doctypes, doc=self)
 
 	def on_trash(self):
-		frappe.enqueue(delete_accounting_dimension, doc=self)
+		if frappe.flags.in_test:
+			delete_accounting_dimension(doc=self)
+		else:
+			frappe.enqueue(delete_accounting_dimension, doc=self)
 
 	def set_fieldname_and_label(self):
 		if not self.label:
@@ -103,7 +109,10 @@ def delete_accounting_dimension(doc):
 
 @frappe.whitelist()
 def disable_dimension(doc):
-	frappe.enqueue(start_dimension_disabling, doc=doc)
+	if frappe.flags.in_test:
+		frappe.enqueue(start_dimension_disabling, doc=doc)
+	else:
+		start_dimension_disabling(doc=doc)
 
 def start_dimension_disabling(doc):
 	doc = json.loads(doc)
