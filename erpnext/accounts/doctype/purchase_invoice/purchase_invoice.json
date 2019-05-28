@@ -1813,6 +1813,7 @@
    "bold": 0,
    "collapsible": 0,
    "columns": 0,
+   "depends_on": "eval:(!doc.is_return)",
    "fieldname": "revalue_purchase_receipt",
    "fieldtype": "Check",
    "hidden": 0,
