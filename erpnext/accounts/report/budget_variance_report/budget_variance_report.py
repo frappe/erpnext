@@ -96,7 +96,7 @@ def get_cost_centers(filters):
 		return frappe.db.sql_list("""select name from `tab{tab}` where company=%s
 			{cond}""".format(tab=filters.get("budget_against"), cond=cond), filters.get("company"))
 	else:
-		return frappe.db.sql_list("""select name from `tab{tab}`""".format(tab=filters.get("budget_against")))
+		return frappe.db.sql_list("""select name from `tab{tab}`""".format(tab=filters.get("budget_against"))) #nosec
 
 #Get cost center & target details
 def get_cost_center_target_details(filters):

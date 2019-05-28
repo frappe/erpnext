@@ -468,7 +468,7 @@ class PurchaseInvoice(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.landed_cost_voucher_amount),
 							"project": item.project
-						}), item=item)
+						}, item=item))
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):

@@ -13,7 +13,7 @@ frappe.ui.form.on('Accounting Dimension', {
 
 	document_type: function(frm) {
 		frm.set_value('label', frm.doc.document_type);
-		frm.set_value('fieldname', frappe.scrub(frm.doc.document_type))
+		frm.set_value('fieldname', frappe.scrub(frm.doc.document_type));
 
 		frappe.db.get_value('Accounting Dimension', {'document_type': frm.doc.document_type}, 'document_type', (r) => {
 			if (r.document_type) {
@@ -29,7 +29,7 @@ frappe.ui.form.on('Accounting Dimension', {
 				doc: frm.doc
 			},
 			callback: function() {
-				frappe.msgprint(_("{0} dimension disabled", [frm.doc.label]));
+				frappe.msgprint(__("{0} dimension disabled", [frm.doc.label]));
 			}
 		});
 	}
