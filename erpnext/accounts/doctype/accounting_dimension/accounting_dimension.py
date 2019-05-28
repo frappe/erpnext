@@ -71,22 +71,10 @@ def make_dimension_in_accounting_doctypes(doc):
 					"property_type": "Text",
 					"value": "\nCost Center\nProject\n" + doc.document_type
 				}).insert(ignore_permissions=True)
-			frappe.clear_cache(doctype=doctype)
 		else:
-			if frappe.db.has_column(doctype, doc.fieldname) and (doc.mandatory_for_pl or doc.mandatory_for_bs):
-				frappe.get_doc({
-					"doctype": "Property Setter",
-					"doctype_or_field": "DocField",
-					"doc_type": doctype,
-					"field_name": doc.fieldname,
-					"property": "hidden",
-					"property_type": "Check",
-					"value": 0
-				}).insert(ignore_permissions=True)
-			else:
-				create_custom_field(doctype, df)
+			create_custom_field(doctype, df)
 
-			frappe.clear_cache(doctype=doctype)
+		frappe.clear_cache(doctype=doctype)
 
 def delete_accounting_dimension(doc):
 	doclist = get_doclist()
@@ -94,13 +82,13 @@ def delete_accounting_dimension(doc):
 	frappe.db.sql("""
 		DELETE FROM `tabCustom Field`
 		WHERE  fieldname = %s
-		AND dt IN (%s)""" %
+		AND dt IN (%s)""" %			#nosec
 		('%s', ', '.join(['%s']* len(doclist))), tuple([doc.fieldname] + doclist))
 
 	frappe.db.sql("""
 		DELETE FROM `tabProperty Setter`
 		WHERE  field_name = %s
-		AND doc_type IN (%s)""" %
+		AND doc_type IN (%s)""" %		#nosec
 		('%s', ', '.join(['%s']* len(doclist))), tuple([doc.fieldname] + doclist))
 
 	budget_against_property = frappe.get_doc("Property Setter", "Budget-budget_against-options")

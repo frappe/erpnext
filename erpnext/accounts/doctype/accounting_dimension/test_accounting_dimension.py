@@ -7,6 +7,7 @@ import frappe
 import unittest
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import delete_accounting_dimension
 
 class TestAccountingDimension(unittest.TestCase):
 	def setUp(self):
@@ -17,18 +18,27 @@ class TestAccountingDimension(unittest.TestCase):
 				"doctype": "Accounting Dimension",
 				"document_type": "Department",
 			}).insert()
+		else:
+			dimension1 = frappe.get_doc("Accounting Dimension", "Department")
+			dimension1.disabled = 0
+			dimension1.save()
 
+		if not frappe.db.exists("Accounting Dimension", {"document_type": "Location"}):
 			dimension1 = frappe.get_doc({
 				"doctype": "Accounting Dimension",
 				"document_type": "Location",
 				"mandatory_for_pl": 1
 			}).insert()
-
-	def tearDown(self):
-		delete_dimension()
+		else:
+			dimension1 = frappe.get_doc("Accounting Dimension", "Location")
+			dimension1.disabled = 0
+			dimension1.mandatory_for_pl = 1
+			dimension1.save()
 
 	def test_dimension_against_sales_invoice(self):
 		si = create_sales_invoice(do_not_save=1)
+
+		si.location = "Block 1"
 		si.append("items", {
 			"item_code": "_Test Item",
 			"warehouse": "_Test Warehouse - _TC",
@@ -37,7 +47,8 @@ class TestAccountingDimension(unittest.TestCase):
 			"income_account": "Sales - _TC",
 			"expense_account": "Cost of Goods Sold - _TC",
 			"cost_center": "_Test Cost Center - _TC",
-			"department": "_Test Department - _TC"
+			"department": "_Test Department - _TC",
+			"location": "Block 1"
 		})
 
 		si.save()
@@ -51,6 +62,9 @@ class TestAccountingDimension(unittest.TestCase):
 		je = make_journal_entry("Sales - _TC", "Sales Expenses - _TC", 500, save=False)
 		je.accounts[0].update({"department": "_Test Department - _TC"})
 		je.accounts[1].update({"department": "_Test Department - _TC"})
+
+		je.accounts[0].update({"location": "Block 1"})
+		je.accounts[1].update({"location": "Block 1"})
 
 		je.save()
 		je.submit()
@@ -74,10 +88,20 @@ class TestAccountingDimension(unittest.TestCase):
 		})
 
 		si.save()
-		self.assertRaises(frappe.ValidationError, si.submit())
+		self.assertRaises(frappe.ValidationError, si.submit)
+
+	def tearDown(self):
+		disable_dimension()
 
 
-def delete_dimension():
-	dimension1 = frappe.delete_doc("Accounting Diemnsion", "Department")
-	dimension2 = frappe.delete_doc("Accounting Diemnsion", "Location")
+def disable_dimension():
+	dimension1 = frappe.get_doc("Accounting Dimension", "Department")
+	dimension1.disabled = 1
+	dimension1.save()
+
+	dimension2 = frappe.get_doc("Accounting Dimension", "Location")
+	dimension2.mandatory_for_pl = 0
+	dimension2.disabled = 1
+	dimension2.save()
+
 

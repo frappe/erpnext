@@ -5,9 +5,9 @@ let doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry",
 	"Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item", "Purchase Receipt Item",
 	"Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
 	"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
-	"Travel Request", "Fees", "POS Profile"]
+	"Travel Request", "Fees", "POS Profile"];
 
-let dimension_filters = erpnext.get_dimension_filters()
+let dimension_filters = erpnext.get_dimension_filters();
 
 	doclist.forEach((doctype) => {
 		frappe.ui.form.on(doctype, {

@@ -150,7 +150,7 @@ function get_filters(){
 		}
 	]
 
-	let dimension_filters = erpnext.get_dimension_filters()
+	let dimension_filters = erpnext.get_dimension_filters();
 
 	dimension_filters.then((dimensions) => {
 		dimensions.forEach((dimension) => {
