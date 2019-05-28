@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Delayed Order Summary"] = {
+frappe.query_reports["Delayed Item Report"] = {
 	"filters": [
 		{
 			fieldname: "company",
@@ -55,7 +55,7 @@ frappe.query_reports["Delayed Order Summary"] = {
 			label: __("Based On"),
 			fieldtype: "Select",
 			options: ["Delivery Note", "Sales Invoice"],
-			default: "Sales Invoice",
+			default: "Delivery Note",
 			reqd: 1
 		},
 	]

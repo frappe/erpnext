@@ -15,6 +15,7 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, add_additional_cost
 from erpnext.stock.utils import get_bin
 from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit, get_serial_nos
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
 
 import json
 
@@ -59,6 +60,7 @@ class StockEntry(StockController):
 		self.validate_batch()
 		self.validate_inspection()
 		self.validate_fg_completed_qty()
+		self.validate_difference_account()
 		self.set_job_card_data()
 
 		if not self.from_bom:
@@ -215,7 +217,18 @@ class StockEntry(StockController):
 			production_item = frappe.get_value('Work Order', self.work_order, 'production_item')
 			for item in self.items:
 				if item.item_code == production_item and item.qty != self.fg_completed_qty:
-					frappe.throw(_("Finished product quantity <b>{0}</b> and For Quantity <b>{1}</b> cannot be different").format(item.qty, self.fg_completed_qty))
+					frappe.throw(_("Finished product quantity <b>{0}</b> and For Quantity <b>{1}</b> cannot be different")
+						.format(item.qty, self.fg_completed_qty))
+
+	def validate_difference_account(self):
+		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
+			return
+
+		for d in self.get("items"):
+			if not d.expense_account:
+				frappe.throw(_("Please enter Difference Account"))
+			elif self.is_opening == "Yes" and frappe.db.get_value("Account", d.expense_account, "report_type") == "Profit and Loss":
+				frappe.throw(_("Difference Account must be a Asset/Liability type account, since this Stock Entry is an Opening Entry"), OpeningEntryAccountError)
 
 	def validate_warehouse(self):
 		"""perform various (sometimes conditional) validations on warehouse"""
