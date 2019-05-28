@@ -44,6 +44,11 @@ class Task(NestedSet):
 		if self.act_start_date and self.act_end_date and getdate(self.act_start_date) > getdate(self.act_end_date):
 			frappe.throw(_("'Actual Start Date' can not be greater than 'Actual End Date'"))
 
+		if self.exp_end_date and self.project:
+			project = frappe.get_doc("Project", self.project)
+			if project.expected_end_date and getdate(self.exp_end_date) > getdate(project.expected_end_date):
+				frappe.throw(_("'Expected End Date' can not be greater than the project's 'Expected End Date'"))
+
 	def validate_status(self):
 		if self.status!=self.get_db_value("status") and self.status == "Closed":
 			for d in self.depends_on:
@@ -72,6 +77,7 @@ class Task(NestedSet):
 		self.check_recursion()
 		self.reschedule_dependent_tasks()
 		self.update_project()
+		self.update_project_tasks()
 		self.unassign_todo()
 		self.populate_depends_on()
 
@@ -100,6 +106,25 @@ class Task(NestedSet):
 	def update_project(self):
 		if self.project and not self.flags.from_project:
 			frappe.get_doc("Project", self.project).update_project()
+
+	def update_project_tasks(self):
+		if not self.get("__islocal"):
+			tasks = frappe.db.sql("""SELECT name
+										from `tabProject Task`
+										where task_id = %s and parent != %s""", (self.name, self.project),
+									as_dict=1)
+			for task in tasks:
+				frappe.delete_doc('Project Task', task.get("name"))
+
+			if not frappe.db.exists("Project Task", {"task_id": self.name, "parent": self.project}):
+				project = frappe.get_doc("Project", self.project)
+				project.append("tasks", {
+					"task_id": self.name, "title": self.subject,
+					"status": self.status, 'description': self.description,
+					"start_date": self.exp_start_date, 'end_date': self.exp_end_date,
+				})
+				project.flags.ignore_validate = True
+				project.save()
 
 	def check_recursion(self):
 		if self.flags.ignore_recursion_check: return
