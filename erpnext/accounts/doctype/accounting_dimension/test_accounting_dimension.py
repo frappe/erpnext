@@ -18,6 +18,15 @@ class TestAccountingDimension(unittest.TestCase):
 				"document_type": "Department",
 			}).insert()
 
+			dimension1 = frappe.get_doc({
+				"doctype": "Accounting Dimension",
+				"document_type": "Location",
+				"mandatory_for_pl": 1
+			}).insert()
+
+	def tearDown(self):
+		delete_dimension()
+
 	def test_dimension_against_sales_invoice(self):
 		si = create_sales_invoice(do_not_save=1)
 		si.append("items", {
@@ -51,4 +60,24 @@ class TestAccountingDimension(unittest.TestCase):
 		self.assertEqual(gle.department, "_Test Department - _TC")
 		self.assertEqual(gle1.department, "_Test Department - _TC")
 
+	def test_mandatory(self):
+		si = create_sales_invoice(do_not_save=1)
+		si.append("items", {
+			"item_code": "_Test Item",
+			"warehouse": "_Test Warehouse - _TC",
+			"qty": 1,
+			"rate": 100,
+			"income_account": "Sales - _TC",
+			"expense_account": "Cost of Goods Sold - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"location": ""
+		})
+
+		si.save()
+		self.assertRaises(frappe.ValidationError, si.submit())
+
+
+def delete_dimension():
+	dimension1 = frappe.delete_doc("Accounting Diemnsion", "Department")
+	dimension2 = frappe.delete_doc("Accounting Diemnsion", "Location")
 
