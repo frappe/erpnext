@@ -21,4 +21,4 @@ doclist.forEach((doctype) => {
 			});
 		}
 	});
-})
+});
