@@ -17,9 +17,13 @@ class TestQualityFeedback(unittest.TestCase):
 		self.assertEqual(test_create_feedback, test_get_feedback)
 
 def create_feedback():
+	create_customer()
+
 	feedabck = frappe.get_doc({
 		"doctype": "Quality Feedback",
 		"template": "TMPL-_Test Feedback Template",
+		"document_type": "Customer",
+		"document_name": "Quality Feedback Customer",
 		"date": frappe.utils.nowdate(),
 		"parameters": [
 			{
@@ -40,3 +44,10 @@ def create_feedback():
 
 def get_feedback():
 	return frappe.db.exists("Quality Feedback", {"template": "TMPL-_Test Feedback Template"})
+
+def create_customer():
+	if not frappe.db.exists("Customer", {"customer_name": "Quality Feedback Customer"}):
+		customer = frappe.get_doc({
+				"doctype": "Customer",
+				"customer_name": "Quality Feedback Customer"
+			}).insert(ignore_permissions=True)
