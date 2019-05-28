@@ -8,16 +8,7 @@ frappe.ui.form.on('Quotation', {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
 			'Sales Order': 'Make Sales Order'
-		},
-
-		frm.set_query("quotation_to", function() {
-			return{
-				"filters": {
-					"name": ["in", ["Customer", "Lead"]],
-				}
-			}
-		});
-
+		};
 	},
 
 	refresh: function(frm) {
