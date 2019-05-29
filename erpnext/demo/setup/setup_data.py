@@ -189,7 +189,7 @@ def setup_user_roles():
 		'Stock User', 'Stock Manager', 'Sales User', 'Sales Manager', 'Purchase User',
 		'Purchase Manager', 'Projects User', 'Manufacturing User', 'Manufacturing Manager',
 		'Support Team', 'Academics User', 'Physician', 'Healthcare Administrator', 'Laboratory User',
-		'Nursing User', 'Patient')
+		'Nursing User', 'Patient', 'System Manager')
 
 	if not frappe.db.get_global('demo_hr_user'):
 		user = frappe.get_doc('User', 'CaitlinSnow@example.com')
