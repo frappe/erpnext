@@ -431,22 +431,24 @@ def get_leave_details(employee, date):
 	return ret
 
 @frappe.whitelist()
-def get_leave_balance_on(employee, leave_type, from_date, to_date=nowdate(), allocation_records=None, docname=None,
+def get_leave_balance_on(employee, leave_type, date, to_date=nowdate(), allocation_records=None, docname=None,
 		consider_all_leaves_in_the_allocation_period=False):
+	''' Returns leave balance till date and fetches expiry date based on to_date
+		to calculate minimum remaining leave balance '''
 
 	if allocation_records == None:
-		allocation_records = get_leave_allocation_records(from_date, employee).get(employee, frappe._dict())
+		allocation_records = get_leave_allocation_records(date, employee).get(employee, frappe._dict())
 	allocation = allocation_records.get(leave_type, frappe._dict())
 
-	end_date = allocation.to_date if consider_all_leaves_in_the_allocation_period else from_date
-	expiry = get_allocation_expiry(employee, leave_type, to_date, from_date)
+	end_date = allocation.to_date if consider_all_leaves_in_the_allocation_period else date
+	expiry = get_allocation_expiry(employee, leave_type, to_date, date)
 
 	leaves_taken = get_leaves_taken(employee, leave_type, allocation.from_date, end_date)
 
-	return get_remaining_leaves(allocation, leaves_taken, from_date, expiry)
+	return get_remaining_leaves(allocation, leaves_taken, date, expiry)
 
 def get_remaining_leaves(allocation, leaves_taken, date, expiry):
-	''' Returns leaves remaining after comparing with remaining days for allocation expiry '''
+	''' Returns minimum leaves remaining after comparing with remaining days for allocation expiry '''
 	def _get_remaining_leaves(allocated_leaves, end_date):
 		remaining_leaves = flt(allocated_leaves) + flt(leaves_taken)
 

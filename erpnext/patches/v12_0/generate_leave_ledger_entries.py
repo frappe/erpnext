@@ -22,6 +22,7 @@ def generate_allocation_ledger_entries(allocation_list):
 
     for allocation in allocation_list:
         if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Allocation', 'transaction_name': allocation.name}):
+            allocation.update(dict(doctype="Leave Allocation"))
             leave_allocation = LeaveAllocation(allocation)
             leave_allocation.create_leave_ledger_entry()
 
@@ -33,6 +34,7 @@ def generate_application_leave_ledger_entries(allocation_list):
 
     for record in leave_applications:
         if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Application', 'transaction_name': record.name}):
+            record.update(dict(doctype="Leave Application"))
             leave_application = LeaveApplication(record)
             leave_application.create_leave_ledger_entry()
 
@@ -44,6 +46,7 @@ def generate_encashment_leave_ledger_entries(allocation_list):
 
     for record in leave_encashments:
         if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Encashment', 'transaction_name': record.name}):
+            record.update(dict(doctype="Leave Encashment"))
             leave_encashment = LeaveEncashment(record)
             leave_encashment.create_leave_ledger_entry()
 
@@ -89,7 +92,7 @@ def get_leaves_application_records(allocation_list):
                 from_date >= %s
                 AND leave_type = %s
                 AND employee = %s
-        """, (allocation.from_date, allocation.leave_type, allocation.employee))
+        """, (allocation.from_date, allocation.leave_type, allocation.employee), as_dict=1)
     return leave_applications
 
 def get_leave_encashment_records(allocation_list):
@@ -108,5 +111,5 @@ def get_leave_encashment_records(allocation_list):
                 leave_type = %s
                 AND employee = %s
                 AND encashment_date >= %s
-        """, (allocation.leave_type, allocation.employee, allocation.from_date))
+        """, (allocation.leave_type, allocation.employee, allocation.from_date), as_dict=1)
     return leave_encashments

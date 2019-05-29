@@ -136,8 +136,8 @@ class LeaveAllocation(Document):
 		if flt(leaves) > 0:
 			args = dict(
 				leaves=leaves * -1,
-				from_date=self.to_date,
-				to_date=self.to_date,
+				from_date=self.from_date,
+				to_date=self.from_date,
 				is_carry_forward=0,
 				is_expired=1
 			)
