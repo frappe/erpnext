@@ -15,4 +15,4 @@ def execute():
 
 	if frappe.db.exists("Opportunity", "customer") and frappe.db.exists("Opportunity", "enquiry_from"):
 		frappe.db.sql(""" UPDATE `tabOpportunity` set party_name = customer
-			 enquiry_from = 'Customer' and party_name IS NULL and customer IS NOT NULL""")
+			 where enquiry_from = 'Customer' and party_name IS NULL and customer IS NOT NULL""")
