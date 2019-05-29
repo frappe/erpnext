@@ -44,7 +44,7 @@ class Task(NestedSet):
 		if self.act_start_date and self.act_end_date and getdate(self.act_start_date) > getdate(self.act_end_date):
 			frappe.throw(_("'Actual Start Date' can not be greater than 'Actual End Date'"))
 
-		if self.exp_end_date and self.project:
+		if self.exp_end_date and self.project and frappe.db.exists("Project", {"name": self.project}):
 			project = frappe.get_doc("Project", self.project)
 			if project.expected_end_date and getdate(self.exp_end_date) > getdate(project.expected_end_date):
 				frappe.throw(_("'Expected End Date' can not be greater than the project's 'Expected End Date'"))
@@ -115,7 +115,12 @@ class Task(NestedSet):
 		for task in tasks:
 			frappe.delete_doc('Project Task', task.get("name"))
 
-		if self.project and not frappe.db.exists("Project Task", {"task_id": self.name, "parent": self.project}):
+		if not self.project:
+			return
+
+		task_exists = frappe.db.exists("Project Task", {"task_id": self.name, "parent": self.project})
+
+		if not task_exists and frappe.db.exists("Project", {"name": self.project}):
 			project = frappe.get_doc("Project", self.project)
 			project.append("tasks", {
 				"task_id": self.name, "title": self.subject,
