@@ -40,6 +40,32 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 
 		if (!this.frm.doc.__islocal) {
 			frappe.contacts.render_address_and_contact(cur_frm);
+
+			let make_quotation = this.frm.dashboard.transactions_area.find('.btn-new[data-doctype="Quotation"]').unbind('click');
+			let make_opportunity = this.frm.dashboard.transactions_area.find('.btn-new[data-doctype="Opportunity"]').unbind('click');
+
+			make_quotation.on('click', function() {
+				let doctype = $(this).attr('data-doctype');
+
+				frappe.model.with_doctype(doctype, function() {
+					var new_doc = frappe.model.get_new_doc(doctype);
+					new_doc['quotation_to'] = doc.doctype;
+					new_doc['party_name'] = doc.name;
+					frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
+				});
+			});
+
+			make_opportunity.on('click', function() {
+				let doctype = $(this).attr('data-doctype');
+
+				frappe.model.with_doctype(doctype, function() {
+					var new_doc = frappe.model.get_new_doc(doctype);
+					new_doc['opportunity_from'] = doc.doctype;
+					new_doc['party_name'] = doc.name;
+					frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
+				});
+			});
+
 		} else {
 			frappe.contacts.clear_address_and_contact(cur_frm);
 		}
