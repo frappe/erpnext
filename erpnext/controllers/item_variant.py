@@ -287,17 +287,20 @@ def copy_attributes_to_variant(item, variant):
 					variant.set(field.fieldname, item.get(field.fieldname))
 
 	variant.variant_of = item.name
-	print(allow_fields)
-
-	if not variant.description:
-		variant.description = ""
 
 	if 'description' not in allow_fields:
-		print("it is very bad")
-		if item.variant_based_on == 'Item Attribute' and not variant.description:
-			variant.description = "<div><b>" + item.name + "</b></div>"
-			for d in variant.attributes:
-				variant.description += "<div><b>" + d.attribute + "</b>: " + cstr(d.attribute_value) + "</div>"
+		if not variant.description:
+				variant.description = ""
+
+		if item.variant_based_on=='Item Attribute':
+			if variant.attributes:
+				attributes_description = item.description + " "
+				for d in variant.attributes:
+					attributes_description += "<div>" + d.attribute + ": " + cstr(d.attribute_value) + "</div>"
+
+				if attributes_description not in variant.description:
+					variant.description += attributes_description
+
 
 def make_variant_item_code(template_item_code, template_item_name, variant):
 	"""Uses template's item code and abbreviations to make variant's item code"""
