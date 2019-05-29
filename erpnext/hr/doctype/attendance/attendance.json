@@ -9,6 +9,7 @@
   "naming_series",
   "employee",
   "employee_name",
+  "working_hours",
   "status",
   "leave_type",
   "leave_application",
@@ -136,6 +137,14 @@
    "no_copy": 1,
    "options": "Attendance",
    "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "working_hours",
+   "fieldname": "working_hours",
+   "fieldtype": "Float",
+   "label": "Working Hours",
+   "precision": "1",
    "read_only": 1
   }
  ],
