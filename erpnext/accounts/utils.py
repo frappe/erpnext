@@ -333,7 +333,7 @@ def reconcile_against_document(args):
 		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
 		doc.make_gl_entries(cancel = 0, adv_adj =1)
 
-		if d.voucher_type == 'Payment Entry':
+		if d.voucher_type in ('Payment Entry', 'Journal Entry'):
 			doc.update_expense_claim()
 
 def check_if_advance_entry_modified(args):
@@ -378,9 +378,9 @@ def check_if_advance_entry_modified(args):
 
 def validate_allocated_amount(args):
 	if args.get("allocated_amount") < 0:
-		throw(_("Allocated amount can not be negative"))
+		throw(_("Allocated amount cannot be negative"))
 	elif args.get("allocated_amount") > args.get("unadjusted_amount"):
-		throw(_("Allocated amount can not greater than unadjusted amount"))
+		throw(_("Allocated amount cannot be greater than unadjusted amount"))
 
 def update_reference_in_journal_entry(d, jv_obj):
 	"""

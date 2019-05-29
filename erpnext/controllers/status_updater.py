@@ -45,9 +45,9 @@ status_map = {
 	"Sales Invoice": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
+		["Paid", "eval:self.outstanding_amount==0 and self.docstatus==1"],
 		["Return", "eval:self.is_return==1 and self.docstatus==1"],
-		["Paid", "eval:self.outstanding_amount<=0 and self.docstatus==1 and self.is_return==0"],
-		["Credit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1 and self.is_return==0 and get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1})"],
+		["Credit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1"],
 		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
 		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
@@ -55,9 +55,9 @@ status_map = {
 	"Purchase Invoice": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
+		["Paid", "eval:self.outstanding_amount==0 and self.docstatus==1"],
 		["Return", "eval:self.is_return==1 and self.docstatus==1"],
-		["Paid", "eval:self.outstanding_amount<=0 and self.docstatus==1 and self.is_return==0"],
-		["Debit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1 and self.is_return==0 and get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1})"],
+		["Debit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1"],
 		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
 		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
@@ -316,19 +316,27 @@ class StatusUpdater(Document):
 				.format(frappe.db.escape(frappe.session.user))
 
 	def update_billing_status_for_zero_amount_refdoc(self, ref_dt):
-		ref_fieldname = ref_dt.lower().replace(" ", "_")
-		zero_amount_refdoc = []
-		all_zero_amount_refdoc = frappe.db.sql_list("""select name from `tab%s`
-			where docstatus=1 and base_net_total = 0""" % ref_dt)
+		ref_fieldname = frappe.scrub(ref_dt)
 
-		for item in self.get("items"):
-			if item.get(ref_fieldname) \
-				and item.get(ref_fieldname) in all_zero_amount_refdoc \
-				and item.get(ref_fieldname) not in zero_amount_refdoc:
-					zero_amount_refdoc.append(item.get(ref_fieldname))
+		ref_docs = [item.get(ref_fieldname) for item in (self.get('items') or []) if item.get(ref_fieldname)]
+		if not ref_docs:
+			return
 
-		if zero_amount_refdoc:
-			self.update_billing_status(zero_amount_refdoc, ref_dt, ref_fieldname)
+		zero_amount_refdocs = frappe.db.sql_list("""
+			SELECT
+				name
+			from
+				`tab{ref_dt}`
+			where
+				docstatus = 1
+				and base_net_total = 0
+				and name in %(ref_docs)s
+		""".format(ref_dt=ref_dt), {
+			'ref_docs': ref_docs
+		})
+
+		if zero_amount_refdocs:
+			self.update_billing_status(zero_amount_refdocs, ref_dt, ref_fieldname)
 
 	def update_billing_status(self, zero_amount_refdoc, ref_dt, ref_fieldname):
 		for ref_dn in zero_amount_refdoc:
