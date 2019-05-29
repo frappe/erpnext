@@ -205,7 +205,12 @@ var get_bom_material_detail= function(doc, cdt, cdn, scrap_items) {
 				'item_code': d.item_code,
 				'bom_no': d.bom_no != null ? d.bom_no: '',
 				"scrap_items": scrap_items,
-				'qty': d.qty
+				'qty': d.qty,
+				"stock_qty": d.stock_qty,
+				"include_item_in_manufacturing": d.include_item_in_manufacturing,
+				"uom": d.uom,
+				"stock_uom": d.stock_uom,
+				"conversion_factor": d.conversion_factor
 			},
 			callback: function(r) {
 				d = locals[cdt][cdn];
