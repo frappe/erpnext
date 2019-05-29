@@ -13,15 +13,4 @@ def get_context(context):
 
 
 def get_featured_programs():
-	featured_program_names = frappe.get_all("Program", filters={"is_published": True, "is_featured": True})
-	if featured_program_names:
-		featured_list = [utils.get_program_and_enrollment_status(program['name']) for program in featured_program_names]
-		return featured_list
-	else:
-		return get_all_programs()[:2]
-
-def get_all_programs():
-	program_names = frappe.get_all("Program", filters={"is_published": True})
-	if program_names:
-		program_list = [utils.get_program_and_enrollment_status(program['name']) for program in program_names]
-		return program_list
+	return utils.get_portal_programs()

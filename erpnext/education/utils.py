@@ -57,9 +57,10 @@ def validate_duplicate_student(students):
 
 # LMS Utils
 def get_current_student():
-	"""
-	Returns student user name, example EDU-STU-2018-00001 (Based on the naming series).
-	Takes email from from frappe.session.user
+	"""Returns current student from frappe.session.user
+
+	Returns:
+	    object: Student Document
 	"""
 	email = frappe.session.user
 	if email in ('Administrator', 'Guest'):
@@ -70,41 +71,101 @@ def get_current_student():
 	except (IndexError, frappe.DoesNotExistError):
 		return None
 
-def check_super_access():
-	current_user = frappe.get_doc('User', frappe.session.user)
-	roles = set([role.role for role in current_user.roles])
-	return bool(roles & {'Administrator', 'Instructor', 'Education Manager', 'System Manager', 'Academic User'})
+def get_portal_programs():
+	"""Returns a list of all program to be displayed on the portal
+	Programs are returned based on the following logic
+		is_published and (student_is_enrolled or student_can_self_enroll)
 
-def get_program_enrollment(program_name):
+	Returns:
+	    list of dict: List of all programs and to be displayed on the portal along with enrollment status
 	"""
-	Function to get program enrollments for a particular student for a program
-	"""
-	student = get_current_student()
-	if not student:
+	published_programs = frappe.get_all("Program", filters={"is_published": True})
+	if not published_programs:
 		return None
+
+	program_list = [frappe.get_doc("Program", program) for program in published_programs]
+	portal_programs = []
+
+	for program in program_list:
+		enrollment_status = get_enrollment_status(program.name)
+		if enrollment_status or program.allow_self_enroll:
+			portal_programs.append({'program': program, 'is_enrolled': enrollment_status})
+
+	return portal_programs
+
+def get_enrollment_status(program, student=None):
+	"""Returns enrollment status for current student
+
+	Args:
+	    program (string): Name of the program
+	    student (object): instance of Student document
+
+	Returns:
+	    bool: Is current user enrolled or not
+	"""
+	if not student:
+		student = get_current_student()
+	if student and get_enrollment('program', program, student.name):
+		return True
 	else:
-		enrollment = frappe.get_all("Program Enrollment", filters={'student':student.name, 'program': program_name})
-		if enrollment:
-			return enrollment[0].name
-		else:
-			return None
+		return False
 
-def get_program_and_enrollment_status(program_name):
-	program = frappe.get_doc('Program', program_name)
-	is_enrolled = bool(get_program_enrollment(program_name)) or check_super_access()
-	return {'program': program, 'is_enrolled': is_enrolled}
+def get_enrollment(master, document, student):
+	"""Gets enrollment for course or program
 
-def get_course_enrollment(course_name):
-	student = get_current_student()
-	if not student:
-		return None
-	enrollment_name = frappe.get_all("Course Enrollment", filters={'student': student.name, 'course':course_name})
-	try:
-		name = enrollment_name[0].name
-		enrollment = frappe.get_doc("Course Enrollment", name)
-		return enrollment
-	except:
-		return None
+	Args:
+	    master (string): can either be program or course
+	    document (string): program or course name
+	    student (string): Student ID
+
+	Returns:
+	    string: Enrollment Name if exists else returns empty string
+	"""
+	if master == 'program':
+		enrollments = frappe.get_all("Program Enrollment", filters={'student':student, 'program': document})
+	if master == 'course':
+		enrollments = frappe.get_all("Course Enrollment", filters={'student':student, 'course': document})
+
+	if enrollments:
+		return enrollment[0].name
+	else:
+		return ''
+
+# def check_super_access():
+# 	current_user = frappe.get_doc('User', frappe.session.user)
+# 	roles = set([role.role for role in current_user.roles])
+# 	return bool(roles & {'Administrator', 'Instructor', 'Education Manager', 'System Manager', 'Academic User'})
+
+# def get_program_enrollment(program_name):
+# 	"""
+# 	Function to get program enrollments for a particular student for a program
+# 	"""
+# 	student = get_current_student()
+# 	if not student:
+# 		return None
+# 	else:
+# 		enrollment = frappe.get_all("Program Enrollment", filters={'student':student.name, 'program': program_name})
+# 		if enrollment:
+# 			return enrollment[0].name
+# 		else:
+# 			return None
+
+# def get_program_and_enrollment_status(program_name):
+# 	program = frappe.get_doc('Program', program_name)
+# 	is_enrolled = bool(get_program_enrollment(program_name)) or check_super_access()
+# 	return {'program': program, 'is_enrolled': is_enrolled}
+
+# def get_course_enrollment(course_name):
+# 	student = get_current_student()
+# 	if not student:
+# 		return None
+# 	enrollment_name = frappe.get_all("Course Enrollment", filters={'student': student.name, 'course':course_name})
+# 	try:
+# 		name = enrollment_name[0].name
+# 		enrollment = frappe.get_doc("Course Enrollment", name)
+# 		return enrollment
+# 	except:
+# 		return None
 
 def create_student_from_current_user():
 	user = frappe.get_doc("User", frappe.session.user)
