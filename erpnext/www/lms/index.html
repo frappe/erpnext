@@ -32,8 +32,8 @@
 	</style>
 {% endblock %}
 
-{% macro card(program, is_enrolled) %}
-<div class="col-sm-6 mb-4 text-left">
+{% macro card(program) %}
+<div class="col-sm mb-4 text-left">
 	<a href="/lms/program?name={{ program.name }}" class="no-decoration no-underline">
 	<div class="card h-100">
 		{% if program.hero_image %}
@@ -68,7 +68,7 @@
 	<div class='container'>
 		<div class="row mt-5">
 			{% for program in featured_programs %}
-				{{ card(program.program, program.is_enrolled) }}
+				{{ card(program.program) }}
 			{% endfor %}
 		</div>
 		<p class='mt-4'>

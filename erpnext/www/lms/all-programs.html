@@ -32,25 +32,25 @@
 
 
 {% macro card(program, is_enrolled) %}
-<div class="col-sm mb-4 text-left">
-	<div class="card">
-		<a href="/lms/program?name={{ program.name }}" class="no-decoration no-underline">
-			{% if program.hero_image %}
-			<div class="card-hero-img" style="background-image: url({{ program.hero_image }})"></div>
-			{% else %}
-			<div class="card-image-wrapper text-center">
-				<div class="image-body">{{ program.program_name }}</div>
-			</div>
-			{% endif %}
-			<div class='card-body'>
-				<h5 class='card-title'>{{ program.program_name }}</h5>
-				<div>{{ program.description }}</div>
-			</div>
-			<div class='card-footer'>
-				<a href='#' class='small'>Watch Intro</a>
-			</div>
-		</a>
+<div class="col-sm-6 mb-4 text-left">
+	<a href="/lms/program?name={{ program.name }}" class="no-decoration no-underline">
+	<div class="card h-100">
+		{% if program.hero_image %}
+		<div class="card-hero-img" style="background-image: url({{ program.hero_image }})"></div>
+		{% else %}
+		<div class="card-image-wrapper text-center">
+			<div class="image-body">{{ program.program_name }}</div>
+		</div>
+		{% endif %}
+		<div class='card-body'>
+			<h5 class='card-title'>{{ program.program_name }}</h5>
+			<div>{{ program.description }}</div>
+		</div>
+		<div class='card-footer'>
+			<span class='small'>Watch Intro</span>
+		</div>
 	</div>
+	</a>
 </div>
 {% endmacro %}
 
@@ -68,9 +68,6 @@
 				{{ card(program.program, program.is_enrolled) }}
 			{% endfor %}
 		</div>
-		<p class='mt-4'>
-			<a href='/lms/all-programs' class='text-muted'>View All Programs</a>
-		</p>
 	</div>
 </section>
 {% endblock %}
