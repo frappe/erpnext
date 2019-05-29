@@ -1,5 +1,5 @@
 {% extends "templates/base.html" %}
-{% block title %}{% endblock %}
+{% block title %}{{ content.name or 'Content Page' }}{% endblock %}
 
 {% block head_include %}
 	<style>
@@ -73,30 +73,6 @@
 <div class="my-5">
 	{{ content.description }}
 </div>
-
-{% block script %}
-	<script src="https://cdn.plyr.io/3.5.3/plyr.js"></script>
-	<script>
-		const player = new Plyr('#player');
-
-		frappe.ready(() => {
-			next = document.getElementById('nextButton')
-			next.disabled = false;
-		})
-
-		function handle(url) {
-			frappe.call('ping').then((r) => {
-				frappe.call("add_activity",
-					{
-						course: {{ course }},
-						content_type: {{ content_type }},
-						content: {{ content.name }},
-					}
-				)
-			})
-		}
-	</script>
-{% endblock %}
 {% endmacro %}
 
 {% macro article() %}
@@ -133,4 +109,30 @@
 		</div>
 	</div>
 </section>
+{% endblock %}
+
+{% block script %}
+	{% if content_type=='Video' %}
+			<script src="https://cdn.plyr.io/3.5.3/plyr.js"></script>
+	{% endif  %}
+	<script>
+		{% if content_type=='Video' %}
+			const player = new Plyr('#player');
+		{% endif  %}
+
+		frappe.ready(() => {
+			next = document.getElementById('nextButton')
+			next.disabled = false;
+		})
+
+		function handle(url) {
+			frappe.call("add_activity",
+				{
+					course: "{{ course }}",
+					content_type: "{{ content_type }}",
+					content: "{{ content.name }}",
+				}
+			)
+		}
+	</script>
 {% endblock %}

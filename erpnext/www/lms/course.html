@@ -35,7 +35,11 @@
 {% macro card(topic, index, length) %}
 <div class="col-sm-{{ 12 if length%3 == 1 and index == 1 else 6 if length%3 == 2 and index in [1,2] else 4}} mb-4 text-left">
 	<div class="card h-100">
-		<a href="/lms/content?course={{ course.name }}&topic={{ topic.name }}&type={{ topic.topic_content[0].content_type }}&content={{ topic.topic_content[0].content }}" class="no-decoration no-underline">
+		{% if frappe.session.user == 'Guest' %}
+			 <div>
+		{% else %}
+			<a href="/lms/content?course={{ course.name }}&topic={{ topic.name }}&type={{ topic.topic_content[0].content_type }}&content={{ topic.topic_content[0].content }}" class="no-decoration no-underline">
+		{% endif %}
 			{% if topic.hero_image %}
 			<div class="card-hero-img" style="background-image: url({{ topic.hero_image }})"></div>
 			{% else %}
@@ -48,21 +52,29 @@
 				<div>
 					<ol class="list-unstyled">
 					{% for content in topic.topic_content %}
-						<li><a class="text-muted" href="/lms/content?course={{ course.name }}&topic={{ topic.name }}&type={{ content.content_type }}&content={{ content.content }}">{{ content.content }}</li></a>
+						<li>
+							{% if frappe.session.user == 'Guest' %}
+								 <span class="text-muted">{{ content.content }}</span>
+							{% else %}
+								<a class="text-muted" href="/lms/content?course={{ course.name }}&topic={{ topic.name }}&type={{ content.content_type }}&content={{ content.content }}">
+									{{ content.content }}
+								</a>
+							{% endif %}
+						</li>
 					{% endfor %}
 					</ol>
 				</div>
 			</div>
-			{% if index==1 %}
-			<div class='card-footer'>
-				<i class="fa fa-check-circle text-success"></i> Completed
+		{% if frappe.session.user == 'Guest' %}
 			</div>
-			{% else %}
+		{% else %}
 			<div class='card-footer'>
-				<i class="fa fa-circle-o text-warning"></i> In Progress
+				{% if index==1 %} <span class="indicator green"> Completed </span>
+				{% else %} <span class="indicator orange"> Completed </span>
+				{% endif %}
 			</div>
-			{% endif %}
-		</a>
+			</a>
+		{% endif %}
 	</div>
 </div>
 {% endmacro %}
