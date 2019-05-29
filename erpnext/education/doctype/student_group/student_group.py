@@ -30,7 +30,7 @@ class StudentGroup(Document):
 			frappe.throw(_("""Cannot enroll more than {0} students for this student group.""").format(self.max_strength))
 
 	def validate_students(self):
-		program_enrollment = get_program_enrollment(self.academic_year, self.academic_term, self.program, self.batch, self.course)
+		program_enrollment = get_program_enrollment(self.academic_year, self.academic_term, self.program, self.batch, self.student_category, self.course)
 		students = [d.student for d in program_enrollment] if program_enrollment else []
 		for d in self.students:
 			if not frappe.db.get_value("Student", d.student, "enabled") and d.active and not self.disabled:
@@ -60,8 +60,8 @@ class StudentGroup(Document):
 				roll_no_list.append(d.group_roll_number)
 
 @frappe.whitelist()
-def get_students(academic_year, group_based_on, academic_term=None, program=None, batch=None, course=None):
-	enrolled_students = get_program_enrollment(academic_year, academic_term, program, batch, course)
+def get_students(academic_year, group_based_on, academic_term=None, program=None, batch=None, student_category=None, course=None):
+	enrolled_students = get_program_enrollment(academic_year, academic_term, program, batch, student_category, course)
 
 	if enrolled_students:
 		student_list = []
@@ -76,7 +76,7 @@ def get_students(academic_year, group_based_on, academic_term=None, program=None
 		frappe.msgprint(_("No students found"))
 		return []
 
-def get_program_enrollment(academic_year, academic_term=None, program=None, batch=None, course=None):
+def get_program_enrollment(academic_year, academic_term=None, program=None, batch=None, student_category=None, course=None):
 	
 	condition1 = " "
 	condition2 = " "
@@ -86,6 +86,8 @@ def get_program_enrollment(academic_year, academic_term=None, program=None, batc
 		condition1 += " and pe.program = %(program)s"
 	if batch:
 		condition1 += " and pe.student_batch_name = %(batch)s"
+	if student_category:
+		condition1 += " and pe.student_category = %(student_category)s"
 	if course:
 		condition1 += " and pe.name = pec.parent and pec.course = %(course)s"
 		condition2 = ", `tabProgram Enrollment Course` pec"
@@ -100,14 +102,14 @@ def get_program_enrollment(academic_year, academic_term=None, program=None, batc
 		order by
 			pe.student_name asc
 		'''.format(condition1=condition1, condition2=condition2),
-		({"academic_year": academic_year, "academic_term":academic_term, "program": program, "batch": batch, "course": course}), as_dict=1)
+                ({"academic_year": academic_year, "academic_term":academic_term, "program": program, "batch": batch, "student_category": student_category, "course": course}), as_dict=1)
 
 
 @frappe.whitelist()
 def fetch_students(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("group_based_on") != "Activity":
 		enrolled_students = get_program_enrollment(filters.get('academic_year'), filters.get('academic_term'),
-			filters.get('program'), filters.get('batch'))
+			filters.get('program'), filters.get('batch'), filters.get('student_category'))
 		student_group_student = frappe.db.sql_list('''select student from `tabStudent Group Student` where parent=%s''',
 			(filters.get('student_group')))
 		students = ([d.student for d in enrolled_students if d.student not in student_group_student]
