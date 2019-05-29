@@ -21,9 +21,9 @@ def generate_allocation_ledger_entries(allocation_list):
     from erpnext.hr.doctype.leave_allocation.leave_allocation import LeaveAllocation
 
     for allocation in allocation_list:
-        if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Allocation',
-            'transaction_name': allocation.name}):
-            LeaveAllocation.create_leave_ledger_entry(allocation)
+        if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Allocation', 'transaction_name': allocation.name}):
+            leave_allocation = LeaveAllocation(allocation)
+            leave_allocation.create_leave_ledger_entry()
 
 def generate_application_leave_ledger_entries(allocation_list):
     ''' fix ledger entries for missing leave application transaction '''
@@ -32,9 +32,9 @@ def generate_application_leave_ledger_entries(allocation_list):
     leave_applications = get_leaves_application_records(allocation_list)
 
     for record in leave_applications:
-        if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Application',
-            'transaction_name': record.name}):
-            LeaveApplication.create_leave_ledger_entry(record)
+        if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Application', 'transaction_name': record.name}):
+            leave_application = LeaveApplication(record)
+            leave_application.create_leave_ledger_entry()
 
 def generate_encashment_leave_ledger_entries(allocation_list):
     ''' fix ledger entries for missing leave encashment transaction '''
@@ -43,9 +43,9 @@ def generate_encashment_leave_ledger_entries(allocation_list):
     leave_encashments = get_leave_encashment_records(allocation_list)
 
     for record in leave_encashments:
-        if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Encashment',
-            'transaction_name': record.name}):
-            LeaveEncashment.create_leave_ledger_entry(record)
+        if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Encashment', 'transaction_name': record.name}):
+            leave_encashment = LeaveEncashment(record)
+            leave_encashment.create_leave_ledger_entry()
 
 def get_allocation_records():
     return frappe.db.sql("""
