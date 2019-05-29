@@ -29,7 +29,8 @@
   "is_fixed_asset",
   "asset_category",
   "asset_naming_series",
-  "tolerance",
+  "over_delivery_receipt_allowance",
+  "over_billing_allowance",
   "image",
   "section_break_11",
   "brand",
@@ -198,6 +199,7 @@
    "search_index": 1
   },
   {
+   "default": "0",
    "fieldname": "is_item_from_hub",
    "fieldtype": "Check",
    "label": "Is Item from Hub",
@@ -218,11 +220,13 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
   },
   {
+   "default": "0",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
    "label": "Allow Alternative Item"
@@ -263,6 +267,7 @@
    "label": "Standard Selling Rate"
   },
   {
+   "default": "0",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
    "label": "Is Fixed Asset",
@@ -280,14 +285,6 @@
    "fieldname": "asset_naming_series",
    "fieldtype": "Select",
    "label": "Asset Naming Series"
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "tolerance",
-   "fieldtype": "Float",
-   "label": "Allow over delivery or receipt upto this percent",
-   "oldfieldname": "tolerance",
-   "oldfieldtype": "Currency"
   },
   {
    "fieldname": "image",
@@ -439,6 +436,7 @@
    "label": "Serial Nos and Batches"
   },
   {
+   "default": "0",
    "depends_on": "eval:doc.is_stock_item",
    "fieldname": "has_batch_no",
    "fieldtype": "Check",
@@ -448,6 +446,7 @@
    "oldfieldtype": "Select"
   },
   {
+   "default": "0",
    "depends_on": "has_batch_no",
    "fieldname": "create_new_batch",
    "fieldtype": "Check",
@@ -462,12 +461,14 @@
    "translatable": 1
   },
   {
+   "default": "0",
    "depends_on": "has_batch_no",
    "fieldname": "has_expiry_date",
    "fieldtype": "Check",
    "label": "Has Expiry Date"
   },
   {
+   "default": "0",
    "depends_on": "has_batch_no",
    "fieldname": "retain_sample",
    "fieldtype": "Check",
@@ -485,6 +486,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "depends_on": "eval:doc.is_stock_item || doc.is_fixed_asset",
    "fieldname": "has_serial_no",
    "fieldtype": "Check",
@@ -601,6 +603,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "is_customer_provided_item",
    "fieldtype": "Check",
    "label": "Is Customer Provided Item"
@@ -619,6 +622,7 @@
    "label": "Supplier Details"
   },
   {
+   "default": "0",
    "fieldname": "delivered_by_supplier",
    "fieldtype": "Check",
    "label": "Delivered by Supplier (Drop Ship)",
@@ -718,6 +722,7 @@
    "options": "Account"
   },
   {
+   "default": "0",
    "fieldname": "enable_deferred_revenue",
    "fieldtype": "Check",
    "label": "Enable Deferred Revenue"
@@ -747,6 +752,7 @@
    "options": "Account"
   },
   {
+   "default": "0",
    "fieldname": "enable_deferred_expense",
    "fieldtype": "Check",
    "label": "Enable Deferred Expense"
@@ -800,6 +806,7 @@
    "options": "fa fa-search"
   },
   {
+   "default": "0",
    "fieldname": "inspection_required_before_purchase",
    "fieldtype": "Check",
    "label": "Inspection Required before Purchase",
@@ -807,6 +814,7 @@
    "oldfieldtype": "Select"
   },
   {
+   "default": "0",
    "fieldname": "inspection_required_before_delivery",
    "fieldtype": "Check",
    "label": "Inspection Required before Delivery"
@@ -840,6 +848,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "description": "If subcontracted to a vendor",
    "fieldname": "is_sub_contracted_item",
    "fieldtype": "Check",
@@ -867,6 +876,7 @@
    "options": "fa fa-globe"
   },
   {
+   "default": "0",
    "depends_on": "eval:!doc.variant_of",
    "fieldname": "show_in_website",
    "fieldtype": "Check",
@@ -874,6 +884,7 @@
    "search_index": 1
   },
   {
+   "default": "0",
    "depends_on": "variant_of",
    "fieldname": "show_variant_in_website",
    "fieldtype": "Check",
@@ -1016,6 +1027,19 @@
    "fieldtype": "Check",
    "label": "Synced With Hub",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "over_delivery_receipt_allowance",
+   "fieldtype": "Float",
+   "label": "Over Delivery/Receipt Allowance (%)",
+   "oldfieldname": "tolerance",
+   "oldfieldtype": "Currency"
+  },
+  {
+   "fieldname": "over_billing_allowance",
+   "fieldtype": "Float",
+   "label": "Over Billing Allowance (%)"
   }
  ],
  "has_web_view": 1,
@@ -1023,7 +1047,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2019-05-16 09:32:27.056036",
+ "modified": "2019-05-29 13:03:28.784477",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

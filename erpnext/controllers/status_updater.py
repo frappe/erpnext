@@ -7,6 +7,8 @@ from frappe.utils import flt, comma_or, nowdate, getdate
 from frappe import _
 from frappe.model.document import Document
 
+class OverAllowanceError(frappe.ValidationError): pass
+
 def validate_status(status, options):
 	if status not in options:
 		frappe.throw(_("Status must be one of {0}").format(comma_or(options)))
@@ -150,8 +152,9 @@ class StatusUpdater(Document):
 
 	def validate_qty(self):
 		"""Validates qty at row level"""
-		self.tolerance = {}
-		self.global_tolerance = None
+		self.item_allowance = {}
+		self.global_qty_allowance = None
+		self.global_amount_allowance = None
 
 		for args in self.status_updater:
 			if "target_ref_field" not in args:
@@ -182,32 +185,41 @@ class StatusUpdater(Document):
 
 						# if not item[args['target_ref_field']]:
 						# 	msgprint(_("Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0").format(item.item_code))
-						if args.get('no_tolerance'):
+						if args.get('no_allowance'):
 							item['reduce_by'] = item[args['target_field']] - item[args['target_ref_field']]
 							if item['reduce_by'] > .01:
 								self.limits_crossed_error(args, item)
 
 						elif item[args['target_ref_field']]:
-							self.check_overflow_with_tolerance(item, args)
+							self.check_overflow_with_allowance(item, args)
 
-	def check_overflow_with_tolerance(self, item, args):
+	def check_overflow_with_allowance(self, item, args):
 		"""
-			Checks if there is overflow condering a relaxation tolerance
+			Checks if there is overflow condering a relaxation allowance
 		"""
-		# check if overflow is within tolerance
-		tolerance, self.tolerance, self.global_tolerance = get_tolerance_for(item['item_code'],
-			self.tolerance, self.global_tolerance)
+		qty_or_amount = "qty" if "qty" in args['target_ref_field'] else "amount"
+
+		# check if overflow is within allowance
+		allowance, self.item_allowance, self.global_qty_allowance, self.global_amount_allowance = \
+			get_allowance_for(item['item_code'], self.item_allowance,
+				self.global_qty_allowance, self.global_amount_allowance, qty_or_amount)
+
 		overflow_percent = ((item[args['target_field']] - item[args['target_ref_field']]) /
 		 	item[args['target_ref_field']]) * 100
 
-		if overflow_percent - tolerance > 0.01:
-			item['max_allowed'] = flt(item[args['target_ref_field']] * (100+tolerance)/100)
+		if overflow_percent - allowance > 0.01:
+			item['max_allowed'] = flt(item[args['target_ref_field']] * (100+allowance)/100)
 			item['reduce_by'] = item[args['target_field']] - item['max_allowed']
 
-			self.limits_crossed_error(args, item)
+			self.limits_crossed_error(args, item, qty_or_amount)
 
-	def limits_crossed_error(self, args, item):
+	def limits_crossed_error(self, args, item, qty_or_amount):
 		'''Raise exception for limits crossed'''
+		if qty_or_amount == "qty":
+			action_msg = _('To allow over receipt / delivery, update "Over Receipt/Delivery Allowance" in Stock Settings or the Item.')
+		else:
+			action_msg = _('To allow over billing, update "Over Billing Allowance" in Accounts Settings or the Item.')
+
 		frappe.throw(_('This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?')
 			.format(
 				frappe.bold(_(item["target_ref_field"].title())),
@@ -215,9 +227,7 @@ class StatusUpdater(Document):
 				frappe.bold(_(args.get('target_dt'))),
 				frappe.bold(_(self.doctype)),
 				frappe.bold(item.get('item_code'))
-			) + '<br><br>' +
-				_('To allow over-billing or over-ordering, update "Allowance" in Stock Settings or the Item.'),
-			title = _('Limit Crossed'))
+			) + '<br><br>' + action_msg, OverAllowanceError, title = _('Limit Crossed'))
 
 	def update_qty(self, update_modified=True):
 		"""Updates qty or amount at row level
@@ -346,19 +356,34 @@ class StatusUpdater(Document):
 			ref_doc.db_set("per_billed", per_billed)
 			ref_doc.set_status(update=True)
 
-def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
+def get_allowance_for(item_code, item_allowance={}, global_qty_allowance=None, global_amount_allowance=None, qty_or_amount="qty"):
 	"""
-		Returns the tolerance for the item, if not set, returns global tolerance
+		Returns the allowance for the item, if not set, returns global allowance
 	"""
-	if item_tolerance.get(item_code):
-		return item_tolerance[item_code], item_tolerance, global_tolerance
+	if qty_or_amount == "qty":
+		if item_allowance.get(item_code, frappe._dict()).get("qty"):
+			return item_allowance[item_code].qty, item_allowance, global_qty_allowance, global_amount_allowance
+	else:
+		if item_allowance.get(item_code, frappe._dict()).get("amount"):
+			return item_allowance[item_code].amount, item_allowance, global_qty_allowance, global_amount_allowance
 
-	tolerance = flt(frappe.db.get_value('Item',item_code,'tolerance') or 0)
+	qty_allowance, over_billing_allowance = \
+		frappe.db.get_value('Item', item_code, ['over_delivery_receipt_allowance', 'over_billing_allowance'])
 
-	if not tolerance:
-		if global_tolerance == None:
-			global_tolerance = flt(frappe.db.get_value('Stock Settings', None, 'tolerance'))
-		tolerance = global_tolerance
+	if qty_or_amount == "qty" and not qty_allowance:
+		if global_qty_allowance == None:
+			global_qty_allowance = flt(frappe.db.get_single_value('Stock Settings', 'over_delivery_receipt_allowance'))
+		qty_allowance = global_qty_allowance
+	elif qty_or_amount == "amount" and not over_billing_allowance:
+		if global_amount_allowance == None:
+			global_amount_allowance = flt(frappe.db.get_single_value('Accounts Settings', 'over_billing_allowance'))
+		over_billing_allowance = global_amount_allowance
 
-	item_tolerance[item_code] = tolerance
-	return tolerance, item_tolerance, global_tolerance
+	if qty_or_amount == "qty":
+		allowance = qty_allowance
+		item_allowance.setdefault(item_code, frappe._dict()).setdefault("qty", qty_allowance)
+	else:
+		allowance = over_billing_allowance
+		item_allowance.setdefault(item_code, frappe._dict()).setdefault("amount", over_billing_allowance)
+
+	return allowance, item_allowance, global_qty_allowance, global_amount_allowance
