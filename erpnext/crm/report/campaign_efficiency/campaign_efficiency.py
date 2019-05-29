@@ -115,7 +115,7 @@ def get_filter_conditions(filters):
 
 def get_lead_quotation_count(leads):
 	return frappe.db.sql("""select count(name) from `tabQuotation`
-		where quotation_to = 'Lead' and party_name in (%s)""" % ', '.join(["%s"]*len(leads)), tuple(leads))[0][0]
+		where quotation_to = 'Lead' and party_name in (%s)""" % ', '.join(["%s"]*len(leads)), tuple(leads))[0][0] #nosec
 
 def get_lead_opp_count(leads):
 	return frappe.db.sql("""select count(name) from `tabOpportunity`
