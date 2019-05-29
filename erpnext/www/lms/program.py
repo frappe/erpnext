@@ -7,6 +7,7 @@ no_cache = 1
 def get_context(context):
 	context.education_settings = frappe.get_single("Education Settings")
 	context.program = get_program(frappe.form_dict['name'])
+	context.is_enrolled = utils.get_enrollment_status(program)
 
 def get_program(program_name):
 	try:
