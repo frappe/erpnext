@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 from erpnext.hr.doctype.leave_application.leave_application \
 	import get_leave_allocation_records, get_leave_balance_on, get_approved_leaves_for_period, get_total_allocated_leaves
 
@@ -30,14 +31,23 @@ def get_columns(leave_types):
 
 	return columns
 
+def get_conditions(filters):
+	filters = {
+		"status": "Active",
+		"company": filters.company,
+	}
+	if filters.get("Department"):
+		filters.update(filters.get("Department"))
+
+	return filters
+
 def get_data(filters, leave_types):
 	user = frappe.session.user
-	allocation_records_based_on_to_date = get_leave_allocation_records(filters.to_date)
-	allocation_records_based_on_from_date = get_leave_allocation_records(filters.from_date)
+	conditions = get_conditions(filters)
 
 	active_employees = frappe.get_all("Employee",
-		filters = { "status": "Active", "company": filters.company},
-		fields = ["name", "employee_name", "department", "user_id"])
+		filters=conditions,
+		fields=["name", "employee_name", "department", "user_id"])
 
 	data = []
 	for employee in active_employees:
@@ -54,8 +64,7 @@ def get_data(filters, leave_types):
 				opening = get_total_allocated_leaves(employee.name, leave_type, filters.to_date)
 
 				# closing balance
-				closing = get_leave_balance_on(employee.name, leave_type, filters.to_date,
-					allocation_records_based_on_to_date.get(employee.name, frappe._dict()))
+				closing = flt(opening) - flt(leaves_taken)
 
 				row += [opening, leaves_taken, closing]
 
