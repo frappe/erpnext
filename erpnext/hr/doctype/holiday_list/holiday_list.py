@@ -84,3 +84,26 @@ def get_events(start, end, filters=None):
 		fields=['name', '`tabHoliday`.holiday_date', '`tabHoliday`.description', '`tabHoliday List`.color'],
 		filters = filters,
 		update={"allDay": 1})
+
+def get_holiday_list(employee):
+	employee_holiday = frappe.db.get_all('Employee', fields=['name', 'holiday_list', 'company'], filters={'name':employee})
+	if not employee_holiday:
+		frappe.throw(_("Employee not found."))
+	if employee_holiday[0].holiday_list:
+		return employee_holiday[0].holiday_list
+	else:
+		company_holiday = frappe.db.get_all('Company', fields=['name', 'default_holiday_list'], filters={'name':employee_holiday[0].company})
+		if company_holiday[0].default_holiday_list:
+			return company_holiday[0].default_holiday_list
+	return None
+
+def is_holiday(holiday_list, for_date):
+	"""Returns true if the given date is a holiday in the given holiday list
+	"""
+	holiday = frappe.get_value('Holiday', {
+		'parent': holiday_list,
+		'parentfield': 'holidays',
+		'parenttype': 'Holiday List',
+		'holiday_date': for_date
+		}, 'name')
+	return bool(holiday)
