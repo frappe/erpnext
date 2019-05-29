@@ -211,6 +211,11 @@ frappe.query_reports["General Ledger"] = {
 			"label": __("Currency"),
 			"fieldtype": "Select",
 			"options": erpnext.get_presentation_currency_list()
+		},
+		{
+			"fieldname": "show_opening_entries",
+			"label": __("Show Opening Entries"),
+			"fieldtype": "Check"
 		}
 	]
 }

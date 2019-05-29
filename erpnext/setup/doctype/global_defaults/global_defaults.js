@@ -1,17 +1,15 @@
 // Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-$.extend(cur_frm.cscript, {
-	onload: function (doc, cdt, cdn) {
-		cur_frm.trigger("get_distance_uoms");
+frappe.ui.form.on('Global Defaults', {
+	onload: function(frm) {
+		frm.trigger('get_distance_uoms');
 	},
-
-	validate: function (doc, cdt, cdn) {
-		return $c_obj(doc, 'get_defaults', '', function (r, rt) {
+	validate: function(frm) {
+		frm.call('get_defaults', null, r => {
 			frappe.sys_defaults = r.message;
-		});
+		})
 	},
-
 	get_distance_uoms: function (frm) {
 		let units = [];
 
@@ -27,9 +25,8 @@ $.extend(cur_frm.cscript, {
 				r.message.forEach(row => units.push(row.to_uom));
 			}
 		});
-
-		cur_frm.set_query("default_distance_unit", function (doc) {
+		frm.set_query("default_distance_unit", function () {
 			return { filters: { "name": ["IN", units] } };
-		})
+		});
 	}
 });
