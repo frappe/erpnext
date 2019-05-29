@@ -1,22 +1,21 @@
-{% macro hero(title, description) %}
+{% macro hero(title, description, is_enrolled) %}
 	<div class='container pb-5'>
 		<h1>{{ title}}</h1>
 		<p class='lead' style="max-width: 100%;">{{ description }}</p>
 		<p class="mt-4">
 			{% if frappe.session.user == 'Guest' %}
-			<a id="signup" class="btn btn-primary btn-lg" style="width: 170px;" href="/login#signup" hidden=true>Sign Up</a>
+			<a id="signup" class="btn btn-primary btn-lg" href="/login#signup">Sign Up</a>
+			{% elif not is_enrolled %}
+			<button id="enroll" class="btn btn-primary btn-lg" onclick="enroll()">Enroll</button>
 			{% endif %}
 		</p>
 	</div>
 
 {% block script %}
 <script type="text/javascript">
-	frappe.ready(() => {
-		btn = document.getElementById('signup')
-		if(frappe.session.user == 'Guest') {
-			btn.hidden = false;
-		}
-	})
+	function enroll() {
+		console.log(frappe.utils.get_query_params())
+	}
 </script>
 {% endblock %}
 {% endmacro %}
