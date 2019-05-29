@@ -54,8 +54,8 @@ class SalesInvoice(SellingController):
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
-		if cint(self.is_return) == 1:
-			self.indicator_title = _("Return")
+		if self.outstanding_amount < 0:
+			self.indicator_title = _("Credit Note Issued")
 			self.indicator_color = "darkgrey"
 		elif self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()):
 			self.indicator_color = "orange"
@@ -63,8 +63,8 @@ class SalesInvoice(SellingController):
 		elif self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()):
 			self.indicator_color = "red"
 			self.indicator_title = _("Overdue")
-		elif self.outstanding_amount < 0:
-			self.indicator_title = _("Credit Note Issued")
+		elif cint(self.is_return) == 1:
+			self.indicator_title = _("Return")
 			self.indicator_color = "darkgrey"
 		else:
 			self.indicator_color = "green"
@@ -503,11 +503,14 @@ class SalesInvoice(SellingController):
 
 	def so_dn_required(self):
 		"""check in manage account if sales order / delivery note required or not."""
+		if self.is_return:
+			return
 		dic = {'Sales Order':['so_required', 'is_pos'],'Delivery Note':['dn_required', 'update_stock']}
 		for i in dic:
 			if frappe.db.get_single_value('Selling Settings', dic[i][0]) == 'Yes':
 				for d in self.get('items'):
-					if (d.item_code and frappe.get_cached_value('Item', d.item_code, 'is_stock_item') == 1
+					is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
+					if  (d.item_code and is_stock_item == 1\
 						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1])):
 						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
@@ -1166,6 +1169,8 @@ class SalesInvoice(SellingController):
 		self.set_missing_values(for_validate = True)
 
 def validate_inter_company_party(doctype, party, company, inter_company_invoice_reference):
+	if not party:
+		return
 	if doctype == "Sales Invoice":
 		partytype, ref_partytype, internal = "Customer", "Supplier", "is_internal_customer"
 		ref_doc =  "Purchase Invoice"

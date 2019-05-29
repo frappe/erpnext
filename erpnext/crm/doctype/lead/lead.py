@@ -110,7 +110,7 @@ class Lead(SellingController):
 	def set_lead_name(self):
 		if not self.lead_name:
 			# Check for leads being created through data import
-			if not self.company_name:
+			if not self.company_name and not self.flags.ignore_mandatory:
 				frappe.throw(_("A Lead requires either a person's name or an organization's name"))
 
 			self.lead_name = self.company_name
@@ -150,8 +150,8 @@ def make_opportunity(source_name, target_doc=None):
 			"doctype": "Opportunity",
 			"field_map": {
 				"campaign_name": "campaign",
-				"doctype": "enquiry_from",
-				"name": "lead",
+				"doctype": "opportunity_from",
+				"name": "party_name",
 				"lead_name": "contact_display",
 				"company_name": "customer_name",
 				"email_id": "contact_email",

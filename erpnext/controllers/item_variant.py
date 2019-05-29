@@ -301,7 +301,6 @@ def copy_attributes_to_variant(item, variant):
 				if attributes_description not in variant.description:
 					variant.description += attributes_description
 
-
 def make_variant_item_code(template_item_code, template_item_name, variant):
 	"""Uses template's item code and abbreviations to make variant's item code"""
 	if variant.item_code:

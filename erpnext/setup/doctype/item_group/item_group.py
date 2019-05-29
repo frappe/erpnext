@@ -70,7 +70,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 				limit=context.page_length + 1, search=frappe.form_dict.get("search")),
 			"parents": get_parent_item_groups(self.parent_item_group),
 			"title": self.name,
-			"products_as_list": cint(frappe.db.get_single_value('Website Settings', 'products_as_list'))
+			"products_as_list": cint(frappe.db.get_single_value('Products Settings', 'products_as_list'))
 		})
 
 		if self.slideshow:
@@ -114,8 +114,9 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 	data = frappe.db.sql(query, {"product_group": product_group,"search": search, "today": nowdate()}, as_dict=1)
 	data = adjust_qty_for_expired_items(data)
 
-	for item in data:
-		set_product_info_for_website(item)
+	if cint(frappe.db.get_single_value("Shopping Cart Settings", "enabled")):
+		for item in data:
+			set_product_info_for_website(item)
 
 	return [get_item_for_list_in_html(r) for r in data]
 

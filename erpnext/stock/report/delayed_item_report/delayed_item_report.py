@@ -7,11 +7,11 @@ from frappe import _
 from frappe.utils import date_diff
 
 def execute(filters=None, consolidated = False):
-	data, columns = DelayedOrderItemSummary(filters).run()
+	data, columns = DelayedItemReport(filters).run()
 
 	return data, columns
 
-class DelayedOrderItemSummary(object):
+class DelayedItemReport(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 
@@ -83,7 +83,7 @@ class DelayedOrderItemSummary(object):
 			key = row.sales_order if consolidated else (row.sales_order, row.so_detail)
 			row.update({
 				'delivery_date': so_data.get(key),
-				'delay_days': date_diff(row.posting_date, so_data.get(key))
+				'delayed_days': date_diff(row.posting_date, so_data.get(key))
 			})
 
 		return self.transactions
@@ -148,8 +148,8 @@ class DelayedOrderItemSummary(object):
 			"width": 100
 		},
 		{
-			"label": _("Delay Days"),
-			"fieldname": "delay_days",
+			"label": _("Delayed Days"),
+			"fieldname": "delayed_days",
 			"fieldtype": "Int",
 			"width": 100
 		},

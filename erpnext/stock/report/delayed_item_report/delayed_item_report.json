@@ -1,6 +1,6 @@
 {
  "add_total_row": 0, 
- "creation": "2019-05-12 12:38:44.907187", 
+ "creation": "2019-05-27 19:11:50.605376", 
  "disable_prepared_report": 0, 
  "disabled": 0, 
  "docstatus": 0, 
@@ -8,14 +8,14 @@
  "idx": 0, 
  "is_standard": "Yes", 
  "letter_head": "Gadgets International", 
- "modified": "2019-05-12 12:39:16.378341", 
+ "modified": "2019-05-27 19:11:50.605376", 
  "modified_by": "Administrator", 
  "module": "Stock", 
- "name": "Delayed Order Summary", 
+ "name": "Delayed Item Report", 
  "owner": "Administrator", 
  "prepared_report": 0, 
  "ref_doctype": "Delivery Note", 
- "report_name": "Delayed Order Summary", 
+ "report_name": "Delayed Item Report", 
  "report_type": "Script Report", 
  "roles": [
   {

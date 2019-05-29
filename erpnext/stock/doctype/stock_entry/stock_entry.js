@@ -579,9 +579,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			}
 		});
 
-		// if(!this.item_selector && false) {
-		// 	this.item_selector = new erpnext.ItemSelector({frm: this.frm});
-		// }
+		this.frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},
 
 	refresh: function() {
