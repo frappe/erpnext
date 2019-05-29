@@ -62,7 +62,7 @@
 		<h1>{{ education_settings.portal_title }}</h1>
 		<p class='lead'>{{ education_settings.description }}</p>
 		<p class="mt-4">
-			<a class="btn btn-primary btn-lg" style="width: 170px;" href="/pricing">Start Learning</a>
+			<a class="btn btn-primary btn-lg" style="width: 170px;" href="{{ '/login#signup' if frappe.session.user == 'Guest' else '/lms/all-programs' }}">Start Learning</a>
 		</p>
 		<a href="https://erpnext.com" target="blank" class="mt-0 small text-muted">Go to erpnext.com</a>
 	</div>
