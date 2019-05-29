@@ -553,17 +553,28 @@ def get_stock_and_account_difference(account_list=None, posting_date=None, compa
 
 	if not posting_date: posting_date = nowdate()
 
-	difference = {}
 	warehouse_account = get_warehouse_account_map(company)
 
-	for warehouse, account_data in iteritems(warehouse_account):
-		if account_data.get('account') in account_list:
-			account_balance = get_balance_on(account_data.get('account'), posting_date, in_account_currency=False)
-			stock_value = get_stock_value_on(warehouse, posting_date)
-			if abs(flt(stock_value) - flt(account_balance)) > 0.005:
-				difference.setdefault(account_data.get('account'), flt(stock_value) - flt(account_balance))
+	warehouses = list(set([key for key in warehouse_account]))
+	accounts = list(set([warehouse.account for warehouse in warehouse_account.values()]))
 
-	return difference
+	total_account_balance = 0
+	total_stock_value = 0
+
+	for warehouse in warehouses:
+		if warehouse_account[warehouse]["account"] in account_list:
+			value = get_stock_value_on(warehouse, posting_date)
+			total_stock_value += value
+
+	for account in accounts:
+		if account in account_list:
+			balance = get_balance_on(account, posting_date, in_account_currency=False)
+			total_account_balance += balance
+
+	total_diff = abs(flt(total_stock_value) - flt(total_account_balance))
+
+	return total_diff
+
 
 def get_currency_precision():
 	precision = cint(frappe.db.get_default("currency_precision"))

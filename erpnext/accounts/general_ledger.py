@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.utils import flt, cstr, cint
 from frappe import _
+from erpnext.accounts.utils import get_stock_and_account_difference
 from frappe.model.meta import get_field_precision
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
@@ -113,15 +114,26 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.submit()
 
 def validate_account_for_perpetual_inventory(gl_map):
-	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)) \
-		and gl_map[0].voucher_type=="Journal Entry":
-			aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
+	account_list = [gl_entries.account for gl_entries in gl_map]
+	account_list = list(dict.fromkeys(account_list))
+
+	aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
 				where account_type = 'Stock' and is_group=0""")]
 
-			for entry in gl_map:
-				if entry.account in aii_accounts:
-					frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
-						.format(entry.account), StockAccountInvalidTransaction)
+	stock_value_and_account_balance_difference = get_stock_and_account_difference(account_list=account_list ,company= gl_map[0].company)
+
+
+	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)) \
+		and gl_map[0].voucher_type=="Journal Entry":
+
+			if stock_value_and_account_balance_difference == 0:
+				for entry in gl_map:
+					if entry.account in aii_accounts:
+						frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
+							.format(entry.account), StockAccountInvalidTransaction)
+
+	if stock_value_and_account_balance_difference != 0 and gl_map[0].voucher_type != "Journal Entry":
+		frappe.msgprint(_("Account Balance and Stock Value is Out of sync please Create Journal Entry to Balance"))
 
 def round_off_debit_credit(gl_map):
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
