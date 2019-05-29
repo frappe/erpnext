@@ -411,7 +411,8 @@ def get_leave_details(employee, date):
 	leave_allocation = {}
 	for d in allocation_records:
 		allocation = allocation_records.get(d, frappe._dict())
-		remaining_leaves = get_leave_balance_on(employee, d, date)
+		remaining_leaves = get_leave_balance_on(employee, d, date, to_date = allocation.to_date,
+			consider_all_leaves_in_the_allocation_period=True)
 		date = allocation.to_date
 		leaves_taken = get_leaves_for_period(employee, d, allocation.from_date, date, status="Approved")
 		leaves_pending = get_leaves_for_period(employee, d, allocation.from_date, date, status="Open")
@@ -441,6 +442,7 @@ def get_leave_balance_on(employee, leave_type, from_date, to_date=nowdate(), all
 	expiry = get_allocation_expiry(employee, leave_type, to_date, from_date)
 
 	leaves_taken = get_leaves_taken(employee, leave_type, allocation.from_date, end_date)
+
 	return get_remaining_leaves(allocation, leaves_taken, from_date, expiry)
 
 def get_remaining_leaves(allocation, leaves_taken, date, expiry):

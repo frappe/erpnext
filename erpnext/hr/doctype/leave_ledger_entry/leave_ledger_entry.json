@@ -65,21 +65,21 @@
   {
    "fieldname": "from_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "From Date"
   },
   {
    "fieldname": "to_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "To Date"
   },
   {
+   "default": "0",
    "fieldname": "is_carry_forward",
    "fieldtype": "Check",
    "label": "Is Carry Forward"
   },
   {
+   "default": "0",
    "fieldname": "is_expired",
    "fieldtype": "Check",
    "label": "Is Expired"
@@ -87,7 +87,7 @@
  ],
  "in_create": 1,
  "is_submittable": 1,
- "modified": "2019-05-27 03:25:47.805142",
+ "modified": "2019-05-29 15:58:29.656351",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Ledger Entry",
