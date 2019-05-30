@@ -1,5 +1,6 @@
 {% extends "templates/base.html" %}
 {% block title %}All Programs{% endblock %}
+{% from "www/lms/macros/card.html" import program_card %}
 
 {% block head_include %}
 	<style>
@@ -30,42 +31,18 @@
 	</style>
 {% endblock %}
 
-
-{% macro card(program, is_enrolled) %}
-<div class="col-sm-6 mb-4 text-left">
-	<a href="/lms/program?name={{ program.name }}" class="no-decoration no-underline">
-	<div class="card h-100">
-		{% if program.hero_image %}
-		<div class="card-hero-img" style="background-image: url({{ program.hero_image }})"></div>
-		{% else %}
-		<div class="card-image-wrapper text-center">
-			<div class="image-body">{{ program.program_name }}</div>
-		</div>
-		{% endif %}
-		<div class='card-body'>
-			<h5 class='card-title'>{{ program.program_name }}</h5>
-			<div>{{ program.description }}</div>
-		</div>
-		<div class='card-footer'>
-			<span class='small'>Watch Intro</span>
-		</div>
-	</div>
-	</a>
-</div>
-{% endmacro %}
-
 {% block content %}
 <section class="top-section ">
 	<div class='container pb-5'>
 		<h1>All Programs</h1>
 		<p class="mt-4">
-			<a class="btn btn-primary btn-lg" style="width: 170px;" href="/pricing">Start Learning</a>
+			<a class="btn btn-primary btn-lg" href="{{ '/login#signup' if frappe.session.user == 'Guest' else '/lms/all-programs' }}">{{ 'Start Learning' if frappe.session.user == 'Guest' else 'Explore Programs'}}</a>
 		</p>
 	</div>
 	<div class='container'>
 		<div class="row mt-5">
 			{% for program in all_programs %}
-				{{ card(program.program, program.is_enrolled) }}
+				{{ program_card(program) }}
 			{% endfor %}
 		</div>
 	</div>
