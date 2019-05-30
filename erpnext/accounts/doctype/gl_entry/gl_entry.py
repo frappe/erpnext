@@ -84,15 +84,17 @@ class GLEntry(Document):
 
 	def validate_dimensions_for_pl_and_bs(self):
 
+		account_type = frappe.db.get_value("Account", self.account, "report_type")
+
 		for dimension in get_accounting_dimensions(as_list=False):
 
-			if frappe.db.get_value("Account", self.account, "report_type") == "Profit and Loss" \
+			if account_type == "Profit and Loss" \
 				and dimension.mandatory_for_pl and not dimension.disabled:
 				if not self.get(dimension.fieldname):
 					frappe.throw(_("{0} is required for 'Profit and Loss' account {1}.")
 						.format(dimension.label, self.account))
 
-			if frappe.db.get_value("Account", self.account, "report_type") == "Balance Sheet" \
+			if account_type == "Balance Sheet" \
 				and dimension.mandatory_for_bs and not dimension.disabled:
 				if not self.get(dimension.fieldname):
 					frappe.throw(_("{0} is required for 'Balance Sheet' account {1}.")

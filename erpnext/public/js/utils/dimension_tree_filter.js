@@ -1,6 +1,6 @@
 frappe.provide('frappe.ui.form');
 
-let doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "Asset",
+erpnext.doctypes_with_dimensions = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "Asset",
 	"Expense Claim", "Stock Entry", "Budget", "Payroll Entry", "Delivery Note", "Sales Invoice Item", "Purchase Invoice Item",
 	"Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item", "Purchase Receipt Item",
 	"Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
@@ -9,7 +9,7 @@ let doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry",
 
 let dimension_filters = erpnext.get_dimension_filters();
 
-doclist.forEach((doctype) => {
+erpnext.doctypes_with_dimensions.forEach((doctype) => {
 	frappe.ui.form.on(doctype, {
 		onload: function(frm) {
 			dimension_filters.then((dimensions) => {
