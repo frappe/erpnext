@@ -9,7 +9,6 @@ def get_data():
 		'non_standard_fieldnames': {
 			'Payment Request': 'plan',
 			'Subscription': 'plan'
-
 		},
 		'transactions': [
 			{
