@@ -27,9 +27,6 @@ frappe.ui.form.on('Accounting Dimension', {
 			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.disable_dimension",
 			args: {
 				doc: frm.doc
-			},
-			callback: function() {
-				frappe.msgprint(__("{0} dimension disabled", [frm.doc.label]));
 			}
 		});
 	}
