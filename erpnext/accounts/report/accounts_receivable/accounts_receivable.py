@@ -83,7 +83,7 @@ class ReceivablePayableReport(object):
 
 		for label in ("Invoiced Amount", "Paid Amount", credit_or_debit_note, "Outstanding Amount"):
 			columns.append({
-				"label": label,
+				"label": _(label),
 				"fieldname": frappe.scrub(label),
 				"fieldtype": "Currency",
 				"options": "currency",
