@@ -32,14 +32,15 @@ def get_columns(leave_types):
 	return columns
 
 def get_conditions(filters):
-	filters = {
+	conditions = {
 		"status": "Active",
 		"company": filters.company,
 	}
-	if filters.get("Department"):
-		filters.update(filters.get("Department"))
-
-	return filters
+	if filters.get("department"):
+		conditions.update({
+			"department": filters.get("department")
+		})
+	return conditions
 
 def get_data(filters, leave_types):
 	user = frappe.session.user
