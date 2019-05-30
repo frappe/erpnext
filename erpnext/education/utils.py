@@ -77,7 +77,7 @@ def get_portal_programs():
 		is_published and (student_is_enrolled or student_can_self_enroll)
 
 	Returns:
-		list of objects: List of all programs and to be displayed on the portal along with enrollment status
+		list of dictionary: List of all programs and to be displayed on the portal along with access rights
 	"""
 	published_programs = frappe.get_all("Program", filters={"is_published": True})
 	if not published_programs:
@@ -170,40 +170,34 @@ def enroll_in_program(program_name, student=None):
 	return program_enrollment.name
 
 def has_super_access():
+	"""Check if user has a role that allows full access to LMS
+
+	Returns:
+	    bool: true if user has access to all lms content
+	"""
 	current_user = frappe.get_doc('User', frappe.session.user)
 	roles = set([role.role for role in current_user.roles])
 	return bool(roles & {'Administrator', 'Instructor', 'Education Manager', 'System Manager', 'Academic User'})
 
-# def get_program_enrollment(program_name):
-# 	"""
-# 	Function to get program enrollments for a particular student for a program
-# 	"""
-# 	student get_current_student()
-# 	if not student:
-# 		return None
-# 	else:
-# 		enrollment = frappe.get_all("Program Enrollment", filters={'student':student.name, 'program': program_name})
-# 		if enrollment:
-# 			return enrollment[0].name
-# 		else:
-# 			return None
+@frappe.whitelist()
+def add_activity(course, content_type, content):
+	if has_super_access():
+		return None
 
-# def get_program_and_enrollment_status(program_name):
-# 	program = frappe.get_doc('Program', program_name)
-# 	is_enrolled = bool(get_program_enrollment(program_name)) or check_super_access()
-# 	return {'program': program, 'is_enrolled': is_enrolled}
+	student = get_current_student()
+	if not student:
+		return frappe.throw("Student with email {0} does not exist".format(frappe.session.user), frappe.DoesNotExistError)
 
-# def get_course_enrollment(course_name):
-# 	student = get_current_student()
-# 	if not student:
-# 		return None
-# 	enrollment_name = frappe.get_all("Course Enrollment", filters={'student': student.name, 'course':course_name})
-# 	try:
-# 		name = enrollment_name[0].name
-# 		enrollment = frappe.get_doc("Course Enrollment", name)
-# 		return enrollment
-# 	except:
-# 		return None
+	course_enrollment = get_enrollment("course", course, student.name)
+	print(course_enrollment)
+	if not course_enrollment:
+		return None
+
+	enrollment = frappe.get_doc('Course Enrollment', course_enrollment)
+	if content_type == 'Quiz':
+		return
+	else:
+		return enrollment.add_activity(content_type, content)
 
 def create_student_from_current_user():
 	user = frappe.get_doc("User", frappe.session.user)

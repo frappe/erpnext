@@ -5,10 +5,19 @@ import frappe
 no_cache = 1
 
 def get_context(context):
-	program = frappe.form_dict['program']
-	content = frappe.form_dict['content']
-	content_type = frappe.form_dict['type']
+	# Load Query Parameters
+	try:
+		program = frappe.form_dict['program']
+		content = frappe.form_dict['content']
+		content_type = frappe.form_dict['type']
+		course = frappe.form_dict['course']
+		topic = frappe.form_dict['topic']
+	except KeyError:
+		frappe.local.flags.redirect_location = '/lms'
+		raise frappe.Redirect
 
+
+	# Check if user has access to the content
 	has_program_access = utils.allowed_program_access(program)
 	has_content_access = allowed_content_access(program, content, content_type)
 
@@ -16,46 +25,38 @@ def get_context(context):
 		frappe.local.flags.redirect_location = '/lms'
 		raise frappe.Redirect
 
+
+	# Set context for content to be displayer
 	context.content = frappe.get_doc(content_type, content)
 	context.content_type = content_type
+	context.program = program
+	context.course = course
+	context.topic = topic
 
-	context.course = frappe.form_dict['course']
-	context.topic = frappe.form_dict['topic']
-
-	context.previous = get_previous_content(context.topic, context.course, context.content, context.content_type)
-	context.next = get_next_content(context.topic, context.course, context.content, context.content_type)
-
-
-def get_next_content(topic, course, content, content_type):
-	if frappe.session.user == "Guest":
-		return None
 	topic = frappe.get_doc("Topic", topic)
 	content_list = [{'content_type':item.doctype, 'content':item.name} for item in topic.get_contents()]
-	current_index = content_list.index({'content': content.name, 'content_type': content_type})
+
+	# Set context for progress numbers
+	context.position = content_list.index({'content': content, 'content_type': content_type})
+	context.length = len(content_list)
+
+	# Set context for navigation
+	context.previous = get_previous_content(content_list, context.position)
+	context.next = get_next_content(content_list, context.position)
+
+def get_next_content(content_list, current_index):
 	try:
 		return content_list[current_index + 1]
 	except IndexError:
 		return None
 
-def get_previous_content(topic, course, content, content_type):
-	if frappe.session.user == "Guest":
-		return None
-	topic = frappe.get_doc("Topic", topic)
-	content_list = [{'content_type':item.doctype, 'content':item.name} for item in topic.get_contents()]
-	current_index = content_list.index({'content': content.name, 'content_type': content_type})
+def get_previous_content(content_list, current_index):
 	if current_index == 0:
 		return None
 	else:
 		return content_list[current_index - 1]
 
 def allowed_content_access(program, content, content_type):
-	# Get all content in program
-
-	# Using ORM
-	# course_in_program = [course.course for course in frappe.get_all('Program Course', fields=['course'], filters={'parent': program})]
-	# topics_in_course = [topic.topic for topic in frappe.get_all("Course Topic", fields=['topic'], filters=[['parent','in', course_in_program]])]
-	# contents_of_program = [[c.content, c.content_type] for c in frappe.get_all('Topic Content', fields=['content', 'content_type'], filters=[['parent','in', topics_in_course]])]
-
 	contents_of_program = frappe.db.sql("""select `tabtopic content`.content, `tabtopic content`.content_type
 	from `tabcourse topic`,
 		 `tabprogram course`,
