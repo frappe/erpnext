@@ -9,6 +9,7 @@
   "transaction_type",
   "transaction_name",
   "leaves",
+  "column_break_7",
   "from_date",
   "to_date",
   "is_carry_forward",
@@ -20,6 +21,7 @@
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Employee",
    "options": "Employee"
   },
@@ -32,6 +34,7 @@
    "fieldname": "leave_type",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Leave Type",
    "options": "Leave Type"
   },
@@ -83,11 +86,15 @@
    "fieldname": "is_expired",
    "fieldtype": "Check",
    "label": "Is Expired"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
   }
  ],
  "in_create": 1,
  "is_submittable": 1,
- "modified": "2019-05-29 15:58:29.656351",
+ "modified": "2019-05-30 14:45:16.577534",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Ledger Entry",
@@ -149,5 +156,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "title_field": "employee"
 }
