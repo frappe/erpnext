@@ -3,6 +3,18 @@
 
 frappe.ui.form.on("Customer", {
 	setup: function(frm) {
+
+		frm.make_methods = {
+			'Quotation': () => erpnext.utils.create_new_doc('Quotation', {
+				'quotation_to': frm.doc.doctype,
+				'party_name': frm.doc.name
+			}),
+			'Opportunity': () => erpnext.utils.create_new_doc('Opportunity', {
+				'opportunity_from': frm.doc.doctype,
+				'party_name': frm.doc.name
+			})
+		}
+
 		frm.add_fetch('lead_name', 'company_name', 'customer_name');
 		frm.add_fetch('default_sales_partner','commission_rate','default_commission_rate');
 		frm.set_query('customer_group', {'is_group': 0});
@@ -112,31 +124,6 @@ frappe.ui.form.on("Customer", {
 
 			// indicator
 			erpnext.utils.set_party_dashboard_indicators(frm);
-
-			let make_quotation = frm.dashboard.transactions_area.find('.btn-new[data-doctype="Quotation"]').unbind('click');
-			let make_opportunity = frm.dashboard.transactions_area.find('.btn-new[data-doctype="Opportunity"]').unbind('click');
-
-			make_quotation.on('click', function() {
-				let doctype = $(this).attr('data-doctype');
-
-				frappe.model.with_doctype(doctype, function() {
-					var new_doc = frappe.model.get_new_doc(doctype);
-					new_doc['quotation_to'] = frm.doc.doctype;
-					new_doc['party_name'] = frm.doc.name;
-					frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
-				});
-			});
-
-			make_opportunity.on('click', function() {
-				let doctype = $(this).attr('data-doctype');
-
-				frappe.model.with_doctype(doctype, function() {
-					var new_doc = frappe.model.get_new_doc(doctype);
-					new_doc['opportunity_from'] = frm.doc.doctype;
-					new_doc['party_name'] = frm.doc.name;
-					frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
-				});
-			});
 
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
