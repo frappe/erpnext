@@ -6,14 +6,6 @@ from frappe import _
 def get_data():
 	return {
 		'fieldname': 'tax_category',
-		'non_standard_fieldnames': {
-			'Payment Entry': 'party_name'
-		},
-		'internal_links': {
-			'Purchase Order': ['items', 'purchase_order'],
-			'Project': ['items', 'project'],
-			'Quality Inspection': ['items', 'quality_inspection'],
-		},
 		'transactions': [
 			{
 				'label': _('Pre Sales'),
