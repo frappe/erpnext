@@ -286,6 +286,16 @@ $.extend(erpnext.utils, {
 		refresh_field(table_fieldname);
 	},
 
+	create_new_doc: function (doctype, update_fields) {
+		frappe.model.with_doctype(doctype, function() {
+			var new_doc = frappe.model.get_new_doc(doctype);
+			for (let [key, value] of Object.entries(update_fields)) {
+				new_doc[key] = value;
+			}
+			frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
+		});
+	}
+
 });
 
 erpnext.utils.select_alternate_items = function(opts) {
