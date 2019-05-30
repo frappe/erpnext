@@ -20,7 +20,7 @@
 
 	function enroll() {
 		let params = frappe.utils.get_query_params()
-		console.log(params.program)
+
 		let btn = document.getElementById('enroll');
 		btn.disbaled = true;
 		btn.innerText = 'Enrolling...'
@@ -33,7 +33,6 @@
 		}
 
 		frappe.call(opts).then(res => {
-			console.log(res)
 			let success_dialog = new frappe.ui.Dialog({
 				title: __('Success'),
 				secondary_action: function() {
