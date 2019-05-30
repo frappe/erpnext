@@ -104,8 +104,7 @@ def get_leave_encashment_records(allocation_list):
                 employee,
                 leave_type,
                 encashable_days,
-                from_date,
-                to_date
+                encashment_date
             FROM `tabLeave Encashment`
             WHERE
                 leave_type = %s

@@ -431,7 +431,7 @@ def get_leave_details(employee, date):
 	return ret
 
 @frappe.whitelist()
-def get_leave_balance_on(employee, leave_type, date, to_date=nowdate(), allocation_records=None, docname=None,
+def get_leave_balance_on(employee, leave_type, date, to_date=nowdate(), allocation_records=None,
 		consider_all_leaves_in_the_allocation_period=False):
 	''' Returns leave balance till date and fetches expiry date based on to_date
 		to calculate minimum remaining leave balance '''
@@ -467,13 +467,17 @@ def get_remaining_leaves(allocation, leaves_taken, date, expiry):
 
 def get_leaves_taken(employee, leave_type, from_date, to_date):
 	''' Returns leaves taken based on leave application/encashment '''
-	return frappe.db.get_value("Leave Ledger Entry", filters={
+	leaves = frappe.db.get_all("Leave Ledger Entry", filters={
 		'Employee':employee,
 		'leave_type':leave_type,
 		'leaves': ("<", 0),
 		'to_date':("<=", to_date),
 		'from_date': (">=", from_date)},
-		fieldname=['SUM(leaves)'])
+		or_filters={
+			'is_expired': 0,
+			'is_carry_forward': 1
+		}, fields=['SUM(leaves) as leaves'])
+	return leaves[0]['leaves'] if leaves else None
 
 def get_total_allocated_leaves(employee, leave_type, date):
 	filters= {

@@ -538,7 +538,6 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertEquals(leave_ledger_entry[1].leaves, -2)
 
 def create_carry_forwarded_allocation(employee, leave_type):
-
 		# initial leave allocation
 		leave_allocation = create_leave_allocation(
 			leave_type="_Test_CF_leave_expiry",
