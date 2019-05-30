@@ -35,16 +35,16 @@
 {% macro card(topic, index, length) %}
 <div class="col-sm-{{ 12 if length%3 == 1 and index == 1 else 6 if length%3 == 2 and index in [1,2] else 4}} mb-4 text-left">
 	<div class="card h-100">
-		{% if frappe.session.user == 'Guest' %}
-			 <div>
+		{% if has_access %}
+			<a href="/lms/content?program={{ program }}&course={{ course.name }}&topic={{ topic.name }}&type={{ topic.topic_content[0].content_type }}&content={{ topic.topic_content[0].content }}" class="no-decoration no-underline">
 		{% else %}
-			<a href="/lms/content?course={{ course.name }}&topic={{ topic.name }}&type={{ topic.topic_content[0].content_type }}&content={{ topic.topic_content[0].content }}" class="no-decoration no-underline">
+			<div>
 		{% endif %}
 			{% if topic.hero_image %}
 			<div class="card-hero-img" style="background-image: url({{ topic.hero_image }})"></div>
 			{% else %}
 			<div class="card-image-wrapper text-center">
-				<div class="image-body">{{ topic.topic_name }}</div>
+				<div class="image-body"><i class="fa fa-picture-o" aria-hidden="true"></i></div>
 			</div>
 			{% endif %}
 			<div class='card-body'>
@@ -53,27 +53,27 @@
 					<ol class="list-unstyled">
 					{% for content in topic.topic_content %}
 						<li>
-							{% if frappe.session.user == 'Guest' %}
-								 <span class="text-muted">{{ content.content }}</span>
-							{% else %}
-								<a class="text-muted" href="/lms/content?course={{ course.name }}&topic={{ topic.name }}&type={{ content.content_type }}&content={{ content.content }}">
+							{% if has_access %}
+								<a class="text-muted" href="/lms/content?program={{ program }}&course={{ course.name }}&topic={{ topic.name }}&type={{ content.content_type }}&content={{ content.content }}">
 									{{ content.content }}
 								</a>
+							{% else %}
+								<span class="text-muted">{{ content.content }}</span>
 							{% endif %}
 						</li>
 					{% endfor %}
 					</ol>
 				</div>
 			</div>
-		{% if frappe.session.user == 'Guest' %}
-			</div>
-		{% else %}
+		{% if has_access %}
 			<div class='card-footer'>
 				{% if index==1 %} <span class="indicator green"> Completed </span>
 				{% else %} <span class="indicator orange"> Completed </span>
 				{% endif %}
 			</div>
 			</a>
+		{% else %}
+			</div>
 		{% endif %}
 	</div>
 </div>
@@ -81,7 +81,7 @@
 
 {% block content %}
 <section class="section ">
-	{{ hero(course.course_name, course.course_intro) }}
+	{{ hero(course.course_name, course.course_intro, has_access) }}
 	<div class='container'>
 		<div class="row mt-5">
 			{% for topic in topics %}
