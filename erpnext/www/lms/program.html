@@ -40,7 +40,7 @@
 			<div class="card-hero-img" style="background-image: url({{ course.hero_image }})"></div>
 			{% else %}
 			<div class="card-image-wrapper text-center">
-				<div class="image-body">{{ course.course_name }}</div>
+				<div class="image-body"><i class="fa fa-picture-o" aria-hidden="true"></i></div>
 			</div>
 			{% endif %}
 			<div class='card-body'>
@@ -54,7 +54,7 @@
 
 {% block content %}
 <section class="section">
-	{{ hero(program.program_name, program.description) }}
+	{{ hero(program.program_name, program.description, has_access) }}
 	<div class='container'>
 		<div class="row mt-5">
 			{% for course in program.courses %}
