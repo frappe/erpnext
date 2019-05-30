@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, now_datetime, nowdate
-from erpnext.hr.doctype.holiday_list.holiday_list import get_holiday_list, is_holiday
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee, is_holiday
 from datetime import timedelta, datetime
 
 class OverlapError(frappe.ValidationError): pass
@@ -97,8 +97,8 @@ def get_employee_shift(employee, for_date=nowdate(), consider_default_shift=Fals
 	if shift_type_name:
 		holiday_list_name = frappe.db.get_value('Shift Type', shift_type_name, 'holiday_list')
 		if not holiday_list_name:
-			holiday_list_name = get_holiday_list(employee)
-		if holiday_list_name and is_holiday(holiday_list_name, for_date):
+			holiday_list_name = get_holiday_list_for_employee(employee, False)
+		if holiday_list_name and is_holiday(holiday_list_name, for_date, False):
 			shift_type_name = None
 
 	if not shift_type_name and next_shift_direction:

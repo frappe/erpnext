@@ -16,7 +16,7 @@
   "middle_name",
   "last_name",
   "employee_name",
-  "biometric_rf_id",
+  "attendance_device_id",
   "image",
   "column_break1",
   "company",
@@ -511,6 +511,7 @@
    "options": "Email"
   },
   {
+   "default": "0",
    "fieldname": "unsubscribed",
    "fieldtype": "Check",
    "label": "Unsubscribed"
@@ -749,9 +750,9 @@
    "label": "Old Parent"
   },
   {
-   "fieldname": "biometric_rf_id",
+   "fieldname": "attendance_device_id",
    "fieldtype": "Data",
-   "label": "Biometric/RF tag ID ",
+   "label": "Attendance Device ID (Biometric/RF tag ID)",
    "no_copy": 1,
    "unique": 1
   }
@@ -759,7 +760,7 @@
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2019-05-08 14:32:06.443825",
+ "modified": "2019-05-29 17:33:11.988538",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

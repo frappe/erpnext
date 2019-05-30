@@ -12,7 +12,7 @@ from frappe import _
 from frappe.model.document import Document
 from erpnext.hr.doctype.shift_assignment.shift_assignment import get_employee_shift_timings, get_employee_shift
 from erpnext.hr.doctype.employee_attendance_log.employee_attendance_log import mark_attendance_and_link_log
-from erpnext.hr.doctype.holiday_list.holiday_list import get_holiday_list
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.attendance.attendance import mark_absent
 
 class HRSettings(Document):
@@ -79,9 +79,9 @@ def process_single_employee_logs(logs, hr_settings=None):
 		while logs and logs[0].time <= actual_shift_end:
 			single_shift_logs.append(logs.pop(0))
 		process_single_employee_shift_logs(single_shift_logs, shift_details)
-	mark_absent_for_days_with_no_attendance(last_log.employee, employee_last_sync, hr_settings)
+	mark_absent_for_dates_with_no_attendance(last_log.employee, employee_last_sync, hr_settings)
 
-def mark_absent_for_days_with_no_attendance(employee, employee_last_sync, hr_settings=None):
+def mark_absent_for_dates_with_no_attendance(employee, employee_last_sync, hr_settings=None):
 	"""Marks Absents for the given employee on working days which have no attendance marked. 
 	The Absent is marked starting from one shift before the employee_last_sync 
 	going back to 'hr_settings.process_attendance_after' or employee creation date.
@@ -100,7 +100,7 @@ def mark_absent_for_days_with_no_attendance(employee, employee_last_sync, hr_set
 	if prev_shift:
 		end_date = prev_shift.start_datetime.date()
 	elif hr_settings.attendance_for_employee_without_shift == 'At least one Employee Attendance Log per day as present':
-		for date in get_filtered_date_list(employee, "All Dates", start_date, employee_last_sync.date(), True, get_holiday_list(employee)):
+		for date in get_filtered_date_list(employee, "All Dates", start_date, employee_last_sync.date(), True, get_holiday_list_for_employee(employee, False)):
 			mark_absent(employee, date)
 		return
 	else:
@@ -111,7 +111,7 @@ def mark_absent_for_days_with_no_attendance(employee, employee_last_sync, hr_set
 			if get_employee_shift(employee, date, consider_default_shift):
 				mark_absent(employee, date)
 	elif hr_settings.attendance_for_employee_without_shift == 'At least one Employee Attendance Log per day as present':
-		for date in get_filtered_date_list(employee, "All Dates", start_date, employee_last_sync.date(), True, get_holiday_list(employee)):
+		for date in get_filtered_date_list(employee, "All Dates", start_date, employee_last_sync.date(), True, get_holiday_list_for_employee(employee, False)):
 			mark_absent(employee, date)
 	else:
 		for date in get_filtered_date_list(employee, "Assigned Shifts", start_date, end_date):
@@ -155,9 +155,12 @@ def get_filtered_date_list(employee, base_dates_set, start_date, end_date, filte
 def process_single_employee_shift_logs(logs, shift_details):
 	"""Mark Attendance for a set of logs belonging to a single shift.
 	Assumtion: 
-		1. These logs belongs to an single shift, single employee and is not in a holiday shift.
+		1. These logs belongs to an single shift, single employee and is not in a holiday date.
 		2. Logs are in chronological order
 	"""
+	if shift_details.shift_type.enable_auto_attendance:
+		mark_attendance_and_link_log(logs, 'Skip', None)
+		return
 	check_in_out_type = shift_details.shift_type.determine_check_in_and_check_out
 	working_hours_calc_type = shift_details.shift_type.working_hours_calculation_based_on
 	total_working_hours = calculate_working_hours(logs, check_in_out_type, working_hours_calc_type)

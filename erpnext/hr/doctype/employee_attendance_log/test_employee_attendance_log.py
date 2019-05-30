@@ -8,18 +8,18 @@ from frappe.utils import now_datetime, nowdate, to_timedelta
 import unittest
 from datetime import timedelta
 
-from erpnext.hr.doctype.employee_attendance_log.employee_attendance_log import add_log_based_on_biometric_rf_id, mark_attendance_and_link_log
+from erpnext.hr.doctype.employee_attendance_log.employee_attendance_log import add_log_based_on_employee_field, mark_attendance_and_link_log
 from erpnext.hr.doctype.employee.test_employee import make_employee
 
 class TestEmployeeAttendanceLog(unittest.TestCase):
-	def test_add_log_based_on_biometric_rf_id(self):
-		employee = make_employee("test_add_log_based_on_biometric_rf_id@example.com")
+	def test_add_log_based_on_employee_field(self):
+		employee = make_employee("test_add_log_based_on_employee_field@example.com")
 		employee = frappe.get_doc("Employee", employee)
-		employee.biometric_rf_id = '3344'
+		employee.attendance_device_id = '3344'
 		employee.save()
 
 		time_now = now_datetime().__str__()[:-7]
-		employee_attendance_log = add_log_based_on_biometric_rf_id('3344', time_now, 'mumbai_first_floor', 'IN')
+		employee_attendance_log = add_log_based_on_employee_field('3344', time_now, 'mumbai_first_floor', 'IN')
 		self.assertEqual(employee_attendance_log.employee, employee.name)
 		self.assertEqual(employee_attendance_log.time, time_now)
 		self.assertEqual(employee_attendance_log.device_id, 'mumbai_first_floor')
