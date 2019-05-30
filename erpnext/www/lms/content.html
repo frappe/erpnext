@@ -34,19 +34,19 @@
 {% macro navigation() %}
 <div class="row">
 		<div class="col-md-7">
-			<h1>{{ content.name }}</h1>
+			<h1>{{ content.name }} <span class="small text-muted">({{ position + 1 }}/{{length}})</span></h1>
 		</div>
 		<div class="col-md-5 text-right">
 			{% if previous %}
-				<a href="/lms/content?course={{ course }}&topic={{ topic }}&type={{ previous.content_type }}&content={{ previous.content }}" class='btn btn-outline-secondary'>Previous</a>
+				<a href="/lms/content?program={{ program }}&course={{ course }}&topic={{ topic }}&type={{ previous.content_type }}&content={{ previous.content }}" class='btn btn-outline-secondary'>Previous</a>
 			{% else %}
-				<a href="/lms/course?name={{ course }}" class='btn btn-outline-secondary'>Back to Course</a>
+				<a href="/lms/course?name={{ course }}&program={{ program }}" class='btn btn-outline-secondary'>Back to Course</a>
 			{% endif %}
 
 			{% if next %}
-				<button id="nextButton" onclick="handle('/lms/content?course={{ course }}&topic={{ topic }}&type={{ next.content_type }}&content={{ next.content }}')" class='btn btn-primary' disabled="true">Next</button>
+				<button id="nextButton" onclick="handle('/lms/content?program={{ program }}&course={{ course }}&topic={{ topic }}&type={{ next.content_type }}&content={{ next.content }}')" class='btn btn-primary' disabled="true">Next</button>
 			{% else %}
-				<button id="nextButton" onclick="handle('/lms/course?name={{ course }}')" class='btn btn-primary' disabled="true">Finish Topic</button>
+				<button id="nextButton" onclick="handle('/lms/course?name={{ course }}&program={{ program }}')" class='btn btn-primary' disabled="true">Finish Topic</button>
 			{% endif %}
 		</div>
 	</div>
@@ -126,13 +126,18 @@
 		})
 
 		function handle(url) {
-			frappe.call("add_activity",
-				{
+
+			opts = {
+				method: "erpnext.education.utils.add_activity",
+				args: {
 					course: "{{ course }}",
 					content_type: "{{ content_type }}",
-					content: "{{ content.name }}",
+					content: "{{ content.name }}"
 				}
-			)
+			}
+			frappe.call(opts).then(res => {
+				window.location.href = url;
+			})
 		}
 	</script>
 {% endblock %}

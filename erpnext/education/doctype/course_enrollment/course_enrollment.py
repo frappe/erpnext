@@ -62,8 +62,9 @@ class CourseEnrollment(Document):
 			}).insert()
 
 	def add_activity(self, content_type, content):
-		if check_activity_exists(self.name, content_type, content):
-			pass
+		activity = check_activity_exists(self.name, content_type, content)
+		if activity:
+			return activity
 		else:
 			activity = frappe.get_doc({
 				"doctype": "Course Activity",
@@ -71,9 +72,14 @@ class CourseEnrollment(Document):
 				"content_type": content_type,
 				"content": content,
 				"activity_date": frappe.utils.datetime.datetime.now()
-				})
-			activity.insert()
+			})
+
+			activity.insert(ignore_permissions=True)
+			return activity.name
 
 def check_activity_exists(enrollment, content_type, content):
 	activity = frappe.get_all("Course Activity", filters={'enrollment': enrollment, 'content_type': content_type, 'content': content})
-	return bool(activity)
+	if activity:
+		return activity[0].name
+	else:
+		return None
