@@ -7,10 +7,10 @@
  "field_order": [
   "start_time",
   "end_time",
-  "disable_auto_attendance_for_this_shift",
   "column_break_3",
   "holiday_list",
-  "auto_attendance_configurations_section",
+  "enable_auto_attendance",
+  "auto_attendance_settings_section",
   "determine_check_in_and_check_out",
   "working_hours_calculation_based_on",
   "begin_check_in_before_shift_start_time",
@@ -18,7 +18,7 @@
   "column_break_10",
   "working_hours_threshold_for_half_day",
   "working_hours_threshold_for_absent",
-  "grace_period_configuration_auto_attendance_section",
+  "grace_period_settings_auto_attendance_section",
   "enable_entry_grace_period",
   "late_entry_grace_period",
   "consequence_after",
@@ -86,33 +86,14 @@
    "precision": "1"
   },
   {
-   "depends_on": "eval:!doc.disable_auto_attendance_for_this_shift",
-   "fieldname": "auto_attendance_configurations_section",
-   "fieldtype": "Section Break",
-   "label": "Auto Attendance Configurations"
-  },
-  {
-   "default": "45",
+   "default": "60",
    "description": "The time before the shift start time during which Employee Check-in is considered for attendance.",
    "fieldname": "begin_check_in_before_shift_start_time",
    "fieldtype": "Int",
    "label": "Begin check-in before shift start time (in minutes)"
   },
   {
-   "default": "1",
-   "description": "Don't mark attendance based on Employee Attendance Log.",
-   "fieldname": "disable_auto_attendance_for_this_shift",
-   "fieldtype": "Check",
-   "label": "Disable Auto Attendance for this shift"
-  },
-  {
-   "depends_on": "eval:!doc.disable_auto_attendance_for_this_shift",
-   "fieldname": "grace_period_configuration_auto_attendance_section",
-   "fieldtype": "Section Break",
-   "hidden": 1,
-   "label": "Grace Period Configuration For Auto Attendance"
-  },
-  {
+   "default": "0",
    "fieldname": "enable_entry_grace_period",
    "fieldtype": "Check",
    "label": "Enable Entry Grace Period"
@@ -144,11 +125,13 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "enable_exit_grace_period",
    "fieldtype": "Check",
    "label": "Enable Exit Grace Period"
   },
   {
+   "default": "0",
    "depends_on": "enable_exit_grace_period",
    "fieldname": "enable_different_consequence_for_early_exit",
    "fieldtype": "Check",
@@ -177,13 +160,34 @@
    "options": "Half Day\nAbsent"
   },
   {
-   "description": "Time after the end of shift during which check-out is considered for attendance. (Zero to allow till next shift begins)",
+   "default": "60",
+   "description": "Time after the end of shift during which check-out is considered for attendance.",
    "fieldname": "allow_check_out_after_shift_end_time",
    "fieldtype": "Int",
    "label": "Allow check-out after shift end time (in minutes)"
+  },
+  {
+   "depends_on": "enable_auto_attendance",
+   "fieldname": "auto_attendance_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Auto Attendance Settings"
+  },
+  {
+   "depends_on": "enable_auto_attendance",
+   "fieldname": "grace_period_settings_auto_attendance_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Grace Period Settings For Auto Attendance"
+  },
+  {
+   "default": "0",
+   "description": "Mark attendance based on 'Employee Attendance Log' for Employees assigned to this shift.",
+   "fieldname": "enable_auto_attendance",
+   "fieldtype": "Check",
+   "label": "Enable Auto Attendance"
   }
  ],
- "modified": "2019-05-16 18:57:00.150899",
+ "modified": "2019-05-30 15:31:35.594990",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Type",
