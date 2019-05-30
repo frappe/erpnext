@@ -1,20 +1,50 @@
-{% macro hero(title, description, is_enrolled) %}
+{% macro hero(title, description, has_access) %}
 	<div class='container pb-5'>
-		<h1>{{ title}}</h1>
+		<h1>{{ title }} </h1>
 		<p class='lead' style="max-width: 100%;">{{ description }}</p>
 		<p class="mt-4">
 			{% if frappe.session.user == 'Guest' %}
 			<a id="signup" class="btn btn-primary btn-lg" href="/login#signup">Sign Up</a>
-			{% elif not is_enrolled %}
-			<button id="enroll" class="btn btn-primary btn-lg" onclick="enroll()">Enroll</button>
+			{% elif not has_access %}
+			<button id="enroll" class="btn btn-primary btn-lg" onclick="enroll()" disabled>Enroll</button>
 			{% endif %}
 		</p>
 	</div>
 
 {% block script %}
 <script type="text/javascript">
+	frappe.ready(() => {
+		btn = document.getElementById('enroll');
+		if (btn) btn.disabled = false;
+	})
+
 	function enroll() {
-		console.log(frappe.utils.get_query_params())
+		let params = frappe.utils.get_query_params()
+		console.log(params.program)
+		let btn = document.getElementById('enroll');
+		btn.disbaled = true;
+		btn.innerText = 'Enrolling...'
+
+		let opts = {
+			method: 'erpnext.education.utils.enroll_in_program',
+			args: {
+				program_name: params.program
+			}
+		}
+
+		frappe.call(opts).then(res => {
+			console.log(res)
+			let success_dialog = new frappe.ui.Dialog({
+				title: __('Success'),
+				secondary_action: function() {
+					window.location.reload()
+				}
+			})
+			success_dialog.set_message('You have successfully enrolled for the program ');
+			success_dialog.$message.show()
+			success_dialog.show();
+			btn.disbaled = false;
+		})
 	}
 </script>
 {% endblock %}

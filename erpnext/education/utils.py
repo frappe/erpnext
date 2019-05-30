@@ -60,7 +60,7 @@ def get_current_student():
 	"""Returns current student from frappe.session.user
 
 	Returns:
-	    object: Student Document
+		object: Student Document
 	"""
 	email = frappe.session.user
 	if email in ('Administrator', 'Guest'):
@@ -77,32 +77,29 @@ def get_portal_programs():
 		is_published and (student_is_enrolled or student_can_self_enroll)
 
 	Returns:
-	    list of dict: List of all programs and to be displayed on the portal along with enrollment status
+		list of objects: List of all programs and to be displayed on the portal along with enrollment status
 	"""
 	published_programs = frappe.get_all("Program", filters={"is_published": True})
 	if not published_programs:
 		return None
 
 	program_list = [frappe.get_doc("Program", program) for program in published_programs]
-	portal_programs = []
-
-	for program in program_list:
-		enrollment_status = get_enrollment_status(program.name)
-		if enrollment_status or program.allow_self_enroll:
-			portal_programs.append({'program': program, 'is_enrolled': enrollment_status})
+	portal_programs = [program for program in program_list if allowed_program_access(program.name) or program.allow_self_enroll]
 
 	return portal_programs
 
-def get_enrollment_status(program, student=None):
+def allowed_program_access(program, student=None):
 	"""Returns enrollment status for current student
 
 	Args:
-	    program (string): Name of the program
-	    student (object): instance of Student document
+		program (string): Name of the program
+		student (object): instance of Student document
 
 	Returns:
-	    bool: Is current user enrolled or not
+		bool: Is current user enrolled or not
 	"""
+	if has_super_access():
+		return True
 	if not student:
 		student = get_current_student()
 	if student and get_enrollment('program', program, student.name):
@@ -114,33 +111,74 @@ def get_enrollment(master, document, student):
 	"""Gets enrollment for course or program
 
 	Args:
-	    master (string): can either be program or course
-	    document (string): program or course name
-	    student (string): Student ID
+		master (string): can either be program or course
+		document (string): program or course name
+		student (string): Student ID
 
 	Returns:
-	    string: Enrollment Name if exists else returns empty string
+		string: Enrollment Name if exists else returns empty string
 	"""
 	if master == 'program':
-		enrollments = frappe.get_all("Program Enrollment", filters={'student':student, 'program': document})
+		enrollments = frappe.get_all("Program Enrollment", filters={'student':student, 'program': document, 'docstatus': 1})
 	if master == 'course':
 		enrollments = frappe.get_all("Course Enrollment", filters={'student':student, 'course': document})
 
 	if enrollments:
-		return enrollment[0].name
+		return enrollments[0].name
 	else:
-		return ''
+		return None
 
-# def check_super_access():
-# 	current_user = frappe.get_doc('User', frappe.session.user)
-# 	roles = set([role.role for role in current_user.roles])
-# 	return bool(roles & {'Administrator', 'Instructor', 'Education Manager', 'System Manager', 'Academic User'})
+@frappe.whitelist()
+def enroll_in_program(program_name, student=None):
+	"""Enroll student in program
+
+	Args:
+		program_name (string): Name of the program to be enrolled into
+		student (string, optional): name of student who has to be enrolled, if not
+			provided, a student will be created from the current user
+
+	Returns:
+		string: name of the program enrollment document
+	"""
+	if has_super_access():
+		return
+
+	if not student == None:
+		student = frappe.get_doc("Student", student)
+	else:
+		# Check if self enrollment in allowed
+		program = frappe.get_doc('Program', program_name)
+		if not program.allow_self_enroll:
+			return frappe.throw("You are not allowed to enroll for this course")
+
+		student = get_current_student()
+		if not student:
+			student = create_student_from_current_user()
+
+	# Check if student is already enrolled in program
+	enrollment = get_enrollment('program', program_name, student.name)
+	if enrollment:
+		return enrollment
+
+	# Check if self enrollment in allowed
+	program = frappe.get_doc('Program', program_name)
+	if not program.allow_self_enroll:
+		return frappe.throw("You are not allowed to enroll for this course")
+
+	# Enroll in program
+	program_enrollment = student.enroll_in_program(program_name)
+	return program_enrollment.name
+
+def has_super_access():
+	current_user = frappe.get_doc('User', frappe.session.user)
+	roles = set([role.role for role in current_user.roles])
+	return bool(roles & {'Administrator', 'Instructor', 'Education Manager', 'System Manager', 'Academic User'})
 
 # def get_program_enrollment(program_name):
 # 	"""
 # 	Function to get program enrollments for a particular student for a program
 # 	"""
-# 	student = get_current_student()
+# 	student get_current_student()
 # 	if not student:
 # 		return None
 # 	else:
@@ -169,6 +207,7 @@ def get_enrollment(master, document, student):
 
 def create_student_from_current_user():
 	user = frappe.get_doc("User", frappe.session.user)
+
 	student = frappe.get_doc({
 		"doctype": "Student",
 		"first_name": user.first_name,
@@ -176,6 +215,7 @@ def create_student_from_current_user():
 		"student_email_id": user.email,
 		"user": frappe.session.user
 		})
+
 	student.save(ignore_permissions=True)
 	return student
 
