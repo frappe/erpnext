@@ -46,7 +46,7 @@
 	<div class='container'>
 		<div class="row mt-5">
 			{% for program in featured_programs %}
-				{{ program_card(program) }}
+				{{ program_card(program.program, program.has_access) }}
 			{% endfor %}
 		</div>
 		<p class='mt-4'>

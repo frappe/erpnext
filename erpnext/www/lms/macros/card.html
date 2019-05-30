@@ -1,4 +1,4 @@
-{% macro program_card(program) %}
+{% macro program_card(program, has_access) %}
 <div class="col-sm mb-4 text-left">
 	<a href="/lms/program?program={{ program.name }}" class="no-decoration no-underline">
 	<div class="card h-100">
@@ -14,7 +14,9 @@
 			<div>{{ program.description }}</div>
 		</div>
 		<div class='card-footer'>
-			<span class='small'>Watch Intro</span>
+			{% if has_access %} <span class="indicator green">Enrolled</span>
+			{% else %} <span>Watch Intro</span>
+			{% endif %}
 		</div>
 	</div>
 	</a>

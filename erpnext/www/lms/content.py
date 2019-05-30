@@ -16,7 +16,7 @@ def get_context(context):
 		frappe.local.flags.redirect_location = '/lms'
 		raise frappe.Redirect
 
-	context.content = frappe.get_doc(content_type, content).as_dict()
+	context.content = frappe.get_doc(content_type, content)
 	context.content_type = content_type
 
 	context.course = frappe.form_dict['course']
