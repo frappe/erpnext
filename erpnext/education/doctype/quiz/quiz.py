@@ -7,6 +7,9 @@ import frappe
 from frappe.model.document import Document
 
 class Quiz(Document):
+	def validate(self):
+		if self.passing_score > 100:
+			frappe.throw("Passing Score value should be between 0 and 100")
 
 	def validate_quiz_attempts(self, enrollment, quiz_name):
 		if self.max_attempts > 0:
