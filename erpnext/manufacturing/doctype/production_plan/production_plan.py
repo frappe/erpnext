@@ -5,11 +5,13 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe import msgprint, _
-from frappe.model.document import Document
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_children
-from frappe.utils import cstr, flt, cint, nowdate, add_days, comma_and, now_datetime, ceil
-from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from six import string_types, iteritems
+
+from frappe.model.document import Document
+from frappe.utils import cstr, flt, cint, nowdate, add_days, comma_and, now_datetime, ceil
+from frappe.utils.csvutils import build_csv_response
+from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_children
+from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 
 class ProductionPlan(Document):
@@ -404,25 +406,29 @@ class ProductionPlan(Document):
 		else :
 			msgprint(_("No material request created"))
 
-	def download_raw_materials(self):
-		item_list = [['Item Code', 'Description', 'Stock UOM', 'Required Qty', 'Warehouse',
-			'projected Qty', 'Actual Qty']]
+@frappe.whitelist()
+def download_raw_materials(production_plan):
+	doc = frappe.get_doc('Production Plan', production_plan)
+	doc.check_permission()
 
-		doc = self.as_dict()
-		for d in get_items_for_material_requests(doc, ignore_existing_ordered_qty=True):
-			item_list.append([d.get('item_code'), d.get('description'), d.get('stock_uom'), d.get('quantity'),
-				d.get('warehouse'), d.get('projected_qty'), d.get('actual_qty')])
+	item_list = [['Item Code', 'Description', 'Stock UOM', 'Required Qty', 'Warehouse',
+		'projected Qty', 'Actual Qty']]
 
-			if not self.for_warehouse:
-				row = {'item_code': d.get('item_code')}
-				for bin_dict in get_bin_details(row, self.company, all_warehouse=True):
-					if d.get("warehouse") == bin_dict.get('warehouse'):
-						continue
+	doc = doc.as_dict()
+	for d in get_items_for_material_requests(doc, ignore_existing_ordered_qty=True):
+		item_list.append([d.get('item_code'), d.get('description'), d.get('stock_uom'), d.get('quantity'),
+			d.get('warehouse'), d.get('projected_qty'), d.get('actual_qty')])
 
-					item_list.append(['', '', '', '', bin_dict.get('warehouse'),
-						bin_dict.get('projected_qty'), bin_dict.get('actual_qty')])
+		if not doc.for_warehouse:
+			row = {'item_code': d.get('item_code')}
+			for bin_dict in get_bin_details(row, doc.company, all_warehouse=True):
+				if d.get("warehouse") == bin_dict.get('warehouse'):
+					continue
 
-		return item_list
+				item_list.append(['', '', '', '', bin_dict.get('warehouse'),
+					bin_dict.get('projected_qty'), bin_dict.get('actual_qty')])
+
+	build_csv_response(item_list, doc.name)
 
 def get_exploded_items(item_details, company, bom_no, include_non_stock_items, planned_qty=1):
 	for d in frappe.db.sql("""select bei.item_code, item.default_bom as bom,

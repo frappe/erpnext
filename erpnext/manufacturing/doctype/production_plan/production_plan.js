@@ -198,7 +198,8 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	download_materials_required: function(frm) {
-		$c_obj_csv(frm.doc, 'download_raw_materials', '', '');
+		let get_template_url = 'erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials';
+		open_url_post(frappe.request.url, { cmd: get_template_url, production_plan: frm.doc.name });
 	},
 
 	show_progress: function(frm) {

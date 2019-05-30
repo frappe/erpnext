@@ -353,9 +353,7 @@ cur_frm.cscript.update_totals = function(doc) {
 
 cur_frm.cscript.get_balance = function(doc,dt,dn) {
 	cur_frm.cscript.update_totals(doc);
-	return $c_obj(cur_frm.doc, 'get_balance', '', function(r, rt){
-		cur_frm.refresh();
-	});
+	cur_frm.call('get_balance', null, () => { cur_frm.refresh(); });
 }
 
 cur_frm.cscript.validate = function(doc,cdt,cdn) {
