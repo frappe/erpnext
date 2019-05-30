@@ -321,7 +321,7 @@ def set_discount_amount(rate, item_details):
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
 	from erpnext.accounts.doctype.pricing_rule.utils import get_apply_on_and_items
 	for d in pricing_rules.split(','):
-		if not d: continue
+		if not d or not frappe.db.exists("Pricing Rule", d): continue
 		pricing_rule = frappe.get_doc('Pricing Rule', d)
 
 		if pricing_rule.price_or_product_discount == 'Price':
