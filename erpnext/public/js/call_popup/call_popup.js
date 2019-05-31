@@ -39,27 +39,13 @@ class CallPopup {
 				'label': 'Call Summary',
 				'fieldname': 'call_summary',
 			}, {
-				'label': 'Append To',
-				'fieldtype': 'Select',
-				'fieldname': 'doctype',
-				'options': ['Issue', 'Lead', 'Communication'],
-				'default': this.call_log.doctype
-			}, {
-				'label': 'Document',
-				'fieldtype': 'Dynamic Link',
-				'fieldname': 'docname',
-				'options': 'doctype',
-				'default': this.call_log.name
-			}, {
 				'fieldtype': 'Button',
 				'label': 'Submit',
 				'click': () => {
 					const values = this.dialog.get_values();
-					frappe.xcall('frappe.desk.form.utils.add_comment', {
-						'reference_doctype': values.doctype,
-						'reference_name': values.docname,
-						'content': `${__('Call Summary')}: ${values.call_summary}`,
-						'comment_email': frappe.session.user
+					frappe.xcall('erpnext.crm.doctype.utils.add_call_summary', {
+						'docname': this.call_log.name,
+						'summary': `${__('Call Summary')}: ${values.call_summary}`,
 					}).then(() => {
 						this.dialog.set_value('call_summary', '');
 					});
