@@ -27,6 +27,11 @@ frappe.ui.form.on("Purchase Receipt", {
 	},
 
 	refresh: function(frm) {
+
+		//if(frm.doc.docstatus == 1){
+			frm.add_custom_button(__('Make Stock Entry'),
+				frm.cscript['Make Stock Entry']);
+		//}
 		if(frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
@@ -240,6 +245,13 @@ frappe.ui.form.on('Purchase Receipt Item', {
 		validate_sample_quantity(frm, cdt, cdn);
 	},
 });
+
+cur_frm.cscript['Make Stock Entry'] = function() {
+	frappe.model.open_mapped_doc({
+		method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_stock_entry",
+		frm: cur_frm,
+	})
+}
 
 var validate_sample_quantity = function(frm, cdt, cdn) {
 	var d = locals[cdt][cdn];

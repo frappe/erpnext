@@ -65,6 +65,7 @@ class StockEntry(StockController):
 		self.validate_difference_account()
 		self.set_job_card_data()
 		self.set_purpose_for_stock_entry()
+		self.validate_items_qty_for_purchase_receipt()
 
 		if not self.from_bom:
 			self.fg_completed_qty = 0.0
@@ -122,6 +123,23 @@ class StockEntry(StockController):
 		pro_doc = frappe.get_doc("Work Order", self.work_order)
 		if pro_doc.status == 'Completed':
 			frappe.throw(_("Cannot cancel transaction for Completed Work Order."))
+
+	def validate_items_qty_for_purchase_receipt(self):
+		print("-------->>>>",self.purchase_receipt_no)
+		if(self.purchase_receipt_no):
+			pr = frappe.get_doc("Purchase Receipt")
+			qty_map = {}
+			for item in pr.items:
+				print(item)
+				print("-------->>>>")
+				qty_map[item.item_code] = item
+
+			print(qty_map)
+
+			for item in self.items:
+				if(item.qty > qty_map[item.item_code][qty]):
+					print("------------->inside")
+					frappe.throw(_("Row: {0} the quantity for {1} cannot be greater than {3}").format(item.idx, item.item_code, qty_map[item.item_code][qty]))
 
 	def validate_purpose(self):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer",
