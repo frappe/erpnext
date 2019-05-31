@@ -6,6 +6,18 @@ cur_frm.email_field = "email_id";
 
 erpnext.LeadController = frappe.ui.form.Controller.extend({
 	setup: function () {
+
+		this.frm.make_methods = {
+			'Quotation': () => erpnext.utils.create_new_doc('Quotation', {
+				'quotation_to': this.frm.doc.doctype,
+				'party_name': this.frm.doc.name
+			}),
+			'Opportunity': () => erpnext.utils.create_new_doc('Opportunity', {
+				'opportunity_from': this.frm.doc.doctype,
+				'party_name': this.frm.doc.name
+			})
+		}
+
 		this.frm.fields_dict.customer.get_query = function (doc, cdt, cdn) {
 			return { query: "erpnext.controllers.queries.customer_query" }
 		}
