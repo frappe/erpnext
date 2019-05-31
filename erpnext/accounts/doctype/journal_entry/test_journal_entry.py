@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import unittest, frappe
 from frappe.utils import flt, nowdate
+from erpnext.accounts.utils import get_stock_and_account_difference
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.exceptions import InvalidAccountCurrency
 
@@ -80,6 +81,42 @@ class TestJournalEntry(unittest.TestCase):
 	def test_jv_against_stock_account(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 		set_perpetual_inventory()
+
+		# Making stock value and account balance
+		diff = get_stock_and_account_difference(account_list=['_Test Bank - _TC', 'Stock In Hand - _TC'], company='_Test Company')
+		jv1 = frappe.copy_doc(test_records[0])
+
+		if diff > 0:
+			print(" iam here")
+			jv1.get("accounts")[0].update({
+				"account": get_inventory_account('_Test Company'),
+				"company": "_Test Company",
+				"credit_in_account_currency": 0.0,
+				"debit_in_account_currency": diff,
+				"party_type": None,
+				"party": None
+			})
+			jv1.get("accounts")[1].update({
+				"credit_in_account_currency": diff,
+				"debit_in_account_currency": 0.0,
+			})
+		elif diff < 0:
+			print("i am here also")
+			jv1.get("accounts")[0].update({
+				"account": get_inventory_account('_Test Company'),
+				"company": "_Test Company",
+				"credit_in_account_currency": 0.0,
+				"debit_in_account_currency": diff,
+				"party_type": None,
+				"party": None
+			})
+			jv1.get("accounts")[1].update({
+				"credit_in_account_currency": diff,
+				"debit_in_account_currency": 0.0,
+			})
+
+		jv1.insert()
+		jv1.submit()
 
 		jv = frappe.copy_doc(test_records[0])
 		jv.get("accounts")[0].update({

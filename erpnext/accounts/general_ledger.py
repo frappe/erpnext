@@ -120,8 +120,10 @@ def validate_account_for_perpetual_inventory(gl_map):
 	aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
 				where account_type = 'Stock' and is_group=0""")]
 
-	stock_value_and_account_balance_difference = get_stock_and_account_difference(account_list=account_list ,company= gl_map[0].company)
+	print("aaaaaaaa",account_list, gl_map[0].company)
 
+	stock_value_and_account_balance_difference = get_stock_and_account_difference(account_list=account_list ,company= gl_map[0].company)
+	print("------->>>diff", stock_value_and_account_balance_difference)
 
 	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)) \
 		and gl_map[0].voucher_type=="Journal Entry":

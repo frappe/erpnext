@@ -571,7 +571,7 @@ def get_stock_and_account_difference(account_list=None, posting_date=None, compa
 			balance = get_balance_on(account, posting_date, in_account_currency=False)
 			total_account_balance += balance
 
-	total_diff = abs(flt(total_stock_value) - flt(total_account_balance))
+	total_diff = flt(total_stock_value) - flt(total_account_balance)
 
 	return total_diff
 
