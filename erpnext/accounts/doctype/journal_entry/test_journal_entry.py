@@ -82,12 +82,11 @@ class TestJournalEntry(unittest.TestCase):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 		set_perpetual_inventory()
 
-		# Making stock value and account balance
+		# Making journal Entry to balance stock value and account difference
 		diff = get_stock_and_account_difference(account_list=['_Test Bank - _TC', 'Stock In Hand - _TC'], company='_Test Company')
 		jv1 = frappe.copy_doc(test_records[0])
 
 		if diff > 0:
-			print(" iam here")
 			jv1.get("accounts")[0].update({
 				"account": get_inventory_account('_Test Company'),
 				"company": "_Test Company",
@@ -101,7 +100,6 @@ class TestJournalEntry(unittest.TestCase):
 				"debit_in_account_currency": 0.0,
 			})
 		elif diff < 0:
-			print("i am here also")
 			jv1.get("accounts")[0].update({
 				"account": get_inventory_account('_Test Company'),
 				"company": "_Test Company",
