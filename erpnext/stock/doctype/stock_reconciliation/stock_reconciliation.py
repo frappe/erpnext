@@ -36,6 +36,9 @@ class StockReconciliation(StockController):
 		self.update_stock_ledger()
 		self.make_gl_entries()
 
+		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
+		update_serial_nos_after_submit(self, "items")
+
 	def on_cancel(self):
 		self.delete_and_repost_sle()
 		self.make_gl_entries_on_cancel()
@@ -48,7 +51,8 @@ class StockReconciliation(StockController):
 				self.posting_date, self.posting_time, batch_no=item.batch_no)
 
 			if ((item.qty==None or item.qty==item_dict.get("qty"))
-				and (item.valuation_rate==None or item.valuation_rate==item_dict.get("rate"))):
+				and (item.valuation_rate==None or item.valuation_rate==item_dict.get("rate"))
+				and item.serial_no == item_dict.get("serial_nos")):
 				return False
 			else:
 				# set default as current rates
@@ -64,7 +68,7 @@ class StockReconciliation(StockController):
 				item.current_qty = item_dict.get("qty")
 				item.current_valuation_rate = item_dict.get("rate")
 				self.difference_amount += (flt(item.qty, item.precision("qty")) * \
-					flt(item.valuation_rate or rate, item.precision("valuation_rate")) \
+					flt(item.valuation_rate or item_dict.get("rate"), item.precision("valuation_rate")) \
 					- flt(item_dict.get("qty"), item.precision("qty")) * flt(item_dict.get("rate"), item.precision("valuation_rate")))
 				return True
 
@@ -157,7 +161,7 @@ class StockReconciliation(StockController):
 			validate_is_stock_item(item_code, item.is_stock_item, verbose=0)
 
 			# item should not be serialized
-			if item.has_serial_no and not row.serial_no:
+			if item.has_serial_no and not row.serial_no and not item.serial_no_series:
 				raise frappe.ValidationError(_("Serial nos are required for serialized item {0}").format(item_code))
 
 			# item managed batch-wise not allowed
@@ -180,7 +184,8 @@ class StockReconciliation(StockController):
 
 		sl_entries = []
 		for row in self.items:
-			if row.serial_no or row.batch_no:
+			item = frappe.get_doc("Item", row.item_code)
+			if item.has_serial_no or item.has_batch_no:
 				self.get_sle_for_serialized_items(row, sl_entries)
 			else:
 				previous_sle = get_previous_sle({
@@ -213,6 +218,9 @@ class StockReconciliation(StockController):
 	def get_sle_for_serialized_items(self, row, sl_entries):
 		from erpnext.stock.stock_ledger import get_previous_sle
 
+		serial_nos = get_serial_nos(row.serial_no)
+
+
 		# To issue existing serial nos
 		if row.current_qty and (row.current_serial_no or row.batch_no):
 			args = self.get_sle_for_items(row)
@@ -230,7 +238,7 @@ class StockReconciliation(StockController):
 
 			sl_entries.append(args)
 
-		for serial_no in get_serial_nos(row.serial_no):
+		for serial_no in serial_nos:
 			args = self.get_sle_for_items(row, [serial_no])
 
 			previous_sle = get_previous_sle({
@@ -262,7 +270,7 @@ class StockReconciliation(StockController):
 
 				sl_entries.append(args)
 
-		if self.docstatus == 1:
+		if self.docstatus == 1 and not row.remove_serial_no_from_stock:
 			args = self.get_sle_for_items(row)
 
 			args.update({
@@ -272,6 +280,15 @@ class StockReconciliation(StockController):
 			})
 
 			sl_entries.append(args)
+
+		if serial_nos == get_serial_nos(row.current_serial_no):
+			# update valuation rate
+			self.update_valuation_rate_for_serial_nos(row, serial_nos)
+
+	def update_valuation_rate_for_serial_nos(self, row, serial_nos):
+		valuation_rate = row.valuation_rate if self.docstatus == 1 else row.current_valuation_rate
+		for d in serial_nos:
+			frappe.db.set_value("Serial No", d, 'purchase_rate', valuation_rate)
 
 	def get_sle_for_items(self, row, serial_nos=None):
 		"""Insert Stock Ledger Entries"""
@@ -287,6 +304,7 @@ class StockReconciliation(StockController):
 			"posting_time": self.posting_time,
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
+			"voucher_detail_no": row.name,
 			"company": self.company,
 			"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
 			"is_cancelled": "No" if self.docstatus != 2 else "Yes",
@@ -432,7 +450,6 @@ def get_stock_balance_for(item_code, warehouse,
 	if item_dict.get("has_batch_no"):
 		qty = get_batch_qty(batch_no, warehouse) or 0
 
-	print(qty, rate, batch_no, warehouse)
 	return {
 		'qty': qty,
 		'rate': rate,
@@ -457,7 +474,7 @@ def get_qty_rate_for_serial_nos(item_code, warehouse, posting_date, posting_time
 		"serial_nos": serial_nos
 	})
 
-	rate = get_incoming_rate(args)
+	rate = get_incoming_rate(args, raise_error_if_no_rate=False) or 0
 
 	return qty, rate, serial_nos
 

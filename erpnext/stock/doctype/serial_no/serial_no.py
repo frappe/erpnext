@@ -299,7 +299,7 @@ def validate_so_serial_no(sr, sales_order,):
 		be delivered""").format(sales_order, sr.item_code, sr.name))
 
 def has_duplicate_serial_no(sn, sle):
-	if sn.warehouse:
+	if sn.warehouse and sle.voucher_type != 'Stock Reconciliation':
 		return True
 
 	if sn.company != sle.company:
@@ -413,14 +413,17 @@ def update_serial_nos_after_submit(controller, parentfield):
 		update_rejected_serial_nos = True if (controller.doctype in ("Purchase Receipt", "Purchase Invoice")
 			and d.rejected_qty) else False
 		accepted_serial_nos_updated = False
+
 		if controller.doctype == "Stock Entry":
 			warehouse = d.t_warehouse
 			qty = d.transfer_qty
 		else:
 			warehouse = d.warehouse
-			qty = d.stock_qty
+			qty = (d.qty if controller.doctype == "Stock Reconciliation"
+				else d.stock_qty)
 
 		for sle in stock_ledger_entries:
+			print(accepted_serial_nos_updated, qty, sle.actual_qty)
 			if sle.voucher_detail_no==d.name:
 				if not accepted_serial_nos_updated and qty and abs(sle.actual_qty)==qty \
 					and sle.warehouse == warehouse and sle.serial_no != d.serial_no:
