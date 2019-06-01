@@ -108,7 +108,9 @@ def delete_accounting_dimension(doc):
 
 	budget_against_property = frappe.get_doc("Property Setter", "Budget-budget_against-options")
 	value_list = budget_against_property.value.split('\n')[3:]
-	value_list.remove(doc.document_type)
+
+	if doc.document_type in value_list:
+		value_list.remove(doc.document_type)
 
 	budget_against_property.value = "\nCost Center\nProject\n" + "\n".join(value_list)
 	budget_against_property.save()
