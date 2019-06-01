@@ -15,6 +15,7 @@
   "amount",
   "serial_no_and_batch_section",
   "serial_no",
+  "remove_serial_no_from_stock",
   "column_break_11",
   "batch_no",
   "section_break_3",
@@ -165,10 +166,16 @@
    "fieldtype": "Link",
    "label": "Batch No",
    "options": "Batch"
+  },
+  {
+   "default": "0",
+   "fieldname": "remove_serial_no_from_stock",
+   "fieldtype": "Check",
+   "label": "Remove Serial No from Stock"
   }
  ],
  "istable": 1,
- "modified": "2019-05-24 12:34:50.018491",
+ "modified": "2019-06-01 03:16:38.459307",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",
