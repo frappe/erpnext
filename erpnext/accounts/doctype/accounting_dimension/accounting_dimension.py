@@ -54,7 +54,7 @@ def make_dimension_in_accounting_doctypes(doc):
 		}
 
 		if doctype == "Budget":
-			add_dimensions_to_budget_doctype(df, doc)
+			add_dimension_to_budget_doctype(df, doc)
 		else:
 			create_custom_field(doctype, df)
 
