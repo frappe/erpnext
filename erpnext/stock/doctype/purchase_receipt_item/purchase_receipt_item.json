@@ -4,6 +4,7 @@
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
+ "engine": "InnoDB",
  "field_order": [
   "barcode",
   "section_break_2",
@@ -78,6 +79,10 @@
   "batch_no",
   "column_break_48",
   "rejected_serial_no",
+  "section_break_50",
+  "project",
+  "expense_account",
+  "cost_center",
   "col_break5",
   "allow_zero_valuation_rate",
   "bom",
@@ -771,18 +776,17 @@
    "label": "Material Request Item"
   },
   {
-   "fieldname": "accounting_dimensions_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
-  },
-  {
-   "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break"
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Expense Account",
+   "options": "Account",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-25 22:01:46.674368",
+ "modified": "2019-05-30 18:09:21.648599",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

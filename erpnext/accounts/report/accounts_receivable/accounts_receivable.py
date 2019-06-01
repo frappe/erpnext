@@ -68,13 +68,13 @@ class ReceivablePayableReport(object):
 
 		if self.filters.based_on_payment_terms:
 			columns.append({
-				"label": "Payment Term",
+				"label": _("Payment Term"),
 				"fieldname": "payment_term",
 				"fieldtype": "Data",
 				"width": 120
 			})
 			columns.append({
-				"label": "Invoice Grand Total",
+				"label": _("Invoice Grand Total"),
 				"fieldname": "invoice_grand_total",
 				"fieldtype": "Currency",
 				"options": "currency",
@@ -83,7 +83,7 @@ class ReceivablePayableReport(object):
 
 		for label in ("Invoiced Amount", "Paid Amount", credit_or_debit_note, "Outstanding Amount"):
 			columns.append({
-				"label": label,
+				"label": _(label),
 				"fieldname": frappe.scrub(label),
 				"fieldtype": "Currency",
 				"options": "currency",
