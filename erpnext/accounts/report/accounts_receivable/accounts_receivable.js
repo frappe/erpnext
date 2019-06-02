@@ -123,6 +123,11 @@ frappe.query_reports["Accounts Receivable"] = {
 			"default": "Ungrouped"
 		},
 		{
+			"fieldname":"from_age",
+			"label": __("Show Invoices With Age Above"),
+			"fieldtype": "Int"
+		},
+		{
 			"fieldname":"based_on_payment_terms",
 			"label": __("Based On Payment Terms"),
 			"fieldtype": "Check",

@@ -35,7 +35,7 @@
 <h5 class="text-center">
 	{%= __(filters.ageing_based_on) %}
 	{%= __("Until") %}
-	{%= frappe.datetime.str_to_user(filters.report_date) %}
+	{%= new frappe.datetime.datetime(filters.report_date).format("D MMMM, YYYY") %}
 </h5>
 
 <div class="clearfix">
@@ -247,7 +247,7 @@
 						{% var colspan = 3 %}
 						{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person_in_print) { colspan++; } %}
 						{% if(!filters.show_pdc_in_print) { colspan++; } %}
-						<td colspan="{%= colspan %}" style="text-align: right"><b>{%= __("Total") %}</b></td>
+						<td colspan="{%= colspan %}" style="text-align: right"><b>{%= data[i]['voucher_type'] || __("Total") %}</b></td>
 						<td style="text-align: right">
 							{%= format_currency(data[i]["invoiced_amount"], data[i]["currency"] ) %}</td>
 

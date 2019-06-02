@@ -354,7 +354,7 @@ class ReceivablePayableReport(object):
 			group_by_labels[level2_fieldname] = level2
 
 		if len(group_by) <= 1:
-			return data
+			return self.group_aggregate_age(data, columns)
 
 		total_fields = [c['fieldname'] for c in columns
 			if c['fieldtype'] in ['Float', 'Currency', 'Int'] and c['fieldname'] != 'age']
@@ -370,8 +370,51 @@ class ReceivablePayableReport(object):
 				group_object.payment_terms = self.party_map.get(group_object.group_value, {}).get("payment_terms")
 				group_object.credit_limit = self.party_map.get(group_object.group_value, {}).get("credit_limit")
 
+			group_object.rows = self.group_aggregate_age(group_object.rows, columns, grouped_by)
+
 		return group_report_data(data, group_by, total_fields=total_fields, postprocess_group=postprocess_group,
 			group_by_labels=group_by_labels)
+
+	def group_aggregate_age(self, data, columns, grouped_by=None):
+		if not self.filters.from_age:
+			return data
+
+		to_group = []
+		to_keep = []
+
+		for d in data:
+			if d._isGroupTotal or d._isGroup or d.age >= cint(self.filters.from_age):
+				to_keep.append(d)
+			else:
+				to_group.append(d)
+
+		if not to_group:
+			return data
+
+		total_fields = [c['fieldname'] for c in columns
+			if c['fieldtype'] in ['Float', 'Currency', 'Int'] and c['fieldname'] != 'age']
+
+		below_age_total = group_report_data(to_group, None, total_fields=total_fields, totals_only=True)
+		below_age_total = below_age_total[0]
+		above_age_total = group_report_data(to_keep, None, total_fields=total_fields, totals_only=True)
+		above_age_total = above_age_total[0] if above_age_total else {}
+
+		if grouped_by:
+			below_age_total.update(grouped_by)
+			above_age_total.update(grouped_by)
+
+		below_age_total['voucher_type'] = _("Age <= {0} Total").format(self.filters.from_age)
+
+		above_age_total['voucher_type'] = _("Age > {0} Total").format(self.filters.from_age)
+		above_age_total['_excludeFromTotal'] = True
+		above_age_total['_bold'] = True
+
+		res = []
+		if to_keep:
+			res += to_keep + [above_age_total, {}]
+		res.append(below_age_total)
+
+		return res
 
 	def allocate_pdc_amount_in_fifo(self, gle, row_outstanding):
 		pdc_list = self.pdc_details.get((gle.voucher_no, gle.party), [])
