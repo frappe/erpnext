@@ -15,7 +15,6 @@
   "amount",
   "serial_no_and_batch_section",
   "serial_no",
-  "remove_serial_no_from_stock",
   "column_break_11",
   "batch_no",
   "section_break_3",
@@ -110,6 +109,7 @@
    "label": "Before reconciliation"
   },
   {
+   "default": "0",
    "fieldname": "current_qty",
    "fieldtype": "Float",
    "label": "Current Qty",
@@ -166,16 +166,10 @@
    "fieldtype": "Link",
    "label": "Batch No",
    "options": "Batch"
-  },
-  {
-   "default": "0",
-   "fieldname": "remove_serial_no_from_stock",
-   "fieldtype": "Check",
-   "label": "Remove Serial No from Stock"
   }
  ],
  "istable": 1,
- "modified": "2019-06-01 03:16:38.459307",
+ "modified": "2019-06-14 17:10:53.188305",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",
