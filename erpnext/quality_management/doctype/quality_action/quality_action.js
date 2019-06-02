@@ -16,11 +16,11 @@ frappe.ui.form.on('Quality Action', {
 			callback: function(data){
 				frm.fields_dict.resolutions.grid.remove_all();
 				let objectives = [];
-				let i = 0;
+
 				if(frm.doc.document_type === "Quality Review"){
-					for(i in data.message.reviews) objectives.push(data.message.reviews[i].review);
+					for(let i in data.message.reviews) objectives.push(data.message.reviews[i].review);
 				} else {
-					for(i in data.message.parameters) objectives.push(data.message.parameters[i].feedback);
+					for(let j in data.message.parameters) objectives.push(data.message.parameters[j].feedback);
 				}
 				for (var objective in objectives){
 					frm.add_child("resolutions");
