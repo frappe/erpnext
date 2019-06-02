@@ -18,11 +18,7 @@ def get_data():
 			},
 			{
 				'label': _('References'),
-				'items': ['POS Profile', 'Subscription', 'Restaurant']
-			},
-			{
-				'label': _('Tax Rules'),
-				'items': ['Tax Rule']
+				'items': ['POS Profile', 'Subscription', 'Restaurant', 'Tax Rule']
 			}
 		]
 	}

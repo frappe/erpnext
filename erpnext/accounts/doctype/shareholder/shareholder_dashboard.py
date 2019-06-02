@@ -11,7 +11,6 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'label': _('Share Transfers'),
 				'items': ['Share Transfer']
 			}
 		]

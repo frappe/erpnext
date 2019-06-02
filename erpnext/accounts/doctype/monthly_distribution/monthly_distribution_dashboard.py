@@ -17,7 +17,6 @@ def get_data():
 				'items': ['Sales Person', 'Territory', 'Sales Partner']
 			},
 			{
-				'label': _('References'),
 				'items': ['Budget']
 			}
 		]

@@ -8,11 +8,14 @@ def get_data():
 		'fieldname': 'payment_term',
 		'transactions': [
 			{
-				'label': _('Invoices and Orders'),
-				'items': ['Sales Invoice', 'Sales Order', 'Purchase Invoice', 'Purchase Order', 'Quotation']
+				'label': _('Sales'),
+				'items': ['Sales Invoice', 'Sales Order', 'Quotation']
 			},
 			{
-				'label': _('Payment Terms Template'),
+				'label': _('Purchase'),
+				'items': ['Purchase Invoice', 'Purchase Order']
+			},
+			{
 				'items': ['Payment Terms Template']
 			}
 		]

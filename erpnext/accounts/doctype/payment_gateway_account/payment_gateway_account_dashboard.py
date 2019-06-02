@@ -11,11 +11,9 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'label': _('Payments'),
 				'items': ['Payment Request']
 			},
 			{
-				'label': _('Subscription Plans'),
 				'items': ['Subscription Plan']
 			}
 		]
