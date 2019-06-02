@@ -15,12 +15,8 @@ def get_data():
 				'items': ['Purchase Invoice', 'Purchase Order', 'Purchase Receipt']
 			},
 			{
-				'label': _('Supplier Quotations'),
-				'items': ['Supplier Quotation']
-			},
-			{
-				'label': _('Tax Rules'),
-				'items': ['Tax Rule']
+				'label': _('References'),
+				'items': ['Supplier Quotation', 'Tax Rule']
 			}
 		]
 	}

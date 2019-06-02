@@ -20,7 +20,6 @@ def get_data():
 				'items': ['Purchase Invoice', 'Purchase Order', 'Purchase Receipt']
 			},
 			{
-				'label': _('Item Tax'),
 				'items': ['Item']
 			}
 		]

@@ -12,7 +12,6 @@ def get_data():
 				'items': ['Bank Account', 'Bank Statement Transaction Entry', 'Bank Guarantee']
 			},
 			{
-				'label': _('Payments'),
 				'items': ['Payment Order']
 			}
 		]

@@ -8,7 +8,6 @@ def get_data():
 		'fieldname': 'tax_withholding_category',
 		'transactions': [
 			{
-				'label': _('Suppliers'),
 				'items': ['Supplier']
 			}
 		]

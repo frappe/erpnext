@@ -21,11 +21,9 @@ def get_data():
 				'items': ['Customer', 'Supplier']
 			},
 			{
-				'label': _('Banking'),
 				'items': ['Bank Guarantee']
 			},
 			{
-				'label': _('Journal Entries'),
 				'items': ['Journal Entry']
 			}
 		]

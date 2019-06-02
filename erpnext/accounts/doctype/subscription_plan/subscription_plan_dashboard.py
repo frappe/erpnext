@@ -12,12 +12,8 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'label': _('Payments'),
-				'items': ['Payment Request']
-			},
-			{
-				'label': _('Subscriptions'),
-				'items': ['Subscription']
+				'label': _('References'),
+				'items': ['Payment Request', 'Subscription']
 			}
 		]
 	}

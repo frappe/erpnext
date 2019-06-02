@@ -8,12 +8,7 @@ def get_data():
 		'fieldname': 'loyalty_program',
 		'transactions': [
 			{
-				'label': _('Sales Invoice'),
-				'items': ['Sales Invoice']
-			},
-			{
-				'label': _('Customers'),
-				'items': ['Customer']
+				'items': ['Sales Invoice', 'Customer']
 			}
 		]
 	}

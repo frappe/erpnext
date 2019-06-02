@@ -16,11 +16,9 @@ def get_data():
 				'items': ['Asset', 'Asset Value Adjustment']
 			},
 			{
-				'label': _('Companies'),
 				'items': ['Company']
 			},
 			{
-				'label': _('Journal Entries'),
 				'items': ['Journal Entry']
 			}
 		]
