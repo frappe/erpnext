@@ -13,7 +13,7 @@ from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import EmptyStockReconciliationItemsError, get_items
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.utils import get_stock_balance, get_incoming_rate, get_available_serial_nos
+from erpnext.stock.utils import get_stock_balance, get_incoming_rate, get_available_serial_nos, get_stock_value_on
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 class TestStockReconciliation(unittest.TestCase):
@@ -169,8 +169,60 @@ class TestStockReconciliation(unittest.TestCase):
 			if frappe.db.exists("Serial No", d):
 				frappe.delete_doc("Serial No", d)
 
+	def test_stock_reco_for_batch_item(self):
+		set_perpetual_inventory()
+
+		to_delete_records = []
+		to_delete_serial_nos = []
+
+		# Add new serial nos
+		item_code = "Stock-Reco-batch-Item-1"
+		warehouse = "_Test Warehouse for Stock Reco2 - _TC"
+
+		sr = create_stock_reconciliation(item_code=item_code,
+			warehouse = warehouse, qty=5, rate=200, do_not_submit=1)
+		sr.save(ignore_permissions=True)
+		sr.submit()
+
+		self.assertTrue(sr.items[0].batch_no)
+		to_delete_records.append(sr.name)
+
+		sr1 = create_stock_reconciliation(item_code=item_code,
+			warehouse = warehouse, qty=6, rate=300, batch_no=sr.items[0].batch_no)
+
+		args = {
+			"item_code": item_code,
+			"warehouse": warehouse,
+			"posting_date": nowdate(),
+			"posting_time": nowtime(),
+		}
+
+		valuation_rate = get_incoming_rate(args)
+		self.assertEqual(valuation_rate, 300)
+		to_delete_records.append(sr1.name)
+
+
+		sr2 = create_stock_reconciliation(item_code=item_code,
+			warehouse = warehouse, qty=0, rate=0, batch_no=sr.items[0].batch_no)
+
+		stock_value = get_stock_value_on(warehouse, nowdate(), item_code)
+		self.assertEqual(stock_value, 0)
+		to_delete_records.append(sr2.name)
+
+		to_delete_records.reverse()
+		for d in to_delete_records:
+			stock_doc = frappe.get_doc("Stock Reconciliation", d)
+			stock_doc.cancel()
+
+		frappe.delete_doc("Batch", sr.items[0].batch_no)
+		for d in to_delete_records:
+			frappe.delete_doc("Stock Reconciliation", d)
+
 def create_batch_or_serial_no_items():
 	create_warehouse("_Test Warehouse for Stock Reco1",
+		{"is_group": 0, "parent_warehouse": "_Test Warehouse Group - _TC"})
+
+	create_warehouse("_Test Warehouse for Stock Reco2",
 		{"is_group": 0, "parent_warehouse": "_Test Warehouse Group - _TC"})
 
 	serial_item_doc = create_item("Stock-Reco-Serial-Item-1", is_stock_item=1)
@@ -202,12 +254,12 @@ def create_stock_reconciliation(**args):
 		"qty": args.qty,
 		"valuation_rate": args.rate,
 		"serial_no": args.serial_no,
-		"batch_no": args.batch_no,
-		"remove_serial_no_from_stock": args.remove_serial_no_from_stock or 0
+		"batch_no": args.batch_no
 	})
 
 	try:
-		sr.submit()
+		if not args.do_not_submit:
+			sr.submit()
 	except EmptyStockReconciliationItemsError:
 		pass
 	return sr

@@ -153,6 +153,7 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 	barcode: function(frm, cdt, cdn) {
 		frm.events.set_item_code(frm, cdt, cdn);
 	},
+
 	warehouse: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		if (child.batch_no) {
@@ -161,22 +162,35 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 
 		frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
 	},
+
 	item_code: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		if (child.batch_no) {
-			frappe.model.set_value(child.cdt, child.cdn, "batch_no", "");
+			frappe.model.set_value(cdt, cdn, "batch_no", "");
 		}
 
 		frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
 	},
+
 	batch_no: function(frm, cdt, cdn) {
 		frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
 	},
+
 	qty: function(frm, cdt, cdn) {
 		frm.events.set_amount_quantity(frm, cdt, cdn);
 	},
+
 	valuation_rate: function(frm, cdt, cdn) {
 		frm.events.set_amount_quantity(frm, cdt, cdn);
+	},
+
+	serial_no: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+
+		if (child.serial_no) {
+			const serial_nos = child.serial_no.trim().split('\n');
+			frappe.model.set_value(cdt, cdn, "qty", serial_nos.length);
+		}
 	}
 
 });

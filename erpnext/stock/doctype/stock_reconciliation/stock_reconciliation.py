@@ -32,6 +32,9 @@ class StockReconciliation(StockController):
 		self.validate_expense_account()
 		self.set_total_qty_and_amount()
 
+		if self._action=="submit":
+			self.make_batches('warehouse')
+
 	def on_submit(self):
 		self.update_stock_ledger()
 		self.make_gl_entries()
@@ -50,16 +53,16 @@ class StockReconciliation(StockController):
 			item_dict = get_stock_balance_for(item.item_code, item.warehouse,
 				self.posting_date, self.posting_time, batch_no=item.batch_no)
 
-			if ((item.qty==None or item.qty==item_dict.get("qty"))
-				and (item.valuation_rate==None or item.valuation_rate==item_dict.get("rate"))
-				and item.serial_no == item_dict.get("serial_nos")):
+			if (((item.qty is None or item.qty==item_dict.get("qty")) and
+				(item.valuation_rate is None or item.valuation_rate==item_dict.get("rate")) and not item.serial_no)
+				or (item.serial_no and item.serial_no == item_dict.get("serial_nos"))):
 				return False
 			else:
 				# set default as current rates
-				if item.qty==None:
+				if item.qty is None:
 					item.qty = item_dict.get("qty")
 
-				if item.valuation_rate==None:
+				if item.valuation_rate is None:
 					item.valuation_rate = item_dict.get("rate")
 
 				if item_dict.get("serial_nos"):
@@ -162,14 +165,11 @@ class StockReconciliation(StockController):
 
 			# item should not be serialized
 			if item.has_serial_no and not row.serial_no and not item.serial_no_series:
-				raise frappe.ValidationError(_("Serial nos are required for serialized item {0}").format(item_code))
+				raise frappe.ValidationError(_("Serial no(s) required for serialized item {0}").format(item_code))
 
 			# item managed batch-wise not allowed
 			if item.has_batch_no and not row.batch_no and not item.create_new_batch:
 				raise frappe.ValidationError(_("Batch no is required for batched item {0}").format(item_code))
-
-			if self._action=="submit" and item.create_new_batch:
-				self.make_batches('warehouse')
 
 			# docstatus should be < 2
 			validate_cancelled_item(item_code, item.docstatus, verbose=0)
@@ -203,7 +203,7 @@ class StockReconciliation(StockController):
 						row.valuation_rate = previous_sle.get("valuation_rate", 0)
 
 				if row.qty and not row.valuation_rate:
-					frappe.throw(_("Valuation Rate required for Item in row {0}").format(row.idx))
+					frappe.throw(_("Valuation Rate required for Item {0} at row {1}").format(row.item_code, row.idx))
 
 				if ((previous_sle and row.qty == previous_sle.get("qty_after_transaction")
 					and (row.valuation_rate == previous_sle.get("valuation_rate") or row.qty == 0))
@@ -270,7 +270,7 @@ class StockReconciliation(StockController):
 
 				sl_entries.append(args)
 
-		if self.docstatus == 1 and not row.remove_serial_no_from_stock:
+		if self.docstatus == 1 and row.qty:
 			args = self.get_sle_for_items(row)
 
 			args.update({
@@ -332,7 +332,7 @@ class StockReconciliation(StockController):
 
 		sl_entries = []
 		for row in self.items:
-			if row.serial_no or row.batch_no:
+			if row.serial_no or row.batch_no or row.current_serial_no:
 				self.get_sle_for_serialized_items(row, sl_entries)
 
 		if sl_entries:

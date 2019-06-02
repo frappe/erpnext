@@ -423,7 +423,6 @@ def update_serial_nos_after_submit(controller, parentfield):
 				else d.stock_qty)
 
 		for sle in stock_ledger_entries:
-			print(accepted_serial_nos_updated, qty, sle.actual_qty)
 			if sle.voucher_detail_no==d.name:
 				if not accepted_serial_nos_updated and qty and abs(sle.actual_qty)==qty \
 					and sle.warehouse == warehouse and sle.serial_no != d.serial_no:
