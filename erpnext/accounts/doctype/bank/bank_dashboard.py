@@ -9,7 +9,7 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Bank Deatils'),
-				'items': ['Bank Account', 'Bank Statement Transaction Entry', 'Bank Guarantee']
+				'items': ['Bank Account', 'Bank Guarantee']
 			},
 			{
 				'items': ['Payment Order']
