@@ -13,23 +13,31 @@ def get_data():
 			},
 			{
 				'label': _('Payroll'),
-				'items': ['Salary Structure Assignment', 'Salary Slip', 'Timesheet']
+				'items': ['Salary Structure Assignment', 'Salary Slip', 'Additional Salary', 'Timesheet']
+			},
+			{
+				'label': _('Shift'),
+				'items': ['Shift Request', 'Shift Assignment']
 			},
 			{
 				'label': _('Expense'),
-				'items': ['Expense Claim']
+				'items': ['Expense Claim', 'Travel Request']
 			},
 			{
 				'label': _('Evaluation'),
 				'items': ['Appraisal']
 			},
 			{
-				'label': _('Training'),
-				'items': ['Training Event', 'Training Result']
-			},
-			{
 				'label': _('Lifecycle'),
 				'items': ['Employee Transfer', 'Employee Promotion', 'Employee Separation']
-			}
+			},
+			{
+				'label': _('Benefit'),
+				'items': ['Employee Incentive', 'Retention Bonus','Employee Benefit Application', 'Employee Benefit Claim']
+			},
+			{
+				'label': _('Training'),
+				'items': ['Training Event', 'Training Result', 'Training Feedback', 'Employee Skill Map']
+			},
 		]
 	}
