@@ -342,13 +342,24 @@ erpnext.SerialNoBatchSelector = Class.extend({
 	get_serial_no_fields: function() {
 		var me = this;
 		this.serial_list = [];
+
+		let serial_no_filters = {
+			item_code: me.item_code,
+			delivery_document_no: ""
+		}
+
+		if (me.warehouse_details.name) {
+			serial_no_filters['warehouse'] = me.warehouse_details.name;
+		}
 		return [
 			{fieldtype: 'Section Break', label: __('Serial No')},
 			{
 				fieldtype: 'Link', fieldname: 'serial_no_select', options: 'Serial No',
 				label: __('Select'),
 				get_query: function() {
-					return { filters: {item_code: me.item_code, warehouse: me.warehouse_details.name}};
+					return {
+						filters: serial_no_filters
+					};
 				},
 				onchange: function(e) {
 					if(this.in_local_change) return;
