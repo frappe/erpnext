@@ -43,9 +43,10 @@ class CallPopup {
 				'label': 'Submit',
 				'click': () => {
 					const values = this.dialog.get_values();
+					if (!values.call_summary) return
 					frappe.xcall('erpnext.crm.doctype.utils.add_call_summary', {
 						'docname': this.call_log.name,
-						'summary': `${__('Call Summary')}: ${values.call_summary}`,
+						'summary': values.call_summary,
 					}).then(() => {
 						this.dialog.set_value('call_summary', '');
 					});
@@ -62,6 +63,7 @@ class CallPopup {
 		this.dialog.$body.addClass('call-popup');
 		this.dialog.set_secondary_action(() => {
 			clearInterval(this.updater);
+			delete erpnext.call_popup;
 			this.dialog.hide();
 		});
 		this.dialog.show();
@@ -173,7 +175,7 @@ class CallPopup {
 				const issue_field = this.dialog.fields_dict["last_issue"];
 				issue_field.set_value(issue.subject);
 				issue_field.$wrapper
-					.append(`<a class="text-medium" href="#Form/Issue/${issue.name}">View ${issue.name}</a>`);
+					.append(`<a class="text-medium" href="#List/Issue/List?customer=${issue.customer}">View all issues from ${issue.customer}</a>`);
 			}
 		});
 	}

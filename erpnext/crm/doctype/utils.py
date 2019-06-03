@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 import json
 
 @frappe.whitelist()
@@ -53,7 +54,7 @@ def get_last_interaction(number, reference_doc):
 		if customer_name:
 			last_issue = frappe.get_all('Issue', {
 				'customer': customer_name
-			}, ['name', 'subject'], limit=1)
+			}, ['name', 'subject', 'customer'], limit=1)
 
 	elif reference_doc.doctype == 'Lead':
 		last_communication = frappe.get_all('Communication', {
@@ -70,9 +71,11 @@ def get_last_interaction(number, reference_doc):
 @frappe.whitelist()
 def add_call_summary(docname, summary):
 	communication = frappe.get_doc('Communication', docname)
-	communication.content = 'Call Summary by {user}: {summary}'.format({
-		'user': frappe.utils.get_fullname(frappe.session.user),
-		'summary': summary
-	})
+	content = _('Call Summary by {0}: {1}').format(
+		frappe.utils.get_fullname(frappe.session.user), summary)
+	if not communication.content:
+		communication.content = content
+	else:
+		communication.content += '\n' + content
 	communication.save(ignore_permissions=True)
 

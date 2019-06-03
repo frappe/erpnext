@@ -32,7 +32,14 @@ def handle_incoming_call(*args, **kwargs):
 
 @frappe.whitelist(allow_guest=True)
 def handle_end_call(*args, **kwargs):
-	call_log = get_call_log(kwargs)
+	close_call_log(kwargs)
+
+@frappe.whitelist(allow_guest=True)
+def handle_missed_call(*args, **kwargs):
+	close_call_log(kwargs)
+
+def close_call_log(call_payload):
+	call_log = get_call_log(call_payload)
 	if call_log:
 		call_log.status = 'Closed'
 		call_log.save(ignore_permissions=True)
@@ -82,6 +89,7 @@ def make_a_call(from_number, to_number, caller_id):
 	response = requests.post('https://{api_key}:{api_token}@api.exotel.com/v1/Accounts/{sid}/Calls/connect.json?details=true'.format(
 		api_key=settings.api_key,
 		api_token=settings.api_token,
+		sid=settings.account_sid
 	), data={
 		'From': from_number,
 		'To': to_number,
@@ -92,3 +100,23 @@ def make_a_call(from_number, to_number, caller_id):
 
 def get_exotel_settings():
 	return frappe.get_single('Exotel Settings')
+
+@frappe.whitelist(allow_guest=True)
+def get_phone_numbers():
+	numbers = 'some number'
+	whitelist_numbers(numbers, 'for number')
+	return numbers
+
+def whitelist_numbers(numbers, caller_id):
+	settings = get_exotel_settings()
+	query = 'https://{api_key}:{api_token}@api.exotel.com/v1/Accounts/{sid}/CustomerWhitelist'.format(
+		api_key=settings.api_key,
+		api_token=settings.api_token,
+		sid=settings.account_sid
+	)
+	response = requests.post(query, data={
+		'VirtualNumber': caller_id,
+		'Number': numbers,
+	})
+
+	return response
