@@ -45,7 +45,7 @@
 				<div class="card-body">
 					<h5 class="card-title">{{ card.title }}</h5>
 					<p class="card-subtitle mb-2 text-muted">{{ card.subtitle or '' }}</p>
-					<p class="card-text">{{ card.content | truncate(140, True) }}</p>
+					<p class="card-text">{{ card.content or '' | truncate(140, True) }}</p>
 				</div>
 				<div class="card-body flex-grow-0">
 					<a href="{{ card.route }}" class="card-link">{{ _('More details') }}</a>
