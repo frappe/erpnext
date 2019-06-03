@@ -376,7 +376,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 		let serial_no_filters = {
 			item_code: me.item_code,
-			delivery_document_no: ["in", ""]
+			delivery_document_no: ""
 		}
 
 		if (me.warehouse_details.name) {
