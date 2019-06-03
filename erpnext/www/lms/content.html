@@ -36,7 +36,7 @@
 		<div class="col-md-7">
 			<h1>{{ content.name }} <span class="small text-muted">({{ position + 1 }}/{{length}})</span></h1>
 		</div>
-		<div class="col-md-5 text-right">
+		<div id="nav-buttons" class="col-md-5 text-right" {{ 'hidden' if content_type=='Quiz' }}>
 			{% if previous %}
 				<a href="/lms/content?program={{ program }}&course={{ course }}&topic={{ topic }}&type={{ previous.content_type }}&content={{ previous.content }}" class='btn btn-outline-secondary'>Previous</a>
 			{% else %}
@@ -70,7 +70,7 @@
 	</div>
 </div>
 <div id="player" data-plyr-provider="{{ content.provider|lower }}" data-plyr-embed-id="{{ content.url }}"></div>
-<div class="my-5">
+<div class="my-5" style="line-height: 1.8em;">
 	{{ content.description }}
 </div>
 {% endmacro %}
@@ -95,6 +95,18 @@
 </div>
 {% endmacro %}
 
+{% macro quiz() %}
+<div class="mb-5">
+	<div class="row">
+		<div class="col-md-7">
+			<h1>{{ content.name }} <span class="small text-muted">({{ position + 1 }}/{{length}})</span></h1>
+		</div>
+	</div>
+</div>
+<div id="quiz-wrapper">
+</div>
+{% endmacro %}
+
 {% block content %}
 <section class="section">
 	<div>
@@ -104,7 +116,7 @@
 			{% elif content_type=='Article'%}
 				{{ article() }}
 			{% elif content_type=='Quiz' %}
-				<h2>Quiz: {{ content.name }}</h2>
+				{{ quiz() }}
 			{% endif %}
 		</div>
 	</div>
@@ -113,20 +125,41 @@
 
 {% block script %}
 	{% if content_type=='Video' %}
-			<script src="https://cdn.plyr.io/3.5.3/plyr.js"></script>
+		<script src="https://cdn.plyr.io/3.5.3/plyr.js"></script>
+	{% elif content_type == 'Quiz' %}
+		<script src='/assets/erpnext/js/education/lms/quiz.js'></script>
 	{% endif  %}
 	<script>
-		{% if content_type=='Video' %}
+		{% if content_type == 'Video' %}
 			const player = new Plyr('#player');
+		{% elif content_type == 'Quiz' %}
+			{% if next %}
+			const quiz_exit_button = 'Next'
+			const next_url = '/lms/content?program={{ program }}&course={{ course }}&topic={{ topic }}&type={{ next.content_type }}&content={{ next.content }}'
+			{% else %}
+			const quiz_exit_button = 'Finish Course'
+			const next_url = '/lms/course?name={{ course }}&program={{ program }}'
+			{% endif %}
+			frappe.ready(() => {
+				const quiz = new Quiz(document.getElementById('quiz-wrapper'), {
+					name: '{{ content.name }}',
+					course: '{{ course }}',
+					quiz_exit_button: quiz_exit_button,
+					next_url: next_url
+				})
+				window.quiz = quiz;
+			})
 		{% endif  %}
+
+		{% if content_type != 'Quiz' %}
 
 		frappe.ready(() => {
 			next = document.getElementById('nextButton')
 			next.disabled = false;
 		})
 
-		function handle(url) {
 
+		function handle(url) {
 			opts = {
 				method: "erpnext.education.utils.add_activity",
 				args: {
@@ -139,5 +172,7 @@
 				window.location.href = url;
 			})
 		}
+
+		{% endif %}
 	</script>
 {% endblock %}
