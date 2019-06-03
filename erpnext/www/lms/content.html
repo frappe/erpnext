@@ -144,6 +144,7 @@
 				const quiz = new Quiz(document.getElementById('quiz-wrapper'), {
 					name: '{{ content.name }}',
 					course: '{{ course }}',
+					program: '{{ program }}',
 					quiz_exit_button: quiz_exit_button,
 					next_url: next_url
 				})
@@ -165,7 +166,8 @@
 				args: {
 					course: "{{ course }}",
 					content_type: "{{ content_type }}",
-					content: "{{ content.name }}"
+					content: "{{ content.name }}",
+					program: "{{ program }}"
 				}
 			}
 			frappe.call(opts).then(res => {
