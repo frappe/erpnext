@@ -62,6 +62,17 @@ $.extend(erpnext, {
 		$btn.on("click", function() {
 			me.show_serial_batch_selector(grid_row.frm, grid_row.doc);
 		});
+	},
+
+	get_dimension_filters: async function() {
+		let dimensions = await frappe.db.get_list('Accounting Dimension', {
+			fields: ['label', 'fieldname', 'document_type'],
+			filters: {
+				disabled: 0
+			}
+		});
+
+		return dimensions;
 	}
 });
 
