@@ -43,6 +43,24 @@ frappe.ui.form.on("Issue", {
 				frm.save();
 			});
 		}
+
+		frappe.call({
+			method: "erpnext.support.doctype.service_level_agreement.service_level_agreement.get_service_level_agreement_priorities",
+			args: {
+				name: frm.doc.service_level_agreement,
+			},
+			callback: function (r) {
+				if (r && r.message) {
+					frm.set_query('priority', function() {
+						return {
+							filters: {
+								"name": ["in", r.message],
+							}
+						};
+					});
+				}
+			}
+		});
 	},
 
 	priority: function(frm) {

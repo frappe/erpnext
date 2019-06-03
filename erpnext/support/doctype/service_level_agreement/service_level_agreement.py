@@ -67,3 +67,7 @@ def get_active_service_level_agreement_for(priority, customer=None, service_leve
 		fields=["name", "default_priority", "customer"])
 
 	return agreement[0] if agreement else None
+
+@frappe.whitelist()
+def get_service_level_agreement_priorities(name):
+	return [priority.priority for priority in frappe.get_list("Service Level Priority", filters={"parent": name}, fields=["priority"])]
