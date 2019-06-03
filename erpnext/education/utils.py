@@ -239,6 +239,25 @@ def get_quiz(quiz_name, course):
 	status, score, result = check_quiz_completion(quiz, course_enrollment)
 	return {'questions': questions, 'activity': {'is_complete': status, 'score': score, 'result': result}}
 
+def get_student_topic_details(topic, course_name, program):
+	"""
+	Return the porgress of a course in a program as well as the content to continue from.
+		:param topic_name:
+		:param course_name:
+	"""
+	student = get_current_student()
+	course_enrollment = get_or_create_course_enrollment(course_name, program)
+	progress = student.get_topic_progress(course_enrollment.name, topic)
+	if not progress:
+		return {'label':'Open', 'indicator': 'blue'}
+	count = sum([activity['is_complete'] for activity in progress])
+	if count == 0:
+		return {'label':'Open', 'indicator': 'blue'}
+	elif count == len(progress):
+		return {'label':'Completed', 'indicator': 'green'}
+	elif count < len(progress):
+		return {'label':'In Progress', 'indicator': 'orange'}
+
 def create_student_from_current_user():
 	user = frappe.get_doc("User", frappe.session.user)
 

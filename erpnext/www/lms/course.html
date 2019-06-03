@@ -67,9 +67,7 @@
 			</div>
 		{% if has_access %}
 			<div class='card-footer'>
-				{% if index==1 %} <span class="indicator green"> Completed </span>
-				{% else %} <span class="indicator orange"> Completed </span>
-				{% endif %}
+				<span class="indicator {{ progress[topic.name].indicator }}"> {{ progress[topic.name].label }} </span>
 			</div>
 			</a>
 		{% else %}
