@@ -27,7 +27,7 @@ def get_context(context):
 
 
 	# Set context for content to be displayer
-	context.content = frappe.get_doc(content_type, content)
+	context.content = frappe.get_doc(content_type, content).as_dict()
 	context.content_type = content_type
 	context.program = program
 	context.course = course

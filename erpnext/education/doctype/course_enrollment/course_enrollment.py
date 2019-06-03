@@ -35,7 +35,7 @@ class CourseEnrollment(Document):
 		if enrollment:
 			frappe.throw(_("Student is already enrolled."))
 
-	def add_quiz_activity(self, quiz_name, quiz_response,answers, score, status):
+	def add_quiz_activity(self, quiz_name, quiz_response, answers, score, status):
 		result = {k: ('Correct' if v else 'Wrong') for k,v in answers.items()}
 		result_data = []
 		for key in answers:
@@ -43,7 +43,9 @@ class CourseEnrollment(Document):
 			item['question'] = key
 			item['quiz_result'] = result[key]
 			try:
-				if isinstance(quiz_response[key], list):
+				if not quiz_response[key]:
+					item['selected_option'] = "Unattempted"
+				elif isinstance(quiz_response[key], list):
 					item['selected_option'] = ', '.join(frappe.get_value('Options', res, 'option') for res in quiz_response[key])
 				else:
 					item['selected_option'] = frappe.get_value('Options', quiz_response[key], 'option')
@@ -59,7 +61,7 @@ class CourseEnrollment(Document):
 			"result": result_data,
 			"score": score,
 			"status": status
-			}).insert()
+			}).insert(ignore_permissions = True)
 
 	def add_activity(self, content_type, content):
 		activity = check_activity_exists(self.name, content_type, content)

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies and contributors
-# For lice
 
 from __future__ import unicode_literals, division
 import frappe
@@ -173,7 +172,7 @@ def has_super_access():
 	"""Check if user has a role that allows full access to LMS
 
 	Returns:
-	    bool: true if user has access to all lms content
+		bool: true if user has access to all lms content
 	"""
 	current_user = frappe.get_doc('User', frappe.session.user)
 	roles = set([role.role for role in current_user.roles])
@@ -189,7 +188,6 @@ def add_activity(course, content_type, content):
 		return frappe.throw("Student with email {0} does not exist".format(frappe.session.user), frappe.DoesNotExistError)
 
 	course_enrollment = get_enrollment("course", course, student.name)
-	print(course_enrollment)
 	if not course_enrollment:
 		return None
 
@@ -198,6 +196,56 @@ def add_activity(course, content_type, content):
 		return
 	else:
 		return enrollment.add_activity(content_type, content)
+
+@frappe.whitelist()
+def evaluate_quiz(quiz_response, quiz_name, course):
+	import json
+
+	student = get_current_student()
+
+	quiz_response = json.loads(quiz_response)
+	quiz = frappe.get_doc("Quiz", quiz_name)
+	result, score, status = quiz.evaluate(quiz_response, quiz_name)
+
+	if has_super_access():
+		return {'result': result, 'score': score, 'status': status}
+
+	if student:
+		course_enrollment = get_enrollment("course", course, student.name)
+		if course_enrollment:
+			enrollment = frappe.get_doc('Course Enrollment', course_enrollment)
+			if quiz.allowed_attempt(enrollment, quiz_name):
+				enrollment.add_quiz_activity(quiz_name, quiz_response, result, score, status)
+				return {'result': result, 'score': score, 'status': status}
+			else:
+				return None
+		else:
+			frappe.throw("Something went wrong. Pleae contact the administrator.")
+
+@frappe.whitelist()
+def get_quiz(quiz_name, course):
+	try:
+		quiz = frappe.get_doc("Quiz", quiz_name)
+		questions = quiz.get_questions()
+	except:
+		frappe.throw("Quiz {0} does not exist".format(quiz_name))
+		return None
+
+	questions = [{
+		'name': question.name,
+		'question': question.question,
+		'type': question.question_type,
+		'options': [{'name': option.name, 'option': option.option}
+					for option in question.options],
+		} for question in questions]
+
+	if has_super_access():
+		return {'questions': questions, 'activity': None}
+
+	student = get_current_student()
+	course_enrollment = get_enrollment("course", course, student.name)
+	status, score, result = check_quiz_completion(quiz, course_enrollment)
+	return {'questions': questions, 'activity': {'is_complete': status, 'score': score, 'result': result}}
 
 def create_student_from_current_user():
 	user = frappe.get_doc("User", frappe.session.user)
@@ -226,7 +274,7 @@ def check_content_completion(content_name, content_type, enrollment_name):
 
 def check_quiz_completion(quiz, enrollment_name):
 	attempts = frappe.get_all("Quiz Activity", filters={'enrollment': enrollment_name, 'quiz': quiz.name}, fields=["name", "activity_date", "score", "status"])
-	status = False if quiz.max_attempts == 0 else bool(len(attempts) == quiz.max_attempts)
+	status = False if quiz.max_attempts == 0 else bool(len(attempts) >= quiz.max_attempts)
 	score = None
 	result = None
 	if attempts:
