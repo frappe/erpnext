@@ -355,7 +355,7 @@ class AccountsController(TransactionBase):
 			'fiscal_year': fiscal_year,
 			'voucher_type': self.doctype,
 			'voucher_no': self.name,
-			'remarks': self.get("remarks"),
+			'remarks': self.get("remarks") or self.get("remark"),
 			'debit': 0,
 			'credit': 0,
 			'debit_in_account_currency': 0,

@@ -36,7 +36,9 @@ class PurchaseReceipt(BuyingController):
 			'second_source_field': 'received_qty',
 			'second_join_field': 'po_detail',
 			'percent_join_field': 'purchase_order',
-			'overflow_type': 'receipt'
+			'overflow_type': 'receipt',
+			'second_source_extra_cond': """ and exists(select name from `tabPurchase Invoice`
+				where name=`tabPurchase Invoice Item`.parent and update_stock = 1)"""
 		},
 		{
 			'source_dt': 'Purchase Receipt Item',
@@ -55,10 +57,7 @@ class PurchaseReceipt(BuyingController):
 			'join_field': 'purchase_order_item',
 			'target_field': 'returned_qty',
 			'target_parent_dt': 'Purchase Order',
-			# 'target_parent_field': 'per_received',
-			# 'target_ref_field': 'qty',
 			'source_field': '-1 * qty',
-			# 'overflow_type': 'receipt',
 			'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
 		}]
 		if cint(self.is_return):
@@ -71,7 +70,10 @@ class PurchaseReceipt(BuyingController):
 				'second_source_dt': 'Purchase Invoice Item',
 				'second_source_field': '-1 * qty',
 				'second_join_field': 'po_detail',
-				'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
+				'extra_cond': """ and exists (select name from `tabPurchase Receipt`
+					where name=`tabPurchase Receipt Item`.parent and is_return=1)""",
+				'second_source_extra_cond': """ and exists (select name from `tabPurchase Invoice`
+					where name=`tabPurchase Invoice Item`.parent and is_return=1 and update_stock=1)"""
 			})
 
 	def validate(self):
