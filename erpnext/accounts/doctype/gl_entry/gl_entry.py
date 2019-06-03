@@ -12,6 +12,7 @@ from erpnext.accounts.party import validate_party_gle_currency, validate_party_f
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 exclude_from_linked_with = True
 class GLEntry(Document):
@@ -28,6 +29,7 @@ class GLEntry(Document):
 		self.validate_and_set_fiscal_year()
 		self.pl_must_have_cost_center()
 		self.validate_cost_center()
+		self.validate_dimensions_for_pl_and_bs()
 
 		if not self.flags.from_repost:
 			self.check_pl_account()
@@ -79,6 +81,25 @@ class GLEntry(Document):
 				self.cost_center = None
 			if self.project:
 				self.project = None
+
+	def validate_dimensions_for_pl_and_bs(self):
+
+		account_type = frappe.db.get_value("Account", self.account, "report_type")
+
+		for dimension in get_accounting_dimensions(as_list=False):
+
+			if account_type == "Profit and Loss" \
+				and dimension.mandatory_for_pl and not dimension.disabled:
+				if not self.get(dimension.fieldname):
+					frappe.throw(_("{0} is required for 'Profit and Loss' account {1}.")
+						.format(dimension.label, self.account))
+
+			if account_type == "Balance Sheet" \
+				and dimension.mandatory_for_bs and not dimension.disabled:
+				if not self.get(dimension.fieldname):
+					frappe.throw(_("{0} is required for 'Balance Sheet' account {1}.")
+						.format(dimension.label, self.account))
+
 
 	def check_pl_account(self):
 		if self.is_opening=='Yes' and \

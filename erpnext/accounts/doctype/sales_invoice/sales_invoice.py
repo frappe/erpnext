@@ -786,7 +786,7 @@ class SalesInvoice(SellingController):
 								if account_currency==self.company_currency
 								else flt(item.net_amount, item.precision("net_amount"))),
 							"cost_center": item.cost_center
-						}, account_currency)
+						}, account_currency, item=item)
 					)
 
 		# expense account gl entries

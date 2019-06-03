@@ -7,6 +7,7 @@ from frappe.utils import flt, cstr, cint
 from frappe import _
 from frappe.model.meta import get_field_precision
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 
 class StockAccountInvalidTransaction(frappe.ValidationError): pass
@@ -49,10 +50,11 @@ def process_gl_map(gl_map, merge_entries=True):
 
 def merge_similar_entries(gl_map):
 	merged_gl_map = []
+	accounting_dimensions = get_accounting_dimensions()
 	for entry in gl_map:
 		# if there is already an entry in this account then just add it
 		# to that entry
-		same_head = check_if_in_list(entry, merged_gl_map)
+		same_head = check_if_in_list(entry, merged_gl_map, accounting_dimensions)
 		if same_head:
 			same_head.debit	= flt(same_head.debit) + flt(entry.debit)
 			same_head.debit_in_account_currency	= \
@@ -69,16 +71,24 @@ def merge_similar_entries(gl_map):
 
 	return merged_gl_map
 
-def check_if_in_list(gle, gl_map):
+def check_if_in_list(gle, gl_map, dimensions=None):
+	account_head_fieldnames = ['party_type', 'party', 'against_voucher', 'against_voucher_type',
+		'cost_center', 'project']
+
+	if dimensions:
+		account_head_fieldnames = account_head_fieldnames + dimensions
+
 	for e in gl_map:
-		if e.account == gle.account \
-			and cstr(e.get('party_type'))==cstr(gle.get('party_type')) \
-			and cstr(e.get('party'))==cstr(gle.get('party')) \
-			and cstr(e.get('against_voucher'))==cstr(gle.get('against_voucher')) \
-			and cstr(e.get('against_voucher_type')) == cstr(gle.get('against_voucher_type')) \
-			and cstr(e.get('cost_center')) == cstr(gle.get('cost_center')) \
-			and cstr(e.get('project')) == cstr(gle.get('project')):
-				return e
+		same_head = True
+		if e.account != gle.account:
+			same_head = False
+
+		for fieldname in account_head_fieldnames:
+			if cstr(e.get(fieldname)) != cstr(gle.get(fieldname)):
+				same_head = False
+
+		if same_head:
+			return e
 
 def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 	if not from_repost:
