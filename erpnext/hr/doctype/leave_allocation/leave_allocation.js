@@ -21,6 +21,29 @@ frappe.ui.form.on("Leave Allocation", {
 		})
 	},
 
+	refresh: function(frm) {
+		if(frm.doc.docstatus == 1){
+			frm.add_custom_button('Expire Allocation', function() {
+				frm.trigger("expire_allocation");
+			});
+		}
+	},
+
+	expire_allocation: function(frm) {
+		frappe.call({
+			method: 'erpnext.hr.doctype.leave_application.leave_application.expire_previous_allocation',
+			args: {
+				ref_doc: frm.doc
+			},
+			freeze: true,
+			callback: function(r){
+				if(!r.exc){
+					frappe.msgprint(__("Allocation Expired!"));
+				}
+			}
+		});
+	},
+
 	employee: function(frm) {
 		frm.trigger("calculate_total_leaves_allocated");
 	},
