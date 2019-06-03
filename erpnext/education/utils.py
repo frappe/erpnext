@@ -179,7 +179,7 @@ def has_super_access():
 	return bool(roles & {'Administrator', 'Instructor', 'Education Manager', 'System Manager', 'Academic User'})
 
 @frappe.whitelist()
-def add_activity(course, content_type, content):
+def add_activity(course, content_type, content, program):
 	if has_super_access():
 		return None
 
@@ -187,18 +187,14 @@ def add_activity(course, content_type, content):
 	if not student:
 		return frappe.throw("Student with email {0} does not exist".format(frappe.session.user), frappe.DoesNotExistError)
 
-	course_enrollment = get_enrollment("course", course, student.name)
-	if not course_enrollment:
-		return None
-
-	enrollment = frappe.get_doc('Course Enrollment', course_enrollment)
+	enrollment = get_or_create_course_enrollment(course, program)
 	if content_type == 'Quiz':
 		return
 	else:
 		return enrollment.add_activity(content_type, content)
 
 @frappe.whitelist()
-def evaluate_quiz(quiz_response, quiz_name, course):
+def evaluate_quiz(quiz_response, quiz_name, course, program):
 	import json
 
 	student = get_current_student()
@@ -211,16 +207,12 @@ def evaluate_quiz(quiz_response, quiz_name, course):
 		return {'result': result, 'score': score, 'status': status}
 
 	if student:
-		course_enrollment = get_enrollment("course", course, student.name)
-		if course_enrollment:
-			enrollment = frappe.get_doc('Course Enrollment', course_enrollment)
-			if quiz.allowed_attempt(enrollment, quiz_name):
-				enrollment.add_quiz_activity(quiz_name, quiz_response, result, score, status)
-				return {'result': result, 'score': score, 'status': status}
-			else:
-				return None
+		enrollment = get_or_create_course_enrollment(course, program)
+		if quiz.allowed_attempt(enrollment, quiz_name):
+			enrollment.add_quiz_activity(quiz_name, quiz_response, result, score, status)
+			return {'result': result, 'score': score, 'status': status}
 		else:
-			frappe.throw("Something went wrong. Pleae contact the administrator.")
+			return None
 
 @frappe.whitelist()
 def get_quiz(quiz_name, course):
@@ -261,9 +253,17 @@ def create_student_from_current_user():
 	student.save(ignore_permissions=True)
 	return student
 
-def enroll_in_course(course_name, program_name):
+def get_or_create_course_enrollment(course, program):
 	student = get_current_student()
-	return student.enroll_in_course(course_name=course_name, program_enrollment=get_program_enrollment(program_name))
+	course_enrollment = get_enrollment("course", course, student.name)
+	if not course_enrollment:
+		program_enrollment = get_enrollment('program', program, student.name)
+		if not program_enrollment:
+			frappe.throw("You are not enrolled in program {0}".format(program))
+			return
+		return student.enroll_in_course(course_name=course, program_enrollment=get_enrollment('program', program, student.name))
+	else:
+		return frappe.get_doc('Course Enrollment', course_enrollment)
 
 def check_content_completion(content_name, content_type, enrollment_name):
 	activity = frappe.get_all("Course Activity", filters={'enrollment': enrollment_name, 'content_type': content_type, 'content': content_name})

@@ -63,7 +63,8 @@ class Quiz {
 		frappe.call('erpnext.education.utils.evaluate_quiz', {
 			quiz_name: this.name,
 			quiz_response: this.get_selected(),
-			course: this.course
+			course: this.course,
+			program: this.program
 		}).then(res => {
 			this.submit_btn.remove()
 			if (!res.message) {
