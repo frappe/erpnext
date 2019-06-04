@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.model.naming import make_autoname, revert_series_if_last
+from frappe.model.naming import make_autoname
 from frappe.utils import flt, cint
 from frappe.utils.jinja import render_template
 from frappe.utils.data import add_days
@@ -104,9 +104,6 @@ class Batch(Document):
 
 	def onload(self):
 		self.image = frappe.db.get_value('Item', self.item, 'image')
-
-	def after_delete(self):
-		revert_series_if_last(get_batch_naming_series(), self.name)
 
 	def validate(self):
 		self.item_has_batch_enabled()

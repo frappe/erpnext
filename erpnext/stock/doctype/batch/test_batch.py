@@ -208,11 +208,6 @@ class TestBatch(unittest.TestCase):
 
 		self.assertTrue(batch_name.startswith('BATCH-'))
 
-		batch.delete()
-		batch = self.make_new_batch('_Test Stock Item For Batch Test2')
-
-		self.assertEqual(batch_name, batch.name)
-
 		# reset Stock Settings
 		if not use_naming_series:
 			frappe.set_value('Stock Settings', 'Stock Settings', 'use_naming_series', 0)
