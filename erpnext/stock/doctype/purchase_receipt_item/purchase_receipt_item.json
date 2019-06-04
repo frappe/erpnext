@@ -79,15 +79,16 @@
   "batch_no",
   "column_break_48",
   "rejected_serial_no",
-  "section_break_50",
-  "project",
   "expense_account",
-  "cost_center",
   "col_break5",
   "allow_zero_valuation_rate",
   "bom",
   "include_exploded_items",
   "item_tax_rate",
+  "accounting_dimensions_section",
+  "project",
+  "dimension_col_break",
+  "cost_center",
   "section_break_80",
   "page_break"
  ],
@@ -580,10 +581,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "section_break_50",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "item_tax_template",
    "fieldtype": "Link",
    "label": "Item Tax Template",
@@ -782,11 +779,20 @@
    "label": "Expense Account",
    "options": "Account",
    "read_only": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-30 18:09:21.648599",
+ "modified": "2019-06-01 23:25:20.732134",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
