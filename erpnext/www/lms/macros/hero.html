@@ -1,6 +1,11 @@
-{% macro hero(title, description, has_access) %}
+{% macro hero(title, description, has_access, back) %}
 	<div class='container pb-5'>
-		<h1>{{ title }} </h1>
+		<div class="mb-3">
+			<a href="{{ back.url }}" class="text-muted">
+				<i class="fa fa-chevron-left"></i> Back to {{ back.name }}
+			</a>
+		</div>
+		<h1>{{ title }}</h1>
 		<p class='lead' style="max-width: 100%;">{{ description }}</p>
 		<p class="mt-4">
 			{% if frappe.session.user == 'Guest' %}
