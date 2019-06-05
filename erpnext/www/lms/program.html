@@ -34,21 +34,32 @@
 
 {% macro card(course, index, length) %}
 <div class="col-sm-{{ 12 if length%3 == 1 and index == 1 else 6 if length%3 == 2 and index in [1,2] else 4}} mb-4 text-left">
+	<a href="/lms/course?name={{ course.name }}&program={{ program.name }}" class="no-decoration no-underline">
 	<div class="card h-100">
-		<a href="/lms/course?name={{ course.name }}&program={{ program.name }}" class="no-decoration no-underline">
-			{% if course.hero_image %}
-			<div class="card-hero-img" style="background-image: url({{ course.hero_image }})"></div>
+		{% if course.hero_image %}
+		<div class="card-hero-img" style="background-image: url({{ course.hero_image }})"></div>
+		{% else %}
+		<div class="card-image-wrapper text-center">
+			<div class="image-body"><i class="fa fa-picture-o" aria-hidden="true"></i></div>
+		</div>
+		{% endif %}
+		<div class='card-body'>
+			<h5 class='card-title'>{{ course.course_name }}</h5>
+			<div>{{ course.course_intro }}</div>
+		</div>
+		{% if has_access and progress[course.name] %}
+		<div class='card-footer'>
+			{% if progress[course.name].completed %}
+			<span class="indicator green">Completed</span>
+			{% elif progress[course.name].started %}
+			<span class="indicator orange">In Progress</span>
 			{% else %}
-			<div class="card-image-wrapper text-center">
-				<div class="image-body"><i class="fa fa-picture-o" aria-hidden="true"></i></div>
-			</div>
+			<span class="indicator blue">Open</span>
 			{% endif %}
-			<div class='card-body'>
-				<h5 class='card-title'>{{ course.course_name }}</h5>
-				<div>{{ course.course_intro }}</div>
-			</div>
-		</a>
+		</div>
+		{% endif %}
 	</div>
+	</a>
 </div>
 {% endmacro %}
 
@@ -57,8 +68,8 @@
 	{{ hero(program.program_name, program.description, has_access) }}
 	<div class='container'>
 		<div class="row mt-5">
-			{% for course in program.courses %}
-				{{ card(frappe.get_doc("Course", course.course), loop.index, program.courses|length) }}
+			{% for course in courses %}
+				{{ card(course, loop.index, courses|length) }}
 			{% endfor %}
 		</div>
 	</div>

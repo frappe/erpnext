@@ -249,14 +249,42 @@ def get_student_topic_details(topic, course_name, program):
 	course_enrollment = get_or_create_course_enrollment(course_name, program)
 	progress = student.get_topic_progress(course_enrollment.name, topic)
 	if not progress:
-		return {'label':'Open', 'indicator': 'blue'}
+		return None
 	count = sum([activity['is_complete'] for activity in progress])
 	if count == 0:
-		return {'label':'Open', 'indicator': 'blue'}
+		return {'completed': False, 'started': False}
 	elif count == len(progress):
-		return {'label':'Completed', 'indicator': 'green'}
+		return {'completed': True, 'started': True}
 	elif count < len(progress):
-		return {'label':'In Progress', 'indicator': 'orange'}
+		return {'completed': False, 'started': True}
+
+def get_student_course_details(course, program):
+	"""
+	Return the porgress of a course in a program as well as the content to continue from.
+		:param topic_name:
+		:param course_name:
+	"""
+	course_progress = []
+	for course_topic in course.topics:
+		topic = frappe.get_doc("Topic", course_topic.topic)
+		progress = get_student_topic_details(topic, course.name, program)
+		if progress:
+			course_progress.append(progress)
+
+	if course_progress:
+		number_of_completed_topics = sum([activity['completed'] for activity in course_progress])
+		total_topics = len(course_progress)
+		print("course_progress", course_progress)
+		print("number_of_completed_topics", number_of_completed_topics)
+		print("total_topics", total_topics)
+		if number_of_completed_topics == 0:
+			return {'completed': False, 'started': False}
+		if number_of_completed_topics == total_topics:
+			return {'completed': True, 'started': True}
+		if number_of_completed_topics < total_topics:
+			return {'completed': False, 'started': True}
+
+	return None
 
 def create_student_from_current_user():
 	user = frappe.get_doc("User", frappe.session.user)
