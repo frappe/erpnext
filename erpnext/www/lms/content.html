@@ -38,9 +38,9 @@
 		</div>
 		<div id="nav-buttons" class="col-md-5 text-right" {{ 'hidden' if content_type=='Quiz' }}>
 			{% if previous %}
-				<a href="/lms/content?program={{ program }}&course={{ course }}&topic={{ topic }}&type={{ previous.content_type }}&content={{ previous.content }}" class='btn btn-outline-secondary'>Previous</a>
+				<a href="/lms/content?program={{ program }}&course={{ course }}&topic={{ topic }}&type={{ previous.content_type }}&content={{ previous.content }}" class='btn text-muted' style="box-shadow: none;">Previous</a>
 			{% else %}
-				<a href="/lms/course?name={{ course }}&program={{ program }}" class='btn btn-outline-secondary'>Back to Course</a>
+				<a href="/lms/course?name={{ course }}&program={{ program }}" class='btn text-muted' style="box-shadow: none;">Back to Course</a>
 			{% endif %}
 
 			{% if next %}

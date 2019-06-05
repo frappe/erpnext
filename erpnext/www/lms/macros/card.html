@@ -11,7 +11,7 @@
 		{% endif %}
 		<div class='card-body'>
 			<h5 class='card-title'>{{ program.program_name }}</h5>
-			<div>{{ program.description }}</div>
+			<div>{{ program.description or '' }}</div>
 		</div>
 		<div class='card-footer'>
 			{% if has_access %} <span class="indicator green">Enrolled</span>

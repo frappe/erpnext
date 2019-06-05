@@ -45,7 +45,7 @@
 		{% endif %}
 		<div class='card-body'>
 			<h5 class='card-title'>{{ course.course_name }}</h5>
-			<div>{{ course.course_intro }}</div>
+			<div>{{ course.course_intro or '' }}</div>
 		</div>
 		{% if has_access and progress[course.name] %}
 		<div class='card-footer'>
@@ -65,7 +65,7 @@
 
 {% block content %}
 <section class="section">
-	{{ hero(program.program_name, program.description, has_access, {'name': 'LMS Home', 'url': '/lms'}) }}
+	{{ hero(program.program_name, program.description, has_access, {'name': 'Home', 'url': '/lms'}) }}
 	<div class='container'>
 		<div class="row mt-5">
 			{% for course in courses %}

@@ -74,8 +74,7 @@
   {
    "fieldname": "description",
    "fieldtype": "Small Text",
-   "label": "Description",
-   "reqd": 1
+   "label": "Description"
   },
   {
    "fieldname": "intro_video",
@@ -113,7 +112,7 @@
    "label": "Allow Self Enroll"
   }
  ],
- "modified": "2019-05-29 14:42:44.693874",
+ "modified": "2019-06-05 17:47:26.877296",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Program",
