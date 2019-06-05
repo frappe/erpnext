@@ -120,13 +120,23 @@ class Task(NestedSet):
 
 		task_exists = frappe.db.exists("Project Task", {"task_id": self.name, "parent": self.project})
 
-		if not task_exists and frappe.db.exists("Project", {"name": self.project}):
+		if frappe.db.exists("Project", {"name": self.project}):
 			project = frappe.get_doc("Project", self.project)
-			project.append("tasks", {
+
+			task_dict = {
 				"task_id": self.name, "title": self.subject,
 				"status": self.status, 'description': self.description,
 				"start_date": self.exp_start_date, 'end_date': self.exp_end_date,
-			})
+			}
+
+			if not task_exists:
+				project.append("tasks", task_dict)
+			else:
+				for task in project.tasks:
+					if task.name == task_exists:
+						task.update(task_dict)
+						break
+
 			project.flags.ignore_validate = True
 			project.save()
 
