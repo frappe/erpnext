@@ -50,7 +50,7 @@ _test_records = [
 class TestLeaveApplication(unittest.TestCase):
 	def setUp(self):
 		for dt in ["Leave Application", "Leave Allocation", "Salary Slip", "Leave Ledger Entry"]:
-			frappe.db.sql("DELETE FROM `tab%s`" % dt)
+			frappe.db.sql("DELETE FROM `tab%s`" % dt) #nosec
 
 	@classmethod
 	def setUpClass(cls):

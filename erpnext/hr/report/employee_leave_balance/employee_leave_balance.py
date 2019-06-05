@@ -37,9 +37,10 @@ def get_conditions(filters):
 		"company": filters.company,
 	}
 	if filters.get("department"):
-		conditions.update({
-			"department": filters.get("department")
-		})
+		conditions.update({"department": filters.get("department")})
+	if filters.get("employee"):
+		conditions.update({"employee": filters.get("employee")})
+
 	return conditions
 
 def get_data(filters, leave_types):

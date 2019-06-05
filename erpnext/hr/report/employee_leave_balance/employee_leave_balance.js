@@ -30,6 +30,12 @@ frappe.query_reports["Employee Leave Balance"] = {
 			"label": __("Department"),
 			"fieldtype": "Link",
 			"options": "Department",
+		},
+		{
+			"fieldname":"employee",
+			"label": __("Employee"),
+			"fieldtype": "Link",
+			"options": "Employee",
 		}
 	]
 }
