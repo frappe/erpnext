@@ -5,7 +5,13 @@ import frappe
 no_cache = 1
 
 def get_context(context):
+	if frappe.session.user == "Guest":
+		frappe.local.flags.redirect_location = '/lms'
+		raise frappe.Redirect
+
 	context.student = utils.get_current_student()
+	if not context.student:
+		context.student = frappe.get_doc('User', frappe.session.user)
 	context.progress = get_program_progress(context.student.name)
 
 def get_program_progress(student):
@@ -18,7 +24,3 @@ def get_program_progress(student):
 		student_progress.append({'program': program.program_name, 'name': program.name, 'progress':progress, 'completion': completion})
 
 	return student_progress
-
-
-
-
