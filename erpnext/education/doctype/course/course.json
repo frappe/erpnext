@@ -14,7 +14,7 @@
   "course_abbreviation",
   "section_break_6",
   "topics",
-  "course_intro",
+  "description",
   "hero_image",
   "assessment",
   "default_grading_scale",
@@ -69,11 +69,6 @@
    "options": "Course Topic"
   },
   {
-   "fieldname": "course_intro",
-   "fieldtype": "Small Text",
-   "label": "Course Intro"
-  },
-  {
    "fieldname": "hero_image",
    "fieldtype": "Attach Image",
    "label": "Hero Image"
@@ -94,9 +89,14 @@
    "fieldtype": "Table",
    "label": "Assessment Criteria",
    "options": "Course Assessment Criteria"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
   }
  ],
- "modified": "2019-05-20 19:27:09.381482",
+ "modified": "2019-06-05 18:39:11.870605",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Course",

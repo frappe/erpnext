@@ -45,7 +45,7 @@
 		{% endif %}
 		<div class='card-body'>
 			<h5 class='card-title'>{{ course.course_name }}</h5>
-			<div>{{ course.course_intro or '' }}</div>
+			<div>{{ course.description or '' }}</div>
 		</div>
 		{% if has_access and progress[course.name] %}
 		<div class='card-footer'>
@@ -54,7 +54,7 @@
 			{% elif progress[course.name].started %}
 			<span class="indicator orange">In Progress</span>
 			{% else %}
-			<span class="indicator blue">Open</span>
+			<span class="indicator blue">Start</span>
 			{% endif %}
 		</div>
 		{% endif %}
