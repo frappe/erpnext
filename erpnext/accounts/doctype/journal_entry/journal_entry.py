@@ -460,7 +460,7 @@ class JournalEntry(AccountsController):
 
 		if pay_to_recd_from:
 			self.pay_to_recd_from = pay_to_recd_from
-			total_amount = self.total_debit
+			total_amount = self.total_debit or self.total_credit
 			currency = self.company_currency
 
 		self.set_total_amount(total_amount, currency)
