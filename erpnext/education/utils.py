@@ -246,6 +246,8 @@ def get_student_topic_details(topic, course_name, program):
 		:param course_name:
 	"""
 	student = get_current_student()
+	if not student:
+		return None
 	course_enrollment = get_or_create_course_enrollment(course_name, program)
 	progress = student.get_topic_progress(course_enrollment.name, topic)
 	if not progress:

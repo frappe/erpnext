@@ -85,7 +85,7 @@
 
 {% block content %}
 <section class="section ">
-	{{ hero(course.course_name, course.course_intro, has_access) }}
+	{{ hero(course.course_name, course.course_intro, has_access, {'name': 'Program', 'url': '/lms/program?program=' + program }) }}
 	<div class='container'>
 		<div class="row mt-5">
 			{% for topic in topics %}
