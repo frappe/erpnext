@@ -616,6 +616,10 @@ class SalarySlip(TransactionBase):
 		elif not row.amount:
 			amount = row.default_amount + row.additional_amount
 
+		# apply rounding
+		if frappe.get_cached_value("Salary Component", row.salary_component, "round_to_the_nearest_integer"):
+			amount, additional_amount = rounded(amount), rounded(additional_amount)
+
 		return amount, additional_amount
 
 	def calculate_unclaimed_taxable_benefits(self, payroll_period):
