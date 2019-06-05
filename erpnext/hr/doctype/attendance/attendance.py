@@ -7,7 +7,6 @@ import frappe
 from frappe.utils import getdate, nowdate
 from frappe import _
 from frappe.model.document import Document
-from erpnext.hr.utils import set_employee_name
 from frappe.utils import cstr
 
 class Attendance(Document):
@@ -17,8 +16,6 @@ class Attendance(Document):
 			(self.employee, self.attendance_date, self.name))
 		if res:
 			frappe.throw(_("Attendance for employee {0} is already marked").format(self.employee))
-
-		set_employee_name(self)
 
 	def check_leave_record(self):
 		leave_record = frappe.db.sql("""select leave_type, half_day, half_day_date from `tabLeave Application`
