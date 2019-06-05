@@ -211,7 +211,7 @@ class TestSalarySlip(unittest.TestCase):
 		tax_paid = get_tax_paid_in_period(employee)
 
 		# total taxable income 586000, 250000 @ 5%, 86000 @ 20% ie. 12500 + 17200
-		annual_tax = 113567.79
+		annual_tax = 113568
 		try:
 			self.assertEqual(tax_paid, annual_tax)
 		except AssertionError:
@@ -250,7 +250,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		# total taxable income 416000, 166000 @ 5% ie. 8300
 		try:
-			self.assertEqual(tax_paid, 88607.79)
+			self.assertEqual(tax_paid, 88608)
 		except AssertionError:
 			print("\nSalary Slip - Tax calculation failed on following case\n", data, "\n")
 			raise
@@ -265,7 +265,7 @@ class TestSalarySlip(unittest.TestCase):
 		# total taxable income 566000, 250000 @ 5%, 66000 @ 20%, 12500 + 13200
 		tax_paid = get_tax_paid_in_period(employee)
 		try:
-			self.assertEqual(tax_paid, 121211.48)
+			self.assertEqual(tax_paid, 121211)
 		except AssertionError:
 			print("\nSalary Slip - Tax calculation failed on following case\n", data, "\n")
 			raise
@@ -443,7 +443,8 @@ def make_deduction_salary_component(setup=False, test_tax=False):
 			"type": "Deduction",
 			"amount_based_on_formula": 1,
 			"depends_on_payment_days": 0,
-			"variable_based_on_taxable_salary": 1
+			"variable_based_on_taxable_salary": 1,
+			"round_to_the_nearest_integer": 1
 		}
 	]
 	if not test_tax:
@@ -453,7 +454,8 @@ def make_deduction_salary_component(setup=False, test_tax=False):
 			"condition": 'employment_type=="Intern"',
 			"formula": 'base*.1',
 			"type": "Deduction",
-			"amount_based_on_formula": 1
+			"amount_based_on_formula": 1,
+			"round_to_the_nearest_integer": 1
 		})
 	if setup or test_tax:
 		make_salary_component(data, test_tax)
