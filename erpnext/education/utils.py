@@ -239,7 +239,7 @@ def get_quiz(quiz_name, course):
 	status, score, result = check_quiz_completion(quiz, course_enrollment)
 	return {'questions': questions, 'activity': {'is_complete': status, 'score': score, 'result': result}}
 
-def get_student_topic_details(topic, course_name, program):
+def get_topic_progress(topic, course_name, program):
 	"""
 	Return the porgress of a course in a program as well as the content to continue from.
 		:param topic_name:
@@ -260,7 +260,7 @@ def get_student_topic_details(topic, course_name, program):
 	elif count < len(progress):
 		return {'completed': False, 'started': True}
 
-def get_student_course_details(course, program):
+def get_course_progress(course, program):
 	"""
 	Return the porgress of a course in a program as well as the content to continue from.
 		:param topic_name:
@@ -269,16 +269,14 @@ def get_student_course_details(course, program):
 	course_progress = []
 	for course_topic in course.topics:
 		topic = frappe.get_doc("Topic", course_topic.topic)
-		progress = get_student_topic_details(topic, course.name, program)
+		progress = get_topic_progress(topic, course.name, program)
 		if progress:
 			course_progress.append(progress)
-
 	if course_progress:
 		number_of_completed_topics = sum([activity['completed'] for activity in course_progress])
 		total_topics = len(course_progress)
-		print("course_progress", course_progress)
-		print("number_of_completed_topics", number_of_completed_topics)
-		print("total_topics", total_topics)
+		if total_topics == 1:
+			return course_progress[0]
 		if number_of_completed_topics == 0:
 			return {'completed': False, 'started': False}
 		if number_of_completed_topics == total_topics:
@@ -287,6 +285,47 @@ def get_student_course_details(course, program):
 			return {'completed': False, 'started': True}
 
 	return None
+
+def get_program_progress(program):
+	program_progress = []
+	if not program.courses:
+		return None
+	for program_course in program.courses:
+		course = frappe.get_doc("Course", program_course.course)
+		progress = get_course_progress(course, program.name)
+		if progress:
+			progress['name'] = course.name
+			progress['course'] = course.course_name
+			program_progress.append(progress)
+
+	if program_progress:
+		return program_progress
+
+	return None
+
+def get_program_completion(program):
+	topics = frappe.db.sql("""select `tabcourse topic`.topic, `tabcourse topic`.parent
+	from `tabcourse topic`,
+		 `tabprogram course`
+	where `tabcourse topic`.parent = `tabprogram course`.course
+			and `tabprogram course`.parent = '{0}'""".format(program.name))
+
+	progress = []
+	for topic in topics:
+		topic_doc = frappe.get_doc('Topic', topic[0])
+		topic_progress = get_topic_progress(topic_doc, topic[1], program.name)
+		if topic_progress:
+			progress.append(topic_progress)
+
+	if progress:
+		number_of_completed_topics = sum([activity['completed'] for activity in progress if activity])
+		total_topics = len(progress)
+		try:
+			return int((float(number_of_completed_topics)/total_topics)*100)
+		except ZeroDivisionError:
+			return 0
+
+	return 0
 
 def create_student_from_current_user():
 	user = frappe.get_doc("User", frappe.session.user)

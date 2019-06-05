@@ -18,5 +18,5 @@ def get_program(program_name):
 		frappe.throw(_("Program {0} does not exist.".format(program_name)))
 
 def get_course_progress(courses, program):
-	progress = {course.name: utils.get_student_course_details(course, program) for course in courses}
+	progress = {course.name: utils.get_course_progress(course, program) for course in courses}
 	return progress
