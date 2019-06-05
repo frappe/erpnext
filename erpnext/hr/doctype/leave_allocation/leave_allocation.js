@@ -22,9 +22,18 @@ frappe.ui.form.on("Leave Allocation", {
 	},
 
 	refresh: function(frm) {
-		if(frm.doc.docstatus == 1){
-			frm.add_custom_button('Expire Allocation', function() {
+		if(frm.doc.docstatus === 1 && frm.doc.status === "Active") {
+			// expire current allocation
+			frm.add_custom_button(__('Expire Allocation'), function() {
 				frm.trigger("expire_allocation");
+			});
+
+			// opens leave balance report for employee
+			frm.add_custom_button(__('Check Leave Balance'), function() {
+				frappe.route_options = {
+					employee: frm.doc.employee,
+				};
+				frappe.set_route("query-report", "Employee Leave Balance");
 			});
 		}
 	},
