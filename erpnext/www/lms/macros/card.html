@@ -13,11 +13,13 @@
 			<h5 class='card-title'>{{ program.program_name }}</h5>
 			<div>{{ program.description or '' }}</div>
 		</div>
+		{% if has_access or program.intro_video%}
 		<div class='card-footer'>
 			{% if has_access %} <span class="indicator green">Enrolled</span>
-			{% else %} <span>Watch Intro</span>
+			{% elif program.intro_video %} <span><a href="{{ program.intro_video }}" target="blank">Watch Intro</a></span>
 			{% endif %}
 		</div>
+		{% endif %}
 	</div>
 	</a>
 </div>
