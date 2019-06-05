@@ -36,7 +36,7 @@
 <div class="col-sm-{{ 12 if length%3 == 1 and index == 1 else 6 if length%3 == 2 and index in [1,2] else 4}} mb-4 text-left">
 	<div class="card h-100">
 		{% if has_access %}
-			<a href="/lms/content?program={{ program }}&course={{ course.name }}&topic={{ topic.name }}&type={{ topic.topic_content[0].content_type }}&content={{ topic.topic_content[0].content }}" class="no-decoration no-underline">
+			<a href="/lms/topic?program={{ program }}&course={{ course.name }}&topic={{ topic.name }}" class="no-decoration no-underline">
 		{% else %}
 			<div>
 		{% endif %}
@@ -72,7 +72,7 @@
 				{% elif progress[topic.name].started %}
 					<span class="indicator orange">In Progress</span>
 				{% else %}
-					<span class="indicator blue">Open</span>
+					<span class="indicator blue">Start</span>
 				{% endif %}
 			</div>
 			</a>
@@ -85,11 +85,11 @@
 
 {% block content %}
 <section class="section ">
-	{{ hero(course.course_name, course.course_intro, has_access, {'name': 'Program', 'url': '/lms/program?program=' + program }) }}
+	{{ hero(course.course_name, course.description, has_access, {'name': 'Program', 'url': '/lms/program?program=' + program }) }}
 	<div class='container'>
 		<div class="row mt-5">
 			{% for topic in topics %}
-				{{ card(topic.as_dict(), loop.index, topics|length) }}
+				{{ card(topic, loop.index, topics|length) }}
 			{% endfor %}
 		</div>
 	</div>
