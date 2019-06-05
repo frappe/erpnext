@@ -13,7 +13,7 @@
 				<li>
 					{% if course.completed %} <span class="indicator green">
 					{% elif course.started %} <span class="indicator orange">
-					{% else %} <span class="indicator blue">{{ course }}</span>
+					{% else %} <span class="indicator blue">
 					{% endif %}
 						<a class="text-muted" href="/lms/course?program={{ program.name }}&name={{ course.course }}">{{ course.course }}</a>
 					</span>
