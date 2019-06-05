@@ -29,7 +29,7 @@ frappe.ui.form.on("Leave Allocation", {
 			});
 
 			// opens leave balance report for employee
-			frm.add_custom_button(__('Check Leave Balance'), function() {
+			frm.add_custom_button(__('Leave Balance'), function() {
 				frappe.route_options = {
 					employee: frm.doc.employee,
 				};
