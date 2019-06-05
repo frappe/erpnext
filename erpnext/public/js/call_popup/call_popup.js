@@ -106,7 +106,8 @@ class CallPopup {
 	}
 
 	set_indicator(color, blink=false) {
-		this.dialog.header.find('.indicator').removeClass('hidden').toggleClass('blink', blink).addClass(color);
+		let classes = `indicator ${color} ${blink ? 'blink': ''}`;
+		this.dialog.header.find('.indicator').attr('class', classes);
 	}
 
 	set_call_status(call_status) {
