@@ -45,4 +45,4 @@ def create_student_role():
 		"desk_access": 0,
 		"restrict_to_domain": "Education"
 	})
-	student.insert()
+	student_role.insert()
