@@ -9,11 +9,6 @@ from frappe import _
 from frappe.utils import add_days, today, flt
 
 class LeaveLedgerEntry(Document):
-	def validate_entries(self):
-		total_leaves = frappe.get_all('Leave Ledger Entry', ['SUM(leaves)'])
-		if total_leaves < 0:
-			frappe.throw(_("Invalid Ledger Entry"))
-
 	def on_cancel(self):
 		# allow cancellation of expiry leaves
 		if not self.is_expired:
@@ -43,7 +38,8 @@ def create_leave_ledger_entry(ref_doc, args, submit=True):
 		transaction_type=ref_doc.doctype,
 		transaction_name=ref_doc.name,
 		is_carry_forward=0,
-		is_expired=0
+		is_expired=0,
+		is_lwp=0
 	)
 	ledger.update(args)
 	if submit:
