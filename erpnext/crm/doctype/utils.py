@@ -70,12 +70,13 @@ def get_last_interaction(number, reference_doc):
 
 @frappe.whitelist()
 def add_call_summary(docname, summary):
-	communication = frappe.get_doc('Communication', docname)
+	call_log = frappe.get_doc('Call Log', docname)
 	content = _('Call Summary by {0}: {1}').format(
 		frappe.utils.get_fullname(frappe.session.user), summary)
-	if not communication.content:
-		communication.content = content
+	if not call_log.call_summary:
+		call_log.call_summary = content
 	else:
-		communication.content += '\n' + content
-	communication.save(ignore_permissions=True)
+		call_log.call_summary += '<br>' + content
+	call_log.save(ignore_permissions=True)
+
 
