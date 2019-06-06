@@ -28,6 +28,10 @@
 			line-height: 1;
 			padding: 20px;
 		}
+
+		section {
+			padding: 5rem 0 5rem 0;
+		}
 	</style>
 {% endblock %}
 
@@ -45,7 +49,7 @@
 		{% endif %}
 		<div class='card-body'>
 			<h5 class='card-title'>{{ course.course_name }}</h5>
-			<div>{{ course.description or '' }}</div>
+			<div class="text-muted">{{ course.description or '' }}</div>
 		</div>
 		{% if has_access and progress[course.name] %}
 		<div class='card-footer'>
