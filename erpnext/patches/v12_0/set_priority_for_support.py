@@ -36,6 +36,7 @@ def execute():
 		"resolution_time", "resolution_time_period"]):
 
 		doc = frappe.get_doc("Service Level Agreement", service_level_agreement.name)
+		doc.service_level_agreement_name = service_level_agreement.name
 		doc.append("priorities", {
 			"priority": service_level_agreement.priority,
 			"default_priority": 1,
