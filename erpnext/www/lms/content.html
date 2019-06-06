@@ -3,6 +3,26 @@
 
 {% block head_include %}
 	<style>
+		.lms-content {
+			line-height: 1.8em;
+		}
+
+		.lms-content h1 {
+			margin-top: 1em;
+		}
+
+		.lms-content h2 {
+			margin-top: 1em;
+		}
+
+		.lms-content h3 {
+			margin-top: 0.8em;
+		}
+
+		.lms-content h4 {
+			margin-top: 0.6em;
+		}
+
 		section {
 			padding: 5rem 0 5rem 0;
 		}
@@ -79,7 +99,7 @@
 	</div>
 </div>
 <div id="player" data-plyr-provider="{{ content.provider|lower }}" data-plyr-embed-id="{{ content.url }}"></div>
-<div class="my-5" style="line-height: 1.8em;">
+<div class="my-5 lms-content">
 	{{ content.description }}
 </div>
 {% endmacro %}
@@ -99,7 +119,7 @@
 		{% endif %}
 	</div>
 </div>
-<div style="line-height: 1.8em;">
+<div class="lms-content">
 	{{ content.content }}
 </div>
 {% endmacro %}

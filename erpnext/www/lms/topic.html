@@ -1,6 +1,7 @@
 {% extends "templates/base.html" %}
 {% block title %}Topic Title{% endblock %}
 {% from "www/lms/macros/hero.html" import hero %}
+{% from "www/lms/macros/card.html" import null_card %}
 
 {% block head_include %}
 	<style>
@@ -46,6 +47,11 @@
 			{% for content in contents %}
 				{{ card(content, loop.index, topic.contents|length) }}
 			{% endfor %}
+			{% if contents %}
+				{% for n in range(3 - ((contents|length)%3)) %}
+					{{ null_card() }}
+				{% endfor %}
+			{% endif %}
 		</div>
 	</div>
 </section>
