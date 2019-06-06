@@ -14,6 +14,8 @@ def validate_gstin_for_india(doc, method):
 	if not hasattr(doc, 'gstin') or not doc.gstin:
 		return
 
+	gst_category = []
+
 	if len(doc.links) == 1:
 		link_doctype = doc.links[0].get("link_doctype")
 		link_name = doc.links[0].get("link_name")
