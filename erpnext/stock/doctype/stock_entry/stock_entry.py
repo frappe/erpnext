@@ -127,8 +127,10 @@ class StockEntry(StockController):
 
 	def validate_items_qty_for_purchase_receipt(self):
 		pr_list = list(set([item.reference_purchase_receipt for item in self.items]))
+
 		already_transferred = frappe.get_all("Stock Entry Detail", filters=[('reference_purchase_receipt', 'in', pr_list),
 			('docstatus', '=', 1)], fields = ["item_code", "qty"])
+
 		max_item_to_transfer =  frappe.get_all("Purchase Receipt Item", filters=[("parent", "in", pr_list)], fields = ["parent", "item_code", "qty"])
 		max_item_to_transfer =  calculate_total_qty(max_item_to_transfer)
 
@@ -138,7 +140,8 @@ class StockEntry(StockController):
 		to_transfer = calculate_total_qty(self.items)
 
 		for item in self.items:
-			transferred = already_transferred[item.item_code]["qty"] if already_transferred else 0
+			transferred = already_transferred[item.item_code]["qty"] if already_transferred[item.item_code]["qty"] else 0
+			max_item = max_item_to_transfer[item.item_code]["qty"] if max_item_to_transfer[item.item_code]["qty"] else 0
 			allow_to_transfer = max_item_to_transfer[item.item_code]["qty"] - transferred
 
 			if to_transfer[item.item_code]["qty"] > allow_to_transfer:
