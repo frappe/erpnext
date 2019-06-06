@@ -270,31 +270,43 @@ def allocate_earned_leaves():
 		filters={'is_earned_leave' : 1})
 	today = getdate()
 	divide_by_frequency = {"Yearly": 1, "Half-Yearly": 6, "Quarterly": 4, "Monthly": 12}
-	if e_leave_types:
-		for e_leave_type in e_leave_types:
-			leave_allocations = frappe.db.sql("""select name, employee, from_date, to_date from `tabLeave Allocation` where '{0}'
-				between from_date and to_date and docstatus=1 and leave_type='{1}'"""
-				.format(today, e_leave_type.name), as_dict=1)
-			for allocation in leave_allocations:
-				leave_policy = get_employee_leave_policy(allocation.employee)
-				if not leave_policy:
-					continue
-				if not e_leave_type.earned_leave_frequency == "Monthly":
-					if not check_frequency_hit(allocation.from_date, today, e_leave_type.earned_leave_frequency):
-						continue
-				annual_allocation = frappe.db.sql("""select annual_allocation from `tabLeave Policy Detail`
-					where parent=%s and leave_type=%s""", (leave_policy.name, e_leave_type.name))
-				if annual_allocation and annual_allocation[0]:
-					earned_leaves = flt(annual_allocation[0][0]) / divide_by_frequency[e_leave_type.earned_leave_frequency]
-					if e_leave_type.rounding == "0.5":
-						earned_leaves = round(earned_leaves * 2) / 2
-					else:
-						earned_leaves = round(earned_leaves)
 
-					allocated_leaves = frappe.db.get_value('Leave Allocation', allocation.name, 'total_leaves_allocated')
-					new_allocation = flt(allocated_leaves) + flt(earned_leaves)
-					new_allocation = new_allocation if new_allocation <= e_leave_type.max_leaves_allowed else e_leave_type.max_leaves_allowed
-					frappe.db.set_value('Leave Allocation', allocation.name, 'total_leaves_allocated', new_allocation)
+	for e_leave_type in e_leave_types:
+		leave_allocations = frappe.db.sql("""select name, employee, from_date, to_date from `tabLeave Allocation` where '{0}'
+			between from_date and to_date and docstatus=1 and leave_type='{1}'"""
+			.format(today, e_leave_type.name), as_dict=1)
+		for allocation in leave_allocations:
+			leave_policy = get_employee_leave_policy(allocation.employee)
+			if not leave_policy:
+				continue
+			if not e_leave_type.earned_leave_frequency == "Monthly":
+				if not check_frequency_hit(allocation.from_date, today, e_leave_type.earned_leave_frequency):
+					continue
+			annual_allocation = frappe.db.sql("""select annual_allocation from `tabLeave Policy Detail`
+				where parent=%s and leave_type=%s""", (leave_policy.name, e_leave_type.name))
+			if annual_allocation and annual_allocation[0]:
+				earned_leaves = flt(annual_allocation[0][0]) / divide_by_frequency[e_leave_type.earned_leave_frequency]
+				if e_leave_type.rounding == "0.5":
+					earned_leaves = round(earned_leaves * 2) / 2
+				else:
+					earned_leaves = round(earned_leaves)
+
+				allocation = frappe.get_doc('Leave Allocation', allocation.name)
+				new_allocation = flt(allocation.total_leaves_allocated) + flt(earned_leaves)
+				new_allocation = new_allocation if new_allocation <= e_leave_type.max_leaves_allowed else e_leave_type.max_leaves_allowed
+
+				if new_allocation == allocation.total_leaves_allocated:
+					continue
+				allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
+				create_earned_leave_ledger_entry(allocation, earned_leaves, today)
+
+
+def create_earned_leave_ledger_entry(allocation, earned_leaves, date):
+	''' Create leave ledger entry based on the earned leave frequency '''
+	allocation.new_leaves_allocated = earned_leaves
+	allocation.from_date = date
+	allocation.carry_forwarded_leaves = 0
+	allocation.create_leave_ledger_entry()
 
 def check_frequency_hit(from_date, to_date, frequency):
 	'''Return True if current date matches frequency'''
