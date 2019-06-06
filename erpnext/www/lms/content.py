@@ -63,6 +63,6 @@ def allowed_content_access(program, content, content_type):
 		 `tabtopic content`
 	where `tabcourse topic`.parent = `tabprogram course`.course
 			and `tabtopic content`.parent = `tabcourse topic`.topic
-			and `tabprogram course`.parent = '{0}'""".format(program))
+			and `tabprogram course`.parent = %(program)s""", {'program': program})
 
 	return (content, content_type) in contents_of_program
