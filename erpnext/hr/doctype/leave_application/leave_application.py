@@ -474,7 +474,7 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 			AND is_lwp=0
 			{0}
 		GROUP BY employee, leave_type
-	""".format(conditions), dict(date=date, employee=employee), as_dict=1)
+	""".format(conditions), dict(date=date, employee=employee), as_dict=1) #nosec
 
 	allocated_leaves = frappe._dict()
 	for d in allocation_details:
