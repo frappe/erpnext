@@ -1,8 +1,7 @@
 class CallPopup {
-	constructor({ call_from, call_log, call_status_method }) {
-		this.caller_number = call_from;
+	constructor(call_log) {
+		this.caller_number = call_log.call_from;
 		this.call_log = call_log;
-		this.call_status_method = call_status_method;
 		this.make();
 	}
 
@@ -45,7 +44,7 @@ class CallPopup {
 					const values = this.dialog.get_values();
 					if (!values.call_summary) return
 					frappe.xcall('erpnext.crm.doctype.utils.add_call_summary', {
-						'docname': this.call_log.name,
+						'docname': this.call_log.call_id,
 						'summary': values.call_summary,
 					}).then(() => {
 						this.dialog.set_value('call_summary', '');
@@ -56,10 +55,9 @@ class CallPopup {
 				this.set_call_status();
 			}
 		});
-		this.set_call_status(this.call_log.call_status);
+		this.set_call_status();
 		this.make_caller_info_section();
 		this.dialog.get_close_btn().show();
-		this.setup_call_status_updater();
 		this.dialog.$body.addClass('call-popup');
 		this.dialog.set_secondary_action(() => {
 			clearInterval(this.updater);
@@ -81,7 +79,7 @@ class CallPopup {
 				wrapper.append(`
 					<div class="caller-info">
 						<div>Unknown Number: <b>${this.caller_number}</b></div>
-						<a class="contact-link text-medium" href="#Form/Contact/New Contact?phone=${this.caller_number}">
+						<a class="contact-link" href="#Form/Contact/New Contact?phone=${this.caller_number}">
 							${__('Create New Contact')}
 						</a>
 					</div>
@@ -89,12 +87,14 @@ class CallPopup {
 			} else {
 				const link = contact.links ? contact.links[0] : null;
 				const contact_link = link ? frappe.utils.get_form_link(link.link_doctype, link.link_name, true): '';
+				const contact_name = `${contact.first_name || ''} ${contact.last_name || ''}`
 				wrapper.append(`
 					<div class="caller-info flex">
-						<img src="${contact.image}">
-						<div class='flex-column'>
-							<span>${contact.first_name} ${contact.last_name}</span>
-							<span>${contact.mobile_no}</span>
+						${frappe.avatar(null, 'avatar-xl', contact_name, contact.image)}
+						<div>
+							<h5>${contact_name}</h5>
+							<div>${contact.mobile_no || ''}</div>
+							<div>${contact.phone_no || ''}</div>
 							${contact_link}
 						</div>
 					</div>
@@ -113,17 +113,17 @@ class CallPopup {
 	set_call_status(call_status) {
 		let title = '';
 		call_status = call_status || this.call_log.call_status;
-		if (['busy', 'completed'].includes(call_status) || !call_status) {
+		if (['Ringing'].includes(call_status) || !call_status) {
 			title = __('Incoming call from {0}',
-				[this.contact ? `${this.contact.first_name} ${this.contact.last_name}` : this.caller_number]);
+				[this.contact ? `${this.contact.first_name || ''} ${this.contact.last_name || ''}` : this.caller_number]);
 			this.set_indicator('blue', true);
-		} else if (call_status === 'in-progress') {
+		} else if (call_status === 'In Progress') {
 			title = __('Call Connected');
 			this.set_indicator('yellow');
 		} else if (call_status === 'missed') {
 			this.set_indicator('red');
 			title = __('Call Missed');
-		} else if (call_status === 'disconnected') {
+		} else if (['Completed', 'Disconnected'].includes(call_status)) {
 			this.set_indicator('red');
 			title = __('Call Disconnected');
 		} else {
@@ -133,27 +133,12 @@ class CallPopup {
 		this.dialog.set_title(title);
 	}
 
-	update(data) {
-		this.call_log = data.call_log;
+	update_call_log(call_log) {
+		this.call_log = call_log;
 		this.set_call_status();
 	}
-
-	setup_call_status_updater() {
-		this.updater = setInterval(this.get_call_status.bind(this), 20000);
-	}
-
-	get_call_status() {
-		frappe.xcall(this.call_status_method, {
-			'call_id': this.call_log.call_id
-		}).then((call_status) => {
-			if (call_status === 'completed') {
-				clearInterval(this.updater);
-			}
-		});
-	}
-
 	disconnect_call() {
-		this.set_call_status('disconnected');
+		this.set_call_status('Disconnected');
 		clearInterval(this.updater);
 	}
 
@@ -183,17 +168,16 @@ class CallPopup {
 }
 
 $(document).on('app_ready', function () {
-	frappe.realtime.on('show_call_popup', data => {
+	frappe.realtime.on('show_call_popup', call_log => {
 		if (!erpnext.call_popup) {
-			erpnext.call_popup = new CallPopup(data);
+			erpnext.call_popup = new CallPopup(call_log);
 		} else {
-			erpnext.call_popup.update(data);
+			erpnext.call_popup.update_call_log(call_log);
 			erpnext.call_popup.dialog.show();
 		}
 	});
-
-	frappe.realtime.on('call_disconnected', () => {
-		if (erpnext.call_popup) {
+	frappe.realtime.on('call_disconnected', id => {
+		if (erpnext.call_popup && erpnext.call_popup.call_log.call_id === id) {
 			erpnext.call_popup.disconnect_call();
 		}
 	});
