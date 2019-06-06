@@ -83,38 +83,9 @@ class TestJournalEntry(unittest.TestCase):
 		set_perpetual_inventory()
 
 		# Making journal Entry to balance stock value and account difference
-		diff = get_stock_and_account_difference(account_list=['_Test Bank - _TC', 'Stock In Hand - _TC'], company='_Test Company')
-		jv1 = frappe.copy_doc(test_records[0])
-
-		if diff > 0:
-			jv1.get("accounts")[0].update({
-				"account": get_inventory_account('_Test Company'),
-				"company": "_Test Company",
-				"credit_in_account_currency": 0.0,
-				"debit_in_account_currency": diff,
-				"party_type": None,
-				"party": None
-			})
-			jv1.get("accounts")[1].update({
-				"credit_in_account_currency": diff,
-				"debit_in_account_currency": 0.0,
-			})
-		elif diff < 0:
-			jv1.get("accounts")[0].update({
-				"account": get_inventory_account('_Test Company'),
-				"company": "_Test Company",
-				"credit_in_account_currency": 0.0,
-				"debit_in_account_currency": diff,
-				"party_type": None,
-				"party": None
-			})
-			jv1.get("accounts")[1].update({
-				"credit_in_account_currency": diff,
-				"debit_in_account_currency": 0.0,
-			})
-
-		jv1.insert()
-		jv1.submit()
+		diff = get_stock_and_account_difference(account_list=['_Test Bank - _TC', get_inventory_account('_Test Company')], company='_Test Company')
+		if diff != 0:
+			sync_stock_value_and_account_balance(diff, ['_Test Bank - _TC'], '_Test Company')
 
 		jv = frappe.copy_doc(test_records[0])
 		jv.get("accounts")[0].update({
@@ -332,5 +303,44 @@ def make_journal_entry(account1, account2, amount, cost_center=None, posting_dat
 			jv.submit()
 
 	return jv
+
+def sync_stock_value_and_account_balance(diff ,account_list, company):
+	if diff > 0:
+		to_debit = diff
+		to_credit = 0
+	elif diff < 0:
+		to_credit = -(diff)
+		to_debit = 0
+
+	if diff != 0:
+		jv = frappe.new_doc("Journal Entry")
+		jv.cheque_date =  "2013-03-14"
+		jv.cheque_no =  "33"
+		jv.company = company
+		jv.naming_series = "_T-Journal Entry-"
+		jv.posting_date = "2013-02-14"
+		jv.user_remark = "test"
+		jv.voucher_type = "Bank Entry"
+		jv.append('accounts', {
+			"account": get_inventory_account(company),
+			"party_type": None,
+			"party": None,
+			"credit_in_account_currency": to_credit,
+			"debit_in_account_currency": to_debit,
+			"cost_center": "_Test Cost Center - _TC"
+		})
+
+		for acc in account_list:
+			jv.append('accounts', {
+				"account": acc,
+				'party': "_Test Supplier",
+				"party_type": "Supplier",
+				"credit_in_account_currency": flt(to_debit/len(account_list)),
+				"debit_in_account_currency": flt(to_credit/len(account_list)),
+				"cost_center": "_Test Cost Center - _TC"
+			})
+
+		jv.insert()
+		jv.submit()
 
 test_records = frappe.get_test_records('Journal Entry')

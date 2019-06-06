@@ -15,6 +15,8 @@ from erpnext.controllers.accounts_controller import get_payment_terms
 from erpnext.exceptions import InvalidCurrency
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.accounts.utils import get_stock_and_account_difference
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import sync_stock_value_and_account_balance
 
 test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
 test_ignore = ["Serial No"]
@@ -195,6 +197,25 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def test_gl_entries_with_perpetual_inventory_against_pr(self):
 		pr = frappe.copy_doc(pr_test_records[0])
 		set_perpetual_inventory(1, pr.company)
+
+		pr.save()
+
+		diff = get_stock_and_account_difference(account_list = [
+				'Stock In Hand - _TC',
+				'Stock Received But Not Billed - _TC',
+				'Expenses Included In Valuation - _TC'
+			],
+			company=pr.company)
+
+		diff = diff + pr.grand_total +30
+
+		if(diff != 0):
+			sync_stock_value_and_account_balance(diff, account_list = [
+				'Stock Received But Not Billed - _TC',
+				'Expenses Included In Valuation - _TC'
+				],
+			company=pr.company)
+
 		self.assertTrue(cint(erpnext.is_perpetual_inventory_enabled(pr.company)), 1)
 		pr.submit()
 
@@ -522,6 +543,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 	def test_purchase_invoice_update_stock_gl_entry_with_perpetual_inventory(self):
 		set_perpetual_inventory()
+		diff = get_stock_and_account_difference(account_list=['Stock In Hand - _TC', 'Creditors - _TC'], company = '_Test Company')
+		diff = diff + 250
+		if diff != 0:
+			sync_stock_value_and_account_balance(diff, ['Creditors - _TC'], '_Test Company')
 
 		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(),
 			posting_time=frappe.utils.nowtime())
@@ -539,6 +564,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			[stock_in_hand_account, 250.0, 0.0]
 		])
 
+
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gl_entries[gle.account][0], gle.account)
 			self.assertEqual(expected_gl_entries[gle.account][1], gle.debit)
@@ -546,6 +572,22 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 	def test_purchase_invoice_for_is_paid_and_update_stock_gl_entry_with_perpetual_inventory(self):
 		set_perpetual_inventory()
+
+		diff = get_stock_and_account_difference(account_list = [
+			'Stock In Hand - _TC',
+			'Creditors - _TC',
+			'Cash - _TC'
+		],
+		company='_Test Company')
+
+		diff = diff + 250
+
+		if(diff != 0):
+			sync_stock_value_and_account_balance(diff, account_list = [
+				'Creditors - _TC',
+				'Cash - _TC'
+				],
+			company='_Test Company')
 		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(),
 			posting_time=frappe.utils.nowtime(), cash_bank_account="Cash - _TC", is_paid=1)
 
@@ -627,6 +669,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(pi.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
 
 	def test_rejected_serial_no(self):
+		set_perpetual_inventory(0, '_Test Company')
 		pi = make_purchase_invoice(item_code="_Test Serialized Item With Series", received_qty=2, qty=1,
 			rejected_qty=1, rate=500, update_stock=1,
 			rejected_warehouse = "_Test Rejected Warehouse - _TC")
@@ -718,6 +761,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(flt(pi.outstanding_amount), flt(pi.rounded_total + pi.total_advance))
 
 	def test_purchase_invoice_with_shipping_rule(self):
+		set_perpetual_inventory(0, '_Test Company')
 		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule \
 			import create_shipping_rule
 
