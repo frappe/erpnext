@@ -106,7 +106,7 @@
    "collapsible": 1,
    "fieldname": "response_and_resolution_time_section",
    "fieldtype": "Section Break",
-   "label": "Response and Resolution Time"
+   "label": "Priorities, Response and Resolution Time"
   },
   {
    "collapsible": 1,
@@ -150,7 +150,7 @@
    "read_only": 1
   }
  ],
- "modified": "2019-06-05 13:41:24.189152",
+ "modified": "2019-06-06 12:03:11.247979",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
