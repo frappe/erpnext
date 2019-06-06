@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 from erpnext.hr.doctype.leave_application.leave_application \
-	import get_leave_allocation_records, get_leave_balance_on, get_approved_leaves_for_period, get_total_allocated_leaves
+	import get_leaves_for_period
 
 
 def execute(filters=None):
@@ -59,11 +59,11 @@ def get_data(filters, leave_types):
 
 			for leave_type in leave_types:
 				# leaves taken
-				leaves_taken = get_approved_leaves_for_period(employee.name, leave_type,
-					filters.from_date, filters.to_date)
+				leaves_taken = get_leaves_for_period(employee.name, leave_type,
+					filters.from_date, filters.to_date) * -1
 
 				# opening balance
-				opening = get_total_allocated_leaves(employee.name, leave_type, filters.to_date)
+				opening = get_total_allocated_leaves(employee.name, leave_type, filters.from_date, filters.to_date)
 
 				# closing balance
 				closing = flt(opening) - flt(leaves_taken)
@@ -91,3 +91,19 @@ def get_approvers(department):
 			where parent = %s and parentfield = 'leave_approvers'""", (d), as_dict=True)])
 
 	return approvers
+
+def get_total_allocated_leaves(employee, leave_type, from_date, to_date):
+	''' Returns leave allocation between from date and to date '''
+	filters= {
+		'from_date': ['between', (from_date, to_date)],
+		'to_date': ['between', (from_date, to_date)],
+		'docstatus': 1,
+		'is_expired': 0,
+		'leave_type': leave_type,
+		'employee': employee,
+		'transaction_type': 'Leave Allocation'
+	}
+
+	leave_allocation_records = frappe.db.get_all('Leave Ledger Entry', filters=filters, fields=['SUM(leaves) as leaves'])
+
+	return flt(leave_allocation_records[0].get('leaves')) if leave_allocation_records else flt(0)
