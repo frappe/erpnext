@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["BOM Items and Scraps"] = {
+frappe.query_reports["BOM Explorer"] = {
 	"filters": [
 		{
 			fieldname: "bom",
