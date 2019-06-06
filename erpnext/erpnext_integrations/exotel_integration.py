@@ -24,13 +24,13 @@ def handle_incoming_call(*args, **kwargs):
 
 @frappe.whitelist(allow_guest=True)
 def handle_end_call(*args, **kwargs):
-	frappe.publish_realtime('call_disconnected', data=kwargs.get('CallSid'))
 	update_call_log(kwargs, 'Completed')
+	frappe.publish_realtime('call_disconnected', kwargs.get('CallSid'))
 
 @frappe.whitelist(allow_guest=True)
 def handle_missed_call(*args, **kwargs):
-	frappe.publish_realtime('call_disconnected', data=kwargs.get('CallSid'))
 	update_call_log(kwargs, 'Missed')
+	frappe.publish_realtime('call_disconnected', kwargs.get('CallSid'))
 
 def update_call_log(call_payload, status):
 	call_log = get_call_log(call_payload, False)

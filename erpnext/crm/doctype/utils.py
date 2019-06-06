@@ -42,14 +42,13 @@ def get_last_interaction(number, reference_doc):
 
 		if query_condition:
 			query_condition = query_condition[:-2]
-
-		last_communication = frappe.db.sql("""
-			SELECT `name`, `content`
-			FROM `tabCommunication`
-			WHERE {}
-			ORDER BY `modified`
-			LIMIT 1
-			""".format(query_condition))
+			last_communication = frappe.db.sql("""
+				SELECT `name`, `content`
+				FROM `tabCommunication`
+				WHERE {}
+				ORDER BY `modified`
+				LIMIT 1
+				""".format(query_condition))
 
 		if customer_name:
 			last_issue = frappe.get_all('Issue', {
