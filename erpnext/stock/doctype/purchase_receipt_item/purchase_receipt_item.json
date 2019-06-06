@@ -4,6 +4,7 @@
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
+ "engine": "InnoDB",
  "field_order": [
   "barcode",
   "section_break_2",
@@ -78,14 +79,16 @@
   "batch_no",
   "column_break_48",
   "rejected_serial_no",
-  "section_break_50",
-  "project",
-  "cost_center",
+  "expense_account",
   "col_break5",
   "allow_zero_valuation_rate",
   "bom",
   "include_exploded_items",
   "item_tax_rate",
+  "accounting_dimensions_section",
+  "project",
+  "dimension_col_break",
+  "cost_center",
   "section_break_80",
   "page_break"
  ],
@@ -245,6 +248,7 @@
    "width": "100px"
   },
   {
+   "default": "0",
    "fetch_from": "item_code.retain_sample",
    "fieldname": "retain_sample",
    "fieldtype": "Check",
@@ -361,6 +365,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "is_free_item",
    "fieldtype": "Check",
    "label": "Is Free Item",
@@ -482,6 +487,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
    "hidden": 1,
@@ -575,10 +581,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "section_break_50",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "item_tax_template",
    "fieldtype": "Link",
    "label": "Item Tax Template",
@@ -620,6 +622,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "allow_zero_valuation_rate",
    "fieldtype": "Check",
    "label": "Allow Zero Valuation Rate",
@@ -635,6 +638,7 @@
    "print_hide": 1
   },
   {
+   "default": "0",
    "depends_on": "eval:parent.is_subcontracted == 'Yes'",
    "fieldname": "include_exploded_items",
    "fieldtype": "Check",
@@ -739,6 +743,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "fieldname": "page_break",
    "fieldtype": "Check",
    "label": "Page Break",
@@ -766,11 +771,28 @@
    "fieldname": "material_request_item",
    "fieldtype": "Data",
    "label": "Material Request Item"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Expense Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-08 10:25:27.157675",
+ "modified": "2019-06-01 23:25:20.732134",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
