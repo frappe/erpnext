@@ -1,6 +1,7 @@
 {% extends "templates/base.html" %}
 {% block title %}{{ course.course_name }}{% endblock %}
 {% from "www/lms/macros/hero.html" import hero %}
+{% from "www/lms/macros/card.html" import null_card %}
 
 {% block head_include %}
 	<style>
@@ -35,8 +36,8 @@
 {% endblock %}
 
 
-{% macro card(topic, index, length) %}
-<div class="col-sm-{{ 12 if length%3 == 1 and index == 1 else 6 if length%3 == 2 and index in [1,2] else 4}} mb-4 text-left">
+{% macro card(topic) %}
+<div class="col-sm-4 mb-4 text-left">
 	<div class="card h-100">
 		{% if has_access %}
 			<a href="/lms/topic?program={{ program }}&course={{ course.name }}&topic={{ topic.name }}" class="no-decoration no-underline">
@@ -92,8 +93,13 @@
 	<div class='container'>
 		<div class="row mt-5">
 			{% for topic in topics %}
-				{{ card(topic, loop.index, topics|length) }}
+				{{ card(topic) }}
 			{% endfor %}
+			{% if topics %}
+				{% for n in range(3 - ((topics|length)%3)) %}
+					{{ null_card() }}
+				{% endfor %}
+			{% endif %}
 		</div>
 	</div>
 </section>

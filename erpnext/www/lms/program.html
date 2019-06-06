@@ -1,6 +1,7 @@
 {% extends "templates/base.html" %}
 {% block title %}{{ program.program_name }}{% endblock %}
 {% from "www/lms/macros/hero.html" import hero %}
+{% from "www/lms/macros/card.html" import null_card %}
 
 {% block head_include %}
 	<style>
@@ -36,8 +37,8 @@
 {% endblock %}
 
 
-{% macro card(course, index, length) %}
-<div class="col-sm-{{ 12 if length%3 == 1 and index == 1 else 6 if length%3 == 2 and index in [1,2] else 4}} mb-4 text-left">
+{% macro card(course) %}
+<div class="col-sm-4 mb-4 text-left">
 	<a href="/lms/course?name={{ course.name }}&program={{ program.name }}" class="no-decoration no-underline">
 	<div class="card h-100">
 		{% if course.hero_image %}
@@ -49,7 +50,7 @@
 		{% endif %}
 		<div class='card-body'>
 			<h5 class='card-title'>{{ course.course_name }}</h5>
-			<div class="text-muted">{{ course.description or '' }}</div>
+			<div class="text-muted">{{ course.description[:110] + '...' if course.description else '' }}</div>
 		</div>
 		{% if has_access and progress[course.name] %}
 		<div class='card-footer'>
@@ -73,8 +74,13 @@
 	<div class='container'>
 		<div class="row mt-5">
 			{% for course in courses %}
-				{{ card(course, loop.index, courses|length) }}
+				{{ card(course) }}
 			{% endfor %}
+			{% if courses %}
+				{% for n in range(3 - ((courses|length)%3)) %}
+					{{ null_card() }}
+				{% endfor %}
+			{% endif %}
 		</div>
 	</div>
 </section>
