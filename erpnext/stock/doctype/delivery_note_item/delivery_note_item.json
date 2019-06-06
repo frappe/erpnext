@@ -77,7 +77,9 @@
   "expense_account",
   "allow_zero_valuation_rate",
   "column_break_71",
+  "accounting_dimensions_section",
   "cost_center",
+  "dimension_col_break",
   "section_break_72",
   "page_break"
  ],
@@ -365,6 +367,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "is_free_item",
    "fieldtype": "Check",
    "label": "Is Free Item",
@@ -588,6 +591,7 @@
    "width": "120px"
   },
   {
+   "default": "0",
    "fieldname": "allow_zero_valuation_rate",
    "fieldtype": "Check",
    "label": "Allow Zero Valuation Rate",
@@ -658,6 +662,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "fieldname": "page_break",
    "fieldtype": "Check",
    "label": "Page Break",
@@ -683,11 +688,21 @@
   {
    "fieldname": "column_break_71",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-01 17:56:11.792087",
+ "modified": "2019-05-25 22:08:27.452734",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

@@ -624,7 +624,7 @@ class StockEntry(StockController):
 					"cost_center": d.cost_center,
 					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 					"credit": additional_cost
-				}))
+				}, item=d))
 
 				gl_entries.append(self.get_gl_dict({
 					"account": d.expense_account,
@@ -632,7 +632,7 @@ class StockEntry(StockController):
 					"cost_center": d.cost_center,
 					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 					"credit": -1 * additional_cost # put it as negative credit instead of debit purposefully
-				}))
+				}, item=d))
 
 		return gl_entries
 
