@@ -604,3 +604,5 @@ execute:frappe.delete_doc("Report", "Inactive Items")
 erpnext.patches.v11_1.delete_scheduling_tool
 erpnext.patches.v12_0.generate_leave_ledger_entries
 erpnext.patches.v12_0.make_custom_fields_for_bank_remittance
+erpnext.patches.v12_0.make_custom_fields_for_bank_remittance
+execute:frappe.delete_doc_if_exists("Page", "support-analytics")

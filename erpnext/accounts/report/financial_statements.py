@@ -16,6 +16,7 @@ from frappe import _
 from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, formatdate)
 
 from six import itervalues
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_values=False,
 	company=None, reset_period_on_fy_change=True):
@@ -348,20 +349,23 @@ def set_gl_entries_by_account(
 	additional_conditions += " and account in ({})"\
 		.format(", ".join([frappe.db.escape(d) for d in accounts]))
 
+	gl_filters = {
+		"company": company,
+		"from_date": from_date,
+		"to_date": to_date,
+	}
+
+	for key, value in filters.items():
+		if value:
+			gl_filters.update({
+				key: value
+			})
+
 	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
 		where company=%(company)s
 		{additional_conditions}
 		and posting_date <= %(to_date)s
-		order by account, posting_date""".format(additional_conditions=additional_conditions),
-		{
-			"company": company,
-			"from_date": from_date,
-			"to_date": to_date,
-			"cost_center": filters.cost_center,
-			"project": filters.project,
-			"finance_book": filters.get("finance_book")
-		},
-		as_dict=True)
+		order by account, posting_date""".format(additional_conditions=additional_conditions), gl_filters, as_dict=True) #nosec
 
 	if filters and filters.get('presentation_currency'):
 		convert_to_presentation_currency(gl_entries, get_currency(filters))
@@ -374,6 +378,8 @@ def set_gl_entries_by_account(
 
 def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	additional_conditions = []
+
+	accounting_dimensions = get_accounting_dimensions()
 
 	if ignore_closing_entries:
 		additional_conditions.append("ifnull(voucher_type, '')!='Period Closing Voucher'")
@@ -394,6 +400,11 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 
 		if filters.get("finance_book"):
 			additional_conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
+
+	if accounting_dimensions:
+		for dimension in accounting_dimensions:
+			if filters.get(dimension):
+				additional_conditions.append("{0} in (%({0})s)".format(dimension))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 

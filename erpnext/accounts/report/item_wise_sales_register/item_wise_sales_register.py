@@ -102,7 +102,9 @@ def get_conditions(filters):
 		("customer", " and `tabSales Invoice`.customer = %(customer)s"),
 		("item_code", " and `tabSales Invoice Item`.item_code = %(item_code)s"),
 		("from_date", " and `tabSales Invoice`.posting_date>=%(from_date)s"),
-		("to_date", " and `tabSales Invoice`.posting_date<=%(to_date)s")):
+		("to_date", " and `tabSales Invoice`.posting_date<=%(to_date)s"),
+		("company_gstin", " and `tabSales Invoice`.company_gstin = %(company_gstin)s"),
+		("invoice_type", " and `tabSales Invoice`.invoice_type = %(invoice_type)s")):
 			if filters.get(opts[0]):
 				conditions += opts[1]
 

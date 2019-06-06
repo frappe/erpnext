@@ -26,23 +26,17 @@ frappe.ui.form.on("Task", {
 				}
 			}
 		}
-		if(!frm.is_group){
-			var doc = frm.doc;
-			if(doc.__islocal) {
-				if(!frm.doc.exp_end_date) {
-					frm.set_value("exp_end_date", frappe.datetime.add_days(new Date(), 7));
-				}
-			}
 
-			if(!doc.__islocal) {
-				if(frm.perm[0].write) {
-					if(frm.doc.status!=="Completed" && frm.doc.status!=="Cancelled") {
-						frm.add_custom_button(__("Completed"), function() {
-							frm.set_value("status", "Completed");
+		if(!frm.doc.is_group){
+			if (!frm.is_new()) {
+				if (frm.perm[0].write) {
+					if (!["Closed", "Cancelled"].includes(frm.doc.status)) {
+						frm.add_custom_button(__("Close"), () => {
+							frm.set_value("status", "Closed");
 							frm.save();
 						});
 					} else {
-						frm.add_custom_button(__("Reopen"), function() {
+						frm.add_custom_button(__("Reopen"), () => {
 							frm.set_value("status", "Open");
 							frm.save();
 						});
