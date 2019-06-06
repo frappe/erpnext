@@ -7,7 +7,6 @@ from frappe.utils import flt, date_diff, formatdate, add_days
 from frappe import _
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name, get_leave_period
-from erpnext.hr.doctype.leave_application.leave_application import get_approved_leaves_for_period
 from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
 
 class OverlapError(frappe.ValidationError): pass
@@ -133,9 +132,9 @@ class LeaveAllocation(Document):
 		''' expire previous allocation leaves '''
 		leaves = get_unused_leaves(self.employee, self.leave_type, self.from_date)
 
-		if flt(leaves) > 0:
+		if leaves:
 			args = dict(
-				leaves=leaves * -1,
+				leaves=flt(leaves) * -1,
 				from_date=self.from_date,
 				to_date=self.from_date,
 				is_carry_forward=0,
@@ -198,6 +197,7 @@ def get_unused_leaves(employee, leave_type, date):
 			"employee": employee,
 			"docstatus": 1,
 			"leave_type": leave_type,
+			"is_lwp": 0
 			}, fieldname=['SUM(leaves)'])
 
 def validate_carry_forward(leave_type):

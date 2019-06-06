@@ -62,7 +62,7 @@
   },
   {
    "fieldname": "leaves",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Leaves"
   },
@@ -101,7 +101,7 @@
  ],
  "in_create": 1,
  "is_submittable": 1,
- "modified": "2019-06-05 12:56:04.980160",
+ "modified": "2019-06-06 20:33:37.531161",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Ledger Entry",
