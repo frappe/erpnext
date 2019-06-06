@@ -34,7 +34,7 @@ def get_context(context):
 	context.topic = topic
 
 	topic = frappe.get_doc("Topic", topic)
-	content_list = [{'content_type':item.doctype, 'content':item.name} for item in topic.get_contents()]
+	content_list = [{'content_type':item.content_type, 'content':item.content} for item in topic.topic_content]
 
 	# Set context for progress numbers
 	context.position = content_list.index({'content': content, 'content_type': content_type})
@@ -57,12 +57,12 @@ def get_previous_content(content_list, current_index):
 		return content_list[current_index - 1]
 
 def allowed_content_access(program, content, content_type):
-	contents_of_program = frappe.db.sql("""select `tabtopic content`.content, `tabtopic content`.content_type
-	from `tabcourse topic`,
-		 `tabprogram course`,
-		 `tabtopic content`
-	where `tabcourse topic`.parent = `tabprogram course`.course
-			and `tabtopic content`.parent = `tabcourse topic`.topic
-			and `tabprogram course`.parent = %(program)s""", {'program': program})
+	contents_of_program = frappe.db.sql("""select `tabTopic Content`.content, `tabTopic Content`.content_type
+	from `tabCourse Topic`,
+		 `tabProgram Course`,
+		 `tabTopic Content`
+	where `tabCourse Topic`.parent = `tabProgram Course`.course
+			and `tabTopic Content`.parent = `tabCourse Topic`.topic
+			and `tabProgram Course`.parent = %(program)s""", {'program': program})
 
 	return (content, content_type) in contents_of_program
