@@ -42,7 +42,7 @@
 		{% if has_access %}
 			<a href="/lms/topic?program={{ program }}&course={{ course.name }}&topic={{ topic.name }}" class="no-decoration no-underline">
 		{% else %}
-			<div>
+			<div onclick="show_singup()">
 		{% endif %}
 			{% if topic.hero_image %}
 			<div class="card-hero-img" style="background-image: url({{ topic.hero_image }})"></div>
@@ -103,4 +103,23 @@
 		</div>
 	</div>
 </section>
+{% endblock %}
+
+{% block script %}
+<script>
+	function show_singup() {
+		if (frappe.session.user == "Guest") {
+			let signup_dialog = new frappe.ui.Dialog({
+				title: __('Sign Up'),
+				primary_action: function() {
+					window.location.href = '/login#signup'
+				},
+				primary_action_label: 'Sign Up'
+			})
+			signup_dialog.set_message('You have to sign up to access the course');
+			signup_dialog.$message.show()
+			signup_dialog.show();
+		}
+	}
+</script>
 {% endblock %}
