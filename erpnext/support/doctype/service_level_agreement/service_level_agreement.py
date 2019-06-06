@@ -14,14 +14,12 @@ class ServiceLevelAgreement(Document):
 			if frappe.db.exists("Service Level Agreement", {"default_service_level_agreement": "1", "name": ["!=", self.name]}):
 				frappe.throw(_("A Default Service Level Agreement already exists."))
 		else:
-			if not self.ignore_start_and_end_date and not (self.start_date and self.end_date):
-				frappe.throw(_("Enter Start and End Date for the Agreement."))
+			if self.start_date and self.end_date:
+				if self.start_date >= self.end_date:
+					frappe.throw(_("Start Date of Agreement can't be greater than or equal to End Date."))
 
-			if not self.ignore_start_and_end_date and self.start_date >= self.end_date:
-				frappe.throw(_("Start Date of Agreement can't be greater than or equal to End Date."))
-
-			if not self.ignore_start_and_end_date and self.end_date < frappe.utils.getdate():
-				frappe.throw(_("End Date of Agreement can't be less than today."))
+				if self.end_date < frappe.utils.getdate():
+					frappe.throw(_("End Date of Agreement can't be less than today."))
 
 	def get_service_level_agreement_priority(self, priority):
 		priority = frappe.get_doc("Service Level Priority", {"priority": priority, "parent": self.name})
@@ -36,18 +34,18 @@ class ServiceLevelAgreement(Document):
 
 def check_agreement_status():
 	service_level_agreements = frappe.get_list("Service Level Agreement", filters=[
-		{"agreement_status": "Active"},
+		{"active": 1},
 		{"default_service_level_agreement": 0}
-	], fields=["name", "end_date"])
+	], fields=["name"])
 
 	for service_level_agreement in service_level_agreements:
-		if service_level_agreement.end_date < frappe.utils.getdate():
-			frappe.db.set_value("Service Level Agreement", service_level_agreement.name,
-				"agreement_status", "Expired")
+		doc = frappe.get_doc("Service Level Agreement", service_level_agreement.name)
+		if doc.end_date and doc.end_date < frappe.utils.getdate():
+			frappe.db.set_value("Service Level Agreement", service_level_agreement.name, "active", 0)
 
 def get_active_service_level_agreement_for(priority, customer=None, service_level_agreement=None):
 	filters = [
-		["Service Level Agreement", "agreement_status", "=", "Active"]
+		["Service Level Agreement", "active", "=", 1]
 	]
 
 	if priority:
