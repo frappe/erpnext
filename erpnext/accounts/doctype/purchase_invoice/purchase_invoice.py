@@ -456,7 +456,7 @@ class PurchaseInvoice(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"cost_center": item.cost_center,
 							"project": item.project
-						}, account_currency)
+						}, account_currency, item=item)
 					)
 
 					# Amount added through landed-cost-voucher
@@ -468,7 +468,7 @@ class PurchaseInvoice(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.landed_cost_voucher_amount),
 							"project": item.project
-						}))
+						}, item=item))
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):
@@ -482,7 +482,7 @@ class PurchaseInvoice(BuyingController):
 							"cost_center": item.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.rm_supp_cost)
-						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
+						}, warehouse_account[self.supplier_warehouse]["account_currency"], item=item))
 				elif not item.is_fixed_asset or (item.is_fixed_asset and is_cwip_accounting_disabled()):
 					gl_entries.append(
 						self.get_gl_dict({
@@ -494,7 +494,7 @@ class PurchaseInvoice(BuyingController):
 								else flt(item.net_amount, item.precision("net_amount"))),
 							"cost_center": item.cost_center,
 							"project": item.project
-						}, account_currency)
+						}, account_currency, item=item)
 					)
 
 			if self.auto_accounting_for_stock and self.is_opening == "No" and \
@@ -513,7 +513,7 @@ class PurchaseInvoice(BuyingController):
 									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
 									"remarks": self.remarks or "Accounting Entry for Stock",
 									"cost_center": self.cost_center
-								})
+								}, item=item)
 							)
 
 							self.negative_expense_to_be_booked += flt(item.item_tax_amount, \
@@ -542,7 +542,7 @@ class PurchaseInvoice(BuyingController):
 						"debit_in_account_currency": (base_asset_amount
 							if asset_rbnb_currency == self.company_currency else asset_amount),
 						"cost_center": item.cost_center
-					}))
+					}, item=item))
 
 					if item.item_tax_amount:
 						asset_eiiav_currency = get_account_currency(eiiav_account)
@@ -555,7 +555,7 @@ class PurchaseInvoice(BuyingController):
 							"credit_in_account_currency": (item.item_tax_amount
 								if asset_eiiav_currency == self.company_currency else
 									item.item_tax_amount / self.conversion_rate)
-						}))
+						}, item=item))
 				else:
 					cwip_account = get_asset_account("capital_work_in_progress_account",
 						item.asset, company = self.company)
@@ -569,7 +569,7 @@ class PurchaseInvoice(BuyingController):
 						"debit_in_account_currency": (base_asset_amount
 							if cwip_account_currency == self.company_currency else asset_amount),
 						"cost_center": self.cost_center
-					}))
+					}, item=item))
 
 					if item.item_tax_amount and not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
 						asset_eiiav_currency = get_account_currency(eiiav_account)
@@ -582,7 +582,7 @@ class PurchaseInvoice(BuyingController):
 							"credit_in_account_currency": (item.item_tax_amount
 								if asset_eiiav_currency == self.company_currency else
 									item.item_tax_amount / self.conversion_rate)
-						}))
+						}, item=item))
 
 		return gl_entries
 
@@ -609,7 +609,7 @@ class PurchaseInvoice(BuyingController):
 					"remarks": self.get("remarks") or _("Stock Adjustment"),
 					"cost_center": item.cost_center,
 					"project": item.project
-				}, account_currency)
+				}, account_currency, item=item)
 			)
 
 			warehouse_debit_amount = stock_amount
