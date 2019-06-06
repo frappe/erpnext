@@ -79,4 +79,18 @@ def add_call_summary(docname, summary):
 		call_log.call_summary += '<br>' + content
 	call_log.save(ignore_permissions=True)
 
+def get_employee_emails_for_popup():
+	employee_emails = []
+	now_time = frappe.utils.nowtime()
+	weekday = frappe.utils.get_weekday()
 
+	available_employee_groups = frappe.db.sql("""SELECT `parent`, `employee_group`
+		FROM `tabCommunication Medium Timeslot`
+		WHERE `day_of_week` = %s AND
+		%s BETWEEN `from_time` AND `to_time`
+	""", (weekday, now_time), as_dict=1)
+
+	for group in available_employee_groups:
+		employee_emails += [e.user_id for e in frappe.get_doc('Employee Group', group.employee_group).employee_list]
+
+	return employee_emails

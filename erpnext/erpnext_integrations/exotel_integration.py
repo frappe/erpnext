@@ -1,5 +1,5 @@
 import frappe
-from erpnext.crm.doctype.utils import get_document_with_phone_number
+from erpnext.crm.doctype.utils import get_document_with_phone_number, get_employee_emails_for_popup
 import requests
 
 # api/method/erpnext.erpnext_integrations.exotel_integration.handle_incoming_call
@@ -9,39 +9,34 @@ def handle_incoming_call(*args, **kwargs):
 	exotel_settings = get_exotel_settings()
 	if not exotel_settings.enabled: return
 
-	employee_email = kwargs.get('AgentEmail')
 	status = kwargs.get('Status')
 
 	if status == 'free':
 		# call disconnected for agent
 		# "and get_call_status(kwargs.get('CallSid')) in ['in-progress']" - additional check to ensure if the call was redirected
-		frappe.publish_realtime('call_disconnected', user=employee_email)
 		return
 
 	call_log = get_call_log(kwargs)
 
-	data = frappe._dict({
-		'call_from': kwargs.get('CallFrom'),
-		'agent_email': kwargs.get('AgentEmail'),
-		'call_type': kwargs.get('Direction'),
-		'call_log': call_log,
-		'call_status_method': 'erpnext.erpnext_integrations.exotel_integration.get_call_status'
-	})
-
-	frappe.publish_realtime('show_call_popup', data, user=data.agent_email)
+	employee_emails = get_employee_emails_for_popup()
+	for email in employee_emails:
+		frappe.publish_realtime('show_call_popup', call_log, user=email)
 
 @frappe.whitelist(allow_guest=True)
 def handle_end_call(*args, **kwargs):
-	close_call_log(kwargs)
+	frappe.publish_realtime('call_disconnected', data=kwargs.get('CallSid'))
+	update_call_log(kwargs, 'Completed')
 
 @frappe.whitelist(allow_guest=True)
 def handle_missed_call(*args, **kwargs):
-	close_call_log(kwargs)
+	frappe.publish_realtime('call_disconnected', data=kwargs.get('CallSid'))
+	update_call_log(kwargs, 'Missed')
 
-def close_call_log(call_payload):
-	call_log = get_call_log(call_payload)
+def update_call_log(call_payload, status):
+	call_log = get_call_log(call_payload, False)
 	if call_log:
-		call_log.status = 'Closed'
+		call_log.call_status = status
+		call_log.call_duration = call_payload.get('DialCallDuration') or 0
 		call_log.save(ignore_permissions=True)
 		frappe.db.commit()
 
