@@ -8,7 +8,7 @@ def execute():
 	for priority in priorities:
 		frappe.get_doc({
 			"doctype": "Issue Priority",
-			"name":priority
+			"name": priority
 		}).insert(ignore_permissions=True)
 
 	frappe.reload_doc("support", "doctype", "issue")
@@ -22,26 +22,26 @@ def execute():
 		"resolution_time", "resolution_time_period"]):
 
 		doc = frappe.get_doc("Service Level", service_level.name)
-		doc.update("priorities": [{
+		doc.append("priorities", {
 			"priority": service_level.priority,
 			"default_priority": 1,
 			"response_time": service_level.response_time,
 			"response_time_period": service_level.response_time_period,
 			"resolution_time": service_level.resolution_time,
 			"resolution_time_period": service_level.resolution_time_period
-		}])
+		})
 		doc.save(ignore_permissions=True)
 
 	for service_level_agreement in frappe.get_list("Service Level Agreement", fields=["name", "priority", "response_time", "response_time_period",
 		"resolution_time", "resolution_time_period"]):
 
-		doc = frappe.get_doc("Service Level", service_level_agreement.name)
-		doc.update("priorities": [{
+		doc = frappe.get_doc("Service Level Agreement", service_level_agreement.name)
+		doc.append("priorities", {
 			"priority": service_level_agreement.priority,
 			"default_priority": 1,
 			"response_time": service_level_agreement.response_time,
 			"response_time_period": service_level_agreement.response_time_period,
 			"resolution_time": service_level_agreement.resolution_time,
 			"resolution_time_period": service_level_agreement.resolution_time_period
-		}])
+		})
 		doc.save(ignore_permissions=True)
