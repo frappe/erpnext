@@ -304,11 +304,11 @@ def get_program_progress(program):
 	return None
 
 def get_program_completion(program):
-	topics = frappe.db.sql("""select `tabcourse topic`.topic, `tabcourse topic`.parent
-	from `tabcourse topic`,
-		 `tabprogram course`
-	where `tabcourse topic`.parent = `tabprogram course`.course
-			and `tabprogram course`.parent = %s""", program.name)
+	topics = frappe.db.sql("""select `tabCourse Topic`.topic, `tabCourse Topic`.parent
+	from `tabCourse Topic`,
+		 `tabProgram Course`
+	where `tabCourse Topic`.parent = `tabProgram Course`.course
+			and `tabProgram Course`.parent = %s""", program.name)
 
 	progress = []
 	for topic in topics:
