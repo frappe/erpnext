@@ -68,7 +68,7 @@ frappe.ui.form.on('Payment Order', {
 				docstatus: 1,
 				bank_account: frm.doc.company_bank_account,
 				paid_from: frm.doc.account,
-				status: ["=", "Initiated"],
+				payment_order_status: ["=", "Initiated"],
 			}
 		});
 	},

@@ -43,7 +43,9 @@
   "accounting",
   "expense_account",
   "col_break5",
+  "accounting_dimensions_section",
   "cost_center",
+  "dimension_col_break",
   "more_info",
   "allow_zero_valuation_rate",
   "actual_qty",
@@ -462,6 +464,15 @@
    "label": "Reference Purchase Receipt ",
    "options": "Purchase Receipt",
    "read_only": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,

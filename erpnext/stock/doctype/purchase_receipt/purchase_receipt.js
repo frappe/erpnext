@@ -10,7 +10,7 @@ frappe.ui.form.on("Purchase Receipt", {
 		frm.custom_make_buttons = {
 			'Stock Entry': 'Return',
 			'Purchase Invoice': 'Invoice'
-		}
+		};
 
 		frm.set_query("asset", "items", function() {
 			return {
@@ -18,7 +18,15 @@ frappe.ui.form.on("Purchase Receipt", {
 					"purchase_receipt": frm.doc.name
 				}
 			}
-		})
+		});
+
+		frm.set_query("expense_account", "items", function() {
+			return {
+				query: "erpnext.controllers.queries.get_expense_account",
+				filters: {'company': frm.doc.company}
+			}
+		});
+
 	},
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
