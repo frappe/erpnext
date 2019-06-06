@@ -1,5 +1,5 @@
 {
- "autoname": "call_id",
+ "autoname": "field:call_id",
  "creation": "2019-06-05 12:07:02.634534",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -18,11 +18,13 @@
    "fieldname": "call_id",
    "fieldtype": "Data",
    "label": "Call ID",
-   "read_only": 1
+   "read_only": 1,
+   "unique": 1
   },
   {
    "fieldname": "call_from",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Call From",
    "read_only": 1
   },
@@ -43,14 +45,16 @@
   {
    "fieldname": "call_status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Call Status",
-   "options": "Ringing\nIn Progress\nMissed",
+   "options": "Ringing\nIn Progress\nCompleted\nMissed",
    "read_only": 1
   },
   {
    "description": "Call Duration in seconds",
    "fieldname": "call_duration",
    "fieldtype": "Int",
+   "in_list_view": 1,
    "label": "Call Duration",
    "read_only": 1
   },
@@ -61,7 +65,7 @@
    "read_only": 1
   }
  ],
- "modified": "2019-06-05 12:08:55.527178",
+ "modified": "2019-06-06 07:41:26.208109",
  "modified_by": "Administrator",
  "module": "Communication",
  "name": "Call Log",
@@ -82,5 +86,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "ASC",
+ "title_field": "call_from",
  "track_changes": 1
 }
