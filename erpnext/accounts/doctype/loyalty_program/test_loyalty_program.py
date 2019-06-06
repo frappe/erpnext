@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from frappe.utils import today, cint, flt, getdate
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_program_details_with_points
 from erpnext.accounts.party import get_dashboard_info
 
@@ -261,6 +262,8 @@ def create_records():
 			}
 		]
 	}).insert()
+
+	set_perpetual_inventory(0, '_Test Company')
 
 	# create an item
 	item = frappe.get_doc({
