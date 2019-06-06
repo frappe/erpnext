@@ -30,11 +30,15 @@
 			line-height: 1;
 			padding: 20px;
 		}
+
+		section {
+			padding: 5rem 0 5rem 0;
+		}
 	</style>
 {% endblock %}
 
 {% block content %}
-<section class="top-section ">
+<section class="top-section" style="padding: 6rem 0rem;">
 	<div class='container pb-5'>
 		<h1>{{ education_settings.portal_title }}</h1>
 		<p class='lead'>{{ education_settings.description }}</p>
@@ -52,44 +56,6 @@
 		<p class='mt-4'>
 			<a href='/lms/all-programs' class='text-muted'>View All Programs</a>
 		</p>
-	</div>
-</section>
-<section class="section-padding section-bg">
-	<div class='container'>
-	<div class='card-deck'>
-		<div class="card">
-			<!-- <img class='mt-3' src="/assets/erpnext_com/img/balloon.svg" style='height: 150px'> -->
-			<div class='card-body'>
-				<h5 class='card-title'>Curated Courses</h5>
-				<div>Start with a 14 day trial to get instant access to your own ERPNext Instance. Get expert support and world class hosting too.</div>
-			</div>
-		</div>
-
-		<div class="card">
-			<!-- <img class='mt-3' src="/assets/erpnext_com/img/umbrella.svg" style='height: 150px'> -->
-			<div class='card-body'>
-				<h5 class='card-title'>Built by Experts</h5>
-				<div>For self hosted users, ERPNext Support provides you the priority support and bug fix guarantee, so you can stop worrying.</div>
-			</div>
-		</div>
-
-		<div class="card">
-			<!-- <img class='mt-3' src="/assets/erpnext_com/img/sun.svg" style='height: 150px'> -->
-			<div class='card-body'>
-				<h5 class='card-title'>Learn from the OEMs</h5>
-				<div>ERPNext is open source and infinitely extensible. Customize it, build upon it, add your own apps built with <a href="https://frappe.io/frappe" class="underline">Frappe Framework</a>.</div>
-			</div>
-		</div>
-	</div>
-	</div>
-</section>
-<section class='section-padding'>
-	<div class='container text-center'>
-		<h3 class='text-center'>About ERPNext</h3>
-		<p class='lead'>ERPNext is the world's best 100% open source ERP used by over 5000 companies worldwide.</p>
-		<div class='mt-4 '>
-			<a class="btn btn-primary btn-lg" href="/pricing">Start Learning</a>
-		</div>
 	</div>
 </section>
 {% endblock %}

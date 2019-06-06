@@ -2,6 +2,14 @@
 {% block title %}Topic Title{% endblock %}
 {% from "www/lms/macros/hero.html" import hero %}
 
+{% block head_include %}
+	<style>
+		section {
+			padding: 5rem 0 5rem 0;
+		}
+	</style>
+{% endblock %}
+
 
 {% macro card(content, index, length) %}
 <div class="col-sm-{{ 12 if length%3 == 1 and index == 1 else 6 if length%3 == 2 and index in [1,2] else 4}} mb-4 text-left">
