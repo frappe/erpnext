@@ -53,22 +53,25 @@ frappe.ui.form.on("Leave Application", {
 				},
 				callback: function(r) {
 					if (!r.exc && r.message['leave_allocation']) {
-						leave_details = r.message['leave_allocation'];
+						frm.set_value('leave_details', JSON.stringify(r.message['leave_allocation']));
 					}
 					if (!r.exc && r.message['leave_approver']) {
 						frm.set_value('leave_approver', r.message['leave_approver']);
 					}
 				}
 			});
-
-			$("div").remove(".form-dashboard-section");
-			let section = frm.dashboard.add_section(
-				frappe.render_template('leave_application_dashboard', {
-					data: leave_details
-				})
-			);
-			frm.dashboard.show();
+			frm.trigger("create_dashboard")
 		}
+	},
+
+	create_dashboard: function(frm) {
+		$("div").remove(".form-dashboard-section");
+		let section = frm.dashboard.add_section(
+			frappe.render_template('leave_application_dashboard', {
+				data: JSON.parse(frm.doc.leave_details)
+			})
+		);
+		frm.dashboard.show();
 	},
 
 	refresh: function(frm) {
@@ -95,6 +98,7 @@ frappe.ui.form.on("Leave Application", {
 				};
 				frappe.set_route("query-report", "Employee Leave Balance");
 			});
+			frm.trigger("create_dashboard");
 		}
 	},
 
@@ -148,7 +152,7 @@ frappe.ui.form.on("Leave Application", {
 	},
 
 	get_leave_balance: function(frm) {
-		if(frm.doc.docstatus==0 && frm.doc.employee && frm.doc.leave_type && frm.doc.from_date) {
+		if(frm.doc.docstatus==0 && frm.doc.employee && frm.doc.leave_type && frm.doc.from_date && frm.doc.to_date) {
 			return frappe.call({
 				method: "erpnext.hr.doctype.leave_application.leave_application.get_leave_balance_on",
 				args: {
