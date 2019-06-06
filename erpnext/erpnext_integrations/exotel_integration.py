@@ -47,29 +47,20 @@ def close_call_log(call_payload):
 
 
 def get_call_log(call_payload, create_new_if_not_found=True):
-	communication = frappe.get_all('Communication', {
-		'communication_medium': 'Phone',
+	call_log = frappe.get_all('Call Log', {
 		'call_id': call_payload.get('CallSid'),
 	}, limit=1)
 
-	if communication:
-		communication = frappe.get_doc('Communication', communication[0].name)
-		return communication
+	if call_log:
+		return frappe.get_doc('Call Log', call_log[0].name)
 	elif create_new_if_not_found:
-		communication = frappe.new_doc('Communication')
-		communication.subject = frappe._('Call from {}').format(call_payload.get("CallFrom"))
-		communication.communication_medium = 'Phone'
-		communication.phone_no = call_payload.get("CallFrom")
-		communication.comment_type = 'Info'
-		communication.communication_type = 'Communication'
-		communication.sent_or_received = 'Received'
-		communication.communication_date = call_payload.get('StartTime')
-		communication.call_id = call_payload.get('CallSid')
-		communication.status = 'Open'
-		communication.content = frappe._('Call from {}').format(call_payload.get("CallFrom"))
-		communication.save(ignore_permissions=True)
+		call_log = frappe.new_doc('Call Log')
+		call_log.call_id = call_payload.get('CallSid')
+		call_log.call_from = call_payload.get('CallFrom')
+		call_log.status = 'Ringing'
+		call_log.save(ignore_permissions=True)
 		frappe.db.commit()
-		return communication
+		return call_log
 
 @frappe.whitelist()
 def get_call_status(call_id):
