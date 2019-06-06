@@ -308,7 +308,7 @@ def get_program_completion(program):
 	from `tabcourse topic`,
 		 `tabprogram course`
 	where `tabcourse topic`.parent = `tabprogram course`.course
-			and `tabprogram course`.parent = %(program)s""", {'program': program})
+			and `tabprogram course`.parent = %s""", program.name)
 
 	progress = []
 	for topic in topics:

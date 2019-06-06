@@ -17,18 +17,25 @@ def get_context(context):
 
 def get_contents(topic, course, program):
 	student = utils.get_current_student()
-	if not student:
-		return None
-	course_enrollment = utils.get_or_create_course_enrollment(course, program)
+	if student:
+		course_enrollment = utils.get_or_create_course_enrollment(course, program)
 	contents = topic.get_contents()
 	progress = []
 	if contents:
 		for content in contents:
 			if content.doctype in ('Article', 'Video'):
-				status = utils.check_content_completion(content.name, content.doctype, course_enrollment.name)
+				if student:
+					status = utils.check_content_completion(content.name, content.doctype, course_enrollment.name)
+				else:
+					status = True
 				progress.append({'content': content, 'content_type': content.doctype, 'completed': status})
 			elif content.doctype == 'Quiz':
-				status, score, result = utils.check_quiz_completion(content, course_enrollment.name)
+				if student:
+					status, score, result = utils.check_quiz_completion(content, course_enrollment.name)
+				else:
+					status = False
+					score = None
+					result = None
 				progress.append({'content': content, 'content_type': content.doctype, 'completed': status, 'score': score, 'result': result})
 
 	return progress
