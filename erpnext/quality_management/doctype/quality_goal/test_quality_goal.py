@@ -33,7 +33,7 @@ def create_goal():
 	goal_exist = frappe.db.exists("Quality Goal", {"goal": goal.goal})
 	if not goal_exist:
 		goal.insert()
-		return goal
+		return goal.name
 	else:
 		return goal_exist
 
