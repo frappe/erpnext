@@ -1,6 +1,8 @@
 import frappe
 
 def execute():
+	frappe.reload_doc("support", "doctype", "issue_priority")
+
 	priorities = frappe.get_meta("Issue").get_field("priority").options.split("\n")
 
 	for priority in priorities:
