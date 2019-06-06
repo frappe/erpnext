@@ -62,6 +62,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Chart of Accounts Importer",
+					"labe": _("Chart Of Accounts Importer"),
+					"description": _("Import Chart Of Accounts from CSV / Excel files"),
+					"onboard": 1
+				},
+				{
+					"type": "doctype",
 					"name": "Letter Head",
 					"description": _("Letter Heads for print templates."),
 					"onboard": 1,

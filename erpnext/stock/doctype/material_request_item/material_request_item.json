@@ -28,7 +28,6 @@
   "stock_qty",
   "more_info",
   "lead_time_date",
-  "project",
   "sales_order",
   "sales_order_item",
   "production_plan",
@@ -41,7 +40,9 @@
   "received_qty",
   "accounting_details",
   "expense_account",
-  "column_break_35",
+  "accounting_dimensions_section",
+  "project",
+  "dimension_col_break",
   "cost_center",
   "section_break_37",
   "page_break"
@@ -336,10 +337,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "column_break_35",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -348,6 +345,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "fieldname": "page_break",
    "fieldtype": "Check",
    "label": "Page Break",
@@ -370,16 +368,27 @@
    "fieldname": "received_qty",
    "fieldtype": "Float",
    "label": "Received Quantity"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-16 17:00:00.056060",
+ "modified": "2019-05-25 22:03:10.517886",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",
  "owner": "Administrator",
  "permissions": [],
+ "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1
 }

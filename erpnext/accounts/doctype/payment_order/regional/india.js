@@ -8,7 +8,7 @@ frappe.ui.form.on('Payment Order', {
 	},
 	generate_text_and_download_file: (frm) => {
 		return frappe.call({
-			method: "erpnext.regional.india.bank_remittance_txt.generate_report",
+			method: "erpnext.regional.india.bank_remittance.generate_report",
 			args: {
 				name: frm.doc.name
 			},
