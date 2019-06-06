@@ -15,6 +15,7 @@ from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_b
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, add_additional_cost
 from erpnext.stock.utils import get_bin
+import copy
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit, get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
@@ -125,21 +126,24 @@ class StockEntry(StockController):
 			frappe.throw(_("Cannot cancel transaction for Completed Work Order."))
 
 	def validate_items_qty_for_purchase_receipt(self):
-		print("-------->>>>",self.purchase_receipt_no)
-		if(self.purchase_receipt_no):
-			pr = frappe.get_doc("Purchase Receipt")
-			qty_map = {}
-			for item in pr.items:
-				print(item)
-				print("-------->>>>")
-				qty_map[item.item_code] = item
+		pr_list = list(set([item.reference_purchase_receipt for item in self.items]))
+		already_transferred = frappe.get_all("Stock Entry Detail", filters=[('reference_purchase_receipt', 'in', pr_list),
+			('docstatus', '=', 1)], fields = ["item_code", "qty"])
+		max_item_to_transfer =  frappe.get_all("Purchase Receipt Item", filters=[("parent", "in", pr_list)], fields = ["parent", "item_code", "qty"])
+		max_item_to_transfer =  calculate_total_qty(max_item_to_transfer)
 
-			print(qty_map)
+		if already_transferred:
+			already_transferred = calculate_total_qty(already_transferred)
 
-			for item in self.items:
-				if(item.qty > qty_map[item.item_code][qty]):
-					print("------------->inside")
-					frappe.throw(_("Row: {0} the quantity for {1} cannot be greater than {3}").format(item.idx, item.item_code, qty_map[item.item_code][qty]))
+		to_transfer = calculate_total_qty(self.items)
+
+		for item in self.items:
+			transferred = already_transferred[item.item_code]["qty"] if already_transferred else 0
+			allow_to_transfer = max_item_to_transfer[item.item_code]["qty"] - transferred
+
+			if to_transfer[item.item_code]["qty"] > allow_to_transfer:
+				frappe.throw(_("Row:{0} Total Quantity for {1} can not be greater than {2}").format(item.idx, item.item_code, allow_to_transfer))
+
 
 	def validate_purpose(self):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer",
@@ -1379,6 +1383,21 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 			operating_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
 
 	return operating_cost_per_unit
+
+
+def calculate_total_qty(item_dict):
+	total_item_qty = []
+	for item in item_dict:
+		total_item_qty.append({item.item_code: sum([d.qty for d in item_dict if d.item_code == item.item_code])})
+
+	total_item_qty = [dict(tupleized) for tupleized in set(tuple(item.items()) for item in total_item_qty)]
+	qty_map = {}
+
+	for value in total_item_qty:
+		qty_map[value.keys()[0]] = {'qty': value.values()[0]}
+
+	return qty_map
+
 
 def get_used_alternative_items(purchase_order=None, work_order=None):
 	cond = ""

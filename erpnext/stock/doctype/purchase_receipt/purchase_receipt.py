@@ -536,17 +536,17 @@ def update_purchase_receipt_status(docname, status):
 def make_stock_entry(source_name,target_doc=None):
 	def set_missing_values(source, target):
 		if source.name:
-			target.purchase_receipt_no = source.name
-		target.stock_entry_type = "Material Transfer"
-		for item in target.items:
-			item.s_warehouse = source.supplier_warehouse
+			target.stock_entry_type = "Material Transfer"
 
-	doclist = get_mapped_doc("Purchase Receipt", source_name, 	{
+	doclist = get_mapped_doc("Purchase Receipt", source_name,{
 		"Purchase Receipt": {
 			"doctype": "Stock Entry",
 		},
 		"Purchase Receipt Item": {
 			"doctype": "Stock Entry Detail",
+			"field_map": {
+				"warehouse": "s_warehouse",
+			},
 		},
 	}, target_doc, set_missing_values)
 

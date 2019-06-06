@@ -27,11 +27,6 @@ frappe.ui.form.on("Purchase Receipt", {
 	},
 
 	refresh: function(frm) {
-
-		//if(frm.doc.docstatus == 1){
-			frm.add_custom_button(__('Make Stock Entry'),
-				frm.cscript['Make Stock Entry']);
-		//}
 		if(frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
@@ -103,6 +98,8 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 				}
 
 				cur_frm.add_custom_button(__('Return'), this.make_purchase_return, __('Create'));
+
+				cur_frm.add_custom_button(__('Make Stock Entry'), cur_frm.cscript['Make Stock Entry'], __('Create'));
 
 				if(flt(this.frm.doc.per_billed) < 100) {
 					cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice, __('Create'));

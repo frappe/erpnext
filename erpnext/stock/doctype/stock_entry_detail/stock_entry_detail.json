@@ -58,7 +58,8 @@
   "against_stock_entry",
   "ste_detail",
   "column_break_51",
-  "transferred_qty"
+  "transferred_qty",
+  "reference_purchase_receipt"
  ],
  "fields": [
   {
@@ -454,11 +455,18 @@
    "in_list_view": 1,
    "label": "Item Group",
    "options": "Item_code.item_group"
+  },
+  {
+   "fieldname": "reference_purchase_receipt",
+   "fieldtype": "Link",
+   "label": "Reference Purchase Receipt ",
+   "options": "Purchase Receipt",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-30 18:24:07.750305",
+ "modified": "2019-05-31 13:08:47.290810",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",
