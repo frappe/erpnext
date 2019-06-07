@@ -3,6 +3,8 @@ from erpnext.crm.doctype.utils import get_document_with_phone_number, get_employ
 import requests
 
 # api/method/erpnext.erpnext_integrations.exotel_integration.handle_incoming_call
+# api/method/erpnext.erpnext_integrations.exotel_integration.handle_end_call
+# api/method/erpnext.erpnext_integrations.exotel_integration.handle_missed_call
 
 @frappe.whitelist(allow_guest=True)
 def handle_incoming_call(*args, **kwargs):
@@ -18,41 +20,43 @@ def handle_incoming_call(*args, **kwargs):
 
 	call_log = get_call_log(kwargs)
 
-	employee_emails = get_employee_emails_for_popup()
+	employee_emails = get_employee_emails_for_popup(kwargs.get('To'))
 	for email in employee_emails:
 		frappe.publish_realtime('show_call_popup', call_log, user=email)
 
 @frappe.whitelist(allow_guest=True)
 def handle_end_call(*args, **kwargs):
-	update_call_log(kwargs, 'Completed')
-	frappe.publish_realtime('call_disconnected', kwargs.get('CallSid'))
+	call_log = update_call_log(kwargs, 'Completed')
+	frappe.publish_realtime('call_disconnected', call_log)
 
 @frappe.whitelist(allow_guest=True)
 def handle_missed_call(*args, **kwargs):
-	update_call_log(kwargs, 'Missed')
-	frappe.publish_realtime('call_disconnected', kwargs.get('CallSid'))
+	call_log = update_call_log(kwargs, 'Missed')
+	frappe.publish_realtime('call_disconnected', call_log)
 
 def update_call_log(call_payload, status):
 	call_log = get_call_log(call_payload, False)
 	if call_log:
-		call_log.call_status = status
-		call_log.call_duration = call_payload.get('DialCallDuration') or 0
+		call_log.status = status
+		call_log.duration = call_payload.get('DialCallDuration') or 0
 		call_log.save(ignore_permissions=True)
 		frappe.db.commit()
+		return call_log
 
 
 def get_call_log(call_payload, create_new_if_not_found=True):
 	call_log = frappe.get_all('Call Log', {
-		'call_id': call_payload.get('CallSid'),
+		'id': call_payload.get('CallSid'),
 	}, limit=1)
 
 	if call_log:
 		return frappe.get_doc('Call Log', call_log[0].name)
 	elif create_new_if_not_found:
 		call_log = frappe.new_doc('Call Log')
-		call_log.call_id = call_payload.get('CallSid')
-		call_log.call_from = call_payload.get('CallFrom')
+		call_log.id = call_payload.get('CallSid')
+		call_log.to = call_payload.get('To')
 		call_log.status = 'Ringing'
+		setattr(call_log, 'from', call_payload.get('CallFrom'))
 		call_log.save(ignore_permissions=True)
 		frappe.db.commit()
 		return call_log

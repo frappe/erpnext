@@ -1,6 +1,6 @@
 class CallPopup {
 	constructor(call_log) {
-		this.caller_number = call_log.call_from;
+		this.caller_number = call_log.from;
 		this.call_log = call_log;
 		this.make();
 	}
@@ -21,16 +21,10 @@ class CallPopup {
 				'fieldname': 'last_communication',
 				'read_only': true
 			}, {
-				'fieldname': 'last_communication_link',
-				'fieldtype': 'HTML',
-			}, {
 				'fieldtype': 'Small Text',
 				'label': "Last Issue",
 				'fieldname': 'last_issue',
 				'read_only': true
-			}, {
-				'fieldname': 'last_issue_link',
-				'fieldtype': 'HTML',
 			}, {
 				'fieldtype': 'Column Break',
 			}, {
@@ -44,26 +38,23 @@ class CallPopup {
 					const values = this.dialog.get_values();
 					if (!values.call_summary) return
 					frappe.xcall('erpnext.crm.doctype.utils.add_call_summary', {
-						'docname': this.call_log.call_id,
+						'docname': this.call_log.id,
 						'summary': values.call_summary,
 					}).then(() => {
 						this.dialog.set_value('call_summary', '');
 					});
 				}
 			}],
-			on_minimize_toggle: () => {
-				this.set_call_status();
-			}
 		});
 		this.set_call_status();
 		this.make_caller_info_section();
 		this.dialog.get_close_btn().show();
 		this.dialog.$body.addClass('call-popup');
 		this.dialog.set_secondary_action(() => {
-			clearInterval(this.updater);
 			delete erpnext.call_popup;
 			this.dialog.hide();
 		});
+		frappe.utils.play_sound("incoming_call");
 		this.dialog.show();
 	}
 
@@ -112,7 +103,7 @@ class CallPopup {
 
 	set_call_status(call_status) {
 		let title = '';
-		call_status = call_status || this.call_log.call_status;
+		call_status = call_status || this.call_log.status;
 		if (['Ringing'].includes(call_status) || !call_status) {
 			title = __('Incoming call from {0}',
 				[this.contact ? `${this.contact.first_name || ''} ${this.contact.last_name || ''}` : this.caller_number]);
@@ -120,7 +111,7 @@ class CallPopup {
 		} else if (call_status === 'In Progress') {
 			title = __('Call Connected');
 			this.set_indicator('yellow');
-		} else if (call_status === 'missed') {
+		} else if (call_status === 'Missed') {
 			this.set_indicator('red');
 			title = __('Call Missed');
 		} else if (['Completed', 'Disconnected'].includes(call_status)) {
@@ -137,9 +128,10 @@ class CallPopup {
 		this.call_log = call_log;
 		this.set_call_status();
 	}
-	disconnect_call() {
-		this.set_call_status('Disconnected');
-		clearInterval(this.updater);
+
+	call_disconnected(call_log) {
+		frappe.utils.play_sound("call_disconnect");
+		this.update_call_log(call_log);
 	}
 
 	make_last_interaction_section() {
@@ -147,12 +139,14 @@ class CallPopup {
 			'number': this.caller_number,
 			'reference_doc': this.contact
 		}).then(data => {
+			const comm_field = this.dialog.fields_dict["last_communication"];
 			if (data.last_communication) {
 				const comm = data.last_communication;
 				// this.dialog.set_df_property('last_interaction', 'hidden', false);
-				const comm_field = this.dialog.fields_dict["last_communication"];
 				comm_field.set_value(comm.content);
 				comm_field.$wrapper.append(frappe.utils.get_form_link('Communication', comm.name));
+			} else {
+				comm_field.$wrapper.hide();
 			}
 
 			if (data.last_issue) {
@@ -176,9 +170,9 @@ $(document).on('app_ready', function () {
 			erpnext.call_popup.dialog.show();
 		}
 	});
-	frappe.realtime.on('call_disconnected', id => {
-		if (erpnext.call_popup && erpnext.call_popup.call_log.call_id === id) {
-			erpnext.call_popup.disconnect_call();
+	frappe.realtime.on('call_disconnected', call_log => {
+		if (erpnext.call_popup && erpnext.call_popup.call_log.id === call_log.id) {
+			erpnext.call_popup.call_disconnected(call_log);
 		}
 	});
 });

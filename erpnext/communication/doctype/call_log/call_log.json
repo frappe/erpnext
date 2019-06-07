@@ -1,71 +1,71 @@
 {
- "autoname": "field:call_id",
+ "autoname": "field:id",
  "creation": "2019-06-05 12:07:02.634534",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "call_id",
-  "call_from",
+  "id",
+  "from",
   "column_break_3",
-  "received_by",
+  "to",
   "section_break_5",
-  "call_status",
-  "call_duration",
-  "call_summary"
+  "status",
+  "duration",
+  "summary"
  ],
  "fields": [
   {
-   "fieldname": "call_id",
-   "fieldtype": "Data",
-   "label": "Call ID",
-   "read_only": 1,
-   "unique": 1
-  },
-  {
-   "fieldname": "call_from",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Call From",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "received_by",
-   "fieldtype": "Data",
-   "label": "Received By",
-   "read_only": 1
   },
   {
    "fieldname": "section_break_5",
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "call_status",
+   "fieldname": "id",
+   "fieldtype": "Data",
+   "label": "ID",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "from",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "From",
+   "read_only": 1
+  },
+  {
+   "fieldname": "to",
+   "fieldtype": "Data",
+   "label": "To",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Call Status",
+   "label": "Status",
    "options": "Ringing\nIn Progress\nCompleted\nMissed",
    "read_only": 1
   },
   {
    "description": "Call Duration in seconds",
-   "fieldname": "call_duration",
+   "fieldname": "duration",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Call Duration",
+   "label": "Duration",
    "read_only": 1
   },
   {
-   "fieldname": "call_summary",
+   "fieldname": "summary",
    "fieldtype": "Data",
-   "label": "Call Summary",
+   "label": "Summary",
    "read_only": 1
   }
  ],
- "modified": "2019-06-06 07:41:26.208109",
+ "modified": "2019-06-07 09:49:07.623814",
  "modified_by": "Administrator",
  "module": "Communication",
  "name": "Call Log",
@@ -86,6 +86,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "ASC",
- "title_field": "call_from",
+ "title_field": "from",
  "track_changes": 1
 }
