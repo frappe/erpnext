@@ -59,14 +59,14 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Customer Feedback",
-					"description":_("Customer Feedback"),
+					"name": "Quality Feedback",
+					"description":_("Quality Feedback"),
 					"onboard": 1,
 				},
 				{
 					"type": "doctype",
-					"name": "Customer Feedback Template",
-					"description":_("Customer Feedback Template"),
+					"name": "Quality Feedback Template",
+					"description":_("Quality Feedback Template"),
 				}
 			]
 		},
