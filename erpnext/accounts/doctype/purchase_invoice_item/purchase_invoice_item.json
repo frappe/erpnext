@@ -4,6 +4,7 @@
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
+ "engine": "InnoDB",
  "field_order": [
   "item_code",
   "col_break1",
@@ -15,6 +16,10 @@
   "image_section",
   "image",
   "image_view",
+  "manufacture_details",
+  "manufacturer",
+  "column_break_13",
+  "manufacturer_part_no",
   "quantity_and_rate",
   "received_qty",
   "qty",
@@ -728,11 +733,32 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "manufacture_details",
+   "fieldtype": "Section Break",
+   "label": "Manufacture"
+  },
+  {
+   "fieldname": "manufacturer",
+   "fieldtype": "Link",
+   "label": "Manufacturer",
+   "options": "Manufacturer"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "manufacturer_part_no",
+   "fieldtype": "Data",
+   "label": "Manufacturer Part Number",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-25 22:04:48.435730",
+ "modified": "2019-06-02 06:36:17.078419",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

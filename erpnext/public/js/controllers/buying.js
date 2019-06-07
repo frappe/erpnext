@@ -14,8 +14,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this._super();
 	},
 
-	onload: function() {
-		this.setup_queries();
+	onload: function(doc, cdt, cdn) {
+		this.setup_queries(doc, cdt, cdn);
 		this._super();
 
 		this.frm.set_query('shipping_rule', function() {
@@ -50,7 +50,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		/* eslint-enable */
 	},
 
-	setup_queries: function() {
+	setup_queries: function(doc, cdt, cdn) {
 		var me = this;
 
 		if(this.frm.fields_dict.buying_price_list) {
@@ -88,6 +88,15 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 					query: "erpnext.controllers.queries.item_query",
 					filters: {'is_purchase_item': 1}
 				}
+			}
+		});
+
+
+		this.frm.set_query("manufacturer", "items", function(doc, cdt, cdn) {
+			const row = locals[cdt][cdn];
+			return {
+				query: "erpnext.controllers.queries.item_manufacturer_query",
+				filters:{ 'item_code': row.item_code }
 			}
 		});
 	},
@@ -337,6 +346,25 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 					}
 				}
 			})
+		}
+	},
+
+	manufacturer: function(doc, cdt, cdn) {
+		const row = locals[cdt][cdn];
+
+		if(row.manufacturer) {
+			frappe.call({
+				method: "erpnext.stock.doctype.item_manufacturer.item_manufacturer.get_item_manufacturer_part_no",
+				args: {
+					'item_code': row.item_code,
+					'manufacturer': row.manufacturer
+				},
+				callback: function(r) {
+					if (r.message) {
+						frappe.model.set_value(cdt, cdn, 'manufacturer_part_no', r.message);
+					}
+				}
+			});
 		}
 	}
 });
