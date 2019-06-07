@@ -56,7 +56,7 @@ class CallPopup {
 			delete erpnext.call_popup;
 			this.dialog.hide();
 		});
-		frappe.utils.play_sound("incoming_call");
+		frappe.utils.play_sound("incoming-call");
 		this.dialog.show();
 	}
 
@@ -132,7 +132,7 @@ class CallPopup {
 	}
 
 	call_disconnected(call_log) {
-		frappe.utils.play_sound("call_disconnect");
+		frappe.utils.play_sound("call-disconnect");
 		this.update_call_log(call_log);
 		setTimeout(this.get_close_btn().click, 10000);
 	}
