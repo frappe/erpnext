@@ -1,0 +1,45 @@
+{
+ "creation": "2019-01-27 21:03:23.226529",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "user",
+  "email",
+  "receive"
+ ],
+ "fields": [
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User",
+   "options": "User"
+  },
+  {
+   "fetch_from": "user.email",
+   "fieldname": "email",
+   "fieldtype": "Read Only",
+   "label": "email"
+  },
+  {
+   "default": "Both",
+   "fieldname": "receive",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Receive",
+   "options": "Reminder\nSummary\nBoth"
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-06-07 10:24:14.774611",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Regular Work Summary Group User",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -235,6 +235,7 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.project_status_update_reminder"
 	],
 	"hourly": [
+		'erpnext.hr.doctype.regular_work_summary_group.regular_work_summary_group.trigger_emails',
 		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails',
 		"erpnext.accounts.doctype.subscription.subscription.process_all",
 		"erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_settings.schedule_get_order_details",

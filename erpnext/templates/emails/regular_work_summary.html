@@ -1,0 +1,55 @@
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr>
+		<h3>{{ title }}</h3>
+	</tr>
+</table>
+{% for reply in replies %}
+<table class="panel-header" border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr height="10"></tr>
+	<tr>
+		<td width="15"></td>
+		<td valign="top" width="24">
+			{% if reply.image %}
+			<img class="sender-avatar" width="24" height="24" embed="{{ reply.image }}"/>
+			{% else %}
+			<div class="sender-avatar-placeholder">
+				{{ reply.sender_name[0] }}
+			</div>
+			{% endif %}
+		</td>
+		<td width="10"></td>
+		<td>
+			<div class="text-medium text-muted">
+				<span>{{ reply.sender_name }}</span>
+			</div>
+		</td>
+		<td width="15"></td>
+	</tr>
+	<tr height="10"></tr>
+</table>
+<table class="panel-body" border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr height="10"></tr>
+	<tr>
+		<td width="15"></td>
+		<td>
+			<div>
+				{{ reply.content }}
+			</div>
+		</td>
+		<td width="15"></td>
+	</tr>
+	<tr height="10"></tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr height="20"></tr>
+</table>
+{% endfor %}
+{% if did_not_reply %}
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr>
+		<div class="text-muted">
+			<p>{{ did_not_reply_title }}: {{ did_not_reply }}</p>
+		</div>
+	</tr>
+</table>
+{% endif %}

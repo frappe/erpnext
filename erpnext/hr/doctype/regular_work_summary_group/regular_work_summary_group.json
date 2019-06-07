@@ -1,0 +1,175 @@
+{
+ "autoname": "Prompt",
+ "creation": "2019-06-01 20:33:50.300725",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "select_users",
+  "users",
+  "section_break_holidays",
+  "send_emails_frequency",
+  "holiday_list",
+  "column_request",
+  "send_request_emails_at",
+  "send_request_emails_week_day",
+  "send_request_emails_month_day",
+  "send_request_emails_month",
+  "column_summary",
+  "send_summary_emails_at",
+  "send_summary_emails_week_day",
+  "send_summary_emails_month_day",
+  "send_summary_emails_month",
+  "section_email_content",
+  "subject",
+  "message"
+ ],
+ "fields": [
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "select_users",
+   "fieldtype": "Section Break",
+   "label": "Select Users"
+  },
+  {
+   "fieldname": "users",
+   "fieldtype": "Table",
+   "label": "Users",
+   "options": "Regular Work Summary Group User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_holidays",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "holiday_list",
+   "fieldtype": "Link",
+   "label": "Holiday List",
+   "options": "Holiday List"
+  },
+  {
+   "default": "What did you work on today?",
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject"
+  },
+  {
+   "default": "<p>Please share what did you do today. If you reply by midnight, your response will be recorded!</p>",
+   "fieldname": "message",
+   "fieldtype": "Text Editor",
+   "label": "Message"
+  },
+  {
+   "default": "Daily",
+   "fieldname": "send_emails_frequency",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Send Reminder",
+   "options": "Daily\nWeekly\nMonthly\nYearly",
+   "reqd": 1
+  },
+  {
+   "fieldname": "send_request_emails_at",
+   "fieldtype": "Select",
+   "label": "Time",
+   "options": "00:00\n01:00\n02:00\n03:00\n04:00\n05:00\n06:00\n07:00\n08:00\n09:00\n10:00\n11:00\n12:00\n13:00\n14:00\n15:00\n16:00\n17:00\n18:00\n19:00\n20:00\n21:00\n22:00\n23:00"
+  },
+  {
+   "default": "Friday",
+   "depends_on": "eval:doc.send_emails_frequency == \"Weekly\";",
+   "fieldname": "send_request_emails_week_day",
+   "fieldtype": "Select",
+   "label": "Day",
+   "options": "Sunday\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:in_list([\"Monthly\", \"Yearly\"], doc.send_emails_frequency )",
+   "fieldname": "send_request_emails_month_day",
+   "fieldtype": "Select",
+   "label": "Day",
+   "options": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29\n30\n31\n-1\n-2\n-3\n-4\n-5\n-6\n-7\n-8\n-9\n-10\n-11\n-12\n-13\n-14\n-15"
+  },
+  {
+   "default": "January",
+   "depends_on": "eval:doc.send_emails_frequency == \"Yearly\"",
+   "fieldname": "send_request_emails_month",
+   "fieldtype": "Select",
+   "label": "Month",
+   "options": "January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "fieldname": "send_summary_emails_at",
+   "fieldtype": "Select",
+   "label": "Time",
+   "options": "00:00\n01:00\n02:00\n03:00\n04:00\n05:00\n06:00\n07:00\n08:00\n09:00\n10:00\n11:00\n12:00\n13:00\n14:00\n15:00\n16:00\n17:00\n18:00\n19:00\n20:00\n21:00\n22:00\n23:00"
+  },
+  {
+   "depends_on": "eval:doc.send_emails_frequency == \"Weekly\";",
+   "fieldname": "send_summary_emails_week_day",
+   "fieldtype": "Select",
+   "label": "Day",
+   "options": "Sunday\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday"
+  },
+  {
+   "depends_on": "eval:in_list([\"Monthly\", \"Yearly\"], doc.send_emails_frequency );",
+   "fieldname": "send_summary_emails_month_day",
+   "fieldtype": "Select",
+   "label": "Day",
+   "options": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29\n30\n31\n-1\n-2\n-3\n-4\n-5\n-6\n-7\n-8\n-9\n-10\n-11\n-12\n-13\n-14\n-15"
+  },
+  {
+   "default": "January",
+   "depends_on": "eval:doc.send_emails_frequency == \"Yearly\"",
+   "fieldname": "send_summary_emails_month",
+   "fieldtype": "Select",
+   "label": "Month",
+   "options": "January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "fieldname": "column_request",
+   "fieldtype": "Column Break",
+   "label": "REQUEST"
+  },
+  {
+   "fieldname": "column_summary",
+   "fieldtype": "Column Break",
+   "label": "SUMMARY"
+  },
+  {
+   "default": "January",
+   "fieldname": "section_email_content",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "modified": "2019-06-07 10:24:02.894879",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Regular Work Summary Group",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
