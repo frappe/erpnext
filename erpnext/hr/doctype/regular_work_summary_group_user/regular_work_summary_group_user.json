@@ -28,11 +28,11 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Receive",
-   "options": "Reminder\nSummary\nBoth"
+   "options": "Request\nSummary\nBoth"
   }
  ],
  "istable": 1,
- "modified": "2019-06-07 10:24:14.774611",
+ "modified": "2019-06-07 14:34:16.687857",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Regular Work Summary Group User",
