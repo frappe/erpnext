@@ -264,7 +264,6 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.send_project_status_email_to_users",
 		"erpnext.quality_management.doctype.quality_review.quality_review.review",
 		"erpnext.support.doctype.service_level_agreement.service_level_agreement.check_agreement_status",
-		"erpnext.support.doctype.issue.issue.set_service_level_agreement_status"
 	],
 	"daily_long": [
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"

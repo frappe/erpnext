@@ -77,11 +77,9 @@ class Issue(Document):
 
 	def update_agreement_status(self):
 		current_time = frappe.flags.current_time or now_datetime()
-		if self.service_level_agreement and self.agreement_fulfilled == "Ongoing":
-			response_time_diff = round(time_diff_in_hours(self.response_by, current_time), 2)
-			resolution_time_diff = round(time_diff_in_hours(self.resolution_by, current_time), 2)
 
-			if response_time_diff < 0 or resolution_time_diff < 0:
+		if self.service_level_agreement and self.agreement_fulfilled == "Ongoing":
+			if self.response_by_variance < 0 or self.resolution_by_variance < 0:
 				self.agreement_fulfilled = "Failed"
 			else:
 				self.agreement_fulfilled = "Fulfilled"
@@ -232,33 +230,27 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 
 	return current_date_time
 
-def set_service_level_agreement_status():
-	issues = frappe.get_list("Issue", filters={"status": "Open", "agreement_fulfilled": "Ongoing"})
-	for issue in issues:
-		doc = frappe.get_doc("Issue", issue.name)
-		if doc.service_level_agreement and doc.agreement_fulfilled == "Ongoing":
-			response_time_diff = round(time_diff_in_hours(doc.response_by, now_datetime()), 2)
-			resolution_time_diff = round(time_diff_in_hours(doc.resolution_by, now_datetime()), 2)
-			if response_time_diff < 0 or resolution_time_diff < 0:
-				frappe.db.set_value("Issue", doc.name, "agreement_fulfilled", "Failed")
-			else:
-				frappe.db.set_value("Issue", doc.name, "agreement_fulfilled", "Fulfilled")
-
 def set_service_level_agreement_variance(issue=None):
-	filters = {"status": "Open", "agreement_fulfilled": "Ongoing"}
+	current_time = frappe.flags.current_time or now_datetime()
 
+	filters = {"status": "Open", "agreement_fulfilled": "Ongoing"}
 	if issue:
 		filters = {"name": issue}
 
-	issues = frappe.get_list("Issue", filters=filters)
-	for issue in issues:
+	for issue in frappe.get_list("Issue", filters=filters):
 		doc = frappe.get_doc("Issue", issue.name)
-		if not doc.first_responded_on:
-			variance = round(time_diff_in_hours(doc.response_by, now_datetime()), 2)
+
+		if not doc.first_responded_on: # first_responded_on set when first reply is sent to customer
+			variance = round(time_diff_in_hours(doc.response_by, current_time), 2)
 			frappe.db.set_value("Issue", doc.name, "response_by_variance", variance)
-		if not doc.resolution_date:
-			variance = round(time_diff_in_hours(doc.resolution_by, now_datetime()), 2)
+			if variance < 0:
+				frappe.db.set_value("Issue", doc.name, "agreement_fulfilled", "Failed")
+
+		if not doc.resolution_date: # resolution_date set when issue has been closed
+			variance = round(time_diff_in_hours(doc.resolution_by, current_time), 2)
 			frappe.db.set_value("Issue", doc.name, "resolution_by_variance", variance)
+			if variance < 0:
+				frappe.db.set_value("Issue", doc.name, "agreement_fulfilled", "Failed")
 
 def get_list_context(context=None):
 	return {

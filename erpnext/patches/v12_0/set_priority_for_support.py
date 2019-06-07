@@ -6,10 +6,11 @@ def execute():
 	priorities = frappe.get_meta("Issue").get_field("priority").options.split("\n")
 
 	for priority in priorities:
-		frappe.get_doc({
-			"doctype": "Issue Priority",
-			"name": priority
-		}).insert(ignore_permissions=True)
+		if not frappe.db.exists("Issue Priority", priority):
+			frappe.get_doc({
+				"doctype": "Issue Priority",
+				"name": priority
+			}).insert(ignore_permissions=True)
 
 	frappe.reload_doc("support", "doctype", "issue")
 	frappe.reload_doc("support", "doctype", "service_level")
