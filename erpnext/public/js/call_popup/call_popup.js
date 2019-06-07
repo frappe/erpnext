@@ -19,12 +19,14 @@ class CallPopup {
 				'fieldtype': 'Small Text',
 				'label': "Last Communication",
 				'fieldname': 'last_communication',
-				'read_only': true
+				'read_only': true,
+				'default': `<i class="text-muted">${__('No communication found.')}<i>`
 			}, {
 				'fieldtype': 'Small Text',
 				'label': "Last Issue",
 				'fieldname': 'last_issue',
-				'read_only': true
+				'read_only': true,
+				'default': `<i class="text-muted">${__('No issue raised by the customer.')}<i>`
 			}, {
 				'fieldtype': 'Column Break',
 			}, {
@@ -76,12 +78,12 @@ class CallPopup {
 					</div>
 				`);
 			} else {
+				const contact_name = frappe.utils.get_form_link('Contact', contact.name, true);
 				const link = contact.links ? contact.links[0] : null;
-				const contact_link = link ? frappe.utils.get_form_link(link.link_doctype, link.link_name, true): '';
-				const contact_name = `${contact.first_name || ''} ${contact.last_name || ''}`
+				let contact_link = link ? frappe.utils.get_form_link(link.link_doctype, link.link_name, true): '';
 				wrapper.append(`
 					<div class="caller-info flex">
-						${frappe.avatar(null, 'avatar-xl', contact_name, contact.image)}
+						${frappe.avatar(null, 'avatar-xl', contact.name, contact.image)}
 						<div>
 							<h5>${contact_name}</h5>
 							<div>${contact.mobile_no || ''}</div>
@@ -132,6 +134,7 @@ class CallPopup {
 	call_disconnected(call_log) {
 		frappe.utils.play_sound("call_disconnect");
 		this.update_call_log(call_log);
+		setTimeout(this.get_close_btn().click, 10000);
 	}
 
 	make_last_interaction_section() {
@@ -145,8 +148,6 @@ class CallPopup {
 				// this.dialog.set_df_property('last_interaction', 'hidden', false);
 				comm_field.set_value(comm.content);
 				comm_field.$wrapper.append(frappe.utils.get_form_link('Communication', comm.name));
-			} else {
-				comm_field.$wrapper.hide();
 			}
 
 			if (data.last_issue) {
@@ -154,8 +155,9 @@ class CallPopup {
 				// this.dialog.set_df_property('last_interaction', 'hidden', false);
 				const issue_field = this.dialog.fields_dict["last_issue"];
 				issue_field.set_value(issue.subject);
-				issue_field.$wrapper
-					.append(`<a class="text-medium" href="#List/Issue/List?customer=${issue.customer}">View all issues from ${issue.customer}</a>`);
+				issue_field.$wrapper.append(`<a class="text-medium" href="#List/Issue?customer=${issue.customer}">
+					View all issues from ${issue.customer}
+				</a>`);
 			}
 		});
 	}
