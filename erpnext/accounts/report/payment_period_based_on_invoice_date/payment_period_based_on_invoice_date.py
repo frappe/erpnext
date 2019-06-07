@@ -18,22 +18,22 @@ def execute(filters=None):
 	data = []
 	for d in entries:
 		invoice = invoice_details.get(d.against_voucher) or frappe._dict()
-		
+
 		if d.reference_type=="Purchase Invoice":
 			payment_amount = flt(d.debit) or -1 * flt(d.credit)
 		else:
 			payment_amount = flt(d.credit) or -1 * flt(d.debit)
 
-		row = [d.voucher_type, d.voucher_no, d.party_type, d.party, d.posting_date, d.against_voucher, 
+		row = [d.voucher_type, d.voucher_no, d.party_type, d.party, d.posting_date, d.against_voucher,
 			invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks]
 
 		if d.against_voucher:
-			row += get_ageing_data(30, 60, 90, d.posting_date, invoice.posting_date, payment_amount)
+			row += get_ageing_data(30, 60, 90, 120, d.posting_date, invoice.posting_date, payment_amount)
 		else:
 			row += ["", "", "", "", ""]
 		if invoice.due_date:
 			row.append((getdate(d.posting_date) - getdate(invoice.due_date)).days or 0)
-		
+
 		data.append(row)
 
 	return columns, data
@@ -48,19 +48,19 @@ def get_columns(filters):
 	return [
 		_("Payment Document") + ":: 100",
 		_("Payment Entry") + ":Dynamic Link/"+_("Payment Document")+":140",
-		_("Party Type") + "::100", 
+		_("Party Type") + "::100",
 		_("Party") + ":Dynamic Link/Party Type:140",
 		_("Posting Date") + ":Date:100",
 		_("Invoice") + (":Link/Purchase Invoice:130" if filters.get("payment_type") == "Outgoing" else ":Link/Sales Invoice:130"),
-		_("Invoice Posting Date") + ":Date:130", 
-		_("Payment Due Date") + ":Date:130", 
-		_("Debit") + ":Currency:120", 
+		_("Invoice Posting Date") + ":Date:130",
+		_("Payment Due Date") + ":Date:130",
+		_("Debit") + ":Currency:120",
 		_("Credit") + ":Currency:120",
-		_("Remarks") + "::150", 
+		_("Remarks") + "::150",
 		_("Age") +":Int:40",
-		"0-30:Currency:100", 
-		"30-60:Currency:100", 
-		"60-90:Currency:100", 
+		"0-30:Currency:100",
+		"30-60:Currency:100",
+		"60-90:Currency:100",
 		_("90-Above") + ":Currency:100",
 		_("Delay in payment (Days)") + "::150"
 	]
@@ -79,21 +79,21 @@ def get_conditions(filters):
 
 	if filters.party:
 		conditions.append("party=%(party)s")
-		
+
 	if filters.party_type:
 		conditions.append("against_voucher_type=%(reference_type)s")
 		filters["reference_type"] = "Sales Invoice" if filters.party_type=="Customer" else "Purchase Invoice"
 
 	if filters.get("from_date"):
 		conditions.append("posting_date >= %(from_date)s")
-		
+
 	if filters.get("to_date"):
 		conditions.append("posting_date <= %(to_date)s")
 
 	return "and " + " and ".join(conditions) if conditions else ""
 
 def get_entries(filters):
-	return frappe.db.sql("""select 
+	return frappe.db.sql("""select
 		voucher_type, voucher_no, party_type, party, posting_date, debit, credit, remarks, against_voucher
 		from `tabGL Entry`
 		where company=%(company)s and voucher_type in ('Journal Entry', 'Payment Entry') {0}

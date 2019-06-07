@@ -26,13 +26,14 @@
   "travel_itinerary",
   "itinerary",
   "costing_details",
-  "cost_center",
   "costings",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
   "event_details",
   "name_of_organizer",
   "address_of_organizer",
-  "other_details",
-  "amended_from"
+  "other_details"
  ],
  "fields": [
   {
@@ -199,10 +200,20 @@
    "options": "Travel Request",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-24 00:53:16.457716",
+ "modified": "2019-05-25 23:15:00.609186",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Travel Request",

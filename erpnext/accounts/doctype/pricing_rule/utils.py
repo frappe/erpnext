@@ -480,10 +480,10 @@ def apply_pricing_rule(doc, pr_doc, item_row, value, do_not_validate=False):
 	rule_applied = {}
 
 	for item in doc.get("items"):
-		if not item.pricing_rules:
-			item.pricing_rules = item_row.pricing_rules
-
 		if item.get(apply_on) in items:
+			if not item.pricing_rules:
+				item.pricing_rules = item_row.pricing_rules
+
 			for field in ['discount_percentage', 'discount_amount', 'rate']:
 				if not pr_doc.get(field): continue
 
