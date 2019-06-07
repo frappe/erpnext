@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, date_diff, formatdate, add_days
+from frappe.utils import flt, date_diff, formatdate, add_days, today
 from frappe import _
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name, get_leave_period
@@ -41,8 +41,8 @@ class LeaveAllocation(Document):
 				.format(self.leave_type, self.employee))
 
 	def on_submit(self):
-		self.expire_previous_allocation()
 		self.create_leave_ledger_entry()
+		self.expire_allocation()
 
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
@@ -128,19 +128,24 @@ class LeaveAllocation(Document):
 		)
 		create_leave_ledger_entry(self, args, submit)
 
-	def expire_previous_allocation(self):
-		''' expire previous allocation leaves '''
-		leaves = get_unused_leaves(self.employee, self.leave_type, self.from_date)
+	def expire_allocation(self, current=False):
+		''' expires allocation '''
+		date = self.to_date if current else self.from_date
+		leaves = get_unused_leaves(self.employee, self.leave_type, date)
 
 		if leaves:
+			expiry_date = today() if current else add_days(self.from_date, -1)
 			args = dict(
 				leaves=flt(leaves) * -1,
-				from_date=self.from_date,
-				to_date=self.from_date,
+				from_date=expiry_date,
+				to_date=expiry_date,
 				is_carry_forward=0,
 				is_expired=1
 			)
 			create_leave_ledger_entry(self, args)
+
+		if current:
+			frappe.db.set_value("Leave Allocation", self.name, "status", "Expired")
 
 def get_leave_allocation_for_period(employee, leave_type, from_date, to_date):
 	leave_allocated = 0
@@ -173,23 +178,6 @@ def get_carry_forwarded_leaves(employee, leave_type, date, carry_forward=None):
 		carry_forwarded_leaves = get_unused_leaves(employee, leave_type, date)
 
 	return carry_forwarded_leaves
-
-@frappe.whitelist()
-def expire_current_allocation(ref_doc):
-		''' expire previous allocation leaves '''
-		leaves = get_unused_leaves(ref_doc.employee, ref_doc.leave_type, ref_doc.to_date)
-
-		if flt(leaves) > 0:
-			args = dict(
-				leaves=leaves * -1,
-				from_date=ref_doc.to_date,
-				to_date=ref_doc.to_date,
-				is_carry_forward=0,
-				is_expired=1
-			)
-			create_leave_ledger_entry(ref_doc, args)
-
-		frappe.db.set_value("Leave Allocation", ref_doc.name, "status", "Expired")
 
 def get_unused_leaves(employee, leave_type, date):
 	return frappe.db.get_value("Leave Ledger Entry", filters={

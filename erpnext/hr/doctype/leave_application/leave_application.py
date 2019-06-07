@@ -523,7 +523,6 @@ def get_leaves_for_period(employee, leave_type, from_date, to_date):
 		where employee=%(employee)s and leave_type=%(leave_type)s
 			and docstatus=1
 			and leaves<0
-			and (is_expired=0 or is_carry_forward=1)
 			and (from_date between %(from_date)s and %(to_date)s
 				or to_date between %(from_date)s and %(to_date)s
 				or (from_date < %(from_date)s and to_date > %(to_date)s))
@@ -536,8 +535,8 @@ def get_leaves_for_period(employee, leave_type, from_date, to_date):
 	leave_days = 0
 
 	for leave_entry in leave_entries:
-		if leave_entry.from_date >= getdate(from_date) and \
-				leave_entry.to_date <= getdate(to_date) and leave_entry.transaction_type=='Leave Encashment':
+		if leave_entry.from_date >= getdate(from_date) and leave_entry.to_date <= getdate(to_date) \
+			and leave_entry.transaction_type in ('Leave Encashment', 'Leave Allocation'):
 			leave_days += leave_entry.leaves
 		else:
 			if leave_entry.from_date < getdate(from_date):
