@@ -23,10 +23,13 @@ frappe.ui.form.on("Leave Allocation", {
 
 	refresh: function(frm) {
 		if(frm.doc.docstatus === 1 && frm.doc.status === "Active") {
-			// expire current allocation
-			frm.add_custom_button(__('Expire Allocation'), function() {
-				frm.trigger("expire_allocation");
-			});
+			var valid_expiry = moment(frappe.datetime.get_today()).isBetween(frm.doc.from_date, frm.doc.to_date);
+			if(valid_expiry) {
+				// expire current allocation
+				frm.add_custom_button(__('Expire Allocation'), function() {
+					frm.trigger("expire_allocation");
+				});
+			}
 
 			// opens leave balance report for employee
 			frm.add_custom_button(__('Leave Balance'), function() {
@@ -40,15 +43,17 @@ frappe.ui.form.on("Leave Allocation", {
 
 	expire_allocation: function(frm) {
 		frappe.call({
-			method: 'erpnext.hr.doctype.leave_application.leave_application.expire_previous_allocation',
+			method: 'expire_allocation',
+			doc: frm.doc,
 			args: {
-				ref_doc: frm.doc
+				current: true
 			},
 			freeze: true,
 			callback: function(r){
 				if(!r.exc){
 					frappe.msgprint(__("Allocation Expired!"));
 				}
+				frm.refresh();
 			}
 		});
 	},
@@ -81,7 +86,7 @@ frappe.ui.form.on("Leave Allocation", {
 			frappe.db.get_value("Leave Policy Detail",
 				{'parent': frm.doc.leave_policy, 'leave_type': frm.doc.leave_type},
 				'annual_allocation', (r) => {
-				if (!r.exc) {
+				if (r && !r.exc) {
 					frm.set_value("new_leaves_allocated", flt(r.annual_allocation));
 				}
 			}, "Leave Policy")
