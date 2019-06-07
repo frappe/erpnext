@@ -606,3 +606,5 @@ erpnext.patches.v12_0.generate_leave_ledger_entries
 erpnext.patches.v12_0.make_custom_fields_for_bank_remittance
 erpnext.patches.v12_0.make_custom_fields_for_bank_remittance
 execute:frappe.delete_doc_if_exists("Page", "support-analytics")
+execute:frappe.delete_doc_if_exists("Page", "support-analytics")
+erpnext.patches.v12_0.make_item_manufacturer
