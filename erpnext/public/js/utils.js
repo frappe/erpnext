@@ -595,7 +595,7 @@ erpnext.utils.clear_duplicates = function() {
 	const unique_items = new Map();
 	let items = []
 
-	for (let i = 0; i < cur_frm.doc.items.length; i++) {
+	for (let item of cur_frm.doc.items) {
 		let item = cur_frm.doc.items[i];
 		if (!(unique_items.has(item.item_code) && unique_items.get(item.item_code) === item.qty)) {
 			unique_items.set(item.item_code, item.qty);
