@@ -1,33 +1,30 @@
 <div class="web-list-item transaction-list-item">
-    <a href="/issues?name={{ doc.name }}">
-    <div class="row">
-        <div class="col-xs-3">
-            <span class="indicator {{ "red" if doc.status=="Open" else "darkgrey"   }}">
-                {{ doc.name }}</span>
-				   </div>
-                <div class="col-xs-5 items-preview ellipsis ellipsis-width">
-					{{ doc.subject }}</div>
-					<div class="col-xs-2 text-muted">
-						<span class="indicator
-							{% if doc.status == "Open" %}
-								{% if doc.priority == "Medium" %}
-									orange"> Medium
-								{% elif doc.priority == "Low" %}
-									yellow"> Low
-								{% else %}
-									red"> High
-								{% endif  %}
-							{% elif doc.status == "Closed" %}
-								green"> Closed
-							{% else %}
-								darkgrey"> {{ doc.status }}
-							{% endif %}
-						</span>
-					</div>
-        <div class="col-xs-3 text-right small text-muted">
-            {{ frappe.format_date(doc.modified) }}
-        </div>
-    </div>
-    </a>
+	<a href="/issues?name={{ doc.name }}" class="no-underline">
+		<div class="row py-4 border-bottom">
+			<div class="col-3 d-flex align-items-center">
+				{% set indicator = 'red' if doc.status == 'Open' else 'darkgrey' %}
+				{% set indicator = 'green' if doc.status == 'Closed' else indicator %}
+				<span class="d-inline-flex indicator {{ indicator }}"></span>
+					{{ doc.name }}
+			</div>
+			<div class="col-5 text-muted">
+				{{ doc.subject }}</div>
+			<div class="col-2 d-flex align-items-center text-muted">
+				{% set indicator = 'red' if doc.status == 'Open' else 'darkgrey' %}
+				{% set indicator = 'green' if doc.status == 'Closed' else indicator %}
+				{% set indicator = 'orange' if doc.status == 'Open' and doc.priority == 'Medium' else indicator %}
+				{% set indicator = 'yellow' if doc.status == 'Open' and doc.priority == 'Low' else indicator %}
+				<span class="d-inline-flex indicator {{ indicator }}"></span>
+					{% if doc.status == "Open" %}
+						{{ doc.priority }}
+					{% else %}
+						{{ doc.status }}
+					{%- endif -%}
+				</span>
+			</div>
+			<div class="col-2 text-right text-muted">
+				{{ frappe.format_date(doc.modified) }}
+			</div>
+		</div>
+	</a>
 </div>
- 
