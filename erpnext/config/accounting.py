@@ -174,6 +174,11 @@ def get_data():
 					"name": "Cheque Print Template",
 					"description": _("Setup cheque dimensions for printing")
 				},
+				{
+					"type": "doctype",
+					"name": "Accounting Dimension",
+					"description": _("Setup custom dimensions for accounting")
+				},
 			]
 		},
 		{

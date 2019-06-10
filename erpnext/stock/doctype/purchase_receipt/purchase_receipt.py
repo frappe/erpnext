@@ -223,7 +223,7 @@ class PurchaseReceipt(BuyingController):
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 						"debit": stock_value_diff
-					}, warehouse_account[d.warehouse]["account_currency"]))
+					}, warehouse_account[d.warehouse]["account_currency"], item=d))
 
 					# stock received but not billed
 					stock_rbnb_currency = get_account_currency(stock_rbnb)
@@ -235,7 +235,7 @@ class PurchaseReceipt(BuyingController):
 						"credit": flt(d.base_net_amount, d.precision("base_net_amount")),
 						"credit_in_account_currency": flt(d.base_net_amount, d.precision("base_net_amount")) \
 							if stock_rbnb_currency==self.company_currency else flt(d.net_amount, d.precision("net_amount"))
-					}, stock_rbnb_currency))
+					}, stock_rbnb_currency, item=d))
 
 					negative_expense_to_be_booked += flt(d.item_tax_amount)
 
@@ -248,7 +248,7 @@ class PurchaseReceipt(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.landed_cost_voucher_amount),
 							"project": d.project
-						}))
+						}, item=d))
 
 					# sub-contracting warehouse
 					if flt(d.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
@@ -258,7 +258,7 @@ class PurchaseReceipt(BuyingController):
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.rm_supp_cost)
-						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
+						}, warehouse_account[self.supplier_warehouse]["account_currency"], item=d))
 
 					# divisional loss adjustment
 					valuation_amount_as_per_doc = flt(d.base_net_amount, d.precision("base_net_amount")) + \
@@ -280,7 +280,7 @@ class PurchaseReceipt(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"debit": divisional_loss,
 							"project": d.project
-						}, stock_rbnb_currency))
+						}, stock_rbnb_currency, item=d))
 
 				elif d.warehouse not in warehouse_with_no_account or \
 					d.rejected_warehouse not in warehouse_with_no_account:
@@ -362,7 +362,7 @@ class PurchaseReceipt(BuyingController):
 					"debit": base_asset_amount,
 					"debit_in_account_currency": (base_asset_amount
 						if cwip_account_currency == self.company_currency else asset_amount)
-				}))
+				}, item=d))
 
 				# Asset received but not billed
 				asset_rbnb_currency = get_account_currency(arbnb_account)
@@ -374,7 +374,7 @@ class PurchaseReceipt(BuyingController):
 					"credit": base_asset_amount,
 					"credit_in_account_currency": (base_asset_amount
 						if asset_rbnb_currency == self.company_currency else asset_amount)
-				}))
+				}, item=d))
 
 		return gl_entries
 

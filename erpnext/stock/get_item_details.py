@@ -14,6 +14,7 @@ from erpnext import get_company_currency
 from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
+from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_manufacturer_part_no
 
 from six import string_types, iteritems
 
@@ -311,6 +312,14 @@ def get_basic_details(args, item):
 
 	for fieldname in ("item_name", "item_group", "barcodes", "brand", "stock_uom"):
 		out[fieldname] = item.get(fieldname)
+
+	if args.get("manufacturer"):
+		part_no = get_item_manufacturer_part_no(args.get("item_code"), args.get("manufacturer"))
+		if part_no:
+			out["manufacturer_part_no"] = part_no
+		else:
+			out["manufacturer_part_no"] = None
+			out["manufacturer"] = None
 
 	return out
 
