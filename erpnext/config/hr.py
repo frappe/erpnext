@@ -37,7 +37,7 @@ def get_data():
 				},
 								{
 					"type": "doctype",
-					"name": "Employee Attendance Log",
+					"name": "Employee Checkin",
 					"hide_count": True,
 					"onboard": 1,
 					"dependencies": ["Employee"]
