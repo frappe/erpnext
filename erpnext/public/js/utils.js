@@ -600,7 +600,6 @@ erpnext.utils.clear_duplicates = function() {
 	let items = []
 
 	for (let item of cur_frm.doc.items) {
-		let item = cur_frm.doc.items[i];
 		if (!(unique_items.has(item.item_code) && unique_items.get(item.item_code)[0] === item.qty &&
 			unique_items.get(item.item_code)[1] === item.warehouse && unique_items.get(item.item_code)[2] === item.batch_no)) {
 
