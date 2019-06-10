@@ -11,7 +11,7 @@ from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_wee
 from datetime import datetime, timedelta
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import is_website_user
-from ..service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
+from erpnext.support.doctype.service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
 from erpnext.crm.doctype.opportunity.opportunity import assign_to_user
 from frappe.email.inbox import link_communication_to_document
 
@@ -63,10 +63,10 @@ class Issue(Document):
 	def update_status(self):
 		status = frappe.db.get_value("Issue", self.name, "status")
 		if self.status!="Open" and status =="Open" and not self.first_responded_on:
-			self.first_responded_on = now_datetime()
+			self.first_responded_on = frappe.flags.current_time or now_datetime()
 
 		if self.status=="Closed" and status !="Closed":
-			self.resolution_date = now_datetime()
+			self.resolution_date = frappe.flags.current_time or now_datetime()
 			if frappe.db.get_value("Issue", self.name, "agreement_fulfilled") == "Ongoing":
 				set_service_level_agreement_variance(issue=self.name)
 				self.update_agreement_status()
@@ -79,7 +79,9 @@ class Issue(Document):
 		current_time = frappe.flags.current_time or now_datetime()
 
 		if self.service_level_agreement and self.agreement_fulfilled == "Ongoing":
-			if self.response_by_variance < 0 or self.resolution_by_variance < 0:
+			if frappe.db.get_value("Issue", self.name, "response_by_variance") < 0 or \
+				frappe.db.get_value("Issue", self.name, "resolution_by_variance") < 0:
+
 				self.agreement_fulfilled = "Failed"
 			else:
 				self.agreement_fulfilled = "Fulfilled"
