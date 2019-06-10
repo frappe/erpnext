@@ -443,7 +443,7 @@ class SalarySlip(TransactionBase):
 				else:
 					component_row.additional_amount = amount
 
-				if not overwrite:
+				if not overwrite and component_row.default_amount:
 					amount += component_row.default_amount
 
 			component_row.amount = amount
