@@ -48,7 +48,7 @@ def get_last_interaction(number, reference_doc):
 				WHERE {}
 				ORDER BY `modified`
 				LIMIT 1
-				""".format(query_condition))
+			""".format(query_condition)) # nosec
 
 		if customer_name:
 			last_issue = frappe.get_all('Issue', {

@@ -38,7 +38,7 @@ class CallPopup {
 				'label': 'Submit',
 				'click': () => {
 					const values = this.dialog.get_values();
-					if (!values.call_summary) return
+					if (!values.call_summary) return;
 					frappe.xcall('erpnext.crm.doctype.utils.add_call_summary', {
 						'docname': this.call_log.id,
 						'summary': values.call_summary,
