@@ -537,6 +537,7 @@ def make_stock_entry(source_name,target_doc=None):
 	def set_missing_values(source, target):
 		if source.name:
 			target.stock_entry_type = "Material Transfer"
+			target.purpose =  "Material Transfer"
 
 	doclist = get_mapped_doc("Purchase Receipt", source_name,{
 		"Purchase Receipt": {
