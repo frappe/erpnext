@@ -593,12 +593,18 @@ erpnext.utils.map_current_doc = function(opts) {
 
 erpnext.utils.clear_duplicates = function() {
 	const unique_items = new Map();
+	/*
+		Create a Map of items with
+		item_code => [qty, warehouse, batch_no]
+	*/
 	let items = []
 
 	for (let i = 0; i < cur_frm.doc.items.length; i++) {
 		let item = cur_frm.doc.items[i];
-		if (!(unique_items.has(item.item_code) && unique_items.get(item.item_code) === item.qty)) {
-			unique_items.set(item.item_code, item.qty);
+		if (!(unique_items.has(item.item_code) && unique_items.get(item.item_code)[0] === item.qty &&
+			unique_items.get(item.item_code)[1] === item.warehouse && unique_items.get(item.item_code)[2] === item.batch_no)) {
+
+			unique_items.set(item.item_code, [item.qty, item.warehouse, item.batch_no]);
 			items.push(item);
 		}
 	}
