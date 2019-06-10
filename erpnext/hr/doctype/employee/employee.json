@@ -16,7 +16,6 @@
   "middle_name",
   "last_name",
   "employee_name",
-  "attendance_device_id",
   "image",
   "column_break1",
   "company",
@@ -49,9 +48,12 @@
   "column_break_31",
   "grade",
   "branch",
-  "organization_profile",
+  "attendance_and_leave_details",
   "leave_policy",
+  "attendance_device_id",
+  "column_break_44",
   "holiday_list",
+  "default_shift",
   "salary_information",
   "salary_mode",
   "bank_name",
@@ -398,12 +400,6 @@
    "oldfieldname": "branch",
    "oldfieldtype": "Link",
    "options": "Branch"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "organization_profile",
-   "fieldtype": "Section Break",
-   "label": "Leave Details"
   },
   {
    "fieldname": "leave_policy",
@@ -755,12 +751,28 @@
    "label": "Attendance Device ID (Biometric/RF tag ID)",
    "no_copy": 1,
    "unique": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "attendance_and_leave_details",
+   "fieldtype": "Section Break",
+   "label": "Attendance and Leave Details"
+  },
+  {
+   "fieldname": "column_break_44",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_shift",
+   "fieldtype": "Link",
+   "label": "Default Shift",
+   "options": "Shift Type"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2019-05-29 17:33:11.988538",
+ "modified": "2019-06-01 16:05:55.132180",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

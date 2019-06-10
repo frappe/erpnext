@@ -17,6 +17,7 @@
   "attendance_date",
   "company",
   "department",
+  "shift",
   "attendance_request",
   "amended_from"
  ],
@@ -146,6 +147,12 @@
    "label": "Working Hours",
    "precision": "1",
    "read_only": 1
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "label": "Shift",
+   "options": "Shift Type"
   }
  ],
  "icon": "fa fa-ok",

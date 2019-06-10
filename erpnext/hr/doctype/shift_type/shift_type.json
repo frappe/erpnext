@@ -18,6 +18,8 @@
   "column_break_10",
   "working_hours_threshold_for_half_day",
   "working_hours_threshold_for_absent",
+  "process_attendance_after",
+  "last_sync_of_attendance_log",
   "grace_period_settings_auto_attendance_section",
   "enable_entry_grace_period",
   "late_entry_grace_period",
@@ -185,9 +187,21 @@
    "fieldname": "enable_auto_attendance",
    "fieldtype": "Check",
    "label": "Enable Auto Attendance"
+  },
+  {
+   "description": "Attendance will be marked automatically only after this date.",
+   "fieldname": "process_attendance_after",
+   "fieldtype": "Date",
+   "label": "Process Attendance After"
+  },
+  {
+   "description": "Last Known Successful Sync of Employee Attendance Log. Reset this only if you are sure that all Logs are synced from all the locations. Please don't modify this if you are unsure.",
+   "fieldname": "last_sync_of_attendance_log",
+   "fieldtype": "Datetime",
+   "label": "Last Sync of Attendance Log"
   }
  ],
- "modified": "2019-05-30 15:31:35.594990",
+ "modified": "2019-05-31 16:02:44.272036",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Type",

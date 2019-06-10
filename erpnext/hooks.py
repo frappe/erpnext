@@ -242,7 +242,7 @@ scheduler_events = {
 		"erpnext.accounts.doctype.gl_entry.gl_entry.rename_gle_sle_docs",
 		"erpnext.projects.doctype.project.project.hourly_reminder",
 		"erpnext.projects.doctype.project.project.collect_project_status",
-		"erpnext.hr.doctype.hr_settings.hr_settings.make_attendance_from_employee_attendance_log"
+		"erpnext.hr.doctype.shift_type.shift_type.process_auto_attendance_for_all_shifts"
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",

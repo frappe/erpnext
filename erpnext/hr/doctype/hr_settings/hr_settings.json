@@ -7,28 +7,22 @@
   "employee_settings",
   "retirement_age",
   "emp_created_by",
-  "leave_approval_notification_template",
-  "leave_status_notification_template",
-  "default_shift",
   "column_break_4",
   "stop_birthday_reminders",
-  "maintain_bill_work_hours_same",
-  "leave_approver_mandatory_in_leave_application",
   "expense_approver_mandatory_in_expense_claim",
   "payroll_settings",
   "include_holidays_in_total_working_days",
+  "max_working_hours_against_timesheet",
+  "column_break_11",
   "email_salary_slip_to_employee",
   "encrypt_salary_slips_in_emails",
   "password_policy",
-  "max_working_hours_against_timesheet",
   "leave_settings",
-  "show_leaves_of_all_department_members_in_calendar",
-  "auto_attendance_section",
-  "disable_auto_attendance",
-  "attendance_for_employee_without_shift",
-  "column_break_23",
-  "process_attendance_after",
-  "last_sync_of_attendance_log"
+  "leave_approval_notification_template",
+  "leave_status_notification_template",
+  "column_break_18",
+  "leave_approver_mandatory_in_leave_application",
+  "show_leaves_of_all_department_members_in_calendar"
  ],
  "fields": [
   {
@@ -67,15 +61,11 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "description": "Don't send Employee Birthday Reminders",
    "fieldname": "stop_birthday_reminders",
    "fieldtype": "Check",
    "label": "Stop Birthday Reminders"
-  },
-  {
-   "fieldname": "maintain_bill_work_hours_same",
-   "fieldtype": "Check",
-   "label": "Maintain Billing Hours and Working Hours Same on Timesheet"
   },
   {
    "default": "1",
@@ -95,6 +85,7 @@
    "label": "Payroll Settings"
   },
   {
+   "default": "0",
    "description": "If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day",
    "fieldname": "include_holidays_in_total_working_days",
    "fieldtype": "Check",
@@ -108,6 +99,7 @@
    "label": "Email Salary Slip to Employee"
   },
   {
+   "default": "0",
    "depends_on": "eval: doc.email_salary_slip_to_employee == 1;",
    "description": "The salary slip emailed to the employee will be password protected, the password will be generated based on the password policy.",
    "fieldname": "encrypt_salary_slips_in_emails",
@@ -133,58 +125,24 @@
    "label": "Leave Settings"
   },
   {
+   "default": "0",
    "fieldname": "show_leaves_of_all_department_members_in_calendar",
    "fieldtype": "Check",
    "label": "Show Leaves Of All Department Members In Calendar"
   },
   {
-   "description": "Attendance automatically marked based Employee Attendance Log",
-   "fieldname": "auto_attendance_section",
-   "fieldtype": "Section Break",
-   "label": "Auto Attendance"
-  },
-  {
-   "fieldname": "default_shift",
-   "fieldtype": "Link",
-   "label": "Default Shift",
-   "options": "Shift Type"
-  },
-  {
-   "depends_on": "eval:!doc.disable_auto_attendance",
-   "fieldname": "attendance_for_employee_without_shift",
-   "fieldtype": "Select",
-   "label": "Attendance for Employee Without Shift",
-   "options": "Skip\nBased on Default Shift\nAt least one Employee Attendance Log per day as present"
-  },
-  {
-   "fieldname": "disable_auto_attendance",
-   "fieldtype": "Check",
-   "label": "Disable Auto Attendance"
-  },
-  {
-   "depends_on": "eval:!doc.disable_auto_attendance",
-   "fieldname": "column_break_23",
+   "fieldname": "column_break_11",
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:!doc.disable_auto_attendance",
-   "description": "Attendance will be marked automatically only after this date.",
-   "fieldname": "process_attendance_after",
-   "fieldtype": "Date",
-   "label": "Process Attendance After"
-  },
-  {
-   "depends_on": "eval:!doc.disable_auto_attendance",
-   "description": "Last Known Successful Sync of Employee Attendance Log. Reset this only if you are sure that all Logs are synced from all the locations. Please don't modify this if you are unsure.",
-   "fieldname": "last_sync_of_attendance_log",
-   "fieldtype": "Datetime",
-   "label": "Last Sync of Attendance Log"
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2019-05-22 12:50:40.189766",
+ "modified": "2019-05-31 16:18:50.245872",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
