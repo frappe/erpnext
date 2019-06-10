@@ -72,7 +72,7 @@
    "label": "Agreement Details"
   },
   {
-   "depends_on": "eval: !doc.default_service_level_agreement && !doc.ignore_start_and_end_date",
+   "depends_on": "eval: !doc.default_service_level_agreement",
    "fieldname": "start_date",
    "fieldtype": "Date",
    "label": "Start Date"
@@ -83,7 +83,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval: !doc.default_service_level_agreement && !doc.ignore_start_and_end_date",
+   "depends_on": "eval: !doc.default_service_level_agreement",
    "fieldname": "end_date",
    "fieldtype": "Date",
    "label": "End Date"
@@ -128,7 +128,7 @@
    "read_only": 1
   },
   {
-   "collapsible_depends_on": "eval: !doc.default_service_level_agreement;",
+   "depends_on": "eval: !doc.default_service_level_agreement",
    "fieldname": "apply_to_section",
    "fieldtype": "Section Break",
    "label": "Apply To"
@@ -153,7 +153,7 @@
    "options": "apply_to"
   }
  ],
- "modified": "2019-06-07 00:30:34.755416",
+ "modified": "2019-06-10 11:32:47.778830",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
