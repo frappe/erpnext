@@ -7,7 +7,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, now_datetime, nowdate
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee, is_holiday
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from datetime import timedelta, datetime
 
 class OverlapError(frappe.ValidationError): pass
@@ -90,7 +91,7 @@ def get_employee_shift(employee, for_date=nowdate(), consider_default_shift=Fals
 	:param consider_default_shift: If set to true, default shift is taken when no shift assignment is found.
 	:param next_shift_direction: One of: None, 'forward', 'reverse'. Direction to look for next shift if shift not found on given date.
 	"""
-	default_shift = frappe.db.get_value('HR Settings', None, 'default_shift')
+	default_shift = frappe.db.get_value('Employee', employee, 'default_shift')
 	shift_type_name = frappe.db.get_value('Shift Assignment', {'employee':employee, 'date': for_date, 'docstatus': '1'}, 'shift_type')
 	if not shift_type_name and consider_default_shift:
 		shift_type_name = default_shift
@@ -98,7 +99,7 @@ def get_employee_shift(employee, for_date=nowdate(), consider_default_shift=Fals
 		holiday_list_name = frappe.db.get_value('Shift Type', shift_type_name, 'holiday_list')
 		if not holiday_list_name:
 			holiday_list_name = get_holiday_list_for_employee(employee, False)
-		if holiday_list_name and is_holiday(holiday_list_name, for_date, False):
+		if holiday_list_name and is_holiday(holiday_list_name, for_date):
 			shift_type_name = None
 
 	if not shift_type_name and next_shift_direction:
@@ -114,7 +115,7 @@ def get_employee_shift(employee, for_date=nowdate(), consider_default_shift=Fals
 					break
 		else:
 			direction = '<' if next_shift_direction == 'reverse' else '>'
-			dates = frappe.db.get_list('Shift Assignment',
+			dates = frappe.db.get_all('Shift Assignment',
 				'date',
 				{'employee':employee, 'date':(direction, for_date), 'docstatus': '1'},
 				as_list=True,
@@ -177,3 +178,32 @@ def get_shift_details(shift_type_name, for_date=nowdate()):
 		'actual_start': actual_start,
 		'actual_end': actual_end
 	})
+
+
+def get_actual_start_end_datetime_of_shift(employee, for_datetime, consider_default_shift=False):
+	"""Takes a datetime and returns the 'actual' start datetime and end datetime of the shift in which the timestamp belongs.
+		Here 'actual' means - taking in to account the "begin_check_in_before_shift_start_time" and "allow_check_out_after_shift_end_time".
+		None is returned if the timestamp is outside any actual shift timings.
+		Shift Details is also returned(current/upcoming i.e. if timestamp not in any actual shift then details of next shift returned)
+	"""
+	actual_shift_start = actual_shift_end = shift_details = None
+	shift_timings_as_per_timestamp = get_employee_shift_timings(employee, for_datetime, consider_default_shift)
+	timestamp_list = []
+	for shift in shift_timings_as_per_timestamp:
+		if shift:
+			timestamp_list.extend([shift.actual_start, shift.actual_end])
+		else:
+			timestamp_list.extend([None, None])
+	timestamp_index = None
+	for index, timestamp in enumerate(timestamp_list):
+		if timestamp and for_datetime <= timestamp:
+			timestamp_index = index
+			break
+	if timestamp_index and timestamp_index%2 == 1:
+		shift_details = shift_timings_as_per_timestamp[int((timestamp_index-1)/2)]
+		actual_shift_start = shift_details.actual_start
+		actual_shift_end = shift_details.actual_end
+	elif timestamp_index:
+		shift_details = shift_timings_as_per_timestamp[int(timestamp_index/2)]
+
+	return actual_shift_start, actual_shift_end, shift_details

@@ -12,7 +12,7 @@ class TestHolidayList(unittest.TestCase):
 	def test_holiday_list(self):
 		today_date = getdate()
 		test_holiday_dates = [today_date-timedelta(days=5), today_date-timedelta(days=4)]
-		holiday_list = make_holiday_list("test_is_holiday",
+		holiday_list = make_holiday_list("test_holiday_list",
 			holiday_dates=[
 				{'holiday_date': test_holiday_dates[0], 'description': 'test holiday'},
 				{'holiday_date': test_holiday_dates[1], 'description': 'test holiday2'}

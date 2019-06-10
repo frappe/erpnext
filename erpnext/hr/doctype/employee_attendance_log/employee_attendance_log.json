@@ -8,13 +8,18 @@
   "employee",
   "employee_name",
   "log_type",
+  "shift",
   "column_break_4",
   "time",
   "device_id",
   "skip_auto_attendance",
   "attendance",
   "entry_grace_period_consequence",
-  "exit_grace_period_consequence"
+  "exit_grace_period_consequence",
+  "shift_start",
+  "shift_end",
+  "shift_actual_start",
+  "shift_actual_end"
  ],
  "fields": [
   {
@@ -50,12 +55,14 @@
    "label": "Location / Device ID"
   },
   {
+   "default": "0",
    "fieldname": "entry_grace_period_consequence",
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Entry Grace Period Consequence"
   },
   {
+   "default": "0",
    "fieldname": "exit_grace_period_consequence",
    "fieldtype": "Check",
    "hidden": 1,
@@ -68,10 +75,10 @@
    "options": "\nIN\nOUT"
   },
   {
+   "default": "0",
    "fieldname": "skip_auto_attendance",
    "fieldtype": "Check",
-   "label": "Skip Auto Attendance",
-   "read_only": 1
+   "label": "Skip Auto Attendance"
   },
   {
    "fieldname": "attendance",
@@ -79,9 +86,40 @@
    "label": "Attendance Marked",
    "options": "Attendance",
    "read_only": 1
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "label": "Shift",
+   "options": "Shift Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shift_start",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Shift Start"
+  },
+  {
+   "fieldname": "shift_end",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Shift End"
+  },
+  {
+   "fieldname": "shift_actual_start",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Shift Actual Start"
+  },
+  {
+   "fieldname": "shift_actual_end",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Shift Actual End"
   }
  ],
- "modified": "2019-05-24 13:40:01.287808",
+ "modified": "2019-06-06 23:09:37.766717",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Attendance Log",

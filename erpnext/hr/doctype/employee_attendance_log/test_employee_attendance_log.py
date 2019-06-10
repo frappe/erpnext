@@ -8,7 +8,7 @@ from frappe.utils import now_datetime, nowdate, to_timedelta
 import unittest
 from datetime import timedelta
 
-from erpnext.hr.doctype.employee_attendance_log.employee_attendance_log import add_log_based_on_employee_field, mark_attendance_and_link_log
+from erpnext.hr.doctype.employee_attendance_log.employee_attendance_log import add_log_based_on_employee_field, mark_attendance_and_link_log, calculate_working_hours
 from erpnext.hr.doctype.employee.test_employee import make_employee
 
 class TestEmployeeAttendanceLog(unittest.TestCase):
@@ -44,6 +44,42 @@ class TestEmployeeAttendanceLog(unittest.TestCase):
 			'employee':employee, 'attendance_date':now_date})
 		self.assertEqual(attendance_count, 1)		
 
+	def test_calculate_working_hours(self):
+		check_in_out_type = ['Alternating entries as IN and OUT during the same shift',
+			'Strictly based on Log Type in Employee Attendance Log'] 
+		working_hours_calc_type = ['First Check-in and Last Check-out',
+			'Every Valid Check-in and Check-out']
+		logs_type_1 = [
+			{'time':now_datetime()-timedelta(minutes=390)},
+			{'time':now_datetime()-timedelta(minutes=300)},
+			{'time':now_datetime()-timedelta(minutes=270)},
+			{'time':now_datetime()-timedelta(minutes=90)},
+			{'time':now_datetime()-timedelta(minutes=0)}
+			]
+		logs_type_2 = [
+			{'time':now_datetime()-timedelta(minutes=390),'log_type':'OUT'},
+			{'time':now_datetime()-timedelta(minutes=360),'log_type':'IN'},
+			{'time':now_datetime()-timedelta(minutes=300),'log_type':'OUT'},
+			{'time':now_datetime()-timedelta(minutes=290),'log_type':'IN'},
+			{'time':now_datetime()-timedelta(minutes=260),'log_type':'OUT'},
+			{'time':now_datetime()-timedelta(minutes=240),'log_type':'IN'},
+			{'time':now_datetime()-timedelta(minutes=150),'log_type':'IN'},
+			{'time':now_datetime()-timedelta(minutes=60),'log_type':'OUT'}
+			]
+		logs_type_1 = [frappe._dict(x) for x in logs_type_1]
+		logs_type_2 = [frappe._dict(x) for x in logs_type_2]
+
+		working_hours = calculate_working_hours(logs_type_1,check_in_out_type[0],working_hours_calc_type[0])
+		self.assertEqual(working_hours, 6.5)
+
+		working_hours = calculate_working_hours(logs_type_1,check_in_out_type[0],working_hours_calc_type[1])
+		self.assertEqual(working_hours, 4.5)
+
+		working_hours = calculate_working_hours(logs_type_2,check_in_out_type[1],working_hours_calc_type[0])
+		self.assertEqual(working_hours, 5)
+
+		working_hours = calculate_working_hours(logs_type_2,check_in_out_type[1],working_hours_calc_type[1])
+		self.assertEqual(working_hours, 4.5)
 
 def make_n_attendance_logs(employee, n, hours_to_reverse=1):
 	logs = [make_attendance_log(employee, now_datetime() - timedelta(hours=hours_to_reverse, minutes=n+1))]
