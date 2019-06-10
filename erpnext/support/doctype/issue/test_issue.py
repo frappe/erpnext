@@ -70,6 +70,7 @@ def make_issue(creation=None, customer=None):
 		"subject": "Service Level Agreement Issue",
 		"customer": customer,
 		"raised_by": "test@example.com",
+		"description": "Service Level Agreement Issue",
 		"creation": creation
 	}).insert(ignore_permissions=True)
 
