@@ -1,7 +1,7 @@
 {
  "allow_import": 1,
- "autoname": "ATT-LOG-.MM.-.YYYY.-.######",
- "creation": "2019-04-25 10:17:11.225671",
+ "autoname": "ATT-CKIN-.MM.-.YYYY.-.######",
+ "creation": "2019-06-10 11:56:34.536413",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -38,6 +38,19 @@
    "read_only": 1
   },
   {
+   "fieldname": "log_type",
+   "fieldtype": "Select",
+   "label": "Log Type",
+   "options": "\nIN\nOUT"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "label": "Shift",
+   "options": "Shift Type",
+   "read_only": 1
+  },
+  {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
   },
@@ -56,26 +69,6 @@
   },
   {
    "default": "0",
-   "fieldname": "entry_grace_period_consequence",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Entry Grace Period Consequence"
-  },
-  {
-   "default": "0",
-   "fieldname": "exit_grace_period_consequence",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Exit Grace Period Consequence"
-  },
-  {
-   "fieldname": "log_type",
-   "fieldtype": "Select",
-   "label": "Log Type",
-   "options": "\nIN\nOUT"
-  },
-  {
-   "default": "0",
    "fieldname": "skip_auto_attendance",
    "fieldtype": "Check",
    "label": "Skip Auto Attendance"
@@ -88,11 +81,18 @@
    "read_only": 1
   },
   {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "label": "Shift",
-   "options": "Shift Type",
-   "read_only": 1
+   "default": "0",
+   "fieldname": "entry_grace_period_consequence",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Entry Grace Period Consequence"
+  },
+  {
+   "default": "0",
+   "fieldname": "exit_grace_period_consequence",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Exit Grace Period Consequence"
   },
   {
    "fieldname": "shift_start",
@@ -119,10 +119,10 @@
    "label": "Shift Actual End"
   }
  ],
- "modified": "2019-06-06 23:09:37.766717",
+ "modified": "2019-06-10 11:56:34.536413",
  "modified_by": "Administrator",
  "module": "HR",
- "name": "Employee Attendance Log",
+ "name": "Employee Checkin",
  "owner": "Administrator",
  "permissions": [
   {

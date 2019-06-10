@@ -10,22 +10,22 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import cint, getdate
 from erpnext.hr.doctype.shift_assignment.shift_assignment import get_actual_start_end_datetime_of_shift, get_employee_shift
-from erpnext.hr.doctype.employee_attendance_log.employee_attendance_log import mark_attendance_and_link_log, calculate_working_hours
+from erpnext.hr.doctype.employee_checkin.employee_checkin import mark_attendance_and_link_log, calculate_working_hours
 from erpnext.hr.doctype.attendance.attendance import mark_absent
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 class ShiftType(Document):
 	def process_auto_attendance(self):
-		if not cint(self.enable_auto_attendance) or not self.process_attendance_after or not self.last_sync_of_attendance_log:
+		if not cint(self.enable_auto_attendance) or not self.process_attendance_after or not self.last_sync_of_checkin:
 			return
 		filters = {
 			'skip_auto_attendance':'0',
 			'attendance':('is', 'not set'),
 			'time':('>=', self.process_attendance_after),
-			'shift_actual_start': ('<', self.last_sync_of_attendance_log),
+			'shift_actual_start': ('<', self.last_sync_of_checkin),
 			'shift': self.name
 		}
-		logs = frappe.db.get_list('Employee Attendance Log', fields="*", filters=filters, order_by="employee,time")
+		logs = frappe.db.get_list('Employee Checkin', fields="*", filters=filters, order_by="employee,time")
 		for key, group in itertools.groupby(logs, key=lambda x: (x['employee'], x['shift_actual_start'])):
 			single_shift_logs = list(group)
 			attendance_status, working_hours = self.get_attendance(single_shift_logs)
@@ -54,8 +54,8 @@ class ShiftType(Document):
 		if not date_of_joining:
 			date_of_joining = employee_creation.date()
 		start_date = max(self.process_attendance_after, date_of_joining)
-		actual_shift_datetime = get_actual_start_end_datetime_of_shift(employee, self.last_sync_of_attendance_log, True)
-		last_shift_time = actual_shift_datetime[0] if actual_shift_datetime[0] else self.last_sync_of_attendance_log
+		actual_shift_datetime = get_actual_start_end_datetime_of_shift(employee, self.last_sync_of_checkin, True)
+		last_shift_time = actual_shift_datetime[0] if actual_shift_datetime[0] else self.last_sync_of_checkin
 		prev_shift = get_employee_shift(employee, last_shift_time.date()-timedelta(days=1), True, 'reverse')
 		if prev_shift:
 			end_date = min(prev_shift.start_datetime.date(), relieving_date) if relieving_date else prev_shift.start_datetime.date()
