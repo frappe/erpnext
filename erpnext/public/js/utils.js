@@ -560,6 +560,7 @@ erpnext.utils.map_current_doc = function(opts) {
 				if(!r.exc) {
 					var doc = frappe.model.sync(r.message);
 					cur_frm.dirty();
+					erpnext.utils.clear_duplicates();
 					cur_frm.refresh();
 				}
 			}
@@ -588,6 +589,20 @@ erpnext.utils.map_current_doc = function(opts) {
 		opts.source_name = [opts.source_name];
 		_map();
 	}
+}
+
+erpnext.utils.clear_duplicates = function() {
+	const unique_items = new Map();
+	let items = []
+
+	for (let i = 0; i < cur_frm.doc.items.length; i++) {
+		let item = cur_frm.doc.items[i];
+		if (!(unique_items.has(item.item_code) && unique_items.get(item.item_code) === item.qty)) {
+			unique_items.set(item.item_code, item.qty);
+			items.push(item);
+		}
+	}
+	cur_frm.doc.items = items;
 }
 
 frappe.form.link_formatters['Item'] = function(value, doc) {
