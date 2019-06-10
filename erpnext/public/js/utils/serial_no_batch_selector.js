@@ -280,7 +280,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 								query: 'erpnext.controllers.queries.get_batch_numbers'
 							};
 						},
-						change: function (e) {
+						change: function () {
 							let val = this.get_value();
 							if (val.length === 0) {
 								this.grid_row.on_grid_fields_dict
@@ -341,7 +341,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 						'label': __('Qty'),
 						'in_list_view': 1,
 						'default': 0,
-						change: function (e) {
+						change: function () {
 							var batch_no = this.grid_row.on_grid_fields_dict.batch_no.get_value();
 							var available_qty = this.grid_row.on_grid_fields_dict.available_qty.get_value();
 							var selected_qty = this.grid_row.on_grid_fields_dict.selected_qty.get_value();
