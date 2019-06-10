@@ -261,3 +261,19 @@ def calculate_hra_exemption_for_period(doc):
 		exemptions["monthly_house_rent"] = monthly_rent
 		exemptions["total_eligible_hra_exemption"] = eligible_hra
 		return exemptions
+
+@frappe.whitelist()
+def get_gstins_for_company(company):
+	company_gstins =[]
+	if company:
+		company_gstins = frappe.db.sql("""select
+			distinct `tabAddress`.gstin
+		from
+			`tabAddress`, `tabDynamic Link`
+		where
+			`tabDynamic Link`.parent = `tabAddress`.name and
+			`tabDynamic Link`.parenttype = 'Address' and
+			`tabDynamic Link`.link_doctype = 'Company' and
+			`tabDynamic Link`.link_name = '{0}'""".format(company))
+	return company_gstins
+
