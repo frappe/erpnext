@@ -367,6 +367,20 @@ def generate_ewb_json(dt, dn):
 
 	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(doc_name, frappe.utils.random_string(5))
 
+@frappe.whitelist()
+def get_gstins_for_company(company):
+	company_gstins =[]
+	if company:
+		company_gstins = frappe.db.sql("""select
+			distinct `tabAddress`.gstin
+		from
+			`tabAddress`, `tabDynamic Link`
+		where
+			`tabDynamic Link`.parent = `tabAddress`.name and
+			`tabDynamic Link`.parenttype = 'Address' and
+			`tabDynamic Link`.link_doctype = 'Company' and
+			`tabDynamic Link`.link_name = '{0}'""".format(company))
+	return company_gstins
 
 def get_address_details(data, doc, company_address, billing_address):
 	data.fromPincode = validate_pincode(company_address.pincode, 'Company Address')
