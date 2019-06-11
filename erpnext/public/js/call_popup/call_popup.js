@@ -97,7 +97,7 @@ class CallPopup {
 
 	setup_known_caller(wrapper) {
 		const contact = this.contact;
-		const contact_name = frappe.utils.get_form_link('Contact', contact.name, true);
+		const contact_name = frappe.utils.get_form_link(contact.doctype, contact.name, true, contact.lead_name);
 		const links = contact.links ? contact.links : [];
 
 		let contact_links = '';
