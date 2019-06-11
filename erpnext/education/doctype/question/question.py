@@ -12,6 +12,7 @@ class Question(Document):
 	def validate(self):
 		self.check_at_least_one_option()
 		self.check_minimum_one_correct_answer()
+		self.set_question_type()
 
 	def check_at_least_one_option(self):
 		if len(self.options) <= 1:
@@ -25,6 +26,13 @@ class Question(Document):
 			pass
 		else:
 			frappe.throw(_("A qustion must have at least one correct options"))
+
+	def set_question_type(self):
+		correct_options = [option for option in self.options if option.is_correct]
+		if len(correct_options) > 1:
+			self.question_type = "Multiple Correct Answer"
+		else:
+			self.question_type = "Single Correct Answer"
 
 	def get_answer(self):
 		options = self.options

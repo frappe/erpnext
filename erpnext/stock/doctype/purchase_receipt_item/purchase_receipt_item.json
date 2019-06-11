@@ -19,6 +19,10 @@
   "image_section",
   "image",
   "image_view",
+  "manufacture_details",
+  "manufacturer",
+  "column_break_16",
+  "manufacturer_part_no",
   "received_and_accepted",
   "received_qty",
   "qty",
@@ -788,11 +792,33 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "manufacture_details",
+   "fieldtype": "Section Break",
+   "label": "Manufacture"
+  },
+  {
+   "fieldname": "manufacturer",
+   "fieldtype": "Link",
+   "label": "Manufacturer",
+   "options": "Manufacturer"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "manufacturer_part_no",
+   "fieldtype": "Data",
+   "label": "Manufacturer Part Number",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-06-01 23:25:20.732134",
+ "modified": "2019-06-02 06:37:48.198745",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
