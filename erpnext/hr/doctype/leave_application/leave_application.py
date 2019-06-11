@@ -370,18 +370,19 @@ class LeaveApplication(Document):
 		''' splits leave application into two ledger entries to consider expiry of allocation '''
 		args = dict(
 			from_date=self.from_date,
-			to_date=self.to_date,
+			to_date=expiry_date,
 			leaves=(date_diff(expiry_date, self.from_date) + 1) * -1
 		)
 		create_leave_ledger_entry(self, args, submit)
 
-		start_date = add_days(expiry_date, 1)
-		args.update(dict(
-			from_date=start_date,
-			to_date=self.to_date,
-			leaves=date_diff(self.to_date, expiry_date) * -1
-		))
-		create_leave_ledger_entry(self, args, submit)
+		if expiry_date != self.to_date:
+			start_date = add_days(expiry_date, 1)
+			args.update(dict(
+				from_date=start_date,
+				to_date=self.to_date,
+				leaves=date_diff(self.to_date, expiry_date) * -1
+			))
+			create_leave_ledger_entry(self, args, submit)
 
 def get_allocation_expiry(employee, leave_type, to_date, from_date):
 	expiry =  frappe.get_all("Leave Ledger Entry",
