@@ -4,6 +4,7 @@
  "creation": "2013-01-10 16:34:14",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "naming_series",
   "employee",
@@ -18,6 +19,9 @@
   "expense_details",
   "expenses",
   "sb1",
+  "taxes",
+  "net_total",
+  "section_break_16",
   "posting_date",
   "vehicle_log",
   "task",
@@ -315,12 +319,28 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "taxes",
+   "fieldtype": "Table",
+   "label": "Expense Taxes and Charges",
+   "options": "Expense Taxes and Charges"
+  },
+  {
+   "fieldname": "section_break_16",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "net_total",
+   "fieldtype": "Currency",
+   "label": "Net Total",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2019-05-25 22:53:31.682151",
+ "modified": "2019-06-11 13:21:42.386420",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",

@@ -157,6 +157,14 @@ frappe.ui.form.on("Expense Claim", {
 				}
 			};
 		});
+		// frm.set_query("taxes", "account_head", function(doc) {
+		// 	return {
+		// 		filters: [
+		// 			['docstatus', '=', 1],
+		// 			['company', '=', doc.company]
+		// 		]
+		// 	};
+		// });
 	},
 
 	onload: function(frm) {
@@ -259,6 +267,18 @@ frappe.ui.form.on("Expense Claim", {
 		frm.events.get_advances(frm);
 	},
 
+	get_taxes: function(frm) {
+		if(frm.doc.taxes) {
+			frappe.call({
+				method: "calculate_taxes",
+				doc: frm.doc,
+				callback: (r) => {
+					refresh_field("taxes");
+				}
+			});
+		}
+	},
+
 	get_advances: function(frm) {
 		frappe.model.clear_table(frm.doc, "advances");
 		if (frm.doc.employee) {
@@ -298,6 +318,7 @@ frappe.ui.form.on("Expense Claim Detail", {
 	sanctioned_amount: function(frm, cdt, cdn) {
 		var doc = frm.doc;
 		cur_frm.cscript.calculate_total(doc,cdt,cdn);
+		frm.trigger("get_taxes");
 	}
 });
 
@@ -329,6 +350,47 @@ frappe.ui.form.on("Expense Claim Advance", {
 				}
 			});
 		}
+	}
+});
+
+frappe.ui.form.on("Expense Taxes and Charges", {
+	account_head: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if(child.account_head && !child.description && !child.rate) {
+			// set description from account head
+			child.description = child.account_head.split(' - ').slice(0, -1).join(' - ');
+
+			// set the tax rate from account head
+			frappe.db.get_value("Account", child.account_head, "tax_rate").then((r) => {
+				if(r.message) {
+					frappe.model.set_value(cdt, cdn, 'rate', r.message.tax_rate);
+				}
+			});
+			refresh_field("taxes");
+		}
+	},
+
+	calculate_total: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		child.total = flt(frm.doc.total_sanctioned_amount) + flt(child.tax_amount);
+
+		refresh_field("taxes");
+	},
+
+	rate: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if(!child.amount) {
+			child.tax_amount = flt(frm.doc.total_sanctioned_amount) * (flt(child.rate)/100);
+			refresh_field("taxes");
+		}
+		frm.trigger("calculate_total", cdt, cdn)
+	},
+
+	tax_amount: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		child.rate = flt(child.tax_amount/frm.doc.total_sanctioned_amount) * 100;
+		frm.trigger("calculate_total", cdt, cdn)
+		refresh_field("taxes");
 	}
 });
 
