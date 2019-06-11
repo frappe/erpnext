@@ -3,7 +3,7 @@
 	<a href="/lms/program?program={{ program.name }}" class="no-decoration no-underline">
 	<div class="card h-100">
 		{% if program.hero_image %}
-		<div class="card-hero-img" style="background-image: url({{ program.hero_image }})"></div>
+		<div class="card-hero-img" style="background-image: url('{{ program.hero_image }}')"></div>
 		{% else %}
 		<div class="card-image-wrapper text-center">
 			<div class="image-body"><i class="fa fa-picture-o" aria-hidden="true"></i></div>
@@ -28,7 +28,7 @@
 
 {% macro null_card() %}
 <div class="col-sm-4 mb-4 text-left">
-	<div class="h-100" style="border: 1px solid rgba(209,216,221,0.5);border-radius: 0.25rem;background-color: rgb(250, 251, 252);">
+	<div class="h-100 d-none d-sm-block" style="border: 1px solid rgba(209,216,221,0.5);border-radius: 0.25rem;background-color: rgb(250, 251, 252);">
 	</div>
 </div>
 {% endmacro %}
