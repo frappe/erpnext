@@ -70,12 +70,12 @@ def get_last_interaction(number, reference_doc):
 @frappe.whitelist()
 def add_call_summary(docname, summary):
 	call_log = frappe.get_doc('Call Log', docname)
-	content = _('Call Summary by {0}: {1}').format(
+	summary = _('Call Summary by {0}: {1}').format(
 		frappe.utils.get_fullname(frappe.session.user), summary)
-	if not call_log.call_summary:
-		call_log.call_summary = content
+	if not call_log.summary:
+		call_log.summary = summary
 	else:
-		call_log.call_summary += '<br>' + content
+		call_log.summary += '<br>' + summary
 	call_log.save(ignore_permissions=True)
 
 def get_employee_emails_for_popup(communication_medium):
