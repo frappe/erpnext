@@ -28,6 +28,8 @@ class EmployeeCheckin(Document):
 	def fetch_shift(self):
 		shift_actual_timings = get_actual_start_end_datetime_of_shift(self.employee, get_datetime(self.time), True)
 		if shift_actual_timings[0] and shift_actual_timings[1]:
+			if shift_actual_timings[2].shift_type.determine_check_in_and_check_out == 'Strictly based on Log Type in Employee Checkin' and not self.log_type and not self.skip_auto_attendance:
+				frappe.throw(_('Log Type is required for check-ins falling in the shift: {0}.').format(shift_actual_timings[2].shift_type.name))
 			if not self.attendance:
 				self.shift = shift_actual_timings[2].shift_type.name
 				self.shift_actual_start = shift_actual_timings[0]
