@@ -42,7 +42,7 @@
 	<a href="/lms/course?name={{ course.name }}&program={{ program.name }}" class="no-decoration no-underline">
 	<div class="card h-100">
 		{% if course.hero_image %}
-		<div class="card-hero-img" style="background-image: url({{ course.hero_image }})"></div>
+		<div class="card-hero-img" style="background-image: url('{{ course.hero_image }}')"></div>
 		{% else %}
 		<div class="card-image-wrapper text-center">
 			<div class="image-body"><i class="fa fa-picture-o" aria-hidden="true"></i></div>
