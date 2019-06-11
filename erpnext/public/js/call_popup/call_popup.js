@@ -56,7 +56,7 @@ class CallPopup {
 		this.make_caller_info_section();
 		this.dialog.get_close_btn().show();
 		this.dialog.$body.addClass('call-popup');
-		this.dialog.set_secondary_action(this.close_modal);
+		this.dialog.set_secondary_action(this.close_modal.bind(this));
 		frappe.utils.play_sound("incoming-call");
 		this.dialog.show();
 	}
@@ -70,33 +70,52 @@ class CallPopup {
 			wrapper.empty();
 			const contact = this.contact = contact_doc;
 			if (!contact) {
-				wrapper.append(`
-					<div class="caller-info">
-						<div>${__('Unknown Number')}: <b>${this.caller_number}</b></div>
-						<a class="contact-link" href="#Form/Contact/New Contact?phone=${this.caller_number}">
-							${__('Create New Contact')}
-						</a>
-					</div>
-				`);
+				this.setup_unknown_caller(wrapper);
 			} else {
-				const contact_name = frappe.utils.get_form_link('Contact', contact.name, true);
-				const link = contact.links ? contact.links[0] : null;
-				let contact_link = link ? frappe.utils.get_form_link(link.link_doctype, link.link_name, true): '';
-				wrapper.append(`
-					<div class="caller-info flex">
-						${frappe.avatar(null, 'avatar-xl', contact.name, contact.image)}
-						<div>
-							<h5>${contact_name}</h5>
-							<div>${contact.mobile_no || ''}</div>
-							<div>${contact.phone_no || ''}</div>
-							${contact_link}
-						</div>
-					</div>
-				`);
+				this.setup_known_caller(wrapper);
 				this.set_call_status();
 				this.make_last_interaction_section();
 			}
 		});
+	}
+
+	setup_unknown_caller(wrapper) {
+		wrapper.append(`
+			<div class="caller-info">
+				<b>${__('Unknown Number')}:</b> ${this.caller_number}
+				<button
+					class="margin-left btn btn-new btn-default btn-xs"
+					data-doctype="Contact"
+					title="Make New Contact">
+					<i class="octicon octicon-plus text-medium"></i>
+				</button>
+			</div>
+		`).find('button').click(
+			() => frappe.set_route(`Form/Contact/New Contact?phone=${this.caller_number}`)
+		);
+	}
+
+	setup_known_caller(wrapper) {
+		const contact = this.contact;
+		const contact_name = frappe.utils.get_form_link('Contact', contact.name, true);
+		const links = contact.links ? contact.links : [];
+
+		let contact_links = '';
+
+		links.forEach(link => {
+			contact_links += `<div>${link.link_doctype}: ${frappe.utils.get_form_link(link.link_doctype, link.link_name, true)}</div>`;
+		});
+		wrapper.append(`
+			<div class="caller-info flex">
+				${frappe.avatar(null, 'avatar-xl', contact.name, contact.image)}
+				<div>
+					<h5>${contact_name}</h5>
+					<div>${contact.mobile_no || ''}</div>
+					<div>${contact.phone_no || ''}</div>
+					${contact_links}
+				</div>
+			</div>
+		`);
 	}
 
 	set_indicator(color, blink=false) {
@@ -133,8 +152,8 @@ class CallPopup {
 	}
 
 	close_modal() {
-		delete erpnext.call_popup;
 		this.dialog.hide();
+		delete erpnext.call_popup;
 	}
 
 	call_disconnected(call_log) {
