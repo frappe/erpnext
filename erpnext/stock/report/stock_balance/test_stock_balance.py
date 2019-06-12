@@ -19,6 +19,27 @@ class TestStockBalance(unittest.TestCase):
 		self.assertEquals(item_map['Test_One_Plus'][11],6789.0)
 		self.assertEquals(item_map['Test_Mac_Book_Pro'][11],12345.0)
 
+	def test_for_stock_balance_with_warehouse_and_warehouse_type(self):
+
+		item_1 = get_item("Test_item_for_warehouse_type", 2367)
+
+		wt = get_warehouse_type()
+
+		warehouse = frappe.get_doc("Warehouse", item_1.item_defaults[0].default_warehouse)
+		warehouse.warehouse_type = wt.name
+		warehouse.save()
+
+		cols, rows = execute(filters=frappe._dict({
+				"from_date": now(),
+				"to_date": add_to_date(now(), months = 1),
+				"warehouse_type": wt.name
+			}))
+
+		item_map = get_item_map(rows)
+
+		self.assertEquals(item_map['Test_item_for_warehouse_type'][5], item_1.item_defaults[0].default_warehouse)
+		self.assertEquals(item_map['Test_item_for_warehouse_type'][11], 2367)
+
 def get_item_map(rows):
 
 	item_map = {}
@@ -43,3 +64,15 @@ def get_item(item_code, qty):
 		item.is_stock_item = 1
 
 		item.insert()
+
+def get_warehouse_type():
+
+	if frappe.db.exists("Warehouse Type", "Reserved"):
+		return frappe.get_doc("Warehouse Type", "Reserved")
+
+	wt = frappe.get_doc({
+			"doctype": "Warehouse Type",
+			"name": "Reserved"
+		})
+
+	return wt
