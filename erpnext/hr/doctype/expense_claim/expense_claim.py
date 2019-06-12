@@ -176,7 +176,6 @@ class ExpenseClaim(AccountsController):
 	def add_tax_gl_entries(self, gl_entries):
 		# tax table gl entries
 		for tax in self.get("taxes"):
-			account_currency = get_account_currency(tax.account_head)
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": tax.account_head,
