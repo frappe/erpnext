@@ -104,15 +104,13 @@ class ExpenseClaim(AccountsController):
 		gl_entry = []
 		self.validate_account_details()
 
-		payable_amount = flt(self.net_total) - flt(self.total_advance_amount)
-
 		# payable entry
-		if payable_amount:
+		if self.grand_total:
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": self.payable_account,
-					"credit": payable_amount,
-					"credit_in_account_currency": payable_amount,
+					"credit": self.grand_total,
+					"credit_in_account_currency": self.grand_total,
 					"against": ",".join([d.default_account for d in self.expenses]),
 					"party_type": "Employee",
 					"party": self.employee,
@@ -146,15 +144,16 @@ class ExpenseClaim(AccountsController):
 					"against_voucher": self.name
 				})
 			)
+		self.add_tax_gl_entries(gl_entry)
 
-		if self.is_paid and payable_amount:
+		if self.is_paid and self.grand_total:
 			# payment entry
 			payment_account = get_bank_cash_account(self.mode_of_payment, self.company).get("account")
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": payment_account,
-					"credit": payable_amount,
-					"credit_in_account_currency": payable_amount,
+					"credit": self.grand_total,
+					"credit_in_account_currency": self.grand_total,
 					"against": self.employee
 				})
 			)
@@ -165,14 +164,12 @@ class ExpenseClaim(AccountsController):
 					"party_type": "Employee",
 					"party": self.employee,
 					"against": payment_account,
-					"debit": payable_amount,
-					"debit_in_account_currency": payable_amount,
+					"debit": self.grand_total,
+					"debit_in_account_currency": self.grand_total,
 					"against_voucher": self.name,
 					"against_voucher_type": self.doctype,
 				})
 			)
-
-		self.add_tax_gl_entries(gl_entry)
 
 		return gl_entry
 
@@ -184,11 +181,12 @@ class ExpenseClaim(AccountsController):
 				self.get_gl_dict({
 					"account": tax.account_head,
 					"debit": tax.tax_amount,
+					"debit_in_account_currency": tax.tax_amount,
 					"against": self.employee,
 					"cost_center": self.cost_center,
 					"against_voucher_type": self.doctype,
 					"against_voucher": self.name
-				}, account_currency)
+				})
 			)
 
 	def validate_account_details(self):
@@ -213,13 +211,15 @@ class ExpenseClaim(AccountsController):
 			self.total_sanctioned_amount += flt(d.sanctioned_amount)
 
 	def calculate_taxes(self):
+		self.total_taxes_and_charges = 0
 		for tax in self.taxes:
 			if tax.rate:
 				tax.tax_amount = flt(self.total_sanctioned_amount) * flt(tax.rate/100)
-			if tax.tax_amount:
-				tax.rate = flt(tax.tax_amount)/flt(self.total_sanctioned_amount) * 100
+
 			tax.total = flt(tax.tax_amount) + flt(self.total_sanctioned_amount)
-			self.net_total += tax.total
+			self.total_taxes_and_charges += flt(tax.tax_amount)
+
+		self.grand_total = flt(self.total_sanctioned_amount) + flt(self.total_taxes_and_charges) - flt(self.total_advance_amount)
 
 	def update_task(self):
 		task = frappe.get_doc("Task", self.task)
