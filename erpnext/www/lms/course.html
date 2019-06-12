@@ -45,7 +45,7 @@
 			<div onclick="show_singup()">
 		{% endif %}
 			{% if topic.hero_image %}
-			<div class="card-hero-img" style="background-image: url('{{ topic.hero_image }})'"></div>
+			<div class="card-hero-img" style="background-image: url('{{ topic.hero_image }}')"></div>
 			{% else %}
 			<div class="card-image-wrapper text-center">
 				<div class="image-body"><i class="fa fa-picture-o" aria-hidden="true"></i></div>
@@ -96,7 +96,7 @@
 				{{ card(topic) }}
 			{% endfor %}
 			{% if topics %}
-				{% for n in range(3 - ((topics|length)%3)) %}
+				{% for n in range( (3 - (topics|length)) %3) %}
 					{{ null_card() }}
 				{% endfor %}
 			{% endif %}

@@ -55,7 +55,7 @@
 				{{ program_card(program.program, program.has_access) }}
 			{% endfor %}
 			{% if featured_programs %}
-				{% for n in range(3 - ((featured_programs|length)%3)) %}
+				{% for n in range( (3 - (featured_programs|length)) %3) %}
 					{{ null_card() }}
 				{% endfor %}
 			{% endif %}
