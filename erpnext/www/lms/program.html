@@ -77,7 +77,7 @@
 				{{ card(course) }}
 			{% endfor %}
 			{% if courses %}
-				{% for n in range(3 - ((courses|length)%3)) %}
+				{% for n in range((courses|length)%3) %}
 					{{ null_card() }}
 				{% endfor %}
 			{% endif %}
