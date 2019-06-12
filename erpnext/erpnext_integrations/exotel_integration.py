@@ -1,5 +1,5 @@
 import frappe
-from erpnext.crm.doctype.utils import get_document_with_phone_number, get_employee_emails_for_popup
+from erpnext.crm.doctype.utils import get_employee_emails_for_popup
 import requests
 
 # api/method/erpnext.erpnext_integrations.exotel_integration.handle_incoming_call

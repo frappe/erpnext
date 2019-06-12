@@ -175,7 +175,6 @@ class CallPopup {
 			if (data.last_communication) {
 				const comm = data.last_communication;
 				comm_field.set_value(comm.content);
-				comm_field.$wrapper.append(frappe.utils.get_form_link('Communication', comm.name));
 			}
 
 			if (data.last_issue) {
@@ -183,7 +182,7 @@ class CallPopup {
 				const issue_field = this.dialog.fields_dict["last_issue"];
 				issue_field.set_value(issue.subject);
 				issue_field.$wrapper.append(`<a class="text-medium" href="#List/Issue?customer=${issue.customer}">
-					View all issues from ${issue.customer}
+					${__('View all issues from {0}', [issue.customer])}
 				</a>`);
 			}
 		});
