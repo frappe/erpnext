@@ -172,11 +172,11 @@ class ExpenseClaim(AccountsController):
 				})
 			)
 
-		gl_entry = self.make_tax_gl_entries(gl_entry)
+		self.add_tax_gl_entries(gl_entry)
 
 		return gl_entry
 
-	def make_tax_gl_entries(self, gl_entries):
+	def add_tax_gl_entries(self, gl_entries):
 		# tax table gl entries
 		for tax in self.get("taxes"):
 			account_currency = get_account_currency(tax.account_head)
@@ -190,7 +190,6 @@ class ExpenseClaim(AccountsController):
 					"against_voucher": self.name
 				}, account_currency)
 			)
-		return gl_entries
 
 	def validate_account_details(self):
 		if not self.cost_center:
@@ -210,7 +209,7 @@ class ExpenseClaim(AccountsController):
 			if self.approval_status == 'Rejected':
 				d.sanctioned_amount = 0.0
 
-			self.total_claimed_amount += flt(d.claim_amount)
+			self.total_claimed_amount += flt(d.amount)
 			self.total_sanctioned_amount += flt(d.sanctioned_amount)
 
 	def calculate_taxes(self):
@@ -253,7 +252,7 @@ class ExpenseClaim(AccountsController):
 
 	def validate_sanctioned_amount(self):
 		for d in self.get('expenses'):
-			if flt(d.sanctioned_amount) > flt(d.claim_amount):
+			if flt(d.sanctioned_amount) > flt(d.amount):
 				frappe.throw(_("Sanctioned Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx))
 
 	def set_expense_account(self, validate=False):
