@@ -48,7 +48,7 @@
 				{{ card(content, loop.index, topic.contents|length) }}
 			{% endfor %}
 			{% if contents %}
-				{% for n in range((contents|length)%3) %}
+				{% for n in range( (3 - (contents|length)) %3) %}
 					{{ null_card() }}
 				{% endfor %}
 			{% endif %}
