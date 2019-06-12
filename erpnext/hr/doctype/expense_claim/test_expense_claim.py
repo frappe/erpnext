@@ -89,7 +89,7 @@ class TestExpenseClaim(unittest.TestCase):
 			 "payable_account": payable_account,
 			 "approval_status": "Rejected",
 			 "expenses":
-			 	[{ "expense_type": "Travel", "default_account": "Travel Expenses - WP", "claim_amount": 300, "sanctioned_amount": 200 }]
+			 	[{ "expense_type": "Travel", "default_account": "Travel Expenses - WP", "amount": 300, "sanctioned_amount": 200 }]
 		})
 		expense_claim.submit()
 
@@ -102,7 +102,7 @@ class TestExpenseClaim(unittest.TestCase):
 def get_payable_account(company):
 	return frappe.get_cached_value('Company',  company,  'default_payable_account')
 
-def make_expense_claim(payable_account,claim_amount, sanctioned_amount, company, account, project=None, task_name=None):
+def make_expense_claim(payable_account,amount, sanctioned_amount, company, account, project=None, task_name=None):
 	expense_claim = frappe.get_doc({
 		 "doctype": "Expense Claim",
 		 "employee": "_T-Employee-00001",
@@ -110,7 +110,7 @@ def make_expense_claim(payable_account,claim_amount, sanctioned_amount, company,
 		 "approval_status": "Approved",
 		 "company": company,
 		 "expenses":
-			[{ "expense_type": "Travel", "default_account": account, "claim_amount": claim_amount, "sanctioned_amount": sanctioned_amount }]
+			[{ "expense_type": "Travel", "default_account": account, "amount": amount, "sanctioned_amount": sanctioned_amount }]
 		})
 	if project:
 		expense_claim.project = project

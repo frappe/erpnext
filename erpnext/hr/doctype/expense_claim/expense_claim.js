@@ -109,7 +109,7 @@ cur_frm.cscript.calculate_total = function(doc){
 	doc.total_claimed_amount = 0;
 	doc.total_sanctioned_amount = 0;
 	$.each((doc.expenses || []), function(i, d) {
-		doc.total_claimed_amount += d.claim_amount;
+		doc.total_claimed_amount += d.amount;
 		doc.total_sanctioned_amount += d.sanctioned_amount;
 	});
 
@@ -308,10 +308,10 @@ frappe.ui.form.on("Expense Claim", {
 });
 
 frappe.ui.form.on("Expense Claim Detail", {
-	claim_amount: function(frm, cdt, cdn) {
+	amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		var doc = frm.doc;
-		frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.claim_amount);
+		frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.amount);
 		cur_frm.cscript.calculate_total(doc,cdt,cdn);
 	},
 
