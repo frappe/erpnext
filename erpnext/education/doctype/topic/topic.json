@@ -1,14 +1,13 @@
 {
- "autoname": "field:topic_code",
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:topic_name",
  "creation": "2018-12-12 11:37:39.917760",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "topic_name",
-  "column_break_2",
-  "topic_code",
-  "section_break_4",
   "topic_content",
   "description",
   "hero_image"
@@ -19,23 +18,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Name",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "topic_code",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Code",
    "reqd": 1,
    "unique": 1
-  },
-  {
-   "fieldname": "section_break_4",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "topic_content",
@@ -46,6 +30,7 @@
   {
    "fieldname": "hero_image",
    "fieldtype": "Attach Image",
+   "hidden": 1,
    "label": "Hero Image"
   },
   {
@@ -54,7 +39,8 @@
    "label": "Description"
   }
  ],
- "modified": "2019-06-05 18:38:44.029711",
+ "image_field": "hero_image",
+ "modified": "2019-06-12 12:34:49.911300",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Topic",
