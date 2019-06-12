@@ -56,7 +56,7 @@ def get_last_interaction(number, reference_doc):
 			}, ['name', 'subject', 'customer'], limit=1)
 
 	elif reference_doc.doctype == 'Lead':
-		last_communication = frappe.get_all('Communication', {
+		last_communication = frappe.get_all('Communication', filters={
 			'reference_doctype': reference_doc.doctype,
 			'reference_name': reference_doc.name,
 			'sent_or_received': 'Received'
