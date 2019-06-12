@@ -96,7 +96,7 @@
 				{{ card(topic) }}
 			{% endfor %}
 			{% if topics %}
-				{% for n in range(3 - ((topics|length)%3)) %}
+				{% for n in range(((topics|length)%3)) %}
 					{{ null_card() }}
 				{% endfor %}
 			{% endif %}
