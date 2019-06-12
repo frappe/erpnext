@@ -11,9 +11,6 @@ class TestStockBalance(unittest.TestCase):
 
 		cols, rows = execute(filters=frappe._dict({"from_date": now(), "to_date": add_to_date(now(), months = 1)}))
 
-		from pprint import pprint
-		pprint(rows)
-
 		item_map = get_item_map(rows)
 
 		self.assertEquals(item_map['Test_One_Plus'][11],6789.0)
@@ -22,9 +19,8 @@ class TestStockBalance(unittest.TestCase):
 	def test_for_stock_balance_with_warehouse_and_warehouse_type(self):
 
 		item_1 = get_item("Test_item_for_warehouse_type", 2367)
-
 		wt = get_warehouse_type()
-
+		item_1.reload()
 		warehouse = frappe.get_doc("Warehouse", item_1.item_defaults[0].default_warehouse)
 		warehouse.warehouse_type = wt.name
 		warehouse.save()
@@ -64,6 +60,7 @@ def get_item(item_code, qty):
 		item.is_stock_item = 1
 
 		item.insert()
+		return item
 
 def get_warehouse_type():
 
@@ -74,5 +71,7 @@ def get_warehouse_type():
 			"doctype": "Warehouse Type",
 			"name": "Reserved"
 		})
+
+	wt.insert()
 
 	return wt
