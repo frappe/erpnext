@@ -21,7 +21,7 @@ frappe.ui.form.on("Sales Invoice", {
 		if(frm.doc.docstatus == 1 && !frm.is_dirty()
 			&& !frm.doc.is_return && !frm.doc.ewaybill) {
 
-			frm.add_custom_button('Generate e-Way Bill JSON', () => {
+			frm.add_custom_button('e-Way Bill JSON', () => {
 				var w = window.open(
 					frappe.urllib.get_full_url(
 						"/api/method/erpnext.regional.india.utils.generate_ewb_json?"

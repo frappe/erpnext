@@ -652,35 +652,36 @@ class StockEntry(StockController):
 
 		ret = frappe._dict({
 			'uom'			      	: item.stock_uom,
-			'stock_uom'			: item.stock_uom,
+			'stock_uom'				: item.stock_uom,
 			'description'		  	: item.description,
-			'image'				: item.image,
+			'image'					: item.image,
 			'item_name' 		  	: item.item_name,
-			'expense_account'		: args.get("expense_account"),
-			'cost_center'			: get_default_cost_center(args, item, item_group_defaults),
-			'qty'				: args.get("qty"),
+			'cost_center'			: get_default_cost_center(args, item, item_group_defaults, self.company),
+			'qty'					: args.get("qty"),
 			'transfer_qty'			: args.get('qty'),
 			'conversion_factor'		: 1,
-			'batch_no'			: '',
+			'batch_no'				: '',
 			'actual_qty'			: 0,
 			'basic_rate'			: 0,
-			'serial_no'			: '',
+			'serial_no'				: '',
 			'has_serial_no'			: item.has_serial_no,
 			'has_batch_no'			: item.has_batch_no,
 			'sample_quantity'		: item.sample_quantity
 		})
-		for d in [["Account", "expense_account", "default_expense_account"],
-			["Cost Center", "cost_center", "cost_center"]]:
-				company = frappe.db.get_value(d[0], ret.get(d[1]), "company")
-				if not ret[d[1]] or (company and self.company != company):
-					ret[d[1]] = frappe.get_cached_value('Company',  self.company,  d[2]) if d[2] else None
 
 		# update uom
 		if args.get("uom") and for_update:
 			ret.update(get_uom_details(args.get('item_code'), args.get('uom'), args.get('qty')))
 
-		if not ret["expense_account"]:
-			ret["expense_account"] = frappe.get_cached_value('Company',  self.company,  "stock_adjustment_account")
+		if self.purpose == 'Material Issue':
+			ret["expense_account"] = (item.get("expense_account") or
+				item_group_defaults.get("expense_account") or
+				frappe.get_cached_value('Company',  self.company,  "default_expense_account"))
+
+		for company_field, field in {'stock_adjustment_account': 'expense_account',
+			'cost_center': 'cost_center'}.items():
+			if not ret.get(field):
+				ret[field] = frappe.get_cached_value('Company',  self.company,  company_field)
 
 		args['posting_date'] = self.posting_date
 		args['posting_time'] = self.posting_time
@@ -1036,8 +1037,7 @@ class StockEntry(StockController):
 		return item_dict
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
-		expense_account, cost_center = frappe.db.get_values("Company", self.company, \
-			["default_expense_account", "cost_center"])[0]
+		cost_center = frappe.db.get_value("Company", self.company, 'cost_center')
 
 		for d in item_dict:
 			stock_uom = item_dict[d].get("stock_uom") or frappe.db.get_value("Item", d, "stock_uom")
@@ -1051,7 +1051,7 @@ class StockEntry(StockController):
 			se_child.uom = item_dict[d]["uom"] if item_dict[d].get("uom") else stock_uom
 			se_child.stock_uom = stock_uom
 			se_child.qty = flt(item_dict[d]["qty"], se_child.precision("qty"))
-			se_child.expense_account = item_dict[d].get("expense_account") or expense_account
+			se_child.expense_account = item_dict[d].get("expense_account")
 			se_child.cost_center = item_dict[d].get("cost_center") or cost_center
 			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
 			se_child.subcontracted_item = item_dict[d].get("main_item_code")
