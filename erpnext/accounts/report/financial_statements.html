@@ -23,6 +23,9 @@
 {% } %}
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
 <h3 class="text-center">{%= filters.company %}</h3>
+{% if 'cost_center' in filters %}
+	<h3 class="text-center">{%= filters.cost_center %}</h3>
+{% endif %}
 <h3 class="text-center">{%= filters.fiscal_year %}</h3>
 <h5 class="text-center">{%=  __("Currency") %} : {%= filters.presentation_currency || erpnext.get_currency(filters.company) %} </h4>
 {% if (filters.from_date) { %}
