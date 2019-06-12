@@ -25,13 +25,13 @@ frappe.ui.form.on("Journal Entry", {
 					"group_by_voucher": 0
 				};
 				frappe.set_route("query-report", "General Ledger");
-			}, "fa fa-table");
+			}, __('View'));
 		}
 
 		if(frm.doc.docstatus==1) {
 			frm.add_custom_button(__('Reverse Journal Entry'), function() {
 				return erpnext.journal_entry.reverse_journal_entry(frm);
-			});
+			}, __('Make'));
 		}
 
 		if (frm.doc.__islocal) {
@@ -47,8 +47,7 @@ frappe.ui.form.on("Journal Entry", {
 			frm.add_custom_button(__("Create Inter Company Journal Entry"),
 				function() {
 					frm.trigger("make_inter_company_journal_entry");
-				}
-			);
+				}, __('Make'));
 		}
 	},
 
