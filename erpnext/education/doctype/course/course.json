@@ -1,17 +1,13 @@
 {
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:course_code",
+ "autoname": "field:course_name",
  "creation": "2015-09-07 12:39:55.181893",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "course_name",
   "department",
-  "parent_course",
-  "column_break_3",
-  "course_code",
-  "course_abbreviation",
   "section_break_6",
   "topics",
   "description",
@@ -26,7 +22,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Course Name",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "department",
@@ -37,30 +34,9 @@
    "options": "Department"
   },
   {
-   "fieldname": "parent_course",
-   "fieldtype": "Data",
-   "label": "Parent Course (Leave blank, if this isn't part of Parent Course)"
-  },
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "course_code",
-   "fieldtype": "Data",
-   "label": "Course Code",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
-   "fieldname": "course_abbreviation",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Course Abbreviation"
-  },
-  {
    "fieldname": "section_break_6",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Portal Settings"
   },
   {
    "fieldname": "topics",
@@ -71,6 +47,7 @@
   {
    "fieldname": "hero_image",
    "fieldtype": "Attach Image",
+   "hidden": 1,
    "label": "Hero Image"
   },
   {
@@ -96,7 +73,8 @@
    "label": "Description"
   }
  ],
- "modified": "2019-06-05 18:39:11.870605",
+ "image_field": "hero_image",
+ "modified": "2019-06-12 12:34:23.748157",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Course",
