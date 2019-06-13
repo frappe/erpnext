@@ -152,6 +152,9 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	conditions = []
 
+	if not filters["item_group"]:
+		filters.pop("item_group", None)
+
 	description_cond = ''
 	if frappe.db.count('Item', cache=True) < 50000:
 		# scan description only if items are less than 50000
@@ -437,3 +440,20 @@ def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 		query += " and item = {item}".format(item = frappe.db.escape(filters.get('item')))
 
 	return frappe.db.sql(query, filters)
+
+@frappe.whitelist()
+def item_manufacturer_query(doctype, txt, searchfield, start, page_len, filters):
+	search_txt = "{0}%".format(txt)
+
+	item_filters = {
+		'manufacturer': ('like', search_txt),
+		'item_code': filters.get("item_code")
+	}
+
+	return frappe.get_all("Item Manufacturer",
+		fields = "manufacturer",
+		filters = item_filters,
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=1
+	)

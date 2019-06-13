@@ -15,6 +15,10 @@
   "brand",
   "image_section",
   "image",
+  "manufacture_details",
+  "manufacturer",
+  "column_break_12",
+  "manufacturer_part_no",
   "quantity_and_warehouse",
   "qty",
   "uom",
@@ -378,11 +382,32 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "manufacture_details",
+   "fieldtype": "Section Break",
+   "label": "Manufacture"
+  },
+  {
+   "fieldname": "manufacturer",
+   "fieldtype": "Link",
+   "label": "Manufacturer",
+   "options": "Manufacturer"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "manufacturer_part_no",
+   "fieldtype": "Data",
+   "label": "Manufacturer Part Number",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-25 22:03:10.517886",
+ "modified": "2019-06-02 06:49:36.493957",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

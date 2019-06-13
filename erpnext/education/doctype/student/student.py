@@ -54,7 +54,7 @@ class Student(Document):
 				'send_welcome_email': 1,
 				'user_type': 'Website User'
 				})
-			student_user.add_roles("Student", "LMS User")
+			student_user.add_roles("Student")
 			student_user.save()
 			update_password_link = student_user.reset_password()
 

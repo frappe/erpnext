@@ -17,6 +17,10 @@
   "col_break1",
   "image",
   "image_view",
+  "manufacture_details",
+  "manufacturer",
+  "column_break_14",
+  "manufacturer_part_no",
   "quantity_and_rate",
   "qty",
   "stock_uom",
@@ -672,11 +676,32 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "manufacture_details",
+   "fieldtype": "Section Break",
+   "label": "Manufacture"
+  },
+  {
+   "fieldname": "manufacturer",
+   "fieldtype": "Link",
+   "label": "Manufacturer",
+   "options": "Manufacturer"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "manufacturer_part_no",
+   "fieldtype": "Data",
+   "label": "Manufacturer Part Number",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-25 22:10:32.518941",
+ "modified": "2019-06-02 06:34:47.495730",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
