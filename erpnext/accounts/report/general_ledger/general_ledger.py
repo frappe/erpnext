@@ -26,8 +26,7 @@ def execute(filters=None):
 		account_details.setdefault(acc.name, acc)
 
 	if filters.get('party'):
-		parties = cstr(filters.get("party")).strip()
-		filters.party = [d.strip() for d in parties.split(',') if d]
+		filters.party = frappe.parse_json(filters.get("party"))
 
 	validate_filters(filters, account_details)
 
