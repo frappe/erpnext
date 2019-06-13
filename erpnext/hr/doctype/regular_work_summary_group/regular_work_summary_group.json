@@ -71,7 +71,7 @@
    "fieldname": "send_emails_frequency",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Send Reminder",
+   "label": "Send Emails",
    "options": "Daily\nWeekly\nMonthly\nYearly",
    "reqd": 1
   },
@@ -149,7 +149,7 @@
    "fieldtype": "Section Break"
   }
  ],
- "modified": "2019-06-07 10:24:02.894879",
+ "modified": "2019-06-13 11:39:54.151181",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Regular Work Summary Group",
