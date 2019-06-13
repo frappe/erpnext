@@ -334,8 +334,7 @@
   },
   {
    "fieldname": "transactions_section",
-   "fieldtype": "Section Break",
-   "label": "Transactions"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "grand_total",
@@ -360,7 +359,7 @@
  "icon": "fa fa-money",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2019-06-12 20:00:25.734108",
+ "modified": "2019-06-13 18:05:52.530462",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",
