@@ -31,22 +31,22 @@ def get_columns():
 			"width": 150
 		},
 		{
-			"label": _("Billable Hours"),
-			"fieldtype": "Float",
-			"fieldname": "total_billable_hours",
-			"width": 50
-		},
-		{
 			"label": _("Working Hours"),
 			"fieldtype": "Float",
 			"fieldname": "total_hours",
-			"width": 50
+			"width": 150
+		},
+		{
+			"label": _("Billable Hours"),
+			"fieldtype": "Float",
+			"fieldname": "total_billable_hours",
+			"width": 150
 		},
 		{
 			"label": _("Billing Amount"),
 			"fieldtype": "Currency",
 			"fieldname": "amount",
-			"width": 100
+			"width": 150
 		}
 	]
 
