@@ -275,7 +275,7 @@ frappe.ui.form.on("Expense Claim", {
 			frappe.call({
 				method: "calculate_taxes",
 				doc: frm.doc,
-				callback: (r) => {
+				callback: () => {
 					refresh_field("taxes");
 				}
 			});
@@ -386,7 +386,7 @@ frappe.ui.form.on("Expense Taxes and Charges", {
 		(frm.doc.taxes || []).forEach(function(d) {
 			frm.doc.total_taxes_and_charges += d.tax_amount;
 		});
-		frm.trigger("calculate_grand_total")
+		frm.trigger("calculate_grand_total");
 	},
 
 	rate: function(frm, cdt, cdn) {
@@ -398,7 +398,7 @@ frappe.ui.form.on("Expense Taxes and Charges", {
 	},
 
 	tax_amount: function(frm, cdt, cdn) {
-		frm.trigger("calculate_total_tax", cdt, cdn)
+		frm.trigger("calculate_total_tax", cdt, cdn);
 	}
 });
 
