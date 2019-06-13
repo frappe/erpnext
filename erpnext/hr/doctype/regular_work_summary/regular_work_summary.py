@@ -23,7 +23,6 @@ class RegularWorkSummary(Document):
 		incoming_email_account = frappe.db.get_value('Email Account',
 			dict(enable_incoming=1, default_incoming=1),
 				'email_id')
-		print(emails, incoming_email_account)
 
 		self.db_set('email_sent_to', '\n'.join(emails))
 		frappe.sendmail(recipients=emails,

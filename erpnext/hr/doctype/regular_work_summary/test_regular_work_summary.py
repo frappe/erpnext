@@ -8,8 +8,6 @@ import frappe
 import unittest
 import frappe.utils
 
-# test_records = frappe.get_test_records('Regular Work Summary')
-
 class TestRegularWorkSummary(unittest.TestCase):
 	def test_email_trigger(self):
 		self.setup_and_prepare_test()
