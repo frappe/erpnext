@@ -14,6 +14,7 @@ from erpnext import get_company_currency
 from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
+from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_manufacturer_part_no
 
 from six import string_types, iteritems
 
@@ -312,6 +313,14 @@ def get_basic_details(args, item):
 	for fieldname in ("item_name", "item_group", "barcodes", "brand", "stock_uom"):
 		out[fieldname] = item.get(fieldname)
 
+	if args.get("manufacturer"):
+		part_no = get_item_manufacturer_part_no(args.get("item_code"), args.get("manufacturer"))
+		if part_no:
+			out["manufacturer_part_no"] = part_no
+		else:
+			out["manufacturer_part_no"] = None
+			out["manufacturer"] = None
+
 	return out
 
 @frappe.whitelist()
@@ -414,7 +423,7 @@ def get_default_deferred_account(args, item, fieldname=None):
 	else:
 		return None
 
-def get_default_cost_center(args, item, item_group, brand):
+def get_default_cost_center(args, item, item_group, brand, company=None):
 	cost_center = None
 	if args.get('project'):
 		cost_center = frappe.db.get_value("Project", args.get("project"), "cost_center", cache=True)
@@ -425,7 +434,13 @@ def get_default_cost_center(args, item, item_group, brand):
 		else:
 			cost_center = item.get('buying_cost_center') or item_group.get('buying_cost_center') or brand.get('buying_cost_center')
 
-	return cost_center or args.get("cost_center")
+	cost_center = cost_center or args.get("cost_center")
+
+	if (company and cost_center
+		and frappe.get_cached_value("Cost Center", cost_center, "company") != company):
+		return None
+
+	return cost_center
 
 def get_default_supplier(args, item, item_group, brand):
 	return (item.get("default_supplier")
