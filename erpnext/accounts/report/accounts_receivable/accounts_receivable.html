@@ -46,6 +46,8 @@
 		   var range2 = report.columns[12].label;
 		   var range3 = report.columns[13].label;
 		   var range4 = report.columns[14].label;
+		   var range5 = report.columns[15].label;
+		   var range6 = report.columns[16].label;
 	%}
 	{% if(balance_row) { %}
 	<table class="table table-bordered table-condensed">
@@ -56,8 +58,10 @@
 	            <col style="width: 18mm;">
 	            <col style="width: 18mm;">
 	            <col style="width: 18mm;">
-	            <col style="width: 18mm;">
-	            <col style="width: 18mm;">
+				<col style="width: 18mm;">
+				<col style="width: 18mm;">
+				<col style="width: 18mm;">
+				<col style="width: 18mm;">
 	        </colgroup>
 
 		<thead>
@@ -67,16 +71,20 @@
 				<th>{%= __(range2) %}</th>
 				<th>{%= __(range3) %}</th>
 				<th>{%= __(range4) %}</th>
+				<th>{%= __(range5) %}</th>
+				<th>{%= __(range6) %}</th>
 				<th>{%= __("Total") %}</th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr>
 				<td>{%= __("Total Outstanding") %}</td>
-				<td class="text-right">{%= format_currency(balance_row[range1]) %}</td>
+				<td class="text-right">{%= format_number(balance_row[range1], null, 2) %}</td>
 				<td class="text-right">{%= format_currency(balance_row[range2]) %}</td>
 				<td class="text-right">{%= format_currency(balance_row[range3]) %}</td>
 				<td class="text-right">{%= format_currency(balance_row[range4]) %}</td>
+				<td class="text-right">{%= format_currency(balance_row[range5]) %}</td>
+				<td class="text-right">{%= format_currency(balance_row[range6]) %}</td>
 				<td class="text-right">
 					{%= format_currency(flt(balance_row[("outstanding_amount")]), data[data.length-1]["currency"]) %}
 					</td>
@@ -86,11 +94,15 @@
 				<td></td>
 				<td></td>
 				<td></td>
+				<td></td>
+				<td></td>
 				<td class="text-right">
 					{%= format_currency(flt(balance_row[("pdc/lc_amount")]), data[data.length-1]["currency"]) %}
 				</td>
 			<tr class="cvs-footer">
 				<th class="text-left">{%= __("Cheques Required") %}</th>
+				<th></th>
+				<th></th>
 				<th></th>
 				<th></th>
 				<th></th>

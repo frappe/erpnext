@@ -443,7 +443,7 @@ class SalarySlip(TransactionBase):
 				else:
 					component_row.additional_amount = amount
 
-				if not overwrite:
+				if not overwrite and component_row.default_amount:
 					amount += component_row.default_amount
 
 			component_row.amount = amount
@@ -615,6 +615,10 @@ class SalarySlip(TransactionBase):
 			amount, additional_amount = 0, 0
 		elif not row.amount:
 			amount = row.default_amount + row.additional_amount
+
+		# apply rounding
+		if frappe.get_cached_value("Salary Component", row.salary_component, "round_to_the_nearest_integer"):
+			amount, additional_amount = rounded(amount), rounded(additional_amount)
 
 		return amount, additional_amount
 
