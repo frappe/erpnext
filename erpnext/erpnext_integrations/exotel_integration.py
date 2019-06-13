@@ -63,24 +63,15 @@ def get_call_log(call_payload, create_new_if_not_found=True):
 
 @frappe.whitelist()
 def get_call_status(call_id):
-	print(call_id)
-	settings = get_exotel_settings()
-	response = requests.get('https://{api_key}:{api_token}@api.exotel.com/v1/Accounts/erpnext/Calls/{call_id}.json'.format(
-		api_key=settings.api_key,
-		api_token=settings.api_token,
-		call_id=call_id
-	))
+	endpoint = get_exotel_endpoint('Calls/{call_id}.json'.format(call_id=call_id))
+	response = requests.get(endpoint)
 	status = response.json().get('Call', {}).get('Status')
 	return status
 
 @frappe.whitelist()
 def make_a_call(from_number, to_number, caller_id):
-	settings = get_exotel_settings()
-	response = requests.post('https://{api_key}:{api_token}@api.exotel.com/v1/Accounts/{sid}/Calls/connect.json?details=true'.format(
-		api_key=settings.api_key,
-		api_token=settings.api_token,
-		sid=settings.account_sid
-	), data={
+	endpoint = get_exotel_endpoint('Calls/connect.json?details=true')
+	response = requests.post(endpoint, data={
 		'From': from_number,
 		'To': to_number,
 		'CallerId': caller_id
@@ -98,15 +89,24 @@ def get_phone_numbers():
 	return numbers
 
 def whitelist_numbers(numbers, caller_id):
-	settings = get_exotel_settings()
-	query = 'https://{api_key}:{api_token}@api.exotel.com/v1/Accounts/{sid}/CustomerWhitelist'.format(
-		api_key=settings.api_key,
-		api_token=settings.api_token,
-		sid=settings.account_sid
-	)
-	response = requests.post(query, data={
+	endpoint = get_exotel_endpoint('CustomerWhitelist')
+	response = requests.post(endpoint, data={
 		'VirtualNumber': caller_id,
 		'Number': numbers,
 	})
 
 	return response
+
+def get_all_exophones():
+	endpoint = get_exotel_endpoint('IncomingPhoneNumbers')
+	response = requests.post(endpoint)
+	return response
+
+def get_exotel_endpoint(action):
+	settings = get_exotel_settings()
+	return 'https://{api_key}:{api_token}@api.exotel.com/v1/Accounts/{sid}/{action}'.format(
+		api_key=settings.api_key,
+		api_token=settings.api_token,
+		sid=settings.account_sid,
+		action=action
+	)
