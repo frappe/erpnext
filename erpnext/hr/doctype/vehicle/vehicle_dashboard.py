@@ -11,11 +11,9 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'label': _('Logs'),
 				'items': ['Vehicle Log']
 			},
 			{
-				'label': _('Trip'),
 				'items': ['Delivery Trip']
 			}
 		]

@@ -6,7 +6,6 @@ def get_data():
         'fieldname': 'payroll_period',
         'transactions': [
             {
-                'label': _('Employee Tax Exemption'),
                 'items': ['Employee Tax Exemption Proof Submission', 'Employee Tax Exemption Declaration']
             },
         ],

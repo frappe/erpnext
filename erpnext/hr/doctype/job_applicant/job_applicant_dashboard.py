@@ -6,7 +6,6 @@ def get_data():
         'fieldname': 'job_applicant',
         'transactions': [
             {
-                'label': _('Employee'),
                 'items': ['Employee', 'Employee Onboarding']
             },
             {
