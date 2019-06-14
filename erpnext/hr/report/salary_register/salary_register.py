@@ -24,7 +24,7 @@ def execute(filters=None):
 		if not ss.branch == None:columns[3] = columns[3].replace('-1','120')
 		if not ss.department  == None: columns[4] = columns[4].replace('-1','120')
 		if not ss.designation  == None: columns[5] = columns[5].replace('-1','120')
-		if not ss.leave_withut_pay  == None: columns[9] = columns[9].replace('-1','130')
+		if not ss.leave_without_pay  == None: columns[9] = columns[9].replace('-1','130')
 
 
 		for e in earning_types:
