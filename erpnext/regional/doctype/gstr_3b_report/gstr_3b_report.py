@@ -286,15 +286,24 @@ class GSTR3BReport(Document):
 
 	def get_inter_state_supplies(self, state_number):
 
-		inter_state_supply = frappe.db.sql(""" select sum(s.net_total) as total, sum(t.tax_amount) as tax_amount, s.place_of_supply, s.gst_category
+		inter_state_supply_taxable_value = frappe.db.sql(""" select sum(s.net_total) as total, s.place_of_supply, s.gst_category
+			from `tabSales Invoice` s where s.docstatus = 1 and month(s.posting_date) = %s and year(s.posting_date) = %s
+			and s.company = %s and s.company_gstin = %s and s.gst_category in ('Unregistered', 'Registered Composition', 'UIN Holders')
+			group by s.gst_category, s.place_of_supply""", (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
+
+		inter_state_supply_tax = frappe.db.sql(""" select sum(t.tax_amount) as tax_amount, s.place_of_supply, s.gst_category
 			from `tabSales Invoice` s, `tabSales Taxes and Charges` t
 			where t.parent = s.name and s.docstatus = 1 and month(s.posting_date) = %s and year(s.posting_date) = %s
 			and s.company = %s and s.company_gstin = %s and s.gst_category in ('Unregistered', 'Registered Composition', 'UIN Holders')
-			group by s.gst_category, s.place_of_supply""", (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1, debug=1)
+			group by s.gst_category, s.place_of_supply""", (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
 
+		inter_state_supply_tax_mapping={}
 		inter_state_supply_details = {}
 
-		for d in inter_state_supply:
+		for d in inter_state_supply_tax:
+			inter_state_supply_tax_mapping.setdefault(d.place_of_supply, d.tax_amount)
+
+		for d in inter_state_supply_taxable_value:
 			inter_state_supply_details.setdefault(
 				d.gst_category, []
 			)
@@ -302,13 +311,13 @@ class GSTR3BReport(Document):
 			if state_number != d.place_of_supply.split("-")[0]:
 				inter_state_supply_details[d.gst_category].append({
 					"pos": d.place_of_supply,
-					"txval": d.total,
-					"iamt": d.tax_amount
+					"txval": flt(d.total, 2),
+					"iamt": flt(inter_state_supply_tax_mapping.get(d.place_of_supply), 2)
 				})
 			else:
-				self.report_dict["sup_details"]["osup_det"]["txval"] += flt(d.total/2, 2)
-				self.report_dict["sup_details"]["osup_det"]["camt"] += flt(d.tax_amount/2, 2)
-				self.report_dict["sup_details"]["osup_det"]["samt"] += flt(d.tax_amount/2, 2)
+				self.report_dict["sup_details"]["osup_det"]["txval"] += flt(d.total, 2)
+				self.report_dict["sup_details"]["osup_det"]["camt"] += flt(inter_state_supply_tax_mapping.get(d.place_of_supply)/2, 2)
+				self.report_dict["sup_details"]["osup_det"]["samt"] += flt(inter_state_supply_tax_mapping.get(d.place_of_supply)/2, 2)
 
 		return inter_state_supply_details
 
