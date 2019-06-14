@@ -138,14 +138,15 @@ class GSTR3BReport(Document):
 		outward_supply_tax_amounts = self.get_tax_amounts("Sales Invoice")
 		inward_supply_tax_amounts = self.get_tax_amounts("Purchase Invoice", reverse_charge="Y")
 		itc_details = self.get_itc_details()
-		inter_state_supplies = self.get_inter_state_supplies(self.gst_details.get("gst_state"))
-		inward_nil_exempt = self.get_inward_nil_exempt(self.gst_details.get("gst_state"))
 
 		self.prepare_data("Sales Invoice", outward_supply_tax_amounts, "sup_details", "osup_det", ["Registered Regular"])
 		self.prepare_data("Sales Invoice", outward_supply_tax_amounts, "sup_details", "osup_zero", ["SEZ", "Deemed Export", "Overseas"])
 		self.prepare_data("Purchase Invoice", inward_supply_tax_amounts, "sup_details", "isup_rev", ["Registered Regular"], reverse_charge="Y")
 		self.report_dict["sup_details"]["osup_nil_exmp"]["txval"] = flt(self.get_nil_rated_supply_value(), 2)
 		self.set_itc_details(itc_details)
+
+		inter_state_supplies = self.get_inter_state_supplies(self.gst_details.get("gst_state_number"))
+		inward_nil_exempt = self.get_inward_nil_exempt(self.gst_details.get("gst_state"))
 		self.set_inter_state_supply(inter_state_supplies)
 		self.set_inward_nil_exempt(inward_nil_exempt)
 
@@ -221,7 +222,7 @@ class GSTR3BReport(Document):
 		for k, v in iteritems(account_map):
 			txval -= self.report_dict.get(supply_type, {}).get(supply_category, {}).get(v, 0)
 
-		self.report_dict[supply_type][supply_category]["txval"] = flt(txval, 2)
+		self.report_dict[supply_type][supply_category]["txval"] += flt(txval, 2)
 
 	def set_inter_state_supply(self, inter_state_supply):
 
@@ -283,15 +284,13 @@ class GSTR3BReport(Document):
 			and s.company = %s and s.company_gstin = %s""",
 			(self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)[0].total
 
-	def get_inter_state_supplies(self, state):
+	def get_inter_state_supplies(self, state_number):
 
-		inter_state_supply = frappe.db.sql(""" select sum(s.grand_total) as total, t.tax_amount, a.gst_state, s.gst_category
-			from `tabSales Invoice` s, `tabSales Taxes and Charges` t, `tabAddress` a
-			where t.parent = s.name and s.customer_address = a.name and
-			s.docstatus = 1 and month(s.posting_date) = %s and year(s.posting_date) = %s and
-			a.gst_state <> %s and s.company = %s and s.company_gstin = %s and
-			s.gst_category in ('Unregistered', 'Registered Composition', 'UIN Holders')
-			group by s.gst_category, a.state""", (self.month_no, self.year, state, self.company, self.gst_details.get("gstin")), as_dict=1)
+		inter_state_supply = frappe.db.sql(""" select sum(s.net_total) as total, sum(t.tax_amount) as tax_amount, s.place_of_supply, s.gst_category
+			from `tabSales Invoice` s, `tabSales Taxes and Charges` t
+			where t.parent = s.name and s.docstatus = 1 and month(s.posting_date) = %s and year(s.posting_date) = %s
+			and s.company = %s and s.company_gstin = %s and s.gst_category in ('Unregistered', 'Registered Composition', 'UIN Holders')
+			group by s.gst_category, s.place_of_supply""", (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1, debug=1)
 
 		inter_state_supply_details = {}
 
@@ -300,11 +299,16 @@ class GSTR3BReport(Document):
 				d.gst_category, []
 			)
 
-			inter_state_supply_details[d.gst_category].append({
-				"pos": get_state_code(d.gst_state),
-				"txval": d.total - d.tax_amount,
-				"iamt": d.tax_amount
-			})
+			if state_number != d.place_of_supply.split("-")[0]:
+				inter_state_supply_details[d.gst_category].append({
+					"pos": d.place_of_supply,
+					"txval": d.total,
+					"iamt": d.tax_amount
+				})
+			else:
+				self.report_dict["sup_details"]["osup_det"]["txval"] += flt(d.total/2, 2)
+				self.report_dict["sup_details"]["osup_det"]["camt"] += flt(d.tax_amount/2, 2)
+				self.report_dict["sup_details"]["osup_det"]["samt"] += flt(d.tax_amount/2, 2)
 
 		return inter_state_supply_details
 
