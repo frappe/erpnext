@@ -426,7 +426,6 @@ def get_leave_details(employee, date):
 			"leaves_taken": leaves_taken,
 			"pending_leaves": leaves_pending,
 			"remaining_leaves": remaining_leaves}
-		leave_details = leave_allocation
 
 	ret = {
 		'leave_allocation': leave_allocation,
