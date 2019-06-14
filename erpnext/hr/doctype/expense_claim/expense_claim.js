@@ -394,7 +394,7 @@ frappe.ui.form.on("Expense Taxes and Charges", {
 		if(!child.amount) {
 			child.tax_amount = flt(frm.doc.total_sanctioned_amount) * (flt(child.rate)/100);
 		}
-		frm.trigger("calculate_total_tax", cdt, cdn)
+		frm.trigger("calculate_total_tax", cdt, cdn);
 	},
 
 	tax_amount: function(frm, cdt, cdn) {
