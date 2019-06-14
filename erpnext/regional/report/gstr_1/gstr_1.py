@@ -209,7 +209,10 @@ class Gstr1Report(object):
 					sum(i.get('base_net_amount', 0) for i in items
 					    if i.item_code == d.item_code and i.parent == d.parent))
 
-				item_tax_rate = json.loads(d.item_tax_rate)
+				item_tax_rate = {}
+
+				if d.item_tax_rate:
+					item_tax_rate = json.loads(d.item_tax_rate)
 
 				if item_tax_rate:
 					self.item_tax_rate.setdefault(d.parent, {}).setdefault(d.item_code, item_tax_rate)
