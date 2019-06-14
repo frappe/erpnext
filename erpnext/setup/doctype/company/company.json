@@ -170,9 +170,10 @@
    "label": "Company Description"
   },
   {
+   "collapsible": 1,
    "fieldname": "sales_settings",
    "fieldtype": "Section Break",
-   "label": "Sales"
+   "label": "Sales Settings"
   },
   {
    "fieldname": "sales_monthly_history",
@@ -530,6 +531,7 @@
    "options": "Account"
   },
   {
+   "collapsible": 1,
    "fieldname": "fixed_asset_depreciation_settings",
    "fieldtype": "Section Break",
    "label": "Fixed Asset Depreciation Settings"
@@ -602,6 +604,7 @@
    "options": "Role"
   },
   {
+   "collapsible": 1,
    "description": "For reference only.",
    "fieldname": "company_info",
    "fieldtype": "Section Break",
@@ -708,7 +711,7 @@
  "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",
- "modified": "2019-06-13 18:03:14.764423",
+ "modified": "2019-06-14 14:36:11.363309",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
