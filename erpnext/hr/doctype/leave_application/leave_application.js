@@ -60,7 +60,7 @@ frappe.ui.form.on("Leave Application", {
 					}
 				}
 			});
-			frm.trigger("create_dashboard")
+			frm.trigger("create_dashboard");
 		}
 	},
 
