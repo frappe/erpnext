@@ -35,7 +35,7 @@ def generate_application_leave_ledger_entries():
     leave_applications = get_leaves_application_records()
 
     for application in leave_applications:
-        if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Application', 'transaction_name': record.name}):
+        if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Application', 'transaction_name': application.name}):
             application.update(dict(doctype="Leave Application"))
             frappe.get_doc(application).create_leave_ledger_entry()
 
@@ -44,7 +44,7 @@ def generate_encashment_leave_ledger_entries():
     leave_encashments = get_leave_encashment_records()
 
     for encashment in leave_encashments:
-        if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Encashment', 'transaction_name': record.name}):
+        if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Encashment', 'transaction_name': encashment.name}):
             encashment.update(dict(doctype="Leave Encashment"))
             frappe.get_doc(encashment).create_leave_ledger_entry()
 
