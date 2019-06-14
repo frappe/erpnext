@@ -108,10 +108,8 @@ class Task(NestedSet):
 			frappe.get_doc("Project", self.project).update_project()
 
 	def update_project_tasks(self):
-		tasks = frappe.db.sql("""SELECT name
-									from `tabProject Task`
-									where task_id = %s and parent != %s""", (self.name, self.project or ""),
-								as_dict=1)
+		tasks = frappe.db.get_values("Project Task", {"task_id": self.name, "parent": ["!=", self.project or ""]}, as_dict=1)
+
 		for task in tasks:
 			frappe.delete_doc('Project Task', task.get("name"))
 
