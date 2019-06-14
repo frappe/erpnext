@@ -45,8 +45,8 @@ def execute(filters=None):
 
 						if(filters.get("show_cumulative")):
 							last_total = period_data[0] - period_data[1]
-						
-						period_data[2] = period_data[0] - period_data[1] 
+
+						period_data[2] = period_data[0] - period_data[1]
 						row += period_data
 				totals[2] = totals[0] - totals[1]
 				if filters["period"] != "Yearly" :
@@ -60,7 +60,7 @@ def validate_filters(filters):
 		frappe.throw(_("Filter based on Cost Center is only applicable if Budget Against is selected as Cost Center"))
 
 def get_columns(filters):
-	columns = [_(filters.get("budget_against")) + ":Link/%s:80"%(filters.get("budget_against")), _("Account") + ":Link/Account:80"]
+	columns = [_(filters.get("budget_against")) + ":Link/%s:150"%(filters.get("budget_against")), _("Account") + ":Link/Account:150"]
 
 	group_months = False if filters["period"] == "Monthly" else True
 
@@ -71,7 +71,7 @@ def get_columns(filters):
 			if filters["period"] == "Yearly":
 				labels = [_("Budget") + " " + str(year[0]), _("Actual ") + " " + str(year[0]), _("Varaiance ") + " " + str(year[0])]
 				for label in labels:
-					columns.append(label+":Float:80")
+					columns.append(label+":Float:150")
 			else:
 				for label in [_("Budget") + " (%s)" + " " + str(year[0]), _("Actual") + " (%s)" + " " + str(year[0]), _("Variance") + " (%s)" + " " + str(year[0])]:
 					if group_months:
@@ -79,20 +79,20 @@ def get_columns(filters):
 					else:
 						label = label % formatdate(from_date, format_string="MMM")
 
-					columns.append(label+":Float:80")
+					columns.append(label+":Float:150")
 
 	if filters["period"] != "Yearly" :
-		return columns + [_("Total Budget") + ":Float:80", _("Total Actual") + ":Float:80",
-			_("Total Variance") + ":Float:80"]
+		return columns + [_("Total Budget") + ":Float:150", _("Total Actual") + ":Float:150",
+			_("Total Variance") + ":Float:150"]
 	else:
 		return columns
-		
+
 def get_cost_centers(filters):
 	cond = "and 1=1"
 	if filters.get("budget_against") == "Cost Center":
 		cond = "order by lft"
 
-	return frappe.db.sql_list("""select name from `tab{tab}` where company=%s 
+	return frappe.db.sql_list("""select name from `tab{tab}` where company=%s
 		{cond}""".format(tab=filters.get("budget_against"), cond=cond), filters.get("company"))
 
 #Get cost center & target details
@@ -109,7 +109,7 @@ def get_cost_center_target_details(filters):
 		""".format(budget_against=filters.get("budget_against").replace(" ", "_").lower(), cond=cond),
 		(filters.from_fiscal_year,filters.to_fiscal_year,filters.budget_against, filters.company), as_dict=True)
 
-	
+
 
 #Get target distribution details of accounts of cost center
 def get_target_distribution_details(filters):
@@ -118,7 +118,7 @@ def get_target_distribution_details(filters):
 		from `tabMonthly Distribution Percentage` mdp, `tabMonthly Distribution` md
 		where mdp.parent=md.name and md.fiscal_year between %s and %s order by md.fiscal_year""",(filters.from_fiscal_year, filters.to_fiscal_year), as_dict=1):
 			target_details.setdefault(d.name, {}).setdefault(d.month, flt(d.percentage_allocation))
-	
+
 	return target_details
 
 #Get actual details from gl entry
@@ -129,7 +129,7 @@ def get_actual_details(name, filters):
 	if filters.get("budget_against") == "Cost Center":
 		cc_lft, cc_rgt = frappe.db.get_value("Cost Center", name, ["lft", "rgt"])
 		cond = "lft>='{lft}' and rgt<='{rgt}'".format(lft = cc_lft, rgt=cc_rgt)
-	
+
 	ac_details = frappe.db.sql("""select gl.account, gl.debit, gl.credit,gl.fiscal_year,
 		MONTHNAME(gl.posting_date) as month_name, b.{budget_against} as budget_against
 		from `tabGL Entry` gl, `tabBudget Account` ba, `tabBudget` b
@@ -159,7 +159,7 @@ def get_cost_center_account_month_map(filters):
 
 	for ccd in cost_center_target_details:
 		actual_details = get_actual_details(ccd.budget_against, filters)
-		
+
 		for month_id in range(1, 13):
 			month = datetime.date(2013, month_id, 1).strftime('%B')
 			cam_map.setdefault(ccd.budget_against, {}).setdefault(ccd.account, {}).setdefault(ccd.fiscal_year,{})\
@@ -172,7 +172,7 @@ def get_cost_center_account_month_map(filters):
 				if ccd.monthly_distribution else 100.0/12
 
 			tav_dict.target = flt(ccd.budget_amount) * month_percentage / 100
-			
+
 			for ad in actual_details.get(ccd.account, []):
 				if ad.month_name == month:
 						tav_dict.actual += flt(ad.debit) - flt(ad.credit)
