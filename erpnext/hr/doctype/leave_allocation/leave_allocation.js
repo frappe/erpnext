@@ -63,7 +63,7 @@ frappe.ui.form.on("Leave Allocation", {
 	},
 
 	leave_type: function(frm) {
-		frm.trigger("leave_policy")
+		frm.trigger("leave_policy");
 		frm.trigger("calculate_total_leaves_allocated");
 	},
 
@@ -83,13 +83,12 @@ frappe.ui.form.on("Leave Allocation", {
 
 	leave_policy: function(frm) {
 		if(frm.doc.leave_policy && frm.doc.leave_type) {
-			frappe.db.get_value("Leave Policy Detail",
-				{'parent': frm.doc.leave_policy, 'leave_type': frm.doc.leave_type},
-				'annual_allocation', (r) => {
-				if (r && !r.exc) {
-					frm.set_value("new_leaves_allocated", flt(r.annual_allocation));
-				}
-			}, "Leave Policy")
+			frappe.db.get_value("Leave Policy Detail",{
+				'parent': frm.doc.leave_policy,
+				'leave_type': frm.doc.leave_type
+			}, 'annual_allocation', (r) => {
+				if (r && !r.exc) frm.set_value("new_leaves_allocated", flt(r.annual_allocation));
+			}, "Leave Policy");
 		}
 	},
 	calculate_total_leaves_allocated: function(frm) {
