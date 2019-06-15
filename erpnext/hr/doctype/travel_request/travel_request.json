@@ -193,6 +193,15 @@
    "label": "Other Details"
   },
   {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Travel Request",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
@@ -203,6 +212,7 @@
    "fieldtype": "Column Break"
   }
  ],
+ "is_submittable": 1,
  "modified": "2019-05-25 23:15:00.609186",
  "modified_by": "Administrator",
  "module": "HR",
