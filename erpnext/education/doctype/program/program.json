@@ -1,7 +1,7 @@
 {
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:program_code",
+ "autoname": "field:program_name",
  "creation": "2015-09-07 12:54:03.609282",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -9,18 +9,17 @@
   "program_name",
   "department",
   "column_break_3",
-  "program_code",
   "program_abbreviation",
-  "section_break_5",
+  "section_break_courses",
   "courses",
-  "section_break_9",
-  "description",
+  "section_break_5",
+  "is_published",
+  "allow_self_enroll",
+  "is_featured",
+  "column_break_11",
   "intro_video",
   "hero_image",
-  "column_break_11",
-  "is_published",
-  "is_featured",
-  "allow_self_enroll"
+  "description"
  ],
  "fields": [
   {
@@ -28,7 +27,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Program Name",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "department",
@@ -41,13 +41,6 @@
   {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "program_code",
-   "fieldtype": "Data",
-   "label": "Program Code",
-   "reqd": 1,
-   "unique": 1
   },
   {
    "fieldname": "program_abbreviation",
@@ -67,16 +60,13 @@
    "options": "Program Course"
   },
   {
-   "fieldname": "section_break_9",
-   "fieldtype": "Section Break",
-   "label": "LMS Settings"
-  },
-  {
+   "depends_on": "is_published",
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description"
   },
   {
+   "depends_on": "is_published",
    "fieldname": "intro_video",
    "fieldtype": "Data",
    "label": "Intro Video"
@@ -84,11 +74,8 @@
   {
    "fieldname": "hero_image",
    "fieldtype": "Attach Image",
+   "hidden": 1,
    "label": "Hero Image"
-  },
-  {
-   "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -106,13 +93,22 @@
   {
    "default": "0",
    "depends_on": "eval: doc.is_published == 1",
-   "description": "Allow students to enroll themselves from the portal",
    "fieldname": "allow_self_enroll",
    "fieldtype": "Check",
    "label": "Allow Self Enroll"
+  },
+  {
+   "fieldname": "section_break_courses",
+   "fieldtype": "Section Break",
+   "label": "Courses"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2019-06-05 17:47:26.877296",
+ "image_field": "hero_image",
+ "modified": "2019-06-12 12:31:14.999346",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Program",
