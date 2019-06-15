@@ -82,7 +82,7 @@
    "options": "00:00\n01:00\n02:00\n03:00\n04:00\n05:00\n06:00\n07:00\n08:00\n09:00\n10:00\n11:00\n12:00\n13:00\n14:00\n15:00\n16:00\n17:00\n18:00\n19:00\n20:00\n21:00\n22:00\n23:00"
   },
   {
-   "default": "Friday",
+   "default": "Sunday",
    "depends_on": "eval:doc.send_emails_frequency == \"Weekly\";",
    "fieldname": "send_request_emails_week_day",
    "fieldtype": "Select",
@@ -112,6 +112,7 @@
    "options": "00:00\n01:00\n02:00\n03:00\n04:00\n05:00\n06:00\n07:00\n08:00\n09:00\n10:00\n11:00\n12:00\n13:00\n14:00\n15:00\n16:00\n17:00\n18:00\n19:00\n20:00\n21:00\n22:00\n23:00"
   },
   {
+   "default": "Sunday",
    "depends_on": "eval:doc.send_emails_frequency == \"Weekly\";",
    "fieldname": "send_summary_emails_week_day",
    "fieldtype": "Select",
@@ -149,7 +150,7 @@
    "fieldtype": "Section Break"
   }
  ],
- "modified": "2019-06-13 11:39:54.151181",
+ "modified": "2019-06-15 20:23:31.263446",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Regular Work Summary Group",
