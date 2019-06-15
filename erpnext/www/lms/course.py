@@ -5,9 +5,16 @@ import frappe
 no_cache = 1
 
 def get_context(context):
+	try:
+		program = frappe.form_dict['program']
+		course_name = frappe.form_dict['name']
+	except KeyError:
+		frappe.local.flags.redirect_location = '/lms'
+		raise frappe.Redirect
+
 	context.education_settings = frappe.get_single("Education Settings")
-	course = frappe.get_doc('Course', frappe.form_dict['name'])
-	context.program = frappe.form_dict['program']
+	course = frappe.get_doc('Course', course_name)
+	context.program = program
 	context.course = course
 
 	context.topics = course.get_topics()

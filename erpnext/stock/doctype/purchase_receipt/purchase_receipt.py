@@ -12,6 +12,7 @@ from frappe.utils import getdate
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
+from frappe.model.mapper import get_mapped_doc
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
 from six import iteritems
@@ -530,3 +531,24 @@ def make_purchase_return(source_name, target_doc=None):
 def update_purchase_receipt_status(docname, status):
 	pr = frappe.get_doc("Purchase Receipt", docname)
 	pr.update_status(status)
+
+@frappe.whitelist()
+def make_stock_entry(source_name,target_doc=None):
+	def set_missing_values(source, target):
+		target.stock_entry_type = "Material Transfer"
+		target.purpose =  "Material Transfer"
+
+	doclist = get_mapped_doc("Purchase Receipt", source_name,{
+		"Purchase Receipt": {
+			"doctype": "Stock Entry",
+		},
+		"Purchase Receipt Item": {
+			"doctype": "Stock Entry Detail",
+			"field_map": {
+				"warehouse": "s_warehouse",
+				"parent": "reference_purchase_receipt"
+			},
+		},
+	}, target_doc, set_missing_values)
+
+	return doclist

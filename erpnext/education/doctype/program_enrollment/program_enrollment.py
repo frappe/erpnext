@@ -66,7 +66,7 @@ class ProgramEnrollment(Document):
 			msgprint(_("Fee Records Created - {0}").format(comma_and(fee_list)))
 
 	def get_courses(self):
-		return frappe.db.sql('''select course, course_name from `tabProgram Course` where parent = %s and required = 1''', (self.program), as_dict=1)
+		return frappe.db.sql('''select course from `tabProgram Course` where parent = %s and required = 1''', (self.program), as_dict=1)
 
 	def create_course_enrollments(self):
 		student = frappe.get_doc("Student", self.student)
