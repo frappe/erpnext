@@ -98,7 +98,7 @@ class CallPopup {
 
 	setup_known_caller(wrapper) {
 		const contact = this.contact;
-		const contact_name = frappe.utils.get_form_link(contact.doctype, contact.name, true, contact.lead_name);
+		const contact_name = frappe.utils.get_form_link(contact.doctype, contact.name, true, this.get_caller_name());
 		const links = contact.links ? contact.links : [];
 
 		let contact_links = '';
@@ -128,8 +128,7 @@ class CallPopup {
 		let title = '';
 		call_status = call_status || this.call_log.status;
 		if (['Ringing'].includes(call_status) || !call_status) {
-			title = __('Incoming call from {0}',
-				[this.contact ? `${this.contact.first_name || ''} ${this.contact.last_name || ''}` : this.caller_number]);
+			title = __('Incoming call from {0}', [this.get_caller_name()]);
 			this.set_indicator('blue', true);
 		} else if (call_status === 'In Progress') {
 			title = __('Call Connected');
@@ -187,6 +186,9 @@ class CallPopup {
 				</a>`);
 			}
 		});
+	}
+	get_caller_name() {
+		return this.contact ? this.contact.lead_name || this.contact.name || '' : this.caller_number;
 	}
 	setup_listener() {
 		frappe.realtime.on(`call_${this.call_log.id}_disconnected`, call_log => {
