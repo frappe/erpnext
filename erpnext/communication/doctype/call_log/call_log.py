@@ -15,5 +15,5 @@ class CallLog(Document):
 
 	def on_update(self):
 		doc_before_save = self.get_doc_before_save()
-		if doc_before_save.status in ['Ringing'] and self.status in ['Missed', 'Completed']:
+		if doc_before_save and doc_before_save.status in ['Ringing'] and self.status in ['Missed', 'Completed']:
 			frappe.publish_realtime('call_{id}_disconnected'.format(id=self.id), self)
