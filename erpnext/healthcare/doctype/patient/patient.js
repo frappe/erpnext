@@ -21,9 +21,9 @@ frappe.ui.form.on('Patient', {
 			});
 		}
 		if (frm.doc.patient_name && frappe.user.has_role("Physician")) {
-			frm.add_custom_button(__('Medical Record'), function () {
+			frm.add_custom_button(__('Patient History'), function () {
 				frappe.route_options = { "patient": frm.doc.name };
-				frappe.set_route("medical_record");
+				frappe.set_route("patient_history");
 			},"View");
 		}
 		if (!frm.doc.__islocal && (frappe.user.has_role("Nursing User") || frappe.user.has_role("Physician"))) {

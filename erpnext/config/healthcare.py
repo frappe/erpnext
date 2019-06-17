@@ -27,7 +27,7 @@ def get_data():
 				{
 					"type": "page",
 					"name": "patient_history",
-					"label": _("Patient Medical History"),
+					"label": _("Patient History"),
 				},
 				{
 					"type": "page",
