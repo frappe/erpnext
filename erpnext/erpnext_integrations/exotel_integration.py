@@ -75,12 +75,6 @@ def make_a_call(from_number, to_number, caller_id):
 def get_exotel_settings():
 	return frappe.get_single('Exotel Settings')
 
-@frappe.whitelist(allow_guest=True)
-def get_phone_numbers():
-	numbers = 'some number'
-	whitelist_numbers(numbers, 'for number')
-	return numbers
-
 def whitelist_numbers(numbers, caller_id):
 	endpoint = get_exotel_endpoint('CustomerWhitelist')
 	response = requests.post(endpoint, data={
