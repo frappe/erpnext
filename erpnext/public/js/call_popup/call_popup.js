@@ -2,6 +2,7 @@ class CallPopup {
 	constructor(call_log) {
 		this.caller_number = call_log.from;
 		this.call_log = call_log;
+		this.setup_listener();
 		this.make();
 	}
 
@@ -187,6 +188,13 @@ class CallPopup {
 			}
 		});
 	}
+	setup_listener() {
+		frappe.realtime.on(`call_${this.call_log.id}_disconnected`, call_log => {
+			this.call_disconnected(call_log);
+			// Remove call disconnect listener after the call is disconnected
+			frappe.realtime.off(`call_${this.call_log.id}_disconnected`);
+		});
+	}
 }
 
 $(document).on('app_ready', function () {
@@ -196,11 +204,6 @@ $(document).on('app_ready', function () {
 		} else {
 			erpnext.call_popup.update_call_log(call_log);
 			erpnext.call_popup.dialog.show();
-		}
-	});
-	frappe.realtime.on('call_disconnected', call_log => {
-		if (erpnext.call_popup && erpnext.call_popup.call_log.id === call_log.id) {
-			erpnext.call_popup.call_disconnected(call_log);
 		}
 	});
 });

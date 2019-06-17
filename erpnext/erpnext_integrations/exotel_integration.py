@@ -1,5 +1,4 @@
 import frappe
-from erpnext.crm.doctype.utils import get_employee_emails_for_popup
 import requests
 
 # api/method/erpnext.erpnext_integrations.exotel_integration.handle_incoming_call
@@ -17,14 +16,9 @@ def handle_incoming_call(*args, **kwargs):
 
 	call_log = get_call_log(kwargs)
 
-	employee_emails = get_employee_emails_for_popup(kwargs.get('To'))
-	for email in employee_emails:
-		frappe.publish_realtime('show_call_popup', call_log, user=email)
-
 @frappe.whitelist(allow_guest=True)
 def handle_end_call(*args, **kwargs):
 	call_log = update_call_log(kwargs, 'Completed')
-	frappe.publish_realtime('call_disconnected', call_log)
 
 @frappe.whitelist(allow_guest=True)
 def handle_missed_call(*args, **kwargs):
