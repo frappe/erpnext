@@ -14,11 +14,11 @@ def execute():
 
 	issue_priority = frappe.get_list("Issue", fields=["name", "priority"])
 
-	service_level_priority = frappe.get_list("Service Level", fields=["name", "priority", "response_time", "response_time_period",
+	service_level_priority = frappe.get_list("Service Level", fields=["name", "priority", "response_time", "response_time_period", \
 		"resolution_time", "resolution_time_period"])
 
-	service_level_agreement_priority = frappe.get_list("Service Level Agreement", fields=["name", "priority", "response_time", "response_time_period",
-		"resolution_time", "resolution_time_period"])
+	service_level_agreement_priority = frappe.get_list("Service Level Agreement", fields=["name", "priority", "response_time",  \
+		"response_time_period", "resolution_time", "resolution_time_period"])
 
 	frappe.reload_doc("support", "doctype", "issue")
 	frappe.reload_doc("support", "doctype", "service_level_priority")
