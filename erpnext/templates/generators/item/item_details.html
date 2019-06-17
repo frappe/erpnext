@@ -9,7 +9,13 @@
 </p>
 <!-- description -->
 <div itemprop="description">
-	{{ doc.web_long_description or doc.description or _("No description given") | safe }}
+{% if frappe.utils.strip_html(doc.web_long_description) %}
+	{{ doc.web_long_description | safe }}
+{% elif frappe.utils.strip_html(doc.description)  %}
+	{{ doc.description | safe }}
+{% else %}
+	{{ _("No description given") }}
+{% endif  %}
 </div>
 
 {% if has_variants %}
