@@ -12,10 +12,7 @@ def handle_incoming_call(*args, **kwargs):
 	if not exotel_settings.enabled: return
 
 	status = kwargs.get('Status')
-
 	if status == 'free':
-		# call disconnected for agent
-		# "and get_call_status(kwargs.get('CallSid')) in ['in-progress']" - additional check to ensure if the call was redirected
 		return
 
 	call_log = get_call_log(kwargs)
@@ -55,7 +52,8 @@ def get_call_log(call_payload, create_new_if_not_found=True):
 	elif create_new_if_not_found:
 		call_log = frappe.new_doc('Call Log')
 		call_log.id = call_payload.get('CallSid')
-		call_log.to = call_payload.get('To')
+		call_log.to = call_payload.get('CallTo')
+		call_log.medium = call_payload.get('To')
 		call_log.status = 'Ringing'
 		setattr(call_log, 'from', call_payload.get('CallFrom'))
 		call_log.save(ignore_permissions=True)

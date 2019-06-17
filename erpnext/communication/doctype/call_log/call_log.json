@@ -6,8 +6,9 @@
  "field_order": [
   "id",
   "from",
-  "column_break_3",
   "to",
+  "column_break_3",
+  "medium",
   "section_break_5",
   "status",
   "duration",
@@ -70,9 +71,14 @@
    "fieldtype": "Data",
    "label": "Recording URL",
    "read_only": 1
+  },
+  {
+   "fieldname": "medium",
+   "fieldtype": "Data",
+   "label": "Medium"
   }
  ],
- "modified": "2019-06-17 08:01:46.881008",
+ "modified": "2019-06-17 08:21:20.665441",
  "modified_by": "Administrator",
  "module": "Communication",
  "name": "Call Log",
