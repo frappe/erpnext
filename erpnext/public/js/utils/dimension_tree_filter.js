@@ -16,7 +16,7 @@ erpnext.doctypes_with_dimensions.forEach((doctype) => {
 				dimensions.forEach((dimension) => {
 					frappe.model.with_doctype(dimension['document_type'], () => {
 						if (frappe.meta.has_field(dimension['document_type'], 'is_group')) {
-							frm.set_query(dimension['fieldname'],{
+							frm.set_query(dimension['fieldname'], {
 								"is_group": 0
 							});
 						}
