@@ -20,7 +20,7 @@ erpnext.doctypes_with_dimensions.forEach((doctype) => {
 								"is_group": 0
 							});
 						}
-					})
+					});
 				});
 			});
 		}
