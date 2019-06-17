@@ -62,12 +62,14 @@ def get_columns(filters=None):
 def get_data(filters=None):
 	data = []
 	customer_details = get_customer_details(filters)
+
 	items = get_selling_items(filters)
+	item_stock_map = frappe.get_all("Bin", fields=["item_code", "sum(actual_qty) AS available"], group_by="item_code")
+	item_stock_map = {item.item_code: item.available for item in item_stock_map}
 
 	for item in items:
 		price_list_rate = get_price_list_rate_for(customer_details, item.item_code) or 0.0
-		available_stock = frappe.db.sql("SELECT sum(actual_qty) FROM `tabBin` WHERE item_code = %s", item.item_code)
-		available_stock = available_stock[0][0] if available_stock else None
+		available_stock = item_stock_map.get(item.item_code)
 
 		data.append({
 			"item_code": item.item_code,
