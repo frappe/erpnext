@@ -39,7 +39,7 @@ def execute():
 		doc = frappe.get_doc("Service Level Agreement", service_level_agreement.name)
 
 		if doc.customer:
-			doc.append_to = "Customer"
+			doc.apply_to = "Customer"
 			doc.entity = doc.customer
 
 		doc.append("priorities", {
