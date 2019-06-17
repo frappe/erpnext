@@ -75,10 +75,11 @@
   {
    "fieldname": "medium",
    "fieldtype": "Data",
-   "label": "Medium"
+   "label": "Medium",
+   "read_only": 1
   }
  ],
- "modified": "2019-06-17 08:21:20.665441",
+ "modified": "2019-06-17 09:02:48.150383",
  "modified_by": "Administrator",
  "module": "Communication",
  "name": "Call Log",
