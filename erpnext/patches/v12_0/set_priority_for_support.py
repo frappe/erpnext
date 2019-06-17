@@ -21,6 +21,7 @@ def execute():
 		"resolution_time", "resolution_time_period"])
 
 	frappe.reload_doc("support", "doctype", "issue")
+	frappe.reload_doc("support", "doctype", "service_level_priority")
 	frappe.reload_doc("support", "doctype", "service_level")
 	frappe.reload_doc("support", "doctype", "service_level_agreement")
 
