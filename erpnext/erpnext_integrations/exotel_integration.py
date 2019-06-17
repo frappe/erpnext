@@ -14,16 +14,15 @@ def handle_incoming_call(*args, **kwargs):
 	if status == 'free':
 		return
 
-	call_log = get_call_log(kwargs)
+	create_call_log(kwargs)
 
 @frappe.whitelist(allow_guest=True)
 def handle_end_call(*args, **kwargs):
-	call_log = update_call_log(kwargs, 'Completed')
+	update_call_log(kwargs, 'Completed')
 
 @frappe.whitelist(allow_guest=True)
 def handle_missed_call(*args, **kwargs):
-	call_log = update_call_log(kwargs, 'Missed')
-	frappe.publish_realtime('call_disconnected', call_log)
+	update_call_log(kwargs, 'Missed')
 
 def update_call_log(call_payload, status):
 	call_log = get_call_log(call_payload, False)
@@ -34,7 +33,6 @@ def update_call_log(call_payload, status):
 		call_log.save(ignore_permissions=True)
 		frappe.db.commit()
 		return call_log
-
 
 def get_call_log(call_payload, create_new_if_not_found=True):
 	call_log = frappe.get_all('Call Log', {
@@ -53,6 +51,8 @@ def get_call_log(call_payload, create_new_if_not_found=True):
 		call_log.save(ignore_permissions=True)
 		frappe.db.commit()
 		return call_log
+
+create_call_log = get_call_log
 
 @frappe.whitelist()
 def get_call_status(call_id):
