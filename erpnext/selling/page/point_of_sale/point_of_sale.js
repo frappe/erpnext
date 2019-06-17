@@ -737,6 +737,17 @@ class POSCart {
 
 		const customer = this.frm.doc.customer;
 		this.customer_field.set_value(customer);
+
+		if (this.numpad) {
+			const disable_btns = this.disable_numpad_control()
+			const enable_btns = [__('Rate'), __('Disc')]
+
+			if (disable_btns) {
+				enable_btns.filter(btn => !disable_btns.includes(btn))
+			}
+
+			this.numpad.enable_buttons(enable_btns);
+		}
 	}
 
 	get_grand_total() {
@@ -1505,6 +1516,16 @@ class NumberPad {
 				})
 			})
 		}
+	}
+
+	enable_buttons(btns) {
+		btns.forEach((btn) => {
+			const $btn = this.get_btn(btn);
+			$btn.prop("disabled", false)
+			$btn.hover(() => {
+				$btn.css('cursor','pointer');
+			})
+		})
 	}
 
 	set_class() {
