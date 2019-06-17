@@ -445,6 +445,8 @@ class SalarySlip(TransactionBase):
 
 				if not overwrite and component_row.default_amount:
 					amount += component_row.default_amount
+			else:
+				component_row.default_amount = amount
 
 			component_row.amount = amount
 			component_row.deduct_full_tax_on_selected_payroll_date = struct_row.deduct_full_tax_on_selected_payroll_date

@@ -127,8 +127,7 @@ def get_gl_entries(filters):
 		order_by_statement = "order by posting_date, voucher_type, voucher_no"
 
 	if filters.get("group_by") == _("Group by Voucher (Consolidated)"):
-		group_by_statement = """group by voucher_type, voucher_no, account,
-			cost_center, against_voucher_type, against_voucher, posting_date"""
+		group_by_statement = "group by voucher_type, voucher_no, account, cost_center"
 
 		select_fields = """, sum(debit) as debit, sum(credit) as credit,
 			sum(debit_in_account_currency) as debit_in_account_currency,
