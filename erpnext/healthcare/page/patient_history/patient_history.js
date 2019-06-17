@@ -31,6 +31,10 @@ frappe.pages['patient_history'].on_page_load = function(wrapper) {
 	});
 	patient.refresh();
 
+	if (frappe.route_options){
+		patient.set_value(frappe.route_options.patient);
+	}
+
 	this.page.main.on("click", ".btn-show-chart", function() {
 		var	btn_show_id = $(this).attr("data-show-chart-id"), pts = $(this).attr("data-pts");
 		var title = $(this).attr("data-title");
