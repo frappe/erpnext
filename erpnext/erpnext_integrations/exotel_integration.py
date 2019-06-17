@@ -39,6 +39,7 @@ def update_call_log(call_payload, status):
 	if call_log:
 		call_log.status = status
 		call_log.duration = call_payload.get('DialCallDuration') or 0
+		call_log.recording_url = call_payload.get('RecordingUrl')
 		call_log.save(ignore_permissions=True)
 		frappe.db.commit()
 		return call_log
