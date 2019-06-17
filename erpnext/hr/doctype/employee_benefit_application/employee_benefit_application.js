@@ -34,7 +34,7 @@ frappe.ui.form.on('Employee Benefit Application', {
 			return {
 				query : "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_earning_components",
 				filters: {date: frm.doc.date, employee: frm.doc.employee}
-			}
+			};
 		});
 	},
 
