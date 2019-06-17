@@ -73,24 +73,13 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname":"party",
 			"label": __("Party"),
 			"fieldtype": "MultiSelectList",
-			get_data: function() {
+			get_data: function(txt) {
 				if (!frappe.query_report.filters) return;
-				var party_type = frappe.query_report.get_filter_value('party_type');
-				if(!party_type) return;
 
-				return new Promise(resolve => {
-					frappe.call({
-						type: 'GET',
-						method: 'frappe.desk.search.search_link',
-						args: {
-							doctype: frappe.query_report.get_filter_value('party_type'),
-							txt: ''
-						},
-						callback: function(r) {
-							resolve(r.results);
-						}
-					});
-				});
+				let party_type = frappe.query_report.get_filter_value('party_type');
+				if (!party_type) return;
+
+				return frappe.db.get_link_options(party_type, txt);
 			},
 			on_change: function() {
 				var party_type = frappe.query_report.get_filter_value('party_type');
@@ -144,62 +133,17 @@ frappe.query_reports["General Ledger"] = {
 		{
 			"fieldname":"cost_center",
 			"label": __("Cost Center"),
-			"fieldtype": "MultiSelect",
-			get_data: function() {
-				var cost_centers = frappe.query_report.get_filter_value("cost_center") || "";
-
-				const values = cost_centers.split(/\s*,\s*/).filter(d => d);
-				const txt = cost_centers.match(/[^,\s*]*$/)[0] || '';
-				let data = [];
-
-				frappe.call({
-					type: "GET",
-					method:'frappe.desk.search.search_link',
-					async: false,
-					no_spinner: true,
-					args: {
-						doctype: "Cost Center",
-						txt: txt,
-						filters: {
-							"company": frappe.query_report.get_filter_value("company"),
-							"name": ["not in", values]
-						}
-					},
-					callback: function(r) {
-						data = r.results;
-					}
-				});
-				return data;
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Cost Center', txt);
 			}
 		},
 		{
 			"fieldname":"project",
 			"label": __("Project"),
-			"fieldtype": "MultiSelect",
-			get_data: function() {
-				var projects = frappe.query_report.get_filter_value("project") || "";
-
-				const values = projects.split(/\s*,\s*/).filter(d => d);
-				const txt = projects.match(/[^,\s*]*$/)[0] || '';
-				let data = [];
-
-				frappe.call({
-					type: "GET",
-					method:'frappe.desk.search.search_link',
-					async: false,
-					no_spinner: true,
-					args: {
-						doctype: "Project",
-						txt: txt,
-						filters: {
-							"name": ["not in", values]
-						}
-					},
-					callback: function(r) {
-						data = r.results;
-					}
-				});
-				return data;
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Project', txt);
 			}
 		},
 		{

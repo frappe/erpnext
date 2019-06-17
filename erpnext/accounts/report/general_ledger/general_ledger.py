@@ -60,12 +60,10 @@ def validate_filters(filters, account_details):
 		frappe.throw(_("From Date must be before To Date"))
 
 	if filters.get('project'):
-		projects = cstr(filters.get("project")).strip()
-		filters.project = [d.strip() for d in projects.split(',') if d]
+		filters.project = frappe.parse_json(filters.get('project'))
 
 	if filters.get('cost_center'):
-		cost_centers = cstr(filters.get("cost_center")).strip()
-		filters.cost_center = [d.strip() for d in cost_centers.split(',') if d]
+		filters.cost_center = frappe.parse_json(filters.get('cost_center'))
 
 
 def validate_party(filters):
