@@ -275,7 +275,7 @@ def make_custom_fields(update=True):
 		],
 		'Company': [
 			dict(fieldname='hra_section', label='HRA Settings',
-				fieldtype='Section Break', insert_after='asset_received_but_not_billed'),
+				fieldtype='Section Break', insert_after='asset_received_but_not_billed', collapsible=1),
 			dict(fieldname='basic_component', label='Basic Component',
 				fieldtype='Link', options='Salary Component', insert_after='hra_section'),
 			dict(fieldname='hra_component', label='HRA Component',
