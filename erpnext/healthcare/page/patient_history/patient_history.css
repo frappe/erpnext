@@ -48,23 +48,23 @@
 }
 
 .d-flex {
-	display: flex !important;
+	display: flex;
 }
 
 .width-full {
-	width: 100% !important;
+	width: 100%;
 }
 
 .p-3 {
-	padding: 16px !important;
+	padding: 16px;
 }
 
 .mt-2 {
-	margin-top: 8px !important;
+	margin-top: 8px;
 }
 
 .mr-3 {
-	margin-right: 16px !important;
+	margin-right: 16px;
 }
 
 .Box {
@@ -74,7 +74,7 @@
 }
 
 .flex-column {
-	flex-direction: column !important;
+	flex-direction: column;
 }
 
 .avatar {
@@ -86,12 +86,12 @@
 }
 
 .py-3 {
-	padding-top: 16px !important;
-	padding-bottom: 16px !important;
+	padding-top: 16px;
+	padding-bottom: 16px;
 }
 
 .border-bottom {
-	border-bottom: 1px #e1e4e8 solid !important;
+	border-bottom: 1px #e1e4e8 solid;
 }
 
 .date-indicator.blue::after {
