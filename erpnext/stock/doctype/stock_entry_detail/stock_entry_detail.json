@@ -13,6 +13,7 @@
   "t_warehouse",
   "sec_break1",
   "item_code",
+  "item_group",
   "col_break2",
   "item_name",
   "section_break_8",
@@ -59,7 +60,8 @@
   "against_stock_entry",
   "ste_detail",
   "column_break_51",
-  "transferred_qty"
+  "transferred_qty",
+  "reference_purchase_receipt"
  ],
  "fields": [
   {
@@ -72,7 +74,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "columns": 2,
    "fieldname": "s_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -86,7 +87,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "columns": 2,
    "fieldname": "t_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -101,7 +101,6 @@
   },
   {
    "bold": 1,
-   "columns": 3,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -164,7 +163,6 @@
   },
   {
    "bold": 1,
-   "columns": 3,
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -460,15 +458,30 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Group"
+  },
+  {
+   "fieldname": "reference_purchase_receipt",
+   "fieldtype": "Link",
+   "label": "Reference Purchase Receipt",
+   "options": "Purchase Receipt",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-25 22:51:00.802226",
+ "modified": "2019-06-14 11:58:41.958144",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",
  "owner": "Administrator",
  "permissions": [],
+ "sort_field": "modified",
  "sort_order": "ASC"
 }

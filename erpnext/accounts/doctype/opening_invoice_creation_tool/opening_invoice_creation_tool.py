@@ -129,7 +129,9 @@ class OpeningInvoiceCreationTool(Document):
 	def get_invoice_dict(self, row=None):
 		def get_item_dict():
 			default_uom = frappe.db.get_single_value("Stock Settings", "stock_uom") or _("Nos")
-			cost_center = frappe.get_cached_value('Company',  self.company,  "cost_center")
+			cost_center = row.get('cost_center') or frappe.get_cached_value('Company',
+				self.company,  "cost_center")
+
 			if not cost_center:
 				frappe.throw(
 					_("Please set the Default Cost Center in {0} company.").format(frappe.bold(self.company))
@@ -163,6 +165,7 @@ class OpeningInvoiceCreationTool(Document):
 			"is_opening": "Yes",
 			"set_posting_time": 1,
 			"company": self.company,
+			"cost_center": self.cost_center,
 			"due_date": row.due_date,
 			"posting_date": row.posting_date,
 			frappe.scrub(party_type): row.party,

@@ -14,8 +14,12 @@ erpnext.doctypes_with_dimensions.forEach((doctype) => {
 		onload: function(frm) {
 			dimension_filters.then((dimensions) => {
 				dimensions.forEach((dimension) => {
-					frm.set_query(dimension['fieldname'],{
-						"is_group": 0
+					frappe.model.with_doctype(dimension['document_type'], () => {
+						if (frappe.meta.has_field(dimension['document_type'], 'is_group')) {
+							frm.set_query(dimension['fieldname'], {
+								"is_group": 0
+							});
+						}
 					});
 				});
 			});
