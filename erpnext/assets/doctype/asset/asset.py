@@ -291,16 +291,19 @@ class Asset(AccountsController):
 
 	def validate_expected_value_after_useful_life(self):
 		for row in self.get('finance_books'):
-			accumulated_depreciation_after_full_schedule = max([d.accumulated_depreciation_amount
-				for d in self.get("schedules") if cint(d.finance_book_id) == row.idx])
+			accumulated_depreciation_after_full_schedule = [d.accumulated_depreciation_amount
+				for d in self.get("schedules") if cint(d.finance_book_id) == row.idx]
 
-			asset_value_after_full_schedule = flt(flt(self.gross_purchase_amount) -
-				flt(accumulated_depreciation_after_full_schedule),
-				self.precision('gross_purchase_amount'))
+			if accumulated_depreciation_after_full_schedule:
+				accumulated_depreciation_after_full_schedule = max(accumulated_depreciation_after_full_schedule)
 
-			if row.expected_value_after_useful_life < asset_value_after_full_schedule:
-				frappe.throw(_("Depreciation Row {0}: Expected value after useful life must be greater than or equal to {1}")
-					.format(row.idx, asset_value_after_full_schedule))
+				asset_value_after_full_schedule = flt(flt(self.gross_purchase_amount) -
+					flt(accumulated_depreciation_after_full_schedule),
+					self.precision('gross_purchase_amount'))
+
+				if row.expected_value_after_useful_life < asset_value_after_full_schedule:
+					frappe.throw(_("Depreciation Row {0}: Expected value after useful life must be greater than or equal to {1}")
+						.format(row.idx, asset_value_after_full_schedule))
 
 	def validate_cancellation(self):
 		if self.status not in ("Submitted", "Partially Depreciated", "Fully Depreciated"):
