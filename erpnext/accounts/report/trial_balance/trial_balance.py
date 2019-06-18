@@ -180,20 +180,28 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 
 		if d["root_type"] == "Asset" or d["root_type"] == "Equity" or d["root_type"] == "Expense":
 			d["opening_debit"] -= d["opening_credit"]
-			d["opening_credit"] = 0.0
-			total_row["opening_debit"] += d["opening_debit"]
+			d["closing_debit"] -= d["closing_credit"]
+
+			# For opening
+			check_opening_closing_has_negative_value(d, "opening_debit", "opening_credit")
+
+			# For closing
+			check_opening_closing_has_negative_value(d, "closing_debit", "closing_credit")
+
 		if d["root_type"] == "Liability" or d["root_type"] == "Income":
 			d["opening_credit"] -= d["opening_debit"]
-			d["opening_debit"] = 0.0
-			total_row["opening_credit"] += d["opening_credit"]
-		if d["root_type"] == "Asset" or d["root_type"] == "Equity" or d["root_type"] == "Expense":
-			d["closing_debit"] -= d["closing_credit"]
-			d["closing_credit"] = 0.0
-			total_row["closing_debit"] += d["closing_debit"]
-		if d["root_type"] == "Liability" or d["root_type"] == "Income":
 			d["closing_credit"] -= d["closing_debit"]
-			d["closing_debit"] = 0.0
-			total_row["closing_credit"] += d["closing_credit"]
+
+			# For opening
+			check_opening_closing_has_negative_value(d, "opening_credit", "opening_debit")
+
+			# For closing
+			check_opening_closing_has_negative_value(d, "closing_credit", "closing_debit")
+
+		total_row["opening_debit"] += d["opening_debit"]
+		total_row["closing_debit"] += d["closing_debit"]
+		total_row["opening_credit"] += d["opening_credit"]
+		total_row["closing_credit"] += d["closing_credit"]
 
 	return total_row
 
@@ -218,8 +226,6 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 			"account_name": ('{} - {}'.format(d.account_number, d.account_name)
 				if d.account_number else d.account_name)
 		}
-
-		prepare_opening_and_closing(d)
 
 		for key in value_fields:
 			row[key] = flt(d.get(key, 0.0), 3)
@@ -295,22 +301,11 @@ def get_columns():
 		}
 	]
 
-def prepare_opening_and_closing(d):
-	d["closing_debit"] = d["opening_debit"] + d["debit"]
-	d["closing_credit"] = d["opening_credit"] + d["credit"]
+def check_opening_closing_has_negative_value(d, dr_or_cr, switch_to_column):
+	# If opening debit has negetive value then move it to opening credit and vice versa.
 
-	if d["root_type"] == "Asset" or d["root_type"] == "Equity" or d["root_type"] == "Expense":
-		d["opening_debit"] -= d["opening_credit"]
-		d["opening_credit"] = 0.0
-
-	if d["root_type"] == "Liability" or d["root_type"] == "Income":
-		d["opening_credit"] -= d["opening_debit"]
-		d["opening_debit"] = 0.0
-
-	if d["root_type"] == "Asset" or d["root_type"] == "Equity" or d["root_type"] == "Expense":
-		d["closing_debit"] -= d["closing_credit"]
-		d["closing_credit"] = 0.0
-
-	if d["root_type"] == "Liability" or d["root_type"] == "Income":
-		d["closing_credit"] -= d["closing_debit"]
-		d["closing_debit"] = 0.0
+	if d[dr_or_cr] < 0:
+		d[switch_to_column] = abs(d[dr_or_cr])
+		d[dr_or_cr] = 0.0
+	else:
+		d[switch_to_column] = 0.0
