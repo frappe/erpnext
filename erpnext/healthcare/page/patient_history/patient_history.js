@@ -73,15 +73,15 @@ frappe.pages['patient_history'].on_page_load = function(wrapper) {
 	});
 
 	this.page.main.on("click", ".btn-less", function() {
-		docname = $(this).attr("data-docname");
+		var docname = $(this).attr("data-docname");
 		me.page.main.find("."+docname).parent().find('.document-id').show();
 		me.page.main.find("."+docname).parent().find('.document-html').hide();
 	});
 	me.start = 0;
-	me.page.main.on("click", ".btn-get-records", function(e){
+	me.page.main.on("click", ".btn-get-records", function(){
 		get_documents(patient.get_value(), me);
 	});
-}
+};
 
 var get_documents = function(patient, me){
 	frappe.call({
@@ -94,7 +94,7 @@ var get_documents = function(patient, me){
 		callback: function (r) {
 			var data = r.message;
 			if(data.length){
-				add_to_records(me, data)
+				add_to_records(me, data);
 			}else{
 				me.page.main.find(".patient_documents_list").append("<div class='text-muted' align='center'><br><br>No more records..<br><br></div>");
 				me.page.main.find(".btn-get-records").hide();
@@ -112,18 +112,18 @@ var add_to_records = function(me, data){
 			if(data[i].subject){
 				label += "<br/>"+data[i].subject;
 			}
-			data[i] = add_date_separator(data[i])
+			data[i] = add_date_separator(data[i]);
 			if(frappe.user_info(data[i].owner).image){
 				data[i].imgsrc = frappe.utils.get_file_link(frappe.user_info(data[i].owner).image);
 			}
 			else{
 				data[i].imgsrc = false;
 			}
-			var time_line_heading = data[i].practitioner ? `${data[i].practitioner} ` : ``
+			var time_line_heading = data[i].practitioner ? `${data[i].practitioner} ` : ``;
 			time_line_heading += data[i].reference_doctype + " - "+ data[i].reference_name;
 			details += `<li data-toggle='pill' class='patient_doc_menu'
 			data-doctype='${data[i].reference_doctype}' data-docname='${data[i].reference_name}'>
-			<div class='col-sm-12 d-flex border-bottom py-3'>`
+			<div class='col-sm-12 d-flex border-bottom py-3'>`;
 			if (data[i].imgsrc){
 				details += `<span class='mr-3'>
 					<img class='avtar' src='${data[i].imgsrc}' width='32' height='32'>
@@ -153,20 +153,19 @@ var add_to_records = function(me, data){
 					</div>
 				</div>
 			</div>
-			</li>`
-
+			</li>`;
 		}
 	}
 	details += "</ul>";
 	me.page.main.find(".patient_documents_list").append(details);
 	me.start += data.length;
-	if(data.length==20){
+	if(data.length===20){
 		me.page.main.find(".btn-get-records").show();
 	}else{
 		me.page.main.find(".btn-get-records").hide();
 		me.page.main.find(".patient_documents_list").append("<div class='text-muted' align='center'><br><br>No more records..<br><br></div>");
 	}
-}
+};
 
 var add_date_separator = function(data) {
 	var date = frappe.datetime.str_to_obj(data.creation);
@@ -180,8 +179,8 @@ var add_date_separator = function(data) {
 		pdate = frappe.datetime.global_date_format(date);
 	}
 	data.date_sep = pdate;
-	return data
-}
+	return data;
+};
 
 var show_patient_info = function(patient, me){
 	frappe.call({
@@ -228,20 +227,20 @@ var show_patient_vital_charts = function(patient, me, btn_show_id, pts, title) {
 		},
 		callback: function(r) {
 			if (r.message){
-				show_chart_btns_html = "<div style='padding-top:5px;'><a class='btn btn-default btn-xs btn-show-chart' \
+				var show_chart_btns_html = "<div style='padding-top:5px;'><a class='btn btn-default btn-xs btn-show-chart' \
 				data-show-chart-id='bp' data-pts='mmHg' data-title='Blood Pressure'>Blood Pressure</a>\
 				<a class='btn btn-default btn-xs btn-show-chart' data-show-chart-id='pulse_rate' \
 				data-pts='per Minutes' data-title='Respiratory/Pulse Rate'>Respiratory/Pulse Rate</a>\
 				<a class='btn btn-default btn-xs btn-show-chart' data-show-chart-id='temperature' \
 				data-pts='°C or °F' data-title='Temperature'>Temperature</a>\
 				<a class='btn btn-default btn-xs btn-show-chart' data-show-chart-id='bmi' \
-				data-pts='bmi' data-title='BMI'>BMI</a></div>"
+				data-pts='bmi' data-title='BMI'>BMI</a></div>";
 				me.page.main.find(".show_chart_btns").html(show_chart_btns_html);
 				var data = r.message;
 				let labels = [], datasets = [];
 				let bp_systolic = [], bp_diastolic = [], temperature = [];
 				let pulse = [], respiratory_rate = [], bmi = [], height = [], weight = [];
-				for(i=0; i<data.length; i++){
+				for(var i=0; i<data.length; i++){
 					labels.push(data[i].signs_date+"||"+data[i].signs_time);
 					if(btn_show_id=="bp"){
 						bp_systolic.push(data[i].bp_systolic);
@@ -276,7 +275,7 @@ var show_patient_vital_charts = function(patient, me, btn_show_id, pts, title) {
 					datasets.push({name: "Heart Rate / Pulse", values: pulse, chartType:'line'});
 					datasets.push({name: "Respiratory Rate", values: respiratory_rate, chartType:'line'});
 				}
-				let chart = new Chart( ".patient_vital_charts", {
+				new Chart( ".patient_vital_charts", {
 					data: {
 						labels: labels,
 						datasets: datasets
@@ -298,4 +297,4 @@ var show_patient_vital_charts = function(patient, me, btn_show_id, pts, title) {
 			}
 		}
 	});
-}
+};
