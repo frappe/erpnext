@@ -6,7 +6,7 @@ import json
 def get_document_with_phone_number(number):
 	# finds contacts and leads
 	if not number: return
-	number = number[-10:]
+	number = number.lstrip('0')
 	number_filter = {
 		'phone': ['like', '%{}'.format(number)],
 		'mobile_no': ['like', '%{}'.format(number)]
