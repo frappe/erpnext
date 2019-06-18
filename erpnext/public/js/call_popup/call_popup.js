@@ -16,15 +16,16 @@ class CallPopup {
 			}, {
 				'fielname': 'last_interaction',
 				'fieldtype': 'Section Break',
+				'label': __('Activity'),
 			}, {
 				'fieldtype': 'Small Text',
-				'label': "Last Communication",
+				'label': __('Last Communication'),
 				'fieldname': 'last_communication',
 				'read_only': true,
 				'default': `<i class="text-muted">${__('No communication found.')}<i>`
 			}, {
 				'fieldtype': 'Small Text',
-				'label': "Last Issue",
+				'label': __('Last Issue'),
 				'fieldname': 'last_issue',
 				'read_only': true,
 				'default': `<i class="text-muted">${__('No issue raised by the customer.')}<i>`
@@ -32,11 +33,11 @@ class CallPopup {
 				'fieldtype': 'Column Break',
 			}, {
 				'fieldtype': 'Small Text',
-				'label': 'Call Summary',
+				'label': __('Call Summary'),
 				'fieldname': 'call_summary',
 			}, {
 				'fieldtype': 'Button',
-				'label': 'Save',
+				'label': __('Save'),
 				'click': () => {
 					const call_summary = this.dialog.get_value('call_summary');
 					if (!call_summary) return;
@@ -58,7 +59,7 @@ class CallPopup {
 		this.dialog.get_close_btn().show();
 		this.dialog.$body.addClass('call-popup');
 		this.dialog.set_secondary_action(this.close_modal.bind(this));
-		frappe.utils.play_sound("incoming-call");
+		frappe.utils.play_sound('incoming-call');
 		this.dialog.show();
 	}
 
@@ -157,7 +158,7 @@ class CallPopup {
 	}
 
 	call_disconnected(call_log) {
-		frappe.utils.play_sound("call-disconnect");
+		frappe.utils.play_sound('call-disconnect');
 		this.update_call_log(call_log);
 		setTimeout(() => {
 			if (!this.dialog.get_value('call_summary')) {
