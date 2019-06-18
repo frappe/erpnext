@@ -495,7 +495,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = make_sales_order(item_list=so_items, do_not_submit=True)
 		so.submit()
 
-		po = make_purchase_order_for_drop_shipment(so.name, '_Test Supplier')
+		po = make_purchase_order_for_drop_shipment(so.name, '_Test Supplier', selected_items=[so_items[0]['item_code']])
 		po.submit()
 
 		dn = create_dn_against_so(so.name, delivered_qty=1)

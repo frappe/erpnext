@@ -764,7 +764,10 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_purchase_order_for_drop_shipment(source_name, for_supplier=None, target_doc=None):
+def make_purchase_order_for_drop_shipment(source_name, for_supplier=None, selected_items=[], target_doc=None):
+	if isinstance(selected_items, string_types):
+		selected_items = json.loads(selected_items)
+
 	def set_missing_values(source, target):
 		target.supplier = supplier
 		target.apply_discount_on = ""
@@ -843,7 +846,7 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier=None, target
 						"price_list_rate"
 					],
 					"postprocess": update_item,
-					"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == supplier
+					"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == supplier and doc.item_code in selected_items
 				}
 			}, target_doc, set_missing_values)
 			if not for_supplier:
