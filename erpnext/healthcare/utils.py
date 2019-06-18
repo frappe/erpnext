@@ -539,6 +539,6 @@ def render_doc_as_html(doctype, docname, exclude_fields = []):
 		><div class='col-md-12 col-sm-12'>" \
 		+ section_html + html +"</div></div>"
 	if doc_html:
-		doc_html = "<div class='small'><div class='col-md-12 text-right'><a class='btn btn-default btn-xs' href='#Form/%s/%s'>EDIT</a></div>" %(doctype, docname) + doc_html + "</div>"
+		doc_html = "<div class='small'><div class='col-md-12 text-right'><a class='btn btn-default btn-xs' href='#Form/%s/%s'></a></div>" %(doctype, docname) + doc_html + "</div>"
 
 	return {'html': doc_html}
