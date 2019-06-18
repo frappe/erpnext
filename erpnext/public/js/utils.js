@@ -624,7 +624,7 @@ erpnext.utils.clear_duplicates = function() {
 		Create a Map of items with
 		item_code => [qty, warehouse, batch_no]
 	*/
-	let items = []
+	let items = [];
 
 	for (let item of cur_frm.doc.items) {
 		if (!(unique_items.has(item.item_code) && unique_items.get(item.item_code)[0] === item.qty &&
