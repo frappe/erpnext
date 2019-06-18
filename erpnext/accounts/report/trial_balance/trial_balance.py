@@ -105,7 +105,7 @@ def get_rootwise_opening_balances(filters, report_type):
 	if filters.finance_book:
 		fb_conditions = " and finance_book = %(finance_book)s"
 		if filters.include_default_book_entries:
-			fb_conditions = " and (finance_book in (%(finance_book)s, %(company_fb)s) or finance_book is null)"
+			fb_conditions = " and (finance_book in (%(finance_book)s, %(company_fb)s))"
 
 		additional_conditions += fb_conditions
 
