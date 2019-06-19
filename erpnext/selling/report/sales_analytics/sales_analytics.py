@@ -89,14 +89,14 @@ class Analytics(object):
 		query = """
 				select s.order_type as entity, s.{value_field} as value_field, s.{date_field}
 					from `tab{doctype}` s
-					where s.docstatus = 1 and s.company = '{compa}'
-					and s.{date_field} between '{f_date}' and '{t_date}'
+					where s.docstatus = 1 and s.company = %s
+					and s.{date_field} between %s and %s
 					and ifnull(s.order_type, "") != ""
 				order by s.order_type
-			""".format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type,
-					   compa=self.filters.company, f_date=self.filters.from_date, t_date=self.filters.to_date)
+			"""
+			.format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type)
 
-		self.entries = frappe.db.sql(query, as_dict=1)
+		self.entries = frappe.db.sql(query, (self.filters.company, self.filters.from_date, self.filters.to_date),as_dict=1)
 
 		self.get_teams()
 
@@ -296,7 +296,8 @@ class Analytics(object):
 		self.depth_map = frappe._dict()
 
 		self.group_entries = frappe.db.sql("""select name, lft, rgt , {parent} as parent
-			from `tab{tree}` order by lft""".format(tree=self.filters.tree_type, parent=parent), as_dict=1)
+			from `tab{tree}` order by lft"""
+			.format(tree=self.filters.tree_type, parent=parent), as_dict=1)
 
 		for d in self.group_entries:
 			if d.parent:
@@ -314,7 +315,8 @@ class Analytics(object):
 					select distinct order_type as name, 1 as lft, 1 as rgt, "Order Types" as parent
 					from `tab{doctype}`
 					where ifnull(order_type, "") != "") as b
-				order by lft, name""".format(doctype=self.filters.doc_type)
+				order by lft, name"""
+				.format(doctype=self.filters.doc_type)
 
 		self.group_entries = frappe.db.sql(query, as_dict=1)
 
