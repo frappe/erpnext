@@ -25,7 +25,8 @@ def set_priority_for_issue():
 		frappe.db.set_value("Issue", issue.name, "priority", issue.priority)
 
 def set_priorities_service_level():
-	service_level_priorities = frappe.get_list("Service Level", fields=["name", "priority", "response_time", "response_time_period", "resolution_time", "resolution_time_period"])
+	service_level_priorities = frappe.get_list("Service Level", fields=["name", "priority", "response_time", "response_time_period", "resolution_time", "resolution_time_period"], debug=True)
+	print(service_level_priorities)
 	frappe.reload_doc("support", "doctype", "service_level")
 
 	for service_level in service_level_priorities:
@@ -41,7 +42,8 @@ def set_priorities_service_level():
 		doc.save(ignore_permissions=True)
 
 def set_priorities_service_level_agreement():
-	service_level_agreement_priorities = frappe.get_list("Service Level Agreement", fields=["name", "priority", "response_time", "response_time_period", "resolution_time", "resolution_time_period"])
+	service_level_agreement_priorities = frappe.get_list("Service Level Agreement", fields=["name", "priority", "response_time", "response_time_period", "resolution_time", "resolution_time_period"], debug=True)
+	print(service_level_agreement_priorities)
 	frappe.reload_doc("support", "doctype", "service_level_agreement")
 
 	for service_level_agreement in service_level_agreement_priorities:
