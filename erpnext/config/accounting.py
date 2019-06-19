@@ -40,17 +40,6 @@ def get_data():
 					"description": _("Tree of financial accounts."),
 					"onboard": 1,
 				},
-				{
-					"type": "doctype",
-					"name": "Journal Entry",
-					"description": _("Accounting journal entries."),
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Opening Invoice Creation Tool",
-					"description": _("Create Opening Sales and Purchase Invoices")
-				},
 			]
 		},
 		{
@@ -70,13 +59,18 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Payment Request",
-					"description": _("Payment Request"),
+					"name": "Payment Entry",
+					"description": _("Bank/Cash transactions against party or for internal transfer")
 				},
 				{
 					"type": "doctype",
-					"name": "Payment Entry",
-					"description": _("Bank/Cash transactions against party or for internal transfer")
+					"name": "Journal Entry",
+					"description": _("Accounting journal entries.")
+				},
+				{
+					"type": "doctype",
+					"name": "Payment Request",
+					"description": _("Payment Request"),
 				},
 				{
 					"type": "doctype",
@@ -178,6 +172,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Accounting Dimension",
 					"description": _("Setup custom dimensions for accounting")
+				},
+				{
+					"type": "doctype",
+					"name": "Opening Invoice Creation Tool",
+					"description": _("Create Opening Sales and Purchase Invoices")
 				},
 			]
 		},
