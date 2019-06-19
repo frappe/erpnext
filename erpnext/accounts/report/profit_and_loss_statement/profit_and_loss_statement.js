@@ -41,6 +41,11 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 			"fieldname": "accumulated_values",
 			"label": __("Accumulated Values"),
 			"fieldtype": "Check"
+		},
+		{
+			"fieldname": "include_default_book_entries",
+			"label": __("Include Default Book Entries"),
+			"fieldtype": "Check"
 		}
 	);
 });
