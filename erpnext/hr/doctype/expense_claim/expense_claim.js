@@ -361,16 +361,9 @@ frappe.ui.form.on("Expense Claim Advance", {
 frappe.ui.form.on("Expense Taxes and Charges", {
 	account_head: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		if(child.account_head && !child.description && !child.rate) {
+		if(child.account_head && !child.description) {
 			// set description from account head
 			child.description = child.account_head.split(' - ').slice(0, -1).join(' - ');
-
-			// set the tax rate from account head
-			frappe.db.get_value("Account", child.account_head, "tax_rate").then((r) => {
-				if(r.message) {
-					frappe.model.set_value(cdt, cdn, 'rate', r.message.tax_rate);
-				}
-			});
 			refresh_field("taxes");
 		}
 	},
