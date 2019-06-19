@@ -46,9 +46,9 @@ status_map = {
 	"Sales Invoice": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
+		["Paid", "eval:self.outstanding_amount==0 and self.docstatus==1"],
 		["Return", "eval:self.is_return==1 and self.docstatus==1"],
-		["Paid", "eval:self.outstanding_amount<=0 and self.docstatus==1 and self.is_return==0"],
-		["Credit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1 and self.is_return==0 and get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1})"],
+		["Credit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1"],
 		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
 		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
@@ -56,9 +56,9 @@ status_map = {
 	"Purchase Invoice": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
+		["Paid", "eval:self.outstanding_amount==0 and self.docstatus==1"],
 		["Return", "eval:self.is_return==1 and self.docstatus==1"],
-		["Paid", "eval:self.outstanding_amount<=0 and self.docstatus==1 and self.is_return==0"],
-		["Debit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1 and self.is_return==0 and get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1})"],
+		["Debit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1"],
 		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
 		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
@@ -99,6 +99,10 @@ status_map = {
 		["Issued", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue'"],
 		["Received", "eval:self.status != 'Stopped' and self.per_received == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
 		["Partially Received", "eval:self.status != 'Stopped' and self.per_received > 0 and self.per_received < 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"]
+	],
+	"Bank Transaction": [
+		["Unreconciled", "eval:self.docstatus == 1 and self.unallocated_amount>0"],
+		["Reconciled", "eval:self.docstatus == 1 and self.unallocated_amount<=0"]
 	]
 }
 

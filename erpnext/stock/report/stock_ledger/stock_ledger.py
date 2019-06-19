@@ -22,12 +22,8 @@ def execute(filters=None):
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
 
-		data.append([sle.date, sle.item_code, item_detail.item_name, item_detail.item_group,
-			item_detail.brand, item_detail.description, sle.warehouse,
-			item_detail.stock_uom, sle.actual_qty, sle.qty_after_transaction,
-			(sle.incoming_rate if sle.actual_qty > 0 else 0.0),
-			sle.valuation_rate, sle.stock_value, sle.voucher_type, sle.voucher_no,
-			sle.batch_no, sle.serial_no, sle.project, sle.company])
+		sle.update(item_detail)
+		data.append(sle)
 
 		if include_uom:
 			conversion_factors.append(item_detail.conversion_factor)

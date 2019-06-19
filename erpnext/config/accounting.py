@@ -178,7 +178,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Accounting Dimension",
 					"description": _("Setup custom dimensions for accounting")
-				},
+				}
 			]
 		},
 		{
@@ -241,6 +241,12 @@ def get_data():
 					"type": "doctype",
 					"label": _("Bank"),
 					"name": "Bank",
+				},
+				{
+					"type": "page",
+					"label": _("Reconcile payments and bank transactions"),
+					"name": "bank-reconciliation",
+					"description": _("Link bank transactions with payments.")
 				},
 				{
 					"type": "doctype",

@@ -8,6 +8,7 @@ from frappe.utils import flt, formatdate, now_datetime, getdate
 from datetime import date
 from six import iteritems
 from erpnext.regional.doctype.gstr_3b_report.gstr_3b_report import get_period
+from erpnext.regional.india.utils import get_gst_accounts
 
 def execute(filters=None):
 	return Gstr1Report(filters).run()
@@ -42,7 +43,7 @@ class Gstr1Report(object):
 
 	def run(self):
 		self.get_columns()
-		self.get_gst_accounts()
+		self.gst_accounts = get_gst_accounts(self.filters.company)
 		self.get_invoice_data()
 
 		if self.invoices:
@@ -54,7 +55,6 @@ class Gstr1Report(object):
 		return self.columns, self.data
 
 	def get_data(self):
-
 		if self.filters.get("type_of_business") ==  "B2C Small":
 			self.get_b2cs_data()
 		else:
@@ -269,19 +269,6 @@ class Gstr1Report(object):
 			if invoice not in self.items_based_on_tax_rate \
 				and frappe.db.get_value(self.doctype, invoice, "export_type") == "Without Payment of Tax":
 					self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
-
-	def get_gst_accounts(self):
-		self.gst_accounts = frappe._dict()
-		gst_settings_accounts = frappe.get_all("GST Account",
-			filters={"parent": "GST Settings", "company": self.filters.company},
-			fields=["cgst_account", "sgst_account", "igst_account", "cess_account"])
-
-		if not gst_settings_accounts:
-			frappe.throw(_("Please set GST Accounts in GST Settings"))
-
-		for d in gst_settings_accounts:
-			for acc, val in d.items():
-				self.gst_accounts.setdefault(acc, []).append(val)
 
 	def get_columns(self):
 		self.tax_columns = [

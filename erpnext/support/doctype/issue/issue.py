@@ -11,7 +11,7 @@ from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_wee
 from datetime import datetime, timedelta
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import is_website_user
-from ..service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
+from erpnext.support.doctype.service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
 from erpnext.crm.doctype.opportunity.opportunity import assign_to_user
 from frappe.email.inbox import link_communication_to_document
 
@@ -291,6 +291,7 @@ def make_task(source_name, target_doc=None):
 			"doctype": "Task"
 		}
 	}, target_doc)
+
 @frappe.whitelist()
 def make_issue_from_communication(communication, ignore_communication_links=False):
 	""" raise a issue from email """

@@ -166,4 +166,3 @@ dimension_filters.then((dimensions) => {
 		});
 	});
 });
-
