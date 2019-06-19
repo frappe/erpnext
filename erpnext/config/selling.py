@@ -113,6 +113,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Promotional Scheme",
+					"description": _("Rules for applying different promotional schemes.")
+				},
+				{
+					"type": "doctype",
 					"name": "Pricing Rule",
 					"description": _("Rules for applying pricing and discount."),
 					"dependencies": ["Item"],
