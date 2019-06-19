@@ -496,6 +496,7 @@ def get_pending_leaves_for_period(employee, leave_type, from_date, to_date):
 			"leave_type": leave_type,
 			"from_date": ("<=", from_date),
 			"to_date": (">=", to_date),
+			"status": "Open"
 		}, fieldname=['SUM(total_leave_days)']) or flt(0)
 
 def get_remaining_leaves(allocation, leaves_taken, date, expiry):
