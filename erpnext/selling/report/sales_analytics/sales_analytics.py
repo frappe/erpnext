@@ -86,17 +86,10 @@ class Analytics(object):
 		else:
 			value_field = "total_qty"
 
-		query = """
-				select s.order_type as entity, s.{value_field} as value_field, s.{date_field}
-					from `tab{doctype}` s
-					where s.docstatus = 1 and s.company = %s
-					and s.{date_field} between %s and %s
-					and ifnull(s.order_type, "") != ""
-				order by s.order_type
-			"""
-			.format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type)
-
-		self.entries = frappe.db.sql(query, (self.filters.company, self.filters.from_date, self.filters.to_date),as_dict=1)
+		self.entries = frappe.db.sql("""select s.order_type as entity, s.{value_field} as value_field, s.{date_field}
+			from `tab{doctype}` s where s.docstatus = 1 and s.company = %s and s.{date_field} between %s and %s
+			and ifnull(s.order_type, "") != "" order by s.order_type"""
+		.format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type), (self.filters.company, self.filters.from_date, self.filters.to_date),as_dict=1)
 
 		self.get_teams()
 
@@ -297,7 +290,7 @@ class Analytics(object):
 
 		self.group_entries = frappe.db.sql("""select name, lft, rgt , {parent} as parent
 			from `tab{tree}` order by lft"""
-			.format(tree=self.filters.tree_type, parent=parent), as_dict=1)
+		.format(tree=self.filters.tree_type, parent=parent), as_dict=1)
 
 		for d in self.group_entries:
 			if d.parent:
@@ -308,17 +301,10 @@ class Analytics(object):
 	def get_teams(self):
 		self.depth_map = frappe._dict()
 
-		query = """
-				select * from (
-					select "Order Types" as name, 0 as lft, 2 as rgt, '' as parent
-					union
-					select distinct order_type as name, 1 as lft, 1 as rgt, "Order Types" as parent
-					from `tab{doctype}`
-					where ifnull(order_type, "") != "") as b
-				order by lft, name"""
-				.format(doctype=self.filters.doc_type)
-
-		self.group_entries = frappe.db.sql(query, as_dict=1)
+		self.group_entries = frappe.db.sql("""select * from (select "Order Types" as name, 0 as lft,
+			2 as rgt, '' as parent union select distinct order_type as name, 1 as lft, 1 as rgt, "Order Types" as parent
+					from `tab{doctype}` where ifnull(order_type, "") != "") as b order by lft, name"""
+		.format(doctype=self.filters.doc_type), as_dict=1)
 
 		for d in self.group_entries:
 			if d.parent:
