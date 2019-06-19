@@ -390,8 +390,8 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	if filters:
 		if filters.get("project"):
 			if not isinstance(filters.get("project"), list):
-				projects = frappe.safe_encode(filters.get("project"))
-				filters.project = [d.strip() for d in projects.strip().split(',') if d]
+				filters.project = frappe.parse_json(filters.get("project"))
+
 			additional_conditions.append("project in %(project)s")
 
 		if filters.get("cost_center"):
