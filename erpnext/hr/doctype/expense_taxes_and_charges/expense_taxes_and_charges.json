@@ -53,6 +53,7 @@
   },
   {
    "columns": 2,
+   "fetch_from": "account_head.tax_rate",
    "fieldname": "rate",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -91,7 +92,7 @@
   }
  ],
  "istable": 1,
- "modified": "2019-06-11 14:19:34.780611",
+ "modified": "2019-06-19 17:47:40.236436",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Taxes and Charges",
