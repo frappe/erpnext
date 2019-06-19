@@ -26,8 +26,7 @@ def execute(filters=None):
 		account_details.setdefault(acc.name, acc)
 
 	if filters.get('party'):
-		parties = cstr(filters.get("party")).strip()
-		filters.party = [d.strip() for d in parties.split(',') if d]
+		filters.party = frappe.parse_json(filters.get("party"))
 
 	validate_filters(filters, account_details)
 
@@ -61,12 +60,10 @@ def validate_filters(filters, account_details):
 		frappe.throw(_("From Date must be before To Date"))
 
 	if filters.get('project'):
-		projects = cstr(filters.get("project")).strip()
-		filters.project = [d.strip() for d in projects.split(',') if d]
+		filters.project = frappe.parse_json(filters.get('project'))
 
 	if filters.get('cost_center'):
-		cost_centers = cstr(filters.get("cost_center")).strip()
-		filters.cost_center = [d.strip() for d in cost_centers.split(',') if d]
+		filters.cost_center = frappe.parse_json(filters.get('cost_center'))
 
 
 def validate_party(filters):
@@ -129,6 +126,7 @@ def get_gl_entries(filters):
 
 	if filters.get("group_by") == _("Group by Voucher (Consolidated)"):
 		group_by_statement = "group by voucher_type, voucher_no, account, cost_center"
+
 		select_fields = """, sum(debit) as debit, sum(credit) as credit,
 			sum(debit_in_account_currency) as debit_in_account_currency,
 			sum(credit_in_account_currency) as  credit_in_account_currency"""
