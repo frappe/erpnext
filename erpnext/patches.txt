@@ -533,7 +533,7 @@ erpnext.patches.v11_0.create_department_records_for_each_company
 erpnext.patches.v11_0.make_location_from_warehouse
 erpnext.patches.v11_0.make_asset_finance_book_against_old_entries
 erpnext.patches.v11_0.check_buying_selling_in_currency_exchange
-erpnext.patches.v11_0.move_item_defaults_to_child_table_for_multicompany #02-07-2018
+erpnext.patches.v11_0.move_item_defaults_to_child_table_for_multicompany #02-07-2018 #19-06-2019
 erpnext.patches.v11_0.refactor_erpnext_shopify #2018-09-07
 erpnext.patches.v11_0.rename_overproduction_percent_field
 erpnext.patches.v11_0.update_backflush_subcontract_rm_based_on_bom
