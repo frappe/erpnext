@@ -89,5 +89,5 @@ def get_leave_encashment_records():
                 encashment_date
             FROM `tabLeave Encashment`
             WHERE
-                AND docstatus=1
+                docstatus=1
         """, as_dict=1)
