@@ -25,40 +25,46 @@ def set_priority_for_issue():
 		frappe.db.set_value("Issue", issue.name, "priority", issue.priority)
 
 def set_priorities_service_level():
-	service_level_priorities = frappe.get_list("Service Level", fields=["name", "priority", "response_time", "response_time_period", "resolution_time", "resolution_time_period"], debug=True)
-	print(service_level_priorities)
-	frappe.reload_doc("support", "doctype", "service_level")
+	try:
+		service_level_priorities = frappe.get_list("Service Level", fields=["name", "priority", "response_time", "response_time_period", "resolution_time", "resolution_time_period"])
 
-	for service_level in service_level_priorities:
-		doc = frappe.get_doc("Service Level", service_level.name)
-		doc.append("priorities", {
-			"priority": service_level.priority,
-			"default_priority": 1,
-			"response_time": service_level.response_time,
-			"response_time_period": service_level.response_time_period,
-			"resolution_time": service_level.resolution_time,
-			"resolution_time_period": service_level.resolution_time_period
-		})
-		doc.save(ignore_permissions=True)
+		frappe.reload_doc("support", "doctype", "service_level")
+
+		for service_level in service_level_priorities:
+			doc = frappe.get_doc("Service Level", service_level.name)
+			doc.append("priorities", {
+				"priority": service_level.priority,
+				"default_priority": 1,
+				"response_time": service_level.response_time,
+				"response_time_period": service_level.response_time_period,
+				"resolution_time": service_level.resolution_time,
+				"resolution_time_period": service_level.resolution_time_period
+			})
+			doc.save(ignore_permissions=True)
+	except frappe.db.TableMissingError:
+		frappe.reload_doc("support", "doctype", "service_level")
 
 def set_priorities_service_level_agreement():
-	service_level_agreement_priorities = frappe.get_list("Service Level Agreement", fields=["name", "priority", "response_time", "response_time_period", "resolution_time", "resolution_time_period"], debug=True)
-	print(service_level_agreement_priorities)
-	frappe.reload_doc("support", "doctype", "service_level_agreement")
+	try:
+		service_level_agreement_priorities = frappe.get_list("Service Level Agreement", fields=["name", "priority", "response_time", "response_time_period", "resolution_time", "resolution_time_period"])
 
-	for service_level_agreement in service_level_agreement_priorities:
-		doc = frappe.get_doc("Service Level Agreement", service_level_agreement.name)
+		frappe.reload_doc("support", "doctype", "service_level_agreement")
 
-		if doc.customer:
-			doc.apply_to = "Customer"
-			doc.entity = doc.customer
+		for service_level_agreement in service_level_agreement_priorities:
+			doc = frappe.get_doc("Service Level Agreement", service_level_agreement.name)
 
-		doc.append("priorities", {
-			"priority": service_level_agreement.priority,
-			"default_priority": 1,
-			"response_time": service_level_agreement.response_time,
-			"response_time_period": service_level_agreement.response_time_period,
-			"resolution_time": service_level_agreement.resolution_time,
-			"resolution_time_period": service_level_agreement.resolution_time_period
-		})
-		doc.save(ignore_permissions=True)
+			if doc.customer:
+				doc.apply_to = "Customer"
+				doc.entity = doc.customer
+
+			doc.append("priorities", {
+				"priority": service_level_agreement.priority,
+				"default_priority": 1,
+				"response_time": service_level_agreement.response_time,
+				"response_time_period": service_level_agreement.response_time_period,
+				"resolution_time": service_level_agreement.resolution_time,
+				"resolution_time_period": service_level_agreement.resolution_time_period
+			})
+			doc.save(ignore_permissions=True)
+	except frappe.db.TableMissingError:
+		frappe.reload_doc("support", "doctype", "service_level_agreement")
