@@ -216,6 +216,11 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname": "show_opening_entries",
 			"label": __("Show Opening Entries"),
 			"fieldtype": "Check"
+		},
+		{
+			"fieldname": "include_default_book_entries",
+			"label": __("Include Default Book Entries"),
+			"fieldtype": "Check"
 		}
 	]
 }
