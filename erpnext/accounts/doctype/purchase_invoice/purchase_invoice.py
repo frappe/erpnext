@@ -98,6 +98,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_write_off_account()
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount", "items")
 		self.validate_fixed_asset()
+		self.update_packing_list()
 		self.create_remarks()
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
@@ -874,6 +875,12 @@ class PurchaseInvoice(BuyingController):
 
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
+
+	def update_packing_list(self):
+		if cint(self.update_stock) == 1:
+			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+			make_packing_list(self)
+			self.calculate_packing_list_rates()
 
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):

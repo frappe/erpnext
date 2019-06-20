@@ -56,6 +56,9 @@ class PurchaseOrder(BuyingController):
 		self.validate_bom_for_subcontracting_items()
 		self.create_raw_materials_supplied("supplied_items")
 		self.set_received_qty_for_drop_ship_items()
+		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+		make_packing_list(self)
+		self.calculate_packing_list_rates()
 
 	def validate_with_previous_doc(self):
 		super(PurchaseOrder, self).validate_with_previous_doc({
@@ -113,6 +116,8 @@ class PurchaseOrder(BuyingController):
 				if not item.bom:
 					frappe.throw(_("BOM is not specified for subcontracting item {0} at row {1}"\
 						.format(item.item_code, item.idx)))
+				if self.has_product_bundle(item.item_code):
+					frappe.throw(_("Cannot have Product Bundle for subcontracting for item {0} at row {1}".format(item.item_code, item.idx)))
 
 	def get_schedule_dates(self):
 		for d in self.get('items'):
@@ -174,6 +179,11 @@ class PurchaseOrder(BuyingController):
 				and [d.item_code, d.warehouse] not in item_wh_list \
 				and frappe.get_cached_value("Item", d.item_code, "is_stock_item") \
 				and d.warehouse and not d.delivered_by_supplier:
+				if self.has_product_bundle(d.item_code):
+					for p in self.get("packed_items"):
+						if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
+							item_wh_list.append([p.item_code,p.target_warehouse])
+				else:
 					item_wh_list.append([d.item_code, d.warehouse])
 		for item_code, warehouse in item_wh_list:
 			update_bin_qty(item_code, warehouse, {
@@ -262,6 +272,7 @@ class PurchaseOrder(BuyingController):
 
 	def update_delivered_qty_in_sales_order(self):
 		"""Update delivered qty in Sales Order for drop ship"""
+		sales_orders_to_update = []
 		sales_orders_to_update = []
 		for item in self.items:
 			if item.sales_order and item.delivered_by_supplier == 1:

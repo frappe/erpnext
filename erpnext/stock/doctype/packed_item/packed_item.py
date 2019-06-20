@@ -7,6 +7,8 @@ from __future__ import unicode_literals
 import frappe, json
 from frappe.utils import cstr, flt
 from erpnext.stock.get_item_details import get_item_details
+from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.selling_controller import SellingController
 
 from frappe.model.document import Document
 
@@ -14,7 +16,7 @@ class PackedItem(Document):
 	pass
 
 def get_product_bundle_items(item_code):
-	return frappe.db.sql("""select t1.item_code, t1.qty, t1.uom, t1.description
+	return frappe.db.sql("""select t1.item_code, t1.qty, t1.uom, t1.description, t1.weightage_per_qty
 		from `tabProduct Bundle Item` t1, `tabProduct Bundle` t2
 		where t2.new_item_code=%s and t1.parent = t2.name order by t1.idx""", item_code, as_dict=1)
 
@@ -30,7 +32,7 @@ def get_bin_qty(item, warehouse):
 		where item_code = %s and warehouse = %s""", (item, warehouse), as_dict = 1)
 	return det and det[0] or frappe._dict()
 
-def update_packing_list_item(doc, packing_item_code, qty, main_item_row, description):
+def update_packing_list_item(doc, packing_item_code, qty, weightage_per_qty, main_item_row, description):
 	item = get_packing_item_details(packing_item_code, doc.company)
 
 	# check if exists
@@ -51,15 +53,22 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 	pi.description = item.description
 	pi.uom = item.stock_uom
 	pi.qty = flt(qty)
+	pi.weightage_per_qty = flt(weightage_per_qty)
 	pi.description = description
 	if not pi.warehouse:
-		pi.warehouse = (main_item_row.warehouse if ((doc.get('is_pos')
-			or not item.default_warehouse) and main_item_row.warehouse) else item.default_warehouse)
+		if isinstance(doc,SellingController):
+			pi.warehouse = (main_item_row.warehouse if ((doc.get('is_pos')
+				or not item.default_warehouse) and main_item_row.warehouse) else item.default_warehouse)
+		elif isinstance(doc,BuyingController):
+			pi.warehouse = (main_item_row.warehouse)
 
 	if not pi.batch_no:
 		pi.batch_no = cstr(main_item_row.get("batch_no"))
 	if not pi.target_warehouse:
-		pi.target_warehouse = main_item_row.get("target_warehouse")
+		if isinstance(doc,SellingController):
+			pi.target_warehouse = main_item_row.get("target_warehouse")
+		elif isinstance(doc,BuyingController) and (not hasattr(doc,'is_return') or not doc.is_return):
+			pi.target_warehouse = main_item_row.get("warehouse")
 	bin = get_bin_qty(packing_item_code, pi.warehouse)
 	pi.actual_qty = flt(bin.get("actual_qty"))
 	pi.projected_qty = flt(bin.get("projected_qty"))
@@ -73,7 +82,7 @@ def make_packing_list(doc):
 	for d in doc.get("items"):
 		if frappe.db.get_value("Product Bundle", {"new_item_code": d.item_code}):
 			for i in get_product_bundle_items(d.item_code):
-				update_packing_list_item(doc, i.item_code, flt(i.qty)*flt(d.stock_qty), d, i.description)
+				update_packing_list_item(doc, i.item_code, flt(i.qty)*flt(d.stock_qty), i.weightage_per_qty, d, i.description)
 
 			if [d.item_code, d.name] not in parent_items:
 				parent_items.append([d.item_code, d.name])
