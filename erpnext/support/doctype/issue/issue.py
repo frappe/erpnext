@@ -7,7 +7,7 @@ import json
 from frappe import _
 from frappe import utils
 from frappe.model.document import Document
-from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_weekdays, add_to_date, today, get_time, get_datetime
+from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_weekdays, add_to_date, today, get_time, get_datetime, get_time_in_timedelta
 from datetime import datetime, timedelta
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import is_website_user
@@ -217,7 +217,9 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 		current_weekday = weekdays[current_date_time.weekday()]
 
 		if not is_holiday(current_date_time, holidays) and current_weekday in support_days:
-			start_time = current_date_time - datetime(current_date_time.year, current_date_time.month, current_date_time.day) if getdate(current_date_time) == getdate(start_date_time) else support_days[current_weekday].start_time
+			start_time = current_date_time - datetime(current_date_time.year, current_date_time.month, current_date_time.day) \
+				if getdate(current_date_time) == getdate(start_date_time) and get_time_in_timedelta(current_date_time.time()) > support_days[current_weekday].start_time \
+				else support_days[current_weekday].start_time
 			end_time = support_days[current_weekday].end_time
 			time_left_today = time_diff_in_hours(end_time, start_time)
 

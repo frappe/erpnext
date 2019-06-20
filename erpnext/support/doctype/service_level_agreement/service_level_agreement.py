@@ -21,6 +21,10 @@ class ServiceLevelAgreement(Document):
 				if self.end_date < frappe.utils.getdate():
 					frappe.throw(_("End Date of Agreement can't be less than today."))
 
+		if self.entity_type and self.entity:
+			if frappe.db.exists("Service Level Agreement", {"entity_type": self.entity_type, "entity": self.entity, "name": ["!=", self.name]}):
+				frappe.throw(_("Service Level Agreement with Entity Type {0} and Entity {1} already exists.").format(self.entity_type, self.entity))
+
 	def get_service_level_agreement_priority(self, priority):
 		priority = frappe.get_doc("Service Level Priority", {"priority": priority, "parent": self.name})
 

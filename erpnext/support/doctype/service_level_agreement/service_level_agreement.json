@@ -31,8 +31,7 @@
    "depends_on": "eval: !doc.customer;",
    "fieldname": "default_service_level_agreement",
    "fieldtype": "Check",
-   "label": "Default Service Level Agreement",
-   "set_only_once": 1
+   "label": "Default Service Level Agreement"
   },
   {
    "fieldname": "service_level",
@@ -41,8 +40,7 @@
    "in_standard_filter": 1,
    "label": "Service Level",
    "options": "Service Level",
-   "reqd": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "fetch_from": "service_level.holiday_list",
@@ -153,7 +151,7 @@
    "options": "\nCustomer\nCustomer Group\nTerritory"
   }
  ],
- "modified": "2019-06-20 10:34:58.634693",
+ "modified": "2019-06-20 18:04:14.293378",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
