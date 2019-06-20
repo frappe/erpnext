@@ -76,8 +76,6 @@ class Issue(Document):
 			self.resolution_date = None
 
 	def update_agreement_status(self):
-		current_time = frappe.flags.current_time or now_datetime()
-
 		if self.service_level_agreement and self.agreement_fulfilled == "Ongoing":
 			if frappe.db.get_value("Issue", self.name, "response_by_variance") < 0 or \
 				frappe.db.get_value("Issue", self.name, "resolution_by_variance") < 0:
@@ -85,6 +83,19 @@ class Issue(Document):
 				self.agreement_fulfilled = "Failed"
 			else:
 				self.agreement_fulfilled = "Fulfilled"
+
+	def update_agreement_fulfilled_on_custom_status(self):
+		"""
+			Update Agreement Fulfilled status using Custom Scripts for Custom Issue Status
+		"""
+		if not self.first_responded_on: # first_responded_on set when first reply is sent to customer
+			self.response_by_variance = round(time_diff_in_hours(self.response_by, now_datetime()), 2)
+
+		if not self.resolution_date: # resolution_date set when issue has been closed
+			self.resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()), 2)
+
+		self.agreement_fulfilled = "Fulfilled" if self.response_by_variance > 0 and self.resolution_by_variance > 0 else "Failed"
+		self.save(ignore_permissions=True)
 
 	def create_communication(self):
 		communication = frappe.new_doc("Communication")
