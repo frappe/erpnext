@@ -43,11 +43,8 @@ class Gstr2Report(Gstr1Report):
 		self.get_igst_invoices()
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 			invoice_details = self.invoices.get(inv)
-			for key, items in items_based_on_rate.items():
-				rate = key[0]
-				account = key[1]
-
-				row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, account, items)
+			for rate, items in items_based_on_rate.items():
+				row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, items)
 				tax_amount = taxable_value * rate / 100
 				if inv in self.igst_invoices:
 					row += [tax_amount, 0, 0]
