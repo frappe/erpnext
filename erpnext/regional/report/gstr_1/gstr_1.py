@@ -149,7 +149,7 @@ class Gstr1Report(object):
 
 		if self.filters.get("type_of_business") ==  "B2B":
 			conditions += """ and ifnull(invoice_type, '') != 'Export' and is_return != 1
-				and customer in ('{0}') and (customer_gstin IS NOT NULL OR customer_gstin NOT IN ('', 'NA'))""".\
+				and customer in ('{0}') and (customer_gstin IS NOT NULL AND customer_gstin NOT IN ('', 'NA'))""".\
 					format("', '".join([frappe.db.escape(c.name) for c in customers]))
 
 		if self.filters.get("type_of_business") in ("B2C Large", "B2C Small"):

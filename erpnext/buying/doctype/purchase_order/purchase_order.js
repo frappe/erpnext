@@ -33,6 +33,14 @@ frappe.ui.form.on("Purchase Order", {
 				}
 			}
 		});
+
+		frm.set_query("expense_account", "items", function() {
+			return {
+				query: "erpnext.controllers.queries.get_expense_account",
+				filters: {'company': frm.doc.company}
+			}
+		});
+
 	},
 
 	refresh: function(frm) {

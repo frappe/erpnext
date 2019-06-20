@@ -355,7 +355,8 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 				"lft": root_lft,
 				"rgt": root_rgt,
 				"company": d.name,
-				"finance_book": filters.get("finance_book")
+				"finance_book": filters.get("finance_book"),
+				"company_fb": frappe.db.get_value("Company", d.name, 'default_finance_book')
 			},
 			as_dict=True)
 
@@ -386,7 +387,10 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 		additional_conditions.append("gl.posting_date >= %(from_date)s")
 
 	if filters.get("finance_book"):
-		additional_conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
+		if filters.get("include_default_book_entries"):
+			additional_conditions.append("finance_book in (%(finance_book)s, %(company_fb)s)")
+		else:
+			additional_conditions.append("finance_book in (%(finance_book)s)")
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 
