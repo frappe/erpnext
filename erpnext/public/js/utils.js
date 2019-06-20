@@ -65,7 +65,7 @@ $.extend(erpnext, {
 	},
 
 	get_dimension_filters: async function() {
-		if (!frappe.boot.user.can_read.includes('Accounting Dimension')) {
+		if (!frappe.model.can_read('Accounting Dimension')) {
 			return
 		}
 		let dimensions = await frappe.db.get_list('Accounting Dimension', {
