@@ -209,7 +209,6 @@ class Gstr1Report(object):
 				if d.item_tax_rate:
 					item_tax_rate = json.loads(d.item_tax_rate)
 
-				if item_tax_rate:
 					for account, rate in item_tax_rate.items():
 						tax_rate_dict = self.item_tax_rate.setdefault(d.parent, {}).setdefault(d.item_code, [])
 						tax_rate_dict.append(rate)
