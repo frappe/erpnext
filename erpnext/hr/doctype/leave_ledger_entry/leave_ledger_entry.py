@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from frappe.utils import add_days, today, flt
+from frappe.utils import add_days, today, flt, DATE_FORMAT
 
 class LeaveLedgerEntry(Document):
 	def on_cancel(self):
@@ -49,14 +49,31 @@ def create_leave_ledger_entry(ref_doc, args, submit=True):
 
 def delete_ledger_entry(ledger):
 	''' Delete ledger entry on cancel of leave application/allocation/encashment '''
-
 	if ledger.transaction_type == "Leave Allocation":
 		validate_leave_allocation_against_leave_application(ledger)
 
+	expired_entry = get_previous_expiry_ledger_entry(ledger)
 	frappe.db.sql("""DELETE
 		FROM `tabLeave Ledger Entry`
 		WHERE
-			`transaction_name`=%s""", (ledger.transaction_name))
+			`transaction_name`=%s
+			OR `name`=%s""", (ledger.transaction_name, expired_entry))
+
+def get_previous_expiry_ledger_entry(ledger):
+	''' Returns the expiry ledger entry having same creation date as the ledger entry to be cancelled '''
+	creation_date = frappe.db.get_value("Leave Ledger Entry", filters={
+			'transaction_name': ledger.transaction_name,
+			'is_expired': 0
+		}, fieldname=['creation']).strftime(DATE_FORMAT)
+
+	return frappe.db.get_value("Leave Ledger Entry", filters={
+		'creation': ('like', creation_date+"%"),
+		'employee': ledger.employee,
+		'leave_type': ledger.leave_type,
+		'is_expired': 1,
+		'docstatus': 1,
+		'is_carry_forward': 0
+	}, fieldname=['name'])
 
 def process_expired_allocation():
 	''' Check if a carry forwarded allocation has expired and create a expiry ledger entry '''
@@ -70,7 +87,7 @@ def process_expired_allocation():
 		leave_type = [record[0] for record in leave_type_records]
 		expired_allocation = frappe.get_all("Leave Ledger Entry",
 			filters={
-				'to_date': today(),
+				'to_date': add_days(today(), -1),
 				'transaction_type': 'Leave Allocation',
 				'is_carry_forward': 1,
 				'leave_type': ('in', leave_type)

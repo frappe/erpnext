@@ -94,19 +94,10 @@ frappe.ui.form.on("Leave Allocation", {
 	calculate_total_leaves_allocated: function(frm) {
 		if (cint(frm.doc.carry_forward) == 1 && frm.doc.leave_type && frm.doc.employee) {
 			return frappe.call({
-				method: "erpnext.hr.doctype.leave_allocation.leave_allocation.get_carry_forwarded_leaves",
-				args: {
-					"employee": frm.doc.employee,
-					"date": frm.doc.from_date,
-					"leave_type": frm.doc.leave_type,
-					"carry_forward": frm.doc.carry_forward
-				},
+				method: "set_total_leaves_allocated",
+				doc: frm.doc,
 				callback: function(r) {
-					if (!r.exc && r.message) {
-						frm.set_value('carry_forwarded_leaves', r.message);
-						frm.set_value("total_leaves_allocated",
-							flt(r.message) + flt(frm.doc.new_leaves_allocated));
-					}
+					frm.refresh_fields();
 				}
 			})
 		} else if (cint(frm.doc.carry_forward) == 0) {

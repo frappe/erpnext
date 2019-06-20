@@ -417,9 +417,9 @@ def get_leave_details(employee, date):
 		allocation = allocation_records.get(d, frappe._dict())
 		remaining_leaves = get_leave_balance_on(employee, d, date, to_date = allocation.to_date,
 			consider_all_leaves_in_the_allocation_period=True)
-		date = allocation.to_date
-		leaves_taken = get_leaves_for_period(employee, d, allocation.from_date, date) * -1
-		leaves_pending = get_pending_leaves_for_period(employee, d, allocation.from_date, date)
+		end_date = allocation.to_date
+		leaves_taken = get_leaves_for_period(employee, d, allocation.from_date, end_date) * -1
+		leaves_pending = get_pending_leaves_for_period(employee, d, allocation.from_date, end_date)
 
 		leave_allocation[d] = {
 			"total_leaves": allocation.total_leaves_allocated,
@@ -435,14 +435,17 @@ def get_leave_details(employee, date):
 	return ret
 
 @frappe.whitelist()
-def get_leave_balance_on(employee, leave_type, date, to_date=nowdate(), allocation_records=None,
-		consider_all_leaves_in_the_allocation_period=False):
-	''' Returns leave balance till date and fetches expiry date based on to_date
-		to calculate minimum remaining leave balance '''
+def get_leave_balance_on(employee, leave_type, date, to_date=nowdate(), consider_all_leaves_in_the_allocation_period=False):
+	'''
+		Returns leave balance on date
+		:param employee: employee name
+		:param leave_type: leave type
+		:param date: date to check balance on
+		:param to_date: future date to check for allocation expiry
+		:param consider_all_leaves_in_the_allocation_period: consider all leaves taken till the allocation end date
+	'''
 
-	if not allocation_records:
-		allocation_records = get_leave_allocation_records(employee, date, leave_type)
-
+	allocation_records = get_leave_allocation_records(employee, date, leave_type)
 	allocation = allocation_records.get(leave_type, frappe._dict())
 
 	end_date = allocation.to_date if consider_all_leaves_in_the_allocation_period else date
