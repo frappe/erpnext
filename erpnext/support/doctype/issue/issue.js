@@ -1,6 +1,7 @@
 frappe.ui.form.on("Issue", {
 	onload: function(frm) {
 		frm.email_field = "raised_by";
+
 		if (frm.doc.service_level_agreement) {
 			frappe.call({
 				method: "erpnext.support.doctype.service_level_agreement.service_level_agreement.get_service_level_agreement_priorities",
@@ -10,6 +11,24 @@ frappe.ui.form.on("Issue", {
 				callback: function (r) {
 					if (r && r.message) {
 						frm.set_query('priority', function() {
+							return {
+								filters: {
+									"name": ["in", r.message],
+								}
+							};
+						});
+					}
+				}
+			});
+
+			frappe.call({
+				method: "erpnext.support.doctype.service_level_agreement.service_level_agreement.get_valid_service_level_agreements",
+				args: {
+					customer: frm.doc.customer,
+				},
+				callback: function (r) {
+					if (r && r.message) {
+						frm.set_query('service_level_agreement', function() {
 							return {
 								filters: {
 									"name": ["in", r.message],
