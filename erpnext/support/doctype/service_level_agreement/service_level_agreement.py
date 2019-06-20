@@ -70,6 +70,18 @@ def get_active_service_level_agreement_for(priority, customer=None, service_leve
 def get_service_level_agreement_priorities(name):
 	return [priority.priority for priority in frappe.get_list("Service Level Priority", filters={"parent": name}, fields=["priority"])]
 
+@frappe.whitelist()
+def get_valid_service_level_agreements(customer):
+	or_filters = [
+		["Service Level Agreement", "entity", "in", [customer, get_customer_group(customer), get_customer_territory(customer), "IS NULL"]],
+		["Service Level Agreement", "default_service_level_agreement", "=", 1]
+	]
+
+	if not customer:
+		or_filters = ["Service Level Agreement", "default_service_level_agreement", "=", 1]
+
+	return [d.name for d in frappe.get_list("Service Level Agreement", or_filters=or_filters)]
+
 def get_customer_group(customer):
 	if customer:
 		return frappe.db.get_value("Customer", customer, "customer_group")
