@@ -60,11 +60,8 @@ class Gstr1Report(object):
 		else:
 			for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 				invoice_details = self.invoices.get(inv)
-				for key, items in items_based_on_rate.items():
-					rate = key[0]
-					account = key[1]
-
-					row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, account, items)
+				for rate, items in items_based_on_rate.items():
+					row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, items)
 
 					if self.filters.get("type_of_business") ==  "CDNR":
 						row.append("Y" if invoice_details.posting_date <= date(2017, 7, 1) else "N")
@@ -103,7 +100,7 @@ class Gstr1Report(object):
 		for key, value in iteritems(b2cs_output):
 			self.data.append(value)
 
-	def get_row_data_for_invoice(self, invoice, invoice_details, tax_rate, account, items):
+	def get_row_data_for_invoice(self, invoice, invoice_details, tax_rate, items):
 		row = []
 		for fieldname in self.invoice_fields:
 			if self.filters.get("type_of_business") ==  "CDNR" and fieldname == "invoice_value":
@@ -120,10 +117,8 @@ class Gstr1Report(object):
 		taxable_value = 0
 		for item_code, net_amount in self.invoice_items.get(invoice).items():
 				if item_code in items:
-					if self.item_tax_rate.get(invoice) and self.item_tax_rate.get(invoice, {}).get(item_code):
-						item_tax_rate = self.item_tax_rate.get(invoice, {}).get(item_code)
-						if account in item_tax_rate and tax_rate == item_tax_rate.get(account):
-							taxable_value += abs(net_amount)
+					if self.item_tax_rate.get(invoice) and tax_rate == self.item_tax_rate.get(invoice, {}).get(item_code):
+						taxable_value += abs(net_amount)
 					elif not self.item_tax_rate.get(invoice):
 						taxable_value += abs(net_amount)
 
@@ -215,7 +210,8 @@ class Gstr1Report(object):
 					item_tax_rate = json.loads(d.item_tax_rate)
 
 				if item_tax_rate:
-					self.item_tax_rate.setdefault(d.parent, {}).setdefault(d.item_code, item_tax_rate)
+					for account, rate in item_tax_rate.items():
+						self.item_tax_rate.setdefault(d.parent, {}).setdefault(d.item_code, rate)
 
 	def get_items_based_on_tax_rate(self):
 		self.tax_details = frappe.db.sql("""
@@ -255,7 +251,7 @@ class Gstr1Report(object):
 								tax_rate *= 2
 
 							rate_based_dict = self.items_based_on_tax_rate\
-								.setdefault(parent, {}).setdefault((tax_rate, account), [])
+								.setdefault(parent, {}).setdefault(tax_rate, [])
 							if item_code not in rate_based_dict:
 								rate_based_dict.append(item_code)
 					except ValueError:
