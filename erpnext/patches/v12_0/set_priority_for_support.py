@@ -54,7 +54,7 @@ def set_priorities_service_level_agreement():
 			doc = frappe.get_doc("Service Level Agreement", service_level_agreement.name)
 
 			if doc.customer:
-				doc.apply_to = "Customer"
+				doc.entity_type = "Customer"
 				doc.entity = doc.customer
 
 			doc.append("priorities", {
