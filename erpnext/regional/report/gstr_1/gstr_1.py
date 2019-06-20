@@ -117,7 +117,7 @@ class Gstr1Report(object):
 		taxable_value = 0
 		for item_code, net_amount in self.invoice_items.get(invoice).items():
 				if item_code in items:
-					if self.item_tax_rate.get(invoice) and tax_rate == self.item_tax_rate.get(invoice, {}).get(item_code):
+					if self.item_tax_rate.get(invoice) and tax_rate in self.item_tax_rate.get(invoice, {}).get(item_code):
 						taxable_value += abs(net_amount)
 					elif not self.item_tax_rate.get(invoice):
 						taxable_value += abs(net_amount)
@@ -208,7 +208,8 @@ class Gstr1Report(object):
 
 				if item_tax_rate:
 					for account, rate in item_tax_rate.items():
-						self.item_tax_rate.setdefault(d.parent, {}).setdefault(d.item_code, rate)
+						tax_rate_dict = self.item_tax_rate.setdefault(d.parent, {}).setdefault(d.item_code, [])
+						tax_rate_dict.append(rate)
 
 	def get_items_based_on_tax_rate(self):
 		self.tax_details = frappe.db.sql("""
