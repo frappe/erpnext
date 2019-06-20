@@ -14,6 +14,7 @@ from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.controllers.buying_controller import has_product_bundle
 from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -138,7 +139,7 @@ class SalesOrder(SellingController):
 
 		for d in self.get("items"):
 			if (frappe.get_cached_value("Item", d.item_code, "is_stock_item") == 1 or
-				(self.has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))) \
+				(has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))) \
 				and not d.warehouse and not cint(d.delivered_by_supplier):
 				frappe.throw(_("Delivery warehouse required for stock item {0}").format(d.item_code),
 					WarehouseRequired)
@@ -286,7 +287,7 @@ class SalesOrder(SellingController):
 
 		for d in self.get("items"):
 			if (not so_item_rows or d.name in so_item_rows) and not d.delivered_by_supplier:
-				if self.has_product_bundle(d.item_code):
+				if has_product_bundle(d.item_code):
 					for p in self.get("packed_items"):
 						if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 							_valid_for_reserve(p.item_code, p.warehouse)

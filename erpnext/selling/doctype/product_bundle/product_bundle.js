@@ -19,9 +19,6 @@ cur_frm.cscript.onload = function() {
 }
 
 frappe.ui.form.on('Product Bundle', {
-	refresh: function(frm) {
-
-	},
 	set_total_weightage: function(frm, cdt, cdn) {
 		if(isNaN(locals[cdt][cdn].weightage_per_qty)){
 			frappe.model.set_value(cdt, cdn, 'total_weightage', 0.0 );
@@ -30,8 +27,8 @@ frappe.ui.form.on('Product Bundle', {
 			frappe.model.set_value(cdt, cdn, 'total_weightage', 0.0 );
 		}
 		else {
-            frappe.model.set_value(cdt, cdn, 'total_weightage', locals[cdt][cdn].weightage_per_qty * locals[cdt][cdn].qty);
-        }
+			frappe.model.set_value(cdt, cdn, 'total_weightage', locals[cdt][cdn].weightage_per_qty * locals[cdt][cdn].qty);
+		}
 	},
 });
 

@@ -12,6 +12,7 @@ from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import validate_for_items, check_for_closed_status
+from erpnext.controllers.buying_controller import has_product_bundle
 from erpnext.stock.utils import get_bin
 from erpnext.accounts.party import get_party_account_currency
 from six import string_types
@@ -116,7 +117,7 @@ class PurchaseOrder(BuyingController):
 				if not item.bom:
 					frappe.throw(_("BOM is not specified for subcontracting item {0} at row {1}"\
 						.format(item.item_code, item.idx)))
-				if self.has_product_bundle(item.item_code):
+				if has_product_bundle(item.item_code):
 					frappe.throw(_("Cannot have Product Bundle for subcontracting for item {0} at row {1}".format(item.item_code, item.idx)))
 
 	def get_schedule_dates(self):
@@ -179,7 +180,7 @@ class PurchaseOrder(BuyingController):
 				and [d.item_code, d.warehouse] not in item_wh_list \
 				and frappe.get_cached_value("Item", d.item_code, "is_stock_item") \
 				and d.warehouse and not d.delivered_by_supplier:
-				if self.has_product_bundle(d.item_code):
+				if has_product_bundle(d.item_code):
 					for p in self.get("packed_items"):
 						if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 							item_wh_list.append([p.item_code,p.target_warehouse])

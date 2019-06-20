@@ -480,7 +480,7 @@ class BuyingController(StockController):
 						"serial_no": cstr(d.rejected_serial_no).strip(),
 						"incoming_rate": 0.0
 					}))
-			elif self.has_product_bundle(d.item_code):
+			elif has_product_bundle(d.item_code):
 				for p in self.get("packed_items"):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 						if p.qty:
@@ -736,11 +736,6 @@ class BuyingController(StockController):
 		else:
 			validate_item_type(self, "is_purchase_item", "purchase")
 
-	def has_product_bundle(self, item_code):
-		if frappe.db.get_value("Product Bundle", {"new_item_code": item_code}):
-			return True
-		return False
-
 	def calculate_packing_list_rates(self):
 		for p in self.get("packed_items"):
 			for i in self.get("items"):
@@ -822,3 +817,8 @@ def validate_item_type(doc, fieldname, message):
 			error_message = _("Following item {0} is not marked as {1} item. You can enable them as {1} item from its Item master".format(items, message))
 
 		frappe.throw(error_message)
+
+
+def has_product_bundle(item_code):
+	return frappe.db.sql("""select name from `tabProduct Bundle`
+				where new_item_code=%s and docstatus != 2""", item_code)
