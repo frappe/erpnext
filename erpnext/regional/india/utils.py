@@ -40,22 +40,24 @@ def validate_gstin_for_india(doc, method):
 			frappe.throw(_("Invalid GSTIN! The input you've entered doesn't match the format of GSTIN."))
 
 		validate_gstin_check_digit(doc.gstin)
+		set_gst_state_and_state_number(doc)
 
-		if not doc.gst_state:
-			if not doc.state:
-				return
-			state = doc.state.lower()
-			states_lowercase = {s.lower():s for s in states}
-			if state in states_lowercase:
-				doc.gst_state = states_lowercase[state]
-			else:
-				return
-
-		doc.gst_state_number = state_numbers[doc.gst_state]
 		if doc.gst_state_number != doc.gstin[:2]:
 			frappe.throw(_("Invalid GSTIN! First 2 digits of GSTIN should match with State number {0}.")
 				.format(doc.gst_state_number))
 
+def set_gst_state_and_state_number(doc):
+	if not doc.gst_state:
+		if not doc.state:
+			return
+		state = doc.state.lower()
+		states_lowercase = {s.lower():s for s in states}
+		if state in states_lowercase:
+			doc.gst_state = states_lowercase[state]
+		else:
+			return
+
+	doc.gst_state_number = state_numbers[doc.gst_state]
 
 def validate_gstin_check_digit(gstin, label='GSTIN'):
 	''' Function to validate the check digit of the GSTIN.'''
