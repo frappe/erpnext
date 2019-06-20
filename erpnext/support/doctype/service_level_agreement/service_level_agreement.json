@@ -11,8 +11,8 @@
   "column_break_2",
   "employee_group",
   "default_priority",
-  "apply_to_section",
-  "apply_to",
+  "entity_section",
+  "entity_type",
   "column_break_10",
   "entity",
   "agreement_details_section",
@@ -128,19 +128,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: !doc.default_service_level_agreement",
-   "fieldname": "apply_to_section",
-   "fieldtype": "Section Break",
-   "label": "Apply To"
-  },
-  {
-   "fieldname": "apply_to",
-   "fieldtype": "Select",
-   "in_standard_filter": 1,
-   "label": "Apply To",
-   "options": "\nCustomer\nCustomer Group\nTerritory"
-  },
-  {
    "fieldname": "column_break_10",
    "fieldtype": "Column Break"
   },
@@ -150,10 +137,23 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Entity",
-   "options": "apply_to"
+   "options": "entity_type"
+  },
+  {
+   "depends_on": "eval: !doc.default_service_level_agreement",
+   "fieldname": "entity_section",
+   "fieldtype": "Section Break",
+   "label": "Entity"
+  },
+  {
+   "fieldname": "entity_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Entity Type",
+   "options": "\nCustomer\nCustomer Group\nTerritory"
   }
  ],
- "modified": "2019-06-10 11:32:47.778830",
+ "modified": "2019-06-20 10:34:58.634693",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
