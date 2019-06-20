@@ -246,7 +246,7 @@
     {
      "fieldname": "clearance_date",
      "fieldtype": "Date",
-     "label": "Clearance Date",
+     "label": "Clearance Date"
     },
     {
      "fieldname": "column_break_24",

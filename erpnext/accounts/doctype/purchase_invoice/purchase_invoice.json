@@ -960,7 +960,7 @@
      "fieldname": "clearance_date",
      "fieldtype": "Date",
      "hidden": 1,
-     "label": "Clearance Date",
+     "label": "Clearance Date"
      },
     {
      "fieldname": "col_br_payments",

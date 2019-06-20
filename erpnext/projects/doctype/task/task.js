@@ -38,7 +38,7 @@ frappe.ui.form.on("Task", {
 
 				if (frappe.model.can_read("Expense Claim")) {
 					frm.add_custom_button(__("Expense Claims"), () => {
-						frappe.route_options = { "project": frm.doc.project, "task": frm.doc.name }
+						frappe.route_options = { "project": frm.doc.project, "task": frm.doc.name };
 						frappe.set_route("List", "Expense Claim");
 					}, __("View"), true);
 				}
