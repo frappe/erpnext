@@ -49,7 +49,7 @@ frappe.ui.form.on("Leave Application", {
 				async: false,
 				args: {
 					employee: frm.doc.employee,
-					date: frm.doc.posting_date
+					date: frm.doc.from_date? frm.doc.from_date:frm.doc.posting_date
 				},
 				callback: function(r) {
 					if (!r.exc && r.message['leave_allocation']) {
@@ -124,6 +124,7 @@ frappe.ui.form.on("Leave Application", {
 	},
 
 	from_date: function(frm) {
+		frm.trigger("make_dashboard");
 		frm.trigger("half_day_datepicker");
 		frm.trigger("calculate_total_days");
 	},

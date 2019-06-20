@@ -557,7 +557,7 @@ def create_carry_forwarded_allocation(employee, leave_type):
 			leave_type="_Test_CF_leave_expiry",
 			employee=employee.name,
 			employee_name=employee.employee_name,
-			from_date=add_days(nowdate(), -85),
+			from_date=add_days(nowdate(), -84),
 			to_date=add_days(nowdate(), 100),
 			carry_forward=1)
 		leave_allocation.submit()
