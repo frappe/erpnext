@@ -14,8 +14,8 @@ def execute(filters=None):
 	if cint(frappe.db.get_single_value('Accounts Settings', 'use_custom_cash_flow')):
 		from erpnext.accounts.report.cash_flow.custom_cash_flow import execute as execute_custom
 		return execute_custom(filters=filters)
-		
-	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
+
+	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year,
 		filters.periodicity, filters.accumulated_values, filters.company)
 
 	cash_flow_accounts = get_cash_flow_accounts()
@@ -25,18 +25,18 @@ def execute(filters=None):
 		accumulated_values=filters.accumulated_values, ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
 	expense = get_data(filters.company, "Expense", "Debit", period_list, filters=filters,
 		accumulated_values=filters.accumulated_values, ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
-		
+
 	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
 
 	data = []
 	company_currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
-	
+
 	for cash_flow_account in cash_flow_accounts:
 		section_data = []
 		data.append({
-			"account_name": cash_flow_account['section_header'], 
+			"account_name": cash_flow_account['section_header'],
 			"parent_account": None,
-			"indent": 0.0, 
+			"indent": 0.0,
 			"account": cash_flow_account['section_header']
 		})
 
@@ -44,18 +44,18 @@ def execute(filters=None):
 			# add first net income in operations section
 			if net_profit_loss:
 				net_profit_loss.update({
-					"indent": 1, 
+					"indent": 1,
 					"parent_account": cash_flow_accounts[0]['section_header']
 				})
 				data.append(net_profit_loss)
 				section_data.append(net_profit_loss)
 
 		for account in cash_flow_account['account_types']:
-			account_data = get_account_type_based_data(filters.company, 
-				account['account_type'], period_list, filters.accumulated_values)
+			account_data = get_account_type_based_data(filters.company,
+				account['account_type'], period_list, filters.accumulated_values, filters)
 			account_data.update({
 				"account_name": account['label'],
-				"account": account['label'], 
+				"account": account['label'],
 				"indent": 1,
 				"parent_account": cash_flow_account['section_header'],
 				"currency": company_currency
@@ -63,7 +63,7 @@ def execute(filters=None):
 			data.append(account_data)
 			section_data.append(account_data)
 
-		add_total_row_account(data, section_data, cash_flow_account['section_footer'], 
+		add_total_row_account(data, section_data, cash_flow_account['section_footer'],
 			period_list, company_currency)
 
 	add_total_row_account(data, data, _("Net Change in Cash"), period_list, company_currency)
@@ -105,13 +105,15 @@ def get_cash_flow_accounts():
 	# combine all cash flow accounts for iteration
 	return [operation_accounts, investing_accounts, financing_accounts]
 
-def get_account_type_based_data(company, account_type, period_list, accumulated_values):
+def get_account_type_based_data(company, account_type, period_list, accumulated_values, filters):
 	data = {}
 	total = 0
 	for period in period_list:
 		start_date = get_start_date(period, accumulated_values, company)
 
-		amount = get_account_type_based_gl_data(company, start_date, period['to_date'], account_type)
+		amount = get_account_type_based_gl_data(company, start_date,
+			period['to_date'], account_type, filters)
+
 		if amount and account_type == "Depreciation":
 			amount *= -1
 
@@ -121,14 +123,24 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 	data["total"] = total
 	return data
 
-def get_account_type_based_gl_data(company, start_date, end_date, account_type):
+def get_account_type_based_gl_data(company, start_date, end_date, account_type, filters):
+	cond = ""
+
+	if filters.finance_book:
+		cond = " and finance_book = '%s'" %(frappe.db.escape(filters.finance_book))
+		if filters.include_default_book_entries:
+			company_fb = frappe.db.get_value("Company", company, 'default_finance_book')
+
+			cond = """ and finance_book in ('%s', '%s')
+				""" %(frappe.db.escape(filters.finance_book), frappe.db.escape(company_fb))
+
 	gl_sum = frappe.db.sql_list("""
 		select sum(credit) - sum(debit)
 		from `tabGL Entry`
 		where company=%s and posting_date >= %s and posting_date <= %s
 			and voucher_type != 'Period Closing Voucher'
-			and account in ( SELECT name FROM tabAccount WHERE account_type = %s)
-	""", (company, start_date, end_date, account_type))
+			and account in ( SELECT name FROM tabAccount WHERE account_type = %s) {cond}
+	""".format(cond=cond), (company, start_date, end_date, account_type))
 
 	return gl_sum[0] if gl_sum and gl_sum[0] else 0
 
@@ -154,7 +166,7 @@ def add_total_row_account(out, data, label, period_list, currency, consolidated 
 				key = period if consolidated else period['key']
 				total_row.setdefault(key, 0.0)
 				total_row[key] += row.get(key, 0.0)
-			
+
 			total_row.setdefault("total", 0.0)
 			total_row["total"] += row["total"]
 
