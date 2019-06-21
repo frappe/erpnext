@@ -25,18 +25,17 @@ def get_data(filters):
 		row.update(asset_category)
 
 		row.cost_as_on_to_date = (flt(row.cost_as_on_from_date) + flt(row.cost_of_new_purchase) -
-								  flt(row.cost_of_sold_asset) - flt(row.cost_of_scrapped_asset))
+				flt(row.cost_of_sold_asset) - flt(row.cost_of_scrapped_asset))
 
 		row.update(next(asset for asset in assets if asset["asset_category"] == asset_category.get("asset_category", "")))
 		row.accumulated_depreciation_as_on_to_date = (flt(row.accumulated_depreciation_as_on_from_date) +
-													  flt(row.depreciation_amount_during_the_period) -
-													  flt(row.depreciation_eliminated))
+				flt(row.depreciation_amount_during_the_period) - flt(row.depreciation_eliminated))
 
 		row.net_asset_value_as_on_from_date = (flt(row.cost_as_on_from_date) -
-											   flt(row.accumulated_depreciation_as_on_from_date))
+				flt(row.accumulated_depreciation_as_on_from_date))
 
 		row.net_asset_value_as_on_to_date = (flt(row.cost_as_on_to_date) -
-											 flt(row.accumulated_depreciation_as_on_to_date))
+				flt(row.accumulated_depreciation_as_on_to_date))
 
 		data.append(row)
 
@@ -55,14 +54,30 @@ def get_asset_categories(filters):
 						   else
 								0
 						   end), 0) as cost_as_on_from_date,
-			   ifnull(sum(case when purchase_date >= %(from_date)s then gross_purchase_amount else 0 end), 0) as cost_of_new_purchase,
-			   ifnull(sum(case when ifnull(disposal_date, 0) != 0 and disposal_date >= %(from_date)s and disposal_date <= %(to_date)s then
-								case when status = "Sold" then gross_purchase_amount else 0 end
+			   ifnull(sum(case when purchase_date >= %(from_date)s then
+			   						gross_purchase_amount
+			   				   else
+			   				   		0
+			   				   end), 0) as cost_of_new_purchase,
+			   ifnull(sum(case when ifnull(disposal_date, 0) != 0
+			   						and disposal_date >= %(from_date)s
+			   						and disposal_date <= %(to_date)s then
+							   case when status = "Sold" then
+							   		gross_purchase_amount
+							   else
+							   		0
+							   end
 						   else
 								0
 						   end), 0) as cost_of_sold_asset,
-			   ifnull(sum(case when ifnull(disposal_date, 0) != 0 and disposal_date >= %(from_date)s and disposal_date <= %(to_date)s then
-								case when status = "Scrapped" then gross_purchase_amount else 0 end
+			   ifnull(sum(case when ifnull(disposal_date, 0) != 0
+			   						and disposal_date >= %(from_date)s
+			   						and disposal_date <= %(to_date)s then
+							   case when status = "Scrapped" then
+							   		gross_purchase_amount
+							   else
+							   		0
+							   end
 						   else
 								0
 						   end), 0) as cost_of_scrapped_asset
