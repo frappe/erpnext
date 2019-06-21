@@ -66,6 +66,9 @@
   "pricing_rules",
   "raw_materials_supplied",
   "supplied_items",
+  "packing_list",
+  "packed_items",
+  "product_bundle_help",
   "section_break_26",
   "total_qty",
   "base_total",
@@ -593,6 +596,26 @@
    "label": "Supplied Items",
    "options": "Purchase Receipt Item Supplied",
    "read_only": 1
+  },
+  {
+   "fieldname": "packing_list",
+   "fieldtype": "Section Break",
+   "label": "Packing List",
+   "options": "fa fa-suitcase",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "packed_items",
+   "fieldtype": "Table",
+   "label": "Packed Items",
+   "options": "Packed Item",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "product_bundle_help",
+   "fieldtype": "HTML",
+   "label": "Product Bundle Help",
+   "print_hide": 1
   },
   {
    "fieldname": "section_break_26",
@@ -1277,7 +1300,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2019-05-25 22:04:28.889159",
+ "modified": "2019-06-04 20:34:51.156183",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

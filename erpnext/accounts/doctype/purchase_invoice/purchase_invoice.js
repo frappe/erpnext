@@ -324,6 +324,10 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		})
 	},
 
+		packed_items_on_form_rendered: function(doc, grid_row) {
+		erpnext.setup_serial_no();
+	},
+	
 	make_debit_note: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_debit_note",

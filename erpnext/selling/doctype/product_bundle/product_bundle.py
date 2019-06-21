@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe import _
-
+from frappe.utils import flt
 from frappe.model.document import Document
 
 class ProductBundle(Document):
@@ -15,6 +15,8 @@ class ProductBundle(Document):
 	def validate(self):
 		self.validate_main_item()
 		self.validate_child_items()
+		self.calculate_total_weightage()
+		self.validate_total_weightage()
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self, "uom", "qty")
 
@@ -28,6 +30,26 @@ class ProductBundle(Document):
 			if frappe.db.exists("Product Bundle", item.item_code):
 				frappe.throw(_("Child Item should not be a Product Bundle. Please remove item `{0}` and save").format(item.item_code))
 				
+	def calculate_total_weightage(self):
+		weightage_sum = 0.0
+		qty_sum = 0.0
+		for d in self.get('items'):
+			weightage_sum += flt(d.total_weightage)
+			qty_sum += flt(d.qty)
+		self.total_weightage = weightage_sum
+		if self.total_weightage == 0.0:
+			weightage_per_qty = 100 / qty_sum
+			for d in self.get('items'):
+				d.total_weightage = weightage_per_qty * d.qty
+				d.weightage_per_qty = weightage_per_qty
+				weightage_sum += flt(d.total_weightage)
+			self.total_weightage = weightage_sum
+
+	def validate_total_weightage(self):
+		if self.total_weightage != 100:
+			frappe.throw(
+				_("Total weightage should be 100%. Current total weightage is {0}").format(self.total_weightage))
+
 def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
 

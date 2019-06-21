@@ -145,6 +145,10 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			frm: cur_frm
 		})
 	},
+	
+	packed_items_on_form_rendered: function(doc, grid_row) {
+		erpnext.setup_serial_no();
+	},
 
 	close_purchase_receipt: function() {
 		cur_frm.cscript.update_status("Closed");

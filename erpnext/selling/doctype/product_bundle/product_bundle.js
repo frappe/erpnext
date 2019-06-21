@@ -17,3 +17,27 @@ cur_frm.cscript.onload = function() {
 	cur_frm.add_fetch('item_code', 'stock_uom', 'uom');
 	cur_frm.add_fetch('item_code', 'description', 'description');
 }
+
+frappe.ui.form.on('Product Bundle', {
+	set_total_weightage: function(frm, cdt, cdn) {
+		if(isNaN(locals[cdt][cdn].weightage_per_qty)){
+			frappe.model.set_value(cdt, cdn, 'total_weightage', 0.0 );
+		}
+		else if(isNaN(locals[cdt][cdn].qty)) {
+			frappe.model.set_value(cdt, cdn, 'total_weightage', 0.0 );
+		}
+		else {
+			frappe.model.set_value(cdt, cdn, 'total_weightage', locals[cdt][cdn].weightage_per_qty * locals[cdt][cdn].qty);
+		}
+	},
+});
+
+frappe.ui.form.on('Product Bundle Item', {
+	qty: function(frm, cdt, cdn) {
+		frm.events.set_total_weightage(frm, cdt, cdn);
+	},
+
+	weightage_per_qty: function(frm, cdt, cdn) {
+		frm.events.set_total_weightage(frm, cdt, cdn);
+	},
+});
