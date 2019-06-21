@@ -18,11 +18,11 @@ class VehicleLog(Document):
 			if (service_detail.service_item or service_detail.type or service_detail.frequency or service_detail.expense_amount):
 					if not (service_detail.service_item and service_detail.type and service_detail.frequency and service_detail.expense_amount):
 							frappe.throw(_("Service Item,Type,frequency and expense amount are required"))
-							
+
 	def on_submit(self):
 		frappe.db.sql("update `tabVehicle` set last_odometer=%s where license_plate=%s",
 			(self.odometer, self.license_plate))
-	
+
 @frappe.whitelist()
 def get_make_model(license_plate):
 	vehicle=frappe.get_doc("Vehicle",license_plate)
@@ -41,7 +41,7 @@ def make_expense_claim(docname):
 		for serdetail in vehicle_log.service_detail:
 			total_exp_amt = total_exp_amt + serdetail.expense_amount
 		return total_exp_amt
-		
+
 	vehicle_log = frappe.get_doc("Vehicle Log", docname)
 	exp_claim = frappe.new_doc("Expense Claim")
 	exp_claim.employee=vehicle_log.employee
@@ -52,6 +52,6 @@ def make_expense_claim(docname):
 	exp_claim.append("expenses",{
 		"expense_date":vehicle_log.date,
 		"description":_("Vehicle Expenses"),
-		"claim_amount":total_claim_amt
+		"amount":total_claim_amt
 	})
 	return exp_claim.as_dict()

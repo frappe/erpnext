@@ -4,6 +4,7 @@
  "creation": "2013-01-10 16:34:14",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "naming_series",
   "employee",
@@ -12,17 +13,24 @@
   "column_break_5",
   "expense_approver",
   "approval_status",
-  "total_claimed_amount",
-  "total_sanctioned_amount",
   "is_paid",
   "expense_details",
   "expenses",
   "sb1",
+  "taxes",
+  "transactions_section",
+  "total_sanctioned_amount",
+  "total_taxes_and_charges",
+  "total_advance_amount",
+  "column_break_17",
+  "grand_total",
+  "total_claimed_amount",
+  "total_amount_reimbursed",
+  "section_break_16",
   "posting_date",
   "vehicle_log",
   "task",
   "cb1",
-  "total_amount_reimbursed",
   "remark",
   "title",
   "email_id",
@@ -39,8 +47,7 @@
   "status",
   "amended_from",
   "advance_payments",
-  "advances",
-  "total_advance_amount"
+  "advances"
  ],
  "fields": [
   {
@@ -117,7 +124,6 @@
   {
    "fieldname": "total_sanctioned_amount",
    "fieldtype": "Currency",
-   "in_list_view": 1,
    "label": "Total Sanctioned Amount",
    "no_copy": 1,
    "oldfieldname": "total_sanctioned_amount",
@@ -315,12 +321,45 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "taxes",
+   "fieldtype": "Table",
+   "label": "Expense Taxes and Charges",
+   "options": "Expense Taxes and Charges"
+  },
+  {
+   "fieldname": "section_break_16",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "transactions_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Grand Total",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_taxes_and_charges",
+   "fieldtype": "Currency",
+   "label": "Total Taxes and Charges",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2019-05-25 22:53:31.682151",
+ "modified": "2019-06-13 18:05:52.530462",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",
