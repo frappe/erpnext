@@ -80,6 +80,7 @@ class StockController(AccountsController):
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(sle.stock_value_difference, 2),
+							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
 						}, warehouse_account[sle.warehouse]["account_currency"]))
 
 						# to target warehouse / expense account
@@ -89,7 +90,8 @@ class StockController(AccountsController):
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, 2),
-							"project": item_row.get("project") or self.get("project")
+							"project": item_row.get("project") or self.get("project"),
+							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
 						}))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
@@ -123,8 +125,17 @@ class StockController(AccountsController):
 
 	def get_voucher_details(self, default_expense_account, default_cost_center, sle_map):
 		if self.doctype == "Stock Reconciliation":
-			return [frappe._dict({ "name": voucher_detail_no, "expense_account": default_expense_account,
-				"cost_center": default_cost_center }) for voucher_detail_no, sle in sle_map.items()]
+			reconciliation_purpose = frappe.db.get_value(self.doctype, self.name, "purpose")
+			is_opening = "Yes" if reconciliation_purpose == "Opening Stock" else "No"
+			details = []
+			for voucher_detail_no in sle_map:
+				details.append(frappe._dict({
+					"name": voucher_detail_no,
+					"expense_account": default_expense_account,
+					"cost_center": default_cost_center,
+					"is_opening": is_opening
+				}))
+			return details
 		else:
 			details = self.get("items")
 
@@ -351,10 +362,12 @@ class StockController(AccountsController):
 					frappe.throw(_("Row {0}: Quality Inspection rejected for item {1}")
 						.format(d.idx, d.item_code), QualityInspectionRejectedError)
 			elif qa_required :
-				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
-				if self.docstatus==1:
-					raise QualityInspectionRequiredError
-
+				action = frappe.get_doc('Stock Settings').action_if_quality_inspection_is_not_submitted
+				if self.docstatus==1 and action == 'Stop':
+					frappe.throw(_("Quality Inspection required for Item {0} to submit").format(frappe.bold(d.item_code)),
+						exc=QualityInspectionRequiredError)
+				else:
+					frappe.msgprint(_("Create Quality Inspection for Item {0}").format(frappe.bold(d.item_code)))
 
 	def update_blanket_order(self):
 		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))

@@ -100,6 +100,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_fixed_asset()
 		self.create_remarks()
 		self.set_status()
+		self.validate_purchase_receipt_if_update_stock()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
 
 	def validate_release_date(self):
@@ -284,7 +285,7 @@ class PurchaseInvoice(BuyingController):
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
-			self.status_updater.extend([{
+			self.status_updater.append({
 				'source_dt': 'Purchase Invoice Item',
 				'target_dt': 'Purchase Order Item',
 				'join_field': 'po_detail',
@@ -292,28 +293,29 @@ class PurchaseInvoice(BuyingController):
 				'target_parent_dt': 'Purchase Order',
 				'target_parent_field': 'per_received',
 				'target_ref_field': 'qty',
-				'source_field': 'qty',
+				'source_field': 'received_qty',
+				'second_source_dt': 'Purchase Receipt Item',
+				'second_source_field': 'received_qty',
+				'second_join_field': 'purchase_order_item',
 				'percent_join_field':'purchase_order',
-				# 'percent_join_field': 'prevdoc_docname',
 				'overflow_type': 'receipt',
 				'extra_cond': """ and exists(select name from `tabPurchase Invoice`
 					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)"""
-			},
-			{
-				'source_dt': 'Purchase Invoice Item',
-				'target_dt': 'Purchase Order Item',
-				'join_field': 'po_detail',
-				'target_field': 'returned_qty',
-				'target_parent_dt': 'Purchase Order',
-				# 'target_parent_field': 'per_received',
-				# 'target_ref_field': 'qty',
-				'source_field': '-1 * qty',
-				# 'percent_join_field': 'prevdoc_docname',
-				# 'overflow_type': 'receipt',
-				'extra_cond': """ and exists (select name from `tabPurchase Invoice`
-					where name=`tabPurchase Invoice Item`.parent and update_stock=1 and is_return=1)"""
-			}
-		])
+			})
+			if cint(self.is_return):
+				self.status_updater.append({
+					'source_dt': 'Purchase Invoice Item',
+					'target_dt': 'Purchase Order Item',
+					'join_field': 'po_detail',
+					'target_field': 'returned_qty',
+					'source_field': '-1 * qty',
+					'second_source_dt': 'Purchase Receipt Item',
+					'second_source_field': '-1 * qty',
+					'second_join_field': 'purchase_order_item',
+					'overflow_type': 'receipt',
+					'extra_cond': """ and exists (select name from `tabPurchase Invoice`
+						where name=`tabPurchase Invoice Item`.parent and update_stock=1 and is_return=1)"""
+				})
 
 	def validate_purchase_receipt_if_update_stock(self):
 		if self.update_stock:
@@ -327,13 +329,13 @@ class PurchaseInvoice(BuyingController):
 
 		self.check_prev_docstatus()
 		self.update_status_updater_args()
+		self.update_prevdoc_status()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
 
 		if not self.is_return:
 			self.update_against_document_in_jv()
-			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 			self.update_billing_status_in_pr()
 
@@ -763,13 +765,13 @@ class PurchaseInvoice(BuyingController):
 		self.check_for_closed_status()
 
 		self.update_status_updater_args()
+		self.update_prevdoc_status()
 
 		if not self.is_return:
 			from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
 				unlink_ref_doc_from_payment_entries(self)
 
-			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 			self.update_billing_status_in_pr()
 

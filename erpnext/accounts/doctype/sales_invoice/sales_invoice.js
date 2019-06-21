@@ -356,6 +356,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 	set_pos_data: function() {
 		if(this.frm.doc.is_pos) {
+			this.frm.set_value("allocate_advances_automatically", 0);
 			if(!this.frm.doc.company) {
 				this.frm.set_value("is_pos", 0);
 				frappe.msgprint(__("Please specify Company to proceed"));
@@ -370,6 +371,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 								me.frm.pos_print_format = r.message.print_format;
 							}
 							me.frm.script_manager.trigger("update_stock");
+							if(me.frm.doc.taxes_and_charges) {
+								me.frm.script_manager.trigger("taxes_and_charges");
+							}
+
 							frappe.model.set_default_values(me.frm.doc);
 							me.set_dynamic_labels();
 							me.calculate_taxes_and_totals();

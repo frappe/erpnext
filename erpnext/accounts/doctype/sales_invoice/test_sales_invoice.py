@@ -18,6 +18,8 @@ from erpnext.accounts.doctype.account.test_account import get_inventory_account,
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.stock.doctype.item.test_item import create_item
 from six import iteritems
+from erpnext.regional.india.utils import get_ewb_data
+
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
 		w = frappe.copy_doc(test_records[0])
@@ -1610,6 +1612,110 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_gle[i][1], gle.debit)
 			self.assertEqual(expected_gle[i][2], gle.credit)
 			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+
+	def test_eway_bill_json(self):
+		if not frappe.db.exists('Address', '_Test Address for Eway bill-Billing'):
+			address = frappe.get_doc({
+				"address_line1": "_Test Address Line 1",
+				"address_title": "_Test Address for Eway bill",
+				"address_type": "Billing",
+				"city": "_Test City",
+				"state": "Test State",
+				"country": "India",
+				"doctype": "Address",
+				"is_primary_address": 1,
+				"phone": "+91 0000000000",
+				"gstin": "27AAECE4835E1ZR",
+				"gst_state": "Maharashtra",
+				"gst_state_number": "27",
+				"pincode": "401108"
+			}).insert()
+
+			address.append("links", {
+				"link_doctype": "Company",
+				"link_name": "_Test Company"
+			})
+
+			address.save()
+
+		if not frappe.db.exists('Address', '_Test Customer-Address for Eway bill-Shipping'):
+			address = frappe.get_doc({
+				"address_line1": "_Test Address Line 1",
+				"address_title": "_Test Customer-Address for Eway bill",
+				"address_type": "Shipping",
+				"city": "_Test City",
+				"state": "Test State",
+				"country": "India",
+				"doctype": "Address",
+				"is_primary_address": 1,
+				"phone": "+91 0000000000",
+				"gst_state": "Maharashtra",
+				"gst_state_number": "27",
+				"pincode": "410038"
+			}).insert()
+
+			address.append("links", {
+				"link_doctype": "Customer",
+				"link_name": "_Test Customer"
+			})
+
+			address.save()
+
+		gst_settings = frappe.get_doc("GST Settings")
+
+		gst_account = frappe.get_all(
+			"GST Account",
+			fields=["cgst_account", "sgst_account", "igst_account"],
+			filters = {"company": "_Test Company"})
+
+		if not gst_account:
+			gst_settings.append("gst_accounts", {
+				"company": "_Test Company",
+				"cgst_account": "CGST - _TC",
+				"sgst_account": "SGST - _TC",
+				"igst_account": "IGST - _TC",
+			})
+
+		gst_settings.save()
+
+		si = create_sales_invoice(do_not_save =1, rate = '60000')
+
+		si.distance = 2000
+		si.company_address = "_Test Address for Eway bill-Billing"
+		si.customer_address = "_Test Customer-Address for Eway bill-Shipping"
+		si.vehicle_no = "KA12KA1234"
+
+		si.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "CGST - _TC",
+			"cost_center": "Main - _TC",
+			"description": "CGST @ 9.0",
+			"rate": 9
+		})
+
+		si.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "SGST - _TC",
+			"cost_center": "Main - _TC",
+			"description": "SGST @ 9.0",
+			"rate": 9
+		})
+
+		si.submit()
+
+		data = get_ewb_data("Sales Invoice", si.name)
+
+		self.assertEqual(data['version'], '1.0.1118')
+		self.assertEqual(data['billLists'][0]['fromGstin'], '27AAECE4835E1ZR')
+		self.assertEqual(data['billLists'][0]['fromTrdName'], '_Test Company')
+		self.assertEqual(data['billLists'][0]['toTrdName'], '_Test Customer')
+		self.assertEqual(data['billLists'][0]['vehicleType'], 'R')
+		self.assertEqual(data['billLists'][0]['totalValue'], 60000)
+		self.assertEqual(data['billLists'][0]['cgstValue'], 5400)
+		self.assertEqual(data['billLists'][0]['sgstValue'], 5400)
+		self.assertEqual(data['billLists'][0]['vehicleNo'], 'KA12KA1234')
+		self.assertEqual(data['billLists'][0]['itemList'][0]['taxableAmount'], 60000)
+
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")

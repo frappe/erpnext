@@ -33,7 +33,7 @@ frappe.ui.form.on("Communication", {
 
 	make_lead_from_communication: (frm) => {
 		return frappe.call({
-			method: "frappe.email.inbox.make_lead_from_communication",
+			method: "erpnext.crm.doctype.lead.lead.make_lead_from_communication",
 			args: {
 				communication: frm.doc.name
 			},
@@ -48,7 +48,7 @@ frappe.ui.form.on("Communication", {
 
 	make_issue_from_communication: (frm) => {
 		return frappe.call({
-			method: "frappe.email.inbox.make_issue_from_communication",
+			method: "erpnext.support.doctype.issue.issue.make_issue_from_communication",
 			args: {
 				communication: frm.doc.name
 			},
@@ -63,7 +63,7 @@ frappe.ui.form.on("Communication", {
 
 	make_opportunity_from_communication: (frm) => {
 		return frappe.call({
-			method: "frappe.email.inbox.make_opportunity_from_communication",
+			method: "erpnext.crm.doctype.opportunity.opportunity.make_opportunity_from_communication",
 			args: {
 				communication: frm.doc.name
 			},

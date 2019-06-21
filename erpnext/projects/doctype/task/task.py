@@ -157,6 +157,12 @@ class Task(NestedSet):
 		if check_if_child_exists(self.name):
 			throw(_("Child Task exists for this Task. You can not delete this Task."))
 
+		if self.project:
+			tasks = frappe.get_doc('Project', self.project).tasks
+			for task in tasks:
+				if (task.get('task_id') == self.name):
+					frappe.delete_doc('Project Task', task.name)
+
 		self.update_nsm_model()
 
 	def update_status(self):

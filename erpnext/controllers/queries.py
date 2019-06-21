@@ -254,11 +254,13 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 					and return_against in (select name from `tabDelivery Note` where per_billed < 100)
 				)
 			)
-			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc
+			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc limit %(start)s, %(page_len)s
 	""" % {
 		"key": searchfield,
 		"fcond": get_filters_cond(doctype, filters, []),
 		"mcond": get_match_cond(doctype),
+		"start": start,
+		"page_len": page_len,
 		"txt": "%(txt)s"
 	}, {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
 

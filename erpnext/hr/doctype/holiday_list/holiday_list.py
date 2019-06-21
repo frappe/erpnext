@@ -79,6 +79,7 @@ def get_events(start, end, filters=None):
 		filters.append(['Holiday', 'holiday_date', '>', getdate(start)])
 	if end:
 		filters.append(['Holiday', 'holiday_date', '<', getdate(end)])
+
 	return frappe.get_list('Holiday List',
 		fields=['name', '`tabHoliday`.holiday_date', '`tabHoliday`.description', '`tabHoliday List`.color'],
 		filters = filters,

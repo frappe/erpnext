@@ -19,12 +19,12 @@ def execute(filters=None):
 	data = []
 	for ss in salary_slips:
 		row = [ss.name, ss.employee, ss.employee_name, ss.branch, ss.department, ss.designation,
-			ss.company, ss.start_date, ss.end_date, ss.leave_withut_pay, ss.payment_days]
+			ss.company, ss.start_date, ss.end_date, ss.leave_without_pay, ss.payment_days]
 
 		if not ss.branch == None:columns[3] = columns[3].replace('-1','120')
 		if not ss.department  == None: columns[4] = columns[4].replace('-1','120')
 		if not ss.designation  == None: columns[5] = columns[5].replace('-1','120')
-		if not ss.leave_withut_pay  == None: columns[9] = columns[9].replace('-1','130')
+		if not ss.leave_without_pay  == None: columns[9] = columns[9].replace('-1','130')
 
 
 		for e in earning_types:
@@ -34,6 +34,8 @@ def execute(filters=None):
 
 		for d in ded_types:
 			row.append(ss_ded_map.get(ss.name, {}).get(d))
+
+		row.append(ss.total_loan_repayment)
 
 		row += [ss.total_deduction, ss.net_pay]
 
@@ -67,7 +69,7 @@ def get_columns(salary_slips):
 
 	columns = columns + [(e + ":Currency:120") for e in salary_components[_("Earning")]] + \
 		[_("Gross Pay") + ":Currency:120"] + [(d + ":Currency:120") for d in salary_components[_("Deduction")]] + \
-		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
+		[_("Loan Repayment") + ":Currency:120", _("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
 
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
 

@@ -101,7 +101,7 @@ class Asset(AccountsController):
 
 	def set_depreciation_rate(self):
 		for d in self.get("finance_books"):
-			d.rate_of_depreciation = self.get_depreciation_rate(d)
+			d.rate_of_depreciation = self.get_depreciation_rate(d, on_validate=True)
 
 	def make_depreciation_schedule(self):
 		depreciation_method = [d.depreciation_method for d in self.finance_books]
@@ -125,7 +125,7 @@ class Asset(AccountsController):
 					no_of_depreciations * cint(d.frequency_of_depreciation))
 
 				total_days = date_diff(end_date, self.available_for_use_date)
-				rate_per_day = value_after_depreciation / total_days
+				rate_per_day = (value_after_depreciation - d.get("expected_value_after_useful_life")) / total_days
 
 				number_of_pending_depreciations = cint(d.total_number_of_depreciations) - \
 					cint(self.number_of_depreciations_booked)
@@ -291,8 +291,8 @@ class Asset(AccountsController):
 
 	def validate_expected_value_after_useful_life(self):
 		for row in self.get('finance_books'):
-			accumulated_depreciation_after_full_schedule = \
-				max([d.accumulated_depreciation_amount for d in self.get("schedules") if d.finance_book_id == row.idx])
+			accumulated_depreciation_after_full_schedule = max([d.accumulated_depreciation_amount
+				for d in self.get("schedules") if cint(d.finance_book_id) == row.idx])
 
 			asset_value_after_full_schedule = flt(flt(self.gross_purchase_amount) -
 				flt(accumulated_depreciation_after_full_schedule),
@@ -403,7 +403,7 @@ class Asset(AccountsController):
 			make_gl_entries(gl_entries)
 			self.db_set('booked_fixed_asset', 1)
 
-	def get_depreciation_rate(self, args):
+	def get_depreciation_rate(self, args, on_validate=False):
 		if isinstance(args, string_types):
 			args = json.loads(args)
 
@@ -420,7 +420,10 @@ class Asset(AccountsController):
 		if args.get("depreciation_method") == 'Double Declining Balance':
 			return 200.0 / args.get("total_number_of_depreciations")
 
-		if args.get("depreciation_method") == "Written Down Value" and not args.get("rate_of_depreciation"):
+		if args.get("depreciation_method") == "Written Down Value":
+			if args.get("rate_of_depreciation") and on_validate:
+				return args.get("rate_of_depreciation")
+
 			no_of_years = flt(args.get("total_number_of_depreciations") * flt(args.get("frequency_of_depreciation"))) / 12
 			value = flt(args.get("expected_value_after_useful_life")) / flt(self.gross_purchase_amount)
 

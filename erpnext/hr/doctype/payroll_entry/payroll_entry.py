@@ -539,14 +539,15 @@ def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progr
 
 		payroll_entry.email_salary_slip(submitted_ss)
 
-	payroll_entry.db_set("salary_slips_submitted", 1)
-	payroll_entry.notify_update()
+		payroll_entry.db_set("salary_slips_submitted", 1)
+		payroll_entry.notify_update()
 
 	if not submitted_ss and not not_submitted_ss:
 		frappe.msgprint(_("No salary slip found to submit for the above selected criteria OR salary slip already submitted"))
 
 	if not_submitted_ss:
 		frappe.msgprint(_("Could not submit some Salary Slips"))
+
 def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
 		select name from `tabPayroll Entry`

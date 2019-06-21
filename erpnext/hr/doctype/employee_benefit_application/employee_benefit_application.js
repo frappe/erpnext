@@ -3,13 +3,18 @@
 
 frappe.ui.form.on('Employee Benefit Application', {
 	setup: function(frm) {
-		frm.set_query("earning_component", "employee_benefits", function() {
-			return {
-				query : "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_earning_components",
-				filters: {date: frm.doc.date, employee: frm.doc.employee}
-			};
-		});
+		if(!frm.doc.employee || !frm.doc.date) {
+			frappe.throw(__("Please select Employee and Date first"));
+		} else {
+			frm.set_query("earning_component", "employee_benefits", function() {
+				return {
+					query : "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_earning_components",
+					filters: {date: frm.doc.date, employee: frm.doc.employee}
+				};
+			});
+		}
 	},
+
 	employee: function(frm) {
 		var method, args;
 		if(frm.doc.employee && frm.doc.date && frm.doc.payroll_period){

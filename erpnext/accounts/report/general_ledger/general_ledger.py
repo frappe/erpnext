@@ -128,6 +128,7 @@ def get_gl_entries(filters):
 
 	if filters.get("group_by") == _("Group by Voucher (Consolidated)"):
 		group_by_statement = "group by voucher_type, voucher_no, account, cost_center"
+
 		select_fields = """, sum(debit) as debit, sum(credit) as credit,
 			sum(debit_in_account_currency) as debit_in_account_currency,
 			sum(credit_in_account_currency) as  credit_in_account_currency"""
@@ -186,12 +187,8 @@ def get_conditions(filters):
 	if filters.get("project"):
 		conditions.append("project in %(project)s")
 
-	company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
-	if not filters.get("finance_book") or (filters.get("finance_book") == company_finance_book):
-		filters['finance_book'] = company_finance_book
+	if filters.get("finance_book"):
 		conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
-	elif filters.get("finance_book"):
-		conditions.append("ifnull(finance_book, '') = %(finance_book)s")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
@@ -287,7 +284,8 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	for gle in gl_entries:
-		if gle.posting_date < from_date or cstr(gle.is_opening) == "Yes":
+		if (gle.posting_date < from_date or
+			(cstr(gle.is_opening) == "Yes" and not filters.get("show_opening_entries"))):
 			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'opening', gle)
 			update_value_in_dict(totals, 'opening', gle)
 

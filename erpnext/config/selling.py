@@ -291,6 +291,12 @@ def get_data():
 					"name": "Customers Without Any Sales Transactions",
 					"doctype": "Customer"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Partners Commission",
+					"doctype": "Customer"
+				}
 			]
 		},
 		{

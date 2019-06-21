@@ -5,11 +5,6 @@ frappe.provide("erpnext.bom");
 
 frappe.ui.form.on("BOM", {
 	setup: function(frm) {
-		frm.add_fetch("item", "description", "description");
-		frm.add_fetch("item", "image", "image");
-		frm.add_fetch("item", "item_name", "item_name");
-		frm.add_fetch("item", "stock_uom", "uom");
-
 		frm.set_query("bom_no", "items", function() {
 			return {
 				filters: {
@@ -210,7 +205,12 @@ var get_bom_material_detail= function(doc, cdt, cdn, scrap_items) {
 				'item_code': d.item_code,
 				'bom_no': d.bom_no != null ? d.bom_no: '',
 				"scrap_items": scrap_items,
-				'qty': d.qty
+				'qty': d.qty,
+				"stock_qty": d.stock_qty,
+				"include_item_in_manufacturing": d.include_item_in_manufacturing,
+				"uom": d.uom,
+				"stock_uom": d.stock_uom,
+				"conversion_factor": d.conversion_factor
 			},
 			callback: function(r) {
 				d = locals[cdt][cdn];
@@ -414,7 +414,3 @@ frappe.ui.form.on("BOM", "with_operations", function(frm) {
 	}
 	toggle_operations(frm);
 });
-
-cur_frm.cscript.image = function() {
-	refresh_field("image_view");
-};

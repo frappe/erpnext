@@ -24,6 +24,12 @@ frappe.query_reports["Gross Profit"] = {
 			"default": frappe.defaults.get_user_default("year_end_date")
 		},
 		{
+			"fieldname":"sales_invoice",
+			"label": __("Sales Invoice"),
+			"fieldtype": "Link",
+			"options": "Sales Invoice"
+		},
+		{
 			"fieldname":"group_by",
 			"label": __("Group By"),
 			"fieldtype": "Select",

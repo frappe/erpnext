@@ -18,7 +18,7 @@ class SalaryStructure(Document):
 		self.validate_max_benefits_with_flexi()
 
 	def set_missing_values(self):
-		overwritten_fields = ["depends_on_lwp", "variable_based_on_taxable_salary", "is_tax_applicable", "is_flexible_benefit"]
+		overwritten_fields = ["depends_on_payment_days", "variable_based_on_taxable_salary", "is_tax_applicable", "is_flexible_benefit"]
 		overwritten_fields_if_missing = ["amount_based_on_formula", "formula", "amount"]
 		for table in ["earnings", "deductions"]:
 			for d in self.get(table):
@@ -57,11 +57,12 @@ class SalaryStructure(Document):
 					have_a_flexi = True
 					max_of_component = frappe.db.get_value("Salary Component", earning_component.salary_component, "max_benefit_amount")
 					flexi_amount += max_of_component
+
 			if have_a_flexi and flt(self.max_benefits) == 0:
 				frappe.throw(_("Max benefits should be greater than zero to dispense benefits"))
-			if have_a_flexi and flt(self.max_benefits) > flexi_amount:
-				frappe.throw(_("Total flexible benefit component amount {0} should not be less \
-				than max benefits {1}").format(flexi_amount, self.max_benefits))
+			if have_a_flexi and flexi_amount and flt(self.max_benefits) > flexi_amount:
+				frappe.throw(_("Total flexible benefit component amount {0} should not be less than max benefits {1}")
+					.format(flexi_amount, self.max_benefits))
 		if not have_a_flexi and flt(self.max_benefits) > 0:
 			frappe.throw(_("Salary Structure should have flexible benefit component(s) to dispense benefit amount"))
 
@@ -126,7 +127,7 @@ def create_salary_structures_assignment(employee, salary_structure, from_date, b
 
 def get_existing_assignments(employees, salary_structure,from_date):
 	salary_structures_assignments = frappe.db.sql_list("""
-		select distinct employee from `tabSalary Structure Assignment` 
+		select distinct employee from `tabSalary Structure Assignment`
 		where salary_structure=%s and employee in (%s)
 		and from_date=%s and docstatus=1
 	""" % ('%s', ', '.join(['%s']*len(employees)),'%s'), [salary_structure] + employees+[from_date])
@@ -136,7 +137,7 @@ def get_existing_assignments(employees, salary_structure,from_date):
 	return salary_structures_assignments
 
 @frappe.whitelist()
-def make_salary_slip(source_name, target_doc = None, employee = None, as_print = False, print_format = None):
+def make_salary_slip(source_name, target_doc = None, employee = None, as_print = False, print_format = None, for_preview=0):
 	def postprocess(source, target):
 		if employee:
 			employee_details = frappe.db.get_value("Employee", employee,
@@ -146,7 +147,7 @@ def make_salary_slip(source_name, target_doc = None, employee = None, as_print =
 			target.branch = employee_details.branch
 			target.designation = employee_details.designation
 			target.department = employee_details.department
-		target.run_method('process_salary_structure')
+		target.run_method('process_salary_structure', for_preview=for_preview)
 
 	doc = get_mapped_doc("Salary Structure", source_name, {
 		"Salary Structure": {

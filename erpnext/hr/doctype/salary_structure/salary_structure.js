@@ -147,7 +147,8 @@ frappe.ui.form.on('Salary Structure', {
 							source_name: frm.doc.name,
 							employee: values.employee,
 							as_print: 1,
-							print_format: print_format
+							print_format: print_format,
+							for_preview: 1
 						},
 						callback: function(r) {
 							var new_window = window.open();
@@ -246,7 +247,7 @@ frappe.ui.form.on('Salary Detail', {
 							frappe.model.set_value(cdt, cdn, 'amount', result.amount);
 						}
 						frappe.model.set_value(cdt, cdn, 'statistical_component', result.statistical_component);
-						frappe.model.set_value(cdt, cdn, 'depends_on_lwp', result.depends_on_lwp);
+						frappe.model.set_value(cdt, cdn, 'depends_on_payment_days', result.depends_on_payment_days);
 						frappe.model.set_value(cdt, cdn, 'do_not_include_in_total', result.do_not_include_in_total);
 						frappe.model.set_value(cdt, cdn, 'variable_based_on_taxable_salary', result.variable_based_on_taxable_salary);
 						frappe.model.set_value(cdt, cdn, 'is_tax_applicable', result.is_tax_applicable);

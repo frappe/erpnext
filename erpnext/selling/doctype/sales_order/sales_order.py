@@ -544,7 +544,7 @@ def make_project(source_name, target_doc=None):
 		"Sales Order Item": {
 			"doctype": "Project Task",
 			"field_map": {
-				"description": "title",
+				"item_code": "title",
 			},
 		}
 	}, target_doc, postprocess)

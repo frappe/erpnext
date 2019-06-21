@@ -70,7 +70,7 @@ def update_instructors(comp_dict):
 	emp_details = frappe.get_all("Employee", fields=["name", "company"])
 
 	for employee in emp_details:
-		records = comp_dict[employee.company]
+		records = comp_dict[employee.company] if employee.company else []
 
 		for department in records:
 			when_then.append('''

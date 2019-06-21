@@ -31,11 +31,8 @@ def get_data(filters):
 
 		filters_data.append(["against_voucher", "in", assets])
 
-	company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
-	if (not filters.get('finance_book') or (filters.get('finance_book') == company_finance_book)):
+	if filters.get("finance_book"):
 		filters_data.append(["finance_book", "in", ['', filters.get('finance_book')]])
-	elif filters.get("finance_book"):
-		filters_data.append(["finance_book", "=", filters.get('finance_book')])
 
 	gl_entries = frappe.get_all('GL Entry',
 		filters= filters_data,

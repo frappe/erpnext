@@ -10,6 +10,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 				}
 			}
 		});
+
 		frm.set_query('payroll_period', function() {
 			const fields = {'employee': 'Employee', 'company': 'Company'};
 
@@ -27,6 +28,7 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 				}
 			}
 		});
+
 		frm.set_query('exemption_sub_category', 'declarations', function() {
 			return {
 				filters: {
@@ -34,5 +36,16 @@ frappe.ui.form.on('Employee Tax Exemption Declaration', {
 				}
 			}
 		});
+	},
+
+	refresh: function(frm) {
+		if(frm.doc.docstatus==1) {
+			frm.add_custom_button(__('Submit Proof'), function() {
+				frappe.model.open_mapped_doc({
+					method: "erpnext.hr.doctype.employee_tax_exemption_declaration.employee_tax_exemption_declaration.make_proof_submission",
+					frm: frm
+				});
+			}).addClass("btn-primary");
+		}
 	}
 });

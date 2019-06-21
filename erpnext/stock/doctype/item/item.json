@@ -3588,7 +3588,7 @@
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
-   "search_index": 0, 
+   "search_index": 1, 
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
@@ -3622,7 +3622,7 @@
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
-   "search_index": 0, 
+   "search_index": 1, 
    "set_only_once": 0, 
    "translatable": 0, 
    "unique": 0
@@ -4261,7 +4261,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 1, 
- "modified": "2019-04-05 12:03:24.530849", 
+ "modified": "2019-05-24 16:10:14.128517", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 

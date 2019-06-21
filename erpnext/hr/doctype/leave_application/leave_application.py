@@ -135,6 +135,7 @@ class LeaveApplication(Document):
 					date = dt.strftime("%Y-%m-%d")
 					doc = frappe.new_doc("Attendance")
 					doc.employee = self.employee
+					doc.employee_name = self.employee_name
 					doc.attendance_date = date
 					doc.company = self.company
 					doc.leave_type = self.leave_type

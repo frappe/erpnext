@@ -285,6 +285,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	is_paid: function() {
 		hide_fields(this.frm.doc);
 		if(cint(this.frm.doc.is_paid)) {
+			this.frm.set_value("allocate_advances_automatically", 0);
 			if(!this.frm.doc.company) {
 				this.frm.set_value("is_paid", 0)
 				frappe.msgprint(__("Please specify Company to proceed"));
