@@ -103,8 +103,8 @@ class TestTimesheet(unittest.TestCase):
 			{
 				"billable": 1,
 				"activity_type": "_Test Activity Type",
-				"from_type": now_datetime(),
-				"hours": 3,
+				"from_time": now_datetime(),
+				"to_time": now_datetime() + datetime.timedelta(hours=3),
 				"company": "_Test Company"
 			}
 		)
@@ -113,8 +113,8 @@ class TestTimesheet(unittest.TestCase):
 			{
 				"billable": 1,
 				"activity_type": "_Test Activity Type",
-				"from_type": now_datetime(),
-				"hours": 3,
+				"from_time": now_datetime(),
+				"to_time": now_datetime() + datetime.timedelta(hours=3),
 				"company": "_Test Company"
 			}
 		)
