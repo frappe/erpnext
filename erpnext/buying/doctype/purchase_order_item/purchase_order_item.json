@@ -1915,7 +1915,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "default": "1", 
+   "default": "0", 
    "depends_on": "eval:parent.is_subcontracted == 'Yes'", 
    "fieldname": "include_exploded_items", 
    "fieldtype": "Check", 
