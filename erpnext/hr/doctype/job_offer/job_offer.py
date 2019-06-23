@@ -5,11 +5,43 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe import _
+from erpnext.hr.doctype.staffing_plan.staffing_plan import update_staffing_plan
 
 class JobOffer(Document):
 	def onload(self):
 		employee = frappe.db.get_value("Employee", {"job_applicant": self.job_applicant}, "name") or ""
 		self.set_onload("employee", employee)
+
+	def validate(self):
+		self.validate_vacancies()
+
+	def validate_vacancies(self):
+		staffing_plan = self.get_staffing_plan_detail()
+		check_vacancies = frappe.get_single("HR Settings").check_vacancies
+		if staffing_plan and check_vacancies:
+			vacancies = frappe.db.get_value("Staffing Plan Detail", filters={
+				"name": staffing_plan
+			}, fieldname=['staffing_plan'])
+			if vacancies <= 0:
+				frappe.throw(_("Not enough vacancies available. Please update the staffing plan!!!"))
+
+	def on_update_after_submit(self):
+		staffing_plan = self.get_staffing_plan_detail()
+		if staffing_plan and self.status == 'Accepted':
+			update_staffing_plan(staffing_plan, self.designation, self.company)
+
+	def get_staffing_plan_detail(self):
+		detail = frappe.db.sql("""
+			SELECT spd.name as name
+			FROM `tabStaffing Plan Detail` spd, `tabStaffing Plan` sp
+			WHERE
+				sp.docstatus=1
+				AND spd.designation=%s
+				AND sp.company=%s
+				AND %s between sp.from_date and sp.to_date
+		""", (self.designation, self.company, self.offer_date), as_dict=1)
+		return detail[0].get("name") if detail else None
 
 @frappe.whitelist()
 def make_employee(source_name, target_doc=None):
@@ -23,4 +55,3 @@ def make_employee(source_name, target_doc=None):
 				}}
 		}, target_doc, set_missing_values)
 	return doc
-
