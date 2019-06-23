@@ -7,7 +7,13 @@ import frappe
 import unittest
 
 class TestIssuePriority(unittest.TestCase):
-	pass
+
+	def test_priorities(self):
+		make_priorities()
+		priorities = frappe.get_list("Issue Priority")
+
+		for priority in priorities:
+			self.assertIn(priority.name, ["Low", "Medium", "High"])
 
 def make_priorities():
 	insert_priority("Low")
