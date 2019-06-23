@@ -127,7 +127,6 @@ class StaffingPlan(Document):
 
 	def update_staffing_plan_values(self, detail_doc):
 		''' Update all the fields affected by the change of vacancies value '''
-		print('update func')
 		employee_counts = get_designation_counts(detail_doc.designation, self.company)
 
 		detail_doc.db_set('current_count', employee_counts.get("employee_count"))

@@ -26,22 +26,17 @@ class JobOffer(Document):
 			if vacancies <= 0:
 				frappe.throw(_("Not enough vacancies available. Please update the staffing plan!!!"))
 
-	def on_update_after_submit(self):
-		staffing_plan = self.get_staffing_plan_detail()
-		if staffing_plan and self.status == 'Accepted':
-			update_staffing_plan(staffing_plan, self.designation, self.company)
-
-	def get_staffing_plan_detail(self):
-		detail = frappe.db.sql("""
-			SELECT spd.name as name
-			FROM `tabStaffing Plan Detail` spd, `tabStaffing Plan` sp
-			WHERE
-				sp.docstatus=1
-				AND spd.designation=%s
-				AND sp.company=%s
-				AND %s between sp.from_date and sp.to_date
-		""", (self.designation, self.company, self.offer_date), as_dict=1)
-		return detail[0].get("name") if detail else None
+def get_staffing_plan_detail(designation, company, offer_date):
+	detail = frappe.db.sql("""
+		SELECT spd.name as name
+		FROM `tabStaffing Plan Detail` spd, `tabStaffing Plan` sp
+		WHERE
+			sp.docstatus=1
+			AND spd.designation=%s
+			AND sp.company=%s
+			AND %s between sp.from_date and sp.to_date
+	""", (self.designation, self.company, self.offer_date), as_dict=1)
+	return detail[0].get("name") if detail else None
 
 @frappe.whitelist()
 def make_employee(source_name, target_doc=None):

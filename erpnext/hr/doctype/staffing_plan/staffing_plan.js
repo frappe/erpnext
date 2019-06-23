@@ -80,9 +80,7 @@ var set_number_of_positions = function(frm, cdt, cdn) {
 		}
 	});
 	refresh_field("staffing_details");
-	if(frm.docstatus===0) {
 		set_total_estimated_cost(frm, cdt, cdn);
-	}
 }
 
 // Note: Estimated Cost is calculated on number of Vacancies
