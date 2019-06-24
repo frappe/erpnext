@@ -10,6 +10,7 @@ def execute():
 	set_priorities_service_level_agreement()
 
 def set_issue_priority():
+	# Adds priority from issue to Issue Priority DocType as Priority is a new DocType.
 	for priority in frappe.get_meta("Issue").get_field("priority").options.split("\n"):
 		if not frappe.db.exists("Issue Priority", priority):
 			frappe.get_doc({
@@ -18,6 +19,7 @@ def set_issue_priority():
 			}).insert(ignore_permissions=True)
 
 def set_priority_for_issue():
+	# Sets priority for Issues as Select field is changed to Link field.
 	issue_priority = frappe.get_list("Issue", fields=["name", "priority"])
 	frappe.reload_doc("support", "doctype", "issue")
 
@@ -25,6 +27,8 @@ def set_priority_for_issue():
 		frappe.db.set_value("Issue", issue.name, "priority", issue.priority)
 
 def set_priorities_service_level():
+	# Migrates "priority", "response_time", "response_time_period", "resolution_time", "resolution_time_period" to Child Table
+	# as a Service Level can have multiple priorities
 	try:
 		service_level_priorities = frappe.get_list("Service Level", fields=["name", "priority", "response_time", "response_time_period", "resolution_time", "resolution_time_period"])
 
@@ -45,6 +49,8 @@ def set_priorities_service_level():
 		frappe.reload_doc("support", "doctype", "service_level")
 
 def set_priorities_service_level_agreement():
+	# Migrates "priority", "response_time", "response_time_period", "resolution_time", "resolution_time_period" to Child Table
+	# as a Service Level Agreement can have multiple priorities
 	try:
 		service_level_agreement_priorities = frappe.get_list("Service Level Agreement", fields=["name", "priority", "response_time", "response_time_period", "resolution_time", "resolution_time_period"])
 
