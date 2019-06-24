@@ -371,6 +371,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 								me.frm.pos_print_format = r.message.print_format;
 							}
 							me.frm.script_manager.trigger("update_stock");
+							if(me.frm.doc.taxes_and_charges) {
+								me.frm.script_manager.trigger("taxes_and_charges");
+							}
+
 							frappe.model.set_default_values(me.frm.doc);
 							me.set_dynamic_labels();
 							me.calculate_taxes_and_totals();

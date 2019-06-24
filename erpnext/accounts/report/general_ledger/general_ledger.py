@@ -128,12 +128,15 @@ def get_gl_entries(filters):
 		order_by_statement = "order by posting_date, voucher_type, voucher_no"
 
 	if filters.get("group_by") == _("Group by Voucher (Consolidated)"):
-		group_by_statement = """group by voucher_type, voucher_no, account,
-			cost_center, against_voucher_type, against_voucher, posting_date"""
+		group_by_statement = "group by voucher_type, voucher_no, account, cost_center"
 
 		select_fields = """, sum(debit) as debit, sum(credit) as credit,
 			sum(debit_in_account_currency) as debit_in_account_currency,
 			sum(credit_in_account_currency) as  credit_in_account_currency"""
+
+	if filters.get("include_default_book_entries"):
+		filters['company_fb'] = frappe.db.get_value("Company",
+			filters.get("company"), 'default_finance_book')
 
 	gl_entries = frappe.db.sql(
 		"""
@@ -190,7 +193,10 @@ def get_conditions(filters):
 		conditions.append("project in %(project)s")
 
 	if filters.get("finance_book"):
-		conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
+		if filters.get("include_default_book_entries"):
+			conditions.append("finance_book in (%(finance_book)s, %(company_fb)s)")
+		else:
+			conditions.append("finance_book in (%(finance_book)s)")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
