@@ -381,9 +381,12 @@ class BOM(WebsiteGenerator):
 
 				frappe.throw(_("Same item has been entered multiple times. {0}").format(duplicate_list))
 
-	def check_recursion(self):
+	def check_recursion(self, bom_list=[]):
 		""" Check whether recursion occurs in any bom"""
-		bom_list = self.traverse_tree()
+
+		if not bom_list:
+			bom_list = self.traverse_tree()
+
 		bom_nos = frappe.get_all('BOM Item', fields=["bom_no"],
 			filters={'parent': ('in', bom_list), 'parenttype': 'BOM'})
 
@@ -405,7 +408,7 @@ class BOM(WebsiteGenerator):
 		bom_list = self.traverse_tree(bom_list)
 		for bom in bom_list:
 			bom_obj = frappe.get_doc("BOM", bom)
-			bom_obj.check_recursion()
+			bom_obj.check_recursion(bom_list=bom_list)
 			bom_obj.update_exploded_items()
 
 		return bom_list
