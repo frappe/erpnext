@@ -70,12 +70,16 @@ def get_active_service_level_agreement_for(priority, customer=None, service_leve
 
 	return agreement[0] if agreement else None
 
-@frappe.whitelist()
-def get_service_level_agreement_priorities(name):
-	return [priority.priority for priority in frappe.get_list("Service Level Priority", filters={"parent": name}, fields=["priority"])]
+def get_customer_group(customer):
+	if customer:
+		return frappe.db.get_value("Customer", customer, "customer_group")
+
+def get_customer_territory(customer):
+	if customer:
+		return frappe.db.get_value("Customer", customer, "territory")
 
 @frappe.whitelist()
-def get_valid_service_level_agreements(customer=None):
+def get_service_level_agreement_filters(name, customer=None):
 	if not customer:
 		or_filters = [
 			["Service Level Agreement", "default_service_level_agreement", "=", 1]
@@ -86,12 +90,7 @@ def get_valid_service_level_agreements(customer=None):
 			["Service Level Agreement", "default_service_level_agreement", "=", 1]
 		]
 
-	return [d.name for d in frappe.get_list("Service Level Agreement", or_filters=or_filters)]
-
-def get_customer_group(customer):
-	if customer:
-		return frappe.db.get_value("Customer", customer, "customer_group")
-
-def get_customer_territory(customer):
-	if customer:
-		return frappe.db.get_value("Customer", customer, "territory")
+	return {
+		"priority": [priority.priority for priority in frappe.get_list("Service Level Priority", filters={"parent": name}, fields=["priority"])],
+		"service_level_agreements": [d.name for d in frappe.get_list("Service Level Agreement", or_filters=or_filters)]
+	}

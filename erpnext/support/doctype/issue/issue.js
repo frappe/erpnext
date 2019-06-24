@@ -4,34 +4,24 @@ frappe.ui.form.on("Issue", {
 
 		if (frm.doc.service_level_agreement) {
 			frappe.call({
-				method: "erpnext.support.doctype.service_level_agreement.service_level_agreement.get_service_level_agreement_priorities",
+				method: "erpnext.support.doctype.service_level_agreement.service_level_agreement.get_service_level_agreement_filters",
 				args: {
 					name: frm.doc.service_level_agreement,
+					customer: frm.doc.customer
 				},
 				callback: function (r) {
 					if (r && r.message) {
 						frm.set_query('priority', function() {
 							return {
 								filters: {
-									"name": ["in", r.message],
+									"name": ["in", r.message.priority],
 								}
 							};
 						});
-					}
-				}
-			});
-
-			frappe.call({
-				method: "erpnext.support.doctype.service_level_agreement.service_level_agreement.get_valid_service_level_agreements",
-				args: {
-					customer: frm.doc.customer,
-				},
-				callback: function (r) {
-					if (r && r.message) {
 						frm.set_query('service_level_agreement', function() {
 							return {
 								filters: {
-									"name": ["in", r.message],
+									"name": ["in", r.message.service_level_agreements],
 								}
 							};
 						});
@@ -85,10 +75,6 @@ frappe.ui.form.on("Issue", {
 
 	priority: function(frm) {
 		if (frm.doc.service_level_agreement) {
-			frappe.show_alert({
-				indicator: 'green',
-				message: __('Changing Priority.')
-			});
 			frm.call('change_service_level_agreement_and_priority', {
 				"priority": frm.doc.priority,
 				"service_level_agreement": frm.doc.service_level_agreement
@@ -100,10 +86,6 @@ frappe.ui.form.on("Issue", {
 	},
 
 	service_level_agreement: function(frm) {
-		frappe.show_alert({
-			indicator: 'green',
-			message: __('Changing Service Level Agreement.')
-		});
 		frm.call('change_service_level_agreement_and_priority', {
 			"service_level_agreement": frm.doc.service_level_agreement
 		}).then(() => {
