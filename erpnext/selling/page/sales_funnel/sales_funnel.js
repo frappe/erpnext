@@ -277,7 +277,7 @@ erpnext.SalesFunnel = class SalesFunnel {
 		let chart_data = me.options.data ? me.options.data : null;
 
 		const parent = me.elements.funnel_wrapper[0];
-		this.chart = new Chart(parent, {
+		this.chart = new frappe.Chart(parent, {
 			title: __("Sales Opportunities by Source"),
 			height: 400,
 			data: chart_data,
@@ -298,7 +298,7 @@ erpnext.SalesFunnel = class SalesFunnel {
 		let chart_data = me.options.data ? me.options.data : null;
 
 		const parent = me.elements.funnel_wrapper[0];
-		this.chart = new Chart(parent, {
+		this.chart = new frappe.Chart(parent, {
 			title: __("Sales Pipeline by Stage"),
 			height: 400,
 			data: chart_data,
