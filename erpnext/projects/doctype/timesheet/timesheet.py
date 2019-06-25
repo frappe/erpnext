@@ -19,9 +19,6 @@ class OverlapError(frappe.ValidationError): pass
 class OverWorkLoggedError(frappe.ValidationError): pass
 
 class Timesheet(Document):
-	def onload(self):
-		self.get("__onload").maintain_bill_work_hours_same = frappe.db.get_single_value('HR Settings', 'maintain_bill_work_hours_same')
-
 	def validate(self):
 		self.set_employee_name()
 		self.set_status()
