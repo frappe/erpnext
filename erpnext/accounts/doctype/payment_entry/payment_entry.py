@@ -98,7 +98,7 @@ class PaymentEntry(AccountsController):
 		grouped_gles = OrderedDict()
 
 		for gle in gles:
-			gle.remarks = gle.remarks.replace("Note: " + self.user_remark, "").strip()
+			gle.remarks = gle.remarks.replace("Note: {}".format(self.user_remark), "").strip()
 			group = grouped_gles.setdefault((cstr(gle.account), cstr(gle.party_type), cstr(gle.party), cstr(gle.remarks), cstr(gle.reference_no), cstr(gle.reference_date)), frappe._dict({
 				"account": cstr(gle.account),
 				"party_type": cstr(gle.party_type),
