@@ -319,12 +319,12 @@ def get_holiday_list_for_employee(employee, raise_exception=True):
 
 	return holiday_list
 
-def is_holiday(employee, date=None):
+def is_holiday(employee, date=None, raise_exception=True):
 	'''Returns True if given Employee has an holiday on the given date
 	:param employee: Employee `name`
 	:param date: Date to check. Will check for today if None'''
 
-	holiday_list = get_holiday_list_for_employee(employee)
+	holiday_list = get_holiday_list_for_employee(employee, raise_exception)
 	if not date:
 		date = today()
 
