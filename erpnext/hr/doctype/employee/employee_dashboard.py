@@ -9,7 +9,7 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Leave and Attendance'),
-				'items': ['Attendance', 'Attendance Request', 'Leave Application', 'Leave Allocation']
+				'items': ['Attendance', 'Attendance Request', 'Leave Application', 'Leave Allocation', 'Employee Checkin']
 			},
 			{
 				'label': _('Lifecycle'),
