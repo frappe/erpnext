@@ -22,7 +22,16 @@ def verify_request():
 	frappe.set_user(woocommerce_settings.creation_user)
 
 @frappe.whitelist(allow_guest=True)
-def order():
+def order(*args, **kwargs):
+	try:
+		_order(*args, **kwargs)
+	except Exception:
+		error_message = frappe.get_traceback()+"\n\n Request Data: \n"+json.loads(frappe.request.data).__str__()
+		frappe.log_error(error_message, "WooCommerce Error")
+		raise
+
+
+def _order(*args, **kwargs):
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 	if frappe.flags.woocomm_test_order_data:
 		fd = frappe.flags.woocomm_test_order_data
