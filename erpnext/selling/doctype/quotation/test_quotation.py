@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import flt, add_days, nowdate, add_months
+from frappe.utils import flt, add_days, nowdate, add_months, getdate
 import unittest
 
 test_dependencies = ["Product Bundle"]
@@ -18,7 +18,7 @@ class TestQuotation(unittest.TestCase):
 
 		self.assertTrue(quotation.payment_schedule)
 
-	def test_make_sales_order_terms_not_copied(self):
+	def test_make_sales_order_terms_copied(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 
 		quotation = frappe.copy_doc(test_records[0])
@@ -29,7 +29,7 @@ class TestQuotation(unittest.TestCase):
 
 		sales_order = make_sales_order(quotation.name)
 
-		self.assertFalse(sales_order.get('payment_schedule'))
+		self.assertTrue(sales_order.get('payment_schedule'))
 
 	def test_make_sales_order_with_different_currency(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
@@ -109,10 +109,10 @@ class TestQuotation(unittest.TestCase):
 		sales_order.insert()
 
 		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 8906.00)
-		self.assertEqual(sales_order.payment_schedule[0].due_date, quotation.transaction_date)
+		self.assertEqual(sales_order.payment_schedule[0].due_date, getdate(quotation.transaction_date))
 		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 8906.00)
 		self.assertEqual(
-			sales_order.payment_schedule[1].due_date, add_days(quotation.transaction_date, 30)
+			sales_order.payment_schedule[1].due_date, getdate(add_days(quotation.transaction_date, 30))
 		)
 
 	def test_valid_till(self):
