@@ -1,0 +1,165 @@
+{
+ "creation": "2019-06-25 17:29:34.499348",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "voucher_type",
+  "voucher_number",
+  "voucher_date",
+  "cost_center",
+  "currency",
+  "voucher_amount",
+  "exchange_rate",
+  "payment_exchange_rate",
+  "voucher_base_amount",
+  "voucher_payment_amount",
+  "allocated_amount",
+  "balance",
+  "allocated_base_amount",
+  "gain_loss_amount",
+  "supplier_bill_no",
+  "supplier_bill_date"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Voucher Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "voucher_number",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Voucher Number",
+   "options": "voucher_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_date",
+   "fieldtype": "Date",
+   "label": "Voucher Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "voucher_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Outstanding",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "5",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "payment_exchange_rate",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Payment Exchange Rate",
+   "precision": "5",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "voucher_base_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "voucher_payment_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Outstanding",
+   "options": "payment_currency",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "default": "0",
+   "fieldname": "allocated_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Allocated Amount",
+   "options": "payment_currency",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "balance",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Balance",
+   "options": "payment_currency",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "allocated_base_amount",
+   "fieldtype": "Currency",
+   "label": "Allocated Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "gain_loss_amount",
+   "fieldtype": "Currency",
+   "label": "Gain/Loss",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "supplier_bill_no",
+   "fieldtype": "Data",
+   "label": "Supplier Invoice Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "supplier_bill_date",
+   "fieldtype": "Date",
+   "label": "Supplier Invoice Date",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-06-25 17:29:34.499348",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Adjustment Entry Reference",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
