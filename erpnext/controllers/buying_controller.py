@@ -417,7 +417,6 @@ class BuyingController(StockController):
 
 	# validate accepted and rejected qty
 	def validate_accepted_rejected_qty(self):
-		float_precision = frappe.get_single("System Settings").float_precision
 		for d in self.get("items"):
 			self.validate_negative_quantity(d, ["received_qty","qty", "rejected_qty"])
 			if not flt(d.received_qty) and flt(d.qty):
@@ -431,7 +430,7 @@ class BuyingController(StockController):
 
 			val  = flt(d.qty) + flt(d.rejected_qty)
 			# Check Received Qty = Accepted Qty + Rejected Qty
-			if (flt(val, float_precision) != flt(d.received_qty)):
+			if (flt(val, d.precision("received_qty")) != flt(d.received_qty)):
 				frappe.throw(_("Accepted + Rejected Qty must be equal to Received quantity for Item {0}").format(d.item_code))
 
 	def validate_negative_quantity(self, item_row, field_list):
