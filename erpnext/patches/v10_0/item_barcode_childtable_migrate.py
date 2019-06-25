@@ -9,7 +9,7 @@ import frappe
 def execute():
 	frappe.reload_doc("stock", "doctype", "item_barcode")
 
-	items_barcode = frappe.get_all('Item', ['name', 'barcode'], { 'barcode': ('!=', '') })
+	items_barcode = frappe.db.sql("select name, barcode from tabItem where barcode is not null", as_dict=True)
 	frappe.reload_doc("stock", "doctype", "item")
 
 
