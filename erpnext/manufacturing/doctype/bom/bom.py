@@ -383,10 +383,7 @@ class BOM(WebsiteGenerator):
 
 	def check_recursion(self, bom_list=[]):
 		""" Check whether recursion occurs in any bom"""
-
-		if not bom_list:
-			bom_list = self.traverse_tree()
-
+		bom_list = self.traverse_tree()
 		bom_nos = frappe.get_all('BOM Item', fields=["bom_no"],
 			filters={'parent': ('in', bom_list), 'parenttype': 'BOM'})
 
@@ -402,7 +399,7 @@ class BOM(WebsiteGenerator):
 				raise_exception = True
 
 		if raise_exception:
-			frappe.throw(_("BOM recursion: {0} cannot be parent or child of {2}").format(self.name, self.name))
+			frappe.throw(_("BOM recursion: {0} cannot be parent or child of {1}").format(self.name, self.name))
 
 	def update_cost_and_exploded_items(self, bom_list=[]):
 		bom_list = self.traverse_tree(bom_list)
@@ -415,8 +412,8 @@ class BOM(WebsiteGenerator):
 
 	def traverse_tree(self, bom_list=None):
 		def _get_children(bom_no):
-			return [cstr(d[0]) for d in frappe.db.sql("""select bom_no from `tabBOM Item`
-				where parent = %s and ifnull(bom_no, '') != '' and parenttype='BOM'""", bom_no)]
+			return frappe.db.sql_list("""select bom_no from `tabBOM Item`
+				where parent = %s and ifnull(bom_no, '') != '' and parenttype='BOM'""", bom_no)
 
 		count = 0
 		if not bom_list:
