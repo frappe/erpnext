@@ -39,9 +39,9 @@ class TestEmployeeOnboarding(unittest.TestCase):
 
 		# complete the task
 		project = frappe.get_doc('Project', onboarding.project)
-		project.load_tasks()
-		project.tasks[0].status = 'Completed'
-		project.save()
+		task = frappe.get_doc('Task', dict(project=project.name))
+		task.status = 'Completed'
+		task.save()
 
 		# make employee
 		onboarding.reload()
@@ -71,4 +71,3 @@ def _set_up():
 	project = "Employee Onboarding : Test Researcher - test@researcher.com"
 	frappe.db.sql("delete from tabProject where name=%s", project)
 	frappe.db.sql("delete from tabTask where project=%s", project)
-	frappe.db.sql("delete from `tabProject Task` where parent=%s", project)
