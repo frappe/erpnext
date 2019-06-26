@@ -320,11 +320,11 @@ def make_opportunity_from_communication(communication, ignore_communication_link
 	if not lead:
 		lead = make_lead_from_communication(communication, ignore_communication_links=True)
 
-	enquiry_from = "Lead"
+	opportunity_from = "Lead"
 
 	opportunity = frappe.get_doc({
 		"doctype": "Opportunity",
-		"enquiry_from": enquiry_from,
+		"opportunity_from": opportunity_from,
 		"lead": lead
 	}).insert(ignore_permissions=True)
 
