@@ -271,7 +271,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 	get_batch_fields: function() {
 		var me = this;
 
-		filters = {
+		let filters = {
 			item_code: me.item_code
 		}
 
