@@ -59,16 +59,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Payment Entry",
-					"description": _("Bank/Cash transactions against party or for internal transfer")
-				},
-				{
-					"type": "doctype",
-					"name": "Journal Entry",
-					"description": _("Accounting journal entries.")
-				},
-				{
-					"type": "doctype",
 					"name": "Payment Request",
 					"description": _("Payment Request"),
 				},
@@ -177,6 +167,21 @@ def get_data():
 					"type": "doctype",
 					"name": "Opening Invoice Creation Tool",
 					"description": _("Create Opening Sales and Purchase Invoices")
+				},
+			]
+		},
+		{
+			"label": _("Accounting Entries"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Payment Entry",
+					"description": _("Bank/Cash transactions against party or for internal transfer")
+				},
+				{
+					"type": "doctype",
+					"name": "Journal Entry",
+					"description": _("Accounting journal entries.")
 				},
 			]
 		},
