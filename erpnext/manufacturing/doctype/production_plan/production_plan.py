@@ -396,7 +396,7 @@ class ProductionPlan(Document):
 			material_request.flags.ignore_permissions = 1
 			material_request.run_method("set_missing_values")
 
-			if self.submit_material_request:
+			if self.get('submit_material_request'):
 				material_request.submit()
 			else:
 				material_request.save()
