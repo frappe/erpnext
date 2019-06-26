@@ -586,7 +586,7 @@ erpnext.patches.v11_0.add_permissions_in_gst_settings
 erpnext.patches.v11_1.setup_guardian_role
 execute:frappe.delete_doc('DocType', 'Notification Control')
 erpnext.patches.v11_0.remove_barcodes_field_from_copy_fields_to_variants
-erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019
+erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019 #25-06-2019
 erpnext.patches.v11_0.make_italian_localization_fields # 26-03-2019
 erpnext.patches.v11_1.make_job_card_time_logs
 erpnext.patches.v11_1.set_variant_based_on
