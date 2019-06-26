@@ -3,6 +3,11 @@ dist: trusty
 
 python:
   - "2.7"
+  - "3.6"
+
+env:
+  - TEST_TYPE="Server Side Test"
+  - TEST_TYPE="Patch Test"
 
 services:
   - mysql
@@ -39,18 +44,8 @@ before_script:
   - bench start &
   - sleep 10
 
-jobs:
-  include:
-    - stage: test
-      script:
-        - set -e
-        - bench run-tests --app erpnext --coverage
-      after_script:
-        - coveralls -b apps/erpnext -d ../../sites/.coverage
-      env: Server Side Test
-    - # stage
-      script:
-        - wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz
-        - bench --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz --mariadb-root-password travis
-        - bench migrate
-      env: Patch Testing
+script:
+  - bash $TRAVIS_BUILD_DIR/travis/run-tests.sh
+
+after_script:
+  - coveralls -b apps/erpnext -d ../../sites/.coverage

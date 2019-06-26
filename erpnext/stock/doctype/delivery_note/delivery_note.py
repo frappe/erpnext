@@ -443,7 +443,12 @@ def make_sales_invoice(source_name, target_doc=None):
 
 	def get_pending_qty(item_row):
 		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0)
-		returned_qty = flt(returned_qty_map.get(item_row.item_code, 0))
+
+		returned_qty = 0
+		if returned_qty_map.get(item_row.item_code) > 0:
+			returned_qty = flt(returned_qty_map.get(item_row.item_code, 0))
+			returned_qty_map[item_row.item_code] -= pending_qty
+
 		if returned_qty:
 			if returned_qty >= pending_qty:
 				pending_qty = 0
@@ -451,6 +456,7 @@ def make_sales_invoice(source_name, target_doc=None):
 			else:
 				pending_qty -= returned_qty
 				returned_qty = 0
+
 		return pending_qty, returned_qty
 
 	doc = get_mapped_doc("Delivery Note", source_name, {
