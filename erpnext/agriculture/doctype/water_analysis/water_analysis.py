@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe import _
 
 class WaterAnalysis(Document):
 	def load_contents(self):

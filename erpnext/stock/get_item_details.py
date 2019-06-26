@@ -834,12 +834,12 @@ def get_price_list_currency(price_list):
 def get_price_list_uom_dependant(price_list):
 	if price_list:
 		result = frappe.db.get_value("Price List", {"name": price_list,
-			"enabled": 1}, ["name", "price_not_uom_dependant"], as_dict=True)
+			"enabled": 1}, ["name", "price_not_uom_dependent"], as_dict=True)
 
 		if not result:
 			throw(_("Price List {0} is disabled or does not exist").format(price_list))
 
-		return not result.price_not_uom_dependant
+		return not result.price_not_uom_dependent
 
 
 def get_price_list_currency_and_exchange_rate(args):

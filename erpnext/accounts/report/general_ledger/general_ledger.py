@@ -133,6 +133,10 @@ def get_gl_entries(filters):
 			sum(debit_in_account_currency) as debit_in_account_currency,
 			sum(credit_in_account_currency) as  credit_in_account_currency"""
 
+	if filters.get("include_default_book_entries"):
+		filters['company_fb'] = frappe.db.get_value("Company",
+			filters.get("company"), 'default_finance_book')
+
 	gl_entries = frappe.db.sql(
 		"""
 		select
@@ -188,7 +192,10 @@ def get_conditions(filters):
 		conditions.append("project in %(project)s")
 
 	if filters.get("finance_book"):
-		conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
+		if filters.get("include_default_book_entries"):
+			conditions.append("finance_book in (%(finance_book)s, %(company_fb)s)")
+		else:
+			conditions.append("finance_book in (%(finance_book)s)")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")

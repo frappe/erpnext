@@ -133,7 +133,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				if (this.frm.has_perm("submit")) {
 					// close
-					if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
+					if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed, 6) < 100) {
 						this.frm.add_custom_button(__('Close'),
 							function() { me.close_sales_order() }, __("Status"))
 					}
