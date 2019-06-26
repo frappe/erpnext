@@ -32,7 +32,6 @@ class SalesOrder(SellingController):
 
 	def validate(self):
 		super(SalesOrder, self).validate()
-		self.validate_order_type()
 		self.validate_delivery_date()
 		self.validate_proj_cust()
 		self.validate_po()
@@ -101,9 +100,6 @@ class SalesOrder(SellingController):
 				if not res:
 					frappe.msgprint(_("Quotation {0} not of type {1}")
 						.format(d.prevdoc_docname, self.order_type))
-
-	def validate_order_type(self):
-		super(SalesOrder, self).validate_order_type()
 
 	def validate_delivery_date(self):
 		if self.order_type == 'Sales':
