@@ -17,7 +17,7 @@ QUnit.test("Test: Expense Claim [HR]", function (assert) {
 			d.expense_date = '2017-08-01',
 			d.expense_type = 'Test Expense Type 1',
 			d.description  = 'This is just to test Expense Claim',
-			d.claim_amount = 2000,
+			d.amount = 2000,
 			d.sanctioned_amount=2000,
 			refresh_field('expenses');
 		},
