@@ -90,10 +90,10 @@ class ExchangeRateRevaluation(Document):
 
 	def throw_invalid_response_message(self, account_details):
 		if account_details:
-			message = "No outstanding invoices require exchange rate revaluation"
+			message = _("No outstanding invoices require exchange rate revaluation")
 		else:
-			message = "No outstanding invoices found"
-		frappe.msgprint(_(message))
+			message = _("No outstanding invoices found")
+		frappe.msgprint(message)
 
 	def make_jv_entry(self):
 		if self.total_gain_loss == 0:
