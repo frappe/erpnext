@@ -52,7 +52,7 @@ def make_quote(items, customer):
 	qtn = frappe.get_doc({
 		"doctype": "Quotation",
 		"quotation_to": "Customer",
-		"customer": customer,
+		"party_name": customer,
 		"order_type": "Sales"
 	})
 

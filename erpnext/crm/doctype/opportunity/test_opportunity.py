@@ -71,7 +71,7 @@ class TestOpportunity(unittest.TestCase):
 		# assign lead owner
 		frappe.db.set_value('Customer', '_Test Customer', 'account_manager', '')
 		frappe.db.set_value('Lead', '_T-Lead-00001', 'lead_owner', 'test2@example.com')
-		doc = make_opportunity(with_items=0, enquiry_from='Lead')
+		doc = make_opportunity(with_items=0, opportunity_from='Lead')
 
 		self.assertEqual(assign_to.get(dict(doctype = doc.doctype, name = doc.name))[0].get('owner'), 'test2@example.com')
 

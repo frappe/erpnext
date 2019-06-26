@@ -325,10 +325,11 @@ def auto_close_opportunity():
 
 def assign_to_user(doc, subject_field):
 	assign_user = None
-	if doc.customer:
-		assign_user = frappe.db.get_value('Customer', doc.customer, 'account_manager')
-	elif doc.lead:
-		assign_user = frappe.db.get_value('Lead', doc.lead, 'lead_owner')
+	if doc.party_name:
+		if doc.opportunity_from == "Customer":
+			assign_user = frappe.db.get_value("Customer", doc.customer, 'account_manager')
+		else:
+			assign_user = frappe.db.get_value('Lead', doc.lead, 'lead_owner')
 
 	if assign_user and assign_user not in ['Administrator', 'Guest']:
 		if not assign_to.get(dict(doctype = doc.doctype, name = doc.name)):
@@ -347,11 +348,11 @@ def make_opportunity_from_communication(communication, ignore_communication_link
 	if not lead:
 		lead = make_lead_from_communication(communication, ignore_communication_links=True)
 
-	enquiry_from = "Lead"
+	opportunity_from = "Lead"
 
 	opportunity = frappe.get_doc({
 		"doctype": "Opportunity",
-		"enquiry_from": enquiry_from,
+		"opportunity_from": opportunity_from,
 		"lead": lead
 	}).insert(ignore_permissions=True)
 
