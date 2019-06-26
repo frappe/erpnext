@@ -330,7 +330,7 @@ def assign_to_user(doc, subject_field):
 	elif doc.lead:
 		assign_user = frappe.db.get_value('Lead', doc.lead, 'lead_owner')
 
-	if assign_user and assign_user != 'Administrator':
+	if assign_user and assign_user not in ['Administrator', 'Guest']:
 		if not assign_to.get(dict(doctype = doc.doctype, name = doc.name)):
 			assign_to.add({
 				"assign_to": assign_user,

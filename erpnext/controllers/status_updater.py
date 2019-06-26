@@ -27,7 +27,7 @@ status_map = {
 	],
 	"Quotation": [
 		["Draft", None],
-		["Submitted", "eval:self.docstatus==1"],
+		["Open", "eval:self.docstatus==1"],
 		["Lost", "eval:self.status=='Lost'"],
 		["Ordered", "has_sales_order"],
 		["Cancelled", "eval:self.docstatus==2"],

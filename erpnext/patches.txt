@@ -612,3 +612,4 @@ erpnext.patches.v11_1.set_missing_title_for_quotation
 erpnext.patches.v11_1.update_bank_transaction_status
 erpnext.patches.v11_1.renamed_delayed_item_report
 erpnext.patches.v11_1.set_missing_opportunity_from
+erpnext.patches.v12_0.set_quotation_status
