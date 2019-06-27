@@ -107,13 +107,6 @@ class TestExpenseClaim(unittest.TestCase):
 		self.assertEquals(len(gl_entry), 0)
 
 def get_payable_account(company):
-<<<<<<< HEAD
-	return frappe.get_cached_value('Company',  company,  'default_payable_account')
-
-def make_expense_claim(payable_account,claim_amount, sanctioned_amount, company, account, project=None, task_name=None):
-	employee = frappe.db.get_value("Employee", {"status": "Active"})
-	expense_claim = frappe.get_doc({
-=======
 	return frappe.get_cached_value('Company', company, 'default_payable_account')
 
 def generate_taxes():
@@ -130,8 +123,8 @@ def generate_taxes():
 	}]}
 
 def make_expense_claim(payable_account, amount, sanctioned_amount, company, account, project=None, task_name=None, do_not_submit=False, taxes=None):
+	employee = frappe.db.get_value("Employee", {"status": "Active"})
 	expense_claim = {
->>>>>>> 8c621ab90c13d073b2a6072bc12d33a56fefc8c0
 		 "doctype": "Expense Claim",
 		 "employee": employee,
 		 "payable_account": payable_account,
