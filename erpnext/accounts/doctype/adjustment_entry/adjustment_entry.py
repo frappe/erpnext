@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_outstanding_invoices
@@ -34,8 +35,8 @@ class AdjustmentEntry(AccountsController):
         for currency in currencies:
             exc = self.append('exchange_rates', {})
             exc.currency = currency
-            exc.exchange_rate_to_payment_currency = get_exchange_rate(currency, self.payment_currency)
-            exc.exchange_rate_to_base_currency = get_exchange_rate(currency, self.company_currency)
+            exc.exchange_rate_to_payment_currency = get_exchange_rate(currency, self.payment_currency) or 1
+            exc.exchange_rate_to_base_currency = get_exchange_rate(currency, self.company_currency) or 1
 
     def exchange_rates_to_dict(self):
         rates = {}
@@ -102,7 +103,7 @@ class AdjustmentEntry(AccountsController):
             ent.voucher_number = invoice.get('voucher_no')
             ent.voucher_date = invoice.get('posting_date')
             ent.voucher_base_amount = invoice.get('outstanding_amount')
-            ent.currency  = invoice.get("currency")
+            ent.currency = invoice.get("currency")
             ent.exchange_rate = invoice.get('exchange_rate')
             ent.voucher_amount = ent.voucher_base_amount / ent.exchange_rate
             ent.payment_exchange_rate = exchange_rates[ent.currency]['exchange_rate_to_payment_currency']
@@ -110,3 +111,39 @@ class AdjustmentEntry(AccountsController):
             ent.balance = ent.voucher_payment_amount
             ent.supplier_bill_no = invoice.get('supplier_bill_no')
             ent.supplier_bill_date = invoice.get('supplier_bill_date')
+
+    def recalculate_all(self):
+        debit_entries = self.debit_entries or []
+        credit_entries = self.credit_entries or []
+        self.get_exchange_rates(debit_entries + credit_entries)
+        self.recalculate_references(['debit_entries', 'credit_entries'])
+
+    def recalculate_references(self, reference_types):
+        for reference_type in reference_types:
+            entries = self.get(reference_type)
+            exchange_rates = self.exchange_rates_to_dict()
+            if entries:
+                for ent in entries:
+                    ent.payment_exchange_rate = exchange_rates[ent.currency]['exchange_rate_to_payment_currency']
+                    ent.voucher_payment_amount = ent.voucher_amount * ent.payment_exchange_rate
+                    ent.balance = ent.voucher_payment_amount - ent.allocated_amount
+                    ent.allocated_base_amount = ent.allocated_amount * exchange_rates[ent.currency]['exchange_rate_to_base_currency']
+
+    def allocate_amount_to_references(self):
+        total_debit_outstanding = sum([flt(d.voucher_payment_amount) for d in self.get("debit_entries")])
+        total_credit_outstanding = sum([flt(c.voucher_payment_amount) for c in self.get("credit_entries")])
+        # total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
+        allocated_oustanding = max(total_debit_outstanding, total_credit_outstanding)
+        allocate_order = ['credit_entries', 'debit_entries'] if total_debit_outstanding > total_credit_outstanding else ['debit_entries', 'credit_entries']
+        for reference_type in allocate_order:
+            entries = self.get(reference_type)
+            for ent in entries:
+                ent.allocated_amount = 0
+                if self.allocate_payment_amount:
+                    if allocated_oustanding > 0:
+                        if ent.voucher_payment_amount >= allocated_oustanding:
+                            ent.allocated_amount = allocated_oustanding
+                        else:
+                            ent.allocated_amount = ent.voucher_payment_amount
+                        allocated_oustanding -= flt(ent.allocated_amount)
+
