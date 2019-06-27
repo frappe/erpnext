@@ -152,7 +152,7 @@ class Opportunity(TransactionBase):
 		self.add_calendar_event()
 
 		# assign to customer account manager or lead owner
-		assign_to_user(self, subject_field)
+		assign_to_user(self, subject_field, self.opportunity_from, self.party_name)
 
 	def add_calendar_event(self, opts=None, force=False):
 		if not opts:
@@ -323,13 +323,12 @@ def auto_close_opportunity():
 		doc.flags.ignore_mandatory = True
 		doc.save()
 
-def assign_to_user(doc, subject_field):
+def assign_to_user(doc, subject_field, party_type, party_name):
 	assign_user = None
-	if doc.party_name:
-		if doc.opportunity_from == "Customer":
-			assign_user = frappe.db.get_value("Customer", doc.party_name, 'account_manager')
-		else:
-			assign_user = frappe.db.get_value('Lead', doc.party_name, 'lead_owner')
+	if party_type == "Customer":
+		assign_user = frappe.db.get_value("Customer", party_name, 'account_manager')
+	elif party_type == "Lead":
+		assign_user = frappe.db.get_value('Lead', party_name, 'lead_owner')
 
 	if assign_user and assign_user not in ['Administrator', 'Guest']:
 		if not assign_to.get(dict(doctype = doc.doctype, name = doc.name)):
