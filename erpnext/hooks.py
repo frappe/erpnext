@@ -46,7 +46,7 @@ update_and_get_user_progress = "erpnext.utilities.user_progress_utils.update_def
 on_session_creation = "erpnext.shopping_cart.utils.set_cart_count"
 on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
 
-treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', 'Assessment Group']
+treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', 'Assessment Group', 'Department']
 
 # website
 update_website_context = ["erpnext.shopping_cart.utils.update_website_context", "erpnext.education.doctype.education_settings.education_settings.update_website_context"]
@@ -242,7 +242,8 @@ scheduler_events = {
 		"erpnext.accounts.doctype.gl_entry.gl_entry.rename_gle_sle_docs",
 		"erpnext.projects.doctype.project.project.hourly_reminder",
 		"erpnext.projects.doctype.project.project.collect_project_status",
-		"erpnext.hr.doctype.shift_type.shift_type.process_auto_attendance_for_all_shifts"
+		"erpnext.hr.doctype.shift_type.shift_type.process_auto_attendance_for_all_shifts",
+		"erpnext.support.doctype.issue.issue.set_service_level_agreement_variance",
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
@@ -264,7 +265,7 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.update_project_sales_billing",
 		"erpnext.projects.doctype.project.project.send_project_status_email_to_users",
 		"erpnext.quality_management.doctype.quality_review.quality_review.review",
-		"erpnext.support.doctype.service_level_agreement.service_level_agreement.check_agreement_status"
+		"erpnext.support.doctype.service_level_agreement.service_level_agreement.check_agreement_status",
 	],
 	"daily_long": [
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"
