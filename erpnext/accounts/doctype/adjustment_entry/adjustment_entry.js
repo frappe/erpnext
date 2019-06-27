@@ -5,6 +5,17 @@ frappe.provide("erpnext.accounts");
 
 const ALL_TABLES = ['exchange_rates', 'credit_entries', 'debit_entries'];
 
+function update_labels(frm) {
+	const company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+	['debit_entries', 'credit_entries'].map(reference_type => {
+		frm.set_currency_labels(['voucher_payment_amount', 'payment_exchange_rate', 'allocated_amount', 'balance'], frm.doc.payment_currency, reference_type);
+		frm.set_currency_labels(['voucher_base_amount', 'allocated_base_amount', 'gain_loss_amount'], company_currency, reference_type);
+		frm.get_field(reference_type).grid.header_row.refresh();
+	});
+	frm.set_currency_labels(['exchange_rate_to_base_currency'],company_currency, 'exchange_rates');
+	frm.get_field('exchange_rates').grid.header_row.refresh();
+}
+
 erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 
 	onload: function() {
@@ -16,11 +27,11 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 	},
 
 	get_unreconciled_entries: function() {
-		var me = this;
+		const me = this;
 		return this.frm.call({
 			doc: me.frm.doc,
 			method: 'get_unreconciled_entries',
-			callback: function(r, rt) {
+			callback: function() {
 				me.frm.fields_dict.get_unreconciled_entries.$input.removeClass('btn-primary');
 			}
 		});
@@ -31,7 +42,7 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 	},
 	company: function() {
 		this.clear_all_tables();
-		// TODO: Change labels on table columns
+		update_labels(this.frm);
 	},
 	customer: function() {
 		this.clear_all_tables();
@@ -44,7 +55,7 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 		this.clear_all_tables();
 	},
 	payment_currency: function() {
-		// TODO: Change labels on table columns
+		update_labels(this.frm);
 		const me = this;
 		return this.frm.call({
 			doc: me.frm.doc,
