@@ -606,3 +606,4 @@ erpnext.patches.v12_0.make_custom_fields_for_bank_remittance #14-06-2019
 execute:frappe.delete_doc_if_exists("Page", "support-analytics")
 erpnext.patches.v12_0.make_item_manufacturer
 erpnext.patches.v12_0.set_quotation_status
+erpnext.patches.v12_0.set_priority_for_support
