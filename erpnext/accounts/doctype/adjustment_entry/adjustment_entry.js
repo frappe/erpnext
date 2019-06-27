@@ -5,17 +5,6 @@ frappe.provide("erpnext.accounts");
 
 const ALL_TABLES = ['exchange_rates', 'credit_entries', 'debit_entries'];
 
-function update_labels(frm) {
-	const company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
-	['debit_entries', 'credit_entries'].map(reference_type => {
-		frm.set_currency_labels(['voucher_payment_amount', 'payment_exchange_rate', 'allocated_amount', 'balance'], frm.doc.payment_currency, reference_type);
-		frm.set_currency_labels(['voucher_base_amount', 'allocated_base_amount', 'gain_loss_amount'], company_currency, reference_type);
-		frm.get_field(reference_type).grid.header_row.refresh();
-	});
-	frm.set_currency_labels(['exchange_rate_to_base_currency'],company_currency, 'exchange_rates');
-	frm.get_field('exchange_rates').grid.header_row.refresh();
-}
-
 erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 
 	onload: function() {
@@ -42,7 +31,7 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 	},
 	company: function() {
 		this.clear_all_tables();
-		update_labels(this.frm);
+		this.update_labels();
 	},
 	customer: function() {
 		this.clear_all_tables();
@@ -55,13 +44,25 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 		this.clear_all_tables();
 	},
 	payment_currency: function() {
-		update_labels(this.frm);
+		this.update_labels();
 		const me = this;
 		return this.frm.call({
 			doc: me.frm.doc,
 			freeze: true,
 			method: 'recalculate_tables'
 		});
+	},
+
+	update_labels: function () {
+		const company_currency = frappe.get_doc(":Company", this.frm.doc.company).default_currency;
+		['debit_entries', 'credit_entries'].map(reference_type => {
+			this.frm.set_currency_labels(['voucher_payment_amount', 'payment_exchange_rate', 'allocated_amount', 'balance'], this.frm.doc.payment_currency, reference_type);
+			this.frm.set_currency_labels(['voucher_base_amount', 'allocated_base_amount', 'gain_loss_amount'], company_currency, reference_type);
+			this.frm.get_field(reference_type).grid.header_row.refresh();
+		});
+		this.frm.set_currency_labels(['exchange_rate_to_base_currency'],company_currency, 'exchange_rates');
+		this.frm.set_currency_labels(['exchange_rate_to_payment_currency'],this.frm.doc.payment_currency, 'exchange_rates');
+		this.frm.get_field('exchange_rates').grid.header_row.refresh();
 	},
 
 	allocate_payment_amount: function() {
