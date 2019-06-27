@@ -3,31 +3,65 @@
 # See license.txt
 from __future__ import unicode_literals
 from erpnext.hr.doctype.employee_group.test_employee_group import make_employee_group
-from frappe.utils import now_datetime
-import datetime
-from datetime import timedelta
+from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
 
 import frappe
 import unittest
 
 class TestServiceLevel(unittest.TestCase):
-	pass
 
-def make_service_level():
-	employee_group = make_employee_group()
-	make_holiday_list()
+	def test_service_level(self):
+		employee_group = make_employee_group()
+		make_holiday_list()
+		make_priorities()
 
-	# Default Service Level Agreement
-	default_service_level = frappe.get_doc({
+		# Default Service Level
+		test_make_service_level = create_service_level("__Test Service Level", "__Test Holiday List", employee_group, 4, 6)
+		get_make_service_level = get_service_level("__Test Service Level")
+
+		self.assertEqual(test_make_service_level.name, get_make_service_level.name)
+		self.assertEqual(test_make_service_level.holiday_list, get_make_service_level.holiday_list)
+		self.assertEqual(test_make_service_level.employee_group, get_make_service_level.employee_group)
+
+		# Service Level
+		test_make_service_level = create_service_level("_Test Service Level", "__Test Holiday List", employee_group, 2, 3)
+		get_make_service_level = get_service_level("_Test Service Level")
+
+		self.assertEqual(test_make_service_level.name, get_make_service_level.name)
+		self.assertEqual(test_make_service_level.holiday_list, get_make_service_level.holiday_list)
+		self.assertEqual(test_make_service_level.employee_group, get_make_service_level.employee_group)
+
+
+def create_service_level(service_level, holiday_list, employee_group, response_time, resolution_time):
+	sl = frappe.get_doc({
 		"doctype": "Service Level",
-		"service_level": "__Test Service Level",
-		"holiday_list": "__Test Holiday List",
-		"priority": "Medium",
+		"service_level": service_level,
+		"holiday_list": holiday_list,
 		"employee_group": employee_group,
-		"response_time": 4,
-		"response_time_period": "Hour",
-		"resolution_time": 6,
-		"resolution_time_period": "Hour",
+		"priorities": [
+			{
+				"priority": "Low",
+				"response_time": response_time,
+				"response_time_period": "Hour",
+				"resolution_time": resolution_time,
+				"resolution_time_period": "Hour",
+			},
+			{
+				"priority": "Medium",
+				"response_time": response_time,
+				"default_priority": 1,
+				"response_time_period": "Hour",
+				"resolution_time": resolution_time,
+				"resolution_time_period": "Hour",
+			},
+			{
+				"priority": "High",
+				"response_time": response_time,
+				"response_time_period": "Hour",
+				"resolution_time": resolution_time,
+				"resolution_time_period": "Hour",
+			}
+		],
 		"support_and_resolution": [
 			{
 				"workday": "Monday",
@@ -67,73 +101,21 @@ def make_service_level():
 		]
 	})
 
-	default_service_level_exists = frappe.db.exists("Service Level", "__Test Service Level")
-	if not default_service_level_exists:
-		default_service_level.insert()
+	sl_exists = frappe.db.exists("Service Level", {"service_level": service_level})
 
-	service_level = frappe.get_doc({
-		"doctype": "Service Level",
-		"service_level": "_Test Service Level",
-		"holiday_list": "__Test Holiday List",
-		"priority": "Medium",
-		"employee_group": employee_group,
-		"response_time": 2,
-		"response_time_period": "Day",
-		"resolution_time": 3,
-		"resolution_time_period": "Day",
-		"support_and_resolution": [
-			{
-				"workday": "Monday",
-				"start_time": "10:00:00",
-				"end_time": "18:00:00",
-			},
-			{
-				"workday": "Tuesday",
-				"start_time": "10:00:00",
-				"end_time": "18:00:00",
-			},
-			{
-				"workday": "Wednesday",
-				"start_time": "10:00:00",
-				"end_time": "18:00:00",
-			},
-			{
-				"workday": "Thursday",
-				"start_time": "10:00:00",
-				"end_time": "18:00:00",
-			},
-			{
-				"workday": "Friday",
-				"start_time": "10:00:00",
-				"end_time": "18:00:00",
-			},
-			{
-				"workday": "Saturday",
-				"start_time": "10:00:00",
-				"end_time": "18:00:00",
-			},
-			{
-				"workday": "Sunday",
-				"start_time": "10:00:00",
-				"end_time": "18:00:00",
-			}
-		]
-	})
-	service_level_exist = frappe.db.exists("Service Level", "_Test Service Level")
-	if not service_level_exist:
-		service_level.insert()
-		return service_level.service_level
+	if not sl_exists:
+		sl.insert()
+		return sl
 	else:
-		return service_level_exist
+		return frappe.get_doc("Service Level", {"service_level": service_level})
 
-def get_service_level():
-	service_level = frappe.db.exists("Service Level", "_Test Service Level")
-	return service_level
+def get_service_level(service_level):
+	return frappe.get_doc("Service Level", service_level)
 
 def make_holiday_list():
 	holiday_list = frappe.db.exists("Holiday List", "__Test Holiday List")
 	if not holiday_list:
-		now = datetime.datetime.now()
+		now = frappe.utils.now_datetime()
 		holiday_list = frappe.get_doc({
 			"doctype": "Holiday List",
 			"holiday_list_name": "__Test Holiday List",
@@ -154,3 +136,14 @@ def make_holiday_list():
 				},
 			]
 		}).insert()
+
+def create_service_level_for_sla():
+	employee_group = make_employee_group()
+	make_holiday_list()
+	make_priorities()
+
+	# Default Service Level
+	create_service_level("__Test Service Level", "__Test Holiday List", employee_group, 4, 6)
+
+	# Service Level
+	create_service_level("_Test Service Level", "__Test Holiday List", employee_group, 2, 3)
