@@ -16,8 +16,8 @@
   "payment_details_section",
   "payment_currency",
   "column_break_9",
-  "payment_exchange_rate",
   "amended_from",
+  "allocate_payment_amount",
   "section_break_13",
   "exchange_rates",
   "debit_entries_section_break",
@@ -89,15 +89,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "1",
-   "description": "The Exchange Rate at which you received/paid the payment",
-   "fieldname": "payment_exchange_rate",
-   "fieldtype": "Float",
-   "label": "Payment Exchange Rate",
-   "precision": "5",
-   "reqd": 1
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -145,11 +136,17 @@
    "fieldname": "credit_entries",
    "fieldtype": "Table",
    "options": "Adjustment Entry Reference"
+  },
+  {
+   "default": "0",
+   "fieldname": "allocate_payment_amount",
+   "fieldtype": "Check",
+   "label": "Allocate Payment Amount"
   }
  ],
  "hide_toolbar": 1,
  "is_submittable": 1,
- "modified": "2019-06-25 18:00:21.509193",
+ "modified": "2019-06-27 13:25:27.072981",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Adjustment Entry",
