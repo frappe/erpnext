@@ -1,0 +1,87 @@
+{
+ "creation": "2019-05-04 05:54:03.658991",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "priority",
+  "cb_01",
+  "default_priority",
+  "sb_00",
+  "response_time",
+  "response_time_period",
+  "cb_00",
+  "resolution_time",
+  "resolution_time_period"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "priority",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Priority",
+   "options": "Issue Priority"
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "response_time",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Response Time"
+  },
+  {
+   "columns": 1,
+   "fieldname": "resolution_time",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Resolution Time"
+  },
+  {
+   "fieldname": "cb_00",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "response_time_period",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Response Time Period",
+   "options": "Hour\nDay\nWeek"
+  },
+  {
+   "columns": 2,
+   "fieldname": "resolution_time_period",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Resolution Time Period",
+   "options": "Hour\nDay\nWeek"
+  },
+  {
+   "fieldname": "cb_01",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "default_priority",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Default Priority"
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-05-21 06:54:42.674377",
+ "modified_by": "Administrator",
+ "module": "Support",
+ "name": "Service Level Priority",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
