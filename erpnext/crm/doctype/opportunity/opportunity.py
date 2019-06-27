@@ -327,9 +327,9 @@ def assign_to_user(doc, subject_field):
 	assign_user = None
 	if doc.party_name:
 		if doc.opportunity_from == "Customer":
-			assign_user = frappe.db.get_value("Customer", doc.customer, 'account_manager')
+			assign_user = frappe.db.get_value("Customer", doc.party_name, 'account_manager')
 		else:
-			assign_user = frappe.db.get_value('Lead', doc.lead, 'lead_owner')
+			assign_user = frappe.db.get_value('Lead', doc.party_name, 'lead_owner')
 
 	if assign_user and assign_user not in ['Administrator', 'Guest']:
 		if not assign_to.get(dict(doctype = doc.doctype, name = doc.name)):
