@@ -352,6 +352,7 @@ def get_auto_serial_nos(serial_no_series, qty):
 
 def auto_make_serial_nos(args):
 	serial_nos = get_serial_nos(args.get('serial_no'))
+	created_numbers = []
 	for serial_no in serial_nos:
 		if frappe.db.exists("Serial No", serial_no):
 			sr = frappe.get_doc("Serial No", serial_no)
@@ -366,7 +367,12 @@ def auto_make_serial_nos(args):
 				sr.sales_order = None
 			sr.save(ignore_permissions=True)
 		elif args.get('actual_qty', 0) > 0:
-			make_serial_no(serial_no, args)
+			created_numbers.append(make_serial_no(serial_no, args))
+
+	if len(created_numbers) == 1:
+		frappe.msgprint(_("Serial No {0} created").format(created_numbers[0]))
+	elif len(created_numbers) > 0:
+		frappe.msgprint(_("The following serial numbers were created: <br> {0}").format(', '.join(created_numbers)))
 
 def get_item_details(item_code):
 	return frappe.db.sql("""select name, has_batch_no, docstatus,
@@ -399,7 +405,6 @@ def make_serial_no(serial_no, args):
 		sr.warehouse = args.get('warehouse')
 		sr.save()
 
-	frappe.msgprint(_("Serial No {0} created").format(sr.name))
 	return sr.name
 
 def update_serial_nos_after_submit(controller, parentfield):
