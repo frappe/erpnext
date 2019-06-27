@@ -95,8 +95,8 @@ frappe.ui.form.on('Adjustment Entry Reference', {
 		const allocated_base_amount = data.allocated_amount * base_exchange_rate;
 		frappe.model.set_value(cdt, cdn, 'balance', balance);
 		frappe.model.set_value(cdt, cdn, 'allocated_base_amount', allocated_base_amount);
-		const allocated_amount_in_entry_currrency = data.allocated_amount / data.payment_exchange_rate
-		const gain_loss_amount = data.allocated_base_amount - allocated_amount_in_entry_currrency * data.exchange_rate;
+		const allocated_amount_in_entry_currency = data.allocated_amount / data.payment_exchange_rate;
+		const gain_loss_amount = data.allocated_base_amount - allocated_amount_in_entry_currency * data.exchange_rate;
 		frappe.model.set_value(cdt, cdn, 'gain_loss_amount', gain_loss_amount);
 	}
 });
