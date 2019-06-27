@@ -747,7 +747,12 @@ class AccountsController(TransactionBase):
 				count += 1
 				item.qty = group_item_qty[item.item_code]
 				item.amount = group_item_amount[item.item_code]
-				item.rate = flt(flt(item.amount) / flt(item.qty), item.precision("rate"))
+
+				if item.qty:
+					item.rate = flt(flt(item.amount) / flt(item.qty), item.precision("rate"))
+				else:
+					item.rate = 0
+
 				item.idx = count
 				del group_item_qty[item.item_code]
 			else:
