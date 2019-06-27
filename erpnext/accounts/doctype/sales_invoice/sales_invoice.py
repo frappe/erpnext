@@ -487,7 +487,7 @@ class SalesInvoice(SellingController):
 		"""Set against account for debit to account"""
 		against_acc = []
 		for d in self.get('items'):
-			if d.income_account not in against_acc:
+			if d.income_account and d.income_account not in against_acc:
 				against_acc.append(d.income_account)
 		self.against_income_account = ','.join(against_acc)
 
