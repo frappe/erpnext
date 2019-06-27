@@ -49,7 +49,7 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 		return this.frm.call({
 			doc: me.frm.doc,
 			freeze: true,
-			method: 'recalculate_all'
+			method: 'recalculate_tables'
 		});
 	},
 
@@ -95,19 +95,25 @@ frappe.ui.form.on('Adjustment Entry Reference', {
 		const allocated_base_amount = data.allocated_amount * base_exchange_rate;
 		frappe.model.set_value(cdt, cdn, 'balance', balance);
 		frappe.model.set_value(cdt, cdn, 'allocated_base_amount', allocated_base_amount);
+		const allocated_amount_in_entry_currrency = data.allocated_amount / data.payment_exchange_rate
+		const gain_loss_amount = data.allocated_base_amount - allocated_amount_in_entry_currrency * data.exchange_rate;
+		frappe.model.set_value(cdt, cdn, 'gain_loss_amount', gain_loss_amount);
 	}
 });
 
+function call_recalculate_references(frm) {
+	return frm.call({
+		doc: frm.doc,
+		method: 'recalculate_references',
+		args: {
+			reference_types: ['debit_entries', 'credit_entries']
+		}
+	});
+}
+
 frappe.ui.form.on('Adjustment Entry Exchange Rates', {
-	exchange_rate_to_payment_currency: function(frm) {
-		frm.call({
-			doc: frm.doc,
-			method: 'recalculate_references',
-			args: {
-				reference_types: ['debit_entries', 'credit_entries']
-			}
-		});
-	}
+	exchange_rate_to_payment_currency: call_recalculate_references ,
+	exchange_rate_to_base_currency: call_recalculate_references,
 });
 
 $.extend(cur_frm.cscript, new erpnext.accounts.AdjustmentEntryController({frm: cur_frm}));
