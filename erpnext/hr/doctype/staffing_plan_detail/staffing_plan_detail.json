@@ -52,7 +52,6 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "vacancies",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -67,7 +66,7 @@
   }
  ],
  "istable": 1,
- "modified": "2019-06-21 12:29:54.246075",
+ "modified": "2019-06-24 18:40:37.140178",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Staffing Plan Detail",

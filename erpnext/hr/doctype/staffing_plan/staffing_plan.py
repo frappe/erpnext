@@ -15,11 +15,7 @@ class StaffingPlan(Document):
 	def validate(self):
 		self.validate_period()
 		self.validate_details()
-		self.set_total_estimated_budget()
-
-	def on_update_after_submit(self):
-		for detail in self.staffing_details:
-			self.update_staffing_plan_values(detail)
+		set_total_estimated_budget(self)
 
 	def validate_period(self):
 		# Validate Dates
@@ -125,19 +121,6 @@ class StaffingPlan(Document):
 					children_details.total_estimated_cost,
 					frappe.bold(staffing_plan_detail.designation))), SubsidiaryCompanyError)
 
-	def update_staffing_plan_values(self, detail_doc):
-		''' Update all the fields affected by the change of vacancies value '''
-		employee_counts = get_designation_counts(detail_doc.designation, self.company)
-
-		detail_doc.db_set('current_count', employee_counts.get("employee_count"))
-		detail_doc.db_set('current_openings', employee_counts.get("job_openings"))
-		detail_doc.db_set('number_of_positions', detail_doc.current_count+detail_doc.vacancies)
-
-		total_estimated_value = detail_doc.vacancies * detail_doc.estimated_cost_per_position
-		detail_doc.db_set('total_estimated_cost', total_estimated_value)
-		self.set_total_estimated_budget()
-		self.db_set('total_estimated_budget', self.total_estimated_budget)
-
 @frappe.whitelist()
 def get_designation_counts(designation, company):
 	if not designation:
@@ -191,11 +174,3 @@ def get_company_set(company):
 			parent_company='{company}'
 			OR name='{company}'
 	""")
-
-def update_staffing_plan(staffing_plan, designation, company):
-	employee_counts = get_designation_counts(designation, company)
-	staffing_plan = frappe.get_doc("Staffing Plan Detail", staffing_plan)
-	staffing_plan.db_set("current_count", employee_counts.get("employee_count"))
-	staffing_plan.db_set("current_openings", employee_counts.get("job_openings"))
-	vacancies = staffing_plan.number_of_positions - staffing_plan.current_opening
-	staffing_plan.db_set("vacancies", vacancies)

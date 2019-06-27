@@ -12,7 +12,6 @@ from frappe.permissions import add_user_permission, remove_user_permission, \
 from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
-from erpnext.hr.doctype.staffing_plan.staffing_plan import update_staffing_plan
 from erpnext.hr.doctype.job_offer.job_offer import get_staffing_plan_detail
 
 class EmployeeUserDisabledError(frappe.ValidationError): pass
@@ -77,9 +76,6 @@ class Employee(NestedSet):
 		if self.user_id:
 			self.update_user()
 			self.update_user_permissions()
-		if self.job_applicant and self.designation:
-			staffing_plan = get_staffing_plan_detail(self.designation, self.company)
-			update_staffing_plan(staffing_plan, self.designation, self.company)
 
 	def update_user_permissions(self):
 		if not self.create_user_permission: return

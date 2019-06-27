@@ -25,7 +25,7 @@ frappe.ui.form.on('Staffing Plan', {
 				}
 			};
 		});
-	}
+	},
 });
 
 frappe.ui.form.on('Staffing Plan Detail', {
@@ -37,13 +37,11 @@ frappe.ui.form.on('Staffing Plan Detail', {
 	},
 
 	vacancies: function(frm, cdt, cdn) {
-		if(frm.doc.docstatus===0) {
-			let child = locals[cdt][cdn];
-			if(child.vacancies < child.current_openings) {
-				frappe.throw(__("Vacancies cannot be lower than the current openings"))
-			}
-			set_number_of_positions(frm, cdt, cdn);
+		let child = locals[cdt][cdn];
+		if(child.vacancies < child.current_openings) {
+			frappe.throw(__("Vacancies cannot be lower than the current openings"))
 		}
+		set_number_of_positions(frm, cdt, cdn);
 	},
 
 	current_count: function(frm, cdt, cdn) {
@@ -51,14 +49,12 @@ frappe.ui.form.on('Staffing Plan Detail', {
 	},
 
 	estimated_cost_per_position: function(frm, cdt, cdn) {
-		let child = locals[cdt][cdn];
 		set_total_estimated_cost(frm, cdt, cdn);
 	}
 });
 
 var set_number_of_positions = function(frm, cdt, cdn) {
 	let child = locals[cdt][cdn];
-	console.log(child.vacancies)
 	frappe.call({
 		"method": "erpnext.hr.doctype.staffing_plan.staffing_plan.get_designation_counts",
 		args: {
@@ -80,7 +76,7 @@ var set_number_of_positions = function(frm, cdt, cdn) {
 		}
 	});
 	refresh_field("staffing_details");
-		set_total_estimated_cost(frm, cdt, cdn);
+	set_total_estimated_cost(frm, cdt, cdn);
 }
 
 // Note: Estimated Cost is calculated on number of Vacancies
