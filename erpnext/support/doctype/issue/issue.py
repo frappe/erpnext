@@ -173,7 +173,6 @@ class Issue(Document):
 		self.response_by_variance = round(time_diff_in_hours(self.response_by, now_datetime()))
 		self.resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()))
 
-	@frappe.whitelist()
 	def change_service_level_agreement_and_priority(self, priority=None, service_level_agreement=None):
 		self.set_response_and_resolution_time(priority=priority, service_level_agreement=service_level_agreement)
 		self.save(ignore_permissions=True)
