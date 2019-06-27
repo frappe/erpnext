@@ -41,7 +41,8 @@ $.extend(frappe.create_routes, {
 	"Item Group": "Tree/Item Group",
 	"Sales Person": "Tree/Sales Person",
 	"Account": "Tree/Account",
-	"Cost Center": "Tree/Cost Center"
+	"Cost Center": "Tree/Cost Center",
+	"Department": "Tree/Department",
 });
 
 // preferred modules for breadcrumbs

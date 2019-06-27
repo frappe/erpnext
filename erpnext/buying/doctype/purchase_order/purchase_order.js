@@ -104,7 +104,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 		if(doc.docstatus == 1 && !in_list(["Closed", "Delivered"], doc.status)) {
 			if (this.frm.has_perm("submit")) {
-				if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) {
+				if(flt(doc.per_billed, 6) < 100 || flt(doc.per_received, 6) < 100) {
 					cur_frm.add_custom_button(__('Close'), this.close_purchase_order, __("Status"));
 				}
 			}
