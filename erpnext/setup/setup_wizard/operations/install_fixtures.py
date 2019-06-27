@@ -173,6 +173,11 @@ def install(country=None):
 			{"attribute_value": _("White"), "abbr": "WHI"}
 		]},
 
+		# Issue Priority
+		{'doctype': 'Issue Priority', 'name': _('Low')},
+		{'doctype': 'Issue Priority', 'name': _('Medium')},
+		{'doctype': 'Issue Priority', 'name': _('High')},
+
 		#Job Applicant Source
 		{'doctype': 'Job Applicant Source', 'source_name': _('Website Listing')},
 		{'doctype': 'Job Applicant Source', 'source_name': _('Walk In')},
