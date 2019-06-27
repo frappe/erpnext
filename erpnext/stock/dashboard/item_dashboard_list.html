@@ -39,21 +39,6 @@
 					</span>
 				</span>
 			</div>
-			{% if can_write %}
-			<div class="col-sm-2 text-right" style="margin-top: 8px;">
-				{% if d.actual_qty %}
-				<button class="btn btn-default btn-xs btn-move"
-					data-warehouse="{{ d.warehouse }}"
-					data-actual_qty="{{ d.actual_qty }}"
-					data-item="{{ escape(d.item_code) }}">{{ __("Move") }}</a>
-				{% endif %}
-				<button style="margin-left: 7px;" class="btn btn-default btn-xs btn-add"
-					data-warehouse="{{ d.warehouse }}"
-					data-actual_qty="{{ d.actual_qty }}"
-					data-item="{{ escape(d.item_code) }}"
-					data-rate="{{ d.valuation_rate }}">{{ __("Add") }}</a>
-			</div>
-			{% endif %}
 		</div>
 	</div>
 {% endfor %}
