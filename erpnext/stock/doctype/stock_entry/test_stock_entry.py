@@ -74,6 +74,7 @@ class TestStockEntry(unittest.TestCase):
 		frappe.db.set_default("allow_negative_stock", 0)
 
 	def test_auto_material_request(self):
+		set_perpetual_inventory(0)
 		make_item_variant()
 		self._test_auto_material_request("_Test Item")
 		self._test_auto_material_request("_Test Item", material_request_type="Transfer")

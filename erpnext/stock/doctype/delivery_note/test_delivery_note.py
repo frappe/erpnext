@@ -22,6 +22,9 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
 
 class TestDeliveryNote(unittest.TestCase):
+	def setUp(self):
+		set_perpetual_inventory(0)
+
 	def tearDown(self):
 		target_warehouse = "_Test Warehouse 1 - _TC"
 		company = "_Test Company"

@@ -11,6 +11,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt, make_rm_stock_entry
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 import unittest
 
 class TestItemAlternative(unittest.TestCase):
@@ -18,6 +19,7 @@ class TestItemAlternative(unittest.TestCase):
 		make_items()
 
 	def test_alternative_item_for_subcontract_rm(self):
+		set_perpetual_inventory(enable=0)
 		create_stock_reconciliation(item_code='Alternate Item For A RW 1', warehouse='_Test Warehouse - _TC',
 			qty=5, rate=2000)
 		create_stock_reconciliation(item_code='Test FG A RW 2', warehouse='_Test Warehouse - _TC',
@@ -67,6 +69,7 @@ class TestItemAlternative(unittest.TestCase):
 		self.assertEqual(status, True)
 
 	def test_alternative_item_for_production_rm(self):
+		set_perpetual_inventory(enable=0)
 		create_stock_reconciliation(item_code='Alternate Item For A RW 1',
 			warehouse='_Test Warehouse - _TC',qty=5, rate=2000)
 		create_stock_reconciliation(item_code='Test FG A RW 2', warehouse='_Test Warehouse - _TC',

@@ -14,6 +14,7 @@ from erpnext.stock.doctype.item.test_item import make_item
 from six import iteritems
 class TestPurchaseReceipt(unittest.TestCase):
 	def setUp(self):
+		set_perpetual_inventory(0)
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 
 	def test_make_purchase_invoice(self):

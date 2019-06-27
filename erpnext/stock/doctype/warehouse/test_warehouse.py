@@ -15,6 +15,7 @@ test_records = frappe.get_test_records('Warehouse')
 
 class TestWarehouse(unittest.TestCase):
 	def setUp(self):
+		set_perpetual_inventory(0)
 		if not frappe.get_value('Item', '_Test Item'):
 			make_test_records('Item')
 

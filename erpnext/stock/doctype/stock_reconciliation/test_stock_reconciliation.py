@@ -16,6 +16,7 @@ from erpnext.stock.doctype.item.test_item import create_item
 
 class TestStockReconciliation(unittest.TestCase):
 	def setUp(self):
+		set_perpetual_inventory(enable=0)
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 		self.insert_existing_sle()
 

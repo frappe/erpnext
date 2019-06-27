@@ -17,6 +17,7 @@ from erpnext.manufacturing.doctype.production_plan.test_production_plan import m
 
 class TestWorkOrder(unittest.TestCase):
 	def setUp(self):
+		set_perpetual_inventory(0)
 		self.warehouse = '_Test Warehouse 2 - _TC'
 		self.item = '_Test Item'
 

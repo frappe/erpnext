@@ -10,11 +10,13 @@ from frappe.test_runner import make_test_records
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 from six import string_types
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 test_records = frappe.get_test_records('BOM')
 
 class TestBOM(unittest.TestCase):
 	def setUp(self):
+		set_perpetual_inventory(0)
 		if not frappe.get_value('Item', '_Test Item'):
 			make_test_records('Item')
 

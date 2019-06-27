@@ -312,6 +312,8 @@ def sync_stock_value_and_account_balance(diff ,account_list, company):
 		to_credit = -(diff)
 		to_debit = 0
 
+	print("---------------->>>>", to_credit, to_debit, to_credit-to_debit)
+
 	if diff != 0:
 		jv = frappe.new_doc("Journal Entry")
 		jv.cheque_date =  "2013-03-14"
@@ -331,6 +333,7 @@ def sync_stock_value_and_account_balance(diff ,account_list, company):
 		})
 
 		for acc in account_list:
+			print("----------->>>>>>>>>>>",acc ,flt(to_debit/len(account_list)))
 			jv.append('accounts', {
 				"account": acc,
 				'party': "_Test Supplier",
