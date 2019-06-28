@@ -15,7 +15,7 @@ class StaffingPlan(Document):
 	def validate(self):
 		self.validate_period()
 		self.validate_details()
-		set_total_estimated_budget(self)
+		self.set_total_estimated_budget()
 
 	def validate_period(self):
 		# Validate Dates
@@ -33,6 +33,7 @@ class StaffingPlan(Document):
 
 		for detail in self.get("staffing_details"):
 			#Set readonly fields
+			self.set_number_of_positions(detail)
 			designation_counts = get_designation_counts(detail.designation, self.company)
 			detail.current_count = designation_counts['employee_count']
 			detail.current_openings = designation_counts['job_openings']
@@ -42,6 +43,9 @@ class StaffingPlan(Document):
 					detail.total_estimated_cost = cint(detail.vacancies) * flt(detail.estimated_cost_per_position)
 
 			self.total_estimated_budget += detail.total_estimated_cost
+
+	def set_number_of_positions(self, detail):
+		detail.number_of_positions = cint(detail.vacancies) + cint(detail.current_count)
 
 	def validate_overlap(self, staffing_plan_detail):
 		# Validate if any submitted Staffing Plan exist for any Designations in this plan
@@ -166,11 +170,11 @@ def get_active_staffing_plan_details(company, designation, from_date=getdate(now
 	return staffing_plan if staffing_plan else None
 
 def get_company_set(company):
-	return frappe.db.sql_list(f"""
+	return frappe.db.sql_list("""
 		SELECT
 			name
 		FROM `tabCompany`
 		WHERE
-			parent_company='{company}'
-			OR name='{company}'
-	""")
+			parent_company=%(company)s
+			OR name=%(company)s
+	""", (dict(company=company)), debug=1)
