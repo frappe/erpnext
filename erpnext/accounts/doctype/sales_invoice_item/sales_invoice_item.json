@@ -57,6 +57,7 @@
   "income_account",
   "is_fixed_asset",
   "asset",
+  "finance_book",
   "col_break4",
   "expense_account",
   "deferred_revenue",
@@ -770,11 +771,18 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "asset",
+   "fieldname": "finance_book",
+   "fieldtype": "Link",
+   "label": "Finance Book",
+   "options": "Finance Book"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-25 22:05:59.971263",
+ "modified": "2019-06-28 17:30:12.156086",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
