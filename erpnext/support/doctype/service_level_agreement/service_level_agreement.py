@@ -85,8 +85,9 @@ def get_service_level_agreement_filters(name, customer=None):
 			["Service Level Agreement", "default_service_level_agreement", "=", 1]
 		]
 	else:
+		# Include SLA with No Entity and Entity Type
 		or_filters = [
-			["Service Level Agreement", "entity", "in", [customer, get_customer_group(customer), get_customer_territory(customer), "IS NULL"]],
+			["Service Level Agreement", "entity", "in", [customer, get_customer_group(customer), get_customer_territory(customer), ""]],
 			["Service Level Agreement", "default_service_level_agreement", "=", 1]
 		]
 
