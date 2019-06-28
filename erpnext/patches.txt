@@ -594,7 +594,7 @@ erpnext.patches.v11_1.make_job_card_time_logs
 erpnext.patches.v12_0.rename_pricing_rule_child_doctypes
 erpnext.patches.v12_0.move_target_distribution_from_parent_to_child
 erpnext.patches.v12_0.stock_entry_enhancements
-erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019
+erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019 #25-06-2019
 erpnext.patches.v12_0.move_item_tax_to_item_tax_template
 erpnext.patches.v11_1.set_variant_based_on
 erpnext.patches.v11_1.woocommerce_set_creation_user
@@ -607,3 +607,4 @@ execute:frappe.delete_doc_if_exists("Page", "support-analytics")
 erpnext.patches.v12_0.make_item_manufacturer
 erpnext.patches.v12_0.set_quotation_status
 erpnext.patches.v12_0.set_priority_for_support
+erpnext.patches.v12_0.delete_priority_property_setter
