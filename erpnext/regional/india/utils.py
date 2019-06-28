@@ -302,12 +302,12 @@ def get_ewb_data(dt, dn):
 		data.userGstin = data.fromGstin = doc.company_gstin
 		data.supplyType = 'O'
 
-		if doc.invoice_type in ['Regular', 'SEZ']:
+		if doc.gst_category in ['Registered Regular', 'SEZ']:
 			data.subSupplyType = 1
-		elif doc.invoice_type in ['Export', 'Deemed Export']:
+		elif doc.gst_category in ['Overseas', 'Deemed Export']:
 			data.subSupplyType = 3
 		else:
-			frappe.throw(_('Unsupported Invoice Type for e-Way Bill JSON generation'))
+			frappe.throw(_('Unsupported GST Category for e-Way Bill JSON generation'))
 
 		data.docType = 'INV'
 		data.docDate = frappe.utils.formatdate(doc.posting_date, 'dd/mm/yyyy')
