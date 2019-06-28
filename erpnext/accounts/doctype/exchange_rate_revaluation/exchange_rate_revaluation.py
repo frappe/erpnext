@@ -22,7 +22,7 @@ class ExchangeRateRevaluation(Document):
 				- flt(d.balance_in_base_currency, d.precision("balance_in_base_currency"))
 			total_gain_loss += flt(d.gain_loss, d.precision("gain_loss"))
 		self.total_gain_loss = flt(total_gain_loss, self.precision("total_gain_loss"))
-	
+
 	def validate_mandatory(self):
 		if not (self.company and self.posting_date):
 			frappe.throw(_("Please select Company and Posting Date to getting entries"))
@@ -33,8 +33,9 @@ class ExchangeRateRevaluation(Document):
 		company_currency = erpnext.get_company_currency(self.company)
 		precision = get_field_precision(frappe.get_meta("Exchange Rate Revaluation Account")
 			.get_field("new_balance_in_base_currency"), company_currency)
-		for d in self.get_accounts_from_gle():
-			
+
+		account_details = self.get_accounts_from_gle()
+		for d in account_details:
 			current_exchange_rate = d.balance / d.balance_in_account_currency \
 				if d.balance_in_account_currency else 0
 			new_exchange_rate = get_exchange_rate(d.account_currency, company_currency, self.posting_date)
@@ -52,6 +53,10 @@ class ExchangeRateRevaluation(Document):
 					"new_exchange_rate": new_exchange_rate,
 					"new_balance_in_base_currency": new_balance_in_base_currency
 				})
+
+		if not accounts:
+			self.throw_invalid_response_message(account_details)
+
 		return accounts
 
 	def get_accounts_from_gle(self):
@@ -83,11 +88,18 @@ class ExchangeRateRevaluation(Document):
 
 		return account_details
 
+	def throw_invalid_response_message(self, account_details):
+		if account_details:
+			message = _("No outstanding invoices require exchange rate revaluation")
+		else:
+			message = _("No outstanding invoices found")
+		frappe.msgprint(message)
+
 	def make_jv_entry(self):
 		if self.total_gain_loss == 0:
 			return
 
-		unrealized_exchange_gain_loss_account = frappe.get_cached_value('Company',  self.company, 
+		unrealized_exchange_gain_loss_account = frappe.get_cached_value('Company',  self.company,
 			"unrealized_exchange_gain_loss_account")
 		if not unrealized_exchange_gain_loss_account:
 			frappe.throw(_("Please set Unrealized Exchange Gain/Loss Account in Company {0}")
