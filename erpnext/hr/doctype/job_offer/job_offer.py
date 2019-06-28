@@ -24,6 +24,9 @@ class JobOffer(Document):
 			if vacancies - no_of_job_offer <= 0:
 				frappe.throw(_("Not enough vacancies available. Please update the staffing plan!!!"))
 
+	def on_update_after_submit(self):
+		update_job_applicant(self.status, self.applicant_name)
+
 	def get_job_offer(self, from_date, to_date):
 		''' Returns job offer created during a time period '''
 		return frappe.get_all("Job Offer", filters={
@@ -31,6 +34,10 @@ class JobOffer(Document):
 				"designation": self.designation,
 				"company": self.company
 			}, fields=['name'])
+
+def update_job_applicant(status, applicant_name):
+	if status in ("Accepted", "Rejected"):
+		frappe.set_value("Job Applicant", applicant_name, "status", status)
 
 def get_staffing_plan_detail(designation, company, offer_date):
 	detail = frappe.db.sql("""
