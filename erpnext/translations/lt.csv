@@ -21,6 +21,7 @@ DocType: Request for Quotation Item,Supplier Part No,Tiekėjo dalis Nr
 DocType: Journal Entry Account,Party Balance,Šalies balansas
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Source of Funds (Liabilities),Fondų šaltinis (įsipareigojimai)
 DocType: Payroll Period,Taxable Salary Slabs,Apmokestinamos atlyginimo plokštės
+DocType: Quality Action,Quality Feedback,Kokybės atsiliepimai
 DocType: Support Settings,Support Settings,Paramos nustatymai
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js,Please enter Production Item first,Pirmiausia įveskite gamybos elementą
 DocType: Quiz,Grading Basis,Įvertinimo pagrindas
@@ -45,6 +46,7 @@ apps/erpnext/erpnext/www/all-products/item_row.html,More Details,Daugiau informa
 DocType: Salary Component,Earning,Uždirbimas
 DocType: Restaurant Order Entry,Click Enter To Add,Spustelėkite Enter To Add
 DocType: Employee Group,Employee Group,Darbuotojų grupė
+DocType: Quality Procedure,Processes,Procesai
 DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,"Nurodykite valiutų kursą, jei norite konvertuoti vieną valiutą į kitą"
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,Ageing Range 4,Senėjimo diapazonas 4
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,Warehouse required for stock Item {0},Sandėlis reikalingas atsargai {0}
@@ -157,11 +159,13 @@ DocType: Complaint,Complaint,Skundas
 DocType: Shipping Rule,Restrict to Countries,Apriboti tik šalims
 DocType: Hub Tracked Item,Item Manager,Elementų tvarkyklė
 apps/erpnext/erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py,Currency of the Closing Account must be {0},Uždarymo sąskaitos valiuta turi būti {0}
+apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year_dashboard.py,Budgets,Biudžetai
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py,Opening Invoice Item,Sąskaitos faktūros atidarymas
 DocType: Work Order,Plan material for sub-assemblies,"Suplanuokite medžiagą, skirtą agregatams"
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Hardware,Aparatūra
 DocType: Budget,Action if Annual Budget Exceeded on MR,"Veiksmas, jei metinis biudžetas viršija MR"
 DocType: Sales Invoice Advance,Advance Amount,Išankstinė suma
+DocType: Accounting Dimension,Dimension Name,Dydžio pavadinimas
 DocType: Delivery Note Item,Against Sales Invoice Item,Prieš pardavimo sąskaitos elementą
 DocType: Expense Claim,HR-EXP-.YYYY.-,HR-EXP-.YYYY.-
 DocType: BOM Explosion Item,Include Item In Manufacturing,Įtraukti gaminį
@@ -218,7 +222,6 @@ apps/erpnext/erpnext/public/js/setup_wizard.js,What does it do?,Ką tai daro?
 ,Sales Invoice Trends,Pardavimų sąskaitų faktūrų tendencijos
 DocType: Bank Reconciliation,Payment Entries,Mokėjimo įrašai
 DocType: Employee Education,Class / Percentage,Klasė / procentinė dalis
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Elemento kodas&gt; Prekių grupė&gt; Gamintojas
 ,Electronic Invoice Register,Elektroninių sąskaitų faktūrų registras
 DocType: Sales Invoice,Is Return (Credit Note),Ar grąža (kredito pastaba)
 DocType: Lab Test Sample,Lab Test Sample,Laboratorinio tyrimo pavyzdys
@@ -292,6 +295,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_order/regional/india.js,Generate T
 DocType: Item,Variants,Variantai
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js,"Charges will be distributed proportionately based on item qty or amount, as per your selection","Mokesčiai bus paskirstyti proporcingai pagal elemento kiekį arba sumą, pagal jūsų pasirinkimą"
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py,Pending activities for today,Laukiama veikla šiandien
+DocType: Quality Procedure Process,Quality Procedure Process,Kokybės procedūros procesas
 DocType: Fee Schedule Program,Student Batch,Studentų partija
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,Valuation Rate required for Item in row {0},"Vertinimo norma, reikalinga {0} eilutės elementui"
 DocType: BOM Operation,Base Hour Rate(Company Currency),Pagrindinės valandos tarifas (įmonės valiuta)
@@ -311,7 +315,7 @@ apps/erpnext/erpnext/accounts/report/share_balance/share_balance.py,Average Rate
 DocType: Stock Settings,Set Qty in Transactions based on Serial No Input,Nustatyti kiekius operacijose pagal serijos Nr. Įvestį
 apps/erpnext/erpnext/hr/doctype/employee_advance/employee_advance.py,Advance account currency should be same as company currency {0},Išankstinės sąskaitos valiuta turėtų būti tokia pati kaip įmonės valiuta {0}
 apps/erpnext/erpnext/portal/doctype/homepage/homepage.js,Customize Homepage Sections,Tinkinti pagrindinį puslapį
-DocType: Quality Goal,October,Spalio mėn
+DocType: GSTR 3B Report,October,Spalio mėn
 DocType: Selling Settings,Hide Customer's Tax Id from Sales Transactions,Slėpti pardavimo sandorių mokesčių mokėtojo ID
 apps/erpnext/erpnext/regional/india/utils.py,Invalid GSTIN! A GSTIN must have 15 characters.,Netinkamas GSTIN! GSTIN turi būti 15 simbolių.
 apps/erpnext/erpnext/accounts/doctype/promotional_scheme/promotional_scheme.py,Pricing Rule {0} is updated,Kainos taisyklė {0} atnaujinama
@@ -396,7 +400,7 @@ DocType: Leave Encashment,Leave Balance,Palikite pusiausvyrą
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Maintenance Schedule {0} exists against {1},Priežiūros planas {0} egzistuoja prieš {1}
 DocType: Assessment Plan,Supervisor Name,Vadovo vardas
 DocType: Selling Settings,Campaign Naming By,Kampanijos pavadinimas pagal
-DocType: Course,Course Code,Modulio kodas
+DocType: Student Group Creation Tool Course,Course Code,Modulio kodas
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Aerospace,Aerospace
 DocType: Landed Cost Voucher,Distribute Charges Based On,Paskirstykite mokesčius pagal „On“
 DocType: Supplier Scorecard Scoring Criteria,Supplier Scorecard Scoring Criteria,Tiekėjo rezultatų suvestinės kriterijai
@@ -478,10 +482,8 @@ DocType: Restaurant Menu,Restaurant Menu,Restorano meniu
 DocType: Asset Movement,Purpose,Tikslas
 apps/erpnext/erpnext/hr/doctype/salary_structure_assignment/salary_structure_assignment.py,Salary Structure Assignment for Employee already exists,Atlyginimų struktūros priskyrimas darbuotojui jau yra
 DocType: Clinical Procedure,Service Unit,Paslaugų skyrius
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Klientas&gt; Klientų grupė&gt; Teritorija
 DocType: Travel Request,Identification Document Number,Identifikavimo dokumento numeris
 DocType: Stock Entry,Additional Costs,Papildomos išlaidos
-DocType: Course,"Parent Course (Leave blank, if this isn't part of Parent Course)","Tėvų kursas (palikite tuščią, jei tai nėra tėvų kursų dalis)"
 DocType: Employee Education,Employee Education,Darbuotojų švietimas
 apps/erpnext/erpnext/hr/doctype/staffing_plan/staffing_plan.js,Number of positions cannot be less then current count of employees,Pozicijų skaičius negali būti mažesnis už dabartinį darbuotojų skaičių
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,All Customer Groups,Visos klientų grupės
@@ -528,6 +530,7 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,"If two or mo
 apps/erpnext/erpnext/controllers/selling_controller.py,Row {0}: Qty is mandatory,{0} eilutė: Kiekis yra privalomas
 DocType: Sales Invoice,Against Income Account,Prieš pajamų sąskaitą
 apps/erpnext/erpnext/controllers/accounts_controller.py,Row #{0}: Purchase Invoice cannot be made against an existing asset {1},# {0} eilutė: pirkimo sąskaita faktūra negali būti pateikta pagal esamą turtą {1}
+apps/erpnext/erpnext/config/buying.py,Rules for applying different promotional schemes.,Įvairių reklamos schemų taikymo taisyklės.
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,UOM coversion factor required for UOM: {0} in Item: {1},"UOM perskaičiavimo koeficientas, reikalingas UOM: {0} elemente: {1}"
 apps/erpnext/erpnext/buying/utils.py,Please enter quantity for Item {0},Įveskite {0} elemento kiekį
 DocType: Workstation,Electricity Cost,Elektros sąnaudos
@@ -862,7 +865,6 @@ DocType: Item,Total Projected Qty,Bendras numatomas kiekis
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,Boms,Boms
 DocType: Work Order,Actual Start Date,Faktinė pradžios data
 apps/erpnext/erpnext/hr/doctype/compensatory_leave_request/compensatory_leave_request.py,You are not present all day(s) between compensatory leave request days,Jūs nedalyvaujate visą dieną (-as) tarp kompensacinių atostogų dienų
-DocType: Company,About the Company,Apie įmonę
 apps/erpnext/erpnext/config/accounting.py,Tree of financial accounts.,Finansinių sąskaitų medis.
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Indirect Income,Netiesioginės pajamos
 DocType: Hotel Room Reservation Item,Hotel Room Reservation Item,Viešbučio kambarių rezervavimo punktas
@@ -877,6 +879,7 @@ apps/erpnext/erpnext/config/crm.py,Database of potential customers.,Potencialių
 DocType: Skill,Skill Name,Įgūdžių pavadinimas
 apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.js,Print Report Card,Spausdinti ataskaitos kortelę
 DocType: Soil Texture,Ternary Plot,Trivietis sklypas
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Nustatykite {0} pavadinimo seriją naudodami sąrankos nustatymus&gt; Nustatymai&gt; Pavadinimo serija
 apps/erpnext/erpnext/crm/report/lead_conversion_time/lead_conversion_time.py,Support Tickets,Palaikymo bilietai
 DocType: Asset Category Account,Fixed Asset Account,Fiksuoto turto sąskaita
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py,Latest,Naujausi
@@ -886,6 +889,7 @@ DocType: Program Enrollment Course,Program Enrollment Course,Programos priėmimo
 ,IRS 1099,IRS 1099
 apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set the series to be used.,Nustatykite naudotiną seriją.
 DocType: Delivery Trip,Distance UOM,Atstumas UOM
+DocType: Accounting Dimension,Mandatory For Balance Sheet,Privalomas balansui
 DocType: Payment Entry,Total Allocated Amount,Bendra skirta suma
 DocType: Sales Invoice,Get Advances Received,Gaukite gautus avansus
 DocType: Student,B-,B-
@@ -909,6 +913,7 @@ DocType: Maintenance Schedule Item,Maintenance Schedule Item,Techninės prieži�
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,POS Profile required to make POS Entry,„POS“ įrašai reikalingi POS įrašui atlikti
 DocType: Education Settings,Enable LMS,Įgalinti LMS
 DocType: POS Closing Voucher,Sales Invoices Summary,Pardavimų sąskaitų faktūrų suvestinė
+apps/erpnext/erpnext/hr/doctype/employee/employee_dashboard.py,Benefit,Nauda
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Credit To account must be a Balance Sheet account,Kreditas į sąskaitą turi būti balanso sąskaita
 DocType: Video,Duration,Trukmė
 DocType: Lab Test Template,Descriptive,Aprašomasis
@@ -959,6 +964,7 @@ apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py,The numbe
 DocType: Project,Start and End Dates,Pradžios ir pabaigos datos
 DocType: Supplier Scorecard,Notify Employee,Pranešti apie darbuotoją
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Software,Programinė įranga
+DocType: Program,Allow Self Enroll,Leisti savarankiškai registruotis
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Stock Expenses,Išlaidos
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Reference No is mandatory if you entered Reference Date,"Nuorodos numeris yra privalomas, jei įvedėte nuorodos datą"
 DocType: Training Event,Workshop,Seminaras
@@ -1011,6 +1017,7 @@ DocType: Lab Test Template,Lab Test Template,Lab bandymo šablonas
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js,Max: {0},Maks.: {0}
 apps/erpnext/erpnext/regional/italy/utils.py,E-Invoicing Information Missing,Informacijos apie e. Sąskaitą faktūros trūksta
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,No material request created,Nėra sukurtas materialus prašymas
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Elemento kodas&gt; Prekių grupė&gt; Gamintojas
 DocType: Loan,Total Amount Paid,Iš viso sumokėta suma
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py,All these items have already been invoiced,Visi šie elementai jau buvo išrašyti sąskaitoje
 DocType: Training Event,Trainer Name,Trenerio vardas
@@ -1032,6 +1039,7 @@ apps/erpnext/erpnext/config/settings.py,"Create and manage daily, weekly and mon
 DocType: Academic Term,Academic Year,Mokslo metai
 DocType: Sales Stage,Stage Name,Sceninis vardas
 DocType: SMS Center,All Employee (Active),Visi darbuotojai (aktyvūs)
+DocType: Accounting Dimension,Accounting Dimension,Apskaitos dimensija
 DocType: Project,Customer Details,Kliento duomenys
 DocType: Buying Settings,Default Supplier Group,Numatytoji tiekėjų grupė
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Please cancel Purchase Receipt {0} first,Pirmiausia atšaukite pirkimo čekį {0}
@@ -1146,7 +1154,6 @@ DocType: Pricing Rule,"Higher the number, higher the priority","Didesnis skaiči
 DocType: Designation,Required Skills,Reikalingi įgūdžiai
 DocType: Marketplace Settings,Disable Marketplace,Išjungti „Marketplace“
 DocType: Budget,Action if Annual Budget Exceeded on Actual,"Veiksmas, jei metinis biudžetas viršijamas faktiškai"
-DocType: Course,Course Abbreviation,Kurso santrumpa
 apps/erpnext/erpnext/hr/doctype/attendance_request/attendance_request.py,Attendance not submitted for {0} as {1} on leave.,"Dalyvavimas, nepateiktas {0} kaip {1} atostogų metu."
 DocType: Pricing Rule,Promotional Scheme Id,Reklaminės schemos ID
 apps/erpnext/erpnext/projects/doctype/project/project.py,End date of task <b>{0}</b> cannot be greater than <b>{1}</b> expected end date <b>{2}</b>,Užduoties <b>{0}</b> pabaigos data negali būti didesnė nei <b>{1}</b> tikėtina pabaigos data <b>{2}</b>
@@ -1289,7 +1296,7 @@ DocType: Bank Guarantee,Margin Money,Pinigų marža
 DocType: Chapter,Chapter,Skyrius
 DocType: Purchase Receipt Item Supplied,Current Stock,Akcijos
 DocType: Employee,History In Company,Istorija įmonėje
-DocType: Item,Manufacturer,Gamintojas
+DocType: Purchase Invoice Item,Manufacturer,Gamintojas
 apps/erpnext/erpnext/healthcare/setup.py,Moderate Sensitivity,Vidutinis jautrumas
 DocType: Compensatory Leave Request,Leave Allocation,Palikite paskirstymą
 DocType: Timesheet,Timesheet,Laiko juosta
@@ -1320,6 +1327,7 @@ DocType: Work Order,Material Transferred for Manufacturing,Gamybai perduota med�
 DocType: Products Settings,Hide Variants,Slėpti variantus
 DocType: Manufacturing Settings,Disable Capacity Planning and Time Tracking,Išjungti pajėgumų planavimą ir laiko stebėjimą
 DocType: Sales Taxes and Charges Template,* Will be calculated in the transaction.,* Bus skaičiuojamas sandoryje.
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py,{0} is required for 'Balance Sheet' account {1}.,„Balanso“ paskyrai {1} reikia {0}.
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,{0} not allowed to transact with {1}. Please change the Company.,{0} neleidžiama prekiauti su {1}. Pakeiskite bendrovę.
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,"As per the Buying Settings if Purchase Reciept Required == 'YES', then for creating Purchase Invoice, user need to create Purchase Receipt first for item {0}","Kaip nurodyta pirkimo nuostatose, jei reikia įsigyti pirkimo == &#39;TAIP&#39;, tada norėdami sukurti pirkimo sąskaitą, vartotojas turi sukurti pirkinį „Pirkimo kvitas“ elementui {0}"
 DocType: Delivery Trip,Delivery Details,Pristatymo duomenys
@@ -1355,7 +1363,7 @@ apps/erpnext/erpnext/www/all-products/index.html,Prev,Ankstesnis
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Unit of Measure,Matavimo vienetas
 DocType: Lab Test,Test Template,Bandymo šablonas
 DocType: Fertilizer,Fertilizer Contents,Trąšų turinys
-apps/erpnext/erpnext/utilities/user_progress.py,Minute,Minutė
+DocType: Quality Meeting Minutes,Minute,Minutė
 apps/erpnext/erpnext/controllers/accounts_controller.py,"Row #{0}: Asset {1} cannot be submitted, it is already {2}","# {0} eilutė: negalima pateikti turto {1}, jis jau yra {2}"
 DocType: Task,Actual Time (in Hours),Faktinis laikas (valandomis)
 DocType: Period Closing Voucher,Closing Account Head,Sąskaitos vadovo uždarymas
@@ -1528,7 +1536,7 @@ apps/erpnext/erpnext/config/healthcare.py,Laboratory,Laboratorija
 DocType: Purchase Order,To Bill,Apmokestinti
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Utility Expenses,Naudingumo išlaidos
 DocType: Manufacturing Settings,Time Between Operations (in mins),Laikas tarp operacijų (min.)
-DocType: Quality Goal,May,Gegužė
+DocType: GSTR 3B Report,May,Gegužė
 apps/erpnext/erpnext/accounts/utils.py,"Payment Gateway Account not created, please create one manually.","Mokėjimo šliuzo paskyra nėra sukurta, sukurkite ją rankiniu būdu."
 DocType: Opening Invoice Creation Tool,Purchase,Pirkimas
 DocType: Program Enrollment,School House,Mokyklos namai
@@ -1560,6 +1568,7 @@ apps/erpnext/erpnext/config/buying.py,Rules for applying pricing and discount.,K
 DocType: Supplier,Statutory info and other general information about your Supplier,Teisinė informacija ir kita bendra informacija apie jūsų tiekėją
 DocType: Item Default,Default Selling Cost Center,Numatytojo pardavimo kainos centras
 DocType: Sales Partner,Address & Contacts,Adresas ir kontaktai
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Prašome nustatyti numeravimo serijas dalyvavimui naudojant sąranką&gt; Numeracijos serija
 DocType: Subscriber,Subscriber,Abonentas
 apps/erpnext/erpnext/utilities/bot.py,[{0}](#Form/Item/{0}) is out of stock,[{0}] (# Form / Item / {0}) yra nepasiekiamas
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js,Please select Posting Date first,Pirmiausia pasirinkite paskelbimo datą
@@ -1587,6 +1596,7 @@ DocType: Healthcare Practitioner,Inpatient Visit Charge,Stacionarinio apsilankym
 DocType: Bank Statement Settings,Transaction Data Mapping,Operacijų duomenų atvaizdavimas
 apps/erpnext/erpnext/crm/doctype/lead/lead.py,A Lead requires either a person's name or an organization's name,Švinas reikalauja asmens vardo arba organizacijos pavadinimo
 DocType: Student,Guardians,Globėjai
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Švietimo&gt; Švietimo nustatymuose nustatykite instruktoriaus pavadinimo sistemą
 apps/erpnext/erpnext/public/js/stock_analytics.js,Select Brand...,Pasirinkite prekės ženklą ...
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Middle Income,Vidutinės pajamos
 DocType: Shipping Rule,Calculate Based On,Apskaičiuokite pagrindu
@@ -1598,7 +1608,7 @@ DocType: Expense Claim Advance,Expense Claim Advance,Išlaidų reikalavimo avans
 DocType: Purchase Invoice,Rounding Adjustment (Company Currency),Apvalinimo koregavimas (įmonės valiuta)
 DocType: Item,Publish in Hub,Paskelbkite „Hub“
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,GSTIN,GSTIN
-DocType: Quality Goal,August,Rugpjūtis
+DocType: GSTR 3B Report,August,Rugpjūtis
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js,Please enter Purchase Receipt first,Pirmiausia įveskite pirkimo čekį
 apps/erpnext/erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.js,Start Year,Pradžios metai
 apps/erpnext/erpnext/selling/report/sales_partner_target_variance_based_on_item_group/item_group_wise_sales_target_variance.py,Target ({}),Taikymas ({})
@@ -1617,6 +1627,7 @@ DocType: Item,Max Sample Quantity,Maksimalus mėginio kiekis
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,Šaltinis ir tikslinis sandėlis turi būti skirtingi
 DocType: Employee Benefit Application,Benefits Applied,Taikomos išmokos
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Against Journal Entry {0} does not have any unmatched {1} entry,Prieš žurnalo įrašą {0} neturi jokio nesuderinto {1} įrašo
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,"Special Characters except ""-"", ""#"", ""."", ""/"", ""{"" and ""}"" not allowed in naming series","Specialieji simboliai, išskyrus &quot;-&quot;, &quot;#&quot;, &quot;.&quot;, &quot;/&quot;, &quot;{&quot; Ir &quot;}&quot;, neleidžiami vardų serijoje"
 apps/erpnext/erpnext/accounts/doctype/promotional_scheme/promotional_scheme.py,Price or product discount slabs are required,Reikalingos kainos arba nuolaidų plokštės
 apps/erpnext/erpnext/utilities/user_progress.py,Set a Target,Nustatykite taikinį
 apps/erpnext/erpnext/education/doctype/student_attendance/student_attendance.py,Attendance Record {0} exists against Student {1},Dalyvio įrašas {0} egzistuoja prieš studentą {1}
@@ -1632,10 +1643,8 @@ apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py,"Could not cre
 DocType: Supplier Scorecard,Per Month,Per mėnesį
 DocType: Routing,Routing Name,Maršruto pavadinimas
 DocType: Disease,Common Name,Dažnas vardas
-DocType: Quality Goal,Measurable,Išmatuojamas
 DocType: Education Settings,LMS Title,LMS pavadinimas
 apps/erpnext/erpnext/config/non_profit.py,Loan Management,Paskolų valdymas
-apps/erpnext/erpnext/support/page/support_analytics/support_analytics.js,Support Analtyics,Palaikykite „Analty“
 DocType: Clinical Procedure,Consumable Total Amount,Vartojama bendra suma
 apps/erpnext/erpnext/healthcare/doctype/clinical_procedure_template/clinical_procedure_template.js,Enable Template,Įgalinti šabloną
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py,Customer LPO,Kliento LPO
@@ -1775,6 +1784,7 @@ DocType: Restaurant Order Entry Item,Served,Pateikta
 DocType: Loan,Member,Narys
 DocType: Practitioner Service Unit Schedule,Practitioner Service Unit Schedule,Praktikų aptarnavimo skyriaus tvarkaraštis
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Wire Transfer,Vielos perkėlimas
+DocType: Quality Review Objective,Quality Review Objective,Kokybės peržiūros tikslas
 DocType: Bank Reconciliation Detail,Against Account,Prieš sąskaitą
 DocType: Projects Settings,Projects Settings,Projektų nustatymai
 apps/erpnext/erpnext/stock/dashboard/item_dashboard_list.html,Actual Qty {0} / Waiting Qty {1},Tikrasis kiekis {0} / laukimo kiekis {1}
@@ -1803,6 +1813,7 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Venture Capital,Ri
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py,Fiscal Year End Date should be one year after Fiscal Year Start Date,Finansinių metų pabaigos data turėtų būti vieneri metai nuo fiskalinių metų pradžios datos
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py,Daily Reminders,Dienos priminimai
 DocType: Item,Default Sales Unit of Measure,Numatytasis matavimo vienetas
+apps/erpnext/erpnext/regional/report/gst_itemised_sales_register/gst_itemised_sales_register.js,Company GSTIN,Įmonė GSTIN
 DocType: Asset Finance Book,Rate of Depreciation,Nusidėvėjimo norma
 DocType: Support Search Source,Post Description Key,Skelbimo aprašo raktas
 DocType: Loyalty Program Collection,Minimum Total Spent,Minimali bendra suma
@@ -1874,6 +1885,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.py,Default Unit of Measure for Item
 apps/erpnext/erpnext/stock/doctype/item/item.js,Changing Customer Group for the selected Customer is not allowed.,Kliento grupės keitimas pasirinktam klientui neleidžiamas.
 DocType: Serial No,Creation Document Type,Kūrimo dokumento tipas
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,Galimas partijos kiekis sandėlyje
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py,Invoice Grand Total,Sąskaitos faktūra „Grand Total“
 apps/erpnext/erpnext/setup/doctype/territory/territory.js,This is a root territory and cannot be edited.,Tai šakninė teritorija ir negali būti redaguojama.
 DocType: Patient,Surgical History,Chirurginė istorija
 apps/erpnext/erpnext/config/quality_management.py,Tree of Quality Procedures.,Kokybės procedūrų medis.
@@ -1978,6 +1990,8 @@ apps/erpnext/erpnext/buying/doctype/supplier/supplier_dashboard.py,Procurement,P
 DocType: Item Group,Check this if you want to show in website,"Patikrinkite, ar norite rodyti svetainėje"
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py,Fiscal Year {0} not found,Fiskaliniai metai {0} nerastas
 DocType: Bank Statement Settings,Bank Statement Settings,Banko ataskaitos nustatymai
+DocType: Quality Procedure Process,Link existing Quality Procedure.,Susieti esamą kokybės tvarką.
+apps/erpnext/erpnext/config/getting_started.py,Import Chart Of Accounts from CSV / Excel files,Importuoti sąskaitų schemą iš CSV / Excel failų
 DocType: Appraisal Goal,Score (0-5),Rezultatas (0-5)
 apps/erpnext/erpnext/stock/doctype/item/item.py,Attribute {0} selected multiple times in Attributes Table,Atributas lentelėje pažymėtas kelis kartus atributas {0}
 DocType: Purchase Invoice,Debit Note Issued,Išrašyta debeto pastaba
@@ -1986,7 +2000,6 @@ apps/erpnext/erpnext/hr/utils.py,Employee {0} of grade {1} have no default leave
 DocType: Leave Policy Detail,Leave Policy Detail,Palikite politikos informaciją
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,Warehouse not found in the system,Sandėlis sistemoje nerastas
 DocType: Healthcare Practitioner,OP Consulting Charge,OP konsultavimo mokestis
-DocType: Quality Goal,Measurable Goal,Išmatuotinas tikslas
 DocType: Bank Statement Transaction Payment Item,Invoices,Sąskaitos
 DocType: Currency Exchange,Currency Exchange,Valiutos keitykla
 DocType: Payroll Entry,Fortnightly,Naktį
@@ -2049,6 +2062,7 @@ DocType: Buying Settings,Allow Item to be added multiple times in a transaction,
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,{0} {1} is not submitted,{0} {1} nepateikiama
 DocType: Work Order,Backflush raw materials from work-in-progress warehouse,Atsarginės žaliavos iš nepertraukiamo sandėlio
 DocType: Maintenance Team Member,Maintenance Team Member,Techninės priežiūros komandos narys
+apps/erpnext/erpnext/config/accounting.py,Setup custom dimensions for accounting,Nustatykite individualius apskaitos matmenis
 DocType: Crop Cycle,The minimum distance between rows of plants for optimum growth,Minimalus atstumas tarp augalų eilučių siekiant optimalaus augimo
 DocType: Employee Health Insurance,Health Insurance Name,Sveikatos draudimo pavadinimas
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Stock Assets,Akcijų turtas
@@ -2081,7 +2095,7 @@ DocType: Delivery Note,Billing Address Name,Atsiskaitymo adreso pavadinimas
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js,Alternate Item,Pakaitinis elementas
 DocType: Certification Application,Name of Applicant,Pareiškėjo pavadinimas
 DocType: Leave Type,Earned Leave,Uždirbtas atostogas
-DocType: Quality Goal,June,Birželio mėn
+DocType: GSTR 3B Report,June,Birželio mėn
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py,Row {0}: Cost center is required for an item {1},{0} eilutė: elementui {1} reikalingas išlaidų centras
 apps/erpnext/erpnext/setup/doctype/authorization_control/authorization_control.py,Can be approved by {0},Galima patvirtinti {0}
 apps/erpnext/erpnext/stock/doctype/item/item.py,Unit of Measure {0} has been entered more than once in Conversion Factor Table,{0} matavimo vienetas konversijos koeficiento lentelėje buvo įvestas daugiau nei vieną kartą
@@ -2102,6 +2116,7 @@ DocType: Lab Test Template,Standard Selling Rate,Standartinė pardavimo norma
 apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.py,Please set an active menu for Restaurant {0},Nustatykite aktyvų meniu restorane {0}
 apps/erpnext/erpnext/public/js/hub/marketplace.js,You need to be a user with System Manager and Item Manager roles to add users to Marketplace.,"Norint pridėti naudotojų prie „Marketplace“, turite būti „System Manager“ ir „Item Manager“ vaidmenų naudotojas."
 DocType: Asset Finance Book,Asset Finance Book,Turto finansinė knyga
+DocType: Quality Goal Objective,Quality Goal Objective,Kokybės tikslo tikslas
 DocType: Employee Transfer,Employee Transfer,Darbuotojų perkėlimas
 ,Sales Funnel,Pardavimų piltuvas
 DocType: Agriculture Analysis Criteria,Water Analysis,Vandens analizė
@@ -2140,6 +2155,7 @@ DocType: Employee Transfer Property,Employee Transfer Property,Darbuotojų perk�
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html,Pending Activities,Laukiama veikla
 apps/erpnext/erpnext/utilities/user_progress.py,List a few of your customers. They could be organizations or individuals.,Išvardinkite keletą savo klientų. Jie gali būti organizacijos ar asmenys.
 DocType: Bank Guarantee,Bank Account Info,Banko sąskaitos informacija
+DocType: Quality Goal,Weekday,Savaitės diena
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py,Guardian1 Name,Guardian1 pavadinimas
 DocType: Salary Component,Variable Based On Taxable Salary,Kintamasis pagal apmokestinamąjį atlyginimą
 DocType: Accounting Period,Accounting Period,Apskaitos laikotarpis
@@ -2223,7 +2239,7 @@ DocType: Purchase Invoice,Rounding Adjustment,Apvalinimo koregavimas
 DocType: Quality Review Table,Quality Review Table,Kokybės peržiūros lentelė
 DocType: Member,Membership Expiry Date,Narystės galiojimo data
 DocType: Asset Finance Book,Expected Value After Useful Life,Numatoma vertė po naudingo tarnavimo laiko
-DocType: Quality Goal,November,Lapkričio mėn
+DocType: GSTR 3B Report,November,Lapkričio mėn
 DocType: Loan Application,Rate of Interest,Palūkanų norma
 DocType: Bank Statement Transaction Payment Item,Bank Statement Transaction Payment Item,Banko ataskaitos operacijos mokėjimo punktas
 DocType: Restaurant Reservation,Waitlisted,Laukiama sąraše
@@ -2287,6 +2303,7 @@ apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedu
 						must be greater than or equal to {2}","{0} eilutė: norėdami nustatyti {1} periodiškumą, skirtumas tarp nuo ir iki dienos turi būti didesnis arba lygus {2}"
 DocType: Purchase Invoice Item,Valuation Rate,Vertinimo norma
 DocType: Shopping Cart Settings,Default settings for Shopping Cart,Prekių krepšelio numatytieji nustatymai
+DocType: Quiz,Score out of 100,Rezultatas iš 100
 DocType: Manufacturing Settings,Capacity Planning,Pajėgumų planavimas
 apps/erpnext/erpnext/utilities/user_progress.py,Go to Instructors,Eikite į instruktorius
 DocType: Activity Cost,Projects,Projektai
@@ -2296,6 +2313,7 @@ apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.js,"To set this Fi
 DocType: C-Form,II,II
 DocType: Cashier Closing,From Time,Nuo laiko
 apps/erpnext/erpnext/stock/doctype/item/item.js,Variant Details Report,Variantų ataskaitos ataskaita
+,BOM Explorer,BOM Explorer
 DocType: Currency Exchange,For Buying,Pirkimas
 apps/erpnext/erpnext/healthcare/doctype/practitioner_schedule/practitioner_schedule.js,Slots for {0} are not added to the schedule,{0} laiko tarpsniai nėra įtraukti į tvarkaraštį
 DocType: Target Detail,Target Distribution,Tikslinis paskirstymas
@@ -2313,6 +2331,7 @@ DocType: Activity Cost,Activity Cost,Veiklos kaina
 DocType: Journal Entry,Payment Order,Pirkimo užsakymas
 apps/erpnext/erpnext/stock/doctype/item/item_dashboard.py,Pricing,Kainos
 ,Item Delivery Date,Prekių pristatymo data
+DocType: Quality Goal,January-April-July-October,Sausio – balandžio – liepos – spalio mėn
 DocType: Purchase Order Item,Warehouse and Reference,Sandėlis ir nuoroda
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account with child nodes cannot be converted to ledger,"Paskyra, kurioje yra vaikų mazgų, negali būti konvertuojama į knygą"
 DocType: Soil Texture,Clay Composition (%),Molio sudėtis (%)
@@ -2363,6 +2382,7 @@ apps/erpnext/erpnext/hr/utils.py,Future dates not allowed,Ateities datos neleid�
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py,Varaiance ,„Varaiance“
 apps/erpnext/erpnext/regional/italy/utils.py,Row {0}: Please set the Mode of Payment in Payment Schedule,{0} eilutė: nustatykite mokėjimo būdą mokėjimo grafike
 apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html,Academic Term: ,Akademinis terminas:
+DocType: Quality Feedback Parameter,Quality Feedback Parameter,Kokybės atsiliepimų parametras
 apps/erpnext/erpnext/accounts/page/pos/pos.js,Please select Apply Discount On,Pasirinkite Apply Discount
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,Row # {0}: ,# {0} eilutė:
 apps/erpnext/erpnext/regional/report/irs_1099/irs_1099.py,Total Payments,Iš viso mokėjimų
@@ -2405,7 +2425,7 @@ DocType: Hub Tracked Item,Hub Node,Stebėjimo mazgas
 apps/erpnext/erpnext/projects/report/billing_summary.py,Employee ID,Darbuotojo ID
 DocType: Salary Structure Assignment,Salary Structure Assignment,Atlyginimų struktūros priskyrimas
 DocType: POS Closing Voucher Taxes,POS Closing Voucher Taxes,POS uždarymo čekių mokesčiai
-apps/erpnext/erpnext/quality_management/doctype/customer_feedback/customer_feedback_list.js,Action Initialised,Veiksmas inicijuotas
+apps/erpnext/erpnext/quality_management/doctype/quality_review/quality_review_list.js,Action Initialised,Veiksmas inicijuotas
 DocType: POS Profile,Applicable for Users,Taikoma naudotojams
 DocType: Training Event,Exam,Egzaminas
 apps/erpnext/erpnext/accounts/general_ledger.py,Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction.,Nerasta klaidingų pagrindinių knygų įrašų. Galbūt pasirinkote neteisingą paskyrą operacijoje.
@@ -2512,6 +2532,7 @@ apps/erpnext/erpnext/selling/report/sales_partner_target_variance_based_on_item_
 DocType: Location,Longitude,Ilguma
 DocType: Accounts Settings,Determine Address Tax Category From,Nustatykite adreso mokesčių kategoriją nuo
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Identifying Decision Makers,Sprendimų priėmėjų nustatymas
+DocType: Stock Entry Detail,Reference Purchase Receipt,Nuoroda Pirkimo kvitas
 apps/erpnext/erpnext/accounts/doctype/invoice_discounting/invoice_discounting.js,Get Invocies,Gaukite „Invocies“
 DocType: Tally Migration,Is Day Book Data Imported,Ar importuojami dienos knygų duomenys
 ,Sales Partners Commission,Pardavimų partnerių komisija
@@ -2535,6 +2556,7 @@ DocType: Leave Type,Applicable After (Working Days),Taikoma po (darbo dienos)
 DocType: Timesheet Detail,Hrs,Val
 DocType: Supplier Scorecard Criteria,Supplier Scorecard Criteria,Tiekėjo rezultatų vertinimo kriterijai
 DocType: Amazon MWS Settings,FR,FR
+DocType: Quality Feedback Template Parameter,Quality Feedback Template Parameter,Kokybės atsiliepimų šablono parametras
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date of Joining must be greater than Date of Birth,Prisijungimo data turi būti didesnė už gimimo datą
 DocType: Bank Statement Transaction Invoice Item,Invoice Date,Sąskaitos data
 DocType: Healthcare Settings,Create Lab Test(s) on Sales Invoice Submit,Sukurti „Lab“ testą (-us) pardavimų sąskaitoje faktūroje
@@ -2641,7 +2663,7 @@ DocType: Plant Analysis Criteria,Minimum Permissible Value,Minimali leistina ver
 DocType: Stock Entry,Source Warehouse Address,Šaltinio sandėlio adresas
 DocType: Compensatory Leave Request,Compensatory Leave Request,Kompensacinio atostogų prašymas
 DocType: Lead,Mobile No.,Mobilusis Nr.
-DocType: Quality Goal,July,Liepos mėn
+DocType: GSTR 3B Report,July,Liepos mėn
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Eligible ITC,Tinkama ITC
 DocType: Fertilizer,Density (if liquid),Tankis (jei skystas)
 DocType: Employee,External Work History,Išorės darbo istorija
@@ -2717,6 +2739,7 @@ DocType: Certification Application,Certification Status,Sertifikavimo būsena
 apps/erpnext/erpnext/assets/doctype/asset_movement/asset_movement.py,Source Location is required for the asset {0},Šaltinio vieta reikalinga turiniui {0}
 DocType: Employee,Encashment Date,Priėmimo data
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py,Please select Completion Date for Completed Asset Maintenance Log,Pasirinkite užbaigto turto priežiūros žurnalo užbaigimo datą
+DocType: Quiz,Latest Attempt,Paskutinis bandymas
 DocType: Leave Block List,Allow Users,Leisti naudotojams
 apps/erpnext/erpnext/accounts/doctype/account/account.js,Chart Of Accounts,Sąskaitų diagrama
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py,Customer is mandatory if 'Opportunity From' is selected as Customer,"Klientas yra privalomas, jei „Opportunity From“ yra pasirinktas Klientu"
@@ -2781,7 +2804,6 @@ DocType: Supplier Scorecard Period,Supplier Scorecard Setup,Tiekėjas Scorecard 
 DocType: Amazon MWS Settings,Amazon MWS Settings,„Amazon MWS“ nustatymai
 DocType: Program Enrollment,Walking,Ėjimas
 DocType: SMS Log,Requested Numbers,Prašomi numeriai
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Prašome nustatyti numeravimo serijas dalyvavimui naudojant sąranką&gt; Numeracijos serija
 DocType: Woocommerce Settings,Freight and Forwarding Account,Krovinių ir persiuntimo sąskaita
 apps/erpnext/erpnext/accounts/party.py,Please select a Company,Pasirinkite įmonę
 apps/erpnext/erpnext/assets/doctype/asset_category/asset_category.py,Row {0}: {1} must be greater than 0,{0} eilutė: {1} turi būti didesnė nei 0
@@ -2851,7 +2873,7 @@ apps/erpnext/erpnext/config/accounting.py,Bills raised to Customers.,Klientams i
 DocType: Training Event,Seminar,Seminaras
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,Credit ({0}),Kreditas ({0})
 DocType: Payment Request,Subscription Plans,Prenumeratos planai
-DocType: Quality Goal,March,Kovas
+DocType: GSTR 3B Report,March,Kovas
 apps/erpnext/erpnext/stock/doctype/batch/batch.js,Split Batch,Split partija
 DocType: School House,House Name,Namo Pavadinimas
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py,Outstanding for {0} cannot be less than zero ({1}),Neįvykdyta {0} suma negali būti mažesnė už nulį ({1})
@@ -2914,7 +2936,6 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,"For job card {0},
 DocType: Asset,Insurance Start Date,Draudimo pradžios data
 DocType: Target Detail,Target Detail,Tikslinė informacija
 DocType: Packing Slip,Net Weight UOM,Grynasis svoris UOM
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},UOM konversijos koeficientas ({0} -&gt; {1}) elementui: {2} nerastas
 DocType: Purchase Invoice Item,Net Amount (Company Currency),Grynoji suma (įmonės valiuta)
 DocType: Bank Statement Transaction Settings Item,Mapped Data,Žemėlapiai
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Securities and Deposits,Vertybiniai popieriai ir indėliai
@@ -2964,6 +2985,7 @@ DocType: Cheque Print Template,Cheque Height,Patikrinkite aukštį
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please enter relieving date.,Įveskite atleidimo datą.
 DocType: Loyalty Program,Loyalty Program Help,Lojalumo programos pagalba
 DocType: Journal Entry,Inter Company Journal Entry Reference,„Inter Company Journal“ įrašo įrašas
+DocType: Quality Meeting,Agenda,Darbotvarkė
 DocType: Quality Action,Corrective,Koreguojama
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js,Group By,Grupuoti pagal
 DocType: Bank Account,Address and Contact,Adresas ir kontaktas
@@ -3017,7 +3039,7 @@ DocType: GL Entry,Credit Amount,Kredito suma
 apps/erpnext/erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py,Total Amount Credited,Iš viso kredituota suma
 DocType: Support Search Source,Post Route Key List,Po maršruto raktų sąrašo
 apps/erpnext/erpnext/accounts/utils.py,{0} {1} not in any active Fiscal Year.,{0} {1} ne bet kuriame aktyviame fiskaliniame metais.
-DocType: Quality Action Table,Problem,Problema
+DocType: Quality Action Resolution,Problem,Problema
 DocType: Training Event,Conference,Konferencija
 DocType: Mode of Payment Account,Mode of Payment Account,Mokėjimo sąskaitos būdas
 DocType: Leave Encashment,Encashable days,Pridedamos dienos
@@ -3143,7 +3165,7 @@ DocType: Item,"Purchase, Replenishment Details","Pirkimo, papildymo informacija"
 DocType: Purchase Invoice,"Once set, this invoice will be on hold till the set date","Kai bus nustatyta, ši sąskaita bus užlaikyta iki nustatytos datos"
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Stock cannot exist for Item {0} since has variants,"Nuo {0} elemento negalima įsigyti atsargų, nes yra variantų"
 DocType: Lab Test Template,Grouped,Sugrupuota
-DocType: Quality Goal,January,Sausio mėn
+DocType: GSTR 3B Report,January,Sausio mėn
 DocType: Course Assessment Criteria,Course Assessment Criteria,Kursų vertinimo kriterijai
 DocType: Certification Application,INR,INR
 DocType: Job Card Time Log,Completed Qty,Užbaigtas kiekis
@@ -3238,7 +3260,7 @@ DocType: Healthcare Service Unit Type,Healthcare Service Unit Type,Sveikatos pri
 apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py,Please enter atleast 1 invoice in the table,Į lentelę įveskite bent 1 sąskaitą
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,Sales Order {0} is not submitted,Pardavimo užsakymas {0} nepateikiamas
 apps/erpnext/erpnext/education/api.py,Attendance has been marked successfully.,Dalyvavimas buvo pažymėtas sėkmingai.
-apps/erpnext/erpnext/setup/doctype/company/company_dashboard.py,Pre Sales,Prieš-išpardavimai
+apps/erpnext/erpnext/accounts/doctype/tax_category/tax_category_dashboard.py,Pre Sales,Prieš-išpardavimai
 apps/erpnext/erpnext/config/projects.py,Project master.,Projekto vadovas.
 DocType: Daily Work Summary,Daily Work Summary,Dienos darbo suvestinė
 DocType: Asset,Partially Depreciated,Iš dalies nudėvima
@@ -3247,6 +3269,7 @@ apps/erpnext/erpnext/stock/doctype/material_request/material_request.js,For Defa
 DocType: Employee,Leave Encashed?,Palikite įklijuotą?
 DocType: Certified Consultant,Discuss ID,Aptarkite ID
 apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.py,Please set GST Accounts in GST Settings,GST nustatymuose nustatykite GST paskyras
+DocType: Quiz,Latest Highest Score,Naujausias aukščiausias balas
 DocType: Supplier,Billing Currency,Atsiskaitymo valiuta
 apps/erpnext/erpnext/education/doctype/program/program_dashboard.py,Student Activity,Studentų veikla
 apps/erpnext/erpnext/setup/doctype/territory/territory.py,Either target qty or target amount is mandatory,Privaloma nurodyti tikslinį kiekį arba tikslinę sumą
@@ -3272,18 +3295,21 @@ DocType: Sales Order,Not Delivered,Nepristatytas
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,Leave Type {0} cannot be allocated since it is leave without pay,"{0} atostogų tipas negali būti priskirtas, nes tai yra atostogos be darbo užmokesčio"
 DocType: GL Entry,Debit Amount,Debeto suma
 apps/erpnext/erpnext/stock/doctype/item_alternative/item_alternative.py,Already record exists for the item {0},Jau įrašytas elementas {0}
+DocType: Video,Vimeo,Vimeo
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Sub Assemblies,Pogrupiai
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,"If multiple Pricing Rules continue to prevail, users are asked to set Priority manually to resolve conflict.","Jei toliau vyrauja kelios kainų nustatymo taisyklės, naudotojai raginami nustatyti prioritetą rankiniu būdu, kad išspręstų konfliktą."
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,Cannot deduct when category is for 'Valuation' or 'Valuation and Total',"Negalima išskaičiuoti, kai kategorija yra „Vertinimas“ arba „Vertinimas ir bendras“"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,BOM and Manufacturing Quantity are required,Reikalingi BOM ir gamybos kiekiai
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item {0} has reached its end of life on {1},{0} elementas pasiekė savo gyvenimo pabaigą {1}
 DocType: Quality Inspection Reading,Reading 6,Skaitymas 6
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js,Company field is required,Reikalingas įmonės laukas
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,Material Consumption is not set in Manufacturing Settings.,Gamybos nustatymai nenustato medžiagų suvartojimo.
 DocType: Assessment Group,Assessment Group Name,Vertinimo grupės pavadinimas
-DocType: Item,Manufacturer Part Number,Gamintojo dalies numeris
+DocType: Purchase Invoice Item,Manufacturer Part Number,Gamintojo dalies numeris
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Payroll Payable,Mokamas darbo užmokestis
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,Row #{0}: {1} can not be negative for item {2},# {0} eilutė: {1} negali būti neigiama elementui {2}
 apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py,Balance Qty,Balanso kiekis
+DocType: Question,Multiple Correct Answer,Keli teisingi atsakymai
 DocType: Loyalty Program,1 Loyalty Points = How much base currency?,1 Lojalumo taškai = Kiek bazinės valiutos?
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Note: There is not enough leave balance for Leave Type {0},Pastaba: paliekant pusiausvyrą palikti tipą {0}
 DocType: Clinical Procedure,Inpatient Record,Stacionarinis įrašas
@@ -3405,6 +3431,7 @@ DocType: Fee Schedule Program,Total Students,Iš viso studentų
 apps/erpnext/erpnext/utilities/user_progress_utils.py,Local,Vietinis
 DocType: Chapter Member,Leave Reason,Palikite priežastį
 DocType: Salary Component,Condition and Formula,Būklė ir formulė
+DocType: Quality Goal,Objectives,Tikslai
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,"Salary already processed for period between {0} and {1}, Leave application period cannot be between this date range.","Atlyginimas, kuris jau buvo apdorotas laikotarpiui nuo {0} iki {1}, palikimo laikotarpis negali būti tarp šio laiko intervalo."
 DocType: BOM Item,Basic Rate (Company Currency),Pagrindinis tarifas (įmonės valiuta)
 DocType: BOM Scrap Item,BOM Scrap Item,BOM laužas
@@ -3455,6 +3482,7 @@ DocType: Supplier,SUP-.YYYY.-,SUP-.YYYY.-
 DocType: Expense Claim Account,Expense Claim Account,Sąnaudų reikalavimo sąskaita
 apps/erpnext/erpnext/hr/doctype/loan/loan.py,No repayments available for Journal Entry,„Journal Entry“ nėra jokių grąžinamų mokėjimų
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,{0} - {1} is inactive student,{0} - {1} yra neaktyvus studentas
+apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js,Make Stock Entry,Padaryti atsargų įrašą
 DocType: Employee Onboarding,Activities,Veikla
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Atleast one warehouse is mandatory,„Atleast“ vienas sandėlis yra privalomas
 ,Customer Credit Balance,Kliento kreditų likutis
@@ -3539,7 +3567,6 @@ DocType: Contract,Contract Terms,Sutarties sąlygos
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py,Either target qty or target amount is mandatory.,Privaloma nurodyti tikslinį kiekį arba tikslinę sumą.
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/utils.py,Invalid {0},Neteisingas {0}
 DocType: Item,FIFO,FIFO
-DocType: Quality Meeting,Meeting Date,Susitikimo data
 DocType: Inpatient Record,HLC-INP-.YYYY.-,HLC-INP-.YYYY.-
 apps/erpnext/erpnext/setup/doctype/company/company.py,Abbreviation cannot have more than 5 characters,Santrumpa negali būti daugiau kaip 5 simboliai
 DocType: Employee Benefit Application,Max Benefits (Yearly),Maksimalūs privalumai (kasmet)
@@ -3641,7 +3668,6 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Invoice Discounting,Bank Charges,Banko mokesčiai
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry_list.js,Goods Transferred,Perduotos prekės
 apps/erpnext/erpnext/public/js/utils/customer_quick_entry.js,Primary Contact Details,Pagrindinė kontaktinė informacija
-DocType: Quality Review,Values,Vertybės
 DocType: Leave Block List,"If not checked, the list will have to be added to each Department where it has to be applied.","Jei nebus pažymėtas, sąrašas turės būti pridėtas prie kiekvieno skyriaus, kur jis turi būti taikomas."
 DocType: Item Group,Show this slideshow at the top of the page,Rodyti šią skaidrių peržiūrą puslapio viršuje
 apps/erpnext/erpnext/support/doctype/issue/issue.py,{0} parameter is invalid,{0} parametras neteisingas
@@ -3660,6 +3686,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,Pl
 DocType: Invoice Discounting,Bank Charges Account,Banko mokesčių sąskaita
 DocType: Journal Entry,Get Outstanding Invoices,Gaukite išskirtines sąskaitas
 DocType: Opportunity,Opportunity From,Galimybė iš
+apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year_dashboard.py,Target Details,Tikslinė informacija
 DocType: Item,Customer Code,Kliento kodas
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Please enter Item first,Pirmiausia įveskite elementą
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Website Listing,Svetainių sąrašas
@@ -3688,7 +3715,6 @@ apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Th
 DocType: Delivery Note,Delivery To,Pristatyti
 DocType: Bank Statement Transaction Settings Item,Bank Data,Banko duomenys
 apps/erpnext/erpnext/education/report/assessment_plan_status/assessment_plan_status.js,Scheduled Upto,Planuojama Upto
-DocType: Quality Goal,Everyday,Kiekvieną dieną
 DocType: HR Settings,Maintain Billing Hours and Working Hours Same on Timesheet,Išlaikyti apmokėjimo valandas ir darbo valandas tą patį laiko lape
 apps/erpnext/erpnext/config/crm.py,Track Leads by Lead Source.,Sekite švino šaltinius.
 DocType: Clinical Procedure,Nursing User,Slaugantis vartotojas
@@ -3713,7 +3739,7 @@ apps/erpnext/erpnext/config/crm.py,Manage Territory Tree.,Tvarkyti teritorijos m
 DocType: GL Entry,Voucher Type,Kupono tipas
 ,Serial No Service Contract Expiry,Serijos Nr. Paslaugų sutarties galiojimo pabaiga
 DocType: Certification Application,Certified,Sertifikuota
-DocType: Material Request Plan Item,Manufacture,Gamyba
+DocType: Purchase Invoice Item,Manufacture,Gamyba
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js,{0} items produced,{0} pagaminti elementai
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Payment Request for {0},Mokėjimo užklausa {0}
 apps/erpnext/erpnext/accounts/report/inactive_sales_items/inactive_sales_items.js,Days Since Last Order,Dienos nuo paskutinio užsakymo
@@ -3728,7 +3754,7 @@ DocType: Sales Invoice,Company Address Name,Įmonės adreso pavadinimas
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry_list.js,Goods In Transit,Prekės tranzitu
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,You can only redeem max {0} points in this order.,Šioje eilutėje galite išpirkti tik {0} taškus.
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Please set account in Warehouse {0},Nustatykite paskyrą „Warehouse“ {0}
-DocType: Quality Action Table,Resolution,Rezoliucija
+DocType: Quality Action,Resolution,Rezoliucija
 DocType: Sales Invoice,Loyalty Points Redemption,Lojalumo taškų išpirkimas
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Total Taxable Value,Bendra apmokestinamoji vertė
 DocType: Patient Appointment,Scheduled,Planuojama
@@ -3849,6 +3875,7 @@ apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js,You have entered
 DocType: Purchase Invoice Item,Rate,Kaina
 apps/erpnext/erpnext/erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.py,Saving {0},Išsaugota {0}
 DocType: SMS Center,Total Message(s),Iš viso pranešimų (-ų)
+DocType: Purchase Invoice,Accounting Dimensions,Apskaitos matmenys
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,Group by Account,Grupė pagal paskyrą
 DocType: Quotation,In Words will be visible once you save the Quotation.,"Žodžiai bus matomi, kai išsaugosite citatą."
 apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.js,Quantity to Produce,"Kiekis, kurį reikia gaminti"
@@ -4013,7 +4040,7 @@ apps/erpnext/erpnext/config/accounting.py,Setup cheque dimensions for printing,N
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,"If you have any questions, please get back to us.","Jei turite klausimų, prašome kreiptis į mus."
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Purchase Receipt {0} is not submitted,Pirkimo kvitas {0} nepateikiamas
 DocType: Task,Total Expense Claim (via Expense Claim),Bendras išlaidų reikalavimas (naudojant išlaidų reikalavimą)
-DocType: Quality Action,Quality Goal,Kokybės tikslas
+DocType: Quality Goal,Quality Goal,Kokybės tikslas
 DocType: Support Settings,Support Portal,Paramos portalas
 apps/erpnext/erpnext/projects/doctype/project/project.py,End date of task <b>{0}</b> cannot be less than <b>{1}</b> expected start date <b>{2}</b>,Užduoties <b>{0}</b> pabaigos data negali būti mažesnė nei <b>{1}</b> tikėtina pradžios data <b>{2}</b>
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py,Employee {0} is on Leave on {1},Darbuotojas {0} yra paliktas {1}
@@ -4072,7 +4099,6 @@ DocType: BOM,Operating Cost (Company Currency),Veiklos išlaidos (įmonės valiu
 DocType: Item Price,Item Price,Prekė Kaina
 DocType: Payment Entry,Party Name,Šalies pavadinimas
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js,Please select a customer,Pasirinkite klientą
-DocType: Course,Course Intro,Kurso intro
 DocType: Program Enrollment Tool,New Program,Nauja programa
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js,"Number of new Cost Center, it will be included in the cost center name as a prefix","Naujo išlaidų centro numeris, jis bus įtrauktas į išlaidų centro pavadinimą kaip prefiksas"
 apps/erpnext/erpnext/accounts/doctype/bank_guarantee/bank_guarantee.py,Select the customer or supplier.,Pasirinkite klientą arba tiekėją.
@@ -4273,6 +4299,7 @@ DocType: Customer,CUST-.YYYY.-,CUST-.YYYY.-
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py,Net pay cannot be negative,Grynasis darbo užmokestis negali būti neigiamas
 apps/erpnext/erpnext/crm/report/lead_conversion_time/lead_conversion_time.py,No of Interactions,Sąveikos Nr
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Row {0}# Item {1} cannot be transferred more than {2} against Purchase Order {3},{0} # eilutė {1} negali būti perkelta daugiau nei {2} nuo užsakymo {3}
+apps/erpnext/erpnext/hr/doctype/employee/employee_dashboard.py,Shift,Shift
 apps/erpnext/erpnext/erpnext_integrations/doctype/tally_migration/tally_migration.py,Processing Chart of Accounts and Parties,Apskaitos diagrama ir Šalys
 DocType: Stock Settings,Convert Item Description to Clean HTML,Konvertuoti elemento aprašą į švarų HTML
 apps/erpnext/erpnext/patches/v11_0/rename_supplier_type_to_supplier_group.py,All Supplier Groups,Visos tiekėjų grupės
@@ -4351,6 +4378,7 @@ apps/erpnext/erpnext/education/doctype/course_enrollment/course_enrollment.py,St
 DocType: Product Bundle,Parent Item,Tėvų punktas
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Brokerage,Tarpininkavimas
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Please create purchase receipt or purchase invoice for the item {0},Sukurkite {0} elemento pirkimo čekį arba pirkimo sąskaitą faktūrą
+,Product Bundle Balance,Produkto rinkinio balansas
 apps/erpnext/erpnext/public/js/setup_wizard.js,Company Name cannot be Company,Įmonės pavadinimas negali būti Bendrovė
 DocType: Maintenance Visit,Breakdown,Palūžti
 DocType: Inpatient Record,B Negative,B Neigiamas
@@ -4359,7 +4387,7 @@ DocType: Purchase Invoice,Credit To,Kreditas
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js,Submit this Work Order for further processing.,Pateikite šį darbo užsakymą tolesniam apdorojimui.
 DocType: Bank Guarantee,Bank Guarantee Number,Banko garantijos numeris
 apps/erpnext/erpnext/templates/pages/material_request_info.html,Delivered: {0},Pristatyta: {0}
-DocType: Quality Action,Under Review,Peržiūrimas
+DocType: Quality Meeting Table,Under Review,Peržiūrimas
 apps/erpnext/erpnext/public/js/setup_wizard.js,Agriculture (beta),Žemės ūkis (beta)
 ,Average Commission Rate,Vidutinis Komisijos tarifas
 DocType: Sales Invoice,Customer's Purchase Order Date,Kliento pirkimo užsakymo data
@@ -4476,7 +4504,7 @@ apps/erpnext/erpnext/crm/doctype/lead/lead.py,"Email Address must be unique, alr
 apps/erpnext/erpnext/config/accounting.py,Match Payments with Invoices,Atitinkami mokėjimai su sąskaitomis
 DocType: Holiday List,Weekly Off,Savaitės išjungimas
 apps/erpnext/erpnext/stock/doctype/item_alternative/item_alternative.py,Not allow to set alternative item for the item {0},Neleisti nustatyti alternatyvaus elemento {0}
-apps/erpnext/erpnext/www/lms.py,Program {0} does not exist.,Programa {0} neegzistuoja.
+apps/erpnext/erpnext/www/lms/program.py,Program {0} does not exist.,Programa {0} neegzistuoja.
 apps/erpnext/erpnext/hr/doctype/department/department.js,You cannot edit root node.,Negalite redaguoti šakninio mazgo.
 DocType: Fee Schedule,Student Category,Studentų kategorija
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Item {0}: {1} qty produced, ","{0} punktas: {1} pagamintas kiekis,"
@@ -4567,8 +4595,8 @@ DocType: Crop,Crop Spacing,Augalų atstumas
 DocType: Selling Settings,How often should project and company be updated based on Sales Transactions.,"Kaip dažnai turėtų būti atnaujinami projektai ir įmonės, remiantis pardavimo sandoriais."
 DocType: Pricing Rule,Period Settings,Laikotarpio nustatymai
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py,Net Change in Accounts Receivable,Grynieji gautinų sumų pokytis
+DocType: Quality Feedback Template,Quality Feedback Template,Kokybės atsiliepimų šablonas
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js,For Quantity must be greater than zero,Kiekis turi būti didesnis nei nulis
-DocType: Quality Goal,Goal Objectives,Tikslo tikslai
 apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py,"There are inconsistencies between the rate, no of shares and the amount calculated","Yra neatitikimų tarp akcijų, akcijų skaičiaus ir apskaičiuotos sumos"
 DocType: Student Group Creation Tool,Leave blank if you make students groups per year,"Palikite tuščią, jei kasmet mokinių grupes"
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Loans (Liabilities),Paskolos (įsipareigojimai)
@@ -4603,12 +4631,13 @@ DocType: Quality Procedure Table,Step,Žingsnis
 DocType: Normal Test Items,Result Value,Rezultato vertė
 DocType: Cash Flow Mapping,Is Income Tax Liability,Ar pajamų mokesčio atsakomybė
 DocType: Healthcare Practitioner,Inpatient Visit Charge Item,Stacionarinio apsilankymo mokestis
-apps/erpnext/erpnext/www/lms.py,{0} {1} does not exist.,{0} {1} neegzistuoja.
+apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py,{0} {1} does not exist.,{0} {1} neegzistuoja.
 apps/erpnext/erpnext/templates/emails/training_event.html,Update Response,Atnaujinti atsakymą
 DocType: Bank Guarantee,Supplier,Tiekėjas
 apps/erpnext/erpnext/templates/generators/item/item_configure.js,Enter value betweeen {0} and {1},Įveskite vertę {0} ir {1}
 DocType: Purchase Order,Order Confirmation Date,Užsakymo patvirtinimo data
 DocType: Delivery Trip,Calculate Estimated Arrival Times,Apskaičiuokite numatomus atvykimo laikus
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Prašome nustatyti darbuotojų pavadinimo sistemą žmogiškųjų išteklių&gt; HR nustatymuose
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Consumable,Vartojimas
 DocType: Instructor,EDU-INS-.YYYY.-,EDU-INS - .YYYY.-
 DocType: Subscription,Subscription Start Date,Prenumeratos pradžios data
@@ -4672,6 +4701,7 @@ DocType: Cheque Print Template,Is Account Payable,Ar sąskaita mokama
 apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py,Total Order Value,Bendra užsakymo vertė
 apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation.py,Supplier {0} not found in {1},Tiekėjas {0} nerastas {1}
 apps/erpnext/erpnext/config/settings.py,Setup SMS gateway settings,Nustatykite SMS šliuzo nustatymus
+DocType: Salary Component,Round to the Nearest Integer,Apskritimas iki artimiausio dydžio
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Root cannot have a parent cost center,Šaknis negali turėti tėvų sąnaudų centro
 DocType: Healthcare Service Unit,Allow Appointments,Leisti susitikimus
 DocType: BOM,Show Operations,Rodyti operacijas
@@ -4798,7 +4828,6 @@ apps/erpnext/erpnext/controllers/buying_controller.py,Please enter 'Is Subcontra
 DocType: Company,Default Holiday List,Numatytasis atostogų sąrašas
 DocType: Naming Series,Current Value,Dabartinė vertė
 apps/erpnext/erpnext/config/accounting.py,"Seasonality for setting budgets, targets etc.","Sezoniškumas nustatant biudžetus, tikslus ir kt."
-DocType: Program,Program Code,Programos kodas
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Warning: Sales Order {0} already exists against Customer's Purchase Order {1},Įspėjimas: pardavimų užsakymas {0} jau yra prieš kliento užsakymą {1}
 apps/erpnext/erpnext/utilities/user_progress.py,Monthly Sales Target (,Mėnesio pardavimo tikslas (
 DocType: Guardian,Guardian Interests,Globėjų interesai
@@ -4848,10 +4877,11 @@ apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py,Overlapping
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Paid and Not Delivered,Mokama ir nepateikta
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item Code is mandatory because Item is not automatically numbered,"Elemento kodas yra privalomas, nes elementas nėra automatiškai sunumeruotas"
 DocType: GST HSN Code,HSN Code,HSN kodas
-DocType: Quality Goal,September,Rugsėjo mėn
+DocType: GSTR 3B Report,September,Rugsėjo mėn
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Administrative Expenses,Administracinės išlaidos
 DocType: C-Form,C-Form No,C formos Nr
 DocType: Purchase Invoice,End date of current invoice's period,Dabartinės sąskaitos faktūros laikotarpio pabaigos data
+DocType: Item,Manufacturers,Gamintojai
 DocType: Crop Cycle,Crop Cycle,Apkarpyti ciklą
 DocType: Serial No,Creation Time,Kūrimo laikas
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py,Please enter Approving Role or Approving User,Įveskite patvirtinimo funkciją arba patvirtinantį naudotoją
@@ -4924,8 +4954,6 @@ DocType: Employee,Short biography for website and other publications.,Trumpas in
 DocType: Purchase Invoice Item,Received Qty,Gautas kiekis
 DocType: Purchase Invoice Item,Rate (Company Currency),Įvertinimas (įmonės valiuta)
 DocType: Item Reorder,Request for,Prašymas
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","Jei norite atšaukti šį dokumentą, ištrinkite darbuotoją <a href=""#Form/Employee/{0}"">{0}</a>"
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py,Installing presets,Presetų diegimas
 apps/erpnext/erpnext/hr/doctype/loan/loan.py,Please enter Repayment Periods,Įveskite grąžinimo laikotarpius
 DocType: Pricing Rule,Advanced Settings,Pažangūs nustatymai
@@ -4951,7 +4979,7 @@ apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Leave of 
 DocType: Shopping Cart Settings,Enable Shopping Cart,Įgalinti pirkinių krepšelį
 DocType: Pricing Rule,Apply Rule On Other,Taikyti taisyklę kitiems
 DocType: Vehicle,Last Carbon Check,Paskutinis anglies patikrinimas
-DocType: Vehicle,Make,Padaryti
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js,Make,Padaryti
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.py,Sales Invoice {0} created as paid,Pardavimo sąskaita-faktūra {0} sukurta kaip mokama
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,To create a Payment Request reference document is required,"Norint sukurti mokėjimo užklausos nuorodos dokumentą, reikia"
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Income Tax,Pajamų mokestis
@@ -5027,7 +5055,6 @@ DocType: Territory,Parent Territory,Tėvų teritorija
 DocType: Vehicle Log,Odometer Reading,Odometro rodmenys
 DocType: Additional Salary,Salary Slip,Algos lapelis
 DocType: Payroll Entry,Payroll Frequency,Darbo užmokesčio dažnumas
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Prašome nustatyti darbuotojų pavadinimo sistemą žmogiškųjų išteklių&gt; HR nustatymuose
 apps/erpnext/erpnext/hr/doctype/employee_benefit_application/employee_benefit_application.py,"Start and end dates not in a valid Payroll Period, cannot calculate {0}","Pradžios ir pabaigos datos, kurios nėra galiojančiame darbo užmokesčio laikotarpyje, negali apskaičiuoti {0}"
 DocType: Products Settings,Home Page is Products,Pagrindinis puslapis yra produktai
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Calls,Skambučiai
@@ -5080,7 +5107,6 @@ apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,"Cannot deliver Serial
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Fetching records......,Įrašų įrašymas ......
 DocType: Delivery Stop,Contact Information,Kontaktinė informacija
 DocType: Sales Order Item,For Production,Gamybai
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Švietimo&gt; Švietimo nustatymuose nustatykite instruktoriaus pavadinimo sistemą
 DocType: Serial No,Asset Details,Išsami informacija apie turtą
 DocType: Restaurant Reservation,Reservation Time,Rezervavimo laikas
 DocType: Selling Settings,Default Territory,Numatytoji teritorija
@@ -5217,6 +5243,8 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Manager,V
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,Expired Batches,Pasibaigusios partijos
 DocType: Shipping Rule,Shipping Rule Type,Pristatymo taisyklės tipas
 DocType: Job Offer,Accepted,Priimta
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Jei norite atšaukti šį dokumentą, ištrinkite darbuotoją <a href=""#Form/Employee/{0}"">{0}</a>"
 apps/erpnext/erpnext/education/doctype/assessment_plan/assessment_plan.py,You have already assessed for the assessment criteria {}.,Jūs jau įvertinote vertinimo kriterijus {}.
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js,Select Batch Numbers,Pasirinkite partijos numerius
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py,Age (Days),Amžius (dienos)
@@ -5233,6 +5261,7 @@ apps/erpnext/erpnext/healthcare/doctype/healthcare_service_unit/healthcare_servi
 apps/erpnext/erpnext/config/buying.py,Bundle items at time of sale.,Rinkinio elementai pardavimo metu.
 DocType: Payment Reconciliation Payment,Allocated Amount,Paskirta suma
 apps/erpnext/erpnext/hr/doctype/staffing_plan/staffing_plan.py,Please select Company and Designation,Pasirinkite įmonę ir paskyrą
+apps/erpnext/erpnext/stock/report/product_bundle_balance/product_bundle_balance.py,'Date' is required,Reikalinga „Data“
 DocType: Email Digest,Bank Credit Balance,Banko kredito balansas
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.js,Show Cumulative Amount,Rodyti sukauptą sumą
 apps/erpnext/erpnext/accounts/doctype/loyalty_program/loyalty_program.py,You don't have enought Loyalty Points to redeem,Jūs neturite pasitikėjimo lojalumo taškų išpirkti
@@ -5293,11 +5322,12 @@ DocType: Purchase Taxes and Charges,On Previous Row Total,Ankstesnėje eilutėje
 DocType: Student,Student Email Address,Studentų el. Pašto adresas
 DocType: Academic Term,Education,Švietimas
 DocType: Supplier Quotation,Supplier Address,Tiekėjo adresas
-DocType: Salary Component,Do not include in total,Neįtraukite viso
+DocType: Salary Detail,Do not include in total,Neįtraukite viso
 apps/erpnext/erpnext/stock/doctype/item/item.py,Cannot set multiple Item Defaults for a company.,Negalima nustatyti kelių įmonės elementų numatytųjų reikšmių.
 apps/erpnext/erpnext/accounts/party.py,{0}: {1} does not exists,{0}: {1} nėra
 DocType: Purchase Receipt Item,Rejected Quantity,Atmestas kiekis
 DocType: Cashier Closing,To TIme,TIme
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},UOM konversijos koeficientas ({0} -&gt; {1}) elementui: {2} nerastas
 DocType: Daily Work Summary Group User,Daily Work Summary Group User,Dienos darbo suvestinė Grupės vartotojas
 DocType: Fiscal Year Company,Fiscal Year Company,Finansinių metų bendrovė
 apps/erpnext/erpnext/stock/doctype/item_alternative/item_alternative.py,Alternative item must not be same as item code,Alternatyvus elementas neturi būti toks pats kaip prekės kodas
@@ -5407,7 +5437,6 @@ DocType: Fee Schedule,Send Payment Request Email,Siųsti mokėjimo užklausą el
 DocType: Sales Invoice,In Words will be visible once you save the Sales Invoice.,"Žodžiai bus matomi, kai išsaugosite pardavimo sąskaitą."
 DocType: Sales Invoice,Sales Team1,Pardavimų komanda1
 DocType: Work Order,Required Items,Reikalingi elementai
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,"Special Characters except ""-"", ""#"", ""."" and ""/"" not allowed in naming series","Specialūs simboliai, išskyrus &quot;-&quot;, &quot;#&quot;, &quot;.&quot; ir „/“ neleidžiama vardų serijoje"
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html,Read the ERPNext Manual,Perskaitykite ERPNext vadovą
 DocType: Accounts Settings,Check Supplier Invoice Number Uniqueness,Patikrinkite tiekėjo sąskaitos faktūros numerį unikalumą
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js,Search Sub Assemblies,Ieškoti subkomponentų
@@ -5475,7 +5504,6 @@ DocType: Taxable Salary Slab,Percent Deduction,Procentinis sumažinimas
 apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py,Quantity to Produce can not be less than Zero,Kiekis gaminti negali būti mažesnis už nulį
 DocType: Share Balance,To No,Į Ne
 DocType: Leave Control Panel,Allocate Leaves,Paskirstykite lapus
-DocType: Quiz,Last Attempt,Paskutinis bandymas
 DocType: Assessment Result,Student Name,Studento vardas
 apps/erpnext/erpnext/config/crm.py,Plan for maintenance visits.,Priežiūros apsilankymų planas.
 apps/erpnext/erpnext/templates/emails/reorder_item.html,Following Material Requests have been raised automatically based on Item's re-order level,"Toliau nurodyti esminiai prašymai buvo keliami automatiškai, remiantis elemento pertvarkymo lygiu"
@@ -5544,6 +5572,7 @@ DocType: Naming Series,This is the number of the last created transaction with t
 DocType: Supplier Scorecard,Indicator Color,Indikatoriaus spalva
 DocType: Item Variant Settings,Copy Fields to Variant,Kopijuokite laukus į variantą
 DocType: Soil Texture,Sandy Loam,Sandy Loam
+DocType: Question,Single Correct Answer,Vienintelis teisingas atsakymas
 apps/erpnext/erpnext/hr/utils.py,From date can not be less than employee's joining date,Nuo datos negali būti mažesnė už darbuotojo prisijungimo datą
 DocType: Selling Settings,Allow multiple Sales Orders against a Customer's Purchase Order,Leisti kelis pardavimų užsakymus prieš kliento užsakymą
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html,PDC/LC,PDC / LC
@@ -5606,7 +5635,7 @@ DocType: Account,Expenses Included In Valuation,Išlaidos įtrauktos į vertinim
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js,Serial Numbers,Serijos numeriai
 DocType: Salary Slip,Deductions,Atskaitos
 ,Supplier-Wise Sales Analytics,Tiekėjo-protingo pardavimo analitika
-DocType: Quality Goal,February,Vasario mėn
+DocType: GSTR 3B Report,February,Vasario mėn
 DocType: Appraisal,For Employee,Darbuotojui
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Actual Delivery Date,Faktinė pristatymo data
 DocType: Sales Partner,Sales Partner Name,Pardavimo partnerio pavadinimas
@@ -5702,7 +5731,6 @@ DocType: Procedure Prescription,Procedure Created,Procedūra Sukurta
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Against Supplier Invoice {0} dated {1},Prieš tiekėjo sąskaitą faktūrą {0} {1}
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js,Change POS Profile,Pakeisti POS profilį
 apps/erpnext/erpnext/utilities/activation.py,Create Lead,Sukurti švino
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Tiekėjas&gt; Tiekėjo tipas
 DocType: Shopify Settings,Default Customer,Numatytasis klientas
 DocType: Payment Entry Reference,Supplier Invoice No,Tiekėjo sąskaita faktūra Nr
 DocType: Pricing Rule,Mixed Conditions,Mišrios sąlygos
@@ -5753,12 +5781,14 @@ DocType: Item,End of Life,Gyvenimo pabaiga
 DocType: Lab Test Template,Sensitivity,Jautrumas
 DocType: Territory,Territory Targets,Teritorijos tikslai
 apps/erpnext/erpnext/hr/doctype/leave_period/leave_period.py,"Skipping Leave Allocation for the following employees, as Leave Allocation records already exists against them. {0}","Praleidimo palikimo praleidimas šiems darbuotojams, nes palikimo paskirstymo įrašai jau yra prieš juos. {0}"
+DocType: Quality Action Resolution,Quality Action Resolution,Kokybės veiksmų rezoliucija
 DocType: Sales Invoice Item,Delivered By Supplier,Tiekėjas
 DocType: Agriculture Analysis Criteria,Plant Analysis,Augalų analizė
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Expense account is mandatory for item {0},Sąnaudų sąskaita yra privaloma {0} elementui
 ,Subcontracted Raw Materials To Be Transferred,Perduodamos subrangos žaliavos
 DocType: Cashier Closing,Cashier Closing,Kasos uždarymas
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,Item {0} has already been returned,{0} elementas jau buvo grąžintas
+apps/erpnext/erpnext/regional/india/utils.py,Invalid GSTIN! The input you've entered doesn't match the GSTIN format for UIN Holders or Non-Resident OIDAR Service Providers,Netinkamas GSTIN! Įvestas įvestis neatitinka UIN turėtojų arba ne rezidentų OIDAR paslaugų teikėjų GSTIN formato
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py,Child warehouse exists for this warehouse. You can not delete this warehouse.,Šiam sandėliui yra vaikų sandėlis. Negalite ištrinti šio sandėlio.
 DocType: Diagnosis,Diagnosis,Diagnozė
 apps/erpnext/erpnext/hr/doctype/compensatory_leave_request/compensatory_leave_request.py,There is no leave period in between {0} and {1},Tarp {0} ir {1} nėra atostogų laikotarpio
@@ -5775,6 +5805,7 @@ DocType: QuickBooks Migrator,Authorization Settings,Autorizacijos nustatymai
 DocType: Homepage,Products,Produktai
 ,Profit and Loss Statement,Pelno ir nuostolių ataskaita
 apps/erpnext/erpnext/hotels/report/hotel_room_occupancy/hotel_room_occupancy.py,Rooms Booked,Kambariai užsakyti
+apps/erpnext/erpnext/stock/doctype/item_manufacturer/item_manufacturer.py,Duplicate entry against the item code {0} and manufacturer {1},Dublikatas įrašant elemento kodą {0} ir gamintoją {1}
 DocType: Item Barcode,EAN,EAN
 DocType: Purchase Invoice Item,Total Weight,Bendras svoris
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Travel,Kelionė
@@ -5821,6 +5852,7 @@ apps/erpnext/erpnext/hr/doctype/employee_tax_exemption_declaration/employee_tax_
 DocType: Selling Settings,Default Customer Group,Numatytoji klientų grupė
 DocType: Journal Entry Account,Debit in Company Currency,Debeto įmonės valiuta
 DocType: Woocommerce Settings,"The fallback series is ""SO-WOO-"".",Atsarginė serija yra „SO-WOO-“.
+DocType: Quality Meeting Agenda,Quality Meeting Agenda,Kokybės susitikimo darbotvarkė
 DocType: Cash Flow Mapper,Section Header,Sekcijos antraštė
 apps/erpnext/erpnext/utilities/user_progress.py,Your Products or Services,Jūsų produktai ar paslaugos
 DocType: Crop,Perennial,Daugiamečiai
@@ -5866,7 +5898,7 @@ apps/erpnext/erpnext/config/buying.py,Templates of supplier scorecard variables.
 DocType: Item,"A Product or a Service that is bought, sold or kept in stock.","Produktas arba paslauga, kuri yra perkama, parduodama ar laikoma sandėlyje."
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,Closing (Opening + Total),Uždarymas (atidarymas + iš viso)
 DocType: Supplier Scorecard Criteria,Criteria Formula,Kriterijų formulė
-,Support Analytics,„Analytics“ palaikymas
+apps/erpnext/erpnext/config/support.py,Support Analytics,„Analytics“ palaikymas
 apps/erpnext/erpnext/config/quality_management.py,Review and Action,Peržiūra ir veiksmai
 DocType: Account,"If the account is frozen, entries are allowed to restricted users.","Jei paskyra užšaldyta, įrašai leidžiami ribotiems vartotojams."
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py,Amount After Depreciation,Suma po nusidėvėjimo
@@ -5911,7 +5943,6 @@ DocType: Contract Template,Contract Terms and Conditions,Sutarties sąlygos
 apps/erpnext/erpnext/erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js,Fetch Data,Fetch Data
 DocType: Stock Settings,Default Item Group,Numatytoji elementų grupė
 DocType: Sales Invoice Timesheet,Billing Hours,Atsiskaitymo valandos
-DocType: Item,Item Code for Suppliers,Tiekėjų kodas
 apps/erpnext/erpnext/education/doctype/student_leave_application/student_leave_application.py,Leave application {0} already exists against the student {1},Palikite programą {0} jau prieš studentą {1}
 DocType: Pricing Rule,Margin Type,Maržos tipas
 DocType: Purchase Invoice Item,Rejected Serial No,Atmestas Serijos Nr
@@ -5981,6 +6012,7 @@ apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py,Net Change in Equity
 apps/erpnext/erpnext/hr/doctype/leave_period/leave_period.py,Leaves has been granted sucessfully,Lapai buvo sėkmingai išduoti
 DocType: Loyalty Point Entry,Expiry Date,Galiojimo pabaigos data
 DocType: Project Task,Working,Darbas
+apps/erpnext/erpnext/quality_management/doctype/quality_procedure/quality_procedure.py,{0} already has a Parent Procedure {1}.,{0} jau turi tėvų procedūrą {1}.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient_dashboard.py,This is based on transactions against this Patient. See timeline below for details,Tai grindžiama sandoriais prieš šią pacientą. Išsamesnės informacijos ieškokite žemiau
 DocType: Material Request,Requested For,Prašoma
 DocType: SMS Center,All Sales Person,Visi pardavimų asmenys
@@ -6068,6 +6100,7 @@ DocType: Loan Type,Maximum Loan Amount,Maksimali paskolos suma
 apps/erpnext/erpnext/regional/doctype/gst_settings/gst_settings.py,Email not found in default contact,El. Laiškas nerastas numatytuoju kontaktu
 DocType: Hotel Room Reservation,Booked,Užsakyta
 DocType: Maintenance Visit,Partially Completed,Iš dalies baigtas
+DocType: Quality Procedure Process,Process Description,Proceso aprašymas
 DocType: Company,Default Employee Advance Account,Numatytoji darbuotojų išankstinė sąskaita
 DocType: Leave Type,Allow Negative Balance,Leisti neigiamą balansą
 apps/erpnext/erpnext/education/report/assessment_plan_status/assessment_plan_status.py,Assessment Plan Name,Vertinimo plano pavadinimas
@@ -6109,6 +6142,7 @@ apps/erpnext/erpnext/projects/doctype/activity_cost/activity_cost.py,Activity Co
 DocType: Request for Quotation Item,Request for Quotation Item,Užklausos prašymas
 apps/erpnext/erpnext/accounts/doctype/item_tax_template/item_tax_template.py,{0} entered twice in Item Tax,{0} du kartus įvedėte elemento mokestį
 DocType: Additional Salary,Deduct Full Tax on Selected Payroll Date,Išskaičiuokite visą mokestį už pasirinktą darbo užmokesčio datą
+apps/erpnext/erpnext/hr/doctype/vehicle/vehicle.py,Last carbon check date cannot be a future date,Paskutinė anglies patikrinimo data negali būti būsima data
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,Select change amount account,Pasirinkite pakeitimo sumos paskyrą
 DocType: Support Settings,Forum Posts,Forumo žinutės
 DocType: Timesheet Detail,Expected Hrs,Tikėtini valandos
@@ -6118,7 +6152,7 @@ DocType: Program Enrollment Tool,Enroll Students,Užregistruokite mokinius
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py,Repeat Customer Revenue,Pakartokite klientų pajamas
 DocType: Company,Date of Commencement,Pradžios data
 DocType: Bank,Bank Name,Banko pavadinimas
-DocType: Quality Goal,December,Gruodžio mėn
+DocType: GSTR 3B Report,December,Gruodžio mėn
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Valid from date must be less than valid upto date,Galioja nuo datos turi būti mažesnė nei galiojanti iki datos
 apps/erpnext/erpnext/hr/doctype/employee/employee_dashboard.py,This is based on the attendance of this Employee,Tai grindžiama šio darbuotojo dalyvavimu
 DocType: Products Settings,"If checked, the Home page will be the default Item Group for the website","Jei pažymėtas, pagrindinis puslapis bus numatytasis elemento grupė"
@@ -6161,6 +6195,7 @@ DocType: Payment Entry,Payment Type,Mokėjimo tipas
 apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py,The folio numbers are not matching,Folio numeriai nesutampa
 DocType: C-Form,ACC-CF-.YYYY.-,ACC-CF –YYYY.-
 apps/erpnext/erpnext/controllers/stock_controller.py,Quality Inspection: {0} is not submitted for the item: {1} in row {2},Kokybės patikrinimas: {0} nepateikiamas elementui: {1} eilutėje {2}
+apps/erpnext/erpnext/accounts/doctype/accounting_dimension/accounting_dimension.js,Show {0},Rodyti {0}
 apps/erpnext/erpnext/templates/generators/item/item_configure.js,{0} item found.,Rasta {0} elemento.
 ,Stock Ageing,Atsargų senėjimas
 DocType: Customer Group,Mention if non-standard receivable account applicable,"Nurodykite, ar taikoma standartinė gautina sąskaita"
@@ -6437,6 +6472,7 @@ DocType: Travel Request,Costing,Sąnaudų apskaičiavimas
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Fixed Assets,Ilgalaikis turtas
 DocType: Purchase Order,Ref SQ,Ref SQ
 DocType: Salary Structure,Total Earning,Visas uždarbis
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Klientas&gt; Klientų grupė&gt; Teritorija
 DocType: Share Balance,From No,Nuo Nr
 DocType: Payment Reconciliation Invoice,Payment Reconciliation Invoice,Mokėjimo suderinimo sąskaita
 DocType: Purchase Invoice,Taxes and Charges Added,Įtraukti mokesčiai ir mokesčiai
@@ -6444,7 +6480,9 @@ DocType: Purchase Taxes and Charges,Consider Tax or Charge for,Apsvarstykite mok
 DocType: Authorization Rule,Authorized Value,Įgaliota vertė
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Received From,Gautas nuo
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py,Warehouse {0} does not exist,Sandėlis {0} neegzistuoja
+DocType: Item Manufacturer,Item Manufacturer,Prekė Gamintojas
 DocType: Sales Invoice,Sales Team,Pardavimų komanda
+apps/erpnext/erpnext/stock/report/product_bundle_balance/product_bundle_balance.py,Bundle Qty,Paketo kiekis
 DocType: Purchase Order Item Supplied,Stock UOM,Atsargos UOM
 DocType: Installation Note,Installation Date,Diegimo data
 DocType: Email Digest,New Quotations,Naujos kainos
@@ -6508,7 +6546,6 @@ apps/erpnext/erpnext/education/doctype/student_group/student_group.py,{0} - {1} 
 DocType: Holiday List,Holiday List Name,Atostogų sąrašo pavadinimas
 DocType: Water Analysis,Collection Temperature ,Kolekcijos temperatūra
 DocType: Healthcare Settings,Manage Appointment Invoice submit and cancel automatically for Patient Encounter,Tvarkykite paskyrimo sąskaitą faktūrą ir automatiškai atšaukite paciento susitikimą
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Nustatykite {0} pavadinimo seriją naudodami sąrankos nustatymus&gt; Nustatymai&gt; Pavadinimo serija
 DocType: Employee Benefit Claim,Claim Date,Reikalavimo data
 DocType: Supplier,Leave blank if the Supplier is blocked indefinitely,"Jei tiekėjas yra užblokuotas neribotą laiką, palikite tuščią"
 apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.js,Attendance From Date and Attendance To Date is mandatory,Dalyvavimas nuo datos ir lankomumo dienos yra privalomas
@@ -6519,6 +6556,7 @@ apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Series Updated
 DocType: Employee,Date Of Retirement,Išėjimo į pensiją data
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Please select Patient,Pasirinkite Pacientas
 DocType: Asset,Straight Line,Tiesi linija
+DocType: Quality Action,Resolutions,Rezoliucijos
 DocType: SMS Log,No of Sent SMS,Išsiųstų SMS žinučių skaičius
 ,GST Itemised Sales Register,GST detalusis pardavimo registras
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py,Total advance amount cannot be greater than total sanctioned amount,Bendra avansinė suma negali būti didesnė už bendrą sankciją
@@ -6629,7 +6667,7 @@ DocType: Account,Profit and Loss,Pelnas ir nuostoliai
 apps/erpnext/erpnext/manufacturing/report/bom_stock_calculated/bom_stock_calculated.py,Diff Qty,Dif. Kiekis
 DocType: Asset Finance Book,Written Down Value,Parašyta vertė
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Opening Balance Equity,Atidarymo balanso nuosavybė
-DocType: Quality Goal,April,Balandis
+DocType: GSTR 3B Report,April,Balandis
 DocType: Supplier,Credit Limit,Kredito limitas
 apps/erpnext/erpnext/public/js/setup_wizard.js,Distribution,Platinimas
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html,debit_note_amt,debit_note_amt
@@ -6684,6 +6722,7 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice_list.js,
 apps/erpnext/erpnext/config/integrations.py,Connect Shopify with ERPNext,Prijunkite „Shopify“ su ERPNext
 DocType: Homepage Section Card,Subtitle,Subtitrai
 DocType: Soil Texture,Loam,Loam
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Tiekėjas&gt; Tiekėjo tipas
 DocType: BOM,Scrap Material Cost(Company Currency),Metalo laužas (įmonės valiuta)
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py,Delivery Note {0} must not be submitted,Pristatymo pastaba {0} negali būti pateikta
 DocType: Task,Actual Start Date (via Time Sheet),Faktinė pradžios data (per laiko lapą)
@@ -6739,7 +6778,7 @@ apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.js,Add to 
 DocType: Drug Prescription,Dosage,Dozavimas
 DocType: Cheque Print Template,Starting position from top edge,Pradinė padėtis nuo viršutinio krašto
 apps/erpnext/erpnext/healthcare/doctype/practitioner_schedule/practitioner_schedule.js,Appointment Duration (mins),Paskyrimo trukmė (min.)
-DocType: Pricing Rule,Disable,Išjungti
+DocType: Accounting Dimension,Disable,Išjungti
 DocType: Email Digest,Purchase Orders to Receive,Pirkimo užsakymai gauti
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py,Productions Orders cannot be raised for:,„Productions“ užsakymai negali būti keliami:
 DocType: Projects Settings,Ignore Employee Time Overlap,Ignoruoti darbuotojų laiko persidengimą
@@ -6823,6 +6862,7 @@ apps/erpnext/erpnext/setup/doctype/company/company.js,Create Tax Template,Sukurt
 DocType: Item Attribute,Numeric Values,Skaitinės vertės
 DocType: Delivery Note,Instructions,Instrukcijos
 DocType: Blanket Order Item,Blanket Order Item,Antklodės užsakymo elementas
+DocType: Accounting Dimension,Mandatory For Profit and Loss Account,Privaloma pelno (nuostolio) ataskaitai
 apps/erpnext/erpnext/controllers/selling_controller.py,Commission rate cannot be greater than 100,Komisija negali būti didesnė nei 100
 DocType: Course Topic,Course Topic,Modulio tema
 DocType: Employee,This will restrict user access to other employee records,Tai apribos vartotojo prieigą prie kitų darbuotojų įrašų
@@ -6847,12 +6887,14 @@ apps/erpnext/erpnext/config/accounting.py,Subscription Management,Prenumeratos v
 apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js,Get customers from,Gaukite klientų iš
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py,{0} Digest,{0} Digest
 DocType: Employee,Reports to,Pranešti
+DocType: Video,YouTube,„YouTube“
 DocType: Party Account,Party Account,Šalies paskyra
 DocType: Assessment Plan,Schedule,Tvarkaraštis
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please enter ,Įveskite
 DocType: Lead,Channel Partner,Kanalo partneris
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html,Invoiced Amount,Sąskaitos faktūros suma
 DocType: Project,From Template,Iš šablono
+,DATEV,DATEV
 apps/erpnext/erpnext/selling/doctype/customer/customer_dashboard.py,Subscriptions,Prenumeratos
 apps/erpnext/erpnext/manufacturing/report/bom_stock_calculated/bom_stock_calculated.js,Quantity to Make,"Kiekis, kurį reikia padaryti"
 DocType: Quality Review Table,Achieved,Pasiekta
@@ -6899,7 +6941,6 @@ DocType: Journal Entry,Subscription Section,Prenumeratos skyrius
 DocType: Salary Slip,Payment Days,Mokėjimo dienos
 apps/erpnext/erpnext/config/non_profit.py,Volunteer information.,Savanorių informacija.
 apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py,`Freeze Stocks Older Than` should be smaller than %d days.,„Užšaldyti atsargas senesniems nei“ turėtų būti mažesnis nei% d dienų.
-apps/erpnext/erpnext/support/page/support_analytics/support_analytics.js,Select Fiscal Year,Pasirinkite fiskalinius metus
 DocType: Bank Reconciliation,Total Amount,Visas kiekis
 DocType: Certification Application,Non Profit,Ne pelnas
 DocType: Subscription Settings,Cancel Invoice After Grace Period,Atšaukite sąskaitą faktūrą po malonės laikotarpio
@@ -6912,7 +6953,6 @@ DocType: Serial No,Warranty Period (Days),Garantijos laikotarpis (dienos)
 DocType: Expense Claim Detail,Expense Claim Detail,Išlaidų reikalavimo informacija
 apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.html,Program: ,Programa:
 DocType: Patient Medical Record,Patient Medical Record,Paciento medicininis įrašas
-DocType: Quality Action,Action Description,Veiksmo aprašymas
 DocType: Item,Variant Based On,Variantas pagrįstas
 DocType: Vehicle Service,Brake Oil,Stabdžių alyva
 DocType: Employee,Create User,Sukurti vartotoją
@@ -6968,7 +7008,7 @@ DocType: Cash Flow Mapper,Section Name,Sekcijos pavadinimas
 DocType: Packed Item,Packed Item,Supakuotas elementas
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py,{0} {1}: Either debit or credit amount is required for {2},{0} {1}: {2} reikalinga debeto arba kredito suma
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py,Submitting Salary Slips...,Atlyginimų skilčių pateikimas ...
-apps/erpnext/erpnext/quality_management/doctype/customer_feedback/customer_feedback_list.js,No Action,Jokių veiksmų
+apps/erpnext/erpnext/quality_management/doctype/quality_review/quality_review_list.js,No Action,Jokių veiksmų
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py,"Budget cannot be assigned against {0}, as it's not an Income or Expense account","Biudžetas negali būti priskirtas pagal {0}, nes tai nėra pajamų ar išlaidų sąskaita"
 apps/erpnext/erpnext/config/accounting.py,Masters and Accounts,Meistrai ir sąskaitos
 DocType: Quality Procedure Table,Responsible Individual,Atsakingas asmuo
@@ -7091,7 +7131,6 @@ apps/erpnext/erpnext/hr/doctype/employee_tax_exemption_proof_submission/employee
 DocType: Company,Allow Account Creation Against Child Company,Leisti sąskaitos kūrimą prieš vaiko kompaniją
 DocType: Payment Entry,Company Bank Account,Įmonės banko sąskaita
 DocType: Amazon MWS Settings,UK,JK
-DocType: Quality Procedure,Procedure Steps,Procedūros žingsniai
 DocType: Normal Test Items,Normal Test Items,Normalūs bandymo elementai
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py,Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).,{0} punktas: Užsakytas kiekis {1} negali būti mažesnis už minimalų užsakymo kiekį {2} (apibrėžtas punkte).
 apps/erpnext/erpnext/templates/generators/item/item_add_to_cart.html,Not in Stock,Ne sandėlyje
@@ -7170,7 +7209,6 @@ apps/erpnext/erpnext/config/agriculture.py,Analytics,„Analytics“
 DocType: Maintenance Team Member,Maintenance Role,Techninės priežiūros vaidmuo
 apps/erpnext/erpnext/config/buying.py,Terms and Conditions Template,Sąlygos ir sąlygos šablonas
 DocType: Fee Schedule Program,Fee Schedule Program,Mokesčių grafiko programa
-apps/erpnext/erpnext/www/lms.py,Course {0} does not exist.,Kursas {0} neegzistuoja.
 DocType: Project Task,Make Timesheet,Padaryti laikraštį
 DocType: Production Plan Item,Production Plan Item,Gamybos plano punktas
 apps/erpnext/erpnext/education/report/assessment_plan_status/assessment_plan_status.py,Total Student,Iš viso studentų
@@ -7192,6 +7230,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py,
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py,Wrapping up,Apvyniojimas
 apps/erpnext/erpnext/non_profit/doctype/membership/membership.py,You can only renew if your membership expires within 30 days,Galite atnaujinti tik jei narystė baigiasi per 30 dienų
 apps/erpnext/erpnext/templates/generators/item/item_configure.js,Value must be between {0} and {1},Reikšmė turi būti tarp {0} ir {1}
+DocType: Quality Feedback,Parameters,Parametrai
 ,Sales Partner Transaction Summary,Pardavimų partnerių sandorių suvestinė
 DocType: Asset Maintenance,Maintenance Manager Name,Priežiūros vadybininko pavadinimas
 apps/erpnext/erpnext/public/js/controllers/transaction.js,It is needed to fetch Item Details.,Reikia atsiųsti elemento duomenis.
@@ -7229,6 +7268,7 @@ DocType: Student Admission,Student Admission,Studentų priėmimas
 DocType: Designation Skill,Skill,Įgūdžiai
 DocType: Budget Account,Budget Account,Biudžeto paskyra
 DocType: Employee Transfer,Create New Employee Id,Sukurti naują darbuotojo ID
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py,{0} is required for 'Profit and Loss' account {1}.,{0} reikalinga paskyrai „Pelnas ir nuostoliai“ {1}.
 apps/erpnext/erpnext/config/accounting.py,Goods and Services Tax (GST India),Prekių ir paslaugų mokestis (GST India)
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py,Creating Salary Slips...,Atlyginimo lapelių kūrimas ...
 DocType: Employee Skill,Employee Skill,Darbuotojų įgūdžiai
@@ -7329,6 +7369,7 @@ DocType: Clinical Procedure Item,Invoice Separately as Consumables,Sąskaita fak
 DocType: Subscription,Days Until Due,Dienos iki pabaigos
 apps/erpnext/erpnext/templates/pages/projects.js,Show Completed,Rodyti užbaigtą
 apps/erpnext/erpnext/config/accounting.py,Bank Statement Transaction Entry Report,Banko ataskaitos operacijos įvedimo ataskaita
+apps/erpnext/erpnext/accounts/doctype/bank/bank_dashboard.py,Bank Deatils,„Bank Deatils“
 apps/erpnext/erpnext/utilities/transaction_base.py,Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ,# {0} eilutė: norma turi būti tokia pati kaip {1}: {2} ({3} / {4})
 DocType: Clinical Procedure,HLC-CPR-.YYYY.-,HLC-CPR-.YYYY.-
 DocType: Healthcare Settings,Healthcare Service Items,Sveikatos priežiūros paslaugos
@@ -7385,6 +7426,7 @@ DocType: Training Event Employee,Invited,Pakviestas
 apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py,Maximum amount eligible for the component {0} exceeds {1},"Maksimali suma, atitinkanti komponentą {0}, viršija {1}"
 apps/erpnext/erpnext/accounts/report/purchase_order_items_to_be_billed/purchase_order_items_to_be_billed.py,Amount to Bill,Suma į Bill
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,"For {0}, only debit accounts can be linked against another credit entry","Jei {0}, tik debeto sąskaitos gali būti susietos su kitu kredito įrašu"
+apps/erpnext/erpnext/accounts/doctype/accounting_dimension/accounting_dimension.py,Creating Dimensions...,Matmenų kūrimas ...
 DocType: Bank Statement Transaction Entry,Payable Account,Mokėtina sąskaita
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Please mention no of visits required,"Prašome paminėti, kad nereikia apsilankyti"
 DocType: Accounts Settings,Only select if you have setup Cash Flow Mapper documents,"Pasirinkite tik, jei turite sąrankos „Cash Flow Mapper“ dokumentus"
@@ -7402,6 +7444,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js,Select items to save the invoice,"
 DocType: Service Level,Resolution Time,Skyros laikas
 DocType: Grading Scale Interval,Grade Description,Įvertinimo aprašymas
 DocType: Homepage Section,Cards,Kortelės
+DocType: Quality Meeting Minutes,Quality Meeting Minutes,Kokybės susitikimo protokolai
 DocType: Linked Plant Analysis,Linked Plant Analysis,Susijusios gamyklos analizė
 apps/erpnext/erpnext/public/js/controllers/transaction.js,Service Stop Date cannot be after Service End Date,Paslaugų pabaigos data negali būti po paslaugos pabaigos datos
 apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.py,Please set B2C Limit in GST Settings.,GST nustatymuose nustatykite B2C ribą.
@@ -7435,7 +7478,6 @@ DocType: Employee Attendance Tool,Employee Attendance Tool,Darbuotojų dalyvavim
 DocType: Employee,Educational Qualification,edukacinė kvalifikacija
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Accessable Value,Prieinama vertė
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Sample quantity {0} cannot be more than received quantity {1},Mėginio kiekis {0} negali būti didesnis už gautą kiekį {1}
-DocType: Quiz,Last Highest Score,Paskutinis aukščiausias balas
 DocType: POS Profile,Taxes and Charges,Mokesčiai ir mokesčiai
 DocType: Opportunity,Contact Mobile No,Susisiekite su „Mobile No“
 DocType: Employee,Joining Details,Prisijungimas prie informacijos
