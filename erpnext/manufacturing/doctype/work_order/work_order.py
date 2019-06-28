@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import json
+import math
 from frappe import _
 from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate
 from frappe.model.document import Document
@@ -323,7 +324,8 @@ class WorkOrder(Document):
 			select
 				operation, description, workstation, idx,
 				base_hour_rate as hour_rate, time_in_mins,
-				"Pending" as status, parent as bom
+				"Pending" as status, parent as bom,
+				is_batch_operation, batch_size
 			from
 				`tabBOM Operation`
 			where
@@ -348,7 +350,10 @@ class WorkOrder(Document):
 		bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
 
 		for d in self.get("operations"):
-			d.time_in_mins = flt(d.time_in_mins) / flt(bom_qty) * flt(self.qty)
+			if d.is_batch_operation:
+				d.time_in_mins = flt(d.time_in_mins) / flt(bom_qty) * math.ceil(flt(self.qty)/flt(d.batch_size))
+			else:
+				d.time_in_mins = flt(d.time_in_mins) / flt(bom_qty) * flt(self.qty)
 
 		self.calculate_operating_cost()
 
