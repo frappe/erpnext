@@ -18,7 +18,7 @@ class ServiceLevelAgreement(Document):
 				if self.start_date >= self.end_date:
 					frappe.throw(_("Start Date of Agreement can't be greater than or equal to End Date."))
 
-				if self.end_date < frappe.utils.getdate():
+				if self.end_date < frappe.utils.nowdate():
 					frappe.throw(_("End Date of Agreement can't be less than today."))
 
 		if self.entity_type and self.entity:
