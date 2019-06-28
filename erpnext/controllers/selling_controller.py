@@ -55,14 +55,28 @@ class SellingController(StockController):
 		self.set_price_list_and_item_details(for_validate=for_validate)
 
 	def set_missing_lead_customer_details(self):
+		customer, lead = None, None
 		if getattr(self, "customer", None):
+			customer = self.customer
+		elif self.doctype == "Opportunity" and self.party_name:
+			if self.opportunity_from == "Customer":
+				customer = self.party_name
+			else:
+				lead = self.party_name
+		elif self.doctype == "Quotation" and self.party_name:
+			if self.quotation_to == "Customer":
+				customer = self.party_name
+			else:
+				lead = self.party_name
+
+		if customer:
 			from erpnext.accounts.party import _get_party_details
 			fetch_payment_terms_template = False
 			if (self.get("__islocal") or
 				self.company != frappe.db.get_value(self.doctype, self.name, 'company')):
 				fetch_payment_terms_template = True
 
-			party_details = _get_party_details(self.customer,
+			party_details = _get_party_details(customer,
 				ignore_permissions=self.flags.ignore_permissions,
 				doctype=self.doctype, company=self.company,
 				fetch_payment_terms_template=fetch_payment_terms_template,
@@ -71,10 +85,9 @@ class SellingController(StockController):
 				party_details.pop("sales_team")
 			self.update_if_missing(party_details)
 
-		elif getattr(self, "lead", None):
+		elif lead:
 			from erpnext.crm.doctype.lead.lead import get_lead_details
-			self.update_if_missing(get_lead_details(
-				self.lead,
+			self.update_if_missing(get_lead_details(lead,
 				posting_date=self.get('transaction_date') or self.get('posting_date'),
 				company=self.company))
 
