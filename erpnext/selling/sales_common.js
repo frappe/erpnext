@@ -230,10 +230,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					callback:function(r){
 						if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
 
-							if (doc.doctype === 'Sales Invoice' && (!doc.update_stock))
-							{
-								return;
-							}
+							if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
 
 							me.set_batch_number(cdt, cdn);
 							me.batch_no(doc, cdt, cdn);
@@ -378,10 +375,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	    this._super(doc, cdt, cdn, dont_fetch_price_list_rate);
 		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn) &&
 			in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-				if (doc.doctype === 'Sales Invoice' && (!doc.update_stock))
-				{
-					return;
-				}
+				if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
 				this.set_batch_number(cdt, cdn);
 			}
 	},
@@ -390,10 +384,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this._super(doc, cdt, cdn);
 
 		if(in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-			if (doc.doctype === 'Sales Invoice' && (!doc.update_stock))
-			{
-				return;
-			}
+			if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
 			this.set_batch_number(cdt, cdn);
 		}
 	},
