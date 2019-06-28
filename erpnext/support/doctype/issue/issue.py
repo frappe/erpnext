@@ -39,10 +39,10 @@ class Issue(Document):
 			self.flags.communication_created = None
 
 		# assign to customer account manager or lead owner
-		if doc.customer:
-			party_type, party_name = "Customer", doc.customer
+		if self.customer:
+			party_type, party_name = "Customer", self.customer
 		else:
-			party_type, party_name = "Lead", doc.name
+			party_type, party_name = "Lead", self.name
 
 		assign_to_user(self, 'subject', party_type, party_name)
 
