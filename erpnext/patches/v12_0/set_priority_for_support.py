@@ -18,8 +18,6 @@ def set_issue_priority():
 				"name": priority
 			}).insert(ignore_permissions=True)
 
-	frappe.delete_doc_if_exists("Property Setter", {"field_name": "priority", "property": "options"})
-
 def set_priority_for_issue():
 	# Sets priority for Issues as Select field is changed to Link field.
 	issue_priority = frappe.get_list("Issue", fields=["name", "priority"])
