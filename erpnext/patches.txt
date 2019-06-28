@@ -607,3 +607,4 @@ execute:frappe.delete_doc_if_exists("Page", "support-analytics")
 erpnext.patches.v12_0.make_item_manufacturer
 erpnext.patches.v12_0.set_quotation_status
 erpnext.patches.v12_0.set_priority_for_support
+erpnext.patches.v12_0.delete_priority_property_setter
