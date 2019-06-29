@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, erpnext, json
 from frappe import _, scrub, ValidationError
 from frappe.utils import flt, comma_or, nowdate, getdate
-from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on, get_allow_cost_center_in_entry_of_bs_account
+from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on, get_allow_cost_center_in_entry_of_bs_account, get_negative_outstanding_invoices
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.setup.utils import get_exchange_rate
@@ -648,42 +648,6 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 		order_list.append(d)
 
 	return order_list
-
-def get_negative_outstanding_invoices(party_type, party, party_account, party_account_currency, company_currency, cost_center=None):
-	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
-	supplier_condition = ""
-	if voucher_type == "Purchase Invoice":
-		supplier_condition = "and (release_date is null or release_date <= CURDATE())"
-	if party_account_currency == company_currency:
-		grand_total_field = "base_grand_total"
-		rounded_total_field = "base_rounded_total"
-	else:
-		grand_total_field = "grand_total"
-		rounded_total_field = "rounded_total"
-
-	return frappe.db.sql("""
-		select
-			"{voucher_type}" as voucher_type, name as voucher_no,
-			if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
-			outstanding_amount, posting_date,
-			due_date, conversion_rate as exchange_rate
-		from
-			`tab{voucher_type}`
-		where
-			{party_type} = %s and {party_account} = %s and docstatus = 1 and outstanding_amount < 0
-			{supplier_condition}
-		order by
-			posting_date, name
-		""".format(**{
-			"supplier_condition": supplier_condition,
-			"rounded_total_field": rounded_total_field,
-			"grand_total_field": grand_total_field,
-			"voucher_type": voucher_type,
-			"party_type": scrub(party_type),
-			"party_account": "debit_to" if party_type == "Customer" else "credit_to",
-			"cost_center": cost_center
-		}), (party, party_account), as_dict=True)
-
 
 @frappe.whitelist()
 def get_party_details(company, party_type, party, date, cost_center=None):

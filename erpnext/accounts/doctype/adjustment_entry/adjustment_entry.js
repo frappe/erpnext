@@ -45,6 +45,7 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 	},
 	payment_currency: function() {
 		this.update_labels();
+		recalculate_deductions_base_amount(this.frm);
 		const me = this;
 		return this.frm.call({
 			doc: me.frm.doc,
@@ -63,6 +64,9 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 		this.frm.set_currency_labels(['exchange_rate_to_base_currency'],company_currency, 'exchange_rates');
 		this.frm.set_currency_labels(['exchange_rate_to_payment_currency'],this.frm.doc.payment_currency, 'exchange_rates');
 		this.frm.get_field('exchange_rates').grid.header_row.refresh();
+		this.frm.set_currency_labels(['base_amount'],company_currency, 'deductions');
+		this.frm.set_currency_labels(['amount'],this.frm.doc.payment_currency, 'deductions');
+		this.frm.get_field('deductions').grid.header_row.refresh();
 	},
 
 	allocate_payment_amount: function() {
@@ -110,6 +114,10 @@ frappe.ui.form.on('Adjustment Entry Reference', {
 		const allocated_amount_in_entry_currency = data.allocated_amount / data.payment_exchange_rate;
 		const gain_loss_amount = data.allocated_base_amount - allocated_amount_in_entry_currency * data.exchange_rate;
 		frappe.model.set_value(cdt, cdn, 'gain_loss_amount', gain_loss_amount);
+		frm.call({
+			doc: frm.doc,
+			method: 'calculate_summary_totals'
+		});
 	}
 });
 
@@ -123,9 +131,37 @@ function call_recalculate_references(frm) {
 	});
 }
 
+function recalculate_deductions_base_amount(frm) {
+	const exchange_rates = frm.doc.exchange_rates;
+	const base_exchange_rate_obj = exchange_rates.find(exchg_rate => exchg_rate.currency === frm.doc.payment_currency);
+	const base_exchange_rate = base_exchange_rate_obj ? base_exchange_rate_obj.exchange_rate_to_base_currency : 1;
+	const deductions = frm.doc.deductions || [];
+	deductions.map(deduction => {
+		const base_amount = deduction.amount * base_exchange_rate;
+		frappe.model.set_value(deduction.doctype, deduction.name, 'base_amount', base_amount);
+	});
+}
+
 frappe.ui.form.on('Adjustment Entry Exchange Rates', {
 	exchange_rate_to_payment_currency: call_recalculate_references ,
-	exchange_rate_to_base_currency: call_recalculate_references,
+	exchange_rate_to_base_currency: function (frm) {
+		recalculate_deductions_base_amount(frm);
+		call_recalculate_references(frm);
+	},
+});
+
+frappe.ui.form.on('Adjustment Entry Deduction', {
+	amount: function (frm, cdt, cdn) {
+		const data = locals[cdt][cdn];
+		const exchange_rates = frm.doc.exchange_rates;
+		const base_exchange_rate = exchange_rates.find(exchg_rate => exchg_rate.currency === frm.doc.payment_currency).exchange_rate_to_base_currency;
+		const base_amount = data.amount * base_exchange_rate;
+		frappe.model.set_value(cdt, cdn, 'base_amount', base_amount);
+		frm.call({
+			doc: frm.doc,
+			method: 'calculate_summary_totals'
+		});
+	}
 });
 
 $.extend(cur_frm.cscript, new erpnext.accounts.AdjustmentEntryController({frm: cur_frm}));

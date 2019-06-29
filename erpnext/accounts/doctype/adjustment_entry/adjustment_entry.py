@@ -6,12 +6,16 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt
-from erpnext.controllers.accounts_controller import AccountsController
+from frappe.model.document import Document
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.utils import get_outstanding_invoices
+from erpnext.accounts.utils import get_outstanding_invoices, get_negative_outstanding_invoices
 from erpnext.setup.utils import get_exchange_rate
 
-class AdjustmentEntry(AccountsController):
+class AdjustmentEntry(Document):
+    def on_submit(self):
+        if self.difference_amount:
+            frappe.throw(_("Difference Amount must be zero"))
+
     def get_unreconciled_entries(self):
         self.check_mandatory_to_fetch()
         self.get_entries()
@@ -75,7 +79,11 @@ class AdjustmentEntry(AccountsController):
             party_type = "Supplier"
             party = self.supplier
         account = get_party_account(party_type, party, self.company)
-        non_reconciled_invoices = get_outstanding_invoices(party_type, party, account)
+        positive_outstanding_invoices = get_outstanding_invoices(party_type, party, account)
+        negative_outstanding_invoices = get_negative_outstanding_invoices(party_type,
+                                                                          party, account,
+                                                                          frappe.db.get_value("Account", account, 'account_currency'), self.company_currency)
+        non_reconciled_invoices = negative_outstanding_invoices + positive_outstanding_invoices
         self.get_extra_invoice_details(non_reconciled_invoices)
         return non_reconciled_invoices
 
@@ -129,14 +137,20 @@ class AdjustmentEntry(AccountsController):
                 for ent in entries:
                     ent.recalculate_amounts(exchange_rates)
 
+    def calculate_summary_totals(self):
+        self.receivable_adjusted = sum([flt(d.allocated_amount) for d in self.get("debit_entries")])
+        self.payable_adjusted = sum([flt(d.allocated_amount) for d in self.get("credit_entries")])
+        self.total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
+        self.difference_amount = abs(self.receivable_adjusted - self.payable_adjusted - self.total_deductions)
+
     def allocate_amount_to_references(self):
         total_debit_outstanding = sum([flt(d.voucher_payment_amount) for d in self.get("debit_entries")])
         total_credit_outstanding = sum([flt(c.voucher_payment_amount) for c in self.get("credit_entries")])
         exchange_rates = self.exchange_rates_to_dict()
-        # total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
+        total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
         allocate_order = ['credit_entries', 'debit_entries'] if total_debit_outstanding > total_credit_outstanding else ['debit_entries', 'credit_entries']
         for reference_type in allocate_order:
-            allocated_oustanding = min(total_debit_outstanding, total_credit_outstanding)
+            allocated_oustanding = min(total_debit_outstanding, total_credit_outstanding) - total_deductions
             entries = self.get(reference_type)
             for ent in entries:
                 ent.allocated_amount = 0
@@ -148,4 +162,5 @@ class AdjustmentEntry(AccountsController):
                             ent.allocated_amount = ent.voucher_payment_amount
                         allocated_oustanding -= flt(ent.allocated_amount)
                 ent.recalculate_amounts(exchange_rates)
+        self.calculate_summary_totals()
 

@@ -25,7 +25,14 @@
   "credit_entries_section_break",
   "credit_entries",
   "deduction_section_break",
-  "deductions"
+  "deductions",
+  "summary_section_break",
+  "receivable_adjusted",
+  "payable_adjusted",
+  "total_deductions",
+  "column_break_25",
+  "difference_amount",
+  "total_balance"
  ],
  "fields": [
   {
@@ -142,11 +149,55 @@
    "fieldname": "allocate_payment_amount",
    "fieldtype": "Check",
    "label": "Allocate Payment Amount"
+  },
+  {
+   "fieldname": "summary_section_break",
+   "fieldtype": "Section Break",
+   "label": "Summary"
+  },
+  {
+   "fieldname": "receivable_adjusted",
+   "fieldtype": "Currency",
+   "label": "Receivable Adjusted",
+   "options": "payment_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payable_adjusted",
+   "fieldtype": "Currency",
+   "label": "Payable Adjusted",
+   "options": "payment_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_deductions",
+   "fieldtype": "Currency",
+   "label": "Deductions",
+   "options": "payment_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "difference_amount",
+   "fieldtype": "Currency",
+   "label": "Difference Amount",
+   "options": "payment_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_balance",
+   "fieldtype": "Currency",
+   "label": "Total Balance",
+   "options": "payment_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
  "is_submittable": 1,
- "modified": "2019-06-27 13:25:27.072981",
+ "modified": "2019-06-29 15:19:32.661023",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Adjustment Entry",
