@@ -19,9 +19,11 @@ class TestDeliveryTrip(unittest.TestCase):
 		create_delivery_notification()
 		create_test_contact_and_address()
 
-		settings = frappe.get_single("Google Maps Settings")
-		settings.home_address = frappe.get_last_doc("Address").name
-		settings.save()
+		settings = frappe.get_doc({
+			"doctype": "Google Maps",
+			"address": frappe.get_last_doc("Address").name
+		})
+		settings.save(ignore_permissions=True)
 
 		self.delivery_trip = create_delivery_trip()
 

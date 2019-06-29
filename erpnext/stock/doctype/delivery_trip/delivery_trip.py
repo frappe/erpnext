@@ -100,8 +100,8 @@ class DeliveryTrip(Document):
 			optimize (bool): True if route needs to be optimized, else False
 		"""
 
-		if not frappe.db.get_single_value("Google Maps Settings", "enabled"):
-			frappe.throw(_("Cannot process route, since Google Maps Settings is disabled."))
+		if not frappe.db.get_value("Google Maps", {"entity": self.driver}, "enable"):
+			frappe.throw(_("Cannot process route, since Google Maps Integration for driver {0} is disabled.").format(self.driver))
 
 		departure_datetime = get_datetime(self.departure_time)
 		route_list = self.form_route_list(optimize)
@@ -109,7 +109,7 @@ class DeliveryTrip(Document):
 		# For locks, maintain idx count while looping through route list
 		idx = 0
 		for route in route_list:
-			directions = get_directions(route, optimize)
+			directions = get_directions(route, optimize, self.driver)
 
 			if directions:
 				if optimize and len(directions.get("waypoint_order")) > 1:
@@ -158,8 +158,11 @@ class DeliveryTrip(Document):
 			(list of list of str): List of address routes split at locks, if optimize is `True`
 		"""
 
-		settings = frappe.get_single("Google Maps Settings")
-		home_address = get_address_display(frappe.get_doc("Address", settings.home_address).as_dict())
+		settings = frappe.get_doc("Google Maps", {"entity": self.driver})
+		if not settings:
+			frappe.throw(_("Google Maps Integration for driver {0} is disabled.").format(self.driver))
+
+		home_address = get_address_display(frappe.get_doc("Address", settings.address).as_dict())
 
 		route_list = []
 		# Initialize first leg with origin as the home address
@@ -310,7 +313,7 @@ def sanitize_address(address):
 	return ', '.join(address[:3])
 
 
-def get_directions(route, optimize):
+def get_directions(route, optimize, driver):
 	"""
 	Retrieve map directions for a given route and departure time.
 	If optimize is `True`, Google Maps will return an optimized
@@ -327,7 +330,7 @@ def get_directions(route, optimize):
 		(dict): Route legs and, if `optimize` is `True`, optimized waypoint order
 	"""
 
-	settings = frappe.get_single("Google Maps Settings")
+	settings = frappe.get_doc("Google Maps", {"entity": driver})
 	maps_client = settings.get_client()
 
 	directions_data = {
