@@ -68,7 +68,7 @@ frappe.ui.form.on('Delivery Trip', {
 
 	calculate_arrival_time: function (frm) {
 		frappe.db.get_value("Google Maps", {entity: frm.doc.driver}, "enable", (r) => {
-			if (r.enabled == 0) {
+			if (r.enable == 0) {
 				frappe.throw(__("Please enable Google Maps Integration to estimate and optimize routes"));
 			} else {
 				frappe.call({
@@ -88,7 +88,7 @@ frappe.ui.form.on('Delivery Trip', {
 
 	optimize_route: function (frm) {
 		frappe.db.get_value("Google Maps", {entity: frm.doc.driver}, "enable", (r) => {
-			if (r.enabled == 0) {
+			if (r.enable == 0) {
 				frappe.throw(__("Please enable Google Maps Integration to estimate and optimize routes"));
 			} else {
 				frappe.call({

@@ -21,6 +21,9 @@ class TestDeliveryTrip(unittest.TestCase):
 
 		settings = frappe.get_doc({
 			"doctype": "Google Maps",
+			"enable": 1,
+			"entity_type": "Driver",
+			"entity": frappe.get_last_doc("Driver").name,
 			"address": frappe.get_last_doc("Address").name
 		})
 		settings.save(ignore_permissions=True)
