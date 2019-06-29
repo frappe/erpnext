@@ -23,7 +23,7 @@ class DuplicatePartyAccountError(frappe.ValidationError): pass
 @frappe.whitelist()
 def get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None, letter_of_credit=None,
 	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True,
-	party_address=None, shipping_address=None, pos_profile=None):
+	party_address=None, shipping_address=None, pos_profile=None, cost_center=None):
 
 	if not party:
 		return {}
@@ -31,11 +31,11 @@ def get_party_details(party=None, account=None, party_type="Customer", company=N
 		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 	return _get_party_details(party, account, party_type, letter_of_credit,
 		company, posting_date, bill_date, price_list, currency, doctype, ignore_permissions,
-		fetch_payment_terms_template, party_address, shipping_address, pos_profile)
+		fetch_payment_terms_template, party_address, shipping_address, pos_profile, cost_center)
 
 def _get_party_details(party=None, account=None, party_type="Customer", letter_of_credit=None, company=None, posting_date=None,
 	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False,
-	fetch_payment_terms_template=True, party_address=None, shipping_address=None, pos_profile=None):
+	fetch_payment_terms_template=True, party_address=None, shipping_address=None, pos_profile=None, cost_center=None):
 
 	out = frappe._dict(set_due_date(party, party_type, company, posting_date, bill_date, doctype))
 	party = out[scrub(party_type)]
@@ -57,8 +57,8 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 	set_other_values(out, party, party_type)
 	set_price_list(out, party, party_type, price_list, pos_profile)
 
-	out["tax_category"] = get_address_tax_category(party.get("tax_category"),
-		party_address, shipping_address if party_type != "Supplier" else party_address)
+	out["tax_category"] = get_address_tax_category(party.get("tax_category"), "", "",
+		party_address, shipping_address if party_type != "Supplier" else party_address, cost_center)
 	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company,
 		customer_group=out.customer_group, supplier_group=out.supplier_group, tax_category=out.tax_category,
 		billing_address=party_address, shipping_address=shipping_address)
@@ -365,14 +365,19 @@ def validate_due_date(posting_date, due_date, party_type, party, company=None, b
 					.format(formatdate(default_due_date)))
 
 @frappe.whitelist()
-def get_address_tax_category(tax_category, billing_address=None, shipping_address=None):
+def get_address_tax_category(tax_category, party_type=None, party=None, billing_address=None, shipping_address=None, cost_center=None):
+	cost_center_tax_category = frappe.get_cached_value("Cost Center", cost_center, "tax_category")\
+		if cost_center else ""
+
+	party_tax_category = frappe.get_cached_value(party_type, party, "tax_category") \
+		if party_type and party else ""
+
 	addr_tax_category_from = frappe.db.get_single_value("Accounts Settings", "determine_address_tax_category_from")
-	if addr_tax_category_from == "Shipping Address":
-		if shipping_address:
-			tax_category = frappe.db.get_value("Address", shipping_address, "tax_category") or tax_category
-	else:
-		if billing_address:
-			tax_category = frappe.db.get_value("Address", billing_address, "tax_category") or tax_category
+	address = shipping_address if addr_tax_category_from == "Shipping Address" else billing_address
+	address_tax_category = frappe.db.get_value("Address", address, "tax_category")\
+		if address else ""
+
+	tax_category = cost_center_tax_category or address_tax_category or party_tax_category or tax_category
 
 	return cstr(tax_category)
 

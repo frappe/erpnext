@@ -116,6 +116,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		erpnext.utils.set_taxes_from_address(this.frm, "shipping_address_name", "customer_address", "shipping_address_name");
 	},
 
+	cost_center: function() {
+		erpnext.utils.set_taxes_from_address(this.frm, "cost_center", "customer_address", "shipping_address_name");
+	},
+
 	sales_partner: function() {
 		this.apply_pricing_rule();
 	},
