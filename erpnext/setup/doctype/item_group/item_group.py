@@ -12,6 +12,7 @@ from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from erpnext.shopping_cart.product_info import set_product_info_for_website
 from erpnext.utilities.product import get_qty_in_stock
+from six import iteritems
 
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
@@ -209,10 +210,16 @@ def get_item_group_defaults(item, company):
 	item = frappe.get_cached_doc("Item", item)
 	item_group = frappe.get_cached_doc("Item Group", item.item_group)
 
-	for d in item_group.item_group_defaults or []:
-		if d.company == company:
-			row = copy.deepcopy(d.as_dict())
-			row.pop("name")
-			return row
+	item_defaults = frappe._dict()
 
-	return frappe._dict()
+	while item_group:
+		for d in item_group.item_group_defaults or []:
+			if d.company == company:
+				for k, v in iteritems(d.as_dict()):
+					if not item_defaults.get(k) and k != 'name':
+						item_defaults[k] = v
+				break
+
+		item_group = frappe.get_cached_doc("Item Group", item_group.parent_item_group) if item_group.parent_item_group else None
+
+	return item_defaults
