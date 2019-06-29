@@ -10,6 +10,7 @@ from frappe.model.document import Document
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_outstanding_invoices, get_negative_outstanding_invoices
 from erpnext.setup.utils import get_exchange_rate
+from erpnext.controllers.accounts_controller import get_advance_payment_entries
 
 class AdjustmentEntry(Document):
     def on_submit(self):
@@ -32,6 +33,20 @@ class AdjustmentEntry(Document):
         if self.adjustment_type != 'Sales':
             mandatory_fields.append("supplier")
         return mandatory_fields
+
+    def get_party_details(self, type="debit_entries"):
+        if type == 'debit_entries':
+            party_type = "Customer"
+            party = self.customer
+        else:
+            party_type = "Supplier"
+            party = self.supplier
+        account = get_party_account(party_type, party, self.company)
+        order_doctype = "Sales Order" if party_type == "Customer" else "Purchase Order"
+        account_currency = frappe.db.get_value("Account", account,
+                            'account_currency')
+        return [party_type, party, account, order_doctype, account_currency]
+
 
     def get_exchange_rates(self, entries):
         currencies = list(set([entry.get("currency") for entry in entries]))
@@ -56,14 +71,16 @@ class AdjustmentEntry(Document):
     def get_entries(self):
         if self.adjustment_type == 'Sales':
             sales_invoices = self.get_invoices('debit_entries')
-            payments = self.get_received_payments()
+            payments = self.get_payments('debit_entries')
             self.get_exchange_rates(sales_invoices + payments)
             self.add_invoice_entries(sales_invoices, 'debit_entries')
+            self.add_payment_entries(payments, 'credit_entries')
         elif self.adjustment_type == 'Purchase':
             purchase_invoices = self.get_invoices('credit_entries')
-            payments = self.get_paid_payments()
+            payments = self.get_payments('credit_entries')
             self.get_exchange_rates(payments + purchase_invoices)
             self.add_invoice_entries(purchase_invoices, 'credit_entries')
+            self.add_payment_entries(payments, 'debit_entries')
         else:
             sales_invoices = self.get_invoices('debit_entries')
             purchase_invoices = self.get_invoices('credit_entries')
@@ -72,17 +89,12 @@ class AdjustmentEntry(Document):
             self.add_invoice_entries(purchase_invoices, 'credit_entries')
 
     def get_invoices(self, field_name):
-        if field_name == 'debit_entries':
-            party_type = "Customer"
-            party = self.customer
-        else:
-            party_type = "Supplier"
-            party = self.supplier
-        account = get_party_account(party_type, party, self.company)
+        party_type, party, account, order_doctype, account_currency = self.get_party_details(field_name)
         positive_outstanding_invoices = get_outstanding_invoices(party_type, party, account)
         negative_outstanding_invoices = get_negative_outstanding_invoices(party_type,
-                                                                          party, account,
-                                                                          frappe.db.get_value("Account", account, 'account_currency'), self.company_currency)
+                                                                  party, account,
+                                                                  account_currency,
+                                                                  self.company_currency)
         non_reconciled_invoices = negative_outstanding_invoices + positive_outstanding_invoices
         self.get_extra_invoice_details(non_reconciled_invoices)
         return non_reconciled_invoices
@@ -92,16 +104,41 @@ class AdjustmentEntry(Document):
             d["exchange_rate"] = 1
             if d.voucher_type in ("Sales Invoice", "Purchase Invoice"):
                 d["exchange_rate"], d["currency"], d["cost_center"] = frappe.db.get_value(d.voucher_type, d.voucher_no, ["conversion_rate", "currency", "cost_center"])
+            if d.voucher_type in ("Journal Entry"):
+                debit_in_account_currency, debit, d["currency"], d["cost_center"] = frappe.db.get_value('GL Entry', d.name, ["debit_in_account_currency", "debit", "account_currency", "cost_center"])
+                d["exchange_rate"] = debit / debit_in_account_currency
             if d.voucher_type in ("Purchase Invoice"):
                 d["supplier_bill_no"], d["supplier_bill_date"] = frappe.db.get_value(d.voucher_type, d.voucher_no, ["bill_no", "bill_date"])
 
-    def get_received_payments(self):
-        print("Received")
-        return []
+    def get_payments(self, field_name):
+        party_type, party, account, order_doctype = self.get_party_details(field_name)
+        advance_payments = get_advance_payment_entries(party_type, party, account, order_doctype)
+        self.get_extra_payment_details(advance_payments, field_name)
+        return advance_payments
 
-    def get_paid_payments(self):
-        print("paid")
-        return []
+    def get_extra_payment_details(self, advances, field_name):
+        for d in advances:
+            d["exchange_rate"] = 1
+            if d.reference_type in ("Payment Entry") and field_name == 'debit_entries':
+                d["posting_date"], d["exchange_rate"], d["currency"] = frappe.db.get_value(d.reference_type, d.reference_name,
+                                                                        ["posting_date", "target_exchange_rate", "paid_to_account_currency"])
+            elif d.reference_type in ("Payment Entry") and field_name == 'credit_entries':
+                d["posting_date"], d["exchange_rate"], d["currency"] = frappe.db.get_value(d.reference_type, d.reference_name, ["posting_date", "source_exchange_rate", "paid_from_account_currency"])
+
+    def add_payment_entries(self, advances, field_name):
+        exchange_rates = self.exchange_rates_to_dict()
+        self.set(field_name, [])
+
+        for advance in advances:
+            ent = self.append(field_name, {})
+            ent.voucher_type = advance.get('reference_type')
+            ent.voucher_number = advance.get('reference_name')
+            ent.voucher_date = advance.get('posting_date')
+            ent.voucher_base_amount = advance.get('amount')
+            ent.currency = advance.get("currency")
+            ent.exchange_rate = advance.get('exchange_rate')
+            ent.voucher_amount = ent.voucher_base_amount / ent.exchange_rate
+            ent.recalculate_amounts(exchange_rates)
 
     def add_invoice_entries(self, invoices, field_name):
         exchange_rates = self.exchange_rates_to_dict()
@@ -117,9 +154,7 @@ class AdjustmentEntry(Document):
             ent.exchange_rate = invoice.get('exchange_rate')
             ent.cost_center = invoice.get('cost_center')
             ent.voucher_amount = ent.voucher_base_amount / ent.exchange_rate
-            ent.payment_exchange_rate = exchange_rates[ent.currency]['exchange_rate_to_payment_currency']
-            ent.voucher_payment_amount = ent.voucher_amount * ent.payment_exchange_rate
-            ent.balance = ent.voucher_payment_amount
+            ent.recalculate_amounts(exchange_rates)
             ent.supplier_bill_no = invoice.get('supplier_bill_no')
             ent.supplier_bill_date = invoice.get('supplier_bill_date')
 

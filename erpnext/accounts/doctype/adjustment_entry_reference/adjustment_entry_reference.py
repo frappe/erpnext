@@ -10,6 +10,7 @@ from frappe.model.document import Document
 class AdjustmentEntryReference(Document):
 
 	def recalculate_amounts(self, exchange_rates):
+		self.allocated_amount = self.allocated_amount or 0
 		self.payment_exchange_rate = exchange_rates[self.currency]['exchange_rate_to_payment_currency']
 		self.voucher_payment_amount = self.voucher_amount * self.payment_exchange_rate
 		self.balance = self.voucher_payment_amount - self.allocated_amount
