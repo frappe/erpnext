@@ -1838,13 +1838,14 @@ class Payment {
 		});
 	}
 
-	update_loyalty_points() {
-		if (this.dialog.get_value("redeem_loyalty_points")) {
-			this.dialog.set_value("loyalty_points", this.frm.doc.loyalty_points);
-			this.dialog.set_value("loyalty_amount", this.frm.doc.loyalty_amount);
-			this.update_payment_amount();
-			this.show_paid_amount();
-		}
+	async update_loyalty_points() {
+		const { loyalty_points, loyalty_amount } = this.frm.doc;
+		await Promise.all([
+			this.dialog.set_value("loyalty_points", loyalty_points),
+			this.dialog.set_value("loyalty_amount", loyalty_amount)
+		]);
+		this.update_payment_amount();
+		this.show_paid_amount();
 	}
 
 }
