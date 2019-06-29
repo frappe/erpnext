@@ -1694,7 +1694,13 @@ class Payment {
 				fieldtype: 'Check',
 				label: 'Redeem Loyalty Points',
 				fieldname: 'redeem_loyalty_points',
-				onchange: () => {
+				onchange: async function () {
+					if (!cint(me.dialog.get_value('redeem_loyalty_points'))) {
+						await Promise.all([
+							me.frm.set_value('loyalty_points', 0),
+							me.dialog.set_value('loyalty_points', 0)
+						]);
+					}
 					me.update_cur_frm_value("redeem_loyalty_points", () => {
 						frappe.flags.redeem_loyalty_points = false;
 						me.update_loyalty_points();
