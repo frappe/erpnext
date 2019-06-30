@@ -573,19 +573,19 @@ def get_json():
 
 	res = {}
 	if filters["type_of_business"] == "B2B":
-		for item in report_data:
+		for item in report_data[:-1]:
 			res.setdefault(item["customer_gstin"], {}).setdefault(item["invoice_number"],[]).append(item)
 
 		out = get_b2b_json(res, gstin)
 		gst_json["b2b"] = out
 	elif filters["type_of_business"] == "B2C Large":
-		for item in report_data:
+		for item in report_data[:-1]:
 			res.setdefault(item["place_of_supply"], []).append(item)
 
 		out = get_b2cl_json(res, gstin)
 		gst_json["b2cl"] = out
 	elif filters["type_of_business"] == "EXPORT":
-		for item in report_data:
+		for item in report_data[:-1]:
 			res.setdefault(item["export_type"], []).append(item)
 
 		out = get_export_json(res)
