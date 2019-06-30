@@ -235,6 +235,11 @@ frappe.query_reports["General Ledger"] = {
 			"fieldtype": "Check"
 		},
 		{
+			"fieldname": "show_opening_entries",
+			"label": __("Show Opening Entries"),
+			"fieldtype": "Check"
+		},
+		{
 			"fieldname":"tax_id",
 			"label": __("NTN"),
 			"fieldtype": "Data",

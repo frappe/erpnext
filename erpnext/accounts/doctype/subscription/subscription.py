@@ -314,13 +314,11 @@ class Subscription(Document):
 
 		self.save()
 
-	@property
 	def is_postpaid_to_invoice(self):
 		return getdate(nowdate()) > getdate(self.current_invoice_end) or \
 			(getdate(nowdate()) >= getdate(self.current_invoice_end) and getdate(self.current_invoice_end) == getdate(self.current_invoice_start)) and \
 			not self.has_outstanding_invoice()
 
-	@property
 	def is_prepaid_to_invoice(self):
 		if not self.generate_invoice_at_period_start:
 			return False
@@ -340,7 +338,7 @@ class Subscription(Document):
 		2. Change the `Subscription` status to 'Past Due Date'
 		3. Change the `Subscription` status to 'Cancelled'
 		"""
-		if self.is_postpaid_to_invoice or self.is_prepaid_to_invoice:
+		if self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice():
 			self.generate_invoice()
 			if self.current_invoice_is_past_due():
 				self.status = 'Past Due Date'

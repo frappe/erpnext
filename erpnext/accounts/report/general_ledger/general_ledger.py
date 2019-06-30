@@ -237,7 +237,7 @@ def calculate_opening_closing(filters, gl_entries, group_field, group_value, gro
 
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	for gle in gl_entries:
-		if gle.posting_date < from_date or cstr(gle.is_opening) == "Yes":
+		if gle.posting_date < from_date or (cstr(gle.is_opening) == "Yes" and not filters.get("show_opening_entries")):
 			update_totals_for('opening', gle)
 			update_totals_for('closing', gle)
 			gle.to_remove = True

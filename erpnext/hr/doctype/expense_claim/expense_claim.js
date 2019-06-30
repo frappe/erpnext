@@ -233,7 +233,8 @@ frappe.ui.form.on("Expense Claim", {
 		frm.fields_dict["cost_center"].get_query = function() {
 			return {
 				filters: {
-					"company": frm.doc.company
+					"company": frm.doc.company,
+					"is_group": 0
 				}
 			};
 		};
@@ -244,7 +245,9 @@ frappe.ui.form.on("Expense Claim", {
 			return {
 				filters: {
 					"report_type": "Balance Sheet",
-					"account_type": "Payable"
+					"account_type": "Payable",
+					"company": frm.doc.company,
+					"is_group": 0
 				}
 			};
 		};

@@ -176,7 +176,7 @@ class TestBatch(unittest.TestCase):
 				item = item_name,
 				batch_id = batch_name
 			)).insert(ignore_permissions=True)
-			batch.submit()
+			batch.save()
 
 		stock_entry = frappe.get_doc(dict(
 			doctype = 'Stock Entry',

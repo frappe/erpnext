@@ -13,11 +13,11 @@ frappe.listview_settings['Quotation'] = {
 	},
 
 	get_indicator: function(doc) {
-		if(doc.status==="Submitted") {
+		if(doc.status==="Open") {
 			if (doc.valid_till && doc.valid_till < frappe.datetime.nowdate()) {
 				return [__("Expired"), "darkgrey", "valid_till,<," + frappe.datetime.nowdate()];
 			} else {
-				return [__("Submitted"), "blue", "status,=,Submitted"];
+				return [__("Open"), "orange", "status,=,Open"];
 			}
 		} else if(doc.status==="Ordered") {
 			return [__("Ordered"), "green", "status,=,Ordered"];

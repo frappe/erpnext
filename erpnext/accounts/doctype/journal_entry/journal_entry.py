@@ -479,8 +479,9 @@ class JournalEntry(AccountsController):
 						name_field = "customer_name" if d.party_type=="Customer" else "supplier_name"
 					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party, name_field)
 
-				party_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
-				party_account_currency = d.account_currency
+				if pay_to_recd_from and pay_to_recd_from == d.party:
+					party_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
+					party_account_currency = d.account_currency
 
 			elif frappe.db.get_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
 				bank_amount += (d.debit_in_account_currency or d.credit_in_account_currency)

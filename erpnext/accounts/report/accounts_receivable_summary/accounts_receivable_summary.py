@@ -82,7 +82,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		for i, label in enumerate(["0-{range1}".format(range1=self.filters["range1"]),
 			"{range1}-{range2}".format(range1=cint(self.filters["range1"]) + 1, range2=self.filters["range2"]),
 			"{range2}-{range3}".format(range2=cint(self.filters["range2"]) + 1, range3=self.filters["range3"]),
-			"{range3}-{above}".format(range3=cint(self.filters["range3"]) + 1, above=_("Above"))]):
+			"{range3}-{range4}".format(range3=cint(self.filters["range3"]) + 1, range4=self.filters["range4"]),
+			"{range4}-{above}".format(range4=cint(self.filters["range4"]) + 1, above=_("Above"))]):
 				columns.append({
 					"label": label,
 					"fieldname": "range{}".format(i + 1),
@@ -151,7 +152,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			row["return_amount"] = party_dict.return_amount
 			row["outstanding_amount"] = party_dict.outstanding_amount
 
-			for i in range(4):
+			for i in range(5):
 				row["range{}".format(i+1)] = party_dict.get("range{}".format(i+1))
 
 			if args.get("party_type") == "Customer":
@@ -179,6 +180,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 					"range2": 0,
 					"range3": 0,
 					"range4": 0,
+					"range5": 0,
 					"sales_person": []
 				})
 			)

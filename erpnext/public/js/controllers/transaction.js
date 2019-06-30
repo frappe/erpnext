@@ -279,6 +279,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 		if(frappe.meta.get_docfield(this.frm.doc.doctype + " Item", "item_code")) {
 			this.setup_item_selector();
+			this.frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 		}
 	},
 
@@ -1261,6 +1262,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		return {
 			"items": this._get_item_list(item),
 			"customer": me.frm.doc.customer || me.frm.doc.party_name,
+			"quotation_to": me.frm.doc.quotation_to,
 			"customer_group": me.frm.doc.customer_group,
 			"territory": me.frm.doc.territory,
 			"supplier": me.frm.doc.supplier,
@@ -1431,7 +1433,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					if(!r.exc) {
 						me.frm.set_value("taxes", r.message);
 						me.set_dynamic_labels();
-						me.calculate_taxes_and_totals();
+						
+						if(me.frm.doc.shipping_rule) {
+							me.frm.script_manager.trigger("shipping_rule");
+						} else {
+							me.calculate_taxes_and_totals();
+						}
 					}
 				}
 			});
@@ -1576,6 +1583,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				method: "set_advances",
 				doc: this.frm.doc,
 				callback: function(r, rt) {
+					refresh_field("advances");
 					me.calculate_taxes_and_totals();
 				}
 			})

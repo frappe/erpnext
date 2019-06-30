@@ -47,6 +47,10 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		erpnext.utils.get_party_details(this.frm, null, null, function() {
 			me.apply_price_list();
 		});
+
+		if(me.frm.doc.quotation_to=="Lead" && me.frm.doc.party_name) {
+			me.frm.trigger("get_lead_details");
+		}
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
@@ -86,22 +90,29 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		if (this.frm.doc.docstatus===0) {
 			this.frm.add_custom_button(__('Opportunity'),
 				function() {
-					var setters = {};
-					if(me.frm.doc.customer) {
-						setters.customer = me.frm.doc.customer || undefined;
-					} else if (me.frm.doc.lead) {
-						setters.lead = me.frm.doc.lead || undefined;
-					}
 					erpnext.utils.map_current_doc({
 						method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
 						source_doctype: "Opportunity",
 						target: me.frm,
-						setters: setters,
+						setters: [
+							{
+								label: "Party",
+								fieldname: "party_name",
+								fieldtype: "Link",
+								options: me.frm.doc.quotation_to,
+								default: me.frm.doc.party_name || undefined
+							},
+							{
+								label: "Opportunity Type",
+								fieldname: "opportunity_type",
+								fieldtype: "Link",
+								options: "Opportunity Type",
+								default: me.frm.doc.order_type || undefined
+							}
+						],
 						get_query_filters: {
 							status: ["not in", ["Lost", "Closed"]],
-							company: me.frm.doc.company,
-							// cannot set opportunity_type as setter, as the fieldname is order_type
-							opportunity_type: me.frm.doc.order_type,
+							company: me.frm.doc.company
 						}
 					})
 				}, __("Get items from"), "btn-default");
@@ -162,16 +173,16 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		}
 	},
 
-	lead: function() {
+	get_lead_details: function() {
 		var me = this;
-		if(!this.frm.doc.lead) {
+		if(!this.frm.doc.quotation_to === "Lead") {
 			return;
 		}
 
 		frappe.call({
 			method: "erpnext.crm.doctype.lead.lead.get_lead_details",
 			args: {
-				'lead': this.frm.doc.lead,
+				'lead': this.frm.doc.party_name,
 				'posting_date': this.frm.doc.transaction_date,
 				'company': this.frm.doc.company,
 			},

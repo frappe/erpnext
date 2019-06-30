@@ -249,6 +249,10 @@ class AccountsController(TransactionBase):
 				document_type = "{} Item".format(self.doctype)
 				parent_dict.update({"document_type": document_type})
 
+			# party_name field used for customer in quotation
+			if self.doctype == "Quotation" and self.quotation_to == "Customer" and parent_dict.get("party_name"):
+				parent_dict.update({"customer": parent_dict.get("party_name")})
+
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
@@ -357,7 +361,7 @@ class AccountsController(TransactionBase):
 			'fiscal_year': fiscal_year,
 			'voucher_type': self.doctype,
 			'voucher_no': self.name,
-			'remarks': self.get("remarks"),
+			'remarks': self.get("remarks") or self.get("remark"),
 			'debit': 0,
 			'credit': 0,
 			'debit_in_account_currency': 0,
@@ -796,7 +800,12 @@ class AccountsController(TransactionBase):
 				count += 1
 				item.qty = group_item_qty[item.item_code]
 				item.amount = group_item_amount[item.item_code]
-				item.rate = flt(flt(item.amount) / flt(item.qty), item.precision("rate"))
+
+				if item.qty:
+					item.rate = flt(flt(item.amount) / flt(item.qty), item.precision("rate"))
+				else:
+					item.rate = 0
+
 				item.idx = count
 				del group_item_qty[item.item_code]
 			else:

@@ -28,7 +28,7 @@ def get_columns():
 			"width": 150
 		},
 		{
-			"fieldname": "item_name",
+			"fieldname": "item",
 			"fieldtype": "Link",
 			"options": "Item",
 			"label": "Item",
@@ -82,12 +82,12 @@ def get_data(filters):
 			row = {
 				"territory": territory.name,
 				"item_group": item.item_group,
-				"item": item.name,
+				"item": item.item_code,
 				"item_name": item.item_name
 			}
 
-			if sales_invoice_data.get((territory.name,item.name)):
-				item_obj = sales_invoice_data[(territory.name,item.name)]
+			if sales_invoice_data.get((territory.name,item.item_code)):
+				item_obj = sales_invoice_data[(territory.name,item.item_code)]
 				if item_obj.days_since_last_order > cint(filters['days']):
 					row.update({
 						"territory": item_obj.territory,
@@ -111,15 +111,15 @@ def get_sales_details(filters):
 	date_field = "s.transaction_date" if filters["based_on"] == "Sales Order" else "s.posting_date"
 
 	sales_data = frappe.db.sql("""
-		select s.territory, s.customer, si.item_group, si.item_name, si.qty, {date_field} as last_order_date,
+		select s.territory, s.customer, si.item_group, si.item_code, si.qty, {date_field} as last_order_date,
 		DATEDIFF(CURDATE(), {date_field}) as days_since_last_order
 		from `tab{doctype}` s, `tab{doctype} Item` si
 		where s.name = si.parent and s.docstatus = 1
-		group by si.name order by days_since_last_order """ #nosec
+		order by days_since_last_order """ #nosec
 		.format(date_field = date_field, doctype = filters['based_on']), as_dict=1)
 
 	for d in sales_data:
-		item_details_map.setdefault((d.territory,d.item_name), d)
+		item_details_map.setdefault((d.territory,d.item_code), d)
 
 	return item_details_map
 
@@ -149,6 +149,6 @@ def get_items(filters):
 			"name": filters["item"]
 		})
 
-	items = frappe.get_all("Item", fields=["name", "item_group", "item_name"], filters=filters_dict, order_by="name")
+	items = frappe.get_all("Item", fields=["name", "item_group", "item_name", "item_code"], filters=filters_dict, order_by="name")
 
 	return items

@@ -287,14 +287,14 @@ def copy_attributes_to_variant(item, variant):
 					variant.set(field.fieldname, item.get(field.fieldname))
 
 	variant.variant_of = item.name
-	if 'description' in allow_fields:
-		variant.has_variants = 0
+
+	if 'description' not in allow_fields:
 		if not variant.description:
-			variant.description = ""
+				variant.description = ""
 
 		if item.variant_based_on=='Item Attribute':
 			if variant.attributes:
-				attributes_description = ""
+				attributes_description = item.description + " "
 				for d in variant.attributes:
 					attributes_description += "<div>" + d.attribute + ": " + cstr(d.attribute_value) + "</div>"
 

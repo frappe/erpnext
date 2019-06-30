@@ -57,6 +57,7 @@
 		var range2 = report.columns.find(d => d.fieldname == "range2").label;
 		var range3 = report.columns.find(d => d.fieldname == "range3").label;
 		var range4 = report.columns.find(d => d.fieldname == "range4").label;
+		var range5 = report.columns.find(d => d.fieldname == "range5").label;
 	%}
 	{% if(balance_row) { %}
 	<table class="table table-bordered table-condensed">
@@ -78,6 +79,7 @@
 				<th>{%= __(range2) %}</th>
 				<th>{%= __(range3) %}</th>
 				<th>{%= __(range4) %}</th>
+				<th>{%= __(range5) %}</th>
 				<th>{%= __("Total") %}</th>
 			</tr>
 		</thead>
@@ -88,6 +90,7 @@
 				<td class="text-right">{%= format_currency(balance_row[range2]) %}</td>
 				<td class="text-right">{%= format_currency(balance_row[range3]) %}</td>
 				<td class="text-right">{%= format_currency(balance_row[range4]) %}</td>
+				<td class="text-right">{%= format_currency(balance_row[range5]) %}</td>
 				<td class="text-right">
 					{%= format_currency(flt(balance_row[("outstanding_amount")]), data[data.length-1]["currency"]) %}
 					</td>
@@ -150,12 +153,14 @@
 					var range2 = report.columns.find(d => d.fieldname == "range2").label;
 					var range3 = report.columns.find(d => d.fieldname == "range3").label;
 					var range4 = report.columns.find(d => d.fieldname == "range4").label;
+					var range5 = report.columns.find(d => d.fieldname == "range5").label;
 				%}
-				<th style="width: 40%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
-				<th style="width: 15%">{%= __(range1) %}</th>
-				<th style="width: 15%">{%= __(range2) %}</th>
-				<th style="width: 15%">{%= __(range3) %}</th>
-				<th style="width: 15%">{%= __(range4) %}</th>
+				<th style="width: 50%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
+				<th style="width: 10%">{%= __(range1) %}</th>
+				<th style="width: 10%">{%= __(range2) %}</th>
+				<th style="width: 10%">{%= __(range3) %}</th>
+				<th style="width: 10%">{%= __(range4) %}</th>
+				<th style="width: 10%">{%= __(range5) %}</th>
 			{% } %}
 		</tr>
 	</thead>
@@ -271,7 +276,7 @@
 					{% } %}
 				{% } %}
 			{% } else { %}
-				{% if(data[i]["party"] != __("Total")) { %}
+				{% if(data[i]["party"]) { %}
 					<td>
 						{% if(!(filters.customer || filters.supplier)) { %}
 							{%= data[i]["party"] %}
@@ -281,12 +286,13 @@
 						{% } %}
 					</td>
 				{% } else { %}
-					<td><b>{%= __("Total") %}</b></td>
+					<td class="text-right"><b>{%= __("Total") %}</b></td>
 				{% } %}
 				<td style="text-align: right">{%= format_currency(data[i]["range1"], data[i]["currency"]) %}</td>
 				<td style="text-align: right">{%= format_currency(data[i]["range2"], data[i]["currency"]) %}</td>
 				<td style="text-align: right">{%= format_currency(data[i]["range3"], data[i]["currency"]) %}</td>
 				<td style="text-align: right">{%= format_currency(data[i]["range4"], data[i]["currency"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["range5"], data[i]["currency"]) %}</td>
 			{% } %}
 			</tr>
 		{% } %}

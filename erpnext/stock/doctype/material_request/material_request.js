@@ -38,6 +38,10 @@ frappe.ui.form.on('Material Request', {
 		};
 	},
 
+	onload_post_render: function(frm) {
+		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
+	},
+
 	refresh: function(frm) {
 		frm.events.make_custom_buttons(frm);
 	},
@@ -182,6 +186,7 @@ frappe.ui.form.on('Material Request', {
 			var values = d.get_values();
 			if(!values) return;
 			values["company"] = frm.doc.company;
+			if(!frm.doc.company) frappe.throw(__("Company field is required"));
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.bom.bom.get_bom_items",
 				args: values,

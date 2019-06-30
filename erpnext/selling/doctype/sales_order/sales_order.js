@@ -77,10 +77,6 @@ frappe.ui.form.on("Sales Order", {
 			if(!d.delivery_date) d.delivery_date = frm.doc.delivery_date;
 		});
 		refresh_field("items");
-	},
-
-	onload_post_render: function(frm) {
-		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	}
 });
 
@@ -137,19 +133,22 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				if (this.frm.has_perm("submit")) {
 					// close
-					if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
+					if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed, 6) < 100) {
 						this.frm.add_custom_button(__('Close'),
 							function() { me.close_sales_order() }, __("Status"))
 					}
 				}
 
 				// delivery note
-				if(flt(doc.per_delivered, 6) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
+				if(flt(doc.per_delivered, 6) < 100 && allow_delivery) {
 					this.frm.add_custom_button(__('Delivery'),
 						function() { me.make_delivery_note_based_on_delivery_date(); }, __("Make"));
-					this.frm.add_custom_button(__('Work Order'),
-						function() { me.make_work_order() }, __("Make"));
 
+					if(["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1){
+						this.frm.add_custom_button(__('Work Order'),
+							function() { me.make_work_order() }, __("Make"));
+
+						}
 					this.frm.page.set_inner_btn_group_as_primary(__("Make"));
 				}
 
@@ -225,13 +224,19 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 						source_doctype: "Quotation",
 						target: me.frm,
-						setters: {
-							customer: me.frm.doc.customer || undefined
-						},
+						setters: [
+							{
+								label: "Customer",
+								fieldname: "party_name",
+								fieldtype: "Link",
+								options: "Customer",
+								default: me.frm.doc.customer || undefined
+							}
+						],
 						get_query_filters: {
 							company: me.frm.doc.company,
 							docstatus: 1,
-							status: ["!=", "Lost"],
+							status: ["!=", "Lost"]
 						}
 					})
 				}, __("Get items from"));

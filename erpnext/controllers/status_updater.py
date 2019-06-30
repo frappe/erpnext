@@ -27,15 +27,15 @@ status_map = {
 	],
 	"Quotation": [
 		["Draft", None],
-		["Submitted", "eval:self.docstatus==1"],
+		["Open", "eval:self.docstatus==1"],
 		["Lost", "eval:self.status=='Lost'"],
 		["Ordered", "has_sales_order"],
 		["Cancelled", "eval:self.docstatus==2"],
 	],
 	"Sales Order": [
 		["Draft", None],
-		["To Deliver and Bill", "eval:self.per_delivered < 100 and self.per_billed < 100 and self.docstatus == 1 and self.order_type in ['Sales', 'Shopping Cart']"],
-		["To Bill", "eval:self.per_delivered == 100 or self.order_type == 'Maintenance' and self.per_billed < 100 and self.docstatus == 1"],
+		["To Deliver and Bill", "eval:self.per_delivered < 100 and self.per_billed < 100 and self.docstatus == 1"],
+		["To Bill", "eval:self.per_delivered == 100 and self.per_billed < 100 and self.docstatus == 1"],
 		["To Deliver", "eval:self.per_delivered < 100 and self.per_billed == 100 and self.docstatus == 1"],
 		["Completed", "eval:self.per_delivered == 100 and self.per_billed == 100 and self.docstatus == 1"],
 		["Completed", "eval:self.order_type == 'Maintenance' and self.per_billed == 100 and self.docstatus == 1"],
@@ -331,19 +331,27 @@ class StatusUpdater(Document):
 				.format(frappe.db.escape(frappe.session.user))
 
 	def update_billing_status_for_zero_amount_refdoc(self, ref_dt):
-		ref_fieldname = ref_dt.lower().replace(" ", "_")
-		zero_amount_refdoc = []
-		all_zero_amount_refdoc = frappe.db.sql_list("""select name from `tab%s`
-			where docstatus=1 and base_net_total = 0""" % ref_dt)
+		ref_fieldname = frappe.scrub(ref_dt)
 
-		for item in self.get("items"):
-			if item.get(ref_fieldname) \
-				and item.get(ref_fieldname) in all_zero_amount_refdoc \
-				and item.get(ref_fieldname) not in zero_amount_refdoc:
-					zero_amount_refdoc.append(item.get(ref_fieldname))
+		ref_docs = [item.get(ref_fieldname) for item in (self.get('items') or []) if item.get(ref_fieldname)]
+		if not ref_docs:
+			return
 
-		if zero_amount_refdoc:
-			self.update_billing_status(zero_amount_refdoc, ref_dt, ref_fieldname)
+		zero_amount_refdocs = frappe.db.sql_list("""
+			SELECT
+				name
+			from
+				`tab{ref_dt}`
+			where
+				docstatus = 1
+				and base_net_total = 0
+				and name in %(ref_docs)s
+		""".format(ref_dt=ref_dt), {
+			'ref_docs': ref_docs
+		})
+
+		if zero_amount_refdocs:
+			self.update_billing_status(zero_amount_refdocs, ref_dt, ref_fieldname)
 
 	def update_billing_status(self, zero_amount_refdoc, ref_dt, ref_fieldname):
 		for ref_dn in zero_amount_refdoc:

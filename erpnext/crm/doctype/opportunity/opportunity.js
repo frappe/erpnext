@@ -20,10 +20,22 @@ frappe.ui.form.on("Opportunity", {
 		});
 	},
 
+	onload_post_render: function(frm) {
+		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
+	},
+
 	party_name: function(frm) {
+		frm.toggle_display("contact_info", frm.doc.party_name);
+
 		if (frm.doc.opportunity_from == "Customer") {
 			frm.trigger('set_contact_link');
 			erpnext.utils.get_party_details(frm);
+		} else if (frm.doc.opportunity_from == "Lead") {
+			erpnext.utils.map_current_doc({
+				method: "erpnext.crm.doctype.lead.lead.make_opportunity",
+				source_name: frm.doc.party_name,
+				frm: frm
+			});
 		}
 	},
 
@@ -82,9 +94,9 @@ frappe.ui.form.on("Opportunity", {
 
 	set_contact_link: function(frm) {
 		if(frm.doc.opportunity_from == "Customer" && frm.doc.party_name) {
-			frappe.dynamic_link = {doc: frm.doc, fieldname: 'customer', doctype: 'Customer'}
+			frappe.dynamic_link = {doc: frm.doc, fieldname: 'party_name', doctype: 'Customer'}
 		} else if(frm.doc.opportunity_from == "Lead" && frm.doc.party_name) {
-			frappe.dynamic_link = {doc: frm.doc, fieldname: 'lead', doctype: 'Lead'}
+			frappe.dynamic_link = {doc: frm.doc, fieldname: 'party_name', doctype: 'Lead'}
 		}
 	},
 
@@ -138,12 +150,14 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			};
 		});
 
-		$.each([["lead", "lead"],
-			["customer", "customer"],
-			["contact_person", "contact_query"]],
-			function(i, opts) {
-				me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
-			});
+		me.frm.set_query('contact_person', erpnext.queries['contact_query'])
+
+		if (me.frm.doc.opportunity_from == "Lead") {
+			me.frm.set_query('party_name', erpnext.queries['lead']);
+		}
+		else if (me.frm.doc.opportunity_from == "Cuatomer") {
+			me.frm.set_query('party_name', erpnext.queries['customer']);
+		}
 	},
 
 	create_quotation: function() {
@@ -155,11 +169,6 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 });
 
 $.extend(cur_frm.cscript, new erpnext.crm.Opportunity({frm: cur_frm}));
-
-cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
-	if(doc.opportunity_from == 'Lead' && doc.party_name)
-		cur_frm.cscript.lead(doc, cdt, cdn);
-}
 
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
@@ -177,15 +186,6 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 			}
 		})
 	}
-}
-
-cur_frm.cscript.lead = function(doc, cdt, cdn) {
-	cur_frm.toggle_display("contact_info", doc.party_name);
-	erpnext.utils.map_current_doc({
-		method: "erpnext.crm.doctype.lead.lead.make_opportunity",
-		source_name: cur_frm.doc.party_name,
-		frm: cur_frm
-	});
 }
 
 cur_frm.cscript['Declare Opportunity Lost'] = function() {
