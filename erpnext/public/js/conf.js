@@ -11,9 +11,6 @@ $(document).bind('toolbar_setup', function() {
 		href="https://discuss.erpnext.com">Feedback</a></p>'
 
 
-	$('.navbar-home').html('<img class="erpnext-icon" src="'+
-			frappe.urllib.get_base_url()+'/assets/erpnext/images/erp-icon.svg" />');
-
 	$('[data-link="docs"]').attr("href", "https://erpnext.com/docs")
 	$('[data-link="issues"]').attr("href", "https://github.com/frappe/erpnext/issues")
 
@@ -41,7 +38,8 @@ $.extend(frappe.create_routes, {
 	"Item Group": "Tree/Item Group",
 	"Sales Person": "Tree/Sales Person",
 	"Account": "Tree/Account",
-	"Cost Center": "Tree/Cost Center"
+	"Cost Center": "Tree/Cost Center",
+	"Department": "Tree/Department",
 });
 
 // preferred modules for breadcrumbs

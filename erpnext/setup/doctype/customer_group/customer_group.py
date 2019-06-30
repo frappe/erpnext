@@ -8,7 +8,7 @@ from frappe import _
 
 from frappe.utils.nestedset import NestedSet
 class CustomerGroup(NestedSet):
-	nsm_parent_field = 'parent_customer_group';
+	nsm_parent_field = 'parent_customer_group'
 
 	def on_update(self):
 		self.validate_name_with_customer()

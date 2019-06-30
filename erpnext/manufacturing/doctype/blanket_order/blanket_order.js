@@ -35,5 +35,13 @@ frappe.ui.form.on('Blanket Order', {
 
 	onload_post_render: function(frm) {
 		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
-	}
+	},
+
+	tc_name: function (frm) {
+		erpnext.utils.get_terms(frm.doc.tc_name, frm.doc, function (r) {
+			if (!r.exc) {
+				frm.set_value("terms", r.message);
+			}
+		});
+	},
 });
