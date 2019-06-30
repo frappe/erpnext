@@ -1,0 +1,100 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2019-06-30 16:05:30.015615",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "campaign_section",
+  "campaign_name",
+  "lead",
+  "column_break_4",
+  "start_date",
+  "status",
+  "email_schedule_section",
+  "email_schedule",
+  "naming_series"
+ ],
+ "fields": [
+  {
+   "fieldname": "campaign_section",
+   "fieldtype": "Section Break",
+   "label": "CAMPAIGN "
+  },
+  {
+   "fieldname": "campaign_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Campaign Name",
+   "options": "Campaign",
+   "reqd": 1
+  },
+  {
+   "fieldname": "lead",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Lead",
+   "options": "Lead",
+   "reqd": 1
+  },
+  {
+   "default": "Started",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nStarted\nIn Progress\nCompleted"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "email_schedule_section",
+   "fieldtype": "Section Break",
+   "label": "EMAIL SCHEDULE"
+  },
+  {
+   "fieldname": "email_schedule",
+   "fieldtype": "Table",
+   "label": "Email Schedule",
+   "options": "Campaign Email Schedule",
+   "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "MAIL-CAMP-.YYYY.-",
+   "reqd": 1
+  }
+ ],
+ "modified": "2019-06-30 16:23:00.696185",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Email Campaign",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
