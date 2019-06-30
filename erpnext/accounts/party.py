@@ -97,7 +97,7 @@ def set_address_details(out, party, party_type, doctype=None, company=None, part
 		if doctype:
 			out.update(get_fetch_values(doctype, 'shipping_address_name', out.shipping_address_name))
 
-	if doctype and doctype in ['Delivery Note', 'Sales Invoice']:
+	if doctype and doctype in ['Sales Order', 'Delivery Note', 'Sales Invoice']:
 		out.update(get_company_address(company))
 		if out.company_address:
 			out.update(get_fetch_values(doctype, 'company_address', out.company_address))
