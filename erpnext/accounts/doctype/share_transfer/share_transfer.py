@@ -82,20 +82,20 @@ class ShareTransfer(Document):
 	def basic_validations(self):
 		if self.transfer_type == 'Purchase':
 			self.to_shareholder = ''
-			if self.from_shareholder is None or self.from_shareholder is '':
+			if not self.from_shareholder:
 				frappe.throw(_('The field From Shareholder cannot be blank'))
-			if self.from_folio_no is None or self.from_folio_no is '':
+			if not self.from_folio_no:
 				self.to_folio_no = self.autoname_folio(self.to_shareholder)
 		elif (self.transfer_type == 'Issue'):
 			self.from_shareholder = ''
-			if self.to_shareholder is None or self.to_shareholder == '':
+			if not self.to_shareholder:
 				frappe.throw(_('The field To Shareholder cannot be blank'))
-			if self.to_folio_no is None or self.to_folio_no is '':
+			if not self.to_folio_no:
 				self.to_folio_no = self.autoname_folio(self.to_shareholder)
 		else:
 			if self.from_shareholder is None or self.to_shareholder is None:
 				frappe.throw(_('The fields From Shareholder and To Shareholder cannot be blank'))
-			if self.to_folio_no is None or self.to_folio_no is '':
+			if not self.to_folio_no:
 				self.to_folio_no = self.autoname_folio(self.to_shareholder)
 		if self.from_shareholder == self.to_shareholder:
 			frappe.throw(_('The seller and the buyer cannot be the same'))
@@ -179,14 +179,14 @@ class ShareTransfer(Document):
 
 	def folio_no_validation(self):
 		shareholders = ['from_shareholder', 'to_shareholder']
-		shareholders = [shareholder for shareholder in shareholders if self.get(shareholder) is not '']
+		shareholders = [shareholder for shareholder in shareholders if self.get(shareholder)]
 		for shareholder in shareholders:
 			doc = frappe.get_doc('Shareholder', self.get(shareholder))
 			if doc.company != self.company:
 				frappe.throw(_('The shareholder does not belong to this company'))
-			if doc.folio_no is '' or doc.folio_no is None:
+			if not doc.folio_no:
 				doc.folio_no = self.from_folio_no \
-					if (shareholder == 'from_shareholder') else self.to_folio_no;
+					if (shareholder == 'from_shareholder') else self.to_folio_no
 				doc.save()
 			else:
 				if doc.folio_no and doc.folio_no != (self.from_folio_no if (shareholder == 'from_shareholder') else self.to_folio_no):
