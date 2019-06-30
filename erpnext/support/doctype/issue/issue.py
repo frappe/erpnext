@@ -175,13 +175,14 @@ class Issue(Document):
 		self.resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()))
 
 	def change_service_level_agreement_and_priority(self):
-		if not self.priority == frappe.db.get_value("Issue", self.name, "priority"):
-			self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
-			frappe.msgprint("Priority has been updated.")
+		if self.service_level_agreement and frappe.db.exists("Issue", self.name):
+			if not self.priority == frappe.db.get_value("Issue", self.name, "priority"):
+				self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
+				frappe.msgprint(_("Priority has been changed to {0}.").format(self.priority))
 
-		if not self.service_level_agreement == frappe.db.get_value("Issue", self.name, "service_level_agreement"):
-			self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
-			frappe.msgprint("Service Level Agreement has been updated.")
+			if not self.service_level_agreement == frappe.db.get_value("Issue", self.name, "service_level_agreement"):
+				self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
+				frappe.msgprint(_("Service Level Agreement has been changed to {0}.").format(self.service_level_agreement))
 
 def get_expected_time_for(parameter, service_level, start_date_time):
 	current_date_time = start_date_time
