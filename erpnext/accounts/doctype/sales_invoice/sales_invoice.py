@@ -78,9 +78,18 @@ class SalesInvoice(SellingController):
 		if not self.stin:
 			set_name_by_naming_series(self)
 		else:
-			abbr = self.get_company_abbr()
-			nstr = str(self.stin).zfill(5)
-			self.name = "{0}-{1}".format(abbr, nstr)
+			series_from_cost_center = None
+			current_cost_center = self.cost_center
+			while current_cost_center and not series_from_cost_center:
+				series_from_cost_center, current_cost_center = frappe.get_cached_value("Cost Center", current_cost_center,
+					["invoice_naming_prefix", "parent_cost_center"])
+
+			prefix = self.get_company_abbr()
+			if series_from_cost_center:
+				prefix = "{0}-{1}".format(prefix, series_from_cost_center)
+
+			nstr = cstr(self.stin).zfill(5)
+			self.name = "{0}-{1}".format(prefix, nstr)
 
 	def validate(self):
 		super(SalesInvoice, self).validate()

@@ -366,8 +366,11 @@ def validate_due_date(posting_date, due_date, party_type, party, company=None, b
 
 @frappe.whitelist()
 def get_address_tax_category(tax_category, party_type=None, party=None, billing_address=None, shipping_address=None, cost_center=None):
-	cost_center_tax_category = frappe.get_cached_value("Cost Center", cost_center, "tax_category")\
-		if cost_center else ""
+	cost_center_tax_category = None
+	current_cost_center = cost_center
+	while current_cost_center and not cost_center_tax_category:
+		cost_center_tax_category, current_cost_center = frappe.get_cached_value("Cost Center", current_cost_center,
+			["tax_category", "parent_cost_center"])
 
 	party_tax_category = frappe.get_cached_value(party_type, party, "tax_category") \
 		if party_type and party else ""
