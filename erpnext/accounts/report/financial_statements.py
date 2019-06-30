@@ -355,6 +355,10 @@ def set_gl_entries_by_account(
 		"to_date": to_date,
 	}
 
+	if filters.get("include_default_book_entries"):
+		gl_filters["company_fb"] = frappe.db.get_value("Company",
+			company, 'default_finance_book')
+
 	for key, value in filters.items():
 		if value:
 			gl_filters.update({
@@ -390,8 +394,8 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	if filters:
 		if filters.get("project"):
 			if not isinstance(filters.get("project"), list):
-				projects = frappe.safe_encode(filters.get("project"))
-				filters.project = [d.strip() for d in projects.strip().split(',') if d]
+				filters.project = frappe.parse_json(filters.get("project"))
+
 			additional_conditions.append("project in %(project)s")
 
 		if filters.get("cost_center"):
@@ -399,7 +403,10 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 			additional_conditions.append("cost_center in %(cost_center)s")
 
 		if filters.get("finance_book"):
-			additional_conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
+			if filters.get("include_default_book_entries"):
+				additional_conditions.append("finance_book in (%(finance_book)s, %(company_fb)s)")
+			else:
+				additional_conditions.append("finance_book in (%(finance_book)s)")
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:

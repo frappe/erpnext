@@ -26,8 +26,7 @@ def execute(filters=None):
 		account_details.setdefault(acc.name, acc)
 
 	if filters.get('party'):
-		parties = cstr(filters.get("party")).strip()
-		filters.party = [d.strip() for d in parties.split(',') if d]
+		filters.party = frappe.parse_json(filters.get("party"))
 
 	validate_filters(filters, account_details)
 
@@ -61,12 +60,10 @@ def validate_filters(filters, account_details):
 		frappe.throw(_("From Date must be before To Date"))
 
 	if filters.get('project'):
-		projects = cstr(filters.get("project")).strip()
-		filters.project = [d.strip() for d in projects.split(',') if d]
+		filters.project = frappe.parse_json(filters.get('project'))
 
 	if filters.get('cost_center'):
-		cost_centers = cstr(filters.get("cost_center")).strip()
-		filters.cost_center = [d.strip() for d in cost_centers.split(',') if d]
+		filters.cost_center = frappe.parse_json(filters.get('cost_center'))
 
 
 def validate_party(filters):
@@ -134,6 +131,10 @@ def get_gl_entries(filters):
 			sum(debit_in_account_currency) as debit_in_account_currency,
 			sum(credit_in_account_currency) as  credit_in_account_currency"""
 
+	if filters.get("include_default_book_entries"):
+		filters['company_fb'] = frappe.db.get_value("Company",
+			filters.get("company"), 'default_finance_book')
+
 	gl_entries = frappe.db.sql(
 		"""
 		select
@@ -189,7 +190,10 @@ def get_conditions(filters):
 		conditions.append("project in %(project)s")
 
 	if filters.get("finance_book"):
-		conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
+		if filters.get("include_default_book_entries"):
+			conditions.append("finance_book in (%(finance_book)s, %(company_fb)s)")
+		else:
+			conditions.append("finance_book in (%(finance_book)s)")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
