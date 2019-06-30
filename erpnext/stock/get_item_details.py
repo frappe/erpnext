@@ -307,6 +307,7 @@ def get_basic_details(args, item):
 	for d in [
 		["Account", "income_account", "default_income_account"],
 		["Account", "expense_account", "default_expense_account"],
+		["Cost Center", "cost_center", "cost_center"],
 		["Warehouse", "warehouse", ""]]:
 			if not out[d[1]]:
 				out[d[1]] = frappe.get_cached_value('Company',  args.company,  d[2]) if d[2] else None
