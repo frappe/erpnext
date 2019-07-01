@@ -11,7 +11,8 @@ frappe.ui.form.on("Sales Order", {
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order',
 			'Project': 'Project',
-			'Purchase Invoice': 'Purchase Invoice'
+			'Purchase Invoice': 'Purchase Invoice',
+			'Payment Entry': 'Payment'
 		}
 
 		// formatter for material request item
