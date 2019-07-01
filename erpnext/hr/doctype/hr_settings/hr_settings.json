@@ -3,24 +3,26 @@
  "doctype": "DocType",
  "document_type": "Other",
  "editable_grid": 1,
+ "engine": "InnoDB",
  "field_order": [
   "employee_settings",
   "retirement_age",
   "emp_created_by",
-  "leave_approval_notification_template",
-  "leave_status_notification_template",
   "column_break_4",
   "stop_birthday_reminders",
-  "maintain_bill_work_hours_same",
-  "leave_approver_mandatory_in_leave_application",
   "expense_approver_mandatory_in_expense_claim",
   "payroll_settings",
   "include_holidays_in_total_working_days",
+  "max_working_hours_against_timesheet",
+  "column_break_11",
   "email_salary_slip_to_employee",
   "encrypt_salary_slips_in_emails",
   "password_policy",
-  "max_working_hours_against_timesheet",
   "leave_settings",
+  "leave_approval_notification_template",
+  "leave_status_notification_template",
+  "column_break_18",
+  "leave_approver_mandatory_in_leave_application",
   "show_leaves_of_all_department_members_in_calendar",
   "hiring_settings_section",
   "check_vacancies"
@@ -67,12 +69,6 @@
    "fieldname": "stop_birthday_reminders",
    "fieldtype": "Check",
    "label": "Stop Birthday Reminders"
-  },
-  {
-   "default": "0",
-   "fieldname": "maintain_bill_work_hours_same",
-   "fieldtype": "Check",
-   "label": "Maintain Billing Hours and Working Hours Same on Timesheet"
   },
   {
    "default": "1",
@@ -139,6 +135,14 @@
    "label": "Show Leaves Of All Department Members In Calendar"
   },
   {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
    "collapsible": 1,
    "fieldname": "hiring_settings_section",
    "fieldtype": "Section Break",
@@ -154,7 +158,7 @@
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2019-06-21 14:02:47.792666",
+ "modified": "2019-07-01 18:55:06.302419",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
@@ -170,5 +174,6 @@
    "write": 1
   }
  ],
+ "sort_field": "modified",
  "sort_order": "ASC"
 }
