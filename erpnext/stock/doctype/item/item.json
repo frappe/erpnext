@@ -4,7 +4,6 @@
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 1, 
- "autoname": "field:item_code", 
  "beta": 0, 
  "creation": "2013-05-03 10:45:46", 
  "custom": 0, 
