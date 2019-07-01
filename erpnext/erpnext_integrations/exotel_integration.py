@@ -6,26 +6,29 @@ import requests
 # api/method/erpnext.erpnext_integrations.exotel_integration.handle_missed_call
 
 @frappe.whitelist(allow_guest=True)
-def handle_incoming_call(*args, **kwargs):
+def handle_incoming_call(**kwargs):
 	exotel_settings = get_exotel_settings()
 	if not exotel_settings.enabled: return
 
-	status = kwargs.get('Status')
+	call_payload = kwargs
+	status = call_payload.get('Status')
 	if status == 'free':
 		return
 
-	create_call_log(kwargs)
+	call_log = get_call_log(call_payload)
+	if not call_log:
+		create_call_log(call_payload)
 
 @frappe.whitelist(allow_guest=True)
-def handle_end_call(*args, **kwargs):
+def handle_end_call(**kwargs):
 	update_call_log(kwargs, 'Completed')
 
 @frappe.whitelist(allow_guest=True)
-def handle_missed_call(*args, **kwargs):
+def handle_missed_call(**kwargs):
 	update_call_log(kwargs, 'Missed')
 
 def update_call_log(call_payload, status):
-	call_log = get_call_log(call_payload, False)
+	call_log = get_call_log(call_payload)
 	if call_log:
 		call_log.status = status
 		call_log.duration = call_payload.get('DialCallDuration') or 0
@@ -34,25 +37,24 @@ def update_call_log(call_payload, status):
 		frappe.db.commit()
 		return call_log
 
-def get_call_log(call_payload, create_new_if_not_found=True):
+def get_call_log(call_payload):
 	call_log = frappe.get_all('Call Log', {
 		'id': call_payload.get('CallSid'),
 	}, limit=1)
 
 	if call_log:
 		return frappe.get_doc('Call Log', call_log[0].name)
-	elif create_new_if_not_found:
-		call_log = frappe.new_doc('Call Log')
-		call_log.id = call_payload.get('CallSid')
-		call_log.to = call_payload.get('CallTo')
-		call_log.medium = call_payload.get('To')
-		call_log.status = 'Ringing'
-		setattr(call_log, 'from', call_payload.get('CallFrom'))
-		call_log.save(ignore_permissions=True)
-		frappe.db.commit()
-		return call_log
 
-create_call_log = get_call_log
+def create_call_log(call_payload):
+	call_log = frappe.new_doc('Call Log')
+	call_log.id = call_payload.get('CallSid')
+	call_log.to = call_payload.get('CallTo')
+	call_log.medium = call_payload.get('To')
+	call_log.status = 'Ringing'
+	setattr(call_log, 'from', call_payload.get('CallFrom'))
+	call_log.save(ignore_permissions=True)
+	frappe.db.commit()
+	return call_log
 
 @frappe.whitelist()
 def get_call_status(call_id):
