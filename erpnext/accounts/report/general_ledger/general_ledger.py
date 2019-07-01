@@ -248,13 +248,13 @@ def calculate_opening_closing(filters, gl_entries, group_field, group_value, gro
 	return totals
 
 def postprocess_group(filters, group_object, grouped_by):
-	group_object.rows = filter(lambda d: not d.get("to_remove"), group_object.rows)
-
 	if group_object.rows:
 		if 'party' in grouped_by:
 			if group_object.rows[0].party_type == "Customer":
 				customer = frappe.get_cached_doc("Customer", grouped_by['party'])
 				group_object.sales_person = ", ".join(set([d.sales_person for d in customer.sales_team]))
+
+		group_object.rows = filter(lambda d: not d.get("to_remove"), group_object.rows)
 
 		if 'voucher_no' not in grouped_by:
 			group_object.rows.insert(0, group_object.totals.opening)
