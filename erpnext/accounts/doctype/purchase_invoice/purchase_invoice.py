@@ -484,18 +484,59 @@ class PurchaseInvoice(BuyingController):
 							"credit": flt(item.rm_supp_cost)
 						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
 				elif not item.is_fixed_asset or (item.is_fixed_asset and is_cwip_accounting_disabled()):
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": item.expense_account if not item.enable_deferred_expense else item.deferred_expense_account,
-							"against": self.supplier,
-							"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
-							"debit_in_account_currency": (flt(item.base_net_amount,
-								item.precision("base_net_amount")) if account_currency==self.company_currency
-								else flt(item.net_amount, item.precision("net_amount"))),
-							"cost_center": item.cost_center,
-							"project": item.project
-						}, account_currency)
-					)
+					if not (self.is_return and item.enable_deferred_expense):
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": item.expense_account if not item.enable_deferred_expense else item.deferred_expense_account,
+								"against": self.supplier,
+								"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
+								"debit_in_account_currency": (flt(item.base_net_amount,
+									item.precision("base_net_amount")) if account_currency==self.company_currency
+									else flt(item.net_amount, item.precision("net_amount"))),
+								"cost_center": item.cost_center,
+								"project": item.project
+							}, account_currency)
+						)
+
+					elif self.is_return and item.enable_deferred_expense:
+						booked_income = frappe.get_all("GL Entry",
+							fields = ['sum(debit_in_account_currency) as debit_in_account_currency',
+								'sum(debit) as debit'],
+							filters = {'account': item.income_account, 'voucher_no': self.return_against})[0]
+
+						defered_amount = item.base_net_amount
+						base_defered_amount = (item.base_net_amount
+							if account_currency==self.company_currency else item.net_amount)
+
+						if abs(item.base_net_amount) > booked_income.get("debit", 0):
+							defered_amount = abs(item.base_net_amount + booked_income.get('debit', 0))
+							base_defered_amount = abs(base_defered_amount +
+								booked_income.get('debit_in_account_currency', 0))
+
+						if defered_amount:
+							gl_entries.append(
+								self.get_gl_dict({
+									"account": item.deferred_expense_account,
+									"against": self.customer,
+									"credit": flt(defered_amount, item.precision("base_net_amount")),
+									"credit_in_account_currency": flt(base_defered_amount, item.precision("base_net_amount")),
+									"cost_center": item.cost_center,
+									"against_voucher_type": "Sales Invoice",
+									"against_voucher": self.return_against
+								}, account_currency)
+							)
+
+						if booked_income.get('debit', 0):
+							gl_entries.append(
+								self.get_gl_dict({
+									"account": item.income_account,
+									"against": self.customer,
+									"credit": flt(booked_income.get('debit', 0), item.precision("base_net_amount")),
+									"credit_in_account_currency": flt(booked_income.get('debit_in_account_currency', 0),
+										item.precision("base_net_amount")),
+									"cost_center": item.cost_center
+								}, account_currency)
+							)
 
 			if self.auto_accounting_for_stock and self.is_opening == "No" and \
 				item.item_code in stock_items and item.item_tax_amount:

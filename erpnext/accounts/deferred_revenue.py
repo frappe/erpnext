@@ -46,10 +46,12 @@ def convert_deferred_expense_to_expense(start_date=None, end_date=None):
 		and enable_deferred_expense = 1 and docstatus = 1 and ifnull(amount, 0) > 0
 	''', (end_date, start_date))
 
+	voucherwise_deferred_amount = get_voucherwise_deferred_amount("Purchase Invoice", invoices)
+
 	# For each invoice, book deferred expense
 	for invoice in invoices:
 		doc = frappe.get_doc("Purchase Invoice", invoice)
-		book_deferred_income_or_expense(doc, end_date)
+		book_deferred_income_or_expense(doc, voucherwise_deferred_amount, end_date)
 
 def convert_deferred_revenue_to_income(start_date=None, end_date=None):
 	# book the expense/income on the last day, but it will be trigger on the 1st of month at 12:00 AM
@@ -65,9 +67,40 @@ def convert_deferred_revenue_to_income(start_date=None, end_date=None):
 		and enable_deferred_revenue = 1 and docstatus = 1 and ifnull(amount, 0) > 0
 	''', (end_date, start_date))
 
+	voucherwise_deferred_amount = get_voucherwise_deferred_amount("Sales Invoice", invoices)
+
 	for invoice in invoices:
 		doc = frappe.get_doc("Sales Invoice", invoice)
-		book_deferred_income_or_expense(doc, end_date)
+		book_deferred_income_or_expense(doc, voucherwise_deferred_amount, end_date)
+
+def get_voucherwise_deferred_amount(doctype, invoice_list):
+	voucherwise_deferred_amount = {}
+
+	deferred_account = ("deferred_revenue_account"
+		if doctype=="Sales Invoice" else "deferred_expense_account")
+
+	accounts = []
+	for d in frappe.db.get_all( doctype + " Item",
+		fields = [deferred_account],
+		filters={'parent': ('in', invoice_list), 'docstatus': 1}):
+		if d.get(deferred_account) not in accounts:
+			accounts.append(deferred_account)
+
+	retuned_entries = []
+	for d in frappe.get_all(doctype, fields = ["name"],
+		filters = {"docstatus": 1, "is_return": 1, "return_against": ('in', invoice_list)}):
+		if d.name not in accounts:
+			retuned_entries.append(d.name)
+
+	if accounts and retuned_entries:
+		for d in frappe.get_all("GL Entry",
+			filters = {'against_voucher': ('in', invoice_list), 'against_voucher_type': doctype,
+				'account': ('in', accounts)},
+			fields = ["sum(debit_in_account_currency-credit_in_account_currency) as amt", "against_voucher"],
+			group_by = ["against_voucher"]):
+			voucherwise_deferred_amount[d.against_voucher] = d.amt
+
+	return voucherwise_deferred_amount
 
 def get_booking_dates(doc, item, posting_date=None):
 	if not posting_date:
@@ -75,7 +108,8 @@ def get_booking_dates(doc, item, posting_date=None):
 
 	last_gl_entry = False
 
-	deferred_account = "deferred_revenue_account" if doc.doctype=="Sales Invoice" else "deferred_expense_account"
+	deferred_account = ("deferred_revenue_account"
+		if doc.doctype=="Sales Invoice" else "deferred_expense_account")
 
 	prev_gl_entry = frappe.db.sql('''
 		select name, posting_date from `tabGL Entry` where company=%s and account=%s and
@@ -136,7 +170,7 @@ def calculate_amount(doc, item, last_gl_entry, total_days, total_booking_days, a
 
 	return amount, base_amount
 
-def book_deferred_income_or_expense(doc, posting_date=None):
+def book_deferred_income_or_expense(doc, voucherwise_deferred_amount, posting_date=None):
 	enable_check = "enable_deferred_revenue" \
 		if doc.doctype=="Sales Invoice" else "enable_deferred_expense"
 
@@ -158,12 +192,20 @@ def book_deferred_income_or_expense(doc, posting_date=None):
 		amount, base_amount = calculate_amount(doc, item, last_gl_entry,
 			total_days, total_booking_days, account_currency)
 
-		make_gl_entries(doc, credit_account, debit_account, against,
-			amount, base_amount, end_date, project, account_currency, item.cost_center, item.name)
+		if voucherwise_deferred_amount.get(doc.name, 0):
+			if voucherwise_deferred_amount.get(doc.name, 0) > amount:
+				amount = 0
+				voucherwise_deferred_amount[doc.name] -= amount
+			else:
+				amount -= voucherwise_deferred_amount[doc.name]
+				voucherwise_deferred_amount[doc.name] = 0
+
+		if amount:
+			make_gl_entries(doc, credit_account, debit_account, against,
+				amount, base_amount, end_date, project, account_currency, item.cost_center, item.name)
 
 		if getdate(end_date) < getdate(posting_date) and not last_gl_entry:
 			_book_deferred_revenue_or_expense(item)
-
 
 	for item in doc.get('items'):
 		if item.get(enable_check):

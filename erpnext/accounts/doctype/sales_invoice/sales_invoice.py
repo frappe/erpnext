@@ -779,17 +779,58 @@ class SalesInvoice(SellingController):
 					asset.set_status("Sold" if self.docstatus==1 else None)
 				else:
 					account_currency = get_account_currency(item.income_account)
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": item.income_account if not item.enable_deferred_revenue else item.deferred_revenue_account,
-							"against": self.customer,
-							"credit": flt(item.base_net_amount, item.precision("base_net_amount")),
-							"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
-								if account_currency==self.company_currency
-								else flt(item.net_amount, item.precision("net_amount"))),
-							"cost_center": item.cost_center
-						}, account_currency)
-					)
+
+					if not (self.is_return and item.enable_deferred_revenue):
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": item.income_account if not item.enable_deferred_revenue else item.deferred_revenue_account,
+								"against": self.customer,
+								"credit": flt(item.base_net_amount, item.precision("base_net_amount")),
+								"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
+									if account_currency==self.company_currency
+									else flt(item.net_amount, item.precision("net_amount"))),
+								"cost_center": item.cost_center
+							}, account_currency)
+						)
+					elif self.is_return and item.enable_deferred_revenue:
+						booked_income = frappe.get_all("GL Entry",
+							fields = ['sum(credit_in_account_currency) as credit_in_account_currency',
+								'sum(credit) as credit'],
+							filters = {'account': item.income_account, 'voucher_no': self.return_against})[0]
+
+						defered_amount = item.base_net_amount
+						base_defered_amount = (item.base_net_amount
+							if account_currency==self.company_currency else item.net_amount)
+
+						if abs(item.base_net_amount) > booked_income.get("credit", 0):
+							defered_amount = abs(item.base_net_amount + booked_income.get('credit', 0))
+							base_defered_amount = abs(base_defered_amount +
+								booked_income.get('credit_in_account_currency', 0))
+
+						if defered_amount:
+							gl_entries.append(
+								self.get_gl_dict({
+									"account": item.deferred_revenue_account,
+									"against": self.customer,
+									"debit": flt(defered_amount, item.precision("base_net_amount")),
+									"debit_in_account_currency": flt(base_defered_amount, item.precision("base_net_amount")),
+									"cost_center": item.cost_center,
+									"against_voucher_type": "Sales Invoice",
+									"against_voucher": self.return_against
+								}, account_currency)
+							)
+
+						if booked_income.get('credit', 0):
+							gl_entries.append(
+								self.get_gl_dict({
+									"account": item.income_account,
+									"against": self.customer,
+									"debit": flt(booked_income.get('credit', 0), item.precision("base_net_amount")),
+									"debit_in_account_currency": flt(booked_income.get('credit_in_account_currency', 0),
+										item.precision("base_net_amount")),
+									"cost_center": item.cost_center
+								}, account_currency)
+							)
 
 		# expense account gl entries
 		if cint(self.update_stock) and \
