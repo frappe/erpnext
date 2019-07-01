@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
+from frappe.utils import getdate
 
 class ServiceLevelAgreement(Document):
 
@@ -15,10 +16,10 @@ class ServiceLevelAgreement(Document):
 				frappe.throw(_("A Default Service Level Agreement already exists."))
 		else:
 			if self.start_date and self.end_date:
-				if self.start_date >= self.end_date:
+				if getdate(self.start_date) >= getdate(self.end_date):
 					frappe.throw(_("Start Date of Agreement can't be greater than or equal to End Date."))
 
-				if self.end_date < frappe.utils.nowdate():
+				if getdate(self.end_date) < frappe.utils.nowdate():
 					frappe.throw(_("End Date of Agreement can't be less than today."))
 
 		if self.entity_type and self.entity:
@@ -44,7 +45,7 @@ def check_agreement_status():
 
 	for service_level_agreement in service_level_agreements:
 		doc = frappe.get_doc("Service Level Agreement", service_level_agreement.name)
-		if doc.end_date and doc.end_date < frappe.utils.getdate():
+		if doc.end_date and getdate(doc.end_date) < frappe.utils.getdate():
 			frappe.db.set_value("Service Level Agreement", service_level_agreement.name, "active", 0)
 
 def get_active_service_level_agreement_for(priority, customer=None, service_level_agreement=None):
