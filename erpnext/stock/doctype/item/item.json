@@ -119,7 +119,7 @@
    "search_index": 0, 
    "set_only_once": 0, 
    "translatable": 0, 
-   "unique": 1
+   "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
@@ -4261,7 +4261,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 1, 
- "modified": "2019-05-24 16:10:14.128517", 
+ "modified": "2019-07-01 13:18:04.696980", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
