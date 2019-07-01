@@ -57,6 +57,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Service Level Agreement",
 					"description": _("Service Level Agreement."),
+				},
+				{
+					"type": "doctype",
+					"name": "Service Level Agreement Settings",
+					"description": _("Service Level Agreement Settings."),
 				}
 			]
 		},

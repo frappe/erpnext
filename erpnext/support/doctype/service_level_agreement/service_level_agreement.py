@@ -49,6 +49,9 @@ def check_agreement_status():
 			frappe.db.set_value("Service Level Agreement", service_level_agreement.name, "active", 0)
 
 def get_active_service_level_agreement_for(priority, customer=None, service_level_agreement=None):
+	if not frappe.db.get_single_value("Service Level Agreement Settings", "track_service_level_agreement"):
+		return
+
 	filters = [
 		["Service Level Agreement", "active", "=", 1],
 	]
@@ -81,6 +84,9 @@ def get_customer_territory(customer):
 
 @frappe.whitelist()
 def get_service_level_agreement_filters(name, customer=None):
+	if not frappe.db.get_single_value("Service Level Agreement Settings", "track_service_level_agreement"):
+		return
+
 	if not customer:
 		or_filters = [
 			["Service Level Agreement", "default_service_level_agreement", "=", 1]
