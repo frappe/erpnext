@@ -96,7 +96,6 @@ class Issue(Document):
 			self.resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()), 2)
 
 		self.agreement_fulfilled = "Fulfilled" if self.response_by_variance > 0 and self.resolution_by_variance > 0 else "Failed"
-		self.save(ignore_permissions=True)
 
 	def create_communication(self):
 		communication = frappe.new_doc("Communication")
