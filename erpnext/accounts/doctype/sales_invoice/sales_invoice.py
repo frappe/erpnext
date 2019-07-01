@@ -770,7 +770,14 @@ class SalesInvoice(SellingController):
 				if item.is_fixed_asset:
 					asset = frappe.get_doc("Asset", item.asset)
 
-					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset, item.base_net_amount)
+					if (len(asset.finance_books) > 1 and not item.finance_book
+						and asset.finance_books[0].finance_book):
+						frappe.throw(_("Select finance book for the item {0} at row {1}")
+							.format(item.item_code, item.idx))
+
+					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
+						item.base_net_amount, item.finance_book)
+
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
 						gl_entries.append(self.get_gl_dict(gle))
