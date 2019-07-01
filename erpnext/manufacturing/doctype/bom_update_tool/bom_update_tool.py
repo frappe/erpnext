@@ -55,7 +55,7 @@ class BOMUpdateTool(Document):
 			bom_list = []
 
 		data = frappe.db.sql(""" select distinct parent from `tabBOM Item`
-			where ifnull(bom_no, '') = %s and docstatus < 2 and parenttype='BOM'""", bom)
+			where bom_no = %s and docstatus < 2 and parenttype='BOM'""", bom)
 
 		for d in data:
 			bom_list.append(d[0])

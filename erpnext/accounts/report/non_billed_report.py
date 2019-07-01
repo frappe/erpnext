@@ -25,7 +25,8 @@ def get_ordered_to_be_billed_data(args):
 		from
 			`{parent_tab}`, `{child_tab}`
 		where
-			`{parent_tab}`.name = `{child_tab}`.parent and `{parent_tab}`.docstatus = 1 and `{parent_tab}`.status != 'Closed'
+			`{parent_tab}`.name = `{child_tab}`.parent and `{parent_tab}`.docstatus = 1
+			and `{parent_tab}`.status not in ('Closed', 'Completed')
 			and `{child_tab}`.amount > 0 and round(`{child_tab}`.billed_amt *
 			ifnull(`{parent_tab}`.conversion_rate, 1), {precision}) < `{child_tab}`.base_amount
 		order by
