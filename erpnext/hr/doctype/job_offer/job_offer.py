@@ -19,13 +19,13 @@ class JobOffer(Document):
 		staffing_plan = get_staffing_plan_detail(self.designation, self.company, self.offer_date)
 		check_vacancies = frappe.get_single("HR Settings").check_vacancies
 		if staffing_plan and check_vacancies:
-			vacancies = frappe.db.get_value("Staffing Plan Detail", filters={"name": staffing_plan.name}, fieldname=['staffing_plan'])
+			vacancies = frappe.db.get_value("Staffing Plan Detail", filters={"name": staffing_plan.name}, fieldname=['vacancies'])
 			no_of_job_offer = len(self.get_job_offer(staffing_plan.from_date, staffing_plan.to_date))
 			if vacancies - no_of_job_offer <= 0:
-				frappe.throw(_("Not enough vacancies available. Please update the staffing plan!!!"))
+				frappe.throw(_("Not enough vacancies available. Please update the staffing plan"))
 
-	def on_update_after_submit(self):
-		update_job_applicant(self.status, self.applicant_name)
+	def on_change(self):
+		update_job_applicant(self.status, self.job_applicant)
 
 	def get_job_offer(self, from_date, to_date):
 		''' Returns job offer created during a time period '''
@@ -35,9 +35,9 @@ class JobOffer(Document):
 				"company": self.company
 			}, fields=['name'])
 
-def update_job_applicant(status, applicant_name):
+def update_job_applicant(status, job_applicant):
 	if status in ("Accepted", "Rejected"):
-		frappe.set_value("Job Applicant", applicant_name, "status", status)
+		frappe.set_value("Job Applicant", job_applicant, "status", status)
 
 def get_staffing_plan_detail(designation, company, offer_date):
 	detail = frappe.db.sql("""
@@ -51,7 +51,7 @@ def get_staffing_plan_detail(designation, company, offer_date):
 			AND sp.company=%s
 			AND %s between sp.from_date and sp.to_date
 	""", (designation, company, offer_date), as_dict=1)
-	return detail[0].get("name") if detail else None
+	return detail[0] if detail else None
 
 @frappe.whitelist()
 def make_employee(source_name, target_doc=None):

@@ -177,4 +177,4 @@ def get_company_set(company):
 		WHERE
 			parent_company=%(company)s
 			OR name=%(company)s
-	""", (dict(company=company)), debug=1)
+	""", (dict(company=company)))
