@@ -42,7 +42,14 @@ class DelayedOrderReport(DelayedItemReport):
 			"fieldname": "customer",
 			"fieldtype": "Link",
 			"options": "Customer",
-			"width": 100
+			"width": 200
+		},
+		{
+			"label": _("Shipping Address"),
+			"fieldname": "shipping_address_name",
+			"fieldtype": "Link",
+			"options": "Address",
+			"width": 140
 		},
 		{
 			"label": _("Expected Delivery Date"),
@@ -73,11 +80,11 @@ class DelayedOrderReport(DelayedItemReport):
 			"fieldname": "sales_order",
 			"fieldtype": "Link",
 			"options": "Sales Order",
-			"width": 100
+			"width": 150
 		},
 		{
 			"label": _("Customer PO"),
 			"fieldname": "po_no",
 			"fieldtype": "Data",
-			"width": 100
+			"width": 110
 		}]
