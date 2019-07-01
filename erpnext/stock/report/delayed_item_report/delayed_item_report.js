@@ -55,7 +55,7 @@ frappe.query_reports["Delayed Item Report"] = {
 			label: __("Based On"),
 			fieldtype: "Select",
 			options: ["Delivery Note", "Sales Invoice"],
-			default: "Delivery Note",
+			default: "Sales Invoice",
 			reqd: 1
 		},
 	]
