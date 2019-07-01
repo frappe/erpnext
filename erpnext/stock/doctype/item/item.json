@@ -158,7 +158,7 @@
    "label": "Item Code",
    "oldfieldname": "item_code",
    "oldfieldtype": "Data",
-   "unique": 1
+   "unique": 0
   },
   {
    "depends_on": "variant_of",
@@ -1034,7 +1034,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2019-06-02 04:45:59.911507",
+ "modified": "2019-07-01 13:18:04.696980",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
