@@ -10,4 +10,10 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 		"fieldtype": "Check",
 		"default": 1
 	});
+
+	frappe.query_reports["Balance Sheet"]["filters"].push({
+		"fieldname": "include_default_book_entries",
+		"label": __("Include Default Book Entries"),
+		"fieldtype": "Check"
+	});
 });
