@@ -64,8 +64,8 @@ class CallPopup {
 	}
 
 	make_caller_info_section() {
-		const wrapper = this.dialog.fields_dict['caller_info'].$wrapper;
-		wrapper.append('<div class="text-muted"> Loading... </div>');
+		const wrapper = this.dialog.get_field('caller_info').$wrapper;
+		wrapper.append(`<div class="text-muted"> ${__("Loading...")} </div>`);
 		frappe.xcall('erpnext.crm.doctype.utils.get_document_with_phone_number', {
 			'number': this.caller_number
 		}).then(contact_doc => {
@@ -88,7 +88,7 @@ class CallPopup {
 				<button
 					class="margin-left btn btn-new btn-default btn-xs"
 					data-doctype="Contact"
-					title="Make New Contact">
+					title=${__("Make New Contact")}>
 					<i class="octicon octicon-plus text-medium"></i>
 				</button>
 			</div>
@@ -172,7 +172,7 @@ class CallPopup {
 			'number': this.caller_number,
 			'reference_doc': this.contact
 		}).then(data => {
-			const comm_field = this.dialog.fields_dict["last_communication"];
+			const comm_field = this.dialog.get_field('last_communication');
 			if (data.last_communication) {
 				const comm = data.last_communication;
 				comm_field.set_value(comm.content);
@@ -180,7 +180,7 @@ class CallPopup {
 
 			if (data.last_issue) {
 				const issue = data.last_issue;
-				const issue_field = this.dialog.fields_dict["last_issue"];
+				const issue_field = this.dialog.get_field("last_issue");
 				issue_field.set_value(issue.subject);
 				issue_field.$wrapper.append(`<a class="text-medium" href="#List/Issue?customer=${issue.customer}">
 					${__('View all issues from {0}', [issue.customer])}

@@ -82,12 +82,14 @@ def get_employee_emails_for_popup(communication_medium):
 	now_time = frappe.utils.nowtime()
 	weekday = frappe.utils.get_weekday()
 
-	available_employee_groups = frappe.db.sql_list("""SELECT `employee_group`
-		FROM `tabCommunication Medium Timeslot`
-		WHERE `day_of_week` = %s
-		AND `parent` = %s
-		AND %s BETWEEN `from_time` AND `to_time`
-	""", (weekday, communication_medium, now_time))
+	available_employee_groups = frappe.get_all("Communication Medium Timeslot", filters={
+		'day_of_week': weekday,
+		'parent': communication_medium,
+		'from_time': ['<=', now_time],
+		'to_time': ['>=', now_time],
+	}, fields=['employee_group'], debug=1)
+
+	available_employee_groups = tuple([emp.employee_group for emp in available_employee_groups])
 
 	employees = frappe.get_all('Employee Group Table', filters={
 		'parent': ['in', available_employee_groups]
