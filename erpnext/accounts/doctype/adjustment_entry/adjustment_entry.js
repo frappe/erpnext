@@ -44,6 +44,10 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 		this.update_labels();
 	},
 
+	cost_center: function(){
+		this.get_unreconciled_entries()
+	},
+
 	get_unreconciled_entries: function() {
 		const me = this;
 		return this.frm.call({

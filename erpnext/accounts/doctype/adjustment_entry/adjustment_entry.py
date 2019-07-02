@@ -10,7 +10,7 @@ from erpnext import get_party_account_type
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.utils import get_outstanding_invoices, get_negative_outstanding_invoices, get_account_currency
+from erpnext.accounts.utils import get_outstanding_invoices, get_negative_outstanding_invoices, get_account_currency, get_allow_cost_center_in_entry_of_bs_account
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.controllers.accounts_controller import get_advance_payment_entries
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_company_defaults
@@ -131,7 +131,11 @@ class AdjustmentEntry(AccountsController):
         party_type, party, order_doctype = self.get_party_details(field_name)
         party_account = self.get(party_type.lower() + "_account")
         party_account_currency = self.get(party_type.lower() + "_account_currency")
-        positive_outstanding_invoices = get_outstanding_invoices(party_type, party, party_account)
+        condition = ""
+        # Add cost center condition
+        if self.cost_center and get_allow_cost_center_in_entry_of_bs_account():
+            condition += " and cost_center='%s'" % self.cost_center
+        positive_outstanding_invoices = get_outstanding_invoices(party_type, party, party_account, condition=condition)
         negative_outstanding_invoices = get_negative_outstanding_invoices(party_type,
                                                                   party, party_account,
                                                                   party_account_currency,
