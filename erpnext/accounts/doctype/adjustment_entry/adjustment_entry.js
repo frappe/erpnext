@@ -177,7 +177,7 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 function get_exchange_rate(frm, from_currency, exchange_rate_field) {
 	const exchange_rates = frm.doc.exchange_rates;
 	const exchange_rate = exchange_rates.find(exchg_rate => exchg_rate.currency === from_currency);
-	return exchange_rate && exchange_rate[exchange_rate_field];
+	return exchange_rate ? exchange_rate[exchange_rate_field] : 1;
 }
 
 frappe.ui.form.on('Adjustment Entry Reference', {
