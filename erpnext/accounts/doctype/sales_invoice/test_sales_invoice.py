@@ -1798,6 +1798,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.company_address = "_Test Address for Eway bill-Billing"
 		si.customer_address = "_Test Customer-Address for Eway bill-Shipping"
 		si.vehicle_no = "KA12KA1234"
+		si.gst_category = "Registered Regular"
 
 		si.append("taxes", {
 			"charge_type": "On Net Total",
