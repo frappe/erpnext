@@ -281,7 +281,9 @@ class SalarySlip(TransactionBase):
 			wages_row = {
 				"salary_component": salary_component,
 				"abbr": frappe.db.get_value("Salary Component", salary_component, "salary_component_abbr"),
-				"amount": self.hour_rate * self.total_working_hours
+				"amount": self.hour_rate * self.total_working_hours,
+				"default_amount": 0.0,
+				"additional_amount": 0.0
 			}
 			doc.append('earnings', wages_row)
 

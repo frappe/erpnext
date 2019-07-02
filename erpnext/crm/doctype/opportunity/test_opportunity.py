@@ -7,7 +7,6 @@ from frappe.utils import today, random_string
 from erpnext.crm.doctype.lead.lead import make_customer
 from erpnext.crm.doctype.opportunity.opportunity import make_quotation
 import unittest
-from frappe.desk.form import assign_to
 
 test_records = frappe.get_test_records('Opportunity')
 
