@@ -50,7 +50,9 @@ status_map = {
 		["Paid", "eval:self.outstanding_amount<=0 and self.docstatus==1 and self.is_return==0"],
 		["Credit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1 and self.is_return==0 and get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1})"],
 		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
+		["Unpaid and Discounted", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1 and self.is_discounted and self.discounting_status=='Disbursed'"],
 		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
+		["Overdue and Discounted", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1 and self.is_discounted and self.discounting_status=='Disbursed'"],
 		["Cancelled", "eval:self.docstatus==2"],
 	],
 	"Purchase Invoice": [

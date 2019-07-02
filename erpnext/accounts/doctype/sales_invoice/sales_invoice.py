@@ -1174,6 +1174,56 @@ class SalesInvoice(SellingController):
 
 		self.set_missing_values(for_validate = True)
 
+	def get_discounting_status(self):
+		status = None
+		if self.is_discounted:
+			invoice_discounting_list = frappe.db.sql("""
+				select status
+				from `tabInvoice Discounting` id, `tabDiscounted Invoice` d
+				where
+					id.name = d.parent
+					and d.sales_invoice=%s
+					and id.docstatus=1
+					and status in ('Disbursed', 'Settled')
+			""", self.name)
+			for d in invoice_discounting_list:
+				status = d[0]
+				if status == "Disbursed":
+					break
+		return status
+
+	def set_status(self, update=False, status=None, update_modified=True):
+		if self.is_new():
+			if self.get('amended_from'):
+				self.status = 'Draft'
+			return
+
+		if not status:
+			if self.docstatus == 2:
+				status = "Cancelled"
+			elif self.docstatus == 1:
+				if flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
+					self.status = "Overdue and Discounted"
+				elif self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()):
+					self.status = "Overdue"
+				elif self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
+					self.status = "Unpaid and Discounted"
+				elif self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()):
+					self.status = "Unpaid"
+				elif self.outstanding_amount < 0 and self.is_return==0 and get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+					self.status = "Credit Note Issued"
+				elif self.outstanding_amount<=0 and self.is_return==0:
+					self.status = "Paid"
+				elif self.is_return == 1:
+					self.status = "Return"
+				else:
+					self.status = "Submitted"
+			else:
+				self.status = "Draft"
+
+		if update:
+			self.db_set('status', self.status, update_modified = update_modified)
+
 def validate_inter_company_party(doctype, party, company, inter_company_reference):
 	if not party:
 		return
@@ -1429,3 +1479,17 @@ def get_loyalty_programs(customer):
 		return []
 	else:
 		return lp_details
+
+@frappe.whitelist()
+def create_invoice_discounting(source_name, target_doc=None):
+	invoice = frappe.get_doc("Sales Invoice", source_name)
+	invoice_discounting = frappe.new_doc("Invoice Discounting")
+	invoice_discounting.company = invoice.company
+	invoice_discounting.append("invoices", {
+		"sales_invoice": source_name,
+		"customer": invoice.customer,
+		"posting_date": invoice.posting_date,
+		"outstanding_amount": invoice.outstanding_amount
+	})
+
+	return invoice_discounting
