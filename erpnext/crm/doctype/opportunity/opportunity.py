@@ -150,9 +150,6 @@ class Opportunity(TransactionBase):
 	def on_update(self):
 		self.add_calendar_event()
 
-		# assign to customer account manager or lead owner
-		assign_to_user(self, subject_field, self.opportunity_from, self.party_name)
-
 	def add_calendar_event(self, opts=None, force=False):
 		if not opts:
 			opts = frappe._dict()
@@ -321,22 +318,6 @@ def auto_close_opportunity():
 		doc.flags.ignore_permissions = True
 		doc.flags.ignore_mandatory = True
 		doc.save()
-
-def assign_to_user(doc, subject_field, party_type, party_name):
-	assign_user = None
-	if party_type == "Customer":
-		assign_user = frappe.db.get_value("Customer", party_name, 'account_manager')
-	elif party_type == "Lead":
-		assign_user = frappe.db.get_value('Lead', party_name, 'lead_owner')
-
-	if assign_user and assign_user not in ['Administrator', 'Guest']:
-		if not assign_to.get(dict(doctype = doc.doctype, name = doc.name)):
-			assign_to.add({
-				"assign_to": assign_user,
-				"doctype": doc.doctype,
-				"name": doc.name,
-				"description": doc.get(subject_field)
-			})
 
 @frappe.whitelist()
 def make_opportunity_from_communication(communication, ignore_communication_links=False):

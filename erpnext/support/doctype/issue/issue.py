@@ -38,14 +38,6 @@ class Issue(Document):
 			self.create_communication()
 			self.flags.communication_created = None
 
-		# assign to customer account manager or lead owner
-		if self.customer:
-			party_type, party_name = "Customer", self.customer
-		else:
-			party_type, party_name = "Lead", self.name
-
-		assign_to_user(self, 'subject', party_type, party_name)
-
 	def set_lead_contact(self, email_id):
 		import email.utils
 

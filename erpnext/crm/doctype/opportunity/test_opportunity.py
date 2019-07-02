@@ -60,21 +60,6 @@ class TestOpportunity(unittest.TestCase):
 		self.assertEqual(opp_doc.opportunity_from, "Customer")
 		self.assertEqual(opp_doc.party_name, customer.name)
 
-	def test_assignment(self):
-		# assign cutomer account manager
-		frappe.db.set_value('Customer', '_Test Customer', 'account_manager', 'test1@example.com')
-		doc = make_opportunity(with_items=0)
-
-		self.assertEqual(assign_to.get(dict(doctype = doc.doctype, name = doc.name))[0].get('owner'), 'test1@example.com')
-
-		# assign lead owner
-		frappe.db.set_value('Customer', '_Test Customer', 'account_manager', '')
-		frappe.db.set_value('Lead', '_T-Lead-00001', 'lead_owner', 'test2@example.com')
-		doc = make_opportunity(with_items=0, opportunity_from='Lead')
-
-		self.assertEqual(assign_to.get(dict(doctype = doc.doctype, name = doc.name))[0].get('owner'), 'test2@example.com')
-
-
 def make_opportunity(**args):
 	args = frappe._dict(args)
 
