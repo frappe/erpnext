@@ -14,7 +14,6 @@ from erpnext.accounts.utils import get_outstanding_invoices, get_negative_outsta
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.controllers.accounts_controller import get_advance_payment_entries
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_company_defaults
-from datetime import date
 
 class AdjustmentEntry(AccountsController):
     def validate(self):
