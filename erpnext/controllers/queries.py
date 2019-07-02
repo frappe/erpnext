@@ -297,7 +297,6 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				order by batch.expiry_date, sle.batch_no desc
 				limit %(start)s, %(page_len)s""".format(cond, match_conditions=get_match_cond(doctype)), args)
 
-	if batch_nos:
 		return batch_nos
 	else:
 		return frappe.db.sql("""select name, concat('MFG-', manufacturing_date), concat('EXP-',expiry_date) from `tabBatch` batch
