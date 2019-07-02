@@ -19,6 +19,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_company_def
 class AdjustmentEntry(AccountsController):
     def validate(self):
         self.validate_customer_supplier_account()
+        self.validate_allocated_amount()
 
     def on_submit(self):
         if self.difference_amount:
@@ -43,6 +44,13 @@ class AdjustmentEntry(AccountsController):
         exchange_gain_loss_account = company_details.exchange_gain_loss_account
         if exchange_gain_loss_account is None:
             frappe.throw("Exchange gain loss account not set for {0}").format(self.company)
+
+    def validate_allocated_amount(self):
+        for d in self.debit_entries + self.credit_entries:
+            if (flt(d.allocated_amount)) > 0:
+                if flt(d.allocated_amount) > flt(d.voucher_payment_amount):
+                    frappe.throw(
+                        _("{0} Row #{1}: Allocated Amount cannot be greater than outstanding amount.").format(d.parentfield, d.idx))
 
     def get_unreconciled_entries(self):
         self.check_mandatory_to_fetch()
