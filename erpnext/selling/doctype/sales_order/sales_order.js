@@ -107,7 +107,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	refresh: function(doc, dt, dn) {
 		var me = this;
 		this._super();
-		var allow_purchase = false;
 		var allow_delivery = false;
 
 		if(doc.docstatus==1) {
@@ -132,8 +131,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			}
 			if(doc.status !== 'Closed') {
 				if(doc.status !== 'On Hold') {
-
-					allow_purchase = true
 
 					if (this.frm.has_perm("submit")) {
 						if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
@@ -163,9 +160,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					}
 
 					// make purchase order
-					if(allow_purchase) {
 						this.frm.add_custom_button(__('Purchase Order'), () => this.make_purchase_order(), __('Create'));
-					}
+
 					// maintenance
 					if(flt(doc.per_delivered, 2) < 100 &&
 							["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
@@ -580,7 +576,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			dialog.hide();
 			return frappe.call({
 				type: "GET",
-				method: "erpnext.selling.doctype.sales_order.sales_order.make_purchase_order_for_drop_shipment",
+				method: "erpnext.selling.doctype.sales_order.sales_order.make_purchase_order",
 				args: {
 					"source_name": me.frm.doc.name,
 					"for_supplier": args.supplier,

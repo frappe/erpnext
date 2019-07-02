@@ -764,7 +764,7 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_purchase_order_for_drop_shipment(source_name, for_supplier=None, selected_items=[], target_doc=None):
+def make_purchase_order(source_name, for_supplier=None, selected_items=[], target_doc=None):
 	if isinstance(selected_items, string_types):
 		selected_items = json.loads(selected_items)
 
