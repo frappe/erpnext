@@ -14,7 +14,7 @@ class PriceList(Document):
 			throw(_("Price List must be applicable for Buying or Selling"))
 
 	def on_update(self):
-		self.set_default_if_missing()
+		# self.set_default_if_missing()
 		self.update_item_price()
 
 	def set_default_if_missing(self):

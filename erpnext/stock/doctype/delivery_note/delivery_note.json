@@ -4241,7 +4241,7 @@
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
@@ -5204,7 +5204,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2019-07-02 01:56:07.523140", 
+ "modified": "2019-07-03 03:15:57.069350", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note", 

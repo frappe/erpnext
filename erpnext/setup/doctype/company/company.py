@@ -68,7 +68,9 @@ class Company(NestedSet):
 			"default_receivable_account", "default_payable_account",
 			"default_expense_account", "default_income_account",
 			"stock_received_but_not_billed", "stock_adjustment_account",
-			"expenses_included_in_valuation", "default_payroll_payable_account", "default_letter_of_credit_account"]:
+			"expenses_included_in_valuation", "default_payroll_payable_account", "default_letter_of_credit_account",
+			"temporary_opening_account",
+			"sales_tax_account", "service_tax_account", "extra_tax_account", "further_tax_account", "advance_tax_account"]:
 				if self.get(field):
 					for_company = frappe.db.get_value("Account", self.get(field), "company")
 					if for_company != self.name:
@@ -228,6 +230,12 @@ class Company(NestedSet):
 				{"account_name": _("Employee Advances"), "company": self.name, "is_group": 0})
 
 			self.db_set("default_employee_advance_account", employe_advance_account)
+
+		if not self.temporary_opening_account:
+			temporary_opening_account = frappe.db.get_value("Account",
+				{"account_name": _("Temporary Opening"), "company": self.name, "is_group": 0})
+
+			self.db_set("temporary_opening_account", temporary_opening_account)
 
 		if not self.write_off_account:
 			write_off_acct = frappe.db.get_value("Account",

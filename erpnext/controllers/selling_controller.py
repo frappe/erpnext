@@ -374,8 +374,9 @@ class SellingController(StockController):
 			sales_orders = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
 			if sales_orders:
 				po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
-				if po_nos and po_nos[0].get('po_no'):
-					self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
+				po_nos = list(set(filter(lambda d: d.po_no, po_nos)))
+				if po_nos:
+					self.po_no = ', '.join(po_nos)
 
 	def set_gross_profit(self):
 		if self.doctype == "Sales Order":

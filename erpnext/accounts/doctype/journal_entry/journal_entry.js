@@ -8,6 +8,8 @@ frappe.provide("erpnext.journal_entry");
 frappe.ui.form.on("Journal Entry", {
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
+		erpnext.hide_company();
+
 		frm.cscript.voucher_type(frm.doc);
 
 		if(frm.doc.docstatus==1) {
