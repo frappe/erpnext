@@ -7,12 +7,41 @@ const ALL_TABLES = ['exchange_rates', 'credit_entries', 'debit_entries'];
 
 erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 
+	setup: function() {
+		const frm = this.frm;
+		frm.set_query("cost_center", function() {
+			return {
+				filters: {
+					"is_group": 0,
+					"company": frm.doc.company
+				}
+			}
+		});
+		frm.set_query("account", "deductions", function() {
+			return {
+				filters: {
+					"is_group": 0,
+					"company": frm.doc.company
+				}
+			}
+		});
+		frm.set_query("cost_center", "deductions", function() {
+			return {
+				filters: {
+					"is_group": 0,
+					"company": frm.doc.company
+				}
+			}
+		});
+	},
+
 	onload: function() {
 		const me = this;
 		ALL_TABLES.forEach(function (field) {
 			me.frm.set_df_property(field, "cannot_add_rows", 1);
 		});
 		this.set_customer_supplier_required();
+		this.update_labels();
 	},
 
 	get_unreconciled_entries: function() {
@@ -27,8 +56,25 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
   	},
 
 	refresh: function() {
-
+		this.show_general_ledger();
 	},
+
+	show_general_ledger: function() {
+		const frm = this.frm;
+		if(frm.doc.docstatus==1) {
+			frm.add_custom_button(__('Ledger'), function() {
+				frappe.route_options = {
+					"voucher_no": frm.doc.name,
+					"from_date": frm.doc.posting_date,
+					"to_date": frm.doc.posting_date,
+					"company": frm.doc.company,
+					group_by: ""
+				};
+				frappe.set_route("query-report", "General Ledger");
+			}, "fa fa-table");
+		}
+	},
+
 	company: function() {
 		this.clear_all_tables();
 		this.update_labels();

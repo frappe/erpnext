@@ -9,12 +9,12 @@ from frappe.model.document import Document
 
 class AdjustmentEntryReference(Document):
 
-	def recalculate_amounts(self, exchange_rates):
+	def recalculate_amounts(self, payment_currency, exchange_rates):
 		self.allocated_amount = self.allocated_amount or 0
 		self.payment_exchange_rate = exchange_rates[self.currency]['exchange_rate_to_payment_currency']
 		self.voucher_payment_amount = self.voucher_amount * self.payment_exchange_rate
 		self.balance = self.voucher_payment_amount - self.allocated_amount
-		self.allocated_base_amount = self.allocated_amount * exchange_rates[self.currency][
-			'exchange_rate_to_base_currency']
+		self.allocated_base_amount = self.allocated_amount * exchange_rates[payment_currency]['exchange_rate_to_base_currency']
 		allocated_amount_in_entry_currrency = self.allocated_amount / self.payment_exchange_rate
-		self.gain_loss_amount = self.allocated_base_amount - allocated_amount_in_entry_currrency * self.exchange_rate
+		gain_loss_amount = self.allocated_base_amount - allocated_amount_in_entry_currrency * self.exchange_rate
+		self.gain_loss_amount = gain_loss_amount if self.parentfield == 'debit_entries' else (-gain_loss_amount)

@@ -9,7 +9,9 @@
   "basic_details_section",
   "company",
   "adjustment_type",
+  "posting_date",
   "column_break_5",
+  "cost_center",
   "customer",
   "supplier",
   "get_unreconciled_entries",
@@ -44,7 +46,8 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "description": "Sales: Match Sales Invoices with Payments Received<br>\nPurchase: Match Purchase Invoices with Payments Paid<br>\nNetting: Match Sales Invoices with Purchase Invoices<br>",
@@ -148,7 +151,9 @@
    "default": "0",
    "fieldname": "allocate_payment_amount",
    "fieldtype": "Check",
-   "label": "Allocate Payment Amount"
+   "label": "Allocate Payment Amount",
+   "print_hide": 1,
+   "report_hide": 1
   },
   {
    "fieldname": "summary_section_break",
@@ -193,11 +198,25 @@
   {
    "fieldname": "column_break_25",
    "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
- "hide_toolbar": 1,
  "is_submittable": 1,
- "modified": "2019-06-29 15:19:32.661023",
+ "modified": "2019-07-01 18:25:01.660692",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Adjustment Entry",
