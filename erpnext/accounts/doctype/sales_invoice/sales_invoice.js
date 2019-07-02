@@ -175,7 +175,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					source_doctype: "Quotation",
 					target: me.frm,
 					setters: {
-						customer: me.frm.doc.customer || undefined,
+						party_name: me.frm.doc.customer || undefined,
 					},
 					get_query_filters: {
 						docstatus: 1,
