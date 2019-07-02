@@ -49,6 +49,7 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 		return this.frm.call({
 			doc: me.frm.doc,
 			method: 'get_unreconciled_entries',
+			freeze: true,
 			callback: function() {
 				me.frm.fields_dict.get_unreconciled_entries.$input.removeClass('btn-primary');
 			}
@@ -78,13 +79,34 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 	company: function() {
 		this.clear_all_tables();
 		this.update_labels();
+		const me = this;
+		this.frm.call({
+			doc: me.frm.doc,
+			method: 'validate_company_exchange_gain_loss_account'
+		});
 	},
+
 	customer: function() {
 		this.clear_all_tables();
+		this.set_account_details(this.frm.doc.customer, 'Customer');
 	},
 	supplier: function() {
 		this.clear_all_tables();
+		this.set_account_details(this.frm.doc.supplier, 'Supplier');
 	},
+
+	set_account_details: function(party, party_type) {
+		const me = this;
+		return this.frm.call({
+			doc: me.frm.doc,
+			method: 'set_party_account_details',
+			args: {
+				party,
+				party_type
+			}
+		});
+	},
+
 	adjustment_type: function() {
 		this.set_customer_supplier_required();
 		this.clear_all_tables();

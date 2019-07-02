@@ -15,6 +15,7 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.controllers.accounts_controller import get_advance_payment_entries
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_company_defaults
 
+
 class AdjustmentEntry(AccountsController):
     def validate(self):
         self.validate_customer_supplier_account()
@@ -28,12 +29,8 @@ class AdjustmentEntry(AccountsController):
         self.make_gl_entries(cancel=1)
 
     def validate_customer_supplier_account(self):
-        customer_account = get_party_account("Customer", self.customer, self.company)
-        supplier_account = get_party_account("Supplier", self.supplier, self.company)
-        customer_account_currency = frappe.db.get_value("Account", customer_account,
-                                               'account_currency')
-        supplier_account_currency = frappe.db.get_value("Account", supplier_account,
-                                                        'supplier_account')
+        customer_account_currency = self.customer_account_currency
+        supplier_account_currency = self.supplier_account_currency
         if customer_account_currency != supplier_account_currency:
             frappe.throw(_("Customer account currency ({0}) and supplier account currency ({1}) should be same")
                          .format(customer_account_currency, supplier_account_currency))
@@ -41,10 +38,16 @@ class AdjustmentEntry(AccountsController):
             frappe.throw(_("Payment currency ({0}) should be same as Customer/Supplier account currency ({1})")
                          .format(self.payment_currency, customer_account_currency))
 
+    def validate_company_exchange_gain_loss_account(self):
+        company_details = get_company_defaults(self.company)
+        exchange_gain_loss_account = company_details.exchange_gain_loss_account
+        if exchange_gain_loss_account is None:
+            frappe.throw("Exchange gain loss account not set for {0}").format(self.company)
 
     def get_unreconciled_entries(self):
         self.check_mandatory_to_fetch()
         self.get_entries()
+        self.calculate_summary_totals()
 
     def check_mandatory_to_fetch(self):
         for fieldname in self.get_mandatory_fields():
@@ -59,6 +62,13 @@ class AdjustmentEntry(AccountsController):
             mandatory_fields.append("supplier")
         return mandatory_fields
 
+    def set_party_account_details(self, party_type='', party=''):
+        account = get_party_account(party_type, party, self.company)
+        account_currency = frappe.db.get_value("Account", account,
+                                               'account_currency')
+        self.set(party_type.lower() + "_account", account)
+        self.set(party_type.lower() + "_account_currency", account_currency)
+
     def get_party_details(self, type="debit_entries"):
         if type == 'debit_entries':
             party_type = "Customer"
@@ -66,12 +76,8 @@ class AdjustmentEntry(AccountsController):
         else:
             party_type = "Supplier"
             party = self.supplier
-        account = get_party_account(party_type, party, self.company)
         order_doctype = "Sales Order" if party_type == "Customer" else "Purchase Order"
-        account_currency = frappe.db.get_value("Account", account,
-                            'account_currency')
-        return [party_type, party, account, order_doctype, account_currency]
-
+        return [party_type, party, order_doctype]
 
     def get_exchange_rates(self, entries):
         currencies = list(set([entry.get("currency") for entry in entries]))
@@ -114,11 +120,13 @@ class AdjustmentEntry(AccountsController):
             self.add_invoice_entries(purchase_invoices, 'credit_entries')
 
     def get_invoices(self, field_name):
-        party_type, party, account, order_doctype, account_currency = self.get_party_details(field_name)
-        positive_outstanding_invoices = get_outstanding_invoices(party_type, party, account)
+        party_type, party, order_doctype = self.get_party_details(field_name)
+        party_account = self.get(party_type.lower() + "_account")
+        party_account_currency = self.get(party_type.lower() + "_account_currency")
+        positive_outstanding_invoices = get_outstanding_invoices(party_type, party, party_account)
         negative_outstanding_invoices = get_negative_outstanding_invoices(party_type,
-                                                                  party, account,
-                                                                  account_currency,
+                                                                  party, party_account,
+                                                                  party_account_currency,
                                                                   self.company_currency)
         non_reconciled_invoices = negative_outstanding_invoices + positive_outstanding_invoices
         self.get_extra_invoice_details(non_reconciled_invoices)
@@ -136,8 +144,9 @@ class AdjustmentEntry(AccountsController):
                 d["supplier_bill_no"], d["supplier_bill_date"] = frappe.db.get_value(d.voucher_type, d.voucher_no, ["bill_no", "bill_date"])
 
     def get_payments(self, field_name):
-        party_type, party, account, order_doctype, account_currency = self.get_party_details(field_name)
-        advance_payments = get_advance_payment_entries(party_type, party, account, order_doctype)
+        party_type, party, order_doctype = self.get_party_details(field_name)
+        party_account = self.get(party_type.lower() + "_account")
+        advance_payments = get_advance_payment_entries(party_type, party, party_account, order_doctype)
         self.get_extra_payment_details(advance_payments, field_name)
         return advance_payments
 
@@ -167,7 +176,8 @@ class AdjustmentEntry(AccountsController):
 
     def add_invoice_entries(self, invoices, field_name):
         exchange_rates = self.exchange_rates_to_dict()
-        party_type, party, account, order_doctype, account_currency = self.get_party_details(field_name)
+        party_type, party, order_doctype = self.get_party_details(field_name)
+        party_account_currency = self.get(party_type.lower() + "_account_currency")
         self.set(field_name, [])
 
         for invoice in invoices:
@@ -178,7 +188,7 @@ class AdjustmentEntry(AccountsController):
             ent.currency = invoice.get("currency")
             ent.exchange_rate = invoice.get('exchange_rate')
             ent.cost_center = invoice.get('cost_center')
-            if account_currency != self.company_currency:
+            if party_account_currency != self.company_currency:
                 ent.voucher_base_amount = invoice.get('outstanding_amount') * invoice.get('exchange_rate')
                 ent.voucher_amount = invoice.get('outstanding_amount')
             else:
@@ -201,11 +211,14 @@ class AdjustmentEntry(AccountsController):
             if entries:
                 for ent in entries:
                     ent.recalculate_amounts(self.payment_currency, exchange_rates)
+        self.calculate_summary_totals()
 
     def calculate_summary_totals(self):
         self.receivable_adjusted = sum([flt(d.allocated_amount) for d in self.get("debit_entries")])
         self.payable_adjusted = sum([flt(d.allocated_amount) for d in self.get("credit_entries")])
         self.total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
+        self.total_balance = abs(sum([flt(d.balance) for d in self.get("debit_entries")]) - sum([flt(d.balance) for d in self.get("credit_entries")]))
+        self.total_gain_loss = sum([flt(d.gain_loss_amount) for d in self.get("debit_entries")]) + sum([flt(d.gain_loss_amount) for d in self.get("credit_entries")])
         self.difference_amount = abs(self.receivable_adjusted - self.payable_adjusted - self.total_deductions)
 
     def allocate_amount_to_references(self):
@@ -238,9 +251,13 @@ class AdjustmentEntry(AccountsController):
 
     def add_party_gl_entries(self, gl_entries):
         party_details_dict = dict()
+
         for reference_type in ['debit_entries', 'credit_entries']:
-            party_type, party, account, order_doctype, account_currency = self.get_party_details(reference_type)
-            party_details_dict[reference_type] = dict({'party_type': party_type, 'party': party, 'account': account, 'order_doctype': order_doctype, 'account_currency': account_currency})
+            party_type, party, order_doctype = self.get_party_details(reference_type)
+            party_account = self.get(party_type.lower() + "_account")
+            party_account_currency = self.get(party_type.lower() + "_account_currency")
+            party_details_dict[reference_type] = dict({'party_type': party_type, 'party': party, 'account': party_account, 'order_doctype': order_doctype, 'account_currency': party_account_currency})
+
         for reference_type in ['debit_entries', 'credit_entries']:
             entries = self.get(reference_type)
             party_details = party_details_dict[reference_type]
@@ -261,7 +278,7 @@ class AdjustmentEntry(AccountsController):
                 })
                 allocated_amount_in_entry_currrency = ent.allocated_amount / ent.payment_exchange_rate
                 allocated_amount_in_company_currency = allocated_amount_in_entry_currrency * ent.exchange_rate
-                allocated_amount_in_account_currrency = ent.allocated_amount * ent.payment_exchange_rate if account_currency != self.company_currency else allocated_amount_in_company_currency
+                allocated_amount_in_account_currrency = ent.allocated_amount * ent.payment_exchange_rate if party_details['account_currency'] != self.company_currency else allocated_amount_in_company_currency
                 party_gl_dict.update({
                     dr_or_cr + "_in_account_currency": allocated_amount_in_account_currrency,
                     dr_or_cr: allocated_amount_in_company_currency
@@ -292,18 +309,17 @@ class AdjustmentEntry(AccountsController):
         if exchange_gain_loss_account is None:
             frappe.throw("Exchange gain loss account not set for {0}").format(self.company)
         account_root_type = frappe.db.get_value("Account", exchange_gain_loss_account, "root_type")
-        total_gain_loss = sum([flt(d.gain_loss_amount) for d in self.get("debit_entries")]) + sum([flt(d.gain_loss_amount) for d in self.get("credit_entries")])
         gl_dict = self.get_gl_dict({
                     "account": exchange_gain_loss_account,
                     "account_currency": self.company_currency,
                     "cost_center": self.cost_center or company_details.cost_center,
                  })
         if account_root_type == "Expense":
-            dr_or_cr = "credit" if total_gain_loss > 0 else "debit"
+            dr_or_cr = "credit" if self.total_gain_loss > 0 else "debit"
         else:
-            dr_or_cr = "debit" if total_gain_loss > 0 else "credit"
+            dr_or_cr = "debit" if self.total_gain_loss > 0 else "credit"
         gl_dict.update({
-            dr_or_cr + "_in_account_currency": abs(total_gain_loss),
-            dr_or_cr: abs(total_gain_loss)
+            dr_or_cr + "_in_account_currency": abs(self.total_gain_loss),
+            dr_or_cr: abs(self.total_gain_loss)
         })
         gl_entries.append(gl_dict)
