@@ -3,9 +3,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+import frappe
 from frappe import _
 from frappe.utils import flt
+from erpnext import get_party_account_type
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.party import get_party_account
@@ -229,10 +230,8 @@ class AdjustmentEntry(AccountsController):
                 ent.recalculate_amounts(self.payment_currency, exchange_rates)
         self.calculate_summary_totals()
 
-
     def make_gl_entries(self, cancel=0, adv_adj=0):
         gl_entries = []
-        self.posting_date = date.today()
         self.add_party_gl_entries(gl_entries)
         self.add_deductions_gl_entries(gl_entries)
         self.add_gain_loss_entries(gl_entries)
@@ -247,7 +246,7 @@ class AdjustmentEntry(AccountsController):
             entries = self.get(reference_type)
             party_details = party_details_dict[reference_type]
             against_account = party_details_dict['credit_entries']['account'] if reference_type == 'debit_entries' else party_details_dict['debit_entries']['account']
-            dr_or_cr = "credit" if erpnext.get_party_account_type(party_details['party_type']) == 'Receivable' else "debit"
+            dr_or_cr = "credit" if get_party_account_type(party_details['party_type']) == 'Receivable' else "debit"
             for ent in entries:
                 party_gl_dict = self.get_gl_dict({
                     "account": party_details['account'],

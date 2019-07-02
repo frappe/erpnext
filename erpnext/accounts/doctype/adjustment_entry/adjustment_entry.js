@@ -148,11 +148,16 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 	},
 });
 
+function get_exchange_rate(frm, from_currency, exchange_rate_field) {
+	const exchange_rates = frm.doc.exchange_rates;
+	const exchange_rate = exchange_rates.find(exchg_rate => exchg_rate.currency === from_currency);
+	return exchange_rate && exchange_rate[exchange_rate_field];
+}
+
 frappe.ui.form.on('Adjustment Entry Reference', {
 	allocated_amount: function(frm, cdt, cdn) {
 		const data = locals[cdt][cdn];
-		const exchange_rates = frm.doc.exchange_rates;
-		const base_exchange_rate = exchange_rates.find(exchg_rate => exchg_rate.currency === frm.doc.payment_currency).exchange_rate_to_base_currency;
+		const base_exchange_rate = get_exchange_rate(frm, frm.doc.payment_currency, 'exchange_rate_to_base_currency');
 		const balance = data.voucher_payment_amount - data.allocated_amount;
 		const allocated_base_amount = data.allocated_amount * base_exchange_rate;
 		frappe.model.set_value(cdt, cdn, 'balance', balance);
@@ -178,9 +183,7 @@ function call_recalculate_references(frm) {
 }
 
 function recalculate_deductions_base_amount(frm) {
-	const exchange_rates = frm.doc.exchange_rates;
-	const base_exchange_rate_obj = exchange_rates.find(exchg_rate => exchg_rate.currency === frm.doc.payment_currency);
-	const base_exchange_rate = base_exchange_rate_obj ? base_exchange_rate_obj.exchange_rate_to_base_currency : 1;
+	const base_exchange_rate = get_exchange_rate(frm, frm.doc.payment_currency, 'exchange_rate_to_base_currency');
 	const deductions = frm.doc.deductions || [];
 	deductions.map(deduction => {
 		const base_amount = deduction.amount * base_exchange_rate;
@@ -199,8 +202,7 @@ frappe.ui.form.on('Adjustment Entry Exchange Rates', {
 frappe.ui.form.on('Adjustment Entry Deduction', {
 	amount: function (frm, cdt, cdn) {
 		const data = locals[cdt][cdn];
-		const exchange_rates = frm.doc.exchange_rates;
-		const base_exchange_rate = exchange_rates.find(exchg_rate => exchg_rate.currency === frm.doc.payment_currency).exchange_rate_to_base_currency;
+		const base_exchange_rate = get_exchange_rate(frm, frm.doc.payment_currency, 'exchange_rate_to_base_currency');
 		const base_amount = data.amount * base_exchange_rate;
 		frappe.model.set_value(cdt, cdn, 'base_amount', base_amount);
 		frm.call({
