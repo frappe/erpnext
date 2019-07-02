@@ -39,7 +39,7 @@ frappe.ui.form.on('Staffing Plan Detail', {
 	vacancies: function(frm, cdt, cdn) {
 		let child = locals[cdt][cdn];
 		if(child.vacancies < child.current_openings) {
-			frappe.throw(__("Vacancies cannot be lower than the current openings"))
+			frappe.throw(__("Vacancies cannot be lower than the current openings"));
 		}
 		set_number_of_positions(frm, cdt, cdn);
 	},
