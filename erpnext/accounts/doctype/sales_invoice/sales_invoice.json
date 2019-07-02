@@ -155,6 +155,7 @@
   "inter_company_invoice_reference",
   "customer_group",
   "campaign",
+  "is_discounted",
   "col_break23",
   "status",
   "source",
@@ -1336,7 +1337,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "\nDraft\nReturn\nCredit Note Issued\nSubmitted\nPaid\nUnpaid\nOverdue\nCancelled",
+   "options": "\nDraft\nReturn\nCredit Note Issued\nSubmitted\nPaid\nUnpaid\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nOverdue\nCancelled",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1553,12 +1554,20 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_discounted",
+   "fieldtype": "Check",
+   "label": "Is Discounted",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2019-05-25 22:05:03.474745",
+ "modified": "2019-07-02 15:21:40.257028",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
