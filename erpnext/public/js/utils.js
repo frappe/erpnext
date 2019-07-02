@@ -595,6 +595,7 @@ erpnext.utils.map_current_doc = function(opts) {
 }
 
 erpnext.utils.clear_duplicates = function() {
+	if(!cur_frm.doc.items) return;
 	const unique_items = new Map();
 	/*
 		Create a Map of items with
