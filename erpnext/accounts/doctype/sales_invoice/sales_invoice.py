@@ -1210,7 +1210,7 @@ class SalesInvoice(SellingController):
 					self.status = "Unpaid and Discounted"
 				elif self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()):
 					self.status = "Unpaid"
-				elif self.outstanding_amount < 0 and self.is_return==0 and get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+				elif self.outstanding_amount < 0 and self.is_return==0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
 					self.status = "Credit Note Issued"
 				elif self.outstanding_amount<=0 and self.is_return==0:
 					self.status = "Paid"
