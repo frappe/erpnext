@@ -157,7 +157,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	can_change_release_date: function(date) {
 		const diff = frappe.datetime.get_diff(date, frappe.datetime.nowdate());
 		if (diff < 0) {
-			frappe.throw('New release date should be in the future');
+			frappe.throw(__('New release date should be in the future'));
 			return false;
 		} else {
 			return true;
