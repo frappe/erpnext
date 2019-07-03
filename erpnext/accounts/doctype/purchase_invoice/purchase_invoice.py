@@ -105,7 +105,7 @@ class PurchaseInvoice(BuyingController):
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
-			frappe.msgprint('Release date must be in the future', raise_exception=True)
+			frappe.throw(_('Release date must be in the future'))
 
 	def validate_cash(self):
 		if not self.cash_bank_account and flt(self.paid_amount):

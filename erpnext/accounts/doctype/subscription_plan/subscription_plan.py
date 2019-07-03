@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from erpnext.utilities.product import get_price
 
@@ -13,7 +14,7 @@ class SubscriptionPlan(Document):
 
 	def validate_interval_count(self):
 		if self.billing_interval_count < 1:
-			frappe.throw('Billing Interval Count cannot be less than 1')
+			frappe.throw(_('Billing Interval Count cannot be less than 1'))
 
 @frappe.whitelist()
 def get_plan_rate(plan, quantity=1, customer=None):
@@ -26,7 +27,7 @@ def get_plan_rate(plan, quantity=1, customer=None):
 			customer_group = frappe.db.get_value("Customer", customer, "customer_group")
 		else:
 			customer_group = None
-		
+
 		price = get_price(item_code=plan.item, price_list=plan.price_list, customer_group=customer_group, company=None, qty=quantity)
 		if not price:
 			return 0

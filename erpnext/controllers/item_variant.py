@@ -176,7 +176,7 @@ def enqueue_multiple_variant_creation(item, args):
 	for key in variants:
 		total_variants *= len(variants[key])
 	if total_variants >= 600:
-		frappe.msgprint("Please do not create more than 500 items at a time", raise_exception=1)
+		frappe.throw(_("Please do not create more than 500 items at a time"))
 		return
 	if total_variants < 10:
 		return create_multiple_variants(item, args)
