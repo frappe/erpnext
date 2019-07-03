@@ -435,7 +435,7 @@ def update_reference_in_journal_entry(d, jv_obj):
 	jv_obj.flags.ignore_validate_update_after_submit = True
 	jv_obj.save(ignore_permissions=True)
 
-def update_reference_in_payment_entry(d, payment_entry):
+def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	reference_details = {
 		"reference_doctype": d.against_voucher_type,
 		"reference_name": d.against_voucher,
@@ -466,7 +466,17 @@ def update_reference_in_payment_entry(d, payment_entry):
 	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()
 	payment_entry.set_amounts()
-	payment_entry.save(ignore_permissions=True)
+
+	if d.difference_amount and d.difference_account:
+		payment_entry.set_gain_or_loss(account_details={
+			'account': d.difference_account,
+			'cost_center': payment_entry.cost_center or frappe.get_cached_value('Company',
+				payment_entry.company, "cost_center"),
+			'amount': d.difference_amount
+		})
+
+	if not do_not_save:
+		payment_entry.save(ignore_permissions=True)
 
 def unlink_ref_doc_from_payment_entries(ref_doc):
 	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name)
