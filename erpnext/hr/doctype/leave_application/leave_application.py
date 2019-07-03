@@ -521,8 +521,39 @@ def get_remaining_leaves(allocation, leaves_taken, date, expiry):
 		return _get_remaining_leaves(allocation.total_leaves_allocated, allocation.to_date)
 
 def get_leaves_for_period(employee, leave_type, from_date, to_date):
-	leave_entries = frappe.db.sql("""
-		select employee, leave_type, from_date, to_date, leaves, transaction_type
+	leave_entries = get_leave_entries(employee, leave_type, from_date, to_date)
+	leave_days = 0
+
+	for leave_entry in leave_entries:
+		inclusive_period = leave_entry.from_date >= getdate(from_date) and leave_entry.to_date <= getdate(to_date)
+
+		if  inclusive_period and leave_entry.transaction_type == 'Leave Encashment':
+			leave_days += leave_entry.leaves
+
+		elif inclusive_period and leave_entry.transaction_type == 'Leave Allocation' \
+			and not skip_expiry_leaves(leave_entry, to_date):
+			leave_days += leave_entry.leaves
+
+		else:
+			if leave_entry.from_date < getdate(from_date):
+				leave_entry.from_date = from_date
+			if leave_entry.to_date > getdate(to_date):
+				leave_entry.to_date = to_date
+
+			leave_days += get_number_of_leave_days(employee, leave_type,
+				leave_entry.from_date, leave_entry.to_date) * -1
+
+	return leave_days
+
+def skip_expiry_leaves(leave_entry, date):
+	''' Checks whether the expired leaves coincide with the to_date of leave balance check '''
+	end_date = frappe.db.get_value("Leave Allocation", {'name': leave_entry.transaction_name}, ['to_date'])
+	return True if end_date == date and not leave_entry.is_carry_forward else False
+
+def get_leave_entries(employee, leave_type, from_date, to_date):
+	''' Returns leave entries between from_date and to_date '''
+	return frappe.db.sql("""
+		select employee, leave_type, from_date, to_date, leaves, transaction_type, is_carry_forward
 		from `tabLeave Ledger Entry`
 		where employee=%(employee)s and leave_type=%(leave_type)s
 			and docstatus=1
@@ -536,22 +567,6 @@ def get_leaves_for_period(employee, leave_type, from_date, to_date):
 		"employee": employee,
 		"leave_type": leave_type
 	}, as_dict=1)
-	leave_days = 0
-
-	for leave_entry in leave_entries:
-		if leave_entry.from_date >= getdate(from_date) and leave_entry.to_date <= getdate(to_date) \
-			and leave_entry.transaction_type in ('Leave Encashment', 'Leave Allocation'):
-			leave_days += leave_entry.leaves
-		else:
-			if leave_entry.from_date < getdate(from_date):
-				leave_entry.from_date = from_date
-			if leave_entry.to_date > getdate(to_date):
-				leave_entry.to_date = to_date
-
-			leave_days += get_number_of_leave_days(employee, leave_type,
-				leave_entry.from_date, leave_entry.to_date) * -1
-
-	return leave_days
 
 @frappe.whitelist()
 def get_holidays(employee, from_date, to_date):
