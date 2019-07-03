@@ -39,8 +39,6 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 					});
 					frm.events.get_total_gain_loss(frm);
 					refresh_field("accounts");
-				} else {
-					frappe.msgprint(__("No records found"));
 				}
 			}
 		});
