@@ -282,7 +282,7 @@ def copy_attributes_to_variant(item, variant):
 
 	if 'description' not in allow_fields:
 		if not variant.description:
-			variant.description = ""
+				variant.description = ""
 
 		if item.variant_based_on=='Item Attribute':
 			if variant.attributes:
