@@ -211,9 +211,8 @@ class SalesOrder(SellingController):
 
 		if self.project:
 			project = frappe.get_doc("Project", self.project)
-			project.flags.dont_sync_tasks = True
 			project.update_sales_amount()
-			project.save()
+			project.db_update()
 
 	def check_credit_limit(self):
 		# if bypass credit limit check is set to true (1) at sales order level,

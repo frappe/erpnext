@@ -24,10 +24,9 @@ class PaymentReconciliation(Document):
 
 	def get_payment_entries(self):
 		order_doctype = "Sales Order" if self.party_type=="Customer" else "Purchase Order"
-
 		payment_entries = get_advance_payment_entries(self.party_type, self.party,
 			self.receivable_payable_account, order_doctype, against_all_orders=True, limit=self.limit)
-			
+
 		return payment_entries
 
 	def get_jv_entries(self):
@@ -37,7 +36,7 @@ class PaymentReconciliation(Document):
 		bank_account_condition = "t2.against_account like %(bank_cash_account)s" \
 				if self.bank_cash_account else "1=1"
 
-		limit_cond = "limit %s" % (self.limit or 1000)
+		limit_cond = "limit %s" % self.limit if self.limit else ""
 
 		journal_entries = frappe.db.sql("""
 			select
@@ -84,7 +83,10 @@ class PaymentReconciliation(Document):
 		condition = self.check_condition()
 
 		non_reconciled_invoices = get_outstanding_invoices(self.party_type, self.party,
-			self.receivable_payable_account, condition=condition, limit=self.limit)
+			self.receivable_payable_account, condition=condition)
+
+		if self.limit:
+			non_reconciled_invoices = non_reconciled_invoices[:self.limit]
 
 		self.add_invoice_entries(non_reconciled_invoices)
 

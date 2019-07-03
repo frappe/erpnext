@@ -322,7 +322,10 @@ def sort_accounts(accounts, is_root=False, key="name"):
 	"""Sort root types as Asset, Liability, Equity, Income, Expense"""
 
 	def compare_accounts(a, b):
-		if is_root:
+		if re.split('\W+', a[key])[0].isdigit():
+			# if chart of accounts is numbered, then sort by number
+			return cmp(a[key], b[key])
+		elif is_root:
 			if a.report_type != b.report_type and a.report_type == "Balance Sheet":
 				return -1
 			if a.root_type != b.root_type and a.root_type == "Asset":
@@ -353,6 +356,7 @@ def set_gl_entries_by_account(
 		"company": company,
 		"from_date": from_date,
 		"to_date": to_date,
+		"finance_book": filters.get("finance_book")
 	}
 
 	if filters.get("include_default_book_entries"):
