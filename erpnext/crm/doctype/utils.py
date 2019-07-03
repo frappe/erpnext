@@ -87,7 +87,7 @@ def get_employee_emails_for_popup(communication_medium):
 		'parent': communication_medium,
 		'from_time': ['<=', now_time],
 		'to_time': ['>=', now_time],
-	}, fields=['employee_group'], debug=1)
+	}, fields=['employee_group'])
 
 	available_employee_groups = tuple([emp.employee_group for emp in available_employee_groups])
 
