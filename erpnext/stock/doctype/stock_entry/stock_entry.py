@@ -697,6 +697,11 @@ class StockEntry(StockController):
 			if not ret.get(field):
 				ret[field] = frappe.get_cached_value('Company',  self.company,  company_field)
 
+		if self.is_opening == "Yes":
+			temporary_opening_account = frappe.get_cached_value('Company',  self.company,  'temporary_opening_account')
+			if temporary_opening_account:
+				ret['expense_account'] = temporary_opening_account
+
 		args['posting_date'] = self.posting_date
 		args['posting_time'] = self.posting_time
 
