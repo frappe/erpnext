@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 import json
 from six import iteritems
@@ -414,7 +415,7 @@ class GSTR3BReport(Document):
 		if gst_details:
 			return gst_details[0]
 		else:
-			frappe.throw("Please enter GSTIN and state for the Company Address {0}".format(self.company_address))
+			frappe.throw(_("Please enter GSTIN and state for the Company Address {0}".format(self.company_address)))
 
 	def get_account_heads(self):
 
@@ -427,7 +428,7 @@ class GSTR3BReport(Document):
 		if account_heads:
 			return account_heads
 		else:
-			frappe.throw("Please set account heads in GST Settings for Compnay {0}".format(self.company))
+			frappe.throw(_("Please set account heads in GST Settings for Compnay {0}".format(self.company)))
 
 	def get_missing_field_invoices(self):
 
