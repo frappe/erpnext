@@ -167,7 +167,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Opening Invoice Creation Tool",
 					"description": _("Create Opening Sales and Purchase Invoices")
-				},
+				}
 			]
 		},
 		{
@@ -182,7 +182,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Journal Entry",
 					"description": _("Accounting journal entries.")
-				},
+				}
 			]
 		},
 		{
@@ -245,6 +245,12 @@ def get_data():
 					"type": "doctype",
 					"label": _("Bank"),
 					"name": "Bank",
+				},
+				{
+					"type": "page",
+					"label": _("Reconcile payments and bank transactions"),
+					"name": "bank-reconciliation",
+					"description": _("Link bank transactions with payments.")
 				},
 				{
 					"type": "doctype",

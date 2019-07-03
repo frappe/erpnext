@@ -36,7 +36,7 @@ def make_depreciation_entry(asset_name, date=None):
 	fixed_asset_account, accumulated_depreciation_account, depreciation_expense_account = \
 		get_depreciation_accounts(asset)
 
-	depreciation_cost_center, depreciation_series = frappe.get_cached_value('Company',  asset.company, 
+	depreciation_cost_center, depreciation_series = frappe.get_cached_value('Company',  asset.company,
 		["depreciation_cost_center", "series_for_depreciation_entry"])
 
 	depreciation_cost_center = asset.cost_center or depreciation_cost_center
@@ -70,7 +70,7 @@ def make_depreciation_entry(asset_name, date=None):
 			je.submit()
 
 			d.db_set("journal_entry", je.name)
-			
+
 			idx = cint(d.finance_book_id)
 			finance_books = asset.get('finance_books')[idx - 1]
 			finance_books.value_after_depreciation -= d.depreciation_amount
@@ -88,15 +88,15 @@ def get_depreciation_accounts(asset):
 		fieldname = ['fixed_asset_account', 'accumulated_depreciation_account',
 			'depreciation_expense_account'], as_dict=1)
 
-	if accounts:	
+	if accounts:
 		fixed_asset_account = accounts.fixed_asset_account
 		accumulated_depreciation_account = accounts.accumulated_depreciation_account
 		depreciation_expense_account = accounts.depreciation_expense_account
-		
+
 	if not accumulated_depreciation_account or not depreciation_expense_account:
-		accounts = frappe.get_cached_value('Company',  asset.company, 
+		accounts = frappe.get_cached_value('Company',  asset.company,
 			["accumulated_depreciation_account", "depreciation_expense_account"])
-		
+
 		if not accumulated_depreciation_account:
 			accumulated_depreciation_account = accounts[0]
 		if not depreciation_expense_account:
@@ -135,11 +135,11 @@ def scrap_asset(asset_name):
 
 	je.flags.ignore_permissions = True
 	je.submit()
-	
+
 	frappe.db.set_value("Asset", asset_name, "disposal_date", today())
 	frappe.db.set_value("Asset", asset_name, "journal_entry_for_scrap", je.name)
 	asset.set_status("Scrapped")
-	
+
 	frappe.msgprint(_("Asset scrapped via Journal Entry {0}").format(je.name))
 
 @frappe.whitelist()
@@ -147,21 +147,29 @@ def restore_asset(asset_name):
 	asset = frappe.get_doc("Asset", asset_name)
 
 	je = asset.journal_entry_for_scrap
-	
+
 	asset.db_set("disposal_date", None)
 	asset.db_set("journal_entry_for_scrap", None)
-	
+
 	frappe.get_doc("Journal Entry", je).cancel()
 
 	asset.set_status()
 
 @frappe.whitelist()
-def get_gl_entries_on_asset_disposal(asset, selling_amount=0):
+def get_gl_entries_on_asset_disposal(asset, selling_amount=0, finance_book=None):
 	fixed_asset_account, accumulated_depr_account, depr_expense_account = get_depreciation_accounts(asset)
 	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(asset.company)
 	depreciation_cost_center = asset.cost_center or depreciation_cost_center
 
-	accumulated_depr_amount = flt(asset.gross_purchase_amount) - flt(asset.value_after_depreciation)
+	idx = 1
+	if finance_book:
+		for d in asset.finance_books:
+			if d.finance_book == finance_book:
+				idx = d.idx
+				break
+
+	value_after_depreciation = asset.finance_books[idx - 1].value_after_depreciation
+	accumulated_depr_amount = flt(asset.gross_purchase_amount) - flt(value_after_depreciation)
 
 	gl_entries = [
 		{
@@ -176,7 +184,7 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0):
 		}
 	]
 
-	profit_amount = flt(selling_amount) - flt(asset.value_after_depreciation)
+	profit_amount = flt(selling_amount) - flt(value_after_depreciation)
 	if profit_amount:
 		debit_or_credit = "debit" if profit_amount < 0 else "credit"
 		gl_entries.append({
@@ -190,7 +198,7 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0):
 
 @frappe.whitelist()
 def get_disposal_account_and_cost_center(company):
-	disposal_account, depreciation_cost_center = frappe.get_cached_value('Company',  company, 
+	disposal_account, depreciation_cost_center = frappe.get_cached_value('Company',  company,
 		["disposal_account", "depreciation_cost_center"])
 
 	if not disposal_account:

@@ -51,15 +51,6 @@ class PurchaseReceipt(BuyingController):
 			'target_ref_field': 'qty',
 			'source_field': 'qty',
 			'percent_join_field': 'material_request'
-		},
-		{
-			'source_dt': 'Purchase Receipt Item',
-			'target_dt': 'Purchase Order Item',
-			'join_field': 'purchase_order_item',
-			'target_field': 'returned_qty',
-			'target_parent_dt': 'Purchase Order',
-			'source_field': '-1 * qty',
-			'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
 		}]
 		if cint(self.is_return):
 			self.status_updater.append({
@@ -445,6 +436,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 		doc = frappe.get_doc(target)
 		doc.ignore_pricing_rule = 1
+		doc.run_method("onload")
 		doc.run_method("set_missing_values")
 		doc.run_method("calculate_taxes_and_totals")
 
