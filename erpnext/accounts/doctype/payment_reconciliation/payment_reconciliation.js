@@ -173,7 +173,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 					args.forEach(d => {
 						frappe.model.set_value("Payment Reconciliation Payment", d.docname,
 							"difference_account", d.difference_account);
-					})
+					});
 
 					me.reconcile_payment_entries();
 					dialog.hide();
