@@ -599,9 +599,12 @@ class ReceivablePayableReport(object):
 
 		rows = []
 		for d in data:
+			values = d[self.ageing_col_idx_start : self.ageing_col_idx_start+5]
+			precision = cint(frappe.db.get_default("float_precision")) or 2
+			formatted_values = [frappe.utils.rounded(val, precision) for val in values]
 			rows.append(
 				{
-					'values': d[self.ageing_col_idx_start : self.ageing_col_idx_start+5]
+					'values': formatted_values
 				}
 			)
 
