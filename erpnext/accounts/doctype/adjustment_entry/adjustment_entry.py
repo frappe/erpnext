@@ -10,7 +10,7 @@ from erpnext import get_party_account_type
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.utils import get_outstanding_invoices, get_negative_outstanding_invoices, get_account_currency, get_allow_cost_center_in_entry_of_bs_account
+from erpnext.accounts.utils import get_outstanding_invoices, get_negative_outstanding_invoices, get_allow_cost_center_in_entry_of_bs_account
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.controllers.accounts_controller import get_advance_payment_entries
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_company_defaults
