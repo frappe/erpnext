@@ -32,12 +32,13 @@ class AdjustmentEntry(AccountsController):
     def validate_customer_supplier_account(self):
         customer_account_currency = self.customer_account_currency
         supplier_account_currency = self.supplier_account_currency
-        if customer_account_currency != supplier_account_currency:
+        customer_supplier_currency = self.customer_account_currency or self.supplier_account_currency
+        if self.customer and self.supplier and customer_account_currency != supplier_account_currency:
             frappe.throw(_("Customer account currency ({0}) and supplier account currency ({1}) should be same")
                          .format(customer_account_currency, supplier_account_currency))
-        elif customer_account_currency != self.payment_currency and self.company_currency != customer_account_currency:
+        elif customer_supplier_currency != self.payment_currency and self.company_currency != customer_supplier_currency:
             frappe.throw(_("Payment currency ({0}) should be same as Customer/Supplier account currency ({1})")
-                         .format(self.payment_currency, customer_account_currency))
+                         .format(self.payment_currency, customer_supplier_currency))
 
     def validate_company_exchange_gain_loss_account(self):
         company_details = get_company_defaults(self.company)
@@ -231,7 +232,7 @@ class AdjustmentEntry(AccountsController):
         self.total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
         self.total_balance = abs(sum([flt(d.balance) for d in self.get("debit_entries")]) - sum([flt(d.balance) for d in self.get("credit_entries")]))
         self.total_gain_loss = sum([flt(d.gain_loss_amount) for d in self.get("debit_entries")]) + sum([flt(d.gain_loss_amount) for d in self.get("credit_entries")])
-        self.difference_amount = abs(self.receivable_adjusted - self.payable_adjusted - self.total_deductions)
+        self.difference_amount = flt(abs(self.receivable_adjusted - self.payable_adjusted - self.total_deductions), self.precision("difference_amount"))
 
     def allocate_amount_to_references(self):
         total_debit_outstanding = sum([flt(d.voucher_payment_amount) for d in self.get("debit_entries")])
