@@ -28,14 +28,11 @@
   "allocate_payment_amount",
   "debit_entries",
   "credit_entries",
-  "deduction_section_break",
-  "deductions",
   "accounting_dimensions_section",
   "cost_center",
   "summary_section_break",
   "receivable_adjusted",
   "payable_adjusted",
-  "total_deductions",
   "column_break_25",
   "difference_amount",
   "total_balance",
@@ -55,12 +52,12 @@
    "reqd": 1
   },
   {
-   "description": "Sales: Match Sales Invoices with Payments Received<br>\nPurchase: Match Purchase Invoices with Payments Paid<br>\nNetting: Match Sales Invoices with Purchase Invoices<br>",
+   "description": "Netting: Match Sales Invoices with Purchase Invoices<br>",
    "fieldname": "adjustment_type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Adjustment Type",
-   "options": "Sales\nPurchase\nNetting",
+   "options": "Netting",
    "reqd": 1
   },
   {
@@ -124,17 +121,6 @@
    "options": "Adjustment Entry Exchange Rates"
   },
   {
-   "fieldname": "deduction_section_break",
-   "fieldtype": "Section Break",
-   "label": "Deductions"
-  },
-  {
-   "fieldname": "deductions",
-   "fieldtype": "Table",
-   "label": "Deductions",
-   "options": "Adjustment Entry Deduction"
-  },
-  {
    "fieldname": "debit_entries",
    "fieldtype": "Table",
    "label": "Debit Entries",
@@ -170,13 +156,6 @@
    "fieldname": "payable_adjusted",
    "fieldtype": "Currency",
    "label": "Payable Adjusted",
-   "options": "payment_currency",
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_deductions",
-   "fieldtype": "Currency",
-   "label": "Deductions",
    "options": "payment_currency",
    "read_only": 1
   },
@@ -265,7 +244,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-07-02 13:20:47.500381",
+ "modified": "2019-07-03 14:49:24.516025",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Adjustment Entry",

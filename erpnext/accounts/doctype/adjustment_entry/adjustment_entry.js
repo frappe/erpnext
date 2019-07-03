@@ -17,22 +17,6 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 				}
 			}
 		});
-		frm.set_query("account", "deductions", function() {
-			return {
-				filters: {
-					"is_group": 0,
-					"company": frm.doc.company
-				}
-			}
-		});
-		frm.set_query("cost_center", "deductions", function() {
-			return {
-				filters: {
-					"is_group": 0,
-					"company": frm.doc.company
-				}
-			}
-		});
 	},
 
 	onload: function() {
@@ -117,7 +101,6 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 	},
 	payment_currency: function() {
 		this.update_labels();
-		recalculate_deductions_base_amount(this.frm);
 		const me = this;
 		return this.frm.call({
 			doc: me.frm.doc,
@@ -136,9 +119,6 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 		this.frm.set_currency_labels(['exchange_rate_to_base_currency'],company_currency, 'exchange_rates');
 		this.frm.set_currency_labels(['exchange_rate_to_payment_currency'],this.frm.doc.payment_currency, 'exchange_rates');
 		this.frm.get_field('exchange_rates').grid.header_row.refresh();
-		this.frm.set_currency_labels(['base_amount'],company_currency, 'deductions');
-		this.frm.set_currency_labels(['amount'],this.frm.doc.payment_currency, 'deductions');
-		this.frm.get_field('deductions').grid.header_row.refresh();
 	},
 
 	allocate_payment_amount: function() {
@@ -208,19 +188,9 @@ function call_recalculate_references(frm) {
 	});
 }
 
-function recalculate_deductions_base_amount(frm) {
-	const base_exchange_rate = get_exchange_rate(frm, frm.doc.payment_currency, 'exchange_rate_to_base_currency');
-	const deductions = frm.doc.deductions || [];
-	deductions.map(deduction => {
-		const base_amount = deduction.amount * base_exchange_rate;
-		frappe.model.set_value(deduction.doctype, deduction.name, 'base_amount', base_amount);
-	});
-}
-
 frappe.ui.form.on('Adjustment Entry Exchange Rates', {
 	exchange_rate_to_payment_currency: call_recalculate_references ,
 	exchange_rate_to_base_currency: function (frm) {
-		recalculate_deductions_base_amount(frm);
 		call_recalculate_references(frm);
 	},
 });

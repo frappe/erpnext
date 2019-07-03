@@ -54,6 +54,7 @@ class AdjustmentEntry(AccountsController):
                         _("{0} Row #{1}: Allocated Amount cannot be greater than outstanding amount.").format(d.parentfield, d.idx))
 
     def get_unreconciled_entries(self):
+        self.allocate_payment_amount = False
         self.check_mandatory_to_fetch()
         self.get_entries()
         self.calculate_summary_totals()
@@ -229,19 +230,17 @@ class AdjustmentEntry(AccountsController):
     def calculate_summary_totals(self):
         self.receivable_adjusted = sum([flt(d.allocated_amount) for d in self.get("debit_entries")])
         self.payable_adjusted = sum([flt(d.allocated_amount) for d in self.get("credit_entries")])
-        self.total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
         self.total_balance = abs(sum([flt(d.balance) for d in self.get("debit_entries")]) - sum([flt(d.balance) for d in self.get("credit_entries")]))
         self.total_gain_loss = sum([flt(d.gain_loss_amount) for d in self.get("debit_entries")]) + sum([flt(d.gain_loss_amount) for d in self.get("credit_entries")])
-        self.difference_amount = flt(abs(self.receivable_adjusted - self.payable_adjusted - self.total_deductions), self.precision("difference_amount"))
+        self.difference_amount = flt(abs(self.receivable_adjusted - self.payable_adjusted), self.precision("difference_amount"))
 
     def allocate_amount_to_references(self):
         total_debit_outstanding = sum([flt(d.voucher_payment_amount) for d in self.get("debit_entries")])
         total_credit_outstanding = sum([flt(c.voucher_payment_amount) for c in self.get("credit_entries")])
         exchange_rates = self.exchange_rates_to_dict()
-        total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
         allocate_order = ['credit_entries', 'debit_entries'] if total_debit_outstanding > total_credit_outstanding else ['debit_entries', 'credit_entries']
         for reference_type in allocate_order:
-            allocated_oustanding = min(total_debit_outstanding, total_credit_outstanding) - total_deductions
+            allocated_oustanding = min(total_debit_outstanding, total_credit_outstanding)
             entries = self.get(reference_type)
             for ent in entries:
                 ent.allocated_amount = 0
@@ -258,7 +257,6 @@ class AdjustmentEntry(AccountsController):
     def make_gl_entries(self, cancel=0, adv_adj=0):
         gl_entries = []
         self.add_party_gl_entries(gl_entries)
-        self.add_deductions_gl_entries(gl_entries)
         self.add_gain_loss_entries(gl_entries)
         make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
 
@@ -297,24 +295,6 @@ class AdjustmentEntry(AccountsController):
                     dr_or_cr: allocated_amount_in_company_currency
                 })
                 gl_entries.append(party_gl_dict)
-
-    def add_deductions_gl_entries(self, gl_entries):
-        for d in self.get("deductions"):
-            if d.amount:
-                account_currency = get_account_currency(d.account)
-                if account_currency != self.company_currency:
-                    frappe.throw(_("Currency for {0} must be {1}").format(d.account, self.company_currency))
-
-                gl_entries.append(
-                    self.get_gl_dict({
-                        "account": d.account,
-                        "account_currency": account_currency,
-                        "against": self.customer,
-                        "debit_in_account_currency": d.amount,
-                        "debit": d.amount,
-                        "cost_center": d.cost_center
-                    }, item=d)
-                )
 
     def add_gain_loss_entries(self, gl_entries):
         company_details = get_company_defaults(self.company)
