@@ -10,33 +10,36 @@ from erpnext.accounts.doctype.account.test_account import create_account
 
 test_records = frappe.get_test_records('Expense Claim')
 test_dependencies = ['Employee']
+company_name = '_Test Company'
+
 
 class TestExpenseClaim(unittest.TestCase):
 	def test_total_expense_claim_for_project(self):
 		frappe.db.sql("""delete from `tabTask` where project = "_Test Project 1" """)
 		frappe.db.sql("""delete from `tabProject Task` where parent = "_Test Project 1" """)
 		frappe.db.sql("""delete from `tabProject` where name = "_Test Project 1" """)
-		frappe.db.sql("delete from `tabExpense Claim` where project='_Test Project 1'")
 
 		frappe.get_doc({
 			"project_name": "_Test Project 1",
-			"doctype": "Project",
+			"doctype": "Project"
 		}).save()
 
-		task = frappe.get_doc({
-			"doctype": "Task",
-			"subject": "_Test Project Task 1",
-			"project": "_Test Project 1"
-		}).save()
+		task = frappe.get_doc(dict(
+			doctype = 'Task',
+			subject = '_Test Project Task 1',
+			status = 'Open',
+			project = '_Test Project 1'
+		)).insert()
 
-		task_name = frappe.db.get_value("Task", {"project": "_Test Project 1"})
-		payable_account = get_payable_account("Wind Power LLC")
-		make_expense_claim(payable_account, 300, 200, "Wind Power LLC","Travel Expenses - WP", "_Test Project 1", task_name)
+		task_name = task.name
+		payable_account = get_payable_account(company_name)
+
+		make_expense_claim(payable_account, 300, 200, company_name, "Travel Expenses - _TC", "_Test Project 1", task_name)
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 200)
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 200)
 
-		expense_claim2 = make_expense_claim(payable_account, 600, 500, "Wind Power LLC", "Travel Expenses - WP","_Test Project 1", task_name)
+		expense_claim2 = make_expense_claim(payable_account, 600, 500, company_name, "Travel Expenses - _TC","_Test Project 1", task_name)
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 700)
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 700)
@@ -48,8 +51,8 @@ class TestExpenseClaim(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 200)
 
 	def test_expense_claim_status(self):
-		payable_account = get_payable_account("Wind Power LLC")
-		expense_claim = make_expense_claim(payable_account, 300, 200, "Wind Power LLC", "Travel Expenses - WP")
+		payable_account = get_payable_account(company_name)
+		expense_claim = make_expense_claim(payable_account, 300, 200, company_name, "Travel Expenses - _TC")
 
 		je_dict = make_bank_entry("Expense Claim", expense_claim.name)
 		je = frappe.get_doc(je_dict)
@@ -66,9 +69,9 @@ class TestExpenseClaim(unittest.TestCase):
 		self.assertEqual(expense_claim.status, "Unpaid")
 
 	def test_expense_claim_gl_entry(self):
-		payable_account = get_payable_account("Wind Power LLC")
+		payable_account = get_payable_account(company_name)
 		taxes = generate_taxes()
-		expense_claim = make_expense_claim(payable_account, 300, 200, "Wind Power LLC", "Travel Expenses - WP", do_not_submit=True, taxes=taxes)
+		expense_claim = make_expense_claim(payable_account, 300, 200, company_name, "Travel Expenses - _TC", do_not_submit=True, taxes=taxes)
 		expense_claim.submit()
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
@@ -78,9 +81,9 @@ class TestExpenseClaim(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = dict((d[0], d) for d in [
-			['CGST - WP',10.0, 0.0],
+			['CGST - _TC',18.0, 0.0],
 			[payable_account, 0.0, 210.0],
-			["Travel Expenses - WP", 200.0, 0.0]
+			["Travel Expenses - _TC", 200.0, 0.0]
 		])
 
 		for gle in gl_entries:
@@ -89,14 +92,14 @@ class TestExpenseClaim(unittest.TestCase):
 			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
 	def test_rejected_expense_claim(self):
-		payable_account = get_payable_account("Wind Power LLC")
+		payable_account = get_payable_account(company_name)
 		expense_claim = frappe.get_doc({
 			 "doctype": "Expense Claim",
 			 "employee": "_T-Employee-00001",
 			 "payable_account": payable_account,
 			 "approval_status": "Rejected",
 			 "expenses":
-			 	[{ "expense_type": "Travel", "default_account": "Travel Expenses - WP", "amount": 300, "sanctioned_amount": 200 }]
+			 	[{ "expense_type": "Travel", "default_account": "Travel Expenses - _TC", "amount": 300, "sanctioned_amount": 200 }]
 		})
 		expense_claim.submit()
 
@@ -111,9 +114,9 @@ def get_payable_account(company):
 
 def generate_taxes():
 	parent_account = frappe.db.get_value('Account',
-		{'company': "Wind Power LLC", 'is_group':1, 'account_type': 'Tax'},
+		{'company': company_name, 'is_group':1, 'account_type': 'Tax'},
 		'name')
-	account = create_account(company="Wind Power LLC", account_name="CGST", account_type="Tax", parent_account=parent_account)
+	account = create_account(company=company_name, account_name="CGST", account_type="Tax", parent_account=parent_account)
 	return {'taxes':[{
 		"account_head": account,
 		"rate": 0,
