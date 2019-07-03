@@ -69,7 +69,8 @@
    "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Subject",
-   "reqd": 1
+   "reqd": 1,
+   "in_standard_filter": 1
   },
   {
    "fieldname": "customer",

@@ -28,8 +28,8 @@ class Quotation(SellingController):
 		self.update_opportunity()
 		self.validate_order_type()
 		self.validate_uom_is_integer("stock_uom", "qty")
-		self.validate_quotation_to()
 		self.validate_valid_till()
+		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
 
@@ -43,16 +43,16 @@ class Quotation(SellingController):
 	def validate_order_type(self):
 		super(Quotation, self).validate_order_type()
 
-	def validate_quotation_to(self):
-		if self.customer:
-			self.quotation_to = "Customer"
-			self.lead = None
-		elif self.lead:
-			self.quotation_to = "Lead"
-
 	def update_lead(self):
-		if self.lead:
-			frappe.get_doc("Lead", self.lead).set_status(update=True)
+		if self.quotation_to == "Lead" and self.party_name:
+			frappe.get_doc("Lead", self.party_name).set_status(update=True)
+
+	def set_customer_name(self):
+		if self.party_name and self.quotation_to == 'Customer':
+			self.customer_name = frappe.db.get_value("Customer", self.party_name, "customer_name")
+		elif self.party_name and self.quotation_to == 'Lead':
+			lead_name, company_name = frappe.db.get_value("Lead", self.party_name, ["lead_name", "company_name"])
+			self.customer_name = company_name or lead_name
 
 	def update_opportunity(self):
 		for opportunity in list(set([d.prevdoc_docname for d in self.get("items")])):
@@ -226,33 +226,38 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	return doclist
 
 def _make_customer(source_name, ignore_permissions=False):
-	quotation = frappe.db.get_value("Quotation", source_name, ["lead", "order_type", "customer"])
-	if quotation and quotation[0] and not quotation[2]:
-		lead_name = quotation[0]
-		customer_name = frappe.db.get_value("Customer", {"lead_name": lead_name},
-			["name", "customer_name"], as_dict=True)
-		if not customer_name:
-			from erpnext.crm.doctype.lead.lead import _make_customer
-			customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
-			customer = frappe.get_doc(customer_doclist)
-			customer.flags.ignore_permissions = ignore_permissions
-			if quotation[1] == "Shopping Cart":
-				customer.customer_group = frappe.db.get_value("Shopping Cart Settings", None,
-					"default_customer_group")
+	quotation = frappe.db.get_value("Quotation",
+		source_name, ["order_type", "party_name", "customer_name"], as_dict=1)
 
-			try:
-				customer.insert()
-				return customer
-			except frappe.NameError:
-				if frappe.defaults.get_global_default('cust_master_name') == "Customer Name":
-					customer.run_method("autoname")
-					customer.name += "-" + lead_name
+	if quotation and quotation.get('party_name'):
+		if not frappe.db.exists("Customer", quotation.get("party_name")):
+			lead_name = quotation.get("party_name")
+			customer_name = frappe.db.get_value("Customer", {"lead_name": lead_name},
+				["name", "customer_name"], as_dict=True)
+			if not customer_name:
+				from erpnext.crm.doctype.lead.lead import _make_customer
+				customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
+				customer = frappe.get_doc(customer_doclist)
+				customer.flags.ignore_permissions = ignore_permissions
+				if quotation.get("party_name") == "Shopping Cart":
+					customer.customer_group = frappe.db.get_value("Shopping Cart Settings", None,
+						"default_customer_group")
+
+				try:
 					customer.insert()
 					return customer
-				else:
-					raise
-			except frappe.MandatoryError:
-				frappe.local.message_log = []
-				frappe.throw(_("Please create Customer from Lead {0}").format(lead_name))
+				except frappe.NameError:
+					if frappe.defaults.get_global_default('cust_master_name') == "Customer Name":
+						customer.run_method("autoname")
+						customer.name += "-" + lead_name
+						customer.insert()
+						return customer
+					else:
+						raise
+				except frappe.MandatoryError:
+					frappe.local.message_log = []
+					frappe.throw(_("Please create Customer from Lead {0}").format(lead_name))
+			else:
+				return customer_name
 		else:
-			return customer_name
+			return frappe.get_doc("Customer", quotation.get("party_name"))
