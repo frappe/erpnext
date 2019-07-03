@@ -124,7 +124,7 @@ def create_sales_order(shopify_order, shopify_settings, company=None):
 
 	else:
 		so = frappe.get_doc("Sales Order", so)
-	
+
 	frappe.db.commit()
 	return so
 
@@ -252,6 +252,6 @@ def get_tax_account_head(tax):
 		{"parent": "Shopify Settings", "shopify_tax": tax_title}, "tax_account")
 
 	if not tax_account:
-		frappe.throw("Tax Account not specified for Shopify Tax {0}".format(tax.get("title")))
+		frappe.throw(_("Tax Account not specified for Shopify Tax {0}".format(tax.get("title"))))
 
 	return tax_account
