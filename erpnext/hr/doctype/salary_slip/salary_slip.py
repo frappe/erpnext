@@ -281,7 +281,9 @@ class SalarySlip(TransactionBase):
 			wages_row = {
 				"salary_component": salary_component,
 				"abbr": frappe.db.get_value("Salary Component", salary_component, "salary_component_abbr"),
-				"amount": self.hour_rate * self.total_working_hours
+				"amount": self.hour_rate * self.total_working_hours,
+				"default_amount": 0.0,
+				"additional_amount": 0.0
 			}
 			doc.append('earnings', wages_row)
 
@@ -294,10 +296,7 @@ class SalarySlip(TransactionBase):
 
 		self.set_loan_repayment()
 
-		self.net_pay = 0
-		if self.total_working_days:
-			self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
-
+		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
 		self.rounded_total = rounded(self.net_pay)
 
 	def calculate_component_amounts(self):

@@ -33,7 +33,6 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEqual(quotation.quotation_to, "Customer")
 		self.assertEqual(quotation.contact_person,
 			frappe.db.get_value("Contact", dict(email_id="test_cart_user@example.com")))
-		self.assertEqual(quotation.lead, None)
 		self.assertEqual(quotation.contact_email, frappe.session.user)
 
 		return quotation
@@ -44,8 +43,7 @@ class TestShoppingCart(unittest.TestCase):
 		# test if quotation with customer is fetched
 		quotation = _get_cart_quotation()
 		self.assertEqual(quotation.quotation_to, "Customer")
-		self.assertEqual(quotation.customer, "_Test Customer")
-		self.assertEqual(quotation.lead, None)
+		self.assertEqual(quotation.party_name, "_Test Customer")
 		self.assertEqual(quotation.contact_email, frappe.session.user)
 
 		return quotation
@@ -107,10 +105,11 @@ class TestShoppingCart(unittest.TestCase):
 
 		from erpnext.accounts.party import set_taxes
 
-		tax_rule_master = set_taxes(quotation.customer, "Customer",
+		tax_rule_master = set_taxes(quotation.party_name, "Customer",
 			quotation.transaction_date, quotation.company, customer_group=None, supplier_group=None,
 			tax_category=quotation.tax_category, billing_address=quotation.customer_address,
 			shipping_address=quotation.shipping_address_name, use_for_shopping_cart=1)
+
 		self.assertEqual(quotation.taxes_and_charges, tax_rule_master)
 		self.assertEqual(quotation.total_taxes_and_charges, 1000.0)
 
@@ -123,7 +122,7 @@ class TestShoppingCart(unittest.TestCase):
 			"doctype": "Quotation",
 			"quotation_to": "Customer",
 			"order_type": "Shopping Cart",
-			"customer": get_party(frappe.session.user).name,
+			"party_name": get_party(frappe.session.user).name,
 			"docstatus": 0,
 			"contact_email": frappe.session.user,
 			"selling_price_list": "_Test Price List Rest of the World",
