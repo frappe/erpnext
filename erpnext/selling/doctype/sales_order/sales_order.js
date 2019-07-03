@@ -34,7 +34,7 @@ frappe.ui.form.on("Sales Order", {
 	},
 	refresh: function(frm) {
 		if(frm.doc.docstatus === 1 && frm.doc.status !== 'Closed'
-			&& flt(frm.doc.per_delivered) < 100 && flt(frm.doc.per_billed) < 100) {
+			&& flt(frm.doc.per_delivered, 6) < 100 && flt(frm.doc.per_billed, 6) < 100) {
 			frm.add_custom_button(__('Update Items'), () => {
 				erpnext.utils.update_child_items({
 					frm: frm,
@@ -231,13 +231,19 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 						source_doctype: "Quotation",
 						target: me.frm,
-						setters: {
-							customer: me.frm.doc.customer || undefined
-						},
+						setters: [
+							{
+								label: "Customer",
+								fieldname: "party_name",
+								fieldtype: "Link",
+								options: "Customer",
+								default: me.frm.doc.customer || undefined
+							}
+						],
 						get_query_filters: {
 							company: me.frm.doc.company,
 							docstatus: 1,
-							status: ["!=", "Lost"],
+							status: ["!=", "Lost"]
 						}
 					})
 				}, __("Get items from"));

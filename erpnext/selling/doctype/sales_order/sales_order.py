@@ -211,9 +211,8 @@ class SalesOrder(SellingController):
 
 		if self.project:
 			project = frappe.get_doc("Project", self.project)
-			project.flags.dont_sync_tasks = True
 			project.update_sales_amount()
-			project.save()
+			project.db_update()
 
 	def check_credit_limit(self):
 		# if bypass credit limit check is set to true (1) at sales order level,
@@ -581,8 +580,8 @@ def make_delivery_note(source_name, target_doc=None):
 
 		if item:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
-				or item.get("selling_cost_center") \
-				or item_group.get("selling_cost_center")
+				or item.get("buying_cost_center") \
+				or item_group.get("buying_cost_center")
 
 	target_doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {

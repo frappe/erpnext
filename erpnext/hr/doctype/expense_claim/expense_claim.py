@@ -12,6 +12,7 @@ from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.controllers.accounts_controller import AccountsController
 from frappe.utils.csvutils import getlink
+from erpnext.accounts.utils import get_account_currency
 
 class InvalidExpenseApproverError(frappe.ValidationError): pass
 class ExpenseApproverIdentityError(frappe.ValidationError): pass
@@ -29,6 +30,7 @@ class ExpenseClaim(AccountsController):
 		self.set_expense_account(validate=True)
 		self.set_payable_account()
 		self.set_cost_center()
+		self.calculate_taxes()
 		self.set_status()
 		if self.task and not self.project:
 			self.project = frappe.db.get_value("Task", self.task, "project")
@@ -93,7 +95,7 @@ class ExpenseClaim(AccountsController):
 		elif self.project:
 			frappe.get_doc("Project", self.project).update_project()
 
-	def make_gl_entries(self, cancel = False):
+	def make_gl_entries(self, cancel=False):
 		if flt(self.total_sanctioned_amount) > 0:
 			gl_entries = self.get_gl_entries()
 			make_gl_entries(gl_entries, cancel)
@@ -102,15 +104,13 @@ class ExpenseClaim(AccountsController):
 		gl_entry = []
 		self.validate_account_details()
 
-		payable_amount = flt(self.total_sanctioned_amount) - flt(self.total_advance_amount)
-
 		# payable entry
-		if payable_amount:
+		if self.grand_total:
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": self.payable_account,
-					"credit": payable_amount,
-					"credit_in_account_currency": payable_amount,
+					"credit": self.grand_total,
+					"credit_in_account_currency": self.grand_total,
 					"against": ",".join([d.default_account for d in self.expenses]),
 					"party_type": "Employee",
 					"party": self.employee,
@@ -144,15 +144,16 @@ class ExpenseClaim(AccountsController):
 					"against_voucher": self.name
 				})
 			)
+		self.add_tax_gl_entries(gl_entry)
 
-		if self.is_paid and payable_amount:
+		if self.is_paid and self.grand_total:
 			# payment entry
 			payment_account = get_bank_cash_account(self.mode_of_payment, self.company).get("account")
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": payment_account,
-					"credit": payable_amount,
-					"credit_in_account_currency": payable_amount,
+					"credit": self.grand_total,
+					"credit_in_account_currency": self.grand_total,
 					"against": self.employee
 				})
 			)
@@ -163,14 +164,29 @@ class ExpenseClaim(AccountsController):
 					"party_type": "Employee",
 					"party": self.employee,
 					"against": payment_account,
-					"debit": payable_amount,
-					"debit_in_account_currency": payable_amount,
+					"debit": self.grand_total,
+					"debit_in_account_currency": self.grand_total,
 					"against_voucher": self.name,
 					"against_voucher_type": self.doctype,
 				})
 			)
 
 		return gl_entry
+
+	def add_tax_gl_entries(self, gl_entries):
+		# tax table gl entries
+		for tax in self.get("taxes"):
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": tax.account_head,
+					"debit": tax.tax_amount,
+					"debit_in_account_currency": tax.tax_amount,
+					"against": self.employee,
+					"cost_center": self.cost_center,
+					"against_voucher_type": self.doctype,
+					"against_voucher": self.name
+				})
+			)
 
 	def validate_account_details(self):
 		if not self.cost_center:
@@ -190,8 +206,19 @@ class ExpenseClaim(AccountsController):
 			if self.approval_status == 'Rejected':
 				d.sanctioned_amount = 0.0
 
-			self.total_claimed_amount += flt(d.claim_amount)
+			self.total_claimed_amount += flt(d.amount)
 			self.total_sanctioned_amount += flt(d.sanctioned_amount)
+
+	def calculate_taxes(self):
+		self.total_taxes_and_charges = 0
+		for tax in self.taxes:
+			if tax.rate:
+				tax.tax_amount = flt(self.total_sanctioned_amount) * flt(tax.rate/100)
+
+			tax.total = flt(tax.tax_amount) + flt(self.total_sanctioned_amount)
+			self.total_taxes_and_charges += flt(tax.tax_amount)
+
+		self.grand_total = flt(self.total_sanctioned_amount) + flt(self.total_taxes_and_charges) - flt(self.total_advance_amount)
 
 	def update_task(self):
 		task = frappe.get_doc("Task", self.task)
@@ -224,7 +251,7 @@ class ExpenseClaim(AccountsController):
 
 	def validate_sanctioned_amount(self):
 		for d in self.get('expenses'):
-			if flt(d.sanctioned_amount) > flt(d.claim_amount):
+			if flt(d.sanctioned_amount) > flt(d.amount):
 				frappe.throw(_("Sanctioned Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx))
 
 	def set_expense_account(self, validate=False):

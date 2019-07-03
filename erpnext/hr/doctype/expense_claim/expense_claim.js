@@ -109,12 +109,9 @@ cur_frm.cscript.calculate_total = function(doc){
 	doc.total_claimed_amount = 0;
 	doc.total_sanctioned_amount = 0;
 	$.each((doc.expenses || []), function(i, d) {
-		doc.total_claimed_amount += d.claim_amount;
+		doc.total_claimed_amount += d.amount;
 		doc.total_sanctioned_amount += d.sanctioned_amount;
 	});
-
-	refresh_field("total_claimed_amount");
-	refresh_field('total_sanctioned_amount');
 };
 
 cur_frm.cscript.calculate_total_amount = function(doc,cdt,cdn){
@@ -157,6 +154,14 @@ frappe.ui.form.on("Expense Claim", {
 				}
 			};
 		});
+		frm.set_query("account_head", "taxes", function(doc) {
+			return {
+				filters: [
+					['company', '=', doc.company],
+					['account_type', 'in', ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation"]]
+				]
+			};
+		});
 	},
 
 	onload: function(frm) {
@@ -195,6 +200,12 @@ frappe.ui.form.on("Expense Claim", {
 			frm.add_custom_button(__('Payment'),
 				function() { frm.events.make_payment_entry(frm); }, __('Create'));
 		}
+	},
+
+	calculate_grand_total: function(frm) {
+		var grand_total = flt(frm.doc.total_sanctioned_amount) + flt(frm.doc.total_taxes_and_charges) - flt(frm.doc.total_advance_amount);
+		frm.set_value("grand_total", grand_total);
+		frm.refresh_fields();
 	},
 
 	make_payment_entry: function(frm) {
@@ -259,6 +270,18 @@ frappe.ui.form.on("Expense Claim", {
 		frm.events.get_advances(frm);
 	},
 
+	get_taxes: function(frm) {
+		if(frm.doc.taxes) {
+			frappe.call({
+				method: "calculate_taxes",
+				doc: frm.doc,
+				callback: () => {
+					refresh_field("taxes");
+				}
+			});
+		}
+	},
+
 	get_advances: function(frm) {
 		frappe.model.clear_table(frm.doc, "advances");
 		if (frm.doc.employee) {
@@ -288,16 +311,18 @@ frappe.ui.form.on("Expense Claim", {
 });
 
 frappe.ui.form.on("Expense Claim Detail", {
-	claim_amount: function(frm, cdt, cdn) {
+	amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		var doc = frm.doc;
-		frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.claim_amount);
+		frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.amount);
 		cur_frm.cscript.calculate_total(doc,cdt,cdn);
 	},
 
 	sanctioned_amount: function(frm, cdt, cdn) {
 		var doc = frm.doc;
 		cur_frm.cscript.calculate_total(doc,cdt,cdn);
+		frm.trigger("get_taxes");
+		frm.trigger("calculate_grand_total");
 	}
 });
 
@@ -324,11 +349,49 @@ frappe.ui.form.on("Expense Claim Advance", {
 						child.advance_paid = r.message[0].paid_amount;
 						child.unclaimed_amount = flt(r.message[0].paid_amount) - flt(r.message[0].claimed_amount);
 						child.allocated_amount = flt(r.message[0].paid_amount) - flt(r.message[0].claimed_amount);
+						frm.trigger('calculate_grand_total');
 						refresh_field("advances");
 					}
 				}
 			});
 		}
+	}
+});
+
+frappe.ui.form.on("Expense Taxes and Charges", {
+	account_head: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if(child.account_head && !child.description) {
+			// set description from account head
+			child.description = child.account_head.split(' - ').slice(0, -1).join(' - ');
+			refresh_field("taxes");
+		}
+	},
+
+	calculate_total_tax: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		child.total = flt(frm.doc.total_sanctioned_amount) + flt(child.tax_amount);
+		frm.trigger("calculate_tax_amount", cdt, cdn);
+	},
+
+	calculate_tax_amount: function(frm) {
+		frm.doc.total_taxes_and_charges = 0;
+		(frm.doc.taxes || []).forEach(function(d) {
+			frm.doc.total_taxes_and_charges += d.tax_amount;
+		});
+		frm.trigger("calculate_grand_total");
+	},
+
+	rate: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if(!child.amount) {
+			child.tax_amount = flt(frm.doc.total_sanctioned_amount) * (flt(child.rate)/100);
+		}
+		frm.trigger("calculate_total_tax", cdt, cdn);
+	},
+
+	tax_amount: function(frm, cdt, cdn) {
+		frm.trigger("calculate_total_tax", cdt, cdn);
 	}
 });
 
