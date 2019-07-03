@@ -85,16 +85,6 @@ frappe.ui.form.on("Leave Application", {
 				frm.set_value('employee', perm['Employee'].map(perm_doc => perm_doc.doc)[0]);
 			}
 		}
-
-		if (frm.doc.docstatus === 1) {
-			frm.add_custom_button(__('Leave Balance'), function() {
-				frappe.route_options = {
-					employee: frm.doc.employee,
-					group_by: ""
-				};
-				frappe.set_route("query-report", "Employee Leave Balance");
-			});
-		}
 	},
 
 	employee: function(frm) {

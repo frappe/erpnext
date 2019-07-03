@@ -438,7 +438,7 @@ def get_leave_details(employee, date):
 @frappe.whitelist()
 def get_leave_balance_on(employee, leave_type, date, to_date=nowdate(), consider_all_leaves_in_the_allocation_period=False):
 	'''
-		Returns leave balance on date
+		Returns leave balance till date
 		:param employee: employee name
 		:param leave_type: leave type
 		:param date: date to check balance on

@@ -30,14 +30,6 @@ frappe.ui.form.on("Leave Allocation", {
 					frm.trigger("expire_allocation");
 				});
 			}
-
-			// opens leave balance report for employee
-			frm.add_custom_button(__('Leave Balance'), function() {
-				frappe.route_options = {
-					employee: frm.doc.employee,
-				};
-				frappe.set_route("query-report", "Employee Leave Balance");
-			});
 		}
 	},
 
