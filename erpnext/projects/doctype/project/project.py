@@ -199,9 +199,6 @@ class Project(Document):
 								content=content.format(*messages))
 				user.welcome_email_sent = 1
 
-	def on_update(self):
-		self.update_costing_and_percentage_complete()
-
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
 	return dict(frappe.db.sql('''select unix_timestamp(from_time), count(*)
