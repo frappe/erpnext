@@ -34,7 +34,8 @@ class Project(Document):
 		if not self.is_new():
 			self.copy_from_template()
 		self.send_welcome_email()
-		self.update_percent_complete(from_validate=True)
+		self.update_costing()
+		self.update_percent_complete()
 
 	def copy_from_template(self):
 		'''
@@ -65,10 +66,6 @@ class Project(Document):
 					task_weight = task.task_weight
 				)).insert()
 
-	def update_costing_and_percentage_complete(self):
-		self.update_percent_complete()
-		self.update_costing()
-
 	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data: return True
 
@@ -79,6 +76,7 @@ class Project(Document):
 				return True
 
 	def update_project(self):
+		'''Called externally by Task'''
 		self.update_percent_complete()
 		self.update_costing()
 		self.save(ignore_permissions=True)
@@ -125,9 +123,6 @@ class Project(Document):
 		else:
 			self.status = "Open"
 
-		if not from_validate:
-			self.db_update()
-
 	def update_costing(self):
 		from_time_sheet = frappe.db.sql("""select
 			sum(costing_amount) as costing_amount,
@@ -154,7 +149,6 @@ class Project(Document):
 		self.update_sales_amount()
 		self.update_billed_amount()
 		self.calculate_gross_margin()
-		self.db_update()
 
 	def calculate_gross_margin(self):
 		expense_amount = (flt(self.total_costing_amount) + flt(self.total_expense_claim)
