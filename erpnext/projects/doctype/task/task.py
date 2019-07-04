@@ -164,7 +164,6 @@ class Task(NestedSet):
 				if task.get('task_id') == self.name:
 					frappe.delete_doc('Project Task', task.name)
 
-
 		self.update_nsm_model()
 
 	def update_status(self):
