@@ -449,7 +449,7 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
 
 	def test_drop_shipping(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order_for_drop_shipment
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
@@ -495,7 +495,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = make_sales_order(item_list=so_items, do_not_submit=True)
 		so.submit()
 
-		po = make_purchase_order_for_drop_shipment(so.name, '_Test Supplier')
+		po = make_purchase_order(so.name, '_Test Supplier', selected_items=[so_items[0]['item_code']])
 		po.submit()
 
 		dn = create_dn_against_so(so.name, delivered_qty=1)
