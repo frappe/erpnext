@@ -66,7 +66,7 @@ for(var i=0, l=data.length; i<l; i++) {
 		</tr>
 	</thead>
 	<tbody>
-		{% for(var i=0, l=data.length-1; i<l; i++) { %}
+		{% for(var i=0, l=data.length; i<l; i++) { %}
 			<tr>
 			{% if(data[i].posting_date) { %}
 				<td class="text-center text-nowrap">
@@ -132,6 +132,7 @@ for(var i=0, l=data.length; i<l; i++) {
 					{% if(show_ref_col) { colspan++; } %}
 					{% if(!(filters.party || filters.account || group.party || group.account)) { colspan++; } %}
 					{% if(filters.against_in_print) { colspan++; } %}
+
 					<td class="text-right" colspan="{%= colspan %}"><strong>{%= frappe.format(data[i].account, {fieldtype: "Link"}) || "&nbsp;" %}</strong></td>
 					<td class="text-right text-nowrap">
 						<b>{%= data[i].account && format_currency(data[i].debit, filters.presentation_currency) %}</b>
@@ -151,4 +152,4 @@ for(var i=0, l=data.length; i<l; i++) {
 <p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
 {% } %}
 
-{{ frappe.utils.print_report_groups(data, print_group, print_settings.page_break_groups, _p) }}
+{{ frappe.utils.print_report_groups(original_data, print_group, print_settings.page_break_groups, _p) }}

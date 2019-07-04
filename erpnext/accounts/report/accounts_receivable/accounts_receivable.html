@@ -301,4 +301,4 @@
 <p class="text-right text-muted">{{ __("Printed On ") }}{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
 {% } %}
 
-{{ frappe.utils.print_report_groups(data, print_group, print_settings.page_break_groups, _p) }}
+{{ frappe.utils.print_report_groups(original_data, print_group, print_settings.page_break_groups, _p) }}
