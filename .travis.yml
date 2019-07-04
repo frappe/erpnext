@@ -23,7 +23,7 @@ install:
   - nvm install 10
   - pip install python-coveralls
   - wget https://raw.githubusercontent.com/frappe/bench/master/playbooks/install.py
-  - sudo python install.py --develop --user travis --without-bench-setup --frappe-repo-url https://github.com/adityahase/frappe --frappe-branch faster-travis
+  - sudo python install.py --develop --user travis --without-bench-setup
   - sudo pip install -e ~/bench
 
   - rm $TRAVIS_BUILD_DIR/.git/shallow
