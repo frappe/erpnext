@@ -32,23 +32,6 @@ class TestProject(unittest.TestCase):
 		self.assertEqual(task4.title, 'Task 4')
 		self.assertEqual(getdate(task4.end_date), getdate('2019-01-06'))
 
-	def test_bulk_complete_and_cancel(self):
-		frappe.db.sql('delete from tabTask where project = "Test Project for Bulk Actions"')
-		frappe.delete_doc('Project', 'Test Project for Bulk Actions')
-
-		project = get_project('Test Project for Bulk Actions')
-		set_project_status(project.name, 'Completed')
-
-		# check all tasks are completed
-		self.assertTrue(all([d.status=='Completed' for d in
-			frappe.get_all('Task', ['name', 'status'], dict(project = project.name))]))
-
-		# check all tasks are cancelled
-		set_project_status(project.name, 'Cancelled')
-		self.assertTrue(all([d.status=='Cancelled' for d in
-			frappe.get_all('Task', ['name', 'status'], dict(project = project.name))]))
-
-
 def get_project(name):
 	template = get_project_template()
 

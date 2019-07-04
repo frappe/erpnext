@@ -69,7 +69,8 @@
    "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Subject",
-   "reqd": 1
+   "reqd": 1,
+   "in_standard_filter": 1
   },
   {
    "fieldname": "customer",
@@ -336,7 +337,7 @@
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2019-05-20 15:19:00.771333",
+ "modified": "2019-06-27 15:19:00.771333",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
