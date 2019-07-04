@@ -16,8 +16,8 @@ company_name = '_Test Company'
 class TestExpenseClaim(unittest.TestCase):
 	def test_total_expense_claim_for_project(self):
 		frappe.db.sql("""delete from `tabTask` where project = "_Test Project 1" """)
-		frappe.db.sql("""delete from `tabProject Task` where parent = "_Test Project 1" """)
 		frappe.db.sql("""delete from `tabProject` where name = "_Test Project 1" """)
+		frappe.db.sql("update `tabExpense Claim` set project = '', task = ''")
 
 		frappe.get_doc({
 			"project_name": "_Test Project 1",
@@ -82,7 +82,7 @@ class TestExpenseClaim(unittest.TestCase):
 
 		expected_values = dict((d[0], d) for d in [
 			['CGST - _TC',18.0, 0.0],
-			[payable_account, 0.0, 210.0],
+			[payable_account, 0.0, 218.0],
 			["Travel Expenses - _TC", 200.0, 0.0]
 		])
 
@@ -127,6 +127,7 @@ def generate_taxes():
 
 def make_expense_claim(payable_account, amount, sanctioned_amount, company, account, project=None, task_name=None, do_not_submit=False, taxes=None):
 	employee = frappe.db.get_value("Employee", {"status": "Active"})
+	currency = frappe.db.get_value('Company', company, 'default_currency')
 	expense_claim = {
 		 "doctype": "Expense Claim",
 		 "employee": employee,
@@ -136,6 +137,7 @@ def make_expense_claim(payable_account, amount, sanctioned_amount, company, acco
 		 "expenses":
 			[{"expense_type": "Travel",
 			"default_account": account,
+			'currency': currency,
 			"amount": amount,
 			"sanctioned_amount": sanctioned_amount}]}
 	if taxes:
