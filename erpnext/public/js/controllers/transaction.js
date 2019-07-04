@@ -298,7 +298,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				args: { search_value: this.frm.doc.scan_barcode }
 			}).then(r => {
 				const data = r && r.message;
-				if (!data) {
+				if (!data || Object.keys(data).length === 0) {
 					scan_barcode_field.set_new_description(__('Cannot find Item with this barcode'));
 					return;
 				}
@@ -437,7 +437,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							serial_no: item.serial_no,
 							set_warehouse: me.frm.doc.set_warehouse,
 							warehouse: item.warehouse,
-							customer: me.frm.doc.customer,
+							customer: me.frm.doc.customer || me.frm.doc.party_name,
+							quotation_to: me.frm.doc.quotation_to,
 							supplier: me.frm.doc.supplier,
 							currency: me.frm.doc.currency,
 							update_stock: update_stock,
@@ -1179,7 +1180,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		return {
 			"items": this._get_item_list(item),
-			"customer": me.frm.doc.customer,
+			"customer": me.frm.doc.customer || me.frm.doc.party_name,
+			"quotation_to": me.frm.doc.quotation_to,
 			"customer_group": me.frm.doc.customer_group,
 			"territory": me.frm.doc.territory,
 			"supplier": me.frm.doc.supplier,

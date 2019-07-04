@@ -12,7 +12,6 @@ from datetime import datetime, timedelta
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import is_website_user
 from erpnext.support.doctype.service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
-from erpnext.crm.doctype.opportunity.opportunity import assign_to_user
 from frappe.email.inbox import link_communication_to_document
 
 sender_field = "raised_by"
@@ -29,6 +28,7 @@ class Issue(Document):
 		if not self.raised_by:
 			self.raised_by = frappe.session.user
 
+		self.change_service_level_agreement_and_priority()
 		self.update_status()
 		self.set_lead_contact(self.raised_by)
 
@@ -37,9 +37,6 @@ class Issue(Document):
 		if self.flags.create_communication and self.via_customer_portal:
 			self.create_communication()
 			self.flags.communication_created = None
-
-		# assign to customer account manager or lead owner
-		assign_to_user(self, 'subject')
 
 	def set_lead_contact(self, email_id):
 		import email.utils
@@ -173,10 +170,14 @@ class Issue(Document):
 		self.response_by_variance = round(time_diff_in_hours(self.response_by, now_datetime()))
 		self.resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()))
 
-	@frappe.whitelist()
-	def change_service_level_agreement_and_priority(self, priority=None, service_level_agreement=None):
-		self.set_response_and_resolution_time(priority=priority, service_level_agreement=service_level_agreement)
-		self.save(ignore_permissions=True)
+	def change_service_level_agreement_and_priority(self):
+		if not self.priority == frappe.db.get_value("Issue", self.name, "priority"):
+			self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
+			frappe.msgprint("Priority has been updated.")
+
+		if not self.service_level_agreement == frappe.db.get_value("Issue", self.name, "service_level_agreement"):
+			self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
+			frappe.msgprint("Service Level Agreement has been updated.")
 
 def get_expected_time_for(parameter, service_level, start_date_time):
 	current_date_time = start_date_time

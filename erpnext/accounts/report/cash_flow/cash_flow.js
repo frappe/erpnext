@@ -15,4 +15,10 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 		"label": __("Accumulated Values"),
 		"fieldtype": "Check"
 	});
+
+	frappe.query_reports["Cash Flow"]["filters"].push({
+		"fieldname": "include_default_book_entries",
+		"label": __("Include Default Book Entries"),
+		"fieldtype": "Check"
+	});
 });
