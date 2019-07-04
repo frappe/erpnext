@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
+from frappe import _, ValidationError
 from frappe.utils import flt
 from erpnext import get_party_account_type
 from erpnext.controllers.accounts_controller import AccountsController
@@ -14,6 +14,9 @@ from erpnext.accounts.utils import get_outstanding_invoices, get_negative_outsta
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.controllers.accounts_controller import get_advance_payment_entries
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_company_defaults
+
+class InvalidAdjustmentEntry(ValidationError):
+	pass
 
 
 class AdjustmentEntry(AccountsController):
@@ -35,10 +38,10 @@ class AdjustmentEntry(AccountsController):
         customer_supplier_currency = self.customer_account_currency or self.supplier_account_currency
         if self.customer and self.supplier and customer_account_currency != supplier_account_currency:
             frappe.throw(_("Customer account currency ({0}) and supplier account currency ({1}) should be same")
-                         .format(customer_account_currency, supplier_account_currency))
+                         .format(customer_account_currency, supplier_account_currency), InvalidAdjustmentEntry)
         elif customer_supplier_currency != self.payment_currency and self.company_currency != customer_supplier_currency:
             frappe.throw(_("Payment currency ({0}) should be same as Customer/Supplier account currency ({1})")
-                         .format(self.payment_currency, customer_supplier_currency))
+                         .format(self.payment_currency, customer_supplier_currency), InvalidAdjustmentEntry)
 
     def validate_company_exchange_gain_loss_account(self):
         company_details = get_company_defaults(self.company)
