@@ -59,6 +59,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
+		if(this.frm.fields_dict.tc_name) {
+			this.frm.set_query("tc_name", function() {
+				return { filters: { selling: 1 } };
+			});
+		}
+
 		if(!this.frm.fields_dict["items"]) {
 			return;
 		}
