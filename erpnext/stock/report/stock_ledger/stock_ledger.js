@@ -33,12 +33,6 @@ frappe.query_reports["Stock Ledger"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"warehouse",
-			"label": __("Warehouse"),
-			"fieldtype": "Link",
-			"options": "Warehouse"
-		},
-		{
 			"fieldname":"item_code",
 			"label": __("Item"),
 			"fieldtype": "Link",
@@ -48,6 +42,12 @@ frappe.query_reports["Stock Ledger"] = {
 					query: "erpnext.controllers.queries.item_query"
 				}
 			}
+		},
+		{
+			"fieldname":"warehouse",
+			"label": __("Warehouse"),
+			"fieldtype": "Link",
+			"options": "Warehouse"
 		},
 		{
 			"fieldname":"item_group",

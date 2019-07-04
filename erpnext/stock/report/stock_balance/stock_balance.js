@@ -27,19 +27,6 @@ frappe.query_reports["Stock Balance"] = {
 			"default": frappe.datetime.get_today()
 		},
 		{
-			"fieldname": "item_group",
-			"label": __("Item Group"),
-			"fieldtype": "Link",
-			"width": "80",
-			"options": "Item Group"
-		},
-		{
-			"fieldname":"brand",
-			"label": __("Brand"),
-			"fieldtype": "Link",
-			"options": "Brand"
-		},
-		{
 			"fieldname": "item_code",
 			"label": __("Item"),
 			"fieldtype": "Link",
@@ -57,6 +44,19 @@ frappe.query_reports["Stock Balance"] = {
 			"fieldtype": "Link",
 			"width": "80",
 			"options": "Warehouse"
+		},
+		{
+			"fieldname": "item_group",
+			"label": __("Item Group"),
+			"fieldtype": "Link",
+			"width": "80",
+			"options": "Item Group"
+		},
+		{
+			"fieldname":"brand",
+			"label": __("Brand"),
+			"fieldtype": "Link",
+			"options": "Brand"
 		},
 		{
 			"fieldname":"include_uom",
