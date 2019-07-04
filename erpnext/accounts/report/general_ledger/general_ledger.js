@@ -151,6 +151,11 @@ frappe.query_reports["General Ledger"] = {
 			"label": __("Show Opening Entries"),
 			"fieldtype": "Check"
 		},
+		{
+			"fieldname": "include_default_book_entries",
+			"label": __("Include Default Book Entries"),
+			"fieldtype": "Check"
+		}
 	]
 }
 
@@ -166,4 +171,3 @@ dimension_filters.then((dimensions) => {
 		});
 	});
 });
-

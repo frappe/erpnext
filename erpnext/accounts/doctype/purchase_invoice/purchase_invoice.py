@@ -105,7 +105,7 @@ class PurchaseInvoice(BuyingController):
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
-			frappe.msgprint('Release date must be in the future', raise_exception=True)
+			frappe.throw(_('Release date must be in the future'))
 
 	def validate_cash(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
@@ -787,9 +787,8 @@ class PurchaseInvoice(BuyingController):
 		for d in self.items:
 			if d.project and d.project not in project_list:
 				project = frappe.get_doc("Project", d.project)
-				project.flags.dont_sync_tasks = True
 				project.update_purchase_costing()
-				project.save()
+				project.db_update()
 				project_list.append(d.project)
 
 	def validate_supplier_invoice(self):

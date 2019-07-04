@@ -366,8 +366,9 @@ class TestAsset(unittest.TestCase):
 		self.assertTrue(asset.journal_entry_for_scrap)
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 100000.0, 0.0),
-			("_Test Fixed Asset - _TC", 0.0, 100000.0)
+			("_Test Accumulated Depreciations - _TC", 147.54, 0.0),
+			("_Test Fixed Asset - _TC", 0.0, 100000.0),
+			("_Test Gain/Loss on Asset Disposal - _TC", 99852.46, 0.0)
 		)
 
 		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
@@ -411,9 +412,9 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 100000.0, 0.0),
+			("_Test Accumulated Depreciations - _TC", 23051.47, 0.0),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
-			("_Test Gain/Loss on Asset Disposal - _TC", 0, 25000.0),
+			("_Test Gain/Loss on Asset Disposal - _TC", 51948.53, 0.0),
 			("Debtors - _TC", 25000.0, 0.0)
 		)
 

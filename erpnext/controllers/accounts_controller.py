@@ -32,8 +32,8 @@ class AccountsController(TransactionBase):
 		return self.__company_currency
 
 	def onload(self):
-		self.get("__onload").make_payment_via_journal_entry \
-			= frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
+		self.set_onload("make_payment_via_journal_entry",
+			frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry'))
 
 		if self.is_new():
 			relevant_docs = ("Quotation", "Purchase Order", "Sales Order",
@@ -242,6 +242,10 @@ class AccountsController(TransactionBase):
 				parent_dict.update({"document_type": document_type})
 
 			self.set('pricing_rules', [])
+			# party_name field used for customer in quotation
+			if self.doctype == "Quotation" and self.quotation_to == "Customer" and parent_dict.get("party_name"):
+				parent_dict.update({"customer": parent_dict.get("party_name")})
+
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
@@ -392,7 +396,7 @@ class AccountsController(TransactionBase):
 	def validate_qty_is_not_zero(self):
 		for item in self.items:
 			if not item.qty:
-				frappe.throw("Item quantity can not be zero")
+				frappe.throw(_("Item quantity can not be zero"))
 
 	def validate_account_currency(self, account, account_currency=None):
 		valid_currency = [self.company_currency]
@@ -1006,11 +1010,11 @@ def get_advance_journal_entries(party_type, party, party_account, amount_field,
 
 
 def get_advance_payment_entries(party_type, party, party_account, order_doctype,
-		order_list=None, include_unallocated=True, against_all_orders=False, limit=1000):
+		order_list=None, include_unallocated=True, against_all_orders=False, limit=None):
 	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
 	payment_type = "Receive" if party_type == "Customer" else "Pay"
 	payment_entries_against_order, unallocated_payment_entries = [], []
-	limit_cond = "limit %s" % (limit or 1000)
+	limit_cond = "limit %s" % limit if limit else ""
 
 	if order_list or against_all_orders:
 		if order_list:
