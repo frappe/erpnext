@@ -51,7 +51,8 @@ class TestProductionPlan(unittest.TestCase):
 
 		for name in material_requests:
 			mr = frappe.get_doc('Material Request', name[0])
-			mr.cancel()
+			if mr.docstatus != 0:
+				mr.cancel()
 
 		for name in work_orders:
 			mr = frappe.delete_doc('Work Order', name[0])

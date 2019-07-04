@@ -1,0 +1,36 @@
+<div class="list-row">
+	<div>
+		<div class="col-xs-3 col-sm-2 ellipsis">
+			{{ name }}
+		</div>
+		<div class="col-xs-3 col-sm-2 ellipsis">
+			{% if (typeof reference_date !== "undefined") %}
+				{%= frappe.datetime.str_to_user(reference_date) %}
+			{% else %}
+				{% if (typeof posting_date !== "undefined") %}
+					{%= frappe.datetime.str_to_user(posting_date) %}
+				{% endif %}
+			{% endif %}
+		</div>
+		<div class="col-sm-2 ellipsis hidden-xs">
+			{{ format_currency(paid_amount, currency) }}
+		</div>
+		<div class="col-sm-2 ellipsis hidden-xs">
+			{% if (typeof party !== "undefined") %}
+				{{ party }}
+			{% endif %}
+		</div>
+		<div class="col-xs-3 col-sm-2 ellipsis">
+			{% if (typeof reference_no !== "undefined") %}
+				{{ reference_no }}
+			{% else %}
+				{{ "" }}
+			{% endif %}
+		</div>
+		<div class="col-xs-2 col-sm-2">
+			<div class="text-right margin-bottom">
+				<button class="btn btn-primary btn-xs reconciliation-btn" data-doctype="{{ doctype }}" data-name="{{ name }}">{{ __("Reconcile") }}</button>
+			</div>
+		</div>
+	</div>
+</div>

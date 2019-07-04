@@ -80,7 +80,7 @@ def prepare_invoice(invoice, progressive_number):
 		invoice.stamp_duty = stamp_duty_charge_row.tax_amount
 
 	for item in invoice.e_invoice_items:
-		if item.tax_rate == 0.0 and item.tax_amount == 0.0:
+		if item.tax_rate == 0.0 and item.tax_amount == 0.0 and tax_data.get("0.0"):
 			item.tax_exemption_reason = tax_data["0.0"]["tax_exemption_reason"]
 
 	customer_po_data = {}
@@ -326,6 +326,9 @@ def get_company_country(company):
 	return frappe.get_cached_value('Company', company, 'country')
 
 def get_e_invoice_attachments(invoice):
+	if not invoice.company_tax_id:
+		return []
+
 	out = []
 	attachments = get_attachments(invoice.doctype, invoice.name)
 	company_tax_id = invoice.company_tax_id if invoice.company_tax_id.startswith("IT") else "IT" + invoice.company_tax_id
