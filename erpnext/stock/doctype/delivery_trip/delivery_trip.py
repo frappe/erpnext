@@ -332,7 +332,7 @@ def get_directions(route, optimize, driver):
 	"""
 
 	if not frappe.db.exists("Google Maps", {"entity": driver}):
-		frappe.throw(_("Google Maps Integration for driver {0} is disabled.").format(self.driver))
+		frappe.throw(_("Google Maps Integration for driver {0} is disabled.").format(driver))
 
 	settings = frappe.get_doc("Google Maps", {"entity": driver})
 	maps_client = settings.get_client()
