@@ -54,8 +54,8 @@ class SalesInvoice(SellingController):
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
-		if cint(self.is_return) == 1:
-			self.indicator_title = _("Return")
+		if self.outstanding_amount < 0:
+			self.indicator_title = _("Credit Note Issued")
 			self.indicator_color = "darkgrey"
 		elif self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()):
 			self.indicator_color = "orange"
@@ -63,8 +63,8 @@ class SalesInvoice(SellingController):
 		elif self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()):
 			self.indicator_color = "red"
 			self.indicator_title = _("Overdue")
-		elif self.outstanding_amount < 0:
-			self.indicator_title = _("Credit Note Issued")
+		elif cint(self.is_return) == 1:
+			self.indicator_title = _("Return")
 			self.indicator_color = "darkgrey"
 		else:
 			self.indicator_color = "green"
@@ -485,7 +485,7 @@ class SalesInvoice(SellingController):
 		"""Set against account for debit to account"""
 		against_acc = []
 		for d in self.get('items'):
-			if d.income_account not in against_acc:
+			if d.income_account and d.income_account not in against_acc:
 				against_acc.append(d.income_account)
 		self.against_income_account = ','.join(against_acc)
 
@@ -508,8 +508,8 @@ class SalesInvoice(SellingController):
 			if frappe.db.get_single_value('Selling Settings', dic[i][0]) == 'Yes':
 				for d in self.get('items'):
 					is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
-					if d.item_code and is_stock_item == 1\
-						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1]):
+					if  (d.item_code and is_stock_item == 1\
+						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1])):
 						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
 
@@ -768,7 +768,14 @@ class SalesInvoice(SellingController):
 				if item.is_fixed_asset:
 					asset = frappe.get_doc("Asset", item.asset)
 
-					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset, item.base_net_amount)
+					if (len(asset.finance_books) > 1 and not item.finance_book
+						and asset.finance_books[0].finance_book):
+						frappe.throw(_("Select finance book for the item {0} at row {1}")
+							.format(item.item_code, item.idx))
+
+					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
+						item.base_net_amount, item.finance_book)
+
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
 						gl_entries.append(self.get_gl_dict(gle))
@@ -786,7 +793,7 @@ class SalesInvoice(SellingController):
 								if account_currency==self.company_currency
 								else flt(item.net_amount, item.precision("net_amount"))),
 							"cost_center": item.cost_center
-						}, account_currency)
+						}, account_currency, item=item)
 					)
 
 		# expense account gl entries
@@ -1022,9 +1029,8 @@ class SalesInvoice(SellingController):
 	def update_project(self):
 		if self.project:
 			project = frappe.get_doc("Project", self.project)
-			project.flags.dont_sync_tasks = True
 			project.update_billed_amount()
-			project.save()
+			project.db_update()
 
 
 	def verify_payment_amount_is_positive(self):

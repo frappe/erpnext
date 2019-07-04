@@ -507,7 +507,7 @@ class PaymentEntry(AccountsController):
 						"debit_in_account_currency": d.amount,
 						"debit": d.amount,
 						"cost_center": d.cost_center
-					})
+					}, item=d)
 				)
 
 	def update_advance_paid(self):
@@ -534,6 +534,20 @@ class PaymentEntry(AccountsController):
 			"cost_center": frappe.get_cached_value('Company',  self.company,  "cost_center"),
 			"amount": self.total_allocated_amount * (tax_details['tax']['rate'] / 100)
 		}
+
+	def set_gain_or_loss(self, account_details=None):
+		if not self.difference_amount:
+			self.set_difference_amount()
+
+		row = {
+			'amount': self.difference_amount
+		}
+
+		if account_details:
+			row.update(account_details)
+
+		self.append('deductions', row)
+		self.set_unallocated_amount()
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args):

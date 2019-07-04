@@ -510,4 +510,3 @@ def update_status(status, name):
 def make_inter_company_sales_order(source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 	return make_inter_company_transaction("Purchase Order", source_name, target_doc)
-
