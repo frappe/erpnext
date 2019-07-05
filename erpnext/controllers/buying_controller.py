@@ -497,10 +497,10 @@ class BuyingController(StockController):
 							})
 							if self.is_return:
 								original_incoming_rate = frappe.db.get_value("Stock Ledger Entry",
-																			 {"voucher_type": "Purchase Receipt",
-																			  "voucher_no": self.return_against,
-																			  "item_code": p.item_code},
-																			 "incoming_rate")
+									{"voucher_type": "Purchase Receipt",
+									"voucher_no": self.return_against,
+									"item_code": p.item_code},
+									"incoming_rate")
 
 								sle.update({
 									"outgoing_rate": original_incoming_rate
