@@ -616,3 +616,4 @@ erpnext.patches.v12_0.set_quotation_status
 erpnext.patches.v12_0.set_priority_for_support
 erpnext.patches.v12_0.delete_priority_property_setter
 erpnext.patches.v12_0.add_default_buying_selling_terms_in_company
+erpnext.patches.v11_1.rename_bank_name_to_bank_in_employee

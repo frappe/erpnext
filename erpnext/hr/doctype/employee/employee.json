@@ -56,7 +56,7 @@
   "default_shift",
   "salary_information",
   "salary_mode",
-  "bank_name",
+  "bank",
   "bank_ac_no",
   "health_insurance_section",
   "health_insurance_provider",
@@ -435,11 +435,12 @@
   },
   {
    "depends_on": "eval:doc.salary_mode == 'Bank'",
-   "fieldname": "bank_name",
-   "fieldtype": "Data",
-   "label": "Bank Name",
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "label": "Bank",
    "oldfieldname": "bank_name",
-   "oldfieldtype": "Link"
+   "oldfieldtype": "Link",
+   "options": "Bank"
   },
   {
    "depends_on": "eval:doc.salary_mode == 'Bank'",
@@ -772,7 +773,7 @@
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2019-06-01 16:05:55.132180",
+ "modified": "2019-07-05 23:13:00.606219",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
