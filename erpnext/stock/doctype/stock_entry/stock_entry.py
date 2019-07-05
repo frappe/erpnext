@@ -324,8 +324,10 @@ class StockEntry(StockController):
 			completed_qty = d.completed_qty + (allowance_percentage/100 * d.completed_qty)
 			if total_completed_qty > flt(completed_qty):
 				job_card = frappe.db.get_value('Job Card', {'operation_id': d.name}, 'name')
-				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order # {3}. Please update operation status via Job Card # {4}")
-					.format(d.idx, d.operation, total_completed_qty, self.work_order, job_card), OperationsNotCompleteError)
+				work_order_link = frappe.utils.get_link_to_form('Work Order', self.work_order)
+				job_card_link = frappe.utils.get_link_to_form('Job Card', job_card)
+				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}.")
+					.format(d.idx, frappe.bold(d.operation), frappe.bold(total_completed_qty), work_order_link, job_card_link), OperationsNotCompleteError)
 
 	def check_duplicate_entry_for_work_order(self):
 		other_ste = [t[0] for t in frappe.db.get_values("Stock Entry",  {
