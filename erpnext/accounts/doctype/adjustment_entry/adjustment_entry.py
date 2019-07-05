@@ -231,8 +231,8 @@ class AdjustmentEntry(AccountsController):
         self.calculate_summary_totals()
 
     def calculate_summary_totals(self):
-        self.receivable_adjusted = sum([flt(d.allocated_amount) for d in self.get("debit_entries")])
-        self.payable_adjusted = sum([flt(d.allocated_amount) for d in self.get("credit_entries")])
+        self.receivable_adjusted = flt(sum([flt(d.allocated_amount) for d in self.get("debit_entries")]), self.precision("receivable_adjusted"))
+        self.payable_adjusted = flt(sum([flt(d.allocated_amount) for d in self.get("credit_entries")]), self.precision("payable_adjusted"))
         self.total_balance = abs(sum([flt(d.balance) for d in self.get("debit_entries")]) - sum([flt(d.balance) for d in self.get("credit_entries")]))
         self.total_gain_loss = sum([flt(d.gain_loss_amount) for d in self.get("debit_entries")]) + sum([flt(d.gain_loss_amount) for d in self.get("credit_entries")])
         self.difference_amount = flt(abs(self.receivable_adjusted - self.payable_adjusted), self.precision("difference_amount"))
