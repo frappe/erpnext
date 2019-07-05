@@ -43,7 +43,7 @@ class TestMapper(unittest.TestCase):
 		qtn = frappe.get_doc({
 			"doctype": "Quotation",
 			"quotation_to": "Customer",
-			"customer": customer,
+			"party_name": customer,
 			"order_type": "Sales",
 			"transaction_date" : nowdate(),
 			"valid_till" : add_months(nowdate(), 1)
