@@ -16,6 +16,31 @@ erpnext.stock.ItemDashboard = Class.extend({
 		this.content = $(frappe.render_template('item_dashboard')).appendTo(this.parent);
 		this.result = this.content.find('.result');
 
+		this.content.on('click', '.btn-move', function() {
+			let item = unescape($(this).attr('data-item'));
+			let warehouse = unescape($(this).attr('data-warehouse'));
+			open_stock_entry(item, warehouse, "Material Transfer");
+		});
+
+		this.content.on('click', '.btn-add', function() {
+			let item = unescape($(this).attr('data-item'));
+			let warehouse = unescape($(this).attr('data-warehouse'));
+			open_stock_entry(item, warehouse);
+		});
+
+		function open_stock_entry(item, warehouse, entry_type) {
+			frappe.model.with_doctype('Stock Entry', function() {
+				var doc = frappe.model.get_new_doc('Stock Entry');
+				if (entry_type) doc.stock_entry_type = entry_type;
+
+				var row = frappe.model.add_child(doc, 'items');
+				row.item_code = item;
+				row.s_warehouse = warehouse;
+
+				frappe.set_route('Form', doc.doctype, doc.name);
+			})
+		}
+
 		// more
 		this.content.find('.btn-more').on('click', function() {
 			me.start += 20;
