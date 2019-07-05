@@ -80,7 +80,10 @@ def get_gl_entries(filters):
 			jnl.cheque_no as JnlRef, jnl.posting_date as JnlPostDate, jnl.title as JnlTitle,
 			pay.name as PayName, pay.posting_date as PayPostDate, pay.title as PayTitle,
 			cus.customer_name, cus.name as cusName,
-			sup.supplier_name, sup.name as supName
+			sup.supplier_name, sup.name as supName,
+			emp.employee_name, emp.name as empName,
+			stu.title as student_name, stu.name as stuName,
+			member_name, mem.name as memName
 
 		from `tabGL Entry` gl
 			left join `tabSales Invoice` inv on gl.voucher_no = inv.name
@@ -89,6 +92,9 @@ def get_gl_entries(filters):
 			left join `tabPayment Entry` pay on gl.voucher_no = pay.name
 			left join `tabCustomer` cus on gl.party = cus.name
 			left join `tabSupplier` sup on gl.party = sup.name
+			left join `tabEmployee` emp on gl.party = emp.name
+			left join `tabStudent` stu on gl.party = stu.name
+			left join `tabMember` mem on gl.party = mem.name
 		where gl.company=%(company)s and gl.fiscal_year=%(fiscal_year)s
 		{group_by_condition}
 		order by GlPostDate, voucher_no"""\
@@ -127,6 +133,18 @@ def get_result_as_list(data, filters):
 		elif d.get("party_type") == "Supplier":
 			CompAuxNum = d.get("supName")
 			CompAuxLib = d.get("supplier_name")
+
+		elif d.get("party_type") == "Employee":
+			CompAuxNum = d.get("empName")
+			CompAuxLib = d.get("employee_name")
+
+		elif d.get("party_type") == "Student":
+			CompAuxNum = d.get("stuName")
+			CompAuxLib = d.get("student_name")
+
+		elif d.get("party_type") == "Member":
+			CompAuxNum = d.get("memName")
+			CompAuxLib = d.get("member_name")
 
 		else:
 			CompAuxNum = ""

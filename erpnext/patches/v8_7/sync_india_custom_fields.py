@@ -8,10 +8,10 @@ def execute():
 		return
 
 	frappe.reload_doc('hr', 'doctype', 'payroll_period')
-	frappe.reload_doc('hr', 'doctype', 'employee_tax_exemption_declaration_category')
-	frappe.reload_doc('hr', 'doctype', 'employee_tax_exemption_proof_submission_detail')
 	frappe.reload_doc('hr', 'doctype', 'employee_tax_exemption_declaration')
 	frappe.reload_doc('hr', 'doctype', 'employee_tax_exemption_proof_submission')
+	frappe.reload_doc('hr', 'doctype', 'employee_tax_exemption_declaration_category')
+	frappe.reload_doc('hr', 'doctype', 'employee_tax_exemption_proof_submission_detail')
 
 	for doctype in ["Sales Invoice", "Delivery Note", "Purchase Invoice"]:
 		frappe.db.sql("""delete from `tabCustom Field` where dt = %s
