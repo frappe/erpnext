@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import flt, getdate, formatdate, cstr
 from erpnext.accounts.report.financial_statements \
 	import filter_accounts, set_gl_entries_by_account, filter_out_zero_value_rows
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 value_fields = ("opening_debit", "opening_credit", "debit", "credit", "closing_debit", "closing_credit")
 
@@ -105,9 +106,28 @@ def get_rootwise_opening_balances(filters, report_type):
 	if filters.finance_book:
 		fb_conditions = " and finance_book = %(finance_book)s"
 		if filters.include_default_book_entries:
-			fb_conditions = " and (finance_book in (%(finance_book)s, %(company_fb)s) or finance_book is null)"
+			fb_conditions = " and (finance_book in (%(finance_book)s, %(company_fb)s))"
 
 		additional_conditions += fb_conditions
+
+	accounting_dimensions = get_accounting_dimensions()
+
+	query_filters = {
+		"company": filters.company,
+		"from_date": filters.from_date,
+		"report_type": report_type,
+		"year_start_date": filters.year_start_date,
+		"finance_book": filters.finance_book,
+		"company_fb": frappe.db.get_value("Company", filters.company, 'default_finance_book')
+	}
+
+	if accounting_dimensions:
+		for dimension in accounting_dimensions:
+			additional_conditions += """ and {0} in (%({0})s) """.format(dimension)
+
+			query_filters.update({
+				dimension: filters.get(dimension)
+			})
 
 	gle = frappe.db.sql("""
 		select
@@ -118,16 +138,7 @@ def get_rootwise_opening_balances(filters, report_type):
 			{additional_conditions}
 			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
 			and account in (select name from `tabAccount` where report_type=%(report_type)s)
-		group by account""".format(additional_conditions=additional_conditions),
-		{
-			"company": filters.company,
-			"from_date": filters.from_date,
-			"report_type": report_type,
-			"year_start_date": filters.year_start_date,
-			"finance_book": filters.finance_book,
-			"company_fb": frappe.db.get_value("Company", filters.company, 'default_finance_book')
-		},
-		as_dict=True)
+		group by account""".format(additional_conditions=additional_conditions), query_filters , as_dict=True)
 
 	opening = frappe._dict()
 	for d in gle:
