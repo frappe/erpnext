@@ -222,17 +222,17 @@
 			</tr>
 			<tr>
 				<td>&nbsp (1) {{__("As per rules 42 & 43 of CGST Rules")}}</td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[0].iamt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[0].camt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[0].samt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[0].csamt, 2) }}</td>
 			</tr>
 			<tr>
 				<td>&nbsp (2) {{__("Others")}}</td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[1].iamt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[1].camt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[1].samt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[1].csamt, 2) }}</td>
 			</tr>
 			<tr>
 				<td><b>(C) {{__("Net ITC Available(A) - (B)")}}</b></td>

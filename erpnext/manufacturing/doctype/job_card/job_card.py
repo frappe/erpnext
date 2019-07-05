@@ -18,21 +18,22 @@ class JobCard(Document):
 		self.total_completed_qty = 0.0
 		self.total_time_in_mins = 0.0
 
-		for d in self.get('time_logs'):
-			if get_datetime(d.from_time) > get_datetime(d.to_time):
-				frappe.throw(_("Row {0}: From time must be less than to time").format(d.idx))
+		if self.get('time_logs'):
+			for d in self.get('time_logs'):
+				if get_datetime(d.from_time) > get_datetime(d.to_time):
+					frappe.throw(_("Row {0}: From time must be less than to time").format(d.idx))
 
-			data = self.get_overlap_for(d)
-			if data:
-				frappe.throw(_("Row {0}: From Time and To Time of {1} is overlapping with {2}")
-					.format(d.idx, self.name, data.name))
+				data = self.get_overlap_for(d)
+				if data:
+					frappe.throw(_("Row {0}: From Time and To Time of {1} is overlapping with {2}")
+						.format(d.idx, self.name, data.name))
 
-			if d.from_time and d.to_time:
-				d.time_in_mins = time_diff_in_hours(d.to_time, d.from_time) * 60
-				self.total_time_in_mins += d.time_in_mins
+				if d.from_time and d.to_time:
+					d.time_in_mins = time_diff_in_hours(d.to_time, d.from_time) * 60
+					self.total_time_in_mins += d.time_in_mins
 
-			if d.completed_qty:
-				self.total_completed_qty += d.completed_qty
+				if d.completed_qty:
+					self.total_completed_qty += d.completed_qty
 
 	def get_overlap_for(self, args):
 		existing = frappe.db.sql("""select jc.name as name from
@@ -112,8 +113,10 @@ class JobCard(Document):
 			for_quantity += doc.total_completed_qty
 			time_in_mins += doc.total_time_in_mins
 			for time_log in doc.time_logs:
-				from_time_list.append(time_log.from_time)
-				to_time_list.append(time_log.to_time)
+				if time_log.from_time:
+					from_time_list.append(time_log.from_time)
+				if time_log.to_time:
+					to_time_list.append(time_log.to_time)
 
 		if for_quantity:
 			wo = frappe.get_doc('Work Order', self.work_order)
