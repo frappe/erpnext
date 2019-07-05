@@ -118,7 +118,7 @@
     <DatiGenerali>
       <DatiGeneraliDocumento>
         <TipoDocumento>{{ doc.type_of_document }}</TipoDocumento>
-        <Divisa>EUR</Divisa>
+        <Divisa>{{ doc.currency }}</Divisa>
         <Data>{{ doc.posting_date }}</Data>
         <Numero>{{ doc.unamended_name }}</Numero>
         {%- if doc.stamp_duty %}

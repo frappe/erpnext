@@ -4,43 +4,6 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Production"),
-			"icon": "fa fa-star",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Work Order",
-					"description": _("Orders released for production."),
-					"onboard": 1,
-					"dependencies": ["Item", "BOM"]
-				},
-				{
-					"type": "doctype",
-					"name": "Production Plan",
-					"description": _("Generate Material Requests (MRP) and Work Orders."),
-					"onboard": 1,
-					"dependencies": ["Item", "BOM"]
-				},
-				{
-					"type": "doctype",
-					"name": "Stock Entry",
-					"onboard": 1,
-					"dependencies": ["Item"]
-				},
-				{
-					"type": "doctype",
-					"name": "Timesheet",
-					"description": _("Time Sheet for manufacturing."),
-					"onboard": 1,
-					"dependencies": ["Activity Type"]
-				},
-				{
-					"type": "doctype",
-					"name": "Job Card"
-				}
-			]
-		},
-		{
 			"label": _("Bill of Materials"),
 			"items": [
 				{
@@ -83,6 +46,43 @@ def get_data():
 					"name": "Routing"
 				}
 
+			]
+		},
+		{
+			"label": _("Production"),
+			"icon": "fa fa-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Work Order",
+					"description": _("Orders released for production."),
+					"onboard": 1,
+					"dependencies": ["Item", "BOM"]
+				},
+				{
+					"type": "doctype",
+					"name": "Production Plan",
+					"description": _("Generate Material Requests (MRP) and Work Orders."),
+					"onboard": 1,
+					"dependencies": ["Item", "BOM"]
+				},
+				{
+					"type": "doctype",
+					"name": "Stock Entry",
+					"onboard": 1,
+					"dependencies": ["Item"]
+				},
+				{
+					"type": "doctype",
+					"name": "Timesheet",
+					"description": _("Time Sheet for manufacturing."),
+					"onboard": 1,
+					"dependencies": ["Activity Type"]
+				},
+				{
+					"type": "doctype",
+					"name": "Job Card"
+				}
 			]
 		},
 		{

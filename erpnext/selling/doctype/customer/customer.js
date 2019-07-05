@@ -3,6 +3,18 @@
 
 frappe.ui.form.on("Customer", {
 	setup: function(frm) {
+
+		frm.make_methods = {
+			'Quotation': () => erpnext.utils.create_new_doc('Quotation', {
+				'quotation_to': frm.doc.doctype,
+				'party_name': frm.doc.name
+			}),
+			'Opportunity': () => erpnext.utils.create_new_doc('Opportunity', {
+				'opportunity_from': frm.doc.doctype,
+				'party_name': frm.doc.name
+			})
+		}
+
 		frm.add_fetch('lead_name', 'company_name', 'customer_name');
 		frm.add_fetch('default_sales_partner','commission_rate','default_commission_rate');
 		frm.set_query('customer_group', {'is_group': 0});
