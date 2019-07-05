@@ -6,9 +6,9 @@ def get_data():
 		'fieldname': 'bom_no',
 		'non_standard_fieldnames': {
 			'Item': 'default_bom',
-            'Purchase Order': 'bom',
-            'Purchase Receipt': 'bom',
-            'Purchase Invoice': 'bom'
+			'Purchase Order': 'bom',
+			'Purchase Receipt': 'bom',
+			'Purchase Invoice': 'bom'
 		},
 		'transactions': [
 			{
@@ -19,7 +19,7 @@ def get_data():
 				'label': _('Manufacture'),
 				'items': ['BOM', 'Work Order', 'Job Card', 'Production Plan']
 			},
-            {
+			{
 				'label': _('Purchase'),
 				'items': ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 			}
