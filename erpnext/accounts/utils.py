@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate
-from frappe import throw, _
+from frappe import throw, _, scrub
 from frappe.utils import formatdate, get_number_format_info
 from six import iteritems
 # imported to enable erpnext.accounts.utils.get_account_currency
@@ -653,7 +653,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 			{condition}
 			and ((voucher_type = 'Journal Entry'
 					and (against_voucher = '' or against_voucher is null))
-				or (voucher_type not in ('Journal Entry', 'Payment Entry')))
+				or (voucher_type not in ('Journal Entry', 'Payment Entry', 'Adjustment Entry')))
 		group by voucher_type, voucher_no
 		order by posting_date, name""".format(
 			dr_or_cr=dr_or_cr,
@@ -708,6 +708,40 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 	outstanding_invoices = sorted(outstanding_invoices, key=lambda k: k['due_date'] or getdate(nowdate()))
 	return outstanding_invoices
 
+def get_negative_outstanding_invoices(party_type, party, party_account, party_account_currency, company_currency, cost_center=None):
+	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
+	supplier_condition = ""
+	if voucher_type == "Purchase Invoice":
+		supplier_condition = "and (release_date is null or release_date <= CURDATE())"
+	if party_account_currency == company_currency:
+		grand_total_field = "base_grand_total"
+		rounded_total_field = "base_rounded_total"
+	else:
+		grand_total_field = "grand_total"
+		rounded_total_field = "rounded_total"
+
+	return frappe.db.sql("""
+		select
+			"{voucher_type}" as voucher_type, name as voucher_no,
+			if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
+			outstanding_amount, posting_date,
+			due_date, conversion_rate as exchange_rate
+		from
+			`tab{voucher_type}`
+		where
+			{party_type} = %s and {party_account} = %s and docstatus = 1 and outstanding_amount < 0
+			{supplier_condition}
+		order by
+			posting_date, name
+		""".format(**{
+			"supplier_condition": supplier_condition,
+			"rounded_total_field": rounded_total_field,
+			"grand_total_field": grand_total_field,
+			"voucher_type": voucher_type,
+			"party_type": scrub(party_type),
+			"party_account": "debit_to" if party_type == "Customer" else "credit_to",
+			"cost_center": cost_center
+		}), (party, party_account), as_dict=True)
 
 def get_account_name(account_type=None, root_type=None, is_group=None, account_currency=None, company=None):
 	"""return account based on matching conditions"""

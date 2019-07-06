@@ -9,23 +9,34 @@
   "basic_details_section",
   "company",
   "adjustment_type",
+  "posting_date",
   "column_break_5",
   "customer",
+  "customer_account",
+  "customer_account_currency",
   "supplier",
+  "supplier_account",
+  "supplier_account_currency",
   "get_unreconciled_entries",
   "payment_details_section",
   "payment_currency",
   "column_break_9",
   "amended_from",
-  "allocate_payment_amount",
   "section_break_13",
   "exchange_rates",
-  "debit_entries_section_break",
+  "references",
+  "allocate_payment_amount",
   "debit_entries",
-  "credit_entries_section_break",
   "credit_entries",
-  "deduction_section_break",
-  "deductions"
+  "accounting_dimensions_section",
+  "cost_center",
+  "summary_section_break",
+  "receivable_adjusted",
+  "payable_adjusted",
+  "column_break_25",
+  "difference_amount",
+  "total_balance",
+  "total_gain_loss"
  ],
  "fields": [
   {
@@ -37,15 +48,16 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
-   "description": "Sales: Match Sales Invoices with Payments Received<br>\nPurchase: Match Purchase Invoices with Payments Paid<br>\nNetting: Match Sales Invoices with Purchase Invoices<br>",
+   "description": "Netting: Match Sales Invoices with Purchase Invoices<br>",
    "fieldname": "adjustment_type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Adjustment Type",
-   "options": "Sales\nPurchase\nNetting",
+   "options": "Netting",
    "reqd": 1
   },
   {
@@ -105,48 +117,134 @@
   {
    "fieldname": "exchange_rates",
    "fieldtype": "Table",
+   "label": "Exchange Rates",
    "options": "Adjustment Entry Exchange Rates"
-  },
-  {
-   "fieldname": "deduction_section_break",
-   "fieldtype": "Section Break",
-   "label": "Deductions"
-  },
-  {
-   "fieldname": "deductions",
-   "fieldtype": "Table",
-   "options": "Adjustment Entry Deduction"
-  },
-  {
-   "fieldname": "debit_entries_section_break",
-   "fieldtype": "Section Break",
-   "label": "Debit Entries"
   },
   {
    "fieldname": "debit_entries",
    "fieldtype": "Table",
+   "label": "Debit Entries",
    "options": "Adjustment Entry Reference"
-  },
-  {
-   "fieldname": "credit_entries_section_break",
-   "fieldtype": "Section Break",
-   "label": "Credit Entries"
   },
   {
    "fieldname": "credit_entries",
    "fieldtype": "Table",
+   "label": "Credit Entries",
    "options": "Adjustment Entry Reference"
   },
   {
    "default": "0",
    "fieldname": "allocate_payment_amount",
    "fieldtype": "Check",
-   "label": "Allocate Payment Amount"
+   "label": "Allocate Payment Amount",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "summary_section_break",
+   "fieldtype": "Section Break",
+   "label": "Summary"
+  },
+  {
+   "fieldname": "receivable_adjusted",
+   "fieldtype": "Currency",
+   "label": "Receivable Adjusted",
+   "options": "payment_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payable_adjusted",
+   "fieldtype": "Currency",
+   "label": "Payable Adjusted",
+   "options": "payment_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "difference_amount",
+   "fieldtype": "Currency",
+   "label": "Difference Amount",
+   "options": "payment_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_balance",
+   "fieldtype": "Currency",
+   "label": "Total Balance",
+   "options": "payment_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "customer_account",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Customer Account",
+   "options": "Account",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "customer_account_currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Customer Account Currency",
+   "options": "Currency",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "supplier_account",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Supplier Account",
+   "options": "Account",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "supplier_account_currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Supplier Account Currency",
+   "options": "Currency",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "references",
+   "fieldtype": "Section Break",
+   "label": "References"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "total_gain_loss",
+   "fieldtype": "Currency",
+   "label": "Total Gain/Loss",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
- "hide_toolbar": 1,
  "is_submittable": 1,
- "modified": "2019-06-27 13:25:27.072981",
+ "modified": "2019-07-03 14:49:24.516025",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Adjustment Entry",
