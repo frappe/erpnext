@@ -247,7 +247,7 @@ class AdjustmentEntry(AccountsController):
                     "party": party_details['party'],
                     "against": against_account,
                     "account_currency": party_details['account_currency'],
-                    "cost_center": self.cost_center
+                    "cost_center": ent.cost_center or self.cost_center
                  })
                 party_gl_dict.update({
                     "against_voucher_type": ent.voucher_type,
