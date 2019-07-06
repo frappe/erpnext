@@ -76,7 +76,6 @@
    "is_customer_provided_item",
    "customer",
    "supplier_details",
-   "manufacturers",
    "delivered_by_supplier",
    "column_break2",
    "supplier_items",
@@ -1022,12 +1021,6 @@
     "fieldtype": "Check",
     "label": "Synced With Hub",
     "read_only": 1
-   },
-   {
-    "fieldname": "manufacturers",
-    "fieldtype": "Table",
-    "label": "Manufacturers",
-    "options": "Item Manufacturer"
    }
   ],
   "has_web_view": 1,
@@ -1035,7 +1028,7 @@
   "idx": 2,
   "image_field": "image",
   "max_attachments": 1,
-  "modified": "2019-06-02 04:45:59.911507",
+  "modified": "2019-07-05 12:18:13.977931",
   "modified_by": "Administrator",
   "module": "Stock",
   "name": "Item",
