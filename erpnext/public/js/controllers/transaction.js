@@ -585,8 +585,17 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						me.frm.set_value("letter_head", company_doc.default_letter_head);
 					}
 				}
-				if (company_doc.default_terms && me.frm.doc.doctype != "Purchase Invoice" && frappe.meta.has_field(me.frm.doc.doctype, "tc_name")) {
-					me.frm.set_value("tc_name", company_doc.default_terms);
+				let selling_doctypes_for_tc = ["Sales Invoice", "Quotation", "Sales Order", "Delivery Note"];
+				if (company_doc.default_selling_terms && frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
+				selling_doctypes_for_tc.indexOf(me.frm.doc.doctype) != -1) {
+					me.frm.set_value("tc_name", company_doc.default_selling_terms);
+				}
+				let buying_doctypes_for_tc = ["Request for Quotation", "Supplier Quotation", "Purchase Order",
+					"Material Request", "Purchase Receipt"];
+				// Purchase Invoice is excluded as per issue #3345
+				if (company_doc.default_buying_terms && frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
+				buying_doctypes_for_tc.indexOf(me.frm.doc.doctype) != -1) {
+					me.frm.set_value("tc_name", company_doc.default_buying_terms);
 				}
 
 				frappe.run_serially([
