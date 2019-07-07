@@ -74,7 +74,6 @@ class Gstr1Report(object):
 
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 			invoice_details = self.invoices.get(inv)
-
 			for rate, items in items_based_on_rate.items():
 				place_of_supply = invoice_details.get("place_of_supply")
 				ecommerce_gstin =  invoice_details.get("ecommerce_gstin")
@@ -85,7 +84,7 @@ class Gstr1Report(object):
 					"rate": "",
 					"taxable_value": 0,
 					"cess_amount": 0,
-					"type": 0
+					"type": ""
 				})
 
 				row = b2cs_output.get((rate, place_of_supply, ecommerce_gstin))
@@ -94,6 +93,7 @@ class Gstr1Report(object):
 				row["rate"] = rate
 				row["taxable_value"] += sum([abs(net_amount)
 					for item_code, net_amount in self.invoice_items.get(inv).items() if item_code in items])
+				row["cess_amount"] += flt(self.invoice_cess.get(inv), 2)
 				row["type"] = "E" if ecommerce_gstin else "OE"
 
 		for key, value in iteritems(b2cs_output):
@@ -122,6 +122,10 @@ class Gstr1Report(object):
 						taxable_value += abs(net_amount)
 
 		row += [tax_rate or 0, taxable_value]
+
+		for column in self.other_columns:
+			if column.get('fieldname') == 'cess_amount':
+				row.append(flt(self.invoice_cess.get(invoice), 2))
 
 		return row, taxable_value
 
@@ -327,7 +331,7 @@ class Gstr1Report(object):
 					"fieldtype": "Data"
 				},
 				{
-					"fieldname": "invoice_type",
+					"fieldname": "gst_category",
 					"label": "Invoice Type",
 					"fieldtype": "Data"
 				},
@@ -564,12 +568,18 @@ def get_json():
 
 		out = get_b2b_json(res, gstin)
 		gst_json["b2b"] = out
+
 	elif filters["type_of_business"] == "B2C Large":
 		for item in report_data[:-1]:
 			res.setdefault(item["place_of_supply"], []).append(item)
 
 		out = get_b2cl_json(res, gstin)
 		gst_json["b2cl"] = out
+
+	elif filters["type_of_business"] == "B2C Small":
+		out = get_b2cs_json(report_data[:-1], gstin)
+		gst_json["b2cs"] = out
+
 	elif filters["type_of_business"] == "EXPORT":
 		for item in report_data[:-1]:
 			res.setdefault(item["export_type"], []).append(item)
@@ -602,6 +612,45 @@ def get_b2b_json(res, gstin):
 		if not inv: continue
 		b2b_item["inv"] = inv
 		out.append(b2b_item)
+
+	return out
+
+def get_b2cs_json(data, gstin):
+
+	company_state_number = gstin[0:2]
+
+	out = []
+	for d in data:
+
+		pos = d.get('place_of_supply').split('-')[0]
+		tax_details = {}
+
+		rate = d.get('rate', 0)
+		tax = flt((d["taxable_value"]*rate)/100.0, 2)
+
+		if company_state_number == pos:
+			tax_details.update({"camt": flt(tax/2.0, 2), "samt": flt(tax/2.0, 2)})
+		else:
+			tax_details.update({"iamt": tax})
+
+		inv = {
+			"sply_ty": "INTRA" if company_state_number == pos else "INTER",
+			"pos": pos,
+			"typ": d.get('type'),
+			"txval": flt(d.get('taxable_value'), 2),
+			"rt": rate,
+			"iamt": flt(tax_details.get('iamt'), 2),
+			"camt": flt(tax_details.get('camt'), 2),
+			"samt": flt(tax_details.get('samt'), 2),
+			"csamt": flt(d.get('cess_amount'), 2)
+		}
+
+		if d.get('type') == "E" and d.get('ecommerce_gstin'):
+			inv.update({
+				"etin": d.get('ecommerce_gstin')
+			})
+
+		out.append(inv)
 
 	return out
 
