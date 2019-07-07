@@ -670,7 +670,7 @@ class StockEntry(StockController):
 			'description'		  	: item.description,
 			'image'					: item.image,
 			'item_name' 		  	: item.item_name,
-			'cost_center'			: get_default_cost_center(args, item, item_group_defaults, brand_defaults, self.company),
+			'cost_center'			: get_default_cost_center(args, item, item_group_defaults, brand_defaults, company=self.company),
 			'qty'					: args.get("qty"),
 			'transfer_qty'			: args.get('qty'),
 			'conversion_factor'		: 1,

@@ -44,7 +44,6 @@ class SellingController(StockController):
 		self.set_alt_uom_qty()
 		self.set_po_nos()
 		self.set_gross_profit()
-		set_default_income_account_for_item(self)
 		self.set_customer_address()
 
 	def set_missing_values(self, for_validate=False):

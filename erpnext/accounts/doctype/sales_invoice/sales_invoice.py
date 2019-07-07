@@ -78,15 +78,13 @@ class SalesInvoice(SellingController):
 		if not self.stin:
 			set_name_by_naming_series(self)
 		else:
-			series_from_cost_center = None
-			current_cost_center = self.cost_center
-			while current_cost_center and not series_from_cost_center:
-				series_from_cost_center, current_cost_center = frappe.get_cached_value("Cost Center", current_cost_center,
-					["invoice_naming_prefix", "parent_cost_center"])
+			series_from_order_type = None
+			if self.order_type_name:
+				series_from_order_type = frappe.get_cached_value("Order Type", self.order_type_name, "tax_invoice_naming_prefix")
 
 			prefix = self.get_company_abbr()
-			if series_from_cost_center:
-				prefix = "{0}-{1}".format(prefix, series_from_cost_center)
+			if series_from_order_type:
+				prefix = "{0}-{1}".format(prefix, series_from_order_type)
 
 			nstr = cstr(self.stin).zfill(5)
 			self.name = "{0}-{1}".format(prefix, nstr)

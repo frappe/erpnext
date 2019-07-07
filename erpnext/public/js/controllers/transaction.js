@@ -459,6 +459,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
 							company: me.frm.doc.company,
 							order_type: me.frm.doc.order_type,
+							order_type_name: me.frm.doc.order_type_name,
 							is_pos: cint(me.frm.doc.is_pos),
 							is_subcontracted: me.frm.doc.is_subcontracted,
 							transaction_date: me.frm.doc.transaction_date || me.frm.doc.posting_date,
@@ -664,6 +665,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		} else {
 			set_party_account(set_pricing);
 		}
+
+		this.update_item_defaults();
 
 		if(this.frm.doc.company) {
 			erpnext.last_selected_company = this.frm.doc.company;
@@ -1517,6 +1520,55 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			});
 		}
+	},
+
+	update_item_defaults: function() {
+		var me = this;
+		var items = [];
+		$.each(this.frm.doc.items || [], function(i, item) {
+			if(item.item_code) {
+				items.push({
+					name: item.name,
+					item_code: item.item_code,
+					cost_center: item.cost_center,
+					income_account: item.income_account,
+					expense_account: item.expense_account,
+				});
+			}
+		});
+
+		if(items.length) {
+			return this.frm.call({
+				method: "erpnext.stock.get_item_details.get_item_defaults_info",
+				args: {
+					args: {
+						doctype: me.frm.doc.doctype,
+						company: me.frm.doc.company,
+						order_type_name: me.frm.doc.order_type_name,
+						customer: me.frm.doc.customer,
+						supplier: me.frm.doc.supplier,
+						project: me.frm.doc.project,
+					},
+					items: items
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						$.each(me.frm.doc.items || [], function(i, item) {
+							if(item.item_code && r.message.hasOwnProperty(item.name)) {
+								$.each(r.message[item.name] || {}, function (k ,v) {
+									item[k] = v;
+								});
+							}
+						});
+						me.frm.refresh_field('items');
+					}
+				}
+			});
+		}
+	},
+
+	order_type_name: function() {
+		this.update_item_defaults();
 	},
 
 	is_recurring: function() {
