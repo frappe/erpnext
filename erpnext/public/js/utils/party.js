@@ -128,11 +128,8 @@ erpnext.utils.set_taxes_from_address = function(frm, triggered_from_field, billi
 		method: "erpnext.accounts.party.get_address_tax_category",
 		args: {
 			"tax_category": frm.doc.tax_category,
-			"party_type": frm.doc.customer ? "Customer" : (frm.doc.supplier ? "Supplier" : ""),
-			"party": frm.doc.customer || frm.doc.supplier,
 			"billing_address": frm.doc[billing_address_field],
-			"shipping_address": frm.doc[shipping_address_field],
-			"cost_center": frm.doc.cost_center
+			"shipping_address": frm.doc[shipping_address_field]
 		},
 		callback: function(r) {
 			if(!r.exc){

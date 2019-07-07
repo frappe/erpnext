@@ -120,10 +120,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		erpnext.utils.set_taxes_from_address(this.frm, "supplier_address", "supplier_address", "supplier_address");
 	},
 
-	cost_center: function() {
-		erpnext.utils.set_taxes_from_address(this.frm, "cost_center", "supplier_address", "supplier_address");
-	},
-
 	buying_price_list: function() {
 		this.apply_price_list();
 	},
