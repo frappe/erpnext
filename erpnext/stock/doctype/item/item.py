@@ -122,6 +122,7 @@ class Item(WebsiteGenerator):
 		self.validate_item_defaults()
 		self.validate_customer_provided_part()
 		self.update_defaults_from_item_group()
+		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
 
 		if not self.get("__islocal"):
@@ -858,6 +859,12 @@ class Item(WebsiteGenerator):
 				frappe.db.get_value("Production Order",
 					filters={"production_item": self.name, "docstatus": 1}):
 				return True
+
+	def validate_auto_reorder_enabled_in_stock_settings(self):
+		if self.reorder_levels:
+			enabled = frappe.db.get_single_value('Stock Settings', 'auto_indent')
+			if not enabled:
+				frappe.msgprint(msg=_("You have to enable auto re-order in Stock Settings to maintain re-order levels."), title=_("Enable Auto Re-Order"), indicator="orange")
 
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''
