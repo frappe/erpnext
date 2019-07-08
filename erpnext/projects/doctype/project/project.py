@@ -79,7 +79,7 @@ class Project(Document):
 		'''Called externally by Task'''
 		self.update_percent_complete()
 		self.update_costing()
-		self.save(ignore_permissions=True)
+		self.db_update()
 
 	def after_insert(self):
 		self.copy_from_template()
