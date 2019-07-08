@@ -615,5 +615,6 @@ erpnext.patches.v11_1.set_missing_opportunity_from
 erpnext.patches.v12_0.set_quotation_status
 erpnext.patches.v12_0.set_priority_for_support
 erpnext.patches.v12_0.delete_priority_property_setter
+erpnext.patches.v11_1.update_default_supplier_in_item_defaults
 erpnext.patches.v12_0.update_due_date_in_gle
 erpnext.patches.v12_0.add_default_buying_selling_terms_in_company
