@@ -67,12 +67,11 @@ frappe.ui.form.on('Delivery Trip', {
 	},
 
 	calculate_arrival_time: function (frm) {
-		frappe.db.get_value("Google Maps", {"entity": frm.doc.driver}, "enable", (r) => {
+		frappe.db.get_value("Google Maps", {"driver": frm.doc.driver}, "enable", (r) => {
 			if (r.enable === 1) {
+				frappe.show_alert({message:__("Updating estimated arrival times."), indicator:'blue'});
 				frappe.call({
 					method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.get_arrival_times',
-					freeze: true,
-					freeze_message: __("Updating estimated arrival times."),
 					args: {
 						delivery_trip: frm.doc.name,
 					},
@@ -87,12 +86,11 @@ frappe.ui.form.on('Delivery Trip', {
 	},
 
 	optimize_route: function (frm) {
-		frappe.db.get_value("Google Maps", {"entity": frm.doc.driver}, "enable", (r) => {
+		frappe.db.get_value("Google Maps", {"driver": frm.doc.driver}, "enable", (r) => {
 			if (r.enable === 1) {
+				frappe.show_alert({message:__("Optimizing routes."), indicator:'blue'});
 				frappe.call({
 					method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.optimize_route',
-					freeze: true,
-					freeze_message: __("Optimizing routes."),
 					args: {
 						delivery_trip: frm.doc.name,
 					},
