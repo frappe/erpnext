@@ -24,7 +24,6 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 		ALL_TABLES.forEach(function (field) {
 			me.frm.set_df_property(field, "cannot_add_rows", 1);
 		});
-		this.set_customer_supplier_required();
 		this.update_labels();
 	},
 
@@ -95,10 +94,6 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 		});
 	},
 
-	adjustment_type: function() {
-		this.set_customer_supplier_required();
-		this.clear_all_tables();
-	},
 	payment_currency: function() {
 		this.update_labels();
 		const me = this;
@@ -137,21 +132,6 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 		this.frm.fields_dict.get_unreconciled_entries.$input.addClass('btn-primary');
 	},
 
-	set_customer_supplier_required: function() {
-		const frm = this.frm;
-		if(frm.doc.adjustment_type === 'Sales') {
-			frm.set_df_property("customer", "reqd", 1);
-			frm.set_df_property("supplier", "reqd", 0);
-			frm.set_value("supplier", null);
-		} else if(frm.doc.adjustment_type === 'Purchase') {
-			frm.set_df_property("customer", "reqd", 0);
-			frm.set_df_property("supplier", "reqd", 1);
-			frm.set_value("customer", null);
-		} else {
-			frm.set_df_property("customer", "reqd", 1);
-			frm.set_df_property("supplier", "reqd", 1);
-		}
-	},
 });
 
 function get_exchange_rate(frm, from_currency, exchange_rate_field) {

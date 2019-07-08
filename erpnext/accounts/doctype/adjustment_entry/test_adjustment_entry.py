@@ -13,7 +13,6 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make
 def get_adjustment_entry():
 	ae = frappe.new_doc("Adjustment Entry")
 	ae.company = "_Test Company"
-	ae.adjustment_type = "Netting"
 	ae.payment_currency = "INR"
 	ae.customer = "_Test Customer"
 	ae.supplier = "_Test Supplier"

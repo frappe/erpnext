@@ -8,7 +8,6 @@
  "field_order": [
   "basic_details_section",
   "company",
-  "adjustment_type",
   "posting_date",
   "column_break_5",
   "customer",
@@ -52,31 +51,22 @@
    "reqd": 1
   },
   {
-   "description": "Netting: Match Sales Invoices with Purchase Invoices<br>",
-   "fieldname": "adjustment_type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Adjustment Type",
-   "options": "Netting",
-   "reqd": 1
-  },
-  {
    "fieldname": "column_break_5",
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.adjustment_type==='Sales' || doc.adjustment_type==='Netting'",
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "reqd": 1
   },
   {
-   "depends_on": "eval:doc.adjustment_type==='Purchase' || doc.adjustment_type==='Netting'",
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
-   "options": "Supplier"
+   "options": "Supplier",
+   "reqd": 1
   },
   {
    "fieldname": "get_unreconciled_entries",
@@ -244,7 +234,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-07-03 14:49:24.516025",
+ "modified": "2019-07-08 17:54:58.781674",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Adjustment Entry",

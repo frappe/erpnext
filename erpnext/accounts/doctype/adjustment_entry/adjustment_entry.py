@@ -66,7 +66,7 @@ class AdjustmentEntry(AccountsController):
                 frappe.throw(_("Please select {0} first").format(self.meta.get_label(fieldname)))
 
     def get_mandatory_fields(self):
-        return ["company", "adjustment_type", "customer", "supplier"]
+        return ["company", "customer", "supplier"]
 
     def set_party_account_details(self, party_type='', party=''):
         account = get_party_account(party_type, party, self.company)
@@ -173,8 +173,8 @@ class AdjustmentEntry(AccountsController):
             ent.supplier_bill_date = invoice.get('supplier_bill_date')
 
     def recalculate_tables(self):
-        debit_entries = self.debit_entries
-        credit_entries = self.credit_entries
+        debit_entries = self.debit_entries if hasattr(self, 'debit_entries') else []
+        credit_entries = self.credit_entries if hasattr(self, 'credit_entries') else []
         self.get_exchange_rates(debit_entries + credit_entries)
         self.recalculate_references(['debit_entries', 'credit_entries'])
 
