@@ -206,11 +206,11 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			idx desc, name
 		limit %(start)s, %(page_len)s """.format(
-			fcond=get_filters_cond(doctype, filters, conditions),
+			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
 			mcond=get_match_cond(doctype),
 			key=frappe.db.escape(searchfield)),
 		{
-			'txt': "%%%s%%" % frappe.db.escape(txt),
+			'txt': "%"+frappe.db.escape(txt)+"%",
 			'_txt': txt.replace("%", ""),
 			'start': start or 0,
 			'page_len': page_len or 20
