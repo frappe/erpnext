@@ -57,6 +57,7 @@
   {
    "fieldname": "customer",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Customer",
    "options": "Customer",
    "reqd": 1
@@ -234,7 +235,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-07-08 17:54:58.781674",
+ "modified": "2019-07-08 18:19:52.639070",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Adjustment Entry",
