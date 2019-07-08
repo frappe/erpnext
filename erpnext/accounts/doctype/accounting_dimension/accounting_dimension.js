@@ -9,6 +9,26 @@ frappe.ui.form.on('Accounting Dimension', {
 				frappe.set_route("List", frm.doc.document_type);
 			});
 		}
+
+		let button = frm.doc.disabled ? "Enable" : "Disable";
+
+		frm.add_custom_button(__(button), function() {
+
+			frm.set_value('disabled', 1 - frm.doc.disabled);
+
+			frappe.call({
+				method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.disable_dimension",
+				args: {
+					doc: frm.doc
+				},
+				freeze: true,
+				callback: function(r) {
+					let message = frm.doc.disabled ? "Dimension Disabled" : "Dimension Enabled";
+					frm.save();
+					frappe.show_alert({message:__(message), indicator:'green'});
+				}
+			});
+		});
 	},
 
 	document_type: function(frm) {
@@ -21,13 +41,4 @@ frappe.ui.form.on('Accounting Dimension', {
 			}
 		});
 	},
-
-	disabled: function(frm) {
-		frappe.call({
-			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.disable_dimension",
-			args: {
-				doc: frm.doc
-			}
-		});
-	}
 });
