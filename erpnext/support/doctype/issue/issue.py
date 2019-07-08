@@ -117,6 +117,7 @@ class Issue(Document):
 
 		replicated_issue = deepcopy(self)
 		replicated_issue.subject = subject
+		replicated_issue.creation = now_datetime()
 		frappe.get_doc(replicated_issue).insert()
 
 		# Replicate linked Communications
@@ -135,7 +136,8 @@ class Issue(Document):
 		return replicated_issue.name
 
 	def before_insert(self):
-		self.set_response_and_resolution_time()
+		if frappe.db.get_single_value("Service Level Agreement Settings", "track_service_level_agreement"):
+			self.set_response_and_resolution_time()
 
 	def set_response_and_resolution_time(self, priority=None, service_level_agreement=None):
 		service_level_agreement = get_active_service_level_agreement_for(priority=priority,
@@ -170,7 +172,9 @@ class Issue(Document):
 		self.resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()))
 
 	def change_service_level_agreement_and_priority(self):
-		if self.service_level_agreement and frappe.db.exists("Issue", self.name):
+		if self.service_level_agreement and frappe.db.exists("Issue", self.name) and \
+			frappe.db.get_single_value("Service Level Agreement Settings", "track_service_level_agreement"):
+
 			if not self.priority == frappe.db.get_value("Issue", self.name, "priority"):
 				self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
 				frappe.msgprint(_("Priority has been changed to {0}.").format(self.priority))

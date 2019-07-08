@@ -340,11 +340,7 @@
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
-<<<<<<< HEAD
  "modified": "2019-06-30 13:19:38.215525",
-=======
- "modified": "2019-06-27 15:19:00.771333",
->>>>>>> 2f67fb25a65c26a948203d18137aa15d577650d6
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
