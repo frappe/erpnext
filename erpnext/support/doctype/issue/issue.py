@@ -258,15 +258,15 @@ def set_service_level_agreement_variance(issue=None):
 
 		if not doc.first_responded_on: # first_responded_on set when first reply is sent to customer
 			variance = round(time_diff_in_hours(doc.response_by, current_time), 2)
-			frappe.db.set_value("Issue", doc.name, "response_by_variance", variance)
+			frappe.db.set_value(dt="Issue", dn=doc.name, field="response_by_variance", val=variance, update_modified=False)
 			if variance < 0:
-				frappe.db.set_value("Issue", doc.name, "agreement_fulfilled", "Failed")
+				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_fulfilled", val="Failed", update_modified=False)
 
 		if not doc.resolution_date: # resolution_date set when issue has been closed
 			variance = round(time_diff_in_hours(doc.resolution_by, current_time), 2)
-			frappe.db.set_value("Issue", doc.name, "resolution_by_variance", variance)
+			frappe.db.set_value(dt="Issue", dn=doc.name, field="resolution_by_variance", val=variance, update_modified=False)
 			if variance < 0:
-				frappe.db.set_value("Issue", doc.name, "agreement_fulfilled", "Failed")
+				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_fulfilled", val="Failed", update_modified=False)
 
 def get_list_context(context=None):
 	return {
