@@ -3,11 +3,11 @@ from frappe import _
 
 def get_data():
 	return {
-		'fieldname': 'job_card',
+		'fieldname': 'operation',
 		'transactions': [
 			{
-				'label': _('Transactions'),
-				'items': ['Material Request', 'Stock Entry']
+				'label': _('Manufacture'),
+				'items': ['BOM', 'Work Order', 'Job Card', 'Timesheet']
 			}
 		]
 	}
