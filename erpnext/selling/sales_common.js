@@ -151,6 +151,11 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	discount_amount: function(doc, cdt, cdn) {
+
+		if(doc.name === cdn) {
+			return;
+		}
+
 		var item = frappe.get_doc(cdt, cdn);
 		item.discount_percentage = 0.0;
 		this.apply_discount_on_item(doc, cdt, cdn, 'discount_amount');
