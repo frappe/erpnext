@@ -169,6 +169,11 @@ default_roles = [
 	{'role': 'Student', 'doctype':'Student', 'email_field': 'student_email_id'},
 ]
 
+sounds = [
+	{"name": "incoming-call", "src": "/assets/erpnext/sounds/incoming-call.mp3", "volume": 0.2},
+	{"name": "call-disconnect", "src": "/assets/erpnext/sounds/call-disconnect.mp3", "volume": 0.2},
+]
+
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
@@ -240,6 +245,7 @@ scheduler_events = {
 		"erpnext.accounts.doctype.subscription.subscription.process_all",
 		"erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_settings.schedule_get_order_details",
 		"erpnext.accounts.doctype.gl_entry.gl_entry.rename_gle_sle_docs",
+		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
 		"erpnext.projects.doctype.project.project.hourly_reminder",
 		"erpnext.projects.doctype.project.project.collect_project_status",
 		"erpnext.hr.doctype.shift_type.shift_type.process_auto_attendance_for_all_shifts",

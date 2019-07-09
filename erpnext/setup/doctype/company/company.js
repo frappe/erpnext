@@ -17,6 +17,14 @@ frappe.ui.form.on("Company", {
 				filters: {"is_group": 1}
 			}
 		});
+
+		frm.set_query("default_selling_terms", function() {
+			return { filters: { selling: 1 } };
+		});
+
+		frm.set_query("default_buying_terms", function() {
+			return { filters: { buying: 1 } };
+		});
 	},
 
 	company_name: function(frm) {

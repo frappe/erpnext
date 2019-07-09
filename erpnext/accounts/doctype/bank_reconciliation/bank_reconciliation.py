@@ -103,7 +103,7 @@ class BankReconciliation(Document):
 		for d in self.get('payment_entries'):
 			if d.clearance_date:
 				if not d.payment_document:
-					frappe.throw(_("Row #{0}: Payment document is required to complete the trasaction"))
+					frappe.throw(_("Row #{0}: Payment document is required to complete the transaction"))
 
 				if d.cheque_date and getdate(d.clearance_date) < getdate(d.cheque_date):
 					frappe.throw(_("Row #{0}: Clearance date {1} cannot be before Cheque Date {2}")
@@ -113,10 +113,8 @@ class BankReconciliation(Document):
 				if not d.clearance_date:
 					d.clearance_date = None
 
-				frappe.db.set_value(d.payment_document, d.payment_entry, "clearance_date", d.clearance_date)
-				frappe.db.sql("""update `tab{0}` set clearance_date = %s, modified = %s
-					where name=%s""".format(d.payment_document),
-				(d.clearance_date, nowdate(), d.payment_entry))
+				payment_entry = frappe.get_doc(d.payment_document, d.payment_entry)
+				payment_entry.db_set('clearance_date', d.clearance_date)
 
 				clearance_date_updated = True
 
