@@ -121,7 +121,7 @@ class AdjustmentEntry(AccountsController):
         # Add cost center condition
         if self.cost_center and get_allow_cost_center_in_entry_of_bs_account():
             condition += " and cost_center='%s'" % self.cost_center
-        positive_outstanding_invoices = get_outstanding_invoices(party_type, party, party_account, condition=condition)
+        positive_outstanding_invoices = get_outstanding_invoices(party_type, party, party_account, condition=condition, filters={"outstanding_amt_greater_than": 0})
         self.get_extra_invoice_details(positive_outstanding_invoices)
         return positive_outstanding_invoices
 
@@ -132,6 +132,7 @@ class AdjustmentEntry(AccountsController):
         cost_center = self.cost_center if get_allow_cost_center_in_entry_of_bs_account() else None
         negative_outstanding_invoices = get_negative_outstanding_invoices(party_type,
                                                                           party, party_account,
+                                                                          self.company,
                                                                           party_account_currency,
                                                                           self.company_currency, cost_center)
         self.get_extra_invoice_details(negative_outstanding_invoices)

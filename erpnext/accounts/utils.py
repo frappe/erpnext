@@ -628,7 +628,7 @@ def get_held_invoices(party_type, party):
 	return held_invoices
 
 
-def get_outstanding_invoices(party_type, party, account, condition=None):
+def get_outstanding_invoices(party_type, party, account, condition=None, filters=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
@@ -644,7 +644,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 
 	invoice_list = frappe.db.sql("""
 		select
-			name, voucher_no, voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount
+			name, voucher_no, voucher_type, posting_date, due_date,
+			ifnull(sum({dr_or_cr}), 0) as invoice_amount
 		from
 			`tabGL Entry`
 		where
@@ -677,7 +678,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 	""".format(payment_dr_or_cr=payment_dr_or_cr), {
 		"party_type": party_type,
 		"party": party,
-		"account": account,
+		"account": account
 	}, as_dict=True)
 
 	pe_map = frappe._dict()
@@ -688,10 +689,12 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		payment_amount = pe_map.get((d.voucher_type, d.voucher_no), 0)
 		outstanding_amount = flt(d.invoice_amount - payment_amount, precision)
 		if outstanding_amount > 0.5 / (10**precision):
-			if not d.voucher_type == "Purchase Invoice" or d.voucher_no not in held_invoices:
-				due_date = frappe.db.get_value(
-					d.voucher_type, d.voucher_no, "posting_date" if party_type == "Employee" else "due_date")
+			if (filters.get("outstanding_amt_greater_than") and
+				not (outstanding_amount >= filters.get("outstanding_amt_greater_than") and
+				outstanding_amount <= filters.get("outstanding_amt_less_than"))):
+				continue
 
+			if not d.voucher_type == "Purchase Invoice" or d.voucher_no not in held_invoices:
 				outstanding_invoices.append(
 					frappe._dict({
 						'voucher_no': d.voucher_no,
@@ -700,15 +703,16 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 						'invoice_amount': flt(d.invoice_amount),
 						'payment_amount': payment_amount,
 						'outstanding_amount': outstanding_amount,
-						'due_date': due_date,
-						'name': d.name
+						'name': d.name,
+						'due_date': d.due_date
 					})
 				)
 
 	outstanding_invoices = sorted(outstanding_invoices, key=lambda k: k['due_date'] or getdate(nowdate()))
 	return outstanding_invoices
 
-def get_negative_outstanding_invoices(party_type, party, party_account, party_account_currency, company_currency, cost_center=None):
+def get_negative_outstanding_invoices(party_type, party, party_account,
+	company, party_account_currency, company_currency, cost_center=None):
 	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
 	supplier_condition = ""
 	if voucher_type == "Purchase Invoice":
@@ -729,7 +733,8 @@ def get_negative_outstanding_invoices(party_type, party, party_account, party_ac
 		from
 			`tab{voucher_type}`
 		where
-			{party_type} = %s and {party_account} = %s and docstatus = 1 and outstanding_amount < 0
+			{party_type} = %s and {party_account} = %s and docstatus = 1 and
+			company = %s and outstanding_amount < 0
 			{supplier_condition}
 		order by
 			posting_date, name
@@ -741,7 +746,7 @@ def get_negative_outstanding_invoices(party_type, party, party_account, party_ac
 			"party_type": scrub(party_type),
 			"party_account": "debit_to" if party_type == "Customer" else "credit_to",
 			"cost_center": cost_center
-		}), (party, party_account), as_dict=True)
+		}), (party, party_account, company), as_dict=True)
 
 def get_account_name(account_type=None, root_type=None, is_group=None, account_currency=None, company=None):
 	"""return account based on matching conditions"""
