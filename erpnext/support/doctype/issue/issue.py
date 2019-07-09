@@ -118,6 +118,16 @@ class Issue(Document):
 		replicated_issue = deepcopy(self)
 		replicated_issue.subject = subject
 		replicated_issue.creation = now_datetime()
+
+		# Reset SLA
+		if replicated_issue.service_level_agreement:
+			replicated_issue.service_level_agreement = None
+			replicated_issue.agreement_fulfilled = "Ongoing"
+			replicated_issue.response_by = None
+			replicated_issue.response_by_variance = None
+			replicated_issue.resolution_by = None
+			replicated_issue.resolution_by_variance = None
+
 		frappe.get_doc(replicated_issue).insert()
 
 		# Replicate linked Communications
@@ -136,7 +146,7 @@ class Issue(Document):
 		return replicated_issue.name
 
 	def before_insert(self):
-		if frappe.db.get_single_value("Service Level Agreement Settings", "track_service_level_agreement"):
+		if frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
 			self.set_response_and_resolution_time()
 
 	def set_response_and_resolution_time(self, priority=None, service_level_agreement=None):
@@ -173,7 +183,7 @@ class Issue(Document):
 
 	def change_service_level_agreement_and_priority(self):
 		if self.service_level_agreement and frappe.db.exists("Issue", self.name) and \
-			frappe.db.get_single_value("Service Level Agreement Settings", "track_service_level_agreement"):
+			frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
 
 			if not self.priority == frappe.db.get_value("Issue", self.name, "priority"):
 				self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)

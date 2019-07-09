@@ -11,7 +11,7 @@ from datetime import timedelta
 
 class TestIssue(unittest.TestCase):
 	def test_response_time_and_resolution_time_based_on_different_sla(self):
-		frappe.db.set_value("Service Level Agreement Settings", None, "track_service_level_agreement", 1)
+		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
 		create_service_level_agreements_for_issues()
 
 		creation = datetime.datetime(2019, 3, 4, 12, 0)

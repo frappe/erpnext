@@ -57,11 +57,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Service Level Agreement",
 					"description": _("Service Level Agreement."),
-				},
-				{
-					"type": "doctype",
-					"name": "Service Level Agreement Settings",
-					"description": _("Service Level Agreement Settings."),
 				}
 			]
 		},
@@ -99,6 +94,17 @@ def get_data():
 					"name": "Support Hours",
 					"doctype": "Issue",
 					"is_query_report": True
+				},
+			]
+		},
+		{
+			"label": _("Settings"),
+			"icon": "fa fa-list",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Support Settings",
+					"label": _("Support Settings"),
 				},
 			]
 		},
