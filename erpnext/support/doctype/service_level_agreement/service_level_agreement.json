@@ -5,6 +5,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "enable",
   "service_level",
   "default_service_level_agreement",
   "holiday_list",
@@ -149,9 +150,15 @@
    "in_standard_filter": 1,
    "label": "Entity Type",
    "options": "\nCustomer\nCustomer Group\nTerritory"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable",
+   "fieldtype": "Check",
+   "label": "Enable"
   }
  ],
- "modified": "2019-06-20 18:04:14.293378",
+ "modified": "2019-07-09 17:22:16.402939",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",

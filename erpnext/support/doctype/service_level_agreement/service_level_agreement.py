@@ -54,6 +54,7 @@ def get_active_service_level_agreement_for(priority, customer=None, service_leve
 
 	filters = [
 		["Service Level Agreement", "active", "=", 1],
+		["Service Level Agreement", "enable", "=", 1]
 	]
 
 	if priority:
@@ -87,6 +88,11 @@ def get_service_level_agreement_filters(name, customer=None):
 	if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
 		return
 
+	filters = [
+		["Service Level Agreement", "active", "=", 1],
+		["Service Level Agreement", "enable", "=", 1]
+	]
+
 	if not customer:
 		or_filters = [
 			["Service Level Agreement", "default_service_level_agreement", "=", 1]
@@ -100,5 +106,5 @@ def get_service_level_agreement_filters(name, customer=None):
 
 	return {
 		"priority": [priority.priority for priority in frappe.get_list("Service Level Priority", filters={"parent": name}, fields=["priority"])],
-		"service_level_agreements": [d.name for d in frappe.get_list("Service Level Agreement", or_filters=or_filters)]
+		"service_level_agreements": [d.name for d in frappe.get_list("Service Level Agreement", filters=filters, or_filters=or_filters)]
 	}

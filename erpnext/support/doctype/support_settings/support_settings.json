@@ -115,14 +115,13 @@
   },
   {
    "default": "0",
-   "description": "Enable Service Level Agreements in Issues.",
    "fieldname": "track_service_level_agreement",
    "fieldtype": "Check",
    "label": "Track Service Level Agreement"
   }
  ],
  "issingle": 1,
- "modified": "2019-07-09 08:28:12.243682",
+ "modified": "2019-07-09 17:11:38.216732",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support Settings",
