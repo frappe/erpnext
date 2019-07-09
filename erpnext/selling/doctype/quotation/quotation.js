@@ -8,15 +8,27 @@ frappe.ui.form.on('Quotation', {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
 			'Sales Order': 'Make Sales Order'
-		}
+		},
+
+		frm.set_query("quotation_to", function() {
+			return{
+				"filters": {
+					"name": ["in", ["Customer", "Lead"]],
+				}
+			}
+		});
+
 	},
 
 	refresh: function(frm) {
 		frm.trigger("set_label");
+		frm.trigger("set_dynamic_field_label");
 	},
 
 	quotation_to: function(frm) {
 		frm.trigger("set_label");
+		frm.trigger("toggle_reqd_lead_customer");
+		frm.trigger("set_dynamic_field_label");
 	},
 
 	set_label: function(frm) {
@@ -28,16 +40,22 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
 		var me = this;
 		this._super(doc, dt, dn);
-		if(doc.customer && !doc.quotation_to)
-			doc.quotation_to = "Customer";
-		else if(doc.lead && !doc.quotation_to)
-			doc.quotation_to = "Lead";
 
+	},
+	party_name: function() {
+		var me = this;
+		erpnext.utils.get_party_details(this.frm, null, null, function() {
+			me.apply_price_list();
+		});
+
+		if(me.frm.doc.quotation_to=="Lead" && me.frm.doc.party_name) {
+			me.frm.trigger("get_lead_details");
+		}
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
 		doctype = doc.quotation_to == 'Customer' ? 'Customer':'Lead';
-		frappe.dynamic_link = {doc: this.frm.doc, fieldname: doctype.toLowerCase(), doctype: doctype}
+		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'party_name', doctype: doctype}
 
 		var me = this;
 
@@ -73,22 +91,29 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		if (this.frm.doc.docstatus===0) {
 			this.frm.add_custom_button(__('Opportunity'),
 				function() {
-					var setters = {};
-					if(me.frm.doc.customer) {
-						setters.customer = me.frm.doc.customer || undefined;
-					} else if (me.frm.doc.lead) {
-						setters.lead = me.frm.doc.lead || undefined;
-					}
 					erpnext.utils.map_current_doc({
 						method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
 						source_doctype: "Opportunity",
 						target: me.frm,
-						setters: setters,
+						setters: [
+							{
+								label: "Party",
+								fieldname: "party_name",
+								fieldtype: "Link",
+								options: me.frm.doc.quotation_to,
+								default: me.frm.doc.party_name || undefined
+							},
+							{
+								label: "Opportunity Type",
+								fieldname: "opportunity_type",
+								fieldtype: "Link",
+								options: "Opportunity Type",
+								default: me.frm.doc.order_type || undefined
+							}
+						],
 						get_query_filters: {
 							status: ["not in", ["Lost", "Closed"]],
-							company: me.frm.doc.company,
-							// cannot set opportunity_type as setter, as the fieldname is order_type
-							opportunity_type: me.frm.doc.order_type,
+							company: me.frm.doc.company
 						}
 					})
 				}, __("Get items from"), "btn-default");
@@ -98,31 +123,44 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 	},
 
-	quotation_to: function() {
-		var me = this;
-		if (this.frm.doc.quotation_to == "Lead") {
-			this.frm.set_value("customer", null);
-			this.frm.set_value("contact_person", null);
-		} else if (this.frm.doc.quotation_to == "Customer") {
-			this.frm.set_value("lead", null);
+	set_dynamic_field_label: function(){
+		if (this.frm.doc.quotation_to == "Customer")
+		{
+			this.frm.set_df_property("party_name", "label", "Customer");
+			this.frm.fields_dict.party_name.get_query = null;
 		}
 
-		this.toggle_reqd_lead_customer();
+		if (this.frm.doc.quotation_to == "Lead")
+		{
+			this.frm.set_df_property("party_name", "label", "Lead");
+
+			this.frm.fields_dict.party_name.get_query = function() {
+				return{	query: "erpnext.controllers.queries.lead_query" }
+			}
+		}
 	},
 
 	toggle_reqd_lead_customer: function() {
 		var me = this;
 
-		this.frm.toggle_reqd("lead", this.frm.doc.quotation_to == "Lead");
-		this.frm.toggle_reqd("customer", this.frm.doc.quotation_to == "Customer");
-
 		// to overwrite the customer_filter trigger from queries.js
-		this.frm.set_query('customer_address', erpnext.queries.address_query);
-		this.frm.set_query('shipping_address_name', erpnext.queries.address_query);
+		this.frm.toggle_reqd("party_name", this.frm.doc.quotation_to);
+		this.frm.set_query('customer_address', this.address_query);
+		this.frm.set_query('shipping_address_name', this.address_query);
 	},
 
 	tc_name: function() {
 		this.get_terms();
+	},
+
+	address_query: function(doc) {
+		return {
+			query: 'frappe.contacts.doctype.address.address.address_query',
+			filters: {
+				link_doctype: frappe.dynamic_link.doctype,
+				link_name: doc.party_name
+			}
+		};
 	},
 
 	validate_company_and_party: function(party_field) {
@@ -136,16 +174,16 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		}
 	},
 
-	lead: function() {
+	get_lead_details: function() {
 		var me = this;
-		if(!this.frm.doc.lead) {
+		if(!this.frm.doc.quotation_to === "Lead") {
 			return;
 		}
 
 		frappe.call({
 			method: "erpnext.crm.doctype.lead.lead.get_lead_details",
 			args: {
-				'lead': this.frm.doc.lead,
+				'lead': this.frm.doc.party_name,
 				'posting_date': this.frm.doc.transaction_date,
 				'company': this.frm.doc.company,
 			},
@@ -163,10 +201,6 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 });
 
 cur_frm.script_manager.make(erpnext.selling.QuotationController);
-
-cur_frm.fields_dict.lead.get_query = function(doc,cdt,cdn) {
-	return{	query: "erpnext.controllers.queries.lead_query" }
-}
 
 cur_frm.cscript['Make Sales Order'] = function() {
 	frappe.model.open_mapped_doc({
