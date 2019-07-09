@@ -7,20 +7,23 @@
  "field_order": [
   "campaign_section",
   "campaign_name",
-  "lead",
-  "column_break_4",
+  "email_campaign_for",
   "start_date",
+  "column_break_4",
+  "sender",
+  "recipient",
+  "end_date",
   "status",
   "email_schedule_section",
   "email_schedule",
-  "naming_series",
-  "amended_from"
+  "unsubscribed",
+  "naming_series"
  ],
  "fields": [
   {
    "fieldname": "campaign_section",
    "fieldtype": "Section Break",
-   "label": "CAMPAIGN "
+   "label": "Campaign"
   },
   {
    "fieldname": "campaign_name",
@@ -31,19 +34,10 @@
    "reqd": 1
   },
   {
-   "fieldname": "lead",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Lead",
-   "options": "Lead",
-   "reqd": 1
-  },
-  {
-   "default": "Started",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nDraft\nSubmitted\nStarted\nIn Progress\nCompleted"
+   "options": "\nScheduled\nIn Progress\nCompleted\nUnsubscribed"
   },
   {
    "fieldname": "column_break_4",
@@ -58,7 +52,7 @@
   {
    "fieldname": "email_schedule_section",
    "fieldtype": "Section Break",
-   "label": "EMAIL SCHEDULE"
+   "label": "Email Schedule"
   },
   {
    "fieldname": "email_schedule",
@@ -75,17 +69,41 @@
    "reqd": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Email Campaign",
-   "print_hide": 1,
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date",
    "read_only": 1
+  },
+  {
+   "default": "Lead",
+   "fieldname": "email_campaign_for",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Email Campaign For ",
+   "options": "\nLead\nContact"
+  },
+  {
+   "fieldname": "recipient",
+   "fieldtype": "Dynamic Link",
+   "label": "Recipient",
+   "options": "email_campaign_for",
+   "reqd": 1
+  },
+  {
+   "default": "__user",
+   "fieldname": "sender",
+   "fieldtype": "Link",
+   "label": "Sender",
+   "options": "User"
+  },
+  {
+   "default": "0",
+   "fieldname": "unsubscribed",
+   "fieldtype": "Check",
+   "label": "Unsubscribed"
   }
  ],
- "is_submittable": 1,
- "modified": "2019-06-30 23:00:24.765312",
+ "modified": "2019-07-09 15:07:03.328591",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Email Campaign",
