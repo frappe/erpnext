@@ -45,14 +45,83 @@ def get_average_age(fifo_queue, to_date):
 	return (age_qty / total_qty) if total_qty else 0.0
 
 def get_columns(filters):
-	columns = [_("Item Code") + ":Link/Item:100", _("Item Name") + "::100", _("Description") + "::200",
-		_("Item Group") + ":Link/Item Group:100", _("Brand") + ":Link/Brand:100"]
+	columns = [
+		{
+			"label": _("Item Code"),
+			"fieldname": "item_code",
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": 100
+		},
+		{
+			"label": _("Item Name"),
+			"fieldname": "item_name",
+			"fieldtype": "Data",
+			"width": 100
+		},
+		{
+			"label": _("Description"),
+			"fieldname": "description",
+			"fieldtype": "Data",
+			"width": 200
+		},
+		{
+			"label": _("Item Group"),
+			"fieldname": "item_group",
+			"fieldtype": "Link",
+			"options": "Item Group",
+			"width": 100
+		},
+		{
+			"label": _("Brand"),
+			"fieldname": "brand",
+			"fieldtype": "Link",
+			"options": "Brand",
+			"width": 100
+		}]
 
 	if filters.get("show_ageing_warehouse_wise"):
-		columns.extend([_("Warehouse") + ":Link/Warehouse:100"])
+		columns +=[{
+			"label": _("Warehouse"),
+			"fieldname": "warehouse",
+			"fieldtype": "Link",
+			"options": "Warehouse",
+			"width": 100
+		}]
 
-	columns.extend([_("Available Qty") + ":Float:100", _("Average Age") + ":Float:100",
-		_("Earliest") + ":Int:80", _("Latest") + ":Int:80", _("UOM") + ":Link/UOM:100"])
+	columns.extend([
+		{
+			"label": _("Available Qty"),
+			"fieldname": "qty",
+			"fieldtype": "Float",
+			"width": 100
+		},
+		{
+			"label": _("Average Age"),
+			"fieldname": "average_age",
+			"fieldtype": "Float",
+			"width": 100
+		},
+		{
+			"label": _("Earliest"),
+			"fieldname": "earliest",
+			"fieldtype": "Int",
+			"width": 80
+		},
+		{
+			"label": _("Latest"),
+			"fieldname": "latest",
+			"fieldtype": "Int",
+			"width": 80
+		},
+		{
+			"label": _("UOM"),
+			"fieldname": "uom",
+			"fieldtype": "Link",
+			"options": "UOM",
+			"width": 100
+		}
+	])
 
 	return columns
 
