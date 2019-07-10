@@ -11,6 +11,9 @@ from frappe.utils import getdate
 class ServiceLevelAgreement(Document):
 
 	def validate(self):
+		if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
+			frappe.throw(_("Service Level Agreement tracking is not enabled."))
+
 		if self.default_service_level_agreement:
 			if frappe.db.exists("Service Level Agreement", {"default_service_level_agreement": "1", "name": ["!=", self.name]}):
 				frappe.throw(_("A Default Service Level Agreement already exists."))
