@@ -61,4 +61,4 @@ $.extend(frappe.breadcrumbs.module_map, {
 	'Utilities': 'Settings',
 	'Shopping Cart': 'Website',
 	'Contacts': 'CRM'
-})
+});
