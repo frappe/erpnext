@@ -38,6 +38,29 @@ frappe.ui.form.on("Purchase Receipt", {
 		if(frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
+
+		if (frm.doc.docstatus === 1 && frm.doc.is_return === 1 && frm.doc.per_billed !== 100) {
+			frm.add_custom_button(__('Debit Note'), function() {
+				frappe.confirm(__("Are you sure you want to make debit note?"),
+					function() {
+						frm.trigger("make_debit_note");
+					}
+				);
+			}, __('Create'));
+
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
+		}
+	},
+
+	make_debit_note: function(frm) {
+		frm.call({
+			method: "make_return_invoice",
+			doc: frm.doc,
+			freeze: true,
+			callback: function() {
+				frm.reload_doc();
+			}
+		});
 	},
 
 	company: function(frm) {
