@@ -96,3 +96,14 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 	}
 });
 
+erpnext.dimension_filters.then((dimensions) => {
+	dimensions.forEach((dimension) => {
+		frappe.query_reports["Trial Balance"].filters.splice(5, 0 ,{
+			"fieldname": dimension["fieldname"],
+			"label": __(dimension["label"]),
+			"fieldtype": "Link",
+			"options": dimension["document_type"]
+		});
+	});
+});
+

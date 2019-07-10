@@ -109,7 +109,7 @@ class CallPopup {
 		});
 		wrapper.append(`
 			<div class="caller-info flex">
-				${frappe.avatar(null, 'avatar-xl', contact.name, contact.image)}
+				${frappe.avatar(null, 'avatar-xl', contact.name, contact.image || '')}
 				<div>
 					<h5>${contact_name}</h5>
 					<div>${contact.mobile_no || ''}</div>
