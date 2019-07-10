@@ -184,7 +184,13 @@ erpnext.utils.set_taxes = function(frm, triggered_from_field) {
 			"supplier_group": frm.doc.supplier_group,
 			"tax_category": frm.doc.tax_category,
 			"billing_address": ((frm.doc.customer || frm.doc.lead) ? (frm.doc.customer_address) : (frm.doc.supplier_address)),
-			"shipping_address": frm.doc.shipping_address_name
+			"shipping_address": frm.doc.shipping_address_name,
+			"order_type": frm.doc.order_type_name,
+			"cost_center": frm.doc.cost_center,
+			"tax_id": frm.doc.tax_id,
+			"tax_cnic": frm.doc.tax_cnic,
+			"tax_strn": frm.doc.tax_strn,
+			"stin": frm.doc.stin
 		},
 		callback: function(r) {
 			if(r.message){

@@ -8,7 +8,7 @@ from frappe import _, msgprint, scrub
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
 from frappe.utils import (add_days, getdate, formatdate, date_diff,
-	add_years, get_timestamp, nowdate, flt, cstr, add_months, get_last_day)
+	add_years, get_timestamp, nowdate, flt, cstr, cint, add_months, get_last_day)
 from frappe.contacts.doctype.address.address import (get_address_display,
 	get_default_address, get_company_address)
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
@@ -377,7 +377,8 @@ def get_address_tax_category(tax_category, billing_address=None, shipping_addres
 
 @frappe.whitelist()
 def set_taxes(party, party_type, posting_date, company, customer_group=None, supplier_group=None, tax_category=None,
-	billing_address=None, shipping_address=None, use_for_shopping_cart=None):
+		billing_address=None, shipping_address=None, order_type=None, tax_id=None, tax_cnic=None, tax_strn=None, stin=None,
+		cost_center=None, use_for_shopping_cart=None):
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
 		scrub(party_type): party,
@@ -393,9 +394,22 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 	if supplier_group:
 		args['supplier_group'] = supplier_group
 
+	if order_type:
+		args['order_type'] = order_type
+
+	if cost_center:
+		args['cost_center'] = cost_center
+
+	args['tax_id'] = "Set" if tax_id else "Not Set"
+	args['tax_cnic'] = "Set" if tax_cnic else "Not Set"
+	args['tax_strn'] = "Set" if tax_strn else "Not Set"
+
+	if stin is not None:
+		args['stin'] = "Set" if cint(stin) else "Not Set"
+
 	if billing_address or shipping_address:
-		args.update(get_party_details(party, party_type, {"billing_address": billing_address, \
-			"shipping_address": shipping_address }))
+		args.update(get_party_details(party, party_type, {"billing_address": billing_address,
+			"shipping_address": shipping_address}))
 	else:
 		args.update(get_party_details(party, party_type))
 
@@ -407,7 +421,6 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 			del args['lead']
 	else:
 		args.update({"tax_type": "Purchase"})
-
 	if use_for_shopping_cart:
 		args.update({"use_for_shopping_cart": use_for_shopping_cart})
 

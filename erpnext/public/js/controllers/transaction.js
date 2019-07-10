@@ -1569,6 +1569,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	order_type_name: function() {
 		this.update_item_defaults();
+		erpnext.utils.set_taxes(this.frm, 'order_type_name');
+	},
+
+	cost_center: function() {
+		erpnext.utils.set_taxes(this.frm, 'cost_center');
+	},
+
+	stin: function() {
+		erpnext.utils.set_taxes(this.frm, 'stin');
 	},
 
 	is_recurring: function() {

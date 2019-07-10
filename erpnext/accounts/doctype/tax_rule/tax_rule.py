@@ -69,6 +69,12 @@ class TaxRule(Document):
 			"shipping_zipcode":	self.shipping_zipcode,
 			"shipping_country":	self.shipping_country,
 			"tax_category":		self.tax_category,
+			"order_type":		self.order_type,
+			"cost_center":		self.cost_center,
+			"tax_id":			self.tax_id,
+			"tax_cnic":			self.tax_cnic,
+			"tax_strn":			self.tax_strn,
+			"stin":				self.stin,
 			"company":			self.company
 		}
 
@@ -145,9 +151,9 @@ def get_tax_template(posting_date, args):
 	conditions = ["""(from_date is null or from_date <= '{0}')
 		and (to_date is null or to_date >= '{0}')""".format(posting_date)]
 
-	conditions.append("ifnull(tax_category, '') = '{0}'".format(frappe.db.escape(cstr(args.get("tax_category")))))
-	if 'tax_category' in args.keys():
-		del args['tax_category']
+	#conditions.append("ifnull(tax_category, '') = '{0}'".format(frappe.db.escape(cstr(args.get("tax_category")))))
+	#if 'tax_category' in args.keys():
+	#	del args['tax_category']
 
 	for key, value in iteritems(args):
 		if key=="use_for_shopping_cart":
