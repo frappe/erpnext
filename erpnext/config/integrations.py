@@ -20,6 +20,16 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Google Services"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Google Maps",
+					"description": _("Google Maps"),
+				},
+			]
+		},
+		{
 			"label": _("Settings"),
 			"items": [
 				{
