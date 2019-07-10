@@ -92,7 +92,6 @@ class Issue(Document):
 			self.resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()), 2)
 
 		self.agreement_fulfilled = "Fulfilled" if self.response_by_variance > 0 and self.resolution_by_variance > 0 else "Failed"
-		self.save(ignore_permissions=True)
 
 	def create_communication(self):
 		communication = frappe.new_doc("Communication")
@@ -118,6 +117,17 @@ class Issue(Document):
 
 		replicated_issue = deepcopy(self)
 		replicated_issue.subject = subject
+		replicated_issue.creation = now_datetime()
+
+		# Reset SLA
+		if replicated_issue.service_level_agreement:
+			replicated_issue.service_level_agreement = None
+			replicated_issue.agreement_fulfilled = "Ongoing"
+			replicated_issue.response_by = None
+			replicated_issue.response_by_variance = None
+			replicated_issue.resolution_by = None
+			replicated_issue.resolution_by_variance = None
+
 		frappe.get_doc(replicated_issue).insert()
 
 		# Replicate linked Communications
@@ -136,7 +146,8 @@ class Issue(Document):
 		return replicated_issue.name
 
 	def before_insert(self):
-		self.set_response_and_resolution_time()
+		if frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
+			self.set_response_and_resolution_time()
 
 	def set_response_and_resolution_time(self, priority=None, service_level_agreement=None):
 		service_level_agreement = get_active_service_level_agreement_for(priority=priority,
@@ -171,13 +182,16 @@ class Issue(Document):
 		self.resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()))
 
 	def change_service_level_agreement_and_priority(self):
-		if not self.priority == frappe.db.get_value("Issue", self.name, "priority"):
-			self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
-			frappe.msgprint("Priority has been updated.")
+		if self.service_level_agreement and frappe.db.exists("Issue", self.name) and \
+			frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
 
-		if not self.service_level_agreement == frappe.db.get_value("Issue", self.name, "service_level_agreement"):
-			self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
-			frappe.msgprint("Service Level Agreement has been updated.")
+			if not self.priority == frappe.db.get_value("Issue", self.name, "priority"):
+				self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
+				frappe.msgprint(_("Priority has been changed to {0}.").format(self.priority))
+
+			if not self.service_level_agreement == frappe.db.get_value("Issue", self.name, "service_level_agreement"):
+				self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
+				frappe.msgprint(_("Service Level Agreement has been changed to {0}.").format(self.service_level_agreement))
 
 def get_expected_time_for(parameter, service_level, start_date_time):
 	current_date_time = start_date_time

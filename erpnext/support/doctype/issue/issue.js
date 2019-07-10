@@ -129,8 +129,15 @@ frappe.ui.form.on("Issue", {
 function set_time_to_resolve_and_response(frm) {
 	frm.dashboard.clear_headline();
 
-	var time_to_respond = get_time_left(frm.doc.response_by, frm.doc.agreement_fulfilled);
-	var time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_fulfilled);
+	var time_to_respond = get_status(frm.doc.response_by_variance);
+	if (!frm.doc.first_responded_on && frm.doc.agreement_fulfilled === "Ongoing") {
+		time_to_respond = get_time_left(frm.doc.response_by, frm.doc.agreement_fulfilled);
+	}
+
+	var time_to_resolve = get_status(frm.doc.resolution_by_variance);
+	if (!frm.doc.resolution_date && frm.doc.agreement_fulfilled === "Ongoing") {
+		time_to_resolve = get_time_left(frm.doc.response_by, frm.doc.agreement_fulfilled);
+	}
 
 	frm.dashboard.set_headline_alert(
 		'<div class="row">' +
@@ -146,7 +153,15 @@ function set_time_to_resolve_and_response(frm) {
 
 function get_time_left(timestamp, agreement_fulfilled) {
 	const diff = moment(timestamp).diff(moment());
-	const diff_display = diff >= 44500 ? moment.duration(diff).humanize() : moment(0, 'seconds').format('HH:mm');
-	let indicator = (diff_display == '00:00' && agreement_fulfilled != "Fulfilled") ? "red" : "green";
+	const diff_display = diff >= 44500 ? moment.duration(diff).humanize() : "Failed";
+	let indicator = (diff_display == 'Failed' && agreement_fulfilled != "Fulfilled") ? "red" : "green";
 	return {"diff_display": diff_display, "indicator": indicator};
+}
+
+function get_status(variance) {
+	if (variance > 0) {
+		return {"diff_display": "Fulfilled", "indicator": "green"};
+	} else {
+		return {"diff_display": "Failed", "indicator": "red"};
+	}
 }
