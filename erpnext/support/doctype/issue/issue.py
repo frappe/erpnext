@@ -195,7 +195,7 @@ class Issue(Document):
 				frappe.msgprint(_("Service Level Agreement has been changed to {0}.").format(self.service_level_agreement))
 
 	def reset_service_level_agreement(self):
-		if not frappe.get_single_value("Support Settings", "allow_resetting_service_level_agreement"):
+		if not frappe.db.get_single_value("Support Settings", "allow_resetting_service_level_agreement"):
 			frappe.throw(_("Allow Resetting Service Level Agreement from Support Settings."))
 
 		self.service_level_agreement_creation = now_datetime()
