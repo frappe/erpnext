@@ -547,12 +547,6 @@ def make_project(source_name, target_doc=None):
 				"base_grand_total" : "estimated_costing",
 			}
 		},
-		"Sales Order Item": {
-			"doctype": "Project Task",
-			"field_map": {
-				"item_code": "title",
-			},
-		}
 	}, target_doc, postprocess)
 
 	return doc
