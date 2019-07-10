@@ -374,7 +374,7 @@ class AccountsController(TransactionBase):
 	def validate_qty_is_not_zero(self):
 		for item in self.items:
 			if not item.qty:
-				frappe.throw("Item quantity can not be zero")
+				frappe.throw(_("Item quantity can not be zero"))
 
 	def validate_account_currency(self, account, account_currency=None):
 		valid_currency = [self.company_currency]
@@ -747,7 +747,12 @@ class AccountsController(TransactionBase):
 				count += 1
 				item.qty = group_item_qty[item.item_code]
 				item.amount = group_item_amount[item.item_code]
-				item.rate = flt(flt(item.amount) / flt(item.qty), item.precision("rate"))
+
+				if item.qty:
+					item.rate = flt(flt(item.amount) / flt(item.qty), item.precision("rate"))
+				else:
+					item.rate = 0
+
 				item.idx = count
 				del group_item_qty[item.item_code]
 			else:
