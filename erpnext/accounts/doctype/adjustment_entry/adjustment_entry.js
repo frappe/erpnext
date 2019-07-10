@@ -183,8 +183,8 @@ frappe.ui.form.on('Adjustment Entry Reference', {
 					voucher_type:  row.voucher_type,
 					voucher_number: row.voucher_number
 				}
-			})
-		};
+			});
+		}
 	},
 
 	allocated_amount: function(frm, cdt, cdn) {
