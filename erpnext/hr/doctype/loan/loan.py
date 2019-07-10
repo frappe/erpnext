@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, math, json
 import erpnext
 from frappe import _
-from frappe.utils import flt, rounded, add_months, nowdate
+from frappe.utils import flt, rounded, add_months, nowdate, getdate
 from erpnext.controllers.accounts_controller import AccountsController
 
 class Loan(AccountsController):
