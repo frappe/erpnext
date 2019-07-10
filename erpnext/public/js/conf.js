@@ -58,5 +58,7 @@ $.extend(frappe.breadcrumbs.module_map, {
 	'Geo': 'Settings',
 	'Accounts': 'Accounting',
 	'Portal': 'Website',
-	'Utilities': 'Settings'
+	'Utilities': 'Settings',
+	'Shopping Cart': 'Website',
+	'Contacts': 'CRM'
 })
