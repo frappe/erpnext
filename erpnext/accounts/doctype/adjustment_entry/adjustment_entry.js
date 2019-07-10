@@ -15,20 +15,52 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 					"is_group": 0,
 					"company": frm.doc.company
 				}
-			}
+			};
 		});
+		const voucher_type_query = function() {
+			return {
+				filters: { "name": ["in", ["Sales Invoice", "Purchase Invoice"]] }
+			};
+		};
+		frm.set_query("voucher_type", "debit_entries", voucher_type_query);
+		frm.set_query("voucher_type", "credit_entries", voucher_type_query);
+
+		const voucher_number_query = function(doc, cdt, cdn) {
+			const child = locals[cdt][cdn];
+			const filters = [[child.voucher_type, "docstatus", "=", 1], [child.voucher_type, "company", "=", doc.company]];
+			if(child.parentfield === 'debit_entries') {
+				if(child.voucher_type === 'Purchase Invoice') {
+					filters.push([child.voucher_type, "supplier", "=", doc.supplier]);
+					filters.push([child.voucher_type, "outstanding_amount", "<",0]);
+				} else {
+					filters.push([child.voucher_type, "customer", "=", doc.customer]);
+					filters.push([child.voucher_type, "outstanding_amount", ">",0]);
+				}
+			} else {
+				if(child.voucher_type === 'Sales Invoice') {
+					filters.push([child.voucher_type, "customer", "=", doc.customer]);
+					filters.push([child.voucher_type, "outstanding_amount", "<",0]);
+				} else {
+					filters.push([child.voucher_type, "supplier", "=", doc.supplier]);
+					filters.push([child.voucher_type, "outstanding_amount", ">",0]);
+				}
+			}
+			console.log("filters", filters);
+			return {
+				filters: filters
+			};
+		};
+		frm.set_query("voucher_number", "debit_entries", voucher_number_query);
+		frm.set_query("voucher_number", "credit_entries", voucher_number_query);
 	},
 
 	onload: function() {
-		const me = this;
-		ALL_TABLES.forEach(function (field) {
-			me.frm.set_df_property(field, "cannot_add_rows", 1);
-		});
+		this.frm.set_df_property("exchange_rates", "cannot_add_rows", 1);
 		this.update_labels();
 	},
 
 	cost_center: function(){
-		this.get_unreconciled_entries()
+		this.get_unreconciled_entries();
 	},
 
 	get_unreconciled_entries: function() {
@@ -49,7 +81,7 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 
 	show_general_ledger: function() {
 		const frm = this.frm;
-		if(frm.doc.docstatus==1) {
+		if(frm.doc.docstatus===1) {
 			frm.add_custom_button(__('Ledger'), function() {
 				frappe.route_options = {
 					"voucher_no": frm.doc.name,
@@ -141,6 +173,21 @@ function get_exchange_rate(frm, from_currency, exchange_rate_field) {
 }
 
 frappe.ui.form.on('Adjustment Entry Reference', {
+	voucher_number: function(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (row.voucher_number && row.voucher_type) {
+			return frm.call({
+				doc: frm.doc,
+				method: "add_reference_doc_details",
+				args: {
+					reference_type: row.parentfield,
+					voucher_type:  row.voucher_type,
+					voucher_number: row.voucher_number
+				}
+			})
+		}
+	},
+
 	allocated_amount: function(frm, cdt, cdn) {
 		const data = locals[cdt][cdn];
 		const base_exchange_rate = get_exchange_rate(frm, frm.doc.payment_currency, 'exchange_rate_to_base_currency');

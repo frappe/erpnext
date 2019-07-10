@@ -154,24 +154,24 @@ class AdjustmentEntry(AccountsController):
         party_type, party, order_doctype = self.get_party_details(field_name)
         party_account_currency = self.get(party_type.lower() + "_account_currency")
         self.set(field_name, [])
-
         for invoice in invoices:
-            ent = self.append(field_name, {})
-            ent.voucher_type = invoice.get('voucher_type')
-            ent.voucher_number = invoice.get('voucher_no')
-            ent.voucher_date = invoice.get('posting_date')
-            ent.currency = invoice.get("currency")
-            ent.exchange_rate = invoice.get('exchange_rate')
-            ent.cost_center = invoice.get('cost_center')
-            if party_account_currency != self.company_currency:
-                ent.voucher_base_amount = abs(invoice.get('outstanding_amount') * invoice.get('exchange_rate'))
-                ent.voucher_amount = abs(invoice.get('outstanding_amount'))
-            else:
-                ent.voucher_base_amount = abs(invoice.get('outstanding_amount'))
-                ent.voucher_amount = abs(ent.voucher_base_amount / ent.exchange_rate)
-            ent.recalculate_amounts(self.payment_currency, exchange_rates)
-            ent.supplier_bill_no = invoice.get('supplier_bill_no')
-            ent.supplier_bill_date = invoice.get('supplier_bill_date')
+            ent = self.append(field_name, { "voucher_type": invoice.get('voucher_type'), "voucher_number": invoice.get('voucher_no') })
+            self.set_reference_entry_details(ent, invoice, party_account_currency, exchange_rates)
+
+    def set_reference_entry_details(self, ent, invoice, party_account_currency, exchange_rates):
+        ent.voucher_date = invoice.get('posting_date')
+        ent.currency = invoice.get("currency")
+        ent.exchange_rate = invoice.get('exchange_rate') or invoice.get('conversion_rate')
+        ent.cost_center = invoice.get('cost_center')
+        if party_account_currency != self.company_currency:
+            ent.voucher_base_amount = abs(invoice.get('outstanding_amount') * ent.exchange_rate)
+            ent.voucher_amount = abs(invoice.get('outstanding_amount'))
+        else:
+            ent.voucher_base_amount = abs(invoice.get('outstanding_amount'))
+            ent.voucher_amount = abs(ent.voucher_base_amount / ent.exchange_rate)
+        ent.recalculate_amounts(self.payment_currency, exchange_rates)
+        ent.supplier_bill_no = invoice.get('supplier_bill_no')
+        ent.supplier_bill_date = invoice.get('supplier_bill_date')
 
     def recalculate_tables(self):
         debit_entries = self.debit_entries if hasattr(self, 'debit_entries') else []
@@ -187,6 +187,18 @@ class AdjustmentEntry(AccountsController):
                 for ent in entries:
                     ent.recalculate_amounts(self.payment_currency, exchange_rates)
         self.calculate_summary_totals()
+
+    def add_reference_doc_details(self, reference_type, voucher_type, voucher_number):
+        ref_doc = frappe.get_doc(voucher_type, voucher_number)
+        reference_entries = self.get(reference_type)
+        exchange_rates = self.exchange_rates_to_dict()
+        party_type, party, order_doctype = self.get_party_details("debit_entries" if voucher_type == 'Sales Invoice' else "credit_entries")
+        party_account_currency = self.get(party_type.lower() + "_account_currency")
+        if len([ent for ent in reference_entries if ent.voucher_number == voucher_number and ent.voucher_type == voucher_type]) > 1:
+            frappe.throw(_("{0} {1} is already present in {2}").format(voucher_type, voucher_number, reference_type))
+        ent = next((ent for ent in reference_entries if ent.voucher_number == voucher_number and ent.voucher_type == voucher_type), None)
+        if ent:
+            self.set_reference_entry_details(ent, ref_doc, party_account_currency, exchange_rates)
 
     def calculate_summary_totals(self):
         self.receivable_adjusted = flt(sum([flt(d.allocated_amount) for d in self.get("debit_entries")]), self.precision("receivable_adjusted"))
