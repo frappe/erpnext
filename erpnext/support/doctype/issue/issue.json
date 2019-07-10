@@ -22,10 +22,12 @@
   "service_level_agreement",
   "response_by",
   "response_by_variance",
+  "reset_service_level_agreement",
   "cb",
   "agreement_fulfilled",
   "resolution_by",
   "resolution_by_variance",
+  "service_level_agreement_creation",
   "response",
   "mins_to_first_response",
   "first_responded_on",
@@ -68,9 +70,9 @@
    "fieldname": "subject",
    "fieldtype": "Data",
    "in_global_search": 1,
+   "in_standard_filter": 1,
    "label": "Subject",
-   "reqd": 1,
-   "in_standard_filter": 1
+   "reqd": 1
   },
   {
    "fieldname": "customer",
@@ -336,11 +338,24 @@
    "fieldtype": "Float",
    "label": "Resolution By Variance",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.service_level_agreement",
+   "fieldname": "service_level_agreement_creation",
+   "fieldtype": "Datetime",
+   "label": "Service Level Agreement Creation",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.service_level_agreement",
+   "fieldname": "reset_service_level_agreement",
+   "fieldtype": "Button",
+   "label": "Reset Service Level Agreement"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2019-06-30 13:19:38.215525",
+ "modified": "2019-07-10 22:06:49.279707",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

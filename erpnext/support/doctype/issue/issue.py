@@ -173,8 +173,9 @@ class Issue(Document):
 
 		if not self.creation:
 			self.creation = now_datetime()
+			self.service_level_agreement_creation = now_datetime()
 
-		start_date_time = get_datetime(self.creation)
+		start_date_time = get_datetime(self.service_level_agreement_creation)
 		self.response_by = get_expected_time_for(parameter='response', service_level=priority, start_date_time=start_date_time)
 		self.resolution_by = get_expected_time_for(parameter='resolution', service_level=priority, start_date_time=start_date_time)
 
@@ -192,6 +193,14 @@ class Issue(Document):
 			if not self.service_level_agreement == frappe.db.get_value("Issue", self.name, "service_level_agreement"):
 				self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
 				frappe.msgprint(_("Service Level Agreement has been changed to {0}.").format(self.service_level_agreement))
+
+	def reset_service_level_agreement(self):
+		if not frappe.get_single_value("Support Settings", "allow_resetting_service_level_agreement"):
+			frappe.throw(_("Allow Resetting Service Level Agreement from Support Settings."))
+
+		self.service_level_agreement_creation = now_datetime()
+		self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
+		self.save()
 
 def get_expected_time_for(parameter, service_level, start_date_time):
 	current_date_time = start_date_time

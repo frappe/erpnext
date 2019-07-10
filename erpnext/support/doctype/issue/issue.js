@@ -2,6 +2,12 @@ frappe.ui.form.on("Issue", {
 	onload: function(frm) {
 		frm.email_field = "raised_by";
 
+		frappe.db.get_value("Support Settings", {name: "Support Settings"}, "allow_resetting_service_level_agreement", (r) => {
+			if (!r.allow_resetting_service_level_agreement) {
+				frm.set_df_property("reset_service_level_agreement", "hidden", 1) ;
+			}
+		});
+
 		if (frm.doc.service_level_agreement) {
 			frappe.call({
 				method: "erpnext.support.doctype.service_level_agreement.service_level_agreement.get_service_level_agreement_filters",
@@ -71,6 +77,15 @@ frappe.ui.form.on("Issue", {
 				frm.save();
 			});
 		}
+	},
+
+	reset_service_level_agreement: function(frm) {
+		frappe.confirm(__("Reset Service Level Agreement ?"), function() {
+			frm.call("reset_service_level_agreement", () => {
+				frm.refresh();
+				frappe.msgprint(__("Service Level Agreement Reset."));
+			});
+		});
 	},
 
 	timeline_refresh: function(frm) {
