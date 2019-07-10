@@ -33,6 +33,9 @@ def import_coa(file_name, company):
 
 def generate_data_from_csv(file_name, as_dict=False):
 	''' read csv file and return the generated nested tree '''
+	if not file_name.endswith('.csv'):
+		frappe.throw("Only CSV files can be used to for importing data. Please check the file format you are trying to upload")
+
 	file_doc = frappe.get_doc('File', {"file_url": file_name})
 	file_path = file_doc.get_full_path()
 
@@ -99,7 +102,7 @@ def build_forest(data):
 	for i in data:
 		account_name, _, account_number, is_group, account_type, root_type = i
 		charts_map[account_name] = {}
-		if is_group: charts_map[account_name]["is_group"] = is_group
+		if is_group == 1: charts_map[account_name]["is_group"] = is_group
 		if account_type: charts_map[account_name]["account_type"] = account_type
 		if root_type: charts_map[account_name]["root_type"] = root_type
 		if account_number: charts_map[account_name]["account_number"] = account_number
@@ -158,14 +161,14 @@ def validate_root(accounts):
 
 def validate_account_types(accounts):
 	account_types_for_ledger = ["Cost of Goods Sold", "Depreciation", "Fixed Asset", "Payable", "Receivable", "Stock Adjustment"]
-	account_types = [accounts[d]["account_type"] for d in accounts if not accounts[d]['is_group']]
+	account_types = [accounts[d]["account_type"] for d in accounts if not accounts[d]['is_group'] == 1]
 
 	missing = list(set(account_types_for_ledger) - set(account_types))
 	if missing:
 		return _("Please identify/create Account (Ledger) for type - {0}").format(' , '.join(missing))
 
 	account_types_for_group = ["Bank", "Cash", "Stock"]
-	account_groups = [accounts[d]["account_type"] for d in accounts if accounts[d]['is_group']]
+	account_groups = [accounts[d]["account_type"] for d in accounts if accounts[d]['is_group'] not in ('', 1)]
 
 	missing = list(set(account_types_for_group) - set(account_groups))
 	if missing:
