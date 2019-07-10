@@ -8,6 +8,10 @@ frappe.ui.form.on("POS Profile", "onload", function(frm) {
 		return { filters: { selling: 1 } };
 	});
 
+	frm.set_query("tc_name", function() {
+		return { filters: { selling: 1 } };
+	});
+
 	erpnext.queries.setup_queries(frm, "Warehouse", function() {
 		return erpnext.queries.warehouse(frm.doc);
 	});

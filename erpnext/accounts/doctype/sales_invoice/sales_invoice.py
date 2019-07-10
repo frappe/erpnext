@@ -734,6 +734,7 @@ class SalesInvoice(SellingController):
 					"account": self.debit_to,
 					"party_type": "Customer",
 					"party": self.customer,
+					"due_date": self.due_date,
 					"against": self.against_income_account,
 					"debit": grand_total_in_company_currency,
 					"debit_in_account_currency": grand_total_in_company_currency \
@@ -783,10 +784,13 @@ class SalesInvoice(SellingController):
 					asset.db_set("disposal_date", self.posting_date)
 					asset.set_status("Sold" if self.docstatus==1 else None)
 				else:
-					account_currency = get_account_currency(item.income_account)
+					income_account = (item.income_account
+						if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
+
+					account_currency = get_account_currency(income_account)
 					gl_entries.append(
 						self.get_gl_dict({
-							"account": item.income_account if not item.enable_deferred_revenue else item.deferred_revenue_account,
+							"account": income_account,
 							"against": self.customer,
 							"credit": flt(item.base_net_amount, item.precision("base_net_amount")),
 							"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))

@@ -98,8 +98,8 @@ def validate_item_attribute_value(attributes_list, attribute, attribute_value, i
 	if allow_rename_attribute_value:
 		pass
 	elif attribute_value not in attributes_list:
-		frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values for Item {2}").format(
-			attribute_value, attribute, item), InvalidItemAttributeValueError, title=_('Invalid Attribute'))
+		frappe.throw(_("The value {0} is already assigned to an exisiting Item {2}.").format(
+			attribute_value, attribute, item), InvalidItemAttributeValueError, title=_('Rename Not Allowed'))
 
 def get_attribute_values(item):
 	if not frappe.flags.attribute_values:
