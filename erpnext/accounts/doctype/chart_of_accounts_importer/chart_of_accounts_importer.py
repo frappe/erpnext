@@ -99,8 +99,16 @@ def build_forest(data):
 				return [child] + return_parent(data, parent_account)
 
 	charts_map, paths = {}, []
+
+	line_no = 3
+	error_messages = []
+
 	for i in data:
 		account_name, _, account_number, is_group, account_type, root_type = i
+
+		if not account_name:
+			error_messages.append("Row {0}: Please enter Account Name".format(line_no))
+
 		charts_map[account_name] = {}
 		if is_group == 1: charts_map[account_name]["is_group"] = is_group
 		if account_type: charts_map[account_name]["account_type"] = account_type
@@ -108,6 +116,10 @@ def build_forest(data):
 		if account_number: charts_map[account_name]["account_number"] = account_number
 		path = return_parent(data, account_name)[::-1]
 		paths.append(path) # List of path is created
+		line_no += 1
+
+	if error_messages:
+		frappe.throw("<br>".join(error_messages))
 
 	out = {}
 	for path in paths:
@@ -153,11 +165,16 @@ def validate_root(accounts):
 	if len(roots) < 4:
 		return _("Number of root accounts cannot be less than 4")
 
+	error_messages = []
+
 	for account in roots:
-		if not account.get("root_type"):
-			return _("Please enter Root Type for - {0}").format(account.get("account_name"))
-		elif account.get("root_type") not in ("Asset", "Liability", "Expense", "Income", "Equity"):
-			return _('Root Type for "{0}" must be one of the Asset, Liability, Income, Expense and Equity').format(account.get("account_name"))
+		if not account.get("root_type") and account.get("account_name"):
+			error_messages.append("Please enter Root Type for account- {0}".format(account.get("account_name")))
+		elif account.get("root_type") not in ("Asset", "Liability", "Expense", "Income", "Equity") and account.get("account_name"):
+			error_messages.append("Root Type for {0} must be one of the Asset, Liability, Income, Expense and Equity".format(account.get("account_name")))
+
+	if error_messages:
+		return "<br>".join(error_messages)
 
 def validate_account_types(accounts):
 	account_types_for_ledger = ["Cost of Goods Sold", "Depreciation", "Fixed Asset", "Payable", "Receivable", "Stock Adjustment"]
