@@ -603,3 +603,4 @@ erpnext.patches.v11_1.update_bank_transaction_status
 erpnext.patches.v11_1.renamed_delayed_item_report
 erpnext.patches.v11_1.set_missing_opportunity_from
 erpnext.patches.v11_1.set_quotation_status
+erpnext.patches.v11_1.update_default_supplier_in_item_defaults
