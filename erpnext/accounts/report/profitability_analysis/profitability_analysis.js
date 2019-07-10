@@ -16,7 +16,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"fieldname": "based_on",
 				"label": __("Based On"),
 				"fieldtype": "Select",
-				"options": "Cost Center\nProject",
+				"options": ["Cost Center", "Project"],
 				"default": "Cost Center",
 				"reqd": 1
 			},
@@ -104,5 +104,10 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 		"parent_field": "parent_account",
 		"initial_depth": 3
 	}
-});
 
+	erpnext.dimension_filters.then((dimensions) => {
+		dimensions.forEach((dimension) => {
+			frappe.query_reports["Profitability Analysis"].filters[1].options.push(dimension["document_type"]);
+		});
+	});
+});
