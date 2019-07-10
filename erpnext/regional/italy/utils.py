@@ -316,6 +316,9 @@ def get_company_country(company):
 	return frappe.get_cached_value('Company', company, 'country')
 
 def get_e_invoice_attachments(invoice):
+	if not invoice.company_tax_id:
+		return []
+
 	out = []
 	attachments = get_attachments(invoice.doctype, invoice.name)
 	company_tax_id = invoice.company_tax_id if invoice.company_tax_id.startswith("IT") else "IT" + invoice.company_tax_id
