@@ -31,13 +31,16 @@ class ItemPrice(Document):
 				frappe.throw(_("Valid From Date must be lesser than Valid Upto Date."))
 
 	def update_price_list_details(self):
-		self.buying, self.selling, self.currency = \
-			frappe.db.get_value("Price List",
-								{"name": self.price_list, "enabled": 1},
-								["buying", "selling", "currency"])
+		if self.price_list:
+			self.buying, self.selling, self.currency = \
+				frappe.db.get_value("Price List",
+					{"name": self.price_list, "enabled": 1},
+					["buying", "selling", "currency"])
 
 	def update_item_details(self):
-		self.item_name, self.item_description = frappe.db.get_value("Item",self.item_code,["item_name", "description"])
+		if self.item_code:
+			self.item_name, self.item_description = frappe.db.get_value("Item",
+				self.item_code,["item_name", "description"])
 
 	def check_duplicates(self):
 		conditions = "where item_code=%(item_code)s and price_list=%(price_list)s and name != %(name)s"
