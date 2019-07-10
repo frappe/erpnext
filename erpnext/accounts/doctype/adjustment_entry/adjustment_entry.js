@@ -45,7 +45,6 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 					filters.push([child.voucher_type, "outstanding_amount", ">",0]);
 				}
 			}
-			console.log("filters", filters);
 			return {
 				filters: filters
 			};
@@ -73,7 +72,7 @@ erpnext.accounts.AdjustmentEntryController = frappe.ui.form.Controller.extend({
 				me.frm.fields_dict.get_unreconciled_entries.$input.removeClass('btn-primary');
 			}
 		});
-  	},
+	},
 
 	refresh: function() {
 		this.show_general_ledger();
@@ -185,7 +184,7 @@ frappe.ui.form.on('Adjustment Entry Reference', {
 					voucher_number: row.voucher_number
 				}
 			})
-		}
+		};
 	},
 
 	allocated_amount: function(frm, cdt, cdn) {
