@@ -173,25 +173,30 @@ erpnext.utils.set_taxes = function(frm, triggered_from_field) {
 		party = frm.doc.party_name;
 	}
 
+	var args = {
+		"party": party,
+		"party_type": party_type,
+		"posting_date": frm.doc.posting_date || frm.doc.transaction_date,
+		"company": frm.doc.company,
+		"customer_group": frm.doc.customer_group,
+		"supplier_group": frm.doc.supplier_group,
+		"tax_category": frm.doc.tax_category,
+		"billing_address": ((frm.doc.customer || frm.doc.lead) ? (frm.doc.customer_address) : (frm.doc.supplier_address)),
+		"shipping_address": frm.doc.shipping_address_name,
+		"order_type": frm.doc.order_type_name,
+		"cost_center": frm.doc.cost_center,
+		"tax_id": frm.doc.tax_id,
+		"tax_cnic": frm.doc.tax_cnic,
+		"tax_strn": frm.doc.tax_strn
+	};
+
+	if (frappe.meta.has_field(frm.doc.doctype, 'stin')) {
+		args["stin"] = cint(frm.doc.stin);
+	}
+
 	frappe.call({
 		method: "erpnext.accounts.party.set_taxes",
-		args: {
-			"party": party,
-			"party_type": party_type,
-			"posting_date": frm.doc.posting_date || frm.doc.transaction_date,
-			"company": frm.doc.company,
-			"customer_group": frm.doc.customer_group,
-			"supplier_group": frm.doc.supplier_group,
-			"tax_category": frm.doc.tax_category,
-			"billing_address": ((frm.doc.customer || frm.doc.lead) ? (frm.doc.customer_address) : (frm.doc.supplier_address)),
-			"shipping_address": frm.doc.shipping_address_name,
-			"order_type": frm.doc.order_type_name,
-			"cost_center": frm.doc.cost_center,
-			"tax_id": frm.doc.tax_id,
-			"tax_cnic": frm.doc.tax_cnic,
-			"tax_strn": frm.doc.tax_strn,
-			"stin": frm.doc.stin
-		},
+		args: args,
 		callback: function(r) {
 			if(r.message){
 				frm.set_value("taxes_and_charges", r.message)
