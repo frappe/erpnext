@@ -136,7 +136,7 @@ function set_time_to_resolve_and_response(frm) {
 
 	var time_to_resolve = get_status(frm.doc.resolution_by_variance);
 	if (!frm.doc.resolution_date && frm.doc.agreement_fulfilled === "Ongoing") {
-		time_to_resolve = get_time_left(frm.doc.response_by, frm.doc.agreement_fulfilled);
+		time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_fulfilled);
 	}
 
 	frm.dashboard.set_headline_alert(
