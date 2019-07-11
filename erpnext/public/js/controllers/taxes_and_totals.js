@@ -221,7 +221,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				var has_margin_field = frappe.meta.has_field(item.doctype, 'margin_type');
 				if (has_margin_field && flt(item.rate_with_margin) > 0) {
 					item.tax_exclusive_rate_with_margin = flt(item.rate_with_margin / (1 + item.cumulated_tax_fraction));
-					item.base_tax_exclusive_rate_with_margin = flt(item.tax_exclusive_rate_with_margin * self.doc.conversion_rate);
+					item.base_tax_exclusive_rate_with_margin = flt(item.tax_exclusive_rate_with_margin * me.frm.doc.conversion_rate);
 					item.tax_exclusive_discount_amount = flt(item.tax_exclusive_rate_with_margin - item.tax_exclusive_rate);
 				} else if (flt(item.tax_exclusive_price_list_rate) > 0) {
 					item.tax_exclusive_discount_amount = flt(item.tax_exclusive_price_list_rate - item.tax_exclusive_rate);
