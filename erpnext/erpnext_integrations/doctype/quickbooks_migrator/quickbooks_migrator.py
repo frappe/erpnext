@@ -497,12 +497,12 @@ class QuickBooksMigrator(Document):
 				erpcustomer = frappe.get_doc({
 					"doctype": "Customer",
 					"quickbooks_id": customer["Id"],
-					"customer_name" : encode_company_abbr(customer["DisplayName"], self.company),
-					"customer_type" : "Individual",
-					"customer_group" : "Commercial",
+					"customer_name": encode_company_abbr(customer["DisplayName"], self.company),
+					"customer_type": "Individual",
+					"customer_group": "Commercial",
 					"default_currency": customer["CurrencyRef"]["value"],
 					"accounts": [{"company": self.company, "account": receivable_account}],
-					"territory" : "All Territories",
+					"territory": "All Territories",
 					"company": self.company,
 				}).insert()
 				if "BillAddr" in customer:
@@ -520,7 +520,7 @@ class QuickBooksMigrator(Document):
 					item_dict = {
 						"doctype": "Item",
 						"quickbooks_id": item["Id"],
-						"item_code" : encode_company_abbr(item["Name"], self.company),
+						"item_code": encode_company_abbr(item["Name"], self.company),
 						"stock_uom": "Unit",
 						"is_stock_item": 0,
 						"item_group": "All Item Groups",
@@ -548,8 +548,8 @@ class QuickBooksMigrator(Document):
 				erpsupplier = frappe.get_doc({
 					"doctype": "Supplier",
 					"quickbooks_id": vendor["Id"],
-					"supplier_name" : encode_company_abbr(vendor["DisplayName"], self.company),
-					"supplier_group" : "All Supplier Groups",
+					"supplier_name": encode_company_abbr(vendor["DisplayName"], self.company),
+					"supplier_group": "All Supplier Groups",
 					"company": self.company,
 				}).insert()
 				if "BillAddr" in vendor:
@@ -1199,7 +1199,7 @@ class QuickBooksMigrator(Document):
 
 
 	def _create_address(self, entity, doctype, address, address_type):
-		try :
+		try:
 			if not frappe.db.exists({"doctype": "Address", "quickbooks_id": address["Id"]}):
 				frappe.get_doc({
 					"doctype": "Address",
