@@ -47,7 +47,9 @@ class QuickBooksMigrator(Document):
 		if self.company:
 			# We need a Cost Center corresponding to the selected erpnext Company
 			self.default_cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
-			self.default_warehouse = frappe.get_all('Warehouse', filters={"company": self.company, "is_group": 0})[0]["name"]
+			company_warehouses = frappe.get_all('Warehouse', filters={"company": self.company, "is_group": 0})
+			if company_warehouses:
+				self.default_warehouse = company_warehouses[0].name
 		if self.authorization_endpoint:
 			self.authorization_url = self.oauth.authorization_url(self.authorization_endpoint)[0]
 
