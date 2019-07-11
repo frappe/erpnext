@@ -340,9 +340,9 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: doc.service_level_agreement",
    "fieldname": "service_level_agreement_creation",
    "fieldtype": "Datetime",
+   "hidden": 1,
    "label": "Service Level Agreement Creation",
    "read_only": 1
   },
@@ -355,7 +355,7 @@
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2019-07-10 22:06:49.279707",
+ "modified": "2019-07-11 23:57:22.015881",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

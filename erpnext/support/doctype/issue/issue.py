@@ -121,6 +121,7 @@ class Issue(Document):
 
 		# Reset SLA
 		if replicated_issue.service_level_agreement:
+			replicated_issue.service_level_agreement_creation = now_datetime()
 			replicated_issue.service_level_agreement = None
 			replicated_issue.agreement_fulfilled = "Ongoing"
 			replicated_issue.response_by = None
