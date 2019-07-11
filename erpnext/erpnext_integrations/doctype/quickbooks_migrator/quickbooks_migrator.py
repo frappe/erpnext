@@ -830,7 +830,7 @@ class QuickBooksMigrator(Document):
 					"currency": invoice["CurrencyRef"]["value"],
 					"conversion_rate": invoice.get("ExchangeRate", 1),
 					"posting_date": invoice["TxnDate"],
-					"due_date":  invoice.get("DueDate", invoice["TxnDate"]),
+					"due_date": invoice.get("DueDate", invoice["TxnDate"]),
 					"credit_to": credit_to_account,
 					"supplier": frappe.get_all("Supplier",
 						filters={
