@@ -44,7 +44,16 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	args.currency = frm.doc.currency;
 	args.company = frm.doc.company;
 	args.doctype = frm.doc.doctype;
+	args.order_type = frm.doc.order_type_name;
 	args.cost_center = frm.doc.cost_center;
+	args.tax_id = frm.doc.tax_id;
+	args.tax_cnic = frm.doc.tax_cnic;
+	args.tax_strn = frm.doc.tax_strn;
+
+	if (frappe.meta.has_field(frm.doc.doctype, 'stin')) {
+		args["stin"] = cint(frm.doc.stin);
+	}
+
 	frappe.call({
 		method: method,
 		args: args,
