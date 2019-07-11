@@ -7,7 +7,9 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from requests_oauthlib import OAuth2Session
-import json, requests, traceback
+import json
+import requests
+import traceback
 from erpnext import encode_company_abbr
 
 # QuickBooks requires a redirect URL, User will be redirect to this URL
