@@ -160,25 +160,26 @@ class calculate_taxes_and_totals(object):
 				item.cumulated_tax_fraction += tax.tax_fraction_for_current_item
 
 			if item.cumulated_tax_fraction and not self.discount_amount_applied:
-				rate_before_discount = flt(item.tax_exclusive_price_list_rate / (1 + item.cumulated_tax_fraction))
-				item.tax_exclusive_price_list_rate = flt(rate_before_discount)
-
 				item.tax_exclusive_amount = flt(item.amount / (1 + item.cumulated_tax_fraction))
-				item.tax_exclusive_rate = (item.tax_exclusive_amount / item.qty) if item.qty \
-					else (item.rate / (1 + item.cumulated_tax_fraction))
+				item.tax_exclusive_rate = flt(item.tax_exclusive_amount / item.qty) if item.qty \
+					else flt(item.rate / (1 + item.cumulated_tax_fraction))
 
-				if has_margin_field and flt(item.tax_exclusive_rate_with_margin) > 0:
-					rate_before_discount = item.tax_exclusive_rate_with_margin / (1 + item.cumulated_tax_fraction)
-					item.tax_exclusive_rate_with_margin = flt(rate_before_discount)
+				item.tax_exclusive_amount_before_discount = flt(item.amount_before_discount / (1 + item.cumulated_tax_fraction))
+				item.tax_exclusive_total_discount = flt(item.tax_exclusive_amount_before_discount - item.tax_exclusive_amount)
+
+				if item.qty:
+					item.tax_exclusive_price_list_rate = flt(item.tax_exclusive_amount_before_discount / item.qty)
+				elif item.price_list_rate:
+					item.tax_exclusive_price_list_rate = flt(item.price_list_rate / (1 + item.cumulated_tax_fraction))
+				else:
+					item.tax_exclusive_price_list_rate = 0.0
+
+				if has_margin_field and flt(item.rate_with_margin) > 0:
+					item.tax_exclusive_rate_with_margin = flt(item.rate_with_margin / (1 + item.cumulated_tax_fraction))
 					item.base_tax_exclusive_rate_with_margin = flt(item.tax_exclusive_rate_with_margin * self.doc.conversion_rate)
 					item.tax_exclusive_discount_amount = flt(item.tax_exclusive_rate_with_margin - item.tax_exclusive_rate)
 				elif flt(item.tax_exclusive_price_list_rate) > 0:
 					item.tax_exclusive_discount_amount = flt(item.tax_exclusive_price_list_rate - item.tax_exclusive_rate)
-
-				item.tax_exclusive_amount_before_discount = flt(rate_before_discount * item.qty,
-					item.precision("tax_exclusive_amount_before_discount"))
-				item.tax_exclusive_total_discount = flt(item.tax_exclusive_amount_before_discount - item.tax_exclusive_amount,
-					item.precision("tax_exclusive_total_discount"))
 
 				item.net_amount = flt(item.amount / (1 + item.cumulated_tax_fraction))
 				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate")) if item.qty else 0.0
