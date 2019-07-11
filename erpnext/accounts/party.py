@@ -404,7 +404,7 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 	args['tax_cnic'] = "Set" if tax_cnic else "Not Set"
 	args['tax_strn'] = "Set" if tax_strn else "Not Set"
 
-	if 'stin' in args:
+	if 'stin' is not None:
 		args['stin'] = "Set" if cint(stin) else "Not Set"
 
 	if billing_address or shipping_address:
