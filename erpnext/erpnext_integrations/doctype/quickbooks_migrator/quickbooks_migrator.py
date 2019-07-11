@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from requests_oauthlib import OAuth2Session
-import json, requests
+import json, requests, traceback
 from erpnext import encode_company_abbr
 
 # QuickBooks requires a redirect URL, User will be redirect to this URL
@@ -32,7 +32,6 @@ def callback(*args, **kwargs):
 class QuickBooksMigrator(Document):
 	def __init__(self, *args, **kwargs):
 		super(QuickBooksMigrator, self).__init__(*args, **kwargs)
-		from pprint import pprint
 		self.oauth = OAuth2Session(
 			client_id=self.client_id,
 			redirect_uri=self.redirect_url,
@@ -1252,8 +1251,6 @@ class QuickBooksMigrator(Document):
 
 
 	def _log_error(self, execption, data=""):
-		import json, traceback
-		traceback.print_exc()
 		frappe.log_error(title="QuickBooks Migration Error",
 			message="\n".join([
 				"Data",
