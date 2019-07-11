@@ -174,9 +174,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					method: "erpnext.selling.doctype.quotation.quotation.make_sales_invoice",
 					source_doctype: "Quotation",
 					target: me.frm,
-					setters: {
-						customer: me.frm.doc.customer || undefined,
-					},
+					setters: [{
+						fieldtype: 'Link',
+						label: __('Customer'),
+						options: 'Customer',
+						fieldname: 'party_name',
+						default: me.frm.doc.customer,
+					}],
 					get_query_filters: {
 						docstatus: 1,
 						status: ["!=", "Lost"],
@@ -371,6 +375,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 								me.frm.pos_print_format = r.message.print_format;
 							}
 							me.frm.script_manager.trigger("update_stock");
+							if(me.frm.doc.taxes_and_charges) {
+								me.frm.script_manager.trigger("taxes_and_charges");
+							}
+
 							frappe.model.set_default_values(me.frm.doc);
 							me.set_dynamic_labels();
 							me.calculate_taxes_and_totals();

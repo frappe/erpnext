@@ -7,7 +7,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, cint
-from frappe import _
 
 class SoilTexture(Document):
 	soil_edit_order = [2, 1, 0]
@@ -35,8 +34,8 @@ class SoilTexture(Document):
 		if sum(self.soil_edit_order) < 5: return
 		last_edit_index = self.soil_edit_order.index(min(self.soil_edit_order))
 
-		# set composition of the last edited soil 
-		self.set( self.soil_types[last_edit_index], 
+		# set composition of the last edited soil
+		self.set( self.soil_types[last_edit_index],
 			100 - sum(cint(self.get(soil_type)) for soil_type in self.soil_types) + cint(self.get(self.soil_types[last_edit_index])))
 
 		# calculate soil type

@@ -184,7 +184,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.calculate_incentive(sales_person);
 			refresh_field(["allocated_percentage", "allocated_amount", "commission_rate","incentives"], sales_person.name,
 				sales_person.parentfield);
-		}	
+		}
 	},
 
 	sales_person: function(doc, cdt, cdn) {
@@ -215,6 +215,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					},
 					callback:function(r){
 						if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+
+							if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
+
 							me.set_batch_number(cdt, cdn);
 							me.batch_no(doc, cdt, cdn);
 						}
@@ -358,13 +361,18 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	    this._super(doc, cdt, cdn, dont_fetch_price_list_rate);
 		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn) &&
 			in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-			this.set_batch_number(cdt, cdn);
-		}
+				if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
+				this.set_batch_number(cdt, cdn);
+			}
 	},
 
 	qty: function(doc, cdt, cdn) {
 		this._super(doc, cdt, cdn);
-		this.set_batch_number(cdt, cdn);
+
+		if(in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+			if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
+			this.set_batch_number(cdt, cdn);
+		}
 	},
 
 	/* Determine appropriate batch number and set it in the form.
@@ -396,7 +404,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		if (doc.auto_repeat) {
 			frappe.call({
 				method:"frappe.desk.doctype.auto_repeat.auto_repeat.update_reference",
-				args:{ 
+				args:{
 					docname: doc.auto_repeat,
 					reference:doc.name
 				},

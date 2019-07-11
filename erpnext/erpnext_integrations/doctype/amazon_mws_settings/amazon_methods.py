@@ -40,7 +40,7 @@ def get_products_details():
 				products_response = call_mws_method(products.get_matching_product,marketplaceid=marketplace,
 					asins=asin_list)
 
-				matching_products_list = products_response.parsed 
+				matching_products_list = products_response.parsed
 				for product in matching_products_list:
 					skus = [row["sku"] for row in sku_asin if row["asin"]==product.ASIN]
 					for sku in skus:
@@ -116,7 +116,7 @@ def call_mws_method(mws_method, *args, **kwargs):
 	mws_settings = frappe.get_doc("Amazon MWS Settings")
 	max_retries = mws_settings.max_retry_limit
 
-	for x in xrange(0, max_retries):
+	for x in range(0, max_retries):
 		try:
 			response = mws_method(*args, **kwargs)
 			return response

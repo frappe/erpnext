@@ -45,6 +45,13 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				label: __(me.warehouse_details.type),
 				default: me.warehouse_details.name,
 				onchange: function(e) {
+
+					if(me.has_batch) {
+						fields = fields.concat(me.get_batch_fields());
+					} else {
+						fields = fields.concat(me.get_serial_no_fields());
+					}
+
 					me.warehouse_details.name = this.get_value();
 					var batches = this.layout.fields_dict.batches;
 					if(batches) {
@@ -232,31 +239,37 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 	get_batch_fields: function() {
 		var me = this;
+
 		return [
-			{fieldtype:'Section Break', label: __('Batches')},
-			{fieldname: 'batches', fieldtype: 'Table',
+			{ fieldtype: 'Section Break', label: __('Batches') },
+			{
+				fieldname: 'batches', fieldtype: 'Table',
 				fields: [
 					{
-						fieldtype:'Link',
-						fieldname:'batch_no',
-						options: 'Batch',
-						label: __('Select Batch'),
-						in_list_view:1,
-						get_query: function() {
+						'fieldtype': 'Link',
+						'read_only': 0,
+						'fieldname': 'batch_no',
+						'options': 'Batch',
+						'label': __('Select Batch'),
+						'in_list_view': 1,
+						get_query: function () {
 							return {
-							    filters: {item: me.item_code },
-							    query: 'erpnext.controllers.queries.get_batch_numbers'
-					        };
+								filters: {
+									item_code: me.item_code,
+									warehouse: me.warehouse || me.warehouse_details.name
+								},
+								query: 'erpnext.controllers.queries.get_batch_no'
+							};
 						},
-						onchange: function(e) {
+						change: function () {
 							let val = this.get_value();
-							if(val.length === 0) {
+							if (val.length === 0) {
 								this.grid_row.on_grid_fields_dict
 									.available_qty.set_value(0);
 								return;
 							}
 							let selected_batches = this.grid.grid_rows.map((row) => {
-								if(row === this.grid_row) {
+								if (row === this.grid_row) {
 									return "";
 								}
 
@@ -264,12 +277,12 @@ erpnext.SerialNoBatchSelector = Class.extend({
 									return row.on_grid_fields_dict.batch_no.get_value();
 								}
 							});
-							if(selected_batches.includes(val)) {
+							if (selected_batches.includes(val)) {
 								this.set_value("");
 								frappe.throw(__(`Batch ${val} already selected.`));
 								return;
 							}
-							if(me.warehouse_details.name) {
+							if (me.warehouse_details.name) {
 								frappe.call({
 									method: 'erpnext.stock.doctype.batch.batch.get_batch_qty',
 									args: {
@@ -292,31 +305,32 @@ erpnext.SerialNoBatchSelector = Class.extend({
 						}
 					},
 					{
-						fieldtype:'Float',
-						read_only:1,
-						fieldname:'available_qty',
-						label: __('Available'),
-						in_list_view:1,
-						default: 0,
-						onchange: function() {
+						'fieldtype': 'Float',
+						'read_only': 1,
+						'fieldname': 'available_qty',
+						'label': __('Available'),
+						'in_list_view': 1,
+						'default': 0,
+						change: function () {
 							this.grid_row.on_grid_fields_dict.selected_qty.set_value('0');
 						}
 					},
 					{
-						fieldtype:'Float',
-						fieldname:'selected_qty',
-						label: __('Qty'),
-						in_list_view:1,
+						'fieldtype': 'Float',
+						'read_only': 0,
+						'fieldname': 'selected_qty',
+						'label': __('Qty'),
+						'in_list_view': 1,
 						'default': 0,
-						onchange: function(e) {
+						change: function () {
 							var batch_no = this.grid_row.on_grid_fields_dict.batch_no.get_value();
 							var available_qty = this.grid_row.on_grid_fields_dict.available_qty.get_value();
 							var selected_qty = this.grid_row.on_grid_fields_dict.selected_qty.get_value();
 
-							if(batch_no.length === 0 && parseInt(selected_qty)!==0) {
+							if (batch_no.length === 0 && parseInt(selected_qty) !== 0) {
 								frappe.throw(__("Please select a batch"));
 							}
-							if(me.warehouse_details.type === 'Source Warehouse' &&
+							if (me.warehouse_details.type === 'Source Warehouse' &&
 								parseFloat(available_qty) < parseFloat(selected_qty)) {
 
 								this.set_value('0');
@@ -332,7 +346,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				],
 				in_place_edit: true,
 				data: this.data,
-				get_data: function() {
+				get_data: function () {
 					return this.data;
 				},
 			}

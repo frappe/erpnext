@@ -4,11 +4,10 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import flt, cint, nowdate
+from frappe.utils import flt, cint, nowdate, getdate
 
 from frappe import throw, _
 import frappe.defaults
-from frappe.utils import getdate
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
@@ -128,7 +127,7 @@ class PurchaseReceipt(BuyingController):
 			self.company, self.base_grand_total)
 
 		self.update_prevdoc_status()
-		if self.per_billed < 100:
+		if cint(self.per_billed) < 100:
 			self.update_billing_status()
 		else:
 			self.status = "Completed"

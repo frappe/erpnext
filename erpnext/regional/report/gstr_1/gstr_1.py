@@ -85,7 +85,7 @@ class Gstr1Report(object):
 					"rate": "",
 					"taxable_value": 0,
 					"cess_amount": 0,
-					"type": 0
+					"type": ""
 				})
 
 				row = b2cs_output.get((rate, place_of_supply, ecommerce_gstin))
@@ -94,6 +94,7 @@ class Gstr1Report(object):
 				row["rate"] = rate
 				row["taxable_value"] += sum([abs(net_amount)
 					for item_code, net_amount in self.invoice_items.get(inv).items() if item_code in items])
+				row["cess_amount"] += flt(self.invoice_cess.get(inv), 2)
 				row["type"] = "E" if ecommerce_gstin else "OE"
 
 		for key, value in iteritems(b2cs_output):
@@ -117,6 +118,10 @@ class Gstr1Report(object):
 		taxable_value = sum([abs(net_amount)
 			for item_code, net_amount in self.invoice_items.get(invoice).items() if item_code in items])
 		row += [tax_rate or 0, taxable_value]
+
+		for column in self.other_columns:
+			if column.get('fieldname') == 'cess_amount':
+				row.append(flt(self.invoice_cess.get(invoice), 2))
 
 		return row, taxable_value
 
