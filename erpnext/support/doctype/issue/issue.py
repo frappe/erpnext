@@ -194,9 +194,18 @@ class Issue(Document):
 				self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
 				frappe.msgprint(_("Service Level Agreement has been changed to {0}.").format(self.service_level_agreement))
 
-	def reset_service_level_agreement(self):
+	def reset_service_level_agreement(self, reason, user):
 		if not frappe.db.get_single_value("Support Settings", "allow_resetting_service_level_agreement"):
 			frappe.throw(_("Allow Resetting Service Level Agreement from Support Settings."))
+
+		frappe.get_doc({
+			"doctype": "Comment",
+			"comment_type": "Info",
+			"reference_doctype": self.doctype,
+			"reference_name": self.name,
+			"comment_email": user,
+			"content": " resetted Service Level Agreement - {0}".format(_(reason)),
+		}).insert(ignore_permissions=True)
 
 		self.service_level_agreement_creation = now_datetime()
 		self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)

@@ -80,12 +80,39 @@ frappe.ui.form.on("Issue", {
 	},
 
 	reset_service_level_agreement: function(frm) {
-		frappe.confirm(__("Reset Service Level Agreement ?"), function() {
-			frm.call("reset_service_level_agreement", () => {
-				frm.refresh();
-				frappe.msgprint(__("Service Level Agreement Reset."));
-			});
+		let reset_sla = new frappe.ui.Dialog({
+			title: __("Reset Service Level Agreement"),
+			fields: [
+				{
+					fieldtype: "Data",
+					fieldname: "reason",
+					label: __("Reason"),
+					reqd: 1
+				}
+			],
+			primary_action_label: __("Reset"),
+			primary_action: (values) => {
+				reset_sla.disable_primary_action();
+				reset_sla.hide();
+				reset_sla.clear();
+
+				frappe.show_alert({
+					indicator: 'green',
+					message: __('Resetting Service Level Agreement.')
+				});
+
+				frm.call("reset_service_level_agreement", {
+					reason: values.reason,
+					user: frappe.session.user_email
+				}, () => {
+					reset_sla.enable_primary_action();
+					frm.refresh();
+					frappe.msgprint(__("Service Level Agreement Reset."));
+				});
+			}
 		});
+
+		reset_sla.show();
 	},
 
 	timeline_refresh: function(frm) {
