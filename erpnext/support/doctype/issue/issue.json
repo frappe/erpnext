@@ -113,6 +113,7 @@
    "search_index": 1
   },
   {
+   "default": "Medium",
    "fieldname": "priority",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -143,7 +144,6 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval: doc.service_level_agreement",
    "fieldname": "service_level_section",
    "fieldtype": "Section Break",
    "label": "Service Level"
@@ -314,6 +314,7 @@
   },
   {
    "default": "Ongoing",
+   "depends_on": "eval: doc.service_level_agreement",
    "fieldname": "agreement_fulfilled",
    "fieldtype": "Select",
    "label": "Service Level Agreement Fulfilled",
@@ -321,6 +322,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval: doc.service_level_agreement",
    "description": "in hours",
    "fieldname": "response_by_variance",
    "fieldtype": "Float",
@@ -328,6 +330,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval: doc.service_level_agreement",
    "description": "in hours",
    "fieldname": "resolution_by_variance",
    "fieldtype": "Float",
@@ -337,7 +340,7 @@
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2019-06-27 15:19:00.771333",
+ "modified": "2019-06-30 13:19:38.215525",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
