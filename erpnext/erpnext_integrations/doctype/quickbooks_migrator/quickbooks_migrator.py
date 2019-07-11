@@ -494,7 +494,7 @@ class QuickBooksMigrator(Document):
 						"account_currency": customer["CurrencyRef"]["value"],
 						"company": self.company,
 					})[0]["name"]
-				except Exception as e:
+				except Exception:
 					receivable_account = None
 				erpcustomer = frappe.get_doc({
 					"doctype": "Customer",
