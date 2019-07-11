@@ -217,7 +217,7 @@ class QuickBooksMigrator(Document):
 
 	def _fetch_general_ledger(self):
 		try:
-			query_uri = "{}/company/{}/reports/GeneralLedger".format(self.api_endpoint ,self.quickbooks_company_id)
+			query_uri = "{}/company/{}/reports/GeneralLedger".format(self.api_endpoint, self.quickbooks_company_id)
 			response = self._get(query_uri,
 				params={
 					"columns": ",".join(["tx_date", "txn_type", "credit_amt", "debt_amt"]),
@@ -555,7 +555,7 @@ class QuickBooksMigrator(Document):
 				if "BillAddr" in vendor:
 					self._create_address(erpsupplier, "Supplier", vendor["BillAddr"], "Billing")
 				if "ShipAddr" in vendor:
-					self._create_address(erpsupplier, "Supplier",vendor["ShipAddr"], "Shipping")
+					self._create_address(erpsupplier, "Supplier", vendor["ShipAddr"], "Shipping")
 		except Exception as e:
 			self._log_error(e)
 
