@@ -3,6 +3,7 @@
  "autoname": "naming_series:",
  "creation": "2016-06-01 14:38:51.012597",
  "doctype": "DocType",
+ "engine": "InnoDB",
  "field_order": [
   "type_of_payment",
   "naming_series",
@@ -11,7 +12,6 @@
   "column_break_5",
   "posting_date",
   "company",
-  "cost_center",
   "mode_of_payment",
   "party_section",
   "party_type",
@@ -40,7 +40,7 @@
   "target_exchange_rate",
   "base_received_amount",
   "section_break_14",
-  "allocate_payment_amount",
+  "get_outstanding_invoice",
   "references",
   "section_break_34",
   "total_allocated_amount",
@@ -57,8 +57,11 @@
   "column_break_23",
   "reference_date",
   "clearance_date",
-  "section_break_12",
+  "accounting_dimensions_section",
   "project",
+  "dimension_col_break",
+  "cost_center",
+  "section_break_12",
   "remarks",
   "column_break_16",
   "letter_head",
@@ -322,19 +325,15 @@
    "reqd": 1
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "references",
    "depends_on": "eval:(doc.party && doc.paid_from && doc.paid_to && doc.paid_amount && doc.received_amount)",
    "fieldname": "section_break_14",
    "fieldtype": "Section Break",
    "label": "Reference"
   },
   {
-   "default": "1",
-   "depends_on": "eval:in_list(['Pay', 'Receive'], doc.payment_type)",
-   "fieldname": "allocate_payment_amount",
-   "fieldtype": "Check",
-   "label": "Allocate Payment Amount"
+   "fieldname": "get_outstanding_invoice",
+   "fieldtype": "Button",
+   "label": "Get Outstanding Invoice"
   },
   {
    "fieldname": "references",
@@ -554,10 +553,20 @@
    "label": "Payment Order Status",
    "options": "Initiated\nPayment Ordered",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-15 15:43:29.229496",
+ "modified": "2019-05-27 15:53:21.108857",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

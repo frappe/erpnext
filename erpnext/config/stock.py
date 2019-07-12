@@ -163,6 +163,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Item Manufacturer",
+				},
+				{
+					"type": "doctype",
 					"name": "Item Variant Settings",
 				},
 			]
@@ -277,9 +281,9 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"is_query_report": True,
 					"name": "Item Shortage Report",
-					"route": "#Report/Bin/Item Shortage Report",
-					"doctype": "Purchase Receipt"
+					"doctype": "Bin"
 				},
 				{
 					"type": "report",

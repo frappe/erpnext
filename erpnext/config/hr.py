@@ -20,6 +20,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Employee Group",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
 					"name": "Attendance",
 					"onboard": 1,
 					"dependencies": ["Employee"]
@@ -33,6 +38,13 @@ def get_data():
 					"type": "doctype",
 					"name": "Upload Attendance",
 					"hide_count": True,
+					"dependencies": ["Employee"]
+				},
+								{
+					"type": "doctype",
+					"name": "Employee Checkin",
+					"hide_count": True,
+					"onboard": 1,
 					"dependencies": ["Employee"]
 				},
 			]

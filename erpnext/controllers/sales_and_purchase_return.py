@@ -75,7 +75,7 @@ def validate_returned_items(doc):
 
 	items_returned = False
 	for d in doc.get("items"):
-		if flt(d.qty) < 0 or d.get('received_qty') < 0:
+		if d.item_code and (flt(d.qty) < 0 or d.get('received_qty') < 0):
 			if d.item_code not in valid_items:
 				frappe.throw(_("Row # {0}: Returned Item {1} does not exists in {2} {3}")
 					.format(d.idx, d.item_code, doc.doctype, doc.return_against))
@@ -105,6 +105,9 @@ def validate_returned_items(doc):
 					and not d.get("warehouse"):
 						frappe.throw(_("Warehouse is mandatory"))
 
+			items_returned = True
+
+		elif d.item_name:
 			items_returned = True
 
 	if not items_returned:
@@ -205,11 +208,14 @@ def get_already_returned_items(doc):
 
 def make_return_doc(doctype, source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
+	company = frappe.db.get_value("Delivery Note", source_name, "company")
+	default_warehouse_for_sales_return = frappe.db.get_value("Company", company, "default_warehouse_for_sales_return")
 	def set_missing_values(source, target):
 		doc = frappe.get_doc(target)
 		doc.is_return = 1
 		doc.return_against = source.name
 		doc.ignore_pricing_rule = 1
+		doc.set_warehouse = ""
 		if doctype == "Sales Invoice":
 			doc.is_pos = source.is_pos
 
@@ -253,7 +259,6 @@ def make_return_doc(doctype, source_name, target_doc=None):
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = -1* source_doc.qty
-		default_return_warehouse = frappe.db.get_single_value("Stock Settings", "default_return_warehouse")
 		if doctype == "Purchase Receipt":
 			target_doc.received_qty = -1* source_doc.received_qty
 			target_doc.rejected_qty = -1* source_doc.rejected_qty
@@ -278,13 +283,16 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.so_detail = source_doc.so_detail
 			target_doc.si_detail = source_doc.si_detail
 			target_doc.expense_account = source_doc.expense_account
-			target_doc.warehouse = default_return_warehouse if default_return_warehouse else source_doc.warehouse
+			if default_warehouse_for_sales_return:
+				target_doc.warehouse = default_warehouse_for_sales_return
 		elif doctype == "Sales Invoice":
 			target_doc.sales_order = source_doc.sales_order
 			target_doc.delivery_note = source_doc.delivery_note
 			target_doc.so_detail = source_doc.so_detail
 			target_doc.dn_detail = source_doc.dn_detail
 			target_doc.expense_account = source_doc.expense_account
+			if default_warehouse_for_sales_return:
+				target_doc.warehouse = default_warehouse_for_sales_return
 
 	def update_terms(source_doc, target_doc, source_parent):
 		target_doc.payment_amount = -source_doc.payment_amount

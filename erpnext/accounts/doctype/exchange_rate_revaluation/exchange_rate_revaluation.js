@@ -21,9 +21,29 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 
 	refresh: function(frm) {
 		if(frm.doc.docstatus==1) {
-			frm.add_custom_button(__('Create Journal Entry'), function() {
-				return frm.events.make_jv(frm);
-			});
+			frappe.db.get_value("Journal Entry Account", {
+				'reference_type': 'Exchange Rate Revaluation',
+				'reference_name': frm.doc.name,
+				'docstatus': 1
+			}, "sum(debit) as sum", (r) =>{
+				let total_amt = 0;
+				frm.doc.accounts.forEach(d=> {
+					total_amt = total_amt + d['new_balance_in_base_currency'];
+				});
+				if(total_amt === r.sum) {
+					frm.add_custom_button(__("Journal Entry"), function(){
+						frappe.route_options = {
+							'reference_type': 'Exchange Rate Revaluation',
+							'reference_name': frm.doc.name
+						};
+						frappe.set_route("List", "Journal Entry");
+					}, __("View"));
+				} else {
+					frm.add_custom_button(__('Create Journal Entry'), function() {
+						return frm.events.make_jv(frm);
+					});
+				}
+			}, 'Journal Entry');
 		}
 	},
 
@@ -39,8 +59,6 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 					});
 					frm.events.get_total_gain_loss(frm);
 					refresh_field("accounts");
-				} else {
-					frappe.msgprint(__("No records found"));
 				}
 			}
 		});

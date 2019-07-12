@@ -105,7 +105,7 @@ class PurchaseInvoice(BuyingController):
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
-			frappe.msgprint('Release date must be in the future', raise_exception=True)
+			frappe.throw(_('Release date must be in the future'))
 
 	def validate_cash(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
@@ -337,7 +337,8 @@ class PurchaseInvoice(BuyingController):
 		if not self.is_return:
 			self.update_against_document_in_jv()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
-			self.update_billing_status_in_pr()
+
+		self.update_billing_status_in_pr()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
@@ -416,6 +417,7 @@ class PurchaseInvoice(BuyingController):
 					"account": self.credit_to,
 					"party_type": "Supplier",
 					"party": self.supplier,
+					"due_date": self.due_date,
 					"against": self.against_expense_account,
 					"credit": grand_total_in_company_currency,
 					"credit_in_account_currency": grand_total_in_company_currency \
@@ -456,7 +458,7 @@ class PurchaseInvoice(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"cost_center": item.cost_center,
 							"project": item.project
-						}, account_currency)
+						}, account_currency, item=item)
 					)
 
 					# Amount added through landed-cost-voucher
@@ -468,7 +470,7 @@ class PurchaseInvoice(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.landed_cost_voucher_amount),
 							"project": item.project
-						}))
+						}, item=item))
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):
@@ -482,11 +484,15 @@ class PurchaseInvoice(BuyingController):
 							"cost_center": item.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.rm_supp_cost)
-						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
+						}, warehouse_account[self.supplier_warehouse]["account_currency"], item=item))
 				elif not item.is_fixed_asset or (item.is_fixed_asset and is_cwip_accounting_disabled()):
+
+					expense_account = (item.expense_account
+						if (not item.enable_deferred_expense or self.is_return) else item.deferred_expense_account)
+
 					gl_entries.append(
 						self.get_gl_dict({
-							"account": item.expense_account if not item.enable_deferred_expense else item.deferred_expense_account,
+							"account": expense_account,
 							"against": self.supplier,
 							"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
 							"debit_in_account_currency": (flt(item.base_net_amount,
@@ -494,7 +500,7 @@ class PurchaseInvoice(BuyingController):
 								else flt(item.net_amount, item.precision("net_amount"))),
 							"cost_center": item.cost_center,
 							"project": item.project
-						}, account_currency)
+						}, account_currency, item=item)
 					)
 
 			if self.auto_accounting_for_stock and self.is_opening == "No" and \
@@ -513,7 +519,7 @@ class PurchaseInvoice(BuyingController):
 									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
 									"remarks": self.remarks or "Accounting Entry for Stock",
 									"cost_center": self.cost_center
-								})
+								}, item=item)
 							)
 
 							self.negative_expense_to_be_booked += flt(item.item_tax_amount, \
@@ -542,7 +548,7 @@ class PurchaseInvoice(BuyingController):
 						"debit_in_account_currency": (base_asset_amount
 							if asset_rbnb_currency == self.company_currency else asset_amount),
 						"cost_center": item.cost_center
-					}))
+					}, item=item))
 
 					if item.item_tax_amount:
 						asset_eiiav_currency = get_account_currency(eiiav_account)
@@ -555,7 +561,7 @@ class PurchaseInvoice(BuyingController):
 							"credit_in_account_currency": (item.item_tax_amount
 								if asset_eiiav_currency == self.company_currency else
 									item.item_tax_amount / self.conversion_rate)
-						}))
+						}, item=item))
 				else:
 					cwip_account = get_asset_account("capital_work_in_progress_account",
 						item.asset, company = self.company)
@@ -569,7 +575,7 @@ class PurchaseInvoice(BuyingController):
 						"debit_in_account_currency": (base_asset_amount
 							if cwip_account_currency == self.company_currency else asset_amount),
 						"cost_center": self.cost_center
-					}))
+					}, item=item))
 
 					if item.item_tax_amount and not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
 						asset_eiiav_currency = get_account_currency(eiiav_account)
@@ -582,7 +588,7 @@ class PurchaseInvoice(BuyingController):
 							"credit_in_account_currency": (item.item_tax_amount
 								if asset_eiiav_currency == self.company_currency else
 									item.item_tax_amount / self.conversion_rate)
-						}))
+						}, item=item))
 
 		return gl_entries
 
@@ -609,7 +615,7 @@ class PurchaseInvoice(BuyingController):
 					"remarks": self.get("remarks") or _("Stock Adjustment"),
 					"cost_center": item.cost_center,
 					"project": item.project
-				}, account_currency)
+				}, account_currency, item=item)
 			)
 
 			warehouse_debit_amount = stock_amount
@@ -769,7 +775,8 @@ class PurchaseInvoice(BuyingController):
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
-			self.update_billing_status_in_pr()
+
+		self.update_billing_status_in_pr()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
@@ -787,9 +794,8 @@ class PurchaseInvoice(BuyingController):
 		for d in self.items:
 			if d.project and d.project not in project_list:
 				project = frappe.get_doc("Project", d.project)
-				project.flags.dont_sync_tasks = True
 				project.update_purchase_costing()
-				project.save()
+				project.db_update()
 				project_list.append(d.project)
 
 	def validate_supplier_invoice(self):

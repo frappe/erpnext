@@ -113,6 +113,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Promotional Scheme",
+					"description": _("Rules for applying different promotional schemes.")
+				},
+				{
+					"type": "doctype",
 					"name": "Pricing Rule",
 					"description": _("Rules for applying pricing and discount."),
 					"dependencies": ["Item"],
@@ -310,7 +315,30 @@ def get_data():
 					"is_query_report": True,
 					"name": "Sales Partners Commission",
 					"doctype": "Customer"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Partners Commission",
+					"doctype": "Customer"
 				}
+			]
+		},
+		{
+			"label": _("SMS"),
+			"icon": "fa fa-wrench",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "SMS Center",
+					"description":_("Send mass SMS to your contacts"),
+				},
+				{
+					"type": "doctype",
+					"name": "SMS Log",
+					"description":_("Logs for maintaining sms delivery status"),
+				},
+
 			]
 		},
 		{

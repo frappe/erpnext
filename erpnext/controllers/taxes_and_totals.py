@@ -397,7 +397,7 @@ class calculate_taxes_and_totals(object):
 					net_total += item.net_amount
 
 					# discount amount rounding loss adjustment if no taxes
-					if (not taxes or self.doc.apply_discount_on == "Net Total") \
+					if (self.doc.apply_discount_on == "Net Total" or not taxes or total_for_discount_amount==self.doc.net_total) \
 						and i == len(self.doc.get("items")) - 1:
 							discount_amount_loss = flt(self.doc.net_total - net_total - self.doc.discount_amount,
 								self.doc.precision("net_total"))
@@ -616,7 +616,7 @@ def get_itemised_tax_breakup_data(doc):
 
 	return itemised_tax, itemised_taxable_amount
 
-def get_itemised_tax(taxes):
+def get_itemised_tax(taxes, with_tax_account=False):
 	itemised_tax = {}
 	for tax in taxes:
 		if getattr(tax, "category", None) and tax.category=="Valuation":
@@ -640,6 +640,9 @@ def get_itemised_tax(taxes):
 					tax_rate = tax_rate,
 					tax_amount = tax_amount
 				))
+
+				if with_tax_account:
+					itemised_tax[item_code][tax.description].tax_account = tax.account_head
 
 	return itemised_tax
 
