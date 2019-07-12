@@ -1,35 +1,25 @@
 {
- "autoname": "naming_series:",
+ "autoname": "format:MAIL-CAMP-{YYYY}-{#####}",
  "creation": "2019-06-30 16:05:30.015615",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "campaign_section",
   "campaign_name",
   "email_campaign_for",
-  "start_date",
-  "column_break_4",
-  "sender",
   "recipient",
+  "sender",
+  "column_break_4",
+  "start_date",
   "end_date",
-  "status",
-  "email_schedule_section",
-  "email_schedule",
-  "unsubscribed",
-  "naming_series"
+  "status"
  ],
  "fields": [
-  {
-   "fieldname": "campaign_section",
-   "fieldtype": "Section Break",
-   "label": "Campaign"
-  },
   {
    "fieldname": "campaign_name",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Campaign Name",
+   "label": "Campaign",
    "options": "Campaign",
    "reqd": 1
   },
@@ -37,7 +27,8 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nScheduled\nIn Progress\nCompleted\nUnsubscribed"
+   "options": "\nScheduled\nIn Progress\nCompleted\nUnsubscribed",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_4",
@@ -47,25 +38,6 @@
    "fieldname": "start_date",
    "fieldtype": "Date",
    "label": "Start Date",
-   "reqd": 1
-  },
-  {
-   "fieldname": "email_schedule_section",
-   "fieldtype": "Section Break",
-   "label": "Email Schedule"
-  },
-  {
-   "fieldname": "email_schedule",
-   "fieldtype": "Table",
-   "label": "Email Schedule",
-   "options": "Campaign Email Schedule",
-   "reqd": 1
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Naming Series",
-   "options": "MAIL-CAMP-.YYYY.-",
    "reqd": 1
   },
   {
@@ -95,15 +67,9 @@
    "fieldtype": "Link",
    "label": "Sender",
    "options": "User"
-  },
-  {
-   "default": "0",
-   "fieldname": "unsubscribed",
-   "fieldtype": "Check",
-   "label": "Unsubscribed"
   }
  ],
- "modified": "2019-07-09 15:07:03.328591",
+ "modified": "2019-07-12 13:47:37.261213",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Email Campaign",

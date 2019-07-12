@@ -6,6 +6,7 @@
  "description": "Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "campaign",
   "campaign_name",
@@ -18,6 +19,9 @@
   "currency",
   "column_break2",
   "budget",
+  "schedule_section",
+  "campaign_schedule_section",
+  "campaign_schedule",
   "description_section",
   "description"
  ],
@@ -53,13 +57,13 @@
    "width": "300px"
   },
   {
+   "default": "Planned",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
    "options": "\nPlanned\nIn Progress\nCompleted\nCancelled",
-   "reqd": 1,
-   "default": "Planned"
+   "reqd": 1
   },
   {
    "fieldname": "from_date",
@@ -98,11 +102,26 @@
    "fieldname": "budget_section",
    "fieldtype": "Section Break",
    "label": "BUDGET"
+  },
+  {
+   "fieldname": "campaign_schedule_section",
+   "fieldtype": "Section Break",
+   "label": "Campaign Schedule"
+  },
+  {
+   "fieldname": "campaign_schedule",
+   "fieldtype": "Table",
+   "label": "Campaign Schedule",
+   "options": "Campaign Email Schedule"
+  },
+  {
+   "fieldname": "schedule_section",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-bullhorn",
  "idx": 1,
- "modified": "2019-04-29 22:09:39.251884",
+ "modified": "2019-07-12 11:52:47.196736",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Campaign",
@@ -140,5 +159,7 @@
    "write": 1
   }
  ],
- "quick_entry": 1
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC"
 }
