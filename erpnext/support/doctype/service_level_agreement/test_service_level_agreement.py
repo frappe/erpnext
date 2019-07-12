@@ -76,6 +76,7 @@ def create_service_level_agreement(default_service_level_agreement, service_leve
 
 	service_level_agreement = frappe.get_doc({
 		"doctype": "Service Level Agreement",
+		"enable": 1,
 		"default_service_level_agreement": default_service_level_agreement,
 		"service_level": service_level,
 		"holiday_list": holiday_list,
