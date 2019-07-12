@@ -247,7 +247,7 @@ def get_data():
 		{
 			"label": _("Taxes"),
 			"items": [
-				{x
+				{
 					"type": "doctype",
 					"name": "Sales Taxes and Charges Template",
 					"description": _("Tax template for selling transactions.")
