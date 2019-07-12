@@ -7,12 +7,12 @@ erpnext.doctypes_with_dimensions = ["GL Entry", "Sales Invoice", "Purchase Invoi
 	"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
 	"Travel Request", "Fees", "POS Profile"];
 
-let dimension_filters = erpnext.get_dimension_filters();
+erpnext.dimension_filters = erpnext.get_dimension_filters();
 
 erpnext.doctypes_with_dimensions.forEach((doctype) => {
 	frappe.ui.form.on(doctype, {
 		onload: function(frm) {
-			dimension_filters.then((dimensions) => {
+			erpnext.dimension_filters.then((dimensions) => {
 				dimensions.forEach((dimension) => {
 					frappe.model.with_doctype(dimension['document_type'], () => {
 						if (frappe.meta.has_field(dimension['document_type'], 'is_group')) {

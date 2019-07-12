@@ -97,4 +97,15 @@ def get_data():
 				},
 			]
 		},
+		{
+			"label": _("Settings"),
+			"icon": "fa fa-list",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Support Settings",
+					"label": _("Support Settings"),
+				},
+			]
+		},
 	]
