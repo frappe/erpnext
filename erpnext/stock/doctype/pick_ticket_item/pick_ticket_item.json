@@ -1,0 +1,72 @@
+{
+ "creation": "2019-07-11 16:01:22.832885",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "item_name",
+  "description",
+  "reference_document_item",
+  "warehouse",
+  "qty",
+  "picked_qty"
+ ],
+ "fields": [
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "fieldname": "picked_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Picked Qty"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fetch_from": "item.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name"
+  },
+  {
+   "fetch_from": "item.description",
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "reference_document_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reference Document Item"
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-07-11 16:34:52.853146",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Pick Ticket Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
