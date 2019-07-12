@@ -61,7 +61,7 @@ def place_order():
 	quotation.flags.ignore_permissions = True
 	quotation.submit()
 
-	if quotation.lead:
+	if quotation.quotation_to == 'Lead' and quotation.party_name:
 		# company used to create customer accounts
 		frappe.defaults.set_user_default("company", quotation.company)
 

@@ -52,3 +52,13 @@ $.extend(frappe.breadcrumbs.preferred, {
 	"Sales Partner": "Selling",
 	"Brand": "Selling"
 });
+
+$.extend(frappe.breadcrumbs.module_map, {
+	'ERPNext Integrations': 'Integrations',
+	'Geo': 'Settings',
+	'Accounts': 'Accounting',
+	'Portal': 'Website',
+	'Utilities': 'Settings',
+	'Shopping Cart': 'Website',
+	'Contacts': 'CRM'
+});
