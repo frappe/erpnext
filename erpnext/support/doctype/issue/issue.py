@@ -12,7 +12,6 @@ from datetime import datetime, timedelta
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import is_website_user
 from erpnext.support.doctype.service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
-from erpnext.crm.doctype.opportunity.opportunity import assign_to_user
 from frappe.email.inbox import link_communication_to_document
 
 sender_field = "raised_by"
@@ -38,9 +37,6 @@ class Issue(Document):
 		if self.flags.create_communication and self.via_customer_portal:
 			self.create_communication()
 			self.flags.communication_created = None
-
-		# assign to customer account manager or lead owner
-		assign_to_user(self, 'subject')
 
 	def set_lead_contact(self, email_id):
 		import email.utils
@@ -96,7 +92,6 @@ class Issue(Document):
 			self.resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()), 2)
 
 		self.agreement_fulfilled = "Fulfilled" if self.response_by_variance > 0 and self.resolution_by_variance > 0 else "Failed"
-		self.save(ignore_permissions=True)
 
 	def create_communication(self):
 		communication = frappe.new_doc("Communication")
@@ -122,6 +117,17 @@ class Issue(Document):
 
 		replicated_issue = deepcopy(self)
 		replicated_issue.subject = subject
+		replicated_issue.creation = now_datetime()
+
+		# Reset SLA
+		if replicated_issue.service_level_agreement:
+			replicated_issue.service_level_agreement = None
+			replicated_issue.agreement_fulfilled = "Ongoing"
+			replicated_issue.response_by = None
+			replicated_issue.response_by_variance = None
+			replicated_issue.resolution_by = None
+			replicated_issue.resolution_by_variance = None
+
 		frappe.get_doc(replicated_issue).insert()
 
 		# Replicate linked Communications
@@ -140,7 +146,8 @@ class Issue(Document):
 		return replicated_issue.name
 
 	def before_insert(self):
-		self.set_response_and_resolution_time()
+		if frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
+			self.set_response_and_resolution_time()
 
 	def set_response_and_resolution_time(self, priority=None, service_level_agreement=None):
 		service_level_agreement = get_active_service_level_agreement_for(priority=priority,
@@ -175,13 +182,16 @@ class Issue(Document):
 		self.resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()))
 
 	def change_service_level_agreement_and_priority(self):
-		if not self.priority == frappe.db.get_value("Issue", self.name, "priority"):
-			self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
-			frappe.msgprint("Priority has been updated.")
+		if self.service_level_agreement and frappe.db.exists("Issue", self.name) and \
+			frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
 
-		if not self.service_level_agreement == frappe.db.get_value("Issue", self.name, "service_level_agreement"):
-			self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
-			frappe.msgprint("Service Level Agreement has been updated.")
+			if not self.priority == frappe.db.get_value("Issue", self.name, "priority"):
+				self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
+				frappe.msgprint(_("Priority has been changed to {0}.").format(self.priority))
+
+			if not self.service_level_agreement == frappe.db.get_value("Issue", self.name, "service_level_agreement"):
+				self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
+				frappe.msgprint(_("Service Level Agreement has been changed to {0}.").format(self.service_level_agreement))
 
 def get_expected_time_for(parameter, service_level, start_date_time):
 	current_date_time = start_date_time
@@ -262,15 +272,15 @@ def set_service_level_agreement_variance(issue=None):
 
 		if not doc.first_responded_on: # first_responded_on set when first reply is sent to customer
 			variance = round(time_diff_in_hours(doc.response_by, current_time), 2)
-			frappe.db.set_value("Issue", doc.name, "response_by_variance", variance)
+			frappe.db.set_value(dt="Issue", dn=doc.name, field="response_by_variance", val=variance, update_modified=False)
 			if variance < 0:
-				frappe.db.set_value("Issue", doc.name, "agreement_fulfilled", "Failed")
+				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_fulfilled", val="Failed", update_modified=False)
 
 		if not doc.resolution_date: # resolution_date set when issue has been closed
 			variance = round(time_diff_in_hours(doc.resolution_by, current_time), 2)
-			frappe.db.set_value("Issue", doc.name, "resolution_by_variance", variance)
+			frappe.db.set_value(dt="Issue", dn=doc.name, field="resolution_by_variance", val=variance, update_modified=False)
 			if variance < 0:
-				frappe.db.set_value("Issue", doc.name, "agreement_fulfilled", "Failed")
+				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_fulfilled", val="Failed", update_modified=False)
 
 def get_list_context(context=None):
 	return {

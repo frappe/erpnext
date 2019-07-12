@@ -17,10 +17,8 @@ def execute():
 	frappe.reload_doc('stock', 'doctype', 'item_default')
 	frappe.reload_doc('stock', 'doctype', 'item')
 
-	if frappe.db.a_row_exists('Item Default'): return
-
 	companies = frappe.get_all("Company")
-	if len(companies) == 1:
+	if len(companies) == 1 and not frappe.get_all("Item Default", limit=1):
 		try:
 			frappe.db.sql('''
 					INSERT INTO `tabItem Default`
@@ -35,32 +33,64 @@ def execute():
 		except:
 			pass
 	else:
-		item_details = frappe.get_all("Item", fields=["name", "default_warehouse", "buying_cost_center",
-									"expense_account", "selling_cost_center", "income_account"], limit=100)
+		item_details = frappe.db.sql(""" SELECT name, default_warehouse,
+				buying_cost_center, expense_account, selling_cost_center, income_account
+			FROM tabItem
+			WHERE
+				name not in (select distinct parent from `tabItem Default`) and ifnull(disabled, 0) = 0"""
+		, as_dict=1)
 
-		for item in item_details:
-			item_defaults = []
+		items_default_data = {}
+		for item_data in item_details:
+			for d in [["default_warehouse", "Warehouse"], ["expense_account", "Account"],
+				["income_account", "Account"], ["buying_cost_center", "Cost Center"],
+				["selling_cost_center", "Cost Center"]]:
+				if item_data.get(d[0]):
+					company = frappe.get_value(d[1], item_data.get(d[0]), "company", cache=True)
 
-			def insert_into_item_defaults(doc_field_name, doc_field_value, company):
-				for d in item_defaults:
-					if d.get("company") == company:
-						d[doc_field_name] = doc_field_value
-						return
-				item_defaults.append({
-					"company": company,
-					doc_field_name: doc_field_value
-				})
+					if item_data.name not in items_default_data:
+						items_default_data[item_data.name] = {}
 
-			for d in [
-						["default_warehouse", "Warehouse"], ["expense_account", "Account"], ["income_account", "Account"],
-						["buying_cost_center", "Cost Center"], ["selling_cost_center", "Cost Center"]
-					]:
-				if item.get(d[0]):
-					company = frappe.get_value(d[1], item.get(d[0]), "company", cache=True)
-					insert_into_item_defaults(d[0], item.get(d[0]), company)
+					company_wise_data = items_default_data[item_data.name]
 
-			doc = frappe.get_doc("Item", item.name)
-			doc.extend("item_defaults", item_defaults)
+					if company not in company_wise_data:
+						company_wise_data[company] = {}
 
-			for child_doc in doc.item_defaults:
-				child_doc.db_insert()
+					default_data = company_wise_data[company]
+					default_data[d[0]] = item_data.get(d[0])
+
+		to_insert_data = []
+
+		# items_default_data data structure will be as follow
+		# {
+		# 	'item_code 1': {'company 1': {'default_warehouse': 'Test Warehouse 1'}},
+		# 	'item_code 2': {
+		# 		'company 1': {'default_warehouse': 'Test Warehouse 1'},
+		# 		'company 2': {'default_warehouse': 'Test Warehouse 1'}
+		# 	}
+		# }
+
+		for item_code, companywise_item_data in items_default_data.items():
+			for company, item_default_data in companywise_item_data.items():
+				to_insert_data.append((
+					frappe.generate_hash("", 10),
+					item_code,
+					'Item',
+					'item_defaults',
+					company,
+					item_default_data.get('default_warehouse'),
+					item_default_data.get('expense_account'),
+					item_default_data.get('income_account'),
+					item_default_data.get('buying_cost_center'),
+					item_default_data.get('selling_cost_center'),
+				))
+
+		if to_insert_data:
+			frappe.db.sql('''
+				INSERT INTO `tabItem Default`
+				(
+					`name`, `parent`, `parenttype`, `parentfield`, `company`, `default_warehouse`,
+					`expense_account`, `income_account`, `buying_cost_center`, `selling_cost_center`
+				)
+				VALUES {}
+			'''.format(', '.join(['%s'] * len(to_insert_data))), tuple(to_insert_data))

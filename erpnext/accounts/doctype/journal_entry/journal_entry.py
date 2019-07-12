@@ -331,7 +331,8 @@ class JournalEntry(AccountsController):
 		for reference_name, total in iteritems(self.reference_totals):
 			reference_type = self.reference_types[reference_name]
 
-			if reference_type in ("Sales Invoice", "Purchase Invoice"):
+			if (reference_type in ("Sales Invoice", "Purchase Invoice") and
+				self.voucher_type not in ['Debit Note', 'Credit Note']):
 				invoice = frappe.db.get_value(reference_type, reference_name,
 					["docstatus", "outstanding_amount"], as_dict=1)
 
@@ -497,6 +498,7 @@ class JournalEntry(AccountsController):
 					self.get_gl_dict({
 						"account": d.account,
 						"party_type": d.party_type,
+						"due_date": self.due_date,
 						"party": d.party,
 						"against": d.against_account,
 						"debit": flt(d.debit, d.precision("debit")),
