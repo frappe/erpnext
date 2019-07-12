@@ -110,7 +110,7 @@ def get_reserved_qty(item_code, warehouse):
 	return flt(reserved_qty[0][0]) if reserved_qty else 0
 
 def get_indented_qty(item_code, warehouse):
-	indented_qty = frappe.db.sql("""select sum(mr_item.qty - mr_item.ordered_qty)
+	indented_qty = frappe.db.sql("""select sum((mr_item.qty - mr_item.ordered_qty) * mr_item.conversion_factor)
 		from `tabMaterial Request Item` mr_item, `tabMaterial Request` mr
 		where mr_item.item_code=%s and mr_item.warehouse=%s
 		and mr_item.qty > mr_item.ordered_qty and mr_item.parent=mr.name
