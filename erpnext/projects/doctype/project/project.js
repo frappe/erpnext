@@ -1,23 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 frappe.ui.form.on("Project", {
-	setup: function (frm) {
-		frm.set_indicator_formatter('title',
-			function (doc) {
-				let indicator = 'orange';
-				if (doc.status == 'Overdue') {
-					indicator = 'red';
-				} else if (doc.status == 'Cancelled') {
-					indicator = 'dark grey';
-				} else if (doc.status == 'Completed') {
-					indicator = 'green';
-				}
-				return indicator;
-			}
-		);
-	},
-
-
 	onload: function (frm) {
 		var so = frappe.meta.get_docfield("Project", "sales_order");
 		so.get_route_options_for_new_doc = function (field) {
@@ -99,58 +82,4 @@ frappe.ui.form.on("Project", {
 		});
 	},
 
-	tasks_refresh: function (frm) {
-		var grid = frm.get_field('tasks').grid;
-		grid.wrapper.find('select[data-fieldname="status"]').each(function () {
-			if ($(this).val() === 'Open') {
-				$(this).addClass('input-indicator-open');
-			} else {
-				$(this).removeClass('input-indicator-open');
-			}
-		});
-	},
-
-	status: function(frm) {
-		if (frm.doc.status === 'Cancelled') {
-			frappe.confirm(__('Set tasks in this project as cancelled?'), () => {
-				frm.doc.tasks = frm.doc.tasks.map(task => {
-					task.status = 'Cancelled';
-					return task;
-				});
-				frm.refresh_field('tasks');
-			});
-		}
-	}
-});
-
-frappe.ui.form.on("Project Task", {
-	edit_task: function(frm, doctype, name) {
-		var doc = frappe.get_doc(doctype, name);
-		if(doc.task_id) {
-			frappe.set_route("Form", "Task", doc.task_id);
-		} else {
-			frappe.msgprint(__("Save the document first."));
-		}
-	},
-
-	edit_timesheet: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn];
-		frappe.route_options = {"project": frm.doc.project_name, "task": child.task_id};
-		frappe.set_route("List", "Timesheet");
-	},
-
-	make_timesheet: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn];
-		frappe.model.with_doctype('Timesheet', function() {
-			var doc = frappe.model.get_new_doc('Timesheet');
-			var row = frappe.model.add_child(doc, 'time_logs');
-			row.project = frm.doc.project_name;
-			row.task = child.task_id;
-			frappe.set_route('Form', doc.doctype, doc.name);
-		})
-	},
-
-	status: function(frm, doctype, name) {
-		frm.trigger('tasks_refresh');
-	},
 });

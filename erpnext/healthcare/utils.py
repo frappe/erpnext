@@ -82,7 +82,7 @@ def get_healthcare_services_to_invoice(patient):
 						'service': service_item, 'rate': practitioner_charge,
 						'income_account': income_account})
 
-			lab_tests = frappe.get_list("Lab Test", {'patient': patient.name, 'invoiced': False})
+			lab_tests = frappe.get_list("Lab Test", {'patient': patient.name, 'invoiced': False, 'docstatus': 1})
 			if lab_tests:
 				for lab_test in lab_tests:
 					lab_test_obj = frappe.get_doc("Lab Test", lab_test['name'])

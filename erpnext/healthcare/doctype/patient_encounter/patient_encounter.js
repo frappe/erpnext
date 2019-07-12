@@ -160,7 +160,7 @@ var btn_create_vital_signs = function (frm) {
 
 var btn_create_procedure = function (frm) {
 	if(!frm.doc.patient){
-		frappe.throw("Please select patient");
+		frappe.throw(__("Please select patient"));
 	}
 	frappe.route_options = {
 		"patient": frm.doc.patient,
