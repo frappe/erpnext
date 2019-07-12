@@ -3,8 +3,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-# import frappe
+import frappe
+from frappe import _
 from frappe.model.document import Document
 
 class GoogleMaps(Document):
-	pass
+
+	def validate(self):
+		if not frappe.db.get_single_value("Google Settings", "api_key"):
+			frappe.throw(_("Enter API Key in Google Settings for Google Maps Integration."))
