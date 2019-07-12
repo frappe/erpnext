@@ -133,7 +133,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				if (this.frm.has_perm("submit")) {
 					// close
-					if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
+					if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed, 6) < 100) {
 						this.frm.add_custom_button(__('Close'),
 							function() { me.close_sales_order() }, __("Status"))
 					}
@@ -219,13 +219,19 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 						source_doctype: "Quotation",
 						target: me.frm,
-						setters: {
-							customer: me.frm.doc.customer || undefined
-						},
+						setters: [
+							{
+								label: "Customer",
+								fieldname: "party_name",
+								fieldtype: "Link",
+								options: "Customer",
+								default: me.frm.doc.customer || undefined
+							}
+						],
 						get_query_filters: {
 							company: me.frm.doc.company,
 							docstatus: 1,
-							status: ["!=", "Lost"],
+							status: ["!=", "Lost"]
 						}
 					})
 				}, __("Get items from"));

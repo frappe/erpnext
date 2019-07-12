@@ -414,6 +414,8 @@ def get_returned_qty_map(delivery_note):
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
 	doc = frappe.get_doc('Delivery Note', source_name)
+
+	to_make_invoice_qty_map = {}
 	returned_qty_map = get_returned_qty_map(source_name)
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
@@ -434,8 +436,7 @@ def make_sales_invoice(source_name, target_doc=None):
 			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
 
 	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty, returned_qty = get_pending_qty(source_doc)
-		returned_qty_map[source_doc.item_code] = returned_qty
+		target_doc.qty = to_make_invoice_qty_map[source_doc.name]
 
 		if source_doc.serial_no and source_parent.per_billed > 0:
 			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
@@ -443,7 +444,12 @@ def make_sales_invoice(source_name, target_doc=None):
 
 	def get_pending_qty(item_row):
 		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0)
-		returned_qty = flt(returned_qty_map.get(item_row.item_code, 0))
+
+		returned_qty = 0
+		if returned_qty_map.get(item_row.item_code, 0) > 0:
+			returned_qty = flt(returned_qty_map.get(item_row.item_code, 0))
+			returned_qty_map[item_row.item_code] -= pending_qty
+
 		if returned_qty:
 			if returned_qty >= pending_qty:
 				pending_qty = 0
@@ -451,7 +457,10 @@ def make_sales_invoice(source_name, target_doc=None):
 			else:
 				pending_qty -= returned_qty
 				returned_qty = 0
-		return pending_qty, returned_qty
+
+		to_make_invoice_qty_map[item_row.name] = pending_qty
+
+		return pending_qty
 
 	doc = get_mapped_doc("Delivery Note", source_name, {
 		"Delivery Note": {
@@ -471,7 +480,7 @@ def make_sales_invoice(source_name, target_doc=None):
 				"cost_center": "cost_center"
 			},
 			"postprocess": update_item,
-			"filter": lambda d: get_pending_qty(d)[0] <= 0 if not doc.get("is_return") else get_pending_qty(d)[0] > 0
+			"filter": lambda d: get_pending_qty(d) <= 0 if not doc.get("is_return") else get_pending_qty(d) > 0
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",

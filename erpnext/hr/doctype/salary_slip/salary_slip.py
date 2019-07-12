@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import datetime, math
 
-from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, getdate
+from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
@@ -281,7 +281,9 @@ class SalarySlip(TransactionBase):
 			wages_row = {
 				"salary_component": salary_component,
 				"abbr": frappe.db.get_value("Salary Component", salary_component, "salary_component_abbr"),
-				"amount": self.hour_rate * self.total_working_hours
+				"amount": self.hour_rate * self.total_working_hours,
+				"default_amount": 0.0,
+				"additional_amount": 0.0
 			}
 			doc.append('earnings', wages_row)
 
@@ -616,7 +618,7 @@ class SalarySlip(TransactionBase):
 		elif not self.payment_days and not self.salary_slip_based_on_timesheet and cint(row.depends_on_payment_days):
 			amount, additional_amount = 0, 0
 		elif not row.amount:
-			amount = row.default_amount + row.additional_amount
+			amount = flt(row.default_amount) + flt(row.additional_amount)
 
 		# apply rounding
 		if frappe.get_cached_value("Salary Component", row.salary_component, "round_to_the_nearest_integer"):
