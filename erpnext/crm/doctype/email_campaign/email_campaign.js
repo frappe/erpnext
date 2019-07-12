@@ -4,7 +4,7 @@
 frappe.ui.form.on('Email Campaign', {
 	// refresh: function(frm) {
 	// }
-    email_campaign_for: function(frm) {
-      frm.set_value('recipient', '');
-    }
+  email_campaign_for: function(frm) {
+    frm.set_value('recipient', '');
+  }
 });
