@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 class ReceivablePayableReport(object):
 	def __init__(self, filters=None):
@@ -552,6 +553,14 @@ class ReceivablePayableReport(object):
 				filters={"account_type": account_type, "company": self.filters.company})]
 			conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
 			values += accounts
+
+		accounting_dimensions = get_accounting_dimensions()
+
+		if accounting_dimensions:
+			for dimension in accounting_dimensions:
+				if self.filters.get(dimension):
+					conditions.append("{0} = %s".format(dimension))
+					values.append(self.filters.get(dimension))
 
 		return " and ".join(conditions), values
 
