@@ -10,5 +10,8 @@ from frappe.model.document import Document
 class GoogleMaps(Document):
 
 	def validate(self):
+		if not frappe.db.get_single_value("Google Settings", "enable"):
+			frappe.throw(_("Enable Google Integration from Google Settings."))
+			
 		if not frappe.db.get_single_value("Google Settings", "api_key"):
 			frappe.throw(_("Enter API Key in Google Settings for Google Maps Integration."))
