@@ -302,19 +302,19 @@ def get_barcode_data(items_list):
 	return itemwise_barcode
 
 
-def get_item_tax_data():
+#def get_item_tax_data():
 	# get default tax of an item
 	# example: {'Consulting Services': {'Excise 12 - TS': '12.000'}}
 
-	itemwise_tax = {}
-	taxes = frappe.db.sql(""" select parent, tax_type, tax_rate from `tabItem Tax`""", as_dict=1)
+	# itemwise_tax = {}
+	# taxes = frappe.db.sql(""" select parent, tax_type, tax_rate from `tabItem Tax`""", as_dict=1)
 
-	for tax in taxes:
-		if tax.parent not in itemwise_tax:
-			itemwise_tax.setdefault(tax.parent, {})
-		itemwise_tax[tax.parent][tax.tax_type] = tax.tax_rate
+	# for tax in taxes:
+		# if tax.parent not in itemwise_tax:
+			# itemwise_tax.setdefault(tax.parent, {})
+		# itemwise_tax[tax.parent][tax.tax_type] = tax.tax_rate
 
-	return itemwise_tax
+	# return itemwise_tax
 
 
 def get_price_list_data(selling_price_list):
