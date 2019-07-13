@@ -2,6 +2,12 @@ frappe.ui.form.on("Issue", {
 	onload: function(frm) {
 		frm.email_field = "raised_by";
 
+		frappe.db.get_value("Support Settings", {name: "Support Settings"}, "allow_resetting_service_level_agreement", (r) => {
+			if (!r.allow_resetting_service_level_agreement) {
+				frm.set_df_property("reset_service_level_agreement", "hidden", 1) ;
+			}
+		});
+
 		if (frm.doc.service_level_agreement) {
 			frappe.call({
 				method: "erpnext.support.doctype.service_level_agreement.service_level_agreement.get_service_level_agreement_filters",
@@ -73,6 +79,42 @@ frappe.ui.form.on("Issue", {
 		}
 	},
 
+	reset_service_level_agreement: function(frm) {
+		let reset_sla = new frappe.ui.Dialog({
+			title: __("Reset Service Level Agreement"),
+			fields: [
+				{
+					fieldtype: "Data",
+					fieldname: "reason",
+					label: __("Reason"),
+					reqd: 1
+				}
+			],
+			primary_action_label: __("Reset"),
+			primary_action: (values) => {
+				reset_sla.disable_primary_action();
+				reset_sla.hide();
+				reset_sla.clear();
+
+				frappe.show_alert({
+					indicator: 'green',
+					message: __('Resetting Service Level Agreement.')
+				});
+
+				frm.call("reset_service_level_agreement", {
+					reason: values.reason,
+					user: frappe.session.user_email
+				}, () => {
+					reset_sla.enable_primary_action();
+					frm.refresh();
+					frappe.msgprint(__("Service Level Agreement Reset."));
+				});
+			}
+		});
+
+		reset_sla.show();
+	},
+
 	timeline_refresh: function(frm) {
 		// create button for "Help Article"
 		if(frappe.model.can_create('Help Article')) {
@@ -129,8 +171,15 @@ frappe.ui.form.on("Issue", {
 function set_time_to_resolve_and_response(frm) {
 	frm.dashboard.clear_headline();
 
-	var time_to_respond = get_time_left(frm.doc.response_by, frm.doc.agreement_fulfilled);
-	var time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_fulfilled);
+	var time_to_respond = get_status(frm.doc.response_by_variance);
+	if (!frm.doc.first_responded_on && frm.doc.agreement_fulfilled === "Ongoing") {
+		time_to_respond = get_time_left(frm.doc.response_by, frm.doc.agreement_fulfilled);
+	}
+
+	var time_to_resolve = get_status(frm.doc.resolution_by_variance);
+	if (!frm.doc.resolution_date && frm.doc.agreement_fulfilled === "Ongoing") {
+		time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_fulfilled);
+	}
 
 	frm.dashboard.set_headline_alert(
 		'<div class="row">' +
@@ -146,7 +195,15 @@ function set_time_to_resolve_and_response(frm) {
 
 function get_time_left(timestamp, agreement_fulfilled) {
 	const diff = moment(timestamp).diff(moment());
-	const diff_display = diff >= 44500 ? moment.duration(diff).humanize() : moment(0, 'seconds').format('HH:mm');
-	let indicator = (diff_display == '00:00' && agreement_fulfilled != "Fulfilled") ? "red" : "green";
+	const diff_display = diff >= 44500 ? moment.duration(diff).humanize() : "Failed";
+	let indicator = (diff_display == 'Failed' && agreement_fulfilled != "Fulfilled") ? "red" : "green";
 	return {"diff_display": diff_display, "indicator": indicator};
+}
+
+function get_status(variance) {
+	if (variance > 0) {
+		return {"diff_display": "Fulfilled", "indicator": "green"};
+	} else {
+		return {"diff_display": "Failed", "indicator": "red"};
+	}
 }

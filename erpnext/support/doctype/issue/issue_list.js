@@ -23,8 +23,8 @@ frappe.listview_settings['Issue'] = {
 				'Low': 'yellow',
 				'Medium': 'orange',
 				'High': 'red'
-			}
-			return [__(doc.status), color[doc.priority] || 'Red', `status,=,Open`];
+			};
+			return [__(doc.status), color[doc.priority] || 'red', `status,=,Open`];
 		} else if (doc.status === 'Closed') {
 			return [__(doc.status), "green", "status,=," + doc.status];
 		} else {
