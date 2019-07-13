@@ -13,5 +13,5 @@ def execute():
             WHERE
                 `tabGL Entry`.voucher_no = `tab{doctype}`.name and `tabGL Entry`.party is not null
                 and `tabGL Entry`.voucher_type in ('Sales Invoice', 'Purchase Invoice', 'Journal Entry')
-                and account in (select name from `tabAccount` where account_type in ('Receivable', 'Payable') )""" #nosec
+                and `tabGL Entry`.account in (select name from `tabAccount` where account_type in ('Receivable', 'Payable'))""" #nosec
             .format(doctype=doctype))
