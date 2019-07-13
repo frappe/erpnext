@@ -26,7 +26,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Open\nClose"
+   "options": "Open\nClosed"
   },
   {
    "fieldname": "minutes",
@@ -55,7 +55,7 @@
    "label": "Minutes"
   }
  ],
- "modified": "2019-05-26 23:12:23.364357",
+ "modified": "2019-07-13 19:57:40.500541",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Meeting",
