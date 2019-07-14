@@ -324,8 +324,7 @@ class WorkOrder(Document):
 			select
 				operation, description, workstation, idx,
 				base_hour_rate as hour_rate, time_in_mins,
-				"Pending" as status, parent as bom,
-				is_batch_operation, batch_size
+				"Pending" as status, parent as bom, batch_size
 			from
 				`tabBOM Operation`
 			where
