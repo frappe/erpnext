@@ -11,7 +11,6 @@
   "col_break1",
   "hour_rate",
   "time_in_mins",
-  "is_batch_operation",
   "batch_size",
   "operating_cost",
   "base_hour_rate",
@@ -101,14 +100,7 @@
    "label": "Image"
   },
   {
-   "default": "0",
-   "fieldname": "is_batch_operation",
-   "fieldtype": "Check",
-   "label": "Is Batch Operation"
-  },
-  {
    "default": "1",
-   "depends_on": "eval:doc.is_batch_operation==1;",
    "fieldname": "batch_size",
    "fieldtype": "Int",
    "label": "Batch Size"
@@ -116,8 +108,8 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-06-29 03:35:32.213562",
- "modified_by": "Administrator",
+ "modified": "2019-07-14 22:35:55.374037",
+ "modified_by": "govindsmenokee@gmail.com",
  "module": "Manufacturing",
  "name": "BOM Operation",
  "owner": "Administrator",
