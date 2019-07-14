@@ -33,3 +33,14 @@ frappe.query_reports["Customer Credit Balance"] = {
 		},
 	]
 }
+
+erpnext.dimension_filters.then((dimensions) => {
+	dimensions.forEach((dimension) => {
+		frappe.query_reports["Customer Credit Balance"].filters.push({
+			"fieldname": dimension["fieldname"],
+			"label": __(dimension["label"]),
+			"fieldtype": "Link",
+			"options": dimension["document_type"]
+		});
+	});
+});
