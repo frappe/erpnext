@@ -9,6 +9,7 @@
   "document_type",
   "label",
   "fieldname",
+  "default_dimension",
   "mandatory_for_bs",
   "mandatory_for_pl",
   "disabled"
@@ -53,9 +54,15 @@
    "fieldname": "mandatory_for_pl",
    "fieldtype": "Check",
    "label": "Mandatory For Profit and Loss Account"
+  },
+  {
+   "fieldname": "default_dimension",
+   "fieldtype": "Dynamic Link",
+   "label": "Default Dimension",
+   "options": "document_type"
   }
  ],
- "modified": "2019-07-14 17:25:01.307948",
+ "modified": "2019-07-14 19:16:25.405924",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension",
