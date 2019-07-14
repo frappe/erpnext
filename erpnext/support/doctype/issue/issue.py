@@ -121,6 +121,7 @@ class Issue(Document):
 
 		# Reset SLA
 		if replicated_issue.service_level_agreement:
+			replicated_issue.service_level_agreement_creation = now_datetime()
 			replicated_issue.service_level_agreement = None
 			replicated_issue.agreement_fulfilled = "Ongoing"
 			replicated_issue.response_by = None
@@ -173,8 +174,9 @@ class Issue(Document):
 
 		if not self.creation:
 			self.creation = now_datetime()
+			self.service_level_agreement_creation = now_datetime()
 
-		start_date_time = get_datetime(self.creation)
+		start_date_time = get_datetime(self.service_level_agreement_creation)
 		self.response_by = get_expected_time_for(parameter='response', service_level=priority, start_date_time=start_date_time)
 		self.resolution_by = get_expected_time_for(parameter='resolution', service_level=priority, start_date_time=start_date_time)
 
@@ -192,6 +194,23 @@ class Issue(Document):
 			if not self.service_level_agreement == frappe.db.get_value("Issue", self.name, "service_level_agreement"):
 				self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
 				frappe.msgprint(_("Service Level Agreement has been changed to {0}.").format(self.service_level_agreement))
+
+	def reset_service_level_agreement(self, reason, user):
+		if not frappe.db.get_single_value("Support Settings", "allow_resetting_service_level_agreement"):
+			frappe.throw(_("Allow Resetting Service Level Agreement from Support Settings."))
+
+		frappe.get_doc({
+			"doctype": "Comment",
+			"comment_type": "Info",
+			"reference_doctype": self.doctype,
+			"reference_name": self.name,
+			"comment_email": user,
+			"content": " resetted Service Level Agreement - {0}".format(_(reason)),
+		}).insert(ignore_permissions=True)
+
+		self.service_level_agreement_creation = now_datetime()
+		self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
+		self.save()
 
 def get_expected_time_for(parameter, service_level, start_date_time):
 	current_date_time = start_date_time
