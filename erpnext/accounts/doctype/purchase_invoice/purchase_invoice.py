@@ -337,7 +337,8 @@ class PurchaseInvoice(BuyingController):
 		if not self.is_return:
 			self.update_against_document_in_jv()
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
-			self.update_billing_status_in_pr()
+
+		self.update_billing_status_in_pr()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
@@ -416,6 +417,7 @@ class PurchaseInvoice(BuyingController):
 					"account": self.credit_to,
 					"party_type": "Supplier",
 					"party": self.supplier,
+					"due_date": self.due_date,
 					"against": self.against_expense_account,
 					"credit": grand_total_in_company_currency,
 					"credit_in_account_currency": grand_total_in_company_currency \
@@ -484,9 +486,13 @@ class PurchaseInvoice(BuyingController):
 							"credit": flt(item.rm_supp_cost)
 						}, warehouse_account[self.supplier_warehouse]["account_currency"], item=item))
 				elif not item.is_fixed_asset or (item.is_fixed_asset and is_cwip_accounting_disabled()):
+
+					expense_account = (item.expense_account
+						if (not item.enable_deferred_expense or self.is_return) else item.deferred_expense_account)
+
 					gl_entries.append(
 						self.get_gl_dict({
-							"account": item.expense_account if not item.enable_deferred_expense else item.deferred_expense_account,
+							"account": expense_account,
 							"against": self.supplier,
 							"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
 							"debit_in_account_currency": (flt(item.base_net_amount,
@@ -769,7 +775,8 @@ class PurchaseInvoice(BuyingController):
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
-			self.update_billing_status_in_pr()
+
+		self.update_billing_status_in_pr()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO

@@ -65,7 +65,7 @@ $.extend(erpnext.queries, {
 				frappe.throw(__("Please set {0}",
 					[__(frappe.meta.get_label(doc.doctype, frappe.dynamic_link.fieldname, doc.name))]));
 			}
-
+			console.log(frappe.dynamic_link)
 			return {
 				query: 'frappe.contacts.doctype.address.address.address_query',
 				filters: {

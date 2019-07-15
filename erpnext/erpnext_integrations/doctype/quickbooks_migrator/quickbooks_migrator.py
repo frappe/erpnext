@@ -7,7 +7,9 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from requests_oauthlib import OAuth2Session
-import json, requests
+import json
+import requests
+import traceback
 from erpnext import encode_company_abbr
 
 # QuickBooks requires a redirect URL, User will be redirect to this URL
@@ -32,7 +34,6 @@ def callback(*args, **kwargs):
 class QuickBooksMigrator(Document):
 	def __init__(self, *args, **kwargs):
 		super(QuickBooksMigrator, self).__init__(*args, **kwargs)
-		from pprint import pprint
 		self.oauth = OAuth2Session(
 			client_id=self.client_id,
 			redirect_uri=self.redirect_url,
@@ -46,7 +47,9 @@ class QuickBooksMigrator(Document):
 		if self.company:
 			# We need a Cost Center corresponding to the selected erpnext Company
 			self.default_cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
-			self.default_warehouse = frappe.get_all('Warehouse', filters={"company": self.company, "is_group": 0})[0]["name"]
+			company_warehouses = frappe.get_all('Warehouse', filters={"company": self.company, "is_group": 0})
+			if company_warehouses:
+				self.default_warehouse = company_warehouses[0].name
 		if self.authorization_endpoint:
 			self.authorization_url = self.oauth.authorization_url(self.authorization_endpoint)[0]
 
@@ -218,7 +221,7 @@ class QuickBooksMigrator(Document):
 
 	def _fetch_general_ledger(self):
 		try:
-			query_uri = "{}/company/{}/reports/GeneralLedger".format(self.api_endpoint ,self.quickbooks_company_id)
+			query_uri = "{}/company/{}/reports/GeneralLedger".format(self.api_endpoint, self.quickbooks_company_id)
 			response = self._get(query_uri,
 				params={
 					"columns": ",".join(["tx_date", "txn_type", "credit_amt", "debt_amt"]),
@@ -493,17 +496,17 @@ class QuickBooksMigrator(Document):
 						"account_currency": customer["CurrencyRef"]["value"],
 						"company": self.company,
 					})[0]["name"]
-				except Exception as e:
+				except Exception:
 					receivable_account = None
 				erpcustomer = frappe.get_doc({
 					"doctype": "Customer",
 					"quickbooks_id": customer["Id"],
-					"customer_name" : encode_company_abbr(customer["DisplayName"], self.company),
-					"customer_type" : "Individual",
-					"customer_group" : "Commercial",
+					"customer_name": encode_company_abbr(customer["DisplayName"], self.company),
+					"customer_type": "Individual",
+					"customer_group": "Commercial",
 					"default_currency": customer["CurrencyRef"]["value"],
 					"accounts": [{"company": self.company, "account": receivable_account}],
-					"territory" : "All Territories",
+					"territory": "All Territories",
 					"company": self.company,
 				}).insert()
 				if "BillAddr" in customer:
@@ -521,7 +524,7 @@ class QuickBooksMigrator(Document):
 					item_dict = {
 						"doctype": "Item",
 						"quickbooks_id": item["Id"],
-						"item_code" : encode_company_abbr(item["Name"], self.company),
+						"item_code": encode_company_abbr(item["Name"], self.company),
 						"stock_uom": "Unit",
 						"is_stock_item": 0,
 						"item_group": "All Item Groups",
@@ -549,14 +552,14 @@ class QuickBooksMigrator(Document):
 				erpsupplier = frappe.get_doc({
 					"doctype": "Supplier",
 					"quickbooks_id": vendor["Id"],
-					"supplier_name" : encode_company_abbr(vendor["DisplayName"], self.company),
-					"supplier_group" : "All Supplier Groups",
+					"supplier_name": encode_company_abbr(vendor["DisplayName"], self.company),
+					"supplier_group": "All Supplier Groups",
 					"company": self.company,
 				}).insert()
 				if "BillAddr" in vendor:
 					self._create_address(erpsupplier, "Supplier", vendor["BillAddr"], "Billing")
 				if "ShipAddr" in vendor:
-					self._create_address(erpsupplier, "Supplier",vendor["ShipAddr"], "Shipping")
+					self._create_address(erpsupplier, "Supplier", vendor["ShipAddr"], "Shipping")
 		except Exception as e:
 			self._log_error(e)
 
@@ -829,7 +832,7 @@ class QuickBooksMigrator(Document):
 					"currency": invoice["CurrencyRef"]["value"],
 					"conversion_rate": invoice.get("ExchangeRate", 1),
 					"posting_date": invoice["TxnDate"],
-					"due_date":  invoice.get("DueDate", invoice["TxnDate"]),
+					"due_date": invoice.get("DueDate", invoice["TxnDate"]),
 					"credit_to": credit_to_account,
 					"supplier": frappe.get_all("Supplier",
 						filters={
@@ -1200,7 +1203,7 @@ class QuickBooksMigrator(Document):
 
 
 	def _create_address(self, entity, doctype, address, address_type):
-		try :
+		try:
 			if not frappe.db.exists({"doctype": "Address", "quickbooks_id": address["Id"]}):
 				frappe.get_doc({
 					"doctype": "Address",
@@ -1252,8 +1255,6 @@ class QuickBooksMigrator(Document):
 
 
 	def _log_error(self, execption, data=""):
-		import json, traceback
-		traceback.print_exc()
 		frappe.log_error(title="QuickBooks Migration Error",
 			message="\n".join([
 				"Data",
