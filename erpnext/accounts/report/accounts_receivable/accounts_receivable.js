@@ -8,6 +8,7 @@ frappe.query_reports["Accounts Receivable"] = {
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
+			"reqd": 1,
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
@@ -42,6 +43,13 @@ frappe.query_reports["Accounts Receivable"] = {
 			"label": __("Ageing Range 3"),
 			"fieldtype": "Int",
 			"default": "90",
+			"reqd": 1
+		},
+		{
+			"fieldname":"range4",
+			"label": __("Ageing Range 4"),
+			"fieldtype": "Int",
+			"default": "120",
 			"reqd": 1
 		},
 		{
@@ -164,3 +172,14 @@ frappe.query_reports["Accounts Receivable"] = {
 		});
 	}
 }
+
+erpnext.dimension_filters.then((dimensions) => {
+	dimensions.forEach((dimension) => {
+		frappe.query_reports["Accounts Receivable"].filters.splice(9, 0 ,{
+			"fieldname": dimension["fieldname"],
+			"label": __(dimension["label"]),
+			"fieldtype": "Link",
+			"options": dimension["document_type"]
+		});
+	});
+});

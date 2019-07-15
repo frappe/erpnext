@@ -331,7 +331,8 @@ class JournalEntry(AccountsController):
 		for reference_name, total in iteritems(self.reference_totals):
 			reference_type = self.reference_types[reference_name]
 
-			if reference_type in ("Sales Invoice", "Purchase Invoice"):
+			if (reference_type in ("Sales Invoice", "Purchase Invoice") and
+				self.voucher_type not in ['Debit Note', 'Credit Note']):
 				invoice = frappe.db.get_value(reference_type, reference_name,
 					["docstatus", "outstanding_amount"], as_dict=1)
 
@@ -458,8 +459,9 @@ class JournalEntry(AccountsController):
 					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
 						"customer_name" if d.party_type=="Customer" else "supplier_name")
 
-				party_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
-				party_account_currency = d.account_currency
+				if pay_to_recd_from and pay_to_recd_from == d.party:
+					party_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
+					party_account_currency = d.account_currency
 
 			elif frappe.db.get_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
 				bank_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
@@ -496,6 +498,7 @@ class JournalEntry(AccountsController):
 					self.get_gl_dict({
 						"account": d.account,
 						"party_type": d.party_type,
+						"due_date": self.due_date,
 						"party": d.party,
 						"against": d.against_account,
 						"debit": flt(d.debit, d.precision("debit")),
@@ -509,7 +512,7 @@ class JournalEntry(AccountsController):
 						"cost_center": d.cost_center,
 						"project": d.project,
 						"finance_book": self.finance_book
-					})
+					}, item=d)
 				)
 
 		if gl_map:

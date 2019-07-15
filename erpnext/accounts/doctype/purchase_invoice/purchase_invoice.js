@@ -157,7 +157,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	can_change_release_date: function(date) {
 		const diff = frappe.datetime.get_diff(date, frappe.datetime.nowdate());
 		if (diff < 0) {
-			frappe.throw('New release date should be in the future');
+			frappe.throw(__('New release date should be in the future'));
 			return false;
 		} else {
 			return true;
@@ -285,6 +285,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	is_paid: function() {
 		hide_fields(this.frm.doc);
 		if(cint(this.frm.doc.is_paid)) {
+			this.frm.set_value("allocate_advances_automatically", 0);
 			if(!this.frm.doc.company) {
 				this.frm.set_value("is_paid", 0)
 				frappe.msgprint(__("Please specify Company to proceed"));
@@ -522,8 +523,13 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	onload: function(frm) {
-		if(frm.doc.__onload && !frm.doc.__onload.supplier_tds) {
-			me.frm.set_df_property("apply_tds", "read_only", 1);
+		if(frm.doc.__onload) {
+			if(frm.doc.supplier) {
+				frm.doc.apply_tds = frm.doc.__onload.supplier_tds ? 1 : 0;
+			}
+			if(!frm.doc.__onload.supplier_tds) {
+				frm.set_df_property("apply_tds", "read_only", 1);
+			}
 		}
 
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {

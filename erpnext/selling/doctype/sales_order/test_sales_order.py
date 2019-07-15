@@ -124,6 +124,44 @@ class TestSalesOrder(unittest.TestCase):
 		so.load_from_db()
 		self.assertEqual(so.get("items")[0].delivered_qty, 9)
 
+	def test_return_against_sales_order(self):
+		so = make_sales_order()
+
+		dn = create_dn_against_so(so.name, 6)
+
+		so.load_from_db()
+		self.assertEqual(so.get("items")[0].delivered_qty, 6)
+
+		# Check delivered_qty after make_sales_invoice with update_stock checked
+		si2 = make_sales_invoice(so.name)
+		si2.set("update_stock", 1)
+		si2.get("items")[0].qty = 3
+		si2.insert()
+		si2.submit()
+
+		so.load_from_db()
+
+		self.assertEqual(so.get("items")[0].delivered_qty, 9)
+
+		# Make return deliver note, sales invoice and check quantity
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-3, do_not_submit=True)
+		dn1.items[0].against_sales_order = so.name
+		dn1.items[0].so_detail = so.items[0].name
+		dn1.submit()
+
+		si1 = create_sales_invoice(is_return=1, return_against=si2.name, qty=-1, update_stock=1, do_not_submit=True)
+		si1.items[0].sales_order = so.name
+		si1.items[0].so_detail = so.items[0].name
+		si1.submit()
+
+
+		so.load_from_db()
+		self.assertEqual(so.get("items")[0].delivered_qty, 5)
+
+
 	def test_reserved_qty_for_partial_delivery(self):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
 		existing_reserved_qty = get_reserved_qty()
@@ -411,7 +449,7 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
 
 	def test_drop_shipping(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order_for_drop_shipment
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
@@ -457,7 +495,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = make_sales_order(item_list=so_items, do_not_submit=True)
 		so.submit()
 
-		po = make_purchase_order_for_drop_shipment(so.name, '_Test Supplier')
+		po = make_purchase_order(so.name, '_Test Supplier', selected_items=[so_items[0]['item_code']])
 		po.submit()
 
 		dn = create_dn_against_so(so.name, delivered_qty=1)

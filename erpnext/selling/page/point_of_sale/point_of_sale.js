@@ -573,7 +573,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 		function get_frm(_frm) {
 			const page = $('<div>');
-			const frm = _frm || new _f.Frm(doctype, page, false);
+			const frm = _frm || new frappe.ui.form.Form(doctype, page, false);
 			const name = frappe.model.make_new_doc_and_get_name(doctype, true);
 			frm.refresh(name);
 			frm.doc.items = [];
@@ -779,6 +779,17 @@ class POSCart {
 
 		const customer = this.frm.doc.customer;
 		this.customer_field.set_value(customer);
+
+		if (this.numpad) {
+			const disable_btns = this.disable_numpad_control()
+			const enable_btns = [__('Rate'), __('Disc')]
+
+			if (disable_btns) {
+				enable_btns.filter(btn => !disable_btns.includes(btn))
+			}
+
+			this.numpad.enable_buttons(enable_btns);
+		}
 	}
 
 	get_grand_total() {
@@ -1549,6 +1560,16 @@ class NumberPad {
 				})
 			})
 		}
+	}
+
+	enable_buttons(btns) {
+		btns.forEach((btn) => {
+			const $btn = this.get_btn(btn);
+			$btn.prop("disabled", false)
+			$btn.hover(() => {
+				$btn.css('cursor','pointer');
+			})
+		})
 	}
 
 	set_class() {

@@ -20,9 +20,9 @@ class Course(Document):
 				frappe.throw(_("Total Weightage of all Assessment Criteria must be 100%"))
 
 	def get_topics(self):
-		try:
-			topic_list = self.get_all_children()
-			topic_data = [frappe.get_doc("Topic", topic.topic) for topic in topic_list]
-		except frappe.DoesNotExistError:
-			return None
+		topic_data= []
+		for topic in self.topics:
+			topic_doc = frappe.get_doc("Topic", topic.topic)
+			if topic_doc.topic_content:
+				topic_data.append(topic_doc)
 		return topic_data

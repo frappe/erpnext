@@ -147,7 +147,8 @@ frappe.ui.form.on('Salary Structure', {
 							source_name: frm.doc.name,
 							employee: values.employee,
 							as_print: 1,
-							print_format: print_format
+							print_format: print_format,
+							for_preview: 1
 						},
 						callback: function(r) {
 							var new_window = window.open();

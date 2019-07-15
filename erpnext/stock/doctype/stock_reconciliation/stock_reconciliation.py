@@ -238,8 +238,8 @@ class StockReconciliation(StockController):
 			return
 
 		if not self.expense_account:
-			msgprint(_("Please enter Expense Account"), raise_exception=1)
-		elif not frappe.db.sql("""select name from `tabStock Ledger Entry` limit 1"""):
+			frappe.throw(_("Please enter Expense Account"))
+		elif self.purpose == "Opening Stock" or not frappe.db.sql("""select name from `tabStock Ledger Entry` limit 1"""):
 			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(_("Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry"), OpeningEntryAccountError)
 
@@ -276,7 +276,8 @@ def get_items(warehouse, posting_date, posting_time, company):
 	items = frappe.db.sql("""
 		select i.name, i.item_name, bin.warehouse
 		from tabBin bin, tabItem i
-		where i.name=bin.item_code and i.disabled=0
+		where i.name=bin.item_code and i.disabled=0 and i.is_stock_item = 1
+		and i.has_variants = 0 and i.has_serial_no = 0 and i.has_batch_no = 0
 		and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=bin.warehouse)
 	""", (lft, rgt))
 

@@ -102,6 +102,9 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 	for attribute, values in attribute_filters.items():
 		attribute_values = values
 
+		if not isinstance(attribute_values, list):
+			attribute_values = [attribute_values]
+
 		if not attribute_values: continue
 
 		wheres = []
@@ -167,8 +170,13 @@ def get_attributes_and_values(item_code):
 		if attribute in attribute_list:
 			valid_options.setdefault(attribute, set()).add(attribute_value)
 
+	item_attribute_values = frappe.db.get_all('Item Attribute Value',
+		['parent', 'attribute_value', 'idx'], order_by='parent asc, idx asc')
+	ordered_attribute_value_map = frappe._dict()
+	for iv in item_attribute_values:
+		ordered_attribute_value_map.setdefault(iv.parent, []).append(iv.attribute_value)
+
 	# build attribute values in idx order
-	ordered_attribute_value_map = item_cache.get_ordered_attribute_values()
 	for attr in attributes:
 		valid_attribute_values = valid_options.get(attr.attribute, [])
 		ordered_values = ordered_attribute_value_map.get(attr.attribute, [])
@@ -252,7 +260,8 @@ def get_items_with_selected_attributes(item_code, selected_attributes):
 
 	items = []
 	for attribute, value in selected_attributes.items():
-		items.append(set(attribute_value_item_map[(attribute, value)]))
+		filtered_items = attribute_value_item_map.get((attribute, value), [])
+		items.append(set(filtered_items))
 
 	return set.intersection(*items)
 

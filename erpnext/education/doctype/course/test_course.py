@@ -3,6 +3,7 @@
 # See license.txt
 from __future__ import unicode_literals
 from erpnext.education.doctype.topic.test_topic import make_topic
+from erpnext.education.doctype.topic.test_topic import make_topic_and_linked_content
 
 import frappe
 import unittest
@@ -11,6 +12,8 @@ import unittest
 
 class TestCourse(unittest.TestCase):
 	def setUp(self):
+		make_topic_and_linked_content("_Test Topic 1", [{"type":"Article", "name": "_Test Article 1"}])
+		make_topic_and_linked_content("_Test Topic 2", [{"type":"Article", "name": "_Test Article 2"}])
 		make_course_and_linked_topic("_Test Course 1", ["_Test Topic 1", "_Test Topic 2"])
 
 	def test_get_topics(self):

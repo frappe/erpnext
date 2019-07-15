@@ -5,63 +5,50 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-import datetime
+
 class QualityReview(Document):
 	pass
 
 def review():
-	now = datetime.datetime.now()
-	day = now.day
-	day_name = now.strftime("%A")
-	month=now.strftime("%B")
+	day = frappe.utils.getdate().day
+	weekday = frappe.utils.getdate().strftime("%A")
+	month = frappe.utils.getdate().strftime("%B")
 
-	for data in frappe.get_all("Quality Goal",fields=['name', 'frequency', 'date', 'weekly', 'measurable']):
-		if data.frequency == 'Daily':
-			create_review(data.name, data.measurable)
+	for goal in frappe.get_list("Quality Goal", fields=['name', 'frequency', 'date', 'weekday']):
+		if goal.frequency == 'Daily':
+			create_review(goal.name)
 
-		elif data.frequency == 'Weekly':
-			if data.weekly == day_name:
-				create_review(data.name, data.measurable)
+		elif goal.frequency == 'Weekly' and goal.weekday == weekday:
+			create_review(goal.name)
 
-		elif data.frequency == 'Monthly':
-			if data.date == str(day):
-				create_review(data.name, data.measurable)
+		elif goal.frequency == 'Monthly' and goal.date == str(day):
+			create_review(goal.name)
 
-		elif data.frequency == 'Quarterly':
-			if (month == 'January' or month == 'April' or month == 'July' or month == 'October') and str(day) == data.date:
-				create_review(data.name, data.measurable)
+		elif goal.frequency == 'Quarterly' and goal.data == str(day) and get_quarter(month):
+			create_review(goal.name)
 
-		elif data.frequency == 'Half Yearly':
-			if (month == 'January' or month == 'July') and str(day) == data.date:
-				create_review(data.name, data.measurable)
+def create_review(goal):
+	goal = frappe.get_doc("Quality Goal", goal)
 
-		elif data.frequency == 'Yearly':
-			if month == data.yearly and str(day) == data.date:
-				create_review(data.name, data.measurable)
-
-		else:
-			pass
-
-def create_review(name, measurable):
-	objectives = frappe.get_all("Quality Objective", filters={'parent': name }, fields=['objective', 'target', 'unit'])
-	doc = frappe.get_doc({
+	review = frappe.get_doc({
 		"doctype": "Quality Review",
-   		"goal": name,
-   		"date": frappe.as_unicode(frappe.utils.nowdate()),
-		"measurable": measurable,
+		"goal": goal.name,
+		"date": frappe.utils.getdate()
 	})
-	if measurable == 'Yes':
-		for objective in objectives:
-			doc.append("values",{
-				'objective': objective.objective,
-				'target': objective.target,
-				'achieved': 0,
-				'unit': objective.unit
-			})
+
+	for objective in goal.objectives:
+		review.append("reviews",
+			{
+				"objective": objective.objective,
+				"target": objective.target,
+				"uom": objective.uom
+			}
+		)
+
+	review.insert(ignore_permissions=True)
+
+def get_quarter(month):
+	if month in  ["January", "April", "July", "October"]:
+		return True
 	else:
-		for objective in objectives:
-			doc.append("values",{
-				'objective': objective.objective,
-			})
-	doc.insert()
-	frappe.db.commit()
+		return False

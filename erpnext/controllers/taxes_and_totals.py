@@ -15,6 +15,9 @@ class calculate_taxes_and_totals(object):
 		self.calculate()
 
 	def calculate(self):
+		if not len(self.doc.get("items")):
+			return
+
 		self.discount_amount_applied = False
 		self._calculate()
 
@@ -59,19 +62,21 @@ class calculate_taxes_and_totals(object):
 
 				if item.discount_percentage == 100:
 					item.rate = 0.0
-				elif (not item.rate or item.discount_percentage > 0) and item.price_list_rate:
-					item.rate = flt(item.price_list_rate *
-						(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
-					item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
-				elif item.discount_amount and item.price_list_rate:
-					item.rate =  item.price_list_rate - item.discount_amount
+				elif item.price_list_rate:
+					if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
+						item.rate = flt(item.price_list_rate *
+							(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
+						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
+					elif item.discount_amount and item.pricing_rules:
+						item.rate =  item.price_list_rate - item.discount_amount
 
 				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']:
 					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
-
 					if flt(item.rate_with_margin) > 0:
 						item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
 						item.discount_amount = item.rate_with_margin - item.rate
+					elif flt(item.price_list_rate) > 0:
+						item.discount_amount = item.price_list_rate - item.rate
 				elif flt(item.price_list_rate) > 0 and not item.discount_amount:
 					item.discount_amount = item.price_list_rate - item.rate
 
@@ -395,7 +400,7 @@ class calculate_taxes_and_totals(object):
 					net_total += item.net_amount
 
 					# discount amount rounding loss adjustment if no taxes
-					if (not taxes or self.doc.apply_discount_on == "Net Total") \
+					if (self.doc.apply_discount_on == "Net Total" or not taxes or total_for_discount_amount==self.doc.net_total) \
 						and i == len(self.doc.get("items")) - 1:
 							discount_amount_loss = flt(self.doc.net_total - net_total - self.doc.discount_amount,
 								self.doc.precision("net_total"))
@@ -614,7 +619,7 @@ def get_itemised_tax_breakup_data(doc):
 
 	return itemised_tax, itemised_taxable_amount
 
-def get_itemised_tax(taxes):
+def get_itemised_tax(taxes, with_tax_account=False):
 	itemised_tax = {}
 	for tax in taxes:
 		if getattr(tax, "category", None) and tax.category=="Valuation":
@@ -638,6 +643,9 @@ def get_itemised_tax(taxes):
 					tax_rate = tax_rate,
 					tax_amount = tax_amount
 				))
+
+				if with_tax_account:
+					itemised_tax[item_code][tax.description].tax_account = tax.account_head
 
 	return itemised_tax
 

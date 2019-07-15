@@ -102,9 +102,9 @@ class TestAsset(unittest.TestCase):
 		asset.save()
 		self.assertEqual(asset.status, "Draft")
 		expected_schedules = [
-			["2020-06-06", 163.93, 163.93],
-			["2021-04-06", 49836.07, 50000.0],
-			["2022-02-06", 40000.0, 90000.00]
+			["2020-06-06", 147.54, 147.54],
+			["2021-04-06", 44852.46, 45000.0],
+			["2022-02-06", 45000.0, 90000.00]
 		]
 
 		schedules = [[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
@@ -130,8 +130,8 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(asset.status, "Draft")
 		asset.save()
 		expected_schedules = [
-			["2020-06-06", 197.37, 40197.37],
-			["2021-04-06", 49802.63, 90000.00]
+			["2020-06-06", 164.47, 40164.47],
+			["2021-04-06", 49835.53, 90000.00]
 		]
 		schedules = [[cstr(d.schedule_date), flt(d.depreciation_amount, 2), d.accumulated_depreciation_amount]
 			for d in asset.get("schedules")]
@@ -266,8 +266,8 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(asset.get("schedules")[0].journal_entry[:4], "DEPR")
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 0.0, 35699.15),
-			("_Test Depreciations - _TC", 35699.15, 0.0)
+			("_Test Accumulated Depreciations - _TC", 0.0, 32129.24),
+			("_Test Depreciations - _TC", 32129.24, 0.0)
 		)
 
 		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
@@ -366,8 +366,9 @@ class TestAsset(unittest.TestCase):
 		self.assertTrue(asset.journal_entry_for_scrap)
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 100000.0, 0.0),
-			("_Test Fixed Asset - _TC", 0.0, 100000.0)
+			("_Test Accumulated Depreciations - _TC", 147.54, 0.0),
+			("_Test Fixed Asset - _TC", 0.0, 100000.0),
+			("_Test Gain/Loss on Asset Disposal - _TC", 99852.46, 0.0)
 		)
 
 		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
@@ -411,9 +412,9 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 100000.0, 0.0),
+			("_Test Accumulated Depreciations - _TC", 23051.47, 0.0),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
-			("_Test Gain/Loss on Asset Disposal - _TC", 0, 25000.0),
+			("_Test Gain/Loss on Asset Disposal - _TC", 51948.53, 0.0),
 			("Debtors - _TC", 25000.0, 0.0)
 		)
 

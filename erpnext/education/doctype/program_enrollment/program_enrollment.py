@@ -66,7 +66,7 @@ class ProgramEnrollment(Document):
 			msgprint(_("Fee Records Created - {0}").format(comma_and(fee_list)))
 
 	def get_courses(self):
-		return frappe.db.sql('''select course, course_name from `tabProgram Course` where parent = %s and required = 1''', (self.program), as_dict=1)
+		return frappe.db.sql('''select course from `tabProgram Course` where parent = %s and required = 1''', (self.program), as_dict=1)
 
 	def create_course_enrollments(self):
 		student = frappe.get_doc("Student", self.student)
@@ -95,29 +95,6 @@ class ProgramEnrollment(Document):
 		quiz_progress.name = self.program
 		quiz_progress.program = self.program
 		return quiz_progress
-
-	def get_program_progress(self):
-		import math
-		program = frappe.get_doc("Program", self.program)
-		program_progress = {}
-		progress = []
-		for course in program.get_all_children():
-			course_progress = lms.get_student_course_details(course.course, self.program)
-			is_complete = False
-			if course_progress['flag'] == "Completed":
-				is_complete = True
-			progress.append({'course_name': course.course_name, 'name': course.course, 'is_complete': is_complete})
-
-		program_progress['progress'] = progress
-		program_progress['name'] = self.program
-		program_progress['program'] = frappe.get_value("Program", self.program, 'program_name')
-
-		try:
-			program_progress['percentage'] = math.ceil((sum([item['is_complete'] for item in progress] * 100)/len(progress)))
-		except ZeroDivisionError:
-			program_progress['percentage'] = 0
-
-		return program_progress
 
 @frappe.whitelist()
 def get_program_courses(doctype, txt, searchfield, start, page_len, filters):

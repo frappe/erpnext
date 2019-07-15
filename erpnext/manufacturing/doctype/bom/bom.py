@@ -172,13 +172,14 @@ class BOM(WebsiteGenerator):
 			#Customer Provided parts will have zero rate
 			if not frappe.db.get_value('Item', arg["item_code"], 'is_customer_provided_item'):
 				if arg.get('bom_no') and self.set_rate_of_sub_assembly_item_based_on_bom:
-					rate = self.get_bom_unitcost(arg['bom_no'])
+					rate = self.get_bom_unitcost(arg['bom_no']) * (arg.get("conversion_factor") or 1)
 				else:
 					if self.rm_cost_as_per == 'Valuation Rate':
-						rate = self.get_valuation_rate(arg)
+						rate = self.get_valuation_rate(arg) * (arg.get("conversion_factor") or 1)
 					elif self.rm_cost_as_per == 'Last Purchase Rate':
-						rate = arg.get('last_purchase_rate') \
-							or frappe.db.get_value("Item", arg['item_code'], "last_purchase_rate")
+						rate = (arg.get('last_purchase_rate') \
+							or frappe.db.get_value("Item", arg['item_code'], "last_purchase_rate")) \
+								* (arg.get("conversion_factor") or 1)
 					elif self.rm_cost_as_per == "Price List":
 						if not self.buying_price_list:
 							frappe.throw(_("Please select Price List"))
@@ -191,7 +192,7 @@ class BOM(WebsiteGenerator):
 							"transaction_type": "buying",
 							"company": self.company,
 							"currency": self.currency,
-							"conversion_rate": self.conversion_rate or 1,
+							"conversion_rate": 1, # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
 							"conversion_factor": arg.get("conversion_factor") or 1,
 							"plc_conversion_rate": 1,
 							"ignore_party": True
@@ -203,13 +204,13 @@ class BOM(WebsiteGenerator):
 
 					if not rate:
 						if self.rm_cost_as_per == "Price List":
-							frappe.msgprint(_("Price not found for item {0} and price list {1}")
+							frappe.msgprint(_("Price not found for item {0} in price list {1}")
 								.format(arg["item_code"], self.buying_price_list), alert=True)
 						else:
 							frappe.msgprint(_("{0} not found for item {1}")
 								.format(self.rm_cost_as_per, arg["item_code"]), alert=True)
 
-		return flt(rate)
+		return flt(rate) / (self.conversion_rate or 1)
 
 	def update_cost(self, update_parent=True, from_child_bom=False, save=True):
 		if self.docstatus == 2:
@@ -380,7 +381,7 @@ class BOM(WebsiteGenerator):
 
 				frappe.throw(_("Same item has been entered multiple times. {0}").format(duplicate_list))
 
-	def check_recursion(self):
+	def check_recursion(self, bom_list=[]):
 		""" Check whether recursion occurs in any bom"""
 		bom_list = self.traverse_tree()
 		bom_nos = frappe.get_all('BOM Item', fields=["bom_no"],
@@ -398,21 +399,21 @@ class BOM(WebsiteGenerator):
 				raise_exception = True
 
 		if raise_exception:
-			frappe.throw(_("BOM recursion: {0} cannot be parent or child of {2}").format(self.name, self.name))
+			frappe.throw(_("BOM recursion: {0} cannot be parent or child of {1}").format(self.name, self.name))
 
 	def update_cost_and_exploded_items(self, bom_list=[]):
 		bom_list = self.traverse_tree(bom_list)
 		for bom in bom_list:
 			bom_obj = frappe.get_doc("BOM", bom)
-			bom_obj.check_recursion()
+			bom_obj.check_recursion(bom_list=bom_list)
 			bom_obj.update_exploded_items()
 
 		return bom_list
 
 	def traverse_tree(self, bom_list=None):
 		def _get_children(bom_no):
-			return [cstr(d[0]) for d in frappe.db.sql("""select bom_no from `tabBOM Item`
-				where parent = %s and ifnull(bom_no, '') != '' and parenttype='BOM'""", bom_no)]
+			return frappe.db.sql_list("""select bom_no from `tabBOM Item`
+				where parent = %s and ifnull(bom_no, '') != '' and parenttype='BOM'""", bom_no)
 
 		count = 0
 		if not bom_list:
@@ -593,6 +594,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * %(qty)s as qty,
 				item.description,
 				item.image,
+				bom.project,
 				item.stock_uom,
 				item.allow_alternative_item,
 				item_default.default_warehouse,

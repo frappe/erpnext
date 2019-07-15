@@ -11,6 +11,8 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make
 from erpnext.stock.doctype.item.test_item import make_item
 import json
 
+test_dependencies = ["Territory", "Customer Group", "Supplier Group", "Item"]
+
 class TestGSTR3BReport(unittest.TestCase):
 	def test_gstr_3b_report(self):
 
@@ -388,5 +390,3 @@ def set_account_heads():
 		})
 
 		gst_settings.save()
-
-

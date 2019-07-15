@@ -22,7 +22,16 @@ def verify_request():
 	frappe.set_user(woocommerce_settings.creation_user)
 
 @frappe.whitelist(allow_guest=True)
-def order():
+def order(*args, **kwargs):
+	try:
+		_order(*args, **kwargs)
+	except Exception:
+		error_message = frappe.get_traceback()+"\n\n Request Data: \n"+json.loads(frappe.request.data).__str__()
+		frappe.log_error(error_message, "WooCommerce Error")
+		raise
+
+
+def _order(*args, **kwargs):
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 	if frappe.flags.woocomm_test_order_data:
 		fd = frappe.flags.woocomm_test_order_data
@@ -186,7 +195,7 @@ def link_item(item_data,item_status):
 	item.item_name = str(item_data.get("name"))
 	item.item_code = "woocommerce - " + str(item_data.get("product_id"))
 	item.woocommerce_id = str(item_data.get("product_id"))
-	item.item_group = "WooCommerce Products"
+	item.item_group = _("WooCommerce Products")
 	item.stock_uom = woocommerce_settings.uom or _("Nos")
 	item.save()
 	frappe.db.commit()

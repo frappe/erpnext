@@ -33,6 +33,14 @@ frappe.ui.form.on("Purchase Order", {
 				}
 			}
 		});
+
+		frm.set_query("expense_account", "items", function() {
+			return {
+				query: "erpnext.controllers.queries.get_expense_account",
+				filters: {'company': frm.doc.company}
+			}
+		});
+
 	},
 
 	refresh: function(frm) {
@@ -99,7 +107,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		if(doc.docstatus == 1) {
 			if(!in_list(["Closed", "Delivered"], doc.status)) {
 				if (this.frm.has_perm("submit")) {
-					if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) {
+					if(flt(doc.per_billed, 6) < 100 || flt(doc.per_received, 6) < 100) {
 						if (doc.status != "On Hold") {
 							this.frm.add_custom_button(__('Hold'), () => this.hold_purchase_order(), __("Status"));
 						} else{
@@ -137,6 +145,20 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						cur_frm.add_custom_button(__('Subscription'), function() {
 							erpnext.utils.make_subscription(doc.doctype, doc.name)
 						}, __('Create'))
+					}
+
+					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
+						let me = this;
+						frappe.model.with_doc("Supplier", me.frm.doc.supplier, () => {
+							let supplier = frappe.model.get_doc("Supplier", me.frm.doc.supplier);
+							let internal = supplier.is_internal_supplier;
+							let disabled = supplier.disabled;
+							if (internal === 1 && disabled === 0) {
+								me.frm.add_custom_button("Inter Company Order", function() {
+									me.make_inter_company_order(me.frm);
+								}, __('Create'));
+							}
+						});
 					}
 				}
 				if(flt(doc.per_billed)==0) {
@@ -293,6 +315,13 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
+		});
+	},
+
+	make_inter_company_order: function(frm) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_inter_company_sales_order",
+			frm: frm
 		});
 	},
 

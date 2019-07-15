@@ -126,6 +126,20 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	make_material_request: function(frm) {
+
+		frappe.confirm(__("Do you want to submit the material request"),
+			function() {
+				frm.events.create_material_request(frm, 1);
+			},
+			function() {
+				frm.events.create_material_request(frm, 0);
+			}
+		);
+	},
+
+	create_material_request: function(frm, submit) {
+		frm.doc.submit_material_request = submit;
+
 		frappe.call({
 			method: "make_material_request",
 			freeze: true,
@@ -198,7 +212,8 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	download_materials_required: function(frm) {
-		$c_obj_csv(frm.doc, 'download_raw_materials', '', '');
+		let get_template_url = 'erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials';
+		open_url_post(frappe.request.url, { cmd: get_template_url, production_plan: frm.doc.name });
 	},
 
 	show_progress: function(frm) {

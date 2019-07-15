@@ -90,11 +90,11 @@ class Lead(SellingController):
 		return frappe.db.get_value("Customer", {"lead_name": self.name})
 
 	def has_opportunity(self):
-		return frappe.db.get_value("Opportunity", {"lead": self.name, "status": ["!=", "Lost"]})
+		return frappe.db.get_value("Opportunity", {"party_name": self.name, "status": ["!=", "Lost"]})
 
 	def has_quotation(self):
 		return frappe.db.get_value("Quotation", {
-			"lead": self.name,
+			"party_name": self.name,
 			"docstatus": 1,
 			"status": ["!=", "Lost"]
 
@@ -102,14 +102,18 @@ class Lead(SellingController):
 
 	def has_lost_quotation(self):
 		return frappe.db.get_value("Quotation", {
-			"lead": self.name,
+			"party_name": self.name,
 			"docstatus": 1,
 			"status": "Lost"
 		})
 
 	def set_lead_name(self):
 		if not self.lead_name:
-			frappe.db.set_value("Lead", self.name, "lead_name", self.company_name)
+			# Check for leads being created through data import
+			if not self.company_name and not self.flags.ignore_mandatory:
+				frappe.throw(_("A Lead requires either a person's name or an organization's name"))
+
+			self.lead_name = self.company_name
 
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):
@@ -146,8 +150,8 @@ def make_opportunity(source_name, target_doc=None):
 			"doctype": "Opportunity",
 			"field_map": {
 				"campaign_name": "campaign",
-				"doctype": "enquiry_from",
-				"name": "lead",
+				"doctype": "opportunity_from",
+				"name": "party_name",
 				"lead_name": "contact_display",
 				"company_name": "customer_name",
 				"email_id": "contact_email",
@@ -163,7 +167,7 @@ def make_quotation(source_name, target_doc=None):
 		{"Lead": {
 			"doctype": "Quotation",
 			"field_map": {
-				"name": "lead"
+				"name": "party_name"
 			}
 		}}, target_doc)
 	target_doc.quotation_to = "Lead"
@@ -186,7 +190,7 @@ def get_lead_details(lead, posting_date=None, company=None):
 	out.update({
 		"territory": lead.territory,
 		"customer_name": lead.company_name or lead.lead_name,
-		"contact_display": lead.lead_name,
+		"contact_display": " ".join(filter(None, [lead.salutation, lead.lead_name])),
 		"contact_email": lead.email_id,
 		"contact_mobile": lead.mobile_no,
 		"contact_phone": lead.phone,

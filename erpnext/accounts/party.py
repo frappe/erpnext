@@ -44,7 +44,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 		frappe.throw(_("Not permitted for {0}").format(party), frappe.PermissionError)
 
 	party = frappe.get_doc(party_type, party)
-	currency = party.default_currency if party.default_currency else get_company_currency(company)
+	currency = party.default_currency if party.get("default_currency") else get_company_currency(company)
 
 	party_address, shipping_address = set_address_details(out, party, party_type, doctype, company, party_address, shipping_address)
 	set_contact_details(out, party, party_type)
@@ -144,7 +144,7 @@ def set_other_values(out, party, party_type):
 
 def get_default_price_list(party):
 	"""Return default price list for party (Document object)"""
-	if party.default_price_list:
+	if party.get("default_price_list"):
 		return party.default_price_list
 
 	if party.doctype == "Customer":
@@ -463,8 +463,8 @@ def get_timeline_data(doctype, name):
 	after = add_years(None, -1).strftime('%Y-%m-%d')
 	group_by='group by date(creation)'
 
-	data = get_communication_data(doctype, name,
-		fields=fields, after=after, group_by=group_by, as_dict=False)
+	data = get_communication_data(doctype, name, after=after, group_by='group by date(creation)',
+		fields='date(C.creation) as creation, count(C.name)',as_dict=False)
 
 	# fetch and append data from Activity Log
 	data += frappe.db.sql("""select {fields}

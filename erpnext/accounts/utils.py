@@ -333,6 +333,9 @@ def reconcile_against_document(args):
 		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
 		doc.make_gl_entries(cancel = 0, adv_adj =1)
 
+		if d.voucher_type in ('Payment Entry', 'Journal Entry'):
+			doc.update_expense_claim()
+
 def check_if_advance_entry_modified(args):
 	"""
 		check if there is already a voucher reference
@@ -375,9 +378,9 @@ def check_if_advance_entry_modified(args):
 
 def validate_allocated_amount(args):
 	if args.get("allocated_amount") < 0:
-		throw(_("Allocated amount can not be negative"))
+		throw(_("Allocated amount cannot be negative"))
 	elif args.get("allocated_amount") > args.get("unadjusted_amount"):
-		throw(_("Allocated amount can not greater than unadjusted amount"))
+		throw(_("Allocated amount cannot be greater than unadjusted amount"))
 
 def update_reference_in_journal_entry(d, jv_obj):
 	"""
@@ -432,7 +435,7 @@ def update_reference_in_journal_entry(d, jv_obj):
 	jv_obj.flags.ignore_validate_update_after_submit = True
 	jv_obj.save(ignore_permissions=True)
 
-def update_reference_in_payment_entry(d, payment_entry):
+def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	reference_details = {
 		"reference_doctype": d.against_voucher_type,
 		"reference_name": d.against_voucher,
@@ -463,7 +466,17 @@ def update_reference_in_payment_entry(d, payment_entry):
 	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()
 	payment_entry.set_amounts()
-	payment_entry.save(ignore_permissions=True)
+
+	if d.difference_amount and d.difference_account:
+		payment_entry.set_gain_or_loss(account_details={
+			'account': d.difference_account,
+			'cost_center': payment_entry.cost_center or frappe.get_cached_value('Company',
+				payment_entry.company, "cost_center"),
+			'amount': d.difference_amount
+		})
+
+	if not do_not_save:
+		payment_entry.save(ignore_permissions=True)
 
 def unlink_ref_doc_from_payment_entries(ref_doc):
 	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name)
@@ -615,7 +628,7 @@ def get_held_invoices(party_type, party):
 	return held_invoices
 
 
-def get_outstanding_invoices(party_type, party, account, condition=None, limit=None):
+def get_outstanding_invoices(party_type, party, account, condition=None, filters=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
@@ -628,11 +641,11 @@ def get_outstanding_invoices(party_type, party, account, condition=None, limit=N
 
 	invoice = 'Sales Invoice' if erpnext.get_party_account_type(party_type) == 'Receivable' else 'Purchase Invoice'
 	held_invoices = get_held_invoices(party_type, party)
-	limit_cond = "limit %s" % limit if limit else ""
 
 	invoice_list = frappe.db.sql("""
 		select
-			voucher_no, voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount
+			voucher_no, voucher_type, posting_date, due_date,
+			ifnull(sum({dr_or_cr}), 0) as invoice_amount
 		from
 			`tabGL Entry`
 		where
@@ -643,11 +656,10 @@ def get_outstanding_invoices(party_type, party, account, condition=None, limit=N
 					and (against_voucher = '' or against_voucher is null))
 				or (voucher_type not in ('Journal Entry', 'Payment Entry')))
 		group by voucher_type, voucher_no
-		order by posting_date, name {limit_cond}""".format(
+		order by posting_date, name""".format(
 			dr_or_cr=dr_or_cr,
 			invoice = invoice,
-			condition=condition or "",
-			limit_cond = limit_cond
+			condition=condition or ""
 		), {
 			"party_type": party_type,
 			"party": party,
@@ -666,7 +678,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, limit=N
 	""".format(payment_dr_or_cr=payment_dr_or_cr), {
 		"party_type": party_type,
 		"party": party,
-		"account": account,
+		"account": account
 	}, as_dict=True)
 
 	pe_map = frappe._dict()
@@ -677,10 +689,12 @@ def get_outstanding_invoices(party_type, party, account, condition=None, limit=N
 		payment_amount = pe_map.get((d.voucher_type, d.voucher_no), 0)
 		outstanding_amount = flt(d.invoice_amount - payment_amount, precision)
 		if outstanding_amount > 0.5 / (10**precision):
-			if not d.voucher_type == "Purchase Invoice" or d.voucher_no not in held_invoices:
-				due_date = frappe.db.get_value(
-					d.voucher_type, d.voucher_no, "posting_date" if party_type == "Employee" else "due_date")
+			if (filters.get("outstanding_amt_greater_than") and
+				not (outstanding_amount >= filters.get("outstanding_amt_greater_than") and
+				outstanding_amount <= filters.get("outstanding_amt_less_than"))):
+				continue
 
+			if not d.voucher_type == "Purchase Invoice" or d.voucher_no not in held_invoices:
 				outstanding_invoices.append(
 					frappe._dict({
 						'voucher_no': d.voucher_no,
@@ -689,7 +703,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, limit=N
 						'invoice_amount': flt(d.invoice_amount),
 						'payment_amount': payment_amount,
 						'outstanding_amount': outstanding_amount,
-						'due_date': due_date
+						'due_date': d.due_date
 					})
 				)
 
@@ -720,6 +734,7 @@ def get_children(doctype, parent, company, is_root=False):
 	parent_fieldname = 'parent_' + doctype.lower().replace(' ', '_')
 	fields = [
 		'name as value',
+		'root_type',
 		'is_group as expandable'
 	]
 	filters = [['docstatus', '<', 2]]
@@ -727,7 +742,7 @@ def get_children(doctype, parent, company, is_root=False):
 	filters.append(['ifnull(`{0}`,"")'.format(parent_fieldname), '=', '' if is_root else parent])
 
 	if is_root:
-		fields += ['root_type', 'report_type', 'account_currency'] if doctype == 'Account' else []
+		fields += ['report_type', 'account_currency'] if doctype == 'Account' else []
 		filters.append(['company', '=', company])
 
 	else:
