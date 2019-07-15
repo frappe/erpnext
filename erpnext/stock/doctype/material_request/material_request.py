@@ -370,19 +370,20 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 def get_material_requests_based_on_supplier(supplier):
 	supplier_items = [d.parent for d in frappe.db.get_all("Item Default",
 		{"default_supplier": supplier}, 'parent')]
-	if supplier_items:
-		material_requests = frappe.db.sql_list("""select distinct mr.name
-			from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
-			where mr.name = mr_item.parent
-				and mr_item.item_code in (%s)
-				and mr.material_request_type = 'Purchase'
-				and mr.per_ordered < 99.99
-				and mr.docstatus = 1
-				and mr.status != 'Stopped'
-			order by mr_item.item_code ASC""" % ', '.join(['%s']*len(supplier_items)),
-			tuple(supplier_items))
-	else:
-		material_requests = []
+	if not supplier_items:
+		frappe.throw(_("{0} is not the default supplier for any items.".format(supplier)))
+
+	material_requests = frappe.db.sql_list("""select distinct mr.name
+		from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
+		where mr.name = mr_item.parent
+			and mr_item.item_code in (%s)
+			and mr.material_request_type = 'Purchase'
+			and mr.per_ordered < 99.99
+			and mr.docstatus = 1
+			and mr.status != 'Stopped'
+		order by mr_item.item_code ASC""" % ', '.join(['%s']*len(supplier_items)),
+		tuple(supplier_items))
+
 	return material_requests, supplier_items
 
 @frappe.whitelist()
@@ -449,7 +450,7 @@ def make_stock_entry(source_name, target_doc=None):
 			"field_map": {
 				"name": "material_request_item",
 				"parent": "material_request",
-				"uom": "stock_uom",
+				"uom": "stock_uom"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.ordered_qty < doc.stock_qty

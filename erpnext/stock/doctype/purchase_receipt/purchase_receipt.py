@@ -387,6 +387,16 @@ class PurchaseReceipt(BuyingController):
 
 		self.load_from_db()
 
+	def make_return_invoice(self):
+		return_invoice = make_purchase_invoice(self.name)
+		return_invoice.is_return = True
+		return_invoice.save()
+		return_invoice.submit()
+
+		debit_note_link = frappe.utils.get_link_to_form('Purchase Invoice', return_invoice.name)
+
+		frappe.msgprint(_("Debit Note {0} has been created automatically").format(debit_note_link))
+
 def update_billed_amount_based_on_po(po_detail, update_modified=True):
 	# Billed against Sales Order directly
 	billed_against_po = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item`
