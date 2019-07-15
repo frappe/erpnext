@@ -498,6 +498,7 @@ erpnext.patches.v10_0.update_hub_connector_domain
 erpnext.patches.v10_0.set_student_party_type
 erpnext.patches.v10_0.update_project_in_sle
 erpnext.patches.v10_0.fix_reserved_qty_for_sub_contract
+erpnext.patches.v10_0.repost_requested_qty_for_non_stock_uom_items
 erpnext.patches.v10_0.taxes_issue_with_pos
 erpnext.patches.v10_0.set_qty_in_transactions_based_on_serial_no_input
 erpnext.patches.v10_0.show_leaves_of_all_department_members_in_calendar
