@@ -587,7 +587,6 @@ erpnext.utils.map_current_doc = function(opts) {
 				if(!r.exc) {
 					var doc = frappe.model.sync(r.message);
 					cur_frm.dirty();
-					erpnext.utils.clear_duplicates();
 					cur_frm.refresh();
 				}
 			}
@@ -616,28 +615,6 @@ erpnext.utils.map_current_doc = function(opts) {
 		opts.source_name = [opts.source_name];
 		_map();
 	}
-}
-
-erpnext.utils.clear_duplicates = function() {
-	if(!cur_frm.doc.items) return;
-	const unique_items = new Map();
-	/*
-		Create a Map of items with
-		item_code => [qty, warehouse, batch_no]
-	*/
-	let items = [];
-
-	for (let item of cur_frm.doc.items) {
-		if (!(unique_items.has(item.item_code) && unique_items.get(item.item_code)[0] === item.qty &&
-			unique_items.get(item.item_code)[1] === item.warehouse && unique_items.get(item.item_code)[2] === item.batch_no &&
-			unique_items.get(item.item_code)[3] === item.delivery_date && unique_items.get(item.item_code)[4] === item.required_date &&
-			unique_items.get(item.item_code)[5] === item.rate)) {
-
-			unique_items.set(item.item_code, [item.qty, item.warehouse, item.batch_no, item.delivery_date, item.required_date, item.rate]);
-			items.push(item);
-		}
-	}
-	cur_frm.doc.items = items;
 }
 
 frappe.form.link_formatters['Item'] = function(value, doc) {
