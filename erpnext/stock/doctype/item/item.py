@@ -1007,7 +1007,7 @@ def invalidate_item_variants_cache_for_website(doc):
 
 	if item_code:
 		item_cache = ItemVariantsCacheManager(item_code)
-		item_cache.rebuild_cache()
+		item_cache.clear_cache()
 
 
 def check_stock_uom_with_bin(item, stock_uom):
