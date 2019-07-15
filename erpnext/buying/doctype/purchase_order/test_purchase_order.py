@@ -58,24 +58,17 @@ class TestPurchaseOrder(unittest.TestCase):
 
 	def test_ordered_qty_against_pi_with_update_stock(self):
 		existing_ordered_qty = get_ordered_qty()
-
 		po = create_purchase_order()
 
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 10)
 
 		frappe.db.set_value('Item', '_Test Item', 'over_delivery_receipt_allowance', 50)
-		frappe.db.set_value('Item', '_Test Item', 'over_billing_allowance', 0)
-		frappe.db.set_value("Accounts Settings", None, "over_billing_allowance", 10)
+		frappe.db.set_value('Item', '_Test Item', 'over_billing_allowance', 20)
 
 		pi = make_pi_from_po(po.name)
 		pi.update_stock = 1
 		pi.items[0].qty = 12
 		pi.insert()
-
-		self.assertRaises(OverAllowanceError, pi.submit)
-
-		frappe.db.set_value('Item', '_Test Item', 'over_billing_allowance', 20)
-
 		pi.submit()
 
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
@@ -89,9 +82,9 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 0)
 
-		frappe.db.set_value('Item', '_Test Item', 'over_delivery_receipt_allowance', None)
-		frappe.db.set_value('Item', '_Test Item', 'over_billing_allowance', None)
-		frappe.db.set_value("Accounts Settings", None, "over_billing_allowance", None)
+		frappe.db.set_value('Item', '_Test Item', 'over_delivery_receipt_allowance', 0)
+		frappe.db.set_value('Item', '_Test Item', 'over_billing_allowance', 0)
+		frappe.db.set_value("Accounts Settings", None, "over_billing_allowance", 0)
 
 
 	def test_update_child_qty_rate(self):
