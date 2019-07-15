@@ -505,6 +505,7 @@ erpnext.patches.v10_0.update_hub_connector_domain
 erpnext.patches.v10_0.set_student_party_type
 erpnext.patches.v10_0.update_project_in_sle
 erpnext.patches.v10_0.fix_reserved_qty_for_sub_contract
+erpnext.patches.v10_0.repost_requested_qty_for_non_stock_uom_items
 erpnext.patches.v11_0.merge_land_unit_with_location
 erpnext.patches.v11_0.add_index_on_nestedset_doctypes
 erpnext.patches.v11_0.remove_modules_setup_page
@@ -605,6 +606,7 @@ erpnext.patches.v11_1.delete_scheduling_tool
 erpnext.patches.v12_0.make_custom_fields_for_bank_remittance #14-06-2019
 execute:frappe.delete_doc_if_exists("Page", "support-analytics")
 erpnext.patches.v12_0.make_item_manufacturer
+erpnext.patches.v12_0.remove_patient_medical_record_page
 erpnext.patches.v11_1.move_customer_lead_to_dynamic_column
 erpnext.patches.v11_1.set_default_action_for_quality_inspection
 erpnext.patches.v11_1.delete_bom_browser

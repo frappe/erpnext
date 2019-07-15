@@ -6,6 +6,7 @@
  "field_order": [
   "sb_00",
   "track_service_level_agreement",
+  "allow_resetting_service_level_agreement",
   "issues_sb",
   "close_issue_after_days",
   "portal_sb",
@@ -118,10 +119,16 @@
    "fieldname": "track_service_level_agreement",
    "fieldtype": "Check",
    "label": "Track Service Level Agreement"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_resetting_service_level_agreement",
+   "fieldtype": "Check",
+   "label": "Allow Resetting Service Level Agreement"
   }
  ],
  "issingle": 1,
- "modified": "2019-07-09 17:11:38.216732",
+ "modified": "2019-07-10 22:52:39.663873",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support Settings",
