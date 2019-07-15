@@ -318,41 +318,5 @@ def get_data():
 				}
 			]
 		},
-		{
-			"label": _("SMS"),
-			"icon": "fa fa-wrench",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "SMS Center",
-					"description":_("Send mass SMS to your contacts"),
-				},
-				{
-					"type": "doctype",
-					"name": "SMS Log",
-					"description":_("Logs for maintaining sms delivery status"),
-				},
-
-			]
-		},
-		{
-			"label": _("Help"),
-			"items": [
-				{
-					"type": "help",
-					"label": _("Customer and Supplier"),
-					"youtube_id": "anoGi_RpQ20"
-				},
-				{
-					"type": "help",
-					"label": _("Sales Order to Payment"),
-					"youtube_id": "1eP90MWoDQM"
-				},
-				{
-					"type": "help",
-					"label": _("Point-of-Sale"),
-					"youtube_id": "4WkelWkbP_c"
-				},
-			]
-		},
+		
 	]

@@ -596,6 +596,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * %(qty)s as qty,
 				item.description,
 				item.image,
+				bom.project,
 				item.stock_uom,
 				item.allow_alternative_item,
 				item_default.default_warehouse,
