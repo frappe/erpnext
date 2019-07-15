@@ -45,16 +45,6 @@ status_map = {
 		["Closed", "eval:self.status=='Closed'"],
 		["On Hold", "eval:self.status=='On Hold'"],
 	],
-	"Sales Invoice": [
-		["Draft", None],
-		["Submitted", "eval:self.docstatus==1"],
-		["Paid", "eval:self.outstanding_amount==0 and self.docstatus==1"],
-		["Return", "eval:self.is_return==1 and self.docstatus==1"],
-		["Credit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1"],
-		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
-		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
-		["Cancelled", "eval:self.docstatus==2"],
-	],
 	"Purchase Invoice": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
