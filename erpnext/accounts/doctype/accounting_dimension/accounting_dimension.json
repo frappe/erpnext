@@ -38,7 +38,8 @@
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Disable"
+   "label": "Disable",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -53,7 +54,7 @@
    "label": "Mandatory For Profit and Loss Account"
   }
  ],
- "modified": "2019-05-27 18:18:17.792726",
+ "modified": "2019-07-07 18:56:19.517450",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension",

@@ -121,11 +121,11 @@ def delete_accounting_dimension(doc):
 @frappe.whitelist()
 def disable_dimension(doc):
 	if frappe.flags.in_test:
-		frappe.enqueue(start_dimension_disabling, doc=doc)
+		toggle_disabling(doc=doc)
 	else:
-		start_dimension_disabling(doc=doc)
+		frappe.enqueue(toggle_disabling, doc=doc)
 
-def start_dimension_disabling(doc):
+def toggle_disabling(doc):
 	doc = json.loads(doc)
 
 	if doc.get('disabled'):

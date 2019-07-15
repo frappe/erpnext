@@ -14,6 +14,10 @@
 	margin-bottom: -4px;
 }
 
+.medical_record-row > * {
+	z-index: -999;
+}
+
 .date-indicator {
     background:none;
     font-size:12px;
@@ -33,6 +37,61 @@
 
 .date-indicator.blue {
 	color: #5e64ff;
+}
+
+.div-bg-color {
+	background: #fafbfc;
+}
+
+.bg-color-white {
+	background: #FFFFFF;
+}
+
+.d-flex {
+	display: flex;
+}
+
+.width-full {
+	width: 100%;
+}
+
+.p-3 {
+	padding: 16px;
+}
+
+.mt-2 {
+	margin-top: 8px;
+}
+
+.mr-3 {
+	margin-right: 16px;
+}
+
+.Box {
+	background-color: #fff;
+	border: 1px solid #d1d5da;
+	border-radius: 3px;
+}
+
+.flex-column {
+	flex-direction: column;
+}
+
+.avatar {
+	display: inline-block;
+	overflow: hidden;
+	line-height: 1;
+	vertical-align: middle;
+	border-radius: 3px;
+}
+
+.py-3 {
+	padding-top: 16px;
+	padding-bottom: 16px;
+}
+
+.border-bottom {
+	border-bottom: 1px #e1e4e8 solid;
 }
 
 .date-indicator.blue::after {
@@ -64,9 +123,4 @@
 
 #page-medical_record .list-filters {
 	display: none ;
-}
-
-#page-medical_record .octicon-heart {
-	color: #ff5858;
-	margin: 0px 5px;
 }
