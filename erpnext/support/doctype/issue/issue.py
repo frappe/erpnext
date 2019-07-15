@@ -270,7 +270,8 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 				allotted_days -= 1
 				expected_time_is_set = allotted_days <= 0
 
-		current_date_time = add_to_date(current_date_time, days=1)
+		if not expected_time_is_set:
+			current_date_time = add_to_date(current_date_time, days=1)
 
 	if end_time and time_period != 'Hour':
 		current_date_time = datetime.combine(getdate(current_date_time), get_time(end_time))
