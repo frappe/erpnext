@@ -1203,17 +1203,17 @@ class SalesInvoice(SellingController):
 			elif self.docstatus == 1:
 				if flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
 					self.status = "Overdue and Discounted"
-				elif self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()):
+				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
 					self.status = "Overdue"
-				elif self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
+				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
 					self.status = "Unpaid and Discounted"
-				elif self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()):
+				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
 					self.status = "Unpaid"
-				elif self.outstanding_amount < 0 and self.is_return==0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+				elif flt(self.outstanding_amount) < 0 and self.is_return==0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
 					self.status = "Credit Note Issued"
 				elif self.is_return == 1:
 					self.status = "Return"
-				elif self.outstanding_amount<=0:
+				elif flt(self.outstanding_amount)<=0:
 					self.status = "Paid"
 				else:
 					self.status = "Submitted"
