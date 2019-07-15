@@ -19,9 +19,8 @@
   "currency",
   "column_break2",
   "budget",
-  "schedule_section",
-  "campaign_schedule_section",
-  "campaign_schedule",
+  "campaign_schedules_section",
+  "campaign_schedules",
   "description_section",
   "description"
  ],
@@ -104,24 +103,20 @@
    "label": "BUDGET"
   },
   {
-   "fieldname": "campaign_schedule_section",
-   "fieldtype": "Section Break",
-   "label": "Campaign Schedule"
-  },
-  {
-   "fieldname": "campaign_schedule",
+   "fieldname": "campaign_schedules",
    "fieldtype": "Table",
-   "label": "Campaign Schedule",
+   "label": "Campaign Schedules",
    "options": "Campaign Email Schedule"
   },
   {
-   "fieldname": "schedule_section",
-   "fieldtype": "Section Break"
+   "fieldname": "campaign_schedules_section",
+   "fieldtype": "Section Break",
+   "label": "Campaign Schedules"
   }
  ],
  "icon": "fa fa-bullhorn",
  "idx": 1,
- "modified": "2019-07-12 11:52:47.196736",
+ "modified": "2019-07-15 17:45:06.168107",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Campaign",

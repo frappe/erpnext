@@ -26,7 +26,7 @@ class EmailCampaign(Document):
 
 		#set the end date as start date + max(send after days) in campaign schedule
 		send_after_days = []
-		for entry in campaign.get("campaign_schedule"):
+		for entry in campaign.get("campaign_schedules"):
 			send_after_days.append(entry.send_after_days)
 		end_date = add_days(getdate(self.start_date), max(send_after_days))
 
@@ -56,8 +56,8 @@ def send_email_to_leads():
 	email_campaigns = frappe.get_all("Email Campaign", filters = { 'status': ('not in', ['Unsubscribed', 'Completed', 'Scheduled']) })
 	for camp in email_campaigns:
 		email_campaign = frappe.get_doc("Email Campaign", camp.name)
-		campaign = frappe.get_doc("Campaign", email_campaign.campaign_name)
-		for entry in campaign.get("campaign_schedule"):
+		campaign = frappe.get_cached_doc("Campaign", email_campaign.campaign_name)
+		for entry in campaign.get("campaign_schedules"):
 			scheduled_date = add_days(email_campaign.get('start_date'), entry.get('send_after_days'))
 			if scheduled_date == getdate(today()):
 				send_mail(entry, email_campaign)
@@ -82,7 +82,6 @@ def send_mail(entry, email_campaign):
 		email_template = email_template.name
 	)
 
-@frappe.whitelist(allow_guest=True)
 #called from hooks on doc_event Email Unsubscribe
 def unsubscribe_recipient(unsubscribe, method):
 	if unsubscribe.reference_doctype == 'Email Campaign':
