@@ -6,29 +6,33 @@ from __future__ import unicode_literals
 import frappe, math, json
 import erpnext
 from frappe import _
-from frappe.utils import flt, rounded, add_months, nowdate
+from frappe.utils import flt, rounded, add_months, nowdate, getdate
 from erpnext.controllers.accounts_controller import AccountsController
 
 class Loan(AccountsController):
 	def validate(self):
-		check_repayment_method(self.repayment_method, self.loan_amount, self.monthly_repayment_amount, self.repayment_periods)
+		validate_repayment_method(self.repayment_method, self.loan_amount, self.monthly_repayment_amount, self.repayment_periods)
+		self.set_missing_fields()
+		self.make_repayment_schedule()
+		self.set_repayment_period()
+		self.calculate_totals()
+
+	def set_missing_fields(self):
 		if not self.company:
 			self.company = erpnext.get_default_company()
+
 		if not self.posting_date:
 			self.posting_date = nowdate()
+
 		if self.loan_type and not self.rate_of_interest:
 			self.rate_of_interest = frappe.db.get_value("Loan Type", self.loan_type, "rate_of_interest")
+
 		if self.repayment_method == "Repay Over Number of Periods":
 			self.monthly_repayment_amount = get_monthly_repayment_amount(self.repayment_method, self.loan_amount, self.rate_of_interest, self.repayment_periods)
+
 		if self.status == "Repaid/Closed":
 			self.total_amount_paid = self.total_payment
-		if self.status == 'Disbursed' and self.repayment_start_date < self.disbursement_date:
-			frappe.throw(_("Repayment Start Date cannot be before Disbursement Date."))
 
-		if self.status == "Disbursed":
-			self.make_repayment_schedule()
-			self.set_repayment_period()
-			self.calculate_totals()
 
 	def make_jv_entry(self):
 		self.check_permission('write')
@@ -105,20 +109,31 @@ def update_total_amount_paid(doc):
 	frappe.db.set_value("Loan", doc.name, "total_amount_paid", total_amount_paid)
 
 def update_disbursement_status(doc):
-	disbursement = frappe.db.sql("""select posting_date, ifnull(sum(credit_in_account_currency), 0) as disbursed_amount
-		from `tabGL Entry` where account = %s and against_voucher_type = 'Loan' and against_voucher = %s""",
-		(doc.payment_account, doc.name), as_dict=1)[0]
-	if disbursement.disbursed_amount == doc.loan_amount:
-		frappe.db.set_value("Loan", doc.name , "status", "Disbursed")
-	if disbursement.disbursed_amount == 0:
-		frappe.db.set_value("Loan", doc.name , "status", "Sanctioned")
-	if disbursement.disbursed_amount > doc.loan_amount:
-		frappe.throw(_("Disbursed Amount cannot be greater than Loan Amount {0}").format(doc.loan_amount))
-	if disbursement.disbursed_amount > 0:
-		frappe.db.set_value("Loan", doc.name , "disbursement_date", disbursement.posting_date)
-		frappe.db.set_value("Loan", doc.name , "repayment_start_date", disbursement.posting_date)
+	disbursement = frappe.db.sql("""
+		select posting_date, ifnull(sum(credit_in_account_currency), 0) as disbursed_amount
+		from `tabGL Entry`
+		where account = %s and against_voucher_type = 'Loan' and against_voucher = %s
+	""", (doc.payment_account, doc.name), as_dict=1)[0]
 
-def check_repayment_method(repayment_method, loan_amount, monthly_repayment_amount, repayment_periods):
+	disbursement_date = None
+	if not disbursement or disbursement.disbursed_amount == 0:
+		status = "Sanctioned"
+	elif disbursement.disbursed_amount == doc.loan_amount:
+		disbursement_date = disbursement.posting_date
+		status = "Disbursed"
+	elif disbursement.disbursed_amount > doc.loan_amount:
+		frappe.throw(_("Disbursed Amount cannot be greater than Loan Amount {0}").format(doc.loan_amount))
+
+	if status == 'Disbursed' and getdate(disbursement_date) > getdate(frappe.db.get_value("Loan", doc.name, "repayment_start_date")):
+			frappe.throw(_("Disbursement Date cannot be after Loan Repayment Start Date"))
+
+	frappe.db.sql("""
+		update `tabLoan`
+		set status = %s, disbursement_date = %s
+		where name = %s
+	""", (status, disbursement_date, doc.name))
+
+def validate_repayment_method(repayment_method, loan_amount, monthly_repayment_amount, repayment_periods):
 	if repayment_method == "Repay Over Number of Periods" and not repayment_periods:
 		frappe.throw(_("Please enter Repayment Periods"))
 

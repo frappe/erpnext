@@ -502,6 +502,7 @@ class JournalEntry(AccountsController):
 					self.get_gl_dict({
 						"account": d.account,
 						"party_type": d.party_type,
+						"due_date": self.due_date,
 						"party": d.party,
 						"against": d.against_account,
 						"debit": flt(d.debit, d.precision("debit")),

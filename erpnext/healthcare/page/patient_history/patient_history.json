@@ -1,18 +1,21 @@
 {
  "content": null, 
- "creation": "2016-06-09 11:33:14.025787", 
+ "creation": "2018-08-08 17:09:13.816199", 
  "docstatus": 0, 
  "doctype": "Page", 
- "icon": "icon-play", 
+ "icon": "", 
  "idx": 0, 
- "modified": "2018-08-06 11:40:39.705660", 
+ "modified": "2018-08-08 17:09:55.969424", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
- "name": "medical_record", 
+ "name": "patient_history", 
  "owner": "Administrator", 
- "page_name": "medical_record", 
+ "page_name": "patient_history", 
  "restrict_to_domain": "Healthcare", 
  "roles": [
+  {
+   "role": "Healthcare Administrator"
+  }, 
   {
    "role": "Physician"
   }
@@ -21,5 +24,5 @@
  "standard": "Yes", 
  "style": null, 
  "system_page": 0, 
- "title": "Medical Record"
+ "title": "Patient History"
 }

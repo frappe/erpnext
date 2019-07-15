@@ -159,9 +159,7 @@ frappe.query_reports["General Ledger"] = {
 	]
 }
 
-let dimension_filters = erpnext.get_dimension_filters();
-
-dimension_filters.then((dimensions) => {
+erpnext.dimension_filters.then((dimensions) => {
 	dimensions.forEach((dimension) => {
 		frappe.query_reports["General Ledger"].filters.splice(15, 0 ,{
 			"fieldname": dimension["fieldname"],
