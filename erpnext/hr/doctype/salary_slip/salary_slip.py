@@ -618,7 +618,7 @@ class SalarySlip(TransactionBase):
 		elif not self.payment_days and not self.salary_slip_based_on_timesheet and cint(row.depends_on_payment_days):
 			amount, additional_amount = 0, 0
 		elif not row.amount:
-			amount = row.default_amount + row.additional_amount
+			amount = flt(row.default_amount) + flt(row.additional_amount)
 
 		# apply rounding
 		if frappe.get_cached_value("Salary Component", row.salary_component, "round_to_the_nearest_integer"):

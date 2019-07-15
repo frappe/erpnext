@@ -174,9 +174,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					method: "erpnext.selling.doctype.quotation.quotation.make_sales_invoice",
 					source_doctype: "Quotation",
 					target: me.frm,
-					setters: {
-						customer: me.frm.doc.customer || undefined,
-					},
+					setters: [{
+						fieldtype: 'Link',
+						label: __('Customer'),
+						options: 'Customer',
+						fieldname: 'party_name',
+						default: me.frm.doc.customer,
+					}],
 					get_query_filters: {
 						docstatus: 1,
 						status: ["!=", "Lost"],

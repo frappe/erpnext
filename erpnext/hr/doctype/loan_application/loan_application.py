@@ -9,11 +9,11 @@ from frappe.utils import flt, rounded
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 
-from erpnext.hr.doctype.loan.loan import get_monthly_repayment_amount, check_repayment_method
+from erpnext.hr.doctype.loan.loan import get_monthly_repayment_amount, validate_repayment_method
 
 class LoanApplication(Document):
 	def validate(self):
-		check_repayment_method(self.repayment_method, self.loan_amount, self.repayment_amount, self.repayment_periods)
+		validate_repayment_method(self.repayment_method, self.loan_amount, self.repayment_amount, self.repayment_periods)
 		self.validate_loan_amount()
 		self.get_repayment_details()
 
