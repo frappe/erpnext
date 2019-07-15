@@ -16,31 +16,6 @@ frappe.query_reports["Customer Credit Balance"] = {
 			"label": __("Customer"),
 			"fieldtype": "Link",
 			"options": "Customer"
-		},
-		{
-			"fieldname":"cost_center",
-			"label": __("Cost Center"),
-			"fieldtype": "Link",
-			"options": "Cost Center",
-			get_query: () => {
-				var company = frappe.query_report.get_filter_value('company');
-				return {
-					filters: {
-						'company': company
-					}
-				}
-			}
-		},
+		}
 	]
 }
-
-erpnext.dimension_filters.then((dimensions) => {
-	dimensions.forEach((dimension) => {
-		frappe.query_reports["Customer Credit Balance"].filters.push({
-			"fieldname": dimension["fieldname"],
-			"label": __(dimension["label"]),
-			"fieldtype": "Link",
-			"options": dimension["document_type"]
-		});
-	});
-});
