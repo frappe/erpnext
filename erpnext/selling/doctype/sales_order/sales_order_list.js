@@ -34,7 +34,7 @@ frappe.listview_settings['Sales Order'] = {
 					"per_delivered,<,100|per_billed,=,100|status,!=,Closed"];
 			}
 
-		} else if ((flt(doc.per_delivered, 6) == 100)
+		} else if ((flt(doc.per_delivered, 6) === 100)
 			&& flt(doc.grand_total) !== 0 && flt(doc.per_billed, 6) < 100 && doc.status !== "Closed") {
 			// to bill
 
