@@ -40,11 +40,9 @@ def get_data():
 					"type": "doctype",
 					"name": "Employee Health Insurance"
 				},
-								
-				
 			]
 		},
-{
+		{
 			"label": _("Attendance"),
 			"items": [
 				{
@@ -54,7 +52,6 @@ def get_data():
 					"onboard": 1,
 					"dependencies": ["Employee"]
 				},
-				
 				{
 					"type": "doctype",
 					"name": "Attendance",
@@ -76,7 +73,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Employee Checkin",
 					"hide_count": True,
-					"onboard": 1,
 					"dependencies": ["Employee"]
 				},
 				{
@@ -84,7 +80,7 @@ def get_data():
 					"is_query_report": True,
 					"name": "Monthly Attendance Sheet",
 					"doctype": "Attendance"
-				},				
+				},
 			]
 		},
 		{
@@ -100,14 +96,12 @@ def get_data():
 					"name": "Leave Allocation",
 					"dependencies": ["Employee"]
 				},
-				
 				{
 					"type": "doctype",
 					"name": "Leave Policy",
 					"dependencies": ["Leave Type"]
 				},
 				{
-
 					"type": "doctype",
 					"name": "Leave Period",
 					"dependencies": ["Employee"]
@@ -120,7 +114,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Holiday List",
 				},
-			
 				{
 					"type": "doctype",
 					"name": "Compensatory Leave Request",
@@ -131,7 +124,6 @@ def get_data():
 					"name": "Leave Encashment",
 					"dependencies": ["Employee"]
 				},
-				
 				{
 					"type": "doctype",
 					"name": "Leave Block List",
@@ -141,10 +133,9 @@ def get_data():
 					"is_query_report": True,
 					"name": "Employee Leave Balance",
 					"doctype": "Leave Application"
-				},				
+				},
 			]
 		},
-
 		{
 			"label": _("Payroll"),
 			"items": [
@@ -153,15 +144,12 @@ def get_data():
 					"name": "Salary Structure",
 					"onboard": 1,
 				},
-				
-				
 				{
 					"type": "doctype",
 					"name": "Salary Structure Assignment",
 					"onboard": 1,
 					"dependencies": ["Salary Structure", "Employee"],
 				},
-				
 				{
 					"type": "doctype",
 					"name": "Payroll Entry",
@@ -180,7 +168,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Additional Salary",
 				},
-				
 				{
 					"type": "doctype",
 					"name": "Retention Bonus",
@@ -222,9 +209,6 @@ def get_data():
 					"name": "Employee Benefit Claim",
 					"dependencies": ["Employee"]
 				},
-				
-				
-				
 			]
 		},
 		{
@@ -249,37 +233,30 @@ def get_data():
 					"type": "doctype",
 					"name": "Employee Separation",
 					"dependencies": ["Employee"],
-				},	
-				
+				},
 				{
 					"type": "doctype",
 					"name": "Employee Onboarding Template",
 					"dependencies": ["Employee"]
 				},
-				
 				{
 					"type": "doctype",
 					"name": "Employee Separation Template",
 					"dependencies": ["Employee"]
 				},
-				
-				
-				
 			]
 		},
-		
-
-
-
-		
 		{
 			"label": _("Recruitment"),
 			"items": [
-				
-				
 				{
 					"type": "doctype",
 					"name": "Job Opening",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Job Applicant",
 					"onboard": 1,
 				},
 				{
@@ -291,19 +268,9 @@ def get_data():
 					"type": "doctype",
 					"name": "Staffing Plan",
 				},
-				
-
-				{
-					"type": "doctype",
-					"name": "Job Applicant",
-					"onboard": 1,
-				},
-				
-				
-				
 			]
 		},
-{
+		{
 			"label": _("Training"),
 			"items": [
 				{
@@ -322,10 +289,8 @@ def get_data():
 					"type": "doctype",
 					"name": "Training Feedback"
 				},
-
-
 			]
-},
+		},
 		{
 			"label": _("Performance"),
 			"items": [
@@ -351,15 +316,11 @@ def get_data():
 					"label": _("Energy Point Leaderboard"),
 					"route": "#social/users"
 				},
-				
 			]
 		},
-{
+		{
 			"label": _("Expense Claims"),
 			"items": [
-				
-				
-				
 				{
 					"type": "doctype",
 					"name": "Expense Claim",
@@ -370,7 +331,6 @@ def get_data():
 					"name": "Employee Advance",
 					"dependencies": ["Employee"]
 				},
-				
 			]
 		},
 		{
@@ -391,7 +351,6 @@ def get_data():
 				},
 			]
 		},
-		
 		{
 			"label": _("Shift Management"),
 			"items": [
@@ -407,13 +366,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Shift Assignment",
 				},
-				
 			]
 		},
 		{
 			"label": _("Fleet Management"),
 			"items": [
-				
 				{
 					"type": "doctype",
 					"name": "Vehicle"
@@ -442,7 +399,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Daily Work Summary Group"
 				},
-				
 				{
 					"type": "page",
 					"name": "team-updates",
@@ -474,26 +430,4 @@ def get_data():
 				},
 			]
 		},
-		
-		# {
-		# 	"label": _("Help"),
-		# 	"icon": "fa fa-facetime-video",
-		# 	"items": [
-		# 		{
-		# 			"type": "help",
-		# 			"label": _("Setting up Employees"),
-		# 			"youtube_id": "USfIUdZlUhw"
-		# 		},
-		# 		{
-		# 			"type": "help",
-		# 			"label": _("Leave Management"),
-		# 			"youtube_id": "fc0p_AXebc8"
-		# 		},
-		# 		{
-		# 			"type": "help",
-		# 			"label": _("Expense Claims"),
-		# 			"youtube_id": "5SZHJF--ZFY"
-		# 		}
-		# 	]
-		# },
 	]
