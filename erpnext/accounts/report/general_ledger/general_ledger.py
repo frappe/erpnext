@@ -11,6 +11,7 @@ from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from six import iteritems
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from collections import OrderedDict
 
 def execute(filters=None):
 	if not filters:
@@ -274,7 +275,7 @@ def group_by_field(group_by):
 		return 'voucher_no'
 
 def initialize_gle_map(gl_entries, filters):
-	gle_map = frappe._dict()
+	gle_map = OrderedDict()
 	group_by = group_by_field(filters.get('group_by'))
 
 	for gle in gl_entries:
