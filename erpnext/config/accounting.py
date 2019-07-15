@@ -306,8 +306,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Bank Guarantee",
-					"doctype": "Bank Guarantee"
+					"name": "Bank Guarantee"
 				},
 			]
 		},
