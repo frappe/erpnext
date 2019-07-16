@@ -46,7 +46,7 @@ def get_data(item_code=None, warehouse=None, item_group=None,
 		item.update({
 			'item_name': frappe.get_cached_value("Item", item.item_code, 'item_name'),
 			'disable_quick_entry': frappe.get_cached_value("Item", item.item_code, 'has_batch_no')
-									or frappe.get_cached_value("Item", item.item_code, 'has_serial_no'),
+				or frappe.get_cached_value("Item", item.item_code, 'has_serial_no'),
 		})
 
 	return items

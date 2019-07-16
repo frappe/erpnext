@@ -34,9 +34,11 @@ erpnext.stock.ItemDashboard = Class.extend({
 			let disable_quick_entry = Number(unescape($(this).attr('data-disable_quick_entry')));
 			let rate = unescape($(this).attr('data-rate'));
 
-			if (disable_quick_entry) open_stock_entry(item, warehouse);
-
-			else erpnext.stock.move_item(item, null, warehouse, actual_qty, rate, function() { me.refresh(); })
+			if (disable_quick_entry) {
+				open_stock_entry(item, warehouse);
+			} else {
+				erpnext.stock.move_item(item, null, warehouse, actual_qty, rate, function() { me.refresh(); })
+			}
 		});
 
 		function open_stock_entry(item, warehouse, entry_type) {
