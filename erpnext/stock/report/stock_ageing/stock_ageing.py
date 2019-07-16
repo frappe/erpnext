@@ -16,8 +16,9 @@ def execute(filters=None):
 	for item, item_dict in iteritems(item_details):
 		fifo_queue = sorted(item_dict["fifo_queue"], key=lambda x: x[1])
 		details = item_dict["details"]
-		if not fifo_queue: continue
+		if not fifo_queue or (not item_dict.get("total_qty")): continue
 
+		print(fifo_queue)
 		average_age = get_average_age(fifo_queue, to_date)
 		earliest_age = date_diff(to_date, fifo_queue[0][1])
 		latest_age = date_diff(to_date, fifo_queue[-1][1])
@@ -39,8 +40,13 @@ def get_average_age(fifo_queue, to_date):
 	batch_age = age_qty = total_qty = 0.0
 	for batch in fifo_queue:
 		batch_age = date_diff(to_date, batch[1])
-		age_qty += batch_age * batch[0]
-		total_qty += batch[0]
+
+		if type(batch[0]) in ['int', 'float']:
+			age_qty += batch_age * batch[0]
+			total_qty += batch[0]
+		else:
+			age_qty += batch_age * 1
+			total_qty += 1
 
 	return (age_qty / total_qty) if total_qty else 0.0
 
@@ -128,6 +134,7 @@ def get_columns(filters):
 def get_fifo_queue(filters):
 	item_details = {}
 	transfered_item_details = {}
+	serial_no_batch_purchase_details = {}
 
 	sle = get_stock_ledger_entries(filters)
 
@@ -142,7 +149,7 @@ def get_fifo_queue(filters):
 			d.actual_qty = flt(d.qty_after_transaction) - flt(item_details[key].get("qty_after_transaction", 0))
 
 		if d.actual_qty > 0:
-			if filters.get('show_warehouse_wise_stock') and transfered_item_details.get((d.voucher_no, d.name)):
+			if transfered_item_details.get((d.voucher_no, d.name)):
 				qty_to_add = d.actual_qty
 				while qty_to_add:
 					batch = transfered_item_details[(d.voucher_no, d.name)][0]
@@ -154,21 +161,43 @@ def get_fifo_queue(filters):
 						batch[0] -= qty_to_add
 						fifo_queue.append([qty_to_add, batch[1]])
 			else:
-				fifo_queue.append([d.actual_qty, d.posting_date])
-		else:
-			qty_to_pop = abs(d.actual_qty)
-			while qty_to_pop:
-				batch = fifo_queue[0] if fifo_queue else [0, None]
-				if 0 < batch[0] <= qty_to_pop:
-					# if batch qty > 0
-					# not enough or exactly same qty in current batch, clear batch
-					qty_to_pop -= batch[0]
-					transfered_item_details[(d.voucher_no, d.name)].append(fifo_queue.pop(0))
+				if d.serial_no or d.batch_no:
+					if d.serial_no:
+						for no in d.serial_no.split("\n"):
+							if serial_no_batch_purchase_details.get(no):
+								fifo_queue.append([no, serial_no_batch_purchase_details.get(no)])
+							else:
+								serial_no_batch_purchase_details.setdefault(no, d.posting_date)
+								fifo_queue.append([no, d.posting_date])
+					else:
+						if serial_no_batch_purchase_details.get(d.batch_no):
+							fifo_queue.append([d.batch_no, serial_no_batch_purchase_details.get(d.batch_no)])
+						else:
+							serial_no_batch_purchase_details.setdefault(d.batch_no, d.posting_date)
+							fifo_queue.append([d.batch_no, d.posting_date])
+
 				else:
-					# all from current batch
-					batch[0] -= qty_to_pop
-					transfered_item_details[(d.voucher_no, d.name)].append([qty_to_pop, batch[1]])
-					qty_to_pop = 0
+					fifo_queue.append([d.actual_qty, d.posting_date])
+		else:
+			if d.serial_no or d.batch_no:
+				serial_no_list = d.serial_no.split("\n")
+				for serial_no in fifo_queue:
+					if serial_no[0] in serial_no_list:
+						fifo_queue.remove(serial_no)
+			else:
+				qty_to_pop = abs(d.actual_qty)
+				while qty_to_pop:
+					batch = fifo_queue[0] if fifo_queue else [0, None]
+					if 0 < batch[0] <= qty_to_pop:
+						# if batch qty > 0
+						# not enough or exactly same qty in current batch, clear batch
+						qty_to_pop -= batch[0]
+						transfered_item_details[(d.voucher_no, d.name)].append(fifo_queue.pop(0))
+					else:
+						# all from current batch
+						batch[0] -= qty_to_pop
+						transfered_item_details[(d.voucher_no, d.name)].append([qty_to_pop, batch[1]])
+						qty_to_pop = 0
 
 		item_details[key]["qty_after_transaction"] = d.qty_after_transaction
 
@@ -182,7 +211,7 @@ def get_fifo_queue(filters):
 def get_stock_ledger_entries(filters):
 	return frappe.db.sql("""select
 			item.name, item.item_name, item_group, brand, description, item.stock_uom,
-			actual_qty, posting_date, voucher_type, voucher_no, qty_after_transaction, warehouse
+			actual_qty, posting_date, voucher_type, voucher_no, serial_no, batch_no, qty_after_transaction, warehouse
 		from `tabStock Ledger Entry` sle,
 			(select name, item_name, description, stock_uom, brand, item_group
 				from `tabItem` {item_conditions}) item
@@ -190,7 +219,7 @@ def get_stock_ledger_entries(filters):
 			company = %(company)s and
 			posting_date <= %(to_date)s
 			{sle_conditions}
-			order by posting_date, posting_time, sle.creation, actual_qty"""\
+			order by posting_date, posting_time, sle.creation, actual_qty""" #nosec
 		.format(item_conditions=get_item_conditions(filters),
 			sle_conditions=get_sle_conditions(filters)), filters, as_dict=True)
 
