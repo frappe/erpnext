@@ -51,7 +51,7 @@ class DeliveryNote(SellingController):
 			'source_field': 'qty',
 			'percent_join_field': 'against_sales_invoice',
 			'overflow_type': 'delivery',
-			'no_tolerance': 1
+			'no_allowance': 1
 		}]
 		if cint(self.is_return):
 			self.status_updater.append({
