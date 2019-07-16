@@ -155,7 +155,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					var me = this;
 					if (this.frm.doc.customer) {
 						frappe.call({
-							method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details",
+							method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
 							args: {
 								"customer": me.frm.doc.customer,
 								"expiry_date": me.frm.doc.posting_date,
@@ -1694,7 +1694,13 @@ class Payment {
 				fieldtype: 'Check',
 				label: 'Redeem Loyalty Points',
 				fieldname: 'redeem_loyalty_points',
-				onchange: () => {
+				onchange: async function () {
+					if (!cint(me.dialog.get_value('redeem_loyalty_points'))) {
+						await Promise.all([
+							me.frm.set_value('loyalty_points', 0),
+							me.dialog.set_value('loyalty_points', 0)
+						]);
+					}
 					me.update_cur_frm_value("redeem_loyalty_points", () => {
 						frappe.flags.redeem_loyalty_points = false;
 						me.update_loyalty_points();
@@ -1838,13 +1844,14 @@ class Payment {
 		});
 	}
 
-	update_loyalty_points() {
-		if (this.dialog.get_value("redeem_loyalty_points")) {
-			this.dialog.set_value("loyalty_points", this.frm.doc.loyalty_points);
-			this.dialog.set_value("loyalty_amount", this.frm.doc.loyalty_amount);
-			this.update_payment_amount();
-			this.show_paid_amount();
-		}
+	async update_loyalty_points() {
+		const { loyalty_points, loyalty_amount } = this.frm.doc;
+		await Promise.all([
+			this.dialog.set_value("loyalty_points", loyalty_points),
+			this.dialog.set_value("loyalty_amount", loyalty_amount)
+		]);
+		this.update_payment_amount();
+		this.show_paid_amount();
 	}
 
 }
