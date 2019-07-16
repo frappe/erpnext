@@ -6,19 +6,23 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
+from frappe.utils import getdate
 
 class ServiceLevelAgreement(Document):
 
 	def validate(self):
+		if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
+			frappe.throw(_("Service Level Agreement tracking is not enabled."))
+
 		if self.default_service_level_agreement:
 			if frappe.db.exists("Service Level Agreement", {"default_service_level_agreement": "1", "name": ["!=", self.name]}):
 				frappe.throw(_("A Default Service Level Agreement already exists."))
 		else:
 			if self.start_date and self.end_date:
-				if self.start_date >= self.end_date:
+				if getdate(self.start_date) >= getdate(self.end_date):
 					frappe.throw(_("Start Date of Agreement can't be greater than or equal to End Date."))
 
-				if self.end_date < frappe.utils.getdate():
+				if getdate(self.end_date) < getdate(frappe.utils.getdate()):
 					frappe.throw(_("End Date of Agreement can't be less than today."))
 
 		if self.entity_type and self.entity:
@@ -44,12 +48,16 @@ def check_agreement_status():
 
 	for service_level_agreement in service_level_agreements:
 		doc = frappe.get_doc("Service Level Agreement", service_level_agreement.name)
-		if doc.end_date and doc.end_date < frappe.utils.getdate():
+		if doc.end_date and getdate(doc.end_date) < getdate(frappe.utils.getdate()):
 			frappe.db.set_value("Service Level Agreement", service_level_agreement.name, "active", 0)
 
 def get_active_service_level_agreement_for(priority, customer=None, service_level_agreement=None):
+	if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
+		return
+
 	filters = [
 		["Service Level Agreement", "active", "=", 1],
+		["Service Level Agreement", "enable", "=", 1]
 	]
 
 	if priority:
@@ -80,6 +88,14 @@ def get_customer_territory(customer):
 
 @frappe.whitelist()
 def get_service_level_agreement_filters(name, customer=None):
+	if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
+		return
+
+	filters = [
+		["Service Level Agreement", "active", "=", 1],
+		["Service Level Agreement", "enable", "=", 1]
+	]
+
 	if not customer:
 		or_filters = [
 			["Service Level Agreement", "default_service_level_agreement", "=", 1]
@@ -93,5 +109,5 @@ def get_service_level_agreement_filters(name, customer=None):
 
 	return {
 		"priority": [priority.priority for priority in frappe.get_list("Service Level Priority", filters={"parent": name}, fields=["priority"])],
-		"service_level_agreements": [d.name for d in frappe.get_list("Service Level Agreement", or_filters=or_filters)]
+		"service_level_agreements": [d.name for d in frappe.get_list("Service Level Agreement", filters=filters, or_filters=or_filters)]
 	}
