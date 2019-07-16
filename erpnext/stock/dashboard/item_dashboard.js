@@ -17,29 +17,32 @@ erpnext.stock.ItemDashboard = Class.extend({
 		this.result = this.content.find('.result');
 
 		this.content.on('click', '.btn-move', function() {
-			let item = unescape($(this).attr('data-item'));
-			let warehouse = unescape($(this).attr('data-warehouse'));
-			let actual_qty = unescape($(this).attr('data-actual_qty'));
-			let disable_quick_entry = Number(unescape($(this).attr('data-disable_quick_entry')));
-
-			if (disable_quick_entry) open_stock_entry(item, warehouse, "Material Transfer");
-
-			else erpnext.stock.move_item(item, warehouse, null, actual_qty, null, function() { me.refresh(); })
+			handle_move_add($(this), "Move")
 		});
 
 		this.content.on('click', '.btn-add', function() {
-			let item = unescape($(this).attr('data-item'));
-			let warehouse = unescape($(this).attr('data-warehouse'));
-			let actual_qty = unescape($(this).attr('data-actual_qty'));
-			let disable_quick_entry = Number(unescape($(this).attr('data-disable_quick_entry')));
-			let rate = unescape($(this).attr('data-rate'));
+			handle_move_add($(this), "Move")
+		});
+
+		function handle_move_add(element, action) {
+			let item = unescape(element.attr('data-item'));
+			let warehouse = unescape(element.attr('data-warehouse'));
+			let actual_qty = unescape(element.attr('data-actual_qty'));
+			let disable_quick_entry = Number(unescape(element.attr('data-disable_quick_entry')));
+			let entry_type = action === "Move" ? "Material Transfer": null;
 
 			if (disable_quick_entry) {
-				open_stock_entry(item, warehouse);
+				open_stock_entry(item, warehouse, entry_type);
 			} else {
-				erpnext.stock.move_item(item, null, warehouse, actual_qty, rate, function() { me.refresh(); })
+				if (action === "Add") {
+					let rate = unescape($(this).attr('data-rate'));
+					erpnext.stock.move_item(item, null, warehouse, actual_qty, rate, function() { me.refresh(); });
+				}
+				else {
+					erpnext.stock.move_item(item, warehouse, null, actual_qty, null, function() { me.refresh(); });
+				}
 			}
-		});
+		}
 
 		function open_stock_entry(item, warehouse, entry_type) {
 			frappe.model.with_doctype('Stock Entry', function() {
