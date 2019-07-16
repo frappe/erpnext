@@ -273,6 +273,7 @@ def get_batches(item_code, warehouse, qty=1, as_dict=True):
 		WHERE
 			sle.item_code = %s
 				AND sle.warehouse = %s
+				AND batch.disabled = 0
 				AND (batch.expiry_date >= CURDATE() or batch.expiry_date IS NULL)
 		GROUP BY
 			batch_id

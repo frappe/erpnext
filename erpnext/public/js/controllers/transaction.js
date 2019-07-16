@@ -306,58 +306,72 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	scan_barcode: function() {
 		let scan_barcode_field = this.frm.fields_dict["scan_barcode"];
 
-		let show_description = function(idx, exist = null) {
-			if (exist) {
+		let set_description = function (idx, item_exists = null, invalid_id = null, serial_no_exists = null) {
+			if (invalid_id) {
+				scan_barcode_field.set_new_description(__('Invalid barcode / serial / batch ID.'));
+			} else if (serial_no_exists) {
+				scan_barcode_field.set_new_description(__('Row #{0}: Serial number already added', [idx]));
+			} else if (item_exists) {
 				scan_barcode_field.set_new_description(__('Row #{0}: Qty increased by 1', [idx]));
 			} else {
 				scan_barcode_field.set_new_description(__('Row #{0}: Item added', [idx]));
-			}
+			};
 		}
 
-		if(this.frm.doc.scan_barcode) {
+		if (this.frm.doc.scan_barcode) {
 			frappe.call({
 				method: "erpnext.selling.page.point_of_sale.point_of_sale.search_serial_or_batch_or_barcode_number",
 				args: { search_value: this.frm.doc.scan_barcode }
 			}).then(r => {
 				const data = r && r.message;
+
 				if (!data || Object.keys(data).length === 0) {
-					scan_barcode_field.set_new_description(__('Cannot find Item with this barcode'));
+					set_description(null, null, true);
+					scan_barcode_field.set_value('');
 					return;
 				}
 
-				let cur_grid = this.frm.fields_dict.items.grid;
+				this.frm.from_barcode = true;
 
-				let row_to_modify = null;
+				// retrieve the item row to apply the scanned ID in
 				const existing_item_row = this.frm.doc.items.find(d => d.item_code === data.item_code);
 				const blank_item_row = this.frm.doc.items.find(d => !d.item_code);
 
-				if (existing_item_row) {
-					row_to_modify = existing_item_row;
-				} else if (blank_item_row) {
-					row_to_modify = blank_item_row;
+				let row = existing_item_row || blank_item_row || null;
+				if (!row) {
+					let cur_grid = this.frm.fields_dict.items.grid;
+					row = frappe.model.add_child(this.frm.doc, cur_grid.doctype, 'items');
 				}
 
-				if (!row_to_modify) {
-					// add new row
-					row_to_modify = frappe.model.add_child(this.frm.doc, cur_grid.doctype, 'items');
+				// update serial nos instead of overwriting them,
+				// return if serial no already exists in table
+				if (data["serial_no"]) {
+					let existing_serial_nos = (row.serial_no || "").split("\n");
+					if (!existing_serial_nos.includes(data["serial_no"])) {
+						existing_serial_nos.push(data["serial_no"]);
+						data["serial_no"] = existing_serial_nos.join("\n")
+					} else {
+						// serial no already exists in table
+						set_description(row.idx, row.item_code, null, true);
+						scan_barcode_field.set_value('');
+						return;
+					}
 				}
 
-				show_description(row_to_modify.idx, row_to_modify.item_code);
+				set_description(row.idx, row.item_code);
+				scan_barcode_field.set_value('');
 
-				this.frm.from_barcode = true;
-				frappe.model.set_value(row_to_modify.doctype, row_to_modify.name, {
+				// set the item details
+				frappe.model.set_value(row.doctype, row.name, {
 					item_code: data.item_code,
-					qty: (row_to_modify.qty || 0) + 1
+					qty: (row.qty || 0) + 1
 				});
 
 				['serial_no', 'batch_no', 'barcode'].forEach(field => {
-					if (data[field] && frappe.meta.has_field(row_to_modify.doctype, field)) {
-						frappe.model.set_value(row_to_modify.doctype,
-							row_to_modify.name, field, data[field]);
+					if (data[field] && frappe.meta.has_field(row.doctype, field)) {
+						frappe.model.set_value(row.doctype, row.name, field, data[field]);
 					}
 				});
-
-				scan_barcode_field.set_value('');
 			});
 		}
 		return false;

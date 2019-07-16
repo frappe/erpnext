@@ -2,12 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
-from frappe.utils.nestedset import get_root_of
-from frappe.utils import cint
-from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
+
+import json
 
 from six import string_types
+
+import frappe
+from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
+from frappe.utils import cint, nowdate
+from frappe.utils.nestedset import get_root_of
+
 
 @frappe.whitelist()
 def get_items(start, page_length, price_list, item_group, search_value="", pos_profile=None):
@@ -113,19 +117,23 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 @frappe.whitelist()
 def search_serial_or_batch_or_barcode_number(search_value):
 	# search barcode no
-	barcode_data = frappe.db.get_value('Item Barcode', {'barcode': search_value}, ['barcode', 'parent as item_code'], as_dict=True)
-	if barcode_data:
-		return barcode_data
+	barcode = frappe.db.get_value('Item Barcode', {'barcode': search_value}, ['barcode', 'parent as item_code'], as_dict=True)
+	if barcode:
+		return barcode
 
 	# search serial no
-	serial_no_data = frappe.db.get_value('Serial No', search_value, ['name as serial_no', 'item_code'], as_dict=True)
-	if serial_no_data:
-		return serial_no_data
+	serial_no = frappe.get_all('Serial No',
+		{"name": search_value, "warranty_expiry_date": ["<=", nowdate()], "amc_expiry_date": ["<=", nowdate()]},
+		['name as serial_no', 'item_code'])
+	if serial_no:
+		return serial_no[0]
 
 	# search batch no
-	batch_no_data = frappe.db.get_value('Batch', search_value, ['name as batch_no', 'item as item_code'], as_dict=True)
-	if batch_no_data:
-		return batch_no_data
+	batch_no = frappe.get_all('Batch',
+		{"name": search_value, "batch_qty": [">", 0], "disabled": 0, "expiry_date": ["<=", nowdate()]},
+		['name as batch_no', 'item as item_code'])
+	if batch_no:
+		return batch_no[0]
 
 	return {}
 
