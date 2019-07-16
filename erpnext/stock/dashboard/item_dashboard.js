@@ -21,7 +21,7 @@ erpnext.stock.ItemDashboard = Class.extend({
 		});
 
 		this.content.on('click', '.btn-add', function() {
-			handle_move_add($(this), "Move")
+			handle_move_add($(this), "Add")
 		});
 
 		function handle_move_add(element, action) {
