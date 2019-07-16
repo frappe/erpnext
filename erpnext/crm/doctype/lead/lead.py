@@ -23,6 +23,13 @@ class Lead(SellingController):
 		self.get("__onload").is_customer = customer
 		load_address_and_contact(self)
 
+	def on_update(self):
+		doc = self.get_doc_before_save()
+		for field in ['mobile_no', 'phone']:
+			old_number = doc.get(field)
+			if old_number and old_number != self.get(field):
+				frappe.cache().hdel('lead_with_number', old_number)
+
 	def validate(self):
 		self.set_lead_name()
 		self._prev = frappe._dict({
@@ -230,3 +237,19 @@ def make_lead_from_communication(communication, ignore_communication_links=False
 
 	link_communication_to_document(doc, "Lead", lead_name, ignore_communication_links)
 	return lead_name
+
+def get_lead_with_phone_number(number):
+	if not number: return
+
+	lead = frappe.cache().hget('lead_with_number', number)
+	if lead: return lead
+
+	leads = frappe.get_all('Lead', or_filters={
+		'phone': ['like', '%{}'.format(number)],
+		'mobile_no': ['like', '%{}'.format(number)]
+	}, limit=1)
+
+	lead = leads[0].name if leads else None
+	frappe.cache().hset('lead_with_number', number, lead)
+
+	return lead
