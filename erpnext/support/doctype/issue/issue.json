@@ -1,364 +1,384 @@
 {
- "allow_import": 1,
- "allow_rename": 1,
- "autoname": "naming_series:",
- "creation": "2013-02-01 10:36:25",
- "doctype": "DocType",
- "document_type": "Setup",
- "engine": "InnoDB",
- "field_order": [
-  "subject_section",
-  "naming_series",
-  "subject",
-  "customer",
-  "raised_by",
-  "cb00",
-  "status",
-  "priority",
-  "issue_type",
-  "sb_details",
-  "description",
-  "service_level_section",
-  "service_level_agreement",
-  "response_by",
-  "response_by_variance",
-  "cb",
-  "agreement_fulfilled",
-  "resolution_by",
-  "resolution_by_variance",
-  "response",
-  "mins_to_first_response",
-  "first_responded_on",
-  "additional_info",
-  "lead",
-  "contact",
-  "email_account",
-  "column_break_16",
-  "customer_name",
-  "project",
-  "company",
-  "section_break_19",
-  "resolution_details",
-  "column_break1",
-  "opening_date",
-  "opening_time",
-  "resolution_date",
-  "content_type",
-  "attachment",
-  "via_customer_portal"
- ],
- "fields": [
-  {
-   "fieldname": "subject_section",
-   "fieldtype": "Section Break",
-   "label": "Subject",
-   "options": "fa fa-flag"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "no_copy": 1,
-   "options": "ISS-.YYYY.-",
-   "print_hide": 1,
-   "set_only_once": 1
-  },
-  {
-   "bold": 1,
-   "fieldname": "subject",
-   "fieldtype": "Data",
-   "in_global_search": 1,
-   "label": "Subject",
-   "reqd": 1
-  },
-  {
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "in_global_search": 1,
-   "label": "Customer",
-   "oldfieldname": "customer",
-   "oldfieldtype": "Link",
-   "options": "Customer",
-   "print_hide": 1,
-   "search_index": 1
-  },
-  {
-   "bold": 1,
-   "depends_on": "eval:doc.__islocal",
-   "fieldname": "raised_by",
-   "fieldtype": "Data",
-   "in_global_search": 1,
-   "in_list_view": 1,
-   "label": "Raised By (Email)",
-   "oldfieldname": "raised_by",
-   "oldfieldtype": "Data",
-   "options": "Email"
-  },
-  {
-   "fieldname": "cb00",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "Open",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Status",
-   "no_copy": 1,
-   "oldfieldname": "status",
-   "oldfieldtype": "Select",
-   "options": "Open\nReplied\nHold\nClosed",
-   "search_index": 1
-  },
-  {
-   "fieldname": "priority",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Priority",
-   "options": "Issue Priority"
-  },
-  {
-   "fieldname": "issue_type",
-   "fieldtype": "Link",
-   "label": "Issue Type",
-   "options": "Issue Type"
-  },
-  {
-   "collapsible": 1,
-   "collapsible_depends_on": "eval:doc.status!=\"Closed\"",
-   "fieldname": "sb_details",
-   "fieldtype": "Section Break",
-   "label": "Details"
-  },
-  {
-   "bold": 1,
-   "fieldname": "description",
-   "fieldtype": "Text Editor",
-   "in_global_search": 1,
-   "label": "Description",
-   "oldfieldname": "problem_description",
-   "oldfieldtype": "Text"
-  },
-  {
-   "collapsible": 1,
-   "depends_on": "eval: doc.service_level_agreement",
-   "fieldname": "service_level_section",
-   "fieldtype": "Section Break",
-   "label": "Service Level"
-  },
-  {
-   "fieldname": "service_level_agreement",
-   "fieldtype": "Link",
-   "label": "Service Level Agreement",
-   "options": "Service Level Agreement"
-  },
-  {
-   "fieldname": "response_by",
-   "fieldtype": "Datetime",
-   "label": "Response By",
-   "read_only": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "cb",
-   "fieldtype": "Column Break",
-   "options": "fa fa-pushpin",
-   "read_only": 1
-  },
-  {
-   "fieldname": "resolution_by",
-   "fieldtype": "Datetime",
-   "label": "Resolution By",
-   "read_only": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "response",
-   "fieldtype": "Section Break",
-   "label": "Response"
-  },
-  {
-   "bold": 1,
-   "fieldname": "mins_to_first_response",
-   "fieldtype": "Float",
-   "label": "Mins to First Response",
-   "read_only": 1
-  },
-  {
-   "fieldname": "first_responded_on",
-   "fieldtype": "Datetime",
-   "label": "First Responded On"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "additional_info",
-   "fieldtype": "Section Break",
-   "label": "Reference",
-   "options": "fa fa-pushpin",
-   "read_only": 1
-  },
-  {
-   "fieldname": "lead",
-   "fieldtype": "Link",
-   "label": "Lead",
-   "options": "Lead"
-  },
-  {
-   "fieldname": "contact",
-   "fieldtype": "Link",
-   "label": "Contact",
-   "options": "Contact"
-  },
-  {
-   "fieldname": "email_account",
-   "fieldtype": "Link",
-   "label": "Email Account",
-   "options": "Email Account"
-  },
-  {
-   "fieldname": "column_break_16",
-   "fieldtype": "Column Break"
-  },
-  {
-   "bold": 1,
-   "fieldname": "customer_name",
-   "fieldtype": "Data",
-   "label": "Customer Name",
-   "oldfieldname": "customer_name",
-   "oldfieldtype": "Data",
-   "read_only": 1
-  },
-  {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "options": "Project"
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company",
-   "print_hide": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "section_break_19",
-   "fieldtype": "Section Break",
-   "label": "Resolution"
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "resolution_details",
-   "fieldtype": "Text Editor",
-   "label": "Resolution Details",
-   "no_copy": 1,
-   "oldfieldname": "resolution_details",
-   "oldfieldtype": "Text"
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "column_break1",
-   "fieldtype": "Column Break",
-   "oldfieldtype": "Column Break",
-   "read_only": 1
-  },
-  {
-   "default": "Today",
-   "fieldname": "opening_date",
-   "fieldtype": "Date",
-   "label": "Opening Date",
-   "no_copy": 1,
-   "oldfieldname": "opening_date",
-   "oldfieldtype": "Date",
-   "read_only": 1
-  },
-  {
-   "fieldname": "opening_time",
-   "fieldtype": "Time",
-   "label": "Opening Time",
-   "no_copy": 1,
-   "oldfieldname": "opening_time",
-   "oldfieldtype": "Time",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "resolution_date",
-   "fieldtype": "Datetime",
-   "label": "Resolution Date",
-   "no_copy": 1,
-   "oldfieldname": "resolution_date",
-   "oldfieldtype": "Date",
-   "read_only": 1
-  },
-  {
-   "fieldname": "content_type",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Content Type"
-  },
-  {
-   "fieldname": "attachment",
-   "fieldtype": "Attach",
-   "hidden": 1,
-   "label": "Attachment"
-  },
-  {
-   "default": "0",
-   "fieldname": "via_customer_portal",
-   "fieldtype": "Check",
-   "label": "Via Customer Portal"
-  },
-  {
-   "default": "Ongoing",
-   "fieldname": "agreement_fulfilled",
-   "fieldtype": "Select",
-   "label": "Service Level Agreement Fulfilled",
-   "options": "Ongoing\nFulfilled\nFailed",
-   "read_only": 1
-  },
-  {
-   "description": "in hours",
-   "fieldname": "response_by_variance",
-   "fieldtype": "Float",
-   "label": "Response By Variance",
-   "read_only": 1
-  },
-  {
-   "description": "in hours",
-   "fieldname": "resolution_by_variance",
-   "fieldtype": "Float",
-   "label": "Resolution By Variance",
-   "read_only": 1
-  }
- ],
- "icon": "fa fa-ticket",
- "idx": 7,
- "modified": "2019-05-20 15:19:00.771333",
- "modified_by": "Administrator",
- "module": "Support",
- "name": "Issue",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Support Team",
-   "share": 1,
-   "write": 1
-  }
- ],
- "quick_entry": 1,
- "search_fields": "status,customer,subject,raised_by",
- "sort_field": "modified",
- "sort_order": "ASC",
- "timeline_field": "customer",
- "title_field": "subject",
- "track_seen": 1
-}
+  "allow_import": 1,
+  "allow_rename": 1,
+  "autoname": "naming_series:",
+  "creation": "2013-02-01 10:36:25",
+  "doctype": "DocType",
+  "document_type": "Setup",
+  "engine": "InnoDB",
+  "field_order": [
+   "subject_section",
+   "naming_series",
+   "subject",
+   "customer",
+   "raised_by",
+   "cb00",
+   "status",
+   "priority",
+   "issue_type",
+   "sb_details",
+   "description",
+   "service_level_section",
+   "service_level_agreement",
+   "response_by",
+   "response_by_variance",
+   "reset_service_level_agreement",
+   "cb",
+   "agreement_fulfilled",
+   "resolution_by",
+   "resolution_by_variance",
+   "service_level_agreement_creation",
+   "response",
+   "mins_to_first_response",
+   "first_responded_on",
+   "additional_info",
+   "lead",
+   "contact",
+   "email_account",
+   "column_break_16",
+   "customer_name",
+   "project",
+   "company",
+   "section_break_19",
+   "resolution_details",
+   "column_break1",
+   "opening_date",
+   "opening_time",
+   "resolution_date",
+   "content_type",
+   "attachment",
+   "via_customer_portal"
+  ],
+  "fields": [
+   {
+    "fieldname": "subject_section",
+    "fieldtype": "Section Break",
+    "label": "Subject",
+    "options": "fa fa-flag"
+   },
+   {
+    "fieldname": "naming_series",
+    "fieldtype": "Select",
+    "label": "Series",
+    "no_copy": 1,
+    "options": "ISS-.YYYY.-",
+    "print_hide": 1,
+    "set_only_once": 1
+   },
+   {
+    "bold": 1,
+    "fieldname": "subject",
+    "fieldtype": "Data",
+    "in_global_search": 1,
+    "in_standard_filter": 1,
+    "label": "Subject",
+    "reqd": 1
+   },
+   {
+    "fieldname": "customer",
+    "fieldtype": "Link",
+    "in_global_search": 1,
+    "label": "Customer",
+    "oldfieldname": "customer",
+    "oldfieldtype": "Link",
+    "options": "Customer",
+    "print_hide": 1,
+    "search_index": 1
+   },
+   {
+    "bold": 1,
+    "depends_on": "eval:doc.__islocal",
+    "fieldname": "raised_by",
+    "fieldtype": "Data",
+    "in_global_search": 1,
+    "in_list_view": 1,
+    "label": "Raised By (Email)",
+    "oldfieldname": "raised_by",
+    "oldfieldtype": "Data",
+    "options": "Email"
+   },
+   {
+    "fieldname": "cb00",
+    "fieldtype": "Column Break"
+   },
+   {
+    "default": "Open",
+    "fieldname": "status",
+    "fieldtype": "Select",
+    "in_list_view": 1,
+    "in_standard_filter": 1,
+    "label": "Status",
+    "no_copy": 1,
+    "oldfieldname": "status",
+    "oldfieldtype": "Select",
+    "options": "Open\nReplied\nHold\nClosed",
+    "search_index": 1
+   },
+   {
+    "default": "Medium",
+    "fieldname": "priority",
+    "fieldtype": "Link",
+    "in_standard_filter": 1,
+    "label": "Priority",
+    "options": "Issue Priority"
+   },
+   {
+    "fieldname": "issue_type",
+    "fieldtype": "Link",
+    "label": "Issue Type",
+    "options": "Issue Type"
+   },
+   {
+    "collapsible": 1,
+    "collapsible_depends_on": "eval:doc.status!=\"Closed\"",
+    "fieldname": "sb_details",
+    "fieldtype": "Section Break",
+    "label": "Details"
+   },
+   {
+    "bold": 1,
+    "fieldname": "description",
+    "fieldtype": "Text Editor",
+    "in_global_search": 1,
+    "label": "Description",
+    "oldfieldname": "problem_description",
+    "oldfieldtype": "Text"
+   },
+   {
+    "collapsible": 1,
+    "fieldname": "service_level_section",
+    "fieldtype": "Section Break",
+    "label": "Service Level"
+   },
+   {
+    "fieldname": "service_level_agreement",
+    "fieldtype": "Link",
+    "label": "Service Level Agreement",
+    "options": "Service Level Agreement"
+   },
+   {
+    "fieldname": "response_by",
+    "fieldtype": "Datetime",
+    "label": "Response By",
+    "read_only": 1
+   },
+   {
+    "collapsible": 1,
+    "fieldname": "cb",
+    "fieldtype": "Column Break",
+    "options": "fa fa-pushpin",
+    "read_only": 1
+   },
+   {
+    "fieldname": "resolution_by",
+    "fieldtype": "Datetime",
+    "label": "Resolution By",
+    "read_only": 1
+   },
+   {
+    "collapsible": 1,
+    "fieldname": "response",
+    "fieldtype": "Section Break",
+    "label": "Response"
+   },
+   {
+    "bold": 1,
+    "fieldname": "mins_to_first_response",
+    "fieldtype": "Float",
+    "label": "Mins to First Response",
+    "read_only": 1
+   },
+   {
+    "fieldname": "first_responded_on",
+    "fieldtype": "Datetime",
+    "label": "First Responded On"
+   },
+   {
+    "collapsible": 1,
+    "fieldname": "additional_info",
+    "fieldtype": "Section Break",
+    "label": "Reference",
+    "options": "fa fa-pushpin",
+    "read_only": 1
+   },
+   {
+    "fieldname": "lead",
+    "fieldtype": "Link",
+    "label": "Lead",
+    "options": "Lead"
+   },
+   {
+    "fieldname": "contact",
+    "fieldtype": "Link",
+    "label": "Contact",
+    "options": "Contact"
+   },
+   {
+    "fieldname": "email_account",
+    "fieldtype": "Link",
+    "label": "Email Account",
+    "options": "Email Account"
+   },
+   {
+    "fieldname": "column_break_16",
+    "fieldtype": "Column Break"
+   },
+   {
+    "bold": 1,
+    "fieldname": "customer_name",
+    "fieldtype": "Data",
+    "label": "Customer Name",
+    "oldfieldname": "customer_name",
+    "oldfieldtype": "Data",
+    "read_only": 1
+   },
+   {
+    "fieldname": "project",
+    "fieldtype": "Link",
+    "label": "Project",
+    "options": "Project"
+   },
+   {
+    "fieldname": "company",
+    "fieldtype": "Link",
+    "label": "Company",
+    "options": "Company",
+    "print_hide": 1
+   },
+   {
+    "collapsible": 1,
+    "fieldname": "section_break_19",
+    "fieldtype": "Section Break",
+    "label": "Resolution"
+   },
+   {
+    "depends_on": "eval:!doc.__islocal",
+    "fieldname": "resolution_details",
+    "fieldtype": "Text Editor",
+    "label": "Resolution Details",
+    "no_copy": 1,
+    "oldfieldname": "resolution_details",
+    "oldfieldtype": "Text"
+   },
+   {
+    "depends_on": "eval:!doc.__islocal",
+    "fieldname": "column_break1",
+    "fieldtype": "Column Break",
+    "oldfieldtype": "Column Break",
+    "read_only": 1
+   },
+   {
+    "default": "Today",
+    "fieldname": "opening_date",
+    "fieldtype": "Date",
+    "label": "Opening Date",
+    "no_copy": 1,
+    "oldfieldname": "opening_date",
+    "oldfieldtype": "Date",
+    "read_only": 1
+   },
+   {
+    "fieldname": "opening_time",
+    "fieldtype": "Time",
+    "label": "Opening Time",
+    "no_copy": 1,
+    "oldfieldname": "opening_time",
+    "oldfieldtype": "Time",
+    "read_only": 1
+   },
+   {
+    "depends_on": "eval:!doc.__islocal",
+    "fieldname": "resolution_date",
+    "fieldtype": "Datetime",
+    "label": "Resolution Date",
+    "no_copy": 1,
+    "oldfieldname": "resolution_date",
+    "oldfieldtype": "Date",
+    "read_only": 1
+   },
+   {
+    "fieldname": "content_type",
+    "fieldtype": "Data",
+    "hidden": 1,
+    "label": "Content Type"
+   },
+   {
+    "fieldname": "attachment",
+    "fieldtype": "Attach",
+    "hidden": 1,
+    "label": "Attachment"
+   },
+   {
+    "default": "0",
+    "fieldname": "via_customer_portal",
+    "fieldtype": "Check",
+    "label": "Via Customer Portal"
+   },
+   {
+    "default": "Ongoing",
+    "depends_on": "eval: doc.service_level_agreement",
+    "fieldname": "agreement_fulfilled",
+    "fieldtype": "Select",
+    "label": "Service Level Agreement Fulfilled",
+    "options": "Ongoing\nFulfilled\nFailed",
+    "read_only": 1
+   },
+   {
+    "depends_on": "eval: doc.service_level_agreement",
+    "description": "in hours",
+    "fieldname": "response_by_variance",
+    "fieldtype": "Float",
+    "label": "Response By Variance",
+    "read_only": 1
+   },
+   {
+    "depends_on": "eval: doc.service_level_agreement",
+    "description": "in hours",
+    "fieldname": "resolution_by_variance",
+    "fieldtype": "Float",
+    "label": "Resolution By Variance",
+    "read_only": 1
+   },
+   {
+    "fieldname": "service_level_agreement_creation",
+    "fieldtype": "Datetime",
+    "hidden": 1,
+    "label": "Service Level Agreement Creation",
+    "read_only": 1
+   },
+   {
+    "depends_on": "eval: doc.service_level_agreement",
+    "fieldname": "reset_service_level_agreement",
+    "fieldtype": "Button",
+    "label": "Reset Service Level Agreement"
+   }
+  ],
+  "icon": "fa fa-ticket",
+  "idx": 7,
+  "modified": "2019-07-11 23:57:22.015881",
+  "modified_by": "Administrator",
+  "module": "Support",
+  "name": "Issue",
+  "owner": "Administrator",
+  "permissions": [
+   {
+    "create": 1,
+    "delete": 1,
+    "email": 1,
+    "print": 1,
+    "read": 1,
+    "report": 1,
+    "role": "Support Team",
+    "share": 1,
+    "write": 1
+   }
+  ],
+  "quick_entry": 1,
+  "search_fields": "status,customer,subject,raised_by",
+  "sort_field": "modified",
+  "sort_order": "ASC",
+  "timeline_field": "customer",
+  "title_field": "subject",
+  "track_changes": 1,
+  "track_seen": 1
+ }
