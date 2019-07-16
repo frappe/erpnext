@@ -20,7 +20,7 @@ def get_last_interaction(contact=None, lead=None):
 		if query_condition:
 			# remove extra appended 'OR'
 			query_condition = query_condition[:-2]
-			communication = frappe.db.sql("""
+			last_communication = frappe.db.sql("""
 				SELECT `name`, `content`
 				FROM `tabCommunication`
 				WHERE
@@ -28,12 +28,12 @@ def get_last_interaction(contact=None, lead=None):
 					({})
 				ORDER BY `modified`
 				LIMIT 1
-			""".format(query_condition))  # nosec
+			""".format(query_condition), as_dict=1)  # nosec
 
 	if lead:
 		last_communication = frappe.get_all('Communication', filters={
-			'reference_doctype': reference_doc.doctype,
-			'reference_name': reference_doc.name,
+			'reference_doctype': 'Contact',
+			'reference_name': contact,
 			'sent_or_received': 'Received'
 		}, fields=['name', 'content'], limit=1)
 
