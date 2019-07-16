@@ -10,6 +10,7 @@
     "acc_frozen_upto",
     "frozen_accounts_modifier",
     "determine_address_tax_category_from",
+    "over_billing_allowance",
     "column_break_4",
     "credit_controller",
     "check_supplier_invoice_uniqueness",
@@ -168,12 +169,18 @@
      "fieldname": "automatically_fetch_payment_terms",
      "fieldtype": "Check",
      "label": "Automatically Fetch Payment Terms"
+    },
+    {
+     "description": "Percentage you are allowed to bill more against the amount ordered. For example: If the order value is $100 for an item and tolerance is set as 10% then you are allowed to bill for $110.",
+     "fieldname": "over_billing_allowance",
+     "fieldtype": "Currency",
+     "label": "Over Billing Allowance (%)"
     }
    ],
    "icon": "icon-cog",
    "idx": 1,
    "issingle": 1,
-   "modified": "2019-04-28 18:20:55.789946",
+   "modified": "2019-07-04 18:20:55.789946",
    "modified_by": "Administrator",
    "module": "Accounts",
    "name": "Accounts Settings",
