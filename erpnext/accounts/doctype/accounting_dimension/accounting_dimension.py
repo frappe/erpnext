@@ -144,6 +144,14 @@ def toggle_disabling(doc):
 
 		frappe.clear_cache(doctype=doctype)
 
+	dimension_filters = frappe.db.sql("""
+		SELECT label, fieldname, document_type
+		FROM `tabAccounting Dimension`
+		WHERE disabled = 0
+	""", as_dict=1)
+
+	return dimension_filters
+
 def get_doctypes_with_dimensions():
 	doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "Asset",
 		"Expense Claim", "Stock Entry", "Budget", "Payroll Entry", "Delivery Note", "Sales Invoice Item", "Purchase Invoice Item",

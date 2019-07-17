@@ -105,9 +105,8 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 		"initial_depth": 3
 	}
 
-	erpnext.dimension_filters.then((dimensions) => {
-		dimensions.forEach((dimension) => {
-			frappe.query_reports["Profitability Analysis"].filters[1].options.push(dimension["document_type"]);
-		});
+	frappe.boot.dimension_filters.forEach((dimension) => {
+		frappe.query_reports["Profitability Analysis"].filters[1].options.push(dimension["document_type"]);
 	});
+
 });
