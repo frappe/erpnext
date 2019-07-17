@@ -200,21 +200,6 @@ class DeliveryTrip(Document):
 
 		self.delivery_stops[start:start + len(stops_order)] = stops_order
 
-	def get_maps_client(self):
-		# return Google Maps Client for route optimiaztion
-
-		if not frappe.db.get_single_value("Google Settings", "api_key"):
-			frappe.throw(_("Enter API key in Google Settings."))
-
-		import googlemaps
-
-		try:
-			client = googlemaps.Client(key=frappe.db.get_single_value("Google Settings", "api_key"))
-		except Exception as e:
-			frappe.throw(e.message)
-
-		return client
-
 	def get_directions(self, route, optimize):
 		"""
 		Retrieve map directions for a given route and departure time.
@@ -231,8 +216,15 @@ class DeliveryTrip(Document):
 		Returns:
 			(dict): Route legs and, if `optimize` is `True`, optimized waypoint order
 		"""
+		if not frappe.db.get_single_value("Google Settings", "api_key"):
+			frappe.throw(_("Enter API key in Google Settings."))
 
-		maps_client = self.get_maps_client()
+		import googlemaps
+
+		try:
+			maps_client = googlemaps.Client(key=frappe.db.get_single_value("Google Settings", "api_key"))
+		except Exception as e:
+			frappe.throw(e)
 
 		directions_data = {
 			"origin": route[0],
@@ -321,18 +313,6 @@ def get_contact_display(contact):
 	}
 
 	return contact_info.html
-
-
-@frappe.whitelist()
-def optimize_route(delivery_trip):
-	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
-	delivery_trip.process_route(optimize=True)
-
-
-@frappe.whitelist()
-def get_arrival_times(delivery_trip):
-	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
-	delivery_trip.process_route(optimize=False)
 
 
 def sanitize_address(address):
