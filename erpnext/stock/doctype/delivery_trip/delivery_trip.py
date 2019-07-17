@@ -106,7 +106,7 @@ class DeliveryTrip(Document):
 		# For locks, maintain idx count while looping through route list
 		idx = 0
 		for route in route_list:
-			directions = get_directions(self, route, optimize)
+			directions = self.get_directions(route, optimize)
 
 			if directions:
 				if optimize and len(directions.get("waypoint_order")) > 1:
@@ -200,7 +200,7 @@ class DeliveryTrip(Document):
 
 		self.delivery_stops[start:start + len(stops_order)] = stops_order
 
-	def get_client(self):
+	def get_maps_client(self):
 		# return Google Maps Client for route optimiaztion
 
 		if not frappe.db.get_single_value("Google Settings", "api_key"):
@@ -214,6 +214,40 @@ class DeliveryTrip(Document):
 			frappe.throw(e.message)
 
 		return client
+
+	def get_directions(self, route, optimize):
+		"""
+		Retrieve map directions for a given route and departure time.
+		If optimize is `True`, Google Maps will return an optimized
+		order for the intermediate waypoints.
+
+		NOTE: Google's API does take an additional `departure_time` key,
+		but it only works for routes without any waypoints.
+
+		Args:
+			route (list of str): Route addresses (origin -> waypoint(s), if any -> destination)
+			optimize (bool): `True` if route needs to be optimized, else `False`
+
+		Returns:
+			(dict): Route legs and, if `optimize` is `True`, optimized waypoint order
+		"""
+
+		maps_client = self.get_maps_client()
+
+		directions_data = {
+			"origin": route[0],
+			"destination": route[-1],
+			"waypoints": route[1: -1],
+			"optimize_waypoints": optimize
+		}
+
+		try:
+			directions = maps_client.directions(**directions_data)
+		except Exception as e:
+			frappe.throw(_(e.message))
+
+		return directions[0] if directions else False
+
 
 
 @frappe.whitelist()
@@ -319,40 +353,6 @@ def sanitize_address(address):
 
 	# Only get the first 3 blocks of the address
 	return ', '.join(address[:3])
-
-
-def get_directions(doc, route, optimize):
-	"""
-	Retrieve map directions for a given route and departure time.
-	If optimize is `True`, Google Maps will return an optimized
-	order for the intermediate waypoints.
-
-	NOTE: Google's API does take an additional `departure_time` key,
-	but it only works for routes without any waypoints.
-
-	Args:
-		route (list of str): Route addresses (origin -> waypoint(s), if any -> destination)
-		optimize (bool): `True` if route needs to be optimized, else `False`
-
-	Returns:
-		(dict): Route legs and, if `optimize` is `True`, optimized waypoint order
-	"""
-
-	maps_client = doc.get_client()
-
-	directions_data = {
-		"origin": route[0],
-		"destination": route[-1],
-		"waypoints": route[1: -1],
-		"optimize_waypoints": optimize
-	}
-
-	try:
-		directions = maps_client.directions(**directions_data)
-	except Exception as e:
-		frappe.throw(_(e.message))
-
-	return directions[0] if directions else False
 
 
 @frappe.whitelist()
