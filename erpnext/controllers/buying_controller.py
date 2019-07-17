@@ -12,6 +12,7 @@ from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock.doctype.stock_entry.stock_entry import get_used_alternative_items
 from erpnext.stock.doctype.serial_no.serial_no import get_auto_serial_nos, auto_make_serial_nos, get_serial_nos
+from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from frappe.contacts.doctype.address.address import get_address_display
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
@@ -61,6 +62,10 @@ class BuyingController(StockController):
 
 		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
 			self.update_valuation_rate("items")
+
+		if self.doctype in ['Purchase Order', 'Purchase Invoice', 'Purchase Receipt']:
+			make_packing_list(self)
+			self.calculate_packing_list_rates()
 
 	def set_missing_values(self, for_validate=False):
 		super(BuyingController, self).set_missing_values(for_validate)

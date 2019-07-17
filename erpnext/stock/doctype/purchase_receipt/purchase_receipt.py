@@ -84,10 +84,6 @@ class PurchaseReceipt(BuyingController):
 
 		self.check_on_hold_or_closed_status()
 
-		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		make_packing_list(self)
-		self.calculate_packing_list_rates()
-
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
 
