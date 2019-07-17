@@ -72,9 +72,14 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Promotional Scheme",
+					"description": _("Rules for applying different promotional schemes.")
+				},
+				{
+					"type": "doctype",
 					"name": "Pricing Rule",
 					"description": _("Rules for applying pricing and discount.")
-				},
+				}
 			]
 		},
 		{
@@ -215,7 +220,7 @@ def get_data():
 					"type": "report",
 					"is_query_report": True,
 					"name": "Address And Contacts",
-					"label": "Supplier Addresses And Contacts",
+					"label": _("Supplier Addresses And Contacts"),
 					"reference_doctype": "Address",
 					"route_options": {
 						"party_type": "Supplier"
@@ -223,29 +228,5 @@ def get_data():
 				}
 			]
 		},
-		{
-			"label": _("Help"),
-			"items": [
-				{
-					"type": "help",
-					"label": _("Customer and Supplier"),
-					"youtube_id": "anoGi_RpQ20"
-				},
-				{
-					"type": "help",
-					"label": _("Material Request to Purchase Order"),
-					"youtube_id": "4TN9kPyfIqM"
-				},
-				{
-					"type": "help",
-					"label": _("Purchase Order to Payment"),
-					"youtube_id": "EK65tLdVUDk"
-				},
-				{
-					"type": "help",
-					"label": _("Managing Subcontracting"),
-					"youtube_id": "ThiMCC2DtKo"
-				},
-			]
-		},
+		
 	]

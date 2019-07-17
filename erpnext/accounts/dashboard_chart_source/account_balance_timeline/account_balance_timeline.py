@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, json
-from frappe.utils import add_to_date, date_diff, getdate, nowdate, get_last_day
+from frappe.utils import add_to_date, date_diff, getdate, nowdate, get_last_day, formatdate
 from erpnext.accounts.report.general_ledger.general_ledger import execute
 from frappe.core.page.dashboard.dashboard import cache_source, get_from_date_from_timespan
 from frappe.desk.doctype.dashboard_chart.dashboard_chart import get_period_ending
@@ -37,7 +37,7 @@ def get(chart_name=None, from_date = None, to_date = None):
 	result = build_result(account, dates, gl_entries)
 
 	return {
-		"labels": [r[0].strftime('%Y-%m-%d') for r in result],
+		"labels": [formatdate(r[0].strftime('%Y-%m-%d')) for r in result],
 		"datasets": [{
 			"name": account,
 			"values": [r[1] for r in result]

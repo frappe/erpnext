@@ -61,6 +61,14 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			});
 		}
 
+		if(this.frm.fields_dict.tc_name) {
+			this.frm.set_query("tc_name", function() {
+				return{
+					filters: { 'buying': 1 }
+				}
+			});
+		}
+
 		me.frm.set_query('supplier', erpnext.queries.supplier);
 		me.frm.set_query('contact_person', erpnext.queries.contact_query);
 		me.frm.set_query('supplier_address', erpnext.queries.address_query);
@@ -133,6 +141,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	price_list_rate: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
+
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
 		let item_rate = item.price_list_rate;
@@ -144,7 +153,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			item.discount_amount = flt(item_rate) * flt(item.discount_percentage) / 100;
 		}
 
-		item.rate = flt((item.price_list_rate) - (item.discount_amount), precision('rate', item));
+		if (item.discount_amount) {
+			item.rate = flt((item.price_list_rate) - (item.discount_amount), precision('rate', item));
+		} else {
+			item.rate = item_rate;
+		}
 
 		this.calculate_taxes_and_totals();
 	},
@@ -333,7 +346,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	update_auto_repeat_reference: function(doc) {
 		if (doc.auto_repeat) {
 			frappe.call({
-				method:"frappe.desk.doctype.auto_repeat.auto_repeat.update_reference",
+				method:"frappe.automation.doctype.auto_repeat.auto_repeat.update_reference",
 				args:{
 					docname: doc.auto_repeat,
 					reference:doc.name
