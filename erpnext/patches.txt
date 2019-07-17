@@ -506,6 +506,7 @@ erpnext.patches.v10_0.update_hub_connector_domain
 erpnext.patches.v10_0.set_student_party_type
 erpnext.patches.v10_0.update_project_in_sle
 erpnext.patches.v10_0.fix_reserved_qty_for_sub_contract
+erpnext.patches.v10_0.repost_requested_qty_for_non_stock_uom_items
 erpnext.patches.v11_0.merge_land_unit_with_location
 erpnext.patches.v11_0.add_index_on_nestedset_doctypes
 erpnext.patches.v11_0.remove_modules_setup_page
