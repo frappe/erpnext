@@ -28,18 +28,39 @@ class InvoiceDiscounting(AccountsController):
 		self.total_amount = sum([flt(d.outstanding_amount) for d in self.invoices])
 
 	def on_submit(self):
+		self.update_sales_invoice()
 		self.make_gl_entries()
 
 	def on_cancel(self):
 		self.set_status()
+		self.update_sales_invoice()
 		self.make_gl_entries()
 
-	def set_status(self):
-		self.status = "Draft"
-		if self.docstatus == 1:
-			self.status = "Sanctioned"
-		elif self.docstatus == 2:
-			self.status = "Cancelled"
+	def set_status(self, status=None):
+		if status:
+			self.status = status
+			self.db_set("status", status)
+			for d in self.invoices:
+				frappe.get_doc("Sales Invoice", d.sales_invoice).set_status(update=True, update_modified=False)
+		else:
+			self.status = "Draft"
+			if self.docstatus == 1:
+				self.status = "Sanctioned"
+			elif self.docstatus == 2:
+				self.status = "Cancelled"
+
+	def update_sales_invoice(self):
+		for d in self.invoices:
+			if self.docstatus == 1:
+				is_discounted = 1
+			else:
+				discounted_invoice = frappe.db.exists({
+					"doctype": "Discounted Invoice",
+					"sales_invoice": d.sales_invoice,
+					"docstatus": 1
+				})
+				is_discounted = 1 if discounted_invoice else 0
+			frappe.db.set_value("Sales Invoice", d.sales_invoice, "is_discounted", is_discounted)
 
 	def make_gl_entries(self):
 		company_currency = frappe.get_cached_value('Company',  self.company, "default_currency")

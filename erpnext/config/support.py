@@ -21,13 +21,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Issue Priority",
 					"description": _("Issue Priority."),
-				},
-				{
-					"type": "doctype",
-					"name": "Communication",
-					"description": _("Communication log."),
-					"onboard": 1,
-				},
+				}
 			]
 		},
 		{
