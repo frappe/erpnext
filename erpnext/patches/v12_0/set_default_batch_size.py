@@ -17,4 +17,3 @@ def execute():
         SET
             wop.batch_size = 1
     """)
-    frappe.db.commit()
