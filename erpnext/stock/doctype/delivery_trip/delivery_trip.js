@@ -67,6 +67,10 @@ frappe.ui.form.on('Delivery Trip', {
 	},
 
 	calculate_arrival_time: function (frm) {
+		frappe.show_alert({
+			message: "Calculating Arrival Times",
+			indicator: 'orange'
+		});
 		frappe.call({
 			method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.get_arrival_times',
 			args: {
@@ -79,6 +83,10 @@ frappe.ui.form.on('Delivery Trip', {
 	},
 
 	optimize_route: function (frm) {
+		frappe.show_alert({
+			message: "Optimizing Route",
+			indicator: 'orange'
+		});
 		frappe.call({
 			method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.optimize_route',
 			args: {
