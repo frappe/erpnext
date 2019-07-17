@@ -39,6 +39,8 @@ def boot_session(bootinfo):
 
 		party_account_types = frappe.db.sql(""" select name, ifnull(account_type, '') from `tabParty Type`""")
 		bootinfo.party_account_types = frappe._dict(party_account_types)
+		load_dimension_filters(bootinfo)
+		load_default_dimensions(bootinfo)
 
 def load_country_and_currency(bootinfo):
 	country = frappe.db.get_default("country")
@@ -48,6 +50,22 @@ def load_country_and_currency(bootinfo):
 	bootinfo.docs += frappe.db.sql("""select name, fraction, fraction_units,
 		number_format, smallest_currency_fraction_value, symbol from tabCurrency
 		where enabled=1""", as_dict=1, update={"doctype":":Currency"})
+
+def load_dimension_filters(bootinfo):
+	bootinfo.dimension_filters = frappe.db.sql("""
+		SELECT label, fieldname, document_type
+		FROM `tabAccounting Dimension`
+		WHERE disabled = 0
+	""", as_dict=1)
+
+def load_default_dimensions(bootinfo):
+	default_dimensions = frappe.db.sql("""SELECT parent, company, default_dimension
+		FROM `tabAccounting Dimension Detail`""", as_dict=1)
+
+	bootinfo.default_dimensions = {}
+	for dimension in default_dimensions:
+		bootinfo.default_dimensions.setdefault(dimension['company'], {})
+		bootinfo.default_dimensions[dimension['company']][dimension['parent']] = dimension['default_dimension']
 
 def update_page_info(bootinfo):
 	bootinfo.page_info.update({
