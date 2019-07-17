@@ -37,15 +37,19 @@ class StockLedgerEntry(Document):
 	def on_submit(self):
 		self.check_stock_frozen_date()
 		self.actual_amt_check()
-
-		if self.batch_no:
-			batch = frappe.get_doc("Batch", self.batch_no)
-			batch.calculate_batch_qty()
-			batch.save()
+		self.calculate_batch_qty()
 
 		if not self.get("via_landed_cost_voucher"):
 			from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
 			process_serial_no(self)
+
+	def on_cancel(self):
+		self.calculate_batch_qty()
+
+	def calculate_batch_qty(self):
+		if self.batch_no:
+			batch_qty = frappe.db.get_value("Stock Ledger Entry", {"docstatus": 1, "batch_no": self.batch_no}, "sum(actual_qty)")
+			frappe.db.set_value("Batch", self.batch_no, "batch_qty", batch_qty)
 
 	#check for item quantity available in stock
 	def actual_amt_check(self):
