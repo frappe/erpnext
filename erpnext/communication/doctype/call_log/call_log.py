@@ -46,9 +46,10 @@ def get_employee_email(number):
 
 	employees = frappe.get_all('Employee', or_filters={
 		'phone': ['like', '%{}'.format(number)],
-	}, limit=1)
+		'user_id': ['!=', '']
+	}, fields=['user_id'], limit=1)
 
-	employee = employees[0].name if employees else None
+	employee = employees[0].user_id if employees else None
 	frappe.cache().hset('employee_with_number', number, employee)
 
 	return employee
