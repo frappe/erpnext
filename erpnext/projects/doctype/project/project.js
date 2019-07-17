@@ -1,6 +1,23 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 frappe.ui.form.on("Project", {
+	setup(frm) {
+		frm.make_methods = {
+			'Timesheet': () => {
+				let doctype = 'Timesheet';
+				frappe.model.with_doctype(doctype, () => {
+					let new_doc = frappe.model.get_new_doc(doctype);
+
+					// add a new row and set the project
+					let time_log = frappe.model.get_new_doc('Timesheet Detail');
+					time_log.project = frm.doc.name;
+					new_doc.time_logs = [time_log];
+
+					frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
+				})
+			},
+		}
+	},
 	onload: function (frm) {
 		var so = frappe.meta.get_docfield("Project", "sales_order");
 		so.get_route_options_for_new_doc = function (field) {
