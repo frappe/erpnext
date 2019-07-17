@@ -12,6 +12,7 @@ from frappe.utils import getdate
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
+from frappe.model.mapper import get_mapped_doc
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
 from six import iteritems
@@ -50,15 +51,6 @@ class PurchaseReceipt(BuyingController):
 			'target_ref_field': 'qty',
 			'source_field': 'qty',
 			'percent_join_field': 'material_request'
-		},
-		{
-			'source_dt': 'Purchase Receipt Item',
-			'target_dt': 'Purchase Order Item',
-			'join_field': 'purchase_order_item',
-			'target_field': 'returned_qty',
-			'target_parent_dt': 'Purchase Order',
-			'source_field': '-1 * qty',
-			'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
 		}]
 		if cint(self.is_return):
 			self.status_updater.append({
@@ -395,6 +387,16 @@ class PurchaseReceipt(BuyingController):
 
 		self.load_from_db()
 
+	def make_return_invoice(self):
+		return_invoice = make_purchase_invoice(self.name)
+		return_invoice.is_return = True
+		return_invoice.save()
+		return_invoice.submit()
+
+		debit_note_link = frappe.utils.get_link_to_form('Purchase Invoice', return_invoice.name)
+
+		frappe.msgprint(_("Debit Note {0} has been created automatically").format(debit_note_link))
+
 def update_billed_amount_based_on_po(po_detail, update_modified=True):
 	# Billed against Sales Order directly
 	billed_against_po = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item`
@@ -444,6 +446,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 		doc = frappe.get_doc(target)
 		doc.ignore_pricing_rule = 1
+		doc.run_method("onload")
 		doc.run_method("set_missing_values")
 		doc.run_method("calculate_taxes_and_totals")
 
@@ -530,3 +533,24 @@ def make_purchase_return(source_name, target_doc=None):
 def update_purchase_receipt_status(docname, status):
 	pr = frappe.get_doc("Purchase Receipt", docname)
 	pr.update_status(status)
+
+@frappe.whitelist()
+def make_stock_entry(source_name,target_doc=None):
+	def set_missing_values(source, target):
+		target.stock_entry_type = "Material Transfer"
+		target.purpose =  "Material Transfer"
+
+	doclist = get_mapped_doc("Purchase Receipt", source_name,{
+		"Purchase Receipt": {
+			"doctype": "Stock Entry",
+		},
+		"Purchase Receipt Item": {
+			"doctype": "Stock Entry Detail",
+			"field_map": {
+				"warehouse": "s_warehouse",
+				"parent": "reference_purchase_receipt"
+			},
+		},
+	}, target_doc, set_missing_values)
+
+	return doclist

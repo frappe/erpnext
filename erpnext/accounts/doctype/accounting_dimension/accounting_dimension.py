@@ -121,11 +121,11 @@ def delete_accounting_dimension(doc):
 @frappe.whitelist()
 def disable_dimension(doc):
 	if frappe.flags.in_test:
-		frappe.enqueue(start_dimension_disabling, doc=doc)
+		toggle_disabling(doc=doc)
 	else:
-		start_dimension_disabling(doc=doc)
+		frappe.enqueue(toggle_disabling, doc=doc)
 
-def start_dimension_disabling(doc):
+def toggle_disabling(doc):
 	doc = json.loads(doc)
 
 	if doc.get('disabled'):
@@ -155,7 +155,7 @@ def get_doctypes_with_dimensions():
 	return doclist
 
 def get_accounting_dimensions(as_list=True):
-	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["label", "fieldname", "mandatory_for_pl", "mandatory_for_bs", "disabled"])
+	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["label", "fieldname", "mandatory_for_pl", "mandatory_for_bs", "disabled"], filters={"disabled": 0})
 
 	if as_list:
 		return [d.fieldname for d in accounting_dimensions]

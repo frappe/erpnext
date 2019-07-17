@@ -65,6 +65,9 @@ $.extend(erpnext, {
 	},
 
 	get_dimension_filters: async function() {
+		if (!frappe.model.can_read('Accounting Dimension')) {
+			return [];
+		}
 		let dimensions = await frappe.db.get_list('Accounting Dimension', {
 			fields: ['label', 'fieldname', 'document_type'],
 			filters: {
@@ -177,7 +180,7 @@ $.extend(erpnext.utils, {
 
 	make_subscription: function(doctype, docname) {
 		frappe.call({
-			method: "frappe.desk.doctype.auto_repeat.auto_repeat.make_auto_repeat",
+			method: "frappe.automation.doctype.auto_repeat.auto_repeat.make_auto_repeat",
 			args: {
 				doctype: doctype,
 				docname: docname
@@ -262,6 +265,16 @@ $.extend(erpnext.utils, {
 		}
 		refresh_field(table_fieldname);
 	},
+
+	create_new_doc: function (doctype, update_fields) {
+		frappe.model.with_doctype(doctype, function() {
+			var new_doc = frappe.model.get_new_doc(doctype);
+			for (let [key, value] of Object.entries(update_fields)) {
+				new_doc[key] = value;
+			}
+			frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
+		});
+	}
 
 });
 

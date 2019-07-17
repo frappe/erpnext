@@ -126,6 +126,20 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	make_material_request: function(frm) {
+
+		frappe.confirm(__("Do you want to submit the material request"),
+			function() {
+				frm.events.create_material_request(frm, 1);
+			},
+			function() {
+				frm.events.create_material_request(frm, 0);
+			}
+		);
+	},
+
+	create_material_request: function(frm, submit) {
+		frm.doc.submit_material_request = submit;
+
 		frappe.call({
 			method: "make_material_request",
 			freeze: true,

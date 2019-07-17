@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Installation Note', {
 	setup: function(frm) {
-		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
+		frappe.dynamic_link = {doc: frm.doc, fieldname: 'customer', doctype: 'Customer'}
 		frm.set_query('customer_address', erpnext.queries.address_query);
 		frm.set_query('contact_person', erpnext.queries.contact_query);
 		frm.set_query('customer', erpnext.queries.customer);
