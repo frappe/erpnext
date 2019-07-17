@@ -126,7 +126,8 @@
    "fieldname": "project_template",
    "fieldtype": "Link",
    "label": "From Template",
-   "options": "Project Template"
+   "options": "Project Template",
+   "set_only_once": 1
   },
   {
    "fieldname": "expected_start_date",
@@ -442,7 +443,7 @@
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "max_attachments": 4,
- "modified": "2019-06-25 16:14:43.887151",
+ "modified": "2019-07-16 11:11:12.343658",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
@@ -481,6 +482,7 @@
  "quick_entry": 1,
  "search_fields": "customer, status, priority, is_active",
  "show_name_in_global_search": 1,
+ "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "customer",
  "track_seen": 1

@@ -354,7 +354,7 @@ def make_custom_fields(update=True):
 			'fieldtype': 'Data',
 			'depends_on': 'eval:(doc.docstatus === 1)',
 			'allow_on_submit': 1,
-			'insert_after': 'project',
+			'insert_after': 'tax_id',
 			'translatable': 0
 		}
 	]
