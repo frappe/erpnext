@@ -21,8 +21,7 @@ def execute(filters=None):
 		row = []
 
 		outstanding_amt = get_customer_outstanding(d.name, filters.get("company"),
-			ignore_outstanding_sales_order=d.bypass_credit_limit_check_at_sales_order,
-			cost_center=filters.get("cost_center"))
+			ignore_outstanding_sales_order=d.bypass_credit_limit_check_at_sales_order)
 
 		credit_limit = get_credit_limit(d.name, filters.get("company"))
 
@@ -66,3 +65,4 @@ def get_details(filters):
 	return frappe.db.sql("""select name, customer_name,
 		bypass_credit_limit_check_at_sales_order, is_frozen, disabled from `tabCustomer` %s
 	""" % conditions, filters, as_dict=1)
+
