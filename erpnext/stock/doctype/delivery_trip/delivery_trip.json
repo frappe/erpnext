@@ -121,12 +121,14 @@
   },
   {
    "depends_on": "eval:!doc.__islocal",
+   "description": "Use Google Maps Direction API to calculate estimated arrival times",
    "fieldname": "calculate_arrival_time",
    "fieldtype": "Button",
    "label": "Calculate Estimated Arrival Times"
   },
   {
    "depends_on": "eval:!doc.__islocal",
+   "description": "Use Google Maps Direction API to optimize route",
    "fieldname": "optimize_route",
    "fieldtype": "Button",
    "label": "Optimize Route"
@@ -168,7 +170,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-07-17 11:29:27.195492",
+ "modified": "2019-07-17 12:55:10.897835",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Trip",
