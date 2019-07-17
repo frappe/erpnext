@@ -67,41 +67,27 @@ frappe.ui.form.on('Delivery Trip', {
 	},
 
 	calculate_arrival_time: function (frm) {
-		frappe.db.get_value("Google Maps", {"driver": frm.doc.driver}, "enable", (r) => {
-			if (r.enable === 1) {
-				frappe.show_alert({message:__("Updating estimated arrival times."), indicator:'blue'});
-				frappe.call({
-					method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.get_arrival_times',
-					args: {
-						delivery_trip: frm.doc.name,
-					},
-					callback: function (r) {
-						frm.reload_doc();
-					}
-				});
-			} else {
-				frappe.throw(__("Please enable Google Maps Integration to estimate and optimize routes"));
+		frappe.call({
+			method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.get_arrival_times',
+			args: {
+				delivery_trip: frm.doc.name,
+			},
+			callback: function (r) {
+				frm.reload_doc();
 			}
-		})
+		});
 	},
 
 	optimize_route: function (frm) {
-		frappe.db.get_value("Google Maps", {"driver": frm.doc.driver}, "enable", (r) => {
-			if (r.enable === 1) {
-				frappe.show_alert({message:__("Optimizing routes."), indicator:'blue'});
-				frappe.call({
-					method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.optimize_route',
-					args: {
-						delivery_trip: frm.doc.name,
-					},
-					callback: function (r) {
-						frm.reload_doc();
-					}
-				});
-			} else {
-				frappe.throw(__("Please enable Google Maps Integration to estimate and optimize routes"));
+		frappe.call({
+			method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.optimize_route',
+			args: {
+				delivery_trip: frm.doc.name,
+			},
+			callback: function (r) {
+				frm.reload_doc();
 			}
-		})
+		});
 	},
 
 	notify_customers: function (frm) {

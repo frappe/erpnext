@@ -15,7 +15,6 @@ from frappe.utils import add_days, flt, now_datetime, nowdate
 class TestDeliveryTrip(unittest.TestCase):
 	def setUp(self):
 		create_driver()
-		create_maps()
 		create_vehicle()
 		create_delivery_notification()
 		create_test_contact_and_address()
@@ -99,17 +98,7 @@ class TestDeliveryTrip(unittest.TestCase):
 
 def create_driver():
 	if not frappe.db.exists("Driver", {"full_name": "Newton Scmander"}):
-		driver = frappe.get_doc({
-			"doctype": "Driver",
-			"full_name": "Newton Scmander",
-			"cell_number": "98343424242",
-			"license_number": "B809"
-		})
-		driver.insert()
-
-def create_maps():
-	if not frappe.db.exists('Address', {"address_title": "_Test Address for Customer"}):
-		frappe.get_doc(dict(
+		address = frappe.get_doc(dict(
 			doctype='Address',
 			address_title='_Test Address for Customer',
 			address_type='Office',
@@ -123,16 +112,14 @@ def create_maps():
 			)]
 		)).insert(ignore_permissions=True)
 
-	if not frappe.db.exists("Google Maps", {"driver": frappe.db.get_value("Driver", {"full_name": "Newton Scmander"}, "name")}):
-		frappe.db.set_value("Google Settings", None, "enable", 1)
-		frappe.db.set_value("Google Settings", None, "api_key", "qwe")
-
-		frappe.get_doc({
-			"doctype": "Google Maps",
-			"enable": 1,
-			"driver": frappe.db.get_value("Driver", {"full_name": "Newton Scmander"}, "name"),
-			"address": frappe.db.get_value("Address", {"address_title": "_Test Address for Customer"}, "name")
-		}).insert(ignore_permissions=True)
+		driver = frappe.get_doc({
+			"doctype": "Driver",
+			"full_name": "Newton Scmander",
+			"cell_number": "98343424242",
+			"license_number": "B809",
+			"address": address.name
+		})
+		driver.insert()
 
 def create_delivery_notification():
 	if not frappe.db.exists("Email Template", "Delivery Notification"):

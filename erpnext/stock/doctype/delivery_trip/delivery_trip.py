@@ -100,16 +100,13 @@ class DeliveryTrip(Document):
 			optimize (bool): True if route needs to be optimized, else False
 		"""
 
-		if not frappe.db.get_value("Google Maps", {"driver": self.driver}, "enable"):
-			frappe.throw(_("Cannot process route, since Google Maps Integration for driver {0} is disabled.").format(self.driver))
-
 		departure_datetime = get_datetime(self.departure_time)
 		route_list = self.form_route_list(optimize)
 
 		# For locks, maintain idx count while looping through route list
 		idx = 0
 		for route in route_list:
-			directions = get_directions(route, optimize, self.driver)
+			directions = get_directions(self, route, optimize)
 
 			if directions:
 				if optimize and len(directions.get("waypoint_order")) > 1:
@@ -157,12 +154,8 @@ class DeliveryTrip(Document):
 		Returns:
 			(list of list of str): List of address routes split at locks, if optimize is `True`
 		"""
-		if not frappe.db.exists("Google Maps", {"driver": self.driver}):
-			frappe.throw(_("Google Maps Integration for driver {0} is disabled.").format(self.driver))
 
-		settings = frappe.get_doc("Google Maps", {"driver": self.driver})
-
-		home_address = get_address_display(frappe.get_doc("Address", settings.address).as_dict())
+		home_address = get_address_display(frappe.get_doc("Address", self.driver_address).as_dict())
 
 		route_list = []
 		# Initialize first leg with origin as the home address
@@ -206,6 +199,21 @@ class DeliveryTrip(Document):
 			stops_order.append(self.delivery_stops[old_idx])
 
 		self.delivery_stops[start:start + len(stops_order)] = stops_order
+
+	def get_client(self):
+		# return Google Maps Client for route optimiaztion
+
+		if not frappe.db.get_single_value("Google Settings", "api_key"):
+			frappe.throw(_("Enter API key in Google Settings."))
+
+		import googlemaps
+
+		try:
+			client = googlemaps.Client(key=frappe.db.get_single_value("Google Settings", "api_key"))
+		except Exception as e:
+			frappe.throw(e.message)
+
+		return client
 
 
 @frappe.whitelist()
@@ -313,7 +321,7 @@ def sanitize_address(address):
 	return ', '.join(address[:3])
 
 
-def get_directions(route, optimize, driver):
+def get_directions(doc, route, optimize):
 	"""
 	Retrieve map directions for a given route and departure time.
 	If optimize is `True`, Google Maps will return an optimized
@@ -325,17 +333,12 @@ def get_directions(route, optimize, driver):
 	Args:
 		route (list of str): Route addresses (origin -> waypoint(s), if any -> destination)
 		optimize (bool): `True` if route needs to be optimized, else `False`
-		driver: Name of the Delivery Trip Driver
 
 	Returns:
 		(dict): Route legs and, if `optimize` is `True`, optimized waypoint order
 	"""
 
-	if not frappe.db.exists("Google Maps", {"driver": driver}):
-		frappe.throw(_("Google Maps Integration for driver {0} is disabled.").format(driver))
-
-	settings = frappe.get_doc("Google Maps", {"driver": driver})
-	maps_client = settings.get_client()
+	maps_client = doc.get_client()
 
 	directions_data = {
 		"origin": route[0],
