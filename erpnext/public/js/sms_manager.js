@@ -30,6 +30,8 @@ erpnext.SMSManager = function SMSManager(doc) {
 			this.show('', '', '', doc.mobile_no, default_msg[doc.doctype]);
 		else if (doc.doctype == 'Opportunity')
 			this.show('', '', '', doc.contact_no, default_msg[doc.doctype]);
+		else if (doc.doctype == 'Quotation')
+			this.show(doc.contact_person, doc.quotation_to, doc.party_name, '', default_msg[doc.doctype]);
 		else if (doc.doctype == 'Material Request')
 			this.show('', '', '', '', default_msg[doc.doctype]);
 
