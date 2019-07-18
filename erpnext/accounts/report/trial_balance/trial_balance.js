@@ -95,7 +95,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 		"initial_depth": 3
 	}
 
-	frappe.boot.dimension_filters.forEach((dimension) => {
+	erpnext.dimension_filters.forEach((dimension) => {
 		frappe.query_reports["Trial Balance"].filters.splice(5, 0 ,{
 			"fieldname": dimension["fieldname"],
 			"label": __(dimension["label"]),
