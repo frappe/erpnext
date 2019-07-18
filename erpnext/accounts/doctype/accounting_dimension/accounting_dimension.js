@@ -63,4 +63,4 @@ frappe.ui.form.on('Accounting Dimension Detail', {
 		let row = locals[cdt][cdn];
 		row.reference_document = frm.doc.document_type;
 	}
-})
+});
