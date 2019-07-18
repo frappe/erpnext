@@ -97,16 +97,17 @@ class TestDeliveryTrip(unittest.TestCase):
 
 
 def create_driver():
-	if not frappe.db.exists("Driver", {"full_name": "Newton Scmander"}):
-		address = frappe.get_doc(dict(
-			doctype='Address',
-			address_title='_Test Address for Driver',
-			address_type='Office',
-			address_line1='Station Road',
-			city='_Test City',
-			state='Test State',
-			country='India',
-		)).insert(ignore_permissions=True)
+	if not (frappe.db.exists("Driver", {"full_name": "Newton Scmander"}) and frappe.db.exists("Address", {"address_title": "_Test Address for Driver"})):
+
+		address = frappe.get_doc({
+			"doctype": "Address",
+			"address_title": "_Test Address for Driver",
+			"address_type": "Office",
+			"address_line1": "Station Road",
+			"city": "_Test City",
+			"state": "Test State",
+			"country": "India",
+		}).insert(ignore_permissions=True)
 
 		driver = frappe.get_doc({
 			"doctype": "Driver",
@@ -114,17 +115,13 @@ def create_driver():
 			"cell_number": "98343424242",
 			"license_number": "B809",
 			"address": address.name
-		}).insert()
+		}).insert(ignore_permissions=True)
 
-		address.append("links",
-			{
-				"link_doctype": "Driver",
-				"link_name": driver.name
-			}
-		)
-		address.save()
+	else:
+		driver = frappe.get_doc("Driver", {"full_name": "Newton Scmander"})
+		address = frappe.get_doc("Address", {"address_title": "_Test Address for Driver"})
 
-		return driver.name, address.name
+	return driver.name, address.name
 
 def create_delivery_notification():
 	if not frappe.db.exists("Email Template", "Delivery Notification"):
