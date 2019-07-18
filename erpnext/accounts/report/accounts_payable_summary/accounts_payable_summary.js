@@ -99,7 +99,7 @@ frappe.query_reports["Accounts Payable Summary"] = {
 	}
 }
 
-frappe.boot.dimension_filters.forEach((dimension) => {
+erpnext.dimension_filters.forEach((dimension) => {
 	frappe.query_reports["Accounts Payable Summary"].filters.splice(9, 0 ,{
 		"fieldname": dimension["fieldname"],
 		"label": __(dimension["label"]),
