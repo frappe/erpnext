@@ -14,7 +14,8 @@ from frappe.utils import add_days, flt, now_datetime, nowdate
 
 class TestDeliveryTrip(unittest.TestCase):
 	def setUp(self):
-		driver, address = create_driver()
+		address = create_address()
+		driver= create_driver(address)
 		create_vehicle()
 		create_delivery_notification()
 		create_test_contact_and_address()
@@ -95,10 +96,8 @@ class TestDeliveryTrip(unittest.TestCase):
 		self.delivery_trip.save()
 		self.assertEqual(self.delivery_trip.status, "Completed")
 
-
-def create_driver():
-	if not (frappe.db.exists("Driver", {"full_name": "Newton Scmander"}) and frappe.db.exists("Address", {"address_title": "_Test Address for Driver"})):
-
+def create_address():
+	if not frappe.db.exists("Address", {"address_title": "_Test Address for Driver"}):
 		address = frappe.get_doc({
 			"doctype": "Address",
 			"address_title": "_Test Address for Driver",
@@ -109,6 +108,12 @@ def create_driver():
 			"country": "India",
 		}).insert(ignore_permissions=True)
 
+		return address
+
+	return frappe.get_doc("Address", {"address_title": "_Test Address for Driver"})
+
+def create_driver(address):
+	if not frappe.db.exists("Driver", {"full_name": "Newton Scmander"}):
 		driver = frappe.get_doc({
 			"doctype": "Driver",
 			"full_name": "Newton Scmander",
@@ -117,11 +122,9 @@ def create_driver():
 			"address": address.name
 		}).insert(ignore_permissions=True)
 
-	else:
-		driver = frappe.get_doc("Driver", {"full_name": "Newton Scmander"})
-		address = frappe.get_doc("Address", {"address_title": "_Test Address for Driver"})
+		return driver
 
-	return driver.name, address.name
+	return frappe.get_doc("Driver", {"full_name": "Newton Scmander"})
 
 def create_delivery_notification():
 	if not frappe.db.exists("Email Template", "Delivery Notification"):
@@ -163,8 +166,8 @@ def create_delivery_trip(driver, address):
 		"doctype": "Delivery Trip",
 		"company": erpnext.get_default_company(),
 		"departure_time": add_days(now_datetime(), 5),
-		"driver": driver,
-		"driver_address": address,
+		"driver": driver.name,
+		"driver_address": address.name,
 		"vehicle": "JB 007",
 		"delivery_stops": [{
 			"customer": "_Test Customer",
