@@ -173,7 +173,7 @@ frappe.query_reports["Accounts Receivable"] = {
 	}
 }
 
-frappe.boot.dimension_filters.forEach((dimension) => {
+erpnext.dimension_filters.forEach((dimension) => {
 	frappe.query_reports["Accounts Receivable"].filters.splice(9, 0 ,{
 		"fieldname": dimension["fieldname"],
 		"label": __(dimension["label"]),

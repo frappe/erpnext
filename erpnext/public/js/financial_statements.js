@@ -129,7 +129,7 @@ function get_filters(){
 		}
 	]
 
-	frappe.boot.dimension_filters.forEach((dimension) => {
+	erpnext.dimension_filters.forEach((dimension) => {
 		filters.push({
 			"fieldname": dimension["fieldname"],
 			"label": __(dimension["label"]),
