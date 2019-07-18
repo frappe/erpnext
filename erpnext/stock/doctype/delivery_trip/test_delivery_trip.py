@@ -14,12 +14,12 @@ from frappe.utils import add_days, flt, now_datetime, nowdate
 
 class TestDeliveryTrip(unittest.TestCase):
 	def setUp(self):
-		create_driver()
+		driver, address = create_driver()
 		create_vehicle()
 		create_delivery_notification()
 		create_test_contact_and_address()
 
-		self.delivery_trip = create_delivery_trip()
+		self.delivery_trip = create_delivery_trip(driver, address)
 
 	def tearDown(self):
 		frappe.db.sql("delete from `tabDriver`")
@@ -100,16 +100,12 @@ def create_driver():
 	if not frappe.db.exists("Driver", {"full_name": "Newton Scmander"}):
 		address = frappe.get_doc(dict(
 			doctype='Address',
-			address_title='_Test Address for Customer',
+			address_title='_Test Address for Driver',
 			address_type='Office',
 			address_line1='Station Road',
 			city='_Test City',
 			state='Test State',
 			country='India',
-			links = [dict(
-				link_doctype='Customer',
-				link_name='_Test Customer'
-			)]
 		)).insert(ignore_permissions=True)
 
 		driver = frappe.get_doc({
@@ -118,8 +114,17 @@ def create_driver():
 			"cell_number": "98343424242",
 			"license_number": "B809",
 			"address": address.name
-		})
-		driver.insert()
+		}).insert()
+
+		address.append("links",
+			{
+				"link_doctype": "Driver",
+				"link_name": driver.name
+			}
+		)
+		address.save()
+
+		return driver.name, address.name
 
 def create_delivery_notification():
 	if not frappe.db.exists("Email Template", "Delivery Notification"):
@@ -154,15 +159,15 @@ def create_vehicle():
 		vehicle.insert()
 
 
-def create_delivery_trip():
+def create_delivery_trip(driver, address):
 	contact = get_contact_and_address("_Test Customer")
 
 	delivery_trip = frappe.get_doc({
 		"doctype": "Delivery Trip",
 		"company": erpnext.get_default_company(),
 		"departure_time": add_days(now_datetime(), 5),
-		"driver": frappe.db.get_value('Driver', {"full_name": "Newton Scmander"}, "name"),
-		"driver_address": frappe.db.get_value('Driver', {"full_name": "Newton Scmander"}, "address"),
+		"driver": driver,
+		"driver_address": address,
 		"vehicle": "JB 007",
 		"delivery_stops": [{
 			"customer": "_Test Customer",
