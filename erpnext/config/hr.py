@@ -221,6 +221,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Employee Skill Map",
+					"dependencies": ["Employee"],
+				},
+				{
+					"type": "doctype",
 					"name": "Employee Promotion",
 					"dependencies": ["Employee"],
 				},
