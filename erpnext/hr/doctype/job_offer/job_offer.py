@@ -6,6 +6,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe import _
+from frappe.utils.data import get_link_to_form
 
 class JobOffer(Document):
 	def onload(self):
@@ -20,9 +21,9 @@ class JobOffer(Document):
 		check_vacancies = frappe.get_single("HR Settings").check_vacancies
 		if staffing_plan and check_vacancies:
 			vacancies = frappe.db.get_value("Staffing Plan Detail", filters={"name": staffing_plan.name}, fieldname=['vacancies'])
-			no_of_job_offer = len(self.get_job_offer(staffing_plan.from_date, staffing_plan.to_date))
-			if vacancies - no_of_job_offer <= 0:
-				frappe.throw(_("Not enough vacancies available. Please update the staffing plan"))
+			job_offers = len(self.get_job_offer(staffing_plan.from_date, staffing_plan.to_date))
+			if vacancies - job_offers <= 0:
+				frappe.throw(_("All vacancies in the staffing plan {0} are filled").format(get_link_to_form("Staffing Plan", staffing_plan.parent)))
 
 	def on_change(self):
 		update_job_applicant(self.status, self.job_applicant)
@@ -43,7 +44,8 @@ def get_staffing_plan_detail(designation, company, offer_date):
 	detail = frappe.db.sql("""
 		SELECT spd.name as name,
 			sp.from_date as from_date,
-			sp.to_date as to_date
+			sp.to_date as to_date,
+			sp.name as parent
 		FROM `tabStaffing Plan Detail` spd, `tabStaffing Plan` sp
 		WHERE
 			sp.docstatus=1
