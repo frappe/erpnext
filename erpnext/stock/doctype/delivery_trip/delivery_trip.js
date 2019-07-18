@@ -67,6 +67,9 @@ frappe.ui.form.on('Delivery Trip', {
 	},
 
 	calculate_arrival_time: function (frm) {
+		if (!frm.doc.driver_address) {
+			frappe.throw(__("Cannot Calculate Arrival Time as Driver Address is Missing."))
+		}
 		frappe.show_alert({
 			message: "Calculating Arrival Times",
 			indicator: 'orange'
@@ -80,6 +83,9 @@ frappe.ui.form.on('Delivery Trip', {
 	},
 
 	optimize_route: function (frm) {
+		if (!frm.doc.driver_address) {
+			frappe.throw(__("Cannot Optimize Route as Driver Address is Missing."))
+		}
 		frappe.show_alert({
 			message: "Optimizing Route",
 			indicator: 'orange'
