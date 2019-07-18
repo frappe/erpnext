@@ -14,11 +14,11 @@ from frappe.utils import add_days, flt, now_datetime, nowdate
 
 class TestDeliveryTrip(unittest.TestCase):
 	def setUp(self):
-		address = create_address()
-		driver= create_driver(address)
+		driver = create_driver()
 		create_vehicle()
 		create_delivery_notification()
 		create_test_contact_and_address()
+		address = create_address(driver)
 
 		self.delivery_trip = create_delivery_trip(driver, address)
 
@@ -96,7 +96,7 @@ class TestDeliveryTrip(unittest.TestCase):
 		self.delivery_trip.save()
 		self.assertEqual(self.delivery_trip.status, "Completed")
 
-def create_address():
+def create_address(driver):
 	if not frappe.db.exists("Address", {"address_title": "_Test Address for Driver"}):
 		address = frappe.get_doc({
 			"doctype": "Address",
@@ -106,20 +106,27 @@ def create_address():
 			"city": "_Test City",
 			"state": "Test State",
 			"country": "India",
+			"links":[
+				{
+					"link_doctype": "Driver",
+					"link_name": driver.name
+				}
+			]
 		}).insert(ignore_permissions=True)
+
+		frappe.db.set_value("Driver", driver.name, "address", address.name)
 
 		return address
 
 	return frappe.get_doc("Address", {"address_title": "_Test Address for Driver"})
 
-def create_driver(address):
+def create_driver():
 	if not frappe.db.exists("Driver", {"full_name": "Newton Scmander"}):
 		driver = frappe.get_doc({
 			"doctype": "Driver",
 			"full_name": "Newton Scmander",
 			"cell_number": "98343424242",
 			"license_number": "B809",
-			"address": address.name
 		}).insert(ignore_permissions=True)
 
 		return driver
@@ -159,8 +166,9 @@ def create_vehicle():
 		vehicle.insert()
 
 
-def create_delivery_trip(driver, address):
-	contact = get_contact_and_address("_Test Customer")
+def create_delivery_trip(driver, address, contact=None):
+	if not contact:
+		contact = get_contact_and_address("_Test Customer")
 
 	delivery_trip = frappe.get_doc({
 		"doctype": "Delivery Trip",

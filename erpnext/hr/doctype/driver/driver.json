@@ -114,12 +114,11 @@
    "fieldname": "address",
    "fieldtype": "Link",
    "label": "Address",
-   "options": "Address",
-   "reqd": 1
+   "options": "Address"
   }
  ],
  "icon": "fa fa-user",
- "modified": "2019-07-17 11:07:21.812288",
+ "modified": "2019-07-18 16:29:14.151380",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Driver",
