@@ -35,7 +35,9 @@ class Asset(AccountsController):
 		self.validate_in_use_date()
 		self.set_status()
 		self.update_stock_movement()
+		print("----------------->>>here")
 		if not self.booked_fixed_asset and not is_cwip_accounting_disabled():
+			print("---------------also here")
 			self.make_gl_entries()
 
 	def on_cancel(self):
@@ -388,7 +390,8 @@ class Asset(AccountsController):
 				"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 				"posting_date": self.available_for_use_date,
 				"credit": self.purchase_receipt_amount,
-				"credit_in_account_currency": self.purchase_receipt_amount
+				"credit_in_account_currency": self.purchase_receipt_amount,
+				"cost_center": self.cost_center
 			}))
 
 			gl_entries.append(self.get_gl_dict({
@@ -397,7 +400,8 @@ class Asset(AccountsController):
 				"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 				"posting_date": self.available_for_use_date,
 				"debit": self.purchase_receipt_amount,
-				"debit_in_account_currency": self.purchase_receipt_amount
+				"debit_in_account_currency": self.purchase_receipt_amount,
+				"cost_center": self.cost_center
 			}))
 
 		if gl_entries:
