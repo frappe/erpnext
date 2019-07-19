@@ -476,6 +476,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							stock_uom: item.stock_uom,
 							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
 							cost_center: item.cost_center,
+							apply_discount_after_taxes: item.apply_discount_after_taxes,
 							tax_category: me.frm.doc.tax_category,
 							item_tax_template: item.item_tax_template
 						}
@@ -578,6 +579,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			}
 		}
+	},
+
+	apply_discount_after_taxes: function() {
+		this.set_dynamic_labels();
+		this.calculate_taxes_and_totals();
 	},
 
 	validate: function() {
@@ -1032,7 +1038,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	change_form_labels: function(company_currency) {
 		var me = this;
 
-		this.frm.set_currency_labels(["base_total", "base_net_total", "base_total_taxes_and_charges",
+		this.frm.set_currency_labels(["base_total", "base_net_total", "base_item_net_total",
+			"base_total_taxes_and_charges", "base_total_discount_after_taxes", "base_total_after_taxes",
 			"base_discount_amount", "base_grand_total", "base_rounded_total", "base_in_words",
 			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted", "total_amount_to_pay",
 			"base_paid_amount", "base_write_off_amount", "base_change_amount", "base_operating_cost",
@@ -1041,8 +1048,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"base_total_before_discount", "base_tax_exclusive_total_before_discount",
 			"base_total_discount", "base_tax_exclusive_total_discount"], company_currency);
 
-		this.frm.set_currency_labels(["total", "net_total", "total_taxes_and_charges", "discount_amount",
-			"grand_total", "taxes_and_charges_added", "taxes_and_charges_deducted",
+		this.frm.set_currency_labels(["total", "net_total", "item_net_total", "total_taxes_and_charges",
+			"discount_amount", "grand_total", "total_discount_after_taxes", "total_after_taxes",
+			"taxes_and_charges_added", "taxes_and_charges_deducted",
 			"rounded_total", "in_words", "paid_amount", "write_off_amount", "operating_cost",
 			"scrap_material_cost", "rounding_adjustment", "raw_material_cost",
 			"total_cost", "tax_exclusive_total",
@@ -1061,7 +1069,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		// toggle fields
-		this.frm.toggle_display(["conversion_rate", "base_total", "base_net_total",
+		this.frm.toggle_display(["conversion_rate", "base_total", "base_net_total", "base_item_net_total",
+			"base_total_discount_after_taxes", "base_total_after_taxes",
 			"base_total_taxes_and_charges", "base_taxes_and_charges_added", "base_taxes_and_charges_deducted",
 			"base_grand_total", "base_rounded_total", "base_in_words", "base_discount_amount",
 			"base_paid_amount", "base_write_off_amount", "base_operating_cost", "base_raw_material_cost",
@@ -1086,7 +1095,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				cur_frm.toggle_display(fname, show_exclusive && (me.frm.doc.currency != company_currency));
 		});
 
-		var show_net = cint(cur_frm.doc.discount_amount) || show_exclusive;
+		var apply_discount_after_taxes = (cur_frm.doc.items || []).filter(d => cint(d.apply_discount_after_taxes)).length;
+		var show_net = cint(cur_frm.doc.discount_amount) || apply_discount_after_taxes || show_exclusive;
 
 		if(frappe.meta.get_docfield(cur_frm.doctype, "net_total"))
 			cur_frm.toggle_display("net_total", show_net);
@@ -1099,14 +1109,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	change_grid_labels: function(company_currency) {
 		var me = this;
 
-		this.frm.set_currency_labels(["base_rate", "base_net_rate", "base_price_list_rate", "base_amount",
-				"base_net_amount", "base_rate_with_margin", "base_tax_exclusive_price_list_rate",
+		this.frm.set_currency_labels(["base_price_list_rate", "base_rate", "base_net_rate", "base_item_net_rate",
+				"base_amount", "base_net_amount", "base_item_net_amount",
+				"base_rate_with_margin", "base_tax_exclusive_price_list_rate",
 				"base_tax_exclusive_rate", "base_tax_exclusive_amount", "base_tax_exclusive_rate_with_margin",
 				"base_amount_before_discount", "base_tax_exclusive_amount_before_discount",
 				"base_total_discount", "base_tax_exclusive_total_discount"],
 			company_currency, "items");
 
-		this.frm.set_currency_labels(["rate", "net_rate", "price_list_rate", "amount", "net_amount", "rate_with_margin",
+		this.frm.set_currency_labels(["price_list_rate", "rate", "net_rate", "item_net_rate",
+				"amount", "net_amount", "item_net_amount", "rate_with_margin",
 				"discount_amount", "tax_exclusive_price_list_rate", "tax_exclusive_rate", "tax_exclusive_amount",
 				"tax_exclusive_discount_amount", "tax_exclusive_rate_with_margin",
 				"amount_before_discount", "tax_exclusive_amount_before_discount",
@@ -1181,14 +1193,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				item_grid.set_column_disp(fname, (show_exclusive && (me.frm.doc.currency != company_currency)));
 		});
 
-		var show_net = cint(cur_frm.doc.discount_amount) || show_exclusive;
+		var apply_discount_after_taxes = (cur_frm.doc.items || []).filter(d => cint(d.apply_discount_after_taxes)).length;
+		var show_net = cint(cur_frm.doc.discount_amount) || apply_discount_after_taxes || show_exclusive;
 
-		$.each(["net_rate", "net_amount"], function(i, fname) {
+		$.each(["item_net_rate", "item_net_amount", "net_rate", "net_amount"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
 				item_grid.set_column_disp(fname, show_net);
 		});
 
-		$.each(["base_net_rate", "base_net_amount"], function(i, fname) {
+		$.each(["base_item_net_rate", "base_item_net_amount", "base_net_rate", "base_net_amount"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
 				item_grid.set_column_disp(fname, (show_net && (me.frm.doc.currency != company_currency)));
 		});
@@ -1308,7 +1321,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"warehouse": d.warehouse,
 					"serial_no": d.serial_no,
 					"discount_percentage": d.discount_percentage || 0.0,
-					"conversion_factor": d.conversion_factor || 1.0
+					"conversion_factor": d.conversion_factor || 1.0,
+					"apply_discount_after_taxes": d.apply_discount_after_taxes
 				});
 
 				// if doctype is Quotation Item / Sales Order Iten then add Margin Type and rate in item_list
@@ -1533,6 +1547,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					cost_center: item.cost_center,
 					income_account: item.income_account,
 					expense_account: item.expense_account,
+					apply_discount_after_taxes: item.apply_discount_after_taxes
 				});
 			}
 		});

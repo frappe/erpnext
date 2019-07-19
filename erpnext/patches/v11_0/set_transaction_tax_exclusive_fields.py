@@ -36,6 +36,9 @@ def execute():
 		'tax_exclusive_total_before_discount',
 		'total_discount',
 		'tax_exclusive_total_discount',
+		'item_net_total',
+		'total_after_taxes',
+		'total_discount_after_taxes',
 	]
 	new_transaction_fields += ['base_' + f for f in new_transaction_fields]
 	new_transaction_fields = set(new_transaction_fields)
@@ -50,6 +53,8 @@ def execute():
 		'tax_exclusive_amount_before_discount',
 		'total_discount',
 		'tax_exclusive_total_discount',
+		'item_net_rate',
+		'item_net_amount',
 	]
 	new_item_fields += ['base_' + f for f in new_item_fields]
 	new_item_fields = set(new_item_fields)
@@ -74,4 +79,4 @@ def execute():
 				frappe.db.set_value(dt + " Item", item.name, update_dict, None, update_modified=False)
 
 			for tax in doc.taxes:
-				frappe.db.set_value(tax.doctype, tax.name, "displayed_total", tax.displayed_total)
+				frappe.db.set_value(tax.doctype, tax.name, "displayed_total", tax.displayed_total, update_modified=False)
