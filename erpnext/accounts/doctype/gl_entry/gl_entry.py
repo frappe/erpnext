@@ -91,13 +91,13 @@ class GLEntry(Document):
 			if account_type == "Profit and Loss" \
 				and dimension.mandatory_for_pl and not dimension.disabled:
 				if not self.get(dimension.fieldname):
-					frappe.throw(_("{0} is required for 'Profit and Loss' account {1}.")
+					frappe.throw(_("Accounting Dimension <b>{0}</b> is required for 'Profit and Loss' account {1}.")
 						.format(dimension.label, self.account))
 
 			if account_type == "Balance Sheet" \
 				and dimension.mandatory_for_bs and not dimension.disabled:
 				if not self.get(dimension.fieldname):
-					frappe.throw(_("{0} is required for 'Balance Sheet' account {1}.")
+					frappe.throw(_("Accounting Dimension <b>{0}</b> is required for 'Balance Sheet' account {1}.")
 						.format(dimension.label, self.account))
 
 

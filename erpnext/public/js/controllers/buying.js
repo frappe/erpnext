@@ -141,6 +141,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	price_list_rate: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
+
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
 		let item_rate = item.price_list_rate;
@@ -154,6 +155,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 		if (item.discount_amount) {
 			item.rate = flt((item.price_list_rate) - (item.discount_amount), precision('rate', item));
+		} else {
+			item.rate = item_rate;
 		}
 
 		this.calculate_taxes_and_totals();
@@ -343,7 +346,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	update_auto_repeat_reference: function(doc) {
 		if (doc.auto_repeat) {
 			frappe.call({
-				method:"frappe.desk.doctype.auto_repeat.auto_repeat.update_reference",
+				method:"frappe.automation.doctype.auto_repeat.auto_repeat.update_reference",
 				args:{
 					docname: doc.auto_repeat,
 					reference:doc.name
