@@ -35,9 +35,7 @@ class Asset(AccountsController):
 		self.validate_in_use_date()
 		self.set_status()
 		self.update_stock_movement()
-		print("----------------->>>here")
 		if not self.booked_fixed_asset and not is_cwip_accounting_disabled():
-			print("---------------also here")
 			self.make_gl_entries()
 
 	def on_cancel(self):
