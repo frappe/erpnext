@@ -1099,7 +1099,8 @@ class SalesInvoice(SellingController):
 	def set_loyalty_program_tier(self):
 		lp_details = get_loyalty_program_details_with_points(self.customer, company=self.company,
 				loyalty_program=self.loyalty_program, include_expired_entry=True)
-		frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", lp_details.tier_name)
+		if lp_details:
+			frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", lp_details.tier_name)
 
 	def get_returned_amount(self):
 		returned_amount = frappe.db.sql("""
