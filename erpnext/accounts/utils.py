@@ -685,7 +685,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 		payment_amount = pe_map.get((d.voucher_type, d.voucher_no), 0)
 		outstanding_amount = flt(d.invoice_amount - payment_amount, precision)
 		if outstanding_amount > 0.5 / (10**precision):
-			if (filters.get("outstanding_amt_greater_than") and
+			if (filters and filters.get("outstanding_amt_greater_than") and
 				not (outstanding_amount >= filters.get("outstanding_amt_greater_than") and
 				outstanding_amount <= filters.get("outstanding_amt_less_than"))):
 				continue
