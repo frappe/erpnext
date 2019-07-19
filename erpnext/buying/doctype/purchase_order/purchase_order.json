@@ -572,7 +572,7 @@
    "fieldtype": "Link",
    "label": "Purchase Taxes and Charges Template",
    "oldfieldname": "purchase_other_charges",
-   "oldfieldtype": "Link",
+   "oldfieldtype": "Long Link",
    "options": "Purchase Taxes and Charges Template",
    "print_hide": 1
   },
