@@ -23,7 +23,7 @@ class JobOffer(Document):
 			vacancies = frappe.db.get_value("Staffing Plan Detail", filters={"name": staffing_plan.name}, fieldname=['vacancies'])
 			job_offers = len(self.get_job_offer(staffing_plan.from_date, staffing_plan.to_date))
 			if vacancies - job_offers <= 0:
-				frappe.throw(_("All vacancies in the staffing plan {0} are filled").format(get_link_to_form("Staffing Plan", staffing_plan.parent)))
+				frappe.throw(_("There are no vacancies under staffing plan {0}".format(get_link_to_form("Staffing Plan", staffing_plan.parent))))
 
 	def on_change(self):
 		update_job_applicant(self.status, self.job_applicant)
