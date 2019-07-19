@@ -119,6 +119,8 @@ class PayrollEntry(Document):
 				frappe.enqueue(create_salary_slips_for_employees, timeout=600, employees=emp_list, args=args)
 			else:
 				create_salary_slips_for_employees(emp_list, args, publish_progress=False)
+				# since this method is called via frm.call this doc needs to be updated manually
+				self.reload()
 
 	def get_sal_slip_list(self, ss_status, as_dict=False):
 		"""
