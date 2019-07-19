@@ -69,7 +69,9 @@ def execute(filters=None):
 	add_total_row_account(data, data, _("Net Change in Cash"), period_list, company_currency)
 	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 
-	return columns, data
+	chart = get_chart_data(columns, data)
+
+	return columns, data, None, chart
 
 def get_cash_flow_accounts():
 	operation_accounts = {
@@ -172,3 +174,20 @@ def add_total_row_account(out, data, label, period_list, currency, consolidated 
 
 	out.append(total_row)
 	out.append({})
+
+def get_chart_data(columns, data):
+	labels = [d.get("label") for d in columns[2:]]
+	datasets = [{'name':account.get('account').replace("'", ""), 'values': [account.get('total')]}  for account in data if account.get('parent_account') == None and account.get('currency')]
+	datasets = datasets[:-1]
+
+	chart = {
+		"data": {
+			'labels': labels,
+			'datasets': datasets
+		},
+		"type": "bar"
+	}
+	
+	chart["fieldtype"] = "Currency"
+
+	return chart

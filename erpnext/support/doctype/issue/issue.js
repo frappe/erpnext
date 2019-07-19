@@ -2,6 +2,12 @@ frappe.ui.form.on("Issue", {
 	onload: function(frm) {
 		frm.email_field = "raised_by";
 
+		frappe.db.get_value("Support Settings", {name: "Support Settings"}, "allow_resetting_service_level_agreement", (r) => {
+			if (!r.allow_resetting_service_level_agreement) {
+				frm.set_df_property("reset_service_level_agreement", "hidden", 1) ;
+			}
+		});
+
 		if (frm.doc.service_level_agreement) {
 			frappe.call({
 				method: "erpnext.support.doctype.service_level_agreement.service_level_agreement.get_service_level_agreement_filters",
@@ -73,6 +79,42 @@ frappe.ui.form.on("Issue", {
 		}
 	},
 
+	reset_service_level_agreement: function(frm) {
+		let reset_sla = new frappe.ui.Dialog({
+			title: __("Reset Service Level Agreement"),
+			fields: [
+				{
+					fieldtype: "Data",
+					fieldname: "reason",
+					label: __("Reason"),
+					reqd: 1
+				}
+			],
+			primary_action_label: __("Reset"),
+			primary_action: (values) => {
+				reset_sla.disable_primary_action();
+				reset_sla.hide();
+				reset_sla.clear();
+
+				frappe.show_alert({
+					indicator: 'green',
+					message: __('Resetting Service Level Agreement.')
+				});
+
+				frm.call("reset_service_level_agreement", {
+					reason: values.reason,
+					user: frappe.session.user_email
+				}, () => {
+					reset_sla.enable_primary_action();
+					frm.refresh();
+					frappe.msgprint(__("Service Level Agreement Reset."));
+				});
+			}
+		});
+
+		reset_sla.show();
+	},
+
 	timeline_refresh: function(frm) {
 		// create button for "Help Article"
 		if(frappe.model.can_create('Help Article')) {
@@ -136,7 +178,7 @@ function set_time_to_resolve_and_response(frm) {
 
 	var time_to_resolve = get_status(frm.doc.resolution_by_variance);
 	if (!frm.doc.resolution_date && frm.doc.agreement_fulfilled === "Ongoing") {
-		time_to_resolve = get_time_left(frm.doc.response_by, frm.doc.agreement_fulfilled);
+		time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_fulfilled);
 	}
 
 	frm.dashboard.set_headline_alert(

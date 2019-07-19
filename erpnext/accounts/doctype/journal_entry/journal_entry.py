@@ -105,24 +105,28 @@ class JournalEntry(AccountsController):
 
 		invoice_discounting_list = list(set([d.reference_name for d in self.accounts if d.reference_type=="Invoice Discounting"]))
 		for inv_disc in invoice_discounting_list:
-			short_term_loan_account, id_status = frappe.db.get_value("Invoice Discounting", inv_disc, ["short_term_loan", "status"])
+			inv_disc_doc = frappe.get_doc("Invoice Discounting", inv_disc)
+			status = None
 			for d in self.accounts:
-				if d.account == short_term_loan_account and d.reference_name == inv_disc:
+				if d.account == inv_disc_doc.short_term_loan and d.reference_name == inv_disc:
 					if self.docstatus == 1:
 						if d.credit > 0:
-							_validate_invoice_discounting_status(inv_disc, id_status, "Sanctioned", d.idx)
+							_validate_invoice_discounting_status(inv_disc, inv_disc_doc.status, "Sanctioned", d.idx)
 							status = "Disbursed"
 						elif d.debit > 0:
-							_validate_invoice_discounting_status(inv_disc, id_status, "Disbursed", d.idx)
+							_validate_invoice_discounting_status(inv_disc, inv_disc_doc.status, "Disbursed", d.idx)
 							status = "Settled"
 					else:
 						if d.credit > 0:
-							_validate_invoice_discounting_status(inv_disc, id_status, "Disbursed", d.idx)
+							_validate_invoice_discounting_status(inv_disc, inv_disc_doc.status, "Disbursed", d.idx)
 							status = "Sanctioned"
 						elif d.debit > 0:
-							_validate_invoice_discounting_status(inv_disc, id_status, "Settled", d.idx)
+							_validate_invoice_discounting_status(inv_disc, inv_disc_doc.status, "Settled", d.idx)
 							status = "Disbursed"
-					frappe.db.set_value("Invoice Discounting", inv_disc, "status", status)
+					break
+			if status:
+				inv_disc_doc.set_status(status=status)
+
 
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):
