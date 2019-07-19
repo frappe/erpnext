@@ -14,7 +14,7 @@ frappe.ui.form.on("Project", {
 					new_doc.time_logs = [time_log];
 
 					frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
-				})
+				});
 			},
 		}
 	},
