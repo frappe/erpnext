@@ -56,10 +56,17 @@ def get_columns():
 			"width": 90
 		},
 		{
-			"fieldname": "payment_entry",
-			"label": _("Payment Entry"),
+			"fieldname": "payment_document",
+			"label": _("Payment Document Type"),
 			"fieldtype": "Link",
-			"options": "Payment Entry",
+			"options": "DocType",
+			"width": 220
+		},
+		{
+			"fieldname": "payment_entry",
+			"label": _("Payment Document"),
+			"fieldtype": "Dynamic Link",
+			"options": "payment_document",
 			"width": 220
 		},
 		{
