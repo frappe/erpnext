@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
+import json
 import frappe.defaults
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from frappe.utils import flt, add_days, nowdate, getdate
@@ -15,7 +16,7 @@ from erpnext.stock.doctype.material_request.test_material_request import make_ma
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.controllers.accounts_controller import update_child_qty_rate
-import json
+from erpnext.controllers.status_updater import OverAllowanceError
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):
@@ -41,7 +42,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 4)
 
-		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
+		frappe.db.set_value('Item', '_Test Item', 'over_delivery_receipt_allowance', 50)
 
 		pr = create_pr_against_po(po.name, received_qty=8)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
@@ -57,12 +58,12 @@ class TestPurchaseOrder(unittest.TestCase):
 
 	def test_ordered_qty_against_pi_with_update_stock(self):
 		existing_ordered_qty = get_ordered_qty()
-
 		po = create_purchase_order()
 
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 10)
 
-		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
+		frappe.db.set_value('Item', '_Test Item', 'over_delivery_receipt_allowance', 50)
+		frappe.db.set_value('Item', '_Test Item', 'over_billing_allowance', 20)
 
 		pi = make_pi_from_po(po.name)
 		pi.update_stock = 1
@@ -80,6 +81,11 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 0)
+
+		frappe.db.set_value('Item', '_Test Item', 'over_delivery_receipt_allowance', 0)
+		frappe.db.set_value('Item', '_Test Item', 'over_billing_allowance', 0)
+		frappe.db.set_value("Accounts Settings", None, "over_billing_allowance", 0)
+
 
 	def test_update_child_qty_rate(self):
 		mr = make_material_request(qty=10)
