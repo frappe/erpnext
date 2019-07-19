@@ -31,21 +31,22 @@ class TestLoanApplication(unittest.TestCase):
 				"rate_of_interest": 9.2,
 				"loan_amount": 250000,
 				"repayment_method": "Repay Over Number of Periods",
-				"repayment_periods": 24
+				"repayment_periods": 18
 			})
 			loan_application.insert()
-	
+
 
 	def test_loan_totals(self):
 		loan_application = frappe.get_doc("Loan Application", {"applicant":self.applicant})
-		self.assertEquals(loan_application.repayment_amount, 11445)
-		self.assertEquals(loan_application.total_payable_interest, 24657)
-		self.assertEquals(loan_application.total_payable_amount, 274657)
 
-		loan_application.repayment_method = "Repay Fixed Amount per Period"
-		loan_application.repayment_amount = 15000
+		self.assertEqual(loan_application.total_payable_interest, 18599)
+		self.assertEqual(loan_application.total_payable_amount, 268599)
+		self.assertEqual(loan_application.repayment_amount, 14923)
+
+		loan_application.repayment_periods = 24
 		loan_application.save()
+		loan_application.reload()
 
-		self.assertEqual(loan_application.repayment_periods, 18)
-		self.assertEqual(loan_application.total_payable_interest, 18506)
-		self.assertEqual(loan_application.total_payable_amount, 268506)
+		self.assertEqual(loan_application.total_payable_interest, 24657)
+		self.assertEqual(loan_application.total_payable_amount, 274657)
+		self.assertEqual(loan_application.repayment_amount, 11445)
