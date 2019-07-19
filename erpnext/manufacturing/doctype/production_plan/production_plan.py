@@ -505,7 +505,7 @@ def get_material_request_items(row, sales_order,
 	total_qty = row['qty']
 
 	required_qty = 0
-	if ignore_existing_ordered_qty or bin_dict.get("projected_qty") < 0:
+	if ignore_existing_ordered_qty or bin_dict.get("projected_qty", 0) < 0:
 		required_qty = total_qty
 	elif total_qty > bin_dict.get("projected_qty"):
 		required_qty = total_qty - bin_dict.get("projected_qty")
