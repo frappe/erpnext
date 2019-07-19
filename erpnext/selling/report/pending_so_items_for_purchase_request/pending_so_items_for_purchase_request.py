@@ -115,6 +115,11 @@ def get_data():
 		{"sales_order_item": ("!=",""), "docstatus": 1},
 		["parent", "qty", "sales_order", "item_code"])
 
+	packed_items = get_packed_items([row.name for row in sales_order_entry])
+
+	item_with_product_bundle = get_item_with_product_bundle([row.item_code for row in sales_order_entry])
+	item_with_product_bundle = [row.new_item_code for row in item_with_product_bundle]
+
 	materials_request_dict = {}
 
 	for record in mr_records:
@@ -139,19 +144,57 @@ def get_data():
 
 		# check for pending sales order
 		if cint(so.net_qty) > cint(materials_request.get('qty')):
-			so_record = {
-				"item_code": so.item_code,
-				"item_name": so.item_name,
-				"description": so.description,
-				"sales_order_no": so.name,
-				"date": so.transaction_date,
-				"material_request": ','.join(materials_request.get('material_requests', [])),
-				"customer": so.customer,
-				"territory": so.territory,
-				"so_qty": so.net_qty,
-				"requested_qty": cint(materials_request.get('qty')),
-				"pending_qty": so.net_qty - cint(materials_request.get('qty')),
-				"company": so.company
-			}
-			pending_so.append(so_record)
+
+			if so.item_code not in item_with_product_bundle:
+				so_record = {
+					"item_code": so.item_code,
+					"item_name": so.item_name,
+					"description": so.description,
+					"sales_order_no": so.name,
+					"date": so.transaction_date,
+					"material_request": ','.join(materials_request.get('material_requests', [])),
+					"customer": so.customer,
+					"territory": so.territory,
+					"so_qty": so.net_qty,
+					"requested_qty": cint(materials_request.get('qty')),
+					"pending_qty": so.net_qty - cint(materials_request.get('qty')),
+					"company": so.company
+				}
+				pending_so.append(so_record)
+			else:
+				for item in packed_items:
+					material_request_qty = materials_request.get('qty') if materials_request.get('qty') else 0
+					so_record = {
+						"item_code": item.item_code,
+						"item_name": item.item_name,
+						"description": item.description,
+						"sales_order_no": so.name,
+						"date": so.transaction_date,
+						"material_request": ','.join(materials_request.get('material_requests', [])),
+						"customer": so.customer,
+						"territory": so.territory,
+						"so_qty": item.qty,
+						"requested_qty": cint(material_request_qty * item.qty),
+						"pending_qty": (so.net_qty - cint(material_request_qty)) * item.qty,
+						"company": so.company
+					}
+					pending_so.append(so_record)
+
+
 	return pending_so
+
+def get_item_with_product_bundle(item_list):
+
+	bundled_item = frappe.get_all("Product Bundle", filters = [
+		("new_item_code", "IN", item_list)
+	], fields = ["new_item_code"])
+
+	return bundled_item
+
+def get_packed_items(sales_order_list):
+
+	packed_items = frappe.get_all("Packed Item", filters = [
+		("parent", "IN", sales_order_list)
+	], fields = ["*"])
+
+	return packed_items
