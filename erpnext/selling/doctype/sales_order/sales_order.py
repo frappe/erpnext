@@ -14,7 +14,7 @@ from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.controllers.selling_controller import SellingController
-from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
+from frappe.automation.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -509,10 +509,12 @@ def make_material_request(source_name, target_doc=None):
 		doc.material_request_type = "Purchase"
 
 	def update_item(source, target, source_parent):
+		# qty is for packed items, because packed items don't have stock_qty field
+		qty = source.get("stock_qty") or source.get("qty")
 		target.project = source_parent.project
-		target.qty = source.stock_qty - requested_item_qty.get(source.name, 0)
+		target.qty = qty - requested_item_qty.get(source.name, 0)
 		target.conversion_factor = 1
-		target.stock_qty = source.stock_qty - requested_item_qty.get(source.name, 0)
+		target.stock_qty = qty - requested_item_qty.get(source.name, 0)
 
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
