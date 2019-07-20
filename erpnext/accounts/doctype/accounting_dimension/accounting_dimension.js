@@ -4,17 +4,17 @@
 frappe.ui.form.on('Accounting Dimension', {
 
 	refresh: function(frm) {
+		frm.set_query('document_type', () => {
+			return {
+				filters: {
+					name: ['not in', ['Accounting Dimension', 'Project', 'Cost Center', 'Accounting Dimension Detail']]
+				}
+			};
+		});
+
 		if (!frm.is_new()) {
 			frm.add_custom_button(__('Show {0}', [frm.doc.document_type]), function () {
 				frappe.set_route("List", frm.doc.document_type);
-			});
-
-			frm.set_query('document_type', () => {
-				return {
-					filters: {
-						name: ['not in', ['Accounting Dimension', 'Project', 'Cost Center']]
-					}
-				};
 			});
 
 			let button = frm.doc.disabled ? "Enable" : "Disable";
