@@ -121,7 +121,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 
 	allow_cost_center_in_entry_of_bs_account = get_allow_cost_center_in_entry_of_bs_account()
 
-	if acc:
+	if account:
 		report_type = acc.report_type
 	else:
 		report_type = ""
