@@ -84,8 +84,11 @@ class calculate_taxes_and_totals(object):
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 				item.total_discount = flt(item.amount_before_discount - item.amount, item.precision("total_discount"))
 
-				item.net_rate = item.item_net_rate = rate_before_discount if cint(item.apply_discount_after_taxes) else item.rate
-				item.net_amount = item.item_net_amount = item.amount_before_discount if cint(item.apply_discount_after_taxes) else item.amount
+				item.taxable_rate = rate_before_discount if cint(item.apply_discount_after_taxes) else item.rate
+				item.taxable_amount = item.amount_before_discount if cint(item.apply_discount_after_taxes) else item.amount
+
+				item.net_rate = item.rate
+				item.net_amount = item.amount
 
 				item.tax_exclusive_price_list_rate = item.price_list_rate
 				item.tax_exclusive_rate = item.rate
@@ -98,7 +101,7 @@ class calculate_taxes_and_totals(object):
 					item.base_tax_exclusive_rate_with_margin = item.base_rate_with_margin
 
 				self._set_in_company_currency(item, ["price_list_rate", "rate", "amount",
-					"item_net_rate", "item_net_amount", "net_rate", "net_amount",
+					"taxable_rate", "taxable_amount", "net_rate", "net_amount",
 					"tax_exclusive_price_list_rate", "tax_exclusive_rate", "tax_exclusive_amount",
 					"amount_before_discount", "total_discount", "tax_exclusive_amount_before_discount", "tax_exclusive_total_discount"])
 
@@ -185,13 +188,16 @@ class calculate_taxes_and_totals(object):
 				elif flt(item.tax_exclusive_price_list_rate) > 0:
 					item.tax_exclusive_discount_amount = flt(item.tax_exclusive_price_list_rate - item.tax_exclusive_rate)
 
-				item.net_amount = item.item_net_amount = flt(item.net_amount / (1 + item.cumulated_tax_fraction))
-				item.net_rate = item.item_net_rate = flt(item.net_amount / item.qty, item.precision("net_rate")) if item.qty else 0.0
+				item.taxable_amount = flt(item.taxable_amount / (1 + item.cumulated_tax_fraction))
+				item.taxable_rate = flt(item.taxable_amount / item.qty, item.precision("taxable_rate")) if item.qty else 0.0
+
+				item.net_amount = flt(item.net_amount / (1 + item.cumulated_tax_fraction))
+				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate")) if item.qty else 0.0
 
 				item.discount_percentage = flt(item.discount_percentage,
 					item.precision("discount_percentage"))
 
-				self._set_in_company_currency(item, ["item_net_rate", "item_net_amount", "net_rate", "net_amount",
+				self._set_in_company_currency(item, ["taxable_rate", "taxable_amount", "net_rate", "net_amount",
 					"tax_exclusive_price_list_rate", "tax_exclusive_rate", "tax_exclusive_amount",
 					"tax_exclusive_amount_before_discount", "tax_exclusive_total_discount"])
 
@@ -231,7 +237,7 @@ class calculate_taxes_and_totals(object):
 
 	def calculate_net_total(self):
 		self.doc.total_qty = self.doc.total = self.doc.base_total = self.doc.net_total = self.doc.base_net_total = 0.0
-		self.doc.item_net_total = self.doc.base_item_net_total = 0.0
+		self.doc.taxable_total = self.doc.base_taxable_total = 0.0
 		self.doc.total_alt_uom_qty = 0
 		self.doc.base_tax_exclusive_total = self.doc.tax_exclusive_total = 0.0
 		self.doc.base_total_discount = self.doc.total_discount = 0.0
@@ -264,14 +270,14 @@ class calculate_taxes_and_totals(object):
 				self.doc.total_discount_after_taxes += item.tax_exclusive_total_discount
 				self.doc.base_total_discount_after_taxes += item.base_tax_exclusive_total_discount
 
-			self.doc.item_net_total += item.item_net_amount
-			self.doc.base_item_net_total += item.base_item_net_amount
+			self.doc.taxable_total += item.taxable_amount
+			self.doc.base_taxable_total += item.base_taxable_amount
 
 			self.doc.net_total += item.net_amount
 			self.doc.base_net_total += item.base_net_amount
 
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total",
-			"item_net_total", "base_item_net_total",
+			"taxable_total", "base_taxable_total",
 			"total_discount_after_taxes", "base_total_discount_after_taxes",
 			"tax_exclusive_total", "base_tax_exclusive_total",
 			"total_before_discount", "total_discount", "base_total_before_discount", "base_total_discount",
@@ -327,7 +333,7 @@ class calculate_taxes_and_totals(object):
 				# note: grand_total_for_current_item contains the contribution of
 				# item's amount, previously applied tax and the current tax on that item
 				if i==0:
-					tax.grand_total_for_current_item = flt(item.net_amount + current_tax_amount)
+					tax.grand_total_for_current_item = flt(item.taxable_amount + current_tax_amount)
 				else:
 					tax.grand_total_for_current_item = \
 						flt(self.doc.get("taxes")[i-1].grand_total_for_current_item + current_tax_amount)
@@ -364,10 +370,10 @@ class calculate_taxes_and_totals(object):
 		tax_amount_before_discount = self.get_tax_amount_if_for_valuation_or_deduction(tax_amount_before_discount, tax)
 
 		if row_idx == 0:
-			tax.total = self.doc.net_total + tax_amount
+			tax.total = self.doc.taxable_total + tax_amount
 
 			if self.doc.apply_discount_on == "Grand Total":
-				tax.displayed_total = self.doc.item_net_total + tax_amount_before_discount
+				tax.displayed_total = self.doc.taxable_total + tax_amount_before_discount
 			else:
 				tax.displayed_total = tax.total
 		else:
@@ -399,7 +405,7 @@ class calculate_taxes_and_totals(object):
 				current_tax_amount = actual * (tax_on_net_amount / tax_on_net_total)
 
 		elif tax.charge_type == "On Net Total":
-			current_tax_amount = (tax_rate / 100.0) * item.net_amount
+			current_tax_amount = (tax_rate / 100.0) * item.taxable_amount
 		elif tax.charge_type == "On Previous Row Amount":
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.doc.get("taxes")[cint(tax.row_id) - 1].tax_amount_for_current_item
@@ -440,9 +446,9 @@ class calculate_taxes_and_totals(object):
 
 	def calculate_totals(self):
 		self.doc.total_after_taxes = flt(self.doc.get("taxes")[-1].total) + flt(self.doc.rounding_adjustment) \
-			if self.doc.get("taxes") else flt(self.doc.net_total)
+			if self.doc.get("taxes") else flt(self.doc.taxable_total)
 
-		self.doc.total_taxes_and_charges = self.doc.total_after_taxes - self.doc.net_total - flt(self.doc.rounding_adjustment)
+		self.doc.total_taxes_and_charges = self.doc.total_after_taxes - self.doc.taxable_total - flt(self.doc.rounding_adjustment)
 		if self.should_round_transaction_currency():
 			self.doc.total_taxes_and_charges = flt(self.doc.total_taxes_and_charges, self.doc.precision("total_taxes_and_charges"))
 
@@ -451,7 +457,7 @@ class calculate_taxes_and_totals(object):
 
 		if self.doc.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
 			self.doc.base_total_after_taxes = flt(self.doc.total_after_taxes * self.doc.conversion_rate) \
-				if self.doc.total_taxes_and_charges else self.doc.base_net_total
+				if self.doc.total_taxes_and_charges else self.doc.base_taxable_total
 		else:
 			self.doc.taxes_and_charges_added = self.doc.taxes_and_charges_deducted = 0.0
 			for tax in self.doc.get("taxes"):
@@ -465,7 +471,7 @@ class calculate_taxes_and_totals(object):
 
 			self.doc.base_total_after_taxes = flt(self.doc.total_after_taxes * self.doc.conversion_rate) \
 				if (self.doc.taxes_and_charges_added or self.doc.taxes_and_charges_deducted) \
-				else self.doc.base_net_total
+				else self.doc.base_taxable_total
 
 			self._set_in_company_currency(self.doc, ["taxes_and_charges_added", "taxes_and_charges_deducted"],
 				not self.should_round_transaction_currency())
@@ -514,6 +520,9 @@ class calculate_taxes_and_totals(object):
 		if self.doc.discount_amount:
 			if not self.doc.apply_discount_on:
 				frappe.throw(_("Please select Apply Discount On"))
+
+			if filter(lambda d: cint(d.apply_discount_after_taxes), self.doc.items):
+				frappe.throw(_("Additional Discount is not allowed when discount is applied after taxes."))
 
 			self.doc.base_discount_amount = flt(self.doc.discount_amount * self.doc.conversion_rate,
 				self.doc.precision("base_discount_amount"))
@@ -795,7 +804,7 @@ def get_itemised_taxable_amount(items):
 	for item in items:
 		item_code = item.item_code or item.item_name
 		itemised_taxable_amount.setdefault(item_code, 0)
-		itemised_taxable_amount[item_code] += item.net_amount
+		itemised_taxable_amount[item_code] += item.taxable_amount
 
 	return itemised_taxable_amount
 

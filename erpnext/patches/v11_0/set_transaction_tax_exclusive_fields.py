@@ -36,7 +36,8 @@ def execute():
 		'tax_exclusive_total_before_discount',
 		'total_discount',
 		'tax_exclusive_total_discount',
-		'item_net_total',
+		'taxable_total',
+		'net_total',
 		'total_after_taxes',
 		'total_discount_after_taxes',
 	]
@@ -53,8 +54,10 @@ def execute():
 		'tax_exclusive_amount_before_discount',
 		'total_discount',
 		'tax_exclusive_total_discount',
-		'item_net_rate',
-		'item_net_amount',
+		'taxable_rate',
+		'taxable_amount',
+		'net_rate',
+		'net_amount',
 	]
 	new_item_fields += ['base_' + f for f in new_item_fields]
 	new_item_fields = set(new_item_fields)
