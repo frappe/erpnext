@@ -396,16 +396,15 @@ class SalesInvoice(SellingController):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'letter_head', 'tc_name',
-				'company', 'select_print_heading', 'cash_bank_account', 'write_off_account',
+				'company', 'select_print_heading', 'cash_bank_account', 'write_off_account', 'taxes_and_charges',
 				'write_off_cost_center', 'apply_discount_on', 'cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
 
 			customer_price_list = frappe.get_value("Customer", self.customer, 'default_price_list')
 
-			for field in ['taxes_and_charges', 'company_address']:
-				if pos.get(field):
-					self.set(field, pos.get(fieldname))
+			if pos.get("company_address"):
+				self.company_address = pos.get("company_address")
 
 			if not customer_price_list:
 				self.set('selling_price_list', pos.get('selling_price_list'))
