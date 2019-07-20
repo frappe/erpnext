@@ -516,16 +516,14 @@ class BOM(WebsiteGenerator):
 		return erpnext.get_company_currency(self.company)
 
 	def add_to_cur_exploded_items(self, args):
-		if self.cur_exploded_items.get(args.item_code) and self.cur_exploded_items[args.item_code]["operation"] == args.operation:
-			if args.operation is None:
-				self.cur_exploded_items[args.item_code]["stock_qty"] += args.stock_qty
-			else:
-				self.cur_exploded_items[args.item_code+":"+args.operation]["stock_qty"] += args.stock_qty
+		key = (args.item_code)
+		if args.operation:
+			key = (args.item_code, args.operation)
+
+		if key in self.cur_exploded_items:
+			self.cur_exploded_items[key]["stock_qty"] += args.stock_qty
 		else:
-			if args.operation is None:
-				self.cur_exploded_items[args.item_code] = args
-			else:
-				self.cur_exploded_items[args.item_code+":"+args.operation] = args
+			self.cur_exploded_items[key] = args
 
 	def get_child_exploded_items(self, bom_no, stock_qty):
 		""" Add all items from Flat BOM of child BOM"""
@@ -640,16 +638,14 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 
 	for item in items:
-		if item.item_code in item_dict and ( fetch_scrap_items or item_dict[item.item_code]["operation"] == item.operation):
-			if item.operation is None:
-				item_dict[item.item_code]["qty"] += flt(item.qty)
-			else:
-				item_dict[item.item_code+":"+item.operation]["qty"] += flt(item.qty)
+		key = (item.item_code)
+		if item.operation:
+			key = (item.item_code, item.operation)
+
+		if key in item_dict:
+			item_dict[key]["qty"] += flt(item.qty)
 		else:
-			if item.operation is None:
-				item_dict[item.item_code] = item
-			else:
-				item_dict[item.item_code+":"+item.operation] = item
+			item_dict[key] = item
 
 	for item, item_details in item_dict.items():
 		for d in [["Account", "expense_account", "default_expense_account"],
