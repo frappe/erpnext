@@ -64,6 +64,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 	},
 
 	refresh: function() {
+		erpnext.hide_company();
 		this.frm.disable_save();
 		this.toggle_primary_action();
 	},

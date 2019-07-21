@@ -1046,7 +1046,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"base_raw_material_cost", "base_total_cost", "base_scrap_material_cost",
 			"base_rounding_adjustment", "base_tax_exclusive_total",
 			"base_total_before_discount", "base_tax_exclusive_total_before_discount",
-			"base_total_discount", "base_tax_exclusive_total_discount"], company_currency);
+			"base_total_discount", "base_tax_exclusive_total_discount",
+			"customer_outstanding_amount", "customer_credit_limit", "customer_credit_balance"], company_currency);
 
 		this.frm.set_currency_labels(["total", "net_total", "taxable_total", "total_taxes_and_charges",
 			"discount_amount", "grand_total", "total_discount_after_taxes", "total_after_taxes",

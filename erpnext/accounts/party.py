@@ -80,6 +80,12 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 			"allocated_percentage": d.allocated_percentage or None
 		} for d in party.get("sales_team")]
 
+	if doctype == "Sales Order":
+		from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
+		out["customer_credit_limit"] = get_credit_limit(party.name, company)
+		out["customer_outstanding_amount"] = get_customer_outstanding(party.name, company)
+		out["customer_credit_balance"] = out["customer_credit_limit"] - out["customer_outstanding_amount"]
+
 	# supplier tax withholding category
 	if party_type == "Supplier" and party:
 		out["supplier_tds"] = frappe.get_value(party_type, party.name, "tax_withholding_category")
