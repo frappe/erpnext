@@ -407,7 +407,7 @@ class SalesInvoice(SellingController):
 
 			for field in ['taxes_and_charges', 'company_address']:
 				if pos.get(field):
-					self.set(field, pos.get(fieldname))
+					self.set(field, pos.get(field))
 
 			if not customer_price_list:
 				self.set('selling_price_list', pos.get('selling_price_list'))
