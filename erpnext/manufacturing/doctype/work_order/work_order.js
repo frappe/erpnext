@@ -282,8 +282,9 @@ frappe.ui.form.on("Work Order", {
 		}
 		message = title;
 		// pending qty
-		if(!frm.doc.skip_transfer){
-			var pending_complete = frm.doc.material_transferred_for_manufacturing - frm.doc.produced_qty;
+		if(!frm.doc.skip_transfer && frm.doc.material_transferred > 0){
+			var pending_complete = frm.doc.qty - frm.doc.produced_qty;
+
 			if(pending_complete) {
 				var title = __('{0} items in progress', [pending_complete]);
 				var width = ((pending_complete / frm.doc.qty * 100) - added_min);
@@ -448,8 +449,7 @@ erpnext.work_order = {
 				|| frm.doc.transfer_material_against == 'Job Card') ? 0 : 1;
 
 			if (show_start_btn){
-				if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty))
-					&& frm.doc.status != 'Stopped') {
+				if (frm.doc.material_transferred !== 100 && frm.doc.status != 'Stopped') {
 					frm.has_start_btn = true;
 					var start_btn = frm.add_custom_button(__('Start'), function() {
 						erpnext.work_order.make_se(frm, 'Material Transfer for Manufacture');
@@ -460,8 +460,8 @@ erpnext.work_order = {
 
 			if(!frm.doc.skip_transfer){
 				// If "Material Consumption is check in Manufacturing Settings, allow Material Consumption
-				if ((flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing))
-				&& frm.doc.status != 'Stopped') {
+				if (frm.doc.material_transferred > 0.0 && frm.doc.qty > frm.doc.produced_qty
+					&& frm.doc.status != 'Stopped') {
 					frm.has_finish_btn = true;
 
 					if (frm.doc.__onload && frm.doc.__onload.material_consumption == 1) {
@@ -487,7 +487,7 @@ erpnext.work_order = {
 						erpnext.work_order.make_se(frm, 'Manufacture');
 					});
 
-					if(doc.material_transferred_for_manufacturing>=doc.qty) {
+					if(doc.material_transferred > 0.0) {
 						// all materials transferred for manufacturing, make this primary
 						finish_btn.addClass('btn-primary');
 					}
@@ -538,13 +538,7 @@ erpnext.work_order = {
 	},
 
 	make_se: function(frm, purpose) {
-		if(!frm.doc.skip_transfer){
-			var max = (purpose === "Manufacture") ?
-				flt(frm.doc.material_transferred_for_manufacturing) - flt(frm.doc.produced_qty) :
-				flt(frm.doc.qty) - flt(frm.doc.material_transferred_for_manufacturing);
-		} else {
-			var max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
-		}
+		var max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
 
 		max = flt(max, precision("qty"));
 		frappe.prompt({fieldtype:"Float", label: __("Qty for {0}", [purpose]), fieldname:"qty",

@@ -6,6 +6,8 @@ import frappe
 
 def execute():
 	# reload schema
+
+	frappe.reload_doc("manufacturing", "doctype", "manufacturing_settings")
 	for doctype in ("Work Order", "Work Order Item", "Work Order Operation", 
 		"BOM Item", "BOM Explosion Item", "BOM"):
 			frappe.reload_doctype(doctype)

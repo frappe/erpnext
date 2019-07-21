@@ -13,7 +13,7 @@ from dateutil.relativedelta import relativedelta
 from erpnext.stock.doctype.item.item import validate_end_of_life
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError
-from erpnext.stock.doctype.stock_entry.stock_entry import get_additional_costs
+from erpnext.stock.doctype.stock_entry.stock_entry import get_additional_costs, get_produced_qty
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 from frappe.utils.csvutils import getlink
@@ -195,22 +195,14 @@ class WorkOrder(Document):
 		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
 			"overproduction_percentage_for_work_order"))
 
-		for purpose, fieldname in (("Manufacture", "produced_qty"),
-			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")):
-			if (purpose == 'Material Transfer for Manufacture' and
-				self.operations and self.transfer_material_against == 'Job Card'):
-				continue
+		doc = frappe.get_doc("Work Order", self.name)
+		produced_qty = get_produced_qty(self.name, doc.production_item)
+		doc.db_set("produced_qty", produced_qty)
 
-			qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
-				from `tabStock Entry` where work_order=%s and docstatus=1
-				and purpose=%s""", (self.name, purpose))[0][0])
-
-			completed_qty = self.qty + (allowance_percentage/100 * self.qty)
-			if qty > completed_qty:
-				frappe.throw(_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(\
-					self.meta.get_label(fieldname), qty, completed_qty, self.name), StockOverProductionError)
-
-			self.db_set(fieldname, qty)
+		qty_to_manufacture = self.qty + (allowance_percentage/100 * self.qty)
+		if produced_qty > qty_to_manufacture:
+			frappe.throw(_("Manufactured Qty ({0}) cannot be greater than Quantity to Manufacture ({1}) in Work Order {2}").format(\
+				produced_qty, qty_to_manufacture, self.name), StockOverProductionError)
 
 		if self.production_plan:
 			self.update_production_plan_status()
@@ -479,6 +471,12 @@ class WorkOrder(Document):
 		'''update transferred qty from submitted stock entries for that item against
 			the work order'''
 
+		sum_required_qty = 0
+		sum_transferred_qty = 0
+
+		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
+			"overproduction_percentage_for_work_order"))
+
 		for d in self.required_items:
 			transferred_qty = frappe.db.sql('''select sum(qty)
 				from `tabStock Entry` entry, `tabStock Entry Detail` detail
@@ -493,6 +491,19 @@ class WorkOrder(Document):
 					})[0][0]
 
 			d.db_set('transferred_qty', flt(transferred_qty), update_modified = False)
+			sum_required_qty += d.required_qty
+			sum_transferred_qty +=  d.transferred_qty
+
+			required_qty = d.required_qty + (allowance_percentage/100 * self.qty)
+			if (d.transferred_qty > required_qty):
+				frappe.throw(_("Row {0}: For item {1}, transferred qty ({2}) cannot be greater than required qty ({3}) in Work Order {4}").format(\
+					d.idx, d.item_code, d.transferred_qty, required_qty, self.name), StockOverProductionError)
+
+		percentage_transferred = 0
+		if sum_transferred_qty:
+			percentage_transferred = sum_transferred_qty / sum_required_qty * 100
+
+		self.db_set("material_transferred", percentage_transferred)
 
 	def update_consumed_qty_for_required_items(self):
 		'''update consumed qty from submitted stock entries for that item against
@@ -513,6 +524,11 @@ class WorkOrder(Document):
 					})[0][0]
 
 			d.db_set('consumed_qty', flt(consumed_qty), update_modified = False)
+
+			if (not self.skip_transfer and self.transfer_material_against == 'Work Order'
+				and consumed_qty > d.transferred_qty):
+				frappe.throw(_("Row {0}: For item {1}, consumed qty ({2}) cannot be greater than transferred qty ({3}) in Work Order {4}").format(\
+					d.idx, d.item_code, consumed_qty, d.transferred_qty, self.name), StockOverProductionError)
 
 	def make_bom(self):
 		data = frappe.db.sql(""" select sed.item_code, sed.qty, sed.s_warehouse

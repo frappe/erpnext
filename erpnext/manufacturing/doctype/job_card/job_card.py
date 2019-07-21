@@ -168,8 +168,6 @@ class JobCard(Document):
 					if job_cards:
 						qty = min([d.qty for d in job_cards])
 
-			doc.db_set('material_transferred_for_manufacturing', qty)
-
 		self.set_status(update_status)
 
 	def set_status(self, update_status=False):

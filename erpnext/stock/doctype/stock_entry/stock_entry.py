@@ -654,10 +654,9 @@ class StockEntry(StockController):
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
 			_validate_work_order(pro_doc)
 			pro_doc.run_method("update_status")
-			if self.fg_completed_qty:
+			if self.fg_completed_qty and self.purpose == "Manufacture":
 				pro_doc.run_method("update_work_order_qty")
-				if self.purpose == "Manufacture":
-					pro_doc.run_method("update_planned_qty")
+				pro_doc.run_method("update_planned_qty")
 
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select i.name, i.stock_uom, i.description, i.image, i.item_name, i.item_group,
@@ -969,12 +968,12 @@ class StockEntry(StockController):
 		for d in materials_already_backflushed:
 			backflushed_materials.setdefault(d.item_code,[]).append({d.warehouse: d.qty})
 
-		po_qty = frappe.db.sql("""select qty, produced_qty, material_transferred_for_manufacturing from
+		po_qty = frappe.db.sql("""select qty, produced_qty, material_transferred from
 			`tabWork Order` where name=%s""", self.work_order, as_dict=1)[0]
 
 		manufacturing_qty = flt(po_qty.qty)
 		produced_qty = flt(po_qty.produced_qty)
-		trans_qty = flt(po_qty.material_transferred_for_manufacturing)
+		trans_qty = flt(po_qty.material_transferred)
 
 		for item in transferred_materials:
 			qty= item.qty
@@ -994,7 +993,7 @@ class StockEntry(StockController):
 
 			if trans_qty and manufacturing_qty >= (produced_qty + flt(self.fg_completed_qty)):
 				if qty >= req_qty:
-					qty = (req_qty/trans_qty) * flt(self.fg_completed_qty)
+					qty = (req_qty/consumed_qty) * flt(self.fg_completed_qty)
 				else:
 					qty = qty - consumed_qty
 
@@ -1453,3 +1452,15 @@ def validate_sample_quantity(item_code, sample_quantity, qty, batch_no = None):
 			format(max_retain_qty, batch_no, item_code), alert=True)
 		sample_quantity = qty_diff
 	return sample_quantity
+
+def get_produced_qty(work_order, item_code):
+	produced_qty = frappe.db.sql(""" SELECT sum(`tabStock Entry Detail`.qty) as qty
+		FROM
+			`tabStock Entry`, `tabStock Entry Detail`
+		WHERE
+			`tabStock Entry`.name = `tabStock Entry Detail`.parent and `tabStock Entry`.docstatus = 1
+			and `tabStock Entry`.work_order = %s and ifnull(`tabStock Entry Detail`.s_warehouse, '') = ''
+			and `tabStock Entry Detail`.item_code = %s and `tabStock Entry`.purpose = 'Manufacture'
+	""", (work_order, item_code))
+
+	return (produced_qty and produced_qty[0][0]) or 0
