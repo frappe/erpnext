@@ -107,7 +107,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	refresh: function(doc, dt, dn) {
 		var me = this;
 		this._super();
-		var allow_delivery = false;
+		let allow_delivery = false;
 
 		if(doc.docstatus==1) {
 			if(this.frm.has_perm("submit")) {
@@ -131,6 +131,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			}
 			if(doc.status !== 'Closed') {
 				if(doc.status !== 'On Hold') {
+
+					allow_delivery = this.frm.doc.items.some(item => item.delivered_by_supplier === 0 && item.qty > flt(item.delivered_qty))
 
 					if (this.frm.has_perm("submit")) {
 						if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
