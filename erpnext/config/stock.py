@@ -59,7 +59,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Item Price Stock",
+					"name": "Item Prices",
 					"doctype": "Item",
 				}
 			]

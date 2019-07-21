@@ -1,0 +1,77 @@
+<style>
+@media screen {
+	.print-format {
+		padding: 8mm;
+	}
+}
+
+.print-format {
+	font-size: 9pt !important;
+}
+.print-format td, .print-format th {
+	vertical-align:middle !important;
+}
+</style>
+
+{%
+
+var item_groups = {};
+
+data = data.filter(d => d.print_in_price_list);
+
+for(var i = 0; i < data.length; i++) {
+    if (!data[i].item_code) {
+        continue;
+    }
+
+    if (!item_groups.hasOwnProperty(data[i].item_group)) {
+        item_groups[data[i].item_group] = [];
+    }
+
+    var group = item_groups[data[i].item_group];
+    group.push(data[i]);
+}
+
+$.each(item_groups || {}, function(item_group, items) {
+    item_groups[item_group] = items.sort((a, b) => a.item_name.localeCompare(b.item_name));
+});
+
+%}
+
+{% if (columns[0].price_list_note) { %}
+<div style="font-size: 8pt;">{%= columns[0].price_list_note %}</div>
+{% } %}
+
+<table class="table table-bordered" style="margin-top: 3px;">
+	<thead>
+        <tr><th class="text-center" style="font-size: 10pt;" colspan="10">
+            {% if (filters.customer_name) { %}
+                {%= filters.customer_name %} —
+            {% } else if(filters.customer) { %}
+                {%= filters.customer %} —
+            {% } %}
+            Price List: {%= __("From") %} {%= new frappe.datetime.datetime(filters.date).format("ddd, D MMMM, YYYY") %}
+        </th></tr>
+		<tr>
+            <th style="width: 85%">{%= __("Product") %}</th>
+            <th style="width: 5%" class="text-center">{%= __("UOM") %}</th>
+            <th style="width: 10%" class="text-center">{%= __("Rate") %}</th>
+		</tr>
+	</thead>
+	<tbody>
+    {% $.each(item_groups || {}, function(item_group, items) { %}
+        <tr>
+            <td colspan="10" class="text-center" style="font-size: 9pt"><strong>{%= item_group %}</strong></td>
+        </tr>
+
+        {% $.each(items || [], function(i, d) { %}
+            <tr>
+                <td>{%= d.item_code %}</td>
+                <td class="text-center">{%= d.sales_uom || d.stock_uom %}</td>
+                <td class="text-center">{%= d.print_rate ? format_currency(d.print_rate) : '' %}</td>
+            </tr>
+        {% }); %}
+    {% }); %}
+	</tbody>
+</table>
+<p class="text-right text-muted">{{ __("Printed On ") }}{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
