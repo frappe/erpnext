@@ -15,6 +15,7 @@ class EmailCampaign(Document):
 		#checking if email is set for lead. Not checking for contact as email is a mandatory field for contact.
 		if self.email_campaign_for == "Lead":
 			self.validate_lead()
+		self.validate_email_campaign_already_exists()
 		self.update_status()
 
 	def validate_dates(self):
@@ -40,6 +41,10 @@ class EmailCampaign(Document):
 		if not lead_email_id:
 			frappe.throw(_("Please set an email id for lead communication"))
 
+	def validate_email_campaign_already_exists(self):
+		if frappe.db.get_value("Email Campaign", {"campaign_name": self.campaign_name, "recipient": self.recipient, "status": "Active"}):
+			frappe.throw(_("The Campaign '{0}' already exists for the {1} '{2}'").format(self.campaign_name, self.email_campaign_for, self.recipient))
+
 	def update_status(self):
 		start_date = getdate(self.start_date)
 		end_date = getdate(self.end_date)
@@ -52,7 +57,7 @@ class EmailCampaign(Document):
 			self.status = "Completed"
 
 #called through hooks to send campaign mails to leads
-def send_email_to_leads():
+def send_email_to_leads_or_contacts():
 	email_campaigns = frappe.get_all("Email Campaign", filters = { 'status': ('not in', ['Unsubscribed', 'Completed', 'Scheduled']) })
 	for camp in email_campaigns:
 		email_campaign = frappe.get_doc("Email Campaign", camp.name)
@@ -81,6 +86,7 @@ def send_mail(entry, email_campaign):
 		send_email = True,
 		email_template = email_template.name
 	)
+	return comm
 
 #called from hooks on doc_event Email Unsubscribe
 def unsubscribe_recipient(unsubscribe, method):

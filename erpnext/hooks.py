@@ -275,7 +275,7 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.send_project_status_email_to_users",
 		"erpnext.quality_management.doctype.quality_review.quality_review.review",
 		"erpnext.support.doctype.service_level_agreement.service_level_agreement.check_agreement_status",
-		"erpnext.crm.doctype.email_campaign.email_campaign.send_email_to_leads",
+		"erpnext.crm.doctype.email_campaign.email_campaign.send_email_to_leads_or_contacts",
 		"erpnext.crm.doctype.email_campaign.email_campaign.set_email_campaign_status"
 	],
 	"daily_long": [
