@@ -160,6 +160,13 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Procurement Tracker",
+					"reference_doctype": "Purchase Order",
+					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Requested Items To Be Ordered",
 					"reference_doctype": "Material Request",
 					"onboard": 1,
@@ -228,5 +235,5 @@ def get_data():
 				}
 			]
 		},
-		
+
 	]
