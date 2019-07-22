@@ -52,7 +52,6 @@ class StockReconciliation(StockController):
 		def _changed(item):
 			item_dict = get_stock_balance_for(item.item_code, item.warehouse,
 				self.posting_date, self.posting_time, batch_no=item.batch_no)
-
 			if (((item.qty is None or item.qty==item_dict.get("qty")) and
 				(item.valuation_rate is None or item.valuation_rate==item_dict.get("rate")) and not item.serial_no)
 				or (item.serial_no and item.serial_no == item_dict.get("serial_nos"))):
@@ -261,16 +260,7 @@ class StockReconciliation(StockController):
 
 				sl_entries.append(new_args)
 
-			if self.docstatus == 2:
-				args.update({
-					'actual_qty': 1,
-					'incoming_rate': row.valuation_rate,
-					'valuation_rate': row.valuation_rate
-				})
-
-				sl_entries.append(args)
-
-		if self.docstatus == 1 and row.qty:
+		if row.qty:
 			args = self.get_sle_for_items(row)
 
 			args.update({
