@@ -12,6 +12,6 @@ from frappe.model.document import Document
 class LeaveType(Document):
 	def validate(self):
 		if self.is_lwp:
-			leave_allocation = frappe.get_doc("Leave Allocation", {"leave_type": self.name}, ['name'])
+			leave_allocation = frappe.db.sql_list("""select name from `tabLeave Allocation` where leave_type=%s""", (self.name))
 			if leave_allocation:
 				frappe.throw(_("""Leave application is linked with leave allocations {0}. Leave application cannot be set as leave without pay""").format(", ".join(leave_allocation))) #nosec
