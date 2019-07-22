@@ -28,11 +28,20 @@ class TestAccountingDimension(unittest.TestCase):
 				"doctype": "Accounting Dimension",
 				"document_type": "Location",
 				"mandatory_for_pl": 1
-			}).insert()
+			})
+
+			dimension1.append("dimension_defaults", {
+				"company": "_Test Company",
+				"reference_document": "Location",
+				"default_dimension": "Block 1",
+				"mandatory_for_pl": 1
+			})
+
+			dimension1.insert()
+			dimension1.save()
 		else:
 			dimension1 = frappe.get_doc("Accounting Dimension", "Location")
 			dimension1.disabled = 0
-			dimension1.mandatory_for_pl = 1
 			dimension1.save()
 
 	def test_dimension_against_sales_invoice(self):
