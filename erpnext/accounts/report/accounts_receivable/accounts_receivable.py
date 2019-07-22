@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 class ReceivablePayableReport(object):
 	def __init__(self, filters=None):
@@ -540,6 +541,10 @@ class ReceivablePayableReport(object):
 					where supplier_group=%s)""")
 				values.append(self.filters.get("supplier_group"))
 
+			if self.filters.get("payment_terms_template"):
+				conditions.append("party in (select name from tabSupplier where payment_terms=%s)")
+				values.append(self.filters.get("payment_terms_template"))
+
 		if self.filters.get("cost_center"):
 			lft, rgt = frappe.get_cached_value("Cost Center",
 				self.filters.get("cost_center"), ['lft', 'rgt'])
@@ -552,6 +557,14 @@ class ReceivablePayableReport(object):
 				filters={"account_type": account_type, "company": self.filters.company})]
 			conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
 			values += accounts
+
+		accounting_dimensions = get_accounting_dimensions()
+
+		if accounting_dimensions:
+			for dimension in accounting_dimensions:
+				if self.filters.get(dimension):
+					conditions.append("{0} = %s".format(dimension))
+					values.append(self.filters.get(dimension))
 
 		return " and ".join(conditions), values
 
@@ -599,9 +612,12 @@ class ReceivablePayableReport(object):
 
 		rows = []
 		for d in data:
+			values = d[self.ageing_col_idx_start : self.ageing_col_idx_start+5]
+			precision = cint(frappe.db.get_default("float_precision")) or 2
+			formatted_values = [frappe.utils.rounded(val, precision) for val in values]
 			rows.append(
 				{
-					'values': d[self.ageing_col_idx_start : self.ageing_col_idx_start+5]
+					'values': formatted_values
 				}
 			)
 

@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt
 from frappe import msgprint, _
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 def execute(filters=None):
 	return _execute(filters)
@@ -162,6 +163,16 @@ def get_conditions(filters):
 		conditions +=  """ and exists(select name from `tabSales Invoice Item`
 			 where parent=`tabSales Invoice`.name
 			 	and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s)"""
+
+	accounting_dimensions = get_accounting_dimensions()
+
+	if accounting_dimensions:
+		for dimension in accounting_dimensions:
+			if filters.get(dimension):
+				conditions += """ and exists(select name from `tabSales Invoice Item`
+					where parent=`tabSales Invoice`.name
+						and ifnull(`tabSales Invoice Item`.{0}, '') = %({0})s)""".format(dimension)
+
 
 	return conditions
 

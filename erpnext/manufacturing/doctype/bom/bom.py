@@ -578,6 +578,8 @@ class BOM(WebsiteGenerator):
 			for d in self.operations:
 				if not d.description:
 					d.description = frappe.db.get_value('Operation', d.operation, 'description')
+				if not d.batch_size > 0:
+					d.batch_size = 1
 
 def get_list_context(context):
 	context.title = _("Bill of Materials")
@@ -592,8 +594,8 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				bom_item.idx,
 				item.item_name,
 				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * %(qty)s as qty,
-				item.description,
 				item.image,
+				bom.project,
 				item.stock_uom,
 				item.allow_alternative_item,
 				item_default.default_warehouse,
@@ -620,17 +622,22 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			where_conditions="",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
-			select_columns = """, bom_item.source_warehouse, bom_item.operation, bom_item.include_item_in_manufacturing,
+			select_columns = """, bom_item.source_warehouse, bom_item.operation,
+				bom_item.include_item_in_manufacturing, bom_item.description,
 				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1) as idx""")
 
 		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	elif fetch_scrap_items:
-		query = query.format(table="BOM Scrap Item", where_conditions="", select_columns=", bom_item.idx", is_stock_item=is_stock_item, qty_field="stock_qty")
+		query = query.format(table="BOM Scrap Item", where_conditions="",
+			select_columns=", bom_item.idx, item.description", is_stock_item=is_stock_item, qty_field="stock_qty")
+
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", where_conditions="", is_stock_item=is_stock_item,
 			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
-			select_columns = ", bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse, bom_item.idx, bom_item.operation, bom_item.include_item_in_manufacturing")
+			select_columns = """, bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
+				bom_item.idx, bom_item.operation, bom_item.include_item_in_manufacturing,
+				bom_item.description """)
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 
 	for item in items:

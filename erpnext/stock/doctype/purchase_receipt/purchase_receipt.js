@@ -38,6 +38,29 @@ frappe.ui.form.on("Purchase Receipt", {
 		if(frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
+
+		if (frm.doc.docstatus === 1 && frm.doc.is_return === 1 && frm.doc.per_billed !== 100) {
+			frm.add_custom_button(__('Debit Note'), function() {
+				frappe.confirm(__("Are you sure you want to make debit note?"),
+					function() {
+						frm.trigger("make_debit_note");
+					}
+				);
+			}, __('Create'));
+
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
+		}
+	},
+
+	make_debit_note: function(frm) {
+		frm.call({
+			method: "make_return_invoice",
+			doc: frm.doc,
+			freeze: true,
+			callback: function() {
+				frm.reload_doc();
+			}
+		});
 	},
 
 	company: function(frm) {
@@ -241,7 +264,11 @@ frappe.ui.form.on('Purchase Receipt Item', {
 		var d = locals[cdt][cdn];
 		frappe.db.get_value('Item', {name: d.item_code}, 'sample_quantity', (r) => {
 			frappe.model.set_value(cdt, cdn, "sample_quantity", r.sample_quantity);
+			validate_sample_quantity(frm, cdt, cdn);
 		});
+	},
+	qty: function(frm, cdt, cdn) {
+		validate_sample_quantity(frm, cdt, cdn);
 	},
 	sample_quantity: function(frm, cdt, cdn) {
 		validate_sample_quantity(frm, cdt, cdn);
@@ -260,7 +287,7 @@ cur_frm.cscript['Make Stock Entry'] = function() {
 
 var validate_sample_quantity = function(frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	if (d.sample_quantity) {
+	if (d.sample_quantity && d.qty) {
 		frappe.call({
 			method: 'erpnext.stock.doctype.stock_entry.stock_entry.validate_sample_quantity',
 			args: {
