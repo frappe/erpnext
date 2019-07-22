@@ -11,38 +11,34 @@ from frappe.core.doctype.communication.email import make
 
 class EmailCampaign(Document):
 	def validate(self):
-		self.validate_dates()
+		self.set_date()
 		#checking if email is set for lead. Not checking for contact as email is a mandatory field for contact.
 		if self.email_campaign_for == "Lead":
 			self.validate_lead()
 		self.validate_email_campaign_already_exists()
 		self.update_status()
 
-	def validate_dates(self):
-		campaign = frappe.get_doc("Campaign", self.campaign_name)
-
-		#email campaign cannot start before campaign
-		if campaign.from_date and getdate(self.start_date) < getdate(campaign.from_date):
-			frappe.throw(_("Email Campaign Start Date cannot be before Campaign Start Date"))
-
+	def set_date(self):
+		if getdate(self.start_date) < getdate(today()):
+			frappe.throw(_("Start Date cannot be before the current date"))
 		#set the end date as start date + max(send after days) in campaign schedule
 		send_after_days = []
+		campaign = frappe.get_doc("Campaign", self.campaign_name)
 		for entry in campaign.get("campaign_schedules"):
 			send_after_days.append(entry.send_after_days)
-		end_date = add_days(getdate(self.start_date), max(send_after_days))
-
-		if campaign.to_date and getdate(end_date) > getdate(campaign.to_date):
-			frappe.throw(_("Email Schedule cannot extend Campaign End Date"))
-		else:
-			self.end_date = end_date
+		try:
+			end_date = add_days(getdate(self.start_date), max(send_after_days))
+		except ValueError:
+			frappe.throw(_("Please set up the Campaign Schedule in the Campaign {0}").format(self.campaign_name))
 
 	def validate_lead(self):
 		lead_email_id = frappe.db.get_value("Lead", self.recipient, 'email_id')
 		if not lead_email_id:
-			frappe.throw(_("Please set an email id for lead communication"))
+			lead_name = frappe.db.get_value("Lead", self.recipient, 'lead_name')
+			frappe.throw(_("Please set an email id for the Lead {0}").format(lead_name))
 
 	def validate_email_campaign_already_exists(self):
-		if frappe.db.get_value("Email Campaign", {"campaign_name": self.campaign_name, "recipient": self.recipient, "status": "In Progress"}):
+		if frappe.db.get_value("Email Campaign", {"campaign_name": self.campaign_name, "recipient": self.recipient, "status": ("in", ["In Progress", "Scheduled"])}):
 			frappe.throw(_("The Campaign '{0}' already exists for the {1} '{2}'").format(self.campaign_name, self.email_campaign_for, self.recipient))
 
 	def update_status(self):
