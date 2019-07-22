@@ -38,7 +38,12 @@ class EmailCampaign(Document):
 			frappe.throw(_("Please set an email id for the Lead {0}").format(lead_name))
 
 	def validate_email_campaign_already_exists(self):
-		if frappe.db.get_value("Email Campaign", {"campaign_name": self.campaign_name, "recipient": self.recipient, "status": ("in", ["In Progress", "Scheduled"])}):
+		email_campaign_exists = frappe.db.exists("Email Campaign", {
+		"campaign_name": self.campaign_name,
+		"recipient": self.recipient,
+		"status": ("in", ["In Progress", "Scheduled"])
+		})
+		if email_campaign_exists:
 			frappe.throw(_("The Campaign '{0}' already exists for the {1} '{2}'").format(self.campaign_name, self.email_campaign_for, self.recipient))
 
 	def update_status(self):
