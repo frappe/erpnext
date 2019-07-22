@@ -166,6 +166,7 @@ class SalesInvoice(SellingController):
 		self.make_gl_entries()
 
 		if not self.is_return:
+			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.check_credit_limit()
 
@@ -220,6 +221,7 @@ class SalesInvoice(SellingController):
 		self.update_billing_status_in_dn()
 
 		if not self.is_return:
+			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.update_serial_no(in_cancel=True)
 
@@ -395,13 +397,16 @@ class SalesInvoice(SellingController):
 			if pos.get('account_for_change_amount'):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
 
-			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',
-				'company', 'select_print_heading', 'cash_bank_account', 'company_address',
-				'write_off_account', 'write_off_cost_center', 'apply_discount_on', 'cost_center'):
+			for fieldname in ('territory', 'naming_series', 'currency', 'letter_head', 'tc_name',
+				'company', 'select_print_heading', 'cash_bank_account', 'write_off_account', 'taxes_and_charges',
+				'write_off_cost_center', 'apply_discount_on', 'cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
 
 			customer_price_list = frappe.get_value("Customer", self.customer, 'default_price_list')
+
+			if pos.get("company_address"):
+				self.company_address = pos.get("company_address")
 
 			if not customer_price_list:
 				self.set('selling_price_list', pos.get('selling_price_list'))
@@ -1255,9 +1260,8 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 			frappe.throw(_("Invalid Company for Inter Company Transaction."))
 
 	elif frappe.db.get_value(partytype, {"name": party, internal: 1}, "name") == party:
-		companies = frappe.db.sql("""select company from `tabAllowed To Transact With`
-			where parenttype = '{0}' and parent = '{1}'""".format(partytype, party), as_list = 1)
-		companies = [d[0] for d in companies]
+		companies = frappe.get_all("Allowed To Transact With", fields=["company"], filters={"parenttype": partytype, "parent": party})
+		companies = [d.company for d in companies]
 		if not company in companies:
 			frappe.throw(_("{0} not allowed to transact with {1}. Please change the Company.").format(partytype, company))
 

@@ -42,20 +42,6 @@ frappe.ui.form.on("Task", {
 						frappe.set_route("List", "Expense Claim");
 					}, __("View"), true);
 				}
-
-				if (frm.perm[0].write) {
-					if (!["Closed", "Cancelled"].includes(frm.doc.status)) {
-						frm.add_custom_button(__("Close"), () => {
-							frm.set_value("status", "Closed");
-							frm.save();
-						});
-					} else {
-						frm.add_custom_button(__("Reopen"), () => {
-							frm.set_value("status", "Open");
-							frm.save();
-						});
-					}
-				}
 			}
 		}
 	},

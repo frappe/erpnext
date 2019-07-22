@@ -207,10 +207,10 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 			idx desc, name
 		limit %(start)s, %(page_len)s """.format(
 			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
-			mcond=get_match_cond(doctype),
-			key=frappe.db.escape(searchfield)),
+			mcond=get_match_cond(doctype).replace('%', '%%'),
+			key=searchfield),
 		{
-			'txt': "%"+frappe.db.escape(txt)+"%",
+			'txt': '%' + txt + '%',
 			'_txt': txt.replace("%", ""),
 			'start': start or 0,
 			'page_len': page_len or 20
