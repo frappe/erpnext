@@ -54,7 +54,7 @@ def generate_expiry_allocation_ledger_entries():
 		if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Allocation', 'transaction_name': allocation.name, 'is_expired': 1}):
 			allocation.update(dict(doctype="Leave Allocation"))
 			allocation_obj = frappe.get_doc(allocation)
-			allocation_obj.expire_allocation()
+			allocation_obj.expire_previous_allocation()
 
 def get_allocation_records():
 	return frappe.db.sql("""
