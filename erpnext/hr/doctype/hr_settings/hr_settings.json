@@ -3,6 +3,7 @@
  "doctype": "DocType",
  "document_type": "Other",
  "editable_grid": 1,
+ "engine": "InnoDB",
  "field_order": [
   "employee_settings",
   "retirement_age",
@@ -22,7 +23,9 @@
   "leave_status_notification_template",
   "column_break_18",
   "leave_approver_mandatory_in_leave_application",
-  "show_leaves_of_all_department_members_in_calendar"
+  "show_leaves_of_all_department_members_in_calendar",
+  "hiring_settings",
+  "check_vacancies"
  ],
  "fields": [
   {
@@ -45,18 +48,6 @@
    "options": "Naming Series\nEmployee Number\nFull Name"
   },
   {
-   "fieldname": "leave_approval_notification_template",
-   "fieldtype": "Link",
-   "label": "Leave Approval Notification Template",
-   "options": "Email Template"
-  },
-  {
-   "fieldname": "leave_status_notification_template",
-   "fieldtype": "Link",
-   "label": "Leave Status Notification Template",
-   "options": "Email Template"
-  },
-  {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
   },
@@ -66,12 +57,6 @@
    "fieldname": "stop_birthday_reminders",
    "fieldtype": "Check",
    "label": "Stop Birthday Reminders"
-  },
-  {
-   "default": "1",
-   "fieldname": "leave_approver_mandatory_in_leave_application",
-   "fieldtype": "Check",
-   "label": "Leave Approver Mandatory In Leave Application"
   },
   {
    "default": "1",
@@ -90,6 +75,15 @@
    "fieldname": "include_holidays_in_total_working_days",
    "fieldtype": "Check",
    "label": "Include holidays in Total no. of Working Days"
+  },
+  {
+   "fieldname": "max_working_hours_against_timesheet",
+   "fieldtype": "Float",
+   "label": "Max working hours against Timesheet"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
   },
   {
    "default": "1",
@@ -115,14 +109,32 @@
    "label": "Password Policy"
   },
   {
-   "fieldname": "max_working_hours_against_timesheet",
-   "fieldtype": "Float",
-   "label": "Max working hours against Timesheet"
-  },
-  {
+   "collapsible": 1,
    "fieldname": "leave_settings",
    "fieldtype": "Section Break",
    "label": "Leave Settings"
+  },
+  {
+   "fieldname": "leave_approval_notification_template",
+   "fieldtype": "Link",
+   "label": "Leave Approval Notification Template",
+   "options": "Email Template"
+  },
+  {
+   "fieldname": "leave_status_notification_template",
+   "fieldtype": "Link",
+   "label": "Leave Status Notification Template",
+   "options": "Email Template"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "leave_approver_mandatory_in_leave_application",
+   "fieldtype": "Check",
+   "label": "Leave Approver Mandatory In Leave Application"
   },
   {
    "default": "0",
@@ -131,18 +143,22 @@
    "label": "Show Leaves Of All Department Members In Calendar"
   },
   {
-   "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
+   "collapsible": 1,
+   "fieldname": "hiring_settings",
+   "fieldtype": "Section Break",
+   "label": "Hiring Settings"
   },
   {
-   "fieldname": "column_break_18",
-   "fieldtype": "Column Break"
+   "default": "0",
+   "fieldname": "check_vacancies",
+   "fieldtype": "Check",
+   "label": "Check Vacancies On Job Offer Creation"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2019-05-31 16:18:50.245872",
+ "modified": "2019-07-01 18:59:55.256878",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
@@ -158,5 +174,6 @@
    "write": 1
   }
  ],
+ "sort_field": "modified",
  "sort_order": "ASC"
 }
