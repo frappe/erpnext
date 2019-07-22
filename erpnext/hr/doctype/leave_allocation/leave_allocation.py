@@ -42,7 +42,7 @@ class LeaveAllocation(Document):
 
 	def on_submit(self):
 		self.create_leave_ledger_entry()
-		self.expire_allocation()
+		self.expire_previous_allocation()
 
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
@@ -128,14 +128,14 @@ class LeaveAllocation(Document):
 		)
 		create_leave_ledger_entry(self, args, submit)
 
-	def expire_allocation(self, current=False):
+	def expire_current_allocation(self):
 		''' expires allocation '''
-		date = self.to_date if current else self.from_date
+		date = self.to_date
 		leaves = get_unused_leaves(self.employee, self.leave_type, date)
-		ref_name = self.name if current else self.get_previous_allocation()
+		ref_name = self.name
 
 		if leaves:
-			expiry_date = today() if current else add_days(self.from_date, -1)
+			expiry_date = today()
 			args = dict(
 				leaves=flt(leaves) * -1,
 				transaction_name=ref_name,
@@ -146,8 +146,26 @@ class LeaveAllocation(Document):
 			)
 			create_leave_ledger_entry(self, args)
 
-		if current:
-			frappe.db.set_value("Leave Allocation", self.name, "status", "Expired")
+		frappe.db.set_value("Leave Allocation", self.name, "expired", 1)
+
+	def expire_previous_allocation(self):
+		date = self.from_date
+		leaves = get_unused_leaves(self.employee, self.leave_type, date)
+		ref_name = self.get_previous_allocation()
+
+		if leaves:
+			expiry_date = add_days(self.from_date, -1)
+			args = dict(
+				leaves=flt(leaves) * -1,
+				transaction_name=ref_name,
+				from_date=expiry_date,
+				to_date=expiry_date,
+				is_carry_forward=0,
+				is_expired=1
+			)
+			create_leave_ledger_entry(self, args)
+
+		frappe.db.set_value("Leave Allocation", ref_name, "expired", 1)
 
 	def get_previous_allocation(self):
 		return frappe.db.get_value("Leave Allocation",

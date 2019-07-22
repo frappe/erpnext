@@ -22,7 +22,7 @@ frappe.ui.form.on("Leave Allocation", {
 	},
 
 	refresh: function(frm) {
-		if(frm.doc.docstatus === 1 && frm.doc.status === "Active") {
+		if(frm.doc.docstatus === 1 && frm.doc.expired) {
 			var valid_expiry = moment(frappe.datetime.get_today()).isBetween(frm.doc.from_date, frm.doc.to_date);
 			if(valid_expiry) {
 				// expire current allocation
@@ -35,11 +35,8 @@ frappe.ui.form.on("Leave Allocation", {
 
 	expire_allocation: function(frm) {
 		frappe.call({
-			method: 'expire_allocation',
+			method: 'expire_current_allocation',
 			doc: frm.doc,
-			args: {
-				current: true
-			},
 			freeze: true,
 			callback: function(r){
 				if(!r.exc){
