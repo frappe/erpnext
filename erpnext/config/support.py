@@ -21,13 +21,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Issue Priority",
 					"description": _("Issue Priority."),
-				},
-				{
-					"type": "doctype",
-					"name": "Communication",
-					"description": _("Communication log."),
-					"onboard": 1,
-				},
+				}
 			]
 		},
 		{
@@ -94,6 +88,17 @@ def get_data():
 					"name": "Support Hours",
 					"doctype": "Issue",
 					"is_query_report": True
+				},
+			]
+		},
+		{
+			"label": _("Settings"),
+			"icon": "fa fa-list",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Support Settings",
+					"label": _("Support Settings"),
 				},
 			]
 		},
