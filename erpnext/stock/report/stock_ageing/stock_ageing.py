@@ -166,9 +166,9 @@ def get_fifo_queue(filters):
 				else:
 					fifo_queue.append([d.actual_qty, d.posting_date])
 		else:
-			if d.serial_no or d.batch_no:
+			if d.serial_no:
 				if d.serial_no:
-					serial_no_list = d.serial_no.split("\n")
+					serial_no_list = get_serial_nos(d.serial_no)
 					for serial_no in fifo_queue:
 						if serial_no[0] in serial_no_list:
 							fifo_queue.remove(serial_no)
