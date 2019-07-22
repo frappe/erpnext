@@ -67,43 +67,34 @@ frappe.ui.form.on('Delivery Trip', {
 	},
 
 	calculate_arrival_time: function (frm) {
-		frappe.db.get_value("Google Maps Settings", { name: "Google Maps Settings" }, "enabled", (r) => {
-			if (r.enabled == 0) {
-				frappe.throw(__("Please enable Google Maps Settings to estimate and optimize routes"));
-			} else {
-				frappe.call({
-					method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.get_arrival_times',
-					freeze: true,
-					freeze_message: __("Updating estimated arrival times."),
-					args: {
-						delivery_trip: frm.doc.name,
-					},
-					callback: function (r) {
-						frm.reload_doc();
-					}
-				});
-			}
-		})
+		if (!frm.doc.driver_address) {
+			frappe.throw(__("Cannot Calculate Arrival Time as Driver Address is Missing."));
+		}
+		frappe.show_alert({
+			message: "Calculating Arrival Times",
+			indicator: 'orange'
+		});
+		frm.call("process_route", {
+			optimize: false,
+		}, () => {
+			frm.reload_doc();
+		});
+
 	},
 
 	optimize_route: function (frm) {
-		frappe.db.get_value("Google Maps Settings", {name: "Google Maps Settings"}, "enabled", (r) => {
-			if (r.enabled == 0) {
-				frappe.throw(__("Please enable Google Maps Settings to estimate and optimize routes"));
-			} else {
-				frappe.call({
-					method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.optimize_route',
-					freeze: true,
-					freeze_message: __("Optimizing routes."),
-					args: {
-						delivery_trip: frm.doc.name,
-					},
-					callback: function (r) {
-						frm.reload_doc();
-					}
-				});
-			}
-		})
+		if (!frm.doc.driver_address) {
+			frappe.throw(__("Cannot Optimize Route as Driver Address is Missing."));
+		}
+		frappe.show_alert({
+			message: "Optimizing Route",
+			indicator: 'orange'
+		});
+		frm.call("process_route", {
+			optimize: true,
+		}, () => {
+			frm.reload_doc();
+		});
 	},
 
 	notify_customers: function (frm) {

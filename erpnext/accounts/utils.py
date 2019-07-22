@@ -104,6 +104,9 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		# get balance of all entries that exist
 		date = nowdate()
 
+	if account:
+		acc = frappe.get_doc("Account", account)
+
 	try:
 		year_start_date = get_fiscal_year(date, verbose=0)[1]
 	except FiscalYearError:
@@ -118,7 +121,12 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 
 	allow_cost_center_in_entry_of_bs_account = get_allow_cost_center_in_entry_of_bs_account()
 
-	if cost_center and allow_cost_center_in_entry_of_bs_account:
+	if account:
+		report_type = acc.report_type
+	else:
+		report_type = ""
+
+	if cost_center and (allow_cost_center_in_entry_of_bs_account or report_type =='Profit and Loss'):
 		cc = frappe.get_doc("Cost Center", cost_center)
 		if cc.is_group:
 			cond.append(""" exists (
@@ -132,18 +140,11 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 
 	if account:
 
-		acc = frappe.get_doc("Account", account)
-
 		if not frappe.flags.ignore_account_permission:
 			acc.check_permission("read")
 
-
-		if not allow_cost_center_in_entry_of_bs_account and acc.report_type == 'Profit and Loss':
+		if report_type == 'Profit and Loss':
 			# for pl accounts, get balance within a fiscal year
-			cond.append("posting_date >= '%s' and voucher_type != 'Period Closing Voucher'" \
-				% year_start_date)
-		elif allow_cost_center_in_entry_of_bs_account:
-			# for all accounts, get balance within a fiscal year if maintain cost center in balance account is checked
 			cond.append("posting_date >= '%s' and voucher_type != 'Period Closing Voucher'" \
 				% year_start_date)
 		# different filter for group and ledger - improved performance
@@ -689,7 +690,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 		payment_amount = pe_map.get((d.voucher_type, d.voucher_no), 0)
 		outstanding_amount = flt(d.invoice_amount - payment_amount, precision)
 		if outstanding_amount > 0.5 / (10**precision):
-			if (filters.get("outstanding_amt_greater_than") and
+			if (filters and filters.get("outstanding_amt_greater_than") and
 				not (outstanding_amount >= filters.get("outstanding_amt_greater_than") and
 				outstanding_amount <= filters.get("outstanding_amt_less_than"))):
 				continue
@@ -734,7 +735,6 @@ def get_children(doctype, parent, company, is_root=False):
 	parent_fieldname = 'parent_' + doctype.lower().replace(' ', '_')
 	fields = [
 		'name as value',
-		'root_type',
 		'is_group as expandable'
 	]
 	filters = [['docstatus', '<', 2]]
@@ -742,11 +742,11 @@ def get_children(doctype, parent, company, is_root=False):
 	filters.append(['ifnull(`{0}`,"")'.format(parent_fieldname), '=', '' if is_root else parent])
 
 	if is_root:
-		fields += ['report_type', 'account_currency'] if doctype == 'Account' else []
+		fields += ['root_type', 'report_type', 'account_currency'] if doctype == 'Account' else []
 		filters.append(['company', '=', company])
 
 	else:
-		fields += ['account_currency'] if doctype == 'Account' else []
+		fields += ['root_type', 'account_currency'] if doctype == 'Account' else []
 		fields += [parent_fieldname + ' as parent']
 
 	acc = frappe.get_list(doctype, fields=fields, filters=filters)

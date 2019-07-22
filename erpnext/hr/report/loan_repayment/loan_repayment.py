@@ -73,7 +73,7 @@ def create_columns():
 def get_record():
 	data = []
 	loans = frappe.get_all("Loan",
-		filters=[("status", "=", "Fully Disbursed")],
+		filters=[("status", "=", "Disbursed")],
 		fields=["applicant", "applicant_name", "name", "loan_amount", "rate_of_interest",
 			"total_payment", "monthly_repayment_amount", "total_amount_paid"]
 	)
