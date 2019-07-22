@@ -9,6 +9,10 @@ from frappe import _
 from frappe.utils import add_days, today, flt, DATE_FORMAT
 
 class LeaveLedgerEntry(Document):
+	def validate(self):
+		if self.from_date > self.to_date:
+			frappe.throw(_("To date needs to be before from date"))
+
 	def on_cancel(self):
 		# allow cancellation of expiry leaves
 		if not self.is_expired:

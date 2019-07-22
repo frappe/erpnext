@@ -357,7 +357,7 @@ class LeaveApplication(Document):
 		lwp = frappe.db.get_value("Leave Type", self.leave_type, "is_lwp")
 
 		if expiry_date:
-			self.create_ledger_entry_for_intermediate_allocation_expiry(expiry_date, submit)
+			self.create_ledger_entry_for_intermediate_allocation_expiry(expiry_date, submit, lwp)
 		else:
 			args = dict(
 				leaves=self.total_leave_days * -1,
@@ -367,16 +367,17 @@ class LeaveApplication(Document):
 			)
 			create_leave_ledger_entry(self, args, submit)
 
-	def create_ledger_entry_for_intermediate_allocation_expiry(self, expiry_date, submit):
+	def create_ledger_entry_for_intermediate_allocation_expiry(self, expiry_date, submit, lwp):
 		''' splits leave application into two ledger entries to consider expiry of allocation '''
 		args = dict(
 			from_date=self.from_date,
 			to_date=expiry_date,
-			leaves=(date_diff(expiry_date, self.from_date) + 1) * -1
+			leaves=(date_diff(expiry_date, self.from_date) + 1) * -1,
+			is_lwp=lwp
 		)
 		create_leave_ledger_entry(self, args, submit)
 
-		if expiry_date != self.to_date:
+		if getdate(expiry_date) != getdate(self.to_date):
 			start_date = add_days(expiry_date, 1)
 			args.update(dict(
 				from_date=start_date,
