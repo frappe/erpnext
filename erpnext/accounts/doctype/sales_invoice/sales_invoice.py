@@ -166,6 +166,7 @@ class SalesInvoice(SellingController):
 		self.make_gl_entries()
 
 		if not self.is_return:
+			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.check_credit_limit()
 
@@ -222,6 +223,7 @@ class SalesInvoice(SellingController):
 		self.update_billing_status_in_dn()
 
 		if not self.is_return:
+			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.update_serial_no(in_cancel=True)
 
@@ -407,7 +409,7 @@ class SalesInvoice(SellingController):
 
 			for field in ['taxes_and_charges', 'company_address']:
 				if pos.get(field):
-					self.set(field, pos.get(fieldname))
+					self.set(field, pos.get(field))
 
 			if not customer_price_list:
 				self.set('selling_price_list', pos.get('selling_price_list'))
