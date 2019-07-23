@@ -95,7 +95,7 @@ def get_existing_allocations(employees, leave_period):
 def get_leave_type_details():
 	leave_type_details = frappe._dict()
 	leave_types = frappe.get_all("Leave Type",
-		fields=["name", "is_lwp", "is_earned_leave", "is_compensatory", "is_carry_forward", "carry_forward_leave_expiry"])
+		fields=["name", "is_lwp", "is_earned_leave", "is_compensatory", "is_carry_forward", "expire_carried_forward_leaves"])
 	for d in leave_types:
 		leave_type_details.setdefault(d.name, d)
 	return leave_type_details

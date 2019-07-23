@@ -97,7 +97,7 @@ class TestLeaveAllocation(unittest.TestCase):
 		leave_type = create_leave_type(
 			leave_type_name="_Test_CF_leave_expiry",
 			is_carry_forward=1,
-			carry_forward_leave_expiry=90)
+			expire_carried_forward_leaves=90)
 		leave_type.submit()
 
 		# initial leave allocation

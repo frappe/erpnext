@@ -86,7 +86,7 @@ def process_expired_allocation():
 
 	# fetch leave type records that has carry forwarded leaves expiry
 	leave_type_records = frappe.db.get_values("Leave Type", filters={
-			'carry_forward_leave_expiry': (">", 0)
+			'expire_carried_forward_leaves': (">", 0)
 		}, fieldname=['name'])
 
 	if leave_type_records:
