@@ -148,30 +148,28 @@ def get_fifo_queue(filters):
 		if d.voucher_type == "Stock Reconciliation":
 			d.actual_qty = flt(d.qty_after_transaction) - flt(item_details[key].get("qty_after_transaction", 0))
 
+		serial_no_list = get_serial_nos(d.serial_no) if d.serial_no else []
+
 		if d.actual_qty > 0:
 			if transfered_item_details.get((d.voucher_no, d.name)):
-				qty_to_add = d.actual_qty
 				batch = transfered_item_details[(d.voucher_no, d.name)][0]
 				fifo_queue.append(batch)
 				transfered_item_details[((d.voucher_no, d.name))].pop(0)
 			else:
-				if d.serial_no:
-					if d.serial_no:
-						for no in get_serial_nos(d.serial_no):
-							if serial_no_batch_purchase_details.get(no):
-								fifo_queue.append([no, serial_no_batch_purchase_details.get(no)])
-							else:
-								serial_no_batch_purchase_details.setdefault(no, d.posting_date)
-								fifo_queue.append([no, d.posting_date])
+				if serial_no_list:
+					for serial_no in serial_no_list:
+						if serial_no_batch_purchase_details.get(serial_no):
+							fifo_queue.append([serial_no, serial_no_batch_purchase_details.get(serial_no)])
+						else:
+							serial_no_batch_purchase_details.setdefault(serial_no, d.posting_date)
+							fifo_queue.append([serial_no, d.posting_date])
 				else:
 					fifo_queue.append([d.actual_qty, d.posting_date])
 		else:
-			if d.serial_no:
-				if d.serial_no:
-					serial_no_list = get_serial_nos(d.serial_no)
-					for serial_no in fifo_queue:
-						if serial_no[0] in serial_no_list:
-							fifo_queue.remove(serial_no)
+			if serial_no_list:
+				for serial_no in fifo_queue:
+					if serial_no[0] in serial_no_list:
+						fifo_queue.remove(serial_no)
 			else:
 				qty_to_pop = abs(d.actual_qty)
 				while qty_to_pop:
