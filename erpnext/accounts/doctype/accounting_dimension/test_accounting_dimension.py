@@ -27,14 +27,13 @@ class TestAccountingDimension(unittest.TestCase):
 			dimension1 = frappe.get_doc({
 				"doctype": "Accounting Dimension",
 				"document_type": "Location",
-				"mandatory_for_pl": 1
 			})
 
 			dimension1.append("dimension_defaults", {
 				"company": "_Test Company",
 				"reference_document": "Location",
 				"default_dimension": "Block 1",
-				"mandatory_for_pl": 1
+				"mandatory_for_bs": 1
 			})
 
 			dimension1.insert()
