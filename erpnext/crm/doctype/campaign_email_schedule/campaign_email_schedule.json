@@ -1,0 +1,38 @@
+{
+ "creation": "2019-06-30 15:56:20.306901",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "email_template",
+  "send_after_days"
+ ],
+ "fields": [
+  {
+   "fieldname": "send_after_days",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Send After (days)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "email_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Email Template",
+   "options": "Email Template",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-07-12 11:46:43.184123",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Campaign Email Schedule",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
