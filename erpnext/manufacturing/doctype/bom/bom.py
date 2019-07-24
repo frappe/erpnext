@@ -578,6 +578,8 @@ class BOM(WebsiteGenerator):
 			for d in self.operations:
 				if not d.description:
 					d.description = frappe.db.get_value('Operation', d.operation, 'description')
+				if not d.batch_size > 0:
+					d.batch_size = 1
 
 def get_list_context(context):
 	context.title = _("Bill of Materials")

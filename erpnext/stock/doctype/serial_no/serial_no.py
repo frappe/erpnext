@@ -222,7 +222,7 @@ def validate_serial_no(sle, item_det):
 						frappe.throw(_("Serial No {0} has already been received").format(serial_no),
 							SerialNoDuplicateError)
 
-					if (sr.delivery_document_no and sle.voucher_type != 'Stock Entry'
+					if (sr.delivery_document_no and sle.voucher_type not in ['Stock Entry', 'Stock Reconciliation']
 						and sle.voucher_type == sr.delivery_document_type):
 						return_against = frappe.db.get_value(sle.voucher_type, sle.voucher_no, 'return_against')
 						if return_against and return_against != sr.delivery_document_no:
@@ -299,7 +299,7 @@ def validate_so_serial_no(sr, sales_order,):
 		be delivered""").format(sales_order, sr.item_code, sr.name))
 
 def has_duplicate_serial_no(sn, sle):
-	if sn.warehouse:
+	if sn.warehouse and sle.voucher_type != 'Stock Reconciliation':
 		return True
 
 	if sn.company != sle.company:
@@ -415,16 +415,20 @@ def update_serial_nos_after_submit(controller, parentfield):
 	if not stock_ledger_entries: return
 
 	for d in controller.get(parentfield):
+		if d.serial_no:
+			continue
+
 		update_rejected_serial_nos = True if (controller.doctype in ("Purchase Receipt", "Purchase Invoice")
 			and d.rejected_qty) else False
 		accepted_serial_nos_updated = False
+
 		if controller.doctype == "Stock Entry":
 			warehouse = d.t_warehouse
 			qty = d.transfer_qty
 		else:
 			warehouse = d.warehouse
-			qty = d.stock_qty
-
+			qty = (d.qty if controller.doctype == "Stock Reconciliation"
+				else d.stock_qty)
 		for sle in stock_ledger_entries:
 			if sle.voucher_detail_no==d.name:
 				if not accepted_serial_nos_updated and qty and abs(sle.actual_qty)==qty \
