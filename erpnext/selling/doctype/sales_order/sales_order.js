@@ -102,6 +102,7 @@ frappe.ui.form.on("Sales Order Item", {
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
 		this._super();
+		this.frm.add_custom_button(__('Pick Ticket'), () => this.make_pick_ticket(), __('Create'));
 	},
 
 	refresh: function(doc, dt, dn) {
@@ -231,6 +232,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		}
 
 		this.order_type(doc);
+	},
+
+	make_pick_ticket() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_pick_ticket",
+			frm: this.frm
+		})
 	},
 
 	make_work_order() {
