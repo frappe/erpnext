@@ -641,20 +641,18 @@ def get_orders_to_be_billed(posting_date, party_type, party,
 
 	# Add cost center condition
 	if voucher_type:
-		doc = frappe.get_doc({"doctype": voucher_type})
-		condition = ""
-		if doc and hasattr(doc, 'cost_center'):
-			condition = " and cost_center='%s'" % cost_center
-
-	orders = []
-	if voucher_type:
-		ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
+		if party_account_currency == company_currency:
+			grand_total_field = "base_grand_total"
+			rounded_total_field = "base_rounded_total"
+		else:
+			grand_total_field = "grand_total"
+			rounded_total_field = "rounded_total"
 
 		orders = frappe.db.sql("""
 			select
 				name as voucher_no,
-				{ref_field} as invoice_amount,
-				({ref_field} - advance_paid) as outstanding_amount,
+				if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
+				(if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) - advance_paid) as outstanding_amount,
 				transaction_date as posting_date
 			from
 				`tab{voucher_type}`
@@ -663,13 +661,14 @@ def get_orders_to_be_billed(posting_date, party_type, party,
 				and docstatus = 1
 				and company = %s
 				and ifnull(status, "") != "Closed"
-				and {ref_field} > advance_paid
+				and if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) > advance_paid
 				and abs(100 - per_billed) > 0.01
 				{condition}
 			order by
 				transaction_date, name
 		""".format(**{
-			"ref_field": ref_field,
+			"rounded_total_field": rounded_total_field,
+			"grand_total_field": grand_total_field,
 			"voucher_type": voucher_type,
 			"party_type": scrub(party_type),
 			"condition": condition
