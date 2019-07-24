@@ -51,7 +51,7 @@ class DeliveryNote(SellingController):
 			'source_field': 'qty',
 			'percent_join_field': 'against_sales_invoice',
 			'overflow_type': 'delivery',
-			'no_tolerance': 1
+			'no_allowance': 1
 		}]
 		if cint(self.is_return):
 			self.status_updater.append({
@@ -333,7 +333,10 @@ class DeliveryNote(SellingController):
 			return_invoice.is_return = True
 			return_invoice.save()
 			return_invoice.submit()
-			frappe.msgprint(_("Credit Note {0} has been created automatically").format(return_invoice.name))
+
+			credit_note_link = frappe.utils.get_link_to_form('Sales Invoice', return_invoice.name)
+
+			frappe.msgprint(_("Credit Note {0} has been created automatically").format(credit_note_link))
 		except:
 			frappe.throw(_("Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"))
 

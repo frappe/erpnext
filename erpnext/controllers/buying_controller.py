@@ -636,7 +636,8 @@ class BuyingController(StockController):
 		asset.set_missing_values()
 		asset.insert()
 
-		frappe.msgprint(_("Asset {0} created").format(asset.name))
+		asset_link = frappe.utils.get_link_to_form('Asset', asset.name)
+		frappe.msgprint(_("Asset {0} created").format(asset_link))
 		return asset.name
 
 	def make_asset_movement(self, row):

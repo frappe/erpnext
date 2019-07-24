@@ -12,6 +12,7 @@ from frappe.permissions import add_user_permission, remove_user_permission, \
 from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
+from erpnext.hr.doctype.job_offer.job_offer import get_staffing_plan_detail
 
 class EmployeeUserDisabledError(frappe.ValidationError): pass
 class EmployeeLeftValidationError(frappe.ValidationError): pass
@@ -78,7 +79,15 @@ class Employee(NestedSet):
 
 	def update_user_permissions(self):
 		if not self.create_user_permission: return
-		if not has_permission('User Permission', ptype='write'): return
+		if not has_permission('User Permission', ptype='write', raise_exception=False): return
+
+		employee_user_permission_exists = frappe.db.exists('User Permission', {
+			'allow': 'Employee',
+			'for_value': self.name,
+			'user': self.user_id
+		})
+
+		if employee_user_permission_exists: return
 
 		employee_user_permission_exists = frappe.db.exists('User Permission', {
 			'allow': 'Employee',
@@ -237,7 +246,7 @@ def validate_employee_role(doc, method):
 def update_user_permissions(doc, method):
 	# called via User hook
 	if "Employee" in [d.role for d in doc.get("roles")]:
-		if not has_permission('User Permission', ptype='write'): return
+		if not has_permission('User Permission', ptype='write', raise_exception=False): return
 		employee = frappe.get_doc("Employee", {"user_id": doc.name})
 		employee.update_user_permissions()
 

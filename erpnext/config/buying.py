@@ -160,6 +160,13 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Procurement Tracker",
+					"reference_doctype": "Purchase Order",
+					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Requested Items To Be Ordered",
 					"reference_doctype": "Material Request",
 					"onboard": 1,
@@ -228,29 +235,5 @@ def get_data():
 				}
 			]
 		},
-		{
-			"label": _("Help"),
-			"items": [
-				{
-					"type": "help",
-					"label": _("Customer and Supplier"),
-					"youtube_id": "anoGi_RpQ20"
-				},
-				{
-					"type": "help",
-					"label": _("Material Request to Purchase Order"),
-					"youtube_id": "4TN9kPyfIqM"
-				},
-				{
-					"type": "help",
-					"label": _("Purchase Order to Payment"),
-					"youtube_id": "EK65tLdVUDk"
-				},
-				{
-					"type": "help",
-					"label": _("Managing Subcontracting"),
-					"youtube_id": "ThiMCC2DtKo"
-				},
-			]
-		},
+
 	]

@@ -54,8 +54,8 @@ class SalesInvoice(SellingController):
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
-		if cint(self.is_return) == 1:
-			self.indicator_title = _("Return")
+		if self.outstanding_amount < 0:
+			self.indicator_title = _("Credit Note Issued")
 			self.indicator_color = "darkgrey"
 		elif self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()):
 			self.indicator_color = "orange"
@@ -63,8 +63,8 @@ class SalesInvoice(SellingController):
 		elif self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()):
 			self.indicator_color = "red"
 			self.indicator_title = _("Overdue")
-		elif self.outstanding_amount < 0:
-			self.indicator_title = _("Credit Note Issued")
+		elif cint(self.is_return) == 1:
+			self.indicator_title = _("Return")
 			self.indicator_color = "darkgrey"
 		else:
 			self.indicator_color = "green"
@@ -166,6 +166,7 @@ class SalesInvoice(SellingController):
 		self.make_gl_entries()
 
 		if not self.is_return:
+			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.check_credit_limit()
 
@@ -220,6 +221,7 @@ class SalesInvoice(SellingController):
 		self.update_billing_status_in_dn()
 
 		if not self.is_return:
+			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.update_serial_no(in_cancel=True)
 
@@ -395,13 +397,16 @@ class SalesInvoice(SellingController):
 			if pos.get('account_for_change_amount'):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
 
-			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',
-				'company', 'select_print_heading', 'cash_bank_account', 'company_address',
-				'write_off_account', 'write_off_cost_center', 'apply_discount_on', 'cost_center'):
+			for fieldname in ('territory', 'naming_series', 'currency', 'letter_head', 'tc_name',
+				'company', 'select_print_heading', 'cash_bank_account', 'write_off_account', 'taxes_and_charges',
+				'write_off_cost_center', 'apply_discount_on', 'cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
 
 			customer_price_list = frappe.get_value("Customer", self.customer, 'default_price_list')
+
+			if pos.get("company_address"):
+				self.company_address = pos.get("company_address")
 
 			if not customer_price_list:
 				self.set('selling_price_list', pos.get('selling_price_list'))
@@ -508,8 +513,8 @@ class SalesInvoice(SellingController):
 			if frappe.db.get_single_value('Selling Settings', dic[i][0]) == 'Yes':
 				for d in self.get('items'):
 					is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
-					if d.item_code and is_stock_item == 1\
-						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1]):
+					if  (d.item_code and is_stock_item == 1\
+						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1])):
 						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
 
@@ -734,6 +739,7 @@ class SalesInvoice(SellingController):
 					"account": self.debit_to,
 					"party_type": "Customer",
 					"party": self.customer,
+					"due_date": self.due_date,
 					"against": self.against_income_account,
 					"debit": grand_total_in_company_currency,
 					"debit_in_account_currency": grand_total_in_company_currency \
@@ -783,10 +789,13 @@ class SalesInvoice(SellingController):
 					asset.db_set("disposal_date", self.posting_date)
 					asset.set_status("Sold" if self.docstatus==1 else None)
 				else:
-					account_currency = get_account_currency(item.income_account)
+					income_account = (item.income_account
+						if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
+
+					account_currency = get_account_currency(income_account)
 					gl_entries.append(
 						self.get_gl_dict({
-							"account": item.income_account if not item.enable_deferred_revenue else item.deferred_revenue_account,
+							"account": income_account,
 							"against": self.customer,
 							"credit": flt(item.base_net_amount, item.precision("base_net_amount")),
 							"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
@@ -1029,9 +1038,8 @@ class SalesInvoice(SellingController):
 	def update_project(self):
 		if self.project:
 			project = frappe.get_doc("Project", self.project)
-			project.flags.dont_sync_tasks = True
 			project.update_billed_amount()
-			project.save()
+			project.db_update()
 
 
 	def verify_payment_amount_is_positive(self):
@@ -1174,6 +1182,56 @@ class SalesInvoice(SellingController):
 
 		self.set_missing_values(for_validate = True)
 
+	def get_discounting_status(self):
+		status = None
+		if self.is_discounted:
+			invoice_discounting_list = frappe.db.sql("""
+				select status
+				from `tabInvoice Discounting` id, `tabDiscounted Invoice` d
+				where
+					id.name = d.parent
+					and d.sales_invoice=%s
+					and id.docstatus=1
+					and status in ('Disbursed', 'Settled')
+			""", self.name)
+			for d in invoice_discounting_list:
+				status = d[0]
+				if status == "Disbursed":
+					break
+		return status
+
+	def set_status(self, update=False, status=None, update_modified=True):
+		if self.is_new():
+			if self.get('amended_from'):
+				self.status = 'Draft'
+			return
+
+		if not status:
+			if self.docstatus == 2:
+				status = "Cancelled"
+			elif self.docstatus == 1:
+				if flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
+					self.status = "Overdue and Discounted"
+				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
+					self.status = "Overdue"
+				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
+					self.status = "Unpaid and Discounted"
+				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
+					self.status = "Unpaid"
+				elif flt(self.outstanding_amount) < 0 and self.is_return==0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+					self.status = "Credit Note Issued"
+				elif self.is_return == 1:
+					self.status = "Return"
+				elif flt(self.outstanding_amount)<=0:
+					self.status = "Paid"
+				else:
+					self.status = "Submitted"
+			else:
+				self.status = "Draft"
+
+		if update:
+			self.db_set('status', self.status, update_modified = update_modified)
+
 def validate_inter_company_party(doctype, party, company, inter_company_reference):
 	if not party:
 		return
@@ -1202,9 +1260,8 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 			frappe.throw(_("Invalid Company for Inter Company Transaction."))
 
 	elif frappe.db.get_value(partytype, {"name": party, internal: 1}, "name") == party:
-		companies = frappe.db.sql("""select company from `tabAllowed To Transact With`
-			where parenttype = '{0}' and parent = '{1}'""".format(partytype, party), as_list = 1)
-		companies = [d[0] for d in companies]
+		companies = frappe.get_all("Allowed To Transact With", fields=["company"], filters={"parenttype": partytype, "parent": party})
+		companies = [d.company for d in companies]
 		if not company in companies:
 			frappe.throw(_("{0} not allowed to transact with {1}. Please change the Company.").format(partytype, company))
 
@@ -1429,3 +1486,17 @@ def get_loyalty_programs(customer):
 		return []
 	else:
 		return lp_details
+
+@frappe.whitelist()
+def create_invoice_discounting(source_name, target_doc=None):
+	invoice = frappe.get_doc("Sales Invoice", source_name)
+	invoice_discounting = frappe.new_doc("Invoice Discounting")
+	invoice_discounting.company = invoice.company
+	invoice_discounting.append("invoices", {
+		"sales_invoice": source_name,
+		"customer": invoice.customer,
+		"posting_date": invoice.posting_date,
+		"outstanding_amount": invoice.outstanding_amount
+	})
+
+	return invoice_discounting
