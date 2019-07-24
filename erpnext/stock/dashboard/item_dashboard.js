@@ -16,17 +16,46 @@ erpnext.stock.ItemDashboard = Class.extend({
 		this.content = $(frappe.render_template('item_dashboard')).appendTo(this.parent);
 		this.result = this.content.find('.result');
 
-		// move
 		this.content.on('click', '.btn-move', function() {
-			erpnext.stock.move_item(unescape($(this).attr('data-item')), $(this).attr('data-warehouse'),
-				null, $(this).attr('data-actual_qty'), null, function() { me.refresh(); });
+			handle_move_add($(this), "Move")
 		});
 
 		this.content.on('click', '.btn-add', function() {
-			erpnext.stock.move_item(unescape($(this).attr('data-item')), null, $(this).attr('data-warehouse'),
-				$(this).attr('data-actual_qty'), $(this).attr('data-rate'),
-				function() { me.refresh(); });
+			handle_move_add($(this), "Add")
 		});
+
+		function handle_move_add(element, action) {
+			let item = unescape(element.attr('data-item'));
+			let warehouse = unescape(element.attr('data-warehouse'));
+			let actual_qty = unescape(element.attr('data-actual_qty'));
+			let disable_quick_entry = Number(unescape(element.attr('data-disable_quick_entry')));
+			let entry_type = action === "Move" ? "Material Transfer": null;
+
+			if (disable_quick_entry) {
+				open_stock_entry(item, warehouse, entry_type);
+			} else {
+				if (action === "Add") {
+					let rate = unescape($(this).attr('data-rate'));
+					erpnext.stock.move_item(item, null, warehouse, actual_qty, rate, function() { me.refresh(); });
+				}
+				else {
+					erpnext.stock.move_item(item, warehouse, null, actual_qty, null, function() { me.refresh(); });
+				}
+			}
+		}
+
+		function open_stock_entry(item, warehouse, entry_type) {
+			frappe.model.with_doctype('Stock Entry', function() {
+				var doc = frappe.model.get_new_doc('Stock Entry');
+				if (entry_type) doc.stock_entry_type = entry_type;
+
+				var row = frappe.model.add_child(doc, 'items');
+				row.item_code = item;
+				row.s_warehouse = warehouse;
+
+				frappe.set_route('Form', doc.doctype, doc.name);
+			})
+		}
 
 		// more
 		this.content.find('.btn-more').on('click', function() {

@@ -173,7 +173,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 		in_rate = get_valuation_rate(args.get('item_code'), args.get('warehouse'),
 			args.get('voucher_type'), voucher_no, args.get('allow_zero_valuation'),
 			currency=erpnext.get_company_currency(args.get('company')), company=args.get('company'),
-			raise_error_if_no_rate=True)
+			raise_error_if_no_rate=raise_error_if_no_rate)
 
 	return in_rate
 
@@ -277,3 +277,7 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 					new_row.append(None)
 
 		result[row_idx] = new_row
+
+def get_available_serial_nos(item_code, warehouse):
+	return frappe.get_all("Serial No", filters = {'item_code': item_code,
+		'warehouse': warehouse, 'delivery_document_no': ''}) or []

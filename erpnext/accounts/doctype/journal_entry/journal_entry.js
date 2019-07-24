@@ -223,11 +223,18 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 			if(in_list(["Sales Invoice", "Purchase Invoice"], jvd.reference_type)) {
 				out.filters.push([jvd.reference_type, "outstanding_amount", "!=", 0]);
-
+				// Filter by cost center
+				if(jvd.cost_center) {
+					out.filters.push([jvd.reference_type, "cost_center", "in", ["", jvd.cost_center]]);
+				}
 				// account filter
 				frappe.model.validate_missing(jvd, "account");
 				var party_account_field = jvd.reference_type==="Sales Invoice" ? "debit_to": "credit_to";
 				out.filters.push([jvd.reference_type, party_account_field, "=", jvd.account]);
+
+				if (in_list(['Debit Note', 'Credit Note'], doc.voucher_type)) {
+					out.filters.push([jvd.reference_type, "is_return", "=", 1]);
+				}
 			}
 
 			if(in_list(["Sales Order", "Purchase Order"], jvd.reference_type)) {

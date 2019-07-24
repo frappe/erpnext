@@ -14,7 +14,7 @@ from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.controllers.selling_controller import SellingController
-from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
+from frappe.automation.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -211,9 +211,8 @@ class SalesOrder(SellingController):
 
 		if self.project:
 			project = frappe.get_doc("Project", self.project)
-			project.flags.dont_sync_tasks = True
 			project.update_sales_amount()
-			project.save()
+			project.db_update()
 
 	def check_credit_limit(self):
 		# if bypass credit limit check is set to true (1) at sales order level,
@@ -493,13 +492,29 @@ def close_or_unclose_sales_orders(names, status):
 
 	frappe.local.message_log = []
 
+def get_requested_item_qty(sales_order):
+	return frappe._dict(frappe.db.sql("""
+		select sales_order_item, sum(stock_qty)
+		from `tabMaterial Request Item`
+		where docstatus = 1
+			and sales_order = %s
+		group by sales_order_item
+	""", sales_order))
+
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
+	requested_item_qty = get_requested_item_qty(source_name)
+
 	def postprocess(source, doc):
 		doc.material_request_type = "Purchase"
 
 	def update_item(source, target, source_parent):
+		# qty is for packed items, because packed items don't have stock_qty field
+		qty = source.get("stock_qty") or source.get("qty")
 		target.project = source_parent.project
+		target.qty = qty - requested_item_qty.get(source.name, 0)
+		target.conversion_factor = 1
+		target.stock_qty = qty - requested_item_qty.get(source.name, 0)
 
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -524,7 +539,7 @@ def make_material_request(source_name, target_doc=None):
 				"stock_uom": "uom",
 				"stock_qty": "qty"
 			},
-			"condition": lambda doc: not frappe.db.exists('Product Bundle', doc.item_code),
+			"condition": lambda doc: not frappe.db.exists('Product Bundle', doc.item_code) and doc.stock_qty > requested_item_qty.get(doc.name, 0),
 			"postprocess": update_item
 		}
 	}, target_doc, postprocess)
@@ -548,12 +563,6 @@ def make_project(source_name, target_doc=None):
 				"base_grand_total" : "estimated_costing",
 			}
 		},
-		"Sales Order Item": {
-			"doctype": "Project Task",
-			"field_map": {
-				"item_code": "title",
-			},
-		}
 	}, target_doc, postprocess)
 
 	return doc
@@ -765,7 +774,10 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_purchase_order_for_drop_shipment(source_name, for_supplier=None, target_doc=None):
+def make_purchase_order(source_name, for_supplier=None, selected_items=[], target_doc=None):
+	if isinstance(selected_items, string_types):
+		selected_items = json.loads(selected_items)
+
 	def set_missing_values(source, target):
 		target.supplier = supplier
 		target.apply_discount_on = ""
@@ -844,7 +856,7 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier=None, target
 						"price_list_rate"
 					],
 					"postprocess": update_item,
-					"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == supplier
+					"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == supplier and doc.item_code in selected_items
 				}
 			}, target_doc, set_missing_values)
 			if not for_supplier:
