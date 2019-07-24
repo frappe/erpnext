@@ -10,7 +10,11 @@
   "reference_document_item",
   "warehouse",
   "qty",
-  "picked_qty"
+  "picked_qty",
+  "has_serial_no",
+  "has_batch_no",
+  "serial_no",
+  "batch_no"
  ],
  "fields": [
   {
@@ -56,10 +60,39 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Reference Document Item"
+  },
+  {
+   "depends_on": "has_serial_no",
+   "fieldname": "serial_no",
+   "fieldtype": "Small Text",
+   "label": "Serial No"
+  },
+  {
+   "depends_on": "has_batch_no",
+   "fieldname": "batch_no",
+   "fieldtype": "Link",
+   "label": "Batch No",
+   "options": "Batch"
+  },
+  {
+   "default": "0",
+   "fetch_from": "item.has_serial_no",
+   "fieldname": "has_serial_no",
+   "fieldtype": "Check",
+   "label": "Has Serial No",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item.has_batch_no",
+   "fieldname": "has_batch_no",
+   "fieldtype": "Check",
+   "label": "Has Batch No",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2019-07-11 16:34:52.853146",
+ "modified": "2019-07-24 11:05:27.407791",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick Ticket Item",
