@@ -1,11 +1,10 @@
 {
+ "autoname": "PICK.####",
  "creation": "2019-07-11 16:03:13.681045",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "reference_doctype",
-  "reference_name",
   "company",
   "column_break_4",
   "group_warehouse",
@@ -13,18 +12,6 @@
   "items"
  ],
  "fields": [
-  {
-   "fieldname": "reference_doctype",
-   "fieldtype": "Select",
-   "label": "Reference Document Type",
-   "options": "Sales Order\nWork Order"
-  },
-  {
-   "fieldname": "reference_name",
-   "fieldtype": "Dynamic Link",
-   "label": "Reference Name",
-   "options": "reference_doctype"
-  },
   {
    "fieldname": "items",
    "fieldtype": "Table",
@@ -53,7 +40,7 @@
    "fieldtype": "Section Break"
   }
  ],
- "modified": "2019-07-12 11:42:03.508514",
+ "modified": "2019-07-24 14:59:44.542987",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick Ticket",

@@ -6,15 +6,20 @@
  "field_order": [
   "item",
   "item_name",
+  "column_break_2",
   "description",
-  "reference_document_item",
+  "has_batch_no",
+  "has_serial_no",
+  "section_break_5",
   "warehouse",
   "qty",
   "picked_qty",
-  "has_serial_no",
-  "has_batch_no",
   "serial_no",
-  "batch_no"
+  "batch_no",
+  "reference_section",
+  "reference_doctype",
+  "reference_name",
+  "reference_document_item"
  ],
  "fields": [
   {
@@ -47,13 +52,15 @@
    "fetch_from": "item.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "label": "Item Name"
+   "label": "Item Name",
+   "read_only": 1
   },
   {
    "fetch_from": "item.description",
    "fieldname": "description",
    "fieldtype": "Text",
-   "label": "Description"
+   "label": "Description",
+   "read_only": 1
   },
   {
    "fieldname": "reference_document_item",
@@ -89,10 +96,35 @@
    "fieldtype": "Check",
    "label": "Has Batch No",
    "read_only": 1
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Select",
+   "label": "Reference Document Type",
+   "options": "Sales Order\nWork Order"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Document",
+   "options": "reference_doctype"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
   }
  ],
  "istable": 1,
- "modified": "2019-07-24 11:05:27.407791",
+ "modified": "2019-07-24 15:09:35.712289",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick Ticket Item",
