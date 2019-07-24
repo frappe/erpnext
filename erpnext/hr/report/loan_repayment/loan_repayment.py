@@ -71,6 +71,7 @@ def create_columns():
 		]
 
 def get_record():
+	print("--------------------------->>>>>>>>>")
 	data = []
 	loans = frappe.get_all("Loan",
 		filters=[("status", "=", "Fully Disbursed")],
