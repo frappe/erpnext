@@ -125,8 +125,9 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 	data["total"] = total
 	return data
 
-def get_account_type_based_gl_data(company, start_date, end_date, account_type, filters):
+def get_account_type_based_gl_data(company, start_date, end_date, account_type, filters={}):
 	cond = ""
+	filters = frappe._dict(filters)
 
 	if filters.finance_book:
 		cond = " and finance_book = %s" %(frappe.db.escape(filters.finance_book))
@@ -187,7 +188,7 @@ def get_chart_data(columns, data):
 		},
 		"type": "bar"
 	}
-	
+
 	chart["fieldtype"] = "Currency"
 
 	return chart
