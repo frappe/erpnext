@@ -157,9 +157,12 @@ class update_entries_after(object):
 		if sle.serial_no:
 			self.get_serialized_values(sle)
 			self.qty_after_transaction += flt(sle.actual_qty)
+			if sle.voucher_type == "Stock Reconciliation":
+				self.qty_after_transaction = sle.qty_after_transaction
+
 			self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 		else:
-			if sle.voucher_type=="Stock Reconciliation":
+			if sle.voucher_type=="Stock Reconciliation" and not sle.batch_no:
 				# assert
 				self.valuation_rate = sle.valuation_rate
 				self.qty_after_transaction = sle.qty_after_transaction
@@ -371,7 +374,7 @@ class update_entries_after(object):
 		"""get Stock Ledger Entries after a particular datetime, for reposting"""
 		return get_stock_ledger_entries(self.previous_sle or frappe._dict({
 				"item_code": self.args.get("item_code"), "warehouse": self.args.get("warehouse") }),
-			">", "asc", for_update=True)
+			">", "asc", for_update=True, check_serial_no=False)
 
 	def raise_exceptions(self):
 		deficiency = min(e["diff"] for e in self.exceptions)
@@ -412,13 +415,17 @@ def get_previous_sle(args, for_update=False):
 	sle = get_stock_ledger_entries(args, "<=", "desc", "limit 1", for_update=for_update)
 	return sle and sle[0] or {}
 
-def get_stock_ledger_entries(previous_sle, operator=None, order="desc", limit=None, for_update=False, debug=False):
+def get_stock_ledger_entries(previous_sle, operator=None,
+	order="desc", limit=None, for_update=False, debug=False, check_serial_no=True):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 	conditions = " and timestamp(posting_date, posting_time) {0} timestamp(%(posting_date)s, %(posting_time)s)".format(operator)
 	if previous_sle.get("warehouse"):
 		conditions += " and warehouse = %(warehouse)s"
 	elif previous_sle.get("warehouse_condition"):
 		conditions += " and " + previous_sle.get("warehouse_condition")
+
+	if check_serial_no and previous_sle.get("serial_no"):
+		conditions += " and serial_no like {}".format(frappe.db.escape('%{0}%'.format(previous_sle.get("serial_no"))))
 
 	if not previous_sle.get("posting_date"):
 		previous_sle["posting_date"] = "1900-01-01"
@@ -479,6 +486,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	if not allow_zero_rate and not valuation_rate and raise_error_if_no_rate \
 			and cint(erpnext.is_perpetual_inventory_enabled(company)):
 		frappe.local.message_log = []
-		frappe.throw(_("Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a zero valuation rate item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submiting/cancelling this entry").format(item_code, voucher_type, voucher_no))
+		frappe.throw(_("Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a zero valuation rate item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submiting / cancelling this entry.")
+			.format(item_code, voucher_type, voucher_no))
 
 	return valuation_rate

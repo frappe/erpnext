@@ -30,7 +30,7 @@ class LoanApplication(Document):
 			monthly_interest_rate = flt(self.rate_of_interest) / (12 *100)
 			if monthly_interest_rate:
 				min_repayment_amount = self.loan_amount*monthly_interest_rate
-				if self.repayment_amount - min_repayment_amount < 0:
+				if self.repayment_amount - min_repayment_amount <= 0:
 					frappe.throw(_("Repayment Amount must be greater than " \
 						+ str(flt(min_repayment_amount, 2))))
 				self.repayment_periods = math.ceil((math.log(self.repayment_amount) -
