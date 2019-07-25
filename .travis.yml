@@ -59,6 +59,11 @@ install:
   - mysql -u root -e "UPDATE mysql.user SET Password=PASSWORD('travis') WHERE User='root'"
   - mysql -u root -e "FLUSH PRIVILEGES"
 
+  - wget -O /tmp/wkhtmltox.tar.xz https://github.com/frappe/wkhtmltopdf/raw/master/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
+  - tar -xf /tmp/wkhtmltox.tar.xz -C /tmp
+  - sudo mv /tmp/wkhtmltox/bin/wkhtmltopdf /usr/local/bin/wkhtmltopdf
+  - sudo chmod o+x /usr/local/bin/wkhtmltopdf
+
   - cd ~/frappe-bench
 
   - sed -i 's/watch:/# watch:/g' Procfile
