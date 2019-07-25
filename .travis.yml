@@ -2,8 +2,8 @@ dist: trusty
 
 language: python
 
-services:
-  - mysql
+addons:
+  mariadb: 10.3
 
 jobs:
   include:
