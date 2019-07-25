@@ -58,7 +58,7 @@ before_script:
   - sed -i 's/9000/9001/g' sites/common_site_config.json
   - bench start &
   - bench get-app erpnext $TRAVIS_BUILD_DIR
-  - bench --site test_site reinstall --mariadb-root-username root --mariadb-root-password travis --yes
+  - bench --site test_site reinstall --yes
 
 after_script:
   - pip install python-coveralls
