@@ -30,9 +30,7 @@ jobs:
     script: bench migrate
 
 install:
-  # fix mongodb travis error
   - nvm install 10
-  - pip install python-coveralls
   - wget https://raw.githubusercontent.com/frappe/bench/master/playbooks/install.py
   - sudo python install.py --develop --user travis --without-bench-setup
   - sudo pip install -e ~/bench
@@ -56,4 +54,5 @@ before_script:
   - sleep 10
 
 after_script:
+  - pip install python-coveralls
   - coveralls -b apps/erpnext -d ../../sites/.coverage
