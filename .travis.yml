@@ -36,8 +36,9 @@ install:
   - git clone https://github.com/frappe/bench --depth 1
   - pip install -e ./bench
 
-  - rm $TRAVIS_BUILD_DIR/.git/shallow
-  - bash $TRAVIS_BUILD_DIR/travis/bench_init.sh
+  - git clone https://github.com/frappe/frappe --branch $TRAVIS_BRANCH --depth 1
+  - bench init --frappe-path ~/frappe --python $(which python) frappe-bench
+
   - cp -r $TRAVIS_BUILD_DIR/test_sites/test_site ~/frappe-bench/sites/
 
 before_script:
