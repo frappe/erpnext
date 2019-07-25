@@ -39,7 +39,8 @@ install:
   - git clone https://github.com/frappe/frappe --branch $TRAVIS_BRANCH --depth 1
   - bench init --frappe-path ~/frappe --python $(which python) frappe-bench
 
-  - cp -r $TRAVIS_BUILD_DIR/test_sites/test_site ~/frappe-bench/sites/
+  - mkdir ~/frappe-bench/sites/test_site
+  - cp -r $TRAVIS_BUILD_DIR/.travis/site_config.json ~/frappe-bench/sites/test_site/
 
 before_script:
   - mysql -u root -ptravis -e 'create database test_frappe'
