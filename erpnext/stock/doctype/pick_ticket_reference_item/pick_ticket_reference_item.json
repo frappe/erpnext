@@ -1,0 +1,27 @@
+{
+ "creation": "2019-07-24 16:11:07.415562",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item"
+ ],
+ "fields": [
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item"
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-07-24 16:12:58.000378",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Pick Ticket Reference Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

@@ -8,6 +8,8 @@
   "company",
   "column_break_4",
   "group_warehouse",
+  "section_break_4",
+  "reference_document_items",
   "section_break_6",
   "items"
  ],
@@ -15,8 +17,9 @@
   {
    "fieldname": "items",
    "fieldtype": "Table",
-   "label": "Items",
-   "options": "Pick Ticket Item"
+   "label": "Items Locations",
+   "options": "Pick Ticket Item",
+   "read_only": 1
   },
   {
    "description": "Items under this warehouse will be suggested",
@@ -38,9 +41,21 @@
   {
    "fieldname": "section_break_6",
    "fieldtype": "Section Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break",
+   "label": "Reference Items"
+  },
+  {
+   "fieldname": "reference_document_items",
+   "fieldtype": "Table",
+   "label": "Reference Document Items",
+   "options": "Pick Ticket Reference Item"
   }
  ],
- "modified": "2019-07-24 14:59:44.542987",
+ "modified": "2019-07-24 16:13:51.668880",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick Ticket",
