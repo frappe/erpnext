@@ -2,6 +2,12 @@ dist: trusty
 
 language: python
 
+git:
+  depth: 1
+
+cache:
+  - pip
+
 addons:
   hosts: test_site
   mariadb: 10.3
