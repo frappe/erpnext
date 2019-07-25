@@ -30,10 +30,11 @@ jobs:
     script: bench migrate
 
 install:
+  - cd ~
   - nvm install 10
-  - wget https://raw.githubusercontent.com/frappe/bench/master/playbooks/install.py
-  - sudo python install.py --develop --user travis --without-bench-setup
-  - sudo pip install -e ~/bench
+
+  - git clone https://github.com/frappe/bench --depth 1
+  - pip install -e ./bench
 
   - rm $TRAVIS_BUILD_DIR/.git/shallow
   - bash $TRAVIS_BUILD_DIR/travis/bench_init.sh
