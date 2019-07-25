@@ -49,7 +49,6 @@ install:
   - mkdir ~/frappe-bench/sites/test_site
   - cp -r $TRAVIS_BUILD_DIR/.travis/site_config.json ~/frappe-bench/sites/test_site/
 
-before_script:
   - mysql -u root -e "SET GLOBAL character_set_server = 'utf8mb4'"
   - mysql -u root -e "SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
 
