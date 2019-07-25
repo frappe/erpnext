@@ -33,7 +33,8 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty"
+   "label": "Qty",
+   "read_only": 1
   },
   {
    "fieldname": "picked_qty",
@@ -46,7 +47,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "read_only": 1
   },
   {
    "fetch_from": "item.item_name",
@@ -66,20 +68,22 @@
    "fieldname": "reference_document_item",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Reference Document Item"
+   "label": "Reference Document Item",
+   "read_only": 1
   },
   {
    "depends_on": "has_serial_no",
    "fieldname": "serial_no",
    "fieldtype": "Small Text",
-   "label": "Serial No"
+   "label": "Serial No",
+   "read_only": 1
   },
   {
-   "depends_on": "has_batch_no",
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch No",
-   "options": "Batch"
+   "options": "Batch",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -106,13 +110,15 @@
    "fieldname": "reference_doctype",
    "fieldtype": "Select",
    "label": "Reference Document Type",
-   "options": "Sales Order\nWork Order"
+   "options": "Sales Order\nWork Order",
+   "read_only": 1
   },
   {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "label": "Reference Document",
-   "options": "reference_doctype"
+   "options": "reference_doctype",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_2",
@@ -124,7 +130,7 @@
   }
  ],
  "istable": 1,
- "modified": "2019-07-24 15:09:35.712289",
+ "modified": "2019-07-25 11:18:58.478250",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick Ticket Item",
