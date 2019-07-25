@@ -67,8 +67,8 @@ before_script:
   - sed -i 's/socketio:/# socketio:/g' Procfile
   - sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
 
-  - bench start &
   - bench get-app erpnext $TRAVIS_BUILD_DIR
+  - bench start &
   - bench --site test_site reinstall --yes
 
 after_script:
