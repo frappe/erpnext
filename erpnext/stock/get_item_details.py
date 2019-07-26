@@ -756,7 +756,7 @@ def validate_conversion_rate(args, meta):
 	if args.price_list:
 		if (not args.plc_conversion_rate
 			and args.price_list_currency==frappe.db.get_value("Price List", args.price_list, "currency", cache=True)):
-			args.plc_conversion_rate = 1.0
+			args.plc_conversion_rate = args.conversion_rate
 
 		# validate price list currency conversion rate
 		if not args.get("price_list_currency"):
