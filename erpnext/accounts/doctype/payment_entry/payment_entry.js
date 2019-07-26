@@ -210,6 +210,17 @@ frappe.ui.form.on('Payment Entry', {
 		cur_frm.set_df_property("target_exchange_rate", "description",
 			("1 " + frm.doc.paid_to_account_currency + " = [?] " + company_currency));
 
+		if (frm.doc.payment_type == "Receive") {
+			frm.fields_dict['paid_from'].set_label(__("Receivable Account"));
+			frm.fields_dict['paid_to'].set_label(__("Account Deposited To"));
+		} else if (frm.doc.payment_type == "Pay") {
+			frm.fields_dict['paid_from'].set_label(__("Account Paid From"));
+			frm.fields_dict['paid_to'].set_label(__("Payable Account"));
+		} else {
+			frm.fields_dict['paid_from'].set_label(__("Account Paid From"));
+			frm.fields_dict['paid_to'].set_label(__("Account Paid To"));
+		}
+
 		frm.refresh_fields();
 	},
 
@@ -229,6 +240,7 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	payment_type: function(frm) {
+		frm.events.set_dynamic_labels(frm);
 		if(frm.doc.payment_type == "Internal Transfer") {
 			$.each(["party", "party_balance", "paid_from", "paid_to",
 				"references", "total_allocated_amount"], function(i, field) {

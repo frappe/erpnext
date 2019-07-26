@@ -231,19 +231,20 @@ class PaymentEntry(AccountsController):
 
 			if self.party_account and self.party_type in ("Customer", "Supplier", "Letter of Credit"):
 				self.validate_account_type(self.party_account,
-					[erpnext.get_party_account_type(self.party_type)])
+					[erpnext.get_party_account_type(self.party_type)], raise_exception=True)
 
 	def validate_bank_accounts(self):
 		if self.payment_type in ("Pay", "Internal Transfer"):
-			self.validate_account_type(self.paid_from, ["Bank", "Cash"])
+			self.validate_account_type(self.paid_from, ["Bank", "Cash"], raise_exception=False)
 
 		if self.payment_type in ("Receive", "Internal Transfer"):
-			self.validate_account_type(self.paid_to, ["Bank", "Cash"])
+			self.validate_account_type(self.paid_to, ["Bank", "Cash"], raise_exception=False)
 
-	def validate_account_type(self, account, account_types):
+	def validate_account_type(self, account, account_types, raise_exception=True):
 		account_type = frappe.db.get_value("Account", account, "account_type")
 		if account_type not in account_types:
-			frappe.throw(_("Account Type for {0} must be {1}").format(account, comma_or(account_types)))
+			frappe.msgprint(_("Account Type for {0} is not one of {1}").format(account, comma_or(account_types)),
+				raise_exception=raise_exception)
 
 	def set_exchange_rate(self):
 		if self.paid_from and not self.source_exchange_rate:
@@ -660,10 +661,10 @@ def get_outstanding_reference_documents(args):
 		condition += " and cost_center='%s'" % args.get("cost_center")
 
 	include_orders = False
-	party_account_type = erpnext.get_party_account_type(args.get("party_type"))
-	if (args.get("payment_type") == "Receive" and party_account_type == "Payable") \
-			or (args.get("payment_type") == "Pay" and party_account_type == "Receivable"):
-		include_orders = True
+	'''party_account_type = erpnext.get_party_account_type(args.get("party_type"))
+	if (args.get("payment_type") == "Receive" and party_account_type == "Receivable") \
+			or (args.get("payment_type") == "Pay" and party_account_type == "Payable"):
+		include_orders = True'''
 
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
 		args.get("party_account"), condition=condition, include_negative_outstanding=True)
@@ -681,14 +682,14 @@ def get_outstanding_reference_documents(args):
 
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
 	orders_to_be_billed = []
-	if not include_orders:
+	if include_orders:
 		orders_to_be_billed = get_orders_to_be_billed(args.get("posting_date"),args.get("party_type"),
 			args.get("party"), party_account_currency, company_currency)
 
 	outstanding_employee_advances = []
 	if args.get("party_type") == "Employee":
 		outstanding_employee_advances = get_oustanding_employee_advances(args.get("party"), args.get("party_account"),
-			is_return=negative_invoices)
+			is_return=args.get("payment_type") == "Receive")
 
 	return outstanding_invoices + orders_to_be_billed + outstanding_employee_advances
 
