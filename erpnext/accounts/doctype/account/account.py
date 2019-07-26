@@ -123,7 +123,9 @@ class Account(NestedSet):
 				doc.flags.ignore_root_company_validation = True
 				doc.update({
 					"company": company,
-					"account_currency": None,
+					# parent account's currency should be passed down to child account's curreny
+					# if it is None, it picks it up from default company currency, which might be unintended
+					"account_currency": self.account_currency,
 					"parent_account": parent_acc_name_map[company]
 				})
 				doc.save()
