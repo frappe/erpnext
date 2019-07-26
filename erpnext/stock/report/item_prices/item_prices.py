@@ -96,11 +96,12 @@ def get_data(filters):
 	""".format(item_conditions), filters, as_dict=1)
 
 	item_price_data = frappe.db.sql("""
-		select p.name, p.price_list, p.item_code, p.price_list_rate, ifnull(p.valid_from, '2000-01-01') as valid_from
+		select p.name, p.price_list, p.item_code, p.price_list_rate, p.currency,
+			ifnull(p.valid_from, '2000-01-01') as valid_from
 		from `tabItem Price` p
 		inner join `tabItem` item on item.name = p.item_code
 		where %(date)s between ifnull(p.valid_from, '2000-01-01') and ifnull(p.valid_upto, '2500-12-31')
-			{0} {1}
+			and ifnull(p.customer, '') = '' and ifnull(p.supplier, '') = '' {0} {1}
 	""".format(item_conditions, price_lists_cond), filters, as_dict=1)
 
 	previous_item_prices = frappe.db.sql("""
@@ -133,6 +134,7 @@ def get_data(filters):
 			price.current_price = d.price_list_rate
 			price.valid_from = d.valid_from
 			price.item_price = d.name
+			price.currency = d.currency
 
 	for d in previous_item_prices:
 		if d.item_code in item_price_map and d.price_list in item_price_map[d.item_code]:
@@ -153,6 +155,7 @@ def get_data(filters):
 
 		for price_list, price in iteritems(item_price_map.get(item_code, {})):
 			d["rate_" + scrub(price_list)] = price.current_price
+			d["currency_" + scrub(price_list)] = price.currency
 			if d.standard_rate is not None:
 				d["rate_diff_" + scrub(price_list)] = flt(price.current_price) - flt(d.standard_rate)
 			if price.previous_price is not None:
@@ -234,20 +237,21 @@ def get_columns(filters, price_lists):
 	columns = [
 		{"fieldname": "item_code", "label": _("Item"), "fieldtype": "Link", "options": "Item", "width": 200,
 			"price_list_note": frappe.db.get_single_value("Price List Settings", "price_list_note")},
-		{"fieldname": "print_in_price_list", "label": _("Print"), "fieldtype": "Check", "width": 50, "editable": True},
+		{"fieldname": "print_in_price_list", "label": _("Print"), "fieldtype": "Check", "width": 50, "editable": 1},
 		# {"fieldname": "item_group", "label": _("Item Group"), "fieldtype": "Link", "options": "Item Group", "width": 120},
-		{"fieldname": "po_qty", "label": _("PO Qty"), "fieldtype": "Float", "width": 80, "restricted": True},
-		{"fieldname": "po_lc_rate", "label": _("PO Rate"), "fieldtype": "Currency", "width": 90, "restricted": True},
-		{"fieldname": "actual_qty", "label": _("Stock Qty"), "fieldtype": "Float", "width": 80, "restricted": True},
-		{"fieldname": "valuation_rate", "label": _("Stock Rate"), "fieldtype": "Currency", "width": 90, "restricted": True},
-		{"fieldname": "avg_lc_rate", "label": _("Avg Rate"), "fieldtype": "Currency", "width": 90, "restricted": True},
+		{"fieldname": "po_qty", "label": _("PO Qty"), "fieldtype": "Float", "width": 80, "restricted": 1},
+		{"fieldname": "po_lc_rate", "label": _("PO Rate"), "fieldtype": "Currency", "width": 90, "restricted": 1},
+		{"fieldname": "actual_qty", "label": _("Stock Qty"), "fieldtype": "Float", "width": 80, "restricted": 1},
+		{"fieldname": "valuation_rate", "label": _("Stock Rate"), "fieldtype": "Currency", "width": 90, "restricted": 1},
+		{"fieldname": "avg_lc_rate", "label": _("Avg Rate"), "fieldtype": "Currency", "width": 90, "restricted": 1},
 	]
 
 	if filters.standard_price_list:
 		columns += [
 			{"fieldname": "standard_rate", "label": _("Standard Rate"), "fieldtype": "Currency", "width": 110,
-				"editable": True, "price_list": filters.standard_price_list, "is_base_price": True},
-			{"fieldname": "margin_rate", "label": _("Margin"), "fieldtype": "Percent", "width": 60, "restricted": True},
+				"editable": 1, "price_list": filters.standard_price_list,
+				"force_currency_symbol": 1, "options": "currency_" + scrub(filters.standard_price_list)},
+			{"fieldname": "margin_rate", "label": _("Margin"), "fieldtype": "Percent", "width": 60, "restricted": 1},
 		]
 
 	for price_list in sorted(price_lists):
@@ -257,8 +261,10 @@ def get_columns(filters, price_lists):
 				"label": price_list,
 				"fieldtype": "Currency",
 				"width": 110,
-				"editable": True,
+				"editable": 1,
 				"price_list": price_list,
+				"options": "currency_" + scrub(price_list),
+				"force_currency_symbol": 1
 			})
 
 	show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
