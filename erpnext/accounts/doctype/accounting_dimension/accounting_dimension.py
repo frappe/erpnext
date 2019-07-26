@@ -96,13 +96,13 @@ def delete_accounting_dimension(doc):
 
 	frappe.db.sql("""
 		DELETE FROM `tabCustom Field`
-		WHERE  fieldname = %s
+		WHERE fieldname = %s
 		AND dt IN (%s)""" %			#nosec
 		('%s', ', '.join(['%s']* len(doclist))), tuple([doc.fieldname] + doclist))
 
 	frappe.db.sql("""
 		DELETE FROM `tabProperty Setter`
-		WHERE  field_name = %s
+		WHERE field_name = %s
 		AND doc_type IN (%s)""" %		#nosec
 		('%s', ', '.join(['%s']* len(doclist))), tuple([doc.fieldname] + doclist))
 
@@ -150,7 +150,8 @@ def get_doctypes_with_dimensions():
 		"Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item", "Purchase Receipt Item",
 		"Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
 		"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
-		"Travel Request", "Fees", "POS Profile"]
+		"Travel Request", "Fees", "POS Profile", "Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item", "Subscription",
+		"Subscription Plan"]
 
 	return doclist
 
