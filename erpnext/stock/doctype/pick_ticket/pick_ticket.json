@@ -43,7 +43,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "collapsible": 1,
    "fieldname": "section_break_4",
    "fieldtype": "Section Break",
    "label": "Reference Items"
@@ -55,7 +54,7 @@
    "options": "Pick Ticket Reference Item"
   }
  ],
- "modified": "2019-07-24 16:13:51.668880",
+ "modified": "2019-07-26 12:06:08.941760",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick Ticket",

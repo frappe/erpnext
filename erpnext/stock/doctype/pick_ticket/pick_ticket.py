@@ -7,16 +7,20 @@ import frappe
 from frappe.model.document import Document
 
 class PickTicket(Document):
-	pass
+	def set_item_locations(self):
+		reference_items = self.reference_document_items
+		self.delete_key('items')
+		for item in reference_items:
+			data = get_items_with_warehouse_and_quantity(item)
 
-def get_pick_list(reference_doctype, reference_name, items_field):
-	doc = frappe.new_doc('Pick Ticket')
-	reference_doc = frappe.get_doc(reference_doctype, reference_name)
-	doc.company = reference_doc.company
-	items = reference_doc.get(items_field)
-	add_picklist_items(items, doc, reference_doc)
-	doc.save()
-	return doc
+			for item_info in data:
+				self.append('items', item_info)
+
+		for item in self.get('items'):
+			if frappe.get_cached_value('Item', item.item, 'has_serial_no'):
+				set_serial_nos(item)
+			elif frappe.get_cached_value('Item', item.item, 'has_batch_no'):
+				set_batch_no(item, self)
 
 def get_available_items(item):
 	# gets all items available in different warehouses
@@ -28,43 +32,29 @@ def get_available_items(item):
 
 	return available_items
 
-def get_items_with_warehouse_and_quantity(item_doc, reference_doc):
+def get_items_with_warehouse_and_quantity(item_doc):
 	items = []
-	item_locations = get_available_items(item_doc.item_code)
+	item_locations = get_available_items(item_doc.item)
 	remaining_qty = item_doc.qty
 
-	if not item_locations:
-		print('{} qty of {} is out of stock. Skipping...'.format(remaining_qty, item_doc.item))
-		return items
 
 	while remaining_qty > 0 and item_locations:
 		item_location = item_locations.pop(0)
 		qty = remaining_qty if item_location.qty >= remaining_qty else item_location.qty
 		items.append({
-			'item': item_doc.item_code,
+			'item': item_doc.item,
 			'qty': qty,
 			'warehouse': item_location.warehouse,
-			'reference_doctype': reference_doc.doctype,
-			'reference_name': reference_doc.name
+			'reference_doctype': item_doc.reference_doctype,
+			'reference_name': item_doc.reference_name
 		})
 		remaining_qty -= qty
 
+	if remaining_qty:
+		print('---------- {} qty of {} is out of stock. Skipping... -------------'.format(remaining_qty, item_doc.item))
+		return items
+
 	return items
-
-def add_picklist_items(reference_items, doc, reference_doc):
-	for item in reference_items:
-		data = get_items_with_warehouse_and_quantity(item, reference_doc)
-
-		for item_info in data:
-			doc.append('items', item_info)
-
-	doc.insert()
-
-	for item in doc.get('items'):
-		if item.has_serial_no:
-			set_serial_nos(item)
-		elif item.has_batch_no:
-			set_batch_no(item, doc)
 
 def set_serial_nos(item):
 	serial_nos = frappe.get_all('Serial No', {
