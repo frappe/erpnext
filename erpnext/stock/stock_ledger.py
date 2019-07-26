@@ -85,8 +85,10 @@ class update_entries_after(object):
 		self.allow_negative_stock = allow_negative_stock
 		self.via_landed_cost_voucher = via_landed_cost_voucher
 		if not self.allow_negative_stock:
-			self.allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings",
-				"allow_negative_stock"))
+			allow_negative_stock_setting = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+			allow_negative_stock_role = frappe.db.get_single_value("Stock Settings", "restrict_negative_stock_to_role")
+			has_negative_stock_role_permission = not allow_negative_stock_role or allow_negative_stock_role in frappe.get_roles()
+			self.allow_negative_stock = cint(allow_negative_stock_setting and has_negative_stock_role_permission)
 
 		self.args = args
 		for key, value in iteritems(args):
