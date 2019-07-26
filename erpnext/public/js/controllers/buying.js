@@ -253,6 +253,15 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			"shipping_address_display", true);
 	},
 
+	pol_address: function() {
+		erpnext.utils.get_address_display(this.frm, "pol_address",
+			"pol_address_display");
+	},
+	poa_address: function() {
+		erpnext.utils.get_address_display(this.frm, "poa_address",
+			"poa_address_display");
+	},
+
 	tc_name: function() {
 		this.get_terms();
 	},
