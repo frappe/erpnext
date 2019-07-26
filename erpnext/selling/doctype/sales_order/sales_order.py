@@ -998,6 +998,22 @@ def make_inter_company_purchase_order(source_name, target_doc=None):
 	return make_inter_company_transaction("Sales Order", source_name, target_doc)
 
 @frappe.whitelist()
-def make_pick_ticket(source_name, target_doc=None, offset=None):
-	from erpnext.stock.doctype.pick_ticket.pick_ticket import get_pick_list
-	return get_pick_list('Sales Order', source_name, 'items')
+def make_pick_ticket(source_name, target_doc=None):
+	doc = get_mapped_doc("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Pick Ticket",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Sales Order Item": {
+			"doctype": "Pick Ticket Reference Item",
+			"field_map": {
+				"item_code": "item",
+				"parenttype": "reference_doctype",
+				"parent": "reference_name"
+			},
+		},
+	}, target_doc)
+
+	return doc
