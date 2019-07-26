@@ -5,7 +5,7 @@ erpnext.doctypes_with_dimensions = ["GL Entry", "Sales Invoice", "Purchase Invoi
 	"Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item", "Purchase Receipt Item",
 	"Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
 	"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
-	"Travel Request", "Fees", "POS Profile"];
+	"Travel Request", "Fees", "POS Profile", "Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item"];
 
 frappe.call({
 	method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimension_filters",
@@ -24,6 +24,9 @@ erpnext.doctypes_with_dimensions.forEach((doctype) => {
 						frm.set_query(dimension['fieldname'], {
 							"is_group": 0
 						});
+					}
+					if (frm.is_new() && frappe.meta.has_field(doctype, 'company') && frm.doc.company) {
+						frm.set_value(dimension['fieldname'], erpnext.default_dimensions[frm.doc.company][dimension['document_type']]);
 					}
 				});
 			});
