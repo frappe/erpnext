@@ -189,6 +189,9 @@ class Item(WebsiteGenerator):
 					'route')) + '/' + self.scrub((self.item_name if self.item_name else self.item_code) + '-' + random_string(5))
 
 	def validate_website_image(self):
+		if frappe.flags.in_import:
+			return
+
 		"""Validate if the website image is a public file"""
 		auto_set_website_image = False
 		if not self.website_image and self.image:
@@ -208,8 +211,7 @@ class Item(WebsiteGenerator):
 
 		if not file_doc:
 			if not auto_set_website_image:
-				frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found")
-									.format(self.website_image, self.name))
+				frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found").format(self.website_image, self.name))
 
 			self.website_image = None
 
@@ -220,6 +222,9 @@ class Item(WebsiteGenerator):
 			self.website_image = None
 
 	def make_thumbnail(self):
+		if frappe.flags.in_import:
+			return
+
 		"""Make a thumbnail of `website_image`"""
 		import requests.exceptions
 
