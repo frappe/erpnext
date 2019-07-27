@@ -164,8 +164,9 @@ def get_accounting_dimensions(as_list=True):
 		return accounting_dimensions
 
 def get_checks_for_pl_and_bs_accounts():
-	dimensions = frappe.db.sql("""SELECT parent, company, mandatory_for_pl, mandatory_for_bs
-		FROM `tabAccounting Dimension Detail`""", as_dict=1)
+	dimensions = frappe.db.sql("""SELECT p.label, p.disabled, p.fieldname, c.company, c.mandatory_for_pl, c.mandatory_for_bs
+		FROM `tabAccounting Dimension`p ,`tabAccounting Dimension Detail` c
+		WHERE p.name = c.parent""", as_dict=1)
 
 	return dimensions
 
