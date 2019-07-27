@@ -162,6 +162,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Payroll Period",
+				},
+				{
+					"type": "doctype",
 					"name": "Salary Component",
 				},
 				{
