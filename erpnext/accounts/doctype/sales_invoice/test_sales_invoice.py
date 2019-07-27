@@ -29,10 +29,12 @@ class TestSalesInvoice(unittest.TestCase):
 		w.submit()
 		return w
 
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		unlink_payment_on_cancel_of_invoice()
 
-	def tearDown(self):
+	@classmethod
+	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
 
 	def test_timestamp_change(self):
@@ -135,6 +137,7 @@ class TestSalesInvoice(unittest.TestCase):
 		unlink_payment_on_cancel_of_invoice(0)
 		si = frappe.get_doc('Sales Invoice', si.name)
 		self.assertRaises(frappe.LinkExistsError, si.cancel)
+		unlink_payment_on_cancel_of_invoice()
 
 	def test_sales_invoice_calculation_export_currency(self):
 		si = frappe.copy_doc(test_records[2])
