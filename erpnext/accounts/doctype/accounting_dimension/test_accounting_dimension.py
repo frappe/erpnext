@@ -108,7 +108,6 @@ def disable_dimension():
 	dimension1.save()
 
 	dimension2 = frappe.get_doc("Accounting Dimension", "Location")
-	dimension2.mandatory_for_pl = 0
 	dimension2.disabled = 1
 	dimension2.save()
 
