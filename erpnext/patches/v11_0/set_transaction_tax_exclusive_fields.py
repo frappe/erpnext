@@ -58,6 +58,9 @@ def execute():
 		'taxable_amount',
 		'net_rate',
 		'net_amount',
+		'item_taxes_and_charges',
+		'tax_inclusive_amount',
+		'tax_inclusive_rate',
 	]
 	new_item_fields += ['base_' + f for f in new_item_fields]
 	new_item_fields = set(new_item_fields)

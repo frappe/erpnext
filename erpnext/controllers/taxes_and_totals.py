@@ -8,6 +8,8 @@ from frappe import _, scrub
 from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 from erpnext.controllers.accounts_controller import validate_conversion_rate, \
 	validate_taxes_and_charges, validate_inclusive_tax
+from six import iteritems
+
 
 class calculate_taxes_and_totals(object):
 	def __init__(self, doc):
@@ -36,6 +38,7 @@ class calculate_taxes_and_totals(object):
 		self.calculate_net_total()
 		self.calculate_taxes()
 		self.manipulate_grand_total_for_inclusive_tax()
+		self.calculate_tax_inclusive_rate()
 		self.calculate_totals()
 		self._cleanup()
 		self.calculate_total_net_weight()
@@ -89,6 +92,10 @@ class calculate_taxes_and_totals(object):
 
 				item.net_rate = item.rate
 				item.net_amount = item.amount
+
+				item.item_taxes_and_charges = 0
+				item.tax_inclusive_amount = 0
+				item.tax_inclusive_rate = 0
 
 				item.tax_exclusive_price_list_rate = item.price_list_rate
 				item.tax_exclusive_rate = item.rate
@@ -419,6 +426,8 @@ class calculate_taxes_and_totals(object):
 
 	def set_item_wise_tax(self, item, tax, tax_rate, current_tax_amount):
 		# store tax breakup for each item
+		item.item_taxes_and_charges += current_tax_amount
+
 		key = item.item_code or item.item_name
 		item_wise_tax_amount = current_tax_amount*self.doc.conversion_rate
 		if tax.item_wise_tax_detail.get(key):
@@ -443,6 +452,13 @@ class calculate_taxes_and_totals(object):
 			if diff and abs(diff) <= (5.0 / 10**last_tax.precision("tax_amount")):
 				self.doc.rounding_adjustment = flt(flt(self.doc.rounding_adjustment) +
 					flt(diff), self.doc.precision("rounding_adjustment"))
+
+	def calculate_tax_inclusive_rate(self):
+		for item in self.doc.items:
+			item.tax_inclusive_amount = flt(item.tax_exclusive_amount + item.item_taxes_and_charges)
+			item.tax_inclusive_rate = flt(item.tax_inclusive_amount / item.qty) if item.qty else 0
+			self._set_in_company_currency(item, ['item_taxes_and_charges', 'tax_inclusive_amount', 'tax_inclusive_rate'],
+				not self.should_round_transaction_currency())
 
 	def calculate_totals(self):
 		self.doc.total_after_taxes = flt(self.doc.get("taxes")[-1].total) + flt(self.doc.rounding_adjustment) \
@@ -726,6 +742,19 @@ def get_itemised_tax_breakup_html(doc):
 	# get tax breakup data
 	itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(doc)
 
+	# get totals
+	item_totals = {}
+	tax_totals = {}
+	total_taxes_and_charges = 0
+	for item, taxes in iteritems(itemised_tax):
+		item_totals.setdefault(item, 0)
+		for tax, tax_data in iteritems(taxes):
+			tax_totals.setdefault(tax, 0)
+
+			tax_totals[tax] += tax_data.tax_amount
+			item_totals[item] += tax_data.tax_amount
+			total_taxes_and_charges += tax_data.tax_amount
+
 	if cint(doc.get("calculate_tax_on_company_currency")):
 		currency = erpnext.get_company_currency(doc.company)
 		conversion_rate = 1.0
@@ -746,6 +775,9 @@ def get_itemised_tax_breakup_html(doc):
 			itemised_tax=itemised_tax,
 			itemised_taxable_amount=itemised_taxable_amount,
 			tax_accounts=tax_accounts,
+			item_totals=item_totals,
+			tax_totals=tax_totals,
+			total_taxes_and_charges=total_taxes_and_charges,
 			conversion_rate=conversion_rate,
 			currency=currency
 		)
@@ -759,7 +791,7 @@ def update_itemised_tax_data(doc):
 
 @erpnext.allow_regional
 def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
-	return [_("Item"), _("Taxable Amount")] + tax_accounts
+	return [_("Item")] + tax_accounts
 
 @erpnext.allow_regional
 def get_itemised_tax_breakup_data(doc):

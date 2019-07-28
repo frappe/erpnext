@@ -61,6 +61,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.calculate_net_total();
 		this.calculate_taxes();
 		this.manipulate_grand_total_for_inclusive_tax();
+		this.calculate_tax_inclusive_rate();
 		this.calculate_totals();
 		this._cleanup();
 	},
@@ -114,6 +115,10 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 				item.net_rate = item.rate;
 				item.net_amount = item.amount;
+
+				item.item_taxes_and_charges = 0;
+				item.tax_inclusive_amount = 0;
+				item.tax_inclusive_rate = 0;
 
 				item.tax_exclusive_price_list_rate = item.price_list_rate;
 				item.tax_exclusive_rate = item.rate;
@@ -510,6 +515,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	set_item_wise_tax: function(item, tax, tax_rate, current_tax_amount) {
 		// store tax breakup for each item
+		item.item_taxes_and_charges += current_tax_amount;
+
 		let tax_detail = tax.item_wise_tax_detail;
 		let key = item.item_code || item.item_name;
 
@@ -553,6 +560,16 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				}
 			}
 		}
+	},
+
+	calculate_tax_inclusive_rate: function() {
+		var me = this;
+		$.each(me.frm.doc.items || [], function(i, item) {
+			item.tax_inclusive_amount = flt(item.tax_exclusive_amount + item.item_taxes_and_charges);
+			item.tax_inclusive_rate = item.qty ? flt(item.tax_inclusive_amount / item.qty) : 0;
+			me.set_in_company_currency(item, ['item_taxes_and_charges', 'tax_inclusive_amount', 'tax_inclusive_rate'],
+				!me.should_round_transaction_currency());
+		});
 	},
 
 	calculate_totals: function() {

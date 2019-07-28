@@ -580,7 +580,7 @@ erpnext.patches.v10_0.repost_gle_for_purchase_receipts_with_rejected_items
 erpnext.patches.v10_0.allow_operators_in_supplier_scorecard
 erpnext.patches.v11_0.update_delivery_trip_status
 erpnext.patches.v11_0.set_missing_gst_hsn_code
-erpnext.patches.v11_0.set_transaction_tax_exclusive_fields #2019-02-18 #2019-02-28(2) #2019-07-19 #20190-07-21
+erpnext.patches.v11_0.set_transaction_tax_exclusive_fields #2019-02-18 #2019-02-28(2) #2019-07-19 #2019-07-21 #2019-07-28
 erpnext.patches.v11_0.unset_against_voucher_in_receivable_payable_gl_entry
 erpnext.patches.v11_0.set_transaction_item_alt_uom_qty #2019-02-27
 erpnext.patches.v11_0.migrate_reference_and_clearance_to_journal_entry_accounts_table
@@ -617,3 +617,4 @@ erpnext.patches.v11_1.update_bank_transaction_status
 erpnext.patches.v11_1.renamed_delayed_item_report
 erpnext.patches.v11_1.set_missing_opportunity_from
 erpnext.patches.v11_1.set_quotation_status
+erpnext.patches.v11_1.rename_company_tax_ntn_cnic

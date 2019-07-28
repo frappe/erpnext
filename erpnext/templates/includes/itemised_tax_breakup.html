@@ -9,15 +9,13 @@
 						<th class="text-right">{{ key }}</th>
 					{% endif %}
 				{% endfor%}
+				<th class='text-right'>{{ _("Total") }}</th>
 			</tr>
 		</thead>
 		<tbody>
 			{% for item, taxes in itemised_tax.items() %}
 				<tr>
 					<td>{{ item }}</td>
-					<td class='text-right'>
-						{{ frappe.utils.fmt_money(itemised_taxable_amount.get(item, 0), None, currency) }}
-					</td>
 					{% for tax_account in tax_accounts %}
 						{% set tax_details = taxes.get(tax_account) %}
 						{% if tax_details %}
@@ -31,8 +29,16 @@
 							<td></td>
 						{% endif %}
 					{% endfor %}
+					<td class='text-right'>{{ frappe.utils.fmt_money(item_totals[item] / conversion_rate, None, currency) }}</td>
 				</tr>
 			{% endfor %}
+			<tr>
+				<td><b>{{ _("Total") }}</b></td>
+				{% for tax_account in tax_accounts %}
+					<td class='text-right'>{{ frappe.utils.fmt_money(tax_totals[tax_account] / conversion_rate, None, currency) }}</td>
+				{% endfor %}
+				<td class='text-right'>{{ frappe.utils.fmt_money(total_taxes_and_charges / conversion_rate, None, currency) }}</td>
+			</tr>
 		</tbody>
 	</table>
 </div>

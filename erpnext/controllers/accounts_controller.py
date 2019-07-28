@@ -790,31 +790,69 @@ class AccountsController(TransactionBase):
 							total_allocated_amount, update_modified=False)
 
 	def group_similar_items(self):
-		group_item_qty = {}
-		group_item_amount = {}
-		# to update serial number in print
+		group_item_data = {}
+		item_meta = frappe.get_meta(self.doctype + " Item")
 		count = 0
 
-		for item in self.items:
-			group_item_qty[item.item_code] = group_item_qty.get(item.item_code, 0) + item.qty
-			group_item_amount[item.item_code] = group_item_amount.get(item.item_code, 0) + item.amount
+		sum_fields = ['qty', 'alt_uom_qty', 'total_weight',
+			'amount', 'taxable_amount', 'net_amount', 'total_discount', 'amount_before_discount',
+			'item_taxes_and_charges', 'tax_inclusive_amount']
+		sum_fields += ['tax_exclusive_' + f for f in sum_fields if item_meta.has_field('tax_exclusive_' + f)]
 
+		rate_fields = [('rate', 'amount'), ('taxable_rate', 'taxable_amount'), ('net_rate', 'net_amount'),
+			('discount_amount', 'total_discount'), ('price_list_rate', 'amount_before_discount'),
+			('tax_inclusive_rate', 'tax_inclusive_amount'), ('weight_per_unit', 'total_weight')]
+		rate_fields += [('tax_exclusive_' + t, 'tax_exclusive_' + s) for t, s in rate_fields
+			if item_meta.has_field('tax_exclusive_' + t) and item_meta.has_field('tax_exclusive_' + s)]
+
+		base_fields = [('base_' + f, f) for f in sum_fields if item_meta.has_field('base_' + f)]
+		base_fields += [('base_' + t, t) for t, s in rate_fields if item_meta.has_field('base_' + t)]
+
+		# Sum amounts
+		for item in self.items:
+			group_item = group_item_data.setdefault(item.item_code, frappe._dict())
+			for f in sum_fields:
+				group_item[f] = group_item.get(f, 0) + flt(item.get(f))
+
+			group_item_serial_nos = group_item.setdefault('serial_no', [])
+			if item.serial_no:
+				group_item_serial_nos += filter(lambda s: s, item.serial_no.split('\n'))
+
+		# Calculate average rates and get serial nos string
+		for group_item in group_item_data.values():
+			if group_item.qty:
+				for target, source in rate_fields:
+					group_item[target] = flt(group_item[source]) / flt(group_item.qty)
+			else:
+				for target, source in rate_fields:
+					group_item[target] = 0
+
+			group_item.serial_no = '\n'.join(group_item.serial_no)
+
+		# Calculate company currenct values
+		for group_item in group_item_data.values():
+			for target, source in base_fields:
+				group_item[target] = group_item.get(source, 0) * self.conversion_rate
+
+		# Remove duplicates and set aggregated values
 		duplicate_list = []
 		for item in self.items:
-			if item.item_code in group_item_qty:
+			if item.item_code in group_item_data.keys():
 				count += 1
-				item.qty = group_item_qty[item.item_code]
-				item.amount = group_item_amount[item.item_code]
 
-				if item.qty:
-					item.rate = flt(flt(item.amount) / flt(item.qty), item.precision("rate"))
-				else:
-					item.rate = 0
+				# Will set price_list_rate instead
+				if item.get('rate_with_margin'):
+					item.rate_with_margin = 0
+				if item.get('tax_exclusive_rate_with_margin'):
+					item.tax_exclusive_rate_with_margin = 0
+
+				item.update(group_item_data[item.item_code])
 
 				item.idx = count
-				del group_item_qty[item.item_code]
+				del group_item_data[item.item_code]
 			else:
 				duplicate_list.append(item)
+
 		for item in duplicate_list:
 			self.remove(item)
 

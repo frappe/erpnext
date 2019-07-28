@@ -1124,6 +1124,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				"base_rate_with_margin", "base_tax_exclusive_price_list_rate",
 				"base_tax_exclusive_rate", "base_tax_exclusive_amount", "base_tax_exclusive_rate_with_margin",
 				"base_amount_before_discount", "base_tax_exclusive_amount_before_discount",
+				"base_item_taxes_and_charges", "base_tax_inclusive_amount", "base_tax_inclusive_rate",
 				"base_total_discount", "base_tax_exclusive_total_discount"],
 			company_currency, "items");
 
@@ -1182,7 +1183,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		var item_grid = this.frm.fields_dict["items"].grid;
 		$.each(["base_rate", "base_price_list_rate", "base_amount", "base_rate_with_margin",
-		"base_amount_before_discount", "base_total_discount"], function(i, fname) {
+		"base_amount_before_discount", "base_total_discount",
+		"base_item_taxes_and_charges", "base_tax_inclusive_amount", "base_tax_inclusive_rate"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
 				item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
 		});
