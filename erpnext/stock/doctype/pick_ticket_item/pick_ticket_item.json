@@ -72,7 +72,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "has_serial_no",
    "fieldname": "serial_no",
    "fieldtype": "Small Text",
    "label": "Serial No",
@@ -130,7 +129,7 @@
   }
  ],
  "istable": 1,
- "modified": "2019-07-25 11:18:58.478250",
+ "modified": "2019-07-26 14:47:33.965373",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick Ticket Item",
