@@ -134,6 +134,10 @@ class AccountsController(TransactionBase):
 			if self.get("group_same_items"):
 				self.group_similar_items()
 
+			self.warehouses = list(set([frappe.get_cached_value("Warehouse", item.warehouse, 'warehouse_name') for item in self.items if item.get('warehouse')]))
+			for item in self.items:
+				item.alt_uom_or_uom = item.alt_uom or item.uom
+
 			if self.get("discount_amount"):
 				self.discount_amount = -self.discount_amount
 
