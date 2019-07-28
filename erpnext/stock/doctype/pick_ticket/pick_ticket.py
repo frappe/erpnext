@@ -61,7 +61,7 @@ def set_serial_nos(item):
 		'item_code': item.item,
 		'warehouse': item.warehouse
 	}, limit=item.qty, order_by='purchase_date')
-	item.serial_no = '\n'.join([serial_no.name for serial_no in serial_nos])
+	item.set('serial_no', '\n'.join([serial_no.name for serial_no in serial_nos]))
 
 def set_batch_no(item, doc):
 	batches = frappe.get_all('Stock Ledger Entry',
