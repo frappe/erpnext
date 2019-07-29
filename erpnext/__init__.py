@@ -22,6 +22,18 @@ def get_default_company(user=None):
 
 	return default_company
 
+def get_company_address(args):
+	from frappe.contacts.doctype.address.address import get_default_address
+
+	adress_name = None
+	if args.get('company_address'):
+		address_name = args.get('company_address')
+	else:
+		company = args.get('company') or get_default_company()
+		if company:
+			address_name = get_default_address('Company', company)
+
+	return frappe.get_cached_doc('Address', address_name)
 
 def get_default_currency():
 	'''Returns the currency of the default company'''

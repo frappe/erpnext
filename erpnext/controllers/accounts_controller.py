@@ -135,7 +135,9 @@ class AccountsController(TransactionBase):
 			if self.get("group_same_items"):
 				self.group_similar_items()
 
-			self.warehouses = list(set([frappe.get_cached_value("Warehouse", item.warehouse, 'warehouse_name') for item in self.items if item.get('warehouse')]))
+			self.warehouses = list(set([frappe.get_cached_value("Warehouse", item.warehouse, 'warehouse_name')
+				for item in self.items if item.get('warehouse')]))
+
 			for item in self.items:
 				item.alt_uom_or_uom = item.alt_uom or item.uom
 
@@ -153,6 +155,14 @@ class AccountsController(TransactionBase):
 
 		if self.doctype in ['Journal Entry', 'Payment Entry']:
 			self.get_gl_entries_for_print()
+
+		self.company_address_doc = erpnext.get_company_address(self)
+
+		if self.doctype == "Stock Entry":
+			self.s_warehouses = list(set([frappe.get_cached_value("Warehouse", item.s_warehouse, 'warehouse_name')
+				for item in self.items if item.get('s_warehouse')]))
+			self.t_warehouses = list(set([frappe.get_cached_value("Warehouse", item.t_warehouse, 'warehouse_name')
+				for item in self.items if item.get('t_warehouse')]))
 
 	def validate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
