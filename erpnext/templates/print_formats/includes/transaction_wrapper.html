@@ -46,8 +46,8 @@
 					{%- endif %}
 					<div style="line-height:1.3;">{{ row('Address', doc.address_display) }}</div>
 					{{ row('Description', doc.remarks, empty_value="No Remarks") }}
-					{{ row('Source', doc.s_warehouses|join('<br />')) }}
-					{{ row('Target', doc.t_warehouses|join('<br />')) }}
+					{{ row('Source', doc.s_warehouses|join(', ')) }}
+					{{ row('Target', doc.t_warehouses|join(', ')) }}
 				</div>
 				<div class="doc">
 					{{ row('Date', frappe.format_date(doc.posting_date, "d MMMM, Y")) }}
@@ -56,7 +56,7 @@
 						{{ row('NTN/CNIC', doc.tax_id or doc.tax_cnic) }}
 					{%- endif %}
 					{% if doc.doctype in ['Delivery Note', 'Purchase Receipt'] %}
-						{{ row('Location', doc.warehouses|join('<br />')) }}
+						{{ row('Location', doc.warehouses|join(', ')) }}
 					{% endif %}
 					{{ row('PO #', doc.po_no) }}
 					{{ row('Driver', doc.driver_name) }}
