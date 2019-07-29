@@ -290,9 +290,6 @@ class Subscription(Document):
 		invoice.save()
 		invoice.submit()
 
-		for dimension in accounting_dimensions:
-			invoice.load_from_db()
-
 		return invoice
 
 	def get_items_from_plans(self, plans, prorate=0):
