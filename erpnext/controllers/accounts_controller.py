@@ -60,7 +60,7 @@ class AccountsController(TransactionBase):
 
 	def validate(self):
 
-		if not self.is_return:
+		if not self.get('is_return'):
 			self.validate_qty_is_not_zero()
 
 		if self.get("_action") and self._action != "update_after_submit":
