@@ -128,30 +128,7 @@ class DeliveryNote(SellingController):
 
 		self.update_current_stock()
 
-		self.calculate_alt_uom_tax_inclusive_values()
-
 		if not self.installation_status: self.installation_status = 'Not Installed'
-
-	def calculate_alt_uom_tax_inclusive_values(self):
-		import json
-
-		item_qty_map = {}
-		for item in self.items:
-			item.tax_inclusive_amount = item.amount
-			if item.item_code:
-				item_qty_map.setdefault(item.item_code, 0)
-				item_qty_map[item.item_code] += item.alt_uom_qty
-
-		for tax in self.taxes:
-			if not tax.included_in_print_rate:
-				tax_detail = json.loads(tax.item_wise_tax_detail)
-				for item in self.items:
-					if item.item_code:
-						item.tax_inclusive_amount += tax_detail[item.item_code][1] * item.alt_uom_qty / item_qty_map[item.item_code]
-
-		for item in self.items:
-			if item.item_code:
-				item.alt_uom_tax_inclusive_rate = flt(item.tax_inclusive_amount / item.alt_uom_qty)
 
 	def validate_with_previous_doc(self):
 		super(DeliveryNote, self).validate_with_previous_doc({
