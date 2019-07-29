@@ -507,18 +507,14 @@ class JournalEntry(AccountsController):
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
 
+		gl_map = self.get_gl_entries()
+		if gl_map:
+			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj, merge_entries=False)
+
+	def get_gl_entries(self):
 		gl_map = []
 		for d in self.get("accounts"):
 			if d.debit or d.credit:
-				r = []
-				if d.user_remark:
-					r.append(d.user_remark)
-				if self.user_remark:
-					r.append(_("Note: {0}").format(self.user_remark))
-				if self.reference_account:
-					r.append(_('Reference Account: {0}').format(self.reference_account))
-				remarks = "\n".join(r)
-
 				gl_map.append(
 					self.get_gl_dict({
 						"account": d.account,
@@ -528,11 +524,13 @@ class JournalEntry(AccountsController):
 						"debit": flt(d.debit, d.precision("debit")),
 						"credit": flt(d.credit, d.precision("credit")),
 						"account_currency": d.account_currency,
-						"debit_in_account_currency": flt(d.debit_in_account_currency, d.precision("debit_in_account_currency")),
-						"credit_in_account_currency": flt(d.credit_in_account_currency, d.precision("credit_in_account_currency")),
+						"debit_in_account_currency": flt(d.debit_in_account_currency,
+							d.precision("debit_in_account_currency")),
+						"credit_in_account_currency": flt(d.credit_in_account_currency,
+							d.precision("credit_in_account_currency")),
 						"against_voucher_type": d.reference_type,
 						"against_voucher": d.reference_name,
-						"remarks": remarks,
+						"remarks": d.user_remark or self.user_remark or self.remark,
 						"reference_no": d.cheque_no,
 						"reference_date": d.cheque_date,
 						"cost_center": d.cost_center,
@@ -540,9 +538,7 @@ class JournalEntry(AccountsController):
 						"finance_book": self.finance_book
 					})
 				)
-
-		if gl_map:
-			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj, merge_entries=False)
+		return gl_map
 
 	def get_balance(self):
 		if not self.get('accounts'):

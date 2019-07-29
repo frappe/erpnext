@@ -82,53 +82,6 @@ class PaymentEntry(AccountsController):
 		self.update_reference_details()
 		self.delink_advance_entry_references()
 
-	def before_print(self):
-		from frappe.utils import cstr
-		from collections import OrderedDict
-
-		super(PaymentEntry, self).before_print()
-		gles = frappe.db.sql("""
-			select
-				account, remarks, party_type, party, debit, credit,
-				against_voucher, against_voucher_type, reference_no, reference_date
-			from `tabGL Entry`
-			where voucher_type = %s and voucher_no = %s
-		""", [self.doctype, self.name], as_dict=1)
-
-		grouped_gles = OrderedDict()
-
-		for gle in gles:
-			gle.remarks = gle.remarks.replace("Note: {}".format(self.user_remark), "").strip()
-			group = grouped_gles.setdefault((cstr(gle.account), cstr(gle.party_type), cstr(gle.party), cstr(gle.remarks), cstr(gle.reference_no), cstr(gle.reference_date)), frappe._dict({
-				"account": cstr(gle.account),
-				"party_type": cstr(gle.party_type),
-				"party": cstr(gle.party),
-				"remarks": cstr(gle.remarks),
-				"reference_no": cstr(gle.reference_no),
-				"reference_date": cstr(gle.reference_date),
-				"sum": 0, "against_voucher_set": set(), "against_voucher": []
-			}))
-			group.sum += flt(gle.debit) - flt(gle.credit)
-			if gle.against_voucher_type and gle.against_voucher:
-				group.against_voucher_set.add((cstr(gle.against_voucher_type), cstr(gle.against_voucher)))
-
-		for d in grouped_gles.values():
-			d.debit = d.sum if d.sum > 0 else 0
-			d.credit = -d.sum if d.sum < 0 else 0
-
-			for against_voucher_type, against_voucher in d.against_voucher_set:
-				amended_from = frappe.db.get_value(against_voucher_type, against_voucher, "amended_from")
-				if not amended_from:
-					d.against_voucher.append(against_voucher)
-				else:
-					d.against_voucher.append(against_voucher[:against_voucher.rfind('-')])
-
-			d.against_voucher = ", ".join(d.against_voucher or [])
-
-		self.gles = grouped_gles.values()
-		self.total_debit = sum([d.debit for d in self.gles])
-		self.total_credit = sum([d.credit for d in self.gles])
-
 	def validate_duplicate_entry(self):
 		reference_names = []
 		for d in self.get("references"):
@@ -479,12 +432,15 @@ class PaymentEntry(AccountsController):
 		if self.payment_type in ("Receive", "Pay") and not self.get("party_account_field"):
 			self.setup_party_account_field()
 
+		gl_entries = self.get_gl_entries()
+		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
+
+	def get_gl_entries(self):
 		gl_entries = []
 		self.add_party_gl_entries(gl_entries)
 		self.add_bank_gl_entries(gl_entries)
 		self.add_deductions_gl_entries(gl_entries)
-
-		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
+		return gl_entries
 
 	def add_party_gl_entries(self, gl_entries):
 		if self.party_account:
@@ -502,24 +458,17 @@ class PaymentEntry(AccountsController):
 				"cost_center": self.cost_center,
 				"reference_no": self.reference_no,
 				"reference_date": self.reference_date,
-				"remarks": _("Note: {0}").format(self.user_remark) if self.user_remark else self.remarks
+				"remarks": self.user_remark or self.remarks
 			})
 
 			dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
 
 			for d in self.get("references"):
-				r = []
-				if d.user_remark:
-					r.append(d.user_remark)
-				if self.user_remark:
-					r.append(_("Note: {0}").format(self.user_remark))
-				remarks = "\n".join(r) if r else self.remarks
-
 				gle = party_gl_dict.copy()
 				gle.update({
 					"against_voucher_type": d.reference_doctype,
 					"against_voucher": d.reference_name,
-					"remarks": remarks
+					"remarks": d.user_remark or self.user_remark or self.remarks
 				})
 
 				allocated_amount_in_company_currency = flt(flt(d.allocated_amount) * flt(d.exchange_rate),
@@ -557,7 +506,7 @@ class PaymentEntry(AccountsController):
 					"cost_center": self.cost_center,
 					"reference_no": self.reference_no,
 					"reference_date": self.reference_date,
-					"remarks": _("Note: {0}").format(self.user_remark) if self.user_remark else self.remarks
+					"remarks": self.user_remark or self.remarks
 				})
 			)
 		if self.payment_type in ("Receive", "Internal Transfer"):
@@ -571,7 +520,7 @@ class PaymentEntry(AccountsController):
 					"cost_center": self.cost_center,
 					"reference_no": self.reference_no,
 					"reference_date": self.reference_date,
-					"remarks": _("Note: {0}").format(self.user_remark) if self.user_remark else self.remarks
+					"remarks": self.user_remark or self.remarks
 				})
 			)
 
@@ -581,13 +530,6 @@ class PaymentEntry(AccountsController):
 				account_currency = get_account_currency(d.account)
 				if account_currency != self.company_currency:
 					frappe.throw(_("Currency for {0} must be {1}").format(d.account, self.company_currency))
-
-				r = []
-				if d.user_remark:
-					r.append(d.user_remark)
-				if self.user_remark:
-					r.append(_("Note: {0}").format(self.user_remark))
-				remarks = "\n".join(r) if r else self.remarks
 
 				gl_entries.append(
 					self.get_gl_dict({
@@ -600,7 +542,7 @@ class PaymentEntry(AccountsController):
 						"project": self.project,
 						"reference_no": self.reference_no,
 						"reference_date": self.reference_date,
-						"remarks": remarks
+						"remarks": d.user_remark or self.user_remark or self.remarks
 					})
 				)
 

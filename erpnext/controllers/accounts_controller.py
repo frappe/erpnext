@@ -5,7 +5,8 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import json
 from frappe import _, throw, scrub
-from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day, nowdate
+from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day, nowdate,\
+	cstr
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
@@ -149,6 +150,9 @@ class AccountsController(TransactionBase):
 				df.set("print_hide", 0)
 			else:
 				df.set("print_hide", 1)
+
+		if self.doctype in ['Journal Entry', 'Payment Entry']:
+			self.get_gl_entries_for_print()
 
 	def validate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
@@ -819,7 +823,7 @@ class AccountsController(TransactionBase):
 				group_item[f] = group_item.get(f, 0) + flt(item.get(f))
 
 			group_item_serial_nos = group_item.setdefault('serial_no', [])
-			if item.serial_no:
+			if item.get('serial_no'):
 				group_item_serial_nos += filter(lambda s: s, item.serial_no.split('\n'))
 
 		# Calculate average rates and get serial nos string
@@ -859,6 +863,61 @@ class AccountsController(TransactionBase):
 
 		for item in duplicate_list:
 			self.remove(item)
+
+	def get_gl_entries_for_print(self):
+		from collections import OrderedDict
+
+		if self.docstatus == 1:
+			gles = frappe.db.sql("""
+				select
+					account, remarks, party_type, party, debit, credit,
+					against_voucher, against_voucher_type, reference_no, reference_date
+				from `tabGL Entry`
+				where voucher_type = %s and voucher_no = %s
+			""", [self.doctype, self.name], as_dict=1)
+		else:
+			gles = self.get_gl_entries()
+
+		grouped_gles = OrderedDict()
+
+		for gle in gles:
+			key = (cstr(gle.account), cstr(gle.party_type), cstr(gle.party), cstr(gle.remarks), cstr(gle.reference_no),
+				cstr(gle.reference_date), bool(gle.against_voucher))
+			group = grouped_gles.setdefault(key, frappe._dict({
+				"account": cstr(gle.account),
+				"party_type": cstr(gle.party_type),
+				"party": cstr(gle.party),
+				"remarks": cstr(gle.remarks),
+				"reference_no": cstr(gle.reference_no),
+				"reference_date": cstr(gle.reference_date),
+				"sum": 0, "against_voucher_set": set(), "against_voucher": []
+			}))
+			group.sum += flt(gle.debit) - flt(gle.credit)
+			if gle.against_voucher_type and gle.against_voucher:
+				group.against_voucher_set.add((cstr(gle.against_voucher_type), cstr(gle.against_voucher)))
+
+		for d in grouped_gles.values():
+			d.debit = d.sum if d.sum > 0 else 0
+			d.credit = -d.sum if d.sum < 0 else 0
+
+			for against_voucher_type, against_voucher in d.against_voucher_set:
+				bill_no = None
+				if against_voucher_type in ['Journal Entry', 'Purchase Invoice']:
+					bill_no = frappe.db.get_value(against_voucher_type, against_voucher, 'bill_no')
+
+				if bill_no:
+					d.against_voucher.append(bill_no)
+				else:
+					d.against_voucher.append(frappe.utils.get_original_name(against_voucher_type, against_voucher))
+
+			d.against_voucher = ", ".join(d.against_voucher or [])
+
+		debit_gles = filter(lambda d: d.debit - d.credit > 0, grouped_gles.values())
+		credit_gles = filter(lambda d: d.debit - d.credit < 0, grouped_gles.values())
+
+		self.gl_entries = debit_gles + credit_gles
+		self.total_debit = sum([d.debit for d in self.gl_entries])
+		self.total_credit = sum([d.credit for d in self.gl_entries])
 
 	def set_payment_schedule(self):
 		if self.doctype == 'Sales Invoice' and self.is_pos:

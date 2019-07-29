@@ -23,10 +23,10 @@
 	<!-- Header Section -->
 	<div id="header-html" class="hidden-pdf">
 		<div class="transaction-pf">
-			<div class="visible-pdf" style="line-height:2.4">&nbsp;</div>
+			<div class="visible-pdf" style="line-height:1.2">&nbsp;</div>
 			<div class="letter-head text-center" style="border:#000 1px solid;width:100%;">
 				{% if not no_letterhead %}
-					<h1 style="margin:0;padding:3px;border-bottom:#000 1px solid;">{{ doc.company }}</h1>
+					<h1 class="company-name" style="margin:0;padding:3px;border-bottom:#000 1px solid;">{{ doc.company }}</h1>
 				{% endif %}
 				<h4 style="margin:0;padding:3px;">{{ doc.select_print_heading or doc.doctype }}{% if doc.docstatus == 0 %} (Draft){% endif %} - {{ frappe.original_name(doc) }}</h4>
 			</div>
