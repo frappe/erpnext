@@ -63,6 +63,8 @@ def set_serial_nos(item_doc):
 	}, limit=item_doc.qty, order_by='purchase_date')
 	item_doc.set('serial_no', '\n'.join([serial_no.name for serial_no in serial_nos]))
 
+	# should we assume that all serialized item available in stock will have serial no?
+
 def set_batch_no(item_doc, parent_doc):
 	batches = frappe.db.sql("""
 		SELECT
@@ -88,18 +90,19 @@ def set_batch_no(item_doc, parent_doc):
 	while required_qty > 0 and batches:
 		batch = batches.pop()
 		batch_expiry = frappe.get_value('Batch', batch.batch_no, 'expiry_date')
-		if batch_expiry and batch_expiry < frappe.utils.getdate():
+		if batch_expiry and batch_expiry <= frappe.utils.getdate():
 			print('---------- Batch {} is expired. Skipping... -------------'.format(batch.batch_no))
 			continue
 		item_doc.batch_no = batch.batch_no
-		required_qty -= batch.qty
 		if batch.qty >= item_doc.qty:
+			required_qty = 0
 			break
 		else:
 			# split item if quantity of item in batch is less that required
 			# Look for another batch
 
 			# set quantity of of item equal to batch quantity
+			required_qty -= batch.qty
 			item_doc.set('qty', batch.qty)
 			item_doc = parent_doc.append('items', {
 				'item': item_doc.item,
