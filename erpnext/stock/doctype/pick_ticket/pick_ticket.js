@@ -27,13 +27,11 @@ frappe.ui.form.on('Pick Ticket', {
 			});
 		}, __("Get items from"));
 
-		frm.add_custom_button(__('Get Item Locations'), () => {
-			frm.trigger('set_item_locations');
-		});
+		if (frm.doc.reference_document_items.length) {
+			frm.add_custom_button(__('Get Item Locations'), () => {
+				frm.call('set_item_locations');
+			});
+		}
 	},
-
-	set_item_locations: (frm) => {
-		frm.call('set_item_locations')
-	}
 
 });
