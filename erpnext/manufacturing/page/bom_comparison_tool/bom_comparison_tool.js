@@ -112,18 +112,19 @@ erpnext.BOMComparisonTool = class BOMComparisonTool {
 			let df = frappe.meta.get_docfield(doctype, fieldname);
 
 			let html = changes.map(change => {
-				let [fieldname, idx, item_code, changes] = change;
+				let [fieldname,, item_code, changes] = change;
 				let df = frappe.meta.get_docfield(doctype, fieldname);
 				let child_doctype = df.options;
 				let values_changed = this.get_changed_values(child_doctype, changes);
 
 				return values_changed.map((change, i) => {
 					let [fieldname, value1, value2] = change;
+					let th = i === 0
+						? `<th rowspan="${values_changed.length}">${item_code}</th>`
+						: '';
 					return `
 						<tr>
-							${i === 0
-								? `<th rowspan="${values_changed.length}">${item_code}</th>`
-								: ''}
+							${th}
 							<td>${frappe.meta.get_label(child_doctype, fieldname)}</td>
 							<td>${value1}</td>
 							<td>${value2}</td>
@@ -155,23 +156,17 @@ erpnext.BOMComparisonTool = class BOMComparisonTool {
 
 				let html = rows.map(row => {
 					let [, doc] = row;
-					return `
-						<tr>
-							<tr>
-							${fields.map(df => {
-								return `<td>${doc[df.fieldname]}</td>`
-							}).join('')}
-						</tr>
-					`;
+					let cells = fields
+						.map(df => `<td>${doc[df.fieldname]}</td>`)
+						.join('');
+					return `<tr>${cells}</tr>`;
 				}).join('');
 
+				let header = fields.map(df => `<th>${df.label}</th>`).join('');
 				return `
 					<h4 class="margin-top">${$.format(title, [df.label])}</h4>
 					<table class="table table-bordered">
-						${fields.map(df => {
-							return `<th>${df.label}</th>`
-						}).join('')}
-						</tr>
+						<tr>${header}</tr>
 						${html}
 					</table>
 				`;
@@ -206,7 +201,7 @@ erpnext.BOMComparisonTool = class BOMComparisonTool {
 			return true;
 		});
 	}
-}
+};
 
 function group_items(array, fn) {
 	return array.reduce((acc, item) => {
