@@ -14,13 +14,13 @@ class PickTicket(Document):
 			data = get_items_with_warehouse_and_quantity(item)
 
 			for item_info in data:
-				self.append('items', item_info)
+				print(self.append('items', item_info))
 
-		for item in self.get('items'):
-			if frappe.get_cached_value('Item', item.item, 'has_serial_no'):
-				set_serial_nos(item)
-			elif frappe.get_cached_value('Item', item.item, 'has_batch_no'):
-				set_batch_no(item, self)
+		for item_doc in self.get('items'):
+			if frappe.get_cached_value('Item', item_doc.item, 'has_serial_no'):
+				set_serial_nos(item_doc)
+			elif frappe.get_cached_value('Item', item_doc.item, 'has_batch_no'):
+				set_batch_no(item_doc, self)
 
 def get_available_items(item):
 	# gets all items available in different warehouses
@@ -56,22 +56,58 @@ def get_items_with_warehouse_and_quantity(item_doc):
 
 	return items
 
-def set_serial_nos(item):
+def set_serial_nos(item_doc):
 	serial_nos = frappe.get_all('Serial No', {
-		'item_code': item.item,
-		'warehouse': item.warehouse
-	}, limit=item.qty, order_by='purchase_date')
-	item.set('serial_no', '\n'.join([serial_no.name for serial_no in serial_nos]))
+		'item_code': item_doc.item,
+		'warehouse': item_doc.warehouse
+	}, limit=item_doc.qty, order_by='purchase_date')
+	item_doc.set('serial_no', '\n'.join([serial_no.name for serial_no in serial_nos]))
 
-def set_batch_no(item, doc):
-	batches = frappe.get_all('Stock Ledger Entry',
-		fields=['batch_no', 'sum(actual_qty) as qty'],
-		filters={
-			'item_code': item.item,
-			'warehouse': item.warehouse
-		},
-		group_by='warehouse, batch_no, item_code')
+def set_batch_no(item_doc, parent_doc):
+	batches = frappe.db.sql("""
+		SELECT
+			`batch_no`,
+			SUM(`actual_qty`) AS `qty`
+		FROM
+			`tabStock Ledger Entry`
+		WHERE
+			`item_code`=%(item_code)s
+			AND `warehouse`=%(warehouse)s
+		GROUP BY
+			`warehouse`,
+			`batch_no`,
+			`item_code`
+		HAVING `qty` > 0
+	""", {
+		'item_code': item_doc.item,
+		'warehouse': item_doc.warehouse,
+	}, as_dict=1)
+	print(batches)
 
-	if batches:
-		# TODO: check expiry and split item if batch is more than 1
-		item.batch_no = batches[0].batch_no
+	required_qty = item_doc.qty
+	while required_qty > 0 and batches:
+		batch = batches.pop()
+		batch_expiry = frappe.get_value('Batch', batch.batch_no, 'expiry_date')
+		if batch_expiry and batch_expiry < frappe.utils.getdate():
+			print('---------- Batch {} is expired. Skipping... -------------'.format(batch.batch_no))
+			continue
+		item_doc.batch_no = batch.batch_no
+		required_qty -= batch.qty
+		if batch.qty >= item_doc.qty:
+			break
+		else:
+			# split item if quantity of item in batch is less that required
+			# Look for another batch
+
+			# set quantity of of item equal to batch quantity
+			item_doc.set('qty', batch.qty)
+			item_doc = parent_doc.append('items', {
+				'item': item_doc.item,
+				'qty': required_qty,
+				'warehouse': item_doc.warehouse,
+				'reference_doctype': item_doc.reference_doctype,
+				'reference_name': item_doc.reference_name
+			})
+	if required_qty:
+		print('---------- No batches found for {} qty of {}. Skipping... -------------'.format(required_qty, item_doc.item))
+		parent_doc.remove(item_doc)
