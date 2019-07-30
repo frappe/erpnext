@@ -2,6 +2,16 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Pick Ticket', {
+	setup: (frm) => {
+		frm.set_query('group_warehouse', () => {
+			return {
+				filters: {
+					'is_group': 1,
+					'company': frm.doc.company
+				}
+			};
+		});
+	},
 	refresh: (frm) => {
 		this.frm.add_custom_button(__('Sales Order'), function() {
 			erpnext.utils.map_current_doc({
