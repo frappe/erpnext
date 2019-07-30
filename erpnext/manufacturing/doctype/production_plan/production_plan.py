@@ -320,7 +320,8 @@ class ProductionPlan(Document):
 				'qty': data.get("stock_qty") * item.get("qty"),
 				'production_plan': self.name,
 				'company': self.company,
-				'fg_warehouse': item.get("fg_warehouse")
+				'fg_warehouse': item.get("fg_warehouse"),
+				'update_consumed_material_cost_in_project': 0
 			})
 
 			work_order = self.create_work_order(data)
