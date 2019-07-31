@@ -38,7 +38,6 @@ class TestLeaveEncashment(unittest.TestCase):
 		self.leave_period = create_leave_period(add_months(today(), -3), add_months(today(), 3))
 		self.leave_period.grant_leave_allocation(employee=self.employee)
 
-
 	def test_leave_balance_value_and_amount(self):
 		frappe.db.sql('''delete from `tabLeave Encashment`''')
 		leave_encashment = frappe.get_doc(dict(
