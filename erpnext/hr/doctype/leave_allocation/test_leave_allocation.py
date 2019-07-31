@@ -3,7 +3,7 @@ import frappe
 import unittest
 from frappe.utils import nowdate, add_months, getdate, add_days
 from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
-from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import process_expired_allocation
+from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import process_expired_allocation, expire_allocation
 
 class TestLeaveAllocation(unittest.TestCase):
 	def test_overlapping_allocation(self):
@@ -107,6 +107,8 @@ class TestLeaveAllocation(unittest.TestCase):
 			to_date=add_months(nowdate(), -12),
 			carry_forward=1)
 		leave_allocation.submit()
+
+		expire_allocation(leave_allocation)
 
 		leave_allocation = create_leave_allocation(
 			leave_type="_Test_CF_leave_expiry",

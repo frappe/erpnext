@@ -7,7 +7,7 @@ from frappe.utils import flt, date_diff, formatdate, add_days, today
 from frappe import _
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name, get_leave_period
-from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
+from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import expire_allocation, create_leave_ledger_entry
 
 class OverlapError(frappe.ValidationError): pass
 class BackDatedAllocationError(frappe.ValidationError): pass
@@ -42,7 +42,11 @@ class LeaveAllocation(Document):
 
 	def on_submit(self):
 		self.create_leave_ledger_entry()
-		self.expire_previous_allocation()
+
+		# expire all unused leaves in the ledger on creation of carry forward allocation
+		allocation = get_previous_allocation(self.from_date, self.leave_type, self.employee)
+		if self.carry_forward and allocation:
+			expire_allocation(allocation)
 
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
@@ -128,55 +132,17 @@ class LeaveAllocation(Document):
 		)
 		create_leave_ledger_entry(self, args, submit)
 
-	def expire_current_allocation(self):
-		''' expires allocation '''
-		date = self.to_date
-		leaves = get_unused_leaves(self.employee, self.leave_type, date)
-		ref_name = self.name
-
-		if leaves:
-			expiry_date = today()
-			args = dict(
-				leaves=flt(leaves) * -1,
-				transaction_name=ref_name,
-				from_date=expiry_date,
-				to_date=expiry_date,
-				is_carry_forward=0,
-				is_expired=1
-			)
-			create_leave_ledger_entry(self, args)
-
-		frappe.db.set_value("Leave Allocation", self.name, "expired", 1)
-
-	def expire_previous_allocation(self):
-		date = self.from_date
-		leaves = get_unused_leaves(self.employee, self.leave_type, date)
-		ref_name = self.get_previous_allocation()
-
-		if leaves:
-			expiry_date = add_days(self.from_date, -1)
-			args = dict(
-				leaves=flt(leaves) * -1,
-				transaction_name=ref_name,
-				from_date=expiry_date,
-				to_date=expiry_date,
-				is_carry_forward=0,
-				is_expired=1
-			)
-			create_leave_ledger_entry(self, args)
-
-		frappe.db.set_value("Leave Allocation", ref_name, "expired", 1)
-
-	def get_previous_allocation(self):
-		return frappe.db.get_value("Leave Allocation",
-			filters={
-				'to_date': ("<", self.from_date),
-				'leave_type': self.leave_type,
-				'employee': self.employee,
-				'docstatus': 1
-			},
-			order_by='to_date DESC',
-			fieldname=['name'])
+def get_previous_allocation(from_date, leave_type, employee):
+	''' Returns document properties of previous allocation '''
+	return frappe.db.get_value("Leave Allocation",
+		filters={
+			'to_date': ("<", from_date),
+			'leave_type': leave_type,
+			'employee': employee,
+			'docstatus': 1
+		},
+		order_by='to_date DESC',
+		fieldname=['name', 'from_date', 'to_date'], as_dict=1)
 
 def get_leave_allocation_for_period(employee, leave_type, from_date, to_date):
 	leave_allocated = 0
@@ -203,21 +169,27 @@ def get_leave_allocation_for_period(employee, leave_type, from_date, to_date):
 
 @frappe.whitelist()
 def get_carry_forwarded_leaves(employee, leave_type, date, carry_forward=None):
-	carry_forwarded_leaves = 0
-	if carry_forward:
+	''' Returns carry forwarded leaves for the given employee '''
+	carry_forwarded_leaves = 0.0
+	previous_allocation = get_previous_allocation(date, leave_type, employee)
+	if carry_forward and previous_allocation:
 		validate_carry_forward(leave_type)
-		carry_forwarded_leaves = get_unused_leaves(employee, leave_type, date)
+		carry_forwarded_leaves = get_unused_leaves(employee, leave_type, previous_allocation.from_date, previous_allocation.to_date)
 
 	return carry_forwarded_leaves
 
-def get_unused_leaves(employee, leave_type, date):
-	return frappe.db.get_value("Leave Ledger Entry", filters={
-			"to_date": ("<=", date),
-			"employee": employee,
-			"docstatus": 1,
-			"leave_type": leave_type,
-			"is_lwp": 0
-			}, fieldname=['SUM(leaves)'])
+def get_unused_leaves(employee, leave_type, from_date, to_date):
+	''' Returns unused leaves between the given period while skipping leave allocation expiry '''
+	leaves = frappe.get_all("Leave Ledger Entry", filters={
+		'employee': employee,
+		'leave_type': leave_type,
+		'from_date': ('>=', from_date),
+		'to_date': ('<=', to_date)
+		}, or_filters={
+			'is_expired': 0,
+			'is_carry_forward': 1
+		}, fields=['sum(leaves) as leaves'])
+	return flt(leaves[0]['leaves'])
 
 def validate_carry_forward(leave_type):
 	if not frappe.db.get_value("Leave Type", leave_type, "is_carry_forward"):

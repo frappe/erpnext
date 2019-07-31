@@ -198,7 +198,7 @@ class LeaveApplication(Document):
 			if not is_lwp(self.leave_type):
 				self.leave_balance = get_leave_balance_on(self.employee, self.leave_type, self.from_date, self.to_date,
 					consider_all_leaves_in_the_allocation_period=True)
-				if self.status != "Rejected" and self.leave_balance < self.total_leave_days:
+				if self.status != "Rejected" and (self.leave_balance < self.total_leave_days or not self.leave_balance):
 					if frappe.db.get_value("Leave Type", self.leave_type, "allow_negative"):
 						frappe.msgprint(_("Note: There is not enough leave balance for Leave Type {0}")
 							.format(self.leave_type))
