@@ -48,13 +48,14 @@ def generate_encashment_leave_ledger_entries():
 
 def generate_expiry_allocation_ledger_entries():
 	''' fix ledger entries for missing leave allocation transaction '''
+	from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import expire_allocation
 	allocation_list = get_allocation_records()
 
 	for allocation in allocation_list:
 		if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Allocation', 'transaction_name': allocation.name, 'is_expired': 1}):
 			allocation.update(dict(doctype="Leave Allocation"))
 			allocation_obj = frappe.get_doc(allocation)
-			allocation_obj.expire_previous_allocation()
+			expire_allocation(allocation_obj)
 
 def get_allocation_records():
 	return frappe.db.sql("""

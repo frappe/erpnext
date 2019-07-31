@@ -35,8 +35,11 @@ frappe.ui.form.on("Leave Allocation", {
 
 	expire_allocation: function(frm) {
 		frappe.call({
-			method: 'expire_current_allocation',
-			doc: frm.doc,
+			method: 'erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry.expire_allocation',
+			args: {
+				'allocation': frm.doc,
+				'expiry_date': frappe.datetime.get_today()
+			},
 			freeze: true,
 			callback: function(r){
 				if(!r.exc){
