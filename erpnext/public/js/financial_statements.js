@@ -129,14 +129,12 @@ function get_filters(){
 		}
 	]
 
-	erpnext.dimension_filters.then((dimensions) => {
-		dimensions.forEach((dimension) => {
-			filters.push({
-				"fieldname": dimension["fieldname"],
-				"label": __(dimension["label"]),
-				"fieldtype": "Link",
-				"options": dimension["document_type"]
-			});
+	erpnext.dimension_filters.forEach((dimension) => {
+		filters.push({
+			"fieldname": dimension["fieldname"],
+			"label": __(dimension["label"]),
+			"fieldtype": "Link",
+			"options": dimension["document_type"]
 		});
 	});
 
