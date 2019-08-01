@@ -318,6 +318,21 @@ def allow_to_make_project_update(project, time, frequency):
 	if get_time(nowtime()) >= get_time(time):
 		return True
 
+
+@frappe.whitelist()
+def create_duplicate_project(prev_doc):
+	''' Create duplicate project based on the old project '''
+	import json
+	prev_doc = json.loads(prev_doc)
+
+	# change the copied doc name to new project name
+	project = frappe.copy_doc(prev_doc)
+	project.name = project_name
+	project.project_name = project_name
+	project.insert()
+
+	return project
+
 def get_projects_for_collect_progress(frequency, fields):
 	fields.extend(["name"])
 
