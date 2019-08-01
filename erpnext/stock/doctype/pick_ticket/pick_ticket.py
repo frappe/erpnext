@@ -5,23 +5,24 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
 
 class PickTicket(Document):
 	def set_item_locations(self):
-		reference_items = self.reference_document_items
+		reference_items = self.reference_items
 
 		from_warehouses = None
-		if self.group_warehouse:
-			from_warehouses = frappe.db.get_descendants('Warehouse', self.group_warehouse)
+		if self.parent_warehouse:
+			from_warehouses = frappe.db.get_descendants('Warehouse', self.parent_warehouse)
 
 		# Reset
-		self.delete_key('items')
+		self.delete_key('item_locations')
 		for item in reference_items:
 			data = get_items_with_warehouse_and_quantity(item, from_warehouses)
 			for item_info in data:
-				print(self.append('items', item_info))
+				print(self.append('item_locations', item_info))
 
-		for item_doc in self.get('items'):
+		for item_doc in self.get('item_locations'):
 			if frappe.get_cached_value('Item', item_doc.item, 'has_serial_no'):
 				set_serial_nos(item_doc)
 			elif frappe.get_cached_value('Item', item_doc.item, 'has_batch_no'):
@@ -40,7 +41,8 @@ def get_items_with_warehouse_and_quantity(item_doc, from_warehouses):
 			'qty': qty,
 			'warehouse': item_location.warehouse,
 			'reference_doctype': item_doc.reference_doctype,
-			'reference_name': item_doc.reference_name
+			'reference_name': item_doc.reference_name,
+			'reference_document_item': item_doc.reference_document_item,
 		})
 		remaining_qty -= qty
 
@@ -120,8 +122,29 @@ def set_batch_no(item_doc, parent_doc):
 				'qty': required_qty,
 				'warehouse': item_doc.warehouse,
 				'reference_doctype': item_doc.reference_doctype,
-				'reference_name': item_doc.reference_name
+				'reference_name': item_doc.reference_name,
+				'reference_document_item': item_doc.reference_document_item,
 			})
 	if required_qty:
 		frappe.msgprint('No batches found for {} qty of {}. Skipping...'.format(required_qty, item_doc.item))
 		parent_doc.remove(item_doc)
+
+@frappe.whitelist()
+def make_delivery_note(source_name, target_doc=None):
+	target_doc = get_mapped_doc("Pick Ticket", source_name, {
+		"Pick Ticket": {
+			"doctype": "Delivery Note",
+			# "validation": {
+			# 	"docstatus": ["=", 1]
+			# }
+		},
+		"Pick Ticket Item": {
+			"doctype": "Delivery Note Item",
+			"field_map": {
+				"item": "item_code",
+				"reference_docname": "against_sales_order",
+			},
+		},
+	}, target_doc)
+
+	return target_doc

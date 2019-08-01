@@ -1011,7 +1011,8 @@ def make_pick_ticket(source_name, target_doc=None):
 			"field_map": {
 				"item_code": "item",
 				"parenttype": "reference_doctype",
-				"parent": "reference_name"
+				"parent": "reference_name",
+				"name": "reference_document_item"
 			},
 		},
 	}, target_doc)

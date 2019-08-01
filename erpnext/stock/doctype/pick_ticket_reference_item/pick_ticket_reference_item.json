@@ -7,7 +7,8 @@
   "item",
   "qty",
   "reference_doctype",
-  "reference_name"
+  "reference_name",
+  "reference_document_item"
  ],
  "fields": [
   {
@@ -34,10 +35,15 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty"
+  },
+  {
+   "fieldname": "reference_document_item",
+   "fieldtype": "Data",
+   "label": "Reference Document Item"
   }
  ],
  "istable": 1,
- "modified": "2019-07-26 12:17:52.142186",
+ "modified": "2019-07-30 23:43:30.901151",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick Ticket Reference Item",
