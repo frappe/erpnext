@@ -46,7 +46,7 @@
  "modified": "2019-07-30 23:43:30.901151",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "Pick Ticket Reference Item",
+ "name": "Pick List Reference Item",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

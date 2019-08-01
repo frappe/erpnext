@@ -110,7 +110,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		let allow_delivery = false;
 
 		if (doc.docstatus==1) {
-			this.frm.add_custom_button(__('Pick Ticket'), () => this.make_pick_ticket(), __('Create'));
+			this.frm.add_custom_button(__('Pick List'), () => this.make_pick_ticket(), __('Create'));
 
 			if(this.frm.has_perm("submit")) {
 				if(doc.status === 'On Hold') {

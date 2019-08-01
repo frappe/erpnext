@@ -132,7 +132,7 @@
  "modified": "2019-07-30 23:47:53.566473",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "Pick Ticket Item",
+ "name": "Pick List Item",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,

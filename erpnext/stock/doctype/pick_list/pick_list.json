@@ -43,19 +43,19 @@
    "fieldname": "item_locations",
    "fieldtype": "Table",
    "label": "Item Locations",
-   "options": "Pick Ticket Item"
+   "options": "Pick List Item"
   },
   {
    "fieldname": "reference_items",
    "fieldtype": "Table",
    "label": "Items To Be Picked",
-   "options": "Pick Ticket Reference Item"
+   "options": "Pick List Reference Item"
   }
  ],
  "modified": "2019-08-01 10:50:17.055509",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "Pick Ticket",
+ "name": "Pick List",
  "owner": "Administrator",
  "permissions": [
   {
