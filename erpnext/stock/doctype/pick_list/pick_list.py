@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
-class PickTicket(Document):
+class PickList(Document):
 	def set_item_locations(self):
 		reference_items = self.reference_items
 
@@ -131,14 +131,14 @@ def set_batch_no(item_doc, parent_doc):
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
-	target_doc = get_mapped_doc("Pick Ticket", source_name, {
-		"Pick Ticket": {
+	target_doc = get_mapped_doc("Pick List", source_name, {
+		"Pick List": {
 			"doctype": "Delivery Note",
 			# "validation": {
 			# 	"docstatus": ["=", 1]
 			# }
 		},
-		"Pick Ticket Item": {
+		"Pick List Item": {
 			"doctype": "Delivery Note Item",
 			"field_map": {
 				"item": "item_code",

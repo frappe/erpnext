@@ -1,7 +1,7 @@
 // Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Pick Ticket', {
+frappe.ui.form.on('Pick List', {
 	setup: (frm) => {
 		frm.set_query('parent_warehouse', () => {
 			return {
@@ -16,7 +16,7 @@ frappe.ui.form.on('Pick Ticket', {
 		frm.add_custom_button(__('Delivery Note'), () => frm.trigger('make_delivery_note'), __('Create'));
 		frm.add_custom_button(__('Sales Order'), function() {
 			erpnext.utils.map_current_doc({
-				method: "erpnext.selling.doctype.sales_order.sales_order.make_pick_ticket",
+				method: "erpnext.selling.doctype.sales_order.sales_order.make_pick_list",
 				source_doctype: "Sales Order",
 				target: frm,
 				setters: {
@@ -36,7 +36,7 @@ frappe.ui.form.on('Pick Ticket', {
 	},
 	make_delivery_note(frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.pick_ticket.pick_ticket.make_delivery_note",
+			method: "erpnext.stock.doctype.pick_list.pick_list.make_delivery_note",
 			frm: frm
 		});
 	},

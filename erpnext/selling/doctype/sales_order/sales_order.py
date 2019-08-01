@@ -1001,13 +1001,13 @@ def make_inter_company_purchase_order(source_name, target_doc=None):
 def make_pick_ticket(source_name, target_doc=None):
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
-			"doctype": "Pick Ticket",
+			"doctype": "Pick List",
 			"validation": {
 				"docstatus": ["=", 1]
 			}
 		},
 		"Sales Order Item": {
-			"doctype": "Pick Ticket Reference Item",
+			"doctype": "Pick List Reference Item",
 			"field_map": {
 				"item_code": "item",
 				"parenttype": "reference_doctype",
