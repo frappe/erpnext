@@ -103,7 +103,7 @@ class TestAdjustmentEntry(unittest.TestCase):
 		expected_gle = dict((d[0], d) for d in [
 			["Debtors - _TC", 0, 6230.99, usd_sales_invoice.name],
 			["Creditors - _TC", 6400, 0, eur_purchase_invoice.name],
-			["_Test Exchange Gain/Loss - _TC", 0, 169.01, None]
+			["Exchange Gain/Loss - _TC", 0, 169.01, None]
 		])
 		self.validate_gl_entries(ae.name, expected_gle)
 		sales_outstanding_amount = flt(frappe.db.get_value("Sales Invoice", usd_sales_invoice.name, "outstanding_amount"))
