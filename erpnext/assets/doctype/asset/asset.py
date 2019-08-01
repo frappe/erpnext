@@ -388,7 +388,8 @@ class Asset(AccountsController):
 				"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 				"posting_date": self.available_for_use_date,
 				"credit": self.purchase_receipt_amount,
-				"credit_in_account_currency": self.purchase_receipt_amount
+				"credit_in_account_currency": self.purchase_receipt_amount,
+				"cost_center": self.cost_center
 			}))
 
 			gl_entries.append(self.get_gl_dict({
@@ -397,7 +398,8 @@ class Asset(AccountsController):
 				"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 				"posting_date": self.available_for_use_date,
 				"debit": self.purchase_receipt_amount,
-				"debit_in_account_currency": self.purchase_receipt_amount
+				"debit_in_account_currency": self.purchase_receipt_amount,
+				"cost_center": self.cost_center
 			}))
 
 		if gl_entries:
