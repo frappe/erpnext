@@ -171,7 +171,7 @@ erpnext.BOMComparisonTool = class BOMComparisonTool {
 					</table>
 				`;
 			}).join('');
-		}
+		};
 
 		let added_by_fieldname = group_items(diff.added, change => change[0]);
 		let removed_by_fieldname = group_items(diff.removed, change => change[0]);
