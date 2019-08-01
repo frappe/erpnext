@@ -115,13 +115,12 @@ frappe.query_reports["Accounts Payable"] = {
 	}
 }
 
-erpnext.dimension_filters.then((dimensions) => {
-	dimensions.forEach((dimension) => {
-		frappe.query_reports["Accounts Payable"].filters.splice(9, 0 ,{
-			"fieldname": dimension["fieldname"],
-			"label": __(dimension["label"]),
-			"fieldtype": "Link",
-			"options": dimension["document_type"]
-		});
+erpnext.dimension_filters.forEach((dimension) => {
+	frappe.query_reports["Accounts Payable"].filters.splice(9, 0 ,{
+		"fieldname": dimension["fieldname"],
+		"label": __(dimension["label"]),
+		"fieldtype": "Link",
+		"options": dimension["document_type"]
 	});
 });
+

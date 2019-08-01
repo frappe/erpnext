@@ -210,6 +210,7 @@ class Issue(Document):
 
 		self.service_level_agreement_creation = now_datetime()
 		self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
+		self.agreement_fulfilled = "Ongoing"
 		self.save()
 
 def get_expected_time_for(parameter, service_level, start_date_time):
