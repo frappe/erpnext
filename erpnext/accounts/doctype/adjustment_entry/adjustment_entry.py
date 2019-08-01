@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, ValidationError
-from frappe.utils import flt
+from frappe.utils import flt, comma_or
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.party import get_party_account
@@ -20,7 +20,7 @@ class InvalidAdjustmentEntry(ValidationError):
 class AdjustmentEntry(AccountsController):
     def validate(self):
         self.validate_customer_supplier_account()
-        self.validate_allocated_amount()
+        self.validate_reference_documents()
 
     def on_submit(self):
         if self.difference_amount:
@@ -47,10 +47,30 @@ class AdjustmentEntry(AccountsController):
         if exchange_gain_loss_account is None:
             frappe.throw("Exchange gain loss account not set for {0}").format(self.company)
 
-    def validate_allocated_amount(self):
+    def validate_reference_documents(self):
+        valid_reference_doctypes = ("Sales Invoice", "Purchase Invoice", "Journal Entry")
         for d in self.debit_entries + self.credit_entries:
+            if d.voucher_type not in valid_reference_doctypes:
+                frappe.throw(_("Reference Doctype must be one of {0}")
+                             .format(comma_or(valid_reference_doctypes)))
+            if not frappe.db.exists(d.voucher_type, d.voucher_number):
+                frappe.throw(_("{0} {1} does not exist").format(d.voucher_type, d.voucher_number))
+            else:
+                ref_doc = frappe.get_doc(d.voucher_type, d.voucher_number)
+                if d.voucher_type in ("Sales Invoice", "Purchase Invoice"):
+                    if d.voucher_type == "Sales Invoice" and ref_doc.debit_to != self.customer_account:
+                        frappe.throw(_("{0} {1} is associated with {2}, but Party Account is {3}")
+                                     .format(d.voucher_type, d.voucher_number, ref_doc.debit_to,
+                                             self.customer_account))
+                    elif d.voucher_type == "Purchase Invoice" and ref_doc.credit_to != self.supplier_account:
+                        frappe.throw(_("{0} {1} is associated with {2}, but Party Account is {3}")
+                                     .format(d.voucher_type, d.voucher_number, ref_doc.credit_to,
+                                             self.supplier_account))
+                if ref_doc.docstatus != 1:
+                    frappe.throw(_("{0} {1} must be submitted")
+                                 .format(d.voucher_type, d.voucher_number))
             if (flt(d.allocated_amount)) > 0:
-                if flt(d.allocated_amount) > flt(d.voucher_payment_amount):
+                if flt(d.allocated_amount, d.precision("allocated_amount")) > flt(d.voucher_payment_amount, d.precision("voucher_payment_amount")):
                     frappe.throw(
                         _("{0} Row #{1}: Allocated Amount cannot be greater than outstanding amount.").format(d.parentfield, d.idx))
 
@@ -85,16 +105,21 @@ class AdjustmentEntry(AccountsController):
         order_doctype = "Sales Order" if party_type == "Customer" else "Purchase Order"
         return [party_type, party, order_doctype]
 
+    def add_invoice_currency_exchange_rate(self, currency):
+        if any(exchange_rate.currency == currency for exchange_rate in self.get('exchange_rates')):
+            return
+        exc = self.append('exchange_rates', {})
+        exc.currency = currency
+        exc.exchange_rate_to_payment_currency = get_exchange_rate(currency, self.payment_currency) or 1
+        exc.exchange_rate_to_base_currency = get_exchange_rate(currency, self.company_currency) or 1
+
     def get_exchange_rates(self, entries):
         currencies = list(set([entry.get("currency") for entry in entries]))
         if self.payment_currency not in currencies:
             currencies.append(self.payment_currency)
         self.set('exchange_rates', [])
         for currency in currencies:
-            exc = self.append('exchange_rates', {})
-            exc.currency = currency
-            exc.exchange_rate_to_payment_currency = get_exchange_rate(currency, self.payment_currency) or 1
-            exc.exchange_rate_to_base_currency = get_exchange_rate(currency, self.company_currency) or 1
+            self.add_invoice_currency_exchange_rate(currency)
 
     def exchange_rates_to_dict(self):
         rates = {}
@@ -191,6 +216,7 @@ class AdjustmentEntry(AccountsController):
     def add_reference_doc_details(self, reference_type, voucher_type, voucher_number):
         ref_doc = frappe.get_doc(voucher_type, voucher_number)
         reference_entries = self.get(reference_type)
+        self.add_invoice_currency_exchange_rate(ref_doc.get("currency"))
         exchange_rates = self.exchange_rates_to_dict()
         party_type, party, order_doctype = self.get_party_details("debit_entries" if voucher_type == 'Sales Invoice' else "credit_entries")
         party_account_currency = self.get(party_type.lower() + "_account_currency")
@@ -199,6 +225,7 @@ class AdjustmentEntry(AccountsController):
         ent = next((ent for ent in reference_entries if ent.voucher_number == voucher_number and ent.voucher_type == voucher_type), None)
         if ent:
             self.set_reference_entry_details(ent, ref_doc, party_account_currency, exchange_rates)
+            self.calculate_summary_totals()
 
     def calculate_summary_totals(self):
         self.receivable_adjusted = flt(sum([flt(d.allocated_amount) for d in self.get("debit_entries")]), self.precision("receivable_adjusted"))

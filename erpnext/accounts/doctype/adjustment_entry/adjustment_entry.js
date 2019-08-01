@@ -171,7 +171,18 @@ function get_exchange_rate(frm, from_currency, exchange_rate_field) {
 	return exchange_rate ? exchange_rate[exchange_rate_field] : 1;
 }
 
+function call_calculate_summary(frm) {
+	return frm.call({
+		doc: frm.doc,
+		method: 'calculate_summary_totals'
+	});
+}
+
 frappe.ui.form.on('Adjustment Entry Reference', {
+	credit_entries_remove: call_calculate_summary,
+
+	debit_entries_remove: call_calculate_summary,
+
 	voucher_number: function(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
 		if (row.voucher_number && row.voucher_type) {
@@ -192,11 +203,12 @@ frappe.ui.form.on('Adjustment Entry Reference', {
 		const base_exchange_rate = get_exchange_rate(frm, frm.doc.payment_currency, 'exchange_rate_to_base_currency');
 		const balance = data.voucher_payment_amount - data.allocated_amount;
 		const allocated_base_amount = data.allocated_amount * base_exchange_rate;
-		frappe.model.set_value(cdt, cdn, 'balance', balance);
-		frappe.model.set_value(cdt, cdn, 'allocated_base_amount', allocated_base_amount);
+		frappe.model.set_value(cdt, cdn, 'balance', flt(balance));
+		frappe.model.set_value(cdt, cdn, 'allocated_base_amount', flt(allocated_base_amount));
 		const allocated_amount_in_entry_currency = data.allocated_amount / data.payment_exchange_rate;
 		const gain_loss_amount = data.allocated_base_amount - allocated_amount_in_entry_currency * data.exchange_rate;
-		frappe.model.set_value(cdt, cdn, 'gain_loss_amount', gain_loss_amount);
+		const final_gain_loss_amount = data.parentfield === 'debit_entries' ? flt(gain_loss_amount) : flt(gain_loss_amount * -1);
+		frappe.model.set_value(cdt, cdn, 'gain_loss_amount', final_gain_loss_amount);
 		frm.call({
 			doc: frm.doc,
 			method: 'calculate_summary_totals'
