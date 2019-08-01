@@ -21,6 +21,7 @@ class AdjustmentEntry(AccountsController):
     def validate(self):
         self.validate_customer_supplier_account()
         self.validate_reference_documents()
+        self.clear_unallocated_reference_document_rows()
 
     def on_submit(self):
         if self.difference_amount:
@@ -73,6 +74,13 @@ class AdjustmentEntry(AccountsController):
                 if flt(d.allocated_amount, d.precision("allocated_amount")) > flt(d.voucher_payment_amount, d.precision("voucher_payment_amount")):
                     frappe.throw(
                         _("{0} Row #{1}: Allocated Amount cannot be greater than outstanding amount.").format(d.parentfield, d.idx))
+
+    # Clear the reference document which doesn't have allocated amount on validate so that form can be loaded fast
+    def clear_unallocated_reference_document_rows(self):
+        self.set("debit_entries", self.get("debit_entries", {"allocated_amount": ["not in", [0, None, ""]]}))
+        self.set("credit_entries", self.get("credit_entries", {"allocated_amount": ["not in", [0, None, ""]]}))
+        frappe.db.sql("""delete from `tabAdjustment Entry Reference`
+     			where parent = %s and allocated_amount = 0""", self.name)
 
     def get_unreconciled_entries(self):
         self.allocate_payment_amount = False
