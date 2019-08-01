@@ -541,6 +541,10 @@ class ReceivablePayableReport(object):
 					where supplier_group=%s)""")
 				values.append(self.filters.get("supplier_group"))
 
+			if self.filters.get("payment_terms_template"):
+				conditions.append("party in (select name from tabSupplier where payment_terms=%s)")
+				values.append(self.filters.get("payment_terms_template"))
+
 		if self.filters.get("cost_center"):
 			lft, rgt = frappe.get_cached_value("Cost Center",
 				self.filters.get("cost_center"), ['lft', 'rgt'])

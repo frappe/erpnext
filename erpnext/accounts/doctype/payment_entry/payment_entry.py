@@ -601,7 +601,7 @@ def get_outstanding_reference_documents(args):
 		condition += " and company = {0}".format(frappe.db.escape(args.get("company")))
 
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
-		args.get("party_account"), filters=args, condition=condition, limit=100)
+		args.get("party_account"), filters=args, condition=condition)
 
 	for d in outstanding_invoices:
 		d["exchange_rate"] = 1
