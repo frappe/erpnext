@@ -108,8 +108,8 @@ def get_data(filters):
 		select p.price_list, p.item_code, p.price_list_rate, ifnull(p.valid_from, '2000-01-01') as valid_from
 		from `tabItem Price` as p
 		inner join `tabItem` item on item.name = p.item_code
-		where ifnull(p.valid_from, '2000-01-01') < %(date)s {0} {1}
-		order by ifnull(p.valid_from, '2000-01-01') desc
+		where ifnull(p.valid_upto, '0000-00-00') != '0000-00-00' and p.valid_upto < %(date)s {0} {1}
+		order by p.valid_upto desc
 	""".format(item_conditions, price_lists_cond), filters, as_dict=1)
 
 	items_map = {}
