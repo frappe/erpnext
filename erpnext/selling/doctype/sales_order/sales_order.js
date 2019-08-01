@@ -110,7 +110,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		let allow_delivery = false;
 
 		if (doc.docstatus==1) {
-			this.frm.add_custom_button(__('Pick List'), () => this.make_pick_ticket(), __('Create'));
+			this.frm.add_custom_button(__('Pick List'), () => this.make_pick_list(), __('Create'));
 
 			if(this.frm.has_perm("submit")) {
 				if(doc.status === 'On Hold') {
@@ -235,9 +235,9 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		this.order_type(doc);
 	},
 
-	make_pick_ticket() {
+	make_pick_list() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_pick_ticket",
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_pick_list",
 			frm: this.frm
 		})
 	},
