@@ -68,7 +68,6 @@
   {
    "fieldname": "reference_document_item",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Reference Document Item",
    "read_only": 1
   },
@@ -130,7 +129,7 @@
   }
  ],
  "istable": 1,
- "modified": "2019-07-30 09:28:44.969479",
+ "modified": "2019-07-30 23:47:53.566473",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick Ticket Item",

@@ -102,7 +102,6 @@ frappe.ui.form.on("Sales Order Item", {
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
 		this._super();
-		this.frm.add_custom_button(__('Pick Ticket'), () => this.make_pick_ticket(), __('Create'));
 	},
 
 	refresh: function(doc, dt, dn) {
@@ -110,7 +109,9 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		this._super();
 		let allow_delivery = false;
 
-		if(doc.docstatus==1) {
+		if (doc.docstatus==1) {
+			this.frm.add_custom_button(__('Pick Ticket'), () => this.make_pick_ticket(), __('Create'));
+
 			if(this.frm.has_perm("submit")) {
 				if(doc.status === 'On Hold') {
 				   // un-hold

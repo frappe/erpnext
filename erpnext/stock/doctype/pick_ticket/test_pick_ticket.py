@@ -14,7 +14,7 @@ class TestPickTicket(unittest.TestCase):
 		pick_ticket = frappe.get_doc({
 			'doctype': 'Pick Ticket',
 			'company': '_Test Company',
-			'reference_document_items': [{
+			'reference_items': [{
 				'item': '_Test Item Home Desktop 100',
 				'reference_doctype': 'Sales Order',
 				'qty': 5,
@@ -24,15 +24,15 @@ class TestPickTicket(unittest.TestCase):
 
 		pick_ticket.set_item_locations()
 
-		self.assertEqual(pick_ticket.items[0].item, '_Test Item Home Desktop 100')
-		self.assertEqual(pick_ticket.items[0].warehouse, '_Test Warehouse - _TC')
-		self.assertEqual(pick_ticket.items[0].qty, 5)
+		self.assertEqual(pick_ticket.items_locations[0].item, '_Test Item Home Desktop 100')
+		self.assertEqual(pick_ticket.items_locations[0].warehouse, '_Test Warehouse - _TC')
+		self.assertEqual(pick_ticket.items_locations[0].qty, 5)
 
 	def test_pick_ticket_skips_out_of_stock_item(self):
 		pick_ticket = frappe.get_doc({
 			'doctype': 'Pick Ticket',
 			'company': '_Test Company',
-			'reference_document_items': [{
+			'reference_items': [{
 				'item': '_Test Item Warehouse Group Wise Reorder',
 				'reference_doctype': 'Sales Order',
 				'qty': 1000,
@@ -42,9 +42,9 @@ class TestPickTicket(unittest.TestCase):
 
 		pick_ticket.set_item_locations()
 
-		self.assertEqual(pick_ticket.items[0].item, '_Test Item Warehouse Group Wise Reorder')
-		self.assertEqual(pick_ticket.items[0].warehouse, '_Test Warehouse Group-C1 - _TC')
-		self.assertEqual(pick_ticket.items[0].qty, 30)
+		self.assertEqual(pick_ticket.items_locations[0].item, '_Test Item Warehouse Group Wise Reorder')
+		self.assertEqual(pick_ticket.items_locations[0].warehouse, '_Test Warehouse Group-C1 - _TC')
+		self.assertEqual(pick_ticket.items_locations[0].qty, 30)
 
 
 	def test_pick_ticket_skips_items_in_expired_batch(self):
@@ -68,7 +68,7 @@ class TestPickTicket(unittest.TestCase):
 		pick_ticket = frappe.get_doc({
 			'doctype': 'Pick Ticket',
 			'company': '_Test Company',
-			'reference_document_items': [{
+			'reference_items': [{
 				'item': '_Test Serialized Item',
 				'reference_doctype': 'Sales Order',
 				'qty': 1000,
@@ -77,24 +77,14 @@ class TestPickTicket(unittest.TestCase):
 		})
 
 		pick_ticket.set_item_locations()
-		self.assertEqual(pick_ticket.items[0].item, '_Test Serialized Item')
-		self.assertEqual(pick_ticket.items[0].warehouse, '_Test Warehouse Group-C1 - _TC')
-		self.assertEqual(pick_ticket.items[0].qty, 30)
-		self.assertEqual(pick_ticket.items[0].serial_no, 30)
+		self.assertEqual(pick_ticket.items_locations[0].item, '_Test Serialized Item')
+		self.assertEqual(pick_ticket.items_locations[0].warehouse, '_Test Warehouse Group-C1 - _TC')
+		self.assertEqual(pick_ticket.items_locations[0].qty, 30)
+		self.assertEqual(pick_ticket.items_locations[0].serial_no, 30)
 
 
 	def test_pick_ticket_for_multiple_reference_doctypes(self):
 		pass
-
-
-# def create_new_pick_ticket():
-# 	pass
-# 	doc = frappe.new_doc('Pick Ticket')
-# 	doc.items.append({
-# 		'item': '_Test Warehouse - _TC',
-# 		''
-# 	})
-
 
 
 ## records required

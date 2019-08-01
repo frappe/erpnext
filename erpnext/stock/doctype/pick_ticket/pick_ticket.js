@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Pick Ticket', {
 	setup: (frm) => {
-		frm.set_query('group_warehouse', () => {
+		frm.set_query('parent_warehouse', () => {
 			return {
 				filters: {
 					'is_group': 1,
@@ -13,7 +13,8 @@ frappe.ui.form.on('Pick Ticket', {
 		});
 	},
 	refresh: (frm) => {
-		this.frm.add_custom_button(__('Sales Order'), function() {
+		frm.add_custom_button(__('Delivery Note'), () => frm.trigger('make_delivery_note'), __('Create'));
+		frm.add_custom_button(__('Sales Order'), function() {
 			erpnext.utils.map_current_doc({
 				method: "erpnext.selling.doctype.sales_order.sales_order.make_pick_ticket",
 				source_doctype: "Sales Order",
@@ -27,11 +28,16 @@ frappe.ui.form.on('Pick Ticket', {
 			});
 		}, __("Get items from"));
 
-		if (frm.doc.reference_document_items.length) {
+		if (frm.doc.reference_items && frm.doc.reference_items.length) {
 			frm.add_custom_button(__('Get Item Locations'), () => {
 				frm.call('set_item_locations');
 			});
 		}
 	},
-
+	make_delivery_note(frm) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.pick_ticket.pick_ticket.make_delivery_note",
+			frm: frm
+		});
+	},
 });

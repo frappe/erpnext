@@ -7,27 +7,13 @@
  "field_order": [
   "company",
   "column_break_4",
-  "group_warehouse",
+  "parent_warehouse",
   "section_break_4",
-  "reference_document_items",
+  "reference_items",
   "section_break_6",
-  "items"
+  "item_locations"
  ],
  "fields": [
-  {
-   "fieldname": "items",
-   "fieldtype": "Table",
-   "label": "Items Locations",
-   "options": "Pick Ticket Item",
-   "read_only": 1
-  },
-  {
-   "description": "Items under this warehouse will be suggested",
-   "fieldname": "group_warehouse",
-   "fieldtype": "Link",
-   "label": "Group Warehouse",
-   "options": "Warehouse"
-  },
   {
    "fieldname": "company",
    "fieldtype": "Link",
@@ -44,17 +30,29 @@
   },
   {
    "fieldname": "section_break_4",
-   "fieldtype": "Section Break",
-   "label": "Reference Items"
+   "fieldtype": "Section Break"
   },
   {
-   "fieldname": "reference_document_items",
+   "description": "Items under this warehouse will be suggested",
+   "fieldname": "parent_warehouse",
+   "fieldtype": "Link",
+   "label": "Parent Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "item_locations",
    "fieldtype": "Table",
-   "label": "Reference Document Items",
+   "label": "Item Locations",
+   "options": "Pick Ticket Item"
+  },
+  {
+   "fieldname": "reference_items",
+   "fieldtype": "Table",
+   "label": "Items To Be Picked",
    "options": "Pick Ticket Reference Item"
   }
  ],
- "modified": "2019-07-26 12:06:08.941760",
+ "modified": "2019-08-01 10:50:17.055509",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick Ticket",
