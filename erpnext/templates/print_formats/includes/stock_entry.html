@@ -29,9 +29,9 @@
 			<td class="text-right">{{ row.qty }}</td>
 			{% if not uoms|length == 1 %}<td>{{ row.uom }}</td>{% endif %}
 			{% if show_alt_uom_cols %}
-				<td class="text-right">{% if row.alt_uom %}{{ row.alt_uom_size }}{% endif %}</td>
-				<td class="text-right">{% if row.alt_uom %}{{ row.alt_uom_qty }}{% endif %}</td>
-				{% if not alt_uoms|length == 1 %}<td>{{ row.alt_uom or '' }}</td>{% endif %}
+				<td class="text-right">{{ row.get_formatted("alt_uom_size") }}</td>
+				<td class="text-right">{{ row.get_formatted("alt_uom_qty") }}</td>
+				{% if not alt_uoms|length == 1 %}<td>{{ row.alt_uom or row.stock_uom }}</td>{% endif %}
 			{% endif %}
 		</tr>
 	{%- endfor -%}
