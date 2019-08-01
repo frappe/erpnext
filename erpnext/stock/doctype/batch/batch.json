@@ -6,13 +6,18 @@
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
+  "sb_disabled",
+  "disabled",
+  "sb_batch",
   "batch_id",
   "item",
+  "item_name",
   "image",
   "parent_batch",
-  "column_break_3",
-  "disabled",
   "manufacturing_date",
+  "column_break_3",
+  "batch_qty",
+  "stock_uom",
   "expiry_date",
   "source",
   "supplier",
@@ -33,7 +38,6 @@
    "depends_on": "eval:doc.__islocal",
    "fieldname": "batch_id",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Batch ID",
    "no_copy": 1,
    "oldfieldname": "batch_id",
@@ -124,13 +128,45 @@
    "oldfieldname": "description",
    "oldfieldtype": "Small Text",
    "width": "300px"
+  },
+  {
+   "fieldname": "sb_disabled",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "sb_batch",
+   "fieldtype": "Section Break",
+   "label": "Batch Details"
+  },
+  {
+   "fetch_from": "item.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "batch_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Batch Quantity",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item.stock_uom",
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Batch UOM",
+   "options": "UOM",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-archive",
  "idx": 1,
  "image_field": "image",
  "max_attachments": 5,
- "modified": "2019-07-16 23:04:47.554387",
+ "modified": "2019-08-01 03:33:52.900790",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
