@@ -19,6 +19,7 @@ from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 from frappe.utils.csvutils import getlink
 from erpnext.stock.utils import get_bin, validate_warehouse_company, get_latest_stock_qty
 from erpnext.utilities.transaction_base import validate_uom_is_integer
+from frappe.model.mapper import get_mapped_doc
 
 class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
@@ -707,3 +708,26 @@ def get_work_order_operation_data(work_order, operation, workstation):
 	for d in work_order.operations:
 		if d.operation == operation and d.workstation == workstation:
 			return d
+
+@frappe.whitelist()
+def make_pick_list(source_name, target_doc=None):
+	doc = get_mapped_doc("Work Order", source_name, {
+		"Work Order": {
+			"doctype": "Pick List",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Work Order Item": {
+			"doctype": "Pick List Reference Item",
+			"field_map": {
+				"item_code": "item",
+				"required_qty": "qty",
+				"parenttype": "reference_doctype",
+				"parent": "reference_name",
+				"name": "reference_document_item"
+			},
+		},
+	}, target_doc)
+
+	return doc
