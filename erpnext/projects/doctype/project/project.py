@@ -320,10 +320,8 @@ def allow_to_make_project_update(project, time, frequency):
 
 
 @frappe.whitelist()
-def create_duplicate_project(prev_doc):
+def create_duplicate_project(prev_doc, project_name):
 	''' Create duplicate project based on the old project '''
-	import json
-	prev_doc = json.loads(prev_doc)
 
 	# change the copied doc name to new project name
 	project = frappe.copy_doc(prev_doc)

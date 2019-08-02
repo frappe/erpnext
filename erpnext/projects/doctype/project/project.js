@@ -89,7 +89,25 @@ frappe.ui.form.on("Project", {
 			frm.add_custom_button(__('Cancelled'), () => {
 				frm.events.set_status(frm, 'Cancelled');
 			}, __('Set Status'));
+			frm.add_custom_button(__('Duplicate'), () => {
+				frm.events.create_duplicate();
+			});
 		}
+	},
+
+	create_duplicate: function(frm) {
+		frappe.call({
+			method: "erpnext.projects.doctype.project.project.create_duplicate_project",
+			args: {
+				prev_doc: frm.doc,
+				project_name: frm.doc.name + ' - 01'
+			},
+			callback: function(r) {
+				if(r.message) {
+					frappe.set_route('Form', 'Project', r.message.name);
+				}
+			}
+		});
 	},
 
 	set_status: function(frm, status) {
