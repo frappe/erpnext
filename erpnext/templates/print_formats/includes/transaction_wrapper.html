@@ -9,9 +9,9 @@
 {%- set company = frappe.get_cached_doc("Company", doc.company) -%}
 {%- set address = doc.company_address_doc -%}
 
-{% macro row(label, value, value_border=True, hide_empty=True, empty_value=None) -%}
+{% macro row(label, value, value_border=True, hide_empty=True, empty_value=None, style=None) -%}
 	{% if not hide_empty or (value and value != empty_value) %}
-	<div class="print-row">
+	<div class="print-row"{% if style %}{{ style }}{% endif %}>
 		<div class="print-col">{{ _(label) }}:</div>
 		<div class="value {% if value_border %}value-border{% endif %}">{{ value }}</div>
 	</div>
@@ -44,7 +44,9 @@
 					{% if doc.supplier_name or doc.supplier -%}
 						<strong>{{ row('Supplier', doc.supplier_name or doc.supplier) }}</strong>
 					{%- endif %}
-					<div style="line-height:1.3;">{{ row('Address', doc.address_display) }}</div>
+					{{ row('Address', doc.address_display, style="line-height:1.3;") }}
+					{{ row('Port Of Loading', doc.pol_address_display, style="line-height:1.3;") }}
+					{{ row('Port Of Arrival', doc.poa_address_display, style="line-height:1.3;") }}
 					{{ row('Description', doc.remarks, empty_value="No Remarks") }}
 					{{ row('Source', doc.s_warehouses|join(', ')) }}
 					{{ row('Target', doc.t_warehouses|join(', ')) }}
@@ -55,9 +57,13 @@
 						{{ row('STRN', doc.tax_strn) }}
 						{{ row('NTN/CNIC', doc.tax_id or doc.tax_cnic) }}
 					{%- endif %}
-					{% if doc.doctype in ['Delivery Note', 'Purchase Receipt'] %}
+					{% if doc.doctype in ['Delivery Note', 'Purchase Receipt'] -%}
 						{{ row('Location', doc.warehouses|join(', ')) }}
-					{% endif %}
+					{%- endif %}
+					{% if doc.doctype in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'] -%}
+						{% if doc.incoterms %}{{ row('Incoterms', doc.incoterms.split()[0]) }}{% endif %}
+						{{ row('Payment Terms', doc.payment_terms_template) }}
+					{%- endif %}
 					{{ row('PO #', doc.po_no) }}
 					{{ row('Driver', doc.driver_name) }}
 					{{ row('Bill #', doc.bill_no) }}

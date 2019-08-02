@@ -7,9 +7,9 @@
 {%- set address = doc.company_address_doc -%}
 {%- set order_type_doc = frappe.get_cached_doc("Order Type", doc.order_type_name) if doc.order_type_name else None -%}
 
-{% macro row(label, value, value_border=True, hide_empty=True, empty_value=None) -%}
+{% macro row(label, value, value_border=True, hide_empty=True, empty_value=None, style=None) -%}
 	{% if not hide_empty or (value and value != empty_value) %}
-	<div class="print-row">
+	<div class="print-row"{% if style %}{{ style }}{% endif %}>
 		<div class="print-col">{{ _(label) }}:</div>
 		<div class="value {% if value_border %}value-border{% endif %}">{{ value }}</div>
 	</div>
@@ -59,7 +59,9 @@
 			<div class="sec-details clearfix">
 				<div class="party">
 					<strong>{{ row('Customer', doc.customer_name) }}</strong>
-					<div style="line-height:1.3;">{{ row('Address', doc.address_display) }}</div>
+					{{ row('Address', doc.address_display, style="line-height:1.3;") }}
+					{{ row('Port Of Loading', doc.pol_address_display, style="line-height:1.3;") }}
+					{{ row('Port Of Arrival', doc.poa_address_display, style="line-height:1.3;") }}
 					{{ row('Description', doc.remarks, empty_value="No Remarks") }}
 					{% if delivery_docs and delivery_docs != [None] and delivery_docs != [''] -%}
 						{{ row('Delivery', frappe.list_original_names("Delivery Note", delivery_docs)|join(', ')) }}
