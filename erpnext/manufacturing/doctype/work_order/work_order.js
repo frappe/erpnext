@@ -163,7 +163,10 @@ frappe.ui.form.on("Work Order", {
 			});
 
 			frm.add_custom_button(__('Pick List'), () => {
-				frm.trigger("make_bom");
+				frappe.model.open_mapped_doc({
+					method: "erpnext.manufacturing.doctype.work_order.work_order.make_pick_list",
+					frm
+				});
 			}, __('Make'));
 		}
 	},
