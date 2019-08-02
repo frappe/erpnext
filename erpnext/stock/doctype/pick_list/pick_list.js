@@ -14,14 +14,29 @@ frappe.ui.form.on('Pick List', {
 	},
 	refresh: (frm) => {
 		frm.add_custom_button(__('Delivery Note'), () => frm.trigger('make_delivery_note'), __('Create'));
-		frm.add_custom_button(__('Sales Order'), function() {
+		frm.add_custom_button(__('Sales Order'), () => {
 			erpnext.utils.map_current_doc({
 				method: "erpnext.selling.doctype.sales_order.sales_order.make_pick_list",
 				source_doctype: "Sales Order",
 				target: frm,
 				setters: {
-					company: frm.doc.company || undefined,
+					company: frm.doc.company,
 				},
+				get_query_filters: {
+					docstatus: 1,
+				}
+			});
+		}, __("Get items from"));
+
+		frm.add_custom_button(__('Work Order'), () => {
+			erpnext.utils.map_current_doc({
+				method: "erpnext.manufacturing.doctype.work_order.work_order.make_pick_list",
+				source_doctype: "Work Order",
+				target: frm,
+				setters: {
+					company: frm.doc.company,
+				},
+				date_field: 'creation',
 				get_query_filters: {
 					docstatus: 1,
 				}

@@ -161,6 +161,10 @@ frappe.ui.form.on("Work Order", {
 			frm.add_custom_button(__('Create BOM'), () => {
 				frm.trigger("make_bom");
 			});
+
+			frm.add_custom_button(__('Pick List'), () => {
+				frm.trigger("make_bom");
+			}, __('Make'));
 		}
 	},
 
@@ -262,6 +266,10 @@ frappe.ui.form.on("Work Order", {
 				}
 			}
 		});
+	},
+
+	make_pick_list() {
+
 	},
 
 	show_progress: function(frm) {

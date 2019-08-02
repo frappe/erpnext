@@ -97,7 +97,6 @@ def set_batch_no(item_doc, parent_doc):
 		'item_code': item_doc.item,
 		'warehouse': item_doc.warehouse,
 	}, as_dict=1)
-	print(batches)
 
 	required_qty = item_doc.qty
 	while required_qty > 0 and batches:
@@ -114,8 +113,8 @@ def set_batch_no(item_doc, parent_doc):
 			# split item if quantity of item in batch is less that required
 			# Look for another batch
 
-			# set quantity of of item equal to batch quantity
 			required_qty -= batch.qty
+			# set quantity of current item equal to batch quantity
 			item_doc.set('qty', batch.qty)
 			item_doc = parent_doc.append('items', {
 				'item': item_doc.item,
