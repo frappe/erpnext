@@ -33,7 +33,7 @@ def get_company_address(args):
 		if company:
 			address_name = get_default_address('Company', company)
 
-	return frappe.get_cached_doc('Address', address_name)
+	return frappe.get_cached_doc('Address', address_name) if adress_name else None
 
 def get_default_currency():
 	'''Returns the currency of the default company'''
