@@ -93,6 +93,12 @@ def get_data():
 					"doctype": "Asset Maintenance",
 					"dependencies": ["Asset Maintenance"]
 				},
+				{
+					"type": "report",
+					"name": "Asset-wise Depreciations and Balances",
+					"doctype": "Asset",
+					"dependencies": ["Asset"]
+				},
 			]
 		}
 	]
