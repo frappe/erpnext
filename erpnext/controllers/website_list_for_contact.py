@@ -150,8 +150,7 @@ def get_customers_suppliers(doctype, user):
 		suppliers = [c.link_name for c in contacts if c.link_doctype == 'Supplier']
 	elif frappe.has_permission(doctype, 'read', user=user):
 		customer_list = frappe.get_list("Customer")
-		customers = [customer.name for customer in customer_list]
-		suppliers = [supplier.name for supplier in customer_list]
+		customers = suppliers = [customer.name for customer in customer_list]
 
 	return customers if has_customer_field else None, \
 		suppliers if has_supplier_field else None
