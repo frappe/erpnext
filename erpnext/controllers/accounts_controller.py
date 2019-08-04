@@ -828,7 +828,8 @@ class AccountsController(TransactionBase):
 
 		# Sum amounts
 		for item in self.items:
-			group_item = group_item_data.setdefault(item.item_code, frappe._dict())
+			group_key = (cstr(item.item_code), cstr(item.item_name), item.uom)
+			group_item = group_item_data.setdefault(group_key, frappe._dict())
 			for f in sum_fields:
 				group_item[f] = group_item.get(f, 0) + flt(item.get(f))
 
@@ -855,7 +856,8 @@ class AccountsController(TransactionBase):
 		# Remove duplicates and set aggregated values
 		duplicate_list = []
 		for item in self.items:
-			if item.item_code in group_item_data.keys():
+			group_key = (cstr(item.item_code), cstr(item.item_name), item.uom)
+			if group_key in group_item_data.keys():
 				count += 1
 
 				# Will set price_list_rate instead
@@ -864,10 +866,10 @@ class AccountsController(TransactionBase):
 				if item.get('tax_exclusive_rate_with_margin'):
 					item.tax_exclusive_rate_with_margin = 0
 
-				item.update(group_item_data[item.item_code])
+				item.update(group_item_data[group_key])
 
 				item.idx = count
-				del group_item_data[item.item_code]
+				del group_item_data[group_key]
 			else:
 				duplicate_list.append(item)
 

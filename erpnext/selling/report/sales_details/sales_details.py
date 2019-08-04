@@ -222,7 +222,7 @@ class SalesPurchaseDetailsReport(object):
 
 		# Group same items
 		if cint(self.filters.get("group_same_items")):
-			data = group_report_data(data, ("item_code", "uom", "voucher_no"), calculate_totals=self.calculate_group_totals,
+			data = group_report_data(data, ("item_code", "item_name", "uom", "voucher_no"), calculate_totals=self.calculate_group_totals,
 				totals_only=True)
 
 		if len(self.group_by) <= 1:
@@ -257,7 +257,7 @@ class SalesPurchaseDetailsReport(object):
 
 		# Set group values
 		if data:
-			if group_field == ("item_code", "uom", "voucher_no"):
+			if group_field == ("item_code", "item_name", "uom", "voucher_no"):
 				for f, v in iteritems(data[0]):
 					if f not in totals:
 						totals[f] = v
@@ -292,7 +292,7 @@ class SalesPurchaseDetailsReport(object):
 			"item_code": "Item",
 		}
 
-		if group_field == ("item_code", "uom", "voucher_no") and data:
+		if group_field == ("item_code", "item_nane", "uom", "voucher_no") and data:
 			totals['doc_type'] = data[0].get('doc_type')
 			totals['reference'] = data[0].get('reference')
 		else:
