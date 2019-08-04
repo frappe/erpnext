@@ -10,9 +10,6 @@ def get_data():
 			{
 				'label': _('Bank Deatils'),
 				'items': ['Bank Account', 'Bank Guarantee']
-			},
-			{
-				'items': ['Payment Order']
 			}
 		]
 	}
