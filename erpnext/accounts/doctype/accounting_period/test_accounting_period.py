@@ -39,6 +39,8 @@ def create_accounting_period(**args):
     accounting_period.end_date = args.end_date or add_months(nowdate(), 1)
     accounting_period.company = args.company or "_Test Company"
     accounting_period.period_name =args.period_name or  "_Test_Period_Name_1"
-    accounting_period.closed_documents = [{"document_type": 'Sales Invoice', "closed": 1}]
+    accounting_period.append("closed_documents", {
+        "document_type": 'Sales Invoice', "closed": 1
+    })
 
     return accounting_period
