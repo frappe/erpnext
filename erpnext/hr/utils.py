@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
-from frappe.utils import formatdate, format_datetime, getdate, get_datetime, nowdate, flt, cstr
+from frappe.utils import formatdate, format_datetime, getdate, get_datetime, nowdate, flt, cstr, add_days, today
 from frappe.model.document import Document
 from frappe.desk.form import assign_to
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
@@ -262,6 +262,19 @@ def get_leave_period(from_date, to_date, company):
 
 	if leave_period:
 		return leave_period
+
+def generate_leave_encashment():
+	''' Generates a draft leave encashment on allocation expiry '''
+	from erpnext.hr.doctype.leave_encashment.leave_encashment import create_leave_encashment
+	if frappe.db.get_single_value('HR Settings', 'auto_leave_encashment'):
+		leave_type = frappe.db.sql_list("SELECT name FROM `tabLeave Type` WHERE `allow_encashment`=1")
+
+		leave_allocation = frappe.get_all("Leave Allocation", filters={
+			'to_date': add_days(today(), -1),
+			'leave_type': ('in', leave_type)
+		}, fields=['employee', 'leave_period', 'leave_type', 'to_date', 'total_leaves_allocated', 'new_leaves_allocated'])
+
+		create_leave_encashment(leave_allocation=leave_allocation)
 
 def allocate_earned_leaves():
 	'''Allocate earned leaves to Employees'''
