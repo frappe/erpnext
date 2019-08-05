@@ -58,7 +58,9 @@ class AccountsController(TransactionBase):
 
 	def validate(self):
 
-		self.validate_qty_is_not_zero()
+		if not self.get('is_return'):
+			self.validate_qty_is_not_zero()
+
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 
@@ -1110,6 +1112,10 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
 						 .format(child_item.idx, child_item.item_code))
 		else:
 			child_item.rate = flt(d.get("rate"))
+		if flt(child_item.price_list_rate):
+			child_item.discount_percentage = flt((1 - flt(child_item.rate) / flt(child_item.price_list_rate)) * 100.0, \
+				child_item.precision("discount_percentage"))
+
 		child_item.flags.ignore_validate_update_after_submit = True
 		child_item.save()
 

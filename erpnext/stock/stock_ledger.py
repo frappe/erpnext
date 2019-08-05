@@ -360,8 +360,17 @@ class update_entries_after(object):
 			self.stock_queue.append([0, sle.incoming_rate or sle.outgoing_rate or self.valuation_rate])
 
 	def check_if_allow_zero_valuation_rate(self, voucher_type, voucher_detail_no):
-		ref_item_dt = voucher_type + (" Detail" if voucher_type == "Stock Entry" else " Item")
-		return frappe.db.get_value(ref_item_dt, voucher_detail_no, "allow_zero_valuation_rate")
+		ref_item_dt = ""
+
+		if voucher_type == "Stock Entry":
+			ref_item_dt = voucher_type + " Detail"
+		elif voucher_type in ["Purchase Invoice", "Sales Invoice", "Delivery Note", "Purchase Receipt"]:
+			ref_item_dt = voucher_type + " Item"
+
+		if ref_item_dt:
+			return frappe.db.get_value(ref_item_dt, voucher_detail_no, "allow_zero_valuation_rate")
+		else:
+			return 0
 
 	def get_sle_before_datetime(self):
 		"""get previous stock ledger entry before current time-bucket"""
