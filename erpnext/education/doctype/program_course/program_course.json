@@ -5,6 +5,7 @@
  "engine": "InnoDB",
  "field_order": [
   "course",
+  "course_name",
   "required"
  ],
  "fields": [
@@ -16,6 +17,14 @@
    "label": "Course",
    "options": "Course",
    "reqd": 1
+  },
+   {
+   "fieldname": "course_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Course Name",
+   "fetch_from": "course.course_name",
+   "read_only":1
   },
   {
    "default": "0",
