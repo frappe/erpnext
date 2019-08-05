@@ -64,7 +64,7 @@ class LeaveEncashment(Document):
 
 		allocation = self.get_leave_allocation()
 
-		self.leave_balance = allocation.total_leaves_allocated - get_unused_leaves(self.employee, self.leave_type, self.encashment_date)
+		self.leave_balance = allocation.total_leaves_allocated - get_unused_leaves(self.employee, self.leave_type, allocation.from_date, self.encashment_date)
 
 		encashable_days = self.leave_balance - frappe.db.get_value('Leave Type', self.leave_type, 'encashment_threshold_days')
 		self.encashable_days = encashable_days if encashable_days > 0 else 0
