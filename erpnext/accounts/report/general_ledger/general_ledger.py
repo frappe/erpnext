@@ -29,6 +29,8 @@ def execute(filters=None):
 		parties = cstr(filters.get("party")).strip()
 		filters.party = [d.strip() for d in parties.split(',') if d]
 
+	get_ledger_currency(filters)
+
 	validate_filters(filters, account_details)
 
 	validate_party(filters)
@@ -146,7 +148,8 @@ def get_gl_entries(filters):
 		select
 			posting_date, account, party_type, party,
 			voucher_type, voucher_no, cost_center, project, account_currency,
-			remarks, against, is_opening, against_voucher_type {select_fields}
+			remarks, against, is_opening, against_voucher_type,
+			%(ledger_currency)s as currency {select_fields}
 		from `tabGL Entry`
 		where company=%(company)s {conditions} {group_by_statement}
 		{order_by_statement}
@@ -321,16 +324,15 @@ def get_supplier_invoice_details():
 
 	return inv_details
 
-def get_columns(filters):
+def get_ledger_currency(filters):
 	if filters.get("presentation_currency"):
-		currency = filters["presentation_currency"]
+		filters.ledger_currency = filters["presentation_currency"]
+	elif filters.get("company"):
+		filters.ledger_currency = get_company_currency(filters["company"])
 	else:
-		if filters.get("company"):
-			currency = get_company_currency(filters["company"])
-		else:
-			company = get_default_company()
-			currency = get_company_currency(company)
+		filters.ledger_currency = get_company_currency(get_default_company())
 
+def get_columns(filters):
 	columns = [
 		{
 			"label": _("Posting Date"),
@@ -370,21 +372,21 @@ def get_columns(filters):
 			"options": "party_type"
 		},
 		{
-			"label": _("Debit ({0})".format(currency)),
+			"label": _("Debit ({0})".format(filters.ledger_currency)),
 			"fieldname": "debit",
 			"fieldtype": "Currency",
 			"options": "currency",
 			"width": 100
 		},
 		{
-			"label": _("Credit ({0})".format(currency)),
+			"label": _("Credit ({0})".format(filters.ledger_currency)),
 			"fieldname": "credit",
 			"fieldtype": "Currency",
 			"options": "currency",
 			"width": 100
 		},
 		{
-			"label": _("Balance ({0})".format(currency)),
+			"label": _("Balance ({0})".format(filters.ledger_currency)),
 			"fieldname": "balance",
 			"fieldtype": "Currency",
 			"options": "currency",
