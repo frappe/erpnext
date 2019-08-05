@@ -64,7 +64,7 @@ class LeaveEncashment(Document):
 
 		allocation = self.get_leave_allocation()
 
-		self.leave_balance = allocation.total_leaves_allocated - get_unused_leaves(self.employee, self.leave_type, allocation.from_date, self.encashment_date)
+		self.leave_balance = allocation.total_leaves_allocated - get_unused_leaves(self.employee, self.leave_type, self.encashment_date)
 
 		encashable_days = self.leave_balance - frappe.db.get_value('Leave Type', self.leave_type, 'encashment_threshold_days')
 		self.encashable_days = encashable_days if encashable_days > 0 else 0
@@ -102,3 +102,17 @@ class LeaveEncashment(Document):
 			)
 			create_leave_ledger_entry(self, args, submit)
 
+
+def create_leave_encashment(leave_allocation):
+	''' Creates leave encashment for the given allocations '''
+	for allocation in leave_allocation:
+		if not get_assigned_salary_structure(allocation.employee, allocation.to_date):
+			continue
+		leave_encashment = frappe.get_doc(dict(
+			doctype="Leave Encashment",
+			leave_period=allocation.leave_period,
+			employee=allocation.employee,
+			leave_type=allocation.leave_type,
+			encashment_date=allocation.to_date
+		))
+		leave_encashment.insert(ignore_permissions=True)
