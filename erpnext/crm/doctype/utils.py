@@ -52,7 +52,7 @@ def get_last_issue_from_customer(customer_name):
 	return issues[0] if issues else None
 
 
-def get_employee_emails_for_popup(communication_medium):
+def get_scheduled_employees_for_popup(communication_medium):
 	now_time = frappe.utils.nowtime()
 	weekday = frappe.utils.get_weekday()
 
