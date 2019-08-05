@@ -28,28 +28,28 @@ class CallLog(Document):
 			self.trigger_call_popup()
 
 	def trigger_call_popup(self):
-		employee_email = get_employee_email(self.to)
-		if employee_email:
-			frappe.publish_realtime('show_call_popup', self, user=employee_email)
+		employee_emails = get_employee_emails(self.to)
+		for email in employee_emails:
+			frappe.publish_realtime('show_call_popup', self, user=email)
 
 @frappe.whitelist()
 def add_call_summary(call_log, summary):
 	doc = frappe.get_doc('Call Log', call_log)
 	doc.add_comment('Comment', frappe.bold(_('Call Summary')) + '<br><br>' + summary)
 
-def get_employee_email(number):
+def get_employee_emails(number):
+	'''Returns employee's emails of employees that have passed phone number'''
 	if not number: return
-	number = number.lstrip('0')
 
-	employee = frappe.cache().hget('employee_with_number', number)
-	if employee: return employee
+	employee_emails = frappe.cache().hget('employees_with_number', number)
+	if employee_emails: return employee_emails
 
-	employees = frappe.get_all('Employee', or_filters={
-		'phone': ['like', '%{}'.format(number)],
+	employees = frappe.get_all('Employee', filters={
+		'cell_number': ['like', '%{}'.format(number.lstrip('0'))],
 		'user_id': ['!=', '']
-	}, fields=['user_id'], limit=1)
+	}, fields=['user_id'])
 
-	employee = employees[0].user_id if employees else None
-	frappe.cache().hset('employee_with_number', number, employee)
+	employee_emails = [employee.user_id for employee in employees]
+	frappe.cache().hset('employees_with_number', number, employee_emails)
 
 	return employee

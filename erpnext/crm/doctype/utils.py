@@ -7,8 +7,8 @@ def get_last_interaction(contact=None, lead=None):
 
 	if not contact and not lead: return
 
-	last_communication = {}
-	last_issue = {}
+	last_communication = None
+	last_issue = None
 	if contact:
 		query_condition = ''
 		contact = frappe.get_doc('Contact', contact)
@@ -32,8 +32,8 @@ def get_last_interaction(contact=None, lead=None):
 
 	if lead:
 		last_communication = frappe.get_all('Communication', filters={
-			'reference_doctype': 'Contact',
-			'reference_name': contact,
+			'reference_doctype': 'Lead',
+			'reference_name': lead,
 			'sent_or_received': 'Received'
 		}, fields=['name', 'content'], limit=1)
 
