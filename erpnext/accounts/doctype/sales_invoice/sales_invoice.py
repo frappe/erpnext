@@ -254,6 +254,8 @@ class SalesInvoice(SellingController):
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_cancel")
 
+		self.flags.ignore_links = True
+
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
 			self.status_updater.append({
@@ -692,15 +694,15 @@ class SalesInvoice(SellingController):
 				update_outstanding_amt(self.debit_to, "Customer", self.customer,
 					self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name)
 
-			if repost_future_gle and cint(self.update_stock) \
-				and cint(auto_accounting_for_stock):
-					items, warehouses = self.get_items_and_warehouses()
-					update_gl_entries_after(self.posting_date, self.posting_time,
-						warehouses, items, company = self.company)
+			# if repost_future_gle and cint(self.update_stock) \
+			# 	and cint(auto_accounting_for_stock):
+			# 		items, warehouses = self.get_items_and_warehouses()
+			# 		update_gl_entries_after(self.posting_date, self.posting_time,
+			# 			warehouses, items, company = self.company)
 		elif self.docstatus == 2 and cint(self.update_stock) \
 			and cint(auto_accounting_for_stock):
-				from erpnext.accounts.general_ledger import delete_gl_entries
-				delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+				from erpnext.accounts.general_ledger import make_reverse_gl_entries
+				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import merge_similar_entries

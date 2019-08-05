@@ -21,7 +21,7 @@ def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, upd
 			else:
 				frappe.throw(_("Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction."))
 		else:
-			delete_gl_entries(gl_map, adv_adj=adv_adj, update_outstanding=update_outstanding)
+			make_reverse_gl_entries(gl_map, adv_adj=adv_adj, update_outstanding=update_outstanding, cancel=cancel)
 
 def process_gl_map(gl_map, merge_entries=True):
 	if merge_entries:
@@ -196,26 +196,72 @@ def get_round_off_account_and_cost_center(company):
 
 	return round_off_account, round_off_cost_center
 
-def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
-		adv_adj=False, update_outstanding="Yes"):
+# def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
+# 		adv_adj=False, update_outstanding="Yes"):
+
+# 	from erpnext.accounts.doctype.gl_entry.gl_entry import validate_balance_type, \
+# 		check_freezing_date, update_outstanding_amt, validate_frozen_account
+
+# 	if not gl_entries:
+# 		gl_entries = frappe.db.sql("""
+# 			select account, posting_date, party_type, party, cost_center, fiscal_year,voucher_type,
+# 			voucher_no, against_voucher_type, against_voucher, cost_center, company
+# 			from `tabGL Entry`
+# 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no), as_dict=True)
+
+# 	if gl_entries:
+# 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
+
+# 	frappe.db.sql("""delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s""",
+# 		(voucher_type or gl_entries[0]["voucher_type"], voucher_no or gl_entries[0]["voucher_no"]))
+
+# 	for entry in gl_entries:
+# 		validate_frozen_account(entry["account"], adv_adj)
+# 		validate_balance_type(entry["account"], adv_adj)
+# 		if not adv_adj:
+# 			validate_expense_against_budget(entry)
+
+# 		if entry.get("against_voucher") and update_outstanding == 'Yes' and not adv_adj:
+# 			update_outstanding_amt(entry["account"], entry.get("party_type"), entry.get("party"), entry.get("against_voucher_type"),
+# 				entry.get("against_voucher"), on_cancel=True)
+
+def make_reverse_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
+	adv_adj=False, update_outstanding="Yes", cancel=False):
 
 	from erpnext.accounts.doctype.gl_entry.gl_entry import validate_balance_type, \
 		check_freezing_date, update_outstanding_amt, validate_frozen_account
 
 	if not gl_entries:
-		gl_entries = frappe.db.sql("""
-			select account, posting_date, party_type, party, cost_center, fiscal_year,voucher_type,
-			voucher_no, against_voucher_type, against_voucher, cost_center, company
-			from `tabGL Entry`
-			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no), as_dict=True)
+
+		gl_entries = frappe.get_all("GL Entry",
+			fields = ["*"],
+			filters = {
+				"voucher_type": voucher_type,
+				"voucher_no": voucher_no
+			})
 
 	if gl_entries:
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 
-	frappe.db.sql("""delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s""",
-		(voucher_type or gl_entries[0]["voucher_type"], voucher_no or gl_entries[0]["voucher_no"]))
-
 	for entry in gl_entries:
+
+		debit = entry.get('debit', 0)
+		credit = entry.get('credit', 0)
+
+		debit_in_account_currency = entry.get('debit_in_account_currency', 0)
+		credit_in_account_currency = entry.get('credit_in_account_currency', 0)
+
+		entry['debit'] = credit
+		entry['credit'] = debit
+		entry['debit_in_account_currency'] = debit_in_account_currency
+		entry['credit_in_account_currency'] = credit_in_account_currency
+
+		if cancel:
+			entry['remarks'] = "On cancellation of " + entry['voucher_no']
+
+		if entry['debit'] or entry['credit']:
+			make_entry(entry, adv_adj, "No")
+
 		validate_frozen_account(entry["account"], adv_adj)
 		validate_balance_type(entry["account"], adv_adj)
 		if not adv_adj:

@@ -5,7 +5,7 @@ frappe.ui.form.on('Period Closing Voucher', {
 	onload: function(frm) {
 		if (!frm.doc.transaction_date) frm.doc.transaction_date = frappe.datetime.obj_to_str(new Date());
 	},
-	
+
 	setup: function(frm) {
 		frm.set_query("closing_account_head", function() {
 			return {
@@ -18,9 +18,9 @@ frappe.ui.form.on('Period Closing Voucher', {
 			}
 		});
 	},
-	
+
 	refresh: function(frm) {
-		if(frm.doc.docstatus==1) {
+		if(frm.doc.docstatus > 0) {
 			frm.add_custom_button(__('Ledger'), function() {
 				frappe.route_options = {
 					"voucher_no": frm.doc.name,
@@ -33,5 +33,5 @@ frappe.ui.form.on('Period Closing Voucher', {
 			}, "fa fa-table");
 		}
 	}
-	
+
 })
