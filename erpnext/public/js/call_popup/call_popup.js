@@ -51,16 +51,17 @@ class CallPopup {
 				'depends_on': () => this.get_caller_name()
 			}, {
 				'fieldtype': 'Small Text',
+				'label': __('Last Issue'),
+				'fieldname': 'last_issue',
+				'read_only': true,
+				'depends_on': () => this.call_log.contact,
+				'default': `<i class="text-muted">${__('No issue has been raised by the caller.')}<i>`
+			}, {
+				'fieldtype': 'Small Text',
 				'label': __('Last Communication'),
 				'fieldname': 'last_communication',
 				'read_only': true,
 				'default': `<i class="text-muted">${__('No communication found.')}<i>`
-			}, {
-				'fieldtype': 'Small Text',
-				'label': __('Last Issue'),
-				'fieldname': 'last_issue',
-				'read_only': true,
-				'default': `<i class="text-muted">${__('No issue raised by the customer.')}<i>`
 			}, {
 				'fieldtype': 'Section Break',
 			}, {
@@ -79,13 +80,15 @@ class CallPopup {
 					}).then(() => {
 						this.close_modal();
 						frappe.show_alert({
-							message: `${__('Call Summary Saved')}
+							message: `
+								${__('Call Summary Saved')}
 								<br>
 								<a
 									class="text-small text-muted"
 									href="#Form/Call Log/${this.call_log.name}">
 									${__('View call log')}
-								</a>`,
+								</a>
+							`,
 							indicator: 'green'
 						});
 					});
@@ -163,9 +166,11 @@ class CallPopup {
 				const issue = data.last_issue;
 				const issue_field = this.dialog.get_field("last_issue");
 				issue_field.set_value(issue.subject);
-				issue_field.$wrapper.append(`<a class="text-medium" href="#List/Issue?customer=${issue.customer}">
-					${__('View all issues from {0}', [issue.customer])}
-				</a>`);
+				issue_field.$wrapper.append(`
+					<a class="text-medium" href="#List/Issue?customer=${issue.customer}">
+						${__('View all issues from {0}', [issue.customer])}
+					</a>
+				`);
 			}
 		});
 	}
