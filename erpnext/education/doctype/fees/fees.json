@@ -16,7 +16,6 @@
   "company",
   "posting_date",
   "posting_time",
-  "set_posting_time",
   "due_date",
   "student_details",
   "program_enrollment",
@@ -126,14 +125,6 @@
    "fieldtype": "Time",
    "label": "Posting Time",
    "no_copy": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.docstatus==0",
-   "fieldname": "set_posting_time",
-   "fieldtype": "Check",
-   "label": "Edit Posting Date and Time",
-   "print_hide": 1
   },
   {
    "fieldname": "due_date",
@@ -336,7 +327,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-25 22:58:20.026368",
+ "modified": "2019-08-05 16:57:41.048166",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Fees",
