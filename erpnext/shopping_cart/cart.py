@@ -202,13 +202,12 @@ def _get_cart_quotation(party=None):
 	if quotation:
 		qdoc = frappe.get_doc("Quotation", quotation[0].name)
 	else:
-		[company, price_list] = frappe.db.get_value("Shopping Cart Settings", None, ["company", "price_list"])
+		company = frappe.db.get_value("Shopping Cart Settings", None, ["company"])
 		qdoc = frappe.get_doc({
 			"doctype": "Quotation",
 			"naming_series": get_shopping_cart_settings().quotation_series or "QTN-CART-",
 			"quotation_to": party.doctype,
 			"company": company,
-			"selling_price_list": price_list,
 			"order_type": "Shopping Cart",
 			"status": "Draft",
 			"docstatus": 0,
