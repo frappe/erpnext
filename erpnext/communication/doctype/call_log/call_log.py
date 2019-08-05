@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from erpnext.crm.doctype.utils import get_employee_emails_for_popup
+from erpnext.crm.doctype.utils import get_scheduled_employees_for_popup
 from frappe.contacts.doctype.contact.contact import get_contact_with_phone_number
 from erpnext.crm.doctype.lead.lead import get_lead_with_phone_number
 
@@ -28,8 +28,16 @@ class CallLog(Document):
 			self.trigger_call_popup()
 
 	def trigger_call_popup(self):
-		employee_emails = get_employee_emails(self.to)
-		for email in employee_emails:
+		scheduled_employees = get_scheduled_employees_for_popup(self.to)
+		employee_emails = get_employees_with_number(self.to)
+
+		# check if employees with matched number are scheduled to receive popup
+		emails = set(scheduled_employees).intersection(employee_emails)
+
+		# # if no employee found with matching phone number then show popup to scheduled employees
+		# emails = emails or scheduled_employees if employee_emails
+
+		for email in emails:
 			frappe.publish_realtime('show_call_popup', self, user=email)
 
 @frappe.whitelist()
@@ -37,9 +45,8 @@ def add_call_summary(call_log, summary):
 	doc = frappe.get_doc('Call Log', call_log)
 	doc.add_comment('Comment', frappe.bold(_('Call Summary')) + '<br><br>' + summary)
 
-def get_employee_emails(number):
-	'''Returns employee's emails of employees that have passed phone number'''
-	if not number: return
+def get_employees_with_number(number):
+	if not number: return []
 
 	employee_emails = frappe.cache().hget('employees_with_number', number)
 	if employee_emails: return employee_emails
