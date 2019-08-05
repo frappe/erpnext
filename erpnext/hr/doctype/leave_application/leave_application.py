@@ -515,7 +515,7 @@ def get_remaining_leaves(allocation, leaves_taken, date, expiry):
 
 		return remaining_leaves
 
-	if expiry:
+	if expiry and allocation.carry_forwarded_leaves:
 		remaining_leaves = _get_remaining_leaves(allocation.carry_forwarded_leaves, expiry)
 
 		return flt(allocation.new_leaves_allocated) + flt(remaining_leaves)
