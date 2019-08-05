@@ -27,7 +27,7 @@ class SalesPerson(NestedSet):
 		allocated_amount = frappe.db.sql("""
 			select sum(allocated_amount)
 			from `tabSales Team`
-			where sales_person = %s and docstatus=1 and parenttype = 'Sales Order'
+			where sales_person = %s and docstatus=1 and parenttype = 'Sales Invoice'
 		""",(self.sales_person_name))
 
 		info = {}

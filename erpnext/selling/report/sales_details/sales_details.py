@@ -69,11 +69,12 @@ class SalesPurchaseDetailsReport(object):
 		qty_field = self.get_qty_fieldname()
 
 		sales_person_table = ", `tabSales Team` sp" if self.filters.party_type == "Customer" else ""
-		sales_person_condition = "and sp.parent = s.name and sp.parenttype = %(doctype)s" if self.filters.party_type == "Customer" else ""
-		sales_person_field = ", GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person" if self.filters.party_type == "Customer" else ""
+		sales_person_condition = "and sp.parent = s.name and sp.parenttype = %(doctype)s" if sales_person_table else ""
+		sales_person_field = ", GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person" if sales_person_table else ""
+		contribution_field = ", sum(sp.allocated_percentage) as allocated_percentage" if sales_person_table else ""
 
 		supplier_table = ", `tabSupplier` sup" if self.filters.party_type == "Supplier" else ""
-		supplier_condition = "and sup.name = s.supplier" if self.filters.party_type == "Supplier" else ""
+		supplier_condition = "and sup.name = s.supplier" if supplier_table else ""
 
 		territory_field = ", s.territory" if self.filters.party_type == "Customer" else ""
 
@@ -97,7 +98,7 @@ class SalesPurchaseDetailsReport(object):
 				i.{qty_field} as qty,
 				i.uom, i.stock_uom, i.alt_uom,
 				i.brand, i.item_group,
-				{amount_fields} {party_group_field} {sales_person_field} {territory_field}
+				{amount_fields} {party_group_field} {territory_field} {sales_person_field} {contribution_field}
 				{stin_field}
 			from 
 				`tab{doctype} Item` i, `tab{doctype}` s {sales_person_table} {supplier_table}
@@ -117,6 +118,7 @@ class SalesPurchaseDetailsReport(object):
 			doctype=self.filters.doctype,
 			stin_field=stin_field,
 			sales_person_field=sales_person_field,
+			contribution_field=contribution_field,
 			sales_person_table=sales_person_table,
 			sales_person_condition=sales_person_condition,
 			supplier_table=supplier_table,
@@ -197,6 +199,7 @@ class SalesPurchaseDetailsReport(object):
 				d[f] = flt(tax_rate)
 
 			self.postprocess_row(d)
+			self.apply_sales_person_contribution(d)
 
 	def get_grouped_data(self):
 		data = self.entries
@@ -231,8 +234,10 @@ class SalesPurchaseDetailsReport(object):
 		return group_report_data(data, self.group_by, calculate_totals=self.calculate_group_totals)
 
 	def calculate_group_totals(self, data, group_field, group_value, grouped_by):
-		total_fields = ['qty'] + self.amount_fields
-		total_fields += self.tax_amount_fields
+		total_fields = ['qty'] + self.amount_fields + self.tax_amount_fields
+		if self.filters.sales_person:
+			total_fields.append('actual_net_amount')
+
 		averageif_fields = self.tax_rate_fields
 
 		totals = {}
@@ -282,7 +287,8 @@ class SalesPurchaseDetailsReport(object):
 					details = self.additional_customer_info.get(group_value, frappe._dict())
 					totals.update({
 						"sales_person": grouped_by.get("sales_person") or details.sales_person,
-						"territory": grouped_by.get("territory") or details.territory
+						"territory": grouped_by.get("territory") or details.territory,
+						"allocated_percentage": details.allocated_percentage
 					})
 
 		# Set reference field
@@ -303,6 +309,10 @@ class SalesPurchaseDetailsReport(object):
 
 			if not group_field and self.group_by == [None]:
 				totals['voucher_no'] = "'Total'"
+
+		# Calculate sales person contribution percentage
+		if totals.get('actual_net_amount'):
+			totals['allocated_percentage'] = totals['base_net_amount'] / totals['actual_net_amount'] * 100
 
 		self.postprocess_row(totals)
 		return totals
@@ -341,6 +351,14 @@ class SalesPurchaseDetailsReport(object):
 
 			if f + "_count" in row:
 				del row[f + "_count"]
+
+	def apply_sales_person_contribution(self, row):
+		if self.filters.sales_person:
+			row['actual_net_amount'] = row["base_net_amount"]
+
+			fields = ['qty', 'total_tax_amount', 'grand_total'] + self.amount_fields + self.tax_amount_fields
+			for f in fields:
+				row[f] *= row.allocated_percentage / 100
 
 	def get_qty_fieldname(self):
 		filter_to_field = {
@@ -479,6 +497,13 @@ class SalesPurchaseDetailsReport(object):
 				},
 			]
 
+		if self.filters.sales_person:
+			columns.append({
+				"label": _("% Contribution"),
+				"fieldtype": "Percent",
+				"fieldname": "allocated_percentage",
+				"width": 60
+			})
 		columns += [
 			{
 				"label": _("UOM"),
