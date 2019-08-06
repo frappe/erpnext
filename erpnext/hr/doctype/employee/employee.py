@@ -217,10 +217,12 @@ class Employee(NestedSet):
 
 	def reset_employee_emails_cache(self):
 		prev_doc = self.get_doc_before_save()
-		if (self.cell_number != prev_doc.cell_number or
-			self.user_id != prev_doc.user_id):
-			frappe.cache().hdel('employees_with_number', prev_doc.cell_number)
-			frappe.cache().hdel('employees_with_number', self.cell_number)
+		cell_number = self.get('cell_number')
+		prev_number = prev_doc.get('cell_number')
+		if (cell_number != prev_number or
+			self.get('user_id') != prev_doc.get('user_id')):
+			frappe.cache().hdel('employees_with_number', cell_number)
+			frappe.cache().hdel('employees_with_number', prev_number)
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
