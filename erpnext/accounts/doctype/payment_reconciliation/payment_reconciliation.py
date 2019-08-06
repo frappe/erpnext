@@ -57,7 +57,7 @@ class PaymentReconciliation(Document):
 			ent.amount = flt(e.get('invoice_amount'))
 			ent.outstanding_amount = e.get('outstanding_amount')
 
-	def reconcile(self, args):
+	def reconcile(self):
 		for e in self.get('payments'):
 			e.invoice_type = None
 			if e.invoice_number and " | " in e.invoice_number:

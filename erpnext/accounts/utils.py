@@ -337,6 +337,7 @@ def reconcile_against_document(args):
 	"""
 		Cancel JV, Update aginst document, split if required and resubmit jv
 	"""
+
 	for d in args:
 
 		check_if_advance_entry_modified(d)
@@ -430,13 +431,10 @@ def update_reference_in_journal_entry(d, jv_doc):
 	if d.get("voucher_detail_no"):
 		rows_to_reconcile.append(jv_doc.get("accounts", {"name": d["voucher_detail_no"]})[0])
 	else:
-		rows_to_reconcile += jv_doc.get("accounts", {
-			"reference_type": None,
-			"reference_name": None,
-			"party_type": d["party_type"],
-			"party": d["party"],
-			"account": d["account"]
-		})
+		for row in jv_doc.accounts:
+			if row.party_type == d['party_type'] and row.party == d['party'] and row.account == d['account']\
+					and not row.reference_type and not row.reference_name:
+				rows_to_reconcile.append(row)
 
 	to_update_advance_amount = []
 	amt_allocated = 0.0

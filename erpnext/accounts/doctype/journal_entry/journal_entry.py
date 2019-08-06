@@ -140,6 +140,11 @@ class JournalEntry(AccountsController):
 				if not (d.party_type and d.party):
 					frappe.throw(_("Row {0}: Party Type and Party is required for Receivable / Payable account {1}").format(d.idx, d.account))
 
+				if not (d.reference_type and d.reference_name) and not cint(self.is_advance):
+					frappe.throw(_("Row {0}: No voucher is referenced in Receivable / Payable account {1}. "
+						"Please set 'Against Document' or check 'Is Advance' if you do not want to reference this entry against another voucher")
+						.format(d.idx, d.account))
+
 	def check_credit_limit(self):
 		customers = list(set([d.party for d in self.get("accounts")
 			if d.party_type=="Customer" and d.party and flt(d.debit) > 0]))
@@ -421,9 +426,6 @@ class JournalEntry(AccountsController):
 
 		if self.user_remark:
 			r.append(_("Note: {0}").format(self.user_remark))
-
-		if self.reference_account:
-			r.append(_('Reference Account: {0}').format(self.reference_account))
 
 		# Reference numbers string
 		refs = set([d.cheque_no for d in self.accounts if d.cheque_no])

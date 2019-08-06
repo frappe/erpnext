@@ -257,17 +257,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			return out;
 		});
 
-		me.frm.set_query("reference_account", function(doc) {
-			var account_type = ["Tax", "Chargeable", "Expenses Included In Valuation"];
-			return {
-				query: "erpnext.controllers.queries.tax_account_query",
-				filters: {
-					"account_type": account_type,
-					"company": doc.company
-				}
-			}
-		});
-
 	},
 
 	setup_balance_formatter: function() {
