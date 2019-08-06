@@ -44,6 +44,11 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	cur_frm.cscript.validate_calculate_item_details(doc);
 }
 
+cur_frm.cscript.items_on_form_rendered = function (doc, grid_row) {
+	// display the "Add Serial No" button
+	erpnext.setup_serial_no();
+}
+
 // To Case No. cannot be less than From Case No.
 cur_frm.cscript.validate_case_nos = function(doc) {
 	doc = locals[doc.doctype][doc.name];

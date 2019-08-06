@@ -29,6 +29,9 @@ class PackingSlip(Document):
 		validate_uom_is_integer(self, "stock_uom", "qty")
 		validate_uom_is_integer(self, "weight_uom", "net_weight")
 
+	def on_submit(self):
+		self.update_delivery_notes()
+
 	def validate_delivery_note(self):
 		"""
 			Validates if delivery note has status as draft
@@ -76,6 +79,15 @@ class PackingSlip(Document):
 			if new_packed_qty > flt(item['qty']) and no_of_cases:
 				self.recommend_new_qty(item, ps_item_qty, no_of_cases)
 
+	def update_delivery_notes(self):
+		dn = frappe.get_doc("Delivery Note", self.delivery_note)
+		dn_items = {item.item_code: item.name for item in dn.items}
+
+		for packing_item in self.items:
+			if packing_item.item_code in dn_items:
+				for row in dn.items:
+					if row.name == dn_items.get(packing_item.item_code):
+						frappe.db.set_value("Delivery Note Item", row.name, "serial_no", packing_item.serial_no)
 
 	def get_details_for_packing(self):
 		"""
@@ -105,7 +117,7 @@ class PackingSlip(Document):
 				from `tabPacking Slip` ps, `tabPacking Slip Item` psi
 				where ps.name = psi.parent and ps.docstatus = 1
 				and ps.delivery_note = dni.parent and psi.item_code=dni.item_code) as packed_qty,
-			stock_uom, item_name, description, dni.batch_no {custom_fields}
+			stock_uom, item_name, description, dni.batch_no, dni.serial_no {custom_fields}
 			from `tabDelivery Note Item` dni
 			where parent=%s {condition}
 			group by item_code""".format(condition=condition, custom_fields=custom_fields),
@@ -166,6 +178,7 @@ class PackingSlip(Document):
 				ch.stock_uom = item.stock_uom
 				ch.description = item.description
 				ch.batch_no = item.batch_no
+				ch.serial_no = item.serial_no
 				ch.qty = flt(item.qty) - flt(item.packed_qty)
 
 				# copy custom fields
