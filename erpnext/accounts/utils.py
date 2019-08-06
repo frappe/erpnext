@@ -553,7 +553,14 @@ def update_reference_in_payment_entry(d, payment_entry):
 	for dn, dt in set(to_update_advance_amount):
 		frappe.get_doc(dn, dt).set_total_advance_paid()
 
-def unlink_ref_doc_from_payment_entries(ref_doc):
+def unlink_ref_doc_from_payment_entries(ref_doc, validate_permission=False):
+	if validate_permission:
+		allow_unlink_setting = cint(frappe.db.get_single_value("Stock Settings", "unlink_payment_on_cancellation_of_invoice"))
+		allow_unlink_role = frappe.db.get_single_value("Stock Settings", "restrict_unlink_payments_to_role")
+		has_unlink_role_permission = not allow_unlink_role or allow_unlink_role in frappe.get_roles()
+		if not allow_unlink_setting or not has_unlink_role_permission:
+			return
+
 	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name)
 	remove_ref_doc_link_from_pe(ref_doc.doctype, ref_doc.name)
 
@@ -564,7 +571,7 @@ def unlink_ref_doc_from_payment_entries(ref_doc):
 		and voucher_no != ifnull(against_voucher, '')""",
 		(now(), frappe.session.user, ref_doc.doctype, ref_doc.name))
 
-	if ref_doc.doctype in ("Sales Invoice", "Purchase Invoice"):
+	if ref_doc.doctype in ("Sales Invoice", "Purchase Invoice", "Landed Cost Voucher"):
 		ref_doc.set("advances", [])
 
 		frappe.db.sql("""delete from `tab{0} Advance` where parent = %s"""

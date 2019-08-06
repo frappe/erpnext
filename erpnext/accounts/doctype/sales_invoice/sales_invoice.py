@@ -231,8 +231,7 @@ class SalesInvoice(SellingController):
 		self.check_close_sales_order("sales_order")
 
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
-		if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
-			unlink_ref_doc_from_payment_entries(self)
+		unlink_ref_doc_from_payment_entries(self, validate_permission=True)
 
 		if self.is_return and not self.update_billed_amount_in_sales_order:
 			# NOTE status updating bypassed for is_return
