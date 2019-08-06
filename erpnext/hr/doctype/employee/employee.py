@@ -216,7 +216,7 @@ class Employee(NestedSet):
 			doc.db_set("employee", self.name)
 
 	def reset_employee_emails_cache(self):
-		prev_doc = self.get_doc_before_save()
+		prev_doc = self.get_doc_before_save() or {}
 		cell_number = self.get('cell_number')
 		prev_number = prev_doc.get('cell_number')
 		if (cell_number != prev_number or
