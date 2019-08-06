@@ -36,12 +36,18 @@ class EmployeeBoardingController(Document):
 			}).insert(ignore_permissions=True)
 		self.db_set("project", project.name)
 		self.db_set("boarding_status", "Pending")
+		self.reload()
+		self.create_task_and_notify_user()
 
+	def create_task_and_notify_user(self):
 		# create the task for the given project and assign to the concerned person
 		for activity in self.activities:
+			if activity.task:
+				continue
+
 			task = frappe.get_doc({
 					"doctype": "Task",
-					"project": project.name,
+					"project": self.project,
 					"subject": activity.activity_name + " : " + self.employee_name,
 					"description": activity.description,
 					"department": self.department,
@@ -69,6 +75,7 @@ class EmployeeBoardingController(Document):
 				'doctype'		:	task.doctype,
 				'name'			:	task.name,
 				'description'	:	task.description or task.subject,
+				'notify':	self.notify_users_by_email
 			}
 			assign_to.add(args)
 
