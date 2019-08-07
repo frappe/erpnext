@@ -6,5 +6,5 @@ python-stdnum
 braintree
 gocardless_pro
 woocommerce
-pandas
+pandas==0.14.1
 plaid-python
