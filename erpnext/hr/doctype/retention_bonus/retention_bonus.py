@@ -10,7 +10,51 @@ from frappe.utils import getdate
 
 class RetentionBonus(Document):
 	def validate(self):
-		if frappe.get_value("Employee", self.employee, "status") == "Left":
-			frappe.throw(_("Cannot create Retention Bonus for left Employees"))
+		if frappe.get_value('Employee', self.employee, 'status') == 'Left':
+			frappe.throw(_('Cannot create Retention Bonus for left Employees'))
 		if getdate(self.bonus_payment_date) < getdate():
-			frappe.throw(_("Bonus Payment Date cannot be a past date"))
+			frappe.throw(_('Bonus Payment Date cannot be a past date'))
+
+	def on_submit(self):
+		company = frappe.db.get_value('Employee', self.employee, 'company')
+		additional_salary = frappe.db.exists('Additional Salary', {
+				'employee': self.employee, 
+				'salary_component': 'Arrear',
+				'payroll_date': self.bonus_payment_date, 
+				'company': company,
+				'docstatus': 1
+			})
+
+		if not additional_salary:
+			additional_salary = frappe.new_doc('Additional Salary')
+			additional_salary.employee = self.employee
+			additional_salary.salary_component = 'Arrear'
+			additional_salary.amount = self.bonus_amount
+			additional_salary.payroll_date = self.bonus_payment_date
+			additional_salary.company = company
+			additional_salary.submit()
+			self.db_set('additional_salary', additional_salary.name)
+
+		else:
+			bonus_added = frappe.db.get_value('Additional Salary', additional_salary, 'amount') + self.bonus_amount
+			frappe.db.set_value('Additional Salary', additional_salary, 'amount', bonus_added)
+			self.db_set('additional_salary', additional_salary)
+
+	def on_cancel(self):
+		if self.additional_salary:
+			linked_document_exists = check_if_linked_document_exists(self)
+
+			if linked_document_exists:
+				bonus_removed = frappe.db.get_value('Additional Salary', self.additional_salary, 'amount') - self.bonus_amount
+				frappe.db.set_value('Additional Salary', self.additional_salary, 'amount', bonus_removed)
+			else:
+				frappe.get_doc('Additional Salary', self.additional_salary).cancel()
+			
+			self.db_set('additional_salary', '')
+
+def check_if_linked_document_exists(doc):
+	linked_doctypes = ['Leave Encashment', 'Employee Incentive', 'Retention Bonus']
+	for doctype in linked_doctypes:
+		if frappe.db.get_value(doctype, filters={'additional_salary': doc.additional_salary, "docstatus": 1}) and doctype != doc.doctype:
+			return True
+
