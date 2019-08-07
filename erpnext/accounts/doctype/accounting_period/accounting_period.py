@@ -41,7 +41,6 @@ class AccountingPeriod(Document):
 
 	def get_doctypes_for_closing(self):
 		docs_for_closing = []
-		#if not self.closed_documents or len(self.closed_documents) == 0:
 		doctypes = ["Sales Invoice", "Purchase Invoice", "Journal Entry", "Payroll Entry", "Bank Reconciliation",
 			"Asset", "Purchase Order", "Sales Order", "Leave Application", "Leave Allocation", "Stock Entry"]
 		closed_doctypes = [{"document_type": doctype, "closed": 1} for doctype in doctypes]

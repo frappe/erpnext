@@ -32,7 +32,6 @@ def validate_accounting_period(gl_map):
 		WHERE
 			ap.name = cd.parent
 			AND ap.company = %(company)s
-			AND ap.status = "Open"
 			AND cd.closed = 1
 			AND cd.document_type = %(voucher_type)s
 			AND %(date)s between ap.start_date and ap.end_date
@@ -43,7 +42,7 @@ def validate_accounting_period(gl_map):
 			}, as_dict=1)
 
 	if accounting_periods:
-		frappe.throw(_("You can't create the accounting entries in the closed accounting period {0}")
+		frappe.throw(_("You can't create accounting entries in the closed accounting period {0}")
 			.format(accounting_periods[0].name), ClosedAccountingPeriod)
 
 def process_gl_map(gl_map, merge_entries=True):
