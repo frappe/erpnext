@@ -553,8 +553,8 @@ def update_reference_in_payment_entry(d, payment_entry):
 
 def unlink_ref_doc_from_payment_entries(ref_doc, validate_permission=False):
 	if validate_permission:
-		allow_unlink_setting = cint(frappe.db.get_single_value("Stock Settings", "unlink_payment_on_cancellation_of_invoice"))
-		allow_unlink_role = frappe.db.get_single_value("Stock Settings", "restrict_unlink_payments_to_role")
+		allow_unlink_setting = cint(frappe.db.get_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice"))
+		allow_unlink_role = frappe.db.get_single_value("Accounts Settings", "restrict_unlink_payments_to_role")
 		has_unlink_role_permission = not allow_unlink_role or allow_unlink_role in frappe.get_roles()
 		if not allow_unlink_setting or not has_unlink_role_permission:
 			return
