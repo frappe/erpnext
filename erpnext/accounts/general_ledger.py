@@ -116,6 +116,7 @@ def check_if_in_list(gle, gl_map, dimensions=None):
 def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 	if not from_repost:
 		validate_account_for_perpetual_inventory(gl_map)
+		validate_cwip_accounts(gl_map)
 
 	round_off_debit_credit(gl_map)
 
@@ -145,6 +146,16 @@ def validate_account_for_perpetual_inventory(gl_map):
 				if entry.account in aii_accounts:
 					frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
 						.format(entry.account), StockAccountInvalidTransaction)
+
+def validate_cwip_accounts(gl_map):
+	if not cint(frappe.db.get_value("Asset Settings", None, "disable_cwip_accounting")) \
+		and gl_map[0].voucher_type == "Journal Entry":
+			cwip_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
+				where account_type = 'Capital Work in Progress' and is_group=0""")]
+
+			for entry in gl_map:
+				if entry.account in cwip_accounts:
+					frappe.throw(_("Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry").format(entry.account))
 
 def round_off_debit_credit(gl_map):
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
