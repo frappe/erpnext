@@ -382,7 +382,7 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=[]):
 			`tab{child_doc}`.amount
 		FROM `tab{child_doc}`, `tab{parent_doc}`
 		WHERE
-			`tab{child_doc}`.parent = `tab{parent_doc}`.name and {date_field}
+			`tab{child_doc}`.parent = `tab{parent_doc}`.name and `tab{parent_doc}`.{date_field}
 			between %s and %s and `tab{parent_doc}`.docstatus = 1
 			{condition} group by `tab{child_doc}`.name
 	""".format(parent_doc = doctype,
