@@ -164,7 +164,7 @@ class Task(NestedSet):
 		if self.status not in ('Cancelled', 'Completed') and self.exp_end_date:
 			from datetime import datetime
 			if self.exp_end_date < datetime.now().date():
-				self.db_set('status', 'Overdue')
+				self.db_set('status', 'Overdue', update_modified=False)
 				self.update_project()
 
 @frappe.whitelist()
