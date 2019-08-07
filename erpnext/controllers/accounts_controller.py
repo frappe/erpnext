@@ -95,6 +95,8 @@ class AccountsController(TransactionBase):
 		self.validate_party()
 		self.validate_currency()
 
+		self.clean_remarks()
+
 		if self.doctype == 'Purchase Invoice':
 			self.validate_paid_amount()
 
@@ -749,6 +751,11 @@ class AccountsController(TransactionBase):
 				# Note: not validating with gle account because we don't have the account
 				# at quotation / sales order level and we shouldn't stop someone
 				# from creating a sales invoice if sales order is already created
+
+	def clean_remarks(self):
+		for f in ['remarks', 'remark', 'user_remark', 'user_remarks']:
+			if self.meta.has_field(f):
+				self.set(f, cstr(self.get(f)).strip())
 
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
