@@ -120,19 +120,31 @@ class PaymentReconciliation(Document):
 		if self.limit:
 			non_reconciled_invoices = non_reconciled_invoices[:self.limit]
 
-		self.add_invoice_entries(non_reconciled_invoices)
+		self.add_invoice_entries(non_reconciled_invoices,'set_entries')
 
-	def add_invoice_entries(self, non_reconciled_invoices):
+	def add_invoice_entries(self, non_reconciled_invoices,flag):
 		#Populate 'invoices' with JVs and Invoices to reconcile against
 		self.set('invoices', [])
+		if flag == 'set_entries':
+			for e in non_reconciled_invoices:
+				ent = self.append('invoices', {})
+				ent.invoice_type = e.get('voucher_type')
+				ent.invoice_number = e.get('voucher_no')
+				ent.invoice_date = e.get('posting_date')
+				ent.amount = flt(e.get('invoice_amount'))
+				ent.outstanding_amount = e.get('outstanding_amount')
+				ent.invoice_due_date = e.get('due_date')
 
-		for e in non_reconciled_invoices:
-			ent = self.append('invoices', {})
-			ent.invoice_type = e.get('voucher_type')
-			ent.invoice_number = e.get('voucher_no')
-			ent.invoice_date = e.get('posting_date')
-			ent.amount = flt(e.get('invoice_amount'))
-			ent.outstanding_amount = e.get('outstanding_amount')
+		#sets sorted entries 
+		else: 	
+			for e in non_reconciled_invoices:
+				ent = self.append('invoices', {})
+				ent.invoice_type = e.get('invoice_type')
+				ent.invoice_number = e.get('invoice_number')
+				ent.invoice_date = e.get('invoice_date')
+				ent.invoice_due_date = e.get('invoice_due_date')
+				ent.amount = flt(e.get('amount'))
+				ent.outstanding_amount = e.get('outstanding_amount')
 
 	def reconcile(self, args):
 		for e in self.get('payments'):
@@ -166,6 +178,40 @@ class PaymentReconciliation(Document):
 		msgprint(_("Successfully Reconciled"))
 		self.get_unreconciled_entries()
 
+	def reconcile_invoices(self):
+		#reconciles entries in invoices table
+
+		for e in self.get('invoices'):
+			e.payment_jv_type = None, None
+			if e.payment_jv_number and " | " in e.payment_jv_number:
+				 e.payment_jv_type, e.payment_jv_number = e.payment_jv_number.split(" | ")
+				 
+		self.validate_entries()
+
+		dr_or_cr = ("credit_in_account_currency"
+			if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit_in_account_currency")
+
+		invoice_lst = []
+		dr_or_cr_notes = []
+		for e in self.get('invoices'):
+			reconciled_invoice = []
+			if e.payment_jv_number and e.payment_jv_amount:
+				if e.payment_jv_type in ['Sales Invoice', 'Purchase Invoice']:
+					reconciled_invoice = dr_or_cr_notes
+				else:
+					reconciled_invoice = invoice_lst
+
+				reconciled_invoice.append(self.get_invoice_details(e,dr_or_cr))
+
+		if invoice_lst :
+			reconcile_against_document(invoice_lst)
+
+		if dr_or_cr_notes:
+			reconcile_dr_cr_note(dr_or_cr_notes)
+
+			msgprint(_("Successfully Reconciled"))
+			self.get_unreconciled_entries()
+
 	def get_payment_details(self, row, dr_or_cr):
 		return frappe._dict({
 			'voucher_type': row.reference_type,
@@ -181,21 +227,55 @@ class PaymentReconciliation(Document):
 			'unadjusted_amount' : flt(row.amount),
 			'allocated_amount' : flt(row.allocated_amount),
 			'difference_amount': row.difference_amount,
-			'difference_account': row.difference_account
+			'difference_account': row.difference_account,
+			'idx' : row.idx
 		})
 
-	def get_difference_amount(self, child_row):
-		if child_row.get("reference_type") != 'Payment Entry': return
+	def get_invoice_details(self,e,dr_or_cr):
+		return frappe._dict({
+			'voucher_type': e.payment_jv_type,
+			'voucher_no' : e.payment_jv_number,
+			'voucher_detail_no' : e.reference_row,
+			'against_voucher_type' : e.invoice_type,
+			'against_voucher'  : e.invoice_number,
+			'account' : self.receivable_payable_account,
+			'party_type': self.party_type,
+			'party': self.party,
+			'is_advance' : e.is_advance,
+			'dr_or_cr' : dr_or_cr,
+			'unadjusted_amount' : flt(e.payment_jv_amount),
+			'allocated_amount' : flt(e.amount),
+			'difference_account': e.difference_account,
+			'difference_amount' : e.difference_amount,
+			'idx': e.idx
+		})
 
-		child_row = frappe._dict(child_row)
+	def get_difference_amount(self, child_row,source_table):
+		if source_table == 'payments':
+			if child_row.get("reference_type") != 'Payment Entry': return
 
-		if child_row.invoice_number and " | " in child_row.invoice_number:
-			child_row.invoice_type, child_row.invoice_number = child_row.invoice_number.split(" | ")
+			child_row = frappe._dict(child_row)
 
-		dr_or_cr = ("credit_in_account_currency"
-			if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit_in_account_currency")
+			if child_row.invoice_number and " | " in child_row.invoice_number:
+				child_row.invoice_type, child_row.invoice_number = child_row.invoice_number.split(" | ")
 
-		row = self.get_payment_details(child_row, dr_or_cr)
+			dr_or_cr = ("credit_in_account_currency"
+				if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit_in_account_currency")
+
+			row = self.get_payment_details(child_row, dr_or_cr)
+
+		else:
+			child_row = frappe._dict(child_row)
+
+			if child_row.payment_jv_number and " | " in child_row.payment_jv_number:
+				child_row.payment_jv_type, child_row.payment_jv_number = child_row.payment_jv_number.split(" | ")
+
+			if child_row.payment_jv_type != 'Payment Entry': return
+
+			dr_or_cr = ("credit_in_account_currency"
+				if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit_in_account_currency")
+
+			row = self.get_invoice_details(child_row, dr_or_cr)
 
 		doc = frappe.get_doc(row.voucher_type, row.voucher_no)
 		update_reference_in_payment_entry(row, doc, do_not_save=True)
@@ -239,6 +319,26 @@ class PaymentReconciliation(Document):
 		if not invoices_to_reconcile:
 			frappe.throw(_("Please select Allocated Amount, Invoice Type and Invoice Number in atleast one row"))
 
+	def validate_entries(self):
+		#validation of entries in invoices table
+		if not self.get("invoices"):
+			frappe.throw(_("No records found in the Invoice table"))
+
+		if not self.get("payments"):
+			frappe.throw(_("No records found in the Payment table"))
+
+		payments_to_reconcile = []
+		
+		for p in self.get('invoices') :
+			if p.payment_jv_number:
+				payments_to_reconcile.append(p.payment_jv_number)
+				if flt(p.amount) > flt(p.payment_jv_amount):
+					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equals to Payment Entry amount {2}")
+						.format(p.idx, p.amount, p.payment_jv_amount))
+
+		if not payments_to_reconcile:
+			frappe.throw(_("Please select Allocated Amount, Invoice Type and Invoice Number in atleast one row"))
+	
 	def check_condition(self):
 		cond = " and posting_date >= {0}".format(frappe.db.escape(self.from_date)) if self.from_date else ""
 		cond += " and posting_date <= {0}".format(frappe.db.escape(self.to_date)) if self.to_date else ""
@@ -251,6 +351,12 @@ class PaymentReconciliation(Document):
 			cond += " and `{0}` <= {1}".format(dr_or_cr, flt(self.maximum_amount))
 
 		return cond
+
+	def sort_invoice_entries(self,invoice_list,sort_key):
+		sorted_list = sorted(invoice_list, key=lambda invoice: invoice[sort_key])
+		for i, invoice in enumerate(sorted_list, start=1):
+			invoice['idx'] = i
+		self.add_invoice_entries(sorted_list,'sort_entries')
 
 def reconcile_dr_cr_note(dr_cr_notes):
 	for d in dr_cr_notes:

@@ -314,28 +314,46 @@ def reconcile_against_document(args):
 	"""
 		Cancel JV, Update aginst document, split if required and resubmit jv
 	"""
-	for d in args:
+	for i,v in enumerate(args):
 
-		check_if_advance_entry_modified(d)
-		validate_allocated_amount(d)
+		check_if_advance_entry_modified(v)
+		validate_allocated_amount(v)
 
 		# cancel advance entry
-		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
+		doc = frappe.get_doc(v.voucher_type, v.voucher_no)
 
 		doc.make_gl_entries(cancel=1, adv_adj=1)
 
 		# update ref in advance entry
-		if d.voucher_type == "Journal Entry":
-			update_reference_in_journal_entry(d, doc)
+		if v.voucher_type == "Journal Entry":
+			update_reference_in_journal_entry(v, doc)
 		else:
-			update_reference_in_payment_entry(d, doc)
+			update_reference_in_payment_entry(v, doc)
 
 		# re-submit advance entry
-		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
+		doc = frappe.get_doc(v.voucher_type, v.voucher_no)
 		doc.make_gl_entries(cancel = 0, adv_adj =1)
 
-		if d.voucher_type in ('Payment Entry', 'Journal Entry'):
+		if v.voucher_type in ('Payment Entry', 'Journal Entry'):
 			doc.update_expense_claim()
+
+		#check in invoices table if there's more than one reference of PE/JV 
+		#adjust amount and reference row in subsequent entry with same reference
+		if i < (len(args) - 1):
+			for k in range(1,(len(args) - i)):
+				if v.voucher_no == args[i+k]['voucher_no']:
+					if v.voucher_type == "Payment Entry":	
+						unadjusted_amount = frappe.db.get_value("Payment Entry",v.voucher_no,"unallocated_amount")
+					else:
+						jv = frappe.get_doc("Journal Entry",v.voucher_no)
+						if v.dr_or_cr == 'debit_in_account_currency' :
+							unadjusted_amount = jv.accounts[-1].debit_in_account_currency
+							args[i+k]['voucher_detail_no'] = jv.accounts[-1].name
+						else:
+							unadjusted_amount = jv.accounts[-1].credit_in_account_currency
+							args[i+k]['voucher_detail_no'] = jv.accounts[-1].name
+					args[i+k]['unadjusted_amount'] = unadjusted_amount
+					break
 
 def check_if_advance_entry_modified(args):
 	"""
@@ -379,9 +397,9 @@ def check_if_advance_entry_modified(args):
 
 def validate_allocated_amount(args):
 	if args.get("allocated_amount") < 0:
-		throw(_("Allocated amount cannot be negative"))
+		throw(_("Row {0} : Allocated amount cannot be negative").format(args['idx']))
 	elif args.get("allocated_amount") > args.get("unadjusted_amount"):
-		throw(_("Allocated amount cannot be greater than unadjusted amount"))
+		throw(_("Row {0} : Allocated amount cannot be greater than unadjusted amount").format(args['idx']))
 
 def update_reference_in_journal_entry(d, jv_obj):
 	"""
