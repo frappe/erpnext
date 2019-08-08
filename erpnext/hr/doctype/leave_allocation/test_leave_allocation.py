@@ -80,7 +80,7 @@ class TestLeaveAllocation(unittest.TestCase):
 			leave_type="_Test_CF_leave",
 			from_date=add_months(nowdate(), -12),
 			to_date=add_months(nowdate(), -1),
-			carry_forward=1)
+			carry_forward=0)
 		leave_allocation.submit()
 
 		# leave allocation with carry forward from previous allocation
@@ -89,7 +89,7 @@ class TestLeaveAllocation(unittest.TestCase):
 			carry_forward=1)
 		leave_allocation_1.submit()
 
-		self.assertEquals(leave_allocation.total_leaves_allocated, leave_allocation_1.carry_forwarded_leaves)
+		self.assertEquals(leave_allocation.total_leaves_allocated, leave_allocation_1.unused_leaves)
 
 	def test_carry_forward_leaves_expiry(self):
 		frappe.db.sql("delete from `tabLeave Allocation`")
@@ -105,10 +105,8 @@ class TestLeaveAllocation(unittest.TestCase):
 			leave_type="_Test_CF_leave_expiry",
 			from_date=add_months(nowdate(), -24),
 			to_date=add_months(nowdate(), -12),
-			carry_forward=1)
+			carry_forward=0)
 		leave_allocation.submit()
-
-		expire_allocation(leave_allocation)
 
 		leave_allocation = create_leave_allocation(
 			leave_type="_Test_CF_leave_expiry",
@@ -128,7 +126,7 @@ class TestLeaveAllocation(unittest.TestCase):
 			to_date=add_months(nowdate(), 12))
 		leave_allocation_1.submit()
 
-		self.assertEquals(leave_allocation_1.carry_forwarded_leaves, leave_allocation.new_leaves_allocated)
+		self.assertEquals(leave_allocation_1.unused_leaves, leave_allocation.new_leaves_allocated)
 
 	def test_creation_of_leave_ledger_entry_on_submit(self):
 		frappe.db.sql("delete from `tabLeave Allocation`")

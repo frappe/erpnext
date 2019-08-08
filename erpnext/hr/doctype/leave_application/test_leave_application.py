@@ -542,6 +542,19 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertEquals(leave_ledger_entry[0].leaves, -9)
 		self.assertEquals(leave_ledger_entry[1].leaves, -2)
 
+	def test_leave_application_creation_after_expiry(self):
+		# test leave balance for carry forwarded allocation
+		employee = get_employee()
+		leave_type = create_leave_type(
+			leave_type_name="_Test_CF_leave_expiry",
+			is_carry_forward=1,
+			expire_carried_forward_leaves=90)
+		leave_type.submit()
+
+		create_carry_forwarded_allocation(employee, leave_type)
+
+		self.assertEquals(get_leave_balance_on(employee.name, leave_type.name, add_days(nowdate(), -85), add_days(nowdate(), -84)), 0)
+
 def create_carry_forwarded_allocation(employee, leave_type):
 		# initial leave allocation
 		leave_allocation = create_leave_allocation(
@@ -550,7 +563,7 @@ def create_carry_forwarded_allocation(employee, leave_type):
 			employee_name=employee.employee_name,
 			from_date=add_months(nowdate(), -24),
 			to_date=add_months(nowdate(), -12),
-			carry_forward=1)
+			carry_forward=0)
 		leave_allocation.submit()
 
 		leave_allocation = create_leave_allocation(
