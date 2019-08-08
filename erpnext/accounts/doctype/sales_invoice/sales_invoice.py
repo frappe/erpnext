@@ -104,6 +104,8 @@ class SalesInvoice(SellingController):
 		# validate service stop date to lie in between start and end date
 		validate_service_stop_date(self)
 
+		self.validate_for_items()
+
 		if not self.is_opening:
 			self.is_opening = 'No'
 
@@ -552,6 +554,26 @@ class SalesInvoice(SellingController):
 		for d in self.get("items"):
 			if d.delivery_note:
 				msgprint(_("Stock cannot be updated against Delivery Note {0}").format(d.delivery_note), raise_exception=1)
+
+	def validate_for_items(self):
+		check_list, chk_dupl_itm = [], []
+		if cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
+			return
+
+		for d in self.get('items'):
+			e = [d.item_code, d.description, d.warehouse, d.sales_order or d.delivery_note, d.batch_no or '']
+			f = [d.item_code, d.description, d.sales_order or d.delivery_note]
+
+			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
+				if e in check_list:
+					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
+				else:
+					check_list.append(e)
+			else:
+				if f in chk_dupl_itm:
+					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
+				else:
+					chk_dupl_itm.append(f)
 
 	def validate_write_off_account(self):
 		if flt(self.write_off_amount) and not self.write_off_account:
