@@ -122,7 +122,7 @@ frappe.treeview_settings["Account"] = {
 	onrender: function(node) {
 		if(frappe.boot.user.can_read.indexOf("GL Entry") !== -1){
 
-			// show Dr if positive since balance is calculatrd as debit - credit else show Cr
+			// show Dr if positive since balance is calculated as debit - credit else show Cr
 			let dr_or_cr = node.data.balance_in_account_currency > 0 ? "Dr": "Cr";
 
 			if (node.data && node.data.balance!==undefined) {
