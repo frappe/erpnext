@@ -266,8 +266,10 @@ def get_leave_period(from_date, to_date, company):
 def generate_leave_encashment():
 	''' Generates a draft leave encashment on allocation expiry '''
 	from erpnext.hr.doctype.leave_encashment.leave_encashment import create_leave_encashment
+
 	if frappe.db.get_single_value('HR Settings', 'auto_leave_encashment'):
-		leave_type = frappe.db.sql_list("SELECT name FROM `tabLeave Type` WHERE `allow_encashment`=1")
+		leave_type = frappe.get_all('Leave Type', filters={'allow_encashment': 1}, fields=['name'])
+		leave_type=[l['name'] for l in leave_type]
 
 		leave_allocation = frappe.get_all("Leave Allocation", filters={
 			'to_date': add_days(today(), -1),
@@ -285,9 +287,8 @@ def allocate_earned_leaves():
 	divide_by_frequency = {"Yearly": 1, "Half-Yearly": 6, "Quarterly": 4, "Monthly": 12}
 
 	for e_leave_type in e_leave_types:
-		leave_allocations = frappe.db.sql("""select name, employee, from_date, to_date from `tabLeave Allocation` where '{0}'
-			between from_date and to_date and docstatus=1 and leave_type='{1}'"""
-			.format(today, e_leave_type.name), as_dict=1)
+		leave_allocations = frappe.db.sql("""select name, employee, from_date, to_date from `tabLeave Allocation` where %s
+			between from_date and to_date and docstatus=1 and leave_type=%s""", (today, e_leave_type.name), as_dict=1)
 		for allocation in leave_allocations:
 			leave_policy = get_employee_leave_policy(allocation.employee)
 			if not leave_policy:
@@ -295,8 +296,10 @@ def allocate_earned_leaves():
 			if not e_leave_type.earned_leave_frequency == "Monthly":
 				if not check_frequency_hit(allocation.from_date, today, e_leave_type.earned_leave_frequency):
 					continue
-			annual_allocation = frappe.db.sql("""select annual_allocation from `tabLeave Policy Detail`
-				where parent=%s and leave_type=%s""", (leave_policy.name, e_leave_type.name))
+			annual_allocation = frappe.get_all("Leave Policy Detail", filters={
+				'parent': leave_policy.name,
+				'leave_type': e_leave_type.name
+			}, fields=['annual_allocation'])
 			if annual_allocation and annual_allocation[0]:
 				earned_leaves = flt(annual_allocation[0][0]) / divide_by_frequency[e_leave_type.earned_leave_frequency]
 				if e_leave_type.rounding == "0.5":

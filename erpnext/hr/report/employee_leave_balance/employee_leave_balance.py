@@ -66,7 +66,7 @@ def get_data(filters, leave_types):
 					filters.from_date, filters.to_date) * -1
 
 				# opening balance
-				opening = get_leave_balance_on(employee.name, leave_type, filters.from_date)
+				opening = get_total_allocated_leaves(employee.name, leave_type, filters.from_date, filters.to_date)
 
 				# closing balance
 				closing = flt(opening) - flt(leaves_taken)
