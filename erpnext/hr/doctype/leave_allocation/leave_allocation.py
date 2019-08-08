@@ -50,6 +50,8 @@ class LeaveAllocation(Document):
 
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
+		if self.carry_forward:
+			self.set_carry_forwarded_leaves_in_previous_allocation(on_cancel=True)
 
 	def validate_period(self):
 		if date_diff(self.to_date, self.from_date) <= 0:
@@ -89,23 +91,32 @@ class LeaveAllocation(Document):
 					BackDatedAllocationError)
 
 	def set_total_leaves_allocated(self):
-		self.carry_forwarded_leaves = get_carry_forwarded_leaves(self.employee,
+		self.unused_leaves = get_carry_forwarded_leaves(self.employee,
 			self.leave_type, self.from_date, self.carry_forward)
 
-		self.total_leaves_allocated = flt(self.carry_forwarded_leaves) + flt(self.new_leaves_allocated)
-		self.maintain_carry_forwarded_leaves()
+		self.total_leaves_allocated = flt(self.unused_leaves) + flt(self.new_leaves_allocated)
+
+		if self.carry_forward:
+			self.maintain_carry_forwarded_leaves()
+			self.set_carry_forwarded_leaves_in_previous_allocation()
 
 		if not self.total_leaves_allocated and not frappe.db.get_value("Leave Type", self.leave_type, "is_earned_leave") and not frappe.db.get_value("Leave Type", self.leave_type, "is_compensatory"):
-			frappe.throw(_("Total leaves allocated is mandatory for Leave Type {0}".format(self.leave_type)))
+			frappe.throw(_("Total leaves allocated is mandatory for Leave Type {0}").format(self.leave_type))
 
 	def maintain_carry_forwarded_leaves(self):
-		''' reduce the carry forwarded leaves to be within the maximum allowed leaves '''
-		if not self.carry_forward:
-			return
+		''' Reduce the carry forwarded leaves to be within the maximum allowed leaves '''
+		
 		max_leaves_allowed = frappe.db.get_value("Leave Type", self.leave_type, "max_leaves_allowed")
 		if self.new_leaves_allocated <= max_leaves_allowed <= self.total_leaves_allocated:
-			self.carry_forwarded_leaves = max_leaves_allowed - flt(self.new_leaves_allocated)
+			self.unused_leaves = max_leaves_allowed - flt(self.new_leaves_allocated)
 			self.total_leaves_allocated = flt(max_leaves_allowed)
+
+	def set_carry_forwarded_leaves_in_previous_allocation(self, on_cancel=False):
+		''' Set carry forwarded leaves in previous allocation '''
+		previous_allocation = get_previous_allocation(self.from_date, self.leave_type, self.employee)
+		if on_cancel:
+			self.unused_leaves = 0.0
+		frappe.db.set_value("Leave Allocation", previous_allocation.name, 'carry_forwarded_leaves_count', self.unused_leaves)
 
 	def validate_total_leaves_allocated(self):
 		# Adding a day to include To Date in the difference
@@ -114,10 +125,10 @@ class LeaveAllocation(Document):
 			frappe.throw(_("Total allocated leaves are more than days in the period"), OverAllocationError)
 
 	def create_leave_ledger_entry(self, submit=True):
-		if self.carry_forwarded_leaves:
+		if self.unused_leaves:
 			expiry_days = frappe.db.get_value("Leave Type", self.leave_type, "expire_carried_forward_leaves")
 			args = dict(
-				leaves=self.carry_forwarded_leaves,
+				leaves=self.unused_leaves,
 				from_date=self.from_date,
 				to_date=add_days(self.from_date, expiry_days - 1) if expiry_days else self.to_date,
 				is_carry_forward=1
@@ -142,7 +153,7 @@ def get_previous_allocation(from_date, leave_type, employee):
 			'docstatus': 1
 		},
 		order_by='to_date DESC',
-		fieldname=['name', 'from_date', 'to_date'], as_dict=1)
+		fieldname=['name', 'from_date', 'to_date', 'employee', 'leave_type'], as_dict=1)
 
 def get_leave_allocation_for_period(employee, leave_type, from_date, to_date):
 	leave_allocated = 0
@@ -170,13 +181,13 @@ def get_leave_allocation_for_period(employee, leave_type, from_date, to_date):
 @frappe.whitelist()
 def get_carry_forwarded_leaves(employee, leave_type, date, carry_forward=None):
 	''' Returns carry forwarded leaves for the given employee '''
-	carry_forwarded_leaves = 0.0
+	unused_leaves = 0.0
 	previous_allocation = get_previous_allocation(date, leave_type, employee)
 	if carry_forward and previous_allocation:
 		validate_carry_forward(leave_type)
-		carry_forwarded_leaves = get_unused_leaves(employee, leave_type, previous_allocation.from_date, previous_allocation.to_date)
+		unused_leaves = get_unused_leaves(employee, leave_type, previous_allocation.from_date, previous_allocation.to_date)
 
-	return carry_forwarded_leaves
+	return unused_leaves
 
 def get_unused_leaves(employee, leave_type, from_date, to_date):
 	''' Returns unused leaves between the given period while skipping leave allocation expiry '''

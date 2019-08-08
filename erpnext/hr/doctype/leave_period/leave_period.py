@@ -22,7 +22,7 @@ class LeavePeriod(Document):
 
 		condition_str = " and " + " and ".join(conditions) if len(conditions) else ""
 
-		employees = frappe._dict(frappe.db.sql("select name, date_of_joining from tabEmployee where status='Active' {condition}"
+		employees = frappe._dict(frappe.db.sql("select name, date_of_joining from tabEmployee where status='Active' {condition}" #nosec
 			.format(condition=condition_str), tuple(values)))
 
 		return employees

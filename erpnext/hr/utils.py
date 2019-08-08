@@ -318,7 +318,7 @@ def create_earned_leave_ledger_entry(allocation, earned_leaves, date):
 	''' Create leave ledger entry based on the earned leave frequency '''
 	allocation.new_leaves_allocated = earned_leaves
 	allocation.from_date = date
-	allocation.carry_forwarded_leaves = 0
+	allocation.unused_leaves = 0
 	allocation.create_leave_ledger_entry()
 
 def check_frequency_hit(from_date, to_date, frequency):

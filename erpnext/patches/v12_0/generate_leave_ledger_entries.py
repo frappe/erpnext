@@ -13,10 +13,21 @@ def execute():
 	if frappe.db.a_row_exists("Leave Ledger Entry"):
 		return
 
+	if not frappe.get_meta("Leave Allocation").has_field("unused_leaves"):
+		frappe.reload_doc("HR", "doctype", "Leave Allocation")
+		update_leave_allocation_fieldname()
+
 	generate_allocation_ledger_entries()
 	generate_application_leave_ledger_entries()
 	generate_encashment_leave_ledger_entries()
 	generate_expiry_allocation_ledger_entries()
+
+def update_leave_allocation_fieldname():
+	''' maps data from old field to the new field '''
+	frappe.db.sql("""
+		UPDATE `tabLeave Allocation`
+		SET `unused_leaves` = `carry_forwarded_leaves`
+	""")
 
 def generate_allocation_ledger_entries():
 	''' fix ledger entries for missing leave allocation transaction '''
@@ -64,7 +75,7 @@ def get_allocation_records():
 			employee,
 			leave_type,
 			new_leaves_allocated,
-			carry_forwarded_leaves,
+			unused_leaves,
 			from_date,
 			to_date,
 			carry_forward
