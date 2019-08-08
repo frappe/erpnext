@@ -69,45 +69,18 @@ def generate_expiry_allocation_ledger_entries():
 			expire_allocation(allocation_obj)
 
 def get_allocation_records():
-	return frappe.db.sql("""
-		SELECT
-			name,
-			employee,
-			leave_type,
-			new_leaves_allocated,
-			unused_leaves,
-			from_date,
-			to_date,
-			carry_forward
-		FROM `tabLeave Allocation`
-		WHERE
-			docstatus=1
-		ORDER BY to_date ASC
-	""", as_dict=1)
+	return frappe.get_all("Leave Allocation", filters={
+		"docstatus": 1
+		}, fields=['name', 'employee', 'leave_type', 'new_leaves_allocated',
+			'unused_leaves', 'from_date', 'to_date', 'carry_forward'
+		], order_by='to_date ASC')
 
 def get_leaves_application_records():
-	return frappe.db.sql("""
-			SELECT
-				name,
-				employee,
-				leave_type,
-				total_leave_days,
-				from_date,
-				to_date
-			FROM `tabLeave Application`
-			WHERE
-				docstatus=1
-		""", as_dict=1)
+	return frappe.get_all("Leave Application", filters={
+		"docstatus": 1
+		}, fields=['name', 'employee', 'leave_type', 'total_leave_days', 'from_date', 'to_date'])
 
 def get_leave_encashment_records():
-	return frappe.db.sql("""
-			SELECT
-				name,
-				employee,
-				leave_type,
-				encashable_days,
-				encashment_date
-			FROM `tabLeave Encashment`
-			WHERE
-				docstatus=1
-		""", as_dict=1)
+	return frappe.get_all("Leave Encashment", filters={
+		"docstatus": 1
+		}, fields=['name', 'employee', 'leave_type', 'encashable_days', 'encashment_date'])

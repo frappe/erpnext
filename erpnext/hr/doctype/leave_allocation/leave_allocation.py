@@ -126,7 +126,7 @@ class LeaveAllocation(Document):
 
 	def create_leave_ledger_entry(self, submit=True):
 		if self.unused_leaves:
-			expiry_days = frappe.db.get_value("Leave Type", self.leave_type, "expire_carried_forward_leaves")
+			expiry_days = frappe.db.get_value("Leave Type", self.leave_type, "expire_carry_forwarded_leaves_after_days")
 			args = dict(
 				leaves=self.unused_leaves,
 				from_date=self.from_date,

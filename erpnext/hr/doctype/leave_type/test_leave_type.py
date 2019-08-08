@@ -19,7 +19,7 @@ def create_leave_type(**args):
         "is_earned_leave": args.is_earned_leave or 0,
         "is_lwp": args.is_lwp or 0,
         "is_carry_forward": args.is_carry_forward or 0,
-        "expire_carried_forward_leaves": args.expire_carried_forward_leaves or 0,
+        "expire_carry_forwarded_leaves_after_days": args.expire_carry_forwarded_leaves_after_days or 0,
         "encashment_threshold_days": args.encashment_threshold_days or 5,
         "earning_component": "Leave Encashment"
     })
