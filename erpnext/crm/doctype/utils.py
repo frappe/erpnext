@@ -11,11 +11,13 @@ def get_last_interaction(contact=None, lead=None):
 	last_issue = None
 	if contact:
 		query_condition = ''
+		values = []
 		contact = frappe.get_doc('Contact', contact)
 		for link in contact.links:
 			if link.link_doctype == 'Customer':
 				last_issue = get_last_issue_from_customer(link.link_name)
-			query_condition += "(`reference_doctype`='{}' AND `reference_name`='{}') OR".format(link.link_doctype, link.link_name)
+			query_condition += "(`reference_doctype`=%s AND `reference_name`=%s) OR"
+			values += [link_link_doctype, link_link_name]
 
 		if query_condition:
 			# remove extra appended 'OR'
@@ -23,19 +25,18 @@ def get_last_interaction(contact=None, lead=None):
 			last_communication = frappe.db.sql("""
 				SELECT `name`, `content`
 				FROM `tabCommunication`
-				WHERE
-					`sent_or_received`='Received' AND
-					({})
+				WHERE `sent_or_received`='Received'
+				AND ({})
 				ORDER BY `modified`
 				LIMIT 1
-			""".format(query_condition), as_dict=1)  # nosec
+			""".format(query_condition), values, as_dict=1)  # nosec
 
 	if lead:
 		last_communication = frappe.get_all('Communication', filters={
 			'reference_doctype': 'Lead',
 			'reference_name': lead,
 			'sent_or_received': 'Received'
-		}, fields=['name', 'content'], limit=1)
+		}, fields=['name', 'content'], order_by='`creation` DESC', limit=1)
 
 	last_communication = last_communication[0] if last_communication else None
 
@@ -47,7 +48,7 @@ def get_last_interaction(contact=None, lead=None):
 def get_last_issue_from_customer(customer_name):
 	issues = frappe.get_all('Issue', {
 		'customer': customer_name
-	}, ['name', 'subject', 'customer'], limit=1)
+	}, ['name', 'subject', 'customer'], order_by='`creation` DESC', limit=1)
 
 	return issues[0] if issues else None
 

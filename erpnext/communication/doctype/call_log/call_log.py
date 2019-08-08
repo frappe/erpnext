@@ -12,6 +12,8 @@ from erpnext.crm.doctype.lead.lead import get_lead_with_phone_number
 
 class CallLog(Document):
 	def before_insert(self):
+		# strip 0 from the start of the number for proper number comparisions
+		# eg. 07888383332 should match with 7888383332
 		number = self.get('from').lstrip('0')
 		self.contact = get_contact_with_phone_number(number)
 		self.lead = get_lead_with_phone_number(number)
