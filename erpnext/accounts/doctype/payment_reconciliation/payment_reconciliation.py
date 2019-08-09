@@ -93,7 +93,7 @@ class PaymentReconciliation(Document):
 				and `tab{doc}`.is_return = 1 and `tabGL Entry`.against_voucher_type = %(voucher_type)s
 				and `tab{doc}`.docstatus = 1 and `tabGL Entry`.party = %(party)s
 				and `tabGL Entry`.party_type = %(party_type)s and `tabGL Entry`.account = %(account)s
-			GROUP BY `tabSales Invoice`.name
+			GROUP BY `tab{doc}`.name
 			Having
 				amount > 0
 		""".format(doc=voucher_type, dr_or_cr=dr_or_cr, reconciled_dr_or_cr=reconciled_dr_or_cr), {
