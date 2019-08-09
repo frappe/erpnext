@@ -296,12 +296,12 @@ def allocate_earned_leaves():
 			if not e_leave_type.earned_leave_frequency == "Monthly":
 				if not check_frequency_hit(allocation.from_date, today, e_leave_type.earned_leave_frequency):
 					continue
-			annual_allocation = frappe.get_all("Leave Policy Detail", filters={
+			annual_allocation = frappe.db.get_value("Leave Policy Detail", filters={
 				'parent': leave_policy.name,
 				'leave_type': e_leave_type.name
-			}, fields=['annual_allocation'])
-			if annual_allocation and annual_allocation[0]:
-				earned_leaves = flt(annual_allocation[0][0]) / divide_by_frequency[e_leave_type.earned_leave_frequency]
+			}, fieldname=['annual_allocation'])
+			if annual_allocation:
+				earned_leaves = flt(annual_allocation) / divide_by_frequency[e_leave_type.earned_leave_frequency]
 				if e_leave_type.rounding == "0.5":
 					earned_leaves = round(earned_leaves * 2) / 2
 				else:
