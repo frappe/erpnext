@@ -43,7 +43,7 @@ install:
   - git clone https://github.com/frappe/bench --depth 1
   - pip install -e ./bench
 
-  - git clone https://github.com/frappe/frappe --branch $TRAVIS_BRANCH --depth 1
+  - git clone https://github.com/DigiThinkIT/frappe --branch $TRAVIS_BRANCH --depth 1
   - bench init --skip-assets --frappe-path ~/frappe --python $(which python) frappe-bench
 
   - mkdir ~/frappe-bench/sites/test_site
