@@ -105,6 +105,9 @@ class StockEntry(StockController):
 			self.update_work_order()
 
 		self.update_stock_ledger()
+
+		self.flags.ignore_links = True
+
 		self.make_gl_entries_on_cancel()
 		self.update_cost_in_project()
 		self.update_transferred_qty()

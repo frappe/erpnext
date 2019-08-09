@@ -227,39 +227,39 @@ def reset_serial_no_status_and_warehouse(serial_nos=None):
 			except:
 				pass
 
-# def repost_all_stock_vouchers():
-# 	warehouses_with_account = frappe.db.sql_list("""select warehouse from tabAccount
-# 		where ifnull(account_type, '') = 'Stock' and (warehouse is not null and warehouse != '')
-# 		and is_group=0""")
+def repost_all_stock_vouchers():
+	warehouses_with_account = frappe.db.sql_list("""select warehouse from tabAccount
+		where ifnull(account_type, '') = 'Stock' and (warehouse is not null and warehouse != '')
+		and is_group=0""")
 
-# 	vouchers = frappe.db.sql("""select distinct voucher_type, voucher_no
-# 		from `tabStock Ledger Entry` sle
-# 		where voucher_type != "Serial No" and sle.warehouse in (%s)
-# 		order by posting_date, posting_time, creation""" %
-# 		', '.join(['%s']*len(warehouses_with_account)), tuple(warehouses_with_account))
+	vouchers = frappe.db.sql("""select distinct voucher_type, voucher_no
+		from `tabStock Ledger Entry` sle
+		where voucher_type != "Serial No" and sle.warehouse in (%s)
+		order by posting_date, posting_time, creation""" %
+		', '.join(['%s']*len(warehouses_with_account)), tuple(warehouses_with_account))
 
-# 	rejected = []
-# 	i = 0
-# 	for voucher_type, voucher_no in vouchers:
-# 		i+=1
-# 		print(i, "/", len(vouchers), voucher_type, voucher_no)
-# 		try:
-# 			for dt in ["Stock Ledger Entry", "GL Entry"]:
-# 				frappe.db.sql("""delete from `tab%s` where voucher_type=%s and voucher_no=%s"""%
-# 					(dt, '%s', '%s'), (voucher_type, voucher_no))
+	rejected = []
+	i = 0
+	for voucher_type, voucher_no in vouchers:
+		i+=1
+		print(i, "/", len(vouchers), voucher_type, voucher_no)
+		try:
+			for dt in ["Stock Ledger Entry", "GL Entry"]:
+				frappe.db.sql("""delete from `tab%s` where voucher_type=%s and voucher_no=%s"""%
+					(dt, '%s', '%s'), (voucher_type, voucher_no))
 
-# 			doc = frappe.get_doc(voucher_type, voucher_no)
-# 			if voucher_type=="Stock Entry" and doc.purpose in ["Manufacture", "Repack"]:
-# 				doc.calculate_rate_and_amount(force=1)
-# 			elif voucher_type=="Purchase Receipt" and doc.is_subcontracted == "Yes":
-# 				doc.validate()
+			doc = frappe.get_doc(voucher_type, voucher_no)
+			if voucher_type=="Stock Entry" and doc.purpose in ["Manufacture", "Repack"]:
+				doc.calculate_rate_and_amount(force=1)
+			elif voucher_type=="Purchase Receipt" and doc.is_subcontracted == "Yes":
+				doc.validate()
 
-# 			doc.update_stock_ledger()
-# 			doc.make_gl_entries(repost_future_gle=False)
-# 			frappe.db.commit()
-# 		except Exception:
-# 			print(frappe.get_traceback())
-# 			rejected.append([voucher_type, voucher_no])
-# 			frappe.db.rollback()
+			doc.update_stock_ledger()
+			doc.make_gl_entries(repost_future_gle=False)
+			frappe.db.commit()
+		except Exception:
+			print(frappe.get_traceback())
+			rejected.append([voucher_type, voucher_no])
+			frappe.db.rollback()
 
-# 	print(rejected)
+	print(rejected)

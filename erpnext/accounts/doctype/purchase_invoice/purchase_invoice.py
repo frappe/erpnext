@@ -354,7 +354,7 @@ class PurchaseInvoice(BuyingController):
 		self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
-	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
+	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if not self.grand_total:
 			return
 		if not gl_entries:
@@ -369,12 +369,6 @@ class PurchaseInvoice(BuyingController):
 			if update_outstanding == "No":
 				update_outstanding_amt(self.credit_to, "Supplier", self.supplier,
 					self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name)
-
-			# if repost_future_gle and cint(self.update_stock) and self.auto_accounting_for_stock:
-			# 	from erpnext.controllers.stock_controller import update_gl_entries_after
-			# 	items, warehouses = self.get_items_and_warehouses()
-			# 	update_gl_entries_after(self.posting_date, self.posting_time,
-			# 		warehouses, items, company = self.company)
 
 		elif self.docstatus == 2 and cint(self.update_stock) and self.auto_accounting_for_stock:
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)

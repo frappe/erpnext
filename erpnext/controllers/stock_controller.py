@@ -21,7 +21,7 @@ class StockController(AccountsController):
 		super(StockController, self).validate()
 		self.validate_inspection()
 
-	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
+	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if self.docstatus == 2:
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -284,10 +284,10 @@ class StockController(AccountsController):
 		from erpnext.stock.stock_ledger import make_sl_entries
 		make_sl_entries(sl_entries, is_amended, allow_negative_stock, via_landed_cost_voucher)
 
-	def make_gl_entries_on_cancel(self, repost_future_gle=True):
+	def make_gl_entries_on_cancel(self):
 		if frappe.db.sql("""select name from `tabGL Entry` where voucher_type=%s
 			and voucher_no=%s""", (self.doctype, self.name)):
-				self.make_gl_entries(repost_future_gle=repost_future_gle)
+				self.make_gl_entries()
 
 	def get_serialized_items(self):
 		serialized_items = []

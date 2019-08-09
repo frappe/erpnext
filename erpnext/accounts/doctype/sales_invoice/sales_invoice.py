@@ -7,7 +7,6 @@ import frappe.defaults
 from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date
-from erpnext.controllers.stock_controller import update_gl_entries_after
 from frappe.model.mapper import get_mapped_doc
 from erpnext.accounts.doctype.sales_invoice.pos import update_multi_mode_option
 
@@ -673,7 +672,7 @@ class SalesInvoice(SellingController):
 			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
-	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
+	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 
 		if not gl_entries:
@@ -694,11 +693,6 @@ class SalesInvoice(SellingController):
 				update_outstanding_amt(self.debit_to, "Customer", self.customer,
 					self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name)
 
-			# if repost_future_gle and cint(self.update_stock) \
-			# 	and cint(auto_accounting_for_stock):
-			# 		items, warehouses = self.get_items_and_warehouses()
-			# 		update_gl_entries_after(self.posting_date, self.posting_time,
-			# 			warehouses, items, company = self.company)
 		elif self.docstatus == 2 and cint(self.update_stock) \
 			and cint(auto_accounting_for_stock):
 				from erpnext.accounts.general_ledger import make_reverse_gl_entries

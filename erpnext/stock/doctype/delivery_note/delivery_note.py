@@ -245,6 +245,7 @@ class DeliveryNote(SellingController):
 		self.cancel_packing_slips()
 
 		self.make_gl_entries_on_cancel()
+		self.flags.ignore_links = True
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
