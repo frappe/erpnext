@@ -121,7 +121,10 @@ frappe.treeview_settings["Account"] = {
 	},
 	onrender: function(node) {
 		if(frappe.boot.user.can_read.indexOf("GL Entry") !== -1){
-			var dr_or_cr = in_list(["Liability", "Income", "Equity"], node.data.root_type) ? "Cr" : "Dr";
+
+			// show Dr if positive since balance is calculated as debit - credit else show Cr
+			let dr_or_cr = node.data.balance_in_account_currency > 0 ? "Dr": "Cr";
+
 			if (node.data && node.data.balance!==undefined) {
 				$('<span class="balance-area pull-right text-muted small">'
 					+ (node.data.balance_in_account_currency ?
