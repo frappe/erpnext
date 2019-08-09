@@ -19,9 +19,9 @@
 			{% if(contact_list[i].phone) { %}
 				{%= __("Phone ") %}: <b>{%= contact_list[i].phone %}</b><br>
 			{% endif %}
-			{% if(contact_list[i].phones) { %}
-				{% for(var j=0, k=contact_list[i].phones.length; j<k; j++) { %}
-					{%= __("Phone ") %}: {%= contact_list[i].phones[j].phone %}<br>
+			{% if(contact_list[i].phone_nos) { %}
+				{% for(var j=0, k=contact_list[i].phone_nos.length; j<k; j++) { %}
+					{%= __("Phone ") %}: {%= contact_list[i].phone_nos[j].phone %}<br>
 				{% } %}
 			{% endif %}
 		</p>
