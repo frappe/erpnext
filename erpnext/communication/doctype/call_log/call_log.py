@@ -62,3 +62,25 @@ def get_employees_with_number(number):
 	frappe.cache().hset('employees_with_number', number, employee_emails)
 
 	return employee
+
+def set_caller_information(doc, state):
+	'''Called from hoooks on creation of Lead or Contact'''
+	if doc.doctype not in ['Lead', 'Contact']: return
+
+	numbers = [doc.get('phone'), doc.get('mobile_no')]
+	for_doc = doc.doctype.lower()
+
+	for number in numbers:
+		if not number: continue
+		print(number)
+		filters = frappe._dict({
+			'from': ['like', '%{}'.format(number.lstrip('0'))],
+			for_doc: ''
+		})
+
+		logs = frappe.get_all('Call Log', filters=filters)
+
+		for log in logs:
+			call_log = frappe.get_doc('Call Log', log.name)
+			call_log.set(for_doc, doc.name)
+			call_log.save(ignore_permissions=True)
