@@ -6,6 +6,7 @@ frappe.ui.form.on("Work Order", {
 		frm.custom_make_buttons = {
 			'Stock Entry': 'Start',
 			'Pick List': 'Create Pick List',
+			'Job Card': 'Create Job Card'
 		};
 
 		// Set query for warehouses

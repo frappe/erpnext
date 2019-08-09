@@ -498,6 +498,9 @@ class WorkOrder(Document):
 		'''update transferred qty from submitted stock entries for that item against
 			the work order'''
 
+		backflush_based_on = frappe.db.get_single_value("Manufacturing Settings",
+				"backflush_raw_materials_based_on")
+
 		for d in self.required_items:
 			transferred_qty = frappe.db.sql('''select sum(qty)
 				from `tabStock Entry` entry, `tabStock Entry Detail` detail
@@ -510,6 +513,10 @@ class WorkOrder(Document):
 						'name': self.name,
 						'item': d.item_code
 					})[0][0]
+
+			if backflush_based_on == "BOM" and (flt(transferred_qty) > d.required_qty):
+				frappe.throw(_("Row {0}: For item {1}, transferred qty ({2}) cannot be greater than required qty ({3}) in Work Order {4}")
+					.format(d.idx, d.item_code, transferred_qty, d.required_qty, self.name), StockOverProductionError)
 
 			d.db_set('transferred_qty', flt(transferred_qty), update_modified = False)
 
