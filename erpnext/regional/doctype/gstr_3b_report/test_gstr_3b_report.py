@@ -176,6 +176,9 @@ def create_purchase_invoices():
 			do_not_save=1
 		)
 
+	pi1.place_of_supply = "29-Karnataka"
+	pi1.save()
+
 	pi1.submit()
 
 def make_suppliers():
