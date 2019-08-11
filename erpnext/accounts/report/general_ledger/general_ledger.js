@@ -159,16 +159,12 @@ frappe.query_reports["General Ledger"] = {
 	]
 }
 
-let dimension_filters = erpnext.get_dimension_filters();
-
-dimension_filters.then((dimensions) => {
-	dimensions.forEach((dimension) => {
-		frappe.query_reports["General Ledger"].filters.splice(15, 0 ,{
-			"fieldname": dimension["fieldname"],
-			"label": __(dimension["label"]),
-			"fieldtype": "Link",
-			"options": dimension["document_type"]
-		});
+erpnext.dimension_filters.forEach((dimension) => {
+	frappe.query_reports["General Ledger"].filters.splice(15, 0 ,{
+		"fieldname": dimension["fieldname"],
+		"label": __(dimension["label"]),
+		"fieldtype": "Link",
+		"options": dimension["document_type"]
 	});
 });
 

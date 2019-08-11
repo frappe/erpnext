@@ -395,7 +395,9 @@ class BuyingController(StockController):
 	def set_qty_as_per_stock_uom(self):
 		for d in self.get("items"):
 			if d.meta.get_field("stock_qty"):
-				if not d.conversion_factor:
+				# Check if item code is present
+				# Conversion factor should not be mandatory for non itemized items
+				if not d.conversion_factor and d.item_code:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
 
@@ -636,7 +638,8 @@ class BuyingController(StockController):
 		asset.set_missing_values()
 		asset.insert()
 
-		frappe.msgprint(_("Asset {0} created").format(asset.name))
+		asset_link = frappe.utils.get_link_to_form('Asset', asset.name)
+		frappe.msgprint(_("Asset {0} created").format(asset_link))
 		return asset.name
 
 	def make_asset_movement(self, row):

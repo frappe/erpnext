@@ -145,7 +145,7 @@ class Task(NestedSet):
 
 	def populate_depends_on(self):
 		if self.parent_task:
-			parent = frappe.get_cached_doc('Task', self.parent_task)
+			parent = frappe.get_doc('Task', self.parent_task)
 			if not self.name in [row.task for row in parent.depends_on]:
 				parent.append("depends_on", {
 					"doctype": "Task Depends On",
@@ -158,20 +158,13 @@ class Task(NestedSet):
 		if check_if_child_exists(self.name):
 			throw(_("Child Task exists for this Task. You can not delete this Task."))
 
-		if self.project:
-			tasks = frappe.get_doc('Project', self.project).tasks
-			for task in tasks:
-				if task.get('task_id') == self.name:
-					frappe.delete_doc('Project Task', task.name)
-
-
 		self.update_nsm_model()
 
 	def update_status(self):
 		if self.status not in ('Cancelled', 'Completed') and self.exp_end_date:
 			from datetime import datetime
 			if self.exp_end_date < datetime.now().date():
-				self.db_set('status', 'Overdue')
+				self.db_set('status', 'Overdue', update_modified=False)
 				self.update_project()
 
 @frappe.whitelist()

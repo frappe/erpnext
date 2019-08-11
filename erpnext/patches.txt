@@ -505,6 +505,7 @@ erpnext.patches.v10_0.update_hub_connector_domain
 erpnext.patches.v10_0.set_student_party_type
 erpnext.patches.v10_0.update_project_in_sle
 erpnext.patches.v10_0.fix_reserved_qty_for_sub_contract
+erpnext.patches.v10_0.repost_requested_qty_for_non_stock_uom_items
 erpnext.patches.v11_0.merge_land_unit_with_location
 erpnext.patches.v11_0.add_index_on_nestedset_doctypes
 erpnext.patches.v11_0.remove_modules_setup_page
@@ -533,7 +534,7 @@ erpnext.patches.v11_0.create_department_records_for_each_company
 erpnext.patches.v11_0.make_location_from_warehouse
 erpnext.patches.v11_0.make_asset_finance_book_against_old_entries
 erpnext.patches.v11_0.check_buying_selling_in_currency_exchange
-erpnext.patches.v11_0.move_item_defaults_to_child_table_for_multicompany #02-07-2018
+erpnext.patches.v11_0.move_item_defaults_to_child_table_for_multicompany #02-07-2018 #19-06-2019
 erpnext.patches.v11_0.refactor_erpnext_shopify #2018-09-07
 erpnext.patches.v11_0.rename_overproduction_percent_field
 erpnext.patches.v11_0.update_backflush_subcontract_rm_based_on_bom
@@ -569,7 +570,7 @@ execute:frappe.delete_doc_if_exists("Page", "sales-analytics")
 execute:frappe.delete_doc_if_exists("Page", "purchase-analytics")
 execute:frappe.delete_doc_if_exists("Page", "stock-analytics")
 execute:frappe.delete_doc_if_exists("Page", "production-analytics")
-erpnext.patches.v11_0.ewaybill_fields_gst_india #2019-05-01
+erpnext.patches.v11_0.ewaybill_fields_gst_india #2018-11-13 #2019-01-09 #2019-04-01 #2019-04-26 #2019-05-03
 erpnext.patches.v11_0.drop_column_max_days_allowed
 erpnext.patches.v10_0.update_user_image_in_employee
 erpnext.patches.v10_0.repost_gle_for_purchase_receipts_with_rejected_items
@@ -602,9 +603,26 @@ erpnext.patches.v11_1.set_salary_details_submittable
 erpnext.patches.v11_1.rename_depends_on_lwp
 execute:frappe.delete_doc("Report", "Inactive Items")
 erpnext.patches.v11_1.delete_scheduling_tool
+erpnext.patches.v12_0.rename_tolerance_fields
 erpnext.patches.v12_0.make_custom_fields_for_bank_remittance #14-06-2019
 execute:frappe.delete_doc_if_exists("Page", "support-analytics")
 erpnext.patches.v12_0.make_item_manufacturer
+erpnext.patches.v12_0.remove_patient_medical_record_page
+erpnext.patches.v11_1.move_customer_lead_to_dynamic_column
+erpnext.patches.v11_1.set_default_action_for_quality_inspection
+erpnext.patches.v11_1.delete_bom_browser
+erpnext.patches.v11_1.set_missing_title_for_quotation
+erpnext.patches.v11_1.update_bank_transaction_status
+erpnext.patches.v11_1.renamed_delayed_item_report
+erpnext.patches.v11_1.set_missing_opportunity_from
 erpnext.patches.v12_0.set_quotation_status
 erpnext.patches.v12_0.set_priority_for_support
 erpnext.patches.v12_0.delete_priority_property_setter
+erpnext.patches.v12_0.set_default_batch_size
+execute:frappe.delete_doc("DocType", "Project Task")
+erpnext.patches.v11_1.update_default_supplier_in_item_defaults
+erpnext.patches.v12_0.update_due_date_in_gle
+erpnext.patches.v12_0.add_default_buying_selling_terms_in_company
+erpnext.patches.v12_0.update_ewaybill_field_position
+erpnext.patches.v12_0.create_accounting_dimensions_in_missing_doctypes
+erpnext.patches.v11_1.set_status_for_material_request_type_manufacture

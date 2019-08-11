@@ -4,6 +4,12 @@
 frappe.provide("erpnext.job_offer");
 
 frappe.ui.form.on("Job Offer", {
+	onload: function (frm) {
+		frm.set_query("select_terms", function() {
+			return { filters: { hr: 1 } };
+		});
+	},
+
 	select_terms: function (frm) {
 		erpnext.utils.get_terms(frm.doc.select_terms, frm.doc, function (r) {
 			if (!r.exc) {

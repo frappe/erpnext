@@ -122,6 +122,7 @@ class Item(WebsiteGenerator):
 		self.validate_item_defaults()
 		self.validate_customer_provided_part()
 		self.update_defaults_from_item_group()
+		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
 
 		if not self.get("__islocal"):
@@ -196,6 +197,9 @@ class Item(WebsiteGenerator):
 					'route')) + '/' + self.scrub((self.item_name if self.item_name else self.item_code) + '-' + random_string(5))
 
 	def validate_website_image(self):
+		if frappe.flags.in_import:
+			return
+
 		"""Validate if the website image is a public file"""
 		auto_set_website_image = False
 		if not self.website_image and self.image:
@@ -215,8 +219,7 @@ class Item(WebsiteGenerator):
 
 		if not file_doc:
 			if not auto_set_website_image:
-				frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found")
-									.format(self.website_image, self.name))
+				frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found").format(self.website_image, self.name))
 
 			self.website_image = None
 
@@ -227,6 +230,9 @@ class Item(WebsiteGenerator):
 			self.website_image = None
 
 	def make_thumbnail(self):
+		if frappe.flags.in_import:
+			return
+
 		"""Make a thumbnail of `website_image`"""
 		import requests.exceptions
 
@@ -859,6 +865,12 @@ class Item(WebsiteGenerator):
 					filters={"production_item": self.name, "docstatus": 1}):
 				return True
 
+	def validate_auto_reorder_enabled_in_stock_settings(self):
+		if self.reorder_levels:
+			enabled = frappe.db.get_single_value('Stock Settings', 'auto_indent')
+			if not enabled:
+				frappe.msgprint(msg=_("You have to enable auto re-order in Stock Settings to maintain re-order levels."), title=_("Enable Auto Re-Order"), indicator="orange")
+
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''
 	out = {}
@@ -1000,7 +1012,7 @@ def invalidate_item_variants_cache_for_website(doc):
 
 	if item_code:
 		item_cache = ItemVariantsCacheManager(item_code)
-		item_cache.rebuild_cache()
+		item_cache.clear_cache()
 
 
 def check_stock_uom_with_bin(item, stock_uom):

@@ -32,8 +32,8 @@ class AccountsController(TransactionBase):
 		return self.__company_currency
 
 	def onload(self):
-		self.get("__onload").make_payment_via_journal_entry \
-			= frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
+		self.set_onload("make_payment_via_journal_entry",
+			frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry'))
 
 		if self.is_new():
 			relevant_docs = ("Quotation", "Purchase Order", "Sales Order",
@@ -60,7 +60,9 @@ class AccountsController(TransactionBase):
 
 	def validate(self):
 
-		self.validate_qty_is_not_zero()
+		if not self.get('is_return'):
+			self.validate_qty_is_not_zero()
+
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 
@@ -242,6 +244,10 @@ class AccountsController(TransactionBase):
 				parent_dict.update({"document_type": document_type})
 
 			self.set('pricing_rules', [])
+			# party_name field used for customer in quotation
+			if self.doctype == "Quotation" and self.quotation_to == "Customer" and parent_dict.get("party_name"):
+				parent_dict.update({"customer": parent_dict.get("party_name")})
+
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
@@ -471,21 +477,20 @@ class AccountsController(TransactionBase):
 			order_doctype = "Purchase Order"
 
 		order_list = list(set([d.get(order_field)
-							   for d in self.get("items") if d.get(order_field)]))
+			for d in self.get("items") if d.get(order_field)]))
 
 		journal_entries = get_advance_journal_entries(party_type, party, party_account,
-													  amount_field, order_doctype, order_list, include_unallocated)
+			amount_field, order_doctype, order_list, include_unallocated)
 
 		payment_entries = get_advance_payment_entries(party_type, party, party_account,
-													  order_doctype, order_list, include_unallocated)
+			order_doctype, order_list, include_unallocated)
 
 		res = journal_entries + payment_entries
 
 		return res
 
 	def is_inclusive_tax(self):
-		is_inclusive = cint(frappe.db.get_single_value("Accounts Settings",
-													   "show_inclusive_tax_in_print"))
+		is_inclusive = cint(frappe.db.get_single_value("Accounts Settings", "show_inclusive_tax_in_print"))
 
 		if is_inclusive:
 			is_inclusive = 0
@@ -497,7 +502,7 @@ class AccountsController(TransactionBase):
 	def validate_advance_entries(self):
 		order_field = "sales_order" if self.doctype == "Sales Invoice" else "purchase_order"
 		order_list = list(set([d.get(order_field)
-							   for d in self.get("items") if d.get(order_field)]))
+			for d in self.get("items") if d.get(order_field)]))
 
 		if not order_list: return
 
@@ -509,7 +514,7 @@ class AccountsController(TransactionBase):
 				if not advance_entries_against_si or d.reference_name not in advance_entries_against_si:
 					frappe.msgprint(_(
 						"Payment Entry {0} is linked against Order {1}, check if it should be pulled as advance in this invoice.")
-									.format(d.reference_name, d.against_order))
+							.format(d.reference_name, d.against_order))
 
 	def update_against_document_in_jv(self):
 		"""
@@ -547,9 +552,9 @@ class AccountsController(TransactionBase):
 					'unadjusted_amount': flt(d.advance_amount),
 					'allocated_amount': flt(d.allocated_amount),
 					'exchange_rate': (self.conversion_rate
-									  if self.party_account_currency != self.company_currency else 1),
+						if self.party_account_currency != self.company_currency else 1),
 					'grand_total': (self.base_grand_total
-									if self.party_account_currency == self.company_currency else self.grand_total),
+						if self.party_account_currency == self.company_currency else self.grand_total),
 					'outstanding_amount': self.outstanding_amount
 				})
 				lst.append(args)
@@ -572,36 +577,37 @@ class AccountsController(TransactionBase):
 				unlink_ref_doc_from_payment_entries(self)
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
-		from erpnext.controllers.status_updater import get_tolerance_for
-		item_tolerance = {}
-		global_tolerance = None
+		from erpnext.controllers.status_updater import get_allowance_for
+		item_allowance = {}
+		global_qty_allowance, global_amount_allowance = None, None
 
 		for item in self.get("items"):
 			if item.get(item_ref_dn):
 				ref_amt = flt(frappe.db.get_value(ref_dt + " Item",
-												  item.get(item_ref_dn), based_on), self.precision(based_on, item))
+					item.get(item_ref_dn), based_on), self.precision(based_on, item))
 				if not ref_amt:
 					frappe.msgprint(
-						_("Warning: System will not check overbilling since amount for Item {0} in {1} is zero").format(
-							item.item_code, ref_dt))
+						_("Warning: System will not check overbilling since amount for Item {0} in {1} is zero")
+							.format(item.item_code, ref_dt))
 				else:
-					already_billed = frappe.db.sql("""select sum(%s) from `tab%s`
-						where %s=%s and docstatus=1 and parent != %s""" %
-												   (based_on, self.doctype + " Item", item_ref_dn, '%s', '%s'),
-												   (item.get(item_ref_dn), self.name))[0][0]
+					already_billed = frappe.db.sql("""
+						select sum(%s)
+						from `tab%s`
+						where %s=%s and docstatus=1 and parent != %s
+					""" % (based_on, self.doctype + " Item", item_ref_dn, '%s', '%s'),
+					   (item.get(item_ref_dn), self.name))[0][0]
 
 					total_billed_amt = flt(flt(already_billed) + flt(item.get(based_on)),
-										   self.precision(based_on, item))
+						self.precision(based_on, item))
 
-					tolerance, item_tolerance, global_tolerance = get_tolerance_for(item.item_code,
-																					item_tolerance, global_tolerance)
+					allowance, item_allowance, global_qty_allowance, global_amount_allowance = \
+						get_allowance_for(item.item_code, item_allowance, global_qty_allowance, global_amount_allowance, "amount")
 
-					max_allowed_amt = flt(ref_amt * (100 + tolerance) / 100)
+					max_allowed_amt = flt(ref_amt * (100 + allowance) / 100)
 
 					if total_billed_amt - max_allowed_amt > 0.01:
-						frappe.throw(_(
-							"Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set in Stock Settings").format(
-							item.item_code, item.idx, max_allowed_amt))
+						frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set in Stock Settings")
+							.format(item.item_code, item.idx, max_allowed_amt))
 
 	def get_company_default(self, fieldname):
 		from erpnext.accounts.utils import get_company_default
@@ -611,9 +617,10 @@ class AccountsController(TransactionBase):
 		stock_items = []
 		item_codes = list(set(item.item_code for item in self.get("items")))
 		if item_codes:
-			stock_items = [r[0] for r in frappe.db.sql("""select name
-				from `tabItem` where name in (%s) and is_stock_item=1""" % \
-													   (", ".join((["%s"] * len(item_codes))),), item_codes)]
+			stock_items = [r[0] for r in frappe.db.sql("""
+				select name from `tabItem`
+				where name in (%s) and is_stock_item=1
+			""" % (", ".join((["%s"] * len(item_codes))),), item_codes)]
 
 		return stock_items
 
@@ -856,7 +863,7 @@ class AccountsController(TransactionBase):
 
 			if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 				grand_total = grand_total - flt(self.write_off_amount)
-			if total != grand_total:
+			if total != flt(grand_total, self.precision("grand_total")):
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
 
 	def is_rounded_total_disabled(self):
@@ -1006,11 +1013,11 @@ def get_advance_journal_entries(party_type, party, party_account, amount_field,
 
 
 def get_advance_payment_entries(party_type, party, party_account, order_doctype,
-		order_list=None, include_unallocated=True, against_all_orders=False, limit=1000):
+		order_list=None, include_unallocated=True, against_all_orders=False, limit=None):
 	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
 	payment_type = "Receive" if party_type == "Customer" else "Pay"
 	payment_entries_against_order, unallocated_payment_entries = [], []
-	limit_cond = "limit %s" % (limit or 1000)
+	limit_cond = "limit %s" % limit if limit else ""
 
 	if order_list or against_all_orders:
 		if order_list:
@@ -1185,6 +1192,11 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 						 .format(child_item.idx, child_item.item_code))
 		else:
 			child_item.rate = flt(d.get("rate"))
+
+		if flt(child_item.price_list_rate):
+			child_item.discount_percentage = flt((1 - flt(child_item.rate) / flt(child_item.price_list_rate)) * 100.0, \
+				child_item.precision("discount_percentage"))
+
 		child_item.flags.ignore_validate_update_after_submit = True
 		if new_child_flag:
 			child_item.idx = len(parent.items) + 1

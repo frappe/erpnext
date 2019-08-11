@@ -8,16 +8,10 @@ from erpnext.support.doctype.service_level_agreement.test_service_level_agreemen
 from frappe.utils import now_datetime, get_datetime
 import datetime
 from datetime import timedelta
-from frappe.desk.form import assign_to
 
 class TestIssue(unittest.TestCase):
-	def test_assignment(self):
-		frappe.db.set_value('Customer', '_Test Customer', 'account_manager', 'test1@example.com')
-		doc = make_issue(customer='_Test Customer')
-		self.assertEqual(assign_to.get(dict(doctype = doc.doctype, name = doc.name))[0].get('owner'), 'test1@example.com')
-
-
 	def test_response_time_and_resolution_time_based_on_different_sla(self):
+		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
 		create_service_level_agreements_for_issues()
 
 		creation = datetime.datetime(2019, 3, 4, 12, 0)
@@ -86,7 +80,8 @@ def make_issue(creation=None, customer=None, index=0):
 		"customer": customer,
 		"raised_by": "test@example.com",
 		"description": "Service Level Agreement Issue",
-		"creation": creation
+		"creation": creation,
+		"service_level_agreement_creation": creation
 	}).insert(ignore_permissions=True)
 
 	return issue
