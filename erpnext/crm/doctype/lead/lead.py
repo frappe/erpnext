@@ -145,6 +145,17 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 
 @frappe.whitelist()
 def make_opportunity(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		address = frappe.db.exists('Dynamic Link', {
+			'link_doctype': target.doctype,
+			'link_name': target.name,
+			'parenttype': 'Address',
+			'disabled': 0
+		})
+
+		if address:
+			target.customer_address = address
+
 	target_doc = get_mapped_doc("Lead", source_name,
 		{"Lead": {
 			"doctype": "Opportunity",
@@ -157,7 +168,7 @@ def make_opportunity(source_name, target_doc=None):
 				"email_id": "contact_email",
 				"mobile_no": "contact_mobile"
 			}
-		}}, target_doc)
+		}}, target_doc, set_missing_values)
 
 	return target_doc
 
