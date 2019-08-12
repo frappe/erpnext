@@ -84,7 +84,7 @@ class StockLedgerEntry(Document):
 				elif not frappe.db.get_value("Batch",{"item": self.item_code, "name": self.batch_no}):
 					frappe.throw(_("{0} is not a valid Batch Number for Item {1}").format(self.batch_no, self.item_code))
 
-			elif item_det.has_batch_no ==0 and self.batch_no and self.is_cancelled == "No":
+			elif item_det.has_batch_no ==0 and self.batch_no and not self.is_cancelled:
 				frappe.throw(_("The Item {0} cannot have Batch").format(self.item_code))
 
 		if item_det.has_variants:

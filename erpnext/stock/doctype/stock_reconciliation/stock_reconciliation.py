@@ -297,7 +297,7 @@ class StockReconciliation(StockController):
 			"voucher_detail_no": row.name,
 			"company": self.company,
 			"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
-			"is_cancelled": "No" if self.docstatus != 2 else "Yes",
+			"is_cancelled": 1 if self.docstatus == 2 else 0,
 			"serial_no": '\n'.join(serial_nos) if serial_nos else '',
 			"batch_no": row.batch_no,
 			"valuation_rate": flt(row.valuation_rate, row.precision("valuation_rate"))

@@ -58,7 +58,7 @@ def repost_actual_qty(item_code, warehouse, allow_zero_rate=False):
 
 def get_balance_qty_from_sle(item_code, warehouse):
 	balance_qty = frappe.db.sql("""select qty_after_transaction from `tabStock Ledger Entry`
-		where item_code=%s and warehouse=%s and is_cancelled='No'
+		where item_code=%s and warehouse=%s and is_cancelled=0
 		order by posting_date desc, posting_time desc, creation desc
 		limit 1""", (item_code, warehouse))
 
@@ -171,7 +171,7 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 			print(d[0], d[1], d[2], serial_nos[0][0])
 
 		sle = frappe.db.sql("""select valuation_rate, company from `tabStock Ledger Entry`
-			where item_code = %s and warehouse = %s and ifnull(is_cancelled, 'No') = 'No'
+			where item_code = %s and warehouse = %s and is_cancelled = 0
 			order by posting_date desc limit 1""", (d[0], d[1]))
 
 		sle_dict = {
@@ -188,7 +188,6 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 			'stock_uom'					: d[3],
 			'incoming_rate'				: sle and flt(serial_nos[0][0]) > flt(d[2]) and flt(sle[0][0]) or 0,
 			'company'					: sle and cstr(sle[0][1]) or 0,
-			'is_cancelled'			 	: 'No',
 			'batch_no'					: '',
 			'serial_no'					: ''
 		}
@@ -255,7 +254,7 @@ def repost_all_stock_vouchers():
 				doc.validate()
 
 			doc.update_stock_ledger()
-			doc.make_gl_entries(repost_future_gle=False)
+			doc.make_gl_entries()
 			frappe.db.commit()
 		except Exception:
 			print(frappe.get_traceback())
