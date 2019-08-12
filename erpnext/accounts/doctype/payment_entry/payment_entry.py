@@ -719,6 +719,17 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 @frappe.whitelist()
 def get_account_details(account, date, cost_center=None):
 	frappe.has_permission('Payment Entry', throw=True)
+
+	# to check if passed account is accessible under Payment Entry
+	# There might be user permissions which can only allow account under certain doctypes
+	# except Payment Entry
+	account_list = frappe.get_list('Account', {
+		'name': account
+	}, reference_doctype='Payment Entry', limit=1)
+
+	if not account_list:
+		frappe.throw(_('Account: {0} is not permitted under Payment Entry').format(account))
+
 	return frappe._dict({
 		"account_currency": get_account_currency(account),
 		"account_balance": get_balance_on(account, date, cost_center=cost_center),
