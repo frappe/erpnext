@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, date_diff, formatdate, add_days, today
+from frappe.utils import flt, date_diff, formatdate, add_days, today, getdate
 from frappe import _
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name, get_leave_period
@@ -127,10 +127,11 @@ class LeaveAllocation(Document):
 	def create_leave_ledger_entry(self, submit=True):
 		if self.unused_leaves:
 			expiry_days = frappe.db.get_value("Leave Type", self.leave_type, "expire_carry_forwarded_leaves_after_days")
+			end_date = add_days(self.from_date, expiry_days - 1) if expiry_days else self.to_date
 			args = dict(
 				leaves=self.unused_leaves,
 				from_date=self.from_date,
-				to_date=add_days(self.from_date, expiry_days - 1) if expiry_days else self.to_date,
+				to_date= min(getdate(end_date), getdate(self.to_date)),
 				is_carry_forward=1
 			)
 			create_leave_ledger_entry(self, args, submit)
