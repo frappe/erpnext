@@ -336,6 +336,7 @@ class PurchaseInvoice(BuyingController):
 
 		if not self.is_return:
 			self.update_against_document_in_jv()
+			self.update_billing_status_for_zero_amount_refdoc("Purchase Receipt")
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 
 		self.update_billing_status_in_pr()
@@ -774,6 +775,7 @@ class PurchaseInvoice(BuyingController):
 		self.update_prevdoc_status()
 
 		if not self.is_return:
+			self.update_billing_status_for_zero_amount_refdoc("Purchase Receipt")
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 
 		self.update_billing_status_in_pr()

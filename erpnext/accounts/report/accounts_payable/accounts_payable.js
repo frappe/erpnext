@@ -89,6 +89,12 @@ frappe.query_reports["Accounts Payable"] = {
 			}
 		},
 		{
+			"fieldname":"payment_terms_template",
+			"label": __("Payment Terms Template"),
+			"fieldtype": "Link",
+			"options": "Payment Terms Template"
+		},
+		{
 			"fieldname":"supplier_group",
 			"label": __("Supplier Group"),
 			"fieldtype": "Link",
@@ -109,13 +115,12 @@ frappe.query_reports["Accounts Payable"] = {
 	}
 }
 
-erpnext.dimension_filters.then((dimensions) => {
-	dimensions.forEach((dimension) => {
-		frappe.query_reports["Accounts Payable"].filters.splice(9, 0 ,{
-			"fieldname": dimension["fieldname"],
-			"label": __(dimension["label"]),
-			"fieldtype": "Link",
-			"options": dimension["document_type"]
-		});
+erpnext.dimension_filters.forEach((dimension) => {
+	frappe.query_reports["Accounts Payable"].filters.splice(9, 0 ,{
+		"fieldname": dimension["fieldname"],
+		"label": __(dimension["label"]),
+		"fieldtype": "Link",
+		"options": dimension["document_type"]
 	});
 });
+

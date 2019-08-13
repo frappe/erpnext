@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe
-import urllib
 import copy
 from frappe.utils import nowdate, cint, cstr
 from frappe.utils.nestedset import NestedSet
@@ -12,6 +11,7 @@ from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from erpnext.shopping_cart.product_info import set_product_info_for_website
 from erpnext.utilities.product import get_qty_in_stock
+from six.moves.urllib.parse import quote
 
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
@@ -69,8 +69,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 			"items": get_product_list_for_group(product_group = self.name, start=start,
 				limit=context.page_length + 1, search=frappe.form_dict.get("search")),
 			"parents": get_parent_item_groups(self.parent_item_group),
-			"title": self.name,
-			"products_as_list": cint(frappe.db.get_single_value('Products Settings', 'products_as_list'))
+			"title": self.name
 		})
 
 		if self.slideshow:
@@ -166,7 +165,7 @@ def get_item_for_list_in_html(context):
 	# add missing absolute link in files
 	# user may forget it during upload
 	if (context.get("website_image") or "").startswith("files/"):
-		context["website_image"] = "/" + urllib.quote(context["website_image"])
+		context["website_image"] = "/" + quote(context["website_image"])
 
 	context["show_availability_status"] = cint(frappe.db.get_single_value('Products Settings',
 		'show_availability_status'))

@@ -28,7 +28,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Rating",
-   "options": "1\n2\n3\n4\n5",
+   "options": "\n1\n2\n3\n4\n5",
    "reqd": 1
   },
   {
@@ -44,7 +44,7 @@
   }
  ],
  "istable": 1,
- "modified": "2019-05-26 21:50:48.951264",
+ "modified": "2019-07-13 19:58:08.966141",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Feedback Parameter",

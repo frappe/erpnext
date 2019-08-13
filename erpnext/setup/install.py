@@ -22,6 +22,7 @@ def after_install():
 	add_all_roles_to("Administrator")
 	create_default_cash_flow_mapper_templates()
 	create_default_success_action()
+	add_company_to_session_defaults()
 	frappe.db.commit()
 
 
@@ -84,3 +85,10 @@ def create_default_success_action():
 		if not frappe.db.exists('Success Action', success_action.get("ref_doctype")):
 			doc = frappe.get_doc(success_action)
 			doc.insert(ignore_permissions=True)
+
+def add_company_to_session_defaults():
+	settings = frappe.get_single("Session Default Settings")
+	settings.append("session_defaults", {
+		"ref_doctype": "Company"
+	})
+	settings.save()

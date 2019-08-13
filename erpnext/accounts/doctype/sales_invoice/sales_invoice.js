@@ -44,6 +44,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		this.frm.toggle_reqd("due_date", !this.frm.doc.is_return);
 
+		if (this.frm.doc.is_return) {
+			this.frm.return_print_format = "Sales Invoice Return";
+		}
+
 		this.show_general_ledger();
 
 		if(doc.update_stock) this.show_stock_ledger();
@@ -83,9 +87,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			}
 
-			if (doc.outstanding_amount>0 && !cint(doc.is_return)) {
+			if (doc.outstanding_amount>0) {
 				cur_frm.add_custom_button(__('Payment Request'), function() {
 					me.make_payment_request();
+				}, __('Create'));
+
+				cur_frm.add_custom_button(__('Invoice Discounting'), function() {
+					cur_frm.events.create_invoice_discounting(cur_frm);
 				}, __('Create'));
 			}
 
@@ -144,15 +152,23 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	set_default_print_format: function() {
-		// set default print format to POS type
+		// set default print format to POS type or Credit Note
 		if(cur_frm.doc.is_pos) {
 			if(cur_frm.pos_print_format) {
 				cur_frm.meta._default_print_format = cur_frm.meta.default_print_format;
 				cur_frm.meta.default_print_format = cur_frm.pos_print_format;
 			}
+		} else if(cur_frm.doc.is_return) {
+			if(cur_frm.return_print_format) {
+				cur_frm.meta._default_print_format = cur_frm.meta.default_print_format;
+				cur_frm.meta.default_print_format = cur_frm.return_print_format;
+			}
 		} else {
 			if(cur_frm.meta._default_print_format) {
 				cur_frm.meta.default_print_format = cur_frm.meta._default_print_format;
+				cur_frm.meta._default_print_format = null;
+			} else if(in_list([cur_frm.pos_print_format, cur_frm.return_print_format], cur_frm.meta.default_print_format)) {
+				cur_frm.meta.default_print_format = null;
 				cur_frm.meta._default_print_format = null;
 			}
 		}
@@ -187,9 +203,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					method: "erpnext.selling.doctype.quotation.quotation.make_sales_invoice",
 					source_doctype: "Quotation",
 					target: me.frm,
-					setters: {
-						customer: me.frm.doc.customer || undefined,
-					},
+					setters: [{
+						fieldtype: 'Link',
+						label: __('Customer'),
+						options: 'Customer',
+						fieldname: 'party_name',
+						default: me.frm.doc.customer,
+					}],
 					get_query_filters: {
 						docstatus: 1,
 						status: ["!=", "Lost"],
@@ -804,6 +824,13 @@ frappe.ui.form.on('Sales Invoice', {
 			frm.set_df_property("patient_name", "hidden", 1);
 			frm.set_df_property("ref_practitioner", "hidden", 1);
 		}
+	},
+
+	create_invoice_discounting: function(frm) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_invoice_discounting",
+			frm: frm
+		});
 	}
 })
 
