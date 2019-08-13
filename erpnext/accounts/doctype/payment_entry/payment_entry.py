@@ -756,9 +756,7 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 def get_account_details(account, date, cost_center=None):
 	frappe.has_permission('Payment Entry', throw=True)
 
-	# to check if passed account is accessible under Payment Entry
-	# There might be user permissions which can only allow account under certain doctypes
-	# except Payment Entry
+	# to check if the passed account is accessible under reference doctype Payment Entry
 	account_list = frappe.get_list('Account', {
 		'name': account
 	}, reference_doctype='Payment Entry', limit=1)
