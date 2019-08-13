@@ -231,8 +231,12 @@ doc_events = {
 	('Sales Invoice', 'Purchase Invoice', 'Delivery Note'): {
 		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
 	},
-	"Contact":{
-		"on_trash": "erpnext.support.doctype.issue.issue.update_issue"
+	"Contact": {
+		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
+		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information"
+	},
+	"Lead": {
+		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information"
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
