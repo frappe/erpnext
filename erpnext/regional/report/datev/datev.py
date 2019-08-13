@@ -28,18 +28,18 @@ def execute(filters=None):
 def validate(filters):
 	"""Make sure all mandatory filters and settings are present."""
 	if not filters.get('company'):
-		frappe.throw(_('Company is a mandatory filter.'))
+		frappe.throw(_('<b>Company</b> is a mandatory filter.'))
 
 	if not filters.get('from_date'):
-		frappe.throw(_('From Date is a mandatory filter.'))
+		frappe.throw(_('<b>From Date</b> is a mandatory filter.'))
 
 	if not filters.get('to_date'):
-		frappe.throw(_('To Date is a mandatory filter.'))
+		frappe.throw(_('<b>To Date</b> is a mandatory filter.'))
 
 	try:
 		frappe.get_doc('DATEV Settings', filters.get('company')):
 	except frappe.DoesNotExistError:
-		frappe.throw(_('Please create DATEV Settings for your company.'))
+		frappe.throw(_('Please create <b>DATEV Settings</b> for Company <b>{}</b>.').format(filters.get('company')))
 
 def get_columns():
 	"""Return the list of columns that will be shown in query report."""
