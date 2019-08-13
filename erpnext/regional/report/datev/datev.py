@@ -18,24 +18,28 @@ import pandas as pd
 
 def execute(filters=None):
 	"""Entry point for frappe."""
-	validate_filters(filters)
+	validate(filters)
 	result = get_gl_entries(filters, as_dict=0)
 	columns = get_columns()
 
 	return columns, result
 
 
-def validate_filters(filters):
-	"""Make sure all mandatory filters are present."""
+def validate(filters):
+	"""Make sure all mandatory filters and settings are present."""
 	if not filters.get('company'):
-		frappe.throw(_('{0} is mandatory').format(_('Company')))
+		frappe.throw(_('Company is a mandatory filter.'))
 
 	if not filters.get('from_date'):
-		frappe.throw(_('{0} is mandatory').format(_('From Date')))
+		frappe.throw(_('From Date is a mandatory filter.'))
 
 	if not filters.get('to_date'):
-		frappe.throw(_('{0} is mandatory').format(_('To Date')))
+		frappe.throw(_('To Date is a mandatory filter.'))
 
+	try:
+		frappe.get_doc('DATEV Settings', filters.get('company')):
+	except frappe.DoesNotExistError:
+		frappe.throw(_('Please create DATEV Settings for your company.'))
 
 def get_columns():
 	"""Return the list of columns that will be shown in query report."""
@@ -433,7 +437,7 @@ def download_datev_csv(filters=None):
 	if isinstance(filters, string_types):
 		filters = json.loads(filters)
 
-	validate_filters(filters)
+	validate(filters)
 	data = get_gl_entries(filters, as_dict=1)
 
 	frappe.response['result'] = get_datev_csv(data, filters)
