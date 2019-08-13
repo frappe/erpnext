@@ -16,6 +16,7 @@
   "col_break123",
   "lead_owner",
   "status",
+  "salutation",
   "gender",
   "source",
   "customer",
@@ -29,16 +30,20 @@
   "notes_section",
   "notes",
   "contact_info",
-  "address_desc",
   "address_html",
+  "address_title",
+  "address_line1",
+  "address_line2",
+  "city",
+  "county",
+  "state",
+  "country",
+  "pincode",
   "column_break2",
   "contact_html",
   "phone",
-  "salutation",
   "mobile_no",
   "fax",
-  "website",
-  "territory",
   "more_info",
   "type",
   "market_segment",
@@ -46,6 +51,8 @@
   "request_type",
   "column_break3",
   "company",
+  "website",
+  "territory",
   "unsubscribed",
   "blog_subscriber"
  ],
@@ -73,7 +80,6 @@
    "set_only_once": 1
   },
   {
-   "depends_on": "eval:!doc.organization_lead",
    "fieldname": "lead_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -130,7 +136,6 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:!doc.organization_lead",
    "fieldname": "gender",
    "fieldtype": "Link",
    "label": "Gender",
@@ -218,18 +223,12 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.__islocal",
    "fieldname": "contact_info",
    "fieldtype": "Section Break",
    "label": "Address & Contact",
    "oldfieldtype": "Column Break",
    "options": "fa fa-map-marker"
-  },
-  {
-   "depends_on": "eval:doc.__islocal",
-   "fieldname": "address_desc",
-   "fieldtype": "HTML",
-   "label": "Address Desc",
-   "print_hide": 1
   },
   {
    "fieldname": "address_html",
@@ -242,14 +241,13 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.organization_lead",
    "fieldname": "contact_html",
    "fieldtype": "HTML",
    "label": "Contact HTML",
    "read_only": 1
   },
   {
-   "depends_on": "eval:!doc.organization_lead",
+   "depends_on": "eval: doc.__islocal",
    "fieldname": "phone",
    "fieldtype": "Data",
    "label": "Phone",
@@ -257,14 +255,14 @@
    "oldfieldtype": "Data"
   },
   {
-   "depends_on": "eval:!doc.organization_lead",
+   "depends_on": "eval: doc.__islocal",
    "fieldname": "salutation",
    "fieldtype": "Link",
    "label": "Salutation",
    "options": "Salutation"
   },
   {
-   "depends_on": "eval:!doc.organization_lead",
+   "depends_on": "eval: doc.__islocal",
    "fieldname": "mobile_no",
    "fieldtype": "Data",
    "label": "Mobile No.",
@@ -272,7 +270,7 @@
    "oldfieldtype": "Data"
   },
   {
-   "depends_on": "eval:!doc.organization_lead",
+   "depends_on": "eval: doc.__islocal",
    "fieldname": "fax",
    "fieldtype": "Data",
    "label": "Fax",
@@ -361,12 +359,62 @@
    "fieldname": "blog_subscriber",
    "fieldtype": "Check",
    "label": "Blog Subscriber"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "address_title",
+   "fieldtype": "Data",
+   "label": "Address Title"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "address_line1",
+   "fieldtype": "Data",
+   "label": "Address Line 1"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "address_line2",
+   "fieldtype": "Data",
+   "label": "Address Line 2"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City/Town"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "county",
+   "fieldtype": "Data",
+   "label": "County"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "state",
+   "fieldtype": "Data",
+   "label": "State"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "pincode",
+   "fieldtype": "Data",
+   "label": "Postal Code",
+   "options": "Country"
   }
  ],
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
- "modified": "2019-09-19 12:49:02.536647",
+ "modified": "2019-09-20 12:49:02.536647",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -423,15 +471,6 @@
    "read": 1,
    "report": 1,
    "role": "Sales User"
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Guest",
-   "share": 1
   }
  ],
  "search_fields": "lead_name,lead_owner,status",
