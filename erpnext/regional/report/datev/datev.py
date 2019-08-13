@@ -212,7 +212,7 @@ def get_datev_csv(data, filters):
 		frappe.get_value("DATEV Settings", filters.get("company"), "client_number") or "",
 		"",
 		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
-		"",
+		frappe.utils.formatdate(frappe.defaults.get_user_default("year_start_date"), "yyyyMMdd"),
 		# N = Length of account numbers (Sachkontenlänge)
 		"4",
 		# O = Transaction batch start date (YYYYMMDD)
