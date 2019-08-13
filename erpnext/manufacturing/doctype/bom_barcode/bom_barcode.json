@@ -1,0 +1,40 @@
+{
+ "autoname": "field:barcode",
+ "creation": "2019-08-09 12:05:57.539075",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "barcode",
+  "barcode_type"
+ ],
+ "fields": [
+  {
+   "fieldname": "barcode",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "Barcode",
+   "no_copy": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "barcode_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Barcode Type",
+   "options": "\nEAN\nUPC-A"
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-08-12 15:46:23.414456",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM Barcode",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

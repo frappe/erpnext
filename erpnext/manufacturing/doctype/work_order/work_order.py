@@ -436,6 +436,18 @@ class WorkOrder(Document):
 		self.set_work_order_operations()
 
 		return check_if_scrap_warehouse_mandatory(self.bom_no)
+	
+	def get_item_bom_from_barcode(self,barcode):
+		bom = frappe.db.get_value("BOM Barcode",barcode,"parent")
+		if bom == None :
+			frappe.msgprint(_("Invalid Barcode. There is no BOM attached to this barcode."))
+			res = "invalid"
+			return res 
+		
+		else:
+			item = frappe.db.get_value("BOM",bom,"item")
+			self.production_item = item
+			self.bom_no = bom
 
 	def set_available_qty(self):
 		for d in self.get("required_items"):
