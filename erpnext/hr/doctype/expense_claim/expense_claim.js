@@ -188,8 +188,7 @@ frappe.ui.form.on("Expense Claim", {
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));
 		}
-
-		if (frm.doc.docstatus===1 && !cint(frm.doc.is_paid) && cint(frm.doc.grand_total) > 0
+		if (frm.doc.docstatus===1 && !cint(frm.doc.is_paid)
 				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
 				&& frappe.model.can_create("Payment Entry")) {
 			frm.add_custom_button(__('Payment'),
