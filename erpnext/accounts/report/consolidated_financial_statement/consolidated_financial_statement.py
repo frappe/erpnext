@@ -130,7 +130,7 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 				section_data.append(net_profit_loss)
 
 		for account in cash_flow_account['account_types']:
-			account_data = get_account_type_based_data(account['account_type'], companies, fiscal_year)
+			account_data = get_account_type_based_data(account['account_type'], companies, fiscal_year, filters)
 			account_data.update({
 				"account_name": account['label'],
 				"account": account['label'],
@@ -148,12 +148,12 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 
 	return data
 
-def get_account_type_based_data(account_type, companies, fiscal_year):
+def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 	data = {}
 	total = 0
 	for company in companies:
 		amount = get_account_type_based_gl_data(company,
-			fiscal_year.year_start_date, fiscal_year.year_end_date, account_type)
+			fiscal_year.year_start_date, fiscal_year.year_end_date, account_type, filters)
 
 		if amount and account_type == "Depreciation":
 			amount *= -1

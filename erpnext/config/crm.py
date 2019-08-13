@@ -143,6 +143,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Email Campaign",
+					"description": _("Sends Mails to lead or contact based on a Campaign schedule"),
+				},
+				{
+					"type": "doctype",
 					"name": "SMS Center",
 					"description":_("Send mass SMS to your contacts"),
 				},

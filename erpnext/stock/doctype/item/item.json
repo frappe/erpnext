@@ -29,7 +29,8 @@
    "is_fixed_asset",
    "asset_category",
    "asset_naming_series",
-   "tolerance",
+   "over_delivery_receipt_allowance",
+   "over_billing_allowance",
    "image",
    "section_break_11",
    "brand",
@@ -285,14 +286,6 @@
     "label": "Asset Naming Series"
    },
    {
-    "depends_on": "eval:!doc.__islocal",
-    "fieldname": "tolerance",
-    "fieldtype": "Float",
-    "label": "Allow over delivery or receipt upto this percent",
-    "oldfieldname": "tolerance",
-    "oldfieldtype": "Currency"
-   },
-   {
     "fieldname": "image",
     "fieldtype": "Attach Image",
     "hidden": 1,
@@ -475,7 +468,6 @@
    },
    {
     "default": "0",
-    "depends_on": "has_batch_no",
     "fieldname": "retain_sample",
     "fieldtype": "Check",
     "label": "Retain Sample"
@@ -1021,6 +1013,26 @@
     "fieldtype": "Check",
     "label": "Synced With Hub",
     "read_only": 1
+   },
+   {
+    "fieldname": "manufacturers",
+    "fieldtype": "Table",
+    "label": "Manufacturers",
+    "options": "Item Manufacturer"
+   },
+   {
+    "depends_on": "eval:!doc.__islocal",
+    "fieldname": "over_delivery_receipt_allowance",
+    "fieldtype": "Float",
+    "label": "Over Delivery/Receipt Allowance (%)",
+    "oldfieldname": "tolerance",
+    "oldfieldtype": "Currency"
+   },
+   {
+    "fieldname": "over_billing_allowance",
+    "fieldtype": "Float",
+    "label": "Over Billing Allowance (%)",
+    "depends_on": "eval:!doc.__islocal"
    }
   ],
   "has_web_view": 1,
@@ -1028,7 +1040,7 @@
   "idx": 2,
   "image_field": "image",
   "max_attachments": 1,
-  "modified": "2019-07-05 12:18:13.977931",
+  "modified": "2019-07-12 12:18:13.977931",
   "modified_by": "Administrator",
   "module": "Stock",
   "name": "Item",

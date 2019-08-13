@@ -16,20 +16,6 @@ frappe.query_reports["Customer Credit Balance"] = {
 			"label": __("Customer"),
 			"fieldtype": "Link",
 			"options": "Customer"
-		},
-		{
-			"fieldname":"cost_center",
-			"label": __("Cost Center"),
-			"fieldtype": "Link",
-			"options": "Cost Center",
-			get_query: () => {
-				var company = frappe.query_report.get_filter_value('company');
-				return {
-					filters: {
-						'company': company
-					}
-				}
-			}
-		},
+		}
 	]
 }
