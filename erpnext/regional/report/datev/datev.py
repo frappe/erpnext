@@ -206,10 +206,10 @@ def get_datev_csv(data, filters):
 		# J = Imported by -- stays empty
 		"",
 		# K = Tax consultant number (Beraternummer)
-		# TODO: frappe.get_value("Company", filters.get("company"), "tax_consultant_number"),
+		frappe.get_value("DATEV Settings", filters.get("company"), "consultant_number") or "",
 		"",
 		# L = Tax client number (Mandantennummer)
-		# TODO: frappe.get_value("Company", filters.get("company"), "tax_client_number"),
+		frappe.get_value("DATEV Settings", filters.get("company"), "client_number") or "",
 		"",
 		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
 		"",
