@@ -29,20 +29,10 @@ erpnext.integrations.plaidLink = class plaidLink {
 
 	init_config() {
 		const me = this;
-		frappe.xcall('erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.plaid_configuration')
-			.then(result => {
-				if (result !== "disabled") {
-					if (result.plaid_env == undefined || result.plaid_public_key == undefined) {
-						frappe.throw(__("Please add valid Plaid API keys in site_config.json first"));
-					}
-					me.plaid_env = result.plaid_env;
-					me.plaid_public_key = result.plaid_public_key;
-					me.client_name = result.client_name;
-					me.init_plaid();
-				} else {
-					frappe.throw(__("Please save your document before adding a new account"));
-				}
-			});
+		me.plaid_env = me.frm.doc.plaid_env;
+		me.plaid_public_key = me.frm.doc.plaid_public_key;
+		me.client_name = frappe.boot.sitename;
+		me.init_plaid();
 	}
 
 	init_plaid() {
