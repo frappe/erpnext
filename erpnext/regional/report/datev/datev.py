@@ -37,7 +37,7 @@ def validate(filters):
 		frappe.throw(_('<b>To Date</b> is a mandatory filter.'))
 
 	try:
-		frappe.get_doc('DATEV Settings', filters.get('company')):
+		frappe.get_doc('DATEV Settings', filters.get('company'))
 	except frappe.DoesNotExistError:
 		frappe.throw(_('Please create <b>DATEV Settings</b> for Company <b>{}</b>.').format(filters.get('company')))
 
