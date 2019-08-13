@@ -724,7 +724,9 @@ def get_account_details(account, date, cost_center=None):
 	account_list = frappe.get_list('Account', {
 		'name': account
 	}, reference_doctype='Payment Entry', limit=1)
-	
+
+	account_balance = get_balance_on(account, date, cost_center=cost_center, ignore_account_permission=True)
+
 	# There might be some user permissions which will allow account under certain doctypes
 	# except for Payment Entry, only in such case we should throw permission error
 	if not account_list:
@@ -732,7 +734,7 @@ def get_account_details(account, date, cost_center=None):
 
 	return frappe._dict({
 		"account_currency": get_account_currency(account),
-		"account_balance": get_balance_on(account, date, cost_center=cost_center),
+		"account_balance": account_balance,
 		"account_type": frappe.db.get_value("Account", account, "account_type")
 	})
 
