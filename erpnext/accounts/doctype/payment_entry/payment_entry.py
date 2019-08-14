@@ -683,8 +683,8 @@ def get_orders_to_be_billed(posting_date, party_type, party,
 
 	order_list = []
 	for d in orders:
-		if not (d.outstanding_amount >= filters.get("outstanding_amt_greater_than")
-			and d.outstanding_amount <= filters.get("outstanding_amt_less_than")):
+		if not (flt(d.outstanding_amount) >= flt(filters.get("outstanding_amt_greater_than"))
+			and flt(d.outstanding_amount) <= flt(filters.get("outstanding_amt_less_than"))):
 			continue
 
 		d["voucher_type"] = voucher_type
