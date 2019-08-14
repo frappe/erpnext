@@ -335,7 +335,7 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	bom_no: function(frm) {
-		return frm.call({
+		frm.call({
 			doc: frm.doc,
 			method: "get_items_and_operations_from_bom",
 			freeze: true,
@@ -347,24 +347,21 @@ frappe.ui.form.on("Work Order", {
 		});
 	},
 
-	bom_barcode: function(frm) { 
-		let p = new Promise(resolve =>{
-			return frm.call({
+	bom_barcode: function(frm) {
+		frm.call({
 				doc: frm.doc,
 				method: "get_item_bom_from_barcode",
-				args: {barcode: frm.doc.bom_barcode},
-				
+				args: {barcode: frm.doc.bom_barcode},	
 			}).then((r) => {
 				if (r.message){
 					frm.set_value("production_item","");
 					frm.set_value("bom_no","");
 					frm.set_value("qty","");
 					frm.refresh();
-					resolve();
 				}
 			});
-		});
-	} ,
+	},
+
 	use_multi_level_bom: function(frm) {
 		if(frm.doc.bom_no) {
 			frm.trigger("bom_no");
