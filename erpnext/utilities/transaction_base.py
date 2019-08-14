@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import cstr, now_datetime, cint, flt, get_time
+from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime
 from erpnext.controllers.status_updater import StatusUpdater
 
 from six import string_types
@@ -27,6 +27,8 @@ class TransactionBase(StatusUpdater):
 				get_time(self.posting_time)
 			except ValueError:
 				frappe.throw(_('Invalid Posting Time'))
+
+		self.validate_with_last_transaction_posting_time()
 
 	def add_calendar_event(self, opts, force=False):
 		if cstr(self.contact_by) != cstr(self._prev.contact_by) or \
@@ -144,6 +146,25 @@ class TransactionBase(StatusUpdater):
 			ret = None
 
 		return ret
+
+	def validate_with_last_transaction_posting_time(self):
+
+		if self.doctype not in ["Sales Invoice", "Purchase Invoice", "Stock Entry", "Stock Reconciliation", "Delivery Note"
+			"Purchase Receipt", "Fees"]:
+			return
+
+		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
+			if not (self.get("update_stock") or self.get("is_pos")):
+				return
+
+		transaction_time = frappe.db.sql("""select MAX(posting_date) as posting_date, MAX(posting_time) as posting_time from `tab{doctype}`
+			where docstatus = 1 """.format(doctype=self.doctype), as_dict=1)[0]
+
+		last_transaction_posting_time = "%s %s" % (transaction_time.get('posting_date'), transaction_time.get("posting_time") or "00:00:00")
+		cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
+
+		if get_datetime(cur_doc_posting_datetime) < get_datetime(last_transaction_posting_time):
+			frappe.throw(_("Posting timestamp must be before last transaction"))
 
 def delete_events(ref_type, ref_name):
 	events = frappe.db.sql_list(""" SELECT

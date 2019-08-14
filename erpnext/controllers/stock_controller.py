@@ -33,10 +33,6 @@ class StockController(AccountsController):
 					gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries, from_repost=from_repost)
 
-			# if repost_future_gle:
-			# 	items, warehouses = self.get_items_and_warehouses()
-			# 	update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items,
-			# 		warehouse_account, company=self.company)
 		elif self.doctype in ['Purchase Receipt', 'Purchase Invoice'] and self.docstatus == 1:
 			gl_entries = []
 			gl_entries = self.get_asset_gl_entry(gl_entries)
@@ -374,75 +370,4 @@ class StockController(AccountsController):
 		for blanket_order in blanket_orders:
 			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
 
-# def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
-# 		warehouse_account=None, company=None):
-# 	def _delete_gl_entries(voucher_type, voucher_no):
-# 		frappe.db.sql("""delete from `tabGL Entry`
-# 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 
-# 	if not warehouse_account:
-# 		warehouse_account = get_warehouse_account_map(company)
-
-# 	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time, for_warehouses, for_items)
-# 	gle = get_voucherwise_gl_entries(future_stock_vouchers, posting_date)
-
-# 	for voucher_type, voucher_no in future_stock_vouchers:
-# 		existing_gle = gle.get((voucher_type, voucher_no), [])
-# 		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
-# 		expected_gle = voucher_obj.get_gl_entries(warehouse_account)
-# 		if expected_gle:
-# 			if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
-# 				_delete_gl_entries(voucher_type, voucher_no)
-# 				voucher_obj.make_gl_entries(gl_entries=expected_gle, repost_future_gle=False, from_repost=True)
-# 		else:
-# 			_delete_gl_entries(voucher_type, voucher_no)
-
-# def compare_existing_and_expected_gle(existing_gle, expected_gle):
-# 	matched = True
-# 	for entry in expected_gle:
-# 		account_existed = False
-# 		for e in existing_gle:
-# 			if entry.account == e.account:
-# 				account_existed = True
-# 			if entry.account == e.account and entry.against_account == e.against_account \
-# 					and (not entry.cost_center or not e.cost_center or entry.cost_center == e.cost_center) \
-# 					and (entry.debit != e.debit or entry.credit != e.credit):
-# 				matched = False
-# 				break
-# 		if not account_existed:
-# 			matched = False
-# 			break
-# 	return matched
-
-# def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None):
-# 	future_stock_vouchers = []
-
-# 	values = []
-# 	condition = ""
-# 	if for_items:
-# 		condition += " and item_code in ({})".format(", ".join(["%s"] * len(for_items)))
-# 		values += for_items
-
-# 	if for_warehouses:
-# 		condition += " and warehouse in ({})".format(", ".join(["%s"] * len(for_warehouses)))
-# 		values += for_warehouses
-
-# 	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
-# 		from `tabStock Ledger Entry` sle
-# 		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) {condition}
-# 		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc""".format(condition=condition),
-# 		tuple([posting_date, posting_time] + values), as_dict=True):
-# 			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
-
-# 	return future_stock_vouchers
-
-# def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
-# 	gl_entries = {}
-# 	if future_stock_vouchers:
-# 		for d in frappe.db.sql("""select * from `tabGL Entry`
-# 			where posting_date >= %s and voucher_no in (%s)""" %
-# 			('%s', ', '.join(['%s']*len(future_stock_vouchers))),
-# 			tuple([posting_date] + [d[1] for d in future_stock_vouchers]), as_dict=1):
-# 				gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
-
-# 	return gl_entries

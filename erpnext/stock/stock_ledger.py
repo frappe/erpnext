@@ -20,13 +20,13 @@ def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via
 	if sl_entries:
 		from erpnext.stock.utils import update_bin
 
-		cancel = True if sl_entries[0].get("is_cancelled") == "Yes" else False
+		cancel = sl_entries[0].get("is_cancelled")
 		if cancel:
-			set_as_cancel(sl_entries[0].get('voucher_no'), sl_entries[0].get('voucher_type'))
+			set_as_cancel(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
 
 		for sle in sl_entries:
 			sle_id = None
-			if sle.get('is_cancelled') == 'Yes':
+			if cancel:
 				sle['actual_qty'] = -flt(sle['actual_qty'])
 
 			if sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
@@ -39,13 +39,11 @@ def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via
 			})
 			update_bin(args, allow_negative_stock, via_landed_cost_voucher)
 
-		if cancel:
-			delete_cancelled_entry(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
 
 def set_as_cancel(voucher_type, voucher_no):
-	frappe.db.sql("""update `tabStock Ledger Entry` set is_cancelled='Yes',
+	frappe.db.sql("""update `tabStock Ledger Entry` set is_cancelled=1,
 		modified=%s, modified_by=%s
-		where voucher_no=%s and voucher_type=%s""",
+		where voucher_type=%s and voucher_no=%s""",
 		(now(), frappe.session.user, voucher_type, voucher_no))
 
 def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
@@ -58,9 +56,6 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	sle.submit()
 	return sle.name
 
-def delete_cancelled_entry(voucher_type, voucher_no):
-	frappe.db.sql("""delete from `tabStock Ledger Entry`
-		where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 
 class update_entries_after(object):
 	"""
@@ -444,9 +439,11 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 	if operator in (">", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"
 
-	return frappe.db.sql("""select *, timestamp(posting_date, posting_time) as "timestamp" from `tabStock Ledger Entry`
+	return frappe.db.sql("""
+		select *, timestamp(posting_date, posting_time) as "timestamp"
+		from `tabStock Ledger Entry`
 		where item_code = %%(item_code)s
-		and ifnull(is_cancelled, 'No')='No'
+		and is_cancelled=0
 		%(conditions)s
 		order by timestamp(posting_date, posting_time) %(order)s, creation %(order)s
 		%(limit)s %(for_update)s""" % {
