@@ -39,7 +39,6 @@ class GLEntry(Document):
 	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes', from_repost=False):
 		if not from_repost:
 			self.validate_account_details(adv_adj)
-			check_freezing_date(self.posting_date, adv_adj)
 
 		validate_frozen_account(self.account, adv_adj)
 		validate_balance_type(self.account, adv_adj)
@@ -159,7 +158,6 @@ class GLEntry(Document):
 		if self.party_type and self.party:
 			validate_party_gle_currency(self.party_type, self.party, self.company, self.account_currency)
 
-
 	def validate_and_set_fiscal_year(self):
 		if not self.fiscal_year:
 			self.fiscal_year = get_fiscal_year(self.posting_date, company=self.company)[0]
@@ -175,19 +173,6 @@ def validate_balance_type(account, adv_adj=False):
 			if (balance_must_be=="Debit" and flt(balance) < 0) or \
 				(balance_must_be=="Credit" and flt(balance) > 0):
 				frappe.throw(_("Balance for Account {0} must always be {1}").format(account, _(balance_must_be)))
-
-def check_freezing_date(posting_date, adv_adj=False):
-	"""
-		Nobody can do GL Entries where posting date is before freezing date
-		except authorized person
-	"""
-	if not adv_adj:
-		acc_frozen_upto = frappe.db.get_value('Accounts Settings', None, 'acc_frozen_upto')
-		if acc_frozen_upto:
-			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
-			if getdate(posting_date) <= getdate(acc_frozen_upto) \
-					and not frozen_accounts_modifier in frappe.get_roles():
-				frappe.throw(_("You are not authorized to add or update entries before {0}").format(formatdate(acc_frozen_upto)))
 
 def update_outstanding_amt(account, party_type, party, against_voucher_type, against_voucher, on_cancel=False):
 	if party_type and party:
