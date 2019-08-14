@@ -704,7 +704,7 @@ apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_st
 DocType: Announcement,Student,Student
 apps/erpnext/erpnext/accounts/report/purchase_order_items_to_be_billed/purchase_order_items_to_be_billed.py,Suplier Name,Naziv dobavljača
 apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py,In Qty,Prijem količine
-apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py,Selling Rate,Prodajna cijena
+apps/erpnext/erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.py,Selling Rate,Prodajna cijena
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,Stock cannot be updated against Delivery Note {0},Zaliha se ne može promijeniti jer je vezana sa otpremnicom {0}
 apps/erpnext/erpnext/accounts/page/pos/pos.js,You are in offline mode. You will not be able to reload until you have network.,Радите без интернета. Нећете моћи да учитате страницу док се не повежете.
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js,Form View,Prikaži kao formu
