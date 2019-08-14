@@ -323,7 +323,6 @@ def allocate_earned_leaves():
 				allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
 				create_earned_leave_ledger_entry(allocation, earned_leaves, today)
 
-
 def create_earned_leave_ledger_entry(allocation, earned_leaves, date):
 	''' Create leave ledger entry based on the earned leave frequency '''
 	allocation.new_leaves_allocated = earned_leaves
