@@ -349,17 +349,17 @@ frappe.ui.form.on("Work Order", {
 
 	bom_barcode: function(frm) {
 		frm.call({
-				doc: frm.doc,
-				method: "get_item_bom_from_barcode",
-				args: {barcode: frm.doc.bom_barcode},	
-			}).then((r) => {
-				if (r.message){
-					frm.set_value("production_item","");
-					frm.set_value("bom_no","");
-					frm.set_value("qty","");
-					frm.refresh();
-				}
-			});
+			doc: frm.doc,
+			method: "get_item_bom_from_barcode",
+			args: {barcode: frm.doc.bom_barcode},	
+		}).then((r) => {
+			if (r.message){
+				frm.set_value("production_item","");
+				frm.set_value("bom_no","");
+				frm.set_value("qty","");
+				frm.refresh();
+			}
+		});
 	},
 
 	use_multi_level_bom: function(frm) {
