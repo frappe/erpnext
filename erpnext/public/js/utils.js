@@ -70,8 +70,9 @@ $.extend(erpnext, {
 						"get_query": function () {
 							return {
 								filters: {
-									item_code:grid_row.doc.item_code,
-									warehouse:cur_frm.doc.is_return ? null : grid_row.doc.warehouse
+									item_code: grid_row.doc.item_code,
+									warehouse: cur_frm.doc.is_return ? null : grid_row.doc.warehouse,
+									batch_no: grid_row.doc.batch_no || null
 								}
 							}
 						}
