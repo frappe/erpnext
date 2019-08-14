@@ -163,7 +163,7 @@ apps/erpnext/erpnext/hr/doctype/employee_checkin/employee_checkin.py,This employ
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Accountant,اکاؤنٹنٹ
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py,Selling Price List,قیمت کی فہرست فروخت
 DocType: Patient,Tobacco Current Use,تمباکو موجودہ استعمال
-apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py,Selling Rate,فروخت کی شرح
+apps/erpnext/erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.py,Selling Rate,فروخت کی شرح
 apps/erpnext/erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js,Please save your document before adding a new account,براہ کرم نیا اکاؤنٹ شامل کرنے سے پہلے اپنی دستاویز کو محفوظ کریں۔
 DocType: Cost Center,Stock User,اسٹاک صارف
 DocType: Soil Analysis,(Ca+Mg)/K,(Ca + MG) / K
@@ -199,7 +199,6 @@ apps/erpnext/erpnext/accounts/utils.py,{0} {1} not in any active Fiscal Year.,{0
 DocType: Packed Item,Parent Detail docname,والدین تفصیل docname
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Reference: {0}, Item Code: {1} and Customer: {2}",حوالہ: {0}، آئٹم کوڈ: {1} اور کسٹمر: {2}
 apps/erpnext/erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py,{0} {1} is not present in the parent company,{0} {1} والدین کی کمپنی میں موجود نہیں ہے
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,سپلائر&gt; سپلائر کی قسم
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py,Trial Period End Date Cannot be before Trial Period Start Date,آزمائشی مدت کے اختتام تاریخ آزمائشی دورہ شروع ہونے سے پہلے نہیں ہوسکتی ہے
 apps/erpnext/erpnext/utilities/user_progress.py,Kg,کلو
 DocType: Tax Withholding Category,Tax Withholding Category,ٹیکس کو روکنے والے زمرہ
@@ -310,6 +309,7 @@ DocType: Location,Location Name,مقام کا نام
 DocType: Quality Procedure Table,Responsible Individual,ذمہ دار انفرادی۔
 DocType: Naming Series,Prefix,اپسرگ
 apps/erpnext/erpnext/hr/notification/training_scheduled/training_scheduled.html,Event Location,واقعہ مقام
+apps/erpnext/erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.py,Available Stock,دستیاب اسٹاک
 DocType: Asset Settings,Asset Settings,اثاثہ کی ترتیبات
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Consumable,فراہمی
 DocType: Student,B-,B-
@@ -343,6 +343,7 @@ DocType: Agriculture Analysis Criteria,Fertilizer,کھاد
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,"Cannot ensure delivery by Serial No as \
 				Item {0} is added with and without Ensure Delivery by \
 				Serial No.",سیریل نمبر کی طرف سے \ آئٹم {0} کے ذریعے ترسیل کو یقینی بنانے کے بغیر اور سیریل نمبر کی طرف سے یقینی بنانے کے بغیر شامل نہیں کیا جاسکتا ہے.
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,براہ کرم تعلیم&gt; تعلیم کی ترتیبات میں انسٹرکٹر نام دینے کا نظام مرتب کریں۔
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,At least one mode of payment is required for POS invoice.,ادائیگی کی کم از کم ایک موڈ POS انوائس کے لئے ضروری ہے.
 DocType: Bank Statement Transaction Invoice Item,Bank Statement Transaction Invoice Item,بینک بیان ٹرانزیکشن انوائس آئٹم
 DocType: Salary Detail,Tax on flexible benefit,لچکدار فائدہ پر ٹیکس
@@ -1639,7 +1640,6 @@ DocType: Support Search Source,Search Term Param Name,تلاش ٹرم پیر ن�
 DocType: Item Barcode,Item Barcode,آئٹم بارکوڈ
 DocType: Delivery Trip,In Transit,ٹرانزٹ میں
 DocType: Woocommerce Settings,Endpoints,اختتام
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,آئٹم کوڈ&gt; آئٹم گروپ&gt; برانڈ۔
 DocType: Shopping Cart Settings,Show Configure Button,کنفیگر بٹن دکھائیں۔
 DocType: Quality Inspection Reading,Reading 6,6 پڑھنا
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js,Cannot {0} {1} {2} without any negative outstanding invoice,نہ {0} {1} {2} بھی منفی بقایا انوائس کے بغیر کر سکتے ہیں
@@ -2187,6 +2187,7 @@ apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js,Serial Numbers,
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js,Item 2,آئٹم 2
 DocType: Pricing Rule,Validate Applied Rule,قابل اطلاق قانون کی تصدیق کریں۔
 DocType: QuickBooks Migrator,Authorization Endpoint,اجازت کے آخر پوائنٹ
+DocType: Employee Onboarding,Notify users by email,صارفین کو ای میل کے ذریعے مطلع کریں۔
 DocType: Travel Request,International,بین اقوامی
 DocType: Training Event,Training Event,تربیت ایونٹ
 DocType: Item,Auto re-order,آٹو دوبارہ آرڈر
@@ -2789,7 +2790,6 @@ apps/erpnext/erpnext/utilities/page/leaderboard/leaderboard.js,No items found.,�
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py,You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global Settings,آپ مالی سال {0} کو حذف نہیں کر سکتے ہیں. مالی سال {0} گلوبل ترتیبات میں ڈیفالٹ کے طور پر مقرر کیا جاتا ہے
 DocType: Share Transfer,Equity/Liability Account,مساوات / ذمہ داری اکاؤنٹ
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.py,A customer with the same name already exists,ایک ہی نام کے ساتھ گاہک پہلے ہی موجود ہے
-DocType: Contract,Inactive,غیر فعال
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js,This will submit Salary Slips and create accrual Journal Entry. Do you want to proceed?,یہ تنخواہ سلپس جمع کردیتا ہے اور اسکرین جرنل انٹری تخلیق کرتا ہے. کیا آپ آگے بڑھنا چاہتے ہیں؟
 DocType: Purchase Invoice,Total Net Weight,کل نیٹ وزن
 DocType: Purchase Order,Order Confirmation No,آرڈر کی توثیق نمبر
@@ -3064,7 +3064,6 @@ apps/erpnext/erpnext/setup/doctype/company/test_company.py,No Account matched th
 apps/erpnext/erpnext/accounts/party.py,Billing currency must be equal to either default company's currency or party account currency,بلنگ کی کرنسی کو پہلے ہی ڈیفالٹ کمپنی کی کرنسی یا پارٹی اکاؤنٹ کرنسی کے برابر ہونا ضروری ہے
 DocType: Packing Slip,Indicates that the package is a part of this delivery (Only Draft),پیکیج اس کی ترسیل (صرف ڈرافٹ) کا ایک حصہ ہے کہ اشارہ کرتا ہے
 apps/erpnext/erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.py,Closing Balance,اختتامی توازن
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},UOM کے تبادلوں کا عنصر ({0} -&gt; {1}) آئٹم کے لئے نہیں ملا: {2}
 DocType: Soil Texture,Loam,لوام
 apps/erpnext/erpnext/controllers/accounts_controller.py,Row {0}: Due Date cannot be before posting date,صف {0}: تاریخ کی تاریخ تاریخ سے پہلے نہیں ہوسکتی ہے
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py,Quantity for Item {0} must be less than {1},شے کے لئے مقدار {0} سے کم ہونا چاہئے {1}
@@ -3581,7 +3580,6 @@ apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.py,No GST No. found for the C
 DocType: Stock Settings,Raise Material Request when stock reaches re-order level,اسٹاک دوبارہ آرڈر کی سطح تک پہنچ جاتا ہے مواد کی درخواست میں اضافہ
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Full-time,پورا وقت
 DocType: Payroll Entry,Employees,ایمپلائز
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,براہ کرم حاضری کے لئے نمبر بندی سیریز سیٹ اپ&gt; نمبرنگ سیریز کے ذریعے ترتیب دیں۔
 DocType: Question,Single Correct Answer,سنگل درست جواب۔
 DocType: Employee,Contact Details,رابطہ کی تفصیلات
 DocType: C-Form,Received Date,موصول تاریخ
@@ -4190,6 +4188,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_tax
 DocType: Pricing Rule,Price or Product Discount,قیمت یا مصنوع کی چھوٹ۔
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,For row {0}: Enter planned qty,قطار {0} کے لئے: منصوبہ بندی کی مقدار درج کریں
 DocType: Account,Income Account,انکم اکاؤنٹ
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,کسٹمر&gt; کسٹمر گروپ&gt; علاقہ۔
 DocType: Payment Request,Amount in customer's currency,کسٹمر کی کرنسی میں رقم
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,Delivery,ڈلیوری
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py,Assigning Structures...,ڈھانچے کی تفویض…
@@ -4238,7 +4237,6 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Income Ta
 DocType: HR Settings,Check Vacancies On Job Offer Creation,ملازمت کی پیش کش پر خالی آسامیوں کو چیک کریں۔
 apps/erpnext/erpnext/utilities/user_progress.py,Go to Letterheads,لیٹر ہیڈز پر جائیں
 DocType: Subscription,Cancel At End Of Period,مدت کے آخر میں منسوخ کریں
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,براہ کرم تعلیم&gt; تعلیم کی ترتیبات میں انسٹرکٹر نام دینے کا نظام مرتب کریں۔
 apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.js,Property already added,پراپرٹی پہلے سے شامل ہے
 DocType: Item Supplier,Item Supplier,آئٹم پردایک
 apps/erpnext/erpnext/public/js/controllers/transaction.js,Please enter Item Code to get batch no,بیچ کوئی حاصل کرنے کے لئے آئٹم کوڈ درج کریں
@@ -4521,6 +4519,7 @@ DocType: Training Event,Theory,نظریہ
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js,Warning: Material Requested Qty is less than Minimum Order Qty,انتباہ: مقدار درخواست مواد کم از کم آرڈر کی مقدار سے کم ہے
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py,Account {0} is frozen,اکاؤنٹ {0} منجمد ہے
 DocType: Quiz Question,Quiz Question,کوئز سوال۔
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,سپلائر&gt; سپلائر کی قسم
 DocType: Company,Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.,تنظیم سے تعلق رکھنے والے اکاؤنٹس کی ایک علیحدہ چارٹ کے ساتھ قانونی / ماتحت.
 DocType: Payment Request,Mute Email,گونگا ای میل
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,"Food, Beverage & Tobacco",کھانا، مشروب اور تمباکو
@@ -5028,7 +5027,6 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Delivery warehouse required for stock item {0},ڈلیوری گودام اسٹاک شے کے لئے کی ضرورت {0}
 DocType: Packing Slip,The gross weight of the package. Usually net weight + packaging material weight. (for print),پیکج کی مجموعی وزن. عام طور پر نیٹ وزن پیکیجنگ مواد وزن. (پرنٹ کے لئے)
 DocType: Assessment Plan,Program,پروگرام کا
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,برائے کرم انسانی وسائل&gt; HR کی ترتیبات میں ملازمین کے نام دینے کا نظام مرتب کریں۔
 DocType: Accounts Settings,Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,اس کردار کے ساتھ صارفین کو منجمد اکاؤنٹس کے خلاف اکاؤنٹنگ اندراجات منجمد اکاؤنٹس قائم کرنے اور تخلیق / ترمیم کریں کرنے کی اجازت ہے
 ,Project Billing Summary,پروجیکٹ بلنگ کا خلاصہ۔
 DocType: Vital Signs,Cuts,پکڑتا ہے
@@ -5373,6 +5371,8 @@ DocType: Sales Invoice,Distance (in km),فاصلے (کلومیٹر میں)
 apps/erpnext/erpnext/accounts/doctype/monthly_distribution/monthly_distribution.py,Percentage Allocation should be equal to 100%,فیصدی ایلوکیشن 100٪ کے برابر ہونا چاہئے
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js,Please select Posting Date before selecting Party,پارٹی منتخب کرنے سے پہلے پوسٹنگ کی تاریخ براہ مہربانی منتخب کریں
 apps/erpnext/erpnext/config/accounting.py,Payment Terms based on conditions,شرائط پر مبنی ادائیگی کی شرائط۔
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","براہ کرم اس دستاویز کو منسوخ کرنے کے لئے ملازم <a href=""#Form/Employee/{0}"">{0}</a> delete کو حذف کریں۔"
 DocType: Program Enrollment,School House,سکول ہاؤس
 DocType: Serial No,Out of AMC,اے ایم سی کے باہر
 DocType: Opportunity,Opportunity Amount,موقع کی رقم
@@ -5575,6 +5575,7 @@ apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py,Order
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py,Order/Quot %,آرڈر / عمومی quot٪
 apps/erpnext/erpnext/config/healthcare.py,Record Patient Vitals,ریکارڈ مریض وٹیلز
 DocType: Fee Schedule,Institution,ادارہ
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},UOM کے تبادلوں کا عنصر ({0} -&gt; {1}) آئٹم کے لئے نہیں ملا: {2}
 DocType: Asset,Partially Depreciated,جزوی طور پر فرسودگی
 DocType: Issue,Opening Time,افتتاحی وقت
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py,From and To dates required,سے اور مطلوبہ تاریخوں کے لئے
@@ -5791,6 +5792,7 @@ apps/erpnext/erpnext/public/js/pos/pos.html,No Customers yet!,ابھی تک کو
 DocType: Quality Procedure Process,Link existing Quality Procedure.,موجودہ کوالٹی پروسیجر کو لنک کریں۔
 apps/erpnext/erpnext/config/hr.py,Loans,قرضے۔
 DocType: Healthcare Service Unit,Healthcare Service Unit,ہیلتھ کیئر سروس یونٹ
+,Customer-wise Item Price,کسٹمر وار آئٹم قیمت۔
 apps/erpnext/erpnext/public/js/financial_statements.js,Cash Flow Statement,کیش فلو کا بیان
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,No material request created,کوئی مادی درخواست نہیں کی گئی
 apps/erpnext/erpnext/hr/doctype/loan_application/loan_application.py,Loan Amount cannot exceed Maximum Loan Amount of {0},قرض کی رقم {0} کی زیادہ سے زیادہ قرض کی رقم سے زیادہ نہیں ہوسکتی
@@ -6053,6 +6055,7 @@ apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_stat
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,افتتاحی ویلیو
 DocType: Salary Component,Formula,فارمولہ
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,Serial #,سیریل نمبر
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,برائے کرم انسانی وسائل&gt; HR کی ترتیبات میں ملازمین کے نام دینے کا نظام مرتب کریں۔
 DocType: Material Request Plan Item,Required Quantity,مطلوبہ مقدار
 DocType: Lab Test Template,Lab Test Template,لیب ٹیسٹنگ سانچہ
 apps/erpnext/erpnext/setup/doctype/company/company.py,Sales Account,سیلز اکاؤنٹ
@@ -6298,7 +6301,6 @@ DocType: Antibiotic,Laboratory User,لیبارٹری صارف
 DocType: Request for Quotation Item,Project Name,پراجیکٹ کا نام
 apps/erpnext/erpnext/regional/italy/utils.py,Please set the Customer Address,برائے کرم کسٹمر ایڈریس متعین کریں۔
 DocType: Customer,Mention if non-standard receivable account,ذکر غیر معیاری وصولی اکاؤنٹ تو
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,کسٹمر&gt; کسٹمر گروپ&gt; علاقہ۔
 DocType: Bank,Plaid Access Token,پلائڈ رسائی ٹوکن۔
 apps/erpnext/erpnext/hr/doctype/employee_benefit_application/employee_benefit_application.py,Please add the remaining benefits {0} to any of the existing component,موجودہ حصوں میں سے کوئی بھی باقی فوائد {0} کو شامل کریں
 DocType: Journal Entry Account,If Income or Expense,آمدنی یا اخراجات تو
@@ -6557,8 +6559,6 @@ DocType: Employee Tax Exemption Proof Submission,Tax Exemption Proofs,ٹیکس �
 apps/erpnext/erpnext/buying/utils.py,Please enter quantity for Item {0},شے کے لئے مقدار درج کریں {0}
 DocType: Quality Procedure,Processes,عمل
 DocType: Shift Type,First Check-in and Last Check-out,پہلے چیک ان اور آخری چیک آؤٹ۔
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","براہ کرم اس دستاویز کو منسوخ کرنے کے لئے ملازم <a href=""#Form/Employee/{0}"">{0}</a> delete کو حذف کریں۔"
 apps/erpnext/erpnext/regional/report/hsn_wise_summary_of_outward_supplies/hsn_wise_summary_of_outward_supplies.py,Total Taxable Amount,کل ٹیکس قابل رقم
 DocType: Employee External Work History,Employee External Work History,ملازم بیرونی کام کی تاریخ
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py,Job card {0} created,ملازمت کارڈ {0} تیار
@@ -6595,6 +6595,7 @@ DocType: Shareholder,ACC-SH-.YYYY.-,ACC-SH -YYYY.-
 apps/erpnext/erpnext/accounts/doctype/payment_terms_template/payment_terms_template.py,Combined invoice portion must equal 100%,مشترکہ انوائس کا حصہ 100٪
 DocType: Item Default,Default Expense Account,پہلے سے طے شدہ ایکسپینس اکاؤنٹ
 DocType: GST Account,CGST Account,CGST اکاؤنٹ
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,آئٹم کوڈ&gt; آئٹم گروپ&gt; برانڈ۔
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py,Student Email ID,Student کی ای میل آئی ڈی
 DocType: Employee,Notice (days),نوٹس (دن)
 DocType: POS Closing Voucher Invoices,POS Closing Voucher Invoices,پی او وی بند واؤچر انوائس
@@ -7230,6 +7231,7 @@ DocType: Purchase Invoice,Y,Y
 DocType: Maintenance Visit,Maintenance Date,بحالی کی تاریخ
 DocType: Purchase Invoice Item,Rejected Serial No,مسترد سیریل نمبر
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py,Year start date or end date is overlapping with {0}. To avoid please set company,سال کے آغاز کی تاریخ یا تاریخ انتہاء {0} کے ساتھ اتیویاپی ہے. سے بچنے کے لئے مقرر کی کمپنی کے لئے براہ مہربانی
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,براہ کرم حاضری کے لئے نمبر بندی سیریز سیٹ اپ&gt; نمبرنگ سیریز کے ذریعے ترتیب دیں۔
 apps/erpnext/erpnext/selling/doctype/customer/customer.py,Please mention the Lead Name in Lead {0},براہ کرم لیڈ نام {0} میں ذکر کریں.
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Start date should be less than end date for Item {0},شے کے لئے ختم ہونے کی تاریخ سے کم ہونا چاہئے شروع کرنے کی تاریخ {0}
 DocType: Shift Type,Auto Attendance Settings,خود حاضری کی ترتیبات۔
