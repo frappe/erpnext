@@ -624,7 +624,7 @@ def get_outstanding_reference_documents(args):
 	data = negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 
 	if not data:
-		frappe.msgprint(_("No outstanding invoices found for the {0} <b>{1}</b>.")
+		frappe.msgprint(_("No outstanding invoices found for the {0} <b>{1}</b> which qualify the filters you have specified.")
 			.format(args.get("party_type").lower(), args.get("party")))
 
 	return data
@@ -648,13 +648,18 @@ def get_orders_to_be_billed(posting_date, party_type, party,
 
 	orders = []
 	if voucher_type:
-		ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
+		if party_account_currency == company_currency:
+			grand_total_field = "base_grand_total"
+			rounded_total_field = "base_rounded_total"
+		else:
+			grand_total_field = "grand_total"
+			rounded_total_field = "rounded_total"
 
 		orders = frappe.db.sql("""
 			select
 				name as voucher_no,
-				{ref_field} as invoice_amount,
-				({ref_field} - advance_paid) as outstanding_amount,
+				if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
+				(if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) - advance_paid) as outstanding_amount,
 				transaction_date as posting_date
 			from
 				`tab{voucher_type}`
@@ -663,13 +668,14 @@ def get_orders_to_be_billed(posting_date, party_type, party,
 				and docstatus = 1
 				and company = %s
 				and ifnull(status, "") != "Closed"
-				and {ref_field} > advance_paid
+				and if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) > advance_paid
 				and abs(100 - per_billed) > 0.01
 				{condition}
 			order by
 				transaction_date, name
 		""".format(**{
-			"ref_field": ref_field,
+			"rounded_total_field": rounded_total_field,
+			"grand_total_field": grand_total_field,
 			"voucher_type": voucher_type,
 			"party_type": scrub(party_type),
 			"condition": condition
@@ -677,8 +683,8 @@ def get_orders_to_be_billed(posting_date, party_type, party,
 
 	order_list = []
 	for d in orders:
-		if not (d.outstanding_amount >= filters.get("outstanding_amt_greater_than")
-			and d.outstanding_amount <= filters.get("outstanding_amt_less_than")):
+		if not (flt(d.outstanding_amount) >= flt(filters.get("outstanding_amt_greater_than"))
+			and flt(d.outstanding_amount) <= flt(filters.get("outstanding_amt_less_than"))):
 			continue
 
 		d["voucher_type"] = voucher_type
@@ -755,9 +761,23 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 @frappe.whitelist()
 def get_account_details(account, date, cost_center=None):
 	frappe.has_permission('Payment Entry', throw=True)
+
+	# to check if the passed account is accessible under reference doctype Payment Entry
+	account_list = frappe.get_list('Account', {
+		'name': account
+	}, reference_doctype='Payment Entry', limit=1)
+
+	# There might be some user permissions which will allow account under certain doctypes
+	# except for Payment Entry, only in such case we should throw permission error
+	if not account_list:
+		frappe.throw(_('Account: {0} is not permitted under Payment Entry').format(account))
+
+	account_balance = get_balance_on(account, date, cost_center=cost_center,
+		ignore_account_permission=True)
+
 	return frappe._dict({
 		"account_currency": get_account_currency(account),
-		"account_balance": get_balance_on(account, date, cost_center=cost_center),
+		"account_balance": account_balance,
 		"account_type": frappe.db.get_value("Account", account, "account_type")
 	})
 
