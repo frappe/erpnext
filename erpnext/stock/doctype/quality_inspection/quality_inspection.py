@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
 from frappe.model.document import Document
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template \
 	import get_template_details
@@ -12,7 +11,6 @@ class QualityInspection(Document):
 	def validate(self):
 		if not self.readings and self.item_code:
 			self.get_item_specification_details()
-		self.validate_inspection_type()
 
 	def get_item_specification_details(self):
 		if not self.quality_inspection_template:
@@ -28,14 +26,6 @@ class QualityInspection(Document):
 			child.specification = d.specification
 			child.value = d.value
 			child.status = "Accepted"
-
-	def validate_inspection_type(self):
-		if self.inspection_type != "In Process":
-			inspection_required = frappe.db.get_value("Item", filters={
-				'name': self.item_code
-			}, fieldname=['inspection_required_before_purchase', 'inspection_required_before_delivery'])
-			if 0 in inspection_required:
-				frappe.throw(_('Inspection type for the item can only be in process.'))
 
 	def get_quality_inspection_template(self):
 		template = ''
