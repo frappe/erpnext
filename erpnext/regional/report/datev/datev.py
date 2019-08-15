@@ -123,9 +123,9 @@ def get_customers(filters):
 	return frappe.db.sql("""
 		SELECT
 
-			acc.account_number as Konto,
+			acc.account_number as 'Konto',
 			cus.customer_name as 'Name (Adressatentyp Unternehmen)',
-			case cus.customer_type when 'Individual' then 1 when 'Company' then 2 else 0,
+			case cus.customer_type when 'Individual' then 1 when 'Company' then 2 else 0 end as 'Adressatentyp',
 			adr.address_line1 as 'Straße',
 			adr.pincode as 'Postleitzahl',
 			adr.city as 'Ort',
@@ -154,7 +154,7 @@ def get_customers(filters):
 			left join `tabContact` con
 			on cus.customer_primary_contact = con.name
 
-		WHERE pa.company = %(company)s""", filters, as_dict=1)
+		WHERE par.company = %(company)s""", filters, as_dict=1)
 
 
 def get_suppliers(filters):
@@ -167,9 +167,9 @@ def get_suppliers(filters):
 	return frappe.db.sql("""
 		SELECT
 
-			acc.account_number as Konto,
+			acc.account_number as 'Konto',
 			sup.supplier_name as 'Name (Adressatentyp Unternehmen)',
-			case cus.supplier_type when 'Individual' then '1' when 'Company' then '2' else '0',
+			case cus.supplier_type when 'Individual' then '1' when 'Company' then '2' else '0' end as 'Adressatentyp',
 			adr.address_line1 as 'Straße',
 			adr.pincode as 'Postleitzahl',
 			adr.city as 'Ort',
@@ -179,7 +179,7 @@ def get_suppliers(filters):
 			coalesce(con.mobile_no, con.phone) as 'Telefon',
 			sup.website as 'Internet',
 			sup.tax_id as 'Steuernummer',
-			case sup.on_hold when 1 then sup.release_date else null as 'Zahlungssperre bis'
+			case sup.on_hold when 1 then sup.release_date else null end as 'Zahlungssperre bis'
 
 		FROM `tabParty Account` par
 
@@ -198,7 +198,7 @@ def get_suppliers(filters):
 			left join `tabContact` con
 			on sup.supplier_primary_contact = con.name
 
-		WHERE pa.company = %(company)s""", filters, as_dict=1)
+		WHERE par.company = %(company)s""", filters, as_dict=1)
 
 
 def get_account_names(filters):
