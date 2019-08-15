@@ -161,6 +161,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Finance Book",
 				},
+                {
+                    "type": "doctype",
+                    "name": "Months",
+                },
 				{
 					"type": "doctype",
 					"name": "Accounting Period",
