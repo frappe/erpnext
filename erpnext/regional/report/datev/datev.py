@@ -239,6 +239,9 @@ def get_datev_csv(data, filters, csv_class):
 	empty_df = pd.DataFrame(columns=csv_class.COLUMNS)
 	data_df = pd.DataFrame.from_records(data)
 
+	if csv_class.DATA_CATEGORY == DataCategory.ACCOUNT_NAMES:
+		data_df.rename(columns={'account_number':'Konto','name':'Kontenbeschriftung'}, inplace=True)
+
 	result = empty_df.append(data_df)
 
 	if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS:
