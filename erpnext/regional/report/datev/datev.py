@@ -218,7 +218,7 @@ def get_suppliers(filters):
 def get_account_names(filters):
 	return frappe.get_list("Account", 
 		fields=["account_number", "name"], 
-		filters={"company": filters.get("company")})
+		filters={"company": filters.get("company"), "is_group": "0"})
 
 
 def get_datev_csv(data, filters, csv_class):
