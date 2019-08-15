@@ -8,12 +8,18 @@
   "from",
   "to",
   "column_break_3",
+  "received_by",
   "medium",
+  "caller_information",
+  "contact",
+  "contact_name",
+  "column_break_10",
+  "lead",
+  "lead_name",
   "section_break_5",
   "status",
   "duration",
-  "recording_url",
-  "summary"
+  "recording_url"
  ],
  "fields": [
   {
@@ -61,12 +67,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "summary",
-   "fieldtype": "Data",
-   "label": "Summary",
-   "read_only": 1
-  },
-  {
    "fieldname": "recording_url",
    "fieldtype": "Data",
    "label": "Recording URL",
@@ -77,10 +77,58 @@
    "fieldtype": "Data",
    "label": "Medium",
    "read_only": 1
+  },
+  {
+   "fieldname": "received_by",
+   "fieldtype": "Link",
+   "label": "Received By",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "caller_information",
+   "fieldtype": "Section Break",
+   "label": "Caller Information"
+  },
+  {
+   "fieldname": "contact",
+   "fieldtype": "Link",
+   "label": "Contact",
+   "options": "Contact",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lead",
+   "fieldtype": "Link",
+   "label": "Lead ",
+   "options": "Lead",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "contact.name",
+   "fieldname": "contact_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Contact Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "lead.lead_name",
+   "fieldname": "lead_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Lead Name",
+   "read_only": 1
   }
  ],
  "in_create": 1,
- "modified": "2019-07-01 09:09:48.516722",
+ "modified": "2019-08-06 05:46:53.144683",
  "modified_by": "Administrator",
  "module": "Communication",
  "name": "Call Log",
@@ -97,10 +145,15 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Employee"
   }
  ],
  "sort_field": "modified",
  "sort_order": "ASC",
  "title_field": "from",
- "track_changes": 1
+ "track_changes": 1,
+ "track_views": 1
 }
