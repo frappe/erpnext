@@ -367,6 +367,6 @@ def download_datev_csv(filters=None):
 	suppliers_csv = get_datev_csv(suppliers, filters, csv_class=DebtorsCreditors)
 	zip_archive.writestr('EXTF_Lieferanten.csv', suppliers_csv)
 
-	frappe.response['result'] = zip_buffer.get_value()
+	frappe.response['result'] = zip_buffer.getvalue()
 	frappe.response['doctype'] = 'DATEV'
 	frappe.response['type'] = 'zip'
