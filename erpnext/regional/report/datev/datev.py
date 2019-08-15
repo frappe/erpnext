@@ -129,7 +129,7 @@ def get_customers(filters):
 			adr.address_line1 as 'Straße',
 			adr.pincode as 'Postleitzahl',
 			adr.city as 'Ort',
-			UPPER(country.code) as 'Land'
+			UPPER(country.code) as 'Land',
 			adr.address_line2 as 'Adresszusatz',
 			con.email_id as 'E-Mail',
 			coalesce(con.mobile_no, con.phone) as 'Telefon',
@@ -173,7 +173,7 @@ def get_suppliers(filters):
 			adr.address_line1 as 'Straße',
 			adr.pincode as 'Postleitzahl',
 			adr.city as 'Ort',
-			UPPER(cty.code) as 'Land'
+			UPPER(cty.code) as 'Land',
 			adr.address_line2 as 'Adresszusatz',
 			con.email_id as 'E-Mail',
 			coalesce(con.mobile_no, con.phone) as 'Telefon',
