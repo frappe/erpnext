@@ -61,7 +61,7 @@ def get_transactions(filters, as_dict):
 	as_dict -- return as list of dicts [0,1]
 	"""
 	gl_entries = frappe.db.sql("""
-		select
+		SELECT
 
 			/* either debit or credit amount; always positive */
 			case gl.debit when 0 then gl.credit else gl.debit end as 'Umsatz (ohne Soll/Haben-Kz)',
@@ -82,7 +82,7 @@ def get_transactions(filters, as_dict):
 			gl.against_voucher_type as 'Beleginfo - Art 2',
 			gl.against_voucher as 'Beleginfo - Inhalt 2'
 
-		from `tabGL Entry` gl
+		FROM `tabGL Entry` gl
 
 			/* Statistisches Konto (Debitoren/Kreditoren) */
 			left join `tabParty Account` pa
@@ -105,36 +105,100 @@ def get_transactions(filters, as_dict):
 			left join `tabAccount` acc_against_pa 
 			on pa.account = acc_against_pa.name
 
-		where gl.company = %(company)s 
-		and DATE(gl.posting_date) >= %(from_date)s
-		and DATE(gl.posting_date) <= %(to_date)s
-		order by 'Belegdatum', gl.voucher_no""", filters, as_dict=as_dict)
+		WHERE gl.company = %(company)s 
+		AND DATE(gl.posting_date) >= %(from_date)s
+		AND DATE(gl.posting_date) <= %(to_date)s
+		ORDER BY 'Belegdatum', gl.voucher_no""", filters, as_dict=as_dict)
 
 	return gl_entries
 
 
-def get_customers(filters, as_dict):
+def get_customers(filters):
 	"""
-	Get a list of Debtors and Creditors.
+	Get a list of Customers.
 
 	Arguments:
 	filters -- dict of filters to be passed to the sql query
-	as_dict -- return as list of dicts [0,1]
 	"""
-	# TODO: map to DebtorCreditor.COLUMNS
-	return frappe.db.sql("""select * from tabCustomer""", filters, as_dict=as_dict)
+	return frappe.db.sql("""
+		SELECT
+
+			acc.account_number as Konto,
+			cus.customer_name as 'Name (Adressatentyp Unternehmen)',
+			case cus.customer_type when 'Individual' then 1 when 'Company' then 2 else 0,
+			adr.address_line1 as 'Straße',
+			adr.pincode as 'Postleitzahl',
+			adr.city as 'Ort',
+			UPPER(country.code) as 'Land'
+			adr.address_line2 as 'Adresszusatz',
+			con.email_id as 'E-Mail',
+			coalesce(con.mobile_no, con.phone) as 'Telefon',
+			cus.website as 'Internet',
+			cus.tax_id as 'Steuernummer',
+			cus.credit_limit as 'Kreditlimit (Debitor)'
+
+		FROM `tabParty Account` par
+
+			left join `tabAccount` acc
+			on par.account = acc.name
+
+			left join `tabCustomer` cus
+			on par.parent = cus.name
+
+			left join `tabAddress` adr
+			on cus.customer_primary_address = adr.name
+
+			left join `tabCountry` country 
+			on adr.country = country.name
+
+			left join `tabContact` con
+			on cus.customer_primary_contact = con.name
+
+		WHERE pa.company = %(company)s""", filters, as_dict=1)
 
 
-def get_suppliers(filters, as_dict):
+def get_suppliers(filters):
 	"""
-	Get a list of Debtors and Creditors.
+	Get a list of Suppliers.
 
 	Arguments:
 	filters -- dict of filters to be passed to the sql query
-	as_dict -- return as list of dicts [0,1]
 	"""
-	# TODO: map to DebtorCreditor.COLUMNS
-	return frappe.db.sql("""select * from tabSupplier""", filters, as_dict=as_dict)
+	return frappe.db.sql("""
+		SELECT
+
+			acc.account_number as Konto,
+			sup.supplier_name as 'Name (Adressatentyp Unternehmen)',
+			case cus.supplier_type when 'Individual' then '1' when 'Company' then '2' else '0',
+			adr.address_line1 as 'Straße',
+			adr.pincode as 'Postleitzahl',
+			adr.city as 'Ort',
+			UPPER(cty.code) as 'Land'
+			adr.address_line2 as 'Adresszusatz',
+			con.email_id as 'E-Mail',
+			coalesce(con.mobile_no, con.phone) as 'Telefon',
+			sup.website as 'Internet',
+			sup.tax_id as 'Steuernummer',
+			case sup.on_hold when 1 then sup.release_date else null as 'Zahlungssperre bis'
+
+		FROM `tabParty Account` par
+
+			left join `tabAccount` acc
+			on par.account = acc.name
+
+			left join `tabSupplier` sup
+			on par.parent = sup.name
+
+			left join `tabAddress` adr
+			on sup.supplier_primary_address = adr.name
+
+			left join `tabCountry` cty
+			on adr.country = cty.name
+
+			left join `tabContact` con
+			on sup.supplier_primary_contact = con.name
+
+		WHERE pa.company = %(company)s""", filters, as_dict=1)
 
 
 def get_account_names(filters):
