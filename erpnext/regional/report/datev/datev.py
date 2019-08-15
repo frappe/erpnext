@@ -140,21 +140,22 @@ def get_customers(filters):
 		FROM `tabParty Account` par
 
 			left join `tabAccount` acc
-			on par.account = acc.name
+			on acc.name = par.account
 
 			left join `tabCustomer` cus
-			on par.parent = cus.name
+			on cus.name = par.parent
 
 			left join `tabAddress` adr
-			on cus.customer_primary_address = adr.name
+			on adr.name = cus.customer_primary_address
 
-			left join `tabCountry` country 
-			on adr.country = country.name
+			left join `tabCountry` country
+			on country.name = adr.country
 
 			left join `tabContact` con
-			on cus.customer_primary_contact = con.name
+			on con.name = cus.customer_primary_contact
 
-		WHERE par.company = %(company)s""", filters, as_dict=1)
+		WHERE par.company = %(company)s
+		AND par.parenttype = 'Customer'""", filters, as_dict=1)
 
 
 def get_suppliers(filters):
@@ -169,11 +170,11 @@ def get_suppliers(filters):
 
 			acc.account_number as 'Konto',
 			sup.supplier_name as 'Name (Adressatentyp Unternehmen)',
-			case cus.supplier_type when 'Individual' then '1' when 'Company' then '2' else '0' end as 'Adressatentyp',
+			case sup.supplier_type when 'Individual' then '1' when 'Company' then '2' else '0' end as 'Adressatentyp',
 			adr.address_line1 as 'Straße',
 			adr.pincode as 'Postleitzahl',
 			adr.city as 'Ort',
-			UPPER(cty.code) as 'Land',
+			UPPER(country.code) as 'Land',
 			adr.address_line2 as 'Adresszusatz',
 			con.email_id as 'E-Mail',
 			coalesce(con.mobile_no, con.phone) as 'Telefon',
@@ -184,21 +185,34 @@ def get_suppliers(filters):
 		FROM `tabParty Account` par
 
 			left join `tabAccount` acc
-			on par.account = acc.name
+			on acc.name = par.account
 
 			left join `tabSupplier` sup
-			on par.parent = sup.name
+			on sup.name = par.parent
 
+			left join `tabDynamic Link` dyn_adr
+			on dyn_adr.link_name = sup.name
+			and dyn_adr.link_doctype = 'Supplier'
+			and dyn_adr.parenttype = 'Address'
+			
 			left join `tabAddress` adr
-			on sup.supplier_primary_address = adr.name
+			on adr.name = dyn_adr.parent
+			and adr.is_primary_address = '1'
 
-			left join `tabCountry` cty
-			on adr.country = cty.name
+			left join `tabCountry` country
+			on country.name = adr.country
+
+			left join `tabDynamic Link` dyn_con
+			on dyn_con.link_name = sup.name
+			and dyn_con.link_doctype = 'Supplier'
+			and dyn_con.parenttype = 'Contact'
 
 			left join `tabContact` con
-			on sup.supplier_primary_contact = con.name
+			on con.name = dyn_con.parent
+			and con.is_primary_contact = '1'
 
-		WHERE par.company = %(company)s""", filters, as_dict=1)
+		WHERE par.company = %(company)s
+		AND par.parenttype = 'Supplier'""", filters, as_dict=1)
 
 
 def get_account_names(filters):
