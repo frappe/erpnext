@@ -1,3 +1,6 @@
+# coding: utf-8
+"""Constants used in datev.py."""
+
 TRANSACTION_COLUMNS = [
 	# All possible columns must tbe listed here, because DATEV requires them to
 	# be present in the CSV.
