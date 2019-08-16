@@ -220,7 +220,6 @@ def make_reverse_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 
 		for entry in gl_entries:
 
-			print("#############")
 			debit = entry.get('debit', 0)
 			credit = entry.get('credit', 0)
 
