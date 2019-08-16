@@ -137,6 +137,9 @@ def get_sle_conditions(filters):
 	if filters.get("project"):
 		conditions.append("project=%(project)s")
 
+	if filters.get("dont_show_cancelled_doc_entries"):
+		conditions.append("is_cancelled = 0")
+
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 def get_opening_balance(filters, columns):

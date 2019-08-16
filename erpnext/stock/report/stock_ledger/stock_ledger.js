@@ -76,12 +76,12 @@ frappe.query_reports["Stock Ledger"] = {
 			"label": __("Include UOM"),
 			"fieldtype": "Link",
 			"options": "UOM"
+		},
+		{
+			"fieldname": "dont_show_cancelled_doc_entries",
+			"label": __("Don't Show Cancelled Document Entries"),
+			"fieldtype": "Check",
+			"default": 1
 		}
 	]
 }
-
-// $(function() {
-// 	$(wrapper).bind("show", function() {
-// 		frappe.query_report.load();
-// 	});
-// });

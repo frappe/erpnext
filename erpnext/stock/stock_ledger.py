@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import frappe, erpnext
 from frappe import _
-from frappe.utils import cint, flt, cstr, now
+from frappe.utils import cint, flt, cstr, now, now_datetime
 from erpnext.stock.utils import get_valuation_method
 import json
 
@@ -16,7 +16,7 @@ class NegativeStockError(frappe.ValidationError): pass
 _exceptions = frappe.local('stockledger_exceptions')
 # _exceptions = []
 
-def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via_landed_cost_voucher=False):
+def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 	if sl_entries:
 		from erpnext.stock.utils import update_bin
 
@@ -28,14 +28,15 @@ def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via
 			sle_id = None
 			if cancel:
 				sle['actual_qty'] = -flt(sle['actual_qty'])
+				sle['posting_date'] = now_datetime().strftime('%Y-%m-%d')
+				sle['posting_time'] = now_datetime().strftime('%H:%M:%S.%f')
 
 			if sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
 				sle_id = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
 
 			args = sle.copy()
 			args.update({
-				"sle_id": sle_id,
-				"is_amended": is_amended
+				"sle_id": sle_id
 			})
 			update_bin(args, allow_negative_stock, via_landed_cost_voucher)
 

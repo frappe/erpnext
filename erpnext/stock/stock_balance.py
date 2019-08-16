@@ -199,8 +199,7 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 
 		args = sle_dict.copy()
 		args.update({
-			"sle_id": sle_doc.name,
-			"is_amended": 'No'
+			"sle_id": sle_doc.name
 		})
 
 		update_bin(args)

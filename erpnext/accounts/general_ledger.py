@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import flt, cstr, cint, today
+from frappe.utils import flt, cstr, cint, today, now
 from frappe import _
 from frappe.model.meta import get_field_precision
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
@@ -220,6 +220,7 @@ def make_reverse_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 
 		for entry in gl_entries:
 
+			print("#############")
 			debit = entry.get('debit', 0)
 			credit = entry.get('credit', 0)
 
