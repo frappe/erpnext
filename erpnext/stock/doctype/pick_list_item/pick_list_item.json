@@ -4,32 +4,29 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "item",
+  "item_code",
   "item_name",
   "column_break_2",
   "description",
-  "has_batch_no",
-  "has_serial_no",
   "section_break_5",
   "warehouse",
+  "quantity_section",
   "qty",
+  "stock_qty",
   "picked_qty",
+  "column_break_11",
+  "uom",
+  "stock_uom",
+  "conversion_factor",
+  "serial_no_and_batch_section",
   "serial_no",
+  "column_break_20",
   "batch_no",
-  "reference_section",
-  "reference_doctype",
-  "reference_name",
-  "reference_document_item"
+  "column_break_15",
+  "sales_order",
+  "sales_order_item"
  ],
  "fields": [
-  {
-   "fieldname": "item",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Item",
-   "options": "Item",
-   "read_only": 1
-  },
   {
    "fieldname": "qty",
    "fieldtype": "Float",
@@ -52,72 +49,31 @@
    "read_only": 1
   },
   {
-   "fetch_from": "item.item_name",
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "label": "Item Name",
    "read_only": 1
   },
   {
-   "fetch_from": "item.description",
+   "fetch_from": "item_code.description",
    "fieldname": "description",
    "fieldtype": "Text",
    "label": "Description",
    "read_only": 1
   },
   {
-   "fieldname": "reference_document_item",
-   "fieldtype": "Data",
-   "label": "Reference Document Item",
-   "read_only": 1
-  },
-  {
+   "depends_on": "serial_no",
    "fieldname": "serial_no",
    "fieldtype": "Small Text",
-   "label": "Serial No",
-   "read_only": 1
+   "label": "Serial No"
   },
   {
+   "depends_on": "batch_no",
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch No",
-   "options": "Batch",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fetch_from": "item.has_serial_no",
-   "fieldname": "has_serial_no",
-   "fieldtype": "Check",
-   "label": "Has Serial No",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fetch_from": "item.has_batch_no",
-   "fieldname": "has_batch_no",
-   "fieldtype": "Check",
-   "label": "Has Batch No",
-   "read_only": 1
-  },
-  {
-   "fieldname": "reference_section",
-   "fieldtype": "Section Break",
-   "label": "Reference"
-  },
-  {
-   "fieldname": "reference_doctype",
-   "fieldtype": "Select",
-   "label": "Reference Document Type",
-   "options": "Sales Order\nWork Order",
-   "read_only": 1
-  },
-  {
-   "fieldname": "reference_name",
-   "fieldtype": "Dynamic Link",
-   "label": "Reference Document",
-   "options": "reference_doctype",
-   "read_only": 1
+   "options": "Batch"
   },
   {
    "fieldname": "column_break_2",
@@ -126,10 +82,80 @@
   {
    "fieldname": "section_break_5",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "UOM Conversion Factor",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_qty",
+   "fieldtype": "Float",
+   "label": "Qty as per Stock UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "quantity_section",
+   "fieldtype": "Section Break",
+   "label": "Quantity"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_order_item",
+   "fieldtype": "Data",
+   "label": "Sales Order Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "serial_no_and_batch_section",
+   "fieldtype": "Section Break",
+   "label": "Serial No and Batch"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
- "modified": "2019-07-30 23:47:53.566473",
+ "modified": "2019-08-14 18:41:37.727388",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List Item",

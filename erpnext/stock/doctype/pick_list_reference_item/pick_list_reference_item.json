@@ -4,32 +4,19 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "item",
+  "item_code",
+  "quantity_section",
   "qty",
-  "reference_doctype",
-  "reference_name",
-  "reference_document_item"
+  "stock_qty",
+  "column_break_5",
+  "uom",
+  "stock_uom",
+  "conversion_factor",
+  "reference_section",
+  "sales_order",
+  "sales_order_item"
  ],
  "fields": [
-  {
-   "fieldname": "item",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Item",
-   "options": "Item"
-  },
-  {
-   "fieldname": "reference_doctype",
-   "fieldtype": "Link",
-   "label": "Reference Document type",
-   "options": "DocType"
-  },
-  {
-   "fieldname": "reference_name",
-   "fieldtype": "Dynamic Link",
-   "label": "Reference Name",
-   "options": "reference_doctype"
-  },
   {
    "fieldname": "qty",
    "fieldtype": "Float",
@@ -37,13 +24,62 @@
    "label": "Qty"
   },
   {
-   "fieldname": "reference_document_item",
+   "fieldname": "quantity_section",
+   "fieldtype": "Section Break",
+   "label": "Quantity"
+  },
+  {
+   "fieldname": "stock_qty",
+   "fieldtype": "Float",
+   "label": "Stock Qty"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order"
+  },
+  {
+   "fieldname": "sales_order_item",
    "fieldtype": "Data",
-   "label": "Reference Document Item"
+   "label": "Sales Order Item"
+  },
+  {
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "UOM Conversion Factor"
   }
  ],
  "istable": 1,
- "modified": "2019-07-30 23:43:30.901151",
+ "modified": "2019-08-14 18:38:28.867113",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List Reference Item",
