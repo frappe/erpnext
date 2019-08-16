@@ -7,6 +7,7 @@
  "field_order": [
   "company",
   "column_break_4",
+  "items_based_on",
   "parent_warehouse",
   "section_break_4",
   "reference_items",
@@ -50,9 +51,16 @@
    "fieldtype": "Table",
    "label": "Items To Be Picked",
    "options": "Pick List Reference Item"
+  },
+  {
+   "default": "Sales Order",
+   "fieldname": "items_based_on",
+   "fieldtype": "Select",
+   "label": "Items Based On",
+   "options": "\nSales Order\nWork Order"
   }
  ],
- "modified": "2019-08-01 10:50:17.055509",
+ "modified": "2019-08-13 19:30:01.151720",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

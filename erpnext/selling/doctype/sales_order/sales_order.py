@@ -568,7 +568,7 @@ def make_project(source_name, target_doc=None):
 	return doc
 
 @frappe.whitelist()
-def make_delivery_note(source_name, target_doc=None):
+def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 	def set_missing_values(source, target):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
@@ -593,22 +593,12 @@ def make_delivery_note(source_name, target_doc=None):
 				or item.get("buying_cost_center") \
 				or item_group.get("buying_cost_center")
 
-	target_doc = get_mapped_doc("Sales Order", source_name, {
+	mapper = {
 		"Sales Order": {
 			"doctype": "Delivery Note",
 			"validation": {
 				"docstatus": ["=", 1]
 			}
-		},
-		"Sales Order Item": {
-			"doctype": "Delivery Note Item",
-			"field_map": {
-				"rate": "rate",
-				"name": "so_detail",
-				"parent": "against_sales_order",
-			},
-			"postprocess": update_item,
-			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
@@ -618,7 +608,21 @@ def make_delivery_note(source_name, target_doc=None):
 			"doctype": "Sales Team",
 			"add_if_empty": True
 		}
-	}, target_doc, set_missing_values)
+	}
+
+	if not skip_item_mapping:
+		mapper["Sales Order Item"] = {
+			"doctype": "Delivery Note Item",
+			"field_map": {
+				"rate": "rate",
+				"name": "so_detail",
+				"parent": "against_sales_order",
+			},
+			"postprocess": update_item,
+			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
+		}
+
+	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
 
 	return target_doc
 
@@ -999,9 +1003,16 @@ def make_inter_company_purchase_order(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_pick_list(source_name, target_doc=None):
+	def update_item_quantity(source, target, source_parent):
+		target.qty = flt(source.qty) - flt(source.delivered_qty)
+		target.stock_qty = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.conversion_factor)
+
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Pick List",
+			"field_map": {
+				"doctype": "items_based_on"
+			},
 			"validation": {
 				"docstatus": ["=", 1]
 			}
@@ -1009,11 +1020,11 @@ def make_pick_list(source_name, target_doc=None):
 		"Sales Order Item": {
 			"doctype": "Pick List Reference Item",
 			"field_map": {
-				"item_code": "item",
-				"parenttype": "reference_doctype",
-				"parent": "reference_name",
-				"name": "reference_document_item"
+				"parent": "sales_order",
+				"name": "sales_order_item"
 			},
+			"postprocess": update_item_quantity,
+			"conditions": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 		},
 	}, target_doc)
 

@@ -22,7 +22,7 @@ sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
 purchase_doctypes = ['Material Request', 'Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 
 @frappe.whitelist()
-def get_item_details(args, doc=None):
+def get_item_details(args, doc=None, overwrite_warehouse=True):
 	"""
 		args = {
 			"item_code": "",
@@ -44,11 +44,15 @@ def get_item_details(args, doc=None):
 			"set_warehouse": ""
 		}
 	"""
+
 	args = process_args(args)
+	print('warehouse', args.warehouse, '========')
 	item = frappe.get_cached_doc("Item", args.item_code)
 	validate_item_details(args, item)
 
-	out = get_basic_details(args, item)
+	out = get_basic_details(args, item, overwrite_warehouse)
+
+	print('warehouse2', out.warehouse, '========')
 
 	get_item_tax_template(args, item, out)
 	out["item_tax_rate"] = get_item_tax_map(args.company, args.get("item_tax_template") if out.get("item_tax_template") is None \
@@ -178,7 +182,7 @@ def validate_item_details(args, item):
 			throw(_("Item {0} must be a Sub-contracted Item").format(item.name))
 
 
-def get_basic_details(args, item):
+def get_basic_details(args, item, overwrite_warehouse=True):
 	"""
 	:param args: {
 			"item_code": "",
@@ -225,14 +229,26 @@ def get_basic_details(args, item):
 	item_group_defaults = get_item_group_defaults(item.name, args.company)
 	brand_defaults = get_brand_defaults(item.name, args.company)
 
-	warehouse = (args.get("set_warehouse") or item_defaults.get("default_warehouse") or
-		item_group_defaults.get("default_warehouse") or brand_defaults.get("default_warehouse") or args.warehouse)
+	if overwrite_warehouse or not args.warehouse:
+		warehouse = (
+			args.get("set_warehouse") or
+			item_defaults.get("default_warehouse") or
+			item_group_defaults.get("default_warehouse") or
+			brand_defaults.get("default_warehouse") or
+			args.warehouse
+		)
 
-	if not warehouse:
-		defaults = frappe.defaults.get_defaults() or {}
-		if defaults.get("default_warehouse") and frappe.db.exists("Warehouse",
-			{'name': defaults.default_warehouse, 'company': args.company}):
-			warehouse = defaults.default_warehouse
+		if not warehouse:
+			defaults = frappe.defaults.get_defaults() or {}
+			warehouse_exists = frappe.db.exists("Warehouse", {
+				'name': defaults.default_warehouse,
+				'company': args.company
+			})
+			if defaults.get("default_warehouse") and warehouse_exists:
+				warehouse = defaults.default_warehouse
+
+	else:
+		warehouse = args.warehouse
 
 	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
@@ -784,6 +800,7 @@ def get_projected_qty(item_code, warehouse):
 
 @frappe.whitelist()
 def get_bin_details(item_code, warehouse):
+	print(item_code, warehouse, '---------------------------')
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 		["projected_qty", "actual_qty", "reserved_qty"], as_dict=True, cache=True) \
 			or {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
