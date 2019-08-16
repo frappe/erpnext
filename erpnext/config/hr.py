@@ -134,6 +134,12 @@ def get_data():
 					"name": "Employee Leave Balance",
 					"doctype": "Leave Application"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Leave Ledger Entry",
+					"doctype": "Leave Ledger Entry"
+				},
 			]
 		},
 		{
