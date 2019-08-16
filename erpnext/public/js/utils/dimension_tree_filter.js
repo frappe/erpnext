@@ -28,25 +28,27 @@ erpnext.doctypes_with_dimensions.forEach((doctype) => {
 						});
 					}
 
-					if (frappe.meta.has_field(doctype, dimension['fieldname'])) {
-						if (frm.is_new() && frappe.meta.has_field(doctype, 'company') && frm.doc.company) {
-							frm.set_value(dimension['fieldname'], erpnext.default_dimensions[frm.doc.company][dimension['document_type']]);
+					if (Object.keys(erpnext.default_dimensions).length > 0) {
+						if (frappe.meta.has_field(doctype, dimension['fieldname'])) {
+							if (frm.is_new() && frappe.meta.has_field(doctype, 'company') && frm.doc.company) {
+								frm.set_value(dimension['fieldname'], erpnext.default_dimensions[frm.doc.company][dimension['document_type']]);
+							}
 						}
-					}
 
-					if (frm.doc.items && frm.doc.items.length) {
-						frm.doc.items[0][dimension['fieldname']] = erpnext.default_dimensions[frm.doc.company][dimension['document_type']];
-					}
+						if (frm.doc.items && frm.doc.items.length) {
+							frm.doc.items[0][dimension['fieldname']] = erpnext.default_dimensions[frm.doc.company][dimension['document_type']];
+						}
 
-					if (frm.doc.accounts && frm.doc.accounts.length) {
-						frm.doc.accounts[0][dimension['fieldname']] = erpnext.default_dimensions[frm.doc.company][dimension['document_type']];
+						if (frm.doc.accounts && frm.doc.accounts.length) {
+							frm.doc.accounts[0][dimension['fieldname']] = erpnext.default_dimensions[frm.doc.company][dimension['document_type']];
+						}
 					}
 				});
 			});
 		},
 
 		company: function(frm) {
-			if(frm.doc.company) {
+			if(frm.doc.company && (Object.keys(erpnext.default_dimensions).length > 0)) {
 				erpnext.dimension_filters.forEach((dimension) => {
 					if (frappe.meta.has_field(doctype, dimension['fieldname'])) {
 						frm.set_value(dimension['fieldname'], erpnext.default_dimensions[frm.doc.company][dimension['document_type']]);
