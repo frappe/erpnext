@@ -17,6 +17,8 @@ from erpnext.accounts.party import get_party_account_currency
 from six import string_types
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
+	unlink_inter_company_doc
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -56,6 +58,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_bom_for_subcontracting_items()
 		self.create_raw_materials_supplied("supplied_items")
 		self.set_received_qty_for_drop_ship_items()
+		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_order_reference)
 
 	def validate_with_previous_doc(self):
 		super(PurchaseOrder, self).validate_with_previous_doc({
@@ -219,6 +222,7 @@ class PurchaseOrder(BuyingController):
 
 		self.update_blanket_order()
 
+		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
 
 	def on_cancel(self):
 		super(PurchaseOrder, self).on_cancel()
@@ -244,6 +248,7 @@ class PurchaseOrder(BuyingController):
 
 		self.update_blanket_order()
 
+		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
 
 	def on_update(self):
 		pass
@@ -364,7 +369,9 @@ def make_purchase_receipt(source_name, target_doc=None):
 			"field_map": {
 				"name": "purchase_order_item",
 				"parent": "purchase_order",
-				"bom": "bom"
+				"bom": "bom",
+				"material_request": "material_request",
+				"material_request_item": "material_request_item"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
@@ -398,7 +405,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 			or item.get("buying_cost_center")
 			or item_group.get("buying_cost_center"))
 
-	doc = get_mapped_doc("Purchase Order", source_name,	{
+	fields = {
 		"Purchase Order": {
 			"doctype": "Purchase Invoice",
 			"field_map": {
@@ -421,8 +428,16 @@ def make_purchase_invoice(source_name, target_doc=None):
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",
 			"add_if_empty": True
+		},
+	}
+
+	if frappe.get_single("Accounts Settings").automatically_fetch_payment_terms == 1:
+		fields["Payment Schedule"] = {
+			"doctype": "Payment Schedule",
+			"add_if_empty": True
 		}
-	}, target_doc, postprocess)
+
+	doc = get_mapped_doc("Purchase Order", source_name,	fields, target_doc, postprocess)
 
 	return doc
 
@@ -468,7 +483,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 							'from_warehouse': rm_item_data["warehouse"],
 							'stock_uom': rm_item_data["stock_uom"],
 							'main_item_code': rm_item_data["item_code"],
-							'allow_alternative_item': item_wh[rm_item_code].get('allow_alternative_item')
+							'allow_alternative_item': item_wh.get(rm_item_code, {}).get('allow_alternative_item')
 						}
 					}
 					stock_entry.add_to_stock_entry_detail(items_dict)
@@ -490,3 +505,8 @@ def update_status(status, name):
 	po = frappe.get_doc("Purchase Order", name)
 	po.update_status(status)
 	po.update_delivered_qty_in_sales_order()
+
+@frappe.whitelist()
+def make_inter_company_sales_order(source_name, target_doc=None):
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
+	return make_inter_company_transaction("Purchase Order", source_name, target_doc)

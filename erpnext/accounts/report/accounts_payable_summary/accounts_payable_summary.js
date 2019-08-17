@@ -45,6 +45,13 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			"reqd": 1
 		},
 		{
+			"fieldname":"range4",
+			"label": __("Ageing Range 4"),
+			"fieldtype": "Int",
+			"default": "120",
+			"reqd": 1
+		},
+		{
 			"fieldname":"finance_book",
 			"label": __("Finance Book"),
 			"fieldtype": "Link",
@@ -71,6 +78,12 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			"options": "Supplier"
 		},
 		{
+			"fieldname":"payment_terms_template",
+			"label": __("Payment Terms Template"),
+			"fieldtype": "Link",
+			"options": "Payment Terms Template"
+		},
+		{
 			"fieldname":"supplier_group",
 			"label": __("Supplier Group"),
 			"fieldtype": "Link",
@@ -85,3 +98,13 @@ frappe.query_reports["Accounts Payable Summary"] = {
 		});
 	}
 }
+
+erpnext.dimension_filters.forEach((dimension) => {
+	frappe.query_reports["Accounts Payable Summary"].filters.splice(9, 0 ,{
+		"fieldname": dimension["fieldname"],
+		"label": __(dimension["label"]),
+		"fieldtype": "Link",
+		"options": dimension["document_type"]
+	});
+});
+

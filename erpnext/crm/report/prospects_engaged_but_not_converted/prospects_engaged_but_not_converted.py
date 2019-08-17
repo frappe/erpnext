@@ -35,14 +35,14 @@ def get_data(filters):
 
 	for lead in frappe.get_all('Lead', fields = ['name', 'lead_name', 'company_name'], filters=lead_filters):
 		data = frappe.db.sql("""
-			select 
-				`tabCommunication`.reference_doctype, `tabCommunication`.reference_name, 
+			select
+				`tabCommunication`.reference_doctype, `tabCommunication`.reference_name,
 				`tabCommunication`.content, `tabCommunication`.communication_date
-			from 
+			from
 				(
-					(select name, lead from `tabOpportunity` where lead = %(lead)s)
-				union 
-					(select name, lead from `tabQuotation` where lead = %(lead)s)
+					(select name, party_name as lead from `tabOpportunity` where opportunity_from='Lead' and party_name = %(lead)s)
+				union
+					(select name, party_name as lead from `tabQuotation` where quotation_to = 'Lead' and party_name = %(lead)s)
 				union
 					(select name, lead from `tabIssue` where lead = %(lead)s and status!='Closed')
 				union

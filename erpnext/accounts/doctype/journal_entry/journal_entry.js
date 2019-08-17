@@ -25,13 +25,13 @@ frappe.ui.form.on("Journal Entry", {
 					"group_by_voucher": 0
 				};
 				frappe.set_route("query-report", "General Ledger");
-			}, "fa fa-table");
+			}, __('View'));
 		}
 
 		if(frm.doc.docstatus==1) {
 			frm.add_custom_button(__('Reverse Journal Entry'), function() {
 				return erpnext.journal_entry.reverse_journal_entry(frm);
-			});
+			}, __('Make'));
 		}
 
 		if (frm.doc.__islocal) {
@@ -47,8 +47,7 @@ frappe.ui.form.on("Journal Entry", {
 			frm.add_custom_button(__("Create Inter Company Journal Entry"),
 				function() {
 					frm.trigger("make_inter_company_journal_entry");
-				}
-			);
+				}, __('Make'));
 		}
 	},
 
@@ -224,11 +223,18 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 			if(in_list(["Sales Invoice", "Purchase Invoice"], jvd.reference_type)) {
 				out.filters.push([jvd.reference_type, "outstanding_amount", "!=", 0]);
-
+				// Filter by cost center
+				if(jvd.cost_center) {
+					out.filters.push([jvd.reference_type, "cost_center", "in", ["", jvd.cost_center]]);
+				}
 				// account filter
 				frappe.model.validate_missing(jvd, "account");
 				var party_account_field = jvd.reference_type==="Sales Invoice" ? "debit_to": "credit_to";
 				out.filters.push([jvd.reference_type, party_account_field, "=", jvd.account]);
+
+				if (in_list(['Debit Note', 'Credit Note'], doc.voucher_type)) {
+					out.filters.push([jvd.reference_type, "is_return", "=", 1]);
+				}
 			}
 
 			if(in_list(["Sales Order", "Purchase Order"], jvd.reference_type)) {
@@ -354,9 +360,7 @@ cur_frm.cscript.update_totals = function(doc) {
 
 cur_frm.cscript.get_balance = function(doc,dt,dn) {
 	cur_frm.cscript.update_totals(doc);
-	return $c_obj(cur_frm.doc, 'get_balance', '', function(r, rt){
-		cur_frm.refresh();
-	});
+	cur_frm.call('get_balance', null, () => { cur_frm.refresh(); });
 }
 
 cur_frm.cscript.validate = function(doc,cdt,cdn) {

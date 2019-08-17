@@ -9,27 +9,35 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Leave and Attendance'),
-				'items': ['Attendance', 'Attendance Request', 'Leave Application', 'Leave Allocation']
+				'items': ['Attendance', 'Attendance Request', 'Leave Application', 'Leave Allocation', 'Employee Checkin']
 			},
 			{
-				'label': _('Payroll'),
-				'items': ['Salary Structure Assignment', 'Salary Slip', 'Timesheet']
+				'label': _('Lifecycle'),
+				'items': ['Employee Transfer', 'Employee Promotion', 'Employee Separation']
+			},
+			{
+				'label': _('Shift'),
+				'items': ['Shift Request', 'Shift Assignment']
 			},
 			{
 				'label': _('Expense'),
-				'items': ['Expense Claim']
+				'items': ['Expense Claim', 'Travel Request']
+			},
+			{
+				'label': _('Benefit'),
+				'items': ['Employee Benefit Application', 'Employee Benefit Claim']
 			},
 			{
 				'label': _('Evaluation'),
 				'items': ['Appraisal']
 			},
 			{
-				'label': _('Training'),
-				'items': ['Training Event', 'Training Result']
+				'label': _('Payroll'),
+				'items': ['Salary Structure Assignment', 'Salary Slip', 'Additional Salary', 'Timesheet','Employee Incentive', 'Retention Bonus']
 			},
 			{
-				'label': _('Lifecycle'),
-				'items': ['Employee Transfer', 'Employee Promotion', 'Employee Separation']
-			}
+				'label': _('Training'),
+				'items': ['Training Event', 'Training Result', 'Training Feedback', 'Employee Skill Map']
+			},
 		]
 	}

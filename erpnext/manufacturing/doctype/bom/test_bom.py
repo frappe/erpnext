@@ -9,6 +9,7 @@ from frappe.utils import cstr
 from frappe.test_runner import make_test_records
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
+from six import string_types
 
 test_records = frappe.get_test_records('BOM')
 
@@ -63,16 +64,8 @@ class TestBOM(unittest.TestCase):
 			and item_code='_Test Item 2' and docstatus=1 and parenttype='BOM'""")
 		rm_rate = rm_rate[0][0] if rm_rate else 0
 
-		# update valuation rate of item '_Test Item 2'
-		warehouse_list = frappe.db.sql_list("""select warehouse from `tabBin`
-			where item_code='_Test Item 2' and actual_qty > 0""")
-
-		if not warehouse_list:
-			warehouse_list.append("_Test Warehouse - _TC")
-
-		for warehouse in warehouse_list:
-			create_stock_reconciliation(item_code="_Test Item 2", warehouse=warehouse,
-				qty=200, rate=rm_rate + 10)
+		# Reset item valuation rate
+		reset_item_valuation_rate(item_code='_Test Item 2', qty=200, rate=rm_rate + 10)
 
 		# update cost of all BOMs based on latest valuation rate
 		update_cost()
@@ -96,8 +89,8 @@ class TestBOM(unittest.TestCase):
 		self.assertEqual(bom.base_raw_material_cost, 480000)
 		self.assertEqual(bom.base_total_cost, 486000)
 
-	def test_bom_cost_multi_uom_multi_currency(self):
-		frappe.db.set_value("Price List", "_Test Price List", "price_not_uom_dependant", 1)
+	def test_bom_cost_multi_uom_multi_currency_based_on_price_list(self):
+		frappe.db.set_value("Price List", "_Test Price List", "price_not_uom_dependent", 1)
 		for item_code, rate in (("_Test Item", 3600), ("_Test Item Home Desktop Manufactured", 3000)):
 			frappe.db.sql("delete from `tabItem Price` where price_list='_Test Price List' and item_code=%s",
 				item_code)
@@ -131,5 +124,35 @@ class TestBOM(unittest.TestCase):
 		self.assertEqual(bom.base_raw_material_cost, 27000)
 		self.assertEqual(bom.base_total_cost, 33000)
 
+	def test_bom_cost_multi_uom_based_on_valuation_rate(self):
+		bom = frappe.copy_doc(test_records[2])
+		bom.set_rate_of_sub_assembly_item_based_on_bom = 0
+		bom.rm_cost_as_per = "Valuation Rate"
+		bom.items[0].uom = "_Test UOM 1"
+		bom.items[0].conversion_factor = 6
+		bom.insert()
+
+		reset_item_valuation_rate(item_code='_Test Item', qty=200, rate=200)
+
+		bom.update_cost()
+
+		self.assertEqual(bom.items[0].rate, 20)
+
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
+
+def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=None):
+	if warehouse_list and isinstance(warehouse_list, string_types):
+		warehouse_list = [warehouse_list]
+
+	if not warehouse_list:
+		warehouse_list = frappe.db.sql_list("""
+			select warehouse from `tabBin`
+			where item_code=%s and actual_qty > 0
+		""", item_code)
+
+		if not warehouse_list:
+			warehouse_list.append("_Test Warehouse - _TC")
+
+	for warehouse in warehouse_list:
+		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=qty, rate=rate)

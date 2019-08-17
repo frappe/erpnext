@@ -12,6 +12,16 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 class PayrollEntry(Document):
+	def onload(self):
+		if not self.docstatus==1:
+			return
+
+		# check if salary slips were manually submitted
+		entries = frappe.db.count("Salary Slip", {'payroll_entry': self.name, 'docstatus': 1}, ['name'])
+		if cint(entries) == len(self.employees) and not self.salary_slips_submitted:
+			self.db_set("salary_slips_submitted", 1)
+			self.reload()
+
 	def on_submit(self):
 		self.create_salary_slips()
 
@@ -119,6 +129,8 @@ class PayrollEntry(Document):
 				frappe.enqueue(create_salary_slips_for_employees, timeout=600, employees=emp_list, args=args)
 			else:
 				create_salary_slips_for_employees(emp_list, args, publish_progress=False)
+				# since this method is called via frm.call this doc needs to be updated manually
+				self.reload()
 
 	def get_sal_slip_list(self, ss_status, as_dict=False):
 		"""
@@ -543,14 +555,15 @@ def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progr
 
 		payroll_entry.email_salary_slip(submitted_ss)
 
-	payroll_entry.db_set("salary_slips_submitted", 1)
-	payroll_entry.notify_update()
+		payroll_entry.db_set("salary_slips_submitted", 1)
+		payroll_entry.notify_update()
 
 	if not submitted_ss and not not_submitted_ss:
 		frappe.msgprint(_("No salary slip found to submit for the above selected criteria OR salary slip already submitted"))
 
 	if not_submitted_ss:
 		frappe.msgprint(_("Could not submit some Salary Slips"))
+
 def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
 		select name from `tabPayroll Entry`

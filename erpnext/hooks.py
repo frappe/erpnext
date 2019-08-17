@@ -10,11 +10,10 @@ app_color = "#e74c3c"
 app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
+app_logo_url = '/assets/erpnext/images/erp-icon.svg'
 
 
 develop_version = '12.x.x-develop'
-
-error_report_email = "support@erpnext.com"
 
 app_include_js = "assets/js/erpnext.min.js"
 app_include_css = "assets/css/erpnext.css"
@@ -24,7 +23,8 @@ web_include_css = "assets/css/erpnext-web.css"
 doctype_js = {
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
-	"Website Theme": "public/js/website_theme.js"
+	"Website Theme": "public/js/website_theme.js",
+	"Newsletter": "public/js/newsletter.js"
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"
@@ -46,10 +46,10 @@ update_and_get_user_progress = "erpnext.utilities.user_progress_utils.update_def
 on_session_creation = "erpnext.shopping_cart.utils.set_cart_count"
 on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
 
-treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', 'Assessment Group']
+treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', 'Assessment Group', 'Department']
 
 # website
-update_website_context = "erpnext.shopping_cart.utils.update_website_context"
+update_website_context = ["erpnext.shopping_cart.utils.update_website_context", "erpnext.education.doctype.education_settings.education_settings.update_website_context"]
 my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
 
 email_append_to = ["Job Applicant", "Lead", "Opportunity", "Issue"]
@@ -169,9 +169,10 @@ default_roles = [
 	{'role': 'Student', 'doctype':'Student', 'email_field': 'student_email_id'},
 ]
 
-role_home_page = {
-	"LMS User": "/lms"
-}
+sounds = [
+	{"name": "incoming-call", "src": "/assets/erpnext/sounds/incoming-call.mp3", "volume": 0.2},
+	{"name": "call-disconnect", "src": "/assets/erpnext/sounds/call-disconnect.mp3", "volume": 0.2},
+]
 
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
@@ -232,6 +233,9 @@ doc_events = {
 	},
 	"Contact":{
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue"
+	},
+	"Email Unsubscribe": {
+		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
 	}
 }
 
@@ -244,8 +248,11 @@ scheduler_events = {
 		"erpnext.accounts.doctype.subscription.subscription.process_all",
 		"erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_settings.schedule_get_order_details",
 		"erpnext.accounts.doctype.gl_entry.gl_entry.rename_gle_sle_docs",
+		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
 		"erpnext.projects.doctype.project.project.hourly_reminder",
-		"erpnext.projects.doctype.project.project.collect_project_status"
+		"erpnext.projects.doctype.project.project.collect_project_status",
+		"erpnext.hr.doctype.shift_type.shift_type.process_auto_attendance_for_all_shifts",
+		"erpnext.support.doctype.issue.issue.set_service_level_agreement_variance",
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
@@ -267,12 +274,14 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.update_project_sales_billing",
 		"erpnext.projects.doctype.project.project.send_project_status_email_to_users",
 		"erpnext.quality_management.doctype.quality_review.quality_review.review",
-		"erpnext.support.doctype.service_level_agreement.service_level_agreement.check_agreement_status"
+		"erpnext.support.doctype.service_level_agreement.service_level_agreement.check_agreement_status",
+		"erpnext.crm.doctype.email_campaign.email_campaign.send_email_to_leads_or_contacts",
+		"erpnext.crm.doctype.email_campaign.email_campaign.set_email_campaign_status"
 	],
 	"daily_long": [
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"
 	],
-	"monthly": [
+	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.convert_deferred_revenue_to_income",
 		"erpnext.accounts.deferred_revenue.convert_deferred_expense_to_expense",
 		"erpnext.hr.utils.allocate_earned_leaves"

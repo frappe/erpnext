@@ -19,34 +19,28 @@ frappe.ui.form.on("Task", {
 	},
 
 	refresh: function(frm) {
-		frm.fields_dict['parent_task'].get_query = function() {
+		frm.fields_dict['parent_task'].get_query = function () {
 			return {
 				filters: {
 					"is_group": 1,
 				}
 			}
 		}
-		if(!frm.is_group){
-			var doc = frm.doc;
-			if(doc.__islocal) {
-				if(!frm.doc.exp_end_date) {
-					frm.set_value("exp_end_date", frappe.datetime.add_days(new Date(), 7));
-				}
-			}
 
-			if(!doc.__islocal) {
-				if(frm.perm[0].write) {
-					if(frm.doc.status!=="Completed" && frm.doc.status!=="Cancelled") {
-						frm.add_custom_button(__("Completed"), function() {
-							frm.set_value("status", "Completed");
-							frm.save();
-						});
-					} else {
-						frm.add_custom_button(__("Reopen"), function() {
-							frm.set_value("status", "Open");
-							frm.save();
-						});
-					}
+		if (!frm.doc.is_group) {
+			if (!frm.is_new()) {
+				if (frappe.model.can_read("Timesheet")) {
+					frm.add_custom_button(__("Timesheet"), () => {
+						frappe.route_options = { "project": frm.doc.project, "task": frm.doc.name }
+						frappe.set_route("List", "Timesheet");
+					}, __("View"), true);
+				}
+
+				if (frappe.model.can_read("Expense Claim")) {
+					frm.add_custom_button(__("Expense Claims"), () => {
+						frappe.route_options = { "project": frm.doc.project, "task": frm.doc.name };
+						frappe.set_route("List", "Expense Claim");
+					}, __("View"), true);
 				}
 			}
 		}
@@ -58,13 +52,6 @@ frappe.ui.form.on("Task", {
 				query: "erpnext.projects.doctype.task.task.get_project"
 			}
 		};
-	},
-
-	project: function(frm) {
-		if(frm.doc.project) {
-			return get_server_fields('get_project_details', '','', frm.doc, frm.doc.doctype,
-				frm.doc.name, 1);
-		}
 	},
 
 	is_group: function (frm) {

@@ -20,11 +20,13 @@ test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Templ
 test_ignore = ["Serial No"]
 
 class TestPurchaseInvoice(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		unlink_payment_on_cancel_of_invoice()
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 
-	def tearDown(self):
+	@classmethod
+	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
 
 	def test_gl_entries_without_perpetual_inventory(self):
@@ -91,6 +93,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi_doc = frappe.get_doc('Purchase Invoice', pi_doc.name)
 
 		self.assertRaises(frappe.LinkExistsError, pi_doc.cancel)
+		unlink_payment_on_cancel_of_invoice()
 
 	def test_purchase_invoice_for_blocked_supplier(self):
 		supplier = frappe.get_doc('Supplier', '_Test Supplier')
@@ -402,9 +405,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi.save()
 		pi.submit()
-		self.assertEqual(pi.payment_schedule[0].payment_amount, 756.15)
+		self.assertEqual(pi.payment_schedule[0].payment_amount, 606.15)
 		self.assertEqual(pi.payment_schedule[0].due_date, pi.posting_date)
-		self.assertEqual(pi.payment_schedule[1].payment_amount, 756.15)
+		self.assertEqual(pi.payment_schedule[1].payment_amount, 606.15)
 		self.assertEqual(pi.payment_schedule[1].due_date, add_days(pi.posting_date, 30))
 
 		pi.load_from_db()

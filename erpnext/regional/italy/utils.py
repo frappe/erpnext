@@ -75,12 +75,12 @@ def prepare_invoice(invoice, progressive_number):
 	invoice.tax_data = tax_data
 
 	#Check if stamp duty (Bollo) of 2 EUR exists.
-	stamp_duty_charge_row = next((tax for tax in invoice.taxes if tax.charge_type == _("Actual") and tax.tax_amount == 2.0 ), None)
+	stamp_duty_charge_row = next((tax for tax in invoice.taxes if tax.charge_type == "Actual" and tax.tax_amount == 2.0 ), None)
 	if stamp_duty_charge_row:
 		invoice.stamp_duty = stamp_duty_charge_row.tax_amount
 
 	for item in invoice.e_invoice_items:
-		if item.tax_rate == 0.0 and item.tax_amount == 0.0:
+		if item.tax_rate == 0.0 and item.tax_amount == 0.0 and tax_data.get("0.0"):
 			item.tax_exemption_reason = tax_data["0.0"]["tax_exemption_reason"]
 
 	customer_po_data = {}
@@ -222,7 +222,7 @@ def sales_invoice_validate(doc):
 	#Validate customer details
 	customer = frappe.get_doc("Customer", doc.customer)
 
-	if customer.customer_type == _("Individual"):
+	if customer.customer_type == "Individual":
 		doc.customer_fiscal_code = customer.fiscal_code
 		if not doc.customer_fiscal_code:
 			frappe.throw(_("Please set Fiscal Code for the customer '%s'" % doc.customer), title=_("E-Invoicing Information Missing"))
@@ -292,7 +292,7 @@ def prepare_and_attach_invoice(doc, replace=False):
 		"content": invoice_xml
 	})
 	_file.save()
-	return file
+	return _file
 
 @frappe.whitelist()
 def generate_single_invoice(docname):
@@ -326,6 +326,9 @@ def get_company_country(company):
 	return frappe.get_cached_value('Company', company, 'country')
 
 def get_e_invoice_attachments(invoice):
+	if not invoice.company_tax_id:
+		return []
+
 	out = []
 	attachments = get_attachments(invoice.doctype, invoice.name)
 	company_tax_id = invoice.company_tax_id if invoice.company_tax_id.startswith("IT") else "IT" + invoice.company_tax_id

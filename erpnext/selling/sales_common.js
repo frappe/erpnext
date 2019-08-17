@@ -59,6 +59,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
+		if(this.frm.fields_dict.tc_name) {
+			this.frm.set_query("tc_name", function() {
+				return { filters: { selling: 1 } };
+			});
+		}
+
 		if(!this.frm.fields_dict["items"]) {
 			return;
 		}
@@ -145,6 +151,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	discount_amount: function(doc, cdt, cdn) {
+
+		if(doc.name === cdn) {
+			return;
+		}
+
+		var item = frappe.get_doc(cdt, cdn);
+		item.discount_percentage = 0.0;
 		this.apply_discount_on_item(doc, cdt, cdn, 'discount_amount');
 	},
 
@@ -227,6 +240,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					},
 					callback:function(r){
 						if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+
+							if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
+
 							me.set_batch_number(cdt, cdn);
 							me.batch_no(doc, cdt, cdn);
 						}
@@ -370,13 +386,18 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	    this._super(doc, cdt, cdn, dont_fetch_price_list_rate);
 		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn) &&
 			in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-			this.set_batch_number(cdt, cdn);
-		}
+				if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
+				this.set_batch_number(cdt, cdn);
+			}
 	},
 
 	qty: function(doc, cdt, cdn) {
 		this._super(doc, cdt, cdn);
-		this.set_batch_number(cdt, cdn);
+
+		if(in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+			if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
+			this.set_batch_number(cdt, cdn);
+		}
 	},
 
 	/* Determine appropriate batch number and set it in the form.
@@ -407,7 +428,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	update_auto_repeat_reference: function(doc) {
 		if (doc.auto_repeat) {
 			frappe.call({
-				method:"frappe.desk.doctype.auto_repeat.auto_repeat.update_reference",
+				method:"frappe.automation.doctype.auto_repeat.auto_repeat.update_reference",
 				args:{
 					docname: doc.auto_repeat,
 					reference:doc.name

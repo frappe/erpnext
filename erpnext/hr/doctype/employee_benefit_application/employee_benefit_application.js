@@ -2,15 +2,8 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Employee Benefit Application', {
-	setup: function(frm) {
-		frm.set_query("earning_component", "employee_benefits", function() {
-			return {
-				query : "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_earning_components",
-				filters: {date: frm.doc.date, employee: frm.doc.employee}
-			};
-		});
-	},
 	employee: function(frm) {
+		frm.trigger('set_earning_component');
 		var method, args;
 		if(frm.doc.employee && frm.doc.date && frm.doc.payroll_period){
 			method = "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_max_benefits_remaining";
@@ -30,6 +23,21 @@ frappe.ui.form.on('Employee Benefit Application', {
 			get_max_benefits(frm, method, args);
 		}
 	},
+
+	date: function(frm) {
+		frm.trigger('set_earning_component');
+	},
+
+	set_earning_component: function(frm) {
+		if(!frm.doc.employee && !frm.doc.date) return;
+		frm.set_query("earning_component", "employee_benefits", function() {
+			return {
+				query : "erpnext.hr.doctype.employee_benefit_application.employee_benefit_application.get_earning_components",
+				filters: {date: frm.doc.date, employee: frm.doc.employee}
+			};
+		});
+	},
+
 	payroll_period: function(frm) {
 		var method, args;
 		if(frm.doc.employee && frm.doc.date && frm.doc.payroll_period){

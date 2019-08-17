@@ -233,6 +233,8 @@ def update_completed_and_requested_qty(stock_entry, method):
 				mr_obj.update_requested_qty(mr_item_rows)
 
 def set_missing_values(source, target_doc):
+	if target_doc.doctype == "Purchase Order" and getdate(target_doc.schedule_date) <  getdate(nowdate()):
+		target_doc.schedule_date = None
 	target_doc.run_method("set_missing_values")
 	target_doc.run_method("calculate_taxes_and_totals")
 
@@ -240,6 +242,8 @@ def update_item(obj, target, source_parent):
 	target.conversion_factor = obj.conversion_factor
 	target.qty = flt(flt(obj.stock_qty) - flt(obj.ordered_qty))/ target.conversion_factor
 	target.stock_qty = (target.qty * target.conversion_factor)
+	if getdate(target.schedule_date) < getdate(nowdate()):
+		target.schedule_date = None
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -336,7 +340,8 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 
 	def postprocess(source, target_doc):
 		target_doc.supplier = source_name
-		target_doc.schedule_date = add_days(nowdate(), 1)
+		if getdate(target_doc.schedule_date) < getdate(nowdate()):
+			target_doc.schedule_date = None
 		target_doc.set("items", [d for d in target_doc.get("items")
 			if d.get("item_code") in supplier_items and d.get("qty") > 0])
 
@@ -365,19 +370,20 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 def get_material_requests_based_on_supplier(supplier):
 	supplier_items = [d.parent for d in frappe.db.get_all("Item Default",
 		{"default_supplier": supplier}, 'parent')]
-	if supplier_items:
-		material_requests = frappe.db.sql_list("""select distinct mr.name
-			from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
-			where mr.name = mr_item.parent
-				and mr_item.item_code in (%s)
-				and mr.material_request_type = 'Purchase'
-				and mr.per_ordered < 99.99
-				and mr.docstatus = 1
-				and mr.status != 'Stopped'
-			order by mr_item.item_code ASC""" % ', '.join(['%s']*len(supplier_items)),
-			tuple(supplier_items))
-	else:
-		material_requests = []
+	if not supplier_items:
+		frappe.throw(_("{0} is not the default supplier for any items.".format(supplier)))
+
+	material_requests = frappe.db.sql_list("""select distinct mr.name
+		from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
+		where mr.name = mr_item.parent
+			and mr_item.item_code in (%s)
+			and mr.material_request_type = 'Purchase'
+			and mr.per_ordered < 99.99
+			and mr.docstatus = 1
+			and mr.status != 'Stopped'
+		order by mr_item.item_code ASC""" % ', '.join(['%s']*len(supplier_items)),
+		tuple(supplier_items))
+
 	return material_requests, supplier_items
 
 @frappe.whitelist()
@@ -444,7 +450,7 @@ def make_stock_entry(source_name, target_doc=None):
 			"field_map": {
 				"name": "material_request_item",
 				"parent": "material_request",
-				"uom": "stock_uom",
+				"uom": "stock_uom"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.ordered_qty < doc.stock_qty

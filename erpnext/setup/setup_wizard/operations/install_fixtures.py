@@ -173,6 +173,11 @@ def install(country=None):
 			{"attribute_value": _("White"), "abbr": "WHI"}
 		]},
 
+		# Issue Priority
+		{'doctype': 'Issue Priority', 'name': _('Low')},
+		{'doctype': 'Issue Priority', 'name': _('Medium')},
+		{'doctype': 'Issue Priority', 'name': _('High')},
+
 		#Job Applicant Source
 		{'doctype': 'Job Applicant Source', 'source_name': _('Website Listing')},
 		{'doctype': 'Job Applicant Source', 'source_name': _('Walk In')},
@@ -363,7 +368,12 @@ def add_sale_stages():
 def install_company(args):
 	records = [
 		# Fiscal Year
-		{ "doctype": "Fiscal Year", 'year': get_fy_details(args.fy_start_date, args.fy_end_date), 'year_start_date': args.fy_start_date, 'year_end_date': args.fy_end_date },
+		{
+			'doctype': "Fiscal Year",
+			'year': get_fy_details(args.fy_start_date, args.fy_end_date),
+			'year_start_date': args.fy_start_date,
+			'year_end_date': args.fy_end_date
+		},
 
 		# Company
 		{

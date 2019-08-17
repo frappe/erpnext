@@ -92,7 +92,13 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			$.each(this.frm.doc["items"] || [], function(i, item) {
 				frappe.model.round_floats_in(item);
 				item.net_rate = item.rate;
-				item.amount = flt(item.rate * item.qty, precision("amount", item));
+
+				if ((!item.qty) && me.frm.doc.is_return) {
+					item.amount = flt(item.rate * -1, precision("amount", item));
+				} else {
+					item.amount = flt(item.rate * item.qty, precision("amount", item));
+				}
+
 				item.net_amount = item.amount;
 				item.item_tax_amount = 0.0;
 				item.total_weight = flt(item.weight_per_unit * item.stock_qty);
@@ -515,7 +521,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					net_total += item.net_amount;
 
 					// discount amount rounding loss adjustment if no taxes
-					if ((!(me.frm.doc.taxes || []).length || (me.frm.doc.apply_discount_on == "Net Total"))
+					if ((!(me.frm.doc.taxes || []).length || total_for_discount_amount==me.frm.doc.net_total || (me.frm.doc.apply_discount_on == "Net Total"))
 							&& i == (me.frm.doc.items || []).length - 1) {
 						var discount_amount_loss = flt(me.frm.doc.net_total - net_total
 							- me.frm.doc.discount_amount, precision("net_total"));

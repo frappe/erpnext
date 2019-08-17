@@ -11,6 +11,8 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make
 from erpnext.stock.doctype.item.test_item import make_item
 import json
 
+test_dependencies = ["Territory", "Customer Group", "Supplier Group", "Item"]
+
 class TestGSTR3BReport(unittest.TestCase):
 	def test_gstr_3b_report(self):
 
@@ -174,6 +176,9 @@ def create_purchase_invoices():
 			do_not_save=1
 		)
 
+	pi1.shipping_address = "_Test Supplier GST-1-Billing"
+	pi1.save()
+
 	pi1.submit()
 
 def make_suppliers():
@@ -216,6 +221,7 @@ def make_suppliers():
 			"link_name": "_Test Registered Supplier"
 		})
 
+		address.is_shipping_address = 1
 		address.save()
 
 	if not frappe.db.exists('Address', '_Test Supplier GST-2-Billing'):
@@ -388,5 +394,3 @@ def set_account_heads():
 		})
 
 		gst_settings.save()
-
-

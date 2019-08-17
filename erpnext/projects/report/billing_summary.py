@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import time_diff_in_hours
+from frappe.utils import time_diff_in_hours, flt
 
 def get_columns():
 	return [
@@ -31,90 +31,74 @@ def get_columns():
 			"width": 150
 		},
 		{
-			"label": _("Billable Hours"),
-			"fieldtype": "Float",
-			"fieldname": "total_billable_hours",
-			"width": 50
-		},
-		{
 			"label": _("Working Hours"),
 			"fieldtype": "Float",
 			"fieldname": "total_hours",
-			"width": 50
+			"width": 150
 		},
 		{
-			"label": _("Amount"),
+			"label": _("Billable Hours"),
+			"fieldtype": "Float",
+			"fieldname": "total_billable_hours",
+			"width": 150
+		},
+		{
+			"label": _("Billing Amount"),
 			"fieldtype": "Currency",
 			"fieldname": "amount",
-			"width": 100
+			"width": 150
 		}
 	]
 
 def get_data(filters):
 	data = []
-	record = get_records(filters)
+	if(filters.from_date > filters.to_date):
+		frappe.msgprint(_(" From Date can not be greater than To Date"))
+		return data
 
-	billable_hours_worked = 0
-	hours_worked = 0
-	working_cost = 0
-	for entries in record:
+	timesheets = get_timesheets(filters)
+
+	filters.from_date = frappe.utils.get_datetime(filters.from_date)
+	filters.to_date = frappe.utils.add_to_date(frappe.utils.get_datetime(filters.to_date), days=1, seconds=-1)
+
+	timesheet_details = get_timesheet_details(filters, timesheets.keys())
+
+	for ts, ts_details in timesheet_details.items():
 		total_hours = 0
-		total_billable_hours = 0
+		total_billing_hours = 0
 		total_amount = 0
-		entries_exists = False
-		timesheet_details = get_timesheet_details(filters, entries.name)
-		for activity in timesheet_details:
-			entries_exists = True
-			time_start = activity.from_time
-			time_end = frappe.utils.add_to_date(activity.from_time, hours=activity.hours)
-			from_date = frappe.utils.get_datetime(filters.from_date)
-			to_date = frappe.utils.get_datetime(filters.to_date)
 
-			if time_start <= from_date and time_end >= from_date:
-				total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(activity,
-					time_end, from_date, total_hours, total_billable_hours, total_amount)
+		for row in ts_details:
+			from_time, to_time = filters.from_date, filters.to_date
 
-				billable_hours_worked += total_billable_hours
-				hours_worked += total_hours
-				working_cost += total_amount
-			elif time_start >= from_date and time_end >= to_date:
-				total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(activity,
-					to_date, time_start, total_hours, total_billable_hours, total_amount)
+			if row.to_time < from_time or row.from_time > to_time:
+				continue
 
-				billable_hours_worked += total_billable_hours
-				hours_worked += total_hours
-				working_cost += total_amount
-			elif time_start >= from_date and time_end <= to_date:
-				total_hours, total_billable_hours, total_amount = get_billable_and_total_hours(activity,
-					time_end, time_start, total_hours, total_billable_hours, total_amount)
+			if row.from_time > from_time:
+				from_time = row.from_time
 
-				billable_hours_worked += total_billable_hours
-				hours_worked += total_hours
-				working_cost += total_amount
+			if row.to_time < to_time:
+				to_time = row.to_time
 
-		row = {
-			"employee": entries.employee,
-			"employee_name": entries.employee_name,
-			"timesheet": entries.name,
-			"total_billable_hours": total_billable_hours,
-			"total_hours": total_hours,
-			"amount": total_amount
-		}
+			activity_duration, billing_duration = get_billable_and_total_duration(row, from_time, to_time)
 
-		if entries_exists:
-			data.append(row)
-			entries_exists = False
+			total_hours += activity_duration
+			total_billing_hours += billing_duration
+			total_amount += billing_duration * flt(row.billing_rate)
 
-	total = {
-		"total_billable_hours": billable_hours_worked,
-		"total_hours": hours_worked,
-		"amount": working_cost
-	}
-	if billable_hours_worked !=0 or hours_worked !=0 or working_cost !=0:
-		data.append(total)
+		if total_hours:
+			data.append({
+				"employee": timesheets.get(ts).employee,
+				"employee_name": timesheets.get(ts).employee_name,
+				"timesheet": ts,
+				"total_billable_hours": total_billing_hours,
+				"total_hours": total_hours,
+				"amount": total_amount
+			})
+
 	return data
 
-def get_records(filters):
+def get_timesheets(filters):
 	record_filters = [
 			["start_date", "<=", filters.to_date],
 			["end_date", ">=", filters.from_date],
@@ -124,23 +108,39 @@ def get_records(filters):
 	if "employee" in filters:
 		record_filters.append(["employee", "=", filters.employee])
 
-	return frappe.get_all("Timesheet", filters=record_filters, fields=[" * "] )
+	timesheets = frappe.get_all("Timesheet", filters=record_filters, fields=["employee", "employee_name", "name"])
+	timesheet_map = frappe._dict()
+	for d in timesheets:
+		timesheet_map.setdefault(d.name, d)
 
-def get_billable_and_total_hours(activity, end, start, total_hours, total_billable_hours, total_amount):
-	total_hours += abs(time_diff_in_hours(end, start))
-	if activity.billable:
-		total_billable_hours += abs(time_diff_in_hours(end, start))
-		total_amount += total_billable_hours * activity.billing_rate
-	return total_hours, total_billable_hours, total_amount
+	return timesheet_map
 
-def get_timesheet_details(filters, parent):
-	timesheet_details_filter = {"parent": parent}
+def get_timesheet_details(filters, timesheet_list):
+	timesheet_details_filter = {
+		"parent": ["in", timesheet_list]
+	}
 
 	if "project" in filters:
 		timesheet_details_filter["project"] = filters.project
 
-	return frappe.get_all(
+	timesheet_details = frappe.get_all(
 		"Timesheet Detail",
 		filters = timesheet_details_filter,
-		fields=["*"]
-		)
+		fields=["from_time", "to_time", "hours", "billable", "billing_hours", "billing_rate", "parent"]
+	)
+
+	timesheet_details_map = frappe._dict()
+	for d in timesheet_details:
+		timesheet_details_map.setdefault(d.parent, []).append(d)
+
+	return timesheet_details_map
+
+def get_billable_and_total_duration(activity, start_time, end_time):
+	activity_duration = time_diff_in_hours(end_time, start_time)
+	billing_duration = 0.0
+	if activity.billable:
+		billing_duration = activity.billing_hours
+		if activity_duration != activity.billing_hours:
+			billing_duration = activity_duration * activity.billing_hours / activity.hours
+
+	return flt(activity_duration, 2), flt(billing_duration, 2)

@@ -62,13 +62,16 @@ class ItemVariantsCacheManager:
 
 		item_variants_data = frappe.db.get_all('Item Variant Attribute',
 			{'variant_of': parent_item_code}, ['parent', 'attribute', 'attribute_value'],
-			order_by='parent',
+			order_by='name',
 			as_list=1
 		)
+
+		disabled_items = set([i.name for i in frappe.db.get_all('Item', {'disabled': 1})])
 
 		attribute_value_item_map = frappe._dict({})
 		item_attribute_value_map = frappe._dict({})
 
+		item_variants_data = [r for r in item_variants_data if r[0] not in disabled_items]
 		for row in item_variants_data:
 			item_code, attribute, attribute_value = row
 			# (attr, value) => [item1, item2]
@@ -93,10 +96,13 @@ class ItemVariantsCacheManager:
 		for key in keys:
 			frappe.cache().hdel(key, self.item_code)
 
+	def rebuild_cache(self):
+		self.clear_cache()
+		enqueue_build_cache(self.item_code)
+
 
 def build_cache(item_code):
 	frappe.cache().hset('item_cache_build_in_progress', item_code, 1)
-	print('ItemVariantsCacheManager: Building cache for', item_code)
 	i = ItemVariantsCacheManager(item_code)
 	i.build_cache()
 	frappe.cache().hset('item_cache_build_in_progress', item_code, 0)
@@ -104,4 +110,4 @@ def build_cache(item_code):
 def enqueue_build_cache(item_code):
 	if frappe.cache().hget('item_cache_build_in_progress', item_code):
 		return
-	frappe.enqueue(build_cache, item_code=item_code, queue='short')
+	frappe.enqueue(build_cache, item_code=item_code, queue='long')
