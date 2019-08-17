@@ -7,5 +7,4 @@ import frappe
 from frappe.model.document import Document
 
 class AssetMaintenanceTask(Document):
-	def autoname(self):
-		self.name = self.maintenance_task
+	pass
