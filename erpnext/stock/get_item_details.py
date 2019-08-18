@@ -639,8 +639,7 @@ def get_item_price(args, item_code, ignore_party=False):
 	args['item_code'] = item_code
 
 	conditions = """where item_code=%(item_code)s
-		and price_list=%(price_list)s
-		and ifnull(uom, '') in ('', %(uom)s)"""
+		and price_list=%(price_list)s"""
 
 	if not ignore_party:
 		if args.get("customer"):
@@ -657,9 +656,29 @@ def get_item_price(args, item_code, ignore_party=False):
 		conditions += """ and %(transaction_date)s between
 			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
 
-	return frappe.db.sql(""" select name, price_list_rate, uom
+	out = frappe.db.sql(""" select name, price_list_rate, uom, ifnull(valid_from, '2000-01-01') as valid_from
 		from `tabItem Price` {conditions}
-		order by uom desc, min_qty desc """.format(conditions=conditions), args)
+		order by uom desc, min_qty desc """.format(conditions=conditions), args, as_list=1)
+
+	matches_uom = filter(lambda d: cstr(d[2]) == cstr(args.get('uom')), out)
+	if matches_uom:
+		return matches_uom
+
+	has_uom = filter(lambda d: d[2], out)
+	if has_uom:
+		# there are item prices with uom other than the current uom
+
+		item = frappe.get_cached_doc("Item", item_code)
+		uom_conversion_factor = dict([(d.uom, d.conversion_factor) for d in item.uoms])
+
+		has_uom_with_conversion_factor = [d for d in has_uom if d[2] in uom_conversion_factor]
+		for d in has_uom_with_conversion_factor:
+			d[1] /= uom_conversion_factor.get(d[2])
+
+		if has_uom_with_conversion_factor:
+			return has_uom_with_conversion_factor
+
+	return out
 
 def get_price_list_rate_for(args, item_code):
 	"""
