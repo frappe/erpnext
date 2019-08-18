@@ -233,8 +233,8 @@ def get_basic_details(args, item):
 
 	warehouse = args.get("set_warehouse") or user_default_warehouse\
 		or order_type_defaults.get("default_warehouse") or item_defaults.get("default_warehouse")\
-		or item_group_defaults.get("default_warehouse")\
-		or brand_defaults.get("default_warehouse") or args.warehouse
+		or brand_defaults.get("default_warehouse")\
+		or item_group_defaults.get("default_warehouse") or args.warehouse
 
 	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
@@ -417,8 +417,8 @@ def calculate_service_end_date(args, item=None):
 def get_default_income_account(args, item, item_group, brand, order_type):
 	account = order_type.get("income_account")\
 		or item.get("income_account")\
-		or item_group.get("income_account")\
 		or brand.get("income_account")\
+		or item_group.get("income_account")
 
 	if not account and args.company:
 		account = frappe.get_cached_value("Company", args.company, "default_income_account")
@@ -428,8 +428,8 @@ def get_default_income_account(args, item, item_group, brand, order_type):
 def get_default_expense_account(args, item, item_group, brand, order_type):
 	account = order_type.get("expense_account")\
 		or item.get("expense_account")\
-		or item_group.get("expense_account")\
-		or brand.get("expense_account")
+		or brand.get("expense_account")\
+		or item_group.get("expense_account")
 
 	if not account and args.company:
 		account = frappe.get_cached_value("Company", args.company, "default_expense_account")
@@ -455,10 +455,10 @@ def get_default_cost_center(args, item, item_group, brand, order_type=None, comp
 	if not cost_center:
 		if args.get('doctype') in sales_doctypes or args.get('customer'):
 			cost_center = order_type.get('selling_cost_center') or item.get('selling_cost_center')\
-				or item_group.get('selling_cost_center') or brand.get('selling_cost_center')
+				or brand.get('selling_cost_center') or item_group.get('selling_cost_center')
 		else:
-			cost_center = order_type.get('buying_cost_center') or item.get('buying_cost_center')\
-				or item_group.get('buying_cost_center') or brand.get('buying_cost_center')
+			cost_center = order_type.get('buying_cost_center') or item.get('buying_cost_center') \
+				or brand.get('buying_cost_center') or item_group.get('buying_cost_center')
 
 	if not cost_center and (company or args.company):
 		cost_center = frappe.get_cached_value("Company", company or args.company, "cost_center")
@@ -473,8 +473,8 @@ def get_default_cost_center(args, item, item_group, brand, order_type=None, comp
 
 def get_default_supplier(args, item, item_group, brand, order_type):
 	return (item.get("default_supplier")
-		or item_group.get("default_supplier")
 		or brand.get("default_supplier")
+		or item_group.get("default_supplier")
 		or order_type.get("default_supplier"))
 
 
@@ -488,8 +488,8 @@ def get_default_apply_discount_after_taxes(args, item, item_group, brand, order_
 
 	apply_discount_after_taxes = (order_type.get(fieldname)
 		or item.get(fieldname)
-		or item_group.get(fieldname)
-		or brand.get(fieldname))
+		or brand.get(fieldname)
+		or item_group.get(fieldname))
 
 	if not apply_discount_after_taxes:
 		apply_discount_after_taxes = frappe.db.get_single_value(settings_dt, "apply_discount_after_taxes")
@@ -1083,7 +1083,7 @@ def get_valuation_rate(item_code, company, warehouse=None, order_type_name=None)
 	if item.get("is_stock_item"):
 		if not warehouse:
 			warehouse = order_type.get("default_warehouse") or item.get("default_warehouse")\
-				or item_group.get("default_warehouse") or brand.get("default_warehouse")
+				or brand.get("default_warehouse") or item_group.get("default_warehouse")
 
 		return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 			["valuation_rate"], as_dict=True) or {"valuation_rate": 0}
