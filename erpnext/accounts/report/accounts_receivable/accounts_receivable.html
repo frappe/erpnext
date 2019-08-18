@@ -155,12 +155,13 @@
 					var range4 = report.columns.find(d => d.fieldname == "range4").label;
 					var range5 = report.columns.find(d => d.fieldname == "range5").label;
 				%}
-				<th style="width: 50%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
+				<th style="width: 40%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
 				<th style="width: 10%">{%= __(range1) %}</th>
 				<th style="width: 10%">{%= __(range2) %}</th>
 				<th style="width: 10%">{%= __(range3) %}</th>
 				<th style="width: 10%">{%= __(range4) %}</th>
 				<th style="width: 10%">{%= __(range5) %}</th>
+				<th style="width: 10%">{%= __("Outstanding Amount") %}</th>
 			{% } %}
 		</tr>
 	</thead>
@@ -276,7 +277,7 @@
 					{% } %}
 				{% } %}
 			{% } else { %}
-				{% if(data[i]["party"]) { %}
+				{% if(data[i]["party"] && !data[i]['is_total_row']) { %}
 					<td>
 						{% if(!(filters.customer || filters.supplier)) { %}
 							{%= data[i]["party"] %}
@@ -293,6 +294,7 @@
 				<td style="text-align: right">{%= format_currency(data[i]["range3"], data[i]["currency"]) %}</td>
 				<td style="text-align: right">{%= format_currency(data[i]["range4"], data[i]["currency"]) %}</td>
 				<td style="text-align: right">{%= format_currency(data[i]["range5"], data[i]["currency"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}</td>
 			{% } %}
 			</tr>
 		{% } %}
