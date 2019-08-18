@@ -15,9 +15,7 @@ class FBRInvoiceWiseTaxes(object):
 		if not self.filters.get("company"):
 			self.filters["company"] = frappe.db.get_single_value('Global Defaults', 'default_company')
 
-		self.filters.sales_tax_account = frappe.get_cached_value('Company', self.filters.company, "sales_tax_account")
-		self.filters.extra_tax_account = frappe.get_cached_value('Company', self.filters.company, "extra_tax_account")
-		self.filters.further_tax_account = frappe.get_cached_value('Company', self.filters.company, "further_tax_account")
+		self.filters.service_tax_account = frappe.get_cached_value('Company', self.filters.company, "service_tax_account")
 
 	def run(self, args):
 		if self.filters.from_date > self.filters.to_date:
@@ -58,15 +56,15 @@ class FBRInvoiceWiseTaxes(object):
 				"width": 110
 			},
 			{
-				"label": _("Buyer Type"),
+				"label": _("City"),
 				"fieldtype": "Data",
-				"fieldname": "tax_strn",
+				"fieldname": "city",
 				"width": 90
 			},
 			{
-				"label": _("Province"),
+				"label": _("Buyer Type"),
 				"fieldtype": "Data",
-				"fieldname": "state",
+				"fieldname": "buyer_type",
 				"width": 90
 			},
 			{
@@ -117,26 +115,6 @@ class FBRInvoiceWiseTaxes(object):
 				"width": 50
 			},
 			{
-				"label": _("Description"),
-				"fieldtype": "Data",
-				"fieldname": "description",
-				"width": 80
-			},
-			{
-				"label": _("Quantity"),
-				"fieldtype": "Data",
-				"fieldname": "qty",
-				"width": 80,
-				"hide_for_view": 1
-			},
-			{
-				"label": _("UOM"),
-				"fieldtype": "Data",
-				"fieldname": "uom",
-				"width": 80,
-				"hide_for_view": 1
-			},
-			{
 				"label": _("Taxable Total"),
 				"fieldtype": "Currency",
 				"fieldname": "base_taxable_total",
@@ -144,16 +122,9 @@ class FBRInvoiceWiseTaxes(object):
 				"width": 110
 			},
 			{
-				"label": _("Sales Tax"),
+				"label": _("Service Tax"),
 				"fieldtype": "Currency",
-				"fieldname": "sales_tax",
-				"options": "Company:company:default_currency",
-				"width": 110
-			},
-			{
-				"label": _("Extra Tax"),
-				"fieldtype": "Currency",
-				"fieldname": "extra_tax",
+				"fieldname": "service_tax",
 				"options": "Company:company:default_currency",
 				"width": 110
 			},
@@ -163,34 +134,6 @@ class FBRInvoiceWiseTaxes(object):
 				"fieldname": "withheld_amount",
 				"width": 80,
 				"hide_for_view": 1
-			},
-			{
-				"label": _("SRO No. / Schedule No."),
-				"fieldtype": "Data",
-				"fieldname": "sro_no",
-				"width": 80,
-				"hide_for_view": 1
-			},
-			{
-				"label": _("Item Sr. No."),
-				"fieldtype": "Data",
-				"fieldname": "item_sr_no",
-				"width": 80,
-				"hide_for_view": 1
-			},
-			{
-				"label": _("Further Tax"),
-				"fieldtype": "Currency",
-				"fieldname": "further_tax",
-				"options": "Company:company:default_currency",
-				"width": 110
-			},
-			{
-				"label": _("Grand Total"),
-				"fieldtype": "Currency",
-				"fieldname": "base_grand_total",
-				"options": "Company:company:default_currency",
-				"width": 110
 			},
 		]
 
@@ -210,35 +153,27 @@ class FBRInvoiceWiseTaxes(object):
 		self.invoices = frappe.db.sql("""
 			select
 				i.name as invoice, i.stin, DATE_FORMAT(i.posting_date, '%%d/%%m/%%Y') as posting_date,
-				i.base_taxable_total, i.base_grand_total, addr.state,
-				i.customer as party, i.customer_name as party_name, c.tax_id, c.tax_cnic, c.tax_strn,
-				cc.tax_description as description
+				i.base_taxable_total, i.base_grand_total, addr.city,
+				i.customer as party, i.customer_name as party_name, c.tax_id, c.tax_cnic
 			from `tabSales Invoice` i
 			left join `tabCustomer` c on c.name = i.customer
 			left join `tabAddress` addr on addr.name = i.customer_address
-			left join `tabCost Center` cc on cc.name = i.cost_center
 			where i.docstatus = 1 and i.company = %(company)s and i.posting_date between %(from_date)s and %(to_date)s
-				and ifnull(i.stin, 0) != 0 {0} and i.order_type != 'Maintenance'
+				and ifnull(i.stin, 0) != 0 {0} and i.order_type = 'Maintenance'
 			order by i.posting_date, i.stin
 		""".format(conditions), self.filters, as_dict=1)
 
 		invoices_map = {}
 		for d in self.invoices:
-			d.sales_tax = 0
-			d.extra_tax = 0
-			d.further_tax = 0
-			d.tax_strn = "Registered" if d.tax_strn else "Unregistered"
-			d.sale_type = " Goods at standard rate (default)"
-			d.document_type = "SI"
+			d.service_tax = 0
+			d.buyer_type = "End_Consumer"
+			d.sale_type = "Services"
+			d.document_type = "SSTWH"
 			invoices_map[d.invoice] = d
 
 		tax_accounts = []
-		if self.filters.sales_tax_account:
-			tax_accounts.append(self.filters.sales_tax_account)
-		if self.filters.extra_tax_account:
-			tax_accounts.append(self.filters.extra_tax_account)
-		if self.filters.further_tax_account:
-			tax_accounts.append(self.filters.further_tax_account)
+		if self.filters.service_tax_account:
+			tax_accounts.append(self.filters.service_tax_account)
 
 		if invoices_map and tax_accounts:
 			taxes = frappe.db.sql("""
@@ -255,13 +190,9 @@ class FBRInvoiceWiseTaxes(object):
 
 		for tax in taxes:
 			tax_field = ''
-			if tax.account_head == self.filters.sales_tax_account:
-				tax_field = 'sales_tax'
+			if tax.account_head == self.filters.service_tax_account:
+				tax_field = 'service_tax'
 				invoices_map[tax.invoice]['rate'] = tax.rate
-			elif tax.account_head == self.filters.extra_tax_account:
-				tax_field = 'extra_tax'
-			elif tax.account_head == self.filters.further_tax_account:
-				tax_field = 'further_tax'
 
 			if tax_field:
 				invoices_map[tax.invoice][tax_field] += flt(tax.amount)

@@ -618,3 +618,4 @@ erpnext.patches.v11_1.renamed_delayed_item_report
 erpnext.patches.v11_1.set_missing_opportunity_from
 erpnext.patches.v11_1.set_quotation_status
 erpnext.patches.v11_1.rename_company_tax_ntn_cnic
+erpnext.patches.v11_1.set_sales_order_type

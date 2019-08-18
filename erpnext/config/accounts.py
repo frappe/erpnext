@@ -231,6 +231,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "SRB Service Tax Report",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"name": "FBR Advance Tax Report",
 					"doctype": "Sales Invoice",
 					"is_query_report": True
