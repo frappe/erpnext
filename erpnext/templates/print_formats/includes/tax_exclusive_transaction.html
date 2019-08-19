@@ -5,20 +5,37 @@
 {% macro empty_columns() -%}
 	<td class="no-border"></td>
 	<td class="no-border"></td>
+	{% if not doc.doctype.startswith('Purchase') %}
+		<td class="no-border"></td>
+		{% if not uoms|length == 1 %}
+			<td class="no-border"></td>
+		{% endif %}
+		{% if show_alt_uom_cols %}
+			<td class="no-border"></td>
+			<td class="no-border"></td>
+		{% endif %}
+		{% if not alt_uoms|length == 1 %}
+			<td class="no-border"></td>
+		{% endif %}
+	{% endif %}
 {%- endmacro %}
 
 {% macro totals_colspan() -%}
-	{% set columns = {"len": 3-1} %}
+	{% set columns = {"len": 2-1} %}
 
-	{% if not uoms|length == 1 %}
+	{% if doc.doctype.startswith('Purchase') %}
 		{%- set x=columns.update({"len": columns['len'] + 1 }) -%}
+		{% if not uoms|length == 1 %}
+			{%- set x=columns.update({"len": columns['len'] + 1 }) -%}
+		{% endif %}
+		{% if show_alt_uom_cols %}
+			{%- set x=columns.update({"len": columns['len'] + 2 }) -%}
+		{% endif %}
+		{% if not alt_uoms|length == 1 %}
+			{%- set x=columns.update({"len": columns['len'] + 1 }) -%}
+		{% endif %}
 	{% endif %}
-	{% if show_alt_uom_cols %}
-		{%- set x=columns.update({"len": columns['len'] + 2 }) -%}
-	{% endif %}
-	{% if not alt_uoms|length == 1 %}
-		{%- set x=columns.update({"len": columns['len'] + 1 }) -%}
-	{% endif %}
+
 	{% if show_discount %}
 		{%- set x=columns.update({"len": columns['len'] + 3 }) -%}
 	{% endif %}
