@@ -168,7 +168,8 @@ class FBRInvoiceWiseTaxes(object):
 			d.service_tax = 0
 			d.buyer_type = "End_Consumer"
 			d.sale_type = "Services"
-			d.document_type = "SSTWH"
+			d.document_type = "SI"
+			d.hscode = "98201000"
 			invoices_map[d.invoice] = d
 
 		tax_accounts = []
