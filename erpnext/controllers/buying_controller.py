@@ -717,7 +717,7 @@ def get_items_from_bom(item_code, bom, exploded_item=1):
 		where
 			t2.parent = t1.name and t1.item = %s
 			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s
-			and t2.item_code = t3.name and t3.is_stock_item = 1""".format(doctype),
+			and t2.item_code = t3.name""".format(doctype),
 			(item_code, bom), as_dict=1)
 
 	if not bom_items:
