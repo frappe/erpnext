@@ -369,10 +369,11 @@ def auto_make_serial_nos(args):
 		elif args.get('actual_qty', 0) > 0:
 			created_numbers.append(make_serial_no(serial_no, args))
 
-	if len(created_numbers) == 1:
-		frappe.msgprint(_("Serial No {0} created").format(created_numbers[0]))
-	elif len(created_numbers) > 0:
-		frappe.msgprint(_("The following serial numbers were created: <br> {0}").format(', '.join(created_numbers)))
+	form_links = list(map(lambda d: frappe.utils.get_link_to_form('Serial No', d), created_numbers))
+	if len(form_links) == 1:
+		frappe.msgprint(_("Serial No {0} created").format(form_links[0]))
+	elif len(form_links) > 0:
+		frappe.msgprint(_("The following serial numbers were created: <br> {0}").format(', '.join(form_links)))
 
 def get_item_details(item_code):
 	return frappe.db.sql("""select name, has_batch_no, docstatus,

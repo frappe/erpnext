@@ -18,7 +18,7 @@ class TestQualityProcedure(unittest.TestCase):
 def create_procedure():
 	procedure = frappe.get_doc({
 		"doctype": "Quality Procedure",
-		"procedure": "_Test Quality Procedure",
+		"quality_procedure_name": "_Test Quality Procedure",
 		"processes": [
 			{
 				"process_description": "_Test Quality Procedure Table",
@@ -37,7 +37,7 @@ def create_procedure():
 def create_nested_procedure():
 	nested_procedure = frappe.get_doc({
 		"doctype": "Quality Procedure",
-		"procedure": "_Test Nested Quality Procedure",
+		"quality_procedure_name": "_Test Nested Quality Procedure",
 		"processes": [
 			{
 				"procedure": "PRC-_Test Quality Procedure"
