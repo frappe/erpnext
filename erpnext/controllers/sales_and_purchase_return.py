@@ -25,9 +25,9 @@ def validate_return_against(doc):
 		ref_doc = frappe.get_doc(doc.doctype, doc.return_against)
 
 		if doc.doctype == "Sales Invoice":
-			party_type == "customer"
+			party_type = "customer"
 		else:
-			party_type == "supplier"
+			party_type = "supplier"
 
 		if ref_doc.company == doc.company and ref_doc.get(pary_type) == doc.get(party_type) and ref_doc.docstatus == 1:
 			# validate posting date time
