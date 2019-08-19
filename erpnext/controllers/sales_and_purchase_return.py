@@ -24,7 +24,7 @@ def validate_return_against(doc):
 	else:
 		ref_doc = frappe.get_doc(doc.doctype, doc.return_against)
 
-		if doc.doctype == "Sales Invoice":
+		if doc.doctype in ("Sales Invoice", "Delivery Note"):
 			party_type = "customer"
 		else:
 			party_type = "supplier"
