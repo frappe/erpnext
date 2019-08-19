@@ -412,7 +412,7 @@ def get_cost_centers_with_children(cost_centers):
 			children = frappe.get_all("Cost Center", filters={"lft": [">=", lft], "rgt": ["<=", rgt]})
 			all_cost_centers += [c.name for c in children]
 		else:
-			frappe.throw(_("Cost Center: {0} does not exists".format(d)))
+			frappe.throw(_("Cost Center: {0} does not exist".format(d)))
 
 	return list(set(all_cost_centers))
 
