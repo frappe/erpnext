@@ -73,6 +73,28 @@ erpnext.child_docs.forEach((doctype) => {
 				var row = frappe.get_doc(cdt, cdn);
 				frm.script_manager.copy_from_first_row("accounts", row, [dimension['fieldname']]);
 			});
+		},
+
+		company: function(frm) {
+			if(frm.doc.company) {
+				erpnext.dimension_filters.forEach((dimension) => {
+					frm.set_value(dimension['fieldname'], erpnext.default_dimensions[frm.doc.company][dimension['document_type']]);
+				});
+			}
+		},
+
+		items_add: function(frm, cdt, cdn) {
+			erpnext.dimension_filters.forEach((dimension) => {
+				var row = frappe.get_doc(cdt, cdn);
+				frm.script_manager.copy_from_first_row("items", row, [dimension['fieldname']]);
+			});
+		},
+
+		accounts_add: function(frm, cdt, cdn) {
+			erpnext.dimension_filters.forEach((dimension) => {
+				var row = frappe.get_doc(cdt, cdn);
+				frm.script_manager.copy_from_first_row("accounts", row, [dimension['fieldname']]);
+			});
 		}
 	});
 });
