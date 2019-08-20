@@ -521,14 +521,20 @@ class StockEntry(StockController):
 		backflush_raw_materials_based_on = frappe.db.get_single_value("Buying Settings",
 			"backflush_raw_materials_of_subcontract_based_on")
 
+		qty_allowance = flt(frappe.db.get_single_value("Buying Settings",
+			"over_transfer_allowance"))
+
 		if (self.purpose == "Send to Subcontractor" and self.purchase_order and
 			backflush_raw_materials_based_on == 'BOM'):
 			purchase_order = frappe.get_doc("Purchase Order", self.purchase_order)
 			for se_item in self.items:
 				item_code = se_item.original_item or se_item.item_code
 				precision = cint(frappe.db.get_default("float_precision")) or 3
-				total_allowed = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
+				required_qty = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
 					if d.rm_item_code == item_code])
+
+				total_allowed = required_qty + (required_qty * (qty_allowance/100))
+
 				if not total_allowed:
 					frappe.throw(_("Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1}")
 						.format(se_item.item_code, self.purchase_order))
@@ -1106,6 +1112,7 @@ class StockEntry(StockController):
 			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
 			se_child.subcontracted_item = item_dict[d].get("main_item_code")
 			se_child.original_item = item_dict[d].get("original_item")
+			se_child.po_detail = item_dict[d].get("po_detail")
 
 			if item_dict[d].get("idx"):
 				se_child.idx = item_dict[d].get("idx")
@@ -1157,7 +1164,11 @@ class StockEntry(StockController):
 			where po.name = poitemsup.parent
 			and po.name = %s""", self.purchase_order))
 
-		#Update reserved sub contracted quantity in bin based on Supplied Item Details
+		#Update Supplied Qty in PO Supplied Items
+		frappe.db.sql("""UPDATE `tabPurchase Order Item Supplied` pos, `tabStock Entry Detail` sed
+			SET pos.supplied_qty = sed.transfer_qty where pos.name = sed.po_detail""")
+
+		#Update reserved sub contracted quantity in bin based on Supplied Item Details and
 		for d in self.get("items"):
 			item_code = d.get('original_item') or d.get('item_code')
 			reserve_warehouse = item_wh.get(item_code)
