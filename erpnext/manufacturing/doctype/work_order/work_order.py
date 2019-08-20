@@ -711,6 +711,14 @@ def get_work_order_operation_data(work_order, operation, workstation):
 
 @frappe.whitelist()
 def make_pick_list(source_name, target_doc=None):
+	def update_item_quantity(source, target, source_parent):
+		qty = source.required_qty - source.transferred_qty
+		target.qty = qty
+		target.stock_qty = qty
+		target.uom = frappe.get_value('Item', source.item_code, 'stock_uom')
+		target.stock_uom = target.uom
+		target.conversion_factor = 1
+
 	doc = get_mapped_doc("Work Order", source_name, {
 		"Work Order": {
 			"doctype": "Pick List",
@@ -720,13 +728,8 @@ def make_pick_list(source_name, target_doc=None):
 		},
 		"Work Order Item": {
 			"doctype": "Pick List Reference Item",
-			"field_map": {
-				"item_code": "item",
-				"required_qty": "qty",
-				"parenttype": "reference_doctype",
-				"parent": "reference_name",
-				"name": "reference_document_item"
-			},
+			"postprocess": update_item_quantity,
+			"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty)
 		},
 	}, target_doc)
 
