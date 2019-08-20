@@ -40,15 +40,8 @@ frappe.ui.form.on('Accounting Dimension', {
 	},
 
 	document_type: function(frm) {
-
 		frm.set_value('label', frm.doc.document_type);
 		frm.set_value('fieldname', frappe.model.scrub(frm.doc.document_type));
-
-		if (frm.is_new()){
-			let row = frappe.model.add_child(frm.doc, "Accounting Dimension Detail", "dimension_defaults");
-			row.reference_document = frm.doc.document_type;
-			frm.refresh_fields("dimension_defaults");
-		}
 
 		frappe.db.get_value('Accounting Dimension', {'document_type': frm.doc.document_type}, 'document_type', (r) => {
 			if (r && r.document_type) {
