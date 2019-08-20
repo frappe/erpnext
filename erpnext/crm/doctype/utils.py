@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 import json
+from frappe.contacts.doctype.contact.contact import get_contact_with_phone_number
 
 @frappe.whitelist()
 def get_document_with_phone_number(number):
@@ -11,10 +12,10 @@ def get_document_with_phone_number(number):
 		'phone': ['like', '%{}'.format(number)],
 		'mobile_no': ['like', '%{}'.format(number)]
 	}
-	contacts = frappe.get_all('Contact', or_filters=number_filter, limit=1)
+	contact = get_contact_with_phone_number(number)
 
-	if contacts:
-		return frappe.get_doc('Contact', contacts[0].name)
+	if contact:
+		return frappe.get_doc('Contact', contact)
 
 	leads = frappe.get_all('Lead', or_filters=number_filter, limit=1)
 
