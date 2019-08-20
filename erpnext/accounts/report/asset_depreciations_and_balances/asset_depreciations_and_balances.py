@@ -42,11 +42,21 @@ def get_data(filters):
 	return data
 	
 def get_asset_categories(filters):
-	condition = " and asset_category = '%s' " % filters.asset_category if filters.asset_category else ""
+	condition = ''
+
+	args = {
+		'company': filters.company,
+		'to_date': filters.to_date,
+		'asset_category': filters.asset_category,
+	}
+
+	if filters.asset_category:
+		condition = " and asset_category = %(asset_category)s "
+
 	return frappe.db.sql_list("""
 		select distinct asset_category from `tabAsset` 
-		where docstatus=1 and company=%s and purchase_date <= %s {}
-	""".format(condition), (filters.company, filters.to_date))
+		where docstatus=1 and company = %(company)s and purchase_date <= %(to_date)s {}
+	""".format(condition), args)
 	
 def get_assets(filters):
 	return frappe.db.sql("""

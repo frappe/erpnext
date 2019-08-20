@@ -44,15 +44,22 @@ def get_data(filters):
 	return data
 	
 def get_assets(filters):
-	condition = " and name = '%s' " % filters.asset if filters.asset else ""
-	condition += " and asset_category = '%s' " % filters.asset_category if filters.asset_category else ""
+	args = {
+		'company': filters.company,
+		'to_date': filters.to_date,
+		'asset': filters.asset,
+		'asset_category': filters.asset_category,
+	}
+
+	condition = ""
+	condition += " and name = %(asset)s " if filters.asset else ""
+	condition += " and asset_category = %(asset_category)s " if filters.asset_category else ""
 
 	return frappe.db.sql("""
 		select name, asset_category, purchase_date, gross_purchase_amount, disposal_date, status
 		from `tabAsset` 
-		where docstatus=1 and company=%s and purchase_date <= %s and docstatus=1 {} 
-		order by asset_category, purchase_date """.format(condition) , 
-		(filters.company, filters.to_date), as_dict=1)
+		where docstatus=1 and company = %(company)s and purchase_date <= %(to_date)s and docstatus=1 {} 
+		order by asset_category, purchase_date """.format(condition), args, as_dict=1)
 
 
 def get_asset_costs(assets, filters):
