@@ -24,6 +24,7 @@
   "column_break_18",
   "leave_approver_mandatory_in_leave_application",
   "show_leaves_of_all_department_members_in_calendar",
+  "auto_leave_encashment",
   "hiring_settings",
   "check_vacancies"
  ],
@@ -153,12 +154,18 @@
    "fieldname": "check_vacancies",
    "fieldtype": "Check",
    "label": "Check Vacancies On Job Offer Creation"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_leave_encashment",
+   "fieldtype": "Check",
+   "label": "Auto Leave Encashment"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2019-07-01 18:59:55.256878",
+ "modified": "2019-08-05 13:07:17.993968",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",

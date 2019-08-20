@@ -124,8 +124,6 @@ def check_matching_amount(bank_account, company, transaction):
 			'txt': '%%%s%%' % amount
 		}, as_dict=True)
 
-		frappe.errprint(journal_entries)
-
 	if transaction.credit > 0:
 		sales_invoices = frappe.db.sql("""
 			SELECT
