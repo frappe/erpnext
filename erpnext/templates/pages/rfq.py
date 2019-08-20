@@ -5,8 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import formatdate
-from erpnext.controllers.website_list_for_contact import (get_customers_suppliers,
-					get_party_details)
+from erpnext.controllers.website_list_for_contact import get_customers_suppliers
 
 def get_context(context):
 	context.no_cache = 1
@@ -23,8 +22,8 @@ def get_supplier():
 	doctype = frappe.form_dict.doctype
 	parties_doctype = 'Request for Quotation Supplier' if doctype == 'Request for Quotation' else doctype
 	customers, suppliers = get_customers_suppliers(parties_doctype, frappe.session.user)
-	key, parties = get_party_details(customers, suppliers)
-	return parties[0] if key == 'supplier' else ''
+
+	return suppliers[0] if suppliers else ''
 
 def check_supplier_has_docname_access(supplier):
 	status = True
