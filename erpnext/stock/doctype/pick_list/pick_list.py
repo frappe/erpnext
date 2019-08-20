@@ -10,6 +10,8 @@ from frappe.model.mapper import get_mapped_doc, map_child_doc
 from frappe.utils import floor, flt, today
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note as make_delivery_note_from_sales_order
 
+# TODO: Prioritize SO or WO group warehouse
+
 class PickList(Document):
 	def set_item_locations(self):
 		reference_items = self.reference_items
@@ -154,36 +156,6 @@ def get_item_locations_based_on_batch_nos(item_doc):
 		if required_qty <= 0:
 			break
 
-	# required_qty = item_doc.qty
-	# while required_qty > 0 and batches:
-	# 	batch = batches.pop()
-	# 	batch_expiry = frappe.get_value('Batch', batch.batch_no, 'expiry_date')
-	# 	if batch_expiry and batch_expiry <= frappe.utils.getdate():
-	# 		frappe.msgprint('Skipping expired Batch {}'.format(batch.batch_no))
-	# 		continue
-	# 	item_doc.batch_no = batch.batch_no
-	# 	if batch.qty >= item_doc.qty:
-	# 		required_qty = 0
-	# 		break
-	# 	else:
-	# 		# split item_code if quantity of item_code in batch is less that required
-	# 		# Look for another batch
-
-	# 		required_qty -= batch.qty
-	# 		# set quantity of current item_code equal to batch quantity
-	# 		item_doc.set('qty', batch.qty)
-	# 		item_doc = parent_doc.append('items', {
-	# 			'item_code': item_doc.item_code,
-	# 			'qty': required_qty,
-	# 			'warehouse': item_doc.warehouse,
-	# 			'sales_order': item_doc.sales_order,
-	# 			'sales_order_item': item_doc.sales_order_item,
-	# 			'uom': item_doc.uom,
-	# 			'stock_uom': item_doc.stock_uom,
-	# 			'conversion_factor': item_doc.conversion_factor,
-	# 			'stock_qty': qty * item_doc.conversion_factor,
-	# 		})
-
 	if required_qty:
 		frappe.msgprint('No batches found for {} qty of {}.'.format(required_qty, item_doc.item_code))
 
@@ -251,3 +223,26 @@ def update_delivery_note_item(source, target, delivery_note):
 			})
 
 	target.cost_center = cost_center
+
+@frappe.whitelist()
+def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filters, as_dict):
+	return frappe.db.sql("""
+		SELECT
+			`name`, `company`, `planned_start_date`
+		FROM
+			`tabWork Order`
+		WHERE
+			`qty` > `produced_qty`
+			AND `status` not in ('Completed', 'Stopped')
+			AND name like %(txt)s
+			AND docstatus = 1
+		ORDER BY
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999), name
+		LIMIT
+			%(start)s, %(page_length)s""",
+		{
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace('%', ''),
+			'start': start,
+			'page_length': frappe.utils.cint(page_length),
+		}, as_dict=as_dict)
