@@ -57,10 +57,10 @@
    "fieldname": "items_based_on",
    "fieldtype": "Select",
    "label": "Items Based On",
-   "options": "\nSales Order\nWork Order"
+   "options": "Sales Order\nWork Order"
   }
  ],
- "modified": "2019-08-13 19:30:01.151720",
+ "modified": "2019-08-19 12:31:54.023456",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
