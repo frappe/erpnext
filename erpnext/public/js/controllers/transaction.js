@@ -1421,6 +1421,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 	},
 
+	get_latest_price: function() {
+		this.apply_price_list();
+	},
+
 	validate_company_and_party: function() {
 		var me = this;
 		var valid = true;
