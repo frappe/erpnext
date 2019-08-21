@@ -1,7 +1,6 @@
 import frappe
 from frappe import _
 import json
-from frappe.contacts.doctype.contact.contact import get_contact_with_phone_number
 
 @frappe.whitelist()
 def get_last_interaction(contact=None, lead=None):
