@@ -14,37 +14,44 @@ class TestPickList(unittest.TestCase):
 		pick_list = frappe.get_doc({
 			'doctype': 'Pick List',
 			'company': '_Test Company',
+			'customer': '_Test Customer',
+			'items_based_on': 'Sales Order',
 			'items': [{
-				'item': '_Test Item Home Desktop 100',
-				'reference_doctype': 'Sales Order',
+				'item_code': '_Test Item Home Desktop 100',
 				'qty': 5,
-				'reference_name': '_T-Sales Order-1',
-			}],
+				'stock_qty': 5,
+				'conversion_factor': 1,
+				'sales_order': '_T-Sales Order-1',
+				'sales_item': '_T-Sales Order-1_item',
+			}]
 		})
-
 		pick_list.set_item_locations()
 
-		self.assertEqual(pick_list.items_locations[0].item, '_Test Item Home Desktop 100')
-		self.assertEqual(pick_list.items_locations[0].warehouse, '_Test Warehouse - _TC')
-		self.assertEqual(pick_list.items_locations[0].qty, 5)
+		self.assertEqual(pick_list.locations[0].item_code, '_Test Item Home Desktop 100')
+		self.assertEqual(pick_list.locations[0].warehouse, '_Test Warehouse - _TC')
+		self.assertEqual(pick_list.locations[0].qty, 5)
 
 	def test_pick_list_skips_out_of_stock_item(self):
 		pick_list = frappe.get_doc({
 			'doctype': 'Pick List',
 			'company': '_Test Company',
+			'customer': '_Test Customer',
+			'items_based_on': 'Sales Order',
 			'items': [{
-				'item': '_Test Item Warehouse Group Wise Reorder',
-				'reference_doctype': 'Sales Order',
+				'item_code': '_Test Item Warehouse Group Wise Reorder',
 				'qty': 1000,
-				'reference_name': '_T-Sales Order-1',
-			}],
+				'stock_qty': 1000,
+				'conversion_factor': 1,
+				'sales_order': '_T-Sales Order-1',
+				'sales_item': '_T-Sales Order-1_item',
+			}]
 		})
 
 		pick_list.set_item_locations()
 
-		self.assertEqual(pick_list.items_locations[0].item, '_Test Item Warehouse Group Wise Reorder')
-		self.assertEqual(pick_list.items_locations[0].warehouse, '_Test Warehouse Group-C1 - _TC')
-		self.assertEqual(pick_list.items_locations[0].qty, 30)
+		self.assertEqual(pick_list.locations[0].item_code, '_Test Item Warehouse Group Wise Reorder')
+		self.assertEqual(pick_list.locations[0].warehouse, '_Test Warehouse Group-C1 - _TC')
+		self.assertEqual(pick_list.locations[0].qty, 30)
 
 
 	def test_pick_list_skips_items_in_expired_batch(self):
@@ -68,19 +75,23 @@ class TestPickList(unittest.TestCase):
 		pick_list = frappe.get_doc({
 			'doctype': 'Pick List',
 			'company': '_Test Company',
+			'customer': '_Test Customer',
+			'items_based_on': 'Sales Order',
 			'items': [{
-				'item': '_Test Serialized Item',
-				'reference_doctype': 'Sales Order',
+				'item_code': '_Test Serialized Item',
 				'qty': 1000,
-				'reference_name': '_T-Sales Order-1',
-			}],
+				'stock_qty': 1000,
+				'conversion_factor': 1,
+				'sales_order': '_T-Sales Order-1',
+				'sales_item': '_T-Sales Order-1_item',
+			}]
 		})
 
 		pick_list.set_item_locations()
-		self.assertEqual(pick_list.items_locations[0].item, '_Test Serialized Item')
-		self.assertEqual(pick_list.items_locations[0].warehouse, '_Test Warehouse Group-C1 - _TC')
-		self.assertEqual(pick_list.items_locations[0].qty, 30)
-		self.assertEqual(pick_list.items_locations[0].serial_no, 30)
+		self.assertEqual(pick_list.locations[0].item_code, '_Test Serialized Item')
+		self.assertEqual(pick_list.locations[0].warehouse, '_Test Warehouse - _TC')
+		self.assertEqual(pick_list.locations[0].qty, 5)
+		self.assertEqual(pick_list.locations[0].serial_no, '123450\n123451\n123452\n123453\n123454')
 
 
 	def test_pick_list_for_multiple_reference_doctypes(self):
