@@ -14,7 +14,7 @@ class TestPickList(unittest.TestCase):
 		pick_list = frappe.get_doc({
 			'doctype': 'Pick List',
 			'company': '_Test Company',
-			'reference_items': [{
+			'items': [{
 				'item': '_Test Item Home Desktop 100',
 				'reference_doctype': 'Sales Order',
 				'qty': 5,
@@ -32,7 +32,7 @@ class TestPickList(unittest.TestCase):
 		pick_list = frappe.get_doc({
 			'doctype': 'Pick List',
 			'company': '_Test Company',
-			'reference_items': [{
+			'items': [{
 				'item': '_Test Item Warehouse Group Wise Reorder',
 				'reference_doctype': 'Sales Order',
 				'qty': 1000,
@@ -68,7 +68,7 @@ class TestPickList(unittest.TestCase):
 		pick_list = frappe.get_doc({
 			'doctype': 'Pick List',
 			'company': '_Test Company',
-			'reference_items': [{
+			'items': [{
 				'item': '_Test Serialized Item',
 				'reference_doctype': 'Sales Order',
 				'qty': 1000,

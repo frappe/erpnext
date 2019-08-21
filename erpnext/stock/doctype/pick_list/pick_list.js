@@ -11,17 +11,33 @@ frappe.ui.form.on('Pick List', {
 				}
 			};
 		});
+		frm.set_query('work_order', () => {
+			return {
+				query: 'erpnext.stock.doctype.pick_list.pick_list.get_pending_work_orders',
+				filters: {
+					'company': frm.doc.company
+				}
+			};
+		});
 	},
 	refresh: (frm) => {
-		frm.add_custom_button(__('Delivery Note'), () => frm.trigger('make_delivery_note'), __('Create'));
+		frm.trigger('add_get_items_button');
 
-		if (frm.doc.reference_items && frm.doc.reference_items.length) {
+		if (frm.doc.items && (frm.doc.items.length > 1 || frm.doc.items[0].item_code)) {
 			frm.add_custom_button(__('Get Item Locations'), () => {
 				frm.call('set_item_locations');
-			});
+			}).addClass('btn-primary');
 		}
 
-		frm.trigger('add_get_items_button');
+		frm.add_custom_button(__('Delivery Note'), () => frm.trigger('make_delivery_note'), __('Create'));
+	},
+	work_order: (frm) => {
+		frm.clear_table('items');
+		erpnext.utils.map_current_doc({
+			method: 'erpnext.manufacturing.doctype.work_order.work_order.create_pick_list',
+			target: frm,
+			source_name: frm.doc.work_order
+		});
 	},
 	items_based_on: (frm) => {
 		frm.trigger('add_get_items_button');
@@ -33,40 +49,29 @@ frappe.ui.form.on('Pick List', {
 		});
 	},
 	add_get_items_button(frm) {
-		frm.remove_custom_button(__("Get items"));
 		let source_doctype = frm.doc.items_based_on;
-		let date_field = 'transaction_date';
-		let get_query_method = null;
+		if (source_doctype != 'Sales Order') return;
 		let get_query_filters = {
 			docstatus: 1,
 			per_delivered: ['<', 100],
-			status: ['!=', '']
+			status: ['!=', ''],
+			customer: frm.doc.customer
 		};
-		let method = 'erpnext.selling.doctype.sales_order.sales_order.make_pick_list';
-		if (source_doctype === 'Work Order') {
-			method = 'erpnext.manufacturing.doctype.work_order.work_order.make_pick_list';
-			date_field = 'planned_start_date';
-			get_query_method = 'erpnext.stock.doctype.pick_list.pick_list.get_pending_work_orders';
-			get_query_filters = null;
-		}
-
-		let get_query = () => {
-			return {
-				'query': get_query_method,
-				'filters': get_query_filters
-			};
-		};
-
-		frm.add_custom_button(__("Get items"), () => {
+		frm.get_items_btn = frm.add_custom_button(__('Get Items'), () => {
+			if (!frm.doc.customer) {
+				frappe.msgprint(__('Please select Customer first'));
+				return;
+			}
 			erpnext.utils.map_current_doc({
-				method: method,
-				source_doctype: source_doctype,
+				method: 'erpnext.selling.doctype.sales_order.sales_order.make_pick_list',
+				source_doctype: 'Sales Order',
 				target: frm,
 				setters: {
 					company: frm.doc.company,
+					customer: frm.doc.customer
 				},
-				date_field: date_field,
-				get_query: get_query
+				date_field: 'transaction_date',
+				get_query_filters: get_query_filters
 			});
 		});
 	}

@@ -710,7 +710,7 @@ def get_work_order_operation_data(work_order, operation, workstation):
 			return d
 
 @frappe.whitelist()
-def make_pick_list(source_name, target_doc=None):
+def create_pick_list(source_name, target_doc=None):
 	def update_item_quantity(source, target, source_parent):
 		qty = source.required_qty - source.transferred_qty
 		target.qty = qty

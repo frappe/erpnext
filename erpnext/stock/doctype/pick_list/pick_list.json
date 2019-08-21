@@ -5,21 +5,25 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "company",
-  "column_break_4",
   "items_based_on",
+  "customer",
+  "work_order",
+  "column_break_4",
   "parent_warehouse",
+  "company",
   "section_break_4",
-  "reference_items",
+  "items",
   "section_break_6",
-  "item_locations"
+  "locations"
  ],
  "fields": [
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_4",
@@ -41,26 +45,45 @@
    "options": "Warehouse"
   },
   {
-   "fieldname": "item_locations",
+   "default": "Work Order",
+   "fieldname": "items_based_on",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Items Based On",
+   "options": "Sales Order\nWork Order",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.items_based_on===\"Sales Order\"",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.items_based_on===\"Work Order\"",
+   "fieldname": "work_order",
+   "fieldtype": "Link",
+   "label": "Work Order",
+   "options": "Work Order"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items To Be Picked",
+   "options": "Pick List Reference Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "locations",
    "fieldtype": "Table",
    "label": "Item Locations",
    "options": "Pick List Item"
-  },
-  {
-   "fieldname": "reference_items",
-   "fieldtype": "Table",
-   "label": "Items To Be Picked",
-   "options": "Pick List Reference Item"
-  },
-  {
-   "default": "Sales Order",
-   "fieldname": "items_based_on",
-   "fieldtype": "Select",
-   "label": "Items Based On",
-   "options": "Sales Order\nWork Order"
   }
  ],
- "modified": "2019-08-19 12:31:54.023456",
+ "modified": "2019-08-20 16:57:11.006221",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
