@@ -53,7 +53,7 @@ def get_employees_with_number(number):
 	if employee_emails: return employee_emails
 
 	employees = frappe.get_all('Employee', filters={
-		'cell_number': ['like', '%{}'.format(number)],
+		'cell_number': ['like', '%{}%'.format(number)],
 		'user_id': ['!=', '']
 	}, fields=['user_id'])
 
