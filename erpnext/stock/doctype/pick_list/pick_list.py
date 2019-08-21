@@ -14,25 +14,29 @@ from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note a
 
 class PickList(Document):
 	def set_item_locations(self):
-		reference_items = self.reference_items
+		items = self.items
+		self.item_location_map = frappe._dict()
 
 		from_warehouses = None
 		if self.parent_warehouse:
 			from_warehouses = frappe.db.get_descendants('Warehouse', self.parent_warehouse)
 
 		# Reset
-		self.delete_key('item_locations')
-		for item_doc in reference_items:
-			if frappe.get_cached_value('Item', item_doc.item_code, 'has_serial_no'):
-				item_locations = get_item_locations_based_on_serial_nos(item_doc)
-			elif frappe.get_cached_value('Item', item_doc.item_code, 'has_batch_no'):
-				item_locations = get_item_locations_based_on_batch_nos(item_doc)
+		self.delete_key('locations')
+		for item_doc in items:
+			item_code = item_doc.item_code
+			if frappe.get_cached_value('Item', item_code, 'has_serial_no'):
+				locations = get_item_locations_based_on_serial_nos(item_doc)
+			elif frappe.get_cached_value('Item', item_code, 'has_batch_no'):
+				locations = get_item_locations_based_on_batch_nos(item_doc)
 			else:
-				item_locations = get_items_with_warehouse_and_quantity(item_doc, from_warehouses)
+				if item_code not in self.item_location_map:
+					self.item_location_map[item_code] = get_available_items(item_code, from_warehouses)
+				locations = get_items_with_warehouse_and_quantity(item_doc, from_warehouses, self.item_location_map)
 
-			for row in item_locations:
+			for row in locations:
 				row.update({
-					'item_code': item_doc.item_code,
+					'item_code': item_code,
 					'sales_order': item_doc.sales_order,
 					'sales_order_item': item_doc.sales_order_item,
 					'uom': item_doc.uom,
@@ -41,14 +45,15 @@ class PickList(Document):
 					'stock_qty': row.get("qty", 0) * item_doc.conversion_factor,
 					'picked_qty': row.get("qty", 0) * item_doc.conversion_factor
 				})
-				self.append('item_locations', row)
+				self.append('locations', row)
 
-def get_items_with_warehouse_and_quantity(item_doc, from_warehouses):
-	item_locations = []
-	item_location_map = get_available_items(item_doc.item_code, from_warehouses)
+def get_items_with_warehouse_and_quantity(item_doc, from_warehouses, item_location_map):
+	available_locations = item_location_map.get(item_doc.item_code)
+
+	locations = []
 	remaining_stock_qty = item_doc.stock_qty
-	while remaining_stock_qty > 0 and item_location_map:
-		item_location = item_location_map.pop(0)
+	while remaining_stock_qty > 0 and available_locations:
+		item_location = available_locations.pop(0)
 		stock_qty = remaining_stock_qty if item_location.qty >= remaining_stock_qty else item_location.qty
 		qty = stock_qty / (item_doc.conversion_factor or 1)
 
@@ -57,16 +62,25 @@ def get_items_with_warehouse_and_quantity(item_doc, from_warehouses):
 			qty = floor(qty)
 			stock_qty = qty * item_doc.conversion_factor
 
-		item_locations.append({
+		locations.append({
 			'qty': qty,
 			'warehouse': item_location.warehouse
 		})
 		remaining_stock_qty -= stock_qty
 
+		qty_diff = item_location.qty - stock_qty
+		# if extra quantity is available push current warehouse to available locations
+		if qty_diff:
+			item_location.qty = qty_diff
+			available_locations = [item_location] + available_locations
+
 	if remaining_stock_qty:
 		frappe.msgprint('{0} {1} of {2} is not available.'
 			.format(remaining_stock_qty / item_doc.conversion_factor, item_doc.uom, item_doc.item_code))
-	return item_locations
+
+	# update available locations for the item
+	item_location_map[item_doc.item_code] = available_locations
+	return locations
 
 def get_available_items(item_code, from_warehouses):
 	# gets all items available in different warehouses
@@ -110,15 +124,15 @@ def get_item_locations_based_on_serial_nos(item_doc):
 	for serial_no, warehouse in serial_nos:
 		warehouse_serial_nos_map.setdefault(warehouse, []).append(serial_no)
 
-	item_locations = []
+	locations = []
 	for warehouse, serial_nos in iteritems(warehouse_serial_nos_map):
-		item_locations.append({
+		locations.append({
 			'qty': len(serial_nos),
 			'warehouse': warehouse,
 			'serial_no': '\n'.join(serial_nos)
 		})
 
-	return item_locations
+	return locations
 
 def get_item_locations_based_on_batch_nos(item_doc):
 	batch_qty = frappe.db.sql("""
@@ -143,7 +157,7 @@ def get_item_locations_based_on_batch_nos(item_doc):
 		'today': today()
 	}, as_dict=1)
 
-	item_locations = []
+	locations = []
 	required_qty = item_doc.qty
 	for d in batch_qty:
 		if d.qty > required_qty:
@@ -151,7 +165,7 @@ def get_item_locations_based_on_batch_nos(item_doc):
 		else:
 			required_qty -= d.qty
 
-		item_locations.append(d)
+		locations.append(d)
 
 		if required_qty <= 0:
 			break
@@ -159,12 +173,12 @@ def get_item_locations_based_on_batch_nos(item_doc):
 	if required_qty:
 		frappe.msgprint('No batches found for {} qty of {}.'.format(required_qty, item_doc.item_code))
 
-	return item_locations
+	return locations
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
 	pick_list = frappe.get_doc('Pick List', source_name)
-	sales_orders = [d.sales_order for d in pick_list.item_locations]
+	sales_orders = [d.sales_order for d in pick_list.locations]
 	sales_orders = set(sales_orders)
 
 	delivery_note = None
@@ -172,7 +186,7 @@ def make_delivery_note(source_name, target_doc=None):
 		delivery_note = make_delivery_note_from_sales_order(sales_order,
 			delivery_note, skip_item_mapping=True)
 
-	for location in pick_list.item_locations:
+	for location in pick_list.locations:
 		sales_order_item = frappe.get_cached_doc('Sales Order Item', location.sales_order_item)
 		item_table_mapper = {
 			"doctype": "Delivery Note Item",
@@ -232,10 +246,11 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 		FROM
 			`tabWork Order`
 		WHERE
-			`qty` > `produced_qty`
-			AND `status` not in ('Completed', 'Stopped')
-			AND name like %(txt)s
-			AND docstatus = 1
+			`status` not in ('Completed', 'Stopped')
+			AND `qty` > `produced_qty`
+			AND `docstatus` = 1
+			AND `company` = %(company)s
+			AND `name` like %(txt)s
 		ORDER BY
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999), name
 		LIMIT
@@ -245,4 +260,5 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 			'_txt': txt.replace('%', ''),
 			'start': start,
 			'page_length': frappe.utils.cint(page_length),
+			'company': filters.get('company')
 		}, as_dict=as_dict)
