@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import getdate
+from frappe.utils import getdate, today
 
 def execute():
 	""" Generates leave ledger entries for leave allocation/application/encashment
@@ -66,7 +66,8 @@ def generate_expiry_allocation_ledger_entries():
 		if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Allocation', 'transaction_name': allocation.name, 'is_expired': 1}):
 			allocation.update(dict(doctype="Leave Allocation"))
 			allocation_obj = frappe.get_doc(allocation)
-			expire_allocation(allocation_obj)
+			if allocation_obj.to_date <= getdate(today()):
+				expire_allocation(allocation_obj)
 
 def get_allocation_records():
 	return frappe.get_all("Leave Allocation", filters={
