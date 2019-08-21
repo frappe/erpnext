@@ -70,9 +70,13 @@ def set_caller_information(doc, state):
 	numbers = [doc.get('phone'), doc.get('mobile_no')]
 	for_doc = doc.doctype.lower()
 
+	# Contact now has all the nos saved in child table
+	if doc.doctype == 'Contact':
+		numbers = [nos.phone for nos in doc.phone_nos]
+
 	for number in numbers:
 		if not number: continue
-		print(number)
+
 		filters = frappe._dict({
 			'from': ['like', '%{}'.format(number.lstrip('0'))],
 			for_doc: ''
