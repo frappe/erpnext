@@ -4,11 +4,12 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.model.document import Document
+import json
 from six import iteritems
-from frappe.model.mapper import get_mapped_doc, map_child_doc
+from frappe.model.document import Document
 from frappe.utils import floor, flt, today
-from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note as make_delivery_note_from_sales_order
+from frappe.model.mapper import get_mapped_doc, map_child_doc
+from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note as create_delivery_note_from_sales_order
 
 # TODO: Prioritize SO or WO group warehouse
 
@@ -49,7 +50,6 @@ class PickList(Document):
 
 def get_items_with_warehouse_and_quantity(item_doc, from_warehouses, item_location_map):
 	available_locations = item_location_map.get(item_doc.item_code)
-
 	locations = []
 	remaining_stock_qty = item_doc.stock_qty
 	while remaining_stock_qty > 0 and available_locations:
@@ -97,15 +97,6 @@ def get_available_items(item_code, from_warehouses):
 		order_by='creation')
 
 	return available_items
-
-def set_serial_nos(item_doc):
-	serial_nos = frappe.get_all('Serial No', {
-		'item_code': item_doc.item_code,
-		'warehouse': item_doc.warehouse
-	}, limit=item_doc.stock_qty, order_by='purchase_date')
-	item_doc.set('serial_no', '\n'.join([serial_no.name for serial_no in serial_nos]))
-
-	# should we assume that all serialized item_code available in stock will have serial no?
 
 def get_item_locations_based_on_serial_nos(item_doc):
 	serial_nos = frappe.get_all('Serial No',
@@ -176,26 +167,26 @@ def get_item_locations_based_on_batch_nos(item_doc):
 	return locations
 
 @frappe.whitelist()
-def make_delivery_note(source_name, target_doc=None):
+def create_delivery_note(source_name, target_doc=None):
 	pick_list = frappe.get_doc('Pick List', source_name)
 	sales_orders = [d.sales_order for d in pick_list.locations]
 	sales_orders = set(sales_orders)
 
 	delivery_note = None
 	for sales_order in sales_orders:
-		delivery_note = make_delivery_note_from_sales_order(sales_order,
+		delivery_note = create_delivery_note_from_sales_order(sales_order,
 			delivery_note, skip_item_mapping=True)
 
 	for location in pick_list.locations:
 		sales_order_item = frappe.get_cached_doc('Sales Order Item', location.sales_order_item)
 		item_table_mapper = {
-			"doctype": "Delivery Note Item",
-			"field_map": {
-				"rate": "rate",
-				"name": "so_detail",
-				"parent": "against_sales_order",
+			'doctype': 'Delivery Note Item',
+			'field_map': {
+				'rate': 'rate',
+				'name': 'so_detail',
+				'parent': 'against_sales_order',
 			},
-			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
+			'condition': lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 		}
 
 		dn_item = map_child_doc(sales_order_item, delivery_note, item_table_mapper)
@@ -210,11 +201,6 @@ def make_delivery_note(source_name, target_doc=None):
 
 	return delivery_note
 
-
-def set_delivery_note_missing_values(target):
-	target.run_method("set_missing_values")
-	target.run_method("set_po_nos")
-	target.run_method("calculate_taxes_and_totals")
 
 def update_delivery_note_item(source, target, delivery_note):
 	cost_center = frappe.db.get_value("Project", delivery_note.project, "cost_center")
@@ -237,6 +223,56 @@ def update_delivery_note_item(source, target, delivery_note):
 			})
 
 	target.cost_center = cost_center
+
+def set_delivery_note_missing_values(target):
+	target.run_method('set_missing_values')
+	target.run_method('set_po_nos')
+	target.run_method('calculate_taxes_and_totals')
+
+
+@frappe.whitelist()
+def create_stock_entry(pick_list, qty):
+	pick_list = frappe.get_doc(json.loads(pick_list))
+	work_order = frappe.get_doc("Work Order", pick_list.get('work_order'))
+	if not qty:
+		qty = work_order.qty - work_order.material_transferred_for_manufacturing
+	if not qty: return
+
+	stock_entry = frappe.new_doc('Stock Entry')
+	stock_entry.purpose = 'Material Transfer For Manufacture'
+	stock_entry.set_stock_entry_type()
+	stock_entry.work_order = work_order.name
+	stock_entry.company = work_order.company
+	stock_entry.from_bom = 1
+	stock_entry.bom_no = work_order.bom_no
+	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
+	stock_entry.fg_completed_qty = (flt(work_order.qty) - flt(work_order.produced_qty))
+	if work_order.bom_no:
+		stock_entry.inspection_required = frappe.db.get_value('BOM',
+			work_order.bom_no, 'inspection_required')
+
+	is_wip_warehouse_group = frappe.db.get_value('Warehouse', work_order.wip_warehouse, 'is_group')
+	if not (is_wip_warehouse_group and work_order.skip_transfer):
+		wip_warehouse = work_order.wip_warehouse
+	else:
+		wip_warehouse = None
+	stock_entry.to_warehouse = wip_warehouse
+
+	stock_entry.project = work_order.project
+
+	for location in pick_list.locations:
+		item = frappe._dict()
+		item.item_code = location.item_code
+		item.s_warehouse = location.warehouse
+		item.t_warehouse = wip_warehouse
+		item.qty = location.qty
+		item.uom = location.uom
+		item.conversion_factor = location.conversion_factor
+		item.stock_uom = location.stock_uom
+
+		stock_entry.append('items', item)
+
+	return stock_entry.as_dict()
 
 @frappe.whitelist()
 def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filters, as_dict):

@@ -28,8 +28,11 @@ frappe.ui.form.on('Pick List', {
 				frm.call('set_item_locations');
 			}).addClass('btn-primary');
 		}
-
-		frm.add_custom_button(__('Delivery Note'), () => frm.trigger('make_delivery_note'), __('Create'));
+		if (frm.doc.items_based_on === 'Sales Order') {
+			frm.add_custom_button(__('Delivery Note'), () => frm.trigger('create_delivery_note'), __('Create'));
+		} else {
+			frm.add_custom_button(__('Stock Entry'), () => frm.trigger('create_stock_entry'), __('Create'));
+		}
 	},
 	work_order: (frm) => {
 		frm.clear_table('items');
@@ -42,10 +45,21 @@ frappe.ui.form.on('Pick List', {
 	items_based_on: (frm) => {
 		frm.trigger('add_get_items_button');
 	},
-	make_delivery_note(frm) {
+	create_delivery_note(frm) {
 		frappe.model.open_mapped_doc({
-			method: 'erpnext.stock.doctype.pick_list.pick_list.make_delivery_note',
+			method: 'erpnext.stock.doctype.pick_list.pick_list.create_delivery_note',
 			frm: frm
+		});
+	},
+	create_stock_entry(frm) {
+		// TODO: show dialog for qty
+
+		frappe.xcall('erpnext.stock.doctype.pick_list.pick_list.create_stock_entry', {
+			'pick_list': frm.doc,
+			'qty': 1
+		}).then(stock_entry => {
+			frappe.model.sync(stock_entry);
+			frappe.set_route("Form", 'Stock Entry', stock_entry.name);
 		});
 	},
 	add_get_items_button(frm) {
