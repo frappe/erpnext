@@ -41,7 +41,7 @@ class PurchaseInvoice(BuyingController):
 			'source_dt': 'Purchase Invoice Item',
 			'target_dt': 'Purchase Order Item',
 			'join_field': 'po_detail',
-			'target_field': 'billed_amt',
+			'target_field': 'billed_qty',
 			'target_parent_dt': 'Purchase Order',
 			'target_parent_field': 'per_billed',
 			'target_ref_field': 'qty',

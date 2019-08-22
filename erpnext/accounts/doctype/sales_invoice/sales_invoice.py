@@ -40,7 +40,7 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).__init__(*args, **kwargs)
 		self.status_updater = [{
 			'source_dt': 'Sales Invoice Item',
-			'target_field': 'billed_amt',
+			'target_field': 'billed_qty',
 			'target_ref_field': 'qty',
 			'target_dt': 'Sales Order Item',
 			'join_field': 'so_detail',

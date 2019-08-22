@@ -307,14 +307,14 @@ class StockController(AccountsController):
 
 		return serialized_items
 
-	def get_incoming_rate_for_sales_return(self, item_code, against_document):
+	def get_incoming_rate_for_sales_return(self, item_code, against_document_type, against_document):
 		incoming_rate = 0.0
-		if against_document and item_code:
+		if against_document_type and against_document and item_code:
 			incoming_rate = frappe.db.sql("""select abs(stock_value_difference / actual_qty)
 				from `tabStock Ledger Entry`
 				where voucher_type = %s and voucher_no = %s
 					and item_code = %s limit 1""",
-				(self.doctype, against_document, item_code))
+				(against_document_type, against_document, item_code))
 			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
 
 		return incoming_rate
@@ -334,7 +334,7 @@ class StockController(AccountsController):
 			"target_parent_dt": self.doctype,
 			"target_parent_field": "per_billed",
 			"target_ref_field": "qty",
-			"target_field": "billed_amt",
+			"target_field": "billed_qty",
 			"name": self.name,
 		}, update_modified)
 
