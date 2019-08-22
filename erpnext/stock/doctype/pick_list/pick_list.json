@@ -5,6 +5,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "purpose",
   "items_based_on",
   "customer",
   "work_order",
@@ -15,7 +16,8 @@
   "section_break_4",
   "items",
   "section_break_6",
-  "locations"
+  "locations",
+  "amended_from"
  ],
  "fields": [
   {
@@ -87,16 +89,36 @@
    "description": "Qty of raw materials will be decided based on the qty of the Finished Goods Item",
    "fieldname": "for_qty",
    "fieldtype": "Float",
-   "label": "Qty of Finished Goods Item"
+   "label": "Qty of Finished Goods Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Pick List",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "Material Transfer for manufacturing",
+   "fieldname": "purpose",
+   "fieldtype": "Select",
+   "label": "Purpose",
+   "options": "Material Transfer for manufacturing\nMaterial Issue\nMaterial Transfer\nDelivery against Sales Order"
   }
  ],
- "modified": "2019-08-22 09:50:01.099449",
+ "is_submittable": 1,
+ "modified": "2019-08-22 13:36:18.912659",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -104,8 +126,54 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "System Manager",
+   "role": "Stock Manager",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
