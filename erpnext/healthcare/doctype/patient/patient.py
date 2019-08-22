@@ -64,7 +64,9 @@ class Patient(Document):
 	def invoice_patient_registration(self):
 		frappe.db.set_value("Patient", self.name, "disabled", 0)
 		send_registration_sms(self)
-		if(frappe.get_value("Healthcare Settings", None, "registration_fee")>0):
+		healthcare_settings = frappe.get_single('Healthcare Settings')
+
+		if((healthcare_settings.registration_fee)>0):
 			company = frappe.defaults.get_user_default('company')
 			if not company:
 				company = frappe.db.get_value("Global Defaults", None, "default_company")
