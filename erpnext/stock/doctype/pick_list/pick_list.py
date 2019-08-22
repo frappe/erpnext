@@ -237,6 +237,7 @@ def create_stock_entry(pick_list):
 	work_order = frappe.get_doc("Work Order", pick_list.get('work_order'))
 
 	stock_entry = frappe.new_doc('Stock Entry')
+	stock_entry.pick_list = pick_list.get('name')
 	stock_entry.purpose = 'Material Transfer For Manufacture'
 	stock_entry.set_stock_entry_type()
 	stock_entry.work_order = work_order.name
@@ -264,11 +265,16 @@ def create_stock_entry(pick_list):
 		item.s_warehouse = location.warehouse
 		item.t_warehouse = wip_warehouse
 		item.qty = location.qty
+		item.transfer_qty = location.stock_qty
 		item.uom = location.uom
 		item.conversion_factor = location.conversion_factor
 		item.stock_uom = location.stock_uom
 
 		stock_entry.append('items', item)
+
+	stock_entry.set_incoming_rate()
+	stock_entry.set_actual_qty()
+	stock_entry.calculate_rate_and_amount(update_finished_item_rate=False)
 
 	return stock_entry.as_dict()
 
@@ -281,7 +287,7 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 			`tabWork Order`
 		WHERE
 			`status` not in ('Completed', 'Stopped')
-			AND `qty` > `produced_qty`
+			AND `qty` > `material_transferred_for_manufacturing`
 			AND `docstatus` = 1
 			AND `company` = %(company)s
 			AND `name` like %(txt)s
@@ -296,3 +302,6 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 			'page_length': frappe.utils.cint(page_length),
 			'company': filters.get('company')
 		}, as_dict=as_dict)
+
+def get_item_details(item_code):
+	pass

@@ -14,7 +14,9 @@
   "conversion_factor",
   "reference_section",
   "sales_order",
-  "sales_order_item"
+  "sales_order_item",
+  "material_request",
+  "material_request_item"
  ],
  "fields": [
   {
@@ -65,21 +67,34 @@
    "fieldname": "sales_order",
    "fieldtype": "Link",
    "label": "Sales Order",
-   "options": "Sales Order"
+   "options": "Sales Order",
+   "read_only": 1
   },
   {
    "fieldname": "sales_order_item",
    "fieldtype": "Data",
-   "label": "Sales Order Item"
+   "label": "Sales Order Item",
+   "read_only": 1
   },
   {
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "UOM Conversion Factor"
+  },
+  {
+   "fieldname": "material_request",
+   "fieldtype": "Link",
+   "label": "Material Request",
+   "options": "Material Request"
+  },
+  {
+   "fieldname": "material_request_item",
+   "fieldtype": "Data",
+   "label": "Material Request Item"
   }
  ],
  "istable": 1,
- "modified": "2019-08-14 18:38:28.867113",
+ "modified": "2019-08-22 14:19:19.725540",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List Reference Item",
