@@ -331,11 +331,11 @@ def create_duplicate_project(prev_doc, project_name):
 
 	task_list = frappe.get_all("Task", filters={
 		'project': prev_doc.get('name')
-	}, fields=['*'])
+	}, fields=['name'])
 	for task in task_list:
 		task = frappe.get_doc('Task', task)
-		new_task = frappe.copy_doc(task.name)
-		new_task.project = project
+		new_task = frappe.copy_doc(task)
+		new_task.project = project.name
 		new_task.insert()
 
 	return project
