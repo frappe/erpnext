@@ -145,6 +145,9 @@ class Lead(SellingController):
 		return address
 
 	def create_contact(self):
+		if not self.lead_name:
+			self.set_lead_name()
+
 		names = self.lead_name.split(" ")
 		if len(names) > 1:
 			first_name, last_name = names[0], " ".join(names[1:])
