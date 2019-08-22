@@ -596,6 +596,7 @@ erpnext.patches.v12_0.rename_pricing_rule_child_doctypes
 erpnext.patches.v12_0.move_target_distribution_from_parent_to_child
 erpnext.patches.v12_0.stock_entry_enhancements
 erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019 #25-06-2019
+erpnext.patches.v12_0.make_item_manufacturer
 erpnext.patches.v12_0.move_item_tax_to_item_tax_template
 erpnext.patches.v11_1.set_variant_based_on
 erpnext.patches.v11_1.woocommerce_set_creation_user
@@ -606,7 +607,6 @@ erpnext.patches.v11_1.delete_scheduling_tool
 erpnext.patches.v12_0.rename_tolerance_fields
 erpnext.patches.v12_0.make_custom_fields_for_bank_remittance #14-06-2019
 execute:frappe.delete_doc_if_exists("Page", "support-analytics")
-erpnext.patches.v12_0.make_item_manufacturer
 erpnext.patches.v12_0.remove_patient_medical_record_page
 erpnext.patches.v11_1.move_customer_lead_to_dynamic_column
 erpnext.patches.v11_1.set_default_action_for_quality_inspection
@@ -624,4 +624,6 @@ erpnext.patches.v11_1.update_default_supplier_in_item_defaults
 erpnext.patches.v12_0.update_due_date_in_gle
 erpnext.patches.v12_0.add_default_buying_selling_terms_in_company
 erpnext.patches.v12_0.update_ewaybill_field_position
+erpnext.patches.v12_0.create_accounting_dimensions_in_missing_doctypes
 erpnext.patches.v11_1.set_status_for_material_request_type_manufacture
+erpnext.patches.v12_0.generate_leave_ledger_entries

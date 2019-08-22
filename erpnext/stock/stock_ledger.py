@@ -363,8 +363,17 @@ class update_entries_after(object):
 			self.stock_queue.append([0, sle.incoming_rate or sle.outgoing_rate or self.valuation_rate])
 
 	def check_if_allow_zero_valuation_rate(self, voucher_type, voucher_detail_no):
-		ref_item_dt = voucher_type + (" Detail" if voucher_type == "Stock Entry" else " Item")
-		return frappe.db.get_value(ref_item_dt, voucher_detail_no, "allow_zero_valuation_rate")
+		ref_item_dt = ""
+
+		if voucher_type == "Stock Entry":
+			ref_item_dt = voucher_type + " Detail"
+		elif voucher_type in ["Purchase Invoice", "Sales Invoice", "Delivery Note", "Purchase Receipt"]:
+			ref_item_dt = voucher_type + " Item"
+
+		if ref_item_dt:
+			return frappe.db.get_value(ref_item_dt, voucher_detail_no, "allow_zero_valuation_rate")
+		else:
+			return 0
 
 	def get_sle_before_datetime(self):
 		"""get previous stock ledger entry before current time-bucket"""
@@ -455,16 +464,22 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 
 	last_valuation_rate = frappe.db.sql("""select valuation_rate
 		from `tabStock Ledger Entry`
-		where item_code = %s and warehouse = %s
-		and valuation_rate >= 0
-		order by posting_date desc, posting_time desc, creation desc limit 1""", (item_code, warehouse))
+		where
+			item_code = %s
+			AND warehouse = %s
+			AND valuation_rate >= 0
+			AND NOT (voucher_no = %s AND voucher_type = %s)
+		order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse, voucher_no, voucher_type))
 
 	if not last_valuation_rate:
 		# Get valuation rate from last sle for the item against any warehouse
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry`
-			where item_code = %s and valuation_rate > 0
-			order by posting_date desc, posting_time desc, creation desc limit 1""", item_code)
+			where
+				item_code = %s
+				AND valuation_rate > 0
+				AND NOT(voucher_no = %s AND voucher_type = %s)
+			order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, voucher_no, voucher_type))
 
 	if last_valuation_rate:
 		return flt(last_valuation_rate[0][0]) # as there is previous records, it might come with zero rate
