@@ -36,6 +36,7 @@ class Lead(SellingController):
 
 	def validate(self):
 		self.set_lead_name()
+		self.set_title()
 		self._prev = frappe._dict({
 			"contact_date": frappe.db.get_value("Lead", self.name, "contact_date") if (not cint(self.is_new())) else None,
 			"ends_on": frappe.db.get_value("Lead", self.name, "ends_on") if (not cint(self.is_new())) else None,
@@ -119,6 +120,12 @@ class Lead(SellingController):
 				frappe.throw(_("A Lead requires either a person's name or an organization's name"))
 
 			self.lead_name = self.company_name
+
+	def set_title(self):
+		if self.organization_lead:
+			self.title = self.company_name
+		else:
+			self.title = self.lead_name
 
 	def create_address(self):
 		address_fields = ["address_title", "address_line1", "address_line2",
