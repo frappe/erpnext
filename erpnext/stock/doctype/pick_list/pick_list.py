@@ -231,12 +231,9 @@ def set_delivery_note_missing_values(target):
 
 
 @frappe.whitelist()
-def create_stock_entry(pick_list, qty):
+def create_stock_entry(pick_list):
 	pick_list = frappe.get_doc(json.loads(pick_list))
 	work_order = frappe.get_doc("Work Order", pick_list.get('work_order'))
-	if not qty:
-		qty = work_order.qty - work_order.material_transferred_for_manufacturing
-	if not qty: return
 
 	stock_entry = frappe.new_doc('Stock Entry')
 	stock_entry.purpose = 'Material Transfer For Manufacture'
@@ -246,7 +243,7 @@ def create_stock_entry(pick_list, qty):
 	stock_entry.from_bom = 1
 	stock_entry.bom_no = work_order.bom_no
 	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
-	stock_entry.fg_completed_qty = (flt(work_order.qty) - flt(work_order.produced_qty))
+	stock_entry.fg_completed_qty = pick_list.qty
 	if work_order.bom_no:
 		stock_entry.inspection_required = frappe.db.get_value('BOM',
 			work_order.bom_no, 'inspection_required')

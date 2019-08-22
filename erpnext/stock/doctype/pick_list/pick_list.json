@@ -8,6 +8,7 @@
   "items_based_on",
   "customer",
   "work_order",
+  "qty",
   "column_break_4",
   "parent_warehouse",
   "company",
@@ -59,8 +60,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Customer",
-   "options": "Customer",
-   "reqd": 1
+   "options": "Customer"
   },
   {
    "depends_on": "eval:doc.items_based_on===\"Work Order\"",
@@ -81,9 +81,16 @@
    "fieldtype": "Table",
    "label": "Item Locations",
    "options": "Pick List Item"
+  },
+  {
+   "depends_on": "work_order",
+   "description": "Qty of raw materials will be decided based on the qty of the Finished Goods Item",
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Qty of Finished Goods Item"
   }
  ],
- "modified": "2019-08-20 16:57:11.006221",
+ "modified": "2019-08-22 09:50:01.099449",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
