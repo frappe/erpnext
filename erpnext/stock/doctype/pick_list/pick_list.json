@@ -8,7 +8,7 @@
   "items_based_on",
   "customer",
   "work_order",
-  "qty",
+  "for_qty",
   "column_break_4",
   "parent_warehouse",
   "company",
@@ -85,7 +85,7 @@
   {
    "depends_on": "work_order",
    "description": "Qty of raw materials will be decided based on the qty of the Finished Goods Item",
-   "fieldname": "qty",
+   "fieldname": "for_qty",
    "fieldtype": "Float",
    "label": "Qty of Finished Goods Item"
   }

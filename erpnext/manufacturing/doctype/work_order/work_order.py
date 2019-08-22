@@ -711,13 +711,29 @@ def get_work_order_operation_data(work_order, operation, workstation):
 
 @frappe.whitelist()
 def create_pick_list(source_name, target_doc=None):
+	pick_list = json.loads(target_doc)
+	max_finished_goods_qty = frappe.db.get_value('Work Order', source_name, 'qty')
 	def update_item_quantity(source, target, source_parent):
-		qty = source.required_qty - source.transferred_qty
-		target.qty = qty
-		target.stock_qty = qty
-		target.uom = frappe.get_value('Item', source.item_code, 'stock_uom')
-		target.stock_uom = target.uom
-		target.conversion_factor = 1
+		# qty = source.required_qty - source.transferred_qty
+		# target.qty = qty
+
+		pending_to_issue = flt(source.required_qty) - flt(source.transferred_qty)
+		desire_to_transfer = flt(source.required_qty) / max_finished_goods_qty * flt(pick_list.get('for_qty'))
+
+		qty = 0
+		if desire_to_transfer <= pending_to_issue:
+			qty = desire_to_transfer
+		elif pending_to_issue > 0:
+			qty = pending_to_issue
+
+		if qty:
+			target.qty = qty
+			target.stock_qty = qty
+			target.uom = frappe.get_value('Item', source.item_code, 'stock_uom')
+			target.stock_uom = target.uom
+			target.conversion_factor = 1
+		else:
+			target.delete()
 
 	doc = get_mapped_doc("Work Order", source_name, {
 		"Work Order": {
@@ -732,5 +748,18 @@ def create_pick_list(source_name, target_doc=None):
 			"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty)
 		},
 	}, target_doc)
+
+	# # aggregate qty for same item
+	# item_map = frappe._dict()
+	# for item in doc.items:
+	# 	item.idx = None
+	# 	if not item_map.get(item.item_code):
+	# 		item_map[item.item_code] = item
+	# 	else:
+	# 		item_map[item.item_code].qty += item.qty
+	# 		item_map[item.item_code].stock_qty += item.stock_qty
+
+	# doc.delete_key('items')
+	# doc.set('items', item_map.values())
 
 	return doc

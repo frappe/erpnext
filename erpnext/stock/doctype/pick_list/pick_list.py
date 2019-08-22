@@ -61,6 +61,7 @@ def get_items_with_warehouse_and_quantity(item_doc, from_warehouses, item_locati
 		if uom_must_be_whole_number:
 			qty = floor(qty)
 			stock_qty = qty * item_doc.conversion_factor
+			if not stock_qty: break
 
 		locations.append({
 			'qty': qty,
@@ -243,7 +244,7 @@ def create_stock_entry(pick_list):
 	stock_entry.from_bom = 1
 	stock_entry.bom_no = work_order.bom_no
 	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
-	stock_entry.fg_completed_qty = pick_list.qty
+	stock_entry.fg_completed_qty = pick_list.for_qty
 	if work_order.bom_no:
 		stock_entry.inspection_required = frappe.db.get_value('BOM',
 			work_order.bom_no, 'inspection_required')

@@ -28,32 +28,35 @@ frappe.ui.form.on('Pick List', {
 				frm.call('set_item_locations');
 			}).addClass('btn-primary');
 		}
-		if (frm.doc.items_based_on === 'Sales Order') {
-			frm.add_custom_button(__('Delivery Note'), () => frm.trigger('create_delivery_note'), __('Create'));
-		} else {
-			frm.add_custom_button(__('Stock Entry'), () => frm.trigger('create_stock_entry'), __('Create'));
+		if (frm.doc.docstatus == 1) {
+			if (frm.doc.items_based_on === 'Sales Order') {
+				frm.add_custom_button(__('Delivery Note'), () => frm.trigger('create_delivery_note'), __('Create'));
+			} else {
+				frm.add_custom_button(__('Stock Entry'), () => frm.trigger('create_stock_entry'), __('Create'));
+			}
 		}
 	},
 	work_order: (frm) => {
-		frm.clear_table('items');
 		frappe.db.get_value('Work Order',
 			frm.doc.work_order,
-			['qty', 'produced_qty']
+			['qty', 'material_transferred_for_manufacturing']
 		).then(data => {
 			let qty_data = data.message;
-			let max = qty_data.qty - qty_data.produced_qty;
+			let max = qty_data.qty - qty_data.material_transferred_for_manufacturing;
 			frappe.prompt({
 				fieldtype: 'Float',
-				label: __('Qty'),
+				label: __('Qty of Finished Goods Item'),
 				fieldname: 'qty',
 				description: __('Max: {0}', [max]),
 				default: max
 			}, (data) => {
-				frm.set_value('qty', data.qty);
+				frm.set_value('for_qty', data.qty);
 				if (data.qty > max) {
 					frappe.msgprint(__('Quantity must not be more than {0}', [max]));
 					return;
 				}
+				frm.clear_table('items');
+				frm.clear_table('locations');
 				erpnext.utils.map_current_doc({
 					method: 'erpnext.manufacturing.doctype.work_order.work_order.create_pick_list',
 					target: frm,
@@ -63,6 +66,8 @@ frappe.ui.form.on('Pick List', {
 		});
 	},
 	items_based_on: (frm) => {
+		frm.clear_table('items');
+		frm.clear_table('locations');
 		frm.trigger('add_get_items_button');
 	},
 	create_delivery_note(frm) {
@@ -107,3 +112,13 @@ frappe.ui.form.on('Pick List', {
 		});
 	}
 });
+
+
+// frappe.ui.form.on('Pick List Reference Item', {
+// 	item_code: (frm, cdt, cdn) => {
+// 		let row = locals[cdt][cdn];
+// 		if (row.item_code) {
+// 			frappe.xcall('');
+// 		}
+// 	}
+// });
