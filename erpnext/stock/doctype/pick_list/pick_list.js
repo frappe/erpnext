@@ -36,10 +36,30 @@ frappe.ui.form.on('Pick List', {
 	},
 	work_order: (frm) => {
 		frm.clear_table('items');
-		erpnext.utils.map_current_doc({
-			method: 'erpnext.manufacturing.doctype.work_order.work_order.create_pick_list',
-			target: frm,
-			source_name: frm.doc.work_order
+		frappe.db.get_value('Work Order',
+			frm.doc.work_order,
+			['qty', 'produced_qty']
+		).then(data => {
+			let qty_data = data.message;
+			let max = qty_data.qty - qty_data.produced_qty;
+			frappe.prompt({
+				fieldtype: 'Float',
+				label: __('Qty'),
+				fieldname: 'qty',
+				description: __('Max: {0}', [max]),
+				default: max
+			}, (data) => {
+				frm.set_value('qty', data.qty);
+				if (data.qty > max) {
+					frappe.msgprint(__('Quantity must not be more than {0}', [max]));
+					return;
+				}
+				erpnext.utils.map_current_doc({
+					method: 'erpnext.manufacturing.doctype.work_order.work_order.create_pick_list',
+					target: frm,
+					source_name: frm.doc.work_order
+				});
+			}, __("Select Quantity"), __('Get Items'));
 		});
 	},
 	items_based_on: (frm) => {
@@ -52,11 +72,8 @@ frappe.ui.form.on('Pick List', {
 		});
 	},
 	create_stock_entry(frm) {
-		// TODO: show dialog for qty
-
 		frappe.xcall('erpnext.stock.doctype.pick_list.pick_list.create_stock_entry', {
 			'pick_list': frm.doc,
-			'qty': 1
 		}).then(stock_entry => {
 			frappe.model.sync(stock_entry);
 			frappe.set_route("Form", 'Stock Entry', stock_entry.name);
