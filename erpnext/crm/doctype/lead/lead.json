@@ -54,7 +54,8 @@
   "website",
   "territory",
   "unsubscribed",
-  "blog_subscriber"
+  "blog_subscriber",
+  "title"
  ],
  "fields": [
   {
@@ -409,6 +410,13 @@
    "fieldtype": "Data",
    "label": "Postal Code",
    "options": "Country"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-user",
@@ -477,5 +485,5 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "lead_name"
+ "title_field": "title"
 }
