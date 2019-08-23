@@ -6,7 +6,6 @@
  "engine": "InnoDB",
  "field_order": [
   "purpose",
-  "items_based_on",
   "customer",
   "work_order",
   "for_qty",
@@ -48,16 +47,7 @@
    "options": "Warehouse"
   },
   {
-   "default": "Work Order",
-   "fieldname": "items_based_on",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Items Based On",
-   "options": "Sales Order\nWork Order",
-   "reqd": 1
-  },
-  {
-   "depends_on": "eval:doc.items_based_on===\"Sales Order\"",
+   "depends_on": "eval:doc.purpose==='Delivery against Sales Order'",
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -65,7 +55,7 @@
    "options": "Customer"
   },
   {
-   "depends_on": "eval:doc.items_based_on===\"Work Order\"",
+   "depends_on": "eval:doc.purpose==='Material Transfer for Manufacture'",
    "fieldname": "work_order",
    "fieldtype": "Link",
    "label": "Work Order",
@@ -102,15 +92,15 @@
    "read_only": 1
   },
   {
-   "default": "Material Transfer for manufacturing",
+   "default": "Material Transfer for Manufacture",
    "fieldname": "purpose",
    "fieldtype": "Select",
    "label": "Purpose",
-   "options": "Material Transfer for manufacturing\nMaterial Issue\nMaterial Transfer\nDelivery against Sales Order"
+   "options": "Material Transfer for Manufacture\nMaterial Issue\nMaterial Transfer\nDelivery against Sales Order"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-22 13:36:18.912659",
+ "modified": "2019-08-22 16:58:07.270447",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

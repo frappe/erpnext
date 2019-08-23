@@ -23,16 +23,21 @@ frappe.ui.form.on('Pick List', {
 	refresh: (frm) => {
 		frm.trigger('add_get_items_button');
 
-		if (frm.doc.items && (frm.doc.items.length > 1 || frm.doc.items[0].item_code)) {
+		if (frm.doc.items && (frm.doc.items.length > 1 || frm.doc.items[0].item_code) && frm.doc.docstatus === 0) {
 			frm.add_custom_button(__('Get Item Locations'), () => {
 				frm.call('set_item_locations');
 			}).addClass('btn-primary');
 		}
-		if (frm.doc.docstatus == 1) {
-			if (frm.doc.items_based_on === 'Sales Order') {
+		if (frm.doc.docstatus === 1) {
+			if (frm.doc.purpose === 'Delivery against Sales Order') {
 				frm.add_custom_button(__('Delivery Note'), () => frm.trigger('create_delivery_note'), __('Create'));
 			} else {
-				frm.add_custom_button(__('Stock Entry'), () => frm.trigger('create_stock_entry'), __('Create'));
+				frappe.xcall('erpnext.stock.doctype.pick_list.pick_list.stock_entry_exists', {
+					'pick_list_name': frm.doc.name
+				}).then(exists => {
+					if (exists) return;
+					frm.add_custom_button(__('Stock Entry'), () => frm.trigger('create_stock_entry'), __('Create'));
+				});
 			}
 		}
 	},
@@ -65,7 +70,7 @@ frappe.ui.form.on('Pick List', {
 			}, __("Select Quantity"), __('Get Items'));
 		});
 	},
-	items_based_on: (frm) => {
+	purpose: (frm) => {
 		frm.clear_table('items');
 		frm.clear_table('locations');
 		frm.trigger('add_get_items_button');
@@ -85,8 +90,8 @@ frappe.ui.form.on('Pick List', {
 		});
 	},
 	add_get_items_button(frm) {
-		let source_doctype = frm.doc.items_based_on;
-		if (source_doctype != 'Sales Order') return;
+		let purpose = frm.doc.purpose;
+		if (purpose != 'Delivery against Sales Order' || frm.doc.docstatus !== 0) return;
 		let get_query_filters = {
 			docstatus: 1,
 			per_delivered: ['<', 100],
