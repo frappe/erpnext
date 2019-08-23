@@ -35,13 +35,13 @@ frappe.ui.form.on('Invoice Discounting', {
 		frm.set_query(fieldname, () => { return { "filters": filters }; });
 	},
 
-	refresh_filters:(frm) =>{
-		let invoices_account = Object.keys(frm.doc.invoices).map(function(key) {
+	refresh_filters: (frm) =>{
+		let invoice_accounts = Object.keys(frm.doc.invoices).map(function(key) {
 			return frm.doc.invoices[key].debit_to;
 		});
 		let filters = [
 			["account_type", "=", "Receivable"],
-			["name", "not in", invoices_account]
+			["name", "not in", invoice_accounts]
 		];
 		frm.events.filter_accounts("accounts_receivable_credit", frm, filters);
 		frm.events.filter_accounts("accounts_receivable_discounted", frm, filters);
@@ -51,19 +51,19 @@ frappe.ui.form.on('Invoice Discounting', {
 	refresh: (frm) => {
 		frm.events.show_general_ledger(frm);
 
-		if(frm.doc.docstatus === 0) {
+		if (frm.doc.docstatus === 0) {
 			frm.add_custom_button(__('Get Invoices'), function() {
 				frm.events.get_invoices(frm);
 			});
 		}
 
-		if(frm.doc.docstatus === 1 && frm.doc.status !== "Settled") {
-			if(frm.doc.status == "Sanctioned") {
+		if (frm.doc.docstatus === 1 && frm.doc.status !== "Settled") {
+			if (frm.doc.status == "Sanctioned") {
 				frm.add_custom_button(__('Disburse Loan'), function() {
 					frm.events.create_disbursement_entry(frm);
 				}).addClass("btn-primary");
 			}
-			if(frm.doc.status == "Disbursed") {
+			if (frm.doc.status == "Disbursed") {
 				frm.add_custom_button(__('Close Loan'), function() {
 					frm.events.close_loan(frm);
 				}).addClass("btn-primary");
@@ -80,7 +80,7 @@ frappe.ui.form.on('Invoice Discounting', {
 	},
 
 	set_end_date: (frm) => {
-		if(frm.doc.loan_start_date && frm.doc.loan_period) {
+		if (frm.doc.loan_start_date && frm.doc.loan_period) {
 			let end_date = frappe.datetime.add_days(frm.doc.loan_start_date, frm.doc.loan_period);
 			frm.set_value("loan_end_date", end_date);
 		}
