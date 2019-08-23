@@ -161,7 +161,7 @@ class TransactionBase(StatusUpdater):
 			select MAX(timestamp(posting_date, posting_time)) as posting_time
 			from `tabStock Ledger Entry`
 			where docstatus = 1 """
-			.format(doctype=self.doctype))[0][0]
+			.format(doctype=self.doctype))[0][0] #nosec
 
 		cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
 
