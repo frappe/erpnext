@@ -141,31 +141,33 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 		}
 	},
 
-	order_by : function() {
-		if (this.frm.doc.order_by_fifo == 1 && this.frm.doc.order_by == "Payment Date"){
-			var me  = this;
+	order_by: function () {
+		let me = this;
+		if (this.frm.doc.order_by_fifo == 1 && this.frm.doc.order_by == "Payment Date") {
 			return this.frm.call({
-				doc : me.frm.doc,
-				args: { invoice_list: me.frm.doc.invoices ,
-				sort_key: 'invoice_date'},
+				doc: me.frm.doc,
+				args: {
+					invoice_list: me.frm.doc.invoices,
+					sort_key: 'invoice_date'
+				},
 				method: 'sort_invoice_entries',
-				callback: function(){
-					return ;
+				callback: function () {
+					return;
 				}
 
 			});
 		}
-		else{
-			var me  = this;
+		else {
 			return this.frm.call({
-				doc : me.frm.doc,
-				args: { invoice_list: me.frm.doc.invoices ,
-				sort_key: 'invoice_due_date'},
+				doc: me.frm.doc,
+				args: {
+					invoice_list: me.frm.doc.invoices,
+					sort_key: 'invoice_due_date'
+				},
 				method: 'sort_invoice_entries',
-				callback: function(){
-					return ;
+				callback: function () {
+					return;
 				}
-
 			});
 		}
 	},
@@ -317,17 +319,17 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 		refresh_field("payments");
 	},
 
-	set_entry_options: function() {
+	set_entry_options: function () {
 		var entries = [];
 
-		$.each(this.frm.doc.payments || [], (i,row) => {
+		$.each(this.frm.doc.payments || [], (i, row) => {
 			if (row.reference_name && !in_list(entries, row.reference_name))
-			entries.push( row.reference_type + " | " + row.reference_name);
+				entries.push(row.reference_type + " | " + row.reference_name);
 		});
 
-		if (entries){
-			frappe.meta.get_docfield("Payment Reconciliation Invoice","payment_jv_number",
-			this.frm.doc.name).options = "\n" + entries.join("\n");
+		if (entries) {
+			frappe.meta.get_docfield("Payment Reconciliation Invoice", "payment_jv_number",
+				this.frm.doc.name).options = "\n" + entries.join("\n");
 		}
 	},
 
