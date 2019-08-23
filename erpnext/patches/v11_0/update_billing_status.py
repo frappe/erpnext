@@ -79,9 +79,13 @@ def execute():
 		name = name.name
 		doc = frappe.get_doc("Delivery Note", name)
 		doc.update_prevdoc_status()
+		if doc.is_return:
+			doc.update_billing_percentage()
 
 	pr_names = frappe.get_all("Purchase Receipt", {"docstatus": 1})
 	for name in pr_names:
 		name = name.name
 		doc = frappe.get_doc("Purchase Receipt", name)
 		doc.update_prevdoc_status()
+		if doc.is_return:
+			doc.update_billing_percentage()

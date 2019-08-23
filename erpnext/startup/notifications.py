@@ -36,7 +36,7 @@ def get_notification_config():
 			},
 			"Job Applicant": {"status": "Open"},
 			"Delivery Note": {
-				"status": ("not in", ("Completed", "Closed")),
+				"status": ("not in", ("Completed", "Return", "Closed")),
 				"docstatus": ("<", 2)
 			},
 			"Stock Entry": {"docstatus": 0},
@@ -52,7 +52,7 @@ def get_notification_config():
 				"docstatus": ("<", 2)
 			},
 			"Purchase Receipt": {
-				"status": ("not in", ("Completed", "Closed")),
+				"status": ("not in", ("Completed", "Return", "Closed")),
 				"docstatus": ("<", 2)
 			},
 			"Landed Cost Voucher": {
