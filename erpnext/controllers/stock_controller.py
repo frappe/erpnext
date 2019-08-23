@@ -333,10 +333,30 @@ class StockController(AccountsController):
 			"target_dt": self.doctype + " Item",
 			"target_parent_dt": self.doctype,
 			"target_parent_field": "per_billed",
-			"target_ref_field": "qty",
+			"target_ref_field": "received_qty" if self.doctype in ["Purchase Receipt", "Purchase Invoice"] else "qty",
 			"target_field": "billed_qty",
 			"name": self.name,
 		}, update_modified)
+
+		if self.meta.get_field('per_returned'):
+			self._update_percent_field({
+				"target_dt": self.doctype + " Item",
+				"target_parent_dt": self.doctype,
+				"target_parent_field": "per_returned",
+				"target_ref_field": "received_qty" if self.doctype in ["Purchase Receipt", "Purchase Invoice"] else "qty",
+				"target_field": "returned_qty",
+				"name": self.name,
+			}, update_modified)
+
+			if self.meta.get_field('per_completed'):
+				self._update_percent_field({
+					"target_dt": self.doctype + " Item",
+					"target_parent_dt": self.doctype,
+					"target_parent_field": "per_completed",
+					"target_ref_field": "received_qty" if self.doctype in ["Purchase Receipt", "Purchase Invoice"] else "qty",
+					"target_field": "(billed_qty + returned_qty)",
+					"name": self.name,
+				}, update_modified)
 
 	def validate_inspection(self):
 		'''Checks if quality inspection is set for Items that require inspection.

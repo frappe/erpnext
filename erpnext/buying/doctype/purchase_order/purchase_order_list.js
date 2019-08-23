@@ -1,23 +1,23 @@
 frappe.listview_settings['Purchase Order'] = {
 	add_fields: ["base_grand_total", "company", "currency", "supplier",
-		"supplier_name", "per_received", "per_billed", "status"],
+		"supplier_name", "per_received", "per_billed", "per_completed", "status"],
 	get_indicator: function (doc) {
 		if (doc.status === "Closed") {
 			return [__("Closed"), "green", "status,=,Closed"];
 		} else if (doc.status === "Delivered") {
 			return [__("Delivered"), "green", "status,=,Closed"];
 		} else if (flt(doc.per_received, 2) < 100 && doc.status !== "Closed") {
-			if (flt(doc.per_billed, 2) < 100) {
+			if (flt(doc.per_completed, 2) < 100) {
 				return [__("To Receive and Bill"), "orange",
-					"per_received,<,100|per_billed,<,100|status,!=,Closed"];
+					"per_received,<,100|per_completed,<,100|status,!=,Closed"];
 			} else {
 				return [__("To Receive"), "orange",
-					"per_received,<,100|per_billed,=,100|status,!=,Closed"];
+					"per_received,<,100|per_completed,=,100|status,!=,Closed"];
 			}
-		} else if (flt(doc.per_received, 2) == 100 && flt(doc.per_billed, 2) < 100 && doc.status !== "Closed") {
-			return [__("To Bill"), "orange", "per_received,=,100|per_billed,<,100|status,!=,Closed"];
-		} else if (flt(doc.per_received, 2) == 100 && flt(doc.per_billed, 2) == 100 && doc.status !== "Closed") {
-			return [__("Completed"), "green", "per_received,=,100|per_billed,=,100|status,!=,Closed"];
+		} else if (flt(doc.per_received, 2) == 100 && flt(doc.per_completed, 2) < 100 && doc.status !== "Closed") {
+			return [__("To Bill"), "orange", "per_received,=,100|per_completed,<,100|status,!=,Closed"];
+		} else if (flt(doc.per_received, 2) == 100 && flt(doc.per_completed, 2) == 100 && doc.status !== "Closed") {
+			return [__("Completed"), "green", "per_received,=,100|per_completed,=,100|status,!=,Closed"];
 		}
 	},
 	onload: function (listview) {

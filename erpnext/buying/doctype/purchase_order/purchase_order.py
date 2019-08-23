@@ -384,7 +384,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 			target.set_advances()
 
 	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) - flt(obj.billed_qty)
+		target.qty = flt(obj.qty) - flt(obj.billed_qty) - flt(obj.returned_qty)
 
 	fields = {
 		"Purchase Order": {

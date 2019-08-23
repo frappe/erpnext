@@ -15,7 +15,7 @@ from frappe.model.naming import set_name_by_naming_series
 
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.utils import get_account_currency
-from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
+from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so, update_billed_amount_based_on_dn
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.assets.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal
@@ -47,14 +47,74 @@ class SalesInvoice(SellingController):
 			'target_parent_dt': 'Sales Order',
 			'target_parent_field': 'per_billed',
 			'source_field': 'qty',
-			'join_field': 'so_detail',
 			'percent_join_field': 'sales_order',
 			'status_field': 'billing_status',
 			'keyword': 'Billed',
 			'overflow_type': 'billing',
 			'extra_cond': """ and exists(select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent
-				and (is_return=0 or update_billed_amount_in_sales_order=1))"""
+				and (is_return=0 or reopen_order=1))"""
+		},
+		{
+			'source_dt': 'Sales Invoice Item',
+			'update_children': self.update_billing_status_in_dn,
+			'target_field': 'billed_qty',
+			'target_ref_field': 'qty',
+			'target_dt': 'Delivery Note Item',
+			'join_field': 'dn_detail',
+			'target_parent_dt': 'Delivery Note',
+			'target_parent_field': 'per_billed',
+		},
+		{
+			'source_dt': 'Sales Invoice Item',
+			'target_dt': 'Sales Order Item',
+			'join_field': 'so_detail',
+			'target_field': '(billed_qty + returned_qty)',
+			'update_children': False,
+			'target_ref_field': 'qty',
+			'target_parent_dt': 'Sales Order',
+			'target_parent_field': 'per_completed',
+			'percent_join_field': 'sales_order'
 		}]
+
+	def update_status_updater_args(self):
+		if cint(self.update_stock):
+			self.status_updater.append({
+				'source_dt':'Sales Invoice Item',
+				'target_dt':'Sales Order Item',
+				'target_parent_dt':'Sales Order',
+				'target_parent_field':'per_delivered',
+				'target_field':'delivered_qty',
+				'target_ref_field':'qty',
+				'source_field':'qty',
+				'join_field':'so_detail',
+				'percent_join_field':'sales_order',
+				'status_field':'delivery_status',
+				'keyword':'Delivered',
+				'second_source_dt': 'Delivery Note Item',
+				'second_source_field': 'qty',
+				'second_join_field': 'so_detail',
+				'overflow_type': 'delivery',
+				'extra_cond': """ and exists(select name from `tabSales Invoice`
+					where name=`tabSales Invoice Item`.parent and update_stock = 1 and (is_return=0 or reopen_order=1))""",
+				'second_source_extra_cond': """ and exists (select name from `tabDelivery Note`
+					where name=`tabDelivery Note Item`.parent and (is_return=0 or reopen_order=1))""",
+			})
+			if cint(self.is_return):
+				self.status_updater.append({
+					'source_dt': 'Sales Invoice Item',
+					'target_dt': 'Sales Order Item',
+					'join_field': 'so_detail',
+					'target_field': 'total_returned_qty',
+					'target_parent_dt': 'Sales Order',
+					'source_field': '-1 * qty',
+					'second_source_dt': 'Delivery Note Item',
+					'second_source_field': '-1 * qty',
+					'second_join_field': 'so_detail',
+					'extra_cond': """ and exists (select name from `tabSales Invoice`
+						where name=`tabSales Invoice Item`.parent and is_return=1 and update_stock=1)""",
+					'second_source_extra_cond': """ and exists (select name from `tabDelivery Note`
+						where name=`tabDelivery Note Item`.parent and is_return=1)"""
+				})
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
@@ -118,7 +178,7 @@ class SalesInvoice(SellingController):
 			self.validate_item_code()
 			self.validate_warehouse()
 			self.update_current_stock()
-			self.validate_delivery_note()
+			self.validate_delivery_note_if_update_stock()
 
 		self.validate_update_stock_mandatory()
 
@@ -169,13 +229,8 @@ class SalesInvoice(SellingController):
 
 		self.check_prev_docstatus()
 
-		if self.is_return and not self.update_billed_amount_in_sales_order:
-			# NOTE status updating bypassed for is_return
-			self.status_updater = []
-
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
-		self.update_billing_status_in_dn()
 		self.clear_unallocated_mode_of_payments()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
@@ -233,13 +288,8 @@ class SalesInvoice(SellingController):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 		unlink_ref_doc_from_payment_entries(self, validate_permission=True)
 
-		if self.is_return and not self.update_billed_amount_in_sales_order:
-			# NOTE status updating bypassed for is_return
-			self.status_updater = []
-
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
-		self.update_billing_status_in_dn()
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
@@ -273,41 +323,6 @@ class SalesInvoice(SellingController):
 
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_cancel")
-
-	def update_status_updater_args(self):
-		if cint(self.update_stock):
-			self.status_updater.append({
-				'source_dt':'Sales Invoice Item',
-				'target_dt':'Sales Order Item',
-				'target_parent_dt':'Sales Order',
-				'target_parent_field':'per_delivered',
-				'target_field':'delivered_qty',
-				'target_ref_field':'qty',
-				'source_field':'qty',
-				'join_field':'so_detail',
-				'percent_join_field':'sales_order',
-				'status_field':'delivery_status',
-				'keyword':'Delivered',
-				'second_source_dt': 'Delivery Note Item',
-				'second_source_field': 'qty',
-				'second_join_field': 'so_detail',
-				'overflow_type': 'delivery',
-				'extra_cond': """ and exists(select name from `tabSales Invoice`
-					where name=`tabSales Invoice Item`.parent and update_stock = 1)"""
-			})
-			if cint(self.is_return):
-				self.status_updater.append({
-					'source_dt': 'Sales Invoice Item',
-					'target_dt': 'Sales Order Item',
-					'join_field': 'so_detail',
-					'target_field': 'returned_qty',
-					'target_parent_dt': 'Sales Order',
-					'source_field': '-1 * qty',
-					'second_source_dt': 'Delivery Note Item',
-					'second_source_field': '-1 * qty',
-					'second_join_field': 'so_detail',
-					'extra_cond': """ and exists (select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent and update_stock=1 and is_return=1)"""
-				})
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
@@ -571,10 +586,11 @@ class SalesInvoice(SellingController):
 			if not d.warehouse and frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
 				frappe.throw(_("Warehouse required for stock Item {0}").format(d.item_code))
 
-	def validate_delivery_note(self):
-		for d in self.get("items"):
-			if d.delivery_note:
-				msgprint(_("Stock cannot be updated against Delivery Note {0}").format(d.delivery_note), raise_exception=1)
+	def validate_delivery_note_if_update_stock(self):
+		if not cint(self.is_return) and cint(self.update_stock):
+			for d in self.get("items"):
+				if d.delivery_note:
+					msgprint(_("Stock cannot be updated against Delivery Note {0}").format(d.delivery_note), raise_exception=1)
 
 	def validate_update_stock_mandatory(self):
 		if not cint(self.update_stock) and not cint(frappe.db.get_single_value("Accounts Settings", "allow_invoicing_without_updating_stock")):
@@ -967,20 +983,14 @@ class SalesInvoice(SellingController):
 	def update_billing_status_in_dn(self, update_modified=True):
 		updated_delivery_notes = []
 		for d in self.get("items"):
-			if d.dn_detail:
-				billed_amt = frappe.db.sql("""
-					select sum(item.qty)
-					from `tabSales Invoice Item` item, `tabSales Invoice` inv
-					where inv.name=item.parent and item.dn_detail=%s and item.docstatus=1 and inv.is_return = 0
-				""", d.dn_detail)
-				billed_amt = billed_amt and billed_amt[0][0] or 0
-				frappe.db.set_value("Delivery Note Item", d.dn_detail, "billed_amt", billed_amt, update_modified=update_modified)
-				updated_delivery_notes.append(d.delivery_note)
-			elif d.so_detail:
+			if d.so_detail:
 				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
+			elif d.dn_detail:
+				update_billed_amount_based_on_dn(d.dn_detail, update_modified)
+				updated_delivery_notes.append(d.delivery_note)
 
 		for dn in set(updated_delivery_notes):
-			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
+			frappe.get_doc("Delivery Note", dn).update_billing_status()
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		for fieldname in ("c_form_applicable", "c_form_no", "write_off_amount"):

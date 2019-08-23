@@ -680,7 +680,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			target.redeem_loyalty_points = 1
 
 	def update_item(source, target, source_parent):
-		target.qty = flt(source.qty) - flt(source.billed_qty)
+		target.qty = flt(source.qty) - flt(source.billed_qty) - flt(source.returned_qty)
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
