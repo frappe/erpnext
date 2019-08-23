@@ -177,6 +177,7 @@ class Account(NestedSet):
 		''' Checks if a account in parent company exists in the  '''
 		info = frappe.db.get_value("Account", {
 			"account_name": doc.account_name,
+			"account_number": doc.account_number
 		}, ['company', 'account_currency', 'is_group', 'root_type', 'account_type', 'balance_must_be', 'account_name'], as_dict=1)
 
 		if not info:
