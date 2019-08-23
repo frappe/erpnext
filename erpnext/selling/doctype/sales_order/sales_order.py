@@ -680,17 +680,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			target.redeem_loyalty_points = 1
 
 	def update_item(source, target, source_parent):
-		target.base_amount = (flt(source.qty) - flt(source.billed_amt)) * flt(source.base_rate)
-		target.amount = (flt(source.qty) - flt(source.billed_amt)) * flt(source.rate)
-		target.qty = flt(source.qty) - flt(source.billed_amt)
-
-		if source_parent.project:
-			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
-		if not target.cost_center and target.item_code:
-			item = get_item_defaults(target.item_code, source_parent.company)
-			item_group = get_item_group_defaults(target.item_code, source_parent.company)
-			target.cost_center = item.get("selling_cost_center") \
-				or item_group.get("selling_cost_center")
+		target.qty = flt(source.qty) - flt(source.billed_qty) - flt(source.returned_qty)
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -710,7 +700,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 				"parent": "sales_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.qty and (doc.base_amount==0 or abs(doc.billed_amt) < abs(doc.qty))
+			"condition": lambda doc: doc.qty and (abs(doc.billed_qty) < abs(doc.qty))
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",

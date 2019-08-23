@@ -134,7 +134,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				if (this.frm.has_perm("submit")) {
 					// close
-					if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed, 6) < 100) {
+					if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_completed, 6) < 100) {
 						this.frm.add_custom_button(__('Close'),
 							function() { me.close_sales_order() }, __("Status"))
 					}
@@ -154,7 +154,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 
 				// sales invoice
-				if(flt(doc.per_billed, 6) < 100) {
+				if(flt(doc.per_completed, 6) < 100) {
 					this.frm.add_custom_button(__('Invoice'),
 						function() { me.make_sales_invoice() }, __("Make"));
 				}

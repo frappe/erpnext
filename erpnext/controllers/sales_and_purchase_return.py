@@ -42,11 +42,6 @@ def validate_return_against(doc):
 			frappe.throw(_("Exchange Rate must be same as {0} {1} ({2})")
 				.format(doc.doctype, doc.return_against, ref_doc.conversion_rate))
 
-		# validate update stock
-		if doc.doctype == "Sales Invoice" and doc.update_stock and not ref_doc.update_stock:
-				frappe.throw(_("'Update Stock' can not be checked because items are not delivered via {0}")
-					.format(doc.return_against))
-
 def validate_returned_items(doc):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -59,9 +54,37 @@ def validate_returned_items(doc):
 	if doc.doctype in ['Purchase Invoice', 'Purchase Receipt']:
 		select_fields += ",rejected_qty, received_qty"
 
-	for d in frappe.db.sql("""select {0} from `tab{1} Item` where parent = %s"""
-		.format(select_fields, doc.doctype), doc.return_against, as_dict=1):
+	previous_dt = None
+	previous_doc_fields = ""
+	previous_docs = []
+	previous_doc_item_codes = []
+	if doc.doctype == 'Sales Invoice':
+		previous_dt = "Delivery Note"
+		previous_doc_fields = ",delivery_note"
+	if doc.doctype == 'Purchase Invoice':
+		previous_dt = "Purchase Receipt"
+		previous_doc_fields = ",purchase_receipt"
+
+	return_against_items = frappe.db.sql("""select {0}{1} from `tab{2} Item` where parent = %s"""
+		.format(select_fields, previous_doc_fields, doc.doctype), doc.return_against, as_dict=1)
+	for d in return_against_items:
+		if previous_dt == 'Delivery Note' and d.delivery_note:
+			previous_docs.append(d.delivery_note)
+			previous_doc_item_codes.append(d.item_code)
+		elif previous_dt == 'Purchase Receipt' and d.purchase_receipt:
+			previous_docs.append(d.purchase_receipt)
+			previous_doc_item_codes.append(d.item_code)
+		else:
 			valid_items = get_ref_item_dict(valid_items, d)
+
+	if previous_dt and previous_docs:
+		previous_docs = list(set(previous_docs))
+		previous_doc_item_codes = list(set(previous_doc_item_codes))
+		for previous_dn in previous_docs:
+			previous_doc_items = frappe.db.sql("""select {0} from `tab{1} Item` where parent = %s and item_code in ({2})"""
+				.format(select_fields, previous_dt, ", ".join(['%s']*len(previous_doc_item_codes))), [previous_dn] + previous_doc_item_codes, as_dict=1)
+			for d in previous_doc_items:
+				valid_items = get_ref_item_dict(valid_items, d)
 
 	if doc.doctype in ("Delivery Note", "Sales Invoice"):
 		for d in frappe.db.sql("""select item_code, qty, serial_no, batch_no from `tabPacked Item`
@@ -176,6 +199,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	return valid_items
 
 def get_already_returned_items(doc):
+	fields = ['qty', 'stock_qty', 'received_qty', 'rejected_qty']
 	column = 'child.item_code, sum(abs(child.qty)) as qty, sum(abs(child.stock_qty)) as stock_qty'
 	if doc.doctype in ['Purchase Invoice', 'Purchase Receipt']:
 		column += """, sum(abs(child.rejected_qty) * child.conversion_factor) as rejected_qty,
@@ -191,15 +215,48 @@ def get_already_returned_items(doc):
 		group by item_code
 	""".format(column, doc.doctype, doc.doctype), doc.return_against, as_dict=1)
 
+	# Check previous or future document for returns
+	others_docs = None
+	if doc.doctype == 'Sales Invoice':
+		other_dt = 'Delivery Note'
+		others_docs = list(set([d.delivery_note for d in doc.items if d.delivery_note]))
+		other_dt_condition = 'and par.return_against in ({0})'.format(", ".join(['%s'] * len(others_docs)))
+	elif doc.doctype == 'Purchase Invoice':
+		other_dt = 'Purchase Receipt'
+		others_docs = list(set([d.purchase_receipt for d in doc.items if d.purchase_receipt]))
+		other_dt_condition = 'and par.return_against in ({0})'.format(", ".join(['%s'] * len(others_docs)))
+	elif doc.doctype == 'Delivery Note':
+		other_dt = 'Sales Invoice'
+		others_docs = [doc.return_against]
+		other_dt_condition = 'and child.delivery_note = %s'
+	elif doc.doctype == 'Purchase Receipt':
+		other_dt = 'Purchase Invoice'
+		others_docs = [doc.return_against]
+		other_dt_condition = 'and child.purchase_receipt = %s'
+
+	other_dt_data = []
+	if others_docs:
+		other_dt_data = frappe.db.sql("""
+			select {0}
+			from
+				`tab{1} Item` child, `tab{1}` par
+			where
+				child.parent = par.name and par.docstatus = 1
+				and par.is_return = 1 and ifnull(par.return_against, '') != ''
+				{2}
+			group by item_code
+		""".format(column, other_dt, other_dt_condition), others_docs, as_dict=1)
+
 	items = {}
 
-	for d in data:
-		items.setdefault(d.item_code, frappe._dict({
-			"qty": d.get("qty"),
-			"stock_qty": d.get("stock_qty"),
-			"received_qty": d.get("received_qty"),
-			"rejected_qty": d.get("rejected_qty")
-		}))
+	for d in data + other_dt_data:
+		if d.item_code not in items:
+			items[d.item_code] = frappe._dict()
+			for f in fields:
+				items[d.item_code][f] = 0
+
+		for f in fields:
+			items[d.item_code][f] += flt(d.get(f))
 
 	return items
 
@@ -214,6 +271,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		doc.ignore_pricing_rule = 1
 		doc.set_warehouse = default_warehouse_for_sales_return or source.set_warehouse
 		if doctype == "Sales Invoice":
+			doc.update_stock = 1
 			doc.is_pos = source.is_pos
 
 			# look for Print Heading "Credit Note"
@@ -221,6 +279,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 				doc.select_print_heading = frappe.db.get_value("Print Heading", _("Credit Note"))
 
 		elif doctype == "Purchase Invoice":
+			doc.update_stock = 1
 			# look for Print Heading "Debit Note"
 			doc.select_print_heading = frappe.db.get_value("Print Heading", _("Debit Note"))
 
@@ -262,6 +321,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.qty = -1* source_doc.qty
 			target_doc.stock_qty = -1 * source_doc.stock_qty
 			target_doc.purchase_order = source_doc.purchase_order
+			target_doc.pr_detail = source_doc.name
 			target_doc.purchase_order_item = source_doc.purchase_order_item
 			target_doc.rejected_warehouse = source_doc.rejected_warehouse
 		elif doctype == "Purchase Invoice":
@@ -275,8 +335,10 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.po_detail = source_doc.po_detail
 			target_doc.pr_detail = source_doc.pr_detail
 		elif doctype == "Delivery Note":
+			target_doc.qty = -1* (source_doc.qty - source_doc.billed_qty - source_doc.returned_qty)
 			target_doc.against_sales_order = source_doc.against_sales_order
 			target_doc.against_sales_invoice = source_doc.against_sales_invoice
+			target_doc.dn_detail = source_doc.name
 			target_doc.so_detail = source_doc.so_detail
 			target_doc.si_detail = source_doc.si_detail
 			target_doc.expense_account = source_doc.expense_account
