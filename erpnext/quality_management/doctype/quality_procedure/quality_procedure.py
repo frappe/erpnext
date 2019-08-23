@@ -36,12 +36,10 @@ class QualityProcedure(NestedSet):
 			doc.load_from_db()
 
 			for process in doc.processes:
-				if process.procedure:
-					flag_is_group = 1
+				flag_is_group = 1 if process.procedure else 0
 
-			if flag_is_group == 0:
-				doc.is_group = 0
-				doc.save(ignore_permissions=True)
+			doc.is_group = 0 if flag_is_group == 0 else 1
+			doc.save(ignore_permissions=True)
 
 	def set_parent(self):
 		for process in self.processes:
