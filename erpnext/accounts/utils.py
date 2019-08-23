@@ -84,7 +84,8 @@ def validate_fiscal_year(date, fiscal_year, company, label="Date", doc=None):
 			throw(_("{0} '{1}' not in Fiscal Year {2}").format(label, formatdate(date), fiscal_year))
 
 @frappe.whitelist()
-def get_balance_on(account=None, date=None, party_type=None, party=None, company=None, in_account_currency=True, cost_center=None):
+def get_balance_on(account=None, date=None, party_type=None, party=None, company=None,
+	in_account_currency=True, cost_center=None, ignore_account_permission=False):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
 	if not date and frappe.form_dict.get("date"):
@@ -121,7 +122,12 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 
 	allow_cost_center_in_entry_of_bs_account = get_allow_cost_center_in_entry_of_bs_account()
 
-	if cost_center and (allow_cost_center_in_entry_of_bs_account or acc.report_type =='Profit and Loss'):
+	if account:
+		report_type = acc.report_type
+	else:
+		report_type = ""
+
+	if cost_center and (allow_cost_center_in_entry_of_bs_account or report_type =='Profit and Loss'):
 		cc = frappe.get_doc("Cost Center", cost_center)
 		if cc.is_group:
 			cond.append(""" exists (
@@ -135,10 +141,11 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 
 	if account:
 
-		if not frappe.flags.ignore_account_permission:
+		if not (frappe.flags.ignore_account_permission
+			or ignore_account_permission):
 			acc.check_permission("read")
 
-		if acc.report_type == 'Profit and Loss':
+		if report_type == 'Profit and Loss':
 			# for pl accounts, get balance within a fiscal year
 			cond.append("posting_date >= '%s' and voucher_type != 'Period Closing Voucher'" \
 				% year_start_date)
@@ -685,7 +692,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 		payment_amount = pe_map.get((d.voucher_type, d.voucher_no), 0)
 		outstanding_amount = flt(d.invoice_amount - payment_amount, precision)
 		if outstanding_amount > 0.5 / (10**precision):
-			if (filters.get("outstanding_amt_greater_than") and
+			if (filters and filters.get("outstanding_amt_greater_than") and
 				not (outstanding_amount >= filters.get("outstanding_amt_greater_than") and
 				outstanding_amount <= filters.get("outstanding_amt_less_than"))):
 				continue
