@@ -9,6 +9,7 @@ from erpnext.setup.utils import get_exchange_rate
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.get_item_details import get_price_list_rate
+from frappe.core.doctype.version.version import get_diff
 
 import functools
 
@@ -381,7 +382,7 @@ class BOM(WebsiteGenerator):
 
 				frappe.throw(_("Same item has been entered multiple times. {0}").format(duplicate_list))
 
-	def check_recursion(self):
+	def check_recursion(self, bom_list=[]):
 		""" Check whether recursion occurs in any bom"""
 		bom_list = self.traverse_tree()
 		bom_nos = frappe.get_all('BOM Item', fields=["bom_no"],
@@ -399,21 +400,21 @@ class BOM(WebsiteGenerator):
 				raise_exception = True
 
 		if raise_exception:
-			frappe.throw(_("BOM recursion: {0} cannot be parent or child of {2}").format(self.name, self.name))
+			frappe.throw(_("BOM recursion: {0} cannot be parent or child of {1}").format(self.name, self.name))
 
 	def update_cost_and_exploded_items(self, bom_list=[]):
 		bom_list = self.traverse_tree(bom_list)
 		for bom in bom_list:
 			bom_obj = frappe.get_doc("BOM", bom)
-			bom_obj.check_recursion()
+			bom_obj.check_recursion(bom_list=bom_list)
 			bom_obj.update_exploded_items()
 
 		return bom_list
 
 	def traverse_tree(self, bom_list=None):
 		def _get_children(bom_no):
-			return [cstr(d[0]) for d in frappe.db.sql("""select bom_no from `tabBOM Item`
-				where parent = %s and ifnull(bom_no, '') != '' and parenttype='BOM'""", bom_no)]
+			return frappe.db.sql_list("""select bom_no from `tabBOM Item`
+				where parent = %s and ifnull(bom_no, '') != '' and parenttype='BOM'""", bom_no)
 
 		count = 0
 		if not bom_list:
@@ -578,6 +579,8 @@ class BOM(WebsiteGenerator):
 			for d in self.operations:
 				if not d.description:
 					d.description = frappe.db.get_value('Operation', d.operation, 'description')
+				if not d.batch_size > 0:
+					d.batch_size = 1
 
 def get_list_context(context):
 	context.title = _("Bill of Materials")
@@ -592,8 +595,8 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				bom_item.idx,
 				item.item_name,
 				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * %(qty)s as qty,
-				item.description,
 				item.image,
+				bom.project,
 				item.stock_uom,
 				item.allow_alternative_item,
 				item_default.default_warehouse,
@@ -620,17 +623,22 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			where_conditions="",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
-			select_columns = """, bom_item.source_warehouse, bom_item.operation, bom_item.include_item_in_manufacturing,
+			select_columns = """, bom_item.source_warehouse, bom_item.operation,
+				bom_item.include_item_in_manufacturing, bom_item.description,
 				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1) as idx""")
 
 		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	elif fetch_scrap_items:
-		query = query.format(table="BOM Scrap Item", where_conditions="", select_columns=", bom_item.idx", is_stock_item=is_stock_item, qty_field="stock_qty")
+		query = query.format(table="BOM Scrap Item", where_conditions="",
+			select_columns=", bom_item.idx, item.description", is_stock_item=is_stock_item, qty_field="stock_qty")
+
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", where_conditions="", is_stock_item=is_stock_item,
 			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
-			select_columns = ", bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse, bom_item.idx, bom_item.operation, bom_item.include_item_in_manufacturing")
+			select_columns = """, bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
+				bom_item.idx, bom_item.operation, bom_item.include_item_in_manufacturing,
+				bom_item.description """)
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 
 	for item in items:
@@ -756,3 +764,52 @@ def add_additional_cost(stock_entry, work_order):
 			'description': name[0],
 			'amount': items.get(name[0])
 		})
+
+@frappe.whitelist()
+def get_bom_diff(bom1, bom2):
+	from frappe.model import table_fields
+
+	doc1 = frappe.get_doc('BOM', bom1)
+	doc2 = frappe.get_doc('BOM', bom2)
+
+	out = get_diff(doc1, doc2)
+	out.row_changed = []
+	out.added = []
+	out.removed = []
+
+	meta = doc1.meta
+
+	identifiers = {
+		'operations': 'operation',
+		'items': 'item_code',
+		'scrap_items': 'item_code',
+		'exploded_items': 'item_code'
+	}
+
+	for df in meta.fields:
+		old_value, new_value = doc1.get(df.fieldname), doc2.get(df.fieldname)
+
+		if df.fieldtype in table_fields:
+			identifier = identifiers[df.fieldname]
+			# make maps
+			old_row_by_identifier, new_row_by_identifier = {}, {}
+			for d in old_value:
+				old_row_by_identifier[d.get(identifier)] = d
+			for d in new_value:
+				new_row_by_identifier[d.get(identifier)] = d
+
+			# check rows for additions, changes
+			for i, d in enumerate(new_value):
+				if d.get(identifier) in old_row_by_identifier:
+					diff = get_diff(old_row_by_identifier[d.get(identifier)], d, for_child=True)
+					if diff and diff.changed:
+						out.row_changed.append((df.fieldname, i, d.get(identifier), diff.changed))
+				else:
+					out.added.append([df.fieldname, d.as_dict()])
+
+			# check for deletions
+			for d in old_value:
+				if not d.get(identifier) in new_row_by_identifier:
+					out.removed.append([df.fieldname, d.as_dict()])
+
+	return out

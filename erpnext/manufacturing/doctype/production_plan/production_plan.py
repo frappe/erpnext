@@ -320,7 +320,8 @@ class ProductionPlan(Document):
 				'qty': data.get("stock_qty") * item.get("qty"),
 				'production_plan': self.name,
 				'company': self.company,
-				'fg_warehouse': item.get("fg_warehouse")
+				'fg_warehouse': item.get("fg_warehouse"),
+				'update_consumed_material_cost_in_project': 0
 			})
 
 			work_order = self.create_work_order(data)
@@ -395,7 +396,11 @@ class ProductionPlan(Document):
 			# submit
 			material_request.flags.ignore_permissions = 1
 			material_request.run_method("set_missing_values")
-			material_request.submit()
+
+			if self.get('submit_material_request'):
+				material_request.submit()
+			else:
+				material_request.save()
 
 		frappe.flags.mute_messages = False
 
@@ -426,7 +431,7 @@ def download_raw_materials(production_plan):
 					continue
 
 				item_list.append(['', '', '', '', bin_dict.get('warehouse'),
-					bin_dict.get('projected_qty'), bin_dict.get('actual_qty')])
+					bin_dict.get('projected_qty', 0), bin_dict.get('actual_qty', 0)])
 
 	build_csv_response(item_list, doc.name)
 
@@ -501,10 +506,10 @@ def get_material_request_items(row, sales_order,
 	total_qty = row['qty']
 
 	required_qty = 0
-	if ignore_existing_ordered_qty or bin_dict.get("projected_qty") < 0:
+	if ignore_existing_ordered_qty or bin_dict.get("projected_qty", 0) < 0:
 		required_qty = total_qty
-	elif total_qty > bin_dict.get("projected_qty"):
-		required_qty = total_qty - bin_dict.get("projected_qty")
+	elif total_qty > bin_dict.get("projected_qty", 0):
+		required_qty = total_qty - bin_dict.get("projected_qty", 0)
 	if required_qty > 0 and required_qty < row['min_order_qty']:
 		required_qty = row['min_order_qty']
 	item_group_defaults = get_item_group_defaults(row.item_code, company)

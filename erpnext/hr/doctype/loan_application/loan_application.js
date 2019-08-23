@@ -23,9 +23,8 @@ frappe.ui.form.on('Loan Application', {
 	},
 	add_toolbar_buttons: function(frm) {
 		if (frm.doc.status == "Approved") {
-			frm.add_custom_button(__('Loan'), function() {
+			frm.add_custom_button(__('Create Loan'), function() {
 				frappe.call({
-					type: "GET",
 					method: "erpnext.hr.doctype.loan_application.loan_application.make_loan",
 					args: {
 						"source_name": frm.doc.name
@@ -37,7 +36,7 @@ frappe.ui.form.on('Loan Application', {
 						}
 					}
 				});
-			})
+			}).addClass("btn-primary");
 		}
 	}
 });

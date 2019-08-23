@@ -52,27 +52,31 @@ def get_cart_quotation(doc=None):
 @frappe.whitelist()
 def place_order():
 	quotation = _get_cart_quotation()
-	quotation.company = frappe.db.get_value("Shopping Cart Settings", None, "company")
+	cart_settings = frappe.db.get_value("Shopping Cart Settings", None,
+		["company", "allow_items_not_in_stock"], as_dict=1)
+	quotation.company = cart_settings.company
 	if not quotation.get("customer_address"):
 		throw(_("{0} is required").format(_(quotation.meta.get_label("customer_address"))))
 
 	quotation.flags.ignore_permissions = True
 	quotation.submit()
 
-	if quotation.lead:
+	if quotation.quotation_to == 'Lead' and quotation.party_name:
 		# company used to create customer accounts
 		frappe.defaults.set_user_default("company", quotation.company)
 
 	from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))
-	for item in sales_order.get("items"):
-		item.reserved_warehouse, is_stock_item = frappe.db.get_value("Item",
-			item.item_code, ["website_warehouse", "is_stock_item"])
 
-		if is_stock_item:
-			item_stock = get_qty_in_stock(item.item_code, "website_warehouse")
-			if item.qty > item_stock.stock_qty[0][0]:
-				throw(_("Only {0} in stock for item {1}").format(item_stock.stock_qty[0][0], item.item_code))
+	if not cart_settings.allow_items_not_in_stock:
+		for item in sales_order.get("items"):
+			item.reserved_warehouse, is_stock_item = frappe.db.get_value("Item",
+				item.item_code, ["website_warehouse", "is_stock_item"])
+
+			if is_stock_item:
+				item_stock = get_qty_in_stock(item.item_code, "website_warehouse")
+				if item.qty > item_stock.stock_qty[0][0]:
+					throw(_("Only {0} in stock for item {1}").format(item_stock.stock_qty[0][0], item.item_code))
 
 	sales_order.flags.ignore_permissions = True
 	sales_order.insert()
@@ -241,22 +245,23 @@ def _get_cart_quotation(party=None):
 		party = get_party()
 
 	quotation = frappe.get_all("Quotation", fields=["name"], filters=
-		{party.doctype.lower(): party.name, "order_type": "Shopping Cart", "docstatus": 0},
+		{"party_name": party.name, "order_type": "Shopping Cart", "docstatus": 0},
 		order_by="modified desc", limit_page_length=1)
 
 	if quotation:
 		qdoc = frappe.get_doc("Quotation", quotation[0].name)
 	else:
+		company = frappe.db.get_value("Shopping Cart Settings", None, ["company"])
 		qdoc = frappe.get_doc({
 			"doctype": "Quotation",
 			"naming_series": get_shopping_cart_settings().quotation_series or "QTN-CART-",
 			"quotation_to": party.doctype,
-			"company": frappe.db.get_value("Shopping Cart Settings", None, "company"),
+			"company": company,
 			"order_type": "Shopping Cart",
 			"status": "Draft",
 			"docstatus": 0,
 			"__islocal": 1,
-			(party.doctype.lower()): party.name
+			"party_name": party.name
 		})
 
 		qdoc.contact_person = frappe.db.get_value("Contact", {"email_id": frappe.session.user})
@@ -336,9 +341,9 @@ def _set_price_list(quotation, cart_settings):
 
 	# check if customer price list exists
 	selling_price_list = None
-	if quotation.customer:
+	if quotation.party_name:
 		from erpnext.accounts.party import get_default_price_list
-		selling_price_list = get_default_price_list(frappe.get_doc("Customer", quotation.customer))
+		selling_price_list = get_default_price_list(frappe.get_doc("Customer", quotation.party_name))
 
 	# else check for territory based price list
 	if not selling_price_list:
@@ -350,9 +355,9 @@ def set_taxes(quotation, cart_settings):
 	"""set taxes based on billing territory"""
 	from erpnext.accounts.party import set_taxes
 
-	customer_group = frappe.db.get_value("Customer", quotation.customer, "customer_group")
+	customer_group = frappe.db.get_value("Customer", quotation.party_name, "customer_group")
 
-	quotation.taxes_and_charges = set_taxes(quotation.customer, "Customer",
+	quotation.taxes_and_charges = set_taxes(quotation.party_name, "Customer",
 		quotation.transaction_date, quotation.company, customer_group=customer_group, supplier_group=None,
 		tax_category=quotation.tax_category, billing_address=quotation.customer_address,
 		shipping_address=quotation.shipping_address_name, use_for_shopping_cart=1)

@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt
 from frappe import msgprint, _
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 def execute(filters=None):
 	return _execute(filters)
@@ -157,11 +158,21 @@ def get_conditions(filters):
 		conditions +=  """ and exists(select name from `tabSales Invoice Item`
 			 where parent=`tabSales Invoice`.name
 			 	and ifnull(`tabSales Invoice Item`.brand, '') = %(brand)s)"""
-	
+
 	if filters.get("item_group"):
 		conditions +=  """ and exists(select name from `tabSales Invoice Item`
 			 where parent=`tabSales Invoice`.name
 			 	and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s)"""
+
+	accounting_dimensions = get_accounting_dimensions()
+
+	if accounting_dimensions:
+		for dimension in accounting_dimensions:
+			if filters.get(dimension):
+				conditions += """ and exists(select name from `tabSales Invoice Item`
+					where parent=`tabSales Invoice`.name
+						and ifnull(`tabSales Invoice Item`.{0}, '') = %({0})s)""".format(dimension)
+
 
 	return conditions
 
@@ -171,7 +182,7 @@ def get_invoices(filters, additional_query_columns):
 
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
-		select name, posting_date, debit_to, project, customer, 
+		select name, posting_date, debit_to, project, customer,
 		customer_name, owner, remarks, territory, tax_id, customer_group,
 		base_net_total, base_grand_total, base_rounded_total, outstanding_amount {0}
 		from `tabSales Invoice`

@@ -67,8 +67,6 @@ class Item(WebsiteGenerator):
 				from frappe.model.naming import set_name_by_naming_series
 				set_name_by_naming_series(self)
 				self.item_code = self.name
-		elif not self.item_code:
-			msgprint(_("Item Code is mandatory because Item is not automatically numbered"), raise_exception=1)
 
 		self.item_code = strip(self.item_code)
 		self.name = self.item_code
@@ -124,7 +122,8 @@ class Item(WebsiteGenerator):
 		self.validate_item_defaults()
 		self.validate_customer_provided_part()
 		self.update_defaults_from_item_group()
-		self.validate_stock_for_has_batch_and_has_serial()
+		self.validate_auto_reorder_enabled_in_stock_settings()
+		self.cant_change()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -198,6 +197,9 @@ class Item(WebsiteGenerator):
 					'route')) + '/' + self.scrub((self.item_name if self.item_name else self.item_code) + '-' + random_string(5))
 
 	def validate_website_image(self):
+		if frappe.flags.in_import:
+			return
+
 		"""Validate if the website image is a public file"""
 		auto_set_website_image = False
 		if not self.website_image and self.image:
@@ -217,8 +219,7 @@ class Item(WebsiteGenerator):
 
 		if not file_doc:
 			if not auto_set_website_image:
-				frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found")
-									.format(self.website_image, self.name))
+				frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found").format(self.website_image, self.name))
 
 			self.website_image = None
 
@@ -229,6 +230,9 @@ class Item(WebsiteGenerator):
 			self.website_image = None
 
 	def make_thumbnail(self):
+		if frappe.flags.in_import:
+			return
+
 		"""Make a thumbnail of `website_image`"""
 		import requests.exceptions
 
@@ -830,11 +834,42 @@ class Item(WebsiteGenerator):
 			for d in self.attributes:
 				d.variant_of = self.variant_of
 
-	def validate_stock_for_has_batch_and_has_serial(self):
-		if self.stock_ledger_created():
-			for value in ["has_batch_no", "has_serial_no"]:
-				if frappe.db.get_value("Item", self.name, value) != self.get_value(value):
-					frappe.throw(_("Cannot change {0} as Stock Transaction for Item {1} exist.".format(value, self.name)))
+	def cant_change(self):
+		if not self.get("__islocal"):
+			fields = ("has_serial_no", "is_stock_item", "valuation_method", "has_batch_no")
+
+			values = frappe.db.get_value("Item", self.name, fields, as_dict=True)
+			if not values.get('valuation_method') and self.get('valuation_method'):
+				values['valuation_method'] = frappe.db.get_single_value("Stock Settings", "valuation_method") or "FIFO"
+
+			if values:
+				for field in fields:
+					if cstr(self.get(field)) != cstr(values.get(field)):
+						if not self.check_if_linked_document_exists(field):
+							break # no linked document, allowed
+						else:
+							frappe.throw(_("As there are existing transactions against item {0}, you can not change the value of {1}").format(self.name, frappe.bold(self.meta.get_label(field))))
+
+	def check_if_linked_document_exists(self, field):
+		linked_doctypes = ["Delivery Note Item", "Sales Invoice Item", "Purchase Receipt Item",
+			"Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item"]
+
+		# For "Is Stock Item", following doctypes is important
+		# because reserved_qty, ordered_qty and requested_qty updated from these doctypes
+		if field == "is_stock_item":
+			linked_doctypes += ["Sales Order Item", "Purchase Order Item", "Material Request Item"]
+
+		for doctype in linked_doctypes:
+			if frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
+				frappe.db.get_value("Production Order",
+					filters={"production_item": self.name, "docstatus": 1}):
+				return True
+
+	def validate_auto_reorder_enabled_in_stock_settings(self):
+		if self.reorder_levels:
+			enabled = frappe.db.get_single_value('Stock Settings', 'auto_indent')
+			if not enabled:
+				frappe.msgprint(msg=_("You have to enable auto re-order in Stock Settings to maintain re-order levels."), title=_("Enable Auto Re-Order"), indicator="orange")
 
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''
@@ -977,7 +1012,7 @@ def invalidate_item_variants_cache_for_website(doc):
 
 	if item_code:
 		item_cache = ItemVariantsCacheManager(item_code)
-		item_cache.rebuild_cache()
+		item_cache.clear_cache()
 
 
 def check_stock_uom_with_bin(item, stock_uom):

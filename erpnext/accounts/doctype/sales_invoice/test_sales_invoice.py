@@ -19,6 +19,8 @@ from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.stock.doctype.item.test_item import create_item
 from six import iteritems
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
+from erpnext.regional.india.utils import get_ewb_data
+
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
 		w = frappe.copy_doc(test_records[0])
@@ -27,10 +29,12 @@ class TestSalesInvoice(unittest.TestCase):
 		w.submit()
 		return w
 
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		unlink_payment_on_cancel_of_invoice()
 
-	def tearDown(self):
+	@classmethod
+	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
 
 	def test_timestamp_change(self):
@@ -133,6 +137,7 @@ class TestSalesInvoice(unittest.TestCase):
 		unlink_payment_on_cancel_of_invoice(0)
 		si = frappe.get_doc('Sales Invoice', si.name)
 		self.assertRaises(frappe.LinkExistsError, si.cancel)
+		unlink_payment_on_cancel_of_invoice()
 
 	def test_sales_invoice_calculation_export_currency(self):
 		si = frappe.copy_doc(test_records[2])
@@ -1421,7 +1426,7 @@ class TestSalesInvoice(unittest.TestCase):
 				"included_in_print_rate": 1
 			})
 		si.save()
-
+		si.submit()
 		self.assertEqual(si.net_total, 19453.13)
 		self.assertEqual(si.grand_total, 24900)
 		self.assertEqual(si.total_taxes_and_charges, 5446.88)
@@ -1432,6 +1437,50 @@ class TestSalesInvoice(unittest.TestCase):
 			["_Test Account Service Tax - _TC", 0.0, 5446.88],
 			["Sales - _TC", 0.0, 19453.13],
 			["Round Off - _TC", 0.01, 0.0]
+		])
+
+		gl_entries = frappe.db.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", si.name, as_dict=1)
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account][0], gle.account)
+			self.assertEqual(expected_values[gle.account][1], gle.debit)
+			self.assertEqual(expected_values[gle.account][2], gle.credit)
+
+	def test_rounding_adjustment_2(self):
+		si = create_sales_invoice(rate=400, do_not_save=True)
+		for rate in [400, 600, 100]:
+			si.append("items", {
+				"item_code": "_Test Item",
+				"gst_hsn_code": "999800",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"rate": rate,
+				"income_account": "Sales - _TC",
+				"cost_center": "_Test Cost Center - _TC"
+			})
+		for tax_account in ["_Test Account VAT - _TC", "_Test Account Service Tax - _TC"]:
+			si.append("taxes", {
+				"charge_type": "On Net Total",
+				"account_head": tax_account,
+				"description": tax_account,
+				"rate": 9,
+				"cost_center": "_Test Cost Center - _TC",
+				"included_in_print_rate": 1
+			})
+		si.save()
+		si.submit()
+		self.assertEqual(si.net_total, 1271.19)
+		self.assertEqual(si.grand_total, 1500)
+		self.assertEqual(si.total_taxes_and_charges, 228.82)
+		self.assertEqual(si.rounding_adjustment, -0.01)
+
+		expected_values = dict((d[0], d) for d in [
+			[si.debit_to, 1500, 0.0],
+			["_Test Account Service Tax - _TC", 0.0, 114.41],
+			["_Test Account VAT - _TC", 0.0, 114.41],
+			["Sales - _TC", 0.0, 1271.18]
 		])
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
@@ -1680,6 +1729,111 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
+
+	def test_eway_bill_json(self):
+		if not frappe.db.exists('Address', '_Test Address for Eway bill-Billing'):
+			address = frappe.get_doc({
+				"address_line1": "_Test Address Line 1",
+				"address_title": "_Test Address for Eway bill",
+				"address_type": "Billing",
+				"city": "_Test City",
+				"state": "Test State",
+				"country": "India",
+				"doctype": "Address",
+				"is_primary_address": 1,
+				"phone": "+91 0000000000",
+				"gstin": "27AAECE4835E1ZR",
+				"gst_state": "Maharashtra",
+				"gst_state_number": "27",
+				"pincode": "401108"
+			}).insert()
+
+			address.append("links", {
+				"link_doctype": "Company",
+				"link_name": "_Test Company"
+			})
+
+			address.save()
+
+		if not frappe.db.exists('Address', '_Test Customer-Address for Eway bill-Shipping'):
+			address = frappe.get_doc({
+				"address_line1": "_Test Address Line 1",
+				"address_title": "_Test Customer-Address for Eway bill",
+				"address_type": "Shipping",
+				"city": "_Test City",
+				"state": "Test State",
+				"country": "India",
+				"doctype": "Address",
+				"is_primary_address": 1,
+				"phone": "+91 0000000000",
+				"gst_state": "Maharashtra",
+				"gst_state_number": "27",
+				"pincode": "410038"
+			}).insert()
+
+			address.append("links", {
+				"link_doctype": "Customer",
+				"link_name": "_Test Customer"
+			})
+
+			address.save()
+
+		gst_settings = frappe.get_doc("GST Settings")
+
+		gst_account = frappe.get_all(
+			"GST Account",
+			fields=["cgst_account", "sgst_account", "igst_account"],
+			filters = {"company": "_Test Company"})
+
+		if not gst_account:
+			gst_settings.append("gst_accounts", {
+				"company": "_Test Company",
+				"cgst_account": "CGST - _TC",
+				"sgst_account": "SGST - _TC",
+				"igst_account": "IGST - _TC",
+			})
+
+		gst_settings.save()
+
+		si = create_sales_invoice(do_not_save =1, rate = '60000')
+
+		si.distance = 2000
+		si.company_address = "_Test Address for Eway bill-Billing"
+		si.customer_address = "_Test Customer-Address for Eway bill-Shipping"
+		si.vehicle_no = "KA12KA1234"
+		si.gst_category = "Registered Regular"
+
+		si.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "CGST - _TC",
+			"cost_center": "Main - _TC",
+			"description": "CGST @ 9.0",
+			"rate": 9
+		})
+
+		si.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "SGST - _TC",
+			"cost_center": "Main - _TC",
+			"description": "SGST @ 9.0",
+			"rate": 9
+		})
+
+		si.submit()
+
+		data = get_ewb_data("Sales Invoice", si.name)
+
+		self.assertEqual(data['version'], '1.0.1118')
+		self.assertEqual(data['billLists'][0]['fromGstin'], '27AAECE4835E1ZR')
+		self.assertEqual(data['billLists'][0]['fromTrdName'], '_Test Company')
+		self.assertEqual(data['billLists'][0]['toTrdName'], '_Test Customer')
+		self.assertEqual(data['billLists'][0]['vehicleType'], 'R')
+		self.assertEqual(data['billLists'][0]['totalValue'], 60000)
+		self.assertEqual(data['billLists'][0]['cgstValue'], 5400)
+		self.assertEqual(data['billLists'][0]['sgstValue'], 5400)
+		self.assertEqual(data['billLists'][0]['vehicleNo'], 'KA12KA1234')
+		self.assertEqual(data['billLists'][0]['itemList'][0]['taxableAmount'], 60000)
+
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")

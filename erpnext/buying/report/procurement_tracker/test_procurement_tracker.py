@@ -30,7 +30,7 @@ class TestProcurementTracker(unittest.TestCase):
 				company_name="_Test Procurement Company",
 				abbr="_TPC",
 				default_currency="INR",
-				country="India"
+				country="Pakistan"
 				)).insert()
 		warehouse = create_warehouse("_Test Procurement Warehouse", company="_Test Procurement Company")
 		mr = make_material_request(company="_Test Procurement Company", warehouse=warehouse)

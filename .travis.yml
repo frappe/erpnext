@@ -1,56 +1,80 @@
-language: python
 dist: trusty
 
-python:
-  - "2.7"
+language: python
 
-services:
-  - mysql
+git:
+  depth: 1
 
-install:
-  # fix mongodb travis error
-  - sudo rm /etc/apt/sources.list.d/mongodb*.list
-  - pip install flake8==3.3.0
-  - flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics
-  - sudo rm /etc/apt/sources.list.d/docker.list
-  - sudo apt-get install hhvm && rm -rf /home/travis/.kiex/
-  - sudo apt-get purge -y mysql-common mysql-server mysql-client
-  - nvm install 10
-  - pip install python-coveralls
-  - wget https://raw.githubusercontent.com/frappe/bench/master/playbooks/install.py
-  - sudo python install.py --develop --user travis --without-bench-setup
-  - sudo pip install -e ~/bench
+cache:
+  - pip
 
-  - rm $TRAVIS_BUILD_DIR/.git/shallow
-  - bash $TRAVIS_BUILD_DIR/travis/bench_init.sh
-  - cp -r $TRAVIS_BUILD_DIR/test_sites/test_site ~/frappe-bench/sites/
-
-before_script:
-  - mysql -u root -ptravis -e 'create database test_frappe'
-  - echo "USE mysql;\nCREATE USER 'test_frappe'@'localhost' IDENTIFIED BY 'test_frappe';\nFLUSH PRIVILEGES;\n" | mysql -u root -ptravis
-  - echo "USE mysql;\nGRANT ALL PRIVILEGES ON \`test_frappe\`.* TO 'test_frappe'@'localhost';\n" | mysql -u root -ptravis
-
-  - cd ~/frappe-bench
-  - bench get-app erpnext $TRAVIS_BUILD_DIR
-  - bench use test_site
-  - bench reinstall --mariadb-root-username root --mariadb-root-password travis --yes
-  - bench scheduler disable
-  - sed -i 's/9000/9001/g' sites/common_site_config.json
-  - bench start &
-  - sleep 10
+addons:
+  hosts: test_site
+  mariadb: 10.3
 
 jobs:
   include:
-    - stage: test
-      script:
-        - set -e
-        - bench run-tests --app erpnext --coverage
-      after_script:
-        - coveralls -b apps/erpnext -d ../../sites/.coverage
-      env: Server Side Test
-    - # stage
-      script:
-        - wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz
-        - bench --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz --mariadb-root-password travis
-        - bench migrate
-      env: Patch Testing
+  - name: "Python 2.7 Server Side Test"
+    python: 2.7
+    script: bench --site test_site run-tests --app erpnext --coverage
+
+  - name: "Python 3.6 Server Side Test"
+    python: 3.6
+    script: bench --site test_site run-tests --app erpnext --coverage
+
+  - name: "Python 2.7 Patch Test"
+    python: 2.7
+    before_script:
+      - wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz
+      - bench --site test_site --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz
+    script: bench --site test_site migrate
+
+  - name: "Python 3.6 Patch Test"
+    python: 3.6
+    before_script:
+      - wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz
+      - bench --site test_site --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz
+    script: bench --site test_site migrate
+
+install:
+  - cd ~
+  - nvm install 10
+
+  - git clone https://github.com/frappe/bench --depth 1
+  - pip install -e ./bench
+
+  - git clone https://github.com/frappe/frappe --branch $TRAVIS_BRANCH --depth 1
+  - bench init --skip-assets --frappe-path ~/frappe --python $(which python) frappe-bench
+
+  - mkdir ~/frappe-bench/sites/test_site
+  - cp -r $TRAVIS_BUILD_DIR/.travis/site_config.json ~/frappe-bench/sites/test_site/
+
+  - mysql -u root -e "SET GLOBAL character_set_server = 'utf8mb4'"
+  - mysql -u root -e "SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
+
+  - mysql -u root -e "CREATE DATABASE test_frappe"
+  - mysql -u root -e "CREATE USER 'test_frappe'@'localhost' IDENTIFIED BY 'test_frappe'"
+  - mysql -u root -e "GRANT ALL PRIVILEGES ON \`test_frappe\`.* TO 'test_frappe'@'localhost'"
+
+  - mysql -u root -e "UPDATE mysql.user SET Password=PASSWORD('travis') WHERE User='root'"
+  - mysql -u root -e "FLUSH PRIVILEGES"
+
+  - wget -O /tmp/wkhtmltox.tar.xz https://github.com/frappe/wkhtmltopdf/raw/master/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
+  - tar -xf /tmp/wkhtmltox.tar.xz -C /tmp
+  - sudo mv /tmp/wkhtmltox/bin/wkhtmltopdf /usr/local/bin/wkhtmltopdf
+  - sudo chmod o+x /usr/local/bin/wkhtmltopdf
+
+  - cd ~/frappe-bench
+
+  - sed -i 's/watch:/# watch:/g' Procfile
+  - sed -i 's/schedule:/# schedule:/g' Procfile
+  - sed -i 's/socketio:/# socketio:/g' Procfile
+  - sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
+
+  - bench get-app erpnext $TRAVIS_BUILD_DIR
+  - bench start &
+  - bench --site test_site reinstall --yes
+
+after_script:
+  - pip install python-coveralls
+  - coveralls -b apps/erpnext -d ../../sites/.coverage

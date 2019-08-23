@@ -113,6 +113,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Promotional Scheme",
+					"description": _("Rules for applying different promotional schemes.")
+				},
+				{
+					"type": "doctype",
 					"name": "Pricing Rule",
 					"description": _("Rules for applying pricing and discount."),
 					"dependencies": ["Item"],
@@ -304,27 +309,14 @@ def get_data():
 					"is_query_report": True,
 					"name": "Sales Partners Commission",
 					"doctype": "Customer"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Partners Commission",
+					"doctype": "Customer"
 				}
 			]
 		},
-		{
-			"label": _("Help"),
-			"items": [
-				{
-					"type": "help",
-					"label": _("Customer and Supplier"),
-					"youtube_id": "anoGi_RpQ20"
-				},
-				{
-					"type": "help",
-					"label": _("Sales Order to Payment"),
-					"youtube_id": "1eP90MWoDQM"
-				},
-				{
-					"type": "help",
-					"label": _("Point-of-Sale"),
-					"youtube_id": "4WkelWkbP_c"
-				},
-			]
-		},
+		
 	]

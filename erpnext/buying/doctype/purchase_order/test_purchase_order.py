@@ -4,16 +4,19 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
+import json
 import frappe.defaults
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from frappe.utils import flt, add_days, nowdate, getdate
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.buying.doctype.purchase_order.purchase_order import (make_purchase_receipt, make_purchase_invoice, make_rm_stock_entry as make_subcontract_transfer_entry)
+from erpnext.buying.doctype.purchase_order.purchase_order \
+	import (make_purchase_receipt, make_purchase_invoice as make_pi_from_po, make_rm_stock_entry as make_subcontract_transfer_entry)
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice as make_pi_from_pr
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.controllers.accounts_controller import update_child_qty_rate
-import json
+from erpnext.controllers.status_updater import OverAllowanceError
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):
@@ -39,7 +42,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 4)
 
-		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
+		frappe.db.set_value('Item', '_Test Item', 'over_delivery_receipt_allowance', 50)
 
 		pr = create_pr_against_po(po.name, received_qty=8)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
@@ -55,14 +58,14 @@ class TestPurchaseOrder(unittest.TestCase):
 
 	def test_ordered_qty_against_pi_with_update_stock(self):
 		existing_ordered_qty = get_ordered_qty()
-
 		po = create_purchase_order()
 
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 10)
 
-		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
+		frappe.db.set_value('Item', '_Test Item', 'over_delivery_receipt_allowance', 50)
+		frappe.db.set_value('Item', '_Test Item', 'over_billing_allowance', 20)
 
-		pi = make_purchase_invoice(po.name)
+		pi = make_pi_from_po(po.name)
 		pi.update_stock = 1
 		pi.items[0].qty = 12
 		pi.insert()
@@ -79,6 +82,11 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 0)
 
+		frappe.db.set_value('Item', '_Test Item', 'over_delivery_receipt_allowance', 0)
+		frappe.db.set_value('Item', '_Test Item', 'over_billing_allowance', 0)
+		frappe.db.set_value("Accounts Settings", None, "over_billing_allowance", 0)
+
+
 	def test_update_child_qty_rate(self):
 		mr = make_material_request(qty=10)
 		po = make_purchase_order(mr.name)
@@ -89,7 +97,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		create_pr_against_po(po.name)
 
-		make_purchase_invoice(po.name)
+		make_pi_from_po(po.name)
 
 		existing_ordered_qty = get_ordered_qty()
 		existing_requested_qty = get_requested_qty()
@@ -111,29 +119,37 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_update_qty(self):
 		po = create_purchase_order()
 
-		make_pr_against_po(po.name, 6)
+		pr = make_pr_against_po(po.name, 2)
 
 		po.load_from_db()
-		self.assertEqual(po.get("items")[0].received_qty, 6)
+		self.assertEqual(po.get("items")[0].received_qty, 2)
 
-		# Check received_qty after make_purchase_invoice without update_stock checked
-		pi1 = make_purchase_invoice(po.name)
-		pi1.get("items")[0].qty = 6
+		# Check received_qty after making PI from PR without update_stock checked
+		pi1 = make_pi_from_pr(pr.name)
+		pi1.get("items")[0].qty = 2
 		pi1.insert()
 		pi1.submit()
 
 		po.load_from_db()
-		self.assertEqual(po.get("items")[0].received_qty, 6)
+		self.assertEqual(po.get("items")[0].received_qty, 2)
 
-		# Check received_qty after make_purchase_invoice with update_stock checked
-		pi2 = make_purchase_invoice(po.name)
+		# Check received_qty after making PI from PO with update_stock checked
+		pi2 = make_pi_from_po(po.name)
 		pi2.set("update_stock", 1)
 		pi2.get("items")[0].qty = 3
 		pi2.insert()
 		pi2.submit()
 
 		po.load_from_db()
-		self.assertEqual(po.get("items")[0].received_qty, 9)
+		self.assertEqual(po.get("items")[0].received_qty, 5)
+
+		# Check received_qty after making PR from PO
+		pr = make_pr_against_po(po.name, 1)
+
+		po.load_from_db()
+		self.assertEqual(po.get("items")[0].received_qty, 6)
+
+
 
 	def test_return_against_purchase_order(self):
 		po = create_purchase_order()
@@ -143,7 +159,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 6)
 
-		pi2 = make_purchase_invoice(po.name)
+		pi2 = make_pi_from_po(po.name)
 		pi2.set("update_stock", 1)
 		pi2.get("items")[0].qty = 3
 		pi2.insert()
@@ -175,10 +191,10 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_invoice(self):
 		po = create_purchase_order(do_not_submit=True)
 
-		self.assertRaises(frappe.ValidationError, make_purchase_invoice, po.name)
+		self.assertRaises(frappe.ValidationError, make_pi_from_po, po.name)
 
 		po.submit()
-		pi = make_purchase_invoice(po.name)
+		pi = make_pi_from_po(po.name)
 
 		self.assertEqual(pi.doctype, "Purchase Invoice")
 		self.assertEqual(len(pi.get("items", [])), 1)
@@ -186,7 +202,7 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_purchase_order_on_hold(self):
 		po = create_purchase_order(item_code="_Test Product Bundle Item")
 		po.db_set('Status', "On Hold")
-		pi = make_purchase_invoice(po.name)
+		pi = make_pi_from_po(po.name)
 		pr = make_purchase_receipt(po.name)
 		self.assertRaises(frappe.ValidationError, pr.submit)
 		self.assertRaises(frappe.ValidationError, pi.submit)
@@ -195,7 +211,7 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_invoice_with_terms(self):
 		po = create_purchase_order(do_not_save=True)
 
-		self.assertRaises(frappe.ValidationError, make_purchase_invoice, po.name)
+		self.assertRaises(frappe.ValidationError, make_pi_from_po, po.name)
 
 		po.update(
 			{"payment_terms_template": "_Test Payment Term Template"}
@@ -208,7 +224,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(getdate(po.payment_schedule[0].due_date), getdate(po.transaction_date))
 		self.assertEqual(po.payment_schedule[1].payment_amount, 2500.0)
 		self.assertEqual(getdate(po.payment_schedule[1].due_date), add_days(getdate(po.transaction_date), 30))
-		pi = make_purchase_invoice(po.name)
+		pi = make_pi_from_po(po.name)
 		pi.save()
 
 		self.assertEqual(pi.doctype, "Purchase Invoice")
@@ -346,7 +362,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		self.assertTrue(po.get('payment_schedule'))
 
-		pi = make_purchase_invoice(po.name)
+		pi = make_pi_from_po(po.name)
 
 		self.assertFalse(pi.get('payment_schedule'))
 
@@ -357,7 +373,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.submit()
 		self.assertTrue(po.get('payment_schedule'))
 
-		pi = make_purchase_invoice(po.name)
+		pi = make_pi_from_po(po.name)
 		pi.insert()
 		self.assertTrue(pi.get('payment_schedule'))
 
@@ -442,7 +458,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(bin7.reserved_qty_for_sub_contract, bin2.reserved_qty_for_sub_contract - 6)
 
 		# Make Purchase Invoice
-		pi = make_purchase_invoice(po.name)
+		pi = make_pi_from_po(po.name)
 		pi.update_stock = 1
 		pi.supplier_warehouse = "_Test Warehouse 1 - _TC"
 		pi.insert()

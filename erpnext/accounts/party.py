@@ -44,7 +44,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 		frappe.throw(_("Not permitted for {0}").format(party), frappe.PermissionError)
 
 	party = frappe.get_doc(party_type, party)
-	currency = party.default_currency if party.default_currency else get_company_currency(company)
+	currency = party.default_currency if party.get("default_currency") else get_company_currency(company)
 
 	party_address, shipping_address = set_address_details(out, party, party_type, doctype, company, party_address, shipping_address)
 	set_contact_details(out, party, party_type)
@@ -144,7 +144,7 @@ def set_other_values(out, party, party_type):
 
 def get_default_price_list(party):
 	"""Return default price list for party (Document object)"""
-	if party.default_price_list:
+	if party.get("default_price_list"):
 		return party.default_price_list
 
 	if party.doctype == "Customer":
@@ -469,7 +469,9 @@ def get_timeline_data(doctype, name):
 	# fetch and append data from Activity Log
 	data += frappe.db.sql("""select {fields}
 		from `tabActivity Log`
-		where reference_doctype={doctype} and reference_name={name}
+		where (reference_doctype="{doctype}" and reference_name="{name}")
+		or (timeline_doctype in ("{doctype}") and timeline_name="{name}")
+		or (reference_doctype in ("Quotation", "Opportunity") and timeline_name="{name}")
 		and status!='Success' and creation > {after}
 		{group_by} order by creation desc
 		""".format(doctype=frappe.db.escape(doctype), name=frappe.db.escape(name), fields=fields,

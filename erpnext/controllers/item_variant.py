@@ -98,8 +98,8 @@ def validate_item_attribute_value(attributes_list, attribute, attribute_value, i
 	if allow_rename_attribute_value:
 		pass
 	elif attribute_value not in attributes_list:
-		frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values for Item {2}").format(
-			attribute_value, attribute, item), InvalidItemAttributeValueError, title=_('Invalid Attribute'))
+		frappe.throw(_("The value {0} is already assigned to an exisiting Item {2}.").format(
+			attribute_value, attribute, item), InvalidItemAttributeValueError, title=_('Rename Not Allowed'))
 
 def get_attribute_values(item):
 	if not frappe.flags.attribute_values:
@@ -176,7 +176,7 @@ def enqueue_multiple_variant_creation(item, args):
 	for key in variants:
 		total_variants *= len(variants[key])
 	if total_variants >= 600:
-		frappe.msgprint("Please do not create more than 500 items at a time", raise_exception=1)
+		frappe.throw(_("Please do not create more than 500 items at a time"))
 		return
 	if total_variants < 10:
 		return create_multiple_variants(item, args)
@@ -279,14 +279,14 @@ def copy_attributes_to_variant(item, variant):
 					variant.set(field.fieldname, item.get(field.fieldname))
 
 	variant.variant_of = item.name
-	if 'description' in allow_fields:
-		variant.has_variants = 0
+
+	if 'description' not in allow_fields:
 		if not variant.description:
-			variant.description = ""
+				variant.description = ""
 
 		if item.variant_based_on=='Item Attribute':
 			if variant.attributes:
-				attributes_description = ""
+				attributes_description = item.description + " "
 				for d in variant.attributes:
 					attributes_description += "<div>" + d.attribute + ": " + cstr(d.attribute_value) + "</div>"
 

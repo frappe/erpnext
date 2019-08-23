@@ -60,12 +60,11 @@ frappe.ui.form.on('Employee Onboarding', {
 				},
 				callback: function(r) {
 					if (r.message) {
-						$.each(r.message, function(i, d) {
-							var row = frappe.model.add_child(frm.doc, "Employee Boarding Activity", "activities");
-							$.extend(row, d);
+						r.message.forEach((d) => {
+							frm.add_child("activities", d);
 						});
+						refresh_field("activities");
 					}
-					refresh_field("activities");
 				}
 			});
 		}

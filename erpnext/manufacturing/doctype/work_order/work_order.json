@@ -4,6 +4,7 @@
  "creation": "2013-01-10 16:34:16",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "item",
   "naming_series",
@@ -12,9 +13,6 @@
   "item_name",
   "image",
   "bom_no",
-  "allow_alternative_item",
-  "use_multi_level_bom",
-  "skip_transfer",
   "column_break1",
   "company",
   "qty",
@@ -22,7 +20,13 @@
   "produced_qty",
   "sales_order",
   "project",
+  "settings_section",
+  "allow_alternative_item",
+  "use_multi_level_bom",
+  "column_break_18",
+  "skip_transfer",
   "from_wip_warehouse",
+  "update_consumed_material_cost_in_project",
   "warehouses",
   "wip_warehouse",
   "fg_warehouse",
@@ -442,13 +446,28 @@
    "oldfieldtype": "Data",
    "options": "Work Order",
    "read_only": 1
+  },
+  {
+   "fieldname": "settings_section",
+   "fieldtype": "Section Break",
+   "label": "Settings"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "update_consumed_material_cost_in_project",
+   "fieldtype": "Check",
+   "label": "Update Consumed Material Cost In Project"
   }
  ],
  "icon": "fa fa-cogs",
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2019-05-27 09:36:16.707719",
+ "modified": "2019-07-31 00:13:38.218277",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
@@ -477,6 +496,7 @@
    "role": "Stock User"
   }
  ],
+ "sort_field": "modified",
  "sort_order": "ASC",
  "title_field": "production_item",
  "track_changes": 1,

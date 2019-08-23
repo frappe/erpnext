@@ -135,8 +135,8 @@ class NamingSeries(Document):
 
 	def validate_series_name(self, n):
 		import re
-		if not re.match("^[\w\- /.#]*$", n, re.UNICODE):
-			throw(_('Special Characters except "-", "#", "." and "/" not allowed in naming series'))
+		if not re.match("^[\w\- /.#{}]*$", n, re.UNICODE):
+			throw(_('Special Characters except "-", "#", ".", "/", "{" and "}" not allowed in naming series'))
 
 	def get_options(self, arg=None):
 		if frappe.get_meta(arg or self.select_doc_for_series).get_field("naming_series"):

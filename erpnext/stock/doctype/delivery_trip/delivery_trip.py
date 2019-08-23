@@ -20,8 +20,7 @@ class DeliveryTrip(Document):
 		# Google Maps returns distances in meters by default
 		self.default_distance_uom = frappe.db.get_single_value("Global Defaults", "default_distance_unit") or "Meter"
 		self.uom_conversion_factor = frappe.db.get_value("UOM Conversion Factor",
-														{"from_uom": "Meter", "to_uom": self.default_distance_uom},
-														"value")
+			{"from_uom": "Meter", "to_uom": self.default_distance_uom}, "value")
 
 	def validate(self):
 		self.validate_stop_addresses()
@@ -101,16 +100,13 @@ class DeliveryTrip(Document):
 			optimize (bool): True if route needs to be optimized, else False
 		"""
 
-		if not frappe.db.get_single_value("Google Maps Settings", "enabled"):
-			frappe.throw(_("Cannot process route, since Google Maps Settings is disabled."))
-
 		departure_datetime = get_datetime(self.departure_time)
 		route_list = self.form_route_list(optimize)
 
 		# For locks, maintain idx count while looping through route list
 		idx = 0
 		for route in route_list:
-			directions = get_directions(route, optimize)
+			directions = self.get_directions(route, optimize)
 
 			if directions:
 				if optimize and len(directions.get("waypoint_order")) > 1:
@@ -139,7 +135,7 @@ class DeliveryTrip(Document):
 				# Include last leg in the final distance calculation
 				self.uom = self.default_distance_uom
 				total_distance = sum([leg.get("distance", {}).get("value", 0.0)
-											for leg in directions.get("legs")])  # in meters
+					for leg in directions.get("legs")])  # in meters
 				self.total_distance = total_distance * self.uom_conversion_factor
 			else:
 				idx += len(route) - 1
@@ -158,9 +154,10 @@ class DeliveryTrip(Document):
 		Returns:
 			(list of list of str): List of address routes split at locks, if optimize is `True`
 		"""
+		if not self.driver_address:
+			frappe.throw(_("Cannot Calculate Arrival Time as Driver Address is Missing."))
 
-		settings = frappe.get_single("Google Maps Settings")
-		home_address = get_address_display(frappe.get_doc("Address", settings.home_address).as_dict())
+		home_address = get_address_display(frappe.get_doc("Address", self.driver_address).as_dict())
 
 		route_list = []
 		# Initialize first leg with origin as the home address
@@ -204,6 +201,47 @@ class DeliveryTrip(Document):
 			stops_order.append(self.delivery_stops[old_idx])
 
 		self.delivery_stops[start:start + len(stops_order)] = stops_order
+
+	def get_directions(self, route, optimize):
+		"""
+		Retrieve map directions for a given route and departure time.
+		If optimize is `True`, Google Maps will return an optimized
+		order for the intermediate waypoints.
+
+		NOTE: Google's API does take an additional `departure_time` key,
+		but it only works for routes without any waypoints.
+
+		Args:
+			route (list of str): Route addresses (origin -> waypoint(s), if any -> destination)
+			optimize (bool): `True` if route needs to be optimized, else `False`
+
+		Returns:
+			(dict): Route legs and, if `optimize` is `True`, optimized waypoint order
+		"""
+		if not frappe.db.get_single_value("Google Settings", "api_key"):
+			frappe.throw(_("Enter API key in Google Settings."))
+
+		import googlemaps
+
+		try:
+			maps_client = googlemaps.Client(key=frappe.db.get_single_value("Google Settings", "api_key"))
+		except Exception as e:
+			frappe.throw(e)
+
+		directions_data = {
+			"origin": route[0],
+			"destination": route[-1],
+			"waypoints": route[1: -1],
+			"optimize_waypoints": optimize
+		}
+
+		try:
+			directions = maps_client.directions(**directions_data)
+		except Exception as e:
+			frappe.throw(_(e.message))
+
+		return directions[0] if directions else False
+
 
 
 @frappe.whitelist()
@@ -279,18 +317,6 @@ def get_contact_display(contact):
 	return contact_info.html
 
 
-@frappe.whitelist()
-def optimize_route(delivery_trip):
-	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
-	delivery_trip.process_route(optimize=True)
-
-
-@frappe.whitelist()
-def get_arrival_times(delivery_trip):
-	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
-	delivery_trip.process_route(optimize=False)
-
-
 def sanitize_address(address):
 	"""
 	Remove HTML breaks in a given address
@@ -311,41 +337,6 @@ def sanitize_address(address):
 	return ', '.join(address[:3])
 
 
-def get_directions(route, optimize):
-	"""
-	Retrieve map directions for a given route and departure time.
-	If optimize is `True`, Google Maps will return an optimized
-	order for the intermediate waypoints.
-
-	NOTE: Google's API does take an additional `departure_time` key,
-	but it only works for routes without any waypoints.
-
-	Args:
-		route (list of str): Route addresses (origin -> waypoint(s), if any -> destination)
-		optimize (bool): `True` if route needs to be optimized, else `False`
-
-	Returns:
-		(dict): Route legs and, if `optimize` is `True`, optimized waypoint order
-	"""
-
-	settings = frappe.get_single("Google Maps Settings")
-	maps_client = settings.get_client()
-
-	directions_data = {
-		"origin": route[0],
-		"destination": route[-1],
-		"waypoints": route[1: -1],
-		"optimize_waypoints": optimize
-	}
-
-	try:
-		directions = maps_client.directions(**directions_data)
-	except Exception as e:
-		frappe.throw(_(e.message))
-
-	return directions[0] if directions else False
-
-
 @frappe.whitelist()
 def notify_customers(delivery_trip):
 	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
@@ -358,8 +349,12 @@ def notify_customers(delivery_trip):
 	email_recipients = []
 
 	for stop in delivery_trip.delivery_stops:
-		contact_info = frappe.db.get_value("Contact", stop.contact,
-											["first_name", "last_name", "email_id", "gender"], as_dict=1)
+		contact_info = frappe.db.get_value("Contact", stop.contact, ["first_name", "last_name", "email_id"], as_dict=1)
+
+		context.update({"items": []})
+		if stop.delivery_note:
+			items = frappe.get_all("Delivery Note Item", filters={"parent": stop.delivery_note, "docstatus": 1}, fields=["*"])
+			context.update({"items": items})
 
 		if contact_info and contact_info.email_id:
 			context.update(stop.as_dict())
@@ -369,9 +364,9 @@ def notify_customers(delivery_trip):
 			dispatch_template = frappe.get_doc("Email Template", dispatch_template_name)
 
 			frappe.sendmail(recipients=contact_info.email_id,
-							subject=dispatch_template.subject,
-							message=frappe.render_template(dispatch_template.response, context),
-							attachments=get_attachments(stop))
+				subject=dispatch_template.subject,
+				message=frappe.render_template(dispatch_template.response, context),
+				attachments=get_attachments(stop))
 
 			stop.db_set("email_sent_to", contact_info.email_id)
 			email_recipients.append(contact_info.email_id)
@@ -388,9 +383,7 @@ def get_attachments(delivery_stop):
 		return []
 
 	dispatch_attachment = frappe.db.get_single_value("Delivery Settings", "dispatch_attachment")
-	attachments = frappe.attach_print("Delivery Note",
-										delivery_stop.delivery_note,
-										file_name="Delivery Note",
-										print_format=dispatch_attachment)
+	attachments = frappe.attach_print("Delivery Note", delivery_stop.delivery_note,
+		file_name="Delivery Note", print_format=dispatch_attachment)
 
 	return [attachments]

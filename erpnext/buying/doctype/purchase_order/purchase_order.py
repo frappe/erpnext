@@ -483,7 +483,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 							'from_warehouse': rm_item_data["warehouse"],
 							'stock_uom': rm_item_data["stock_uom"],
 							'main_item_code': rm_item_data["item_code"],
-							'allow_alternative_item': item_wh[rm_item_code].get('allow_alternative_item')
+							'allow_alternative_item': item_wh.get(rm_item_code, {}).get('allow_alternative_item')
 						}
 					}
 					stock_entry.add_to_stock_entry_detail(items_dict)
@@ -510,4 +510,3 @@ def update_status(status, name):
 def make_inter_company_sales_order(source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 	return make_inter_company_transaction("Purchase Order", source_name, target_doc)
-

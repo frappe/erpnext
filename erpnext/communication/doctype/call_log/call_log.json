@@ -1,0 +1,159 @@
+{
+ "autoname": "field:id",
+ "creation": "2019-06-05 12:07:02.634534",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "id",
+  "from",
+  "to",
+  "column_break_3",
+  "received_by",
+  "medium",
+  "caller_information",
+  "contact",
+  "contact_name",
+  "column_break_10",
+  "lead",
+  "lead_name",
+  "section_break_5",
+  "status",
+  "duration",
+  "recording_url"
+ ],
+ "fields": [
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "id",
+   "fieldtype": "Data",
+   "label": "ID",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "from",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "From",
+   "read_only": 1
+  },
+  {
+   "fieldname": "to",
+   "fieldtype": "Data",
+   "label": "To",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Ringing\nIn Progress\nCompleted\nMissed",
+   "read_only": 1
+  },
+  {
+   "description": "Call Duration in seconds",
+   "fieldname": "duration",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Duration",
+   "read_only": 1
+  },
+  {
+   "fieldname": "recording_url",
+   "fieldtype": "Data",
+   "label": "Recording URL",
+   "read_only": 1
+  },
+  {
+   "fieldname": "medium",
+   "fieldtype": "Data",
+   "label": "Medium",
+   "read_only": 1
+  },
+  {
+   "fieldname": "received_by",
+   "fieldtype": "Link",
+   "label": "Received By",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "caller_information",
+   "fieldtype": "Section Break",
+   "label": "Caller Information"
+  },
+  {
+   "fieldname": "contact",
+   "fieldtype": "Link",
+   "label": "Contact",
+   "options": "Contact",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lead",
+   "fieldtype": "Link",
+   "label": "Lead ",
+   "options": "Lead",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "contact.name",
+   "fieldname": "contact_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Contact Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "lead.lead_name",
+   "fieldname": "lead_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Lead Name",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "modified": "2019-08-06 05:46:53.144683",
+ "modified_by": "Administrator",
+ "module": "Communication",
+ "name": "Call Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Employee"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "title_field": "from",
+ "track_changes": 1,
+ "track_views": 1
+}
