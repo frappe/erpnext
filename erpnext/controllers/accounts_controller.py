@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import json
+import re
 from frappe import _, throw, scrub
 from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day, nowdate,\
 	cstr
@@ -755,7 +756,10 @@ class AccountsController(TransactionBase):
 	def clean_remarks(self):
 		for f in ['remarks', 'remark', 'user_remark', 'user_remarks']:
 			if self.meta.has_field(f):
-				self.set(f, cstr(self.get(f)).strip())
+				cleaned_remarks = cstr(self.get(f)).strip()
+				cleaned_remarks = re.sub(r'\n\s*\n', '\n', cleaned_remarks)
+				cleaned_remarks = re.sub(r' +', ' ', cleaned_remarks)
+				self.set(f, cleaned_remarks)
 
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
