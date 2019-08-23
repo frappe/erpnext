@@ -4,7 +4,7 @@ frappe.provide('erpnext.pos');
 frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: 'Point of Sale',
+		title: __('Point of Sale'),
 		single_column: true
 	});
 
