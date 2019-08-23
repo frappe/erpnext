@@ -43,7 +43,8 @@ class StockReconciliation(StockController):
 		update_serial_nos_after_submit(self, "items")
 
 	def on_cancel(self):
-		self.delete_and_repost_sle()
+		self.flags.ignore_links = True
+		self.make_sle_on_cancel()
 		self.make_gl_entries_on_cancel()
 
 	def remove_items_with_no_change(self):
@@ -308,18 +309,7 @@ class StockReconciliation(StockController):
 
 		return data
 
-	def delete_and_repost_sle(self):
-		"""	Delete Stock Ledger Entries related to this voucher
-			and repost future Stock Ledger Entries"""
-
-		existing_entries = frappe.db.sql("""select distinct item_code, warehouse
-			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""",
-			(self.doctype, self.name), as_dict=1)
-
-		# delete entries
-		frappe.db.sql("""delete from `tabStock Ledger Entry`
-			where voucher_type=%s and voucher_no=%s""", (self.doctype, self.name))
-
+	def make_sle_on_cancel(self):
 		sl_entries = []
 		for row in self.items:
 			if row.serial_no or row.batch_no or row.current_serial_no:
@@ -329,15 +319,6 @@ class StockReconciliation(StockController):
 			sl_entries.reverse()
 			allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
-
-		# repost future entries for selected item_code, warehouse
-		for entries in existing_entries:
-			update_entries_after({
-				"item_code": entries.item_code,
-				"warehouse": entries.warehouse,
-				"posting_date": self.posting_date,
-				"posting_time": self.posting_time
-			})
 
 	def get_gl_entries(self, warehouse_account=None):
 		if not self.cost_center:

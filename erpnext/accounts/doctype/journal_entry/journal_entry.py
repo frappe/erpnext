@@ -47,6 +47,7 @@ class JournalEntry(AccountsController):
 	def on_submit(self):
 		self.validate_cheque_info()
 		self.check_credit_limit()
+		self.flags.ignore_links = True
 		self.make_gl_entries()
 		self.update_advance_paid()
 		self.update_expense_claim()

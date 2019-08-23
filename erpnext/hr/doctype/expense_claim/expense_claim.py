@@ -76,6 +76,7 @@ class ExpenseClaim(AccountsController):
 
 	def on_cancel(self):
 		self.update_task_and_project()
+		self.flags.ignore_links = True
 		if self.payable_account:
 			self.make_gl_entries(cancel=True)
 
