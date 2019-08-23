@@ -364,11 +364,8 @@ def reconcile_dr_cr_note(dr_cr_notes):
 		voucher_type = ('Credit Note'
 			if d.voucher_type == 'Sales Invoice' else 'Debit Note')
 
-		dr_or_cr = ('credit_in_account_currency'
-			if d.reference_type == 'Sales Invoice' else 'debit_in_account_currency')
-
 		reconcile_dr_or_cr = ('debit_in_account_currency'
-			if dr_or_cr == 'credit_in_account_currency' else 'credit_in_account_currency')
+			if d.dr_or_cr == 'credit_in_account_currency' else 'credit_in_account_currency')
 
 		jv = frappe.get_doc({
 			"doctype": "Journal Entry",
@@ -379,8 +376,7 @@ def reconcile_dr_cr_note(dr_cr_notes):
 					'account': d.account,
 					'party': d.party,
 					'party_type': d.party_type,
-					reconcile_dr_or_cr: (abs(d.allocated_amount)
-						if abs(d.unadjusted_amount) > abs(d.allocated_amount) else abs(d.unadjusted_amount)),
+					d.dr_or_cr: abs(d.allocated_amount),
 					'reference_type': d.against_voucher_type,
 					'reference_name': d.against_voucher
 				},
@@ -388,7 +384,8 @@ def reconcile_dr_cr_note(dr_cr_notes):
 					'account': d.account,
 					'party': d.party,
 					'party_type': d.party_type,
-					dr_or_cr: abs(d.allocated_amount),
+					reconcile_dr_or_cr: (abs(d.allocated_amount)
+						if abs(d.unadjusted_amount) > abs(d.allocated_amount) else abs(d.unadjusted_amount)),
 					'reference_type': d.voucher_type,
 					'reference_name': d.voucher_no
 				}
