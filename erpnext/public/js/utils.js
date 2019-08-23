@@ -60,7 +60,15 @@ $.extend(erpnext, {
 
 		var me = this;
 		$btn.on("click", function() {
-			me.show_serial_batch_selector(grid_row.frm, grid_row.doc);
+			let callback = '';
+			let on_close = '';
+
+			if (grid_row.doc.serial_no) {
+				grid_row.doc.has_serial_no = true;
+			}
+
+			me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
+				callback, on_close, true);
 		});
 	},
 });

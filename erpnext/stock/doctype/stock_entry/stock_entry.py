@@ -145,6 +145,10 @@ class StockEntry(StockController):
 				self.precision("transfer_qty", item))
 
 	def update_cost_in_project(self):
+		if (self.work_order and not frappe.db.get_value("Work Order",
+			self.work_order, "update_consumed_material_cost_in_project")):
+			return
+
 		if self.project:
 			amount = frappe.db.sql(""" select ifnull(sum(sed.amount), 0)
 				from
