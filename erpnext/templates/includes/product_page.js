@@ -29,7 +29,7 @@ frappe.ready(function() {
 						.html(r.message.product_info.price.formatted_price_sales_uom + "<div style='font-size: small'>\
 							(" + r.message.product_info.price.formatted_price + " / " + r.message.product_info.uom + ")</div>");
 
-					if(r.message.product_info.in_stock==0) {
+					if(r.message.product_info.in_stock==0 && r.message.cart_settings.show_stock_availability) {
 						$(".item-stock").html("<div style='color: red'> <i class='fa fa-close'></i> {{ _("Not in stock") }}</div>");
 					}
 					else if(r.message.product_info.in_stock==1) {
