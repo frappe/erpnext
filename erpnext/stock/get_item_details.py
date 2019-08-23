@@ -460,6 +460,9 @@ def get_default_cost_center(args, item, item_group, brand, order_type=None, comp
 			cost_center = order_type.get('buying_cost_center') or item.get('buying_cost_center') \
 				or brand.get('buying_cost_center') or item_group.get('buying_cost_center')
 
+	if not cost_center:
+		cost_center = args.get("parent_cost_center")
+
 	if not cost_center and (company or args.company):
 		cost_center = frappe.get_cached_value("Company", company or args.company, "cost_center")
 

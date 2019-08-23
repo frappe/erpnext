@@ -476,6 +476,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							stock_uom: item.stock_uom,
 							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
 							cost_center: item.cost_center,
+							parent_cost_center: me.frm.doc.cost_center,
 							apply_discount_after_taxes: item.apply_discount_after_taxes,
 							tax_category: me.frm.doc.tax_category,
 							item_tax_template: item.item_tax_template
@@ -1579,6 +1580,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						customer: me.frm.doc.customer,
 						supplier: me.frm.doc.supplier,
 						project: me.frm.doc.project,
+						parent_cost_center: me.frm.doc.cost_center
 					},
 					items: items
 				},
@@ -1604,6 +1606,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	cost_center: function() {
+		this.update_item_defaults();
 		erpnext.utils.set_taxes(this.frm, 'cost_center');
 	},
 
