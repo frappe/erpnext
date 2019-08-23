@@ -535,7 +535,7 @@ class StockEntry(StockController):
 
 				total_allowed = required_qty + (required_qty * (qty_allowance/100))
 
-				if not total_allowed:
+				if not required_qty:
 					frappe.throw(_("Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1}")
 						.format(se_item.item_code, self.purchase_order))
 				total_supplied = frappe.db.sql("""select sum(transfer_qty)
