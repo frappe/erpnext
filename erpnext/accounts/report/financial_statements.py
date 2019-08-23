@@ -425,9 +425,12 @@ def get_cost_centers_with_children(cost_centers):
 
 	all_cost_centers = []
 	for d in cost_centers:
-		lft, rgt = frappe.db.get_value("Cost Center", d, ["lft", "rgt"])
-		children = frappe.get_all("Cost Center", filters={"lft": [">=", lft], "rgt": ["<=", rgt]})
-		all_cost_centers += [c.name for c in children]
+		if frappe.db.exists("Cost Center", d):
+			lft, rgt = frappe.db.get_value("Cost Center", d, ["lft", "rgt"])
+			children = frappe.get_all("Cost Center", filters={"lft": [">=", lft], "rgt": ["<=", rgt]})
+			all_cost_centers += [c.name for c in children]
+		else:
+			frappe.throw(_("Cost Center: {0} does not exist".format(d)))
 
 	return list(set(all_cost_centers))
 
