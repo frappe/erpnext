@@ -393,27 +393,31 @@ class DeliveryNote(SellingController):
 			frappe.throw(_("Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"))
 
 def update_billed_amount_based_on_dn(dn_detail, update_modified=True):
-	billed_qty = frappe.db.sql("""
-		select sum(item.qty)
+	billed = frappe.db.sql("""
+		select sum(item.qty), sum(item.amount)
 		from `tabSales Invoice Item` item, `tabSales Invoice` inv
 		where inv.name=item.parent and item.dn_detail=%s and item.docstatus=1 and inv.is_return = 0
 	""", dn_detail)
 
-	billed_qty = billed_qty and billed_qty[0][0] or 0
-	frappe.db.set_value("Delivery Note Item", dn_detail, "billed_qty", billed_qty, update_modified=update_modified)
+	billed_qty = flt(billed[0][0]) if billed else 0
+	billed_amt = flt(billed[0][1]) if billed else 0
+	frappe.db.set_value("Delivery Note Item", dn_detail, {"billed_qty": billed_qty, "billed_amt": billed_amt}, None,
+		update_modified=update_modified)
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
 	# Billed against Sales Order directly
 	billed_against_so = frappe.db.sql("""
-		select sum(item.qty)
+		select sum(item.qty), sum(item.amount)
 		from `tabSales Invoice Item` item, `tabSales Invoice` inv
 		where inv.name=item.parent and item.so_detail=%s and (item.dn_detail is null or item.dn_detail = '')
 			and item.docstatus=1 and inv.is_return = 0
 	""", so_detail)
-	billed_against_so = billed_against_so and billed_against_so[0][0] or 0
+	billed_qty_against_so = flt(billed_against_so[0][0]) if billed_against_so else 0
+	billed_amt_against_so = flt(billed_against_so[0][1]) if billed_against_so else 0
 
 	# Get all Delivery Note Item rows against the Sales Order Item row
-	dn_details = frappe.db.sql("""select dn_item.name, dn_item.qty, dn_item.returned_qty, dn_item.si_detail, dn_item.parent
+	dn_details = frappe.db.sql("""select dn_item.name, dn_item.amount, dn_item.qty, dn_item.returned_qty,
+			dn_item.si_detail, dn_item.parent
 		from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
 		where dn.name=dn_item.parent and dn_item.so_detail=%s
 			and dn.docstatus=1 and dn.is_return = 0
@@ -421,33 +425,40 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 
 	updated_dn = []
 	for dnd in dn_details:
-		billed_qty_agianst_dn = 0
+		billed_qty_against_dn = 0
+		billed_amt_against_dn = 0
 
 		# If delivered against Sales Invoice
 		if dnd.si_detail:
-			billed_qty_agianst_dn = flt(dnd.qty)
-			billed_against_so -= billed_qty_agianst_dn
+			billed_qty_against_dn = flt(dnd.qty)
+			billed_amt_against_dn = flt(dnd.amount)
+			billed_qty_against_so -= billed_qty_against_dn
+			billed_amt_against_so -= billed_amt_against_dn
 		else:
 			# Get billed qty directly against Delivery Note
-			billed_qty_agianst_dn = frappe.db.sql("""
-				select sum(item.qty)
+			billed_against_dn = frappe.db.sql("""
+				select sum(item.qty), sum(item.amount)
 				from `tabSales Invoice Item` item, `tabSales Invoice` inv
 				where inv.name=item.parent and item.dn_detail=%s and item.docstatus=1 and inv.is_return = 0
 			""", dnd.name)
-			billed_qty_agianst_dn = billed_qty_agianst_dn and billed_qty_agianst_dn[0][0] or 0
+			billed_qty_against_dn = flt(billed_against_dn[0][0]) if billed_against_dn else 0
+			billed_amt_against_dn = flt(billed_against_dn[0][1]) if billed_against_dn else 0
 
-		# Distribute billed qty directly against SO between DNs based on FIFO
-		billable_qty = flt(dnd.qty) - flt(dnd.returned_qty)
-		if billed_against_so and billed_qty_agianst_dn < billable_qty:
-			pending_to_bill = billable_qty - billed_qty_agianst_dn
-			if pending_to_bill <= billed_against_so:
-				billed_qty_agianst_dn += pending_to_bill
-				billed_against_so -= pending_to_bill
-			else:
-				billed_qty_agianst_dn += billed_against_so
-				billed_against_so = 0
+		# Distribute billed qty and amt directly against SO between DNs based on FIFO
+		pending_qty_to_bill = flt(dnd.qty) - flt(dnd.returned_qty) - billed_qty_against_dn
+		if billed_qty_against_so and pending_qty_to_bill > 0:
+			billed_qty_against_dn += min(billed_qty_against_so, pending_qty_to_bill)
+			billed_qty_against_so -= min(billed_qty_against_so, pending_qty_to_bill)
 
-		frappe.db.set_value("Delivery Note Item", dnd.name, "billed_qty", billed_qty_agianst_dn, update_modified=update_modified)
+		pending_amt_to_bill = flt(dnd.amount) - billed_amt_against_dn
+		pending_amt_to_bill -= flt(dnd.amount) / flt(dnd.qty) * flt(dnd.returned_qty) if dnd.qty else 0
+		if billed_amt_against_so and pending_amt_to_bill > 0:
+			billed_amt_against_dn += min(billed_amt_against_so, pending_amt_to_bill)
+			billed_amt_against_so -= min(billed_amt_against_so, pending_amt_to_bill)
+
+		frappe.db.set_value("Delivery Note Item", dnd.name, {
+			"billed_qty": billed_qty_against_dn, "billed_amt": billed_amt_against_dn
+		}, None, update_modified=update_modified)
 
 		updated_dn.append(dnd.parent)
 

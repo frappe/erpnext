@@ -53,6 +53,15 @@ class PurchaseInvoice(BuyingController):
 		},
 		{
 			'source_dt': 'Purchase Invoice Item',
+			'target_field': 'billed_amt',
+			'target_dt': 'Purchase Order Item',
+			'join_field': 'po_detail',
+			'source_field': 'amount',
+			'extra_cond': """ and exists(select name from `tabPurchase Invoice` where name=`tabPurchase Invoice Item`.parent
+				and (is_return=0 or reopen_order=1))"""
+		},
+		{
+			'source_dt': 'Purchase Invoice Item',
 			'update_children': self.update_billing_status_in_pr,
 			'target_field': 'billed_qty',
 			'target_ref_field': 'received_qty',
@@ -948,11 +957,11 @@ class PurchaseInvoice(BuyingController):
 	def update_billing_status_in_pr(self, update_modified=True):
 		updated_purchase_receipts = []
 		for d in self.get("items"):
-			if d.po_detail:
-				updated_purchase_receipts += update_billed_amount_based_on_po(d.po_detail, update_modified)
-			elif d.pr_detail:
+			if d.pr_detail:
 				update_billed_amount_based_on_pr(d.pr_detail, update_modified)
 				updated_purchase_receipts.append(d.purchase_receipt)
+			elif d.po_detail:
+				updated_purchase_receipts += update_billed_amount_based_on_po(d.po_detail, update_modified)
 
 		for pr in set(updated_purchase_receipts):
 			frappe.get_doc("Purchase Receipt", pr).update_billing_percentage(update_modified=update_modified)

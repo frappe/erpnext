@@ -441,32 +441,37 @@ class PurchaseReceipt(BuyingController):
 				from `tabPurchase Invoice Item` i
 				inner  join `tabPurchase Invoice` pi on pi.name = i.parent and pi.is_return = 0
 				where pi.docstatus = 1 and i.pr_detail = %s""", d.name)
-			d.billed_net_amount = data[0][0] if data else 0.0
-			d.billed_item_tax_amount = data[0][1] if data else 0.0
-			d.billed_qty = data[0][2] if data else 0.0
+			d.billed_net_amount = flt(data[0][0]) if data else 0.0
+			d.billed_item_tax_amount = flt(data[0][1]) if data else 0.0
+			d.billed_qty = flt(data[0][2]) if data else 0.0
 
 def update_billed_amount_based_on_pr(pr_detail, update_modified=True):
-	billed_qty = frappe.db.sql("""
-		select sum(item.qty)
+	billed = frappe.db.sql("""
+		select sum(item.qty), sum(item.amount)
 		from `tabPurchase Invoice Item` item, `tabPurchase Invoice` inv
 		where inv.name=item.parent and item.pr_detail=%s and item.docstatus=1 and inv.is_return = 0
 	""", pr_detail)
-	billed_qty = billed_qty and billed_qty[0][0] or 0
 
-	frappe.db.set_value("Purchase Receipt Item", pr_detail, "billed_qty", billed_qty, update_modified=update_modified)
+	billed_qty = flt(billed[0][0]) if billed else 0
+	billed_amt = flt(billed[0][1]) if billed else 0
+
+	frappe.db.set_value("Purchase Receipt Item", pr_detail, {"billed_qty": billed_qty, "billed_amt": billed_amt}, None,
+		update_modified=update_modified)
 
 def update_billed_amount_based_on_po(po_detail, update_modified=True):
 	# Billed against Purchase Order directly
 	billed_against_po = frappe.db.sql("""
-		select sum(item.qty)
+		select sum(item.qty), sum(item.amount)
 		from `tabPurchase Invoice Item` item, `tabPurchase Invoice` inv
 		where inv.name=item.parent and item.po_detail=%s and (item.pr_detail is null or item.pr_detail = '') and item.docstatus=1
 			and inv.is_return = 0
 	""", po_detail)
-	billed_against_po = billed_against_po and billed_against_po[0][0] or 0
+	billed_qty_against_po = flt(billed_against_po[0][0]) if billed_against_po else 0
+	billed_amt_against_po = flt(billed_against_po[0][1]) if billed_against_po else 0
 
 	# Get all Purhcase Receipt Item rows against the Purchase Order Item row
-	pr_details = frappe.db.sql("""select pr_item.name, pr_item.received_qty, pr_item.returned_qty, pr_item.parent
+	pr_details = frappe.db.sql("""select pr_item.name, pr_item.amount,
+			pr_item.received_qty, pr_item.qty, pr_item.returned_qty, pr_item.rejected_qty, pr_item.parent
 		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
 		where pr.name=pr_item.parent and pr_item.purchase_order_item=%s
 			and pr.docstatus=1 and pr.is_return = 0
@@ -475,24 +480,32 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 	updated_pr = []
 	for pr_item in pr_details:
 		# Get billed qty directly against Purchase Receipt
-		billed_qty_agianst_pr = frappe.db.sql("""
-			select sum(item.qty)
+		billed_against_pr = frappe.db.sql("""
+			select sum(item.qty), sum(item.amount)
 			from `tabPurchase Invoice Item` item, `tabPurchase Invoice` inv
 			where inv.name=item.parent and item.pr_detail=%s and item.docstatus=1 and inv.is_return = 0""", pr_item.name)
-		billed_qty_agianst_pr = billed_qty_agianst_pr and billed_qty_agianst_pr[0][0] or 0
+		billed_qty_against_pr = flt(billed_against_pr[0][0]) if billed_against_pr else 0
+		billed_amt_against_pr = flt(billed_against_pr[0][1]) if billed_against_pr else 0
+
+		returned_or_rejected_qty = max(flt(pr_item.returned_qty), flt(pr_item.rejected_qty))
 
 		# Distribute billed qty directly against PO between PRs based on FIFO
-		billable_qty = flt(pr_item.received_qty) - flt(pr_item.returned_qty)
-		if billed_against_po and billed_qty_agianst_pr < billable_qty:
-			pending_to_bill = flt(billable_qty) - billed_qty_agianst_pr
-			if pending_to_bill <= billed_against_po:
-				billed_qty_agianst_pr += pending_to_bill
-				billed_against_po -= pending_to_bill
-			else:
-				billed_qty_agianst_pr += billed_against_po
-				billed_against_po = 0
+		pending_qty_to_bill = flt(pr_item.received_qty) - returned_or_rejected_qty
+		pending_qty_to_bill -= billed_qty_against_pr
+		if billed_qty_against_po and pending_qty_to_bill > 0:
+			billed_qty_against_pr += min(billed_qty_against_po, pending_qty_to_bill)
+			billed_qty_against_po -= min(billed_qty_against_po, pending_qty_to_bill)
 
-		frappe.db.set_value("Purchase Receipt Item", pr_item.name, "billed_qty", billed_qty_agianst_pr, update_modified=update_modified)
+		pending_amt_to_bill = flt(pr_item.amount)
+		pending_amt_to_bill -= flt(pr_item.amount) / flt(pr_item.received_qty) * returned_or_rejected_qty if pr_item.received_qty else 0
+		pending_amt_to_bill -= billed_amt_against_pr
+		if billed_amt_against_po and pending_amt_to_bill > 0:
+			billed_amt_against_pr += min(billed_amt_against_po, pending_amt_to_bill)
+			billed_amt_against_po -= min(billed_amt_against_po, pending_amt_to_bill)
+
+		frappe.db.set_value("Purchase Receipt Item", pr_item.name, {
+			"billed_qty": billed_qty_against_pr, "billed_amt": billed_amt_against_pr
+		}, None, update_modified=update_modified)
 
 		updated_pr.append(pr_item.parent)
 
