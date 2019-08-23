@@ -1165,8 +1165,11 @@ class StockEntry(StockController):
 			and po.name = %s""", self.purchase_order))
 
 		#Update Supplied Qty in PO Supplied Items
-		frappe.db.sql("""UPDATE `tabPurchase Order Item Supplied` pos, `tabStock Entry Detail` sed
-			SET pos.supplied_qty = sed.transfer_qty where pos.name = sed.po_detail""")
+
+		frappe.db.sql("""UPDATE `tabPurchase Order Item Supplied` pos
+			SET pos.supplied_qty = (SELECT ifnull(sum(transfer_qty), 0) FROM `tabStock Entry Detail` sed
+			WHERE pos.name = sed.po_detail and sed.docstatus = 1)
+			WHERE pos.docstatus = 1""")
 
 		#Update reserved sub contracted quantity in bin based on Supplied Item Details and
 		for d in self.get("items"):
