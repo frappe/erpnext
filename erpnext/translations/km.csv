@@ -167,7 +167,7 @@ apps/erpnext/erpnext/hr/doctype/employee_checkin/employee_checkin.py,This employ
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Accountant,គណនេយ្យករ
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py,Selling Price List,លក់បញ្ជីតំលៃ
 DocType: Patient,Tobacco Current Use,ការប្រើប្រាស់ថ្នាំជក់បច្ចុប្បន្ន
-apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py,Selling Rate,អត្រាលក់
+apps/erpnext/erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.py,Selling Rate,អត្រាលក់
 apps/erpnext/erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js,Please save your document before adding a new account,សូមរក្សាទុកឯកសាររបស់អ្នកមុនពេលបន្ថែមគណនីថ្មី។
 DocType: Cost Center,Stock User,អ្នកប្រើប្រាស់ភាគហ៊ុន
 DocType: Soil Analysis,(Ca+Mg)/K,(Ca + Mg) / K
@@ -204,7 +204,6 @@ apps/erpnext/erpnext/accounts/utils.py,{0} {1} not in any active Fiscal Year.,{0
 DocType: Packed Item,Parent Detail docname,ពត៌មានលំអិតរបស់ឪពុកម្តាយ docname
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Reference: {0}, Item Code: {1} and Customer: {2}","ឯកសារយោង: {0}, លេខកូដធាតុ: {1} និងអតិថិជន: {2}"
 apps/erpnext/erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py,{0} {1} is not present in the parent company,{0} {1} មិនមានវត្តមាននៅក្នុងក្រុមហ៊ុនមេ
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,អ្នកផ្គត់ផ្គង់&gt; ប្រភេទអ្នកផ្គត់ផ្គង់។
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py,Trial Period End Date Cannot be before Trial Period Start Date,កាលបរិច្ឆេទបញ្ចប់នៃសវនាការមិនអាចនៅមុនថ្ងៃជំនុំជម្រះបានទេ
 apps/erpnext/erpnext/utilities/user_progress.py,Kg,គីឡូក្រាម
 DocType: Tax Withholding Category,Tax Withholding Category,ប្រភេទពន្ធកាត់ពន្ធ
@@ -317,6 +316,7 @@ DocType: Location,Location Name,ឈ្មោះទីតាំង
 DocType: Quality Procedure Table,Responsible Individual,បុគ្គលទទួលខុសត្រូវ។
 DocType: Naming Series,Prefix,បុព្វបទ
 apps/erpnext/erpnext/hr/notification/training_scheduled/training_scheduled.html,Event Location,ទីតាំងព្រឹត្តិការណ៍
+apps/erpnext/erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.py,Available Stock,មានស្តុក។
 DocType: Asset Settings,Asset Settings,ការកំណត់ធនធាន
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Consumable,ប្រើប្រាស់
 DocType: Student,B-,B-
@@ -349,6 +349,7 @@ DocType: Agriculture Analysis Criteria,Fertilizer,ជី
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,"Cannot ensure delivery by Serial No as \
 				Item {0} is added with and without Ensure Delivery by \
 				Serial No.",មិនអាចធានាថាការដឹកជញ្ជូនតាមលេខស៊េរីជាធាតុ \ {0} ត្រូវបានបន្ថែមនិងគ្មានការធានាការដឹកជញ្ជូនដោយ \ លេខស៊េរី។
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,សូមតំឡើងប្រព័ន្ធដាក់ឈ្មោះគ្រូនៅក្នុងការអប់រំ&gt; ការកំណត់ការអប់រំ។
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,At least one mode of payment is required for POS invoice.,របៀបយ៉ាងហោចណាស់មួយនៃការទូទាត់ត្រូវបានទាមទារសម្រាប់វិក័យប័ត្រម៉ាស៊ីនឆូតកាត។
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,Batch no is required for batched item {0},បាច់មិនត្រូវបានទាមទារសម្រាប់វត្ថុដែលត្រូវបានគេបោះបង់ចោល {0}
 DocType: Bank Statement Transaction Invoice Item,Bank Statement Transaction Invoice Item,របាយការណ៍គណនីធនាគារ
@@ -869,7 +870,6 @@ apps/erpnext/erpnext/healthcare/doctype/clinical_procedure_template/clinical_pro
 DocType: Supplier Scorecard Standing,Notify Other,ជូនដំណឹងផ្សេងទៀត
 DocType: Vital Signs,Blood Pressure (systolic),សម្ពាធឈាម (ស៊ីស្តូលិក)
 DocType: Item Price,Valid Upto,រីករាយជាមួយនឹងមានសុពលភាព
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,សូមកំណត់ឈ្មោះដាក់ឈ្មោះសំរាប់ {0} តាមរយៈតំឡើង&gt; ការកំណត់&gt; តំរុយឈ្មោះ។
 DocType: Training Event,Workshop,សិក្ខាសាលា
 DocType: Supplier Scorecard Scoring Standing,Warn Purchase Orders,ព្រមានការបញ្ជាទិញ
 apps/erpnext/erpnext/utilities/user_progress.py,List a few of your customers. They could be organizations or individuals.,រាយមួយចំនួននៃអតិថិជនរបស់អ្នក។ ពួកគេអាចត្រូវបានអង្គការឬបុគ្គល។
@@ -1650,7 +1650,6 @@ DocType: Support Search Source,Search Term Param Name,ឈ្មោះស្វ�
 DocType: Item Barcode,Item Barcode,កូដផលិតផលធាតុ
 DocType: Delivery Trip,In Transit,នៅក្នុងដំណើរឆ្លងកាត់។
 DocType: Woocommerce Settings,Endpoints,ចំណុចបញ្ចប់
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,លេខកូដរបស់ក្រុម&gt; ក្រុមក្រុម&gt; ម៉ាក។
 DocType: Shopping Cart Settings,Show Configure Button,បង្ហាញប៊ូតុងកំណត់រចនាសម្ព័ន្ធ។
 DocType: Quality Inspection Reading,Reading 6,ការអាន 6
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js,Cannot {0} {1} {2} without any negative outstanding invoice,មិនអាច {0} {1} {2} ដោយគ្មានវិក័យប័ត្រឆ្នើមអវិជ្ជមាន
@@ -2194,6 +2193,7 @@ apps/erpnext/erpnext/controllers/stock_controller.py,Row {0}: Quality Inspection
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js,Item 2,ធាតុ 2
 DocType: Pricing Rule,Validate Applied Rule,ធ្វើឱ្យច្បាប់អនុវត្តបានត្រឹមត្រូវ។
 DocType: QuickBooks Migrator,Authorization Endpoint,ចំណុចនៃការអនុញ្ញាត
+DocType: Employee Onboarding,Notify users by email,ជូនដំណឹងដល់អ្នកប្រើប្រាស់តាមរយៈអ៊ីមែល។
 DocType: Travel Request,International,អន្តរជាតិ
 DocType: Training Event,Training Event,ព្រឹត្តិការណ៍បណ្តុះបណ្តាល
 DocType: Item,Auto re-order,ការបញ្ជាទិញជាថ្មីម្តងទៀតដោយស្វ័យប្រវត្តិ
@@ -2801,7 +2801,6 @@ apps/erpnext/erpnext/utilities/page/leaderboard/leaderboard.js,No items found.,�
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py,You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global Settings,អ្នកមិនអាចលុបឆ្នាំសារពើពន្ធ {0} ។ ឆ្នាំសារពើពន្ធ {0} ត្រូវបានកំណត់ជាលំនាំដើមនៅក្នុងការកំណត់សកល
 DocType: Share Transfer,Equity/Liability Account,គណនីសមធម៌ / ការទទួលខុសត្រូវ
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.py,A customer with the same name already exists,អតិថិជនដែលមានឈ្មោះដូចគ្នាមានរួចហើយ
-DocType: Contract,Inactive,អសកម្ម
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js,This will submit Salary Slips and create accrual Journal Entry. Do you want to proceed?,នេះនឹងបង្ហាញប្រាក់បៀវត្សរ៍និងបង្កើតប្រាក់ចំណូលចូលក្នុង Journal Entry ។ តើអ្នកចង់បន្តទេ?
 DocType: Purchase Invoice,Total Net Weight,សរុបទំងន់សុទ្ធ
 DocType: Purchase Order,Order Confirmation No,ការបញ្ជាក់ពីលំដាប់លេខ
@@ -3593,7 +3592,6 @@ apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.py,No GST No. found for the C
 DocType: Stock Settings,Raise Material Request when stock reaches re-order level,ចូរលើកសំណើសុំនៅពេលដែលភាគហ៊ុនសម្ភារៈឈានដល់កម្រិតបញ្ជាទិញឡើងវិញ
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Full-time,ពេញម៉ោង
 DocType: Payroll Entry,Employees,និយោជិត
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,សូមរៀបចំស៊េរីលេខរៀងសម្រាប់ការចូលរួមតាមរយៈតំឡើង&gt; លេខរៀង។
 DocType: Question,Single Correct Answer,ចម្លើយត្រឹមត្រូវតែមួយ។
 DocType: Employee,Contact Details,ពត៌មានទំនាក់ទំនង
 DocType: C-Form,Received Date,កាលបរិច្ឆេទទទួលបាន
@@ -4200,6 +4198,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_tax
 DocType: Pricing Rule,Price or Product Discount,ការបញ្ចុះតំលៃឬផលិតផល។
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,For row {0}: Enter planned qty,សម្រាប់ជួរដេក {0}: បញ្ចូល Qty ដែលបានគ្រោងទុក
 DocType: Account,Income Account,គណនីប្រាក់ចំណូល
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,អតិថិជន&gt; ក្រុមអតិថិជន&gt; ទឹកដី។
 DocType: Payment Request,Amount in customer's currency,ចំនួនទឹកប្រាក់របស់អតិថិជនជារូបិយប័ណ្ណ
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,Delivery,ការដឹកជញ្ជូន
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py,Assigning Structures...,ការផ្តល់រចនាសម្ព័ន្ធ ...
@@ -4249,7 +4248,6 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Income Ta
 DocType: HR Settings,Check Vacancies On Job Offer Creation,ពិនិត្យមើលភាពទំនេរលើការបង្កើតការផ្តល់ជូនការងារ។
 apps/erpnext/erpnext/utilities/user_progress.py,Go to Letterheads,ទៅកាន់ក្បាលអក្សរ
 DocType: Subscription,Cancel At End Of Period,បោះបង់នៅចុងបញ្ចប់នៃរយៈពេល
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,សូមតំឡើងប្រព័ន្ធដាក់ឈ្មោះគ្រូនៅក្នុងការអប់រំ&gt; ការកំណត់ការអប់រំ។
 apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.js,Property already added,អចលនទ្រព្យបានបន្ថែមរួចហើយ
 DocType: Item Supplier,Item Supplier,ផ្គត់ផ្គង់ធាតុ
 apps/erpnext/erpnext/public/js/controllers/transaction.js,Please enter Item Code to get batch no,សូមបញ្ចូលលេខកូដធាតុដើម្បីទទួលបាច់នោះទេ
@@ -4533,6 +4531,7 @@ DocType: Training Event,Theory,ទ្រឹស្តី
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js,Warning: Material Requested Qty is less than Minimum Order Qty,ព្រមាន: សម្ភារៈដែលបានស្នើ Qty គឺតិចជាងអប្បបរមាលំដាប់ Qty
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py,Account {0} is frozen,គណនី {0} គឺការកក
 DocType: Quiz Question,Quiz Question,សំណួរសំណួរ។
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,អ្នកផ្គត់ផ្គង់&gt; ប្រភេទអ្នកផ្គត់ផ្គង់។
 DocType: Company,Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.,ផ្នែកច្បាប់អង្គភាព / តារាងរួមផ្សំជាមួយនឹងគណនីដាច់ដោយឡែកមួយដែលជាកម្មសិទ្ធិរបស់អង្គការនេះ។
 DocType: Payment Request,Mute Email,ស្ងាត់អ៊ីម៉ែល
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,"Food, Beverage & Tobacco","អាហារ, ភេសជ្ជៈនិងថ្នាំជក់"
@@ -5041,7 +5040,6 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Delivery warehouse required for stock item {0},ឃ្លាំងដឹកជញ្ជូនចាំបាច់សម្រាប់មុខទំនិញក្នុងស្ដុក {0}
 DocType: Packing Slip,The gross weight of the package. Usually net weight + packaging material weight. (for print),ទំងន់សរុបនៃកញ្ចប់។ ជាធម្មតាមានទម្ងន់សុទ្ធ + + ការវេចខ្ចប់មានទម្ងន់សម្ភារៈ។ (សម្រាប់ការបោះពុម្ព)
 DocType: Assessment Plan,Program,កម្មវិធី
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,សូមរៀបចំប្រព័ន្ធដាក់ឈ្មោះបុគ្គលិកនៅក្នុងធនធានមនុស្ស&gt; ធនធានមនុស្ស។
 DocType: Accounts Settings,Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,អ្នកប្រើដែលមានតួនាទីនេះត្រូវបានអនុញ្ញាតឱ្យកំណត់គណនីរបស់ទឹកកកនិងបង្កើត / កែប្រែធាតុគណនេយ្យប្រឆាំងនឹងគណនីជាទឹកកក
 ,Project Billing Summary,សង្ខេបវិក្កយបត្រគម្រោង។
 DocType: Vital Signs,Cuts,កាត់
@@ -5291,6 +5289,7 @@ DocType: Stock Settings,Use Naming Series,ប្រើស៊ុមឈ្មោ�
 apps/erpnext/erpnext/quality_management/doctype/quality_review/quality_review_list.js,No Action,គ្មានសកម្មភាព
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js,Valuation type charges can not marked as Inclusive,ការចោទប្រកាន់មិនអាចវាយតម្លៃប្រភេទសម្គាល់ថាជាការរួមបញ្ចូល
 DocType: POS Profile,Update Stock,ធ្វើឱ្យទាន់សម័យហ៊ុន
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,សូមកំណត់ឈ្មោះដាក់ឈ្មោះសំរាប់ {0} តាមរយៈតំឡើង&gt; ការកំណត់&gt; តំរុយឈ្មោះ។
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js,Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,UOM ផ្សេងគ្នាសម្រាប់ធាតុនឹងនាំឱ្យមានមិនត្រឹមត្រូវ (សរុប) តម្លៃទម្ងន់សុទ្ធ។ សូមប្រាកដថាទម្ងន់សុទ្ធនៃធាតុគ្នាគឺនៅ UOM ដូចគ្នា។
 DocType: Certification Application,Payment Details,សេចក្ដីលម្អិតការបង់ប្រាក់
 apps/erpnext/erpnext/stock/report/item_prices/item_prices.py,BOM Rate,អត្រា Bom
@@ -5395,6 +5394,8 @@ DocType: Sales Invoice,Distance (in km),ចម្ងាយ (គិតជាគ�
 apps/erpnext/erpnext/accounts/doctype/monthly_distribution/monthly_distribution.py,Percentage Allocation should be equal to 100%,ការបែងចែកគួរតែស្មើជាភាគរយទៅ 100%
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js,Please select Posting Date before selecting Party,សូមជ្រើសរើសកាលបរិច្ឆេទមុនការជ្រើសគណបក្ស
 apps/erpnext/erpnext/config/accounting.py,Payment Terms based on conditions,ល័ក្ខខ័ណ្ឌនៃការទូទាត់ផ្អែកលើល័ក្ខខ័ណ្ឌ។
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","សូមលុបនិយោជិក <a href=""#Form/Employee/{0}"">{0}</a> \ ដើម្បីលុបចោលឯកសារនេះ។"
 DocType: Program Enrollment,School House,សាលាផ្ទះ
 DocType: Serial No,Out of AMC,ចេញពីមជ្ឈមណ្ឌល AMC
 DocType: Opportunity,Opportunity Amount,ចំនួនឱកាស
@@ -5817,6 +5818,7 @@ apps/erpnext/erpnext/public/js/pos/pos.html,No Customers yet!,គ្មានអ
 DocType: Quality Procedure Process,Link existing Quality Procedure.,ភ្ជាប់នីតិវិធីគុណភាពដែលមានស្រាប់។
 apps/erpnext/erpnext/config/hr.py,Loans,ប្រាក់កម្ចី។
 DocType: Healthcare Service Unit,Healthcare Service Unit,អង្គភាពសេវាកម្មសុខភាព
+,Customer-wise Item Price,តម្លៃរបស់អតិថិជនដែលមានប្រាជ្ញា។
 apps/erpnext/erpnext/public/js/financial_statements.js,Cash Flow Statement,សេចក្តីថ្លែងការណ៍លំហូរសាច់ប្រាក់
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,No material request created,គ្មានការស្នើសុំសម្ភារៈបានបង្កើត
 apps/erpnext/erpnext/hr/doctype/loan_application/loan_application.py,Loan Amount cannot exceed Maximum Loan Amount of {0},ចំនួនទឹកប្រាក់កម្ចីមិនអាចលើសពីចំនួនទឹកប្រាក់កម្ចីអតិបរមានៃ {0}
@@ -6081,6 +6083,7 @@ apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_stat
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,តម្លៃពិធីបើក
 DocType: Salary Component,Formula,រូបមន្ត
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,Serial #,# សៀរៀល
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,សូមរៀបចំប្រព័ន្ធដាក់ឈ្មោះបុគ្គលិកនៅក្នុងធនធានមនុស្ស&gt; ធនធានមនុស្ស។
 DocType: Material Request Plan Item,Required Quantity,បរិមាណដែលត្រូវការ។
 DocType: Lab Test Template,Lab Test Template,គំរូតេស្តមន្ទីរពិសោធន៍
 apps/erpnext/erpnext/accounts/doctype/accounting_period/accounting_period.py,Accounting Period overlaps with {0},រយៈពេលគណនេយ្យត្រួតគ្នាជាមួយ {0}
@@ -6216,6 +6219,7 @@ apps/erpnext/erpnext/assets/doctype/asset/asset.py,Depreciation Row {0}: Next De
 apps/erpnext/erpnext/setup/doctype/company/company.py,Abbreviation is mandatory,អក្សរកាត់គឺជាការចាំបាច់
 DocType: Project,Task Progress,វឌ្ឍនភាពភារកិច្ច
 apps/erpnext/erpnext/templates/includes/navbar/navbar_items.html,Cart,រទេះ
+apps/erpnext/erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py,Bank account {0} already exists and could not be created again,គណនីធនាគារ {0} មានរួចហើយហើយមិនអាចបង្កើតម្តងទៀតបានទេ។
 apps/erpnext/erpnext/public/js/call_popup/call_popup.js,Call Missed,ខកខានហៅ។
 DocType: Certified Consultant,GitHub ID,លេខសម្គាល់ GitHub
 DocType: Staffing Plan,Total Estimated Budget,សរុបថវិកាប៉ាន់ស្មាន
@@ -6330,7 +6334,6 @@ DocType: Antibiotic,Laboratory User,អ្នកប្រើមន្ទីរ�
 DocType: Request for Quotation Item,Project Name,ឈ្មោះគម្រោង
 apps/erpnext/erpnext/regional/italy/utils.py,Please set the Customer Address,សូមកំណត់អាសយដ្ឋានអតិថិជន។
 DocType: Customer,Mention if non-standard receivable account,និយាយពីការប្រសិនបើគណនីដែលមិនមែនជាស្តង់ដាទទួល
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,អតិថិជន&gt; ក្រុមអតិថិជន&gt; ទឹកដី។
 DocType: Bank,Plaid Access Token,ថូខឹនផ្លាទីនចូល។
 apps/erpnext/erpnext/hr/doctype/employee_benefit_application/employee_benefit_application.py,Please add the remaining benefits {0} to any of the existing component,សូមបន្ថែមអត្ថប្រយោជន៍ដែលនៅសល់ {0} ទៅសមាសភាគដែលមានស្រាប់
 DocType: Journal Entry Account,If Income or Expense,ប្រសិនបើមានប្រាក់ចំណូលឬការចំណាយ
@@ -6594,8 +6597,6 @@ DocType: Employee Tax Exemption Proof Submission,Tax Exemption Proofs,ភស្�
 apps/erpnext/erpnext/buying/utils.py,Please enter quantity for Item {0},សូមបញ្ចូលបរិមាណសម្រាប់ធាតុ {0}
 DocType: Quality Procedure,Processes,ដំណើរការ។
 DocType: Shift Type,First Check-in and Last Check-out,ចូលដំបូងនិងចូលចុងក្រោយ។
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","សូមលុបនិយោជិក <a href=""#Form/Employee/{0}"">{0}</a> \ ដើម្បីលុបចោលឯកសារនេះ។"
 apps/erpnext/erpnext/regional/report/hsn_wise_summary_of_outward_supplies/hsn_wise_summary_of_outward_supplies.py,Total Taxable Amount,បរិមាណពន្ធសរុប
 DocType: Employee External Work History,Employee External Work History,បុគ្គលិកខាងក្រៅប្រវត្តិការងារ
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py,Job card {0} created,បង្កើតប័ណ្ណការងារ {0}
@@ -6632,6 +6633,7 @@ DocType: Shareholder,ACC-SH-.YYYY.-,ACC-SH -YYYY.-
 apps/erpnext/erpnext/accounts/doctype/payment_terms_template/payment_terms_template.py,Combined invoice portion must equal 100%,ចំណែកវិក្កយបត្ររួមបញ្ចូលគ្នាត្រូវតែស្មើនឹង 100%
 DocType: Item Default,Default Expense Account,ចំណាយតាមគណនីលំនាំដើម
 DocType: GST Account,CGST Account,គណនី CGST
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,លេខកូដរបស់ក្រុម&gt; ក្រុមក្រុម&gt; ម៉ាក។
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py,Student Email ID,លេខសម្គាល់អ៊ីមែលរបស់សិស្ស
 DocType: Employee,Notice (days),សេចក្តីជូនដំណឹង (ថ្ងៃ)
 DocType: POS Closing Voucher Invoices,POS Closing Voucher Invoices,វិក័យប័ត្របិទប័ណ្ណវិក្ក័យប័ត្រ
@@ -7272,6 +7274,7 @@ DocType: Purchase Invoice,Y,Y
 DocType: Maintenance Visit,Maintenance Date,ថែទាំកាលបរិច្ឆេទ
 DocType: Purchase Invoice Item,Rejected Serial No,គ្មានសៀរៀលច្រានចោល
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py,Year start date or end date is overlapping with {0}. To avoid please set company,កាលបរិច្ឆេទចាប់ផ្ដើមកាលពីឆ្នាំឬកាលបរិច្ឆេទចុងត្រូវបានត្រួតស៊ីគ្នានឹង {0} ។ ដើម្បីជៀសវាងសូមកំណត់របស់ក្រុមហ៊ុន
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,សូមរៀបចំស៊េរីលេខរៀងសម្រាប់ការចូលរួមតាមរយៈតំឡើង&gt; លេខរៀង។
 apps/erpnext/erpnext/selling/doctype/customer/customer.py,Please mention the Lead Name in Lead {0},សូមនិយាយពីឈ្មោះនាំមុខក្នុង {0}
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Start date should be less than end date for Item {0},កាលបរិច្ឆេទចាប់ផ្ដើមគួរតែតិចជាងកាលបរិច្ឆេទចុងក្រោយសម្រាប់ធាតុ {0}
 DocType: Shift Type,Auto Attendance Settings,ការកំណត់ការចូលរួមដោយស្វ័យប្រវត្តិ។
