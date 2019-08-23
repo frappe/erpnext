@@ -307,7 +307,7 @@ def get_item_tax_data():
 	# example: {'Consulting Services': {'Excise 12 - TS': '12.000'}}
 
 	itemwise_tax = {}
-	taxes = frappe.db.sql(""" select parent, tax_type, tax_rate from `tabItem Tax`""", as_dict=1)
+	taxes = frappe.db.sql(""" select parent, tax_type, tax_rate from `tabItem Tax Template Detail`""", as_dict=1)
 
 	for tax in taxes:
 		if tax.parent not in itemwise_tax:

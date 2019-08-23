@@ -134,6 +134,12 @@ def get_data():
 					"name": "Employee Leave Balance",
 					"doctype": "Leave Application"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Leave Ledger Entry",
+					"doctype": "Leave Ledger Entry"
+				},
 			]
 		},
 		{
@@ -211,6 +217,16 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Employee Benefit Claim",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Tax Exemption Category",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Tax Exemption Sub Category",
 					"dependencies": ["Employee"]
 				},
 			]
