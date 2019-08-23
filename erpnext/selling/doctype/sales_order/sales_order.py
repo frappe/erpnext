@@ -1010,9 +1010,6 @@ def make_pick_list(source_name, target_doc=None):
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Pick List",
-			"field_map": {
-				"doctype": "items_based_on"
-			},
 			"validation": {
 				"docstatus": ["=", 1]
 			}
@@ -1027,5 +1024,7 @@ def make_pick_list(source_name, target_doc=None):
 			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 		},
 	}, target_doc)
+
+	doc.purpose = 'Delivery against Sales Order'
 
 	return doc

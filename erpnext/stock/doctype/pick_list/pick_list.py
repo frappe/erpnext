@@ -7,6 +7,7 @@ import frappe
 import json
 from six import iteritems
 from frappe.model.document import Document
+from frappe import _
 from frappe.utils import floor, flt, today
 from frappe.model.mapper import get_mapped_doc, map_child_doc
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note as create_delivery_note_from_sales_order
@@ -234,11 +235,14 @@ def set_delivery_note_missing_values(target):
 @frappe.whitelist()
 def create_stock_entry(pick_list):
 	pick_list = frappe.get_doc(json.loads(pick_list))
+	if stock_entry_exists(pick_list.get('name')):
+		return frappe.msgprint(_('Stock Entry already exists against this Pick List'))
+
 	work_order = frappe.get_doc("Work Order", pick_list.get('work_order'))
 
 	stock_entry = frappe.new_doc('Stock Entry')
 	stock_entry.pick_list = pick_list.get('name')
-	stock_entry.purpose = 'Material Transfer For Manufacture'
+	stock_entry.purpose = pick_list.get('purpose')
 	stock_entry.set_stock_entry_type()
 	stock_entry.work_order = work_order.name
 	stock_entry.company = work_order.company
@@ -305,3 +309,9 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 
 def get_item_details(item_code):
 	pass
+
+@frappe.whitelist()
+def stock_entry_exists(pick_list_name):
+	return frappe.db.exists('Stock Entry', {
+		'pick_list': pick_list_name
+	})
