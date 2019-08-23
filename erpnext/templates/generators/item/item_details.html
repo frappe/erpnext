@@ -9,9 +9,9 @@
 </p>
 <!-- description -->
 <div itemprop="description">
-{% if frappe.utils.strip_html(doc.web_long_description) %}
+{% if frappe.utils.strip_html(doc.web_long_description or '') %}
 	{{ doc.web_long_description | safe }}
-{% elif frappe.utils.strip_html(doc.description)  %}
+{% elif frappe.utils.strip_html(doc.description or '')  %}
 	{{ doc.description | safe }}
 {% else %}
 	{{ _("No description given") }}
