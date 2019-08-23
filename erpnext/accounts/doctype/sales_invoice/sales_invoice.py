@@ -56,6 +56,15 @@ class SalesInvoice(SellingController):
 		},
 		{
 			'source_dt': 'Sales Invoice Item',
+			'target_field': 'billed_amt',
+			'target_dt': 'Sales Order Item',
+			'join_field': 'so_detail',
+			'source_field': 'amount',
+			'extra_cond': """ and exists(select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent
+				and (is_return=0 or reopen_order=1))"""
+		},
+		{
+			'source_dt': 'Sales Invoice Item',
 			'update_children': self.update_billing_status_in_dn,
 			'target_field': 'billed_qty',
 			'target_ref_field': 'qty',
@@ -983,11 +992,11 @@ class SalesInvoice(SellingController):
 	def update_billing_status_in_dn(self, update_modified=True):
 		updated_delivery_notes = []
 		for d in self.get("items"):
-			if d.so_detail:
-				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
-			elif d.dn_detail:
+			if d.dn_detail:
 				update_billed_amount_based_on_dn(d.dn_detail, update_modified)
 				updated_delivery_notes.append(d.delivery_note)
+			elif d.so_detail:
+				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
 
 		for dn in set(updated_delivery_notes):
 			frappe.get_doc("Delivery Note", dn).update_billing_status()
