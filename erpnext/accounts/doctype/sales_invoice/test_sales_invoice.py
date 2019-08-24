@@ -361,7 +361,7 @@ class TestSalesInvoice(unittest.TestCase):
 		gle = frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
-		self.assertFalse(gle)
+		self.assertTrue(gle)
 
 	def test_tax_calculation_with_multiple_items(self):
 		si = create_sales_invoice(qty=84, rate=4.6, do_not_save=True)
@@ -676,7 +676,7 @@ class TestSalesInvoice(unittest.TestCase):
 		gle = frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
-		self.assertFalse(gle)
+		self.assertTrue(gle)
 
 	def test_pos_gl_entry_with_perpetual_inventory(self):
 		set_perpetual_inventory()
@@ -818,11 +818,10 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_gl_entries[i][2], gle.credit)
 
 		si.cancel()
-		frappe.delete_doc('Sales Invoice', si.name)
 		gle = frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
-		self.assertFalse(gle)
+		self.assertTrue(gle)
 
 		set_perpetual_inventory(0)
 
@@ -942,9 +941,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(si.outstanding_amount, 262.0)
 
 		si.cancel()
-
-		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
-			where reference_name=%s""", si.name))
 
 	def test_serialized(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
@@ -1161,7 +1157,7 @@ class TestSalesInvoice(unittest.TestCase):
 		gle = frappe.db.sql("""select name from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
-		self.assertFalse(gle)
+		self.assertTrue(gle)
 
 	def test_invalid_currency(self):
 		# Customer currency = USD

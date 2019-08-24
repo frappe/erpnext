@@ -97,9 +97,7 @@ class TestDeliveryNote(unittest.TestCase):
 		bal = get_balance_on(stock_in_hand_account)
 		self.assertEqual(bal, prev_bal - stock_value_difference)
 
-		# back dated incoming entry
-		make_stock_entry(posting_date=add_days(nowdate(), -2), target="_Test Warehouse - _TC",
-			qty=5, basic_rate=100)
+		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
 
 		gl_entries = get_gl_entries("Delivery Note", dn.name)
 		self.assertTrue(gl_entries)
@@ -115,7 +113,7 @@ class TestDeliveryNote(unittest.TestCase):
 			self.assertEqual([gle.debit, gle.credit], expected_values.get(gle.account))
 
 		dn.cancel()
-		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
+		self.assertTrue(get_gl_entries("Delivery Note", dn.name))
 		set_perpetual_inventory(0, company)
 
 	def test_delivery_note_gl_entry_packing_item(self):
@@ -156,7 +154,6 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(flt(bal, 2), flt(prev_bal - stock_value_diff, 2))
 
 		dn.cancel()
-		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
 
 		set_perpetual_inventory(0, company)
 
@@ -485,27 +482,19 @@ class TestDeliveryNote(unittest.TestCase):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		dn1 = make_delivery_note(so.name)
-		dn1.set_posting_time = 1
-		dn1.posting_time = "10:00"
 		dn1.get("items")[0].qty = 2
 		dn1.submit()
 
+		dn2 = make_delivery_note(so.name)
+		dn2.get("items")[0].qty = 3
+		dn2.submit()
+
+		dn1.load_from_db()
 		self.assertEqual(dn1.get("items")[0].billed_amt, 200)
 		self.assertEqual(dn1.per_billed, 100)
 		self.assertEqual(dn1.status, "Completed")
 
-		dn2 = make_delivery_note(so.name)
-		dn2.set_posting_time = 1
-		dn2.posting_time = "08:00"
-		dn2.get("items")[0].qty = 4
-		dn2.submit()
-
-		dn1.load_from_db()
-		self.assertEqual(dn1.get("items")[0].billed_amt, 100)
-		self.assertEqual(dn1.per_billed, 50)
-		self.assertEqual(dn1.status, "To Bill")
-
-		self.assertEqual(dn2.get("items")[0].billed_amt, 400)
+		self.assertEqual(dn2.get("items")[0].billed_amt, 300)
 		self.assertEqual(dn2.per_billed, 100)
 		self.assertEqual(dn2.status, "Completed")
 
@@ -518,8 +507,6 @@ class TestDeliveryNote(unittest.TestCase):
 		so = make_sales_order()
 
 		dn1 = make_delivery_note(so.name)
-		dn1.set_posting_time = 1
-		dn1.posting_time = "10:00"
 		dn1.get("items")[0].qty = 2
 		dn1.submit()
 
@@ -534,7 +521,6 @@ class TestDeliveryNote(unittest.TestCase):
 		si2.submit()
 
 		dn2 = make_delivery_note(so.name)
-		dn2.posting_time = "08:00"
 		dn2.get("items")[0].qty = 5
 		dn2.submit()
 

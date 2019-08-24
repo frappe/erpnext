@@ -84,7 +84,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
 		pr.cancel()
-		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
+		self.assertTrue(get_gl_entries("Purchase Receipt", pr.name))
 
 		set_perpetual_inventory(0, pr.company)
 
