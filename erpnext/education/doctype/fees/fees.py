@@ -80,7 +80,7 @@ class Fees(AccountsController):
 			frappe.msgprint(_("Payment request {0} created").format(getlink("Payment Request", pr.name)))
 
 	def on_cancel(self):
-		self.flags.ignore_links = True
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 		make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name, cancel=True)
 		# frappe.db.set(self, 'status', 'Cancelled')
 

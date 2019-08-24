@@ -76,7 +76,7 @@ class ExpenseClaim(AccountsController):
 
 	def on_cancel(self):
 		self.update_task_and_project()
-		self.flags.ignore_links = True
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 		if self.payable_account:
 			self.make_gl_entries(cancel=True)
 

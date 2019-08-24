@@ -47,7 +47,6 @@ class JournalEntry(AccountsController):
 	def on_submit(self):
 		self.validate_cheque_info()
 		self.check_credit_limit()
-		self.flags.ignore_links = True
 		self.make_gl_entries()
 		self.update_advance_paid()
 		self.update_expense_claim()
@@ -60,6 +59,7 @@ class JournalEntry(AccountsController):
 		from erpnext.hr.doctype.salary_slip.salary_slip import unlink_ref_doc_from_salary_slip
 		unlink_ref_doc_from_payment_entries(self)
 		unlink_ref_doc_from_salary_slip(self.name)
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 		self.make_gl_entries(1)
 		self.update_advance_paid()
 		self.update_expense_claim()

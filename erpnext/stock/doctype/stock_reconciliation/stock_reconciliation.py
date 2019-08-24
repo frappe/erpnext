@@ -43,7 +43,7 @@ class StockReconciliation(StockController):
 		update_serial_nos_after_submit(self, "items")
 
 	def on_cancel(self):
-		self.flags.ignore_links = True
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 		self.make_sle_on_cancel()
 		self.make_gl_entries_on_cancel()
 

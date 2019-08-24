@@ -73,7 +73,7 @@ class PaymentEntry(AccountsController):
 
 
 	def on_cancel(self):
-		self.flags.ignore_links = True
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 		self.setup_party_account_field()
 		self.make_gl_entries(cancel=1)
 		self.update_outstanding_amounts()

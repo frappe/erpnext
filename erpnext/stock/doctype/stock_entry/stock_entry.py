@@ -106,7 +106,7 @@ class StockEntry(StockController):
 
 		self.update_stock_ledger()
 
-		self.flags.ignore_links = True
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 
 		self.make_gl_entries_on_cancel()
 		self.update_cost_in_project()

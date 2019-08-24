@@ -784,7 +784,7 @@ class PurchaseInvoice(BuyingController):
 		frappe.db.set(self, 'status', 'Cancelled')
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
-		self.flags.ignore_links = True
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 
 	def update_project(self):
 		project_list = []

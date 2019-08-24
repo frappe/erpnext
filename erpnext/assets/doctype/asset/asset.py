@@ -42,7 +42,7 @@ class Asset(AccountsController):
 		self.validate_cancellation()
 		self.delete_depreciation_entries()
 		self.set_status()
-		self.flags.ignore_links = True
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 		make_reverse_gl_entries(voucher_type='Asset', voucher_no=self.name, cancel=True)
 		self.db_set('booked_fixed_asset', 0)
 
