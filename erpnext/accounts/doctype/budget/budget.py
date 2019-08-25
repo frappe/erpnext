@@ -247,8 +247,6 @@ def get_other_condition(args, budget, for_doc):
 	return condition
 
 def get_actual_expense(args):
-	condition1 = " and gle.posting_date <= %(month_end_date)s" \
-		if args.get("month_end_date") else ""
 	if args.budget_against_field == "Cost Center":
 		lft_rgt = frappe.db.get_value(args.budget_against_field,
 			args.budget_against, ["lft", "rgt"], as_dict=1)
@@ -263,12 +261,11 @@ def get_actual_expense(args):
 		select sum(gle.debit) - sum(gle.credit)
 		from `tabGL Entry` gle
 		where gle.account=%(account)s
-			{condition1}
 			and gle.fiscal_year=%(fiscal_year)s
 			and gle.company=%(company)s
 			and gle.docstatus=1
 			{condition2}
-	""".format(condition1=condition1, condition2=condition2), (args))[0][0])
+	""".format(condition2=condition2), (args))[0][0])
 
 def get_accumulated_monthly_budget(monthly_distribution, posting_date, fiscal_year, annual_budget):
 	distribution = {}
