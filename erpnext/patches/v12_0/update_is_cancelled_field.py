@@ -8,4 +8,4 @@ def execute():
 		frappe.db.sql("UPDATE `tabStock Ledger Entry` SET is_cancelled = IF(is_cancelled='No', 0, 1)")
 		frappe.db.sql("UPDATE `tabSerial No` SET is_cancelled = IF(is_cancelled='No', 0, 1)")
 	except:
-		pass
+		None
