@@ -8,6 +8,7 @@
   "purpose",
   "customer",
   "work_order",
+  "material_request",
   "for_qty",
   "column_break_4",
   "parent_warehouse",
@@ -97,10 +98,17 @@
    "fieldtype": "Select",
    "label": "Purpose",
    "options": "Material Transfer for Manufacture\nMaterial Issue\nMaterial Transfer\nDelivery against Sales Order"
+  },
+  {
+   "depends_on": "eval:['Material Transfer', 'Material Issue'].includes(doc.purpose)",
+   "fieldname": "material_request",
+   "fieldtype": "Link",
+   "label": "Material Request",
+   "options": "Material Request"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-22 16:58:07.270447",
+ "modified": "2019-08-23 12:34:00.223445",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

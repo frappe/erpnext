@@ -41,6 +41,8 @@ class PickList(Document):
 					'item_code': item_code,
 					'sales_order': item_doc.sales_order,
 					'sales_order_item': item_doc.sales_order_item,
+					'material_request': item_doc.material_request,
+					'material_request_item': item_doc.material_request_item,
 					'uom': item_doc.uom,
 					'stock_uom': item_doc.stock_uom,
 					'conversion_factor': item_doc.conversion_factor,
@@ -231,7 +233,6 @@ def set_delivery_note_missing_values(target):
 	target.run_method('set_po_nos')
 	target.run_method('calculate_taxes_and_totals')
 
-
 @frappe.whitelist()
 def create_stock_entry(pick_list):
 	pick_list = frappe.get_doc(json.loads(pick_list))
@@ -281,6 +282,28 @@ def create_stock_entry(pick_list):
 	stock_entry.calculate_rate_and_amount(update_finished_item_rate=False)
 
 	return stock_entry.as_dict()
+
+
+@frappe.whitelist()
+def create_stock_entry_with_material_request_items(pick_list):
+	stock_entry = frappe.new_doc('Stock Entry')
+	stock_entry.pick_list = pick_list.get('name')
+	stock_entry.purpose = pick_list.get('purpose')
+	stock_entry.set_stock_entry_type()
+
+	doc = get_mapped_doc("Work Order", source_name, {
+		"Work Order": {
+			"doctype": "Pick List",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Work Order Item": {
+			"doctype": "Pick List Reference Item",
+			"postprocess": update_item_quantity,
+			"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty)
+		},
+	}, target_doc)
 
 @frappe.whitelist()
 def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filters, as_dict):

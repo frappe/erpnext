@@ -24,7 +24,9 @@
   "batch_no",
   "column_break_15",
   "sales_order",
-  "sales_order_item"
+  "sales_order_item",
+  "material_request",
+  "material_request_item"
  ],
  "fields": [
   {
@@ -152,10 +154,21 @@
   {
    "fieldname": "column_break_20",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "material_request",
+   "fieldtype": "Link",
+   "label": "Material Request",
+   "options": "Material Request"
+  },
+  {
+   "fieldname": "material_request_item",
+   "fieldtype": "Data",
+   "label": "Material Request Item"
   }
  ],
  "istable": 1,
- "modified": "2019-08-14 18:41:37.727388",
+ "modified": "2019-08-23 14:13:11.088354",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List Item",
