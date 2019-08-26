@@ -7,8 +7,6 @@ import frappe
 import unittest
 # test_dependencies = ['Item', 'Sales Invoice', 'Stock Entry', 'Batch']
 
-from erpnext.selling.doctype.sales_order.sales_order import make_pick_list
-
 class TestPickList(unittest.TestCase):
 	def test_pick_list_picks_warehouse_for_each_item(self):
 		pick_list = frappe.get_doc({

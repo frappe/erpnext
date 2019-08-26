@@ -118,7 +118,7 @@ frappe.ui.form.on('Pick List', {
 				return;
 			}
 			erpnext.utils.map_current_doc({
-				method: 'erpnext.selling.doctype.sales_order.sales_order.make_pick_list',
+				method: 'erpnext.selling.doctype.sales_order.sales_order.create_pick_list',
 				source_doctype: 'Sales Order',
 				target: frm,
 				setters: {
