@@ -27,14 +27,17 @@ frappe.ui.form.on('Pick List', {
 			};
 		});
 	},
+	get_item_locations(frm) {
+		frm.call('set_item_locations');
+	},
 	refresh: (frm) => {
 		frm.trigger('add_get_items_button');
 
-		if (frm.doc.items && (frm.doc.items.length > 1 || frm.doc.items[0].item_code) && frm.doc.docstatus === 0) {
-			frm.add_custom_button(__('Get Item Locations'), () => {
-				frm.call('set_item_locations');
-			}).addClass('btn-primary');
-		}
+		// if (frm.doc.items && (frm.doc.items.length > 1 || frm.doc.items[0].item_code) && frm.doc.docstatus === 0) {
+		// 	frm.add_custom_button(__('Get Item Locations'), () => {
+		//  	frm.call('set_item_locations');
+		// 	}).addClass('btn-primary');
+		// }
 		if (frm.doc.docstatus === 1) {
 			if (frm.doc.purpose === 'Delivery against Sales Order') {
 				frm.add_custom_button(__('Delivery Note'), () => frm.trigger('create_delivery_note'), __('Create'));

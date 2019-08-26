@@ -85,16 +85,18 @@
    "fieldname": "material_request",
    "fieldtype": "Link",
    "label": "Material Request",
-   "options": "Material Request"
+   "options": "Material Request",
+   "read_only": 1
   },
   {
    "fieldname": "material_request_item",
    "fieldtype": "Data",
-   "label": "Material Request Item"
+   "label": "Material Request Item",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2019-08-22 14:19:19.725540",
+ "modified": "2019-08-26 06:54:50.702552",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List Reference Item",
