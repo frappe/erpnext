@@ -32,23 +32,18 @@ frappe.ui.form.on('Pick List', {
 	},
 	refresh: (frm) => {
 		frm.trigger('add_get_items_button');
-
-		// if (frm.doc.items && (frm.doc.items.length > 1 || frm.doc.items[0].item_code) && frm.doc.docstatus === 0) {
-		// 	frm.add_custom_button(__('Get Item Locations'), () => {
-		//  	frm.call('set_item_locations');
-		// 	}).addClass('btn-primary');
-		// }
 		if (frm.doc.docstatus === 1) {
-			if (frm.doc.purpose === 'Delivery against Sales Order') {
-				frm.add_custom_button(__('Delivery Note'), () => frm.trigger('create_delivery_note'), __('Create'));
-			} else {
-				frappe.xcall('erpnext.stock.doctype.pick_list.pick_list.stock_entry_exists', {
-					'pick_list_name': frm.doc.name
-				}).then(exists => {
-					if (exists) return;
+			frappe.xcall('erpnext.stock.doctype.pick_list.pick_list.target_document_exists', {
+				'pick_list_name': frm.doc.name,
+				'purpose': frm.doc.purpose
+			}).then(target_document_exists => {
+				if (target_document_exists) return;
+				if (frm.doc.purpose === 'Delivery against Sales Order') {
+					frm.add_custom_button(__('Delivery Note'), () => frm.trigger('create_delivery_note'), __('Create'));
+				} else {
 					frm.add_custom_button(__('Stock Entry'), () => frm.trigger('create_stock_entry'), __('Create'));
-				});
-			}
+				}
+			});
 		}
 	},
 	work_order: (frm) => {
