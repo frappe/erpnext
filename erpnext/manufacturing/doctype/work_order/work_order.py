@@ -710,15 +710,15 @@ def get_work_order_operation_data(work_order, operation, workstation):
 			return d
 
 @frappe.whitelist()
-def create_pick_list(source_name, target_doc=None):
-	pick_list = json.loads(target_doc)
+def create_pick_list(source_name, target_doc=None, for_qty=None):
+	pick_list = for_qty or json.loads(target_doc).get('for_qty')
 	max_finished_goods_qty = frappe.db.get_value('Work Order', source_name, 'qty')
 	def update_item_quantity(source, target, source_parent):
 		# qty = source.required_qty - source.transferred_qty
 		# target.qty = qty
 
 		pending_to_issue = flt(source.required_qty) - flt(source.transferred_qty)
-		desire_to_transfer = flt(source.required_qty) / max_finished_goods_qty * flt(pick_list.get('for_qty'))
+		desire_to_transfer = flt(source.required_qty) / max_finished_goods_qty * flt(for_qty)
 
 		qty = 0
 		if desire_to_transfer <= pending_to_issue:
@@ -761,5 +761,7 @@ def create_pick_list(source_name, target_doc=None):
 
 	# doc.delete_key('items')
 	# doc.set('items', item_map.values())
+
+	doc.for_qty = for_qty
 
 	return doc
