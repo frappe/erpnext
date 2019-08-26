@@ -275,11 +275,14 @@ class DeliveryNote(SellingController):
 		# update delivered qty in sales order
 		self.update_prevdoc_status()
 		self.update_billing_status()
+		self.update_billing_status_for_zero_amount("Sales Order", "against_sales_order")
 
 		if not self.is_return:
 			self.check_credit_limit()
+
 		elif self.issue_credit_note:
 			self.make_return_invoice()
+
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
@@ -291,6 +294,7 @@ class DeliveryNote(SellingController):
 
 		self.update_prevdoc_status()
 		self.update_billing_status()
+		self.update_billing_status_for_zero_amount("Sales Order", "against_sales_order")
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO

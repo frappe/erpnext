@@ -329,7 +329,7 @@ class StockController(AccountsController):
 			validate_warehouse_company(w, self.company)
 
 	def update_billing_percentage(self, update_modified=True):
-		if not cint(self.is_return):
+		if not cint(self.get('is_return')):
 			self._update_percent_field({
 				"target_dt": self.doctype + " Item",
 				"target_parent_dt": self.doctype,

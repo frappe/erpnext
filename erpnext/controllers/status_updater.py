@@ -36,9 +36,9 @@ status_map = {
 		["Draft", None],
 		["To Deliver and Bill", "eval:self.per_delivered < 100 and self.per_completed < 100 and self.docstatus == 1"],
 		["To Bill", "eval:self.per_delivered == 100 and self.per_completed < 100 and self.docstatus == 1"],
-		["To Deliver", "eval:self.per_delivered < 100 and self.per_completed == 100 and self.docstatus == 1"],
-		["Completed", "eval:self.per_delivered == 100 and self.per_completed == 100 and self.docstatus == 1"],
-		["Completed", "eval:self.order_type == 'Maintenance' and self.per_completed == 100 and self.docstatus == 1"],
+		["To Deliver", "eval:self.per_delivered < 100 and (self.grand_total == 0 or self.per_completed == 100) and self.docstatus == 1"],
+		["Completed", "eval:self.per_delivered == 100 and (self.grand_total == 0 or self.per_completed == 100) and self.docstatus == 1"],
+		["Completed", "eval:self.order_type == 'Maintenance' and (self.grand_total == 0 or self.per_completed == 100) and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
 	],
@@ -66,8 +66,8 @@ status_map = {
 		["Draft", None],
 		["To Receive and Bill", "eval:self.per_received < 100 and self.per_completed < 100 and self.docstatus == 1"],
 		["To Bill", "eval:self.per_received == 100 and self.per_completed < 100 and self.docstatus == 1"],
-		["To Receive", "eval:self.per_received < 100 and self.per_completed == 100 and self.docstatus == 1"],
-		["Completed", "eval:self.per_received == 100 and self.per_completed == 100 and self.docstatus == 1"],
+		["To Receive", "eval:self.per_received < 100 and (self.grand_total == 0 or self.per_completed == 100) and self.docstatus == 1"],
+		["Completed", "eval:self.per_received == 100 and (self.grand_total == 0 or self.per_completed == 100) and self.docstatus == 1"],
 		["Delivered", "eval:self.status=='Delivered'"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
@@ -340,43 +340,29 @@ class StatusUpdater(Document):
 			args['update_modified'] = ', modified = now(), modified_by = "{0}"'\
 				.format(frappe.db.escape(frappe.session.user))
 
-	def update_billing_status_for_zero_amount_refdoc(self, ref_dt):
-		ref_fieldname = frappe.scrub(ref_dt)
+	def update_billing_status_for_zero_amount(self, ref_dt, ref_fieldname):
+		zero_amount_refdoc = set([d.get(ref_fieldname) for d in self.get("items", [])
+			if d.get(ref_fieldname) and d.base_net_amount == 0])
 
-		ref_docs = [item.get(ref_fieldname) for item in (self.get('items') or []) if item.get(ref_fieldname)]
-		if not ref_docs:
-			return
-
-		zero_amount_refdocs = frappe.db.sql_list("""
-			SELECT
-				name
-			from
-				`tab{ref_dt}`
-			where
-				docstatus = 1
-				and base_net_total = 0
-				and name in %(ref_docs)s
-		""".format(ref_dt=ref_dt), {
-			'ref_docs': ref_docs
-		})
-
-		if zero_amount_refdocs:
-			self.update_billing_status(zero_amount_refdocs, ref_dt, ref_fieldname)
-
-	def update_billing_status(self, zero_amount_refdoc, ref_dt, ref_fieldname):
 		for ref_dn in zero_amount_refdoc:
-			ref_doc_qty = flt(frappe.db.sql("""select ifnull(sum(qty), 0) from `tab%s Item`
-				where parent=%s""" % (ref_dt, '%s'), (ref_dn))[0][0])
+			ref_doc_qty = flt(frappe.db.sql("""
+				select ifnull(sum(qty), 0)
+				from `tab{0} Item` i, `tab{0}` p
+				where i.parent = p.name and p.name=%s and p.docstatus=1
+			""".format(ref_dt), ref_dn)[0][0])
 
-			billed_qty = flt(frappe.db.sql("""select ifnull(sum(qty), 0)
-				from `tab%s Item` where %s=%s and docstatus=1""" %
-				(self.doctype, ref_fieldname, '%s'), (ref_dn))[0][0])
-
-			per_billed = (min(ref_doc_qty, billed_qty) / ref_doc_qty) * 100
+			zero_amount_qty = flt(frappe.db.sql("""
+				select ifnull(sum(qty), 0)
+				from `tab{0} Item` i, `tab{0}` p
+				where i.parent = p.name and {1} = %s and i.base_net_amount = 0 and p.docstatus=1 and p.is_return = 0
+			""".format(self.doctype, ref_fieldname), ref_dn)[0][0])
 
 			ref_doc = frappe.get_doc(ref_dt, ref_dn)
+			if zero_amount_qty >= ref_doc_qty:
+				ref_doc.db_set("per_completed", 100)
+			else:
+				ref_doc.update_billing_percentage()
 
-			ref_doc.db_set("per_billed", per_billed)
 			ref_doc.set_status(update=True)
 
 def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):

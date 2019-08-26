@@ -62,8 +62,6 @@ def execute():
 		doc = frappe.get_doc("Sales Invoice", name)
 		doc.update_status_updater_args()
 		doc.update_prevdoc_status()
-		if not doc.is_return:
-			doc.update_billing_status_for_zero_amount_refdoc("Sales Order")
 
 	pi_names = frappe.get_all("Purchase Invoice", {"docstatus": 1})
 	for name in pi_names:
@@ -71,14 +69,13 @@ def execute():
 		doc = frappe.get_doc("Purchase Invoice", name)
 		doc.update_status_updater_args()
 		doc.update_prevdoc_status()
-		if not doc.is_return:
-			doc.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 
 	dn_names = frappe.get_all("Delivery Note", {"docstatus": 1})
 	for name in dn_names:
 		name = name.name
 		doc = frappe.get_doc("Delivery Note", name)
 		doc.update_prevdoc_status()
+		doc.update_billing_status_for_zero_amount("Sales Order", "against_sales_order")
 		if doc.is_return:
 			doc.update_billing_percentage()
 
@@ -87,5 +84,6 @@ def execute():
 		name = name.name
 		doc = frappe.get_doc("Purchase Receipt", name)
 		doc.update_prevdoc_status()
+		doc.update_billing_status_for_zero_amount("Purchase Order", "purchase_order")
 		if doc.is_return:
 			doc.update_billing_percentage()
