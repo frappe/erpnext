@@ -6,15 +6,13 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from erpnext.crm.doctype.utils import get_scheduled_employees_for_popup
+from erpnext.crm.doctype.utils import get_scheduled_employees_for_popup, strip_number
 from frappe.contacts.doctype.contact.contact import get_contact_with_phone_number
 from erpnext.crm.doctype.lead.lead import get_lead_with_phone_number
 
 class CallLog(Document):
 	def before_insert(self):
-		# strip 0 from the start of the number for proper number comparisions
-		# eg. 07888383332 should match with 7888383332
-		number = self.get('from').lstrip('0')
+		number = strip_number(self.get('from'))
 		self.contact = get_contact_with_phone_number(number)
 		self.lead = get_lead_with_phone_number(number)
 
@@ -48,13 +46,14 @@ def add_call_summary(call_log, summary):
 	doc.add_comment('Comment', frappe.bold(_('Call Summary')) + '<br><br>' + summary)
 
 def get_employees_with_number(number):
+	number = strip_number(number)
 	if not number: return []
 
 	employee_emails = frappe.cache().hget('employees_with_number', number)
 	if employee_emails: return employee_emails
 
 	employees = frappe.get_all('Employee', filters={
-		'cell_number': ['like', '%{}'.format(number.lstrip('0'))],
+		'cell_number': ['like', '%{}%'.format(number)],
 		'user_id': ['!=', '']
 	}, fields=['user_id'])
 
@@ -64,23 +63,29 @@ def get_employees_with_number(number):
 	return employee
 
 def set_caller_information(doc, state):
-	'''Called from hoooks on creation of Lead or Contact'''
+	'''Called from hooks on creation of Lead or Contact'''
 	if doc.doctype not in ['Lead', 'Contact']: return
 
 	numbers = [doc.get('phone'), doc.get('mobile_no')]
-	for_doc = doc.doctype.lower()
+	# contact for Contact and lead for Lead
+	fieldname = doc.doctype.lower()
+
+	# contact_name or lead_name
+	display_name_field = '{}_name'.format(fieldname)
 
 	for number in numbers:
+		number = strip_number(number)
 		if not number: continue
-		print(number)
+
 		filters = frappe._dict({
-			'from': ['like', '%{}'.format(number.lstrip('0'))],
-			for_doc: ''
+			'from': ['like', '%{}'.format(number)],
+			fieldname: ''
 		})
 
 		logs = frappe.get_all('Call Log', filters=filters)
 
 		for log in logs:
-			call_log = frappe.get_doc('Call Log', log.name)
-			call_log.set(for_doc, doc.name)
-			call_log.save(ignore_permissions=True)
+			frappe.db.set_value('Call Log', log.name, {
+				fieldname: doc.name,
+				display_name_field: doc.get_title()
+			}, update_modified=False)
