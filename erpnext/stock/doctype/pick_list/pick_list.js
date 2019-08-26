@@ -19,6 +19,13 @@ frappe.ui.form.on('Pick List', {
 				}
 			};
 		});
+		frm.set_query('material_request', () => {
+			return {
+				filters: {
+					'material_request_type': ['=', frm.doc.purpose]
+				}
+			};
+		});
 	},
 	refresh: (frm) => {
 		frm.trigger('add_get_items_button');
@@ -70,6 +77,15 @@ frappe.ui.form.on('Pick List', {
 			}, __("Select Quantity"), __('Get Items'));
 		});
 	},
+	material_request: (frm) => {
+		frm.clear_table('items');
+		frm.clear_table('locations');
+		erpnext.utils.map_current_doc({
+			method: 'erpnext.stock.doctype.material_request.material_request.create_pick_list',
+			target: frm,
+			source_name: frm.doc.material_request
+		});
+	},
 	purpose: (frm) => {
 		frm.clear_table('items');
 		frm.clear_table('locations');
@@ -117,13 +133,3 @@ frappe.ui.form.on('Pick List', {
 		});
 	}
 });
-
-
-// frappe.ui.form.on('Pick List Reference Item', {
-// 	item_code: (frm, cdt, cdn) => {
-// 		let row = locals[cdt][cdn];
-// 		if (row.item_code) {
-// 			frappe.xcall('');
-// 		}
-// 	}
-// });

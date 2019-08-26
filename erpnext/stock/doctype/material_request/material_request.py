@@ -502,3 +502,24 @@ def raise_work_orders(material_request):
 		frappe.throw(_("Productions Orders cannot be raised for:") + '\n' + new_line_sep(errors))
 
 	return work_orders
+
+@frappe.whitelist()
+def create_pick_list(source_name, target_doc=None):
+	doc = get_mapped_doc('Material Request', source_name, {
+		'Material Request': {
+			'doctype': 'Pick List',
+			'validation': {
+				'docstatus': ['=', 1]
+			}
+		},
+		'Material Request Item': {
+			'doctype': 'Pick List Reference Item',
+			'field_map': {
+				'name': 'material_request_item',
+				'qty': 'stock_qty'
+			},
+			# 'condition': lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty)
+		},
+	}, target_doc)
+
+	return doc
