@@ -7,6 +7,10 @@ def execute():
 	try:
 		frappe.reload_doc("stock", "doctype", "stock_ledger_entry")
 		frappe.reload_doc("stock", "doctype", "serial_no")
+
+		frappe.db.sql("UPDATE `tabStock Ledger Entry` SET is_cancelled = 0 where is_cancelled IS NULL")
+		frappe.db.sql("UPDATE `tabSerial No` SET is_cancelled = 0 where is_cancelled IS NULL")
+
 		frappe.db.sql("UPDATE `tabStock Ledger Entry` SET is_cancelled = IF(is_cancelled='No', 0, 1)")
 		frappe.db.sql("UPDATE `tabSerial No` SET is_cancelled = IF(is_cancelled='No', 0, 1)")
 	except:
