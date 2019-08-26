@@ -98,7 +98,7 @@
    "fieldname": "purpose",
    "fieldtype": "Select",
    "label": "Purpose",
-   "options": "Material Transfer for Manufacture\nMaterial Issue\nMaterial Transfer\nDelivery against Sales Order"
+   "options": "Material Transfer for Manufacture\nMaterial Transfer\nDelivery against Sales Order"
   },
   {
    "depends_on": "eval:['Material Transfer', 'Material Issue'].includes(doc.purpose)",
@@ -115,7 +115,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-26 06:52:04.532885",
+ "modified": "2019-08-26 16:11:03.184637",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

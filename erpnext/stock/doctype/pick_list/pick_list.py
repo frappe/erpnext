@@ -359,9 +359,14 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 
 def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 	for location in pick_list.locations:
+		target_warehouse = None
+		if location.material_request_item:
+			target_warehouse = frappe.get_value('Material Request Item',
+				location.material_request_item, 'warehouse')
 		item = frappe._dict()
 		item.item_code = location.item_code
 		item.s_warehouse = location.warehouse
+		item.t_warehouse = target_warehouse
 		item.qty = location.qty
 		item.transfer_qty = location.stock_qty
 		item.uom = location.uom
