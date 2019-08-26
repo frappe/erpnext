@@ -37,17 +37,7 @@
 		</p>
 		{% endif %}
 		{% if (contact_list[i].address) { %}
-			{%= __("Address ") %}: {%= contact_list[i].address %}
-				{% if (contact_list[i].city) { %}
-					, {%= contact_list[i].city %}
-				{% endif %}
-				{% if (contact_list[i].state) { %}
-					, {%= contact_list[i].state %}
-				{% endif %}
-				{% if (contact_list[i].country) { %}
-					, {%= contact_list[i].country %}
-				{% endif %}
-			<br>
+			{%= __("Address ") %}: {%= contact_list[i].address %}<br>
 		{% endif %}
 	</div>
 {% } %}
