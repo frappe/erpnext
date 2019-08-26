@@ -139,6 +139,7 @@ frappe.query_reports["General Ledger"] = {
 			"fieldtype": "Data",
 			on_change: function() {
 				frappe.query_report.set_filter_value('group_by', "");
+				frappe.query_report.set_filter_value('merge_similar_entries', 0);
 			}
 		},
 		{
@@ -230,9 +231,10 @@ frappe.query_reports["General Ledger"] = {
 			on_change: function() { }
 		},
 		{
-			"fieldname": "show_detailed_entries",
-			"label": __("Show Detailed Entries"),
-			"fieldtype": "Check"
+			"fieldname": "merge_similar_entries",
+			"label": __("Merge Similar Entries"),
+			"fieldtype": "Check",
+			"default": 1
 		},
 		{
 			"fieldname": "show_opening_entries",

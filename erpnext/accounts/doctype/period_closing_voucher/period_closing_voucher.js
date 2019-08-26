@@ -27,7 +27,7 @@ frappe.ui.form.on('Period Closing Voucher', {
 					"from_date": frm.doc.posting_date,
 					"to_date": frm.doc.posting_date,
 					"company": frm.doc.company,
-					group_by_voucher: 0
+					"merge_similar_entries": 0
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, "fa fa-table");

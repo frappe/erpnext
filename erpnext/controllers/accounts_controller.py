@@ -396,7 +396,9 @@ class AccountsController(TransactionBase):
 			'party_type': None,
 			'party': None,
 			'project': self.get("project") or self.get("set_project"),
-			'cost_center': self.get("cost_center")
+			'cost_center': self.get("cost_center"),
+			'reference_no': self.get("reference_no") or self.get("cheque_no") or self.get("bill_no"),
+			'reference_date': self.get("reference_date") or self.get("cheque_date") or self.get("bill_date")
 		})
 		gl_dict.update(args)
 
@@ -904,7 +906,7 @@ class AccountsController(TransactionBase):
 		grouped_gles = OrderedDict()
 
 		for gle in gles:
-			key = (cstr(gle.account), cstr(gle.party_type), cstr(gle.party), cstr(gle.remarks), cstr(gle.reference_no),
+			key = (gle.account, cstr(gle.party_type), cstr(gle.party), cstr(gle.remarks), cstr(gle.reference_no),
 				cstr(gle.reference_date), bool(gle.against_voucher))
 			group = grouped_gles.setdefault(key, frappe._dict({
 				"account": cstr(gle.account),

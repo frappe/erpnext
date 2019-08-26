@@ -95,15 +95,15 @@ for(var i=0, l=data.length; i<l; i++) {
 				{% } %}
 
 				<td>
-					{%= (data[i].remarks || "").split("\n").join("<br />") %}
-					{% if(data[i].against_voucher) { %}
-						{% if(data[i].remarks) { %}<br />{% } %}
-						{%= __("Against") %}
-						{%= data[i].against_voucher_type %}:
-						<a href="#Form/{%= data[i].against_voucher_type %}/{%= data[i].against_voucher %}" target="_blank">{%= data[i].against_voucher %}</a>
-					{% } %}
-					{% if(data[i].bill_no) { %}
-						<br />{%= __("Supplier Invoice No") %}: {%= data[i].bill_no %}
+					{% if(data[i].party && (filters.account || group.account) && !(filters.party || group.party)) { %}
+						<div><b>{%= data[i].party %}</b></div>
+					{% endif %}
+					<div>{%= (data[i].remarks || "").split("\n").join("<br />") %}</div>
+					{% if(data[i].against_voucher || data[i].against_bill_no) { %}
+						<div>
+							{%= __("Against") %}:
+							<a href="#Form/{%= data[i].against_voucher_type %}/{%= data[i].against_voucher %}" target="_blank">{%= data[i].against_bill_no || data[i].against_voucher %}</a>
+						</div>
 					{% } %}
 				</td>
 

@@ -232,7 +232,7 @@ frappe.ui.form.on('Payment Entry', {
 					"from_date": frm.doc.posting_date,
 					"to_date": frm.doc.posting_date,
 					"company": frm.doc.company,
-					show_detailed_entries: 1
+					"merge_similar_entries": 0
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, "fa fa-table");

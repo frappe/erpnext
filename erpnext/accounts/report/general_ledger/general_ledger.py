@@ -11,6 +11,7 @@ from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from frappe.desk.query_report import group_report_data
+from collections import OrderedDict
 
 def execute(filters=None):
 	if not filters:
@@ -29,17 +30,15 @@ def execute(filters=None):
 		parties = cstr(filters.get("party")).strip()
 		filters.party = [d.strip() for d in parties.split(',') if d]
 
-	get_ledger_currency(filters)
-
 	validate_filters(filters, account_details)
 
 	validate_party(filters)
 
 	filters = set_account_currency(filters)
 
-	columns = get_columns(filters)
-
 	res = get_result(filters, account_details)
+
+	columns = get_columns(filters)
 
 	return columns, res
 
@@ -56,7 +55,7 @@ def validate_filters(filters, account_details):
 		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
 
 	if filters.get("voucher_no"):
-		filters.show_detailed_entries = True
+		filters.merge_similar_entries = False
 
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
@@ -111,6 +110,16 @@ def set_account_currency(filters):
 def get_result(filters, account_details):
 	gl_entries = get_gl_entries(filters)
 
+	supplier_invoice_details = get_supplier_invoice_details()
+
+	if not filters.get('merge_similar_entries'):
+		if supplier_invoice_details:
+			for gle in gl_entries:
+				gle['against_bill_no'] = supplier_invoice_details.get((gle.get('against_voucher_type'), gle.get('against_voucher')), '')
+
+	if filters.get('merge_similar_entries'):
+		gl_entries = merge_similar_entries(filters, gl_entries, supplier_invoice_details)
+
 	group_by_field = get_group_by_field(filters.get('group_by'))
 	group_by = [None]
 	if group_by_field:
@@ -126,44 +135,67 @@ def get_result(filters, account_details):
 
 def get_gl_entries(filters):
 	currency_map = get_currency(filters)
-	select_fields = """, debit, credit, debit_in_account_currency, credit_in_account_currency,
-		reference_no, reference_date, against_voucher"""
+	filters.ledger_currency = currency_map.get("presentation_currency") or currency_map.get("company_currency")
 
-	group_by_statement = ''
-	order_by_statement = "order by posting_date, account"
-
-	if not cint(filters.get("show_detailed_entries")):
-		group_by_statement = "group by voucher_type, voucher_no, account, cost_center, party_type, party"
-		select_fields = """,
-			if(sum(debit-credit) > 0, sum(debit-credit), 0) as debit,
-			if(sum(debit-credit) < 0, -sum(debit-credit), 0) as credit,
-			if(sum(debit_in_account_currency-credit_in_account_currency) > 0, sum(debit_in_account_currency-credit_in_account_currency), 0) as debit_in_account_currency,
-			if(sum(debit_in_account_currency-credit_in_account_currency) < 0, -sum(debit_in_account_currency-credit_in_account_currency), 0) as credit_in_account_currency,
-			GROUP_CONCAT(DISTINCT reference_no SEPARATOR ', ') as reference_no,
-			min(reference_date) as reference_date,
-			GROUP_CONCAT(DISTINCT against_voucher SEPARATOR ', ') as against_voucher"""
-
-	gl_entries = frappe.db.sql(
-		"""
+	gl_entries = frappe.db.sql("""
 		select
 			posting_date, account, party_type, party,
 			voucher_type, voucher_no, cost_center, project, account_currency,
-			remarks, against, is_opening, against_voucher_type,
-			%(ledger_currency)s as currency {select_fields}
+			debit, credit, debit_in_account_currency, credit_in_account_currency,
+			remarks, against, is_opening, against_voucher_type, against_voucher, reference_no, reference_date,
+			%(ledger_currency)s as currency
 		from `tabGL Entry`
-		where company=%(company)s {conditions} {group_by_statement}
-		{order_by_statement}
-		""".format(
-			select_fields=select_fields, conditions=get_conditions(filters),
-			group_by_statement=group_by_statement,
-			order_by_statement=order_by_statement
-		),
-		filters, as_dict=1)
+		where company=%(company)s {conditions}
+		order by posting_date, account
+		""".format(conditions=get_conditions(filters)), filters, as_dict=1)
 
 	if filters.get('presentation_currency'):
 		return convert_to_presentation_currency(gl_entries, currency_map)
 	else:
 		return gl_entries
+
+
+def merge_similar_entries(filters, gl_entries, supplier_invoice_details):
+	merged_gles = OrderedDict()
+
+	out = []
+	for gle in gl_entries:
+		if gle.is_opening == "Yes" or gle.posting_date < getdate(filters.from_date):
+			out.append(gle)
+		else:
+			key = (gle.voucher_type, gle.voucher_no, gle.account, cstr(gle.party_type), cstr(gle.party), cstr(gle.cost_center),
+			cstr(gle.project), cstr(gle.remarks), cstr(gle.reference_no), cstr(gle.reference_date))
+
+			if key not in merged_gles:
+				gle.update({"dr_cr": 0, "against_voucher_set": set(), "against_voucher_list": [], "against_set": set()})
+				group = merged_gles[key] = gle
+			else:
+				group = merged_gles[key]
+
+			group.dr_cr += flt(gle.debit) - flt(gle.credit)
+
+			if gle.against_voucher_type and gle.against_voucher:
+				group.against_voucher_set.add((cstr(gle.against_voucher_type), cstr(gle.against_voucher)))
+			if gle.against:
+				for acc in cstr(gle.against).strip().split(","):
+					group.against_set.add(acc.strip())
+
+	for group in merged_gles.values():
+		group.debit = group.dr_cr if group.dr_cr > 0 else 0
+		group.credit = -group.dr_cr if group.dr_cr < 0 else 0
+
+		for against_voucher_type, against_voucher in group.against_voucher_set:
+			bill_no = supplier_invoice_details.get((against_voucher_type, against_voucher))
+			if bill_no:
+				group.against_voucher_list.append(bill_no)
+			else:
+				group.against_voucher_list.append(against_voucher)
+
+		group.against_voucher = ", ".join(group.against_voucher_list or [])
+		group.against = ", ".join(group.against_set or [])
+		out.append(group)
+
+	return out
 
 
 def get_conditions(filters):
@@ -201,11 +233,13 @@ def get_conditions(filters):
 	if filters.get("party"):
 		conditions.append("party in %(party)s")
 
-	if not (filters.get("account") or filters.get("party") or
-		filters.get("group_by") in [_("Group by Account"), _("Group by Party")]):
-		conditions.append("posting_date >=%(from_date)s")
-
-	conditions.append("posting_date <=%(to_date)s")
+	if filters.get("account") or filters.get("party") \
+			or filters.get("group_by") in [_("Group by Account"), _("Group by Party")]:
+		conditions.append("(posting_date <= %(to_date)s or is_opening = 'Yes')")
+	else:
+		conditions.append("posting_date between %(from_date)s and %(to_date)s")
+		if not filters.get('show_opening_entries'):
+			conditions.append("is_opening != 'Yes'")
 
 	if filters.get("project"):
 		conditions.append("project in %(project)s")
@@ -268,7 +302,6 @@ def postprocess_group(filters, group_object, grouped_by):
 			group_object.rows.append(group_object.totals.closing)
 
 		balance, balance_in_account_currency = 0, 0
-		inv_details = get_supplier_invoice_details()
 
 		for d in group_object.rows:
 			if not d.posting_date:
@@ -279,7 +312,11 @@ def postprocess_group(filters, group_object, grouped_by):
 
 			d['account_currency'] = filters.account_currency
 			d['currency'] = filters.presentation_currency or filters.company_currency
-			d['bill_no'] = inv_details.get(d.get('against_voucher'), '')
+
+		group_object.totals.opening.debit = 0
+		group_object.totals.opening.credit = 0
+		group_object.totals.closing.debit = group_object.totals.total.debit
+		group_object.totals.closing.credit = group_object.totals.total.credit
 
 	# Do not show totals as they have already been added as rows
 	del group_object['totals']
@@ -302,7 +339,7 @@ def get_totals_dict():
 	return _dict(
 		opening=_get_debit_credit_dict(_('Opening')),
 		total=_get_debit_credit_dict(_('Total')),
-		closing=_get_debit_credit_dict(_('Closing (Opening + Total)')),
+		closing=_get_debit_credit_dict(_('Closing')),
 		_isGroupTotal=True
 	)
 
@@ -318,19 +355,12 @@ def get_group_by_field(group_by):
 
 def get_supplier_invoice_details():
 	inv_details = {}
-	for d in frappe.db.sql(""" select name, bill_no from `tabPurchase Invoice`
-		where docstatus = 1 and bill_no is not null and bill_no != '' """, as_dict=1):
-		inv_details[d.name] = d.bill_no
+	for voucher_type in ['Purchase Invoice', 'Journal Entry']:
+		for d in frappe.db.sql("""select name, bill_no from `tab{0}`
+				where docstatus = 1 and bill_no is not null and bill_no != ''""".format(voucher_type), as_dict=1):
+			inv_details[(voucher_type, d.name)] = d.bill_no
 
 	return inv_details
-
-def get_ledger_currency(filters):
-	if filters.get("presentation_currency"):
-		filters.ledger_currency = filters["presentation_currency"]
-	elif filters.get("company"):
-		filters.ledger_currency = get_company_currency(filters["company"])
-	else:
-		filters.ledger_currency = get_company_currency(get_default_company())
 
 def get_columns(filters):
 	columns = [
@@ -405,7 +435,8 @@ def get_columns(filters):
 		{
 			"label": _("Against Voucher Type"),
 			"fieldname": "against_voucher_type",
-			"width": 120
+			"width": 120,
+			"hide_if_merge_similar": 1
 		},
 		{
 			"label": _("Against Voucher"),
@@ -438,11 +469,15 @@ def get_columns(filters):
 			"width": 100
 		},
 		{
-			"label": _("Supplier Invoice No"),
-			"fieldname": "bill_no",
+			"label": _("Against Bill No"),
+			"fieldname": "against_bill_no",
 			"fieldtype": "Data",
-			"width": 100
+			"width": 100,
+			"hide_if_merge_similar": 1
 		},
 	]
+
+	if filters.get('merge_similar_entries'):
+		columns = [col for col in columns if not col.get('hide_if_merge_similar')]
 
 	return columns

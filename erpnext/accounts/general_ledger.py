@@ -77,7 +77,10 @@ def check_if_in_list(gle, gl_map):
 			and cstr(e.get('against_voucher'))==cstr(gle.get('against_voucher')) \
 			and cstr(e.get('against_voucher_type')) == cstr(gle.get('against_voucher_type')) \
 			and cstr(e.get('cost_center')) == cstr(gle.get('cost_center')) \
-			and cstr(e.get('project')) == cstr(gle.get('project')):
+			and cstr(e.get('project')) == cstr(gle.get('project')) \
+			and cstr(e.get('remarks')) == cstr(gle.get('remarks')) \
+			and cstr(e.get('reference_no')) == cstr(gle.get('reference_no')) \
+			and cstr(e.get('reference_date')) == cstr(gle.get('reference_date')):
 				return e
 
 def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):

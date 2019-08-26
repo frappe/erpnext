@@ -197,7 +197,9 @@ frappe.ui.form.on("Expense Claim", {
 				frappe.route_options = {
 					voucher_no: frm.doc.name,
 					company: frm.doc.company,
-					group_by_voucher: false
+					from_date: frm.doc.posting_date,
+					to_date: frm.doc.posting_date,
+					merge_similar_entries: 0
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));

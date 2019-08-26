@@ -533,8 +533,8 @@ class JournalEntry(AccountsController):
 						"against_voucher_type": d.reference_type,
 						"against_voucher": d.reference_name,
 						"remarks": d.user_remark or self.user_remark or self.remark,
-						"reference_no": d.cheque_no,
-						"reference_date": d.cheque_date,
+						"reference_no": d.cheque_no or self.bill_no,
+						"reference_date": d.cheque_date or self.bill_date,
 						"cost_center": d.cost_center,
 						"project": d.project,
 						"finance_book": self.finance_book

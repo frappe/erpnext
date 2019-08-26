@@ -619,7 +619,7 @@ def get_outstanding_reference_documents(args):
 			elif d.voucher_type == "Journal Entry":
 				d["exchange_rate"] = get_average_party_exchange_rate_on_journal_entry(d.voucher_no,
 					args.get("party_type"), args.get("party"), args.get("party_account"))
-		if d.voucher_type in ("Purchase Invoice"):
+		if d.voucher_type in ("Purchase Invoice", "Journal Entry"):
 			d["bill_no"] = frappe.db.get_value(d.voucher_type, d.voucher_no, "bill_no")
 
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
