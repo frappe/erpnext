@@ -264,10 +264,6 @@ frappe.ui.form.on("Work Order", {
 		});
 	},
 
-	make_pick_list() {
-
-	},
-
 	show_progress: function(frm) {
 		var bars = [];
 		var message = '';

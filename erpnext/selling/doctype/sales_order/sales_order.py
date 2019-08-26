@@ -1002,7 +1002,7 @@ def make_inter_company_purchase_order(source_name, target_doc=None):
 	return make_inter_company_transaction("Sales Order", source_name, target_doc)
 
 @frappe.whitelist()
-def make_pick_list(source_name, target_doc=None):
+def create_pick_list(source_name, target_doc=None):
 	def update_item_quantity(source, target, source_parent):
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 		target.stock_qty = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.conversion_factor)
