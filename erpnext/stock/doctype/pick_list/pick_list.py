@@ -170,6 +170,7 @@ def get_item_locations_based_on_batch_nos(item_doc):
 
 	return locations
 
+
 @frappe.whitelist()
 def create_delivery_note(source_name, target_doc=None):
 	pick_list = frappe.get_doc('Pick List', source_name)
@@ -181,18 +182,18 @@ def create_delivery_note(source_name, target_doc=None):
 		delivery_note = create_delivery_note_from_sales_order(sales_order,
 			delivery_note, skip_item_mapping=True)
 
+	item_table_mapper = {
+		'doctype': 'Delivery Note Item',
+		'field_map': {
+			'rate': 'rate',
+			'name': 'so_detail',
+			'parent': 'against_sales_order',
+		},
+		'condition': lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
+	}
+
 	for location in pick_list.locations:
 		sales_order_item = frappe.get_cached_doc('Sales Order Item', location.sales_order_item)
-		item_table_mapper = {
-			'doctype': 'Delivery Note Item',
-			'field_map': {
-				'rate': 'rate',
-				'name': 'so_detail',
-				'parent': 'against_sales_order',
-			},
-			'condition': lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
-		}
-
 		dn_item = map_child_doc(sales_order_item, delivery_note, item_table_mapper)
 
 		if dn_item:
@@ -203,86 +204,32 @@ def create_delivery_note(source_name, target_doc=None):
 
 	set_delivery_note_missing_values(delivery_note)
 
+	delivery_note.pick_list = pick_list.name
+
 	return delivery_note
-
-
-def update_delivery_note_item(source, target, delivery_note):
-	cost_center = frappe.db.get_value("Project", delivery_note.project, "cost_center")
-	if not cost_center:
-		cost_center = frappe.db.get_value('Item Default',
-			fieldname=['buying_cost_center'],
-			filters={
-				'parent': source.item_code,
-				'parenttype': 'Item',
-				'company': delivery_note.company
-			})
-
-	if not cost_center:
-		cost_center = frappe.db.get_value('Item Default',
-			fieldname=['buying_cost_center'],
-			filters={
-				'parent': source.item_group,
-				'parenttype': 'Item Group',
-				'company': delivery_note.company
-			})
-
-	target.cost_center = cost_center
-
-def set_delivery_note_missing_values(target):
-	target.run_method('set_missing_values')
-	target.run_method('set_po_nos')
-	target.run_method('calculate_taxes_and_totals')
 
 @frappe.whitelist()
 def create_stock_entry(pick_list):
 	pick_list = frappe.get_doc(json.loads(pick_list))
-	if stock_entry_exists(pick_list.get('name')):
-		return frappe.msgprint(_('Stock Entry already exists against this Pick List'))
 
-	work_order = frappe.get_doc("Work Order", pick_list.get('work_order'))
+	if stock_entry_exists(pick_list.get('name')):
+		return frappe.msgprint(_('Stock Entry has been already created against this Pick List'))
 
 	stock_entry = frappe.new_doc('Stock Entry')
 	stock_entry.pick_list = pick_list.get('name')
 	stock_entry.purpose = pick_list.get('purpose')
 	stock_entry.set_stock_entry_type()
-	stock_entry.work_order = work_order.name
-	stock_entry.company = work_order.company
-	stock_entry.from_bom = 1
-	stock_entry.bom_no = work_order.bom_no
-	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
-	stock_entry.fg_completed_qty = pick_list.for_qty
-	if work_order.bom_no:
-		stock_entry.inspection_required = frappe.db.get_value('BOM',
-			work_order.bom_no, 'inspection_required')
 
-	is_wip_warehouse_group = frappe.db.get_value('Warehouse', work_order.wip_warehouse, 'is_group')
-	if not (is_wip_warehouse_group and work_order.skip_transfer):
-		wip_warehouse = work_order.wip_warehouse
-	else:
-		wip_warehouse = None
-	stock_entry.to_warehouse = wip_warehouse
-
-	stock_entry.project = work_order.project
-
-	for location in pick_list.locations:
-		item = frappe._dict()
-		item.item_code = location.item_code
-		item.s_warehouse = location.warehouse
-		item.t_warehouse = wip_warehouse
-		item.qty = location.qty
-		item.transfer_qty = location.stock_qty
-		item.uom = location.uom
-		item.conversion_factor = location.conversion_factor
-		item.stock_uom = location.stock_uom
-
-		stock_entry.append('items', item)
+	if pick_list.get('work_order'):
+		stock_entry = update_stock_entry_based_on_work_order(pick_list, stock_entry)
+	elif pick_list.get('material_request'):
+		stock_entry = update_stock_entry_based_on_material_request(pick_list, stock_entry)
 
 	stock_entry.set_incoming_rate()
 	stock_entry.set_actual_qty()
 	stock_entry.calculate_rate_and_amount(update_finished_item_rate=False)
 
 	return stock_entry.as_dict()
-
 
 @frappe.whitelist()
 def create_stock_entry_with_material_request_items(pick_list):
@@ -330,11 +277,99 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 			'company': filters.get('company')
 		}, as_dict=as_dict)
 
-def get_item_details(item_code):
-	pass
-
 @frappe.whitelist()
+def target_document_exists(pick_list_name, purpose):
+	if purpose == 'Delivery against Sales Order':
+		return frappe.db.exists('Delivery Note', {
+			'pick_list': pick_list_name
+		})
+
+	return stock_entry_exists(pick_list_name)
+
+
+def update_delivery_note_item(source, target, delivery_note):
+	cost_center = frappe.db.get_value('Project', delivery_note.project, 'cost_center')
+	if not cost_center:
+		cost_center = get_cost_center(source.item_code, 'Item', delivery_note.company)
+
+	if not cost_center:
+		cost_center = get_cost_center(source.item_group, 'Item Group', delivery_note.company)
+
+	target.cost_center = cost_center
+
+def get_cost_center(for_item, from_doctype, company):
+	'''Returns Cost Center for Item or Item Group'''
+	return frappe.db.get_value('Item Default',
+		fieldname=['buying_cost_center'],
+		filters={
+			'parent': for_item,
+			'parenttype': from_doctype,
+			'company': company
+		})
+
+def set_delivery_note_missing_values(target):
+	target.run_method('set_missing_values')
+	target.run_method('set_po_nos')
+	target.run_method('calculate_taxes_and_totals')
+
 def stock_entry_exists(pick_list_name):
 	return frappe.db.exists('Stock Entry', {
 		'pick_list': pick_list_name
 	})
+
+def get_item_details(item_code):
+	pass
+
+def update_stock_entry_based_on_work_order(pick_list, stock_entry):
+	work_order = frappe.get_doc("Work Order", pick_list.get('work_order'))
+
+	stock_entry.work_order = work_order.name
+	stock_entry.company = work_order.company
+	stock_entry.from_bom = 1
+	stock_entry.bom_no = work_order.bom_no
+	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
+	stock_entry.fg_completed_qty = pick_list.for_qty
+	if work_order.bom_no:
+		stock_entry.inspection_required = frappe.db.get_value('BOM',
+			work_order.bom_no, 'inspection_required')
+
+	is_wip_warehouse_group = frappe.db.get_value('Warehouse', work_order.wip_warehouse, 'is_group')
+	if not (is_wip_warehouse_group and work_order.skip_transfer):
+		wip_warehouse = work_order.wip_warehouse
+	else:
+		wip_warehouse = None
+	stock_entry.to_warehouse = wip_warehouse
+
+	stock_entry.project = work_order.project
+
+	for location in pick_list.locations:
+		item = frappe._dict()
+		item.item_code = location.item_code
+		item.s_warehouse = location.warehouse
+		item.t_warehouse = wip_warehouse
+		item.qty = location.qty
+		item.transfer_qty = location.stock_qty
+		item.uom = location.uom
+		item.conversion_factor = location.conversion_factor
+		item.stock_uom = location.stock_uom
+
+		stock_entry.append('items', item)
+
+	return stock_entry
+
+def update_stock_entry_based_on_material_request(pick_list, stock_entry):
+	for location in pick_list.locations:
+		item = frappe._dict()
+		item.item_code = location.item_code
+		item.s_warehouse = location.warehouse
+		item.qty = location.qty
+		item.transfer_qty = location.stock_qty
+		item.uom = location.uom
+		item.conversion_factor = location.conversion_factor
+		item.stock_uom = location.stock_uom
+		item.material_request = location.material_request
+		item.material_request_item = location.material_request_item
+
+		stock_entry.append('items', item)
+
+	return stock_entry
