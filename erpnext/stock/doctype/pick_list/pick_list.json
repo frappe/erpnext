@@ -15,6 +15,7 @@
   "company",
   "section_break_4",
   "items",
+  "get_item_locations",
   "section_break_6",
   "locations",
   "amended_from"
@@ -105,10 +106,16 @@
    "fieldtype": "Link",
    "label": "Material Request",
    "options": "Material Request"
+  },
+  {
+   "depends_on": "eval: doc.items.length && (doc.items.length > 1 || doc.items[0].item_code) && doc.docstatus === 0",
+   "fieldname": "get_item_locations",
+   "fieldtype": "Button",
+   "label": "Get Item Locations"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-23 12:34:00.223445",
+ "modified": "2019-08-26 06:52:04.532885",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
