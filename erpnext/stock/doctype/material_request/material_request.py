@@ -508,6 +508,9 @@ def create_pick_list(source_name, target_doc=None):
 	doc = get_mapped_doc('Material Request', source_name, {
 		'Material Request': {
 			'doctype': 'Pick List',
+			'field_map': {
+				'material_request_type': 'purpose'
+			},
 			'validation': {
 				'docstatus': ['=', 1]
 			}

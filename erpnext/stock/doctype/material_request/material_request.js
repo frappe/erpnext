@@ -55,13 +55,19 @@ frappe.ui.form.on('Material Request', {
 
 		if (frm.doc.docstatus == 1 && frm.doc.status != 'Stopped') {
 			if (flt(frm.doc.per_ordered, 2) < 100) {
-				// make
+				let add_create_pick_list_button = () => {
+					frm.add_custom_button(__('Pick List'),
+						() => frm.events.create_pick_list(frm), __('Create'));
+				}
+
 				if (frm.doc.material_request_type === "Material Transfer") {
+					add_create_pick_list_button();
 					frm.add_custom_button(__("Transfer Material"),
 						() => frm.events.make_stock_entry(frm), __('Create'));
 				}
 
 				if (frm.doc.material_request_type === "Material Issue") {
+					add_create_pick_list_button();
 					frm.add_custom_button(__("Issue Material"),
 						() => frm.events.make_stock_entry(frm), __('Create'));
 				}
@@ -254,6 +260,13 @@ frappe.ui.form.on('Material Request', {
 	make_stock_entry: function(frm) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
+			frm: frm
+		});
+	},
+
+	create_pick_list: (frm) => {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.material_request.material_request.create_pick_list",
 			frm: frm
 		});
 	},
