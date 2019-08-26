@@ -161,13 +161,6 @@ frappe.ui.form.on("Work Order", {
 			frm.add_custom_button(__('Create BOM'), () => {
 				frm.trigger("make_bom");
 			});
-
-			frm.add_custom_button(__('Pick List'), () => {
-				frappe.model.open_mapped_doc({
-					method: "erpnext.manufacturing.doctype.work_order.work_order.make_pick_list",
-					frm
-				});
-			}, __('Make'));
 		}
 	},
 
@@ -553,31 +546,46 @@ erpnext.work_order = {
 			var max = (purpose === "Manufacture") ?
 				flt(frm.doc.material_transferred_for_manufacturing) - flt(frm.doc.produced_qty) :
 				flt(frm.doc.qty) - flt(frm.doc.material_transferred_for_manufacturing);
-		} else {
-			var max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
 		}
+		max = flt(max, precision('qty'));
 
-		max = flt(max, precision("qty"));
-		frappe.prompt({fieldtype:"Float", label: __("Qty for {0}", [purpose]), fieldname:"qty",
-			description: __("Max: {0}", [max]), 'default': max }, function(data)
-		{
-			if(data.qty > max) {
-				frappe.msgprint(__("Quantity must not be more than {0}", [max]));
+		frappe.prompt([{
+			fieldtype: 'Float',
+			label: __('Qty for {0}', [purpose]),
+			fieldname: 'qty',
+			description: __('Max: {0}',[max]),
+			default: max
+		}, {
+			fieldtype: 'Select',
+			label: __('Create'),
+			fieldname: 'create',
+			default: 'Stock Entry',
+			options: 'Stock Entry\nPick List'
+		}], function (data) {
+			if (data.qty > max) {
+				frappe.msgprint(__('Quantity must not be more than {0}', [max]));
 				return;
 			}
-			frappe.call({
-				method:"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",
-				args: {
-					"work_order_id": frm.doc.name,
-					"purpose": purpose,
-					"qty": data.qty
-				},
-				callback: function(r) {
-					var doclist = frappe.model.sync(r.message);
-					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-				}
-			});
-		}, __("Select Quantity"), __('Create'));
+			if (data.create === 'Stock Entry') {
+				frappe.xcall('erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry', {
+					'work_order_id': frm.doc.name,
+					'purpose': purpose,
+					'qty': data.qty
+				}).then(stock_entry => {
+					frappe.model.sync(stock_entry);
+					frappe.set_route('Form', stock_entry.doctype, stock_entry.name);
+				});
+			} else {
+				frappe.xcall('erpnext.manufacturing.doctype.work_order.work_order.create_pick_list', {
+					'source_name': frm.doc.name,
+					'for_qty': data.qty
+				}).then(pick_list => {
+					frappe.model.sync(pick_list);
+					frappe.set_route('Form', pick_list.doctype, pick_list.name);
+				});
+			}
+
+		}, __('Select Quantity'), __('Create'));
 	},
 
 	make_consumption_se: function(frm, backflush_raw_materials_based_on) {
