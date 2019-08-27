@@ -617,7 +617,7 @@ class StockEntry(StockController):
 		if self.docstatus == 2:
 			sl_entries.reverse()
 
-		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No')
+		self.make_sl_entries(sl_entries)
 
 	def get_gl_entries(self, warehouse_account):
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")

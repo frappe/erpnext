@@ -443,7 +443,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEquals(pi2.items[1].qty, 1)
 
 def get_gl_entries(voucher_type, voucher_no):
-	return frappe.db.sql("""select account, debit, credit, cost_center
+	return frappe.db.sql("""select account, debit, credit, cost_center, is_cancelled
 		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
 		order by account desc""", (voucher_type, voucher_no), as_dict=1)
 

@@ -24,6 +24,7 @@ class TestBudget(unittest.TestCase):
 			{"voucher_type": "Journal Entry", "voucher_no": jv.name}))
 
 		budget.cancel()
+		jv.cancel()
 
 	def test_monthly_budget_crossed_stop1(self):
 		set_total_expense_zero("2013-02-28", "Cost Center")
@@ -152,53 +153,57 @@ class TestBudget(unittest.TestCase):
 
 		budget.cancel()
 
-	# def test_monthly_budget_on_cancellation1(self):
-	# 	set_total_expense_zero("2013-02-28", "Cost Center")
+	def test_monthly_budget_on_cancellation1(self):
+		set_total_expense_zero("2013-02-28", "Cost Center")
 
-	# 	budget = make_budget(budget_against="Cost Center")
+		budget = make_budget(budget_against="Cost Center")
 
-	# 	jv1 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-	# 		"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", posting_date="2013-02-28", submit=True)
+		jv1 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
+			"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", posting_date="2013-02-28", submit=True)
 
-	# 	self.assertTrue(frappe.db.get_value("GL Entry",
-	# 		{"voucher_type": "Journal Entry", "voucher_no": jv1.name}))
+		self.assertTrue(frappe.db.get_value("GL Entry",
+			{"voucher_type": "Journal Entry", "voucher_no": jv1.name}))
 
-	# 	jv2 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-	# 		"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", posting_date="2013-02-28", submit=True)
+		jv2 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
+			"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", posting_date="2013-02-28", submit=True)
 
-	# 	self.assertTrue(frappe.db.get_value("GL Entry",
-	# 		{"voucher_type": "Journal Entry", "voucher_no": jv2.name}))
+		self.assertTrue(frappe.db.get_value("GL Entry",
+			{"voucher_type": "Journal Entry", "voucher_no": jv2.name}))
 
-	# 	frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
+		frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
 
-	# 	self.assertRaises(BudgetError, jv1.cancel)
+		self.assertRaises(BudgetError, jv1.cancel)
 
-	# 	budget.load_from_db()
-	# 	budget.cancel()
+		budget.load_from_db()
+		budget.cancel()
+		jv1.cancel()
+		jv2.cancel()
 
-	# def test_monthly_budget_on_cancellation2(self):
-	# 	set_total_expense_zero("2013-02-28", "Project")
+	def test_monthly_budget_on_cancellation2(self):
+		set_total_expense_zero("2013-02-28", "Project")
 
-	# 	budget = make_budget(budget_against="Project")
+		budget = make_budget(budget_against="Project")
 
-	# 	jv1 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-	# 		"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", posting_date="2013-02-28", submit=True, project="_Test Project")
+		jv1 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
+			"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", posting_date="2013-02-28", submit=True, project="_Test Project")
 
-	# 	self.assertTrue(frappe.db.get_value("GL Entry",
-	# 		{"voucher_type": "Journal Entry", "voucher_no": jv1.name}))
+		self.assertTrue(frappe.db.get_value("GL Entry",
+			{"voucher_type": "Journal Entry", "voucher_no": jv1.name}))
 
-	# 	jv2 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
-	# 		"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", posting_date="2013-02-28", submit=True, project="_Test Project")
+		jv2 = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
+			"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", posting_date="2013-02-28", submit=True, project="_Test Project")
 
-	# 	self.assertTrue(frappe.db.get_value("GL Entry",
-	# 		{"voucher_type": "Journal Entry", "voucher_no": jv2.name}))
+		self.assertTrue(frappe.db.get_value("GL Entry",
+			{"voucher_type": "Journal Entry", "voucher_no": jv2.name}))
 
-	# 	frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
+		frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
 
-	# 	self.assertRaises(BudgetError, jv1.cancel)
+		self.assertRaises(BudgetError, jv1.cancel)
 
-	# 	budget.load_from_db()
-	# 	budget.cancel()
+		budget.load_from_db()
+		budget.cancel()
+		jv1.cancel()
+		jv2.cancel()
 
 	def test_monthly_budget_against_group_cost_center(self):
 		set_total_expense_zero("2013-02-28", "Cost Center")

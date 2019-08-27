@@ -634,7 +634,7 @@ class AccountsController(TransactionBase):
 
 		advance = frappe.db.sql("""
 			select
-				account_currency, sum({dr_or_cr}) as amount
+				account_currency, sum(debit_in_account_currency) - sum(credit_in_account_currency) as amount
 			from
 				`tabGL Entry`
 			where
@@ -644,6 +644,10 @@ class AccountsController(TransactionBase):
 
 		if advance:
 			advance = advance[0]
+
+			if self.doctype == "Sales Order":
+				advance['amount'] = - advance['amount']
+
 			advance_paid = flt(advance.amount, self.precision("advance_paid"))
 			formatted_advance_paid = fmt_money(advance_paid, precision=self.precision("advance_paid"),
 											   currency=advance.account_currency)

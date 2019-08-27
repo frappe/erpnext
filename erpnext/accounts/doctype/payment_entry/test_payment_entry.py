@@ -35,8 +35,6 @@ class TestPaymentEntry(unittest.TestCase):
 
 		pe.cancel()
 
-		self.assertFalse(self.get_gle(pe.name))
-
 		so_advance_paid = frappe.db.get_value("Sales Order", so.name, "advance_paid")
 		self.assertEqual(so_advance_paid, 0)
 
