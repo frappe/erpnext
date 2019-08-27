@@ -139,8 +139,8 @@ class AccountsController(TransactionBase):
 				if not self.cash_bank_account:
 					# show message that the amount is not paid
 					frappe.throw(_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
-					
-				if cint(self.is_return) and self.grand_total > self.paid_amount:
+
+				if cint(self.is_return) and (self.grand_total > self.paid_amount):
 					self.paid_amount = flt(flt(self.grand_total), self.precision("paid_amount"))
 
 				elif not flt(self.paid_amount) and flt(self.outstanding_amount) > 0:
