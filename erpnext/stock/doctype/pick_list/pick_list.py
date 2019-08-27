@@ -10,6 +10,7 @@ from frappe.model.document import Document
 from frappe import _
 from frappe.utils import floor, flt, today
 from frappe.model.mapper import get_mapped_doc, map_child_doc
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note as create_delivery_note_from_sales_order
 
 # TODO: Prioritize SO or WO group warehouse
