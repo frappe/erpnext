@@ -384,15 +384,17 @@ class StockReconciliation(StockController):
 			self._cancel()
 
 @frappe.whitelist()
-def get_items(warehouse, posting_date, posting_time, company):
+def get_items(warehouse, posting_date, posting_time, company, supplier = "%"):
 	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+
 	items = frappe.db.sql("""
 		select i.name, i.item_name, bin.warehouse
-		from tabBin bin, tabItem i
-		where i.name=bin.item_code and i.disabled=0 and i.is_stock_item = 1
+		from tabBin bin, tabItem i, `tabItem Default` id
+		where i.name=bin.item_code and i.name=id.parent and i.disabled=0 and i.is_stock_item = 1
 		and i.has_variants = 0 and i.has_serial_no = 0 and i.has_batch_no = 0
+		and id.default_supplier LIKE %s
 		and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=bin.warehouse)
-	""", (lft, rgt))
+	""", (supplier, lft, rgt))
 
 	items += frappe.db.sql("""
 		select i.name, i.item_name, id.default_warehouse
@@ -401,8 +403,9 @@ def get_items(warehouse, posting_date, posting_time, company):
 			and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=id.default_warehouse)
 			and i.is_stock_item = 1 and i.has_serial_no = 0 and i.has_batch_no = 0
 			and i.has_variants = 0 and i.disabled = 0 and id.company=%s
+			and id.default_supplier LIKE %s
 		group by i.name
-	""", (lft, rgt, company))
+	""", (lft, rgt, company, supplier))
 
 	res = []
 	for d in set(items):
