@@ -41,19 +41,19 @@ frappe.ui.form.on("Stock Reconciliation", {
 	},
 
 	get_items: function(frm) {
-		frappe.prompt({label:"Warehouse", fieldname: "warehouse", fieldtype:"Link", options:"Warehouse", reqd: 1,
-			"get_query": function() {
-				return {
-					"filters": {
-						"company": frm.doc.company,
-					}
-				}
-			}},
-			function(data) {
+		var d = new frappe.ui.Dialog({
+			'fields': [
+				{'fieldname': 'warehouse', 'label': 'Warehouse', 'fieldtype': 'Link', options:"Warehouse", reqd: 1},
+				{'fieldname': 'supplier',  'label': 'Supplier', 'fieldtype': 'Link', options:"Supplier"}
+			],
+			primary_action: function(){
+				var data = d.get_values();
+				d.hide();
 				frappe.call({
 					method:"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_items",
 					args: {
 						warehouse: data.warehouse,
+						supplier: data.supplier,
 						posting_date: frm.doc.posting_date,
 						posting_time: frm.doc.posting_time,
 						company:frm.doc.company
@@ -71,7 +71,8 @@ frappe.ui.form.on("Stock Reconciliation", {
 					}
 				});
 			}
-		, __("Get Items"), __("Update"));
+		});
+		d.show();
 	},
 
 	set_valuation_rate_and_qty: function(frm, cdt, cdn) {
