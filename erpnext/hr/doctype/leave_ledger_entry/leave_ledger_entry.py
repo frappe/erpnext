@@ -116,7 +116,7 @@ def process_expired_allocation():
 		})
 
 	if expire_allocation:
-		create_expiry_ledger_entry(expire_allocation)
+			create_expiry_ledger_entry(expire_allocation)
 
 def create_expiry_ledger_entry(allocations):
 	''' Create ledger entry for expired allocation '''
