@@ -66,9 +66,6 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(asset.supplier, None)
 		self.assertEqual(asset.purchase_invoice, None)
 
-		self.assertFalse(frappe.db.get_value("GL Entry",
-			{"voucher_type": "Purchase Invoice", "voucher_no": pi.name}))
-
 	def test_is_fixed_asset_set(self):
 		doc = frappe.new_doc('Purchase Invoice')
 		doc.supplier = '_Test Supplier'
@@ -456,7 +453,6 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(gle, expected_gle)
 
 		si.cancel()
-		frappe.delete_doc("Sales Invoice", si.name)
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
 
