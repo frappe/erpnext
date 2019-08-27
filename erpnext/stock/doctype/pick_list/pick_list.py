@@ -317,8 +317,15 @@ def stock_entry_exists(pick_list_name):
 		'pick_list': pick_list_name
 	})
 
-def get_item_details(item_code):
-	pass
+@frappe.whitelist()
+def get_item_details(item_code, uom=None):
+	details = frappe.db.get_value('Item', item_code, ['stock_uom', 'name'], as_dict=1)
+	details.uom = uom or details.stock_uom
+	if uom:
+		details.update(get_conversion_factor(item_code, uom))
+
+	return details
+
 
 def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 	work_order = frappe.get_doc("Work Order", pick_list.get('work_order'))

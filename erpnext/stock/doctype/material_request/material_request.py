@@ -521,7 +521,6 @@ def create_pick_list(source_name, target_doc=None):
 				'name': 'material_request_item',
 				'qty': 'stock_qty'
 			},
-			# 'condition': lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty)
 		},
 	}, target_doc)
 
