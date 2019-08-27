@@ -262,15 +262,15 @@ def make_reverse_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 
 			entry['debit'] = credit
 			entry['credit'] = debit
-			entry['debit_in_account_currency'] = debit_in_account_currency
-			entry['credit_in_account_currency'] = credit_in_account_currency
+			entry['debit_in_account_currency'] = credit_in_account_currency
+			entry['credit_in_account_currency'] = debit_in_account_currency
 
 			entry['remarks'] = "On cancellation of " + entry['voucher_no']
 			entry['is_cancelled'] = 1
 			entry['posting_date'] = today()
 
 			if entry['debit'] or entry['credit']:
-				make_entry(entry, adv_adj, "No")
+				make_entry(entry, adv_adj, "Yes")
 
 
 def check_freezing_date(posting_date, adv_adj=False):
