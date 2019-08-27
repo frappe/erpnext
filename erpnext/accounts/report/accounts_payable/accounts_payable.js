@@ -86,6 +86,12 @@ frappe.query_reports["Accounts Payable"] = {
 			"options": "Cost Center"
 		},
 		{
+			"fieldname":"project",
+			"label": __("Project"),
+			"fieldtype": "Link",
+			"options": "Project"
+		},
+		{
 			"fieldname":"group_by",
 			"label": __("Group By Level 1"),
 			"fieldtype": "Select",

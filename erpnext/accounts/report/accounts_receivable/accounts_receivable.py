@@ -6,7 +6,7 @@ import frappe, erpnext
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr
 from frappe.desk.query_report import group_report_data
-from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account
+from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account, get_allow_project_in_entry_of_bs_account
 
 class ReceivablePayableReport(object):
 	def __init__(self, filters=None):
@@ -255,6 +255,15 @@ class ReceivablePayableReport(object):
 				"width": 100
 			})
 
+		if get_allow_project_in_entry_of_bs_account():
+			columns.append({
+				"label": _("Project"),
+				"fieldtype": "Link",
+				"fieldname": "project",
+				"options": "Project",
+				"width": 100
+			})
+
 		if args.get("party_type") == 'Customer':
 			columns.append({
 				"label": _("Customer Contact"),
@@ -300,7 +309,7 @@ class ReceivablePayableReport(object):
 			self.payment_term_map = self.get_payment_term_detail(voucher_nos)
 
 		for gle in gl_entries_data:
-			if self.is_receivable_or_payable(gle, self.dr_or_cr, future_vouchers, return_entries) and self.is_in_cost_center(gle):
+			if self.is_receivable_or_payable(gle, self.dr_or_cr, future_vouchers, return_entries) and self.is_in_cost_center(gle) and self.is_in_project(gle):
 				outstanding_amount, credit_note_amount, payment_amount = self.get_outstanding_amount(
 					gle, self.filters.report_date, self.dr_or_cr, return_entries)
 
@@ -607,6 +616,15 @@ class ReceivablePayableReport(object):
 		else:
 			return True
 
+	def is_in_project(self, gle):
+		if self.filters.get("project"):
+			if gle.get("project"):
+				return gle.project == self.filters.project
+			else:
+				return False
+		else:
+			return True
+
 	def get_return_entries(self, party_type):
 		doctype = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
 		return_entries = frappe._dict(frappe.get_all(doctype,
@@ -706,7 +724,7 @@ class ReceivablePayableReport(object):
 		self.gl_entries = frappe.db.sql("""
 			select
 				gle.name, gle.posting_date, gle.account, gle.party_type, gle.party, gle.voucher_type, gle.voucher_no,
-				gle.against_voucher_type, gle.against_voucher, gle.account_currency, gle.remarks, gle.cost_center,
+				gle.against_voucher_type, gle.against_voucher, gle.account_currency, gle.remarks, gle.cost_center, gle.project,
 				{select_fields} {cost_center_fields}
 			from
 				`tabGL Entry` gle {cost_center_join}

@@ -74,6 +74,12 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			"label": __("Cost Center"),
 			"fieldtype": "Link",
 			"options": "Cost Center"
+		},
+		{
+			"fieldname":"Project",
+			"label": __("Project"),
+			"fieldtype": "Link",
+			"options": "Project"
 		}
 	],
 
