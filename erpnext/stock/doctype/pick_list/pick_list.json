@@ -1,10 +1,12 @@
 {
- "autoname": "PICK.####",
+ "autoname": "naming_series:",
  "creation": "2019-07-11 16:03:13.681045",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
+  "company",
   "purpose",
   "customer",
   "work_order",
@@ -12,7 +14,6 @@
   "for_qty",
   "column_break_4",
   "parent_warehouse",
-  "company",
   "section_break_4",
   "items",
   "get_item_locations",
@@ -112,10 +113,18 @@
    "fieldname": "get_item_locations",
    "fieldtype": "Button",
    "label": "Get Item Locations"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "STO-PICK-.YYYY.-",
+   "reqd": 1,
+   "set_only_once": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-27 21:24:50.609986",
+ "modified": "2019-08-28 12:27:22.743705",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

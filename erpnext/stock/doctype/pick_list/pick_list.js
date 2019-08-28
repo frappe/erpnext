@@ -3,6 +3,10 @@
 
 frappe.ui.form.on('Pick List', {
 	setup: (frm) => {
+		frm.custom_make_buttons = {
+			'Delivery Note': 'Delivery Note',
+			'Stock Entry': 'Stock Entry',
+		};
 		frm.set_query('parent_warehouse', () => {
 			return {
 				filters: {
