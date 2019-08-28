@@ -1,0 +1,91 @@
+{
+ "autoname": "format:APMT-{appointment_date}-{####}",
+ "creation": "2019-08-27 10:48:27.926283",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "from_time",
+  "to_time",
+  "appointment_date",
+  "customer_details_section",
+  "customer_name",
+  "customer_phone_number",
+  "customer_skype",
+  "customer_details"
+ ],
+ "fields": [
+  {
+   "fieldname": "from_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "From Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "To Tme",
+   "reqd": 1
+  },
+  {
+   "fieldname": "appointment_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date ",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer_details_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Details"
+  },
+  {
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer_phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number"
+  },
+  {
+   "fieldname": "customer_skype",
+   "fieldtype": "Data",
+   "label": "Skype ID"
+  },
+  {
+   "fieldname": "customer_details",
+   "fieldtype": "Long Text",
+   "label": "Details"
+  }
+ ],
+ "modified": "2019-08-27 12:43:30.143937",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Appointment",
+ "name_case": "UPPER CASE",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
