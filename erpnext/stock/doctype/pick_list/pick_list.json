@@ -14,8 +14,6 @@
   "for_qty",
   "column_break_4",
   "parent_warehouse",
-  "section_break_4",
-  "items",
   "get_item_locations",
   "section_break_6",
   "locations",
@@ -39,10 +37,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "section_break_4",
-   "fieldtype": "Section Break"
-  },
-  {
    "description": "Items under this warehouse will be suggested",
    "fieldname": "parent_warehouse",
    "fieldtype": "Link",
@@ -63,13 +57,6 @@
    "fieldtype": "Link",
    "label": "Work Order",
    "options": "Work Order"
-  },
-  {
-   "fieldname": "items",
-   "fieldtype": "Table",
-   "label": "Items To Be Picked",
-   "options": "Pick List Reference Item",
-   "reqd": 1
   },
   {
    "fieldname": "locations",
@@ -109,7 +96,6 @@
    "options": "Material Request"
   },
   {
-   "depends_on": "eval: doc.items.length && (doc.items.length > 1 || doc.items[0].item_code) && doc.docstatus === 0",
    "fieldname": "get_item_locations",
    "fieldtype": "Button",
    "label": "Get Item Locations"
@@ -124,7 +110,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-28 12:27:22.743705",
+ "modified": "2019-08-28 12:49:59.800807",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
@@ -191,7 +177,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1
