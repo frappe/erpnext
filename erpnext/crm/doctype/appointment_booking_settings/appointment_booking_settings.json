@@ -1,0 +1,72 @@
+{
+ "creation": "2019-08-27 10:56:48.309824",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "availability_of_slots",
+  "number_of_agents",
+  "holiday_list",
+  "email_reminders",
+  "appointment_duration"
+ ],
+ "fields": [
+  {
+   "fieldname": "availability_of_slots",
+   "fieldtype": "Table",
+   "label": "Availability Of Slots",
+   "options": "Availability Of Slots",
+   "reqd": 1
+  },
+  {
+   "fieldname": "number_of_agents",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "No. Of Agents",
+   "reqd": 1
+  },
+  {
+   "fieldname": "holiday_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Holiday List",
+   "options": "Holiday List",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "email_reminders",
+   "fieldtype": "Check",
+   "label": "Email Reminders"
+  },
+  {
+   "default": "60",
+   "fieldname": "appointment_duration",
+   "fieldtype": "Int",
+   "label": "Appointment Duration",
+   "reqd": 1
+  }
+ ],
+ "issingle": 1,
+ "modified": "2019-08-27 17:32:46.208951",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Appointment Booking Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

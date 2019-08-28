@@ -1,0 +1,85 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ _("Book Appointment") }}{% endblock %}
+
+{% block page_content %}
+<style>
+    .time-slot {
+        margin: 0 0;
+        border: 0.5px solid #cccccc;
+        min-height: 100px;
+    }
+
+    .time-slot:hover {
+        background: #ddd;
+    }
+
+    .time-slot.unavailable {
+        background: #bbb;
+
+        color: #777777
+    }
+
+    input[type="radio"] {
+        visibility: hidden;
+        display: none;
+    }
+
+    .time-slot.selected {
+        color: white;
+        background: #5e64ff;
+    }
+</style>
+<div class="container">
+    <div class="text-center mb-5">
+        {% if is_holiday %}
+        <h3> This day is a holiday</h3>
+        {% else %}
+        <h3>Pick A Time Slot</h3>
+        <h4>Selected date is {{ date }}</h4>
+    </div>
+    <!-- Start of main content-->
+
+    <div class="mt-3 justify-content-center">
+        <div class="row">
+            <div class="col-md time-slot unavailable" id="12pm">12 pm to 1 am</div>
+            <div class="col-md time-slot selected" id="1am">1 am to 2 am</div>
+            <div class="col-md time-slot" id="2am">2 am to 3 am</div>
+            <div class="col-md time-slot" id="3am">3 am to 4 am</div>
+            <div class="col-md time-slot" id="4am">4 am to 5 am</div>
+            <div class="col-md time-slot" id="5am">5 am to 6 am</div>
+            <div class="col-md time-slot" id="6am">6 am to 7 am</div>
+            <div class="col-md time-slot" id="7am">7 am to 8 am</div>
+        </div>
+        <div class="row">
+            <div class=" col-md time-slot" id="8am">8 am to 9 am</div>
+            <div class=" col-md time-slot" id="9am">9 am to 10 am</div>
+            <div class=" col-md time-slot" id="10am">10 am to 11 am</div>
+            <div class=" col-md time-slot" id="11am">11 am to 12 am</div>
+            <div class=" col-md time-slot" id="12am">12 am to 1 pm</div>
+            <div class=" col-md time-slot" id="1pm">1 pm to 2 pm</div>
+            <div class=" col-md time-slot" id="2pm">2 pm to 3 pm</div>
+            <div class=" col-md time-slot" id="3pm">3 pm to 4pm</div>
+        </div>
+        <div class="row">
+            <div class=" col-md time-slot" id="4pm">4pm to 5pm</div>
+            <div class=" col-md time-slot" id="5pm">5 pm to 6 pm</div>
+            <div class=" col-md time-slot" id="6pm">6 pm to 7 pm</div>
+            <div class=" col-md time-slot" id="7pm">7 pm to 8 pm</div>
+            <div class=" col-md time-slot" id="8pm">8 pm to 9 pm</div>
+            <div class=" col-md time-slot" id="9pm">9 pm to 10 pm</div>
+            <div class=" col-md time-slot" id="10pm">10 pm to 11 pm</div>
+            <div class=" col-md time-slot" id="11pm">11 pm to 12 pm</div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-4 align-self-center">
+                <button class="form-control mt-5 btn btn-dark" onclick="next()">
+                    Next
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<!-- End of main content --> 
+{% endblock %}
