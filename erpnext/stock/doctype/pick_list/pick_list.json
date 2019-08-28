@@ -77,7 +77,7 @@
    "options": "Pick List Item"
   },
   {
-   "depends_on": "work_order",
+   "depends_on": "eval:doc.purpose==='Material Transfer for Manufacture'",
    "description": "Qty of raw materials will be decided based on the qty of the Finished Goods Item",
    "fieldname": "for_qty",
    "fieldtype": "Float",
@@ -115,7 +115,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-26 16:11:03.184637",
+ "modified": "2019-08-27 21:24:50.609986",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

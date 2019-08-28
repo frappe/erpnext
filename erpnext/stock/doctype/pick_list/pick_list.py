@@ -55,13 +55,19 @@ class PickList(Document):
 def get_items_with_warehouse_and_quantity(item_doc, from_warehouses, item_location_map):
 	available_locations = item_location_map.get(item_doc.item_code)
 	locations = []
+	skip_warehouse = None
+
+	if item_doc.material_request:
+		skip_warehouse = frappe.get_value('Material Request Item', item_doc.material_request_item, 'warehouse')
+
 	remaining_stock_qty = item_doc.stock_qty
 	while remaining_stock_qty > 0 and available_locations:
 		item_location = available_locations.pop(0)
+
 		stock_qty = remaining_stock_qty if item_location.qty >= remaining_stock_qty else item_location.qty
 		qty = stock_qty / (item_doc.conversion_factor or 1)
 
-		uom_must_be_whole_number = frappe.db.get_value("UOM", item_doc.uom, "must_be_whole_number")
+		uom_must_be_whole_number = frappe.db.get_value('UOM', item_doc.uom, 'must_be_whole_number')
 		if uom_must_be_whole_number:
 			qty = floor(qty)
 			stock_qty = qty * item_doc.conversion_factor
@@ -131,7 +137,7 @@ def get_item_locations_based_on_serial_nos(item_doc):
 	return locations
 
 def get_item_locations_based_on_batch_nos(item_doc):
-	batch_qty = frappe.db.sql("""
+	batch_locations = frappe.db.sql("""
 		SELECT
 			sle.`warehouse`,
 			sle.`batch_no`,
@@ -141,27 +147,30 @@ def get_item_locations_based_on_batch_nos(item_doc):
 		WHERE
 			sle.batch_no = batch.name
 			and sle.`item_code`=%(item_code)s
-			and IFNULL(batch.expiry_date, '2200-01-01') > %(today)s
+			and IFNULL(batch.`expiry_date`, '2200-01-01') > %(today)s
 		GROUP BY
 			`warehouse`,
 			`batch_no`,
 			`item_code`
 		HAVING `qty` > 0
-		ORDER BY IFNULL(batch.expiry_date, '2200-01-01')
+		ORDER BY IFNULL(batch.`expiry_date`, '2200-01-01'), batch.`creation`
 	""", {
 		'item_code': item_doc.item_code,
 		'today': today()
 	}, as_dict=1)
 
 	locations = []
-	required_qty = item_doc.qty
-	for d in batch_qty:
-		if d.qty > required_qty:
-			d.qty = required_qty
-		else:
-			required_qty -= d.qty
+	required_qty = item_doc.stock_qty
 
-		locations.append(d)
+	for batch_location in batch_locations:
+		if batch_location.qty >= required_qty:
+			# this batch should fulfill the required items
+			batch_location.qty = required_qty
+			required_qty = 0
+		else:
+			required_qty -= batch_location.qty
+
+		locations.append(batch_location)
 
 		if required_qty <= 0:
 			break
@@ -170,7 +179,6 @@ def get_item_locations_based_on_batch_nos(item_doc):
 		frappe.msgprint('No batches found for {} qty of {}.'.format(required_qty, item_doc.item_code))
 
 	return locations
-
 
 @frappe.whitelist()
 def create_delivery_note(source_name, target_doc=None):
@@ -199,7 +207,9 @@ def create_delivery_note(source_name, target_doc=None):
 
 		if dn_item:
 			dn_item.warehouse = location.warehouse
-			dn_item.qty = location.qty
+			dn_item.qty = location.picked_qty
+			dn_item.batch_no = location.batch_no
+			dn_item.serial_no = location.serial_no
 
 			update_delivery_note_item(sales_order_item, dn_item, delivery_note)
 
@@ -355,8 +365,8 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 		item.item_code = location.item_code
 		item.s_warehouse = location.warehouse
 		item.t_warehouse = wip_warehouse
-		item.qty = location.qty
-		item.transfer_qty = location.stock_qty
+		item.qty = location.picked_qty * location.conversion_factor
+		item.transfer_qty = location.picked_qty
 		item.uom = location.uom
 		item.conversion_factor = location.conversion_factor
 		item.stock_uom = location.stock_uom
@@ -375,8 +385,8 @@ def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 		item.item_code = location.item_code
 		item.s_warehouse = location.warehouse
 		item.t_warehouse = target_warehouse
-		item.qty = location.qty
-		item.transfer_qty = location.stock_qty
+		item.qty = location.picked_qty * location.conversion_factor
+		item.transfer_qty = location.picked_qty
 		item.uom = location.uom
 		item.conversion_factor = location.conversion_factor
 		item.stock_uom = location.stock_uom
