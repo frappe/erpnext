@@ -596,7 +596,7 @@ class JournalEntry(AccountsController):
 		for d in self.accounts:
 			if d.reference_type=="Expense Claim" and d.reference_name:
 				doc = frappe.get_doc("Expense Claim", d.reference_name)
-				update_reimbursed_amount(doc)
+				update_reimbursed_amount(doc, jv=self.name)
 
 	def update_loan(self):
 		if self.paid_loan:

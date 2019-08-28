@@ -160,7 +160,7 @@ class TransactionBase(StatusUpdater):
 		last_transaction_time = frappe.db.sql("""
 			select MAX(timestamp(posting_date, posting_time)) as posting_time
 			from `tabStock Ledger Entry`
-			where docstatus = 1 """ #nosec
+			where docstatus = 1 and is_cancelled = 0""" #nosec
 			.format(doctype=self.doctype))[0][0]
 
 		cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")

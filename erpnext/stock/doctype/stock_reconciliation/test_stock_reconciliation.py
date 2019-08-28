@@ -6,7 +6,7 @@
 
 from __future__ import unicode_literals
 import frappe, unittest
-from frappe.utils import flt, nowdate, nowtime
+from frappe.utils import flt, nowdate, nowtime, add_days
 from erpnext.accounts.utils import get_stock_and_account_difference
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
@@ -34,11 +34,11 @@ class TestStockReconciliation(unittest.TestCase):
 		# [[qty, valuation_rate, posting_date,
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
 		input_data = [
-			[50, 1000, "2012-12-26", "12:00"],
-			[25, 900, "2012-12-26", "12:00"],
-			["", 1000, "2012-12-20", "12:05"],
-			[20, "", "2012-12-26", "12:05"],
-			[0, "", "2012-12-31", "12:10"]
+			[50, 1000, nowdate(), nowtime()],
+			[25, 900, nowdate(), nowtime()],
+			["", 1000, nowdate(), nowtime()],
+			[20, "", nowdate(), nowtime()],
+			[0, "", nowdate(), nowtime()]
 		]
 
 		for d in input_data:
@@ -77,12 +77,6 @@ class TestStockReconciliation(unittest.TestCase):
 
 			stock_reco.cancel()
 
-			self.assertFalse(frappe.db.get_value("Stock Ledger Entry",
-				{"voucher_type": "Stock Reconciliation", "voucher_no": stock_reco.name}))
-
-			self.assertFalse(frappe.db.get_value("GL Entry",
-				{"voucher_type": "Stock Reconciliation", "voucher_no": stock_reco.name}))
-
 			set_perpetual_inventory(0)
 
 	def test_get_items(self):
@@ -111,7 +105,7 @@ class TestStockReconciliation(unittest.TestCase):
 		sr = create_stock_reconciliation(item_code=serial_item_code,
 			warehouse = serial_warehouse, qty=5, rate=200)
 
-		# print(sr.name)
+		print(sr.name, sr.items[0].serial_no)
 		serial_nos = get_serial_nos(sr.items[0].serial_no)
 		self.assertEqual(len(serial_nos), 5)
 
@@ -152,7 +146,6 @@ class TestStockReconciliation(unittest.TestCase):
 		for d in to_delete_records:
 			stock_doc = frappe.get_doc("Stock Reconciliation", d)
 			stock_doc.cancel()
-			frappe.delete_doc("Stock Reconciliation", stock_doc.name)
 
 		for d in serial_nos + serial_nos1:
 			if frappe.db.exists("Serial No", d):
@@ -203,20 +196,17 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_doc = frappe.get_doc("Stock Reconciliation", d)
 			stock_doc.cancel()
 
-		frappe.delete_doc("Batch", sr.items[0].batch_no)
-		for d in to_delete_records:
-			frappe.delete_doc("Stock Reconciliation", d)
 
 def insert_existing_sle():
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
-	make_stock_entry(posting_date="2012-12-15", posting_time=nowtime(), item_code="_Test Item",
+	make_stock_entry(posting_date=nowdate(), posting_time=nowtime(), item_code="_Test Item",
 		target="_Test Warehouse - _TC", qty=10, basic_rate=700)
 
-	make_stock_entry(posting_date="2012-12-25", posting_time=nowtime(), item_code="_Test Item",
+	make_stock_entry(posting_date=nowdate(), posting_time=nowtime(), item_code="_Test Item",
 		source="_Test Warehouse - _TC", qty=15)
 
-	make_stock_entry(posting_date="2013-01-05", posting_time=nowtime(), item_code="_Test Item",
+	make_stock_entry(posting_date=nowdate(), posting_time=nowtime(), item_code="_Test Item",
 		target="_Test Warehouse - _TC", qty=15, basic_rate=1200)
 
 def create_batch_or_serial_no_items():
