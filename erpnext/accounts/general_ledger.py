@@ -126,10 +126,6 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 	for entry in gl_map:
 		make_entry(entry, adv_adj, update_outstanding, from_repost)
 
-		# check against budget
-		if not from_repost:
-			validate_expense_against_budget(entry)
-
 def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	args.update({"doctype": "GL Entry"})
 	gle = frappe.get_doc(args)
@@ -138,6 +134,10 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.insert()
 	gle.run_method("on_update_with_args", adv_adj, update_outstanding, from_repost)
 	gle.submit()
+
+	# check against budget
+	if not from_repost:
+		validate_expense_against_budget(args)
 
 def validate_account_for_perpetual_inventory(gl_map):
 	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)) \
