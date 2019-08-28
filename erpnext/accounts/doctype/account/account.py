@@ -123,10 +123,13 @@ class Account(NestedSet):
 				doc.flags.ignore_root_company_validation = True
 				doc.update({
 					"company": company,
-					"account_currency": None,
+					# parent account's currency should be passed down to child account's curreny
+					# if it is None, it picks it up from default company currency, which might be unintended
+					"account_currency": self.account_currency,
 					"parent_account": parent_acc_name_map[company]
 				})
-				doc.save()
+				if not self.check_if_child_acc_exists(doc):
+					doc.save()
 				frappe.msgprint(_("Account {0} is added in the child company {1}")
 					.format(doc.name, company))
 
@@ -169,6 +172,24 @@ class Account(NestedSet):
 		elif self.account_currency != frappe.db.get_value("Account", self.name, "account_currency"):
 			if frappe.db.get_value("GL Entry", {"account": self.name}):
 				frappe.throw(_("Currency can not be changed after making entries using some other currency"))
+
+	def check_if_child_acc_exists(self, doc):
+		''' Checks if a account in parent company exists in the  '''
+		info = frappe.db.get_value("Account", {
+			"account_name": doc.account_name,
+			"account_number": doc.account_number
+		}, ['company', 'account_currency', 'is_group', 'root_type', 'account_type', 'balance_must_be', 'account_name'], as_dict=1)
+
+		if not info:
+			return
+
+		doc = vars(doc)
+		dict_diff = [k for k in info if k in doc and info[k] != doc[k] and k != "company"]
+		if dict_diff:
+			frappe.throw(_("Account {0} already exists in child company {1}. The following fields have different values, they should be same:<ul><li>{2}</li></ul>")
+				.format(info.account_name, info.company, '</li><li>'.join(dict_diff)))
+		else:
+			return True
 
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():

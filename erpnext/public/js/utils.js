@@ -60,23 +60,17 @@ $.extend(erpnext, {
 
 		var me = this;
 		$btn.on("click", function() {
-			me.show_serial_batch_selector(grid_row.frm, grid_row.doc);
+			let callback = '';
+			let on_close = '';
+
+			if (grid_row.doc.serial_no) {
+				grid_row.doc.has_serial_no = true;
+			}
+
+			me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
+				callback, on_close, true);
 		});
 	},
-
-	get_dimension_filters: async function() {
-		if (!frappe.model.can_read('Accounting Dimension')) {
-			return [];
-		}
-		let dimensions = await frappe.db.get_list('Accounting Dimension', {
-			fields: ['label', 'fieldname', 'document_type'],
-			filters: {
-				disabled: 0
-			}
-		});
-
-		return dimensions;
-	}
 });
 
 

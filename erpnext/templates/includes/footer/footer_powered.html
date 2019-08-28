@@ -1,1 +1,3 @@
-<a href="https://erpnext.com?source=website_footer" target="_blank" class="text-muted">Powered by ERPNext</a>
+{% set domains = frappe.get_doc("Domain Settings").active_domains %}
+
+<a href="https://erpnext.com?source=website_footer" target="_blank" class="text-muted">Powered by ERPNext - {{ domains[0].domain if domains else 'Open Source' }} ERP Software</a>
