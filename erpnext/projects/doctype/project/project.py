@@ -322,6 +322,8 @@ def allow_to_make_project_update(project, time, frequency):
 @frappe.whitelist()
 def create_duplicate_project(prev_doc, project_name):
 	''' Create duplicate project based on the old project '''
+	import json
+	prev_doc = json.loads(prev_doc)
 
 	# change the copied doc name to new project name
 	project = frappe.copy_doc(prev_doc)
@@ -329,9 +331,12 @@ def create_duplicate_project(prev_doc, project_name):
 	project.project_name = project_name
 	project.insert()
 
+	# fetch all the task linked with the old project
 	task_list = frappe.get_all("Task", filters={
 		'project': prev_doc.get('name')
 	}, fields=['name'])
+
+	# Create duplicate task for all the task
 	for task in task_list:
 		task = frappe.get_doc('Task', task)
 		new_task = frappe.copy_doc(task)
