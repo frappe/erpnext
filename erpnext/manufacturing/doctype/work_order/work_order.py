@@ -735,33 +735,22 @@ def create_pick_list(source_name, target_doc=None, for_qty=None):
 		else:
 			target.delete()
 
-	doc = get_mapped_doc("Work Order", source_name, {
-		"Work Order": {
-			"doctype": "Pick List",
-			"validation": {
-				"docstatus": ["=", 1]
+	doc = get_mapped_doc('Work Order', source_name, {
+		'Work Order': {
+			'doctype': 'Pick List',
+			'validation': {
+				'docstatus': ['=', 1]
 			}
 		},
-		"Work Order Item": {
-			"doctype": "Pick List Reference Item",
-			"postprocess": update_item_quantity,
-			"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty)
+		'Work Order Item': {
+			'doctype': 'Pick List Item',
+			'postprocess': update_item_quantity,
+			'condition': lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty)
 		},
 	}, target_doc)
 
-	# # aggregate qty for same item
-	# item_map = frappe._dict()
-	# for item in doc.items:
-	# 	item.idx = None
-	# 	if not item_map.get(item.item_code):
-	# 		item_map[item.item_code] = item
-	# 	else:
-	# 		item_map[item.item_code].qty += item.qty
-	# 		item_map[item.item_code].stock_qty += item.stock_qty
-
-	# doc.delete_key('items')
-	# doc.set('items', item_map.values())
-
 	doc.for_qty = for_qty
+
+	doc.set_item_locations()
 
 	return doc

@@ -33,8 +33,7 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty",
-   "read_only": 1
+   "label": "Qty"
   },
   {
    "fieldname": "picked_qty",
@@ -100,8 +99,7 @@
    "fieldname": "uom",
    "fieldtype": "Link",
    "label": "UOM",
-   "options": "UOM",
-   "read_only": 1
+   "options": "UOM"
   },
   {
    "fieldname": "conversion_factor",
@@ -121,8 +119,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Item",
-   "options": "Item",
-   "read_only": 1
+   "options": "Item"
   },
   {
    "fieldname": "quantity_section",
@@ -171,7 +168,7 @@
   }
  ],
  "istable": 1,
- "modified": "2019-08-28 12:34:06.224534",
+ "modified": "2019-08-28 15:56:14.507776",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List Item",

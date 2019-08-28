@@ -30,6 +30,7 @@ frappe.ui.form.on('Pick List', {
 				}
 			};
 		});
+		// frm.set_df_property('get_item_locations', 'hidden', frm.is_dirty());
 	},
 	get_item_locations: (frm) => {
 		frm.call('set_item_locations');
@@ -69,7 +70,6 @@ frappe.ui.form.on('Pick List', {
 					frappe.msgprint(__('Quantity must not be more than {0}', [max]));
 					return;
 				}
-				frm.clear_table('items');
 				frm.clear_table('locations');
 				erpnext.utils.map_current_doc({
 					method: 'erpnext.manufacturing.doctype.work_order.work_order.create_pick_list',
@@ -80,20 +80,13 @@ frappe.ui.form.on('Pick List', {
 		});
 	},
 	material_request: (frm) => {
-		frm.clear_table('items');
-		frm.clear_table('locations');
 		erpnext.utils.map_current_doc({
 			method: 'erpnext.stock.doctype.material_request.material_request.create_pick_list',
 			target: frm,
 			source_name: frm.doc.material_request
 		});
 	},
-	parent_warehouse: (frm) => {
-		frm.clear_table('locations');
-		frm.refresh_field('locations');
-	},
 	purpose: (frm) => {
-		frm.clear_table('items');
 		frm.clear_table('locations');
 		frm.trigger('add_get_items_button');
 	},
@@ -140,7 +133,7 @@ frappe.ui.form.on('Pick List', {
 	}
 });
 
-frappe.ui.form.on('Pick List Reference Item', {
+frappe.ui.form.on('Pick List Item', {
 	item_code: (frm, cdt, cdn) => {
 		let row = frappe.get_doc(cdt, cdn);
 		if (row.item_code) {
