@@ -13,6 +13,7 @@
   {
    "fieldname": "credit_limit",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Credit Limit"
   },
   {
@@ -22,6 +23,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
    "options": "Company"
   },
@@ -33,7 +35,7 @@
   }
  ],
  "istable": 1,
- "modified": "2019-08-28 18:19:26.905239",
+ "modified": "2019-08-29 18:27:10.323287",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer Credit Limit",
@@ -41,6 +43,5 @@
  "permissions": [],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "DESC",
- "track_changes": 1
+ "sort_order": "DESC"
 }
