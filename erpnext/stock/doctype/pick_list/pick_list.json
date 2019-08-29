@@ -96,6 +96,7 @@
    "options": "Material Request"
   },
   {
+   "depends_on": "eval:doc.docstatus===0",
    "fieldname": "get_item_locations",
    "fieldtype": "Button",
    "label": "Get Item Locations"
@@ -110,7 +111,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-28 12:49:59.800807",
+ "modified": "2019-08-29 21:10:11.572387",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

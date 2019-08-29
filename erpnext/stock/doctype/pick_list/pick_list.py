@@ -170,6 +170,7 @@ def get_available_item_locations_for_serialized_item(item_code, from_warehouses,
 	return locations
 
 def get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty):
+	warehouse_condition = 'and warehouse in %(warehouses)s' if from_warehouses else ''
 	batch_locations = frappe.db.sql("""
 		SELECT
 			sle.`warehouse`,
@@ -181,15 +182,17 @@ def get_available_item_locations_for_batched_item(item_code, from_warehouses, re
 			sle.batch_no = batch.name
 			and sle.`item_code`=%(item_code)s
 			and IFNULL(batch.`expiry_date`, '2200-01-01') > %(today)s
+			{warehouse_condition}
 		GROUP BY
 			`warehouse`,
 			`batch_no`,
 			`item_code`
 		HAVING `qty` > 0
 		ORDER BY IFNULL(batch.`expiry_date`, '2200-01-01'), batch.`creation`
-	""", {
+	""".format(warehouse_condition=warehouse_condition), { #nosec
 		'item_code': item_code,
-		'today': today()
+		'today': today(),
+		'warehouses': from_warehouses
 	}, as_dict=1)
 
 	total_qty_available = sum(location.get('qty') for location in batch_locations)
