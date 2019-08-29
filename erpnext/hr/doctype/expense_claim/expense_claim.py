@@ -269,7 +269,7 @@ def update_reimbursed_amount(doc, jv=None):
 
 	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) - ifnull(sum(credit_in_account_currency), 0)as amt
 		from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
-		and party = %s {condition}""".format(condition=condition),
+		and party = %s {condition}""".format(condition=condition), #nosec
 		(doc.name, doc.employee) ,as_dict=1)[0].amt
 
 	doc.total_amount_reimbursed = amt

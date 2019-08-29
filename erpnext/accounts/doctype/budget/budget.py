@@ -263,6 +263,7 @@ def get_actual_expense(args):
 		select sum(gle.debit) - sum(gle.credit)
 		from `tabGL Entry` gle
 		where gle.account=%(account)s
+			{condition1}
 			and gle.fiscal_year=%(fiscal_year)s
 			and gle.company=%(company)s
 			and gle.docstatus=1
