@@ -31,7 +31,7 @@ class SellingController(StockController):
 
 	def onload(self):
 		super(SellingController, self).onload()
-		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
+		if self.docstatus==0 and self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
 			for item in self.get("items"):
 				item.update(get_bin_details(item.item_code, item.warehouse))
 
