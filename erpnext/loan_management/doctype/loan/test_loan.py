@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
 
@@ -14,7 +14,7 @@ class TestLoan(unittest.TestCase):
 		create_loan_type("Personal Loan", 500000, 8.4)
 		self.applicant = make_employee("robert_loan@loan.com")
 		create_loan(self.applicant, "Personal Loan", 280000, "Repay Over Number of Periods", 20)
-	
+
 	def test_loan(self):
 		loan = frappe.get_doc("Loan", {"applicant":self.applicant})
 		self.assertEquals(loan.monthly_repayment_amount, 15052)
