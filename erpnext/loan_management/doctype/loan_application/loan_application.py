@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -9,7 +9,7 @@ from frappe.utils import flt, rounded
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 
-from erpnext.hr.doctype.loan.loan import get_monthly_repayment_amount, validate_repayment_method
+from erpnext.loan_management.doctype.loan.loan import get_monthly_repayment_amount, validate_repayment_method
 
 class LoanApplication(Document):
 	def validate(self):

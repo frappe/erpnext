@@ -1,7 +1,7 @@
-// Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
+// Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-{% include 'erpnext/hr/loan_common.js' %};
+{% include 'erpnext/loan_management/loan_common.js' %};
 
 frappe.ui.form.on('Loan Application', {
 	refresh: function(frm) {
@@ -40,3 +40,4 @@ frappe.ui.form.on('Loan Application', {
 		}
 	}
 });
+
