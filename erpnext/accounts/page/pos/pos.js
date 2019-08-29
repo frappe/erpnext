@@ -1763,10 +1763,18 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.email_queue_list = this.get_email_queue() || {};
 		this.customers_list = this.get_customers_details() || {};
 
-		if (this.si_docs.length || this.email_queue_list || this.customers_list) {
+		if(this.customer_doc) {
+			this.freeze = this.customer_doc.display
+		}
+
+		freeze_screen = this.freeze_screen || false;
+
+		if ((this.si_docs.length || this.email_queue_list || this.customers_list) && !this.freeze) {
+			this.freeze = true;
+
 			frappe.call({
 				method: "erpnext.accounts.doctype.sales_invoice.pos.make_invoice",
-				freeze: true,
+				freeze: freeze_screen,
 				args: {
 					doc_list: me.si_docs,
 					email_queue_list: me.email_queue_list,
