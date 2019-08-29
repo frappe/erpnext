@@ -1,0 +1,78 @@
+{
+ "autoname": "field:loan_name",
+ "creation": "2019-08-29 18:08:38.159726",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "loan_name",
+  "maximum_loan_amount",
+  "rate_of_interest",
+  "column_break_2",
+  "disabled",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "loan_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Loan Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "maximum_loan_amount",
+   "fieldtype": "Currency",
+   "label": "Maximum Loan Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "rate_of_interest",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Rate of Interest (%) Yearly",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description"
+  }
+ ],
+ "modified": "2019-08-29 18:08:38.159726",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Loan Type",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Employee"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
