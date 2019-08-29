@@ -9,8 +9,12 @@ function select_time() {
         return
     }
     console.log(this.id)
-    var selected = document.getElementsByClassName('selected')[0];
-    selected.classList.remove('selected');
+    try{
+        selected_element = document.getElementsByClassName('selected')[0]
+    }catch(e){
+        this.classList.add('selected')
+    }
+    selected_element.classList.remove('selected');
     this.classList.add('selected');
 }
 
