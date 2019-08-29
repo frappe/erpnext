@@ -16,6 +16,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Purchase Invoice",
+					"onboard": 1,
+					"dependencies": ["Item", "Supplier"]
+				},
+				{
+					"type": "doctype",
 					"name": "Material Request",
 					"onboard": 1,
 					"dependencies": ["Item"],
