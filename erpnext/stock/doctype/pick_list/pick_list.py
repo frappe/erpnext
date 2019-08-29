@@ -37,10 +37,8 @@ class PickList(Document):
 					self.item_location_map[item_code] = get_available_items(item_code, from_warehouses)
 				locations = get_items_with_warehouse_and_quantity(item_doc, from_warehouses, self.item_location_map)
 
-			# hack
-			del item_doc.idx
-			if len(locations) > 1:
-				del item_doc.name
+			item_doc.idx = None
+			item_doc.name = None
 
 			for row in locations:
 				stock_qty = row.get('qty', 0) * item_doc.conversion_factor
@@ -49,7 +47,7 @@ class PickList(Document):
 					'picked_qty': stock_qty
 				})
 
-				location = item_doc
+				location = item_doc.as_dict()
 				location.update(row)
 				self.append('locations', location)
 
@@ -236,6 +234,8 @@ def create_stock_entry(pick_list):
 		stock_entry = update_stock_entry_based_on_work_order(pick_list, stock_entry)
 	elif pick_list.get('material_request'):
 		stock_entry = update_stock_entry_based_on_material_request(pick_list, stock_entry)
+	else:
+		stock_entry = update_stock_entry_items_with_no_reference(pick_list, stock_entry)
 
 	stock_entry.set_incoming_rate()
 	stock_entry.set_actual_qty()
@@ -365,6 +365,23 @@ def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 		item.item_code = location.item_code
 		item.s_warehouse = location.warehouse
 		item.t_warehouse = target_warehouse
+		item.qty = location.picked_qty * location.conversion_factor
+		item.transfer_qty = location.picked_qty
+		item.uom = location.uom
+		item.conversion_factor = location.conversion_factor
+		item.stock_uom = location.stock_uom
+		item.material_request = location.material_request
+		item.material_request_item = location.material_request_item
+
+		stock_entry.append('items', item)
+
+	return stock_entry
+
+def update_stock_entry_items_with_no_reference(pick_list, stock_entry):
+	for location in pick_list.locations:
+		item = frappe._dict()
+		item.item_code = location.item_code
+		item.s_warehouse = location.warehouse
 		item.qty = location.picked_qty * location.conversion_factor
 		item.transfer_qty = location.picked_qty
 		item.uom = location.uom
