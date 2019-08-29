@@ -16,6 +16,9 @@ from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note a
 # TODO: Prioritize SO or WO group warehouse
 
 class PickList(Document):
+	def before_save(self):
+		self.set_item_locations()
+
 	def before_submit(self):
 		for item in self.locations:
 			if not frappe.get_cached_value('Item', item.item_code, 'has_serial_no'):
@@ -56,7 +59,7 @@ class PickList(Document):
 				self.append('locations', location)
 
 	def aggregate_item_qty(self):
-		locations = self.locations
+		locations = self.get('locations')
 		self.item_count_map = {}
 		# aggregate qty for same item
 		item_map = frappe._dict()
