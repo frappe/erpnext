@@ -8,7 +8,7 @@ import json
 from six import iteritems
 from frappe.model.document import Document
 from frappe import _
-from frappe.utils import floor, flt, today
+from frappe.utils import floor, flt, today, cint
 from frappe.model.mapper import get_mapped_doc, map_child_doc
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note as create_delivery_note_from_sales_order
@@ -17,51 +17,69 @@ from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note a
 
 class PickList(Document):
 	def set_item_locations(self):
-		item_locations = self.locations
+		items = self.aggregate_item_qty()
 		self.item_location_map = frappe._dict()
 
 		from_warehouses = None
 		if self.parent_warehouse:
 			from_warehouses = frappe.db.get_descendants('Warehouse', self.parent_warehouse)
 
-		# Reset
+		# reset
 		self.delete_key('locations')
-		for item_doc in item_locations:
+		for item_doc in items:
 			item_code = item_doc.item_code
-			if frappe.get_cached_value('Item', item_code, 'has_serial_no'):
-				locations = get_item_locations_based_on_serial_nos(item_doc)
-			elif frappe.get_cached_value('Item', item_code, 'has_batch_no'):
-				locations = get_item_locations_based_on_batch_nos(item_doc)
-			else:
-				if item_code not in self.item_location_map:
-					self.item_location_map[item_code] = get_available_items(item_code, from_warehouses)
-				locations = get_items_with_warehouse_and_quantity(item_doc, from_warehouses, self.item_location_map)
+
+			self.item_location_map.setdefault(item_code,
+				get_available_item_locations(item_code, from_warehouses, self.item_count_map.get(item_code)))
+
+			locations = get_items_with_location_and_quantity(item_doc, self.item_location_map)
 
 			item_doc.idx = None
 			item_doc.name = None
 
 			for row in locations:
-				stock_qty = row.get('qty', 0) * item_doc.conversion_factor
 				row.update({
-					'stock_qty': stock_qty,
-					'picked_qty': stock_qty
+					'picked_qty': row.stock_qty
 				})
 
 				location = item_doc.as_dict()
 				location.update(row)
 				self.append('locations', location)
 
-def get_items_with_warehouse_and_quantity(item_doc, from_warehouses, item_location_map):
+	def aggregate_item_qty(self):
+		locations = self.locations
+		self.item_count_map = {}
+		# aggregate qty for same item
+		item_map = frappe._dict()
+		for item in locations:
+			item_code = item.item_code
+			reference = item.sales_order_item or item.material_request_item
+			key = (item_code, item.uom, reference)
+
+			item.idx = None
+			item.name = None
+
+			if item_map.get(key):
+				item_map[key].qty += item.qty
+				item_map[key].stock_qty += item.stock_qty
+			else:
+				item_map[key] = item
+
+			# maintain count of each item (useful to limit get query)
+			self.item_count_map.setdefault(item_code, 0)
+			self.item_count_map[item_code] += item.stock_qty
+
+		return item_map.values()
+
+
+def get_items_with_location_and_quantity(item_doc, item_location_map):
 	available_locations = item_location_map.get(item_doc.item_code)
 	locations = []
-	skip_warehouse = None
-
-	if item_doc.material_request:
-		skip_warehouse = frappe.get_value('Material Request Item', item_doc.material_request_item, 'warehouse')
 
 	remaining_stock_qty = item_doc.stock_qty
 	while remaining_stock_qty > 0 and available_locations:
 		item_location = available_locations.pop(0)
+		item_location = frappe._dict(item_location)
 
 		stock_qty = remaining_stock_qty if item_location.qty >= remaining_stock_qty else item_location.qty
 		qty = stock_qty / (item_doc.conversion_factor or 1)
@@ -72,54 +90,61 @@ def get_items_with_warehouse_and_quantity(item_doc, from_warehouses, item_locati
 			stock_qty = qty * item_doc.conversion_factor
 			if not stock_qty: break
 
-		locations.append({
+		serial_nos = None
+		if item_location.serial_no:
+			serial_nos = '\n'.join(item_location.serial_no[0: cint(stock_qty)])
+
+		locations.append(frappe._dict({
 			'qty': qty,
-			'warehouse': item_location.warehouse
-		})
+			'stock_qty': stock_qty,
+			'warehouse': item_location.warehouse,
+			'serial_no': serial_nos,
+			'batch_no': item_location.batch_no
+		}))
+
 		remaining_stock_qty -= stock_qty
 
 		qty_diff = item_location.qty - stock_qty
 		# if extra quantity is available push current warehouse to available locations
-		if qty_diff:
+		if qty_diff > 0:
 			item_location.qty = qty_diff
+			if item_location.serial_no:
+				# set remaining serial numbers
+				item_location.serial_no = item_location.serial_no[-qty_diff:]
 			available_locations = [item_location] + available_locations
-
-	if remaining_stock_qty:
-		frappe.msgprint('{0} {1} of {2} is not available.'
-			.format(remaining_stock_qty / item_doc.conversion_factor, item_doc.uom, item_doc.item_code))
 
 	# update available locations for the item
 	item_location_map[item_doc.item_code] = available_locations
 	return locations
 
-def get_available_items(item_code, from_warehouses):
-	# gets all items available in different warehouses
+def get_available_item_locations(item_code, from_warehouses, required_qty):
+	if frappe.get_cached_value('Item', item_code, 'has_serial_no'):
+		return get_available_item_locations_for_serialized_item(item_code, from_warehouses, required_qty)
+	elif frappe.get_cached_value('Item', item_code, 'has_batch_no'):
+		return get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty)
+	else:
+		return get_available_item_locations_for_other_item(item_code, from_warehouses, required_qty)
+
+def get_available_item_locations_for_serialized_item(item_code, from_warehouses, required_qty):
 	filters = frappe._dict({
 		'item_code': item_code,
-		'actual_qty': ['>', 0]
+		'warehouse': ['!=', '']
 	})
+
 	if from_warehouses:
 		filters.warehouse = ['in', from_warehouses]
 
-	available_items = frappe.get_all('Bin',
-		fields=['warehouse', 'actual_qty as qty'],
-		filters=filters,
-		order_by='creation')
-
-	return available_items
-
-def get_item_locations_based_on_serial_nos(item_doc):
 	serial_nos = frappe.get_all('Serial No',
-		fields = ['name', 'warehouse'],
-		filters = {
-			'item_code': item_doc.item_code,
-			'warehouse': ['!=', '']
-		}, limit=item_doc.stock_qty, order_by='purchase_date', as_list=1)
+		fields=['name', 'warehouse'],
+		filters=filters,
+		limit=required_qty,
+		order_by='purchase_date',
+		as_list=1)
 
-	remaining_stock_qty = flt(item_doc.stock_qty) - len(serial_nos)
+	remaining_stock_qty = required_qty - len(serial_nos)
 	if remaining_stock_qty:
-		frappe.msgprint('{0} {1} of {2} is not available.'
-			.format(remaining_stock_qty, item_doc.stock_uom, item_doc.item_code))
+		frappe.msgprint('{0} qty of {1} is not available.'
+			.format(remaining_stock_qty, item_code))
 
 	warehouse_serial_nos_map = frappe._dict()
 	for serial_no, warehouse in serial_nos:
@@ -130,12 +155,12 @@ def get_item_locations_based_on_serial_nos(item_doc):
 		locations.append({
 			'qty': len(serial_nos),
 			'warehouse': warehouse,
-			'serial_no': '\n'.join(serial_nos)
+			'serial_no': serial_nos
 		})
 
 	return locations
 
-def get_item_locations_based_on_batch_nos(item_doc):
+def get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty):
 	batch_locations = frappe.db.sql("""
 		SELECT
 			sle.`warehouse`,
@@ -154,30 +179,36 @@ def get_item_locations_based_on_batch_nos(item_doc):
 		HAVING `qty` > 0
 		ORDER BY IFNULL(batch.`expiry_date`, '2200-01-01'), batch.`creation`
 	""", {
-		'item_code': item_doc.item_code,
+		'item_code': item_code,
 		'today': today()
 	}, as_dict=1)
 
-	locations = []
-	required_qty = item_doc.stock_qty
+	total_qty_available = sum(location.get('qty') for location in batch_locations)
 
-	for batch_location in batch_locations:
-		if batch_location.qty >= required_qty:
-			# this batch should fulfill the required items
-			batch_location.qty = required_qty
-			required_qty = 0
-		else:
-			required_qty -= batch_location.qty
+	remaining_qty = required_qty - total_qty_available
 
-		locations.append(batch_location)
+	if remaining_qty > 0:
+		frappe.msgprint('No batches found for {} qty of {}.'.format(remaining_qty, item_code))
 
-		if required_qty <= 0:
-			break
+	return batch_locations
 
-	if required_qty:
-		frappe.msgprint('No batches found for {} qty of {}.'.format(required_qty, item_doc.item_code))
+def get_available_item_locations_for_other_item(item_code, from_warehouses, required_qty):
+	# gets all items available in different warehouses
+	filters = frappe._dict({
+		'item_code': item_code,
+		'actual_qty': ['>', 0]
+	})
 
-	return locations
+	if from_warehouses:
+		filters.warehouse = ['in', from_warehouses]
+
+	item_locations = frappe.get_all('Bin',
+		fields=['warehouse', 'actual_qty as qty'],
+		filters=filters,
+		limit=required_qty,
+		order_by='creation')
+
+	return item_locations
 
 @frappe.whitelist()
 def create_delivery_note(source_name, target_doc=None):
@@ -342,14 +373,8 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 
 	for location in pick_list.locations:
 		item = frappe._dict()
-		item.item_code = location.item_code
-		item.s_warehouse = location.warehouse
+		update_common_item_properties(item, location)
 		item.t_warehouse = wip_warehouse
-		item.qty = location.picked_qty * location.conversion_factor
-		item.transfer_qty = location.picked_qty
-		item.uom = location.uom
-		item.conversion_factor = location.conversion_factor
-		item.stock_uom = location.stock_uom
 
 		stock_entry.append('items', item)
 
@@ -362,17 +387,8 @@ def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 			target_warehouse = frappe.get_value('Material Request Item',
 				location.material_request_item, 'warehouse')
 		item = frappe._dict()
-		item.item_code = location.item_code
-		item.s_warehouse = location.warehouse
+		update_common_item_properties(item, location)
 		item.t_warehouse = target_warehouse
-		item.qty = location.picked_qty * location.conversion_factor
-		item.transfer_qty = location.picked_qty
-		item.uom = location.uom
-		item.conversion_factor = location.conversion_factor
-		item.stock_uom = location.stock_uom
-		item.material_request = location.material_request
-		item.material_request_item = location.material_request_item
-
 		stock_entry.append('items', item)
 
 	return stock_entry
@@ -380,16 +396,21 @@ def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 def update_stock_entry_items_with_no_reference(pick_list, stock_entry):
 	for location in pick_list.locations:
 		item = frappe._dict()
-		item.item_code = location.item_code
-		item.s_warehouse = location.warehouse
-		item.qty = location.picked_qty * location.conversion_factor
-		item.transfer_qty = location.picked_qty
-		item.uom = location.uom
-		item.conversion_factor = location.conversion_factor
-		item.stock_uom = location.stock_uom
-		item.material_request = location.material_request
-		item.material_request_item = location.material_request_item
+		update_common_item_properties(item, location)
 
 		stock_entry.append('items', item)
 
 	return stock_entry
+
+def update_common_item_properties(item, location):
+	item.item_code = location.item_code
+	item.s_warehouse = location.warehouse
+	item.qty = location.picked_qty * location.conversion_factor
+	item.transfer_qty = location.picked_qty
+	item.uom = location.uom
+	item.conversion_factor = location.conversion_factor
+	item.stock_uom = location.stock_uom
+	item.material_request = location.material_request
+	item.serial_no = location.serial_no
+	item.batch_no = location.batch_no
+	item.material_request_item = location.material_request_item
