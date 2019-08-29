@@ -4,13 +4,14 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "credit_limit",
-  "bypass_credit_limit_check",
+  "company",
   "column_break_2",
-  "company"
+  "credit_limit",
+  "bypass_credit_limit_check"
  ],
  "fields": [
   {
+   "columns": 4,
    "fieldname": "credit_limit",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -21,6 +22,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 4,
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -31,11 +33,12 @@
    "default": "0",
    "fieldname": "bypass_credit_limit_check",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Bypass credit limit_check"
   }
  ],
  "istable": 1,
- "modified": "2019-08-29 18:27:10.323287",
+ "modified": "2019-08-29 20:46:36.073953",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer Credit Limit",
