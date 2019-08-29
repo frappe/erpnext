@@ -30,7 +30,6 @@ frappe.ui.form.on('Pick List', {
 				}
 			};
 		});
-		// frm.set_df_property('get_item_locations', 'hidden', frm.is_dirty());
 	},
 	get_item_locations: (frm) => {
 		frm.call('set_item_locations');
