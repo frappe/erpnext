@@ -67,5 +67,4 @@ def make_loan(source_name, target_doc = None):
 		}
 	}, target_doc)
 
-	print(vars(doclist))
 	return doclist
