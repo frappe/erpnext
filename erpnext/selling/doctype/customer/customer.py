@@ -167,11 +167,17 @@ class Customer(TransactionBase):
 			frappe.throw(_("A Customer Group exists with same name please change the Customer name or rename the Customer Group"), frappe.NameError)
 
 	def validate_credit_limit_on_change(self):
-		if self.get("__islocal") or not self.credit_limit:
+		if self.get("__islocal") or not self.credit_limit_reference:
 			return
+
+		company_record = [c.company for c in self.credit_limit_reference]
 
 		for limit in frappe.get_all("Customer Credit Limit", {'parent': self.name}, ["credit_limit", "company"]):
 			outstanding_amt = get_customer_outstanding(self.name, limit.company)
+			company_record.append(limit.company)
+			if company_record.count(limit.company) >2:
+				frappe.throw(_("Credit limit is already defined for the Company {0}").format(limit.company, self.name))
+
 			if flt(limit.credit_limit) < outstanding_amt:
 				frappe.throw(_("""New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}""").format(outstanding_amt))
 
@@ -322,14 +328,18 @@ def get_credit_limit(customer, company):
 
 	if customer:
 		credit_record = frappe.db.sql("""SELECT
-				customer_group,
-				credit_limit
+				c.customer_group,
+				ccl.credit_limit
 			FROM `tabCustomer`c , `tabCustomer Credit Limit` ccl
 			WHERE
-				c.name = ccl.parent
-		 """, as_dict=1)
+				c.name = %s
+				AND c.name = ccl.parent
+				AND ccl.company = %s
+		""", (customer, company), as_dict=1)
 
-		if not credit_record.credit_limit:
+		credit_limit = credit_record.credit_limit
+
+		if not credit_limit:
 			credit_limit = frappe.get_cached_value("Customer Group", credit_record.customer_group, "credit_limit")
 
 	if not credit_limit:
