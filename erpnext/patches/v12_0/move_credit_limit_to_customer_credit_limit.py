@@ -19,16 +19,17 @@ def move_credit_limit_to_child_table():
 
 	credit_limit_data = frappe.db.sql(''' SELECT
 		name, credit_limit,
-		bypass_credit_limit_check_against_sales_order
+		bypass_credit_limit_check_at_sales_order
 		FROM `tabCustomer`''', as_dict=1)
 
-	default_company = frappe.db.get_single_value("Global Defaults", "default_company")
+	companies = frappe.get_all("Company", 'name')
 
 	for customer in credit_limit_data:
 		customer = frappe.get_doc("Customer", customer.name)
-		customer.append("credit_limit", {
-			'credit_limit': customer.credit_limit,
-			'bypass_credit_limit_check': customer.bypass_credit_limit_check_against_sales_order,
-			'company': default_company
-		})
+		for company in companies:
+			customer.append("credit_limit_reference", {
+				'credit_limit': customer.credit_limit,
+				'bypass_credit_limit_check': customer.bypass_credit_limit_check_at_sales_order,
+				'company': company.name
+			})
 		customer.save()

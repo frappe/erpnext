@@ -50,7 +50,7 @@
   "accounts",
   "credit_limit_section",
   "payment_terms",
-  "credit_limit",
+  "credit_limit_reference",
   "more_info",
   "customer_details",
   "column_break_45",
@@ -345,13 +345,6 @@
    "label": "Credit Limit and Payment Terms"
   },
   {
-   "default": "0",
-   "fieldname": "credit_limit",
-   "fieldtype": "Table",
-   "label": "Credit Limit",
-   "options": "Customer Credit Limit"
-  },
-  {
    "fieldname": "payment_terms",
    "fieldtype": "Link",
    "label": "Default Payment Terms Template",
@@ -464,12 +457,19 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "credit_limit_reference",
+   "fieldtype": "Table",
+   "label": "Credit Limit",
+   "options": "Customer Credit Limit"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2019-08-28 17:38:09.709688",
+ "modified": "2019-08-30 18:03:13.332934",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -550,6 +550,7 @@
  "quick_entry": 1,
  "search_fields": "customer_name,customer_group,territory, mobile_no,primary_address",
  "show_name_in_global_search": 1,
+ "sort_field": "modified",
  "sort_order": "ASC",
  "title_field": "customer_name",
  "track_changes": 1
