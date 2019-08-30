@@ -130,12 +130,24 @@ def get_items_with_location_and_quantity(item_doc, item_location_map):
 	return locations
 
 def get_available_item_locations(item_code, from_warehouses, required_qty):
+	locations = []
 	if frappe.get_cached_value('Item', item_code, 'has_serial_no'):
-		return get_available_item_locations_for_serialized_item(item_code, from_warehouses, required_qty)
+		locations = get_available_item_locations_for_serialized_item(item_code, from_warehouses, required_qty)
 	elif frappe.get_cached_value('Item', item_code, 'has_batch_no'):
-		return get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty)
+		locations = get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty)
 	else:
-		return get_available_item_locations_for_other_item(item_code, from_warehouses, required_qty)
+		locations = get_available_item_locations_for_other_item(item_code, from_warehouses, required_qty)
+
+	total_qty_available = sum(location.get('qty') for location in locations)
+
+	remaining_qty = required_qty - total_qty_available
+
+	if remaining_qty > 0:
+		frappe.msgprint(_('{0} units of {1} is not available.')
+			.format(remaining_qty, frappe.get_desk_link('Item', item_code)))
+
+	return locations
+
 
 def get_available_item_locations_for_serialized_item(item_code, from_warehouses, required_qty):
 	filters = frappe._dict({
@@ -152,11 +164,6 @@ def get_available_item_locations_for_serialized_item(item_code, from_warehouses,
 		limit=required_qty,
 		order_by='purchase_date',
 		as_list=1)
-
-	remaining_stock_qty = required_qty - len(serial_nos)
-	if remaining_stock_qty:
-		frappe.msgprint('{0} qty of {1} is not available.'
-			.format(remaining_stock_qty, item_code))
 
 	warehouse_serial_nos_map = frappe._dict()
 	for serial_no, warehouse in serial_nos:
@@ -198,13 +205,6 @@ def get_available_item_locations_for_batched_item(item_code, from_warehouses, re
 		'warehouses': from_warehouses
 	}, as_dict=1)
 
-	total_qty_available = sum(location.get('qty') for location in batch_locations)
-
-	remaining_qty = required_qty - total_qty_available
-
-	if remaining_qty > 0:
-		frappe.msgprint('No batches found for {} qty of {}.'.format(remaining_qty, item_code))
-
 	return batch_locations
 
 def get_available_item_locations_for_other_item(item_code, from_warehouses, required_qty):
@@ -224,6 +224,7 @@ def get_available_item_locations_for_other_item(item_code, from_warehouses, requ
 		order_by='creation')
 
 	return item_locations
+
 
 @frappe.whitelist()
 def create_delivery_note(source_name, target_doc=None):
@@ -323,6 +324,15 @@ def target_document_exists(pick_list_name, purpose):
 
 	return stock_entry_exists(pick_list_name)
 
+@frappe.whitelist()
+def get_item_details(item_code, uom=None):
+	details = frappe.db.get_value('Item', item_code, ['stock_uom', 'name'], as_dict=1)
+	details.uom = uom or details.stock_uom
+	if uom:
+		details.update(get_conversion_factor(item_code, uom))
+
+	return details
+
 
 def update_delivery_note_item(source, target, delivery_note):
 	cost_center = frappe.db.get_value('Project', delivery_note.project, 'cost_center')
@@ -353,16 +363,6 @@ def stock_entry_exists(pick_list_name):
 	return frappe.db.exists('Stock Entry', {
 		'pick_list': pick_list_name
 	})
-
-@frappe.whitelist()
-def get_item_details(item_code, uom=None):
-	details = frappe.db.get_value('Item', item_code, ['stock_uom', 'name'], as_dict=1)
-	details.uom = uom or details.stock_uom
-	if uom:
-		details.update(get_conversion_factor(item_code, uom))
-
-	return details
-
 
 def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 	work_order = frappe.get_doc("Work Order", pick_list.get('work_order'))
