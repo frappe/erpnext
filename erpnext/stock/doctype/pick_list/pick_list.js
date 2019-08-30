@@ -39,7 +39,11 @@ frappe.ui.form.on('Pick List', {
 		});
 	},
 	get_item_locations: (frm) => {
-		frm.call('set_item_locations');
+		if (!frm.doc.locations || !frm.doc.locations.length) {
+			frappe.msgprint(__('First add items in the Item Locations table'));
+		} else {
+			frm.call('set_item_locations');
+		}
 	},
 	refresh: (frm) => {
 		frm.trigger('add_get_items_button');
