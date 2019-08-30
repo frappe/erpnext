@@ -394,8 +394,8 @@ class SellingController(StockController):
 			elif self.doctype == "Delivery Note":
 				e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
 				f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
-			elif self.doctype == "Sales Order":
-				e = [d.item_code, d.description, d.warehouse, d.batch_no or '']
+			elif self.doctype in ["Sales Order", "Quotation"]:
+				e = [d.item_code, d.description, d.warehouse, '']
 				f = [d.item_code, d.description]
 
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
