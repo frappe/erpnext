@@ -30,6 +30,13 @@ frappe.ui.form.on('Pick List', {
 				}
 			};
 		});
+		frm.set_query('item_code', 'locations', () => {
+			return {
+				filters: {
+					is_stock_item: 1
+				}
+			};
+		});
 	},
 	get_item_locations: (frm) => {
 		frm.call('set_item_locations');
