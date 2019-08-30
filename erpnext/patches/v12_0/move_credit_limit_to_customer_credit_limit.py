@@ -18,8 +18,8 @@ def move_credit_limit_to_child_table():
 	''' maps data from old field to the new field in the child table '''
 
 	credit_limit_data = frappe.db.sql(''' SELECT
-		name, credit_limit,
-		bypass_credit_limit_check_at_sales_order
+			name, credit_limit,
+			bypass_credit_limit_check_at_sales_order
 		FROM `tabCustomer`''', as_dict=1)
 
 	companies = frappe.get_all("Company", 'name')

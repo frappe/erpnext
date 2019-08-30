@@ -335,12 +335,13 @@ def get_credit_limit(customer, company):
 				c.name = %s
 				AND c.name = ccl.parent
 				AND ccl.company = %s
-		""", (customer, company), as_dict=1)
+		""", (customer, company))
 
-		credit_limit = credit_record.credit_limit
+		if credit_record:
+			customer_group, credit_limit = credit_record[0]
 
-		if not credit_limit:
-			credit_limit = frappe.get_cached_value("Customer Group", credit_record.customer_group, "credit_limit")
+		if not credit_limit and customer_group:
+			credit_limit = frappe.get_cached_value("Customer Group", customer_group, "credit_limit")
 
 	if not credit_limit:
 		credit_limit = frappe.get_cached_value('Company',  company,  "credit_limit")
