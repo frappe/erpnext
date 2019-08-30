@@ -86,7 +86,7 @@ frappe.ui.form.on('Pick List', {
 					target: frm,
 					source_name: frm.doc.work_order
 				});
-			}, __("Select Quantity"), __('Get Items'));
+			}, __('Select Quantity'), __('Get Items'));
 		});
 	},
 	material_request: (frm) => {
