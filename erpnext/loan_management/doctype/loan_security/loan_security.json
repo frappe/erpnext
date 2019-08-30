@@ -1,0 +1,154 @@
+{
+ "autoname": "LS-.{applicant}.-.{loan_security_name}.-.#####",
+ "creation": "2019-08-29 18:48:51.371674",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "loan_application_details_section",
+  "applicant",
+  "column_break_3",
+  "loan_application",
+  "is_pledged",
+  "loan_security_details_section",
+  "loan_security_type",
+  "loan_security_name",
+  "unit_of_measurement",
+  "haircut",
+  "column_break_9",
+  "qty",
+  "loan_security_price",
+  "amount",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "loan_security_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Loan Security Type",
+   "options": "Loan Security Type",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "loan_security_type.unit_of_measurement",
+   "fieldname": "unit_of_measurement",
+   "fieldtype": "Data",
+   "label": "Unit Of Measurement",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Quantity",
+   "reqd": 1
+  },
+  {
+   "fieldname": "loan_security_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Loan Security Price",
+   "options": "Company:company:default_currency",
+   "reqd": 1
+  },
+  {
+   "default": "0.0",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Loan Security",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "loan_application_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Application Details"
+  },
+  {
+   "fieldname": "loan_application",
+   "fieldtype": "Link",
+   "label": "Loan Application",
+   "options": "Loan Application",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "loan_application.applicant",
+   "fieldname": "applicant",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Applicant",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "loan_security_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Security Details"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_pledged",
+   "fieldtype": "Check",
+   "label": "Is Pledged",
+   "read_only": 1
+  },
+  {
+   "fieldname": "loan_security_name",
+   "fieldtype": "Data",
+   "label": "Loan Security Name",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "loan_security_type.haircut",
+   "fieldname": "haircut",
+   "fieldtype": "Percent",
+   "label": "Haircut",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2019-08-29 23:07:49.837826",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Loan Security",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "search_fields": "applicant,loan_security_type,amount",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
