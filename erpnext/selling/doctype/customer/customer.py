@@ -327,20 +327,10 @@ def get_credit_limit(customer, company):
 	credit_limit = None
 
 	if customer:
-		credit_record = frappe.db.sql("""SELECT
-				c.customer_group,
-				ccl.credit_limit
-			FROM `tabCustomer`c , `tabCustomer Credit Limit` ccl
-			WHERE
-				c.name = %s
-				AND c.name = ccl.parent
-				AND ccl.company = %s
-		""", (customer, company))
+		credit_limit = frappe.db.get_value("Customer Credit Limit", {'parent': customer, 'company': company}, 'credit_limit')
 
-		if credit_record:
-			customer_group, credit_limit = credit_record[0]
-
-		if not credit_limit and customer_group:
+		if not credit_limit:
+			customer_group = frappe.db.get_value("Customer", customer, 'credit_group')
 			credit_limit = frappe.get_cached_value("Customer Group", customer_group, "credit_limit")
 
 	if not credit_limit:
