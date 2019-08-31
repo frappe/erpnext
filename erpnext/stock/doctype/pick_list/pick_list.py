@@ -8,6 +8,7 @@ import json
 from six import iteritems
 from frappe.model.document import Document
 from frappe import _
+from collections import OrderedDict
 from frappe.utils import floor, flt, today, cint
 from frappe.model.mapper import get_mapped_doc, map_child_doc
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -62,7 +63,7 @@ class PickList(Document):
 		locations = self.get('locations')
 		self.item_count_map = {}
 		# aggregate qty for same item
-		item_map = frappe._dict()
+		item_map = OrderedDict()
 		for item in locations:
 			item_code = item.item_code
 			reference = item.sales_order_item or item.material_request_item
