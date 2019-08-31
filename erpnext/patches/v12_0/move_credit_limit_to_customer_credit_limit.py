@@ -17,7 +17,8 @@ def execute():
 def move_credit_limit_to_child_table():
 	''' maps data from old field to the new field in the child table '''
 
-	if not frappe.db.has_column('Customer', 'bypass_credit_limit_check_at_sales_order'):
+	fields=""
+	if frappe.db.has_column('Customer', 'bypass_credit_limit_check_at_sales_order'):
 		fields = ", bypass_credit_limit_check_at_sales_order"
 
 	credit_limit_data = frappe.db.sql(''' SELECT
