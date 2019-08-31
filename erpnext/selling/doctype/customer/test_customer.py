@@ -226,7 +226,7 @@ class TestCustomer(unittest.TestCase):
 			make_sales_order(qty=item_qty)
 
 		if credit_limit == 0.0:
-			frappe.db.set_value("Customer", {'parent': '_Test Customer', 'company': '_Test Company'}, 'credit_limit', outstanding_amt - 50.0)
+			frappe.db.set_value("Customer Credit Limit", {'parent': '_Test Customer', 'company': '_Test Company'}, 'credit_limit', outstanding_amt - 50.0)
 
 		# Sales Order
 		so = make_sales_order(do_not_submit=True)
@@ -252,7 +252,7 @@ class TestCustomer(unittest.TestCase):
 	def test_customer_credit_limit_on_change(self):
 		outstanding_amt = self.get_customer_outstanding_amount()
 		customer = frappe.get_doc("Customer", '_Test Customer')
-		customer.credit_limit_reference['credit_limit'] = flt(outstanding_amt - 100)
+		customer.credit_limit_reference[0].credit_limit = flt(outstanding_amt - 100)
 		self.assertRaises(frappe.ValidationError, customer.save)
 
 	def test_customer_payment_terms(self):
