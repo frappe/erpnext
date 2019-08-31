@@ -25,7 +25,7 @@ class TestCustomer(unittest.TestCase):
 			make_test_records('Item')
 
 	def tearDown(self):
-		frappe.db.set_value("Customer", {'parent': '_Test Customer', 'company': '_Test Company'}, 'credit_limit', 0.0)
+		frappe.db.set_value("Customer Credit Limit", {'parent': '_Test Customer', 'company': '_Test Company'}, 'credit_limit', 0.0)
 
 	def test_party_details(self):
 		from erpnext.accounts.party import get_party_details
