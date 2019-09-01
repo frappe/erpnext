@@ -9,7 +9,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
-from erpnext.hr.doctype.loan.loan import update_disbursement_status, update_total_amount_paid
+from erpnext.loan_management.doctype.loan.loan import update_disbursement_status, update_total_amount_paid
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_party_account_based_on_invoice_discounting
 
 from six import string_types, iteritems
