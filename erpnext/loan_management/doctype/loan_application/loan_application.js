@@ -5,8 +5,17 @@
 
 frappe.ui.form.on('Loan Application', {
 	refresh: function(frm) {
-		frm.trigger("toggle_fields")
-		frm.trigger("add_toolbar_buttons")
+		frm.trigger("toggle_fields");
+		frm.trigger("add_toolbar_buttons");
+
+		frm.set_query('loan_security', 'loan_security_pledges', function(doc, cdt, cdn) {
+			return {
+				filters: {
+					applicant: frm.doc.applicant,
+					is_pledged: 0
+				}
+			};
+		});
 	},
 	repayment_method: function(frm) {
 		frm.doc.repayment_amount = frm.doc.repayment_periods = ""
@@ -38,6 +47,11 @@ frappe.ui.form.on('Loan Application', {
 				});
 			}).addClass("btn-primary");
 		}
+	},
+
+	is_secured_loan(frm) {
+		frm.set_df_property('loan_amount', 'read_only', 1);
+		frm.set_df_property('loan_amount', 'reqd', 0);
+		frm.set_df_property('loan_security_pledges', 'reqd', 1);
 	}
 });
-

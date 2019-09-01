@@ -14,19 +14,21 @@
   "company",
   "section_break_4",
   "loan_type",
-  "loan_amount",
+  "is_secured_loan",
   "required_by_date",
+  "rate_of_interest",
   "column_break_7",
   "description",
+  "loan_amount",
+  "loan_security_details_section",
+  "loan_security_pledges",
   "repayment_info",
   "repayment_method",
-  "rate_of_interest",
   "total_payable_interest",
   "column_break_11",
   "repayment_amount",
   "repayment_periods",
   "total_payable_amount",
-  "amended_from",
   "amended_from"
  ],
  "fields": [
@@ -34,7 +36,7 @@
    "fieldname": "applicant_type",
    "fieldtype": "Select",
    "label": "Applicant Type",
-   "options": "Employee\nMember",
+   "options": "Employee\nMember\nCustomer",
    "reqd": 1
   },
   {
@@ -174,17 +176,26 @@
    "read_only": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Loan Application",
-   "print_hide": 1,
-   "read_only": 1
+   "default": "0",
+   "fieldname": "is_secured_loan",
+   "fieldtype": "Check",
+   "label": "Is Secured Loan"
+  },
+  {
+   "depends_on": "eval:doc.is_secured_loan == 1",
+   "fieldname": "loan_security_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Security Details"
+  },
+  {
+   "fieldname": "loan_security_pledges",
+   "fieldtype": "Table",
+   "label": "Loan Security Pledges",
+   "options": "Loan Application Pledge"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-29 17:46:49.201740",
+ "modified": "2019-08-30 22:14:07.492376",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Application",

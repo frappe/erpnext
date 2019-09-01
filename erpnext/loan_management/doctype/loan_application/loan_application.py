@@ -14,8 +14,15 @@ from erpnext.loan_management.doctype.loan.loan import get_monthly_repayment_amou
 class LoanApplication(Document):
 	def validate(self):
 		validate_repayment_method(self.repayment_method, self.loan_amount, self.repayment_amount, self.repayment_periods)
+		self.set_loan_amount()
 		self.validate_loan_amount()
 		self.get_repayment_details()
+
+	def on_submit(self):
+		self.pledge_loan_securities()
+
+	def on_cancel(self):
+		self.unpledge_loan_securities()
 
 	def validate_loan_amount(self):
 		maximum_loan_limit = frappe.db.get_value('Loan Type', self.loan_type, 'maximum_loan_amount')
@@ -52,6 +59,34 @@ class LoanApplication(Document):
 			self.total_payable_interest += interest_amount
 
 		self.total_payable_amount = self.loan_amount + self.total_payable_interest
+
+	def set_loan_amount(self):
+
+		if not self.is_secured_loan:
+			return
+
+		loan_amount = 0
+		self.pledge_list = []
+		for security in self.loan_security_pledges:
+			loan_amount += security.amount - (security.amount * security.haircut/100)
+			self.pledge_list.append(security.loan_security)
+
+		self.loan_amount = loan_amount
+
+	def pledge_loan_securities(self):
+		frappe.db.sql("""UPDATE `tabLoan Security`
+			set is_pledged = 1, loan_application = %s where
+			name in (%s) """  % ('%s', ", ".join(['%s']*len(self.pledge_list))), tuple([self.name] + self.pledge_list))
+
+	def unpledge_loan_securities(self):
+		pledge_list = self.get_pledges()
+
+		frappe.db.sql("""UPDATE `tabLoan Security`
+			set is_pledged = 0 , loan_application = '' where
+			name in (%s) """  % ", ".join(['%s']*len(pledge_list)), tuple(pledge_list))
+
+	def get_pledges(self):
+		return [ d.loan_security for d in self.loan_security_pledges]
 
 @frappe.whitelist()
 def make_loan(source_name, target_doc = None):
