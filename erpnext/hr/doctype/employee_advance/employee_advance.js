@@ -56,6 +56,10 @@ frappe.ui.form.on('Employee Advance', {
 				}
 			}
 		}
+
+		if (!frm.doc.__islocal && frm.doc.docstatus==1) {
+			this.frm.page.set_inner_btn_group_as_primary(__("Make"));
+		}
 	},
 
 	make_payment_entry: function(frm, is_return) {
