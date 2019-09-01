@@ -199,6 +199,16 @@ class Analytics(object):
 			conditions.append("""sp.sales_person in (select name from `tabSales Person`
 					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
 
+		if self.filters.get("order_type"):
+			conditions.append("s.order_type=%(order_type)s")
+
+		if self.filters.get("cost_center"):
+			conditions.append("i.cost_center=%(cost_center)s")
+
+		if self.filters.get("project"):
+			conditions.append("i.project=%(project)s" if frappe.get_meta(self.filters.doctype + " Item").has_field("project")
+				else "s.project=%(project)s")
+
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 	def get_rows(self):

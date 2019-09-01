@@ -92,7 +92,19 @@ frappe.query_reports["Purchase Analytics"] = {
 			label: __("Brand"),
 			fieldtype: "Link",
 			options: "Brand"
-		}
+		},
+		{
+			fieldname: "cost_center",
+			label: __("Cost Center"),
+			fieldtype: "Link",
+			options: "Cost Center"
+		},
+		{
+			fieldname: "project",
+			label: __("Project"),
+			fieldtype: "Link",
+			options: "Project"
+		},
 	],
 	after_datatable_render: function(datatable_obj) {
 		const checkbox = $(datatable_obj.wrapper).find(".dt-row-0").find('input[type=checkbox]');

@@ -54,6 +54,9 @@ class SalesPurchaseDetailsReport(object):
 		if self.filters.from_date > self.filters.to_date:
 			frappe.throw(_("From Date must be before To Date"))
 
+		if self.filters.get("cost_center") and not frappe.get_meta(self.filters.doctype + " Item").has_field("cost_center"):
+			frappe.throw(_("Cannot filter {0} by Cost Center").format(self.filters.doctype))
+
 		self.filters.party_type = party_type
 
 		self.get_entries()
@@ -78,6 +81,11 @@ class SalesPurchaseDetailsReport(object):
 
 		territory_field = ", s.territory" if self.filters.party_type == "Customer" else ""
 
+		cost_center_field = ", i.cost_center" if frappe.get_meta(self.filters.doctype + " Item").has_field("cost_center")\
+			else ""
+		project_field = ", i.project" if frappe.get_meta(self.filters.doctype + " Item").has_field("project")\
+			else ", s.project"
+
 		party_group_field = ", s.customer_group as party_group, 'Customer Group' as party_group_dt" if self.filters.party_type == "Customer"\
 			else ", sup.supplier_group as party_group, 'Supplier Group' as party_group_dt"
 
@@ -99,6 +107,7 @@ class SalesPurchaseDetailsReport(object):
 				i.uom, i.stock_uom, i.alt_uom,
 				i.brand, i.item_group,
 				{amount_fields} {party_group_field} {territory_field} {sales_person_field} {contribution_field}
+				{cost_center_field} {project_field}
 				{stin_field}
 			from 
 				`tab{doctype} Item` i, `tab{doctype}` s {sales_person_table} {supplier_table}
@@ -121,6 +130,8 @@ class SalesPurchaseDetailsReport(object):
 			contribution_field=contribution_field,
 			sales_person_table=sales_person_table,
 			sales_person_condition=sales_person_condition,
+			cost_center_field=cost_center_field,
+			project_field=project_field,
 			supplier_table=supplier_table,
 			supplier_condition=supplier_condition,
 			is_opening_condition=is_opening_condition,
@@ -183,6 +194,8 @@ class SalesPurchaseDetailsReport(object):
 				"group_doctype": "Item Group",
 				"group": d.item_group,
 				"brand": d.brand,
+				"cost_center": d.cost_center,
+				"project": d.project,
 				scrub(self.filters.party_type) + "_name": d.party_name,
 			})
 
@@ -407,6 +420,16 @@ class SalesPurchaseDetailsReport(object):
 			lft, rgt = frappe.db.get_value("Sales Person", self.filters.sales_person, ["lft", "rgt"])
 			conditions.append("""sp.sales_person in (select name from `tabSales Person`
 					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+
+		if self.filters.get("order_type"):
+			conditions.append("s.order_type=%(order_type)s")
+
+		if self.filters.get("cost_center"):
+			conditions.append("i.cost_center=%(cost_center)s")
+
+		if self.filters.get("project"):
+			conditions.append("i.project=%(project)s" if frappe.get_meta(self.filters.doctype + " Item").has_field("project")
+				else "s.project=%(project)s")
 
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -680,7 +703,23 @@ class SalesPurchaseDetailsReport(object):
 				},
 			]
 
+		if frappe.get_meta(self.filters.doctype + " Item").has_field("cost_center"):
+			columns.append({
+				"label": _("Cost Center"),
+				"fieldtype": "Link",
+				"fieldname": "cost_center",
+				"options": "Cost Center",
+				"width": 100
+			})
+
 		columns += [
+			{
+				"label": _("Project"),
+				"fieldtype": "Link",
+				"fieldname": "project",
+				"options": "Project",
+				"width": 100
+			},
 			{
 				"label": _("Group"),
 				"fieldtype": "Dynamic Link",

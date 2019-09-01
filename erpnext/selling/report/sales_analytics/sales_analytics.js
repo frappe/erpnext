@@ -21,6 +21,12 @@ frappe.query_reports["Sales Analytics"] = {
 			reqd: 1
 		},
 		{
+			fieldname: "order_type",
+			label: __("Order Type"),
+			fieldtype: "Select",
+			options: "\nSales\nMaintenance\nShopping Cart"
+		},
+		{
 			fieldname: "value_field",
 			label: __("Amount Or Qty"),
 			fieldtype: "Select",
@@ -104,7 +110,19 @@ frappe.query_reports["Sales Analytics"] = {
 			label: __("Sales Person"),
 			fieldtype: "Link",
 			options: "Sales Person"
-		}
+		},
+		{
+			fieldname: "cost_center",
+			label: __("Cost Center"),
+			fieldtype: "Link",
+			options: "Cost Center"
+		},
+		{
+			fieldname: "project",
+			label: __("Project"),
+			fieldtype: "Link",
+			options: "Project"
+		},
 	],
 	after_datatable_render: function(datatable_obj) {
 		const checkbox = $(datatable_obj.wrapper).find(".dt-row-0").find('input[type=checkbox]');

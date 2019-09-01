@@ -73,6 +73,18 @@ frappe.query_reports["Purchase Details"] = {
 			options: "Brand"
 		},
 		{
+			fieldname: "cost_center",
+			label: __("Cost Center"),
+			fieldtype: "Link",
+			options: "Cost Center"
+		},
+		{
+			fieldname: "project",
+			label: __("Project"),
+			fieldtype: "Link",
+			options: "Project"
+		},
+		{
 			fieldname: "group_by_1",
 			label: __("Group By Level 1"),
 			fieldtype: "Select",

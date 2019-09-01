@@ -21,6 +21,12 @@ frappe.query_reports["Sales Details"] = {
 			reqd: 1
 		},
 		{
+			fieldname: "order_type",
+			label: __("Order Type"),
+			fieldtype: "Select",
+			options: "\nSales\nMaintenance\nShopping Cart"
+		},
+		{
 			fieldname: "qty_field",
 			label: __("Quantity Type"),
 			fieldtype: "Select",
@@ -83,6 +89,18 @@ frappe.query_reports["Sales Details"] = {
 			label: __("Sales Person"),
 			fieldtype: "Link",
 			options: "Sales Person"
+		},
+		{
+			fieldname: "cost_center",
+			label: __("Cost Center"),
+			fieldtype: "Link",
+			options: "Cost Center"
+		},
+		{
+			fieldname: "project",
+			label: __("Project"),
+			fieldtype: "Link",
+			options: "Project"
 		},
 		{
 			fieldname: "group_by_1",
