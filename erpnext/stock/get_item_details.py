@@ -482,12 +482,8 @@ def get_default_supplier(args, item, item_group, brand, order_type):
 
 
 def get_default_apply_discount_after_taxes(args, item, item_group, brand, order_type):
-	if args.get('doctype') in sales_doctypes or args.get('customer'):
-		settings_dt = "Selling Settings"
-		fieldname = "selling_apply_discount_after_taxes"
-	else:
-		settings_dt = "Buying Settings"
-		fieldname = "buying_apply_discount_after_taxes"
+	fieldname = "selling_apply_discount_after_taxes" if args.get('doctype') in sales_doctypes or args.get('customer') \
+		else "buying_apply_discount_after_taxes"
 
 	apply_discount_after_taxes = (order_type.get(fieldname)
 		or item.get(fieldname)
@@ -495,7 +491,7 @@ def get_default_apply_discount_after_taxes(args, item, item_group, brand, order_
 		or item_group.get(fieldname))
 
 	if not apply_discount_after_taxes:
-		apply_discount_after_taxes = frappe.db.get_single_value(settings_dt, "apply_discount_after_taxes")
+		apply_discount_after_taxes = frappe.get_cached_value("Company", args.company, fieldname)
 
 	return cint(apply_discount_after_taxes == "Yes" if apply_discount_after_taxes else args.apply_discount_after_taxes)
 
