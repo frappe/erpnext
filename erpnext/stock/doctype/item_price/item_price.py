@@ -38,7 +38,8 @@ class ItemPrice(Document):
 								["buying", "selling", "currency"])
 
 	def update_item_details(self):
-		self.item_name, self.item_description = frappe.db.get_value("Item",self.item_code,["item_name", "description"])
+		self.item_name, self.item_description, self.item_group, self.brand = frappe.db.get_value("Item", self.item_code,
+			["item_name", "description", "item_group", "brand"])
 
 	def check_duplicates(self):
 		conditions = "where item_code=%(item_code)s and price_list=%(price_list)s and name != %(name)s"

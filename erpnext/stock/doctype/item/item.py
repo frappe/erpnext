@@ -656,9 +656,10 @@ class Item(WebsiteGenerator):
 				_("An Item Group exists with same name, please change the item name or rename the item group"))
 
 	def update_item_price(self):
-		frappe.db.sql("""update `tabItem Price` set item_name=%s,
-			item_description=%s, brand=%s where item_code=%s""",
-					(self.item_name, self.description, self.brand, self.name))
+		frappe.db.sql("""
+			update `tabItem Price` set item_name=%s, item_description=%s, item_group=%s, brand=%s
+			where item_code=%s
+		""", (self.item_name, self.description, self.item_group, self.brand, self.name))
 
 	def on_trash(self):
 		super(Item, self).on_trash()
