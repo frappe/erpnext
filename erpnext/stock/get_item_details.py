@@ -500,6 +500,14 @@ def get_default_apply_discount_after_taxes(args, item, item_group, brand, order_
 	return cint(apply_discount_after_taxes == "Yes" if apply_discount_after_taxes else args.apply_discount_after_taxes)
 
 
+def get_default_allow_zero_valuation_rate(args, item, item_group, brand, order_type):
+	allow_zero_valuation_rate = (order_type.get("allow_zero_valuation_rate")
+		or item.get("allow_zero_valuation_rate")
+		or brand.get("allow_zero_valuation_rate")
+		or item_group.get("allow_zero_valuation_rate"))
+
+	return cint(allow_zero_valuation_rate == "Yes" if allow_zero_valuation_rate else args.get('allow_zero_valuation_rate'))
+
 @frappe.whitelist()
 def get_item_defaults_info(args, items):
 	"""
@@ -517,6 +525,7 @@ def get_item_defaults_info(args, items):
 		"cost_center": "",
 		"income_account": "",
 		"expense_account": "",
+		"allow_zero_valuation_rate": "",
 	}, ...]
 	:return: dict
 	"""
@@ -543,7 +552,7 @@ def get_item_defaults_info(args, items):
 	return out
 
 
-def get_item_defaults_details(args, item_defaults=None, item_group_defaults=None, brand_defaults=None, order_type_defaults=None):
+def get_item_defaults_details(args, item_defaults, item_group_defaults, brand_defaults, order_type_defaults):
 	"""
 	:param args: {
 			"doctype": "",
@@ -554,6 +563,7 @@ def get_item_defaults_details(args, item_defaults=None, item_group_defaults=None
 			"cost_center": "",
 			"income_account": "",
 			"expense_account": "",
+			"allow_zero_valuation_rate": "",
 
 			"customer": "",
 			"supplier": None,
@@ -562,14 +572,12 @@ def get_item_defaults_details(args, item_defaults=None, item_group_defaults=None
 	:return: dict
 	"""
 
-	if not args.company:
-		return {}
-
 	return {
 		"income_account": get_default_income_account(args, item_defaults, item_group_defaults, brand_defaults, order_type_defaults),
 		"expense_account": get_default_expense_account(args, item_defaults, item_group_defaults, brand_defaults, order_type_defaults),
 		"cost_center": get_default_cost_center(args, item_defaults, item_group_defaults, brand_defaults, order_type_defaults),
 		"apply_discount_after_taxes": get_default_apply_discount_after_taxes(args, item_defaults, item_group_defaults, brand_defaults, order_type_defaults),
+		"allow_zero_valuation_rate": get_default_allow_zero_valuation_rate(args, item_defaults, item_group_defaults, brand_defaults, order_type_defaults)
 	}
 
 def get_price_list_rate(args, item_doc, out):

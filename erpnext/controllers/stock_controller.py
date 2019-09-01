@@ -284,6 +284,22 @@ class StockController(AccountsController):
 			"is_cancelled": self.docstatus==2 and "Yes" or "No"
 		})
 
+		if self.get("customer"):
+			sl_dict.update({
+				"party_type": "Customer",
+				"party": self.get("customer")
+			})
+		elif self.get("supplier"):
+			sl_dict.update({
+				"party_type": "Supplier",
+				"party": self.get("supplier")
+			})
+		elif self.get("party_type") and self.get("party"):
+			sl_dict.update({
+				"party_type": self.get("party_type"),
+				"party": self.get("party")
+			})
+
 		sl_dict.update(args)
 		return sl_dict
 

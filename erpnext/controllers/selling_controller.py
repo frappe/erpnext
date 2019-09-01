@@ -298,17 +298,6 @@ class SellingController(StockController):
 
 				sales_order.update_reserved_qty(so_item_rows)
 
-	def get_sl_entries(self, d, args):
-		new_args = {}
-		if self.get("customer"):
-			new_args = {
-				"party_type": "Customer",
-				"party": self.get("customer")
-			}
-
-		new_args.update(args)
-		return super(SellingController, self).get_sl_entries(d, new_args)
-
 	def update_stock_ledger(self):
 		self.update_reserved_qty()
 

@@ -483,17 +483,6 @@ class BuyingController(StockController):
 				frappe.throw(_("Row #{0}: {1} can not be negative for item {2}".format(item_row['idx'],
 					frappe.get_meta(item_row.doctype).get_label(fieldname), item_row['item_code'])))
 
-	def get_sl_entries(self, d, args):
-		new_args = {}
-		if self.get("supplier"):
-			new_args = {
-				"party_type": "Supplier",
-				"party": self.get("supplier")
-			}
-
-		new_args.update(args)
-		return super(BuyingController, self).get_sl_entries(d, new_args)
-
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
 		self.update_ordered_and_reserved_qty()
 

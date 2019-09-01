@@ -478,6 +478,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							cost_center: item.cost_center,
 							parent_cost_center: me.frm.doc.cost_center,
 							apply_discount_after_taxes: item.apply_discount_after_taxes,
+							allow_zero_valuation_rate: item.allow_zero_valuation_rate,
 							tax_category: me.frm.doc.tax_category,
 							item_tax_template: item.item_tax_template
 						}
@@ -1335,7 +1336,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"serial_no": d.serial_no,
 					"discount_percentage": d.discount_percentage || 0.0,
 					"conversion_factor": d.conversion_factor || 1.0,
-					"apply_discount_after_taxes": d.apply_discount_after_taxes
+					"apply_discount_after_taxes": d.apply_discount_after_taxes,
+					"allow_zero_valuation_rate": d.allow_zero_valuation_rate
 				});
 
 				// if doctype is Quotation Item / Sales Order Iten then add Margin Type and rate in item_list
@@ -1564,7 +1566,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					cost_center: item.cost_center,
 					income_account: item.income_account,
 					expense_account: item.expense_account,
-					apply_discount_after_taxes: item.apply_discount_after_taxes
+					apply_discount_after_taxes: item.apply_discount_after_taxes,
+					allow_zero_valuation_rate: me.allow_zero_valuation_rate
 				});
 			}
 		});
