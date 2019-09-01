@@ -4,6 +4,170 @@
 frappe.provide("erpnext.hr");
 
 erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
+	setup: function() {
+		var me = this;
+
+		me.frm.custom_make_buttons = {
+			'Payment Entry': 'Payment'
+		};
+
+		if (me.frm.doc.__islocal) {
+			me.frm.doc.posting_date = frappe.datetime.get_today();
+		}
+
+		me.frm.add_fetch('employee', 'company', 'company');
+		me.frm.add_fetch('employee','employee_name','employee_name');
+		me.frm.add_fetch('expense_type','description','description');
+		me.frm.add_fetch("company", "cost_center", "cost_center");
+		me.frm.add_fetch("company", "default_expense_claim_payable_account", "payable_account");
+
+		me.frm.fields_dict.employee.get_query = function() {
+			return {
+				query: "erpnext.controllers.queries.employee_query"
+			};
+		};
+
+		me.frm.set_query("expense_approver", function() {
+			return {
+				query: "erpnext.hr.doctype.department_approver.department_approver.get_approvers",
+				filters: {
+					employee: me.frm.doc.employee,
+					doctype: me.frm.doc.doctype
+				}
+			};
+		});
+		me.frm.fields_dict["cost_center"].get_query = function() {
+			return {
+				filters: {
+					"company": me.frm.doc.company,
+					"is_group": 0
+				}
+			};
+		};
+		me.frm.fields_dict["payable_account"].get_query = function() {
+			return {
+				filters: {
+					"account_type": ["in", ["Payable", "Receivable"]],
+					"company": me.frm.doc.company,
+					"is_group": 0
+				}
+			};
+		};
+		me.frm.fields_dict['task'].get_query = function() {
+			return {
+				filters: {
+					'project': me.frm.doc.project
+				}
+			};
+		};
+
+		me.frm.set_query("expense_account", "expenses", function(doc, cdt, cdn) {
+			var d = frappe.get_doc(cdt, cdn);
+			var filters = {
+				company: me.frm.doc.company,
+				is_group: 0
+			};
+
+			if (d.requires_purchase_invoice) {
+				filters.account_type = "Payable";
+			} else {
+				filters.root_type = "Expense";
+			}
+
+			return {
+				filters: filters
+			};
+		});
+		me.frm.set_query("purchase_invoice", "expenses", function(doc, cdt, cdn) {
+			var d = frappe.get_doc(cdt, cdn);
+			if (!d.requires_purchase_invoice) {
+				return {
+					filters: {
+						name: ""
+					}
+				}
+			} else {
+				return {
+					filters: {
+						company: me.frm.doc.company,
+						outstanding_amount: ['>', 0]
+					}
+				};
+			}
+		});
+	},
+
+	onload: function() {
+		var me = this;
+		if (me.frm.doc.docstatus == 0) {
+			return frappe.call({
+				method: "erpnext.hr.doctype.leave_application.leave_application.get_mandatory_approval",
+				args: {
+					doctype: me.frm.doc.doctype,
+				},
+				callback: function(r) {
+					if (!r.exc && r.message) {
+						me.frm.toggle_reqd("expense_approver", true);
+					}
+				}
+			});
+		}
+	},
+
+	refresh: function() {
+		var me = this;
+
+		erpnext.hide_company();
+		erpnext.toggle_naming_series();
+
+		if(me.frm.doc.docstatus === 1) {
+			me.frm.add_custom_button(__('Accounting Ledger'), function() {
+				frappe.route_options = {
+					voucher_no: me.frm.doc.name,
+					company: me.frm.doc.company,
+					from_date: me.frm.doc.posting_date,
+					to_date: me.frm.doc.posting_date,
+					merge_similar_entries: 0
+				};
+				frappe.set_route("query-report", "General Ledger");
+			}, __("View"));
+
+			if (flt(me.frm.doc.outstanding_amount) > 0 && frappe.model.can_create("Payment Entry")) {
+				me.frm.add_custom_button(__('Payment'), function() {
+					me.make_payment_entry();
+				}, __("Make"));
+			}
+		}
+
+		this.set_help();
+	},
+
+	calculate_totals: function() {
+		var me = this;
+
+		me.frm.doc.total_claimed_amount = 0;
+		me.frm.doc.total_sanctioned_amount = 0;
+		me.frm.doc.total_advance = 0;
+		me.frm.doc.total_amount_reimbursed = 0;
+
+		$.each(me.frm.doc.expenses || [], function(i, d) {
+			frappe.model.round_floats_in(d, ['claim_amount', 'sanctioned_amount']);
+			me.frm.doc.total_claimed_amount += d.claim_amount;
+			me.frm.doc.total_sanctioned_amount += d.sanctioned_amount;
+});
+		$.each(me.frm.doc.advances || [], function(i, d) {
+			frappe.model.round_floats_in(d, ['allocated_amount']);
+			me.frm.doc.total_advance += d.allocated_amount;
+		});
+
+		frappe.model.round_floats_in(me.frm.doc, ["total_claimed_amount", "total_sanctioned_amount", "total_advance",
+			"total_amount_reimbursed"]);
+		me.frm.doc.outstanding_amount = flt(me.frm.doc.total_sanctioned_amount - me.frm.doc.total_amount_reimbursed - me.frm.doc.total_advance,
+			precision("outstanding_amount"));
+
+		me.frm.refresh_fields();
+	},
+
 	expense_type: function(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		if(!doc.company) {
@@ -24,7 +188,7 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 			},
 			callback: function(r) {
 				if (r.message) {
-					d.default_account = r.message.account;
+					d.expense_account = r.message;
 				}
 			}
 		});
@@ -33,196 +197,91 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 	purchase_invoice: function(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		if(!doc.company) {
-			d.expense_type = "";
-			frappe.msgprint(__("Please set the Company"));
-			this.frm.refresh_fields();
+			d.purchase_invoice = "";
+			frappe.msgprint(__("Please set the Company first"));
+			this.frm.refresh_field("purchase_invoice");
 			return;
 		}
 
-		if(!d.purchase_invoice) {
-			return;
+		if(!cint(d.requires_purchase_invoice)) {
+			d.purchase_invoice = "";
+			this.frm.refresh_field("purchase_invoice");
 		}
-		return frappe.call({
-			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_purchase_invoice_details",
-			args: {
-				"purchase_invoice": d.purchase_invoice
-			},
-			callback: function(r) {
-				if (r.message) {
-					d.default_account = r.message.account;
-					d.supplier = r.message.supplier;
-				}
-			}
-		});
-	}
-});
 
-$.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}));
-
-cur_frm.add_fetch('employee', 'company', 'company');
-cur_frm.add_fetch('employee','employee_name','employee_name');
-cur_frm.add_fetch('expense_type','description','description');
-
-cur_frm.cscript.onload = function(doc) {
-	if (doc.__islocal) {
-		cur_frm.set_value("posting_date", frappe.datetime.get_today());
-	}
-
-	cur_frm.fields_dict.employee.get_query = function() {
-		return {
-			query: "erpnext.controllers.queries.employee_query"
-		};
-	};
-};
-
-cur_frm.cscript.refresh = function(doc) {
-	cur_frm.cscript.set_help(doc);
-
-	if(!doc.__islocal) {
-
-		if (doc.docstatus===1) {
-			/* eslint-disable */
-			// no idea how `me` works here
-			var entry_doctype, entry_reference_doctype, entry_reference_name;
-			if(doc.__onload.make_payment_via_journal_entry){
-				entry_doctype = "Journal Entry";
-				entry_reference_doctype = "Journal Entry Account.reference_type";
-				entry_reference_name = "Journal Entry.reference_name";
-			} else {
-				entry_doctype = "Payment Entry";
-				entry_reference_doctype = "Payment Entry Reference.reference_doctype";
-				entry_reference_name = "Payment Entry Reference.reference_name";
-			}
-
-			if (cint(doc.total_amount_reimbursed) > 0 && frappe.model.can_read(entry_doctype)) {
-				cur_frm.add_custom_button(__('Bank Entries'), function() {
-					frappe.route_options = {
-						party_type: "Employee",
-						party: doc.employee,
-						company: doc.company
-					};
-					frappe.set_route("List", entry_doctype);
-				}, __("View"));
-			}
-			/* eslint-enable */
-		}
-	}
-};
-
-cur_frm.cscript.set_help = function(doc) {
-	cur_frm.set_intro("");
-	if(doc.__islocal && !in_list(frappe.user_roles, "HR User")) {
-		cur_frm.set_intro(__("Fill the form and save it"));
-	}
-};
-
-cur_frm.cscript.validate = function(doc) {
-	cur_frm.cscript.calculate_total(doc);
-};
-
-cur_frm.cscript.calculate_total = function(doc){
-	doc.total_claimed_amount = 0;
-	doc.total_sanctioned_amount = 0;
-	$.each((doc.expenses || []), function(i, d) {
-		doc.total_claimed_amount += d.claim_amount;
-		doc.total_sanctioned_amount += d.sanctioned_amount;
-	});
-
-	refresh_field("total_claimed_amount");
-	refresh_field('total_sanctioned_amount');
-};
-
-cur_frm.cscript.calculate_total_amount = function(doc,cdt,cdn){
-	cur_frm.cscript.calculate_total(doc,cdt,cdn);
-};
-
-erpnext.expense_claim = {
-	set_title :function(frm) {
-		if (!frm.doc.task) {
-			frm.set_value("title", frm.doc.employee_name);
-		}
-		else {
-			frm.set_value("title", frm.doc.employee_name + " for "+ frm.doc.task);
-		}
-	}
-};
-
-frappe.ui.form.on("Expense Claim", {
-	setup: function(frm) {
-		frm.trigger("set_query_for_cost_center");
-		frm.trigger("set_query_for_payable_account");
-		frm.add_fetch("company", "cost_center", "cost_center");
-		frm.add_fetch("company", "default_expense_claim_payable_account", "payable_account");
-		frm.set_query("employee_advance", "advances", function(doc) {
-			return {
-				filters: [
-					['docstatus', '=', 1],
-					['employee', '=', doc.employee],
-					['balance_amount', '<', 0]
-				]
-			};
-		});
-		frm.set_query("expense_approver", function() {
-			return {
-				query: "erpnext.hr.doctype.department_approver.department_approver.get_approvers",
-				filters: {
-					employee: frm.doc.employee,
-					doctype: frm.doc.doctype
-				}
-			};
-		});
-	},
-
-	onload: function(frm) {
-		if (frm.doc.docstatus == 0) {
+		if(d.purchase_invoice) {
 			return frappe.call({
-				method: "erpnext.hr.doctype.leave_application.leave_application.get_mandatory_approval",
+				method: "erpnext.hr.doctype.expense_claim.expense_claim.get_purchase_invoice_details",
 				args: {
-					doctype: frm.doc.doctype,
+					"purchase_invoice": d.purchase_invoice
 				},
-				callback: function(r) {
-					if (!r.exc && r.message) {
-						frm.toggle_reqd("expense_approver", true);
+				callback: function (r) {
+					if (r.message) {
+						d.expense_account = r.message.account;
+						d.supplier = r.message.supplier;
 					}
 				}
 			});
 		}
 	},
 
-	refresh: function(frm) {
-		frm.trigger("toggle_fields");
-
-		if(frm.doc.docstatus == 1) {
-			frm.add_custom_button(__('Accounting Ledger'), function() {
-				frappe.route_options = {
-					voucher_no: frm.doc.name,
-					company: frm.doc.company,
-					from_date: frm.doc.posting_date,
-					to_date: frm.doc.posting_date,
-					merge_similar_entries: 0
-				};
-				frappe.set_route("query-report", "General Ledger");
-			}, __("View"));
-		}
-
-		if (frm.doc.docstatus===1
-				&& (flt(frm.doc.total_amount_reimbursed) + flt(frm.doc.total_advance_amount) < flt(frm.doc.total_sanctioned_amount))
-				&& frappe.model.can_create("Payment Entry")) {
-			frm.add_custom_button(__('Payment'),
-				function() { frm.events.make_payment_entry(frm); }, __("Make"));
-		}
+	employee: function() {
+		this.get_advances();
 	},
 
-	make_payment_entry: function(frm) {
+	payable_account: function() {
+		this.get_advances();
+	},
+
+	claim_amount: function(doc, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if(!child.sanctioned_amount) {
+			child.sanctioned_amount = child.claim_amount;
+		}
+
+		this.calculate_totals(doc, cdt, cdn);
+	},
+
+	sanctioned_amount: function(doc, cdt, cdn) {
+		this.calculate_totals(doc, cdt, cdn);
+	},
+
+	allocated_amount: function(doc, cdt, cdn) {
+		this.calculate_totals(doc, cdt, cdn);
+	},
+
+	advances_remove: function(doc, cdt, cdn) {
+		this.calculate_totals(doc, cdt, cdn);
+	},
+
+	expenses_remove: function(doc, cdt, cdn) {
+		this.calculate_totals(doc, cdt, cdn);
+	},
+
+	get_advances: function() {
+		var me = this;
+		return me.frm.call({
+			method: "set_advances",
+			doc: me.frm.doc,
+			callback: function(r, rt) {
+				refresh_field("advances");
+				me.calculate_totals();
+				me.frm.dirty();
+			}
+		})
+	},
+
+	make_payment_entry: function() {
+		var me = this;
+
 		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
-		if(frm.doc.__onload && frm.doc.__onload.make_payment_via_journal_entry) {
+		if(me.frm.doc.__onload && me.frm.doc.__onload.make_payment_via_journal_entry) {
 			method = "erpnext.hr.doctype.expense_claim.expense_claim.make_bank_entry";
 		}
 		return frappe.call({
 			method: method,
 			args: {
-				"dt": frm.doc.doctype,
-				"dn": frm.doc.name
+				"dt": me.frm.doc.doctype,
+				"dn": me.frm.doc.name
 			},
 			callback: function(r) {
 				var doclist = frappe.model.sync(r.message);
@@ -231,120 +290,12 @@ frappe.ui.form.on("Expense Claim", {
 		});
 	},
 
-	set_query_for_cost_center: function(frm) {
-		frm.fields_dict["cost_center"].get_query = function() {
-			return {
-				filters: {
-					"company": frm.doc.company,
-					"is_group": 0
-				}
-			};
-		};
-	},
-
-	set_query_for_payable_account: function(frm) {
-		frm.fields_dict["payable_account"].get_query = function() {
-			return {
-				filters: {
-					"report_type": "Balance Sheet",
-					"account_type": "Payable",
-					"company": frm.doc.company,
-					"is_group": 0
-				}
-			};
-		};
-	},
-
-	is_paid: function(frm) {
-		frm.trigger("toggle_fields");
-	},
-
-	toggle_fields: function(frm) {
-		frm.toggle_reqd("mode_of_payment", frm.doc.is_paid);
-	},
-
-	employee_name: function(frm) {
-		erpnext.expense_claim.set_title(frm);
-	},
-
-	task: function(frm) {
-		erpnext.expense_claim.set_title(frm);
-	},
-
-	employee: function(frm) {
-		frm.events.get_advances(frm);
-	},
-
-	get_advances: function(frm) {
-		frappe.model.clear_table(frm.doc, "advances");
-		if (frm.doc.employee) {
-			return frappe.call({
-				method: "erpnext.hr.doctype.employee_advance.employee_advance.get_outstanding_advances",
-				args: {
-					employee: frm.doc.employee
-				},
-				callback: function(r, rt) {
-					if(r.message) {
-						$.each(r.message, function(i, d) {
-							var row = frappe.model.add_child(frm.doc, "Expense Claim Advance", "advances");
-							Object.assign(row, d);
-						});
-						refresh_field("advances");
-					}
-				}
-			});
+	set_help: function() {
+		this.frm.set_intro("");
+		if(this.frm.doc.__islocal && !in_list(frappe.user_roles, "HR User")) {
+			this.frm.set_intro(__("Fill the form and save it"));
 		}
-	}
+	},
 });
 
-frappe.ui.form.on("Expense Claim Detail", {
-	claim_amount: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn];
-		var doc = frm.doc;
-
-		if(!child.sanctioned_amount){
-			frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.claim_amount);
-		}
-
-		cur_frm.cscript.calculate_total(doc,cdt,cdn);
-	},
-
-	sanctioned_amount: function(frm, cdt, cdn) {
-		var doc = frm.doc;
-		cur_frm.cscript.calculate_total(doc,cdt,cdn);
-	}
-});
-
-frappe.ui.form.on("Expense Claim Advance", {
-	employee_advance: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn];
-		if (child.employee_advance) {
-			if(!frm.doc.employee) {
-				frappe.msgprint(__('Select an employee to get the employee advance.'));
-				frm.doc.advances = [];
-				refresh_field("advances");
-			} else {
-				return frappe.call({
-					method: "erpnext.hr.doctype.employee_advance.employee_advance.get_advance_details",
-					args: {
-						employee_advance: child.employee_advance
-					},
-					callback: function(r, rt) {
-						if(r.message) {
-							Object.assign(child, r.message);
-							refresh_field("advances");
-						}
-					}
-				});
-			}
-		}
-	}
-});
-
-cur_frm.fields_dict['task'].get_query = function(doc) {
-	return {
-		filters:{
-			'project': doc.project
-		}
-	};
-};
+$.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}));

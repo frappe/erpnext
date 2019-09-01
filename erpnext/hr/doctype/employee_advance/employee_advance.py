@@ -54,10 +54,14 @@ class EmployeeAdvance(StatusUpdater):
 
 	def update_claimed_amount(self):
 		claimed_amount = frappe.db.sql("""
-			select sum(ifnull(allocated_amount, 0))
-			from `tabExpense Claim Advance`
-			where employee_advance = %s and docstatus=1
-		""", self.name)[0][0] or 0
+			select ifnull(sum(credit), 0)
+			from `tabGL Entry`
+			where against_voucher_type = 'Employee Advance'
+				and against_voucher = %s
+				and party_type = 'Employee'
+				and party = %s
+				and voucher_type = 'Expense Claim'
+		""", (self.name, self.employee))[0][0] or 0
 
 		self.db_set("claimed_amount", flt(claimed_amount))
 		self.set_status(update=True)
@@ -70,20 +74,20 @@ def get_due_advance_amount(employee, posting_date):
 	return sum([(emp.advance_amount - emp.paid_amount) for emp in employee_due_amount])
 
 @frappe.whitelist()
-def get_outstanding_advances(employee):
+def get_unclaimed_advances(employee, advance_account):
 	return frappe.db.sql("""
-		select name as employee_advance, posting_date, advance_account, paid_amount as advance_paid,
-			-balance_amount as unclaimed_amount, -balance_amount as allocated_amount
+		select 'Employee Advance' as reference_type, name as reference_name, posting_date, paid_amount,
+			balance_amount as advance_amount, purpose as remarks
 		from `tabEmployee Advance`
-		where docstatus=1 and employee=%s and balance_amount < 0
+		where docstatus=1 and employee=%s and advance_account=%s and balance_amount > 0
 		order by posting_date
-	""", employee, as_dict=1)
+	""", [employee, advance_account], as_dict=1)
 
 @frappe.whitelist()
 def get_advance_details(employee_advance):
 	details = frappe.db.sql("""
 		select name as employee_advance, posting_date, advance_account, paid_amount as advance_paid,
-			-balance_amount as unclaimed_amount, -balance_amount as allocated_amount
+			balance_amount as unclaimed_amount, balance_amount as allocated_amount
 		from `tabEmployee Advance`
 		where docstatus=1 and name=%s
 	""", employee_advance, as_dict=1)

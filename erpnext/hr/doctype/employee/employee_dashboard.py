@@ -17,7 +17,7 @@ def get_data():
 			},
 			{
 				'label': _('Expense'),
-				'items': ['Expense Claim']
+				'items': ['Expense Claim', 'Employee Advance']
 			},
 			{
 				'label': _('Evaluation'),

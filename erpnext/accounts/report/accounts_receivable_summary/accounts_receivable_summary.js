@@ -52,12 +52,6 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"finance_book",
-			"label": __("Finance Book"),
-			"fieldtype": "Link",
-			"options": "Finance Book"
-		},
-		{
 			"fieldname":"customer",
 			"label": __("Customer"),
 			"fieldtype": "Link",
@@ -94,6 +88,23 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			"options": "Sales Person"
 		},
 		{
+			"fieldname": "account",
+			"label": __("Receivable Account"),
+			"fieldtype": "Link",
+			"options": "Account",
+			"get_query": function() {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					"doctype": "Account",
+					"filters": {
+						"company": company,
+						"account_type": "Receivable",
+						"is_group": 0
+					}
+				}
+			}
+		},
+		{
 			"fieldname":"cost_center",
 			"label": __("Cost Center"),
 			"fieldtype": "Link",
@@ -104,7 +115,13 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			"label": __("Project"),
 			"fieldtype": "Link",
 			"options": "Project"
-		}
+		},
+		{
+			"fieldname":"finance_book",
+			"label": __("Finance Book"),
+			"fieldtype": "Link",
+			"options": "Finance Book"
+		},
 	],
 
 	onload: function(report) {

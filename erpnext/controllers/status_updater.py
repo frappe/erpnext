@@ -116,6 +116,14 @@ status_map = {
 		["Unclaimed", "eval:self.paid_amount and self.paid_amount == self.advance_amount and self.docstatus==1"],
 		["Claimed", "eval:self.paid_amount and self.balance_amount == 0 and self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
+	],
+	"Expense Claim": [
+		["Draft", None],
+		["Submitted", "eval:self.docstatus==1"],
+		["Unpaid", "eval:self.approval_status == 'Approved' and self.outstanding_amount > 0 and self.docstatus==1"],
+		["Paid", "eval:self.approval_status == 'Approved' and self.outstanding_amount == 0 and self.docstatus==1"],
+		["Rejected", "eval:self.approval_status == 'Rejected' and self.docstatus==1"],
+		["Cancelled", "eval:self.docstatus==2"],
 	]
 }
 

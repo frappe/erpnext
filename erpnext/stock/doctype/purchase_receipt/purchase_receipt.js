@@ -8,7 +8,7 @@ frappe.provide("erpnext.stock");
 frappe.ui.form.on("Purchase Receipt", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Stock Entry': 'Return',
+			'Purchase Receipt': 'Return',
 			'Purchase Invoice': 'Invoice',
 			'Landed Cost Voucher': 'Landed Cost Voucher'
 		}

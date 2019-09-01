@@ -12,7 +12,7 @@ frappe.ui.form.on("Delivery Note", {
 			'Packing Slip': 'Packing Slip',
 			'Installation Note': 'Installation Note',
 			'Sales Invoice': 'Invoice',
-			'Stock Entry': 'Return',
+			'Delivery Note': 'Sales Return',
 		},
 		frm.set_indicator_formatter('item_code',
 			function(doc) {

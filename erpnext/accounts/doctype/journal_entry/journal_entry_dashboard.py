@@ -6,8 +6,8 @@ def get_data():
 		'fieldname': 'reference_name',
 		'transactions': [
 			{
-				'label': _('Payment'),
-				'items': ['Payment Entry', 'Journal Entry']
-			},
+				'label': _('Referenced By'),
+				'items': ['Journal Entry', 'Payment Entry']
+			}
 		]
 	}

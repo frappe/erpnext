@@ -116,7 +116,7 @@ class PaymentEntry(AccountsController):
 
 	def delink_advance_entry_references(self):
 		for reference in self.references:
-			if reference.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Landed Cost Voucher"):
+			if reference.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Landed Cost Voucher", "Expense Claim"):
 				doc = frappe.get_doc(reference.reference_doctype, reference.reference_name)
 				doc.delink_advance_entries(self.name)
 
@@ -691,9 +691,9 @@ def get_oustanding_employee_advances(employee, account, is_return):
 		advances = frappe.db.sql("""
 			select
 				posting_date, 'Employee Advance' as voucher_type, name as voucher_no,
-				paid_amount as invoice_amount, balance_amount as outstanding_amount
+				paid_amount as invoice_amount, -balance_amount as outstanding_amount
 			from `tabEmployee Advance`
-			where advance_account = %s and employee = %s and balance_amount < 0
+			where advance_account = %s and employee = %s and balance_amount > 0
 			order by posting_date, name
 		""", [account, employee], as_dict=1)
 	else:
@@ -810,10 +810,6 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		total_amount = ref_doc.get("grand_total")
 		exchange_rate = 1
 		outstanding_amount = ref_doc.get("outstanding_amount")
-	elif reference_doctype == "Landed Cost Voucher":
-		total_amount = ref_doc.get("total_taxes_and_charges")
-		exchange_rate = ref_doc.get("conversion_rate")
-		outstanding_amount = ref_doc.get("outstanding_amount")
 	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
 		total_amount = ref_doc.get("total_amount")
 		if ref_doc.multi_currency:
@@ -834,22 +830,22 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 				total_amount = ref_doc.base_grand_total
 			exchange_rate = 1
 		else:
-			total_amount = ref_doc.grand_total
+			if reference_doctype == "Landed Cost Voucher":
+				total_amount = ref_doc.grand_total
 
 			# Get the exchange rate from the original ref doc
 			# or get it based on the posting date of the ref doc
 			exchange_rate = ref_doc.get("conversion_rate") or \
 				get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 
-		if reference_doctype in ("Sales Invoice", "Purchase Invoice"):
+		if reference_doctype in ("Sales Invoice", "Purchase Invoice", "Landed Cost Voucher"):
 			outstanding_amount = ref_doc.get("outstanding_amount")
 			bill_no = ref_doc.get("bill_no")
 		elif reference_doctype == "Expense Claim":
-			outstanding_amount = flt(ref_doc.get("total_sanctioned_amount")) \
-				- flt(ref_doc.get("total_amount+reimbursed")) - flt(ref_doc.get("total_advance_amount"))
+			outstanding_amount = ref_doc.get("outstanding_amount")
 		elif reference_doctype == "Employee Advance":
 			if payment_type == "Receive":
-				outstanding_amount = ref_doc.balance_amount
+				outstanding_amount = -ref_doc.balance_amount
 			else:
 				outstanding_amount = ref_doc.advance_amount - flt(ref_doc.paid_amount)
 		else:
@@ -918,28 +914,24 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	grand_total = outstanding_amount = 0
 	if party_amount:
 		grand_total = outstanding_amount = party_amount
-	elif dt in ("Sales Invoice", "Purchase Invoice"):
+	elif dt in ("Sales Invoice", "Purchase Invoice", "Landed Cost Voucher"):
 		if party_account_currency == doc.company_currency:
-			grand_total = doc.base_rounded_total or doc.base_grand_total
+			grand_total = doc.get("base_rounded_total") or doc.base_grand_total
 		else:
-			grand_total = doc.rounded_total or doc.grand_total
+			grand_total = doc.get("rounded_total") or doc.grand_total
 		outstanding_amount = doc.outstanding_amount
-	elif dt in ("Expense Claim"):
+	elif dt == "Expense Claim":
 		grand_total = doc.total_sanctioned_amount
-		outstanding_amount = doc.total_sanctioned_amount \
-			- doc.total_amount_reimbursed - flt(doc.total_advance_amount)
+		outstanding_amount = doc.outstanding_amount
 	elif dt == "Employee Advance":
 		if is_advance_return:
 			grand_total = doc.paid_amount
-			outstanding_amount = doc.balance_amount
+			outstanding_amount = -doc.balance_amount
 		else:
 			grand_total = doc.advance_amount
 			outstanding_amount = flt(doc.advance_amount) - flt(doc.paid_amount)
 	elif dt == "Fees":
 		grand_total = doc.grand_total
-		outstanding_amount = doc.outstanding_amount
-	elif dt == "Landed Cost Voucher":
-		grand_total = doc.total_taxes_and_charges
 		outstanding_amount = doc.outstanding_amount
 	else:
 		if party_account_currency == doc.company_currency:

@@ -175,29 +175,11 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		me.frm.set_query("reference_name", "accounts", function(doc, cdt, cdn) {
 			var jvd = frappe.get_doc(cdt, cdn);
 
-			// expense claim
-			if(jvd.reference_type==="Expense Claim") {
-				return {
-					filters: {
-						'total_sanctioned_amount': ['>', 0],
-						'status': ['!=', 'Paid'],
-						'docstatus': 1
-					}
-				};
-			}
-
-			if(jvd.reference_type==="Employee Advance") {
-				return {
-					filters: {
-						'status': ['=', 'Unpaid'],
-						'docstatus': 1
-					}
-				};
-			}
-
 			// journal entry
 			if(jvd.reference_type==="Journal Entry") {
 				frappe.model.validate_missing(jvd, "account");
+				frappe.model.validate_missing(jvd, "party_type");
+				frappe.model.validate_missing(jvd, "party");
 				return {
 					query: "erpnext.accounts.doctype.journal_entry.journal_entry.get_against_jv",
 					filters: {
@@ -215,38 +197,49 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				};
 			}
 
+			var party_account_field = "";
 			var out = {
 				filters: [
 					[jvd.reference_type, "docstatus", "=", 1]
 				]
 			};
 
-			if(in_list(["Sales Invoice", "Purchase Invoice", "Landed Cost Voucher"], jvd.reference_type)) {
+			if(in_list(["Sales Invoice", "Purchase Invoice", "Landed Cost Voucher", "Expense Claim"], jvd.reference_type)) {
 				out.filters.push([jvd.reference_type, "outstanding_amount", "!=", 0]);
 
 				// account filter
-				frappe.model.validate_missing(jvd, "account");
-				var party_account_field = jvd.reference_type==="Sales Invoice" ? "debit_to": "credit_to";
-				out.filters.push([jvd.reference_type, party_account_field, "=", jvd.account]);
+				if (jvd.reference_type == "Expense Claim") {
+					party_account_field = "payable_account";
+				} else {
+					party_account_field = jvd.reference_type==="Sales Invoice" ? "debit_to": "credit_to";
+				}
 			}
 
 			if(in_list(["Sales Order", "Purchase Order"], jvd.reference_type)) {
-				// party_type and party mandatory
-				frappe.model.validate_missing(jvd, "party_type");
-				frappe.model.validate_missing(jvd, "party");
-
+				frappe.model.validate_missing(jvd, "account");
 				out.filters.push([jvd.reference_type, "per_billed", "<", 100]);
+			}
+
+			if(jvd.reference_type == "Employee Advance") {
+				party_account_field = "advance_account";
+				out.filters.push([jvd.reference_type, "status", "in", ['Unpaid', 'Unclaimed']]);
+			}
+
+			if(party_account_field) {
+				out.filters.push([jvd.reference_type, party_account_field, "=", jvd.account]);
 			}
 
 			if(jvd.party_type && jvd.party) {
 				var party_field = "";
 				if(jvd.reference_type == "Landed Cost Voucher") {
 					out.filters.push([jvd.reference_type, "party_type", "=", jvd.party_type]);
-					var party_field = "party"
+					party_field = "party"
 				} else if(jvd.reference_type.indexOf("Sales")===0) {
-					var party_field = "customer";
+					party_field = "customer";
 				} else if (jvd.reference_type.indexOf("Purchase")===0) {
-					var party_field = "supplier";
+					party_field = "supplier";
+				} else if (['Employee Advance', 'Expense Claim'.includes(jvd.reference_type)]) {
+					party_field = "employee";
 				}
 
 				if (party_field) {
@@ -274,16 +267,18 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		})
 	},
 
+	reference_type: function(doc, cdt, cdn) {
+		frappe.model.set_value(cdt, cdn, 'reference_name', '');
+	},
+
 	reference_name: function(doc, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
 
 		if(d.reference_name) {
-			if (d.reference_type==="Purchase Invoice" && !flt(d.debit)) {
-				this.get_outstanding('Purchase Invoice', d.reference_name, doc.company, d);
-			} else if (d.reference_type==="Sales Invoice" && !flt(d.credit)) {
-				this.get_outstanding('Sales Invoice', d.reference_name, doc.company, d);
-			} else if (d.reference_type==="Journal Entry" && !flt(d.debit) && !flt(d.credit) && d.party_type && d.party) {
+			if (d.reference_type==="Journal Entry" && d.party_type && d.party) {
 				this.get_outstanding('Journal Entry', d.reference_name, doc.company, d);
+			} else {
+				this.get_outstanding(d.reference_type, d.reference_name, doc.company, d);
 			}
 			erpnext.journal_entry.set_exchange_rate(this.frm, cdt, cdn);
 		}
@@ -307,7 +302,13 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			callback: function(r) {
 				if(r.message) {
 					$.each(r.message, function(field, value) {
-						frappe.model.set_value(child.doctype, child.name, field, value);
+						if(['debit_in_account_currency', 'credit_in_account_currency', 'debit', 'credit'].includes(field)) {
+							if(!child.debit_in_account_currency && !child.credit_in_account_currency) {
+								frappe.model.set_value(child.doctype, child.name, field, value);
+							}
+						} else {
+							frappe.model.set_value(child.doctype, child.name, field, value);
+						}
 					})
 				}
 			}

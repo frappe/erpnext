@@ -3,6 +3,11 @@
 
 frappe.ui.form.on('Employee Advance', {
 	setup: function(frm) {
+		me.frm.custom_make_buttons = {
+			'Payment Entry': 'Payment',
+			'Expense Claim': 'Expense Claim'
+		};
+
 		frm.add_fetch("employee", "company", "company");
 		frm.add_fetch("company", "default_employee_advance_account", "advance_account");
 
@@ -36,7 +41,7 @@ frappe.ui.form.on('Employee Advance', {
 						frm.events.make_payment_entry(frm, false);
 					}, __("Make"));
 				}
-				if (flt(frm.doc.balance_amount) < 0) {
+				if (flt(frm.doc.balance_amount) > 0) {
 					frm.add_custom_button(__('Return Payment'), function() {
 						frm.events.make_payment_entry(frm, true);
 					}, __("Make"));

@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.query_reports["Accounts Payable"] = {
+frappe.query_reports["Employees Payable"] = {
 	"filters": [
 		{
 			"fieldname":"company",
@@ -9,13 +9,6 @@ frappe.query_reports["Accounts Payable"] = {
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("Company")
-		},
-		{
-			"fieldname":"ageing_based_on",
-			"label": __("Ageing Based On"),
-			"fieldtype": "Select",
-			"options": 'Posting Date\nDue Date\nSupplier Invoice Date',
-			"default": "Posting Date"
 		},
 		{
 			"fieldname":"report_date",
@@ -52,30 +45,32 @@ frappe.query_reports["Accounts Payable"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"supplier",
-			"label": __("Supplier"),
+			"fieldname":"employee",
+			"label": __("Employee"),
 			"fieldtype": "Link",
-			"options": "Supplier",
-			on_change: () => {
-				var supplier = frappe.query_report.get_filter_value('supplier');
-				if (supplier) {
-					frappe.db.get_value('Supplier', supplier, "tax_id", function(value) {
-						frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
-					});
-				} else {
-					frappe.query_report.set_filter_value('tax_id', "");
-				}
-			}
+			"options": "Employee"
 		},
 		{
-			"fieldname":"supplier_group",
-			"label": __("Supplier Group"),
+			"fieldname":"department",
+			"label": __("Department"),
 			"fieldtype": "Link",
-			"options": "Supplier Group"
+			"options": "Department"
+		},
+		{
+			"fieldname":"designation",
+			"label": __("Designation"),
+			"fieldtype": "Link",
+			"options": "Designation"
+		},
+		{
+			"fieldname":"branch",
+			"label": __("Branch"),
+			"fieldtype": "Link",
+			"options": "Branch"
 		},
 		{
 			"fieldname": "account",
-			"label": __("Payable Account"),
+			"label": __("Account"),
 			"fieldtype": "Link",
 			"options": "Account",
 			"get_query": function() {
@@ -84,7 +79,7 @@ frappe.query_reports["Accounts Payable"] = {
 					"doctype": "Account",
 					"filters": {
 						"company": company,
-						"account_type": "Payable",
+						"account_type": ["in", ["Payable", "Receivable"]],
 						"is_group": 0
 					}
 				}
@@ -112,40 +107,28 @@ frappe.query_reports["Accounts Payable"] = {
 			"fieldname":"group_by",
 			"label": __("Group By Level 1"),
 			"fieldtype": "Select",
-			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group\nGroup by Cost Center\nGroup by Project",
+			"options": "Ungrouped\nGroup by Employee\nGroup by Department\nGroup by Designation\nGroup by Branch\nGroup by Cost Center\nGroup by Project",
 			"default": "Ungrouped"
 		},
 		{
 			"fieldname":"group_by_2",
 			"label": __("Group By Level 2"),
 			"fieldtype": "Select",
-			"options": "Ungrouped\nGroup by Supplier\nGroup by Supplier Group\nGroup by Cost Center\nGroup by Project",
+			"options": "Ungrouped\nGroup by Employee\nGroup by Department\nGroup by Designation\nGroup by Branch\nGroup by Cost Center\nGroup by Project",
 			"default": "Ungrouped"
 		},
-		{
-			"fieldname":"mark_overdue_in_print",
-			"label": __("Mark Overdue in Print"),
-			"fieldtype": "Check",
-			on_change: function() { return false; }
-		},
-		{
-			"fieldname":"tax_id",
-			"label": __("NTN"),
-			"fieldtype": "Data",
-			"hidden": 1
-		}
 	],
 	onload: function(report) {
-		report.page.add_inner_button(__("Accounts Payable Summary"), function() {
+		report.page.add_inner_button(__("Employees Payable Summary"), function() {
 			var filters = report.get_values();
-			frappe.set_route('query-report', 'Accounts Payable Summary', {company: filters.company});
+			frappe.set_route('query-report', 'Employees Payable Summary', {company: filters.company});
 		});
 		report.page.add_inner_button(__("Payment Reconciliation"), function() {
 			var filters = report.get_values();
 			frappe.set_route('Form', 'Payment Reconciliation', {
 				company: filters.company,
-				party_type: "Supplier",
-				party: filters.supplier,
+				party_type: "Employee",
+				party: filters.employee,
 			});
 		});
 	},

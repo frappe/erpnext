@@ -41,32 +41,6 @@ class LandedCostVoucher(AccountsController):
 		self.update_landed_cost()
 		self.make_gl_entries(cancel=True)
 
-	def get_referenced_taxes(self):
-		if self.credit_to and self.party:
-			self.set("taxes", [])
-			tax_amounts = frappe.db.sql("""
-				select je.reference_account as account_head, sum(ge.debit - ge.credit) as amount
-				from `tabGL Entry` as ge, `tabJournal Entry` as je
-				where
-					ge.account=%s and ge.party_type=%s and ge.party=%s
-					and ge.voucher_type='Journal Entry' and ge.voucher_no=je.name
-					and je.reference_account is not null and je.reference_account != ''
-				group by je.reference_account
-			""", [self.credit_to, self.party_type, self.party], as_dict=True)
-
-			balance = get_balance_on(party_type=self.party_type, party=self.party, company=self.company)
-
-			total_tax_amounts = sum(tax.amount for tax in tax_amounts)
-			diff = flt(balance - total_tax_amounts, self.precision("amount", "taxes"))
-
-			if diff:
-				tax_amounts.append({
-					'remarks': _("Remaining balance"),
-					'amount': diff,
-					'account_head': None})
-
-			return tax_amounts
-
 	def get_items_from_purchase_receipts(self):
 		self.set("items", [])
 		for pr in self.get("purchase_receipts"):

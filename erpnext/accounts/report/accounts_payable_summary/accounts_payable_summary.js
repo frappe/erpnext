@@ -52,12 +52,6 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"finance_book",
-			"label": __("Finance Book"),
-			"fieldtype": "Link",
-			"options": "Finance Book"
-		},
-		{
 			"fieldname":"supplier",
 			"label": __("Supplier"),
 			"fieldtype": "Link",
@@ -70,6 +64,23 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			"options": "Supplier Group"
 		},
 		{
+			"fieldname": "account",
+			"label": __("Payable Account"),
+			"fieldtype": "Link",
+			"options": "Account",
+			"get_query": function() {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					"doctype": "Account",
+					"filters": {
+						"company": company,
+						"account_type": "Payable",
+						"is_group": 0
+					}
+				}
+			}
+		},
+		{
 			"fieldname":"cost_center",
 			"label": __("Cost Center"),
 			"fieldtype": "Link",
@@ -80,7 +91,13 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			"label": __("Project"),
 			"fieldtype": "Link",
 			"options": "Project"
-		}
+		},
+		{
+			"fieldname":"finance_book",
+			"label": __("Finance Book"),
+			"fieldtype": "Link",
+			"options": "Finance Book"
+		},
 	],
 
 	onload: function(report) {

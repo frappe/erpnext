@@ -485,6 +485,9 @@ class AccountsController(TransactionBase):
 			})
 
 	def get_advance_entries(self, include_unallocated=True):
+		against_all_orders = False
+		order_field = None
+		order_doctype = None
 		if self.doctype == "Sales Invoice":
 			party_account = self.debit_to
 			party_type = "Customer"
@@ -497,12 +500,14 @@ class AccountsController(TransactionBase):
 			party = self.letter_of_credit if self.letter_of_credit else self.supplier
 			order_field = "purchase_order"
 			order_doctype = "Purchase Order"
+		elif self.doctype == "Expense Claim":
+			party_account = self.payable_account
+			party_type = "Employee"
+			party = self.employee
 		else:
 			party_account = self.credit_to
 			party_type = self.party_type
 			party = self.party
-			order_field = None
-			order_doctype = None
 
 		if order_field:
 			order_list = list(set([d.get(order_field) for d in self.get("items") if d.get(order_field)]))
@@ -510,12 +515,12 @@ class AccountsController(TransactionBase):
 			order_list = []
 
 		journal_entries = get_advance_journal_entries(party_type, party, party_account,
-													  order_doctype, order_list, include_unallocated)
+			order_doctype, order_list, include_unallocated, against_all_orders=against_all_orders)
 
 		payment_entries = get_advance_payment_entries(party_type, party, party_account,
-													  order_doctype, order_list, include_unallocated)
+			order_doctype, order_list, include_unallocated, against_all_orders=against_all_orders)
 
-		res = journal_entries + payment_entries
+		res = sorted(journal_entries + payment_entries, key=lambda d: (not bool(d.against_order), d.posting_date))
 
 		return res
 
@@ -565,6 +570,11 @@ class AccountsController(TransactionBase):
 			party = self.letter_of_credit if self.letter_of_credit else self.supplier
 			party_account = self.credit_to
 			dr_or_cr = "debit_in_account_currency"
+		elif self.doctype == "Expense Claim":
+			party_type = "Employee"
+			party = self.employee
+			party_account = self.payable_account
+			dr_or_cr = "debit_in_account_currency"
 		else:
 			party_type = self.party_type
 			party = self.party
@@ -573,10 +583,13 @@ class AccountsController(TransactionBase):
 
 		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
 			invoice_amounts = {
-				'exchange_rate': (self.conversion_rate
-								  if self.party_account_currency != self.company_currency else 1),
-				'grand_total': (self.base_grand_total
-								if self.party_account_currency == self.company_currency else self.grand_total)
+				'exchange_rate': (self.conversion_rate if self.party_account_currency != self.company_currency else 1),
+				'grand_total': (self.base_grand_total if self.party_account_currency == self.company_currency else self.grand_total)
+			}
+		elif self.doctype == "Expense Claim":
+			invoice_amounts = {
+				'exchange_rate': 1,
+				'grand_total': self.total_sanctioned_amount
 			}
 		else:
 			invoice_amounts = {
@@ -586,7 +599,7 @@ class AccountsController(TransactionBase):
 
 		lst = []
 		for d in self.get('advances'):
-			if flt(d.allocated_amount) > 0:
+			if flt(d.allocated_amount) > 0 and d.reference_type != 'Employee Advance':
 				args = frappe._dict({
 					'voucher_type': d.reference_type,
 					'voucher_no': d.reference_name,
@@ -1158,7 +1171,8 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 		journal_entries += frappe.db.sql("""
 			select
 				"Journal Entry" as reference_type, je.name as reference_name, je.remark as remarks,
-				jea.{dr_or_cr} as amount, jea.name as reference_row, jea.reference_name as against_order
+				jea.{dr_or_cr} as amount, jea.name as reference_row, jea.reference_name as against_order,
+				je.posting_date
 			from
 				`tabJournal Entry` je, `tabJournal Entry Account` jea
 			where
@@ -1188,7 +1202,7 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 
 		journal_entries += frappe.db.sql("""
 		select
-			gle_je.voucher_type as reference_type, je.name as reference_name, je.remark as remarks,
+			gle_je.voucher_type as reference_type, je.name as reference_name, je.remark as remarks, je.posting_date,
 			ifnull(sum({bal_dr_or_cr}), 0) - (
 				select ifnull(sum({payment_dr_or_cr}), 0)
 				from `tabGL Entry` gle_payment
@@ -1268,7 +1282,8 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 
 	if include_unallocated:
 		unallocated_payment_entries = frappe.db.sql("""
-			select "Payment Entry" as reference_type, name as reference_name, remarks, unallocated_amount as amount
+			select "Payment Entry" as reference_type, name as reference_name, remarks, unallocated_amount as amount,
+				pe.posting_date
 			from `tabPayment Entry` pe
 			where
 				{party_account_field} = %s and party_type = %s and party = %s and payment_type = %s

@@ -6,6 +6,7 @@ def get_data():
 		'non_standard_fieldnames': {
 			'Journal Entry': 'reference_name',
 			'Payment Entry': 'reference_name',
+			'Expense Claim': 'reference_name',
 		},
 		'transactions': [
 			{

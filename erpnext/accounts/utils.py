@@ -376,7 +376,7 @@ def check_if_advance_entry_modified(args):
 					je.name = jea.parent and jea.account = %(account)s and je.docstatus=1
 					and je.name = %(voucher_no)s and jea.name = %(voucher_detail_no)s
 					and jea.party_type = %(party_type)s and jea.party = %(party)s
-					and ifnull(jea.reference_type, '') in ('', 'Sales Order', 'Purchase Order')
+					and ifnull(jea.reference_type, '') in ('', 'Sales Order', 'Purchase Order', 'Employee Advance')
 					and jea.{dr_or_cr} = %(unadjusted_amount)s""".format(dr_or_cr=args.dr_or_cr), args)
 		else:
 			if erpnext.get_party_account_type(args.party_type) == 'Receivable':
@@ -403,7 +403,7 @@ def check_if_advance_entry_modified(args):
 					pe.name = pref.parent and pe.docstatus = 1
 					and pe.name = %(voucher_no)s and pref.name = %(voucher_detail_no)s
 					and pe.party_type = %(party_type)s and pe.party = %(party)s and pe.{0} = %(account)s
-					and pref.reference_doctype in ('Sales Order', 'Purchase Order')
+					and pref.reference_doctype in ('Sales Order', 'Purchase Order', 'Employee Advance')
 					and pref.allocated_amount = %(unadjusted_amount)s
 			""".format(party_account_field), args)
 		else:
@@ -569,7 +569,7 @@ def unlink_ref_doc_from_payment_entries(ref_doc, validate_permission=False):
 		and voucher_no != ifnull(against_voucher, '')""",
 		(now(), frappe.session.user, ref_doc.doctype, ref_doc.name))
 
-	if ref_doc.doctype in ("Sales Invoice", "Purchase Invoice", "Landed Cost Voucher"):
+	if ref_doc.doctype in ("Sales Invoice", "Purchase Invoice", "Landed Cost Voucher", "Expense Claim"):
 		ref_doc.set("advances", [])
 
 		frappe.db.sql("""delete from `tab{0} Advance` where parent = %s"""
