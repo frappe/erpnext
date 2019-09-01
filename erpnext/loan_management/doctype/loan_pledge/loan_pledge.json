@@ -1,0 +1,63 @@
+{
+ "creation": "2019-08-30 22:24:37.705159",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "loan_security",
+  "qty",
+  "loan_security_price",
+  "amount",
+  "haircut"
+ ],
+ "fields": [
+  {
+   "fieldname": "loan_security",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Loan Security",
+   "options": "Loan Security"
+  },
+  {
+   "fetch_from": "loan_security.loan_security_price",
+   "fieldname": "loan_security_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Loan Security Price",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "loan_security.amount",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "loan_security.haircut",
+   "fieldname": "haircut",
+   "fieldtype": "Percent",
+   "label": "Haircut"
+  },
+  {
+   "fetch_from": "loan_security.qty",
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Quantity",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-08-30 23:17:58.373388",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Loan Pledge",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
