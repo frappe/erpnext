@@ -19,6 +19,7 @@
   "repay_from_salary",
   "section_break_8",
   "loan_amount",
+  "is_secured_loan",
   "rate_of_interest",
   "disbursement_date",
   "repayment_start_date",
@@ -26,6 +27,8 @@
   "repayment_method",
   "repayment_periods",
   "monthly_repayment_amount",
+  "loan_security_details_section",
+  "loan_security_pledges",
   "account_info",
   "mode_of_payment",
   "payment_account",
@@ -46,7 +49,7 @@
    "fieldname": "applicant_type",
    "fieldtype": "Select",
    "label": "Applicant Type",
-   "options": "Employee\nMember",
+   "options": "Employee\nMember\nCustomer",
    "reqd": 1
   },
   {
@@ -261,10 +264,27 @@
    "options": "Loan",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_secured_loan",
+   "fieldtype": "Check",
+   "label": "Is Secured Loan"
+  },
+  {
+   "fieldname": "loan_security_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Security Details"
+  },
+  {
+   "fieldname": "loan_security_pledges",
+   "fieldtype": "Table",
+   "label": "Loan Security Pledges",
+   "options": "Loan Pledge"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-29 17:30:36.101193",
+ "modified": "2019-08-30 22:25:10.998982",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

@@ -41,13 +41,17 @@ frappe.ui.form.on('Loan', {
 	refresh: function (frm) {
 		if (frm.doc.docstatus == 1) {
 			if (frm.doc.status == "Sanctioned") {
-				frm.add_custom_button(__('Create Disbursement Entry'), function() {
+				frm.add_custom_button(__('Disbursement Entry'), function() {
 					frm.trigger("make_jv");
-				}).addClass("btn-primary");
+				},__('Make'));
 			} else if (frm.doc.status == "Disbursed" && frm.doc.repayment_start_date && (frm.doc.applicant_type == 'Member' || frm.doc.repay_from_salary == 0)) {
-				frm.add_custom_button(__('Create Repayment Entry'), function() {
+				frm.add_custom_button(__('Repayment Entry'), function() {
 					frm.trigger("make_repayment_entry");
-				}).addClass("btn-primary");
+				},__('Make'));
+
+				frm.add_custom_button(__('Loan Closure Entry'), function() {
+					frm.trigger("make_closure_entry");
+				},__('Make'));
 			}
 		}
 		frm.trigger("toggle_fields");
@@ -64,7 +68,7 @@ frappe.ui.form.on('Loan', {
 				"loan_amount": frm.doc.loan_amount,
 				"payment_account": frm.doc.payment_account
 			},
-			method: "erpnext.hr.doctype.loan.loan.make_jv_entry",
+			method: "erpnext.loan_management.doctype.loan.loan.make_jv_entry",
 			callback: function (r) {
 				if (r.message)
 					var doc = frappe.model.sync(r.message)[0];
@@ -159,6 +163,26 @@ frappe.ui.form.on('Loan', {
 		});
 	},
 
+	make_closure_entry: function(frm) {
+		frappe.call({
+			args: {
+				"loan": frm.doc.name,
+				"company": frm.doc.company,
+				"loan_account": frm.doc.loan_account,
+				"applicant_type": frm.doc.applicant_type,
+				"applicant": frm.doc.applicant,
+				"loan_amount": frm.doc.loan_amount,
+				"payment_account": frm.doc.payment_account
+			},
+			method: "erpnext.loan_management.doctype.loan.loan.make_closure_entry",
+			callback: function (r) {
+				if (r.message)
+					var doc = frappe.model.sync(r.message)[0];
+				frappe.set_route("Form", doc.doctype, doc.name);
+			}
+		})
+	},
+
 	mode_of_payment: function (frm) {
 		if (frm.doc.mode_of_payment && frm.doc.company) {
 			frappe.call({
@@ -179,7 +203,7 @@ frappe.ui.form.on('Loan', {
 	loan_application: function (frm) {
 	    if(frm.doc.loan_application){
             return frappe.call({
-                method: "erpnext.hr.doctype.loan.loan.get_loan_application",
+                method: "erpnext.loan_management.doctype.loan.loan.get_loan_application",
                 args: {
                     "loan_application": frm.doc.loan_application
                 },
@@ -190,7 +214,21 @@ frappe.ui.form.on('Loan', {
                         frm.set_value("repayment_method", r.message.repayment_method);
                         frm.set_value("monthly_repayment_amount", r.message.repayment_amount);
                         frm.set_value("repayment_periods", r.message.repayment_periods);
-                        frm.set_value("rate_of_interest", r.message.rate_of_interest);
+						frm.set_value("rate_of_interest", r.message.rate_of_interest);
+						frm.set_value("is_secured_loan", r.message.is_secured_loan);
+
+						if (frm.doc.is_secured_loan) {
+							$.each(r.message.loan_security_pledges, function(i, d) {
+								let row = frm.add_child("loan_security_pledges");
+								row.loan_security = d.loan_security;
+								row.qty = d.qty;
+								row.loan_security_price = d.loan_security_price;
+								row.amount = d.amount;
+								row.haircut = d.haircut;
+							});
+
+							frm.refresh_fields("loan_security_pledges");
+						}
                     }
                 }
             });
@@ -209,7 +247,7 @@ frappe.ui.form.on('Loan', {
 
 var _make_repayment_entry = function(frm, payment_rows) {
 	frappe.call({
-		method:"erpnext.hr.doctype.loan.loan.make_repayment_entry",
+		method:"erpnext.loan_management.doctype.loan.loan.make_repayment_entry",
 		args: {
 			payment_rows: payment_rows,
 			"loan": frm.doc.name,

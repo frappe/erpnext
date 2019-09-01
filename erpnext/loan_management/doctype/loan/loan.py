@@ -17,6 +17,12 @@ class Loan(AccountsController):
 		self.set_repayment_period()
 		self.calculate_totals()
 
+	def on_submit():
+		self.pledge_loan_securities()
+
+	def on_cancel():
+		self.unpledge_loan_securities()
+
 	def set_missing_fields(self):
 		if not self.company:
 			self.company = erpnext.get_default_company()
@@ -30,8 +36,8 @@ class Loan(AccountsController):
 		if self.repayment_method == "Repay Over Number of Periods":
 			self.monthly_repayment_amount = get_monthly_repayment_amount(self.repayment_method, self.loan_amount, self.rate_of_interest, self.repayment_periods)
 
-		if self.status == "Repaid/Closed":
-			self.total_amount_paid = self.total_payment
+		# if self.status == "Repaid/Closed":
+		# 	self.total_amount_paid = self.total_payment
 
 
 	def make_jv_entry(self):
@@ -100,6 +106,21 @@ class Loan(AccountsController):
 			self.total_interest_payable +=data.interest_amount
 			if data.paid:
 				self.total_amount_paid += data.total_payment
+
+	def pledge_loan_securities():
+		frappe.db.sql("""UPDATE `tabLoan Security`
+			set is_pledged = 1, loan = %s where
+			name in (%s) """  % ('%s', ", ".join(['%s']*len(self.pledge_list))), tuple([self.name] + self.pledge_list))
+
+	def unpledge_loan_securities(self):
+		pledge_list = self.get_pledges()
+
+		frappe.db.sql("""UPDATE `tabLoan Security`
+			set is_pledged = 0, loan = '' where
+			name in (%s) """  % ", ".join(['%s']*len(pledge_list)), tuple(pledge_list))
+
+	def get_pledges(self):
+		return [ d.loan_security for d in self.loan_security_pledges]
 
 def update_total_amount_paid(doc):
 	total_amount_paid = 0
@@ -237,4 +258,82 @@ def make_jv_entry(loan, company, loan_account, applicant_type, applicant, loan_a
 		"reference_name": loan,
 		})
 	journal_entry.set("accounts", account_amt_list)
+	return journal_entry.as_dict()
+
+def calculate_closure_amount(loan):
+
+	loan_doc = frappe.get_doc("Loan", loan)
+	penalty_amount = frappe.db.get_value("Loan Type", loan_doc.loan_type, "penalty_amount")
+
+	closure_amounts = {
+		'penalty_amount': 0.0,
+		'interest_amount': 0.0,
+		'principal_amount': 0.0,
+		'total_payment': 0.0
+	}
+
+	current_date = nowdate()
+	for payment in loan_doc.repayment_schedule:
+
+		payment_date = getdate(payment.payment)
+		if not self.paid:
+			if payment_date < current_date:
+				closure_amounts['principal_amount'] += payment.principal_amount
+				closure_amounts['total_payment'] += payment.principal_amount
+
+
+			if payment_date.month <= current_date.month:
+				closure_amounts['interest_amount'] += payment.interest_amount
+				closure_amounts['total_payment'] += payment.interest_amount
+
+	return closure_amounts
+
+def close_loan(loan, total_amount_paid):
+	frappe.db.sql("""UPDATE `tabRepayment Schedule` set paid = 1
+		where parent = %s and docstatus = 2""", (loan))
+
+	frappe.db.set_value("Loan", loan, "total_amount_paid", total_amount_paid)
+	frappe.db.set_value("Loan", loan, "status", "Repaid/Closed")
+
+@frappe.whitelist()
+def make_closure_entry(loan, company, loan_account, applicant_type, applicant, payment_account=None, interest_income_account=None):
+
+	closure_amounts = calculate_closure_amount(loan)
+
+	journal_entry = frappe.new_doc('Journal Entry')
+	journal_entry.voucher_type = 'Bank Entry'
+	journal_entry.user_remark = _('Against Loan: {0}').format(loan)
+	journal_entry.company = company
+	journal_entry.posting_date = nowdate()
+	account_amt_list = []
+
+	account_amt_list.append({
+		"account": payment_account,
+		"debit_in_account_currency": closure_amounts['total_payment'],
+		"reference_type": "Loan",
+		"reference_name": loan,
+		})
+
+	account_amt_list.append({
+		"account": loan_account,
+		"credit_in_account_currency": closure_amounts['principal_amount'],
+		"party_type": applicant_type,
+		"party": applicant,
+		"reference_type": "Loan",
+		"reference_name": loan,
+		})
+
+	account_amt_list.append({
+		"account": interest_income_account,
+		"credit_in_account_currency": closure_amounts['interest_amount'],
+		"reference_type": "Loan",
+		"reference_name": loan,
+		})
+	journal_entry.set("accounts", account_amt_list)
+
+	total_amount_paid = frappe.db.get_value("Loan Type", loan_doc.loan_type, "total_amount_paid") \
+		+ closure_amounts['total_payment']
+
+	close_loan(loan, total_amount_paid)
+
 	return journal_entry.as_dict()

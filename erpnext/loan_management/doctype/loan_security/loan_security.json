@@ -9,6 +9,7 @@
   "applicant",
   "column_break_3",
   "loan_application",
+  "loan",
   "is_pledged",
   "loan_security_details_section",
   "loan_security_type",
@@ -122,10 +123,16 @@
    "fieldtype": "Percent",
    "label": "Haircut",
    "read_only": 1
+  },
+  {
+   "fieldname": "loan",
+   "fieldtype": "Link",
+   "label": "Loan ",
+   "options": "Loan"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-29 23:07:49.837826",
+ "modified": "2019-08-30 22:19:50.645411",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security",
