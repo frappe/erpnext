@@ -26,7 +26,8 @@ def boot_session(bootinfo):
 			'default_valid_till'))
 
 		# if no company, show a dialog box to create a new company
-		bootinfo.customer_count = frappe.db.sql("""SELECT count(*) FROM `tabCustomer`""")[0][0]
+		cust_count = frappe.db.sql("""SELECT count(*) FROM `tabCustomer`""")
+		bootinfo.customer_count = cust_count[0][0] if cust_count else 0
 
 		if not bootinfo.customer_count:
 			bootinfo.setup_complete = frappe.db.sql("""SELECT `name`
