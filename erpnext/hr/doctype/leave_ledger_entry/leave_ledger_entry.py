@@ -115,6 +115,8 @@ def process_expired_allocation():
 				'is_carry_forward': 0,
 				'leave_type': ('in', leave_type)
 			})
+	else:
+		expire_allocation = None
 
 	if expire_allocation:
 		create_expiry_ledger_entry(expire_allocation)
