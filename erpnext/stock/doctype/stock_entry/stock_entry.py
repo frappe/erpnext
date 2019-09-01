@@ -54,6 +54,7 @@ class StockEntry(StockController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_warehouse()
+		self.validate_for_maintenance()
 		self.validate_work_order()
 		self.validate_bom()
 		self.validate_finished_goods()
@@ -292,6 +293,15 @@ class StockEntry(StockController):
 			if cstr(d.s_warehouse) == cstr(d.t_warehouse) and not self.purpose == "Material Transfer for Manufacture":
 				frappe.throw(_("Source and target warehouse cannot be same for row {0}").format(d.idx))
 
+	def validate_for_maintenance(self):
+		if self.purpose not in ('Material Receipt', 'Material Issue'):
+			self.for_maintenance = 0
+
+		if not self.for_maintenance:
+			self.customer = self.customer_name = self.customer_address = None
+		if not self.customer_address and not self.supplier_address:
+			self.address_display = None
+
 	def validate_work_order(self):
 		if self.purpose in ("Manufacture", "Material Transfer for Manufacture", "Material Consumption for Manufacture"):
 			# check if work order is entered
@@ -434,6 +444,11 @@ class StockEntry(StockController):
 				if getattr(self, "pro_doc", frappe._dict()).scrap_warehouse == d.t_warehouse:
 
 					scrap_material_cost += flt(d.basic_amount)
+
+			if self.for_maintenance:
+				d.basic_rate = 0
+				d.basic_amount = 0
+				d.allow_zero_valuation_rate = 1
 
 		number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
 		if self.purpose == "Repack" or (fg_basic_rate == 0.0 and number_of_fg_items == 1) or update_finished_item_rate:
@@ -1321,7 +1336,7 @@ def get_warehouse_details(args):
 		})
 		ret = {
 			"actual_qty" : get_previous_sle(args).get("qty_after_transaction") or 0,
-			"basic_rate" : get_incoming_rate(args)
+			"basic_rate" : get_incoming_rate(args) if not args.get('for_maintenance') else 0
 		}
 	return ret
 

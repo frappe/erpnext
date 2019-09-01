@@ -198,6 +198,10 @@ frappe.ui.form.on('Stock Entry', {
 		frm.cscript.toggle_related_fields(frm.doc);
 	},
 
+	for_maintenance: function(frm) {
+		frm.cscript.toggle_related_fields(frm.doc);
+	},
+
 	validate_purpose_consumption: function(frm) {
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings.is_material_consumption_enabled",
@@ -276,30 +280,35 @@ frappe.ui.form.on('Stock Entry', {
 		}
 		item.alt_uom_qty = flt(flt(item.transfer_qty) * flt(item.alt_uom_size), precision("alt_uom_qty", item));
 
-		const args = {
-			'item_code'			: item.item_code,
-			'posting_date'		: frm.doc.posting_date,
-			'posting_time'		: frm.doc.posting_time,
-			'warehouse'			: cstr(item.s_warehouse) || cstr(item.t_warehouse),
-			'serial_no'			: item.serial_no,
-			'company'			: frm.doc.company,
-			'qty'				: item.s_warehouse ? -1*flt(item.transfer_qty) : flt(item.transfer_qty),
-			'voucher_type'		: frm.doc.doctype,
-			'voucher_no'		: item.name,
-			'allow_zero_valuation': 1,
-		};
+		if (cint(frm.doc.for_maintenance)) {
+			frappe.model.set_value(cdt, cdn, 'basic_rate', 0.0);
+			frm.events.calculate_basic_amount(frm, item);
+		} else {
+			const args = {
+				'item_code': item.item_code,
+				'posting_date': frm.doc.posting_date,
+				'posting_time': frm.doc.posting_time,
+				'warehouse': cstr(item.s_warehouse) || cstr(item.t_warehouse),
+				'serial_no': item.serial_no,
+				'company': frm.doc.company,
+				'qty': item.s_warehouse ? -1 * flt(item.transfer_qty) : flt(item.transfer_qty),
+				'voucher_type': frm.doc.doctype,
+				'voucher_no': item.name,
+				'allow_zero_valuation': 1,
+			};
 
-		if (item.item_code || item.serial_no) {
-			frappe.call({
-				method: "erpnext.stock.utils.get_incoming_rate",
-				args: {
-					args: args
-				},
-				callback: function(r) {
-					frappe.model.set_value(cdt, cdn, 'basic_rate', (r.message || 0.0));
-					frm.events.calculate_basic_amount(frm, item);
-				}
-			});
+			if (item.item_code || item.serial_no) {
+				frappe.call({
+					method: "erpnext.stock.utils.get_incoming_rate",
+					args: {
+						args: args
+					},
+					callback: function (r) {
+						frappe.model.set_value(cdt, cdn, 'basic_rate', (r.message || 0.0));
+						frm.events.calculate_basic_amount(frm, item);
+					}
+				});
+			}
 		}
 	},
 
@@ -320,6 +329,7 @@ frappe.ui.form.on('Stock Entry', {
 						'company': frm.doc.company,
 						'voucher_type': frm.doc.doctype,
 						'voucher_no': child.name,
+						'for_maintenance': cint(frm.doc.for_maintenance),
 						'allow_zero_valuation': 1
 					}
 				},
@@ -382,8 +392,16 @@ frappe.ui.form.on('Stock Entry', {
 
 	target_warehouse_address: function(frm) {
 		erpnext.utils.get_address_display(frm, 'target_warehouse_address', 'target_address_display', false);
+	},
+
+	customer_address: function(frm) {
+		erpnext.utils.get_address_display(frm, 'customer_address', 'address_display', false);
+	},
+
+	supplier_address: function(frm) {
+		erpnext.utils.get_address_display(frm, 'supplier_address', 'address_display', false);
 	}
-})
+});
 
 frappe.ui.form.on('Stock Entry Detail', {
 	qty: function(frm, cdt, cdn) {
@@ -408,6 +426,11 @@ frappe.ui.form.on('Stock Entry Detail', {
 
 	basic_rate: function(frm, cdt, cdn) {
 		var item = locals[cdt][cdn];
+
+		if (cint(frm.doc.for_maintenance)) {
+			item.basic_rate = 0;
+		}
+
 		frm.events.calculate_basic_amount(frm, item);
 	},
 
@@ -460,6 +483,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 				'qty'			: d.qty,
 				'voucher_type'		: frm.doc.doctype,
 				'voucher_no'		: d.name,
+				'for_maintenance'	: cint(frm.doc.for_maintenance),
 				'allow_zero_valuation': 1,
 			};
 			return frappe.call({
@@ -572,8 +596,14 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 		this.frm.add_fetch("purchase_order", "supplier", "supplier");
 
-		frappe.dynamic_link = { doc: this.frm.doc, fieldname: 'supplier', doctype: 'Supplier' }
-		this.frm.set_query("supplier_address", erpnext.queries.address_query)
+		this.frm.set_query("supplier_address", function() {
+			frappe.dynamic_link = { doc: me.frm.doc, fieldname: 'supplier', doctype: 'Supplier' };
+			return erpnext.queries.address_query
+		});
+		this.frm.set_query("customer_address", function() {
+			frappe.dynamic_link = { doc: me.frm.doc, fieldname: 'customer', doctype: 'Customer' };
+			return erpnext.queries.address_query
+		});
 	},
 
 	onload_post_render: function() {
@@ -768,6 +798,14 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	toggle_related_fields: function(doc) {
 		this.frm.toggle_enable("from_warehouse", doc.purpose!='Material Receipt');
 		this.frm.toggle_enable("to_warehouse", doc.purpose!='Material Issue');
+		if (doc.purpose == 'Material Receipt') {
+			doc.from_warehouse = null;
+			refresh_field('from_warehouse');
+		}
+		if (doc.purpose == 'Material Issue') {
+			doc.to_warehouse = null;
+			refresh_field('to_warehouse');
+		}
 
 		this.frm.fields_dict["items"].grid.set_column_disp("s_warehouse", doc.purpose!='Material Receipt');
 		this.frm.fields_dict["items"].grid.set_column_disp("t_warehouse", doc.purpose!='Material Issue');
@@ -776,15 +814,21 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 		this.frm.cscript.toggle_enable_bom();
 
-		if (doc.purpose == 'Subcontract') {
-			doc.customer = doc.customer_name = doc.customer_address =
-				doc.delivery_note_no = doc.sales_invoice_no = null;
-		} else {
-			doc.customer = doc.customer_name = doc.customer_address =
-				doc.delivery_note_no = doc.sales_invoice_no = doc.supplier =
-				doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no =
-				doc.address_display = null;
+		if (doc.purpose != 'Subcontract') {
+			doc.supplier = doc.supplier_name = doc.supplier_address = doc.purchase_order = null;
 		}
+
+		var for_maintenance = in_list(['Material Receipt', 'Material Issue'], doc.purpose) && cint(doc.for_maintenance);
+		this.frm.toggle_reqd("customer", for_maintenance);
+		if (!for_maintenance) {
+			doc.customer = doc.customer_name = doc.customer_address = null;
+			doc.for_maintenance = 0;
+		}
+
+		if (!doc.customer_address && !doc.supplier_address) {
+			doc.address_display = null;
+		}
+
 		if(doc.purpose == "Material Receipt") {
 			this.frm.set_value("from_bom", 0);
 		}
@@ -797,6 +841,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	supplier: function(doc) {
+		erpnext.utils.get_party_details(this.frm, null, null, null);
+	},
+
+	customer: function(doc) {
 		erpnext.utils.get_party_details(this.frm, null, null, null);
 	}
 });
