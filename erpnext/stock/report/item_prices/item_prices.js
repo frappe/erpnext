@@ -88,6 +88,20 @@ frappe.query_reports["Item Prices"] = {
 			fieldtype: "Link",
 			options:"Price List"
 		},
+		{
+			fieldname: "uom",
+			label: __("UOM"),
+			fieldtype: "Link",
+			options:"UOM"
+		},
+		{
+			fieldname: "default_uom",
+			label: __("Default UOM"),
+			fieldtype: "Select",
+			options: "Default UOM\nStock UOM\nContents UOM",
+			default: "Default UOM"
+		},
+
 	],
 	formatter: function(value, row, column, data, default_formatter) {
 		var original_value = value;
@@ -139,6 +153,7 @@ frappe.query_reports["Item Prices"] = {
 				item_code: data['item_code'],
 				price_list: column.price_list,
 				price_list_rate: new_value,
+				uom: data['uom'],
 				filters: frappe.query_report.get_filter_values()
 			};
 		}

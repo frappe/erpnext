@@ -11,7 +11,7 @@ from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
 from erpnext.stock.doctype.batch.batch import get_batch_no
 from erpnext import get_company_currency
-from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor
+from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor, convert_item_uom_for
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.selling.doctype.order_type.order_type import get_order_type_defaults
@@ -633,7 +633,7 @@ def insert_item_price(args):
 def get_item_price(args, item_code, ignore_party=False):
 	"""
 		Get name, price_list_rate from Item Price based on conditions
-			Check if the desired qty is within the increment of the packing list.
+			Check if the Derised qty is within the increment of the packing list.
 		:param args: dict (or frappe._dict) with mandatory fields price_list, uom
 			optional fields min_qty, transaction_date, customer, supplier
 		:param item_code: str, Item Doctype field item_code
@@ -643,6 +643,7 @@ def get_item_price(args, item_code, ignore_party=False):
 
 	conditions = """where item_code=%(item_code)s
 		and price_list=%(price_list)s"""
+	order_by = "order by uom desc, min_qty desc"
 
 	if not ignore_party:
 		if args.get("customer"):
@@ -656,12 +657,20 @@ def get_item_price(args, item_code, ignore_party=False):
 		conditions += " and ifnull(min_qty, 0) <= %(min_qty)s"
 
 	if args.get('transaction_date'):
-		conditions += """ and %(transaction_date)s between
-			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
+		if args.get('period') == 'future':
+			args['uom'] = args.get('uom', '')
+			conditions += """ and ifnull(valid_from, '2000-01-01') > %(transaction_date)s and ifnull(uom, '') = %(uom)s"""
+			order_by = "order by valid_from asc, min_qty desc "
+		else:
+			conditions += """ and %(transaction_date)s between
+				ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
 
-	out = frappe.db.sql(""" select name, price_list_rate, uom, ifnull(valid_from, '2000-01-01') as valid_from
-		from `tabItem Price` {conditions}
-		order by uom desc, min_qty desc """.format(conditions=conditions), args, as_list=1)
+	out = frappe.db.sql("""
+		select name, price_list_rate, uom,
+			ifnull(valid_from, '2000-01-01') as valid_from, ifnull(valid_upto, '2500-12-31') as valid_upto
+		from `tabItem Price`
+		{conditions} {order_by}
+	""".format(conditions=conditions, order_by=order_by), args, as_list=1)
 
 	matches_uom = filter(lambda d: cstr(d[2]) == cstr(args.get('uom')), out)
 	if matches_uom:
@@ -672,14 +681,13 @@ def get_item_price(args, item_code, ignore_party=False):
 		# there are item prices with uom other than the current uom
 
 		item = frappe.get_cached_doc("Item", item_code)
-		uom_conversion_factor = dict([(d.uom, d.conversion_factor) for d in item.uoms])
+		item_uoms = [d.uom for d in item.uoms]
 
-		has_uom_with_conversion_factor = [d for d in has_uom if d[2] in uom_conversion_factor]
-		for d in has_uom_with_conversion_factor:
-			d[1] /= uom_conversion_factor.get(d[2])
-
+		has_uom_with_conversion_factor = [d for d in has_uom if d[2] in item_uoms]
 		if has_uom_with_conversion_factor:
 			return has_uom_with_conversion_factor
+		else:
+			return [d for d in out if not d[2]]
 
 	return out
 
@@ -729,7 +737,8 @@ def get_price_list_rate_for(args, item_code):
 		if item_price_data[0][2] == args.get("uom"):
 			return item_price_data[0][1]
 		elif args.get('price_list_uom_dependant'):
-			return flt(item_price_data[0][1] * flt(args.get("conversion_factor", 1)))
+			return convert_item_uom_for(value=item_price_data[0][1], item_code=item_code,
+				from_uom=item_price_data[0][2], to_uom=args.get("uom"), conversion_factor=args.get("conversion_factor"))
 		else:
 			return item_price_data[0][1]
 

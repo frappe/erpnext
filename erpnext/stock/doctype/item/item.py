@@ -1088,6 +1088,30 @@ def get_uom_conv_factor(uom, stock_uom):
 	return value
 
 @frappe.whitelist()
+def convert_item_uom_for(value, item_code, from_uom=None, to_uom=None, conversion_factor=None, null_if_not_convertible=False):
+	value = flt(value)
+	conversion_factor = flt(conversion_factor)
+
+	if cstr(from_uom) != cstr(to_uom):
+		item = frappe.get_cached_doc("Item", item_code)
+		uom_conversion_factors = dict([(c.uom, c.conversion_factor) for c in item.uoms])
+		from_uom = from_uom or item.stock_uom
+
+		if from_uom in uom_conversion_factors:
+			value /= uom_conversion_factors.get(from_uom)
+		elif null_if_not_convertible:
+			return None
+
+		if conversion_factor:
+			value *= conversion_factor
+		elif to_uom and to_uom in uom_conversion_factors:
+			value *= uom_conversion_factors.get(to_uom)
+		elif null_if_not_convertible:
+			return None
+
+	return value
+
+@frappe.whitelist()
 def get_item_attribute(parent, attribute_value=''):
 	if not frappe.has_permission("Item"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
