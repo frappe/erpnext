@@ -5,7 +5,7 @@
  "engine": "InnoDB",
  "field_order": [
   "loan_security",
-  "quantity",
+  "qty",
   "loan_security_price",
   "amount",
   "haircut"
@@ -17,14 +17,6 @@
    "in_list_view": 1,
    "label": "Loan Security",
    "options": "Loan Security"
-  },
-  {
-   "fetch_from": "loan_security.qty",
-   "fieldname": "quantity",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Quantity",
-   "read_only": 1
   },
   {
    "fetch_from": "loan_security.loan_security_price",
@@ -47,13 +39,21 @@
    "fieldname": "haircut",
    "fieldtype": "Percent",
    "label": "Haircut"
+  },
+  {
+   "fetch_from": "loan_security.qty",
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Quantity",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2019-08-29 23:43:32.855570",
+ "modified": "2019-08-30 23:18:14.593626",
  "modified_by": "Administrator",
  "module": "Loan Management",
- "name": "Loan Securities Pledge",
+ "name": "Loan Application Pledge",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
