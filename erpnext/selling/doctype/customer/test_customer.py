@@ -252,7 +252,10 @@ class TestCustomer(unittest.TestCase):
 	def test_customer_credit_limit_on_change(self):
 		outstanding_amt = self.get_customer_outstanding_amount()
 		customer = frappe.get_doc("Customer", '_Test Customer')
-		customer.credit_limit_reference[0].credit_limit = flt(outstanding_amt - 100)
+		customer.append('credit_limit_reference', {'credit_limit': flt(outstanding_amt - 100), 'company': '_Test Company'})
+
+		''' define new credit limit for same company '''
+		customer.append('credit_limit_reference', {'credit_limit': flt(outstanding_amt - 100), 'company': '_Test Company'})
 		self.assertRaises(frappe.ValidationError, customer.save)
 
 	def test_customer_payment_terms(self):
