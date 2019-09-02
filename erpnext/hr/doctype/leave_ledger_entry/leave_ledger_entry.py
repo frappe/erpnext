@@ -95,26 +95,25 @@ def process_expired_allocation():
 			'expire_carry_forwarded_leaves_after_days': (">", 0)
 		}, fieldname=['name'])
 
-	if leave_type_records:
-		leave_type = [record[0] for record in leave_type_records]
+	leave_type = [record[0] for record in leave_type_records]
 
-		expired_allocation = frappe.db.sql_list("""SELECT name
-			FROM `tabLeave Ledger Entry`
-			WHERE
-				`transaction_type`='Leave Allocation'
-				AND `is_expired`=1""")
+	expired_allocation = frappe.db.sql_list("""SELECT name
+		FROM `tabLeave Ledger Entry`
+		WHERE
+			`transaction_type`='Leave Allocation'
+			AND `is_expired`=1""")
 
-		expire_allocation = frappe.get_all("Leave Ledger Entry",
-			fields=['leaves', 'to_date', 'employee', 'leave_type', 'is_carry_forward', 'transaction_name as name', 'transaction_type'],
-			filters={
-				'to_date': ("<", today()),
-				'transaction_type': 'Leave Allocation',
-				'transaction_name': ('not in', expired_allocation)
-			},
-			or_filters={
-				'is_carry_forward': 0,
-				'leave_type': ('in', leave_type)
-			})
+	expire_allocation = frappe.get_all("Leave Ledger Entry",
+		fields=['leaves', 'to_date', 'employee', 'leave_type', 'is_carry_forward', 'transaction_name as name', 'transaction_type'],
+		filters={
+			'to_date': ("<", today()),
+			'transaction_type': 'Leave Allocation',
+			'transaction_name': ('not in', expired_allocation)
+		},
+		or_filters={
+			'is_carry_forward': 0,
+			'leave_type': ('in', leave_type)
+		})
 
 	if expire_allocation:
 		create_expiry_ledger_entry(expire_allocation)
