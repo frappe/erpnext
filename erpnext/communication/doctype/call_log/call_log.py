@@ -75,7 +75,7 @@ def set_caller_information(doc, state):
 
 	# Contact now has all the nos saved in child table
 	if doc.doctype == 'Contact':
-		numbers = [nos.phone for nos in doc.phone_nos]
+		numbers = [d.phone for d in doc.phone_nos]
 
 	for number in numbers:
 		number = strip_number(number)
