@@ -153,7 +153,6 @@
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
    "print_width": "300px", 
-   "read_only": 1, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
