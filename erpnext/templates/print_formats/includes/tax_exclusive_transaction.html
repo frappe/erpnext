@@ -13,9 +13,9 @@
 		{% if show_alt_uom_cols %}
 			<td class="no-border"></td>
 			<td class="no-border"></td>
-		{% endif %}
-		{% if not alt_uoms|length == 1 %}
-			<td class="no-border"></td>
+			{% if not alt_uoms|length == 1 %}
+				<td class="no-border"></td>
+			{% endif %}
 		{% endif %}
 	{% endif %}
 {%- endmacro %}
