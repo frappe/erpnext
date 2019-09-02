@@ -26,6 +26,10 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 	def validate(self):
 		super(ItemGroup, self).validate()
+
+		if not self.parent_item_group:
+			self.parent_item_group = 'All Item Groups'
+
 		self.make_route()
 
 	def on_update(self):
