@@ -17,7 +17,7 @@
 		{% if (contact_list[i].phones || contact_list[i].email_ids) { %}
 		<p>
 			{% if(contact_list[i].phone) { %}
-				{%= __("Phone ") %}: {%= contact_list[i].phone %}<span class="text-muted"> ({%= __("Primary") %})</span><br>
+				{%= __("Phone") %}: {%= contact_list[i].phone %}<span class="text-muted"> ({%= __("Primary") %})</span><br>
 			{% endif %}
 			{% if(contact_list[i].phone_nos) { %}
 				{% for(var j=0, k=contact_list[i].phone_nos.length; j<k; j++) { %}
@@ -27,7 +27,7 @@
 		</p>
 		<p>
 			{% if(contact_list[i].email_id) { %}
-				{%= __("Email ") %}: {%= contact_list[i].email_id %}<span class="text-muted"> ({%= __("Primary") %})</span><br>
+				{%= __("Email") %}: {%= contact_list[i].email_id %}<span class="text-muted"> ({%= __("Primary") %})</span><br>
 			{% endif %}
 			{% if(contact_list[i].email_ids) { %}
 				{% for(var j=0, k=contact_list[i].email_ids.length; j<k; j++) { %}
