@@ -14,7 +14,12 @@ class TestAccountsReceivable(unittest.TestCase):
 
 		filters = {
 			'company': '_Test Company 2',
-			'based_on_payment_terms': 1
+			'based_on_payment_terms': 1,
+			'report_date': today(),
+			'range1': 30,
+			'range2': 60,
+			'range3': 90,
+			'range4': 120
 		}
 
 		name = make_sales_invoice()

@@ -224,9 +224,9 @@ class update_entries_after(object):
 		elif actual_qty < 0:
 			# In case of delivery/stock issue, get average purchase rate
 			# of serial nos of current entry
-			stock_value_change = -1 * flt(frappe.db.sql("""select sum(purchase_rate)
-				from `tabSerial No` where name in (%s)""" % (", ".join(["%s"]*len(serial_no))),
-				tuple(serial_no))[0][0])
+			stock_value_change = -1 * flt(frappe.get_all("Serial No",
+				fields=["sum(purchase_rate)"],
+				filters = {'name': ('in', serial_no)}, as_list=1)[0][0])
 
 		new_stock_qty = self.qty_after_transaction + actual_qty
 
