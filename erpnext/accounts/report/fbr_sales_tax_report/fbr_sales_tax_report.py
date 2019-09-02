@@ -64,7 +64,7 @@ class FBRInvoiceWiseTaxes(object):
 				"width": 90
 			},
 			{
-				"label": _("Province"),
+				"label": _("Sale Origination Province of Supplier"),
 				"fieldtype": "Data",
 				"fieldname": "state",
 				"width": 90
@@ -85,13 +85,13 @@ class FBRInvoiceWiseTaxes(object):
 				"hide_for_export": 1
 			},
 			{
-				"label": _("Inv #"),
+				"label": _("Document Number"),
 				"fieldtype": "Int",
 				"fieldname": "stin",
 				"width": 60
 			},
 			{
-				"label": _("Date"),
+				"label": _("Document Date"),
 				"fieldtype": "Data",
 				"fieldname": "posting_date",
 				"width": 80
@@ -137,14 +137,21 @@ class FBRInvoiceWiseTaxes(object):
 				"hide_for_view": 1
 			},
 			{
-				"label": _("Taxable Total"),
+				"label": _("Value of Sales Excluding Sales Tax"),
 				"fieldtype": "Currency",
 				"fieldname": "base_taxable_total",
 				"options": "Company:company:default_currency",
 				"width": 110
 			},
 			{
-				"label": _("Sales Tax"),
+				"label": _("Fixed / notified value or Retail Price"),
+				"fieldtype": "Data",
+				"fieldname": "retail_price",
+				"width": 50,
+				"hide_for_view": 1
+			},
+			{
+				"label": _("Sales Tax/ FED in ST Mode"),
 				"fieldtype": "Currency",
 				"fieldname": "sales_tax",
 				"options": "Company:company:default_currency",
@@ -186,7 +193,7 @@ class FBRInvoiceWiseTaxes(object):
 				"width": 110
 			},
 			{
-				"label": _("Grand Total"),
+				"label": _("Total Value of Sales"),
 				"fieldtype": "Currency",
 				"fieldname": "base_grand_total",
 				"options": "Company:company:default_currency",

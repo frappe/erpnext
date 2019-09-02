@@ -31,32 +31,32 @@ class FBRInvoiceWiseTaxes(object):
 	def get_columns(self):
 		columns = [
 			{
-				"label": _("Buyer NTN"),
+				"label": _("NTN"),
 				"fieldtype": "Data",
 				"fieldname": "tax_id",
 				"width": 70
 			},
 			{
-				"label": _("Buyer CNIC"),
+				"label": _("CNIC"),
 				"fieldtype": "Data",
 				"fieldname": "tax_cnic",
 				"width": 110
 			},
 			{
-				"label": _("Buyer Name"),
+				"label": _("Name of Buyer"),
 				"fieldtype": "Link",
 				"fieldname": "party",
 				"options": self.filters.party_type,
 				"width": 200
 			},
 			{
-				"label": _("Buyer Name"),
+				"label": _("Name of Buyer"),
 				"fieldtype": "Data",
 				"fieldname": "party_name",
 				"width": 110
 			},
 			{
-				"label": _("City"),
+				"label": _("District of Buyer"),
 				"fieldtype": "Data",
 				"fieldname": "city",
 				"width": 90
@@ -83,13 +83,13 @@ class FBRInvoiceWiseTaxes(object):
 				"hide_for_export": 1
 			},
 			{
-				"label": _("Inv #"),
+				"label": _("Document Number"),
 				"fieldtype": "Int",
 				"fieldname": "stin",
 				"width": 60
 			},
 			{
-				"label": _("Date"),
+				"label": _("Document Date"),
 				"fieldtype": "Data",
 				"fieldname": "posting_date",
 				"width": 80
@@ -115,14 +115,14 @@ class FBRInvoiceWiseTaxes(object):
 				"width": 50
 			},
 			{
-				"label": _("Taxable Total"),
+				"label": _("Value of Sales Excluding Sales Tax"),
 				"fieldtype": "Currency",
 				"fieldname": "base_taxable_total",
 				"options": "Company:company:default_currency",
 				"width": 110
 			},
 			{
-				"label": _("Service Tax"),
+				"label": _("Sales Tax Involved"),
 				"fieldtype": "Currency",
 				"fieldname": "service_tax",
 				"options": "Company:company:default_currency",
