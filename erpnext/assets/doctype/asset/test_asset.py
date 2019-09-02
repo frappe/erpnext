@@ -453,7 +453,6 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(gle, expected_gle)
 
 		si.cancel()
-
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
 
 	def test_asset_expected_value_after_useful_life(self):
