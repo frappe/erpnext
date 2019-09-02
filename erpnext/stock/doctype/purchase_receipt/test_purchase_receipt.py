@@ -329,6 +329,11 @@ class TestPurchaseReceipt(unittest.TestCase):
 		location = frappe.db.get_value('Serial No', serial_nos[0].name, 'location')
 		self.assertEquals(location, "Test Location")
 
+		frappe.db.set_value("Asset", asset, "purchase_receipt", "")
+		frappe.db.set_value("Purchase Receipt Item", pr.items[0].name, "asset", "")
+
+		pr.load_from_db()
+
 		pr.cancel()
 		serial_nos = frappe.get_all('Serial No', {'asset': asset}, 'name') or []
 		self.assertEquals(len(serial_nos), 0)
