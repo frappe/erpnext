@@ -29,7 +29,7 @@ def move_credit_limit_to_child_table():
 	companies = frappe.get_all("Company", 'name')
 
 	for record in credit_limit_record:
-		customer = frappe.get_doc("Customer", customer.name)
+		customer = frappe.get_doc("Customer", record.name)
 		for company in companies:
 			customer.append("credit_limit_reference", {
 				'credit_limit': record.credit_limit,
