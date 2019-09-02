@@ -7,10 +7,6 @@
  "field_order": [
   "loan_application_details_section",
   "applicant",
-  "column_break_3",
-  "loan_application",
-  "loan",
-  "is_pledged",
   "loan_security_details_section",
   "loan_security_type",
   "loan_security_name",
@@ -66,7 +62,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Loan Security",
+   "options": "Loan Security Pledge",
    "print_hide": 1,
    "read_only": 1
   },
@@ -74,13 +70,6 @@
    "fieldname": "loan_application_details_section",
    "fieldtype": "Section Break",
    "label": "Loan Application Details"
-  },
-  {
-   "fieldname": "loan_application",
-   "fieldtype": "Link",
-   "label": "Loan Application",
-   "options": "Loan Application",
-   "read_only": 1
   },
   {
    "fetch_from": "loan_application.applicant",
@@ -97,19 +86,8 @@
    "label": "Loan Security Details"
   },
   {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_pledged",
-   "fieldtype": "Check",
-   "label": "Is Pledged",
-   "read_only": 1
   },
   {
    "fieldname": "loan_security_name",
@@ -123,19 +101,13 @@
    "fieldtype": "Percent",
    "label": "Haircut",
    "read_only": 1
-  },
-  {
-   "fieldname": "loan",
-   "fieldtype": "Link",
-   "label": "Loan ",
-   "options": "Loan"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-30 22:19:50.645411",
+ "modified": "2019-09-02 14:56:30.357813",
  "modified_by": "Administrator",
  "module": "Loan Management",
- "name": "Loan Security",
+ "name": "Loan Security Pledge",
  "owner": "Administrator",
  "permissions": [
   {

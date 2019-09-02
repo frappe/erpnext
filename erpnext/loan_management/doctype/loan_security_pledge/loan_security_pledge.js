@@ -1,11 +1,11 @@
 // Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Loan Security', {
+frappe.ui.form.on('Loan Security Pledge', {
 	// refresh: function(frm) {
 
 	// }
-	loan_security_price: function(frm) {
+	loan_security_pledge_price: function(frm) {
 		frm.trigger('set_amount');
 	},
 
@@ -14,6 +14,6 @@ frappe.ui.form.on('Loan Security', {
 	},
 
 	set_amount: function(frm) {
-		frm.set_value('amount', frm.doc.loan_security_price * frm.doc.qty);
+		frm.set_value('amount', frm.doc.loan_security_pledge_price * frm.doc.qty);
 	}
 });

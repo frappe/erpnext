@@ -6,5 +6,5 @@ from __future__ import unicode_literals
 # import frappe
 import unittest
 
-class TestLoanSecurity(unittest.TestCase):
+class TestLoanSecurityPledge(unittest.TestCase):
 	pass
