@@ -59,6 +59,7 @@ class FBRInvoiceWiseTaxes(object):
 				"label": _("District of Buyer"),
 				"fieldtype": "Data",
 				"fieldname": "city",
+				"editable": 1,
 				"width": 90
 			},
 			{
@@ -153,7 +154,7 @@ class FBRInvoiceWiseTaxes(object):
 		self.invoices = frappe.db.sql("""
 			select
 				i.name as invoice, i.stin, DATE_FORMAT(i.posting_date, '%%d/%%m/%%Y') as posting_date,
-				i.base_taxable_total, i.base_grand_total, addr.city,
+				i.base_taxable_total, i.base_grand_total, addr.city, addr.name as address_name,
 				i.customer as party, i.customer_name as party_name, c.tax_id, c.tax_cnic
 			from `tabSales Invoice` i
 			left join `tabCustomer` c on c.name = i.customer

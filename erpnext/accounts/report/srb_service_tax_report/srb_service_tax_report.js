@@ -37,5 +37,25 @@ frappe.query_reports["SRB Service Tax Report"] = {
 			label: __("For Export"),
 			fieldtype: "Check",
 		},
-	]
+	],
+	onChange: function(new_value, column, data, rowIndex) {
+		if (column.fieldname == "city" && new_value) {
+			if (!data.address_name) {
+				frappe.throw(__("No address set in Sales Invoice {0}", data.invoice))
+			}
+
+			return frappe.call({
+				method: "frappe.client.set_value",
+				args: {
+					doctype: "Address",
+					name: data.address_name,
+					fieldname: 'city',
+					value: new_value
+				},
+				callback: function (r) {
+					frappe.query_report.refresh();
+				}
+			});
+		}
+	}
 };

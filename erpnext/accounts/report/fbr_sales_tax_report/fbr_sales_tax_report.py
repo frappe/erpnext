@@ -67,6 +67,7 @@ class FBRInvoiceWiseTaxes(object):
 				"label": _("Sale Origination Province of Supplier"),
 				"fieldtype": "Data",
 				"fieldname": "state",
+				"editable": 1,
 				"width": 90
 			},
 			{
@@ -217,7 +218,7 @@ class FBRInvoiceWiseTaxes(object):
 		self.invoices = frappe.db.sql("""
 			select
 				i.name as invoice, i.stin, DATE_FORMAT(i.posting_date, '%%d/%%m/%%Y') as posting_date,
-				i.base_taxable_total, i.base_grand_total, addr.state,
+				i.base_taxable_total, i.base_grand_total, addr.state, addr.name as address_name,
 				i.customer as party, i.customer_name as party_name, c.tax_id, c.tax_cnic, c.tax_strn,
 				cc.tax_description as description
 			from `tabSales Invoice` i
