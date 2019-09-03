@@ -1,0 +1,70 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ _("Book Appointment") }}{% endblock %}
+
+{% block page_content %}
+<div class="container">
+    <!-- title: Book an appointment -->
+    <div id="select-date">
+        <div class="text-center mb-5">
+            <h3>Book an appointment</h3>
+            <p class="lead">Select the date and your timezone</p>
+        </div>
+        <div class="row justify-content-center mt-3">
+            <div class="col-md-4 align-self-center ">
+                <form name="myform">
+                    <input type="date" onchange="validate_date()" name="appointment-date" id="appointment-date"
+                        class="form-control mt-3">
+                    <select name="appointment-timezone" id="appointment-timezone" class="form-control mt-3">
+                    </select>
+                </form>
+                <button class="form-control mt-3 btn btn-dark" id="next-button" onclick="navigate_to_time_select()">
+                    Next
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!--Select Time Slot-->
+    <div id="select-time">
+        <div class="text-center mb-5">
+            <h3>Pick A Time Slot</h3>
+            <p class="lead">Selected date is <span class="date-span">Date Span</span></p>
+        </div>
+        <div class="mt-3 justify-content-center">
+            <div class="row" id="timeslot-container">
+                
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-4 align-self-center">
+                    <button class="form-control mt-5 btn btn-dark" onclick="initialise_enter_details()">
+                        Next
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Enter Details-->
+    <div id="enter-details">
+        <div class="text-center mb-5">
+            <h3>Add details</h3>
+            <p class="lead">Selected date is <span class="date-span">Date Span</span> at <span class="time-span"> time </span></p>
+        </div>
+        <div class="row justify-content-center mt-3">
+            <div class="col-md-4 align-items-center">
+                <input class="form-control mt-3" type="text" name="customer_name" id="customer_name" placeholder="Your Name"
+                    required>
+                <input class="form-control mt-3" type="tel" name="customer_number" id="customer_number"
+                    placeholder="Contact Number" required>
+                <input class="form-control mt-3" type="text" name="customer_skype" id="customer_skype" placeholder="Skype"
+                    required>
+                <textarea class="form-control mt-3" name="customer_notes" id="customer_notes" cols="30" rows="10"
+                    placeholder="Notes"></textarea>
+                <button class="btn btn-primary form-control mt-3" onclick="submit()">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

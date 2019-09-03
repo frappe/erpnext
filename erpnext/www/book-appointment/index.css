@@ -1,0 +1,25 @@
+.time-slot {
+    margin: 0 0;
+    border: 0.5px solid #cccccc;
+    min-height: 100px;
+}
+
+.time-slot:hover {
+    background: #ddd;
+}
+
+.time-slot.unavailable {
+    background: #bbb;
+
+    color: #777777
+}
+
+input[type="radio"] {
+    visibility: hidden;
+    display: none;
+}
+
+.time-slot.selected {
+    color: white;
+    background: #5e64ff;
+}
