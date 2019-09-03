@@ -111,7 +111,6 @@ class DeliveryNote(SellingController):
 		self.so_required()
 		self.validate_proj_cust()
 		self.check_close_sales_order("against_sales_order")
-		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
@@ -165,25 +164,6 @@ class DeliveryNote(SellingController):
 			if not res:
 				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
 
-	def validate_for_items(self):
-		check_list, chk_dupl_itm = [], []
-		if cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
-			return
-
-		for d in self.get('items'):
-			e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
-			f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
-
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
-				if e in check_list:
-					frappe.msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
-				else:
-					check_list.append(e)
-			else:
-				if f in chk_dupl_itm:
-					frappe.msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
-				else:
-					chk_dupl_itm.append(f)
 
 	def validate_warehouse(self):
 		super(DeliveryNote, self).validate_warehouse()
