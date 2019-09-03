@@ -605,7 +605,6 @@ erpnext.patches.v11_1.rename_depends_on_lwp
 execute:frappe.delete_doc("Report", "Inactive Items")
 erpnext.patches.v11_1.delete_scheduling_tool
 erpnext.patches.v12_0.rename_tolerance_fields
-erpnext.patches.v12_0.make_custom_fields_for_bank_remittance #14-06-2019
 execute:frappe.delete_doc_if_exists("Page", "support-analytics")
 erpnext.patches.v12_0.remove_patient_medical_record_page
 erpnext.patches.v11_1.move_customer_lead_to_dynamic_column
@@ -626,4 +625,10 @@ erpnext.patches.v12_0.add_default_buying_selling_terms_in_company
 erpnext.patches.v12_0.update_ewaybill_field_position
 erpnext.patches.v12_0.create_accounting_dimensions_in_missing_doctypes
 erpnext.patches.v11_1.set_status_for_material_request_type_manufacture
+execute:frappe.reload_doc('desk', 'doctype','dashboard_chart_link')
+execute:frappe.reload_doc('desk', 'doctype','dashboard')
+execute:frappe.reload_doc('desk', 'doctype','dashboard_chart_source')
+execute:frappe.reload_doc('desk', 'doctype','dashboard_chart')
+erpnext.patches.v12_0.add_default_dashboards
+erpnext.patches.v12_0.remove_bank_remittance_custom_fields
 erpnext.patches.v12_0.generate_leave_ledger_entries
