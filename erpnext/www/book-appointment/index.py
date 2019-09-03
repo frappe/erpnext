@@ -1,5 +1,6 @@
 import frappe
 import datetime
+import json
 
 @frappe.whitelist(allow_guest=True)
 def get_appointment_settings():
@@ -68,10 +69,18 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 
 @frappe.whitelist(allow_guest=True) 
 def create_appointment(date,time,contact):
-    
-    appointment = frappe.frappe.get_doc('Appointment')
-    appointment.scheduled_time = date
+    appointment = frappe.new_doc('Appointment')
+    format_string = '%Y-%m-%d %H:%M:%S'
+    appointment.scheduled_time = datetime.datetime.strptime(date+" "+time,format_string)
+    contact = json.loads(contact)
+    appointment.customer_name = contact['name']
+    appointment.customer_phone_no = contact['number']
+    appointment.customer_skype = contact['skype']
+    appointment.customer_details = contact['notes']
+    appointment.insert()
 
+
+# Helper Functions
 def filter_timeslots(date,timeslots):
     filtered_timeslots = []
     for timeslot in timeslots:
@@ -81,8 +90,6 @@ def filter_timeslots(date,timeslots):
 
 def check_availabilty(timeslot,settings):
     return frappe.db.count('Appointment',{'scheduled_time':timeslot})<settings.number_of_agents
-
-        
 
 def _is_holiday(date, holiday_list):
     for holiday in holiday_list.holidays:
