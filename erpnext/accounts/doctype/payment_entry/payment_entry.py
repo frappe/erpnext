@@ -624,8 +624,8 @@ def get_outstanding_reference_documents(args):
 	data = negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 
 	if not data:
-		frappe.msgprint(_("No outstanding invoices found for the {0} <b>{1}</b> which qualify the filters you have specified.")
-			.format(args.get("party_type").lower(), args.get("party")))
+		frappe.msgprint(_("No outstanding invoices found for the {0} {1} which qualify the filters you have specified.")
+			.format(args.get("party_type").lower(), frappe.bold(args.get("party"))))
 
 	return data
 
@@ -683,8 +683,8 @@ def get_orders_to_be_billed(posting_date, party_type, party,
 
 	order_list = []
 	for d in orders:
-		if not (d.outstanding_amount >= filters.get("outstanding_amt_greater_than")
-			and d.outstanding_amount <= filters.get("outstanding_amt_less_than")):
+		if not (flt(d.outstanding_amount) >= flt(filters.get("outstanding_amt_greater_than"))
+			and flt(d.outstanding_amount) <= flt(filters.get("outstanding_amt_less_than"))):
 			continue
 
 		d["voucher_type"] = voucher_type
@@ -947,10 +947,15 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		paid_amount = abs(outstanding_amount)
 		if bank_amount:
 			received_amount = bank_amount
+		else:
+			received_amount = paid_amount * doc.conversion_rate
 	else:
 		received_amount = abs(outstanding_amount)
 		if bank_amount:
 			paid_amount = bank_amount
+		else:
+			# if party account currency and bank currency is different then populate paid amount as well
+			paid_amount = received_amount * doc.conversion_rate
 
 	pe = frappe.new_doc("Payment Entry")
 	pe.payment_type = payment_type
