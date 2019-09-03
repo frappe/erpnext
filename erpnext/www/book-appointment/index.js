@@ -80,7 +80,7 @@ async function navigate_to_time_select() {
     console.log(slots)
     if (slots.length <= 0) {
         let message_div = document.createElement('p');
-        
+
         message_div.innerHTML = "There are no slots available on this date";
         timeslot_container.appendChild(message_div);
     }
@@ -134,7 +134,7 @@ function initialise_enter_details() {
     time_span.innerHTML = time_div.id
 }
 
-function submit() {
+async function submit() {
     var date = document.getElementById('appointment-date').value;
     var time = document.getElementsByClassName('selected')[0].id;
     contact = {};
@@ -143,4 +143,13 @@ function submit() {
     contact.skype = document.getElementById('customer_skype').value;
     contact.notes = document.getElementById('customer_notes').value;
     console.log({ date, time, contact });
+    let abc = (await frappe.call({
+        method: 'erpnext.www.book-appointment.index.create_appointment',
+        args: {
+            'date': date,
+            'time': time,
+            'contact': contact
+        }
+    })).message;
+    console.log(abc)
 } 
