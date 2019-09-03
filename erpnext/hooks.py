@@ -354,6 +354,7 @@ user_privacy_documents = [
 ]
 
 custom_module_name_to_module_map = {
-	"Accounts": "Accounting",
-	"HR": "Human Resources"
+	"Accounts": ["Accounting"],
+	"HR": ["Human Resources"],
+	"Quality Management": ["Quality"]
 }
