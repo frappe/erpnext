@@ -8,9 +8,10 @@
   "loan_name",
   "maximum_loan_amount",
   "rate_of_interest",
+  "penalty_interest_rate",
+  "grace_period_in_days",
   "is_term_loan",
   "column_break_2",
-  "penalty_amount",
   "disabled",
   "description",
   "account_details_section",
@@ -59,11 +60,6 @@
    "label": "Description"
   },
   {
-   "fieldname": "penalty_amount",
-   "fieldtype": "Currency",
-   "label": "Penalty Amount"
-  },
-  {
    "fieldname": "account_details_section",
    "fieldtype": "Section Break",
    "label": "Account Details"
@@ -107,9 +103,20 @@
    "fieldname": "is_term_loan",
    "fieldtype": "Check",
    "label": "Is Term Loan"
+  },
+  {
+   "fieldname": "penalty_interest_rate",
+   "fieldtype": "Percent",
+   "label": "Penalty Interest Rate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "grace_period_in_days",
+   "fieldtype": "Int",
+   "label": "Grace Period in Days"
   }
  ],
- "modified": "2019-09-02 16:14:21.949658",
+ "modified": "2019-09-03 14:39:55.800054",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",

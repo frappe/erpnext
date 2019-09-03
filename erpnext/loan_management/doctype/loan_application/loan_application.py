@@ -19,10 +19,11 @@ class LoanApplication(Document):
 		self.get_repayment_details()
 
 	def on_submit(self):
-		self.pledge_loan_securities()
+		self.link_loan_securities()
 
 	def on_cancel(self):
-		self.unpledge_loan_securities()
+		self.unlink_loan_securities()
+
 	def validate_loan_amount(self):
 		maximum_loan_limit = frappe.db.get_value('Loan Type', self.loan_type, 'maximum_loan_amount')
 		if maximum_loan_limit and self.loan_amount > maximum_loan_limit:
@@ -60,24 +61,23 @@ class LoanApplication(Document):
 		self.total_payable_amount = self.loan_amount + self.total_payable_interest
 
 	def set_loan_amount(self):
-
-		self.pledge_list = []
 		if not self.loan_amount and self.is_secured_loan and self.loan_security_pledges:
+			self.loan_amount = 0
 			for security in self.loan_security_pledges:
 				self.loan_amount += security.amount - (security.amount * security.haircut/100)
-			self.pledge_list.append(security.loan_security)
 
-
-	def pledge_loan_securities(self):
-		frappe.db.sql("""UPDATE `tabLoan Security`
-			set is_pledged = 1, loan_application = %s where
-			name in (%s) """  % ('%s', ", ".join(['%s']*len(self.pledge_list))), tuple([self.name] + self.pledge_list))
-
-	def unpledge_loan_securities(self):
+	def link_loan_securities(self):
 		pledge_list = self.get_pledges()
 
 		frappe.db.sql("""UPDATE `tabLoan Security`
-			set is_pledged = 0 , loan_application = '' where
+			set loan_application = %s where
+			name in (%s) """  % ('%s', ", ".join(['%s']*len(pledge_list))), tuple([self.name] + pledge_list))
+
+	def unlink_loan_securities(self):
+		pledge_list = self.get_pledges()
+
+		frappe.db.sql("""UPDATE `tabLoan Security`
+			set loan_application = '' where
 			name in (%s) """  % ", ".join(['%s']*len(pledge_list)), tuple(pledge_list))
 
 	def get_pledges(self):

@@ -23,11 +23,11 @@ class Loan(AccountsController):
 
 		self.calculate_totals()
 
-	def on_submit():
-		self.pledge_loan_securities()
+	def on_submit(self):
+		self.link_loan_securities()
 
-	def on_cancel():
-		self.unpledge_loan_securities()
+	def on_cancel(self):
+		self.unlink_loan_securities()
 
 	def set_missing_fields(self):
 		if not self.company:
@@ -120,16 +120,18 @@ class Loan(AccountsController):
 			for security in self.loan_security_pledges:
 				self.loan_amount += security.amount - (security.amount * security.haircut/100)
 
-	def pledge_loan_securities():
-		frappe.db.sql("""UPDATE `tabLoan Security`
-			set is_pledged = 1, loan = %s where
-			name in (%s) """  % ('%s', ", ".join(['%s']*len(self.pledge_list))), tuple([self.name] + self.pledge_list))
-
-	def unpledge_loan_securities(self):
+	def link_loan_securities(self):
 		pledge_list = self.get_pledges()
 
-		frappe.db.sql("""UPDATE `tabLoan Security`
-			set is_pledged = 0, loan = '' where
+		frappe.db.sql("""UPDATE `tabLoan Security Pledge`
+			set loan = %s where
+			name in (%s) """  % ('%s', ", ".join(['%s']*len(pledge_list))), tuple([self.name] + pledge_list))
+
+	def unlink_loan_securities(self):
+		pledge_list = self.get_pledges()
+
+		frappe.db.sql("""UPDATE `tabLoan Security Pledge`
+			set loan = '' where
 			name in (%s) """  % ", ".join(['%s']*len(pledge_list)), tuple(pledge_list))
 
 	def get_pledges(self):

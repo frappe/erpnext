@@ -7,6 +7,9 @@
  "field_order": [
   "loan_application_details_section",
   "applicant",
+  "column_break_3",
+  "loan",
+  "loan_application",
   "loan_security_details_section",
   "loan_security",
   "unit_of_measurement",
@@ -94,10 +97,28 @@
    "label": "Loan Security",
    "options": "Loan Security",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "loan",
+   "fieldtype": "Link",
+   "label": "Loan",
+   "options": "Loan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "loan_application",
+   "fieldtype": "Link",
+   "label": "Loan Application",
+   "options": "Loan Application",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-02 15:24:27.903294",
+ "modified": "2019-09-03 15:54:06.897113",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Pledge",
