@@ -11,8 +11,7 @@ frappe.ui.form.on('Loan Application', {
 		frm.set_query('loan_security', 'loan_security_pledges', function(doc, cdt, cdn) {
 			return {
 				filters: {
-					applicant: frm.doc.applicant,
-					is_pledged: 0
+					applicant: frm.doc.applicant
 				}
 			};
 		});
@@ -48,10 +47,4 @@ frappe.ui.form.on('Loan Application', {
 			}).addClass("btn-primary");
 		}
 	},
-
-	is_secured_loan(frm) {
-		frm.set_df_property('loan_amount', 'read_only', 1);
-		frm.set_df_property('loan_amount', 'reqd', 0);
-		frm.set_df_property('loan_security_pledges', 'reqd', 1);
-	}
 });

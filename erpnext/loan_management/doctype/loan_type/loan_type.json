@@ -8,10 +8,18 @@
   "loan_name",
   "maximum_loan_amount",
   "rate_of_interest",
+  "is_term_loan",
   "column_break_2",
   "penalty_amount",
   "disabled",
-  "description"
+  "description",
+  "account_details_section",
+  "mode_of_payment",
+  "payment_account",
+  "loan_account",
+  "column_break_12",
+  "interest_income_account",
+  "penalty_income_account"
  ],
  "fields": [
   {
@@ -54,9 +62,54 @@
    "fieldname": "penalty_amount",
    "fieldtype": "Currency",
    "label": "Penalty Amount"
+  },
+  {
+   "fieldname": "account_details_section",
+   "fieldtype": "Section Break",
+   "label": "Account Details"
+  },
+  {
+   "fieldname": "mode_of_payment",
+   "fieldtype": "Link",
+   "label": "Mode of Payment",
+   "options": "Mode of Payment"
+  },
+  {
+   "fieldname": "payment_account",
+   "fieldtype": "Link",
+   "label": "Payment Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "loan_account",
+   "fieldtype": "Link",
+   "label": "Loan Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "interest_income_account",
+   "fieldtype": "Link",
+   "label": "Interest Income Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "penalty_income_account",
+   "fieldtype": "Link",
+   "label": "Penalty Income Account",
+   "options": "Account"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_term_loan",
+   "fieldtype": "Check",
+   "label": "Is Term Loan"
   }
  ],
- "modified": "2019-09-01 17:28:26.602887",
+ "modified": "2019-09-02 16:14:21.949658",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",

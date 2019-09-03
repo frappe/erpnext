@@ -23,7 +23,6 @@ class LoanApplication(Document):
 
 	def on_cancel(self):
 		self.unpledge_loan_securities()
-
 	def validate_loan_amount(self):
 		maximum_loan_limit = frappe.db.get_value('Loan Type', self.loan_type, 'maximum_loan_amount')
 		if maximum_loan_limit and self.loan_amount > maximum_loan_limit:
@@ -62,16 +61,12 @@ class LoanApplication(Document):
 
 	def set_loan_amount(self):
 
-		if not self.is_secured_loan:
-			return
-
-		loan_amount = 0
 		self.pledge_list = []
-		for security in self.loan_security_pledges:
-			loan_amount += security.amount - (security.amount * security.haircut/100)
+		if not self.loan_amount and self.is_secured_loan and self.loan_security_pledges:
+			for security in self.loan_security_pledges:
+				self.loan_amount += security.amount - (security.amount * security.haircut/100)
 			self.pledge_list.append(security.loan_security)
 
-		self.loan_amount = loan_amount
 
 	def pledge_loan_securities(self):
 		frappe.db.sql("""UPDATE `tabLoan Security`

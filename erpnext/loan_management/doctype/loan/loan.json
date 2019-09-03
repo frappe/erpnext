@@ -24,6 +24,7 @@
   "disbursement_date",
   "repayment_start_date",
   "column_break_11",
+  "is_term_loan",
   "repayment_method",
   "repayment_periods",
   "monthly_repayment_amount",
@@ -155,12 +156,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "Repay Over Number of Periods",
    "fieldname": "repayment_method",
    "fieldtype": "Select",
    "label": "Repayment Method",
-   "options": "\nRepay Fixed Amount per Period\nRepay Over Number of Periods",
-   "reqd": 1
+   "options": "\nRepay Fixed Amount per Period\nRepay Over Number of Periods"
   },
   {
    "fieldname": "repayment_periods",
@@ -180,6 +179,7 @@
    "label": "Account Info"
   },
   {
+   "fetch_from": "loan_type.mode_of_payment",
    "fieldname": "mode_of_payment",
    "fieldtype": "Link",
    "label": "Mode of Payment",
@@ -187,6 +187,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "loan_type.payment_account",
    "fieldname": "payment_account",
    "fieldtype": "Link",
    "label": "Payment Account",
@@ -198,6 +199,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "loan_type.loan_account",
    "fieldname": "loan_account",
    "fieldtype": "Link",
    "label": "Loan Account",
@@ -205,6 +207,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "loan_type.interest_income_account",
    "fieldname": "interest_income_account",
    "fieldtype": "Link",
    "label": "Interest Income Account",
@@ -212,11 +215,13 @@
    "reqd": 1
   },
   {
+   "depends_on": "is_term_loan",
    "fieldname": "section_break_15",
    "fieldtype": "Section Break",
    "label": "Repayment Schedule"
   },
   {
+   "depends_on": "eval:doc.is_term_loan == 1",
    "fieldname": "repayment_schedule",
    "fieldtype": "Table",
    "label": "Repayment Schedule",
@@ -272,6 +277,7 @@
    "label": "Is Secured Loan"
   },
   {
+   "depends_on": "is_secured_loan",
    "fieldname": "loan_security_details_section",
    "fieldtype": "Section Break",
    "label": "Loan Security Details"
@@ -281,10 +287,18 @@
    "fieldtype": "Table",
    "label": "Loan Security Pledges",
    "options": "Loan Pledge"
+  },
+  {
+   "default": "0",
+   "fetch_from": "loan_type.is_term_loan",
+   "fieldname": "is_term_loan",
+   "fieldtype": "Check",
+   "label": "Is Term Loan",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-30 22:25:10.998982",
+ "modified": "2019-09-03 09:57:13.174854",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

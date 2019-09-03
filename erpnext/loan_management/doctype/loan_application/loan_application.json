@@ -188,6 +188,7 @@
    "label": "Loan Security Details"
   },
   {
+   "depends_on": "eval:doc.is_secured_loan == 1",
    "fieldname": "loan_security_pledges",
    "fieldtype": "Table",
    "label": "Loan Security Pledges",
@@ -195,7 +196,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-30 22:14:07.492376",
+ "modified": "2019-09-01 21:00:44.837288",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Application",

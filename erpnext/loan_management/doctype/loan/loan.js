@@ -49,12 +49,15 @@ frappe.ui.form.on('Loan', {
 					frm.trigger("make_repayment_entry");
 				},__('Make'));
 
-				frm.add_custom_button(__('Loan Closure Entry'), function() {
-					frm.trigger("make_closure_entry");
-				},__('Make'));
 			}
 		}
 		frm.trigger("toggle_fields");
+	},
+
+	loan_type: function(frm) {
+		frm.set_df_property("repayment_method", 'reqd', frm.doc.is_term_loan);
+		frm.set_df_property("repayment_method", 'hidden', 1 - frm.doc.is_term_loan);
+		frm.set_df_property("repayment_periods", 'hidden', 1 - frm.doc.is_term_loan);
 	},
 
 	make_jv: function (frm) {
@@ -163,25 +166,6 @@ frappe.ui.form.on('Loan', {
 		});
 	},
 
-	make_closure_entry: function(frm) {
-		frappe.call({
-			args: {
-				"loan": frm.doc.name,
-				"company": frm.doc.company,
-				"loan_account": frm.doc.loan_account,
-				"applicant_type": frm.doc.applicant_type,
-				"applicant": frm.doc.applicant,
-				"loan_amount": frm.doc.loan_amount,
-				"payment_account": frm.doc.payment_account
-			},
-			method: "erpnext.loan_management.doctype.loan.loan.make_closure_entry",
-			callback: function (r) {
-				if (r.message)
-					var doc = frappe.model.sync(r.message)[0];
-				frappe.set_route("Form", doc.doctype, doc.name);
-			}
-		})
-	},
 
 	mode_of_payment: function (frm) {
 		if (frm.doc.mode_of_payment && frm.doc.company) {
@@ -201,10 +185,10 @@ frappe.ui.form.on('Loan', {
 	},
 
 	loan_application: function (frm) {
-	    if(frm.doc.loan_application){
-            return frappe.call({
-                method: "erpnext.loan_management.doctype.loan.loan.get_loan_application",
-                args: {
+		if(frm.doc.loan_application){
+			return frappe.call({
+				method: "erpnext.loan_management.doctype.loan.loan.get_loan_application",
+				args: {
                     "loan_application": frm.doc.loan_application
                 },
                 callback: function (r) {

@@ -1,5 +1,5 @@
 {
- "autoname": "LS-.{applicant}.-.{loan_security_name}.-.#####",
+ "autoname": "LS-.{applicant}.-.{loan_security}.-.#####",
  "creation": "2019-08-29 18:48:51.371674",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -8,8 +8,7 @@
   "loan_application_details_section",
   "applicant",
   "loan_security_details_section",
-  "loan_security_type",
-  "loan_security_name",
+  "loan_security",
   "unit_of_measurement",
   "haircut",
   "column_break_9",
@@ -20,15 +19,7 @@
  ],
  "fields": [
   {
-   "fieldname": "loan_security_type",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Loan Security Type",
-   "options": "Loan Security Type",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "loan_security_type.unit_of_measurement",
+   "fetch_from": "loan_security.unit_of_measurement",
    "fieldname": "unit_of_measurement",
    "fieldtype": "Data",
    "label": "Unit Of Measurement",
@@ -42,12 +33,13 @@
    "reqd": 1
   },
   {
+   "fetch_from": "loan_security.loan_security_price",
    "fieldname": "loan_security_price",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Loan Security Price",
    "options": "Company:company:default_currency",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "default": "0.0",
@@ -90,21 +82,22 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "loan_security_name",
-   "fieldtype": "Data",
-   "label": "Loan Security Name",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "loan_security_type.haircut",
+   "fetch_from": "loan_security.haircut",
    "fieldname": "haircut",
    "fieldtype": "Percent",
    "label": "Haircut",
    "read_only": 1
+  },
+  {
+   "fieldname": "loan_security",
+   "fieldtype": "Link",
+   "label": "Loan Security",
+   "options": "Loan Security",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-02 14:56:30.357813",
+ "modified": "2019-09-02 15:24:27.903294",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Pledge",
@@ -126,7 +119,7 @@
   }
  ],
  "quick_entry": 1,
- "search_fields": "applicant,loan_security_type,amount",
+ "search_fields": "applicant,amount",
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

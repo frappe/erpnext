@@ -11,4 +11,4 @@ class LoanSecurityPledge(Document):
 		self.set_amount()
 
 	def set_amount(self):
-		self.amount = self.loan_security_pledge_price * self.qty
+		self.amount = self.loan_security_price * self.qty

@@ -11,10 +11,16 @@ from erpnext.controllers.accounts_controller import AccountsController
 
 class Loan(AccountsController):
 	def validate(self):
-		validate_repayment_method(self.repayment_method, self.loan_amount, self.monthly_repayment_amount, self.repayment_periods)
+
+		self.set_loan_amount()
+
 		self.set_missing_fields()
-		self.make_repayment_schedule()
-		self.set_repayment_period()
+
+		if self.is_term_loan:
+			validate_repayment_method(self.repayment_method, self.loan_amount, self.monthly_repayment_amount, self.repayment_periods)
+			self.make_repayment_schedule()
+			self.set_repayment_period()
+
 		self.calculate_totals()
 
 	def on_submit():
@@ -101,11 +107,18 @@ class Loan(AccountsController):
 		self.total_payment = 0
 		self.total_interest_payable = 0
 		self.total_amount_paid = 0
+
 		for data in self.repayment_schedule:
 			self.total_payment += data.total_payment
 			self.total_interest_payable +=data.interest_amount
 			if data.paid:
 				self.total_amount_paid += data.total_payment
+
+	def set_loan_amount(self):
+		if not self.loan_amount and self.is_secured_loan and self.loan_security_pledges:
+			self.loan_amount = 0
+			for security in self.loan_security_pledges:
+				self.loan_amount += security.amount - (security.amount * security.haircut/100)
 
 	def pledge_loan_securities():
 		frappe.db.sql("""UPDATE `tabLoan Security`
@@ -272,17 +285,15 @@ def calculate_closure_amount(loan):
 		'total_payment': 0.0
 	}
 
-	current_date = nowdate()
+	current_date = getdate()
 	for payment in loan_doc.repayment_schedule:
 
-		payment_date = getdate(payment.payment)
-		if not self.paid:
-			if payment_date < current_date:
-				closure_amounts['principal_amount'] += payment.principal_amount
-				closure_amounts['total_payment'] += payment.principal_amount
+		payment_date = getdate(payment.payment_date)
+		if not payment.paid:
+			closure_amounts['principal_amount'] += payment.principal_amount
+			closure_amounts['total_payment'] += payment.principal_amount
 
-
-			if payment_date.month <= current_date.month:
+			if payment_date <= current_date:
 				closure_amounts['interest_amount'] += payment.interest_amount
 				closure_amounts['total_payment'] += payment.interest_amount
 
@@ -295,45 +306,3 @@ def close_loan(loan, total_amount_paid):
 	frappe.db.set_value("Loan", loan, "total_amount_paid", total_amount_paid)
 	frappe.db.set_value("Loan", loan, "status", "Repaid/Closed")
 
-@frappe.whitelist()
-def make_closure_entry(loan, company, loan_account, applicant_type, applicant, payment_account=None, interest_income_account=None):
-
-	closure_amounts = calculate_closure_amount(loan)
-
-	journal_entry = frappe.new_doc('Journal Entry')
-	journal_entry.voucher_type = 'Bank Entry'
-	journal_entry.user_remark = _('Against Loan: {0}').format(loan)
-	journal_entry.company = company
-	journal_entry.posting_date = nowdate()
-	account_amt_list = []
-
-	account_amt_list.append({
-		"account": payment_account,
-		"debit_in_account_currency": closure_amounts['total_payment'],
-		"reference_type": "Loan",
-		"reference_name": loan,
-		})
-
-	account_amt_list.append({
-		"account": loan_account,
-		"credit_in_account_currency": closure_amounts['principal_amount'],
-		"party_type": applicant_type,
-		"party": applicant,
-		"reference_type": "Loan",
-		"reference_name": loan,
-		})
-
-	account_amt_list.append({
-		"account": interest_income_account,
-		"credit_in_account_currency": closure_amounts['interest_amount'],
-		"reference_type": "Loan",
-		"reference_name": loan,
-		})
-	journal_entry.set("accounts", account_amt_list)
-
-	total_amount_paid = frappe.db.get_value("Loan Type", loan_doc.loan_type, "total_amount_paid") \
-		+ closure_amounts['total_payment']
-
-	close_loan(loan, total_amount_paid)
-
-	return journal_entry.as_dict()
