@@ -816,7 +816,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				contact = me.contacts[data.name];
 				if(reg.test(data.name.toLowerCase())
 					|| reg.test(data.customer_name.toLowerCase())
-					|| (contact && reg.test(contact["mobile_no"]))
 					|| (contact && reg.test(contact["phone"]))
 					|| (data.customer_group && reg.test(data.customer_group.toLowerCase()))){
 						return data;
@@ -834,7 +833,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				if(contact && !c['phone']) {
 					c["phone"] = contact["phone"];
 					c["email_id"] = contact["email_id"];
-					c["mobile_no"] = contact["mobile_no"];
 				}
 
 				me.customers_mapper.push({
@@ -844,10 +842,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					customer_group: c.customer_group,
 					territory: c.territory,
 					phone: contact ? contact["phone"] : '',
-					mobile_no: contact ? contact["mobile_no"] : '',
 					email_id: contact ? contact["email_id"] : '',
 					searchtext: ['customer_name', 'customer_group', 'name', 'value',
-						'label', 'email_id', 'phone', 'mobile_no']
+						'label', 'email_id', 'phone']
 						.map(key => c[key]).join(' ')
 						.toLowerCase()
 				});
@@ -1762,18 +1759,11 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.si_docs = this.get_submitted_invoice() || [];
 		this.email_queue_list = this.get_email_queue() || {};
 		this.customers_list = this.get_customers_details() || {};
-		if(this.customer_doc) {
-			this.freeze = this.customer_doc.display
-		}
 
-		freeze_screen = this.freeze_screen || false;
-
-		if ((this.si_docs.length || this.email_queue_list || this.customers_list) && !this.freeze) {
-			this.freeze = true;
-
+		if (this.si_docs.length || this.email_queue_list || this.customers_list) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.sales_invoice.pos.make_invoice",
-				freeze: freeze_screen,
+				freeze: true,
 				args: {
 					doc_list: me.si_docs,
 					email_queue_list: me.email_queue_list,
