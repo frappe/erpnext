@@ -71,7 +71,7 @@ class ShopifySettings(Document):
 				res.raise_for_status()
 				deleted_webhooks.append(d)
 			except Exception as e:
-				frappe.log_error(message=frappe.get_traceback(), title=e[:140])
+				frappe.log_error(message=frappe.get_traceback(), title=e)
 
 		for d in deleted_webhooks:
 			self.remove(d)
