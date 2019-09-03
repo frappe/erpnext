@@ -48,7 +48,6 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 	pi.item_code = packing_item_code
 	pi.item_name = item.item_name
 	pi.parent_detail_docname = main_item_row.name
-	pi.description = item.description
 	pi.uom = item.stock_uom
 	pi.qty = flt(qty)
 	pi.description = description
