@@ -167,7 +167,7 @@ apps/erpnext/erpnext/hr/doctype/employee_checkin/employee_checkin.py,This employ
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Accountant,Účetní
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py,Selling Price List,Prodejní ceník
 DocType: Patient,Tobacco Current Use,Aktuální tabákové použití
-apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py,Selling Rate,Prodejní sazba
+apps/erpnext/erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.py,Selling Rate,Prodejní sazba
 apps/erpnext/erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js,Please save your document before adding a new account,Před přidáním nového účtu uložte dokument
 DocType: Cost Center,Stock User,Sklad Uživatel
 DocType: Soil Analysis,(Ca+Mg)/K,(Ca + Mg) / K
@@ -204,7 +204,6 @@ apps/erpnext/erpnext/accounts/utils.py,{0} {1} not in any active Fiscal Year.,{0
 DocType: Packed Item,Parent Detail docname,Parent Detail docname
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Reference: {0}, Item Code: {1} and Customer: {2}","Odkaz: {0}, kód položky: {1} a zákazník: {2}"
 apps/erpnext/erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py,{0} {1} is not present in the parent company,{0} {1} není v mateřské společnosti
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Dodavatel&gt; Typ dodavatele
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py,Trial Period End Date Cannot be before Trial Period Start Date,Datum ukončení zkušebního období nemůže být před datem zahájení zkušebního období
 apps/erpnext/erpnext/utilities/user_progress.py,Kg,Kg
 DocType: Tax Withholding Category,Tax Withholding Category,Daňové zadržení kategorie
@@ -318,6 +317,7 @@ DocType: Location,Location Name,Název umístění
 DocType: Quality Procedure Table,Responsible Individual,Odpovědná osoba
 DocType: Naming Series,Prefix,Prefix
 apps/erpnext/erpnext/hr/notification/training_scheduled/training_scheduled.html,Event Location,Umístění události
+apps/erpnext/erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.py,Available Stock,Dostupné skladem
 DocType: Asset Settings,Asset Settings,Nastavení aktiv
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Consumable,Spotřební
 DocType: Student,B-,B-
@@ -350,6 +350,7 @@ DocType: Agriculture Analysis Criteria,Fertilizer,Hnojivo
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,"Cannot ensure delivery by Serial No as \
 				Item {0} is added with and without Ensure Delivery by \
 				Serial No.","Nelze zajistit dodávku podle sériového čísla, protože je přidána položka {0} se službou Zajistit dodání podle \ sériového čísla"
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Nastavte prosím Pojmenovací systém instruktorů v sekci Vzdělávání&gt; Nastavení vzdělávání
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,At least one mode of payment is required for POS invoice.,pro POS fakturu je nutná alespoň jeden způsob platby.
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,Batch no is required for batched item {0},Šarže č. Je vyžadována pro dávkovou položku {0}
 DocType: Bank Statement Transaction Invoice Item,Bank Statement Transaction Invoice Item,Položka faktury bankovního výpisu
@@ -873,7 +874,6 @@ DocType: Supplier Scorecard Standing,Notify Other,Upozornit ostatní
 DocType: Vital Signs,Blood Pressure (systolic),Krevní tlak (systolický)
 apps/erpnext/erpnext/controllers/buying_controller.py,{0} {1} is {2},{0} {1} je {2}
 DocType: Item Price,Valid Upto,Valid aľ
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Nastavte Naming Series pro {0} prostřednictvím Nastavení&gt; Nastavení&gt; Naming Series
 DocType: Training Event,Workshop,Dílna
 DocType: Supplier Scorecard Scoring Standing,Warn Purchase Orders,Upozornění na nákupní objednávky
 apps/erpnext/erpnext/utilities/user_progress.py,List a few of your customers. They could be organizations or individuals.,Seznam několik svých zákazníků. Ty by mohly být organizace nebo jednotlivci.
@@ -1676,7 +1676,6 @@ DocType: Support Search Source,Search Term Param Name,Hledaný výraz Param Name
 DocType: Item Barcode,Item Barcode,Položka Barcode
 DocType: Delivery Trip,In Transit,V tranzitu
 DocType: Woocommerce Settings,Endpoints,Koncové body
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Kód položky&gt; Skupina položek&gt; Značka
 DocType: Shopping Cart Settings,Show Configure Button,Zobrazit tlačítko Konfigurovat
 DocType: Quality Inspection Reading,Reading 6,Čtení 6
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js,Cannot {0} {1} {2} without any negative outstanding invoice,Nelze {0} {1} {2} bez negativních vynikající faktura
@@ -2036,6 +2035,7 @@ apps/erpnext/erpnext/accounts/doctype/accounting_dimension/accounting_dimension.
 DocType: Cheque Print Template,Payer Settings,Nastavení plátce
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,No pending Material Requests found to link for the given items.,Žádná nevyřízená žádost o materiál nebyla nalezena k odkazu na dané položky.
 apps/erpnext/erpnext/public/js/utils/party.js,Select company first,Nejprve vyberte společnost
+apps/erpnext/erpnext/accounts/general_ledger.py,Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry,Účet: <b>{0}</b> je kapitál Probíhá zpracování a nelze jej aktualizovat zápisem do deníku
 apps/erpnext/erpnext/education/doctype/quiz/quiz.py,Compare List function takes on list arguments,Funkce Porovnání seznamu přebírá argumenty seznamu
 DocType: Item Attribute Value,"This will be appended to the Item Code of the variant. For example, if your abbreviation is ""SM"", and the item code is ""T-SHIRT"", the item code of the variant will be ""T-SHIRT-SM""","To bude připojen na položku zákoníku varianty. Například, pokud vaše zkratka je ""SM"", a položka je kód ""T-SHIRT"", položka kód varianty bude ""T-SHIRT-SM"""
 DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary Slip.,"Čistá Pay (slovy) budou viditelné, jakmile uložíte výplatní pásce."
@@ -2220,6 +2220,7 @@ apps/erpnext/erpnext/controllers/stock_controller.py,Row {0}: Quality Inspection
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js,Item 2,Položka 2
 DocType: Pricing Rule,Validate Applied Rule,Ověřte použité pravidlo
 DocType: QuickBooks Migrator,Authorization Endpoint,Autorizační koncový bod
+DocType: Employee Onboarding,Notify users by email,Upozornit uživatele e-mailem
 DocType: Travel Request,International,Mezinárodní
 DocType: Training Event,Training Event,Training Event
 DocType: Item,Auto re-order,Automatické znovuobjednání
@@ -2831,7 +2832,6 @@ apps/erpnext/erpnext/utilities/page/leaderboard/leaderboard.js,No items found.,�
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py,You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global Settings,Nelze odstranit fiskální rok {0}. Fiskální rok {0} je nastaven jako výchozí v globálním nastavení
 DocType: Share Transfer,Equity/Liability Account,Účet vlastního kapitálu / odpovědnosti
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.py,A customer with the same name already exists,Zákazník se stejným jménem již existuje
-DocType: Contract,Inactive,Neaktivní
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js,This will submit Salary Slips and create accrual Journal Entry. Do you want to proceed?,Tím bude předkládán výplatní pásky a vytvářet záznamy časového rozvrhu. Chcete pokračovat?
 DocType: Purchase Invoice,Total Net Weight,Celková čistá hmotnost
 DocType: Purchase Order,Order Confirmation No,Potvrzení objednávky č
@@ -3108,7 +3108,6 @@ apps/erpnext/erpnext/setup/doctype/company/test_company.py,No Account matched th
 apps/erpnext/erpnext/accounts/party.py,Billing currency must be equal to either default company's currency or party account currency,Měna fakturace se musí rovnat buď měně výchozí měny nebo měně stran účtu
 DocType: Packing Slip,Indicates that the package is a part of this delivery (Only Draft),"Označuje, že balíček je součástí této dodávky (Pouze návrhu)"
 apps/erpnext/erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.py,Closing Balance,Konečný zůstatek
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},UOM konverzní faktor ({0} -&gt; {1}) nebyl nalezen pro položku: {2}
 DocType: Soil Texture,Loam,Hlína
 apps/erpnext/erpnext/controllers/accounts_controller.py,Row {0}: Due Date cannot be before posting date,Řádek {0}: K datu splatnosti nemůže být datum odeslání
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py,Quantity for Item {0} must be less than {1},Množství k bodu {0} musí být menší než {1}
@@ -3632,7 +3631,6 @@ apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.py,No GST No. found for the C
 DocType: Stock Settings,Raise Material Request when stock reaches re-order level,Zvýšit Materiál vyžádání při stock dosáhne úrovně re-order
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Full-time,Na plný úvazek
 DocType: Payroll Entry,Employees,zaměstnanci
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Nastavte číslovací řady pro Docházku prostřednictvím Nastavení&gt; Číslovací řady
 DocType: Question,Single Correct Answer,Jedna správná odpověď
 DocType: Employee,Contact Details,Kontaktní údaje
 DocType: C-Form,Received Date,Datum přijetí
@@ -4263,6 +4261,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_tax
 DocType: Pricing Rule,Price or Product Discount,Cena nebo sleva produktu
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,For row {0}: Enter planned qty,Pro řádek {0}: Zadejte plánované množství
 DocType: Account,Income Account,Účet příjmů
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Zákazník&gt; Skupina zákazníků&gt; Území
 DocType: Payment Request,Amount in customer's currency,Částka v měně zákazníka
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,Delivery,Dodávka
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py,Assigning Structures...,Přiřazení struktur ...
@@ -4312,7 +4311,6 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Income Ta
 DocType: HR Settings,Check Vacancies On Job Offer Creation,Zkontrolujte volná místa při vytváření pracovních nabídek
 apps/erpnext/erpnext/utilities/user_progress.py,Go to Letterheads,Přejděte na Letterheads
 DocType: Subscription,Cancel At End Of Period,Zrušit na konci období
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Nastavte prosím Pojmenovací systém instruktorů v sekci Vzdělávání&gt; Nastavení vzdělávání
 apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.js,Property already added,Vlastnictví již bylo přidáno
 DocType: Item Supplier,Item Supplier,Položka Dodavatel
 apps/erpnext/erpnext/public/js/controllers/transaction.js,Please enter Item Code to get batch no,"Prosím, zadejte kód položky se dostat dávku no"
@@ -4609,6 +4607,7 @@ DocType: Training Event,Theory,Teorie
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js,Warning: Material Requested Qty is less than Minimum Order Qty,Upozornění: Materiál Požadované množství je menší než minimální objednávka Množství
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py,Account {0} is frozen,Účet {0} je zmrazen
 DocType: Quiz Question,Quiz Question,Kvízová otázka
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Dodavatel&gt; Typ dodavatele
 DocType: Company,Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.,"Právní subjekt / dceřiná společnost s oddělenou Graf účtů, které patří do organizace."
 DocType: Payment Request,Mute Email,Mute Email
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,"Food, Beverage & Tobacco","Potraviny, nápoje a tabák"
@@ -5119,7 +5118,6 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Delivery warehouse required for stock item {0},Dodávka sklad potřebný pro živočišnou položku {0}
 DocType: Packing Slip,The gross weight of the package. Usually net weight + packaging material weight. (for print),Celková hmotnost balení. Obvykle se čistá hmotnost + obalového materiálu hmotnosti. (Pro tisk)
 DocType: Assessment Plan,Program,Program
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Nastavte prosím systém názvů zaměstnanců v části Lidské zdroje&gt; Nastavení lidských zdrojů
 DocType: Accounts Settings,Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,Uživatelé s touto rolí se mohou nastavit na zmrazené účty a vytvořit / upravit účetní zápisy proti zmrazených účtů
 ,Project Billing Summary,Přehled fakturace projektu
 DocType: Vital Signs,Cuts,Řezy
@@ -5367,6 +5365,7 @@ DocType: Stock Settings,Use Naming Series,Používejte sérii pojmenování
 apps/erpnext/erpnext/quality_management/doctype/quality_review/quality_review_list.js,No Action,Žádná akce
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js,Valuation type charges can not marked as Inclusive,Poplatky typu ocenění může není označen jako Inclusive
 DocType: POS Profile,Update Stock,Aktualizace skladem
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Nastavte Naming Series pro {0} prostřednictvím Nastavení&gt; Nastavení&gt; Naming Series
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js,Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,"Různé UOM položky povede k nesprávné (celkem) Čistá hmotnost hodnoty. Ujistěte se, že čistá hmotnost každé položky je ve stejném nerozpuštěných."
 DocType: Certification Application,Payment Details,Platební údaje
 apps/erpnext/erpnext/stock/report/item_prices/item_prices.py,BOM Rate,BOM Rate
@@ -5470,6 +5469,8 @@ DocType: Sales Invoice,Distance (in km),Vzdálenost (v km)
 apps/erpnext/erpnext/accounts/doctype/monthly_distribution/monthly_distribution.py,Percentage Allocation should be equal to 100%,Podíl alokace by měla být ve výši 100%
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js,Please select Posting Date before selecting Party,"Prosím, vyberte Datum zveřejnění před výběrem Party"
 apps/erpnext/erpnext/config/accounting.py,Payment Terms based on conditions,Platební podmínky na základě podmínek
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Chcete-li tento dokument zrušit, prosím odstraňte zaměstnance <a href=""#Form/Employee/{0}"">{0}</a> \"
 DocType: Program Enrollment,School House,School House
 DocType: Serial No,Out of AMC,Out of AMC
 DocType: Opportunity,Opportunity Amount,Částka příležitostí
@@ -5671,6 +5672,7 @@ apps/erpnext/erpnext/hr/doctype/employee_tax_exemption_declaration/employee_tax_
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py,Order/Quot %,Objednávka / kvóta%
 apps/erpnext/erpnext/config/healthcare.py,Record Patient Vitals,Zaznamenejte vitál pacientů
 DocType: Fee Schedule,Institution,Instituce
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},UOM konverzní faktor ({0} -&gt; {1}) nebyl nalezen pro položku: {2}
 DocType: Asset,Partially Depreciated,částečně odepisována
 DocType: Issue,Opening Time,Otevírací doba
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py,From and To dates required,Data OD a DO jsou vyžadována
@@ -5887,6 +5889,7 @@ apps/erpnext/erpnext/public/js/pos/pos.html,No Customers yet!,Zatím žádné z�
 DocType: Quality Procedure Process,Link existing Quality Procedure.,Propojte stávající postup kvality.
 apps/erpnext/erpnext/config/hr.py,Loans,Půjčky
 DocType: Healthcare Service Unit,Healthcare Service Unit,Jednotka zdravotnických služeb
+,Customer-wise Item Price,Cena předmětu podle přání zákazníka
 apps/erpnext/erpnext/public/js/financial_statements.js,Cash Flow Statement,Přehled o peněžních tocích
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,No material request created,Žádná materiálová žádost nebyla vytvořena
 apps/erpnext/erpnext/hr/doctype/loan_application/loan_application.py,Loan Amount cannot exceed Maximum Loan Amount of {0},Výše úvěru nesmí být vyšší než Maximální výše úvěru částku {0}
@@ -6148,6 +6151,7 @@ apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_stat
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,otevření Value
 DocType: Salary Component,Formula,Vzorec
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,Serial #,Serial #
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Nastavte prosím systém názvů zaměstnanců v části Lidské zdroje&gt; Nastavení lidských zdrojů
 DocType: Material Request Plan Item,Required Quantity,Požadované množství
 DocType: Lab Test Template,Lab Test Template,Šablona zkušebního laboratoře
 apps/erpnext/erpnext/accounts/doctype/accounting_period/accounting_period.py,Accounting Period overlaps with {0},Účetní období se překrývá s {0}
@@ -6398,7 +6402,6 @@ DocType: Antibiotic,Laboratory User,Laboratorní uživatel
 DocType: Request for Quotation Item,Project Name,Název projektu
 apps/erpnext/erpnext/regional/italy/utils.py,Please set the Customer Address,Nastavte prosím zákaznickou adresu
 DocType: Customer,Mention if non-standard receivable account,Zmínka v případě nestandardní pohledávky účet
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Zákazník&gt; Skupina zákazníků&gt; Území
 DocType: Bank,Plaid Access Token,Plaid Access Token
 apps/erpnext/erpnext/hr/doctype/employee_benefit_application/employee_benefit_application.py,Please add the remaining benefits {0} to any of the existing component,Přidejte zbývající výhody {0} do kterékoli existující komponenty
 DocType: Journal Entry Account,If Income or Expense,Pokud je výnos nebo náklad
@@ -6661,8 +6664,6 @@ DocType: Employee Tax Exemption Proof Submission,Tax Exemption Proofs,Osvědčen
 apps/erpnext/erpnext/buying/utils.py,Please enter quantity for Item {0},"Zadejte prosím množství produktů, bod {0}"
 DocType: Quality Procedure,Processes,Procesy
 DocType: Shift Type,First Check-in and Last Check-out,První check-in a poslední check-out
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","Chcete-li tento dokument zrušit, prosím odstraňte zaměstnance <a href=""#Form/Employee/{0}"">{0}</a> \"
 apps/erpnext/erpnext/regional/report/hsn_wise_summary_of_outward_supplies/hsn_wise_summary_of_outward_supplies.py,Total Taxable Amount,Celková zdanitelná částka
 DocType: Employee External Work History,Employee External Work History,Zaměstnanec vnější práce History
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py,Job card {0} created,Byla vytvořena karta {0}
@@ -6698,6 +6699,7 @@ DocType: Shareholder,ACC-SH-.YYYY.-,ACC-SH-.YYYY.-
 apps/erpnext/erpnext/accounts/doctype/payment_terms_template/payment_terms_template.py,Combined invoice portion must equal 100%,Kombinovaná část faktury se musí rovnat 100%
 DocType: Item Default,Default Expense Account,Výchozí výdajový účet
 DocType: GST Account,CGST Account,CGST účet
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Kód položky&gt; Skupina položek&gt; Značka
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py,Student Email ID,Student ID e-mailu
 DocType: Employee,Notice (days),Oznámení (dny)
 DocType: POS Closing Voucher Invoices,POS Closing Voucher Invoices,Pokladní doklady POS
@@ -7336,6 +7338,7 @@ DocType: Purchase Invoice,Y,Y
 DocType: Maintenance Visit,Maintenance Date,Datum údržby
 DocType: Purchase Invoice Item,Rejected Serial No,Odmítnuté sériové číslo
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py,Year start date or end date is overlapping with {0}. To avoid please set company,Rok datum zahájení nebo ukončení se překrývá s {0}. Aby se zabránilo nastavte firmu
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Nastavte číslovací řady pro Docházku prostřednictvím Nastavení&gt; Číslovací řady
 apps/erpnext/erpnext/selling/doctype/customer/customer.py,Please mention the Lead Name in Lead {0},Uvedete prosím vedoucí jméno ve vedoucím {0}
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Start date should be less than end date for Item {0},Datum zahájení by měla být menší než konečné datum pro bod {0}
 DocType: Shift Type,Auto Attendance Settings,Nastavení automatické účasti

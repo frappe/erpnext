@@ -12,6 +12,7 @@ from erpnext.accounts.general_ledger import make_gl_entries
 class InvoiceDiscounting(AccountsController):
 	def validate(self):
 		self.validate_mandatory()
+		self.validate_invoices()
 		self.calculate_total_amount()
 		self.set_status()
 		self.set_end_date()
@@ -23,6 +24,15 @@ class InvoiceDiscounting(AccountsController):
 	def validate_mandatory(self):
 		if self.docstatus == 1 and not (self.loan_start_date and self.loan_period):
 			frappe.throw(_("Loan Start Date and Loan Period are mandatory to save the Invoice Discounting"))
+
+	def validate_invoices(self):
+		discounted_invoices = [record.sales_invoice for record in 
+			frappe.get_all("Discounted Invoice",fields = ["sales_invoice"], filters= {"docstatus":1})]
+
+		for record in self.invoices:
+			if record.sales_invoice in discounted_invoices:
+				frappe.throw("Row({0}): {1} is already discounted in {2}"
+					.format(record.idx, frappe.bold(record.sales_invoice), frappe.bold(record.parent)))
 
 	def calculate_total_amount(self):
 		self.total_amount = sum([flt(d.outstanding_amount) for d in self.invoices])
@@ -212,7 +222,8 @@ def get_invoices(filters):
 			name as sales_invoice,
 			customer,
 			posting_date,
-			outstanding_amount
+			outstanding_amount,
+			debit_to
 		from `tabSales Invoice` si
 		where
 			docstatus = 1

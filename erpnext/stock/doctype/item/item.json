@@ -468,7 +468,6 @@
    },
    {
     "default": "0",
-    "depends_on": "has_batch_no",
     "fieldname": "retain_sample",
     "fieldtype": "Check",
     "label": "Retain Sample"

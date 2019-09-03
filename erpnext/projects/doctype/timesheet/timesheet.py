@@ -96,7 +96,7 @@ class Timesheet(Document):
 
 		for time in self.time_logs:
 			if time.from_time and time.to_time:
-				if flt(std_working_hours) > 0:
+				if flt(std_working_hours) and date_diff(time.to_time, time.from_time):
 					time.hours = flt(std_working_hours) * date_diff(time.to_time, time.from_time)
 				else:
 					if not time.hours:
