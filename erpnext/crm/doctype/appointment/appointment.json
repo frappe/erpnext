@@ -5,9 +5,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "from_time",
-  "to_time",
-  "appointment_date",
+  "scheduled_time",
   "customer_details_section",
   "customer_name",
   "customer_phone_number",
@@ -62,9 +60,16 @@
    "fieldname": "customer_details",
    "fieldtype": "Long Text",
    "label": "Details"
+  },
+  {
+   "fieldname": "scheduled_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Scheduled Time",
+   "reqd": 1
   }
  ],
- "modified": "2019-08-27 12:43:30.143937",
+ "modified": "2019-09-01 10:19:50.711989",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
