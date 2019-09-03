@@ -73,6 +73,10 @@ def set_caller_information(doc, state):
 	# contact_name or lead_name
 	display_name_field = '{}_name'.format(fieldname)
 
+	# Contact now has all the nos saved in child table
+	if doc.doctype == 'Contact':
+		numbers = [d.phone for d in doc.phone_nos]
+
 	for number in numbers:
 		number = strip_number(number)
 		if not number: continue
