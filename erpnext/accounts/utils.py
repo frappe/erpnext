@@ -84,7 +84,8 @@ def validate_fiscal_year(date, fiscal_year, company, label="Date", doc=None):
 			throw(_("{0} '{1}' not in Fiscal Year {2}").format(label, formatdate(date), fiscal_year))
 
 @frappe.whitelist()
-def get_balance_on(account=None, date=None, party_type=None, party=None, company=None, in_account_currency=True, cost_center=None):
+def get_balance_on(account=None, date=None, party_type=None, party=None, company=None,
+	in_account_currency=True, cost_center=None, ignore_account_permission=False):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
 	if not date and frappe.form_dict.get("date"):
@@ -140,7 +141,8 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 
 	if account:
 
-		if not frappe.flags.ignore_account_permission:
+		if not (frappe.flags.ignore_account_permission
+			or ignore_account_permission):
 			acc.check_permission("read")
 
 		if report_type == 'Profit and Loss':
