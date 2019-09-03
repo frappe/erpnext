@@ -49,7 +49,6 @@ class TestLoyaltyProgram(unittest.TestCase):
 		# cancel and delete
 		for d in [si_redeem, si_original]:
 			d.cancel()
-			frappe.delete_doc('Sales Invoice', d.name)
 
 	def test_loyalty_points_earned_multiple_tier(self):
 		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Multiple Loyalty")
@@ -91,7 +90,6 @@ class TestLoyaltyProgram(unittest.TestCase):
 		# cancel and delete
 		for d in [si_redeem, si_original]:
 			d.cancel()
-			frappe.delete_doc('Sales Invoice', d.name)
 
 	def test_cancel_sales_invoice(self):
 		''' cancelling the sales invoice should cancel the earned points'''
@@ -143,7 +141,6 @@ class TestLoyaltyProgram(unittest.TestCase):
 				d.cancel()
 			except frappe.TimestampMismatchError:
 				frappe.get_doc('Sales Invoice', d.name).cancel()
-			frappe.delete_doc('Sales Invoice', d.name)
 
 	def test_loyalty_points_for_dashboard(self):
 		doc = frappe.get_doc('Customer', 'Test Loyalty Customer')
