@@ -337,14 +337,15 @@ def make_contact(args, is_primary_contact=1):
 	contact = frappe.get_doc({
 		'doctype': 'Contact',
 		'first_name': args.get('name'),
-		'mobile_no': args.get('mobile_no'),
-		'email_id': args.get('email_id'),
 		'is_primary_contact': is_primary_contact,
 		'links': [{
 			'link_doctype': args.get('doctype'),
 			'link_name': args.get('name')
 		}]
-	}).insert()
+	})
+	contact.add_email(args.get('email_id'))
+	contact.add_phone(args.get('mobile_no'))
+	contact.insert()
 
 	return contact
 
@@ -371,7 +372,7 @@ def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, fil
 	return frappe.db.sql("""
 		select `tabContact`.name from `tabContact`, `tabDynamic Link`
 			where `tabContact`.name = `tabDynamic Link`.parent and `tabDynamic Link`.link_name = %(customer)s
-			and `tabDynamic Link`.link_doctype = 'Customer' and `tabContact`.is_primary_contact = 1
+			and `tabDynamic Link`.link_doctype = 'Customer'
 			and `tabContact`.name like %(txt)s
 		""", {
 			'customer': customer,
@@ -383,7 +384,7 @@ def get_customer_primary_address(doctype, txt, searchfield, start, page_len, fil
 	return frappe.db.sql("""
 		select `tabAddress`.name from `tabAddress`, `tabDynamic Link`
 			where `tabAddress`.name = `tabDynamic Link`.parent and `tabDynamic Link`.link_name = %(customer)s
-			and `tabDynamic Link`.link_doctype = 'Customer' and `tabAddress`.is_primary_address = 1
+			and `tabDynamic Link`.link_doctype = 'Customer'
 			and `tabAddress`.name like %(txt)s
 		""", {
 			'customer': customer,

@@ -8,7 +8,8 @@
   "customer",
   "column_break_3",
   "posting_date",
-  "outstanding_amount"
+  "outstanding_amount",
+  "debit_to"
  ],
  "fields": [
   {
@@ -48,10 +49,18 @@
   {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "sales_invoice.debit_to",
+   "fieldname": "debit_to",
+   "fieldtype": "Link",
+   "label": "Debit to",
+   "options": "Account",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2019-05-30 19:27:29.436153",
+ "modified": "2019-08-07 15:13:55.808349",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Discounted Invoice",
