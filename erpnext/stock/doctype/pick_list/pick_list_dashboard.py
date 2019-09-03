@@ -3,10 +3,10 @@ from frappe import _
 
 def get_data():
 	return {
-		'fieldname': 'work_order',
+		'fieldname': 'pick_list',
 		'transactions': [
 			{
-				'items': ['Pick List', 'Stock Entry', 'Job Card']
-			}
+				'items': ['Stock Entry', 'Delivery Note']
+			},
 		]
 	}
