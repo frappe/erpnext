@@ -11,6 +11,7 @@
   "employee",
   "bonus_payment_date",
   "bonus_amount",
+  "salary_component",
   "amended_from",
   "column_break_6",
   "employee_name",
@@ -89,10 +90,17 @@
    "no_copy": 1,
    "options": "Additional Salary",
    "read_only": 1
+  },
+  {
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "label": "Salary Component",
+   "options": "Salary Component",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-07 17:19:11.907583",
+ "modified": "2019-09-03 16:47:24.210422",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Retention Bonus",

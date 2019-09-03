@@ -11,7 +11,7 @@ class EmployeeIncentive(Document):
 		company = frappe.db.get_value('Employee', self.employee, 'company')
 		additional_salary = frappe.db.exists('Additional Salary', {
 				'employee': self.employee, 
-				'salary_component': 'Arrear',
+				'salary_component': self.salary_component,
 				'payroll_date': self.payroll_date, 
 				'company': company,
 				'docstatus': 1
@@ -20,7 +20,7 @@ class EmployeeIncentive(Document):
 		if not additional_salary:
 			additional_salary = frappe.new_doc('Additional Salary')
 			additional_salary.employee = self.employee
-			additional_salary.salary_component = 'Arrear'
+			additional_salary.salary_component = self.salary_component
 			additional_salary.amount = self.incentive_amount
 			additional_salary.payroll_date = self.payroll_date
 			additional_salary.company = company
@@ -34,14 +34,11 @@ class EmployeeIncentive(Document):
 
 	def on_cancel(self):
 		if self.additional_salary:
-			from erpnext.hr.doctype.retention_bonus.retention_bonus import check_if_linked_document_exists
-			linked_document_exists = check_if_linked_document_exists(self)
-
-			if linked_document_exists:
-				incentive_removed = frappe.db.get_value('Additional Salary', self.additional_salary, 'amount') - self.incentive_amount
-				frappe.db.set_value('Additional Salary', self.additional_salary, 'amount', incentive_removed)
-			else:
+			incentive_removed = frappe.db.get_value('Additional Salary', self.additional_salary, 'amount') - self.incentive_amount
+			if incentive_removed == 0:
 				frappe.get_doc('Additional Salary', self.additional_salary).cancel()
+			else:
+				frappe.db.set_value('Additional Salary', self.additional_salary, 'amount', incentive_removed)
 
 			self.db_set('additional_salary', '')
 

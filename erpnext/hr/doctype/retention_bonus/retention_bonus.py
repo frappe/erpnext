@@ -19,7 +19,7 @@ class RetentionBonus(Document):
 		company = frappe.db.get_value('Employee', self.employee, 'company')
 		additional_salary = frappe.db.exists('Additional Salary', {
 				'employee': self.employee, 
-				'salary_component': 'Arrear',
+				'salary_component': self.salary_component,
 				'payroll_date': self.bonus_payment_date, 
 				'company': company,
 				'docstatus': 1
@@ -28,7 +28,7 @@ class RetentionBonus(Document):
 		if not additional_salary:
 			additional_salary = frappe.new_doc('Additional Salary')
 			additional_salary.employee = self.employee
-			additional_salary.salary_component = 'Arrear'
+			additional_salary.salary_component = self.salary_component
 			additional_salary.amount = self.bonus_amount
 			additional_salary.payroll_date = self.bonus_payment_date
 			additional_salary.company = company
@@ -42,19 +42,10 @@ class RetentionBonus(Document):
 
 	def on_cancel(self):
 		if self.additional_salary:
-			linked_document_exists = check_if_linked_document_exists(self)
-
-			if linked_document_exists:
-				bonus_removed = frappe.db.get_value('Additional Salary', self.additional_salary, 'amount') - self.bonus_amount
-				frappe.db.set_value('Additional Salary', self.additional_salary, 'amount', bonus_removed)
-			else:
+			bonus_removed = frappe.db.get_value('Additional Salary', self.additional_salary, 'amount') - self.bonus_amount
+			if bonus_removed == 0:
 				frappe.get_doc('Additional Salary', self.additional_salary).cancel()
+			else:
+				frappe.db.set_value('Additional Salary', self.additional_salary, 'amount', bonus_removed)
 			
 			self.db_set('additional_salary', '')
-
-def check_if_linked_document_exists(doc):
-	linked_doctypes = ['Leave Encashment', 'Employee Incentive', 'Retention Bonus']
-	for doctype in linked_doctypes:
-		if frappe.db.get_value(doctype, filters={'additional_salary': doc.additional_salary, "docstatus": 1}) and doctype != doc.doctype:
-			return True
-
