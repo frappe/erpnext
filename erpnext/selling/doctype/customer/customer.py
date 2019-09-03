@@ -337,14 +337,15 @@ def make_contact(args, is_primary_contact=1):
 	contact = frappe.get_doc({
 		'doctype': 'Contact',
 		'first_name': args.get('name'),
-		'mobile_no': args.get('mobile_no'),
-		'email_id': args.get('email_id'),
 		'is_primary_contact': is_primary_contact,
 		'links': [{
 			'link_doctype': args.get('doctype'),
 			'link_name': args.get('name')
 		}]
-	}).insert()
+	})
+	contact.add_email(args.get('email_id'))
+	contact.add_phone(args.get('mobile_no'))
+	contact.insert()
 
 	return contact
 
