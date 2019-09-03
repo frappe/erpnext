@@ -1,5 +1,5 @@
 {
- "autoname": "format:APMT-{appointment_date}-{####}",
+ "autoname": "format:APMT-{scheduled_time}-{####}",
  "creation": "2019-08-27 10:48:27.926283",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -48,7 +48,7 @@
    "reqd": 1
   }
  ],
- "modified": "2019-09-01 10:19:50.711989",
+ "modified": "2019-09-03 14:07:16.837591",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
