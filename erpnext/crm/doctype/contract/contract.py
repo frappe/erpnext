@@ -88,7 +88,7 @@ def get_status(start_date, end_date):
 	end_date = getdate(end_date)
 	now_date = getdate(nowdate())
 
-	return "Active" if start_date < now_date < end_date else "Inactive"
+	return "Active" if start_date <= now_date <= end_date else "Inactive"
 
 
 def update_status_for_contracts():
