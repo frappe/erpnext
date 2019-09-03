@@ -632,3 +632,4 @@ execute:frappe.reload_doc('desk', 'doctype','dashboard_chart')
 erpnext.patches.v12_0.add_default_dashboards
 erpnext.patches.v12_0.remove_bank_remittance_custom_fields
 erpnext.patches.v12_0.generate_leave_ledger_entries
+execute:frappe.delete_doc_if_exists("Report", "Loan Repayment")

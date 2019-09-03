@@ -6,7 +6,6 @@ import frappe
 from frappe import _
 
 def execute(filters=None):
-
 	columns = create_columns()
 	data = get_record()
 	return columns, data

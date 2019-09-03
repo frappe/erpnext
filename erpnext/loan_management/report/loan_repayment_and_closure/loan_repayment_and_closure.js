@@ -2,8 +2,8 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Loan Repayment"] = {
+frappe.query_reports["Loan Repayment and Closure"] = {
 	"filters": [
 
 	]
-}
+};
