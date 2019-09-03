@@ -30,11 +30,11 @@ class LoanApplication(Document):
 			monthly_interest_rate = flt(self.rate_of_interest) / (12 *100)
 			if monthly_interest_rate:
 				min_repayment_amount = self.loan_amount*monthly_interest_rate
-				if self.repayment_amount - min_repayment_amount < 0:
+				if (self.repayment_amount - min_repayment_amount) <= 0:
 					frappe.throw(_("Repayment Amount must be greater than " \
 						+ str(flt(min_repayment_amount, 2))))
-				self.repayment_periods = math.ceil(math.log(self.repayment_amount) -
-					math.log(self.repayment_amount - min_repayment_amount) /(math.log(1 + monthly_interest_rate)))
+				self.repayment_periods = math.ceil((math.log(self.repayment_amount) -
+					math.log(self.repayment_amount - min_repayment_amount)) /(math.log(1 + monthly_interest_rate)))
 			else:
 				self.repayment_periods = self.loan_amount / self.repayment_amount
 
@@ -58,6 +58,9 @@ def make_loan(source_name, target_doc = None):
 	doclist = get_mapped_doc("Loan Application", source_name, {
 		"Loan Application": {
 			"doctype": "Loan",
+			"field_map": {
+				"repayment_amount": "monthly_repayment_amount"
+			},
 			"validation": {
 				"docstatus": ["=", 1]
 			}
