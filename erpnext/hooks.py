@@ -352,3 +352,8 @@ user_privacy_documents = [
 		'personal_fields': ['contact_mobile', 'contact_display', 'customer_name'],
 	}
 ]
+
+custom_module_name_to_module_map = {
+	"Accounts": "Accounting",
+	"HR": "Human Resources"
+}
