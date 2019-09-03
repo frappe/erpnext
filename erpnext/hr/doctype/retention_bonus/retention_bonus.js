@@ -16,7 +16,7 @@ frappe.ui.form.on('Retention Bonus', {
 				filters: {
 					"type": "Earning"
 				}
-			}
+			};
 		});
 	}
 });

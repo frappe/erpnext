@@ -16,7 +16,7 @@ frappe.ui.form.on('Employee Incentive', {
 				filters: {
 					"type": "Earning"
 				}
-			}
+			};
 		});
 	}
 });
