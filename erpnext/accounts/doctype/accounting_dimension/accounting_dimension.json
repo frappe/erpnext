@@ -1,6 +1,4 @@
 {
- "_comments": "[]",
- "_liked_by": "[]",
  "autoname": "field:label",
  "creation": "2019-05-04 18:13:37.002352",
  "doctype": "DocType",
@@ -9,8 +7,7 @@
   "document_type",
   "label",
   "fieldname",
-  "mandatory_for_bs",
-  "mandatory_for_pl",
+  "dimension_defaults",
   "disabled"
  ],
  "fields": [
@@ -38,22 +35,18 @@
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Disable"
+   "hidden": 1,
+   "label": "Disable",
+   "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "mandatory_for_bs",
-   "fieldtype": "Check",
-   "label": "Mandatory For Balance Sheet"
-  },
-  {
-   "default": "0",
-   "fieldname": "mandatory_for_pl",
-   "fieldtype": "Check",
-   "label": "Mandatory For Profit and Loss Account"
+   "fieldname": "dimension_defaults",
+   "fieldtype": "Table",
+   "label": "Dimension Defaults",
+   "options": "Accounting Dimension Detail"
   }
  ],
- "modified": "2019-05-27 18:18:17.792726",
+ "modified": "2019-07-17 16:49:31.134385",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension",

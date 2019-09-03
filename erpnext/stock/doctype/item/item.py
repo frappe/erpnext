@@ -124,6 +124,7 @@ class Item(WebsiteGenerator):
 		self.update_defaults_from_item_group()
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
+		self.update_show_in_website()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -197,6 +198,9 @@ class Item(WebsiteGenerator):
 					'route')) + '/' + self.scrub((self.item_name if self.item_name else self.item_code) + '-' + random_string(5))
 
 	def validate_website_image(self):
+		if frappe.flags.in_import:
+			return
+
 		"""Validate if the website image is a public file"""
 		auto_set_website_image = False
 		if not self.website_image and self.image:
@@ -216,8 +220,7 @@ class Item(WebsiteGenerator):
 
 		if not file_doc:
 			if not auto_set_website_image:
-				frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found")
-									.format(self.website_image, self.name))
+				frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found").format(self.website_image, self.name))
 
 			self.website_image = None
 
@@ -228,6 +231,9 @@ class Item(WebsiteGenerator):
 			self.website_image = None
 
 	def make_thumbnail(self):
+		if frappe.flags.in_import:
+			return
+
 		"""Make a thumbnail of `website_image`"""
 		import requests.exceptions
 
@@ -470,6 +476,10 @@ class Item(WebsiteGenerator):
 				to_remove.append(d)
 
 		[self.remove(d) for d in to_remove]
+
+	def update_show_in_website(self):
+		if self.disabled:
+			self.show_in_website = False
 
 	def update_template_tables(self):
 		template = frappe.get_doc("Item", self.variant_of)
@@ -1007,7 +1017,7 @@ def invalidate_item_variants_cache_for_website(doc):
 
 	if item_code:
 		item_cache = ItemVariantsCacheManager(item_code)
-		item_cache.rebuild_cache()
+		item_cache.clear_cache()
 
 
 def check_stock_uom_with_bin(item, stock_uom):

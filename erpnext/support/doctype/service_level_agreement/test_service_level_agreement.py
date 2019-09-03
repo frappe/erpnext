@@ -10,6 +10,8 @@ from erpnext.support.doctype.service_level.test_service_level import create_serv
 class TestServiceLevelAgreement(unittest.TestCase):
 
 	def test_service_level_agreement(self):
+		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
+
 		create_service_level_for_sla()
 
 		# Default Service Level Agreement
@@ -74,6 +76,7 @@ def create_service_level_agreement(default_service_level_agreement, service_leve
 
 	service_level_agreement = frappe.get_doc({
 		"doctype": "Service Level Agreement",
+		"enable": 1,
 		"default_service_level_agreement": default_service_level_agreement,
 		"service_level": service_level,
 		"holiday_list": holiday_list,

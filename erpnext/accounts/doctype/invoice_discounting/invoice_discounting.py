@@ -12,6 +12,7 @@ from erpnext.accounts.general_ledger import make_gl_entries
 class InvoiceDiscounting(AccountsController):
 	def validate(self):
 		self.validate_mandatory()
+		self.validate_invoices()
 		self.calculate_total_amount()
 		self.set_status()
 		self.set_end_date()
@@ -24,22 +25,52 @@ class InvoiceDiscounting(AccountsController):
 		if self.docstatus == 1 and not (self.loan_start_date and self.loan_period):
 			frappe.throw(_("Loan Start Date and Loan Period are mandatory to save the Invoice Discounting"))
 
+	def validate_invoices(self):
+		discounted_invoices = [record.sales_invoice for record in 
+			frappe.get_all("Discounted Invoice",fields = ["sales_invoice"], filters= {"docstatus":1})]
+
+		for record in self.invoices:
+			if record.sales_invoice in discounted_invoices:
+				frappe.throw("Row({0}): {1} is already discounted in {2}"
+					.format(record.idx, frappe.bold(record.sales_invoice), frappe.bold(record.parent)))
+
 	def calculate_total_amount(self):
 		self.total_amount = sum([flt(d.outstanding_amount) for d in self.invoices])
 
 	def on_submit(self):
+		self.update_sales_invoice()
 		self.make_gl_entries()
 
 	def on_cancel(self):
 		self.set_status()
+		self.update_sales_invoice()
 		self.make_gl_entries()
 
-	def set_status(self):
-		self.status = "Draft"
-		if self.docstatus == 1:
-			self.status = "Sanctioned"
-		elif self.docstatus == 2:
-			self.status = "Cancelled"
+	def set_status(self, status=None):
+		if status:
+			self.status = status
+			self.db_set("status", status)
+			for d in self.invoices:
+				frappe.get_doc("Sales Invoice", d.sales_invoice).set_status(update=True, update_modified=False)
+		else:
+			self.status = "Draft"
+			if self.docstatus == 1:
+				self.status = "Sanctioned"
+			elif self.docstatus == 2:
+				self.status = "Cancelled"
+
+	def update_sales_invoice(self):
+		for d in self.invoices:
+			if self.docstatus == 1:
+				is_discounted = 1
+			else:
+				discounted_invoice = frappe.db.exists({
+					"doctype": "Discounted Invoice",
+					"sales_invoice": d.sales_invoice,
+					"docstatus": 1
+				})
+				is_discounted = 1 if discounted_invoice else 0
+			frappe.db.set_value("Sales Invoice", d.sales_invoice, "is_discounted", is_discounted)
 
 	def make_gl_entries(self):
 		company_currency = frappe.get_cached_value('Company',  self.company, "default_currency")
@@ -191,7 +222,8 @@ def get_invoices(filters):
 			name as sales_invoice,
 			customer,
 			posting_date,
-			outstanding_amount
+			outstanding_amount,
+			debit_to
 		from `tabSales Invoice` si
 		where
 			docstatus = 1

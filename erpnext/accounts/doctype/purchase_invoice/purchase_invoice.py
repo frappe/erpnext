@@ -336,8 +336,10 @@ class PurchaseInvoice(BuyingController):
 
 		if not self.is_return:
 			self.update_against_document_in_jv()
+			self.update_billing_status_for_zero_amount_refdoc("Purchase Receipt")
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
-			self.update_billing_status_in_pr()
+
+		self.update_billing_status_in_pr()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
@@ -416,6 +418,7 @@ class PurchaseInvoice(BuyingController):
 					"account": self.credit_to,
 					"party_type": "Supplier",
 					"party": self.supplier,
+					"due_date": self.due_date,
 					"against": self.against_expense_account,
 					"credit": grand_total_in_company_currency,
 					"credit_in_account_currency": grand_total_in_company_currency \
@@ -772,8 +775,10 @@ class PurchaseInvoice(BuyingController):
 		self.update_prevdoc_status()
 
 		if not self.is_return:
+			self.update_billing_status_for_zero_amount_refdoc("Purchase Receipt")
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
-			self.update_billing_status_in_pr()
+
+		self.update_billing_status_in_pr()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO

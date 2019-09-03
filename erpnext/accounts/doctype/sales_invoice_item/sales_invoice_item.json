@@ -764,6 +764,7 @@
    "label": "Image"
   },
   {
+   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -782,7 +783,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-06-28 17:30:12.156086",
+ "modified": "2019-07-16 16:36:46.527606",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

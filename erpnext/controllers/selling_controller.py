@@ -45,6 +45,7 @@ class SellingController(StockController):
 		self.set_gross_profit()
 		set_default_income_account_for_item(self)
 		self.set_customer_address()
+		self.validate_for_duplicate_items()
 
 	def set_missing_values(self, for_validate=False):
 
@@ -380,6 +381,34 @@ class SellingController(StockController):
 		for address_field, address_display_field in address_dict.items():
 			if self.get(address_field):
 				self.set(address_display_field, get_address_display(self.get(address_field)))
+
+	def validate_for_duplicate_items(self):
+		check_list, chk_dupl_itm = [], []
+		if cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
+			return
+
+		for d in self.get('items'):
+			if self.doctype == "Sales Invoice":
+				e = [d.item_code, d.description, d.warehouse, d.sales_order or d.delivery_note, d.batch_no or '']
+				f = [d.item_code, d.description, d.sales_order or d.delivery_note]
+			elif self.doctype == "Delivery Note":
+				e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
+				f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
+			elif self.doctype in ["Sales Order", "Quotation"]:
+				e = [d.item_code, d.description, d.warehouse, '']
+				f = [d.item_code, d.description]
+
+			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
+				if e in check_list:
+					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
+				else:
+					check_list.append(e)
+			else:
+				if f in chk_dupl_itm:
+					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
+				else:
+					chk_dupl_itm.append(f)
+
 
 	def validate_items(self):
 		# validate items to see if they have is_sales_item enabled

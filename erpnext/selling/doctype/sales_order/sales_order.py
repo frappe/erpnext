@@ -14,7 +14,7 @@ from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.controllers.selling_controller import SellingController
-from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
+from frappe.automation.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -72,9 +72,7 @@ class SalesOrder(SellingController):
 				frappe.msgprint(_("Warning: Sales Order {0} already exists against Customer's Purchase Order {1}").format(so[0][0], self.po_no))
 
 	def validate_for_items(self):
-		check_list = []
 		for d in self.get('items'):
-			check_list.append(cstr(d.item_code))
 
 			# used for production plan
 			d.transaction_date = self.transaction_date
@@ -82,13 +80,6 @@ class SalesOrder(SellingController):
 			tot_avail_qty = frappe.db.sql("select projected_qty from `tabBin` \
 				where item_code = %s and warehouse = %s", (d.item_code, d.warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
-
-		# check for same entry multiple times
-		unique_chk_list = set(check_list)
-		if len(unique_chk_list) != len(check_list) and \
-			not cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
-			frappe.msgprint(_("Same item has been entered multiple times"),
-				title=_("Warning"), indicator='orange')
 
 	def product_bundle_has_stock_item(self, product_bundle):
 		"""Returns true if product bundle has stock item"""
@@ -492,13 +483,29 @@ def close_or_unclose_sales_orders(names, status):
 
 	frappe.local.message_log = []
 
+def get_requested_item_qty(sales_order):
+	return frappe._dict(frappe.db.sql("""
+		select sales_order_item, sum(stock_qty)
+		from `tabMaterial Request Item`
+		where docstatus = 1
+			and sales_order = %s
+		group by sales_order_item
+	""", sales_order))
+
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
+	requested_item_qty = get_requested_item_qty(source_name)
+
 	def postprocess(source, doc):
 		doc.material_request_type = "Purchase"
 
 	def update_item(source, target, source_parent):
+		# qty is for packed items, because packed items don't have stock_qty field
+		qty = source.get("stock_qty") or source.get("qty")
 		target.project = source_parent.project
+		target.qty = qty - requested_item_qty.get(source.name, 0)
+		target.conversion_factor = 1
+		target.stock_qty = qty - requested_item_qty.get(source.name, 0)
 
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -523,7 +530,7 @@ def make_material_request(source_name, target_doc=None):
 				"stock_uom": "uom",
 				"stock_qty": "qty"
 			},
-			"condition": lambda doc: not frappe.db.exists('Product Bundle', doc.item_code),
+			"condition": lambda doc: not frappe.db.exists('Product Bundle', doc.item_code) and doc.stock_qty > requested_item_qty.get(doc.name, 0),
 			"postprocess": update_item
 		}
 	}, target_doc, postprocess)
@@ -547,18 +554,12 @@ def make_project(source_name, target_doc=None):
 				"base_grand_total" : "estimated_costing",
 			}
 		},
-		"Sales Order Item": {
-			"doctype": "Project Task",
-			"field_map": {
-				"item_code": "title",
-			},
-		}
 	}, target_doc, postprocess)
 
 	return doc
 
 @frappe.whitelist()
-def make_delivery_note(source_name, target_doc=None):
+def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 	def set_missing_values(source, target):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
@@ -583,22 +584,12 @@ def make_delivery_note(source_name, target_doc=None):
 				or item.get("buying_cost_center") \
 				or item_group.get("buying_cost_center")
 
-	target_doc = get_mapped_doc("Sales Order", source_name, {
+	mapper = {
 		"Sales Order": {
 			"doctype": "Delivery Note",
 			"validation": {
 				"docstatus": ["=", 1]
 			}
-		},
-		"Sales Order Item": {
-			"doctype": "Delivery Note Item",
-			"field_map": {
-				"rate": "rate",
-				"name": "so_detail",
-				"parent": "against_sales_order",
-			},
-			"postprocess": update_item,
-			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
@@ -608,7 +599,21 @@ def make_delivery_note(source_name, target_doc=None):
 			"doctype": "Sales Team",
 			"add_if_empty": True
 		}
-	}, target_doc, set_missing_values)
+	}
+
+	if not skip_item_mapping:
+		mapper["Sales Order Item"] = {
+			"doctype": "Delivery Note Item",
+			"field_map": {
+				"rate": "rate",
+				"name": "so_detail",
+				"parent": "against_sales_order",
+			},
+			"postprocess": update_item,
+			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
+		}
+
+	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
 
 	return target_doc
 
@@ -986,3 +991,33 @@ def make_raw_material_request(items, company, sales_order, project=None):
 def make_inter_company_purchase_order(source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 	return make_inter_company_transaction("Sales Order", source_name, target_doc)
+
+@frappe.whitelist()
+def create_pick_list(source_name, target_doc=None):
+	def update_item_quantity(source, target, source_parent):
+		target.qty = flt(source.qty) - flt(source.delivered_qty)
+		target.stock_qty = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.conversion_factor)
+
+	doc = get_mapped_doc('Sales Order', source_name, {
+		'Sales Order': {
+			'doctype': 'Pick List',
+			'validation': {
+				'docstatus': ['=', 1]
+			}
+		},
+		'Sales Order Item': {
+			'doctype': 'Pick List Item',
+			'field_map': {
+				'parent': 'sales_order',
+				'name': 'sales_order_item'
+			},
+			'postprocess': update_item_quantity,
+			'condition': lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
+		},
+	}, target_doc)
+
+	doc.purpose = 'Delivery against Sales Order'
+
+	doc.set_item_locations()
+
+	return doc

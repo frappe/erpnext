@@ -400,7 +400,9 @@ class BuyingController(StockController):
 	def set_qty_as_per_stock_uom(self):
 		for d in self.get("items"):
 			if d.meta.get_field("stock_qty"):
-				if not d.conversion_factor:
+				# Check if item code is present
+				# Conversion factor should not be mandatory for non itemized items
+				if not d.conversion_factor and d.item_code:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
 
@@ -674,7 +676,8 @@ class BuyingController(StockController):
 		asset.set_missing_values()
 		asset.insert()
 
-		frappe.msgprint(_("Asset {0} created").format(asset.name))
+		asset_link = frappe.utils.get_link_to_form('Asset', asset.name)
+		frappe.msgprint(_("Asset {0} created").format(asset_link))
 		return asset.name
 
 	def make_asset_movement(self, row):
@@ -770,7 +773,7 @@ def get_items_from_bom(item_code, bom, exploded_item=1):
 		where
 			t2.parent = t1.name and t1.item = %s
 			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s
-			and t2.item_code = t3.name and t3.is_stock_item = 1""".format(doctype),
+			and t2.item_code = t3.name""".format(doctype),
 			(item_code, bom), as_dict=1)
 
 	if not bom_items:

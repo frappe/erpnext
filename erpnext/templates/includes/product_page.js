@@ -29,10 +29,10 @@ frappe.ready(function() {
 						.html(r.message.product_info.price.formatted_price_sales_uom + "<div style='font-size: small'>\
 							(" + r.message.product_info.price.formatted_price + " / " + r.message.product_info.uom + ")</div>");
 
-					if(r.message.product_info.in_stock==0) {
+					if(r.message.product_info.in_stock===0) {
 						$(".item-stock").html("<div style='color: red'> <i class='fa fa-close'></i> {{ _("Not in stock") }}</div>");
 					}
-					else if(r.message.product_info.in_stock==1) {
+					else if(r.message.product_info.in_stock===1 && r.message.cart_settings.show_stock_availability) {
 						var qty_display = "{{ _("In stock") }}";
 						if (r.message.product_info.show_stock_qty) {
 							qty_display += " ("+r.message.product_info.stock_qty+")";
@@ -75,13 +75,13 @@ frappe.ready(function() {
 			newVal = 0;
 
 		if (btn.attr('data-dir') == 'up') {
-			newVal = parseInt(oldValue) + 1;
+			newVal = Number.parseInt(oldValue) + 1;
 		} else if (btn.attr('data-dir') == 'dwn')  {
-			if (parseInt(oldValue) > 1) {
-				newVal = parseInt(oldValue) - 1;
+			if (Number.parseInt(oldValue) > 1) {
+				newVal = Number.parseInt(oldValue) - 1;
 			}
 			else {
-				newVal = parseInt(oldValue);
+				newVal = Number.parseInt(oldValue);
 			}
 		}
 		input.val(newVal);

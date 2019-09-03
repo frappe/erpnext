@@ -51,7 +51,7 @@ class DeliveryNote(SellingController):
 			'source_field': 'qty',
 			'percent_join_field': 'against_sales_invoice',
 			'overflow_type': 'delivery',
-			'no_tolerance': 1
+			'no_allowance': 1
 		}]
 		if cint(self.is_return):
 			self.status_updater.append({
@@ -166,24 +166,7 @@ class DeliveryNote(SellingController):
 				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
 
 	def validate_for_items(self):
-		check_list, chk_dupl_itm = [], []
-		if cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
-			return
-
 		for d in self.get('items'):
-			e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
-			f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
-
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
-				if e in check_list:
-					frappe.msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
-				else:
-					check_list.append(e)
-			else:
-				if f in chk_dupl_itm:
-					frappe.msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
-				else:
-					chk_dupl_itm.append(f)
 			#Customer Provided parts will have zero valuation rate
 			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
 				d.allow_zero_valuation_rate = 1
@@ -333,7 +316,10 @@ class DeliveryNote(SellingController):
 			return_invoice.is_return = True
 			return_invoice.save()
 			return_invoice.submit()
-			frappe.msgprint(_("Credit Note {0} has been created automatically").format(return_invoice.name))
+
+			credit_note_link = frappe.utils.get_link_to_form('Sales Invoice', return_invoice.name)
+
+			frappe.msgprint(_("Credit Note {0} has been created automatically").format(credit_note_link))
 		except:
 			frappe.throw(_("Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"))
 

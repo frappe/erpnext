@@ -96,13 +96,13 @@ def delete_accounting_dimension(doc):
 
 	frappe.db.sql("""
 		DELETE FROM `tabCustom Field`
-		WHERE  fieldname = %s
+		WHERE fieldname = %s
 		AND dt IN (%s)""" %			#nosec
 		('%s', ', '.join(['%s']* len(doclist))), tuple([doc.fieldname] + doclist))
 
 	frappe.db.sql("""
 		DELETE FROM `tabProperty Setter`
-		WHERE  field_name = %s
+		WHERE field_name = %s
 		AND doc_type IN (%s)""" %		#nosec
 		('%s', ', '.join(['%s']* len(doclist))), tuple([doc.fieldname] + doclist))
 
@@ -121,11 +121,11 @@ def delete_accounting_dimension(doc):
 @frappe.whitelist()
 def disable_dimension(doc):
 	if frappe.flags.in_test:
-		frappe.enqueue(start_dimension_disabling, doc=doc)
+		toggle_disabling(doc=doc)
 	else:
-		start_dimension_disabling(doc=doc)
+		frappe.enqueue(toggle_disabling, doc=doc)
 
-def start_dimension_disabling(doc):
+def toggle_disabling(doc):
 	doc = json.loads(doc)
 
 	if doc.get('disabled'):
@@ -150,14 +150,40 @@ def get_doctypes_with_dimensions():
 		"Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item", "Purchase Receipt Item",
 		"Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
 		"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
-		"Travel Request", "Fees", "POS Profile"]
+		"Travel Request", "Fees", "POS Profile", "Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item", "Subscription",
+		"Subscription Plan"]
 
 	return doclist
 
 def get_accounting_dimensions(as_list=True):
-	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["label", "fieldname", "mandatory_for_pl", "mandatory_for_bs", "disabled"])
+	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["label", "fieldname", "disabled"])
 
 	if as_list:
 		return [d.fieldname for d in accounting_dimensions]
 	else:
 		return accounting_dimensions
+
+def get_checks_for_pl_and_bs_accounts():
+	dimensions = frappe.db.sql("""SELECT p.label, p.disabled, p.fieldname, c.company, c.mandatory_for_pl, c.mandatory_for_bs
+		FROM `tabAccounting Dimension`p ,`tabAccounting Dimension Detail` c
+		WHERE p.name = c.parent""", as_dict=1)
+
+	return dimensions
+
+@frappe.whitelist()
+def get_dimension_filters():
+	dimension_filters = frappe.db.sql("""
+		SELECT label, fieldname, document_type
+		FROM `tabAccounting Dimension`
+		WHERE disabled = 0
+	""", as_dict=1)
+
+	default_dimensions = frappe.db.sql("""SELECT parent, company, default_dimension
+		FROM `tabAccounting Dimension Detail`""", as_dict=1)
+
+	default_dimensions_map = {}
+	for dimension in default_dimensions:
+		default_dimensions_map.setdefault(dimension['company'], {})
+		default_dimensions_map[dimension['company']][dimension['parent']] = dimension['default_dimension']
+
+	return dimension_filters, default_dimensions_map
