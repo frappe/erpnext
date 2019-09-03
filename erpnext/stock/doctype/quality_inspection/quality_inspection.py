@@ -63,10 +63,12 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		mcond = get_match_cond(filters["from"])
 		cond, qi_condition = "", "and (quality_inspection is null or quality_inspection = '')"
 
-		if filters.get('from') in ['Purchase Invoice Item', 'Purchase Receipt Item']:
+		if filters.get('from') in ['Purchase Invoice Item', 'Purchase Receipt Item']\
+				and filters.get("inspection_type") != "In Process":
 			cond = """and item_code in (select name from `tabItem` where
 				inspection_required_before_purchase = 1)"""
-		elif filters.get('from') in ['Sales Invoice Item', 'Delivery Note Item']:
+		elif filters.get('from') in ['Sales Invoice Item', 'Delivery Note Item']\
+				and filters.get("inspection_type") != "In Process":
 			cond = """and item_code in (select name from `tabItem` where
 				inspection_required_before_delivery = 1)"""
 		elif filters.get('from') == 'Stock Entry Detail':

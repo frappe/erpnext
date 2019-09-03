@@ -1762,6 +1762,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.si_docs = this.get_submitted_invoice() || [];
 		this.email_queue_list = this.get_email_queue() || {};
 		this.customers_list = this.get_customers_details() || {};
+
 		if(this.customer_doc) {
 			this.freeze = this.customer_doc.display
 		}

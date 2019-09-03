@@ -701,6 +701,7 @@ def create_delivery_note(**args):
 		"qty": args.qty or 1,
 		"rate": args.rate or 100,
 		"conversion_factor": 1.0,
+		"allow_zero_valuation_rate": args.allow_zero_valuation_rate or 1,
 		"expense_account": "Cost of Goods Sold - _TC",
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no,
