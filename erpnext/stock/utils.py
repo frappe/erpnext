@@ -247,6 +247,16 @@ def is_group_warehouse(warehouse):
 	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
 		frappe.throw(_("Group node warehouse is not allowed to select for transactions"))
 
+def format_item_name(doc):
+	if doc.get('item_name') and doc.get('item_name') != doc.get('item_code'):
+		if doc.get('hide_item_code'):
+			return doc.get('item_name')
+		else:
+			return "{0}: {1}".format(doc.get('item_code'), doc.get('item_name')) if doc.get('item_name')\
+				else doc.get('item_code')
+	else:
+		return doc.get('item_code')
+
 def update_included_uom_in_list_report(columns, result, include_uom, conversion_factors):
 	if not include_uom or not conversion_factors:
 		return

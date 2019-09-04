@@ -21,8 +21,8 @@ $.extend(erpnext, {
 	},
 
 	toggle_naming_series: function() {
-		if(cur_frm.fields_dict.naming_series) {
-			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal?true:false);
+		if(cur_frm.fields_dict.naming_series && !cur_frm.doc.__islocal) {
+			cur_frm.toggle_display("naming_series", false);
 		}
 	},
 
@@ -337,6 +337,44 @@ $.extend(erpnext.utils, {
 			}
 
 			frm.set_value(fieldname, value);
+		}
+	},
+
+	set_item_naming_series_options: function(frm) {
+		frappe.model.with_doctype("Item", function() {
+			var item_series = cstr(frappe.meta.get_docfield("Item", "naming_series").options).split("\n");
+			if (item_series.length || item_series[0]) {
+				item_series.unshift('');
+			}
+			frm.set_df_property("item_naming_series", "options", item_series.join('\n'));
+		});
+	},
+
+	set_override_item_naming_by: function(frm) {
+		if (!frm.doc.item_group && !frm.doc.brand) {
+			frm.set_df_property('item_naming_by', 'read_only', 0);
+			frm.set_df_property('naming_series', 'read_only', 0);
+		} else {
+			frappe.call({
+				method: "erpnext.stock.doctype.item.item.get_override_naming_by",
+				args: {
+					item_group_name: frm.doc.item_group,
+					brand_name: frm.doc.brand
+				},
+				callback: function (r) {
+					if (r.message) {
+						frm.set_df_property('item_naming_by', 'read_only', r.message.override_naming_by ? 1 : 0);
+						frm.set_df_property('naming_series', 'read_only', (r.message.override_naming_by && r.message.override_naming_series) ? 1 : 0);
+
+						if (r.message.override_naming_by) {
+							frm.get_field('item_naming_by').set_value(r.message.override_naming_by);
+							if (r.message.override_naming_series) {
+								frm.get_field('naming_series').set_value(r.message.override_naming_series);
+							}
+						}
+					}
+				}
+			});
 		}
 	},
 
@@ -673,7 +711,11 @@ erpnext.utils.map_current_doc = function(opts) {
 
 frappe.form.link_formatters['Item'] = function(value, doc) {
 	if(doc && doc.item_name && doc.item_name !== value) {
-		return value? value + ': ' + doc.item_name: doc.item_name;
+		if (doc.hide_item_code) {
+			return doc.item_name;
+		} else {
+			return value ? value + ': ' + doc.item_name : doc.item_name;
+		}
 	} else {
 		return value;
 	}

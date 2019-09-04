@@ -286,6 +286,12 @@ get_site_info = 'erpnext.utilities.get_site_info'
 
 payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account"
 
+jenv = {
+	'methods': [
+		'format_item_name:erpnext.stock.utils.format_item_name'
+	]
+}
+
 regional_overrides = {
 	'France': {
 		'erpnext.tests.test_regional.test_method': 'erpnext.regional.france.utils.test_method'

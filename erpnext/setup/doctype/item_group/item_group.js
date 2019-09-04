@@ -61,6 +61,8 @@ frappe.ui.form.on("Item Group", {
 				frappe.set_route("List", "Item", {"item_group": frm.doc.name});
 			});
 		}
+
+		erpnext.utils.set_item_naming_series_options(frm);
 	},
 
 	set_root_readonly: function(frm) {

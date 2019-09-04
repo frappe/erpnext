@@ -444,6 +444,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					args: {
 						args: {
 							item_code: item.item_code,
+							hide_item_code: item.hide_item_code,
 							barcode: item.barcode,
 							serial_no: item.serial_no,
 							set_warehouse: me.frm.doc.set_warehouse,

@@ -83,12 +83,7 @@ frappe.ui.form.on("Item", {
 				[`<a href="#Form/Item/${frm.doc.variant_of}">${frm.doc.variant_of}</a>`]), true);
 		}
 
-		if (frappe.defaults.get_default("item_naming_by")!="Naming Series" || frm.doc.variant_of) {
-			frm.toggle_display("naming_series", false);
-		} else {
-			erpnext.toggle_naming_series();
-		}
-
+		erpnext.item.toggle_naming_fields(frm);
 		erpnext.item.edit_prices_button(frm);
 		erpnext.item.toggle_attributes(frm);
 
@@ -146,6 +141,17 @@ frappe.ui.form.on("Item", {
 	},
 
 	page_name: frappe.utils.warn_page_name_change,
+
+	brand: function(frm) {
+		erpnext.utils.set_override_item_naming_by(frm);
+	},
+	item_group: function(frm) {
+		erpnext.utils.set_override_item_naming_by(frm);
+	},
+
+	item_naming_by: function(frm) {
+		erpnext.item.toggle_naming_fields(frm);
+	},
 
 	item_code: function(frm) {
 		if(!frm.doc.item_name)
@@ -354,12 +360,20 @@ $.extend(erpnext.item, {
 
 	edit_prices_button: function(frm) {
 		frm.add_custom_button(__("Add / Edit Prices"), function() {
-			frappe.set_route("List", "Item Price", {"item_code": frm.doc.name});
+			frappe.set_route("query-report", "Item Prices", {"item_code": frm.doc.name});
 		}, __("View"));
 	},
 
+	toggle_naming_fields: function(frm) {
+		frm.toggle_reqd("item_name", frm.doc.item_naming_by == "Item Name" ? 1 : 0);
+		if (frm.doc.__islocal) {
+			frm.toggle_reqd("item_code", frm.doc.item_naming_by == "Item Code" ? 1 : 0);
+			frm.toggle_reqd("naming_series", frm.doc.item_naming_by == "Naming Series" ? 1 : 0);
+		}
+	},
+
 	weight_to_validate: function(frm){
-		if((frm.doc.nett_weight || frm.doc.gross_weight) && !frm.doc.weight_uom) {
+		if((frm.doc.net_weight || frm.doc.gross_weight) && !frm.doc.weight_uom) {
 			frappe.msgprint(__('Weight is mentioned,\nPlease mention "Weight UOM" too'));
 			frappe.validated = 0;
 		}

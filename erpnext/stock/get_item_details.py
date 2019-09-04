@@ -253,6 +253,7 @@ def get_basic_details(args, item):
 	out = frappe._dict({
 		"item_code": item.name,
 		"item_name": item.item_name,
+		"hide_item_code": get_hide_item_code(args, item),
 		"description": cstr(item.description).strip(),
 		"image": cstr(item.image).strip(),
 		"warehouse": warehouse,
@@ -503,6 +504,20 @@ def get_default_allow_zero_valuation_rate(args, item, item_group, brand, order_t
 		or item_group.get("allow_zero_valuation_rate"))
 
 	return cint(allow_zero_valuation_rate == "Yes" if allow_zero_valuation_rate else args.get('allow_zero_valuation_rate'))
+
+
+def get_hide_item_code(args, item):
+	brand = frappe.get_cached_doc("Brand", item.brand) if item.brand else {}
+	show_item_code = (item.get("show_item_code")
+		or brand.get("show_item_code"))
+
+	item_group_name = item.item_group
+	while item_group_name and not show_item_code:
+		item_group = frappe.get_cached_doc("Item Group", item_group_name)
+		show_item_code = item_group.get("show_item_code")
+		item_group_name = item_group.parent_item_group
+
+	return cint(show_item_code != "Yes" if show_item_code else args.get('hide_item_code'))
 
 @frappe.whitelist()
 def get_item_defaults_info(args, items):

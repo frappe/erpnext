@@ -15,10 +15,6 @@ class StockSettings(Document):
 			"allow_negative_stock", "default_warehouse", "set_qty_in_transactions_based_on_serial_no_input"]:
 				frappe.db.set_default(key, self.get(key, ""))
 
-		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
-		set_by_naming_series("Item", "item_code",
-			self.get("item_naming_by")=="Naming Series", hide_name_field=True)
-
 		stock_frozen_limit = 356
 		submitted_stock_frozen = self.stock_frozen_upto_days or 0
 		if submitted_stock_frozen > stock_frozen_limit:
@@ -29,6 +25,9 @@ class StockSettings(Document):
 		for name in ["barcode", "barcodes", "scan_barcode"]:
 			frappe.make_property_setter({'fieldname': name, 'property': 'hidden',
 				'value': 0 if self.show_barcode_field else 1})
+
+		frappe.make_property_setter({'doctype': 'Item', 'fieldname': 'item_naming_by', 'property': 'default',
+			'value': self.item_naming_by})
 
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()

@@ -25,7 +25,7 @@
 	{%- for row in doc.items -%}
 		<tr{% if row.page_break %} class="page-break"{% endif %}>
 			<td class="text-center">{{ row.idx }}</td>
-			<td>{{ row.item_name }}</td>
+			<td>{{ format_item_name(row) }}</td>
 			<td class="text-right">{{ row.qty }}</td>
 			{% if not uoms|length == 1 %}<td>{{ row.uom }}</td>{% endif %}
 			{% if show_alt_uom_cols %}

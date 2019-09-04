@@ -473,6 +473,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 		if(d.item_code) {
 			var args = {
 				'item_code'			: d.item_code,
+				'hide_item_code'	: d.hide_item_code,
 				'warehouse'			: cstr(d.s_warehouse) || cstr(d.t_warehouse),
 				'transfer_qty'		: d.transfer_qty,
 				'serial_no'		: d.serial_no,

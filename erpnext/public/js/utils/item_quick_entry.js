@@ -18,10 +18,26 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		this.dialog.fields_dict.attribute_html.$wrapper.append(frappe.render_template("item_quick_entry"));
 		this.init_for_create_variant_trigger();
 		this.init_for_item_template_trigger();
+		this.init_for_item_naming_by_trigger();
 		// explicitly hide manufacturing fields as hidden not working.
 		this.toggle_manufacturer_fields();
 		this.dialog.get_field("item_template").df.hidden = 1;
 		this.dialog.get_field("item_template").refresh();
+	},
+
+	init_for_item_naming_by_trigger: function() {
+		var me = this;
+		me.dialog.fields_dict["item_naming_by"].df.onchange = () => {
+			me.dialog.set_df_property("item_code", "reqd", me.dialog.doc.item_naming_by == "Item Code" ? 1 : 0);
+			me.dialog.set_df_property("item_name", "reqd", me.dialog.doc.item_naming_by == "Item Name" ? 1 : 0);
+			me.dialog.set_df_property("naming_series", "reqd", me.dialog.doc.item_naming_by == "Naming Series" ? 1 : 0);
+		};
+		me.dialog.fields_dict["brand"].df.onchange = () => {
+			erpnext.utils.set_override_item_naming_by(me.dialog);
+		};
+		me.dialog.fields_dict["item_group"].df.onchange = () => {
+			erpnext.utils.set_override_item_naming_by(me.dialog);
+		};
 	},
 
 	register_primary_action: function() {
@@ -173,7 +189,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		template_field.refresh();
 
 		// hide properties for variant
-		['item_code', 'item_name', 'item_group', 'stock_uom', 'alt_uom', 'alt_uom_size'].forEach((d) => {
+		['item_code', 'item_name', 'item_group', 'stock_uom'].forEach((d) => {
 			let f = this.dialog.get_field(d);
 			f.df.hidden = for_variant;
 			f.refresh();

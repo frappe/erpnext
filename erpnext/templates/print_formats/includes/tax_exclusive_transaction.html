@@ -72,7 +72,7 @@
 	<tr{% if row.page_break %} class="page-break"{% endif %}>
 		<td class="text-center">{{ row.idx }}</td>
 		<td>
-			{{ row.item_name }}
+			{{ format_item_name(row) }}
 			{% if row.serial_no %}<div>Serial #: {{ row.serial_no.split('\n')|join(', ') }}</div>{% endif %}
 		</td>
 		<td class="text-right">{{ row.get_formatted('qty') }}</td>

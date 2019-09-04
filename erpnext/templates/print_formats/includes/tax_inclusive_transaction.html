@@ -19,7 +19,7 @@
 	{%- for row in doc.items -%}
 		<tr{% if row.page_break %} class="page-break"{% endif %}>
 			<td class="text-center">{{ row.idx }}</td>
-			<td>{{ row.item_name }}</td>
+			<td>{{ format_item_name(row) }}</td>
 			<td class="text-right">{{ row.get_formatted("alt_uom_qty") }}</td>
 			{% if not uoms|length == 1 %}<td>{{ row.alt_uom_or_uom }}</td>{% endif %}
 			<td class="text-right text-nowrap">{{ frappe.format_value(row.tax_inclusive_amount / row.alt_uom_qty if row.alt_uom_qty else 0, row.meta.get_field("rate")) }}</td>

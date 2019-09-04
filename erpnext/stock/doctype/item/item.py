@@ -62,7 +62,19 @@ class Item(WebsiteGenerator):
 		self.set_onload('asset_naming_series', self._asset_naming_series)
 
 	def autoname(self):
-		if frappe.db.get_default("item_naming_by") == "Naming Series":
+		override = get_override_naming_by(self.item_group, self.brand, self.item_naming_by)
+		if override.override_naming_by:
+			self.item_naming_by = override.override_naming_by
+			if override.override_naming_series:
+				self.naming_series = override.override_naming_series
+
+		if self.item_naming_by == "Item Code" and not self.item_code:
+			frappe.throw(_("Item Code is mandatory"))
+
+		if self.item_naming_by == "Item Name" and not self.item_name:
+			frappe.throw(_("Item Name is mandatory"))
+
+		if self.item_naming_by == "Naming Series":
 			if self.variant_of:
 				if not self.item_code:
 					template_item_name = frappe.db.get_value("Item", self.variant_of, "item_name")
@@ -71,16 +83,15 @@ class Item(WebsiteGenerator):
 				from frappe.model.naming import set_name_by_naming_series
 				set_name_by_naming_series(self)
 				self.item_code = self.name
-
-		self.item_code = strip(self.item_code)
-		self.name = self.item_code
+		elif self.item_naming_by == "Item Code":
+			self.item_code = self.clean_name(self.item_code)
+			self.name = self.item_code
+		elif self.item_naming_by == "Item Name":
+			self.validate_item_name()
+			self.name = self.item_code = self.item_name
 
 	def before_insert(self):
-		if not self.description:
-			self.description = self.item_name
-
-		# if self.is_sales_item and not self.get('is_item_from_hub'):
-		# 	self.publish_in_hub = 1
+		pass
 
 	def after_insert(self):
 		'''set opening stock and item price'''
@@ -96,12 +107,7 @@ class Item(WebsiteGenerator):
 
 		super(Item, self).validate()
 
-		if not self.item_name:
-			self.item_name = self.item_code
-
-		if not self.description:
-			self.description = self.item_name
-
+		self.validate_item_name()
 		self.validate_uom()
 		self.validate_description()
 		self.add_alt_uom_in_conversion_table()
@@ -609,6 +615,19 @@ class Item(WebsiteGenerator):
 					frappe.throw(_("{0} entered twice in Item Tax").format(d.item_tax_template))
 				else:
 					check_list.append(d.item_tax_template)
+
+	@staticmethod
+	def clean_name(name):
+		return strip(cstr(name)).replace(r'/\s\s+/g', ' ')
+
+	def validate_item_name(self):
+		if not self.item_name:
+			self.item_name = self.item_code
+
+		self.item_name = self.clean_name(self.item_name)
+
+		if not self.description:
+			self.description = self.item_name
 
 	def validate_barcode(self):
 		from stdnum import ean
@@ -1119,6 +1138,35 @@ def get_item_attribute(parent, attribute_value=''):
 
 	return frappe.get_all("Item Attribute Value", fields = ["attribute_value"],
 		filters = {'parent': parent, 'attribute_value': ("like", "%%%s%%" % attribute_value)})
+
+@frappe.whitelist()
+def get_override_naming_by(item_group_name=None, brand_name=None, validate_item_naming_by=None):
+	override_naming_by = None
+	override_naming_series = None
+	if brand_name:
+		brand = frappe.get_cached_value("Brand", brand_name, ['item_naming_by', 'item_naming_series'], as_dict=1)
+		if brand and brand.item_naming_by:
+			if validate_item_naming_by and validate_item_naming_by != brand.item_naming_by:
+				frappe.throw(_("Items of Brand {0} must be named by {1}").format(brand_name, brand.item_naming_by))
+			if brand.item_naming_by == "Naming Series":
+				override_naming_series = brand.item_naming_series
+			override_naming_by = brand.item_naming_by
+
+	while item_group_name and not override_naming_by:
+		item_group = frappe.get_cached_value("Item Group", item_group_name,
+			['item_naming_by', 'item_naming_series', 'parent_item_group'], as_dict=1)
+		if item_group and item_group.item_naming_by:
+			if validate_item_naming_by and validate_item_naming_by != item_group.item_naming_by:
+				frappe.throw(_("Items under Item Group {0} must be named by {1}").format(item_group_name, item_group.item_naming_by))
+			if item_group.item_naming_by == "Naming Series":
+				override_naming_series = item_group.item_naming_series
+			override_naming_by = item_group.item_naming_by
+		item_group_name = item_group.parent_item_group
+
+	return frappe._dict({
+		"override_naming_by": override_naming_by,
+		"override_naming_series": override_naming_series
+	})
 
 def update_variants(variants, template, publish_progress=True):
 	count=0

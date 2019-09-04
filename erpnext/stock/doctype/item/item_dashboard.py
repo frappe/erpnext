@@ -28,20 +28,23 @@ def get_data():
 			},
 			{
 				'label': _('Buy'),
-				'items': ['Material Request', 'Supplier Quotation', 'Request for Quotation',
-					'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
+				'items': ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Landed Cost Voucher']
+			},
+			{
+				'label': _('Request'),
+				'items': ['Material Request', 'Supplier Quotation', 'Request for Quotation']
+			},
+			{
+				'label': _('Work Done'),
+				'items': ['Work Order', 'Maintenance Visit', 'Warranty Claim', 'Project']
+			},
+			{
+				'label': _('Move'),
+				'items': ['Stock Entry', 'Stock Reconciliation']
 			},
 			{
 				'label': _('Traceability'),
 				'items': ['Serial No', 'Batch']
 			},
-			{
-				'label': _('Move'),
-				'items': ['Stock Entry']
-			},
-			{
-				'label': _('Manufacture'),
-				'items': ['Work Order']
-			}
 		]
 	}

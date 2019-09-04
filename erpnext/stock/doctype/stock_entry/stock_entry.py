@@ -8,7 +8,8 @@ from frappe import _
 from frappe.utils import cstr, cint, flt, comma_or, getdate, nowdate, formatdate, format_time
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError, get_valuation_rate
-from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor, get_reserved_qty_for_so
+from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor,\
+	get_reserved_qty_for_so, get_hide_item_code
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty
@@ -665,7 +666,7 @@ class StockEntry(StockController):
 		item = frappe.db.sql("""select i.name, i.stock_uom, i.description, i.image, i.item_name, i.item_group,
 				i.has_batch_no, i.sample_quantity, i.has_serial_no,
 				id.expense_account, id.buying_cost_center,
-				i.alt_uom, i.alt_uom_size
+				i.alt_uom, i.alt_uom_size, i.show_item_code
 			from `tabItem` i LEFT JOIN `tabItem Default` id ON i.name=id.parent and id.company=%s
 			where i.name=%s
 				and i.disabled=0
@@ -685,6 +686,7 @@ class StockEntry(StockController):
 			'description'		  	: item.description,
 			'image'					: item.image,
 			'item_name' 		  	: item.item_name,
+			'hide_item_code'		: get_hide_item_code(args, item),
 			'cost_center'			: get_default_cost_center(args, item, item_group_defaults, brand_defaults, company=self.company),
 			'qty'					: args.get("qty"),
 			'transfer_qty'			: args.get('qty'),
