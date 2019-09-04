@@ -328,6 +328,7 @@ def create_duplicate_project(prev_doc, project_name):
 	# change the copied doc name to new project name
 	project = frappe.copy_doc(prev_doc)
 	project.name = project_name
+	project.project_template = ''
 	project.project_name = project_name
 	project.insert()
 
@@ -342,6 +343,8 @@ def create_duplicate_project(prev_doc, project_name):
 		new_task = frappe.copy_doc(task)
 		new_task.project = project.name
 		new_task.insert()
+
+	project.project_template = prev_doc.project_template
 
 	return project
 
