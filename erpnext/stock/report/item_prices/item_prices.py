@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
-from frappe.utils import flt, nowdate, getdate, cstr
+from frappe.utils import flt, nowdate, getdate, cstr, cint
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from erpnext.stock.doctype.item.item import convert_item_uom_for
 from six import iteritems, string_types
@@ -64,13 +64,14 @@ def get_printable_data(columns, data, filters):
 def get_data(filters):
 	conditions = get_item_conditions(filters, use_doc_name=False)
 	item_conditions = get_item_conditions(filters, use_doc_name=True)
+	show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
 
 	price_lists, selected_price_list = get_price_lists(filters)
 	price_lists_cond = " and p.price_list in ('{0}')".format("', '".join([frappe.db.escape(d) for d in price_lists]))
 
 	item_data = frappe.db.sql("""
 		select item.name as item_code, item.item_name, item.item_group, item.stock_uom, item.sales_uom, item.alt_uom, item.alt_uom_size,
-			item.print_in_price_list
+			item.hide_in_price_list
 		from tabItem item
 		where disabled != 1 {0}
 	""".format(item_conditions), filters, as_dict=1)
@@ -103,6 +104,7 @@ def get_data(filters):
 		inner join `tabItem` item on item.name = p.item_code
 		where %(date)s between ifnull(p.valid_from, '2000-01-01') and ifnull(p.valid_upto, '2500-12-31')
 			and ifnull(p.customer, '') = '' and ifnull(p.supplier, '') = '' {0} {1}
+		order by p.uom
 	""".format(item_conditions, price_lists_cond), filters, as_dict=1)
 
 	previous_item_prices = frappe.db.sql("""
@@ -115,17 +117,21 @@ def get_data(filters):
 
 	items_map = {}
 	for d in item_data:
+		default_uom = d.purchase_uom if filters.buying_selling == "Buying" else d.sales_uom
 		if filters.uom:
 			d['uom'] = filters.uom
 		elif filters.default_uom == "Stock UOM":
 			d['uom'] = d.stock_uom
 		elif filters.default_uom == "Contents UOM":
-			d['uom'] = d.alt_uom
+			d['uom'] = d.alt_uom or default_uom
 		else:
-			d['uom'] = d.purchase_uom if filters.buying_selling == "Buying" else d.sales_uom
+			d['uom'] = default_uom
 
 		if not d.get('uom'):
 			d['uom'] = d.stock_uom
+
+		d['print_in_price_list'] = cint(not d['hide_in_price_list'])
+		del d['hide_in_price_list']
 
 		d['alt_uom_size'] = convert_item_uom_for(d.alt_uom_size, d.item_code, d.stock_uom, d.uom)
 		items_map[d.item_code] = d
@@ -147,8 +153,13 @@ def get_data(filters):
 	item_price_map = {}
 	for d in item_price_data:
 		if d.item_code in items_map and d.price_list_rate is not None:
+			current_item = items_map[d.item_code]
 			price = item_price_map.setdefault(d.item_code, {}).setdefault(d.price_list, frappe._dict())
-			if price.get('current_price') is None or cstr(d.uom) == cstr(items_map[d.item_code].uom):
+			pick_price = (cstr(d.uom) == cstr(current_item.uom)
+					or (cstr(price.reference_uom) != cstr(current_item.uom) and cstr(d.uom) != current_item.stock_uom)
+					or not price)
+
+			if pick_price:
 				price.current_price = d.price_list_rate
 				price.valid_from = d.valid_from
 				price.reference_uom = d.uom
@@ -157,7 +168,6 @@ def get_data(filters):
 				if d.price_list == filters.standard_price_list:
 					items_map[d.item_code].standard_rate = d.price_list_rate
 
-				show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
 				show_amounts = not show_amounts_role or show_amounts_role in frappe.get_roles()
 				if show_amounts:
 					price.item_price = d.name
@@ -169,8 +179,9 @@ def get_data(filters):
 				price.previous_price = d.price_list_rate
 
 	for item_code, d in iteritems(items_map):
-		d.actual_qty = flt(d.actual_qty)
-		d.po_qty = flt(d.po_qty)
+		conversion_factor = convert_item_uom_for(1, d.item_code, d.stock_uom, d.uom)
+		d.actual_qty = flt(d.actual_qty) / conversion_factor
+		d.po_qty = flt(d.po_qty) / conversion_factor
 
 		d.po_lc_rate = flt(d.po_lc_amount) / d.po_qty if d.po_qty else 0
 		d.valuation_rate = flt(d.stock_value) / d.actual_qty if d.actual_qty else 0

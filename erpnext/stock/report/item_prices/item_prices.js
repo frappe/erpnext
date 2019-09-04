@@ -143,8 +143,8 @@ frappe.query_reports["Item Prices"] = {
 			args = {
 				doctype: "Item",
 				name: data.item_code,
-				fieldname: 'print_in_price_list',
-				value: new_value
+				fieldname: 'hide_in_price_list',
+				value: cint(!new_value)
 			};
 		} else {
 			method = "erpnext.stock.report.item_prices.item_prices.set_item_pl_rate";

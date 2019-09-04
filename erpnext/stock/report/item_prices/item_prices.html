@@ -1,21 +1,22 @@
 <style>
 @media screen {
-	.print-format {
-		padding: 8mm;
-	}
+    .print-format {
+        padding: 8mm;
+    }
 }
 
 .print-format {
-	font-size: 9pt !important;
+    font-size: 9pt !important;
 }
 .print-format td, .print-format th {
-	vertical-align:middle !important;
+    vertical-align:middle !important;
 }
 </style>
 
 {%
 
 var item_groups = {};
+var alt_uoms = [];
 
 data = data.filter(d => d.print_in_price_list);
 
@@ -30,6 +31,10 @@ for(var i = 0; i < data.length; i++) {
 
     var group = item_groups[data[i].item_group];
     group.push(data[i]);
+
+    if (data[i].alt_uom && data[i].alt_uom != data[i].uom && !alt_uoms.includes(data[i].alt_uom)) {
+        alt_uoms.push(data[i].alt_uom);
+    }
 }
 
 $.each(item_groups || {}, function(item_group, items) {
@@ -43,7 +48,7 @@ $.each(item_groups || {}, function(item_group, items) {
 {% } %}
 
 <table class="table table-bordered" style="margin-top: 3px;">
-	<thead>
+    <thead>
         <tr><th class="text-center" style="font-size: 10pt;" colspan="10">
             {% if (filters.customer_name) { %}
                 {%= filters.customer_name %} —
@@ -52,13 +57,19 @@ $.each(item_groups || {}, function(item_group, items) {
             {% } %}
             Price List: {%= __("From") %} {%= new frappe.datetime.datetime(filters.date).format("ddd, D MMMM, YYYY") %}
         </th></tr>
-		<tr>
-            <th style="width: 85%">{%= __("Product") %}</th>
-            <th style="width: 5%" class="text-center">{%= __("UOM") %}</th>
+        <tr>
+            {% if (alt_uoms.length) { %}
+                <th style="width: 75%">{%= __("Product") %}</th>
+                <th style="width: 5%" class="text-center">{%= __("UOM") %}</th>
+                <th style="width: 10%" class="text-center">{%= __("Per Unit") %}</th>
+            {% } else { %}
+                <th style="width: 85%">{%= __("Product") %}</th>
+                <th style="width: 5%" class="text-center">{%= __("UOM") %}</th>
+            {% } %}
             <th style="width: 10%" class="text-center">{%= __("Rate") %}</th>
-		</tr>
-	</thead>
-	<tbody>
+        </tr>
+    </thead>
+    <tbody>
     {% $.each(item_groups || {}, function(item_group, items) { %}
         <tr>
             <td colspan="10" class="text-center" style="font-size: 9pt"><strong>{%= item_group %}</strong></td>
@@ -66,12 +77,15 @@ $.each(item_groups || {}, function(item_group, items) {
 
         {% $.each(items || [], function(i, d) { %}
             <tr>
-                <td>{%= d.item_code %}</td>
-                <td class="text-center">{%= d.sales_uom || d.stock_uom %}</td>
-                <td class="text-center">{%= d.print_rate ? format_currency(d.print_rate) : '' %}</td>
+                <td>{%= frappe.form.link_formatters['Item'](d.item_code, d) %}</td>
+                <td class="text-center">{%= d.uom %}</td>
+                {% if (alt_uoms.length) { %}
+                    <td class="text-center">{% if (d.alt_uom && d.alt_uom != d.uom) { %}{%= d.alt_uom_size %} {%= d.alt_uom || d.uom %}{% } %}</td>
+                {% } %}
+                <td class="text-center">{%= d.print_rate ? format_currency(d.print_rate, d.currency) : '' %}</td>
             </tr>
         {% }); %}
     {% }); %}
-	</tbody>
+    </tbody>
 </table>
 <p class="text-right text-muted">{{ __("Printed On ") }}{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>

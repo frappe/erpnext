@@ -702,11 +702,13 @@ def get_item_price(args, item_code, ignore_party=False):
 		item = frappe.get_cached_doc("Item", item_code)
 		item_uoms = [d.uom for d in item.uoms]
 
-		has_uom_with_conversion_factor = [d for d in has_uom if d[2] in item_uoms]
-		if has_uom_with_conversion_factor:
-			return has_uom_with_conversion_factor
-		else:
-			return [d for d in out if not d[2]]
+		convertible_prices = [d for d in has_uom if d[2] in item_uoms]
+		if convertible_prices:
+			has_uom_other_than_stock_uom = filter(lambda d: cstr(d[2]) != cstr(item.stock_uom), convertible_prices)
+			if has_uom_other_than_stock_uom:
+				return has_uom_other_than_stock_uom
+
+		return convertible_prices
 
 	return out
 
