@@ -363,6 +363,10 @@ def get_item_tax_template(args, item, out):
 	if not item_tax_template:
 		item_tax_template = _get_item_tax_template(args, item.taxes, out)
 
+	if not item_tax_template and item.hs_code:
+		hs_code_doc = frappe.get_cached_doc("HS Code", item.hs_code)
+		item_tax_template = _get_item_tax_template(args, hs_code_doc.taxes, out)
+
 	if not item_tax_template:
 		item_group = item.item_group
 		while item_group and not item_tax_template:
