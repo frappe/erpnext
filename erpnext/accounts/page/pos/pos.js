@@ -816,7 +816,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				contact = me.contacts[data.name];
 				if(reg.test(data.name.toLowerCase())
 					|| reg.test(data.customer_name.toLowerCase())
-					|| (contact && reg.test(contact["mobile_no"]))
 					|| (contact && reg.test(contact["phone"]))
 					|| (data.customer_group && reg.test(data.customer_group.toLowerCase()))){
 						return data;
@@ -834,7 +833,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				if(contact && !c['phone']) {
 					c["phone"] = contact["phone"];
 					c["email_id"] = contact["email_id"];
-					c["mobile_no"] = contact["mobile_no"];
 				}
 
 				me.customers_mapper.push({
@@ -844,10 +842,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					customer_group: c.customer_group,
 					territory: c.territory,
 					phone: contact ? contact["phone"] : '',
-					mobile_no: contact ? contact["mobile_no"] : '',
 					email_id: contact ? contact["email_id"] : '',
 					searchtext: ['customer_name', 'customer_group', 'name', 'value',
-						'label', 'email_id', 'phone', 'mobile_no']
+						'label', 'email_id', 'phone']
 						.map(key => c[key]).join(' ')
 						.toLowerCase()
 				});
@@ -1121,7 +1118,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		if (key) {
 			return $.grep(this.items_list, function (item) {
 				if (search_status) {
-					if (in_list(me.batch_no_data[item.item_code], me.search_item.$input.val())) {
+					if (me.batch_no_data[item.item_code] &&
+						in_list(me.batch_no_data[item.item_code], me.search_item.$input.val())) {
 						search_status = false;
 						return me.item_batch_no[item.item_code] = me.search_item.$input.val()
 					} else if (me.serial_no_data[item.item_code]
@@ -1129,7 +1127,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 						search_status = false;
 						me.item_serial_no[item.item_code] = [me.search_item.$input.val(), me.serial_no_data[item.item_code][me.search_item.$input.val()]]
 						return true
-					} else if (in_list(me.barcode_data[item.item_code], me.search_item.$input.val())) {
+					} else if (me.barcode_data[item.item_code] &&
+						in_list(me.barcode_data[item.item_code], me.search_item.$input.val())) {
 						search_status = false;
 						return true;
 					} else if (reg.test(item.item_code.toLowerCase()) || (item.description && reg.test(item.description.toLowerCase())) ||

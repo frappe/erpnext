@@ -336,18 +336,19 @@ def set_price_list_and_rate(quotation, cart_settings):
 
 def _set_price_list(quotation, cart_settings):
 	"""Set price list based on customer or shopping cart default"""
-	if quotation.selling_price_list:
-		return
+	from erpnext.accounts.party import get_default_price_list
 
 	# check if customer price list exists
 	selling_price_list = None
 	if quotation.party_name:
-		from erpnext.accounts.party import get_default_price_list
-		selling_price_list = get_default_price_list(frappe.get_doc("Customer", quotation.party_name))
+		selling_price_list = frappe.db.get_value('Customer', quotation.party_name, 'default_price_list')
 
 	# else check for territory based price list
 	if not selling_price_list:
 		selling_price_list = cart_settings.price_list
+
+	if not selling_price_list and quotation.party_name:
+		selling_price_list = get_default_price_list(frappe.get_doc("Customer", quotation.party_name))
 
 	quotation.selling_price_list = selling_price_list
 
