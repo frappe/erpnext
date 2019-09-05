@@ -492,7 +492,7 @@ class ReceivablePayableReport(object):
 		elif party_type_field=="supplier":
 			self.add_supplier_filters(conditions, values)
 
-		self.add_accounting_dimensions_filters()
+		self.add_accounting_dimensions_filters(conditions, values)
 
 		return " and ".join(conditions), values
 
