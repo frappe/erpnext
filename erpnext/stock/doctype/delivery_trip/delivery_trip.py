@@ -340,7 +340,7 @@ def get_directions(route, optimize):
 	try:
 		directions = maps_client.directions(**directions_data)
 	except Exception as e:
-		frappe.throw(_(e.message))
+		frappe.throw(_(e))
 
 	return directions[0] if directions else False
 
