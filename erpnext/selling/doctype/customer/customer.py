@@ -170,14 +170,14 @@ class Customer(TransactionBase):
 		if self.get("__islocal") or not self.credit_limit_reference:
 			return
 
-		company_record = [c.company for c in self.credit_limit_reference]
-
-		for limit in frappe.get_all("Customer Credit Limit", {'parent': self.name}, ["credit_limit", "company"]):
-			outstanding_amt = get_customer_outstanding(self.name, limit.company)
-			company_record.append(limit.company)
-			if company_record.count(limit.company) >2:
+		company_record = []
+		for limit in self.credit_limit_reference:
+			if limit.company in company_record:
 				frappe.throw(_("Credit limit is already defined for the Company {0}").format(limit.company, self.name))
+			else:
+				company_record.append(limit.company)
 
+			outstanding_amt = get_customer_outstanding(self.name, limit.company)
 			if flt(limit.credit_limit) < outstanding_amt:
 				frappe.throw(_("""New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}""").format(outstanding_amt))
 
@@ -330,7 +330,7 @@ def get_credit_limit(customer, company):
 		credit_limit = frappe.db.get_value("Customer Credit Limit", {'parent': customer, 'company': company}, 'credit_limit')
 
 		if not credit_limit:
-			customer_group = frappe.db.get_value("Customer", customer, 'customer_group')
+			customer_group = frappe.get_cached_value("Customer", customer, 'customer_group')
 			credit_limit = frappe.get_cached_value("Customer Group", customer_group, "credit_limit")
 
 	if not credit_limit:
