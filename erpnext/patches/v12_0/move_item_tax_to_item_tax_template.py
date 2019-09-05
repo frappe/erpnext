@@ -82,7 +82,7 @@ def get_item_tax_template(item_tax_templates, rename_template_to_untitled, item_
 			account_name = " - ".join(parts[:-1])
 			company = frappe.db.get_value("Company", filters={"abbr": parts[-1]})
 			parent_account = frappe.db.get_value("Account",
-				filters={"account_type": "Tax", "root_type": "Liability", "is_group": 0}, fieldname="parent_account")
+				filters={"account_type": "Tax", "root_type": "Liability", "is_group": 0, "company": company}, fieldname="parent_account")
 
 			frappe.get_doc({
 				"doctype": "Account",

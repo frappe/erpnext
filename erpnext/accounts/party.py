@@ -365,7 +365,7 @@ def validate_due_date(posting_date, due_date, party_type, party, company=None, b
 					.format(formatdate(default_due_date)))
 
 @frappe.whitelist()
-def get_address_tax_category(tax_category, billing_address=None, shipping_address=None):
+def get_address_tax_category(tax_category=None, billing_address=None, shipping_address=None):
 	addr_tax_category_from = frappe.db.get_single_value("Accounts Settings", "determine_address_tax_category_from")
 	if addr_tax_category_from == "Shipping Address":
 		if shipping_address:
