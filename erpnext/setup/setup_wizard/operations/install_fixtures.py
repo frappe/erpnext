@@ -507,8 +507,11 @@ def add_dashboards():
 	dashboard_data = get_default_dashboards()
 
 	# create account balance timeline before creating dashbaord charts
-	account_balance_timeline = 'erpnext/erpnext/accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.json'
-	import_file_by_path(account_balance_timeline, force=0, for_sync=True)
+	doctype = "dashboard_chart_source"
+	docname = "account_balance_timeline"
+	folder = os.path.dirname(frappe.get_module("erpnext.accounts").__file__)
+	doc_path = os.path.join(folder, doctype, docname, docname) + ".json"
+	import_file_by_path(doc_path, force=0, for_sync=True)
 
 	make_records(dashboard_data["Charts"])
 	make_records(dashboard_data["Dashboards"])
