@@ -97,7 +97,7 @@ class ProductionPlan(Document):
 			self.get_mr_items()
 
 	def get_so_items(self):
-		so_list = [d.sales_order for d in self.sales_orders if d.sales_order]
+		so_list = [d.sales_order for d in self.get("sales_orders", []) if d.sales_order]
 		if not so_list:
 			msgprint(_("Please enter Sales Orders in the above table"))
 			return []
@@ -132,7 +132,7 @@ class ProductionPlan(Document):
 		self.calculate_total_planned_qty()
 
 	def get_mr_items(self):
-		mr_list = [d.material_request for d in self.material_requests if d.material_request]
+		mr_list = [d.material_request for d in self.get("material_requests", []) if d.material_request]
 		if not mr_list:
 			msgprint(_("Please enter Material Requests in the above table"))
 			return []
