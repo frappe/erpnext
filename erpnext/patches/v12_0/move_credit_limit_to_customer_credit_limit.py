@@ -36,4 +36,4 @@ def move_credit_limit_to_child_table():
 				'bypass_credit_limit_check': record.bypass_credit_limit_check_at_sales_order,
 				'company': company.name
 			})
-		customer.save()
+		customer.db_insert()
