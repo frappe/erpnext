@@ -11,7 +11,7 @@ from frappe.utils import getdate, date_diff
 class AdditionalSalary(Document):
 	def before_insert(self):
 		if frappe.db.exists("Additional Salary", {"employee": self.employee, "salary_component": self.salary_component,
-			"amount": self.amount, "payroll_date": self.payroll_date, "company": self.company}):
+			"amount": self.amount, "payroll_date": self.payroll_date, "company": self.company, "docstatus": 1}):
 
 			frappe.throw(_("Additional Salary Component Exists."))
 
