@@ -60,7 +60,7 @@ def get_details(filters):
 	conditions = ""
 
 	if filters.get("customer"):
-		conditions += " AND name = " + filters.get("customer")
+		conditions += " AND c.name = " + filters.get("customer")
 
 	return frappe.db.sql("""SELECT
 			c.name, c.customer_name,
