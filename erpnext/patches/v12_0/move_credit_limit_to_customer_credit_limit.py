@@ -21,10 +21,10 @@ def move_credit_limit_to_child_table():
 	if frappe.db.has_column('Customer', 'bypass_credit_limit_check_at_sales_order'):
 		fields = ", bypass_credit_limit_check_at_sales_order"
 
-	credit_limit_record = frappe.db.sql(''' SELECT
-			name, credit_limit
-			{0}
-		FROM `tabCustomer`'''.format(fields), as_dict=1) #nosec
+	credit_limit_record = frappe.db.sql('''
+		SELECT name, credit_limit {0}
+		FROM `tabCustomer` where credit_limit > 0
+	'''.format(fields), as_dict=1) #nosec
 
 	companies = frappe.get_all("Company", 'name')
 
@@ -36,4 +36,5 @@ def move_credit_limit_to_child_table():
 				'bypass_credit_limit_check': record.bypass_credit_limit_check_at_sales_order,
 				'company': company.name
 			})
-		customer.db_insert()
+		for row in customer.credit_limit_reference:
+			row.db_insert()
