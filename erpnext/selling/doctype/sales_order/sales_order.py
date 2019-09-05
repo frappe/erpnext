@@ -518,7 +518,7 @@ def make_material_request(source_name, target_doc=None):
 			"doctype": "Material Request Item",
 			"field_map": {
 				"parent": "sales_order",
-				"stock_uom": "uom"
+				"uom": "stock_uom"
 			},
 			"postprocess": update_item
 		},
