@@ -478,8 +478,6 @@ class AccountsController(TransactionBase):
 
 		order_list = list(set([d.get(order_field)
 			for d in self.get("items") if d.get(order_field)]))
-			
-		frappe.log_error(str(order_list))
 
 		journal_entries = get_advance_journal_entries(party_type, party, party_account,
 			amount_field, order_doctype, order_list, include_unallocated)
