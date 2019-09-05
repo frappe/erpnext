@@ -503,7 +503,7 @@ def install_defaults(args=None):
 def add_dashboards():
 	from erpnext.setup.setup_wizard.data.dashboard_charts import get_default_dashboards
 	dashboard_data = get_default_dashboards()
-
+	frappe.reload_doctype("Dashboard Chart Source", "Account Balance Timeline")
 	make_records(dashboard_data["Charts"])
 	make_records(dashboard_data["Dashboards"])
 
