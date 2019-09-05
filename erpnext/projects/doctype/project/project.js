@@ -96,17 +96,17 @@ frappe.ui.form.on("Project", {
 	},
 
 	create_duplicate: function(frm) {
-		frappe.call({
-			method: "erpnext.projects.doctype.project.project.create_duplicate_project",
-			args: {
-				prev_doc: frm.doc,
-				project_name: frm.doc.name + ' - 01'
-			},
-			callback: function(r) {
-				if(r.message) {
-					frappe.set_route('Form', 'Project', r.message.name);
-				}
-			}
+		return new Promise(resolve => {
+			frappe.prompt('Project Name', (data) => {
+				frappe.xcall('erpnext.projects.doctype.project.project.create_duplicate_project',
+					{
+						prev_doc: frm.doc,
+						project_name: data.value
+					}).then(() => {
+					frappe.set_route('Form', "Project", data.value);
+				});
+				resolve();
+			});
 		});
 	},
 
