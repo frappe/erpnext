@@ -53,7 +53,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	set_other_values(out, party, party_type)
 	set_price_list(out, party, party_type, price_list, pos_profile)
 
-	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_type)
+	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_group)
 
 	if fetch_payment_terms_template:
 		out["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)

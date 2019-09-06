@@ -39,8 +39,8 @@ def execute(filters=None):
 	return columns, data
 
 def validate_filters(filters):
-	if (filters.get("payment_type") == "Incoming" and filters.get("party_type") == "Supplier") or \
-		(filters.get("payment_type") == "Outgoing" and filters.get("party_type") == "Customer"):
+	if (filters.get("payment_type") == _("Incoming") and filters.get("party_type") == "Supplier") or \
+		(filters.get("payment_type") == _("Outgoing") and filters.get("party_type") == "Customer"):
 			frappe.throw(_("{0} payment entries can not be filtered by {1}")\
 				.format(filters.payment_type, filters.party_type))
 
@@ -51,7 +51,7 @@ def get_columns(filters):
 		_("Party Type") + "::100",
 		_("Party") + ":Dynamic Link/Party Type:140",
 		_("Posting Date") + ":Date:100",
-		_("Invoice") + (":Link/Purchase Invoice:130" if filters.get("payment_type") == "Outgoing" else ":Link/Sales Invoice:130"),
+		_("Invoice") + (":Link/Purchase Invoice:130" if filters.get("payment_type") == _("Outgoing") else ":Link/Sales Invoice:130"),
 		_("Invoice Posting Date") + ":Date:130",
 		_("Payment Due Date") + ":Date:130",
 		_("Debit") + ":Currency:120",
@@ -69,7 +69,7 @@ def get_conditions(filters):
 	conditions = []
 
 	if not filters.party_type:
-		if filters.payment_type == "Outgoing":
+		if filters.payment_type == _("Outgoing"):
 			filters.party_type = "Supplier"
 		else:
 			filters.party_type = "Customer"
@@ -101,7 +101,7 @@ def get_entries(filters):
 
 def get_invoice_posting_date_map(filters):
 	invoice_details = {}
-	dt = "Sales Invoice" if filters.get("payment_type") == "Incoming" else "Purchase Invoice"
+	dt = "Sales Invoice" if filters.get("payment_type") == _("Incoming") else "Purchase Invoice"
 	for t in frappe.db.sql("select name, posting_date, due_date from `tab{0}`".format(dt), as_dict=1):
 		invoice_details[t.name] = t
 
