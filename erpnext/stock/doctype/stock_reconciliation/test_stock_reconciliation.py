@@ -152,7 +152,6 @@ class TestStockReconciliation(unittest.TestCase):
 		for d in to_delete_records:
 			stock_doc = frappe.get_doc("Stock Reconciliation", d)
 			stock_doc.cancel()
-			frappe.delete_doc("Stock Reconciliation", stock_doc.name)
 
 		for d in serial_nos + serial_nos1:
 			if frappe.db.exists("Serial No", d):
@@ -203,9 +202,6 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_doc = frappe.get_doc("Stock Reconciliation", d)
 			stock_doc.cancel()
 
-		frappe.delete_doc("Batch", sr.items[0].batch_no)
-		for d in to_delete_records:
-			frappe.delete_doc("Stock Reconciliation", d)
 
 def insert_existing_sle():
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry

@@ -475,12 +475,13 @@ def install_defaults(args=None):
 
 				frappe.db.set_value("Company", args.company_name, "default_bank_account", bank_account.name, update_modified=False)
 
-				return doc
 			except RootNotEditable:
 				frappe.throw(_("Bank account cannot be named as {0}").format(args.bank_account))
 			except frappe.DuplicateEntryError:
 				# bank account same as a CoA entry
 				pass
+
+	add_dashboards()
 
 	# Now, with fixtures out of the way, onto concrete stuff
 	records = [
@@ -498,6 +499,13 @@ def install_defaults(args=None):
 	]
 
 	make_records(records)
+
+def add_dashboards():
+	from erpnext.setup.setup_wizard.data.dashboard_charts import get_default_dashboards
+	dashboard_data = get_default_dashboards()
+
+	make_records(dashboard_data["Charts"])
+	make_records(dashboard_data["Dashboards"])
 
 
 def get_fy_details(fy_start_date, fy_end_date):

@@ -1,7 +1,7 @@
 QUnit.module('Sales Order');
 
 QUnit.test("test_sales_order_without_bypass_credit_limit_check", function(assert) {
-//#PR : 10861, Author : ashish-greycube & jigneshpshah,  Email:mr.ashish.shah@gmail.com 
+//#PR : 10861, Author : ashish-greycube & jigneshpshah,  Email:mr.ashish.shah@gmail.com
 	assert.expect(2);
 	let done = assert.async();
 	frappe.run_serially([
@@ -10,8 +10,10 @@ QUnit.test("test_sales_order_without_bypass_credit_limit_check", function(assert
 		() => frappe.quick_entry.dialog.$wrapper.find('.edit-full').click(),
 		() => frappe.timeout(1),
 		() => cur_frm.set_value("customer_name", "Test Customer 11"),
-		() => cur_frm.set_value("credit_limit", 100.00),
-		() => cur_frm.set_value("bypass_credit_limit_check_at_sales_order", 0),
+		() => cur_frm.add_child('credit_limits', {
+			'credit_limit': 1000,
+			'company': '_Test Company',
+			'bypass_credit_limit_check': 1}),
 		// save form
 		() => cur_frm.save(),
 		() => frappe.timeout(1),
@@ -21,10 +23,10 @@ QUnit.test("test_sales_order_without_bypass_credit_limit_check", function(assert
 		() => frappe.click_link('Edit in full page'),
 		() => cur_frm.set_value("item_code", "Test Product 11"),
 		() => cur_frm.set_value("item_group", "Products"),
-		() => cur_frm.set_value("standard_rate", 100),	
+		() => cur_frm.set_value("standard_rate", 100),
 		// save form
 		() => cur_frm.save(),
-		() => frappe.timeout(1),		
+		() => frappe.timeout(1),
 
 		() => {
 			return frappe.tests.make('Sales Order', [
@@ -45,14 +47,14 @@ QUnit.test("test_sales_order_without_bypass_credit_limit_check", function(assert
 		() => frappe.tests.click_button('Yes'),
 		() => frappe.timeout(3),
 		() => {
-		
-			if (cur_dialog.body.innerText.match(/^Credit limit has been crossed for customer.*$/)) 
-				{ 
+
+			if (cur_dialog.body.innerText.match(/^Credit limit has been crossed for customer.*$/))
+				{
     				/*Match found */
     				assert.ok(true, "Credit Limit crossed message received");
 				}
-			
-	
+
+
 		},
 		() => cur_dialog.cancel(),
 		() => done()

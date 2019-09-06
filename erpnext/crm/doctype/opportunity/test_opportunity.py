@@ -45,15 +45,16 @@ class TestOpportunity(unittest.TestCase):
 
 		# create new customer and create new contact against 'new.opportunity@example.com'
 		customer = make_customer(opp_doc.party_name).insert(ignore_permissions=True)
-		frappe.get_doc({
+		contact = frappe.get_doc({
 			"doctype": "Contact",
-			"email_id": new_lead_email_id,
 			"first_name": "_Test Opportunity Customer",
 			"links": [{
 				"link_doctype": "Customer",
 				"link_name": customer.name
 			}]
-		}).insert(ignore_permissions=True)
+		})
+		contact.add_email(new_lead_email_id)
+		contact.insert(ignore_permissions=True)
 
 		opp_doc = frappe.get_doc(args).insert(ignore_permissions=True)
 		self.assertTrue(opp_doc.party_name)
