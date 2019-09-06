@@ -652,3 +652,4 @@ erpnext.patches.v11_0.update_package_total_in_delivery_trips
 erpnext.patches.v12_0.enable_auto_select_batches_in_stock_settings
 erpnext.patches.v12_0.set_is_completed_field_in_sales_orders
 erpnext.patches.v12_0.set_total_batch_quantity
+erpnext.patches.v12_0.set_lead_title_field
