@@ -291,7 +291,11 @@ def prepare_and_attach_invoice(doc, replace=False):
 	progressive_name, progressive_number = get_progressive_name_and_number(doc, replace)
 
 	invoice = prepare_invoice(doc, progressive_number)
-	invoice_xml = frappe.render_template('erpnext/regional/italy/e-invoice.xml', context={"doc": invoice}, is_path=True)
+	item_meta = frappe.get_meta("Sales Invoice Item")
+
+	invoice_xml = frappe.render_template('erpnext/regional/italy/e-invoice.xml',
+		context={"doc": invoice, "item_meta": item_meta}, is_path=True)
+
 	invoice_xml = invoice_xml.replace("&", "&amp;")
 
 	xml_filename = progressive_name + ".xml"
