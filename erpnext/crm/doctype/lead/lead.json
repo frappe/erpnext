@@ -17,6 +17,7 @@
   "lead_owner",
   "status",
   "salutation",
+  "designation",
   "gender",
   "source",
   "customer",
@@ -137,6 +138,13 @@
    "search_index": 1
   },
   {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "salutation",
+   "fieldtype": "Link",
+   "label": "Salutation",
+   "options": "Salutation"
+  },
+  {
    "fieldname": "gender",
    "fieldtype": "Link",
    "label": "Gender",
@@ -238,6 +246,56 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "address_title",
+   "fieldtype": "Data",
+   "label": "Address Title"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "address_line1",
+   "fieldtype": "Data",
+   "label": "Address Line 1"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "address_line2",
+   "fieldtype": "Data",
+   "label": "Address Line 2"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City/Town"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "county",
+   "fieldtype": "Data",
+   "label": "County"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "state",
+   "fieldtype": "Data",
+   "label": "State"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "pincode",
+   "fieldtype": "Data",
+   "label": "Postal Code",
+   "options": "Country"
+  },
+  {
    "fieldname": "column_break2",
    "fieldtype": "Column Break"
   },
@@ -257,13 +315,6 @@
   },
   {
    "depends_on": "eval: doc.__islocal",
-   "fieldname": "salutation",
-   "fieldtype": "Link",
-   "label": "Salutation",
-   "options": "Salutation"
-  },
-  {
-   "depends_on": "eval: doc.__islocal",
    "fieldname": "mobile_no",
    "fieldtype": "Data",
    "label": "Mobile No.",
@@ -277,22 +328,6 @@
    "label": "Fax",
    "oldfieldname": "fax",
    "oldfieldtype": "Data"
-  },
-  {
-   "fieldname": "website",
-   "fieldtype": "Data",
-   "label": "Website",
-   "oldfieldname": "website",
-   "oldfieldtype": "Data"
-  },
-  {
-   "fieldname": "territory",
-   "fieldtype": "Link",
-   "label": "Territory",
-   "oldfieldname": "territory",
-   "oldfieldtype": "Link",
-   "options": "Territory",
-   "print_hide": 1
   },
   {
    "collapsible": 1,
@@ -350,6 +385,22 @@
    "remember_last_selected_value": 1
   },
   {
+   "fieldname": "website",
+   "fieldtype": "Data",
+   "label": "Website",
+   "oldfieldname": "website",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "oldfieldname": "territory",
+   "oldfieldtype": "Link",
+   "options": "Territory",
+   "print_hide": 1
+  },
+  {
    "default": "0",
    "fieldname": "unsubscribed",
    "fieldtype": "Check",
@@ -362,61 +413,17 @@
    "label": "Blog Subscriber"
   },
   {
-   "depends_on": "eval: doc.__islocal",
-   "fieldname": "address_title",
-   "fieldtype": "Data",
-   "label": "Address Title"
-  },
-  {
-   "depends_on": "eval: doc.__islocal",
-   "fieldname": "address_line1",
-   "fieldtype": "Data",
-   "label": "Address Line 1"
-  },
-  {
-   "depends_on": "eval: doc.__islocal",
-   "fieldname": "address_line2",
-   "fieldtype": "Data",
-   "label": "Address Line 2"
-  },
-  {
-   "depends_on": "eval: doc.__islocal",
-   "fieldname": "city",
-   "fieldtype": "Data",
-   "label": "City/Town"
-  },
-  {
-   "depends_on": "eval: doc.__islocal",
-   "fieldname": "county",
-   "fieldtype": "Data",
-   "label": "County"
-  },
-  {
-   "depends_on": "eval: doc.__islocal",
-   "fieldname": "state",
-   "fieldtype": "Data",
-   "label": "State"
-  },
-  {
-   "depends_on": "eval: doc.__islocal",
-   "fieldname": "country",
-   "fieldtype": "Link",
-   "label": "Country",
-   "options": "Country"
-  },
-  {
-   "depends_on": "eval: doc.__islocal",
-   "fieldname": "pincode",
-   "fieldtype": "Data",
-   "label": "Postal Code",
-   "options": "Country"
-  },
-  {
    "fieldname": "title",
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Title",
    "print_hide": 1
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation"
   }
  ],
  "icon": "fa fa-user",
