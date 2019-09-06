@@ -1,4 +1,5 @@
 {
+ "create_on_install": 1,
  "creation": "2019-05-09 15:47:39.760406",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -102,7 +103,7 @@
  ],
  "in_create": 1,
  "is_submittable": 1,
- "modified": "2019-08-20 14:40:04.130799",
+ "modified": "2019-09-06 20:22:37.736943",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Ledger Entry",

@@ -2,6 +2,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
+ "create_on_install": 1,
  "creation": "2017-10-17 08:21:50.489773",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -118,7 +119,7 @@
   }
  ],
  "icon": "fa fa-user",
- "modified": "2019-07-18 16:29:14.151380",
+ "modified": "2019-09-06 20:22:44.347454",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Driver",

@@ -1,6 +1,7 @@
 {
  "allow_import": 1,
  "autoname": "EMP-CKIN-.MM.-.YYYY.-.######",
+ "create_on_install": 1,
  "creation": "2019-06-10 11:56:34.536413",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -103,7 +104,7 @@
    "label": "Shift Actual End"
   }
  ],
- "modified": "2019-07-23 23:47:33.975263",
+ "modified": "2019-09-06 20:22:43.917071",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Checkin",

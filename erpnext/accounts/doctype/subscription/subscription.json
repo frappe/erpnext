@@ -1,5 +1,6 @@
 {
  "autoname": "ACC-SUB-.YYYY.-.#####",
+ "create_on_install": 1,
  "creation": "2017-07-18 17:50:43.967266",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -196,7 +197,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2019-07-25 18:45:38.579579",
+ "modified": "2019-09-06 20:19:15.795496",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",

@@ -1,6 +1,7 @@
 {
  "allow_import": 1,
  "autoname": "ACC-INV-DISC-.YYYY.-.#####",
+ "create_on_install": 1,
  "creation": "2019-03-07 12:01:56.296952",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -168,7 +169,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-30 19:08:21.199759",
+ "modified": "2019-09-06 20:19:43.974996",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Invoice Discounting",

@@ -1,5 +1,6 @@
 {
  "autoname": "HR-TRQ-.YYYY.-.#####",
+ "create_on_install": 1,
  "creation": "2018-05-15 06:32:33.950356",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -33,7 +34,8 @@
   "event_details",
   "name_of_organizer",
   "address_of_organizer",
-  "other_details"
+  "other_details",
+  "amended_from"
  ],
  "fields": [
   {
@@ -213,7 +215,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-25 23:15:00.609186",
+ "modified": "2019-09-06 20:23:03.968623",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Travel Request",

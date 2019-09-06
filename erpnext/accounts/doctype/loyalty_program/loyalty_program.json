@@ -1,5 +1,6 @@
 {
  "autoname": "field:loyalty_program_name",
+ "create_on_install": 1,
  "creation": "2018-01-23 06:23:05.731431",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -145,7 +146,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2019-05-26 09:11:46.120251",
+ "modified": "2019-09-06 20:19:45.973497",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Loyalty Program",

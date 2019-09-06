@@ -1,6 +1,7 @@
 {
  "allow_copy": 1,
  "beta": 1,
+ "create_on_install": 1,
  "creation": "2017-08-29 02:22:54.947711",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -75,7 +76,7 @@
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2019-07-25 14:57:33.187689",
+ "modified": "2019-09-06 20:19:17.821365",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool",

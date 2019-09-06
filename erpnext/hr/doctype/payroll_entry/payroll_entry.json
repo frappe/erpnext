@@ -1,6 +1,7 @@
 {
  "allow_copy": 1,
  "autoname": "HR-PRUN-.YYYY.-.#####",
+ "create_on_install": 1,
  "creation": "2017-10-23 15:22:29.291323",
  "doctype": "DocType",
  "document_type": "Other",
@@ -252,7 +253,7 @@
  ],
  "icon": "fa fa-cog",
  "is_submittable": 1,
- "modified": "2019-05-25 22:47:49.977955",
+ "modified": "2019-09-06 20:23:07.508482",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Payroll Entry",

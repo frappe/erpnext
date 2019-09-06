@@ -1,5 +1,6 @@
 {
  "autoname": "hash",
+ "create_on_install": 1,
  "creation": "2019-06-03 11:42:33.123976",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -93,7 +94,7 @@
   }
  ],
  "istable": 1,
- "modified": "2019-06-20 12:01:33.919555",
+ "modified": "2019-09-06 20:22:48.119614",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Taxes and Charges",

@@ -1,6 +1,7 @@
 {
  "allow_import": 1,
  "autoname": "naming_series:",
+ "create_on_install": 1,
  "creation": "2016-06-01 14:38:51.012597",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -566,7 +567,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-27 15:53:21.108857",
+ "modified": "2019-09-06 20:19:44.819664",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

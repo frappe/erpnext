@@ -6,9 +6,10 @@ from __future__ import unicode_literals
 
 import frappe
 from erpnext.setup.utils import insert_record
-
+from frappe.core.doctype.module_def.module_def import enable_module
 
 def setup_education():
+	enable_module("Education")
 	disable_desk_access_for_student_role()
 	if frappe.db.exists("Academic Year", "2015-16"):
 		# already setup

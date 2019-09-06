@@ -3,8 +3,10 @@ import frappe
 
 from frappe import _
 from erpnext.setup.utils import insert_record
+from frappe.core.doctype.module_def.module_def import enable_module
 
 def setup_healthcare():
+	enable_module("Healthcare")
 	if frappe.db.exists('Medical Department', 'Cardiology'):
 		# already setup
 		return

@@ -1,6 +1,7 @@
 {
  "allow_rename": 1,
  "autoname": "field:plan_name",
+ "create_on_install": 1,
  "creation": "2018-02-24 11:31:23.066506",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -138,7 +139,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2019-07-25 18:35:04.362556",
+ "modified": "2019-09-06 20:19:16.620625",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription Plan",
