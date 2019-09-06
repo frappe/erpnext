@@ -50,7 +50,7 @@
   "accounts",
   "credit_limit_section",
   "payment_terms",
-  "credit_limit_reference",
+  "credit_limits",
   "more_info",
   "customer_details",
   "column_break_45",
@@ -460,7 +460,7 @@
   },
   {
    "default": "0",
-   "fieldname": "credit_limit_reference",
+   "fieldname": "credit_limits",
    "fieldtype": "Table",
    "label": "Credit Limit",
    "options": "Customer Credit Limit"
@@ -469,7 +469,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2019-08-30 18:03:13.332934",
+ "modified": "2019-09-06 12:40:31.801424",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
