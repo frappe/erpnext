@@ -153,7 +153,8 @@ def get_invoice_summary(items, taxes):
 						tax_rate=tax.rate,
 						tax_amount=(reference_row.tax_amount * tax.rate) / 100,
 						net_amount=reference_row.tax_amount,
-						taxable_amount=reference_row.tax_amount,
+						taxable_amount=(reference_row.tax_amount if tax.charge_type == 'On Previous Row Amount'
+							else reference_row.total),
 						item_tax_rate={tax.account_head: tax.rate},
 						charges=True,
 						type="Actual",
