@@ -208,7 +208,9 @@ class SalesOrder(SellingController):
 	def check_credit_limit(self):
 		# if bypass credit limit check is set to true (1) at sales order level,
 		# then we need not to check credit limit and vise versa
-		if not cint(frappe.db.get_value("Customer Credit Limit", {'parent': self.customer, 'company': self.company}, "bypass_credit_limit_check")):
+		if not cint(frappe.db.get_value("Customer Credit Limit",
+			{'parent': self.customer, 'parenttype': 'Customer', 'company': self.company},
+			"bypass_credit_limit_check")):
 			check_credit_limit(self.customer, self.company)
 
 	def check_nextdoc_docstatus(self):

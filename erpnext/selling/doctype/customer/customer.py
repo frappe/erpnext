@@ -167,11 +167,11 @@ class Customer(TransactionBase):
 			frappe.throw(_("A Customer Group exists with same name please change the Customer name or rename the Customer Group"), frappe.NameError)
 
 	def validate_credit_limit_on_change(self):
-		if self.get("__islocal") or not self.credit_limit_reference:
+		if self.get("__islocal") or not self.credit_limits:
 			return
 
 		company_record = []
-		for limit in self.credit_limit_reference:
+		for limit in self.credit_limits:
 			if limit.company in company_record:
 				frappe.throw(_("Credit limit is already defined for the Company {0}").format(limit.company, self.name))
 			else:
@@ -327,11 +327,13 @@ def get_credit_limit(customer, company):
 	credit_limit = None
 
 	if customer:
-		credit_limit = frappe.db.get_value("Customer Credit Limit", {'parent': customer, 'company': company}, 'credit_limit')
+		credit_limit = frappe.db.get_value("Customer Credit Limit",
+			{'parent': customer, 'parenttype': 'Customer', 'company': company}, 'credit_limit')
 
 		if not credit_limit:
 			customer_group = frappe.get_cached_value("Customer", customer, 'customer_group')
-			credit_limit = frappe.get_cached_value("Customer Group", customer_group, "credit_limit")
+			credit_limit = frappe.db.get_value("Customer Credit Limit",
+				{'parent': customer_group, 'parenttype': 'Customer Group', 'company': company}, 'credit_limit')
 
 	if not credit_limit:
 		credit_limit = frappe.get_cached_value('Company',  company,  "credit_limit")
