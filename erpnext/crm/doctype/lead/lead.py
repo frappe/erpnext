@@ -154,7 +154,7 @@ class Lead(SellingController):
 		else:
 			first_name, last_name = self.lead_name, None
 
-		contact_fields = ["email_id", "salutation", "gender", "phone", "mobile_no"]
+		contact_fields = ["email_id", "salutation", "gender", "designation", "phone", "mobile_no"]
 
 		contact = frappe.new_doc("Contact")
 		contact.update({contact_field: self.get(contact_field) for contact_field in contact_fields})
@@ -187,7 +187,7 @@ class Lead(SellingController):
 
 	def flush_address_and_contact_fields(self):
 		fields = ['address_line1', 'address_line2', 'address_title', 'city', 'country',
-			'county', 'fax', 'mobile_no', 'phone', 'pincode', 'salutation', 'state']
+			'county', 'fax', 'mobile_no', 'phone', 'pincode', 'state']
 
 		for field in fields:
 			self.set(field, None)
