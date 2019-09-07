@@ -225,7 +225,7 @@ class ExpenseClaim(AccountsController):
 
 				if d.allocated_amount and flt(d.allocated_amount) > flt(d.advance_amount):
 					frappe.throw(_("Row #{0}: Allocated Amount {1} cannot be greater than the Unclaimed Amount {2}")
-						.format(d.idx, d.allocated_amount, d.unclaimed_amount))
+						.format(d.idx, d.allocated_amount, d.advance_amount))
 
 	def validate_outstanding_amount(self):
 		if self.total_advance:

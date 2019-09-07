@@ -119,7 +119,8 @@ class ReceivablePayableReport(object):
 		elif self.filters.get("party_type") == "Supplier":
 			return_label = "Debit Note"
 		elif self.filters.get("party_type") == "Employee":
-			invoiced_label = "Claimed Amount"
+			invoiced_label = "Paid Amount"
+			paid_label = "Claimed Amount"
 
 		columns += [
 			{
@@ -306,6 +307,8 @@ class ReceivablePayableReport(object):
 		from erpnext.accounts.utils import get_currency_precision
 		self.currency_precision = get_currency_precision() or 2
 		self.dr_or_cr = "debit" if erpnext.get_party_account_type(self.filters.get("party_type")) == "Receivable" else "credit"
+		if self.filters.get("party_type") == "Employee":
+			self.dr_or_cr = "debit"
 
 		future_vouchers = self.get_entries_after(self.filters.report_date, self.filters.get("party_type"))
 
@@ -376,14 +379,14 @@ class ReceivablePayableReport(object):
 				ea_details = self.employee_advance_details.get(gle.against_voucher, frappe._dict())
 				if gle.against_voucher not in employee_advances_already_added and self.is_in_cost_center(ea_details) and self.is_in_project(ea_details):
 					employee_advances_already_added.append(gle.against_voucher)
-					claimed_amount, outstanding_amount, return_amount = self.get_employee_advance_outstanding(gle,
+					outstanding_amount, return_amount, payment_amount = self.get_employee_advance_outstanding(gle,
 						self.filters.report_date)
 
 					if abs(outstanding_amount) > 0.1 / 10 ** self.currency_precision:
 						ea = gle.copy()
 
-						ea.credit = claimed_amount
-						ea.debit = 0
+						ea.credit = 0
+						ea.debit = payment_amount
 						ea.voucher_type = gle.against_voucher_type
 						ea.voucher_no = gle.against_voucher
 						ea.remarks = ea_details.purpose
@@ -715,8 +718,8 @@ class ReceivablePayableReport(object):
 				else:
 					return_amount += flt(e.credit, self.currency_precision)
 
-		outstanding_amount = claimed_amount - payment_amount - return_amount
-		return claimed_amount, outstanding_amount, return_amount
+		outstanding_amount = payment_amount - claimed_amount - return_amount
+		return outstanding_amount, return_amount, payment_amount
 
 	def get_party_name(self, party_type, party_name):
 		return self.get_party_map(party_type).get(party_name, {}).get(frappe.scrub(party_type) + "_name", '')

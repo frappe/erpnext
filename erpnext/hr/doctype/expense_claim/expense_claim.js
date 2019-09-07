@@ -140,7 +140,7 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 		}
 
 		if (!me.frm.doc.__islocal && me.frm.doc.docstatus==1) {
-			this.frm.page.set_inner_btn_group_as_primary(__("Make"));
+			me.frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 
 		this.set_help();
