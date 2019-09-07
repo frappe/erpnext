@@ -234,8 +234,10 @@ class DeliveryNote(SellingController):
 
 		extra_amount = 0
 		validate_against_credit_limit = False
-		bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer", self.customer,
-			"bypass_credit_limit_check_at_sales_order"))
+		bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer Credit Limit",
+			filters={'parent': self.customer, 'parenttype': 'Customer', 'company': self.company},
+			fieldname="bypass_credit_limit_check"))
+
 		if bypass_credit_limit_check_at_sales_order:
 			validate_against_credit_limit = True
 			extra_amount = self.base_grand_total
