@@ -1091,7 +1091,7 @@ def get_employee_advance_details(names):
 			from `tabEmployee Advance` ea
 			left join `tabCost Center` cc on cc.name = ea.cost_center
 			where ea.docstatus = 1 and ea.name in ({0})
-			""".format(','.join(['%s'] * len(names))), names, as_dict=1, debug=1)
+			""".format(','.join(['%s'] * len(names))), names, as_dict=1)
 
 		for d in employee_advances:
 			details[d.name] = d

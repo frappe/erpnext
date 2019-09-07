@@ -10,11 +10,11 @@
  "modified": "2019-08-27 08:15:10.393257", 
  "modified_by": "Administrator", 
  "module": "HR", 
- "name": "Employees Payable", 
+ "name": "Employees Receivable",
  "owner": "Administrator", 
  "prepared_report": 0, 
  "ref_doctype": "Expense Claim", 
- "report_name": "Employees Payable", 
+ "report_name": "Employees Receivable",
  "report_type": "Script Report", 
  "roles": [
   {

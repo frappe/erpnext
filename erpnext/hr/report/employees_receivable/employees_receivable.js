@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.query_reports["Employees Payable"] = {
+frappe.query_reports["Employees Receivable"] = {
 	"filters": [
 		{
 			"fieldname":"company",
@@ -119,10 +119,10 @@ frappe.query_reports["Employees Payable"] = {
 		},
 	],
 	onload: function(report) {
-		report.page.add_inner_button(__("Employees Payable Summary"), function() {
+		/*report.page.add_inner_button(__("Employees Receivable Summary"), function() {
 			var filters = report.get_values();
-			frappe.set_route('query-report', 'Employees Payable Summary', {company: filters.company});
-		});
+			frappe.set_route('query-report', 'Employees Receivable Summary', {company: filters.company});
+		});*/
 		report.page.add_inner_button(__("Payment Reconciliation"), function() {
 			var filters = report.get_values();
 			frappe.set_route('Form', 'Payment Reconciliation', {
