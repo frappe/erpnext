@@ -350,6 +350,20 @@ $.extend(erpnext.utils, {
 		});
 	},
 
+	add_payment_reconciliation_button: function(party_type, page, get_values) {
+		page.add_inner_button(__("Payment Reconciliation"), function() {
+			var values = get_values();
+			frappe.set_route('Form', 'Payment Reconciliation').then(() => {
+				cur_frm.set_value({
+					company: values.company,
+					party_type: party_type,
+					party: values[frappe.scrub(party_type)],
+					receivable_payable_accocunt: values.account
+				});
+			});
+		});
+	},
+
 	set_override_item_naming_by: function(frm) {
 		if (!frm.doc.item_group && !frm.doc.brand) {
 			frm.set_df_property('item_naming_by', 'read_only', 0);

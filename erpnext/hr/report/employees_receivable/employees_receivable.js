@@ -123,14 +123,7 @@ frappe.query_reports["Employees Receivable"] = {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Employees Receivable Summary', {company: filters.company});
 		});*/
-		report.page.add_inner_button(__("Payment Reconciliation"), function() {
-			var filters = report.get_values();
-			frappe.set_route('Form', 'Payment Reconciliation', {
-				company: filters.company,
-				party_type: "Employee",
-				party: filters.employee,
-			});
-		});
+		erpnext.utils.add_payment_reconciliation_button("Employee", report.page, () => report.get_values());
 	},
 	initial_depth: 1
 }

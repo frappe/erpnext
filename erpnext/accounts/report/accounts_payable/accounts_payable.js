@@ -140,14 +140,7 @@ frappe.query_reports["Accounts Payable"] = {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Accounts Payable Summary', {company: filters.company});
 		});
-		report.page.add_inner_button(__("Payment Reconciliation"), function() {
-			var filters = report.get_values();
-			frappe.set_route('Form', 'Payment Reconciliation', {
-				company: filters.company,
-				party_type: "Supplier",
-				party: filters.supplier,
-			});
-		});
+		erpnext.utils.add_payment_reconciliation_button("Supplier", report.page, () => report.get_values());
 	},
 	initial_depth: 1
 }
