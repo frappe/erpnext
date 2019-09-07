@@ -25,3 +25,6 @@ def execute():
 			item.db_set('item_naming_by', 'Item Name')
 		else:
 			item.db_set('item_naming_by', 'Item Code')
+
+		if item.name == "Service":
+			item.db_set('show_item_code', 'No')
