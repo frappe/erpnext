@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import copy
+from frappe import _
 from frappe.utils import nowdate, cint, cstr
 from frappe.utils.nestedset import NestedSet
 from frappe.website.website_generator import WebsiteGenerator
@@ -27,8 +28,8 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 	def validate(self):
 		super(ItemGroup, self).validate()
 
-		if not self.parent_item_group and not frappe.flags.in_test:
-			self.parent_item_group = 'All Item Groups'
+		if not self.parent_item_group and not frappe.flags.in_test and frappe.db.exists("Item Group", _('All Item Groups')):
+			self.parent_item_group = _('All Item Groups')
 
 		self.make_route()
 
