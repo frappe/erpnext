@@ -28,8 +28,9 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 	def validate(self):
 		super(ItemGroup, self).validate()
 
-		if not self.parent_item_group and not frappe.flags.in_test and frappe.db.exists("Item Group", _('All Item Groups')):
-			self.parent_item_group = _('All Item Groups')
+		if not self.parent_item_group and not frappe.flags.in_test:
+			if frappe.db.exists("Item Group", _('All Item Groups'), cache=True):
+				self.parent_item_group = _('All Item Groups')
 
 		self.make_route()
 
