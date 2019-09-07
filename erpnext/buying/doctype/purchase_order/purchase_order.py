@@ -477,6 +477,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 					rm_item_code = rm_item_data["rm_item_code"]
 					items_dict = {
 						rm_item_code: {
+							"po_detail": rm_item_data.get("name"),
 							"item_name": rm_item_data["item_name"],
 							"description": item_wh.get(rm_item_code, {}).get('description', ""),
 							'qty': rm_item_data["qty"],

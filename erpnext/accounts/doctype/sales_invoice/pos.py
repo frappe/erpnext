@@ -227,8 +227,8 @@ def get_contacts(customers):
 		customers = [frappe._dict({'name': customers})]
 
 	for data in customers:
-		contact = frappe.db.sql(""" select email_id, phone, mobile_no from `tabContact`
-			where is_primary_contact =1 and name in
+		contact = frappe.db.sql(""" select email_id, phone from `tabContact`
+			where is_primary_contact=1 and name in
 			(select parent from `tabDynamic Link` where link_doctype = 'Customer' and link_name = %s
 			and parenttype = 'Contact')""", data.name, as_dict=1)
 		if contact:
@@ -432,7 +432,6 @@ def get_customer_id(doc, customer=None):
 
 	return cust_id
 
-
 def make_customer_and_address(customers):
 	customers_list = []
 	for customer, data in iteritems(customers):
@@ -448,7 +447,6 @@ def make_customer_and_address(customers):
 		customers_list.append(customer)
 	frappe.db.commit()
 	return customers_list
-
 
 def add_customer(data):
 	customer = data.get('full_name') or data.get('customer')
@@ -466,20 +464,17 @@ def add_customer(data):
 	frappe.db.commit()
 	return customer_doc.name
 
-
 def get_territory(data):
 	if data.get('territory'):
 		return data.get('territory')
 
 	return frappe.db.get_single_value('Selling Settings','territory') or _('All Territories')
 
-
 def get_customer_group(data):
 	if data.get('customer_group'):
 		return data.get('customer_group')
 
 	return frappe.db.get_single_value('Selling Settings', 'customer_group') or frappe.db.get_value('Customer Group', {'is_group': 0}, 'name')
-
 
 def make_contact(args, customer):
 	if args.get('email_id') or args.get('phone'):
@@ -506,7 +501,6 @@ def make_contact(args, customer):
 		doc.flags.ignore_mandatory = True
 		doc.save(ignore_permissions=True)
 
-
 def make_address(args, customer):
 	if not args.get('address_line1'):
 		return
@@ -521,7 +515,10 @@ def make_address(args, customer):
 		address = frappe.get_doc('Address', name)
 	else:
 		address = frappe.new_doc('Address')
-		address.country = frappe.get_cached_value('Company',  args.get('company'),  'country')
+		if args.get('company'):
+			address.country = frappe.get_cached_value('Company',
+				args.get('company'),  'country')
+
 		address.append('links', {
 			'link_doctype': 'Customer',
 			'link_name': customer
@@ -532,7 +529,6 @@ def make_address(args, customer):
 	address.update(args)
 	address.flags.ignore_mandatory = True
 	address.save(ignore_permissions=True)
-
 
 def make_email_queue(email_queue):
 	name_list = []
@@ -549,7 +545,6 @@ def make_email_queue(email_queue):
 		name_list.append(key)
 
 	return name_list
-
 
 def validate_item(doc):
 	for item in doc.get('items'):
@@ -569,7 +564,6 @@ def validate_item(doc):
 			item_doc.save(ignore_permissions=True)
 			frappe.db.commit()
 
-
 def submit_invoice(si_doc, name, doc, name_list):
 	try:
 		si_doc.insert()
@@ -584,7 +578,6 @@ def submit_invoice(si_doc, name, doc, name_list):
 		name_list = save_invoice(doc, name, name_list)
 
 	return name_list
-
 
 def save_invoice(doc, name, name_list):
 	try:
