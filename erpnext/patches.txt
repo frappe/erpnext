@@ -622,3 +622,4 @@ erpnext.patches.v11_1.set_sales_order_type
 erpnext.patches.v11_1.update_item_price_item_details
 erpnext.patches.v11_1.move_apply_discount_after_taxes_to_company
 execute:frappe.delete_doc_if_exists("Report", "Employees Payable")
+erpnext.patches.v11_1.set_item_naming_by
