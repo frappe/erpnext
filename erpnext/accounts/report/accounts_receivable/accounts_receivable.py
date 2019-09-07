@@ -573,7 +573,7 @@ class ReceivablePayableReport(object):
 			entry_date = gle.posting_date
 
 		ageing_data = get_ageing_data(cint(self.filters.range1), cint(self.filters.range2),
-			cint(self.filters.range3), cint(self.filters.range4), self.age_as_on, entry_date, outstanding_amount)
+			cint(self.filters.range3), cint(self.filters.range4), cint(self.filters.range5), self.age_as_on, entry_date, outstanding_amount)
 		row["age"] = ageing_data[0]
 		for i in range(5):
 			row["range{}".format(i+1)] = ageing_data[i+1]
@@ -932,7 +932,7 @@ class ReceivablePayableReport(object):
 		return payment_term_map
 
 	def get_chart_data(self, columns, data):
-		ageing_columns = columns[self.ageing_col_idx_start : self.ageing_col_idx_start+4]
+		ageing_columns = columns[self.ageing_col_idx_start : self.ageing_col_idx_start+5]
 		rows = []
 		for d in data:
 			rows.append(
@@ -946,6 +946,7 @@ class ReceivablePayableReport(object):
 				'labels': [d.get("label") for d in ageing_columns],
 				'datasets': rows
 			},
+			"colors": ['light-blue', 'blue', 'purple', 'orange', 'red'],
 			"type": 'percentage'
 		}
 
@@ -956,7 +957,7 @@ def execute(filters=None):
 	}
 	return ReceivablePayableReport(filters).run(args)
 
-def get_ageing_data(first_range, second_range, third_range, fourth_range, age_as_on, entry_date, outstanding_amount):
+def get_ageing_data(first_range, second_range, third_range, fourth_range, fifth_range, age_as_on, entry_date, outstanding_amount):
 	# [0-30, 30-60, 60-90, 90-120, 120-above]
 	outstanding_range = [0.0, 0.0, 0.0, 0.0, 0.0]
 
@@ -965,7 +966,7 @@ def get_ageing_data(first_range, second_range, third_range, fourth_range, age_as
 
 	age = (getdate(age_as_on) - getdate(entry_date)).days or 0
 	index = None
-	for i, days in enumerate([first_range, second_range, third_range, fourth_range]):
+	for i, days in enumerate([first_range, second_range, third_range, fourth_range, fifth_range]):
 		if age <= days:
 			index = i
 			break
