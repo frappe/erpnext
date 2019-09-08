@@ -465,6 +465,7 @@ def apply_pricing_rule_for_free_items(doc, pricing_rule):
 			if pricing_rule.get('same_item') else pricing_rule.get('free_item')) and d.is_free_item]
 
 		if not items:
+			frappe.log_error(pricing_rule.get('free_item_rate'))
 			doc.append('items', {
 				'item_code': pricing_rule.get('free_item'),
 				'qty': pricing_rule.get('free_qty'),
