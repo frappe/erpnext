@@ -296,13 +296,12 @@ class AccountsController(TransactionBase):
 							item.set("price_list_rate", ret.get("price_list_rate"))
 
 						if item.get("price_list_rate"):
-							frappe.log_error("Item Rate Before is " + str(item.rate))
 							item.rate = flt(item.price_list_rate *
 								(1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate"))
-							frappe.log_error("Item Rate After is " + str(item.rate))
 
 							if item.get('discount_amount'):
 								item.rate = item.price_list_rate - item.discount_amount
+								frappe.log_error("Item Rate After2 is " + str(item.rate))
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
