@@ -938,7 +938,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 
 	# bank or cash
 	bank = get_default_bank_cash_account(doc.company, "Bank", mode_of_payment=doc.get("mode_of_payment"),
-		account=bank_account, party_account_currency)
+		account=bank_account, currency=party_account_currency)
 		
 	frappe.log_error(bank)
 
