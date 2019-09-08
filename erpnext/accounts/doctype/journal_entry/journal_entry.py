@@ -647,6 +647,7 @@ class JournalEntry(AccountsController):
 @frappe.whitelist()
 def get_default_bank_cash_account(company, account_type=None, mode_of_payment=None, account=None, currency=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+	frappe.log_error(mode_of_payment)
 	if mode_of_payment:
 		account = get_bank_cash_account(mode_of_payment, company).get("account")
 
@@ -661,11 +662,11 @@ def get_default_bank_cash_account(company, account_type=None, mode_of_payment=No
 				currency = frappe.get_cached_value('Company',  company,  "default_currency")
 			frappe.log_error(currency)
 			account = frappe.get_cached_value('Company',  company,  "default_bank_account")
-			frappe.log_error(account)
+			frappe.log_error("Account: " + account)
 			if not account:
 				account_list = frappe.get_all("Account", filters = {"company": company,
 					"account_type": "Bank", "is_group": 0, "currency": currency})
-				frappe.log_error(account_list)
+				frappe.log_error("List: " + account_list)
 				if len(account_list) == 1:
 					account = account_list[0].name
 
