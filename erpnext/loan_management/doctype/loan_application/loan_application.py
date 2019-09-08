@@ -81,7 +81,7 @@ class LoanApplication(Document):
 			name in (%s) """  % ", ".join(['%s']*len(pledge_list)), tuple(pledge_list))
 
 	def get_pledges(self):
-		return [ d.loan_security for d in self.loan_security_pledges]
+		return [ d.loan_security_pledge for d in self.loan_security_pledges]
 
 @frappe.whitelist()
 def make_loan(source_name, target_doc = None):

@@ -8,7 +8,7 @@ frappe.ui.form.on('Loan Application', {
 		frm.trigger("toggle_fields");
 		frm.trigger("add_toolbar_buttons");
 
-		frm.set_query('loan_security', 'loan_security_pledges', function(doc, cdt, cdn) {
+		frm.set_query('loan_security_pledge', 'loan_security_pledges', function(doc, cdt, cdn) {
 			return {
 				filters: {
 					applicant: frm.doc.applicant

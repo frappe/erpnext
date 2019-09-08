@@ -4,6 +4,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "loan_security_pledge",
   "loan_security",
   "qty",
   "loan_security_price",
@@ -12,46 +13,55 @@
  ],
  "fields": [
   {
+   "fetch_from": "loan_security_pledge.loan_security",
    "fieldname": "loan_security",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Loan Security",
-   "options": "Loan Security Pledge"
+   "options": "Loan Security"
   },
   {
-   "fetch_from": "loan_security.loan_security_price",
+   "fetch_from": "loan_security_pledge.loan_security_price",
    "fieldname": "loan_security_price",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Loan Security Price",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
-   "fetch_from": "loan_security.amount",
+   "fetch_from": "loan_security_pledge.amount",
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
-   "fetch_from": "loan_security.haircut",
+   "fetch_from": "loan_security_pledge.haircut",
    "fieldname": "haircut",
    "fieldtype": "Percent",
    "label": "Haircut",
    "read_only": 1
   },
   {
-   "fetch_from": "loan_security.qty",
+   "fetch_from": "loan_security_pledge.qty",
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Quantity",
    "read_only": 1
+  },
+  {
+   "fieldname": "loan_security_pledge",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Loan Security Pledge",
+   "options": "Loan Security Pledge"
   }
  ],
  "istable": 1,
- "modified": "2019-09-03 10:54:56.107706",
+ "modified": "2019-09-08 19:56:31.919659",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Pledge",
