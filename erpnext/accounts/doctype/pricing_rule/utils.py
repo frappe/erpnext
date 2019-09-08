@@ -33,12 +33,12 @@ def get_pricing_rules(args, doc=None):
 	if not pricing_rules: return []
 
 	if apply_multiple_pricing_rules(pricing_rules):
-		frappe.log_error(pricing_rules)
 		for pricing_rule in pricing_rules:
 			pricing_rule = filter_pricing_rules(args, pricing_rule, doc)
 			if pricing_rule:
 				rules.append(pricing_rule)
 	else:
+		frappe.log_error(pricing_rules)
 		pricing_rule = filter_pricing_rules(args, pricing_rules, doc)
 		if pricing_rule:
 			rules.append(pricing_rule)
