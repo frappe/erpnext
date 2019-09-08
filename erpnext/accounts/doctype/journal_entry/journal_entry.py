@@ -659,10 +659,13 @@ def get_default_bank_cash_account(company, account_type=None, mode_of_payment=No
 		if account_type=="Bank":
 			if currency == None:
 				currency = frappe.get_cached_value('Company',  company,  "default_currency")
+			frappe.log_error(currency)
 			account = frappe.get_cached_value('Company',  company,  "default_bank_account")
+			frappe.log_error(account)
 			if not account:
 				account_list = frappe.get_all("Account", filters = {"company": company,
 					"account_type": "Bank", "is_group": 0, "currency": currency})
+				frappe.log_error(account_list)
 				if len(account_list) == 1:
 					account = account_list[0].name
 
