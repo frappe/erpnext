@@ -43,8 +43,8 @@ class LoanDisbursement(AccountsController):
 			self.get_gl_dict({
 				"account": loan_details.loan_account,
 				"against": loan_details.applicant,
-				"debit": loan_details.loan_amount,
-				"debit_in_account_currency": loan_details.loan_amount,
+				"debit": self.disbursed_amount,
+				"debit_in_account_currency": self.disbursed_amount,
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
 				"remarks": "Against Loan:" + self.against_loan,
@@ -56,8 +56,8 @@ class LoanDisbursement(AccountsController):
 			self.get_gl_dict({
 				"account": loan_details.payment_account,
 				"against": loan_details.applicant,
-				"credit": loan_details.loan_amount,
-				"credit_in_account_currency": loan_details.loan_amount,
+				"credit": self.disbursed_amount,
+				"credit_in_account_currency": self.disbursed_amount,
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
 				"remarks": "Against Loan:" + self.against_loan,
