@@ -163,15 +163,14 @@ class Gstr1Report(object):
 			if not b2c_limit:
 				frappe.throw(_("Please set B2C Limit in GST Settings."))
 
-		if self.filters.get("type_of_business") ==  "B2C Large" and customers:
+		if self.filters.get("type_of_business") ==  "B2C Large":
 			conditions += """ and SUBSTR(place_of_supply, 1, 2) != SUBSTR(company_gstin, 1, 2)
-				and grand_total > {0} and is_return != 1 and gst_category ='Unregistered' """.\
-					format(flt(b2c_limit), ", ".join([frappe.db.escape(c.name) for c in customers]))
-		elif self.filters.get("type_of_business") ==  "B2C Small" and customers:
+				and grand_total > {0} and is_return != 1 and gst_category ='Unregistered' """.format(flt(b2c_limit))
+
+		elif self.filters.get("type_of_business") ==  "B2C Small":
 			conditions += """ and (
 				SUBSTR(place_of_supply, 1, 2) = SUBSTR(company_gstin, 1, 2)
-					or grand_total <= {0}) and is_return != 1 and gst_category ='Unregistered' """.\
-						format(flt(b2c_limit), ", ".join([frappe.db.escape(c.name) for c in customers]))
+					or grand_total <= {0}) and is_return != 1 and gst_category ='Unregistered' """.format(flt(b2c_limit))
 
 		elif self.filters.get("type_of_business") ==  "CDNR":
 			conditions += """ and is_return = 1 """
