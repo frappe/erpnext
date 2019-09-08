@@ -264,8 +264,6 @@ class AccountsController(TransactionBase):
 						args["is_subcontracted"] = self.is_subcontracted
 
 					ret = get_item_details(args, self, overwrite_warehouse=False)
-					
-					frappe.log_error("RET:" + str(ret))
 
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
@@ -301,7 +299,6 @@ class AccountsController(TransactionBase):
 
 							if item.get('discount_amount'):
 								item.rate = item.price_list_rate - item.discount_amount
-								frappe.log_error("Item Rate After2 is " + str(item.rate))
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
@@ -791,7 +788,9 @@ class AccountsController(TransactionBase):
 				item.amount = group_item_amount[item.item_code]
 
 				if item.qty:
+					frappe.log_error("Rate before:" + str(item.rate))
 					item.rate = flt(flt(item.amount) / flt(item.qty), item.precision("rate"))
+					frappe.log_error("Rate after:" + str(item.rate))
 				else:
 					item.rate = 0
 
