@@ -249,7 +249,7 @@ class AccountsController(TransactionBase):
 				parent_dict.update({"customer": parent_dict.get("party_name")})
 
 			for item in self.get("items"):
-				frappe.log_error("Current rate is: " + item.rate)
+				frappe.log_error("Current rate is: " + str(item.rate))
 				if item.get("item_code"):
 					args = parent_dict.copy()
 					args.update(item.as_dict())
