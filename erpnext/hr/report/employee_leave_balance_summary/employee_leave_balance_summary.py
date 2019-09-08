@@ -7,7 +7,7 @@ from frappe.utils import flt
 from frappe import _
 from erpnext.hr.doctype.leave_application.leave_application import get_leaves_for_period
 
-from ..employee_leave_balance.employee_leave_balance import get_total_allocated_leaves
+from erpnext.hr.report.employee_leave_balance.employee_leave_balance import get_total_allocated_leaves
 
 def execute(filters=None):
 	if filters.to_date <= filters.from_date:
