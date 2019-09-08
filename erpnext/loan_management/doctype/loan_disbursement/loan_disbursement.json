@@ -1,0 +1,101 @@
+{
+ "creation": "2019-09-07 12:44:49.125452",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "against_loan",
+  "company",
+  "applicant",
+  "disbursement_date",
+  "posting_date",
+  "disbursed_amount",
+  "amended_from",
+  "accounting_dimensions_section",
+  "cost_center"
+ ],
+ "fields": [
+  {
+   "fieldname": "against_loan",
+   "fieldtype": "Link",
+   "label": "Against Loan ",
+   "options": "Loan"
+  },
+  {
+   "fieldname": "disbursement_date",
+   "fieldtype": "Date",
+   "label": "Disbursement Date"
+  },
+  {
+   "fieldname": "disbursed_amount",
+   "fieldtype": "Currency",
+   "label": "Disbursed Amount"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Loan Disbursement",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "against_loan.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "against_loan.applicant",
+   "fieldname": "applicant",
+   "fieldtype": "Data",
+   "label": "Applicant",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Posting Date",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2019-09-07 17:03:49.110926",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Loan Disbursement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
