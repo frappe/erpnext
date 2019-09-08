@@ -474,7 +474,7 @@ def apply_pricing_rule_for_free_items(doc, pricing_rule):
 				'is_free_item': 1
 			})
 
-			#doc.set_missing_values()
+			doc.set_missing_values()
 
 def apply_pricing_rule(doc, pr_doc, item_row, value, do_not_validate=False):
 	apply_on, items = get_apply_on_and_items(pr_doc, item_row)
