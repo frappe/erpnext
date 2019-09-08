@@ -249,6 +249,7 @@ class AccountsController(TransactionBase):
 				parent_dict.update({"customer": parent_dict.get("party_name")})
 
 			for item in self.get("items"):
+				frappe.log_error("Current rate is: " + item.rate)
 				if item.get("item_code"):
 					args = parent_dict.copy()
 					args.update(item.as_dict())
@@ -265,6 +266,7 @@ class AccountsController(TransactionBase):
 
 					ret = get_item_details(args, self, overwrite_warehouse=False)
 					frappe.log_error("RET: " + str(ret))
+					frappe.log_error("Current rate is: " + item.rate)
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (item.get(fieldname) is None or fieldname in force_item_fields):
