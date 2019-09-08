@@ -458,7 +458,7 @@ def get_applied_pricing_rules(doc, item_row):
 		if item_row.get("pricing_rules") else [])
 
 def apply_pricing_rule_for_free_items(doc, pricing_rule):
-	if pricing_rule.get('free_item'):
+	if pricing_rule.get('free_item') or pricing_rule.get('same_item'):
 		items = [d.item_code for d in doc.items
 			if d.item_code == (d.item_code
 			if pricing_rule.get('same_item') else pricing_rule.get('free_item')) and d.is_free_item]
