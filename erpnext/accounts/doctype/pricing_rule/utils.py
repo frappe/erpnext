@@ -470,7 +470,8 @@ def apply_pricing_rule_for_free_items(doc, pricing_rule):
 				'item_code': pricing_rule.get('free_item'),
 				'qty': pricing_rule.get('free_qty'),
 				'uom': pricing_rule.get('free_item_uom'),
-				'rate': pricing_rule.get('free_item_rate'),
+				#'rate': pricing_rule.get('free_item_rate'),
+				'rate': 0,
 				'is_free_item': 1
 			})
 
