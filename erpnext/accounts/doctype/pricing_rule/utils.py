@@ -458,21 +458,21 @@ def get_applied_pricing_rules(doc, item_row):
 		if item_row.get("pricing_rules") else [])
 
 def apply_pricing_rule_for_free_items(doc, pricing_rule):
-	#if pricing_rule.get('free_item'):
-	items = [d.item_code for d in doc.items
-		if d.item_code == (d.item_code
-		if pricing_rule.get('same_item') else pricing_rule.get('free_item')) and d.is_free_item]
+	if pricing_rule.get('free_item'):
+		items = [d.item_code for d in doc.items
+			if d.item_code == (d.item_code
+			if pricing_rule.get('same_item') else pricing_rule.get('free_item')) and d.is_free_item]
 
-	if not items:
-		doc.append('items', {
-			'item_code': pricing_rule.get('free_item'),
-			'qty': pricing_rule.get('free_qty'),
-			'uom': pricing_rule.get('free_item_uom'),
-			'rate': pricing_rule.get('free_item_rate'),
-			'is_free_item': 1
-		})
+		if not items:
+			doc.append('items', {
+				'item_code': pricing_rule.get('free_item'),
+				'qty': pricing_rule.get('free_qty'),
+				'uom': pricing_rule.get('free_item_uom'),
+				'rate': pricing_rule.get('free_item_rate'),
+				'is_free_item': 1
+			})
 
-		doc.set_missing_values()
+			doc.set_missing_values()
 
 def apply_pricing_rule(doc, pr_doc, item_row, value, do_not_validate=False):
 	apply_on, items = get_apply_on_and_items(pr_doc, item_row)
