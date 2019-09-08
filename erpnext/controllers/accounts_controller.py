@@ -270,7 +270,6 @@ class AccountsController(TransactionBase):
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (item.get(fieldname) is None or fieldname in force_item_fields):
-								frappe.log_error(str(fieldname) + ": Forced to "+ str(value))
 								item.set(fieldname, value)
 
 							elif fieldname in ['cost_center', 'conversion_factor'] and not item.get(fieldname):
@@ -297,8 +296,10 @@ class AccountsController(TransactionBase):
 							item.set("price_list_rate", ret.get("price_list_rate"))
 
 						if item.get("price_list_rate"):
+							frappe.log_error("Item Rate Before is " + str(item.rate))
 							item.rate = flt(item.price_list_rate *
 								(1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate"))
+							frappe.log_error("Item Rate After is " + str(item.rate))
 
 							if item.get('discount_amount'):
 								item.rate = item.price_list_rate - item.discount_amount
