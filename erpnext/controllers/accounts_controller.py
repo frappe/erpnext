@@ -264,6 +264,8 @@ class AccountsController(TransactionBase):
 						args["is_subcontracted"] = self.is_subcontracted
 
 					ret = get_item_details(args, self, overwrite_warehouse=False)
+					
+					frappe.log_error(ret)
 
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
@@ -286,22 +288,18 @@ class AccountsController(TransactionBase):
 
 
 					if ret.get("pricing_rules") and not ret.get("validate_applied_rule", 0):
-						frappe.log_error("Inside")
 						# if user changed the discount percentage then set user's discount percentage ?
 						item.set("pricing_rules", ret.get("pricing_rules"))
 						item.set("discount_percentage", ret.get("discount_percentage"))
 						item.set("discount_amount", ret.get("discount_amount"))
 						if ret.get("pricing_rule_for") == "Rate":
-							frappe.log_error("Inside2")
 							item.set("price_list_rate", ret.get("price_list_rate"))
 
 						if item.get("price_list_rate"):
-							frappe.log_error("Inside3")
 							item.rate = flt(item.price_list_rate *
 								(1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate"))
 
 							if item.get('discount_amount'):
-								frappe.log_error("Inside4")
 								item.rate = item.price_list_rate - item.discount_amount
 
 			if self.doctype == "Purchase Invoice":
