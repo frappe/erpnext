@@ -38,7 +38,6 @@ def get_pricing_rules(args, doc=None):
 			if pricing_rule:
 				rules.append(pricing_rule)
 	else:
-		frappe.log_error(pricing_rules)
 		pricing_rule = filter_pricing_rules(args, pricing_rules, doc)
 		if pricing_rule:
 			rules.append(pricing_rule)
@@ -465,13 +464,11 @@ def apply_pricing_rule_for_free_items(doc, pricing_rule):
 			if pricing_rule.get('same_item') else pricing_rule.get('free_item')) and d.is_free_item]
 
 		if not items:
-			frappe.log_error("RATE: " + str(pricing_rule.get('free_item_rate')))
 			doc.append('items', {
 				'item_code': pricing_rule.get('free_item'),
 				'qty': pricing_rule.get('free_qty'),
 				'uom': pricing_rule.get('free_item_uom'),
-				#'rate': pricing_rule.get('free_item_rate'),
-				'rate': 0,
+				'rate': pricing_rule.get('free_item_rate'),
 				'is_free_item': 1
 			})
 
