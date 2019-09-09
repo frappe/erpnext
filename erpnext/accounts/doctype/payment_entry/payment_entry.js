@@ -568,12 +568,11 @@ frappe.ui.form.on('Payment Entry', {
 		d.fields_dict.today_overdue.$input.on('click',function(event){
 			var from = ""
 			var to = new Date().toISOString().slice(0, 10)
-			console.log(d.fields_dict.from_posting_date)
-			console.log(d.fields_dict.to_due_date)
-			d.fields_dict.to_due_date.value = to
+
+			d.set_value('from_due_date','')
 			d.set_value('to_due_date',to)
-			d.fields_dict.to_due_date.refresh_field()
-			console.log(to)
+			d.set_value('from_posting_date','')
+			d.set_value('to_posting_date','')
 		});	
 		d.show();
 			
