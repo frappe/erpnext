@@ -1,5 +1,5 @@
 {
- "autoname": "LS-.{applicant}.-.{loan_security}.-.#####",
+ "autoname": "LS-.{applicant}.-.#####",
  "creation": "2019-08-29 18:48:51.371674",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -11,47 +11,11 @@
   "loan",
   "loan_application",
   "loan_security_details_section",
-  "loan_security",
-  "unit_of_measurement",
-  "haircut",
-  "column_break_9",
-  "qty",
-  "loan_security_price",
-  "amount",
+  "loan_security_pledges",
+  "total_security_value",
   "amended_from"
  ],
  "fields": [
-  {
-   "fetch_from": "loan_security.unit_of_measurement",
-   "fieldname": "unit_of_measurement",
-   "fieldtype": "Data",
-   "label": "Unit Of Measurement",
-   "read_only": 1
-  },
-  {
-   "fieldname": "qty",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Quantity",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "loan_security.loan_security_price",
-   "fieldname": "loan_security_price",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Loan Security Price",
-   "options": "Company:company:default_currency",
-   "read_only": 1
-  },
-  {
-   "default": "0.0",
-   "fieldname": "amount",
-   "fieldtype": "Currency",
-   "label": "Amount",
-   "options": "Company:company:default_currency",
-   "read_only": 1
-  },
   {
    "fieldname": "amended_from",
    "fieldtype": "Link",
@@ -81,24 +45,6 @@
    "label": "Loan Security Details"
   },
   {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "loan_security.haircut",
-   "fieldname": "haircut",
-   "fieldtype": "Percent",
-   "label": "Haircut",
-   "read_only": 1
-  },
-  {
-   "fieldname": "loan_security",
-   "fieldtype": "Link",
-   "label": "Loan Security",
-   "options": "Loan Security",
-   "reqd": 1
-  },
-  {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   },
@@ -115,10 +61,24 @@
    "label": "Loan Application",
    "options": "Loan Application",
    "read_only": 1
+  },
+  {
+   "fieldname": "loan_security_pledges",
+   "fieldtype": "Table",
+   "label": "Loan Security Pledges",
+   "options": "Pledge",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_security_value",
+   "fieldtype": "Currency",
+   "label": "Total Security Value",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-03 15:54:06.897113",
+ "modified": "2019-09-09 17:39:32.237173",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Pledge",
@@ -140,7 +100,7 @@
   }
  ],
  "quick_entry": 1,
- "search_fields": "applicant,amount",
+ "search_fields": "applicant",
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

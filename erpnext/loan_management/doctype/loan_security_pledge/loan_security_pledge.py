@@ -8,7 +8,14 @@ from frappe.model.document import Document
 
 class LoanSecurityPledge(Document):
 	def validate(self):
-		self.set_amount()
+		self.set_pledge_amount()
 
-	def set_amount(self):
-		self.amount = self.loan_security_price * self.qty
+	def set_pledge_amount(self):
+		total_security_value = 0
+
+		for pledge in self.loan_security_pledges:
+			pledge.amount = pledge.qty * pledge.loan_security_price
+
+			total_security_value += pledge.amount
+
+		self.total_security_value = total_security_value
