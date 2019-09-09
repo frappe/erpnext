@@ -18,34 +18,36 @@ class LoanApplication(Document):
 		self.validate_loan_amount()
 		self.get_repayment_details()
 
-	def on_submit(self):
-		self.link_loan_securities()
-
-	def on_cancel(self):
-		self.unlink_loan_securities()
-
 	def validate_loan_amount(self):
 		maximum_loan_limit = frappe.db.get_value('Loan Type', self.loan_type, 'maximum_loan_amount')
 		if maximum_loan_limit and self.loan_amount > maximum_loan_limit:
 			frappe.throw(_("Loan Amount cannot exceed Maximum Loan Amount of {0}").format(maximum_loan_limit))
 
+		if self.maximum_loan_amount and self.loan_amount > self.maximum_loan_amount:
+			frappe.throw(_("Loan Amount exceeds maximum loan amount of {0} as per proposed securities").format(self.maximum_loan_amount))
+
 	def get_repayment_details(self):
-		if self.repayment_method == "Repay Over Number of Periods":
-			self.repayment_amount = get_monthly_repayment_amount(self.repayment_method, self.loan_amount, self.rate_of_interest, self.repayment_periods)
 
-		if self.repayment_method == "Repay Fixed Amount per Period":
-			monthly_interest_rate = flt(self.rate_of_interest) / (12 *100)
-			if monthly_interest_rate:
-				min_repayment_amount = self.loan_amount*monthly_interest_rate
-				if self.repayment_amount - min_repayment_amount <= 0:
-					frappe.throw(_("Repayment Amount must be greater than " \
-						+ str(flt(min_repayment_amount, 2))))
-				self.repayment_periods = math.ceil((math.log(self.repayment_amount) -
-					math.log(self.repayment_amount - min_repayment_amount)) /(math.log(1 + monthly_interest_rate)))
-			else:
-				self.repayment_periods = self.loan_amount / self.repayment_amount
+		if self.is_term_loan:
+			if self.repayment_method == "Repay Over Number of Periods":
+				self.repayment_amount = get_monthly_repayment_amount(self.repayment_method, self.loan_amount, self.rate_of_interest, self.repayment_periods)
 
-		self.calculate_payable_amount()
+			if self.repayment_method == "Repay Fixed Amount per Period":
+				monthly_interest_rate = flt(self.rate_of_interest) / (12 *100)
+				if monthly_interest_rate:
+					min_repayment_amount = self.loan_amount*monthly_interest_rate
+					if self.repayment_amount - min_repayment_amount <= 0:
+						frappe.throw(_("Repayment Amount must be greater than " \
+							+ str(flt(min_repayment_amount, 2))))
+					self.repayment_periods = math.ceil((math.log(self.repayment_amount) -
+						math.log(self.repayment_amount - min_repayment_amount)) /(math.log(1 + monthly_interest_rate)))
+				else:
+					self.repayment_periods = self.loan_amount / self.repayment_amount
+
+			self.calculate_payable_amount()
+		else:
+			self.total_payable_amount = self.loan_amount
+			self.total_payable_interest = self.total_payable_amount * self.rate_of_interest/100
 
 	def calculate_payable_amount(self):
 		balance_amount = self.loan_amount
@@ -65,20 +67,6 @@ class LoanApplication(Document):
 			self.loan_amount = 0
 			for security in self.loan_security_pledges:
 				self.loan_amount += security.amount - (security.amount * security.haircut/100)
-
-	def link_loan_securities(self):
-		pledge_list = self.get_pledges()
-
-		frappe.db.sql("""UPDATE `tabLoan Security`
-			set loan_application = %s where
-			name in (%s) """  % ('%s', ", ".join(['%s']*len(pledge_list))), tuple([self.name] + pledge_list))
-
-	def unlink_loan_securities(self):
-		pledge_list = self.get_pledges()
-
-		frappe.db.sql("""UPDATE `tabLoan Security`
-			set loan_application = '' where
-			name in (%s) """  % ", ".join(['%s']*len(pledge_list)), tuple(pledge_list))
 
 	def get_pledges(self):
 		return [ d.loan_security_pledge for d in self.loan_security_pledges]
