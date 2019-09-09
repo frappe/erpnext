@@ -165,12 +165,13 @@ function setup_details_page(){
 async function submit() {
     // form validation here
     form_validation();
+    debugger;
     let appointment = (await frappe.call({
         method: 'erpnext.www.book-appointment.index.create_appointment',
         args: {
-            'date': date,
-            'time': time,
-            'contact': contact
+            'date': window.selected_date,
+            'time': window.selected_time,
+            'contact': window.contact
         }
     })).message;
     frappe.msgprint(__('Appointment Created Successfully'));
@@ -181,7 +182,7 @@ async function submit() {
 
 function form_validation(){
     var date = window.selected_date;
-    var time = document.getElementsByClassName('selected')[0].id;
+    var time = window.selected_time;
     contact = {};
     contact.name = document.getElementById('customer_name').value;
     contact.number = document.getElementById('customer_number').value;

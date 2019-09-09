@@ -76,7 +76,7 @@ def create_appointment(date,time,contact):
     appointment.scheduled_time = datetime.datetime.strptime(date+" "+time,format_string)
     contact = json.loads(contact)
     appointment.customer_name = contact['name']
-    appointment.customer_phone_no = contact['number']
+    appointment.customer_phone_number = contact['number']
     appointment.customer_skype = contact['skype']
     appointment.customer_details = contact['notes']
     appointment.insert()
