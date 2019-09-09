@@ -97,7 +97,7 @@ class LeaveAllocation(Document):
 
 		self.total_leaves_allocated = flt(self.unused_leaves) + flt(self.new_leaves_allocated)
 
-		self.carry_forward_based_on_max_allowed_leaves()
+		self.limit_carry_forward_based_on_max_allowed_leaves()
 
 		if self.carry_forward:
 			self.set_carry_forwarded_leaves_in_previous_allocation()
@@ -108,7 +108,7 @@ class LeaveAllocation(Document):
 				frappe.throw(_("Total leaves allocated is mandatory for Leave Type {0}")
 					.format(self.leave_type))
 
-	def carry_forward_based_on_max_allowed_leaves(self):
+	def limit_carry_forward_based_on_max_allowed_leaves(self):
 		max_leaves_allowed = frappe.db.get_value("Leave Type", self.leave_type, "max_leaves_allowed")
 		if max_leaves_allowed and self.total_leaves_allocated > flt(max_leaves_allowed):
 			self.total_leaves_allocated = flt(max_leaves_allowed)
