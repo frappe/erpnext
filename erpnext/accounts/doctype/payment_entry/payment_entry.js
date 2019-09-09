@@ -543,7 +543,7 @@ frappe.ui.form.on('Payment Entry', {
 			{fieldtype:"Section Break", label: __("Due Date")},
 			{fieldtype:"Button", label: __("Due Today"), fieldname:"today_overdue"},
 			{fieldtype:"Column Break"},
-			{fieldtype:"Button", label: __("30 Days"), fieldname:"30_days_overdue"},
+			{fieldtype:"Button", label: __("30 Days"), fieldname:"thirty_days_overdue"},
 			{fieldtype:"Column Break"},
 			{fieldtype:"Button", label: __("60 Days"), fieldname:"60_days_overdue"},
 			{fieldtype:"Column Break"},
@@ -572,7 +572,7 @@ frappe.ui.form.on('Payment Entry', {
 			d.set_value('from_posting_date','')
 			d.set_value('to_posting_date','')
 		});	
-		d.fields_dict.30_days_overdue.$input.on('click',function(event){
+		d.fields_dict.thirty_days_overdue.$input.on('click',function(event){
 			var to = new Date().toISOString().slice(0, 10)
 			d.set_value('from_due_date','')
 			d.set_value('to_due_date',to)
