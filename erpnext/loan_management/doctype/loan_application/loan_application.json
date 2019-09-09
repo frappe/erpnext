@@ -14,14 +14,16 @@
   "company",
   "section_break_4",
   "loan_type",
+  "is_term_loan",
+  "loan_amount",
   "is_secured_loan",
-  "required_by_date",
   "rate_of_interest",
   "column_break_7",
   "description",
-  "loan_amount",
+  "required_by_date",
   "loan_security_details_section",
-  "loan_security_pledges",
+  "proposed_pledges",
+  "maximum_loan_amount",
   "repayment_info",
   "repayment_method",
   "total_payable_interest",
@@ -97,6 +99,7 @@
    "reqd": 1
   },
   {
+   "bold": 1,
    "fieldname": "loan_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -124,11 +127,13 @@
    "label": "Repayment Info"
   },
   {
+   "depends_on": "is_term_loan",
+   "fetch_from": "loan_type.repayment_method",
    "fieldname": "repayment_method",
    "fieldtype": "Select",
    "label": "Repayment Method",
    "options": "\nRepay Fixed Amount per Period\nRepay Over Number of Periods",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fetch_from": "loan_type.rate_of_interest",
@@ -149,12 +154,14 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "repayment_method",
    "fieldname": "repayment_amount",
    "fieldtype": "Currency",
    "label": "Monthly Repayment Amount",
    "options": "Company:company:default_currency"
   },
   {
+   "depends_on": "repayment_method",
    "fieldname": "repayment_periods",
    "fieldtype": "Int",
    "label": "Repayment Period in Months"
@@ -189,14 +196,29 @@
   },
   {
    "depends_on": "eval:doc.is_secured_loan == 1",
-   "fieldname": "loan_security_pledges",
+   "fieldname": "proposed_pledges",
    "fieldtype": "Table",
-   "label": "Loan Security Pledges",
-   "options": "Loan Application Pledge"
+   "label": "Proposed Pledges",
+   "options": "Proposed Pledge"
+  },
+  {
+   "fieldname": "maximum_loan_amount",
+   "fieldtype": "Currency",
+   "label": "Maximum Loan Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "loan_type.is_term_loan",
+   "fieldname": "is_term_loan",
+   "fieldtype": "Check",
+   "label": "Is Term Loan",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-01 21:00:44.837288",
+ "modified": "2019-09-09 14:29:08.060738",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Application",

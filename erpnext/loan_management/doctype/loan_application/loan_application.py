@@ -15,6 +15,7 @@ class LoanApplication(Document):
 	def validate(self):
 		validate_repayment_method(self.repayment_method, self.loan_amount, self.repayment_amount, self.repayment_periods)
 		self.set_loan_amount()
+		self.set_pledge_amount()
 		self.validate_loan_amount()
 		self.get_repayment_details()
 
@@ -25,6 +26,10 @@ class LoanApplication(Document):
 
 		if self.maximum_loan_amount and self.loan_amount > self.maximum_loan_amount:
 			frappe.throw(_("Loan Amount exceeds maximum loan amount of {0} as per proposed securities").format(self.maximum_loan_amount))
+
+	def set_pledge_amount(self):
+		for proposed_pledge in self.proposed_pledges:
+			proposed_pledge.amount = proposed_pledge.qty * proposed_pledge.loan_security_price
 
 	def get_repayment_details(self):
 
@@ -63,16 +68,13 @@ class LoanApplication(Document):
 		self.total_payable_amount = self.loan_amount + self.total_payable_interest
 
 	def set_loan_amount(self):
-		if not self.loan_amount and self.is_secured_loan and self.loan_security_pledges:
+		if not self.loan_amount and self.is_secured_loan and self.proposed_pledges:
 			self.loan_amount = 0
 			for security in self.loan_security_pledges:
 				self.loan_amount += security.amount - (security.amount * security.haircut/100)
 
-	def get_pledges(self):
-		return [ d.loan_security_pledge for d in self.loan_security_pledges]
-
 @frappe.whitelist()
-def make_loan(source_name, target_doc = None):
+def create_loan(source_name, target_doc = None):
 	doclist = get_mapped_doc("Loan Application", source_name, {
 		"Loan Application": {
 			"doctype": "Loan",
@@ -83,3 +85,26 @@ def make_loan(source_name, target_doc = None):
 	}, target_doc)
 
 	return doclist
+
+@frappe.whitelist()
+def create_pledge(loan_application):
+	loan_application_doc = frappe.get_doc("Loan Application", loan_application)
+
+	lsp = frappe.new_doc("Loan Security Pledge")
+	lsp.applicant = loan_application_doc.applicant
+	lsp.loan_application = loan_application_doc.name
+
+	for pledge in loan_application_doc.proposed_pledges:
+
+		lsp.append('loan_security_pledges', {
+			"loan_security": pledge.loan_security,
+			"qty": pledge.qty,
+			"loan_security_price": pledge.loan_security_price,
+			"haircut": pledge.haircut
+		})
+
+	lsp.save()
+	lsp.submit()
+
+	message = _("Loan Security Pledge Created : {0}").format(lsp.name)
+	frappe.msgprint(message)
