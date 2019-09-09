@@ -265,16 +265,17 @@ def update_status(name, status):
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
-
 	def postprocess(source, target_doc):
 		if frappe.flags.args and frappe.flags.args.default_supplier:
+			supplier = frappe.flags.args.default_supplier
 			# items only for given default supplier
 			supplier_items = []
 			for d in target_doc.items:
-				default_supplier = get_item_defaults(d.item_code, target_doc.company).get('default_supplier')
-				if frappe.flags.args.default_supplier == default_supplier:
+				supplier_data = get_item_defaults(d.item_code, target_doc.company).get("supplier_items")
+				if supplier in [data.supplier for data in supplier_data]:
 					supplier_items.append(d)
 			target_doc.items = supplier_items
+			target_doc.supplier = supplier
 
 		set_missing_values(source, target_doc)
 
@@ -335,7 +336,6 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 			import json
 			target_doc = frappe.get_doc(json.loads(target_doc))
 		target_doc.set("items", [])
-
 	material_requests, supplier_items = get_material_requests_based_on_supplier(source_name)
 
 	def postprocess(source, target_doc):
@@ -348,7 +348,7 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 		set_missing_values(source, target_doc)
 
 	for mr in material_requests:
-		target_doc = get_mapped_doc("Material Request", mr, 	{
+		target_doc = get_mapped_doc("Material Request", mr, {
 			"Material Request": {
 				"doctype": "Purchase Order",
 			},
