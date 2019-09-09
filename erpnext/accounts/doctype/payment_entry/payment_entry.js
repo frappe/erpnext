@@ -563,7 +563,9 @@ frappe.ui.form.on('Payment Entry', {
 				frappe.flags.allocate_payment_amount = true;
 				frm.events.validate_filters_data(frm, filters);
 				frm.events.get_outstanding_documents(frm, filters);
-			}
+				d.hide();
+			},
+			primary_action_label: 'Get Outstanding Invoices'
 		});
 		d.fields_dict.today_overdue.$input.on('click',function(event){
 			var date = new Date();
