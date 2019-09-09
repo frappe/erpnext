@@ -558,6 +558,7 @@ frappe.ui.form.on('Payment Entry', {
 
 		frappe.prompt(fields, function(filters){
 			frappe.flags.allocate_payment_amount = true;
+			frappe.flags.today_overdue.innerText = "Test"
 			frm.events.validate_filters_data(frm, filters);
 			frm.events.get_outstanding_documents(frm, filters);
 		}, __("Filters"), __("Get Outstanding Invoices"));
