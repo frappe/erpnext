@@ -545,9 +545,9 @@ frappe.ui.form.on('Payment Entry', {
 			{fieldtype:"Column Break"},
 			{fieldtype:"Button", label: __("30 Days"), fieldname:"thirty_days_overdue"},
 			{fieldtype:"Column Break"},
-			{fieldtype:"Button", label: __("60 Days"), fieldname:"60_days_overdue"},
+			{fieldtype:"Button", label: __("60 Days"), fieldname:"sixty_days_overdue"},
 			{fieldtype:"Column Break"},
-			{fieldtype:"Button", label: __("90+ Days"), fieldname:"90_days_overdue"},
+			{fieldtype:"Button", label: __("90+ Days"), fieldname:"ninety_days_overdue"},
 			{fieldtype:"Section Break", label: __("Outstanding Amount")},
 			{fieldtype:"Float", label: __("Greater Than Amount"),fieldname:"outstanding_amt_greater_than", default: 0},
 			{fieldtype:"Column Break"},
@@ -570,7 +570,7 @@ frappe.ui.form.on('Payment Entry', {
 			var to = new Date().toISOString().slice(0, 10)
 			date.setDate(date.getDate() - 29);
 			var from = date.toISOString().slice(0, 10)
-			d.set_value('from_due_date','')
+			d.set_value('from_due_date',from)
 			d.set_value('to_due_date',to)
 			d.set_value('from_posting_date','')
 			d.set_value('to_posting_date','')
@@ -580,6 +580,28 @@ frappe.ui.form.on('Payment Entry', {
 			date.setDate(date.getDate() - 59);
 			var from = date.toISOString().slice(0, 10)
 			date.setDate(date.getDate() - 30);
+			var to = date.toISOString().slice(0, 10)
+			d.set_value('from_due_date',from)
+			d.set_value('to_due_date',to)
+			d.set_value('from_posting_date','')
+			d.set_value('to_posting_date','')
+		});	
+		d.fields_dict.sixty_days_overdue.$input.on('click',function(event){
+			var date = new Date();
+			date.setDate(date.getDate() - 89);
+			var from = date.toISOString().slice(0, 10)
+			date.setDate(date.getDate() - 60);
+			var to = date.toISOString().slice(0, 10)
+			d.set_value('from_due_date',from)
+			d.set_value('to_due_date',to)
+			d.set_value('from_posting_date','')
+			d.set_value('to_posting_date','')
+		});	
+		d.fields_dict.ninety_days_overdue.$input.on('click',function(event){
+			var date = new Date();
+			//date.setDate(date.getDate() - 59);
+			//var from = date.toISOString().slice(0, 10)
+			date.setDate(date.getDate() - 90);
 			var to = date.toISOString().slice(0, 10)
 			d.set_value('from_due_date','')
 			d.set_value('to_due_date',to)
