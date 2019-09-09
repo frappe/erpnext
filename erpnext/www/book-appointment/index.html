@@ -3,8 +3,8 @@
 {% block title %}{{ _("Book Appointment") }}{% endblock %}
 
 {% block script %}
-    <script src="assets/js/moment-bundle.min.js"></script>
-    <script src="book-appointment/index.js"></script>
+<script src="assets/js/moment-bundle.min.js"></script>
+<script src="book-appointment/index.js"></script>
 {% endblock %}
 
 {% block page_content %}
@@ -18,15 +18,16 @@
         <div class="row justify-content-center mt-3">
             <div class="col-md-6 align-self-center ">
                 <div class="row">
-                    <input type="date" oninput="on_date_or_timezone_select()" name="appointment-date" id="appointment-date"
-                        class="form-control mt-3 col-md m-3">
-                    <select name="appointment-timezone" oninput="on_date_or_timezone_select()" id="appointment-timezone" class="form-control mt-3 col-md">
+                    <input type="date" oninput="on_date_or_timezone_select()" name="appointment-date"
+                        id="appointment-date" class="form-control mt-3 col-md m-3">
+                    <select name="appointment-timezone" oninput="on_date_or_timezone_select()" id="appointment-timezone"
+                        class="form-control mt-3 col-md">
                     </select>
                 </div>
             </div>
         </div>
-        <div class="row mt-3" id="timeslot-container" >
-            
+        <div class="row mt-3" id="timeslot-container">
+
         </div>
         <div class="row justify-content-center mt-3">
             <div class="col-md-4">
