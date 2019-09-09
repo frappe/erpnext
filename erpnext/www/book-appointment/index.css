@@ -1,7 +1,12 @@
 .time-slot {
-    margin: 0 0;
+    margin-bottom: 2em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    border-radius: 0.4em;
+    cursor: pointer;
     border: 0.5px solid #cccccc;
-    min-height: 100px;
+    min-height: 75px;
+    padding: 0.5em 1em;
 }
 
 .time-slot:hover {
@@ -9,9 +14,13 @@
 }
 
 .time-slot.unavailable {
-    background: #bbb;
+    background: #CBD5E0;
+    cursor: not-allowed;
+    color: #718096
+}
 
-    color: #777777
+.time-slot.unavailable .text-muted {
+    color: #718096
 }
 
 input[type="radio"] {
@@ -22,4 +31,8 @@ input[type="radio"] {
 .time-slot.selected {
     color: white;
     background: #5e64ff;
+}
+
+.time-slot.selected .text-muted {
+    color: #EDF2F7 !important;
 }
