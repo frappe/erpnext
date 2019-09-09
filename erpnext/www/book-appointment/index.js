@@ -156,10 +156,8 @@ function setup_details_page(){
     let page2 = document.getElementById('enter-details');
     page1.style.display = 'none';
     page2.style.display = 'block';
-
     let date_container = document.getElementsByClassName('date-span')[0];
     let time_container = document.getElementsByClassName('time-span')[0];
-
     date_container.innerHTML = new Date(window.selected_date).toLocaleDateString();
     time_container.innerHTML = moment(window.selected_time,"HH:mm:ss").format("LT");
 }
