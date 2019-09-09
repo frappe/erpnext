@@ -28,12 +28,14 @@
   {
    "fieldname": "customer_phone_number",
    "fieldtype": "Data",
-   "label": "Phone Number"
+   "label": "Phone Number",
+   "reqd": 1
   },
   {
    "fieldname": "customer_skype",
    "fieldtype": "Data",
-   "label": "Skype ID"
+   "label": "Skype ID",
+   "reqd": 1
   },
   {
    "fieldname": "customer_details",
@@ -48,7 +50,7 @@
    "reqd": 1
   }
  ],
- "modified": "2019-09-09 12:23:33.611408",
+ "modified": "2019-09-09 15:40:21.881421",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
