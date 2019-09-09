@@ -574,7 +574,7 @@ frappe.ui.form.on('Payment Entry', {
 		});	
 		d.fields_dict.30_days_overdue.$input.on('click',function(event){
 			var date = new Date();
-			date = date.setDate(date.getDate() - 30);
+			//date = date.setDate(date.getDate() - 30);
 			var to = date.toISOString().slice(0, 10);
 			d.set_value('from_due_date','')
 			d.set_value('to_due_date',to)
