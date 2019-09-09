@@ -32,7 +32,6 @@ class ProductionPlan(Document):
 	def get_open_sales_orders(self):
 		""" Pull sales orders  which are pending to deliver based on criteria selected"""
 		open_so = get_sales_orders(self)
-
 		if open_so:
 			self.add_so_in_table(open_so)
 		else:
@@ -47,7 +46,7 @@ class ProductionPlan(Document):
 				'sales_order': data.name,
 				'sales_order_date': data.transaction_date,
 				'customer': data.customer,
-				'grand_total': data.grand_total
+				'grand_total': data.base_grand_total
 			})
 
 	def get_pending_material_requests(self):
