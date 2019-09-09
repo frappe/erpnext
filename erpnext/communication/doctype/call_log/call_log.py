@@ -28,7 +28,7 @@ class CallLog(Document):
 			self.trigger_call_popup()
 
 	def trigger_call_popup(self):
-		scheduled_employees = get_scheduled_employees_for_popup(self.to)
+		scheduled_employees = get_scheduled_employees_for_popup(self.medium)
 		employee_emails = get_employees_with_number(self.to)
 
 		# check if employees with matched number are scheduled to receive popup
