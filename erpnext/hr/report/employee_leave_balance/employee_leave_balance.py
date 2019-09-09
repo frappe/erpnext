@@ -66,10 +66,10 @@ def get_data(filters, leave_types):
 					filters.from_date, filters.to_date) * -1
 
 				# opening balance
-				opening = get_total_allocated_leaves(employee.name, leave_type, filters.from_date, filters.to_date)
+				opening = get_leave_balance_on(employee.name, leave_type, filters.from_date)
 
 				# closing balance
-				closing = flt(opening) - flt(leaves_taken)
+				closing = get_leave_balance_on(employee.name, leave_type, filters.to_date)
 
 				row += [opening, leaves_taken, closing]
 
@@ -94,18 +94,3 @@ def get_approvers(department):
 			where parent = %s and parentfield = 'leave_approvers'""", (d), as_dict=True)])
 
 	return approvers
-
-def get_total_allocated_leaves(employee, leave_type, from_date, to_date):
-	''' Returns leave allocation between from date and to date '''
-	leave_allocation_records = frappe.db.get_all('Leave Ledger Entry', filters={
-			'docstatus': 1,
-			'is_expired': 0,
-			'leave_type': leave_type,
-			'employee': employee,
-			'transaction_type': 'Leave Allocation'
-		}, or_filters={
-			'from_date': ['between', (from_date, to_date)],
-			'to_date': ['between', (from_date, to_date)]
-		}, fields=['SUM(leaves) as leaves'])
-
-	return flt(leave_allocation_records[0].get('leaves')) if leave_allocation_records else flt(0)
