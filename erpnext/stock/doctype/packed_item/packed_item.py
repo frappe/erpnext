@@ -30,14 +30,14 @@ def get_bin_qty(item, warehouse):
 		where item_code = %s and warehouse = %s""", (item, warehouse), as_dict = 1)
 	return det and det[0] or frappe._dict()
 
-def update_packing_list_item(doc, packing_item_code, qty, main_item_row, description):
+def update_packing_list_item(doc, packing_item_code, qty, main_item_row, description):	
 	item = get_packing_item_details(packing_item_code, doc.company)
 
 	# check if exists
 	exists = 0
 	for d in doc.get("packed_items"):
 		if d.parent_item == main_item_row.item_code and d.item_code == packing_item_code and\
-				d.parent_detail_docname == main_item_row.name and d.description == description:
+				d.parent_detail_docname == main_item_row.name:
 			pi, exists = d, 1
 			break
 
@@ -48,10 +48,10 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 	pi.item_code = packing_item_code
 	pi.item_name = item.item_name
 	pi.parent_detail_docname = main_item_row.name
-	pi.description = item.description
 	pi.uom = item.stock_uom
 	pi.qty = flt(qty)
-	pi.description = description
+	if description and not pi.description:
+		pi.description = description
 	if not pi.warehouse:
 		pi.warehouse = (main_item_row.warehouse if ((doc.get('is_pos')
 			or not item.default_warehouse) and main_item_row.warehouse) else item.default_warehouse)
