@@ -151,7 +151,8 @@ def get_invoice_summary(items, taxes):
 						tax_rate=tax.rate,
 						tax_amount=(reference_row.tax_amount * tax.rate) / 100,
 						net_amount=reference_row.tax_amount,
-						taxable_amount=reference_row.tax_amount,
+						taxable_amount=(reference_row.tax_amount if tax.charge_type == 'On Previous Row Amount'
+							else reference_row.total),
 						item_tax_rate={tax.account_head: tax.rate},
 						charges=True
 					)
@@ -278,7 +279,11 @@ def prepare_and_attach_invoice(doc, replace=False):
 	progressive_name, progressive_number = get_progressive_name_and_number(doc, replace)
 
 	invoice = prepare_invoice(doc, progressive_number)
-	invoice_xml = frappe.render_template('erpnext/regional/italy/e-invoice.xml', context={"doc": invoice}, is_path=True)
+	item_meta = frappe.get_meta("Sales Invoice Item")
+
+	invoice_xml = frappe.render_template('erpnext/regional/italy/e-invoice.xml',
+		context={"doc": invoice, "item_meta": item_meta}, is_path=True)
+
 	invoice_xml = invoice_xml.replace("&", "&amp;")
 
 	xml_filename = progressive_name + ".xml"
