@@ -2,6 +2,8 @@ import frappe
 import datetime
 import json
 
+no_cache = 1
+
 @frappe.whitelist(allow_guest=True)
 def get_appointment_settings():
     settings = frappe.get_doc('Appointment Booking Settings')
