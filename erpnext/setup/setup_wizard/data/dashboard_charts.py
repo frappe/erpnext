@@ -14,7 +14,7 @@ def get_company_for_dashboards():
 	return None
 
 def get_default_dashboards():
-	company = frappe.get_doc("Company", get_company_for_dashboards)
+	company = frappe.get_doc("Company", get_company_for_dashboards())
 	income_account = company.default_income_account or get_account("Income Account", company.name)
 	expense_account = company.default_expense_account or get_account("Expense Account", company.name)
 	bank_account = company.default_bank_account or get_account("Bank", company.name)
