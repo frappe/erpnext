@@ -565,7 +565,9 @@ frappe.ui.form.on('Payment Entry', {
 				frm.events.get_outstanding_documents(frm, filters);
 			}
 		});
-		d.fields_dict.today_overdue.$wrapper.on('click',console.log('Hello World'));	
+		d.fields_dict.today_overdue.$input.on('click',function(event){
+			console.log("Hey")
+		});	
 		d.show();
 			
 
