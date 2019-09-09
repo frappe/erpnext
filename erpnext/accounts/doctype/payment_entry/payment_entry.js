@@ -533,17 +533,23 @@ frappe.ui.form.on('Payment Entry', {
 		const today = frappe.datetime.get_today();
 		const fields = [
 			{fieldtype:"Section Break", label: __("Posting Date")},
-			{fieldtype:"Date", label: __("From Date"),
-				fieldname:"from_posting_date", default:frappe.datetime.add_days(today, -30)},
+			{fieldtype:"Date", label: __("From Date"),fieldname:"from_posting_date", default:frappe.datetime.add_days(today, -30)},
 			{fieldtype:"Column Break"},
 			{fieldtype:"Date", label: __("To Date"), fieldname:"to_posting_date", default:today},
 			{fieldtype:"Section Break", label: __("Due Date")},
 			{fieldtype:"Date", label: __("From Date"), fieldname:"from_due_date"},
 			{fieldtype:"Column Break"},
 			{fieldtype:"Date", label: __("To Date"), fieldname:"to_due_date"},
+			{fieldtype:"Section Break", label: __("Due Date")},
+			{fieldtype:"Button", label: __("Due Today"), fieldname:"today_overdue"},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Button", label: __("30 Days"), fieldname:"30_days_overdue"},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Button", label: __("60 Days"), fieldname:"60_days_overdue"},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Button", label: __("90+ Days"), fieldname:"90_days_overdue"},
 			{fieldtype:"Section Break", label: __("Outstanding Amount")},
-			{fieldtype:"Float", label: __("Greater Than Amount"),
-				fieldname:"outstanding_amt_greater_than", default: 0},
+			{fieldtype:"Float", label: __("Greater Than Amount"),fieldname:"outstanding_amt_greater_than", default: 0},
 			{fieldtype:"Column Break"},
 			{fieldtype:"Float", label: __("Less Than Amount"), fieldname:"outstanding_amt_less_than"},
 			{fieldtype:"Section Break"},
@@ -555,6 +561,8 @@ frappe.ui.form.on('Payment Entry', {
 			frm.events.validate_filters_data(frm, filters);
 			frm.events.get_outstanding_documents(frm, filters);
 		}, __("Filters"), __("Get Outstanding Invoices"));
+		
+		$('#today_overdue').on("click",	console.log("Hey"))
 	},
 
 	validate_filters_data: function(frm, filters) {
