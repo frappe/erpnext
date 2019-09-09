@@ -573,7 +573,9 @@ frappe.ui.form.on('Payment Entry', {
 			d.set_value('to_posting_date','')
 		});	
 		d.fields_dict.thirty_days_overdue.$input.on('click',function(event){
-			var to = new Date().toISOString().slice(0, 10)
+			var date = new Date();
+			date.setDate(date.getDate() - 30);
+			var to = date.toISOString().slice(0, 10)
 			d.set_value('from_due_date','')
 			d.set_value('to_due_date',to)
 			d.set_value('from_posting_date','')
