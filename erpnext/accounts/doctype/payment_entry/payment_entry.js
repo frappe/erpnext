@@ -579,6 +579,7 @@ frappe.ui.form.on('Payment Entry', {
 			var date = new Date();
 			date.setDate(date.getDate() - 59);
 			var from = date.toISOString().slice(0, 10)
+			var date = new Date();
 			date.setDate(date.getDate() - 30);
 			var to = date.toISOString().slice(0, 10)
 			d.set_value('from_due_date',from)
@@ -590,6 +591,7 @@ frappe.ui.form.on('Payment Entry', {
 			var date = new Date();
 			date.setDate(date.getDate() - 89);
 			var from = date.toISOString().slice(0, 10)
+			var date = new Date();
 			date.setDate(date.getDate() - 60);
 			var to = date.toISOString().slice(0, 10)
 			d.set_value('from_due_date',from)
