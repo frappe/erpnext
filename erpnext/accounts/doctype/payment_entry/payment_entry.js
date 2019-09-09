@@ -566,7 +566,10 @@ frappe.ui.form.on('Payment Entry', {
 			}
 		});
 		d.fields_dict.today_overdue.$input.on('click',function(event){
-			console.log("Hey")
+			var from = ""
+			var to = new Date().toISOString().slice(0, 10)
+			d.fields_dict.to_due_date = to
+			console.log(to)
 		});	
 		d.show();
 			
