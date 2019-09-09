@@ -8,7 +8,6 @@ from frappe import _
 from frappe.utils import getdate, cstr, add_days, date_diff, getdate, ceil
 from frappe.model.document import Document
 from erpnext.hr.utils import validate_overlap, get_employee_leave_policy
-from erpnext.hr.doctype.leave_allocation.leave_allocation import get_carry_forwarded_leaves
 from frappe.utils.background_jobs import enqueue
 from six import iteritems
 
