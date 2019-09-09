@@ -556,14 +556,19 @@ frappe.ui.form.on('Payment Entry', {
 			{fieldtype:"Check", label: __("Allocate Payment Amount"), fieldname:"allocate_payment_amount", default:1},
 		];
 
-		frappe.prompt(fields, function(filters){
-			frappe.flags.allocate_payment_amount = true;
-			frappe.flags.today_overdue.innerText = "Test"
-			frm.events.validate_filters_data(frm, filters);
-			frm.events.get_outstanding_documents(frm, filters);
-		}, __("Filters"), __("Get Outstanding Invoices"));
-		
-		$('#today_overdue').on("click",	console.log("Hey"))
+		var d = new frappe.ui.Dialog({
+			'fields': fields,
+			primary_action: function(){
+				var filters = d.get_values();
+				frappe.flags.allocate_payment_amount = true;
+				frm.events.validate_filters_data(frm, filters);
+				frm.events.get_outstanding_documents(frm, filters);
+			}
+		});
+		d.fields_dict.today_overdue.$wrapper.on('click',console.log('Hello World'));	
+		d.show();
+			
+
 	},
 
 	validate_filters_data: function(frm, filters) {
