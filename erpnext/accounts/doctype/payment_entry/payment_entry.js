@@ -571,6 +571,7 @@ frappe.ui.form.on('Payment Entry', {
 			console.log(d.fields_dict.from_posting_date)
 			console.log(d.fields_dict.to_due_date)
 			d.fields_dict.to_due_date.value = to
+			d.fields_dict.to_due_date.refresh_field()
 			console.log(to)
 		});	
 		d.show();
