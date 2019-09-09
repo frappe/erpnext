@@ -11,6 +11,8 @@
   "penalty_interest_rate",
   "grace_period_in_days",
   "is_term_loan",
+  "repayment_method",
+  "repayment_periods",
   "column_break_2",
   "disabled",
   "description",
@@ -124,10 +126,23 @@
    "options": "Loan Type",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "is_term_loan",
+   "fieldname": "repayment_method",
+   "fieldtype": "Select",
+   "label": "Repayment Method",
+   "options": "\nRepay Fixed Amount per Period\nRepay Over Number of Periods"
+  },
+  {
+   "depends_on": "is_term_loan",
+   "fieldname": "repayment_periods",
+   "fieldtype": "Int",
+   "label": "Repayment Period in Months"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-06 15:03:21.456415",
+ "modified": "2019-09-09 13:27:17.654080",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",
