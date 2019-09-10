@@ -1008,10 +1008,10 @@ class StockEntry(StockController):
 				})
 
 	def get_transfered_raw_materials(self):
-		qty_to_manufacture, produced_qty, transferred_qty = frappe.db.get_value("Work Order", self.work_order, ["qty", "produced_qty", "material_transferred_for_manufacturing"])
+		qty_to_manufacture, produced_qty, material_transferred_qty = frappe.db.get_value("Work Order", self.work_order, ["qty", "produced_qty", "material_transferred_for_manufacturing"])
 		qty_to_manufacture = flt(qty_to_manufacture)
 		produced_qty = flt(produced_qty)
-		transferred_qty = flt(transferred_qty)
+		material_transferred_qty = flt(material_transferred_qty)
 		remaining_qty = qty_to_manufacture - produced_qty
 
 		query = """
@@ -1040,54 +1040,56 @@ class StockEntry(StockController):
 		"""
 
 		# get all items already consumed for manufacture against the work order
-		consumed_materials = frappe.db.sql(query, self.work_order, ['Manufacture', 'Material Consumption for Manufacture'], as_dict=1)
+		consumed_materials = frappe.db.sql(query, (['Manufacture', 'Material Consumption for Manufacture'], self.work_order), as_dict=1)
 		backflushed_materials = {}
 		for item in consumed_materials:
 			backflushed_materials.setdefault(item.item_code, []).append({item.warehouse: item.qty})
 
 		# loop through the transferred quantities, and add an entry for each
 		# remaining item needed for manufacture, if not already consumed
-		transferred_materials = frappe.db.sql(query, self.work_order, ['Material Transfer for Manufacture'], as_dict=1)
+		transferred_materials = frappe.db.sql(query, (['Material Transfer for Manufacture'], self.work_order), as_dict=1)
 		for item in transferred_materials:
-			item_qty = item.qty
 			item_code = item.original_item or item.item_code
-			req_items = frappe.get_all('Work Order Item',
+			transferred_qty = item.qty
+			transferred_qty_each = flt(transferred_qty / qty_to_manufacture)
+
+			required_item = frappe.get_all("Work Order Item",
 				filters={'parent': self.work_order, 'item_code': item_code},
 				fields=["required_qty", "consumed_qty"]
 				)
 
-			required_qty = flt(req_items[0].required_qty)
-			required_qty_each = flt(required_qty / qty_to_manufacture)
-			consumed_qty = flt(req_items[0].consumed_qty)
+			consumed_qty = flt(required_item[0].consumed_qty)
 
-			if transferred_qty and remaining_qty >= flt(self.fg_completed_qty):
-				if item_qty >= required_qty:
-					item_qty = (required_qty / transferred_qty) * flt(self.fg_completed_qty)
-				else:
-					item_qty -= consumed_qty
-
-				if self.purpose == 'Manufacture':
+			if remaining_qty > flt(self.fg_completed_qty):
+				if self.purpose == "Material Consumption for Manufacture":
+					if transferred_qty >= required_qty:
+						transferred_qty = (required_qty / material_transferred_qty) * flt(self.fg_completed_qty)
+					else:
+						transferred_qty -= consumed_qty
+				elif self.purpose == 'Manufacture':
 					# If a Material Consumption is already booked, pull only the remaining
 					# transferred components to finish the product(s)
-					remaining_item_qty = required_qty_each * flt(self.fg_completed_qty)
+					remaining_item_qty = transferred_qty_each * flt(self.fg_completed_qty)
 
-					if consumed_qty == 0:
-						item_qty = remaining_item_qty
+					if consumed_qty == transferred_qty:
+						transferred_qty = 0
+					elif consumed_qty == 0:
+						transferred_qty = remaining_item_qty
 					else:
-						actual_consumed_qty = required_qty_each * produced_qty
+						actual_consumed_qty = transferred_qty_each * produced_qty
 						remaining_consumed_qty = consumed_qty - actual_consumed_qty
-						item_qty = max(0, remaining_item_qty - remaining_consumed_qty)
+						transferred_qty = max(0, remaining_item_qty - remaining_consumed_qty)
 			elif backflushed_materials.get(item.item_code):
 				for d in backflushed_materials.get(item.item_code):
 					if d.get(item.warehouse):
-						item_qty -= d.get(item.warehouse)
+						transferred_qty -= d.get(item.warehouse)
 
-			if item_qty > 0:
+			if transferred_qty > 0:
 				self.add_to_stock_entry_detail({
 					item.item_code: {
 						"from_warehouse": item.warehouse,
 						"to_warehouse": "",
-						"qty": item_qty,
+						"qty": transferred_qty,
 						"item_name": item.item_name,
 						"description": item.description,
 						"stock_uom": item.stock_uom,
