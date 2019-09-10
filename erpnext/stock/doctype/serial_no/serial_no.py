@@ -459,3 +459,13 @@ def get_delivery_note_serial_no(item_code, qty, delivery_note):
 		serial_nos = '\n'.join(dn_serial_nos)
 
 	return serial_nos
+
+@frappe.whitelist()
+def get_serial_no_item_customer(serial_no):
+	details = frappe.db.get_value("Serial No", serial_no, ['item_code', 'customer'], as_dict=1)
+	return {
+		"item_code": details.item_code,
+		"item_name": frappe.db.get_value("Item", details.item_code, "item_name"),
+		"customer": details.customer,
+		"customer_name": frappe.db.get_value("Customer", details.customer, "customer_name") if details.customer else ""
+	}

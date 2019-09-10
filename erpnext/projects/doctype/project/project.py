@@ -81,6 +81,7 @@ class Project(Document):
 		self.tasks = []
 		self.load_tasks()
 		self.validate_dates()
+		self.validate_serial_no()
 		self.send_welcome_email()
 		self.update_percent_complete(from_validate=True)
 
@@ -178,6 +179,18 @@ class Project(Document):
 		# delete
 		for t in frappe.get_all("Task", ["name"], {"project": self.name, "name": ("not in", task_names)}):
 			self.deleted_task_list.append(t.name)
+
+	def validate_serial_no(self):
+		if self.serial_no:
+			serial_no = frappe.db.get_value('Serial No', self.serial_no, ['item_code', 'customer'], as_dict=1)
+			if not self.item_code and serial_no.item_code:
+				self.item_code = serial_no.item_code
+				self.item_name = frappe.get_cached_value("Item", self.item_code, 'item_name')
+			elif self.item_code != serial_no.item_code:
+				frappe.throw(_("Serial No {0} belongs to {1}".format(self.serial_no, serial_no.item_code)))
+
+			if self.customer and serial_no.customer and self.customer != serial_no.customer:
+				frappe.throw(_("Serial No {0} is assigned to Customer {1}".format(self.serial_no, serial_no.customer)))
 
 	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data: return True
@@ -602,3 +615,48 @@ def create_kanban_board_if_not_exists(project):
 		quick_kanban_board('Task', project, 'status')
 
 	return True
+
+@frappe.whitelist()
+def make_against_project(project_name, dt):
+	from frappe.model.utils import get_fetch_values
+
+	project = frappe.get_doc("Project", project_name)
+	doc = frappe.new_doc(dt)
+
+	if doc.meta.has_field('company'):
+		doc.company = project.company
+	if doc.meta.has_field('project'):
+		doc.project = project_name
+	if doc.meta.has_field('set_project'):
+		doc.set_project = project_name
+
+	# Set customer
+	if project.customer:
+		if doc.meta.has_field('customer'):
+			doc.customer = project.customer
+			doc.update(get_fetch_values(doc.doctype, 'customer', project.customer))
+		elif dt == 'Quotation':
+			doc.quotation_to = 'Customer'
+			doc.party_name = project.customer
+			doc.update(get_fetch_values(doc.doctype, 'party_name', project.customer))
+
+	if project.item_code:
+		if doc.meta.has_field('item_code'):
+			doc.item_code = project.item_code
+			doc.update(get_fetch_values(doc.doctype, 'item_code', project.item_code))
+
+			if doc.meta.has_field('serial_no'):
+				doc.serial_no = project.serial_no
+				doc.update(get_fetch_values(doc.doctype, 'serial_no', project.serial_no))
+		else:
+			child = doc.append("purposes" if dt == "Maintenance Visit" else "items", {
+				"item_code": project.item_code,
+				"serial_no": project.serial_no
+			})
+			child.update(get_fetch_values(child.doctype, 'item_code', project.item_code))
+			if child.meta.has_field('serial_no'):
+				child.update(get_fetch_values(child.doctype, 'serial_no', project.serial_no))
+
+	doc.run_method("set_missing_values")
+	doc.run_method("calculate_taxes_and_totals")
+	return doc
