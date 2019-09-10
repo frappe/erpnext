@@ -190,7 +190,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 					frappe.set_route("Form", doc.doctype, doc.name);
 				}
 				else {
-					frappe.msgprint(__("Retention Stock Entry already created or Sample Quantity not provided"));
+					frappe.msgprint(__("Purchase Receipt doesn't have any Item for which Retain Sample is enabled."));
 				}
 			}
 		});

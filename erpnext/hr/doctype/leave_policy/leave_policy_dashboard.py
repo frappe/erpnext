@@ -12,6 +12,9 @@ def get_data():
 			},
 			{
 				'items': ['Employee Grade']
-			}
+			},
+			{
+				'items': ['Leave Allocation']
+			},
 		]
 	}

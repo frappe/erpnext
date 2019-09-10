@@ -72,9 +72,7 @@ class SalesOrder(SellingController):
 				frappe.msgprint(_("Warning: Sales Order {0} already exists against Customer's Purchase Order {1}").format(so[0][0], self.po_no))
 
 	def validate_for_items(self):
-		check_list = []
 		for d in self.get('items'):
-			check_list.append(cstr(d.item_code))
 
 			# used for production plan
 			d.transaction_date = self.transaction_date
@@ -82,13 +80,6 @@ class SalesOrder(SellingController):
 			tot_avail_qty = frappe.db.sql("select projected_qty from `tabBin` \
 				where item_code = %s and warehouse = %s", (d.item_code, d.warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
-
-		# check for same entry multiple times
-		unique_chk_list = set(check_list)
-		if len(unique_chk_list) != len(check_list) and \
-			not cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
-			frappe.msgprint(_("Same item has been entered multiple times"),
-				title=_("Warning"), indicator='orange')
 
 	def product_bundle_has_stock_item(self, product_bundle):
 		"""Returns true if product bundle has stock item"""
@@ -217,7 +208,9 @@ class SalesOrder(SellingController):
 	def check_credit_limit(self):
 		# if bypass credit limit check is set to true (1) at sales order level,
 		# then we need not to check credit limit and vise versa
-		if not cint(frappe.get_cached_value("Customer", self.customer, "bypass_credit_limit_check_at_sales_order")):
+		if not cint(frappe.db.get_value("Customer Credit Limit",
+			{'parent': self.customer, 'parenttype': 'Customer', 'company': self.company},
+			"bypass_credit_limit_check")):
 			check_credit_limit(self.customer, self.company)
 
 	def check_nextdoc_docstatus(self):
@@ -527,7 +520,7 @@ def make_material_request(source_name, target_doc=None):
 			"doctype": "Material Request Item",
 			"field_map": {
 				"parent": "sales_order",
-				"stock_uom": "uom"
+				"uom": "stock_uom"
 			},
 			"postprocess": update_item
 		},
@@ -568,7 +561,7 @@ def make_project(source_name, target_doc=None):
 	return doc
 
 @frappe.whitelist()
-def make_delivery_note(source_name, target_doc=None):
+def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 	def set_missing_values(source, target):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
@@ -593,22 +586,12 @@ def make_delivery_note(source_name, target_doc=None):
 				or item.get("buying_cost_center") \
 				or item_group.get("buying_cost_center")
 
-	target_doc = get_mapped_doc("Sales Order", source_name, {
+	mapper = {
 		"Sales Order": {
 			"doctype": "Delivery Note",
 			"validation": {
 				"docstatus": ["=", 1]
 			}
-		},
-		"Sales Order Item": {
-			"doctype": "Delivery Note Item",
-			"field_map": {
-				"rate": "rate",
-				"name": "so_detail",
-				"parent": "against_sales_order",
-			},
-			"postprocess": update_item,
-			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
@@ -618,7 +601,21 @@ def make_delivery_note(source_name, target_doc=None):
 			"doctype": "Sales Team",
 			"add_if_empty": True
 		}
-	}, target_doc, set_missing_values)
+	}
+
+	if not skip_item_mapping:
+		mapper["Sales Order Item"] = {
+			"doctype": "Delivery Note Item",
+			"field_map": {
+				"rate": "rate",
+				"name": "so_detail",
+				"parent": "against_sales_order",
+			},
+			"postprocess": update_item,
+			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
+		}
+
+	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
 
 	return target_doc
 
@@ -996,3 +993,33 @@ def make_raw_material_request(items, company, sales_order, project=None):
 def make_inter_company_purchase_order(source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 	return make_inter_company_transaction("Sales Order", source_name, target_doc)
+
+@frappe.whitelist()
+def create_pick_list(source_name, target_doc=None):
+	def update_item_quantity(source, target, source_parent):
+		target.qty = flt(source.qty) - flt(source.delivered_qty)
+		target.stock_qty = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.conversion_factor)
+
+	doc = get_mapped_doc('Sales Order', source_name, {
+		'Sales Order': {
+			'doctype': 'Pick List',
+			'validation': {
+				'docstatus': ['=', 1]
+			}
+		},
+		'Sales Order Item': {
+			'doctype': 'Pick List Item',
+			'field_map': {
+				'parent': 'sales_order',
+				'name': 'sales_order_item'
+			},
+			'postprocess': update_item_quantity,
+			'condition': lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
+		},
+	}, target_doc)
+
+	doc.purpose = 'Delivery against Sales Order'
+
+	doc.set_item_locations()
+
+	return doc
