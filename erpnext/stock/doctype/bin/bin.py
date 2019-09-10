@@ -127,4 +127,4 @@ class Bin(Document):
 		self.db_set('projected_qty', self.projected_qty)
 
 def on_doctype_update():
-	frappe.db.add_index("Bin", ["item_code", "warehouse"])
+	frappe.db.add_unique("Bin", ["item_code", "warehouse"])
