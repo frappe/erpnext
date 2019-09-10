@@ -5,9 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt
 from frappe import _
-from erpnext.hr.doctype.leave_application.leave_application import get_leaves_for_period
-
-from erpnext.hr.report.employee_leave_balance.employee_leave_balance import get_total_allocated_leaves
+from erpnext.hr.doctype.leave_application.leave_application import get_leaves_for_period, get_leave_balance_on
 
 def execute(filters=None):
 	if filters.to_date <= filters.from_date:
@@ -58,14 +56,12 @@ def get_columns():
 def get_data(filters):
 	leave_types = frappe.db.sql_list("SELECT `name` FROM `tabLeave Type` ORDER BY `name` ASC")
 
-	conditions = {
-		'status': 'Active',
-	}
+	conditions = get_conditions(filters)
 
-	if filters.get('employee'):
-		conditions['name'] = filters.get('employee')
+	user = frappe.session.user
+	department_approver_map = get_department_leave_approver_map(filters.get('department'))
 
-	active_employees = frappe.get_all('Employee',
+	active_employees = frappe.get_list('Employee',
 		filters=conditions,
 		fields=['name', 'employee_name', 'department', 'user_id'])
 
@@ -76,21 +72,56 @@ def get_data(filters):
 			'leave_type': leave_type
 		})
 		for employee in active_employees:
-			row = frappe._dict({
-				'employee': employee.name,
-				'employee_name': employee.employee_name
-			})
+			leave_approvers = department_approver_map.get(employee.department_name, [])
 
-			leaves_taken = get_leaves_for_period(employee.name, leave_type,
-				filters.from_date, filters.to_date) * -1
+			if (len(leave_approvers) and user in leave_approvers) or (user in ["Administrator", employee.user_id]) \
+				or ("HR Manager" in frappe.get_roles(user)):
+				row = frappe._dict({
+					'employee': employee.name,
+					'employee_name': employee.employee_name
+				})
 
-			opening = get_total_allocated_leaves(employee.name, leave_type, filters.from_date, filters.to_date)
-			closing = flt(opening) - flt(leaves_taken)
+				leaves_taken = get_leaves_for_period(employee.name, leave_type,
+					filters.from_date, filters.to_date) * -1
 
-			row.opening_balance = opening
-			row.leaves_taken = leaves_taken
-			row.closing_balance = closing
-			row.indent = 1
-			data.append(row)
+				opening = get_leave_balance_on(employee.name, leave_type, filters.from_date)
+				closing = get_leave_balance_on(employee.name, leave_type, filters.to_date)
+
+				row.opening_balance = opening
+				row.leaves_taken = leaves_taken
+				row.closing_balance = closing
+				row.indent = 1
+				data.append(row)
 
 	return data
+
+def get_conditions(filters):
+	conditions={
+		'status': 'Active',
+	}
+	if filters.get('employee'):
+		conditions['name'] = filters.get('employee')
+
+	if filters.get('employee'):
+		conditions['name'] = filters.get('employee')
+
+	return conditions
+
+def get_department_leave_approver_map(department=None):
+	conditions=''
+	if department:
+		conditions='and department_name = %(department)s or parent_department = %(department)s'%{'department': department}
+
+	# get current department and all its child
+	department_list = frappe.db.sql_list(''' SELECT name FROM `tabDepartment` WHERE disabled=0{0}'''.format(conditions)) #nosec
+
+	# retrieve approvers list from current department and from its subsequent child departments
+	return frappe._dict(frappe.db.sql('''
+		SELECT
+			a.parent,
+			GROUP_CONCAT(DISTINCT appr.approver)
+		FROM `tabDepartment Approver` a, `tabDepartment Approver` appr
+		WHERE
+			a.parentfield = 'leave_approvers'
+			AND a.parent in {0}
+		GROUP BY parent'''.format(tuple(department_list)))) #nosec

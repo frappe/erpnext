@@ -8,6 +8,8 @@ from frappe.utils import flt
 from erpnext.hr.doctype.leave_application.leave_application \
 	import get_leave_balance_on, get_leaves_for_period
 
+from erpnext.hr.report.employee_leave_balance_summary.employee_leave_balance_summary \
+	import get_department_leave_approver_map
 
 def execute(filters=None):
 	leave_types = frappe.db.sql_list("select name from `tabLeave Type` order by name asc")
@@ -19,7 +21,7 @@ def execute(filters=None):
 
 def get_columns(leave_types):
 	columns = [
-		_("Employee") + ":Link/Employee:150",
+		_("Employee") + ":Link.Employee:150",
 		_("Employee Name") + "::200",
 		_("Department") +"::150"
 	]
@@ -54,9 +56,11 @@ def get_data(filters, leave_types):
 		filters=conditions,
 		fields=["name", "employee_name", "department", "user_id"])
 
+	department_approver_map = get_department_leave_approver_map(filters.get('department'))
+
 	data = []
 	for employee in active_employees:
-		leave_approvers = get_approvers(employee.department)
+		leave_approvers = department_approver_map.get(employee.department_name, [])
 		if (len(leave_approvers) and user in leave_approvers) or (user in ["Administrator", employee.user_id]) or ("HR Manager" in frappe.get_roles(user)):
 			row = [employee.name, employee.employee_name, employee.department]
 
@@ -76,21 +80,3 @@ def get_data(filters, leave_types):
 			data.append(row)
 
 	return data
-
-def get_approvers(department):
-	if not department:
-		return []
-
-	approvers = []
-	# get current department and all its child
-	department_details = frappe.db.get_value("Department", {"name": department}, ["lft", "rgt"], as_dict=True)
-	department_list = frappe.db.sql("""select name from `tabDepartment`
-		where lft >= %s and rgt <= %s order by lft desc
-		""", (department_details.lft, department_details.rgt), as_list = True)
-
-	# retrieve approvers list from current department and from its subsequent child departments
-	for d in department_list:
-		approvers.extend([l.leave_approver for l in frappe.db.sql("""select approver from `tabDepartment Approver` \
-			where parent = %s and parentfield = 'leave_approvers'""", (d), as_dict=True)])
-
-	return approvers
