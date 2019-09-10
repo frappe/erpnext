@@ -160,6 +160,18 @@ def get_data():
 					"type": "doctype",
 					"name": "Travel Request",
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Employees Receivable",
+					"doctype": "Expense Claim"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Employee Ledger Summary",
+					"doctype": "Expense Claim"
+				},
 			]
 		},
 		{
