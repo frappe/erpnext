@@ -21,42 +21,45 @@ def get_list_context(context=None):
 
 def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20, order_by="modified"):
 	user = frappe.session.user
-	key = None
+	ignore_permissions = False
 
 	if not filters: filters = []
 
 	if doctype == 'Supplier Quotation':
-		filters.append((doctype, "docstatus", "<", 2))
+		filters.append((doctype, 'docstatus', '<', 2))
 	else:
-		filters.append((doctype, "docstatus", "=", 1))
+		filters.append((doctype, 'docstatus', '=', 1))
 
-	if (user != "Guest" and is_website_user()) or doctype == 'Request for Quotation':
+	if (user != 'Guest' and is_website_user()) or doctype == 'Request for Quotation':
 		parties_doctype = 'Request for Quotation Supplier' if doctype == 'Request for Quotation' else doctype
 		# find party for this contact
 		customers, suppliers = get_customers_suppliers(parties_doctype, user)
 
-		if not customers and not suppliers: return []
-
-		key, parties = get_party_details(customers, suppliers)
-
-		if doctype == 'Request for Quotation':
-			return rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_page_length)
-
-		filters.append((doctype, key, "in", parties))
-
-		if key:
-			return post_process(doctype, get_list_for_transactions(doctype, txt,
-				filters=filters, fields="name",limit_start=limit_start,
-				limit_page_length=limit_page_length,ignore_permissions=True,
-				order_by="modified desc"))
+		if customers:
+			if doctype == 'Quotation':
+				filters.append(('quotation_to', '=', 'Customer'))
+				filters.append(('party_name', 'in', customers))
+			else:
+				filters.append(('customer', 'in', customers))
+		elif suppliers:
+			filters.append(('supplier', 'in', suppliers))
 		else:
 			return []
 
-	return post_process(doctype, get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_length,
-		fields="name", order_by="modified desc"))
+		if doctype == 'Request for Quotation':
+			parties = customers or suppliers
+			return rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_page_length)
+
+		# Since customers and supplier do not have direct access to internal doctypes
+		ignore_permissions = True
+
+	transactions = get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_length,
+		fields='name', ignore_permissions=ignore_permissions, order_by='modified desc')
+
+	return post_process(doctype, transactions)
 
 def get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_length=20,
-	ignore_permissions=False,fields=None, order_by=None):
+	ignore_permissions=False, fields=None, order_by=None):
 	""" Get List of transactions like Invoices, Orders """
 	from frappe.www.list import get_list
 	meta = frappe.get_meta(doctype)
@@ -82,16 +85,6 @@ def get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_len
 			data.append(r)
 
 	return data
-
-def get_party_details(customers, suppliers):
-	if customers:
-		key, parties = "customer", customers
-	elif suppliers:
-		key, parties = "supplier", suppliers
-	else:
-		key, parties = "customer", []
-
-	return key, parties
 
 def rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_page_length):
 	data = frappe.db.sql("""select distinct parent as name, supplier from `tab{doctype}`
@@ -159,7 +152,7 @@ def has_website_permission(doc, ptype, user, verbose=False):
 	doctype = doc.doctype
 	customers, suppliers = get_customers_suppliers(doctype, user)
 	if customers:
-		return frappe.db.exists(doctype, filters=get_customer_filter(doc, customers))
+		return frappe.db.exists(doctype, get_customer_filter(doc, customers))
 	elif suppliers:
 		fieldname = 'suppliers' if doctype == 'Request for Quotation' else 'supplier'
 		return frappe.db.exists(doctype, filters={
@@ -175,7 +168,7 @@ def get_customer_filter(doc, customers):
 	filters.name = doc.name
 	filters[get_customer_field_name(doctype)] = ['in', customers]
 	if doctype == 'Quotation':
-		filters.party_type = 'Customer'
+		filters.quotation_to = 'Customer'
 	return filters
 
 def get_customer_field_name(doctype):

@@ -124,6 +124,7 @@ class Item(WebsiteGenerator):
 		self.validate_item_defaults()
 		self.update_defaults_from_item_group()
 		self.validate_stock_for_has_batch_and_has_serial()
+		self.update_show_in_website()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -436,6 +437,10 @@ class Item(WebsiteGenerator):
 				to_remove.append(d)
 
 		[self.remove(d) for d in to_remove]
+
+	def update_show_in_website(self):
+		if self.disabled:
+			self.show_in_website = False
 
 	def update_template_tables(self):
 		template = frappe.get_doc("Item", self.variant_of)
