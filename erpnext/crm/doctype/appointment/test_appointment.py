@@ -18,6 +18,11 @@ def create_appointments(number):
             'customer_skype': 'test'+str(i),
         })
 
+def delete_appointments():
+        doc_list = frappe.get_list('Appointment',filters={'scheduled_time':datetime.datetime.min,'customer_phone_number':'8088'})
+        for doc in doc_list:
+            doc.delete()
+
 
 class TestAppointment(unittest.TestCase):
     def setUp(self):
@@ -34,14 +39,9 @@ class TestAppointment(unittest.TestCase):
     def tearDown(self):
         delete_appointments()
 
-    def delete_appointments(self):
-        doc_list = frappe.get_list('Appointment',filters={'scheduled_time':datetime.datetime.min,'customer_phone_number':'8088'})
-        for doc in doc_list:
-            doc.delete()
-
     def test_number_of_appointments(self):
         settings = frappe.get_doc('Appointment Booking Settings')
         self.assertFalse(frappe.db.exists('Apoointment',
-                                            filters={'scheduled_time': datetime.datetime.min, 'customer_name':'Extra Customer'}),
+                                            filters={'scheduled_time': datetime.datetime.min, 'customer_name':'Extra Cu'}),
                              settings.number_of_agents,
                              "Number of appointments exceed number of agents")
