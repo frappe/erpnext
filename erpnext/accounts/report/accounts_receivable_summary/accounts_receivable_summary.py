@@ -36,35 +36,46 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				}
 			)
 
-		credit_debit_label = "Credit Note Amt" if args.get('party_type') == 'Customer' else "Debit Note Amt"
+		invoiced_label = "Total Invoiced Amt"
+		paid_label = "Total Paid Amt"
+		return_label = "Returned Amount"
+		if args.get("party_type") == "Customer":
+			return_label = "Credit Note Amt"
+		elif args.get("party_type") == "Supplier":
+			return_label = "Debit Note Amt"
+		elif args.get("party_type") == "Employee":
+			invoiced_label = "Total Paid Amt"
+			paid_label = "Total Claimed Amt"
 
-		columns += [
-			{
+		if args.get("party_type") != "Employee":
+			columns.append({
 				"label": _("Advance Amount"),
 				"fieldname": "advance_amount",
 				"fieldtype": "Currency",
 				"options": "currency",
 				"width": 100
-			},
+			})
+
+		columns += [
 			{
-				"label": _("Total Invoiced Amt"),
+				"label": _(invoiced_label),
 				"fieldname": "invoiced_amount",
 				"fieldtype": "Currency",
 				"options": "currency",
-				"width": 100
+				"width": 140
 			},
 			{
-				"label": _("Total Paid Amt"),
+				"label": _(paid_label),
 				"fieldname": "paid_amount",
 				"fieldtype": "Currency",
 				"options": "currency",
-				"width": 100
+				"width": 140
 			}
 		]
 
 		columns += [
 			{
-				"label": _(credit_debit_label),
+				"label": _(return_label),
 				"fieldname": "return_amount",
 				"fieldtype": "Currency",
 				"options": "currency",
@@ -137,8 +148,11 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		data = []
 
 		partywise_total = self.get_partywise_total(party_naming_by, args)
-		partywise_advance_amount = get_partywise_advanced_payment_amount(args.get("party_type"),
-			self.filters.get("report_date")) or {}
+		if args.get("party_type") != "Employee":
+			partywise_advance_amount = get_partywise_advanced_payment_amount(args.get("party_type"),
+				self.filters.get("report_date")) or {}
+		else:
+			partywise_advance_amount = {}
 
 		for party, party_dict in iteritems(partywise_total):
 			row = frappe._dict({"party": party})

@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.query_reports["Employees Receivable"] = {
+frappe.query_reports["Employees Receivable Summary"] = {
 	"filters": [
 		{
 			"fieldname":"company",
@@ -11,8 +11,15 @@ frappe.query_reports["Employees Receivable"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
+			"fieldname":"ageing_based_on",
+			"label": __("Ageing Based On"),
+			"fieldtype": "Select",
+			"options": 'Posting Date\nDue Date',
+			"default": "Posting Date"
+		},
+		{
 			"fieldname":"report_date",
-			"label": __("As on Date"),
+			"label": __("Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today()
 		},
@@ -103,27 +110,12 @@ frappe.query_reports["Employees Receivable"] = {
 			"fieldtype": "Link",
 			"options": "Finance Book"
 		},
-		{
-			"fieldname":"group_by",
-			"label": __("Group By Level 1"),
-			"fieldtype": "Select",
-			"options": "Ungrouped\nGroup by Employee\nGroup by Department\nGroup by Designation\nGroup by Branch\nGroup by Cost Center\nGroup by Project",
-			"default": "Ungrouped"
-		},
-		{
-			"fieldname":"group_by_2",
-			"label": __("Group By Level 2"),
-			"fieldtype": "Select",
-			"options": "Ungrouped\nGroup by Employee\nGroup by Department\nGroup by Designation\nGroup by Branch\nGroup by Cost Center\nGroup by Project",
-			"default": "Ungrouped"
-		},
 	],
+
 	onload: function(report) {
-		report.page.add_inner_button(__("Employees Receivable Summary"), function() {
+		report.page.add_inner_button(__("Employees Receivable"), function() {
 			var filters = report.get_values();
-			frappe.set_route('query-report', 'Employees Receivable Summary', {company: filters.company});
+			frappe.set_route('query-report', 'Employees Receivable', {company: filters.company});
 		});
-		erpnext.utils.add_payment_reconciliation_button("Employee", report.page, () => report.get_values());
-	},
-	initial_depth: 1
+	}
 }
