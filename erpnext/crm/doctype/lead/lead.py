@@ -85,6 +85,14 @@ class Lead(SellingController):
 			self.name)
 
 		self.delete_events()
+		self.globaly_unsubscribe_email_id()
+
+	def globaly_unsubscribe_email_id(self):
+		frappe.get_doc({
+			"doctype": "Email Unsubscribe",
+			"email": self.email_id,
+			"global_unsubscribe": 1
+		}).insert(ignore_permissions=True)
 
 	def has_customer(self):
 		return frappe.db.get_value("Customer", {"lead_name": self.name})
