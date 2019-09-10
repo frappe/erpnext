@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "scheduled_time",
+  "status",
   "customer_details_section",
   "customer_name",
   "customer_phone_number",
@@ -48,9 +49,16 @@
    "in_list_view": 1,
    "label": "Scheduled Time",
    "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Open\nClosed",
+   "reqd": 1
   }
  ],
- "modified": "2019-09-09 15:40:21.881421",
+ "modified": "2019-09-10 11:17:20.200603",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
