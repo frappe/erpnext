@@ -93,7 +93,13 @@ async function update_time_slots(selected_date, selected_timezone) {
         timeslot_container.appendChild(message_div);
         return
     }
-    window.slots.forEach(slot => {
+    window.slots.forEach((slot,index) => {
+        debugger
+        if(index%8==0){
+            let break_element = document.createElement('div');
+            break_element.classList.add('w-100');
+            timeslot_container.appendChild(break_element);
+        }
         let start_time = new Date(slot.time)
         var timeslot_div = document.createElement('div');
         timeslot_div.classList.add('time-slot');
@@ -120,7 +126,7 @@ function clear_time_slots() {
 function get_slot_layout(time) {
     time = new Date(time)
     let start_time_string = moment(time).format("LT");
-    let end_time = moment(time).add('1','hours');
+    let end_time = moment(time).add(window.appointment_settings.appointment_duration,'minutes');
     let end_time_string = end_time.format("LT");
     return `<span style="font-size: 1.2em;">${start_time_string}</span><br><span class="text-muted small">to ${end_time_string}</span>`;
 }
@@ -158,7 +164,7 @@ function setup_details_page(){
     page2.style.display = 'block';
     let date_container = document.getElementsByClassName('date-span')[0];
     let time_container = document.getElementsByClassName('time-span')[0];
-    date_container.innerHTML = new Date(window.selected_date).toLocaleDateString();
+    date_container.innerHTML = moment(window.selected_date).format("MMM Do YYYY");
     time_container.innerHTML = moment(window.selected_time,"HH:mm:ss").format("LT");
 }
 
