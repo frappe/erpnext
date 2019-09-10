@@ -1,5 +1,5 @@
 {
- "creation": "2019-08-27 10:52:54.204677",
+ "creation": "2019-09-10 15:02:05.779434",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -21,7 +21,7 @@
    "fieldname": "from_time",
    "fieldtype": "Time",
    "in_list_view": 1,
-   "label": "From Time ",
+   "label": "From Time",
    "reqd": 1
   },
   {
@@ -33,10 +33,10 @@
   }
  ],
  "istable": 1,
- "modified": "2019-08-27 10:52:54.204677",
+ "modified": "2019-09-10 15:05:20.406855",
  "modified_by": "Administrator",
  "module": "CRM",
- "name": "Availabilty Of Slots",
+ "name": "Availability Of Slots",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
