@@ -82,6 +82,23 @@ frappe.query_reports["Customer Ledger Summary"] = {
 			"options": "Sales Person"
 		},
 		{
+			"fieldname": "account",
+			"label": __("Account"),
+			"fieldtype": "Link",
+			"options": "Account",
+			"get_query": function() {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					"doctype": "Account",
+					"filters": {
+						"company": company,
+						"account_type": "Receivable",
+						"is_group": 0
+					}
+				}
+			}
+		},
+		{
 			"fieldname":"tax_id",
 			"label": __("NTN"),
 			"fieldtype": "Data",

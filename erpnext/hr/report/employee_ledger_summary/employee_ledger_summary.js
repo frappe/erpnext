@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Supplier Ledger Summary"] = {
+frappe.query_reports["Employee Ledger Summary"] = {
 	"filters": [
 		{
 			"fieldname":"company",
@@ -35,33 +35,27 @@ frappe.query_reports["Supplier Ledger Summary"] = {
 		},
 		{
 			"fieldname":"party",
-			"label": __("Supplier"),
+			"label": __("Employee"),
 			"fieldtype": "Link",
-			"options": "Supplier",
-			on_change: () => {
-				var party = frappe.query_report.get_filter_value('party');
-				if (party) {
-					frappe.db.get_value('Supplier', party, ["tax_id", "supplier_name"], function(value) {
-						frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
-						frappe.query_report.set_filter_value('supplier_name', value["supplier_name"]);
-					});
-				} else {
-					frappe.query_report.set_filter_value('tax_id', "");
-					frappe.query_report.set_filter_value('supplier_name', "");
-				}
-			}
+			"options": "Employee"
 		},
 		{
-			"fieldname":"supplier_group",
-			"label": __("Supplier Group"),
+			"fieldname":"department",
+			"label": __("Department"),
 			"fieldtype": "Link",
-			"options": "Supplier Group"
+			"options": "Department"
 		},
 		{
-			"fieldname":"payment_terms_template",
-			"label": __("Payment Terms Template"),
+			"fieldname":"designation",
+			"label": __("Designation"),
 			"fieldtype": "Link",
-			"options": "Payment Terms Template"
+			"options": "Designation"
+		},
+		{
+			"fieldname":"branch",
+			"label": __("Branch"),
+			"fieldtype": "Link",
+			"options": "Branch"
 		},
 		{
 			"fieldname": "account",
@@ -74,23 +68,11 @@ frappe.query_reports["Supplier Ledger Summary"] = {
 					"doctype": "Account",
 					"filters": {
 						"company": company,
-						"account_type": "Payable",
+						"account_type": ["in", ["Payable", "Receivable"]],
 						"is_group": 0
 					}
 				}
 			}
 		},
-		{
-			"fieldname":"tax_id",
-			"label": __("NTN"),
-			"fieldtype": "Data",
-			"hidden": 1
-		},
-		{
-			"fieldname":"supplier_name",
-			"label": __("Supplier Name"),
-			"fieldtype": "Data",
-			"hidden": 1
-		}
 	]
 };
