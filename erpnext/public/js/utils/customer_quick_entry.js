@@ -37,7 +37,8 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		{
 			label: __("Address Line 1"),
 			fieldname: "address_line1",
-			fieldtype: "Data"
+			fieldtype: "Data",
+			reqd: 1
 		},
 		{
 			label: __("Address Line 2"),
@@ -55,7 +56,8 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		{
 			label: __("City"),
 			fieldname: "city",
-			fieldtype: "Data"
+			fieldtype: "Data",
+			reqd: 1,
 		},
 		{
 			label: __("State"),
@@ -66,7 +68,8 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			label: __("Country"),
 			fieldname: "country",
 			fieldtype: "Link",
-			options: "Country"
+			options: "Country",
+			reqd: 1
 		},
 		{
 			label: __("Customer POS Id"),

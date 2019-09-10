@@ -745,10 +745,12 @@ def get_approved_leaves_for_period(employee, leave_type, from_date, to_date):
 	return leave_days
 
 @frappe.whitelist()
-def get_leave_approver(employee, department=None):
-	if not department:
-		department = frappe.db.get_value('Employee', employee, 'department')
+def get_leave_approver(employee):
+	leave_approver, department = frappe.db.get_value("Employee",
+		employee, ["leave_approver", "department"])
 
-	if department:
-		return frappe.db.get_value('Department Approver', {'parent': department,
+	if not leave_approver and department:
+		leave_approver = frappe.db.get_value('Department Approver', {'parent': department,
 			'parentfield': 'leave_approvers', 'idx': 1}, 'approver')
+
+	return leave_approver
