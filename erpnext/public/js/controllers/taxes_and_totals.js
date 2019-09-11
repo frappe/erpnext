@@ -44,6 +44,12 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			this.calculate_contribution();
 		}
 
+		// Update paid amount on return/debit note creation
+		if(this.frm.doc.doctype === "Purchase Invoice" && this.frm.doc.is_return
+			&& (this.frm.doc.grand_total > this.frm.doc.paid_amount)) {
+			this.frm.doc.paid_amount = flt(this.frm.doc.grand_total, precision("grand_total"));
+		}
+
 		this.frm.refresh_fields();
 	},
 
