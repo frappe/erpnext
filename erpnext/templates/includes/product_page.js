@@ -14,9 +14,10 @@ frappe.ready(function() {
 		callback: function(r) {
 			if(r.message) {
 				if(r.message.cart_settings.enabled) {
+					// NOT price OR (NOT in stock AND NOT allow_not_in_stock)
 					let hide_add_to_cart = !r.message.product_info.price
 						|| (!r.message.product_info.in_stock && !r.message.cart_settings.allow_items_not_in_stock);
-					$(".item-cart, .item-price, .item-stock").toggleClass('hide', hide_add_to_cart);
+					if (hide_add_to_cart) $(".item-cart, .item-price, .item-stock").hide();
 				}
 				if(r.message.cart_settings.show_price) {
 					$(".item-price").toggleClass("hide", false);
