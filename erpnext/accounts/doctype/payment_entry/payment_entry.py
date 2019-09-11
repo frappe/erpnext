@@ -550,7 +550,7 @@ class PaymentEntry(AccountsController):
 		self.set_unallocated_amount()
 
 @frappe.whitelist()
-def get_outstanding_reference_documents(args):
+def get_outstanding_reference_documents(args, print=1):
 
 	if isinstance(args, string_types):
 		args = json.loads(args)
@@ -623,7 +623,7 @@ def get_outstanding_reference_documents(args):
 
 	data = negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 
-	if not data:
+	if not data and print ==1:
 		frappe.msgprint(_("No outstanding invoices found for the {0} {1} which qualify the filters you have specified.")
 			.format(args.get("party_type").lower(), frappe.bold(args.get("party"))))
 
