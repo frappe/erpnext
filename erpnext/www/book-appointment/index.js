@@ -69,6 +69,8 @@ function on_date_or_timezone_select() {
     window.selected_date = date_picker.value;
     window.selected_timezone = timezone.value;
     update_time_slots(date_picker.value, timezone.value);
+    let lead_text = document.getElementById('lead-text');
+    lead_text.innerHTML = "Select Time"
 }
 
 async function get_time_slots(date, timezone) {
