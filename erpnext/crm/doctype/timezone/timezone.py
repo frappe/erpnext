@@ -12,3 +12,6 @@ class Timezone(Document):
         if self.offset > 720 or self.offset < -720:
             frappe.throw(
                 'Timezone offsets must be between -720 and +720 minutes')
+        if frappe.db.exists({'doctype':'Timezone','offset':self.offset}):
+            frappe.throw(
+                'Timezone offsets need to be unique')
