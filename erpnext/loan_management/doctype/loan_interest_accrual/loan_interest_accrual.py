@@ -66,7 +66,7 @@ class LoanInterestAccrual(AccountsController):
 			make_gl_entries(gle_map, cancel=cancel, adv_adj=adv_adj)
 
 
-def make_accural_interest_entry(posting_date=None):
+def make_accrual_interest_entry(posting_date=None):
 	open_loans = frappe.get_all("Loan",
 		fields=["name", "total_payment", "total_amount_paid", "loan_account", "interest_income_account", "is_term_loan",
 			"disbursement_date", "applicant_type", "applicant", "rate_of_interest", "total_interest_payable", "repayment_start_date"],

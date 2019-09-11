@@ -11,7 +11,7 @@ from frappe.utils import (nowdate, add_days, getdate, now_datetime, add_to_date,
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
 from erpnext.loan_management.doctype.loan_security_price.loan_security_price import update_loan_security_price
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_employee
-from erpnext.loan_management.doctype.loan_interest_accural.loan_interest_accural import make_accural_interest_entry
+from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import make_accrual_interest_entry
 
 class TestLoan(unittest.TestCase):
 	def setUp(self):
@@ -123,7 +123,7 @@ class TestLoan(unittest.TestCase):
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=get_first_day(nowdate()))
 
-		make_accural_interest_entry(posting_date=add_days(get_last_day(nowdate()), 1))
+		make_accrual_interest_entry(posting_date=add_days(get_last_day(nowdate()), 1))
 
 		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(get_last_day(nowdate()), 10), "Regular Payment", 111118.68)
 		repayment_entry.save()
@@ -153,7 +153,7 @@ class TestLoan(unittest.TestCase):
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=get_first_day(nowdate()))
 
-		make_accural_interest_entry(posting_date=add_days(get_last_day(nowdate()), 1))
+		make_accrual_interest_entry(posting_date=add_days(get_last_day(nowdate()), 1))
 
 		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(get_last_day(nowdate()), 5),
 			"Loan Closure", 1011095.890411)
