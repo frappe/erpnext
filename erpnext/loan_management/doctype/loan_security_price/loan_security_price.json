@@ -49,7 +49,7 @@
   },
   {
    "fieldname": "valid_from",
-   "fieldtype": "Date",
+   "fieldtype": "Datetime",
    "label": "Valid From"
   },
   {
@@ -58,11 +58,11 @@
   },
   {
    "fieldname": "valid_upto",
-   "fieldtype": "Date",
+   "fieldtype": "Datetime",
    "label": "Valid Upto"
   }
  ],
- "modified": "2019-09-06 15:06:41.331715",
+ "modified": "2019-09-11 10:02:01.176091",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Price",
