@@ -3,6 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+from datetime import timedelta
 import frappe
 from frappe.model.document import Document
 
@@ -12,4 +13,14 @@ class Appointment(Document):
 		settings = frappe.get_doc('Appointment Booking Settings')
 		if(number_of_appointments_in_same_slot>=settings.number_of_agents):
 			frappe.throw('Time slot is not available')
+	
+	def after_insert(self):
+		appointment_event = frappe.new_doc('Event')
+		appointment_event.subject = 'Appointment with ' + self.customer_name
+		appointment_event.starts_on = self.scheduled_time
+		appointment_event.status = 'Open'
+		appointment_event.type = 'Private'
+		settings = frappe.get_doc('Appointment Booking Settings')
+		appointment_event.ends_on = self.scheduled_time + timedelta(minutes=settings.appointment_duration)
+		appointment_event.insert()
 
