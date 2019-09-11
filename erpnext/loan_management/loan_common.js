@@ -23,10 +23,5 @@ frappe.ui.form.on(cur_frm.doctype, {
 		else {
 			frm.set_value("applicant_name", null);
 		}
-	},
-
-	is_secured_loan(frm) {
-		frm.set_df_property('loan_amount', 'reqd', 0);
-		frm.set_df_property('loan_security_pledges', 'reqd', 1);
 	}
 });
