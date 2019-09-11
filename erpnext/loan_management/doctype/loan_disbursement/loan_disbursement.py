@@ -32,8 +32,24 @@ class LoanDisbursement(AccountsController):
 			self.posting_date = self.disbursement_date or nowdate()
 
 	def set_status(self):
-		frappe.db.set_value("Loan", self.against_loan, "status", "Disbursed")
+
+		loan_details = frappe.get_all("Loan",
+			fields = ["loan_amount", "disbursed_amount"],
+			filters= { "name": self.against_loan }
+		)[0]
+
+		disbursed_amount = self.disbursed_amount + loan_details.disbursed_amount
+
+		if disbursed_amount > loan_details.loan_amount:
+			frappe.throw("Disbursed Amount cannot be greater than loan amount")
+
+		if loan_details.loan_amount == disbursed_amount:
+			frappe.db.set_value("Loan", self.against_loan, "status", "Disbursed")
+		else:
+			frappe.db.set_value("Loan", self.against_loan, "status", "Partially Disbursed")
+
 		frappe.db.set_value("Loan", self.against_loan, "disbursement_date", self.disbursement_date)
+		frappe.db.set_value("Loan", self.against_loan, "disbursed_amount", disbursed_amount)
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gle_map = []

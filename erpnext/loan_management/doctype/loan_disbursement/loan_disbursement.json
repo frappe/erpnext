@@ -1,4 +1,5 @@
 {
+ "autoname": "LD-.#####",
  "creation": "2019-09-07 12:44:49.125452",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -9,6 +10,7 @@
   "applicant",
   "disbursement_date",
   "posting_date",
+  "pending_amount_for_disbursal",
   "disbursed_amount",
   "amended_from",
   "accounting_dimensions_section",
@@ -72,10 +74,17 @@
    "hidden": 1,
    "label": "Posting Date",
    "read_only": 1
+  },
+  {
+   "fieldname": "pending_amount_for_disbursal",
+   "fieldtype": "Currency",
+   "label": "Pending Amount For Disbursal",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-07 17:03:49.110926",
+ "modified": "2019-09-10 15:28:11.102240",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Disbursement",
