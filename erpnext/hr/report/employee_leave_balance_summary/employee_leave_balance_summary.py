@@ -63,7 +63,7 @@ def get_data(filters):
 
 	active_employees = frappe.get_list('Employee',
 		filters=conditions,
-		fields=['name', 'employee_name', 'department', 'user_id'])
+		fields=['name', 'employee_name', 'department', 'user_id', 'leave_approver'])
 
 	data = []
 
@@ -72,7 +72,8 @@ def get_data(filters):
 			'leave_type': leave_type
 		})
 		for employee in active_employees:
-			leave_approvers = department_approver_map.get(employee.department_name, [])
+			
+			leave_approvers = employee.leave_approver or department_approver_map.get(employee.department_name, [])
 
 			if (len(leave_approvers) and user in leave_approvers) or (user in ["Administrator", employee.user_id]) \
 				or ("HR Manager" in frappe.get_roles(user)):
@@ -116,12 +117,14 @@ def get_department_leave_approver_map(department=None):
 	department_list = frappe.db.sql_list(''' SELECT name FROM `tabDepartment` WHERE disabled=0{0}'''.format(conditions)) #nosec
 
 	# retrieve approvers list from current department and from its subsequent child departments
-	return frappe._dict(frappe.db.sql('''
-		SELECT
-			a.parent,
-			GROUP_CONCAT(DISTINCT appr.approver)
-		FROM `tabDepartment Approver` a, `tabDepartment Approver` appr
-		WHERE
-			a.parentfield = 'leave_approvers'
-			AND a.parent in {0}
-		GROUP BY parent'''.format(tuple(department_list)))) #nosec
+	approver_list = frappe.get_all('Department Approver', filters={
+		'parentfield': 'leave_approvers',
+		'parent': ('in', department_list)
+	}, fields=['parent', 'approver'], as_list=1)
+
+	approvers = {}
+
+	for k, v in approver_list:
+		approvers.setdefault(k, []).append(v)
+
+	return approvers
