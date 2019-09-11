@@ -117,7 +117,7 @@ class Issue(Document):
 
 		replicated_issue = deepcopy(self)
 		replicated_issue.subject = subject
-		replicated_issue.split_from = self.name
+		replicated_issue.issue_split_from = self.name
 		replicated_issue.creation = now_datetime()
 
 		# Reset SLA
@@ -150,7 +150,7 @@ class Issue(Document):
 			"comment_type": "Info",
 			"reference_doctype": "Issue",
 			"reference_name": replicated_issue.name,
-			"content": " - Split the Issue from <a href='#Issue/Form/{0}'>{0}</a>".format(self.name),
+			"content": " - Split the Issue from <a href='#Issue/Form/{0}'>{1}</a>".format(self.name, frappe.bold(self.name)),
 		}).insert(ignore_permissions=True)
 
 		return replicated_issue.name

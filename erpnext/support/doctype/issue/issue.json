@@ -16,7 +16,7 @@
   "status",
   "priority",
   "issue_type",
-  "split_from",
+  "issue_split_from",
   "sb_details",
   "description",
   "service_level_section",
@@ -354,16 +354,16 @@
    "label": "Reset Service Level Agreement"
   },
   {
-   "fieldname": "split_from",
+   "fieldname": "issue_split_from",
    "fieldtype": "Link",
-   "label": "Split From",
+   "label": "Issue Split From",
    "options": "Issue",
    "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2019-09-11 08:16:50.798042",
+ "modified": "2019-09-11 09:03:57.465623",
  "modified_by": "himanshu@erpnext.com",
  "module": "Support",
  "name": "Issue",
