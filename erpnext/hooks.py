@@ -291,7 +291,8 @@ scheduler_events = {
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.convert_deferred_revenue_to_income",
 		"erpnext.accounts.deferred_revenue.convert_deferred_expense_to_expense",
-		"erpnext.hr.utils.allocate_earned_leaves"
+		"erpnext.hr.utils.allocate_earned_leaves",
+		"erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual.make_accrual_interest_entry"
 	]
 }
 

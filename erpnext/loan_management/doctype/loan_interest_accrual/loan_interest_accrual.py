@@ -11,7 +11,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from calendar import monthrange
 
-class LoanInterestAccural(AccountsController):
+class LoanInterestAccrual(AccountsController):
 	def validate(self):
 		if not self.loan:
 			frappe.throw(_("Loan is mandatory"))
@@ -99,18 +99,18 @@ def make_accural_interest_entry(posting_date=None):
 		interest_per_day = (pending_principal_amount * loan.rate_of_interest) / (365 * 100)
 		payable_interest = interest_per_day * no_of_days_in_previous_month
 
-		loan_interest_accural = frappe.new_doc("Loan Interest Accural")
-		loan_interest_accural.loan = loan.name
-		loan_interest_accural.applicant_type = loan.applicant_type
-		loan_interest_accural.applicant = loan.applicant
-		loan_interest_accural.interest_income_account = loan.interest_income_account
-		loan_interest_accural.loan_account = loan.loan_account
-		loan_interest_accural.pending_principal_amount = pending_principal_amount
-		loan_interest_accural.interest_amount = payable_interest
-		loan_interest_accural.posting_date = posting_date or nowdate()
+		loan_interest_accrual = frappe.new_doc("Loan Interest Accrual")
+		loan_interest_accrual.loan = loan.name
+		loan_interest_accrual.applicant_type = loan.applicant_type
+		loan_interest_accrual.applicant = loan.applicant
+		loan_interest_accrual.interest_income_account = loan.interest_income_account
+		loan_interest_accrual.loan_account = loan.loan_account
+		loan_interest_accrual.pending_principal_amount = pending_principal_amount
+		loan_interest_accrual.interest_amount = payable_interest
+		loan_interest_accrual.posting_date = posting_date or nowdate()
 
-		loan_interest_accural.save()
-		loan_interest_accural.submit()
+		loan_interest_accrual.save()
+		loan_interest_accrual.submit()
 
 
 
