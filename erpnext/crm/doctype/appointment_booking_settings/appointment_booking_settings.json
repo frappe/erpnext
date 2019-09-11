@@ -7,7 +7,6 @@
   "availability_of_slots",
   "number_of_agents",
   "holiday_list",
-  "email_reminders",
   "appointment_duration"
  ],
  "fields": [
@@ -19,6 +18,7 @@
    "reqd": 1
   },
   {
+   "default": "1",
    "fieldname": "number_of_agents",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -34,21 +34,15 @@
    "reqd": 1
   },
   {
-   "default": "0",
-   "fieldname": "email_reminders",
-   "fieldtype": "Check",
-   "label": "Email Reminders"
-  },
-  {
    "default": "60",
    "fieldname": "appointment_duration",
    "fieldtype": "Int",
-   "label": "Appointment Duration",
+   "label": "Appointment Duration (In Minutes)",
    "reqd": 1
   }
  ],
  "issingle": 1,
- "modified": "2019-09-10 15:02:39.969131",
+ "modified": "2019-09-11 14:44:33.471834",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Booking Settings",
