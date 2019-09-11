@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "loan_security_type",
+  "loan_security_code",
   "loan_security_name",
   "unit_of_measurement",
   "column_break_3",
@@ -30,7 +31,7 @@
    "fetch_from": "loan_security_type.haircut",
    "fieldname": "haircut",
    "fieldtype": "Percent",
-   "label": "Haircut"
+   "label": "Haircut %"
   },
   {
    "fieldname": "loan_security_price",
@@ -47,9 +48,15 @@
    "fieldtype": "Link",
    "label": "Loan Security Type",
    "options": "Loan Security Type"
+  },
+  {
+   "fieldname": "loan_security_code",
+   "fieldtype": "Data",
+   "label": "Loan Security Code",
+   "unique": 1
   }
  ],
- "modified": "2019-09-02 18:01:49.147474",
+ "modified": "2019-09-11 12:24:15.684200",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security",
@@ -69,6 +76,7 @@
   }
  ],
  "quick_entry": 1,
+ "search_fields": "loan_security_code",
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1
