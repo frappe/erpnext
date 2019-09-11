@@ -53,7 +53,6 @@ class PackingSlip(Document):
 			frappe.msgprint(_("'To Case No.' cannot be less than 'From Case No.'"),
 				raise_exception=1)
 
-
 		res = frappe.db.sql("""SELECT name FROM `tabPacking Slip`
 			WHERE delivery_note = %(delivery_note)s AND docstatus = 1 AND
 			((from_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s)
