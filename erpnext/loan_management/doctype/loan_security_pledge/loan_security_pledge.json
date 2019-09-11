@@ -13,6 +13,7 @@
   "loan_security_details_section",
   "loan_security_pledges",
   "total_security_value",
+  "maximum_loan_value",
   "amended_from"
  ],
  "fields": [
@@ -75,10 +76,16 @@
    "label": "Total Security Value",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "maximum_loan_value",
+   "fieldtype": "Currency",
+   "label": "Maximum Loan Value",
+   "options": "Company:company:default_currency"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-09 17:39:32.237173",
+ "modified": "2019-09-11 09:22:48.198264",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Pledge",
