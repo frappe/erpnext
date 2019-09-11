@@ -25,23 +25,4 @@ def delete_appointments():
 
 
 class TestAppointment(unittest.TestCase):
-    def setUp(self):
-        settings = frappe.get_doc('Appointment Booking Settings')
-        create_appointments(settings.number_of_agents)
-        frappe.get_doc({
-            'doctype': 'Appointment',
-            'scheduled_time': datetime.datetime.min,
-            'customer_name': 'Extra Customer',
-            'customer_phone_number': '8088',
-            'customer_skype': 'extra_customer',
-        })
-
-    def tearDown(self):
-        delete_appointments()
-
-    def test_number_of_appointments(self):
-        settings = frappe.get_doc('Appointment Booking Settings')
-        self.assertFalse(frappe.db.exists('Apoointment',
-                                            filters={'scheduled_time': datetime.datetime.min, 'customer_name':'Extra Cu'}),
-                             settings.number_of_agents,
-                             "Number of appointments exceed number of agents")
+    pass
