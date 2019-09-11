@@ -3,6 +3,9 @@ import frappe, os
 from frappe import _
 
 def execute():
+	frappe.reload_doc('stock', 'doctype', 'item')
+	frappe.reload_doc('stock', 'doctype', 'stock_settings')
+
 	stock_settings = frappe.get_single("Stock Settings")
 	stock_settings.item_naming_by = "Item Name"
 	stock_settings.save()
