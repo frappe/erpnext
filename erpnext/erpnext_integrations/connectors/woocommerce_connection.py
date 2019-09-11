@@ -62,7 +62,8 @@ def _order(*args, **kwargs):
 
 			item_woo_com_id = item.get("product_id")
 
-			if frappe.get_value("Item",{"woocommerce_id": item_woo_com_id}):
+			if frappe.get_value("Item",{"woocommerce_id": item_woo_com_id}) or\
+				frappe.get_value("Item",{"item_name": item.get('name')}):
 				#Edit
 				link_item(item,1)
 			else:
