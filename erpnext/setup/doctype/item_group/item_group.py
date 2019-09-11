@@ -29,7 +29,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		super(ItemGroup, self).validate()
 
 		if not self.parent_item_group and not frappe.flags.in_test:
-			if frappe.db.exists("Item Group", _('All Item Groups'), cache=True):
+			if frappe.db.exists("Item Group", _('All Item Groups')):
 				self.parent_item_group = _('All Item Groups')
 
 		self.make_route()
