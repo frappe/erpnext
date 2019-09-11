@@ -102,15 +102,8 @@ frappe.ui.form.on("Work Order", {
 		});
 
 		// formatter for work order operation
-		frm.set_indicator_formatter('operation', (doc) => {
-			if (doc.status == "Pending") {
-				return "red"
-			} else if (doc.status == "Work in Progress") {
-				return "orange"
-			} else if (doc.status == "Completed") {
-				return "green"
-			}
-		});
+		frm.set_indicator_formatter('operation',
+			function(doc) { return (frm.doc.qty==doc.completed_qty) ? "green" : "orange" });
 	},
 
 	onload: function(frm) {
