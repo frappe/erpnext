@@ -43,10 +43,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Loan Application",
-				},
-				{
-					"type": "doctype",
 					"name": "Loan Security Pledge",
 				},
 				{
@@ -56,12 +52,20 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Repayment"),
+			"label": _("Disbursement and Repayment"),
 			"items": [
+				{
+					"type": "doctype",
+					"name": "Loan Disbursement",
+				},
 				{
 					"type": "doctype",
 					"name": "Loan Repayment",
 				},
+				{
+					"type": "doctype",
+					"name": "Loan Interest Accrual"
+				}
 			]
 		}
 	]
