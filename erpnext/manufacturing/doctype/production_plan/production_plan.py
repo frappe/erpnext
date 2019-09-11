@@ -99,7 +99,7 @@ class ProductionPlan(Document):
 			self.get_mr_items()
 
 	def get_so_items(self):
-		so_list = [d.sales_order for d in self.sales_orders if d.sales_order]
+		so_list = [d.sales_order for d in self.get("sales_orders", []) if d.sales_order]
 		if not so_list:
 			msgprint(_("Please enter Sales Orders in the above table"))
 			return []
@@ -134,7 +134,7 @@ class ProductionPlan(Document):
 		self.calculate_total_planned_qty()
 
 	def get_mr_items(self):
-		mr_list = [d.material_request for d in self.material_requests if d.material_request]
+		mr_list = [d.material_request for d in self.get("material_requests", []) if d.material_request]
 		if not mr_list:
 			msgprint(_("Please enter Material Requests in the above table"))
 			return []
@@ -301,7 +301,6 @@ class ProductionPlan(Document):
 				wo_list.extend(work_orders)
 
 		frappe.flags.mute_messages = False
-
 		if wo_list:
 			wo_list = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
 				(p, p) for p in wo_list]
@@ -309,15 +308,16 @@ class ProductionPlan(Document):
 		else :
 			msgprint(_("No Work Orders created"))
 
+
 	def make_work_order_for_sub_assembly_items(self, item):
 		work_orders = []
 		bom_data = {}
 
-		get_sub_assembly_items(item.get("bom_no"), bom_data)
+		get_sub_assembly_items(item.get("bom_no"), bom_data, item.get("qty"))
 
 		for key, data in bom_data.items():
 			data.update({
-				'qty': data.get("stock_qty") * item.get("qty"),
+				'qty': data.get("stock_qty"),
 				'production_plan': self.name,
 				'company': self.company,
 				'fg_warehouse': item.get("fg_warehouse"),
@@ -708,7 +708,7 @@ def get_item_data(item_code):
 		"description": item_details.get("description")
 	}
 
-def get_sub_assembly_items(bom_no, bom_data):
+def get_sub_assembly_items(bom_no, bom_data, qty):
 	data = get_children('BOM', parent = bom_no)
 	for d in data:
 		if d.expandable:
@@ -725,6 +725,6 @@ def get_sub_assembly_items(bom_no, bom_data):
 				})
 
 			bom_item = bom_data.get(key)
-			bom_item["stock_qty"] += d.stock_qty
+			bom_item["stock_qty"] += ((d.stock_qty * qty) / d.parent_bom_qty)
 
-			get_sub_assembly_items(bom_item.get("bom_no"), bom_data)
+			get_sub_assembly_items(bom_item.get("bom_no"), bom_data, bom_item["stock_qty"])
