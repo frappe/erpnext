@@ -43,7 +43,8 @@ function setup_date_picker() {
     let date_picker = document.getElementById('appointment-date');
     let today = new Date();
     date_picker.min = today.toISOString().substr(0, 10);
-    date_picker.max = window.holiday_list.to_date;
+    today.setDate(today.getDate() + window.appointment_settings.advance_booking_days);
+    date_picker.max = today.toISOString().substr(0,10);
 }
 
 function hide_next_button(){
