@@ -16,18 +16,15 @@ class Appointment(Document):
 	
 	def before_insert(self):
 		appointment_event = frappe.new_doc('Event')
-		appointment_event.subject = 'Appointment with ' + self.customer_name
-		appointment_event.starts_on = self.scheduled_time
-		appointment_event.status = 'Open'
-		appointment_event.type = 'Private'
-		settings = frappe.get_doc('Appointment Booking Settings')
-		appointment_event.ends_on = self.scheduled_time + timedelta(minutes=settings.appointment_duration)
-		event_participants = []
-		event_participant_customer = frappe.new_doc('Event Participants')
-		event_participant_customer.reference_doctype = 'Lead'
-		event_participant_customer.reference_docname = self.lead
-		event_participants.append(event_participant_customer)
-		appointment_event.event_participants = event_participants
-		appointment_event.insert()
+		appointment_event = frappe.get_doc({
+			"doctype": "Event",
+			"subject": ' '.join(['Appointment with', self.customer_name]),
+			"starts_on": self.scheduled_time,
+			"status": "Open",
+			"type": "Private",
+			"event_participants": [dict(reference_doctype="Lead", reference_docname=self.lead)]
+		})
+	
+		appointment_event.insert(ignore_permissions=True)
 		self.calender_event = appointment_event.name
 
