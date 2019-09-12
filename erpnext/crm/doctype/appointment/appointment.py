@@ -22,6 +22,12 @@ class Appointment(Document):
 		appointment_event.type = 'Private'
 		settings = frappe.get_doc('Appointment Booking Settings')
 		appointment_event.ends_on = self.scheduled_time + timedelta(minutes=settings.appointment_duration)
+		event_participants = []
+		event_participant_customer = frappe.new_doc('Event Participants')
+		event_participant_customer.reference_doctype = 'Lead'
+		event_participant_customer.reference_docname = self.lead
+		event_participants.append(event_participant_customer)
+		appointment_event.event_participants = event_participants
 		appointment_event.insert()
 		self.calender_event = appointment_event.name
 
