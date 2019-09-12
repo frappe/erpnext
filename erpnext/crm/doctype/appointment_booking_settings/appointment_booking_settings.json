@@ -7,7 +7,9 @@
   "availability_of_slots",
   "number_of_agents",
   "holiday_list",
-  "appointment_duration"
+  "appointment_duration",
+  "email_reminders",
+  "advance_booking_days"
  ],
  "fields": [
   {
@@ -39,10 +41,23 @@
    "fieldtype": "Int",
    "label": "Appointment Duration (In Minutes)",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "email_reminders",
+   "fieldtype": "Check",
+   "label": "Email Reminders"
+  },
+  {
+   "default": "7",
+   "fieldname": "advance_booking_days",
+   "fieldtype": "Int",
+   "label": "Number of days appointments can be booked in advance",
+   "reqd": 1
   }
  ],
  "issingle": 1,
- "modified": "2019-09-11 14:44:33.471834",
+ "modified": "2019-09-12 10:47:20.274330",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Booking Settings",
