@@ -43,7 +43,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Exotel Settings"
+					"name": "Exotel Settings",
+					"description": _("Connect your Exotel Account to ERPNext and track call logs"),
 				}
 			]
 		}
