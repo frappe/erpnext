@@ -207,6 +207,7 @@
   {
    "allow_on_submit": 1,
    "description": "Select Payment Account to make Bank Entry",
+   "fetch_from": "bank_account.account",
    "fieldname": "payment_account",
    "fieldtype": "Link",
    "label": "Payment Account",
@@ -259,7 +260,7 @@
  ],
  "icon": "fa fa-cog",
  "is_submittable": 1,
- "modified": "2019-09-11 16:31:43.122670",
+ "modified": "2019-09-12 15:46:31.436381",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Payroll Entry",
