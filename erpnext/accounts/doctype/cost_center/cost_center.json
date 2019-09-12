@@ -34,8 +34,7 @@
    "no_copy": 1,
    "oldfieldname": "cost_center_name",
    "oldfieldtype": "Data",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "fieldname": "cost_center_number",
