@@ -11,7 +11,9 @@
   "customer_name",
   "customer_phone_number",
   "customer_skype",
-  "customer_details"
+  "customer_details",
+  "lead",
+  "calender_event"
  ],
  "fields": [
   {
@@ -56,9 +58,23 @@
    "label": "Status",
    "options": "Open\nClosed",
    "reqd": 1
+  },
+  {
+   "fieldname": "lead",
+   "fieldtype": "Link",
+   "label": "Lead",
+   "options": "Lead",
+   "reqd": 1
+  },
+  {
+   "fieldname": "calender_event",
+   "fieldtype": "Link",
+   "label": "Calender Event",
+   "options": "Event",
+   "reqd": 1
   }
  ],
- "modified": "2019-09-10 11:17:20.200603",
+ "modified": "2019-09-12 10:42:47.841841",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",

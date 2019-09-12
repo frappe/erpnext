@@ -5,7 +5,7 @@ frappe.ready(() => {
 window.holiday_list = [];
 
 async function initialise_select_date() {
-    document.getElementById('enter-details').style.display = 'none';
+    navigate_to_page(1);
     await get_global_variables();
     setup_date_picker();
     setup_timezone_selector();
@@ -115,7 +115,6 @@ async function update_time_slots(selected_date, selected_timezone) {
         timeslot_container.appendChild(timeslot_div);
     });
     set_default_timeslot();
-    show_next_button();
 }
 
 function clear_time_slots() {
@@ -146,6 +145,7 @@ function select_time() {
     window.selected_time = this.id
     selected_element.classList.remove("selected");
     this.classList.add("selected");
+    show_next_button();
 }
 
 function set_default_timeslot() {
@@ -159,11 +159,25 @@ function set_default_timeslot() {
     }
 }
 
-function setup_details_page(){
+function navigate_to_page(page_number){
     let page1 = document.getElementById('select-date-time');
     let page2 = document.getElementById('enter-details');
-    page1.style.display = 'none';
-    page2.style.display = 'block';
+    switch(page_number){
+        case 1: 
+            page1.style.display = 'block';
+            page2.style.display = 'none';
+            break;
+        case 2:
+            page1.style.display = 'none';
+            page2.style.display = 'block';
+            break;
+        default:
+            console.log("That's not a valid page")
+    }
+}
+
+function setup_details_page(){
+    navigate_to_page(2)
     let date_container = document.getElementsByClassName('date-span')[0];
     let time_container = document.getElementsByClassName('time-span')[0];
     date_container.innerHTML = moment(window.selected_date).format("MMM Do YYYY");
@@ -196,6 +210,7 @@ function form_validation(){
     contact.number = document.getElementById('customer_number').value;
     contact.skype = document.getElementById('customer_skype').value;
     contact.notes = document.getElementById('customer_notes').value;
+    contact.email = document.getElementById('customer_email').value;
     window.contact = contact
     console.log({ date, time, contact });
 }
