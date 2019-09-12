@@ -716,6 +716,8 @@ def get_children(doctype, parent=None, is_root=False, **filters):
 				next(item for item in items if item.get('name')
 					== bom_item.get('item_code'))
 			)
+
+			bom_item.parent_bom_qty = bom_doc.quantity
 			bom_item.expandable = 0 if bom_item.value in ('', None)  else 1
 
 		return bom_items
