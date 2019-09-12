@@ -94,8 +94,16 @@ def create_appointment(date, time, contact):
     appointment.customer_skype = contact['skype']
     appointment.customer_details = contact['notes']
     appointment.status = 'Open'
+    appointment.lead = find_lead_by_email(contact['email']).name
     appointment.insert()
 
+def find_lead_by_email(email):
+    if frappe.db.exists({
+        'doctype':'Lead',
+        'email_id':email
+    }):
+        return frappe.get_list('Lead',filters={'email_id':email})[0]
+    frappe.throw('Email ID not associated with any Lead. Please make sure to use the email address you got this mail on')
 
 # Helper Functions
 def filter_timeslots(date, timeslots):

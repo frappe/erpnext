@@ -14,7 +14,7 @@ class Appointment(Document):
 		if(number_of_appointments_in_same_slot>=settings.number_of_agents):
 			frappe.throw('Time slot is not available')
 	
-	def after_insert(self):
+	def before_insert(self):
 		appointment_event = frappe.new_doc('Event')
 		appointment_event.subject = 'Appointment with ' + self.customer_name
 		appointment_event.starts_on = self.scheduled_time
@@ -23,4 +23,5 @@ class Appointment(Document):
 		settings = frappe.get_doc('Appointment Booking Settings')
 		appointment_event.ends_on = self.scheduled_time + timedelta(minutes=settings.appointment_duration)
 		appointment_event.insert()
+		self.calender_event = appointment_event.name
 
