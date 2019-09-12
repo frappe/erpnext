@@ -39,7 +39,6 @@ def validate_filters(filters):
 		frappe.throw(_("'Based On' and 'Group By' can not be same"))
 
 def get_data(filters, conditions):
-	
 	data = []
 	inc, cond= '',''
 	query_details =  conditions["based_on_select"] + conditions["period_wise_select"]
@@ -47,10 +46,11 @@ def get_data(filters, conditions):
 	posting_date = 't1.transaction_date'
 	if conditions.get('trans') in ['Sales Invoice', 'Purchase Invoice', 'Purchase Receipt', 'Delivery Note']:
 		posting_date = 't1.posting_date'
+		if filters.period_based_on:
+			posting_date = 't1.'+filters.period_based_on
 
 	if conditions["based_on_select"] in ["t1.project,", "t2.project,"]:
 		cond = ' and '+ conditions["based_on_select"][:-1] +' IS Not NULL'
-	
 	if conditions.get('trans') in ['Sales Order', 'Purchase Order']:
 		cond += " and t1.status != 'Closed'"
 
