@@ -54,5 +54,5 @@ def get_default_energy_point_rules():
 		'rule_name': rule.get('rule_name') or _('On {0} Creation').format(doctype),
 		'points': rule.get('points'),
 		'user_field': rule.get('user_field') or 'owner'
-	} for doctype, rule in doctype_rule_map.iteritems()]
+	} for doctype, rule in doctype_rule_map.items()]
 
