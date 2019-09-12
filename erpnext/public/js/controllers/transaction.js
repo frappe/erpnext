@@ -277,8 +277,27 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
-		this.frm.fields_dict["scan_barcode"] && this.frm.fields_dict["scan_barcode"].set_value("");
-		this.frm.fields_dict["scan_barcode"] && this.frm.fields_dict["scan_barcode"].set_new_description("");
+		let scan_barcode_field = this.frm.get_field('scan_barcode');
+		if (scan_barcode_field) {
+			scan_barcode_field.set_value("");
+			scan_barcode_field.set_new_description("");
+
+			if (frappe.is_mobile()) {
+				if (scan_barcode_field.$input_wrapper.find('.scan-barcode-button').length) return;
+
+				$(`<p class="scan-barcode-button">
+					<button class="btn btn-xs btn-default">${__('Scan Barcode using Camera')}</button>
+				</p>`)
+					.on('click', '.btn', () => {
+						frappe.require('/assets/js/barcode_scanner.min.js', () => {
+							frappe.barcode.scan_barcode().then(barcode => {
+								scan_barcode_field.set_value(barcode);
+							});
+						});
+					})
+					.appendTo(scan_barcode_field.$input_wrapper);
+			}
+		}
 	},
 
 	scan_barcode: function() {
