@@ -39,7 +39,7 @@ class PayrollEntry(Document):
 			and for which salary structure exists
 		"""
 		cond = self.get_filter_condition()
-		cond += self.get_joining_releiving_condition()
+		cond += self.get_joining_relieving_condition()
 
 		condition = ''
 		if self.payroll_frequency:
