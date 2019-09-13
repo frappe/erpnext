@@ -11,7 +11,7 @@ from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.salary_slip.test_salary_slip import get_salary_component_account, \
 		make_earning_salary_component, make_deduction_salary_component
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_salary_structure
-from erpnext.hr.doctype.loan.test_loan import create_loan
+from erpnext.loan_management.doctype.loan.test_loan import create_loan
 
 class TestPayrollEntry(unittest.TestCase):
 	def setUp(self):

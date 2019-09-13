@@ -11,7 +11,8 @@ from frappe.utils import (nowdate, add_days, getdate, now_datetime, add_to_date,
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
 from erpnext.loan_management.doctype.loan_security_price.loan_security_price import update_loan_security_price
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_employee
-from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import make_accrual_interest_entry
+from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (make_accrual_interest_entry_for_demand_loans,
+	make_accrual_interest_entry_for_term_loans)
 
 class TestLoan(unittest.TestCase):
 	def setUp(self):
@@ -64,7 +65,7 @@ class TestLoan(unittest.TestCase):
 
 		loan_security_pledge = create_loan_security_pledge(self.applicant2, pledges)
 
-		loan = create_loan_with_security(self.applicant2, "Stock Loan", 2000000, "Repay Over Number of Periods", 12, loan_security_pledge.name)
+		loan = create_loan_with_security(self.applicant2, "Stock Loan", "Repay Over Number of Periods", 12, loan_security_pledge.name)
 
 		self.assertEquals(loan.loan_amount, 1000000)
 
@@ -79,7 +80,7 @@ class TestLoan(unittest.TestCase):
 
 		loan_security_pledge = create_loan_security_pledge(self.applicant2, pledges)
 
-		loan = create_loan_with_security(self.applicant2, "Stock Loan", 2000000, "Repay Over Number of Periods", 12, loan_security_pledge.name)
+		loan = create_loan_with_security(self.applicant2, "Stock Loan", "Repay Over Number of Periods", 12, loan_security_pledge.name)
 		self.assertEquals(loan.loan_amount, 1000000)
 
 		loan.submit()
@@ -123,7 +124,7 @@ class TestLoan(unittest.TestCase):
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=get_first_day(nowdate()))
 
-		make_accrual_interest_entry(posting_date=add_days(get_last_day(nowdate()), 1))
+		make_accrual_interest_entry_for_demand_loans(posting_date=add_days(get_last_day(nowdate()), 1))
 
 		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(get_last_day(nowdate()), 10), "Regular Payment", 111118.68)
 		repayment_entry.save()
@@ -153,7 +154,7 @@ class TestLoan(unittest.TestCase):
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=get_first_day(nowdate()))
 
-		make_accrual_interest_entry(posting_date=add_days(get_last_day(nowdate()), 1))
+		make_accrual_interest_entry_for_demand_loans(posting_date=add_days(get_last_day(nowdate()), 1))
 
 		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(get_last_day(nowdate()), 5),
 			"Loan Closure", 1011095.890411)
@@ -167,6 +168,40 @@ class TestLoan(unittest.TestCase):
 
 		self.assertEquals(loan.status, "Repaid/Closed")
 
+	def test_loan_repayment_for_term_loan(self):
+		pledges = []
+		pledges.append({
+			"loan_security": "Test Security 2",
+			"qty": 4000.00,
+			"haircut": 50,
+			"loan_security_price": 250.00
+		})
+
+		pledges.append({
+			"loan_security": "Test Security 1",
+			"qty": 2000.00,
+			"haircut": 50,
+			"loan_security_price": 500.00
+		})
+
+		loan_security_pledge = create_loan_security_pledge(self.applicant2, pledges)
+
+		loan = create_loan_with_security(self.applicant2, "Stock Loan", "Repay Over Number of Periods", 12,
+			loan_security_pledge.name, posting_date=add_months(nowdate(), -1))
+
+		loan.submit()
+
+		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=add_months(nowdate(), -1))
+
+		make_accrual_interest_entry_for_term_loans(posting_date=nowdate())
+
+		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(get_last_day(nowdate()), 5),
+			"Regular Payment", 0.00)
+
+		repayment_entry.save()
+
+		self.assertEquals(repayment_entry.interest_payable, 11250.00)
+		self.assertEquals(repayment_entry.payable_principal_amount, 78303.00)
 
 	def test_security_shortfall(self):
 		pledges = []
@@ -179,7 +214,7 @@ class TestLoan(unittest.TestCase):
 
 		loan_security_pledge = create_loan_security_pledge(self.applicant2, pledges)
 
-		loan = create_loan_with_security(self.applicant2, "Stock Loan", 2000000, "Repay Over Number of Periods", 12, loan_security_pledge.name)
+		loan = create_loan_with_security(self.applicant2, "Stock Loan", "Repay Over Number of Periods", 12, loan_security_pledge.name)
 		loan.submit()
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount)
@@ -192,9 +227,11 @@ class TestLoan(unittest.TestCase):
 		loan_security_shortfall = frappe.get_doc("Loan Security Shortfall", {"loan": loan.name})
 
 		self.assertTrue(loan_security_shortfall)
+
 		self.assertEquals(loan_security_shortfall.loan_amount, 1000000.00)
 		self.assertEquals(loan_security_shortfall.security_value, 400000.00)
 		self.assertEquals(loan_security_shortfall.shortfall_amount, 600000.00)
+
 
 def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest, penalty_interest_rate=None, is_term_loan=None, grace_period_in_days=None,
 	mode_of_payment=None, payment_account=None, loan_account=None, interest_income_account=None, penalty_income_account=None):
@@ -334,19 +371,21 @@ def create_loan(applicant, loan_type, loan_amount, repayment_method, repayment_p
 	else:
 		return frappe.get_doc("Loan", {"applicant":applicant})
 
-def create_loan_with_security(applicant, loan_type, loan_amount, repayment_method, repayment_periods, loan_security_pledge):
+def create_loan_with_security(applicant, loan_type, repayment_method, repayment_periods, loan_security_pledge,
+	posting_date=None, repayment_start_date=None):
 
 	loan = frappe.get_doc({
 		"doctype": "Loan",
 		"company": "_Test Company",
 		"applicant_type": "Customer",
+		"posting_date": posting_date or nowdate(),
 		"applicant": applicant,
 		"loan_type": loan_type,
 		"is_term_loan": 1,
 		"is_secured_loan": 1,
 		"repayment_method": repayment_method,
 		"repayment_periods": repayment_periods,
-		"repayment_start_date": nowdate(),
+		"repayment_start_date": repayment_start_date or nowdate(),
 		"mode_of_payment": frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name'),
 		"loan_security_pledge": loan_security_pledge,
 		"payment_account": 'Cash - _TC',
