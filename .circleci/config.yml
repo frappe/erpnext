@@ -6,11 +6,27 @@ jobs:
     steps:
       - checkout
       - run: npx semantic-release
+  deploy_staging:
+    docker:
+      - image: circleci/node:8
+    steps:
+      - run:
+          name: Trigger rundeck deploy
+          command: |
+            curl --request POST \
+            --url "$RUNDECK_JOB_URL" \
+            --header 'content-type: application/json' \
+            --header 'x-rundeck-auth-token: '"$RUNDECK_TOKEN"'' \
+            --data '{ "options" : { "BenchName" : "frappe-demo" }}'
 
 workflows:
   version: 2
-  release_github:
+  workflow:
     jobs:
+      - deploy_staging:
+          filters:
+            branches:
+              only: bloomstack-staging
       - release:
           filters:
             branches:
