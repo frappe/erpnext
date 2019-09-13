@@ -3,36 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 from collections import Counter
 from datetime import timedelta
+
 import frappe
 from frappe.model.document import Document
 from frappe.desk.form.assign_to import add as add_assignemnt
 
-
-def _get_agents_sorted_by_asc_workload():
-	appointments = frappe.db.get_list('Appointment', fields='*')
-	# Handle case where no appointments are created
-	appointment_counter = Counter()
-	if not appointments:
-		return frappe.get_doc('Appointment Booking Settings').agent_list
-	for appointment in appointments:
-		if appointment._assign == '[]' or not appointment._assign:
-			continue
-		appointment_counter[appointment._assign] += 1
-	sorted_agent_list = appointment_counter.most_common()
-	sorted_agent_list.reverse()
-	return sorted_agent_list
-
-def _check_agent_availability(agent_email,scheduled_time):
-	appointemnts_at_scheduled_time = frappe.get_list('Appointment', filters={'scheduled_time':scheduled_time})
-	for appointment in appointemnts_at_scheduled_time:
-		if appointment._assign == agent_email:
-			return False
-	return True
-
-def _get_employee_from_user(user):
-	return frappe.get_list('Employee', fields='*',filters={'user_id':user})
 
 class Appointment(Document):
 	def validate(self):
@@ -75,3 +53,48 @@ class Appointment(Document):
 					print(calendar_event)
 					calendar_event.save()
 				break
+
+
+def _get_agents_sorted_by_asc_workload():
+	appointments = frappe.db.get_list('Appointment', fields='*')
+	agent_list = _get_agent_list_as_strings()
+	
+	if not appointments:
+		return agent_list
+	
+	appointment_counter = Counter(agent_list)
+	
+	for appointment in appointments:
+		assigned_to = frappe.parse_json(appointment._assign)
+		print(assigned_to)
+		if appointment._assign == '[]' or not appointment._assign:
+			continue
+		if assigned_to[0] in agent_list:
+			appointment_counter[assigned_to[0]] += 1
+	
+	sorted_agent_list = appointment_counter.most_common()
+	sorted_agent_list.reverse()
+	
+	return sorted_agent_list
+
+
+def _get_agent_list_as_strings():
+	agent_list_as_strings = []
+	agent_list = frappe.get_doc('Appointment Booking Settings').agent_list
+	
+	for agent in agent_list:
+		agent_list_as_strings.append(agent.user)
+	
+	return agent_list_as_strings
+
+
+def _check_agent_availability(agent_email,scheduled_time):
+	appointemnts_at_scheduled_time = frappe.get_list('Appointment', filters={'scheduled_time':scheduled_time})
+	for appointment in appointemnts_at_scheduled_time:
+		if appointment._assign == agent_email:
+			return False
+	return True
+
+
+def _get_employee_from_user(user):
+	return frappe.get_list('Employee', fields='*',filters={'user_id':user})
