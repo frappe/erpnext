@@ -22,6 +22,7 @@
   "is_secured_loan",
   "rate_of_interest",
   "disbursement_date",
+  "disbursed_amount",
   "repayment_start_date",
   "column_break_11",
   "is_term_loan",
@@ -29,17 +30,21 @@
   "repayment_periods",
   "monthly_repayment_amount",
   "loan_security_details_section",
-  "loan_security_pledges",
+  "loan_security_pledge",
+  "column_break_25",
+  "maximum_loan_value",
   "account_info",
   "mode_of_payment",
   "payment_account",
   "column_break_9",
   "loan_account",
   "interest_income_account",
+  "penalty_income_account",
   "section_break_15",
   "repayment_schedule",
   "section_break_17",
   "total_payment",
+  "total_principal_paid",
   "column_break_19",
   "total_interest_payable",
   "total_amount_paid",
@@ -78,6 +83,7 @@
    "fieldname": "loan_type",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Loan Type",
    "options": "Loan Type",
    "reqd": 1
@@ -98,6 +104,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "remember_last_selected_value": 1,
@@ -109,7 +116,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "Sanctioned\nDisbursed\nRepaid/Closed",
+   "options": "Sanctioned\nPartially Disbursed\nDisbursed\nRepaid/Closed",
    "read_only": 1
   },
   {
@@ -148,8 +155,7 @@
   {
    "fieldname": "repayment_start_date",
    "fieldtype": "Date",
-   "label": "Repayment Start Date",
-   "reqd": 1
+   "label": "Repayment Start Date"
   },
   {
    "fieldname": "column_break_11",
@@ -167,6 +173,7 @@
    "label": "Repayment Period in Months"
   },
   {
+   "depends_on": "is_term_loan",
    "fieldname": "monthly_repayment_amount",
    "fieldtype": "Currency",
    "label": "Monthly Repayment Amount",
@@ -247,6 +254,7 @@
   },
   {
    "default": "0",
+   "depends_on": "is_term_loan",
    "fieldname": "total_interest_payable",
    "fieldtype": "Currency",
    "label": "Total Interest Payable",
@@ -283,22 +291,55 @@
    "label": "Loan Security Details"
   },
   {
-   "fieldname": "loan_security_pledges",
-   "fieldtype": "Table",
-   "label": "Loan Security Pledges",
-   "options": "Loan Pledge"
-  },
-  {
    "default": "0",
    "fetch_from": "loan_type.is_term_loan",
    "fieldname": "is_term_loan",
    "fieldtype": "Check",
    "label": "Is Term Loan",
    "read_only": 1
+  },
+  {
+   "fetch_from": "loan_type.penalty_income_account",
+   "fieldname": "penalty_income_account",
+   "fieldtype": "Link",
+   "label": "Penalty Income Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_principal_paid",
+   "fieldtype": "Currency",
+   "label": "Total Principal Paid",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "loan_security_pledge",
+   "fieldtype": "Link",
+   "label": "Loan Security Pledge",
+   "options": "Loan Security Pledge"
+  },
+  {
+   "fieldname": "disbursed_amount",
+   "fieldtype": "Currency",
+   "label": "Disbursed Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "loan_security_pledge.maximum_loan_value",
+   "fieldname": "maximum_loan_value",
+   "fieldtype": "Currency",
+   "label": "Maximum Loan Value",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-03 09:57:13.174854",
+ "modified": "2019-09-12 21:48:22.425493",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

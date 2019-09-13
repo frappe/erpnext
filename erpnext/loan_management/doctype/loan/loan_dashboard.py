@@ -3,24 +3,31 @@ from frappe import _
 
 def get_data():
 	return {
-		'fieldname': 'applicant',
+		'fieldname': 'loan',
 		'non_standard_fieldnames': {
-			'Journal Entry': 'reference_name',
-			'Salary Slip': 'employee'
-			},
+			'Loan Disbursement': 'against_loan',
+			'Loan Repayment': 'against_loan',
+		},
 		'transactions': [
 			{
-				'label': _('Applicant'),
-				'items': ['Loan Application']
-			},
-
-			{
-				'label': _('Account'),
-				'items': ['Journal Entry']
+				'label': _('Pledges'),
+				'items': ['Loan Security Pledge']
 			},
 			{
-				'label': _('Employee'),
-				'items': ['Salary Slip']
+				'label': _('Shortfall'),
+				'items': ['Loan Security Shortfall']
+			},
+			{
+				'label': _('Disbursement'),
+				'items': ['Loan Disbursement']
+			},
+			{
+				'label': _('Repayments'),
+				'items': ['Loan Repayment']
+			},
+			{
+				'label': _('Interest Accrual'),
+				'items': ['Loan Interest Accrual']
 			}
 		]
 	}
