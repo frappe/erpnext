@@ -123,6 +123,9 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	setup: function(doc) {
 		this.setup_posting_date_time_check();
 		this._super(doc);
+		this.frm.make_methods = {
+			'Delivery Trip': this.make_delivery_trip,
+		};
 	},
 	refresh: function(doc, dt, dn) {
 		var me = this;
@@ -239,7 +242,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	make_delivery_trip: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_delivery_trip",
-			frm: this.frm
+			frm: cur_frm
 		})
 	},
 
