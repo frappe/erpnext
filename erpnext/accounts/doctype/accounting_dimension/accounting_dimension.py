@@ -14,6 +14,8 @@ from frappe.utils.background_jobs import enqueue
 from frappe.model import core_doctypes_list
 
 class AccountingDimension(Document):
+	def before_insert(self):
+		self.set_fieldname_and_label()
 
 	def validate(self):
 		if self.document_type in core_doctypes_list + ('Accounting Dimension', 'Project',
@@ -23,7 +25,6 @@ class AccountingDimension(Document):
 			frappe.throw(msg)
 
 	def after_insert(self):
-		self.set_fieldname_and_label()
 		if frappe.flags.in_test:
 			make_dimension_in_accounting_doctypes(doc=self)
 		else:
