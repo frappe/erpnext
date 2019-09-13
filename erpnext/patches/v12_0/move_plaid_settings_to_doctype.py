@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+	frappe.reload_doc("erpnext_integrations", "doctype", "plaid_settings")
 	plaid_settings = frappe.get_single("Plaid Settings")
 	if plaid_settings.enabled:
 		if not (frappe.conf.plaid_client_id and frappe.conf.plaid_env \
@@ -17,4 +18,5 @@ def execute():
 				"plaid_env": frappe.conf.plaid_env,
 				"plaid_secret": frappe.conf.plaid_secret
 			})
+		plaid_settings.flags.ignore_mandatory = True
 		plaid_settings.save()
