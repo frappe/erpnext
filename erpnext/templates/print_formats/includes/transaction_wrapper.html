@@ -66,6 +66,7 @@
 					{%- endif %}
 					{{ row('PO #', doc.po_no) }}
 					{{ row('Driver', doc.driver_name) }}
+					{{ row('Proforma Bill #', doc.proforma_bill_no) }}
 					{{ row('Bill #', doc.bill_no) }}
 					{% if quote_docs and quote_docs != [None] and quote_docs != [''] -%}
 						{{ row('Quotation', frappe.list_original_names("Quotation", quote_docs)|join('<br />')) }}
