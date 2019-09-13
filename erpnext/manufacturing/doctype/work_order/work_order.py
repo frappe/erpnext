@@ -212,6 +212,7 @@ class WorkOrder(Document):
 					self.meta.get_label(fieldname), qty, completed_qty, self.name), StockOverProductionError)
 
 			self.db_set(fieldname, qty)
+			frappe.db.set_value('Sales Order Item', self.sales_order_item, 'produced_qty', self.produced_qty)
 
 		if self.production_plan:
 			self.update_production_plan_status()
