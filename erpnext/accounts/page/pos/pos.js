@@ -1699,13 +1699,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		if (this.frm.doc.offline_pos_name
 			&& in_list(existing_pos_list, this.frm.doc.offline_pos_name)) {
 			this.update_invoice()
-			//to retrieve and set the default payment
-			invoice_data[this.frm.doc.offline_pos_name] = this.frm.doc;
-			invoice_data[this.frm.doc.offline_pos_name].payments[0].amount = this.frm.doc.net_total
-			invoice_data[this.frm.doc.offline_pos_name].payments[0].base_amount = this.frm.doc.net_total
-
-			this.frm.doc.paid_amount = this.frm.doc.net_total
-			this.frm.doc.outstanding_amount = 0
 		} else if(!this.frm.doc.offline_pos_name) {
 			this.frm.doc.offline_pos_name = frappe.datetime.now_datetime();
 			this.frm.doc.posting_date = frappe.datetime.get_today();
