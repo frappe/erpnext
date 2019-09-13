@@ -54,6 +54,9 @@
 
 .website-list .result {
 	margin-top: 2rem;
+}
+
+.result {
 	border-bottom: 1px solid $border-color;
 }
 
@@ -62,7 +65,7 @@
 	border-top: 1px solid $border-color;
 	position: relative;
 
-	a {
+	a.transaction-item-link {
 		position: absolute;
 		top: 0;
 		left: 0;
