@@ -75,7 +75,6 @@ function on_date_or_timezone_select() {
 }
 
 async function get_time_slots(date, timezone) {
-    debugger
     let slots = (await frappe.call({
         method: 'erpnext.www.book-appointment.index.get_appointment_slots',
         args: {
@@ -97,7 +96,6 @@ async function update_time_slots(selected_date, selected_timezone) {
         return
     }
     window.slots.forEach((slot,index) => {
-        debugger
         if(index%8==0){
             let break_element = document.createElement('div');
             break_element.classList.add('w-100');
@@ -140,7 +138,6 @@ function select_time() {
     try {
         selected_element = document.getElementsByClassName('selected')[0]
     } catch (e) {
-        debugger
         this.classList.add("selected")
     }
     window.selected_time = this.id
@@ -188,7 +185,6 @@ function setup_details_page(){
 async function submit() {
     // form validation here
     form_validation();
-    debugger;
     let appointment = (await frappe.call({
         method: 'erpnext.www.book-appointment.index.create_appointment',
         args: {
