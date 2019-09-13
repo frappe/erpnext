@@ -246,6 +246,7 @@ def update_taxes_with_shipping_lines(taxes, shipping_lines, shopify_settings):
 	return taxes
 
 def get_tax_account_head(tax):
+	return
 	tax_title = tax.get("title").encode("utf-8")
 
 	tax_account =  frappe.db.get_value("Shopify Tax Account", \
