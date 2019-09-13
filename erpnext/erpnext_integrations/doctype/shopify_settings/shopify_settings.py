@@ -32,12 +32,11 @@ class ShopifySettings(Document):
 		url = get_shopify_url('admin/api/2019-04/webhooks.json', self)
 		print('url', url)
 		for method in webhooks:
-			if method in created_webhooks:
-				continue
-
+			print('method', method)
 			session = get_request_session()
 			print('session', session)
 			try:
+				print(get_header(self))
 				d = session.post(url, data=json.dumps({
 					"webhook": {
 						"topic": method,
@@ -84,11 +83,7 @@ def get_shopify_url(path, settings):
 def get_header(settings):
 	header = {'Content-Type': 'application/json'}
 
-	if settings.app_type == "Private":
-		return header
-	else:
-		header["X-Shopify-Access-Token"] = settings.access_token
-		return header
+	return header;
 
 @frappe.whitelist()
 def get_series():
