@@ -43,7 +43,10 @@ get_help_messages = "erpnext.utilities.activation.get_help_messages"
 get_user_progress_slides = "erpnext.utilities.user_progress.get_user_progress_slides"
 update_and_get_user_progress = "erpnext.utilities.user_progress_utils.update_default_domain_actions_and_get_state"
 
-on_session_creation = "erpnext.shopping_cart.utils.set_cart_count"
+on_session_creation = [
+	"erpnext.portal.utils.create_customer_or_supplier",
+	"erpnext.shopping_cart.utils.set_cart_count"
+]
 on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
 
 treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', 'Assessment Group', 'Department']
@@ -100,6 +103,13 @@ website_route_rules = [
 			"parents": [{"label": _("Supplier Quotation"), "route": "supplier-quotations"}]
 		}
 	},
+	{"from_route": "/purchase-orders", "to_route": "Purchase Order"},
+	{"from_route": "/purchase-orders/<path:name>", "to_route": "order",
+		"defaults": {
+			"doctype": "Purchase Order",
+			"parents": [{"label": _("Purchase Order"), "route": "purchase-orders"}]
+		}
+	},
 	{"from_route": "/quotations", "to_route": "Quotation"},
 	{"from_route": "/quotations/<path:name>", "to_route": "order",
 		"defaults": {
@@ -146,6 +156,7 @@ standard_portal_menu_items = [
 	{"title": _("Projects"), "route": "/project", "reference_doctype": "Project"},
 	{"title": _("Request for Quotations"), "route": "/rfq", "reference_doctype": "Request for Quotation", "role": "Supplier"},
 	{"title": _("Supplier Quotation"), "route": "/supplier-quotations", "reference_doctype": "Supplier Quotation", "role": "Supplier"},
+	{"title": _("Purchase Orders"), "route": "/purchase-orders", "reference_doctype": "Purchase Order", "role": "Supplier"},
 	{"title": _("Quotations"), "route": "/quotations", "reference_doctype": "Quotation", "role":"Customer"},
 	{"title": _("Orders"), "route": "/orders", "reference_doctype": "Sales Order", "role":"Customer"},
 	{"title": _("Invoices"), "route": "/invoices", "reference_doctype": "Sales Invoice", "role":"Customer"},
@@ -158,8 +169,8 @@ standard_portal_menu_items = [
 	{"title": _("Patient Appointment"), "route": "/patient-appointments", "reference_doctype": "Patient Appointment", "role":"Patient"},
 	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"},
 	{"title": _("Newsletter"), "route": "/newsletters", "reference_doctype": "Newsletter"},
-	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission"},
-	{"title": _("Certification"), "route": "/certification", "reference_doctype": "Certification Application"},
+	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission", "role": "Customer"},
+	{"title": _("Certification"), "route": "/certification", "reference_doctype": "Certification Application", "role": "Non Profit Portal User"},
 	{"title": _("Material Request"), "route": "/material-requests", "reference_doctype": "Material Request", "role": "Customer"},
 ]
 
@@ -179,6 +190,7 @@ has_website_permission = {
 	"Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Sales Invoice": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Supplier Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
+	"Purchase Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Material Request": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
