@@ -3,8 +3,18 @@ from frappe import _
 import frappe
 import json
 
+def get_company_for_dashboards():
+	company = frappe.defaults.get_defaults().company
+	if company:
+		return company
+	else:
+		company_list = frappe.get_list("Company")
+		if company_list:
+			return company_list[0].name
+	return None
+
 def get_default_dashboards():
-	company = frappe.get_doc("Company", frappe.defaults.get_defaults().company)
+	company = frappe.get_doc("Company", get_company_for_dashboards())
 	income_account = company.default_income_account or get_account("Income Account", company.name)
 	expense_account = company.default_expense_account or get_account("Expense Account", company.name)
 	bank_account = company.default_bank_account or get_account("Bank", company.name)
