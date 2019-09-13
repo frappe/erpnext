@@ -114,7 +114,7 @@ def get_department_leave_approver_map(department=None):
 		conditions='and department_name = %(department)s or parent_department = %(department)s'%{'department': department}
 
 	# get current department and all its child
-	department_list = frappe.db.sql_list(''' SELECT name FROM `tabDepartment` WHERE disabled=0{0}'''.format(conditions)) #nosec
+	department_list = frappe.db.sql_list(''' SELECT name FROM `tabDepartment` WHERE disabled=0 {0}'''.format(conditions)) #nosec
 
 	# retrieve approvers list from current department and from its subsequent child departments
 	approver_list = frappe.get_all('Department Approver', filters={
