@@ -653,9 +653,15 @@ class BuyingController(StockController):
 			if d.is_fixed_asset and d.asset:
 				asset = frappe.get_doc("Asset", d.asset)
 
+				if delete_asset and d.asset:
+					d.db_set('asset', None)
+					doc_field = frappe.scrub(self.doctype)
+
+					# unlink the purchase invoice/receipt with asset
+					asset.set(doc_field, None)
+
 				if delete_asset and asset.docstatus == 0:
 					frappe.delete_doc("Asset", asset.name)
-					d.db_set('asset', None)
 					continue
 
 				if self.docstatus in [0, 1] and not asset.get(field):
