@@ -9,7 +9,8 @@
   "holiday_list",
   "appointment_duration",
   "email_reminders",
-  "advance_booking_days"
+  "advance_booking_days",
+  "agent_list"
  ],
  "fields": [
   {
@@ -54,10 +55,17 @@
    "fieldtype": "Int",
    "label": "Number of days appointments can be booked in advance",
    "reqd": 1
+  },
+  {
+   "fieldname": "agent_list",
+   "fieldtype": "Table MultiSelect",
+   "label": "Agents",
+   "options": "Assignment Rule User",
+   "reqd": 1
   }
  ],
  "issingle": 1,
- "modified": "2019-09-12 10:52:25.931931",
+ "modified": "2019-09-13 11:31:26.654516",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Booking Settings",
