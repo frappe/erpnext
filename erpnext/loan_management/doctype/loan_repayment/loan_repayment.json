@@ -1,4 +1,5 @@
 {
+ "autoname": "LR-.####",
  "creation": "2019-09-03 14:44:39.977266",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -8,26 +9,42 @@
   "payment_type",
   "posting_date",
   "column_break_3",
+  "company",
   "applicant",
   "loan_type",
+  "is_term_loan",
+  "accounting_dimensions_section",
+  "cost_center",
   "payment_details_section",
-  "principal_amount",
+  "pending_principal_amount",
+  "payable_principal_amount",
   "interest_payable",
+  "amount_paid",
   "column_break_9",
   "penalty_amount",
-  "payment_amount"
+  "payable_amount",
+  "references_section",
+  "reference_number",
+  "column_break_21",
+  "reference_date",
+  "paid_accrual_entries",
+  "amended_from"
  ],
  "fields": [
   {
    "fieldname": "against_loan",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Against Loan",
-   "options": "Loan"
+   "options": "Loan",
+   "reqd": 1
   },
   {
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "label": "Posting Date"
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
   },
   {
    "fieldname": "payment_details_section",
@@ -37,22 +54,15 @@
   {
    "fieldname": "penalty_amount",
    "fieldtype": "Currency",
-   "label": "Penalty Amount"
+   "label": "Penalty Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
    "fieldname": "interest_payable",
    "fieldtype": "Currency",
-   "label": "Interest Payable"
-  },
-  {
-   "fieldname": "principal_amount",
-   "fieldtype": "Currency",
-   "label": "Principal Amount"
-  },
-  {
-   "fieldname": "payment_amount",
-   "fieldtype": "Currency",
-   "label": "Payment Amount",
+   "label": "Interest Payable",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -63,8 +73,10 @@
    "fetch_from": "against_loan.applicant",
    "fieldname": "applicant",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Applicant",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fetch_from": "against_loan.loan_type",
@@ -82,11 +94,106 @@
    "default": "Regular Payment",
    "fieldname": "payment_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Payment Type",
-   "options": "\nRegular Payment\nLoan Closure"
+   "options": "\nRegular Payment\nLoan Closure",
+   "reqd": 1
+  },
+  {
+   "fieldname": "payable_amount",
+   "fieldtype": "Currency",
+   "label": "Payable Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "amount_paid",
+   "fieldtype": "Currency",
+   "label": "Amount Paid",
+   "options": "Company:company:default_currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Loan Repayment",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fetch_from": "against_loan.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pending_principal_amount",
+   "fieldtype": "Currency",
+   "label": "Pending Principal Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "paid_accrual_entries",
+   "fieldtype": "Text",
+   "hidden": 1,
+   "label": "Paid Accrual Entries",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "against_loan.is_term_loan",
+   "fieldname": "is_term_loan",
+   "fieldtype": "Check",
+   "label": "Is Term Loan",
+   "read_only": 1
+  },
+  {
+   "depends_on": "is_term_loan",
+   "fieldname": "payable_principal_amount",
+   "fieldtype": "Currency",
+   "label": "Payable Principal Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "references_section",
+   "fieldtype": "Section Break",
+   "label": "References"
+  },
+  {
+   "fieldname": "reference_number",
+   "fieldtype": "Data",
+   "label": "Reference Number"
+  },
+  {
+   "fieldname": "reference_date",
+   "fieldtype": "Date",
+   "label": "Reference Date"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2019-09-03 14:54:46.453660",
+ "is_submittable": 1,
+ "modified": "2019-09-12 19:36:17.232015",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",
