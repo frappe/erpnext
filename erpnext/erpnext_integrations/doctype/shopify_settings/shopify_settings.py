@@ -25,10 +25,6 @@ class ShopifySettings(Document):
 		if not (self.get_password(raise_exception=False) and self.api_key and self.shopify_url):
 			frappe.msgprint(_("Missing value for Password, API Key or Shopify URL"), raise_exception=frappe.ValidationError)
 
-		else:
-			if not (self.access_token and self.shopify_url):
-				frappe.msgprint(_("Access token or Shopify URL missing"), raise_exception=frappe.ValidationError)
-
 	def register_webhooks(self):
 		webhooks = ["orders/create", "orders/paid", "orders/fulfilled"]
 		# url = get_shopify_url('admin/webhooks.json', self)
@@ -36,12 +32,11 @@ class ShopifySettings(Document):
 		url = get_shopify_url('admin/api/2019-04/webhooks.json', self)
 		print('url', url)
 		for method in webhooks:
-			if method in created_webhooks:
-				continue
-
+			print('method', method)
 			session = get_request_session()
 			print('session', session)
 			try:
+				print(get_header(self))
 				d = session.post(url, data=json.dumps({
 					"webhook": {
 						"topic": method,
@@ -61,7 +56,7 @@ class ShopifySettings(Document):
 		deleted_webhooks = []
 
 		for d in self.webhooks:
-			url = get_shopify_url('admin/webhooks/{0}.json'.format(d.webhook_id), self)
+			url = get_shopify_url('admin/api/2019-04/webhooks.json'.format(d.webhook_id), self)
 			try:
 				res = session.delete(url, headers=get_header(self))
 				res.raise_for_status()
@@ -89,11 +84,7 @@ def get_shopify_url(path, settings):
 def get_header(settings):
 	header = {'Content-Type': 'application/json'}
 
-	if settings.app_type == "Private":
-		return header
-	else:
-		header["X-Shopify-Access-Token"] = settings.access_token
-		return header
+	return header;
 
 @frappe.whitelist()
 def get_series():

@@ -56,12 +56,11 @@
    "label": "Enable Shopify"
   },
   {
-   "default": "Public",
+   "default": "Private",
    "fieldname": "app_type",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "App Type",
-   "options": "Private",
    "read_only": 1,
    "reqd": 1
   },
@@ -259,7 +258,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2019-09-13 12:21:43.957327",
+ "modified": "2019-09-13 12:32:11.384757",
  "modified_by": "umair@erpnext.com",
  "module": "ERPNext Integrations",
  "name": "Shopify Settings",
