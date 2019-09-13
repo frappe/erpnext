@@ -25,6 +25,7 @@ def execute(filters=None):
 	items = get_items(filters)
 	sle = get_stock_ledger_entries(filters, items)
 
+	filters['show_warehouse_wise_stock'] = True
 	item_wise_fifo_queue = get_fifo_queue(filters, sle)
 
 	# if no stock ledger entry found return
@@ -59,7 +60,7 @@ def execute(filters=None):
 			if include_uom:
 				conversion_factors.append(item_map[item].conversion_factor)
 
-			fifo_queue = item_wise_fifo_queue[item].get('fifo_queue')
+			fifo_queue = item_wise_fifo_queue[(item, warehouse)].get('fifo_queue')
 
 			stock_ageing_data = {
 				'average_age': 0,
