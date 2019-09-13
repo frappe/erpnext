@@ -265,6 +265,7 @@ class BuyingController(StockController):
 				rm.rate = get_incoming_rate({
 					"item_code": d.item_code,
 					"warehouse": self.supplier_warehouse,
+					"batch_no": d.batch_no,
 					"posting_date": self.posting_date,
 					"posting_time": self.posting_time,
 					"qty": -1 * qty,
@@ -272,7 +273,7 @@ class BuyingController(StockController):
 				})
 				if not rm.rate:
 					rm.rate = get_valuation_rate(d.item_code, self.supplier_warehouse,
-						self.doctype, self.name, currency=self.company_currency, company = self.company)
+						self.doctype, self.name, d.batch_no, currency=self.company_currency, company = self.company)
 
 				rm.amount = qty * flt(rm.rate)
 
@@ -346,6 +347,7 @@ class BuyingController(StockController):
 				rm.rate = get_incoming_rate({
 					"item_code": bom_item.item_code,
 					"warehouse": self.supplier_warehouse,
+					"batch_no": rm.batch_no,
 					"posting_date": self.posting_date,
 					"posting_time": self.posting_time,
 					"qty": -1 * required_qty,
