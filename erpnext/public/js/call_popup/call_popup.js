@@ -28,12 +28,12 @@ class CallPopup {
 				'depends_on': () => this.call_log.lead
 			}, {
 				'fieldtype': 'Button',
-				'label': __('Make New Contact'),
+				'label': __('Create New Contact'),
 				'click': () => frappe.new_doc('Contact', { 'mobile_no': this.caller_number }),
 				'depends_on': () => !this.get_caller_name()
 			}, {
 				'fieldtype': 'Button',
-				'label': __('Make New Lead'),
+				'label': __('Create New Lead'),
 				'click': () => frappe.new_doc('Lead', { 'mobile_no': this.caller_number }),
 				'depends_on': () => !this.get_caller_name()
 			}, {
