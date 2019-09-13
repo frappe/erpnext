@@ -46,6 +46,10 @@ frappe.ui.form.on('Loan Application', {
 	},
 
 	create_loan: function(frm) {
+		if (frm.doc.status != "Approved") {
+			frappe.throw(__("Cannot create loan until application is approved"))
+		}
+
 		frappe.model.open_mapped_doc({
 			method: 'erpnext.loan_management.doctype.loan_application.loan_application.create_loan',
 			frm: frm
@@ -59,6 +63,11 @@ frappe.ui.form.on('Loan Application', {
 				loan_application: frm.doc.name
 			}
 		})
+	},
+
+	is_term_loan: function(frm) {
+		frm.set_df_property('repayment_method', 'hidden', 1 - frm.doc.is_term_loan);
+		frm.set_df_property('repayment_method', 'reqd', 1 - frm.doc.is_term_loan);
 	}
 });
 

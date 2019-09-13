@@ -25,12 +25,12 @@
   "proposed_pledges",
   "maximum_loan_amount",
   "repayment_info",
+  "total_payable_amount",
   "repayment_method",
-  "total_payable_interest",
   "column_break_11",
+  "total_payable_interest",
   "repayment_amount",
   "repayment_periods",
-  "total_payable_amount",
   "amended_from"
  ],
  "fields": [
@@ -127,13 +127,11 @@
    "label": "Repayment Info"
   },
   {
-   "depends_on": "is_term_loan",
    "fetch_from": "loan_type.repayment_method",
    "fieldname": "repayment_method",
    "fieldtype": "Select",
    "label": "Repayment Method",
-   "options": "\nRepay Fixed Amount per Period\nRepay Over Number of Periods",
-   "read_only": 1
+   "options": "\nRepay Fixed Amount per Period\nRepay Over Number of Periods"
   },
   {
    "fetch_from": "loan_type.rate_of_interest",
@@ -143,6 +141,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "is_term_loan",
    "fieldname": "total_payable_interest",
    "fieldtype": "Currency",
    "label": "Total Payable Interest",
@@ -218,7 +217,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-09 14:29:08.060738",
+ "modified": "2019-09-12 12:16:12.651457",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Application",

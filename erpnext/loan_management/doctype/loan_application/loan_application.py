@@ -52,7 +52,6 @@ class LoanApplication(Document):
 			self.calculate_payable_amount()
 		else:
 			self.total_payable_amount = self.loan_amount
-			self.total_payable_interest = self.total_payable_amount * self.rate_of_interest/100
 
 	def calculate_payable_amount(self):
 		balance_amount = self.loan_amount
