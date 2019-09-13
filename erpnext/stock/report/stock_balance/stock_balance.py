@@ -68,6 +68,7 @@ def execute(filters=None):
 				'latest_age': 0
 			}
 			if fifo_queue:
+				fifo_queue = sorted(fifo_queue, key=lambda fifo_data: fifo_data[1])
 				stock_ageing_data['average_age'] = get_average_age(fifo_queue, to_date)
 				stock_ageing_data['earliest_age'] = date_diff(to_date, fifo_queue[0][1])
 				stock_ageing_data['latest_age'] = date_diff(to_date, fifo_queue[-1][1])
@@ -147,11 +148,12 @@ def get_stock_ledger_entries(filters, items):
 	return frappe.db.sql("""
 		select
 			sle.item_code, warehouse, sle.posting_date, sle.actual_qty, sle.valuation_rate,
-			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference, sle.item_code as name
+			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference,
+			sle.item_code as name, sle.voucher_no
 		from
 			`tabStock Ledger Entry` sle force index (posting_sort_index)
 		where sle.docstatus < 2 %s %s
-		order by sle.posting_date, sle.posting_time, sle.creation""" %
+		order by sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty""" %
 		(item_conditions_sql, conditions), as_dict=1)
 
 def get_item_warehouse_map(filters, sle):
