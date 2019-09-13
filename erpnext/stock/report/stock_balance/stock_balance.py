@@ -78,7 +78,7 @@ def execute(filters=None):
 			data.append(report_data)
 
 	if filters.get('show_variant_attributes', 0) == 1:
-		columns += [{'width': 100, 'fieldname': att_name} for att_name in get_variants_attributes()]
+		columns += [{'width': 100, 'fieldname': att_name, 'label': att_name} for att_name in get_variants_attributes()]
 
 	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
 	return columns, data
@@ -153,7 +153,7 @@ def get_stock_ledger_entries(filters, items):
 		from
 			`tabStock Ledger Entry` sle force index (posting_sort_index)
 		where sle.docstatus < 2 %s %s
-		order by sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty""" %
+		order by sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty""" % #nosec
 		(item_conditions_sql, conditions), as_dict=1)
 
 def get_item_warehouse_map(filters, sle):
