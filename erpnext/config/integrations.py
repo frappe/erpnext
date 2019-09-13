@@ -40,6 +40,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Plaid Settings",
 					"description": _("Connect your bank accounts to ERPNext"),
+				},
+				{
+					"type": "doctype",
+					"name": "Exotel Settings",
+					"description": _("Connect your Exotel Account to ERPNext and track call logs"),
 				}
 			]
 		}
