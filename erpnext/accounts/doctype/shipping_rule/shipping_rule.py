@@ -69,6 +69,7 @@ class ShippingRule(Document):
 		self.add_shipping_rule_to_tax_table(doc, shipping_amount)
 
 	def get_shipping_amount_from_rules(self, value):
+		frappe.errprint(value)
 		for condition in self.get("conditions"):
 			if not condition.to_value or (flt(condition.from_value) <= value <= flt(condition.to_value)):
 				return condition.shipping_amount
