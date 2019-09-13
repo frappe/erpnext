@@ -229,7 +229,7 @@ class update_entries_after(object):
 			validate negative stock for entries current datetime onwards
 			will not consider cancelled entries
 		"""
-		diff = self.batch_data.qty_after_transaction if validate_batch else self.qty_after_transaction
+		diff = self.batch_data.batch_qty_after_transaction if validate_batch else self.qty_after_transaction
 		diff += flt(sle.actual_qty)
 
 		if diff < 0 and abs(diff) > 0.0001:
@@ -471,7 +471,9 @@ class update_entries_after(object):
 				for_update=False, batch_sle=True)
 			previous_batch_sle = previous_batch_sle[0] if previous_batch_sle else frappe._dict()
 
-			self.batch_data = self.previous_batch_sle_dict[sle.batch_no] = previous_batch_sle
+			self.batch_data = self.previous_batch_sle_dict[sle.batch_no] = frappe._dict()
+			for key in ("batch_qty_after_transaction", "batch_valuation_rate", "batch_stock_value"):
+				self.batch_data[key] = flt(previous_batch_sle.get(key))
 			self.batch_data.prev_batch_stock_value = self.batch_data.batch_stock_value or 0.0
 
 	def raise_exceptions(self):
