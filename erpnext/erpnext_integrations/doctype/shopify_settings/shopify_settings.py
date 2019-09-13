@@ -25,10 +25,6 @@ class ShopifySettings(Document):
 		if not (self.get_password(raise_exception=False) and self.api_key and self.shopify_url):
 			frappe.msgprint(_("Missing value for Password, API Key or Shopify URL"), raise_exception=frappe.ValidationError)
 
-		else:
-			if not (self.access_token and self.shopify_url):
-				frappe.msgprint(_("Access token or Shopify URL missing"), raise_exception=frappe.ValidationError)
-
 	def register_webhooks(self):
 		webhooks = ["orders/create", "orders/paid", "orders/fulfilled"]
 		# url = get_shopify_url('admin/webhooks.json', self)
