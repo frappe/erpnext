@@ -102,7 +102,7 @@
    "options": "Account"
   },
   {
-   "default": "1",
+   "default": "0",
    "fieldname": "is_term_loan",
    "fieldtype": "Check",
    "label": "Is Term Loan"
@@ -142,7 +142,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-09 13:27:17.654080",
+ "modified": "2019-09-12 09:10:09.005426",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",

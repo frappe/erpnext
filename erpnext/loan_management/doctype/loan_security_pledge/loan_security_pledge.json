@@ -12,7 +12,9 @@
   "loan_application",
   "loan_security_details_section",
   "loan_security_pledges",
+  "section_break_8",
   "total_security_value",
+  "column_break_9",
   "maximum_loan_value",
   "amended_from"
  ],
@@ -82,10 +84,18 @@
    "fieldtype": "Currency",
    "label": "Maximum Loan Value",
    "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-11 09:22:48.198264",
+ "modified": "2019-09-12 22:56:18.297903",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Pledge",

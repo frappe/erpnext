@@ -32,10 +32,10 @@
   {
    "fieldname": "haircut",
    "fieldtype": "Percent",
-   "label": "Haircut"
+   "label": "Haircut %"
   }
  ],
- "modified": "2019-08-29 23:08:04.996161",
+ "modified": "2019-09-11 12:24:54.497321",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Type",
