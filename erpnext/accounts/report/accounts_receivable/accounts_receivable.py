@@ -364,7 +364,7 @@ class ReceivablePayableReport(object):
 			on
 				(ref.parent = payment_entry.name)
 			where
-				payment_entry.docstatus = 1
+				payment_entry.docstatus < 2
 				and payment_entry.posting_date > %s
 				and payment_entry.party_type = %s
 			""", (self.filters.report_date, self.party_type), as_dict=1)
@@ -389,7 +389,7 @@ class ReceivablePayableReport(object):
 			on
 				(jea.parent = je.name)
 			where
-				je.docstatus = 1
+				je.docstatus < 2
 				and je.posting_date > %s
 				and jea.party_type = %s
 				and jea.reference_name is not null and jea.reference_name != ''
