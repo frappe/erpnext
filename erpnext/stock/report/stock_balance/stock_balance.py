@@ -245,7 +245,7 @@ def get_item_details(items, sle, filters):
 	cf_field = cf_join = ""
 	if filters.get("include_uom"):
 		cf_field = ", ucd.conversion_factor"
-		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom='%s'" \
+		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%s" \
 			% frappe.db.escape(filters.get("include_uom"))
 
 	res = frappe.db.sql("""
