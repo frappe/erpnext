@@ -57,9 +57,9 @@ status_map = {
 	"Purchase Order": [
 		["Draft", None],
 		["To Receive and Bill", "eval:self.per_received < 100 and self.per_billed < 100 and self.docstatus == 1"],
-		["To Bill", "eval:self.per_received == 100 and self.per_billed < 100 and self.docstatus == 1"],
+		["To Bill", "eval:self.per_received >= 100 and self.per_billed < 100 and self.docstatus == 1"],
 		["To Receive", "eval:self.per_received < 100 and self.per_billed == 100 and self.docstatus == 1"],
-		["Completed", "eval:self.per_received == 100 and self.per_billed == 100 and self.docstatus == 1"],
+		["Completed", "eval:self.per_received >= 100 and self.per_billed == 100 and self.docstatus == 1"],
 		["Delivered", "eval:self.status=='Delivered'"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["On Hold", "eval:self.status=='On Hold'"],

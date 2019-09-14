@@ -1118,7 +1118,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		if (key) {
 			return $.grep(this.items_list, function (item) {
 				if (search_status) {
-					if (in_list(me.batch_no_data[item.item_code], me.search_item.$input.val())) {
+					if (me.batch_no_data[item.item_code] &&
+						in_list(me.batch_no_data[item.item_code], me.search_item.$input.val())) {
 						search_status = false;
 						return me.item_batch_no[item.item_code] = me.search_item.$input.val()
 					} else if (me.serial_no_data[item.item_code]
@@ -1126,7 +1127,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 						search_status = false;
 						me.item_serial_no[item.item_code] = [me.search_item.$input.val(), me.serial_no_data[item.item_code][me.search_item.$input.val()]]
 						return true
-					} else if (in_list(me.barcode_data[item.item_code], me.search_item.$input.val())) {
+					} else if (me.barcode_data[item.item_code] &&
+						in_list(me.barcode_data[item.item_code], me.search_item.$input.val())) {
 						search_status = false;
 						return true;
 					} else if (reg.test(item.item_code.toLowerCase()) || (item.description && reg.test(item.description.toLowerCase())) ||
@@ -1689,20 +1691,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		if(this.si_docs) {
 			this.si_docs.forEach((row) => {
-				existing_pos_list.push(Object.keys(row));
+				existing_pos_list.push(Object.keys(row)[0]);
 			});
 		}
 
 		if (this.frm.doc.offline_pos_name
-			&& in_list(existing_pos_list, this.frm.doc.offline_pos_name)) {
+			&& in_list(existing_pos_list, cstr(this.frm.doc.offline_pos_name))) {
 			this.update_invoice()
-			//to retrieve and set the default payment
-			invoice_data[this.frm.doc.offline_pos_name] = this.frm.doc;
-			invoice_data[this.frm.doc.offline_pos_name].payments[0].amount = this.frm.doc.net_total
-			invoice_data[this.frm.doc.offline_pos_name].payments[0].base_amount = this.frm.doc.net_total
-
-			this.frm.doc.paid_amount = this.frm.doc.net_total
-			this.frm.doc.outstanding_amount = 0
 		} else if(!this.frm.doc.offline_pos_name) {
 			this.frm.doc.offline_pos_name = frappe.datetime.now_datetime();
 			this.frm.doc.posting_date = frappe.datetime.get_today();
