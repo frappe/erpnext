@@ -254,7 +254,7 @@ class StockEntry(StockController):
 		target_mandatory = ["Material Receipt", "Material Transfer", "Send to Subcontractor",
 			"Material Transfer for Manufacture", "Send to Warehouse", "Receive at Warehouse"]
 
-		validate_for_manufacture_repack = any([d.bom_no for d in self.get("items")])
+		validate_for_manufacture = any([d.bom_no for d in self.get("items")])
 
 		if self.purpose in source_mandatory and self.purpose not in target_mandatory:
 			self.to_warehouse = None
@@ -285,8 +285,8 @@ class StockEntry(StockController):
 				else:
 					frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
 
-			if self.purpose in ["Manufacture", "Repack"]:
-				if validate_for_manufacture_repack:
+			if self.purpose == "Manufacture":
+				if validate_for_manufacture:
 					if d.bom_no:
 						d.s_warehouse = None
 
