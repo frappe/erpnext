@@ -71,7 +71,7 @@ def remove_empty(d):
 		Helper function that removes all keys from a dictionary (d),
 	that have an empty value.
 	"""
-	for key in d.keys():
+	for key in list(d):
 		if not d[key]:
 			del d[key]
 	return d

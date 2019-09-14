@@ -12,11 +12,14 @@ from frappe.utils.nestedset import get_descendants_of
 
 @frappe.whitelist()
 @cache_source
-def get(chart_name=None, from_date = None, to_date = None):
-	chart = frappe.get_doc('Dashboard Chart', chart_name)
+def get(chart_name = None, chart = None, no_cache = None, from_date = None, to_date = None):
+	if chart_name:
+		chart = frappe.get_doc('Dashboard Chart', chart_name)
+	else:
+		chart = frappe._dict(frappe.parse_json(chart))
 	timespan = chart.timespan
 	timegrain = chart.time_interval
-	filters = json.loads(chart.filters_json)
+	filters = frappe.parse_json(chart.filters_json)
 
 	account = filters.get("account")
 	company = filters.get("company")
