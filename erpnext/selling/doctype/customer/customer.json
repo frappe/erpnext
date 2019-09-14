@@ -50,10 +50,8 @@
   "default_receivable_accounts",
   "accounts",
   "credit_limit_section",
-  "credit_limit",
-  "bypass_credit_limit_check_at_sales_order",
-  "column_break_34",
   "payment_terms",
+  "credit_limits",
   "more_info",
   "customer_details",
   "column_break_45",
@@ -348,24 +346,6 @@
    "label": "Credit Limit and Payment Terms"
   },
   {
-   "fieldname": "credit_limit",
-   "fieldtype": "Currency",
-   "label": "Credit Limit",
-   "oldfieldname": "credit_limit",
-   "oldfieldtype": "Currency",
-   "permlevel": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "bypass_credit_limit_check_at_sales_order",
-   "fieldtype": "Check",
-   "label": "Bypass credit limit check at Sales Order"
-  },
-  {
-   "fieldname": "column_break_34",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "payment_terms",
    "fieldtype": "Link",
    "label": "Default Payment Terms Template",
@@ -478,12 +458,19 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "credit_limits",
+   "fieldtype": "Table",
+   "label": "Credit Limit",
+   "options": "Customer Credit Limit"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2019-09-06 20:21:15.149464",
+ "modified": "2019-09-06 12:40:31.801424",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

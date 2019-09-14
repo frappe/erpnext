@@ -28,6 +28,7 @@
   "address_display",
   "contact_person",
   "contact_display",
+  "contact_phone",
   "contact_mobile",
   "contact_email",
   "company_address_display",
@@ -1165,12 +1166,18 @@
    "fieldname": "update_auto_repeat_reference",
    "fieldtype": "Button",
    "label": "Update Auto Repeat Reference"
+  },
+  {
+   "fieldname": "contact_phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2019-09-06 20:21:03.937807",
+ "modified": "2019-09-12 02:13:56.308839",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

@@ -14,12 +14,13 @@
   "cb0",
   "default_price_list",
   "payment_terms",
-  "credit_limit",
   "lft",
   "rgt",
   "old_parent",
   "default_receivable_account",
-  "accounts"
+  "accounts",
+  "credit_limit_section",
+  "credit_limits"
  ],
  "fields": [
   {
@@ -73,12 +74,6 @@
    "options": "Payment Terms Template"
   },
   {
-   "fieldname": "credit_limit",
-   "fieldtype": "Currency",
-   "label": "Credit Limit",
-   "permlevel": 1
-  },
-  {
    "fieldname": "lft",
    "fieldtype": "Int",
    "hidden": 1,
@@ -127,11 +122,22 @@
    "fieldtype": "Table",
    "label": "Accounts",
    "options": "Party Account"
+  },
+  {
+   "fieldname": "credit_limit_section",
+   "fieldtype": "Section Break",
+   "label": "Credit Limits"
+  },
+  {
+   "fieldname": "credit_limits",
+   "fieldtype": "Table",
+   "label": "Credit Limit",
+   "options": "Customer Credit Limit"
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
- "modified": "2019-09-06 20:26:01.553875",
+ "modified": "2019-09-06 12:40:14.954697",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Customer Group",
@@ -185,6 +191,5 @@
  "quick_entry": 1,
  "search_fields": "parent_customer_group",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
  "sort_order": "DESC"
 }
