@@ -9,6 +9,7 @@ from frappe import _
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import cstr, getdate
 from erpnext.accounts.doctype.account.account import RootNotEditable
+from frappe.desk.doctype.global_search_settings.global_search_settings import update_global_search_doctypes
 
 default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 	"Cold Calling", "Exhibition", "Supplier Reference", "Mass Mailing",
@@ -531,20 +532,3 @@ def get_fy_details(fy_start_date, fy_end_date):
 	else:
 		fy = cstr(start_year) + '-' + cstr(start_year + 1)
 	return fy
-
-def update_global_search_doctypes():
-	global_searches_doctypes = [
-		{"doctype": "Customer", "index": 1},
-		{"doctype": "Supplier", "index": 2},
-		{"doctype": "Item", "index": 3},
-		{"doctype": "Sales Invoice", "index": 4},
-		{"doctype": "Sales Order", "index": 5},
-		{"doctype": "Purchase Receipt", "index": 6},
-		{"doctype": "Delivery Note", "index": 7},
-		{"doctype": "Stock", "index": 8},
-	]
-
-	global_search_settings = frappe.get_single("Global Search Settings")
-	for d in global_searches_doctypes:
-		global_search_settings.insert_at_index(d.get("doctype"), d.get("index"))
-	global_search_settings.save(ignore_permissions=True)
