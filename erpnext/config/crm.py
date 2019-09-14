@@ -41,6 +41,11 @@ def get_data():
 					"name": "Lead Source",
 					"description": _("Track Leads by Lead Source.")
 				},
+				{
+					"type": "doctype",
+					"name": "Contract",
+					"description": _("Helps you keep tracks of Contracts based on Supplier, Customer and Employee"),
+				},
 			]
 		},
 		{

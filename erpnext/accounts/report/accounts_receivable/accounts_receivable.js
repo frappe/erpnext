@@ -130,13 +130,18 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldtype": "Check",
 		},
 		{
-			"fieldname":"show_pdc_in_print",
-			"label": __("Show PDC in Print"),
+			"fieldname":"show_future_payments",
+			"label": __("Show Future Payments"),
 			"fieldtype": "Check",
 		},
 		{
-			"fieldname":"show_sales_person_in_print",
-			"label": __("Show Sales Person in Print"),
+			"fieldname":"show_delivery_notes",
+			"label": __("Show Delivery Notes"),
+			"fieldtype": "Check",
+		},
+		{
+			"fieldname":"show_sales_person",
+			"label": __("Show Sales Person"),
 			"fieldtype": "Check",
 		},
 		{

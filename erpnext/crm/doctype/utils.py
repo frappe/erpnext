@@ -54,6 +54,8 @@ def get_last_issue_from_customer(customer_name):
 
 
 def get_scheduled_employees_for_popup(communication_medium):
+	if not communication_medium: return []
+
 	now_time = frappe.utils.nowtime()
 	weekday = frappe.utils.get_weekday()
 
@@ -73,3 +75,10 @@ def get_scheduled_employees_for_popup(communication_medium):
 	employee_emails = set([employee.user_id for employee in employees])
 
 	return employee_emails
+
+def strip_number(number):
+	if not number: return
+	# strip 0 from the start of the number for proper number comparisions
+	# eg. 07888383332 should match with 7888383332
+	number = number.lstrip('0')
+	return number

@@ -94,6 +94,13 @@ def get_data():
 					"name": "BOM Update Tool",
 					"description": _("Replace BOM and update latest price in all BOMs"),
 				},
+				{
+					"type": "page",
+					"label": _("BOM Comparison Tool"),
+					"name": "bom-comparison-tool",
+					"description": _("Compare BOMs for changes in Raw Materials and Operations"),
+					"data_doctype": "BOM"
+				},
 			]
 		},
 		{
