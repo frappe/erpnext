@@ -1,5 +1,6 @@
 {
  "autoname": "hash",
+ "create_on_install": 1,
  "creation": "2013-05-24 19:29:06",
  "doctype": "DocType",
  "document_type": "Document",
@@ -701,7 +702,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-06-23 20:03:13.818917",
+ "modified": "2019-09-14 20:21:32.509323",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

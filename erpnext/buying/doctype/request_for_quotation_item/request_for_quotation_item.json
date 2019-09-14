@@ -1,5 +1,6 @@
 {
  "autoname": "hash",
+ "create_on_install": 1,
  "creation": "2016-02-25 08:04:02.452958",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -202,6 +203,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "fieldname": "page_break",
    "fieldtype": "Check",
    "label": "Page Break",
@@ -222,7 +224,7 @@
   }
  ],
  "istable": 1,
- "modified": "2019-05-01 17:50:23.703801",
+ "modified": "2019-09-14 20:21:38.370439",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation Item",

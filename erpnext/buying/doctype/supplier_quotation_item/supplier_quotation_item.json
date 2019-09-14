@@ -1,5 +1,6 @@
 {
  "autoname": "hash",
+ "create_on_install": 1,
  "creation": "2013-05-22 12:43:10",
  "doctype": "DocType",
  "document_type": "Document",
@@ -532,7 +533,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-06-02 05:32:46.019237",
+ "modified": "2019-09-14 20:21:34.765855",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",
