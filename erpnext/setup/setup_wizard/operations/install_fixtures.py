@@ -274,6 +274,8 @@ def install(country=None):
 
 	set_more_defaults()
 
+	update_global_search_doctypes()
+
 	# path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(country))
 	# if os.path.exists(path.encode("utf-8")):
 	# 	frappe.get_attr("erpnext.regional.{0}.setup.setup_company_independent_fixtures".format(frappe.scrub(country)))()
@@ -515,3 +517,20 @@ def get_fy_details(fy_start_date, fy_end_date):
 	else:
 		fy = cstr(start_year) + '-' + cstr(start_year + 1)
 	return fy
+
+def update_global_search_doctypes():
+	global_searches_doctypes = [
+		{"doctype": "Customer", "index": 1},
+		{"doctype": "Supplier", "index": 2},
+		{"doctype": "Item", "index": 3},
+		{"doctype": "Sales Invoice", "index": 4},
+		{"doctype": "Sales Order", "index": 5},
+		{"doctype": "Purchase Receipt", "index": 6},
+		{"doctype": "Delivery Note", "index": 7},
+		{"doctype": "Stock", "index": 8},
+	]
+
+	global_search_settings = frappe.get_single("Global Search Settings")
+	for d in global_searches_doctypes:
+		global_search_settings.insert_at_index(d.get("doctype"), d.get("index"))
+	global_search_settings.save(ignore_permissions=True)
