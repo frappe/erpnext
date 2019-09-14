@@ -290,7 +290,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				$input_group.append(scan_barcode_field.$input);
 				$(`<span class="input-group-btn" style="vertical-align: top">
 						<button class="btn btn-default border" type="button">
-							<i class="fa fa-camera"></i>
+							<i class="fa fa-camera text-muted"></i>
 						</button>
 					</span>`)
 					.on('click', '.btn', () => {
