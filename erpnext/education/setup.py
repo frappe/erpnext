@@ -18,6 +18,7 @@ def setup_education():
 
 def create_academic_sessions():
 	data = [
+		{"doctype": "Assessment Group", "assessment_group_name": _("All Assessment Groups"), "is_group": 1, "parent_assessment_group": ""},
 		{"doctype": "Academic Year", "academic_year_name": "2015-16"},
 		{"doctype": "Academic Year", "academic_year_name": "2016-17"},
 		{"doctype": "Academic Year", "academic_year_name": "2017-18"},

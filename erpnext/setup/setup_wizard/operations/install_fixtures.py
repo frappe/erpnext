@@ -220,10 +220,6 @@ def install(country=None):
 		{'doctype': "Print Heading", 'print_heading': _("Credit Note")},
 		{'doctype': "Print Heading", 'print_heading': _("Debit Note")},
 
-		# Assessment Group
-		{'doctype': 'Assessment Group', 'assessment_group_name': _('All Assessment Groups'),
-			'is_group': 1, 'parent_assessment_group': ''},
-
 		# Share Management
 		{"doctype": "Share Type", "title": _("Equity")},
 		{"doctype": "Share Type", "title": _("Preference")},
