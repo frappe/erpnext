@@ -1,5 +1,6 @@
 {
  "autoname": "Prompt",
+ "create_on_install": 1,
  "creation": "2019-05-20 15:14:21.604447",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -13,7 +14,7 @@
    "label": "Description"
   }
  ],
- "modified": "2019-05-20 17:06:38.095647",
+ "modified": "2019-09-14 20:34:44.603854",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue Priority",

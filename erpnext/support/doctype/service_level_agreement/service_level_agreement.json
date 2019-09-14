@@ -1,5 +1,6 @@
 {
  "autoname": "format:SLA-{service_level}-{####}",
+ "create_on_install": 1,
  "creation": "2018-12-26 21:08:15.448812",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -158,7 +159,7 @@
    "label": "Enable"
   }
  ],
- "modified": "2019-07-09 17:22:16.402939",
+ "modified": "2019-09-14 20:34:42.188737",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",

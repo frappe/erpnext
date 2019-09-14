@@ -1,5 +1,6 @@
 {
  "autoname": "format:MAIL-CAMP-{YYYY}-{#####}",
+ "create_on_install": 1,
  "creation": "2019-06-30 16:05:30.015615",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -69,7 +70,7 @@
    "options": "User"
   }
  ],
- "modified": "2019-07-12 13:47:37.261213",
+ "modified": "2019-09-14 20:33:56.785576",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Email Campaign",

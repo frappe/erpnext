@@ -1,6 +1,7 @@
 {
  "allow_import": 1,
  "autoname": "naming_series:",
+ "create_on_install": 1,
  "creation": "2013-04-09 11:43:55",
  "doctype": "DocType",
  "document_type": "Document",
@@ -627,7 +628,7 @@
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2019-09-09 11:40:05.762003",
+ "modified": "2019-09-14 20:33:34.659490",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

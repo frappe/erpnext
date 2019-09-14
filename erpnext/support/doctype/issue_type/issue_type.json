@@ -2,6 +2,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "Prompt",
+ "create_on_install": 1,
  "creation": "2017-10-06 12:53:34.714153",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -17,7 +18,7 @@
    "label": "Description"
   }
  ],
- "modified": "2019-06-26 16:56:39.863392",
+ "modified": "2019-09-14 20:34:42.643023",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue Type",

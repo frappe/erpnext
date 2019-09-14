@@ -1,5 +1,6 @@
 {
  "autoname": "field:service_level",
+ "create_on_install": 1,
  "creation": "2018-11-19 12:44:30.407502",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -75,7 +76,7 @@
    "read_only": 1
   }
  ],
- "modified": "2019-06-06 12:58:03.464056",
+ "modified": "2019-09-14 20:34:42.981249",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level",
