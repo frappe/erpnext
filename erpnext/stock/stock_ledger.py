@@ -206,7 +206,9 @@ class update_entries_after(object):
 		stock_value_difference = self.stock_value - self.prev_stock_value
 
 		self.prev_stock_value = self.stock_value
+
 		if self.batch_wise_valuation:
+			self.batch_data.batch_stock_value = flt(self.batch_data.batch_stock_value, self.precision)
 			self.batch_data.prev_batch_stock_value = self.batch_data.batch_stock_value
 
 		# update current sle
