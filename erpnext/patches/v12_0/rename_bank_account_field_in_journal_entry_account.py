@@ -14,7 +14,8 @@ def execute():
 
 def update_journal_entry_account_fieldname():
 	''' maps data from old field to the new field '''
-	frappe.db.sql("""
-		UPDATE `tabJournal Entry Account`
-		SET `bank_account` = `bank_account_no`
-	""")
+	if frappe.db.has_column('Journal Entry Account', 'bank_account_no'):
+		frappe.db.sql("""
+			UPDATE `tabJournal Entry Account`
+			SET `bank_account` = `bank_account_no`
+		""")
