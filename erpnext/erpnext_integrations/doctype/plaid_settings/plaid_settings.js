@@ -4,8 +4,18 @@
 frappe.provide("erpnext.integrations");
 
 frappe.ui.form.on('Plaid Settings', {
-	link_new_account: function(frm) {
-		new erpnext.integrations.plaidLink(frm);
+	enabled: function(frm) {
+		frm.toggle_reqd('plaid_client_id', frm.doc.enabled);
+		frm.toggle_reqd('plaid_secret', frm.doc.enabled);
+		frm.toggle_reqd('plaid_public_key', frm.doc.enabled);
+		frm.toggle_reqd('plaid_env', frm.doc.enabled);
+	},
+	refresh: function(frm) {
+		if(frm.doc.enabled) {
+			frm.add_custom_button('Link a new bank account', () => {
+				new erpnext.integrations.plaidLink(frm);
+			});
+		}
 	}
 });
 
@@ -19,20 +29,10 @@ erpnext.integrations.plaidLink = class plaidLink {
 
 	init_config() {
 		const me = this;
-		frappe.xcall('erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.plaid_configuration')
-			.then(result => {
-				if (result !== "disabled") {
-					if (result.plaid_env == undefined || result.plaid_public_key == undefined) {
-						frappe.throw(__("Please add valid Plaid api keys in site_config.json first"));
-					}
-					me.plaid_env = result.plaid_env;
-					me.plaid_public_key = result.plaid_public_key;
-					me.client_name = result.client_name;
-					me.init_plaid();
-				} else {
-					frappe.throw(__("Please save your document before adding a new account"));
-				}
-			});
+		me.plaid_env = me.frm.doc.plaid_env;
+		me.plaid_public_key = me.frm.doc.plaid_public_key;
+		me.client_name = frappe.boot.sitename;
+		me.init_plaid();
 	}
 
 	init_plaid() {
