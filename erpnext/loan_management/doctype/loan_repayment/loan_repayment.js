@@ -14,7 +14,7 @@ frappe.ui.form.on('Loan Repayment', {
 			};
 		});
 
-		if (frm.doc.against_loan && frm.doc.posting_date) {
+		if (frm.doc.against_loan && frm.doc.posting_date && frm.doc.docstatus == 0) {
 			frm.trigger('calculate_repayment_amounts');
 		}
 	},
@@ -45,7 +45,6 @@ frappe.ui.form.on('Loan Repayment', {
 				'payment_type': frm.doc.payment_type
 			},
 			callback: function(r) {
-				console.log(r);
 				let amounts = r.message;
 
 				frm.set_value('pending_principal_amount', amounts['principal_amount']);
@@ -56,6 +55,6 @@ frappe.ui.form.on('Loan Repayment', {
 				frm.set_value('penalty_amount', amounts['penalty_amount']);
 				frm.set_value('payable_amount', amounts['payable_amount']);
 			}
-		})
+		});
 	}
 });

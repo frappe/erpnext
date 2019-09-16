@@ -13,7 +13,7 @@ frappe.ui.form.on('Loan Type', {
 					}
 				};
 			});
-		})
+		});
 
 		$.each(["payment_account", "loan_account"], function (i, field) {
 			frm.set_query(field, function () {
@@ -25,6 +25,6 @@ frappe.ui.form.on('Loan Type', {
 					}
 				};
 			});
-		})
+		});
 	}
 });

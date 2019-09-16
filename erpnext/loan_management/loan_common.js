@@ -7,6 +7,19 @@ frappe.ui.form.on(cur_frm.doctype, {
 			frm.set_df_property('applicant_type', 'options', ['Employee', 'Customer']);
 			frm.refresh_field('applicant_type');
 		}
+
+		if (['Loan Disbursement', 'Loan Repayment', 'Loan Interest Accrual'].includes(frm.doc.doctype)
+			&& frm.doc.docstatus == 1) {
+
+			frm.add_custom_button(__("General Ledger"), function() {
+				frappe.route_options = {
+					voucher_no: frm.doc.name,
+					company: frm.doc.company
+				};
+
+				frappe.set_route("query-report", "General Ledger");
+			},__("View"))
+		}
 	},
 	applicant_type: function(frm) {
 		frm.set_value("applicant", null);
