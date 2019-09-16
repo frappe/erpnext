@@ -21,12 +21,13 @@ def execute(filters=None):
 	to_date = filters.get('to_date')
 
 	include_uom = filters.get("include_uom")
-	columns = get_columns()
+	columns = get_columns(filters)
 	items = get_items(filters)
 	sle = get_stock_ledger_entries(filters, items)
 
-	filters['show_warehouse_wise_stock'] = True
-	item_wise_fifo_queue = get_fifo_queue(filters, sle)
+	if filters.get('show_stock_ageing_data'):
+		filters['show_warehouse_wise_stock'] = True
+		item_wise_fifo_queue = get_fifo_queue(filters, sle)
 
 	# if no stock ledger entry found return
 	if not sle:
@@ -37,7 +38,7 @@ def execute(filters=None):
 	item_reorder_detail_map = get_item_reorder_details(item_map.keys())
 
 	data = []
-	conversion_factors = []
+	conversion_factors = {}
 	for (company, item, warehouse) in sorted(iwb_map):
 		if item_map.get(item):
 			qty_dict = iwb_map[(company, item, warehouse)]
@@ -58,32 +59,30 @@ def execute(filters=None):
 			report_data.update(qty_dict)
 
 			if include_uom:
-				conversion_factors.append(item_map[item].conversion_factor)
+				conversion_factors.setdefault(item, item_map[item].conversion_factor)
 
-			fifo_queue = item_wise_fifo_queue[(item, warehouse)].get('fifo_queue')
+			if filters.get('show_stock_ageing_data'):
+				fifo_queue = item_wise_fifo_queue[(item, warehouse)].get('fifo_queue')
 
-			stock_ageing_data = {
-				'average_age': 0,
-				'earliest_age': 0,
-				'latest_age': 0
-			}
-			if fifo_queue:
-				fifo_queue = sorted(fifo_queue, key=lambda fifo_data: fifo_data[1])
-				stock_ageing_data['average_age'] = get_average_age(fifo_queue, to_date)
-				stock_ageing_data['earliest_age'] = date_diff(to_date, fifo_queue[0][1])
-				stock_ageing_data['latest_age'] = date_diff(to_date, fifo_queue[-1][1])
+				stock_ageing_data = {
+					'average_age': 0,
+					'earliest_age': 0,
+					'latest_age': 0
+				}
+				if fifo_queue:
+					fifo_queue = sorted(fifo_queue, key=lambda fifo_data: fifo_data[1])
+					stock_ageing_data['average_age'] = get_average_age(fifo_queue, to_date)
+					stock_ageing_data['earliest_age'] = date_diff(to_date, fifo_queue[0][1])
+					stock_ageing_data['latest_age'] = date_diff(to_date, fifo_queue[-1][1])
 
-			report_data.update(stock_ageing_data)
+				report_data.update(stock_ageing_data)
 
 			data.append(report_data)
-
-	if filters.get('show_variant_attributes', 0) == 1:
-		columns += [{'width': 100, 'fieldname': att_name, 'label': att_name} for att_name in get_variants_attributes()]
 
 	add_additional_uom_columns(columns, data, include_uom, conversion_factors)
 	return columns, data
 
-def get_columns():
+def get_columns(filters):
 	"""return columns"""
 
 	columns = [
@@ -105,11 +104,16 @@ def get_columns():
 		{"label": _("Valuation Rate"), "fieldname": "val_rate", "fieldtype": "Currency", "width": 90, "convertible": "rate"},
 		{"label": _("Reorder Level"), "fieldname": "reorder_level", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Reorder Qty"), "fieldname": "reorder_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
-		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 100},
-		{"label": _("Average Age"), "fieldname": "average_age", "fieldtype": "Data", "width": 100},
-		{"label": _("Earliest Age"), "fieldname": "earliest_age", "fieldtype": "Data", "width": 100},
-		{"label": _("Latest Age"), "fieldname": "latest_age", "fieldtype": "Data", "width": 100}
+		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 100}
 	]
+
+	if filters.get('show_stock_ageing_data'):
+		columns += [{'label': _('Average Age'), 'fieldname': 'average_age', 'width': 100},
+		{'label': _('Earliest Age'), 'fieldname': 'earliest_age', 'width': 100},
+		{'label': _('Latest Age'), 'fieldname': 'latest_age', 'width': 100}]
+
+	if filters.get('show_variant_attributes'):
+		columns += [{'label': att_name, 'fieldname': att_name, 'width': 100} for att_name in get_variants_attributes()]
 
 	return columns
 
