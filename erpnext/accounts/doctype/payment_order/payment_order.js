@@ -66,6 +66,7 @@ frappe.ui.form.on('Payment Order', {
 			get_query_filters: {
 				bank: frm.doc.bank,
 				docstatus: 1,
+				payment_type: ("!=", "Receive"),
 				bank_account: frm.doc.company_bank_account,
 				paid_from: frm.doc.account,
 				payment_order_status: ["=", "Initiated"],

@@ -123,11 +123,12 @@ def get_rootwise_opening_balances(filters, report_type):
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
-			additional_conditions += """ and {0} in (%({0})s) """.format(dimension)
+			if filters.get(dimension):
+				additional_conditions += """ and {0} in (%({0})s) """.format(dimension)
 
-			query_filters.update({
-				dimension: filters.get(dimension)
-			})
+				query_filters.update({
+					dimension: filters.get(dimension)
+				})
 
 	gle = frappe.db.sql("""
 		select

@@ -1,11 +1,11 @@
 {
- "autoname": "format:PRC-{procedure}",
+ "autoname": "format:PRC-{quality_procedure_name}",
  "creation": "2018-10-06 00:06:29.756804",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "procedure",
+  "quality_procedure_name",
   "parent_quality_procedure",
   "is_group",
   "sb_00",
@@ -62,14 +62,14 @@
    "options": "Quality Procedure Process"
   },
   {
-   "fieldname": "procedure",
+   "fieldname": "quality_procedure_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Procedure",
+   "label": "Quality Procedure",
    "reqd": 1
   }
  ],
- "modified": "2019-05-26 22:11:53.771428",
+ "modified": "2019-08-05 13:09:29.945082",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Procedure",

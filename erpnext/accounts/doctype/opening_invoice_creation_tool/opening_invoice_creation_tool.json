@@ -10,7 +10,9 @@
   "create_missing_party",
   "column_break_3",
   "invoice_type",
+  "accounting_dimensions_section",
   "cost_center",
+  "dimension_col_break",
   "section_break_4",
   "invoices"
  ],
@@ -59,11 +61,21 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2019-06-13 11:45:31.405267",
+ "modified": "2019-07-25 14:57:33.187689",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool",

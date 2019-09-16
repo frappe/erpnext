@@ -258,6 +258,7 @@
    "print_hide": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -269,12 +270,13 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-25 22:14:02.715509",
+ "modified": "2019-07-16 17:12:08.238334",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
  "owner": "Administrator",
  "permissions": [],
+ "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1
 }

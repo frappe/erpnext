@@ -468,7 +468,6 @@
    },
    {
     "default": "0",
-    "depends_on": "has_batch_no",
     "fieldname": "retain_sample",
     "fieldtype": "Check",
     "label": "Retain Sample"
@@ -905,7 +904,7 @@
     "description": "Item Image (if not slideshow)",
     "fieldname": "website_image",
     "fieldtype": "Attach",
-    "label": "Image"
+    "label": "Website Image"
    },
    {
     "fieldname": "thumbnail",
@@ -1041,7 +1040,7 @@
   "idx": 2,
   "image_field": "image",
   "max_attachments": 1,
-  "modified": "2019-07-12 12:18:13.977931",
+  "modified": "2019-09-03 18:34:13.977931",
   "modified_by": "Administrator",
   "module": "Stock",
   "name": "Item",

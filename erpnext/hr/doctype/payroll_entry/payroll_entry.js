@@ -69,7 +69,7 @@ frappe.ui.form.on('Payroll Entry', {
 	},
 
 	add_context_buttons: function(frm) {
-		if(frm.doc.salary_slips_submitted) {
+		if(frm.doc.salary_slips_submitted || (frm.doc.__onload && frm.doc.__onload.submitted_ss)) {
 			frm.events.add_bank_entry_button(frm);
 		} else if(frm.doc.salary_slips_created) {
 			frm.add_custom_button(__("Submit Salary Slip"), function() {

@@ -231,8 +231,12 @@ doc_events = {
 	('Sales Invoice', 'Purchase Invoice', 'Delivery Note'): {
 		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
 	},
-	"Contact":{
-		"on_trash": "erpnext.support.doctype.issue.issue.update_issue"
+	"Contact": {
+		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
+		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information"
+	},
+	"Lead": {
+		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information"
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
@@ -279,7 +283,9 @@ scheduler_events = {
 		"erpnext.crm.doctype.email_campaign.email_campaign.set_email_campaign_status"
 	],
 	"daily_long": [
-		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"
+		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
+		"erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry.process_expired_allocation",
+		"erpnext.hr.utils.generate_leave_encashment"
 	],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.convert_deferred_revenue_to_income",

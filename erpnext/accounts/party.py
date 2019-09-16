@@ -292,8 +292,11 @@ def validate_party_accounts(doc):
 
 		party_account_currency = frappe.db.get_value("Account", account.account, "account_currency", cache=True)
 		existing_gle_currency = get_party_gle_currency(doc.doctype, doc.name, account.company)
-		company_default_currency = frappe.get_cached_value('Company',
-			frappe.db.get_default("Company"),  "default_currency")
+		if frappe.db.get_default("Company"):
+			company_default_currency = frappe.get_cached_value('Company',
+				frappe.db.get_default("Company"),  "default_currency")
+		else:
+			company_default_currency = frappe.db.get_value('Company', account.company, "default_currency")
 
 		if existing_gle_currency and party_account_currency != existing_gle_currency:
 			frappe.throw(_("Accounting entries have already been made in currency {0} for company {1}. Please select a receivable or payable account with currency {0}.").format(existing_gle_currency, account.company))
@@ -365,7 +368,7 @@ def validate_due_date(posting_date, due_date, party_type, party, company=None, b
 					.format(formatdate(default_due_date)))
 
 @frappe.whitelist()
-def get_address_tax_category(tax_category, billing_address=None, shipping_address=None):
+def get_address_tax_category(tax_category=None, billing_address=None, shipping_address=None):
 	addr_tax_category_from = frappe.db.get_single_value("Accounts Settings", "determine_address_tax_category_from")
 	if addr_tax_category_from == "Shipping Address":
 		if shipping_address:
@@ -469,7 +472,9 @@ def get_timeline_data(doctype, name):
 	# fetch and append data from Activity Log
 	data += frappe.db.sql("""select {fields}
 		from `tabActivity Log`
-		where reference_doctype={doctype} and reference_name={name}
+		where (reference_doctype="{doctype}" and reference_name="{name}")
+		or (timeline_doctype in ("{doctype}") and timeline_name="{name}")
+		or (reference_doctype in ("Quotation", "Opportunity") and timeline_name="{name}")
 		and status!='Success' and creation > {after}
 		{group_by} order by creation desc
 		""".format(doctype=frappe.db.escape(doctype), name=frappe.db.escape(name), fields=fields,

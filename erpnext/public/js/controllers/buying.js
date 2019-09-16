@@ -452,7 +452,8 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 					company: frm.doc.company,
 					is_subcontracted: frm.doc.is_subcontracted,
 					transaction_date: frm.doc.transaction_date || frm.doc.posting_date,
-					ignore_pricing_rule: frm.doc.ignore_pricing_rule
+					ignore_pricing_rule: frm.doc.ignore_pricing_rule,
+					doctype: frm.doc.doctype
 				}
 			},
 			freeze: true,

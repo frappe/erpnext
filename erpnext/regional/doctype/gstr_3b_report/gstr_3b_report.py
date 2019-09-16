@@ -329,28 +329,29 @@ class GSTR3BReport(Document):
 				d.gst_category, []
 			)
 
-			if state_number != d.place_of_supply.split("-")[0]:
-				inter_state_supply_details[d.gst_category].append({
-					"pos": d.place_of_supply,
-					"txval": flt(d.total, 2),
-					"iamt": flt(inter_state_supply_tax_mapping.get(d.place_of_supply), 2)
-				})
-			else:
-				osup_det = self.report_dict["sup_details"]["osup_det"]
-				osup_det["txval"] = flt(osup_det["txval"] + d.total, 2)
-				osup_det["camt"] = flt(osup_det["camt"] + inter_state_supply_tax_mapping.get(d.place_of_supply)/2, 2)
-				osup_det["samt"] = flt(osup_det["samt"] + inter_state_supply_tax_mapping.get(d.place_of_supply)/2, 2)
+			if d.place_of_supply:
+				if state_number != d.place_of_supply.split("-")[0]:
+					inter_state_supply_details[d.gst_category].append({
+						"pos": d.place_of_supply.split("-")[0],
+						"txval": flt(d.total, 2),
+						"iamt": flt(inter_state_supply_tax_mapping.get(d.place_of_supply), 2)
+					})
+				else:
+					osup_det = self.report_dict["sup_details"]["osup_det"]
+					osup_det["txval"] = flt(osup_det["txval"] + d.total, 2)
+					osup_det["camt"] = flt(osup_det["camt"] + inter_state_supply_tax_mapping.get(d.place_of_supply)/2, 2)
+					osup_det["samt"] = flt(osup_det["samt"] + inter_state_supply_tax_mapping.get(d.place_of_supply)/2, 2)
 
 		return inter_state_supply_details
 
 	def get_inward_nil_exempt(self, state):
 
-		inward_nil_exempt = frappe.db.sql(""" select a.gst_state, sum(i.base_amount) as base_amount,
-			i.is_nil_exempt, i.is_non_gst from `tabPurchase Invoice` p , `tabPurchase Invoice Item` i, `tabAddress` a
-			where p.docstatus = 1 and p.name = i.parent and p.supplier_address = a.name
+		inward_nil_exempt = frappe.db.sql(""" select p.place_of_supply, sum(i.base_amount) as base_amount,
+			i.is_nil_exempt, i.is_non_gst from `tabPurchase Invoice` p , `tabPurchase Invoice Item` i
+			where p.docstatus = 1 and p.name = i.parent
 			and i.is_nil_exempt = 1 or i.is_non_gst = 1 and
 			month(p.posting_date) = %s and year(p.posting_date) = %s and p.company = %s and p.company_gstin = %s
-			group by a.gst_state """, (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
+			group by p.place_of_supply """, (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
 
 		inward_nil_exempt_details = {
 			"gst": {
@@ -364,14 +365,15 @@ class GSTR3BReport(Document):
 		}
 
 		for d in inward_nil_exempt:
-			if d.is_nil_exempt == 1 and state == d.gst_state:
-				inward_nil_exempt_details["gst"]["intra"] += d.base_amount
-			elif d.is_nil_exempt == 1 and state != d.gst_state:
-				inward_nil_exempt_details["gst"]["inter"] += d.base_amount
-			elif d.is_non_gst == 1 and state == d.gst_state:
-				inward_nil_exempt_details["non_gst"]["inter"] += d.base_amount
-			elif d.is_non_gst == 1 and state != d.gst_state:
-				inward_nil_exempt_details["non_gst"]["intra"] += d.base_amount
+			if d.place_of_supply:
+				if d.is_nil_exempt == 1 and state == d.place_of_supply.split("-")[1]:
+					inward_nil_exempt_details["gst"]["intra"] += d.base_amount
+				elif d.is_nil_exempt == 1 and state != d.place_of_supply.split("-")[1]:
+					inward_nil_exempt_details["gst"]["inter"] += d.base_amount
+				elif d.is_non_gst == 1 and state == d.place_of_supply.split("-")[1]:
+					inward_nil_exempt_details["non_gst"]["intra"] += d.base_amount
+				elif d.is_non_gst == 1 and state != d.place_of_supply.split("-")[1]:
+					inward_nil_exempt_details["non_gst"]["inter"] += d.base_amount
 
 		return inward_nil_exempt_details
 

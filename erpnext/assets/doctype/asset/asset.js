@@ -303,14 +303,17 @@ frappe.ui.form.on('Asset', {
 	},
 
 	set_depreciation_rate: function(frm, row) {
-		if (row.total_number_of_depreciations && row.frequency_of_depreciation) {
+		if (row.total_number_of_depreciations && row.frequency_of_depreciation
+			&& row.expected_value_after_useful_life) {
 			frappe.call({
 				method: "get_depreciation_rate",
 				doc: frm.doc,
 				args: row,
 				callback: function(r) {
 					if (r.message) {
-						frappe.model.set_value(row.doctype, row.name, "rate_of_depreciation", r.message);
+						frappe.flags.dont_change_rate = true;
+						frappe.model.set_value(row.doctype, row.name,
+							"rate_of_depreciation", flt(r.message, precision("rate_of_depreciation", row)));
 					}
 				}
 			});
@@ -338,6 +341,14 @@ frappe.ui.form.on('Asset Finance Book', {
 	total_number_of_depreciations: function(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
 		frm.events.set_depreciation_rate(frm, row);
+	},
+
+	rate_of_depreciation: function(frm, cdt, cdn) {
+		if(!frappe.flags.dont_change_rate) {
+			frappe.model.set_value(cdt, cdn, "expected_value_after_useful_life", 0);
+		}
+
+		frappe.flags.dont_change_rate = false;
 	}
 });
 

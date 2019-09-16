@@ -34,7 +34,7 @@ class Quotation(SellingController):
 			self.with_items = 1
 
 	def validate_valid_till(self):
-		if self.valid_till and self.valid_till < self.transaction_date:
+		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
 			frappe.throw(_("Valid till date cannot be before transaction date"))
 
 	def has_sales_order(self):

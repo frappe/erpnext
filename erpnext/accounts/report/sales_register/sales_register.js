@@ -68,13 +68,12 @@ frappe.query_reports["Sales Register"] = {
 	]
 }
 
-erpnext.dimension_filters.then((dimensions) => {
-	dimensions.forEach((dimension) => {
-		frappe.query_reports["Sales Register"].filters.splice(7, 0 ,{
-			"fieldname": dimension["fieldname"],
-			"label": __(dimension["label"]),
-			"fieldtype": "Link",
-			"options": dimension["document_type"]
-		});
+erpnext.dimension_filters.forEach((dimension) => {
+	frappe.query_reports["Sales Register"].filters.splice(7, 0 ,{
+		"fieldname": dimension["fieldname"],
+		"label": __(dimension["label"]),
+		"fieldtype": "Link",
+		"options": dimension["document_type"]
 	});
 });
+

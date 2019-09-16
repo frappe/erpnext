@@ -130,13 +130,18 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldtype": "Check",
 		},
 		{
-			"fieldname":"show_pdc_in_print",
-			"label": __("Show PDC in Print"),
+			"fieldname":"show_future_payments",
+			"label": __("Show Future Payments"),
 			"fieldtype": "Check",
 		},
 		{
-			"fieldname":"show_sales_person_in_print",
-			"label": __("Show Sales Person in Print"),
+			"fieldname":"show_delivery_notes",
+			"label": __("Show Delivery Notes"),
+			"fieldtype": "Check",
+		},
+		{
+			"fieldname":"show_sales_person",
+			"label": __("Show Sales Person"),
 			"fieldtype": "Check",
 		},
 		{
@@ -173,13 +178,12 @@ frappe.query_reports["Accounts Receivable"] = {
 	}
 }
 
-erpnext.dimension_filters.then((dimensions) => {
-	dimensions.forEach((dimension) => {
-		frappe.query_reports["Accounts Receivable"].filters.splice(9, 0 ,{
-			"fieldname": dimension["fieldname"],
-			"label": __(dimension["label"]),
-			"fieldtype": "Link",
-			"options": dimension["document_type"]
-		});
+erpnext.dimension_filters.forEach((dimension) => {
+	frappe.query_reports["Accounts Receivable"].filters.splice(9, 0 ,{
+		"fieldname": dimension["fieldname"],
+		"label": __(dimension["label"]),
+		"fieldtype": "Link",
+		"options": dimension["document_type"]
 	});
 });
+

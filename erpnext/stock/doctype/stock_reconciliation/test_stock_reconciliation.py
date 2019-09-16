@@ -17,10 +17,11 @@ from erpnext.stock.utils import get_stock_balance, get_incoming_rate, get_availa
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 class TestStockReconciliation(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		create_batch_or_serial_no_items()
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
-		self.insert_existing_sle()
+		insert_existing_sle()
 
 	def test_reco_for_fifo(self):
 		self._test_reco_sle_gle("FIFO")
@@ -97,18 +98,6 @@ class TestStockReconciliation(unittest.TestCase):
 		self.assertEqual(["_Test Stock Reco Item", "_Test Warehouse Ledger 1 - _TC", 100],
 			[items[0]["item_code"], items[0]["warehouse"], items[0]["qty"]])
 
-	def insert_existing_sle(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-
-		make_stock_entry(posting_date="2012-12-15", posting_time="02:00", item_code="_Test Item",
-			target="_Test Warehouse - _TC", qty=10, basic_rate=700)
-
-		make_stock_entry(posting_date="2012-12-25", posting_time="03:00", item_code="_Test Item",
-			source="_Test Warehouse - _TC", qty=15)
-
-		make_stock_entry(posting_date="2013-01-05", posting_time="07:00", item_code="_Test Item",
-			target="_Test Warehouse - _TC", qty=15, basic_rate=1200)
-
 	def test_stock_reco_for_serialized_item(self):
 		set_perpetual_inventory()
 
@@ -163,7 +152,6 @@ class TestStockReconciliation(unittest.TestCase):
 		for d in to_delete_records:
 			stock_doc = frappe.get_doc("Stock Reconciliation", d)
 			stock_doc.cancel()
-			frappe.delete_doc("Stock Reconciliation", stock_doc.name)
 
 		for d in serial_nos + serial_nos1:
 			if frappe.db.exists("Serial No", d):
@@ -214,9 +202,18 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_doc = frappe.get_doc("Stock Reconciliation", d)
 			stock_doc.cancel()
 
-		frappe.delete_doc("Batch", sr.items[0].batch_no)
-		for d in to_delete_records:
-			frappe.delete_doc("Stock Reconciliation", d)
+
+def insert_existing_sle():
+	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+	make_stock_entry(posting_date="2012-12-15", posting_time="02:00", item_code="_Test Item",
+		target="_Test Warehouse - _TC", qty=10, basic_rate=700)
+
+	make_stock_entry(posting_date="2012-12-25", posting_time="03:00", item_code="_Test Item",
+		source="_Test Warehouse - _TC", qty=15)
+
+	make_stock_entry(posting_date="2013-01-05", posting_time="07:00", item_code="_Test Item",
+		target="_Test Warehouse - _TC", qty=15, basic_rate=1200)
 
 def create_batch_or_serial_no_items():
 	create_warehouse("_Test Warehouse for Stock Reco1",

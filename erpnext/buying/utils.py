@@ -30,7 +30,9 @@ def update_last_purchase_rate(doc, is_submit):
 			# for it to be considered for latest purchase rate
 			if flt(d.conversion_factor):
 				last_purchase_rate = flt(d.base_rate) / flt(d.conversion_factor)
-			else:
+			# Check if item code is present
+			# Conversion factor should not be mandatory for non itemized items
+			elif d.item_code:
 				frappe.throw(_("UOM Conversion factor is required in row {0}").format(d.idx))
 
 		# update last purchsae rate
@@ -84,13 +86,13 @@ def get_linked_material_requests(items):
 	items = json.loads(items)
 	mr_list = []
 	for item in items:
-		material_request = frappe.db.sql("""SELECT distinct mr.name AS mr_name, 
-				(mr_item.qty - mr_item.ordered_qty) AS qty, 
+		material_request = frappe.db.sql("""SELECT distinct mr.name AS mr_name,
+				(mr_item.qty - mr_item.ordered_qty) AS qty,
 				mr_item.item_code AS item_code,
-				mr_item.name AS mr_item 
+				mr_item.name AS mr_item
 			FROM `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
 			WHERE mr.name = mr_item.parent
-				AND mr_item.item_code = %(item)s 
+				AND mr_item.item_code = %(item)s
 				AND mr.material_request_type = 'Purchase'
 				AND mr.per_ordered < 99.99
 				AND mr.docstatus = 1
@@ -98,6 +100,6 @@ def get_linked_material_requests(items):
                         ORDER BY mr_item.item_code ASC""",{"item": item}, as_dict=1)
 		if material_request:
 			mr_list.append(material_request)
-	
+
 	return mr_list
 

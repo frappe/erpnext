@@ -3,82 +3,59 @@ from frappe import _
 import json
 
 @frappe.whitelist()
-def get_document_with_phone_number(number):
-	# finds contacts and leads
-	if not number: return
-	number = number.lstrip('0')
-	number_filter = {
-		'phone': ['like', '%{}'.format(number)],
-		'mobile_no': ['like', '%{}'.format(number)]
-	}
-	contacts = frappe.get_all('Contact', or_filters=number_filter, limit=1)
+def get_last_interaction(contact=None, lead=None):
 
-	if contacts:
-		return frappe.get_doc('Contact', contacts[0].name)
+	if not contact and not lead: return
 
-	leads = frappe.get_all('Lead', or_filters=number_filter, limit=1)
-
-	if leads:
-		return frappe.get_doc('Lead', leads[0].name)
-
-@frappe.whitelist()
-def get_last_interaction(number, reference_doc):
-	reference_doc = json.loads(reference_doc) if reference_doc else get_document_with_phone_number(number)
-
-	if not reference_doc: return
-
-	reference_doc = frappe._dict(reference_doc)
-
-	last_communication = {}
-	last_issue = {}
-	if reference_doc.doctype == 'Contact':
-		customer_name = ''
+	last_communication = None
+	last_issue = None
+	if contact:
 		query_condition = ''
-		for link in reference_doc.links:
-			link = frappe._dict(link)
+		values = []
+		contact = frappe.get_doc('Contact', contact)
+		for link in contact.links:
 			if link.link_doctype == 'Customer':
-				customer_name = link.link_name
-			query_condition += "(`reference_doctype`='{}' AND `reference_name`='{}') OR".format(link.link_doctype, link.link_name)
+				last_issue = get_last_issue_from_customer(link.link_name)
+			query_condition += "(`reference_doctype`=%s AND `reference_name`=%s) OR"
+			values += [link_link_doctype, link_link_name]
 
 		if query_condition:
+			# remove extra appended 'OR'
 			query_condition = query_condition[:-2]
 			last_communication = frappe.db.sql("""
 				SELECT `name`, `content`
 				FROM `tabCommunication`
-				WHERE {}
+				WHERE `sent_or_received`='Received'
+				AND ({})
 				ORDER BY `modified`
 				LIMIT 1
-			""".format(query_condition)) # nosec
+			""".format(query_condition), values, as_dict=1)  # nosec
 
-		if customer_name:
-			last_issue = frappe.get_all('Issue', {
-				'customer': customer_name
-			}, ['name', 'subject', 'customer'], limit=1)
-
-	elif reference_doc.doctype == 'Lead':
+	if lead:
 		last_communication = frappe.get_all('Communication', filters={
-			'reference_doctype': reference_doc.doctype,
-			'reference_name': reference_doc.name,
+			'reference_doctype': 'Lead',
+			'reference_name': lead,
 			'sent_or_received': 'Received'
-		}, fields=['name', 'content'], limit=1)
+		}, fields=['name', 'content'], order_by='`creation` DESC', limit=1)
+
+	last_communication = last_communication[0] if last_communication else None
 
 	return {
-		'last_communication': last_communication[0] if last_communication else None,
-		'last_issue': last_issue[0] if last_issue else None
+		'last_communication': last_communication,
+		'last_issue': last_issue
 	}
 
-@frappe.whitelist()
-def add_call_summary(docname, summary):
-	call_log = frappe.get_doc('Call Log', docname)
-	summary = _('Call Summary by {0}: {1}').format(
-		frappe.utils.get_fullname(frappe.session.user), summary)
-	if not call_log.summary:
-		call_log.summary = summary
-	else:
-		call_log.summary += '<br>' + summary
-	call_log.save(ignore_permissions=True)
+def get_last_issue_from_customer(customer_name):
+	issues = frappe.get_all('Issue', {
+		'customer': customer_name
+	}, ['name', 'subject', 'customer'], order_by='`creation` DESC', limit=1)
 
-def get_employee_emails_for_popup(communication_medium):
+	return issues[0] if issues else None
+
+
+def get_scheduled_employees_for_popup(communication_medium):
+	if not communication_medium: return []
+
 	now_time = frappe.utils.nowtime()
 	weekday = frappe.utils.get_weekday()
 
@@ -98,3 +75,10 @@ def get_employee_emails_for_popup(communication_medium):
 	employee_emails = set([employee.user_id for employee in employees])
 
 	return employee_emails
+
+def strip_number(number):
+	if not number: return
+	# strip 0 from the start of the number for proper number comparisions
+	# eg. 07888383332 should match with 7888383332
+	number = number.lstrip('0')
+	return number
