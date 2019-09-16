@@ -110,8 +110,7 @@
   {
    "fieldname": "penalty_interest_rate",
    "fieldtype": "Percent",
-   "label": "Penalty Interest Rate",
-   "reqd": 1
+   "label": "Penalty Interest Rate"
   },
   {
    "fieldname": "grace_period_in_days",
@@ -142,7 +141,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-12 09:10:09.005426",
+ "modified": "2019-09-15 02:17:34.525392",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",

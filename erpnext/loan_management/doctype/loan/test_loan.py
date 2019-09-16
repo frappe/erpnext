@@ -16,9 +16,20 @@ from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual
 
 class TestLoan(unittest.TestCase):
 	def setUp(self):
-		create_loan_type("Personal Loan", 500000, 8.4, 0.0, 1, 5, 'Cash', 'Cash - _TC', 'Earnest Money - _TC', 'Sales - _TC', 'Service - _TC')
-		create_loan_type("Stock Loan", 2000000, 13.5, 25, 1, 5, 'Cash', 'Cash - _TC', 'Earnest Money - _TC', 'Sales - _TC', 'Service - _TC')
-		create_loan_type("Demand Loan", 2000000, 13.5, 25, 0, 5, 'Cash', 'Cash - _TC', 'Earnest Money - _TC', 'Sales - _TC', 'Service - _TC')
+		create_loan_accounts()
+		create_loan_type("Personal Loan", 500000, 8.4,
+			is_term_loan=1,
+			mode_of_payment='Cash',
+			payment_account='Payment Account - _TC',
+			loan_account='Loan Account - _TC',
+			interest_income_account='Interest Income Account - _TC',
+			penalty_income_account='Penalty Income Account - _TC')
+
+		create_loan_type("Stock Loan", 2000000, 13.5, 25, 1, 5, 'Cash', 'Payment Account - _TC', 'Loan Account - _TC',
+			'Interest Income Account - _TC', 'Penalty Income Account - _TC')
+
+		create_loan_type("Demand Loan", 2000000, 13.5, 25, 0, 5, 'Cash', 'Payment Account - _TC', 'Loan Account - _TC',
+			'Interest Income Account - _TC', 'Penalty Income Account - _TC')
 
 		create_loan_security_type()
 		create_loan_security()
@@ -159,6 +170,8 @@ class TestLoan(unittest.TestCase):
 		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(get_last_day(nowdate()), 5),
 			"Loan Closure", 1011095.890411)
 
+		repayment_entry.save()
+
 		self.assertEquals(repayment_entry.interest_payable, 11095.890411)
 		self.assertEquals(flt(repayment_entry.penalty_amount, 5), 0)
 
@@ -196,12 +209,16 @@ class TestLoan(unittest.TestCase):
 		make_accrual_interest_entry_for_term_loans(posting_date=nowdate())
 
 		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(get_last_day(nowdate()), 5),
-			"Regular Payment", 0.00)
+			"Regular Payment", 89768.7534247)
 
 		repayment_entry.save()
+		repayment_entry.submit()
+
+		repayment_entry.load_from_db()
 
 		self.assertEquals(repayment_entry.interest_payable, 11250.00)
 		self.assertEquals(repayment_entry.payable_principal_amount, 78303.00)
+
 
 	def test_security_shortfall(self):
 		pledges = []
@@ -232,6 +249,67 @@ class TestLoan(unittest.TestCase):
 		self.assertEquals(loan_security_shortfall.security_value, 400000.00)
 		self.assertEquals(loan_security_shortfall.shortfall_amount, 600000.00)
 
+def create_loan_accounts():
+	if not frappe.db.exists("Account", "Loans and Advances (Assets) - _TC"):
+		frappe.get_doc({
+			"doctype": "Account",
+			"account_name": "Loans and Advances (Assets)",
+			"company": "_Test Company",
+			"root_type": "Asset",
+			"report_type": "Balance Sheet",
+			"currency": "INR",
+			"parent_account": "Current Assets - _TC",
+			"account_type": "Bank",
+			"is_group": 1
+		}).insert(ignore_permissions=True)
+
+	if not frappe.db.exists("Account", "Loan Account - _TC"):
+		frappe.get_doc({
+			"doctype": "Account",
+			"company": "_Test Company",
+			"account_name": "Loan Account",
+			"root_type": "Asset",
+			"report_type": "Balance Sheet",
+			"currency": "INR",
+			"parent_account": "Loans and Advances (Assets) - _TC",
+			"account_type": "Bank",
+		}).insert(ignore_permissions=True)
+
+	if not frappe.db.exists("Account", "Payment Account - _TC"):
+		frappe.get_doc({
+			"doctype": "Account",
+			"company": "_Test Company",
+			"account_name": "Payment Account",
+			"root_type": "Asset",
+			"report_type": "Balance Sheet",
+			"currency": "INR",
+			"parent_account": "Bank Accounts - _TC",
+			"account_type": "Bank",
+		}).insert(ignore_permissions=True)
+
+	if not frappe.db.exists("Account", "Interest Income Account - _TC"):
+		frappe.get_doc({
+			"doctype": "Account",
+			"company": "_Test Company",
+			"root_type": "Income",
+			"account_name": "Interest Income Account",
+			"report_type": "Profit and Loss",
+			"currency": "INR",
+			"parent_account": "Direct Income - _TC",
+			"account_type": "Income Account",
+		}).insert(ignore_permissions=True)
+
+	if not frappe.db.exists("Account", "Penalty Income Account - _TC"):
+		frappe.get_doc({
+			"doctype": "Account",
+			"company": "_Test Company",
+			"account_name": "Penalty Income Account",
+			"root_type": "Income",
+			"report_type": "Profit and Loss",
+			"currency": "INR",
+			"parent_account": "Direct Income - _TC",
+			"account_type": "Income Account",
+		}).insert(ignore_permissions=True)
 
 def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest, penalty_interest_rate=None, is_term_loan=None, grace_period_in_days=None,
 	mode_of_payment=None, payment_account=None, loan_account=None, interest_income_account=None, penalty_income_account=None):
@@ -347,7 +425,8 @@ def create_repayment_entry(loan, applicant, posting_date, payment_type, paid_amo
 	return lr
 
 
-def create_loan(applicant, loan_type, loan_amount, repayment_method, repayment_periods):
+def create_loan(applicant, loan_type, loan_amount, repayment_method, repayment_periods, repayment_start_date=None,
+	posting_date=None):
 	create_loan_type(loan_type, 500000, 8.4)
 	if not frappe.db.get_value("Loan", {"applicant":applicant}):
 		loan = frappe.get_doc({
@@ -360,10 +439,7 @@ def create_loan(applicant, loan_type, loan_amount, repayment_method, repayment_p
 				"repayment_periods": repayment_periods,
 				"repayment_start_date": nowdate(),
 				"is_term_loan": 1,
-				"mode_of_payment": frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name'),
-				"payment_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name"),
-				"loan_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name"),
-				"interest_income_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
+				"posting_date": posting_date or nowdate()
 			})
 
 		loan.save()

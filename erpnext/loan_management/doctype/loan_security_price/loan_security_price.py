@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import getdate, now_datetime, add_to_date, get_datetime, get_timestamp
+from frappe.utils import getdate, now_datetime, add_to_date, get_datetime, get_timestamp, get_datetime_str
 from six import iteritems
 
 class LoanSecurityPrice(Document):
@@ -24,38 +24,37 @@ class LoanSecurityPrice(Document):
 		if existing_loan_security:
 			frappe.throw("Loan Security Price overlapping with {0}".format(existing_loan_security[0][0]))
 
-
-def update_loan_security_price(from_timestamp=None, to_timestamp=None):
+@frappe.whitelist()
+def update_loan_security_price(from_timestamp=None, to_timestamp=None, loan_security_type=None):
 
 	if not from_timestamp:
-		from_timestamp = get_datetime()
+		from_timestamp = get_datetime_str(getdate())
 
 	if not to_timestamp:
-		to_timestamp = get_datetime(add_to_date(getdate(), hours=24))
+		to_timestamp = get_datetime_str(add_to_date(getdate(), hours=24))
+
+	filters = [["valid_upto", "<=", to_timestamp],["valid_from", ">=", from_timestamp]]
+
+	if loan_security_type:
+		filters.append(["loan_security_type", "=", loan_security_type])
 
 	loan_security_prices = frappe.get_all("Loan Security Price", fields=["loan_security", "loan_security_price"],
-		filters=[["valid_upto", "<=", to_timestamp],["valid_from", ">=", from_timestamp]])
+		filters=filters)
 
 	if loan_security_prices:
 		for loan_security_price in loan_security_prices:
 			frappe.db.set_value("Loan Security", loan_security_price.loan_security, 'loan_security_price', loan_security_price.loan_security_price)
 
-	check_for_ltv_shortfall(from_timestamp, to_timestamp)
+	check_for_ltv_shortfall()
 
-def check_for_ltv_shortfall(from_timestamp=None, to_timestamp=None):
+def check_for_ltv_shortfall():
 
-	if not from_timestamp:
-		from_timestamp = get_datetime()
-
-	if not to_timestamp:
-		to_timestamp = get_datetime(add_to_date(getdate(), hours=24))
-
-	loan_security_price_map = frappe._dict(frappe.get_all("Loan Security Price", fields=["loan_security", "loan_security_price"],
-		filters=[["valid_upto", "<=", to_timestamp],["valid_from", ">=", from_timestamp]], as_list=1))
+	loan_security_price_map = frappe._dict(frappe.get_all("Loan Security",
+		fields=["name", "loan_security_price"], as_list=1))
 
 	loans = frappe.db.sql(""" SELECT l.name, l.loan_amount, lp.loan_security, lp.haircut, lp.qty
 		FROM `tabLoan` l, `tabPledge` lp , `tabLoan Security Pledge`p WHERE lp.parent = p.name and p.loan = l.name and l.docstatus = 1
-		and l.status = 'Disbursed'""", as_dict=1)
+		and l.is_secured_loan and l.status = 'Disbursed'""", as_dict=1)
 
 	loan_security_map = {}
 

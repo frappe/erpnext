@@ -5,16 +5,14 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "loan_application_details_section",
+  "loan_details_section",
   "applicant",
   "column_break_3",
   "loan",
   "loan_application",
   "loan_security_details_section",
   "loan_security_pledges",
-  "section_break_8",
   "total_security_value",
-  "column_break_9",
   "maximum_loan_value",
   "amended_from"
  ],
@@ -27,11 +25,6 @@
    "options": "Loan Security Pledge",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "loan_application_details_section",
-   "fieldtype": "Section Break",
-   "label": "Loan Application Details"
   },
   {
    "fetch_from": "loan_application.applicant",
@@ -83,19 +76,17 @@
    "fieldname": "maximum_loan_value",
    "fieldtype": "Currency",
    "label": "Maximum Loan Value",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_8",
-   "fieldtype": "Section Break"
+   "fieldname": "loan_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan  Details"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-12 22:56:18.297903",
+ "modified": "2019-09-13 10:51:27.791079",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Pledge",

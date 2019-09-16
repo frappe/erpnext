@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import nowdate, getdate, now_datetime, get_datetime, flt, date_diff, get_last_day, cint, get_datetime
+from frappe.utils import nowdate, getdate, now_datetime, get_datetime, flt, date_diff, get_last_day, cint, get_datetime, add_days
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from calendar import monthrange
@@ -104,7 +104,7 @@ def make_accrual_interest_entry_for_demand_loans(posting_date=None):
 
 def make_accrual_interest_entry_for_term_loans(posting_date=None):
 
-	curr_date = posting_date or nowdate()
+	curr_date = posting_date or add_days(nowdate(), 1)
 
 	term_loans = frappe.db.sql("""SELECT l.name, l.total_payment, l.total_amount_paid, l.loan_account,
 		l.interest_income_account, l.is_term_loan, l.disbursement_date, l.applicant_type, l.applicant,
@@ -126,7 +126,7 @@ def make_accrual_interest_entry_for_term_loans(posting_date=None):
 			payable_principal = loan.principal_amount , posting_date=posting_date)
 
 	frappe.db.sql("""UPDATE `tabRepayment Schedule`
-		SET is_accrued = 1 where name in (%s)"""
+		SET is_accrued = 1 where name in (%s)""" #nosec
 		% ", ".join(['%s']*len(accured_entries)), tuple(accured_entries))
 
 def make_loan_interest_accrual_entry(loan, applicant_type, applicant, interest_income_account, loan_account,

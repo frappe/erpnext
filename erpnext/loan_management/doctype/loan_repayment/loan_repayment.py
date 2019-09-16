@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import json
 from frappe import _
+from frappe.utils import flt
 from frappe.model.document import Document
 from frappe.utils import date_diff, add_days, getdate, add_months, get_first_day
 from erpnext.controllers.accounts_controller import AccountsController
@@ -17,8 +18,10 @@ class LoanRepayment(AccountsController):
 		amounts = calculate_amounts(self.against_loan, self.posting_date, self.loan_type, self.payment_type)
 		self.set_missing_values(amounts)
 
-	def on_submit(self):
+	def before_submit(self):
 		self.mark_as_paid()
+
+	def on_submit(self):
 		self.make_gl_entries()
 
 	def on_cancel(self):
@@ -44,6 +47,9 @@ class LoanRepayment(AccountsController):
 		if not self.payable_principal_amount and self.is_term_loan:
 			self.payable_principal_amount = amounts['payable_principal_amount']
 
+		if not self.payable_amount:
+			self.payable_amount = amounts['payable_amount']
+
 		if amounts.get("paid_accrual_entries"):
 			self.paid_accrual_entries = frappe.as_json(amounts.get("paid_accrual_entries"))
 
@@ -57,18 +63,22 @@ class LoanRepayment(AccountsController):
 
 		loan = frappe.get_doc("Loan", self.against_loan)
 
-		principal_amount_paid = self.amount_paid - self.penalty_amount - self.interest_payable
+		principal_amount_paid = flt(self.amount_paid - self.penalty_amount - self.interest_payable, 2)
 		paid_accrual_entries = json.loads(self.paid_accrual_entries)
 
 		if principal_amount_paid < 0:
 			msg = _("Paid amount cannot be less than {0}").format(self.penalty_amount + self.interest_payable)
 			frappe.throw(msg)
 
-		if self.payment_type == "Loan Closure" and principal_amount_paid < self.pending_principal_amount:
+		if self.is_term_loan and principal_amount_paid < flt(self.payable_principal_amount, 2):
+			frappe.throw(_("Paid amount cannot be less than {0}".format(self.penalty_amount + self.interest_payable
+				+ self.payable_principal_amount)))
+
+		if self.payment_type == "Loan Closure" and principal_amount_paid < flt(self.pending_principal_amount, 2):
 			msg = _("Amount of {0} is required for Loan closure").format(self.pending_principal_amount)
 
 		frappe.db.sql("""UPDATE `tabLoan Interest Accrual`
-			SET is_paid = 1 where name in (%s)"""
+			SET is_paid = 1 where name in (%s)""" #nosec
 			% ", ".join(['%s']*len(paid_accrual_entries)), tuple(paid_accrual_entries))
 
 		frappe.db.set_value("Loan", self.against_loan, "total_amount_paid", loan.total_amount_paid + principal_amount_paid)
@@ -85,7 +95,7 @@ class LoanRepayment(AccountsController):
 		principal_amount_paid = self.amount_paid - self.penalty_amount - self.interest_payable
 
 		frappe.db.sql("""UPDATE `tabLoan Interest Accrual`
-			SET is_paid = 1 where name in (%s)"""
+			SET is_paid = 1 where name in (%s)""" #nosec
 			% ", ".join(['%s']*len(paid_accrual_entries)), tuple(paid_accrual_entries))
 
 		frappe.db.set_value("Loan", self.against_loan, "total_amount_paid", loan.total_amount_paid - principal_amount_paid)
@@ -156,7 +166,8 @@ class LoanRepayment(AccountsController):
 		if gle_map:
 			make_gl_entries(gle_map, cancel=cancel, adv_adj=adv_adj)
 
-def create_repayment_entry(loan, applicant, company, posting_date, loan_type, payment_type, amount_paid):
+def create_repayment_entry(loan, applicant, company, posting_date, loan_type,
+	payment_type, interest_payable, payable_principal_amount, amount_paid, penalty_amount=None):
 
 	lr = frappe.get_doc({
 		"doctype": "Loan Repayment",
@@ -165,6 +176,9 @@ def create_repayment_entry(loan, applicant, company, posting_date, loan_type, pa
 		"company": company,
 		"posting_date": posting_date,
 		"applicant": applicant,
+		"penalty_amount": penalty_amount,
+		"interets_payable": interest_payable,
+		"payable_principal_amount": payable_principal_amount,
 		"amount_paid": amount_paid,
 		"loan_type": loan_type
 	}).insert()
@@ -212,10 +226,11 @@ def get_amounts(amounts, against_loan, loan_type, posting_date):
 
 	amounts["pending_principal_amount"] = pending_principal_amount
 	amounts["payable_principal_amount"] = payable_principal_amount
-	amounts["paid_accrual_entries"] = paid_accrual_entries
 	amounts["interest_amount"] = total_pending_interest
 	amounts["penalty_amount"] = penalty_amount
+	amounts["payable_amount"] = payable_principal_amount + total_pending_interest + penalty_amount
 
+	amounts["paid_accrual_entries"] = paid_accrual_entries
 	return amounts
 
 @frappe.whitelist()

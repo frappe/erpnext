@@ -4,6 +4,10 @@
 {% include 'erpnext/loan_management/loan_common.js' %};
 
 frappe.ui.form.on('Loan', {
+	setup: function(frm) {
+		frm.add_fetch('loan_type', 'loan_account', 'loan_account');
+	},
+
 	onload: function (frm) {
 		frm.set_query("loan_application", function () {
 			return {
@@ -70,6 +74,10 @@ frappe.ui.form.on('Loan', {
 		frm.set_df_property("repayment_method", 'reqd', frm.doc.is_term_loan);
 		frm.set_df_property("repayment_method", 'hidden', 1 - frm.doc.is_term_loan);
 		frm.set_df_property("repayment_periods", 'hidden', 1 - frm.doc.is_term_loan);
+	},
+
+	is_secured_loan: function(frm) {
+		frm.set_df_property("loan_security_pledge", 'reqd', frm.doc.is_secured_loan);
 	},
 
 	make_loan_disbursement: function (frm) {
