@@ -70,12 +70,12 @@ def make_depreciation_entry(asset_name, date=None):
 			}
 
 			for dimension in accounting_dimensions:
-				if (asset.get(dimension['fieldname']) or dimension.get('mandatory_for_pl') or
-					dimension.get('mandatory_for_bs')):
+				if (asset.get(dimension['fieldname']) or dimension.get('mandatory_for_bs')):
 					credit_entry.update({
 						dimension['fieldname']: asset.get(dimension['fieldname']) or dimension.get('default_dimension')
 					})
 
+				if (asset.get(dimension['fieldname']) or dimension.get('mandatory_for_pl')):
 					debit_entry.update({
 						dimension['fieldname']: asset.get(dimension['fieldname']) or dimension.get('default_dimension')
 					})
