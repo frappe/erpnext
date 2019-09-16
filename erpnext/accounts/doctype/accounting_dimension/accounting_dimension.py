@@ -11,10 +11,20 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe import scrub
 from frappe.utils import cstr
 from frappe.utils.background_jobs import enqueue
+from frappe.model import core_doctypes_list
 
 class AccountingDimension(Document):
 	def before_insert(self):
 		self.set_fieldname_and_label()
+
+	def validate(self):
+		if self.document_type in core_doctypes_list + ('Accounting Dimension', 'Project',
+				'Cost Center', 'Accounting Dimension Detail') :
+
+			msg = _("Not allowed to create accounting dimension for {0}").format(self.document_type)
+			frappe.throw(msg)
+
+	def after_insert(self):
 		if frappe.flags.in_test:
 			make_dimension_in_accounting_doctypes(doc=self)
 		else:
