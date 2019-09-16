@@ -89,7 +89,7 @@ def _get_agent_list_as_strings():
 
 
 def _check_agent_availability(agent_email,scheduled_time):
-	appointemnts_at_scheduled_time = frappe.get_list('Appointment', filters={'scheduled_time':scheduled_time})
+	appointments_at_scheduled_time = frappe.get_list('Appointment', filters={'scheduled_time': scheduled_time})
 	for appointment in appointemnts_at_scheduled_time:
 		if appointment._assign == agent_email:
 			return False
