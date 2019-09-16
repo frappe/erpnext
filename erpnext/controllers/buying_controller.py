@@ -337,7 +337,7 @@ class BuyingController(StockController):
 			if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 				rm.consumed_qty = required_qty
 				rm.description = bom_item.description
-				if item.batch_no and not rm.batch_no:
+				if item.batch_no and frappe.db.get_value("Item", rm.rm_item_code, "has_batch_no") and not rm.batch_no:
 					rm.batch_no = item.batch_no
 
 			# get raw materials rate
