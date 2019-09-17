@@ -23,6 +23,7 @@ def handle_incoming_call(**kwargs):
 		else:
 			update_call_log(call_payload, call_log=call_log)
 	except Exception as e:
+		frappe.db.rollback()
 		frappe.log_error(title=_('Error in Exotel incoming call'))
 		frappe.db.commit()
 
