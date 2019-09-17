@@ -13,6 +13,7 @@ async function initialise_select_date() {
 }
 
 async function get_global_variables() {
+    // Using await 
     window.appointment_settings = (await frappe.call({
         method: 'erpnext.www.book-appointment.index.get_appointment_settings'
     })).message
@@ -29,9 +30,9 @@ async function get_global_variables() {
 
 function setup_timezone_selector() {
     let timezones_element = document.getElementById('appointment-timezone');
-    var offset = new Date().getTimezoneOffset();
+    let offset = new Date().getTimezoneOffset();
     window.timezones.forEach(timezone => {
-        var opt = document.createElement('option');
+        let opt = document.createElement('option');
         opt.value = timezone.offset;
         opt.innerHTML = timezone.timezone_name;
         opt.defaultSelected = (offset == timezone.offset)
@@ -44,16 +45,16 @@ function setup_date_picker() {
     let today = new Date();
     date_picker.min = today.toISOString().substr(0, 10);
     today.setDate(today.getDate() + window.appointment_settings.advance_booking_days);
-    date_picker.max = today.toISOString().substr(0,10);
+    date_picker.max = today.toISOString().substr(0, 10);
 }
 
-function hide_next_button(){
+function hide_next_button() {
     let next_button = document.getElementById('next-button');
     next_button.disabled = true;
-    next_button.onclick = ()=>{frappe.msgprint("Please select a date and time")};
+    next_button.onclick = () => frappe.msgprint("Please select a date and time");
 }
 
-function show_next_button(){
+function show_next_button() {
     let next_button = document.getElementById('next-button');
     next_button.disabled = false;
     next_button.onclick = setup_details_page;
@@ -95,28 +96,36 @@ async function update_time_slots(selected_date, selected_timezone) {
         timeslot_container.appendChild(message_div);
         return
     }
-    window.slots.forEach((slot,index) => {
-        if(index%8==0){
+    window.slots.forEach((slot, index) => {
+        // Add a break after each 8 elements
+        if (index % 8 == 0) {
             let break_element = document.createElement('div');
             break_element.classList.add('w-100');
             timeslot_container.appendChild(break_element);
         }
-        let start_time = new Date(slot.time)
-        var timeslot_div = document.createElement('div');
-        timeslot_div.classList.add('time-slot');
-        timeslot_div.classList.add('col-md');
-        if (!slot.availability) {
-            timeslot_div.classList.add('unavailable')
-        }
-        timeslot_div.innerHTML = get_slot_layout(start_time);
-        timeslot_div.id = slot.time.substr(11, 20);
-        timeslot_div.addEventListener('click', select_time);
+        // Get and append timeslot div
+        let timeslot_div = get_timeslot_div_layout(slot)
         timeslot_container.appendChild(timeslot_div);
     });
     set_default_timeslot();
 }
 
+function get_timeslot_div_layout(timeslot) {
+    let start_time = new Date(timeslot.time)
+    let timeslot_div = document.createElement('div');
+    timeslot_div.classList.add('time-slot');
+    timeslot_div.classList.add('col-md');
+    if (!timeslot.availability) {
+        timeslot_div.classList.add('unavailable')
+    }
+    timeslot_div.innerHTML = get_slot_layout(start_time);
+    timeslot_div.id = timeslot.time.substr(11, 20);
+    timeslot_div.addEventListener('click', select_time);
+    return timeslot_div
+}
+
 function clear_time_slots() {
+    // Clear any existing divs in timeslot container
     let timeslot_container = document.getElementById('timeslot-container');
     while (timeslot_container.firstChild) {
         timeslot_container.removeChild(timeslot_container.firstChild)
@@ -126,23 +135,24 @@ function clear_time_slots() {
 function get_slot_layout(time) {
     time = new Date(time)
     let start_time_string = moment(time).format("LT");
-    let end_time = moment(time).add(window.appointment_settings.appointment_duration,'minutes');
+    let end_time = moment(time).add(window.appointment_settings.appointment_duration, 'minutes');
     let end_time_string = end_time.format("LT");
     return `<span style="font-size: 1.2em;">${start_time_string}</span><br><span class="text-muted small">to ${end_time_string}</span>`;
 }
 
 function select_time() {
-    if (this.classList.contains("unavailable")) {
+    if (this.classList.contains('unavailable')) {
         return
     }
-    try {
-        selected_element = document.getElementsByClassName('selected')[0]
-    } catch (e) {
-        this.classList.add("selected")
+    let selected_element = document.getElementsByClassName('selected');
+    if (!(selected_element.length > 0)){
+        this.classList.add('selected')
+        return
     }
+    selected_element = selected_element[0]
     window.selected_time = this.id
-    selected_element.classList.remove("selected");
-    this.classList.add("selected");
+    selected_element.classList.remove('selected');
+    this.classList.add('selected');
     show_next_button();
 }
 
@@ -151,17 +161,17 @@ function set_default_timeslot() {
     for (let i = 0; i < timeslots.length; i++) {
         const timeslot = timeslots[i];
         if (!timeslot.classList.contains('unavailable')) {
-            timeslot.classList.add("selected");
+            timeslot.classList.add('selected');
             break;
         }
     }
 }
 
-function navigate_to_page(page_number){
+function navigate_to_page(page_number) {
     let page1 = document.getElementById('select-date-time');
     let page2 = document.getElementById('enter-details');
-    switch(page_number){
-        case 1: 
+    switch (page_number) {
+        case 1:
             page1.style.display = 'block';
             page2.style.display = 'none';
             break;
@@ -170,21 +180,21 @@ function navigate_to_page(page_number){
             page2.style.display = 'block';
             break;
         default:
-            console.log("That's not a valid page")
+            break;
     }
 }
 
-function setup_details_page(){
+function setup_details_page() {
     navigate_to_page(2)
     let date_container = document.getElementsByClassName('date-span')[0];
     let time_container = document.getElementsByClassName('time-span')[0];
     date_container.innerHTML = moment(window.selected_date).format("MMM Do YYYY");
-    time_container.innerHTML = moment(window.selected_time,"HH:mm:ss").format("LT");
+    time_container.innerHTML = moment(window.selected_time, "HH:mm:ss").format("LT");
 }
 
 async function submit() {
     // form validation here
-    form_validation();
+    get_form_data();
     let appointment = (await frappe.call({
         method: 'erpnext.www.book-appointment.index.create_appointment',
         args: {
@@ -196,12 +206,10 @@ async function submit() {
     frappe.msgprint(__('Appointment Created Successfully'));
     let button = document.getElementById('submit-button');
     button.disabled = true;
-    button.onclick = () => { console.log('This should never have happened') }
-} 
+    button.onclick = null
+}
 
-function form_validation(){
-    var date = window.selected_date;
-    var time = window.selected_time;
+function get_form_data() {
     contact = {};
     contact.name = document.getElementById('customer_name').value;
     contact.number = document.getElementById('customer_number').value;
@@ -209,5 +217,4 @@ function form_validation(){
     contact.notes = document.getElementById('customer_notes').value;
     contact.email = document.getElementById('customer_email').value;
     window.contact = contact
-    console.log({ date, time, contact });
 }
