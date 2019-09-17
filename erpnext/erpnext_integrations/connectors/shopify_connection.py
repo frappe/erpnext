@@ -19,6 +19,7 @@ def store_request_data(order=None, event=None):
 	dump_request_data(order, event)
 
 def sync_sales_order(order, request_id=None):
+	frappe.set_user('Administrator')
 	shopify_settings = frappe.get_doc("Shopify Settings")
 	frappe.flags.request_id = request_id
 
@@ -33,6 +34,7 @@ def sync_sales_order(order, request_id=None):
 			make_shopify_log(status="Success")
 
 def prepare_sales_invoice(order, request_id=None):
+	frappe.set_user('Administrator')
 	shopify_settings = frappe.get_doc("Shopify Settings")
 	frappe.flags.request_id = request_id
 
@@ -45,6 +47,7 @@ def prepare_sales_invoice(order, request_id=None):
 		make_shopify_log(status="Error", exception=True)
 
 def prepare_delivery_note(order, request_id=None):
+	frappe.set_user('Administrator')
 	shopify_settings = frappe.get_doc("Shopify Settings")
 	frappe.flags.request_id = request_id
 
@@ -151,6 +154,7 @@ def make_payament_entry_against_sales_invoice(doc, shopify_settings):
 	payemnt_entry.flags.ignore_mandatory = True
 	payemnt_entry.reference_no = doc.name
 	payemnt_entry.reference_date = nowdate()
+	payemnt_entry.insert(ignore_permissions=True)
 	payemnt_entry.submit()
 
 def create_delivery_note(shopify_order, shopify_settings, so):
@@ -168,6 +172,7 @@ def create_delivery_note(shopify_order, shopify_settings, so):
 			dn.items = get_fulfillment_items(dn.items, fulfillment.get("line_items"), shopify_settings)
 			dn.flags.ignore_mandatory = True
 			dn.save()
+			dn.submit()
 			frappe.db.commit()
 
 def get_fulfillment_items(dn_items, fulfillment_items, shopify_settings):
@@ -200,7 +205,7 @@ def get_order_items(order_items, shopify_settings):
 				"rate": shopify_item.get("price"),
 				"delivery_date": nowdate(),
 				"qty": shopify_item.get("quantity"),
-				"stock_uom": shopify_item.get("sku"),
+				"stock_uom": shopify_item.get("uom") or _("Nos"),
 				"warehouse": shopify_settings.warehouse
 			})
 		else:
