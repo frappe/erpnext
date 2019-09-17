@@ -425,27 +425,25 @@ def create_repayment_entry(loan, applicant, posting_date, payment_type, paid_amo
 	return lr
 
 
-def create_loan(applicant, loan_type, loan_amount, repayment_method, repayment_periods, repayment_start_date=None,
-	posting_date=None):
-	create_loan_type(loan_type, 500000, 8.4)
-	if not frappe.db.get_value("Loan", {"applicant":applicant}):
-		loan = frappe.get_doc({
-			"doctype": "Loan",
-			"applicant_type": "Employee",
-				"applicant": applicant,
-				"loan_type": loan_type,
-				"loan_amount": loan_amount,
-				"repayment_method": repayment_method,
-				"repayment_periods": repayment_periods,
-				"repayment_start_date": nowdate(),
-				"is_term_loan": 1,
-				"posting_date": posting_date or nowdate()
-			})
+def create_loan(applicant, loan_type, loan_amount, repayment_method, repayment_periods,
+	repayment_start_date=None, posting_date=None):
 
-		loan.save()
-		return loan
-	else:
-		return frappe.get_doc("Loan", {"applicant":applicant})
+	loan = frappe.get_doc({
+		"doctype": "Loan",
+		"applicant_type": "Employee",
+		"company": "_Test Company",
+		"applicant": applicant,
+		"loan_type": loan_type,
+		"loan_amount": loan_amount,
+		"repayment_method": repayment_method,
+		"repayment_periods": repayment_periods,
+		"repayment_start_date": nowdate(),
+		"is_term_loan": 1,
+		"posting_date": posting_date or nowdate()
+	})
+
+	loan.save()
+	return loan
 
 def create_loan_with_security(applicant, loan_type, repayment_method, repayment_periods, loan_security_pledge,
 	posting_date=None, repayment_start_date=None):

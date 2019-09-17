@@ -4,10 +4,6 @@
 {% include 'erpnext/loan_management/loan_common.js' %};
 
 frappe.ui.form.on('Loan', {
-	setup: function(frm) {
-		frm.add_fetch('loan_type', 'loan_account', 'loan_account');
-	},
-
 	onload: function (frm) {
 		frm.set_query("loan_application", function () {
 			return {

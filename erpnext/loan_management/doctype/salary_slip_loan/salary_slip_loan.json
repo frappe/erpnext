@@ -5,12 +5,14 @@
  "engine": "InnoDB",
  "field_order": [
   "loan",
+  "loan_type",
   "loan_account",
   "interest_income_account",
   "column_break_4",
   "principal_amount",
   "interest_amount",
-  "total_payment"
+  "total_payment",
+  "loan_repayment_entry"
  ],
  "fields": [
   {
@@ -61,10 +63,24 @@
    "fieldtype": "Currency",
    "label": "Total Payment",
    "read_only": 1
+  },
+  {
+   "fieldname": "loan_repayment_entry",
+   "fieldtype": "Link",
+   "label": "Loan Repayment Entry",
+   "options": "Loan Repayment",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "loan.loan_type",
+   "fieldname": "loan_type",
+   "fieldtype": "Link",
+   "label": "Loan Type",
+   "options": "Loan Type"
   }
  ],
  "istable": 1,
- "modified": "2019-09-13 09:08:33.345720",
+ "modified": "2019-09-15 00:57:40.370132",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Salary Slip Loan",
