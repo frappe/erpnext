@@ -6,7 +6,7 @@ frappe.ui.form.on('Loan Security Type', {
 		if(!frm.is_new()) {
 			frm.add_custom_button(__('Update Loan Security Price'), function() {
 				frm.trigger('update_price');
-			})
+			});
 		}
 	},
 

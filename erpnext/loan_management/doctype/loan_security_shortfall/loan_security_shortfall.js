@@ -20,6 +20,6 @@ frappe.ui.form.on('Loan Security Shortfall', {
 					frappe.set_route("Form", doc.doctype, doc.name);
 				}
 			}
-		})
+		});
 	}
 });

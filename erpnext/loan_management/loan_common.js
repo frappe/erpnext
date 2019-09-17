@@ -18,7 +18,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 				};
 
 				frappe.set_route("query-report", "General Ledger");
-			},__("View"))
+			},__("View"));
 		}
 	},
 	applicant_type: function(frm) {
