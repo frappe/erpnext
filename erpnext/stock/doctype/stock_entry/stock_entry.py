@@ -812,7 +812,7 @@ class StockEntry(StockController):
 
 					self.add_to_stock_entry_detail(item_dict)
 
-				if self.purpose != "Send to Subcontractor" and self.purpose == "Manufacture":
+				if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
 					scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
 					for item in itervalues(scrap_item_dict):
 						if self.pro_doc and self.pro_doc.scrap_warehouse:
