@@ -74,12 +74,25 @@ class LoanApplication(Document):
 
 @frappe.whitelist()
 def create_loan(source_name, target_doc = None):
+	def update_accounts(source_doc, target_doc, source_parent):
+		account_details = frappe.get_all("Loan Type",
+		 fields=["mode_of_payment", "payment_account","loan_account", "interest_income_account", "penalty_income_account"],
+		 filters = {'name': source_doc.loan_type}
+		)[0]
+
+		target_doc.mode_of_payment = account_details.mode_of_payment
+		target_doc.payment_account = account_details.payment_account
+		target_doc.loan_account = account_details.loan_account
+		target_doc.interest_income_account = account_details.interest_income_account
+		target_doc.penalty_income_account = account_details.penalty_income_account
+
 	doclist = get_mapped_doc("Loan Application", source_name, {
 		"Loan Application": {
 			"doctype": "Loan",
 			"validation": {
 				"docstatus": ["=", 1]
-			}
+			},
+			"postprocess": update_accounts
 		}
 	}, target_doc)
 

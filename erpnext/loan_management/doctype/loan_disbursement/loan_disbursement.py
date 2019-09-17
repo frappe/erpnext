@@ -14,8 +14,10 @@ class LoanDisbursement(AccountsController):
 	def validate(self):
 		self.set_missing_values()
 
-	def on_submit(self):
+	def before_submit(self):
 		self.set_status()
+
+	def on_submit(self):
 		self.make_gl_entries()
 
 	def on_cancel(self):

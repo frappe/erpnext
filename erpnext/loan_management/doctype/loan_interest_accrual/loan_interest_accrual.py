@@ -112,22 +112,23 @@ def make_accrual_interest_entry_for_term_loans(posting_date=None):
 		rs.payment_date, rs.principal_amount, rs.interest_amount, rs.is_accrued , rs.balance_loan_amount
 		FROM `tabLoan` l, `tabRepayment Schedule` rs
 		WHERE rs.parent = l.name
+		AND l.docstatus=1
+		AND l.is_term_loan =1
 		AND rs.payment_date <= %s
 		AND rs.is_accrued=0
-		AND l.docstatus=1
 		AND l.status = 'Disbursed'""", (curr_date), as_dict=1)
 
-	accured_entries = []
+	accrued_entries = []
 
 	for loan in term_loans:
-		accured_entries.append(loan.payment_entry)
+		accrued_entries.append(loan.payment_entry)
 		make_loan_interest_accrual_entry(loan.name, loan.applicant_type, loan.applicant,loan.interest_income_account,
 			loan.loan_account, loan.principal_amount + loan.balance_loan_amount, loan.interest_amount,
 			payable_principal = loan.principal_amount , posting_date=posting_date)
 
 	frappe.db.sql("""UPDATE `tabRepayment Schedule`
 		SET is_accrued = 1 where name in (%s)""" #nosec
-		% ", ".join(['%s']*len(accured_entries)), tuple(accured_entries))
+		% ", ".join(['%s']*len(accrued_entries)), tuple(accrued_entries))
 
 def make_loan_interest_accrual_entry(loan, applicant_type, applicant, interest_income_account, loan_account,
 	pending_principal_amount, interest_amount, payable_principal=None, posting_date=None):
