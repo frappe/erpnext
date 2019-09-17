@@ -213,7 +213,7 @@ class WorkOrder(Document):
 
 			self.db_set(fieldname, qty)
 
-			#for multiple work orders against same sales invoice item
+			#for multiple work orders against same sales order item
 			linked_wo_with_so_item = frappe.db.get_all('Work Order', ['produced_qty'], {
 				'sales_order_item': self.sales_order_item,
 				'name': ('!=', self.name),
