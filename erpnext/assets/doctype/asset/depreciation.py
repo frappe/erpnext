@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, today, getdate, cint
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_checks_for_pl_and_bs_accounts
 
 def post_depreciation_entries(date=None):
 	# Return if automatic booking of asset depreciation is disabled
@@ -41,6 +42,8 @@ def make_depreciation_entry(asset_name, date=None):
 
 	depreciation_cost_center = asset.cost_center or depreciation_cost_center
 
+	accounting_dimensions = get_checks_for_pl_and_bs_accounts()
+
 	for d in asset.get("schedules"):
 		if not d.journal_entry and getdate(d.schedule_date) <= getdate(date):
 			je = frappe.new_doc("Journal Entry")
@@ -51,23 +54,40 @@ def make_depreciation_entry(asset_name, date=None):
 			je.finance_book = d.finance_book
 			je.remark = "Depreciation Entry against {0} worth {1}".format(asset_name, d.depreciation_amount)
 
-			je.append("accounts", {
+			credit_entry = {
 				"account": accumulated_depreciation_account,
 				"credit_in_account_currency": d.depreciation_amount,
 				"reference_type": "Asset",
 				"reference_name": asset.name
-			})
+			}
 
-			je.append("accounts", {
+			debit_entry = {
 				"account": depreciation_expense_account,
 				"debit_in_account_currency": d.depreciation_amount,
 				"reference_type": "Asset",
 				"reference_name": asset.name,
 				"cost_center": depreciation_cost_center
-			})
+			}
+
+			for dimension in accounting_dimensions:
+				if (asset.get(dimension['fieldname']) or dimension.get('mandatory_for_bs')):
+					credit_entry.update({
+						dimension['fieldname']: asset.get(dimension['fieldname']) or dimension.get('default_dimension')
+					})
+
+				if (asset.get(dimension['fieldname']) or dimension.get('mandatory_for_pl')):
+					debit_entry.update({
+						dimension['fieldname']: asset.get(dimension['fieldname']) or dimension.get('default_dimension')
+					})
+
+			je.append("accounts", credit_entry)
+
+			je.append("accounts", debit_entry)
 
 			je.flags.ignore_permissions = True
-			je.submit()
+			je.save()
+			if not je.meta.get_workflow():
+				je.submit()
 
 			d.db_set("journal_entry", je.name)
 
