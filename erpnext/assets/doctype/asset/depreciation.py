@@ -67,7 +67,9 @@ def make_depreciation_entry(asset_name, date=None):
 			})
 
 			je.flags.ignore_permissions = True
-			je.submit()
+			je.save()
+			if not je.meta.get_workflow():
+				je.submit()
 
 			d.db_set("journal_entry", je.name)
 
