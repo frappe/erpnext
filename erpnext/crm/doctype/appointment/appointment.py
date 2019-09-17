@@ -14,22 +14,21 @@ from frappe.desk.form.assign_to import add as add_assignemnt
 
 class Appointment(Document):
 	def validate(self):
-		number_of_appointments_in_same_slot = frappe.db.count('Appointment',filters={'scheduled_time':self.scheduled_time})
+		number_of_appointments_in_same_slot = frappe.db.count('Appointment', filters = {'scheduled_time':self.scheduled_time})
 		settings = frappe.get_doc('Appointment Booking Settings')
 		if(number_of_appointments_in_same_slot >= settings.number_of_agents):
 			frappe.throw('Time slot is not available')
 
 	def before_insert(self):
-		appointment_event = frappe.new_doc('Event')
 		appointment_event = frappe.get_doc({
 			'doctype': 'Event',
 			'subject': ' '.join(['Appointment with', self.customer_name]),
 			'starts_on': self.scheduled_time,
 			'status': 'Open',
 			'type': 'Private',
-			'event_participants': [dict(reference_doctype="Lead", reference_docname=self.lead)]
+			'event_participants': [dict(reference_doctype = "Lead", reference_docname = self.lead)]
 		})
-		appointment_event.insert(ignore_permissions=True)
+		appointment_event.insert(ignore_permissions = True)
 		self.calendar_event = appointment_event.name
 
 	def after_insert(self):
@@ -37,7 +36,6 @@ class Appointment(Document):
 		for agent in available_agents:
 			if(_check_agent_availability(agent, self.scheduled_time)):
 				agent = agent[0]
-				agent = frappe.json.loads(agent)[0]
 				add_assignemnt({
 					'doctype':self.doctype,
 					'name':self.name,
@@ -45,33 +43,25 @@ class Appointment(Document):
 				})
 				employee = _get_employee_from_user(agent)
 				if employee:
-					print(employee)
 					calendar_event = frappe.get_doc('Event', self.calendar_event)
 					calendar_event.append('event_participants', dict(
-						reference_doctype='Employee',
-						reference_docname=employee[0].name))
-					print(calendar_event)
+						reference_doctype= 'Employee',
+						reference_docname= employee.name))
 					calendar_event.save()
 				break
 
-
 def _get_agents_sorted_by_asc_workload():
 	appointments = frappe.db.get_list('Appointment', fields='*')
-	agent_list = _get_agent_list_as_strings()
-	
+	agent_list = _get_agent_list_as_strings()	
 	if not appointments:
 		return agent_list
-	
 	appointment_counter = Counter(agent_list)
-	
 	for appointment in appointments:
 		assigned_to = frappe.parse_json(appointment._assign)
-		print(assigned_to)
-		if appointment._assign == '[]' or not appointment._assign:
+		if not assigned_to:
 			continue
 		if assigned_to[0] in agent_list:
 			appointment_counter[assigned_to[0]] += 1
-	
 	sorted_agent_list = appointment_counter.most_common()
 	sorted_agent_list.reverse()
 	
@@ -81,15 +71,13 @@ def _get_agents_sorted_by_asc_workload():
 def _get_agent_list_as_strings():
 	agent_list_as_strings = []
 	agent_list = frappe.get_doc('Appointment Booking Settings').agent_list
-	
 	for agent in agent_list:
 		agent_list_as_strings.append(agent.user)
-	
 	return agent_list_as_strings
 
 
 def _check_agent_availability(agent_email,scheduled_time):
-	appointemnts_at_scheduled_time = frappe.get_list('Appointment', filters={'scheduled_time':scheduled_time})
+	appointemnts_at_scheduled_time = frappe.get_list('Appointment', filters = {'scheduled_time':scheduled_time})
 	for appointment in appointemnts_at_scheduled_time:
 		if appointment._assign == agent_email:
 			return False
@@ -97,4 +85,7 @@ def _check_agent_availability(agent_email,scheduled_time):
 
 
 def _get_employee_from_user(user):
-	return frappe.get_list('Employee', fields='*',filters={'user_id':user})
+	employee_docname = frappe.db.exists({'doctype':'Employee','user_id':user})
+	if employee_docname:
+		return frappe.get_doc('Employee',employee_docname[0][0]) # frappe.db.exists returns a tuple of a tuple
+	return None

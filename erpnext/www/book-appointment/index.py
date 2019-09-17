@@ -2,6 +2,10 @@ import frappe
 import datetime
 import json
 
+
+WEEKDAYS = ["Monday", "Tuesday", "Wednesday",
+            "Thursday", "Friday", "Saturday", "Sunday"]
+
 no_cache = 1
 
 
@@ -98,11 +102,9 @@ def create_appointment(date, time, contact):
     appointment.insert()
 
 def find_lead_by_email(email):
-    if frappe.db.exists({
-        'doctype':'Lead',
-        'email_id':email
-    }):
-        return frappe.get_list('Lead',filters={'email_id':email})[0]
+    lead_list = frappe.get_list('Lead',filters={'email_id':email})[0]
+    if lead_list:
+        return lead_list
     frappe.throw('Email ID not associated with any Lead. Please make sure to use the email address you got this mail on')
 
 # Helper Functions
@@ -157,7 +159,3 @@ def _convert_to_tz(datetime_object, timezone):
     offset = datetime.timedelta(minutes=-330)
     datetime_object = datetime_object + offset
     return datetime_object
-
-
-WEEKDAYS = ["Monday", "Tuesday", "Wednesday",
-            "Thursday", "Friday", "Saturday", "Sunday"]
