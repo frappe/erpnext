@@ -171,6 +171,8 @@
    "read_only": 1
   },
   {
+   "fetch_from": "user_id.user_image",
+   "fetch_if_empty": 1,
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
@@ -780,7 +782,7 @@
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2019-09-06 15:54:36.735147",
+ "modified": "2019-09-12 14:21:12.711280",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
