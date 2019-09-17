@@ -213,19 +213,8 @@ class WorkOrder(Document):
 
 			self.db_set(fieldname, qty)
 
-			#for multiple work orders against same sales order item
-			linked_wo_with_so_item = frappe.db.get_all('Work Order', ['produced_qty'], {
-				'sales_order_item': self.sales_order_item,
-				'name': ('!=', self.name),
-				'docstatus': 1
-			})
-			if len(linked_wo_with_so_item) > 0:
-				total_produced_qty = 0
-				for wo in linked_wo_with_so_item:
-					total_produced_qty += flt(wo.get('produced_qty'))
-				frappe.db.set_value('Sales Order Item', self.sales_order_item, 'produced_qty', total_produced_qty + flt(self.produced_qty))
-			else:
-				frappe.db.set_value('Sales Order Item', self.sales_order_item, 'produced_qty', self.produced_qty)
+			from erpnext.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
+			update_produced_qty_in_so_item(self.sales_order_item)
 
 		if self.production_plan:
 			self.update_production_plan_status()
