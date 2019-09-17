@@ -60,7 +60,7 @@ def get_employees_with_number(number):
 	employee_emails = [employee.user_id for employee in employees]
 	frappe.cache().hset('employees_with_number', number, employee_emails)
 
-	return employee
+	return employee_emails
 
 def set_caller_information(doc, state):
 	'''Called from hooks on creation of Lead or Contact'''
