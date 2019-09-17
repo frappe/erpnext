@@ -440,17 +440,17 @@ def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def item_manufacturer_query(doctype, txt, searchfield, start, page_len, filters):
-	search_txt = "{0}%".format(txt)
+	item_filters = [
+		['manufacturer', 'like', '%' + txt + '%'],
+		['item_code', '=', filters.get("item_code")]
+	]
 
-	item_filters = {
-		'manufacturer': ('like', search_txt),
-		'item_code': filters.get("item_code")
-	}
-
-	return frappe.get_all("Item Manufacturer",
-		fields = "manufacturer",
-		filters = item_filters,
+	item_manufacturers = frappe.get_all(
+		"Item Manufacturer",
+		fields=["manufacturer", "manufacturer_part_no"],
+		filters=item_filters,
 		limit_start=start,
 		limit_page_length=page_len,
 		as_list=1
 	)
+	return item_manufacturers
