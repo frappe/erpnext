@@ -501,6 +501,11 @@ def install_defaults(args=None):
 	make_records(records)
 
 def add_dashboards():
+	from erpnext.setup.setup_wizard.data.dashboard_charts import get_company_for_dashboards
+
+	if not get_company_for_dashboards():
+		return
+
 	from erpnext.setup.setup_wizard.data.dashboard_charts import get_default_dashboards
 	from frappe.modules.import_file import import_file_by_path
 
