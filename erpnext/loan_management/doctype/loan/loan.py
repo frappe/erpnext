@@ -20,7 +20,8 @@ class Loan(AccountsController):
 		self.validate_loan_security_pledge()
 
 		if self.is_term_loan:
-			validate_repayment_method(self.repayment_method, self.loan_amount, self.monthly_repayment_amount, self.repayment_periods)
+			validate_repayment_method(self.repayment_method, self.loan_amount, self.monthly_repayment_amount,
+				self.repayment_periods, self.is_term_loan)
 			self.make_repayment_schedule()
 			self.set_repayment_period()
 
