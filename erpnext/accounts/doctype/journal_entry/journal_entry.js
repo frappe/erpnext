@@ -167,7 +167,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				filters: {
 					'account': row.account
 				}
-			}
+			};
 		});
 
 		me.frm.set_query("reference_name", "accounts", function(doc, cdt, cdn) {

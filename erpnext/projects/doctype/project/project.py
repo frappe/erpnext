@@ -165,6 +165,7 @@ class Project(Document):
 
 					task.run_method("validate")
 					task.db_update()
+					task.notify_update()
 				else:
 					task.save(ignore_permissions = True)
 				task_names.append(task.name)
