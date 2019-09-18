@@ -353,7 +353,7 @@ user_privacy_documents = [
 	}
 ]
 
-global_searches_doctypes = [
+global_search_doctypes = [
 	{"doctype": "Customer", "index": 1},
 	{"doctype": "Supplier", "index": 2},
 	{"doctype": "Item", "index": 3},
