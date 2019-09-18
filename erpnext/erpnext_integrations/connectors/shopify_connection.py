@@ -140,6 +140,7 @@ def create_sales_invoice(shopify_order, shopify_settings, so):
 		si.naming_series = shopify_settings.sales_invoice_series or "SI-Shopify-"
 		si.flags.ignore_mandatory = True
 		set_cost_center(si.items, shopify_settings.cost_center)
+		si.insert(ignore_mandatory=True)
 		si.submit()
 		make_payament_entry_against_sales_invoice(si, shopify_settings)
 		frappe.db.commit()
