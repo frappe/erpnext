@@ -124,7 +124,11 @@ def update_total_amount_paid(doc):
 			total_amount_paid += data.total_payment
 	frappe.db.set_value("Loan", doc.name, "total_amount_paid", total_amount_paid)
 
-def validate_repayment_method(repayment_method, loan_amount, monthly_repayment_amount, repayment_periods):
+def validate_repayment_method(repayment_method, loan_amount, monthly_repayment_amount, repayment_periods, is_term_loan):
+
+	if is_term_loan and not repayment_method:
+		frappe.throw("Repayment Method is mandatory for term loans")
+
 	if repayment_method == "Repay Over Number of Periods" and not repayment_periods:
 		frappe.throw(_("Please enter Repayment Periods"))
 

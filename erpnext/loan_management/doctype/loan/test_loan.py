@@ -462,10 +462,10 @@ def create_loan_with_security(applicant, loan_type, repayment_method, repayment_
 		"repayment_start_date": repayment_start_date or nowdate(),
 		"mode_of_payment": frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name'),
 		"loan_security_pledge": loan_security_pledge,
-		"payment_account": 'Cash - _TC',
-		"loan_account": 'Earnest Money - _TC',
-		"interest_income_account": 'Sales - _TC',
-		"penalty_income_account": 'Service - _TC',
+		"payment_account": 'Payment Account - _TC',
+		"loan_account": 'Loan Account - _TC',
+		"interest_income_account": 'Interest Income Account - _TC',
+		"penalty_income_account": 'Penalty Income Account - _TC',
 	})
 
 	loan.save()
@@ -485,10 +485,10 @@ def create_demand_loan(applicant, loan_type, loan_security_pledge, posting_date=
 		"is_secured_loan": 1,
 		"mode_of_payment": frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name'),
 		"loan_security_pledge": loan_security_pledge,
-		"payment_account": 'Cash - _TC',
-		"loan_account": 'Earnest Money - _TC',
-		"interest_income_account": 'Sales - _TC',
-		"penalty_income_account": 'Service - _TC',
+		"payment_account": 'Payment Account - _TC',
+		"loan_account": 'Loan Account - _TC',
+		"interest_income_account": 'Interest Income Account - _TC',
+		"penalty_income_account": 'Penalty Income Account - _TC',
 	})
 
 	loan.save()

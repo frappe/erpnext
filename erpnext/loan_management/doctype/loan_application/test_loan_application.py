@@ -15,12 +15,17 @@ class TestLoanApplication(unittest.TestCase):
 
 	def create_loan_type(self):
 		if not frappe.db.get_value("Loan Type", "Home Loan"):
-			frappe.get_doc({
+			loan_type = frappe.get_doc({
 				"doctype": "Loan Type",
 				"loan_name": "Home Loan",
+				"is_term_loan": 1,
 				"maximum_loan_amount": 500000,
-				"rate_of_interest": 9.2
+				"rate_of_interest": 9.2,
+				"repayment_method": "Repay Over Number of Periods",
+				"repayment_periods": 18
 			}).insert()
+
+			loan_type.submit()
 
 	def create_loan_application(self):
 		if not frappe.db.get_value("Loan Application", {"applicant":self.applicant}, "name"):

@@ -17,7 +17,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 					company: frm.doc.company
 				};
 
-				frappe.set_route("query-report", "General Ledger");
+				frappe.set_route("query-report", "Accounting Ledger");
 			},__("View"));
 		}
 	},
