@@ -12,15 +12,13 @@
   "applicable_after",
   "max_continuous_days_allowed",
   "column_break_3",
+  "enabled",
   "is_carry_forward",
   "is_lwp",
   "is_optional_leave",
   "allow_negative",
   "include_holiday",
   "is_compensatory",
-  "carry_forward_section",
-  "maximum_carry_forwarded_leaves",
-  "expire_carry_forwarded_leaves_after_days",
   "encashment",
   "allow_encashment",
   "encashment_threshold_days",
@@ -104,19 +102,6 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval: doc.is_carry_forward == 1",
-   "fieldname": "carry_forward_section",
-   "fieldtype": "Section Break",
-   "label": "Carry Forward"
-  },
-  {
-   "description": "Calculated in days",
-   "fieldname": "expire_carry_forwarded_leaves_after_days",
-   "fieldtype": "Int",
-   "label": "Expire Carry Forwarded Leaves (Days)"
-  },
-  {
-   "collapsible": 1,
    "fieldname": "encashment",
    "fieldtype": "Section Break",
    "label": "Encashment"
@@ -168,15 +153,15 @@
    "options": "0.5\n1.0"
   },
   {
-   "depends_on": "is_carry_forward",
-   "fieldname": "maximum_carry_forwarded_leaves",
-   "fieldtype": "Float",
-   "label": "Maximum Carry Forwarded Leaves"
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
   }
  ],
  "icon": "fa fa-flag",
  "idx": 1,
- "modified": "2019-09-06 18:48:48.946074",
+ "modified": "2019-08-25 10:46:28.679495",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",
