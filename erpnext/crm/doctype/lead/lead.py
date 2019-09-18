@@ -80,8 +80,8 @@ class Lead(SellingController):
 	def check_email_id_is_unique(self):
 		if self.email_id:
 			# validate email is unique
-			duplicate_leads = frappe.db.sql_list("""select name from tabLead
-				where email_id=%s and name!=%s""", (self.email_id, self.name))
+			duplicate_leads = frappe.get_all("Lead", filters={"email_id": self.email_id, "name": ["!=", self.name]})
+			duplicate_leads = [lead.name for lead in duplicate_leads]
 
 			if duplicate_leads:
 				frappe.throw(_("Email Address must be unique, already exists for {0}")
@@ -154,13 +154,28 @@ class Lead(SellingController):
 		else:
 			first_name, last_name = self.lead_name, None
 
-		contact_fields = ["email_id", "salutation", "gender", "designation", "phone", "mobile_no"]
-
 		contact = frappe.new_doc("Contact")
-		contact.update({contact_field: self.get(contact_field) for contact_field in contact_fields})
 		contact.update({
 			"first_name": first_name,
-			"last_name": last_name
+			"last_name": last_name,
+			"salutation": self.salutation,
+			"gender": self.gender,
+			"designation": self.designation,
+			"email_ids": [
+				{
+					"email_id": self.email_id,
+					"is_primary": 1
+				}
+			],
+			"phone_nos": [
+				{
+					"phone": self.phone,
+					"is_primary": 1
+				},
+				{
+					"phone": self.mobile_no,
+				}
+			]
 		})
 		contact.insert()
 
@@ -186,8 +201,8 @@ class Lead(SellingController):
 			self.contact_doc.save()
 
 	def flush_address_and_contact_fields(self):
-		fields = ['address_line1', 'address_line2', 'address_title', 'city', 'country',
-			'county', 'fax', 'mobile_no', 'phone', 'pincode', 'state']
+		fields = ['address_line1', 'address_line2', 'address_title',
+			'city', 'county', 'country', 'fax', 'pincode', 'state']
 
 		for field in fields:
 			self.set(field, None)
