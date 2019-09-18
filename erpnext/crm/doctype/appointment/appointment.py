@@ -20,6 +20,7 @@ class Appointment(Document):
 			frappe.throw('Time slot is not available')
 
 	def before_insert(self):
+		self.lead = _find_lead_by_email(self.lead).name
 		appointment_event = frappe.get_doc({
 			'doctype': 'Event',
 			'subject': ' '.join(['Appointment with', self.customer_name]),
@@ -66,6 +67,12 @@ def _get_agents_sorted_by_asc_workload():
 	sorted_agent_list.reverse()
 	
 	return sorted_agent_list
+
+def _find_lead_by_email(email):
+    lead_list = frappe.get_list('Lead',filters={'email_id':email},ignore_permissions=True)
+    if lead_list:
+        return lead_list[0]
+    frappe.throw('Email ID not associated with any Lead. Please make sure to use the email address you got this mail on')
 
 
 def _get_agent_list_as_strings():
