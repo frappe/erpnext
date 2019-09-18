@@ -140,7 +140,7 @@ def get_fifo_queue(filters, sle=None):
 		sle = get_stock_ledger_entries(filters)
 
 	for d in sle:
- 		key = (d.name, d.warehouse) if filters.get('show_warehouse_wise_stock') else d.name
+		key = (d.name, d.warehouse) if filters.get('show_warehouse_wise_stock') else d.name
 		item_details.setdefault(key, {"details": d, "fifo_queue": []})
 		fifo_queue = item_details[key]["fifo_queue"]
 
