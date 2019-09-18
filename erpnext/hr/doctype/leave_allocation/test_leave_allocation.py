@@ -73,9 +73,11 @@ class TestLeaveAllocation(unittest.TestCase):
 		frappe.db.sql("delete from `tabLeave Allocation`")
 		frappe.db.sql("delete from `tabLeave Ledger Entry`")
 		leave_type = create_leave_type(leave_type_name="_Test_CF_leave", is_carry_forward=1)
-		leave_type.submit()
+		leave_type.maximum_carry_forwarded_leaves = 10
+		leave_type.max_leaves_allowed = 30
+		leave_type.save()
 
-		# initial leave allocation
+		# initial leave allocation = 15
 		leave_allocation = create_leave_allocation(
 			leave_type="_Test_CF_leave",
 			from_date=add_months(nowdate(), -12),
@@ -83,13 +85,26 @@ class TestLeaveAllocation(unittest.TestCase):
 			carry_forward=0)
 		leave_allocation.submit()
 
-		# leave allocation with carry forward from previous allocation
+		# carry forwarded leaves considering maximum_carry_forwarded_leaves
+		# new_leaves = 15, carry_forwarded = 10
 		leave_allocation_1 = create_leave_allocation(
 			leave_type="_Test_CF_leave",
 			carry_forward=1)
 		leave_allocation_1.submit()
 
-		self.assertEquals(leave_allocation.total_leaves_allocated, leave_allocation_1.unused_leaves)
+		self.assertEquals(leave_allocation_1.unused_leaves, 10)
+
+		leave_allocation_1.cancel()
+
+		# carry forwarded leaves considering max_leave_allowed
+		# max_leave_allowed = 30, new_leaves = 25, carry_forwarded = 5
+		leave_allocation_2 = create_leave_allocation(
+			leave_type="_Test_CF_leave",
+			carry_forward=1,
+			new_leaves_allocated=25)
+		leave_allocation_2.submit()
+
+		self.assertEquals(leave_allocation_2.unused_leaves, 5)
 
 	def test_carry_forward_leaves_expiry(self):
 		frappe.db.sql("delete from `tabLeave Allocation`")
@@ -98,7 +113,7 @@ class TestLeaveAllocation(unittest.TestCase):
 			leave_type_name="_Test_CF_leave_expiry",
 			is_carry_forward=1,
 			expire_carry_forwarded_leaves_after_days=90)
-		leave_type.submit()
+		leave_type.save()
 
 		# initial leave allocation
 		leave_allocation = create_leave_allocation(
@@ -156,7 +171,7 @@ def create_leave_allocation(**args):
 		"employee_name": args.employee_name or employee.employee_name,
 		"leave_type": args.leave_type or "_Test Leave Type",
 		"from_date": args.from_date or nowdate(),
-		"new_leaves_allocated": args.new_leaves_created or 15,
+		"new_leaves_allocated": args.new_leaves_allocated or 15,
 		"carry_forward": args.carry_forward or 0,
 		"to_date": args.to_date or add_months(nowdate(), 12)
 	})

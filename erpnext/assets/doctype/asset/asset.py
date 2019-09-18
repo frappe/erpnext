@@ -292,12 +292,6 @@ class Asset(AccountsController):
 		if self.status not in ("Submitted", "Partially Depreciated", "Fully Depreciated"):
 			frappe.throw(_("Asset cannot be cancelled, as it is already {0}").format(self.status))
 
-		if self.purchase_invoice:
-			frappe.throw(_("Please cancel Purchase Invoice {0} first").format(self.purchase_invoice))
-
-		if self.purchase_receipt:
-			frappe.throw(_("Please cancel Purchase Receipt {0} first").format(self.purchase_receipt))
-
 	def delete_depreciation_entries(self):
 		for d in self.get("schedules"):
 			if d.journal_entry:
@@ -351,6 +345,7 @@ class Asset(AccountsController):
 
 		if asset_movement:
 			doc = frappe.get_doc('Asset Movement', asset_movement)
+			doc.naming_series = 'ACC-ASM-.YYYY.-'
 			doc.submit()
 
 	def make_gl_entries(self):

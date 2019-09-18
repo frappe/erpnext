@@ -304,8 +304,10 @@ class SalesInvoice(SellingController):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
 
 		validate_against_credit_limit = False
-		bypass_credit_limit_check_at_sales_order = cint(frappe.get_cached_value("Customer", self.customer,
-			"bypass_credit_limit_check_at_sales_order"))
+		bypass_credit_limit_check_at_sales_order = frappe.db.get_value("Customer Credit Limit",
+			filters={'parent': self.customer, 'parenttype': 'Customer', 'company': self.company},
+			fieldname=["bypass_credit_limit_check"])
+
 		if bypass_credit_limit_check_at_sales_order:
 			validate_against_credit_limit = True
 
