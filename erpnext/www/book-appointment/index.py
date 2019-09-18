@@ -102,9 +102,9 @@ def create_appointment(date, time, contact):
     appointment.insert()
 
 def find_lead_by_email(email):
-    lead_list = frappe.get_list('Lead',filters={'email_id':email})[0]
+    lead_list = frappe.get_list('Lead',filters={'email_id':email},ignore_permissions=True)
     if lead_list:
-        return lead_list
+        return lead_list[0]
     frappe.throw('Email ID not associated with any Lead. Please make sure to use the email address you got this mail on')
 
 # Helper Functions
