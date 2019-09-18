@@ -29,7 +29,7 @@ class Appointment(Document):
 			'type': 'Private',
 			'event_participants': [dict(reference_doctype = "Lead", reference_docname = self.lead)]
 		})
-		appointment_event.insert(ignore_permissions = True)
+		appointment_event.insert(ignore_permissions=True)
 		self.calendar_event = appointment_event.name
 
 	def after_insert(self):
