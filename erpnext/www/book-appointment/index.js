@@ -128,12 +128,12 @@ function clear_time_slots() {
     // Clear any existing divs in timeslot container
     let timeslot_container = document.getElementById('timeslot-container');
     while (timeslot_container.firstChild) {
-        timeslot_container.removeChild(timeslot_container.firstChild)
+        timeslot_container.removeChild(timeslot_container.firstChild);
     }
 }
 
 function get_slot_layout(time) {
-    time = new Date(time)
+    time = new Date(time);
     let start_time_string = moment(time).format("LT");
     let end_time = moment(time).add(window.appointment_settings.appointment_duration, 'minutes');
     let end_time_string = end_time.format("LT");
@@ -142,15 +142,16 @@ function get_slot_layout(time) {
 
 function select_time() {
     if (this.classList.contains('unavailable')) {
-        return
+        return;
     }
     let selected_element = document.getElementsByClassName('selected');
     if (!(selected_element.length > 0)){
-        this.classList.add('selected')
-        return
+        this.classList.add('selected');
+        show_next_button();
+        return;
     }
     selected_element = selected_element[0]
-    window.selected_time = this.id
+    window.selected_time = this.id;
     selected_element.classList.remove('selected');
     this.classList.add('selected');
     show_next_button();
@@ -158,6 +159,7 @@ function select_time() {
 
 function set_default_timeslot() {
     let timeslots = document.getElementsByClassName('time-slot')
+    // Can't use a forEach here since, we need to break the loop after a timeslot is selected
     for (let i = 0; i < timeslots.length; i++) {
         const timeslot = timeslots[i];
         if (!timeslot.classList.contains('unavailable')) {
