@@ -21,6 +21,9 @@ class Appointment(Document):
 
 	def before_insert(self):
 		self.lead = _find_lead_by_email(self.lead).name
+
+
+	def after_insert(self):
 		appointment_event = frappe.get_doc({
 			'doctype': 'Event',
 			'subject': ' '.join(['Appointment with', self.customer_name]),
@@ -31,9 +34,7 @@ class Appointment(Document):
 		})
 		appointment_event.insert(ignore_permissions=True)
 		self.calendar_event = appointment_event.name
-
-	def after_insert(self):
-		available_agents = _get_agents_sorted_by_asc_workload()
+		available_agents = _get_agents_sorted_by_asc_workload(self.scheduled_time.date())
 		for agent in available_agents:
 			if(_check_agent_availability(agent, self.scheduled_time)):
 				agent = agent[0]
@@ -51,7 +52,7 @@ class Appointment(Document):
 					calendar_event.save()
 				break
 
-def _get_agents_sorted_by_asc_workload():
+def _get_agents_sorted_by_asc_workload(date):
 	appointments = frappe.db.get_list('Appointment', fields='*')
 	agent_list = _get_agent_list_as_strings()	
 	if not appointments:
@@ -61,7 +62,7 @@ def _get_agents_sorted_by_asc_workload():
 		assigned_to = frappe.parse_json(appointment._assign)
 		if not assigned_to:
 			continue
-		if assigned_to[0] in agent_list:
+		if (assigned_to[0] in agent_list) and appointment.scheduled_time.date() == date:
 			appointment_counter[assigned_to[0]] += 1
 	sorted_agent_list = appointment_counter.most_common()
 	sorted_agent_list.reverse()
@@ -69,7 +70,7 @@ def _get_agents_sorted_by_asc_workload():
 	return sorted_agent_list
 
 def _find_lead_by_email(email):
-    lead_list = frappe.get_list('Lead',filters={'email_id':email},ignore_permissions=True)
+    lead_list = frappe.get_list('Lead', filters={'email_id':email}, ignore_permissions=True)
     if lead_list:
         return lead_list[0]
     frappe.throw('Email ID not associated with any Lead. Please make sure to use the email address you got this mail on')
@@ -92,7 +93,7 @@ def _check_agent_availability(agent_email,scheduled_time):
 
 
 def _get_employee_from_user(user):
-	employee_docname = frappe.db.exists({'doctype':'Employee','user_id':user})
+	employee_docname = frappe.db.exists({'doctype':'Employee', 'user_id':user})
 	if employee_docname:
-		return frappe.get_doc('Employee',employee_docname[0][0]) # frappe.db.exists returns a tuple of a tuple
+		return frappe.get_doc('Employee', employee_docname[0][0]) # frappe.db.exists returns a tuple of a tuple
 	return None
