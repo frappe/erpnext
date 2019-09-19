@@ -149,6 +149,7 @@
   },
   {
    "columns": 2,
+   "depends_on": "eval: !parent.skip_delivery_note_creation",
    "fieldname": "delivery_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -743,7 +744,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-09-13 12:18:54.903107",
+ "modified": "2019-09-18 10:51:59.502433",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",
