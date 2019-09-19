@@ -1,15 +1,17 @@
 {
- "autoname": "LD-.#####",
+ "autoname": "LM-DIS-.#####",
  "creation": "2019-09-07 12:44:49.125452",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "against_loan",
-  "company",
-  "applicant",
   "disbursement_date",
   "posting_date",
+  "column_break_4",
+  "applicant",
+  "company",
+  "section_break_7",
   "pending_amount_for_disbursal",
   "disbursed_amount",
   "amended_from",
@@ -81,10 +83,18 @@
    "label": "Pending Amount For Disbursal",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-10 15:28:11.102240",
+ "modified": "2019-09-18 06:00:43.544899",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Disbursement",

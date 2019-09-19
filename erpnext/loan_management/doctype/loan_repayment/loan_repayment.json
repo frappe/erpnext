@@ -1,5 +1,5 @@
 {
- "autoname": "LR-.####",
+ "autoname": "LM-REP-.####",
  "creation": "2019-09-03 14:44:39.977266",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -193,7 +193,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-12 19:36:17.232015",
+ "modified": "2019-09-18 13:07:07.913590",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",
