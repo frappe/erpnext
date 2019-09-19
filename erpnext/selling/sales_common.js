@@ -209,7 +209,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					args: {
 						item_code: item.item_code,
 						warehouse: item.warehouse,
-						has_batch_no: has_batch_no,
+						has_batch_no: has_batch_no || 0,
 						stock_qty: item.stock_qty,
 						serial_no: item.serial_no || "",
 					},
