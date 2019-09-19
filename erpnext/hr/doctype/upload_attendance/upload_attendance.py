@@ -60,8 +60,8 @@ def get_data(args):
 			existing_attendance = {}
 			if existing_attendance_records \
 				and tuple([getdate(date), employee.name]) in existing_attendance_records \
-				and getdate(employee.date_of_joining) >= getdate(date) \
-				and getdate(employee.relieving_date) <= getdate(date):
+				and getdate(employee.date_of_joining) <= getdate(date) \
+				and getdate(employee.relieving_date) >= getdate(date):
 					existing_attendance = existing_attendance_records[tuple([getdate(date), employee.name])]
 			row = [
 				existing_attendance and existing_attendance.name or "",
