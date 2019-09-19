@@ -37,6 +37,7 @@ def get_appointment_slots(date, timezone):
         date + ' 23:59:59', format_string)
     query_start_time = _convert_to_ist(query_start_time, timezone)
     query_end_time = _convert_to_ist(query_end_time, timezone)
+    now = datetime.datetime.now()
     # Database queries
     settings = frappe.get_doc('Appointment Booking Settings')
     holiday_list = frappe.get_doc('Holiday List', settings.holiday_list)
@@ -52,7 +53,7 @@ def get_appointment_slots(date, timezone):
                 dict(time=_convert_to_tz(timeslot, timezone), availability=False))
             continue
         # Check availability
-        if check_availabilty(timeslot, settings):
+        if check_availabilty(timeslot, settings) and timeslot >= now:
             converted_timeslots.append(
                 dict(time=_convert_to_tz(timeslot, timezone), availability=True))
         else:
