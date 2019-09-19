@@ -196,7 +196,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		if(items.length >= 1){
 			me.raw_material_data = [];
 			me.show_dialog = 1;
-			let title = "Transfer Material to Supplier";
+			let title = __('Transfer Material to Supplier');
 			let fields = [
 			{fieldtype:'Section Break', label: __('Raw Materials')},
 			{fieldname: 'sub_con_rm_items', fieldtype: 'Table', label: __('Items'),
