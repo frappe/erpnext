@@ -30,6 +30,7 @@ class Appointment(Document):
 			'starts_on': self.scheduled_time,
 			'status': 'Open',
 			'type': 'Private',
+			'send_reminder': frappe.db.get_single_value('Appointment Booking Settings','email_reminders'),
 			'event_participants': [dict(reference_doctype = "Lead", reference_docname = self.lead)]
 		})
 		appointment_event.insert(ignore_permissions=True)
