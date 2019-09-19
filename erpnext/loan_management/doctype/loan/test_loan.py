@@ -7,12 +7,12 @@ import frappe
 import erpnext
 import unittest
 from frappe.utils import (nowdate, add_days, getdate, now_datetime, add_to_date, get_datetime,
-	add_months, get_first_day, get_last_day, flt)
+	add_months, get_first_day, get_last_day, flt, date_diff)
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
 from erpnext.loan_management.doctype.loan_security_price.loan_security_price import update_loan_security_price
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_employee
 from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (make_accrual_interest_entry_for_demand_loans,
-	make_accrual_interest_entry_for_term_loans)
+	make_accrual_interest_entry_for_term_loans, days_in_year)
 
 class TestLoan(unittest.TestCase):
 	def setUp(self):
@@ -133,14 +133,22 @@ class TestLoan(unittest.TestCase):
 
 		self.assertEquals(loan.loan_amount, 1000000)
 
-		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=get_first_day(nowdate()))
+		first_date = get_first_day(nowdate())
+		last_date = get_last_day(nowdate())
 
-		make_accrual_interest_entry_for_demand_loans(posting_date=add_days(get_last_day(nowdate()), 1))
+		no_of_days = date_diff(last_date, first_date) + 1
+
+		accrued_interest_amount = (loan.loan_amount * loan.rate_of_interest * no_of_days) \
+			/ (days_in_year(get_datetime().year) * 100)
+
+		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=first_date)
+
+		make_accrual_interest_entry_for_demand_loans(posting_date=add_days(last_date, 1))
 
 		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(get_last_day(nowdate()), 10), "Regular Payment", 111118.68)
 		repayment_entry.save()
 
-		self.assertEquals(repayment_entry.interest_payable, 11095.890411)
+		self.assertEquals(flt(repayment_entry.interest_payable, 4), flt(accrued_interest_amount, 4))
 		self.assertEquals(flt(repayment_entry.penalty_amount, 5), 22.79977)
 
 		repayment_entry.submit()

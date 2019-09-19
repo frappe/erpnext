@@ -11,13 +11,13 @@ frappe.ui.form.on(cur_frm.doctype, {
 		if (['Loan Disbursement', 'Loan Repayment', 'Loan Interest Accrual'].includes(frm.doc.doctype)
 			&& frm.doc.docstatus == 1) {
 
-			frm.add_custom_button(__("General Ledger"), function() {
+			frm.add_custom_button(__("Accounting Ledger"), function() {
 				frappe.route_options = {
 					voucher_no: frm.doc.name,
 					company: frm.doc.company
 				};
 
-				frappe.set_route("query-report", "Accounting Ledger");
+				frappe.set_route("query-report", "General Ledger");
 			},__("View"));
 		}
 	},

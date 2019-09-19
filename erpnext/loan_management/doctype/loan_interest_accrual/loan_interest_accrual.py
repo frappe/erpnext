@@ -65,6 +65,19 @@ class LoanInterestAccrual(AccountsController):
 		if gle_map:
 			make_gl_entries(gle_map, cancel=cancel, adv_adj=adv_adj)
 
+def calculate_accrula_amount_for_demand_loans(loan, no_of_days_in_previous_month, posting_date, prev_month, year):
+	disbursement_date = get_datetime(loan.disbursement_date)
+	if (disbursement_date.month == prev_month) and (disbursement_date.year == year):
+		no_of_days_in_previous_month = date_diff(get_last_day(disbursement_date), disbursement_date) + 1
+
+	pending_principal_amount = loan.total_payment - loan.total_interest_payable \
+		- loan.total_amount_paid
+
+	interest_per_day = (pending_principal_amount * loan.rate_of_interest) / (days_in_year(year) * 100)
+	payable_interest = interest_per_day * no_of_days_in_previous_month
+
+	make_loan_interest_accrual_entry(loan.name, loan.applicant_type, loan.applicant,loan.interest_income_account,
+		loan.loan_account, pending_principal_amount, payable_interest, posting_date=posting_date)
 
 def make_accrual_interest_entry_for_demand_loans(posting_date=None):
 	open_loans = frappe.get_all("Loan",
@@ -88,19 +101,7 @@ def make_accrual_interest_entry_for_demand_loans(posting_date=None):
 	no_of_days_in_previous_month = monthrange(year, prev_month)[1]
 
 	for loan in open_loans:
-
-		disbursement_date = get_datetime(loan.disbursement_date)
-		if (disbursement_date.month == prev_month) and (disbursement_date.year == year):
-			no_of_days_in_previous_month = date_diff(get_last_day(disbursement_date), disbursement_date) + 1
-
-		pending_principal_amount = loan.total_payment - loan.total_interest_payable \
-			- loan.total_amount_paid
-
-		interest_per_day = (pending_principal_amount * loan.rate_of_interest) / (365 * 100)
-		payable_interest = interest_per_day * no_of_days_in_previous_month
-
-		make_loan_interest_accrual_entry(loan.name, loan.applicant_type, loan.applicant,loan.interest_income_account,
-			loan.loan_account, pending_principal_amount, payable_interest, posting_date=posting_date)
+		calculate_accrula_amount_for_demand_loans(loan, no_of_days_in_previous_month, posting_date, prev_month, year)
 
 def make_accrual_interest_entry_for_term_loans(posting_date=None):
 
@@ -148,4 +149,12 @@ def make_loan_interest_accrual_entry(loan, applicant_type, applicant, interest_i
 
 		loan_interest_accrual.save()
 		loan_interest_accrual.submit()
+
+def days_in_year(year):
+	days = 365
+
+	if (year % 4 == 0) and (year % 100 != 0) or (year % 400 == 0):
+		days = 366
+
+	return days
 

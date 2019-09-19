@@ -5,7 +5,7 @@ frappe.ui.form.on('Loan Security Shortfall', {
 	refresh: function(frm) {
 		frm.add_custom_button(__("Add Loan Security"), function() {
 			frm.trigger('shortfall_action');
-		})
+		});
 	},
 
 	shortfall_action: function(frm) {

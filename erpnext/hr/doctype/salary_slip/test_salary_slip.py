@@ -149,7 +149,7 @@ class TestSalarySlip(unittest.TestCase):
 		from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (make_accrual_interest_entry_for_demand_loans,
 			make_accrual_interest_entry_for_term_loans)
 
-		applicant = make_employee("test_employee@salary.com", company="_Test Company")
+		applicant = make_employee("test_loanemployee@salary.com", company="_Test Company")
 
 		create_loan_accounts()
 
@@ -169,7 +169,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		make_accrual_interest_entry_for_term_loans(posting_date=nowdate())
 
-		ss = make_employee_salary_slip("test_employee@salary.com", "Monthly")
+		ss = make_employee_salary_slip("test_loanemployee@salary.com", "Monthly")
 		ss.submit()
 
 		self.assertEqual(ss.total_loan_repayment, 592)
