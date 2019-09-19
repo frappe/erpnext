@@ -10,7 +10,8 @@ frappe.ui.form.on("Sales Order", {
 			'Sales Invoice': 'Invoice',
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order',
-			'Project': 'Project'
+			'Project': 'Project',
+			'Payment Entry': "Payment"
 		}
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
 
