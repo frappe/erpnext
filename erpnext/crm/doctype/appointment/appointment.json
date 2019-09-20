@@ -63,8 +63,7 @@
    "fieldname": "lead",
    "fieldtype": "Link",
    "label": "Lead",
-   "options": "Lead",
-   "reqd": 1
+   "options": "Lead"
   },
   {
    "fieldname": "calendar_event",
@@ -73,7 +72,7 @@
    "options": "Event"
   }
  ],
- "modified": "2019-09-13 15:25:49.362246",
+ "modified": "2019-09-19 16:00:54.390581",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
