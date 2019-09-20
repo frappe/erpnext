@@ -18,7 +18,7 @@ from erpnext.exceptions import InvalidCurrency
 from six import text_type
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
-force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules")
+force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "has_batch_no", "item_tax_rate", "pricing_rules")
 
 class AccountsController(TransactionBase):
 	def __init__(self, *args, **kwargs):

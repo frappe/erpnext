@@ -16,6 +16,38 @@ frappe.query_reports["Batch-Wise Balance History"] = {
 			"fieldtype": "Date",
 			"width": "80",
 			"default": frappe.datetime.get_today()
-		}
+		},
+		{
+			"fieldname": "item_group",
+			"label": __("Item Group"),
+			"fieldtype": "Link",
+			"width": "80",
+			"options": "Item Group"
+		},
+		{
+			"fieldname":"brand",
+			"label": __("Brand"),
+			"fieldtype": "Link",
+			"options": "Brand"
+		},
+		{
+			"fieldname":"item_code",
+			"label": __("Item"),
+			"fieldtype": "Link",
+			"options": "Item"
+		},
+		{
+			"fieldname":"warehouse",
+			"label": __("Warehouse"),
+			"fieldtype": "Link",
+			"options": "Warehouse"
+		},
+		{
+			"fieldname":"batch_no",
+			"label": __("Batch No"),
+			"fieldtype": "Link",
+			"options": "Batch"
+		},
+
 	]
 }

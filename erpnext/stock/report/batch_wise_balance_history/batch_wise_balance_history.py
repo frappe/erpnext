@@ -46,22 +46,50 @@ def get_conditions(filters):
 		frappe.throw(_("'From Date' is required"))
 
 	if filters.get("to_date"):
-		conditions += " and posting_date <= '%s'" % filters["to_date"]
+		conditions += " and posting_date <= %(to_date)s"
 	else:
 		frappe.throw(_("'To Date' is required"))
 
+	if filters.get("batch_no"):
+		conditions += " and batch_no = %(batch_no)s"
+
+	if filters.get("warehouse"):
+		conditions += " and warehouse = %(warehouse)s"
+
 	return conditions
 
-#get all details
+def get_item_conditions(filters):
+	from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
+	conditions = []
+	if filters.get("item_code"):
+		conditions.append("item.name=%(item_code)s")
+	else:
+		if filters.get("brand"):
+			conditions.append("item.brand=%(brand)s")
+		if filters.get("item_group"):
+			conditions.append(get_item_group_condition(filters.get("item_group")))
+
+	items = []
+	if conditions:
+		items = frappe.db.sql_list("""select name from `tabItem` item where {}"""
+			.format(" and ".join(conditions)), filters)
+	item_conditions_sql = ''
+	if items:
+		item_conditions_sql = ' and sle.item_code in ({})' \
+			.format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items]))
+
+	return item_conditions_sql
+
+# get all details
 def get_stock_ledger_entries(filters):
+	item_conditions = get_item_conditions(filters)
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""
-		select item_code, batch_no, warehouse, posting_date, sum(actual_qty) as actual_qty
-		from `tabStock Ledger Entry`
-		where docstatus < 2 and ifnull(batch_no, '') != '' %s
-		group by voucher_no, batch_no, item_code, warehouse
-		order by item_code, warehouse""" %
-		conditions, as_dict=1)
+
+	return frappe.db.sql("""select item_code, batch_no, warehouse,
+		posting_date, actual_qty
+		from `tabStock Ledger Entry` sle
+		where docstatus < 2 and ifnull(batch_no, '') != '' {0} {1} order by item_code, warehouse
+		""".format(conditions, item_conditions), filters, as_dict=1)
 
 def get_item_warehouse_batch_map(filters, float_precision):
 	sle = get_stock_ledger_entries(filters)
