@@ -66,7 +66,7 @@ frappe.ui.form.on('Stock Quick Balance', {
 							fields.forEach(function (field) {
 								frm.set_value(field, r.message[field]);
 							});
-							frm.set_value('item_barcode', r.message['item_barcode'][0])
+							frm.set_value('item_barcode', r.message['item_barcode'][0]);
 							frm.set_value('image_view', r.message['image']);
 						}
 
@@ -92,13 +92,13 @@ frappe.ui.form.on('Stock Quick Balance', {
 				},
 				callback: (r) => {
 					if (r.message) {
-						let fields = ['item', 'item_name', 'item_description']
+						let fields = ['item', 'item_name', 'item_description'];
 						fields.forEach(function (field) {
 							frm.set_value(field, r.message[field]);
 						});
 					}
 				}
-			})
+			});
 		}
 	}
 });
