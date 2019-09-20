@@ -354,15 +354,15 @@ user_privacy_documents = [
 ]
 
 global_search_doctypes = [
-	{"doctype": "Customer", "index": 1},
-	{"doctype": "Supplier", "index": 2},
-	{"doctype": "Item", "index": 3},
-	{"doctype": "Sales Invoice", "index": 4},
-	{"doctype": "Sales Order", "index": 5},
-	{"doctype": "Purchase Receipt", "index": 6},
-	{"doctype": "Delivery Note", "index": 7},
-	{"doctype": "Stock Entry", "index": 8},
-	{"doctype": "Material Request", "index": 9},
-	{"doctype": "Delivery Trip", "index": 10},
-	{"doctype": "Pick List", "index": 11},
+	{"doctype": "Customer", "index": 0},
+	{"doctype": "Supplier", "index": 1},
+	{"doctype": "Item", "index": 2},
+	{"doctype": "Sales Invoice", "index": 3},
+	{"doctype": "Sales Order", "index": 4},
+	{"doctype": "Purchase Receipt", "index": 5},
+	{"doctype": "Delivery Note", "index": 6},
+	{"doctype": "Stock Entry", "index": 7},
+	{"doctype": "Material Request", "index": 8},
+	{"doctype": "Delivery Trip", "index": 9},
+	{"doctype": "Pick List", "index": 10},
 ]
