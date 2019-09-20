@@ -111,17 +111,14 @@ def filter_timeslots(date, timeslots):
             filtered_timeslots.append(timeslot)
     return filtered_timeslots
 
-
 def check_availabilty(timeslot, settings):
     return frappe.db.count('Appointment', {'scheduled_time': timeslot}) < settings.number_of_agents
-
 
 def _is_holiday(date, holiday_list):
     for holiday in holiday_list.holidays:
         if holiday.holiday_date == date:
             return True
     return False
-
 
 def _get_records(start_time, end_time, settings):
     records = []
@@ -130,16 +127,13 @@ def _get_records(start_time, end_time, settings):
             records.append(record)
     return records
 
-
 def _deltatime_to_datetime(date, deltatime):
     time = (datetime.datetime.min + deltatime).time()
     return datetime.datetime.combine(date.date(), time)
 
-
 def _datetime_to_deltatime(date_time):
     midnight = datetime.datetime.combine(date_time.date(), datetime.time.min)
     return (date_time-midnight)
-
 
 def _convert_to_ist(datetime_object, timezone):
     offset = datetime.timedelta(minutes=timezone)
@@ -147,7 +141,6 @@ def _convert_to_ist(datetime_object, timezone):
     offset = datetime.timedelta(minutes=-330)
     datetime_object = datetime_object - offset
     return datetime_object
-
 
 def _convert_to_tz(datetime_object, timezone):
     offset = datetime.timedelta(minutes=timezone)
