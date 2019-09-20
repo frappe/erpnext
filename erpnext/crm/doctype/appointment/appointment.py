@@ -13,28 +13,56 @@ from frappe.desk.form.assign_to import add as add_assignemnt
 
 
 class Appointment(Document):
-	def validate(self):
+	email=''
+
+	def find_lead_by_email(self,email):
+		lead_list = frappe.get_list('Lead', filters = {'email_id':email}, ignore_permissions = True)
+		if lead_list:
+			return lead_list[0].name
+		self.email = email
+		return None
+	
+	def before_insert(self):
 		number_of_appointments_in_same_slot = frappe.db.count('Appointment', filters = {'scheduled_time':self.scheduled_time})
 		settings = frappe.get_doc('Appointment Booking Settings')
 		if(number_of_appointments_in_same_slot >= settings.number_of_agents):
 			frappe.throw('Time slot is not available')
-
-	def before_insert(self):
-		self.lead = _find_lead_by_email(self.lead).name
-
+		# Link lead
+		self.lead = self.find_lead_by_email(self.lead)
 
 	def after_insert(self):
-		appointment_event = frappe.get_doc({
-			'doctype': 'Event',
-			'subject': ' '.join(['Appointment with', self.customer_name]),
-			'starts_on': self.scheduled_time,
-			'status': 'Open',
-			'type': 'Private',
-			'send_reminder': frappe.db.get_single_value('Appointment Booking Settings','email_reminders'),
-			'event_participants': [dict(reference_doctype = "Lead", reference_docname = self.lead)]
+		# Auto assign
+		self.auto_assign()
+		# Check if lead was found 
+		if(self.lead):
+			# Create Calendar event
+			self.create_calendar_event()
+		else:
+			# Send email to confirm
+			# frappe.sendmail(recipients=[self.email],message='https:/',subject="")
+			frappe.msgprint("Please check your email to confirm the appointment")
+
+	def set_verified(self,email):
+		# Create new lead
+		self.create_lead(email)
+		# Create calender event
+		self.create_calendar_event()
+		self.save( ignore_permissions=True )
+		frappe.db.commit()
+
+	def create_lead(self,email):
+		lead = frappe.get_doc({
+			'doctype':'Lead',
+			'lead_name':self.customer_name,
+			'email_id':email,
+			'notes':self.customer_details,
+			'phone':self.customer_phone_number,
 		})
-		appointment_event.insert(ignore_permissions=True)
-		self.calendar_event = appointment_event.name
+		print(lead.insert( ignore_permissions=True ))
+		# Link lead
+		self.lead = lead.name
+
+	def auto_assign(self):
 		available_agents = _get_agents_sorted_by_asc_workload(self.scheduled_time.date())
 		for agent in available_agents:
 			if(_check_agent_availability(agent, self.scheduled_time)):
@@ -44,14 +72,26 @@ class Appointment(Document):
 					'name':self.name,
 					'assign_to':agent
 				})
-				employee = _get_employee_from_user(agent)
-				if employee:
-					calendar_event = frappe.get_doc('Event', self.calendar_event)
-					calendar_event.append('event_participants', dict(
-						reference_doctype= 'Employee',
-						reference_docname= employee.name))
-					calendar_event.save()
-				break
+			break
+
+	def create_calendar_event(self):
+		appointment_event = frappe.get_doc({
+			'doctype': 'Event',
+			'subject': ' '.join(['Appointment with', self.customer_name]),
+			'starts_on': self.scheduled_time,
+			'status': 'Open',
+			'type': 'Public',
+			'send_reminder': frappe.db.get_single_value('Appointment Booking Settings','email_reminders'),
+			'event_participants': [dict(reference_doctype = "Lead", reference_docname = self.lead)]
+		})
+		employee = _get_employee_from_user(self._assign)
+		if employee:
+			appointment_event.append('event_participants', dict(
+				reference_doctype = 'Employee',
+				reference_docname = employee.name))
+		appointment_event.insert(ignore_permissions=True)
+		self.calendar_event = appointment_event.name
+		self.save(ignore_permissions=True)
 
 def _get_agents_sorted_by_asc_workload(date):
 	appointments = frappe.db.get_list('Appointment', fields='*')
@@ -69,13 +109,6 @@ def _get_agents_sorted_by_asc_workload(date):
 	sorted_agent_list.reverse()
 	
 	return sorted_agent_list
-
-def _find_lead_by_email(email):
-    lead_list = frappe.get_list('Lead', filters={'email_id':email}, ignore_permissions=True)
-    if lead_list:
-        return lead_list[0]
-    frappe.throw('Email ID not associated with any Lead. Please make sure to use the email address you got this mail on')
-
 
 def _get_agent_list_as_strings():
 	agent_list_as_strings = []
