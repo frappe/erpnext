@@ -30,48 +30,6 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			fieldtype: "Data"
 		},
 		{
-			fieldtype: "Section Break",
-			label: __("Primary Address Details"),
-			collapsible: 1
-		},
-		{
-			label: __("Address Line 1"),
-			fieldname: "address_line1",
-			fieldtype: "Data",
-			reqd: 1
-		},
-		{
-			label: __("Address Line 2"),
-			fieldname: "address_line2",
-			fieldtype: "Data"
-		},
-		{
-			label: __("ZIP Code"),
-			fieldname: "pincode",
-			fieldtype: "Data"
-		},
-		{
-			fieldtype: "Column Break"
-		},
-		{
-			label: __("City"),
-			fieldname: "city",
-			fieldtype: "Data",
-			reqd: 1,
-		},
-		{
-			label: __("State"),
-			fieldname: "state",
-			fieldtype: "Data"
-		},
-		{
-			label: __("Country"),
-			fieldname: "country",
-			fieldtype: "Link",
-			options: "Country",
-			reqd: 1
-		},
-		{
 			label: __("Customer POS Id"),
 			fieldname: "customer_pos_id",
 			fieldtype: "Data",
