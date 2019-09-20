@@ -724,7 +724,7 @@ def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
 	return {'serial_no': serial_no}
 
 @frappe.whitelist()
-def get_bin_details_and_serial_nos(item_code, warehouse, has_batch_no, stock_qty=None, serial_no=None):
+def get_bin_details_and_serial_nos(item_code, warehouse, has_batch_no=None, stock_qty=None, serial_no=None):
 	bin_details_and_serial_nos = {}
 	bin_details_and_serial_nos.update(get_bin_details(item_code, warehouse))
 	if flt(stock_qty) > 0:

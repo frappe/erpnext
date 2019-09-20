@@ -445,6 +445,10 @@ class ReceivablePayableReport(object):
 
 		row.age = (getdate(self.age_as_on) - getdate(entry_date)).days or 0
 		index = None
+
+		if not (self.filters.range1 and self.filters.range2 and self.filters.range3 and self.filters.range4):
+			self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4 = 30, 60, 90, 120
+
 		for i, days in enumerate([self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4]):
 			if row.age <= days:
 				index = i
