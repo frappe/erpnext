@@ -67,7 +67,7 @@ frappe.ui.form.on('Loan Application', {
 
 	is_term_loan: function(frm) {
 		frm.set_df_property('repayment_method', 'hidden', 1 - frm.doc.is_term_loan);
-		frm.set_df_property('repayment_method', 'reqd', 1 - frm.doc.is_term_loan);
+		frm.set_df_property('repayment_method', 'reqd', frm.doc.is_term_loan);
 	}
 });
 
