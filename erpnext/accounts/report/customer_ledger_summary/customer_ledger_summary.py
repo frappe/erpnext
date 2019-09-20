@@ -286,14 +286,14 @@ class PartyLedgerSummaryReport(object):
 
 			if parties and accounts:
 				if len(parties) == 1:
-					party = parties.keys()[0]
+					party = list(parties.keys())[0]
 					for account, amount in iteritems(accounts):
 						self.party_adjustment_accounts.add(account)
 						self.party_adjustment_details.setdefault(party, {})
 						self.party_adjustment_details[party].setdefault(account, 0)
 						self.party_adjustment_details[party][account] += amount
 				elif len(accounts) == 1 and not has_irrelevant_entry:
-					account = accounts.keys()[0]
+					account = list(accounts.keys())[0]
 					self.party_adjustment_accounts.add(account)
 					for party, amount in iteritems(parties):
 						self.party_adjustment_details.setdefault(party, {})
