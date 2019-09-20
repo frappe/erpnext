@@ -40,7 +40,9 @@ class Appointment(Document):
 		else:
 			# Send email to confirm
 			verify_url = ''.join([frappe.utils.get_url(),'/book-appointment/verify?email=',self.email,"&appoitnment=",self.name])
-			frappe.sendmail(recipients=[self.email],message=verify_url,self.email,"&appoitnment=",self.name),subject="")
+			frappe.sendmail(recipients=[self.email], 
+							message=verify_url,
+							subject="")
 			frappe.msgprint("Please check your email to confirm the appointment")
 
 	def set_verified(self,email):
