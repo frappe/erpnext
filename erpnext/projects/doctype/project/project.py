@@ -325,6 +325,9 @@ def create_duplicate_project(prev_doc, project_name):
 	import json
 	prev_doc = json.loads(prev_doc)
 
+	if project_name == prev_doc.get('name'):
+		frappe.throw(_("Use a name that is different from previous project name"))
+
 	# change the copied doc name to new project name
 	project = frappe.copy_doc(prev_doc)
 	project.name = project_name

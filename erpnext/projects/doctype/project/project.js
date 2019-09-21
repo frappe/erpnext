@@ -110,7 +110,7 @@ frappe.ui.form.on("Project", {
 						project_name: data.value
 					}).then(() => {
 					frappe.set_route('Form', "Project", data.value);
-					frappe.msgprint(__("Project has copied"));
+					frappe.msgprint(__("Duplicate project has been created"));
 				});
 				resolve();
 			});
