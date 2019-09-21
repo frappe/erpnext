@@ -200,7 +200,7 @@ class Company(NestedSet):
 			})
 
 		for default_account in default_accounts:
-			if self.is_new() and not self.get(default_account):
+			if self.is_new():
 				self._set_default_account(default_account, default_accounts.get(default_account))
 
 		if not self.default_income_account:
