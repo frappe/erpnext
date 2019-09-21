@@ -10,7 +10,8 @@
   "section_break_3",
   "loan_amount",
   "security_value",
-  "shortfall_amount"
+  "shortfall_amount",
+  "status"
  ],
  "fields": [
   {
@@ -51,9 +52,17 @@
    "fieldtype": "Datetime",
    "label": "Shortfall Time",
    "read_only": 1
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nPending\nCompleted",
+   "read_only": 1
   }
  ],
- "modified": "2019-09-18 13:07:23.897516",
+ "modified": "2019-09-19 13:28:07.615508",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Shortfall",

@@ -195,6 +195,8 @@ def get_accured_interest_entries(against_loan):
 
 	return accured_interest_entries
 
+# This function returns the amounts that are payable at the time of loan repayment based on posting date
+# So it pulls all the unpaid Loan Interest Accrual Entries and calculates the penalty if applicable
 
 def get_amounts(amounts, against_loan, loan_type, posting_date):
 
@@ -209,8 +211,11 @@ def get_amounts(amounts, against_loan, loan_type, posting_date):
 	payable_principal_amount = 0
 
 	for entry in accured_interest_entries:
+		# Loan repayment due date is one day after the loan interest is accrued
+		# no of late days are calculated based on loan repayment posting date
+		# and if no_of_late days are positive then penalty is levied
 
-		due_date = add_days(get_first_day(entry.posting_date), 2)
+		due_date = add_days(entry.posting_date, 1)
 		no_of_late_days = date_diff(posting_date,
 					add_days(due_date, loan_type_details.grace_period_in_days)) + 1
 

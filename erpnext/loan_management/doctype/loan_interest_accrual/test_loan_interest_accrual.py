@@ -9,6 +9,7 @@ from erpnext.loan_management.doctype.loan.test_loan import (create_loan_type, cr
 	make_loan_disbursement_entry, create_loan_accounts, create_loan_security_type, create_loan_security, create_demand_loan)
 from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (make_accrual_interest_entry_for_demand_loans,
 	make_accrual_interest_entry_for_term_loans, days_in_year)
+from erpnext.selling.doctype.customer.test_customer import get_customer_dict
 
 class TestLoanInterestAccrual(unittest.TestCase):
 	def setUp(self):

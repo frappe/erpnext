@@ -149,7 +149,7 @@ class TestLoan(unittest.TestCase):
 		repayment_entry.save()
 
 		self.assertEquals(flt(repayment_entry.interest_payable, 4), flt(accrued_interest_amount, 4))
-		self.assertEquals(flt(repayment_entry.penalty_amount, 5), 22.79977)
+		self.assertEquals(flt(repayment_entry.penalty_amount, 5), 30.3997)
 
 		repayment_entry.submit()
 

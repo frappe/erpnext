@@ -1,0 +1,67 @@
+{
+ "creation": "2019-09-19 06:43:26.742336",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "from_time",
+  "to_time",
+  "loan_security_type",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "from_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "From Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "To Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "loan_security_type",
+   "fieldtype": "Link",
+   "label": "Loan Security Type",
+   "options": "Loan Security Type"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Process Loan Security Price",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2019-09-19 06:47:31.905834",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Process Loan Security Price",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
