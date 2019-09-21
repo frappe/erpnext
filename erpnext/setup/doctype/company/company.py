@@ -64,15 +64,19 @@ class Company(NestedSet):
 		})
 
 	def validate_default_accounts(self):
-		default_accounts = ["default_bank_account", "default_cash_account", "default_receivable_account",
-			"default_payable_account", "default_expense_account", "default_income_account", "stock_received_but_not_billed",
-			"stock_adjustment_account", "expenses_included_in_valuation", "default_payroll_payable_account"]
+		accounts = [
+			"default_bank_account", "default_cash_account",
+			"default_receivable_account", "default_payable_account",
+			"default_expense_account", "default_income_account",
+			"stock_received_but_not_billed", "stock_adjustment_account",
+			"expenses_included_in_valuation", "default_payroll_payable_account"
+		]
 
-		for field in default_accounts:
-				if self.get(field):
-					for_company = frappe.db.get_value("Account", self.get(field), "company")
-					if for_company != self.name:
-						frappe.throw(_("Account {0} does not belong to company: {1}").format(self.get(field), self.name))
+		for field in accounts:
+			if self.get(field):
+				for_company = frappe.db.get_value("Account", self.get(field), "company")
+				if for_company != self.name:
+					frappe.throw(_("Account {0} does not belong to company: {1}").format(self.get(field), self.name))
 
 	def validate_currency(self):
 		if self.is_new():
