@@ -308,6 +308,21 @@ class GrossProfitGenerator(object):
 		if self.filters.get("item_code"):
 			conditions += " and `tabSales Invoice Item`.item_code = %(item_code)s"
 
+		if self.filters.get("item_group"):
+			lft, rgt = frappe.db.get_value("Item Group", self.filters.item_group, ["lft", "rgt"])
+			conditions += """and `tabSales Invoice Item`.item_group in (select name from `tabItem Group`
+				where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt)
+
+		if self.filters.get("brand"):
+			conditions += " and `tabSales Invoice Item`.brand = %(brand)s"
+
+		if self.filters.get("cost_center"):
+			conditions += " and `tabSales Invoice Item`.cost_center = %(cost_center)s"
+
+		if self.filters.get("project"):
+			conditions += " and `tabSales Invoice`.project = %(project)s"
+
+
 		self.si_list = frappe.db.sql("""
 			select
 				`tabSales Invoice Item`.parenttype, `tabSales Invoice Item`.parent,
