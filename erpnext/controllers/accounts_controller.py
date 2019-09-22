@@ -1017,12 +1017,14 @@ class AccountsController(TransactionBase):
 				total += flt(d.payment_amount)
 			total = flt(total, self.precision("grand_total"))
 
-			grand_total = flt(self.get("rounded_total") or self.grand_total, self.precision('grand_total'))
+			grand_total = flt(self.get("rounded_total") or self.grand_total)
 			if self.get("total_advance"):
 				grand_total -= self.get("total_advance")
 
 			if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 				grand_total = grand_total - flt(self.write_off_amount)
+			grand_total = flt(grand_total, self.precision('grand_total'))
+
 			if total != grand_total:
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
 
