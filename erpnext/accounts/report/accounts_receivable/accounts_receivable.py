@@ -365,7 +365,7 @@ class ReceivablePayableReport(object):
 			on
 				(ref.parent = payment_entry.name)
 			where
-				payment_entry.docstatus = 1
+				payment_entry.docstatus < 2
 				and payment_entry.posting_date > %s
 				and payment_entry.party_type = %s
 			""", (self.filters.report_date, self.party_type), as_dict=1)
@@ -390,7 +390,7 @@ class ReceivablePayableReport(object):
 			on
 				(jea.parent = je.name)
 			where
-				je.docstatus = 1
+				je.docstatus < 2
 				and je.posting_date > %s
 				and jea.party_type = %s
 				and jea.reference_name is not null and jea.reference_name != ''
@@ -446,6 +446,10 @@ class ReceivablePayableReport(object):
 
 		row.age = (getdate(self.age_as_on) - getdate(entry_date)).days or 0
 		index = None
+
+		if not (self.filters.range1 and self.filters.range2 and self.filters.range3 and self.filters.range4):
+			self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4 = 30, 60, 90, 120
+
 		for i, days in enumerate([self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4]):
 			if row.age <= days:
 				index = i

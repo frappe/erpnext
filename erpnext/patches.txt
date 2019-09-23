@@ -625,6 +625,7 @@ erpnext.patches.v12_0.add_default_buying_selling_terms_in_company
 erpnext.patches.v12_0.update_ewaybill_field_position
 erpnext.patches.v12_0.create_accounting_dimensions_in_missing_doctypes
 erpnext.patches.v11_1.set_status_for_material_request_type_manufacture
+erpnext.patches.v12_0.move_plaid_settings_to_doctype
 execute:frappe.reload_doc('desk', 'doctype','dashboard_chart_link')
 execute:frappe.reload_doc('desk', 'doctype','dashboard')
 execute:frappe.reload_doc('desk', 'doctype','dashboard_chart_source')
@@ -632,3 +633,6 @@ execute:frappe.reload_doc('desk', 'doctype','dashboard_chart')
 erpnext.patches.v12_0.add_default_dashboards
 erpnext.patches.v12_0.remove_bank_remittance_custom_fields
 erpnext.patches.v12_0.generate_leave_ledger_entries
+erpnext.patches.v12_0.move_credit_limit_to_customer_credit_limit
+erpnext.patches.v12_0.add_variant_of_in_item_attribute_table
+erpnext.patches.v12_0.create_default_energy_point_rules
