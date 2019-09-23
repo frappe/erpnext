@@ -2,6 +2,7 @@ frappe.provide('frappe.ui.form');
 
 frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 	init: function(doctype, after_insert) {
+		this.skip_redirect_on_error = true;
 		this._super(doctype, after_insert);
 	},
 
@@ -37,8 +38,7 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		{
 			label: __("Address Line 1"),
 			fieldname: "address_line1",
-			fieldtype: "Data",
-			reqd: 1
+			fieldtype: "Data"
 		},
 		{
 			label: __("Address Line 2"),
@@ -56,8 +56,7 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		{
 			label: __("City"),
 			fieldname: "city",
-			fieldtype: "Data",
-			reqd: 1,
+			fieldtype: "Data"
 		},
 		{
 			label: __("State"),
@@ -68,8 +67,7 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			label: __("Country"),
 			fieldname: "country",
 			fieldtype: "Link",
-			options: "Country",
-			reqd: 1
+			options: "Country"
 		},
 		{
 			label: __("Customer POS Id"),
