@@ -47,7 +47,7 @@ frappe.ui.form.on('Loan Repayment', {
 			callback: function(r) {
 				let amounts = r.message;
 
-				frm.set_value('pending_principal_amount', amounts['principal_amount']);
+				frm.set_value('pending_principal_amount', amounts['pending_principal_amount']);
 				if (frm.doc.is_term_loan) {
 					frm.set_value('payable_principal_amount', amounts['principal_amount']);
 				}

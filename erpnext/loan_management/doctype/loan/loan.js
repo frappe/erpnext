@@ -56,7 +56,7 @@ frappe.ui.form.on('Loan', {
 				frm.add_custom_button(__('Loan Disbursement'), function() {
 					frm.trigger("make_loan_disbursement");
 				},__('Create'));
-			} else if (frm.doc.status == "Disbursed" && frm.doc.repayment_start_date && (frm.doc.applicant_type == 'Member' || frm.doc.repay_from_salary == 0)) {
+			} else if (frm.doc.status == "Disbursed" && (frm.doc.applicant_type == 'Member' || frm.doc.repay_from_salary == 0)) {
 				frm.add_custom_button(__('Loan Repayment'), function() {
 					frm.trigger("make_repayment_entry");
 				},__('Create'));
@@ -87,7 +87,9 @@ frappe.ui.form.on('Loan', {
 			args: {
 				"loan": frm.doc.name,
 				"loan_amount": frm.doc.loan_amount,
-				"disbursed_amount": frm.doc.disbursed_amount
+				"disbursed_amount": frm.doc.disbursed_amount,
+				"company": frm.doc.company,
+				"applicant": frm.doc.applicant
 			},
 			method: "erpnext.loan_management.doctype.loan.loan.make_loan_disbursement",
 			callback: function (r) {
@@ -103,7 +105,8 @@ frappe.ui.form.on('Loan', {
 			args: {
 				"loan": frm.doc.name,
 				"applicant": frm.doc.applicant,
-				"loan_type": frm.doc.loan_type
+				"loan_type": frm.doc.loan_type,
+				"company": frm.doc.company
 			},
 			method: "erpnext.loan_management.doctype.loan.loan.make_repayment_entry",
 			callback: function (r) {

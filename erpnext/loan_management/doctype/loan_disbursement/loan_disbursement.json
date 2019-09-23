@@ -14,12 +14,12 @@
   "section_break_7",
   "pending_amount_for_disbursal",
   "disbursed_amount",
-  "amended_from",
   "accounting_dimensions_section",
   "cost_center",
   "section_break_13",
   "customer_details_section",
-  "bank_account_number"
+  "bank_account_number",
+  "amended_from"
  ],
  "fields": [
   {
@@ -36,7 +36,8 @@
   {
    "fieldname": "disbursed_amount",
    "fieldtype": "Currency",
-   "label": "Disbursed Amount"
+   "label": "Disbursed Amount",
+   "options": "Company:company:default_currency"
   },
   {
    "fieldname": "amended_from",
@@ -111,7 +112,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-23 03:36:17.699339",
+ "modified": "2019-09-23 05:06:03.137929",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Disbursement",

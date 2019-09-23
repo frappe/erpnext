@@ -26,6 +26,10 @@ frappe.ui.form.on(cur_frm.doctype, {
 		frm.set_value("applicant_name", null);
 	},
 	applicant: function(frm) {
+		if (!["Loan Application", "Loan"].includes(frm.doc.doctype)) {
+			return
+		}
+
 		if (frm.doc.applicant) {
 			frappe.model.with_doc(frm.doc.applicant_type, frm.doc.applicant, function() {
 				var applicant = frappe.model.get_doc(frm.doc.applicant_type, frm.doc.applicant);

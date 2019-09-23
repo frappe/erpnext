@@ -104,8 +104,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Loan Amount",
-   "options": "Company:company:default_currency",
-   "reqd": 1
+   "options": "Company:company:default_currency"
   },
   {
    "fieldname": "required_by_date",
@@ -218,7 +217,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-17 13:16:45.641270",
+ "modified": "2019-09-23 04:16:27.791792",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Application",

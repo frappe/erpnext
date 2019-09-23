@@ -168,6 +168,7 @@
    "options": "\nRepay Fixed Amount per Period\nRepay Over Number of Periods"
   },
   {
+   "depends_on": "is_term_loan",
    "fieldname": "repayment_periods",
    "fieldtype": "Int",
    "label": "Repayment Period in Months"
@@ -340,7 +341,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-22 07:17:55.601779",
+ "modified": "2019-09-23 05:35:20.843947",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

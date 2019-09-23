@@ -21,6 +21,9 @@ class LoanApplication(Document):
 		self.get_repayment_details()
 
 	def validate_loan_amount(self):
+		if not self.loan_amount:
+			frappe.throw(_("Loan Amount is mandatory"))
+
 		maximum_loan_limit = frappe.db.get_value('Loan Type', self.loan_type, 'maximum_loan_amount')
 		if maximum_loan_limit and self.loan_amount > maximum_loan_limit:
 			frappe.throw(_("Loan Amount cannot exceed Maximum Loan Amount of {0}").format(maximum_loan_limit))
@@ -70,7 +73,7 @@ class LoanApplication(Document):
 	def set_loan_amount(self):
 		if not self.loan_amount and self.is_secured_loan and self.proposed_pledges:
 			self.loan_amount = 0
-			for security in self.loan_security_pledges:
+			for security in self.proposed_pledges:
 				self.loan_amount += security.amount - (security.amount * security.haircut/100)
 
 @frappe.whitelist()
