@@ -131,19 +131,20 @@ def get_columns(filters):
 
 	return columns
 
-def get_fifo_queue(filters):
+def get_fifo_queue(filters, sle=None):
 	item_details = {}
-	transfered_item_details = {}
+	transferred_item_details = {}
 	serial_no_batch_purchase_details = {}
 
-	sle = get_stock_ledger_entries(filters)
+	if sle == None:
+		sle = get_stock_ledger_entries(filters)
 
 	for d in sle:
 		key = (d.name, d.warehouse) if filters.get('show_warehouse_wise_stock') else d.name
 		item_details.setdefault(key, {"details": d, "fifo_queue": []})
 		fifo_queue = item_details[key]["fifo_queue"]
 
-		transfered_item_details.setdefault((d.voucher_no, d.name), [])
+		transferred_item_details.setdefault((d.voucher_no, d.name), [])
 
 		if d.voucher_type == "Stock Reconciliation":
 			d.actual_qty = flt(d.qty_after_transaction) - flt(item_details[key].get("qty_after_transaction", 0))
@@ -151,10 +152,10 @@ def get_fifo_queue(filters):
 		serial_no_list = get_serial_nos(d.serial_no) if d.serial_no else []
 
 		if d.actual_qty > 0:
-			if transfered_item_details.get((d.voucher_no, d.name)):
-				batch = transfered_item_details[(d.voucher_no, d.name)][0]
+			if transferred_item_details.get((d.voucher_no, d.name)):
+				batch = transferred_item_details[(d.voucher_no, d.name)][0]
 				fifo_queue.append(batch)
-				transfered_item_details[((d.voucher_no, d.name))].pop(0)
+				transferred_item_details[((d.voucher_no, d.name))].pop(0)
 			else:
 				if serial_no_list:
 					for serial_no in serial_no_list:
@@ -178,11 +179,11 @@ def get_fifo_queue(filters):
 						# if batch qty > 0
 						# not enough or exactly same qty in current batch, clear batch
 						qty_to_pop -= batch[0]
-						transfered_item_details[(d.voucher_no, d.name)].append(fifo_queue.pop(0))
+						transferred_item_details[(d.voucher_no, d.name)].append(fifo_queue.pop(0))
 					else:
 						# all from current batch
 						batch[0] -= qty_to_pop
-						transfered_item_details[(d.voucher_no, d.name)].append([qty_to_pop, batch[1]])
+						transferred_item_details[(d.voucher_no, d.name)].append([qty_to_pop, batch[1]])
 						qty_to_pop = 0
 
 		item_details[key]["qty_after_transaction"] = d.qty_after_transaction

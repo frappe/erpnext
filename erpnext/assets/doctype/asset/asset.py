@@ -255,9 +255,15 @@ class Asset(AccountsController):
 		precision = self.precision("gross_purchase_amount")
 
 		if row.depreciation_method in ("Straight Line", "Manual"):
+			depreciation_left = (cint(row.total_number_of_depreciations) - cint(self.number_of_depreciations_booked))
+
+			if not depreciation_left:
+				frappe.msgprint(_("All the depreciations has been booked"))
+				depreciation_amount = flt(row.expected_value_after_useful_life)
+				return depreciation_amount
+
 			depreciation_amount = (flt(row.value_after_depreciation) -
-				flt(row.expected_value_after_useful_life)) / (cint(row.total_number_of_depreciations) -
-				cint(self.number_of_depreciations_booked))
+				flt(row.expected_value_after_useful_life)) / depreciation_left
 		else:
 			depreciation_amount = flt(depreciable_value * (flt(row.rate_of_depreciation) / 100), precision)
 
@@ -275,7 +281,7 @@ class Asset(AccountsController):
 					flt(accumulated_depreciation_after_full_schedule),
 					self.precision('gross_purchase_amount'))
 
-				if (row.expected_value_after_useful_life and 
+				if (row.expected_value_after_useful_life and
 					row.expected_value_after_useful_life < asset_value_after_full_schedule):
 					frappe.throw(_("Depreciation Row {0}: Expected value after useful life must be greater than or equal to {1}")
 						.format(row.idx, asset_value_after_full_schedule))
@@ -285,12 +291,6 @@ class Asset(AccountsController):
 	def validate_cancellation(self):
 		if self.status not in ("Submitted", "Partially Depreciated", "Fully Depreciated"):
 			frappe.throw(_("Asset cannot be cancelled, as it is already {0}").format(self.status))
-
-		if self.purchase_invoice:
-			frappe.throw(_("Please cancel Purchase Invoice {0} first").format(self.purchase_invoice))
-
-		if self.purchase_receipt:
-			frappe.throw(_("Please cancel Purchase Receipt {0} first").format(self.purchase_receipt))
 
 	def delete_depreciation_entries(self):
 		for d in self.get("schedules"):
@@ -345,6 +345,7 @@ class Asset(AccountsController):
 
 		if asset_movement:
 			doc = frappe.get_doc('Asset Movement', asset_movement)
+			doc.naming_series = 'ACC-ASM-.YYYY.-'
 			doc.submit()
 
 	def make_gl_entries(self):

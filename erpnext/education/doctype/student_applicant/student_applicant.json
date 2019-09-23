@@ -705,7 +705,6 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "default": "INDIAN", 
    "fieldname": "nationality", 
    "fieldtype": "Data", 
    "hidden": 0, 

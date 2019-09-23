@@ -126,7 +126,7 @@ class PaymentEntry(AccountsController):
 			if not self.party:
 				frappe.throw(_("Party is mandatory"))
 
-			_party_name = "title" if self.party_type == "Student" else self.party_type.lower() + "_name"
+			_party_name = "title" if self.party_type in ("Student", "Shareholder") else self.party_type.lower() + "_name"
 			self.party_name = frappe.db.get_value(self.party_type, self.party, _party_name)
 
 		if self.party:
@@ -947,10 +947,15 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		paid_amount = abs(outstanding_amount)
 		if bank_amount:
 			received_amount = bank_amount
+		else:
+			received_amount = paid_amount * doc.conversion_rate
 	else:
 		received_amount = abs(outstanding_amount)
 		if bank_amount:
 			paid_amount = bank_amount
+		else:
+			# if party account currency and bank currency is different then populate paid amount as well
+			paid_amount = received_amount * doc.conversion_rate
 
 	pe = frappe.new_doc("Payment Entry")
 	pe.payment_type = payment_type

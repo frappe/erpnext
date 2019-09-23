@@ -124,6 +124,8 @@ class Item(WebsiteGenerator):
 		self.update_defaults_from_item_group()
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
+		self.update_show_in_website()
+		self.validate_manufacturer()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -142,6 +144,13 @@ class Item(WebsiteGenerator):
 		'''Clean HTML description if set'''
 		if cint(frappe.db.get_single_value('Stock Settings', 'clean_description_html')):
 			self.description = clean_html(self.description)
+
+	def validate_manufacturer(self):
+		list_man = [(x.manufacturer, x.manufacturer_part_no) for x in self.get('manufacturers')]
+		set_man = set(list_man)
+
+		if len(list_man) != len(set_man):
+			frappe.throw(_("Duplicate entry in Manufacturers table"))
 
 	def validate_customer_provided_part(self):
 		if self.is_customer_provided_item:
@@ -475,6 +484,10 @@ class Item(WebsiteGenerator):
 				to_remove.append(d)
 
 		[self.remove(d) for d in to_remove]
+
+	def update_show_in_website(self):
+		if self.disabled:
+			self.show_in_website = False
 
 	def update_template_tables(self):
 		template = frappe.get_doc("Item", self.variant_of)
@@ -915,7 +928,6 @@ def validate_cancelled_item(item_code, docstatus=None, verbose=1):
 	if docstatus == 2:
 		msg = _("Item {0} is cancelled").format(item_code)
 		_msgprint(msg, verbose)
-
 
 def _msgprint(msg, verbose):
 	if verbose:
