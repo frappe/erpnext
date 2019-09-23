@@ -98,7 +98,7 @@ def create_appointment(date, time, contact):
     appointment.customer_phone_number = contact['number']
     appointment.customer_skype = contact['skype']
     appointment.customer_details = contact['notes']
-    appointment.lead = contact['email']
+    appointment.email = contact['email']
     appointment.status = 'Open'
     appointment.insert()
 
