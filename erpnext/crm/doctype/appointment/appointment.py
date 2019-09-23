@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 
+import urllib
 from collections import Counter
 from datetime import timedelta
 
@@ -11,6 +12,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.desk.form.assign_to import add as add_assignemnt
+from frappe.utils import get_url
+from frappe.utils.verified_command import verify_request,get_signed_params
 
 
 class Appointment(Document):
@@ -40,12 +43,22 @@ class Appointment(Document):
 			# Set status to unverified
 			self.status = 'Unverified'
 			# Send email to confirm
-			verify_url = ''.join([frappe.utils.get_url(),'/book-appointment/verify?email=',self.customer_email,'&appointment=',self.name])
+			verify_url = self.get_verify_url()
 			message = ''.join(['Please click the following link to confirm your appointment:',verify_url])
 			frappe.sendmail(recipients=[self.customer_email], 
 							message=message,
 							subject=_('Appointment Confirmation'))
 			frappe.msgprint('Please check your email to confirm the appointment')
+
+	def get_verify_url(self):
+		verify_route = '/book-appointment/verify'
+
+		params = {
+			'email':self.customer_email,
+			'appointment':self.name
+		}
+
+		return get_url(verify_route + '?' + get_signed_params(params))
 
 	def on_update(self):
 		# Sync Calednar
@@ -60,8 +73,9 @@ class Appointment(Document):
 			frappe.throw('Email verification failed.')
 		# Create new lead
 		self.create_lead()
-		# Create calender event
+		# Remove unverified status
 		self.status = 'Open'
+		# Create calender event
 		self.create_calendar_event()
 		self.save(ignore_permissions=True)
 		frappe.db.commit()
