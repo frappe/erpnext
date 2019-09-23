@@ -123,8 +123,11 @@ class LandedCostVoucher(Document):
 
 
 			# update stock & gl entries for submit state of PR
+
+			via_landed_cost_voucher = True if self.docstatus == 1 else False
+
 			doc.docstatus = 1
-			doc.update_stock_ledger(via_landed_cost_voucher=True)
+			doc.update_stock_ledger(via_landed_cost_voucher=via_landed_cost_voucher)
 			doc.make_gl_entries()
 
 	def update_rate_in_serial_no(self, receipt_document):

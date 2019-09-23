@@ -176,7 +176,7 @@ class update_entries_after(object):
 				else:
 					self.get_fifo_values(sle)
 					self.qty_after_transaction += flt(sle.actual_qty)
-					self.stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in self.stock_queue))
+					self.stock_value = sum((flt(batch[0]) * flt(batch[1], self.precision) for batch in self.stock_queue))
 
 		# rounding as per precision
 		self.stock_value = flt(self.stock_value, self.precision)
