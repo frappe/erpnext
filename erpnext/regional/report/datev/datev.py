@@ -10,8 +10,9 @@ Provide a report and downloadable CSV according to the German DATEV format.
 from __future__ import unicode_literals
 import datetime
 import json
-import StringIO
+import zlib
 import zipfile
+from six import StringIO
 from six import string_types
 import frappe
 from frappe import _
@@ -352,23 +353,26 @@ def download_datev_csv(filters=None):
 	# This is where my zip will be written
 	zip_buffer = StringIO.StringIO()
 	# This is my zip file
-	zip_archive = zipfile.ZipFile(zip_buffer, mode='w')
+	datev_zip = zipfile.ZipFile(zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED)
 
 	transactions = get_transactions(filters, as_dict=1)
 	transactions_csv = get_datev_csv(transactions, filters, csv_class=Transactions)
-	zip_archive.writestr('EXTF_Buchungsstapel.csv', transactions_csv)
+	datev_zip.writestr('EXTF_Buchungsstapel.csv', transactions_csv)
 
 	account_names = get_account_names(filters)
 	account_names_csv = get_datev_csv(account_names, filters, csv_class=AccountNames)
-	zip_archive.writestr('EXTF_Kontenbeschriftungen.csv', account_names_csv)
+	datev_zip.writestr('EXTF_Kontenbeschriftungen.csv', account_names_csv)
 
 	customers = get_customers(filters)
 	customers_csv = get_datev_csv(customers, filters, csv_class=DebtorsCreditors)
-	zip_archive.writestr('EXTF_Kunden.csv', customers_csv)
+	datev_zip.writestr('EXTF_Kunden.csv', customers_csv)
 
 	suppliers = get_suppliers(filters)
 	suppliers_csv = get_datev_csv(suppliers, filters, csv_class=DebtorsCreditors)
-	zip_archive.writestr('EXTF_Lieferanten.csv', suppliers_csv)
+	datev_zip.writestr('EXTF_Lieferanten.csv', suppliers_csv)
+	
+	# You must call close() before exiting your program or essential records will not be written.
+	datev_zip.close()
 
 	frappe.response['filecontent'] = zip_buffer.getvalue()
 	frappe.response['filename'] = 'DATEV.zip'
