@@ -11,8 +11,12 @@
   "customer_name",
   "customer_phone_number",
   "customer_skype",
+  "customer_email",
+  "col_br_2",
   "customer_details",
+  "linked_docs_section",
   "lead",
+  "col_br_3",
   "calendar_event"
  ],
  "fields": [
@@ -56,7 +60,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Open\nClosed",
+   "options": "Open\nUnverified\nClosed",
    "reqd": 1
   },
   {
@@ -70,9 +74,28 @@
    "fieldtype": "Link",
    "label": "Calendar Event",
    "options": "Event"
+  },
+  {
+   "fieldname": "col_br_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer_email",
+   "fieldtype": "Data",
+   "label": "Email",
+   "reqd": 1
+  },
+  {
+   "fieldname": "linked_docs_section",
+   "fieldtype": "Section Break",
+   "label": "Linked Docs"
+  },
+  {
+   "fieldname": "col_br_3",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2019-09-19 16:00:54.390581",
+ "modified": "2019-09-23 10:57:04.876506",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
