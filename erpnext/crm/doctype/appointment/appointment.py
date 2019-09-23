@@ -66,7 +66,7 @@ class Appointment(Document):
 			return
 		cal_event = frappe.get_doc('Event',self.calendar_event)
 		cal_event.starts_on = self.scheduled_time
-		cal_event.save()
+		cal_event.save(ignore_permissions=True)
 
 	def set_verified(self,email):
 		if not email == self.customer_email:
