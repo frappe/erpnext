@@ -345,6 +345,7 @@ class Asset(AccountsController):
 
 		if asset_movement:
 			doc = frappe.get_doc('Asset Movement', asset_movement)
+			doc.naming_series = 'ACC-ASM-.YYYY.-'
 			doc.submit()
 
 	def make_gl_entries(self):
