@@ -47,6 +47,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Loan Security Unpledge",
+				},
+				{
+					"type": "doctype",
 					"name": "Loan Security Shortfall",
 				},
 			]
