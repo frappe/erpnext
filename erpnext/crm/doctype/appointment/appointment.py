@@ -40,7 +40,7 @@ class Appointment(Document):
 			# Set status to unverified
 			self.status = 'Unverified'
 			# Send email to confirm
-			verify_url = ''.join([frappe.utils.get_url(),'/book-appointment/verify?email=',self.customer_email,'&appoitnment=',self.name])
+			verify_url = ''.join([frappe.utils.get_url(),'/book-appointment/verify?email=',self.customer_email,'&appointment=',self.name])
 			message = ''.join(['Please click the following link to confirm your appointment:',verify_url])
 			frappe.sendmail(recipients=[self.customer_email], 
 							message=message,
@@ -66,14 +66,14 @@ class Appointment(Document):
 		self.save(ignore_permissions=True)
 		frappe.db.commit()
 
-	def create_lead(self,email):
+	def create_lead(self):
 		# Return if already linked
 		if self.lead:
 			return
 		lead = frappe.get_doc({
 			'doctype':'Lead',
 			'lead_name':self.customer_name,
-			'email_id':email,
+			'email_id':self.customer_email,
 			'notes':self.customer_details,
 			'phone':self.customer_phone_number,
 		})
@@ -96,7 +96,7 @@ class Appointment(Document):
 			break
 
 	def create_calendar_event(self):
-		if self.appointment:
+		if self.calendar_event:
 			return
 		appointment_event = frappe.get_doc({
 			'doctype': 'Event',
