@@ -351,7 +351,7 @@ def download_datev_csv(filters=None):
 	validate(filters)
 
 	# This is where my zip will be written
-	zip_buffer = StringIO.StringIO()
+	zip_buffer = StringIO()
 	# This is my zip file
 	datev_zip = zipfile.ZipFile(zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED)
 
