@@ -47,8 +47,10 @@ class Appointment(Document):
 							subject=_('Appointment Confirmation'))
 			frappe.msgprint('Please check your email to confirm the appointment')
 
-	def on_update():
+	def on_update(self):
 		# Sync Calednar
+		if not self.calendar_event:
+			return
 		cal_event = frappe.get_doc('Event',self.calendar_event)
 		cal_event.starts_on = self.scheduled_time
 		cal_event.save()
