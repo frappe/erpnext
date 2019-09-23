@@ -72,7 +72,7 @@ class LoanInterestAccrual(AccountsController):
 def calculate_accrual_amount_for_demand_loans(loan, posting_date, from_background_job):
 	no_of_days, year = get_no_of_days_for_interest_accural(loan, posting_date, from_background_job)
 
-	if not no_of_days:
+	if no_of_days <= 0:
 		frappe.throw("Interest Already accrued till date {0}".format(posting_date))
 
 	pending_principal_amount = loan.total_payment - loan.total_interest_payable \
@@ -84,14 +84,16 @@ def calculate_accrual_amount_for_demand_loans(loan, posting_date, from_backgroun
 	make_loan_interest_accrual_entry(loan.name, loan.applicant_type, loan.applicant,loan.interest_income_account,
 		loan.loan_account, pending_principal_amount, payable_interest, posting_date=posting_date)
 
-def make_accrual_interest_entry_for_demand_loans(posting_date=None, from_background_job=1):
-	open_loans = frappe.get_all("Loan",
-		fields=["name", "total_payment", "total_amount_paid", "loan_account", "interest_income_account", "is_term_loan",
-			"disbursement_date", "applicant_type", "applicant", "rate_of_interest", "total_interest_payable", "repayment_start_date"],
-		filters= {
-			"status": "Disbursed",
-			"docstatus": 1
-		})
+def make_accrual_interest_entry_for_demand_loans(posting_date=None, open_loans=None, from_background_job=1):
+
+	if not open_loans:
+		open_loans = frappe.get_all("Loan",
+			fields=["name", "total_payment", "total_amount_paid", "loan_account", "interest_income_account", "is_term_loan",
+				"disbursement_date", "applicant_type", "applicant", "rate_of_interest", "total_interest_payable", "repayment_start_date"],
+			filters= {
+				"status": "Disbursed",
+				"docstatus": 1
+			})
 
 	for loan in open_loans:
 		calculate_accrual_amount_for_demand_loans(loan, posting_date, from_background_job)
@@ -159,7 +161,8 @@ def get_no_of_days_for_interest_accural(loan, posting_date=None, from_background
 		if (posting_datetime.month == disbursement_date.month) and (posting_datetime.year == disbursement_date.year):
 			no_of_days_in_previous_month = date_diff(posting_date, disbursement_date)
 		else:
-			last_posting_date = get_last_accural_date_in_current_month(posting_datetime.month, posting_datetime.year)
+			last_posting_date = get_last_accural_date_in_current_month(posting_datetime.month,
+				posting_datetime.year, loan.name)
 			no_of_days_in_previous_month = date_diff(posting_date, last_posting_date) + 1
 
 	else:
@@ -178,14 +181,14 @@ def get_no_of_days_for_interest_accural(loan, posting_date=None, from_background
 			no_of_days_in_previous_month = date_diff(get_last_day(disbursement_date), disbursement_date) + 1
 		else:
 			no_of_days_in_previous_month = date_diff(now_datetime(),
-				get_last_accural_date_in_current_month(prev_month, year))
+				get_last_accural_date_in_current_month(prev_month, year, loan.name))
 
 	return no_of_days_in_previous_month, year
 
-def get_last_accural_date_in_current_month(month, year):
+def get_last_accural_date_in_current_month(month, year, loan):
 
 	last_posting_date = frappe.db.sql(""" SELECT MAX(posting_date) from `tabLoan Interest Accrual`
-		WHERE month(posting_date) = %s and year(posting_date) = %s""", (month, year))
+		WHERE month(posting_date) = %s and year(posting_date) = %s and loan = %s""", (month, year, loan))
 
 	if last_posting_date:
 		return last_posting_date[0][0]
