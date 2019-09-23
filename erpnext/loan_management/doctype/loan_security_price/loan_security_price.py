@@ -26,7 +26,6 @@ class LoanSecurityPrice(Document):
 
 @frappe.whitelist()
 def update_loan_security_price(from_timestamp=None, to_timestamp=None, loan_security_type=None, from_background_job=1):
-	print("#############")
 	if not from_timestamp:
 		from_timestamp = get_datetime_str(getdate())
 

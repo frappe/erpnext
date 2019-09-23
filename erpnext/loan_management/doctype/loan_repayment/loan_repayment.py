@@ -84,8 +84,8 @@ class LoanRepayment(AccountsController):
 		frappe.db.set_value("Loan", self.against_loan, "total_amount_paid", loan.total_amount_paid + principal_amount_paid)
 		frappe.db.set_value("Loan", self.against_loan, "total_principal_paid", loan.total_principal_paid + principal_amount_paid)
 
-		if loan.total_amount_paid + principal_amount_paid == loan.total_payment:
-			frappe.db.set_value("Loan", self.against_loan, "status", "Repaid/Closed")
+		if loan.total_principal_paid + principal_amount_paid == loan.total_payment:
+			frappe.db.set_value("Loan", self.against_loan, "status", "Loan Closure Requested")
 
 	def mark_as_unpaid(self):
 

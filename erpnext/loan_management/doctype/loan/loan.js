@@ -62,6 +62,12 @@ frappe.ui.form.on('Loan', {
 				},__('Create'));
 
 			}
+
+			if (frm.doc.status == "Loan Closure Requested") {
+				frm.add_custom_button(__('Loan Security Unpledge'), function() {
+					frm.trigger("create_loan_security_unpledge");
+				},__('Create'));
+			}
 		}
 		frm.trigger("toggle_fields");
 	},
@@ -108,6 +114,20 @@ frappe.ui.form.on('Loan', {
 		})
 	},
 
+	create_loan_security_unpledge: function(frm) {
+		frappe.call({
+			method: "erpnext.loan_management.doctype.loan.loan.create_loan_security_unpledge",
+			args : {
+				"loan": frm.doc.name,
+				"applicant": frm.doc.applicant
+			},
+			callback: function(r) {
+				if (r.message)
+					var doc = frappe.model.sync(r.message)[0];
+				frappe.set_route("Form", doc.doctype, doc.name);
+			}
+		})
+	},
 
 	loan_application: function (frm) {
 		if(frm.doc.loan_application){

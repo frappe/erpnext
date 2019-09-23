@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, math, json
 import erpnext
 from frappe import _
-from frappe.utils import flt, rounded, add_months, nowdate, getdate
+from frappe.utils import flt, rounded, add_months, nowdate, getdate, now_datetime
 from erpnext.controllers.accounts_controller import AccountsController
 
 class Loan(AccountsController):
@@ -112,11 +112,18 @@ class Loan(AccountsController):
 			msg = _("Loan amount cannot be greater than {0}".format(self.maximum_loan_value))
 			frappe.throw(msg)
 
+		if not self.loan_amount:
+			frappe.throw("Loan amount is mandatory")
+
 	def link_loan_security_pledge(self):
-		frappe.db.set_value("Loan Security Pledge", self.loan_security_pledge, "loan", self.name)
+		frappe.db.sql("""UPDATE `tabLoan Security Pledge` SET
+			loan = %s, pledge_status = 'Pledged', pledge_time = %s
+			where name = %s """, (self.name, now_datetime(), self.loan_security_pledge))
 
 	def unlink_loan_security_pledge(self):
-		frappe.db.set_value("Loan Security Pledge", self.loan_security_pledge, "loan", '')
+		frappe.db.sql("""UPDATE `tabLoan Security Pledge` SET
+			loan = '', pledge_status = ''
+			where name = %s """, (self.loan_security_pledge))
 
 def update_total_amount_paid(doc):
 	total_amount_paid = 0
@@ -177,6 +184,26 @@ def make_repayment_entry(loan, applicant, loan_type):
 	repayment_entry.posting_date = nowdate()
 
 	return repayment_entry.as_dict()
+
+@frappe.whitelist()
+def create_loan_security_unpledge(loan, applicant):
+	loan_security_pledge_details = frappe.db.sql("""
+		SELECT p.loan_security, SUM(p.qty) as qty FROM `tabLoan Security Pledge` lsp , `tabPledge` p
+		WHERE p.parent = lsp.name AND lsp.loan = %s
+		GROUP BY p.loan_security
+	""",(loan), as_dict=1)
+
+	unpledge_request = frappe.new_doc("Loan Security Unpledge")
+	unpledge_request.applicant = applicant
+	unpledge_request.loan = loan
+
+	for loan_security in loan_security_pledge_details:
+		unpledge_request.append('loan_security_pledges', {
+			"loan_security": loan_security.loan_security,
+			"qty": loan_security.qty
+		})
+
+	return unpledge_request.as_dict()
 
 
 

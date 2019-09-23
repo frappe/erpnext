@@ -11,7 +11,8 @@
   "unit_of_measurement",
   "column_break_3",
   "haircut",
-  "loan_security_price"
+  "loan_security_price",
+  "disabled"
  ],
  "fields": [
   {
@@ -54,9 +55,15 @@
    "fieldtype": "Data",
    "label": "Loan Security Code",
    "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
- "modified": "2019-09-11 12:24:15.684200",
+ "modified": "2019-09-21 03:10:10.161605",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security",

@@ -1,0 +1,106 @@
+{
+ "autoname": "LSU-.{applicant}.-.#####",
+ "creation": "2019-09-21 13:23:16.117028",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "loan_details_section",
+  "applicant",
+  "column_break_3",
+  "loan",
+  "unpledge_status",
+  "unpledge_time",
+  "loan_security_details_section",
+  "loan_security_pledges",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "loan_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan  Details"
+  },
+  {
+   "fetch_from": "loan_application.applicant",
+   "fieldname": "applicant",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Applicant",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "loan",
+   "fieldtype": "Link",
+   "label": "Loan",
+   "options": "Loan"
+  },
+  {
+   "default": "Requested",
+   "fieldname": "unpledge_status",
+   "fieldtype": "Select",
+   "label": "Unpledge Status",
+   "options": "Requested\nUnpledged",
+   "read_only": 1
+  },
+  {
+   "fieldname": "unpledge_time",
+   "fieldtype": "Datetime",
+   "label": "Unpledge Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "loan_security_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Security Details"
+  },
+  {
+   "fieldname": "loan_security_pledges",
+   "fieldtype": "Table",
+   "label": "Loan Security Pledges",
+   "options": "Unpledge",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Loan Security Unpledge",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2019-09-22 11:27:01.853996",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Loan Security Unpledge",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "search_fields": "applicant",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

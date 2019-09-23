@@ -28,6 +28,10 @@ def get_data():
 			{
 				'label': _('Interest Accrual'),
 				'items': ['Loan Interest Accrual']
+			},
+			{
+				'label': _('Loan Security Unpledge'),
+				'items': ['Loan Security Unpledge']
 			}
 		]
 	}

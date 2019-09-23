@@ -116,7 +116,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "Sanctioned\nPartially Disbursed\nDisbursed\nRepaid/Closed",
+   "options": "Sanctioned\nPartially Disbursed\nDisbursed\nLoan Closure Requested\nRepaid/Closed",
    "read_only": 1
   },
   {
@@ -135,8 +135,7 @@
    "fieldname": "loan_amount",
    "fieldtype": "Currency",
    "label": "Loan Amount",
-   "options": "Company:company:default_currency",
-   "reqd": 1
+   "options": "Company:company:default_currency"
   },
   {
    "fetch_from": "loan_type.rate_of_interest",
@@ -153,6 +152,7 @@
    "label": "Disbursement Date"
   },
   {
+   "depends_on": "is_term_loan",
    "fieldname": "repayment_start_date",
    "fieldtype": "Date",
    "label": "Repayment Start Date"
@@ -331,6 +331,7 @@
    "fieldname": "maximum_loan_value",
    "fieldtype": "Currency",
    "label": "Maximum Loan Value",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -339,7 +340,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-12 21:48:22.425493",
+ "modified": "2019-09-22 07:17:55.601779",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

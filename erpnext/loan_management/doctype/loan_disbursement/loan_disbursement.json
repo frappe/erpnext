@@ -16,7 +16,10 @@
   "disbursed_amount",
   "amended_from",
   "accounting_dimensions_section",
-  "cost_center"
+  "cost_center",
+  "section_break_13",
+  "customer_details_section",
+  "bank_account_number"
  ],
  "fields": [
   {
@@ -91,10 +94,24 @@
   {
    "fieldname": "section_break_7",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "customer_details_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Details"
+  },
+  {
+   "fieldname": "bank_account_number",
+   "fieldtype": "Data",
+   "label": "Bank Account Number"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-18 06:00:43.544899",
+ "modified": "2019-09-23 03:36:17.699339",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Disbursement",

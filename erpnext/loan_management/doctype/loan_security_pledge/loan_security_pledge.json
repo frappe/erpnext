@@ -10,6 +10,8 @@
   "column_break_3",
   "loan",
   "loan_application",
+  "pledge_status",
+  "pledge_time",
   "loan_security_details_section",
   "loan_security_pledges",
   "total_security_value",
@@ -83,10 +85,22 @@
    "fieldname": "loan_details_section",
    "fieldtype": "Section Break",
    "label": "Loan  Details"
+  },
+  {
+   "fieldname": "pledge_status",
+   "fieldtype": "Data",
+   "label": "Pledge Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pledge_time",
+   "fieldtype": "Datetime",
+   "label": "Pledge Time",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-13 10:51:27.791079",
+ "modified": "2019-09-21 08:16:04.969590",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Pledge",
