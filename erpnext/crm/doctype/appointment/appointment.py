@@ -49,7 +49,9 @@ class Appointment(Document):
 
 	def on_update():
 		# Sync Calednar
-		cal_event = frappe.get_doc('Event,self.calendar_event
+		cal_event = frappe.get_doc('Event',self.calendar_event)
+		cal_event.starts_on = self.scheduled_time
+		cal_event.save()
 
 	def set_verified(self,email):
 		if not email == self.email:
