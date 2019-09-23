@@ -8,6 +8,7 @@ from collections import Counter
 from datetime import timedelta
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.desk.form.assign_to import add as add_assignemnt
 
@@ -15,10 +16,9 @@ from frappe.desk.form.assign_to import add as add_assignemnt
 class Appointment(Document):
 
 	def find_lead_by_email(self):
-		lead_list = frappe.get_list('Lead', filters = {'email_id':self.email}, ignore_permissions = True)
+		lead_list = frappe.get_list('Lead', filters = {'email_id':self.customer_email}, ignore_permissions = True)
 		if lead_list:
 			return lead_list[0].name
-		self.email = email
 		return None
 	
 	def before_insert(self):
@@ -40,9 +40,9 @@ class Appointment(Document):
 			# Set status to unverified
 			self.status = 'Unverified'
 			# Send email to confirm
-			verify_url = ''.join([frappe.utils.get_url(),'/book-appointment/verify?email=',self.email,'&appoitnment=',self.name])
-			message = ''.join(['Please click the following link to confirm your appointment:']+verify_url)
-			frappe.sendmail(recipients=[self.email], 
+			verify_url = ''.join([frappe.utils.get_url(),'/book-appointment/verify?email=',self.customer_email,'&appoitnment=',self.name])
+			message = ''.join(['Please click the following link to confirm your appointment:',verify_url])
+			frappe.sendmail(recipients=[self.customer_email], 
 							message=message,
 							subject=_('Appointment Confirmation'))
 			frappe.msgprint('Please check your email to confirm the appointment')
@@ -54,7 +54,7 @@ class Appointment(Document):
 		cal_event.save()
 
 	def set_verified(self,email):
-		if not email == self.email:
+		if not email == self.customer_email:
 			frappe.throw('Email verification failed.')
 		# Create new lead
 		self.create_lead()
