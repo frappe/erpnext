@@ -7,10 +7,12 @@ frappe.ui.form.on("Sales Order", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
+			'Pick List': 'Pick List',
 			'Sales Invoice': 'Invoice',
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order',
-			'Project': 'Project'
+			'Project': 'Project',
+			'Payment Entry': "Payment"
 		}
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
 
@@ -109,7 +111,9 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		this._super();
 		let allow_delivery = false;
 
-		if(doc.docstatus==1) {
+		if (doc.docstatus==1) {
+			this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
+
 			if(this.frm.has_perm("submit")) {
 				if(doc.status === 'On Hold') {
 				   // un-hold
@@ -231,6 +235,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		}
 
 		this.order_type(doc);
+	},
+
+	create_pick_list() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.create_pick_list",
+			frm: this.frm
+		})
 	},
 
 	make_work_order() {

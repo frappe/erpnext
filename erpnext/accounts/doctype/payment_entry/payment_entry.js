@@ -533,28 +533,88 @@ frappe.ui.form.on('Payment Entry', {
 		const today = frappe.datetime.get_today();
 		const fields = [
 			{fieldtype:"Section Break", label: __("Posting Date")},
-			{fieldtype:"Date", label: __("From Date"),
-				fieldname:"from_posting_date", default:frappe.datetime.add_days(today, -30)},
+			{fieldtype:"Date", label: __("From Date"),fieldname:"from_posting_date", default:frappe.datetime.add_days(today, -30)},
 			{fieldtype:"Column Break"},
 			{fieldtype:"Date", label: __("To Date"), fieldname:"to_posting_date", default:today},
 			{fieldtype:"Section Break", label: __("Due Date")},
 			{fieldtype:"Date", label: __("From Date"), fieldname:"from_due_date"},
 			{fieldtype:"Column Break"},
 			{fieldtype:"Date", label: __("To Date"), fieldname:"to_due_date"},
+			{fieldtype:"Section Break", label: __("Due Date")},
+			{fieldtype:"Button", label: __("Due Today"), fieldname:"today_overdue"},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Button", label: __("30 Days"), fieldname:"thirty_days_overdue"},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Button", label: __("60 Days"), fieldname:"sixty_days_overdue"},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Button", label: __("90+ Days"), fieldname:"ninety_days_overdue"},
 			{fieldtype:"Section Break", label: __("Outstanding Amount")},
-			{fieldtype:"Float", label: __("Greater Than Amount"),
-				fieldname:"outstanding_amt_greater_than", default: 0},
+			{fieldtype:"Float", label: __("Greater Than Amount"),fieldname:"outstanding_amt_greater_than", default: 0},
 			{fieldtype:"Column Break"},
 			{fieldtype:"Float", label: __("Less Than Amount"), fieldname:"outstanding_amt_less_than"},
 			{fieldtype:"Section Break"},
 			{fieldtype:"Check", label: __("Allocate Payment Amount"), fieldname:"allocate_payment_amount", default:1},
 		];
 
-		frappe.prompt(fields, function(filters){
-			frappe.flags.allocate_payment_amount = true;
-			frm.events.validate_filters_data(frm, filters);
-			frm.events.get_outstanding_documents(frm, filters);
-		}, __("Filters"), __("Get Outstanding Invoices"));
+		var d = new frappe.ui.Dialog({
+			'fields': fields,
+			primary_action: function(){
+				var filters = d.get_values();
+				frappe.flags.allocate_payment_amount = true;
+				frm.events.validate_filters_data(frm, filters);
+				frm.events.get_outstanding_documents(frm, filters);
+				d.hide();
+			},
+			primary_action_label: 'Get Outstanding Invoices'
+		});
+		d.fields_dict.today_overdue.$input.on('click',function(event){
+			var date = new Date();
+			var to = new Date().toISOString().slice(0, 10)
+			//date.setDate(date.getDate() - 29);
+			//var from = date.toISOString().slice(0, 10)
+			d.set_value('from_due_date','')
+			d.set_value('to_due_date',to)
+			d.set_value('from_posting_date','')
+			d.set_value('to_posting_date','')
+		});	
+		d.fields_dict.thirty_days_overdue.$input.on('click',function(event){
+			//var date = new Date();
+			//date.setDate(date.getDate() - 59);
+			//var from = date.toISOString().slice(0, 10)
+			var date = new Date();
+			date.setDate(date.getDate() - 30);
+			var to = date.toISOString().slice(0, 10)
+			d.set_value('from_due_date','')
+			d.set_value('to_due_date',to)
+			d.set_value('from_posting_date','')
+			d.set_value('to_posting_date','')
+		});	
+		d.fields_dict.sixty_days_overdue.$input.on('click',function(event){
+			//var date = new Date();
+			//date.setDate(date.getDate() - 89);
+			//var from = date.toISOString().slice(0, 10)
+			var date = new Date();
+			date.setDate(date.getDate() - 60);
+			var to = date.toISOString().slice(0, 10)
+			d.set_value('from_due_date','')
+			d.set_value('to_due_date',to)
+			d.set_value('from_posting_date','')
+			d.set_value('to_posting_date','')
+		});	
+		d.fields_dict.ninety_days_overdue.$input.on('click',function(event){
+			var date = new Date();
+			//date.setDate(date.getDate() - 59);
+			//var from = date.toISOString().slice(0, 10)
+			date.setDate(date.getDate() - 90);
+			var to = date.toISOString().slice(0, 10)
+			d.set_value('from_due_date','')
+			d.set_value('to_due_date',to)
+			d.set_value('from_posting_date','')
+			d.set_value('to_posting_date','')
+		});	
+		d.show();
+			
+
 	},
 
 	validate_filters_data: function(frm, filters) {
@@ -720,7 +780,7 @@ frappe.ui.form.on('Payment Entry', {
 
 		$.each(frm.doc.references || [], function(i, row) {
 			row.allocated_amount = 0 //If allocate payment amount checkbox is unchecked, set zero to allocate amount
-			if(frappe.flags.allocate_payment_amount){
+			if(frappe.flags.allocate_payment_amount != 0){
 				if(row.outstanding_amount > 0 && allocated_positive_outstanding > 0) {
 					if(row.outstanding_amount >= allocated_positive_outstanding) {
 						row.allocated_amount = allocated_positive_outstanding;

@@ -126,7 +126,7 @@ class PaymentEntry(AccountsController):
 			if not self.party:
 				frappe.throw(_("Party is mandatory"))
 
-			_party_name = "title" if self.party_type == "Student" else self.party_type.lower() + "_name"
+			_party_name = "title" if self.party_type in ("Student", "Shareholder") else self.party_type.lower() + "_name"
 			self.party_name = frappe.db.get_value(self.party_type, self.party, _party_name)
 
 		if self.party:
@@ -550,7 +550,7 @@ class PaymentEntry(AccountsController):
 		self.set_unallocated_amount()
 
 @frappe.whitelist()
-def get_outstanding_reference_documents(args):
+def get_outstanding_reference_documents(args, print=1):
 
 	if isinstance(args, string_types):
 		args = json.loads(args)
@@ -623,7 +623,7 @@ def get_outstanding_reference_documents(args):
 
 	data = negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 
-	if not data:
+	if not data and print ==1:
 		frappe.msgprint(_("No outstanding invoices found for the {0} {1} which qualify the filters you have specified.")
 			.format(args.get("party_type").lower(), frappe.bold(args.get("party"))))
 
@@ -938,7 +938,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 
 	# bank or cash
 	bank = get_default_bank_cash_account(doc.company, "Bank", mode_of_payment=doc.get("mode_of_payment"),
-		account=bank_account)
+		account=bank_account, currency=party_account_currency)
 
 	paid_amount = received_amount = 0
 	if party_account_currency == bank.account_currency:
@@ -947,10 +947,15 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		paid_amount = abs(outstanding_amount)
 		if bank_amount:
 			received_amount = bank_amount
+		else:
+			received_amount = paid_amount * doc.conversion_rate
 	else:
 		received_amount = abs(outstanding_amount)
 		if bank_amount:
 			paid_amount = bank_amount
+		else:
+			# if party account currency and bank currency is different then populate paid amount as well
+			paid_amount = received_amount * doc.conversion_rate
 
 	pe = frappe.new_doc("Payment Entry")
 	pe.payment_type = payment_type
