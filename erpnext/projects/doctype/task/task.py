@@ -40,9 +40,9 @@ class Task(NestedSet):
 			frappe.throw(_("'Actual Start Date' can not be greater than 'Actual End Date'"))
 
 	def validate_status(self):
-		if self.status!=self.get_db_value("status") and self.status == "Completed":
+		if self.status!=self.get_db_value("status") and self.status == "Closed":
 			for d in self.depends_on:
-				if frappe.db.get_value("Task", d.task, "status") != "Completed":
+				if frappe.db.get_value("Task", d.task, "status") != "Closed":
 					frappe.throw(_("Cannot close task {0} as its dependant task {1} is not closed.").format(frappe.bold(self.name), frappe.bold(d.task)))
 
 			from frappe.desk.form.assign_to import clear
@@ -53,9 +53,9 @@ class Task(NestedSet):
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
 
 		if self.progress == 100:
-			self.status = 'Completed'
+			self.status = 'Closed'
 
-		if self.status == 'Completed':
+		if self.status == 'Closed':
 			self.progress = 100
 
 	def update_depends_on(self):
@@ -77,7 +77,7 @@ class Task(NestedSet):
 		self.populate_depends_on()
 
 	def unassign_todo(self):
-		if self.status in ("Completed", "Cancelled"):
+		if self.status in ("Closed", "Cancelled"):
 			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
 
@@ -161,7 +161,7 @@ class Task(NestedSet):
 		self.update_nsm_model()
 
 	def update_status(self):
-		if self.status not in ('Cancelled', 'Completed') and self.exp_end_date:
+		if self.status not in ('Cancelled', 'Closed') and self.exp_end_date:
 			from datetime import datetime
 			if self.exp_end_date < datetime.now().date():
 				self.db_set('status', 'Overdue', update_modified=False)
@@ -198,7 +198,7 @@ def set_multiple_status(names, status):
 		task.save()
 
 def set_tasks_as_overdue():
-	tasks = frappe.get_all("Task", filters={'status':['not in',['Cancelled', 'Completed']]})
+	tasks = frappe.get_all("Task", filters={'status':['not in',['Cancelled', 'Closed']]})
 	for task in tasks:
 		frappe.get_doc("Task", task.name).update_status()
 
