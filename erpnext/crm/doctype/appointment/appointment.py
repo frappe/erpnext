@@ -33,12 +33,10 @@ class Appointment(Document):
 		self.lead = self.find_lead_by_email()
 
 	def after_insert(self):
-		# Auto assign
-		self.auto_assign()
-		# Check if lead was found 
 		if(self.lead):
 			# Create Calendar event
 			self.create_calendar_event()
+			self.auto_assign()
 		else:
 			# Set status to unverified
 			self.status = 'Unverified'
@@ -77,6 +75,7 @@ class Appointment(Document):
 		self.status = 'Open'
 		# Create calender event
 		self.create_calendar_event()
+		self.auto_assign()
 		self.save(ignore_permissions=True)
 		frappe.db.commit()
 
