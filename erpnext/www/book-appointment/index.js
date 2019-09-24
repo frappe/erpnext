@@ -195,7 +195,11 @@ function setup_details_page() {
 }
 
 async function submit() {
-    // form validation here
+    let form = document.querySelector('#customer-form');
+    if(!form.checkValidity()){
+        form.reportValidity();
+        return;
+    }
     get_form_data();
     let appointment = (await frappe.call({
         method: 'erpnext.www.book-appointment.index.create_appointment',
@@ -212,6 +216,7 @@ async function submit() {
 }
 
 function get_form_data() {
+    
     contact = {};
     contact.name = document.getElementById('customer_name').value;
     contact.number = document.getElementById('customer_number').value;
