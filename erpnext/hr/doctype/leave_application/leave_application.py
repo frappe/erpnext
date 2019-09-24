@@ -439,7 +439,7 @@ def get_leave_details(employee, date):
 	return ret
 
 @frappe.whitelist()
-def get_leave_balance_on(employee, leave_type, date, to_date=nowdate(), consider_all_leaves_in_the_allocation_period=False):
+def get_leave_balance_on(employee, leave_type, date, to_date=None, consider_all_leaves_in_the_allocation_period=False):
 	'''
 		Returns leave balance till date
 		:param employee: employee name
@@ -448,6 +448,9 @@ def get_leave_balance_on(employee, leave_type, date, to_date=nowdate(), consider
 		:param to_date: future date to check for allocation expiry
 		:param consider_all_leaves_in_the_allocation_period: consider all leaves taken till the allocation end date
 	'''
+
+	if not to_date:
+		to_date = nowdate()
 
 	allocation_records = get_leave_allocation_records(employee, date, leave_type)
 	allocation = allocation_records.get(leave_type, frappe._dict())
@@ -745,10 +748,12 @@ def get_approved_leaves_for_period(employee, leave_type, from_date, to_date):
 	return leave_days
 
 @frappe.whitelist()
-def get_leave_approver(employee, department=None):
-	if not department:
-		department = frappe.db.get_value('Employee', employee, 'department')
+def get_leave_approver(employee):
+	leave_approver, department = frappe.db.get_value("Employee",
+		employee, ["leave_approver", "department"])
 
-	if department:
-		return frappe.db.get_value('Department Approver', {'parent': department,
+	if not leave_approver and department:
+		leave_approver = frappe.db.get_value('Department Approver', {'parent': department,
 			'parentfield': 'leave_approvers', 'idx': 1}, 'approver')
+
+	return leave_approver

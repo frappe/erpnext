@@ -15,12 +15,17 @@ class LandedCostVoucher(Document):
 		for pr in self.get("purchase_receipts"):
 			if pr.receipt_document_type and pr.receipt_document:
 				pr_items = frappe.db.sql("""select pr_item.item_code, pr_item.description,
-					pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.name, pr_item.cost_center
+					pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.name,
+					pr_item.cost_center, pr_item.asset
 					from `tab{doctype} Item` pr_item where parent = %s
-					and exists(select name from tabItem where name = pr_item.item_code and is_stock_item = 1)
+					and exists(select name from tabItem
+						where name = pr_item.item_code and (is_stock_item = 1 or is_fixed_asset=1))
 					""".format(doctype=pr.receipt_document_type), pr.receipt_document, as_dict=True)
 
 				for d in pr_items:
+					if d.asset and frappe.db.get_value("Asset", d.asset, 'docstatus') == 1:
+						continue
+
 					item = self.append("items")
 					item.item_code = d.item_code
 					item.description = d.description
