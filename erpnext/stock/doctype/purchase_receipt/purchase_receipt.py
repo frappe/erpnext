@@ -15,6 +15,7 @@ from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from six import iteritems
 
 form_grid_templates = {
@@ -278,8 +279,7 @@ class PurchaseReceipt(BuyingController):
 					d.rejected_warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(d.warehouse)
 
-		if not is_cwip_accounting_disabled():
-			self.get_asset_gl_entry(gl_entries)
+		self.get_asset_gl_entry(gl_entries, expenses_included_in_valuation)
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("taxes"):
@@ -333,14 +333,23 @@ class PurchaseReceipt(BuyingController):
 
 		return process_gl_map(gl_entries)
 
-	def get_asset_gl_entry(self, gl_entries):
+	def get_asset_gl_entry(self, gl_entries, expenses_included_in_valuation=None):
+		arbnb_account, cwip_account = None, None
+
+		cwip_disabled = is_cwip_accounting_disabled()
+
+		if not expenses_included_in_valuation:
+			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+
 		for d in self.get("items"):
-			if d.is_fixed_asset:
+			if d.is_fixed_asset and not (arbnb_account and cwip_account):
 				arbnb_account = self.get_company_default("asset_received_but_not_billed")
 
 				# CWIP entry
 				cwip_account = get_asset_account("capital_work_in_progress_account", d.asset,
 					company = self.company)
+
+			if d.is_fixed_asset and not cwip_disabled:
 
 				asset_amount = flt(d.net_amount) + flt(d.item_tax_amount/self.conversion_rate)
 				base_asset_amount = flt(d.base_net_amount + d.item_tax_amount)
@@ -367,6 +376,36 @@ class PurchaseReceipt(BuyingController):
 					"credit_in_account_currency": (base_asset_amount
 						if asset_rbnb_currency == self.company_currency else asset_amount)
 				}, item=d))
+
+			if d.is_fixed_asset and flt(d.landed_cost_voucher_amount):
+				asset_account = (get_asset_category_account(d.asset, 'fixed_asset_account',
+					company = self.company) if cwip_disabled else cwip_account)
+
+				gl_entries.append(self.get_gl_dict({
+					"account": expenses_included_in_valuation,
+					"against": asset_account,
+					"cost_center": d.cost_center,
+					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+					"credit": flt(d.landed_cost_voucher_amount),
+					"project": d.project
+				}, item=d))
+
+				gl_entries.append(self.get_gl_dict({
+					"account": asset_account,
+					"against": expenses_included_in_valuation,
+					"cost_center": d.cost_center,
+					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+					"debit": flt(d.landed_cost_voucher_amount),
+					"project": d.project
+				}, item=d))
+
+				if d.asset:
+					doc = frappe.get_doc("Asset", d.asset)
+					frappe.db.set_value("Asset", d.asset, "gross_purchase_amount",
+						doc.gross_purchase_amount + flt(d.landed_cost_voucher_amount))
+
+					frappe.db.set_value("Asset", d.asset, "purchase_receipt_amount",
+						doc.purchase_receipt_amount + flt(d.landed_cost_voucher_amount))
 
 		return gl_entries
 

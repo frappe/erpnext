@@ -60,7 +60,7 @@ def get_details(filters):
 	conditions = ""
 
 	if filters.get("customer"):
-		conditions += " AND c.name = " + filters.get("customer")
+		conditions += " AND c.name = '" + filters.get("customer") + "'"
 
 	return frappe.db.sql("""SELECT
 			c.name, c.customer_name,
@@ -69,6 +69,6 @@ def get_details(filters):
 		FROM `tabCustomer` c, `tabCustomer Credit Limit` ccl
 		WHERE
 			c.name = ccl.parent
-			AND ccl.company = %s
-			{0}
-	""".format(conditions), (filters.get("company")), as_dict=1) #nosec
+			AND ccl.company = '{0}'
+			{1}
+	""".format( filters.get("company"),conditions), as_dict=1) #nosec
