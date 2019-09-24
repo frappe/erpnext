@@ -29,11 +29,11 @@ def make_timesheet_for_projects(current_date	):
 def close_tasks(current_date):
 	for task in frappe.get_all("Task", ["name"], {"status": "Open", "exp_end_date": ("<", current_date)}):
 		task = frappe.get_doc("Task", task.name)
-		task.status = "Closed"
+		task.status = "Completed"
 		task.save()
 
 def make_project(current_date):
-	if not frappe.db.exists('Project', 
+	if not frappe.db.exists('Project',
 		"New Product Development " + current_date.strftime("%Y-%m-%d")):
 		project = frappe.get_doc({
 			"doctype": "Project",

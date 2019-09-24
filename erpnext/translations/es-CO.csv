@@ -1,1 +1,3 @@
-apps/erpnext/erpnext/stock/doctype/item/item.py +515,Barcode {0} is not a valid {1} code,El código de barras {0} no es un código válido {1}
+apps/erpnext/erpnext/stock/doctype/item/item.py +529,Barcode {0} is not a valid {1} code,El código de barras {0} no es un código válido {1}
+apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.py +190,{0} on Half day Leave on {1},{0} Ausente medio día en {1}
+apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.py +200,{0} does not have a Healthcare Practitioner Schedule. Add it in Healthcare Practitioner master,{0} no tiene agenda del profesional médico . Añádelo al médico correspondiente.

@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import unittest
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.employee_tax_exemption_declaration.employee_tax_exemption_declaration import DuplicateDeclarationError
 
 class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 	def setUp(self):
@@ -15,71 +16,71 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 		create_exemption_category()
 		frappe.db.sql("""delete from `tabEmployee Tax Exemption Declaration`""")
 
-	def test_exemption_amount_greater_than_category_max(self):
-		declaration = frappe.get_doc({
-			"doctype": "Employee Tax Exemption Declaration",
-			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"payroll_period": "_Test Payroll Period",
-			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
-							exemption_category = "_Test Category",
-							amount = 150000)]
-		})
-		self.assertRaises(frappe.ValidationError, declaration.save)
-		declaration = frappe.get_doc({
-			"doctype": "Employee Tax Exemption Declaration",
-			"payroll_period": "_Test Payroll Period",
-			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
-							exemption_category = "_Test Category",
-							amount = 90000)]
-		})
-		self.assertTrue(declaration.save)
-
 	def test_duplicate_category_in_declaration(self):
 		declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
 			"company": erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
-			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
-							exemption_category = "_Test Category",
-							amount = 100000),
-							dict(exemption_sub_category = "_Test Sub Category",
-							exemption_category = "_Test Category",
-							amount = 50000),
-							]
+			"declarations": [
+				dict(exemption_sub_category = "_Test Sub Category",
+					exemption_category = "_Test Category",
+					amount = 100000),
+				dict(exemption_sub_category = "_Test Sub Category",
+					exemption_category = "_Test Category",
+					amount = 50000)
+			]
 		})
 		self.assertRaises(frappe.ValidationError, declaration.save)
 
-	def test_duplicate_submission_for_payroll_period(self):
+	def test_duplicate_entry_for_payroll_period(self):
 		declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
 			"company":  erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
-			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
-							exemption_category = "_Test Category",
-							amount = 100000),
-							dict(exemption_sub_category = "_Test1 Sub Category",
-							exemption_category = "_Test Category",
-							amount = 50000),
-							]
+			"declarations": [
+				dict(exemption_sub_category = "_Test Sub Category",
+					exemption_category = "_Test Category",
+					amount = 100000),
+				dict(exemption_sub_category = "_Test1 Sub Category",
+					exemption_category = "_Test Category",
+					amount = 50000),
+			]
 		}).insert()
-		declaration.submit()
-		self.assertEquals(declaration.docstatus, 1)
+
 		duplicate_declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
 			"company":  erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
-			"declarations": [dict(exemption_sub_category = "_Test Sub Category",
-							exemption_category = "_Test Category",
-							amount = 100000)
-							]
-		}).insert()
-		self.assertRaises(frappe.DocstatusTransitionError, duplicate_declaration.submit)
+			"declarations": [
+				dict(exemption_sub_category = "_Test Sub Category",
+					exemption_category = "_Test Category",
+					amount = 100000)
+			]
+		})
+		self.assertRaises(DuplicateDeclarationError, duplicate_declaration.insert)
 		duplicate_declaration.employee = frappe.get_value("Employee", {"user_id":"employee1@taxexepmtion.com"}, "name")
-		self.assertTrue(duplicate_declaration.submit)
+		self.assertTrue(duplicate_declaration.insert)
+
+	def test_exemption_amount(self):
+		declaration = frappe.get_doc({
+			"doctype": "Employee Tax Exemption Declaration",
+			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
+			"company":  erpnext.get_default_company(),
+			"payroll_period": "_Test Payroll Period",
+			"declarations": [
+				dict(exemption_sub_category = "_Test Sub Category",
+					exemption_category = "_Test Category",
+					amount = 80000),
+				dict(exemption_sub_category = "_Test1 Sub Category",
+					exemption_category = "_Test Category",
+					amount = 60000),
+			]
+		}).insert()
+
+		self.assertEqual(declaration.total_exemption_amount, 100000)
 
 def create_payroll_period():
 	if not frappe.db.exists("Payroll Period", "_Test Payroll Period"):

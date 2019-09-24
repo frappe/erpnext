@@ -39,18 +39,19 @@ class TestSalaryStructure(unittest.TestCase):
 			holiday_list.save()
 
 	def test_amount_totals(self):
+		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
 		sal_slip = frappe.get_value("Salary Slip", {"employee_name":"test_employee_2@salary.com"})
 		if not sal_slip:
 			sal_slip = make_employee_salary_slip("test_employee_2@salary.com", "Monthly", "Salary Structure Sample")
 			self.assertEqual(sal_slip.get("salary_structure"), 'Salary Structure Sample')
-			self.assertEqual(sal_slip.get("earnings")[0].amount, 25000)
+			self.assertEqual(sal_slip.get("earnings")[0].amount, 50000)
 			self.assertEqual(sal_slip.get("earnings")[1].amount, 3000)
-			self.assertEqual(sal_slip.get("earnings")[2].amount, 12500)
-			self.assertEqual(sal_slip.get("gross_pay"), 40500)
+			self.assertEqual(sal_slip.get("earnings")[2].amount, 25000)
+			self.assertEqual(sal_slip.get("gross_pay"), 78000)
 			self.assertEqual(sal_slip.get("deductions")[0].amount, 5000)
 			self.assertEqual(sal_slip.get("deductions")[1].amount, 5000)
 			self.assertEqual(sal_slip.get("total_deduction"), 10000)
-			self.assertEqual(sal_slip.get("net_pay"), 30500)
+			self.assertEqual(sal_slip.get("net_pay"), 68000)
 
 	def test_whitespaces_in_formula_conditions_fields(self):
 		salary_structure = make_salary_structure("Salary Structure Sample", "Monthly", dont_submit=True)
@@ -71,6 +72,19 @@ class TestSalaryStructure(unittest.TestCase):
 		for row in salary_structure.deductions:
 			self.assertFalse(("\n" in row.formula) or ("\n" in row.condition))
 
+	def test_salary_structures_assignment(self):
+		salary_structure = make_salary_structure("Salary Structure Sample", "Monthly")
+		employee = "test_assign_stucture@salary.com"
+		employee_doc_name = make_employee(employee)
+		# clear the already assigned stuctures
+		frappe.db.sql('''delete from `tabSalary Structure Assignment` where employee=%s and salary_structure=%s ''',
+					  ("test_assign_stucture@salary.com",salary_structure.name))
+		#test structure_assignment
+		salary_structure.assign_salary_structure(employee=employee_doc_name,from_date='2013-01-01',base=5000,variable=200)
+		salary_structure_assignment = frappe.get_doc("Salary Structure Assignment",{'employee':employee_doc_name, 'from_date':'2013-01-01'})
+		self.assertEqual(salary_structure_assignment.docstatus, 1)
+		self.assertEqual(salary_structure_assignment.base, 5000)
+		self.assertEqual(salary_structure_assignment.variable, 200)
 
 def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None, test_tax=False):
 	if test_tax:

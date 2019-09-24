@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from datetime import datetime
+from frappe.utils import getdate
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import DuplicateAssignment
 
 def execute():
@@ -31,14 +32,22 @@ def execute():
 			where is_active='Yes'
 			AND employee in (select name from `tabEmployee` where ifNull(status, '') != 'Left')
 		""".format(cols), as_dict=1)
-	
+
 	for d in ss_details:
 		try:
+			joining_date, relieving_date = frappe.db.get_value("Employee", d.employee,
+				["date_of_joining", "relieving_date"])
+			from_date = d.from_date
+			if joining_date and getdate(from_date) < joining_date:
+				from_date = joining_date
+			elif relieving_date and getdate(from_date) > relieving_date:
+				continue
+
 			s = frappe.new_doc("Salary Structure Assignment")
 			s.employee = d.employee
 			s.employee_name = d.employee_name
 			s.salary_structure = d.salary_structure
-			s.from_date = d.from_date
+			s.from_date = from_date
 			s.to_date = d.to_date if isinstance(d.to_date, datetime) else None
 			s.base = d.get("base")
 			s.variable = d.get("variable")

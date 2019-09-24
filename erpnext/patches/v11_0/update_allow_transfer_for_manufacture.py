@@ -6,7 +6,7 @@ import frappe
 
 def execute():
 	frappe.reload_doc('stock', 'doctype', 'item')
-	frappe.db.sql(""" update `tabItem` set allow_transfer_for_manufacture = 1
+	frappe.db.sql(""" update `tabItem` set include_item_in_manufacturing = 1
 		where ifnull(is_stock_item, 0) = 1""")
 
 	for doctype in ['BOM Item', 'Work Order Item', 'BOM Explosion Item']:
@@ -14,7 +14,7 @@ def execute():
 
 		frappe.db.sql(""" update `tab{0}` child, tabItem item
 			set
-				child.allow_transfer_for_manufacture = 1
+				child.include_item_in_manufacturing = 1
 			where
 				child.item_code = item.name and ifnull(item.is_stock_item, 0) = 1
 		""".format(doctype))

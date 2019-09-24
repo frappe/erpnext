@@ -8,14 +8,13 @@ import { ProfileDialog } from './components/profile_dialog';
 
 // helpers
 import './hub_call';
-import EventEmitter from './event_emitter';
 
 frappe.provide('hub');
 frappe.provide('erpnext.hub');
 frappe.provide('frappe.route');
 
-$.extend(erpnext.hub, EventEmitter.prototype);
-$.extend(frappe.route, EventEmitter.prototype);
+frappe.utils.make_event_emitter(frappe.route);
+frappe.utils.make_event_emitter(erpnext.hub);
 
 erpnext.hub.Marketplace = class Marketplace {
 	constructor({ parent }) {

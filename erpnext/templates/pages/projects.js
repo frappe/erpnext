@@ -3,7 +3,7 @@ frappe.ready(function() {
 	$('.task-status-switch').on('click', function() {
 		var $btn = $(this);
 		if($btn.attr('data-status')==='Open') {
-			reload_items('closed', 'task', $btn);
+			reload_items('completed', 'task', $btn);
 		} else {
 			reload_items('open', 'task', $btn);
 		}
@@ -13,7 +13,7 @@ frappe.ready(function() {
 	$('.issue-status-switch').on('click', function() {
 		var $btn = $(this);
 		if($btn.attr('data-status')==='Open') {
-			reload_items('closed', 'issue', $btn);
+			reload_items('completed', 'issue', $btn);
 		} else {
 			reload_items('open', 'issue', $btn);
 		}
@@ -61,9 +61,9 @@ frappe.ready(function() {
 
 				// update status
 				if(item_status==='open') {
-					$btn.html(__('Show closed')).attr('data-status', 'Open');
+					$btn.html(__('Show Completed')).attr('data-status', 'Open');
 				} else {
-					$btn.html(__('Show open')).attr('data-status', 'Closed');
+					$btn.html(__('Show Open')).attr('data-status', 'Completed');
 				}
 			}
 		});
@@ -72,8 +72,8 @@ frappe.ready(function() {
 
 	var more_items = function(item, item_status){
 		if(item_status) {
-			var item_status = $('.project-'+ item +'-section .btn-group .bold').hasClass('btn-closed-'+ item)
-				? 'closed' : 'open';
+			var item_status = $('.project-'+ item +'-section .btn-group .bold').hasClass('btn-completed-'+ item)
+				? 'completed' : 'open';
 		}
 		$.ajax({
 			method: "GET",

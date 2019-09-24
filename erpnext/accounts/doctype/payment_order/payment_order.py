@@ -11,18 +11,20 @@ from frappe.model.document import Document
 
 class PaymentOrder(Document):
 	def on_submit(self):
-		self.update_payment_request_status()
+		self.update_payment_status()
 
 	def on_cancel(self):
-		self.update_payment_request_status(cancel=True)
+		self.update_payment_status(cancel=True)
 
-	def update_payment_request_status(self, cancel=False):
+	def update_payment_status(self, cancel=False):
 		status = 'Payment Ordered'
 		if cancel:
 			status = 'Initiated'
 
+		ref_field = "status" if self.payment_order_type == "Payment Request" else "payment_order_status"
+
 		for d in self.references:
-			frappe.db.set_value('Payment Request', d.payment_request, 'status', status)
+			frappe.db.set_value(self.payment_order_type, d.get(frappe.scrub(self.payment_order_type)), ref_field, status)
 
 def get_mop_query(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql(""" select mode_of_payment from `tabPayment Order Reference`
@@ -60,7 +62,7 @@ def make_journal_entry(doc, supplier, mode_of_payment=None):
 	je.voucher_type = 'Bank Entry'
 	if mode_of_payment and mode_of_payment_type.get(mode_of_payment) == 'Cash':
 		je.voucher_type = "Cash Entry"
-		
+
 	paid_amt = 0
 	party_account = get_party_account('Supplier', supplier, doc.company)
 	for d in doc.references:

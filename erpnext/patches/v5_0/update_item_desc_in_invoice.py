@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from __future__ import unicode_literals
 import frappe
 from frappe.website.utils import find_first_image
 from frappe.utils import cstr
@@ -29,7 +30,7 @@ def execute():
 				image = item_details.get(d.item_code).image
 			else:
 				desc, image = extract_image_and_description(cstr(d.description))
-				
+
 				if not image:
 					item_detail = item_details.get(d.item_code)
 					if item_detail:

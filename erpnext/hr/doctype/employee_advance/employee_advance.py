@@ -13,7 +13,7 @@ class EmployeeAdvanceOverPayment(frappe.ValidationError):
 
 class EmployeeAdvance(Document):
 	def onload(self):
-		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings', 
+		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings',
 			'make_payment_via_journal_entry')
 
 	def validate(self):
@@ -47,7 +47,7 @@ class EmployeeAdvance(Document):
 		paid_amount = frappe.db.sql("""
 			select ifnull(sum(debit_in_account_currency), 0) as paid_amount
 			from `tabGL Entry`
-			where against_voucher_type = 'Employee Advance' 
+			where against_voucher_type = 'Employee Advance'
 				and against_voucher = %s
 				and party_type = 'Employee'
 				and party = %s
@@ -64,12 +64,20 @@ class EmployeeAdvance(Document):
 
 	def update_claimed_amount(self):
 		claimed_amount = frappe.db.sql("""
-			select sum(ifnull(allocated_amount, 0))
-			from `tabExpense Claim Advance`
-			where employee_advance = %s and docstatus=1 and allocated_amount > 0
-		""", self.name)[0][0]
+			SELECT sum(ifnull(allocated_amount, 0))
+			FROM `tabExpense Claim Advance` eca, `tabExpense Claim` ec
+			WHERE
+				eca.employee_advance = %s
+				AND ec.approval_status="Approved"
+				AND ec.name = eca.parent
+				AND ec.docstatus=1
+				AND eca.allocated_amount > 0
+		""", self.name)[0][0] or 0
 
-		frappe.db.set_value("Employee Advance", self.name, "claimed_amount", claimed_amount)
+		frappe.db.set_value("Employee Advance", self.name, "claimed_amount", flt(claimed_amount))
+		self.reload()
+		self.set_status()
+		frappe.db.set_value("Employee Advance", self.name, "status", self.status)
 
 @frappe.whitelist()
 def get_due_advance_amount(employee, posting_date):

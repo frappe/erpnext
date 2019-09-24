@@ -34,6 +34,9 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 
 	data = []
 	for d in item_list:
+		if not d.stock_qty:
+			continue
+
 		purchase_receipt = None
 		if d.purchase_receipt:
 			purchase_receipt = d.purchase_receipt
@@ -105,10 +108,10 @@ def get_conditions(filters):
 def get_items(filters, additional_query_columns):
 	conditions = get_conditions(filters)
 	match_conditions = frappe.build_match_conditions("Purchase Invoice")
-	
+
 	if match_conditions:
 		match_conditions = " and {0} ".format(match_conditions)
-	
+
 	if additional_query_columns:
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
 

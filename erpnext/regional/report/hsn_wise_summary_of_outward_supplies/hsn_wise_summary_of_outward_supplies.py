@@ -87,7 +87,10 @@ def get_conditions(filters):
 	conditions = ""
 
 	for opts in (("company", " and company=%(company)s"),
-		("gst_hsn_code", " and gst_hsn_code=%(gst_hsn_code)s")):
+		("gst_hsn_code", " and gst_hsn_code=%(gst_hsn_code)s"),
+		("company_gstin", " and company_gstin=%(company_gstin)s"),
+		("from_date", " and posting_date >= %(from_date)s"),
+		("to_date", "and posting_date <= %(to_date)s")):
 			if filters.get(opts[0]):
 				conditions += opts[1]
 
@@ -193,7 +196,7 @@ def get_merged_data(columns, data):
 			add_column_index.append(i)
 
 	for row in data:
-		if merged_hsn_dict.has_key(row[0]):
+		if row[0] in merged_hsn_dict:
 			to_add_row = merged_hsn_dict.get(row[0])
 
 			# add columns from the add_column_index table

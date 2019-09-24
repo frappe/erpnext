@@ -8,7 +8,7 @@ import unittest
 
 from erpnext.accounts.party import get_due_date
 from frappe.test_runner import make_test_records
-from erpnext.exceptions import PartyFrozen, PartyDisabled
+from erpnext.exceptions import PartyFrozen
 from frappe.utils import flt
 from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 from erpnext.tests.utils import create_test_contact_and_address
@@ -25,7 +25,7 @@ class TestCustomer(unittest.TestCase):
 			make_test_records('Item')
 
 	def tearDown(self):
-		frappe.db.set_value("Customer", '_Test Customer', 'credit_limit', 0.0)
+		set_credit_limit('_Test Customer', '_Test Company', 0)
 
 	def test_party_details(self):
 		from erpnext.accounts.party import get_party_details
@@ -56,32 +56,94 @@ class TestCustomer(unittest.TestCase):
 		for key, value in iteritems(to_check):
 			self.assertEqual(value, details.get(key))
 
+	def test_party_details_tax_category(self):
+		from erpnext.accounts.party import get_party_details
+
+		frappe.delete_doc_if_exists("Address", "_Test Address With Tax Category-Billing")
+		frappe.delete_doc_if_exists("Address", "_Test Address With Tax Category-Shipping")
+
+		# Tax Category without Address
+		details = get_party_details("_Test Customer With Tax Category")
+		self.assertEqual(details.tax_category, "_Test Tax Category 1")
+
+		billing_address = frappe.get_doc(dict(
+			doctype='Address',
+			address_title='_Test Address With Tax Category',
+			tax_category='_Test Tax Category 2',
+			address_type='Billing',
+			address_line1='Station Road',
+			city='_Test City',
+			country='India',
+			links=[dict(
+				link_doctype='Customer',
+				link_name='_Test Customer With Tax Category'
+			)]
+		)).insert()
+		shipping_address = frappe.get_doc(dict(
+			doctype='Address',
+			address_title='_Test Address With Tax Category',
+			tax_category='_Test Tax Category 3',
+			address_type='Shipping',
+			address_line1='Station Road',
+			city='_Test City',
+			country='India',
+			links=[dict(
+				link_doctype='Customer',
+				link_name='_Test Customer With Tax Category'
+			)]
+		)).insert()
+
+		settings = frappe.get_single("Accounts Settings")
+		rollback_setting = settings.determine_address_tax_category_from
+
+		# Tax Category from Billing Address
+		settings.determine_address_tax_category_from = "Billing Address"
+		settings.save()
+		details = get_party_details("_Test Customer With Tax Category")
+		self.assertEqual(details.tax_category, "_Test Tax Category 2")
+
+		# Tax Category from Shipping Address
+		settings.determine_address_tax_category_from = "Shipping Address"
+		settings.save()
+		details = get_party_details("_Test Customer With Tax Category")
+		self.assertEqual(details.tax_category, "_Test Tax Category 3")
+
+		# Rollback
+		settings.determine_address_tax_category_from = rollback_setting
+		settings.save()
+		billing_address.delete()
+		shipping_address.delete()
+
 	def test_rename(self):
 		# delete communication linked to these 2 customers
-		for name in ("_Test Customer 1", "_Test Customer 1 Renamed"):
-			frappe.db.sql("""delete from `tabCommunication`
-				where communication_type='Comment' and reference_doctype=%s and reference_name=%s""",
+
+		new_name = "_Test Customer 1 Renamed"
+		for name in ("_Test Customer 1", new_name):
+			frappe.db.sql("""delete from `tabComment`
+				where reference_doctype=%s and reference_name=%s""",
 				("Customer", name))
 
 		# add comments
 		comment = frappe.get_doc("Customer", "_Test Customer 1").add_comment("Comment", "Test Comment for Rename")
 
 		# rename
-		frappe.rename_doc("Customer", "_Test Customer 1", "_Test Customer 1 Renamed")
+		frappe.rename_doc("Customer", "_Test Customer 1", new_name)
 
 		# check if customer renamed
-		self.assertTrue(frappe.db.exists("Customer", "_Test Customer 1 Renamed"))
+		self.assertTrue(frappe.db.exists("Customer", new_name))
 		self.assertFalse(frappe.db.exists("Customer", "_Test Customer 1"))
 
 		# test that comment gets linked to renamed doc
-		self.assertEqual(frappe.db.get_value("Communication", {
-			"communication_type": "Comment",
+		self.assertEqual(frappe.db.get_value("Comment", {
 			"reference_doctype": "Customer",
-			"reference_name": "_Test Customer 1 Renamed"
+			"reference_name": new_name,
+			"content": "Test Comment for Rename"
 		}), comment.name)
 
 		# rename back to original
-		frappe.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
+		frappe.rename_doc("Customer", new_name, "_Test Customer 1")
+
+		frappe.db.rollback()
 
 	def test_freezed_customer(self):
 		make_test_records("Item")
@@ -98,6 +160,15 @@ class TestCustomer(unittest.TestCase):
 
 		so.save()
 
+	def test_delete_customer_contact(self):
+		customer = frappe.get_doc(
+			get_customer_dict('_Test Customer for delete')).insert(ignore_permissions=True)
+
+		customer.mobile_no = "8989889890"
+		customer.save()
+		self.assertTrue(customer.customer_primary_contact)
+		frappe.delete_doc('Customer', customer.name)
+
 	def test_disabled_customer(self):
 		make_test_records("Item")
 
@@ -107,7 +178,7 @@ class TestCustomer(unittest.TestCase):
 
 		so = make_sales_order(do_not_save=True)
 
-		self.assertRaises(PartyDisabled, so.save)
+		self.assertRaises(frappe.ValidationError, so.save)
 
 		frappe.db.set_value("Customer", "_Test Customer", "disabled", 0)
 
@@ -154,8 +225,8 @@ class TestCustomer(unittest.TestCase):
 			item_qty = int((abs(outstanding_amt) + 200)/100)
 			make_sales_order(qty=item_qty)
 
-		if credit_limit == 0.0:
-			frappe.db.set_value("Customer", '_Test Customer', 'credit_limit', outstanding_amt - 50.0)
+		if not credit_limit:
+			set_credit_limit('_Test Customer', '_Test Company', outstanding_amt - 50)
 
 		# Sales Order
 		so = make_sales_order(do_not_submit=True)
@@ -170,7 +241,7 @@ class TestCustomer(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, si.submit)
 
 		if credit_limit > outstanding_amt:
-			frappe.db.set_value("Customer", '_Test Customer', 'credit_limit', credit_limit)
+			set_credit_limit('_Test Customer', '_Test Company', credit_limit)
 
 		# Makes Sales invoice from Sales Order
 		so.save(ignore_permissions=True)
@@ -181,7 +252,10 @@ class TestCustomer(unittest.TestCase):
 	def test_customer_credit_limit_on_change(self):
 		outstanding_amt = self.get_customer_outstanding_amount()
 		customer = frappe.get_doc("Customer", '_Test Customer')
-		customer.credit_limit = flt(outstanding_amt - 100)
+		customer.append('credit_limits', {'credit_limit': flt(outstanding_amt - 100), 'company': '_Test Company'})
+
+		''' define new credit limit for same company '''
+		customer.append('credit_limits', {'credit_limit': flt(outstanding_amt - 100), 'company': '_Test Company'})
 		self.assertRaises(frappe.ValidationError, customer.save)
 
 	def test_customer_payment_terms(self):
@@ -221,3 +295,20 @@ def get_customer_dict(customer_name):
 		 "doctype": "Customer",
 		 "territory": "_Test Territory"
 	}
+
+def set_credit_limit(customer, company, credit_limit):
+	customer = frappe.get_doc("Customer", customer)
+	existing_row = None
+	for d in customer.credit_limits:
+		if d.company == company:
+			existing_row = d
+			d.credit_limit = credit_limit
+			d.db_update()
+			break
+
+	if not existing_row:
+		customer.append('credit_limits', {
+			'company': company,
+			'credit_limit': credit_limit
+		})
+		customer.credit_limits[-1].db_insert()

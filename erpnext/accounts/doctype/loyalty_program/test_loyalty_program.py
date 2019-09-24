@@ -7,6 +7,7 @@ import frappe
 import unittest
 from frappe.utils import today, cint, flt, getdate
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_program_details_with_points
+from erpnext.accounts.party import get_dashboard_info
 
 class TestLoyaltyProgram(unittest.TestCase):
 	@classmethod
@@ -48,7 +49,6 @@ class TestLoyaltyProgram(unittest.TestCase):
 		# cancel and delete
 		for d in [si_redeem, si_original]:
 			d.cancel()
-			frappe.delete_doc('Sales Invoice', d.name)
 
 	def test_loyalty_points_earned_multiple_tier(self):
 		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Multiple Loyalty")
@@ -90,7 +90,6 @@ class TestLoyaltyProgram(unittest.TestCase):
 		# cancel and delete
 		for d in [si_redeem, si_original]:
 			d.cancel()
-			frappe.delete_doc('Sales Invoice', d.name)
 
 	def test_cancel_sales_invoice(self):
 		''' cancelling the sales invoice should cancel the earned points'''
@@ -142,7 +141,13 @@ class TestLoyaltyProgram(unittest.TestCase):
 				d.cancel()
 			except frappe.TimestampMismatchError:
 				frappe.get_doc('Sales Invoice', d.name).cancel()
-			frappe.delete_doc('Sales Invoice', d.name)
+
+	def test_loyalty_points_for_dashboard(self):
+		doc = frappe.get_doc('Customer', 'Test Loyalty Customer')
+		company_wise_info = get_dashboard_info("Customer", doc.name, doc.loyalty_program)
+
+		for d in company_wise_info:
+			self.assertTrue(d.get("loyalty_points"))
 
 def get_points_earned(self):
 	def get_returned_amount():

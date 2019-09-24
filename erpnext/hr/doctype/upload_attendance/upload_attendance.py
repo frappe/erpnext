@@ -41,16 +41,28 @@ def add_header(w):
 	return w
 
 def add_data(w, args):
+	data = get_data(args)
+	writedata(w, data)
+	return w
+
+def get_data(args):
 	dates = get_dates(args)
 	employees = get_active_employees()
 	existing_attendance_records = get_existing_attendance_records(args)
+	data = []
 	for date in dates:
 		for employee in employees:
+			if getdate(date) < getdate(employee.date_of_joining):
+				continue
+			if employee.relieving_date:
+				if getdate(date) > getdate(employee.relieving_date):
+					continue
 			existing_attendance = {}
 			if existing_attendance_records \
-				and tuple([getdate(date), employee.name]) in existing_attendance_records:
+				and tuple([getdate(date), employee.name]) in existing_attendance_records \
+				and getdate(employee.date_of_joining) <= getdate(date) \
+				and getdate(employee.relieving_date) >= getdate(date):
 					existing_attendance = existing_attendance_records[tuple([getdate(date), employee.name])]
-
 			row = [
 				existing_attendance and existing_attendance.name or "",
 				employee.name, employee.employee_name, date,
@@ -58,8 +70,12 @@ def add_data(w, args):
 				existing_attendance and existing_attendance.leave_type or "", employee.company,
 				existing_attendance and existing_attendance.naming_series or get_naming_series(),
 			]
-			w.writerow(row)
-	return w
+			data.append(row)
+	return data
+
+def writedata(w, data):
+	for row in data:
+		w.writerow(row)
 
 def get_dates(args):
 	"""get list of dates in between from date and to date"""
@@ -68,8 +84,13 @@ def get_dates(args):
 	return dates
 
 def get_active_employees():
-	employees = frappe.db.sql("""select name, employee_name, company
-		from tabEmployee where docstatus < 2 and status = 'Active'""", as_dict=1)
+	employees = frappe.db.get_all('Employee',
+		fields=['name', 'employee_name', 'date_of_joining', 'company', 'relieving_date'],
+		filters={
+			'docstatus': ['<', 2],
+			'status': 'Active'
+		}
+	)
 	return employees
 
 def get_existing_attendance_records(args):
@@ -95,23 +116,26 @@ def upload():
 	if not frappe.has_permission("Attendance", "create"):
 		raise frappe.PermissionError
 
-	from frappe.utils.csvutils import read_csv_content_from_uploaded_file
+	from frappe.utils.csvutils import read_csv_content
+	rows = read_csv_content(frappe.local.uploaded_file)
+	if not rows:
+		frappe.throw(_("Please select a csv file"))
+	frappe.enqueue(import_attendances, rows=rows, now=True if len(rows) < 200 else False)
+
+def import_attendances(rows):
 	from frappe.modules import scrub
 
-	rows = read_csv_content_from_uploaded_file()
 	rows = list(filter(lambda x: x and any(x), rows))
-	if not rows:
-		msg = [_("Please select a csv file")]
-		return {"messages": msg, "error": msg}
 	columns = [scrub(f) for f in rows[4]]
 	columns[0] = "name"
 	columns[3] = "attendance_date"
+	rows = rows[5:]
 	ret = []
 	error = False
 
 	from frappe.utils.csvutils import check_record, import_doc
 
-	for i, row in enumerate(rows[5:]):
+	for i, row in enumerate(rows):
 		if not row: continue
 		row_idx = i + 5
 		d = frappe._dict(zip(columns, row))
@@ -123,6 +147,10 @@ def upload():
 		try:
 			check_record(d)
 			ret.append(import_doc(d, "Attendance", 1, row_idx, submit=True))
+			frappe.publish_realtime('import_attendance', dict(
+				progress=i,
+				total=len(rows)
+			))
 		except AttributeError:
 			pass
 		except Exception as e:
@@ -135,4 +163,8 @@ def upload():
 		frappe.db.rollback()
 	else:
 		frappe.db.commit()
-	return {"messages": ret, "error": error}
+
+	frappe.publish_realtime('import_attendance', dict(
+		messages=ret,
+		error=error
+	))

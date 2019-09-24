@@ -60,7 +60,7 @@ class Bin(Document):
 			select * from `tabStock Ledger Entry`
 			where item_code = %s
 			and warehouse = %s
-			order by timestamp(posting_date, posting_time) asc, name asc
+			order by timestamp(posting_date, posting_time) asc, creation asc
 			limit 1
 		""", (self.item_code, self.warehouse), as_dict=1)
 		return sle and sle[0] or None
@@ -106,7 +106,7 @@ class Bin(Document):
 				`tabStock Entry` se, `tabStock Entry Detail` sed, `tabPurchase Order` po
 			where
 				se.docstatus=1
-				and se.purpose='Subcontract'
+				and se.purpose='Send to Subcontractor'
 				and ifnull(se.purchase_order, '') !=''
 				and (sed.item_code = %(item)s or sed.original_item = %(item)s)
 				and se.name = sed.parent

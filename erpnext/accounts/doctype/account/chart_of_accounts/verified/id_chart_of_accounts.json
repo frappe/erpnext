@@ -38,24 +38,24 @@
                 "Kas": {
                     "Kas Mata Uang Lain": {
                         "Kas USD": {
-                            "account_number": "1112.0010", 
+                            "account_number": "1112.001", 
                             "account_type": "Cash"
                         }, 
                         "account_number": "1112.000"
                     }, 
                     "Kas Rupiah": {
                         "Kas Besar": {
-                            "account_number": "1111.0020", 
+                            "account_number": "1111.002", 
                             "account_type": "Cash"
                         }, 
                         "Kas Kecil": {
-                            "account_number": "1111.0010", 
+                            "account_number": "1111.001", 
                             "account_type": "Cash"
                         }, 
                         "account_number": "1111.000", 
                         "account_type": "Cash"
                     }, 
-                    "account_number": "1110.0000"
+                    "account_number": "1110.000"
                 }, 
                 "Pendapatan Yang Akan di Terima": {
                     "Pendapatan Yang di Terima": {
@@ -98,7 +98,7 @@
                     }, 
                     "account_number": "1130.000"
                 }, 
-                "account_number": "1100.0000"
+                "account_number": "1100.000"
             }, 
             "Aktiva Tetap": {
                 "Aktiva": {
@@ -121,20 +121,20 @@
                 "Investasi": {
                     "Investasi": {
                         "Deposito": {
-                            "account_number": "1231.003", 
+                            "account_number": "1231.300", 
                             "is_group": 1
                         }, 
-                        "Investai Saham": {
+                        "Investasi Saham": {
                             "Investasi Saham": {
-                                "account_number": "1231.0011"
+                                "account_number": "1231.101"
                             }, 
-                            "account_number": "1231.001"
+                            "account_number": "1231.100"
                         }, 
                         "Investasi Perumahan": {
                             "Investasi Perumahan": {
-                                "account_number": "1231.0021"
+                                "account_number": "1231.201"
                             }, 
-                            "account_number": "1231.002"
+                            "account_number": "1231.200"
                         }, 
                         "account_number": "1231.000"
                     }, 
@@ -142,7 +142,7 @@
                 }, 
                 "account_number": "1200.000"
             }, 
-            "account_number": "1000.0000", 
+            "account_number": "1000.000", 
             "root_type": "Asset"
         }, 
         "Beban": {

@@ -2,9 +2,8 @@ frappe.ui.form.on("Employee Attendance Tool", {
 	refresh: function(frm) {
 		frm.disable_save();
 	},
-	
+
 	onload: function(frm) {
-		frm.doc.department = frm.doc.branch = frm.doc.company = "All";
 		frm.set_value("date", frappe.datetime.get_today());
 		erpnext.employee_attendance_tool.load_employees(frm);
 	},
@@ -24,7 +23,7 @@ frappe.ui.form.on("Employee Attendance Tool", {
 	company: function(frm) {
 		erpnext.employee_attendance_tool.load_employees(frm);
 	}
-	
+
 });
 
 

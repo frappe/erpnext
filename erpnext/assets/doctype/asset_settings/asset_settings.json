@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_events_in_timeline": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
@@ -14,10 +15,12 @@
  "fields": [
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "fetch_if_empty": 0, 
    "fieldname": "depreciation_options", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -40,15 +43,18 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
+   "translatable": 0, 
    "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
+   "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fieldname": "schedule_based_on_fiscal_year", 
+   "fetch_if_empty": 0, 
+   "fieldname": "disable_cwip_accounting", 
    "fieldtype": "Check", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
@@ -57,7 +63,7 @@
    "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
-   "label": "Calculate Prorated Depreciation Schedule Based on Fiscal Year", 
+   "label": "Disable CWIP Accounting", 
    "length": 0, 
    "no_copy": 0, 
    "permlevel": 0, 
@@ -70,39 +76,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "unique": 0
-  }, 
-  {
-   "allow_bulk_edit": 0, 
-   "allow_on_submit": 0, 
-   "bold": 0, 
-   "collapsible": 0, 
-   "columns": 0, 
-   "default": "360", 
-   "depends_on": "eval:doc.schedule_based_on_fiscal_year", 
-   "description": "This value is used for pro-rata temporis calculation", 
-   "fieldname": "number_of_days_in_fiscal_year", 
-   "fieldtype": "Data", 
-   "hidden": 0, 
-   "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
-   "in_filter": 0, 
-   "in_global_search": 0, 
-   "in_list_view": 0, 
-   "in_standard_filter": 0, 
-   "label": "Number of Days in Fiscal Year", 
-   "length": 0, 
-   "no_copy": 0, 
-   "permlevel": 0, 
-   "precision": "", 
-   "print_hide": 0, 
-   "print_hide_if_no_value": 0, 
-   "read_only": 0, 
-   "remember_last_selected_value": 0, 
-   "report_hide": 0, 
-   "reqd": 0, 
-   "search_index": 0, 
-   "set_only_once": 0, 
+   "translatable": 0, 
    "unique": 0
   }
  ], 
@@ -116,7 +90,7 @@
  "issingle": 1, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-01-05 10:10:39.803255", 
+ "modified": "2019-05-26 18:31:19.930563", 
  "modified_by": "Administrator", 
  "module": "Assets", 
  "name": "Asset Settings", 
@@ -125,7 +99,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 
@@ -145,7 +118,6 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 
@@ -171,5 +143,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 0, 
+ "track_views": 0
 }

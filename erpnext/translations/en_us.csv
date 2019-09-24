@@ -1,0 +1,46 @@
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html,Cheques Required,Checks Required
+apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py,Row #{0}: Clearance date {1} cannot be before Cheque Date {2},Row #{0}: Clearance date {1} cannot be before Check Date {2}
+apps/erpnext/erpnext/utilities/user_progress.py,People who teach at your organisation,People who teach at your organization
+apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,"Leave cannot be applied/cancelled before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}","Leave cannot be applied/canceled before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}"
+apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py,Cancel Material Visit {0} before cancelling this Warranty Claim,Cancel Material Visit {0} before canceling this Warranty Claim
+apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.py,"Appointment cancelled, Please review and cancel the invoice {0}","Appointment canceled, Please review and cancel the invoice {0}"
+apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Outstanding Cheques and Deposits to clear,Outstanding Checks and Deposits to clear
+apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.py,Appointment cancelled,Appointment canceled
+DocType: Payment Entry,Cheque/Reference Date,Check/Reference Date
+DocType: Cheque Print Template,Scanned Cheque,Scanned Check
+DocType: Cheque Print Template,Cheque Size,Check Size
+apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py,Maintenance Status has to be Cancelled or Completed to Submit,Maintenance Status has to be Canceled or Completed to Submit
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,'Entries' cannot be empty,'Entries' can not be empty
+apps/erpnext/erpnext/setup/doctype/company/company.py,"Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency.","Cannot change company's default currency, because there are existing transactions. Transactions must be canceled to change the default currency."
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Maintenance Visit {0} must be canceled before cancelling this Sales Order
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Sales Invoice {0} must be cancelled before cancelling this Sales Order,Sales Invoice {0} must be canceled before cancelling this Sales Order
+DocType: Bank Reconciliation Detail,Cheque Date,Check Date
+apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py,"Stopped Work Order cannot be cancelled, Unstop it first to cancel","Stopped Work Order cannot be canceled, Unstop it first to cancel"
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py,Material Request {0} is cancelled or stopped,Material Request {0} is canceled or stopped
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Closed order cannot be cancelled. Unclose to cancel.,Closed order cannot be canceled. Unclose to cancel.
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,Maintenance Schedule {0} must be canceled before cancelling this Sales Order
+DocType: Accounts Settings,Unlink Payment on Cancellation of Invoice,Unlink Payment on Cancelation of Invoice
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Delivery Notes {0} must be cancelled before cancelling this Sales Order,Delivery Notes {0} must be canceled before cancelling this Sales Order
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Work Order {0} must be cancelled before cancelling this Sales Order,Work Order {0} must be canceled before cancelling this Sales Order
+apps/erpnext/erpnext/config/accounting.py,Setup cheque dimensions for printing,Setup check dimensions for printing
+apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Cheques and Deposits incorrectly cleared,Checks and Deposits incorrectly cleared
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.py,{0} {1} is cancelled so the action cannot be completed,{0} {1} is canceled so the action cannot be completed
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py,Packing Slip(s) cancelled,Packing Slip(s) canceled
+DocType: Payment Entry,Cheque/Reference No,Check/Reference No
+apps/erpnext/erpnext/assets/doctype/asset/asset.py,"Asset cannot be cancelled, as it is already {0}","Asset cannot be canceled, as it is already {0}"
+DocType: Bank Reconciliation,Select account head of the bank where cheque was deposited.,Select account head of the bank where check was deposited.
+DocType: Cheque Print Template,Cheque Print Template,Check Print Template
+apps/erpnext/erpnext/controllers/selling_controller.py,{0} {1} is cancelled or closed,{0} {1} is canceled or closed
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Quotation {0} is cancelled,Quotation {0} is canceled
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,Timesheet {0} is already completed or cancelled,Timesheet {0} is already completed or canceled
+apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Cancelled. Please check your GoCardless Account for more details,Payment Canceled. Please check your GoCardless Account for more details
+apps/erpnext/erpnext/stock/doctype/item/item.py,Item {0} is cancelled,Item {0} is canceled
+DocType: Serial No,Is Cancelled,Is Canceled
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.py,{0} {1} is cancelled or stopped,{0} {1} is canceled or stopped
+apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Colour,Color
+DocType: Bank Reconciliation Detail,Cheque Number,Check Number
+apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py,Cancel Material Visits {0} before cancelling this Maintenance Visit,Cancel Material Visits {0} before canceling this Maintenance Visit
+DocType: Employee,Cheque,Check
+DocType: Cheque Print Template,Cheque Height,Check Height
+DocType: Cheque Print Template,Cheque Width,Check Width
+apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Wire Transfer,Wire Transfer

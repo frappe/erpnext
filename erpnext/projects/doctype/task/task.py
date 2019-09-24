@@ -2,24 +2,23 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
 
-from frappe.utils import getdate, date_diff, add_days, cstr
+import json
+
+import frappe
 from frappe import _, throw
+from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate
 from frappe.utils.nestedset import NestedSet
+from frappe.desk.form.assign_to import close_all_assignments, clear
 
 class CircularReferenceError(frappe.ValidationError): pass
+class EndDateCannotBeGreaterThanProjectEndDateError(frappe.ValidationError): pass
 
 class Task(NestedSet):
 	nsm_parent_field = 'parent_task'
 
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.subject)
-
-	def get_project_details(self):
-		return {
-			"project": self.project
-		}
 
 	def get_customer_details(self):
 		cust = frappe.db.sql("select customer_name from `tabCustomer` where name=%s", self.customer)
@@ -41,17 +40,22 @@ class Task(NestedSet):
 			frappe.throw(_("'Actual Start Date' can not be greater than 'Actual End Date'"))
 
 	def validate_status(self):
-		if self.status!=self.get_db_value("status") and self.status == "Closed":
+		if self.status!=self.get_db_value("status") and self.status == "Completed":
 			for d in self.depends_on:
-				if frappe.db.get_value("Task", d.task, "status") != "Closed":
-					frappe.throw(_("Cannot close task as its dependant task {0} is not closed.").format(d.task))
+				if frappe.db.get_value("Task", d.task, "status") != "Completed":
+					frappe.throw(_("Cannot close task {0} as its dependant task {1} is not closed.").format(frappe.bold(self.name), frappe.bold(d.task)))
 
-			from frappe.desk.form.assign_to import clear
-			clear(self.doctype, self.name)
+			close_all_assignments(self.doctype, self.name)
 
 	def validate_progress(self):
 		if (self.progress or 0) > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
+
+		if self.progress == 100:
+			self.status = 'Completed'
+
+		if self.status == 'Completed':
+			self.progress = 100
 
 	def update_depends_on(self):
 		depends_on_tasks = self.depends_on_tasks or ""
@@ -72,8 +76,9 @@ class Task(NestedSet):
 		self.populate_depends_on()
 
 	def unassign_todo(self):
-		if self.status == "Closed" or self.status == "Cancelled":
-			from frappe.desk.form.assign_to import clear
+		if self.status == "Completed":
+			close_all_assignments(self.doctype, self.name)
+		if self.status == "Cancelled":
 			clear(self.doctype, self.name)
 
 	def update_total_expense_claim(self):
@@ -95,7 +100,7 @@ class Task(NestedSet):
 
 	def update_project(self):
 		if self.project and not self.flags.from_project:
-			frappe.get_doc("Project", self.project).update_project()
+			frappe.get_cached_doc("Project", self.project).update_project()
 
 	def check_recursion(self):
 		if self.flags.ignore_recursion_check: return
@@ -155,10 +160,19 @@ class Task(NestedSet):
 
 		self.update_nsm_model()
 
+	def update_status(self):
+		if self.status not in ('Cancelled', 'Completed') and self.exp_end_date:
+			from datetime import datetime
+			if self.exp_end_date < datetime.now().date():
+				self.db_set('status', 'Overdue', update_modified=False)
+				self.update_project()
+
 @frappe.whitelist()
 def check_if_child_exists(name):
-	return frappe.db.sql("""select name from `tabTask`
-		where parent_task = %s""", name)
+	child_tasks = frappe.get_all("Task", filters={"parent_task": name})
+	child_tasks = [get_link_to_form("Task", task.name) for task in child_tasks]
+	return child_tasks
+
 
 def get_project(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
@@ -184,10 +198,9 @@ def set_multiple_status(names, status):
 		task.save()
 
 def set_tasks_as_overdue():
-	frappe.db.sql("""update tabTask set `status`='Overdue'
-		where exp_end_date is not null
-		and exp_end_date < CURDATE()
-		and `status` not in ('Closed', 'Cancelled')""")
+	tasks = frappe.get_all("Task", filters={'status':['not in',['Cancelled', 'Completed']]})
+	for task in tasks:
+		frappe.get_doc("Task", task.name).update_status()
 
 @frappe.whitelist()
 def get_children(doctype, parent, task=None, project=None, is_root=False):

@@ -40,7 +40,6 @@ def make_pos_profile():
 		"expense_account": "_Test Account Cost for Goods Sold - _TC",
 		"income_account": "Sales - _TC",
 		"name": "_Test POS Profile",
-		"pos_profile_name": "_Test POS Profile",
 		"naming_series": "_T-POS Profile-",
 		"selling_price_list": "_Test Price List",
 		"territory": "_Test Territory",

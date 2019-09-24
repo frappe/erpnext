@@ -22,7 +22,5 @@ class BankGuarantee(Document):
 
 @frappe.whitelist()
 def get_vouchar_detials(column_list, doctype, docname):
-	print (column_list, doctype, docname)
 	return frappe.db.sql(''' select {columns} from `tab{doctype}` where name=%s'''
 		.format(columns=", ".join(json.loads(column_list)), doctype=doctype), docname, as_dict=1)[0]
-

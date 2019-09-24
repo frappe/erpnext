@@ -8,37 +8,8 @@ frappe.query_reports["Accounts Payable"] = {
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
+			"reqd": 1,
 			"default": frappe.defaults.get_user_default("Company")
-		},
-		{
-			"fieldname":"finance_book",
-			"label": __("Finance Book"),
-			"fieldtype": "Link",
-			"options": "Finance Book"
-		},
-		{
-			"fieldname":"supplier",
-			"label": __("Supplier"),
-			"fieldtype": "Link",
-			"options": "Supplier",
-			on_change: () => {
-				var supplier = frappe.query_report.get_filter_value('supplier');
-				frappe.db.get_value('Supplier', supplier, "tax_id", function(value) {
-					frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
-				});
-			}
-		},
-		{
-			"fieldname":"supplier_group",
-			"label": __("Supplier Group"),
-			"fieldtype": "Link",
-			"options": "Supplier Group"
-		},		
-		{
-			"fieldname":"report_date",
-			"label": __("As on Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.get_today()
 		},
 		{
 			"fieldname":"ageing_based_on",
@@ -48,7 +19,10 @@ frappe.query_reports["Accounts Payable"] = {
 			"default": "Posting Date"
 		},
 		{
-			"fieldtype": "Break",
+			"fieldname":"report_date",
+			"label": __("As on Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.get_today()
 		},
 		{
 			"fieldname":"range1",
@@ -72,6 +46,61 @@ frappe.query_reports["Accounts Payable"] = {
 			"reqd": 1
 		},
 		{
+			"fieldname":"range4",
+			"label": __("Ageing Range 4"),
+			"fieldtype": "Int",
+			"default": "120",
+			"reqd": 1
+		},
+		{
+			"fieldname":"finance_book",
+			"label": __("Finance Book"),
+			"fieldtype": "Link",
+			"options": "Finance Book"
+		},
+		{
+			"fieldname":"cost_center",
+			"label": __("Cost Center"),
+			"fieldtype": "Link",
+			"options": "Cost Center",
+			get_query: () => {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					filters: {
+						'company': company
+					}
+				}
+			}
+		},
+		{
+			"fieldname":"supplier",
+			"label": __("Supplier"),
+			"fieldtype": "Link",
+			"options": "Supplier",
+			on_change: () => {
+				var supplier = frappe.query_report.get_filter_value('supplier');
+				if (supplier) {
+					frappe.db.get_value('Supplier', supplier, "tax_id", function(value) {
+						frappe.query_report.set_filter_value('tax_id', value["tax_id"]);
+					});
+				} else {
+					frappe.query_report.set_filter_value('tax_id', "");
+				}
+			}
+		},
+		{
+			"fieldname":"payment_terms_template",
+			"label": __("Payment Terms Template"),
+			"fieldtype": "Link",
+			"options": "Payment Terms Template"
+		},
+		{
+			"fieldname":"supplier_group",
+			"label": __("Supplier Group"),
+			"fieldtype": "Link",
+			"options": "Supplier Group"
+		},
+		{
 			"fieldname":"tax_id",
 			"label": __("Tax Id"),
 			"fieldtype": "Data",
@@ -85,3 +114,13 @@ frappe.query_reports["Accounts Payable"] = {
 		});
 	}
 }
+
+erpnext.dimension_filters.forEach((dimension) => {
+	frappe.query_reports["Accounts Payable"].filters.splice(9, 0 ,{
+		"fieldname": dimension["fieldname"],
+		"label": __(dimension["label"]),
+		"fieldtype": "Link",
+		"options": dimension["document_type"]
+	});
+});
+

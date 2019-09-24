@@ -1,0 +1,53 @@
+{
+ "creation": "2019-03-04 12:55:36.403035",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "workday",
+  "section_break_2",
+  "start_time",
+  "column_break_3",
+  "end_time"
+ ],
+ "fields": [
+  {
+   "fieldname": "workday",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Workday",
+   "options": "Monday\nTuesday\nWednesday\nThursday\nFriday\nSaturday\nSunday"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "start_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Start Time"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "end_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "End Time"
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-05-05 19:15:08.999579",
+ "modified_by": "Administrator",
+ "module": "Support",
+ "name": "Service Day",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

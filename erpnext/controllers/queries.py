@@ -172,8 +172,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				or tabItem.item_code LIKE %(txt)s
 				or tabItem.item_group LIKE %(txt)s
 				or tabItem.item_name LIKE %(txt)s
-				or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s
-				{description_cond}))
+				or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
+				{description_cond})
 			{fcond} {mcond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
@@ -206,9 +206,10 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			idx desc, name
 		limit %(start)s, %(page_len)s """.format(
-			fcond=get_filters_cond(doctype, filters, conditions),
-			mcond=get_match_cond(doctype),
-			key=searchfield), {
+			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
+			mcond=get_match_cond(doctype).replace('%', '%%'),
+			key=searchfield),
+		{
 			'txt': '%' + txt + '%',
 			'_txt': txt.replace("%", ""),
 			'start': start or 0,
@@ -253,11 +254,13 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 					and return_against in (select name from `tabDelivery Note` where per_billed < 100)
 				)
 			)
-			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc
+			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc limit %(start)s, %(page_len)s
 	""" % {
 		"key": searchfield,
 		"fcond": get_filters_cond(doctype, filters, []),
 		"mcond": get_match_cond(doctype),
+		"start": start,
+		"page_len": page_len,
 		"txt": "%(txt)s"
 	}, {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
 
@@ -294,7 +297,6 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				order by batch.expiry_date, sle.batch_no desc
 				limit %(start)s, %(page_len)s""".format(cond, match_conditions=get_match_cond(doctype)), args)
 
-	if batch_nos:
 		return batch_nos
 	else:
 		return frappe.db.sql("""select name, concat('MFG-', manufacturing_date), concat('EXP-',expiry_date) from `tabBatch` batch
@@ -369,7 +371,7 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 
 	return frappe.db.sql("""select tabAccount.name from `tabAccount`
 		where (tabAccount.report_type = "Profit and Loss"
-				or tabAccount.account_type in ("Expense Account", "Fixed Asset", "Temporary", "Asset Received But Not Billed"))
+				or tabAccount.account_type in ("Expense Account", "Fixed Asset", "Temporary", "Asset Received But Not Billed", "Capital Work in Progress"))
 			and tabAccount.is_group=0
 			and tabAccount.docstatus!=2
 			and tabAccount.{key} LIKE %(txt)s
@@ -435,3 +437,20 @@ def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 		query += " and item = {item}".format(item = frappe.db.escape(filters.get('item')))
 
 	return frappe.db.sql(query, filters)
+
+@frappe.whitelist()
+def item_manufacturer_query(doctype, txt, searchfield, start, page_len, filters):
+	item_filters = [
+		['manufacturer', 'like', '%' + txt + '%'],
+		['item_code', '=', filters.get("item_code")]
+	]
+
+	item_manufacturers = frappe.get_all(
+		"Item Manufacturer",
+		fields=["manufacturer", "manufacturer_part_no"],
+		filters=item_filters,
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=1
+	)
+	return item_manufacturers

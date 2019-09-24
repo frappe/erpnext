@@ -9,6 +9,7 @@ from frappe import throw, _
 from frappe.utils import cstr
 from erpnext.accounts.party import validate_party_accounts
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
+from frappe.desk.reportview import build_match_conditions, get_filters_cond
 
 class HealthcarePractitioner(Document):
 	def onload(self):
@@ -65,3 +66,13 @@ class HealthcarePractitioner(Document):
 def validate_service_item(item, msg):
 	if frappe.db.get_value("Item", item, "is_stock_item") == 1:
 		frappe.throw(_(msg))
+
+def get_practitioner_list(doctype, txt, searchfield, start, page_len, filters=None):
+	fields = ["name", "first_name", "mobile_phone"]
+
+	filters = {
+		'name': ("like", "%%%s%%" % txt)
+	}
+
+	return frappe.get_all("Healthcare Practitioner", fields = fields,
+		filters = filters, start=start, page_length=page_len, order_by="name, first_name", as_list=1)

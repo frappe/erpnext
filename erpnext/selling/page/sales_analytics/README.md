@@ -1,1 +1,0 @@
-Trends of sales by Item, Item Group, Customer etc.

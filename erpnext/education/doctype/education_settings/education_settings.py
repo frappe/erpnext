@@ -34,3 +34,6 @@ class EducationSettings(Document):
 			make_property_setter('Instructor', "naming_series", "hidden", 0, "Check")
 		else:
 			make_property_setter('Instructor', "naming_series", "hidden", 1, "Check")
+
+def update_website_context(context):
+	context["lms_enabled"] = frappe.get_doc("Education Settings").enable_lms

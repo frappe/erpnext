@@ -55,10 +55,12 @@ def get_conditions(filters):
 #get all details
 def get_stock_ledger_entries(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select item_code, batch_no, warehouse,
-		posting_date, actual_qty
+	return frappe.db.sql("""
+		select item_code, batch_no, warehouse, posting_date, sum(actual_qty) as actual_qty
 		from `tabStock Ledger Entry`
-		where docstatus < 2 and ifnull(batch_no, '') != '' %s order by item_code, warehouse""" %
+		where docstatus < 2 and ifnull(batch_no, '') != '' %s
+		group by voucher_no, batch_no, item_code, warehouse
+		order by item_code, warehouse""" %
 		conditions, as_dict=1)
 
 def get_item_warehouse_batch_map(filters, float_precision):

@@ -73,14 +73,14 @@ frappe.ui.form.on("Fees", {
 		if(frm.doc.docstatus===1 && frm.doc.outstanding_amount>0) {
 			frm.add_custom_button(__("Payment Request"), function() {
 				frm.events.make_payment_request(frm);
-			}, __("Make"));
-			frm.page.set_inner_btn_group_as_primary(__("Make"));
+			}, __('Create'));
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 		if(frm.doc.docstatus===1 && frm.doc.outstanding_amount!=0) {
 			frm.add_custom_button(__("Payment"), function() {
 				frm.events.make_payment_entry(frm);
-			}, __("Make"));
-			frm.page.set_inner_btn_group_as_primary(__("Make"));
+			}, __('Create'));
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 	},
 

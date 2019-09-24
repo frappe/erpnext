@@ -9,7 +9,7 @@ from frappe import _
 import json
 from datetime import timedelta
 from erpnext.controllers.queries import get_match_cond
-from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint
+from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, date_diff, add_to_date
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.workstation.workstation import (check_if_within_operating_hours,
 	WorkstationHolidayError)
@@ -19,14 +19,12 @@ class OverlapError(frappe.ValidationError): pass
 class OverWorkLoggedError(frappe.ValidationError): pass
 
 class Timesheet(Document):
-	def onload(self):
-		self.get("__onload").maintain_bill_work_hours_same = frappe.db.get_single_value('HR Settings', 'maintain_bill_work_hours_same')
-
 	def validate(self):
 		self.set_employee_name()
 		self.set_status()
 		self.validate_dates()
 		self.validate_time_logs()
+		self.calculate_std_hours()
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
@@ -93,6 +91,17 @@ class Timesheet(Document):
 				self.start_date = getdate(start_date)
 				self.end_date = getdate(end_date)
 
+	def calculate_std_hours(self):
+		std_working_hours = frappe.get_value("Company", self.company, 'standard_working_hours')
+
+		for time in self.time_logs:
+			if time.from_time and time.to_time:
+				if flt(std_working_hours) and date_diff(time.to_time, time.from_time):
+					time.hours = flt(std_working_hours) * date_diff(time.to_time, time.from_time)
+				else:
+					if not time.hours:
+						time.hours = time_diff_in_hours(time.to_time, time.from_time)
+
 	def before_cancel(self):
 		self.set_status()
 
@@ -136,11 +145,16 @@ class Timesheet(Document):
 	def validate_time_logs(self):
 		for data in self.get('time_logs'):
 			self.validate_overlap(data)
+			self.validate_task_project()
 
 	def validate_overlap(self, data):
 		settings = frappe.get_single('Projects Settings')
 		self.validate_overlap_for("user", data, self.user, settings.ignore_user_time_overlap)
 		self.validate_overlap_for("employee", data, self.employee, settings.ignore_employee_time_overlap)
+
+	def validate_task_project(self):
+		for log in self.time_logs:
+			log.project = log.project or frappe.db.get_value("Task", log.task, "project")
 
 	def validate_overlap_for(self, fieldname, args, value, ignore_validation=False):
 		if not value or ignore_validation:

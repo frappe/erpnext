@@ -21,6 +21,9 @@ frappe.ui.form.on("Delivery Note", {
 				return (doc.docstatus==1 || doc.qty<=doc.actual_qty) ? "green" : "orange"
 			})
 
+		erpnext.queries.setup_queries(frm, "Warehouse", function() {
+			return erpnext.queries.warehouse(frm.doc);
+		});
 		erpnext.queries.setup_warehouse_query(frm);
 
 		frm.set_query('project', function(doc) {
@@ -74,8 +77,34 @@ frappe.ui.form.on("Delivery Note", {
 
 
 	},
+
 	print_without_amount: function(frm) {
 		erpnext.stock.delivery_note.set_print_hide(frm.doc);
+	},
+
+	refresh: function(frm) {
+		if (frm.doc.docstatus === 1 && frm.doc.is_return === 1 && frm.doc.per_billed !== 100) {
+			frm.add_custom_button(__('Credit Note'), function() {
+				frappe.confirm(__("Are you sure you want to make credit note?"),
+					function() {
+						frm.trigger("make_credit_note");
+					}
+				);
+			}, __('Create'));
+
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
+		}
+	},
+
+	make_credit_note: function(frm) {
+		frm.call({
+			method: "make_return_invoice",
+			doc: frm.doc,
+			freeze: true,
+			callback: function() {
+				frm.reload_doc();
+			}
+		});
 	}
 });
 
@@ -98,33 +127,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	refresh: function(doc, dt, dn) {
 		var me = this;
 		this._super();
-		if (!doc.is_return && doc.status!="Closed") {
-			if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1)
-				this.frm.add_custom_button(__('Installation Note'), function() {
-					me.make_installation_note() }, __("Make"));
-
-			if (doc.docstatus==1) {
-				this.frm.add_custom_button(__('Sales Return'), function() {
-					me.make_sales_return() }, __("Make"));
-			}
-
-			if (doc.docstatus==1) {
-				this.frm.add_custom_button(__('Delivery Trip'), function() {
-					me.make_delivery_trip() }, __("Make"));
-			}
-
-			if(doc.docstatus==0 && !doc.__islocal) {
-				this.frm.add_custom_button(__('Packing Slip'), function() {
-					frappe.model.open_mapped_doc({
-						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_packing_slip",
-						frm: me.frm
-					}) }, __("Make"));
-			}
-
-			if (!doc.__islocal && doc.docstatus==1) {
-				this.frm.page.set_inner_btn_group_as_primary(__("Make"));
-			}
-
+		if ((!doc.is_return) && (doc.status!="Closed" || this.frm.is_new())) {
 			if (this.frm.doc.docstatus===0) {
 				this.frm.add_custom_button(__('Sales Order'),
 					function() {
@@ -137,13 +140,41 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 							},
 							get_query_filters: {
 								docstatus: 1,
-								status: ["!=", "Closed"],
+								status: ["not in", ["Closed", "On Hold"]],
 								per_delivered: ["<", 99.99],
 								company: me.frm.doc.company,
 								project: me.frm.doc.project || undefined,
 							}
 						})
 					}, __("Get items from"));
+			}
+		}
+
+		if (!doc.is_return && doc.status!="Closed") {
+			if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1)
+				this.frm.add_custom_button(__('Installation Note'), function() {
+					me.make_installation_note() }, __('Create'));
+
+			if (doc.docstatus==1) {
+				this.frm.add_custom_button(__('Sales Return'), function() {
+					me.make_sales_return() }, __('Create'));
+			}
+
+			if (doc.docstatus==1) {
+				this.frm.add_custom_button(__('Delivery Trip'), function() {
+					me.make_delivery_trip() }, __('Create'));
+			}
+
+			if(doc.docstatus==0 && !doc.__islocal) {
+				this.frm.add_custom_button(__('Packing Slip'), function() {
+					frappe.model.open_mapped_doc({
+						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_packing_slip",
+						frm: me.frm
+					}) }, __('Create'));
+			}
+
+			if (!doc.__islocal && doc.docstatus==1) {
+				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
 		}
 
@@ -166,8 +197,8 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			});
 
 			if(!from_sales_invoice) {
-				this.frm.add_custom_button(__('Invoice'), function() { me.make_sales_invoice() },
-					__("Make"));
+				this.frm.add_custom_button(__('Sales Invoice'), function() { me.make_sales_invoice() },
+					__('Create'));
 			}
 		}
 
@@ -180,7 +211,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		if(doc.docstatus==1 && !doc.is_return && !doc.auto_repeat) {
 			cur_frm.add_custom_button(__('Subscription'), function() {
 				erpnext.utils.make_subscription(doc.doctype, doc.name)
-			}, __("Make"))
+			}, __('Create'))
 		}
 	},
 
@@ -217,6 +248,10 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	},
 
 	items_on_form_rendered: function(doc, grid_row) {
+		erpnext.setup_serial_no();
+	},
+
+	packed_items_on_form_rendered: function(doc, grid_row) {
 		erpnext.setup_serial_no();
 	},
 
@@ -293,4 +328,3 @@ erpnext.stock.delivery_note.set_print_hide = function(doc, cdt, cdn){
 			dn_fields['taxes'].print_hide = 0;
 	}
 }
-

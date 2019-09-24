@@ -300,11 +300,15 @@ def insert_lab_test_to_medical_record(doc):
 
 	elif doc.special_test_items:
 		item = doc.special_test_items[0]
-		table_row = item.lab_test_particulars +" "+ item.result_value
+
+		if item.lab_test_particulars and item.result_value:
+			table_row = item.lab_test_particulars +" "+ item.result_value
 
 	elif doc.sensitivity_test_items:
 		item = doc.sensitivity_test_items[0]
-		table_row = item.antibiotic +" "+ item.antibiotic_sensitivity
+
+		if item.antibiotic and item.antibiotic_sensitivity:
+			table_row = item.antibiotic +" "+ item.antibiotic_sensitivity
 
 	if table_row:
 		subject += "<br/>"+table_row

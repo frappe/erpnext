@@ -21,6 +21,8 @@ def get_data(filters, show_party_name):
 	party_name_field = "{0}_name".format(frappe.scrub(filters.get('party_type')))
 	if filters.get('party_type') == 'Student':
 		party_name_field = 'first_name'
+	elif filters.get('party_type') == 'Shareholder':
+		party_name_field = 'title'
 
 	party_filters = {"name": filters.get("party")} if filters.get("party") else {}
 	parties = frappe.get_all(filters.get("party_type"), fields = ["name", party_name_field], 

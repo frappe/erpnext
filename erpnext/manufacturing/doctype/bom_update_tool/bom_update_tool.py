@@ -20,13 +20,12 @@ class BOMUpdateTool(Document):
 		for bom in bom_list:
 			try:
 				bom_obj = frappe.get_doc("BOM", bom)
-				bom_obj.get_doc_before_save()
+				bom_obj.load_doc_before_save()
 				updated_bom = bom_obj.update_cost_and_exploded_items(updated_bom)
 				bom_obj.calculate_cost()
 				bom_obj.update_parent_cost()
 				bom_obj.db_update()
-				if (getattr(bom_obj.meta, 'track_changes', False)
-					and bom_obj._doc_before_save and not bom_obj.flags.ignore_version):
+				if (getattr(bom_obj.meta, 'track_changes', False) and not bom_obj.flags.ignore_version):
 					bom_obj.save_version()
 
 				frappe.db.commit()
@@ -37,7 +36,7 @@ class BOMUpdateTool(Document):
 	def validate_bom(self):
 		if cstr(self.current_bom) == cstr(self.new_bom):
 			frappe.throw(_("Current BOM and New BOM can not be same"))
-			
+
 		if frappe.db.get_value("BOM", self.current_bom, "item") \
 			!= frappe.db.get_value("BOM", self.new_bom, "item"):
 				frappe.throw(_("The selected BOMs are not for the same item"))
@@ -56,7 +55,7 @@ class BOMUpdateTool(Document):
 			bom_list = []
 
 		data = frappe.db.sql(""" select distinct parent from `tabBOM Item`
-			where ifnull(bom_no, '') = %s and docstatus < 2 and parenttype='BOM'""", bom)
+			where bom_no = %s and docstatus < 2 and parenttype='BOM'""", bom)
 
 		for d in data:
 			bom_list.append(d[0])

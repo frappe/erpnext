@@ -11,7 +11,6 @@ def execute():
 	if 'erpnext_shopify' in frappe.get_installed_apps():
 		remove_from_installed_apps('erpnext_shopify')
 
-		frappe.db.sql('delete from `tabDesktop Icon` where app="erpnext_shopify" ')
 		frappe.delete_doc("Module Def", 'erpnext_shopify')
 
 		frappe.db.commit()

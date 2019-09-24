@@ -19,6 +19,7 @@ frappe.ui.form.on("Student Group", {
 						'academic_term': frm.doc.academic_term,
 						'program': frm.doc.program,
 						'batch': frm.doc.batch,
+						'student_category': frm.doc.student_category,
 						'course': frm.doc.course,
 						'student_group': frm.doc.name
 					}
@@ -92,6 +93,7 @@ frappe.ui.form.on("Student Group", {
 						"group_based_on": frm.doc.group_based_on,
 						"program": frm.doc.program,
 						"batch" : frm.doc.batch,
+						"student_category" : frm.doc.student_category,
 						"course": frm.doc.course
 					},
 					callback: function(r) {

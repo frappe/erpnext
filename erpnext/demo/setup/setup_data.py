@@ -376,7 +376,7 @@ def setup_pos_profile():
 	company_abbr = frappe.get_cached_value('Company',  erpnext.get_default_company(),  "abbr")
 	pos = frappe.new_doc('POS Profile')
 	pos.user = frappe.db.get_global('demo_accounts_user')
-	pos.pos_profile_name = "Demo POS Profile"
+	pos.name = "Demo POS Profile"
 	pos.naming_series = 'SINV-'
 	pos.update_stock = 0
 	pos.write_off_account = 'Cost of Goods Sold - '+ company_abbr

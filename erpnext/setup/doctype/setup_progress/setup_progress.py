@@ -16,8 +16,9 @@ def get_setup_progress():
 	return frappe.local.setup_progress
 
 def get_action_completed_state(action_name):
-	return [d.is_completed for d in get_setup_progress().actions
-		if d.action_name == action_name][0]
+	for d in get_setup_progress().actions:
+		if d.action_name == action_name:
+			return d.is_completed
 
 def update_action_completed_state(action_name):
 	action_table_doc = [d for d in get_setup_progress().actions

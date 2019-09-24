@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 def get_data():
 	return {
 		'fieldname':  'leave_policy',
@@ -10,6 +12,9 @@ def get_data():
 			},
 			{
 				'items': ['Employee Grade']
-			}
+			},
+			{
+				'items': ['Leave Allocation']
+			},
 		]
 	}

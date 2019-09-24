@@ -97,7 +97,7 @@ def get_expenses():
 			"expense_date": frappe.flags.current_date,
 			"expense_type": expense_type.name,
 			"default_account": expense_type.default_account or "Miscellaneous Expenses - WPL",
-			"claim_amount": claim_amount,
+			"amount": claim_amount,
 			"sanctioned_amount": claim_amount
 		})
 
@@ -107,7 +107,7 @@ def update_sanctioned_amount(expense_claim):
 	for expense in expense_claim.expenses:
 		sanctioned_amount = random.randint(1,20)*10
 
-		if sanctioned_amount < expense.claim_amount:
+		if sanctioned_amount < expense.amount:
 			expense.sanctioned_amount = sanctioned_amount
 
 def get_timesheet_based_salary_slip_employee():

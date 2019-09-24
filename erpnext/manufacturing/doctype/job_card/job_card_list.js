@@ -6,6 +6,8 @@ frappe.listview_settings['Job Card'] = {
 			return [__("Completed"), "green", "status,=,Completed"];
 		} else if (doc.docstatus == 2) {
 			return [__("Cancelled"), "red", "status,=,Cancelled"];
+		} else if (doc.status === "Material Transferred") {
+			return [__('Material Transferred'), "blue", "status,=,Material Transferred"];
 		} else {
 			return [__("Open"), "red", "status,=,Open"];
 		}

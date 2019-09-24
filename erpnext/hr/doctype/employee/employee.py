@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, validate_email_add, today, add_years, format_datetime
+from frappe.utils import getdate, validate_email_address, today, add_years, format_datetime
 from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
 from frappe.permissions import add_user_permission, remove_user_permission, \
@@ -12,9 +12,10 @@ from frappe.permissions import add_user_permission, remove_user_permission, \
 from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
+from erpnext.hr.doctype.job_offer.job_offer import get_staffing_plan_detail
 
-class EmployeeUserDisabledError(frappe.ValidationError):
-	pass
+class EmployeeUserDisabledError(frappe.ValidationError): pass
+class EmployeeLeftValidationError(frappe.ValidationError): pass
 
 class Employee(NestedSet):
 	nsm_parent_field = 'reports_to'
@@ -62,8 +63,8 @@ class Employee(NestedSet):
 	def validate_user_details(self):
 		data = frappe.db.get_value('User',
 			self.user_id, ['enabled', 'user_image'], as_dict=1)
-
-		self.image = data.get("user_image")
+		if data.get("user_image"):
+			self.image = data.get("user_image")
 		self.validate_for_enabled_user_id(data.get("enabled", 0))
 		self.validate_duplicate_user_id()
 
@@ -75,10 +76,27 @@ class Employee(NestedSet):
 		if self.user_id:
 			self.update_user()
 			self.update_user_permissions()
+		self.reset_employee_emails_cache()
 
 	def update_user_permissions(self):
 		if not self.create_user_permission: return
-		if not has_permission('User Permission', ptype='write'): return
+		if not has_permission('User Permission', ptype='write', raise_exception=False): return
+
+		employee_user_permission_exists = frappe.db.exists('User Permission', {
+			'allow': 'Employee',
+			'for_value': self.name,
+			'user': self.user_id
+		})
+
+		if employee_user_permission_exists: return
+
+		employee_user_permission_exists = frappe.db.exists('User Permission', {
+			'allow': 'Employee',
+			'for_value': self.name,
+			'user': self.user_id
+		})
+
+		if employee_user_permission_exists: return
 
 		add_user_permission("Employee", self.name, self.user_id)
 		set_user_permission_if_allowed("Company", self.company, self.user_id)
@@ -142,13 +160,21 @@ class Employee(NestedSet):
 
 	def validate_email(self):
 		if self.company_email:
-			validate_email_add(self.company_email, True)
+			validate_email_address(self.company_email, True)
 		if self.personal_email:
-			validate_email_add(self.personal_email, True)
+			validate_email_address(self.personal_email, True)
 
 	def validate_status(self):
-		if self.status == 'Left' and not self.relieving_date:
-			throw(_("Please enter relieving date."))
+		if self.status == 'Left':
+			reports_to = frappe.db.get_all('Employee',
+				filters={'reports_to': self.name}
+			)
+			if reports_to:
+				link_to_employees = [frappe.utils.get_link_to_form('Employee', employee.name) for employee in reports_to]
+				throw(_("Employee status cannot be set to 'Left' as following employees are currently reporting to this employee:&nbsp;")
+					+ ', '.join(link_to_employees), EmployeeLeftValidationError)
+			if not self.relieving_date:
+				throw(_("Please enter relieving date."))
 
 	def validate_for_enabled_user_id(self, enabled):
 		if not self.status == 'Active':
@@ -189,6 +215,15 @@ class Employee(NestedSet):
 			doc.validate_employee_creation()
 			doc.db_set("employee", self.name)
 
+	def reset_employee_emails_cache(self):
+		prev_doc = self.get_doc_before_save() or {}
+		cell_number = self.get('cell_number')
+		prev_number = prev_doc.get('cell_number')
+		if (cell_number != prev_number or
+			self.get('user_id') != prev_doc.get('user_id')):
+			frappe.cache().hdel('employees_with_number', cell_number)
+			frappe.cache().hdel('employees_with_number', prev_number)
+
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
 	return dict(frappe.db.sql('''select unix_timestamp(attendance_date), count(*)
@@ -221,7 +256,7 @@ def validate_employee_role(doc, method):
 def update_user_permissions(doc, method):
 	# called via User hook
 	if "Employee" in [d.role for d in doc.get("roles")]:
-		if not has_permission('User Permission', ptype='write'): return
+		if not has_permission('User Permission', ptype='write', raise_exception=False): return
 		employee = frappe.get_doc("Employee", {"user_id": doc.name})
 		employee.update_user_permissions()
 
@@ -303,12 +338,12 @@ def get_holiday_list_for_employee(employee, raise_exception=True):
 
 	return holiday_list
 
-def is_holiday(employee, date=None):
+def is_holiday(employee, date=None, raise_exception=True):
 	'''Returns True if given Employee has an holiday on the given date
 	:param employee: Employee `name`
 	:param date: Date to check. Will check for today if None'''
 
-	holiday_list = get_holiday_list_for_employee(employee)
+	holiday_list = get_holiday_list_for_employee(employee, raise_exception)
 	if not date:
 		date = today()
 

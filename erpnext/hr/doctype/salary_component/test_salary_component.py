@@ -19,7 +19,5 @@ def create_salary_component(component_name, **args):
 				"salary_component": component_name,
 				"type": args.get("type") or "Earning",
 				"is_payable": args.get("is_payable") or 1,
-				"is_tax_applicable": args.get("is_tax_applicable") or 1,
-				"is_additional_component": args.get("is_additional_component") or 1
+				"is_tax_applicable": args.get("is_tax_applicable") or 1
 			}).insert()
-			

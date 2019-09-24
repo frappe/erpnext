@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe
 from erpnext import get_company_currency, get_default_company
 from erpnext.setup.utils import get_exchange_rate
@@ -103,7 +104,7 @@ def convert_to_presentation_currency(gl_entries, currency_info):
 		credit_in_account_currency = flt(entry['credit_in_account_currency'])
 		account_currency = entry['account_currency']
 
-		if account_currency != presentation_currency or (account_currency == presentation_currency and not is_p_or_l_account(account)):
+		if account_currency != presentation_currency:
 			value = debit or credit
 
 			date = currency_info['report_date'] if not is_p_or_l_account(account) else entry['posting_date']
@@ -111,13 +112,15 @@ def convert_to_presentation_currency(gl_entries, currency_info):
 
 			if entry.get('debit'):
 				entry['debit'] = converted_value
-			else:
+
+			if entry.get('credit'):
 				entry['credit'] = converted_value
 
 		elif account_currency == presentation_currency:
 			if entry.get('debit'):
 				entry['debit'] = debit_in_account_currency
-			else:
+
+			if entry.get('credit'):
 				entry['credit'] = credit_in_account_currency
 
 		converted_gl_list.append(entry)
@@ -132,3 +135,25 @@ def get_appropriate_company(filters):
 		company = get_default_company()
 
 	return company
+
+@frappe.whitelist()
+def get_invoiced_item_gross_margin(sales_invoice=None, item_code=None, company=None, with_item_data=False):
+	from erpnext.accounts.report.gross_profit.gross_profit import GrossProfitGenerator
+
+	sales_invoice = sales_invoice or frappe.form_dict.get('sales_invoice')
+	item_code = item_code or frappe.form_dict.get('item_code')
+	company = company or frappe.get_cached_value("Sales Invoice", sales_invoice, 'company')
+
+	filters = {
+		'sales_invoice': sales_invoice,
+		'item_code': item_code,
+		'company': company,
+		'group_by': 'Invoice'
+	}
+
+	gross_profit_data = GrossProfitGenerator(filters)
+	result = gross_profit_data.grouped_data
+	if not with_item_data:
+		result = sum([d.gross_profit for d in result])
+
+	return result

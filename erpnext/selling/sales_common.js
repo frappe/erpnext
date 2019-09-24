@@ -59,6 +59,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
+		if(this.frm.fields_dict.tc_name) {
+			this.frm.set_query("tc_name", function() {
+				return { filters: { selling: 1 } };
+			});
+		}
+
 		if(!this.frm.fields_dict["items"]) {
 			return;
 		}
@@ -103,10 +109,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	customer_address: function() {
 		erpnext.utils.get_address_display(this.frm, "customer_address");
+		erpnext.utils.set_taxes_from_address(this.frm, "customer_address", "customer_address", "shipping_address_name");
 	},
 
 	shipping_address_name: function() {
 		erpnext.utils.get_address_display(this.frm, "shipping_address_name", "shipping_address");
+		erpnext.utils.set_taxes_from_address(this.frm, "shipping_address_name", "customer_address", "shipping_address_name");
 	},
 
 	sales_partner: function() {
@@ -138,8 +146,25 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	discount_percentage: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
+		item.discount_amount = 0.0;
+		this.apply_discount_on_item(doc, cdt, cdn, 'discount_percentage');
+	},
+
+	discount_amount: function(doc, cdt, cdn) {
+
+		if(doc.name === cdn) {
+			return;
+		}
+
+		var item = frappe.get_doc(cdt, cdn);
+		item.discount_percentage = 0.0;
+		this.apply_discount_on_item(doc, cdt, cdn, 'discount_amount');
+	},
+
+	apply_discount_on_item: function(doc, cdt, cdn, field) {
+		var item = frappe.get_doc(cdt, cdn);
 		if(!item.price_list_rate) {
-			item.discount_percentage = 0.0;
+			item[field] = 0.0;
 		} else {
 			this.price_list_rate(doc, cdt, cdn);
 		}
@@ -184,7 +209,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.calculate_incentive(sales_person);
 			refresh_field(["allocated_percentage", "allocated_amount", "commission_rate","incentives"], sales_person.name,
 				sales_person.parentfield);
-		}	
+		}
 	},
 
 	sales_person: function(doc, cdt, cdn) {
@@ -209,12 +234,15 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					args: {
 						item_code: item.item_code,
 						warehouse: item.warehouse,
-						has_batch_no: has_batch_no,
+						has_batch_no: has_batch_no || 0,
 						stock_qty: item.stock_qty,
 						serial_no: item.serial_no || "",
 					},
 					callback:function(r){
 						if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+
+							if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
+
 							me.set_batch_number(cdt, cdn);
 							me.batch_no(doc, cdt, cdn);
 						}
@@ -358,13 +386,18 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	    this._super(doc, cdt, cdn, dont_fetch_price_list_rate);
 		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn) &&
 			in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-			this.set_batch_number(cdt, cdn);
-		}
+				if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
+				this.set_batch_number(cdt, cdn);
+			}
 	},
 
 	qty: function(doc, cdt, cdn) {
 		this._super(doc, cdt, cdn);
-		this.set_batch_number(cdt, cdn);
+
+		if(in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+			if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
+			this.set_batch_number(cdt, cdn);
+		}
 	},
 
 	/* Determine appropriate batch number and set it in the form.
@@ -395,8 +428,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	update_auto_repeat_reference: function(doc) {
 		if (doc.auto_repeat) {
 			frappe.call({
-				method:"frappe.desk.doctype.auto_repeat.auto_repeat.update_reference",
-				args:{ 
+				method:"frappe.automation.doctype.auto_repeat.auto_repeat.update_reference",
+				args:{
 					docname: doc.auto_repeat,
 					reference:doc.name
 				},
@@ -430,5 +463,44 @@ frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
 				}
 			})
 		}
+	}
+})
+
+frappe.ui.form.on(cur_frm.doctype, {
+	set_as_lost_dialog: function(frm) {
+		var dialog = new frappe.ui.Dialog({
+			title: __("Set as Lost"),
+			fields: [
+				{"fieldtype": "Table MultiSelect",
+				"label": __("Lost Reasons"),
+				"fieldname": "lost_reason",
+				"options": "Lost Reason Detail",
+				"reqd": 1},
+
+				{"fieldtype": "Text", "label": __("Detailed Reason"), "fieldname": "detailed_reason"},
+			],
+			primary_action: function() {
+				var values = dialog.get_values();
+				var reasons = values["lost_reason"];
+				var detailed_reason = values["detailed_reason"];
+
+				frm.call({
+					doc: frm.doc,
+					method: 'declare_enquiry_lost',
+					args: {
+						'lost_reasons_list': reasons,
+						'detailed_reason': detailed_reason
+					},
+					callback: function(r) {
+						dialog.hide();
+						frm.reload_doc();
+					},
+				});
+				refresh_field("lost_reason");
+			},
+			primary_action_label: __('Declare Lost')
+		});
+
+		dialog.show();
 	}
 })

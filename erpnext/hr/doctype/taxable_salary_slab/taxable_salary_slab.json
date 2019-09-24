@@ -189,7 +189,7 @@
    "in_standard_filter": 0, 
    "length": 0, 
    "no_copy": 0, 
-   "options": "<h4>Condition Examples</h4>\n<ol>\n<li>Applying tax if employee born between 31-12-1937 and 01-01-1958 (Employees aged 60 to 80)<br>\n<code>Condition: date_of_birth&gt;date(1937, 12, 31) and date_of_birth&lt;date(1958, 01, 01)</code></li><br><li>Applying tax by employee gender<br>\n<code>Condition: gender=\"Male\"</code></li><br>\n<li>Applying tax by Salary Component<br>\n<code>Condition: base &gt; 10000</code></li></ol>", 
+   "options": "<h4>Condition Examples</h4>\n<ol>\n<li>Applying tax if employee born between 31-12-1937 and 01-01-1958 (Employees aged 60 to 80)<br>\n<code>Condition: date_of_birth&gt;date(1937, 12, 31) and date_of_birth&lt;date(1958, 01, 01)</code></li><br><li>Applying tax by employee gender<br>\n<code>Condition: gender==\"Male\"</code></li><br>\n<li>Applying tax by Salary Component<br>\n<code>Condition: base &gt; 10000</code></li></ol>", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 

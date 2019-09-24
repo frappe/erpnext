@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
+import json
+from frappe import _
 from frappe.utils import random_string
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import get_charts_for_country
 
@@ -46,7 +48,7 @@ class TestCompany(unittest.TestCase):
 
 	def test_coa_based_on_country_template(self):
 		countries = ["India", "Brazil", "United Arab Emirates", "Canada", "Germany", "France",
-			"Guatemala", "Indonesia", "Mexico", "Nicaragua", "Netherlands", "Singapore",
+			"Guatemala", "Indonesia", "Italy", "Mexico", "Nicaragua", "Netherlands", "Singapore",
 			"Brazil", "Argentina", "Hungary", "Taiwan"]
 		
 		for country in countries:
@@ -78,7 +80,10 @@ class TestCompany(unittest.TestCase):
 						if account_type in ["Bank", "Cash"]:
 							filters["is_group"] = 1
 
-						self.assertTrue(frappe.get_all("Account", filters))
+						has_matching_accounts = frappe.get_all("Account", filters)
+						error_message = _("No Account matched these filters: {}".format(json.dumps(filters)))
+
+						self.assertTrue(has_matching_accounts, msg=error_message)
 				finally:
 					self.delete_mode_of_payment(template)
 					frappe.delete_doc("Company", template)

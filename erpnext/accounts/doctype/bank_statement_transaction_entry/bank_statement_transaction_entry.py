@@ -16,10 +16,11 @@ import copy
 class BankStatementTransactionEntry(Document):
 	def autoname(self):
 		self.name = self.bank_account + "-" + self.from_date + "-" + self.to_date
-		mapper_name = self.bank + "-Statement-Settings"
-		if not frappe.db.exists("Bank Statement Settings", mapper_name):
-			self.create_settings(self.bank)
-		self.bank_settings = mapper_name
+		if self.bank:
+			mapper_name = self.bank + "-Statement-Settings"
+			if not frappe.db.exists("Bank Statement Settings", mapper_name):
+				self.create_settings(self.bank)
+			self.bank_settings = mapper_name
 
 	def create_settings(self, bank):
 		mapper = frappe.new_doc("Bank Statement Settings")
@@ -47,7 +48,7 @@ class BankStatementTransactionEntry(Document):
 
 	def get_statement_headers(self):
 		if not self.bank_settings:
-			frappe.throw("Bank Data mapper doesn't exist")
+			frappe.throw(_("Bank Data mapper doesn't exist"))
 		mapper_doc = frappe.get_doc("Bank Statement Settings", self.bank_settings)
 		headers = {entry.mapped_header:entry.stmt_header for entry in mapper_doc.header_items}
 		return headers
@@ -56,7 +57,7 @@ class BankStatementTransactionEntry(Document):
 		if self.bank_statement is None: return
 		filename = self.bank_statement.split("/")[-1]
 		if (len(self.new_transaction_items + self.reconciled_transaction_items) > 0):
-			frappe.throw("Transactions already retreived from the statement")
+			frappe.throw(_("Transactions already retreived from the statement"))
 
 		date_format = frappe.get_value("Bank Statement Settings", self.bank_settings, "date_format")
 		if (date_format is None):
@@ -313,7 +314,7 @@ class BankStatementTransactionEntry(Document):
 			try:
 				reconcile_against_document(lst)
 			except:
-				frappe.throw("Exception occurred while reconciling {0}".format(payment.reference_name))
+				frappe.throw(_("Exception occurred while reconciling {0}".format(payment.reference_name)))
 
 	def submit_payment_entries(self):
 		for payment in self.new_transaction_items:
@@ -413,7 +414,7 @@ def get_transaction_entries(filename, headers):
 	elif (filename.lower().endswith("xls")):
 		rows = get_rows_from_xls_file(filename)
 	else:
-		frappe.throw("Only .csv and .xlsx files are supported currently")
+		frappe.throw(_("Only .csv and .xlsx files are supported currently"))
 
 	stmt_headers = headers.values()
 	for row in rows:

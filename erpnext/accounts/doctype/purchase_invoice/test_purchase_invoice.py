@@ -20,11 +20,13 @@ test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Templ
 test_ignore = ["Serial No"]
 
 class TestPurchaseInvoice(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		unlink_payment_on_cancel_of_invoice()
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 
-	def tearDown(self):
+	@classmethod
+	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
 
 	def test_gl_entries_without_perpetual_inventory(self):
@@ -91,6 +93,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi_doc = frappe.get_doc('Purchase Invoice', pi_doc.name)
 
 		self.assertRaises(frappe.LinkExistsError, pi_doc.cancel)
+		unlink_payment_on_cancel_of_invoice()
 
 	def test_purchase_invoice_for_blocked_supplier(self):
 		supplier = frappe.get_doc('Supplier', '_Test Supplier')
@@ -344,6 +347,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi = frappe.copy_doc(test_records[0])
 		pi.disable_rounded_total = 1
+		pi.allocate_advances_automatically = 0
 		pi.append("advances", {
 			"reference_type": "Journal Entry",
 			"reference_name": jv.name,
@@ -383,6 +387,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi = frappe.copy_doc(test_records[0])
 		pi.disable_rounded_total = 1
+		pi.allocate_advances_automatically = 0
 		pi.append("advances", {
 			"reference_type": "Journal Entry",
 			"reference_name": jv.name,
@@ -400,9 +405,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi.save()
 		pi.submit()
-		self.assertEqual(pi.payment_schedule[0].payment_amount, 756.15)
+		self.assertEqual(pi.payment_schedule[0].payment_amount, 606.15)
 		self.assertEqual(pi.payment_schedule[0].due_date, pi.posting_date)
-		self.assertEqual(pi.payment_schedule[1].payment_amount, 756.15)
+		self.assertEqual(pi.payment_schedule[1].payment_amount, 606.15)
 		self.assertEqual(pi.payment_schedule[1].due_date, add_days(pi.posting_date, 30))
 
 		pi.load_from_db()
@@ -551,7 +556,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 				sum(credit) as credit, debit_in_account_currency, credit_in_account_currency
 			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
 			group by account, voucher_no order by account asc;""", pi.name, as_dict=1)
-		
+
 		stock_in_hand_account = get_inventory_account(pi.company, pi.get("items")[0].warehouse)
 		self.assertTrue(gl_entries)
 
@@ -634,7 +639,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertEqual(frappe.db.get_value("Serial No", pi.get("items")[0].rejected_serial_no,
 			"warehouse"), pi.get("items")[0].rejected_warehouse)
-	
+
 	def test_outstanding_amount_after_advance_jv_cancelation(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
 			import test_records as jv_test_records
@@ -656,14 +661,14 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.insert()
 		pi.submit()
 		pi.load_from_db()
-		
+
 		#check outstanding after advance allocation
 		self.assertEqual(flt(pi.outstanding_amount), flt(pi.rounded_total - pi.total_advance))
-		
+
 		#added to avoid Document has been modified exception
 		jv = frappe.get_doc("Journal Entry", jv.name)
 		jv.cancel()
-		
+
 		pi.load_from_db()
 		#check outstanding after advance cancellation
 		self.assertEqual(flt(pi.outstanding_amount), flt(pi.rounded_total + pi.total_advance))
@@ -722,7 +727,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		shipping_rule = create_shipping_rule(shipping_rule_type = "Buying", shipping_rule_name = "Shipping Rule - Purchase Invoice Test")
 
 		pi = frappe.copy_doc(test_records[0])
-		
+
 		pi.shipping_rule = shipping_rule.name
 		pi.insert()
 
@@ -740,14 +745,14 @@ class TestPurchaseInvoice(unittest.TestCase):
 			"tax_amount": shipping_amount,
 			"description": shipping_rule.name,
 			"add_deduct_tax": "Add"
-		}	
+		}
 		pi.append("taxes", shipping_charge)
 		pi.save()
 
 		self.assertEqual(pi.net_total, 1250)
 
 		self.assertEqual(pi.total_taxes_and_charges, 462.3)
-		self.assertEqual(pi.grand_total, 1712.3)	
+		self.assertEqual(pi.grand_total, 1712.3)
 
 	def test_make_pi_without_terms(self):
 		pi = make_purchase_invoice(do_not_save=1)

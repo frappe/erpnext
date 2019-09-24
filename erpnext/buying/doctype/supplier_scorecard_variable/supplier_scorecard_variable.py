@@ -27,13 +27,6 @@ class SupplierScorecardVariable(Document):
 			if not hasattr(sys.modules[__name__], self.path):
 				frappe.throw(_("Could not find path for " + self.path), VariablePathNotFound)
 
-
-@frappe.whitelist()
-def get_scoring_variable(variable_label):
-	variable = frappe.get_doc("Supplier Scorecard Variable", variable_label)
-
-	return variable
-
 def get_total_workdays(scorecard):
 	""" Gets the number of days in this period"""
 	delta = getdate(scorecard.end_date) - getdate(scorecard.start_date)

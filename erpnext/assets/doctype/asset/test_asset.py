@@ -9,6 +9,7 @@ from frappe.utils import cstr, nowdate, getdate, flt, get_last_day, add_days, ad
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset, restore_asset
 from erpnext.assets.doctype.asset.asset import make_sales_invoice, make_purchase_invoice
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice as make_invoice
 
 class TestAsset(unittest.TestCase):
 	def setUp(self):
@@ -68,6 +69,17 @@ class TestAsset(unittest.TestCase):
 		self.assertFalse(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Purchase Invoice", "voucher_no": pi.name}))
 
+	def test_is_fixed_asset_set(self):
+		doc = frappe.new_doc('Purchase Invoice')
+		doc.supplier = '_Test Supplier'
+		doc.append('items', {
+			'item_code': 'Macbook Pro',
+			'qty': 1
+		})
+
+		doc.set_missing_values()
+		self.assertEquals(doc.items[0].is_fixed_asset, 1)
+
 
 	def test_schedule_for_straight_line_method(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
@@ -76,23 +88,23 @@ class TestAsset(unittest.TestCase):
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
 		asset = frappe.get_doc('Asset', asset_name)
 		asset.calculate_depreciation = 1
-		asset.available_for_use_date = '2020-06-06'
-		asset.purchase_date = '2020-06-06'
+		asset.available_for_use_date = '2030-01-01'
+		asset.purchase_date = '2030-01-01'
 
 		asset.append("finance_books", {
 			"expected_value_after_useful_life": 10000,
-			"next_depreciation_date": "2020-12-31",
 			"depreciation_method": "Straight Line",
 			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 10,
-			"depreciation_start_date": "2020-06-06"
+			"frequency_of_depreciation": 12,
+			"depreciation_start_date": "2030-12-31"
 		})
 		asset.save()
+
 		self.assertEqual(asset.status, "Draft")
 		expected_schedules = [
-			["2020-06-06", 163.93, 163.93],
-			["2021-04-06", 49836.07, 50000.0],
-			["2022-02-06", 40000.0, 90000.00]
+			["2030-12-31", 30000.00, 30000.00],
+			["2031-12-31", 30000.00, 60000.00],
+			["2032-12-31", 30000.00, 90000.00]
 		]
 
 		schedules = [[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
@@ -106,20 +118,21 @@ class TestAsset(unittest.TestCase):
 		asset.calculate_depreciation = 1
 		asset.number_of_depreciations_booked = 1
 		asset.opening_accumulated_depreciation = 40000
+		asset.available_for_use_date = "2030-06-06"
 		asset.append("finance_books", {
 			"expected_value_after_useful_life": 10000,
-			"next_depreciation_date": "2020-12-31",
 			"depreciation_method": "Straight Line",
 			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 10,
-			"depreciation_start_date": "2020-06-06"
+			"frequency_of_depreciation": 12,
+			"depreciation_start_date": "2030-12-31"
 		})
 		asset.insert()
 		self.assertEqual(asset.status, "Draft")
 		asset.save()
 		expected_schedules = [
-			["2020-06-06", 197.37, 40197.37],
-			["2021-04-06", 49802.63, 90000.00]
+			["2030-12-31", 14246.58, 54246.58],
+			["2031-12-31", 25000.00, 79246.58],
+			["2032-06-06", 10753.42, 90000.00]
 		]
 		schedules = [[cstr(d.schedule_date), flt(d.depreciation_amount, 2), d.accumulated_depreciation_amount]
 			for d in asset.get("schedules")]
@@ -133,24 +146,23 @@ class TestAsset(unittest.TestCase):
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
 		asset = frappe.get_doc('Asset', asset_name)
 		asset.calculate_depreciation = 1
-		asset.available_for_use_date = '2020-06-06'
-		asset.purchase_date = '2020-06-06'
+		asset.available_for_use_date = '2030-01-01'
+		asset.purchase_date = '2030-01-01'
 		asset.append("finance_books", {
 			"expected_value_after_useful_life": 10000,
-			"next_depreciation_date": "2020-12-31",
 			"depreciation_method": "Double Declining Balance",
 			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 10,
-			"depreciation_start_date": "2020-06-06"
+			"frequency_of_depreciation": 12,
+			"depreciation_start_date": '2030-12-31'
 		})
 		asset.insert()
 		self.assertEqual(asset.status, "Draft")
 		asset.save()
 
 		expected_schedules = [
-			["2020-06-06", 66667.0, 66667.0],
-			["2021-04-06", 22222.0, 88889.0],
-			["2022-02-06", 1111.0, 90000.0]
+			['2030-12-31', 66667.00, 66667.00],
+			['2031-12-31', 22222.11, 88889.11],
+			['2032-12-31', 1110.89, 90000.0]
 		]
 
 		schedules = [[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
@@ -165,23 +177,21 @@ class TestAsset(unittest.TestCase):
 		asset.is_existing_asset = 1
 		asset.number_of_depreciations_booked = 1
 		asset.opening_accumulated_depreciation = 50000
+		asset.available_for_use_date = '2030-01-01'
+		asset.purchase_date = '2029-11-30'
 		asset.append("finance_books", {
 			"expected_value_after_useful_life": 10000,
-			"next_depreciation_date": "2020-12-31",
 			"depreciation_method": "Double Declining Balance",
 			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 10,
-			"depreciation_start_date": "2020-06-06"
+			"frequency_of_depreciation": 12,
+			"depreciation_start_date": "2030-12-31"
 		})
 		asset.insert()
 		self.assertEqual(asset.status, "Draft")
-		asset.save()
-
-		asset.save()
 
 		expected_schedules = [
-			["2020-06-06", 33333.0, 83333.0],
-			["2021-04-06", 6667.0, 90000.0]
+			["2030-12-31", 33333.50, 83333.50],
+			["2031-12-31", 6666.50, 90000.0]
 		]
 
 		schedules = [[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
@@ -197,25 +207,25 @@ class TestAsset(unittest.TestCase):
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
 		asset = frappe.get_doc('Asset', asset_name)
 		asset.calculate_depreciation = 1
-		asset.purchase_date = '2020-06-06'
+		asset.purchase_date = '2030-01-30'
 		asset.is_existing_asset = 0
-		asset.available_for_use_date = "2020-01-30"
+		asset.available_for_use_date = "2030-01-30"
 		asset.append("finance_books", {
 			"expected_value_after_useful_life": 10000,
 			"depreciation_method": "Straight Line",
 			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 10,
-			"depreciation_start_date": "2020-12-31"
+			"frequency_of_depreciation": 12,
+			"depreciation_start_date": "2030-12-31"
 		})
 
 		asset.insert()
 		asset.save()
 
 		expected_schedules = [
-			["2020-12-31", 28000.0, 28000.0],
-			["2021-12-31", 30000.0, 58000.0],
-			["2022-12-31", 30000.0, 88000.0],
-			["2023-01-30", 2000.0, 90000.0]
+			["2030-12-31", 27534.25, 27534.25],
+			["2031-12-31", 30000.0, 57534.25],
+			["2032-12-31", 30000.0, 87534.25],
+			["2033-01-30", 2465.75, 90000.0]
 		]
 
 		schedules = [[cstr(d.schedule_date), flt(d.depreciation_amount, 2), flt(d.accumulated_depreciation_amount, 2)]
@@ -232,7 +242,7 @@ class TestAsset(unittest.TestCase):
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
 		asset = frappe.get_doc('Asset', asset_name)
 		asset.calculate_depreciation = 1
-		asset.purchase_date = '2020-06-06'
+		asset.purchase_date = '2020-01-30'
 		asset.available_for_use_date = "2020-01-30"
 		asset.append("finance_books", {
 			"expected_value_after_useful_life": 10000,
@@ -254,8 +264,8 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(asset.get("schedules")[0].journal_entry[:4], "DEPR")
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 0.0, 35699.15),
-			("_Test Depreciations - _TC", 35699.15, 0.0)
+			("_Test Accumulated Depreciations - _TC", 0.0, 30000.0),
+			("_Test Depreciations - _TC", 30000.0, 0.0)
 		)
 
 		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
@@ -264,6 +274,69 @@ class TestAsset(unittest.TestCase):
 
 		self.assertEqual(gle, expected_gle)
 		self.assertEqual(asset.get("value_after_depreciation"), 0)
+
+	def test_depreciation_entry_for_wdv_without_pro_rata(self):
+		pr = make_purchase_receipt(item_code="Macbook Pro",
+			qty=1, rate=8000.0, location="Test Location")
+
+		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
+		asset = frappe.get_doc('Asset', asset_name)
+		asset.calculate_depreciation = 1
+		asset.available_for_use_date = '2030-01-01'
+		asset.purchase_date = '2030-01-01'
+		asset.append("finance_books", {
+			"expected_value_after_useful_life": 1000,
+			"depreciation_method": "Written Down Value",
+			"total_number_of_depreciations": 3,
+			"frequency_of_depreciation": 12,
+			"depreciation_start_date": "2030-12-31"
+		})
+		asset.save(ignore_permissions=True)
+
+		self.assertEqual(asset.finance_books[0].rate_of_depreciation, 50.0)
+
+		expected_schedules = [
+			["2030-12-31", 4000.00, 4000.00],
+			["2031-12-31", 2000.00, 6000.00],
+			["2032-12-31", 1000.00, 7000.0],
+		]
+
+		schedules = [[cstr(d.schedule_date), flt(d.depreciation_amount, 2), flt(d.accumulated_depreciation_amount, 2)]
+			for d in asset.get("schedules")]
+
+		self.assertEqual(schedules, expected_schedules)
+
+	def test_pro_rata_depreciation_entry_for_wdv(self):
+		pr = make_purchase_receipt(item_code="Macbook Pro",
+			qty=1, rate=8000.0, location="Test Location")
+
+		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
+		asset = frappe.get_doc('Asset', asset_name)
+		asset.calculate_depreciation = 1
+		asset.available_for_use_date = '2030-06-06'
+		asset.purchase_date = '2030-01-01'
+		asset.append("finance_books", {
+			"expected_value_after_useful_life": 1000,
+			"depreciation_method": "Written Down Value",
+			"total_number_of_depreciations": 3,
+			"frequency_of_depreciation": 12,
+			"depreciation_start_date": "2030-12-31"
+		})
+		asset.save(ignore_permissions=True)
+
+		self.assertEqual(asset.finance_books[0].rate_of_depreciation, 50.0)
+
+		expected_schedules = [
+			["2030-12-31", 2279.45, 2279.45],
+			["2031-12-31", 2860.28, 5139.73],
+			["2032-12-31", 1430.14, 6569.87],
+			["2033-06-06", 430.13, 7000.0],
+		]
+
+		schedules = [[cstr(d.schedule_date), flt(d.depreciation_amount, 2), flt(d.accumulated_depreciation_amount, 2)]
+			for d in asset.get("schedules")]
+
+		self.assertEqual(schedules, expected_schedules)
 
 	def test_depreciation_entry_cancellation(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
@@ -303,18 +376,19 @@ class TestAsset(unittest.TestCase):
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
 		asset = frappe.get_doc('Asset', asset_name)
 		asset.calculate_depreciation = 1
-		asset.available_for_use_date = '2020-06-06'
-		asset.purchase_date = '2020-06-06'
+		asset.available_for_use_date = nowdate()
+		asset.purchase_date = nowdate()
 		asset.append("finance_books", {
 			"expected_value_after_useful_life": 10000,
 			"depreciation_method": "Straight Line",
 			"total_number_of_depreciations": 3,
 			"frequency_of_depreciation": 10,
-			"depreciation_start_date": "2020-06-06"
+			"depreciation_start_date": nowdate()
 		})
 		asset.insert()
 		asset.submit()
-		post_depreciation_entries(date="2021-01-01")
+
+		post_depreciation_entries(date=add_months(nowdate(), 10))
 
 		scrap_asset(asset.name)
 
@@ -323,8 +397,9 @@ class TestAsset(unittest.TestCase):
 		self.assertTrue(asset.journal_entry_for_scrap)
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 100000.0, 0.0),
-			("_Test Fixed Asset - _TC", 0.0, 100000.0)
+			("_Test Accumulated Depreciations - _TC", 30000.0, 0.0),
+			("_Test Fixed Asset - _TC", 0.0, 100000.0),
+			("_Test Gain/Loss on Asset Disposal - _TC", 70000.0, 0.0)
 		)
 
 		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
@@ -368,9 +443,9 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 100000.0, 0.0),
+			("_Test Accumulated Depreciations - _TC", 20392.16, 0.0),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
-			("_Test Gain/Loss on Asset Disposal - _TC", 0, 25000.0),
+			("_Test Gain/Loss on Asset Disposal - _TC", 54607.84, 0.0),
 			("Debtors - _TC", 25000.0, 0.0)
 		)
 
@@ -381,8 +456,6 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(gle, expected_gle)
 
 		si.cancel()
-		frappe.delete_doc("Sales Invoice", si.name)
-
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
 
 	def test_asset_expected_value_after_useful_life(self):
@@ -493,6 +566,15 @@ class TestAsset(unittest.TestCase):
 			order by account""", asset_doc.name)
 
 		self.assertEqual(gle, expected_gle)
+
+	def test_expense_head(self):
+		pr = make_purchase_receipt(item_code="Macbook Pro",
+			qty=2, rate=200000.0, location="Test Location")
+
+		doc = make_invoice(pr.name)
+
+		self.assertEquals('Asset Received But Not Billed - _TC', doc.items[0].expense_account)
+
 
 def create_asset_data():
 	if not frappe.db.exists("Asset Category", "Computers"):

@@ -12,6 +12,7 @@ from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock.doctype.stock_entry.stock_entry import get_used_alternative_items
 from erpnext.stock.doctype.serial_no.serial_no import get_auto_serial_nos, auto_make_serial_nos, get_serial_nos
+from frappe.contacts.doctype.address.address import get_address_display
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.controllers.stock_controller import StockController
@@ -42,6 +43,7 @@ class BuyingController(StockController):
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
+		self.set_supplier_address()
 
 		if self.doctype=="Purchase Invoice":
 			self.validate_purchase_receipt_if_update_stock()
@@ -112,6 +114,16 @@ class BuyingController(StockController):
 			d.landed_cost_voucher_amount = lc_voucher_data[0][0] if lc_voucher_data else 0.0
 			if not d.cost_center and lc_voucher_data and lc_voucher_data[0][1]:
 				d.db_set('cost_center', lc_voucher_data[0][1])
+
+	def set_supplier_address(self):
+		address_dict = {
+			'supplier_address': 'address_display',
+			'shipping_address': 'shipping_address_display'
+		}
+
+		for address_field, address_display_field in address_dict.items():
+			if self.get(address_field):
+				self.set(address_display_field, get_address_display(self.get(address_field)))
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
@@ -325,7 +337,7 @@ class BuyingController(StockController):
 			if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 				rm.consumed_qty = required_qty
 				rm.description = bom_item.description
-				if item.batch_no and not rm.batch_no:
+				if item.batch_no and frappe.db.get_value("Item", rm.rm_item_code, "has_batch_no") and not rm.batch_no:
 					rm.batch_no = item.batch_no
 
 			# get raw materials rate
@@ -383,7 +395,9 @@ class BuyingController(StockController):
 	def set_qty_as_per_stock_uom(self):
 		for d in self.get("items"):
 			if d.meta.get_field("stock_qty"):
-				if not d.conversion_factor:
+				# Check if item code is present
+				# Conversion factor should not be mandatory for non itemized items
+				if not d.conversion_factor and d.item_code:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
 
@@ -416,8 +430,9 @@ class BuyingController(StockController):
 			elif not flt(d.rejected_qty):
 				d.rejected_qty = flt(d.received_qty) -  flt(d.qty)
 
+			val  = flt(d.qty) + flt(d.rejected_qty)
 			# Check Received Qty = Accepted Qty + Rejected Qty
-			if ((flt(d.qty) + flt(d.rejected_qty)) != flt(d.received_qty)):
+			if (flt(val, d.precision("received_qty")) != flt(d.received_qty, d.precision("received_qty"))):
 				frappe.throw(_("Accepted + Rejected Qty must be equal to Received quantity for Item {0}").format(d.item_code))
 
 	def validate_negative_quantity(self, item_row, field_list):
@@ -429,6 +444,13 @@ class BuyingController(StockController):
 			if flt(item_row[fieldname]) < 0:
 				frappe.throw(_("Row #{0}: {1} can not be negative for item {2}".format(item_row['idx'],
 					frappe.get_meta(item_row.doctype).get_label(fieldname), item_row['item_code'])))
+
+	def check_for_on_hold_or_closed_status(self, ref_doctype, ref_fieldname):
+		for d in self.get("items"):
+			if d.get(ref_fieldname):
+				status = frappe.db.get_value(ref_doctype, d.get(ref_fieldname), "status")
+				if status in ("Closed", "On Hold"):
+					frappe.throw(_("{0} {1} is {2}").format(ref_doctype,d.get(ref_fieldname), status))
 
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
 		self.update_ordered_and_reserved_qty()
@@ -519,6 +541,8 @@ class BuyingController(StockController):
 		update_last_purchase_rate(self, is_submit = 1)
 
 	def on_cancel(self):
+		super(BuyingController, self).on_cancel()
+
 		if self.get('is_return'):
 			return
 
@@ -614,7 +638,8 @@ class BuyingController(StockController):
 		asset.set_missing_values()
 		asset.insert()
 
-		frappe.msgprint(_("Asset {0} created").format(asset.name))
+		asset_link = frappe.utils.get_link_to_form('Asset', asset.name)
+		frappe.msgprint(_("Asset {0} created").format(asset_link))
 		return asset.name
 
 	def make_asset_movement(self, row):
@@ -666,6 +691,8 @@ class BuyingController(StockController):
 		frappe.db.sql("delete from `tabSerial No` where purchase_document_no=%s", self.name)
 
 	def validate_schedule_date(self):
+		if not self.get("items"):
+			return
 		if not self.schedule_date:
 			self.schedule_date = min([d.schedule_date for d in self.get("items")])
 
@@ -700,7 +727,7 @@ def get_items_from_bom(item_code, bom, exploded_item=1):
 		where
 			t2.parent = t1.name and t1.item = %s
 			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s
-			and t2.item_code = t3.name and t3.is_stock_item = 1""".format(doctype),
+			and t2.item_code = t3.name""".format(doctype),
 			(item_code, bom), as_dict=1)
 
 	if not bom_items:
@@ -715,7 +742,7 @@ def get_subcontracted_raw_materials_from_se(purchase_orders):
 			sed.stock_uom, sed.subcontracted_item as main_item_code, sed.serial_no, sed.batch_no
 		from `tabStock Entry` se,`tabStock Entry Detail` sed
 		where
-			se.name = sed.parent and se.docstatus=1 and se.purpose='Subcontract'
+			se.name = sed.parent and se.docstatus=1 and se.purpose='Send to Subcontractor'
 			and se.purchase_order in (%s) and ifnull(sed.t_warehouse, '') != ''
 		group by sed.item_code, sed.t_warehouse
 	""" % (','.join(['%s'] * len(purchase_orders))), tuple(purchase_orders), as_dict=1)

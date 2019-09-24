@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 
+import erpnext
 import frappe
 import random
 from frappe.utils import random_string
@@ -72,8 +73,10 @@ def work():
 	make_pos_invoice()
 
 def make_payment_entries(ref_doctype, report):
-	outstanding_invoices = list(set([r[3] for r in query_report.run(report,
-	{"report_date": frappe.flags.current_date })["result"] if r[2]==ref_doctype]))
+	outstanding_invoices = list(set([r[3] for r in query_report.run(report, {
+						"report_date": frappe.flags.current_date,
+						"company": erpnext.get_default_company()
+					})["result"] if r[2]==ref_doctype]))
 
 	# make Payment Entry
 	for inv in outstanding_invoices[:random.randint(1, 2)]:

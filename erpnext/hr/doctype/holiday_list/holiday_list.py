@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import json
-from frappe.utils import cint, getdate, formatdate
+from frappe.utils import cint, getdate, formatdate, today
 from frappe import throw, _
 from frappe.model.document import Document
 
@@ -79,7 +79,18 @@ def get_events(start, end, filters=None):
 		filters.append(['Holiday', 'holiday_date', '>', getdate(start)])
 	if end:
 		filters.append(['Holiday', 'holiday_date', '<', getdate(end)])
+
 	return frappe.get_list('Holiday List',
 		fields=['name', '`tabHoliday`.holiday_date', '`tabHoliday`.description', '`tabHoliday List`.color'],
 		filters = filters,
 		update={"allDay": 1})
+
+
+def is_holiday(holiday_list, date=today()):
+	"""Returns true if the given date is a holiday in the given holiday list
+	"""
+	if holiday_list:
+		return bool(frappe.get_all('Holiday List',
+			dict(name=holiday_list, holiday_date=date)))
+	else:
+		return False

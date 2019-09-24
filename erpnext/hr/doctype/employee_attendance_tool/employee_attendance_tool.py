@@ -17,12 +17,11 @@ def get_employees(date, department = None, branch = None, company = None):
 	attendance_not_marked = []
 	attendance_marked = []
 	filters = {"status": "Active", "date_of_joining": ["<=", date]}
-	if department != "All":
-		filters["department"] = department
-	if branch != "All":
-		filters["branch"] = branch
-	if company != "All":
-		filters["company"] = company
+
+	for field, value in {'department': department,
+		'branch': branch, 'company': company}.items():
+		if value:
+			filters[field] = value
 
 	employee_list = frappe.get_list("Employee", fields=["employee", "employee_name"], filters=filters, order_by="employee_name")
 	marked_employee = {}

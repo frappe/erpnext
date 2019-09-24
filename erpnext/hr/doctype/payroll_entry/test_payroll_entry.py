@@ -21,6 +21,8 @@ class TestPayrollEntry(unittest.TestCase):
 		make_earning_salary_component(setup=True)
 		make_deduction_salary_component(setup=True)
 
+		frappe.db.set_value("HR Settings", None, "email_salary_slip_to_employee", 0)
+
 	def test_payroll_entry(self): # pylint: disable=no-self-use
 		company = erpnext.get_default_company()
 		for data in frappe.get_all('Salary Component', fields = ["name"]):

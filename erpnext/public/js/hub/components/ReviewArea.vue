@@ -113,6 +113,10 @@ export default {
 				content: this.review_content.get_value()
 			});
 
+			if (!hub.is_seller_registered()) {
+				frappe.throw(__('You need to login as a Marketplace User before you can add any reviews.'));
+			}
+
 			hub.call('add_item_review', {
 				hub_item_name: this.hub_item_name,
 				review: JSON.stringify(review)

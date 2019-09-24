@@ -18,14 +18,14 @@ def create_or_update_cheque_print_format(template_name):
 			"doc_type": "Payment Entry",
 			"standard": "No",
 			"custom_format": 1,
-			"print_format_type": "Server",
+			"print_format_type": "Jinja",
 			"name": template_name
 		})
 	else:
 		cheque_print = frappe.get_doc("Print Format", template_name)
-	
+
 	doc = frappe.get_doc("Cheque Print Template", template_name)
-	
+
 	cheque_print.html = """
 <style>
 	.print-format {
@@ -91,9 +91,9 @@ def create_or_update_cheque_print_format(template_name):
 		"signatory_from_top_edge": doc.signatory_from_top_edge,
 		"signatory_from_left_edge": doc.signatory_from_left_edge
 	}
-		
+
 	cheque_print.save(ignore_permissions=True)
-	
+
 	frappe.db.set_value("Cheque Print Template", template_name, "has_print_format", 1)
-		
+
 	return cheque_print

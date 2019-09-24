@@ -5,10 +5,8 @@ frappe.ui.form.on('Salary Component', {
 	setup: function(frm) {
 		frm.set_query("default_account", "accounts", function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
-			var root_types = ["Expense", "Liability"];
 			return {
 				filters: {
-					"root_type": ["in", root_types],
 					"is_group": 0,
 					"company": d.company
 				}
@@ -26,14 +24,6 @@ frappe.ui.form.on('Salary Component', {
 	is_flexible_benefit: function(frm) {
 		if(frm.doc.is_flexible_benefit){
 			set_value_for_condition_and_formula(frm);
-			frm.set_value("is_additional_component", 0);
-			frm.set_value("formula", '');
-			frm.set_value("amount", 0);
-		}
-	},
-	is_additional_component: function(frm) {
-		if(frm.doc.is_additional_component){
-			frm.set_value("is_flexible_benefit", 0);
 			frm.set_value("formula", '');
 			frm.set_value("amount", 0);
 		}
@@ -75,5 +65,5 @@ var set_value_for_condition_and_formula = function(frm) {
 	frm.set_value("amount_based_on_formula", 0);
 	frm.set_value("statistical_component", 0);
 	frm.set_value("do_not_include_in_total", 0);
-	frm.set_value("depends_on_lwp", 0);
+	frm.set_value("depends_on_payment_days", 0);
 };

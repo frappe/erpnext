@@ -48,7 +48,7 @@ class ProgramEnrollmentTool(Document):
 			return students
 		else:
 			frappe.throw(_("No students Found"))
-			
+
 	def enroll_students(self):
 		total = len(self.students)
 		for i, stud in enumerate(self.students):

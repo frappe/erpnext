@@ -19,27 +19,33 @@ def verify_request():
 		frappe.get_request_header("X-Wc-Webhook-Signature") and \
 		not sig == bytes(frappe.get_request_header("X-Wc-Webhook-Signature").encode()):
 			frappe.throw(_("Unverified Webhook Data"))
-	frappe.set_user(woocommerce_settings.modified_by)
+	frappe.set_user(woocommerce_settings.creation_user)
 
 @frappe.whitelist(allow_guest=True)
-def order(data=None):
-	if not data:
-		verify_request()
+def order(*args, **kwargs):
+	try:
+		_order(*args, **kwargs)
+	except Exception:
+		error_message = frappe.get_traceback()+"\n\n Request Data: \n"+json.loads(frappe.request.data).__str__()
+		frappe.log_error(error_message, "WooCommerce Error")
+		raise
 
-	if frappe.request and frappe.request.data:
+
+def _order(*args, **kwargs):
+	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
+	if frappe.flags.woocomm_test_order_data:
+		fd = frappe.flags.woocomm_test_order_data
+		event = "created"
+
+	elif frappe.request and frappe.request.data:
+		verify_request()
 		fd = json.loads(frappe.request.data)
-	elif data:
-		fd = data
+		event = frappe.get_request_header("X-Wc-Webhook-Event")
+
 	else:
 		return "success"
 
-	if not data:
-		event = frappe.get_request_header("X-Wc-Webhook-Event")
-	else:
-		event = "created"
-
 	if event == "created":
-
 		raw_billing_data = fd.get("billing")
 		customer_woo_com_email = raw_billing_data.get("email")
 
@@ -73,7 +79,7 @@ def order(data=None):
 
 		new_sales_order.po_no = fd.get("id")
 		new_sales_order.woocommerce_id = fd.get("id")
-		new_sales_order.naming_series = "SO-"
+		new_sales_order.naming_series = woocommerce_settings.sales_order_series or "SO-WOO-"
 
 		placed_order_date = created_date[0]
 		raw_date = datetime.datetime.strptime(placed_order_date, "%Y-%m-%d")
@@ -100,10 +106,10 @@ def order(data=None):
 				"item_name": found_item.item_name,
 				"description": found_item.item_name,
 				"delivery_date":order_delivery_date,
-				"uom": "Nos",
+				"uom": woocommerce_settings.uom or _("Nos"),
 				"qty": item.get("quantity"),
 				"rate": item.get("price"),
-				"warehouse": "Stores" + " - " + company_abbr
+				"warehouse": woocommerce_settings.warehouse or "Stores" + " - " + company_abbr
 				})
 
 			add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax",0)
@@ -175,6 +181,7 @@ def link_customer_and_address(raw_billing_data,customer_status):
 	frappe.db.commit()
 
 def link_item(item_data,item_status):
+	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 
 	if item_status == 0:
 		#Create Item
@@ -188,7 +195,8 @@ def link_item(item_data,item_status):
 	item.item_name = str(item_data.get("name"))
 	item.item_code = "woocommerce - " + str(item_data.get("product_id"))
 	item.woocommerce_id = str(item_data.get("product_id"))
-	item.item_group = "WooCommerce Products"
+	item.item_group = _("WooCommerce Products")
+	item.stock_uom = woocommerce_settings.uom or _("Nos")
 	item.save()
 	frappe.db.commit()
 

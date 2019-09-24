@@ -31,6 +31,11 @@ export default {
 					condition: () => this.hub_registered
 				},
 				{
+					label: __('Your Featured Items'),
+					route: 'marketplace/featured-items',
+					condition: () => this.hub_registered
+				},
+				{
 					label: __('Your Profile'),
 					route: 'marketplace/profile',
 					condition: () => this.hub_registered

@@ -35,7 +35,6 @@
 		"salary_component": "Leave Encashment",
 		"type": "Earning",
 		"is_payable": 1,
-		"is_tax_applicable": 1,
-		"is_additional_component": 1
+		"is_tax_applicable": 1
 	}
 ]

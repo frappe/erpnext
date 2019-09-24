@@ -4,8 +4,8 @@
 
 from __future__ import unicode_literals
 import frappe
-
 from frappe import _
+from frappe.utils.nestedset import get_root_of
 from frappe.model.document import Document
 from six.moves.urllib.parse import urlparse
 
@@ -28,7 +28,7 @@ class WoocommerceSettings(Document):
 
 				if not frappe.get_value("Custom Field",{"name":i[0]}) or not frappe.get_value("Custom Field",{"name":i[1]}):
 					create_custom_field_id_and_check_status = True
-					break;
+					break
 
 
 			if create_custom_field_id_and_check_status:
@@ -62,10 +62,10 @@ class WoocommerceSettings(Document):
 					custom.read_only = 1
 					custom.save()
 
-			if not frappe.get_value("Item Group",{"name": "WooCommerce Products"}):
+			if not frappe.get_value("Item Group",{"name": _("WooCommerce Products")}):
 				item_group = frappe.new_doc("Item Group")
-				item_group.item_group_name = "WooCommerce Products"
-				item_group.parent_item_group = "All Item Groups"
+				item_group.item_group_name = _("WooCommerce Products")
+				item_group.parent_item_group = get_root_of("Item Group")
 				item_group.save()
 
 
@@ -83,7 +83,7 @@ class WoocommerceSettings(Document):
 			for name in email_names:
 				frappe.delete_doc("Custom Field",name)
 
-			frappe.delete_doc("Item Group","WooCommerce Products")
+			frappe.delete_doc("Item Group", _("WooCommerce Products"))
 
 		frappe.db.commit()
 
@@ -122,3 +122,9 @@ def generate_secret():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 	woocommerce_settings.secret = frappe.generate_hash()
 	woocommerce_settings.save()
+
+@frappe.whitelist()
+def get_series():
+	return {
+		"sales_order_series" : frappe.get_meta("Sales Order").get_options("naming_series") or "SO-WOO-",
+	}

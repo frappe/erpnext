@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe
 from erpnext.regional.india.setup  import make_custom_fields
 
@@ -7,6 +8,17 @@ def execute():
 		return
 	frappe.reload_doc("hr", "doctype", "Employee Tax Exemption Declaration")
 	frappe.reload_doc("hr", "doctype", "Employee Tax Exemption Proof Submission")
+	frappe.reload_doc("hr", "doctype", "Employee Grade")
+	frappe.reload_doc("hr", "doctype", "Leave Policy")
+
+	frappe.reload_doc("accounts", "doctype", "Bank Account")
+	frappe.reload_doc("accounts", "doctype", "Tax Withholding Category")
+	frappe.reload_doc("accounts", "doctype", "Allowed To Transact With")
+	frappe.reload_doc("accounts", "doctype", "Finance Book")
+	frappe.reload_doc("accounts", "doctype", "Loyalty Program")
+
+	frappe.reload_doc("stock", "doctype", "Item Barcode")
+
 	make_custom_fields()
 
 	frappe.reload_doc("accounts", "doctype", "sales_taxes_and_charges")

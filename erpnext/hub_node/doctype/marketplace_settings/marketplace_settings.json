@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_events_in_timeline": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
@@ -351,8 +352,8 @@
  "issingle": 1, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-09-01 17:05:59.600583", 
- "modified_by": "cave@aperture.com", 
+ "modified": "2019-02-01 14:21:16.729848", 
+ "modified_by": "Administrator", 
  "module": "Hub Node", 
  "name": "Marketplace Settings", 
  "name_case": "", 

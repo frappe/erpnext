@@ -3,6 +3,18 @@
 
 frappe.ui.form.on("Customer", {
 	setup: function(frm) {
+
+		frm.make_methods = {
+			'Quotation': () => erpnext.utils.create_new_doc('Quotation', {
+				'quotation_to': frm.doc.doctype,
+				'party_name': frm.doc.name
+			}),
+			'Opportunity': () => erpnext.utils.create_new_doc('Opportunity', {
+				'opportunity_from': frm.doc.doctype,
+				'party_name': frm.doc.name
+			})
+		}
+
 		frm.add_fetch('lead_name', 'company_name', 'customer_name');
 		frm.add_fetch('default_sales_partner','commission_rate','default_commission_rate');
 		frm.set_query('customer_group', {'is_group': 0});
@@ -108,15 +120,10 @@ frappe.ui.form.on("Customer", {
 
 			frm.add_custom_button(__('Pricing Rule'), function () {
 				erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
-			}, __("Make"));
+			}, __('Create'));
 
 			// indicator
 			erpnext.utils.set_party_dashboard_indicators(frm);
-
-			//
-			if (frm.doc.__onload.dashboard_info.loyalty_point) {
-				frm.dashboard.add_indicator(__('Loyalty Point: {0}', [frm.doc.__onload.dashboard_info.loyalty_point]), 'blue');
-			}
 
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
@@ -128,5 +135,6 @@ frappe.ui.form.on("Customer", {
 	},
 	validate: function(frm) {
 		if(frm.doc.lead_name) frappe.model.clear_doc("Lead", frm.doc.lead_name);
+
 	},
 });

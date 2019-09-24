@@ -17,5 +17,5 @@ class Member(Document):
 		self.validate_email_type(self.email)
 
 	def validate_email_type(self, email):
-		from frappe.utils import validate_email_add
-		validate_email_add(email.strip(), True)
+		from frappe.utils import validate_email_address
+		validate_email_address(email.strip(), True)

@@ -3,6 +3,7 @@ import frappe, requests
 from frappe import _
 from jinja2 import utils
 from html2text import html2text
+from six import text_type
 from frappe.utils import sanitize_html
 from frappe.utils.global_search import search
 
@@ -12,7 +13,7 @@ def get_context(context):
 		query = str(utils.escape(sanitize_html(frappe.form_dict.q)))
 		context.title = _('Help Results for')
 		context.query = query
-		
+
 		context.route = '/search_help'
 		d = frappe._dict()
 		d.results_sections = get_help_results_sections(query)
@@ -73,7 +74,7 @@ def prepare_api_results(api, topics_data):
 	for topic in topics_data:
 		route = api.base_url + '/' + (api.post_route  + '/' if api.post_route else "")
 		for key in api.post_route_key_list.split(','):
-			route += unicode(topic[key])
+			route += text_type(topic[key])
 
 		results.append(frappe._dict({
 			'title': topic[api.post_title_key],

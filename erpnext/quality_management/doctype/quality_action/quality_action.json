@@ -1,0 +1,125 @@
+{
+ "autoname": "format:ACTN-{#####}",
+ "creation": "2018-10-02 11:40:43.666100",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "corrective_preventive",
+  "document_type",
+  "goal",
+  "cb_00",
+  "date",
+  "document_name",
+  "procedure",
+  "status",
+  "sb_00",
+  "resolutions"
+ ],
+ "fields": [
+  {
+   "depends_on": "eval:doc.type == 'Quality Review'",
+   "fetch_from": "review.goal",
+   "fieldname": "goal",
+   "fieldtype": "Link",
+   "label": "Goal",
+   "options": "Quality Goal",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.type == 'Quality Review'",
+   "fieldname": "procedure",
+   "fieldtype": "Link",
+   "label": "Procedure",
+   "options": "Quality Procedure",
+   "read_only": 1
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Open\nClosed"
+  },
+  {
+   "fieldname": "document_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Document Name",
+   "options": "document_type"
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Document Type",
+   "options": "Quality Review\nQuality Feedback",
+   "reqd": 1
+  },
+  {
+   "default": "Corrective",
+   "fieldname": "corrective_preventive",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Corrective/Preventive",
+   "options": "Corrective\nPreventive",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_00",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break",
+   "label": "Resolution"
+  },
+  {
+   "fieldname": "resolutions",
+   "fieldtype": "Table",
+   "label": "Resolutions",
+   "options": "Quality Action Resolution"
+  }
+ ],
+ "modified": "2019-05-28 13:10:44.092497",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Action",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

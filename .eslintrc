@@ -4,6 +4,10 @@
 		"node": true,
 		"es6": true
 	},
+	"parserOptions": {
+		"ecmaVersion": 6,
+		"sourceType": "module"
+	},
 	"extends": "eslint:recommended",
 	"rules": {
 		"indent": [
@@ -50,9 +54,9 @@
 	"root": true,
 	"globals": {
 		"frappe": true,
+		"Vue": true,
 		"erpnext": true,
 		"hub": true,
-
 		"$": true,
 		"jQuery": true,
 		"moment": true,
@@ -133,6 +137,12 @@
 		"get_server_fields": true,
 		"set_multiple": true,
 		"QUnit": true,
-		"Chart": true
+		"Chart": true,
+		"Cypress": true,
+		"cy": true,
+		"it": true,
+		"context": true,
+		"before": true,
+		"beforeEach": true
 	}
 }

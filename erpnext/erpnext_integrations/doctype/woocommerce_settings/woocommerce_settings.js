@@ -43,3 +43,14 @@ frappe.ui.form.on('Woocommerce Settings', {
 		frm.set_df_property("api_consumer_secret", "reqd", frm.doc.enable_sync);
 	}
 });
+
+frappe.ui.form.on("Woocommerce Settings", "onload", function () {
+	frappe.call({
+		method: "erpnext.erpnext_integrations.doctype.woocommerce_settings.woocommerce_settings.get_series",
+		callback: function (r) {
+			$.each(r.message, function (key, value) {
+				set_field_options(key, value);
+			});
+		}
+	});
+});

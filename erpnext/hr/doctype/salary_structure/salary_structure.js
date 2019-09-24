@@ -58,11 +58,51 @@ frappe.ui.form.on('Salary Structure', {
 				doc.company = frm.doc.company;
 				frappe.set_route('Form', 'Salary Structure Assignment', doc.name);
 			});
+			frm.add_custom_button(__("Assign to Employees"),function () {
+			frm.trigger('assign_to_employees')
+		})
 		}
 		let fields_read_only = ["is_tax_applicable", "is_flexible_benefit", "variable_based_on_taxable_salary"];
 		fields_read_only.forEach(function(field) {
 			frappe.meta.get_docfield("Salary Detail", field, frm.doc.name).read_only = 1;
 		});
+	},
+
+	assign_to_employees:function (frm) {
+		var d = new frappe.ui.Dialog({
+			title: __("Assign to Employees"),
+			fields: [
+				{fieldname: "sec_break", fieldtype: "Section Break", label: __("Filter Employees By (Optional)")},
+				{fieldname: "grade", fieldtype: "Link", options: "Employee Grade", label: __("Employee Grade")},
+				{fieldname:'department', fieldtype:'Link', options: 'Department', label: __('Department')},
+				{fieldname:'designation', fieldtype:'Link', options: 'Designation', label: __('Designation')},
+                {fieldname:"employee", fieldtype: "Link", options: "Employee", label: __("Employee")},
+				{fieldname:'base_variable', fieldtype:'Section Break'},
+				{fieldname:'from_date', fieldtype:'Date', label: __('From Date'), "reqd": 1},
+				{fieldname:'base_col_br', fieldtype:'Column Break'},
+				{fieldname:'base', fieldtype:'Currency', label: __('Base')},
+				{fieldname:'variable', fieldtype:'Currency', label: __('Variable')}
+			],
+			primary_action: function() {
+				var data = d.get_values();
+
+				frappe.call({
+					doc: frm.doc,
+					method: "assign_salary_structure",
+					args: data,
+					callback: function(r) {
+						if(!r.exc) {
+							d.hide();
+							frm.reload_doc();
+						}
+					}
+				});
+			},
+			primary_action_label: __('Assign')
+		});
+
+
+		d.show();
 	},
 
 	salary_slip_based_on_timesheet: function(frm) {
@@ -84,6 +124,7 @@ frappe.ui.form.on('Salary Structure', {
 							"label":__("Employee"),
 							"fieldname":"employee",
 							"fieldtype":"Select",
+							"reqd": true,
 							options: employees
 						}, {
 							fieldname:"fetch",
@@ -106,7 +147,8 @@ frappe.ui.form.on('Salary Structure', {
 							source_name: frm.doc.name,
 							employee: values.employee,
 							as_print: 1,
-							print_format: print_format
+							print_format: print_format,
+							for_preview: 1
 						},
 						callback: function(r) {
 							var new_window = window.open();
@@ -205,7 +247,7 @@ frappe.ui.form.on('Salary Detail', {
 							frappe.model.set_value(cdt, cdn, 'amount', result.amount);
 						}
 						frappe.model.set_value(cdt, cdn, 'statistical_component', result.statistical_component);
-						frappe.model.set_value(cdt, cdn, 'depends_on_lwp', result.depends_on_lwp);
+						frappe.model.set_value(cdt, cdn, 'depends_on_payment_days', result.depends_on_payment_days);
 						frappe.model.set_value(cdt, cdn, 'do_not_include_in_total', result.do_not_include_in_total);
 						frappe.model.set_value(cdt, cdn, 'variable_based_on_taxable_salary', result.variable_based_on_taxable_salary);
 						frappe.model.set_value(cdt, cdn, 'is_tax_applicable', result.is_tax_applicable);

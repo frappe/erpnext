@@ -33,8 +33,8 @@ def boot_session(bootinfo):
 				FROM `tabCompany`
 				LIMIT 1""") and 'Yes' or 'No'
 
-		bootinfo.docs += frappe.db.sql("""select name, default_currency, cost_center, default_terms,
-			default_letter_head, default_bank_account, enable_perpetual_inventory from `tabCompany`""",
+		bootinfo.docs += frappe.db.sql("""select name, default_currency, cost_center, default_selling_terms, default_buying_terms,
+			default_letter_head, default_bank_account, enable_perpetual_inventory, country from `tabCompany`""",
 			as_dict=1, update={"doctype":":Company"})
 
 		party_account_types = frappe.db.sql(""" select name, ifnull(account_type, '') from `tabParty Type`""")

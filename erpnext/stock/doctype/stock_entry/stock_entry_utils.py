@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.utils import cint, flt
 
@@ -88,10 +89,11 @@ def make_stock_entry(**args):
 	s.purchase_receipt_no = args.purchase_receipt_no
 	s.delivery_note_no = args.delivery_note_no
 	s.sales_invoice_no = args.sales_invoice_no
+	s.is_opening = args.is_opening or "No"
 	if not args.cost_center:
 		args.cost_center = frappe.get_value('Company', s.company, 'cost_center')
 
-	if not args.expense_account:
+	if not args.expense_account and s.is_opening == "No":
 		args.expense_account = frappe.get_value('Company', s.company, 'stock_adjustment_account')
 
 	# We can find out the serial number using the batch source document
@@ -123,6 +125,7 @@ def make_stock_entry(**args):
 		'expense_account': args.expense_account
 	})
 
+	s.set_stock_entry_type()
 	if not args.do_not_save:
 		s.insert()
 		if not args.do_not_submit:

@@ -8,7 +8,8 @@ from frappe import _, throw
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.stock.doctype.item.item import get_item_defaults, set_item_default
+from erpnext.stock.doctype.item.item import set_item_default
+from frappe.contacts.doctype.address.address import get_address_display
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -16,7 +17,7 @@ class SellingController(StockController):
 	def __setup__(self):
 		if hasattr(self, "taxes"):
 			self.flags.print_taxes_with_zero_amount = cint(frappe.db.get_single_value("Print Settings",
-				 "print_taxes_with_zero_amount"))
+				"print_taxes_with_zero_amount"))
 			self.flags.show_inclusive_tax_in_print = self.is_inclusive_tax()
 
 			self.print_templates = {
@@ -41,7 +42,10 @@ class SellingController(StockController):
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()
 		self.set_po_nos()
+		self.set_gross_profit()
 		set_default_income_account_for_item(self)
+		self.set_customer_address()
+		self.validate_for_duplicate_items()
 
 	def set_missing_values(self, for_validate=False):
 
@@ -52,14 +56,28 @@ class SellingController(StockController):
 		self.set_price_list_and_item_details(for_validate=for_validate)
 
 	def set_missing_lead_customer_details(self):
+		customer, lead = None, None
 		if getattr(self, "customer", None):
+			customer = self.customer
+		elif self.doctype == "Opportunity" and self.party_name:
+			if self.opportunity_from == "Customer":
+				customer = self.party_name
+			else:
+				lead = self.party_name
+		elif self.doctype == "Quotation" and self.party_name:
+			if self.quotation_to == "Customer":
+				customer = self.party_name
+			else:
+				lead = self.party_name
+
+		if customer:
 			from erpnext.accounts.party import _get_party_details
 			fetch_payment_terms_template = False
 			if (self.get("__islocal") or
 				self.company != frappe.db.get_value(self.doctype, self.name, 'company')):
 				fetch_payment_terms_template = True
 
-			party_details = _get_party_details(self.customer,
+			party_details = _get_party_details(customer,
 				ignore_permissions=self.flags.ignore_permissions,
 				doctype=self.doctype, company=self.company,
 				fetch_payment_terms_template=fetch_payment_terms_template,
@@ -68,10 +86,9 @@ class SellingController(StockController):
 				party_details.pop("sales_team")
 			self.update_if_missing(party_details)
 
-		elif getattr(self, "lead", None):
+		elif lead:
 			from erpnext.crm.doctype.lead.lead import get_lead_details
-			self.update_if_missing(get_lead_details(
-				self.lead,
+			self.update_if_missing(get_lead_details(lead,
 				posting_date=self.get('transaction_date') or self.get('posting_date'),
 				company=self.company))
 
@@ -176,7 +193,7 @@ class SellingController(StockController):
 			last_valuation_rate = frappe.db.sql("""
 				SELECT valuation_rate FROM `tabStock Ledger Entry` WHERE item_code = %s
 				AND warehouse = %s AND valuation_rate > 0
-				ORDER BY posting_date DESC, posting_time DESC, name DESC LIMIT 1
+				ORDER BY posting_date DESC, posting_time DESC, creation DESC LIMIT 1
 				""", (it.item_code, it.warehouse))
 			if last_valuation_rate:
 				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] / (it.conversion_factor or 1)
@@ -254,11 +271,11 @@ class SellingController(StockController):
 		so_warehouse = so_item and so_item[0]["warehouse"] or ""
 		return so_qty, so_warehouse
 
-	def check_close_sales_order(self, ref_fieldname):
+	def check_sales_order_on_hold_or_close(self, ref_fieldname):
 		for d in self.get("items"):
 			if d.get(ref_fieldname):
 				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status")
-				if status == "Closed":
+				if status in ("Closed", "On Hold"):
 					frappe.throw(_("Sales Order {0} is {1}").format(d.get(ref_fieldname), status))
 
 	def update_reserved_qty(self):
@@ -345,7 +362,53 @@ class SellingController(StockController):
 			sales_orders = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
 			if sales_orders:
 				po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
-				self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
+				if po_nos and po_nos[0].get('po_no'):
+					self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
+
+	def set_gross_profit(self):
+		if self.doctype == "Sales Order":
+			for item in self.items:
+				item.gross_profit = flt(((item.base_rate - item.valuation_rate) * item.stock_qty), self.precision("amount", item))
+
+
+	def set_customer_address(self):
+		address_dict = {
+			'customer_address': 'address_display',
+			'shipping_address_name': 'shipping_address',
+			'company_address': 'company_address_display'
+		}
+
+		for address_field, address_display_field in address_dict.items():
+			if self.get(address_field):
+				self.set(address_display_field, get_address_display(self.get(address_field)))
+
+	def validate_for_duplicate_items(self):
+		check_list, chk_dupl_itm = [], []
+		if cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
+			return
+
+		for d in self.get('items'):
+			if self.doctype == "Sales Invoice":
+				e = [d.item_code, d.description, d.warehouse, d.sales_order or d.delivery_note, d.batch_no or '']
+				f = [d.item_code, d.description, d.sales_order or d.delivery_note]
+			elif self.doctype == "Delivery Note":
+				e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
+				f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
+			elif self.doctype in ["Sales Order", "Quotation"]:
+				e = [d.item_code, d.description, d.warehouse, '']
+				f = [d.item_code, d.description]
+
+			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
+				if e in check_list:
+					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
+				else:
+					check_list.append(e)
+			else:
+				if f in chk_dupl_itm:
+					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
+				else:
+					chk_dupl_itm.append(f)
+
 
 	def validate_items(self):
 		# validate items to see if they have is_sales_item enabled

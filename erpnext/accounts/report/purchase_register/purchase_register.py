@@ -66,8 +66,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 				total_tax += tax_amount
 				row.append(tax_amount)
 
-		# total tax, grand total, outstanding amount & rounded total
-		row += [total_tax, inv.base_grand_total, flt(inv.base_grand_total, 2), inv.outstanding_amount]
+		# total tax, grand total, rounded total & outstanding amount 
+		row += [total_tax, inv.base_grand_total, flt(inv.base_grand_total, 0), inv.outstanding_amount]
 		data.append(row)
 
 	return columns, data
@@ -193,7 +193,7 @@ def get_invoice_po_pr_map(invoice_list):
 	pi_items = frappe.db.sql("""
 		select parent, purchase_order, purchase_receipt, po_detail, project
 		from `tabPurchase Invoice Item`
-		where parent in (%s) and (ifnull(purchase_order, '') != '' or ifnull(purchase_receipt, '') != '')
+		where parent in (%s)
 	""" % ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 
 	invoice_po_pr_map = {}

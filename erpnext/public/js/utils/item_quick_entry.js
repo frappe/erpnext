@@ -320,7 +320,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 						["attribute_value", "like", e.target.value + "%"]
 					],
 					fields: ["attribute_value"],
-					parent: "Item"
+					parent: "Item Attribute"
 				},
 				callback: function(r) {
 					if (r.message) {
@@ -389,15 +389,6 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 				mandatory.push(attr.attribute);
 			}
 		})
-
-		if (mandatory.length) {
-			frappe.msgprint({
-				title: __('Missing Values Required'),
-				message: __('Following fields have missing values:') + '<br><br><ul><li>' + mandatory.join('<li>') + '</ul>',
-				indicator: 'orange'
-			});
-			return {};
-		}
 
 		if (this.is_manufacturer) {
 			$.each(this.manufacturer_fields, function(index, field) {

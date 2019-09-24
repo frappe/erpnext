@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
 from erpnext.setup.doctype.setup_progress.setup_progress import get_action_completed_state
@@ -33,7 +34,7 @@ def get_slide_settings():
 			help_links=[
 				{
 					"label": _("Chart of Accounts"),
-					"url": ["https://erpnext.org/docs/user/manual/en/accounts/chart-of-accounts"]
+					"url": ["https://erpnext.com/docs/user/manual/en/accounts/chart-of-accounts"]
 				},
 				{
 					"label": _("Opening Balances"),
@@ -56,7 +57,7 @@ def get_slide_settings():
 			help_links=[
 				{
 					"label": _('Learn More'),
-					"url": ["https://erpnext.org/docs/user/manual/en/setting-up/setting-company-sales-goal"]
+					"url": ["https://erpnext.com/docs/user/manual/en/setting-up/setting-company-sales-goal"]
 				}
 			]
 		),
@@ -80,7 +81,7 @@ def get_slide_settings():
 			help_links=[
 				{
 					"label": _('Learn More'),
-					"url": ["https://erpnext.org/docs/user/manual/en/CRM/customer.html"]
+					"url": ["https://erpnext.com/docs/user/manual/en/CRM/customer.html"]
 				}
 			]
 		),
@@ -123,7 +124,7 @@ def get_slide_settings():
 			help_links=[
 				{
 					"label": _('Learn More'),
-					"url": ["https://erpnext.org/docs/user/manual/en/buying/supplier"]
+					"url": ["https://erpnext.com/docs/user/manual/en/buying/supplier"]
 				},
 				{
 					"label": _('Customers and Suppliers'),
@@ -261,7 +262,7 @@ def get_slide_settings():
 			help_links=[
 				{
 					"label": _('Learn More'),
-					"url": ["https://erpnext.org/docs/user/manual/en/setting-up/users-and-permissions"]
+					"url": ["https://erpnext.com/docs/user/manual/en/setting-up/users-and-permissions"]
 				},
 				{
 					"label": _('Users and Permissions'),

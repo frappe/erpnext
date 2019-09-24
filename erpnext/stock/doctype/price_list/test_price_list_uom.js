@@ -7,7 +7,7 @@ QUnit.test("test price list with uom dependancy", function(assert) {
 
 		() => frappe.set_route('Form', 'Price List', 'Standard Buying'),
 		() => {
-			cur_frm.set_value('price_not_uom_dependant','1');
+			cur_frm.set_value('price_not_uom_dependent','1');
 			frappe.timeout(1);
 		},
 		() => cur_frm.save(),

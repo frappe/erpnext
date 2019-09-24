@@ -21,18 +21,18 @@ class SalesPerson(NestedSet):
 		self.load_dashboard_info()
 
 	def load_dashboard_info(self):
-		company_default_currency = get_default_currency() 
+		company_default_currency = get_default_currency()
 
 		allocated_amount = frappe.db.sql("""
 			select sum(allocated_amount)
-			from `tabSales Team` 
+			from `tabSales Team`
 			where sales_person = %s and docstatus=1 and parenttype = 'Sales Order'
 		""",(self.sales_person_name))
 
 		info = {}
 		info["allocated_amount"] = flt(allocated_amount[0][0]) if allocated_amount else 0
 		info["currency"] = company_default_currency
-		
+
 		self.set_onload('dashboard_info', info)
 
 	def on_update(self):
@@ -48,10 +48,11 @@ class SalesPerson(NestedSet):
 				return frappe.db.get_value("User", user, "email") or user
 
 	def validate_employee_id(self):
-		sales_person = frappe.db.get_value("Sales Person", {"employee": self.employee})
-		
-		if sales_person and sales_person != self.name:
-			frappe.throw(_("Another Sales Person {0} exists with the same Employee id").format(sales_person))
+		if self.employee:
+			sales_person = frappe.db.get_value("Sales Person", {"employee": self.employee})
+
+			if sales_person and sales_person != self.name:
+				frappe.throw(_("Another Sales Person {0} exists with the same Employee id").format(sales_person))
 
 def on_doctype_update():
 	frappe.db.add_index("Sales Person", ["lft", "rgt"])
@@ -65,7 +66,7 @@ def get_timeline_data(doctype, name):
 		from
 			`tabSales Order` dt, `tabSales Team` st
 		where
-			st.sales_person = %s and st.parent = dt.name and dt.transaction_date > date_sub(curdate(), interval 1 year) 
+			st.sales_person = %s and st.parent = dt.name and dt.transaction_date > date_sub(curdate(), interval 1 year)
 			group by dt.transaction_date ''', name)))
 
 	sales_invoice = dict(frappe.db.sql('''select
@@ -75,7 +76,7 @@ def get_timeline_data(doctype, name):
 		where
 			st.sales_person = %s and st.parent = dt.name and dt.posting_date > date_sub(curdate(), interval 1 year)
 			group by dt.posting_date ''', name))
-	
+
 	for key in sales_invoice:
 		if out.get(key):
 			out[key] += sales_invoice[key]
@@ -97,5 +98,3 @@ def get_timeline_data(doctype, name):
 			out[key] = delivery_note[key]
 
 	return out
-
-	

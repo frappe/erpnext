@@ -1,0 +1,13 @@
+{
+ "creation": "2019-02-06 07:57:10.377718",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart Source",
+ "idx": 0,
+ "modified": "2019-04-09 18:30:49.943174",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Account Balance Timeline",
+ "owner": "Administrator",
+ "source_name": "Account Balance Timeline",
+ "timeseries": 1
+}

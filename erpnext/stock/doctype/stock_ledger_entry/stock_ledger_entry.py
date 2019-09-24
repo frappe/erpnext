@@ -16,6 +16,13 @@ class StockFreezeError(frappe.ValidationError): pass
 exclude_from_linked_with = True
 
 class StockLedgerEntry(Document):
+	def autoname(self):
+		"""
+		Temporarily name doc for fast insertion
+		name will be changed using autoname options (in a scheduled job)
+		"""
+		self.name = frappe.generate_hash(txt="", length=10)
+
 	def validate(self):
 		self.flags.ignore_submit_comment = True
 		from erpnext.stock.utils import validate_warehouse_company
@@ -132,4 +139,4 @@ def on_doctype_update():
 
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
 	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
-	
+

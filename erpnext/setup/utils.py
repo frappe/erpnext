@@ -93,12 +93,12 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 
 	try:
 		cache = frappe.cache()
-		key = "currency_exchange_rate:{0}:{1}".format(from_currency, to_currency)
+		key = "currency_exchange_rate_{0}:{1}:{2}".format(transaction_date,from_currency, to_currency)
 		value = cache.get(key)
 
 		if not value:
 			import requests
-			api_url = "https://frankfurter.erpnext.org/{0}".format(transaction_date)
+			api_url = "https://frankfurter.app/{0}".format(transaction_date)
 			response = requests.get(api_url, params={
 				"base": from_currency,
 				"symbols": to_currency
@@ -109,6 +109,7 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 			cache.setex(key, value, 6 * 60 * 60)
 		return flt(value)
 	except:
+		frappe.log_error(title="Get Exchange Rate")
 		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually").format(from_currency, to_currency, transaction_date))
 		return 0.0
 

@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe
 from erpnext import get_default_currency
 

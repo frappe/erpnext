@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from frappe import _
 
 def get_data():
@@ -9,6 +10,16 @@ def get_data():
 					"type": "doctype",
 					"name": "Homepage",
 					"description": _("Settings for website homepage"),
+				},
+				{
+					"type": "doctype",
+					"name": "Homepage Section",
+					"description": _("Add cards or custom sections on homepage"),
+				},
+				{
+					"type": "doctype",
+					"name": "Products Settings",
+					"description": _("Settings for website product listing"),
 				},
 				{
 					"type": "doctype",

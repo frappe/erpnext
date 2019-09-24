@@ -6,6 +6,7 @@
 		"program": "TC101",
 		"date_of_birth": "2000-01-01",
 		"gender": "Male",
+		"student_email_id": "_test_student@example.com",
 		"blood_group": "A+"
 
 	},
@@ -16,6 +17,7 @@
 		"program": "TC101",
 		"date_of_birth": "2000-01-01",
 		"gender": "Male",
+		"student_email_id": "_test_student_1@example.com",
 		"blood_group": "A+"
 
 	},
@@ -25,27 +27,8 @@
 		"last_name": "Name 2",
 		"program": "TC101",
 		"date_of_birth": "2000-01-01",
-		"gender": "Male",
-		"blood_group": "A+"
-
-	},
-	{
-		"first_name": "_Test",
-		"middle_name": "Student",
-		"last_name": "Name 3",
-		"program": "TC101",
-		"date_of_birth": "2000-01-01",
-		"gender": "Male",
-		"blood_group": "A+"
-
-	},
-	{
-		"first_name": "_Test",
-		"middle_name": "Student",
-		"last_name": "Name 4",
-		"program": "TC101",
-		"date_of_birth": "2000-01-01",
-		"gender": "Male",
+		"gender": "Female",
+		"student_email_id": "_test_student_2@example.com",
 		"blood_group": "A+"
 
 	}

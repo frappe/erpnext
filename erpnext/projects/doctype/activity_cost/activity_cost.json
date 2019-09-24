@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_events_in_timeline": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 1, 
@@ -350,7 +351,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-08-21 16:15:35.363505", 
+ "modified": "2019-01-30 11:28:17.991944", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Activity Cost", 

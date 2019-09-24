@@ -19,11 +19,12 @@ def execute(filters=None):
 	return columns, data, None, chart
 
 def get_columns():
-	columns = [_("License") + ":Link/Vehicle:100", _("Make") + ":data:50",
+	columns = [_("License") + ":Link/Vehicle:100", _('Create') + ":data:50",
 		_("Model") + ":data:50", _("Location") + ":data:100",
 		_("Log") + ":Link/Vehicle Log:100", _("Odometer") + ":Int:80",
 		_("Date") + ":Date:100", _("Fuel Qty") + ":Float:80",
-		_("Fuel Price") + ":Float:100",_("Service Expense") + ":Float:100"
+		_("Fuel Price") + ":Float:100",_("Fuel Expense") + ":Float:100",
+		_("Service Expense") + ":Float:100"
 	]
 	return columns
 
@@ -32,7 +33,8 @@ def get_log_data(filters):
 	data = frappe.db.sql("""select
 			vhcl.license_plate as "License", vhcl.make as "Make", vhcl.model as "Model",
 			vhcl.location as "Location", log.name as "Log", log.odometer as "Odometer",
-			log.date as "Date", log.fuel_qty as "Fuel Qty", log.price as "Fuel Price"
+			log.date as "Date", log.fuel_qty as "Fuel Qty", log.price as "Fuel Price",
+			log.fuel_qty * log.price as "Fuel Expense"
 		from
 			`tabVehicle` vhcl,`tabVehicle Log` log
 		where
@@ -58,7 +60,7 @@ def get_chart_data(data,period_list):
 		total_ser_exp=0
 		for row in data:
 			if row["Date"] <= period.to_date and row["Date"] >= period.from_date:
-				total_fuel_exp+=flt(row["Fuel Price"])
+				total_fuel_exp+=flt(row["Fuel Expense"])
 				total_ser_exp+=flt(row["Service Expense"])
 		fueldata.append([period.key,total_fuel_exp])
 		servicedata.append([period.key,total_ser_exp])
