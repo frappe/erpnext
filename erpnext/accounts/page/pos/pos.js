@@ -1625,7 +1625,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		setTimeout(function () {
 			w.print();
 			w.close();
-		}, 1000)
+		}, 1000);
 	},
 
 	submit_invoice: function () {
@@ -1682,6 +1682,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		$(this.wrapper).find('.pos-bill').css('pointer-events', pointer_events);
 		$(this.wrapper).find('.pos-items-section').css('pointer-events', pointer_events);
 		this.set_primary_action();
+
+		$(this.wrapper).find('#pos-item-disc').prop('disabled',
+			this.pos_profile_data.allow_user_to_edit_discount ? false : true);
+
+		$(this.wrapper).find('#pos-item-price').prop('disabled',
+			this.pos_profile_data.allow_user_to_edit_rate ? false : true);
 	},
 
 	create_invoice: function () {
@@ -1900,7 +1906,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			serial_no = me.item_serial_no[key][0];
 		}
 
-		if (this.items[0].has_serial_no && serial_no == "") {
+		if (this.items && this.items[0].has_serial_no && serial_no == "") {
 			this.refresh();
 			frappe.throw(__(repl("Error: Serial no is mandatory for item %(item)s", {
 				'item': this.items[0].item_code

@@ -40,7 +40,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 			row.party = party
 			if self.party_naming_by == "Naming Series":
-				row.party_name = frappe.get_cached_value(self.party_type, party, [self.party_type + "_name"])
+				row.party_name = frappe.get_cached_value(self.party_type,
+					party, frappe.scrub(self.party_type) + "_name")
 
 			row.update(party_dict)
 
