@@ -41,7 +41,7 @@ frappe.query_reports["Stock Balance"] = {
 			"get_query": function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-				}
+				};
 			}
 		},
 		{
@@ -57,7 +57,7 @@ frappe.query_reports["Stock Balance"] = {
 						filters: {
 							'warehouse_type': warehouse_type
 						}
-					}
+					};
 				}
 			}
 		},
@@ -79,5 +79,10 @@ frappe.query_reports["Stock Balance"] = {
 			"label": __("Show Variant Attributes"),
 			"fieldtype": "Check"
 		},
+		{
+			"fieldname": 'show_stock_ageing_data',
+			"label": __('Show Stock Ageing Data'),
+			"fieldtype": 'Check'
+		},
 	]
-}
+};
