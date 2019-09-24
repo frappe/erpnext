@@ -41,6 +41,8 @@ def get_pos_data():
 	items_list = get_items_list(pos_profile, doc.company)
 	customers = get_customers_list(pos_profile)
 
+	doc.plc_conversion_rate = update_plc_conversion_rate(doc, pos_profile)
+
 	return {
 		'doc': doc,
 		'default_customer': pos_profile.get('customer'),
@@ -53,7 +55,7 @@ def get_pos_data():
 		'batch_no_data': get_batch_no_data(),
 		'barcode_data': get_barcode_data(items_list),
 		'tax_data': get_item_tax_data(),
-		'price_list_data': get_price_list_data(doc.selling_price_list),
+		'price_list_data': get_price_list_data(doc.selling_price_list, doc.plc_conversion_rate),
 		'customer_wise_price_list': get_customer_wise_price_list(),
 		'bin_data': get_bin_data(pos_profile),
 		'pricing_rules': get_pricing_rule_data(doc),
@@ -62,6 +64,15 @@ def get_pos_data():
 		'meta': get_meta()
 	}
 
+def update_plc_conversion_rate(doc, pos_profile):
+	conversion_rate = 1.0
+
+	price_list_currency = frappe.get_cached_value("Price List", doc.selling_price_list, "currency")
+	if pos_profile.get("currency") != price_list_currency:
+		conversion_rate = get_exchange_rate(price_list_currency,
+			pos_profile.get("currency"), nowdate(), args="for_selling") or 1.0
+
+	return conversion_rate
 
 def get_meta():
 	doctype_meta = {
@@ -317,14 +328,14 @@ def get_item_tax_data():
 	return itemwise_tax
 
 
-def get_price_list_data(selling_price_list):
+def get_price_list_data(selling_price_list, conversion_rate):
 	itemwise_price_list = {}
 	price_lists = frappe.db.sql("""Select ifnull(price_list_rate, 0) as price_list_rate,
 		item_code from `tabItem Price` ip where price_list = %(price_list)s""",
         {'price_list': selling_price_list}, as_dict=1)
 
 	for item in price_lists:
-		itemwise_price_list[item.item_code] = item.price_list_rate
+		itemwise_price_list[item.item_code] = item.price_list_rate * conversion_rate
 
 	return itemwise_price_list
 
