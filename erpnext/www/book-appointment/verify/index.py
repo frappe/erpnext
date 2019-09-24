@@ -5,7 +5,7 @@ def get_context(context):
     if not verify_request():
         context.success = False
         return context
-    
+
     email = frappe.form_dict['email']
     appointment_name = frappe.form_dict['appointment']
 
