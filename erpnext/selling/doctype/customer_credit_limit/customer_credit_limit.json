@@ -34,11 +34,11 @@
    "fieldname": "bypass_credit_limit_check",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Bypass credit limit_check"
+   "label": "Bypass Credit Limit Check"
   }
  ],
  "istable": 1,
- "modified": "2019-08-29 20:46:36.073953",
+ "modified": "2019-09-24 15:05:26.069911",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer Credit Limit",
