@@ -699,7 +699,7 @@ class SalesInvoice(SellingController):
 				cint(self.redeem_loyalty_points)) else "Yes"
 
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
-				update_outstanding=update_outstanding, merge_entries=False)
+				update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
 
 			if update_outstanding == "No":
 				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
