@@ -255,7 +255,7 @@ class SalarySlip(TransactionBase):
 		for d in range(working_days):
 			dt = add_days(cstr(getdate(self.start_date)), d)
 			leave = frappe.db.sql("""
-				select t1.name, t1.half_day
+				select t1.name, case when t1.half_day_date = %(dt)s or t1.to_date = t1.from_date then t1.half_day else 0 end half_day
 				from `tabLeave Application` t1, `tabLeave Type` t2
 				where t2.name = t1.leave_type
 				and t2.is_lwp = 1
