@@ -141,7 +141,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-15 02:17:34.525392",
+ "modified": "2019-09-25 04:48:33.223116",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",
@@ -155,7 +155,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "HR Manager",
+   "role": "Loan Manager",
    "share": 1,
    "write": 1
   },

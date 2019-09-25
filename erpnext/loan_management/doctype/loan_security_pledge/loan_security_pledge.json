@@ -10,11 +10,13 @@
   "column_break_3",
   "loan",
   "loan_application",
-  "pledge_status",
+  "status",
   "pledge_time",
   "loan_security_details_section",
-  "loan_security_pledges",
+  "securities",
+  "section_break_10",
   "total_security_value",
+  "column_break_11",
   "maximum_loan_value",
   "amended_from"
  ],
@@ -33,6 +35,7 @@
    "fieldname": "applicant",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Applicant",
    "options": "Customer",
    "reqd": 1
@@ -61,13 +64,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "loan_security_pledges",
-   "fieldtype": "Table",
-   "label": "Loan Security Pledges",
-   "options": "Pledge",
-   "reqd": 1
-  },
-  {
    "fieldname": "total_security_value",
    "fieldtype": "Currency",
    "label": "Total Security Value",
@@ -87,9 +83,13 @@
    "label": "Loan  Details"
   },
   {
-   "fieldname": "pledge_status",
-   "fieldtype": "Data",
-   "label": "Pledge Status",
+   "default": "Unpledged",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Unpledged\nPledged\nPartially Pledged",
    "read_only": 1
   },
   {
@@ -97,10 +97,25 @@
    "fieldtype": "Datetime",
    "label": "Pledge Time",
    "read_only": 1
+  },
+  {
+   "fieldname": "securities",
+   "fieldtype": "Table",
+   "label": "Securities",
+   "options": "Pledge",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-21 08:16:04.969590",
+ "modified": "2019-09-25 04:31:55.912099",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Pledge",
@@ -116,6 +131,20 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
    "share": 1,
    "submit": 1,
    "write": 1

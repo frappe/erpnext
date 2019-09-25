@@ -112,13 +112,14 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-23 05:06:03.137929",
+ "modified": "2019-09-25 04:36:19.285940",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Disbursement",
  "owner": "Administrator",
  "permissions": [
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -128,6 +129,21 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

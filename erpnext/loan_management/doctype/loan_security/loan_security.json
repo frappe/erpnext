@@ -63,7 +63,7 @@
    "label": "Disabled"
   }
  ],
- "modified": "2019-09-21 03:10:10.161605",
+ "modified": "2019-09-25 04:39:25.171232",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security",
@@ -78,6 +78,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
    "share": 1,
    "write": 1
   }

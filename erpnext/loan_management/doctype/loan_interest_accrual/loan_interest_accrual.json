@@ -19,6 +19,8 @@
   "pending_principal_amount",
   "payable_principal_amount",
   "interest_amount",
+  "section_break_15",
+  "process_loan_interest_accrual",
   "amended_from"
  ],
  "fields": [
@@ -114,11 +116,21 @@
    "fieldtype": "Currency",
    "label": "Payable Principal Amount",
    "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "process_loan_interest_accrual",
+   "fieldtype": "Link",
+   "label": "Process Loan Interest Accrual",
+   "options": "Process Loan Interest Accrual"
   }
  ],
  "in_create": 1,
  "is_submittable": 1,
- "modified": "2019-09-18 13:02:30.212985",
+ "modified": "2019-09-25 04:33:19.844422",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Interest Accrual",
@@ -133,6 +145,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
    "share": 1,
    "write": 1
   }

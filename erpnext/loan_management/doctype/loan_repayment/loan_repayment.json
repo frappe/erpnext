@@ -193,7 +193,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-18 13:07:07.913590",
+ "modified": "2019-09-25 04:42:47.119231",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",
@@ -208,6 +208,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
    "share": 1,
    "write": 1
   }

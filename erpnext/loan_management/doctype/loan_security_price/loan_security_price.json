@@ -71,7 +71,7 @@
    "read_only": 1
   }
  ],
- "modified": "2019-09-18 13:02:02.071979",
+ "modified": "2019-09-25 04:47:34.003638",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Price",
@@ -86,6 +86,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
    "share": 1,
    "write": 1
   }

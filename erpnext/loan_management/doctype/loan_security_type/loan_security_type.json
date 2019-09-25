@@ -35,7 +35,7 @@
    "label": "Haircut %"
   }
  ],
- "modified": "2019-09-11 12:24:54.497321",
+ "modified": "2019-09-25 04:49:02.696662",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Type",
@@ -50,6 +50,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
    "share": 1,
    "write": 1
   }

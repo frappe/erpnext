@@ -9,10 +9,11 @@
   "applicant",
   "column_break_3",
   "loan",
-  "unpledge_status",
+  "status",
   "unpledge_time",
   "loan_security_details_section",
-  "loan_security_pledges",
+  "securities",
+  "unpledge_type",
   "amended_from"
  ],
  "fields": [
@@ -42,10 +43,10 @@
   },
   {
    "default": "Requested",
-   "fieldname": "unpledge_status",
+   "fieldname": "status",
    "fieldtype": "Select",
-   "label": "Unpledge Status",
-   "options": "Requested\nUnpledged",
+   "label": "Status",
+   "options": "Requested\nApproved",
    "read_only": 1
   },
   {
@@ -60,13 +61,6 @@
    "label": "Loan Security Details"
   },
   {
-   "fieldname": "loan_security_pledges",
-   "fieldtype": "Table",
-   "label": "Loan Security Pledges",
-   "options": "Unpledge",
-   "reqd": 1
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -74,10 +68,24 @@
    "options": "Loan Security Unpledge",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "securities",
+   "fieldtype": "Table",
+   "label": "Securities",
+   "options": "Unpledge",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unpledge_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Unpledge Type",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-22 11:27:01.853996",
+ "modified": "2019-09-25 04:31:28.251339",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Unpledge",
@@ -93,6 +101,20 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
    "share": 1,
    "submit": 1,
    "write": 1
