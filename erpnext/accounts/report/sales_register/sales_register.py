@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt
+from frappe.model.meta import get_field_precision
 from frappe import msgprint, _
 
 def execute(filters=None):
