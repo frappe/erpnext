@@ -56,13 +56,14 @@
   {
    "fieldname": "against_pledge",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Against Pledge",
    "options": "Loan Security Pledge",
    "reqd": 1
   }
  ],
  "istable": 1,
- "modified": "2019-09-25 04:14:47.539660",
+ "modified": "2019-09-25 07:45:31.017472",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Unpledge",

@@ -126,6 +126,7 @@
    "label": "Repayment Info"
   },
   {
+   "depends_on": "is_term_loan",
    "fetch_from": "loan_type.repayment_method",
    "fetch_if_empty": 1,
    "fieldname": "repayment_method",
@@ -217,7 +218,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-25 04:38:49.089572",
+ "modified": "2019-09-25 06:05:18.819624",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Application",

@@ -45,15 +45,15 @@ def update_loan_security_price(from_timestamp=None, to_timestamp=None, loan_secu
 			frappe.db.set_value("Loan Security", loan_security_price.loan_security, 'loan_security_price', loan_security_price.loan_security_price)
 
 	if not process_loan_security_price:
-		process_price = frappe.new_doc("Process Loan Security Price")
+		process = frappe.new_doc("Process Loan Security Price")
 		process.from_time = from_timestamp
 		process.to_time = to_timestamp
 		if loan_security_type:
 			process.loan_security_type = loan_security_type
 
-		process_price.save()
+		process.save()
 
-		process_loan_security_price = process_price.name
+		process_loan_security_price = process.name
 
 	check_for_ltv_shortfall(process_loan_security_price)
 
