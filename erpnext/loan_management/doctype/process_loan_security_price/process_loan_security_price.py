@@ -15,6 +15,6 @@ class ProcessLoanSecurityPrice(Document):
 
 
 @frappe.whitelist()
-def update_loan_security(from_timestamp, to_timestamp, loan_security_type=None):
+def update_loan_security(from_timestamp, to_timestamp,  process_loan_security_price, loan_security_type=None):
 	update_loan_security_price(from_timestamp=from_timestamp, to_timestamp=to_timestamp,
-			loan_security_type=loan_security_type, from_background_job=0)
+			loan_security_type=loan_security_type,  process_loan_security_price=process_loan_security_price)

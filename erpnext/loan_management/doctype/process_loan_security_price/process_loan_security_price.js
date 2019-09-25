@@ -11,7 +11,8 @@ frappe.ui.form.on('Process Loan Security Price', {
 			args: {
 				from_timestamp: frm.doc.from_time,
 				to_timestamp: frm.doc.to_time,
-				loan_security_type: frm.doc.loan_security_type
+				loan_security_type: frm.doc.loan_security_type,
+				process_loan_security_price: frm.doc.name
 			}
 		});
 	}

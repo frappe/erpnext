@@ -12,5 +12,5 @@ class ProcessLoanInterestAccrual(Document):
 
 
 @frappe.whitelist()
-def process_loan_interest(posting_date):
-	make_accrual_interest_entry_for_demand_loans(posting_date, from_background_job=0)
+def process_manual_loan_interest(posting_date, process_loan_interest):
+	make_accrual_interest_entry_for_demand_loans(posting_date, process_loan_interest=process_loan_interest)

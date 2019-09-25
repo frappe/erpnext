@@ -7,9 +7,10 @@ frappe.ui.form.on('Process Loan Interest Accrual', {
 	// }
 	on_submit: function(frm) {
 		frappe.call({
-			method: "erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest",
+			method: "erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_manual_loan_interest",
 			args: {
-				posting_date: frm.doc.posting_date
+				posting_date: frm.doc.posting_date,
+				process_loan_interest: frm.doc.name
 			}
 		})
 	}
