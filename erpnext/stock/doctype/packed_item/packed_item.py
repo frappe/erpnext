@@ -20,7 +20,7 @@ def get_product_bundle_items(item_code):
 
 def get_packing_item_details(item, company):
 	return frappe.db.sql("""
-		select i.item_name, i.description, i.stock_uom, id.default_warehouse
+		select i.item_name, i.is_stock_item, i.description, i.stock_uom, id.default_warehouse
 		from `tabItem` i LEFT JOIN `tabItem Default` id ON id.parent=i.name and id.company=%s
 		where i.name = %s""",
 		(company, item), as_dict = 1)[0]
@@ -30,7 +30,7 @@ def get_bin_qty(item, warehouse):
 		where item_code = %s and warehouse = %s""", (item, warehouse), as_dict = 1)
 	return det and det[0] or frappe._dict()
 
-def update_packing_list_item(doc, packing_item_code, qty, main_item_row, description):	
+def update_packing_list_item(doc, packing_item_code, qty, main_item_row, description):
 	item = get_packing_item_details(packing_item_code, doc.company)
 
 	# check if exists
@@ -53,7 +53,7 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 	if description and not pi.description:
 		pi.description = description
 	if not pi.warehouse:
-		pi.warehouse = (main_item_row.warehouse if ((doc.get('is_pos')
+		pi.warehouse = (main_item_row.warehouse if ((doc.get('is_pos') or item.is_stock_item \
 			or not item.default_warehouse) and main_item_row.warehouse) else item.default_warehouse)
 
 	if not pi.batch_no:
@@ -108,8 +108,8 @@ def get_items_from_product_bundle(args):
 			"qty": flt(args["quantity"]) * flt(item.qty)
 		})
 		items.append(get_item_details(args))
-		
+
 	return items
-	
+
 def on_doctype_update():
 	frappe.db.add_index("Packed Item", ["item_code", "warehouse"])
