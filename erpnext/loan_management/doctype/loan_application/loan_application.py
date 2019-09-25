@@ -112,7 +112,7 @@ def create_pledge(loan_application):
 
 	for pledge in loan_application_doc.proposed_pledges:
 
-		lsp.append('loan_security_pledges', {
+		lsp.append('securities', {
 			"loan_security": pledge.loan_security,
 			"qty": pledge.qty,
 			"loan_security_price": pledge.loan_security_price,

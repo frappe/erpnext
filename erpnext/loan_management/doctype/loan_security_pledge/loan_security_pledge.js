@@ -22,7 +22,7 @@ frappe.ui.form.on("Pledge", {
 
 		let amount = 0;
 		let maximum_amount = 0;
-		$.each(frm.doc.loan_security_pledges || [], function(i, item){
+		$.each(frm.doc.securities || [], function(i, item){
 			amount += item.amount;
 			maximum_amount += item.amount - (item.amount * item.haircut/100);
 		});

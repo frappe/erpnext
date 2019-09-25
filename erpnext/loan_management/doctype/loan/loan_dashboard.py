@@ -10,27 +10,21 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'label': _('Pledges'),
 				'items': ['Loan Security Pledge']
 			},
 			{
-				'label': _('Shortfall'),
 				'items': ['Loan Security Shortfall']
 			},
 			{
-				'label': _('Disbursement'),
 				'items': ['Loan Disbursement']
 			},
 			{
-				'label': _('Repayments'),
 				'items': ['Loan Repayment']
 			},
 			{
-				'label': _('Interest Accrual'),
 				'items': ['Loan Interest Accrual']
 			},
 			{
-				'label': _('Loan Security Unpledge'),
 				'items': ['Loan Security Unpledge']
 			}
 		]

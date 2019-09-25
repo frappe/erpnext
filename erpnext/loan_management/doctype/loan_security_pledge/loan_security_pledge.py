@@ -14,7 +14,7 @@ class LoanSecurityPledge(Document):
 		total_security_value = 0
 		maximum_loan_value = 0
 
-		for pledge in self.loan_security_pledges:
+		for pledge in self.securities:
 			pledge.amount = pledge.qty * pledge.loan_security_price
 
 			total_security_value += pledge.amount

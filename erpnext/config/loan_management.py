@@ -71,5 +71,18 @@ def get_data():
 					"name": "Loan Interest Accrual"
 				}
 			]
+		},
+		{
+			"label": _("Loan Processes"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Process Loan Security Price",
+				},
+				{
+					"type": "doctype",
+					"name": "Process Loan Interest Accrual",
+				}
+			]
 		}
 	]

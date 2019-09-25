@@ -150,8 +150,8 @@ frappe.ui.form.on('Loan', {
 						frm.set_value("is_secured_loan", r.message.is_secured_loan);
 
 						if (frm.doc.is_secured_loan) {
-							$.each(r.message.loan_security_pledges, function(i, d) {
-								let row = frm.add_child("loan_security_pledges");
+							$.each(r.message.proposed_pledges, function(i, d) {
+								let row = frm.add_child("securities");
 								row.loan_security = d.loan_security;
 								row.qty = d.qty;
 								row.loan_security_price = d.loan_security_price;
@@ -159,7 +159,7 @@ frappe.ui.form.on('Loan', {
 								row.haircut = d.haircut;
 							});
 
-							frm.refresh_fields("loan_security_pledges");
+							frm.refresh_fields("securities");
 						}
                     }
                 }

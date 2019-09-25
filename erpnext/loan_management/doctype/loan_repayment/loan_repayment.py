@@ -101,7 +101,7 @@ class LoanRepayment(AccountsController):
 		frappe.db.set_value("Loan", self.against_loan, "total_amount_paid", loan.total_amount_paid - principal_amount_paid)
 		frappe.db.set_value("Loan", self.against_loan, "total_principal_paid", loan.total_principal_paid - principal_amount_paid)
 
-		if loan.status == "Repaid/Closed":
+		if loan.status == "Closed":
 			frappe.db.set_value("Loan", self.against_loan, "status", "Disbursed")
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
