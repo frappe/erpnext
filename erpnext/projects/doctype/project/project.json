@@ -108,7 +108,7 @@
    "fieldname": "percent_complete_method",
    "fieldtype": "Select",
    "label": "% Complete Method",
-   "options": "Task Completion\nTask Progress\nTask Weight"
+   "options": "Manual\nTask Completion\nTask Progress\nTask Weight"
   },
   {
    "bold": 1,
