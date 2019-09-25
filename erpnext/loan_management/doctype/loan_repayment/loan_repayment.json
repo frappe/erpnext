@@ -165,7 +165,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "is_term_loan",
+   "depends_on": "eval:doc.payment_type==\"Loan Closure\" || doc.is_term_loan",
    "fieldname": "payable_principal_amount",
    "fieldtype": "Currency",
    "label": "Payable Principal Amount",
@@ -193,7 +193,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-25 04:42:47.119231",
+ "modified": "2019-09-25 08:53:04.229118",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",

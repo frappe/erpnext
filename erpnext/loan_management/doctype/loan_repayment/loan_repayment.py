@@ -198,7 +198,7 @@ def get_accured_interest_entries(against_loan):
 # This function returns the amounts that are payable at the time of loan repayment based on posting date
 # So it pulls all the unpaid Loan Interest Accrual Entries and calculates the penalty if applicable
 
-def get_amounts(amounts, against_loan, loan_type, posting_date):
+def get_amounts(amounts, against_loan, loan_type, posting_date, payment_type):
 
 	against_loan_doc = frappe.get_doc("Loan", against_loan)
 	loan_type_details = frappe.get_doc("Loan Type", loan_type)
@@ -229,6 +229,9 @@ def get_amounts(amounts, against_loan, loan_type, posting_date):
 
 	pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid - against_loan_doc.total_interest_payable
 
+	if payment_type == "Loan Closure" and not payable_principal_amount:
+		payable_principal_amount = pending_principal_amount
+
 	amounts["pending_principal_amount"] = pending_principal_amount
 	amounts["payable_principal_amount"] = payable_principal_amount
 	amounts["interest_amount"] = total_pending_interest
@@ -249,7 +252,7 @@ def calculate_amounts(against_loan, posting_date, loan_type, payment_type):
 		'payable_amount': 0.0
 	}
 
-	amounts = get_amounts(amounts, against_loan, loan_type, posting_date)
+	amounts = get_amounts(amounts, against_loan, loan_type, posting_date, payment_type)
 
 	return amounts
 

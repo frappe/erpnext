@@ -61,3 +61,6 @@ def approve_unpledge_request(loan, unpledge_request, unpledge_type):
 
 	frappe.db.sql("""UPDATE `tabLoan Security Pledge`
 		SET status = %s WHERE loan = %s""", (unpledge_type, loan))
+
+	if unpledge_type == 'Unpledged':
+		frappe.db.set_value("Loan", loan, 'status', 'Closed')
