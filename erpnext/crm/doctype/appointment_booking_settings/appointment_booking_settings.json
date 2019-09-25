@@ -65,7 +65,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2019-09-19 12:36:34.011724",
+ "modified": "2019-09-25 13:08:28.328561",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Booking Settings",
@@ -94,6 +94,16 @@
    "print": 1,
    "read": 1,
    "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Manager",
    "share": 1,
    "write": 1
   }
