@@ -4,11 +4,13 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from erpnext.accounts.report.accounts_receivable.accounts_receivable import get_ageing_data
+from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
 from frappe.utils import getdate, flt
 
 def execute(filters=None):
-	if not filters: filters = {}
+	if not filters: 
+		filters = {}
+
 	validate_filters(filters)
 
 	columns = get_columns(filters)
@@ -19,18 +21,29 @@ def execute(filters=None):
 	for d in entries:
 		invoice = invoice_details.get(d.against_voucher) or frappe._dict()
 
-		if d.reference_type=="Purchase Invoice":
+		if d.reference_type == "Purchase Invoice":
 			payment_amount = flt(d.debit) or -1 * flt(d.credit)
+
 		else:
 			payment_amount = flt(d.credit) or -1 * flt(d.debit)
 
-		row = [d.voucher_type, d.voucher_no, d.party_type, d.party, d.posting_date, d.against_voucher,
-			invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks]
+		d.update({
+			"range1": 0,
+			"range2": 0,
+			"range3": 0,
+			"range4": 0,
+			"outstanding": payment_amount
+		})
 
 		if d.against_voucher:
-			row += get_ageing_data(30, 60, 90, 120, d.posting_date, invoice.posting_date, payment_amount)
-		else:
-			row += ["", "", "", "", ""]
+			ReceivablePayableReport(filters).get_ageing_data(invoice.posting_date, d)
+		
+		row = [
+			d.voucher_type, d.voucher_no, d.party_type, d.party, d.posting_date, d.against_voucher,
+			invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks, 
+			d.age, d.range1, d.range2, d.range3, d.range4
+		]
+
 		if invoice.due_date:
 			row.append((getdate(d.posting_date) - getdate(invoice.due_date)).days or 0)
 
