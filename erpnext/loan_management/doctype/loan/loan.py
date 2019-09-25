@@ -117,12 +117,12 @@ class Loan(AccountsController):
 
 	def link_loan_security_pledge(self):
 		frappe.db.sql("""UPDATE `tabLoan Security Pledge` SET
-			loan = %s, pledge_status = 'Pledged', pledge_time = %s
+			loan = %s, status = 'Pledged', pledge_time = %s
 			where name = %s """, (self.name, now_datetime(), self.loan_security_pledge))
 
 	def unlink_loan_security_pledge(self):
 		frappe.db.sql("""UPDATE `tabLoan Security Pledge` SET
-			loan = '', pledge_status = ''
+			loan = '', status = 'Unpledged'
 			where name = %s """, (self.loan_security_pledge))
 
 def update_total_amount_paid(doc):
@@ -164,7 +164,7 @@ def get_loan_application(loan_application):
 
 def close_loan(loan, total_amount_paid):
 	frappe.db.set_value("Loan", loan, "total_amount_paid", total_amount_paid)
-	frappe.db.set_value("Loan", loan, "status", "Repaid/Closed")
+	frappe.db.set_value("Loan", loan, "status", "Closed")
 
 @frappe.whitelist()
 def make_loan_disbursement(loan, loan_amount, disbursed_amount, company, applicant):
@@ -191,9 +191,8 @@ def make_repayment_entry(loan, applicant, loan_type,company):
 @frappe.whitelist()
 def create_loan_security_unpledge(loan, applicant):
 	loan_security_pledge_details = frappe.db.sql("""
-		SELECT p.loan_security, SUM(p.qty) as qty FROM `tabLoan Security Pledge` lsp , `tabPledge` p
-		WHERE p.parent = lsp.name AND lsp.loan = %s
-		GROUP BY p.loan_security
+		SELECT p.parent, p.loan_security, p.qty as qty FROM `tabLoan Security Pledge` lsp , `tabPledge` p
+		WHERE p.parent = lsp.name AND lsp.loan = %s AND lsp.docstatus = 1
 	""",(loan), as_dict=1)
 
 	unpledge_request = frappe.new_doc("Loan Security Unpledge")
@@ -201,9 +200,10 @@ def create_loan_security_unpledge(loan, applicant):
 	unpledge_request.loan = loan
 
 	for loan_security in loan_security_pledge_details:
-		unpledge_request.append('loan_security_pledges', {
+		unpledge_request.append('securities', {
 			"loan_security": loan_security.loan_security,
-			"qty": loan_security.qty
+			"qty": loan_security.qty,
+			"against_pledge": loan_security.parent
 		})
 
 	return unpledge_request.as_dict()
