@@ -27,7 +27,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 			style="height: 50vh; display: flex;"><h5 class="text-muted">${empty_state}</h5></div>`)
 		
 		
-		if (!$("#page-bank-reconciliation > div.container.page-body > div.page-wrapper > div > div.row.layout-main > div > div.layout-main-section > div.page-form.flex > div:nth-child(1)")){
+		if ($(".page_form")){
 			me.page.add_field({
 				fieldtype: 'Link',
 				label: __('Company'),
@@ -71,6 +71,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 			})
 		}
 
+		console.log($(".page_form"))
 		// console.log("page", me.page)		
 		// console.log("main_section", me.$main_section)		
 				
