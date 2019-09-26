@@ -154,7 +154,12 @@ frappe.query_reports["Accounts Receivable"] = {
 		},
 		{
 			"fieldname":"from_age",
-			"label": __("Show Invoices With Age Above"),
+			"label": __("Hide Invoices With Age Below"),
+			"fieldtype": "Int"
+		},
+		{
+			"fieldname":"to_age",
+			"label": __("Hide Invoices With Age Above"),
 			"fieldtype": "Int"
 		},
 		{

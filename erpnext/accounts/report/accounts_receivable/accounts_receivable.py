@@ -436,45 +436,71 @@ class ReceivablePayableReport(object):
 			group_by_labels=group_by_labels)
 
 	def group_aggregate_age(self, data, columns, grouped_by=None):
-		if not self.filters.from_age:
+		if not self.filters.from_age and not self.filters.to_age:
 			return data
 
-		to_group = []
 		to_keep = []
+		below_limit = []
+		above_limit = []
 
 		for d in data:
-			if d._isGroupTotal or d._isGroup or d.age >= cint(self.filters.from_age):
+			if d._isGroupTotal or d._isGroup:
 				to_keep.append(d)
+			elif self.filters.from_age and d.age < cint(self.filters.from_age):
+				below_limit.append(d)
+			elif self.filters.to_age and d.age > cint(self.filters.to_age):
+				above_limit.append(d)
 			else:
-				to_group.append(d)
+				to_keep.append(d)
 
-		if not to_group:
+		if not below_limit and not above_limit:
 			return data
 
 		total_fields = [c['fieldname'] for c in columns
 			if c['fieldtype'] in ['Float', 'Currency', 'Int'] and c['fieldname'] != 'age']
 
-		below_age_total = group_report_data(to_group, None, total_fields=total_fields, totals_only=True)
-		below_age_total = below_age_total[0]
-		above_age_total = group_report_data(to_keep, None, total_fields=total_fields, totals_only=True)
-		above_age_total = above_age_total[0] if above_age_total else {}
+		below_limit_total = group_report_data(below_limit, None, total_fields=total_fields, totals_only=True)
+		below_limit_total = below_limit_total[0] if below_limit_total else {}
+		above_limit_total = group_report_data(above_limit, None, total_fields=total_fields, totals_only=True)
+		above_limit_total = above_limit_total[0] if above_limit_total else {}
+		within_limit_total = group_report_data(to_keep, None, total_fields=total_fields, totals_only=True)
+		within_limit_total = within_limit_total[0] if within_limit_total else {}
 
 		if grouped_by:
-			below_age_total.update(grouped_by)
-			above_age_total.update(grouped_by)
+			below_limit_total.update(grouped_by)
+			within_limit_total.update(grouped_by)
+			above_limit_total.update(grouped_by)
 
-		below_age_total['voucher_type'] = _("Age <= {0} Total").format(self.filters.from_age)
+		below_limit_total['voucher_type'] = _("Age < {0} Total").format(self.filters.from_age)
+		above_limit_total['voucher_type'] = _("Age > {0} Total").format(self.filters.to_age)
 
-		above_age_total['voucher_type'] = _("Age > {0} Total").format(self.filters.from_age)
-		above_age_total['_excludeFromTotal'] = True
-		above_age_total['_bold'] = True
+		within_limit_total['_excludeFromTotal'] = True
+		within_limit_total['_bold'] = True
+		if self.filters.from_age and self.filters.to_age:
+			within_limit_total['voucher_type'] = _("Total of Age between {0} and {1}").format(self.filters.from_age, self.filters.to_age)
+		elif self.filters.from_age:
+			within_limit_total['voucher_type'] = _("Total of Age >= {0}").format(self.filters.from_age)
+		elif self.filters.to_age:
+			within_limit_total['voucher_type'] = _("Total of Age <= {0}").format(self.filters.to_age)
 
-		res = []
+		out = []
+		if self.filters.to_age:
+			out.append(above_limit_total)
+
 		if to_keep:
-			res += to_keep + [above_age_total, {}]
-		res.append(below_age_total)
+			if self.filters.to_age:
+				out.append({})
 
-		return res
+			out += to_keep
+			out.append(within_limit_total)
+
+			if self.filters.from_age:
+				out.append({})
+
+		if self.filters.from_age:
+			out.append(below_limit_total)
+
+		return out
 
 	def allocate_pdc_amount_in_fifo(self, gle, row_outstanding):
 		pdc_list = self.pdc_details.get((gle.voucher_no, gle.party), [])
