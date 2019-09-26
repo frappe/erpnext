@@ -110,6 +110,13 @@ website_route_rules = [
 			"parents": [{"label": _("Purchase Order"), "route": "purchase-orders"}]
 		}
 	},
+	{"from_route": "/purchase-invoices", "to_route": "Purchase Invoice"},
+	{"from_route": "/purchase-invoices/<path:name>", "to_route": "order",
+		"defaults": {
+			"doctype": "Purchase Invoice",
+			"parents": [{"label": _("Purchase Invoice"), "route": "purchase-invoices"}]
+		}
+	},
 	{"from_route": "/quotations", "to_route": "Quotation"},
 	{"from_route": "/quotations/<path:name>", "to_route": "order",
 		"defaults": {
@@ -157,6 +164,7 @@ standard_portal_menu_items = [
 	{"title": _("Request for Quotations"), "route": "/rfq", "reference_doctype": "Request for Quotation", "role": "Supplier"},
 	{"title": _("Supplier Quotation"), "route": "/supplier-quotations", "reference_doctype": "Supplier Quotation", "role": "Supplier"},
 	{"title": _("Purchase Orders"), "route": "/purchase-orders", "reference_doctype": "Purchase Order", "role": "Supplier"},
+	{"title": _("Purchase Invoices"), "route": "/purchase-invoices", "reference_doctype": "Purchase Invoice", "role": "Supplier"},
 	{"title": _("Quotations"), "route": "/quotations", "reference_doctype": "Quotation", "role":"Customer"},
 	{"title": _("Orders"), "route": "/orders", "reference_doctype": "Sales Order", "role":"Customer"},
 	{"title": _("Invoices"), "route": "/invoices", "reference_doctype": "Sales Invoice", "role":"Customer"},
@@ -191,6 +199,7 @@ has_website_permission = {
 	"Sales Invoice": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Supplier Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Purchase Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
+	"Purchase Invoice": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Material Request": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",

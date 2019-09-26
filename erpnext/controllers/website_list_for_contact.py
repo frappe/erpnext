@@ -25,7 +25,7 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 
 	if not filters: filters = []
 
-	if doctype == 'Supplier Quotation':
+	if doctype in ['Supplier Quotation', 'Purchase Invoice']:
 		filters.append((doctype, 'docstatus', '<', 2))
 	else:
 		filters.append((doctype, 'docstatus', '=', 1))
@@ -149,6 +149,7 @@ def get_customers_suppliers(doctype, user):
 		suppliers if has_supplier_field else None
 
 def has_website_permission(doc, ptype, user, verbose=False):
+	print(doc)
 	doctype = doc.doctype
 	customers, suppliers = get_customers_suppliers(doctype, user)
 	if customers:
