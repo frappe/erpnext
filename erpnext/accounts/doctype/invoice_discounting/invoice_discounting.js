@@ -206,7 +206,7 @@ frappe.ui.form.on('Invoice Discounting', {
 frappe.ui.form.on('Discounted Invoice', {
 	sales_invoice: (frm) => {
 		frm.events.calculate_total_amount(frm);
-		frm.events.refresh_filters(frm);	
+		frm.events.refresh_filters(frm);
 	},
 	invoices_remove: (frm) => {
 		frm.events.calculate_total_amount(frm);
