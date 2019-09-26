@@ -178,7 +178,7 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 		*/
 		
 		new frappe.ui.FileUploader({
-			method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement'
+			method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement',
 			callback: function(attachment, r) {
 				if (!r.exc && r.message) {
 					me.data = r.message;
