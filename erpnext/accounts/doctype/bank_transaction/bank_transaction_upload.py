@@ -7,18 +7,22 @@ import frappe
 import json
 from frappe.utils import getdate
 from frappe.utils.dateutils import parse_date
+
 from six import iteritems
 
 @frappe.whitelist()
 def upload_bank_statement():
+	
 	if getattr(frappe, "uploaded_file", None):
 		with open(frappe.uploaded_file, "rb") as upfile:
 			fcontent = upfile.read()
+			frappe.log_error(fcontent)
+			frappe.log_error(upfile)
 	else:
 		from frappe.utils.file_manager import get_uploaded_content
 		fname, fcontent = get_uploaded_content()
 
-	frappe.log_error(fname)
+	
 
 	if frappe.safe_encode(fname).lower().endswith("csv".encode('utf-8')):
 		from frappe.utils.csvutils import read_csv_content
