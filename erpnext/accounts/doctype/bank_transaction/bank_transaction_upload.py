@@ -13,20 +13,25 @@ from six import iteritems
 @frappe.whitelist()
 def upload_bank_statement():
 		
-	if getattr(frappe.local, "uploaded_file", None):
-		with open(frappe.local.uploaded_file, "rb") as upfile:
-			fcontent = upfile.read()
-	else:
-		from frappe.utils.file_manager import get_uploaded_content
-		fname, fcontent = get_uploaded_content()
+	from frappe.utils.csvutils import read_csv_content
+	rows = read_csv_content(frappe.local.uploaded_file)
+	if not rows:
+		frappe.throw(_("Please select a csv file"))	
+		
+	#if getattr(frappe, "uploaded_file", None):
+	#	with open(frappe.uploaded_file, "rb") as upfile:
+	#		fcontent = upfile.read()
+	#else:
+	#	from frappe.utils.file_manager import get_uploaded_content
+	#	fname, fcontent = get_uploaded_content()
 
-	if frappe.safe_encode(fname).lower().endswith("csv".encode('utf-8')):
-		from frappe.utils.csvutils import read_csv_content
-		rows = read_csv_content(fcontent, False)
+	#if frappe.safe_encode(fname).lower().endswith("csv".encode('utf-8')):
+	#	from frappe.utils.csvutils import read_csv_content
+	#	rows = read_csv_content(fcontent, False)
 
-	elif frappe.safe_encode(fname).lower().endswith("xlsx".encode('utf-8')):
-		from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file
-		rows = read_xlsx_file_from_attached_file(fcontent=fcontent)
+	#elif frappe.safe_encode(fname).lower().endswith("xlsx".encode('utf-8')):
+	#	from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file
+	#	rows = read_xlsx_file_from_attached_file(fcontent=fcontent)
 
 	columns = rows[0]
 	rows.pop(0)
