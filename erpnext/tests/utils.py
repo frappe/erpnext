@@ -18,7 +18,7 @@ def create_test_contact_and_address():
 		"city": "_Test City",
 		"state": "Test State",
 		"country": "India",
-		"links": = [
+		"links": [
 			{
 				"link_doctype": "Customer",
 				"link_name": "_Test Customer"
