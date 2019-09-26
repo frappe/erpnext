@@ -26,47 +26,51 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		me.$main_section.append(`<div class="flex justify-center align-center text-muted"
 			style="height: 50vh; display: flex;"><h5 class="text-muted">${empty_state}</h5></div>`)
 
-		me.page.add_field({
-			fieldtype: 'Link',
-			label: __('Company'),
-			fieldname: 'company',
-			options: "Company",
-			onchange: function() {
-				if (this.value) {
-					me.company = this.value;
-				} else {
-					me.company = null;
-					me.bank_account = null;
-				}
-			}
-		})
-		me.page.add_field({
-			fieldtype: 'Link',
-			label: __('Bank Account'),
-			fieldname: 'bank_account',
-			options: "Bank Account",
-			get_query: function() {
-				if(!me.company) {
-					frappe.throw(__("Please select company first"));
-					return
-				}
-
-				return {
-					filters: {
-						"company": me.company
+		if (me.page.fields_dict.company === false){
+			me.page.add_field({
+				fieldtype: 'Link',
+				label: __('Company'),
+				fieldname: 'company',
+				options: "Company",
+				onchange: function() {
+					if (this.value) {
+						me.company = this.value;
+					} else {
+						me.company = null;
+						me.bank_account = null;
 					}
 				}
-			},
-			onchange: function() {
-				if (this.value) {
-					me.bank_account = this.value;
-					me.add_actions();
-				} else {
-					me.bank_account = null;
-					me.page.hide_actions_menu();
+			})
+		}
+		if (me.page.fields_dict.bank_account === false){
+			me.page.add_field({
+				fieldtype: 'Link',
+				label: __('Bank Account'),
+				fieldname: 'bank_account',
+				options: "Bank Account",
+				get_query: function() {
+					if(!me.company) {
+						frappe.throw(__("Please select company first"));
+						return
+					}
+
+					return {
+						filters: {
+							"company": me.company
+						}
+					}
+				},
+				onchange: function() {
+					if (this.value) {
+						me.bank_account = this.value;
+						me.add_actions();
+					} else {
+						me.bank_account = null;
+						me.page.hide_actions_menu();
+					}
 				}
-			}
-		})
+			})
+		}
 	}
 
 	check_plaid_status() {
@@ -139,15 +143,13 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 	}
 
 	make() {
-		const me = this;
-		frappe.upload.make({
-			args: {
-				method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement',
-				allow_multiple: 0
-			},
-			no_socketio: true,
-			sample_url: "e.g. http://example.com/somefile.csv",
-			callback: function(attachment, r) {
+		const me = this;	
+		new frappe.ui.FileUploader({
+			method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement',
+			allow_multiple: 0,
+			on_success: function(attachment, r) {
+				console.log(r)
+				console.log(attachment)
 				if (!r.exc && r.message) {
 					me.data = r.message;
 					me.setup_transactions_dom();
