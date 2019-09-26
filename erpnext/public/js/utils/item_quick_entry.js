@@ -32,9 +32,12 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			me.dialog.set_df_property("item_name", "reqd", me.dialog.doc.item_naming_by == "Item Name" ? 1 : 0);
 			me.dialog.set_df_property("naming_series", "reqd", me.dialog.doc.item_naming_by == "Naming Series" ? 1 : 0);
 		};
+		me.dialog.fields_dict["item_naming_by"].df.onchange();
+
 		me.dialog.fields_dict["brand"].df.onchange = () => {
 			erpnext.utils.set_override_item_naming_by(me.dialog);
 		};
+
 		me.dialog.fields_dict["item_group"].df.onchange = () => {
 			erpnext.utils.set_override_item_naming_by(me.dialog);
 		};
@@ -200,7 +203,16 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		// non mandatory for variants
 		['item_code', 'stock_uom', 'item_group'].forEach((d) => {
 			let f = this.dialog.get_field(d);
-			f.df.reqd = !for_variant;
+
+			if(d == 'item_code') {
+				if (for_variant) {
+					f.df.reqd = 0;
+				} else {
+					f.df.reqf = this.dialog.fields_dict.item_naming_by == "Item Code";
+				}
+			} else {
+				f.df.reqd = !for_variant;
+			}
 			f.refresh();
 		});
 
