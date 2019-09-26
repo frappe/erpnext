@@ -125,7 +125,8 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 	constructor(parent) {
 		this.parent = parent;
 		this.data = [];
-
+		this.make();
+		/*
 		const assets = [
 			"/assets/frappe/css/frappe-datatable.css",
 			"/assets/frappe/js/lib/clusterize.min.js",
@@ -136,6 +137,7 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 		frappe.require(assets, () => {
 			this.make();
 		});
+		*/
 	}
 
 	make() {
