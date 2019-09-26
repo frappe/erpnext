@@ -26,6 +26,8 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		me.$main_section.append(`<div class="flex justify-center align-center text-muted"
 			style="height: 50vh; display: flex;"><h5 class="text-muted">${empty_state}</h5></div>`)
 
+		console.log(me.page)
+		
 		me.page.add_field({
 			fieldtype: 'Link',
 			label: __('Company'),
@@ -125,7 +127,6 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 	constructor(parent) {
 		this.parent = parent;
 		this.data = [];
-
 		
 		const assets = [
 			"/assets/frappe/css/frappe-datatable.css",
