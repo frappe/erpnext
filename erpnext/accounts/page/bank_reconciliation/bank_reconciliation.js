@@ -132,7 +132,6 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 			"/assets/frappe/js/lib/clusterize.min.js",
 			"/assets/frappe/js/lib/Sortable.min.js",
 			"/assets/frappe/js/lib/frappe-datatable.js",
-			"/assets/frappe/js/frappe/upload.js"	
 		];
 
 		frappe.require(assets, () => {
