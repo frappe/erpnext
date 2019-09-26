@@ -113,9 +113,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 
 		me.page.add_menu_item(__("Reconcile this account"), function() {
 			me.clear_page_content();
-
-			console.log($(".link-field").length)
-			// me.make_reconciliation_tool();
+			me.make_reconciliation_tool();
 		}, true)
 	}
 
@@ -127,6 +125,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 
 	make_reconciliation_tool() {
 		const me = this;
+		console.log(me);
 		frappe.model.with_doctype("Bank Transaction", () => {
 			erpnext.accounts.ReconciliationList = new erpnext.accounts.ReconciliationTool({
 				parent: me.parent,
