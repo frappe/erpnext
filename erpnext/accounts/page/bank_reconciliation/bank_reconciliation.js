@@ -26,7 +26,6 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		me.$main_section.append(`<div class="flex justify-center align-center text-muted"
 			style="height: 50vh; display: flex;"><h5 class="text-muted">${empty_state}</h5></div>`)
 		
-		console.log(me.page)
 		
 		me.page.add_field({
 			fieldtype: 'Link',
@@ -69,15 +68,10 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 				}
 			}
 		})
-		
+		console.log("page", me.page)		
+		console.log("main_section", me.$main_section)		
 				
 		if (me.page.fields_dict.company){
-			console.log("HEY")
-		} else{
-			console.log("NO")
-		}
-		
-		if (me.page.fields_dict.company2){
 			console.log("HEY")
 		} else{
 			console.log("NO")
