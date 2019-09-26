@@ -18,6 +18,8 @@ def upload_bank_statement():
 		from frappe.utils.file_manager import get_uploaded_content
 		fname, fcontent = get_uploaded_content()
 
+	frappe.log_error(fname)
+
 	if frappe.safe_encode(fname).lower().endswith("csv".encode('utf-8')):
 		from frappe.utils.csvutils import read_csv_content
 		rows = read_csv_content(fcontent, False)
