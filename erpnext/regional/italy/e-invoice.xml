@@ -1,5 +1,11 @@
 {%- macro format_float(value, precision=2) -%}
-{{ value|round(frappe.utils.cint(precision)) }}
+{%- if frappe.utils.cint(precision) == 3 %}
+{{ "%.3f" % value|abs }}
+{%- elif frappe.utils.cint(precision) == 4 -%}
+{{ "%.4f" % value|abs }}
+{%- else -%}
+{{ "%.2f" % value|abs }}
+{%- endif %}
 {%- endmacro -%}
 
 {%- macro render_address(address) %}
