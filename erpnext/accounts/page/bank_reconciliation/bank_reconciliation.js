@@ -25,8 +25,10 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		const empty_state = __("Upload a bank statement, link or reconcile a bank account")
 		me.$main_section.append(`<div class="flex justify-center align-center text-muted"
 			style="height: 50vh; display: flex;"><h5 class="text-muted">${empty_state}</h5></div>`)
-
-		if (me.page.company){
+		
+		console.log(me.page)
+		
+		if (me.page.fields_dict.company){
 			console.log("HEY")
 		} else{
 			console.log("NO")
