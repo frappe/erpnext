@@ -13,18 +13,18 @@ from six import iteritems
 @frappe.whitelist()
 def upload_bank_statement():
 	
-	frappe.log_error(frappe.local.uploaded_file)
-	frappe.log_error(frappe.local.uploaded_filename)
+	#frappe.log_error(frappe.local.uploaded_file)
+	#frappe.log_error()
 	
-	from frappe.utils.file_manager import get_uploaded_content
-	fname, fcontent = get_uploaded_content()
-	frappe.log_error(fname)
-	frappe.log_error(fcontent)
-	
-	from frappe.utils.csvutils import read_csv_content
-	rows = read_csv_content(frappe.local.uploaded_file)
-	if not rows:
-		frappe.throw(_("Please select a csv file"))	
+	#from frappe.utils.file_manager import get_uploaded_content
+	#fname, fcontent = get_uploaded_content()
+	#frappe.log_error(fname)
+	#frappe.log_error(fcontent)
+	#
+	#from frappe.utils.csvutils import read_csv_content
+	#rows = read_csv_content(frappe.local.uploaded_file)
+	#if not rows:
+	#	frappe.throw(_("Please select a csv file"))	
 		
 	#if getattr(frappe, "uploaded_file", None):
 	#	with open(frappe.uploaded_file, "rb") as upfile:
@@ -32,20 +32,21 @@ def upload_bank_statement():
 	#else:
 	#	from frappe.utils.file_manager import get_uploaded_content
 	#	fname, fcontent = get_uploaded_content()
+	
+	fname = frappe.local.uploaded_filename
+	fcontent = frappe.local.uploaded_file
 
-	#if frappe.safe_encode(fname).lower().endswith("csv".encode('utf-8')):
-	#	from frappe.utils.csvutils import read_csv_content
-	#	rows = read_csv_content(fcontent, False)
+	if frappe.safe_encode(fname).lower().endswith("csv".encode('utf-8')):
+		from frappe.utils.csvutils import read_csv_content
+		rows = read_csv_content(fcontent, False)
 
-	#elif frappe.safe_encode(fname).lower().endswith("xlsx".encode('utf-8')):
-	#	from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file
-	#	rows = read_xlsx_file_from_attached_file(fcontent=fcontent)
+	elif frappe.safe_encode(fname).lower().endswith("xlsx".encode('utf-8')):
+		from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file
+		rows = read_xlsx_file_from_attached_file(fcontent=fcontent)
 
 	columns = rows[0]
 	rows.pop(0)
 	data = rows
-	frappe.log_error(columns)
-	frappe.log_error(rows)
 	return {"columns": columns, "data": data}
 
 
