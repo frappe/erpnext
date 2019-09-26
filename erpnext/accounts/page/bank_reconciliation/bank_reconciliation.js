@@ -113,7 +113,9 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 
 		me.page.add_menu_item(__("Reconcile this account"), function() {
 			me.clear_page_content();
-			me.make_reconciliation_tool();
+
+			console.log($(".link-field").length)
+			// me.make_reconciliation_tool();
 		}, true)
 	}
 
