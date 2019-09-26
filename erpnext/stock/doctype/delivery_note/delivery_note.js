@@ -85,26 +85,13 @@ frappe.ui.form.on("Delivery Note", {
 	refresh: function(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.is_return === 1 && frm.doc.per_billed !== 100) {
 			frm.add_custom_button(__('Credit Note'), function() {
-				frappe.confirm(__("Are you sure you want to make credit note?"),
-					function() {
-						frm.trigger("make_credit_note");
-					}
-				);
+				frappe.model.open_mapped_doc({
+					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
+					frm: cur_frm,
+				})
 			}, __('Create'));
-
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
-	},
-
-	make_credit_note: function(frm) {
-		frm.call({
-			method: "make_return_invoice",
-			doc: frm.doc,
-			freeze: true,
-			callback: function() {
-				frm.reload_doc();
-			}
-		});
 	}
 });
 
