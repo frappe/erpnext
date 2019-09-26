@@ -159,8 +159,9 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 		// 	}
 		// })
 		frappe.call({
+			method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement',
 			args: {
-				method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement'
+				
 			},
 			// no_socketio: true,
 			// sample_url: "e.g. http://example.com/somefile.csv",
