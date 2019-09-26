@@ -468,7 +468,7 @@ def make_purchase_receipt(**args):
 	pr.company = args.company or "_Test Company"
 	pr.supplier = args.supplier or "_Test Supplier"
 	pr.is_subcontracted = args.is_subcontracted or "No"
-	pr.supplier_warehouse = "_Test Warehouse 1 - _TC"
+	pr.supplier_warehouse = args.supplier_warehouse or "_Test Warehouse 1 - _TC"
 	pr.currency = args.currency or "INR"
 	pr.is_return = args.is_return
 	pr.return_against = args.return_against

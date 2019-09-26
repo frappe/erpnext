@@ -805,14 +805,12 @@ def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 
 def get_qty_after_transaction(**args):
 	args = frappe._dict(args)
-
 	last_sle = get_previous_sle({
 		"item_code": args.item_code or "_Test Item",
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"posting_date": args.posting_date or nowdate(),
 		"posting_time": args.posting_time or nowtime()
 	})
-
 	return flt(last_sle.get("qty_after_transaction"))
 
 test_records = frappe.get_test_records('Stock Entry')

@@ -6,7 +6,6 @@ import frappe, erpnext
 from frappe.utils import flt, cstr, cint
 from frappe import _
 from erpnext.accounts.utils import get_stock_and_account_difference
-from pprint import pprint
 from frappe.model.meta import get_field_precision
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
@@ -118,7 +117,6 @@ def check_if_in_list(gle, gl_map, dimensions=None):
 
 def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 	if not from_repost:
-		validate_account_for_perpetual_inventory(gl_map)
 		validate_cwip_accounts(gl_map)
 
 	round_off_debit_credit(gl_map)
@@ -129,6 +127,10 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 		# check against budget
 		if not from_repost:
 			validate_expense_against_budget(entry)
+
+	if not from_repost:
+		validate_account_for_perpetual_inventory(gl_map)
+
 
 def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	args.update({"doctype": "GL Entry"})
@@ -142,21 +144,16 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 def validate_account_for_perpetual_inventory(gl_map):
 
 	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)):
-		print(" ------------   >>>>>> hello World")
 
 		account_list = [gl_entries.account for gl_entries in gl_map]
 		account_list = list(dict.fromkeys(account_list))
-		pprint(account_list)
 		aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
 					where account_type = 'Stock' and is_group=0""")]
 
 		stock_value_and_account_balance_difference = get_stock_and_account_difference(account_list=account_list ,company= gl_map[0].company)
 
-		print("----------------->>>", stock_value_and_account_balance_difference)
-
 		if gl_map[0].voucher_type=="Journal Entry":
 				if stock_value_and_account_balance_difference == 0:
-					print("I Am Here")
 					for entry in gl_map:
 						if entry.account in aii_accounts:
 							frappe.throw(_("Account: {0} can only be updated via Stock Transactions")

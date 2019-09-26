@@ -21,7 +21,7 @@ def get_warehouse_account_map(company=None):
 			filters['company'] = company
 
 		for d in frappe.get_all('Warehouse',
-			fields = ["name", "account", "parent_warehouse", "company"],
+			fields = ["name", "account", "parent_warehouse", "company", "is_group"],
 			filters = filters,
 			order_by="lft, rgt"):
 			if not d.account:

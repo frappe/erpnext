@@ -561,6 +561,7 @@ def fix_total_debit_credit():
 				(d.diff, d.voucher_type, d.voucher_no))
 
 def get_stock_and_account_difference(account_list=None, posting_date=None, company=None):
+	from pprint import pprint
 	from erpnext.stock.utils import get_stock_value_on
 	from erpnext.stock import get_warehouse_account_map
 
@@ -575,17 +576,15 @@ def get_stock_and_account_difference(account_list=None, posting_date=None, compa
 	total_stock_value = 0
 
 	for warehouse in warehouses:
-		if warehouse_account[warehouse]["account"] in account_list:
+		if warehouse_account[warehouse]["account"] in account_list and not warehouse_account[warehouse]["is_group"]:
 			value = get_stock_value_on(warehouse, posting_date)
 			total_stock_value += value
 
-	for account in accounts:
-		if account in account_list:
+	for account in account_list:
+		if account in accounts:
 			balance = get_balance_on(account, posting_date, in_account_currency=False)
 			total_account_balance += balance
-
 	total_diff = flt(total_stock_value) - flt(total_account_balance)
-
 	return total_diff
 
 def get_currency_precision():
