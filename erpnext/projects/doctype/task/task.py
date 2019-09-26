@@ -28,6 +28,7 @@ class Task(NestedSet):
 
 	def validate(self):
 		self.validate_dates()
+		self.validate_parent_project_dates()
 		self.validate_progress()
 		self.validate_status()
 		self.update_depends_on()
@@ -38,6 +39,17 @@ class Task(NestedSet):
 
 		if self.act_start_date and self.act_end_date and getdate(self.act_start_date) > getdate(self.act_end_date):
 			frappe.throw(_("'Actual Start Date' can not be greater than 'Actual End Date'"))
+
+	def validate_parent_project_dates(self):
+		if not self.project:
+			return
+
+		project_end_date = getdate(frappe.db.get_value("Project", self.project, "expected_end_date"))
+		if project_end_date < getdate(self.exp_end_date):
+			frappe.throw(_("Task's End Date cannot be after Project's End Date."))
+
+		if project_end_date > getdate(self.exp_start_date):
+			frappe.throw(_("Task's Start Date cannot be after Project's End Date."))
 
 	def validate_status(self):
 		if self.status!=self.get_db_value("status") and self.status == "Completed":
