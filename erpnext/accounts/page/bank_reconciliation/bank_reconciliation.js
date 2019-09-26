@@ -125,7 +125,8 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 	constructor(parent) {
 		this.parent = parent;
 		this.data = [];
-
+		this.make();
+		/*
 		const assets = [
 			"/assets/frappe/css/frappe-datatable.css",
 			"/assets/frappe/js/lib/clusterize.min.js",
@@ -136,11 +137,12 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 		frappe.require(assets, () => {
 			this.make();
 		});
+		*/
 	}
 
 	make() {
 		const me = this;
-		frappe.upload.make_dialog({
+		frappe.upload.make({
 			args: {
 				method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement',
 				allow_multiple: 0
