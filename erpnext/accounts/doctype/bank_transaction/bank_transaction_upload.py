@@ -12,7 +12,10 @@ from six import iteritems
 
 @frappe.whitelist()
 def upload_bank_statement():
-		
+	
+	frappe.log_error(frappe.local.uploaded_file)
+	frappe.log_error(frappe.local)
+	
 	from frappe.utils.csvutils import read_csv_content
 	rows = read_csv_content(frappe.local.uploaded_file)
 	if not rows:
