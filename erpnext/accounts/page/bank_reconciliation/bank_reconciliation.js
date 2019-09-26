@@ -132,7 +132,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 				doctype: "Bank Transaction"
 			});
 		})
-		console.log(me.$div.page-form.flex)
+		console.log($(".page_form"))
 	}
 }
 
