@@ -10,19 +10,21 @@ def create_test_contact_and_address():
 	frappe.db.sql('delete from tabAddress')
 	frappe.db.sql('delete from `tabDynamic Link`')
 
-	frappe.get_doc(dict(
-		doctype='Address',
-		address_title='_Test Address for Customer',
-		address_type='Office',
-		address_line1='Station Road',
-		city='_Test City',
-		state='Test State',
-		country='India',
-		links = [dict(
-			link_doctype='Customer',
-			link_name='_Test Customer'
-		)]
-	)).insert()
+	frappe.get_doc({
+		"doctype": "Address",
+		"address_title": "_Test Address for Customer",
+		"address_type": "Office",
+		"address_line1": "Station Road",
+		"city": "_Test City",
+		"state": "Test State",
+		"country": "India",
+		"links": = [
+			{
+				"link_doctype": "Customer",
+				"link_name": "_Test Customer"
+			}
+		]
+	}).insert()
 
 	contact = frappe.get_doc({
 		"doctype": 'Contact',
