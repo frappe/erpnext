@@ -34,6 +34,12 @@ def get_columns(filters):
 			"width": 100
 		},
 		{
+			"label": _("Status"),
+			"fieldtype": "Data",
+			"fieldname": "status",
+			"width": 90
+		},
+		{
 			"label": _("Business Unit"),
 			"fieldtype": "Data",
 			"fieldname": "business_unit",
@@ -86,10 +92,18 @@ def get_columns(filters):
 	]
 
 def get_conditions(filters):
-	conditions = {}
+	conditions = {'docstatus': 1}
+	status = filters.status
 
 	if filters.company:
 		conditions["company"] = filters.company
+
+	# In Store assets are those that are not sold or scrapped
+	operand = 'not in'
+	if status not in 'In Store':
+		operand = 'in'
+
+	conditions['status'] = (operand, ['Sold', 'Scrapped'])
 
 	return conditions
 
@@ -99,29 +113,32 @@ def get_data(filters):
 
 	conditions = get_conditions(filters)
 	current_value_map = get_finance_book_value_map(filters.finance_book)
-	print(current_value_map)
+	pr_supplier_map = get_purchase_receipt_supplier_map()
+	pi_supplier_map = get_purchase_invoice_supplier_map()
 
 	assets_record = frappe.db.get_all("Asset",
 		filters=conditions,
-		fields=["name", "asset_name", "department", "cost_center",
-			"asset_category", "location", "purchase_date", "supplier",
-			"gross_purchase_amount", "available_for_use_date"])
+		fields=["name", "asset_name", "department", "cost_center", "purchase_receipt",
+			"asset_category", "purchase_date", "gross_purchase_amount",
+			"location", "available_for_use_date", "status"])
 
 	for asset in assets_record:
-		row = {
-			"asset_id": asset.name,
-			"asset_name": asset.asset_name,
-			"department": asset.department,
-			"business_unit": asset.cost_center,
-			"vendor_name": asset.supplier,
-			"gross_purchase_amount": asset.gross_purchase_amount,
-			"available_for_use_date": asset.available_for_use_date,
-			"location": asset.location,
-			"asset_category": asset.asset_category,
-			"purchase_date": asset.purchase_date,
-			"current_value": current_value_map.get(asset.name)
-		}
-		data.append(row)
+		if current_value_map.get(asset.name) is not None:
+			row = {
+				"asset_id": asset.name,
+				"asset_name": asset.asset_name,
+				"status": asset.status,
+				"department": asset.department,
+				"business_unit": asset.cost_center,
+				"vendor_name": pr_supplier_map.get(asset.purchase_receipt) or pi_supplier_map.get(asset.purchase_invoice),
+				"gross_purchase_amount": asset.gross_purchase_amount,
+				"available_for_use_date": asset.available_for_use_date,
+				"location": asset.location,
+				"asset_category": asset.asset_category,
+				"purchase_date": asset.purchase_date,
+				"current_value": current_value_map.get(asset.name)
+			}
+			data.append(row)
 
 	return data
 
@@ -131,4 +148,24 @@ def get_finance_book_value_map(finance_book=''):
 		FROM `tabAsset Finance Book`
 		WHERE
 			parentfield='finance_books'
-			AND finance_book=%s''', (finance_book), debug=1))
+			AND finance_book=%s''', (finance_book)))
+
+def get_purchase_receipt_supplier_map():
+	return frappe._dict(frappe.db.sql(''' Select
+		pr.name, pr.supplier
+		FROM `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri 
+		WHERE
+			pri.parent = pr.name
+			AND pri.is_fixed_asset=1
+			AND pr.docstatus=1
+			AND pr.is_return=0'''))
+
+def get_purchase_invoice_supplier_map():
+	return frappe._dict(frappe.db.sql(''' Select
+		pi.name, pi.supplier
+		FROM `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pii 
+		WHERE
+			pii.parent = pi.name
+			AND pii.is_fixed_asset=1
+			AND pi.docstatus=1
+			AND pi.is_return=0'''))

@@ -13,10 +13,18 @@ frappe.query_reports["Fixed Asset Register"] = {
 			reqd: 1
 		},
 		{
+			fieldname:"status",
+			label: __("Status"),
+			fieldtype: "Select",
+			options: "In Store\nDisposed",
+			default: 'In Store',
+			reqd: 1
+		},
+		{
 			fieldname:"finance_book",
 			label: __("Finance Book"),
 			fieldtype: "Link",
 			options: "Finance Book"
-		}
+		},
 	]
 };
