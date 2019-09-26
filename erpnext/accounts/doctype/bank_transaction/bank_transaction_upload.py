@@ -14,7 +14,7 @@ from six import iteritems
 def upload_bank_statement():
 	
 	frappe.log_error(frappe.local.uploaded_file)
-	frappe.log_error(frappe.local.__dict__)
+	frappe.log_error(dir(frappe.local))
 	
 	from frappe.utils.file_manager import get_uploaded_content
 	fname, fcontent = get_uploaded_content()
