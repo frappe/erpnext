@@ -13,16 +13,16 @@ from six import iteritems
 @frappe.whitelist()
 def upload_bank_statement():
 	
+	frappe.log_error(frappe.local.uploaded_file)
+	rows = read_csv_content(frappe.local.uploaded_file)
+	frappe.log_error(rows)
+	
 	if getattr(frappe, "uploaded_file", None):
 		with open(frappe.uploaded_file, "rb") as upfile:
 			fcontent = upfile.read()
-			frappe.log_error(fcontent)
-			frappe.log_error(upfile)
 	else:
 		from frappe.utils.file_manager import get_uploaded_content
 		fname, fcontent = get_uploaded_content()
-
-	
 
 	if frappe.safe_encode(fname).lower().endswith("csv".encode('utf-8')):
 		from frappe.utils.csvutils import read_csv_content
