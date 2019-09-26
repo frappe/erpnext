@@ -16,6 +16,11 @@ def upload_bank_statement():
 	frappe.log_error(frappe.local.uploaded_file)
 	frappe.log_error(frappe.local)
 	
+	from frappe.utils.file_manager import get_uploaded_content
+	fname, fcontent = get_uploaded_content()
+	frappe.log_error(fname)
+	frappe.log_error(fcontent)
+	
 	from frappe.utils.csvutils import read_csv_content
 	rows = read_csv_content(frappe.local.uploaded_file)
 	if not rows:
