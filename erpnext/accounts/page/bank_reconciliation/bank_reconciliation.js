@@ -142,6 +142,7 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 
 	make() {
 		const me = this;
+		/*
 		// frappe.upload.make({
 		// 	args: {
 		// 		method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement',
@@ -165,6 +166,19 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 			},
 			// no_socketio: true,
 			// sample_url: "e.g. http://example.com/somefile.csv",
+			callback: function(attachment, r) {
+				if (!r.exc && r.message) {
+					me.data = r.message;
+					me.setup_transactions_dom();
+					me.create_datatable();
+					me.add_primary_action();
+				}
+			}
+		})
+		*/
+		
+		new frappe.ui.FileUploader({
+			method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement'
 			callback: function(attachment, r) {
 				if (!r.exc && r.message) {
 					me.data = r.message;
