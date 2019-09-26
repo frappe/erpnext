@@ -36,6 +36,8 @@ def upload_bank_statement():
 	columns = rows[0]
 	rows.pop(0)
 	data = rows
+	frappe.log_error(columns)
+	frappe.log_error(rows)
 	return {"columns": columns, "data": data}
 
 
