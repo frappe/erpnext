@@ -26,7 +26,11 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		me.$main_section.append(`<div class="flex justify-center align-center text-muted"
 			style="height: 50vh; display: flex;"><h5 class="text-muted">${empty_state}</h5></div>`)
 
-		console.log(me.page)
+		if (me.page.company){
+			console.log("HEY")
+		} else{
+			console.log("NO")
+		}
 		
 		me.page.add_field({
 			fieldtype: 'Link',
