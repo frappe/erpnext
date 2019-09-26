@@ -34,6 +34,12 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 			console.log("NO")
 		}
 		
+		if (me.page.fields_dict.company2){
+			console.log("HEY")
+		} else{
+			console.log("NO")
+		}
+		
 		me.page.add_field({
 			fieldtype: 'Link',
 			label: __('Company'),
