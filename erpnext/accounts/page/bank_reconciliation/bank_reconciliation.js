@@ -28,6 +28,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		
 		
 		if (!$(".link-field").length){
+			console.log(!$(".link-field").length)
 			me.page.add_field({
 				fieldtype: 'Link',
 				label: __('Company'),
