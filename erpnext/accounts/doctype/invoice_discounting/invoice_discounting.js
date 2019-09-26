@@ -204,15 +204,9 @@ frappe.ui.form.on('Invoice Discounting', {
 });
 
 frappe.ui.form.on('Discounted Invoice', {
-	sales_invoice: (frm, cdt, cdn) => {
+	sales_invoice: (frm) => {
 		frm.events.calculate_total_amount(frm);
 		frm.events.refresh_filters(frm);	
-		
-		let row = locals[cdt][cdn];
-		frappe.db.get_value("Sales Invoice",row["sales_invoice"], "outstanding_amount", (res) => {
-			row.outstanding_amount = res["outstanding_amount"];
-			frm.refresh_field("invoices");
-		});
 	},
 	invoices_remove: (frm) => {
 		frm.events.calculate_total_amount(frm);
