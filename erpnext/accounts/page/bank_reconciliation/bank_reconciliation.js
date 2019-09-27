@@ -545,7 +545,6 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 
 	display_payment_details(event) {
 		const me = this;
-		console.log(event)
 		if (event.value) {
 			let dt = me.dialog.fields_dict.payment_doctype.value;
 			me.dialog.fields_dict['payment_details'].$wrapper.empty();
@@ -556,7 +555,12 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 				if (dt === "Payment Entry") {
 					payment.currency = doc.payment_type == "Receive" ? doc.paid_to_account_currency : doc.paid_from_account_currency;
 					payment.doctype = dt
-					payment.paid_amount = doc.paid_amount
+					payment.posting_date = doc.posting_date;
+					payment.party = doc.party;
+					payment.reference_no = doc.reference_no;
+					payment.reference_date = doc.reference_date;
+					payment.paid_amount = doc.paid_amount;
+					payment.name = doc.name;
 					displayed_docs.push(payment);
 				} else if (dt === "Journal Entry") {
 					doc.accounts.forEach(payment => {
@@ -590,7 +594,6 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 				const details_wrapper = me.dialog.fields_dict.payment_details.$wrapper;
 				details_wrapper.append(frappe.render_template("linked_payment_header"));
 				displayed_docs.forEach(payment => {
-					console.log(payment)
 					details_wrapper.append(frappe.render_template("linked_payment_row", payment));
 				})
 			})
