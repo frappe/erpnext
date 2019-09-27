@@ -597,3 +597,7 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 
 	}
 }
+
+frappe.pages['bank-reconciliation'].refresh = function (wrapper) {
+    console.log('worked!');
+ }
