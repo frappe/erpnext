@@ -115,7 +115,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 			me.make_reconciliation_tool();
 			let companyName = $("input[data-fieldname='bank_account']").val()
 			$(".page-form").children().slice(0, 3).remove()
-			$("input[data-fieldname='bank_account'] > ul > li > a > p").val(companyName)
+			$("input[data-fieldname='bank_account']").val(companyName)
 		}, true)
 	}
 
