@@ -556,6 +556,7 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 				if (dt === "Payment Entry") {
 					payment.currency = doc.payment_type == "Receive" ? doc.paid_to_account_currency : doc.paid_from_account_currency;
 					payment.doctype = dt
+					payment.paid_amount = doc.paid_amount
 					displayed_docs.push(payment);
 				} else if (dt === "Journal Entry") {
 					doc.accounts.forEach(payment => {
@@ -590,7 +591,6 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 				details_wrapper.append(frappe.render_template("linked_payment_header"));
 				displayed_docs.forEach(payment => {
 					console.log(payment)
-					console.log(values)
 					details_wrapper.append(frappe.render_template("linked_payment_row", payment));
 				})
 			})
