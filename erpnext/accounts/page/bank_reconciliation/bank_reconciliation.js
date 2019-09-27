@@ -113,6 +113,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		me.page.add_menu_item(__("Reconcile this account"), function() {
 			me.clear_page_content();
 			me.make_reconciliation_tool();
+			console.log("childeren length", $(".page-form.row").children().length)
 			console.log("childeren length", $(".page-form.flex").children().length)
 			$("div[data-fieldname='bank_account']").parent().children().slice(3, 6).remove()
 		}, true)
