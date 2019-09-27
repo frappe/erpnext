@@ -69,7 +69,6 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 			}
 		})
 
-		$("div[data-fieldname='bank_account']").parent().children().slice(3, 5).remove()
 		// console.log($(".page_form"))
 		// console.log("page", me.page)		
 		// console.log("main_section", me.$main_section)		
@@ -110,6 +109,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		}
 
 		me.page.add_menu_item(__("Reconcile this account"), function() {
+			$("div[data-fieldname='bank_account']").parent().children().slice(3, 6).remove()
 			me.clear_page_content();
 			me.make_reconciliation_tool();
 			// console.log("childeren length", $("div.page-form.flex").children().length)
@@ -125,14 +125,12 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 
 	make_reconciliation_tool() {
 		const me = this;
-		// console.log(me);
 		frappe.model.with_doctype("Bank Transaction", () => {
 			erpnext.accounts.ReconciliationList = new erpnext.accounts.ReconciliationTool({
 				parent: me.parent,
 				doctype: "Bank Transaction"
 			});
 		})
-
 	}
 }
 
