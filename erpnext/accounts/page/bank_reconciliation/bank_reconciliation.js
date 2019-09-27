@@ -33,6 +33,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 			fieldname: 'company',
 			options: "Company",
 			onchange: function() {
+				console.log("Are we there yet???")
 				if (this.value) {
 					me.company = this.value;
 				} else {
@@ -59,6 +60,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 				}
 			},
 			onchange: function() {
+				console.log("Don't show me twice!!!!")
 				if (this.value) {
 					me.bank_account = this.value;
 					me.add_actions();
@@ -111,7 +113,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		me.page.add_menu_item(__("Reconcile this account"), function() {
 			me.clear_page_content();
 			me.make_reconciliation_tool();
-			console.log("childeren length", $(".page-form, .flex").children().length)
+			console.log("childeren length", $(".page-form.flex").children().length)
 			$("div[data-fieldname='bank_account']").parent().children().slice(3, 6).remove()
 		}, true)
 	}
