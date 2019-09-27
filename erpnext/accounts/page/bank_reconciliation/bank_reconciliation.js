@@ -113,9 +113,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		me.page.add_menu_item(__("Reconcile this account"), function() {
 			me.clear_page_content();
 			me.make_reconciliation_tool();
-			console.log(".page-form.row", $(".page-form").children().length)
-			console.log(".page-form.row", $(".page-form.row").children().length)
-			console.log(".page-form.flex", $(".page-form.flex").children().length)
+			console.log(".page-form", $(".page-form").children().length)
 			$(".page-form").children().slice(3,6).remove()
 		}, true)
 	}
@@ -533,8 +531,6 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 			.then((result) => {
 				setTimeout(function(){
 					erpnext.accounts.ReconciliationList.refresh();
-					$(".page-form").children().slice(3,6).remove()
-
 				}, 2000);
 				me.dialog.hide();
 			})
