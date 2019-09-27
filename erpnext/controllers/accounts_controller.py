@@ -143,7 +143,7 @@ class AccountsController(TransactionBase):
 				if not self.cash_bank_account:
 					# show message that the amount is not paid
 					frappe.throw(_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
-					
+
 				if cint(self.is_return) and self.grand_total > self.paid_amount:
 					self.paid_amount = flt(flt(self.grand_total), self.precision("paid_amount"))
 
@@ -1195,8 +1195,10 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			child_item.rate = flt(d.get("rate"))
 
 		if flt(child_item.price_list_rate):
-			child_item.discount_percentage = flt((1 - flt(child_item.rate) / flt(child_item.price_list_rate)) * 100.0, \
+			discount = flt((1 - flt(child_item.rate) / flt(child_item.price_list_rate)) * 100.0,
 				child_item.precision("discount_percentage"))
+			if discount > 0:
+				child_item.discount_percentage = discount
 
 		child_item.flags.ignore_validate_update_after_submit = True
 		if new_child_flag:
@@ -1220,7 +1222,6 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			parent.update_status_updater()
 	else:
 		parent.check_credit_limit()
-
 	parent.save()
 
 	if parent_doctype == 'Purchase Order':
