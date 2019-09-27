@@ -27,52 +27,50 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 			style="height: 50vh; display: flex;"><h5 class="text-muted">${empty_state}</h5></div>`)
 		
 		
-		if (!$(".link-field").length){
-			console.log(!$(".link-field").length)
-			me.page.add_field({
-				fieldtype: 'Link',
-				label: __('Company'),
-				fieldname: 'company',
-				options: "Company",
-				onchange: function() {
-					if (this.value) {
-						me.company = this.value;
-					} else {
-						me.company = null;
-						me.bank_account = null;
-					}
+		me.page.add_field({
+			fieldtype: 'Link',
+			label: __('Company'),
+			fieldname: 'company',
+			options: "Company",
+			onchange: function() {
+				if (this.value) {
+					me.company = this.value;
+				} else {
+					me.company = null;
+					me.bank_account = null;
 				}
-			})
-			me.page.add_field({
-				fieldtype: 'Link',
-				label: __('Bank Account'),
-				fieldname: 'bank_account',
-				options: "Bank Account",
-				get_query: function() {
-					if(!me.company) {
-						frappe.throw(__("Please select company first"));
-						return
-					}
-	
-					return {
-						filters: {
-							"company": me.company
-						}
-					}
-				},
-				onchange: function() {
-					if (this.value) {
-						me.bank_account = this.value;
-						me.add_actions();
-					} else {
-						me.bank_account = null;
-						me.page.hide_actions_menu();
-					}
+			}
+		})
+		me.page.add_field({
+			fieldtype: 'Link',
+			label: __('Bank Account'),
+			fieldname: 'bank_account',
+			options: "Bank Account",
+			get_query: function() {
+				if(!me.company) {
+					frappe.throw(__("Please select company first"));
+					return
 				}
-			})
-		}
 
-		console.log($(".page_form"))
+				return {
+					filters: {
+						"company": me.company
+					}
+				}
+			},
+			onchange: function() {
+				if (this.value) {
+					me.bank_account = this.value;
+					me.add_actions();
+				} else {
+					me.bank_account = null;
+					me.page.hide_actions_menu();
+				}
+			}
+		})
+
+		$("div[data-fieldname='bank_account']").parent().children().slice(3, 5).remove()
+		// console.log($(".page_form"))
 		// console.log("page", me.page)		
 		// console.log("main_section", me.$main_section)		
 				
