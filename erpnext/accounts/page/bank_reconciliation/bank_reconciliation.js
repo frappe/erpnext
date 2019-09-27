@@ -533,6 +533,7 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 			frappe.db.get_doc(dt, event.value)
 			.then(doc => {
 				let displayed_docs = []
+				let payment = []
 				if (dt === "Payment Entry") {
 					payment.currency = doc.payment_type == "Receive" ? doc.paid_to_account_currency : doc.paid_from_account_currency;
 					payment.doctype = dt
