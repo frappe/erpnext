@@ -5,24 +5,43 @@ import frappe
 def get_leaderboards():
 	leaderboards = {
 		"Customer": {
-			"fields": ['total_sales_amount', 'total_qty_sold', 'outstanding_amount'],
+			"fields": [
+				{'fieldname': 'total_sales_amount', 'fieldtype': 'Currency'},
+				'total_qty_sold',
+				{'fieldname': 'outstanding_amount', 'fieldtype': 'Currency'}
+			],
 			"method": "erpnext.startup.leaderboard.get_all_customers",
 		},
 		"Item": {
-			"fields": ["total_sales_amount", "total_qty_sold", "total_purchase_amount",
-				"total_qty_purchased", "available_stock_qty", "available_stock_value"],
+			"fields": [
+				{'fieldname': 'total_sales_amount', 'fieldtype': 'Currency'},
+				'total_qty_sold'
+				{'fieldname': 'total_purchase_amount', 'fieldtype': 'Currency'},
+				'total_qty_purchased',
+				'available_stock_qty',
+				{'fieldname': 'available_stock_value', 'fieldtype': 'Currency'}
+			],
 			"method": "erpnext.startup.leaderboard.get_all_items",
 		},
 		"Supplier": {
-			"fields": ["total_purchase_amount", "total_qty_purchased", "outstanding_amount"],
+			"fields": [
+				{'fieldname': 'total_purchase_amount', 'fieldtype': 'Currency'},
+				'total_qty_purchased',
+				{'fieldname': 'outstanding_amount', 'fieldtype': 'Currency'}
+			],
 			"method": "erpnext.startup.leaderboard.get_all_suppliers",
 		},
 		"Sales Partner": {
-			"fields": ["total_sales_amount", "total_commission"],
+			"fields": [
+				{'fieldname': 'total_sales_amount', 'fieldtype': 'Currency'},
+				{'fieldname': 'total_commission', 'fieldtype': 'Currency'}
+			],
 			"method": "erpnext.startup.leaderboard.get_all_sales_partner",
 		},
 		"Sales Person": {
-			"fields": ["total_sales_amount"],
+			"fields": [
+				{'fieldname': 'total_sales_amount', 'fieldtype': 'Currency'}
+			],
 			"method": "erpnext.startup.leaderboard.get_all_sales_person",
 		}
 	}
