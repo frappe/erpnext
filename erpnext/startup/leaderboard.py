@@ -15,7 +15,7 @@ def get_leaderboards():
 		"Item": {
 			"fields": [
 				{'fieldname': 'total_sales_amount', 'fieldtype': 'Currency'},
-				'total_qty_sold'
+				'total_qty_sold',
 				{'fieldname': 'total_purchase_amount', 'fieldtype': 'Currency'},
 				'total_qty_purchased',
 				'available_stock_qty',
