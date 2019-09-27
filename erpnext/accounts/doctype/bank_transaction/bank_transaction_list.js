@@ -2,10 +2,12 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.listview_settings['Bank Transaction'] = {
-	add_fields: ["unallocated_amount"],
+	add_fields: ["unallocated_amount", "allocated_amount"],
 	get_indicator: function(doc) {
-		if(flt(doc.unallocated_amount)>0) {
-			return [__("Unreconciled"), "orange", "unallocated_amount,>,0"];
+		if(flt(doc.unallocated_amount)>0 && flt(doc.allocated_amount)> 0 ) {
+			return [__("Partially Reconciled"), "orange", [["allocated_amount,>,0"],["unallocated_amount, >, 0"]]];
+		} else if (flt(doc.unallocated_amount)>0) {
+			return [__("Unreconciled"), "red", "unallocated_amount,>,0"];
 		} else if(flt(doc.unallocated_amount)<=0) {
 			return [__("Reconciled"), "green", "unallocated_amount,=,0"];
 		}

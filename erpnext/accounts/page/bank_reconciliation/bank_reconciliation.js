@@ -26,52 +26,60 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		me.$main_section.append(`<div class="flex justify-center align-center text-muted"
 			style="height: 50vh; display: flex;"><h5 class="text-muted">${empty_state}</h5></div>`)
 		
-		if (me.page.fields_dict.company === false){
-			me.page.add_field({
-				fieldtype: 'Link',
-				label: __('Company'),
-				fieldname: 'company',
-				options: "Company",
-				onchange: function() {
-					if (this.value) {
-						me.company = this.value;
-					} else {
-						me.company = null;
-						me.bank_account = null;
-					}
-				}
-			})
-		}
-		if (me.page.fields_dict.bank_account === false){
-			me.page.add_field({
-				fieldtype: 'Link',
-				label: __('Bank Account'),
-				fieldname: 'bank_account',
-				options: "Bank Account",
-				get_query: function() {
-					if(!me.company) {
-						frappe.throw(__("Please select company first"));
-						return
-					}
-
-					return {
-						filters: {
-							"company": me.company
-						}
-					}
-				},
-				onchange: function() {
-					if (this.value) {
-						me.bank_account = this.value;
-						me.add_actions();
-					} else {
-						me.bank_account = null;
-						me.page.hide_actions_menu();
-					}
-				}
-			})
-		}
 		
+		me.page.add_field({
+			fieldtype: 'Link',
+			label: __('Company'),
+			fieldname: 'company',
+			options: "Company",
+			onchange: function() {
+				console.log("Are we there yet???")
+				if (this.value) {
+					me.company = this.value;
+				} else {
+					me.company = null;
+					me.bank_account = null;
+				}
+			}
+		})
+		me.page.add_field({
+			fieldtype: 'Link',
+			label: __('Bank Account'),
+			fieldname: 'bank_account',
+			options: "Bank Account",
+			get_query: function() {
+				if(!me.company) {
+					frappe.throw(__("Please select company first"));
+					return
+				}
+
+				return {
+					filters: {
+						"company": me.company
+					}
+				}
+			},
+			onchange: function() {
+				console.log("Don't show me twice!!!!")
+				if (this.value) {
+					me.bank_account = this.value;
+					me.add_actions();
+				} else {
+					me.bank_account = null;
+					me.page.hide_actions_menu();
+				}
+			}
+		})
+
+		// console.log($(".page_form"))
+		// console.log("page", me.page)		
+		// console.log("main_section", me.$main_section)		
+				
+		// if (me.page.fields_dict.company){
+		// 	console.log("HEY")
+		// } else{
+		// 	console.log("NO")
+		// }
 	}
 
 	check_plaid_status() {
@@ -105,6 +113,9 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		me.page.add_menu_item(__("Reconcile this account"), function() {
 			me.clear_page_content();
 			me.make_reconciliation_tool();
+			let companyName = $("div[data-fieldname='bank_account']").val()
+			$(".page-form").children().slice(0, 3).remove()
+			$("div[data-fieldname='bank_account']").val(companyName)
 		}, true)
 	}
 
@@ -537,9 +548,16 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 			frappe.db.get_doc(dt, event.value)
 			.then(doc => {
 				let displayed_docs = []
+				let payment = []
 				if (dt === "Payment Entry") {
 					payment.currency = doc.payment_type == "Receive" ? doc.paid_to_account_currency : doc.paid_from_account_currency;
 					payment.doctype = dt
+					payment.posting_date = doc.posting_date;
+					payment.party = doc.party;
+					payment.reference_no = doc.reference_no;
+					payment.reference_date = doc.reference_date;
+					payment.paid_amount = doc.paid_amount;
+					payment.name = doc.name;
 					displayed_docs.push(payment);
 				} else if (dt === "Journal Entry") {
 					doc.accounts.forEach(payment => {
@@ -572,11 +590,17 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 
 				const details_wrapper = me.dialog.fields_dict.payment_details.$wrapper;
 				details_wrapper.append(frappe.render_template("linked_payment_header"));
-				displayed_docs.forEach(values => {
-					details_wrapper.append(frappe.render_template("linked_payment_row", values));
+				displayed_docs.forEach(payment => {
+					details_wrapper.append(frappe.render_template("linked_payment_row", payment));
 				})
 			})
 		}
 
 	}
 }
+
+frappe.pages['bank-reconciliation'].refresh = function (wrapper) {
+	// console.log('worked!');
+	// console.log(".page-form", $(".page-form").children().length);
+	// $(".page-form").children().slice(3,6).remove();
+ }
