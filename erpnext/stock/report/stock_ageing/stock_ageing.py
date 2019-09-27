@@ -17,7 +17,7 @@ def execute(filters=None):
 	for item, item_dict in iteritems(item_details):
 		fifo_queue = sorted(item_dict["fifo_queue"], key=lambda x: x[1])
 		details = item_dict["details"]
-		if not fifo_queue or (not item_dict.get("total_qty")): continue
+		if not fifo_queue or (item_dict.get("total_qty") > 0): continue
 
 		average_age = get_average_age(fifo_queue, to_date)
 		earliest_age = date_diff(to_date, fifo_queue[0][1])
@@ -174,12 +174,18 @@ def get_fifo_queue(filters, sle=None):
 			else:
 				qty_to_pop = abs(d.actual_qty)
 				while qty_to_pop:
-					batch = fifo_queue[0] if fifo_queue else [0, None]
+					batch = fifo_queue[0] if fifo_queue else [0, d.posting_date]
+
 					if 0 < batch[0] <= qty_to_pop:
 						# if batch qty > 0
 						# not enough or exactly same qty in current batch, clear batch
 						qty_to_pop -= batch[0]
 						transferred_item_details[(d.voucher_no, d.name)].append(fifo_queue.pop(0))
+
+					elif not batch[0]:
+						transferred_item_details[(d.voucher_no, d.name)].append([qty_to_pop * -1, batch[1]])
+						qty_to_pop = 0
+
 					else:
 						# all from current batch
 						batch[0] -= qty_to_pop
