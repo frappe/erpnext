@@ -15,6 +15,8 @@ def execute(filters=None):
 	to_date = filters["to_date"]
 	data = []
 	for item, item_dict in iteritems(item_details):
+
+		item_dict['fifo_queue'] = [item for item in item_dict if item[1]]
 		fifo_queue = sorted(item_dict["fifo_queue"], key=lambda x: x[1])
 		details = item_dict["details"]
 		if not fifo_queue or (not item_dict.get("total_qty")): continue
