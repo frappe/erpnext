@@ -589,7 +589,7 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 				const details_wrapper = me.dialog.fields_dict.payment_details.$wrapper;
 				details_wrapper.append(frappe.render_template("linked_payment_header"));
 				displayed_docs.forEach(values => {
-					details_wrapper.append(frappe.render_template("linked_payment_row", values));
+					details_wrapper.append(frappe.render_template("linked_payment_row", payment));
 				})
 			})
 		}
