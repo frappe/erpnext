@@ -543,6 +543,7 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 
 	display_payment_details(event) {
 		const me = this;
+		console.log(event)
 		if (event.value) {
 			let dt = me.dialog.fields_dict.payment_doctype.value;
 			me.dialog.fields_dict['payment_details'].$wrapper.empty();
