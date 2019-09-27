@@ -533,6 +533,8 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 			.then((result) => {
 				setTimeout(function(){
 					erpnext.accounts.ReconciliationList.refresh();
+					$(".page-form").children().slice(3,6).remove()
+
 				}, 2000);
 				me.dialog.hide();
 			})
