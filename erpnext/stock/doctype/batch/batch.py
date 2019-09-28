@@ -9,6 +9,8 @@ from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.utils import flt, cint
 from frappe.utils.jinja import render_template
 from frappe.utils.data import add_days
+from six import string_types
+import json
 
 class UnableToSelectBatchError(frappe.ValidationError):
 	pass
@@ -120,8 +122,8 @@ class Batch(Document):
 			self.expiry_date = add_days(self.manufacturing_date, shelf_life_in_days)
 
 		if has_expiry_date and not self.expiry_date:
-			frappe.throw(_('Expiry date is mandatory for selected item'))
-			frappe.msgprint(_('Set items shelf life in days, to set expiry based on manufacturing_date plus self life'))
+			frappe.msgprint(_('Expiry date is mandatory for selected item.'))
+			frappe.throw(_("Set item's shelf life in days, to set expiry based on manufacturing date plus shelf-life."))
 
 	def get_name_from_naming_series(self):
 		"""
@@ -249,13 +251,17 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False):
 	return batch_no
 
 @frappe.whitelist()
-def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1, conversion_factor=1):
+def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1, conversion_factor=1, exclude_batches=None):
 	if not warehouse or not qty:
 		return []
 
 	batches = get_batches(item_code, warehouse)
-
 	selected_batches = []
+
+	if isinstance(exclude_batches, string_types):
+		json.loads(exclude_batches)
+	if exclude_batches is None:
+		exclude_batches = []
 
 	qty = flt(qty)
 	conversion_factor = flt(conversion_factor or 1)
@@ -263,6 +269,9 @@ def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1, conversion_factor=
 	remaining_qty = stock_qty
 
 	for batch in batches:
+		if batch.name in exclude_batches:
+			continue
+
 		if remaining_qty <= 0:
 			break
 		if stock_qty <= flt(batch.qty):
