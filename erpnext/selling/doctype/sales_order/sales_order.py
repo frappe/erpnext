@@ -628,6 +628,10 @@ def make_project(source_name, target_doc=None):
 def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_mapping=False):
 	def set_missing_values(source, target):
 		target.ignore_pricing_rule = 1
+
+		if not skip_item_mapping:
+			update_purchase_receipt_item_details(source, target)
+
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
@@ -656,6 +660,71 @@ def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_m
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
 				or item.get("buying_cost_center") \
 				or item_group.get("buying_cost_center")
+
+	def update_purchase_receipt_item_details(source, target):
+		updated_rows = []
+
+		for target_dn_item in target.items:
+			updated_rows.append(target_dn_item)
+
+			has_batch_no, has_serial_no = frappe.get_cached_value("Item", target_dn_item.item_code,
+				['has_batch_no', 'has_serial_no'], as_dict=1)
+
+			if target_dn_item.against_sales_order and (has_batch_no or has_serial_no):
+				purchase_receipt_items = frappe.db.sql("""
+					select pr_item.batch_no, pr_item.serial_no, pr_item.qty
+					from `tabPurchase Receipt Item` pr_item
+					inner join `tabPurchase Order Item` po_item on po_item.name = pr_item.purchase_order_item
+					where pr_item.docstatus = 1 and po_item.sales_order_item = %s
+				""", target_dn_item.so_detail, as_dict=1)
+
+				delivery_note_items = frappe.db.sql("""
+					select dn_item.batch_no, dn_item.serial_no, dn_item.qty
+					from `tabDelivery Note Item` dn_item
+					inner join `tabSales Order Item` so_item on so_item.name = dn_item.so_detail
+					where dn_item.docstatus = 1 and dn_item.so_detail = %s
+				""", target_dn_item.so_detail, as_dict=1)
+
+				batch_wise_details = {}
+
+				# Get received batch/serial details
+				for pr_item in purchase_receipt_items:
+					current_batch = batch_wise_details.setdefault(cstr(pr_item.batch_no), frappe._dict({
+						"batch_no": pr_item.batch_no, "serial_nos": [], "remaining_qty": 0
+					}))
+					current_batch.remaining_qty += flt(pr_item.qty)
+					current_batch.serial_nos += cstr(pr_item.serial_no).split("\n")
+
+				# Remove batch/serial nos delivered
+				for dn_item in delivery_note_items:
+					current_batch = batch_wise_details.get(cstr(dn_item.batch_no))
+					if current_batch:
+						current_batch.remaining_qty -= flt(dn_item.qty)
+						if current_batch.remaining_qty <= 0:
+							del batch_wise_details[dn_item.batch_no]
+							continue
+
+						serial_nos_to_remove = cstr(dn_item.serial_no).split("\n")
+						current_batch.serial_nos = list(filter(lambda d: d not in serial_nos_to_remove, current_batch.serial_nos))
+
+				if batch_wise_details:
+					batches = list(batch_wise_details.values())
+					rows = [target_dn_item]
+					for i in range(1, len(batches)):
+						new_row = frappe.copy_doc(target_dn_item)
+						rows.append(new_row)
+						updated_rows.append(new_row)
+
+					for row, batch in zip(rows, batches):
+						row.qty = batch.remaining_qty
+						row.batch_no = batch.batch_no
+						row.serial_no = "\n".join(batch.serial_nos)
+
+		# Replace with updated list
+		for i, row in enumerate(updated_rows):
+			row.idx = i + 1
+		target.items = updated_rows
+
 
 	mapper = {
 		"Sales Order": {
