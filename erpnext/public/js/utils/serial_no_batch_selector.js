@@ -12,7 +12,6 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		if (d.has_batch_no && (!d.batch_no || (this.show_dialog && this.show_dialog !== 'serial_no'))) {
 			this.has_batch = 1;
 			this.setup();
-		// !(this.show_dialog == false) ensures that show_dialog is implictly true, even when undefined
 		} else if(this.show_dialog || this.show_dialog === 'serial_no' || (d.has_serial_no && !d.has_batch_no)) {
 			this.has_batch = 0;
 			this.setup();
