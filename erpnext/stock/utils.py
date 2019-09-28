@@ -222,17 +222,22 @@ def get_avg_purchase_rate(serial_nos):
 
 def get_valuation_method(item_code):
 	"""get valuation method from item or default"""
-	val_method, batch_wise_valuation, has_batch_no = frappe.db.get_value('Item', item_code,
-		['valuation_method', 'batch_wise_valuation', 'has_batch_no'])
+	val_method, batch_wise_valuation, has_batch_no, has_serial_no = frappe.db.get_value('Item', item_code,
+		['valuation_method', 'batch_wise_valuation', 'has_batch_no', 'has_serial_no'])
+
 	if not val_method:
 		val_method = frappe.db.get_value("Stock Settings", None, "valuation_method") or "FIFO"
-	if has_batch_no and not batch_wise_valuation:
-		batch_wise_valuation = frappe.db.get_value("Stock Settings", None, "batch_wise_valuation") or "No"
 
-	if has_batch_no:
-		batch_wise_valuation = 1 if batch_wise_valuation == "Yes" else 0
-	else:
+	if not has_batch_no or has_serial_no:
 		batch_wise_valuation = 0
+	else:
+		if not batch_wise_valuation:
+			batch_wise_valuation = frappe.db.get_value("Stock Settings", None, "batch_wise_valuation") or "No"
+		batch_wise_valuation = 1 if batch_wise_valuation == "Yes" else 0
+
+	if batch_wise_valuation:
+		val_method = "Moving Average"  # only Moving Average within batch is supported for now
+
 	return val_method, batch_wise_valuation
 
 def get_fifo_rate(previous_stock_queue, qty):
