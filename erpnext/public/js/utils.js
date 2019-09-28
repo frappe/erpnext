@@ -68,7 +68,7 @@ $.extend(erpnext, {
 			}
 
 			me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
-				callback, on_close, true);
+				callback, on_close, 'serial_no');
 		});
 	},
 });
