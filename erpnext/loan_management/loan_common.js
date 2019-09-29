@@ -27,7 +27,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 	},
 	applicant: function(frm) {
 		if (!["Loan Application", "Loan"].includes(frm.doc.doctype)) {
-			return
+			return;
 		}
 
 		if (frm.doc.applicant) {

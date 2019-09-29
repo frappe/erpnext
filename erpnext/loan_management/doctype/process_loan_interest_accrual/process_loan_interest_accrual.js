@@ -12,6 +12,6 @@ frappe.ui.form.on('Process Loan Interest Accrual', {
 				posting_date: frm.doc.posting_date,
 				process_loan_interest: frm.doc.name
 			}
-		})
+		});
 	}
 });

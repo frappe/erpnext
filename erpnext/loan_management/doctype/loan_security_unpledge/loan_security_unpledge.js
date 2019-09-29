@@ -12,10 +12,10 @@ frappe.ui.form.on('Loan Security Unpledge', {
 						unpledge_request: frm.doc.name,
 						unpledge_type: frm.doc.unpledge_type
 					},
-					callback: function(r) {
+					callback: function() {
 						frm.reload_doc();
 					}
-				})
+				});
 			});
 		}
 	}
