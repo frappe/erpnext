@@ -9,6 +9,8 @@ from frappe.model.document import Document
 class LoanSecurityPledge(Document):
 	def validate(self):
 		self.set_pledge_amount()
+		if self.is_new() and self.loan:
+			self.db_set("status", "Pledged")
 
 	def set_pledge_amount(self):
 		total_security_value = 0
