@@ -130,7 +130,7 @@ def get_data(filters):
 				"asset_name": asset.asset_name,
 				"status": asset.status,
 				"department": asset.department,
-				"business_unit": asset.cost_center,
+				"cost_center": asset.cost_center,
 				"vendor_name": pr_supplier_map.get(asset.purchase_receipt) or pi_supplier_map.get(asset.purchase_invoice),
 				"gross_purchase_amount": asset.gross_purchase_amount,
 				"available_for_use_date": asset.available_for_use_date,
