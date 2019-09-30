@@ -40,9 +40,10 @@ def get_columns(filters):
 			"width": 90
 		},
 		{
-			"label": _("Business Unit"),
-			"fieldtype": "Data",
-			"fieldname": "business_unit",
+			"label": _("Cost Center"),
+			"fieldtype": "Link",
+			"fieldname": "cost_center",
+			"options": "Cost Center",
 			"width": 100
 		},
 		{
