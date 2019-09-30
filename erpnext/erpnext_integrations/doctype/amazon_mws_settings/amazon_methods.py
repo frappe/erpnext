@@ -4,10 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe, time, dateutil, math, csv
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from six import StringIO
 import erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_api as mws
 from frappe import _
 
@@ -26,7 +23,7 @@ def get_products_details():
 			listings_response = reports.get_report(report_id=report_id)
 
 			#Get ASIN Codes
-			string_io = StringIO(listings_response.original)
+			string_io = StringIO(frappe.safe_decode(listings_response.original))
 			csv_rows = list(csv.reader(string_io, delimiter=str('\t')))
 			asin_list = list(set([row[1] for row in csv_rows[1:]]))
 			#break into chunks of 10
@@ -294,7 +291,8 @@ def create_sales_order(order_json,after_date):
 			so.submit()
 
 		except Exception as e:
-			frappe.log_error(message=e, title="Create Sales Order")
+			import traceback
+			frappe.log_error(message=traceback.format_exc(), title="Create Sales Order")
 
 def create_customer(order_json):
 	order_customer_name = ""
@@ -451,7 +449,7 @@ def get_charges_and_fees(market_place_order_id):
 			shipment_item_list = return_as_list(shipment_event.ShipmentEvent.ShipmentItemList.ShipmentItem)
 
 			for shipment_item in shipment_item_list:
-				charges, fees = []
+				charges, fees = [], []
 
 				if 'ItemChargeList' in shipment_item.keys():
 					charges = return_as_list(shipment_item.ItemChargeList.ChargeComponent)
