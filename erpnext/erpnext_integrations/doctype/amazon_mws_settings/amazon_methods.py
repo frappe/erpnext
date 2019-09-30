@@ -89,8 +89,6 @@ def request_and_fetch_report_id(report_type, start_date=None, end_date=None, mar
 			end_date=end_date,
 			marketplaceids=marketplaceids)
 
-	#add time delay to wait for amazon to generate report
-	time.sleep(20)
 	report_request_id = report_response.parsed["ReportRequestInfo"]["ReportRequestId"]["value"]
 	generated_report_id = None
 	#poll to get generated report

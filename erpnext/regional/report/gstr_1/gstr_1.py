@@ -722,7 +722,7 @@ def get_company_gstin_number(company):
 	if gstin:
 		return gstin[0]["gstin"]
 	else:
-		frappe.throw(_("No GST No. found for the Company."))
+		frappe.throw(_("Please set valid GSTIN No. in Company Address"))
 
 def download_json_file(filename, report_type, data):
 	''' download json content in a file '''
