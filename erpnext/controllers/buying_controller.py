@@ -515,10 +515,15 @@ class BuyingController(StockController):
 			for d in self.get('supplied_items'):
 				# negative quantity is passed, as raw material qty has to be decreased
 				# when PR is submitted and it has to be increased when PR is cancelled
+				incoming_rate = 0
+				if self.is_return and self.return_against and self.docstatus==1:
+					incoming_rate = self.get_incoming_rate_for_sales_return(d.rm_item_code, self.return_against)
+
 				sl_entries.append(self.get_sl_entries(d, {
 					"item_code": d.rm_item_code,
 					"warehouse": self.supplier_warehouse,
 					"actual_qty": -1*flt(d.consumed_qty),
+					"incoming_rate": incoming_rate
 				}))
 
 	def on_submit(self):
