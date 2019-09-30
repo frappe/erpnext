@@ -73,7 +73,7 @@ def make_contact(supplier):
 				{'link_doctype': 'Supplier', 'link_name': supplier.supplier_name}
 			]
 		})
-		contact.add_email(supplier.supplier_email)
+		contact.add_email(supplier.supplier_email, is_primary=True)
 		contact.insert()
 	else:
 		contact = frappe.get_doc('Contact', contact_name)
