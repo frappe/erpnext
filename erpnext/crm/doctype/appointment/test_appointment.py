@@ -19,7 +19,10 @@ def create_test_lead():
     return test_lead
 
 def create_test_appointments():
-    if frappe.db.exists('Appointment',filters={'email':'test@example.com'}):
+    if frappe.db.exists({
+        'doctype':'Appointment',
+        'email':'test@example.com'
+        }):
         return
     test_appointment = frappe.get_doc({
         'doctype':'Appointment',
