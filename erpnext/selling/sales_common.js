@@ -14,18 +14,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this._super();
 		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
 		this.frm.add_fetch("sales_person", "commission_rate", "commission_rate");
-	},
-
-	onload: function() {
-		this._super();
-		this.setup_queries();
-		this.frm.set_query('shipping_rule', function() {
-			return {
-				filters: {
-					"shipping_rule_type": "Selling"
-				}
-			};
-		});
 
 		var me = this;
 		$(me.frm.wrapper).on("grid-row-render", function(e, grid_row) {
@@ -37,6 +25,18 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					me.toggle_select_batch_button(show_select_batch);
 				});
 			}
+		});
+	},
+
+	onload: function() {
+		this._super();
+		this.setup_queries();
+		this.frm.set_query('shipping_rule', function() {
+			return {
+				filters: {
+					"shipping_rule_type": "Selling"
+				}
+			};
 		});
 	},
 
