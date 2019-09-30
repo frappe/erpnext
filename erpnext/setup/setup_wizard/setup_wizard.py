@@ -7,7 +7,6 @@ import frappe
 from frappe import _
 
 from .operations import install_fixtures as fixtures, company_setup, sample_data
-from erpnext.setup.setup_wizard.operations.install_fixtures import setup_global_search
 
 def get_setup_stages(args=None):
 	if frappe.db.sql("select name from tabCompany"):
