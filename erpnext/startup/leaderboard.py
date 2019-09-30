@@ -1,6 +1,7 @@
 
 from __future__ import unicode_literals, print_function
 import frappe
+from frappe.utils import cint
 
 def get_leaderboards():
 	leaderboards = {
@@ -74,8 +75,8 @@ def get_all_customers(from_date, company, field, limit = None):
 			where so.docstatus = 1 and so.transaction_date >= %s and so.company = %s
 			group by so.customer
 			order by value DESC
-			limit {1}
-		""".format(select_field, limit), (from_date, company), as_dict=1)
+			limit %s
+		""".format(select_field), (from_date, company, cint(limit)), as_dict=1) #nosec
 
 @frappe.whitelist()
 def get_all_items(from_date, company, field, limit = None):
@@ -109,8 +110,8 @@ def get_all_items(from_date, company, field, limit = None):
 				and sales_order.company = %s and sales_order.transaction_date >= %s
 			group by order_item.item_code
 			order by value desc
-			limit {2}
-		""".format(select_field, select_doctype, limit), (company, from_date), as_dict=1)
+			limit %s
+		""".format(select_field, select_doctype), (company, from_date, cint(limit)), as_dict=1) #nosec
 
 @frappe.whitelist()
 def get_all_suppliers(from_date, company, field, limit = None):
@@ -139,27 +140,30 @@ def get_all_suppliers(from_date, company, field, limit = None):
 				and  purchase_order.company = %s
 			group by purchase_order.supplier
 			order by value DESC
-			limit {1}""".format(select_field, limit), (from_date, company), as_dict=1)
+			limit %s""".format(select_field), (from_date, company, cint(limit)), as_dict=1) #nosec
 
 @frappe.whitelist()
 def get_all_sales_partner(from_date, company, field, limit = None):
 	if field == "total_sales_amount":
-		select_field = "sum(base_net_total)"
+		select_field = "sum(`base_net_total`)"
 	elif field == "total_commission":
-		select_field = "sum(total_commission)"
+		select_field = "sum(`total_commission`)"
 
-	return frappe.db.sql("""
-		select sales_partner as name, {0} as value
-		from `tabSales Order`
-		where ifnull(sales_partner, '') != '' and docstatus = 1
-			and transaction_date >= %s and company = %s
-		group by sales_partner
-		order by value DESC
-		limit {1}
-	""".format(select_field, limit), (from_date, company), as_dict=1)
+	filters = {
+		'sales_partner': ['!=', ''],
+		'docstatus': 1,
+		'company': company
+	}
+	if from_date:
+		filters['transaction_date'] = ['>=', from_date]
+
+	return frappe.get_list('Sales Order', fields=[
+		'`sales_partner` as name',
+		'{} as value'.format(select_field),
+	], filters=filters, group_by='sales_partner', order_by='value DESC', limit=limit)
 
 @frappe.whitelist()
-def get_all_sales_person(from_date, company, field = None, limit = None):
+def get_all_sales_person(from_date, company, field = None, limit = 0):
 	return frappe.db.sql("""
 		select sales_team.sales_person as name, sum(sales_order.base_net_total) as value
 		from `tabSales Order` as sales_order join `tabSales Team` as sales_team
@@ -169,5 +173,5 @@ def get_all_sales_person(from_date, company, field = None, limit = None):
 			and sales_order.company = %s
 		group by sales_team.sales_person
 		order by value DESC
-		limit {0}
-	""".format(limit), (from_date, company), as_dict=1)
+		limit %s
+	""", (from_date, company, cint(limit)), as_dict=1)
