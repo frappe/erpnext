@@ -1035,4 +1035,3 @@ def update_produced_qty_in_so_item(sales_order_item):
 		for wo in linked_wo_with_so_item:
 			total_produced_qty += flt(wo.get('produced_qty'))
 		frappe.db.set_value('Sales Order Item', sales_order_item, 'produced_qty', total_produced_qty)
-		frappe.db.commit()
