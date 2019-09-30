@@ -161,7 +161,7 @@ def get_warehouse_condition(warehouse):
 	warehouse_details = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"], as_dict=1)
 	if warehouse_details:
 		frappe.log_error("select name from `tabWarehouse` wh where wh.lft >= %s and wh.rgt <= %s and wh.name = '%s'"%(warehouse_details.lft,warehouse_details.rgt, warehouse))
-		return """select name from `tabWarehouse` wh where wh.lft >= %s and wh.rgt <= %s and wh.name = '%s'"""%(warehouse_details.lft,warehouse_details.rgt, warehouse)
+		return """SELECT name FROM `tabWarehouse` WHERE lft >= %s AND rgt <= %s AND name = '%s'"""%(warehouse_details.lft,warehouse_details.rgt, warehouse)
 	return ''
 
 def get_item_group_condition(item_group):
