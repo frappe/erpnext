@@ -1176,7 +1176,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval: doc.order_type === 'Maintenance'",
    "fieldname": "skip_delivery_note_creation",
    "fieldtype": "Check",
    "label": "Skip Delivery Note Creation"
@@ -1185,7 +1184,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2019-09-18 15:08:12.625384",
+ "modified": "2019-09-30 11:17:06.295870",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
