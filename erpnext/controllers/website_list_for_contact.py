@@ -149,7 +149,6 @@ def get_customers_suppliers(doctype, user):
 		suppliers if has_supplier_field else None
 
 def has_website_permission(doc, ptype, user, verbose=False):
-	print(doc)
 	doctype = doc.doctype
 	customers, suppliers = get_customers_suppliers(doctype, user)
 	if customers:
