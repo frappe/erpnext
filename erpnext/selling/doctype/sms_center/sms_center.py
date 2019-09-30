@@ -31,7 +31,7 @@ class SMSCenter(Document):
 					self.sales_partner.replace("'", "\'") or " and ifnull(dl.link_name, '') != ''"
 		if self.send_to in ['All Contact', 'All Customer Contact', 'All Supplier Contact', 'All Sales Partner Contact']:
 			rec = frappe.db.sql("""select CONCAT(ifnull(c.first_name,''), ' ', ifnull(c.last_name,'')),
-				c.phone from `tabContact` c, `tabDynamic Link` dl  where ifnull(c.phone,'')!='' and
+				c.mobile_no from `tabContact` c, `tabDynamic Link` dl  where ifnull(c.mobile_no,'')!='' and
 				c.docstatus != 2 and dl.parent = c.name%s""" % where_clause)
 
 		elif self.send_to == 'All Lead (Open)':
