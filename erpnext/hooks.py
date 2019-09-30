@@ -353,6 +353,7 @@ user_privacy_documents = [
 	}
 ]
 
+# ERPNext doctypes for Global Search
 global_search_doctypes = [
 	{"doctype": "Customer", "index": 0},
 	{"doctype": "Supplier", "index": 1},
@@ -401,4 +402,109 @@ global_search_doctypes = [
 	{"doctype": "Maintenance Schedule", "index": 44},
 	{"doctype": "Maintenance Visit", "index": 45},
 	{"doctype": "Warranty Claim", "index": 46},
+]
+
+healthcare_doctypes = [
+	{'doctype': 'Patient', 'index': 1},
+	{'doctype': 'Medical Department', 'index': 2},
+	{'doctype': 'Vital Signs', 'index': 3},
+	{'doctype': 'Healthcare Practitioner', 'index': 4},
+	{'doctype': 'Patient Appointment', 'index': 5},
+	{'doctype': 'Healthcare Service Unit', 'index': 6},
+	{'doctype': 'Patient Encounter', 'index': 7},
+	{'doctype': 'Antibiotic', 'index': 8},
+	{'doctype': 'Diagnosis', 'index': 9},
+	{'doctype': 'Lab Test', 'index': 10},
+	{'doctype': 'Clinical Procedure', 'index': 11},
+	{'doctype': 'Inpatient Record', 'index': 12},
+	{'doctype': 'Sample Collection', 'index': 13},
+	{'doctype': 'Patient Medical Record', 'index': 14},
+	{'doctype': 'Appointment Type', 'index': 15},
+	{'doctype': 'Fee Validity', 'index': 16},
+	{'doctype': 'Practitioner Schedule', 'index': 17},
+	{'doctype': 'Dosage Form', 'index': 18},
+	{'doctype': 'Lab Test Sample', 'index': 19},
+	{'doctype': 'Prescription Duration', 'index': 20},
+	{'doctype': 'Prescription Dosage', 'index': 21},
+	{'doctype': 'Sensitivity', 'index': 22},
+	{'doctype': 'Complaint', 'index': 23},
+	{'doctype': 'Medical Code', 'index': 24},
+]
+
+education_doctypes = [
+	{'doctype': 'Article', 'index': 1},
+	{'doctype': 'Video', 'index': 2},
+	{'doctype': 'Topic', 'index': 3},
+	{'doctype': 'Course', 'index': 4},
+	{'doctype': 'Program', 'index': 5},
+	{'doctype': 'Quiz', 'index': 6},
+	{'doctype': 'Question', 'index': 7},
+	{'doctype': 'Fee Schedule', 'index': 8},
+	{'doctype': 'Fee Structure', 'index': 9},
+	{'doctype': 'Fees', 'index': 10},
+	{'doctype': 'Student Group', 'index': 11},
+	{'doctype': 'Student', 'index': 12},
+	{'doctype': 'Instructor', 'index': 13},
+	{'doctype': 'Course Activity', 'index': 14},
+	{'doctype': 'Quiz Activity', 'index': 15},
+	{'doctype': 'Course Enrollment', 'index': 16},
+	{'doctype': 'Program Enrollment', 'index': 17},
+	{'doctype': 'Student Language', 'index': 18},
+	{'doctype': 'Student Applicant', 'index': 19},
+	{'doctype': 'Assessment Result', 'index': 20},
+	{'doctype': 'Assessment Plan', 'index': 21},
+	{'doctype': 'Grading Scale', 'index': 22},
+	{'doctype': 'Guardian', 'index': 23},
+	{'doctype': 'Student Leave Application', 'index': 24},
+	{'doctype': 'Student Log', 'index': 25},
+	{'doctype': 'Room', 'index': 26},
+	{'doctype': 'Course Schedule', 'index': 27},
+	{'doctype': 'Student Attendance', 'index': 28},
+	{'doctype': 'Announcement', 'index': 29},
+	{'doctype': 'Student Category', 'index': 30},
+	{'doctype': 'Assessment Group', 'index': 31},
+	{'doctype': 'Student Batch Name', 'index': 32},
+	{'doctype': 'Assessment Criteria', 'index': 33},
+	{'doctype': 'Academic Year', 'index': 34},
+	{'doctype': 'Academic Term', 'index': 35},
+	{'doctype': 'School House', 'index': 36},
+	{'doctype': 'Student Admission', 'index': 37},
+	{'doctype': 'Fee Category', 'index': 38},
+	{'doctype': 'Assessment Code', 'index': 39},
+	{'doctype': 'Discussion', 'index': 40},
+]
+
+agriculture_doctypes = [
+	{'doctype': 'Weather', 'index': 1},
+	{'doctype': 'Soil Texture', 'index': 2},
+	{'doctype': 'Water Analysis', 'index': 3},
+	{'doctype': 'Soil Analysis', 'index': 4},
+	{'doctype': 'Plant Analysis', 'index': 5},
+	{'doctype': 'Agriculture Analysis Criteria', 'index': 6},
+	{'doctype': 'Disease', 'index': 7},
+	{'doctype': 'Crop', 'index': 8},
+	{'doctype': 'Fertilizer', 'index': 9},
+	{'doctype': 'Crop Cycle', 'index': 10}
+]
+
+non_profit_doctypes = [
+	{'doctype': 'Certified Consultant', 'index': 1},
+	{'doctype': 'Certification Application', 'index': 2},
+	{'doctype': 'Volunteer', 'index': 3},
+	{'doctype': 'Membership', 'index': 4},
+	{'doctype': 'Member', 'index': 5},
+	{'doctype': 'Donor', 'index': 6},
+	{'doctype': 'Chapter', 'index': 7},
+	{'doctype': 'Grant Application', 'index': 8},
+	{'doctype': 'Volunteer Type', 'index': 9},
+	{'doctype': 'Donor Type', 'index': 10},
+	{'doctype': 'Membership Type', 'index': 11}
+]
+
+hospitality_doctypes = [
+	{'doctype': 'Hotel Room', 'index': 0},
+	{'doctype': 'Hotel Room Reservation', 'index': 1},
+	{'doctype': 'Hotel Room Pricing', 'index': 2},
+	{'doctype': 'Hotel Room Package', 'index': 3},
+	{'doctype': 'Hotel Room Type', 'index': 4}
 ]
