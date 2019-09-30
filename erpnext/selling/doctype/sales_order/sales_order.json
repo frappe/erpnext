@@ -1178,13 +1178,15 @@
    "default": "0",
    "fieldname": "skip_delivery_note_creation",
    "fieldtype": "Check",
-   "label": "Skip Delivery Note Creation"
+   "in_list_view": 1,
+   "label": "Skip Delivery Note Creation",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2019-09-30 11:17:06.295870",
+ "modified": "2019-09-30 20:18:50.597170",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
