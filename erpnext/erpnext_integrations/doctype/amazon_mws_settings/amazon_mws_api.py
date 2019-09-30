@@ -65,7 +65,8 @@ def calc_md5(string):
 	"""
 	md = hashlib.md5()
 	md.update(string)
-	return base64.encodestring(md.digest()).strip('\n')
+	return base64.encodestring(md.digest()).strip('\n') if six.PY2 \
+		else base64.encodebytes(md.digest()).decode().strip()
 
 def remove_empty(d):
 	"""
@@ -87,8 +88,7 @@ class DictWrapper(object):
 		self.original = xml
 		self._rootkey = rootkey
 		self._mydict = xml_utils.xml2dict().fromstring(remove_namespace(xml))
-		self._response_dict = self._mydict.get(self._mydict.keys()[0],
-												self._mydict)
+		self._response_dict = self._mydict.get(list(self._mydict)[0], self._mydict)
 
 	@property
 	def parsed(self):
