@@ -40,6 +40,7 @@ class ShopifySettings(unittest.TestCase):
 			"price_list": "_Test Price List",
 			"warehouse": "_Test Warehouse - _TC",
 			"cash_bank_account": "Cash - _TC",
+			"account": "Cash - _TC",
 			"customer_group": "_Test Customer Group",
 			"cost_center": "Main - _TC",
 			"taxes": [
