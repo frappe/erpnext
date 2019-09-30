@@ -8,7 +8,7 @@ import unittest
 import datetime
 
 def create_test_lead():
-    if frappe.db.exists({'doctype:''Lead','lead_name':'Test Lead'}):
+    if frappe.db.exists({'doctype':'Lead','lead_name':'Test Lead'}):
         return
     test_lead = frappe.get_doc({
         'doctype':'Lead',
