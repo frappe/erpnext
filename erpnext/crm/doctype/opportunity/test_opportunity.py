@@ -53,7 +53,7 @@ class TestOpportunity(unittest.TestCase):
 				"link_name": customer.name
 			}]
 		})
-		contact.add_email(new_lead_email_id)
+		contact.add_email(new_lead_email_id, is_primary=True)
 		contact.insert(ignore_permissions=True)
 
 		opp_doc = frappe.get_doc(args).insert(ignore_permissions=True)
