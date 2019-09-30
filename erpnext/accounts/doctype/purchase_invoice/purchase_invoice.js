@@ -62,7 +62,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 		if(doc.docstatus == 1 && doc.outstanding_amount != 0
 			&& !(doc.is_return && doc.return_against)) {
-			this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
+			this.frm.add_custom_button(__('Payment Entry'), this.make_payment_entry, __("Make"));
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 
