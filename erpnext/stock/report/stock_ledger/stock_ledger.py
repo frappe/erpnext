@@ -160,6 +160,9 @@ def get_opening_balance(filters, columns):
 def get_warehouse_condition(warehouse):
 	warehouse_details = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"], as_dict=1)
 	if warehouse_details:
+		frappe.log_error(" exists (select name from `tabWarehouse` wh \
+			where wh.lft >= %s and wh.rgt <= %s and warehouse = wh.name)"%(warehouse_details.lft,
+			warehouse_details.rgt)
 		return " exists (select name from `tabWarehouse` wh \
 			where wh.lft >= %s and wh.rgt <= %s and warehouse = wh.name)"%(warehouse_details.lft,
 			warehouse_details.rgt)
