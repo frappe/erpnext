@@ -5,13 +5,14 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr
-from frappe.desk.query_report import group_report_data
+from frappe.desk.query_report import group_report_data, hide_columns_if_filtered
 from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account, get_allow_project_in_entry_of_bs_account
 
 class ReceivablePayableReport(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 		self.filters.report_date = getdate(self.filters.report_date or nowdate())
+		self.aging_column_count = 5
 		self.age_as_on = getdate(nowdate()) \
 			if self.filters.report_date > getdate(nowdate()) \
 			else self.filters.report_date
@@ -39,8 +40,10 @@ class ReceivablePayableReport(object):
 				"label": _(self.filters.get("party_type")),
 				"fieldtype": "Link",
 				"fieldname": "party",
+				"filter_fieldname": scrub(self.filters.get("party_type")),
 				"options": self.filters.get("party_type"),
-				"width": 200 if self.filters.get("group_by", "Ungrouped") == "Ungrouped" else 300
+				"width": 200 if self.filters.get("group_by", "Ungrouped") == "Ungrouped" else 300,
+				"hide_if_filtered": 1
 			}
 		]
 
@@ -175,7 +178,8 @@ class ReceivablePayableReport(object):
 				"fieldtype": "Link",
 				"fieldname": "cost_center",
 				"options": "Cost Center",
-				"width": 100
+				"width": 100,
+				"hide_if_filtered": 1
 			})
 
 		if get_allow_project_in_entry_of_bs_account():
@@ -184,7 +188,8 @@ class ReceivablePayableReport(object):
 				"fieldtype": "Link",
 				"fieldname": "project",
 				"options": "Project",
-				"width": 100
+				"width": 100,
+				"hide_if_filtered": 1
 			})
 
 		columns.append({
@@ -193,8 +198,6 @@ class ReceivablePayableReport(object):
 			"fieldtype": "Data",
 			"width": 200
 		})
-
-		self.ageing_col_idx_start = len(columns)
 
 		if not "range1" in self.filters:
 			self.filters["range1"] = "30"
@@ -205,18 +208,20 @@ class ReceivablePayableReport(object):
 		if not "range4" in self.filters:
 			self.filters["range4"] = "120"
 
+		self.aging_columns = []
 		for i, label in enumerate(["0-{range1}".format(range1=self.filters["range1"]),
 			"{range1}-{range2}".format(range1=cint(self.filters["range1"])+ 1, range2=self.filters["range2"]),
 			"{range2}-{range3}".format(range2=cint(self.filters["range2"])+ 1, range3=self.filters["range3"]),
 			"{range3}-{range4}".format(range3=cint(self.filters["range3"])+ 1, range4=self.filters["range4"]),
 			"{range4}-{above}".format(range4=cint(self.filters["range4"])+ 1, above=_("Above"))]):
-				columns.append({
+				self.aging_columns.append({
 					"label": label,
 					"fieldname": "range{}".format(i+1),
 					"fieldtype": "Currency",
 					"options": "currency",
 					"width": 120
 				})
+		columns += self.aging_columns
 
 		columns += [
 		{
@@ -300,6 +305,8 @@ class ReceivablePayableReport(object):
 					"width": 120
 				}
 			]
+
+		columns = hide_columns_if_filtered(columns, self.filters)
 
 		return columns
 
@@ -604,18 +611,18 @@ class ReceivablePayableReport(object):
 		ageing_data = get_ageing_data(cint(self.filters.range1), cint(self.filters.range2),
 			cint(self.filters.range3), cint(self.filters.range4), cint(self.filters.range5), self.age_as_on, entry_date, outstanding_amount)
 		row["age"] = ageing_data[0]
-		for i in range(5):
+		for i in range(self.aging_column_count):
 			row["range{}".format(i+1)] = ageing_data[i+1]
 
 		# issue 6371-Ageing buckets should not have amounts if due date is not reached
 		if self.filters.ageing_based_on == "Due Date" \
 				and getdate(due_date) > getdate(self.filters.report_date):
-			for i in range(5):
+			for i in range(self.aging_column_count):
 				row["range{}".format(i+1)] = 0
 
 		if self.filters.ageing_based_on == "Supplier Invoice Date" \
 				and getdate(bill_date) > getdate(self.filters.report_date):
-			for i in range(5):
+			for i in range(self.aging_column_count):
 				row["range{}".format(i+1)] = 0
 
 		if self.filters.get(scrub(self.filters.get("party_type"))) or self.filters.get("account"):
@@ -961,18 +968,17 @@ class ReceivablePayableReport(object):
 		return payment_term_map
 
 	def get_chart_data(self, columns, data):
-		ageing_columns = columns[self.ageing_col_idx_start : self.ageing_col_idx_start+5]
 		rows = []
 		for d in data:
 			rows.append(
 				{
-					'values': [d["range{}".format(i+1)] for i in range(5)]
+					'values': [d["range{}".format(i+1)] for i in range(self.aging_column_count)]
 				}
 			)
 
 		return {
 			"data": {
-				'labels': [d.get("label") for d in ageing_columns],
+				'labels': [col.get('label') for col in self.aging_columns],
 				'datasets': rows
 			},
 			"colors": ['light-blue', 'blue', 'purple', 'orange', 'red'],
