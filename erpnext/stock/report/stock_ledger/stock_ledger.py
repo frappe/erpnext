@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
 from erpnext.stock.utils import update_included_uom_in_dict_report
-from frappe.desk.query_report import group_report_data
+from frappe.desk.query_report import group_report_data, hide_columns_if_filtered
 from six import iteritems
 
 def execute(filters=None):
@@ -13,7 +13,7 @@ def execute(filters=None):
 	show_amounts = not show_amounts_role or show_amounts_role in frappe.get_roles()
 
 	include_uom = filters.get("include_uom")
-	columns = get_columns(show_amounts)
+	columns = get_columns(filters, show_amounts)
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
@@ -72,17 +72,17 @@ def execute(filters=None):
 	data = get_grouped_data(filters, data)
 	return columns, data
 
-def get_columns(show_amounts=True):
+def get_columns(filters, show_amounts=True):
 	columns = [
 		{"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 95},
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
 		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 100},
-		{"label": _("Party Type"), "fieldname": "party_type", "fieldtype": "Data", "width": 80},
-		{"label": _("Party"), "fieldname": "party", "fieldtype": "Dynamic Link", "options": "party_type", "width": 100},
-		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 150},
-		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
-		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100},
-		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
+		{"label": _("Party Type"), "fieldname": "party_type", "fieldtype": "Data", "width": 80, "hide_if_filtered": 1},
+		{"label": _("Party"), "fieldname": "party", "fieldtype": "Dynamic Link", "options": "party_type", "width": 150, "hide_if_filtered": 1},
+		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 150, "hide_if_filtered": 1},
+		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100, "hide_if_filtered": 1, "filter_fieldname": "item_code"},
+		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100, "hide_if_filtered": 1, "filter_fieldname": "item_code"},
+		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100, "hide_if_filtered": 1},
 		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 50},
 		{"label": _("Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 60, "convertible": "qty"},
 		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 90, "convertible": "qty"},
@@ -90,7 +90,7 @@ def get_columns(show_amounts=True):
 
 	if show_amounts:
 		columns += [
-			{"label": _("Transaction Rate"), "fieldname": "transaction_rate", "fieldtype": "Currency", "width": 110,
+			{"label": _("In/Out Rate"), "fieldname": "transaction_rate", "fieldtype": "Currency", "width": 100,
 				"options": "Company:company:default_currency", "convertible": "rate"},
 			{"label": _("Valuation Rate"), "fieldname": "valuation_rate", "fieldtype": "Currency", "width": 100,
 				"options": "Company:company:default_currency", "convertible": "rate"},
@@ -101,9 +101,11 @@ def get_columns(show_amounts=True):
 	columns += [
 		{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 100},
 		{"label": _("Serial #"), "fieldname": "serial_no", "fieldtype": "Link", "options": "Serial No", "width": 100},
-		{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
+		{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100, "hide_if_filtered": 1},
 		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 110}
 	]
+
+	columns = hide_columns_if_filtered(columns, filters)
 
 	return columns
 
