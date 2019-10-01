@@ -62,8 +62,8 @@ def get_printable_data(columns, data, filters):
 	return item_groups
 
 def get_data(filters):
-	conditions = get_item_conditions(filters, use_doc_name=False)
-	item_conditions = get_item_conditions(filters, use_doc_name=True)
+	conditions = get_item_conditions(filters, for_item_dt=False)
+	item_conditions = get_item_conditions(filters, for_item_dt=True)
 	show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
 
 	price_lists, selected_price_list = get_price_lists(filters)
@@ -232,8 +232,6 @@ def get_price_lists(filters):
 
 	if filters.customer:
 		filters.selected_price_list = frappe.db.get_value("Customer", filters.customer, 'default_price_list')
-	elif filters.supplier:
-		filters.selected_price_list = frappe.db.get_value("Supplier", filters.supplier, 'default_price_list')
 
 	if filters.selected_price_list:
 		price_lists.append(filters.selected_price_list)
@@ -256,16 +254,26 @@ def get_price_lists(filters):
 	return price_lists, filters.selected_price_list
 
 
-def get_item_conditions(filters, use_doc_name):
+def get_item_conditions(filters, for_item_dt):
 	conditions = []
 
 	if filters.get("item_code"):
-		conditions.append("item.{} = %(item_code)s".format("name" if use_doc_name else "item_code"))
+		conditions.append("item.{} = %(item_code)s".format("name" if for_item_dt else "item_code"))
 	else:
 		if filters.get("brand"):
 			conditions.append("item.brand=%(brand)s")
 		if filters.get("item_group"):
 			conditions.append(get_item_group_condition(filters.get("item_group")))
+
+	if filters.get("supplier") and for_item_dt:
+		supplier_conditions = []
+		if frappe.get_meta("Item").has_field("default_supplier"):
+			supplier_conditions.append("item.default_supplier = %(supplier)s")
+
+		supplier_conditions.append("""exists (select id.name from `tabItem Default` id
+			where id.parent = item.name and id.parenttype = 'Item' and id.default_supplier = %(supplier)s)""")
+
+		conditions.append("({0})".format(" or ".join(supplier_conditions)))
 
 	return " and " + " and ".join(conditions) if conditions else ""
 

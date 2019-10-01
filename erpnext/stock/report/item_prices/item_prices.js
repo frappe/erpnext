@@ -46,6 +46,22 @@ frappe.query_reports["Item Prices"] = {
 			}
 		},
 		{
+			fieldname: "supplier",
+			label: __("For Supplier"),
+			fieldtype: "Link",
+			options:"Supplier",
+			on_change: function () {
+				var customer = frappe.query_report.get_filter_value('supplier');
+				if(customer) {
+					frappe.db.get_value("Supplier", customer, "default_price_list", function(value) {
+						frappe.query_report.set_filter_value('selected_price_list', value["default_price_list"]);
+					});
+				} else {
+					frappe.query_report.set_filter_value('selected_price_list', '');
+				}
+			}
+		},
+		{
 			fieldname: "selected_price_list",
 			label: __("Selected Price List"),
 			fieldtype: "Link",
