@@ -839,7 +839,7 @@ class AccountsController(TransactionBase):
 		item_meta = frappe.get_meta(self.doctype + " Item")
 		count = 0
 
-		sum_fields = ['qty', 'alt_uom_qty', 'total_weight',
+		sum_fields = ['qty', 'stock_qty', 'alt_uom_qty', 'total_weight',
 			'amount', 'taxable_amount', 'net_amount', 'total_discount', 'amount_before_discount',
 			'item_taxes_and_charges', 'tax_inclusive_amount']
 		sum_fields += ['tax_exclusive_' + f for f in sum_fields if item_meta.has_field('tax_exclusive_' + f)]
