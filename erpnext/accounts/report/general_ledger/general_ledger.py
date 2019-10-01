@@ -54,9 +54,6 @@ def validate_filters(filters, account_details):
 		and account_details[filters.account].is_group == 0):
 		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
 
-	if filters.get("voucher_no"):
-		filters.merge_similar_entries = False
-
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
 
