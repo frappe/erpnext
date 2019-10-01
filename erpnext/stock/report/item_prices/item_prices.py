@@ -343,7 +343,7 @@ def _set_item_pl_rate(effective_date, item_code, price_list, price_list_rate, uo
 	from erpnext.stock.get_item_details import get_item_price
 
 	if not price_list_rate:
-		frappe.msgprint(_("Rate for Item {1} is 0. Please confirm rate"))
+		frappe.msgprint(_("Rate for Item {0} is 0 in Price List {1}. Please confirm rate").format(item_code, price_list))
 
 	effective_date = getdate(effective_date)
 	item_price_args = {
