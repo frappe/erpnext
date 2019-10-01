@@ -6,6 +6,7 @@ import frappe
 from frappe import _, scrub, unscrub
 from frappe.utils import getdate, nowdate, flt, cint, cstr
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import get_tax_accounts
+from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from frappe.desk.query_report import group_report_data
 from six import iteritems
 
@@ -71,10 +72,10 @@ class SalesPurchaseDetailsReport(object):
 		party_name_field = party_field + "_name"
 		qty_field = self.get_qty_fieldname()
 
-		sales_person_table = ", `tabSales Team` sp" if self.filters.party_type == "Customer" else ""
-		sales_person_condition = "and sp.parent = s.name and sp.parenttype = %(doctype)s" if sales_person_table else ""
-		sales_person_field = ", GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person" if sales_person_table else ""
-		contribution_field = ", sum(sp.allocated_percentage) as allocated_percentage" if sales_person_table else ""
+		sales_person_join = "left join `tabSales Team` sp on sp.parent = s.name and sp.parenttype = %(doctype)s" \
+			if self.filters.party_type == "Customer" else ""
+		sales_person_field = ", GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person" if sales_person_join else ""
+		contribution_field = ", sum(ifnull(sp.allocated_percentage, 100)) as allocated_percentage" if sales_person_join else ""
 
 		supplier_table = ", `tabSupplier` sup" if self.filters.party_type == "Supplier" else ""
 		supplier_condition = "and sup.name = s.supplier" if supplier_table else ""
@@ -110,10 +111,10 @@ class SalesPurchaseDetailsReport(object):
 				{cost_center_field} {project_field}
 				{stin_field}
 			from 
-				`tab{doctype} Item` i, `tab{doctype}` s {sales_person_table} {supplier_table}
+				`tab{doctype} Item` i, `tab{doctype}` s {supplier_table} {sales_person_join}
 			where i.parent = s.name and s.docstatus = 1 and s.company = %(company)s
 				and s.{date_field} between %(from_date)s and %(to_date)s
-				{sales_person_condition} {supplier_condition} {is_opening_condition} {filter_conditions}
+				{supplier_condition} {is_opening_condition} {filter_conditions}
 			group by s.name, i.name
 			order by s.{date_field}, s.{party_field}, s.name, i.item_code
 		""".format(
@@ -128,8 +129,7 @@ class SalesPurchaseDetailsReport(object):
 			stin_field=stin_field,
 			sales_person_field=sales_person_field,
 			contribution_field=contribution_field,
-			sales_person_table=sales_person_table,
-			sales_person_condition=sales_person_condition,
+			sales_person_join=sales_person_join,
 			cost_center_field=cost_center_field,
 			project_field=project_field,
 			supplier_table=supplier_table,
@@ -144,19 +144,18 @@ class SalesPurchaseDetailsReport(object):
 					s.customer, GROUP_CONCAT(DISTINCT s.territory SEPARATOR ', ') as territory
 					{sales_person_field}
 				from 
-					`tab{doctype} Item` i, `tab{doctype}` s {sales_person_table}
+					`tab{doctype} Item` i, `tab{doctype}` s {sales_person_join}
 				where i.parent = s.name and s.docstatus = 1 and s.company = %(company)s 
 					and sp.parent = s.name and sp.parenttype = %(doctype)s
 					and s.{date_field} between %(from_date)s and %(to_date)s
-					{sales_person_condition} {is_opening_condition} {filter_conditions}
+					{is_opening_condition} {filter_conditions}
 				group by s.{party_field}
 			""".format(
 				party_field=party_field,
 				date_field=self.date_field,
 				doctype=self.filters.doctype,
 				sales_person_field=sales_person_field,
-				sales_person_table=sales_person_table,
-				sales_person_condition=sales_person_condition,
+				sales_person_join=sales_person_join,
 				supplier_table=supplier_table,
 				supplier_condition=supplier_condition,
 				is_opening_condition=is_opening_condition,
@@ -425,11 +424,16 @@ class SalesPurchaseDetailsReport(object):
 			conditions.append("s.order_type=%(order_type)s")
 
 		if self.filters.get("cost_center"):
-			conditions.append("i.cost_center=%(cost_center)s")
+			cost_centers = cstr(self.filters.get("cost_center")).strip()
+			self.filters.cost_center = [d.strip() for d in cost_centers.split(',') if d]
+			self.filters.cost_center = get_cost_centers_with_children(self.filters.cost_center)
+			conditions.append("i.cost_center in %(cost_center)s")
 
 		if self.filters.get("project"):
-			conditions.append("i.project=%(project)s" if frappe.get_meta(self.filters.doctype + " Item").has_field("project")
-				else "s.project=%(project)s")
+			projects = cstr(self.filters.get("project")).strip()
+			self.filters.project = [d.strip() for d in projects.split(',') if d]
+			conditions.append("i.project in %(project)s" if frappe.get_meta(self.filters.doctype + " Item").has_field("project")
+				else "s.project in %(project)s")
 
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 

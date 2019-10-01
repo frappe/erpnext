@@ -4,9 +4,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
-from frappe.utils import getdate, flt, add_to_date, add_days
-from six import iteritems
+from frappe.utils import getdate, flt, add_to_date, add_days, cstr
+from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext.accounts.utils import get_fiscal_year
+from six import iteritems
 
 def execute(filters=None):
 	return Analytics(filters).run()
@@ -104,8 +105,8 @@ class Analytics(object):
 
 	def get_entries(self, entity_field, entity_name_field=None):
 		include_sales_person = self.filters.tree_type == "Sales Person" or self.filters.sales_person
-		sales_team_table = ", `tabSales Team` sp" if include_sales_person else ""
-		sales_person_condition = "and sp.parent = s.name and sp.parenttype = %(doctype)s" if include_sales_person else ""
+		sales_team_join = "left join `tabSales Team` sp on sp.parent = s.name and sp.parenttype = %(doctype)s" \
+			if include_sales_person else ""
 
 		include_supplier = self.filters.tree_type == "Supplier Group" or self.filters.supplier_group
 		supplier_table = ", `tabSupplier` sup" if include_supplier else ""
@@ -116,7 +117,7 @@ class Analytics(object):
 
 		entity_name_field = "{0} as entity_name, ".format(entity_name_field) if entity_name_field else ""
 		if include_sales_person:
-			value_field = "i.{} * sp.allocated_percentage / 100".format(self.get_value_fieldname())
+			value_field = "i.{} * ifnull(sp.allocated_percentage, 100) / 100".format(self.get_value_fieldname())
 		else:
 			value_field = "i.{}".format(self.get_value_fieldname())
 
@@ -127,8 +128,8 @@ class Analytics(object):
 				{value_field} as value_field,
 				s.{date_field}
 			from 
-				`tab{doctype} Item` i, `tab{doctype}` s {sales_team_table} {supplier_table}
-			where i.parent = s.name and s.docstatus = 1 {sales_person_condition} {supplier_condition}
+				`tab{doctype} Item` i, `tab{doctype}` s {supplier_table} {sales_team_join}
+			where i.parent = s.name and s.docstatus = 1 {supplier_condition}
 				and s.company = %(company)s and s.{date_field} between %(from_date)s and %(to_date)s
 				{is_opening_condition} {filter_conditions}
 		""".format(
@@ -137,8 +138,7 @@ class Analytics(object):
 			value_field=value_field,
 			date_field=self.date_field,
 			doctype=self.filters.doctype,
-			sales_team_table=sales_team_table,
-			sales_person_condition=sales_person_condition,
+			sales_team_join=sales_team_join,
 			supplier_table=supplier_table,
 			supplier_condition=supplier_condition,
 			is_opening_condition=is_opening_condition,
@@ -203,11 +203,17 @@ class Analytics(object):
 			conditions.append("s.order_type=%(order_type)s")
 
 		if self.filters.get("cost_center"):
-			conditions.append("i.cost_center=%(cost_center)s")
+			cost_centers = cstr(self.filters.get("cost_center")).strip()
+			self.filters.cost_center = [d.strip() for d in cost_centers.split(',') if d]
+			self.filters.cost_center = get_cost_centers_with_children(self.filters.cost_center)
+			conditions.append("i.cost_center in %(cost_center)s")
 
 		if self.filters.get("project"):
-			conditions.append("i.project=%(project)s" if frappe.get_meta(self.filters.doctype + " Item").has_field("project")
-				else "s.project=%(project)s")
+			projects = cstr(self.filters.get("project")).strip()
+			self.filters.project = [d.strip() for d in projects.split(',') if d]
+			conditions.append(
+				"i.project in %(project)s" if frappe.get_meta(self.filters.doctype + " Item").has_field("project")
+				else "s.project in %(project)s")
 
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
