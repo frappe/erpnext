@@ -50,7 +50,8 @@
    "fieldname": "is_signed",
    "fieldtype": "Check",
    "label": "Signed",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "cb_party",
@@ -226,7 +227,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-30 00:56:41.559681",
+ "modified": "2019-10-01 12:55:37.071784",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract",
