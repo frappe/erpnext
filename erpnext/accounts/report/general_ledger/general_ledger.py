@@ -3,14 +3,12 @@
 
 from __future__ import unicode_literals
 import frappe
-import erpnext
-from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
-from frappe.utils import getdate, cstr, flt, cint
+from frappe.utils import getdate, cstr, flt
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
-from frappe.desk.query_report import group_report_data
+from frappe.desk.query_report import group_report_data, hide_columns_if_filtered
 from collections import OrderedDict
 
 def execute(filters=None):
@@ -380,23 +378,36 @@ def get_columns(filters):
 			"width": 150
 		},
 		{
+			"label": _("Ref No"),
+			"fieldname": "reference_no",
+			"width": 80
+		},
+		{
 			"label": _("Account"),
 			"fieldname": "account",
 			"fieldtype": "Link",
 			"options": "Account",
-			"width": 150
+			"width": 150,
+			"hide_if_filtered": 1
 		},
 		{
 			"label": _("Party Type"),
 			"fieldname": "party_type",
-			"width": 100
+			"width": 100,
+			"hide_if_filtered": 1
 		},
 		{
 			"label": _("Party"),
 			"fieldname": "party",
 			"width": 150,
 			"fieldtype": "Dynamic Link",
-			"options": "party_type"
+			"options": "party_type",
+			"hide_if_filtered": 1
+		},
+		{
+			"label": _("Remarks"),
+			"fieldname": "remarks",
+			"width": 200
 		},
 		{
 			"label": _("Debit ({0})".format(filters.ledger_currency)),
@@ -420,11 +431,6 @@ def get_columns(filters):
 			"width": 120
 		},
 		{
-			"label": _("Remarks"),
-			"fieldname": "remarks",
-			"width": 200
-		},
-		{
 			"label": _("Against Account"),
 			"fieldname": "against",
 			"width": 120
@@ -443,27 +449,24 @@ def get_columns(filters):
 			"width": 150
 		},
 		{
-			"label": _("Ref Date"),
-			"fieldname": "reference_date",
-			"fieldtype": "Date",
-			"width": 90
-		},
-		{
-			"label": _("Ref No"),
-			"fieldname": "reference_no",
-			"width": 80
+			"label": _("Cost Center"),
+			"options": "Cost Center",
+			"fieldname": "cost_center",
+			"width": 100,
+			"hide_if_filtered": 1
 		},
 		{
 			"label": _("Project"),
 			"options": "Project",
 			"fieldname": "project",
-			"width": 100
+			"width": 100,
+			"hide_if_filtered": 1
 		},
 		{
-			"label": _("Cost Center"),
-			"options": "Cost Center",
-			"fieldname": "cost_center",
-			"width": 100
+			"label": _("Ref Date"),
+			"fieldname": "reference_date",
+			"fieldtype": "Date",
+			"width": 90
 		},
 		{
 			"label": _("Against Bill No"),
@@ -476,5 +479,7 @@ def get_columns(filters):
 
 	if filters.get('merge_similar_entries'):
 		columns = [col for col in columns if not col.get('hide_if_merge_similar')]
+
+	columns = hide_columns_if_filtered(columns, filters)
 
 	return columns
