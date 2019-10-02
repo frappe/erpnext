@@ -14,23 +14,20 @@ class BOMUpdateTool(Document):
 	def replace_bom(self):
 		self.validate_bom()
 		self.update_new_bom()
-		bom_list = self.get_parent_boms(self.new_bom)
+		frappe.cache().delete_key('bom_children')
+		bom_list, parent_list = self.get_parent_boms(self.new_bom)
 		updated_bom = []
 
 		for bom in bom_list:
 			try:
 				bom_obj = frappe.get_doc("BOM", bom)
-				bom_obj.load_doc_before_save()
-				updated_bom = bom_obj.update_cost_and_exploded_items(updated_bom)
+				if bom in parent_list and bom != self.new_bom:
+					updated_bom = bom_obj.check_recursion()
+
 				bom_obj.calculate_cost()
 				bom_obj.update_parent_cost()
 				bom_obj.db_update()
-				if (getattr(bom_obj.meta, 'track_changes', False) and not bom_obj.flags.ignore_version):
-					bom_obj.save_version()
-
-				frappe.db.commit()
 			except Exception:
-				frappe.db.rollback()
 				frappe.log_error(frappe.get_traceback())
 
 	def validate_bom(self):
@@ -42,26 +39,27 @@ class BOMUpdateTool(Document):
 				frappe.throw(_("The selected BOMs are not for the same item"))
 
 	def update_new_bom(self):
-		new_bom_unitcost = frappe.db.sql("""select total_cost/quantity
-			from `tabBOM` where name = %s""", self.new_bom)
+		new_bom_unitcost = frappe.db.sql("""SELECT `total_cost`/`quantity`
+			FROM `tabBOM` WHERE name = %s""", self.new_bom)
 		new_bom_unitcost = flt(new_bom_unitcost[0][0]) if new_bom_unitcost else 0
 
 		frappe.db.sql("""update `tabBOM Item` set bom_no=%s,
 			rate=%s, amount=stock_qty*%s where bom_no = %s and docstatus < 2 and parenttype='BOM'""",
 			(self.new_bom, new_bom_unitcost, new_bom_unitcost, self.current_bom))
 
-	def get_parent_boms(self, bom, bom_list=None):
-		if not bom_list:
-			bom_list = []
+	def get_parent_boms(self, bom, bom_list=[], parent_list=[]):
+		data = frappe.db.sql("""SELECT DISTINCT parent FROM `tabBOM Item`
+			WHERE bom_no = %s AND docstatus < 2 AND parenttype='BOM'""", bom)
 
-		data = frappe.db.sql(""" select distinct parent from `tabBOM Item`
-			where bom_no = %s and docstatus < 2 and parenttype='BOM'""", bom)
+		if not data:
+			# to check recursion only for parent bom
+			parent_list.append(bom)
 
 		for d in data:
 			bom_list.append(d[0])
-			self.get_parent_boms(d[0], bom_list)
+			self.get_parent_boms(d[0], bom_list, parent_list=parent_list)
 
-		return list(set(bom_list))
+		return list(set(bom_list)), set(parent_list)
 
 @frappe.whitelist()
 def enqueue_replace_bom(args):
