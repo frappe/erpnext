@@ -29,6 +29,19 @@ frappe.ui.form.on('Maintenance Visit', {
 
 })
 
+frappe.ui.form.on('Maintenance Visit Purpose', {
+	item_code: function(frm, cdt, cdn) {
+		let row = frappe.get_doc(cdt, cdn);
+		frm.set_query('serial_no', 'purposes', () => {
+			return {
+				filters: {
+					item_code: row.item_code
+				}
+			}
+		});
+	},
+});
+
 // TODO commonify this code
 erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 	refresh: function() {
