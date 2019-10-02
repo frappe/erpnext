@@ -350,8 +350,10 @@ def make_contact(args, is_primary_contact=1):
 			'link_name': args.get('name')
 		}]
 	})
-	contact.add_email(args.get('email_id'))
-	contact.add_phone(args.get('mobile_no'))
+	if args.get('email_id'):
+		contact.add_email(args.get('email_id'), is_primary=True)
+	if args.get('mobile_no'):
+		contact.add_phone(args.get('mobile_no'), is_primary_mobile_no=True)
 	contact.insert()
 
 	return contact
