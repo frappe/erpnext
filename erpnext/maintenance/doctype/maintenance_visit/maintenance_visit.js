@@ -4,6 +4,17 @@
 frappe.provide("erpnext.maintenance");
 
 frappe.ui.form.on('Maintenance Visit', {
+	refresh: function(frm) {
+		//filters for serial_no based on item_code
+		frm.set_query('serial_no', 'purposes', function(frm, cdt, cdn) {
+			let item = locals[cdt][cdn];
+			return {
+				filters: {
+					'item_code': item.item_code
+				}
+			};
+		});
+	},
 	setup: function(frm) {
 		frm.set_query('contact_person', erpnext.queries.contact_query);
 		frm.set_query('customer_address', erpnext.queries.address_query);
@@ -28,19 +39,6 @@ frappe.ui.form.on('Maintenance Visit', {
 	}
 
 })
-
-frappe.ui.form.on('Maintenance Visit Purpose', {
-	item_code: function(frm, cdt, cdn) {
-		let row = frappe.get_doc(cdt, cdn);
-		frm.set_query('serial_no', 'purposes', () => {
-			return {
-				filters: {
-					item_code: row.item_code
-				}
-			}
-		});
-	},
-});
 
 // TODO commonify this code
 erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({

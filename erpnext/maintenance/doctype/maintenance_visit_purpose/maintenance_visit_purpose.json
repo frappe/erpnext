@@ -41,7 +41,6 @@
   {
    "fieldname": "serial_no",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Serial No",
    "oldfieldname": "serial_no",
    "oldfieldtype": "Small Text",
@@ -126,7 +125,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-10-02 12:36:33.921202",
+ "modified": "2019-10-03 14:55:52.786805",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Visit Purpose",
