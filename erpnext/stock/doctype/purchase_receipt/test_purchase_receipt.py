@@ -452,6 +452,41 @@ def get_gl_entries(voucher_type, voucher_no):
 		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
 		order by account desc""", (voucher_type, voucher_no), as_dict=1)
 
+def get_taxes(**args):
+
+		args = frappe._dict(args)
+
+		return [{'account_head': '_Test Account Shipping Charges - TCP1',
+			 'add_deduct_tax': 'Add',
+			 'category': 'Valuation and Total',
+			 'charge_type': 'Actual',
+			 'cost_center': args.cost_center or 'Main - TCP1',
+			 'description': 'Shipping Charges',
+			 'doctype': 'Purchase Taxes and Charges',
+			 'parentfield': 'taxes',
+			 'rate': 100.0,
+			 'tax_amount': 100.0},
+			{'account_head': '_Test Account VAT - TCP1',
+			 'add_deduct_tax': 'Add',
+			 'category': 'Total',
+			 'charge_type': 'Actual',
+			 'cost_center': args.cost_center or 'Main - TCP1',
+			 'description': 'VAT',
+			 'doctype': 'Purchase Taxes and Charges',
+			 'parentfield': 'taxes',
+			 'rate': 120.0,
+			 'tax_amount': 120.0},
+			{'account_head': '_Test Account Customs Duty - TCP1',
+			 'add_deduct_tax': 'Add',
+			 'category': 'Valuation',
+			 'charge_type': 'Actual',
+			 'cost_center': args.cost_center or 'Main - TCP1',
+			 'description': 'Customs Duty',
+			 'doctype': 'Purchase Taxes and Charges',
+			 'parentfield': 'taxes',
+			 'rate': 150.0,
+			 'tax_amount': 150.0}]
+
 def make_purchase_receipt(**args):
 	if not frappe.db.exists('Location', 'Test Location'):
 		frappe.get_doc({
@@ -491,6 +526,11 @@ def make_purchase_receipt(**args):
 		"cost_center": args.cost_center or frappe.get_cached_value('Company',  pr.company,  'cost_center'),
 		"asset_location": args.location or "Test Location"
 	})
+
+	if args.get_taxes_and_charges:
+		taxes = get_taxes()
+		for tax in taxes:
+			pr.append("taxes", tax)
 
 	if not args.do_not_save:
 		pr.insert()
