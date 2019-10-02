@@ -540,6 +540,21 @@ class StockEntry(StockController):
 				total_allowed = required_qty + (required_qty * (qty_allowance/100))
 
 				if not required_qty:
+					bom_no = frappe.db.get_value("Purchase Order Item",
+						{"parent": self.purchase_order, "item_code": se_item.subcontracted_item},
+						"bom")
+
+					allow_alternative_item = frappe.get_value("BOM", bom_no, "allow_alternative_item")
+
+					if allow_alternative_item:
+						original_item_code = frappe.get_value("Item Alternative", {"alternative_item_code": item_code}, "item_code")
+
+						required_qty = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
+							if d.rm_item_code == original_item_code])
+
+						total_allowed = required_qty + (required_qty * (qty_allowance/100))
+
+				if not required_qty:
 					frappe.throw(_("Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1}")
 						.format(se_item.item_code, self.purchase_order))
 				total_supplied = frappe.db.sql("""select sum(transfer_qty)

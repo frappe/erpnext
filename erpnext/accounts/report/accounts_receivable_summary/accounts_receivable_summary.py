@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
+from frappe import _, scrub
 from frappe.utils import flt, cint
 from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
@@ -40,7 +40,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 			row.party = party
 			if self.party_naming_by == "Naming Series":
-				row.party_name = frappe.get_cached_value(self.party_type, party, [self.party_type + "_name"])
+				row.party_name = frappe.get_cached_value(self.party_type, party, scrub(self.party_type) + "_name")
 
 			row.update(party_dict)
 
