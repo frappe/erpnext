@@ -477,7 +477,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							stock_uom: item.stock_uom,
 							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
 							cost_center: item.cost_center,
-							parent_cost_center: me.frm.doc.cost_center,
 							apply_discount_after_taxes: item.apply_discount_after_taxes,
 							allow_zero_valuation_rate: item.allow_zero_valuation_rate,
 							tax_category: me.frm.doc.tax_category,
@@ -1583,8 +1582,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						order_type_name: me.frm.doc.order_type_name,
 						customer: me.frm.doc.customer,
 						supplier: me.frm.doc.supplier,
-						project: me.frm.doc.project,
-						parent_cost_center: me.frm.doc.cost_center
+						project: me.frm.doc.project
 					},
 					items: items
 				},
