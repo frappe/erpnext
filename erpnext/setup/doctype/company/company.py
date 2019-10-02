@@ -64,16 +64,19 @@ class Company(NestedSet):
 		})
 
 	def validate_default_accounts(self):
-		for field in ["default_bank_account", "default_cash_account",
+		accounts = [
+			"default_bank_account", "default_cash_account",
 			"default_receivable_account", "default_payable_account",
 			"default_expense_account", "default_income_account",
 			"stock_received_but_not_billed", "stock_adjustment_account",
-			"expenses_included_in_valuation", "default_payroll_payable_account"]:
-				if self.get(field):
-					for_company = frappe.db.get_value("Account", self.get(field), "company")
-					if for_company != self.name:
-						frappe.throw(_("Account {0} does not belong to company: {1}")
-							.format(self.get(field), self.name))
+			"expenses_included_in_valuation", "default_payroll_payable_account"
+		]
+
+		for field in accounts:
+			if self.get(field):
+				for_company = frappe.db.get_value("Account", self.get(field), "company")
+				if for_company != self.name:
+					frappe.throw(_("Account {0} does not belong to company: {1}").format(self.get(field), self.name))
 
 	def validate_currency(self):
 		if self.is_new():
@@ -180,21 +183,29 @@ class Company(NestedSet):
 			self.existing_company = self.parent_company
 
 	def set_default_accounts(self):
-		self._set_default_account("default_cash_account", "Cash")
-		self._set_default_account("default_bank_account", "Bank")
-		self._set_default_account("round_off_account", "Round Off")
-		self._set_default_account("accumulated_depreciation_account", "Accumulated Depreciation")
-		self._set_default_account("depreciation_expense_account", "Depreciation")
-		self._set_default_account("capital_work_in_progress_account", "Capital Work in Progress")
-		self._set_default_account("asset_received_but_not_billed", "Asset Received But Not Billed")
-		self._set_default_account("expenses_included_in_asset_valuation", "Expenses Included In Asset Valuation")
+		default_accounts = {
+			"default_cash_account": "Cash",
+			"default_bank_account": "Bank",
+			"round_off_account": "Round Off",
+			"accumulated_depreciation_account": "Accumulated Depreciation",
+			"depreciation_expense_account": "Depreciation",
+			"capital_work_in_progress_account": "Capital Work in Progress",
+			"asset_received_but_not_billed": "Asset Received But Not Billed",
+			"expenses_included_in_asset_valuation": "Expenses Included In Asset Valuation"
+		}
 
 		if self.enable_perpetual_inventory:
-			self._set_default_account("stock_received_but_not_billed", "Stock Received But Not Billed")
-			self._set_default_account("default_inventory_account", "Stock")
-			self._set_default_account("stock_adjustment_account", "Stock Adjustment")
-			self._set_default_account("expenses_included_in_valuation", "Expenses Included In Valuation")
-			self._set_default_account("default_expense_account", "Cost of Goods Sold")
+			default_accounts.update({
+				"stock_received_but_not_billed": "Stock Received But Not Billed",
+				"default_inventory_account": "Stock",
+				"stock_adjustment_account": "Stock Adjustment",
+				"expenses_included_in_valuation": "Expenses Included In Valuation",
+				"default_expense_account": "Cost of Goods Sold"
+			})
+
+		for default_account in default_accounts:
+			if self.is_new() or frappe.flags.in_test:
+				self._set_default_account(default_account, default_accounts.get(default_account))
 
 		if not self.default_income_account:
 			income_account = frappe.db.get_value("Account",
@@ -243,8 +254,7 @@ class Company(NestedSet):
 		if self.get(fieldname):
 			return
 
-		account = frappe.db.get_value("Account", {"account_type": account_type,
-			"is_group": 0, "company": self.name})
+		account = frappe.db.get_value("Account", {"account_type": account_type, "is_group": 0, "company": self.name})
 
 		if account:
 			self.db_set(fieldname, account)
