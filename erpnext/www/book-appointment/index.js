@@ -99,12 +99,6 @@ async function update_time_slots(selected_date, selected_timezone) {
         return
     }
     window.slots.forEach((slot, index) => {
-        // Add a break after each 8 elements
-        if (index % 8 == 0) {
-            let break_element = document.createElement('div');
-            break_element.classList.add('w-100');
-            timeslot_container.appendChild(break_element);
-        }
         // Get and append timeslot div
         let timeslot_div = get_timeslot_div_layout(slot)
         timeslot_container.appendChild(timeslot_div);
@@ -116,7 +110,6 @@ function get_timeslot_div_layout(timeslot) {
     let start_time = new Date(timeslot.time)
     let timeslot_div = document.createElement('div');
     timeslot_div.classList.add('time-slot');
-    timeslot_div.classList.add('col-md');
     if (!timeslot.availability) {
         timeslot_div.classList.add('unavailable')
     }
