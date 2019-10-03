@@ -1,6 +1,7 @@
 import frappe
 import datetime
 import json
+import pytz
 
 
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday",
@@ -24,20 +25,26 @@ def get_holiday_list(holiday_list_name):
 @frappe.whitelist(allow_guest=True)
 def get_timezones():
     timezones = frappe.get_list('Timezone', fields='*')
-    return timezones
+    return pytz.all_timezones
 
 
 @frappe.whitelist(allow_guest=True)
 def get_appointment_slots(date, timezone):
-    timezone = int(timezone)
+    import pytz
+    guest_timezone = pytz.timezone(timezone)
     format_string = '%Y-%m-%d %H:%M:%S'
     query_start_time = datetime.datetime.strptime(
         date + ' 00:00:00', format_string)
     query_end_time = datetime.datetime.strptime(
         date + ' 23:59:59', format_string)
-    query_start_time = _convert_to_ist(query_start_time, timezone)
-    query_end_time = _convert_to_ist(query_end_time, timezone)
+    local_timezone = frappe.utils.get_time_zone()
+    local_timezone = pytz.timezone(local_timezone)
+    query_start_time = guest_timezone.localize(query_start_time)
+    query_end_time = guest_timezone.localize(query_end_time)
+    query_start_time = query_start_time.astimezone(local_timezone)
+    query_end_time = query_end_time.astimezone(local_timezone)
     now = datetime.datetime.now()
+    # now = local_timezone.localize(now)
     # Database queries
     settings = frappe.get_doc('Appointment Booking Settings')
     holiday_list = frappe.get_doc('Holiday List', settings.holiday_list)
@@ -47,18 +54,22 @@ def get_appointment_slots(date, timezone):
     # Filter timeslots based on date
     converted_timeslots = []
     for timeslot in timeslots:
+        timeslot = local_timezone.localize(timeslot)
+        print(timeslot)
+        timeslot = timeslot.astimezone(guest_timezone)
+        timeslot = timeslot.replace(tzinfo=None)
         # Check if holiday
         if _is_holiday(timeslot.date(), holiday_list):
             converted_timeslots.append(
-                dict(time=_convert_to_tz(timeslot, timezone), availability=False))
+                dict(time=timeslot, availability=False))
             continue
         # Check availability
         if check_availabilty(timeslot, settings) and timeslot >= now:
             converted_timeslots.append(
-                dict(time=_convert_to_tz(timeslot, timezone), availability=True))
+                dict(time=timeslot, availability=True))
         else:
             converted_timeslots.append(
-                dict(time=_convert_to_tz(timeslot, timezone), availability=False))
+                dict(time=timeslot, availability=False))
     date_required = datetime.datetime.strptime(
         date + ' 00:00:00', format_string).date()
     converted_timeslots = filter_timeslots(date_required, converted_timeslots)
@@ -134,17 +145,3 @@ def _deltatime_to_datetime(date, deltatime):
 def _datetime_to_deltatime(date_time):
     midnight = datetime.datetime.combine(date_time.date(), datetime.time.min)
     return (date_time-midnight)
-
-def _convert_to_ist(datetime_object, timezone):
-    offset = datetime.timedelta(minutes=timezone)
-    datetime_object = datetime_object + offset
-    offset = datetime.timedelta(minutes=-330)
-    datetime_object = datetime_object - offset
-    return datetime_object
-
-def _convert_to_tz(datetime_object, timezone):
-    offset = datetime.timedelta(minutes=timezone)
-    datetime_object = datetime_object - offset
-    offset = datetime.timedelta(minutes=-330)
-    datetime_object = datetime_object + offset
-    return datetime_object
