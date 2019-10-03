@@ -4,6 +4,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "enable_scheduling",
   "availability_of_slots",
   "number_of_agents",
   "holiday_list",
@@ -62,10 +63,17 @@
    "label": "Agents",
    "options": "Assignment Rule User",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_scheduling",
+   "fieldtype": "Check",
+   "label": "Enable Appointment Scheduling",
+   "reqd": 1
   }
  ],
  "issingle": 1,
- "modified": "2019-09-25 13:08:28.328561",
+ "modified": "2019-10-03 14:52:33.076253",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Booking Settings",

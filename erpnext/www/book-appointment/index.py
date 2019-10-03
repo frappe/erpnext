@@ -15,6 +15,11 @@ def get_appointment_settings():
     settings = frappe.get_doc('Appointment Booking Settings')
     return settings
 
+@frappe.whitelist(allow_guest=True)
+def is_enabled():
+    enable_scheduling = frappe.db.get_single_value('Appointment Booking Settings','enable_scheduling')
+    return enable_scheduling
+
 
 @frappe.whitelist(allow_guest=True)
 def get_holiday_list(holiday_list_name):
