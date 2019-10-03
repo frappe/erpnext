@@ -54,14 +54,31 @@ def send_whatsapp(receiver_list, msg, doctype="", name=""):
         "body": msg
     }
 
+    attachment_kwargs = {}
     if doctype:
-        message_kwargs.update({"media_url": get_url_for_whatsapp(doctype, name)})
+        attachment_kwargs = {
+            "from_": 'whatsapp:{}'.format(wp_settings.wp_number),
+            "media_url": get_url_for_whatsapp(doctype, name),
+            "body": "{name}.pdf".format(name=name)
+        }
 
     for rec in receiver_list:
+        if attachment_kwargs:
+            attachment_kwargs.update({"to": 'whatsapp:{}'.format(rec)})
+            resp = _send_whatsapp(attachment_kwargs, client)
+            if not resp:
+                errors.append(rec)
+                continue
+
         message_kwargs.update({"to": 'whatsapp:{}'.format(rec)})
-        response = client.messages.create(**message_kwargs)
-        if not response.sid:
+        resp = _send_whatsapp(attachment_kwargs, client)
+        if not resp:
             errors.append(rec)
 
     if errors:
         frappe.msgprint(_("The message wasn't correctly delivered to: {}".format(", ".join(errors))))
+
+
+def _send_whatsapp(message_dict, client):
+    response = client.messages.create(**message_dict)
+    return response.sid
