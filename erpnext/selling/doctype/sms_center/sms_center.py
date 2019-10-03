@@ -10,6 +10,7 @@ from frappe import msgprint, _
 from frappe.model.document import Document
 
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
+from erpnext.erpnext_integrations.doctype.whatsapp_settings.whatsapp_settings import send_whatsapp
 
 class SMSCenter(Document):
 	def create_receiver_list(self):
@@ -73,12 +74,15 @@ class SMSCenter(Document):
 
 		return receiver_nos
 
-	def send_sms(self):
+	def send_message(self):
 		receiver_list = []
 		if not self.message:
 			msgprint(_("Please enter message before sending"))
 		else:
 			receiver_list = self.get_receiver_nos()
-		if receiver_list:
+		if not receiver_list:
+			return
+		if self.type == "SMS":
 			send_sms(receiver_list, cstr(self.message))
-
+		elif self.type == "Whatsapp":
+			send_whatsapp(receiver_list, cstr(self.message))

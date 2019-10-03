@@ -8,3 +8,4 @@ gocardless_pro
 woocommerce
 pandas
 plaid-python
+twilio

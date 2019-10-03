@@ -73,12 +73,14 @@ erpnext.SMSManager = function SMSManager(doc) {
 	}
 	this.make_dialog = function() {
 		var d = new frappe.ui.Dialog({
-			title: 'Send SMS',
+			title: 'Send Message',
 			width: 400,
 			fields: [
+				{fieldname:'type', fieldtype:'Select', label:'Message Type', reqd:1, options:"SMS\nWhatsapp", default:"SMS"},
 				{fieldname:'number', fieldtype:'Data', label:'Mobile Number', reqd:1},
 				{fieldname:'message', fieldtype:'Text', label:'Message', reqd:1},
-				{fieldname:'send', fieldtype:'Button', label:'Send'}
+				{fieldname:'send', fieldtype:'Button', label:'Send'},
+				{fieldname:'send_attachment', fieldtype:'Check', label:'Attach Document Print', depends_on:"eval:this.type!='SMS'"}
 			]
 		})
 		d.fields_dict.send.input.onclick = function() {
@@ -86,12 +88,22 @@ erpnext.SMSManager = function SMSManager(doc) {
 			var v = me.dialog.get_values();
 			if(v) {
 				$(btn).set_working();
+				var correct_method = "frappe.core.doctype.sms_settings.sms_settings.send_sms";
+
+				var args_dict = {
+					receiver_list: [v.number],
+					msg: v.message
+				}
+
+				if(d.fields_dict.type.value == "Whatsapp"){
+					correct_method = "erpnext.erpnext_integrations.doctype.whatsapp_settings.whatsapp_settings.send_whatsapp";
+					var has_attachment = d.fields_dict.send_attachment.get_value()
+					args_dict["doctype"] = (has_attachment == 1? doc.doctype:"")
+					args_dict["name"] = (has_attachment == 1? doc.name:"")
+				}
 				frappe.call({
-					method: "frappe.core.doctype.sms_settings.sms_settings.send_sms",
-					args: {
-						receiver_list: [v.number],
-						msg: v.message
-					},
+					method: correct_method,
+					args: args_dict,
 					callback: function(r) {
 						$(btn).done_working();
 						if(r.exc) {frappe.msgprint(r.exc); return; }
