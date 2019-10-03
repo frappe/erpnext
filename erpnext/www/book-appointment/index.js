@@ -33,9 +33,11 @@ function setup_timezone_selector() {
     let offset = new Date().getTimezoneOffset();
     window.timezones.forEach(timezone => {
         let opt = document.createElement('option');
-        opt.value = timezone.offset;
-        opt.innerHTML = timezone.timezone_name;
-        opt.defaultSelected = (offset == timezone.offset)
+        opt.value = timezone;
+        if(timezone == moment.tz.guess()){
+            opt.selected = true;
+        }
+        opt.innerHTML = timezone;
         timezones_element.appendChild(opt)
     });
 }
