@@ -27,9 +27,3 @@ class AppointmentBookingSettings(Document):
 			
 			if timedelta.total_seconds() % (self.appointment_duration * 60):
 				frappe.throw('The difference between from time and To Time must be a multiple of Appointment ')
-		
-		set_of_days = set(list_of_days)
-
-		if len(list_of_days) > len(set_of_days):
-			frappe.throw(_('Days of week must be unique'))
-	
