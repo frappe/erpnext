@@ -696,6 +696,7 @@ apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,Serial Nos Required fo
 DocType: Authorization Rule,Applicable To (Designation),Aplicables a (Denominación )
 apps/erpnext/erpnext/config/accounting.py,Enable / disable currencies.,Habilitar / Deshabilitar el tipo de monedas
 apps/erpnext/erpnext/controllers/trends.py,Total(Amt),Total (Amt)
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js,Transfer Material to Supplier,Transferencia de material a proveedor
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,El numero de serie no tiene almacén. el almacén debe establecerse por entradas de stock o recibos de compra
 DocType: Shipping Rule,Shipping Rule Conditions,Regla envío Condiciones
 DocType: BOM Update Tool,The new BOM after replacement,La nueva Solicitud de Materiales después de la sustitución
