@@ -42,9 +42,6 @@ class TestAppointment(unittest.TestCase):
         self.test_lead = create_test_lead()
         self.test_appointment = create_test_appointments()
 
-    def tearDown(self):
-        self.test_appointment.delete()
-
     def test_calendar_event_created(self):
         cal_event = frappe.get_doc('Event',self.test_appointment.calendar_event)
         self.assertEqual(cal_event.starts_on ,self.test_appointment.scheduled_time)
