@@ -8,8 +8,9 @@ import unittest
 import datetime
 
 def create_test_lead():
-    if frappe.db.exists({'doctype':'Lead','lead_name':'Test Lead'}):
-        return frappe.get_doc('Lead','Test Lead')
+    test_lead = frappe.db.exists({'doctype':'Lead','lead_name':'Test Lead'})
+    if test_lead:
+        return frappe.get_doc('Lead',test_lead)
     test_lead = frappe.get_doc({
         'doctype':'Lead',
         'lead_name':'Test Lead',
@@ -19,11 +20,9 @@ def create_test_lead():
     return test_lead
 
 def create_test_appointments():
-    if frappe.db.exists({
-        'doctype':'Appointment',
-        'email':'test@example.com'
-        }):
-        return frappe.get_doc('Appointment','Test Appointment')
+    test_appointment = frappe.db.exists({ 'doctype':'Appointment', 'email':'test@example.com' })
+    if test_appointment:
+        return frappe.get_doc('Appointment',test_appointment)
     test_appointment = frappe.get_doc({
         'doctype':'Appointment',
         'email':'test@example.com',
