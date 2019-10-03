@@ -7,6 +7,12 @@
     border: 0.5px solid #cccccc;
     min-height: 75px;
     padding: 0.5em 1em;
+    
+}
+
+#timeslot-container{
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
 }
 
 .time-slot:hover {
