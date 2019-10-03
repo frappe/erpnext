@@ -415,7 +415,7 @@ class BOM(WebsiteGenerator):
 		def _get_children(bom_no):
 			children = frappe.cache().hget('bom_children', bom_no)
 			if children is None:
-				children = frappe.get_list("""SELECT `bom_no` FROM `tabBOM Item`
+				children = frappe.db.sql_list("""SELECT `bom_no` FROM `tabBOM Item`
 					WHERE `parent`=%s AND `bom_no`!='' AND `parenttype`='BOM'""", bom_no)
 				frappe.cache().hset('bom_children', bom_no, children)
 			return children
