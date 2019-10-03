@@ -40,10 +40,11 @@ class TestAppointment(unittest.TestCase):
     test_appointment = test_lead = None
     def setUp(self):
         test_lead = create_test_lead()
-        test_appointment = test_create_test_appointments()
+        test_appointment = create_test_appointments()
 
     def tearDown(self):
-        pass
+        test_appointment.delete()
+        test_lead.delete()
 
     def test_calendar_event_created(self):
         cal_event = frappe.get_doc('Event',test_appointment.calendar_event)
