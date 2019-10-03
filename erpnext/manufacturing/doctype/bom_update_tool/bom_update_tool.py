@@ -20,13 +20,17 @@ class BOMUpdateTool(Document):
 
 		for bom in bom_list:
 			try:
-				bom_obj = frappe.get_doc("BOM", bom)
+				bom_obj = frappe.get_cached_doc('BOM', bom)
+				bom_obj.load_doc_before_save()
+
 				if bom in parent_list and bom != self.new_bom:
 					updated_bom = bom_obj.check_recursion()
 
 				bom_obj.calculate_cost()
 				bom_obj.update_parent_cost()
 				bom_obj.db_update()
+				if bom_obj.meta.get('track_changes') and not bom_obj.flags.ignore_version:
+					bom_obj.save_version()
 			except Exception:
 				frappe.log_error(frappe.get_traceback())
 
@@ -66,8 +70,10 @@ def enqueue_replace_bom(args):
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
-	frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.replace_bom", args=args, timeout=4000)
-	frappe.msgprint(_("Queued for replacing the BOM. It may take a few minutes."))
+	replace_bom(args)
+
+	# frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.replace_bom", args=args, timeout=4000)
+	# frappe.msgprint(_("Queued for replacing the BOM. It may take a few minutes."))
 
 @frappe.whitelist()
 def enqueue_update_cost():
