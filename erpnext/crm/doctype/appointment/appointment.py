@@ -58,7 +58,7 @@ class Appointment(Document):
 
 		return get_url(verify_route + '?' + get_signed_params(params))
 
-	def on_update(self):
+	def on_change(self):
 		# Sync Calednar
 		if not self.calendar_event:
 			return
@@ -66,6 +66,12 @@ class Appointment(Document):
 		cal_event.starts_on = self.scheduled_time
 		cal_event.save(ignore_permissions=True)
 
+	def on_trash(self):
+		# Delete calendar event
+		cal_event = frappe.get_doc('Event',self.calendar_event)
+		if cal_event:
+			cal_event.delete()
+		# Delete task?
 	def set_verified(self,email):
 		if not email == self.customer_email:
 			frappe.throw('Email verification failed.')
