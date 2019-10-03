@@ -37,6 +37,8 @@ class TestSerialNo(unittest.TestCase):
 		self.assertTrue(SerialNoCannotCannotChangeError, sr.save)
 
 	def test_inter_company_transfer(self):
+		set_perpetual_inventory(0, "_Test Company 1")
+		set_perpetual_inventory(0)
 		se = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
 		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
 

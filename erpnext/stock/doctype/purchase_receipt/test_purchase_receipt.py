@@ -14,6 +14,7 @@ from erpnext.stock.doctype.item.test_item import make_item
 from six import iteritems
 class TestPurchaseReceipt(unittest.TestCase):
 	def setUp(self):
+		set_perpetual_inventory(0)
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 
 	def test_make_purchase_invoice(self):
@@ -32,7 +33,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 	def test_purchase_receipt_no_gl_entry(self):
 		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
-		set_perpetual_inventory(0, company)
 
 		existing_bin_stock_value = frappe.db.get_value("Bin", {"item_code": "_Test Item",
 			"warehouse": "_Test Warehouse - _TC"}, "stock_value")
