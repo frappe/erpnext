@@ -1,7 +1,17 @@
-
-frappe.ready(() => {
-    initialise_select_date()
+frappe.ready(async () => {
+    debugger
+    let isSchedulingEnabled = await frappe.call({
+        method:'erpnext.www.book-appointment.index.is_enabled'
+    })
+    isSchedulingEnabled  = isSchedulingEnabled.message
+    if (!isSchedulingEnabled) {
+        frappe.show_alert("This feature is not enabled");
+        window.location.replace('/');
+        return;
+    }
+    initialise_select_date();
 })
+
 window.holiday_list = [];
 
 async function initialise_select_date() {
@@ -16,7 +26,7 @@ async function get_global_variables() {
     // Using await 
     window.appointment_settings = (await frappe.call({
         method: 'erpnext.www.book-appointment.index.get_appointment_settings'
-    })).message
+    })).message;
     window.timezones = (await frappe.call({
         method: 'erpnext.www.book-appointment.index.get_timezones'
     })).message;
