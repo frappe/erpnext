@@ -47,5 +47,5 @@ class TestAppointment(unittest.TestCase):
         self.assertEqual(cal_event.starts_on ,self.test_appointment.scheduled_time)
 
     def test_lead_linked(self):
-        lead = frappe.get_doc('Lead',self.lead)
+        lead = frappe.get_doc('Lead',self.test_lead)
         self.assertIsNotNone(lead)
