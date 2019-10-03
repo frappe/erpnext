@@ -11,14 +11,6 @@ class MaintenanceVisit(TransactionBase):
 	def get_feed(self):
 		return _("To {0}").format(self.customer_name)
 
-	def validate_serial_no(self):
-		for d in self.get('purposes'):
-			if d.serial_no and not frappe.db.exists("Serial No", d.serial_no):
-				frappe.throw(_("Serial No {0} does not exist").format(d.serial_no))
-
-	def validate(self):
-		self.validate_serial_no()
-
 	def update_customer_issue(self, flag):
 		for d in self.get('purposes'):
 			if d.prevdoc_docname and d.prevdoc_doctype == 'Warranty Claim' :
