@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import json
 from frappe import _, throw
-from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day, nowdate
+from frappe.utils import today, flt, cint, cstr, fmt_money, formatdate, getdate, add_days, add_months, get_last_day, nowdate
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
@@ -771,31 +771,55 @@ class AccountsController(TransactionBase):
 							total_allocated_amount, update_modified=False)
 
 	def group_similar_items(self):
-		group_item_qty = {}
-		group_item_amount = {}
-		# to update serial number in print
+		group_item_data = {}
+		item_meta = frappe.get_meta(self.doctype + " Item")
 		count = 0
 
-		for item in self.items:
-			group_item_qty[item.item_code] = group_item_qty.get(item.item_code, 0) + item.qty
-			group_item_amount[item.item_code] = group_item_amount.get(item.item_code, 0) + item.amount
+		sum_fields = ['qty', 'stock_qty', 'alt_uom_qty', 'total_weight', 'amount', 'net_amount']
+		rate_fields = [('rate', 'amount'), ('net_rate', 'net_amount'), ('weight_per_unit', 'total_weight')]
 
+		base_fields = [('base_' + f, f) for f in sum_fields if item_meta.has_field('base_' + f)]
+		base_fields += [('base_' + t, t) for t, s in rate_fields if item_meta.has_field('base_' + t)]
+
+		# Sum amounts
+		for item in self.items:
+			group_key = (cstr(item.item_code), cstr(item.item_name), item.uom)
+			group_item = group_item_data.setdefault(group_key, frappe._dict())
+			for f in sum_fields:
+				group_item[f] = group_item.get(f, 0) + flt(item.get(f))
+
+			group_item_serial_nos = group_item.setdefault('serial_no', [])
+			if item.get('serial_no'):
+				group_item_serial_nos += filter(lambda s: s, item.serial_no.split('\n'))
+
+		# Calculate average rates and get serial nos string
+		for group_item in group_item_data.values():
+			if group_item.qty:
+				for target, source in rate_fields:
+					group_item[target] = flt(group_item[source]) / flt(group_item.qty)
+			else:
+				for target, source in rate_fields:
+					group_item[target] = 0
+
+			group_item.serial_no = '\n'.join(group_item.serial_no)
+
+		# Calculate company currenct values
+		for group_item in group_item_data.values():
+			for target, source in base_fields:
+				group_item[target] = group_item.get(source, 0) * self.conversion_rate
+
+		# Remove duplicates and set aggregated values
 		duplicate_list = []
 		for item in self.items:
-			if item.item_code in group_item_qty:
+			group_key = (cstr(item.item_code), cstr(item.item_name), item.uom)
+			if group_key in group_item_data.keys():
 				count += 1
-				item.qty = group_item_qty[item.item_code]
-				item.amount = group_item_amount[item.item_code]
-
-				if item.qty:
-					item.rate = flt(flt(item.amount) / flt(item.qty), item.precision("rate"))
-				else:
-					item.rate = 0
-
+				item.update(group_item_data[group_key])
 				item.idx = count
-				del group_item_qty[item.item_code]
+				del group_item_data[group_key]
 			else:
 				duplicate_list.append(item)
+
 		for item in duplicate_list:
 			self.remove(item)
 
