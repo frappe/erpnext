@@ -5,12 +5,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils.print_format import download_pdf
 from frappe.model.document import Document
 from frappe.core.doctype.sms_settings.sms_settings import validate_receiver_nos
 from twilio.rest import Client
 from six import string_types
-from frappe.utils.file_manager import upload, remove_file_by_url
-import base64
 
 
 class WhatsappSettings(Document):
@@ -18,11 +17,22 @@ class WhatsappSettings(Document):
         validate_receiver_nos([self.wp_number])
 
 
-def prepare_file_for_whatsapp(filename, filecontent):
-    frappe.form_dict.filename = filename
-    frappe.form_dict.is_private = 0
-    frappe.form_dict.filedata = base64.b64encode(filecontent)
-    return upload()
+@frappe.whitelist(allow_guest=True)
+def get_pdf_for_whatsapp(doctype, name, key):
+    doc = frappe.get_doc(doctype, name)
+    if not key == doc.get_signature():
+        return 403
+    download_pdf(doctype, name, format=None, doc=None, no_letterhead=0)
+
+
+def get_url_for_whatsapp(doctype, name):
+    doc = frappe.get_doc(doctype, name)
+    return "{url}/api/method/erpnext.erpnext_integrations.doctype.whatsapp_settings.whatsapp_settings.get_pdf_for_whatsapp?doctype={doctype}&name={name}&key={key}".format(
+        url=frappe.utils.get_url(),
+        doctype=doctype,
+        name=name,
+        key=doc.get_signature()
+    )
 
 
 @frappe.whitelist()
@@ -44,12 +54,8 @@ def send_whatsapp(receiver_list, msg, doctype="", name=""):
         "body": msg
     }
 
-    attachment = None
     if doctype:
-        filecontent = frappe.get_print(doctype, name, None, doc=None, no_letterhead=1, as_pdf=1)
-        filename = "{name}.pdf".format(name=name.replace(" ", "-").replace("/", "-"))
-        attachment = prepare_file_for_whatsapp(filename, filecontent)
-        message_kwargs.update({"MediaUrl": frappe.utils.get_url() + file.get("file_url", "")[1:]})
+        message_kwargs.update({"media_url": get_url_for_whatsapp(doctype, name)})
 
     for rec in receiver_list:
         message_kwargs.update({"to": 'whatsapp:{}'.format(rec)})
@@ -59,6 +65,3 @@ def send_whatsapp(receiver_list, msg, doctype="", name=""):
 
     if errors:
         frappe.msgprint(_("The message wasn't correctly delivered to: {}".format(", ".join(errors))))
-
-    if attachment and response.status == "sent":
-        remove_file_by_url(file.get("file_url", ""))
