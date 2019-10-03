@@ -42,6 +42,12 @@ def validate_return_against(doc):
 			frappe.throw(_("Exchange Rate must be same as {0} {1} ({2})")
 				.format(doc.doctype, doc.return_against, ref_doc.conversion_rate))
 
+		# validate same transaction type
+		if doc.meta.get_field("order_type_name") and doc.order_type_name != ref_doc.order_type_name:
+			frappe.throw(_("Transaction Type must be the same as {0} {1} ({2})")
+				.format(doc.doctype, doc.return_against, ref_doc.order_type_name))
+
+
 def validate_returned_items(doc):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 

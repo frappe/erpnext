@@ -7,7 +7,7 @@ from frappe.utils import cint, flt, cstr, comma_or
 from frappe import _, throw
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
-from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.get_item_details import get_conversion_factor, get_target_warehouse_validation
 from erpnext.stock.doctype.item.item import set_item_default
 from frappe.contacts.doctype.address.address import get_address_display
 
@@ -38,6 +38,7 @@ class SellingController(StockController):
 	def validate(self):
 		super(SellingController, self).validate()
 		self.validate_items()
+		self.validate_target_warehouse()
 		self.validate_max_discount()
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()
@@ -393,6 +394,17 @@ class SellingController(StockController):
 		# validate items to see if they have is_sales_item enabled
 		from erpnext.controllers.buying_controller import validate_item_type
 		validate_item_type(self, "is_sales_item", "sales")
+
+	def validate_target_warehouse(self):
+		if frappe.get_meta(self.doctype + " Item").has_field("target_warehouse"):
+			for d in self.items:
+				target_warehouse_validation = get_target_warehouse_validation(d.item_code, self.order_type_name, self.company)
+
+				if target_warehouse_validation:
+					if target_warehouse_validation == "Mandatory" and not d.target_warehouse:
+						frappe.throw(_("Row #{0}: Target Warehouse must be set for Item {1}").format(d.idx, d.item_code))
+					if target_warehouse_validation == "Not Allowed" and d.target_warehouse:
+						frappe.throw(_("Row #{0}: Target Warehouse must be not set for Item {1}").format(d.idx, d.item_code))
 
 def set_default_income_account_for_item(obj):
 	for d in obj.get("items"):

@@ -400,6 +400,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		});
 	},
 
+	to_warehouse: function() {
+		var me = this;
+		$.each(this.frm.doc.items || [], function(i, item) {
+			frappe.model.set_value(me.frm.doctype + " Item", item.name, "target_warehouse", me.frm.doc.to_warehouse);
+		});
+	},
+
 	update_auto_repeat_reference: function(doc) {
 		if (doc.auto_repeat) {
 			frappe.call({

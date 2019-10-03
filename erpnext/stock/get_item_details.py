@@ -507,6 +507,18 @@ def get_default_allow_zero_valuation_rate(args, item, item_group, brand, order_t
 	return cint(allow_zero_valuation_rate == "Yes" if allow_zero_valuation_rate else args.get('allow_zero_valuation_rate'))
 
 
+def get_target_warehouse_validation(item_code, order_type_name, company):
+	order_type = get_order_type_defaults(order_type_name, company)
+	item = get_item_defaults(item_code, company)
+	item_group = get_item_group_defaults(item_code, company)
+	brand = get_brand_defaults(item_code, company)
+
+	return (order_type.get("target_warehouse_validation")
+		or item.get("target_warehouse_validation")
+		or brand.get("target_warehouse_validation")
+		or item_group.get("target_warehouse_validation"))
+
+
 def get_hide_item_code(args, item):
 	brand = frappe.get_cached_doc("Brand", item.brand) if item.brand else {}
 	show_item_code = (item.get("show_item_code")
