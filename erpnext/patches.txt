@@ -606,3 +606,4 @@ erpnext.patches.v11_1.set_missing_opportunity_from
 erpnext.patches.v11_1.set_quotation_status
 erpnext.patches.v11_1.update_default_supplier_in_item_defaults
 erpnext.patches.v11_1.set_status_for_material_request_type_manufacture
+erpnext.patches.v11_1.set_produced_qty_field_in_sales_order_for_work_order
