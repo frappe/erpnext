@@ -10,7 +10,6 @@ from frappe.model.document import Document
 from frappe.core.doctype.sms_settings.sms_settings import validate_receiver_nos
 from twilio.rest import Client
 from six import string_types
-from six.moves.urllib.parse import quote
 
 
 class WhatsappSettings(Document):
@@ -72,7 +71,7 @@ def send_whatsapp(receiver_list, msg, doctype="", name=""):
                 continue
 
         message_kwargs.update({"to": 'whatsapp:{}'.format(rec)})
-        resp = _send_whatsapp(attachment_kwargs, client)
+        resp = _send_whatsapp(message_kwargs, client)
         if not resp:
             errors.append(rec)
 
