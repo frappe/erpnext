@@ -38,6 +38,7 @@
    "depends_on": "eval:doc.__islocal",
    "fieldname": "batch_id",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Batch ID",
    "no_copy": 1,
    "oldfieldname": "batch_id",
@@ -48,7 +49,6 @@
   {
    "fieldname": "item",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Item",
    "oldfieldname": "item",
@@ -166,7 +166,7 @@
  "idx": 1,
  "image_field": "image",
  "max_attachments": 5,
- "modified": "2019-08-01 03:33:52.900790",
+ "modified": "2019-10-03 22:38:45.104056",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
@@ -190,5 +190,5 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "item"
+ "title_field": "batch_id"
 }
