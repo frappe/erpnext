@@ -158,29 +158,26 @@ class TestStockEntry(unittest.TestCase):
 			where voucher_type='Stock Entry' and voucher_no=%s""", mr.name))
 
 	def test_material_issue_gl_entry(self):
-		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
-		set_perpetual_inventory(1, company)
+		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
+		make_stock_entry(item_code="_Test Item", target="Stores - TCP1", company= company,
+			qty=50, basic_rate=100, expense_account="Stock Adjustment - TCP1")
 
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
-			qty=50, basic_rate=100, expense_account="Stock Adjustment - _TC")
-
-		mi = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TC",
-			qty=40, expense_account="Stock Adjustment - _TC")
+		mi = make_stock_entry(item_code="_Test Item", source="Stores - TCP1", company=company,
+			qty=40, expense_account="Stock Adjustment - TCP1")
 
 		self.check_stock_ledger_entries("Stock Entry", mi.name,
-			[["_Test Item", "_Test Warehouse - _TC", -40.0]])
+			[["_Test Item", "Stores - TCP1", -40.0]])
 
-		stock_in_hand_account = get_inventory_account(mi.company, "_Test Warehouse - _TC")
+		stock_in_hand_account = get_inventory_account(mi.company, "Stores - TCP1")
 		stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
 			"voucher_no": mi.name}, "stock_value_difference"))
 
 		self.check_gl_entries("Stock Entry", mi.name,
 			sorted([
 				[stock_in_hand_account, 0.0, stock_value_diff],
-				["Stock Adjustment - _TC", stock_value_diff, 0.0]
+				["Stock Adjustment - TCP1", stock_value_diff, 0.0]
 			])
 		)
-
 		mi.cancel()
 
 		self.assertFalse(frappe.db.sql("""select name from `tabStock Ledger Entry`
@@ -190,16 +187,15 @@ class TestStockEntry(unittest.TestCase):
 			where voucher_type='Stock Entry' and voucher_no=%s""", mi.name))
 
 	def test_material_transfer_gl_entry(self):
-		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
-		set_perpetual_inventory(1, company)
+		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 
 		create_stock_reconciliation(qty=100, rate=100)
 
-		mtn = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TC",
-			target="_Test Warehouse 1 - _TC", qty=45)
+		mtn = make_stock_entry(item_code="_Test Item", source="Stores - TCP1",
+			target="Finished Goods - TCP1", qty=45)
 
 		self.check_stock_ledger_entries("Stock Entry", mtn.name,
-			[["_Test Item", "_Test Warehouse - _TC", -45.0], ["_Test Item", "_Test Warehouse 1 - _TC", 45.0]])
+			[["_Test Item", "Stores - TCP1", -45.0], ["_Test Item", "Finished Goods - TCP1", 45.0]])
 
 		stock_in_hand_account = get_inventory_account(mtn.company, mtn.get("items")[0].s_warehouse)
 
@@ -212,7 +208,7 @@ class TestStockEntry(unittest.TestCase):
 
 		else:
 			stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
-				"voucher_no": mtn.name, "warehouse": "_Test Warehouse - _TC"}, "stock_value_difference"))
+				"voucher_no": mtn.name, "warehouse": "Stores - TCP1"}, "stock_value_difference"))
 
 			self.check_gl_entries("Stock Entry", mtn.name,
 				sorted([
@@ -298,7 +294,7 @@ class TestStockEntry(unittest.TestCase):
 		set_perpetual_inventory(0, repack.company)
 
 	def check_stock_ledger_entries(self, voucher_type, voucher_no, expected_sle):
-		expected_sle.sort(key=lambda x: x[0])
+		expected_sle.sort(key=lambda x: x[1])
 
 		# check stock ledger entries
 		sle = frappe.db.sql("""select item_code, warehouse, actual_qty
@@ -306,7 +302,7 @@ class TestStockEntry(unittest.TestCase):
 			and voucher_no = %s order by item_code, warehouse, actual_qty""",
 			(voucher_type, voucher_no), as_list=1)
 		self.assertTrue(sle)
-		sle.sort(key=lambda x: x[0])
+		sle.sort(key=lambda x: x[1])
 
 		for i, sle in enumerate(sle):
 			self.assertEqual(expected_sle[i][0], sle[0])
@@ -773,14 +769,12 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual(doc.per_transferred, 100)
 
 	def test_gle_for_opening_stock_entry(self):
-		set_perpetual_inventory(1)
-
-		mr = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
-			qty=50, basic_rate=100, expense_account="Stock Adjustment - _TC", is_opening="Yes", do_not_save=True)
+		mr = make_stock_entry(item_code="_Test Item", target="Stores - TCP1", company="_Test Company with perpetual inventory 1",qty=50, basic_rate=100, expense_account="Stock Adjustment - TCP1", is_opening="Yes", do_not_save=True)
 
 		self.assertRaises(OpeningEntryAccountError, mr.save)
 
-		mr.items[0].expense_account = "Temporary Opening - _TC"
+		mr.items[0].expense_account = "Temporary Opening - TCP1"
+
 		mr.save()
 		mr.submit()
 

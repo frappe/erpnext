@@ -705,8 +705,6 @@ class TestSalesInvoice(unittest.TestCase):
 		si = frappe.copy_doc(pos)
 		si.insert()
 		si.submit()
-
-		print(si.items[0].expense_account)
 		self.assertEqual(si.paid_amount, 100.0)
 
 		self.pos_gl_entry(si, pos, 50)
@@ -822,9 +820,6 @@ class TestSalesInvoice(unittest.TestCase):
 			order by account asc, debit asc, credit asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 
-		print("------->>>", pos.items[0].expense_account)
-
-
 		stock_in_hand = get_inventory_account('_Test Company with perpetual inventory 1')
 		expected_gl_entries = sorted([
 			[si.debit_to, 100.0, 0.0],
@@ -840,15 +835,7 @@ class TestSalesInvoice(unittest.TestCase):
 			["Cash - TCP1", cash_amount, 0.0]
 		])
 
-		pprint(expected_gl_entries)
-		print("____________>",len(expected_gl_entries), len(gl_entries))
-		pprint(gl_entries)
-
 		for i, gle in enumerate(sorted(gl_entries, key=lambda gle: gle.account)):
-
-			print(expected_gl_entries[i][0], gle.account)
-			print(expected_gl_entries[i][1], gle.debit)
-			print(expected_gl_entries[i][2], gle.credit)
 			self.assertEqual(expected_gl_entries[i][0], gle.account)
 			self.assertEqual(expected_gl_entries[i][1], gle.debit)
 			self.assertEqual(expected_gl_entries[i][2], gle.credit)
@@ -1090,13 +1077,9 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
 		stock_in_hand_account = get_inventory_account('_Test Company with perpetual inventory 1', si1.items[0].warehouse)
 
-		print(stock_in_hand_account, si1.name)
-
 		# Check gl entry
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Sales Invoice",
 			"voucher_no": si1.name, "account": stock_in_hand_account}, "debit")
-
-		print(gle_warehouse_amount ,stock_value_difference)
 
 		self.assertEqual(gle_warehouse_amount, stock_value_difference)
 

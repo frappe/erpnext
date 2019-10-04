@@ -120,7 +120,6 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 		validate_cwip_accounts(gl_map)
 
 	round_off_debit_credit(gl_map)
-
 	for entry in gl_map:
 		make_entry(entry, adv_adj, update_outstanding, from_repost)
 

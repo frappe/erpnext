@@ -378,8 +378,8 @@ class TestDeliveryNote(unittest.TestCase):
 		set_valuation_method("_Test Item Home Desktop 100", "FIFO")
 
 		for warehouse in ("Stores - TCP1", "Finished Goods - TCP1"):
-			create_stock_reconciliation(item_code="_Test Item", target=warehouse, company = company, expense_account = "Stock Adjustment - TCP1", qty=100, rate=100)
-			create_stock_reconciliation(item_code="_Test Item Home Desktop 100", company = company, expense_account = "Stock Adjustment - TCP1", target=warehouse, qty=100, rate=100)
+			create_stock_reconciliation(item_code="_Test Item", target=warehouse, company = company, expense_account = "Stock Adjustment - TCP1", qty=100, rate=100, warehouse="Work In Progress - TCP1")
+			create_stock_reconciliation(item_code="_Test Item Home Desktop 100", company = company, expense_account = "Stock Adjustment - TCP1", target=warehouse, qty=100, rate=100, warehouse="Work In Progress - TCP1")
 
 		opening_qty_test_warehouse_1 = get_qty_after_transaction(warehouse="Finished Goods - TCP1")
 
