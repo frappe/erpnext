@@ -29,7 +29,6 @@ def get_holiday_list(holiday_list_name):
 
 @frappe.whitelist(allow_guest=True)
 def get_timezones():
-    timezones = frappe.get_list('Timezone', fields='*')
     return pytz.all_timezones
 
 
