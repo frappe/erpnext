@@ -242,10 +242,10 @@ class BuyingController(StockController):
 
 	def update_raw_materials_supplied_based_on_stock_entries(self, raw_material_table):
 		self.set(raw_material_table, [])
-		purchase_orders = [d.purchase_order for d in self.items]
+		purchase_orders = set([d.purchase_order for d in self.items])
 		if purchase_orders:
 			items = get_subcontracted_raw_materials_from_se(purchase_orders)
-			backflushed_raw_materials = get_backflushed_subcontracted_raw_materials_from_se(purchase_orders, self.name)
+			backflushed_raw_materials = get_backflushed_subcontracted_raw_materials_from_se(purchase_orders)
 
 			for d in items:
 				qty = d.qty - backflushed_raw_materials.get(d.item_code, 0)
@@ -749,16 +749,16 @@ def get_subcontracted_raw_materials_from_se(purchase_orders):
 		group by sed.item_code, sed.t_warehouse
 	""" % (','.join(['%s'] * len(purchase_orders))), tuple(purchase_orders), as_dict=1)
 
-def get_backflushed_subcontracted_raw_materials_from_se(purchase_orders, purchase_receipt):
+def get_backflushed_subcontracted_raw_materials_from_se(purchase_orders):
 	return frappe._dict(frappe.db.sql("""
 		select
 			prsi.rm_item_code as item_code, sum(prsi.consumed_qty) as qty
 		from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri, `tabPurchase Receipt Item Supplied` prsi
 		where
 			pr.name = pri.parent and pr.name = prsi.parent and pri.purchase_order in (%s)
-			and pri.item_code = prsi.main_item_code and pr.name != '%s' and pr.docstatus = 1
+			and pri.item_code = prsi.main_item_code and pr.docstatus = 1
 		group by prsi.rm_item_code
-	""" % (','.join(['%s'] * len(purchase_orders)), purchase_receipt), tuple(purchase_orders)))
+	""" % (','.join(['%s'] * len(purchase_orders))), tuple(purchase_orders)))
 
 def get_asset_item_details(asset_items):
 	asset_items_data = {}
