@@ -154,28 +154,31 @@ class GrossProfitGenerator(object):
 	def get_average_rate_based_on_group_by(self):
 		# sum buying / selling totals for group
 		for key in list(self.grouped):
+			for i, row in enumerate(self.grouped[key]):
+				if row.parent in self.returned_invoices \
+					and row.item_code in self.returned_invoices[row.parent]:
+					returned_item_rows = self.returned_invoices[row.parent][row.item_code]
+					for returned_item_row in returned_item_rows:
+						row.qty += returned_item_row.qty
+						row.base_amount += flt(returned_item_row.base_amount, self.currency_precision)
+					row.buying_amount = flt(row.qty * row.buying_rate, self.currency_precision)
+
+				if i==0:
+					new_row = row
+				elif self.filters.get("group_by") != "Invoice":
+					new_row.qty += row.qty
+					new_row.buying_amount += flt(row.buying_amount, self.currency_precision)
+					new_row.base_amount += flt(row.base_amount, self.currency_precision)
+
+				if self.filters.get("group_by") == "Invoice" and (row.qty or row.base_amount):
+					self.grouped_data_based_on_group_by(row)
+
 			if self.filters.get("group_by") != "Invoice":
-				for i, row in enumerate(self.grouped[key]):
-					if i==0:
-						new_row = row
-					else:
-						new_row.qty += row.qty
-						new_row.buying_amount += flt(row.buying_amount, self.currency_precision)
-						new_row.base_amount += flt(row.base_amount, self.currency_precision)
-				new_row = self.set_average_rate(new_row)
-				self.grouped_data.append(new_row)
-			else:
-				for i, row in enumerate(self.grouped[key]):
-					if row.parent in self.returned_invoices \
-							and row.item_code in self.returned_invoices[row.parent]:
-						returned_item_rows = self.returned_invoices[row.parent][row.item_code]
-						for returned_item_row in returned_item_rows:
-							row.qty += returned_item_row.qty
-							row.base_amount += flt(returned_item_row.base_amount, self.currency_precision)
-						row.buying_amount = flt(row.qty * row.buying_rate, self.currency_precision)
-					if row.qty or row.base_amount:
-						row = self.set_average_rate(row)
-						self.grouped_data.append(row)
+				self.grouped_data_based_on_group_by(new_row)
+
+	def grouped_data_based_on_group_by(self, row):
+		row = self.set_average_rate(row)
+		self.grouped_data.append(row)
 
 	def set_average_rate(self, new_row):
 		new_row.gross_profit = flt(new_row.base_amount - new_row.buying_amount, self.currency_precision)
@@ -204,10 +207,7 @@ class GrossProfitGenerator(object):
 				.setdefault(inv.item_code, []).append(inv)
 
 	def skip_row(self, row, product_bundles):
-		if self.filters.get("group_by") != "Invoice":
-			if not row.get(scrub(self.filters.get("group_by", ""))):
-				return True
-		elif row.get("is_return") == 1:
+		if row.get("is_return") == 1:
 			return True
 
 	def get_buying_amount_from_product_bundle(self, row, product_bundle):

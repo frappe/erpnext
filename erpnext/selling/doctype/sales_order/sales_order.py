@@ -973,3 +973,15 @@ def make_raw_material_request(items, company, sales_order, project=None):
 	material_request.run_method("set_missing_values")
 	material_request.submit()
 	return material_request
+
+def update_produced_qty_in_so_item(sales_order_item):
+	#for multiple work orders against same sales order item
+	linked_wo_with_so_item = frappe.db.get_all('Work Order', ['produced_qty'], {
+		'sales_order_item': sales_order_item,
+		'docstatus': 1
+	})
+	if len(linked_wo_with_so_item) > 0:
+		total_produced_qty = 0
+		for wo in linked_wo_with_so_item:
+			total_produced_qty += flt(wo.get('produced_qty'))
+		frappe.db.set_value('Sales Order Item', sales_order_item, 'produced_qty', total_produced_qty)
