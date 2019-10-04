@@ -34,7 +34,7 @@ function setup_timezone_selector() {
     window.timezones.forEach(timezone => {
         let opt = document.createElement('option');
         opt.value = timezone;
-        if(timezone == moment.tz.guess()){
+        if (timezone == moment.tz.guess()) {
             opt.selected = true;
         }
         opt.innerHTML = timezone;
@@ -140,7 +140,7 @@ function select_time() {
         return;
     }
     let selected_element = document.getElementsByClassName('selected');
-    if (!(selected_element.length > 0)){
+    if (!(selected_element.length > 0)) {
         this.classList.add('selected');
         show_next_button();
         return;
@@ -191,7 +191,7 @@ function setup_details_page() {
 
 async function submit() {
     let form = document.querySelector('#customer-form');
-    if(!form.checkValidity()){
+    if (!form.checkValidity()) {
         form.reportValidity();
         return;
     }
@@ -211,7 +211,6 @@ async function submit() {
 }
 
 function get_form_data() {
-    
     contact = {};
     contact.name = document.getElementById('customer_name').value;
     contact.number = document.getElementById('customer_number').value;
