@@ -9,21 +9,26 @@ WEEKDAYS = ["Monday", "Tuesday", "Wednesday",
 
 no_cache = 1
 
+
 def get_context(context):
-    is_enabled = frappe.db.get_single_value('Appointment Booking Settings','enable_scheduling')
+    is_enabled = frappe.db.get_single_value(
+        'Appointment Booking Settings', 'enable_scheduling')
     if is_enabled:
         return context
     else:
         raise frappe.DoesNotExistError
+
 
 @frappe.whitelist(allow_guest=True)
 def get_appointment_settings():
     settings = frappe.get_doc('Appointment Booking Settings')
     return settings
 
+
 @frappe.whitelist(allow_guest=True)
 def is_enabled():
-    enable_scheduling = frappe.db.get_single_value('Appointment Booking Settings','enable_scheduling')
+    enable_scheduling = frappe.db.get_single_value(
+        'Appointment Booking Settings', 'enable_scheduling')
     return enable_scheduling
 
 
@@ -131,14 +136,17 @@ def filter_timeslots(date, timeslots):
             filtered_timeslots.append(timeslot)
     return filtered_timeslots
 
+
 def check_availabilty(timeslot, settings):
     return frappe.db.count('Appointment', {'scheduled_time': timeslot}) < settings.number_of_agents
+
 
 def _is_holiday(date, holiday_list):
     for holiday in holiday_list.holidays:
         if holiday.holiday_date == date:
             return True
     return False
+
 
 def _get_records(start_time, end_time, settings):
     records = []
@@ -147,9 +155,11 @@ def _get_records(start_time, end_time, settings):
             records.append(record)
     return records
 
+
 def _deltatime_to_datetime(date, deltatime):
     time = (datetime.datetime.min + deltatime).time()
     return datetime.datetime.combine(date.date(), time)
+
 
 def _datetime_to_deltatime(date_time):
     midnight = datetime.datetime.combine(date_time.date(), datetime.time.min)

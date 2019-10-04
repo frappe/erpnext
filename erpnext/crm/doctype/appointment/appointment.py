@@ -13,160 +13,173 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.desk.form.assign_to import add as add_assignemnt
 from frappe.utils import get_url
-from frappe.utils.verified_command import verify_request,get_signed_params
+from frappe.utils.verified_command import verify_request, get_signed_params
 
 
 class Appointment(Document):
 
-	def find_lead_by_email(self):
-		lead_list = frappe.get_list('Lead', filters = {'email_id':self.customer_email}, ignore_permissions = True)
-		if lead_list:
-			return lead_list[0].name
-		return None
-	
-	def before_insert(self):
-		number_of_appointments_in_same_slot = frappe.db.count('Appointment', filters = {'scheduled_time':self.scheduled_time})
-		settings = frappe.get_doc('Appointment Booking Settings')
-		if(number_of_appointments_in_same_slot >= settings.number_of_agents):
-			frappe.throw('Time slot is not available')
-		# Link lead
-		self.lead = self.find_lead_by_email()
+    def find_lead_by_email(self):
+        lead_list = frappe.get_list(
+            'Lead', filters={'email_id': self.customer_email}, ignore_permissions=True)
+        if lead_list:
+            return lead_list[0].name
+        return None
 
-	def after_insert(self):
-		if(self.lead):
-			# Create Calendar event
-			self.create_calendar_event()
-			self.auto_assign()
-		else:
-			# Set status to unverified
-			self.status = 'Unverified'
-			# Send email to confirm
-			verify_url = self.get_verify_url()
-			message = ''.join(['Please click the following link to confirm your appointment:',verify_url])
-			frappe.sendmail(recipients=[self.customer_email], 
-							message=message,
-							subject=_('Appointment Confirmation'))
-			frappe.msgprint('Please check your email to confirm the appointment')
+    def before_insert(self):
+        number_of_appointments_in_same_slot = frappe.db.count(
+            'Appointment', filters={'scheduled_time': self.scheduled_time})
+        settings = frappe.get_doc('Appointment Booking Settings')
+        if(number_of_appointments_in_same_slot >= settings.number_of_agents):
+            frappe.throw('Time slot is not available')
+        # Link lead
+        self.lead = self.find_lead_by_email()
 
-	def get_verify_url(self):
-		verify_route = '/book-appointment/verify'
+    def after_insert(self):
+        if(self.lead):
+            # Create Calendar event
+            self.create_calendar_event()
+            self.auto_assign()
+        else:
+            # Set status to unverified
+            self.status = 'Unverified'
+            # Send email to confirm
+            verify_url = self.get_verify_url()
+            message = ''.join(
+                ['Please click the following link to confirm your appointment:', verify_url])
+            frappe.sendmail(recipients=[self.customer_email],
+                            message=message,
+                            subject=_('Appointment Confirmation'))
+            frappe.msgprint(
+                'Please check your email to confirm the appointment')
 
-		params = {
-			'email':self.customer_email,
-			'appointment':self.name
-		}
+    def get_verify_url(self):
+        verify_route = '/book-appointment/verify'
 
-		return get_url(verify_route + '?' + get_signed_params(params))
+        params = {
+            'email': self.customer_email,
+            'appointment': self.name
+        }
 
-	def on_change(self):
-		# Sync Calednar
-		if not self.calendar_event:
-			return
-		cal_event = frappe.get_doc('Event',self.calendar_event)
-		cal_event.starts_on = self.scheduled_time
-		cal_event.save(ignore_permissions=True)
+        return get_url(verify_route + '?' + get_signed_params(params))
 
-	def on_trash(self):
-		# Delete calendar event
-		cal_event = frappe.get_doc('Event',self.calendar_event)
-		if cal_event:
-			cal_event.delete()
-		# Delete task?
-	def set_verified(self,email):
-		if not email == self.customer_email:
-			frappe.throw('Email verification failed.')
-		# Create new lead
-		self.create_lead()
-		# Remove unverified status
-		self.status = 'Open'
-		# Create calender event
-		self.create_calendar_event()
-		self.auto_assign()
-		self.save(ignore_permissions=True)
-		frappe.db.commit()
+    def on_change(self):
+        # Sync Calednar
+        if not self.calendar_event:
+            return
+        cal_event = frappe.get_doc('Event', self.calendar_event)
+        cal_event.starts_on = self.scheduled_time
+        cal_event.save(ignore_permissions=True)
 
-	def create_lead(self):
-		# Return if already linked
-		if self.lead:
-			return
-		lead = frappe.get_doc({
-			'doctype':'Lead',
-			'lead_name':self.customer_name,
-			'email_id':self.customer_email,
-			'notes':self.customer_details,
-			'phone':self.customer_phone_number,
-		})
-		lead.insert(ignore_permissions=True)
-		# Link lead
-		self.lead = lead.name
+    def on_trash(self):
+        # Delete calendar event
+        cal_event = frappe.get_doc('Event', self.calendar_event)
+        if cal_event:
+            cal_event.delete()
+        # Delete task?
 
-	def auto_assign(self):
-		if self._assign:
-			return
-		available_agents = _get_agents_sorted_by_asc_workload(self.scheduled_time.date())
-		for agent in available_agents:
-			if(_check_agent_availability(agent, self.scheduled_time)):
-				agent = agent[0]
-				add_assignemnt({
-					'doctype':self.doctype,
-					'name':self.name,
-					'assign_to':agent
-				})
-			break
+    def set_verified(self, email):
+        if not email == self.customer_email:
+            frappe.throw('Email verification failed.')
+        # Create new lead
+        self.create_lead()
+        # Remove unverified status
+        self.status = 'Open'
+        # Create calender event
+        self.create_calendar_event()
+        self.auto_assign()
+        self.save(ignore_permissions=True)
+        frappe.db.commit()
 
-	def create_calendar_event(self):
-		if self.calendar_event:
-			return
-		appointment_event = frappe.get_doc({
-			'doctype': 'Event',
-			'subject': ' '.join(['Appointment with', self.customer_name]),
-			'starts_on': self.scheduled_time,
-			'status': 'Open',
-			'type': 'Public',
-			'send_reminder': frappe.db.get_single_value('Appointment Booking Settings','email_reminders'),
-			'event_participants': [dict(reference_doctype = 'Lead', reference_docname = self.lead)]
-		})
-		employee = _get_employee_from_user(self._assign)
-		if employee:
-			appointment_event.append('event_participants', dict(
-				reference_doctype = 'Employee',
-				reference_docname = employee.name))
-		appointment_event.insert(ignore_permissions=True)
-		self.calendar_event = appointment_event.name
-		self.save(ignore_permissions=True)
+    def create_lead(self):
+        # Return if already linked
+        if self.lead:
+            return
+        lead = frappe.get_doc({
+            'doctype': 'Lead',
+            'lead_name': self.customer_name,
+            'email_id': self.customer_email,
+            'notes': self.customer_details,
+            'phone': self.customer_phone_number,
+        })
+        lead.insert(ignore_permissions=True)
+        # Link lead
+        self.lead = lead.name
+
+    def auto_assign(self):
+        if self._assign:
+            return
+        available_agents = _get_agents_sorted_by_asc_workload(
+            self.scheduled_time.date())
+        for agent in available_agents:
+            if(_check_agent_availability(agent, self.scheduled_time)):
+                agent = agent[0]
+                add_assignemnt({
+                    'doctype': self.doctype,
+                    'name': self.name,
+                    'assign_to': agent
+                })
+            break
+
+    def create_calendar_event(self):
+        if self.calendar_event:
+            return
+        appointment_event = frappe.get_doc({
+            'doctype': 'Event',
+            'subject': ' '.join(['Appointment with', self.customer_name]),
+            'starts_on': self.scheduled_time,
+            'status': 'Open',
+            'type': 'Public',
+            'send_reminder': frappe.db.get_single_value('Appointment Booking Settings', 'email_reminders'),
+            'event_participants': [dict(reference_doctype='Lead', reference_docname=self.lead)]
+        })
+        employee = _get_employee_from_user(self._assign)
+        if employee:
+            appointment_event.append('event_participants', dict(
+                reference_doctype='Employee',
+                reference_docname=employee.name))
+        appointment_event.insert(ignore_permissions=True)
+        self.calendar_event = appointment_event.name
+        self.save(ignore_permissions=True)
+
 
 def _get_agents_sorted_by_asc_workload(date):
-	appointments = frappe.db.get_list('Appointment', fields='*')
-	agent_list = _get_agent_list_as_strings()	
-	if not appointments:
-		return agent_list
-	appointment_counter = Counter(agent_list)
-	for appointment in appointments:
-		assigned_to = frappe.parse_json(appointment._assign)
-		if not assigned_to:
-			continue
-		if (assigned_to[0] in agent_list) and appointment.scheduled_time.date() == date:
-			appointment_counter[assigned_to[0]] += 1
-	sorted_agent_list = appointment_counter.most_common()
-	sorted_agent_list.reverse()
-	return sorted_agent_list
+    appointments = frappe.db.get_list('Appointment', fields='*')
+    agent_list = _get_agent_list_as_strings()
+    if not appointments:
+        return agent_list
+    appointment_counter = Counter(agent_list)
+    for appointment in appointments:
+        assigned_to = frappe.parse_json(appointment._assign)
+        if not assigned_to:
+            continue
+        if (assigned_to[0] in agent_list) and appointment.scheduled_time.date() == date:
+            appointment_counter[assigned_to[0]] += 1
+    sorted_agent_list = appointment_counter.most_common()
+    sorted_agent_list.reverse()
+    return sorted_agent_list
+
 
 def _get_agent_list_as_strings():
-	agent_list_as_strings = []
-	agent_list = frappe.get_doc('Appointment Booking Settings').agent_list
-	for agent in agent_list:
-		agent_list_as_strings.append(agent.user)
-	return agent_list_as_strings
+    agent_list_as_strings = []
+    agent_list = frappe.get_doc('Appointment Booking Settings').agent_list
+    for agent in agent_list:
+        agent_list_as_strings.append(agent.user)
+    return agent_list_as_strings
 
-def _check_agent_availability(agent_email,scheduled_time):
-	appointemnts_at_scheduled_time = frappe.get_list('Appointment', filters = {'scheduled_time':scheduled_time})
-	for appointment in appointemnts_at_scheduled_time:
-		if appointment._assign == agent_email:
-			return False
-	return True
+
+def _check_agent_availability(agent_email, scheduled_time):
+    appointemnts_at_scheduled_time = frappe.get_list(
+        'Appointment', filters={'scheduled_time': scheduled_time})
+    for appointment in appointemnts_at_scheduled_time:
+        if appointment._assign == agent_email:
+            return False
+    return True
+
 
 def _get_employee_from_user(user):
-	employee_docname = frappe.db.exists({'doctype':'Employee', 'user_id':user})
-	if employee_docname:
-		return frappe.get_doc('Employee', employee_docname[0][0]) # frappe.db.exists returns a tuple of a tuple
-	return None
+    employee_docname = frappe.db.exists(
+        {'doctype': 'Employee', 'user_id': user})
+    if employee_docname:
+        # frappe.db.exists returns a tuple of a tuple
+        return frappe.get_doc('Employee', employee_docname[0][0])
+    return None
