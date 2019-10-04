@@ -289,3 +289,16 @@ var validate_sample_quantity = function(frm, cdt, cdn) {
 		});
 	}
 };
+
+
+frappe.ui.form.on("Purchase Receipt Item Supplied", {
+	extra_consumed_qty: function(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		let total_consumed_qty = row.required_qty;
+		if(row.extra_consumed_qty && row.required_qty) {
+			total_consumed_qty = row.extra_consumed_qty + row.required_qty;
+		}
+
+		frappe.model.set_value(cdt, cdn, "consumed_qty", total_consumed_qty);
+	}
+})
