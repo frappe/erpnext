@@ -1,0 +1,112 @@
+[
+	{
+		"doctype": "Company",
+		"company_name": "_Test GmbH",
+		"abbr": "_TG",
+		"country": "Germany"
+	},
+	{
+		"doctype": "Account",
+		"company": "_Test GmbH",
+		"account_name": "Aktiva",
+		"is_group": "1",
+		"root_type": "Asset"
+	},
+	{
+		"doctype": "Account",
+		"company": "_Test GmbH",
+		"parent_account": "Aktiva - _TG",
+		"account_name": "Forderungen aus Lieferungen und Leistungen",
+		"is_group": "1"
+	},
+	{
+		"doctype": "Account",
+		"company": "_Test GmbH",
+		"parent_account": "Forderungen aus Lieferungen und Leistungen - _TG",
+		"account_type": "Receivable",
+		"account_number": "10001",
+		"account_name": "_Test Kunde GmbH"
+	},
+	{
+		"doctype": "Account",
+		"company": "_Test GmbH",
+		"account_name": "Passiva",
+		"is_group": "1",
+		"root_type": "Liability"
+	},
+	{
+		"doctype": "Account",
+		"company": "_Test GmbH",
+		"parent_account": "Passiva - _TG",
+		"account_type": "Tax",
+		"account_number": "3806",
+		"account_name": "Umsatzsteuer 19%"
+	},
+	{
+		"doctype": "Account",
+		"company": "_Test GmbH",
+		"parent_account": "Passiva - _TG",
+		"account_name": "Verbindlichkeiten aus Lieferungen und Leistungen",
+		"is_group": "1"
+	},
+	{
+		"doctype": "Account",
+		"company": "_Test GmbH",
+		"parent_account": "Verbindlichkeiten aus Lieferungen und Leistungen - _TG",
+		"account_type": "Payable",
+		"account_number": "70001",
+		"account_name": "_Test Lieferant GmbH"
+	},
+	{
+		"doctype": "DATEV Settings",
+		"client": "_Test Company 2",
+		"client_number": "12345",
+		"consultant_number": "67890"
+	},
+	{
+		"doctype": "Customer",
+		"customer_name": "_Test Kunde GmbH",
+		"accounts": [{
+			"company": "_Test GmbH",
+			"account": "10001 - _Test Kunde GmbH - _TG"
+		}]
+	},
+	{
+		"doctype": "Supplier",
+		"customer_name": "_Test Lieferant GmbH",
+		"accounts": [{
+			"company": "_Test GmbH",
+			"account": "70001 - _Test Lieferant GmbH - _TG"
+		}]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"docstatus": 1,
+		"customer": "_Test Kunde GmbH",
+		"currency": "EUR",
+		"debit_to": "10001 - _Test Kunde GmbH - _TG",
+		"total": 100,
+		"taxes": [
+			{
+				"charge_type": "On Net Total",
+				"account_head": "3806 - Umsatzsteuer 19% - _TG",
+				"rate": 19
+			}
+		]
+	},
+	{
+		"doctype": "Purchase Invoice",
+		"docstatus": 1,
+		"supplier": "_Test Lieferant GmbH",
+		"currency": "EUR",
+		"credit_to": "70001 - _Test Lieferant GmbH - _TG",
+		"total": 100,
+		"taxes": [
+			{
+				"charge_type": "On Net Total",
+				"account_head": "3806 - Umsatzsteuer 19% - _TG",
+				"rate": 19
+			}
+		]
+	}
+]
