@@ -142,6 +142,8 @@ class Appointment(Document):
                 'party_name': self.lead,
             },
             order_by='creation desc')
+        if not opporutnities:
+            return None
         latest_opportunity = frappe.get_doc(
             'Opportunity', opporutnities[0].name)
         assignee = latest_opportunity._assign
