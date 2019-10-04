@@ -89,6 +89,7 @@ class Appointment(Document):
         self.auto_assign()
         self.save(ignore_permissions=True)
         frappe.db.commit()
+        this.wrapper.find('.filter-edit-area').after(this.get_clear_button())
 
     def create_lead(self):
         # Return if already linked
@@ -106,16 +107,16 @@ class Appointment(Document):
         self.lead = lead.name
 
     def auto_assign(self):
-		# If the latest opportunity is assigned to someone
-		# Assign the appointment to the same
-		existing_assignee = self.get_assignee_from_latest_opportunity()
-		if existing_assignee:
-			add_assignemnt({
-				'doctype':self.doctype
-				'name':self.name
-				'assign_to':existing_assignee
-			})
-			return
+        # If the latest opportunity is assigned to someone
+        # Assign the appointment to the same
+        existing_assignee = self.get_assignee_from_latest_opportunity()
+        if existing_assignee:
+            add_assignemnt({
+                'doctype': self.doctype
+                'name': self.name
+                'assign_to': existing_assignee
+            })
+            return
         if self._assign:
             return
         available_agents = _get_agents_sorted_by_asc_workload(
