@@ -21,7 +21,10 @@ class BOMUpdateTool(Document):
 		for bom in bom_list:
 			try:
 				bom_obj = frappe.get_cached_doc('BOM', bom)
-				bom_obj.load_doc_before_save()
+				# this is only used for versioning and we do not want
+				# to make separate db calls by using load_doc_before_save
+				# which proves to be expensive while doing bulk replace
+				bom_obj._doc_before_save = bom_obj.as_dict()
 
 				if bom in parent_list and bom != self.new_bom:
 					updated_bom = bom_obj.check_recursion()
@@ -70,10 +73,8 @@ def enqueue_replace_bom(args):
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
-	replace_bom(args)
-
-	# frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.replace_bom", args=args, timeout=4000)
-	# frappe.msgprint(_("Queued for replacing the BOM. It may take a few minutes."))
+	frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.replace_bom", args=args, timeout=4000)
+	frappe.msgprint(_("Queued for replacing the BOM. It may take a few minutes."))
 
 @frappe.whitelist()
 def enqueue_update_cost():
