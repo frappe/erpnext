@@ -9,6 +9,19 @@ from frappe.model.document import Document
 class LoanSecurityShortfall(Document):
 	pass
 
+def update_shortfall_status(loan, security_value):
+	loan_security_shortfall = frappe.db.get_value("Loan Security Shortfall",
+		{"loan": loan, "status": "Pending"}, ['name', 'shortfall_amount'], as_dict=1)
+
+	if not loan_security_shortfall:
+		return
+
+	if security_value >= loan_security_shortfall.shortfall_amount:
+		frappe.db.set_value("Loan Security Shortfall", loan_security_shortfall.name, "status", "Completed")
+	else:
+		frappe.db.set_value("Loan Security Shortfall", loan_security_shortfall.name,
+			"shortfall_amount", loan_security_shortfall.shortfall_amount - security_value)
+
 
 @frappe.whitelist()
 def add_security(loan):

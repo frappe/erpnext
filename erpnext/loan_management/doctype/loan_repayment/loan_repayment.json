@@ -28,6 +28,8 @@
   "column_break_21",
   "reference_date",
   "paid_accrual_entries",
+  "partial_paid_entry",
+  "principal_amount_paid",
   "amended_from"
  ],
  "fields": [
@@ -190,10 +192,25 @@
   {
    "fieldname": "column_break_21",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "partial_paid_entry",
+   "fieldtype": "Text",
+   "hidden": 1,
+   "label": "Partial Paid Entry",
+   "read_only": 1
+  },
+  {
+   "default": "0.0",
+   "fieldname": "principal_amount_paid",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Principal Amount Paid",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-25 08:53:04.229118",
+ "modified": "2019-10-03 13:04:56.668261",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",

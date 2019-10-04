@@ -9,6 +9,7 @@
   "disbursement_date",
   "posting_date",
   "column_break_4",
+  "applicant_type",
   "applicant",
   "company",
   "section_break_7",
@@ -18,7 +19,7 @@
   "cost_center",
   "section_break_13",
   "customer_details_section",
-  "bank_account_number",
+  "bank_account",
   "amended_from"
  ],
  "fields": [
@@ -106,13 +107,21 @@
    "label": "Customer Details"
   },
   {
-   "fieldname": "bank_account_number",
+   "fetch_from": "against_loan.applicant_type",
+   "fieldname": "applicant_type",
    "fieldtype": "Data",
-   "label": "Bank Account Number"
+   "label": "Applicant Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-25 04:36:19.285940",
+ "modified": "2019-10-02 00:52:17.158994",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Disbursement",

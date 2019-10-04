@@ -77,7 +77,7 @@ class LoanApplication(Document):
 				self.loan_amount += security.amount - (security.amount * security.haircut/100)
 
 @frappe.whitelist()
-def create_loan(source_name, target_doc = None):
+def create_loan(source_name, target_doc=None, loan_security_pledge=None, submit=0):
 	def update_accounts(source_doc, target_doc, source_parent):
 		account_details = frappe.get_all("Loan Type",
 		 fields=["mode_of_payment", "payment_account","loan_account", "interest_income_account", "penalty_income_account"],
@@ -90,6 +90,10 @@ def create_loan(source_name, target_doc = None):
 		target_doc.interest_income_account = account_details.interest_income_account
 		target_doc.penalty_income_account = account_details.penalty_income_account
 
+		if loan_security_pledge:
+			target_doc.is_secured_loan = 1
+			target_doc.loan_security_pledge = loan_security_pledge
+
 	doclist = get_mapped_doc("Loan Application", source_name, {
 		"Loan Application": {
 			"doctype": "Loan",
@@ -99,6 +103,9 @@ def create_loan(source_name, target_doc = None):
 			"postprocess": update_accounts
 		}
 	}, target_doc)
+
+	if submit:
+		doclist.submit()
 
 	return doclist
 
@@ -124,3 +131,5 @@ def create_pledge(loan_application):
 
 	message = _("Loan Security Pledge Created : {0}").format(lsp.name)
 	frappe.msgprint(message)
+
+	return lsp.name

@@ -70,7 +70,7 @@ class LoanInterestAccrual(AccountsController):
 # rate of interest is 13.5 then first loan interest accural will be on '01-10-2019'
 # which means interest will be accured for 30 days which should be equal to 11095.89
 def calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_interest, from_background_job=0):
-	no_of_days, year = get_no_of_days_for_interest_accural(loan, posting_date, from_background_job)
+	no_of_days = get_no_of_days_for_interest_accural(loan, posting_date, from_background_job)
 
 	if no_of_days <= 0:
 		return
@@ -78,7 +78,7 @@ def calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_i
 	pending_principal_amount = loan.total_payment - loan.total_interest_payable \
 		- loan.total_amount_paid
 
-	interest_per_day = (pending_principal_amount * loan.rate_of_interest) / (days_in_year(year) * 100)
+	interest_per_day = (pending_principal_amount * loan.rate_of_interest) / (days_in_year(get_datetime(posting_date).year) * 100)
 	payable_interest = interest_per_day * no_of_days
 
 	make_loan_interest_accrual_entry(loan.name, loan.applicant_type, loan.applicant,loan.interest_income_account,
@@ -157,45 +157,20 @@ def make_loan_interest_accrual_entry(loan, applicant_type, applicant, interest_i
 
 
 def get_no_of_days_for_interest_accural(loan, posting_date, from_background_job):
-	disbursement_date = get_datetime(loan.disbursement_date)
+	last_interest_accrual_date = get_last_accural_date_in_current_month(loan)
 
-	if posting_date and not from_background_job:
-		posting_datetime = get_datetime(posting_date)
-		year = posting_datetime.year
+	no_of_days = date_diff(posting_date or nowdate(), last_interest_accrual_date) + 1
 
-		if (posting_datetime.month == disbursement_date.month) and (posting_datetime.year == disbursement_date.year):
-			no_of_days_in_previous_month = date_diff(posting_date, disbursement_date)
-		else:
-			last_posting_date = get_last_accural_date_in_current_month(posting_datetime.month,
-				posting_datetime.year, loan.name)
-			no_of_days_in_previous_month = date_diff(posting_date, last_posting_date) + 1
+	return no_of_days
 
-	else:
-		curr_month = get_datetime(posting_date).month or now_datetime().month
-
-		if curr_month == 1:
-			prev_month = 12
-			year = get_datetime(posting_date).year - 1 if posting_date else now_datetime().year - 1
-		else:
-			prev_month = curr_month - 1
-			year = get_datetime(posting_date).year if posting_date else now_datetime().year
-
-		precision = cint(frappe.db.get_default("currency_precision")) or 4
-
-		if (disbursement_date.month == prev_month) and (disbursement_date.year == year):
-			no_of_days_in_previous_month = date_diff(get_last_day(disbursement_date), disbursement_date) + 1
-		else:
-			no_of_days_in_previous_month = date_diff(now_datetime(),
-				get_last_accural_date_in_current_month(prev_month, year, loan.name))
-
-	return no_of_days_in_previous_month, year
-
-def get_last_accural_date_in_current_month(month, year, loan):
+def get_last_accural_date_in_current_month(loan):
 	last_posting_date = frappe.db.sql(""" SELECT MAX(posting_date) from `tabLoan Interest Accrual`
-		WHERE month(posting_date) = %s and year(posting_date) = %s and loan = %s""", (month, year, loan))
+		WHERE loan = %s""", (loan.name))
 
-	if last_posting_date:
+	if last_posting_date[0][0]:
 		return last_posting_date[0][0]
+	else:
+		return loan.disbursement_date
 
 def days_in_year(year):
 	days = 365

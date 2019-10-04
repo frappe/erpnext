@@ -167,7 +167,7 @@ def close_loan(loan, total_amount_paid):
 	frappe.db.set_value("Loan", loan, "status", "Closed")
 
 @frappe.whitelist()
-def make_loan_disbursement(loan, loan_amount, disbursed_amount, company, applicant):
+def make_loan_disbursement(loan, company, applicant, loan_amount, disbursed_amount):
 	disbursement_entry = frappe.new_doc("Loan Disbursement")
 	disbursement_entry.against_loan = loan
 	disbursement_entry.applicant = applicant
@@ -178,7 +178,7 @@ def make_loan_disbursement(loan, loan_amount, disbursed_amount, company, applica
 	return disbursement_entry.as_dict()
 
 @frappe.whitelist()
-def make_repayment_entry(loan, applicant, loan_type,company):
+def make_repayment_entry(loan, applicant, loan_type, company):
 	repayment_entry = frappe.new_doc("Loan Repayment")
 	repayment_entry.against_loan = loan
 	repayment_entry.applicant = applicant

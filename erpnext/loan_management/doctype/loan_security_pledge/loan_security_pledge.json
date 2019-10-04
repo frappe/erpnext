@@ -83,13 +83,13 @@
    "label": "Loan  Details"
   },
   {
-   "default": "Unpledged",
+   "default": "Requested",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Unpledged\nPledged\nPartially Pledged",
+   "options": "Requested\nUnpledged\nPledged\nPartially Pledged",
    "read_only": 1
   },
   {
@@ -115,7 +115,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-25 04:31:55.912099",
+ "modified": "2019-10-02 00:42:43.503270",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Pledge",

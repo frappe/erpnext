@@ -7,10 +7,12 @@ import frappe, erpnext
 import json
 from frappe import _
 from frappe.utils import flt
+from six import iteritems
 from frappe.model.document import Document
 from frappe.utils import date_diff, add_days, getdate, add_months, get_first_day
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import update_shortfall_status
 
 class LoanRepayment(AccountsController):
 
@@ -53,55 +55,84 @@ class LoanRepayment(AccountsController):
 		if amounts.get("paid_accrual_entries"):
 			self.paid_accrual_entries = frappe.as_json(amounts.get("paid_accrual_entries"))
 
-
 	def mark_as_paid(self):
-		paid_payments = []
+		paid_entries = []
 		paid_amount = self.amount_paid
 
 		if not paid_amount:
 			frappe.throw(_("Amount paid cannot be zero"))
 
-		loan = frappe.get_doc("Loan", self.against_loan)
-
-		principal_amount_paid = flt(self.amount_paid - self.penalty_amount - self.interest_payable, 2)
-		paid_accrual_entries = json.loads(self.paid_accrual_entries)
-
-		if principal_amount_paid < 0:
-			msg = _("Paid amount cannot be less than {0}").format(self.penalty_amount + self.interest_payable)
+		if self.amount_paid < self.penalty_amount:
+			msg = _("Paid amount cannot be less than {0}").format(self.penalty_amount)
 			frappe.throw(msg)
 
-		if self.is_term_loan and principal_amount_paid < flt(self.payable_principal_amount, 2):
-			frappe.throw(_("Paid amount cannot be less than {0}".format(self.penalty_amount + self.interest_payable
-				+ self.payable_principal_amount)))
+		loan = frappe.get_doc("Loan", self.against_loan)
 
-		if self.payment_type == "Loan Closure" and principal_amount_paid < flt(self.pending_principal_amount, 2):
-			msg = _("Amount of {0} is required for Loan closure").format(self.pending_principal_amount)
+		if self.paid_accrual_entries:
+			paid_accrual_entries = json.loads(self.paid_accrual_entries)
 
-		frappe.db.sql("""UPDATE `tabLoan Interest Accrual`
-			SET is_paid = 1 where name in (%s)""" #nosec
-			% ", ".join(['%s']*len(paid_accrual_entries)), tuple(paid_accrual_entries))
+		if paid_amount - self.penalty_amount > 0:
 
-		frappe.db.set_value("Loan", self.against_loan, "total_amount_paid", loan.total_amount_paid + principal_amount_paid)
-		frappe.db.set_value("Loan", self.against_loan, "total_principal_paid", loan.total_principal_paid + principal_amount_paid)
+			interest_paid = paid_amount - self.penalty_amount
 
-		if loan.total_principal_paid + principal_amount_paid == loan.total_payment:
+			for lia, interest_amount in iteritems(paid_accrual_entries):
+				if interest_amount <= interest_paid:
+					paid_entries.append(lia)
+					interest_paid -= interest_amount
+				elif interest_paid:
+					self.partial_paid_entry = frappe.as_json({"name": lia, "interest_amount": interest_amount})
+					frappe.db.set_value("Loan Interest Accrual", lia, "interest_amount",
+						interest_amount - interest_paid)
+					interest_paid = 0
+
+		if paid_entries:
+			self.paid_accrual_entries = frappe.as_json(paid_entries)
+		else:
+			self.paid_accrual_entries = ""
+
+		if interest_paid:
+			self.principal_amount_paid = interest_paid
+
+		if self.payment_type == "Loan Closure" and self.amount_paid < flt(self.payable_amount, 2):
+			msg = _("Amount of {0} is required for Loan closure").format(self.payable_amount)
+			frappe.throw(msg)
+
+		if paid_entries:
+			frappe.db.sql("""UPDATE `tabLoan Interest Accrual`
+				SET is_paid = 1 where name in (%s)""" #nosec
+				% ", ".join(['%s']*len(paid_entries)), tuple(paid_entries))
+
+		frappe.db.sql(""" UPDATE `tabLoan` SET total_amount_paid = %s, total_principal_paid = %s
+			WHERE name = %s """, (loan.total_amount_paid + self.principal_amount_paid,
+			loan.total_principal_paid + self.principal_amount_paid, self.against_loan))
+
+		if loan.total_principal_paid + self.principal_amount_paid == loan.total_payment:
 			frappe.db.set_value("Loan", self.against_loan, "status", "Loan Closure Requested")
+
+		update_shortfall_status(self.against_loan, self.principal_amount_paid)
 
 	def mark_as_unpaid(self):
 
 		loan = frappe.get_doc("Loan", self.against_loan)
-		paid_accrual_entries = json.loads(self.paid_accrual_entries)
 
-		principal_amount_paid = self.amount_paid - self.penalty_amount - self.interest_payable
+		if self.paid_accrual_entries:
+			paid_accrual_entries = json.loads(self.paid_accrual_entries)
 
-		frappe.db.sql("""UPDATE `tabLoan Interest Accrual`
-			SET is_paid = 1 where name in (%s)""" #nosec
-			% ", ".join(['%s']*len(paid_accrual_entries)), tuple(paid_accrual_entries))
+		if paid_accrual_entries:
+			frappe.db.sql("""UPDATE `tabLoan Interest Accrual`
+				SET is_paid = 0 where name in (%s)""" #nosec
+				% ", ".join(['%s']*len(paid_accrual_entries)), tuple(paid_accrual_entries))
 
-		frappe.db.set_value("Loan", self.against_loan, "total_amount_paid", loan.total_amount_paid - principal_amount_paid)
-		frappe.db.set_value("Loan", self.against_loan, "total_principal_paid", loan.total_principal_paid - principal_amount_paid)
+		if self.partial_paid_entry:
+			partial_paid_entry = json.loads(self.partial_paid_entry)
+			frappe.db.set_value("Loan Interest Accrual", partial_paid_entry["name"], "interest_amount",
+				partial_paid_entry["interest_amount"])
 
-		if loan.status == "Closed":
+		frappe.db.sql(""" UPDATE `tabLoan` SET total_amount_paid = %s, total_principal_paid = %s
+			WHERE name = %s """, (loan.total_amount_paid - self.principal_amount_paid,
+			loan.total_principal_paid - self.principal_amount_paid, self.against_loan))
+
+		if loan.status == "Loan Closure Requested":
 			frappe.db.set_value("Loan", self.against_loan, "status", "Disbursed")
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
@@ -191,7 +222,7 @@ def get_accured_interest_entries(against_loan):
 		filters = {
 			"loan": against_loan,
 			"is_paid": 0
-		})
+		}, order_by="posting_date")
 
 	return accured_interest_entries
 
@@ -204,7 +235,7 @@ def get_amounts(amounts, against_loan, loan_type, posting_date, payment_type):
 	loan_type_details = frappe.get_doc("Loan Type", loan_type)
 	accured_interest_entries = get_accured_interest_entries(against_loan_doc.name)
 
-	paid_accrual_entries = []
+	pending_accrual_entries = {}
 
 	total_pending_interest = 0
 	penalty_amount = 0
@@ -225,7 +256,7 @@ def get_amounts(amounts, against_loan, loan_type, posting_date, payment_type):
 		total_pending_interest += entry.interest_amount
 		payable_principal_amount += entry.payable_principal_amount
 
-		paid_accrual_entries.append(entry.name)
+		pending_accrual_entries.setdefault(entry.name, entry.interest_amount)
 
 	pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid - against_loan_doc.total_interest_payable
 
@@ -238,7 +269,7 @@ def get_amounts(amounts, against_loan, loan_type, posting_date, payment_type):
 	amounts["penalty_amount"] = penalty_amount
 	amounts["payable_amount"] = payable_principal_amount + total_pending_interest + penalty_amount
 
-	amounts["paid_accrual_entries"] = paid_accrual_entries
+	amounts["paid_accrual_entries"] = pending_accrual_entries
 	return amounts
 
 @frappe.whitelist()

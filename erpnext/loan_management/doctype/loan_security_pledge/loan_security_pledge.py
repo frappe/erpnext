@@ -3,14 +3,20 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-# import frappe
+import frappe
+from frappe.utils import now_datetime
 from frappe.model.document import Document
+from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import update_shortfall_status
 
 class LoanSecurityPledge(Document):
 	def validate(self):
 		self.set_pledge_amount()
-		if self.is_new() and self.loan:
+
+	def on_submit(self):
+		if self.loan:
 			self.db_set("status", "Pledged")
+			self.db_set("pledge_time", now_datetime())
+			update_shortfall_status(self.loan, self.total_security_value)
 
 	def set_pledge_amount(self):
 		total_security_value = 0

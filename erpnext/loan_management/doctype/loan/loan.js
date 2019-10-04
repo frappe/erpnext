@@ -87,9 +87,9 @@ frappe.ui.form.on('Loan', {
 			args: {
 				"loan": frm.doc.name,
 				"loan_amount": frm.doc.loan_amount,
-				"disbursed_amount": frm.doc.disbursed_amount,
 				"company": frm.doc.company,
-				"applicant": frm.doc.applicant
+				"applicant": frm.doc.applicant,
+				"disbursed_amount": frm.doc.disbursed_amount
 			},
 			method: "erpnext.loan_management.doctype.loan.loan.make_loan_disbursement",
 			callback: function (r) {

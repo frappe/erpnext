@@ -59,6 +59,8 @@
    "default": "Pending",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Status",
    "options": "\nPending\nCompleted",
    "read_only": 1
@@ -75,7 +77,7 @@
    "read_only": 1
   }
  ],
- "modified": "2019-09-25 04:32:38.876990",
+ "modified": "2019-10-02 06:50:34.633008",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Shortfall",

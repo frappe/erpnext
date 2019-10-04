@@ -34,6 +34,9 @@ class LoanDisbursement(AccountsController):
 		if not self.posting_date:
 			self.posting_date = self.disbursement_date or nowdate()
 
+		if not self.bank_account and self.applicant_type == "Customer":
+			self.bank_account = frappe.db.get_value("Customer", self.applicant, "default_bank_account")
+
 	def set_status_and_amounts(self):
 
 		loan_details = frappe.get_all("Loan",
@@ -52,7 +55,7 @@ class LoanDisbursement(AccountsController):
 			})
 
 			make_accrual_interest_entry_for_demand_loans(posting_date=add_days(self.disbursement_date, -1),
-				open_loans=open_loans, from_background_job=0)
+				open_loans=open_loans)
 
 		disbursed_amount = self.disbursed_amount + loan_details.disbursed_amount
 

@@ -57,12 +57,16 @@ class TestLoanDisbursement(unittest.TestCase):
 
 		# Paid 511095.89 amount includes 5,00,000 principal amount and 11095.89 interest amount
 		repayment_entry = create_repayment_entry(loan.name, self.applicant, add_days(get_last_day(nowdate()), 5),
-			"Regular Payment", 511095.89)
+			"Regular Payment", 611095.89)
 		repayment_entry.submit()
 
+		loan.reload()
+
 		make_loan_disbursement_entry(loan.name, 500000, disbursement_date=add_days(last_date, 16))
+
+		total_principal_paid = loan.total_principal_paid
 
 		loan.reload()
 
 		# Loan Topup will result in decreasing the Total Principal Paid
-		self.assertEqual(loan.total_principal_paid, 0.00)
+		self.assertEqual(flt(loan.total_principal_paid, 2), flt(total_principal_paid - 500000, 2))
