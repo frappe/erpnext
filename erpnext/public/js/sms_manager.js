@@ -77,13 +77,13 @@ erpnext.SMSManager = function SMSManager(doc) {
 			width: 400,
 			fields: [
 				{fieldname:'type',
-				 fieldtype:'Select',
-				 label:'Message Type',
-				 reqd:1,
-				 options:"SMS\nWhatsapp",
-				 default:"SMS",
-				 onchange: function(event){
-				 	var field = this.layout.get_field("send_attachment")
+				fieldtype:'Select',
+				label:'Message Type',
+				reqd:1,
+				options:"SMS\nWhatsapp",
+				default:"SMS",
+				onchange: function(event){
+					var field = this.layout.get_field("send_attachment")
 					if(this.layout.fields_dict.type.value == "Whatsapp"){
 						field.df.hidden = false;
 					}
@@ -91,8 +91,7 @@ erpnext.SMSManager = function SMSManager(doc) {
 						field.df.hidden = true;
 					}
 					field.refresh()
-				 }
-				},
+				}},
 				{fieldname:'number', fieldtype:'Data', label:'Mobile Number', reqd:1},
 				{fieldname:'message', fieldtype:'Text', label:'Message', reqd:1},
 				{fieldname:'send', fieldtype:'Button', label:'Send'},
