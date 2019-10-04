@@ -220,7 +220,6 @@
   "item_name": "_Test Serialized Item With Series",
   "serial_no_series": "ABCD.#####",
   "stock_uom": "_Test UOM",
-  "rate": 5000,
   "gst_hsn_code": "999800",
   "item_defaults": [{
     "company": "_Test Company",
