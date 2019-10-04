@@ -195,6 +195,7 @@ class ProductionPlan(Document):
 		for data in self.po_items:
 			if data.name == production_plan_item:
 				data.produced_qty = produced_qty
+				data.pending_qty = data.planned_qty - data.produced_qty
 				data.db_update()
 
 		self.calculate_total_produced_qty()

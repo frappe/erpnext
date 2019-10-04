@@ -41,26 +41,13 @@ frappe.ui.form.on("Purchase Receipt", {
 
 		if (frm.doc.docstatus === 1 && frm.doc.is_return === 1 && frm.doc.per_billed !== 100) {
 			frm.add_custom_button(__('Debit Note'), function() {
-				frappe.confirm(__("Are you sure you want to make debit note?"),
-					function() {
-						frm.trigger("make_debit_note");
-					}
-				);
+				frappe.model.open_mapped_doc({
+					method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
+					frm: cur_frm,
+				})
 			}, __('Create'));
-
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
-	},
-
-	make_debit_note: function(frm) {
-		frm.call({
-			method: "make_return_invoice",
-			doc: frm.doc,
-			freeze: true,
-			callback: function() {
-				frm.reload_doc();
-			}
-		});
 	},
 
 	company: function(frm) {
@@ -128,12 +115,12 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 					cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt, __("Status"))
 				}
 
-				cur_frm.add_custom_button(__('Return'), this.make_purchase_return, __('Create'));
+				cur_frm.add_custom_button(__('Purchase Return'), this.make_purchase_return, __('Create'));
 
 				cur_frm.add_custom_button(__('Make Stock Entry'), cur_frm.cscript['Make Stock Entry'], __('Create'));
 
 				if(flt(this.frm.doc.per_billed) < 100) {
-					cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice, __('Create'));
+					cur_frm.add_custom_button(__('Purchase Invoice'), this.make_purchase_invoice, __('Create'));
 				}
 				cur_frm.add_custom_button(__('Retention Stock Entry'), this.make_retention_stock_entry, __('Create'));
 
