@@ -13,9 +13,12 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	item_details = get_fifo_queue(filters)
 	to_date = filters["to_date"]
+	_func = lambda x: x[1]
+
 	data = []
 	for item, item_dict in iteritems(item_details):
-		fifo_queue = sorted(item_dict["fifo_queue"], key=lambda x: x[1])
+
+		fifo_queue = sorted(filter(_func, item_dict["fifo_queue"]), key=_func)
 		details = item_dict["details"]
 		if not fifo_queue or (not item_dict.get("total_qty")): continue
 
@@ -140,7 +143,7 @@ def get_fifo_queue(filters, sle=None):
 		sle = get_stock_ledger_entries(filters)
 
 	for d in sle:
- 		key = (d.name, d.warehouse) if filters.get('show_warehouse_wise_stock') else d.name
+		key = (d.name, d.warehouse) if filters.get('show_warehouse_wise_stock') else d.name
 		item_details.setdefault(key, {"details": d, "fifo_queue": []})
 		fifo_queue = item_details[key]["fifo_queue"]
 
