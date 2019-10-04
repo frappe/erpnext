@@ -77,7 +77,7 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Process Loan Security Price",
+					"name": "Process Loan Security Shortfall",
 				},
 				{
 					"type": "doctype",

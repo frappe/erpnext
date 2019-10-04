@@ -93,7 +93,7 @@ class LoanRepayment(AccountsController):
 		if interest_paid:
 			self.principal_amount_paid = interest_paid
 
-		if self.payment_type == "Loan Closure" and self.amount_paid < flt(self.payable_amount, 2):
+		if self.payment_type == "Loan Closure" and flt(self.amount_paid, 2) < flt(self.payable_amount, 2):
 			msg = _("Amount of {0} is required for Loan closure").format(self.payable_amount)
 			frappe.throw(msg)
 
@@ -102,12 +102,13 @@ class LoanRepayment(AccountsController):
 				SET is_paid = 1 where name in (%s)""" #nosec
 				% ", ".join(['%s']*len(paid_entries)), tuple(paid_entries))
 
+		if flt(loan.total_principal_paid + self.principal_amount_paid, 2) == flt(loan.total_payment, 2):
+			frappe.db.set_value("Loan", self.against_loan, "status", "Loan Closure Requested")
+
 		frappe.db.sql(""" UPDATE `tabLoan` SET total_amount_paid = %s, total_principal_paid = %s
 			WHERE name = %s """, (loan.total_amount_paid + self.principal_amount_paid,
 			loan.total_principal_paid + self.principal_amount_paid, self.against_loan))
 
-		if loan.total_principal_paid + self.principal_amount_paid == loan.total_payment:
-			frappe.db.set_value("Loan", self.against_loan, "status", "Loan Closure Requested")
 
 		update_shortfall_status(self.against_loan, self.principal_amount_paid)
 
@@ -216,15 +217,15 @@ def create_repayment_entry(loan, applicant, company, posting_date, loan_type,
 
 	return lr
 
-def get_accured_interest_entries(against_loan):
-	accured_interest_entries = frappe.get_all("Loan Interest Accrual",
+def get_accrued_interest_entries(against_loan):
+	accrued_interest_entries = frappe.get_all("Loan Interest Accrual",
 		fields=["name", "interest_amount", "posting_date", "payable_principal_amount"],
 		filters = {
 			"loan": against_loan,
 			"is_paid": 0
 		}, order_by="posting_date")
 
-	return accured_interest_entries
+	return accrued_interest_entries
 
 # This function returns the amounts that are payable at the time of loan repayment based on posting date
 # So it pulls all the unpaid Loan Interest Accrual Entries and calculates the penalty if applicable
@@ -233,7 +234,7 @@ def get_amounts(amounts, against_loan, loan_type, posting_date, payment_type):
 
 	against_loan_doc = frappe.get_doc("Loan", against_loan)
 	loan_type_details = frappe.get_doc("Loan Type", loan_type)
-	accured_interest_entries = get_accured_interest_entries(against_loan_doc.name)
+	accrued_interest_entries = get_accrued_interest_entries(against_loan_doc.name)
 
 	pending_accrual_entries = {}
 
@@ -241,7 +242,7 @@ def get_amounts(amounts, against_loan, loan_type, posting_date, payment_type):
 	penalty_amount = 0
 	payable_principal_amount = 0
 
-	for entry in accured_interest_entries:
+	for entry in accrued_interest_entries:
 		# Loan repayment due date is one day after the loan interest is accrued
 		# no of late days are calculated based on loan repayment posting date
 		# and if no_of_late days are positive then penalty is levied

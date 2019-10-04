@@ -35,16 +35,16 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Process Loan Security Price",
+   "options": "Process Loan Security Shortfall",
    "print_hide": 1,
    "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-25 04:40:13.678896",
+ "modified": "2019-10-04 00:49:11.349395",
  "modified_by": "Administrator",
  "module": "Loan Management",
- "name": "Process Loan Security Price",
+ "name": "Process Loan Security Shortfall",
  "owner": "Administrator",
  "permissions": [
   {
