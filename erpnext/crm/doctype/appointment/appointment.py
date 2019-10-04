@@ -112,8 +112,8 @@ class Appointment(Document):
         existing_assignee = self.get_assignee_from_latest_opportunity()
         if existing_assignee:
             add_assignemnt({
-                'doctype': self.doctype
-                'name': self.name
+                'doctype': self.doctype,
+                'name': self.name,
                 'assign_to': existing_assignee
             })
             return
