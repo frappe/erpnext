@@ -59,7 +59,6 @@ def get_appointment_slots(date, timezone):
     converted_timeslots = []
     for timeslot in timeslots:
         timeslot = local_timezone.localize(timeslot)
-        print(timeslot)
         timeslot = timeslot.astimezone(guest_timezone)
         timeslot = timeslot.replace(tzinfo=None)
         # Check if holiday

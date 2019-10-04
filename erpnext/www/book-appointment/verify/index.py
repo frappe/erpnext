@@ -15,6 +15,5 @@ def get_context(context):
         context.success = True
         return context
     else:
-        print('Something not found')
         context.success = False
         return context
