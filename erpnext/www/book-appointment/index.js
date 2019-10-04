@@ -1,14 +1,4 @@
 frappe.ready(async () => {
-    debugger
-    let isSchedulingEnabled = await frappe.call({
-        method:'erpnext.www.book-appointment.index.is_enabled'
-    })
-    isSchedulingEnabled  = isSchedulingEnabled.message
-    if (!isSchedulingEnabled) {
-        frappe.show_alert("This feature is not enabled");
-        window.location.replace('/');
-        return;
-    }
     initialise_select_date();
 })
 
