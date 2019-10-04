@@ -5,13 +5,15 @@
  "engine": "InnoDB",
  "field_order": [
   "enable_scheduling",
+  "agent_detail_section",
   "availability_of_slots",
   "number_of_agents",
+  "agent_list",
   "holiday_list",
+  "appointment_details_section",
   "appointment_duration",
   "email_reminders",
-  "advance_booking_days",
-  "agent_list"
+  "advance_booking_days"
  ],
  "fields": [
   {
@@ -70,10 +72,20 @@
    "fieldtype": "Check",
    "label": "Enable Appointment Scheduling",
    "reqd": 1
+  },
+  {
+   "fieldname": "agent_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Agent Details"
+  },
+  {
+   "fieldname": "appointment_details_section",
+   "fieldtype": "Section Break",
+   "label": "Appointment Details"
   }
  ],
  "issingle": 1,
- "modified": "2019-10-03 14:52:33.076253",
+ "modified": "2019-10-04 11:36:20.839075",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Booking Settings",
