@@ -66,18 +66,22 @@
 	{
 		"doctype": "Customer",
 		"customer_name": "_Test Kunde GmbH",
-		"accounts": [{
-			"company": "_Test GmbH",
-			"account": "10001 - _Test Kunde GmbH - _TG"
-		}]
+		"accounts": [
+			{
+				"company": "_Test GmbH",
+				"account": "10001 - _Test Kunde GmbH - _TG"
+			}
+		]
 	},
 	{
 		"doctype": "Supplier",
 		"customer_name": "_Test Lieferant GmbH",
-		"accounts": [{
-			"company": "_Test GmbH",
-			"account": "70001 - _Test Lieferant GmbH - _TG"
-		}]
+		"accounts": [
+			{
+				"company": "_Test GmbH",
+				"account": "70001 - _Test Lieferant GmbH - _TG"
+			}
+		]
 	},
 	{
 		"doctype": "Sales Invoice",
