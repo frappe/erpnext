@@ -58,6 +58,10 @@ class GLEntry(Document):
 				frappe.throw(_("{0} {1}: Party is required against Payable account {2}")
 					.format(self.voucher_type, self.voucher_no, self.account))
 
+		if self.party and account_type not in ('Receivable', 'Payable'):
+			frappe.throw(_("{0} {1}: Party cannot be set for Account {2} because it is neither a Receivable or Payable account")
+				.format(self.voucher_type, self.voucher_no, self.account))
+
 		# Zero value transaction is not allowed
 		if not (flt(self.debit, self.precision("debit")) or flt(self.credit, self.precision("credit"))):
 			frappe.throw(_("{0} {1}: Either debit or credit amount is required for {2}")
