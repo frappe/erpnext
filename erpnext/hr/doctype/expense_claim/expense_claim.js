@@ -15,12 +15,6 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 			me.frm.doc.posting_date = frappe.datetime.get_today();
 		}
 
-		me.frm.add_fetch('employee', 'company', 'company');
-		me.frm.add_fetch('employee','employee_name','employee_name');
-		me.frm.add_fetch('expense_type','description','description');
-		me.frm.add_fetch("company", "cost_center", "cost_center");
-		me.frm.add_fetch("company", "default_expense_claim_payable_account", "payable_account");
-
 		me.frm.fields_dict.employee.get_query = function() {
 			return {
 				query: "erpnext.controllers.queries.employee_query"
@@ -36,27 +30,12 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 				}
 			};
 		});
-		me.frm.fields_dict["cost_center"].get_query = function() {
-			return {
-				filters: {
-					"company": me.frm.doc.company,
-					"is_group": 0
-				}
-			};
-		};
 		me.frm.fields_dict["payable_account"].get_query = function() {
 			return {
 				filters: {
 					"account_type": ["in", ["Payable", "Receivable"]],
 					"company": me.frm.doc.company,
 					"is_group": 0
-				}
-			};
-		};
-		me.frm.fields_dict['task'].get_query = function() {
-			return {
-				filters: {
-					'project': me.frm.doc.project
 				}
 			};
 		};
@@ -78,6 +57,25 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 				filters: filters
 			};
 		});
+
+		me.frm.set_query("cost_center", "expenses", function() {
+			return {
+				filters: {
+					"company": me.frm.doc.company,
+					"is_group": 0
+				}
+			};
+		});
+
+		me.frm.set_query('task', 'expenses', function(doc, cdt, cdn) {
+			var d = frappe.get_doc(cdt, cdn);
+			return {
+				filters: {
+					'project': d.project
+				}
+			};
+		});
+
 		me.frm.set_query("purchase_invoice", "expenses", function(doc, cdt, cdn) {
 			var d = frappe.get_doc(cdt, cdn);
 			if (!d.requires_purchase_invoice) {
@@ -90,9 +88,21 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 				return {
 					filters: {
 						company: me.frm.doc.company,
-						outstanding_amount: ['>', 0]
+						outstanding_amount: ['>', 0],
+						docstatus: 1
 					}
 				};
+			}
+		});
+
+		me.frm.set_query("party_type", "expenses", function(doc, cdt, cdn) {
+			const row = locals[cdt][cdn];
+
+			return {
+				query: "erpnext.setup.doctype.party_type.party_type.get_party_type",
+				filters: {
+					'account': row.expense_account
+				}
 			}
 		});
 	},
@@ -158,7 +168,7 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 			frappe.model.round_floats_in(d, ['claim_amount', 'sanctioned_amount']);
 			me.frm.doc.total_claimed_amount += d.claim_amount;
 			me.frm.doc.total_sanctioned_amount += d.sanctioned_amount;
-});
+		});
 		$.each(me.frm.doc.advances || [], function(i, d) {
 			frappe.model.round_floats_in(d, ['allocated_amount']);
 			me.frm.doc.total_advance += d.allocated_amount;
@@ -201,18 +211,14 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 	purchase_invoice: function(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		if(!doc.company) {
-			d.purchase_invoice = "";
+			frappe.model.set_value(cdt, cdn, 'purchase_invoice', "");
 			frappe.msgprint(__("Please set the Company first"));
-			this.frm.refresh_field("purchase_invoice");
 			return;
 		}
 
 		if(!cint(d.requires_purchase_invoice)) {
-			d.purchase_invoice = "";
-			this.frm.refresh_field("purchase_invoice");
-		}
-
-		if(d.purchase_invoice) {
+			frappe.model.set_value(cdt, cdn, 'purchase_invoice', "");
+		} else if (d.purchase_invoice) {
 			return frappe.call({
 				method: "erpnext.hr.doctype.expense_claim.expense_claim.get_purchase_invoice_details",
 				args: {
@@ -220,8 +226,10 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 				},
 				callback: function (r) {
 					if (r.message) {
-						d.expense_account = r.message.account;
-						d.supplier = r.message.supplier;
+						frappe.model.set_value(cdt, cdn, 'expense_account', r.message.account);
+						frappe.model.set_value(cdt, cdn, 'party_type', r.message.party_type);
+						frappe.model.set_value(cdt, cdn, 'party', r.message.party);
+						frappe.model.set_value(cdt, cdn, 'project', r.message.project);
 					}
 				}
 			});
@@ -238,9 +246,7 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 
 	claim_amount: function(doc, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		if(!child.sanctioned_amount) {
-			child.sanctioned_amount = child.claim_amount;
-		}
+		child.sanctioned_amount = child.claim_amount;
 
 		this.calculate_totals(doc, cdt, cdn);
 	},

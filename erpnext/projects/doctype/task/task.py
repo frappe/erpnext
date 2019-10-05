@@ -81,7 +81,7 @@ class Task(NestedSet):
 			clear(self.doctype, self.name)
 
 	def update_total_expense_claim(self):
-		self.total_expense_claim = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim`
+		self.total_expense_claim = frappe.db.sql("""select sum(sanctioned_amount) from `tabExpense Claim Detail`
 			where project = %s and task = %s and docstatus=1""",(self.project, self.name))[0][0]
 
 	def update_time_and_costing(self):

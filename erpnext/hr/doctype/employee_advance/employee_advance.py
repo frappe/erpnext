@@ -77,7 +77,7 @@ def get_due_advance_amount(employee, posting_date):
 def get_unclaimed_advances(employee, advance_account):
 	return frappe.db.sql("""
 		select 'Employee Advance' as reference_type, name as reference_name, posting_date, paid_amount,
-			balance_amount as advance_amount, purpose as remarks
+			balance_amount as advance_amount, purpose as remarks, project
 		from `tabEmployee Advance`
 		where docstatus=1 and employee=%s and advance_account=%s and balance_amount > 0
 		order by posting_date

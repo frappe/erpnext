@@ -258,8 +258,8 @@ class Project(Document):
 			from `tabTimesheet Detail` where project = %s and docstatus = 1""", self.name, as_dict=1)[0]
 
 		from_expense_claim = frappe.db.sql("""select
-			sum(total_sanctioned_amount) as total_sanctioned_amount
-			from `tabExpense Claim` where project = %s
+			sum(sanctioned_amount) as total_sanctioned_amount
+			from `tabExpense Claim Detail` where project = %s
 			and docstatus = 1""", self.name, as_dict=1)[0]
 
 		self.actual_start_date = from_time_sheet.start_date

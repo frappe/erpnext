@@ -20,13 +20,11 @@ class ExpenseClaim(AccountsController):
 			'make_payment_via_journal_entry')
 
 	def set_title(self):
-		if self.task or self.project:
-			self.title = "{0} for {1}".format(self.employee_name, self.task or self.project)
-		else:
-			self.title = self.employee_name
+		self.title = self.employee_name or self.employee
 
 	def validate(self):
 		self.set_cost_center()
+		self.set_project_from_task()
 		self.validate_sanctioned_amount()
 		self.validate_employee_advances()
 		self.calculate_totals()
@@ -34,11 +32,12 @@ class ExpenseClaim(AccountsController):
 		set_employee_name(self)
 		self.validate_expense_account(for_validate=True)
 		self.validate_purchase_invoices(for_validate=True)
-		self.clear_unallocated_advances("Expense Claim Advance", "advances")
-		self.set_status()
 
-		if self.task and not self.project:
-			self.project = frappe.db.get_value("Task", self.task, "project")
+		if cint(self.allocate_advances_automatically):
+			self.set_advances()
+		self.clear_unallocated_advances("Expense Claim Advance", "advances")
+
+		self.set_status()
 
 	def on_submit(self):
 		if self.approval_status=="Draft":
@@ -67,18 +66,31 @@ class ExpenseClaim(AccountsController):
 		res = self.get_advance_entries()
 		employee_advances = get_unclaimed_advances(self.employee, self.payable_account)
 
-		total_allocatable = flt(self.total_sanctioned_amount)
-		advance_allocated = 0
+		total_allocatable = 0
+		total_advance_allocated = 0
+		project_wise_allocatable = {}
+		project_wise_allocated = {}
+		for d in self.expenses:
+			project_wise_allocatable.setdefault(cstr(d.project), 0)
+			project_wise_allocatable[cstr(d.project)] += flt(d.sanctioned_amount)
+			total_allocatable += flt(d.sanctioned_amount)
 
 		for d in employee_advances:
-			allocated_amount = min(total_allocatable - advance_allocated, d.advance_amount)
-			advance_allocated += flt(allocated_amount)
+			project_allocatable = project_wise_allocatable.get(cstr(d.project), 0)
+			project_allocated = project_wise_allocated.get(cstr(d.project), 0)
+			allocated_amount = min(project_allocatable - project_allocated, total_allocatable - total_advance_allocated,
+				d.advance_amount)
+
+			project_wise_allocated.setdefault(cstr(d.project), 0)
+			project_wise_allocated[cstr(d.project)] += flt(allocated_amount)
+			total_advance_allocated += flt(allocated_amount)
 
 			self.append("advances", {
 				"reference_type": d.reference_type,
 				"reference_name": d.reference_name,
 				"advance_date": d.posting_date,
 				"remarks": d.remarks,
+				"project": d.project,
 				"advance_amount": flt(d.advance_amount),
 				"allocated_amount": allocated_amount
 			})
@@ -95,8 +107,17 @@ class ExpenseClaim(AccountsController):
 			})
 
 	def set_cost_center(self):
-		if not self.cost_center:
-			self.cost_center = frappe.get_cached_value('Company', self.company, 'cost_center')
+		default_cost_center = self.get('cost_center') or frappe.get_cached_value('Company', self.company, 'cost_center')
+		for d in self.expenses:
+			if d.expense_account and not d.cost_center:
+				report_type = frappe.get_cached_value("Account", d.expense_account, "report_type")
+				if report_type == "Profit and Loss":
+					d.cost_center = default_cost_center
+
+	def set_project_from_task(self):
+		for d in self.expenses:
+			if d.task and not d.project:
+				d.project = frappe.db.get_value("Task", d.task, "project", cache=1)
 
 	def update_claimed_amount_in_employee_advance(self):
 		for d in self.advances:
@@ -104,10 +125,24 @@ class ExpenseClaim(AccountsController):
 				frappe.get_doc("Employee Advance", d.reference_name).update_claimed_amount()
 
 	def update_task_and_project(self):
-		if self.task:
-			self.update_task()
-		elif self.project:
-			frappe.get_doc("Project", self.project).update_project()
+		projects = []
+		tasks = []
+
+		for d in self.expenses:
+			if d.project:
+				projects.append(d.project)
+			if d.task:
+				tasks.append(d.tasks)
+
+		projects = set(projects)
+		for project in projects:
+			frappe.get_doc("Project", project).update_project()
+
+		tasks = set(tasks)
+		for task in tasks:
+			task = frappe.get_doc("Task", task)
+			task.update_total_expense_claim()
+			task.save()
 
 	def make_gl_entries(self, cancel=False):
 		if flt(self.total_sanctioned_amount) > 0:
@@ -131,47 +166,47 @@ class ExpenseClaim(AccountsController):
 					"credit_in_account_currency": payable_amount,
 					"against": ", ".join(set([d.expense_account for d in self.expenses])),
 					"party_type": "Employee",
-					"party": self.employee
+					"party": self.employee,
+					"cost_center": self.get('cost_center')
 				})
 			)
 
 		# expense entries
-		for data in self.expenses:
+		for d in self.expenses:
 			gl_entry.append(
 				self.get_gl_dict({
-					"account": data.expense_account,
-					"debit": data.sanctioned_amount,
-					"debit_in_account_currency": data.sanctioned_amount,
+					"account": d.expense_account,
+					"debit": d.sanctioned_amount,
+					"debit_in_account_currency": d.sanctioned_amount,
 					"against": self.employee,
-					"cost_center": self.cost_center,
-					"party_type": "Supplier" if data.requires_purchase_invoice else "",
-					"party": data.supplier if data.requires_purchase_invoice else "",
-					"against_voucher_type": "Purchase Invoice" if data.requires_purchase_invoice else "",
-					"against_voucher": data.purchase_invoice if data.requires_purchase_invoice else "",
+					"cost_center": d.cost_center,
+					"project": d.project,
+					"party_type": d.party_type,
+					"party": d.party,
+					"against_voucher_type": "Purchase Invoice" if d.requires_purchase_invoice else "",
+					"against_voucher": d.purchase_invoice if d.requires_purchase_invoice else "",
 				})
 			)
 
-		for data in self.advances:
-			if data.reference_type == "Employee Advance":
+		for d in self.advances:
+			if d.reference_type == "Employee Advance":
 				gl_entry.append(
 					self.get_gl_dict({
 						"account": self.payable_account,
-						"credit": data.allocated_amount,
-						"credit_in_account_currency": data.allocated_amount,
+						"credit": d.allocated_amount,
+						"credit_in_account_currency": d.allocated_amount,
 						"against": ", ".join(set([d.expense_account for d in self.expenses])),
 						"party_type": "Employee",
 						"party": self.employee,
 						"against_voucher_type": "Employee Advance",
-						"against_voucher": data.reference_name
+						"against_voucher": d.reference_name,
+						"project": d.project
 					})
 				)
 
 		return gl_entry
 
 	def validate_account_details(self):
-		if not self.cost_center:
-			frappe.throw(_("Cost Center is required to book an Expense Claim"))
-
 		payable_amount = flt(self.total_sanctioned_amount) - flt(self.total_advance)
 		if payable_amount and not self.payable_account:
 			frappe.throw(_("Payable Account is mandatory"))
@@ -201,11 +236,6 @@ class ExpenseClaim(AccountsController):
 			"total_amount_reimbursed"])
 		self.outstanding_amount = flt(self.total_sanctioned_amount - self.total_amount_reimbursed - self.total_advance,
 			self.precision("outstanding_amount"))
-
-	def update_task(self):
-		task = frappe.get_doc("Task", self.task)
-		task.update_total_expense_claim()
-		task.save()
 
 	def validate_employee_advances(self):
 		for d in self.advances:
@@ -249,7 +279,6 @@ class ExpenseClaim(AccountsController):
 			if not for_validate and not expense.expense_account:
 				frappe.throw(_('Row #{0}: Please set Expense Account').format(expense.idx))
 
-
 	def validate_purchase_invoices(self, for_validate=False):
 		for expense in self.expenses:
 			if cint(expense.requires_purchase_invoice):
@@ -259,7 +288,8 @@ class ExpenseClaim(AccountsController):
 
 				details = get_purchase_invoice_details(expense.purchase_invoice)
 				expense.expense_account = details.account
-				expense.supplier = details.supplier
+				expense.party_type = details.party_type
+				expense.party = details.party
 
 				if not for_validate:
 					pi = frappe.db.get_value("Purchase Invoice", expense.purchase_invoice, ["docstatus", "outstanding_amount"], as_dict=1)
@@ -270,7 +300,8 @@ class ExpenseClaim(AccountsController):
 							.format(expense.idx, pi.outstanding_amount, expense.purchase_invoice))
 			else:
 				expense.purchase_invoice = ""
-				expense.supplier = ""
+				expense.party_type = ""
+				expense.party = ""
 
 def update_reimbursed_amount(doc):
 	paid_amount_excl_employee_advance = frappe.db.sql("""
@@ -338,13 +369,16 @@ def get_expense_claim_account(expense_claim_type, company):
 
 @frappe.whitelist()
 def get_purchase_invoice_details(purchase_invoice):
-	details = frappe.db.get_value("Purchase Invoice", purchase_invoice, ["supplier", "credit_to"], as_dict=1)
+	details = frappe.db.get_value("Purchase Invoice", purchase_invoice,
+		["supplier", "credit_to", "letter_of_credit", "set_project"], as_dict=1)
 	if not details:
 		frappe.throw(_("Invalid Purchase Invoice {0}").format(purchase_invoice))
 
 	return frappe._dict({
 		"account": details.credit_to,
-		"supplier": details.supplier
+		"party_type": "Letter of Credit" if details.letter_of_credit else "Supplier",
+		"party": details.letter_of_credit or details.supplier,
+		"project": details.set_project
 	})
 
 
@@ -352,15 +386,11 @@ def get_purchase_invoice_details(purchase_invoice):
 def get_expense_claim(dt, dn):
 	doc = frappe.get_doc(dt, dn)
 	default_payable_account = frappe.get_cached_value('Company',  doc.company,  "default_expense_claim_payable_account")
-	default_cost_center = frappe.get_cached_value('Company',  doc.company,  'cost_center')
 
 	expense_claim = frappe.new_doc('Expense Claim')
 	expense_claim.company = doc.company
 	expense_claim.employee = doc.get("employee")
 	expense_claim.payable_account = doc.get("advance_account") or default_payable_account
-	expense_claim.cost_center = doc.get("cost_center") or default_cost_center
-	expense_claim.project = doc.get("project")
-	expense_claim.task = doc.get("task")
 	expense_claim.append('advances', {
 		'reference_type': 'Employee Advance',
 		'reference_name': doc.name,
