@@ -263,13 +263,17 @@ class TestStockEntry(unittest.TestCase):
 		repack.posting_date = nowdate()
 		repack.posting_time = nowtime()
 
+		expenses_included_in_valuation = frappe.get_value("Company", company, "expenses_included_in_valuation")
+
 		repack.set("additional_costs", [
 			{
-				"description": "Actual Oerating Cost",
+				"expense_account": expenses_included_in_valuation,
+				"description": "Actual Operating Cost",
 				"amount": 1000
 			},
 			{
-				"description": "additional operating costs",
+				"expense_account": expenses_included_in_valuation,
+				"description": "Additional Operating Cost",
 				"amount": 200
 			},
 		])

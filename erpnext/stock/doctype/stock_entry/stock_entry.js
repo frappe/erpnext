@@ -68,6 +68,16 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		});
 
+		frm.set_query("expense_account", "additional_costs", function() {
+			return {
+				filters: {
+					"root_type": "Expense",
+					"account_type": "Expenses Included In Valuation",
+					"company": frm.doc.company
+				}
+			};
+		});
+
 		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
 	},
 
@@ -727,7 +737,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		return frappe.call({
 			method: "erpnext.stock.doctype.stock_entry.stock_entry.get_work_order_details",
 			args: {
-				work_order: me.frm.doc.work_order
+				work_order: me.frm.doc.work_order,
+				company: me.frm.doc.company
 			},
 			callback: function(r) {
 				if (!r.exc) {
