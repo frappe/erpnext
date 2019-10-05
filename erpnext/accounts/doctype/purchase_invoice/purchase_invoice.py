@@ -25,7 +25,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_
 	unlink_inter_company_doc
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_gl_entries_for_landed_cost_voucher
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_item_account_wise_additional_cost
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -437,7 +437,7 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock and self.auto_accounting_for_stock:
 			warehouse_account = get_warehouse_account_map(self.company)
 
-		landed_cost_gl_entries = get_gl_entries_for_landed_cost_voucher(self.name)
+		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 
 		voucher_wise_stock_value = {}
 		if self.update_stock:
@@ -466,8 +466,8 @@ class PurchaseInvoice(BuyingController):
 					)
 
 					# Amount added through landed-cost-voucher
-					if landed_cost_gl_entries:
-						for account, amount in iteritems(landed_cost_gl_entries[item.item_code]):
+					if landed_cost_entries:
+						for account, amount in iteritems(landed_cost_entries[item.item_code]):
 							gl_entries.append(self.get_gl_dict({
 								"account": account,
 								"against": item.expense_account,

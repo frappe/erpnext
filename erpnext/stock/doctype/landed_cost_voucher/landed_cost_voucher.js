@@ -34,10 +34,11 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			return {
 				filters: {
 					"root_type": "Expense",
-					"account_type": "Expenses Included In Valuation"
+					"account_type": "Expenses Included In Valuation",
+					"company": me.frm.doc.company
 				}
 			};
-		})
+		});
 
 	},
 

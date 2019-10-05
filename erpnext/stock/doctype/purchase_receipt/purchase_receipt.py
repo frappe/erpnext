@@ -195,7 +195,7 @@ class PurchaseReceipt(BuyingController):
 		from erpnext.accounts.general_ledger import process_gl_map
 
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
-		landed_cost_gl_entries = get_gl_entries_for_landed_cost_voucher(self.name)
+		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		gl_entries = []
@@ -234,8 +234,8 @@ class PurchaseReceipt(BuyingController):
 					negative_expense_to_be_booked += flt(d.item_tax_amount)
 
 					# Amount added through landed-cost-voucher
-					if landed_cost_gl_entries:
-						for account, amount in iteritems(landed_cost_gl_entries[d.item_code]):
+					if landed_cost_entries:
+						for account, amount in iteritems(landed_cost_entries[d.item_code]):
 							gl_entries.append(self.get_gl_dict({
 								"account": account,
 								"against": warehouse_account[d.warehouse]["account"],
@@ -587,7 +587,7 @@ def make_stock_entry(source_name,target_doc=None):
 
 	return doclist
 
-def get_gl_entries_for_landed_cost_voucher(purchase_document):
+def get_item_account_wise_additional_cost(purchase_document):
 	landed_cost_voucher = frappe.get_value("Landed Cost Purchase Receipt",
 		{"receipt_document": purchase_document}, "parent")
 
@@ -607,9 +607,9 @@ def get_gl_entries_for_landed_cost_voucher(purchase_document):
 		if item.receipt_document == purchase_document:
 			for account in landed_cost_voucher_doc.taxes:
 				item_account_wise_cost.setdefault(item.item_code, {})
-				account_wise_cost = item_account_wise_cost[item.item_code].setdefault(
-					account.expense_account, account.amount * item.get(based_on_field) / total_item_cost
-				)
+				item_account_wise_cost[item.item_code].setdefault(account.expense_account, 0.0)
+				item_account_wise_cost[item.item_code][account.expense_account] += \
+					account.amount * item.get(based_on_field) / total_item_cost
 
 	return item_account_wise_cost
 
