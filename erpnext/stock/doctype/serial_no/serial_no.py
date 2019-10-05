@@ -311,9 +311,10 @@ def has_duplicate_serial_no(sn, sle):
 			sn.delivery_document_type not in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"]:
 			status = True
 
-		if status and sle.voucher_type == 'Stock Entry' and \
-			frappe.db.get_value('Stock Entry', sle.voucher_no, 'purpose') != 'Material Receipt':
-			status = False
+		if status and sle.voucher_type == 'Stock Entry':
+			purpose, for_maintenance = frappe.db.get_value('Stock Entry', sle.voucher_no, ['purpose', 'for_maintenance'])
+			if purpose != 'Material Receipt' or for_maintenance:
+				status = False
 
 	return status
 
