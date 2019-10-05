@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
-import unittest
 import json
+from unittest import TestCase
 import frappe
 from frappe.utils import getdate
 from frappe.test_runner import make_test_objects
@@ -20,42 +20,33 @@ from datev_constants import AccountNames
 from datev_constants import QUERY_REPORT_COLUMNS
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-class TestDatev(unittest.TestCase):
-	def __init__(self):
+class TestDatev(TestCase):
+	def setUp(self):
 		with open("test_records.json", "r") as test_records:
 			make_test_objects("Account", json.load(test_records))
 
-		self.filters = {
-			'company': '_Test GmbH',
-			'from_date': getdate(),
-			'to_date': getdate(),
-		}
-		validate(filters)
+	def test_columns(self):
+		def is_subset(get_data, allowed_keys):
+			"""
+			Validate that the dict contains only allowed keys.
+			
+			Params:
+			get_data -- Function that returns a list of dicts.
+			allowed_keys -- List of allowed keys
+			"""
+			data = get_data({
+				'company': '_Test GmbH',
+				'from_date': getdate(),
+				'to_date': getdate(),
+			}, as_dict=1)
+			actual_set = set(data[0].keys())
+			allowed_set = set(allowed_keys)
+			return actual_set.issubset(allowed_set)
 
-	def _validate_keys(self, get_data, allowed_keys):
-		"""
-		Validate that the dict contains only allowed keys.
-		
-		Params:
-		get_data -- Function that returns a list of dicts.
-		allowed_keys -- List of allowed keys
-		"""
-		data = get_data(self.filters, as_dict=1)
-		actual_set = set(data[0].keys())
-		allowed_set = set(allowed_keys)
-		self.assert(actual_set.issubset(allowed_set))
-
-	def test_transaction(self):
-		self._validate_keys(get_transactions, Transactions.COLUMNS)
-
-	def test_customer(self):
-		self._validate_keys(get_customers, DebtorsCreditors.COLUMNS)
-
-	def test_supplier(self):
-		self._validate_keys(get_suppliers, DebtorsCreditors.COLUMNS)
-
-	def test_account_name(self):
-		self._validate_keys(get_account_names, AccountNames.COLUMNS)
+		self.assertTrue(is_subset(get_transactions, Transactions.COLUMNS))
+		self.assertTrue(is_subset(get_customers, DebtorsCreditors.COLUMNS))
+		self.assertTrue(is_subset(get_suppliers, DebtorsCreditors.COLUMNS))
+		self.assertTrue(is_subset(get_account_names, AccountNames.COLUMNS))
 
 	def test_csv(self):
 		download_datev_csv(self.filters)
