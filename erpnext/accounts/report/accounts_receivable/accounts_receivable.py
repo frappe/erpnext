@@ -438,6 +438,8 @@ class ReceivablePayableReport(object):
 					group_object.credit_limit = self.party_map.get(group_object.group_value, {}).get("credit_limit")
 
 			group_object.rows = self.group_aggregate_age(group_object.rows, columns, grouped_by)
+			if group_object.rows is None:
+				group_object.totals = None
 
 		return group_report_data(data, group_by, total_fields=total_fields, postprocess_group=postprocess_group,
 			group_by_labels=group_by_labels)
@@ -446,19 +448,22 @@ class ReceivablePayableReport(object):
 		if not self.filters.from_age and not self.filters.to_age:
 			return data
 
-		to_keep = []
+		within_limit = []
 		below_limit = []
 		above_limit = []
 
 		for d in data:
 			if d._isGroupTotal or d._isGroup:
-				to_keep.append(d)
+				within_limit.append(d)
 			elif self.filters.from_age and d.age < cint(self.filters.from_age):
 				below_limit.append(d)
 			elif self.filters.to_age and d.age > cint(self.filters.to_age):
 				above_limit.append(d)
 			else:
-				to_keep.append(d)
+				within_limit.append(d)
+
+		if not within_limit:
+			return None
 
 		if not below_limit and not above_limit:
 			return data
@@ -470,7 +475,7 @@ class ReceivablePayableReport(object):
 		below_limit_total = below_limit_total[0] if below_limit_total else {}
 		above_limit_total = group_report_data(above_limit, None, total_fields=total_fields, totals_only=True)
 		above_limit_total = above_limit_total[0] if above_limit_total else {}
-		within_limit_total = group_report_data(to_keep, None, total_fields=total_fields, totals_only=True)
+		within_limit_total = group_report_data(within_limit, None, total_fields=total_fields, totals_only=True)
 		within_limit_total = within_limit_total[0] if within_limit_total else {}
 
 		if grouped_by:
@@ -494,11 +499,11 @@ class ReceivablePayableReport(object):
 		if self.filters.to_age:
 			out.append(above_limit_total)
 
-		if to_keep:
+		if within_limit:
 			if self.filters.to_age:
 				out.append({})
 
-			out += to_keep
+			out += within_limit
 			out.append(within_limit_total)
 
 			if self.filters.from_age:
