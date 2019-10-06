@@ -17,11 +17,11 @@ from six import string_types
 import frappe
 from frappe import _
 import pandas as pd
-from datev_constants import DataCategory
-from datev_constants import Transactions
-from datev_constants import DebtorsCreditors
-from datev_constants import AccountNames
-from datev_constants import QUERY_REPORT_COLUMNS
+from .datev_constants import DataCategory
+from .datev_constants import Transactions
+from .datev_constants import DebtorsCreditors
+from .datev_constants import AccountNames
+from .datev_constants import QUERY_REPORT_COLUMNS
 
 
 def execute(filters=None):

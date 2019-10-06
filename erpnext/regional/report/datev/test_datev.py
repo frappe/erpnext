@@ -13,11 +13,11 @@ from erpnext.regional.report.datev.datev import get_account_names
 from erpnext.regional.report.datev.datev import get_datev_csv
 from erpnext.regional.report.datev.datev import get_header
 from erpnext.regional.report.datev.datev import download_datev_csv
-from datev_constants import DataCategory
-from datev_constants import Transactions
-from datev_constants import DebtorsCreditors
-from datev_constants import AccountNames
-from datev_constants import QUERY_REPORT_COLUMNS
+from .datev_constants import DataCategory
+from .datev_constants import Transactions
+from .datev_constants import DebtorsCreditors
+from .datev_constants import AccountNames
+from .datev_constants import QUERY_REPORT_COLUMNS
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 class TestDatev(TestCase):
