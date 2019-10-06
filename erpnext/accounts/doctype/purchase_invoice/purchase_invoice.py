@@ -467,7 +467,7 @@ class PurchaseInvoice(BuyingController):
 
 					# Amount added through landed-cost-voucher
 					if landed_cost_entries:
-						for account, amount in iteritems(landed_cost_entries[item.item_code]):
+						for account, amount in iteritems(landed_cost_entries[(item.item_code, item.name)]):
 							gl_entries.append(self.get_gl_dict({
 								"account": account,
 								"against": item.expense_account,

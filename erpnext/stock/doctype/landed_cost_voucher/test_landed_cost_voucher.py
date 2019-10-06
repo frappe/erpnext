@@ -181,7 +181,7 @@ def submit_landed_cost_voucher(receipt_document_type, receipt_document, charges=
 
 	lcv.set("taxes", [{
 		"description": "Insurance Charges",
-		"expense_account": "_Test Account Insurance Charges - _TC",
+		"expense_account": "Expenses Included In Valuation - _TC",
 		"amount": charges
 	}])
 

@@ -235,7 +235,7 @@ class PurchaseReceipt(BuyingController):
 
 					# Amount added through landed-cost-voucher
 					if landed_cost_entries:
-						for account, amount in iteritems(landed_cost_entries[d.item_code]):
+						for account, amount in iteritems(landed_cost_entries[(d.item_code, d.name)]):
 							gl_entries.append(self.get_gl_dict({
 								"account": account,
 								"against": warehouse_account[d.warehouse]["account"],
@@ -606,9 +606,9 @@ def get_item_account_wise_additional_cost(purchase_document):
 	for item in landed_cost_voucher_doc.items:
 		if item.receipt_document == purchase_document:
 			for account in landed_cost_voucher_doc.taxes:
-				item_account_wise_cost.setdefault(item.item_code, {})
-				item_account_wise_cost[item.item_code].setdefault(account.expense_account, 0.0)
-				item_account_wise_cost[item.item_code][account.expense_account] += \
+				item_account_wise_cost.setdefault((item.item_code, item.purchase_receipt_item), {})
+				item_account_wise_cost[(item.item_code, item.purchase_receipt_item)].setdefault(account.expense_account, 0.0)
+				item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][account.expense_account] += \
 					account.amount * item.get(based_on_field) / total_item_cost
 
 	return item_account_wise_cost
