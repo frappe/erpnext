@@ -343,6 +343,16 @@ def make_contact(args, is_primary_contact=1):
 	return contact
 
 def make_address(args, is_primary_address=1):
+	reqd_fields = []
+	for field in ['city', 'country']:
+		if not args.get(field):
+			reqd_fields.append( '<li>' + field.title() + '</li>')
+
+	if reqd_fields:
+		msg = _("Following fields are mandatory to create address:")
+		frappe.throw("{0} <br><br> <ul>{1}</ul>".format(msg, '\n'.join(reqd_fields)),
+			title = _("Missing Values Required"))
+
 	address = frappe.get_doc({
 		'doctype': 'Address',
 		'address_title': args.get('name'),
@@ -365,7 +375,7 @@ def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, fil
 	return frappe.db.sql("""
 		select `tabContact`.name from `tabContact`, `tabDynamic Link`
 			where `tabContact`.name = `tabDynamic Link`.parent and `tabDynamic Link`.link_name = %(customer)s
-			and `tabDynamic Link`.link_doctype = 'Customer' and `tabContact`.is_primary_contact = 1
+			and `tabDynamic Link`.link_doctype = 'Customer'
 			and `tabContact`.name like %(txt)s
 		""", {
 			'customer': customer,
@@ -377,7 +387,7 @@ def get_customer_primary_address(doctype, txt, searchfield, start, page_len, fil
 	return frappe.db.sql("""
 		select `tabAddress`.name from `tabAddress`, `tabDynamic Link`
 			where `tabAddress`.name = `tabDynamic Link`.parent and `tabDynamic Link`.link_name = %(customer)s
-			and `tabDynamic Link`.link_doctype = 'Customer' and `tabAddress`.is_primary_address = 1
+			and `tabDynamic Link`.link_doctype = 'Customer'
 			and `tabAddress`.name like %(txt)s
 		""", {
 			'customer': customer,

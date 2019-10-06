@@ -1460,7 +1460,7 @@
  "has_web_view": 0, 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
- "icon": "fa fa-info-sign", 
+ "icon": "fa fa-info-circle", 
  "idx": 195, 
  "image_view": 0, 
  "in_create": 0, 

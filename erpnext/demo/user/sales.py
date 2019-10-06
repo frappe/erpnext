@@ -99,7 +99,7 @@ def make_quotation(domain):
 			"creation": frappe.flags.current_date,
 			"doctype": "Quotation",
 			"quotation_to": "Customer",
-			"customer": customer,
+			"party_name": customer,
 			"currency": party_account_currency or company_currency,
 			"conversion_rate": exchange_rate,
 			"order_type": "Sales",

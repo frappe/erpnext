@@ -11,7 +11,7 @@ frappe.ui.form.on("Delivery Note", {
 		frm.custom_make_buttons = {
 			'Packing Slip': 'Packing Slip',
 			'Installation Note': 'Installation Note',
-			'Sales Invoice': 'Invoice',
+			'Sales Invoice': 'Sales Invoice',
 			'Delivery Note': 'Sales Return',
 		},
 		frm.set_indicator_formatter('item_code',
@@ -122,19 +122,6 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			}
 		}
 
-		if(doc.docstatus==1 && !doc.is_return && doc.status!="Closed" && flt(doc.per_completed) < 100) {
-			// show Make Invoice button only if Delivery Note is not created from Sales Invoice
-			var from_sales_invoice = false;
-			from_sales_invoice = me.frm.doc.items.some(function(item) {
-				return item.against_sales_invoice ? true : false;
-			});
-
-			if(!from_sales_invoice) {
-				this.frm.add_custom_button(__('Invoice'), function() { me.make_sales_invoice() },
-					__("Make"));
-			}
-		}
-
 		if (!doc.is_return && doc.status!="Closed") {
 			if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1)
 				this.frm.add_custom_button(__('Installation Note'), function() {
@@ -207,6 +194,19 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			if (this.frm.has_perm("submit") && doc.status !== "Closed") {
 				me.frm.add_custom_button(__("Close"), function() { me.close_delivery_note() },
 					__("Status"))
+			}
+		}
+
+		if(doc.docstatus==1 && !doc.is_return && doc.status!="Closed" && flt(doc.per_completed) < 100) {
+			// show Make Invoice button only if Delivery Note is not created from Sales Invoice
+			var from_sales_invoice = false;
+			from_sales_invoice = me.frm.doc.items.some(function(item) {
+				return item.against_sales_invoice ? true : false;
+			});
+
+			if(!from_sales_invoice) {
+				this.frm.add_custom_button(__('Sales Invoice'), function() { me.make_sales_invoice() },
+					__("Make"));
 			}
 		}
 

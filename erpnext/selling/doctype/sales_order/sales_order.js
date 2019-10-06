@@ -12,7 +12,7 @@ frappe.ui.form.on("Sales Order", {
 			'Purchase Order': 'Purchase Order',
 			'Project': 'Project',
 			'Purchase Invoice': 'Purchase Invoice',
-			'Payment Entry': 'Payment'
+			'Payment Entry': "Payment"
 		}
 
 		// formatter for material request item
@@ -268,27 +268,44 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					});
 					return;
 				} else {
-					var fields = [
-						{fieldtype:'Table', fieldname: 'items',
-							description: __('Select BOM and Qty for Production'),
-							fields: [
-								{fieldtype:'Read Only', fieldname:'item_code',
-									label: __('Item Code'), in_list_view:1},
-								{fieldtype:'Link', fieldname:'bom', options: 'BOM', reqd: 1,
-									label: __('Select BOM'), in_list_view:1, get_query: function(doc) {
-										return {filters: {item: doc.item_code}};
-									}},
-								{fieldtype:'Float', fieldname:'pending_qty', reqd: 1,
-									label: __('Qty'), in_list_view:1},
-								{fieldtype:'Data', fieldname:'sales_order_item', reqd: 1,
-									label: __('Sales Order Item'), hidden:1}
-							],
-							data: r.message,
-							get_data: function() {
-								return r.message
+					const fields = [{
+						label: 'Items',
+						fieldtype: 'Table',
+						fieldname: 'items',
+						description: __('Select BOM and Qty for Production'),
+						fields: [{
+							fieldtype: 'Read Only',
+							fieldname: 'item_code',
+							label: __('Item Code'),
+							in_list_view: 1
+						}, {
+							fieldtype: 'Link',
+							fieldname: 'bom',
+							options: 'BOM',
+							reqd: 1,
+							label: __('Select BOM'),
+							in_list_view: 1,
+							get_query: function (doc) {
+								return { filters: { item: doc.item_code } };
 							}
+						}, {
+							fieldtype: 'Float',
+							fieldname: 'pending_qty',
+							reqd: 1,
+							label: __('Qty'),
+							in_list_view: 1
+						}, {
+							fieldtype: 'Data',
+							fieldname: 'sales_order_item',
+							reqd: 1,
+							label: __('Sales Order Item'),
+							hidden: 1
+						}],
+						data: r.message,
+						get_data: () => {
+							return r.message
 						}
-					]
+					}]
 					var d = new frappe.ui.Dialog({
 						title: __('Select Items to Manufacture'),
 						fields: fields,

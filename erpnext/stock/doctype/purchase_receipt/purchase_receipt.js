@@ -8,8 +8,8 @@ frappe.provide("erpnext.stock");
 frappe.ui.form.on("Purchase Receipt", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Purchase Receipt': 'Return',
-			'Purchase Invoice': 'Invoice',
+			'Purchase Receipt': 'Purchase Return',
+			'Purchase Invoice': 'Purchase Invoice',
 			'Landed Cost Voucher': 'Landed Cost Voucher'
 		}
 
@@ -106,10 +106,10 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 					cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt, __("Status"))
 				}
 
-				cur_frm.add_custom_button(__('Return'), this.make_purchase_return, __("Make"));
+				cur_frm.add_custom_button(__('Purchase Return'), this.make_purchase_return, __("Make"));
 
 				if(flt(this.frm.doc.per_completed) < 100) {
-					cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice, __("Make"));
+					cur_frm.add_custom_button(__('Purchase Invoice'), this.make_purchase_invoice, __("Make"));
 				}
 				cur_frm.add_custom_button(__('Retention Stock Entry'), this.make_retention_stock_entry, __("Make"));
 

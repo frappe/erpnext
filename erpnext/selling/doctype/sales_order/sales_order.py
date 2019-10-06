@@ -70,9 +70,7 @@ class SalesOrder(SellingController):
 				frappe.msgprint(_("Warning: Sales Order {0} already exists against Customer's Purchase Order {1}").format(so[0][0], self.po_no))
 
 	def validate_for_items(self):
-		check_list = []
 		for d in self.get('items'):
-			check_list.append(cstr(d.item_code))
 
 			# used for production plan
 			d.transaction_date = self.transaction_date
@@ -81,12 +79,11 @@ class SalesOrder(SellingController):
 				where item_code = %s and warehouse = %s", (d.item_code, d.warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
 
-		# check for same entry multiple times
-		unique_chk_list = set(check_list)
-		if len(unique_chk_list) != len(check_list) and \
-			not cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
-			frappe.msgprint(_("Same item has been entered multiple times"),
-				title=_("Warning"), indicator='orange')
+	def product_bundle_has_stock_item(self, product_bundle):
+		"""Returns true if product bundle has stock item"""
+		ret = len(frappe.db.sql("""select i.name from tabItem i, `tabProduct Bundle Item` pbi
+			where pbi.parent = %s and pbi.item_code = i.name and i.is_stock_item = 1""", product_bundle))
+		return ret
 
 	def validate_sales_mntc_quotation(self):
 		for d in self.get('items'):
@@ -133,7 +130,7 @@ class SalesOrder(SellingController):
 
 		for d in self.get("items"):
 			if (frappe.get_cached_value("Item", d.item_code, "is_stock_item") == 1 or
-				self.is_product_bundle_with_stock_item(d.item_code)) \
+				(self.has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))) \
 				and not d.warehouse and not cint(d.delivered_by_supplier):
 				frappe.throw(_("Delivery warehouse required for stock item {0}").format(d.item_code),
 					WarehouseRequired)
@@ -481,13 +478,29 @@ def close_or_unclose_sales_orders(names, status):
 
 	frappe.local.message_log = []
 
+def get_requested_item_qty(sales_order):
+	return frappe._dict(frappe.db.sql("""
+		select sales_order_item, sum(stock_qty)
+		from `tabMaterial Request Item`
+		where docstatus = 1
+			and sales_order = %s
+		group by sales_order_item
+	""", sales_order))
+
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
+	requested_item_qty = get_requested_item_qty(source_name)
+
 	def postprocess(source, doc):
 		doc.material_request_type = "Purchase"
 
 	def update_item(source, target, source_parent):
+		# qty is for packed items, because packed items don't have stock_qty field
+		qty = source.get("stock_qty") or source.get("qty")
 		target.project = source_parent.project
+		target.qty = qty - requested_item_qty.get(source.name, 0)
+		target.conversion_factor = 1
+		target.stock_qty = qty - requested_item_qty.get(source.name, 0)
 
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -512,7 +525,7 @@ def make_material_request(source_name, target_doc=None):
 				"stock_uom": "uom",
 				"stock_qty": "qty"
 			},
-			"condition": lambda doc: not frappe.db.exists('Product Bundle', doc.item_code),
+			"condition": lambda doc: not frappe.db.exists('Product Bundle', doc.item_code) and doc.stock_qty > requested_item_qty.get(doc.name, 0),
 			"postprocess": update_item
 		}
 	}, target_doc, postprocess)
@@ -1004,3 +1017,15 @@ def make_raw_material_request(items, company, sales_order, project=None):
 	material_request.run_method("set_missing_values")
 	material_request.submit()
 	return material_request
+
+def update_produced_qty_in_so_item(sales_order_item):
+	#for multiple work orders against same sales order item
+	linked_wo_with_so_item = frappe.db.get_all('Work Order', ['produced_qty'], {
+		'sales_order_item': sales_order_item,
+		'docstatus': 1
+	})
+	if len(linked_wo_with_so_item) > 0:
+		total_produced_qty = 0
+		for wo in linked_wo_with_so_item:
+			total_produced_qty += flt(wo.get('produced_qty'))
+		frappe.db.set_value('Sales Order Item', sales_order_item, 'produced_qty', total_produced_qty)

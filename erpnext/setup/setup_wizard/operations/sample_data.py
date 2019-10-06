@@ -34,7 +34,7 @@ def make_opportunity(items, customer):
 	b = frappe.get_doc({
 		"doctype": "Opportunity",
 		"opportunity_from": "Customer",
-		"customer": customer,
+		"party_name": customer,
 		"opportunity_type": _("Sales"),
 		"with_items": 1
 	})

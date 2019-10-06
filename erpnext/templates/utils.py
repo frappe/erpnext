@@ -36,11 +36,11 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 	))
 
 	if customer:
-		opportunity.customer = customer[0][0]
+		opportunity.party_name = customer[0][0]
 	elif lead:
-		opportunity.lead = lead
+		opportunity.party_name = lead
 	else:
-		opportunity.lead = new_lead.name
+		opportunity.party_name = new_lead.name
 
 	opportunity.insert(ignore_permissions=True)
 

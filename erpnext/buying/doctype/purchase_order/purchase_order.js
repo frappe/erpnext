@@ -10,7 +10,8 @@ frappe.ui.form.on("Purchase Order", {
 		frm.custom_make_buttons = {
 			'Purchase Receipt': 'Receipt',
 			'Purchase Invoice': 'Invoice',
-			'Stock Entry': 'Material to Supplier'
+			'Stock Entry': 'Material to Supplier',
+			'Payment Entry': 'Payment'
 		}
 
 		frm.set_query("reserve_warehouse", "supplied_items", function() {

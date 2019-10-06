@@ -18,29 +18,21 @@ def validate_return(doc):
 		validate_returned_items(doc)
 
 def validate_return_against(doc):
-	filters = {"doctype": doc.doctype, "docstatus": 1, "company": doc.company}
-	if doc.meta.get_field("customer") and doc.customer:
-		filters["customer"] = doc.customer
-	elif doc.meta.get_field("supplier") and doc.supplier:
-		filters["supplier"] = doc.supplier
-
-	if not frappe.db.exists(filters):
+	if not frappe.db.exists(doc.doctype, doc.return_against):
 			frappe.throw(_("Invalid {0}: {1}")
 				.format(doc.meta.get_label("return_against"), doc.return_against))
 	else:
 		ref_doc = frappe.get_doc(doc.doctype, doc.return_against)
 
-		# validate posting date time
-		return_posting_datetime = "%s %s" % (doc.posting_date, doc.get("posting_time") or "00:00:00")
-		ref_posting_datetime = "%s %s" % (ref_doc.posting_date, ref_doc.get("posting_time") or "00:00:00")
+		party_type = "customer" if doc.doctype in ("Sales Invoice", "Delivery Note") else "supplier"
 
-		if get_datetime(return_posting_datetime) < get_datetime(ref_posting_datetime):
-			frappe.throw(_("Posting timestamp must be after {0}").format(format_datetime(ref_posting_datetime)))
+		if ref_doc.company == doc.company and ref_doc.get(party_type) == doc.get(party_type) and ref_doc.docstatus == 1:
+			# validate posting date time
+			return_posting_datetime = "%s %s" % (doc.posting_date, doc.get("posting_time") or "00:00:00")
+			ref_posting_datetime = "%s %s" % (ref_doc.posting_date, ref_doc.get("posting_time") or "00:00:00")
 
-		# validate same exchange rate
-		if doc.conversion_rate != ref_doc.conversion_rate:
-			frappe.throw(_("Exchange Rate must be same as {0} {1} ({2})")
-				.format(doc.doctype, doc.return_against, ref_doc.conversion_rate))
+			if get_datetime(return_posting_datetime) < get_datetime(ref_posting_datetime):
+				frappe.throw(_("Posting timestamp must be after {0}").format(format_datetime(ref_posting_datetime)))
 
 		# validate same transaction type
 		if doc.meta.get_field("order_type_name") and doc.order_type_name != ref_doc.order_type_name:
@@ -104,7 +96,7 @@ def validate_returned_items(doc):
 
 	items_returned = False
 	for d in doc.get("items"):
-		if flt(d.qty) < 0 or d.get('received_qty') < 0:
+		if d.item_code and (flt(d.qty) < 0 or d.get('received_qty') < 0):
 			if d.item_code not in valid_items:
 				frappe.throw(_("Row # {0}: Returned Item {1} does not exists in {2} {3}")
 					.format(d.idx, d.item_code, doc.doctype, doc.return_against))
@@ -134,6 +126,9 @@ def validate_returned_items(doc):
 					and not d.get("warehouse"):
 						frappe.throw(_("Warehouse is mandatory"))
 
+			items_returned = True
+
+		elif d.item_name:
 			items_returned = True
 
 	if not items_returned:
@@ -311,6 +306,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			elif doc.doctype == 'Purchase Invoice':
 				doc.paid_amount = -1 * source.paid_amount
 				doc.base_paid_amount = -1 * source.base_paid_amount
+				doc.payment_terms_template = ''
+				doc.payment_schedule = []
 
 		if doc.get("is_return") and hasattr(doc, "packed_items"):
 			for d in doc.get("packed_items"):

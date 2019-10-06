@@ -151,7 +151,7 @@ class NamingSeries(Document):
 
 	def insert_series(self, series):
 		"""insert series if missing"""
-		if not frappe.db.get_value('Series', series, 'name', order_by="name"):
+		if frappe.db.get_value('Series', series, 'name', order_by="name") == None:
 			frappe.db.sql("insert into tabSeries (name, current) values (%s, 0)", (series))
 
 	def update_series_start(self):

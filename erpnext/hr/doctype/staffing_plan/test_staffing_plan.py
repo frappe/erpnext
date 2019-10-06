@@ -92,5 +92,5 @@ def make_company():
 	company.abbr = "_TC10"
 	company.parent_company = "_Test Company"
 	company.default_currency = "INR"
-	company.country = "India"
+	company.country = "Pakistan"
 	company.insert()

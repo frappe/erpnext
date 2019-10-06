@@ -60,7 +60,7 @@ def place_order():
 	quotation.flags.ignore_permissions = True
 	quotation.submit()
 
-	if quotation.lead:
+	if quotation.quotation_to == 'Lead' and quotation.party_name:
 		# company used to create customer accounts
 		frappe.defaults.set_user_default("company", quotation.company)
 
@@ -202,11 +202,12 @@ def _get_cart_quotation(party=None):
 	if quotation:
 		qdoc = frappe.get_doc("Quotation", quotation[0].name)
 	else:
+		company = frappe.db.get_value("Shopping Cart Settings", None, ["company"])
 		qdoc = frappe.get_doc({
 			"doctype": "Quotation",
 			"naming_series": get_shopping_cart_settings().quotation_series or "QTN-CART-",
 			"quotation_to": party.doctype,
-			"company": frappe.db.get_value("Shopping Cart Settings", None, "company"),
+			"company": company,
 			"order_type": "Shopping Cart",
 			"status": "Draft",
 			"docstatus": 0,
@@ -286,18 +287,19 @@ def set_price_list_and_rate(quotation, cart_settings):
 
 def _set_price_list(quotation, cart_settings):
 	"""Set price list based on customer or shopping cart default"""
-	if quotation.selling_price_list:
-		return
+	from erpnext.accounts.party import get_default_price_list
 
 	# check if customer price list exists
 	selling_price_list = None
 	if quotation.party_name:
-		from erpnext.accounts.party import get_default_price_list
-		selling_price_list = get_default_price_list(frappe.get_doc("Customer", quotation.party_name))
+		selling_price_list = frappe.db.get_value('Customer', quotation.party_name, 'default_price_list')
 
 	# else check for territory based price list
 	if not selling_price_list:
 		selling_price_list = cart_settings.price_list
+
+	if not selling_price_list and quotation.party_name:
+		selling_price_list = get_default_price_list(frappe.get_doc("Customer", quotation.party_name))
 
 	quotation.selling_price_list = selling_price_list
 

@@ -170,6 +170,7 @@ class Project(Document):
 
 					task.run_method("validate")
 					task.db_update()
+					task.notify_update()
 				else:
 					task.save(ignore_permissions = True)
 				task_names.append(task.name)
@@ -216,7 +217,11 @@ class Project(Document):
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
 	def update_percent_complete(self, from_validate=False):
-		if not self.tasks: return
+		if not self.tasks:
+			if self.status == "Completed" :
+				self.percent_complete = 100
+			return
+			
 		total = frappe.db.sql("""select count(name) from tabTask where project=%s""", self.name)[0][0]
 		if not total and self.percent_complete:
 			self.percent_complete = 0

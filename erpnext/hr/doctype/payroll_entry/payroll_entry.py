@@ -12,6 +12,15 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 class PayrollEntry(Document):
+	def onload(self):
+		if not self.docstatus==1 or self.salary_slips_submitted:
+			return
+
+		# check if salary slips were manually submitted
+		entries = frappe.db.count("Salary Slip", {'payroll_entry': self.name, 'docstatus': 1}, ['name'])
+		if cint(entries) == len(self.employees):
+			self.set_onload("submitted_ss", True)
+
 	def on_submit(self):
 		self.create_salary_slips()
 
@@ -412,7 +421,6 @@ def get_start_end_dates(payroll_frequency, start_date=None, company=None):
 	return frappe._dict({
 		'start_date': start_date, 'end_date': end_date
 	})
-
 
 def get_frequency_kwargs(frequency_name):
 	frequency_dict = {

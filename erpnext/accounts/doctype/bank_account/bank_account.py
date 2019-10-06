@@ -48,7 +48,10 @@ class BankAccount(Document):
 		# Encode characters as numbers
 		encoded = [encode_char(c) if ord(c) >= 65 and ord(c) <= 90 else c for c in flipped]
 
-		to_check = int(''.join(encoded))
+		try:
+			to_check = int(''.join(encoded))
+		except ValueError:
+			frappe.throw(_('IBAN is not valid'))
 
 		if to_check % 97 != 1:
 			frappe.throw(_('IBAN is not valid'))

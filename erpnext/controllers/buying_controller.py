@@ -370,7 +370,7 @@ class BuyingController(StockController):
 			if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 				rm.consumed_qty = required_qty
 				rm.description = bom_item.description
-				if item.batch_no and not rm.batch_no:
+				if item.batch_no and frappe.db.get_value("Item", rm.rm_item_code, "has_batch_no") and not rm.batch_no:
 					rm.batch_no = item.batch_no
 
 			# get raw materials rate
@@ -428,7 +428,9 @@ class BuyingController(StockController):
 	def set_qty_as_per_stock_uom(self):
 		for d in self.get("items"):
 			if d.meta.get_field("stock_qty"):
-				if not d.conversion_factor:
+				# Check if item code is present
+				# Conversion factor should not be mandatory for non itemized items
+				if not d.conversion_factor and d.item_code:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
 
@@ -558,10 +560,15 @@ class BuyingController(StockController):
 			for d in self.get('supplied_items'):
 				# negative quantity is passed, as raw material qty has to be decreased
 				# when PR is submitted and it has to be increased when PR is cancelled
+				incoming_rate = 0
+				if self.is_return and self.return_against and self.docstatus==1:
+					incoming_rate = self.get_incoming_rate_for_sales_return(d.rm_item_code, self.return_against)
+
 				sl_entries.append(self.get_sl_entries(d, {
 					"item_code": d.rm_item_code,
 					"warehouse": self.supplier_warehouse,
 					"actual_qty": -1*flt(d.consumed_qty),
+					"incoming_rate": incoming_rate
 				}))
 
 	def on_submit(self):
@@ -760,7 +767,7 @@ def get_items_from_bom(item_code, bom, exploded_item=1):
 		where
 			t2.parent = t1.name and t1.item = %s
 			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s
-			and t2.item_code = t3.name and t3.is_stock_item = 1""".format(doctype),
+			and t2.item_code = t3.name""".format(doctype),
 			(item_code, bom), as_dict=1)
 
 	if not bom_items:

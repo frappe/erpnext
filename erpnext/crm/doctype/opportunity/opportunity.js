@@ -18,6 +18,10 @@ frappe.ui.form.on("Opportunity", {
 				}
 			}
 		});
+
+		if (frm.doc.opportunity_from && frm.doc.party_name){
+			frm.trigger('set_contact_link');
+		}
 	},
 
 	onload_post_render: function(frm) {

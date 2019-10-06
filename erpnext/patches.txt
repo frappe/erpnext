@@ -506,6 +506,7 @@ erpnext.patches.v10_0.update_hub_connector_domain
 erpnext.patches.v10_0.set_student_party_type
 erpnext.patches.v10_0.update_project_in_sle
 erpnext.patches.v10_0.fix_reserved_qty_for_sub_contract
+erpnext.patches.v10_0.repost_requested_qty_for_non_stock_uom_items
 erpnext.patches.v11_0.merge_land_unit_with_location
 erpnext.patches.v11_0.add_index_on_nestedset_doctypes
 erpnext.patches.v11_0.remove_modules_setup_page
@@ -599,7 +600,7 @@ erpnext.patches.v11_1.setup_guardian_role
 erpnext.patches.v11_1.set_alt_uom_tax_inclusive_values
 execute:frappe.delete_doc('DocType', 'Notification Control')
 erpnext.patches.v11_0.remove_barcodes_field_from_copy_fields_to_variants
-erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019
+erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019 #25-06-2019
 erpnext.patches.v11_0.make_italian_localization_fields # 26-03-2019
 erpnext.patches.v11_1.make_job_card_time_logs
 erpnext.patches.v11_1.set_party_in_sle
@@ -623,3 +624,6 @@ erpnext.patches.v11_1.update_item_price_item_details
 erpnext.patches.v11_1.move_apply_discount_after_taxes_to_company
 execute:frappe.delete_doc_if_exists("Report", "Employees Payable")
 erpnext.patches.v11_1.set_item_naming_by
+erpnext.patches.v11_1.update_default_supplier_in_item_defaults
+erpnext.patches.v11_1.set_status_for_material_request_type_manufacture
+erpnext.patches.v11_1.set_produced_qty_field_in_sales_order_for_work_order

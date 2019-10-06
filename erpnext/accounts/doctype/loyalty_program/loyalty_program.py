@@ -38,7 +38,10 @@ def get_loyalty_details(customer, loyalty_program, expiry_date=None, company=Non
 @frappe.whitelist()
 def get_loyalty_program_details_with_points(customer, loyalty_program=None, expiry_date=None, company=None, silent=False, include_expired_entry=False, current_transaction_amount=0):
 	lp_details = get_loyalty_program_details(customer, loyalty_program, company=company, silent=silent)
-	loyalty_program = frappe.get_doc("Loyalty Program", loyalty_program)
+	loyalty_program_name = loyalty_program or lp_details.loyalty_program
+	if not loyalty_program_name: return
+
+	loyalty_program = frappe.get_doc("Loyalty Program", loyalty_program_name)
 	lp_details.update(get_loyalty_details(customer, loyalty_program.name, expiry_date, company, include_expired_entry))
 
 	tier_spent_level = sorted([d.as_dict() for d in loyalty_program.collection_rules],

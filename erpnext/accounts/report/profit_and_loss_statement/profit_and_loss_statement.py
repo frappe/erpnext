@@ -93,4 +93,6 @@ def get_chart_data(filters, columns, income, expense, net_profit_loss):
 	else:
 		chart["type"] = "line"
 
+	chart["fieldtype"] = "Currency"
+
 	return chart

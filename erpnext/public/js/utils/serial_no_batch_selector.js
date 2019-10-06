@@ -45,6 +45,13 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				label: __(me.warehouse_details.type),
 				default: me.warehouse_details.name,
 				onchange: function(e) {
+
+					if(me.has_batch) {
+						fields = fields.concat(me.get_batch_fields());
+					} else {
+						fields = fields.concat(me.get_serial_no_fields());
+					}
+
 					me.warehouse_details.name = this.get_value();
 					var batches = this.layout.fields_dict.batches;
 					if(batches) {
@@ -232,6 +239,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 	get_batch_fields: function() {
 		var me = this;
+
 		return [
 			{ fieldtype: 'Section Break', label: __('Batches') },
 			{
@@ -246,8 +254,11 @@ erpnext.SerialNoBatchSelector = Class.extend({
 						'in_list_view': 1,
 						get_query: function () {
 							return {
-								filters: { item: me.item_code },
-								query: 'erpnext.controllers.queries.get_batch_numbers'
+								filters: {
+									item_code: me.item_code,
+									warehouse: me.warehouse || me.warehouse_details.name
+								},
+								query: 'erpnext.controllers.queries.get_batch_no'
 							};
 						},
 						change: function () {
