@@ -140,6 +140,8 @@ def period_wise_columns_query(filters, trans):
 
 	if trans in ['Purchase Receipt', 'Delivery Note', 'Purchase Invoice', 'Sales Invoice']:
 		trans_date = 'posting_date'
+		if filters.period_based_on:
+			trans_date = filters.period_based_on
 	else:
 		trans_date = 'transaction_date'
 
