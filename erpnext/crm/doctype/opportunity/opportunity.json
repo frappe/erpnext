@@ -1,5 +1,6 @@
 {
  "allow_import": 1,
+ "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2013-03-07 18:50:30",
  "description": "Potential Sales Deal",
@@ -411,7 +412,7 @@
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
- "modified": "2019-09-12 09:37:30.127901",
+ "modified": "2019-09-30 12:58:37.385400",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

@@ -362,6 +362,7 @@ def auto_make_serial_nos(args):
 			sr.batch_no = args.get('batch_no')
 			sr.location = args.get('location')
 			sr.company = args.get('company')
+			sr.supplier = args.get('supplier')
 			if sr.sales_order and args.get('voucher_type') == "Stock Entry" \
 				and not args.get('actual_qty', 0) > 0:
 				sr.sales_order = None
@@ -396,10 +397,12 @@ def make_serial_no(serial_no, args):
 	sr.via_stock_ledger = args.get('via_stock_ledger') or True
 	sr.asset = args.get('asset')
 	sr.location = args.get('location')
+	
 
 	if args.get('purchase_document_type'):
 		sr.purchase_document_type = args.get('purchase_document_type')
 		sr.purchase_document_no = args.get('purchase_document_no')
+		sr.supplier = args.get('supplier')
 
 	sr.insert()
 	if args.get('warehouse'):
