@@ -646,15 +646,14 @@ class StockEntry(StockController):
 		for t in self.get("additional_costs"):
 			for d in self.get("items"):
 				if d.t_warehouse:
-					item_account_wise_additional_cost.setdefault(d.item_code, {})
-					item_account_wise_additional_cost[d.item_code].setdefault(t.expense_account, 0.0)
-					item_account_wise_additional_cost[d.item_code][t.expense_account] += \
+					item_account_wise_additional_cost.setdefault((d.item_code, d.name), {})
+					item_account_wise_additional_cost[(d.item_code, d.name)].setdefault(t.expense_account, 0.0)
+					item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account] += \
 						(t.amount * d.basic_amount) / total_basic_amount
-
 
 		if item_account_wise_additional_cost:
 			for d in self.get("items"):
-				for account, amount in iteritems(item_account_wise_additional_cost.get(d.item_code, {})):
+				for account, amount in iteritems(item_account_wise_additional_cost.get((d.item_code, d.name), {})):
 					gl_entries.append(self.get_gl_dict({
 						"account": account,
 						"against": d.expense_account,
