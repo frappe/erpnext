@@ -6,50 +6,69 @@ import frappe
 from frappe import _
 
 def execute(filters=None):
-	columns = create_columns()
-	data = get_record()
+	columns = get_columns()
+	data = get_data(filters)
 	return columns, data
 
-def create_columns():
+def get_columns():
 	return [
 			{
-				"label": _("Employee"),
-				"fieldtype": "Data",
-				"fieldname": "employee",
-				"options": "Employee",
-				"width": 200
+				"label": _("Posting Date"),
+				"fieldtype": "Date",
+				"fieldname": "posting_date",
+				"width": 100
 			},
 			{
-				"label": _("Loan"),
+				"label": _("Loan Repayment"),
 				"fieldtype": "Link",
-				"fieldname": "loan_name",
+				"fieldname": "loan_repayment",
+				"options": "Loan Repayment",
+				"width": 100
+			},
+			{
+				"label": _("Against Loan"),
+				"fieldtype": "Link",
+				"fieldname": "against_loan",
 				"options": "Loan",
 				"width": 200
 			},
 			{
-				"label": _("Loan Amount"),
+				"label": _("Applicant"),
+				"fieldtype": "Data",
+				"fieldname": "applicant",
+				"width": 150
+			},
+			{
+				"label": _("Payment Type"),
+				"fieldtype": "Data",
+				"fieldname": "payment_type",
+				"width": 150
+			},
+			{
+				"label": _("Principal Amount"),
 				"fieldtype": "Currency",
-				"fieldname": "loan_amount",
+				"fieldname": "principal_amount",
 				"options": "currency",
 				"width": 100
 			},
 			{
-				"label": _("Interest"),
-				"fieldtype": "Data",
+				"label": _("Interest Amount"),
+				"fieldtype": "Currency",
 				"fieldname": "interest",
+				"options": "currency",
+				"width": 100
+			},
+			{
+				"label": _("Penalty Amount"),
+				"fieldtype": "Currency",
+				"fieldname": "penalty",
+				"options": "currency",
 				"width": 100
 			},
 			{
 				"label": _("Payable Amount"),
 				"fieldtype": "Currency",
 				"fieldname": "payable_amount",
-				"options": "currency",
-				"width": 100
-			},
-			{
-				"label": _("EMI"),
-				"fieldtype": "Currency",
-				"fieldname": "emi",
 				"options": "currency",
 				"width": 100
 			},
@@ -61,32 +80,46 @@ def create_columns():
 				"width": 100
 			},
 			{
-				"label": _("Outstanding Amount"),
-				"fieldtype": "Currency",
-				"fieldname": "out_amt",
-				"options": "currency",
+				"label": _("Currency"),
+				"fieldtype": "Link",
+				"fieldname": "currency",
+				"options": "Currency",
 				"width": 100
-			},
+			}
 		]
 
-def get_record():
+def get_data(filters):
 	data = []
-	loans = frappe.get_all("Loan",
-		filters=[("status", "=", "Disbursed")],
-		fields=["applicant", "applicant_name", "name", "loan_amount", "rate_of_interest",
-			"total_payment", "monthly_repayment_amount", "total_amount_paid"]
+
+	query_filters = {
+		"docstatus": 1,
+		"company": filters.get('company'),
+	}
+
+	if filters.get('applicant'):
+		query_filters.update({
+			"applicant": filters.get('applicant')
+		})
+
+	loan_repayments = frappe.get_all("Loan Repayment",
+		filters = query_filters,
+		fields=["posting_date", "applicant", "name", "against_loan", "payment_type", "payable_amount",
+			"pending_principal_amount", "interest_payable", "penalty_amount", "amount_paid"]
 	)
 
-	for loan in loans:
+	for repayment in loan_repayments:
 		row = {
-			"employee": loan.applicant + ": " + loan.applicant_name,
-			"loan_name": loan.name,
-			"loan_amount": loan.loan_amount,
-			"interest": str(loan.rate_of_interest) + "%",
-			"payable_amount": loan.total_payment,
-			"emi": loan.monthly_repayment_amount,
-			"paid_amount": loan.total_amount_paid,
-			"out_amt": loan.total_payment - loan.total_amount_paid
+			"posting_date": repayment.posting_date,
+			"loan_repayment": repayment.name,
+			"applicant": repayment.applicant,
+			"payment_type": repayment.payment_type,
+			"against_loan": repayment.against_loan,
+			"principal_amount": repayment.pending_principal_amount,
+			"interest": repayment.interest_payable,
+			"penalty": repayment.penalty_amount,
+			"payable_amount": repayment.payable_amount,
+			"paid_amount": repayment.amount_paid,
+			"currency": frappe.get_cached_value("Company", filters.get("company"), "default_currency")
 		}
 
 		data.append(row)
