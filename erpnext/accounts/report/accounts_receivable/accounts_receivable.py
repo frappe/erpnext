@@ -42,8 +42,7 @@ class ReceivablePayableReport(object):
 				"fieldname": "party",
 				"filter_fieldname": scrub(self.filters.get("party_type")),
 				"options": self.filters.get("party_type"),
-				"width": 200 if self.filters.get("group_by", "Ungrouped") == "Ungrouped" else 300,
-				"hide_if_filtered": 1
+				"width": 200 if self.filters.get("group_by", "Ungrouped") == "Ungrouped" else 300
 			}
 		]
 
@@ -582,6 +581,7 @@ class ReceivablePayableReport(object):
 
 		row["account"] = gle.account
 		row["cost_center"] = gle.cost_center
+		row["project"] = gle.project
 
 		# get supplier bill details
 		if self.filters.get("party_type") == "Supplier":
