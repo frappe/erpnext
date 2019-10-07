@@ -35,7 +35,8 @@ class Asset(AccountsController):
 		self.validate_in_use_date()
 		self.set_status()
 		self.update_stock_movement()
-		if not self.booked_fixed_asset and not is_cwip_accounting_disabled():
+		if not self.booked_fixed_asset and not is_cwip_accounting_disabled(self.company,
+			self.asset_category):
 			self.make_gl_entries()
 
 	def on_cancel(self):
@@ -70,10 +71,13 @@ class Asset(AccountsController):
 			self.set('finance_books', finance_books)
 
 	def validate_asset_values(self):
+		if not self.asset_category:
+			self.asset_category = frappe.get_cached_value("Item", self.item_code, "asset_category")
+
 		if not flt(self.gross_purchase_amount):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
 
-		if not is_cwip_accounting_disabled():
+		if not is_cwip_accounting_disabled(self.company, self.asset_category):
 			if not self.is_existing_asset and not (self.purchase_receipt or self.purchase_invoice):
 				frappe.throw(_("Please create purchase receipt or purchase invoice for the item {0}").
 					format(self.item_code))
@@ -418,7 +422,7 @@ def update_maintenance_status():
 			asset.set_status('Out of Order')
 
 def make_post_gl_entry():
-	if is_cwip_accounting_disabled():
+	if is_cwip_accounting_disabled(self.company, self.asset_category):
 		return
 
 	assets = frappe.db.sql_list(""" select name from `tabAsset`
@@ -568,8 +572,15 @@ def make_journal_entry(asset_name):
 
 	return je
 
-def is_cwip_accounting_disabled():
-	return cint(frappe.db.get_single_value("Asset Settings", "disable_cwip_accounting"))
+def is_cwip_accounting_disabled(company, asset_category=None):
+	disable_cwip_in_company = cint(frappe.db.get_value("Company",
+		company, "disable_cwip_accounting"))
+
+	if not asset_category:
+		return disable_cwip_in_company
+
+	return cint(frappe.db.get_value("Asset Category",
+		asset_category, "disable_cwip_accounting"))
 
 def get_pro_rata_amt(row, depreciation_amount, from_date, to_date):
 	days = date_diff(to_date, from_date)

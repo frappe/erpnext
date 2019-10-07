@@ -148,14 +148,17 @@ def validate_account_for_perpetual_inventory(gl_map):
 						.format(entry.account), StockAccountInvalidTransaction)
 
 def validate_cwip_accounts(gl_map):
-	if not cint(frappe.db.get_value("Asset Settings", None, "disable_cwip_accounting")) \
+	from erpnext.assets.doctype.asset.asset import is_cwip_accounting_disabled
+	
+	if not is_cwip_accounting_disabled(gl_map[0].company, None) \
 		and gl_map[0].voucher_type == "Journal Entry":
 			cwip_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
 				where account_type = 'Capital Work in Progress' and is_group=0""")]
 
 			for entry in gl_map:
 				if entry.account in cwip_accounts:
-					frappe.throw(_("Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry").format(entry.account))
+					frappe.throw(
+						_("Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry").format(entry.account))
 
 def round_off_debit_credit(gl_map):
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),

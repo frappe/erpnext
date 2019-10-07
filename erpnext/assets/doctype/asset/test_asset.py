@@ -14,7 +14,6 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchas
 class TestAsset(unittest.TestCase):
 	def setUp(self):
 		set_depreciation_settings_in_company()
-		remove_prorated_depreciation_schedule()
 		create_asset_data()
 		frappe.db.sql("delete from `tabTax Rule`")
 
@@ -200,7 +199,6 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(schedules, expected_schedules)
 
 	def test_schedule_for_prorated_straight_line_method(self):
-		set_prorated_depreciation_schedule()
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=1, rate=100000.0, location="Test Location")
 
@@ -232,8 +230,6 @@ class TestAsset(unittest.TestCase):
 			for d in asset.get("schedules")]
 
 		self.assertEqual(schedules, expected_schedules)
-
-		remove_prorated_depreciation_schedule()
 
 	def test_depreciation(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
@@ -657,18 +653,3 @@ def set_depreciation_settings_in_company():
 
 	# Enable booking asset depreciation entry automatically
 	frappe.db.set_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically", 1)
-
-def remove_prorated_depreciation_schedule():
-	asset_settings = frappe.get_doc("Asset Settings", "Asset Settings")
-	asset_settings.schedule_based_on_fiscal_year = 0
-	asset_settings.save()
-
-	frappe.db.commit()
-
-def set_prorated_depreciation_schedule():
-	asset_settings = frappe.get_doc("Asset Settings", "Asset Settings")
-	asset_settings.schedule_based_on_fiscal_year = 1
-	asset_settings.number_of_days_in_fiscal_year = 360
-	asset_settings.save()
-
-	frappe.db.commit()

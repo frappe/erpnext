@@ -336,12 +336,13 @@ class PurchaseReceipt(BuyingController):
 	def get_asset_gl_entry(self, gl_entries, expenses_included_in_valuation=None):
 		arbnb_account, cwip_account = None, None
 
-		cwip_disabled = is_cwip_accounting_disabled()
-
 		if not expenses_included_in_valuation:
 			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		for d in self.get("items"):
+			asset_category = frappe.db.get_value("Asset", d.asset, "asset_category")
+			cwip_disabled = is_cwip_accounting_disabled(self.company, asset_category)
+
 			if d.is_fixed_asset and not (arbnb_account and cwip_account):
 				arbnb_account = self.get_company_default("asset_received_but_not_billed")
 
@@ -350,7 +351,6 @@ class PurchaseReceipt(BuyingController):
 					company = self.company)
 
 			if d.is_fixed_asset and not cwip_disabled:
-
 				asset_amount = flt(d.net_amount) + flt(d.item_tax_amount/self.conversion_rate)
 				base_asset_amount = flt(d.base_net_amount + d.item_tax_amount)
 
