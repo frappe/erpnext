@@ -213,6 +213,9 @@ class WorkOrder(Document):
 
 			self.db_set(fieldname, qty)
 
+			from erpnext.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
+			update_produced_qty_in_so_item(self.sales_order_item)
+
 		if self.production_plan:
 			self.update_production_plan_status()
 
@@ -539,6 +542,13 @@ class WorkOrder(Document):
 
 		bom.set_bom_material_details()
 		return bom
+
+def get_bom_operations(doctype, txt, searchfield, start, page_len, filters):
+	if txt:
+		filters['operation'] = ('like', '%%%s%%' % txt)
+
+	return frappe.get_all('BOM Operation',
+		filters = filters, fields = ['operation'], as_list=1)
 
 @frappe.whitelist()
 def get_item_details(item, project = None):
