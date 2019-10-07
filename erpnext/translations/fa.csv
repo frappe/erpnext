@@ -286,7 +286,6 @@ apps/erpnext/erpnext/accounts/doctype/cheque_print_template/cheque_print_templat
 DocType: Loan,Repay Over Number of Periods,بازپرداخت تعداد بیش از دوره های
 apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py,Quantity to Produce can not be less than Zero,مقدار تولید نمی تواند کمتر از صفر باشد
 DocType: Stock Entry,Additional Costs,هزینه های اضافی
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,مشتری&gt; گروه مشتری&gt; سرزمین
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account with existing transaction can not be converted to group.,حساب با معامله موجود می تواند به گروه تبدیل نمی کند.
 DocType: Lead,Product Enquiry,پرس و جو محصولات
 DocType: Education Settings,Validate Batch for Students in Student Group,اعتبارسنجی دسته ای برای دانش آموزان در گروه های دانشجویی
@@ -582,6 +581,7 @@ DocType: Payment Term,Payment Term Name,نام و نام خانوادگی پرد
 DocType: Healthcare Settings,Create documents for sample collection,اسناد را برای جمع آوری نمونه ایجاد کنید
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Payment against {0} {1} cannot be greater than Outstanding Amount {2},پرداخت در مقابل {0} {1} نمی تواند بیشتر از برجسته مقدار {2}
 apps/erpnext/erpnext/patches/v11_0/add_healthcare_service_unit_tree_root.py,All Healthcare Service Units,همه ی سرویس های بهداشتی
+apps/erpnext/erpnext/setup/default_energy_point_rules.py,On Converting Opportunity,در تبدیل فرصت
 DocType: Bank Account,Address HTML,آدرس HTML
 DocType: Lead,Mobile No.,شماره موبایل
 apps/erpnext/erpnext/selling/doctype/pos_closing_voucher/closing_voucher_details.html,Mode of Payments,حالت پرداخت
@@ -646,7 +646,6 @@ DocType: Stock Settings,Notify by Email on creation of automatic Material Reques
 DocType: Accounting Dimension,Dimension Name,نام ابعاد
 apps/erpnext/erpnext/healthcare/setup.py,Resistant,مقاوم
 apps/erpnext/erpnext/hotels/doctype/hotel_room_reservation/hotel_room_reservation.py,Please set Hotel Room Rate on {},لطفا قیمت اتاق هتل را برای {} تنظیم کنید
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,لطفاً سریال های شماره گذاری را برای حضور از طریق تنظیم&gt; سری شماره گذاری تنظیم کنید
 DocType: Journal Entry,Multi Currency,چند ارز
 DocType: Bank Statement Transaction Invoice Item,Invoice Type,فاکتور نوع
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Valid from date must be less than valid upto date,اعتبار آن از تاریخ باید کمتر از تاریخ معتبر باشد
@@ -758,6 +757,7 @@ apps/erpnext/erpnext/public/js/controllers/transaction.js,Cannot find Item with 
 apps/erpnext/erpnext/accounts/page/pos/pos.js,Create a new Customer,ایجاد یک مشتری جدید
 apps/erpnext/erpnext/non_profit/report/expiring_memberships/expiring_memberships.py,Expiring On,در حال پایان است
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,"If multiple Pricing Rules continue to prevail, users are asked to set Priority manually to resolve conflict.",اگر چند در قوانین قیمت گذاری ادامه غالب است، از کاربران خواسته به تنظیم اولویت دستی برای حل و فصل درگیری.
+apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js,Purchase Return,بازگشت خرید
 apps/erpnext/erpnext/utilities/activation.py,Create Purchase Orders,ایجاد سفارشات خرید
 ,Purchase Register,خرید ثبت نام
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.py,Patient not found,بیمار یافت نشد
@@ -772,7 +772,6 @@ DocType: Announcement,Receiver,گیرنده
 DocType: Location,Area UOM,منطقه UOM
 apps/erpnext/erpnext/manufacturing/doctype/workstation/workstation.py,Workstation is closed on the following dates as per Holiday List: {0},ایستگاه های کاری در تاریخ زیر را به عنوان در هر فهرست تعطیلات بسته است: {0}
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py,Opportunities,فرصت ها
-apps/erpnext/erpnext/www/all-products/index.html,Clear filters,فیلترها را پاک کنید
 DocType: Lab Test Template,Single,تک
 DocType: Compensatory Leave Request,Work From Date,کار از تاریخ
 DocType: Salary Slip,Total Loan Repayment,مجموع بازپرداخت وام
@@ -815,6 +814,7 @@ DocType: Lead,Channel Partner,کانال شریک
 DocType: Account,Old Parent,قدیمی مرجع
 apps/erpnext/erpnext/education/doctype/program_enrollment_tool/program_enrollment_tool.py,Mandatory field - Academic Year,فیلد اجباری - سال تحصیلی
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,{0} {1} is not associated with {2} {3},{0} {1} با {2} {3} ارتباط ندارد
+DocType: Opportunity,Converted By,تبدیل شده توسط
 apps/erpnext/erpnext/public/js/hub/components/ReviewArea.vue,You need to login as a Marketplace User before you can add any reviews.,قبل از هرگونه بررسی ، باید به عنوان کاربر Marketplace وارد شوید.
 apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.py,Row {0} : Operation is required against the raw material item {1},ردیف {0}: عملیات مورد نیاز علیه مواد خام مورد نیاز است {1}
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py,Please set default payable account for the company {0},لطفا پیش فرض حساب های قابل پرداخت تعیین شده برای شرکت {0}
@@ -839,6 +839,8 @@ DocType: Request for Quotation,Message for Supplier,پیام برای عرضه
 DocType: BOM,Work Order,سفارش کار
 DocType: Sales Invoice,Total Qty,مجموع تعداد
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py,Guardian2 Email ID,Guardian2 ID ایمیل
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","لطفاً برای لغو این سند ، <a href=""#Form/Employee/{0}"">{0}</a> \ کارمند را حذف کنید"
 DocType: Item,Show in Website (Variant),نمایش در وب سایت (نوع)
 DocType: Employee,Health Concerns,نگرانی های بهداشتی
 DocType: Payroll Entry,Select Payroll Period,انتخاب کنید حقوق و دستمزد دوره
@@ -895,7 +897,6 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Administr
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,Please select Course,لطفا دوره را انتخاب کنید
 DocType: Codification Table,Codification Table,جدول کدگذاری
 DocType: Timesheet Detail,Hrs,ساعت
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js,Please select Company,لطفا انتخاب کنید شرکت
 DocType: Employee Skill,Employee Skill,مهارت کارمندان
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js,Difference Account,حساب تفاوت
 DocType: Pricing Rule,Discount on Other Item,تخفیف در مورد دیگر
@@ -963,6 +964,7 @@ DocType: Global Defaults,"If disable, 'Rounded Total' field will not be visible 
 DocType: BOM,Operating Cost,هزینه های عملیاتی
 DocType: Crop,Produced Items,آیتم های تولید شده
 DocType: Bank Statement Transaction Entry,Match Transaction to Invoices,معامله معاملات را به صورت حساب
+apps/erpnext/erpnext/erpnext_integrations/exotel_integration.py,Error in Exotel incoming call,خطا در تماس دریافتی Exotel
 DocType: Sales Order Item,Gross Profit,سود ناخالص
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,Unblock Invoice,انحلال صورتحساب
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,Increment cannot be 0,افزایش نمی تواند 0
@@ -1171,6 +1173,7 @@ apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js,Convert to Grou
 DocType: Activity Cost,Activity Type,نوع فعالیت
 DocType: Request for Quotation,For individual supplier,عرضه کننده منحصر به فرد
 DocType: BOM Operation,Base Hour Rate(Company Currency),یک ساعت یک نرخ پایه (شرکت ارز)
+,Qty To Be Billed,Qty به صورتحساب است
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py,Delivered Amount,تحویل مبلغ
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Production: Raw materials quantity to make manufacturing items.,قطعه رزرو شده برای تولید: مقدار مواد اولیه برای ساخت کالاهای تولیدی.
 DocType: Loyalty Point Entry Redemption,Redemption Date,تاریخ رستگاری
@@ -1286,7 +1289,7 @@ DocType: Material Request Item,Quantity and Warehouse,مقدار و انبار
 DocType: Sales Invoice,Commission Rate (%),نرخ کمیسیون (٪)
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,Please select Program,لطفا انتخاب برنامه
 DocType: Project,Estimated Cost,هزینه تخمین زده شده
-DocType: Request for Quotation,Link to material requests,لینک به درخواست مواد
+DocType: Supplier Quotation,Link to material requests,لینک به درخواست مواد
 apps/erpnext/erpnext/public/js/hub/pages/Publish.vue,Publish,انتشار
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Aerospace,جو زمین
 ,Fichier des Ecritures Comptables [FEC],Ficier Des Ecritures Comptables [FEC]
@@ -1299,6 +1302,7 @@ apps/erpnext/erpnext/hr/doctype/job_offer/job_offer.js,Create Employee,ایجا�
 apps/erpnext/erpnext/utilities/transaction_base.py,Invalid Posting Time,زمان ارسال نامعتبر
 DocType: Salary Component,Condition and Formula,شرایط و فرمول
 DocType: Lead,Campaign Name,نام کمپین
+apps/erpnext/erpnext/setup/default_energy_point_rules.py,On Task Completion,در تکمیل کار
 apps/erpnext/erpnext/hr/doctype/compensatory_leave_request/compensatory_leave_request.py,There is no leave period in between {0} and {1},فاصله زمانی بین {0} و {1} وجود ندارد
 DocType: Fee Validity,Healthcare Practitioner,پزشک متخصص
 DocType: Hotel Room,Capacity,ظرفیت
@@ -1642,7 +1646,6 @@ apps/erpnext/erpnext/healthcare/utils.py,The Patient {0} do not have customer re
 DocType: Quality Feedback Template,Quality Feedback Template,الگوی بازخورد کیفیت
 apps/erpnext/erpnext/config/education.py,LMS Activity,فعالیت LMS
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Internet Publishing,انتشارات اینترنت
-DocType: Prescription Duration,Number,عدد
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js,Creating {0} Invoice,ایجاد {0} صورتحساب
 DocType: Medical Code,Medical Code Standard,کد استاندارد پزشکی
 DocType: Soil Texture,Clay Composition (%),ترکیب خشت (٪)
@@ -1717,6 +1720,7 @@ DocType: Cheque Print Template,Has Print Format,است چاپ فرمت
 DocType: Support Settings,Get Started Sections,بخش های شروع کنید
 DocType: Lead,CRM-LEAD-.YYYY.-,CRM-LEAD- .YYYY.-
 DocType: Invoice Discounting,Sanctioned,تحریم
+,Base Amount,مبلغ پایه
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.js,Total Contribution Amount: {0},مجموع کمک مالی: {0}
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Row #{0}: Please specify Serial No for Item {1},ردیف # {0}: لطفا سریال مشخص نیست برای مورد {1}
 DocType: Payroll Entry,Salary Slips Submitted,حقوق و دستمزد ارسال شده است
@@ -1934,6 +1938,7 @@ DocType: Payment Request,Inward,درون
 apps/erpnext/erpnext/utilities/user_progress.py,List a few of your suppliers. They could be organizations or individuals.,لیست چند از تامین کنندگان خود را. آنها می تواند سازمان ها یا افراد.
 DocType: Accounting Dimension,Dimension Defaults,پیش فرض ابعاد
 apps/erpnext/erpnext/crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.js,Minimum Lead Age (Days),حداقل سن منجر (روز)
+apps/erpnext/erpnext/assets/report/fixed_asset_register/fixed_asset_register.py,Available For Use Date,در دسترس برای تاریخ استفاده
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,All BOMs,همه BOM ها
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js,Create Inter Company Journal Entry,ورود مجله شرکت بین المللی را ایجاد کنید
 DocType: Company,Parent Company,شرکت مادر
@@ -1997,6 +2002,7 @@ DocType: Shift Type,Process Attendance After,حضور در فرآیند پس ا�
 ,IRS 1099,IRS 1099
 DocType: Salary Slip,Leave Without Pay,ترک کنی بدون اینکه پرداخت
 DocType: Payment Request,Outward,به سمت خارج
+apps/erpnext/erpnext/setup/default_energy_point_rules.py,On {0} Creation,در {0} ایجاد
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,State/UT Tax,مالیات دولت / UT
 ,Trial Balance for Party,تعادل دادگاه برای حزب
 ,Gross and Net Profit Report,گزارش سود ناخالص و خالص
@@ -2111,6 +2117,7 @@ apps/erpnext/erpnext/config/help.py,Setting up Employees,راه اندازی ک�
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js,Make Stock Entry,ورود سهام
 DocType: Hotel Room Reservation,Hotel Reservation User,کاربر رزرو هتل
 apps/erpnext/erpnext/projects/doctype/project/project.js,Set Status,تنظیم وضعیت
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,لطفاً سریال های شماره گذاری را برای حضور از طریق تنظیم&gt; سری شماره گذاری تنظیم کنید
 apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please select prefix first,لطفا ابتدا پیشوند انتخاب کنید
 DocType: Contract,Fulfilment Deadline,آخرین مهلت تحویل
 apps/erpnext/erpnext/public/js/hub/pages/Home.vue,Near you,نزدیک تو
@@ -2126,6 +2133,7 @@ apps/erpnext/erpnext/controllers/item_variant.py,Please specify at least one att
 DocType: Announcement,All Students,همه ی دانش آموزان
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Item {0} must be a non-stock item,مورد {0} باید یک آیتم غیر سهام شود
 apps/erpnext/erpnext/stock/doctype/batch/batch.js,View Ledger,مشخصات لجر
+DocType: Cost Center,Lft,LFT
 DocType: Grading Scale,Intervals,فواصل
 DocType: Bank Statement Transaction Entry,Reconciled Transactions,معاملات متقابل
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py,Earliest,قدیمیترین
@@ -2240,6 +2248,7 @@ DocType: Bank Statement Transaction Payment Item,Mode of Payment,نحوه پرد
 apps/erpnext/erpnext/hr/doctype/employee_benefit_application/employee_benefit_application.py,As per your assigned Salary Structure you cannot apply for benefits,همانطور که در ساختار حقوق شما تعیین شده است، نمی توانید برای مزایا درخواست دهید
 apps/erpnext/erpnext/stock/doctype/item/item.py,Website Image should be a public file or website URL,وب سایت تصویر باید یک فایل عمومی و یا آدرس وب سایت می باشد
 DocType: Purchase Invoice Item,BOM,BOM
+apps/erpnext/erpnext/stock/doctype/item/item.py,Duplicate entry in Manufacturers table,ورود تکراری در جدول تولید کنندگان
 apps/erpnext/erpnext/setup/doctype/item_group/item_group.js,This is a root item group and cannot be edited.,این یک گروه مورد ریشه است و نمی تواند ویرایش شود.
 apps/erpnext/erpnext/accounts/doctype/account/account.js,Merge,ادغام
 DocType: Journal Entry Account,Purchase Order,سفارش خرید
@@ -2381,7 +2390,6 @@ apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js,Please select b
 DocType: Asset,Depreciation Schedules,برنامه استهلاک
 apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.js,Create Sales Invoice,ایجاد فاکتور فروش
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Ineligible ITC,ITC واجد شرایط نیست
-apps/erpnext/erpnext/erpnext_integrations/doctype/shopify_settings/shopify_settings.py,"Support for public app is deprecated. Please setup private app, for more details refer user manual",پشتیبانی از برنامه عمومی منسوخ شده است. لطفا برنامه خصوصی را راه اندازی کنید، برای اطلاعات بیشتر، راهنمای کاربر را ببینید
 DocType: Task,Dependent Tasks,وظایف وابسته
 apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.py,Following accounts might be selected in GST Settings:,حسابهای زیر ممکن است در تنظیمات GST انتخاب شوند:
 apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.js,Quantity to Produce,مقدار تولید
@@ -2628,6 +2636,7 @@ apps/erpnext/erpnext/erpnext_integrations/utils.py,Unverified Webhook Data,دا�
 DocType: Water Analysis,Container,کانتینر
 apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.py,Please set valid GSTIN No. in Company Address,لطفاً شماره معتبر GSTIN را در آدرس شرکت تنظیم کنید
 apps/erpnext/erpnext/education/utils.py,Student {0} - {1} appears Multiple times in row {2} & {3},دانشجو {0} - {1} چند بار در ردیف به نظر می رسد {2} و {3}
+apps/erpnext/erpnext/selling/doctype/customer/customer.py,Following fields are mandatory to create address:,زمینه های زیر برای ایجاد آدرس الزامی است:
 DocType: Item Alternative,Two-way,دو طرفه
 DocType: Item,Manufacturers,تولید کنندگان
 ,Employee Billing Summary,خلاصه صورتحساب کارمندان
@@ -2701,9 +2710,9 @@ DocType: Staffing Plan Detail,Estimated Cost Per Position,هزینه پیش بی
 DocType: Employee,HR-EMP-,HR-EMP-
 apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py,User {0} doesn't have any default POS Profile. Check Default at Row {1} for this User.,کاربر {0} هیچ پروفایل پیش فرض POS ندارد. برای این کاربر پیش فرض در ردیف {1} را بررسی کنید.
 DocType: Quality Meeting Minutes,Quality Meeting Minutes,دقیقه جلسات با کیفیت
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,عرضه کننده&gt; نوع عرضه کننده
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Employee Referral,ارجاع کارمند
 DocType: Student Group,Set 0 for no limit,تنظیم 0 برای هیچ محدودیتی
+DocType: Cost Center,rgt,RGT
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,The day(s) on which you are applying for leave are holidays. You need not apply for leave.,روز (بازدید کنندگان) که در آن شما برای مرخصی استفاده از تعطیلات. شما نیاز به درخواست برای ترک نمی کند.
 DocType: Customer,Primary Address and Contact Detail,آدرس اصلی و جزئیات تماس
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.js,Resend Payment Email,ارسال مجدد ایمیل پرداخت
@@ -2812,7 +2821,6 @@ DocType: Vital Signs,Constipated,یبوست
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Against Supplier Invoice {0} dated {1},در برابر تامین کننده فاکتور {0} تاریخ {1}
 DocType: Customer,Default Price List,به طور پیش فرض لیست قیمت
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Asset Movement record {0} created,ضبط حرکت دارایی {0} ایجاد
-apps/erpnext/erpnext/utilities/page/leaderboard/leaderboard.js,No items found.,موردی یافت نشد.
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py,You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global Settings,شما نمی توانید حذف سال مالی {0}. سال مالی {0} به عنوان پیش فرض در تنظیمات جهانی تنظیم
 DocType: Share Transfer,Equity/Liability Account,حساب سهام و مسئولیت
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.py,A customer with the same name already exists,یک مشتری با همین نام قبلا وجود دارد
@@ -2828,6 +2836,7 @@ apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py,Net Change in Accoun
 apps/erpnext/erpnext/selling/doctype/customer/customer.py,Credit limit has been crossed for customer {0} ({1}/{2}),اعتبار محدود شده است برای مشتری {0} ({1} / {2})
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py,Customer required for 'Customerwise Discount',مشتری مورد نیاز برای &#39;تخفیف Customerwise&#39;
 apps/erpnext/erpnext/config/accounting.py,Update bank payment dates with journals.,به روز رسانی تاریخ های پرداخت بانک با مجلات.
+,Billed Qty,قبض قبض
 apps/erpnext/erpnext/stock/doctype/item/item_dashboard.py,Pricing,قیمت گذاری
 DocType: Employee,Attendance Device ID (Biometric/RF tag ID),شناسه دستگاه حضور و غیاب (شناسه برچسب بیومتریک / RF)
 DocType: Quotation,Term Details,جزییات مدت
@@ -2849,6 +2858,7 @@ DocType: Salary Slip,Loan repayment,بازپرداخت وام
 DocType: Share Transfer,Asset Account,حساب دارایی
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,New release date should be in the future,تاریخ انتشار جدید باید در آینده باشد
 DocType: Purchase Invoice,End date of current invoice's period,تاریخ پایان دوره صورتحساب فعلی
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,لطفاً سیستم نامگذاری کارمندان را در منابع انسانی&gt; تنظیمات HR تنظیم کنید
 DocType: Lab Test,Technician Name,نام تکنسین
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,"Cannot ensure delivery by Serial No as \
 					Item {0} is added with and without Ensure Delivery by \
@@ -2856,6 +2866,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,"Cannot ensure d
 DocType: Accounts Settings,Unlink Payment on Cancellation of Invoice,قطع ارتباط پرداخت در لغو فاکتور
 DocType: Bank Reconciliation,From Date,از تاریخ
 apps/erpnext/erpnext/hr/doctype/vehicle_log/vehicle_log.py,Current Odometer reading entered should be greater than initial Vehicle Odometer {0},خواندن کیلومترشمار فعلی وارد باید بیشتر از اولیه خودرو کیلومترشمار شود {0}
+,Purchase Order Items To Be Received or Billed,موارد سفارش را بخرید یا قبض خریداری کنید
 DocType: Restaurant Reservation,No Show,بدون نمایش
 apps/erpnext/erpnext/regional/india/utils.py,You must be a registered supplier to generate e-Way Bill,شما باید یک تهیه کننده ثبت شده برای تولید قبض راه الکترونیکی باشید
 DocType: Shipping Rule Country,Shipping Rule Country,قانون حمل و نقل کشور
@@ -2896,6 +2907,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order_dashboard.py,Fulfil
 apps/erpnext/erpnext/templates/generators/item/item_add_to_cart.html,View in Cart,نمایش سبد خرید
 DocType: Employee Checkin,Shift Actual Start,شروع واقعی Shift
 DocType: Tally Migration,Is Day Book Data Imported,آیا اطلاعات روز کتاب وارد شده است
+,Purchase Order Items To Be Received or Billed1,مواردی را که باید دریافت یا قبض شود خریداری کنید
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Marketing Expenses,هزینه های بازاریابی
 ,Item Shortage Report,مورد گزارش کمبود
 DocType: Bank Transaction Payments,Bank Transaction Payments,پرداختهای معامله بانکی
@@ -3258,6 +3270,7 @@ apps/erpnext/erpnext/config/selling.py,Customer Addresses And Contacts,آدرس 
 DocType: Homepage Section,Section Cards,کارت های بخش
 ,Campaign Efficiency,بهره وری کمپین
 DocType: Discussion,Discussion,بحث
+apps/erpnext/erpnext/setup/default_energy_point_rules.py,On Sales Order Submission,در ارسال سفارش فروش
 DocType: Bank Transaction,Transaction ID,شناسه تراکنش
 DocType: Payroll Entry,Deduct Tax For Unsubmitted Tax Exemption Proof,تخفیف مالیات برای اثبات تخفیف مالیات غیرقانونی
 DocType: Volunteer,Anytime,هر زمان
@@ -3265,7 +3278,6 @@ DocType: Bank Account,Bank Account No,شماره حساب بانکی
 DocType: Employee Tax Exemption Proof Submission,Employee Tax Exemption Proof Submission,ارائه بازپرداخت معاف از مالیات کارمند
 DocType: Patient,Surgical History,تاریخ جراحی
 DocType: Bank Statement Settings Item,Mapped Header,سربرگ مرتب شده
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,لطفاً سیستم نامگذاری کارمندان را در منابع انسانی&gt; تنظیمات HR تنظیم کنید
 DocType: Employee,Resignation Letter Date,استعفای نامه تاریخ
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Pricing Rules are further filtered based on quantity.,مشاهده قوانین قیمت گذاری بیشتر بر اساس مقدار فیلتر شده است.
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py,Please set the Date Of Joining for employee {0},لطفا مجموعه ای از تاریخ پیوستن برای کارمند {0}
@@ -3279,6 +3291,7 @@ DocType: Quiz,Enter 0 to waive limit,0 را وارد کنید تا از حد م�
 DocType: Bank Statement Settings,Mapped Items,موارد ممتاز
 DocType: Amazon MWS Settings,IT,آی تی
 DocType: Chapter,Chapter,فصل
+,Fixed Asset Register,ثبت نام دارایی های ثابت
 apps/erpnext/erpnext/utilities/user_progress.py,Pair,جفت
 DocType: Mode of Payment Account,Default account will be automatically updated in POS Invoice when this mode is selected.,در صورت انتخاب این حالت، حساب پیش فرض به طور خودکار در صورتحساب اعتباری به روز می شود.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js,Select BOM and Qty for Production,انتخاب کنید BOM و تعداد برای تولید
@@ -3409,7 +3422,6 @@ apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Stoc
 apps/erpnext/erpnext/templates/emails/reorder_item.html,Following Material Requests have been raised automatically based on Item's re-order level,پس از درخواست های مواد به طور خودکار بر اساس سطح آیتم سفارش مجدد مطرح شده است
 apps/erpnext/erpnext/controllers/accounts_controller.py,Account {0} is invalid. Account Currency must be {1},حساب {0} نامعتبر است. حساب ارزی باید {1} باشد
 apps/erpnext/erpnext/hr/doctype/salary_structure_assignment/salary_structure_assignment.py,From Date {0} cannot be after employee's relieving Date {1},از تاریخ {0} نمیتواند پس از تخفیف کارمند تاریخ {1}
-apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py,Debit Note {0} has been created automatically,Debit Note {0} بطور خودکار ایجاد شده است
 apps/erpnext/erpnext/accounts/doctype/payment_order/payment_order.js,Create Payment Entries,ورودی های پرداخت را ایجاد کنید
 DocType: Supplier,Is Internal Supplier,آیا تامین کننده داخلی است
 DocType: Employee,Create User Permission,ایجاد مجوز کاربر
@@ -4182,7 +4194,6 @@ DocType: Shopping Cart Settings,Shopping Cart Settings,تنظیمات سبد خ�
 DocType: Journal Entry,Accounting Entries,ثبت های حسابداری
 DocType: Job Card Time Log,Job Card Time Log,ورود به سیستم زمان کار
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,"If selected Pricing Rule is made for 'Rate', it will overwrite Price List. Pricing Rule rate is the final rate, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field.",اگر قانون قیمت گذاری انتخاب شده برای «نرخ» ساخته شده باشد، لیست قیمت را لغو خواهد کرد. نرخ حق الزحمه نرخ نهایی است، بنابراین هیچ تخفیف اضافی باید اعمال شود. از این رو، در معاملات مانند سفارش فروش، سفارش خرید و غیره، در فیلد «نرخ» جای خواهد گرفت، نه «قیمت نرخ قیمت».
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,لطفاً سیستم نامگذاری مربی را در آموزش و پرورش&gt; تنظیمات آموزش تنظیم کنید
 DocType: Journal Entry,Paid Loan,وام پرداخت شده
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py,Duplicate Entry. Please check Authorization Rule {0},تکراری ورودی. لطفا بررسی کنید مجوز قانون {0}
 DocType: Journal Entry Account,Reference Due Date,تاریخ تحویل مرجع
@@ -4199,7 +4210,6 @@ DocType: Shopify Settings,Webhooks Details,Webhooks جزئیات
 apps/erpnext/erpnext/templates/pages/projects.html,No time sheets,بدون ورق زمان
 DocType: GoCardless Mandate,GoCardless Customer,مشتری GoCardless
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,Leave Type {0} cannot be carry-forwarded,نوع ترک {0} نمی تواند حمل فرستاده
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,کد کالا&gt; گروه مورد&gt; نام تجاری
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Maintenance Schedule is not generated for all the items. Please click on 'Generate Schedule',نگهداری و تعمیرات برنامه برای تمام اقلام تولید شده نیست. لطفا بر روی &#39;ایجاد برنامه کلیک کنید
 ,To Produce,به تولید
 DocType: Leave Encashment,Payroll,لیست حقوق
@@ -4312,7 +4322,6 @@ DocType: Delivery Note,Required only for sample item.,فقط برای نمونه
 DocType: Stock Ledger Entry,Actual Qty After Transaction,تعداد واقعی بعد از تراکنش
 ,Pending SO Items For Purchase Request,در انتظار SO آیتم ها برای درخواست خرید
 apps/erpnext/erpnext/education/doctype/student_admission/student_admission.py,Student Admissions,پذیرش دانشجو
-apps/erpnext/erpnext/accounts/party.py,{0} {1} is disabled,{0} {1} غیر فعال است
 DocType: Supplier,Billing Currency,صدور صورت حساب نرخ ارز
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Extra Large,خیلی بزرگ
 DocType: Loan,Loan Application,درخواست وام
@@ -4389,7 +4398,6 @@ DocType: Supplier Scorecard Scoring Variable,Parameter Name,نام پارامت�
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Only Leave Applications with status 'Approved' and 'Rejected' can be submitted,تنها برنامه های کاربردی با وضعیت ترک &#39;تایید&#39; و &#39;رد&#39; را می توان ارسال
 apps/erpnext/erpnext/accounts/doctype/accounting_dimension/accounting_dimension.py,Creating Dimensions...,ایجاد ابعاد ...
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py,Student Group Name is mandatory in row {0},دانشجو نام گروه را در ردیف الزامی است {0}
-DocType: Customer Credit Limit,Bypass credit limit_check,دور زدن اعتبار limit_check
 DocType: Homepage,Products to be shown on website homepage,محصولات به صفحه اصلی وب سایت نشان داده می شود
 DocType: HR Settings,Password Policy,خط مشی رمز عبور
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.js,This is a root customer group and cannot be edited.,این یک گروه مشتری ریشه است و نمی تواند ویرایش شود.
@@ -4969,6 +4977,7 @@ apps/erpnext/erpnext/patches/v7_0/create_warehouse_nestedset.py,All Warehouses,�
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,No {0} found for Inter Company Transactions.,هیچ {0} برای معاملات اینترانت یافت نشد.
 DocType: Travel Itinerary,Rented Car,ماشین اجاره ای
 apps/erpnext/erpnext/public/js/hub/components/profile_dialog.js,About your Company,درباره شرکت شما
+apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.js,Show Stock Ageing Data,نمایش داده های پیری سهام
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Credit To account must be a Balance Sheet account,اعتباری به حساب باید یک حساب ترازنامه شود
 DocType: Donor,Donor,اهدا کننده
 DocType: Global Defaults,Disable In Words,غیر فعال کردن در کلمات
@@ -4982,8 +4991,10 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Patient,Patient ID,شناسه بیمار
 DocType: Practitioner Schedule,Schedule Name,نام برنامه
 DocType: Currency Exchange,For Buying,برای خرید
+apps/erpnext/erpnext/setup/default_energy_point_rules.py,On Purchase Order Submission,در ارسال سفارش خرید
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js,Add All Suppliers,اضافه کردن همه تامین کنندگان
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Row #{0}: Allocated Amount cannot be greater than outstanding amount.,ردیف # {0}: مقدار اختصاص داده شده نمی تواند بیشتر از مقدار برجسته.
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,مشتری&gt; گروه مشتری&gt; سرزمین
 DocType: Tally Migration,Parties,مهمانی ها
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js,Browse BOM,مرور BOM
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Secured Loans,وام
@@ -5015,6 +5026,7 @@ DocType: Subscription,Past Due Date,تاریخ تحویل گذشته
 apps/erpnext/erpnext/stock/doctype/item_alternative/item_alternative.py,Not allow to set alternative item for the item {0},اجازه نمیدهد که آیتم جایگزین برای آیتم {0}
 apps/erpnext/erpnext/hr/doctype/leave_block_list/leave_block_list.py,Date is repeated,تاریخ تکرار شده است
 apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html,Authorized Signatory,امضای مجاز
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,لطفاً سیستم نامگذاری مربی را در آموزش و پرورش&gt; تنظیمات آموزش تنظیم کنید
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Net ITC Available(A) - (B),ITC خالص موجود (A) - (B)
 apps/erpnext/erpnext/education/doctype/fee_schedule/fee_schedule.js,Create Fees,ایجاد هزینه ها
 DocType: Project,Total Purchase Cost (via Purchase Invoice),هزینه خرید مجموع (از طریق فاکتورخرید )
@@ -5034,6 +5046,7 @@ apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.js,Message Sent,پیام های ارسال شده
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account with child nodes cannot be set as ledger,حساب کاربری با گره فرزند می تواند به عنوان دفتر تنظیم شود
 DocType: C-Form,II,II
+apps/erpnext/erpnext/assets/report/fixed_asset_register/fixed_asset_register.py,Vendor Name,نام فروشنده
 DocType: Quiz Result,Wrong,اشتباه
 DocType: Sales Invoice,Rate at which Price list currency is converted to customer's base currency,سرعت که در آن لیست قیمت ارز به ارز پایه مشتری تبدیل
 DocType: Purchase Invoice Item,Net Amount (Company Currency),مبلغ خالص (شرکت ارز)
@@ -5272,6 +5285,7 @@ DocType: Patient,Marital Status,وضعیت تاهل
 DocType: Stock Settings,Auto Material Request,درخواست مواد خودکار
 DocType: Woocommerce Settings,API consumer secret,مخفف API کاربر
 DocType: Delivery Note Item,Available Batch Qty at From Warehouse,در دسترس تعداد دسته ای در از انبار
+,Received Qty Amount,مقدار Qty دریافت کرد
 DocType: Salary Slip,Gross Pay - Total Deduction - Loan Repayment,دستمزد ناخالص - کسر مجموع - بازپرداخت وام
 DocType: Bank Account,Last Integration Date,تاریخ آخرین ادغام
 DocType: Expense Claim,Expense Taxes and Charges,هزینه مالیات و عوارض
@@ -5723,6 +5737,8 @@ DocType: Work Order,MFG-WO-.YYYY.-,MFG-WO- .YYYY.-
 DocType: Drug Prescription,Hour,ساعت
 DocType: Restaurant Order Entry,Last Sales Invoice,آخرین اسکناس فروش
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please select Qty against item {0},لطفا مقدار در مورد item {0} را انتخاب کنید
+apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Latest Age,آخرین سن
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js,Transfer Material to Supplier,انتقال مواد به تامین کننده
 apps/erpnext/erpnext/hr/report/loan_repayment/loan_repayment.py,EMI,EMI
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,جدید بدون سریال را می انبار ندارد. انبار باید توسط بورس ورود یا رسید خرید مجموعه
 DocType: Lead,Lead Type,سرب نوع
@@ -5745,7 +5761,6 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js,Work Order not c
 apps/erpnext/erpnext/hr/doctype/employee_benefit_application/employee_benefit_application.py,"An amount of {0} already claimed for the component {1},\
 						 set the amount equal or greater than {2}",مقدار {0} که قبلا برای کامپوننت {1} داده شده است، مقدار را برابر یا بیشتر از {2}
 DocType: Shipping Rule,Shipping Rule Conditions,حمل و نقل قانون شرایط
-DocType: Purchase Invoice,Export Type,نوع صادرات
 DocType: Salary Slip Loan,Salary Slip Loan,وام وام لغزش
 DocType: BOM Update Tool,The new BOM after replacement,BOM جدید پس از تعویض
 ,Point of Sale,نقطه ای از فروش
@@ -5862,7 +5877,6 @@ apps/erpnext/erpnext/hr/doctype/loan/loan.js,Create Repayment Entry,ورودی �
 DocType: Purchase Order Item,Blanket Order Rate,نرخ سفارش قالب
 ,Customer Ledger Summary,خلاصه لجر مشتری
 apps/erpnext/erpnext/hooks.py,Certification,صدور گواهینامه
-apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js,Are you sure you want to make debit note?,آیا مطمئن هستید که می خواهید یادداشت بدهی بگیرید؟
 DocType: Bank Guarantee,Clauses and Conditions,مقررات و شرایط
 DocType: Serial No,Creation Document Type,ایجاد نوع سند
 DocType: Amazon MWS Settings,ES,ES
@@ -5900,8 +5914,6 @@ apps/erpnext/erpnext/buying/doctype/supplier/supplier.py,Series is mandatory,س�
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Financial Services,خدمات مالی
 DocType: Student Sibling,Student ID,ID دانش آموز
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js,For Quantity must be greater than zero,برای مقدار باید بیشتر از صفر باشد
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","لطفاً برای لغو این سند ، <a href=""#Form/Employee/{0}"">{0}</a> \ کارمند را حذف کنید"
 apps/erpnext/erpnext/config/projects.py,Types of activities for Time Logs,نوع فعالیت برای سیاهههای مربوط زمان
 DocType: Opening Invoice Creation Tool,Sales,فروش
 DocType: Stock Entry Detail,Basic Amount,مقدار اولیه
@@ -5980,6 +5992,7 @@ DocType: Journal Entry,Write Off Based On,ارسال فعال بر اساس
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Print and Stationery,چاپ و لوازم التحریر
 DocType: Stock Settings,Show Barcode Field,نمایش بارکد درست
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js,Send Supplier Emails,ارسال ایمیل کننده
+DocType: Asset Movement,ACC-ASM-.YYYY.-,ACC-ASM-.YYY.-
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,"Salary already processed for period between {0} and {1}, Leave application period cannot be between this date range.",حقوق و دستمزد در حال حاضر برای دوره بین {0} و {1}، ترک دوره نرم افزار نمی تواند بین این محدوده تاریخ پردازش شده است.
 DocType: Fiscal Year,Auto Created,خودکار ایجاد شده است
 apps/erpnext/erpnext/hr/doctype/employee_onboarding/employee_onboarding.py,Submit this to create the Employee record,این را برای ایجاد رکورد کارمند ارسال کنید
@@ -6056,7 +6069,6 @@ DocType: Clinical Procedure Item,Clinical Procedure Item,مورد روش بال�
 DocType: Sales Team,Contact No.,تماس با شماره
 apps/erpnext/erpnext/templates/includes/cart/cart_address.html,Billing Address is same as Shipping Address,آدرس صورتحساب همان آدرس حمل و نقل است
 DocType: Bank Reconciliation,Payment Entries,مطالب پرداخت
-apps/erpnext/erpnext/erpnext_integrations/doctype/shopify_settings/shopify_settings.py,Access token or Shopify URL missing,برچسب دسترسی یا Shopify URL گم شده است
 DocType: Location,Latitude,عرض جغرافیایی
 DocType: Work Order,Scrap Warehouse,انبار ضایعات
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,"Warehouse required at Row No {0}, please set default warehouse for the item {1} for the company {2}",انبار مورد نیاز در ردیف بدون {0}، لطفا برای انبار {1} برای شرکت {2}
@@ -6099,7 +6111,6 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Job Offer Term,Value / Description,ارزش / توضیحات
 apps/erpnext/erpnext/controllers/accounts_controller.py,"Row #{0}: Asset {1} cannot be submitted, it is already {2}",ردیف # {0}: دارایی {1} نمی تواند ارائه شود، آن است که در حال حاضر {2}
 DocType: Tax Rule,Billing Country,کشور صدور صورت حساب
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js,Are you sure you want to make credit note?,آیا مطمئن هستید که می خواهید یادداشت کنید؟
 DocType: Purchase Order Item,Expected Delivery Date,انتظار می رود تاریخ تحویل
 DocType: Restaurant Order Entry,Restaurant Order Entry,ورود به رستوران
 apps/erpnext/erpnext/accounts/general_ledger.py,Debit and Credit not equal for {0} #{1}. Difference is {2}.,بدهی و اعتباری برای {0} # برابر نیست {1}. تفاوت در این است {2}.
@@ -6222,6 +6233,7 @@ apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_
 DocType: Purchase Invoice,Taxes and Charges Added,مالیات و هزینه اضافه شده
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Depreciation Row {0}: Next Depreciation Date cannot be before Available-for-use Date,مقدار خسارت ردیف {0}: تاریخ بعد از انهدام بعدی قبل از موجود بودن برای تاریخ استفاده نمی شود
 ,Sales Funnel,قیف فروش
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,کد کالا&gt; گروه مورد&gt; نام تجاری
 apps/erpnext/erpnext/setup/doctype/company/company.py,Abbreviation is mandatory,مخفف الزامی است
 DocType: Project,Task Progress,وظیفه پیشرفت
 apps/erpnext/erpnext/templates/includes/navbar/navbar_items.html,Cart,گاری
@@ -6462,6 +6474,7 @@ DocType: Education Settings,"For Course based Student Group, the Course will be 
 DocType: Employee Grade,Employee Grade,درجه کارمند
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Piecework,کار از روی مقاطعه
 DocType: GSTR 3B Report,June,ژوئن
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,عرضه کننده&gt; نوع عرضه کننده
 DocType: Share Balance,From No,از شماره
 DocType: Shift Type,Early Exit Grace Period,زودرس دوره گریس
 DocType: Task,Actual Time (in Hours),زمان واقعی (در ساعت)
@@ -6931,6 +6944,7 @@ apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py,This Month's Sum
 DocType: Quality Inspection Reading,Quality Inspection Reading,خواندن بازرسی کیفیت
 apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py,`Freeze Stocks Older Than` should be smaller than %d days.,`سهام منجمد قدیمی تر از` باید کوچکتر از %d روز باشد.
 DocType: Tax Rule,Purchase Tax Template,خرید قالب مالیات
+apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Earliest Age,زودرس ترین سن
 apps/erpnext/erpnext/utilities/user_progress.py,Set a sales goal you'd like to achieve for your company.,یک هدف فروش که میخواهید برای شرکتتان به دست آورید، تنظیم کنید.
 DocType: Quality Goal,Revision,تجدید نظر
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,Healthcare Services,خدمات بهداشتی
@@ -6974,6 +6988,7 @@ DocType: Warranty Claim,Resolved By,حل
 apps/erpnext/erpnext/healthcare/doctype/patient_encounter/patient_encounter.js,Schedule Discharge,تخلیه برنامه
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Cheques and Deposits incorrectly cleared,چک و واریز وجه به اشتباه پاک
 DocType: Homepage Section Card,Homepage Section Card,کارت بخش صفحه
+,Amount To Be Billed,مبلغ صورتحساب
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account {0}: You can not assign itself as parent account,حساب {0}: شما نمی توانید خود را به عنوان پدر و مادر اختصاص حساب
 DocType: Purchase Invoice Item,Price List Rate,لیست قیمت نرخ
 apps/erpnext/erpnext/utilities/activation.py,Create customer quotes,درست به نقل از مشتری
@@ -7026,6 +7041,7 @@ apps/erpnext/erpnext/config/accounting.py,Tax Withholding rates to be applied on
 DocType: Supplier Scorecard Criteria,Supplier Scorecard Criteria,معیارهای کارت امتیازی تامین کننده
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Please select Start Date and End Date for Item {0},لطفا تاریخ شروع و پایان تاریخ برای مورد را انتخاب کنید {0}
 DocType: Maintenance Schedule,MAT-MSH-.YYYY.-,MAT-MSH- .YYYY.-
+,Amount to Receive,مبلغ دریافت
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py,Course is mandatory in row {0},البته در ردیف الزامی است {0}
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py,From date can not be greater than than To date,از تاریخ نمی تواند بیشتر از به روز باشد
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,To date cannot be before from date,تا به امروز نمی تواند قبل از از تاریخ
@@ -7473,6 +7489,7 @@ apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Please enter pa
 DocType: Delivery Note,Print Without Amount,چاپ بدون مقدار
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py,Depreciation Date,تاریخ استهلاک
 ,Work Orders in Progress,دستور کار در حال پیشرفت است
+DocType: Customer Credit Limit,Bypass Credit Limit Check,بررسی محدودیت اعتبار دور زدن
 DocType: Issue,Support Team,تیم پشتیبانی
 apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py,Expiry (In Days),انقضاء (روز)
 DocType: Appraisal,Total Score (Out of 5),نمره کل (از 5)
@@ -7654,6 +7671,7 @@ apps/erpnext/erpnext/accounts/doctype/account/account_tree.js,"Optional. Sets co
 DocType: Sales Invoice,Customer GSTIN,GSTIN و ضوابط
 DocType: Crop Cycle,List of diseases detected on the field. When selected it'll automatically add a list of tasks to deal with the disease ,فهرست بیماری های شناسایی شده در زمینه هنگامی که انتخاب می شود، به طور خودکار یک لیست از وظایف برای مقابله با بیماری را اضافه می کند
 apps/erpnext/erpnext/manufacturing/page/bom_comparison_tool/bom_comparison_tool.js,BOM 1,BOM 1
+apps/erpnext/erpnext/assets/report/fixed_asset_register/fixed_asset_register.py,Asset Id,دارایی شناسه
 apps/erpnext/erpnext/healthcare/doctype/healthcare_service_unit/healthcare_service_unit.js,This is a root healthcare service unit and cannot be edited.,این واحد مراقبت های بهداشتی ریشه است و نمی تواند ویرایش شود.
 DocType: Asset Repair,Repair Status,وضعیت تعمیر
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Requested Qty: Quantity requested for purchase, but not ordered.",درخواست مقدار: مقدار درخواست شده برای خرید ، اما سفارش داده نشده است.

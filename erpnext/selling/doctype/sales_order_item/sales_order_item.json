@@ -110,6 +110,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "ensure_delivery_based_on_produced_serial_no",
    "fieldtype": "Check",
    "label": "Ensure Delivery Based on Produced Serial No"
@@ -381,6 +382,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "is_free_item",
    "fieldtype": "Check",
    "label": "Is Free Item",
@@ -436,6 +438,7 @@
    "print_hide": 1
   },
   {
+   "default": "0",
    "fieldname": "delivered_by_supplier",
    "fieldtype": "Check",
    "label": "Supplier delivers to Customer",
@@ -662,6 +665,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "fieldname": "page_break",
    "fieldtype": "Check",
    "label": "Page Break",
@@ -689,7 +693,6 @@
    "description": "For Production",
    "fieldname": "produced_qty",
    "fieldtype": "Float",
-   "hidden": 1,
    "label": "Produced Quantity",
    "oldfieldname": "produced_qty",
    "oldfieldtype": "Currency",
@@ -740,7 +743,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-01 17:52:32.810797",
+ "modified": "2019-09-13 12:18:54.903107",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",
