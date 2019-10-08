@@ -1148,6 +1148,7 @@
    "fieldname": "language",
    "fieldtype": "Data",
    "label": "Print Language",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1210,7 +1211,8 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nDraft\nReturn\nDebit Note Issued\nSubmitted\nPaid\nUnpaid\nOverdue\nCancelled"
+   "options": "\nDraft\nReturn\nDebit Note Issued\nSubmitted\nPaid\nUnpaid\nOverdue\nCancelled",
+   "print_hide": 1
   },
   {
    "fieldname": "inter_company_invoice_reference",
@@ -1286,7 +1288,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2019-09-06 20:19:32.270769",
+ "modified": "2019-09-17 22:31:42.666601",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

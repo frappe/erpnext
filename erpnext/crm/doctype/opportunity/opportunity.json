@@ -1,5 +1,6 @@
 {
  "allow_import": 1,
+ "allow_rename": 1,
  "autoname": "naming_series:",
  "create_on_install": 1,
  "creation": "2013-03-07 18:50:30",
@@ -18,6 +19,8 @@
   "title",
   "opportunity_type",
   "status",
+  "converted_by",
+  "sales_stage",
   "order_lost_reason",
   "mins_to_first_response",
   "next_contact",
@@ -30,7 +33,6 @@
   "opportunity_amount",
   "with_items",
   "column_break_17",
-  "sales_stage",
   "probability",
   "items_section",
   "items",
@@ -401,11 +403,17 @@
    "label": "Lost Reasons",
    "options": "Lost Reason Detail",
    "read_only": 1
+  },
+  {
+   "fieldname": "converted_by",
+   "fieldtype": "Link",
+   "label": "Converted By",
+   "options": "User"
   }
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
- "modified": "2019-09-14 20:33:57.825657",
+ "modified": "2019-09-30 12:58:37.385400",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

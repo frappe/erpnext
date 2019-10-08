@@ -173,7 +173,7 @@ class BOM(WebsiteGenerator):
 			#Customer Provided parts will have zero rate
 			if not frappe.db.get_value('Item', arg["item_code"], 'is_customer_provided_item'):
 				if arg.get('bom_no') and self.set_rate_of_sub_assembly_item_based_on_bom:
-					rate = self.get_bom_unitcost(arg['bom_no']) * (arg.get("conversion_factor") or 1)
+					rate = flt(self.get_bom_unitcost(arg['bom_no'])) * (arg.get("conversion_factor") or 1)
 				else:
 					if self.rm_cost_as_per == 'Valuation Rate':
 						rate = self.get_valuation_rate(arg) * (arg.get("conversion_factor") or 1)
@@ -648,7 +648,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			item_dict[item.item_code] = item
 
 	for item, item_details in item_dict.items():
-		for d in [["Account", "expense_account", "default_expense_account"],
+		for d in [["Account", "expense_account", "stock_adjustment_account"],
 			["Cost Center", "cost_center", "cost_center"], ["Warehouse", "default_warehouse", ""]]:
 				company_in_record = frappe.db.get_value(d[0], item_details.get(d[1]), "company")
 				if not item_details.get(d[1]) or (company_in_record and company != company_in_record):

@@ -124,7 +124,7 @@
    "depends_on": "eval:doc.docstatus===0 && (doc.items && doc.items.length)",
    "fieldname": "link_to_mrs",
    "fieldtype": "Button",
-   "label": "Link to material requests"
+   "label": "Link to Material Requests"
   },
   {
    "fieldname": "supplier_response_section",
@@ -246,7 +246,7 @@
  ],
  "icon": "fa fa-shopping-cart",
  "is_submittable": 1,
- "modified": "2019-09-14 20:21:55.919378",
+ "modified": "2019-09-24 15:08:32.750661",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",

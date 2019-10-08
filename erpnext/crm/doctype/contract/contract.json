@@ -50,7 +50,8 @@
    "default": "0",
    "fieldname": "is_signed",
    "fieldtype": "Check",
-   "label": "Signed"
+   "label": "Signed",
+   "no_copy": 1
   },
   {
    "fieldname": "cb_party",
@@ -78,6 +79,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
+   "no_copy": 1,
    "options": "Unsigned\nActive\nInactive"
   },
   {
@@ -88,6 +90,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Fulfilment Status",
+   "no_copy": 1,
    "options": "N/A\nUnfulfilled\nPartially Fulfilled\nFulfilled\nLapsed"
   },
   {
@@ -120,14 +123,16 @@
    "fieldname": "signee",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Signee"
+   "label": "Signee",
+   "no_copy": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "signed_on",
    "fieldtype": "Datetime",
    "in_list_view": 1,
-   "label": "Signed On"
+   "label": "Signed On",
+   "no_copy": 1
   },
   {
    "fieldname": "cb_user",
@@ -138,6 +143,7 @@
    "fieldname": "ip_address",
    "fieldtype": "Data",
    "label": "IP Address",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -221,7 +227,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-14 20:34:00.749867",
+ "modified": "2019-09-30 00:56:41.559681",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract",
