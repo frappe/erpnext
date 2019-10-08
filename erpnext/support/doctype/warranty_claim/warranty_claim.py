@@ -30,7 +30,7 @@ class WarrantyClaim(TransactionBase):
 			(self.name))
 		if lst:
 			lst1 = ','.join([x[0] for x in lst])
-			frappe.throw(_("Cancel Material Visit {0} before cancelling this Warranty Claim").format(lst1))
+			frappe.throw(_("Cancel Maintenance Visit {0} before cancelling this Warranty Claim").format(lst1))
 		else:
 			frappe.db.set(self, 'status', 'Cancelled')
 
@@ -67,3 +67,5 @@ def make_maintenance_visit(source_name, target_doc=None):
 		map_child_doc(source_doc, target_doc, table_map, source_doc)
 
 		return target_doc
+	else:
+		frappe.throw(_("A Fully Completed Maintenance Visit already exists against this Warranty Claim"))

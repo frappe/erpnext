@@ -5,6 +5,9 @@ frappe.provide("erpnext.maintenance");
 
 frappe.ui.form.on('Maintenance Schedule', {
 	setup: function(frm) {
+		frm.custom_make_buttons = {
+			"Maintenance Visit": __("Make Maintenance Visit")
+		};
 		frm.set_query('contact_person', erpnext.queries.contact_query);
 		frm.set_query('customer_address', erpnext.queries.address_query);
 	},
