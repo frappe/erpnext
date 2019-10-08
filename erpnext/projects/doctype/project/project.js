@@ -6,6 +6,7 @@ frappe.ui.form.on("Project", {
 		frm.make_button_dts = [
 			'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',
 			'Maintenance Visit', 'Warranty Claim', 'Quality Inspection',
+			'Stock Entry'
 		];
 		$.each(frm.make_button_dts, function (i, dt) {
 			frm.custom_make_buttons[dt] = __(dt);
@@ -124,6 +125,8 @@ frappe.ui.form.on("Project", {
 		if (!frm.doc.__islocal) {
 			var item_table_fieldnames = {
 				'Maintenance Visit': 'purposes',
+				'Stock Entry': 'items',
+				'Delivery Note': 'items'
 			};
 
 			$.each(frm.make_button_dts, function (i, dt) {
@@ -142,11 +145,15 @@ frappe.ui.form.on("Project", {
 						serial_no: frm.doc.serial_no,
 						item_serial_no: frm.doc.serial_no
 					}).then(r => {
+						if (dt == "Stock Entry") {
+							cur_frm.set_value('purpose', 'Material Receipt');
+							cur_frm.set_value('for_maintenance', 1);
+						}
 						if (items_fieldname) {
 							cur_frm.doc[items_fieldname] = [];
 							var child = cur_frm.add_child(items_fieldname, {
-								serial_no: frm.doc.serial_no,
-								project: frm.doc.name
+								project: frm.doc.name,
+								serial_no: frm.doc.serial_no
 							});
 							if (frm.doc.item_code) {
 								frappe.model.set_value(child.doctype, child.name, 'item_code', frm.doc.item_code);
