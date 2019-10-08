@@ -810,7 +810,7 @@ class ReceivablePayableReport(object):
 	def get_gl_entries(self, party_type, date=None, for_future=False):
 		conditions, values = self.prepare_conditions(party_type)
 
-		if self.filters.get(scrub(party_type)):
+		if self.filters.get(scrub(party_type)) or self.filters.get("account"):
 			select_fields = "sum(gle.debit_in_account_currency) as debit, sum(gle.credit_in_account_currency) as credit"
 		else:
 			select_fields = "sum(gle.debit) as debit, sum(gle.credit) as credit"
