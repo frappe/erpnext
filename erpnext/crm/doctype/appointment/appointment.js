@@ -4,7 +4,7 @@
 frappe.ui.form.on('Appointment', {
 	refresh: function(frm) {
 		if(frm.doc.lead){
-			frm.add_custom_button(__(frm.doc.lead),()=>{
+			frm.add_custom_button(frm.doc.lead,()=>{
 				frappe.set_route("Form","Lead",frm.doc.lead);
 			});
 		}
