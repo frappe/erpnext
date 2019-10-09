@@ -55,7 +55,8 @@ class Project(Document):
 				"end_date": task.exp_end_date,
 				"description": task.description,
 				"task_id": task.name,
-				"task_weight": task.task_weight
+				"task_weight": task.task_weight,
+				"service_person": task.service_person
 			}
 
 			self.map_custom_fields(task, task_map, project_task_custom_fields)
@@ -124,7 +125,7 @@ class Project(Document):
 
 		existing_task_data = {}
 
-		fields = ["title", "status", "start_date", "end_date", "description", "task_weight", "task_id"]
+		fields = ["title", "status", "start_date", "end_date", "description", "task_weight", "task_id", "service_person"]
 		exclude_fieldtype = ["Button", "Column Break",
 			"Section Break", "Table", "Read Only", "Attach", "Attach Image", "Color", "Geolocation", "HTML", "Image"]
 
@@ -153,7 +154,8 @@ class Project(Document):
 					"exp_start_date": t.start_date,
 					"exp_end_date": t.end_date,
 					"description": t.description,
-					"task_weight": t.task_weight
+					"task_weight": t.task_weight,
+					"service_person": t.service_person
 				})
 
 				self.map_custom_fields(t, task, custom_fields)
