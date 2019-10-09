@@ -28,8 +28,8 @@ class Appointment(Document):
     def before_insert(self):
         number_of_appointments_in_same_slot = frappe.db.count(
             'Appointment', filters={'scheduled_time': self.scheduled_time})
-        settings = frappe.get_doc('Appointment Booking Settings')
-        if(number_of_appointments_in_same_slot >= settings.number_of_agents):
+        number_of_agents = frappe.db.get_single_value('Appointment Booking Settings', 'number_of_agents')
+        if(number_of_appointments_in_same_slot >= number_of_agents):
             frappe.throw('Time slot is not available')
         # Link lead
         self.lead = self.find_lead_by_email()
