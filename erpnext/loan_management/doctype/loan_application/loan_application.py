@@ -114,8 +114,10 @@ def create_pledge(loan_application):
 	loan_application_doc = frappe.get_doc("Loan Application", loan_application)
 
 	lsp = frappe.new_doc("Loan Security Pledge")
+	lsp.applicant_type = loan_application_doc.applicant_type
 	lsp.applicant = loan_application_doc.applicant
 	lsp.loan_application = loan_application_doc.name
+	lsp.company = loan_application_doc.company
 
 	for pledge in loan_application_doc.proposed_pledges:
 

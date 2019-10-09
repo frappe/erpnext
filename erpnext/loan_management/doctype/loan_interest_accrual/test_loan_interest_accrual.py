@@ -42,17 +42,17 @@ class TestLoanInterestAccrual(unittest.TestCase):
 
 		loan.submit()
 
-		first_date = get_first_day(nowdate())
-		last_date = get_last_day(nowdate())
+		first_date = '2019-10-01'
+		last_date = '2019-10-30'
 
 		no_of_days = date_diff(last_date, first_date) + 1
 
 		accrued_interest_amount = (loan.loan_amount * loan.rate_of_interest * no_of_days) \
-			/ (days_in_year(get_datetime().year) * 100)
+			/ (days_in_year(get_datetime(first_date).year) * 100)
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=first_date)
 
-		make_accrual_interest_entry_for_demand_loans(posting_date=add_days(last_date, 1))
+		make_accrual_interest_entry_for_demand_loans(posting_date=last_date)
 
 		loan_interest_accural = frappe.get_doc("Loan Interest Accrual", {'loan': loan.name})
 

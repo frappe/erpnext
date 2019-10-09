@@ -423,7 +423,9 @@ def create_loan_security():
 def create_loan_security_pledge(applicant, pledges):
 
 	lsp = frappe.new_doc("Loan Security Pledge")
+	lsp.applicant_type = 'Customer'
 	lsp.applicant = applicant
+	lsp.company = "_Test Company"
 
 	for pledge in pledges:
 		lsp.append('securities', {

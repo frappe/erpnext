@@ -60,8 +60,9 @@
   {
    "fetch_from": "against_loan.applicant",
    "fieldname": "applicant",
-   "fieldtype": "Data",
+   "fieldtype": "Dynamic Link",
    "label": "Applicant",
+   "options": "applicant_type",
    "read_only": 1
   },
   {
@@ -109,8 +110,9 @@
   {
    "fetch_from": "against_loan.applicant_type",
    "fieldname": "applicant_type",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "label": "Applicant Type",
+   "options": "Employee\nMember\nCustomer",
    "read_only": 1
   },
   {
@@ -121,7 +123,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-10-02 00:52:17.158994",
+ "modified": "2019-10-08 13:10:52.875266",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Disbursement",

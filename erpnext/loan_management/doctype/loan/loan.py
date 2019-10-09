@@ -167,9 +167,10 @@ def close_loan(loan, total_amount_paid):
 	frappe.db.set_value("Loan", loan, "status", "Closed")
 
 @frappe.whitelist()
-def make_loan_disbursement(loan, company, applicant, loan_amount, disbursed_amount):
+def make_loan_disbursement(loan, company, applicant_type, applicant, loan_amount, disbursed_amount):
 	disbursement_entry = frappe.new_doc("Loan Disbursement")
 	disbursement_entry.against_loan = loan
+	disbursement_entry.applicant_type = applicant_type
 	disbursement_entry.applicant = applicant
 	disbursement_entry.company = company
 	disbursement_entry.disbursement_date = nowdate()
@@ -178,9 +179,10 @@ def make_loan_disbursement(loan, company, applicant, loan_amount, disbursed_amou
 	return disbursement_entry.as_dict()
 
 @frappe.whitelist()
-def make_repayment_entry(loan, applicant, loan_type, company):
+def make_repayment_entry(loan, applicant_type, applicant, loan_type, company):
 	repayment_entry = frappe.new_doc("Loan Repayment")
 	repayment_entry.against_loan = loan
+	repayment_entry.applicant_type = applicant_type
 	repayment_entry.applicant = applicant
 	repayment_entry.company = company
 	repayment_entry.loan_type = loan_type
@@ -189,15 +191,17 @@ def make_repayment_entry(loan, applicant, loan_type, company):
 	return repayment_entry.as_dict()
 
 @frappe.whitelist()
-def create_loan_security_unpledge(loan, applicant):
+def create_loan_security_unpledge(loan, applicant_type, applicant, company):
 	loan_security_pledge_details = frappe.db.sql("""
 		SELECT p.parent, p.loan_security, p.qty as qty FROM `tabLoan Security Pledge` lsp , `tabPledge` p
 		WHERE p.parent = lsp.name AND lsp.loan = %s AND lsp.docstatus = 1
 	""",(loan), as_dict=1)
 
 	unpledge_request = frappe.new_doc("Loan Security Unpledge")
+	unpledge_request.applicant_type = applicant_type
 	unpledge_request.applicant = applicant
 	unpledge_request.loan = loan
+	unpledge_request.company = company
 
 	for loan_security in loan_security_pledge_details:
 		unpledge_request.append('securities', {

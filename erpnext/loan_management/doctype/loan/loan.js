@@ -88,6 +88,7 @@ frappe.ui.form.on('Loan', {
 				"loan": frm.doc.name,
 				"loan_amount": frm.doc.loan_amount,
 				"company": frm.doc.company,
+				"applicant_type": frm.doc.applicant_type,
 				"applicant": frm.doc.applicant,
 				"disbursed_amount": frm.doc.disbursed_amount
 			},
@@ -104,6 +105,7 @@ frappe.ui.form.on('Loan', {
 		frappe.call({
 			args: {
 				"loan": frm.doc.name,
+				"applicant_type": frm.doc.applicant_type,
 				"applicant": frm.doc.applicant,
 				"loan_type": frm.doc.loan_type,
 				"company": frm.doc.company
@@ -122,7 +124,9 @@ frappe.ui.form.on('Loan', {
 			method: "erpnext.loan_management.doctype.loan.loan.create_loan_security_unpledge",
 			args : {
 				"loan": frm.doc.name,
-				"applicant": frm.doc.applicant
+				"applicant_type": frm.doc.applicant_type,
+				"applicant": frm.doc.applicant,
+				"company": frm.doc.company
 			},
 			callback: function(r) {
 				if (r.message)

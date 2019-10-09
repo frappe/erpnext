@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Loan Repayment and Closure"] = {
+frappe.query_reports["Loan Security Status"] = {
 	"filters": [
 		{
 			"fieldname":"company",
@@ -35,7 +35,12 @@ frappe.query_reports["Loan Repayment and Closure"] = {
 				}
 				return applicant_type;
 			}
-
+		},
+		{
+			"fieldname":"pledge_status",
+			"label": __("Pledge Status"),
+			"fieldtype": "Select",
+			"options": ["", "Requested", "Pledged", "Partially Pledged", "Unpledged"],
 		},
 	]
 };
