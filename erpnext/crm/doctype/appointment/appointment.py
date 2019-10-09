@@ -35,7 +35,7 @@ class Appointment(Document):
         self.lead = self.find_lead_by_email()
 
     def after_insert(self):
-        if(self.lead):
+        if self.lead:
             # Create Calendar event
             self.create_calendar_event()
             self.auto_assign()
@@ -63,7 +63,7 @@ class Appointment(Document):
         return get_url(verify_route + '?' + get_signed_params(params))
 
     def on_change(self):
-        # Sync Calednar
+        # Sync Calendar
         if not self.calendar_event:
             return
         cal_event = frappe.get_doc('Event', self.calendar_event)
