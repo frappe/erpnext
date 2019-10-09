@@ -241,32 +241,45 @@ class BuyingController(StockController):
 		if self.is_subcontracted == "No" and self.get("supplied_items"):
 			self.set('supplied_items', [])
 
-
-		# if self.is_subcontracted:
-		# 	parent_items = []
-		# 	backflush_based_on = frappe.db.get_single_value("Buying Settings",
-		# 		'backflush_raw_materials_of_subcontract_based_on')
-
 	def update_raw_materials_supplied_based_on_stock_entries(self):
 		self.set('supplied_items', [])
+
 		purchase_orders = set([d.purchase_order for d in self.items])
-		backflushed_raw_materials = get_backflushed_subcontracted_raw_materials_from_se(purchase_orders)
+
+		# qty of raw materials backflushed (for each item per purchase order)
+		backflushed_raw_materials = get_backflushed_subcontracted_raw_materials(purchase_orders)
+
+		# qty of "finished good" item yet to be received
+		qty_to_be_received_map = get_qty_to_be_received(purchase_orders)
 
 		for item in self.get('items'):
-			raw_materials = get_subcontracted_raw_materials_from_se(item.purchase_order, item.item_code)
+			# qty of raw materials transferred to the supplier
+			transferred_raw_materials = get_subcontracted_raw_materials_from_se(item.purchase_order, item.item_code)
 			item_key = '{}{}'.format(item.item_code, item.purchase_order)
-			for raw_material in raw_materials:
-				qty = item.qty - backflushed_raw_materials.get(item_key, 0)
+
+			for raw_material in transferred_raw_materials:
+				fg_yet_to_be_received = qty_to_be_received_map.get(item_key)
+
+				consumed_qty = backflushed_raw_materials.get(item_key, 0)
+				transferred_qty = raw_material.qty
+
+				available_qty = transferred_qty - consumed_qty
+
+				# backflush all remaining transferred qty in the last Purchase Receipt
+				if fg_yet_to_be_received == item.qty:
+					qty = available_qty
+				else:
+					qty = frappe.utils.ceil((available_qty / fg_yet_to_be_received) * item.qty)
+
+				if qty > available_qty:
+					qty = available_qty
+
 				rm = self.append('supplied_items', {})
-				rm.rm_item_code = raw_material.item_code
-				rm.item_name = raw_material.item_name
-				rm.main_item_code = raw_material.main_item_code
-				rm.description = raw_material.description
-				rm.stock_uom = raw_material.stock_uom
+				rm.update(raw_material)
+
 				rm.required_qty = qty
 				rm.consumed_qty = qty
-				rm.serial_no = raw_material.serial_no
-				rm.batch_no = raw_material.batch_no
+
 				from erpnext.stock.utils import get_incoming_rate
 				rm.rate = get_incoming_rate({
 					"item_code": raw_material.item_code,
@@ -276,12 +289,13 @@ class BuyingController(StockController):
 					"qty": -1 * qty,
 					"serial_no": rm.serial_no
 				})
+
 				if not rm.rate:
 					rm.rate = get_valuation_rate(raw_material.item_code, self.supplier_warehouse,
-						self.doctype, self.name, currency=self.company_currency, company = self.company)
+						self.doctype, self.name, currency=self.company_currency, company=self.company)
 
 				rm.amount = qty * flt(rm.rate)
-				self.total += rm.amount
+				item.rm_supp_cost += rm.amount
 
 	def update_raw_materials_supplied_based_on_bom(self, item, raw_material_table):
 		exploded_item = 1
@@ -733,13 +747,13 @@ def get_items_from_bom(item_code, bom, exploded_item=1):
 def get_subcontracted_raw_materials_from_se(purchase_order, fg_item):
 	raw_materials = frappe.db.sql("""
 		SELECT
-			sed.item_name,
-			sed.item_code,
+			sed.item_code AS rm_item_code,
 			SUM(sed.qty) AS qty,
 			sed.description,
 			sed.stock_uom,
 			sed.subcontracted_item AS main_item_code,
-			sed.serial_no, sed.batch_no
+			sed.serial_no,
+			sed.batch_no
 		FROM `tabStock Entry` se,`tabStock Entry Detail` sed
 		WHERE
 			se.name = sed.parent
@@ -748,12 +762,12 @@ def get_subcontracted_raw_materials_from_se(purchase_order, fg_item):
 			AND se.purchase_order = %s
 			AND IFNULL(sed.t_warehouse, '') != ''
 			AND sed.subcontracted_item = %s
-		GROUP BY sed.item_code, sed.t_warehouse, sed.subcontracted_item
+		GROUP BY sed.item_code, sed.subcontracted_item
 	""", (purchase_order, fg_item), as_dict=1)
 
 	return raw_materials
 
-def get_backflushed_subcontracted_raw_materials_from_se(purchase_orders):
+def get_backflushed_subcontracted_raw_materials(purchase_orders):
 	return frappe._dict(frappe.db.sql("""
 		SELECT
 			CONCAT(prsi.rm_item_code, pri.purchase_order) AS item_key,
@@ -766,7 +780,7 @@ def get_backflushed_subcontracted_raw_materials_from_se(purchase_orders):
 			AND pri.item_code = prsi.main_item_code
 			AND pr.docstatus = 1
 		GROUP BY prsi.rm_item_code, pri.purchase_order
-	""", (purchase_orders)))
+	""", (purchase_orders, )))
 
 def get_asset_item_details(asset_items):
 	asset_items_data = {}
@@ -799,3 +813,13 @@ def validate_item_type(doc, fieldname, message):
 			error_message = _("Following item {0} is not marked as {1} item. You can enable them as {1} item from its Item master".format(items, message))
 
 		frappe.throw(error_message)
+
+def get_qty_to_be_received(purchase_orders):
+	return frappe._dict(frappe.db.sql("""
+		SELECT CONCAT(poi.item_code, poi.parent) AS item_key,
+		SUM(poi.qty) - SUM(poi.received_qty) AS qty_to_be_received
+		FROM `tabPurchase Order Item` poi,
+		WHERE
+			parent in %s
+		GROUP BY poi.item_code, poi.parent
+	""", (purchase_orders, )))
