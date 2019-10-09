@@ -530,6 +530,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 		scrub(party_type): party
 	}, distinct=1, fields=['company'])
 	companies = companies or [frappe._dict({"company": erpnext.get_default_company()})]
+	companies = [d for d in companies if d.company]
 
 	company_wise_info = []
 
