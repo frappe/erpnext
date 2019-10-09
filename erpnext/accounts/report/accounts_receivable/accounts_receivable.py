@@ -305,8 +305,6 @@ class ReceivablePayableReport(object):
 				}
 			]
 
-		columns = hide_columns_if_filtered(columns, self.filters)
-
 		return columns
 
 	def get_data(self):

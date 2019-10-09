@@ -105,8 +105,6 @@ def get_columns(filters, show_amounts=True):
 		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 110}
 	]
 
-	columns = hide_columns_if_filtered(columns, filters)
-
 	return columns
 
 def get_stock_ledger_entries(filters, items):

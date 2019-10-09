@@ -480,6 +480,4 @@ def get_columns(filters):
 	if filters.get('merge_similar_entries'):
 		columns = [col for col in columns if not col.get('hide_if_merge_similar')]
 
-	columns = hide_columns_if_filtered(columns, filters)
-
 	return columns
