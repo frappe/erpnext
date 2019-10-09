@@ -306,8 +306,9 @@ class SellingController(StockController):
 				if flt(d.conversion_factor)==0.0:
 					d.conversion_factor = get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1.0
 				return_rate = 0
-				if cint(self.is_return) and self.return_against and self.docstatus==1:
-					return_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
+				if cint(self.is_return) and self.docstatus==1:
+					return_rate = self.get_incoming_rate_for_sales_return(d.item_code,
+						d.warehouse, self.return_against)
 
 				# On cancellation or if return entry submission, make stock ledger entry for
 				# target warehouse first, to update serial no values properly
