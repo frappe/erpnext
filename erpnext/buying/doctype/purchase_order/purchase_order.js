@@ -15,7 +15,6 @@ frappe.ui.form.on("Purchase Order", {
 		}
 
 		frm.set_query("reserve_warehouse", "supplied_items", function() {
-			debugger
 			return {
 				filters: {
 					"company": frm.doc.company,
