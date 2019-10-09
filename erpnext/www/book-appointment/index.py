@@ -59,7 +59,6 @@ def get_appointment_slots(date, timezone):
     query_start_time = query_start_time.astimezone(local_timezone)
     query_end_time = query_end_time.astimezone(local_timezone)
     now = datetime.datetime.now()
-    # now = local_timezone.localize(now)
     # Database queries
     settings = frappe.get_doc('Appointment Booking Settings')
     holiday_list = frappe.get_doc('Holiday List', settings.holiday_list)
