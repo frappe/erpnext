@@ -89,7 +89,6 @@ class Appointment(Document):
         self.auto_assign()
         self.save(ignore_permissions=True)
         frappe.db.commit()
-        this.wrapper.find('.filter-edit-area').after(this.get_clear_button())
 
     def create_lead(self):
         # Return if already linked
