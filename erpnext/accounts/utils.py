@@ -580,11 +580,14 @@ def get_stock_and_account_difference(account_list=None, posting_date=None, compa
 			value = get_stock_value_on(warehouse, posting_date)
 			total_stock_value += value
 
+	print(account_list)
 	for account in account_list:
 		if account in accounts:
+			print(account)
 			balance = get_balance_on(account, posting_date, in_account_currency=False)
 			total_account_balance += balance
 	total_diff = flt(total_stock_value) - flt(total_account_balance)
+	print(total_diff, flt(total_stock_value), flt(total_account_balance))
 	return total_diff
 
 def get_currency_precision():

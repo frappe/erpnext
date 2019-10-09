@@ -116,3 +116,17 @@ def make_account_for_warehouse(warehouse_name, warehouse_obj):
 			{'company': warehouse_obj.company, 'is_group':1, 'account_type': 'Stock'},'name')
 		account = create_account(account_name=warehouse_name, \
 				account_type="Stock", parent_account= parent_account, company=warehouse_obj.company)
+
+def get_warehouse(**args):
+	args = frappe._dict(args)
+	if(frappe.db.exists("Warehouse", args.warehouse_name + args.abbr)):
+		return frappe.get_doc("Warehouse", args.warehouse_name + args.abbr)
+	else:
+		w = frappe.get_doc({
+		"company": args.company or "_Test Company",
+		"doctype": "Warehouse",
+		"warehouse_name": args.warehouse_name,
+		"is_group": 0
+		})
+		w.insert()
+		return w
