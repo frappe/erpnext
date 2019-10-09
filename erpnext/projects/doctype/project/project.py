@@ -347,7 +347,7 @@ def create_duplicate_project(prev_doc, project_name):
 		new_task.project = project.name
 		new_task.insert()
 
-	project.project_template = prev_doc.project_template
+	project.db_set('project_template', prev_doc.get('project_template')
 
 	return project
 
