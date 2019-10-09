@@ -63,8 +63,7 @@ frappe.query_reports["Budget Variance Report"] = {
 	]
 }
 
-erpnext.dimension_filters.then((dimensions) => {
-	dimensions.forEach((dimension) => {
-		frappe.query_reports["Budget Variance Report"].filters[4].options.push(dimension["document_type"]);
-	});
+erpnext.dimension_filters.forEach((dimension) => {
+	frappe.query_reports["Budget Variance Report"].filters[4].options.push(dimension["document_type"]);
 });
+

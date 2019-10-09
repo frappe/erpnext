@@ -1,0 +1,10 @@
+DocType: Supplier,Block Supplier,Bloque de Proveedor
+apps/erpnext/erpnext/hr/doctype/retention_bonus/retention_bonus.py,Cannot create Retention Bonus for left Employees,No se puede crear una bonificación de retención para los empleados que se han marchado
+apps/erpnext/erpnext/assets/doctype/asset_value_adjustment/asset_value_adjustment.py,Cancel the journal entry {0} first,Cancelar el ingreso diario {0} primero
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,Cannot transfer Employee with status Left,No se puede transferir Empleado con estado ah salido
+DocType: Employee Benefit Claim,Benefit Type and Amount,Tipo de beneficio y monto
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,Block Invoice,Bloque de Factura
+DocType: Item,Asset Naming Series,Series de Nombres de Activos
+,BOM Variance Report,Informe de varianza BOM(Lista de Materiales)
+apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.py,Cannot promote Employee with status Left,No se puede promover Empleado con estado ha salido
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,Auto repeat document updated,Repetición automática del documento actualizado

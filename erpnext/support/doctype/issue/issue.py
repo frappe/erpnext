@@ -117,6 +117,9 @@ class Issue(Document):
 
 		replicated_issue = deepcopy(self)
 		replicated_issue.subject = subject
+		replicated_issue.issue_split_from = self.name
+		replicated_issue.mins_to_first_response = 0
+		replicated_issue.first_responded_on = None
 		replicated_issue.creation = now_datetime()
 
 		# Reset SLA
@@ -143,6 +146,14 @@ class Issue(Document):
 			doc = frappe.get_doc("Communication", communication.name)
 			doc.reference_name = replicated_issue.name
 			doc.save(ignore_permissions=True)
+
+		frappe.get_doc({
+			"doctype": "Comment",
+			"comment_type": "Info",
+			"reference_doctype": "Issue",
+			"reference_name": replicated_issue.name,
+			"content": " - Split the Issue from <a href='#Form/Issue/{0}'>{1}</a>".format(self.name, frappe.bold(self.name)),
+		}).insert(ignore_permissions=True)
 
 		return replicated_issue.name
 
@@ -210,6 +221,7 @@ class Issue(Document):
 
 		self.service_level_agreement_creation = now_datetime()
 		self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
+		self.agreement_fulfilled = "Ongoing"
 		self.save()
 
 def get_expected_time_for(parameter, service_level, start_date_time):

@@ -122,8 +122,8 @@ class Batch(Document):
 			self.expiry_date = add_days(self.manufacturing_date, shelf_life_in_days)
 
 		if has_expiry_date and not self.expiry_date:
-			frappe.throw(_('Expiry date is mandatory for selected item'))
-			frappe.msgprint(_('Set items shelf life in days, to set expiry based on manufacturing_date plus self life'))
+			frappe.msgprint(_('Expiry date is mandatory for selected item.'))
+			frappe.throw(_("Set item's shelf life in days, to set expiry based on manufacturing date plus shelf-life."))
 
 	def get_name_from_naming_series(self):
 		"""

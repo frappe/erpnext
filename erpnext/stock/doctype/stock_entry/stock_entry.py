@@ -145,6 +145,10 @@ class StockEntry(StockController):
 				self.precision("transfer_qty", item))
 
 	def update_cost_in_project(self):
+		if (self.work_order and not frappe.db.get_value("Work Order",
+			self.work_order, "update_consumed_material_cost_in_project")):
+			return
+
 		if self.project:
 			amount = frappe.db.sql(""" select ifnull(sum(sed.amount), 0)
 				from
@@ -250,7 +254,7 @@ class StockEntry(StockController):
 		target_mandatory = ["Material Receipt", "Material Transfer", "Send to Subcontractor",
 			"Material Transfer for Manufacture", "Send to Warehouse", "Receive at Warehouse"]
 
-		validate_for_manufacture_repack = any([d.bom_no for d in self.get("items")])
+		validate_for_manufacture = any([d.bom_no for d in self.get("items")])
 
 		if self.purpose in source_mandatory and self.purpose not in target_mandatory:
 			self.to_warehouse = None
@@ -281,8 +285,8 @@ class StockEntry(StockController):
 				else:
 					frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
 
-			if self.purpose in ["Manufacture", "Repack"]:
-				if validate_for_manufacture_repack:
+			if self.purpose == "Manufacture":
+				if validate_for_manufacture:
 					if d.bom_no:
 						d.s_warehouse = None
 
@@ -324,6 +328,10 @@ class StockEntry(StockController):
 			completed_qty = d.completed_qty + (allowance_percentage/100 * d.completed_qty)
 			if total_completed_qty > flt(completed_qty):
 				job_card = frappe.db.get_value('Job Card', {'operation_id': d.name}, 'name')
+				if not job_card:
+					frappe.throw(_("Work Order {0}: job card not found for the operation {1}")
+						.format(self.work_order, job_card))
+
 				work_order_link = frappe.utils.get_link_to_form('Work Order', self.work_order)
 				job_card_link = frappe.utils.get_link_to_form('Job Card', job_card)
 				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}.")
@@ -359,7 +367,7 @@ class StockEntry(StockController):
 				d.basic_rate = 0.0
 			elif d.t_warehouse and not d.basic_rate:
 				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
-					self.doctype, d.name, d.allow_zero_valuation_rate,
+					self.doctype, self.name, d.allow_zero_valuation_rate,
 					currency=erpnext.get_company_currency(self.company))
 
 	def set_actual_qty(self):
@@ -521,15 +529,36 @@ class StockEntry(StockController):
 		backflush_raw_materials_based_on = frappe.db.get_single_value("Buying Settings",
 			"backflush_raw_materials_of_subcontract_based_on")
 
+		qty_allowance = flt(frappe.db.get_single_value("Buying Settings",
+			"over_transfer_allowance"))
+
 		if (self.purpose == "Send to Subcontractor" and self.purchase_order and
 			backflush_raw_materials_based_on == 'BOM'):
 			purchase_order = frappe.get_doc("Purchase Order", self.purchase_order)
 			for se_item in self.items:
 				item_code = se_item.original_item or se_item.item_code
 				precision = cint(frappe.db.get_default("float_precision")) or 3
-				total_allowed = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
+				required_qty = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
 					if d.rm_item_code == item_code])
-				if not total_allowed:
+
+				total_allowed = required_qty + (required_qty * (qty_allowance/100))
+
+				if not required_qty:
+					bom_no = frappe.db.get_value("Purchase Order Item",
+						{"parent": self.purchase_order, "item_code": se_item.subcontracted_item},
+						"bom")
+
+					allow_alternative_item = frappe.get_value("BOM", bom_no, "allow_alternative_item")
+
+					if allow_alternative_item:
+						original_item_code = frappe.get_value("Item Alternative", {"alternative_item_code": item_code}, "item_code")
+
+						required_qty = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
+							if d.rm_item_code == original_item_code])
+
+						total_allowed = required_qty + (required_qty * (qty_allowance/100))
+
+				if not required_qty:
 					frappe.throw(_("Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1}")
 						.format(se_item.item_code, self.purchase_order))
 				total_supplied = frappe.db.sql("""select sum(transfer_qty)
@@ -802,13 +831,13 @@ class StockEntry(StockController):
 
 					self.add_to_stock_entry_detail(item_dict)
 
-					if self.purpose != "Send to Subcontractor":
-						scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
-						for item in itervalues(scrap_item_dict):
-							if self.pro_doc and self.pro_doc.scrap_warehouse:
-								item["to_warehouse"] = self.pro_doc.scrap_warehouse
+				if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
+					scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
+					for item in itervalues(scrap_item_dict):
+						if self.pro_doc and self.pro_doc.scrap_warehouse:
+							item["to_warehouse"] = self.pro_doc.scrap_warehouse
 
-						self.add_to_stock_entry_detail(scrap_item_dict, bom_no=self.bom_no)
+					self.add_to_stock_entry_detail(scrap_item_dict, bom_no=self.bom_no)
 
 			# fetch the serial_no of the first stock entry for the second stock entry
 			if self.work_order and self.purpose == "Manufacture":
@@ -1106,6 +1135,7 @@ class StockEntry(StockController):
 			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
 			se_child.subcontracted_item = item_dict[d].get("main_item_code")
 			se_child.original_item = item_dict[d].get("original_item")
+			se_child.po_detail = item_dict[d].get("po_detail")
 
 			if item_dict[d].get("idx"):
 				se_child.idx = item_dict[d].get("idx")
@@ -1157,7 +1187,14 @@ class StockEntry(StockController):
 			where po.name = poitemsup.parent
 			and po.name = %s""", self.purchase_order))
 
-		#Update reserved sub contracted quantity in bin based on Supplied Item Details
+		#Update Supplied Qty in PO Supplied Items
+
+		frappe.db.sql("""UPDATE `tabPurchase Order Item Supplied` pos
+			SET pos.supplied_qty = (SELECT ifnull(sum(transfer_qty), 0) FROM `tabStock Entry Detail` sed
+			WHERE pos.name = sed.po_detail and sed.docstatus = 1)
+			WHERE pos.docstatus = 1 and pos.parent = %s""", self.purchase_order)
+
+		#Update reserved sub contracted quantity in bin based on Supplied Item Details and
 		for d in self.get("items"):
 			item_code = d.get('original_item') or d.get('item_code')
 			reserve_warehouse = item_wh.get(item_code)

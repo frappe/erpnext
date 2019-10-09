@@ -168,6 +168,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Payroll Period",
+				},
+				{
+					"type": "doctype",
 					"name": "Salary Component",
 				},
 				{
@@ -213,6 +217,16 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Employee Benefit Claim",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Tax Exemption Category",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Tax Exemption Sub Category",
 					"dependencies": ["Employee"]
 				},
 			]

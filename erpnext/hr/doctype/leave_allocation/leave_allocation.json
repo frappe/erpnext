@@ -17,13 +17,14 @@
   "section_break_6",
   "new_leaves_allocated",
   "carry_forward",
-  "carry_forwarded_leaves",
+  "unused_leaves",
   "total_leaves_allocated",
   "total_leaves_encashed",
   "column_break_10",
   "compensatory_request",
   "leave_period",
   "leave_policy",
+  "carry_forwarded_leaves_count",
   "expired",
   "amended_from",
   "notes",
@@ -119,7 +120,7 @@
   },
   {
    "depends_on": "carry_forward",
-   "fieldname": "carry_forwarded_leaves",
+   "fieldname": "unused_leaves",
    "fieldtype": "Float",
    "label": "Unused leaves",
    "read_only": 1
@@ -168,6 +169,15 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "fieldname": "expired",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Expired",
+   "read_only": 1
+  },
+  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -194,19 +204,17 @@
    "width": "300px"
   },
   {
-   "default": "0",
-   "fieldname": "expired",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "in_standard_filter": 1,
-   "label": "Expired",
+   "depends_on": "carry_forwarded_leaves_count",
+   "fieldname": "carry_forwarded_leaves_count",
+   "fieldtype": "Float",
+   "label": "Carry Forwarded Leaves",
    "read_only": 1
   }
  ],
  "icon": "fa fa-ok",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2019-07-22 17:50:39.591195",
+ "modified": "2019-08-08 15:08:42.440909",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Allocation",

@@ -167,13 +167,18 @@ class Customer(TransactionBase):
 			frappe.throw(_("A Customer Group exists with same name please change the Customer name or rename the Customer Group"), frappe.NameError)
 
 	def validate_credit_limit_on_change(self):
-		if self.get("__islocal") or not self.credit_limit \
-			or self.credit_limit == frappe.db.get_value("Customer", self.name, "credit_limit"):
+		if self.get("__islocal") or not self.credit_limits:
 			return
 
-		for company in frappe.get_all("Company"):
-			outstanding_amt = get_customer_outstanding(self.name, company.name)
-			if flt(self.credit_limit) < outstanding_amt:
+		company_record = []
+		for limit in self.credit_limits:
+			if limit.company in company_record:
+				frappe.throw(_("Credit limit is already defined for the Company {0}").format(limit.company, self.name))
+			else:
+				company_record.append(limit.company)
+
+			outstanding_amt = get_customer_outstanding(self.name, limit.company)
+			if flt(limit.credit_limit) < outstanding_amt:
 				frappe.throw(_("""New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}""").format(outstanding_amt))
 
 	def on_trash(self):
@@ -322,11 +327,13 @@ def get_credit_limit(customer, company):
 	credit_limit = None
 
 	if customer:
-		credit_limit, customer_group = frappe.get_cached_value("Customer",
-			customer, ["credit_limit", "customer_group"])
+		credit_limit = frappe.db.get_value("Customer Credit Limit",
+			{'parent': customer, 'parenttype': 'Customer', 'company': company}, 'credit_limit')
 
 		if not credit_limit:
-			credit_limit = frappe.get_cached_value("Customer Group", customer_group, "credit_limit")
+			customer_group = frappe.get_cached_value("Customer", customer, 'customer_group')
+			credit_limit = frappe.db.get_value("Customer Credit Limit",
+				{'parent': customer_group, 'parenttype': 'Customer Group', 'company': company}, 'credit_limit')
 
 	if not credit_limit:
 		credit_limit = frappe.get_cached_value('Company',  company,  "credit_limit")
@@ -337,18 +344,31 @@ def make_contact(args, is_primary_contact=1):
 	contact = frappe.get_doc({
 		'doctype': 'Contact',
 		'first_name': args.get('name'),
-		'mobile_no': args.get('mobile_no'),
-		'email_id': args.get('email_id'),
 		'is_primary_contact': is_primary_contact,
 		'links': [{
 			'link_doctype': args.get('doctype'),
 			'link_name': args.get('name')
 		}]
-	}).insert()
+	})
+	if args.get('email_id'):
+		contact.add_email(args.get('email_id'), is_primary=True)
+	if args.get('mobile_no'):
+		contact.add_phone(args.get('mobile_no'), is_primary_mobile_no=True)
+	contact.insert()
 
 	return contact
 
 def make_address(args, is_primary_address=1):
+	reqd_fields = []
+	for field in ['city', 'country']:
+		if not args.get(field):
+			reqd_fields.append( '<li>' + field.title() + '</li>')
+
+	if reqd_fields:
+		msg = _("Following fields are mandatory to create address:")
+		frappe.throw("{0} <br><br> <ul>{1}</ul>".format(msg, '\n'.join(reqd_fields)),
+			title = _("Missing Values Required"))
+
 	address = frappe.get_doc({
 		'doctype': 'Address',
 		'address_title': args.get('name'),
@@ -371,7 +391,7 @@ def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, fil
 	return frappe.db.sql("""
 		select `tabContact`.name from `tabContact`, `tabDynamic Link`
 			where `tabContact`.name = `tabDynamic Link`.parent and `tabDynamic Link`.link_name = %(customer)s
-			and `tabDynamic Link`.link_doctype = 'Customer' and `tabContact`.is_primary_contact = 1
+			and `tabDynamic Link`.link_doctype = 'Customer'
 			and `tabContact`.name like %(txt)s
 		""", {
 			'customer': customer,
@@ -383,7 +403,7 @@ def get_customer_primary_address(doctype, txt, searchfield, start, page_len, fil
 	return frappe.db.sql("""
 		select `tabAddress`.name from `tabAddress`, `tabDynamic Link`
 			where `tabAddress`.name = `tabDynamic Link`.parent and `tabDynamic Link`.link_name = %(customer)s
-			and `tabDynamic Link`.link_doctype = 'Customer' and `tabAddress`.is_primary_address = 1
+			and `tabDynamic Link`.link_doctype = 'Customer'
 			and `tabAddress`.name like %(txt)s
 		""", {
 			'customer': customer,

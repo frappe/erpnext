@@ -371,7 +371,7 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 
 	return frappe.db.sql("""select tabAccount.name from `tabAccount`
 		where (tabAccount.report_type = "Profit and Loss"
-				or tabAccount.account_type in ("Expense Account", "Fixed Asset", "Temporary", "Asset Received But Not Billed"))
+				or tabAccount.account_type in ("Expense Account", "Fixed Asset", "Temporary", "Asset Received But Not Billed", "Capital Work in Progress"))
 			and tabAccount.is_group=0
 			and tabAccount.docstatus!=2
 			and tabAccount.{key} LIKE %(txt)s
@@ -440,17 +440,17 @@ def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def item_manufacturer_query(doctype, txt, searchfield, start, page_len, filters):
-	search_txt = "{0}%".format(txt)
+	item_filters = [
+		['manufacturer', 'like', '%' + txt + '%'],
+		['item_code', '=', filters.get("item_code")]
+	]
 
-	item_filters = {
-		'manufacturer': ('like', search_txt),
-		'item_code': filters.get("item_code")
-	}
-
-	return frappe.get_all("Item Manufacturer",
-		fields = "manufacturer",
-		filters = item_filters,
+	item_manufacturers = frappe.get_all(
+		"Item Manufacturer",
+		fields=["manufacturer", "manufacturer_part_no"],
+		filters=item_filters,
 		limit_start=start,
 		limit_page_length=page_len,
 		as_list=1
 	)
+	return item_manufacturers

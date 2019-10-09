@@ -60,7 +60,9 @@ class AccountsController(TransactionBase):
 
 	def validate(self):
 
-		self.validate_qty_is_not_zero()
+		if not self.get('is_return'):
+			self.validate_qty_is_not_zero()
+
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 
@@ -87,7 +89,7 @@ class AccountsController(TransactionBase):
 		self.validate_currency()
 
 		if self.doctype == 'Purchase Invoice':
-			self.validate_paid_amount()
+			self.calculate_paid_amount()
 
 		if self.doctype in ['Purchase Invoice', 'Sales Invoice']:
 			pos_check_field = "is_pos" if self.doctype=="Sales Invoice" else "is_paid"
@@ -133,22 +135,23 @@ class AccountsController(TransactionBase):
 			else:
 				df.set("print_hide", 1)
 
-	def validate_paid_amount(self):
+	def calculate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
 			is_paid = self.get("is_pos") or self.get("is_paid")
-			if cint(is_paid) == 1:
-				if flt(self.paid_amount) == 0 and flt(self.outstanding_amount) > 0:
-					if self.cash_bank_account:
-						self.paid_amount = flt(flt(self.outstanding_amount), self.precision("paid_amount"))
-						self.base_paid_amount = flt(self.paid_amount * self.conversion_rate,
-													self.precision("base_paid_amount"))
-					else:
-						# show message that the amount is not paid
-						self.paid_amount = 0
-						frappe.throw(
-							_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
-			else:
-				frappe.db.set(self, 'paid_amount', 0)
+
+			if is_paid:
+				if not self.cash_bank_account:
+					# show message that the amount is not paid
+					frappe.throw(_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
+
+				if cint(self.is_return) and self.grand_total > self.paid_amount:
+					self.paid_amount = flt(flt(self.grand_total), self.precision("paid_amount"))
+
+				elif not flt(self.paid_amount) and flt(self.outstanding_amount) > 0:
+					self.paid_amount = flt(flt(self.outstanding_amount), self.precision("paid_amount"))
+
+				self.base_paid_amount = flt(self.paid_amount * self.conversion_rate,
+										self.precision("base_paid_amount"))
 
 	def set_missing_values(self, for_validate=False):
 		if frappe.flags.in_test:
@@ -261,7 +264,7 @@ class AccountsController(TransactionBase):
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
 
-					ret = get_item_details(args, self)
+					ret = get_item_details(args, self, overwrite_warehouse=False)
 
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
@@ -1190,6 +1193,13 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 						 .format(child_item.idx, child_item.item_code))
 		else:
 			child_item.rate = flt(d.get("rate"))
+
+		if flt(child_item.price_list_rate):
+			discount = flt((1 - flt(child_item.rate) / flt(child_item.price_list_rate)) * 100.0,
+				child_item.precision("discount_percentage"))
+			if discount > 0:
+				child_item.discount_percentage = discount
+
 		child_item.flags.ignore_validate_update_after_submit = True
 		if new_child_flag:
 			child_item.idx = len(parent.items) + 1
@@ -1212,7 +1222,6 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			parent.update_status_updater()
 	else:
 		parent.check_credit_limit()
-
 	parent.save()
 
 	if parent_doctype == 'Purchase Order':

@@ -38,7 +38,7 @@ class StockLedgerEntry(Document):
 		self.check_stock_frozen_date()
 		self.actual_amt_check()
 
-		if not self.get("via_landed_cost_voucher") and self.voucher_type != 'Stock Reconciliation':
+		if not self.get("via_landed_cost_voucher"):
 			from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
 			process_serial_no(self)
 

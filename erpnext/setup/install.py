@@ -9,6 +9,7 @@ from .default_success_action import get_default_success_action
 from frappe import _
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+from erpnext.setup.default_energy_point_rules import get_default_energy_point_rules
 
 default_mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via
 	<a style="color: #888" href="http://erpnext.org">ERPNext</a></div>"""
@@ -22,6 +23,8 @@ def after_install():
 	add_all_roles_to("Administrator")
 	create_default_cash_flow_mapper_templates()
 	create_default_success_action()
+	create_default_energy_point_rules()
+	add_company_to_session_defaults()
 	frappe.db.commit()
 
 
@@ -84,3 +87,21 @@ def create_default_success_action():
 		if not frappe.db.exists('Success Action', success_action.get("ref_doctype")):
 			doc = frappe.get_doc(success_action)
 			doc.insert(ignore_permissions=True)
+
+def create_default_energy_point_rules():
+
+	for rule in get_default_energy_point_rules():
+		# check if any rule for ref. doctype exists
+		rule_exists = frappe.db.exists('Energy Point Rule', {
+			'reference_doctype': rule.get('reference_doctype')
+		})
+		if rule_exists: continue
+		doc = frappe.get_doc(rule)
+		doc.insert(ignore_permissions=True)
+
+def add_company_to_session_defaults():
+	settings = frappe.get_single("Session Default Settings")
+	settings.append("session_defaults", {
+		"ref_doctype": "Company"
+	})
+	settings.save()

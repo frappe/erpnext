@@ -64,7 +64,8 @@ class LeaveEncashment(Document):
 
 		allocation = self.get_leave_allocation()
 
-		self.leave_balance = allocation.total_leaves_allocated - get_unused_leaves(self.employee, self.leave_type, allocation.from_date, self.encashment_date)
+		self.leave_balance = allocation.total_leaves_allocated - allocation.carry_forwarded_leaves_count\
+			- get_unused_leaves(self.employee, self.leave_type, allocation.from_date, self.encashment_date)
 
 		encashable_days = self.leave_balance - frappe.db.get_value('Leave Type', self.leave_type, 'encashment_threshold_days')
 		self.encashable_days = encashable_days if encashable_days > 0 else 0
@@ -76,9 +77,9 @@ class LeaveEncashment(Document):
 		return True
 
 	def get_leave_allocation(self):
-		leave_allocation = frappe.db.sql("""select name, to_date, total_leaves_allocated from `tabLeave Allocation` where '{0}'
+		leave_allocation = frappe.db.sql("""select name, to_date, total_leaves_allocated, carry_forwarded_leaves_count from `tabLeave Allocation` where '{0}'
 		between from_date and to_date and docstatus=1 and leave_type='{1}'
-		and employee= '{2}'""".format(self.encashment_date or getdate(nowdate()), self.leave_type, self.employee), as_dict=1)
+		and employee= '{2}'""".format(self.encashment_date or getdate(nowdate()), self.leave_type, self.employee), as_dict=1) #nosec
 
 		return leave_allocation[0] if leave_allocation else None
 
@@ -102,3 +103,17 @@ class LeaveEncashment(Document):
 			)
 			create_leave_ledger_entry(self, args, submit)
 
+
+def create_leave_encashment(leave_allocation):
+	''' Creates leave encashment for the given allocations '''
+	for allocation in leave_allocation:
+		if not get_assigned_salary_structure(allocation.employee, allocation.to_date):
+			continue
+		leave_encashment = frappe.get_doc(dict(
+			doctype="Leave Encashment",
+			leave_period=allocation.leave_period,
+			employee=allocation.employee,
+			leave_type=allocation.leave_type,
+			encashment_date=allocation.to_date
+		))
+		leave_encashment.insert(ignore_permissions=True)

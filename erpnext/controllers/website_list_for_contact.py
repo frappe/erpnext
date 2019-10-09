@@ -21,42 +21,45 @@ def get_list_context(context=None):
 
 def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20, order_by="modified"):
 	user = frappe.session.user
-	key = None
+	ignore_permissions = False
 
 	if not filters: filters = []
 
-	if doctype == 'Supplier Quotation':
-		filters.append((doctype, "docstatus", "<", 2))
+	if doctype in ['Supplier Quotation', 'Purchase Invoice']:
+		filters.append((doctype, 'docstatus', '<', 2))
 	else:
-		filters.append((doctype, "docstatus", "=", 1))
+		filters.append((doctype, 'docstatus', '=', 1))
 
-	if (user != "Guest" and is_website_user()) or doctype == 'Request for Quotation':
+	if (user != 'Guest' and is_website_user()) or doctype == 'Request for Quotation':
 		parties_doctype = 'Request for Quotation Supplier' if doctype == 'Request for Quotation' else doctype
 		# find party for this contact
 		customers, suppliers = get_customers_suppliers(parties_doctype, user)
 
-		if not customers and not suppliers: return []
-
-		key, parties = get_party_details(customers, suppliers)
-
-		if doctype == 'Request for Quotation':
-			return rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_page_length)
-
-		filters.append((doctype, key, "in", parties))
-
-		if key:
-			return post_process(doctype, get_list_for_transactions(doctype, txt,
-				filters=filters, fields="name",limit_start=limit_start,
-				limit_page_length=limit_page_length,ignore_permissions=True,
-				order_by="modified desc"))
+		if customers:
+			if doctype == 'Quotation':
+				filters.append(('quotation_to', '=', 'Customer'))
+				filters.append(('party_name', 'in', customers))
+			else:
+				filters.append(('customer', 'in', customers))
+		elif suppliers:
+			filters.append(('supplier', 'in', suppliers))
 		else:
 			return []
 
-	return post_process(doctype, get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_length,
-		fields="name", order_by="modified desc"))
+		if doctype == 'Request for Quotation':
+			parties = customers or suppliers
+			return rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_page_length)
+
+		# Since customers and supplier do not have direct access to internal doctypes
+		ignore_permissions = True
+
+	transactions = get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_length,
+		fields='name', ignore_permissions=ignore_permissions, order_by='modified desc')
+
+	return post_process(doctype, transactions)
 
 def get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_length=20,
-	ignore_permissions=False,fields=None, order_by=None):
+	ignore_permissions=False, fields=None, order_by=None):
 	""" Get List of transactions like Invoices, Orders """
 	from frappe.www.list import get_list
 	meta = frappe.get_meta(doctype)
@@ -77,21 +80,11 @@ def get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_len
 
 	if or_filters:
 		for r in frappe.get_list(doctype, fields=fields,filters=filters, or_filters=or_filters,
-			limit_start=limit_start, limit_page_length=limit_page_length, 
+			limit_start=limit_start, limit_page_length=limit_page_length,
 			ignore_permissions=ignore_permissions, order_by=order_by):
 			data.append(r)
 
 	return data
-
-def get_party_details(customers, suppliers):
-	if customers:
-		key, parties = "customer", customers
-	elif suppliers:
-		key, parties = "supplier", suppliers
-	else:
-		key, parties = "customer", []
-
-	return key, parties
 
 def rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_page_length):
 	data = frappe.db.sql("""select distinct parent as name, supplier from `tab{doctype}`
@@ -130,38 +123,56 @@ def get_customers_suppliers(doctype, user):
 	suppliers = []
 	meta = frappe.get_meta(doctype)
 
+	customer_field_name = get_customer_field_name(doctype)
+
+	has_customer_field = meta.has_field(customer_field_name)
+	has_supplier_field = meta.has_field('supplier')
+
 	if has_common(["Supplier", "Customer"], frappe.get_roles(user)):
 		contacts = frappe.db.sql("""
-			select 
+			select
 				`tabContact`.email_id,
 				`tabDynamic Link`.link_doctype,
 				`tabDynamic Link`.link_name
-			from 
+			from
 				`tabContact`, `tabDynamic Link`
 			where
 				`tabContact`.name=`tabDynamic Link`.parent and `tabContact`.email_id =%s
 			""", user, as_dict=1)
-		customers = [c.link_name for c in contacts if c.link_doctype == 'Customer'] \
-			if meta.get_field("customer") else None
-		suppliers = [c.link_name for c in contacts if c.link_doctype == 'Supplier'] \
-			if meta.get_field("supplier") else None
+		customers = [c.link_name for c in contacts if c.link_doctype == 'Customer']
+		suppliers = [c.link_name for c in contacts if c.link_doctype == 'Supplier']
 	elif frappe.has_permission(doctype, 'read', user=user):
-		customers = [customer.name for customer in frappe.get_list("Customer")] \
-			if meta.get_field("customer") else None
-		suppliers = [supplier.name for supplier in frappe.get_list("Customer")] \
-			if meta.get_field("supplier") else None
+		customer_list = frappe.get_list("Customer")
+		customers = suppliers = [customer.name for customer in customer_list]
 
-	return customers, suppliers
+	return customers if has_customer_field else None, \
+		suppliers if has_supplier_field else None
 
 def has_website_permission(doc, ptype, user, verbose=False):
 	doctype = doc.doctype
 	customers, suppliers = get_customers_suppliers(doctype, user)
 	if customers:
-		return frappe.get_all(doctype, filters=[(doctype, "customer", "in", customers),
-			(doctype, "name", "=", doc.name)]) and True or False
+		return frappe.db.exists(doctype, get_customer_filter(doc, customers))
 	elif suppliers:
 		fieldname = 'suppliers' if doctype == 'Request for Quotation' else 'supplier'
-		return frappe.get_all(doctype, filters=[(doctype, fieldname, "in", suppliers),
-			(doctype, "name", "=", doc.name)]) and True or False
+		return frappe.db.exists(doctype, filters={
+			'name': doc.name,
+			fieldname: ["in", suppliers]
+		})
 	else:
 		return False
+
+def get_customer_filter(doc, customers):
+	doctype = doc.doctype
+	filters = frappe._dict()
+	filters.name = doc.name
+	filters[get_customer_field_name(doctype)] = ['in', customers]
+	if doctype == 'Quotation':
+		filters.quotation_to = 'Customer'
+	return filters
+
+def get_customer_field_name(doctype):
+	if doctype == 'Quotation':
+		return 'party_name'
+	else:
+		return 'customer'

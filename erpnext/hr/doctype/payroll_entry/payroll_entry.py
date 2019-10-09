@@ -12,6 +12,15 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 class PayrollEntry(Document):
+	def onload(self):
+		if not self.docstatus==1 or self.salary_slips_submitted:
+    			return
+
+		# check if salary slips were manually submitted
+		entries = frappe.db.count("Salary Slip", {'payroll_entry': self.name, 'docstatus': 1}, ['name'])
+		if cint(entries) == len(self.employees):
+    			self.set_onload("submitted_ss", True)
+
 	def on_submit(self):
 		self.create_salary_slips()
 
@@ -30,7 +39,7 @@ class PayrollEntry(Document):
 			and for which salary structure exists
 		"""
 		cond = self.get_filter_condition()
-		cond += self.get_joining_releiving_condition()
+		cond += self.get_joining_relieving_condition()
 
 		condition = ''
 		if self.payroll_frequency:
@@ -84,7 +93,7 @@ class PayrollEntry(Document):
 
 		return cond
 
-	def get_joining_releiving_condition(self):
+	def get_joining_relieving_condition(self):
 		cond = """
 			and ifnull(t1.date_of_joining, '0000-00-00') <= '%(end_date)s'
 			and ifnull(t1.relieving_date, '2199-12-31') >= '%(start_date)s'
@@ -332,6 +341,7 @@ class PayrollEntry(Document):
 		journal_entry.set("accounts", [
 			{
 				"account": self.payment_account,
+				"bank_account": self.bank_account,
 				"credit_in_account_currency": payment_amount
 			},
 			{
@@ -418,7 +428,6 @@ def get_start_end_dates(payroll_frequency, start_date=None, company=None):
 	return frappe._dict({
 		'start_date': start_date, 'end_date': end_date
 	})
-
 
 def get_frequency_kwargs(frequency_name):
 	frequency_dict = {

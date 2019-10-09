@@ -72,8 +72,11 @@ def get_previous_expiry_ledger_entry(ledger):
 	''' Returns the expiry ledger entry having same creation date as the ledger entry to be cancelled '''
 	creation_date = frappe.db.get_value("Leave Ledger Entry", filters={
 			'transaction_name': ledger.transaction_name,
-			'is_expired': 0
-		}, fieldname=['creation']).strftime(DATE_FORMAT)
+			'is_expired': 0,
+			'transaction_type': 'Leave Allocation'
+		}, fieldname=['creation'])
+
+	creation_date = creation_date.strftime(DATE_FORMAT) if creation_date else ''
 
 	return frappe.db.get_value("Leave Ledger Entry", filters={
 		'creation': ('like', creation_date+"%"),
@@ -89,29 +92,35 @@ def process_expired_allocation():
 
 	# fetch leave type records that has carry forwarded leaves expiry
 	leave_type_records = frappe.db.get_values("Leave Type", filters={
-			'expire_carried_forward_leaves': (">", 0)
+			'expire_carry_forwarded_leaves_after_days': (">", 0)
 		}, fieldname=['name'])
 
-	if leave_type_records:
-		leave_type = [record[0] for record in leave_type_records]
-		expired_allocation = frappe.get_all("Leave Ledger Entry", 
-			fields=['leaves', 'to_date', 'employee', 'leave_type', 'is_carry_forward', 'transaction_name as name', 'transaction_type'],
-			filters={
-				'to_date': add_days(today(), -1),
-				'transaction_type': 'Leave Allocation',
-			},
-			or_filters={
-				'is_carry_forward': 0,
-				'leave_type': ('in', leave_type)
-			})
+	leave_type = [record[0] for record in leave_type_records]
 
-	if expired_allocation:
-		create_expiry_ledger_entry(expired_allocation)
+	expired_allocation = frappe.db.sql_list("""SELECT name
+		FROM `tabLeave Ledger Entry`
+		WHERE
+			`transaction_type`='Leave Allocation'
+			AND `is_expired`=1""")
 
-def create_expiry_ledger_entry(expired_allocation):
+	expire_allocation = frappe.get_all("Leave Ledger Entry",
+		fields=['leaves', 'to_date', 'employee', 'leave_type', 'is_carry_forward', 'transaction_name as name', 'transaction_type'],
+		filters={
+			'to_date': ("<", today()),
+			'transaction_type': 'Leave Allocation',
+			'transaction_name': ('not in', expired_allocation)
+		},
+		or_filters={
+			'is_carry_forward': 0,
+			'leave_type': ('in', leave_type)
+		})
+
+	if expire_allocation:
+		create_expiry_ledger_entry(expire_allocation)
+
+def create_expiry_ledger_entry(allocations):
 	''' Create ledger entry for expired allocation '''
-	for allocation in expired_allocation:
-
+	for allocation in allocations:
 		if allocation.is_carry_forward:
 			expire_carried_forward_allocation(allocation)
 		else:
@@ -128,7 +137,7 @@ def get_remaining_leaves(allocation):
 
 @frappe.whitelist()
 def expire_allocation(allocation, expiry_date=None):
-	''' expires allocation '''
+	''' expires non-carry forwarded allocation '''
 	leaves = get_remaining_leaves(allocation)
 	expiry_date = expiry_date if expiry_date else allocation.to_date
 
@@ -136,6 +145,7 @@ def expire_allocation(allocation, expiry_date=None):
 		args = dict(
 			leaves=flt(leaves) * -1,
 			transaction_name=allocation.name,
+			transaction_type='Leave Allocation',
 			from_date=expiry_date,
 			to_date=expiry_date,
 			is_carry_forward=0,

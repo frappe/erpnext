@@ -78,6 +78,7 @@ class SalesInvoice(SellingController):
 			self.so_dn_required()
 
 		self.validate_proj_cust()
+		self.validate_pos_return()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
@@ -199,6 +200,16 @@ class SalesInvoice(SellingController):
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_submit")
 
+	def validate_pos_return(self):
+
+		if self.is_pos and self.is_return:
+			total_amount_in_payments = 0
+			for payment in self.payments:
+				total_amount_in_payments += payment.amount
+			invoice_total = self.rounded_total or self.grand_total
+			if total_amount_in_payments < invoice_total:
+				frappe.throw(_("Total payments amount can't be greater than {}".format(-invoice_total)))
+
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
@@ -293,8 +304,10 @@ class SalesInvoice(SellingController):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
 
 		validate_against_credit_limit = False
-		bypass_credit_limit_check_at_sales_order = cint(frappe.get_cached_value("Customer", self.customer,
-			"bypass_credit_limit_check_at_sales_order"))
+		bypass_credit_limit_check_at_sales_order = frappe.db.get_value("Customer Credit Limit",
+			filters={'parent': self.customer, 'parenttype': 'Customer', 'company': self.company},
+			fieldname=["bypass_credit_limit_check"])
+
 		if bypass_credit_limit_check_at_sales_order:
 			validate_against_credit_limit = True
 
@@ -685,7 +698,7 @@ class SalesInvoice(SellingController):
 				cint(self.redeem_loyalty_points)) else "Yes"
 
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
-				update_outstanding=update_outstanding, merge_entries=False)
+				update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
 
 			if update_outstanding == "No":
 				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt

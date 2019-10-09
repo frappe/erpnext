@@ -63,14 +63,14 @@ frappe.ui.form.on("Leave Allocation", {
 		frm.trigger("calculate_total_leaves_allocated");
 	},
 
-	carry_forwarded_leaves: function(frm) {
+	unused_leaves: function(frm) {
 		frm.set_value("total_leaves_allocated",
-			flt(frm.doc.carry_forwarded_leaves) + flt(frm.doc.new_leaves_allocated));
+			flt(frm.doc.unused_leaves) + flt(frm.doc.new_leaves_allocated));
 	},
 
 	new_leaves_allocated: function(frm) {
 		frm.set_value("total_leaves_allocated",
-			flt(frm.doc.carry_forwarded_leaves) + flt(frm.doc.new_leaves_allocated));
+			flt(frm.doc.unused_leaves) + flt(frm.doc.new_leaves_allocated));
 	},
 
 	leave_policy: function(frm) {
@@ -93,7 +93,7 @@ frappe.ui.form.on("Leave Allocation", {
 				}
 			})
 		} else if (cint(frm.doc.carry_forward) == 0) {
-			frm.set_value("carry_forwarded_leaves", 0);
+			frm.set_value("unused_leaves", 0);
 			frm.set_value("total_leaves_allocated", flt(frm.doc.new_leaves_allocated));
 		}
 	}

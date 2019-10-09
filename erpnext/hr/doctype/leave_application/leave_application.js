@@ -49,7 +49,7 @@ frappe.ui.form.on("Leave Application", {
 				async: false,
 				args: {
 					employee: frm.doc.employee,
-					date: frm.doc.from_date? frm.doc.from_date:frm.doc.posting_date
+					date: frm.doc.from_date || frm.doc.posting_date
 				},
 				callback: function(r) {
 					if (!r.exc && r.message['leave_allocation']) {

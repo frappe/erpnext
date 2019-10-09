@@ -27,6 +27,7 @@
    "options": "Employee"
   },
   {
+   "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "label": "Employee Name"
@@ -101,7 +102,7 @@
  ],
  "in_create": 1,
  "is_submittable": 1,
- "modified": "2019-06-21 00:37:07.782810",
+ "modified": "2019-08-20 14:40:04.130799",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Ledger Entry",
