@@ -281,7 +281,7 @@ class BuyingController(StockController):
 
 				from erpnext.stock.utils import get_incoming_rate
 				rm.rate = get_incoming_rate({
-					"item_code": raw_material.item_code,
+					"item_code": raw_material.rm_item_code,
 					"warehouse": self.supplier_warehouse,
 					"posting_date": self.posting_date,
 					"posting_time": self.posting_time,
@@ -831,10 +831,10 @@ def validate_item_type(doc, fieldname, message):
 
 def get_qty_to_be_received(purchase_orders):
 	return frappe._dict(frappe.db.sql("""
-		SELECT CONCAT(poi.item_code, poi.parent) AS item_key,
-		SUM(poi.qty) - SUM(poi.received_qty) AS qty_to_be_received
-		FROM `tabPurchase Order Item` poi,
+		SELECT CONCAT(poi.`item_code`, poi.`parent`) AS item_key,
+		SUM(poi.`qty`) - SUM(poi.`received_qty`) AS qty_to_be_received
+		FROM `tabPurchase Order Item` poi
 		WHERE
-			parent in %s
-		GROUP BY poi.item_code, poi.parent
-	""", (purchase_orders, )))
+			poi.`parent` in %s
+		GROUP BY poi.`item_code`, poi.`parent`
+	""", (purchase_orders)))
