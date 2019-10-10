@@ -352,9 +352,7 @@ def create_duplicate_project(prev_doc, project_name):
 		new_task.project = project.name
 		new_task.insert()
 
-	project.db_set('project_template', prev_doc.get('project_template')
-
-	return project
+	project.db_set('project_template', prev_doc.get('project_template'))
 
 def get_projects_for_collect_progress(frequency, fields):
 	fields.extend(["name"])
