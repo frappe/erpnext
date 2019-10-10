@@ -941,7 +941,7 @@
    "collapsible": 1,
    "fieldname": "printing_details",
    "fieldtype": "Section Break",
-   "label": "Printing Details"
+   "label": "Print Settings"
   },
   {
    "fieldname": "language",
@@ -1120,7 +1120,7 @@
    "allow_on_submit": 1,
    "fieldname": "sales_team",
    "fieldtype": "Table",
-   "label": "Sales Team1",
+   "label": "Sales Team",
    "oldfieldname": "sales_team",
    "oldfieldtype": "Table",
    "options": "Sales Team",
@@ -1176,7 +1176,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2019-09-12 02:13:56.308839",
+ "modified": "2019-09-27 14:23:52.233323",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

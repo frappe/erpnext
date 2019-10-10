@@ -543,6 +543,13 @@ class WorkOrder(Document):
 		bom.set_bom_material_details()
 		return bom
 
+def get_bom_operations(doctype, txt, searchfield, start, page_len, filters):
+	if txt:
+		filters['operation'] = ('like', '%%%s%%' % txt)
+
+	return frappe.get_all('BOM Operation',
+		filters = filters, fields = ['operation'], as_list=1)
+
 @frappe.whitelist()
 def get_item_details(item, project = None):
 	res = frappe.db.sql("""
