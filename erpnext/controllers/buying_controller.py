@@ -253,6 +253,9 @@ class BuyingController(StockController):
 		qty_to_be_received_map = get_qty_to_be_received(purchase_orders)
 
 		for item in self.get('items'):
+			# reset raw_material cost
+			item.rm_supp_cost = 0
+
 			# qty of raw materials transferred to the supplier
 			transferred_raw_materials = get_subcontracted_raw_materials_from_se(item.purchase_order, item.item_code)
 			item_key = '{}{}'.format(item.item_code, item.purchase_order)
