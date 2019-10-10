@@ -943,7 +943,7 @@
    "collapsible": 1,
    "fieldname": "printing_details",
    "fieldtype": "Section Break",
-   "label": "Printing Details"
+   "label": "Print Settings"
   },
   {
    "fieldname": "language",
@@ -1122,7 +1122,7 @@
    "allow_on_submit": 1,
    "fieldname": "sales_team",
    "fieldtype": "Table",
-   "label": "Sales Team1",
+   "label": "Sales Team",
    "oldfieldname": "sales_team",
    "oldfieldtype": "Table",
    "options": "Sales Team",
