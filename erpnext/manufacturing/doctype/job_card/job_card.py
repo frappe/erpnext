@@ -105,7 +105,6 @@ class JobCard(Document):
 		for_quantity, time_in_mins = 0, 0
 		from_time_list, to_time_list = [], []
 
-
 		for d in frappe.get_all('Job Card',
 			filters = {'docstatus': 1, 'operation_id': self.operation_id}):
 			doc = frappe.get_doc('Job Card', d.name)
@@ -125,8 +124,8 @@ class JobCard(Document):
 				if data.name == self.operation_id:
 					data.completed_qty = for_quantity
 					data.actual_operation_time = time_in_mins
-					data.actual_start_time = min(from_time_list)
-					data.actual_end_time = max(to_time_list)
+					data.actual_start_time = min(from_time_list) if from_time_list else None
+					data.actual_end_time = max(to_time_list) if to_time_list else None
 
 			wo.flags.ignore_validate_update_after_submit = True
 			wo.update_operation_status()
