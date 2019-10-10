@@ -115,12 +115,12 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 					cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt, __("Status"))
 				}
 
-				cur_frm.add_custom_button(__('Return'), this.make_purchase_return, __('Create'));
+				cur_frm.add_custom_button(__('Purchase Return'), this.make_purchase_return, __('Create'));
 
 				cur_frm.add_custom_button(__('Make Stock Entry'), cur_frm.cscript['Make Stock Entry'], __('Create'));
 
 				if(flt(this.frm.doc.per_billed) < 100) {
-					cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice, __('Create'));
+					cur_frm.add_custom_button(__('Purchase Invoice'), this.make_purchase_invoice, __('Create'));
 				}
 				cur_frm.add_custom_button(__('Retention Stock Entry'), this.make_retention_stock_entry, __('Create'));
 

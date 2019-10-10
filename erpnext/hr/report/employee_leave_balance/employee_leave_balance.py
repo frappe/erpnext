@@ -60,7 +60,10 @@ def get_data(filters, leave_types):
 
 	data = []
 	for employee in active_employees:
-		leave_approvers = department_approver_map.get(employee.department_name, []).append(employee.leave_approver)
+		leave_approvers = department_approver_map.get(employee.department_name, [])
+		if employee.leave_approver:
+			leave_approvers.append(employee.leave_approver)
+
 		if (len(leave_approvers) and user in leave_approvers) or (user in ["Administrator", employee.user_id]) or ("HR Manager" in frappe.get_roles(user)):
 			row = [employee.name, employee.employee_name, employee.department]
 
