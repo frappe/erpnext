@@ -22,7 +22,8 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 
 class TestDatev(TestCase):
 	def setUp(self):
-		with open("test_records.json", "r") as test_records:
+		path = os.path.join(os.path.dirname(__file__), "test_records.json")
+		with open(path, "r") as test_records:
 			make_test_objects("Account", json.load(test_records))
 
 	def test_columns(self):
