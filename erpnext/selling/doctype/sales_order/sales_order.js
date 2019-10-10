@@ -137,7 +137,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				if(doc.status !== 'On Hold') {
 
 					allow_delivery = this.frm.doc.items.some(item => item.delivered_by_supplier === 0 && item.qty > flt(item.delivered_qty)) 
-						&& !this.frm.doc.skip_delivery_note_creation
+						&& !this.frm.doc.skip_delivery_note
 
 					if (this.frm.has_perm("submit")) {
 						if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
@@ -356,13 +356,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		})
 	},
 
-	skip_delivery_note_creation: function() {
+	skip_delivery_note: function() {
 		this.toggle_delivery_date();
 	},
 
 	toggle_delivery_date: function() {
 		this.frm.fields_dict.items.grid.toggle_reqd("delivery_date", 
-			(this.frm.doc.order_type == "Sales" && !this.frm.doc.skip_delivery_note_creation));
+			(this.frm.doc.order_type == "Sales" && !this.frm.doc.skip_delivery_note));
 	},
 
 	make_raw_material_request: function() {
