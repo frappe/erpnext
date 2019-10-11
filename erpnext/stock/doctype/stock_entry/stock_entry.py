@@ -328,6 +328,10 @@ class StockEntry(StockController):
 			completed_qty = d.completed_qty + (allowance_percentage/100 * d.completed_qty)
 			if total_completed_qty > flt(completed_qty):
 				job_card = frappe.db.get_value('Job Card', {'operation_id': d.name}, 'name')
+				if not job_card:
+					frappe.throw(_("Work Order {0}: job card not found for the operation {1}")
+						.format(self.work_order, job_card))
+
 				work_order_link = frappe.utils.get_link_to_form('Work Order', self.work_order)
 				job_card_link = frappe.utils.get_link_to_form('Job Card', job_card)
 				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}.")
@@ -538,6 +542,21 @@ class StockEntry(StockController):
 					if d.rm_item_code == item_code])
 
 				total_allowed = required_qty + (required_qty * (qty_allowance/100))
+
+				if not required_qty:
+					bom_no = frappe.db.get_value("Purchase Order Item",
+						{"parent": self.purchase_order, "item_code": se_item.subcontracted_item},
+						"bom")
+
+					allow_alternative_item = frappe.get_value("BOM", bom_no, "allow_alternative_item")
+
+					if allow_alternative_item:
+						original_item_code = frappe.get_value("Item Alternative", {"alternative_item_code": item_code}, "item_code")
+
+						required_qty = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
+							if d.rm_item_code == original_item_code])
+
+						total_allowed = required_qty + (required_qty * (qty_allowance/100))
 
 				if not required_qty:
 					frappe.throw(_("Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1}")
