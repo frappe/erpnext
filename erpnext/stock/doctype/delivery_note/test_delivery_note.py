@@ -25,16 +25,6 @@ from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
 class TestDeliveryNote(unittest.TestCase):
 	def setUp(self):
 		set_perpetual_inventory(0)
-	def tearDown(self):
-		target_warehouse = "_Test Warehouse 1 - _TC"
-		company = "_Test Company"
-		if not frappe.db.exists("Account", target_warehouse):
-			parent_account = frappe.db.get_value('Account',
-				{'company': company, 'is_group':1, 'account_type': 'Stock'},'name')
-
-			account = create_account(account_name="_Test Warehouse 1", \
-				account_type="Stock", parent_account= parent_account, company=company)
-			frappe.db.set_value('Warehouse', target_warehouse, 'account', account)
 
 	def test_over_billing_against_dn(self):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
@@ -216,16 +206,16 @@ class TestDeliveryNote(unittest.TestCase):
 			self.assertEqual(cstr(serial_no.get(field)), value)
 
 	def test_sales_return_for_non_bundled_items(self):
-		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
-		set_perpetual_inventory(1, company)
+		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+		make_stock_entry(item_code="_Test Item", target="Stores - TCP1", qty=50, basic_rate=100)
 
-		actual_qty_0 = get_qty_after_transaction()
+		actual_qty_0 = get_qty_after_transaction(warehouse="Stores - TCP1")
 
-		dn = create_delivery_note(qty=5, rate=500)
+		dn = create_delivery_note(qty=5, rate=500, warehouse="Stores - TCP1", company=company,
+			expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
 
-		actual_qty_1 = get_qty_after_transaction()
+		actual_qty_1 = get_qty_after_transaction(warehouse="Stores - TCP1")
 		self.assertEqual(actual_qty_0 - 5, actual_qty_1)
 
 		# outgoing_rate
@@ -233,9 +223,10 @@ class TestDeliveryNote(unittest.TestCase):
 			"voucher_no": dn.name}, "stock_value_difference") / 5
 
 		# return entry
-		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-2, rate=500)
+		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-2, rate=500,
+			company=company, warehouse="Stores - TCP1", expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
 
-		actual_qty_2 = get_qty_after_transaction()
+		actual_qty_2 = get_qty_after_transaction(warehouse="Stores - TCP1")
 
 		self.assertEqual(actual_qty_1 + 2, actual_qty_2)
 
@@ -244,27 +235,29 @@ class TestDeliveryNote(unittest.TestCase):
 			["incoming_rate", "stock_value_difference"])
 
 		self.assertEqual(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
-		stock_in_hand_account = get_inventory_account('_Test Company', dn1.items[0].warehouse)
+		stock_in_hand_account = get_inventory_account(company, dn1.items[0].warehouse)
 
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Delivery Note",
 			"voucher_no": dn1.name, "account": stock_in_hand_account}, "debit")
 
 		self.assertEqual(gle_warehouse_amount, stock_value_difference)
 
-		set_perpetual_inventory(0, company)
-
 	def test_return_single_item_from_bundled_items(self):
-		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
-		set_perpetual_inventory(1, company)
+		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 
-		create_stock_reconciliation(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, rate=100)
-		create_stock_reconciliation(item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC",
-			qty=50, rate=100)
+		create_stock_reconciliation(item_code="_Test Item",
+			warehouse="Stores - TCP1", qty=50, rate=100,
+			company=company, expense_account = "Stock Adjustment - TCP1")
+		create_stock_reconciliation(item_code="_Test Item Home Desktop 100",
+			warehouse="Stores - TCP1", qty=50, rate=100,
+			company=company, expense_account = "Stock Adjustment - TCP1")
 
-		dn = create_delivery_note(item_code="_Test Product Bundle Item", qty=5, rate=500)
+		dn = create_delivery_note(item_code="_Test Product Bundle Item", qty=5, rate=500,
+			company=company, warehouse="Stores - TCP1",
+			expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
 
 		# Qty after delivery
-		actual_qty_1 = get_qty_after_transaction()
+		actual_qty_1 = get_qty_after_transaction(warehouse="Stores - TCP1")
 		self.assertEqual(actual_qty_1,  25)
 
 		# outgoing_rate
@@ -272,10 +265,12 @@ class TestDeliveryNote(unittest.TestCase):
 			"voucher_no": dn.name, "item_code": "_Test Item"}, "stock_value_difference") / 25
 
 		# return 'test item' from packed items
-		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-10, rate=500)
+		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-10, rate=500,
+			company=company, warehouse="Stores - TCP1",
+			expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
 
 		# qty after return
-		actual_qty_2 = get_qty_after_transaction()
+		actual_qty_2 = get_qty_after_transaction(warehouse="Stores - TCP1")
 		self.assertEqual(actual_qty_2, 35)
 
 		# Check incoming rate for return entry
@@ -284,7 +279,7 @@ class TestDeliveryNote(unittest.TestCase):
 			["incoming_rate", "stock_value_difference"])
 
 		self.assertEqual(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
-		stock_in_hand_account = get_inventory_account('_Test Company', dn1.items[0].warehouse)
+		stock_in_hand_account = get_inventory_account(company, dn1.items[0].warehouse)
 
 		# Check gl entry for warehouse
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Delivery Note",
@@ -292,33 +287,33 @@ class TestDeliveryNote(unittest.TestCase):
 
 		self.assertEqual(gle_warehouse_amount, stock_value_difference)
 
-		set_perpetual_inventory(0, company)
 
 	def test_return_entire_bundled_items(self):
-		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
-		set_perpetual_inventory(1, company)
+		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 
 		create_stock_reconciliation(item_code="_Test Item",
-			target="_Test Warehouse - _TC", qty=50, rate=100)
+			warehouse="Stores - TCP1", qty=50, rate=100,
+			company=company, expense_account = "Stock Adjustment - TCP1")
 		create_stock_reconciliation(item_code="_Test Item Home Desktop 100",
-			target="_Test Warehouse - _TC", qty=50, rate=100)
+			warehouse="Stores - TCP1", qty=50, rate=100,
+			company=company, expense_account = "Stock Adjustment - TCP1")
 
-		actual_qty = get_qty_after_transaction()
+		actual_qty = get_qty_after_transaction(warehouse="Stores - TCP1")
 		self.assertEqual(actual_qty, 50)
 
 		dn = create_delivery_note(item_code="_Test Product Bundle Item",
-			qty=5, rate=500)
+			qty=5, rate=500, company=company, warehouse="Stores - TCP1", expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
 
 		# qty after return
-		actual_qty = get_qty_after_transaction()
+		actual_qty = get_qty_after_transaction(warehouse="Stores - TCP1")
 		self.assertEqual(actual_qty, 25)
 
 		#  return bundled item
 		dn1 = create_delivery_note(item_code='_Test Product Bundle Item', is_return=1,
-			return_against=dn.name, qty=-2, rate=500)
+			return_against=dn.name, qty=-2, rate=500, company=company, warehouse="Stores - TCP1", expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
 
 		# qty after return
-		actual_qty = get_qty_after_transaction()
+		actual_qty = get_qty_after_transaction(warehouse="Stores - TCP1")
 		self.assertEqual(actual_qty, 35)
 
 		# Check incoming rate for return entry
@@ -334,8 +329,6 @@ class TestDeliveryNote(unittest.TestCase):
 			"voucher_no": dn1.name, "account": stock_in_hand_account}, "debit")
 
 		self.assertEqual(gle_warehouse_amount, 1400)
-
-		set_perpetual_inventory(0, company)
 
 	def test_return_for_serialized_items(self):
 		se = make_serialized_item()
@@ -378,29 +371,30 @@ class TestDeliveryNote(unittest.TestCase):
 		set_valuation_method("_Test Item", "FIFO")
 		set_valuation_method("_Test Item Home Desktop 100", "FIFO")
 
-		target_warehouse=get_warehouse(company=company, abbr=" - TCP1", warehouse_name="_Test Warehouse").name
+		target_warehouse=get_warehouse(company=company, abbr="TCP1",
+			warehouse_name="_Test Customer Warehouse").name
 
 		for warehouse in ("Stores - TCP1", target_warehouse):
-			create_stock_reconciliation(item_code="_Test Item", warehouse=warehouse, company = company, expense_account = "Stock Adjustment - TCP1", qty=500, rate=100)
-			create_stock_reconciliation(item_code="_Test Item Home Desktop 100", company = company, expense_account = "Stock Adjustment - TCP1", warehouse=warehouse, qty=500, rate=100)
+			create_stock_reconciliation(item_code="_Test Item", warehouse=warehouse, company = company,
+				expense_account = "Stock Adjustment - TCP1", qty=500, rate=100)
+			create_stock_reconciliation(item_code="_Test Item Home Desktop 100", company = company,
+				expense_account = "Stock Adjustment - TCP1", warehouse=warehouse, qty=500, rate=100)
 
-		opening_qty_test_warehouse_1 = get_qty_after_transaction(warehouse=target_warehouse)
-
-		dn = create_delivery_note(item_code="_Test Product Bundle Item", company='_Test Company with perpetual inventory 1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1", do_not_submit=True, qty=5, rate=500, warehouse="Stores - TCP1", target_warehouse=target_warehouse)
+		dn = create_delivery_note(item_code="_Test Product Bundle Item",
+			company='_Test Company with perpetual inventory 1', cost_center = 'Main - TCP1',
+			expense_account = "Cost of Goods Sold - TCP1", do_not_submit=True, qty=5, rate=500,
+			warehouse="Stores - TCP1", target_warehouse=target_warehouse)
 
 		dn.submit()
 
 		# qty after delivery
-		print("asserting")
-		actual_qty = get_qty_after_transaction(warehouse="Stores - TCP1")
-		self.assertEqual(actual_qty, 75)
+		actual_qty_at_source = get_qty_after_transaction(warehouse="Stores - TCP1")
+		self.assertEqual(actual_qty_at_source, 475)
 
-		print("asserting")
-		actual_qty = get_qty_after_transaction(warehouse=target_warehouse)
-		self.assertEqual(actual_qty, opening_qty_test_warehouse_1 + 25)
+		actual_qty_at_target = get_qty_after_transaction(warehouse=target_warehouse)
+		self.assertEqual(actual_qty_at_target, 525)
 
-		# stock value diff for source warehouse
-		# for "_Test Item"
+		# stock value diff for source warehouse for "_Test Item"
 		stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
 			{"voucher_type": "Delivery Note", "voucher_no": dn.name,
 				"item_code": "_Test Item", "warehouse": "Stores - TCP1"},
@@ -410,20 +404,6 @@ class TestDeliveryNote(unittest.TestCase):
 		stock_value_difference1 = frappe.db.get_value("Stock Ledger Entry",
 			{"voucher_type": "Delivery Note", "voucher_no": dn.name,
 				"item_code": "_Test Item", "warehouse": target_warehouse},
-			"stock_value_difference")
-
-		self.assertEqual(abs(stock_value_difference), stock_value_difference1)
-
-		# for "_Test Item Home Desktop 100"
-		stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
-			{"voucher_type": "Delivery Note", "voucher_no": dn.name,
-				"item_code": "_Test Item Home Desktop 100", "warehouse": "Stores - TCP1"},
-			"stock_value_difference")
-
-		# stock value diff for target warehouse
-		stock_value_difference1 = frappe.db.get_value("Stock Ledger Entry",
-			{"voucher_type": "Delivery Note", "voucher_no": dn.name,
-				"item_code": "_Test Item Home Desktop 100", "warehouse": target_warehouse},
 			"stock_value_difference")
 
 		self.assertEqual(abs(stock_value_difference), stock_value_difference1)
@@ -445,7 +425,6 @@ class TestDeliveryNote(unittest.TestCase):
 
 	def test_closed_delivery_note(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import update_delivery_note_status
-
 
 		dn = create_delivery_note(company='_Test Company with perpetual inventory 1', warehouse='Stores - TCP1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1", do_not_submit=True)
 
