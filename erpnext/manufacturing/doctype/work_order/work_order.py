@@ -477,6 +477,9 @@ class WorkOrder(Document):
 						'include_item_in_manufacturing': item.include_item_in_manufacturing
 					})
 
+					if not self.project:
+						self.project = item.get("project")
+
 			self.set_available_qty()
 
 	def update_transaferred_qty_for_required_items(self):
