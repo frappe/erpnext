@@ -286,19 +286,20 @@ class BuyingController(StockController):
 				rm.required_qty = qty
 				rm.consumed_qty = qty
 
-				from erpnext.stock.utils import get_incoming_rate
-				rm.rate = get_incoming_rate({
-					"item_code": raw_material.rm_item_code,
-					"warehouse": self.supplier_warehouse,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
-					"qty": -1 * qty,
-					"serial_no": rm.serial_no
-				})
+				if not raw_material.get('non_stock_item'):
+					from erpnext.stock.utils import get_incoming_rate
+					rm.rate = get_incoming_rate({
+						"item_code": raw_material.rm_item_code,
+						"warehouse": self.supplier_warehouse,
+						"posting_date": self.posting_date,
+						"posting_time": self.posting_time,
+						"qty": -1 * qty,
+						"serial_no": rm.serial_no
+					})
 
-				if not rm.rate:
-					rm.rate = get_valuation_rate(raw_material.item_code, self.supplier_warehouse,
-						self.doctype, self.name, currency=self.company_currency, company=self.company)
+					if not rm.rate:
+						rm.rate = get_valuation_rate(raw_material.item_code, self.supplier_warehouse,
+							self.doctype, self.name, currency=self.company_currency, company=self.company)
 
 				rm.amount = qty * flt(rm.rate)
 				item.rm_supp_cost += rm.amount
@@ -837,6 +838,8 @@ def get_non_stock_items(purchase_order, fg_item_code):
 			pois.rm_item_code,
 			item.description,
 			pois.required_qty AS qty,
+			pois.rate,
+			1 as non_stock_item,
 			pois.stock_uom
 		FROM `tabPurchase Order Item Supplied` pois, `tabItem` item
 		WHERE
