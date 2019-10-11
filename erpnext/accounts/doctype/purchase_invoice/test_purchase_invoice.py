@@ -15,7 +15,6 @@ from erpnext.controllers.accounts_controller import get_payment_terms
 from erpnext.exceptions import InvalidCurrency
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
-from pprint import pprint
 
 test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
 test_ignore = ["Serial No"]
@@ -58,14 +57,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
 
 	def test_gl_entries_with_perpetual_inventory(self):
-		#pi = frappe.copy_doc(test_records[1])
-		#set_perpetual_inventory(1, pi.company)
 		pi = make_purchase_invoice(company="_Test Company with perpetual inventory 1", supplier_warehouse="Work In Progress - TCP1", warehouse= "Stores - TCP1", cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1", get_taxes_and_charges=True, qty=10)
 		self.assertTrue(cint(erpnext.is_perpetual_inventory_enabled(pi.company)), 1)
 
 		self.check_gle_for_pi(pi.name)
-
-		#set_perpetual_inventory(0, pi.company)
 
 	def test_terms_added_after_save(self):
 		pi = frappe.copy_doc(test_records[1])
@@ -524,7 +519,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertFalse(gle)
 
 	def test_purchase_invoice_update_stock_gl_entry_with_perpetual_inventory(self):
-		#set_perpetual_inventory()
 
 		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(),
 			posting_time=frappe.utils.nowtime(), cash_bank_account="Cash - TCP1", company="_Test Company with perpetual inventory 1", supplier_warehouse="Work In Progress - TCP1", warehouse= "Stores - TCP1", cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1")

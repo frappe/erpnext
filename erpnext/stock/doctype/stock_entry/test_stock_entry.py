@@ -132,7 +132,6 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_material_receipt_gl_entry(self):
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
-		#set_perpetual_inventory(1, company)
 
 		mr = make_stock_entry(item_code="_Test Item", target="Stores - TCP1", company= company,
 			qty=50, basic_rate=100, expense_account="Stock Adjustment - TCP1")
@@ -251,14 +250,10 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_repack_with_additional_costs(self):
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
-		#set_perpetual_inventory(1, company)
-
-		#sr = create_stock_reconciliation(item_code="_Test Item", warehouse="Stores - TCP1", cost_center = "Main - #TCP1", qty=200, rate=100, expense_account="Temporary Opening - TCP1", company=company)
 
 		make_stock_entry(item_code="_Test Item", target="Stores - TCP1", company= company,
 			qty=50, basic_rate=100, expense_account="Stock Adjustment - TCP1")
 
-		#repack = frappe.copy_doc(test_records[3])
 
 		repack = make_stock_entry(company = company, purpose="Repack", do_not_save=True)
 		repack.posting_date = nowdate()
@@ -301,7 +296,6 @@ class TestStockEntry(unittest.TestCase):
 				["Expenses Included In Valuation - TCP1", 0.0, 1200.0]
 			])
 		)
-		#set_perpetual_inventory(0, repack.company)
 
 	def check_stock_ledger_entries(self, voucher_type, voucher_no, expected_sle):
 		expected_sle.sort(key=lambda x: x[1])

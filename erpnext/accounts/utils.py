@@ -580,7 +580,7 @@ def get_stock_and_account_balance(account=None, posting_date=None, company=None)
 		total_stock_value += value
 
 	precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
-	return flt(account_balance, presicion), flt(total_stock_value, presicion), related_warehouses
+	return flt(account_balance, precision), flt(total_stock_value, precision), related_warehouses
 
 def get_currency_precision():
 	precision = cint(frappe.db.get_default("currency_precision"))

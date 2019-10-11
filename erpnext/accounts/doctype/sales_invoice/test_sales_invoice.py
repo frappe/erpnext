@@ -23,7 +23,6 @@ from erpnext.regional.india.utils import get_ewb_data
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
-from pprint import pprint
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -682,13 +681,10 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(gle)
 
 	def test_pos_gl_entry_with_perpetual_inventory(self):
-		#set_perpetual_inventory()
 		make_pos_profile()
 
-		#self._insert_purchase_receipt()
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory 1",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
 
-		#pos = copy.deepcopy(test_records[1])
 		pos = create_sales_invoice(company= "_Test Company with perpetual inventory 1", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
 
 		pos.is_pos = 1
@@ -710,13 +706,10 @@ class TestSalesInvoice(unittest.TestCase):
 		self.pos_gl_entry(si, pos, 50)
 
 	def test_pos_change_amount(self):
-		#set_perpetual_inventory()
 		make_pos_profile()
 
-		#self._insert_purchase_receipt()
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory 1",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
 
-		#pos = copy.deepcopy(test_records[1])
 		pos = create_sales_invoice(company= "_Test Company with perpetual inventory 1", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
 
 		pos.is_pos = 1
@@ -736,15 +729,11 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.sales_invoice.pos import make_invoice
 
 		make_pos_profile()
-		#self._insert_purchase_receipt()
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory 1",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
-		#pos = copy.deepcopy(test_records[4])
 		pos = create_sales_invoice(company= "_Test Company with perpetual inventory 1", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
 
 		pos.is_pos = 1
 		pos.update_stock = 1
-		#pos.payments = [{'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - TCP1', 'amount': 300},
-		#					{'mode_of_payment': 'Cash', 'account': 'Cash - TCP1', 'amount': 330}]
 
 		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - TCP1', 'amount': 50})
 		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - TCP1', 'amount': 50})
@@ -1045,14 +1034,12 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(si.get("items")[0].serial_no, dn.get("items")[0].serial_no)
 
 	def test_return_sales_invoice(self):
-		#set_perpetual_inventory()
 		make_stock_entry(item_code="_Test Item", target="Stores - TCP1", qty=50, basic_rate=100)
 
 		actual_qty_0 = get_qty_after_transaction(item_code = "_Test Item", warehouse = "Stores - TCP1")
 
 		si = create_sales_invoice(qty = 5, rate=500, update_stock=1, company= "_Test Company with perpetual inventory 1", debit_to="Debtors - TCP1", item_code= "_Test Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1")
 
-		#si = create_sales_invoice(qty=5, rate=500, update_stock=1)
 
 		actual_qty_1 = get_qty_after_transaction(item_code = "_Test Item", warehouse = "Stores - TCP1")
 
@@ -1092,7 +1079,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(si1.outstanding_amount)
 		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 1500)
 
-		#set_perpetual_inventory(0)
 
 	def test_discount_on_net_total(self):
 		si = frappe.copy_doc(test_records[2])

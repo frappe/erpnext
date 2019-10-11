@@ -12,7 +12,6 @@ from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.item.test_item import make_item
 from six import iteritems
-from pprint import pprint
 class TestPurchaseReceipt(unittest.TestCase):
 	def setUp(self):
 		set_perpetual_inventory(0)
