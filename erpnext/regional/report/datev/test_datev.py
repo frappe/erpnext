@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import os
 import json
 from unittest import TestCase
 import frappe
