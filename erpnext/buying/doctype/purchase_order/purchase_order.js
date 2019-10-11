@@ -284,7 +284,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			})
 		}
 
-		me.dialog.get_field('sub_con_rm_items').check_all()
+		me.dialog.get_field('sub_con_rm_items').check_all_rows()
 
 		me.dialog.show()
 		this.dialog.set_primary_action(__('Transfer'), function() {
