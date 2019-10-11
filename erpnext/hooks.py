@@ -13,7 +13,7 @@ source_link = "https://github.com/frappe/erpnext"
 
 develop_version = '12.x.x-develop'
 
-error_report_email = "saifi0102@gmail.com"
+error_report_email = "saif@mocha.pk"
 
 app_include_js = "assets/js/erpnext.min.js"
 app_include_css = "assets/css/erpnext.css"
