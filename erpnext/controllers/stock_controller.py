@@ -22,10 +22,6 @@ class StockController(AccountsController):
 		self.validate_inspection()
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
-		print("From Stock Controller")
-		print("----------->>>>>>>Gl entries")
-		from pprint import pprint
-		pprint(gl_entries)
 		if self.docstatus == 2:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -210,41 +206,6 @@ class StockController(AccountsController):
 						supplier=getattr(self, 'supplier', None),
 						reference_doctype=self.doctype,
 						reference_name=self.name)).insert().name
-
-	def make_adjustment_entry(self, expected_gle, voucher_obj):
-		from erpnext.accounts.utils import get_stock_and_account_difference
-		account_list = [d.account for d in expected_gle]
-		acc_diff = get_stock_and_account_difference(account_list,
-			expected_gle[0].posting_date, self.company)
-
-		cost_center = self.get_company_default("cost_center")
-		stock_adjustment_account = self.get_company_default("stock_adjustment_account")
-
-		gl_entries = []
-		for account, diff in acc_diff.items():
-			if diff:
-				gl_entries.append([
-					# stock in hand account
-					voucher_obj.get_gl_dict({
-						"account": account,
-						"against": stock_adjustment_account,
-						"debit": diff,
-						"remarks": "Adjustment Accounting Entry for Stock",
-					}),
-
-					# account against stock in hand
-					voucher_obj.get_gl_dict({
-						"account": stock_adjustment_account,
-						"against": account,
-						"credit": diff,
-						"cost_center": cost_center or None,
-						"remarks": "Adjustment Accounting Entry for Stock",
-					}),
-				])
-
-		if gl_entries:
-			from erpnext.accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries)
 
 	def check_expense_account(self, item):
 		if not item.get("expense_account"):
