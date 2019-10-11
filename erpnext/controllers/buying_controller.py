@@ -257,9 +257,12 @@ class BuyingController(StockController):
 
 			# qty of raw materials transferred to the supplier
 			transferred_raw_materials = get_subcontracted_raw_materials_from_se(item.purchase_order, item.item_code)
+
+			non_stock_items = get_non_stock_items(item.purchase_order, item.item_code)
+
 			item_key = '{}{}'.format(item.item_code, item.purchase_order)
 
-			for raw_material in transferred_raw_materials:
+			for raw_material in transferred_raw_materials + non_stock_items:
 				fg_yet_to_be_received = qty_to_be_received_map.get(item_key)
 
 				consumed_qty = backflushed_raw_materials.get(item_key, 0)
@@ -841,3 +844,19 @@ def get_qty_to_be_received(purchase_orders):
 			poi.`parent` in %s
 		GROUP BY poi.`item_code`, poi.`parent`
 	""", (purchase_orders)))
+
+def get_non_stock_items(purchase_order, fg_item_code):
+	return frappe.db.sql("""
+		SELECT
+			pois.main_item_code,
+			pois.rm_item_code,
+			item.description,
+			pois.required_qty AS qty,
+			pois.stock_uom
+		FROM `tabPurchase Order Item Supplied` pois, `tabItem` item
+		WHERE
+			pois.`rm_item_code` = item.`name`
+			AND item.is_stock_item = 0
+			AND pois.`parent` = %s
+			AND pois.`main_item_code` = %s
+	""", (purchase_order, fg_item_code), as_dict=1)
