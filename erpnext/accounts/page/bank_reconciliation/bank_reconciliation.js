@@ -33,7 +33,6 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 			fieldname: 'company',
 			options: "Company",
 			onchange: function() {
-				console.log("Are we there yet???")
 				if (this.value) {
 					me.company = this.value;
 				} else {
@@ -60,7 +59,6 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 				}
 			},
 			onchange: function() {
-				console.log("Don't show me twice!!!!")
 				if (this.value) {
 					me.bank_account = this.value;
 					me.add_actions();
@@ -70,16 +68,6 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 				}
 			}
 		})
-
-		// console.log($(".page_form"))
-		// console.log("page", me.page)		
-		// console.log("main_section", me.$main_section)		
-				
-		// if (me.page.fields_dict.company){
-		// 	console.log("HEY")
-		// } else{
-		// 	console.log("NO")
-		// }
 	}
 
 	check_plaid_status() {
@@ -277,7 +265,7 @@ erpnext.accounts.ReconciliationTool = class ReconciliationTool extends frappe.vi
 
 		this.page_title = __("Bank Reconciliation");
 		this.doctype = 'Bank Transaction';
-		this.fields = ['date', 'description', 'debit', 'credit', 'currency']
+		this.fields = ['date', 'description', 'reference_number', 'debit', 'credit', 'allocated_amount', 'unallocated_amount', 'currency']
 
 	}
 
