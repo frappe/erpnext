@@ -19,7 +19,7 @@
 {%- endmacro %}
 
 {%- macro render_discount_or_margin(item) -%}
-{%- if item.discount_percentage > 0.0 or item.margin_type %}
+{%- if (item.discount_percentage and item.discount_percentage > 0.0) or item.margin_type %}
 <ScontoMaggiorazione>
   {%- if item.discount_percentage > 0.0 %}
   <Tipo>SC</Tipo>
