@@ -606,8 +606,13 @@ class AccountsController(TransactionBase):
 
 					max_allowed_amt = flt(ref_amt * (100 + allowance) / 100)
 
+					if total_billed_amt < 0 and max_allowed_amt < 0:
+						# while making debit note against purchase return entry(purchase receipt) getting overbill error
+						total_billed_amt = abs(total_billed_amt)
+						max_allowed_amt = abs(max_allowed_amt)
+
 					if total_billed_amt - max_allowed_amt > 0.01:
-						frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set in Stock Settings")
+						frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
 							.format(item.item_code, item.idx, max_allowed_amt))
 
 	def get_company_default(self, fieldname):
