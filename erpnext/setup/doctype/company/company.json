@@ -72,7 +72,7 @@
   "stock_received_but_not_billed",
   "expenses_included_in_valuation",
   "fixed_asset_depreciation_settings",
-  "disable_cwip_accounting",
+  "enable_cwip_accounting",
   "accumulated_depreciation_account",
   "depreciation_expense_account",
   "series_for_depreciation_entry",
@@ -724,15 +724,15 @@
   },
   {
    "default": "0",
-   "fieldname": "disable_cwip_accounting",
+   "fieldname": "enable_cwip_accounting",
    "fieldtype": "Check",
-   "label": "Disable CWIP Accounting"
+   "label": "Enable Capital Work in Progress Accounting"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",
- "modified": "2019-10-07 14:52:42.216395",
+ "modified": "2019-10-09 14:42:04.440974",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
