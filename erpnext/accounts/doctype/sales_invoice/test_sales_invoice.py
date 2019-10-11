@@ -840,7 +840,7 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_gl_entries[i][1], gle.debit)
 			self.assertEqual(expected_gl_entries[i][2], gle.credit)
 
-		#si.cancel()
+		si.cancel()
 		gle = frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 

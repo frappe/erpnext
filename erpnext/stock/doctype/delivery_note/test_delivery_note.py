@@ -20,6 +20,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation \
 	import create_stock_reconciliation, set_valuation_method
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order, create_dn_against_so
 from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
+from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
 
 class TestDeliveryNote(unittest.TestCase):
 	def setUp(self):
@@ -377,23 +378,25 @@ class TestDeliveryNote(unittest.TestCase):
 		set_valuation_method("_Test Item", "FIFO")
 		set_valuation_method("_Test Item Home Desktop 100", "FIFO")
 
-		for warehouse in ("Stores - TCP1", "Finished Goods - TCP1"):
-			create_stock_reconciliation(item_code="_Test Item", target=warehouse, company = company, expense_account = "Stock Adjustment - TCP1", qty=100, rate=100, warehouse="Work In Progress - TCP1")
-			create_stock_reconciliation(item_code="_Test Item Home Desktop 100", company = company, expense_account = "Stock Adjustment - TCP1", target=warehouse, qty=100, rate=100, warehouse="Work In Progress - TCP1")
+		target_warehouse=get_warehouse(company=company, abbr=" - TCP1", warehouse_name="_Test Warehouse").name
 
-		opening_qty_test_warehouse_1 = get_qty_after_transaction(warehouse="Finished Goods - TCP1")
+		for warehouse in ("Stores - TCP1", target_warehouse):
+			create_stock_reconciliation(item_code="_Test Item", warehouse=warehouse, company = company, expense_account = "Stock Adjustment - TCP1", qty=500, rate=100)
+			create_stock_reconciliation(item_code="_Test Item Home Desktop 100", company = company, expense_account = "Stock Adjustment - TCP1", warehouse=warehouse, qty=500, rate=100)
 
-		dn = create_delivery_note(item_code="_Test Product Bundle Item", company='_Test Company with perpetual inventory 1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1", do_not_submit=True, qty=5, rate=500, warehouse="Stores - TCP1", target_warehouse="Finished Goods - TCP1")
+		opening_qty_test_warehouse_1 = get_qty_after_transaction(warehouse=target_warehouse)
+
+		dn = create_delivery_note(item_code="_Test Product Bundle Item", company='_Test Company with perpetual inventory 1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1", do_not_submit=True, qty=5, rate=500, warehouse="Stores - TCP1", target_warehouse=target_warehouse)
 
 		dn.submit()
 
 		# qty after delivery
 		print("asserting")
 		actual_qty = get_qty_after_transaction(warehouse="Stores - TCP1")
-		#self.assertEqual(actual_qty, 75)
+		self.assertEqual(actual_qty, 75)
 
 		print("asserting")
-		actual_qty = get_qty_after_transaction(warehouse="Finished Goods - TCP1")
+		actual_qty = get_qty_after_transaction(warehouse=target_warehouse)
 		self.assertEqual(actual_qty, opening_qty_test_warehouse_1 + 25)
 
 		# stock value diff for source warehouse
@@ -406,7 +409,7 @@ class TestDeliveryNote(unittest.TestCase):
 		# stock value diff for target warehouse
 		stock_value_difference1 = frappe.db.get_value("Stock Ledger Entry",
 			{"voucher_type": "Delivery Note", "voucher_no": dn.name,
-				"item_code": "_Test Item", "warehouse": "FinisHed Goods - TCP1"},
+				"item_code": "_Test Item", "warehouse": target_warehouse},
 			"stock_value_difference")
 
 		self.assertEqual(abs(stock_value_difference), stock_value_difference1)
@@ -420,7 +423,7 @@ class TestDeliveryNote(unittest.TestCase):
 		# stock value diff for target warehouse
 		stock_value_difference1 = frappe.db.get_value("Stock Ledger Entry",
 			{"voucher_type": "Delivery Note", "voucher_no": dn.name,
-				"item_code": "_Test Item Home Desktop 100", "warehouse": "Finished Goods - TCP1"},
+				"item_code": "_Test Item Home Desktop 100", "warehouse": target_warehouse},
 			"stock_value_difference")
 
 		self.assertEqual(abs(stock_value_difference), stock_value_difference1)
@@ -435,7 +438,7 @@ class TestDeliveryNote(unittest.TestCase):
 
 		expected_values = {
 			"Stock In Hand - TCP1": [0.0, stock_value_difference],
-			"Finished Goods - TCP1": [stock_value_difference, 0.0]
+			target_warehouse: [stock_value_difference, 0.0]
 		}
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual([gle.debit, gle.credit], expected_values.get(gle.account))

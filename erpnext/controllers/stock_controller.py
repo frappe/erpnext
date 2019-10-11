@@ -22,6 +22,10 @@ class StockController(AccountsController):
 		self.validate_inspection()
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
+		print("From Stock Controller")
+		print("----------->>>>>>>Gl entries")
+		from pprint import pprint
+		pprint(gl_entries)
 		if self.docstatus == 2:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
