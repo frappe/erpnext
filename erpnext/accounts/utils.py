@@ -13,6 +13,10 @@ from six import iteritems
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency
 
+from erpnext.stock.utils import get_stock_value_on
+from erpnext.stock import get_warehouse_account_map
+
+
 class FiscalYearError(frappe.ValidationError): pass
 
 @frappe.whitelist()
@@ -560,35 +564,22 @@ def fix_total_debit_credit():
 				(dr_or_cr, dr_or_cr, '%s', '%s', '%s', dr_or_cr),
 				(d.diff, d.voucher_type, d.voucher_no))
 
-def get_stock_and_account_difference(account_list=None, posting_date=None, company=None):
-	from pprint import pprint
-	from erpnext.stock.utils import get_stock_value_on
-	from erpnext.stock import get_warehouse_account_map
-
+def get_stock_and_account_balance(account=None, posting_date=None, company=None):
 	if not posting_date: posting_date = nowdate()
 
 	warehouse_account = get_warehouse_account_map(company)
 
-	warehouses = list(set([key for key in warehouse_account]))
-	accounts = list(set([warehouse.account for warehouse in warehouse_account.values()]))
+	account_balance = get_balance_on(account, posting_date, in_account_currency=False)
 
-	total_account_balance = 0
-	total_stock_value = 0
+	related_warehouses = [wh for wh, wh_details in warehouse_account.items()
+		if wh_details.account == account and not wh_details.is_group]
 
-	for warehouse in warehouses:
-		if warehouse_account[warehouse]["account"] in account_list and not warehouse_account[warehouse]["is_group"]:
-			value = get_stock_value_on(warehouse, posting_date)
-			total_stock_value += value
+	total_stock_value = 0.0
+	for warehouse in related_warehouses:
+		value = get_stock_value_on(warehouse, posting_date)
+		total_stock_value += value
 
-	print(account_list)
-	for account in account_list:
-		if account in accounts:
-			print(account)
-			balance = get_balance_on(account, posting_date, in_account_currency=False)
-			total_account_balance += balance
-	total_diff = flt(total_stock_value, 5) - flt(total_account_balance, 5)
-	print(total_diff, flt(total_stock_value), flt(total_account_balance))
-	return total_diff
+	return account_balance, total_stock_value, related_warehouses
 
 def get_currency_precision():
 	precision = cint(frappe.db.get_default("currency_precision"))

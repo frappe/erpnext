@@ -3,9 +3,9 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import flt, cstr, cint
+from frappe.utils import flt, cstr, cint, comma_and
 from frappe import _
-from erpnext.accounts.utils import get_stock_and_account_difference
+from erpnext.accounts.utils import get_stock_and_account_balance
 from frappe.model.meta import get_field_precision
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
@@ -16,9 +16,7 @@ class StockAccountInvalidTransaction(frappe.ValidationError): pass
 class StockValueAndAccountBalanceOutOfSync(frappe.ValidationError): pass
 
 def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, update_outstanding='Yes', from_repost=False):
-	print("Creating")
 	if gl_map:
-		print("Hello")
 		if not cancel:
 			validate_accounting_period(gl_map)
 			gl_map = process_gl_map(gl_map, merge_entries)
@@ -143,25 +141,31 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.submit()
 
 def validate_account_for_perpetual_inventory(gl_map):
-
 	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)):
-
 		account_list = [gl_entries.account for gl_entries in gl_map]
-		account_list = list(dict.fromkeys(account_list))
-		aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
-					where account_type = 'Stock' and is_group=0""")]
 
-		stock_value_and_account_balance_difference = get_stock_and_account_difference(account_list=account_list ,company= gl_map[0].company)
+		aii_accounts = [d.name for d in frappe.get_all("Account",
+			filters={'account_type': 'Stock', 'is_group': 0, 'company': gl_map[0].company})]
 
-		if gl_map[0].voucher_type=="Journal Entry":
-				if stock_value_and_account_balance_difference == 0:
-					for entry in gl_map:
-						if entry.account in aii_accounts:
-							frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
-								.format(entry.account), StockAccountInvalidTransaction)
+		for account in account_list:
+			if account not in aii_accounts:
+				continue
 
-		if stock_value_and_account_balance_difference != 0 and gl_map[0].voucher_type != "Journal Entry":
-			frappe.throw(_("Account Balance and Stock Value is Out of sync please Create Journal Entry to Balance"), StockValueAndAccountBalanceOutOfSync)
+			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(account,
+				gl_map[0].posting_date, gl_map[0].company)
+
+			if gl_map[0].voucher_type=="Journal Entry":
+				# In case of Journal Entry, there are no corresponding SL entries,
+				# hence deducting currency amount
+				account_bal -= flt(gl_map[0].debit) - flt(gl_map[0].credit)
+				if account_bal == stock_bal:
+					frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
+						.format(account), StockAccountInvalidTransaction)
+
+			elif account_bal != stock_bal:
+				frappe.throw(_("Account Balance ({0}) and Stock Value ({1}) is out of sync for account {2} and linked warehouse ({3}). Please create adjustment Journal Entry for amount {4}.")
+					.format(account_bal, stock_bal, account, comma_and(warehouse_list), stock_bal - account_bal),
+					StockValueAndAccountBalanceOutOfSync)
 
 def validate_cwip_accounts(gl_map):
 	if not cint(frappe.db.get_value("Asset Settings", None, "disable_cwip_accounting")) \
