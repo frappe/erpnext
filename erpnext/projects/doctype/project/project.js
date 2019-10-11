@@ -85,7 +85,7 @@ frappe.ui.form.on("Project", {
 			.parent('a')
 			.unbind("click")
 			.bind("click", function() {
-				frm.trigger('create_duplicate_project');
+				frm.trigger('create_duplicate');
 			});
 	},
 
