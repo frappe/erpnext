@@ -10,6 +10,7 @@ from frappe import _, throw
 from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate
 from frappe.utils.nestedset import NestedSet
 from frappe.desk.form.assign_to import close_all_assignments, clear
+from frappe.utils import date_diff
 
 class CircularReferenceError(frappe.ValidationError): pass
 class EndDateCannotBeGreaterThanProjectEndDateError(frappe.ValidationError): pass
@@ -45,10 +46,15 @@ class Task(NestedSet):
 			return
 
 		project_end_date = getdate(frappe.db.get_value("Project", self.project, "expected_end_date"))
-		if project_end_date < getdate(self.exp_end_date):
+
+		if date_diff(project_end_date, getdate(self.exp_end_date)) < 0 or \
+			date_diff(project_end_date, getdate(self.act_end_date)) < 0:
+
 			frappe.throw(_("Task's End Date cannot be after Project's End Date."))
 
-		if project_end_date > getdate(self.exp_start_date):
+		if date_diff(project_end_date, getdate(self.exp_start_date)) < 0 or \
+			date_diff(project_end_date, getdate(self.act_start_date)) < 0:
+
 			frappe.throw(_("Task's Start Date cannot be after Project's End Date."))
 
 	def validate_status(self):
