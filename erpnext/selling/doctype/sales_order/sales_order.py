@@ -57,13 +57,13 @@ class SalesOrder(SellingController):
 
 	def validate_po(self):
 		# validate p.o date v/s delivery date
-		if self.po_date:
+		if self.po_date and not self.skip_delivery_note:
 			for d in self.get("items"):
 				if d.delivery_date and getdate(self.po_date) > getdate(d.delivery_date):
 					frappe.throw(_("Row #{0}: Expected Delivery Date cannot be before Purchase Order Date")
 						.format(d.idx))
 
-		if self.po_no and self.customer:
+		if self.po_no and self.customer and not self.skip_delivery_note:
 			so = frappe.db.sql("select name from `tabSales Order` \
 				where ifnull(po_no, '') = %s and name != %s and docstatus < 2\
 				and customer = %s", (self.po_no, self.name, self.customer))
@@ -100,7 +100,7 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).validate_order_type()
 
 	def validate_delivery_date(self):
-		if self.order_type == 'Sales':
+		if self.order_type == 'Sales' and not self.skip_delivery_note:
 			delivery_date_list = [d.delivery_date for d in self.get("items") if d.delivery_date]
 			max_delivery_date = max(delivery_date_list) if delivery_date_list else None
 			if not self.delivery_date:
@@ -760,6 +760,7 @@ def get_events(start, end, filters=None):
 		from
 			`tabSales Order`, `tabSales Order Item`
 		where `tabSales Order`.name = `tabSales Order Item`.parent
+			and `tabSales Order`.skip_delivery_note = 0
 			and (ifnull(`tabSales Order Item`.delivery_date, '0000-00-00')!= '0000-00-00') \
 			and (`tabSales Order Item`.delivery_date between %(start)s and %(end)s)
 			and `tabSales Order`.docstatus < 2
