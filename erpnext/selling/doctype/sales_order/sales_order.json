@@ -14,6 +14,7 @@
   "customer",
   "customer_name",
   "order_type",
+  "skip_delivery_note",
   "column_break1",
   "amended_from",
   "company",
@@ -252,6 +253,7 @@
   },
   {
    "allow_on_submit": 1,
+   "depends_on": "eval:!doc.skip_delivery_note",
    "fieldname": "delivery_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -1023,7 +1025,7 @@
    "print_hide": 1
   },
   {
-   "depends_on": "eval:!doc.__islocal",
+   "depends_on": "eval:!doc.__islocal && !doc.skip_delivery_note_creation",
    "description": "% of materials delivered against this Sales Order",
    "fieldname": "per_delivered",
    "fieldtype": "Percent",
@@ -1171,12 +1173,19 @@
    "fieldtype": "Data",
    "label": "Phone",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "skip_delivery_note",
+   "fieldtype": "Check",
+   "label": "Skip Delivery Note",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2019-09-27 14:23:52.233323",
+ "modified": "2019-10-10 08:46:07.540565",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
