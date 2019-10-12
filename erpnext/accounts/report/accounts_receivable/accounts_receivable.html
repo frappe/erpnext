@@ -32,6 +32,24 @@
 	</h6>
 {% } %}
 
+{% if (filters.cost_center || group.cost_center) { %}
+	<h6 class="text-center">
+		{%= __("Cost Center: ")%}{%= filters.cost_center || group.cost_center %}
+	</h6>
+{% } %}
+
+{% if (filters.project || group.project) { %}
+	<h6 class="text-center">
+		{%= __("Project: ")%}{%= filters.project || group.project %}
+	</h6>
+{% } %}
+
+{% if (filters.territory || group.territory) { %}
+	<h6 class="text-center">
+		{%= __("Territory: ")%}{%= filters.territory || group.territory %}
+	</h6>
+{% } %}
+
 <h5 class="text-center">
 	{%= __(filters.ageing_based_on) %}
 	{%= __("Upto") %}
