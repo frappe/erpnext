@@ -101,7 +101,7 @@ def get_conditions(filters):
 
 	# In Store assets are those that are not sold or scrapped
 	operand = 'not in'
-	if status not in 'In Store':
+	if status not in 'In Location':
 		operand = 'in'
 
 	conditions['status'] = (operand, ['Sold', 'Scrapped'])
