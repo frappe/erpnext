@@ -80,17 +80,12 @@ frappe.ui.form.on("Project", {
 		frm.events.set_buttons(frm);
 	},
 
-	onload_post_render: function(frm) {
-		$(".menu-item-label[data-label='Duplicate']")
-			.parent('a')
-			.unbind("click")
-			.bind("click", function() {
-				frm.trigger('create_duplicate');
-			});
-	},
-
 	set_buttons: function(frm) {
 		if (!frm.is_new()) {
+			frm.add_custom_button(__('Duplicate Project with Tasks'), () => {
+				frm.events.create_duplicate(frm);
+			});
+
 			frm.add_custom_button(__('Completed'), () => {
 				frm.events.set_status(frm, 'Completed');
 			}, __('Set Status'));
