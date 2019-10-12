@@ -3,7 +3,8 @@
 		"doctype": "Company",
 		"company_name": "_Test GmbH",
 		"abbr": "_TG",
-		"country": "Germany"
+		"country": "Germany",
+		"default_currency": "EUR"
 	},
 	{
 		"doctype": "Account",
