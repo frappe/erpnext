@@ -6,18 +6,19 @@
  "engine": "InnoDB",
  "field_order": [
   "loan",
-  "company",
   "applicant_type",
   "applicant",
-  "is_term_loan",
-  "column_break_4",
   "interest_income_account",
   "loan_account",
+  "column_break_4",
+  "company",
+  "posting_date",
+  "is_term_loan",
   "is_paid",
   "section_break_7",
-  "posting_date",
   "pending_principal_amount",
   "payable_principal_amount",
+  "column_break_14",
   "interest_amount",
   "section_break_15",
   "process_loan_interest_accrual",
@@ -88,7 +89,8 @@
   },
   {
    "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Amounts"
   },
   {
    "fetch_from": "loan.company",
@@ -128,11 +130,15 @@
    "fieldtype": "Link",
    "label": "Process Loan Interest Accrual",
    "options": "Process Loan Interest Accrual"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
   }
  ],
  "in_create": 1,
  "is_submittable": 1,
- "modified": "2019-10-08 12:21:44.773766",
+ "modified": "2019-10-09 09:26:00.091765",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Interest Accrual",

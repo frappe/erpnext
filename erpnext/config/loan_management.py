@@ -84,5 +84,24 @@ def get_data():
 					"name": "Process Loan Interest Accrual",
 				}
 			]
+		},
+		{
+			"label": _("Reports"),
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Loan Repayment and Closure",
+					"route": "#query-report/Loan Repayment and Closure",
+					"doctype": "Loan Repayment",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Loan Security Status",
+					"route": "#query-report/Loan Security Status",
+					"doctype": "Loan Security Pledge",
+				}
+			]
 		}
 	]

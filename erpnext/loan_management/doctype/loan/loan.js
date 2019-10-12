@@ -4,6 +4,12 @@
 {% include 'erpnext/loan_management/loan_common.js' %};
 
 frappe.ui.form.on('Loan', {
+	setup: function(frm) {
+		frm.make_methods = {
+			'Loan Disbursement': function() { frm.trigger('make_loan_disbursement') },
+			'Loan Security Unpledge': function() { frm.trigger('create_loan_security_unpledge') }
+		}
+	},
 	onload: function (frm) {
 		frm.set_query("loan_application", function () {
 			return {

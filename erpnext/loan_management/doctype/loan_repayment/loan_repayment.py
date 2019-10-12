@@ -58,6 +58,7 @@ class LoanRepayment(AccountsController):
 	def mark_as_paid(self):
 		paid_entries = []
 		paid_amount = self.amount_paid
+		interest_paid = paid_amount
 
 		if not paid_amount:
 			frappe.throw(_("Amount paid cannot be zero"))
@@ -66,12 +67,16 @@ class LoanRepayment(AccountsController):
 			msg = _("Paid amount cannot be less than {0}").format(self.penalty_amount)
 			frappe.throw(msg)
 
+		if self.payment_type == "Loan Closure" and flt(self.amount_paid, 2) < flt(self.payable_amount, 2):
+			msg = _("Amount of {0} is required for Loan closure").format(self.payable_amount)
+			frappe.throw(msg)
+
 		loan = frappe.get_doc("Loan", self.against_loan)
 
 		if self.paid_accrual_entries:
 			paid_accrual_entries = json.loads(self.paid_accrual_entries)
 
-		if paid_amount - self.penalty_amount > 0:
+		if paid_amount - self.penalty_amount > 0 and self.paid_accrual_entries:
 
 			interest_paid = paid_amount - self.penalty_amount
 
@@ -92,10 +97,6 @@ class LoanRepayment(AccountsController):
 
 		if interest_paid:
 			self.principal_amount_paid = interest_paid
-
-		if self.payment_type == "Loan Closure" and flt(self.amount_paid, 2) < flt(self.payable_amount, 2):
-			msg = _("Amount of {0} is required for Loan closure").format(self.payable_amount)
-			frappe.throw(msg)
 
 		if paid_entries:
 			frappe.db.sql("""UPDATE `tabLoan Interest Accrual`
@@ -119,7 +120,7 @@ class LoanRepayment(AccountsController):
 		if self.paid_accrual_entries:
 			paid_accrual_entries = json.loads(self.paid_accrual_entries)
 
-		if paid_accrual_entries:
+		if self.paid_accrual_entries:
 			frappe.db.sql("""UPDATE `tabLoan Interest Accrual`
 				SET is_paid = 0 where name in (%s)""" #nosec
 				% ", ".join(['%s']*len(paid_accrual_entries)), tuple(paid_accrual_entries))

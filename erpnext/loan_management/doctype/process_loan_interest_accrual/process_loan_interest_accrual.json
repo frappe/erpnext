@@ -5,13 +5,17 @@
  "engine": "InnoDB",
  "field_order": [
   "posting_date",
+  "loan_type",
+  "loan",
   "amended_from"
  ],
  "fields": [
   {
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "label": "Posting Date"
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -21,10 +25,22 @@
    "options": "Process Loan Interest Accrual",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "loan_type",
+   "fieldtype": "Link",
+   "label": "Loan Type",
+   "options": "Loan Type"
+  },
+  {
+   "fieldname": "loan",
+   "fieldtype": "Link",
+   "label": "Loan ",
+   "options": "Loan"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-25 04:39:56.714071",
+ "modified": "2019-10-10 02:29:24.796845",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Process Loan Interest Accrual",

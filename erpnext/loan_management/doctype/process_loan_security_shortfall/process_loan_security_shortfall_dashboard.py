@@ -3,13 +3,10 @@ from frappe import _
 
 def get_data():
 	return {
-		'fieldname': 'loan_type',
+		'fieldname': 'process_loan_security_shortfall',
 		'transactions': [
 			{
-				'items': ['Loan Repayment', 'Loan']
-			},
-			{
-				'items': ['Loan Application']
+				'items': ['Loan Security Shortfall']
 			}
 		]
 	}

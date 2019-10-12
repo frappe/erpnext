@@ -37,7 +37,7 @@
    "label": "Loan Security Code"
   },
   {
-   "fetch_from": "loan_security.unit_of_measurement",
+   "fetch_from": "loan_security.unit_of_measure",
    "fieldname": "uom",
    "fieldtype": "Link",
    "label": "UOM",

@@ -6,14 +6,14 @@
  "engine": "InnoDB",
  "field_order": [
   "loan_details_section",
-  "company",
+  "loan_application",
+  "loan",
   "applicant_type",
   "applicant",
   "column_break_3",
-  "loan",
-  "loan_application",
-  "status",
+  "company",
   "pledge_time",
+  "status",
   "loan_security_details_section",
   "securities",
   "section_break_10",
@@ -113,7 +113,8 @@
   },
   {
    "fieldname": "section_break_10",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Totals"
   },
   {
    "fieldname": "company",
@@ -132,7 +133,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-10-08 13:10:12.881666",
+ "modified": "2019-10-10 13:22:53.297519",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Pledge",

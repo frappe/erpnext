@@ -7,10 +7,10 @@ frappe.ui.form.on('Loan Application', {
 
 	setup: function(frm) {
 		frm.make_methods = {
-			'Loan': function() { frm.trigger('create_loan') }
+			'Loan': function() { frm.trigger('create_loan') },
+			'Loan Security Pledge': function() { frm.trigger('create_loan_security_pledge') },
 		}
 	},
-
 	refresh: function(frm) {
 		frm.trigger("toggle_fields");
 		frm.trigger("add_toolbar_buttons");
@@ -44,7 +44,6 @@ frappe.ui.form.on('Loan Application', {
 			},__('Create'));
 		}
 	},
-
 	create_loan: function(frm) {
 		if (frm.doc.status != "Approved") {
 			frappe.throw(__("Cannot create loan until application is approved"))
@@ -55,19 +54,23 @@ frappe.ui.form.on('Loan Application', {
 			frm: frm
 		});
 	},
-
 	create_loan_security_pledge: function(frm) {
 		frappe.call({
 			method: "erpnext.loan_management.doctype.loan_application.loan_application.create_pledge",
 			args: {
 				loan_application: frm.doc.name
+			},
+			callback: function(r) {
+				frappe.set_route("Form", "Loan Security Pledge", r.message);
 			}
 		})
 	},
-
 	is_term_loan: function(frm) {
 		frm.set_df_property('repayment_method', 'hidden', 1 - frm.doc.is_term_loan);
 		frm.set_df_property('repayment_method', 'reqd', frm.doc.is_term_loan);
+	},
+	is_secured_loan: function(frm) {
+		frm.set_df_property('proposed_pledges', 'reqd', frm.doc.is_secured_loan);
 	}
 });
 

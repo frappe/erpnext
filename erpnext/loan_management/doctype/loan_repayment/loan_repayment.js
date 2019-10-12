@@ -1,6 +1,8 @@
 // Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
+{% include 'erpnext/loan_management/loan_common.js' %};
+
 frappe.ui.form.on('Loan Repayment', {
 	// refresh: function(frm) {
 
@@ -46,10 +48,13 @@ frappe.ui.form.on('Loan Repayment', {
 			},
 			callback: function(r) {
 				let amounts = r.message;
+				frm.set_value('amount_paid', 0.0);
+				frm.set_df_property('amount_paid', 'read_only', frm.doc.payment_type == "Loan Closure" ? 1:0);
 
 				frm.set_value('pending_principal_amount', amounts['pending_principal_amount']);
 				if (frm.doc.is_term_loan || frm.doc.payment_type == "Loan Closure") {
 					frm.set_value('payable_principal_amount', amounts['payable_principal_amount']);
+					frm.set_value('amount_paid', amounts['payable_amount']);
 				}
 				frm.set_value('interest_payable', amounts['interest_amount']);
 				frm.set_value('penalty_amount', amounts['penalty_amount']);

@@ -21,10 +21,6 @@ frappe.ui.form.on(cur_frm.doctype, {
 			},__("View"));
 		}
 	},
-	applicant_type: function(frm) {
-		frm.set_value("applicant", null);
-		frm.set_value("applicant_name", null);
-	},
 	applicant: function(frm) {
 		if (!["Loan Application", "Loan"].includes(frm.doc.doctype)) {
 			return;

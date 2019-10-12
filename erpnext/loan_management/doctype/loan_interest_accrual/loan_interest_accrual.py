@@ -85,15 +85,23 @@ def calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_i
 		loan.loan_account, pending_principal_amount, payable_interest, process_loan_interest = process_loan_interest,
 		 posting_date=posting_date)
 
-def make_accrual_interest_entry_for_demand_loans(posting_date=None, open_loans=None, process_loan_interest=None):
+def make_accrual_interest_entry_for_demand_loans(posting_date=None, open_loans=None, loan_type=None, process_loan_interest=None):
+
+	query_filters = {
+		"status": "Disbursed",
+		"docstatus": 1
+	}
+
+	if loan_type:
+		query_filters.update({
+			"loan_type": loan_type
+		})
+
 	if not open_loans:
 		open_loans = frappe.get_all("Loan",
 			fields=["name", "total_payment", "total_amount_paid", "loan_account", "interest_income_account", "is_term_loan",
 				"disbursement_date", "applicant_type", "applicant", "rate_of_interest", "total_interest_payable", "repayment_start_date"],
-			filters= {
-				"status": "Disbursed",
-				"docstatus": 1
-			})
+			filters=query_filters)
 
 	from_background_job = 0
 	if not process_loan_interest:

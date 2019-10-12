@@ -13,8 +13,8 @@ class LoanSecurityUnpledge(Document):
 	def validate(self):
 		pledge_details = frappe.db.sql("""
 			SELECT p.parent, p.loan_security, p.qty as qty , ls.loan_security_price FROM
-				`tabLoan Security Pledge` lsp ,
-				`tabPledge` p
+				`tabLoan Security Pledge` lsp,
+				`tabPledge` p,
 				`tabLoan Security` ls
 			WHERE
 				p.parent = lsp.name
@@ -51,6 +51,7 @@ class LoanSecurityUnpledge(Document):
 			remaining_qty += unpledge_qty
 			unpledge_value += security_price - (security_price * security.haircut/100)
 
+		print("##########", unpledge_value, loan.total_principal_paid)
 		if unpledge_value > loan.total_principal_paid:
 			frappe.throw(_("Cannot Unpledge, loan security value is greater than the repaid amount"))
 

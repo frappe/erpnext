@@ -6,17 +6,11 @@
  "engine": "InnoDB",
  "field_order": [
   "loan_security_type",
-  "unit_of_measurement",
+  "unit_of_measure",
   "haircut",
   "disabled"
  ],
  "fields": [
-  {
-   "fieldname": "unit_of_measurement",
-   "fieldtype": "Link",
-   "label": "Unit Of Measurement",
-   "options": "UOM"
-  },
   {
    "default": "0",
    "fieldname": "disabled",
@@ -33,9 +27,15 @@
    "fieldname": "haircut",
    "fieldtype": "Percent",
    "label": "Haircut %"
+  },
+  {
+   "fieldname": "unit_of_measure",
+   "fieldtype": "Link",
+   "label": "Unit Of Measure",
+   "options": "UOM"
   }
  ],
- "modified": "2019-09-25 04:49:02.696662",
+ "modified": "2019-10-10 03:05:37.912866",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Type",

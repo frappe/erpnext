@@ -8,7 +8,7 @@
   "loan_security_type",
   "loan_security_code",
   "loan_security_name",
-  "unit_of_measurement",
+  "unit_of_measure",
   "column_break_3",
   "haircut",
   "loan_security_price",
@@ -20,13 +20,6 @@
    "fieldtype": "Data",
    "label": "Loan Security Name",
    "unique": 1
-  },
-  {
-   "fetch_from": "loan_security_type.unit_of_measurement",
-   "fieldname": "unit_of_measurement",
-   "fieldtype": "Link",
-   "label": "Unit Of Measurement",
-   "options": "UOM"
   },
   {
    "fetch_from": "loan_security_type.haircut",
@@ -61,9 +54,16 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "fetch_from": "loan_security_type.unit_of_measure",
+   "fieldname": "unit_of_measure",
+   "fieldtype": "Link",
+   "label": "Unit Of Measure",
+   "options": "UOM"
   }
  ],
- "modified": "2019-09-25 04:39:25.171232",
+ "modified": "2019-10-10 03:06:15.533908",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security",

@@ -10,22 +10,10 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'items': ['Loan Security Pledge']
+				'items': ['Loan Security Pledge', 'Loan Security Shortfall', 'Loan Disbursement']
 			},
 			{
-				'items': ['Loan Security Shortfall']
-			},
-			{
-				'items': ['Loan Disbursement']
-			},
-			{
-				'items': ['Loan Repayment']
-			},
-			{
-				'items': ['Loan Interest Accrual']
-			},
-			{
-				'items': ['Loan Security Unpledge']
+				'items': ['Loan Repayment', 'Loan Interest Accrual', 'Loan Security Unpledge']
 			}
 		]
 	}

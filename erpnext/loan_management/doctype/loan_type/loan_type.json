@@ -10,10 +10,11 @@
   "rate_of_interest",
   "penalty_interest_rate",
   "grace_period_in_days",
-  "is_term_loan",
+  "column_break_2",
+  "company",
   "repayment_method",
   "repayment_periods",
-  "column_break_2",
+  "is_term_loan",
   "disabled",
   "description",
   "account_details_section",
@@ -43,7 +44,6 @@
   {
    "fieldname": "rate_of_interest",
    "fieldtype": "Percent",
-   "in_list_view": 1,
    "label": "Rate of Interest (%) Yearly",
    "reqd": 1
   },
@@ -138,10 +138,17 @@
    "fieldname": "repayment_periods",
    "fieldtype": "Int",
    "label": "Repayment Period in Months"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-25 04:48:33.223116",
+ "modified": "2019-10-11 05:48:58.291796",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",

@@ -373,6 +373,7 @@ def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest, penalty_i
 	if not frappe.db.exists("Loan Type", loan_name):
 		loan_type = frappe.get_doc({
 			"doctype": "Loan Type",
+			"company": "_Test Company",
 			"loan_name": loan_name,
 			"is_term_loan": is_term_loan,
 			"maximum_loan_amount": maximum_loan_amount,
@@ -393,7 +394,7 @@ def create_loan_security_type():
 		frappe.get_doc({
 			"doctype": "Loan Security Type",
 			"loan_security_type": "Stock",
-			"unit_of_measurement": "Nos",
+			"unit_of_measure": "Nos",
 			"haircut": 50.00
 		}).insert(ignore_permissions=True)
 
@@ -404,7 +405,7 @@ def create_loan_security():
 			"loan_security_type": "Stock",
 			"loan_security_code": "532779",
 			"loan_security_name": "Test Security 1",
-			"unit_of_measurement": "Nos",
+			"unit_of_measure": "Nos",
 			"haircut": 50.00,
 			"loan_security_price": 500.00
 		}).insert(ignore_permissions=True)
@@ -415,7 +416,7 @@ def create_loan_security():
 			"loan_security_type": "Stock",
 			"loan_security_code": "531335",
 			"loan_security_name": "Test Security 2",
-			"unit_of_measurement": "Nos",
+			"unit_of_measure": "Nos",
 			"haircut": 50.00,
 			"loan_security_price": 250.00
 		}).insert(ignore_permissions=True)

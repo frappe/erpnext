@@ -9,9 +9,9 @@
   "applicant",
   "applicant_name",
   "column_break_2",
+  "company",
   "posting_date",
   "status",
-  "company",
   "section_break_4",
   "loan_type",
   "is_term_loan",
@@ -20,7 +20,6 @@
   "rate_of_interest",
   "column_break_7",
   "description",
-  "required_by_date",
   "loan_security_details_section",
   "proposed_pledges",
   "maximum_loan_amount",
@@ -105,11 +104,6 @@
    "in_list_view": 1,
    "label": "Loan Amount",
    "options": "Company:company:default_currency"
-  },
-  {
-   "fieldname": "required_by_date",
-   "fieldtype": "Date",
-   "label": "Required by Date"
   },
   {
    "fieldname": "column_break_7",
@@ -218,7 +212,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-25 06:05:18.819624",
+ "modified": "2019-10-10 13:08:10.177545",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Application",

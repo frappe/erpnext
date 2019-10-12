@@ -15,10 +15,17 @@ class LoanApplication(Document):
 
 		validate_repayment_method(self.repayment_method, self.loan_amount, self.repayment_amount,
 			self.repayment_periods, self.is_term_loan)
+
+		self.validate_loan_type()
 		self.set_loan_amount()
 		self.set_pledge_amount()
 		self.validate_loan_amount()
 		self.get_repayment_details()
+
+	def validate_loan_type(self):
+		company = frappe.get_value("Loan Type", self.loan_type, "company")
+		if company != self.company:
+			frappe.throw(_("Please select Loan Type for company {0}").format(frappe.bold(self.company)))
 
 	def validate_loan_amount(self):
 		if not self.loan_amount:
@@ -71,18 +78,23 @@ class LoanApplication(Document):
 		self.total_payable_amount = self.loan_amount + self.total_payable_interest
 
 	def set_loan_amount(self):
+		if self.is_secured_loan and not self.proposed_pledges:
+			frappe.throw(_("Proposed Pledges are mandatory for secured Loans"))
+
 		if not self.loan_amount and self.is_secured_loan and self.proposed_pledges:
 			self.loan_amount = 0
 			for security in self.proposed_pledges:
 				self.loan_amount += security.amount - (security.amount * security.haircut/100)
 
 @frappe.whitelist()
-def create_loan(source_name, target_doc=None, loan_security_pledge=None, submit=0):
+def create_loan(source_name, target_doc=None, submit=0):
 	def update_accounts(source_doc, target_doc, source_parent):
 		account_details = frappe.get_all("Loan Type",
 		 fields=["mode_of_payment", "payment_account","loan_account", "interest_income_account", "penalty_income_account"],
 		 filters = {'name': source_doc.loan_type}
 		)[0]
+
+		loan_security_pledge = frappe.db.get_value("Loan Security Pledge", {"loan_application": source_name}, 'name')
 
 		target_doc.mode_of_payment = account_details.mode_of_payment
 		target_doc.payment_account = account_details.payment_account

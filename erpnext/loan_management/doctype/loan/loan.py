@@ -14,10 +14,9 @@ class Loan(AccountsController):
 		self.set_loan_amount()
 
 		self.set_missing_fields()
-
-		self.validate_loan_amount()
-
+		self.validate_accounts()
 		self.validate_loan_security_pledge()
+		self.validate_loan_amount()
 
 		if self.is_term_loan:
 			validate_repayment_method(self.repayment_method, self.loan_amount, self.monthly_repayment_amount,
@@ -26,6 +25,14 @@ class Loan(AccountsController):
 			self.set_repayment_period()
 
 		self.calculate_totals()
+
+	def validate_accounts(self):
+		for fieldname in ['payment_account', 'loan_account', 'interest_income_account', 'penalty_income_account']:
+			company = frappe.get_value("Account", self.get(fieldname), 'company')
+			print(company, self.company, self.get(fieldname))
+			if company != self.company:
+				frappe.throw(_("Account {0} does not belongs to company {1}").format(frappe.bold(self.get(fieldname)),
+					frappe.bold(self.company)))
 
 	def on_submit(self):
 		self.link_loan_security_pledge()
