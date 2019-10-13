@@ -125,7 +125,7 @@ class LeaveApplication(Document):
 				status = "Half Day" if date == self.half_day_date else "On Leave"
 
 				attendance_name = frappe.db.exists('Attendance', dict(employee = self.employee,
-					attenance_date = date, docstatus = ('!=', 2)))
+					attendance_date = date, docstatus = ('!=', 2)))
 
 				if attendance_name:
 					# update existing attendance, change absent to on leave
