@@ -61,6 +61,7 @@ cur_frm.cscript.clear_sanctioned = function(doc) {
 };
 
 cur_frm.cscript.refresh = function(doc) {
+	cur_frm.set_df_property("cost_center", "hidden", true);
 	cur_frm.cscript.set_help(doc);
 
 	if(!doc.__islocal) {
@@ -342,3 +343,11 @@ cur_frm.fields_dict['task'].get_query = function(doc) {
 		}
 	};
 };
+cur_frm.fields_dict["expenses"].grid.get_field("cost_center").get_query = function(doc){
+       return {
+               filters:{
+
+					   "is_group": "child"
+               }
+       }
+}
