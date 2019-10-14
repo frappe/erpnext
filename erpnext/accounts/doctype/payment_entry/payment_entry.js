@@ -572,8 +572,8 @@ frappe.ui.form.on('Payment Entry', {
 			var to = new Date().toISOString().slice(0, 10)
 			//date.setDate(date.getDate() - 29);
 			//var from = date.toISOString().slice(0, 10)
-			d.set_value('from_due_date','')
-			d.set_value('to_due_date',to)
+			d.set_value('from_due_date',to)
+			d.set_value('to_due_date','')
 			d.set_value('from_posting_date','')
 			d.set_value('to_posting_date','')
 		});	
@@ -584,8 +584,8 @@ frappe.ui.form.on('Payment Entry', {
 			var date = new Date();
 			date.setDate(date.getDate() - 30);
 			var to = date.toISOString().slice(0, 10)
-			d.set_value('from_due_date','')
-			d.set_value('to_due_date',to)
+			d.set_value('from_due_date',to)
+			d.set_value('to_due_date','')
 			d.set_value('from_posting_date','')
 			d.set_value('to_posting_date','')
 		});	
@@ -596,8 +596,8 @@ frappe.ui.form.on('Payment Entry', {
 			var date = new Date();
 			date.setDate(date.getDate() - 60);
 			var to = date.toISOString().slice(0, 10)
-			d.set_value('from_due_date','')
-			d.set_value('to_due_date',to)
+			d.set_value('from_due_date',to)
+			d.set_value('to_due_date','')
 			d.set_value('from_posting_date','')
 			d.set_value('to_posting_date','')
 		});	
@@ -607,8 +607,8 @@ frappe.ui.form.on('Payment Entry', {
 			//var from = date.toISOString().slice(0, 10)
 			date.setDate(date.getDate() - 90);
 			var to = date.toISOString().slice(0, 10)
-			d.set_value('from_due_date','')
-			d.set_value('to_due_date',to)
+			d.set_value('from_due_date',to)
+			d.set_value('to_due_date','')
 			d.set_value('from_posting_date','')
 			d.set_value('to_posting_date','')
 		});	
