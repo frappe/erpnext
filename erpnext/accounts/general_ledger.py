@@ -135,7 +135,8 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.insert()
 	gle.run_method("on_update_with_args", adv_adj, update_outstanding, from_repost)
 	gle.submit()
-
+	frappe.db.sql("""UPDATE `tabGL Entry` SET cost_center = %s WHERE name = %s """, (args.cost_center, gle.name))
+	frappe.db.commit()
 def validate_account_for_perpetual_inventory(gl_map):
 	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)) \
 		and gl_map[0].voucher_type=="Journal Entry":
