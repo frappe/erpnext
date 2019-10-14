@@ -18,7 +18,7 @@ def get_data():
 			"onboard_present": 1
 		},
 		{
-			"module_name": "Accounting",
+			"module_name": "Accounts",
 			"category": "Modules",
 			"label": _("Accounting"),
 			"color": "#3498db",
@@ -137,7 +137,6 @@ def get_data():
 			"type": "module",
 			"description": "Student admissions, fees, courses and scores."
 		},
-
 		{
 			"module_name": "Healthcare",
 			"category": "Domains",
@@ -165,7 +164,6 @@ def get_data():
 			"type": "module",
 			"description": "Hotel rooms, pricing, reservation and amenities."
 		},
-
 		{
 			"module_name": "Non Profit",
 			"category": "Domains",
