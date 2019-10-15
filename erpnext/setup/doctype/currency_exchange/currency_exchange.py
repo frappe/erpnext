@@ -11,7 +11,7 @@ from frappe.utils import get_datetime_str, formatdate, nowdate, cint
 
 class CurrencyExchange(Document):
 	def autoname(self):
-		purpose: str = ""
+		purpose = str("")
 		if not self.date:
 			self.date = nowdate()
 		if cint(self.for_buying)==0 and cint(self.for_selling)==1:
