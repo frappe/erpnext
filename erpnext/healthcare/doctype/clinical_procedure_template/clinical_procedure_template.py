@@ -30,7 +30,7 @@ class ClinicalProcedureTemplate(Document):
 			try:
 				frappe.delete_doc("Item",self.item)
 			except Exception:
-				frappe.throw("""Not permitted. Please disable the Procedure Template""")
+				frappe.throw(_("""Not permitted. Please disable the Procedure Template"""))
 
 	def get_item_details(self, args=None):
 		item = frappe.db.sql("""select stock_uom, item_name

@@ -1,0 +1,9 @@
+DocType: Instructor Log,Other Details,Otros Detalles
+apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.py,{0} does not have a Healthcare Practitioner Schedule. Add it in Healthcare Practitioner master,{0} no tiene agenda del profesional médico . Asígnele al médico
+DocType: Material Request Item,Lead Time Date,Fecha de la Iniciativa
+apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py,Lead Time Days,Tiempo de ejecución en días
+apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.py,{0} on Half day Leave on {1},{0} en Medio día Permiso en {1}
+apps/erpnext/erpnext/selling/report/customer_credit_balance/customer_credit_balance.py,Outstanding Amt,Saldo Pendiente
+DocType: Bank Statement Transaction Invoice Item,Outstanding Amount,Saldo Pendiente
+DocType: Payment Entry Reference,Outstanding,Pendiente
+apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.py,{0} on Leave on {1},{0} De permiso De permiso {1}

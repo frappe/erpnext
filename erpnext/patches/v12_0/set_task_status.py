@@ -2,10 +2,9 @@ import frappe
 
 def execute():
     frappe.reload_doctype('Task')
-    frappe.reload_doctype('Project Task')
 
     # add "Completed" if customized
-    for doctype in ('Task', 'Project Task'):
+    for doctype in ('Task'):
         property_setter_name = frappe.db.exists('Property Setter', dict(doc_type = doctype, field_name = 'status', property = 'options'))
         if property_setter_name:
             property_setter = frappe.get_doc('Property Setter', property_setter_name)

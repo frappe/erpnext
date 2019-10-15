@@ -8,7 +8,7 @@ frappe.query_reports["Sales Analytics"] = {
 			fieldname: "tree_type",
 			label: __("Tree Type"),
 			fieldtype: "Select",
-			options: ["Customer Group","Customer","Item Group","Item","Territory"],
+			options: ["Customer Group","Customer","Item Group","Item","Territory","Order Type"],
 			default: "Customer",
 			reqd: 1
 		},
@@ -80,8 +80,12 @@ frappe.query_reports["Sales Analytics"] = {
 
 					var tree_type = frappe.query_report.filters[0].value;
 
-					if(tree_type == "Customer" || tree_type == "Item") {
+					if(tree_type == "Customer") {
 						row_values = data.slice(4,length-1).map(function (column) {
+							return column.content;
+						})
+					} else if (tree_type == "Item") {
+						row_values = data.slice(5,length-1).map(function (column) {
 							return column.content;
 						})
 					}

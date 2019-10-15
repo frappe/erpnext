@@ -10,9 +10,9 @@ test_dependencies = ["Employee Onboarding"]
 
 class TestEmployeeSeparation(unittest.TestCase):
 	def test_employee_separation(self):
-		employee = get_employee()
+		employee = frappe.db.get_value("Employee", {"status": "Active"})
 		separation = frappe.new_doc('Employee Separation')
-		separation.employee = employee.name
+		separation.employee = employee
 		separation.company = '_Test Company'
 		separation.append('activities', {
 			'activity_name': 'Deactivate Employee',
@@ -24,6 +24,3 @@ class TestEmployeeSeparation(unittest.TestCase):
 		self.assertEqual(separation.docstatus, 1)
 		separation.cancel()
 		self.assertEqual(separation.project, "")
-
-def get_employee():
-	return frappe.get_doc('Employee', {'employee_name': 'Test Researcher'})

@@ -66,10 +66,11 @@
   "net_total",
   "total_net_weight",
   "taxes_section",
-  "taxes_and_charges",
+  "tax_category",
   "column_break_50",
   "shipping_rule",
   "section_break_52",
+  "taxes_and_charges",
   "taxes",
   "sec_tax_breakup",
   "other_charges_calculation",
@@ -569,7 +570,7 @@
   {
    "fieldname": "taxes_and_charges",
    "fieldtype": "Link",
-   "label": "Taxes and Charges",
+   "label": "Purchase Taxes and Charges Template",
    "oldfieldname": "purchase_other_charges",
    "oldfieldtype": "Link",
    "options": "Purchase Taxes and Charges Template",
@@ -1032,12 +1033,18 @@
    "fieldname": "update_auto_repeat_reference",
    "fieldtype": "Button",
    "label": "Update Auto Repeat Reference"
+  },
+  {
+   "fieldname": "tax_category",
+   "fieldtype": "Link",
+   "label": "Tax Category",
+   "options": "Tax Category"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2019-06-24 21:22:05.483429",
+ "modified": "2019-07-11 18:25:49.509343",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

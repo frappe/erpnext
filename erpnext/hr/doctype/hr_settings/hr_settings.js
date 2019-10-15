@@ -15,7 +15,7 @@ frappe.ui.form.on('HR Settings', {
 		let policy = frm.doc.password_policy;
 		if (policy) {
 			if (policy.includes(' ') || policy.includes('--')) {
-				frappe.msgprint("Password policy cannot contain spaces or simultaneous hyphens. The format will be restructured automatically");
+				frappe.msgprint(__("Password policy cannot contain spaces or simultaneous hyphens. The format will be restructured automatically"));
 			}
 			frm.set_value('password_policy', policy.split(new RegExp(" |-", 'g')).filter((token) => token).join('-'));
 		}

@@ -96,7 +96,7 @@ class Timesheet(Document):
 
 		for time in self.time_logs:
 			if time.from_time and time.to_time:
-				if flt(std_working_hours) > 0:
+				if flt(std_working_hours) and date_diff(time.to_time, time.from_time):
 					time.hours = flt(std_working_hours) * date_diff(time.to_time, time.from_time)
 				else:
 					if not time.hours:
@@ -145,11 +145,16 @@ class Timesheet(Document):
 	def validate_time_logs(self):
 		for data in self.get('time_logs'):
 			self.validate_overlap(data)
+			self.validate_task_project()
 
 	def validate_overlap(self, data):
 		settings = frappe.get_single('Projects Settings')
 		self.validate_overlap_for("user", data, self.user, settings.ignore_user_time_overlap)
 		self.validate_overlap_for("employee", data, self.employee, settings.ignore_employee_time_overlap)
+
+	def validate_task_project(self):
+		for log in self.time_logs:
+			log.project = log.project or frappe.db.get_value("Task", log.task, "project")
 
 	def validate_overlap_for(self, fieldname, args, value, ignore_validation=False):
 		if not value or ignore_validation:

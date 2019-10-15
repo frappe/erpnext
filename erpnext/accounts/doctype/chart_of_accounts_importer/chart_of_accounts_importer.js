@@ -78,7 +78,6 @@ var validate_csv_data = function(frm) {
 
 var create_import_button = function(frm) {
 	frm.page.set_primary_action(__("Start Import"), function () {
-		setup_progress_bar(frm);
 		frappe.call({
 			method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.import_coa",
 			args: {
@@ -86,11 +85,11 @@ var create_import_button = function(frm) {
 				company: frm.doc.company
 			},
 			freeze: true,
+			freeze_message: __("Creating Accounts..."),
 			callback: function(r) {
 				if(!r.exc) {
 					clearInterval(frm.page["interval"]);
 					frm.page.set_indicator(__('Import Successfull'), 'blue');
-					frappe.hide_progress();
 					create_reset_button(frm);
 				}
 			}
@@ -125,14 +124,4 @@ var generate_tree_preview = function(frm) {
 			parent = node.value;
 		}
 	});
-};
-
-var setup_progress_bar = function(frm) {
-	frm.page["seconds_elapsed"] = 0;
-	frm.page["execution_time"] = (frm.page["total_accounts"] > 100) ? 100 : frm.page["total_accounts"];
-
-	frm.page["interval"] = setInterval(function()  {
-		frm.page["seconds_elapsed"] += 1;
-		frappe.show_progress(__('Creating Accounts'), frm.page["seconds_elapsed"], frm.page["execution_time"]);
-	}, 250);
 };

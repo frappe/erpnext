@@ -7,8 +7,8 @@ context('Form', () => {
 	it('create a new opportunity', () => {
 		cy.visit('/desk#Form/Opportunity/New Opportunity 1');
 		cy.get('.page-title').should('contain', 'Not Saved');
-		cy.fill_field('enquiry_from', 'Customer', 'Select');
-		cy.fill_field('customer', 'Test Customer', 'Link').blur();
+		cy.fill_field('opportunity_from', 'Customer', 'Select');
+		cy.fill_field('party_name', 'Test Customer', 'Link').blur();
 		cy.get('.primary-action').click();
 		cy.get('.page-title').should('contain', 'Open');
 		cy.get('.form-inner-toolbar button:contains("Lost")').click({ force: true });
@@ -29,4 +29,3 @@ context('Form', () => {
 		cy.get('.page-title').should('contain', 'Lost');
 	});
 });
-

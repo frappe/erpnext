@@ -1,203 +1,210 @@
 {
- "creation": "2013-06-24 15:49:57",
- "description": "Settings for Accounts",
- "doctype": "DocType",
- "document_type": "Other",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "auto_accounting_for_stock",
-  "acc_frozen_upto",
-  "frozen_accounts_modifier",
-  "determine_address_tax_category_from",
-  "column_break_4",
-  "credit_controller",
-  "check_supplier_invoice_uniqueness",
-  "make_payment_via_journal_entry",
-  "unlink_payment_on_cancellation_of_invoice",
-  "unlink_advance_payment_on_cancelation_of_order",
-  "book_asset_depreciation_entry_automatically",
-  "allow_cost_center_in_entry_of_bs_account",
-  "add_taxes_from_item_tax_template",
-  "automatically_fetch_payment_terms",
-  "print_settings",
-  "show_inclusive_tax_in_print",
-  "column_break_12",
-  "show_payment_schedule_in_print",
-  "currency_exchange_section",
-  "allow_stale",
-  "stale_days",
-  "report_settings_sb",
-  "use_custom_cash_flow"
- ],
- "fields": [
-  {
-   "default": "1",
-   "description": "If enabled, the system will post accounting entries for inventory automatically.",
-   "fieldname": "auto_accounting_for_stock",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "in_list_view": 1,
-   "label": "Make Accounting Entry For Every Stock Movement"
-  },
-  {
-   "description": "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.",
-   "fieldname": "acc_frozen_upto",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Accounts Frozen Upto"
-  },
-  {
-   "description": "Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts",
-   "fieldname": "frozen_accounts_modifier",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Role Allowed to Set Frozen Accounts & Edit Frozen Entries",
-   "options": "Role"
-  },
-  {
-   "default": "Billing Address",
-   "description": "Address used to determine Tax Category in transactions.",
-   "fieldname": "determine_address_tax_category_from",
-   "fieldtype": "Select",
-   "label": "Determine Address Tax Category From",
-   "options": "Billing Address\nShipping Address"
-  },
-  {
-   "fieldname": "column_break_4",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Role that is allowed to submit transactions that exceed credit limits set.",
-   "fieldname": "credit_controller",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Credit Controller",
-   "options": "Role"
-  },
-  {
-   "fieldname": "check_supplier_invoice_uniqueness",
-   "fieldtype": "Check",
-   "label": "Check Supplier Invoice Number Uniqueness"
-  },
-  {
-   "fieldname": "make_payment_via_journal_entry",
-   "fieldtype": "Check",
-   "label": "Make Payment via Journal Entry"
-  },
-  {
-   "default": "1",
-   "fieldname": "unlink_payment_on_cancellation_of_invoice",
-   "fieldtype": "Check",
-   "label": "Unlink Payment on Cancellation of Invoice"
-  },
-  {
-   "default": "1",
-   "fieldname": "unlink_advance_payment_on_cancelation_of_order",
-   "fieldtype": "Check",
-   "label": "Unlink Advance Payment on Cancelation of Order"
-  },
-  {
-   "default": "1",
-   "fieldname": "book_asset_depreciation_entry_automatically",
-   "fieldtype": "Check",
-   "label": "Book Asset Depreciation Entry Automatically"
-  },
-  {
-   "fieldname": "allow_cost_center_in_entry_of_bs_account",
-   "fieldtype": "Check",
-   "label": "Allow Cost Center In Entry of Balance Sheet Account"
-  },
-  {
-   "default": "1",
-   "fieldname": "add_taxes_from_item_tax_template",
-   "fieldtype": "Check",
-   "label": "Automatically Add Taxes and Charges from Item Tax Template"
-  },
-  {
-   "fieldname": "print_settings",
-   "fieldtype": "Section Break",
-   "label": "Print Settings"
-  },
-  {
-   "fieldname": "show_inclusive_tax_in_print",
-   "fieldtype": "Check",
-   "label": "Show Inclusive Tax In Print"
-  },
-  {
-   "fieldname": "column_break_12",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "show_payment_schedule_in_print",
-   "fieldtype": "Check",
-   "label": "Show Payment Schedule in Print"
-  },
-  {
-   "fieldname": "currency_exchange_section",
-   "fieldtype": "Section Break",
-   "label": "Currency Exchange Settings"
-  },
-  {
-   "default": "1",
-   "fieldname": "allow_stale",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "label": "Allow Stale Exchange Rates"
-  },
-  {
-   "default": "1",
-   "depends_on": "eval:doc.allow_stale==0",
-   "fieldname": "stale_days",
-   "fieldtype": "Int",
-   "label": "Stale Days"
-  },
-  {
-   "fieldname": "report_settings_sb",
-   "fieldtype": "Section Break",
-   "label": "Report Settings"
-  },
-  {
-   "default": "0",
-   "description": "Only select if you have setup Cash Flow Mapper documents",
-   "fieldname": "use_custom_cash_flow",
-   "fieldtype": "Check",
-   "label": "Use Custom Cash Flow Format"
-  },
-  {
-   "fieldname": "automatically_fetch_payment_terms",
-   "fieldtype": "Check",
-   "label": "Automatically Fetch Payment Terms"
+   "creation": "2013-06-24 15:49:57",
+   "description": "Settings for Accounts",
+   "doctype": "DocType",
+   "document_type": "Other",
+   "editable_grid": 1,
+   "engine": "InnoDB",
+   "field_order": [
+    "auto_accounting_for_stock",
+    "acc_frozen_upto",
+    "frozen_accounts_modifier",
+    "determine_address_tax_category_from",
+    "over_billing_allowance",
+    "column_break_4",
+    "credit_controller",
+    "check_supplier_invoice_uniqueness",
+    "make_payment_via_journal_entry",
+    "unlink_payment_on_cancellation_of_invoice",
+    "unlink_advance_payment_on_cancelation_of_order",
+    "book_asset_depreciation_entry_automatically",
+    "allow_cost_center_in_entry_of_bs_account",
+    "add_taxes_from_item_tax_template",
+    "automatically_fetch_payment_terms",
+    "print_settings",
+    "show_inclusive_tax_in_print",
+    "column_break_12",
+    "show_payment_schedule_in_print",
+    "currency_exchange_section",
+    "allow_stale",
+    "stale_days",
+    "report_settings_sb",
+    "use_custom_cash_flow"
+   ],
+   "fields": [
+    {
+     "default": "1",
+     "description": "If enabled, the system will post accounting entries for inventory automatically.",
+     "fieldname": "auto_accounting_for_stock",
+     "fieldtype": "Check",
+     "hidden": 1,
+     "in_list_view": 1,
+     "label": "Make Accounting Entry For Every Stock Movement"
+    },
+    {
+     "description": "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.",
+     "fieldname": "acc_frozen_upto",
+     "fieldtype": "Date",
+     "in_list_view": 1,
+     "label": "Accounts Frozen Upto"
+    },
+    {
+     "description": "Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts",
+     "fieldname": "frozen_accounts_modifier",
+     "fieldtype": "Link",
+     "in_list_view": 1,
+     "label": "Role Allowed to Set Frozen Accounts & Edit Frozen Entries",
+     "options": "Role"
+    },
+    {
+     "default": "Billing Address",
+     "description": "Address used to determine Tax Category in transactions.",
+     "fieldname": "determine_address_tax_category_from",
+     "fieldtype": "Select",
+     "label": "Determine Address Tax Category From",
+     "options": "Billing Address\nShipping Address"
+    },
+    {
+     "fieldname": "column_break_4",
+     "fieldtype": "Column Break"
+    },
+    {
+     "description": "Role that is allowed to submit transactions that exceed credit limits set.",
+     "fieldname": "credit_controller",
+     "fieldtype": "Link",
+     "in_list_view": 1,
+     "label": "Credit Controller",
+     "options": "Role"
+    },
+    {
+     "fieldname": "check_supplier_invoice_uniqueness",
+     "fieldtype": "Check",
+     "label": "Check Supplier Invoice Number Uniqueness"
+    },
+    {
+     "fieldname": "make_payment_via_journal_entry",
+     "fieldtype": "Check",
+     "label": "Make Payment via Journal Entry"
+    },
+    {
+     "default": "1",
+     "fieldname": "unlink_payment_on_cancellation_of_invoice",
+     "fieldtype": "Check",
+     "label": "Unlink Payment on Cancellation of Invoice"
+    },
+    {
+     "default": "1",
+     "fieldname": "unlink_advance_payment_on_cancelation_of_order",
+     "fieldtype": "Check",
+     "label": "Unlink Advance Payment on Cancelation of Order"
+    },
+    {
+     "default": "1",
+     "fieldname": "book_asset_depreciation_entry_automatically",
+     "fieldtype": "Check",
+     "label": "Book Asset Depreciation Entry Automatically"
+    },
+    {
+     "fieldname": "allow_cost_center_in_entry_of_bs_account",
+     "fieldtype": "Check",
+     "label": "Allow Cost Center In Entry of Balance Sheet Account"
+    },
+    {
+     "default": "1",
+     "fieldname": "add_taxes_from_item_tax_template",
+     "fieldtype": "Check",
+     "label": "Automatically Add Taxes and Charges from Item Tax Template"
+    },
+    {
+     "fieldname": "print_settings",
+     "fieldtype": "Section Break",
+     "label": "Print Settings"
+    },
+    {
+     "fieldname": "show_inclusive_tax_in_print",
+     "fieldtype": "Check",
+     "label": "Show Inclusive Tax In Print"
+    },
+    {
+     "fieldname": "column_break_12",
+     "fieldtype": "Column Break"
+    },
+    {
+     "fieldname": "show_payment_schedule_in_print",
+     "fieldtype": "Check",
+     "label": "Show Payment Schedule in Print"
+    },
+    {
+     "fieldname": "currency_exchange_section",
+     "fieldtype": "Section Break",
+     "label": "Currency Exchange Settings"
+    },
+    {
+     "default": "1",
+     "fieldname": "allow_stale",
+     "fieldtype": "Check",
+     "in_list_view": 1,
+     "label": "Allow Stale Exchange Rates"
+    },
+    {
+     "default": "1",
+     "depends_on": "eval:doc.allow_stale==0",
+     "fieldname": "stale_days",
+     "fieldtype": "Int",
+     "label": "Stale Days"
+    },
+    {
+     "fieldname": "report_settings_sb",
+     "fieldtype": "Section Break",
+     "label": "Report Settings"
+    },
+    {
+     "default": "0",
+     "description": "Only select if you have setup Cash Flow Mapper documents",
+     "fieldname": "use_custom_cash_flow",
+     "fieldtype": "Check",
+     "label": "Use Custom Cash Flow Format"
+    },
+    {
+     "fieldname": "automatically_fetch_payment_terms",
+     "fieldtype": "Check",
+     "label": "Automatically Fetch Payment Terms"
+    },
+    {
+     "description": "Percentage you are allowed to bill more against the amount ordered. For example: If the order value is $100 for an item and tolerance is set as 10% then you are allowed to bill for $110.",
+     "fieldname": "over_billing_allowance",
+     "fieldtype": "Currency",
+     "label": "Over Billing Allowance (%)"
+    }
+   ],
+   "icon": "icon-cog",
+   "idx": 1,
+   "issingle": 1,
+   "modified": "2019-07-04 18:20:55.789946",
+   "modified_by": "Administrator",
+   "module": "Accounts",
+   "name": "Accounts Settings",
+   "owner": "Administrator",
+   "permissions": [
+    {
+     "create": 1,
+     "email": 1,
+     "print": 1,
+     "read": 1,
+     "role": "Accounts Manager",
+     "share": 1,
+     "write": 1
+    },
+    {
+     "read": 1,
+     "role": "Sales User"
+    },
+    {
+     "read": 1,
+     "role": "Purchase User"
+    }
+   ],
+   "quick_entry": 1,
+   "sort_order": "ASC",
+   "track_changes": 1
   }
- ],
- "icon": "icon-cog",
- "idx": 1,
- "issingle": 1,
- "modified": "2019-04-28 18:20:55.789946",
- "modified_by": "Administrator",
- "module": "Accounts",
- "name": "Accounts Settings",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "role": "Accounts Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "read": 1,
-   "role": "Sales User"
-  },
-  {
-   "read": 1,
-   "role": "Purchase User"
-  }
- ],
- "quick_entry": 1,
- "sort_order": "ASC",
- "track_changes": 1
-}

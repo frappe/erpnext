@@ -192,8 +192,8 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_reserved_qty_for_over_delivery(self):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
-		# set over-delivery tolerance
-		frappe.db.set_value('Item', "_Test Item", 'tolerance', 50)
+		# set over-delivery allowance
+		frappe.db.set_value('Item', "_Test Item", 'over_delivery_receipt_allowance', 50)
 
 		existing_reserved_qty = get_reserved_qty()
 
@@ -209,8 +209,9 @@ class TestSalesOrder(unittest.TestCase):
 	def test_reserved_qty_for_over_delivery_via_sales_invoice(self):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
 
-		# set over-delivery tolerance
-		frappe.db.set_value('Item', "_Test Item", 'tolerance', 50)
+		# set over-delivery allowance
+		frappe.db.set_value('Item', "_Test Item", 'over_delivery_receipt_allowance', 50)
+		frappe.db.set_value('Item', "_Test Item", 'over_billing_allowance', 20)
 
 		existing_reserved_qty = get_reserved_qty()
 
@@ -291,8 +292,8 @@ class TestSalesOrder(unittest.TestCase):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
 		make_stock_entry(item="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, rate=100)
 
-		# set over-delivery tolerance
-		frappe.db.set_value('Item', "_Test Product Bundle Item", 'tolerance', 50)
+		# set over-delivery allowance
+		frappe.db.set_value('Item', "_Test Product Bundle Item", 'over_delivery_receipt_allowance', 50)
 
 		existing_reserved_qty_item1 = get_reserved_qty("_Test Item")
 		existing_reserved_qty_item2 = get_reserved_qty("_Test Item Home Desktop 100")
@@ -449,7 +450,7 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
 
 	def test_drop_shipping(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order_for_drop_shipment
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
@@ -495,7 +496,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = make_sales_order(item_list=so_items, do_not_submit=True)
 		so.submit()
 
-		po = make_purchase_order_for_drop_shipment(so.name, '_Test Supplier')
+		po = make_purchase_order(so.name, '_Test Supplier', selected_items=[so_items[0]['item_code']])
 		po.submit()
 
 		dn = create_dn_against_so(so.name, delivered_qty=1)

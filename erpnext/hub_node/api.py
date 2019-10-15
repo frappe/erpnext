@@ -120,7 +120,7 @@ def get_valid_items(search_value=''):
 def publish_selected_items(items_to_publish):
 	items_to_publish = json.loads(items_to_publish)
 	if not len(items_to_publish):
-		frappe.throw('No items to publish')
+		frappe.throw(_('No items to publish'))
 
 	for item in items_to_publish:
 		item_code = item.get('item_code')
@@ -165,7 +165,7 @@ def item_sync_preprocess(intended_item_publish_count):
 		frappe.db.set_value("Marketplace Settings", "Marketplace Settings", "sync_in_progress", 1)
 		return response
 	else:
-		frappe.throw('Unable to update remote activity')
+		frappe.throw(_('Unable to update remote activity'))
 
 
 def item_sync_postprocess():
@@ -173,7 +173,7 @@ def item_sync_postprocess():
 	if response:
 		frappe.db.set_value('Marketplace Settings', 'Marketplace Settings', 'last_sync_datetime', frappe.utils.now())
 	else:
-		frappe.throw('Unable to update remote activity')
+		frappe.throw(_('Unable to update remote activity'))
 
 	frappe.db.set_value('Marketplace Settings', 'Marketplace Settings', 'sync_in_progress', 0)
 

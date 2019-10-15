@@ -9,7 +9,7 @@ import frappe
 from frappe import _, throw
 from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate
 from frappe.utils.nestedset import NestedSet
-
+from frappe.desk.form.assign_to import close_all_assignments, clear
 
 class CircularReferenceError(frappe.ValidationError): pass
 class EndDateCannotBeGreaterThanProjectEndDateError(frappe.ValidationError): pass
@@ -45,8 +45,7 @@ class Task(NestedSet):
 				if frappe.db.get_value("Task", d.task, "status") != "Completed":
 					frappe.throw(_("Cannot close task {0} as its dependant task {1} is not closed.").format(frappe.bold(self.name), frappe.bold(d.task)))
 
-			from frappe.desk.form.assign_to import clear
-			clear(self.doctype, self.name)
+			close_all_assignments(self.doctype, self.name)
 
 	def validate_progress(self):
 		if (self.progress or 0) > 100:
@@ -77,8 +76,9 @@ class Task(NestedSet):
 		self.populate_depends_on()
 
 	def unassign_todo(self):
-		if self.status in ("Completed", "Cancelled"):
-			from frappe.desk.form.assign_to import clear
+		if self.status == "Completed":
+			close_all_assignments(self.doctype, self.name)
+		if self.status == "Cancelled":
 			clear(self.doctype, self.name)
 
 	def update_total_expense_claim(self):
@@ -145,7 +145,7 @@ class Task(NestedSet):
 
 	def populate_depends_on(self):
 		if self.parent_task:
-			parent = frappe.get_cached_doc('Task', self.parent_task)
+			parent = frappe.get_doc('Task', self.parent_task)
 			if not self.name in [row.task for row in parent.depends_on]:
 				parent.append("depends_on", {
 					"doctype": "Task Depends On",
@@ -158,20 +158,13 @@ class Task(NestedSet):
 		if check_if_child_exists(self.name):
 			throw(_("Child Task exists for this Task. You can not delete this Task."))
 
-		if self.project:
-			tasks = frappe.get_doc('Project', self.project).tasks
-			for task in tasks:
-				if task.get('task_id') == self.name:
-					frappe.delete_doc('Project Task', task.name)
-
-
 		self.update_nsm_model()
 
 	def update_status(self):
 		if self.status not in ('Cancelled', 'Completed') and self.exp_end_date:
 			from datetime import datetime
 			if self.exp_end_date < datetime.now().date():
-				self.db_set('status', 'Overdue')
+				self.db_set('status', 'Overdue', update_modified=False)
 				self.update_project()
 
 @frappe.whitelist()

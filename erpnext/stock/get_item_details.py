@@ -22,7 +22,7 @@ sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
 purchase_doctypes = ['Material Request', 'Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 
 @frappe.whitelist()
-def get_item_details(args, doc=None):
+def get_item_details(args, doc=None, overwrite_warehouse=True):
 	"""
 		args = {
 			"item_code": "",
@@ -44,11 +44,12 @@ def get_item_details(args, doc=None):
 			"set_warehouse": ""
 		}
 	"""
+
 	args = process_args(args)
 	item = frappe.get_cached_doc("Item", args.item_code)
 	validate_item_details(args, item)
 
-	out = get_basic_details(args, item)
+	out = get_basic_details(args, item, overwrite_warehouse)
 
 	get_item_tax_template(args, item, out)
 	out["item_tax_rate"] = get_item_tax_map(args.company, args.get("item_tax_template") if out.get("item_tax_template") is None \
@@ -178,7 +179,7 @@ def validate_item_details(args, item):
 			throw(_("Item {0} must be a Sub-contracted Item").format(item.name))
 
 
-def get_basic_details(args, item):
+def get_basic_details(args, item, overwrite_warehouse=True):
 	"""
 	:param args: {
 			"item_code": "",
@@ -225,14 +226,26 @@ def get_basic_details(args, item):
 	item_group_defaults = get_item_group_defaults(item.name, args.company)
 	brand_defaults = get_brand_defaults(item.name, args.company)
 
-	warehouse = (args.get("set_warehouse") or item_defaults.get("default_warehouse") or
-		item_group_defaults.get("default_warehouse") or brand_defaults.get("default_warehouse") or args.warehouse)
+	if overwrite_warehouse or not args.warehouse:
+		warehouse = (
+			args.get("set_warehouse") or
+			item_defaults.get("default_warehouse") or
+			item_group_defaults.get("default_warehouse") or
+			brand_defaults.get("default_warehouse") or
+			args.warehouse
+		)
 
-	if not warehouse:
-		defaults = frappe.defaults.get_defaults() or {}
-		if defaults.get("default_warehouse") and frappe.db.exists("Warehouse",
-			{'name': defaults.default_warehouse, 'company': args.company}):
-			warehouse = defaults.default_warehouse
+		if not warehouse:
+			defaults = frappe.defaults.get_defaults() or {}
+			warehouse_exists = frappe.db.exists("Warehouse", {
+				'name': defaults.default_warehouse,
+				'company': args.company
+			})
+			if defaults.get("default_warehouse") and warehouse_exists:
+				warehouse = defaults.default_warehouse
+
+	else:
+		warehouse = args.warehouse
 
 	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
@@ -321,7 +334,20 @@ def get_basic_details(args, item):
 			out["manufacturer_part_no"] = None
 			out["manufacturer"] = None
 
+	child_doctype = args.doctype + ' Item'
+	meta = frappe.get_meta(child_doctype)
+	if meta.get_field("barcode"):
+		update_barcode_value(out)
+
 	return out
+
+def update_barcode_value(out):
+	from erpnext.accounts.doctype.sales_invoice.pos import get_barcode_data
+	barcode_data = get_barcode_data([out])
+
+	# If item has one barcode then update the value of the barcode field
+	if barcode_data and len(barcode_data.get(out.item_code)) == 1:
+		out['barcode'] = barcode_data.get(out.item_code)[0]
 
 @frappe.whitelist()
 def get_item_tax_info(company, tax_category, item_codes):
@@ -613,7 +639,7 @@ def validate_price_list(args):
 		if not frappe.db.get_value("Price List",
 			{"name": args.price_list, args.transaction_type: 1, "enabled": 1}):
 			throw(_("Price List {0} is disabled or does not exist").format(args.price_list))
-	elif not args.get("supplier"):
+	elif args.get("customer"):
 		throw(_("Price List not selected"))
 
 def validate_conversion_rate(args, meta):
@@ -651,6 +677,10 @@ def validate_conversion_rate(args, meta):
 def get_party_item_code(args, item_doc, out):
 	if args.transaction_type=="selling" and args.customer:
 		out.customer_item_code = None
+
+		if args.quotation_to and args.quotation_to != 'Customer':
+			return
+
 		customer_item_code = item_doc.get("customer_items", {"customer_name": args.customer})
 
 		if customer_item_code:
@@ -778,7 +808,7 @@ def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
 	return {'serial_no': serial_no}
 
 @frappe.whitelist()
-def get_bin_details_and_serial_nos(item_code, warehouse, has_batch_no, stock_qty=None, serial_no=None):
+def get_bin_details_and_serial_nos(item_code, warehouse, has_batch_no=None, stock_qty=None, serial_no=None):
 	bin_details_and_serial_nos = {}
 	bin_details_and_serial_nos.update(get_bin_details(item_code, warehouse))
 	if flt(stock_qty) > 0:

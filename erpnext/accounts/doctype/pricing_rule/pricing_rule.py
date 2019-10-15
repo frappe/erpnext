@@ -220,7 +220,12 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
 
 	if args.transaction_type=="selling":
 		if args.customer and not (args.customer_group and args.territory):
-			customer = frappe.get_cached_value("Customer", args.customer, ["customer_group", "territory"])
+
+			if args.quotation_to and args.quotation_to != 'Customer':
+				customer = frappe._dict()
+			else:
+				customer = frappe.get_cached_value("Customer", args.customer, ["customer_group", "territory"])
+
 			if customer:
 				args.customer_group, args.territory = customer
 
@@ -244,6 +249,9 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
 			if pricing_rule.mixed_conditions or pricing_rule.apply_rule_on_other:
 				continue
 
+			if pricing_rule.coupon_code_based==1 and args.coupon_code==None:
+				return item_details
+				
 			if (not pricing_rule.validate_applied_rule and
 				pricing_rule.price_or_product_discount == "Price"):
 				apply_price_discount_pricing_rule(pricing_rule, item_details, args)

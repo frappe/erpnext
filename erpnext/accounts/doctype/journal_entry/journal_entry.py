@@ -105,24 +105,28 @@ class JournalEntry(AccountsController):
 
 		invoice_discounting_list = list(set([d.reference_name for d in self.accounts if d.reference_type=="Invoice Discounting"]))
 		for inv_disc in invoice_discounting_list:
-			short_term_loan_account, id_status = frappe.db.get_value("Invoice Discounting", inv_disc, ["short_term_loan", "status"])
+			inv_disc_doc = frappe.get_doc("Invoice Discounting", inv_disc)
+			status = None
 			for d in self.accounts:
-				if d.account == short_term_loan_account and d.reference_name == inv_disc:
+				if d.account == inv_disc_doc.short_term_loan and d.reference_name == inv_disc:
 					if self.docstatus == 1:
 						if d.credit > 0:
-							_validate_invoice_discounting_status(inv_disc, id_status, "Sanctioned", d.idx)
+							_validate_invoice_discounting_status(inv_disc, inv_disc_doc.status, "Sanctioned", d.idx)
 							status = "Disbursed"
 						elif d.debit > 0:
-							_validate_invoice_discounting_status(inv_disc, id_status, "Disbursed", d.idx)
+							_validate_invoice_discounting_status(inv_disc, inv_disc_doc.status, "Disbursed", d.idx)
 							status = "Settled"
 					else:
 						if d.credit > 0:
-							_validate_invoice_discounting_status(inv_disc, id_status, "Disbursed", d.idx)
+							_validate_invoice_discounting_status(inv_disc, inv_disc_doc.status, "Disbursed", d.idx)
 							status = "Sanctioned"
 						elif d.debit > 0:
-							_validate_invoice_discounting_status(inv_disc, id_status, "Settled", d.idx)
+							_validate_invoice_discounting_status(inv_disc, inv_disc_doc.status, "Settled", d.idx)
 							status = "Disbursed"
-					frappe.db.set_value("Invoice Discounting", inv_disc, "status", status)
+					break
+			if status:
+				inv_disc_doc.set_status(status=status)
+
 
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):
@@ -331,7 +335,8 @@ class JournalEntry(AccountsController):
 		for reference_name, total in iteritems(self.reference_totals):
 			reference_type = self.reference_types[reference_name]
 
-			if reference_type in ("Sales Invoice", "Purchase Invoice"):
+			if (reference_type in ("Sales Invoice", "Purchase Invoice") and
+				self.voucher_type not in ['Debit Note', 'Credit Note']):
 				invoice = frappe.db.get_value(reference_type, reference_name,
 					["docstatus", "outstanding_amount"], as_dict=1)
 
@@ -497,6 +502,7 @@ class JournalEntry(AccountsController):
 					self.get_gl_dict({
 						"account": d.account,
 						"party_type": d.party_type,
+						"due_date": self.due_date,
 						"party": d.party,
 						"against": d.against_account,
 						"debit": flt(d.debit, d.precision("debit")),
@@ -821,10 +827,10 @@ def get_opening_accounts(company):
 	accounts = frappe.db.sql_list("""select
 			name from tabAccount
 		where
-			is_group=0 and report_type='Balance Sheet' and company=%s and
-			name not in(select distinct account from tabWarehouse where
+			is_group=0 and report_type='Balance Sheet' and company={0} and
+			name not in (select distinct account from tabWarehouse where
 			account is not null and account != '')
-		order by name asc""", frappe.db.escape(company))
+		order by name asc""".format(frappe.db.escape(company)))
 
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 

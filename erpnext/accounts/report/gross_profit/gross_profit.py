@@ -65,7 +65,7 @@ def get_columns(group_wise_columns, filters):
 		"warehouse": _("Warehouse") + ":Link/Warehouse",
 		"qty": _("Qty") + ":Float",
 		"base_rate": _("Avg. Selling Rate") + ":Currency/currency",
-		"buying_rate": _("Avg. Buying Rate") + ":Currency/currency",
+		"buying_rate": _("Valuation Rate") + ":Currency/currency",
 		"base_amount": _("Selling Amount") + ":Currency/currency",
 		"buying_amount": _("Buying Amount") + ":Currency/currency",
 		"gross_profit": _("Gross Profit") + ":Currency/currency",

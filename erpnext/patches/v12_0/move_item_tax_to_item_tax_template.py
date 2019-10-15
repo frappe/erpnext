@@ -41,7 +41,9 @@ def execute():
 		item = frappe.get_doc("Item", item_code)
 		item.set("taxes", [])
 		item.append("taxes", {"item_tax_template": item_tax_template_name, "tax_category": ""})
-		item.save()
+		frappe.db.sql("delete from `tabItem Tax` where parent=%s and parenttype='Item'", item_code)
+		for d in item.taxes:
+			d.db_insert()
 
 	doctypes = [
 		'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',
@@ -82,7 +84,7 @@ def get_item_tax_template(item_tax_templates, rename_template_to_untitled, item_
 			account_name = " - ".join(parts[:-1])
 			company = frappe.db.get_value("Company", filters={"abbr": parts[-1]})
 			parent_account = frappe.db.get_value("Account",
-				filters={"account_type": "Tax", "root_type": "Liability", "is_group": 0}, fieldname="parent_account")
+				filters={"account_type": "Tax", "root_type": "Liability", "is_group": 0, "company": company}, fieldname="parent_account")
 
 			frappe.get_doc({
 				"doctype": "Account",

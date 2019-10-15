@@ -18,21 +18,22 @@ class JobCard(Document):
 		self.total_completed_qty = 0.0
 		self.total_time_in_mins = 0.0
 
-		for d in self.get('time_logs'):
-			if get_datetime(d.from_time) > get_datetime(d.to_time):
-				frappe.throw(_("Row {0}: From time must be less than to time").format(d.idx))
+		if self.get('time_logs'):
+			for d in self.get('time_logs'):
+				if get_datetime(d.from_time) > get_datetime(d.to_time):
+					frappe.throw(_("Row {0}: From time must be less than to time").format(d.idx))
 
-			data = self.get_overlap_for(d)
-			if data:
-				frappe.throw(_("Row {0}: From Time and To Time of {1} is overlapping with {2}")
-					.format(d.idx, self.name, data.name))
+				data = self.get_overlap_for(d)
+				if data:
+					frappe.throw(_("Row {0}: From Time and To Time of {1} is overlapping with {2}")
+						.format(d.idx, self.name, data.name))
 
-			if d.from_time and d.to_time:
-				d.time_in_mins = time_diff_in_hours(d.to_time, d.from_time) * 60
-				self.total_time_in_mins += d.time_in_mins
+				if d.from_time and d.to_time:
+					d.time_in_mins = time_diff_in_hours(d.to_time, d.from_time) * 60
+					self.total_time_in_mins += d.time_in_mins
 
-			if d.completed_qty:
-				self.total_completed_qty += d.completed_qty
+				if d.completed_qty:
+					self.total_completed_qty += d.completed_qty
 
 	def get_overlap_for(self, args):
 		existing = frappe.db.sql("""select jc.name as name from
@@ -104,7 +105,6 @@ class JobCard(Document):
 		for_quantity, time_in_mins = 0, 0
 		from_time_list, to_time_list = [], []
 
-
 		for d in frappe.get_all('Job Card',
 			filters = {'docstatus': 1, 'operation_id': self.operation_id}):
 			doc = frappe.get_doc('Job Card', d.name)
@@ -112,8 +112,10 @@ class JobCard(Document):
 			for_quantity += doc.total_completed_qty
 			time_in_mins += doc.total_time_in_mins
 			for time_log in doc.time_logs:
-				from_time_list.append(time_log.from_time)
-				to_time_list.append(time_log.to_time)
+				if time_log.from_time:
+					from_time_list.append(time_log.from_time)
+				if time_log.to_time:
+					to_time_list.append(time_log.to_time)
 
 		if for_quantity:
 			wo = frappe.get_doc('Work Order', self.work_order)
@@ -122,8 +124,8 @@ class JobCard(Document):
 				if data.name == self.operation_id:
 					data.completed_qty = for_quantity
 					data.actual_operation_time = time_in_mins
-					data.actual_start_time = min(from_time_list)
-					data.actual_end_time = max(to_time_list)
+					data.actual_start_time = min(from_time_list) if from_time_list else None
+					data.actual_end_time = max(to_time_list) if to_time_list else None
 
 			wo.flags.ignore_validate_update_after_submit = True
 			wo.update_operation_status()

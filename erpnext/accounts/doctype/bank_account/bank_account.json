@@ -1,7 +1,6 @@
 {
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:account_name",
  "creation": "2017-05-29 21:35:13.136357",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -10,23 +9,32 @@
   "account_name",
   "account",
   "bank",
-  "is_company_account",
-  "company",
+  "account_type",
+  "account_subtype",
   "column_break_7",
   "is_default",
-  "bank_account_no",
-  "iban",
-  "branch_code",
-  "swift_number",
+  "is_company_account",
+  "company",
   "section_break_11",
   "party_type",
   "column_break_14",
   "party",
+  "account_details_section",
+  "iban",
+  "column_break_12",
+  "bank_account_no",
+  "branch_code",
+  "swift_number",
   "address_and_contact",
   "address_html",
   "website",
-  "column_break_12",
-  "contact_html"
+  "column_break_13",
+  "contact_html",
+  "integration_details_section",
+  "integration_id",
+  "last_integration_date",
+  "column_break_27",
+  "mask"
  ],
  "fields": [
   {
@@ -36,16 +44,15 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Account Name",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
+   "depends_on": "is_company_account",
    "fieldname": "account",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Account",
-   "options": "Account",
-   "reqd": 1
+   "label": "Company Account",
+   "options": "Account"
   },
   {
    "fieldname": "bank",
@@ -55,6 +62,30 @@
    "reqd": 1
   },
   {
+   "fieldname": "account_type",
+   "fieldtype": "Link",
+   "label": "Account Type",
+   "options": "Account Type"
+  },
+  {
+   "fieldname": "account_subtype",
+   "fieldtype": "Link",
+   "label": "Account Subtype",
+   "options": "Account Subtype"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break",
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "label": "Is the Default Account"
+  },
+  {
+   "default": "0",
    "fieldname": "is_company_account",
    "fieldtype": "Check",
    "label": "Is Company Account"
@@ -69,44 +100,10 @@
    "options": "Company"
   },
   {
-   "fieldname": "column_break_7",
-   "fieldtype": "Column Break",
-   "search_index": 1
-  },
-  {
-   "fieldname": "is_default",
-   "fieldtype": "Check",
-   "label": "Is Default"
-  },
-  {
-   "fieldname": "bank_account_no",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Bank Account No",
-   "length": 30
-  },
-  {
-   "fieldname": "iban",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "IBAN",
-   "length": 30
-  },
-  {
-   "fieldname": "branch_code",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Branch Code"
-  },
-  {
-   "fieldname": "swift_number",
-   "fieldtype": "Data",
-   "label": "SWIFT number"
-  },
-  {
    "depends_on": "eval:!doc.is_company_account",
    "fieldname": "section_break_11",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Party Details"
   },
   {
    "fieldname": "party_type",
@@ -125,6 +122,40 @@
    "options": "party_type"
   },
   {
+   "fieldname": "account_details_section",
+   "fieldtype": "Section Break",
+   "label": "Account Details"
+  },
+  {
+   "fieldname": "iban",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "IBAN",
+   "length": 30
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_account_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Bank Account No",
+   "length": 30
+  },
+  {
+   "fieldname": "branch_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Branch Code"
+  },
+  {
+   "fieldname": "swift_number",
+   "fieldtype": "Data",
+   "label": "SWIFT number"
+  },
+  {
    "fieldname": "address_and_contact",
    "fieldtype": "Section Break",
    "label": "Address and Contact",
@@ -141,16 +172,46 @@
    "label": "Website"
   },
   {
-   "fieldname": "column_break_12",
+   "fieldname": "column_break_13",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "contact_html",
    "fieldtype": "HTML",
    "label": "Contact HTML"
+  },
+  {
+   "fieldname": "integration_details_section",
+   "fieldtype": "Section Break",
+   "label": "Integration Details"
+  },
+  {
+   "fieldname": "integration_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Integration ID",
+   "no_copy": 1,
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "description": "Change this date manually to setup the next synchronization start date",
+   "fieldname": "last_integration_date",
+   "fieldtype": "Date",
+   "label": "Last Integration Date"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mask",
+   "fieldtype": "Data",
+   "label": "Mask",
+   "read_only": 1
   }
  ],
- "modified": "2019-04-25 22:10:07.951351",
+ "modified": "2019-10-02 01:34:12.417601",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",

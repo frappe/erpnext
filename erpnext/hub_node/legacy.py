@@ -28,7 +28,7 @@ def make_opportunity(buyer_name, email_id):
 		lead.save(ignore_permissions=True)
 
 	o = frappe.new_doc("Opportunity")
-	o.enquiry_from = "Lead"
+	o.opportunity_from = "Lead"
 	o.lead = frappe.get_all("Lead", filters={"email_id": email_id}, fields = ["name"])[0]["name"]
 	o.save(ignore_permissions=True)
 
@@ -68,12 +68,13 @@ def make_contact(supplier):
 		contact = frappe.get_doc({
 			'doctype': 'Contact',
 			'first_name': supplier.supplier_name,
-			'email_id': supplier.supplier_email,
 			'is_primary_contact': 1,
 			'links': [
 				{'link_doctype': 'Supplier', 'link_name': supplier.supplier_name}
 			]
-		}).insert()
+		})
+		contact.add_email(supplier.supplier_email, is_primary=True)
+		contact.insert()
 	else:
 		contact = frappe.get_doc('Contact', contact_name)
 

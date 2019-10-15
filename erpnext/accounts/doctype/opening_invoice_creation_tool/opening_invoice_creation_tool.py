@@ -7,6 +7,7 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import flt, nowdate
 from frappe.model.document import Document
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 
 class OpeningInvoiceCreationTool(Document):
@@ -172,6 +173,13 @@ class OpeningInvoiceCreationTool(Document):
 			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
 			"currency": frappe.get_cached_value('Company',  self.company,  "default_currency")
 		})
+
+		accounting_dimension = get_accounting_dimensions()
+
+		for dimension in accounting_dimension:
+			args.update({
+				dimension: item.get(dimension)
+			})
 
 		if self.invoice_type == "Sales":
 			args["is_pos"] = 0

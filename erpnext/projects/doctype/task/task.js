@@ -19,7 +19,7 @@ frappe.ui.form.on("Task", {
 	},
 
 	refresh: function(frm) {
-		frm.fields_dict['parent_task'].get_query = function() {
+		frm.fields_dict['parent_task'].get_query = function () {
 			return {
 				filters: {
 					"is_group": 1,
@@ -27,20 +27,20 @@ frappe.ui.form.on("Task", {
 			}
 		}
 
-		if(!frm.doc.is_group){
+		if (!frm.doc.is_group) {
 			if (!frm.is_new()) {
-				if (frm.perm[0].write) {
-					if (!["Closed", "Cancelled"].includes(frm.doc.status)) {
-						frm.add_custom_button(__("Close"), () => {
-							frm.set_value("status", "Closed");
-							frm.save();
-						});
-					} else {
-						frm.add_custom_button(__("Reopen"), () => {
-							frm.set_value("status", "Open");
-							frm.save();
-						});
-					}
+				if (frappe.model.can_read("Timesheet")) {
+					frm.add_custom_button(__("Timesheet"), () => {
+						frappe.route_options = { "project": frm.doc.project, "task": frm.doc.name }
+						frappe.set_route("List", "Timesheet");
+					}, __("View"), true);
+				}
+
+				if (frappe.model.can_read("Expense Claim")) {
+					frm.add_custom_button(__("Expense Claims"), () => {
+						frappe.route_options = { "project": frm.doc.project, "task": frm.doc.name };
+						frappe.set_route("List", "Expense Claim");
+					}, __("View"), true);
 				}
 			}
 		}

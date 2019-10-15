@@ -24,7 +24,7 @@ class TestStaffingPlan(unittest.TestCase):
 		staffing_plan.to_date = add_days(nowdate(), 10)
 		staffing_plan.append("staffing_details", {
 			"designation": "Designer",
-			"number_of_positions": 6,
+			"vacancies": 6,
 			"estimated_cost_per_position": 50000
 		})
 		staffing_plan.insert()
@@ -42,7 +42,7 @@ class TestStaffingPlan(unittest.TestCase):
 		staffing_plan.to_date = add_days(nowdate(), 10)
 		staffing_plan.append("staffing_details", {
 			"designation": "Designer",
-			"number_of_positions": 3,
+			"vacancies": 3,
 			"estimated_cost_per_position": 45000
 		})
 		self.assertRaises(SubsidiaryCompanyError, staffing_plan.insert)
@@ -58,7 +58,7 @@ class TestStaffingPlan(unittest.TestCase):
 		staffing_plan.to_date = add_days(nowdate(), 10)
 		staffing_plan.append("staffing_details", {
 			"designation": "Designer",
-			"number_of_positions": 7,
+			"vacancies": 7,
 			"estimated_cost_per_position": 50000
 		})
 		staffing_plan.insert()
@@ -73,7 +73,7 @@ class TestStaffingPlan(unittest.TestCase):
 		staffing_plan.to_date = add_days(nowdate(), 10)
 		staffing_plan.append("staffing_details", {
 			"designation": "Designer",
-			"number_of_positions": 7,
+			"vacancies": 7,
 			"estimated_cost_per_position": 60000
 		})
 		staffing_plan.insert()
@@ -92,5 +92,5 @@ def make_company():
 	company.abbr = "_TC10"
 	company.parent_company = "_Test Company"
 	company.default_currency = "INR"
-	company.country = "India"
+	company.country = "Pakistan"
 	company.insert()

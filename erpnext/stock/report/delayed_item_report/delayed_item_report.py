@@ -46,7 +46,8 @@ class DelayedItemReport(object):
 		self.transactions = frappe.db.sql(""" SELECT `tab{child_doc}`.item_code, `tab{child_doc}`.item_name,
 				`tab{child_doc}`.item_group, `tab{child_doc}`.qty, `tab{child_doc}`.rate, `tab{child_doc}`.amount,
 				`tab{child_doc}`.so_detail, `tab{child_doc}`.{so_field} as sales_order,
-				`tab{doctype}`.customer, `tab{doctype}`.posting_date, `tab{doctype}`.name, `tab{doctype}`.grand_total
+				`tab{doctype}`.shipping_address_name, `tab{doctype}`.po_no, `tab{doctype}`.customer,
+				`tab{doctype}`.posting_date, `tab{doctype}`.name, `tab{doctype}`.grand_total
 			FROM `tab{child_doc}`, `tab{doctype}`
 			WHERE
 				`tab{child_doc}`.parent = `tab{doctype}`.name and `tab{doctype}`.docstatus = 1 and
@@ -97,12 +98,20 @@ class DelayedItemReport(object):
 			"fieldtype": "Link",
 			"options": based_on,
 			"width": 100
-		},{
+		},
+		{
 			"label": _("Customer"),
 			"fieldname": "customer",
 			"fieldtype": "Link",
 			"options": "Customer",
-			"width": 100
+			"width": 200
+		},
+		{
+			"label": _("Shipping Address"),
+			"fieldname": "shipping_address_name",
+			"fieldtype": "Link",
+			"options": "Address",
+			"width": 120
 		},
 		{
 			"label": _("Expected Delivery Date"),

@@ -176,6 +176,9 @@ def create_purchase_invoices():
 			do_not_save=1
 		)
 
+	pi1.shipping_address = "_Test Supplier GST-1-Billing"
+	pi1.save()
+
 	pi1.submit()
 
 def make_suppliers():
@@ -218,6 +221,7 @@ def make_suppliers():
 			"link_name": "_Test Registered Supplier"
 		})
 
+		address.is_shipping_address = 1
 		address.save()
 
 	if not frappe.db.exists('Address', '_Test Supplier GST-2-Billing'):

@@ -68,7 +68,7 @@ class Quiz {
 		}).then(res => {
 			this.submit_btn.remove()
 			if (!res.message) {
-				frappe.throw("Something went wrong while evaluating the quiz.")
+				frappe.throw(__("Something went wrong while evaluating the quiz."))
 			}
 
 			let indicator = 'red'

@@ -126,6 +126,20 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	make_material_request: function(frm) {
+
+		frappe.confirm(__("Do you want to submit the material request"),
+			function() {
+				frm.events.create_material_request(frm, 1);
+			},
+			function() {
+				frm.events.create_material_request(frm, 0);
+			}
+		);
+	},
+
+	create_material_request: function(frm, submit) {
+		frm.doc.submit_material_request = submit;
+
 		frappe.call({
 			method: "make_material_request",
 			freeze: true,
@@ -258,11 +272,12 @@ frappe.ui.form.on("Production Plan Item", {
 frappe.ui.form.on("Material Request Plan Item", {
 	warehouse: function(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
-		if (row.warehouse && row.item_code) {
+		if (row.warehouse && row.item_code && frm.doc.company) {
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_bin_details",
 				args: {
 					row: row,
+					company: frm.doc.company,
 					for_warehouse: row.warehouse
 				},
 				callback: function(r) {

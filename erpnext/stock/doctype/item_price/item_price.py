@@ -31,13 +31,22 @@ class ItemPrice(Document):
 				frappe.throw(_("Valid From Date must be lesser than Valid Upto Date."))
 
 	def update_price_list_details(self):
-		self.buying, self.selling, self.currency = \
-			frappe.db.get_value("Price List",
-								{"name": self.price_list, "enabled": 1},
-								["buying", "selling", "currency"])
+		if self.price_list:
+			price_list_details = frappe.db.get_value("Price List",
+				{"name": self.price_list, "enabled": 1},
+				["buying", "selling", "currency"])
+
+			if not price_list_details:
+				link = frappe.utils.get_link_to_form('Price List', self.price_list)
+				frappe.throw("The price list {0} does not exists or disabled".
+					format(link))
+
+			self.buying, self.selling, self.currency = price_list_details
 
 	def update_item_details(self):
-		self.item_name, self.item_description = frappe.db.get_value("Item",self.item_code,["item_name", "description"])
+		if self.item_code:
+			self.item_name, self.item_description = frappe.db.get_value("Item",
+				self.item_code,["item_name", "description"])
 
 	def check_duplicates(self):
 		conditions = "where item_code=%(item_code)s and price_list=%(price_list)s and name != %(name)s"

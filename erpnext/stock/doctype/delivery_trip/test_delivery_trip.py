@@ -14,16 +14,13 @@ from frappe.utils import add_days, flt, now_datetime, nowdate
 
 class TestDeliveryTrip(unittest.TestCase):
 	def setUp(self):
-		create_driver()
+		driver = create_driver()
 		create_vehicle()
 		create_delivery_notification()
 		create_test_contact_and_address()
+		address = create_address(driver)
 
-		settings = frappe.get_single("Google Maps Settings")
-		settings.home_address = frappe.get_last_doc("Address").name
-		settings.save()
-
-		self.delivery_trip = create_delivery_trip()
+		self.delivery_trip = create_delivery_trip(driver, address)
 
 	def tearDown(self):
 		frappe.db.sql("delete from `tabDriver`")
@@ -99,17 +96,42 @@ class TestDeliveryTrip(unittest.TestCase):
 		self.delivery_trip.save()
 		self.assertEqual(self.delivery_trip.status, "Completed")
 
+def create_address(driver):
+	if not frappe.db.exists("Address", {"address_title": "_Test Address for Driver"}):
+		address = frappe.get_doc({
+			"doctype": "Address",
+			"address_title": "_Test Address for Driver",
+			"address_type": "Office",
+			"address_line1": "Station Road",
+			"city": "_Test City",
+			"state": "Test State",
+			"country": "India",
+			"links":[
+				{
+					"link_doctype": "Driver",
+					"link_name": driver.name
+				}
+			]
+		}).insert(ignore_permissions=True)
+
+		frappe.db.set_value("Driver", driver.name, "address", address.name)
+
+		return address
+
+	return frappe.get_doc("Address", {"address_title": "_Test Address for Driver"})
 
 def create_driver():
-	if not frappe.db.exists("Driver", "Newton Scmander"):
+	if not frappe.db.exists("Driver", {"full_name": "Newton Scmander"}):
 		driver = frappe.get_doc({
 			"doctype": "Driver",
 			"full_name": "Newton Scmander",
 			"cell_number": "98343424242",
-			"license_number": "B809"
-		})
-		driver.insert()
+			"license_number": "B809",
+		}).insert(ignore_permissions=True)
 
+		return driver
+
+	return frappe.get_doc("Driver", {"full_name": "Newton Scmander"})
 
 def create_delivery_notification():
 	if not frappe.db.exists("Email Template", "Delivery Notification"):
@@ -144,16 +166,16 @@ def create_vehicle():
 		vehicle.insert()
 
 
-def create_delivery_trip(contact=None):
+def create_delivery_trip(driver, address, contact=None):
 	if not contact:
 		contact = get_contact_and_address("_Test Customer")
 
-	delivery_trip = frappe.new_doc("Delivery Trip")
-	delivery_trip.update({
+	delivery_trip = frappe.get_doc({
 		"doctype": "Delivery Trip",
 		"company": erpnext.get_default_company(),
 		"departure_time": add_days(now_datetime(), 5),
-		"driver": frappe.db.get_value('Driver', {"full_name": "Newton Scmander"}),
+		"driver": driver.name,
+		"driver_address": address.name,
 		"vehicle": "JB 007",
 		"delivery_stops": [{
 			"customer": "_Test Customer",
@@ -165,7 +187,6 @@ def create_delivery_trip(contact=None):
 			"address": contact.shipping_address.parent,
 			"contact": contact.contact_person.parent
 		}]
-	})
-	delivery_trip.insert()
+	}).insert(ignore_permissions=True)
 
 	return delivery_trip

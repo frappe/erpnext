@@ -55,5 +55,10 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 			"fieldtype": "Check",
 			"default": 0
 		},
+		{
+			"fieldname": "include_default_book_entries",
+			"label": __("Include Default Book Entries"),
+			"fieldtype": "Check"
+		}
 	]
 }

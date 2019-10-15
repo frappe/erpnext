@@ -105,7 +105,7 @@ class PurchaseInvoice(BuyingController):
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
-			frappe.msgprint('Release date must be in the future', raise_exception=True)
+			frappe.throw(_('Release date must be in the future'))
 
 	def validate_cash(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
@@ -336,8 +336,10 @@ class PurchaseInvoice(BuyingController):
 
 		if not self.is_return:
 			self.update_against_document_in_jv()
+			self.update_billing_status_for_zero_amount_refdoc("Purchase Receipt")
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
-			self.update_billing_status_in_pr()
+
+		self.update_billing_status_in_pr()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
@@ -362,7 +364,7 @@ class PurchaseInvoice(BuyingController):
 			update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
 
 			make_gl_entries(gl_entries,  cancel=(self.docstatus == 2),
-				update_outstanding=update_outstanding, merge_entries=False)
+				update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
 
 			if update_outstanding == "No":
 				update_outstanding_amt(self.credit_to, "Supplier", self.supplier,
@@ -416,6 +418,7 @@ class PurchaseInvoice(BuyingController):
 					"account": self.credit_to,
 					"party_type": "Supplier",
 					"party": self.supplier,
+					"due_date": self.due_date,
 					"against": self.against_expense_account,
 					"credit": grand_total_in_company_currency,
 					"credit_in_account_currency": grand_total_in_company_currency \
@@ -484,9 +487,13 @@ class PurchaseInvoice(BuyingController):
 							"credit": flt(item.rm_supp_cost)
 						}, warehouse_account[self.supplier_warehouse]["account_currency"], item=item))
 				elif not item.is_fixed_asset or (item.is_fixed_asset and is_cwip_accounting_disabled()):
+
+					expense_account = (item.expense_account
+						if (not item.enable_deferred_expense or self.is_return) else item.deferred_expense_account)
+
 					gl_entries.append(
 						self.get_gl_dict({
-							"account": item.expense_account if not item.enable_deferred_expense else item.deferred_expense_account,
+							"account": expense_account,
 							"against": self.supplier,
 							"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
 							"debit_in_account_currency": (flt(item.base_net_amount,
@@ -768,8 +775,10 @@ class PurchaseInvoice(BuyingController):
 		self.update_prevdoc_status()
 
 		if not self.is_return:
+			self.update_billing_status_for_zero_amount_refdoc("Purchase Receipt")
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
-			self.update_billing_status_in_pr()
+
+		self.update_billing_status_in_pr()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
@@ -787,9 +796,8 @@ class PurchaseInvoice(BuyingController):
 		for d in self.items:
 			if d.project and d.project not in project_list:
 				project = frappe.get_doc("Project", d.project)
-				project.flags.dont_sync_tasks = True
 				project.update_purchase_costing()
-				project.save()
+				project.db_update()
 				project_list.append(d.project)
 
 	def validate_supplier_invoice(self):
@@ -871,6 +879,17 @@ class PurchaseInvoice(BuyingController):
 
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
+
+def get_list_context(context=None):
+	from erpnext.controllers.website_list_for_contact import get_list_context
+	list_context = get_list_context(context)
+	list_context.update({
+		'show_sidebar': True,
+		'show_search': True,
+		'no_breadcrumbs': True,
+		'title': _('Purchase Invoices'),
+	})
+	return list_context
 
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):

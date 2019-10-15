@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import getdate
-from frappe.desk.doctype.auto_repeat.auto_repeat import get_next_schedule_date
+from frappe.automation.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 
 def execute():
 	frappe.reload_doc('accounts', 'doctype', 'subscription')
