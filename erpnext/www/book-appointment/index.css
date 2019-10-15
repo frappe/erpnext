@@ -1,4 +1,6 @@
 .time-slot {
+    flex-grow: 1;
+    flex : 0 0 calc(16.66% - 20px);
     margin-bottom: 2em;
     margin-left: 0.5em;
     margin-right: 0.5em;
@@ -9,9 +11,16 @@
     padding: 0.5em 1em;
 }
 
+#customer-form{
+    border-color: black;
+}
+#customer-form ::placeholder{
+    color: #ddd;
+}
 #timeslot-container{
-	display: grid;
-	grid-template-columns: repeat(6, 1fr);
+	display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .time-slot:hover {
