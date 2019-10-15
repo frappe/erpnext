@@ -14,11 +14,11 @@ class CurrencyExchange(Document):
 		if not self.date:
 			self.date = nowdate()
 		if cint(self.for_buying)==0 and cint(self.for_selling)==1:
-			self.purpose = "Selling"
+			purpose = "Selling"
 		if cint(self.for_buying)==1 and cint(self.for_selling)==0:
-			self.purpose = "Buying"
+			purpose = "Buying"
 		self.name = '{0}-{1}-{2}-{3}'.format(formatdate(get_datetime_str(self.date), "yyyy-MM-dd"),
-			self.from_currency, self.to_currency, self.purpose)
+			self.from_currency, self.to_currency, purpose)
 
 	def validate(self):
 		self.validate_value("exchange_rate", ">", 0)
