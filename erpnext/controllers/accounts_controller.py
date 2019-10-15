@@ -285,7 +285,7 @@ class AccountsController(TransactionBase):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
 
 
-					if ret.get("pricing_rules") and not ret.get("validate_applied_rule", 0):
+					if ret.get("pricing_rules") and not ret.get("validate_applied_rule", 0) and item.ignore_pricing_rules==0:
 						# if user changed the discount percentage then set user's discount percentage ?
 						item.set("pricing_rules", ret.get("pricing_rules"))
 						item.set("discount_percentage", ret.get("discount_percentage"))
