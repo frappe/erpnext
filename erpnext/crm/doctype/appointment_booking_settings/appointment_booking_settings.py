@@ -19,9 +19,9 @@ class AppointmentBookingSettings(Document):
     def validate_availability_of_slots(self):
         for record in self.availability_of_slots:
             from_time = datetime.datetime.strptime(
-                min_date+record.from_time, format_string)
+                self.min_date+record.from_time, self.format_string)
             to_time = datetime.datetime.strptime(
-                min_date+record.to_time, format_string)
+                self.min_date+record.to_time, self.format_string)
             timedelta = to_time-from_time
             self.from_time_is_later_than_to_time(from_time, to_time)
             self.duration_is_divisible(from_time, to_time)
@@ -35,4 +35,4 @@ class AppointmentBookingSettings(Document):
         timedelta = to_time - from_time
         if timedelta.total_seconds() % (self.appointment_duration * 60):
             frappe.throw(
-                _('The difference between from time and To Time must be a multiple of Appointmen'))
+                _('The difference between from time and To Time must be a multiple of Appointment'))
