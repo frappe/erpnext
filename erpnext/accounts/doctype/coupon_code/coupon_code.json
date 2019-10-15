@@ -12,7 +12,6 @@
   "customer",
   "column_break_4",
   "coupon_code",
-  "price_list",
   "pricing_rule",
   "uses",
   "valid_from",
@@ -58,12 +57,6 @@
    "no_copy": 1,
    "set_only_once": 1,
    "unique": 1
-  },
-  {
-   "fieldname": "price_list",
-   "fieldtype": "Link",
-   "label": "Price List",
-   "options": "Price List"
   },
   {
    "fieldname": "pricing_rule",
@@ -120,7 +113,7 @@
    "read_only": 1
   }
  ],
- "modified": "2019-05-28 21:06:29.395619",
+ "modified": "2019-10-15 14:12:22.686986",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Coupon Code",
