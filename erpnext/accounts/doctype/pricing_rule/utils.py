@@ -491,6 +491,7 @@ def apply_pricing_rule(doc, pr_doc, item_row, value, do_not_validate=False):
 				if not pr_doc.validate_applied_rule and item.ignore_pricing_rules==0:
 					rule_applied[key] = 1
 					item.set(field, value)
+					frappe.msgprint(item.item_code)
 				elif item.ignore_pricing_rules==1:
 					frappe.msgprint(item.item_code)
 				elif item.get(field) < value:
