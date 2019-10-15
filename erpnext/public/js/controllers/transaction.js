@@ -1233,7 +1233,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"is_return": cint(me.frm.doc.is_return),
 			"update_stock": in_list(['Sales Invoice', 'Purchase Invoice'], me.frm.doc.doctype) ? cint(me.frm.doc.update_stock) : 0,
 			"conversion_factor": me.frm.doc.conversion_factor,
-			"pos_profile": me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : ''
+			"pos_profile": me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
+			"coupon_code": me.frm.doc.coupon_code
 		};
 	},
 
@@ -1742,6 +1743,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				frappe.model.set_value(me.frm.doctype + " Item", item.name, "warehouse", me.frm.doc.set_warehouse);
 			});
 		}
+	},
+	coupon_code: function() {
+		var me = this;
+		frappe.run_serially([
+			() => this.frm.doc.ignore_pricing_rule=1,
+			() => me.ignore_pricing_rule(),
+			() => this.frm.doc.ignore_pricing_rule=0,
+			() => me.apply_pricing_rule()
+		]);
 	}
 });
 

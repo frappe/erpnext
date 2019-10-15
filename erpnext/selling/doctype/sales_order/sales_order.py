@@ -46,6 +46,10 @@ class SalesOrder(SellingController):
 		self.validate_serial_no_based_delivery()
 		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_order_reference)
 
+		if self.coupon_code:
+			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
+			validate_coupon_code(self.coupon_code)
+
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
 
@@ -177,6 +181,9 @@ class SalesOrder(SellingController):
 		self.update_blanket_order()
 
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
+		if self.coupon_code:
+			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
+			update_coupon_code_count(self.coupon_code,'used')
 
 	def on_cancel(self):
 		super(SalesOrder, self).on_cancel()
@@ -195,7 +202,10 @@ class SalesOrder(SellingController):
 		self.update_blanket_order()
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
-
+		if self.coupon_code:
+			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
+			update_coupon_code_count(self.coupon_code,'cancelled')
+			
 	def update_project(self):
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') != "Each Transaction":
 			return
