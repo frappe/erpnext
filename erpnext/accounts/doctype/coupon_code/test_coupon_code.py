@@ -88,7 +88,6 @@ def test_create_test_data():
 		"doctype": "Coupon Code",
 		"coupon_name":"SAVE30",
 		"coupon_code":"SAVE30",
-		"price_list": "_Test Price List",
 		"pricing_rule": "_Test Pricing Rule for _Test Item",
 		"valid_from": "2014-01-01",
 		"maximum_use":1,
