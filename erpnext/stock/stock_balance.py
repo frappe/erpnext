@@ -137,7 +137,7 @@ def get_planned_qty(item_code, warehouse):
 
 	return flt(planned_qty[0][0]) if planned_qty else 0
 
-
+frappe.whitelist()
 def update_bin_qty(item_code, warehouse, qty_dict=None):
 	from erpnext.stock.utils import get_bin
 	bin = get_bin(item_code, warehouse)
