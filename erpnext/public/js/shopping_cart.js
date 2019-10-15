@@ -26,8 +26,12 @@ frappe.ready(function() {
 			.html('<i class="fa fa-fixed-width fa fa-user"></i> ' + full_name);
 	}
 	// set coupon code and sales partner code
-	var referral_coupon_code=getParams(window.location.href)['cc'];
-	var referral_sales_partner=getParams(window.location.href)['sp'];
+
+	var url_args = getParams(window.location.href);
+
+	var referral_coupon_code = url_args['cc'];
+	var referral_sales_partner = url_args['sp'];
+
 	var d = new Date();
 	// expires within 30 minutes
 	d.setTime(d.getTime() + (0.02 * 24 * 60 * 60 * 1000));
