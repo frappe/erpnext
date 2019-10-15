@@ -79,6 +79,7 @@
   "loyalty_points",
   "loyalty_amount",
   "section_break_48",
+  "coupon_code",
   "apply_discount_on",
   "base_discount_amount",
   "column_break_50",
@@ -678,7 +679,13 @@
    "collapsible_depends_on": "discount_amount",
    "fieldname": "section_break_48",
    "fieldtype": "Section Break",
-   "label": "Additional Discount"
+   "label": "Additional Discount and Coupon Code"
+  },
+  {
+    "fieldname": "coupon_code",
+    "fieldtype": "Link",
+    "label": "Coupon Code",
+    "options": "Coupon Code"
   },
   {
    "default": "Grand Total",
@@ -1185,7 +1192,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2019-10-10 08:46:07.540565",
+ "modified": "2019-10-14 08:46:07.540565",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
