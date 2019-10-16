@@ -69,11 +69,13 @@ class TestAsset(unittest.TestCase):
 			{"voucher_type": "Purchase Invoice", "voucher_no": pi.name}))
 
 	def test_is_fixed_asset_set(self):
+		asset = create_asset(is_existing_asset = 1)
 		doc = frappe.new_doc('Purchase Invoice')
 		doc.supplier = '_Test Supplier'
 		doc.append('items', {
 			'item_code': 'Macbook Pro',
-			'qty': 1
+			'qty': 1,
+			'asset': asset.name
 		})
 
 		doc.set_missing_values()
@@ -483,6 +485,8 @@ class TestAsset(unittest.TestCase):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 			make_purchase_invoice as make_purchase_invoice_from_pr)
 
+		#frappe.db.set_value("Asset Category","Computers","enable_cwip_accounting", 1)
+
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=1, rate=5000, do_not_submit=True, location="Test Location")
 
@@ -561,6 +565,7 @@ class TestAsset(unittest.TestCase):
 			where voucher_type='Asset' and voucher_no = %s
 			order by account""", asset_doc.name)
 
+
 		self.assertEqual(gle, expected_gle)
 
 	def test_expense_head(self):
@@ -570,7 +575,6 @@ class TestAsset(unittest.TestCase):
 		doc = make_invoice(pr.name)
 
 		self.assertEquals('Asset Received But Not Billed - _TC', doc.items[0].expense_account)
-
 
 def create_asset_data():
 	if not frappe.db.exists("Asset Category", "Computers"):
@@ -592,15 +596,15 @@ def create_asset(**args):
 
 	asset = frappe.get_doc({
 		"doctype": "Asset",
-		"asset_name": "Macbook Pro 1",
+		"asset_name": args.asset_name or "Macbook Pro 1",
 		"asset_category": "Computers",
-		"item_code": "Macbook Pro",
-		"company": "_Test Company",
+		"item_code": args.item_code or "Macbook Pro",
+		"company": args.company or"_Test Company",
 		"purchase_date": "2015-01-01",
 		"calculate_depreciation": 0,
 		"gross_purchase_amount": 100000,
 		"expected_value_after_useful_life": 10000,
-		"warehouse": "_Test Warehouse - _TC",
+		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"available_for_use_date": "2020-06-06",
 		"location": "Test Location",
 		"asset_owner": "Company",
@@ -612,6 +616,9 @@ def create_asset(**args):
 	except frappe.DuplicateEntryError:
 		pass
 
+	if args.submit:
+		asset.submit()
+
 	return asset
 
 def create_asset_category():
@@ -619,6 +626,7 @@ def create_asset_category():
 	asset_category.asset_category_name = "Computers"
 	asset_category.total_number_of_depreciations = 3
 	asset_category.frequency_of_depreciation = 3
+	asset_category.enable_cwip_accounting = 1
 	asset_category.append("accounts", {
 		"company_name": "_Test Company",
 		"fixed_asset_account": "_Test Fixed Asset - _TC",
