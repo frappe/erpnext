@@ -38,13 +38,13 @@
    "read_only": 1
   },
   {
-   "fetch_from": "sales_invoice.grand_total",
+   "fetch_from": "sales_invoice.outstanding_amount",
+   "fetch_if_empty": 1,
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Outstanding Amount",
-   "options": "Company:company:default_currency",
-   "read_only": 1
+   "options": "Company:company:default_currency"
   },
   {
    "fieldname": "column_break_3",
@@ -60,7 +60,7 @@
   }
  ],
  "istable": 1,
- "modified": "2019-08-07 15:13:55.808349",
+ "modified": "2019-09-26 11:05:36.016772",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Discounted Invoice",
