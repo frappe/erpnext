@@ -114,7 +114,7 @@ class Analytics(object):
 		if self.filters["value_quantity"] == 'Value':
 			value_field = 'base_amount'
 		else:
-			value_field = 'qty'
+			value_field = 'stock_qty'
 
 		self.entries = frappe.db.sql("""
 			select i.item_code as entity, i.item_name as entity_name, i.stock_uom, i.{value_field} as value_field, s.{date_field}
@@ -301,8 +301,10 @@ class Analytics(object):
 	def get_chart_data(self):
 		length = len(self.columns)
 
-		if self.filters.tree_type in ["Customer", "Supplier", "Item"]:
-			labels = [d.get("label") for d in self.columns[2:length-1]]
+		if self.filters.tree_type in ["Customer", "Supplier"]:
+			labels = [d.get("label") for d in self.columns[2:length - 1]]
+		elif self.filters.tree_type == "Item":
+			labels = [d.get("label") for d in self.columns[3:length - 1]]
 		else:
 			labels = [d.get("label") for d in self.columns[1:length-1]]
 		self.chart = {
