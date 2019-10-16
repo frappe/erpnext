@@ -155,6 +155,31 @@ def make_custom_fields(update=True):
 				fetch_from="country.code"),
 			dict(fieldname='state_code', label='State Code',
 				fieldtype='Data', insert_after='state', print_hide=1)
+		],
+		'Purchase Invoice': [
+			dict(fieldname='document_type', label='Document Type',
+				fieldtype='Data', insert_after='company', print_hide=1, read_only=1
+				),
+			dict(fieldname='destination_code', label='Destination Code',
+				fieldtype='Data', insert_after='company', print_hide=1, read_only=1
+				),
+			dict(fieldname='imported_grand_total', label='Imported Grand Total',
+				fieldtype='Data', insert_after='update_auto_repeat_reference', print_hide=1, read_only=1
+				)
+		],
+		'Purchase Taxes and Charges': [
+			dict(fieldname='tax_rate', label='Tax Rate',
+				fieldtype='Data', insert_after='parenttype', print_hide=1, read_only=0
+				)
+		],
+		'Supplier': [
+			dict(fieldname='fiscal_code', label='Fiscal Code',
+				fieldtype='Data', insert_after='tax_id', print_hide=1, read_only=1
+				),
+			dict(fieldname='fiscal_regime', label='Fiscal Regime',
+				fieldtype='Select', insert_after='fiscal_code', print_hide=1, read_only=1,
+				options= "\nRF01\nRF02\nRF04\nRF05\nRF06\nRF07\nRF08\nRF09\nRF10\nRF11\nRF12\nRF13\nRF14\nRF15\nRF16\nRF17\nRF18\nRF19"
+				)
 		]
 	}
 
