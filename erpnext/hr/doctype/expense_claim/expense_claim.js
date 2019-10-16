@@ -403,11 +403,10 @@ cur_frm.fields_dict['task'].get_query = function(doc) {
 		}
 	};
 };
-cur_frm.fields_dict["expenses"].grid.get_field("cost_center").get_query = function(doc){
-       return {
-               filters:{
-
-					   "is_group": "child"
-               }
-       }
-}
+cur_frm.fields_dict["expenses"].grid.get_field("cost_center").get_query = function(){
+	return {
+		filters:{
+			"is_group": "child"
+		}
+	};
+};
