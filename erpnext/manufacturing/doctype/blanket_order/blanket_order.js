@@ -70,7 +70,7 @@ frappe.ui.form.on('Blanket Order', {
 
 	blanket_order_type: function (frm) {
 		frm.trigger('set_tc_name_filter');
-	},
+	}
 });
 
 
