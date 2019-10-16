@@ -52,12 +52,16 @@ frappe.ui.form.on('Blanket Order', {
 	set_tc_name_filter: function(frm) {
 		if (frm.doc.blanket_order_type === 'Selling') {
 			frm.set_df_property("customer","reqd", 1)
+			frm.set_df_property("supplier","reqd", 0)
+
 			frm.set_query("tc_name", function() {
 				return { filters: { selling: 1 } };
 			});
 		}
 		if (frm.doc.blanket_order_type === 'Purchasing') {
-			frm.set_df_property("customer","reqd", 1)			
+			frm.set_df_property("supplier","reqd", 1)			
+			frm.set_df_property("customer","reqd", 0)
+
 			frm.set_query("tc_name", function() {
 				return { filters: { buying: 1 } };
 			});
@@ -66,7 +70,7 @@ frappe.ui.form.on('Blanket Order', {
 
 	blanket_order_type: function (frm) {
 		frm.trigger('set_tc_name_filter');
-	}
+	},
 });
 
 
