@@ -591,7 +591,6 @@
    "oldfieldname": "purchase_order",
    "oldfieldtype": "Link",
    "options": "Purchase Order",
-   "print_hide": 1,
    "read_only": 1,
    "search_index": 1
   },
@@ -607,6 +606,7 @@
    "fieldname": "include_exploded_items",
    "fieldtype": "Check",
    "label": "Include Exploded Items",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -758,7 +758,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-06-02 06:36:17.078419",
+ "modified": "2019-09-17 22:32:05.984240",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
