@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import frappe, unittest
 from frappe.utils import flt
 from erpnext.setup.utils import get_exchange_rate
+from frappe.utils import cint
 
 test_records = frappe.get_test_records('Currency Exchange')
 
