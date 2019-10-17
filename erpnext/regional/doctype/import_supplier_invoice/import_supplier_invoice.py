@@ -29,7 +29,7 @@ class ImportSupplierInvoice(Document):
 		self.publish("File Import", _("Processing XML Files"), 1, 3)
 
 		pi_count = 0
-		mop_options = frappe.get_meta('Mode of Payment').fields['4'].options
+		mop_options = frappe.get_meta('Mode of Payment').fields[4].options
 		mop_str = re.sub('\n', ',', mop_options)
 		mop_dict = dict(item.split("-") for item in mop_str.split(","))
 
