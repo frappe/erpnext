@@ -27,7 +27,12 @@ class ImportSupplierInvoice(Document):
 	def import_xml_data(self):
 		import_file = frappe.get_doc("File", {"file_url": self.zip_file})
 		self.publish("File Import", _("Processing XML Files"), 1, 3)
+
 		pi_count = 0
+		mop_options = frappe.get_meta('Mode of Payment').fields['4'].options
+		mop_str = re.sub('\n', ',', mop_options)
+		mop_dict = dict(item.split("-") for item in mop_str.split(","))
+
 		with zipfile.ZipFile(get_full_path(self.zip_file)) as zf:
 			file_count = 0
 			for file_name in zf.namelist():
@@ -129,16 +134,9 @@ class ImportSupplierInvoice(Document):
 									"description": descr,
 									"tax_amount": float(line.Imposta.text) if len(line.find("Imposta"))!=0 else float(0)
 								})
-
-						mop_dict = {'MP01':"MP01-Contanti", 'MP02':"MP02-Assegno", 'MP03':"MP03-Assegno circolare", 'MP04':"MP04-Contanti presso Tesoreria",
-									'MP05':"MP05-Bonifico", 'MP06': "MP06-Vaglia cambiario", 'MP07': "MP07-Bollettino bancario", 'MP08': "MP08-Carta di pagamento",
-									'MP09':"MP09-RID", 'MP10': "MP10-RID utenze", 'MP11': "MP11-RID veloce", 'MP12':"MP12-RIBA", 'MP13':"MP13-MAV",
-									'MP14':"MP14-Quietanza erario", 'MP15':"MP15-Giroconto su conti di contabilità speciale", 'MP16':"MP16-Domiciliazione bancaria",
-									'MP17': "MP17-Domiciliazione postale", 'MP18': "MP18-Bollettino di c/c postale", 'MP19': "MP19-SEPA Direct Debit",
-									'MP20': "MP20-SEPA Direct Debit CORE", 'MP21': "MP21-SEPA Direct Debit B2B", 'MP22':"MP22-Trattenuta su somme già riscosse"}
 				
 						for line in file_content.find_all("DettaglioPagamento"):
-							mop_code = mop_dict.get(line.ModalitaPagamento.text)
+							mop_code = line.ModalitaPagamento.text + '-' + mop_dict.get(line.ModalitaPagamento.text)
 							
 							if line.find("DataScadenzaPagamento"):
 								due_date = dateutil.parser.parse(line.DataScadenzaPagamento.text).strftime("%Y-%m-%d")
