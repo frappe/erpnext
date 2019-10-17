@@ -5,9 +5,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import date_diff, add_days, getdate
+from frappe.utils import date_diff, add_days, getdate, cint
 from frappe.model.document import Document
-from erpnext.hr.utils import validate_dates, validate_overlap, get_leave_period, get_holidays_for_employee
+from erpnext.hr.utils import validate_dates, validate_overlap, get_leave_period, \
+	get_holidays_for_employee, create_additional_leave_ledger_entry
 
 class CompensatoryLeaveRequest(Document):
 
@@ -52,8 +53,12 @@ class CompensatoryLeaveRequest(Document):
 		if leave_period:
 			leave_allocation = self.exists_allocation_for_period(leave_period)
 			if leave_allocation:
-				leave_allocation.new_leaves_allocated += date_difference
-				leave_allocation.submit()
+				leave_allocation.total_leaves_allocated += date_difference
+				leave_allocation.db_set("total_leaves_allocated", leave_allocation.total_leaves_allocated, update_modified=False)
+
+				# generate additional ledger entry for the new compensatory leaves off
+				create_additional_leave_ledger_entry(leave_allocation, date_difference, add_days(self.work_end_date, 1))
+
 			else:
 				leave_allocation = self.create_leave_allocation(leave_period, date_difference)
 			self.db_set("leave_allocation", leave_allocation.name)
@@ -95,17 +100,18 @@ class CompensatoryLeaveRequest(Document):
 
 	def create_leave_allocation(self, leave_period, date_difference):
 		is_carry_forward = frappe.db.get_value("Leave Type", self.leave_type, "is_carry_forward")
-		allocation = frappe.new_doc("Leave Allocation")
-		allocation.employee = self.employee
-		allocation.employee_name = self.employee_name
-		allocation.leave_type = self.leave_type
-		allocation.from_date = add_days(self.work_end_date, 1)
-		allocation.to_date = leave_period[0].to_date
-		allocation.new_leaves_allocated = date_difference
-		allocation.total_leaves_allocated = date_difference
-		allocation.description = self.reason
-		if is_carry_forward == 1:
-			allocation.carry_forward = True
-		allocation.save(ignore_permissions = True)
+		allocation = frappe.get_doc(dict(
+			doctype="Leave Allocation",
+			employee=self.employee,
+			employee_name=self.employee_name,
+			leave_type=self.leave_type,
+			from_date=add_days(self.work_end_date, 1),
+			to_date=leave_period[0].to_date,
+			carry_forward=cint(is_carry_forward),
+			new_leaves_allocated=date_difference,
+			total_leaves_allocated=date_difference,
+			description=self.reason
+		))
+		allocation.insert(ignore_permissions=True)
 		allocation.submit()
 		return allocation
