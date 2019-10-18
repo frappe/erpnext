@@ -4,6 +4,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "invoice_series",
   "company",
   "item_code",
   "supplier_group",
@@ -67,9 +68,16 @@
    "fieldtype": "Data",
    "label": "Status",
    "read_only": 1
+  },
+  {
+   "fieldname": "invoice_series",
+   "fieldtype": "Select",
+   "label": "Invoice Series",
+   "options": "ACC-PINV-.YYYY.-",
+   "reqd": 1
   }
  ],
- "modified": "2019-10-16 02:00:00.538268",
+ "modified": "2019-10-19 00:15:11.404733",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Import Supplier Invoice",
