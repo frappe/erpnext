@@ -8,6 +8,7 @@
   "first_name": "_Test Employee",
   "gender": "Female",
   "naming_series": "_T-Employee-",
+  "holiday_list": "_Test Holiday List",
   "status": "Active",
   "user_id": "test@example.com"
  },
@@ -20,6 +21,7 @@
   "first_name": "_Test Employee 1",
   "gender": "Male",
   "naming_series": "_T-Employee-",
+  "holiday_list": "_Test Holiday List",
   "status": "Active",
   "user_id": "test1@example.com"
  },
@@ -32,6 +34,7 @@
   "first_name": "_Test Employee 2",
   "gender": "Male",
   "naming_series": "_T-Employee-",
+  "holiday_list": "_Test Holiday List",
   "status": "Active",
   "user_id": "test2@example.com"
  }
