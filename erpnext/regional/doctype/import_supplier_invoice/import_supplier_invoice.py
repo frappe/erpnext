@@ -158,6 +158,7 @@ class ImportSupplierInvoice(Document):
 												pin_code = pin_code, country = country)
 
 						pi_name = create_purchase_invoice(company = self.company,
+														naming_series = self.invoice_series,
 														supplier_name = supplier_name,
 														bill_no = invoice_no,
 														document_type = document_type,
@@ -295,7 +296,7 @@ def create_purchase_invoice(**args):
 	pi = frappe.get_doc({
 			"doctype": "Purchase Invoice",
 			"company": args.company,
-			"naming_series": "PINV-",
+			"naming_series": args.naming_series,
 			"supplier": args.supplier_name,
 			"is_return": args.is_return,
 			"posting_date": today(),
