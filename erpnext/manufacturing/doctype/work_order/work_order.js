@@ -91,6 +91,16 @@ frappe.ui.form.on("Work Order", {
 			};
 		});
 
+		frm.set_query("operation", "required_items", function() {
+			return {
+				query: "erpnext.manufacturing.doctype.work_order.work_order.get_bom_operations",
+				filters: {
+					'parent': frm.doc.bom_no,
+					'parenttype': 'BOM'
+				}
+			};
+		});
+
 		// formatter for work order operation
 		frm.set_indicator_formatter('operation',
 			function(doc) { return (frm.doc.qty==doc.completed_qty) ? "green" : "orange"; });
@@ -545,11 +555,14 @@ erpnext.work_order = {
 
 	get_max_transferable_qty: (frm, purpose) => {
 		let max = 0;
-		if (frm.doc.skip_transfer) return max;
-		if (purpose === 'Manufacture') {
-			max = flt(frm.doc.material_transferred_for_manufacturing) - flt(frm.doc.produced_qty);
+		if (frm.doc.skip_transfer) {
+			max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
 		} else {
-			max = flt(frm.doc.qty) - flt(frm.doc.material_transferred_for_manufacturing);
+			if (purpose === 'Manufacture') {
+				max = flt(frm.doc.material_transferred_for_manufacturing) - flt(frm.doc.produced_qty);
+			} else {
+				max = flt(frm.doc.qty) - flt(frm.doc.material_transferred_for_manufacturing);
+			}
 		}
 		return flt(max, precision('qty'));
 	},

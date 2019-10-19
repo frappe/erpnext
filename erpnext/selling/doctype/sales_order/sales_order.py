@@ -46,6 +46,10 @@ class SalesOrder(SellingController):
 		self.validate_serial_no_based_delivery()
 		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_order_reference)
 
+		if self.coupon_code:
+			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
+			validate_coupon_code(self.coupon_code)
+
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
 
@@ -57,13 +61,13 @@ class SalesOrder(SellingController):
 
 	def validate_po(self):
 		# validate p.o date v/s delivery date
-		if self.po_date:
+		if self.po_date and not self.skip_delivery_note:
 			for d in self.get("items"):
 				if d.delivery_date and getdate(self.po_date) > getdate(d.delivery_date):
 					frappe.throw(_("Row #{0}: Expected Delivery Date cannot be before Purchase Order Date")
 						.format(d.idx))
 
-		if self.po_no and self.customer:
+		if self.po_no and self.customer and not self.skip_delivery_note:
 			so = frappe.db.sql("select name from `tabSales Order` \
 				where ifnull(po_no, '') = %s and name != %s and docstatus < 2\
 				and customer = %s", (self.po_no, self.name, self.customer))
@@ -100,7 +104,7 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).validate_order_type()
 
 	def validate_delivery_date(self):
-		if self.order_type == 'Sales':
+		if self.order_type == 'Sales' and not self.skip_delivery_note:
 			delivery_date_list = [d.delivery_date for d in self.get("items") if d.delivery_date]
 			max_delivery_date = max(delivery_date_list) if delivery_date_list else None
 			if not self.delivery_date:
@@ -177,6 +181,9 @@ class SalesOrder(SellingController):
 		self.update_blanket_order()
 
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
+		if self.coupon_code:
+			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
+			update_coupon_code_count(self.coupon_code,'used')
 
 	def on_cancel(self):
 		super(SalesOrder, self).on_cancel()
@@ -195,7 +202,10 @@ class SalesOrder(SellingController):
 		self.update_blanket_order()
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
-
+		if self.coupon_code:
+			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
+			update_coupon_code_count(self.coupon_code,'cancelled')
+			
 	def update_project(self):
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') != "Each Transaction":
 			return
@@ -760,6 +770,7 @@ def get_events(start, end, filters=None):
 		from
 			`tabSales Order`, `tabSales Order Item`
 		where `tabSales Order`.name = `tabSales Order Item`.parent
+			and `tabSales Order`.skip_delivery_note = 0
 			and (ifnull(`tabSales Order Item`.delivery_date, '0000-00-00')!= '0000-00-00') \
 			and (`tabSales Order Item`.delivery_date between %(start)s and %(end)s)
 			and `tabSales Order`.docstatus < 2
@@ -1023,3 +1034,15 @@ def create_pick_list(source_name, target_doc=None):
 	doc.set_item_locations()
 
 	return doc
+
+def update_produced_qty_in_so_item(sales_order_item):
+	#for multiple work orders against same sales order item
+	linked_wo_with_so_item = frappe.db.get_all('Work Order', ['produced_qty'], {
+		'sales_order_item': sales_order_item,
+		'docstatus': 1
+	})
+	if len(linked_wo_with_so_item) > 0:
+		total_produced_qty = 0
+		for wo in linked_wo_with_so_item:
+			total_produced_qty += flt(wo.get('produced_qty'))
+		frappe.db.set_value('Sales Order Item', sales_order_item, 'produced_qty', total_produced_qty)

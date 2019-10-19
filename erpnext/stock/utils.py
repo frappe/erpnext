@@ -253,32 +253,73 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 		return
 
 	convertible_cols = {}
-	for col_idx in reversed(range(0, len(columns))):
-		col = columns[col_idx]
-		if isinstance(col, dict) and col.get("convertible") in ['rate', 'qty']:
-			convertible_cols[col_idx] = col['convertible']
-			columns.insert(col_idx+1, col.copy())
-			columns[col_idx+1]['fieldname'] += "_alt"
-			if convertible_cols[col_idx] == 'rate':
-				columns[col_idx+1]['label'] += " (per {})".format(include_uom)
-			else:
-				columns[col_idx+1]['label'] += " ({})".format(include_uom)
+
+	is_dict_obj = False
+	if isinstance(result[0], dict):
+		is_dict_obj = True
+
+	convertible_columns = {}
+	for idx, d in enumerate(columns):
+		key = d.get("fieldname") if is_dict_obj else idx
+		if d.get("convertible"):
+			convertible_columns.setdefault(key, d.get("convertible"))
+
+			# Add new column to show qty/rate as per the selected UOM
+			columns.insert(idx+1, {
+				'label': "{0} (per {1})".format(d.get("label"), include_uom),
+				'fieldname': "{0}_{1}".format(d.get("fieldname"), frappe.scrub(include_uom)),
+				'fieldtype': 'Currency' if d.get("convertible") == 'rate' else 'Float'
+			})
 
 	for row_idx, row in enumerate(result):
-		new_row = []
-		for col_idx, d in enumerate(row):
-			new_row.append(d)
-			if col_idx in convertible_cols:
-				if conversion_factors[row_idx]:
-					if convertible_cols[col_idx] == 'rate':
-						new_row.append(flt(d) * conversion_factors[row_idx])
-					else:
-						new_row.append(flt(d) / conversion_factors[row_idx])
-				else:
-					new_row.append(None)
+		data = row.items() if is_dict_obj else enumerate(row)
+		for key, value in data:
+			if not key in convertible_columns or not conversion_factors[row_idx]:
+				continue
 
-		result[row_idx] = new_row
+			if convertible_columns.get(key) == 'rate':
+				new_value = flt(value) * conversion_factors[row_idx]
+			else:
+				new_value = flt(value) / conversion_factors[row_idx]
+
+			if not is_dict_obj:
+				row.insert(key+1, new_value)
+			else:
+				new_key = "{0}_{1}".format(key, frappe.scrub(include_uom))
+				row[new_key] = new_value
 
 def get_available_serial_nos(item_code, warehouse):
 	return frappe.get_all("Serial No", filters = {'item_code': item_code,
 		'warehouse': warehouse, 'delivery_document_no': ''}) or []
+
+def add_additional_uom_columns(columns, result, include_uom, conversion_factors):
+	if not include_uom or not conversion_factors:
+		return
+
+	convertible_column_map = {}
+	for col_idx in list(reversed(range(0, len(columns)))):
+		col = columns[col_idx]
+		if isinstance(col, dict) and col.get('convertible') in ['rate', 'qty']:
+			next_col = col_idx + 1
+			columns.insert(next_col, col.copy())
+			columns[next_col]['fieldname'] += '_alt'
+			convertible_column_map[col.get('fieldname')] = frappe._dict({
+				'converted_col': columns[next_col]['fieldname'],
+				'for_type': col.get('convertible')
+			})
+			if col.get('convertible') == 'rate':
+				columns[next_col]['label'] += ' (per {})'.format(include_uom)
+			else:
+				columns[next_col]['label'] += ' ({})'.format(include_uom)
+
+	for row_idx, row in enumerate(result):
+		for convertible_col, data in convertible_column_map.items():
+			conversion_factor = conversion_factors[row.get('item_code')] or 1
+			for_type = data.for_type
+			value_before_conversion = row.get(convertible_col)
+			if for_type == 'rate':
+				row[data.converted_col] = flt(value_before_conversion) * conversion_factor
+			else:
+				row[data.converted_col] = flt(value_before_conversion) / conversion_factor
+
+		result[row_idx] = row

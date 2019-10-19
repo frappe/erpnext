@@ -7,7 +7,7 @@ frappe.provide("erpnext.journal_entry");
 
 frappe.ui.form.on("Journal Entry", {
 	setup: function(frm) {
-		frm.add_fetch("bank_account_no", "account", "account");
+		frm.add_fetch("bank_account", "account", "account");
 	},
 
 	refresh: function(frm) {
