@@ -8,6 +8,7 @@ Provide a report and downloadable CSV according to the German DATEV format.
   all required columns. Used to import the data into the DATEV Software.
 """
 from __future__ import unicode_literals
+import datetime
 import json
 from six import string_types
 import frappe
@@ -17,24 +18,28 @@ import pandas as pd
 
 def execute(filters=None):
 	"""Entry point for frappe."""
-	validate_filters(filters)
+	validate(filters)
 	result = get_gl_entries(filters, as_dict=0)
 	columns = get_columns()
 
 	return columns, result
 
 
-def validate_filters(filters):
-	"""Make sure all mandatory filters are present."""
+def validate(filters):
+	"""Make sure all mandatory filters and settings are present."""
 	if not filters.get('company'):
-		frappe.throw(_('{0} is mandatory').format(_('Company')))
+		frappe.throw(_('<b>Company</b> is a mandatory filter.'))
 
 	if not filters.get('from_date'):
-		frappe.throw(_('{0} is mandatory').format(_('From Date')))
+		frappe.throw(_('<b>From Date</b> is a mandatory filter.'))
 
 	if not filters.get('to_date'):
-		frappe.throw(_('{0} is mandatory').format(_('To Date')))
+		frappe.throw(_('<b>To Date</b> is a mandatory filter.'))
 
+	try:
+		frappe.get_doc('DATEV Settings', filters.get('company'))
+	except frappe.DoesNotExistError:
+		frappe.throw(_('Please create <b>DATEV Settings</b> for Company <b>{}</b>.').format(filters.get('company')))
 
 def get_columns():
 	"""Return the list of columns that will be shown in query report."""
@@ -158,13 +163,84 @@ def get_gl_entries(filters, as_dict):
 	return gl_entries
 
 
-def get_datev_csv(data):
+def get_datev_csv(data, filters):
 	"""
 	Fill in missing columns and return a CSV in DATEV Format.
 
+	For automatic processing, DATEV requires the first line of the CSV file to
+	hold meta data such as the length of account numbers oder the category of
+	the data.
+
 	Arguments:
 	data -- array of dictionaries
+	filters -- dict
 	"""
+	header = [
+		# A = DATEV format
+		#   DTVF = created by DATEV software,
+		#   EXTF = created by other software
+		"EXTF",
+		# B = version of the DATEV format
+		#   141 = 1.41, 
+		#   510 = 5.10,
+		#   720 = 7.20
+		"510",
+		# C = Data category
+		#   21 = Transaction batch (Buchungsstapel),
+		#   67 = Buchungstextkonstanten,
+		#   16 = Debitors/Creditors,
+		#   20 = Account names (Kontenbeschriftungen)
+		"21",
+		# D = Format name
+		#   Buchungsstapel,
+		#   Buchungstextkonstanten,
+		#   Debitoren/Kreditoren,
+		#   Kontenbeschriftungen
+		"Buchungsstapel",
+		# E = Format version (regarding format name)
+		"",
+		# F = Generated on
+		datetime.datetime.now().strftime("%Y%m%d"),
+		# G = Imported on -- stays empty
+		"",
+		# H = Origin (SV = other (?), RE = KARE)
+		"SV",
+		# I = Exported by
+		frappe.session.user,
+		# J = Imported by -- stays empty
+		"",
+		# K = Tax consultant number (Beraternummer)
+		frappe.get_value("DATEV Settings", filters.get("company"), "consultant_number") or "",
+		"",
+		# L = Tax client number (Mandantennummer)
+		frappe.get_value("DATEV Settings", filters.get("company"), "client_number") or "",
+		"",
+		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
+		frappe.utils.formatdate(frappe.defaults.get_user_default("year_start_date"), "yyyyMMdd"),
+		# N = Length of account numbers (Sachkontenlänge)
+		"4",
+		# O = Transaction batch start date (YYYYMMDD)
+		frappe.utils.formatdate(filters.get('from_date'), "yyyyMMdd"),
+		# P = Transaction batch end date (YYYYMMDD)
+		frappe.utils.formatdate(filters.get('to_date'), "yyyyMMdd"),
+		# Q = Description (for example, "January - February 2019 Transactions")
+		"{} - {} Buchungsstapel".format(
+			frappe.utils.formatdate(filters.get('from_date'), "MMMM yyyy"),
+			frappe.utils.formatdate(filters.get('to_date'), "MMMM yyyy")
+		),
+		# R = Diktatkürzel
+		"",
+		# S = Buchungstyp
+		#   1 = Transaction batch (Buchungsstapel),
+		#   2 = Annual financial statement (Jahresabschluss)
+		"1",
+		# T = Rechnungslegungszweck
+		"",
+		# U = Festschreibung
+		"",
+		# V = Kontoführungs-Währungskennzeichen des Geldkontos
+		frappe.get_value("Company", filters.get("company"), "default_currency")
+	]
 	columns = [
 		# All possible columns must tbe listed here, because DATEV requires them to
 		# be present in the CSV.
@@ -324,9 +400,10 @@ def get_datev_csv(data):
 	data_df = pd.DataFrame.from_records(data)
 
 	result = empty_df.append(data_df)
-	result["Belegdatum"] = pd.to_datetime(result["Belegdatum"])
+	result['Belegdatum'] = pd.to_datetime(result['Belegdatum'])
 
-	return result.to_csv(
+	header = ';'.join(header).encode('latin_1')
+	data = result.to_csv(
 		sep=b';',
 		# European decimal seperator
 		decimal=',',
@@ -342,6 +419,7 @@ def get_datev_csv(data):
 		columns=columns
 	)
 
+	return header + b'\r\n' + data
 
 @frappe.whitelist()
 def download_datev_csv(filters=None):
@@ -359,15 +437,9 @@ def download_datev_csv(filters=None):
 	if isinstance(filters, string_types):
 		filters = json.loads(filters)
 
-	validate_filters(filters)
+	validate(filters)
 	data = get_gl_entries(filters, as_dict=1)
 
-	filename = 'DATEV_Buchungsstapel_{}-{}_bis_{}'.format(
-		filters.get('company'),
-		filters.get('from_date'),
-		filters.get('to_date')
-	)
-
-	frappe.response['result'] = get_datev_csv(data)
-	frappe.response['doctype'] = filename
+	frappe.response['result'] = get_datev_csv(data, filters)
+	frappe.response['doctype'] = 'EXTF_Buchungsstapel'
 	frappe.response['type'] = 'csv'
