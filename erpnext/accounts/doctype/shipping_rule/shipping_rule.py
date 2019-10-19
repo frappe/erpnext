@@ -70,7 +70,9 @@ class ShippingRule(Document):
 
 	def get_shipping_amount_from_rules(self, value):
 		for condition in self.get("conditions"):
-			if not condition.to_value or (flt(condition.from_value) <= value <= flt(condition.to_value)):
+			if value is None:
+				return 0.0
+			elif not condition.to_value or (flt(condition.from_value) <= value <= flt(condition.to_value)):
 				return condition.shipping_amount
 
 		return 0.0

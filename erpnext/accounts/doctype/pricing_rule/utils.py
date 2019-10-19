@@ -488,7 +488,9 @@ def apply_pricing_rule(doc, pr_doc, item_row, value, do_not_validate=False):
 				if not pr_doc.get(field): continue
 
 				key = (item.name, item.pricing_rules)
-				if not pr_doc.validate_applied_rule:
+				if item.ignore_pricing_rules==1:
+					pass
+				elif not pr_doc.validate_applied_rule:
 					rule_applied[key] = 1
 					item.set(field, value)
 				elif item.get(field) < value:
