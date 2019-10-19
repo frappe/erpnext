@@ -100,10 +100,6 @@ frappe.ui.form.on("Opportunity", {
 				});
 			}
 		}
-
-		if (frm.doc.opportunity_from && frm.doc.party_name && !frm.doc.contact_person) {
-			frm.trigger("party_name");
-		}
 	},
 
 	set_contact_link: function(frm) {
@@ -171,7 +167,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		if (me.frm.doc.opportunity_from == "Lead") {
 			me.frm.set_query('party_name', erpnext.queries['lead']);
 		}
-		else if (me.frm.doc.opportunity_from == "Cuatomer") {
+		else if (me.frm.doc.opportunity_from == "Customer") {
 			me.frm.set_query('party_name', erpnext.queries['customer']);
 		}
 	},
