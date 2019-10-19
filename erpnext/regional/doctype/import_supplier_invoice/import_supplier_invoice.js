@@ -12,9 +12,7 @@ frappe.ui.form.on('Import Supplier Invoice', {
 
 		frm.set_query("tax_account", function() {
 			return {
-				filters: {
-					account_type: 'Tax'
-						}
+				filters: { account_type: 'Tax' }
 			};
 		});
 	}
