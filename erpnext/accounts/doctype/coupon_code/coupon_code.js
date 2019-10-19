@@ -8,9 +8,9 @@ frappe.ui.form.on('Coupon Code', {
 				filters: [
 					["Pricing Rule","coupon_code_based", "=", "1"]
 				]
-			}
+			};
 		});
-	},	
+	},
 	coupon_name:function(frm){
 		if (frm.doc.__islocal===1) {
 			frm.trigger("make_coupon_code");
