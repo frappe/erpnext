@@ -940,6 +940,10 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	bank = get_default_bank_cash_account(doc.company, "Bank", mode_of_payment=doc.get("mode_of_payment"),
 		account=bank_account)
 
+	if not bank:
+		bank = get_default_bank_cash_account(doc.company, "Cash", mode_of_payment=doc.get("mode_of_payment"),
+			account=bank_account)
+
 	paid_amount = received_amount = 0
 	if party_account_currency == bank.account_currency:
 		paid_amount = received_amount = abs(outstanding_amount)
@@ -1041,7 +1045,7 @@ def make_payment_order(source_name, target_doc=None):
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.bank_account = source_parent.party_bank_account
-		target_doc.amount = source_parent.base_paid_amount
+		target_doc.amount = source_doc.allocated_amount
 		target_doc.account = source_parent.paid_to
 		target_doc.payment_entry = source_parent.name
 		target_doc.supplier = source_parent.party
