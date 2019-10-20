@@ -234,7 +234,7 @@ var show_patient_vital_charts = function(patient, me, btn_show_id, pts, title) {
 				<a class='btn btn-default btn-xs btn-show-chart' data-show-chart-id='temperature' \
 				data-pts='°C or °F' data-title='Temperature'>Temperature</a>\
 				<a class='btn btn-default btn-xs btn-show-chart' data-show-chart-id='bmi' \
-				data-pts='bmi/m/Kg' data-title='BMI'>BMI</a></div>";
+				data-pts='' data-title='BMI'>BMI</a></div>";
 				me.page.main.find(".show_chart_btns").html(show_chart_btns_html);
 				var data = r.message;
 				let labels = [], datasets = [];
