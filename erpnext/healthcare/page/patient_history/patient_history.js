@@ -275,7 +275,7 @@ var show_patient_vital_charts = function(patient, me, btn_show_id, pts, title) {
 					datasets.push({name: "Heart Rate / Pulse", values: pulse, chartType:'line'});
 					datasets.push({name: "Respiratory Rate", values: respiratory_rate, chartType:'line'});
 				}
-				new Chart( ".patient_vital_charts", {
+				new frappe.Chart( ".patient_vital_charts", {
 					data: {
 						labels: labels,
 						datasets: datasets
