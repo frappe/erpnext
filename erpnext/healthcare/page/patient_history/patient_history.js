@@ -283,7 +283,7 @@ var show_patient_vital_charts = function(patient, me, btn_show_id, pts, title) {
 
 					title: title,
 					type: 'axis-mixed', // 'axis-mixed', 'bar', 'line', 'pie', 'percentage'
-					height: 150,
+					height: 200,
 					colors: ['purple', '#ffa3ef', 'light-blue'],
 
 					tooltipOptions: {
