@@ -351,10 +351,10 @@ class Asset(AccountsController):
 	def make_gl_entries(self):
 		gl_entries = []
 
-		if ((self.purchase_receipt or (self.purchase_invoice and
-			frappe.db.get_value('Purchase Invoice', self.purchase_invoice, 'update_stock')))
+		if ((self.purchase_receipt \
+			or (self.purchase_invoice and frappe.db.get_value('Purchase Invoice', self.purchase_invoice, 'update_stock')))
 			and self.purchase_receipt_amount and self.available_for_use_date <= nowdate()):
-			fixed_aseet_account = get_asset_category_account(self.name, 'fixed_asset_account',
+			fixed_asset_account = get_asset_category_account(self.name, 'fixed_asset_account',
 					asset_category = self.asset_category, company = self.company)
 
 			cwip_account = get_asset_account("capital_work_in_progress_account",
@@ -362,7 +362,7 @@ class Asset(AccountsController):
 
 			gl_entries.append(self.get_gl_dict({
 				"account": cwip_account,
-				"against": fixed_aseet_account,
+				"against": fixed_asset_account,
 				"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 				"posting_date": self.available_for_use_date,
 				"credit": self.purchase_receipt_amount,
@@ -371,7 +371,7 @@ class Asset(AccountsController):
 			}))
 
 			gl_entries.append(self.get_gl_dict({
-				"account": fixed_aseet_account,
+				"account": fixed_asset_account,
 				"against": cwip_account,
 				"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 				"posting_date": self.available_for_use_date,
@@ -567,6 +567,45 @@ def make_journal_entry(asset_name):
 	})
 
 	return je
+
+@frappe.whitelist()
+def make_asset_movement(assets):
+	import json
+	from six import string_types
+	
+	if isinstance(assets, string_types):
+		assets = json.loads(assets)
+	
+	if len(assets) == 0:
+		frappe.throw(_('Atleast one asset has to be selected.'))
+
+	asset_movement = frappe.new_doc("Asset Movement")
+	asset_movement.purpose = "Receipt"
+	asset_movement.quantity = len(assets)
+	
+	prev_reference_docname = ''
+
+	for asset in assets:
+		asset = frappe.get_doc('Asset', asset.get('name'))
+		# get PR/PI linked with asset
+		reference_docname = asset.get('purchase_receipt') if asset.get('purchase_receipt') \
+				else asset.get('purchase_invoice')
+		# checks if all the assets are linked with a single PR/PI
+		if prev_reference_docname == '':
+			prev_reference_docname = reference_docname
+		elif prev_reference_docname != reference_docname:
+			frappe.throw(_('Assets selected should belong to same reference document.'))
+
+		asset_movement.company = asset.get('company')
+		asset_movement.reference_doctype = 'Purchase Receipt' if asset.get('purchase_receipt') else 'Purchase Invoice'
+		asset_movement.reference_name = prev_reference_docname
+		asset_movement.append("assets", {
+			'asset': asset.get('name'),
+			'source_location': asset.get('location')
+		})
+
+	if asset_movement.get('assets'):
+		return asset_movement.as_dict()
 
 def is_cwip_accounting_disabled():
 	return cint(frappe.db.get_single_value("Asset Settings", "disable_cwip_accounting"))
