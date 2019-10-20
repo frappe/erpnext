@@ -107,6 +107,9 @@ class LandedCostVoucher(Document):
 	def update_landed_cost(self):
 		for d in self.get("purchase_receipts"):
 			doc = frappe.get_doc(d.receipt_document_type, d.receipt_document)
+			
+			# check if there are {qty} assets created and linked to this receipt document
+			self.validate_asset_qty(d.receipt_document_type, doc)
 
 			# set landed cost voucher amount in pr item
 			doc.set_landed_cost_voucher_amount()
@@ -118,24 +121,24 @@ class LandedCostVoucher(Document):
 			for item in doc.get("items"):
 				item.db_update()
 
-			# update latest valuation rate in serial no
-			self.update_rate_in_serial_no(doc)
+			# asset gross amount will be updated while creating asset gl entries from PI or PY
 
 			# update stock & gl entries for cancelled state of PR
 			doc.docstatus = 2
 			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
 			doc.make_gl_entries_on_cancel(repost_future_gle=False)
 
-
 			# update stock & gl entries for submit state of PR
 			doc.docstatus = 1
 			doc.update_stock_ledger(via_landed_cost_voucher=True)
 			doc.make_gl_entries()
 
-	def update_rate_in_serial_no(self, receipt_document):
+	def validate_asset_qty(self, receipt_document_type, receipt_document):
+		receipt_document_type = 'purchase_invoice' if receipt_document_type == 'Purchase Invoice' \
+			else 'purchase_receipt'
+
 		for item in receipt_document.get("items"):
-			if item.serial_no:
-				serial_nos = get_serial_nos(item.serial_no)
-				if serial_nos:
-					frappe.db.sql("update `tabSerial No` set purchase_rate=%s where name in ({0})"
-						.format(", ".join(["%s"]*len(serial_nos))), tuple([item.valuation_rate] + serial_nos))
+			docs = frappe.db.get_all('Asset', filters={ receipt_document_type: receipt_document.get('name') })
+			if not docs and len(docs) != item.qty:
+				frappe.throw(_('There are not enough asset created or linked to {0}. \
+					Please create or link {1} Assets with respective document.').format(receipt_document.get('name'), item.qty))
