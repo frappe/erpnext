@@ -71,8 +71,8 @@
   "expense_account",
   "col_break5",
   "is_fixed_asset",
-  "asset",
   "asset_location",
+  "asset_category",
   "deferred_expense_section",
   "deferred_expense_account",
   "service_stop_date",
@@ -414,6 +414,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch No",
@@ -425,12 +426,14 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "serial_no",
    "fieldtype": "Text",
    "label": "Serial No",
    "no_copy": 1
   },
   {
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "rejected_serial_no",
    "fieldtype": "Text",
    "label": "Rejected Serial No",
@@ -625,14 +628,6 @@
   },
   {
    "depends_on": "is_fixed_asset",
-   "fieldname": "asset",
-   "fieldtype": "Link",
-   "label": "Asset",
-   "no_copy": 1,
-   "options": "Asset"
-  },
-  {
-   "depends_on": "is_fixed_asset",
    "fieldname": "asset_location",
    "fieldtype": "Link",
    "label": "Asset Location",
@@ -676,7 +671,7 @@
    "fieldname": "pr_detail",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "PR Detail",
+   "label": "Purchase Receipt Detail",
    "no_copy": 1,
    "oldfieldname": "pr_detail",
    "oldfieldtype": "Data",
@@ -754,11 +749,21 @@
    "fieldtype": "Data",
    "label": "Manufacturer Part Number",
    "read_only": 1
+  },
+  {
+   "depends_on": "is_fixed_asset",
+   "fetch_from": "item_code.asset_category",
+   "fieldname": "asset_category",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Asset Category",
+   "options": "Asset Category",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-09-17 22:32:05.984240",
+ "modified": "2019-10-14 16:02:41.880017",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
