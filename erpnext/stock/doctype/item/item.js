@@ -169,6 +169,7 @@ frappe.ui.form.on("Item", {
 
 	auto_create_assets: function(frm) {
 		frm.set_df_property('asset_naming_series', 'reqd', frm.doc.auto_create_assets);
+		frm.set_df_property('asset_category', 'reqd', frm.doc.auto_create_assets);
 	},
 
 	page_name: frappe.utils.warn_page_name_change,
