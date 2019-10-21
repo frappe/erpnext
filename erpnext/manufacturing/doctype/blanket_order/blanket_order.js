@@ -65,7 +65,6 @@ frappe.ui.form.on('Blanket Order', {
 			frm.set_df_property("customer","reqd", 0);
 			frm.set_value("customer", "");
 
-
 			frm.set_query("tc_name", function() {
 				return { filters: { buying: 1 } };
 			});
