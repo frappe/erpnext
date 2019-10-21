@@ -61,7 +61,7 @@ frappe.ui.form.on('Blanket Order', {
 			});
 		}
 		if (frm.doc.blanket_order_type === 'Purchasing') {
-			frm.set_df_property("supplier","reqd", 1);			
+			frm.set_df_property("supplier","reqd", 1);
 			frm.set_df_property("customer","reqd", 0);
 			frm.set_value("customer", "");
 
