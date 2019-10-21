@@ -16,8 +16,11 @@ class AssetCategory(Document):
 					frappe.throw(_("Row {0}: {1} must be greater than 0").format(d.idx, field), frappe.MandatoryError)
 
 @frappe.whitelist()
-def get_asset_category_account(asset, fieldname, account=None, asset_category = None, company = None):
-	if not asset_category and company:
+def get_asset_category_account(fieldname, item=None, asset=None, account=None, asset_category = None, company = None):
+	if item and frappe.db.get_value("Item", item, "is_fixed_asset"):
+		asset_category = frappe.db.get_value("Item", item, ["asset_category"])
+
+	elif not asset_category and company:
 		if account:
 			if frappe.db.get_value("Account", account, "account_type") != "Fixed Asset":
 				account=None
