@@ -299,7 +299,7 @@ class StockController(AccountsController):
 
 		return serialized_items
 
-	def get_incoming_rate_for_sales_return(self, item_code, against_document):
+	def get_incoming_rate_for_sales_return(self, item_code, warehouse, against_document):
 		incoming_rate = 0.0
 		if against_document and item_code:
 			incoming_rate = frappe.db.sql("""select abs(stock_value_difference / actual_qty)
@@ -308,6 +308,9 @@ class StockController(AccountsController):
 					and item_code = %s limit 1""",
 				(self.doctype, against_document, item_code))
 			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
+		else:
+			incoming_rate = get_valuation_rate(item_code, warehouse,
+				self.doctype, against_document, company=self.company, currency=self.currency)
 
 		return incoming_rate
 
