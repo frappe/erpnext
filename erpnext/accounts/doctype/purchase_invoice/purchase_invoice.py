@@ -225,7 +225,8 @@ class PurchaseInvoice(BuyingController):
 			# in case of auto inventory accounting,
 			# expense account is always "Stock Received But Not Billed" for a stock item
 			# except epening entry, drop-ship entry and fixed asset items
-			asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
+			if item.item_code:
+				asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
 
 			if auto_accounting_for_stock and item.item_code in stock_items \
 				and self.is_opening == 'No' and not item.is_fixed_asset \
@@ -410,7 +411,8 @@ class PurchaseInvoice(BuyingController):
 	def check_asset_cwip_enabled(self):
 		# Check if there exists any item with cwip accounting enabled in it's asset category
 		for item in self.get("items"):
-			asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
+			if item.item_code:
+				asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
 			if item.is_fixed_asset and is_cwip_accounting_enabled(self.company, asset_category):
 				return 1
 		return 0
@@ -456,7 +458,8 @@ class PurchaseInvoice(BuyingController):
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
 				account_currency = get_account_currency(item.expense_account)
-				asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
+				if item.item_code:
+					asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
 
 				if self.update_stock and self.auto_accounting_for_stock and item.item_code in stock_items:
 					# warehouse account
@@ -541,7 +544,8 @@ class PurchaseInvoice(BuyingController):
 
 	def get_asset_gl_entry(self, gl_entries):
 		for item in self.get("items"):
-			asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
+			if item.item_code:
+				asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
 
 			if item.is_fixed_asset and is_cwip_accounting_enabled(self.company, asset_category) :
 				eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
