@@ -773,7 +773,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual(doc.per_transferred, 100)
 
 	def test_gle_for_opening_stock_entry(self):
-		mr = make_stock_entry(item_code="_Test Item", target="Stores - TCP1", company="_Test Company with perpetual inventory 1",qty=50, basic_rate=100, expense_account="Stock Adjustment - TCP1", is_opening="Yes", do_not_save=True)
+		mr = make_stock_entry(item_code="_Test Item", target="Stores - TCP1", company="_Test Company with perpetual inventory",qty=50, basic_rate=100, expense_account="Stock Adjustment - TCP1", is_opening="Yes", do_not_save=True)
 
 		self.assertRaises(OpeningEntryAccountError, mr.save)
 

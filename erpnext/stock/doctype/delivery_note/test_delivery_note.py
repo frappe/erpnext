@@ -67,10 +67,10 @@ class TestDeliveryNote(unittest.TestCase):
 
 		make_stock_entry(target="Stores - TCP1", qty=5, basic_rate=100)
 
-		stock_in_hand_account = get_inventory_account('_Test Company with perpetual inventory 1')
+		stock_in_hand_account = get_inventory_account('_Test Company with perpetual inventory')
 		prev_bal = get_balance_on(stock_in_hand_account)
 
-		dn = create_delivery_note(company='_Test Company with perpetual inventory 1', warehouse='Stores - TCP1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1")
+		dn = create_delivery_note(company='_Test Company with perpetual inventory', warehouse='Stores - TCP1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1")
 
 		gl_entries = get_gl_entries("Delivery Note", dn.name)
 		self.assertTrue(gl_entries)
@@ -116,10 +116,10 @@ class TestDeliveryNote(unittest.TestCase):
 		make_stock_entry(item_code="_Test Item Home Desktop 100",
 			target="Stores - TCP1", qty=10, basic_rate=100)
 
-		stock_in_hand_account = get_inventory_account('_Test Company with perpetual inventory 1')
+		stock_in_hand_account = get_inventory_account('_Test Company with perpetual inventory')
 		prev_bal = get_balance_on(stock_in_hand_account)
 
-		dn = create_delivery_note(item_code="_Test Product Bundle Item", company='_Test Company with perpetual inventory 1', warehouse='Stores - TCP1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1")
+		dn = create_delivery_note(item_code="_Test Product Bundle Item", company='_Test Company with perpetual inventory', warehouse='Stores - TCP1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1")
 
 		stock_value_diff_rm1 = abs(frappe.db.get_value("Stock Ledger Entry",
 			{"voucher_type": "Delivery Note", "voucher_no": dn.name, "item_code": "_Test Item"},
@@ -381,7 +381,7 @@ class TestDeliveryNote(unittest.TestCase):
 				expense_account = "Stock Adjustment - TCP1", warehouse=warehouse, qty=500, rate=100)
 
 		dn = create_delivery_note(item_code="_Test Product Bundle Item",
-			company='_Test Company with perpetual inventory 1', cost_center = 'Main - TCP1',
+			company='_Test Company with perpetual inventory', cost_center = 'Main - TCP1',
 			expense_account = "Cost of Goods Sold - TCP1", do_not_submit=True, qty=5, rate=500,
 			warehouse="Stores - TCP1", target_warehouse=target_warehouse)
 
@@ -426,7 +426,7 @@ class TestDeliveryNote(unittest.TestCase):
 	def test_closed_delivery_note(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import update_delivery_note_status
 
-		dn = create_delivery_note(company='_Test Company with perpetual inventory 1', warehouse='Stores - TCP1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1", do_not_submit=True)
+		dn = create_delivery_note(company='_Test Company with perpetual inventory', warehouse='Stores - TCP1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1", do_not_submit=True)
 
 		dn.submit()
 
@@ -553,7 +553,7 @@ class TestDeliveryNote(unittest.TestCase):
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
 		accounts_settings.save()
 		cost_center = "_Test Cost Center for BS Account - TCP1"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company with perpetual inventory 1")
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company with perpetual inventory")
 
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 
@@ -561,8 +561,8 @@ class TestDeliveryNote(unittest.TestCase):
 
 		make_stock_entry(target="Stores - TCP1", qty=5, basic_rate=100)
 
-		stock_in_hand_account = get_inventory_account('_Test Company with perpetual inventory 1')
-		dn = create_delivery_note(company='_Test Company with perpetual inventory 1', warehouse='Stores - TCP1',  expense_account = "Cost of Goods Sold - TCP1", cost_center=cost_center)
+		stock_in_hand_account = get_inventory_account('_Test Company with perpetual inventory')
+		dn = create_delivery_note(company='_Test Company with perpetual inventory', warehouse='Stores - TCP1',  expense_account = "Cost of Goods Sold - TCP1", cost_center=cost_center)
 
 		gl_entries = get_gl_entries("Delivery Note", dn.name)
 		self.assertTrue(gl_entries)
@@ -592,8 +592,8 @@ class TestDeliveryNote(unittest.TestCase):
 
 		make_stock_entry(target="Stores - TCP1", qty=5, basic_rate=100)
 
-		stock_in_hand_account = get_inventory_account('_Test Company with perpetual inventory 1')
-		dn = create_delivery_note(company='_Test Company with perpetual inventory 1', warehouse='Stores - TCP1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1")
+		stock_in_hand_account = get_inventory_account('_Test Company with perpetual inventory')
+		dn = create_delivery_note(company='_Test Company with perpetual inventory', warehouse='Stores - TCP1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1")
 
 		gl_entries = get_gl_entries("Delivery Note", dn.name)
 

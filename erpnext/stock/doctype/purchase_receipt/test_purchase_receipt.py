@@ -52,7 +52,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
 
 	def test_purchase_receipt_gl_entry(self):
-		pr = make_purchase_receipt(company="_Test Company with perpetual inventory 1", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", get_multiple_items = True, get_taxes_and_charges = True)
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", get_multiple_items = True, get_taxes_and_charges = True)
 		self.assertEqual(cint(erpnext.is_perpetual_inventory_enabled(pr.company)), 1)
 
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
@@ -127,9 +127,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 	def test_purchase_return(self):
 
-		pr = make_purchase_receipt(company="_Test Company with perpetual inventory 1", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1")
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1")
 
-		return_pr = make_purchase_receipt(company="_Test Company with perpetual inventory 1", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", is_return=1, return_against=pr.name, qty=-2)
+		return_pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", is_return=1, return_against=pr.name, qty=-2)
 
 		# check sle
 		outgoing_rate = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
@@ -157,11 +157,11 @@ class TestPurchaseReceipt(unittest.TestCase):
 	def test_purchase_return_for_rejected_qty(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
 
-		rejected_warehouse=get_warehouse(company = "_Test Company with perpetual inventory 1", abbr = " - TCP1", warehouse_name = "_Test Rejected Warehouse").name
+		rejected_warehouse=get_warehouse(company = "_Test Company with perpetual inventory", abbr = " - TCP1", warehouse_name = "_Test Rejected Warehouse").name
 		print(rejected_warehouse)
-		pr = make_purchase_receipt(company="_Test Company with perpetual inventory 1", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", received_qty=4, qty=2, rejected_warehouse=rejected_warehouse)
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", received_qty=4, qty=2, rejected_warehouse=rejected_warehouse)
 
-		return_pr = make_purchase_receipt(company="_Test Company with perpetual inventory 1", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", is_return=1, return_against=pr.name, received_qty = -4, qty=-2, rejected_warehouse=rejected_warehouse)
+		return_pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", is_return=1, return_against=pr.name, received_qty = -4, qty=-2, rejected_warehouse=rejected_warehouse)
 
 		actual_qty = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
 			"voucher_no": return_pr.name, 'warehouse': return_pr.items[0].rejected_warehouse}, "actual_qty")
@@ -338,7 +338,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
 		accounts_settings.save()
 		cost_center = "_Test Cost Center for BS Account - TCP1"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company with perpetual inventory 1")
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company with perpetual inventory")
 
 		if not frappe.db.exists('Location', 'Test Location'):
 			frappe.get_doc({
@@ -346,7 +346,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 				'location_name': 'Test Location'
 			}).insert()
 
-		pr = make_purchase_receipt(cost_center=cost_center, company="_Test Company with perpetual inventory 1", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1")
+		pr = make_purchase_receipt(cost_center=cost_center, company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1")
 
 		stock_in_hand_account = get_inventory_account(pr.company, pr.get("items")[0].warehouse)
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
@@ -377,7 +377,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 				'doctype': 'Location',
 				'location_name': 'Test Location'
 			}).insert()
-		pr = make_purchase_receipt(company="_Test Company with perpetual inventory 1", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1")
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1")
 
 		stock_in_hand_account = get_inventory_account(pr.company, pr.get("items")[0].warehouse)
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)

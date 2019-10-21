@@ -683,9 +683,9 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_pos_gl_entry_with_perpetual_inventory(self):
 		make_pos_profile()
 
-		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory 1",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
+		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
 
-		pos = create_sales_invoice(company= "_Test Company with perpetual inventory 1", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
+		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
 
 		pos.is_pos = 1
 		pos.update_stock = 1
@@ -708,9 +708,9 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_pos_change_amount(self):
 		make_pos_profile()
 
-		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory 1",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
+		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
 
-		pos = create_sales_invoice(company= "_Test Company with perpetual inventory 1", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
+		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
 
 		pos.is_pos = 1
 		pos.update_stock = 1
@@ -729,8 +729,8 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.sales_invoice.pos import make_invoice
 
 		make_pos_profile()
-		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory 1",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
-		pos = create_sales_invoice(company= "_Test Company with perpetual inventory 1", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
+		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
+		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
 
 		pos.is_pos = 1
 		pos.update_stock = 1
@@ -809,7 +809,7 @@ class TestSalesInvoice(unittest.TestCase):
 			order by account asc, debit asc, credit asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 
-		stock_in_hand = get_inventory_account('_Test Company with perpetual inventory 1')
+		stock_in_hand = get_inventory_account('_Test Company with perpetual inventory')
 		expected_gl_entries = sorted([
 			[si.debit_to, 100.0, 0.0],
 			[pos.items[0].income_account, 0.0, 89.09],
@@ -1038,7 +1038,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		actual_qty_0 = get_qty_after_transaction(item_code = "_Test Item", warehouse = "Stores - TCP1")
 
-		si = create_sales_invoice(qty = 5, rate=500, update_stock=1, company= "_Test Company with perpetual inventory 1", debit_to="Debtors - TCP1", item_code= "_Test Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1")
+		si = create_sales_invoice(qty = 5, rate=500, update_stock=1, company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1")
 
 
 		actual_qty_1 = get_qty_after_transaction(item_code = "_Test Item", warehouse = "Stores - TCP1")
@@ -1052,7 +1052,7 @@ class TestSalesInvoice(unittest.TestCase):
 			"voucher_no": si.name}, "stock_value_difference") / 5
 
 		# return entry
-		si1 = create_sales_invoice(is_return=1, return_against=si.name, qty=-2, rate=500, update_stock=1, company= "_Test Company with perpetual inventory 1", debit_to="Debtors - TCP1", item_code= "_Test Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1")
+		si1 = create_sales_invoice(is_return=1, return_against=si.name, qty=-2, rate=500, update_stock=1, company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1")
 
 		actual_qty_2 = get_qty_after_transaction(item_code = "_Test Item", warehouse = "Stores - TCP1")
 		self.assertEqual(actual_qty_1 + 2, actual_qty_2)
@@ -1062,7 +1062,7 @@ class TestSalesInvoice(unittest.TestCase):
 			["incoming_rate", "stock_value_difference"])
 
 		self.assertEqual(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
-		stock_in_hand_account = get_inventory_account('_Test Company with perpetual inventory 1', si1.items[0].warehouse)
+		stock_in_hand_account = get_inventory_account('_Test Company with perpetual inventory', si1.items[0].warehouse)
 
 		# Check gl entry
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Sales Invoice",

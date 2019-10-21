@@ -57,7 +57,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
 
 	def test_gl_entries_with_perpetual_inventory(self):
-		pi = make_purchase_invoice(company="_Test Company with perpetual inventory 1", supplier_warehouse="Work In Progress - TCP1", warehouse= "Stores - TCP1", cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1", get_taxes_and_charges=True, qty=10)
+		pi = make_purchase_invoice(company="_Test Company with perpetual inventory", supplier_warehouse="Work In Progress - TCP1", warehouse= "Stores - TCP1", cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1", get_taxes_and_charges=True, qty=10)
 		self.assertTrue(cint(erpnext.is_perpetual_inventory_enabled(pi.company)), 1)
 
 		self.check_gle_for_pi(pi.name)
@@ -192,11 +192,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 	def test_gl_entries_with_perpetual_inventory_against_pr(self):
 
-		pr = make_purchase_receipt(company="_Test Company with perpetual inventory 1", supplier_warehouse="Work In Progress - TCP1", warehouse= "Stores - TCP1", cost_center = "Main - TCP1", get_taxes_and_charges=True,)
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", supplier_warehouse="Work In Progress - TCP1", warehouse= "Stores - TCP1", cost_center = "Main - TCP1", get_taxes_and_charges=True,)
 
 		self.assertTrue(cint(erpnext.is_perpetual_inventory_enabled(pr.company)), 1)
 
-		pi = make_purchase_invoice(company="_Test Company with perpetual inventory 1", supplier_warehouse="Work In Progress - TCP1", warehouse= "Stores - TCP1", cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1", get_taxes_and_charges=True, qty=10,do_not_save= "True")
+		pi = make_purchase_invoice(company="_Test Company with perpetual inventory", supplier_warehouse="Work In Progress - TCP1", warehouse= "Stores - TCP1", cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1", get_taxes_and_charges=True, qty=10,do_not_save= "True")
 
 		for d in pi.items:
 			d.purchase_receipt = pr.name
@@ -521,7 +521,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def test_purchase_invoice_update_stock_gl_entry_with_perpetual_inventory(self):
 
 		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(),
-			posting_time=frappe.utils.nowtime(), cash_bank_account="Cash - TCP1", company="_Test Company with perpetual inventory 1", supplier_warehouse="Work In Progress - TCP1", warehouse= "Stores - TCP1", cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1")
+			posting_time=frappe.utils.nowtime(), cash_bank_account="Cash - TCP1", company="_Test Company with perpetual inventory", supplier_warehouse="Work In Progress - TCP1", warehouse= "Stores - TCP1", cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1")
 
 		gl_entries = frappe.db.sql("""select account, account_currency, debit, credit,
 			debit_in_account_currency, credit_in_account_currency
@@ -544,7 +544,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def test_purchase_invoice_for_is_paid_and_update_stock_gl_entry_with_perpetual_inventory(self):
 
 		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(),
-			posting_time=frappe.utils.nowtime(), cash_bank_account="Cash - TCP1", is_paid=1, company="_Test Company with perpetual inventory 1", supplier_warehouse="Work In Progress - TCP1", warehouse= "Stores - TCP1", cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1")
+			posting_time=frappe.utils.nowtime(), cash_bank_account="Cash - TCP1", is_paid=1, company="_Test Company with perpetual inventory", supplier_warehouse="Work In Progress - TCP1", warehouse= "Stores - TCP1", cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1")
 
 		gl_entries = frappe.db.sql("""select account, account_currency, sum(debit) as debit,
 				sum(credit) as credit, debit_in_account_currency, credit_in_account_currency
