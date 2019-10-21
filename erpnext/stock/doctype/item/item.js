@@ -51,17 +51,8 @@ frappe.ui.form.on("Item", {
 		}
 		
 		if (frm.doc.is_fixed_asset) {
-			frm.call({
-				method: "set_asset_naming_series",
-				doc: frm.doc,
-				callback: function() {
-					frm.set_value("is_stock_item", frm.doc.is_fixed_asset ? 0 : 1);
-					frm.trigger("set_asset_naming_series");
-				}
-			});
-			
-			frm.toggle_enable(['has_serial_no', 'serial_no_series'], 0);
-			frm.toggle_display(['has_serial_no', 'serial_no_series'], 0);
+			frm.trigger('is_fixed_asset');
+			frm.trigger('auto_create_assets');
 		}
 
 		// clear intro
