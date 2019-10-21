@@ -18,6 +18,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 class Asset(AccountsController):
 	def validate(self):
 		self.validate_asset_values()
+		self.validate_asset_and_reference()
 		self.validate_item()
 		self.set_missing_values()
 		if self.calculate_depreciation:
@@ -44,6 +45,20 @@ class Asset(AccountsController):
 		self.set_status()
 		delete_gl_entries(voucher_type='Asset', voucher_no=self.name)
 		self.db_set('booked_fixed_asset', 0)
+	
+	def validate_asset_and_reference(self):
+		if self.purchase_invoice or self.purchase_receipt:
+			reference_doc = 'Purchase Invoice' if self.purchase_invoice else 'Purchase Receipt'
+			reference_name = self.purchase_invoice or self.purchase_receipt
+			reference_doc = frappe.get_doc(reference_doc, reference_name)
+		if reference_doc.get('company') != self.company:
+			frappe.throw(_("Company of asset {1} and purchase doc {2} doesn't matches.").format(self.asset_name, reference_doc.get('name')))
+
+		if getdate(self.purchase_date) != getdate(reference_doc.get('posting_date')):
+			frappe.throw(_("Posting Date of asset {1} must be same as purchase date of reference doc {2}").format(self.asset_name, reference_doc.get('name')))
+		
+		if self.is_existing_asset and self.purchase_invoice:
+			frappe.throw(_("Purchase Invoice cannot be made against an existing asset {1}").format(self.asset_name))
 
 	def validate_item(self):
 		item = frappe.get_cached_value("Item", self.item_code,
@@ -601,7 +616,8 @@ def make_asset_movement(assets):
 		asset_movement.reference_name = prev_reference_docname
 		asset_movement.append("assets", {
 			'asset': asset.get('name'),
-			'source_location': asset.get('location')
+			'source_location': asset.get('location'),
+			'from_employee': asset.get('custodian')
 		})
 
 	if asset_movement.get('assets'):
