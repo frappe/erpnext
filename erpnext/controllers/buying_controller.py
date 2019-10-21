@@ -150,25 +150,26 @@ class BuyingController(StockController):
 
 			TODO: rename item_tax_amount to valuation_tax_amount
 		"""
-		stock_items = self.get_stock_items() + self.get_asset_items()
+		stock_and_asset_items = self.get_stock_items() + self.get_asset_items()
 
-		stock_items_qty, stock_items_amount = 0, 0
-		last_stock_item_idx = 1
+		stock_and_asset_items_qty, stock_and_asset_items_amount = 0, 0
+		last_item_idx = 1
 		for d in self.get(parentfield):
-			if d.item_code and d.item_code in stock_items:
-				stock_items_qty += flt(d.qty)
-				stock_items_amount += flt(d.base_net_amount)
-				last_stock_item_idx = d.idx
+			if d.item_code and d.item_code in stock_and_asset_items:
+				stock_and_asset_items_qty += flt(d.qty)
+				stock_and_asset_items_amount += flt(d.base_net_amount)
+				last_item_idx = d.idx
 
 		total_valuation_amount = sum([flt(d.base_tax_amount_after_discount_amount) for d in self.get("taxes")
 			if d.category in ["Valuation", "Valuation and Total"]])
 
 		valuation_amount_adjustment = total_valuation_amount
 		for i, item in enumerate(self.get(parentfield)):
-			if item.item_code and item.qty and item.item_code in stock_items:
-				item_proportion = flt(item.base_net_amount) / stock_items_amount if stock_items_amount \
-					else flt(item.qty) / stock_items_qty
-				if i == (last_stock_item_idx - 1):
+			if item.item_code and item.qty and item.item_code in stock_and_asset_items:
+				item_proportion = flt(item.base_net_amount) / stock_and_asset_items_amount if stock_and_asset_items_amount \
+					else flt(item.qty) / stock_and_asset_items_qty
+				
+				if i == (last_item_idx - 1):
 					item.item_tax_amount = flt(valuation_amount_adjustment,
 						self.precision("item_tax_amount", item))
 				else:
@@ -572,43 +573,34 @@ class BuyingController(StockController):
 
 		asset_items = self.get_asset_items()
 		if asset_items:
-			self.make_serial_nos_for_asset(asset_items)
+			self.auto_make_assets(asset_items)
 
-	def make_serial_nos_for_asset(self, asset_items):
+	def auto_make_assets(self, asset_items):
 		items_data = get_asset_item_details(asset_items)
 
+		assets = []
 		for d in self.items:
 			if d.is_fixed_asset:
 				item_data = items_data.get(d.item_code)
-				if not d.asset:
-					asset = self.make_asset(d)
-					d.db_set('asset', asset)
 
-				if item_data.get('has_serial_no'):
-					# If item has serial no
-					if item_data.get('serial_no_series') and not d.serial_no:
-						serial_nos = get_auto_serial_nos(item_data.get('serial_no_series'), d.qty)
-					elif d.serial_no:
-						serial_nos = d.serial_no
-					elif not d.serial_no:
-						frappe.throw(_("Serial no is mandatory for the item {0}").format(d.item_code))
-
-					auto_make_serial_nos({
-						'serial_no': serial_nos,
-						'item_code': d.item_code,
-						'via_stock_ledger': False,
-						'company': self.company,
-						'supplier': self.supplier,
-						'actual_qty': d.qty,
-						'purchase_document_type': self.doctype,
-						'purchase_document_no': self.name,
-						'asset': d.asset,
-						'location': d.asset_location
-					})
-					d.db_set('serial_no', serial_nos)
-
-				if d.asset:
-					self.make_asset_movement(d)
+				if item_data.get('auto_create_assets'):
+					# If asset has to be auto created
+					# Check for asset naming series
+					if item_data.get('asset_naming_series'):
+						for qty in range(cint(d.qty)):
+							asset_name = self.make_asset(d)
+							assets.append({
+								'asset': asset_name,
+								'asset_name': d.item_name,
+								'target_location': d.asset_location
+							})
+						frappe.msgprint(_('{0} Assets Created for {1}').format(cint(d.qty), d.item_code))
+						self.make_asset_movement(assets)
+					else:
+						frappe.throw(_("Asset Naming Series is mandatory for the auto creation for item {0}").format(d.item_code))
+				else:
+					frappe.msgprint(_("Assets not created. You will have to create asset manually."))
+					
 
 	def make_asset(self, row):
 		if not row.asset_location:
@@ -617,7 +609,7 @@ class BuyingController(StockController):
 		item_data = frappe.db.get_value('Item',
 			row.item_code, ['asset_naming_series', 'asset_category'], as_dict=1)
 
-		purchase_amount = flt(row.base_net_amount + row.item_tax_amount)
+		purchase_amount = flt(row.rate + row.item_tax_amount)
 		asset = frappe.get_doc({
 			'doctype': 'Asset',
 			'item_code': row.item_code,
@@ -640,50 +632,45 @@ class BuyingController(StockController):
 		asset.set_missing_values()
 		asset.insert()
 
-		asset_link = frappe.utils.get_link_to_form('Asset', asset.name)
-		frappe.msgprint(_("Asset {0} created").format(asset_link))
 		return asset.name
-
-	def make_asset_movement(self, row):
+	
+	def make_asset_movement(self, assets):
 		asset_movement = frappe.get_doc({
 			'doctype': 'Asset Movement',
-			'asset': row.asset,
-			'target_location': row.asset_location,
+			'assets': assets,
 			'purpose': 'Receipt',
-			'serial_no': row.serial_no,
-			'quantity': len(get_serial_nos(row.serial_no)),
+			'quantity': cint(len(assets)),
 			'company': self.company,
 			'transaction_date': self.posting_date,
 			'reference_doctype': self.doctype,
 			'reference_name': self.name
 		}).insert()
 
-		return asset_movement.name
-
 	def update_fixed_asset(self, field, delete_asset = False):
 		for d in self.get("items"):
-			if d.is_fixed_asset and d.asset:
-				asset = frappe.get_doc("Asset", d.asset)
+			if d.is_fixed_asset:
+				assets = frappe.db.get_all("Asset", filters={ field : self.name, 'item_code' : d.item_code })
 
-				if delete_asset and asset.docstatus == 0:
-					frappe.delete_doc("Asset", asset.name)
-					d.db_set('asset', None)
-					continue
+				for asset in assets:
+					asset = frappe.get_doc('Asset', asset.name)
+					if delete_asset and asset.docstatus == 0:
+						frappe.delete_doc("Asset", asset.name)
+						continue
 
-				if self.docstatus in [0, 1] and not asset.get(field):
-					asset.set(field, self.name)
-					asset.purchase_date = self.posting_date
-					asset.supplier = self.supplier
-				elif self.docstatus == 2:
-					asset.set(field, None)
-					asset.supplier = None
+					if self.docstatus in [0, 1] and not asset.get(field):
+						asset.set(field, self.name)
+						asset.purchase_date = self.posting_date
+						asset.supplier = self.supplier
+					elif self.docstatus == 2:
+						asset.set(field, None)
+						asset.supplier = None
 
-				asset.flags.ignore_validate_update_after_submit = True
-				asset.flags.ignore_mandatory = True
-				if asset.docstatus == 0:
-					asset.flags.ignore_validate = True
+					asset.flags.ignore_validate_update_after_submit = True
+					asset.flags.ignore_mandatory = True
+					if asset.docstatus == 0:
+						asset.flags.ignore_validate = True
 
-				asset.save()
+					asset.save()
 
 	def delete_linked_asset(self):
 		if self.doctype == 'Purchase Invoice' and not self.get('update_stock'):
@@ -762,7 +749,7 @@ def get_backflushed_subcontracted_raw_materials_from_se(purchase_orders, purchas
 
 def get_asset_item_details(asset_items):
 	asset_items_data = {}
-	for d in frappe.get_all('Item', fields = ["name", "has_serial_no", "serial_no_series"],
+	for d in frappe.get_all('Item', fields = ["name", "auto_create_assets", "asset_naming_series"],
 		filters = {'name': ('in', asset_items)}):
 		asset_items_data.setdefault(d.name, d)
 
