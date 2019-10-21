@@ -77,6 +77,8 @@ class ImportSupplierInvoice(Document):
 							pin_code = line.Sede.CAP.text
 							country = get_country(line.Sede.Nazione.text)
 
+						total_discount = 0
+
 						for line in file_content.find_all("DettaglioLinee"):
 							if line.find("PrezzoUnitario") and line.find("PrezzoTotale"):
 								unit_rate = float(line.PrezzoUnitario.text) or float(0)
@@ -120,6 +122,11 @@ class ImportSupplierInvoice(Document):
 												"conversion_factor": float(1),
 												"tax_rate": tax_rate
 											})
+
+								for disc_line in line.find_all("ScontoMaggiorazione"):
+									if disc_line.find("Percentuale"):
+										discount = float(disc_line.Percentuale.text) or float(0)
+										total_discount += float((discount / 100) * (rate * qty))
 
 						for line in file_content.find_all("DatiRiepilogo"):
 							if line.find("AliquotaIVA"):
@@ -165,6 +172,7 @@ class ImportSupplierInvoice(Document):
 														bill_date = bill_date,
 														is_return = return_invoice,
 														destination_code = destination_code,
+														total_discount = total_discount,
 														items = items,
 														taxes = taxes,
 														terms = terms,
@@ -310,6 +318,12 @@ def create_purchase_invoice(**args):
 
 	try:
 		pi.insert(ignore_permissions=True)
+
+		if args.total_discount > 0:
+			pi.apply_discount_on = "Grand Total"
+			pi.discount_amount = args.total_discount
+			pi.save()
+
 		calc_total = 0
 		adj = 0
 		for term in args.terms:
