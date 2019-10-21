@@ -56,7 +56,7 @@ def get_item_info(filters):
 
 def get_consumed_items(condition):
 	consumed_items = frappe.db.sql("""
-		select item_code, sum(actual_qty) as consumed_qty
+		select item_code, abs(sum(actual_qty)) as consumed_qty
 		from `tabStock Ledger Entry`
 		where actual_qty < 0
 			and voucher_type not in ('Delivery Note', 'Sales Invoice')
