@@ -535,13 +535,13 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		rm_items = [
 			{"item_code":item_code,"rm_item_code":"_Test Item","item_name":"_Test Item",
-				"qty":10,"warehouse":"_Test Warehouse - _TC","rate":100,"amount":100,"stock_uom":"Nos"},
+				"qty":10,"warehouse":"_Test Warehouse - _TC","rate":100, "stock_uom":"Nos"},
 			{"item_code":item_code,"rm_item_code":"_Test Item Home Desktop 100","item_name":"_Test Item Home Desktop 100",
-				"qty":20,"warehouse":"_Test Warehouse - _TC","rate":100,"amount":200,"stock_uom":"Nos"},
+				"qty":20,"warehouse":"_Test Warehouse - _TC","rate":100, "stock_uom":"Nos"},
 			{"item_code":item_code,"rm_item_code":"Test Extra Item 1","item_name":"Test Extra Item 1",
-				"qty":10,"warehouse":"_Test Warehouse - _TC","rate":100,"amount":200,"stock_uom":"Nos"},
-			{'item_code': item_code, 'rm_item_code': 'Test Extra Item 2', 'qty': 10, 'rate': 100,
-				 'warehouse': '_Test Warehouse - _TC', 'item_name':'Test Extra Item 2', 'stock_uom':'Nos'}]
+				"qty":10,"warehouse":"_Test Warehouse - _TC","rate":100, "stock_uom":"Nos"},
+			{'item_code': item_code, 'rm_item_code': 'Test Extra Item 2', 'stock_uom':'Nos',
+				'qty': 10, 'rate': 100, 'warehouse': '_Test Warehouse - _TC', 'item_name':'Test Extra Item 2'}]
 
 		rm_item_string = json.dumps(rm_items)
 		se = frappe.get_doc(make_subcontract_transfer_entry(po.name, rm_item_string))
@@ -557,6 +557,11 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		transferred_items = sorted([d.item_code for d in se.get('items') if se.purchase_order == po.name])
 		issued_items = sorted([d.rm_item_code for d in pr.get('supplied_items')])
+
+		# transferred_qty = sorted([d.qty for d in se.get('items') if se.purchase_order == po.name])
+		# issued_qty = sorted([d.required_qty for d in pr.get('supplied_items')])
+
+		# print(transferred_qty, issued_qty)
 
 		self.assertEquals(transferred_items, issued_items)
 		self.assertEquals(pr.get('items')[0].rm_supp_cost, 2000)
