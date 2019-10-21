@@ -23,9 +23,6 @@ frappe.ui.form.on('Quotation', {
 	refresh: function(frm) {
 		frm.trigger("set_label");
 		frm.trigger("set_dynamic_field_label");
-		if (frm.doc.quotation_to && frm.doc.party_name && !frm.doc.contact_person) {
-			frm.trigger("party_name");
-		}
 	},
 
 	quotation_to: function(frm) {
