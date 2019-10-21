@@ -880,6 +880,17 @@ class PurchaseInvoice(BuyingController):
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
 
+def get_list_context(context=None):
+	from erpnext.controllers.website_list_for_contact import get_list_context
+	list_context = get_list_context(context)
+	list_context.update({
+		'show_sidebar': True,
+		'show_search': True,
+		'no_breadcrumbs': True,
+		'title': _('Purchase Invoices'),
+	})
+	return list_context
+
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc

@@ -483,7 +483,7 @@ apps/erpnext/erpnext/stock/stock_ledger.py,{0} units of {1} needed in {2} to com
 DocType: Item Tax Template Detail,Tax Rate,Poreska stopa
 DocType: GL Entry,Remarks,Napomena
 DocType: Opening Invoice Creation Tool,Sales,Prodaja
-DocType: Pricing Rule,Pricing Rule,Pravilnik za cijene
+DocType: Coupon Code,Pricing Rule,Pravilnik za cijene
 DocType: Products Settings,Products Settings,Podešavanje proizvoda
 DocType: Healthcare Practitioner,Mobile,Mobilni
 DocType: Purchase Invoice Item,Price List Rate,Cijena
