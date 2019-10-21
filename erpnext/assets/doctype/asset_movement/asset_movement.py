@@ -108,4 +108,4 @@ class AssetMovement(Document):
 				frappe.db.set_value('Asset', d.asset, 'location', location)
 
 			if employee or self.docstatus==2 or self.purpose == 'Issue':
-				frappe.db.set_value('Asset', d.asset, 'employee', employee)
+				frappe.db.set_value('Asset', d.asset, 'custodian', employee)

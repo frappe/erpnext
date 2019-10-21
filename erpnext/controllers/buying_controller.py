@@ -645,6 +645,7 @@ class BuyingController(StockController):
 			'reference_doctype': self.doctype,
 			'reference_name': self.name
 		}).insert()
+		asset_movement.submit()
 
 	def update_fixed_asset(self, field, delete_asset = False):
 		for d in self.get("items"):
@@ -653,7 +654,7 @@ class BuyingController(StockController):
 
 				for asset in assets:
 					asset = frappe.get_doc('Asset', asset.name)
-					if delete_asset and asset.docstatus == 0:
+					if delete_asset:
 						frappe.delete_doc("Asset", asset.name)
 						continue
 
