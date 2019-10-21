@@ -2111,7 +2111,7 @@ DocType: Payment Entry,Received Amount,הסכום שהתקבל
 DocType: Warehouse,Warehouse Detail,פרט מחסן
 DocType: Blanket Order,Order Type,סוג להזמין
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py,Fiscal Year {0} is required,שנת כספים {0} נדרש
-DocType: Pricing Rule,Pricing Rule,כלל תמחור
+DocType: Coupon Code,Pricing Rule,כלל תמחור
 apps/erpnext/erpnext/controllers/selling_controller.py,To {0} | {1} {2},כדי {0} | {1} {2}
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,Set as Lost,קבע כאבוד
 DocType: Student Applicant,Approved,אושר
@@ -3271,6 +3271,7 @@ DocType: Cheque Print Template,Distance from top edge,מרחק הקצה העלי
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Payment against {0} {1} cannot be greater than Outstanding Amount {2},תשלום כנגד {0} {1} לא יכול להיות גדול מהסכום מצטיין {2}
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.html,Ref,"נ""צ"
 apps/erpnext/erpnext/accounts/utils.py,Please set default {0} in Company {1},אנא קבע את ברירת המחדל {0} ב החברה {1}
+apps/erpnext/erpnext/templates/pages/order.html,Make Purchase Invoice,לבצע את רכישת החשבונית
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Direct Income,הכנסה ישירה
 DocType: C-Form,IV,IV
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2},שורה לא {0}: הסכום אינו יכול להיות גדול מהסכום ממתין נגד תביעת {1} הוצאות. הסכום בהמתנת {2}
