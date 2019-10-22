@@ -16,7 +16,7 @@ frappe.ui.form.on('Share Transfer', {
 				};
 			};
 		});
-		if (frm.doc.docstatus == 1) {
+		if (frm.doc.docstatus == 1 && frm.doc.equity_or_liability_account && frm.doc.asset_account ) {
 			frm.add_custom_button(__('Make Journal Entry'), function () {
 				erpnext.share_transfer.make_jv(frm);
 			});
@@ -92,6 +92,7 @@ erpnext.share_transfer.make_jv = function (frm) {
 		debit_applicant_type = "Shareholder";
 		debit_applicant = frm.doc.from_shareholder;
 	}
+
 	frappe.call({
 		args: {
 			"company": frm.doc.company,

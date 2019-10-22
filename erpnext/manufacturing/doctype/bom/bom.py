@@ -34,7 +34,8 @@ class BOM(WebsiteGenerator):
 			# name can be BOM/ITEM/001, BOM/ITEM/001-1, BOM-ITEM-001, BOM-ITEM-001-1
 
 			# split by item
-			names = [name.split(self.item)[-1][1:] for name in names]
+			names = [name.split(self.item, 1) for name in names]
+			names = [d[-1][1:] for d in filter(lambda x: len(x) > 1 and x[-1], names)]
 
 			# split by (-) if cancelled
 			names = [cint(name.split('-')[-1]) for name in names]
