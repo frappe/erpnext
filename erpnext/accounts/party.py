@@ -12,7 +12,7 @@ from frappe.utils import (add_days, getdate, formatdate, date_diff,
 from frappe.contacts.doctype.address.address import (get_address_display,
 	get_default_address, get_company_address)
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
-from erpnext.exceptions import PartyFrozen, InvalidAccountCurrency
+from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext import get_company_currency
 
@@ -446,7 +446,9 @@ def validate_party_frozen_disabled(party_type, party_name):
 	if party_type and party_name:
 		if party_type in ("Customer", "Supplier"):
 			party = frappe.get_cached_value(party_type, party_name, ["is_frozen", "disabled"], as_dict=True)
-			if party.get("is_frozen"):
+			if party.disabled:
+				frappe.throw(_("{0} {1} is disabled").format(party_type, party_name), PartyDisabled)
+			elif party.get("is_frozen"):
 				frozen_accounts_modifier = frappe.db.get_single_value( 'Accounts Settings', 'frozen_accounts_modifier')
 				if not frozen_accounts_modifier in frappe.get_roles():
 					frappe.throw(_("{0} {1} is frozen").format(party_type, party_name), PartyFrozen)
