@@ -124,6 +124,7 @@ def update_disbursement_status(doc):
 	""", (doc.payment_account, doc.name), as_dict=1)[0]
 
 	disbursement_date = None
+	status = ''
 	if not disbursement or disbursement.disbursed_amount == 0:
 		status = "Sanctioned"
 	elif disbursement.disbursed_amount == doc.loan_amount:

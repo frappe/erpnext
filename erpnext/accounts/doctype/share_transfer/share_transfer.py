@@ -292,11 +292,14 @@ def make_jv_entry( company, account, amount, payment_account,\
 		"party_type": debit_applicant_type,
 		"party": debit_applicant,
 		})
+
 	account_amt_list.append({
 		"account": payment_account,
 		"credit_in_account_currency": amount,
 		"party_type": credit_applicant_type,
 		"party": credit_applicant,
 		})
+
 	journal_entry.set("accounts", account_amt_list)
+
 	return journal_entry.as_dict()
