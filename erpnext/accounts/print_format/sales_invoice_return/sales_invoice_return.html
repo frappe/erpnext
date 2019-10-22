@@ -9,7 +9,7 @@
 	</div>
 	<div class="col-xs-{{ "3" if df.fieldtype=="Check" else "7" }} value">
 		{% if doc.get(df.fieldname) != None -%}
-			{{ frappe.utils.fmt_money((doc[df.fieldname])|int|abs, currency=doc.currency) }}
+			{{ frappe.utils.fmt_money((doc[df.fieldname])|abs, currency=doc.currency) }}
 		{% endif %}
 	</div>
 </div>
@@ -26,7 +26,7 @@
 					<div class="col-xs-5 {%- if doc.align_labels_right %} text-right{%- endif -%}">
 						<label>{{ charge.get_formatted("description") }}</label></div>
 					<div class="col-xs-7 text-right">
-						{{ frappe.utils.fmt_money((charge.tax_amount)|int|abs, currency=doc.currency) }}
+						{{ frappe.utils.fmt_money((charge.tax_amount)|abs, currency=doc.currency) }}
 					</div>
 				</div>
 				{%- endif -%}
@@ -65,8 +65,10 @@
 						{% for tdf in visible_columns %}
 						{% if not d.flags.compact_item_print or tdf.fieldname in doc.get(df.fieldname)[0].flags.compact_item_fields %}
 							<td class="{{ get_align_class(tdf) }}" {{ fieldmeta(df) }}>
-								{% if tdf.fieldtype == 'Currency' %}
-									<div class="value">{{ frappe.utils.fmt_money((d[tdf.fieldname])|int|abs, currency=doc.currency) }}</div></td>
+								{% if tdf.fieldname == 'qty' %}
+									<div class="value">{{ (d[tdf.fieldname])|abs }}</div></td>
+								{% elif tdf.fieldtype == 'Currency' %}
+									<div class="value">{{ frappe.utils.fmt_money((d[tdf.fieldname])|abs, currency=doc.currency) }}</div></td>
 								{% else %}
 									<div class="value">{{ print_value(tdf, d, doc, visible_columns) }}</div></td>
 								{% endif %}
@@ -117,7 +119,7 @@
 						{{ render_currency(df, doc) }}
 					{% elif df.fieldtype =='Table' %}
 						{{ render_table(df, doc)}}
-					{% elif doc[df.fieldname] %}
+					{% elif doc[df.fieldname] and df.fieldname != 'total_qty' %}
 						{{ render_field(df, doc) }}
 					{% endif %}
            		 {% endfor %}
