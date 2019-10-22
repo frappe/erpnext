@@ -608,15 +608,9 @@ $.extend(erpnext.journal_entry, {
 	},
 
 	account_query: function(frm) {
-		var inter_company = 0;
-		if (frm.doc.voucher_type == "Inter Company Journal Entry") {
-			inter_company = 1;
-		}
-
 		var filters = {
 			company: frm.doc.company,
-			is_group: 0,
-			inter_company_account: inter_company
+			is_group: 0
 		};
 		if(!frm.doc.multi_currency) {
 			$.extend(filters, {
