@@ -318,7 +318,7 @@ DocType: Accounts Settings,Shipping Address,Dirección de envío
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py,Receiver List is empty. Please create Receiver List,"Lista de receptores está vacía. Por favor, cree Lista de receptores"
 DocType: Production Plan Sales Order,Production Plan Sales Order,Plan de producción de la orden de ventas (OV)
 DocType: Sales Partner,Sales Partner Target,Socio de Ventas Objetivo
-DocType: Pricing Rule,Pricing Rule,Reglas de Precios
+DocType: Coupon Code,Pricing Rule,Reglas de Precios
 apps/erpnext/erpnext/config/help.py,Material Request to Purchase Order,Requisición de materiales hacia la órden de compra
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,Row # {0}: Returned Item {1} does not exists in {2} {3},Fila # {0}: El artículo vuelto {1} no existe en {2} {3}
 ,Bank Reconciliation Statement,Extractos Bancarios

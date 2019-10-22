@@ -20,12 +20,7 @@ class Asset(AccountsController):
 		self.validate_asset_values()
 		self.validate_item()
 		self.set_missing_values()
-		if self.calculate_depreciation:
-			self.set_depreciation_rate()
-			self.make_depreciation_schedule()
-			self.set_accumulated_depreciation()
-		else:
-			self.finance_books = []
+		self.prepare_depreciation_data()
 		if self.get("schedules"):
 			self.validate_expected_value_after_useful_life()
 
@@ -44,6 +39,17 @@ class Asset(AccountsController):
 		self.set_status()
 		delete_gl_entries(voucher_type='Asset', voucher_no=self.name)
 		self.db_set('booked_fixed_asset', 0)
+
+	def prepare_depreciation_data(self):
+		if self.calculate_depreciation:
+			self.value_after_depreciation = 0
+			self.set_depreciation_rate()
+			self.make_depreciation_schedule()
+			self.set_accumulated_depreciation()
+		else:
+			self.finance_books = []
+			self.value_after_depreciation = (flt(self.gross_purchase_amount) -
+				flt(self.opening_accumulated_depreciation))
 
 	def validate_item(self):
 		item = frappe.get_cached_value("Item", self.item_code,
