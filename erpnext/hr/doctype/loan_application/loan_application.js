@@ -23,20 +23,25 @@ frappe.ui.form.on('Loan Application', {
 	},
 	add_toolbar_buttons: function(frm) {
 		if (frm.doc.status == "Approved") {
-			frm.add_custom_button(__('Create Loan'), function() {
-				frappe.call({
-					method: "erpnext.hr.doctype.loan_application.loan_application.make_loan",
-					args: {
-						"source_name": frm.doc.name
-					},
-					callback: function(r) {
-						if(!r.exc) {
-							var doc = frappe.model.sync(r.message);
-							frappe.set_route("Form", r.message.doctype, r.message.name);
-						}
-					}
-				});
-			}).addClass("btn-primary");
+			// show create loan button if loan not created against loan aplication
+			frappe.db.get_value("Loan", {"loan_application": frm.doc.name}, "name", (r) => {
+				if (!r) {
+					frm.add_custom_button(__('Create Loan'), function() {
+						frappe.call({
+							method: "erpnext.hr.doctype.loan_application.loan_application.make_loan",
+							args: {
+								"source_name": frm.doc.name
+							},
+							callback: function(r) {
+								if(!r.exc) {
+									var doc = frappe.model.sync(r.message);
+									frappe.set_route("Form", r.message.doctype, r.message.name);
+								}
+							}
+						});
+					}).addClass("btn-primary");
+				}
+			});
 		}
 	}
 });

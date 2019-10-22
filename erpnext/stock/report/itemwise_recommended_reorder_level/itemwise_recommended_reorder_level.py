@@ -24,7 +24,7 @@ def execute(filters=None):
 
 	data = []
 	for item in items:
-		total_outgoing = consumed_item_map.get(item.name, 0) + delivered_item_map.get(item.name,0)
+		total_outgoing = flt(consumed_item_map.get(item.name, 0)) + flt(delivered_item_map.get(item.name,0))
 		avg_daily_outgoing = flt(total_outgoing / diff, float_preceision)
 		reorder_level = (avg_daily_outgoing * flt(item.lead_time_days)) + flt(item.safety_stock)
 
@@ -55,18 +55,20 @@ def get_item_info(filters):
 
 
 def get_consumed_items(condition):
-	cn_items = frappe.db.sql("""select se_item.item_code,
-			sum(se_item.transfer_qty) as 'consume_qty'
-		from `tabStock Entry` se, `tabStock Entry Detail` se_item
-		where se.name = se_item.parent and se.docstatus = 1
-		and (ifnull(se_item.t_warehouse, '') = '' or se.purpose = 'Subcontract') %s
-		group by se_item.item_code""" % (condition), as_dict=1)
+	consumed_items = frappe.db.sql("""
+		select item_code, abs(sum(actual_qty)) as consumed_qty
+		from `tabStock Ledger Entry`
+		where actual_qty < 0
+			and voucher_type not in ('Delivery Note', 'Sales Invoice')
+			%s
+		group by item_code
+	""" % condition, as_dict=1)
 
-	cn_items_map = {}
-	for item in cn_items:
-		cn_items_map.setdefault(item.item_code, item.consume_qty)
+	consumed_items_map = {}
+	for item in consumed_items:
+		consumed_items_map.setdefault(item.item_code, item.consumed_qty)
 
-	return cn_items_map
+	return consumed_items_map
 
 def get_delivered_items(condition):
 	dn_items = frappe.db.sql("""select dn_item.item_code, sum(dn_item.stock_qty) as dn_qty
