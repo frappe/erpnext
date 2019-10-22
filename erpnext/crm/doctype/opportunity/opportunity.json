@@ -410,9 +410,9 @@
    "options": "User"
   }
  ],
- "icon": "fa fa-info-sign",
+ "icon": "fa fa-info-circle",
  "idx": 195,
- "modified": "2019-09-30 12:58:37.385400",
+ "modified": "2019-10-22 10:48:37.385400",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
