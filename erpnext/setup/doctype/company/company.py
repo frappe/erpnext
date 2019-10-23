@@ -204,7 +204,7 @@ class Company(NestedSet):
 			})
 
 		for default_account in default_accounts:
-			if self.is_new() or frappe.flags.in_test:
+			if self.is_new() or frappe.flags.in_test or frappe.flags.in_demo:
 				self._set_default_account(default_account, default_accounts.get(default_account))
 
 		if not self.default_income_account:
