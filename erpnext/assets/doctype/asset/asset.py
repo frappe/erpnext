@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, erpnext, math, json
 from frappe import _
 from six import string_types
-from frappe.utils import flt, add_months, cint, nowdate, getdate, today, date_diff, add_days
+from frappe.utils import flt, add_months, cint, nowdate, getdate, today, date_diff, month_diff, add_days
 from frappe.model.document import Document
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset.depreciation \
@@ -144,20 +144,28 @@ class Asset(AccountsController):
 				if not has_pro_rata or n < cint(number_of_pending_depreciations) - 1:
 					schedule_date = add_months(d.depreciation_start_date,
 						n * cint(d.frequency_of_depreciation))
+					
+					monthly_schedule_date = add_months(schedule_date, - d.frequency_of_depreciation + 1)
 
 				# For first row
 				if has_pro_rata and n==0:
-					depreciation_amount, days = get_pro_rata_amt(d, depreciation_amount,
+					depreciation_amount, days, months = get_pro_rata_amt(d, depreciation_amount,
 						self.available_for_use_date, d.depreciation_start_date)
+
+					monthly_schedule_date = add_months(d.depreciation_start_date, - months + 1)
+
 				# For last row
 				elif has_pro_rata and n == cint(number_of_pending_depreciations) - 1:
 					to_date = add_months(self.available_for_use_date,
 						n * cint(d.frequency_of_depreciation))
 
-					depreciation_amount, days = get_pro_rata_amt(d,
+					depreciation_amount, days, months = get_pro_rata_amt(d,
 						depreciation_amount, schedule_date, to_date)
 
+					monthly_schedule_date = add_months(schedule_date, 1)
+
 					schedule_date = add_days(schedule_date, days)
+					last_schedule_date = schedule_date
 
 				if not depreciation_amount: continue
 				value_after_depreciation -= flt(depreciation_amount,
@@ -171,13 +179,36 @@ class Asset(AccountsController):
 					skip_row = True
 
 				if depreciation_amount > 0:
-					self.append("schedules", {
-						"schedule_date": schedule_date,
-						"depreciation_amount": depreciation_amount,
-						"depreciation_method": d.depreciation_method,
-						"finance_book": d.finance_book,
-						"finance_book_id": d.idx
-					})
+					if not self.allow_monthly_depreciation:
+						self.append("schedules", {
+							"schedule_date": schedule_date,
+							"depreciation_amount": depreciation_amount,
+							"depreciation_method": d.depreciation_method,
+							"finance_book": d.finance_book,
+							"finance_book_id": d.idx
+						})
+					else:
+						month_range = months \
+							if (has_pro_rata and n==0) or (has_pro_rata and n == cint(number_of_pending_depreciations) - 1) \
+							else d.frequency_of_depreciation
+
+						for r in range(month_range):
+							if (has_pro_rata and n == cint(number_of_pending_depreciations) - 1) and r == cint(month_range) - 1:
+								self.append("schedules", {
+									"schedule_date": last_schedule_date,
+									"depreciation_amount": depreciation_amount / month_range,
+									"depreciation_method": d.depreciation_method,
+									"finance_book": d.finance_book,
+									"finance_book_id": d.idx
+								})
+							else:
+								self.append("schedules", {
+									"schedule_date": add_months(monthly_schedule_date, r),
+									"depreciation_amount": depreciation_amount / month_range,
+									"depreciation_method": d.depreciation_method,
+									"finance_book": d.finance_book,
+									"finance_book_id": d.idx
+								})
 
 	def check_is_pro_rata(self, row):
 		has_pro_rata = False
@@ -579,9 +610,10 @@ def is_cwip_accounting_disabled():
 
 def get_pro_rata_amt(row, depreciation_amount, from_date, to_date):
 	days = date_diff(to_date, from_date)
+	months = month_diff(to_date, from_date) - 1
 	total_days = get_total_days(to_date, row.frequency_of_depreciation)
 
-	return (depreciation_amount * flt(days)) / flt(total_days), days
+	return (depreciation_amount * flt(days)) / flt(total_days), days, months
 
 def get_total_days(date, frequency):
 	period_start_date = add_months(date,
