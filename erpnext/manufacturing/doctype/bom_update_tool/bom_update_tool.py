@@ -15,7 +15,7 @@ class BOMUpdateTool(Document):
 		self.validate_bom()
 		self.update_new_bom()
 		frappe.cache().delete_key('bom_children')
-		bom_list, parent_list = self.get_parent_boms(self.new_bom)
+		bom_list = self.get_parent_boms(self.new_bom)
 		updated_bom = []
 
 		for bom in bom_list:
@@ -25,10 +25,6 @@ class BOMUpdateTool(Document):
 				# to make separate db calls by using load_doc_before_save
 				# which proves to be expensive while doing bulk replace
 				bom_obj._doc_before_save = bom_obj.as_dict()
-
-				if bom in parent_list and bom != self.new_bom:
-					updated_bom = bom_obj.check_recursion()
-
 				bom_obj.calculate_cost()
 				bom_obj.update_parent_cost()
 				bom_obj.db_update()
@@ -54,19 +50,18 @@ class BOMUpdateTool(Document):
 			rate=%s, amount=stock_qty*%s where bom_no = %s and docstatus < 2 and parenttype='BOM'""",
 			(self.new_bom, new_bom_unitcost, new_bom_unitcost, self.current_bom))
 
-	def get_parent_boms(self, bom, bom_list=[], parent_list=[]):
+	def get_parent_boms(self, bom, bom_list=[]):
 		data = frappe.db.sql("""SELECT DISTINCT parent FROM `tabBOM Item`
 			WHERE bom_no = %s AND docstatus < 2 AND parenttype='BOM'""", bom)
 
-		if not data:
-			# to check recursion only for parent bom
-			parent_list.append(bom)
-
 		for d in data:
-			bom_list.append(d[0])
-			self.get_parent_boms(d[0], bom_list, parent_list=parent_list)
+			if self.new_bom == d[0]:
+				frappe.throw(_("BOM recursion: {0} cannot be child of {1}").format(bom, self.new_bom))
 
-		return list(set(bom_list)), set(parent_list)
+			bom_list.append(d[0])
+			self.get_parent_boms(d[0], bom_list)
+
+		return list(set(bom_list))
 
 @frappe.whitelist()
 def enqueue_replace_bom(args):
