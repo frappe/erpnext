@@ -29,7 +29,8 @@ def sync_sales_order(order, request_id=None):
 			validate_item(order, shopify_settings)
 			create_order(order, shopify_settings)
 		except Exception as e:
-			make_shopify_log(status="Error", message=e.message, exception=False)
+			make_shopify_log(status="Error", exception=e)
+
 		else:
 			make_shopify_log(status="Success")
 
@@ -42,9 +43,9 @@ def prepare_sales_invoice(order, request_id=None):
 		sales_order = get_sales_order(cstr(order['id']))
 		if sales_order:
 			create_sales_invoice(order, shopify_settings, sales_order)
-		make_shopify_log(status="Success")
-	except Exception:
-		make_shopify_log(status="Error", exception=True)
+			make_shopify_log(status="Success")
+	except Exception as e:
+		make_shopify_log(status="Error", exception=e, rollback=True)
 
 def prepare_delivery_note(order, request_id=None):
 	frappe.set_user('Administrator')
@@ -56,8 +57,8 @@ def prepare_delivery_note(order, request_id=None):
 		if sales_order:
 			create_delivery_note(order, shopify_settings, sales_order)
 		make_shopify_log(status="Success")
-	except Exception:
-		make_shopify_log(status="Error", exception=True)
+	except Exception as e:
+		make_shopify_log(status="Error", exception=e, rollback=True)
 
 def get_sales_order(shopify_order_id):
 	sales_order = frappe.db.get_value("Sales Order", filters={"shopify_order_id": shopify_order_id})
@@ -97,7 +98,7 @@ def create_sales_order(shopify_order, shopify_settings, company=None):
 			message = 'Following items are exists in order but relevant record not found in Product master'
 			message += "\n" + ", ".join(product_not_exists)
 
-			make_shopify_log(status="Error", message=message, exception=True)
+			make_shopify_log(status="Error", exception=e, rollback=True)
 
 			return ''
 
