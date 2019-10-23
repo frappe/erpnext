@@ -164,19 +164,13 @@ class ImportSupplierInvoice(Document):
 												city = city, province = province, 
 												pin_code = pin_code, country = country)
 
-						pi_name = create_purchase_invoice(company = self.company,
-														naming_series = self.invoice_series,
-														supplier_name = supplier_name,
-														bill_no = invoice_no,
-														document_type = document_type,
-														bill_date = bill_date,
-														is_return = return_invoice,
-														destination_code = destination_code,
-														total_discount = total_discount,
-														items = items,
-														taxes = taxes,
-														terms = terms,
-														file_name = file_name)
+						pi_name = create_purchase_invoice(company = self.company, naming_series = self.invoice_series,
+														supplier_name = supplier_name, bill_no = invoice_no,
+														document_type = document_type, bill_date = bill_date,
+														is_return = return_invoice, destination_code = destination_code,
+														total_discount = total_discount, items = items,
+														taxes = taxes, terms = terms,file_name = file_name)
+
 						file_count += 1
 						if pi_name:
 							pi_count += 1
@@ -364,15 +358,6 @@ def create_uom(uom):
 		new_uom.uom_name = uom
 		new_uom.save()
 		return new_uom.uom_name
-
-def check_bill_no(invoice_no):
-
-	existing_bill_no = frappe.db.get_value("Purchase Invoice",
-				filters={"bill_no": invoice_no, "docstatus": 1}, fieldname="name")
-	if existing_bill_no:
-		return existing_bill_no
-	else:
-		return None
 
 def get_full_path(file_name):
 	"""Returns file path from given file name"""
