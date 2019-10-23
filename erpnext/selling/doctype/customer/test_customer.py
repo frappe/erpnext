@@ -8,7 +8,7 @@ import unittest
 
 from erpnext.accounts.party import get_due_date
 from frappe.test_runner import make_test_records
-from erpnext.exceptions import PartyFrozen
+from erpnext.exceptions import PartyFrozen, PartyDisabled
 from frappe.utils import flt
 from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 from erpnext.tests.utils import create_test_contact_and_address
@@ -178,7 +178,7 @@ class TestCustomer(unittest.TestCase):
 
 		so = make_sales_order(do_not_save=True)
 
-		self.assertRaises(frappe.ValidationError, so.save)
+		self.assertRaises(PartyDisabled, so.save)
 
 		frappe.db.set_value("Customer", "_Test Customer", "disabled", 0)
 
