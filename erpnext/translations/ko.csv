@@ -1,16 +1,16 @@
-DocType: Accounting Period,Period Name,기간 이름
-DocType: Employee,Salary Mode,급여 모드
-apps/erpnext/erpnext/public/js/hub/marketplace.js,Register,레지스터
+DocType: Accounting Period,Period Name,회계기간명
+DocType: Employee,Salary Mode,급여 유형
+apps/erpnext/erpnext/public/js/hub/marketplace.js,Register,등록
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js,Partially Received,부분적으로 수령 한
 DocType: Patient,Divorced,이혼
 DocType: Support Settings,Post Route Key,경로 키 게시
-DocType: Buying Settings,Allow Item to be added multiple times in a transaction,항목은 트랜잭션에 여러 번 추가 할 수
+DocType: Buying Settings,Allow Item to be added multiple times in a transaction,한 트랜잭션에 여러번 아이템이 추가됨을 허용
 DocType: Content Question,Content Question,내용 질문
-apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py,Cancel Material Visit {0} before cancelling this Warranty Claim,재 방문 {0}이 보증 청구를 취소하기 전에 취소
-DocType: Customer Feedback Table,Qualitative Feedback,정 성적 피드백
+apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py,Cancel Material Visit {0} before cancelling this Warranty Claim,재 방문 {0}이 보증 청구하기 전에 취소
+DocType: Customer Feedback Table,Qualitative Feedback,정성적 피드백
 apps/erpnext/erpnext/config/education.py,Assessment Reports,평가 보고서
 DocType: Invoice Discounting,Accounts Receivable Discounted Account,미수금 할인 계정
-apps/erpnext/erpnext/accounts/doctype/invoice_discounting/invoice_discounting_list.js,Canceled,취소 된
+apps/erpnext/erpnext/accounts/doctype/invoice_discounting/invoice_discounting_list.js,Canceled,취소된
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Consumer Products,소비자 제품
 DocType: Supplier Scorecard,Notify Supplier,공급자에게 알린다.
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.js,Please select Party Type first,첫 번째 파티 유형을 선택하십시오
