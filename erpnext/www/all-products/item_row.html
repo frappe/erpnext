@@ -17,7 +17,7 @@
 				<p class="card-text">
 					{{ item.website_description or item.description or '<i class="text-muted">No description</i>' }}
 				</p>
-				<a href="{{ item.route }}" class="btn btn-sm btn-light">{{ _('More details') }}</a>
+				<a href="/{{ item.route }}" class="btn btn-sm btn-light">{{ _('More details') }}</a>
 			</div>
 		</div>
 	</div>
