@@ -318,7 +318,7 @@ DocType: Accounts Settings,Shipping Address,Dirección de envío
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py,Receiver List is empty. Please create Receiver List,"Lista de receptores está vacía. Por favor, cree Lista de receptores"
 DocType: Production Plan Sales Order,Production Plan Sales Order,Plan de producción de la orden de ventas (OV)
 DocType: Sales Partner,Sales Partner Target,Socio de Ventas Objetivo
-DocType: Pricing Rule,Pricing Rule,Reglas de Precios
+DocType: Coupon Code,Pricing Rule,Reglas de Precios
 apps/erpnext/erpnext/config/help.py,Material Request to Purchase Order,Requisición de materiales hacia la órden de compra
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,Row # {0}: Returned Item {1} does not exists in {2} {3},Fila # {0}: El artículo vuelto {1} no existe en {2} {3}
 ,Bank Reconciliation Statement,Extractos Bancarios
@@ -696,6 +696,7 @@ apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,Serial Nos Required fo
 DocType: Authorization Rule,Applicable To (Designation),Aplicables a (Denominación )
 apps/erpnext/erpnext/config/accounting.py,Enable / disable currencies.,Habilitar / Deshabilitar el tipo de monedas
 apps/erpnext/erpnext/controllers/trends.py,Total(Amt),Total (Amt)
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js,Transfer Material to Supplier,Transferencia de material a proveedor
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,El numero de serie no tiene almacén. el almacén debe establecerse por entradas de stock o recibos de compra
 DocType: Shipping Rule,Shipping Rule Conditions,Regla envío Condiciones
 DocType: BOM Update Tool,The new BOM after replacement,La nueva Solicitud de Materiales después de la sustitución

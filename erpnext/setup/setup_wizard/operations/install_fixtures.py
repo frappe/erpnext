@@ -65,7 +65,7 @@ def install(country=None):
 		{'doctype': 'Leave Type', 'leave_type_name': _('Casual Leave'), 'name': _('Casual Leave'),
 			'allow_encashment': 1, 'is_carry_forward': 1, 'max_continuous_days_allowed': '3', 'include_holiday': 1},
 		{'doctype': 'Leave Type', 'leave_type_name': _('Compensatory Off'), 'name': _('Compensatory Off'),
-			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1},
+			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1, 'is_compensatory':1 },
 		{'doctype': 'Leave Type', 'leave_type_name': _('Sick Leave'), 'name': _('Sick Leave'),
 			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1},
 		{'doctype': 'Leave Type', 'leave_type_name': _('Privilege Leave'), 'name': _('Privilege Leave'),

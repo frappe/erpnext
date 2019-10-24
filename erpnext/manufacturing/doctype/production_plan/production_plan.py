@@ -558,7 +558,7 @@ def get_sales_orders(self):
 		item_filter += " and so_item.item_code = %(item)s"
 
 	open_so = frappe.db.sql("""
-		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
+		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total as grand_total
 		from `tabSales Order` so, `tabSales Order Item` so_item
 		where so_item.parent = so.name
 			and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
