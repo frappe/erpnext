@@ -41,7 +41,9 @@ def execute():
 		item = frappe.get_doc("Item", item_code)
 		item.set("taxes", [])
 		item.append("taxes", {"item_tax_template": item_tax_template_name, "tax_category": ""})
-		item.save()
+		frappe.db.sql("delete from `tabItem Tax` where parent=%s and parenttype='Item'", item_code)
+		for d in item.taxes:
+			d.db_insert()
 
 	doctypes = [
 		'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',
