@@ -227,7 +227,9 @@ class StockEntry(StockController):
 
 		for d in self.get("items"):
 			if not d.expense_account:
-				frappe.throw(_("Please enter Difference Account"))
+				frappe.throw(_("Please enter Difference Account or set default Stock Adjustment Account for company {0}")
+					.format(self.company))
+
 			elif self.is_opening == "Yes" and frappe.db.get_value("Account", d.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(_("Difference Account must be a Asset/Liability type account, since this Stock Entry is an Opening Entry"), OpeningEntryAccountError)
 
