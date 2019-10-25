@@ -157,6 +157,16 @@ def get_employee_field_property(employee, fieldname):
 	else:
 		return False
 
+def get_company_set(company):
+	return frappe.db.sql_list("""
+		SELECT
+			name
+		FROM `tabCompany`
+		WHERE
+			parent_company=%(company)s
+			OR name=%(company)s
+	""", (dict(company=company)))
+
 def validate_dates(doc, from_date, to_date):
 	date_of_joining, relieving_date = frappe.db.get_value("Employee", doc.employee, ["date_of_joining", "relieving_date"])
 	if getdate(from_date) > getdate(to_date):
