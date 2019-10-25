@@ -188,7 +188,6 @@
    "label": "Include in gross"
   },
   {
-   "bold": 1,
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
@@ -197,7 +196,7 @@
  ],
  "icon": "fa fa-money",
  "idx": 1,
- "modified": "2019-08-23 03:40:58.441295",
+ "modified": "2019-10-10 19:10:02.967554",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
