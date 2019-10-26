@@ -51,14 +51,12 @@ class Asset(AccountsController):
 			reference_doc = 'Purchase Invoice' if self.purchase_invoice else 'Purchase Receipt'
 			reference_name = self.purchase_invoice or self.purchase_receipt
 			reference_doc = frappe.get_doc(reference_doc, reference_name)
-		if reference_doc.get('company') != self.company:
-			frappe.throw(_("Company of asset {1} and purchase doc {2} doesn't matches.").format(self.asset_name, reference_doc.get('name')))
-
-		if getdate(self.purchase_date) != getdate(reference_doc.get('posting_date')):
-			frappe.throw(_("Posting Date of asset {1} must be same as purchase date of reference doc {2}").format(self.asset_name, reference_doc.get('name')))
+			if reference_doc.get('company') != self.company:
+				frappe.throw(_("Company of asset {0} and purchase doc {1} doesn't matches.").format(self.name, reference_doc.get('name')))
+		
 		
 		if self.is_existing_asset and self.purchase_invoice:
-			frappe.throw(_("Purchase Invoice cannot be made against an existing asset {1}").format(self.asset_name))
+			frappe.throw(_("Purchase Invoice cannot be made against an existing asset {0}").format(self.name))
 
 	def validate_item(self):
 		item = frappe.get_cached_value("Item", self.item_code,
@@ -356,10 +354,11 @@ class Asset(AccountsController):
 
 	def update_stock_movement(self):
 		asset_movement = frappe.db.get_value('Asset Movement',
-			{'asset': self.name, 'reference_name': self.purchase_receipt, 'docstatus': 0}, 'name')
+			{'reference_name': self.purchase_receipt, 'docstatus': 0}, 'name')
 
 		if asset_movement:
 			doc = frappe.get_doc('Asset Movement', asset_movement)
+			# should this be hard coded ?
 			doc.naming_series = 'ACC-ASM-.YYYY.-'
 			doc.submit()
 
@@ -369,7 +368,7 @@ class Asset(AccountsController):
 		if ((self.purchase_receipt \
 			or (self.purchase_invoice and frappe.db.get_value('Purchase Invoice', self.purchase_invoice, 'update_stock')))
 			and self.purchase_receipt_amount and self.available_for_use_date <= nowdate()):
-			fixed_asset_account = get_asset_category_account(self.name, 'fixed_asset_account',
+			fixed_asset_account = get_asset_category_account('fixed_asset_account', asset=self.name,
 					asset_category = self.asset_category, company = self.company)
 
 			cwip_account = get_asset_account("capital_work_in_progress_account",
@@ -454,11 +453,12 @@ def make_purchase_invoice(asset, item_code, gross_purchase_amount, company, post
 	pi.currency = frappe.get_cached_value('Company',  company,  "default_currency")
 	pi.set_posting_time = 1
 	pi.posting_date = posting_date
+
+	# expense account is dependent on cwip accounting as well as assets which are in use
+	# expense account will be auto fetched when making gl_entries
 	pi.append("items", {
 		"item_code": item_code,
 		"is_fixed_asset": 1,
-		"asset": asset,
-		"expense_account": get_asset_category_account(asset, 'fixed_asset_account'),
 		"qty": 1,
 		"price_list_rate": gross_purchase_amount,
 		"rate": gross_purchase_amount
@@ -540,7 +540,7 @@ def get_item_details(item_code, asset_category):
 def get_asset_account(account_name, asset=None, asset_category=None, company=None):
 	account = None
 	if asset:
-		account = get_asset_category_account(asset, account_name,
+		account = get_asset_category_account(account_name, asset=asset,
 				asset_category = asset_category, company = company)
 
 	if not account:
