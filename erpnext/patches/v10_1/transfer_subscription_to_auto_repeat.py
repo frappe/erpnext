@@ -4,7 +4,7 @@ from frappe.model.utils.rename_field import rename_field
 
 
 def execute():
-	frappe.reload_doc('desk', 'doctype', 'auto_repeat')
+	frappe.reload_doc('automation', 'doctype', 'auto_repeat')
 
 	doctypes_to_rename = {
 		'accounts': ['Journal Entry', 'Payment Entry', 'Purchase Invoice', 'Sales Invoice'],

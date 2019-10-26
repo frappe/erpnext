@@ -39,6 +39,9 @@ def execute(filters=None):
 
 	data = []
 	conversion_factors = {}
+
+	_func = lambda x: x[1]
+
 	for (company, item, warehouse) in sorted(iwb_map):
 		if item_map.get(item):
 			qty_dict = iwb_map[(company, item, warehouse)]
@@ -70,7 +73,9 @@ def execute(filters=None):
 					'latest_age': 0
 				}
 				if fifo_queue:
-					fifo_queue = sorted(fifo_queue, key=lambda fifo_data: fifo_data[1])
+					fifo_queue = sorted(filter(_func, fifo_queue), key=_func)
+					if not fifo_queue: continue
+
 					stock_ageing_data['average_age'] = get_average_age(fifo_queue, to_date)
 					stock_ageing_data['earliest_age'] = date_diff(to_date, fifo_queue[0][1])
 					stock_ageing_data['latest_age'] = date_diff(to_date, fifo_queue[-1][1])
