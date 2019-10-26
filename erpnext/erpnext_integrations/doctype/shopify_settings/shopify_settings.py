@@ -50,7 +50,7 @@ class ShopifySettings(Document):
 		deleted_webhooks = []
 
 		for d in self.webhooks:
-			url = get_shopify_url('admin/api/2019-04/webhooks.json'.format(d.webhook_id), self)
+			url = get_shopify_url('admin/api/2019-04/webhooks/{0}.json'.format(d.webhook_id), self)
 			try:
 				res = session.delete(url, headers=get_header(self))
 				res.raise_for_status()
