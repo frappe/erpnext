@@ -48,7 +48,8 @@ class TestAsset(unittest.TestCase):
 		asset.load_from_db()
 		self.assertEqual(asset.supplier, "_Test Supplier")
 		self.assertEqual(asset.purchase_date, getdate(purchase_date))
-		self.assertEqual(asset.purchase_invoice, pi.name)
+		# Asset won't have reference to PI when purchased through PR
+		self.assertEqual(asset.purchase_receipt, pr.name)
 
 		expected_gle = (
 			("Asset Received But Not Billed - _TC", 100000.0, 0.0),
@@ -61,10 +62,14 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(gle, expected_gle)
 
 		pi.cancel()
-
+		asset_movement_name = frappe.db.get_value("Asset Movement", { "reference_name": pr.name }, "name")
+		asset_movement = frappe.get_doc("Asset Movement", asset_movement_name)
+		asset_movement.cancel()
+		asset_movement.delete()
 		asset.load_from_db()
-		self.assertEqual(asset.supplier, None)
-		self.assertEqual(asset.purchase_invoice, None)
+		asset.cancel()
+		pr.cancel()
+		self.assertEqual(asset.docstatus, 2)
 
 		self.assertFalse(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Purchase Invoice", "voucher_no": pi.name}))
@@ -632,6 +637,8 @@ def create_asset_category():
 	asset_category.insert()
 
 def create_fixed_asset_item():
+	meta = frappe.get_meta('Asset')
+	naming_series = meta.get_field("naming_series").options.splitlines()[0] or 'ACC-ASS-.YYYY.-'
 	try:
 		frappe.get_doc({
 			"doctype": "Item",
@@ -642,7 +649,9 @@ def create_fixed_asset_item():
 			"item_group": "All Item Groups",
 			"stock_uom": "Nos",
 			"is_stock_item": 0,
-			"is_fixed_asset": 1
+			"is_fixed_asset": 1,
+			"auto_create_assets": 1,
+			"asset_naming_series": naming_series
 		}).insert()
 	except frappe.DuplicateEntryError:
 		pass
