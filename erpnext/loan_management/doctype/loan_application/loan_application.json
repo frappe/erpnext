@@ -24,12 +24,12 @@
   "proposed_pledges",
   "maximum_loan_amount",
   "repayment_info",
-  "total_payable_amount",
   "repayment_method",
+  "total_payable_amount",
   "column_break_11",
-  "total_payable_interest",
-  "repayment_amount",
   "repayment_periods",
+  "repayment_amount",
+  "total_payable_interest",
   "amended_from"
  ],
  "fields": [
@@ -115,12 +115,13 @@
    "label": "Reason"
   },
   {
+   "depends_on": "eval: doc.is_term_loan == 1",
    "fieldname": "repayment_info",
    "fieldtype": "Section Break",
    "label": "Repayment Info"
   },
   {
-   "depends_on": "is_term_loan",
+   "depends_on": "eval: doc.is_term_loan == 1",
    "fetch_from": "loan_type.repayment_method",
    "fetch_if_empty": 1,
    "fieldname": "repayment_method",
@@ -212,7 +213,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-10-10 13:08:10.177545",
+ "modified": "2019-10-24 10:32:03.740558",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Application",

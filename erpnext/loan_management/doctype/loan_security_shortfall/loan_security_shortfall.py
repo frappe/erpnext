@@ -25,11 +25,13 @@ def update_shortfall_status(loan, security_value):
 
 @frappe.whitelist()
 def add_security(loan):
-	loan_applicant = frappe.db.get_value("Loan", loan, 'applicant')
+	loan_details = frappe.db.get_value("Loan", loan, ['applicant', 'company', 'applicant_type'], as_dict=1)
 
 	loan_security_pledge = frappe.new_doc("Loan Security Pledge")
 	loan_security_pledge.loan = loan
-	loan_security_pledge.applicant = loan_applicant
+	loan_security_pledge.company = loan_details.company
+	loan_security_pledge.applicant_type = loan_details.applicant_type
+	loan_security_pledge.applicant = loan_details.applicant
 
 	return loan_security_pledge.as_dict()
 

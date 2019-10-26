@@ -107,9 +107,8 @@ class LoanRepayment(AccountsController):
 			frappe.db.set_value("Loan", self.against_loan, "status", "Loan Closure Requested")
 
 		frappe.db.sql(""" UPDATE `tabLoan` SET total_amount_paid = %s, total_principal_paid = %s
-			WHERE name = %s """, (loan.total_amount_paid + self.principal_amount_paid,
+			WHERE name = %s """, (loan.total_amount_paid + self.amount_paid,
 			loan.total_principal_paid + self.principal_amount_paid, self.against_loan))
-
 
 		update_shortfall_status(self.against_loan, self.principal_amount_paid)
 
@@ -131,7 +130,7 @@ class LoanRepayment(AccountsController):
 				partial_paid_entry["interest_amount"])
 
 		frappe.db.sql(""" UPDATE `tabLoan` SET total_amount_paid = %s, total_principal_paid = %s
-			WHERE name = %s """, (loan.total_amount_paid - self.principal_amount_paid,
+			WHERE name = %s """, (loan.total_amount_paid - self.amount_paid,
 			loan.total_principal_paid - self.principal_amount_paid, self.against_loan))
 
 		if loan.status == "Loan Closure Requested":

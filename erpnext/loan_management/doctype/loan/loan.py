@@ -29,7 +29,7 @@ class Loan(AccountsController):
 	def validate_accounts(self):
 		for fieldname in ['payment_account', 'loan_account', 'interest_income_account', 'penalty_income_account']:
 			company = frappe.get_value("Account", self.get(fieldname), 'company')
-			print(company, self.company, self.get(fieldname))
+
 			if company != self.company:
 				frappe.throw(_("Account {0} does not belongs to company {1}").format(frappe.bold(self.get(fieldname)),
 					frappe.bold(self.company)))
@@ -59,9 +59,14 @@ class Loan(AccountsController):
 			frappe.throw("Loan Security Pledge is mandatory for secured loan")
 
 		if self.loan_security_pledge:
-			loan = frappe.db.get_value("Loan Security Pledge", self.loan_security_pledge, 'loan')
-			if loan:
-				frappe.throw(_("Loan Security Pledge already pledged against loan {0}").format(loan))
+			loan_security_details = frappe.db.get_value("Loan Security Pledge", self.loan_security_pledge,
+					['loan', 'company'], as_dict=1)
+
+			if loan_security_details.loan:
+				frappe.throw(_("Loan Security Pledge already pledged against loan {0}").format(loan_security_details.loan))
+
+			if loan_security_details.company != self.company:
+				frappe.throw(_("Loan Security Pledge Company and Loan Company must be same"))
 
 	def make_repayment_schedule(self):
 

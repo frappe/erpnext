@@ -50,7 +50,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.deductions[0].amount, 5000)
 		self.assertEqual(ss.deductions[1].amount, 5000)
 		self.assertEqual(ss.gross_pay, 78000)
-		self.assertEqual(ss.net_pay, 67418.0)
+		self.assertEqual(ss.net_pay, 68000.0)
 
 	def test_salary_slip_with_holidays_excluded(self):
 		no_of_days = self.get_no_of_days()
@@ -70,7 +70,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.deductions[0].amount, 5000)
 		self.assertEqual(ss.deductions[1].amount, 5000)
 		self.assertEqual(ss.gross_pay, 78000)
-		self.assertEqual(ss.net_pay, 67418.0)
+		self.assertEqual(ss.net_pay, 68000.0)
 
 	def test_payment_days(self):
 		no_of_days = self.get_no_of_days()

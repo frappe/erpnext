@@ -51,7 +51,6 @@ class LoanSecurityUnpledge(Document):
 			remaining_qty += unpledge_qty
 			unpledge_value += security_price - (security_price * security.haircut/100)
 
-		print("##########", unpledge_value, loan.total_principal_paid)
 		if unpledge_value > loan.total_principal_paid:
 			frappe.throw(_("Cannot Unpledge, loan security value is greater than the repaid amount"))
 

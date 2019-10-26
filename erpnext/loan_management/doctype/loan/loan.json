@@ -114,6 +114,7 @@
    "default": "Sanctioned",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
    "options": "Sanctioned\nPartially Disbursed\nDisbursed\nLoan Closure Requested\nClosed",
@@ -342,7 +343,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-10-10 13:50:18.776932",
+ "modified": "2019-10-24 23:04:31.633768",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
