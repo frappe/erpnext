@@ -66,7 +66,7 @@ def place_order():
 	from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))
 
-	if not cart_settings.allow_items_not_in_stock:
+	if not cint(cart_settings.allow_items_not_in_stock):
 		for item in sales_order.get("items"):
 			item.reserved_warehouse, is_stock_item = frappe.db.get_value("Item",
 				item.item_code, ["website_warehouse", "is_stock_item"])
@@ -537,3 +537,29 @@ def get_address_territory(address_name):
 
 def show_terms(doc):
 	return doc.tc_name
+
+@frappe.whitelist(allow_guest=True)
+def apply_coupon_code(applied_code,applied_referral_sales_partner):
+	quotation = True
+	if applied_code:
+		coupon_list=frappe.get_all('Coupon Code', filters={"docstatus": ("<", "2"), 'coupon_code':applied_code }, fields=['name'])
+		if coupon_list:
+			coupon_name=coupon_list[0].name
+			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
+			validate_coupon_code(coupon_name)
+			quotation = _get_cart_quotation()
+			quotation.coupon_code=coupon_name
+			quotation.flags.ignore_permissions = True
+			quotation.save()
+			if applied_referral_sales_partner:
+				sales_partner_list=frappe.get_all('Sales Partner', filters={'docstatus': 0, 'referral_code':applied_referral_sales_partner }, fields=['name'])
+				if sales_partner_list:
+					sales_partner_name=sales_partner_list[0].name
+					quotation.referral_sales_partner=sales_partner_name
+					quotation.flags.ignore_permissions = True
+					quotation.save()
+		else:
+			frappe.throw(_("Please enter valid coupon code !!"))
+	else:
+		frappe.throw(_("Please enter coupon code !!"))
+	return quotation

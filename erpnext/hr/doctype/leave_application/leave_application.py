@@ -404,8 +404,11 @@ def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day 
 	if cint(half_day) == 1:
 		if from_date == to_date:
 			number_of_days = 0.5
-		else:
+		elif half_day_date and half_day_date <= to_date:
 			number_of_days = date_diff(to_date, from_date) + .5
+		else:
+			number_of_days = date_diff(to_date, from_date) + 1
+
 	else:
 		number_of_days = date_diff(to_date, from_date) + 1
 
@@ -549,8 +552,16 @@ def get_leaves_for_period(employee, leave_type, from_date, to_date):
 			if leave_entry.to_date > getdate(to_date):
 				leave_entry.to_date = to_date
 
+			half_day = 0
+			half_day_date = None
+			# fetch half day date for leaves with half days
+			if leave_entry.leaves % 1:
+				half_day = 1
+				half_day_date = frappe.db.get_value('Leave Application',
+					{'name': leave_entry.transaction_name}, ['half_day_date'])
+
 			leave_days += get_number_of_leave_days(employee, leave_type,
-				leave_entry.from_date, leave_entry.to_date) * -1
+				leave_entry.from_date, leave_entry.to_date, half_day, half_day_date) * -1
 
 	return leave_days
 
@@ -562,7 +573,7 @@ def skip_expiry_leaves(leave_entry, date):
 def get_leave_entries(employee, leave_type, from_date, to_date):
 	''' Returns leave entries between from_date and to_date '''
 	return frappe.db.sql("""
-		select employee, leave_type, from_date, to_date, leaves, transaction_type, is_carry_forward
+		select employee, leave_type, from_date, to_date, leaves, transaction_type, is_carry_forward, transaction_name
 		from `tabLeave Ledger Entry`
 		where employee=%(employee)s and leave_type=%(leave_type)s
 			and docstatus=1
