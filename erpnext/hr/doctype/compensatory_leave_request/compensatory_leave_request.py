@@ -53,8 +53,10 @@ class CompensatoryLeaveRequest(Document):
 		if leave_period:
 			leave_allocation = self.exists_allocation_for_period(leave_period)
 			if leave_allocation:
-				leave_allocation.total_leaves_allocated += date_difference
-				leave_allocation.db_set("total_leaves_allocated", leave_allocation.total_leaves_allocated, update_modified=False)
+				leave_allocation.new_leaves_allocated += date_difference
+				leave_allocation.validate()
+				leave_allocation.db_set("new_leaves_allocated", leave_allocation.total_leaves_allocated)
+				leave_allocation.db_set("total_leaves_allocated", leave_allocation.total_leaves_allocated)
 
 				# generate additional ledger entry for the new compensatory leaves off
 				create_additional_leave_ledger_entry(leave_allocation, date_difference, add_days(self.work_end_date, 1))
@@ -73,9 +75,14 @@ class CompensatoryLeaveRequest(Document):
 			leave_allocation = frappe.get_doc("Leave Allocation", self.leave_allocation)
 			if leave_allocation:
 				leave_allocation.new_leaves_allocated -= date_difference
-				if leave_allocation.total_leaves_allocated - date_difference <= 0:
-					leave_allocation.total_leaves_allocated = 0
-				leave_allocation.submit()
+				if leave_allocation.new_leaves_allocated - date_difference <= 0:
+					leave_allocation.new_leaves_allocated = 0
+				leave_allocation.validate()
+				leave_allocation.db_set("new_leaves_allocated", leave_allocation.total_leaves_allocated)
+				leave_allocation.db_set("total_leaves_allocated", leave_allocation.total_leaves_allocated)
+
+				# create reverse entry on cancelation
+				create_additional_leave_ledger_entry(leave_allocation, date_difference * -1, add_days(self.work_end_date, 1))
 
 	def exists_allocation_for_period(self, leave_period):
 		leave_allocation = frappe.db.sql("""
