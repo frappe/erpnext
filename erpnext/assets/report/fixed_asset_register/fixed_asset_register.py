@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import cstr
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
@@ -149,12 +150,12 @@ def get_finance_book_value_map(finance_book=''):
 		FROM `tabAsset Finance Book`
 		WHERE
 			parentfield='finance_books'
-			AND finance_book=%s''', (finance_book)))
+			AND ifnull(finance_book, '')=%s''', cstr(finance_book)))
 
 def get_purchase_receipt_supplier_map():
 	return frappe._dict(frappe.db.sql(''' Select
 		pr.name, pr.supplier
-		FROM `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri 
+		FROM `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri
 		WHERE
 			pri.parent = pr.name
 			AND pri.is_fixed_asset=1
@@ -164,7 +165,7 @@ def get_purchase_receipt_supplier_map():
 def get_purchase_invoice_supplier_map():
 	return frappe._dict(frappe.db.sql(''' Select
 		pi.name, pi.supplier
-		FROM `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pii 
+		FROM `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pii
 		WHERE
 			pii.parent = pi.name
 			AND pii.is_fixed_asset=1
