@@ -641,3 +641,4 @@ erpnext.patches.v12_0.set_produced_qty_field_in_sales_order_for_work_order
 erpnext.patches.v12_0.generate_leave_ledger_entries
 erpnext.patches.v12_0.set_default_shopify_app_type
 erpnext.patches.v12_0.replace_accounting_with_accounts_in_home_settings
+execute:frappe.db.set_value("Accounts Settings", None, "add_taxes_from_item_tax_template", 1) #setting default tax template enable
