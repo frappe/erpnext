@@ -37,9 +37,11 @@ class BOM(WebsiteGenerator):
 			names = [name.split(self.item)[-1][1:] for name in names]
 
 			# split by (-) if cancelled
-			names = [cint(name.split('-')[-1]) for name in names]
-
-			idx = max(names) + 1
+			if names:
+				names = [cint(name.split('-')[-1]) for name in names]
+				idx = max(names) + 1
+			else:
+				idx = 1
 		else:
 			idx = 1
 
