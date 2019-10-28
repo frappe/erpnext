@@ -6,7 +6,7 @@ frappe.ui.form.on('Asset Movement', {
 		if (frm.doc.reference_name && frm.doc.reference_doctype){
 			const reference_doctype = frm.doc.reference_doctype === 'Purchase Invoice' ? 'purchase_invoice' : 'purchase_receipt';
 			// On selection of reference name,
-			// sets query to display assets linked to that reference doc 
+			// sets query to display assets linked to that reference doc
 			frm.set_query('asset', 'assets', function() {
 				return {
 					filters: {
@@ -53,4 +53,4 @@ frappe.ui.form.on('Asset Movement Item', {
 			});
 		}
 	}
-})
+});

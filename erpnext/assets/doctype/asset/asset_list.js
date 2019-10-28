@@ -47,6 +47,6 @@ frappe.listview_settings['Asset'] = {
 					}
 				}
 			});
-		})
+		});
 	},
 }
