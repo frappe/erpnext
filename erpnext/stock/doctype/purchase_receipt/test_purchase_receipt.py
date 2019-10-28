@@ -288,8 +288,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 			serial_no=serial_no, basic_rate=100, do_not_submit=True)
 		self.assertRaises(SerialNoDuplicateError, se.submit)
 
-	def test_serialized_asset_item(self):
-		asset_item = "Test Serialized Asset Item"
+	def test_auto_asset_creation(self):
+		asset_item = "Test Asset Item"
 
 		if not frappe.db.exists('Item', asset_item):
 			asset_category = frappe.get_all('Asset Category')
@@ -315,30 +315,30 @@ class TestPurchaseReceipt(unittest.TestCase):
 				asset_category = doc.name
 
 			item_data = make_item(asset_item, {'is_stock_item':0,
-				'stock_uom': 'Box', 'is_fixed_asset': 1, 'has_serial_no': 1,
-				'asset_category': asset_category, 'serial_no_series': 'ABC.###'})
+				'stock_uom': 'Box', 'is_fixed_asset': 1,
+				'asset_category': asset_category, 'asset_naming_series': 'ABC.###'})
 			asset_item = item_data.item_code
 
 		pr = make_purchase_receipt(item_code=asset_item, qty=3)
-		asset = frappe.db.get_value('Asset', {'purchase_receipt': pr.name}, 'name')
-		asset_movement = frappe.db.get_value('Asset Movement', {'reference_name': pr.name}, 'name')
-		serial_nos = frappe.get_all('Serial No', {'asset': asset}, 'name')
+		assets = frappe.db.get_all('Asset', filters={'purchase_receipt': pr.name})
 
-		self.assertEquals(len(serial_nos), 3)
+		self.assertEquals(len(assets), 3)
 
-		location = frappe.db.get_value('Serial No', serial_nos[0].name, 'location')
+		location = frappe.db.get_value('Asset', assets[0].name, 'location')
 		self.assertEquals(location, "Test Location")
 
-		frappe.db.set_value("Asset", asset, "purchase_receipt", "")
-		frappe.db.set_value("Purchase Receipt Item", pr.items[0].name, "asset", "")
+		asset_movement_name = frappe.db.get_value("Asset Movement", { "reference_name": pr.name }, "name")
+		asset_movement = frappe.get_doc("Asset Movement", asset_movement_name)
+		asset_movement.cancel()
+		asset_movement.delete()
 
+		for asset in assets:
+			asset.load_from_db()
+			asset.cancel()
+			self.assertEqual(asset.docstatus, 2)
+		
 		pr.load_from_db()
-
 		pr.cancel()
-		serial_nos = frappe.get_all('Serial No', {'asset': asset}, 'name') or []
-		self.assertEquals(len(serial_nos), 0)
-		#frappe.db.sql("delete from `tabLocation")
-		frappe.db.sql("delete from `tabAsset`")
 
 	def test_purchase_receipt_for_enable_allow_cost_center_in_entry_of_bs_account(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
