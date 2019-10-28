@@ -315,7 +315,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 				asset_category = doc.name
 
 			item_data = make_item(asset_item, {'is_stock_item':0,
-				'stock_uom': 'Box', 'is_fixed_asset': 1,
+				'stock_uom': 'Box', 'is_fixed_asset': 1, 'auto_create_assets': 1,
 				'asset_category': asset_category, 'asset_naming_series': 'ABC.###'})
 			asset_item = item_data.item_code
 
@@ -326,19 +326,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		location = frappe.db.get_value('Asset', assets[0].name, 'location')
 		self.assertEquals(location, "Test Location")
-
-		asset_movement_name = frappe.db.get_value("Asset Movement", { "reference_name": pr.name }, "name")
-		asset_movement = frappe.get_doc("Asset Movement", asset_movement_name)
-		asset_movement.cancel()
-		asset_movement.delete()
-
-		for asset in assets:
-			asset.load_from_db()
-			asset.cancel()
-			self.assertEqual(asset.docstatus, 2)
-		
-		pr.load_from_db()
-		pr.cancel()
 
 	def test_purchase_receipt_for_enable_allow_cost_center_in_entry_of_bs_account(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
