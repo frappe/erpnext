@@ -16,16 +16,13 @@ class LandedCostVoucher(Document):
 			if pr.receipt_document_type and pr.receipt_document:
 				pr_items = frappe.db.sql("""select pr_item.item_code, pr_item.description,
 					pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.name,
-					pr_item.cost_center, pr_item.asset
+					pr_item.cost_center, pr_item.is_fixed_asset
 					from `tab{doctype} Item` pr_item where parent = %s
 					and exists(select name from tabItem
 						where name = pr_item.item_code and (is_stock_item = 1 or is_fixed_asset=1))
 					""".format(doctype=pr.receipt_document_type), pr.receipt_document, as_dict=True)
 
 				for d in pr_items:
-					if d.asset and frappe.db.get_value("Asset", d.asset, 'docstatus') == 1:
-						continue
-
 					item = self.append("items")
 					item.item_code = d.item_code
 					item.description = d.description
@@ -37,15 +34,16 @@ class LandedCostVoucher(Document):
 					item.receipt_document_type = pr.receipt_document_type
 					item.receipt_document = pr.receipt_document
 					item.purchase_receipt_item = d.name
+					item.is_fixed_asset = d.is_fixed_asset
 
 	def validate(self):
 		self.check_mandatory()
-		self.validate_purchase_receipts()
-		self.set_total_taxes_and_charges()
 		if not self.get("items"):
 			self.get_items_from_purchase_receipts()
 		else:
 			self.validate_applicable_charges_for_item()
+		self.validate_purchase_receipts()
+		self.set_total_taxes_and_charges()
 
 	def check_mandatory(self):
 		if not self.get("purchase_receipts"):
@@ -64,6 +62,7 @@ class LandedCostVoucher(Document):
 		for item in self.get("items"):
 			if not item.receipt_document:
 				frappe.throw(_("Item must be added using 'Get Items from Purchase Receipts' button"))
+
 			elif item.receipt_document not in receipt_documents:
 				frappe.throw(_("Item Row {0}: {1} {2} does not exist in above '{1}' table")
 					.format(item.idx, item.receipt_document_type, item.receipt_document))
@@ -109,7 +108,7 @@ class LandedCostVoucher(Document):
 			doc = frappe.get_doc(d.receipt_document_type, d.receipt_document)
 			
 			# check if there are {qty} assets created and linked to this receipt document
-			self.validate_asset_qty(d.receipt_document_type, doc)
+			self.validate_asset_qty_and_status(d.receipt_document_type, doc)
 
 			# set landed cost voucher amount in pr item
 			doc.set_landed_cost_voucher_amount()
@@ -136,16 +135,21 @@ class LandedCostVoucher(Document):
 			doc.update_stock_ledger(via_landed_cost_voucher=True)
 			doc.make_gl_entries()
 
-	def validate_asset_qty(self, receipt_document_type, receipt_document):
+	def validate_asset_qty_and_status(self, receipt_document_type, receipt_document):
 		receipt_document_type = 'purchase_invoice' if receipt_document_type == 'Purchase Invoice' \
 			else 'purchase_receipt'
 
 		for item in receipt_document.get("items"):
 			if item.is_fixed_asset:
 				docs = frappe.db.get_all('Asset', filters={ receipt_document_type: receipt_document.get('name') })
-				if not docs and len(docs) != item.qty:
+				if not docs or len(docs) != item.qty:
 					frappe.throw(_('There are not enough asset created or linked to {0}. \
 						Please create or link {1} Assets with respective document.').format(receipt_document.get('name'), item.qty))
+				if docs:
+					for d in docs:
+						if d.docstatus == 1:
+							frappe.throw(_('Purchase Document {0} has submitted assets.').format(receipt_document.get('name')))
+				
 	
 	def update_rate_in_serial_no_for_non_asset_items(self, receipt_document):
 		for item in receipt_document.get("items"):
