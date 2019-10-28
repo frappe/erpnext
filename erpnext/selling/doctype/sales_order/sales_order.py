@@ -645,11 +645,14 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 
 		if source_parent.project:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
-		if not target.cost_center and target.item_code:
+		if target.item_code:
 			item = get_item_defaults(target.item_code, source_parent.company)
 			item_group = get_item_group_defaults(target.item_code, source_parent.company)
-			target.cost_center = item.get("selling_cost_center") \
+			cost_center = item.get("selling_cost_center") \
 				or item_group.get("selling_cost_center")
+
+			if cost_center:
+				target.cost_center = cost_center
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
