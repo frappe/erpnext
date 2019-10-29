@@ -59,26 +59,21 @@ class LoanSecurityUnpledge(Document):
 		else:
 			self.db_set('unpledge_type', 'Partially Pledged')
 
-@frappe.whitelist()
-def approve_unpledge_request(loan, unpledge_request, unpledge_type):
+	def on_update_after_submit(self):
+		if self.status == "Approved":
+			frappe.db.sql("""
+				UPDATE
+					`tabPledge` p, `tabUnpledge` u, `tabLoan Security Pledge` lsp,
+					`tabLoan Security Unpledge` lsu SET p.qty = (p.qty - u.qty)
+				WHERE
+					lsp.loan = %s
+					AND lsu.status = 'Requested'
+					AND u.parent = %s
+					AND p.parent = u.against_pledge
+					AND p.loan_security = u.loan_security""",(self.loan, self.name))
 
-	frappe.db.sql("""
-		UPDATE
-			`tabPledge` p, `tabUnpledge` u, `tabLoan Security Pledge` lsp,
-			`tabLoan Security Unpledge` lsu SET p.qty = (p.qty - u.qty)
-		WHERE
-			lsp.loan = %s
-			AND lsu.status = 'Requested'
-			AND u.parent = %s
-			AND p.parent = u.against_pledge
-			AND p.loan_security = u.loan_security""",(loan, unpledge_request), debug=1)
+			frappe.db.sql("""UPDATE `tabLoan Security Pledge`
+				SET status = %s WHERE loan = %s""", (self.unpledge_type, self.loan))
 
-	frappe.db.sql("""UPDATE `tabLoan Security Unpledge`
-		SET status = "Approved", unpledge_time = %s
-		WHERE name = %s""", (get_datetime(), unpledge_request))
-
-	frappe.db.sql("""UPDATE `tabLoan Security Pledge`
-		SET status = %s WHERE loan = %s""", (unpledge_type, loan))
-
-	if unpledge_type == 'Unpledged':
-		frappe.db.set_value("Loan", loan, 'status', 'Closed')
+			if self.unpledge_type == 'Unpledged':
+				frappe.db.set_value("Loan", self.loan, 'status', 'Closed')

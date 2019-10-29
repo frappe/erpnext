@@ -45,12 +45,13 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "Requested",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
    "options": "Requested\nApproved",
-   "read_only": 1
+   "permlevel": 1
   },
   {
    "fieldname": "unpledge_time",
@@ -103,7 +104,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-10-23 04:37:25.068200",
+ "modified": "2019-10-28 07:41:47.084882",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Unpledge",
@@ -135,6 +136,18 @@
    "role": "Loan Manager",
    "share": 1,
    "submit": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
+   "share": 1,
    "write": 1
   }
  ],

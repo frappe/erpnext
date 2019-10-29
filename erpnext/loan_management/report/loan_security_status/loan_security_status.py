@@ -102,7 +102,7 @@ def get_data(filters):
 			AND c.parent = p.name
 			AND p.company = %(company)s
 			{conditions}
-	""".format(conditions = conditions), (filters), as_dict=1)
+	""".format(conditions = conditions), (filters), as_dict=1) #nosec
 
 	for pledge in loan_security_pledges:
 		row = {}
