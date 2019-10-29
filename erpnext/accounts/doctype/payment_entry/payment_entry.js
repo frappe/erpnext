@@ -308,7 +308,7 @@ frappe.ui.form.on('Payment Entry', {
 							() => {
 								frm.set_party_account_based_on_party = false;
 								if (r.message.bank_account) {
-									frm.set_value("bank_account", r.message.bank_account);
+									frm.set_value("party_bank_account", r.message.bank_account);
 								}
 							}
 						]);
