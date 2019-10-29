@@ -22,7 +22,6 @@ class Issue(Document):
 		return "{0}: {1}".format(_(self.status), self.subject)
 
 	def validate(self):
-		self.flags.ignore_disabled = 1
 		if self.is_new() and self.via_customer_portal:
 			self.flags.create_communication = True
 
