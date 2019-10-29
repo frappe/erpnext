@@ -696,11 +696,11 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 				and against_voucher_type = 'Expense Claim'
 				and against_voucher is not null and against_voucher != ''
 			group by against_voucher_type, against_voucher
-		""".format(payment_dr_or_cr=dr_or_cr), {
-			"party_type": party_type,
-			"party": party,
-			"account": account
-		}, as_dict=True)
+			""".format(payment_dr_or_cr=dr_or_cr), { #nosec
+				"party_type": party_type,
+				"party": party,
+				"account": account
+			}, as_dict=True)
 
 	advance_allocated_map = frappe._dict()
 	for d in advance_allocated:
