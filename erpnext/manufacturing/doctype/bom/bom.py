@@ -39,9 +39,11 @@ class BOM(WebsiteGenerator):
 			names = [d[-1][1:] for d in filter(lambda x: len(x) > 1 and x[-1], names)]
 
 			# split by (-) if cancelled
-			names = [cint(name.split('-')[-1]) for name in names]
-
-			idx = max(names) + 1
+			if names:
+				names = [cint(name.split('-')[-1]) for name in names]
+				idx = max(names) + 1
+			else:
+				idx = 1
 		else:
 			idx = 1
 
@@ -290,7 +292,8 @@ class BOM(WebsiteGenerator):
 		return valuation_rate
 
 	def manage_default_bom(self):
-		""" Uncheck others if current one is selected as default,
+		""" Uncheck others if current one is selected as default or
+			check the current one as default if it the only bom for the selected item,
 			update default bom in item master
 		"""
 		if self.is_default and self.is_active:
@@ -299,6 +302,9 @@ class BOM(WebsiteGenerator):
 			item = frappe.get_doc("Item", self.item)
 			if item.default_bom != self.name:
 				frappe.db.set_value('Item', self.item, 'default_bom', self.name)
+		elif not frappe.db.exists(dict(doctype='BOM', docstatus=1, item=self.item, is_default=1)) \
+			and self.is_active:
+			frappe.db.set(self, "is_default", 1)
 		else:
 			frappe.db.set(self, "is_default", 0)
 			item = frappe.get_doc("Item", self.item)
