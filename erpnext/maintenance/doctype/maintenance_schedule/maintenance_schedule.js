@@ -24,6 +24,7 @@ frappe.ui.form.on('Maintenance Schedule', {
 			setTimeout(()=> { 
 				debugger;
 				frm.toggle_display('generate_schedule',!(frm.is_new()));
+				frm.toggle_display('schedule',!(frm.is_new()));
 			},10);
 	},
 	customer: function(frm) {
