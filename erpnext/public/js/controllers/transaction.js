@@ -1422,6 +1422,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				'item_code': item.item_code,
 				'posting_date': me.frm.doc.posting_date || frappe.datetime.nowdate(),
 			}
+
+			if (doc.is_return) {
+				filters["is_return"] = 1;
+			}
+
 			if (item.warehouse) filters["warehouse"] = item.warehouse;
 
 			return {
