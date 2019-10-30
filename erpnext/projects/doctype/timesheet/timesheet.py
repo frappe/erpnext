@@ -372,10 +372,14 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 				COALESCE(ts.sales_invoice, tsd.sales_invoice) AS sales_invoice, tsd.project
 			FROM `tabTimesheet` ts, `tabTimesheet Detail` tsd
 			WHERE tsd.parent = ts.name AND
-				(ts.sales_invoice IN %s OR tsd.sales_invoice IN %s OR tsd.project IN %s)
-			ORDER BY end_date ASC
+				(
+					ts.sales_invoice IN %(sales_invoices)s OR
+					tsd.sales_invoice IN %(sales_invoices)s OR
+					tsd.project IN %(projects)s
+				)
+			ORDER BY `end_date` ASC
 			LIMIT {0}, {1}
-		'''.format(limit_start, limit_page_length), [sales_invoices, sales_invoices, projects], as_dict=True)
+		'''.format(limit_start, limit_page_length), dict(sales_invoices=sales_invoices, projects=projects), as_dict=True) #nosec
 
 	return timesheets
 
