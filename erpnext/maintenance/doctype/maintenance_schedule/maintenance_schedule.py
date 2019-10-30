@@ -150,7 +150,7 @@ class MaintenanceSchedule(TransactionBase):
 			elif not d.no_of_visits:
 				throw(_("Please mention no of visits required"))
 			elif not d.sales_person:
-				throw(_("Please select Incharge Person's name"))
+				throw(_("Please select a Sales Person for item: {0}".format(d.item_name)))
 
 			if getdate(d.start_date) >= getdate(d.end_date):
 				throw(_("Start date should be less than end date for Item {0}").format(d.item_code))
