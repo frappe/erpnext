@@ -153,14 +153,17 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	conditions = []
 
 	#Get searchfields from meta and use in Item Link field query
-	meta = frappe.get_meta("Item")
+	meta = frappe.get_meta("Item", cached=True)
 	searchfields = meta.get_search_fields()
 
-	fields = [f for f in searchfields if not f in ["name", "item_group", "description"]]
-	fields = ", ".join(fields)
+	if "description" in searchfields:
+		searchfields.remove("description")
 
-	searchfields = searchfields + [f for f in [searchfield or "name", "item_code", "item_group", "item_name"]
-		if not f in searchfields]
+	columns = [field for field in searchfields if not field in ["name", "item_group", "description"]]
+	columns = ", ".join(columns)
+
+	searchfields = searchfields + [field for field in[searchfield or "name", "item_code", "item_group", "item_name"]
+		if not field in searchfields]
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
 	description_cond = ''
@@ -174,7 +177,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		tabItem.item_group,
 		if(length(tabItem.description) > 40, \
 			concat(substr(tabItem.description, 1, 40), "..."), description) as description,
-		{fields}
+		{columns}
 		from tabItem
 		where tabItem.docstatus < 2
 			and tabItem.has_variants=0
@@ -190,7 +193,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			name, item_name
 		limit %(start)s, %(page_len)s """.format(
 			key=searchfield,
-			fields=fields,
+			columns=columns,
 			scond=searchfields,
 			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
 			mcond=get_match_cond(doctype).replace('%', '%%'),
