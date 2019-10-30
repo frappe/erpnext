@@ -350,13 +350,25 @@ def make_contact(args, is_primary_contact=1):
 			'link_name': args.get('name')
 		}]
 	})
-	contact.add_email(args.get('email_id'))
-	contact.add_phone(args.get('mobile_no'))
+	if args.get('email_id'):
+		contact.add_email(args.get('email_id'), is_primary=True)
+	if args.get('mobile_no'):
+		contact.add_phone(args.get('mobile_no'), is_primary_mobile_no=True)
 	contact.insert()
 
 	return contact
 
 def make_address(args, is_primary_address=1):
+	reqd_fields = []
+	for field in ['city', 'country']:
+		if not args.get(field):
+			reqd_fields.append( '<li>' + field.title() + '</li>')
+
+	if reqd_fields:
+		msg = _("Following fields are mandatory to create address:")
+		frappe.throw("{0} <br><br> <ul>{1}</ul>".format(msg, '\n'.join(reqd_fields)),
+			title = _("Missing Values Required"))
+
 	address = frappe.get_doc({
 		'doctype': 'Address',
 		'address_title': args.get('name'),

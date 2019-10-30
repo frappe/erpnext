@@ -10,7 +10,7 @@
   "account_type",
   "balance",
   "col_break1",
-  "bank_account_no",
+  "bank_account",
   "party_type",
   "party",
   "party_balance",
@@ -88,12 +88,6 @@
   {
    "fieldname": "col_break1",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "bank_account_no",
-   "fieldtype": "Link",
-   "label": "Bank Account No",
-   "options": "Bank Account"
   },
   {
    "fieldname": "party_type",
@@ -266,11 +260,17 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-07-16 17:12:08.238334",
+ "modified": "2019-09-12 12:16:17.588399",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

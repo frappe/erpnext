@@ -4,14 +4,23 @@
 			<div class="col-sm-2 ellipsis hidden-xs">
 				{%= frappe.datetime.str_to_user(date) %}
 			</div>
-			<div class="col-xs-8 col-sm-4 ellipsis list-subject">
+			<div class="col-sm-2 ellipsis list-subject">
 				{{ description }}
 			</div>
-			<div class="col-sm-2 ellipsis hidden-xs">
+			<div class="col-sm-2 ellipsis list-subject">
+				{{ reference_number }}
+			</div>
+			<div class="col-sm-1 ellipsis hidden-xs">
 				{%= format_currency(debit, currency) %}
 			</div>
-			<div class="col-sm-2 ellipsis hidden-xs">
+			<div class="col-sm-1 ellipsis hidden-xs">
 				{%= format_currency(credit, currency) %}
+			</div>
+			<div class="col-sm-1 ellipsis list-subject">
+				{%= format_currency(allocated_amount, currency) %}
+			</div>
+			<div class="col-sm-1 ellipsis list-subject">
+				{%= format_currency(unallocated_amount, currency) %}
 			</div>
 			<div class="col-sm-1 ellipsis hidden-xs">
 				{{ currency }}
