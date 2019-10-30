@@ -1560,7 +1560,7 @@ DocType: Sales Invoice,Payment Due Date,Tarehe ya Kutayarisha Malipo
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Qty iliyohifadhiwa: Wingi imeamuru kuuzwa, lakini haijafikishwa."
 DocType: Drug Prescription,Interval UOM,Muda wa UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Pitia tena, ikiwa anwani iliyochaguliwa imebadilishwa baada ya kuokoa"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Qty iliyohifadhiwa kwa Subcontract: Wingi wa malighafi kutengeneza vitu visivyotengwa.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Qty iliyohifadhiwa kwa Subcontract: Wingi wa malighafi kutengeneza vitu visivyotengwa.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Tofauti ya kipengee {0} tayari ipo na sifa sawa
 DocType: Item,Hub Publishing Details,Maelezo ya Uchapishaji wa Hub
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;Kufungua&#39;

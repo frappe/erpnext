@@ -1572,7 +1572,7 @@ DocType: Sales Invoice,Payment Due Date,Maksājuma Due Date
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Reserved Daudzums: pasūtīts pārdod daudzums, bet nav sniegusi."
 DocType: Drug Prescription,Interval UOM,Intervāls UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Atkārtoti atlasiet, ja pēc saglabāšanas izvēlētā adrese tiek rediģēta"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,"Rezervētais daudzums apakšlīgumam: Izejvielu daudzums, lai izgatavotu apakšsavilkumus."
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,"Rezervētais daudzums apakšlīgumam: Izejvielu daudzums, lai izgatavotu apakšsavilkumus."
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Postenis Variant {0} jau eksistē ar tiem pašiem atribūtiem
 DocType: Item,Hub Publishing Details,Hub Publicēšanas informācija
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&quot;Atklāšana&quot;
