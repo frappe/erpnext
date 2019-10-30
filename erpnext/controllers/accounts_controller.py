@@ -775,7 +775,7 @@ class AccountsController(TransactionBase):
 		item_meta = frappe.get_meta(self.doctype + " Item")
 		count = 0
 
-		sum_fields = ['qty', 'stock_qty', 'alt_uom_qty', 'total_weight', 'amount', 'net_amount']
+		sum_fields = ['qty', 'stock_qty', 'total_weight', 'amount', 'net_amount']
 		rate_fields = [('rate', 'amount'), ('net_rate', 'net_amount'), ('weight_per_unit', 'total_weight')]
 
 		base_fields = [('base_' + f, f) for f in sum_fields if item_meta.has_field('base_' + f)]
