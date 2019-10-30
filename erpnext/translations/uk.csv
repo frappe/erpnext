@@ -1424,7 +1424,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1574,7 +1574,7 @@ DocType: Sales Invoice,Payment Due Date,Дата платежу
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Кількість зарезервованих: кількість замовлена на продаж, але не доставлена."
 DocType: Drug Prescription,Interval UOM,Інтервал УОМ
 DocType: Customer,"Reselect, if the chosen address is edited after save","Змініть вибір, якщо обрана адреса буде відредагована після збереження"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,"Кількість зарезервованих для субпідряду: кількість сировини для виготовлення предметів, що віднімаються на підряд."
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,"Кількість зарезервованих для субпідряду: кількість сировини для виготовлення предметів, що віднімаються на підряд."
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Вже існує варіант позиції {0} з такими атрибутами
 DocType: Item,Hub Publishing Details,Публікація концентратора
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',"""Відкривається"""
@@ -4165,7 +4165,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -5383,11 +5383,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,"Виберіть співробітника, щоб заздалегідь отримати працівника."
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,"Будь ласка, виберіть дійсну дату"
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,Виберіть характер вашого бізнесу.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -5593,7 +5593,7 @@ apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Add more items or open fu
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Delivery Notes {0} must be cancelled before cancelling this Sales Order,Доставка Примітки {0} має бути скасований до скасування цього замовлення клієнта
 apps/erpnext/erpnext/utilities/user_progress.py,Go to Users,Перейти до Користувачів
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Paid amount + Write Off Amount can not be greater than Grand Total,"Оплачена сума + Сума списання не може бути більше, ніж загальний підсумок"
-apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,{0} is not a valid Batch Number for Item {1},"{0} не є допустимим номером партії 
+apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,{0} is not a valid Batch Number for Item {1},"{0} не є допустимим номером партії
 для товару {1}"
 apps/erpnext/erpnext/shopping_cart/cart.py,Please enter valid coupon code !!,Введіть дійсний код купона !!
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Note: There is not enough leave balance for Leave Type {0},Примітка: Недостатньо днів залишилося для типу відпусток {0}
@@ -6858,7 +6858,7 @@ DocType: Subscription Plan Detail,Plan,Планувати
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,Банк балансовий звіт за Головну книгу
 DocType: Job Applicant,Applicant Name,Заявник Ім&#39;я
 DocType: Authorization Rule,Customer / Item Name,Замовник / Назва товару
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 

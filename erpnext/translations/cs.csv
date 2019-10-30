@@ -1412,7 +1412,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1423,19 +1423,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Standardní daň šablona, která může být použita pro všechny prodejních transakcí. Tato šablona může obsahovat seznam daňových hlav a také další náklady / příjmy hlavy jako ""doprava"", ""pojištění"", ""manipulace"" atd. 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Standardní daň šablona, která může být použita pro všechny prodejních transakcí. Tato šablona může obsahovat seznam daňových hlav a také další náklady / příjmy hlavy jako ""doprava"", ""pojištění"", ""manipulace"" atd.
 
- #### Poznámka: 
+ #### Poznámka:
 
  daňovou sazbu, vy definovat zde bude základní sazba daně pro všechny ** položky **. Pokud jsou položky ** **, které mají různé ceny, musí být přidány v ** Položka daních ** stůl v ** položky ** mistra.
 
- #### Popis sloupců 
+ #### Popis sloupců
 
- 1. Výpočet Type: 
+ 1. Výpočet Type:
  - To může být na ** Čistý Total ** (což je součet základní částky).
  - ** Na předchozí řady Total / Částka ** (pro kumulativní daní a poplatků). Zvolíte-li tuto možnost, bude daň se použije jako procento z předchozí řady (v daňové tabulky) množství nebo celkem.
  - ** Aktuální ** (jak je uvedeno).
- 2. Účet Hlava: kniha účtu, pod kterým se bude tato daň rezervovat 
+ 2. Účet Hlava: kniha účtu, pod kterým se bude tato daň rezervovat
  3. Nákladové středisko: V případě, že daň / poplatek je příjmem (jako poštovné) nebo nákladů je třeba rezervovat na nákladové středisko.
  4. Popis: Popis daně (které budou vytištěny v faktur / uvozovek).
  5. Rate: Sazba daně.
@@ -1580,7 +1580,7 @@ DocType: Sales Invoice,Payment Due Date,Splatno dne
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Reserved Množství: Množství objednal k prodeji, ale není doručena."
 DocType: Drug Prescription,Interval UOM,Interval UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Znovu vyberte, pokud je zvolená adresa po uložení upravena"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Vyhrazeno Množství pro subdodávky: Množství surovin pro výrobu subdodávek.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Vyhrazeno Množství pro subdodávky: Množství surovin pro výrobu subdodávek.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Bod Variant {0} již existuje se stejnými vlastnostmi
 DocType: Item,Hub Publishing Details,Podrobnosti o publikování Hubu
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',"""Otevírací"""
@@ -4148,7 +4148,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -4160,19 +4160,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","Standardní daň šablona, která může být použita pro všechny nákupních transakcí. Tato šablona může obsahovat seznam daňových hlav a také ostatní náklady hlavy jako ""doprava"", ""pojištění"", ""manipulace"" atd. 
+10. Add or Deduct: Whether you want to add or deduct the tax.","Standardní daň šablona, která může být použita pro všechny nákupních transakcí. Tato šablona může obsahovat seznam daňových hlav a také ostatní náklady hlavy jako ""doprava"", ""pojištění"", ""manipulace"" atd.
 
- #### Poznámka: 
+ #### Poznámka:
 
  daňovou sazbu, můžete definovat zde bude základní sazba daně pro všechny ** položky **. Pokud jsou položky ** **, které mají různé ceny, musí být přidány v ** Položka daních ** stůl v ** položky ** mistra.
 
- #### Popis sloupců 
+ #### Popis sloupců
 
- 1. Výpočet Type: 
+ 1. Výpočet Type:
  - To může být na ** Čistý Total ** (což je součet základní částky).
  - ** Na předchozí řady Total / Částka ** (pro kumulativní daní a poplatků). Zvolíte-li tuto možnost, bude daň se použije jako procento z předchozí řady (v daňové tabulky) množství nebo celkem.
  - ** Aktuální ** (jak je uvedeno).
- 2. Účet Hlava: kniha účtu, pod kterým se bude tato daň rezervovat 
+ 2. Účet Hlava: kniha účtu, pod kterým se bude tato daň rezervovat
  3. Nákladové středisko: V případě, že daň / poplatek je příjmem (jako poštovné) nebo nákladů je třeba rezervovat na nákladové středisko.
  4. Popis: Popis daně (které budou vytištěny v faktur / uvozovek).
  5. Rate: Sazba daně.
@@ -4542,7 +4542,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Všeobecné obchodní podmínky, které mohou být přidány do prodejů a nákupů.
 
- Příklady: 
+ Příklady:
 
  1. Platnost nabídky.
  1. Platební podmínky (v předstihu, na úvěr, část zálohy atd.)
@@ -4551,7 +4551,7 @@ Examples:
  1. Záruka, pokud existuje.
  1. Vrátí zásady.
  1. Podmínky přepravy, v případě potřeby.
- 1. Způsoby řešení sporů, náhrady škody, odpovědnosti za škodu, atd 
+ 1. Způsoby řešení sporů, náhrady škody, odpovědnosti za škodu, atd
  1. Adresa a kontakt na vaši společnost."
 DocType: Homepage Section,Section Based On,Sekce založená na
 DocType: Shopping Cart Settings,Show Apply Coupon Code,Zobrazit Použít kód kupónu
@@ -5387,11 +5387,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,"Vyberte zaměstnance, chcete-li zaměstnance předem."
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,Vyberte prosím platný datum
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,Vyberte podstatu svého podnikání.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6488,7 +6488,7 @@ apps/erpnext/erpnext/accounts/doctype/bank_account/test_bank_account.py,BankAcco
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Brokerage,Makléřská
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Attendance for employee {0} is already marked for this day,Účast na zaměstnance {0} je již označen pro tento den
 DocType: Work Order Operation,"in Minutes
-Updated via 'Time Log'","v minutách 
+Updated via 'Time Log'","v minutách
  aktualizovat přes ""Time Log"""
 DocType: Customer,From Lead,Od Leadu
 DocType: Amazon MWS Settings,Synch Orders,Synchronizace objednávek
@@ -6846,7 +6846,7 @@ DocType: Subscription Plan Detail,Plan,Plán
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,Výpis z bankovního účtu zůstatek podle hlavní knihy
 DocType: Job Applicant,Applicant Name,Žadatel Název
 DocType: Authorization Rule,Customer / Item Name,Zákazník / Název zboží
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -7465,7 +7465,7 @@ apps/erpnext/erpnext/selling/doctype/customer/customer.py,Please mention the Lea
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Start date should be less than end date for Item {0},Datum zahájení by měla být menší než konečné datum pro bod {0}
 DocType: Shift Type,Auto Attendance Settings,Nastavení automatické účasti
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Příklad:. ABCD ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Příklad:. ABCD #####
  Je-li série nastavuje a pořadové číslo není uvedeno v transakcích, bude vytvořen poté automaticky sériové číslo na základě této série. Pokud chcete vždy výslovně uvést pořadová čísla pro tuto položku. ponechte prázdné."
 DocType: Upload Attendance,Upload Attendance,Nahrát Návštěvnost
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,BOM and Manufacturing Quantity are required,BOM a výroba množství jsou povinné

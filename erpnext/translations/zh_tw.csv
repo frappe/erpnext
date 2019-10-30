@@ -1291,7 +1291,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1450,7 +1450,7 @@ apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js,Projected Qty,預
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.",保留數量：訂購數量待出售，但尚未交付。
 DocType: Drug Prescription,Interval UOM,間隔UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save",重新選擇，如果所選地址在保存後被編輯
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,分包合同的保留數量：製作分項目的原材料數量。
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,分包合同的保留數量：製作分項目的原材料數量。
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,項目變種{0}已經具有相同屬性的存在
 DocType: Item,Hub Publishing Details,Hub發布細節
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',“開放”
@@ -3809,7 +3809,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -4972,11 +4972,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,選擇一名員工以推進員工。
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,請選擇一個有效的日期
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,選擇您的業務的性質。
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6322,7 +6322,7 @@ DocType: Subscription Plan Detail,Plan,計劃
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,銀行對賬單餘額按總帳
 DocType: Job Applicant,Applicant Name,申請人名稱
 DocType: Authorization Rule,Customer / Item Name,客戶／品項名稱
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -6898,7 +6898,7 @@ apps/erpnext/erpnext/selling/doctype/customer/customer.py,Please mention the Lea
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Start date should be less than end date for Item {0},項目{0}的開始日期必須小於結束日期
 DocType: Shift Type,Auto Attendance Settings,自動出勤設置
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","例如：ABCD ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","例如：ABCD #####
 如果串聯設定並且序列號沒有在交易中提到，然後自動序列號將在此基礎上創建的系列。如果你總是想明確提到序號為這個項目。留空。"
 DocType: Upload Attendance,Upload Attendance,上傳考勤
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,BOM and Manufacturing Quantity are required,BOM和生產量是必需的

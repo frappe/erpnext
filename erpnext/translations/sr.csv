@@ -1424,7 +1424,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1435,19 +1435,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Стандардни порез шаблон који се може применити на свим продајним трансакцијама. Овај шаблон може садржати листу пореских глава и такође других шефова расходи / приходима као што су ""Схиппинг"", ""осигурање"", ""Руковање"" итд 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Стандардни порез шаблон који се може применити на свим продајним трансакцијама. Овај шаблон може садржати листу пореских глава и такође других шефова расходи / приходима као што су ""Схиппинг"", ""осигурање"", ""Руковање"" итд
 
- 
+
 
  #### Напомена Порески оцењујете дефине овде ће бити стандардна стопа пореза за све ** ставки **. Ако постоје ** ** артикала које имају различите цене, они морају да се додају у ** тачка порезу ** сто у ** тачка ** господара.
 
- #### Опис Цолумнс 
+ #### Опис Цолумнс
 
- 1. Обрачун Тип: 
+ 1. Обрачун Тип:
  - Ово може бити на ** Нето Укупно ** (да је збир основног износа).
  - ** На Претходна Ров укупно / Износ ** (за кумулативних наплати пореза и). Ако изаберете ову опцију, порез ће се применити као проценат претходни ред (у пореском табели) износу или укупно.
  - ** Стварни ** (као што је поменуто).
- 2. Рачун Шеф: Рачун књига под којима ће овај порез бити кажњен 
+ 2. Рачун Шеф: Рачун књига под којима ће овај порез бити кажњен
  3. Трошак Центар: Ако порески / наплаћује приход (као бродарства) или трошак треба да буде кажњен против трошкова Центра.
  4. Опис: Опис пореза (који ће бити штампан у фактурама / наводницима).
  5. Рате: Пореска стопа.
@@ -1593,7 +1593,7 @@ DocType: Sales Invoice,Payment Due Date,Плаћање Дуе Дате
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Резервисано Кол : Количина наредио за продају , али не испоручује ."
 DocType: Drug Prescription,Interval UOM,Интервал УОМ
 DocType: Customer,"Reselect, if the chosen address is edited after save","Поново изабери, ако је одабрана адреса уређена након чувања"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Количина резервисаног за подуговор: Количине сировина за израду предмета за подухват.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Количина резервисаног за подуговор: Количине сировина за израду предмета за подухват.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Тачка Варијанта {0} већ постоји са истим атрибутима
 DocType: Item,Hub Publishing Details,Детаљи издавања станице
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;Отварање&#39;
@@ -4180,7 +4180,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -4192,19 +4192,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","Стандардни порез шаблон који се може применити на све трансакције куповине. Овај шаблон може садржати листу пореских глава и такође других шефова трошкова као што су ""Схиппинг"", ""осигурање"", ""Руковање"" итд 
+10. Add or Deduct: Whether you want to add or deduct the tax.","Стандардни порез шаблон који се може применити на све трансакције куповине. Овај шаблон може садржати листу пореских глава и такође других шефова трошкова као што су ""Схиппинг"", ""осигурање"", ""Руковање"" итд
 
- 
+
 
  #### Напомена Тхе пореску стопу сте овде дефинишете ће бити стандардна стопа пореза за све ** ставки **. Ако постоје ** ** артикала које имају различите цене, они морају да се додају у ** тачка порезу ** сто у ** тачка ** господара.
 
- #### Опис Цолумнс 
+ #### Опис Цолумнс
 
- 1. Обрачун Тип: 
+ 1. Обрачун Тип:
  - Ово може бити на ** Нето Укупно ** (да је збир основног износа).
  - ** На Претходна Ров укупно / Износ ** (за кумулативних наплати пореза и). Ако изаберете ову опцију, порез ће се применити као проценат претходни ред (у пореском табели) износу или укупно.
  - ** Стварни ** (као што је поменуто).
- 2. Рачун Шеф: Рачун књига под којима ће овај порез бити кажњен 
+ 2. Рачун Шеф: Рачун књига под којима ће овај порез бити кажњен
  3. Трошак Центар: Ако порески / наплаћује приход (као бродарства) или трошак треба да буде кажњен против трошкова Центра.
  4. Опис: Опис пореза (који ће бити штампан у фактурама / наводницима).
  5. Рате: Пореска стопа.
@@ -4576,7 +4576,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Стандардним условима који се могу додати да продаје и куповине.
 
- 
+
 
  Примери: 1. Рок важења понуде.
  1. Услови плаћања (унапред, на кредит, део унапред итд).
@@ -4585,7 +4585,7 @@ Examples:
  1. Гаранција ако их има.
  1. Ретурнс Полици.
  1. Услови бродарства, по потреби.
- 1. Начини баве споровима, одштета, одговорности итд 
+ 1. Начини баве споровима, одштета, одговорности итд
  1. Адреса и контакт Ваше фирме."
 DocType: Homepage Section,Section Based On,Одељак на основу
 DocType: Shopping Cart Settings,Show Apply Coupon Code,Прикажи Примени код купона
@@ -5430,11 +5430,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,Изаберите запосленог да запослени напредује.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,Изаберите важећи датум
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,Изаберите природу вашег посла.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6545,7 +6545,7 @@ apps/erpnext/erpnext/accounts/doctype/bank_account/test_bank_account.py,BankAcco
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Brokerage,посредништво
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Attendance for employee {0} is already marked for this day,Присуство за запосленог {0} је већ означена за овај дан
 DocType: Work Order Operation,"in Minutes
-Updated via 'Time Log'","у Минутес 
+Updated via 'Time Log'","у Минутес
  ажурирано преко 'Време Приступи'"
 DocType: Customer,From Lead,Од Леад
 DocType: Amazon MWS Settings,Synch Orders,Синцх Ордерс
@@ -6904,7 +6904,7 @@ DocType: Subscription Plan Detail,Plan,План
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,Банка Биланс по Главној књизи
 DocType: Job Applicant,Applicant Name,Подносилац захтева Име
 DocType: Authorization Rule,Customer / Item Name,Кориснички / Назив
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -7527,7 +7527,7 @@ apps/erpnext/erpnext/selling/doctype/customer/customer.py,Please mention the Lea
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Start date should be less than end date for Item {0},Дата начала должна быть меньше даты окончания для Пункт {0}
 DocType: Shift Type,Auto Attendance Settings,Подешавања аутоматске посете
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Пример:. АБЦД ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Пример:. АБЦД #####
  Ако Радња је смештена и серијски број се не помиње у трансакцијама, онда аутоматски серијски број ће бити креирана на основу ове серије. Ако сте одувек желели да помиње експлицитно Сериал Нос за ову ставку. оставите празно."
 DocType: Upload Attendance,Upload Attendance,Уплоад присуствовање
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,BOM and Manufacturing Quantity are required,БОМ и Производња Количина се тражи

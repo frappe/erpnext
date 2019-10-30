@@ -1426,7 +1426,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1437,19 +1437,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","แม่แบบภาษีมาตรฐานที่สามารถนำไปใช้กับการทำธุรกรรมการขายทั้งหมด แม่แบบนี้สามารถมีรายชื่อของหัวภาษีและค่าใช้จ่ายอื่น ๆ ที่ยัง / หัวรายได้เช่น ""การจัดส่งสินค้า"", ""ประกันภัย"", ""การจัดการ"" ฯลฯ 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","แม่แบบภาษีมาตรฐานที่สามารถนำไปใช้กับการทำธุรกรรมการขายทั้งหมด แม่แบบนี้สามารถมีรายชื่อของหัวภาษีและค่าใช้จ่ายอื่น ๆ ที่ยัง / หัวรายได้เช่น ""การจัดส่งสินค้า"", ""ประกันภัย"", ""การจัดการ"" ฯลฯ
 
- #### หมายเหตุ 
+ #### หมายเหตุ
 
  อัตราภาษีคุณ กำหนดที่นี่จะเป็นอัตราภาษีมาตรฐานสำหรับรายการทั้งหมด ** ** หากมีรายการ ** ** ที่มีอัตราที่แตกต่างกันพวกเขาจะต้องถูกเพิ่มในรายการภาษี ** ** ตารางในรายการ ** ** ต้นแบบ
 
- #### คำอธิบายของคอลัมน์ 
+ #### คำอธิบายของคอลัมน์
 
- 1 การคำนวณประเภท: 
+ 1 การคำนวณประเภท:
  - นี้สามารถอยู่บน ** สุทธิรวม ** (นั่นคือผลรวมของจำนวนเงินขั้นพื้นฐาน)
  - ** เมื่อก่อนแถวทั้งหมด / จำนวนเงิน ** (สำหรับภาษีสะสมหรือค่าใช้จ่าย) ถ้าคุณเลือกตัวเลือกนี้ภาษีจะถูกนำมาใช้เป็นร้อยละของแถวก่อนหน้า (ในตารางภาษี) จำนวนเงินหรือทั้งหมด
  - ** ** ที่เกิดขึ้นจริง (กล่าว)
- 2 หัวหน้าบัญชี: บัญชีแยกประเภทบัญชีตามที่ภาษีนี้จะถูกจอง 
+ 2 หัวหน้าบัญชี: บัญชีแยกประเภทบัญชีตามที่ภาษีนี้จะถูกจอง
  3 ศูนย์ต้นทุน: ถ้าภาษี / ค่าใช้จ่ายเป็นรายได้ (เช่นค่าจัดส่ง) หรือค่าใช้จ่ายจะต้องมีการจองกับศูนย์ต้นทุน
  4 คำอธิบาย: คำอธิบายของภาษี (ที่จะได้รับการตีพิมพ์ในใบแจ้งหนี้ / คำพูด)
  5 อัตราอัตราภาษี
@@ -1595,7 +1595,7 @@ DocType: Sales Invoice,Payment Due Date,วันที่ครบกำหน�
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.",ลิขสิทธิ์ จำนวน: จำนวน ที่สั่งซื้อ สำหรับการขาย แต่ ไม่ได้ส่ง
 DocType: Drug Prescription,Interval UOM,ช่วง UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save",เลือกใหม่ถ้าที่อยู่ที่เลือกถูกแก้ไขหลังจากบันทึกแล้ว
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,ปริมาณที่สงวนไว้สำหรับการรับเหมาช่วง: ปริมาณวัตถุดิบเพื่อทำรายการย่อย
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,ปริมาณที่สงวนไว้สำหรับการรับเหมาช่วง: ปริมาณวัตถุดิบเพื่อทำรายการย่อย
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,รายการตัวแปร {0} อยู่แล้วที่มีลักษณะเดียวกัน
 DocType: Item,Hub Publishing Details,รายละเอียด Hub Publishing
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening','กำลังเปิด'
@@ -4187,7 +4187,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -4199,19 +4199,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","แม่แบบภาษีมาตรฐานที่สามารถนำไปใช้กับการทำธุรกรรมการซื้อทั้งหมด แม่แบบนี้สามารถมีรายชื่อของหัวภาษีและค่าใช้จ่ายนอกจากนี้ยังมีหัวอื่น ๆ เช่น ""การจัดส่งสินค้า"", ""ประกันภัย"", ""การจัดการ"" ฯลฯ 
+10. Add or Deduct: Whether you want to add or deduct the tax.","แม่แบบภาษีมาตรฐานที่สามารถนำไปใช้กับการทำธุรกรรมการซื้อทั้งหมด แม่แบบนี้สามารถมีรายชื่อของหัวภาษีและค่าใช้จ่ายนอกจากนี้ยังมีหัวอื่น ๆ เช่น ""การจัดส่งสินค้า"", ""ประกันภัย"", ""การจัดการ"" ฯลฯ
 
- #### หมายเหตุ 
+ #### หมายเหตุ
 
  อัตราภาษีที่คุณกำหนดที่นี่ จะเสียภาษีในอัตรามาตรฐานสำหรับรายการทั้งหมด ** ** หากมีรายการ ** ** ที่มีอัตราที่แตกต่างกันพวกเขาจะต้องถูกเพิ่มในรายการภาษี ** ** ตารางในรายการ ** ** ต้นแบบ
 
- #### คำอธิบายของคอลัมน์ 
+ #### คำอธิบายของคอลัมน์
 
- 1 การคำนวณประเภท: 
+ 1 การคำนวณประเภท:
  - นี้สามารถอยู่บน ** สุทธิรวม ** (นั่นคือผลรวมของจำนวนเงินขั้นพื้นฐาน)
  - ** เมื่อก่อนแถวทั้งหมด / จำนวนเงิน ** (สำหรับภาษีสะสมหรือค่าใช้จ่าย) ถ้าคุณเลือกตัวเลือกนี้ภาษีจะถูกนำมาใช้เป็นร้อยละของแถวก่อนหน้า (ในตารางภาษี) จำนวนเงินหรือทั้งหมด
  - ** ** ที่เกิดขึ้นจริง (กล่าว)
- 2 หัวหน้าบัญชี: บัญชีแยกประเภทบัญชีตามที่ภาษีนี้จะถูกจอง 
+ 2 หัวหน้าบัญชี: บัญชีแยกประเภทบัญชีตามที่ภาษีนี้จะถูกจอง
  3 ศูนย์ต้นทุน: ถ้าภาษี / ค่าใช้จ่ายเป็นรายได้ (เช่นค่าจัดส่ง) หรือค่าใช้จ่ายจะต้องมีการจองกับศูนย์ต้นทุน
  4 คำอธิบาย: คำอธิบายของภาษี (ที่จะได้รับการตีพิมพ์ในใบแจ้งหนี้ / คำพูด)
  5 อัตราอัตราภาษี
@@ -4583,7 +4583,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","ตกลงและเงื่อนไขมาตรฐานที่สามารถเพิ่มการขายและการซื้อ
 
- ตัวอย่าง: 
+ ตัวอย่าง:
 
  1 ความถูกต้องของข้อเสนอ
  1 เงื่อนไขการชำระเงิน (ล่วงหน้าในเครดิตส่วนล่วงหน้า ฯลฯ )
@@ -4592,7 +4592,7 @@ Examples:
  1 ถ้ามีการรับประกัน
  1 นโยบายการคืนสินค้า
  1 ข้อตกลงการจัดส่งสินค้าถ้ามีการใช้
- 1 วิธีของข้อพิพาทที่อยู่, การชดใช้หนี้สิน ฯลฯ 
+ 1 วิธีของข้อพิพาทที่อยู่, การชดใช้หนี้สิน ฯลฯ
  1 ที่อยู่และการติดต่อของ บริษัท ของคุณ"
 DocType: Homepage Section,Section Based On,ตามส่วน
 DocType: Shopping Cart Settings,Show Apply Coupon Code,แสดงใช้รหัสคูปอง
@@ -5438,11 +5438,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,เลือกพนักงานเพื่อรับพนักงานล่วงหน้า
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,โปรดเลือกวันที่ที่ถูกต้อง
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,เลือกลักษณะของธุรกิจของคุณ
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6912,7 +6912,7 @@ DocType: Subscription Plan Detail,Plan,วางแผน
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,ยอดเงินบัญชีธนาคารตามบัญชีแยกประเภททั่วไป
 DocType: Job Applicant,Applicant Name,ชื่อผู้ยื่นคำขอ
 DocType: Authorization Rule,Customer / Item Name,ชื่อลูกค้า / รายการ
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -7535,7 +7535,7 @@ apps/erpnext/erpnext/selling/doctype/customer/customer.py,Please mention the Lea
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Start date should be less than end date for Item {0},วันที่เริ่มต้น ควรจะน้อยกว่า วันที่ สิ้นสุดสำหรับ รายการ {0}
 DocType: Shift Type,Auto Attendance Settings,การตั้งค่าการเข้าร่วมอัตโนมัติ
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","ตัวอย่าง:. ABCD ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","ตัวอย่าง:. ABCD #####
  ถ้าชุดคือชุดและที่เก็บไม่ได้กล่าวถึงในการทำธุรกรรมแล้วหมายเลขประจำเครื่องอัตโนมัติจะถูกสร้างขึ้นบนพื้นฐานของซีรีส์นี้ หากคุณเคยต้องการที่จะพูดถึงอย่างชัดเจนเลขที่ผลิตภัณฑ์สำหรับรายการนี้ ปล่อยให้ว่างนี้"
 DocType: Upload Attendance,Upload Attendance,อัพโหลดผู้เข้าร่วม
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,BOM and Manufacturing Quantity are required,รายการวัสดุและปริมาณการผลิตจะต้อง

@@ -1413,7 +1413,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1562,7 +1562,7 @@ DocType: Sales Invoice,Payment Due Date,Tanggal Jatuh Tempo Pembayaran
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Reserved Qty: Jumlah memerintahkan untuk dijual, tapi tidak disampaikan."
 DocType: Drug Prescription,Interval UOM,Interval UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Pilih ulang, jika alamat yang dipilih diedit setelah simpan"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Jumlah Pesanan untuk Sub-kontrak: Kuantitas bahan baku untuk membuat barang-barang yang disubsidi.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Jumlah Pesanan untuk Sub-kontrak: Kuantitas bahan baku untuk membuat barang-barang yang disubsidi.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Item Varian {0} sudah ada dengan atribut yang sama
 DocType: Item,Hub Publishing Details,Rincian Hub Publishing
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening','Awal'
@@ -4130,7 +4130,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -4142,19 +4142,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","Pajak standar template yang dapat diterapkan untuk semua Transaksi Pembelian. Template ini dapat berisi daftar kepala pajak dan juga kepala biaya lain seperti ""Pengiriman"", ""Asuransi"", ""Penanganan"" dll 
+10. Add or Deduct: Whether you want to add or deduct the tax.","Pajak standar template yang dapat diterapkan untuk semua Transaksi Pembelian. Template ini dapat berisi daftar kepala pajak dan juga kepala biaya lain seperti ""Pengiriman"", ""Asuransi"", ""Penanganan"" dll
 
- #### Catatan 
+ #### Catatan
 
  Tarif pajak Anda mendefinisikan sini akan menjadi tarif pajak standar untuk semua item ** **. Jika ada Item ** ** yang memiliki tarif yang berbeda, mereka harus ditambahkan dalam ** Pajak Stok Barang ** meja di ** Stok Barang ** menguasai.
 
- #### Deskripsi Kolom 
+ #### Deskripsi Kolom
 
- 1. Perhitungan Type: 
+ 1. Perhitungan Type:
  - Ini bisa berada di ** Net Jumlah ** (yang adalah jumlah dari jumlah dasar).
  - ** Pada Row Sebelumnya Jumlah / Amount ** (untuk pajak kumulatif atau biaya). Jika Anda memilih opsi ini, pajak akan diterapkan sebagai persentase dari baris sebelumnya (dalam tabel pajak) jumlah atau total.
  - ** Aktual ** (seperti yang disebutkan).
- 2. Akun Kepala: Account buku di mana pajak ini akan dipesan 
+ 2. Akun Kepala: Account buku di mana pajak ini akan dipesan
  3. Biaya Center: Jika pajak / biaya adalah penghasilan (seperti pengiriman) atau beban perlu dipesan terhadap Cost Center.
  4. Keterangan: Deskripsi pajak (yang akan dicetak dalam faktur / tanda kutip).
  5. Tarif: Tarif Pajak.
@@ -5358,11 +5358,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,Pilih karyawan untuk mendapatkan uang muka karyawan.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,Silakan pilih tanggal yang valid
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,Pilih jenis bisnis anda.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6816,7 +6816,7 @@ DocType: Subscription Plan Detail,Plan,Rencana
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,Saldo Laporan Bank sesuai Buku Besar
 DocType: Job Applicant,Applicant Name,Nama Pemohon
 DocType: Authorization Rule,Customer / Item Name,Nama Pelanggan / Barang
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -7435,7 +7435,7 @@ apps/erpnext/erpnext/selling/doctype/customer/customer.py,Please mention the Lea
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Start date should be less than end date for Item {0},Tanggal mulai harus kurang dari tanggal akhir untuk Item {0}
 DocType: Shift Type,Auto Attendance Settings,Pengaturan Kehadiran Otomatis
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Contoh:. ABCD ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Contoh:. ABCD #####
  Jika seri diatur dan Nomor Seri tidak disebutkan dalam transaksi, maka nomor seri otomatis akan dibuat berdasarkan seri ini. Jika Anda ingin selalu menetapkan Nomor Seri untuk item ini, biarkan kosong."
 DocType: Upload Attendance,Upload Attendance,Unggah Kehadiran
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,BOM and Manufacturing Quantity are required,BOM dan Kuantitas Manufaktur diperlukan

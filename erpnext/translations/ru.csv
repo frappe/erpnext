@@ -1425,7 +1425,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1436,19 +1436,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Стандартный шаблон налог, который может быть применен ко всем сделок купли-продажи. Этот шаблон может содержать перечень налоговых руководителей, а также других глав расходы / доходы, как ""Shipping"", ""Insurance"", ""Обращение"" и т.д. 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Стандартный шаблон налог, который может быть применен ко всем сделок купли-продажи. Этот шаблон может содержать перечень налоговых руководителей, а также других глав расходы / доходы, как ""Shipping"", ""Insurance"", ""Обращение"" и т.д.
 
- #### Примечание 
+ #### Примечание
 
  ставка налога на Вы Определить здесь будет стандартная ставка налога на прибыль для всех ** деталей **. Если есть ** товары **, которые имеют различные цены, они должны быть добавлены в ** деталь налога ** стол в ** деталь ** мастера.
 
- #### Описание колонок 
+ #### Описание колонок
 
- 1. Расчет Тип: 
+ 1. Расчет Тип:
  - Это может быть ** Чистый Всего ** (то есть сумма основной суммы).
  - ** На предыдущей строке Total / сумма ** (по совокупности налогов и сборов). Если вы выбираете эту опцию, налог будет применяться в процентах от предыдущего ряда (в налоговом таблицы) суммы или объема.
  - ** ** Фактический (как уже упоминалось).
- 2. Счет Руководитель: лицевому счету, при которых этот налог будут забронированы 
+ 2. Счет Руководитель: лицевому счету, при которых этот налог будут забронированы
  3. Центр Стоимость: Если налог / налог на заряд доход (как перевозка груза) или расходов это должен быть забронирован на МВЗ.
  4. Описание: Описание налога (которые будут напечатаны в счетах-фактурах / кавычек).
  5. Оценить: Налоговая ставка.
@@ -1594,7 +1594,7 @@ DocType: Sales Invoice,Payment Due Date,Дата платежа
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Защищены Кол-во: Количество приказал на продажу, но не поставлены."
 DocType: Drug Prescription,Interval UOM,Интервал UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Повторно выберите, если выбранный адрес отредактирован после сохранения"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Зарезервированное кол-во для субконтракта: количество сырья для изготовления субподрядных изделий.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Зарезервированное кол-во для субконтракта: количество сырья для изготовления субподрядных изделий.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Модификация продукта {0} с этими атрибутами уже существует
 DocType: Item,Hub Publishing Details,Сведения о публикации концентратора
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',«Открывается»
@@ -4181,7 +4181,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -4193,19 +4193,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","Стандартный шаблон налог, который может быть применен ко всем операциям купли-. Этот шаблон может содержать перечень налоговых руководителей, а также других расходов руководителей как ""Shipping"", ""Insurance"", ""Обращение"" и т.д. 
+10. Add or Deduct: Whether you want to add or deduct the tax.","Стандартный шаблон налог, который может быть применен ко всем операциям купли-. Этот шаблон может содержать перечень налоговых руководителей, а также других расходов руководителей как ""Shipping"", ""Insurance"", ""Обращение"" и т.д.
 
- #### Примечание 
+ #### Примечание
 
  ставка налога на которые вы указали здесь будет стандартная ставка налога на прибыль для всех ** деталей **. Если есть ** товары **, которые имеют различные цены, они должны быть добавлены в ** деталь налога ** стол в ** деталь ** мастера.
 
- #### Описание колонок 
+ #### Описание колонок
 
- 1. Расчет Тип: 
+ 1. Расчет Тип:
  - Это может быть ** Чистый Всего ** (то есть сумма основной суммы).
  - ** На предыдущей строке Total / сумма ** (по совокупности налогов и сборов). Если вы выбираете эту опцию, налог будет применяться в процентах от предыдущего ряда (в налоговом таблицы) суммы или объема.
  - ** ** Фактический (как уже упоминалось).
- 2. Счет Руководитель: лицевому счету, при которых этот налог будут забронированы 
+ 2. Счет Руководитель: лицевому счету, при которых этот налог будут забронированы
  3. Центр Стоимость: Если налог / налог на заряд доход (как перевозка груза) или расходов это должен быть забронирован на МВЗ.
  4. Описание: Описание налога (которые будут напечатаны в счетах-фактурах / кавычек).
  5. Оценить: Налоговая ставка.
@@ -4576,7 +4576,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Стандартные положения и условия, которые могут быть добавлены к продажам и покупкам.
 
- Примеры: 
+ Примеры:
 
  1. Срок действия предложения.
  1. Условия оплаты (заранее, в кредит, часть заранее и т.д.).
@@ -4585,7 +4585,7 @@ Examples:
  1. Гарантия, если таковые имеются.
  1. Возвращает политики.
  1. Условия доставки, если применимо.
- 1. Пути решения споров, возмещения, ответственности и т.д. 
+ 1. Пути решения споров, возмещения, ответственности и т.д.
  1. Адрес и контактная Вашей компании."
 DocType: Homepage Section,Section Based On,Раздел на основе
 DocType: Shopping Cart Settings,Show Apply Coupon Code,Показать Применить код купона
@@ -5430,11 +5430,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,"Выберите сотрудника, чтобы получить работу сотрудника."
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,Пожалуйста выберите правильную дату
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,Выберите характер вашего бизнеса.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6543,7 +6543,7 @@ apps/erpnext/erpnext/accounts/doctype/bank_account/test_bank_account.py,BankAcco
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Brokerage,Посредничество
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Attendance for employee {0} is already marked for this day,Участие для работника {0} уже помечено на этот день
 DocType: Work Order Operation,"in Minutes
-Updated via 'Time Log'","в минутах 
+Updated via 'Time Log'","в минутах
  Обновлено помощью ""Time Вход"""
 DocType: Customer,From Lead,Из Обращения
 DocType: Amazon MWS Settings,Synch Orders,Синхронные заказы
@@ -6904,7 +6904,7 @@ DocType: Subscription Plan Detail,Plan,План
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,Банк балансовый отчет за Главную книгу
 DocType: Job Applicant,Applicant Name,Имя заявителя
 DocType: Authorization Rule,Customer / Item Name,Клиент / Название продукта
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 

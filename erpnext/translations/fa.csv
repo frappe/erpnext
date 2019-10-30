@@ -1395,7 +1395,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1544,7 +1544,7 @@ DocType: Sales Invoice,Payment Due Date,پرداخت با توجه تاریخ
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.",Qty رزرو شده: مقدار سفارش برای فروش سفارش داده می شود ، اما تحویل داده نمی شود.
 DocType: Drug Prescription,Interval UOM,فاصله UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save",در صورتی که آدرس انتخاب شده پس از ذخیره ویرایش، مجددا انتخاب کنید
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Qty رزرو شده برای قراردادهای فرعی: مقدار مواد اولیه برای ساخت وسایل فرعی.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Qty رزرو شده برای قراردادهای فرعی: مقدار مواد اولیه برای ساخت وسایل فرعی.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,مورد متغیر {0} در حال حاضر با ویژگی های همان وجود دارد
 DocType: Item,Hub Publishing Details,جزئیات انتشار هاب
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;افتتاح&#39;
@@ -3576,7 +3576,7 @@ DocType: Payment Request,Transaction Details,جزئیات تراکنش
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Please click on 'Generate Schedule' to get schedule,لطفا بر روی &#39;ایجاد برنامه&#39; کلیک کنید برای دریافت برنامه
 DocType: Item,"Purchase, Replenishment Details",خرید ، جزئیات دوباره پر کردن
 DocType: Products Settings,Enable Field Filters,فیلترهای فیلد را فعال کنید
-apps/erpnext/erpnext/stock/doctype/item/item.py,"""Customer Provided Item"" cannot be Purchase Item also","""آیتم مورد اشاره مشتری""      
+apps/erpnext/erpnext/stock/doctype/item/item.py,"""Customer Provided Item"" cannot be Purchase Item also","""آیتم مورد اشاره مشتری""
 نمیتواند خریداری شود"
 DocType: Blanket Order Item,Ordered Quantity,تعداد دستور داد
 apps/erpnext/erpnext/public/js/setup_wizard.js,"e.g. ""Build tools for builders""",به عنوان مثال &quot;ابزار برای سازندگان ساخت&quot;
@@ -4078,7 +4078,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -5265,11 +5265,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,یک کارمند را برای پیشبرد کارمند انتخاب کنید
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,لطفا یک تاریخ معتبر را انتخاب کنید
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,ماهیت کسب و کار خود را انتخاب کنید.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6696,13 +6696,13 @@ apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py,Opp C
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py,Both Trial Period Start Date and Trial Period End Date must be set,هر دو تاریخچه تاریخچه دادگاه و تاریخ پایان تاریخ پرونده باید تعیین شود
 apps/erpnext/erpnext/accounts/report/share_balance/share_balance.py,Average Rate,میانگین امتیازات
 apps/erpnext/erpnext/controllers/accounts_controller.py,Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,مجموع مبلغ پرداختی در برنامه پرداخت باید برابر با مقدار Grand / Rounded باشد
-apps/erpnext/erpnext/stock/doctype/item/item.py,"""Customer Provided Item"" cannot have Valuation Rate","""ایتم مورد نظر مشتری"" 
+apps/erpnext/erpnext/stock/doctype/item/item.py,"""Customer Provided Item"" cannot have Valuation Rate","""ایتم مورد نظر مشتری""
 اعتبار کافی ندارد"
 DocType: Subscription Plan Detail,Plan,طرح
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,تعادل بیانیه بانک به عنوان در هر لجر عمومی
 DocType: Job Applicant,Applicant Name,نام متقاضی
 DocType: Authorization Rule,Customer / Item Name,مشتری / نام آیتم
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 

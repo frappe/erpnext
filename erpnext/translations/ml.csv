@@ -1396,7 +1396,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1544,7 +1544,7 @@ DocType: Sales Invoice,Payment Due Date,പെയ്മെന്റ് നിശ
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","റിസർവ്വ് ചെയ്ത ക്യൂട്ടി: അളവ് വിൽപ്പനയ്ക്ക് ഓർഡർ ചെയ്തു, പക്ഷേ വിതരണം ചെയ്തിട്ടില്ല."
 DocType: Drug Prescription,Interval UOM,ഇടവേള UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","തിരഞ്ഞെടുത്തതിനുശേഷം തിരഞ്ഞെടുത്ത വിലാസം എഡിറ്റുചെയ്തിട്ടുണ്ടെങ്കിൽ, തിരഞ്ഞെടുപ്പ് മാറ്റുക"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,സബ് കോൺ‌ട്രാക്റ്റിനായി റിസർവ്വ് ചെയ്‌ത ക്യൂട്ടി: സബ്‌കോട്രാക്റ്റ് ഇനങ്ങൾ‌ നിർമ്മിക്കുന്നതിനുള്ള അസംസ്കൃത വസ്തുക്കളുടെ അളവ്.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,സബ് കോൺ‌ട്രാക്റ്റിനായി റിസർവ്വ് ചെയ്‌ത ക്യൂട്ടി: സബ്‌കോട്രാക്റ്റ് ഇനങ്ങൾ‌ നിർമ്മിക്കുന്നതിനുള്ള അസംസ്കൃത വസ്തുക്കളുടെ അളവ്.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,ഇനം വേരിയന്റ് {0} ഇതിനകം അതേ ആട്രിബ്യൂട്ടുകളുമുള്ള നിലവിലുണ്ട്
 DocType: Item,Hub Publishing Details,ഹബ് പബ്ലിഷിംഗ് വിശദാംശങ്ങൾ
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;തുറക്കുന്നു&#39;
@@ -4075,7 +4075,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -5264,11 +5264,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,ജീവനക്കാരുടെ മുൻകൂറായി ലഭിക്കാൻ ഒരു ജീവനക്കാരനെ തിരഞ്ഞെടുക്കുക.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,സാധുതയുള്ള ഒരു തീയതി തിരഞ്ഞെടുക്കുക
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,നിങ്ങളുടെ ബിസിനസ്സ് സ്വഭാവം തിരഞ്ഞെടുക്കുക.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6710,7 +6710,7 @@ DocType: Subscription Plan Detail,Plan,പദ്ധതി
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,ജനറൽ ലെഡ്ജർ പ്രകാരം ബാങ്ക് സ്റ്റേറ്റ്മെന്റ് ബാലൻസ്
 DocType: Job Applicant,Applicant Name,അപേക്ഷകന് പേര്
 DocType: Authorization Rule,Customer / Item Name,കസ്റ്റമർ / ഇനം പേര്
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 

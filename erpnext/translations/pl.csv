@@ -1426,7 +1426,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1437,19 +1437,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Standardowy szablon podatek, który może być stosowany do wszystkich transakcji sprzedaży. Ten szablon może zawierać listę szefów podatkowych, a także innych głów koszty / dochodów jak ""Żegluga"", ""Ubezpieczenia"", ""Obsługa"" itp 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Standardowy szablon podatek, który może być stosowany do wszystkich transakcji sprzedaży. Ten szablon może zawierać listę szefów podatkowych, a także innych głów koszty / dochodów jak ""Żegluga"", ""Ubezpieczenia"", ""Obsługa"" itp
 
- #### Uwaga 
+ #### Uwaga
 
  Stopa Ciebie podatku definiujemy tu będzie standardowa stawka podatku w odniesieniu do wszystkich pozycji ** **. Jeśli istnieją ** Pozycje **, które mają różne ceny, muszą być dodane w podatku od towaru ** ** tabeli w poz ** ** mistrza.
 
- #### Opis Kolumny 
+ #### Opis Kolumny
 
- 1. Obliczenie Typ: 
+ 1. Obliczenie Typ:
  i - może to być na całkowita ** ** (to jest suma ilości wyjściowej).
  - ** Na Poprzedni Row Całkowita / Kwota ** (dla skumulowanych podatków lub opłat). Jeśli wybierzesz tę opcję, podatek będzie stosowana jako procent poprzedniego rzędu (w tabeli podatkowej) kwoty lub łącznie.
  - ** Rzeczywista ** (jak wspomniano).
- 2. Szef konta: księga konto, na którym podatek ten zostanie zaksięgowany 
+ 2. Szef konta: księga konto, na którym podatek ten zostanie zaksięgowany
  3. Centrum koszt: Jeżeli podatek / opłata jest dochód (jak wysyłką) lub kosztów musi zostać zaliczony na centrum kosztów.
  4. Opis: Opis podatków (które będą drukowane w faktur / cudzysłowów).
  5. Cena: Stawka podatku.
@@ -1595,7 +1595,7 @@ DocType: Sales Invoice,Payment Due Date,Termin Płatności
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.",
 DocType: Drug Prescription,Interval UOM,Interwał UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Ponownie wybierz, jeśli wybrany adres jest edytowany po zapisaniu"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Zarezerwowana ilość na zlecenie podwykonawstwa: ilość surowców do produkcji artykułów objętych subkontraktami.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Zarezerwowana ilość na zlecenie podwykonawstwa: ilość surowców do produkcji artykułów objętych subkontraktami.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Pozycja Wersja {0} istnieje już z samymi atrybutami
 DocType: Item,Hub Publishing Details,Szczegóły publikacji wydawnictwa Hub
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&quot;Otwarcie&quot;
@@ -4186,7 +4186,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -4198,19 +4198,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","Standardowy szablon podatek, który może być stosowany do wszystkich transakcji kupna. Ten szablon może zawierać listę szefów podatkowych, a także innych głów wydatków jak ""Żegluga"", ""Ubezpieczenia"", ""Obsługa"" itp 
+10. Add or Deduct: Whether you want to add or deduct the tax.","Standardowy szablon podatek, który może być stosowany do wszystkich transakcji kupna. Ten szablon może zawierać listę szefów podatkowych, a także innych głów wydatków jak ""Żegluga"", ""Ubezpieczenia"", ""Obsługa"" itp
 
- #### Uwaga 
+ #### Uwaga
 
  stawki podatku zdefiniować tutaj będzie standardowa stawka podatku w odniesieniu do wszystkich pozycji ** **. Jeśli istnieją ** Pozycje **, które mają różne ceny, muszą być dodane w podatku od towaru ** ** tabeli w poz ** ** mistrza.
 
- #### Opis Kolumny 
+ #### Opis Kolumny
 
- 1. Obliczenie Typ: 
+ 1. Obliczenie Typ:
  i - może to być na całkowita ** ** (to jest suma ilości wyjściowej).
  - ** Na Poprzedni Row Całkowita / Kwota ** (dla skumulowanych podatków lub opłat). Jeśli wybierzesz tę opcję, podatek będzie stosowana jako procent poprzedniego rzędu (w tabeli podatkowej) kwoty lub łącznie.
  - ** Rzeczywista ** (jak wspomniano).
- 2. Szef konta: księga konto, na którym podatek ten zostanie zaksięgowany 
+ 2. Szef konta: księga konto, na którym podatek ten zostanie zaksięgowany
  3. Centrum koszt: Jeżeli podatek / opłata jest dochód (jak wysyłką) lub kosztów musi zostać zaliczony na centrum kosztów.
  4. Opis: Opis podatków (które będą drukowane w faktur / cudzysłowów).
  5. Cena: Stawka podatku.
@@ -4582,7 +4582,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Standardowe Zasady i warunki, które mogą być dodawane do sprzedaży i zakupów.
 
- Przykłady: 
+ Przykłady:
 
  1. Ważność oferty.
  1. Warunki płatności (z góry, na kredyt, część zaliczki itp).
@@ -4591,7 +4591,7 @@ Examples:
  1. Gwarancja jeśli w ogóle.
  1. Zwraca Polityka.
  1. Warunki wysyłki, jeśli dotyczy.
- 1. Sposobów rozwiązywania sporów, odszkodowania, odpowiedzialność itp 
+ 1. Sposobów rozwiązywania sporów, odszkodowania, odpowiedzialność itp
  1. Adres i kontakt z Twojej firmy."
 DocType: Homepage Section,Section Based On,Sekcja na podstawie
 DocType: Shopping Cart Settings,Show Apply Coupon Code,Pokaż zastosuj kod kuponu
@@ -5436,11 +5436,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,"Wybierz pracownika, aby uzyskać awans pracownika."
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,Proszę wybrać prawidłową datę
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,Wybierz charakteru swojej działalności.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6551,7 +6551,7 @@ apps/erpnext/erpnext/accounts/doctype/bank_account/test_bank_account.py,BankAcco
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Brokerage,Pośrednictwo
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Attendance for employee {0} is already marked for this day,Frekwencja na pracownika {0} jest już zaznaczone na ten dzień
 DocType: Work Order Operation,"in Minutes
-Updated via 'Time Log'","w minutach 
+Updated via 'Time Log'","w minutach
  Aktualizacja poprzez ""Czas Zaloguj"""
 DocType: Customer,From Lead,Od śladu
 DocType: Amazon MWS Settings,Synch Orders,Zlecenia synchronizacji
@@ -6912,7 +6912,7 @@ DocType: Subscription Plan Detail,Plan,Plan
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,Bilans wyciągów bankowych wedle Księgi Głównej
 DocType: Job Applicant,Applicant Name,Imię Aplikanta
 DocType: Authorization Rule,Customer / Item Name,Klient / Nazwa Przedmiotu
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -7535,7 +7535,7 @@ apps/erpnext/erpnext/selling/doctype/customer/customer.py,Please mention the Lea
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Start date should be less than end date for Item {0},Data startu powinna być niższa od daty końca dla {0}
 DocType: Shift Type,Auto Attendance Settings,Ustawienia automatycznej obecności
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Przykład:. ABCD ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Przykład:. ABCD #####
  Jeśli seria jest ustawiona i nr seryjny nie jest wymieniony w transakcjach, automatyczny numer seryjny zostanie utworzony na podstawie tej serii. Jeśli chcesz zawsze jednoznacznie ustawiać numery seryjne dla tej pozycji, pozostaw to pole puste."
 DocType: Upload Attendance,Upload Attendance,Wyślij obecność
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,BOM and Manufacturing Quantity are required,BOM i ilości są wymagane Manufacturing

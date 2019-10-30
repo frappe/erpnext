@@ -1404,7 +1404,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1415,19 +1415,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","ಎಲ್ಲಾ ಮಾರಾಟದ ಟ್ರಾನ್ಸಾಕ್ಷನ್ಸ್ ಅನ್ವಯಿಸಬಹುದು ಸ್ಟ್ಯಾಂಡರ್ಡ್ ತೆರಿಗೆ ಟೆಂಪ್ಲೆಟ್. ಈ ಟೆಂಪ್ಲೇಟ್ 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","ಎಲ್ಲಾ ಮಾರಾಟದ ಟ್ರಾನ್ಸಾಕ್ಷನ್ಸ್ ಅನ್ವಯಿಸಬಹುದು ಸ್ಟ್ಯಾಂಡರ್ಡ್ ತೆರಿಗೆ ಟೆಂಪ್ಲೆಟ್. ಈ ಟೆಂಪ್ಲೇಟ್
 
- ತೆರಿಗೆ ನೀವು ಗಮನಿಸಿ #### 
+ ತೆರಿಗೆ ನೀವು ಗಮನಿಸಿ ####
 
  ಇತ್ಯಾದಿ ""ನಿರ್ವಹಣೆ"" ತೆರಿಗೆ ತಲೆ ಮತ್ತು ""ಶಿಪ್ಪಿಂಗ್"", ""ವಿಮೆ"" ನಂತಹ ಇತರ ವೆಚ್ಚದಲ್ಲಿ / ಆದಾಯ ತಲೆ ಪಟ್ಟಿ ಹೊಂದಿರಬಹುದು ** ಎಲ್ಲಾ ** ಐಟಂಗಳು ಗುಣಮಟ್ಟ ತೆರಿಗೆ ಇರುತ್ತದೆ ಇಲ್ಲಿ ವ್ಯಾಖ್ಯಾನಿಸಲು. ಬೇರೆ ಬೇರೆ ದರಗಳನ್ನು ಹೊಂದಿವೆ ** ಎಂದು ** ಐಟಂಗಳು ಎಂದಾದರೆ ಅವರು ** ಐಟಂ ತೆರಿಗೆ ಸೇರಿಸಬೇಕು ** ** ಐಟಂ ** ಮಾಸ್ಟರ್ ಟೇಬಲ್.
 
- #### ಕಾಲಮ್ಗಳು 
+ #### ಕಾಲಮ್ಗಳು
 
- 1 ವಿವರಣೆ. ಲೆಕ್ಕ ಕೌಟುಂಬಿಕತೆ: 
+ 1 ವಿವರಣೆ. ಲೆಕ್ಕ ಕೌಟುಂಬಿಕತೆ:
  - ಈ ಮಾಡಬಹುದು ** ನೆಟ್ (ಮೂಲ ಪ್ರಮಾಣದ ಮೊತ್ತ) ** ಒಟ್ಟು.
  - ** ಹಿಂದಿನ ರೋ ಒಟ್ಟು / ಪ್ರಮಾಣ ** ರಂದು (ಸಂಚಿತ ತೆರಿಗೆ ಅಥವಾ ಆರೋಪಗಳನ್ನು). ನೀವು ಈ ಆಯ್ಕೆಯನ್ನು ಆರಿಸಿದರೆ, ತೆರಿಗೆ ಪ್ರಮಾಣವನ್ನು ಅಥವಾ ಒಟ್ಟು (ತೆರಿಗೆ ಕೋಷ್ಟಕದಲ್ಲಿ) ಹಿಂದಿನ ಸಾಲು ಶೇಕಡಾವಾರು ಅನ್ವಯಿಸಲಾಗುತ್ತದೆ.
  - ** ** ನಿಜವಾದ (ಹೇಳಿದಂತೆ).
- 2. ಖಾತೆ ಹೆಡ್: ಈ ತೆರಿಗೆ 
+ 2. ಖಾತೆ ಹೆಡ್: ಈ ತೆರಿಗೆ
  3 ಕಾಯ್ದಿರಿಸಬೇಕು ಇದು ಅಡಿಯಲ್ಲಿ ಖಾತೆ ಲೆಡ್ಜರ್. ವೆಚ್ಚ ಸೆಂಟರ್: ತೆರಿಗೆ / ಚಾರ್ಜ್ (ಹಡಗು ರೀತಿಯಲ್ಲಿ) ಒಂದು ಆದಾಯ ಅಥವಾ ಖರ್ಚು ವೇಳೆ ಇದು ಒಂದು ವೆಚ್ಚದ ಕೇಂದ್ರವಾಗಿ ವಿರುದ್ಧ ಕಾಯ್ದಿರಿಸಬೇಕು ಅಗತ್ಯವಿದೆ.
  4. ವಿವರಣೆ: ತೆರಿಗೆ ವಿವರಣೆ (ಇನ್ವಾಯ್ಸ್ಗಳು / ಉಲ್ಲೇಖಗಳಲ್ಲಿ ಮುದ್ರಿಸಲಾಗುತ್ತದೆ).
  5. ದರ: ತೆರಿಗೆ.
@@ -1572,7 +1572,7 @@ DocType: Sales Invoice,Payment Due Date,ಪಾವತಿ ಕಾರಣ ದಿನ�
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ ಪ್ರಮಾಣ: ಪ್ರಮಾಣ ಮಾರಾಟ ಆದೇಶ , ಆದರೆ ಈಡೇರಿಸಿಲ್ಲ ."
 DocType: Drug Prescription,Interval UOM,ಮಧ್ಯಂತರ UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","ಆಯ್ಕೆ ಮಾಡಿದ ವಿಳಾಸವನ್ನು ಉಳಿಸಿದ ನಂತರ ಸಂಪಾದಿಸಿದ್ದರೆ, ಆಯ್ಕೆ ರದ್ದುಮಾಡಿ"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,ಉಪಗುತ್ತಿಗೆಗಾಗಿ ಕ್ಯೂಟಿ ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ: ಉಪಕೋಟ್ರಾಕ್ಟ್ ವಸ್ತುಗಳನ್ನು ತಯಾರಿಸಲು ಕಚ್ಚಾ ವಸ್ತುಗಳ ಪ್ರಮಾಣ.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,ಉಪಗುತ್ತಿಗೆಗಾಗಿ ಕ್ಯೂಟಿ ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ: ಉಪಕೋಟ್ರಾಕ್ಟ್ ವಸ್ತುಗಳನ್ನು ತಯಾರಿಸಲು ಕಚ್ಚಾ ವಸ್ತುಗಳ ಪ್ರಮಾಣ.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,ಐಟಂ ಭಿನ್ನ {0} ಈಗಾಗಲೇ ಅದೇ ಲಕ್ಷಣಗಳು ಅಸ್ತಿತ್ವದಲ್ಲಿದ್ದರೆ
 DocType: Item,Hub Publishing Details,ಹಬ್ ಪಬ್ಲಿಷಿಂಗ್ ವಿವರಗಳು
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',ಉದ್ಘಾಟಿಸುತ್ತಿರುವುದು
@@ -4127,7 +4127,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -4139,19 +4139,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","ಎಲ್ಲ ಖರೀದಿ ವ್ಯವಹಾರಗಳು ಅನ್ವಯಿಸಬಹುದು ಸ್ಟ್ಯಾಂಡರ್ಡ್ ತೆರಿಗೆ ಟೆಂಪ್ಲೆಟ್. ಈ ಟೆಂಪ್ಲೇಟ್ ನೀವು ಇಲ್ಲಿ ವ್ಯಾಖ್ಯಾನಿಸಲು 
+10. Add or Deduct: Whether you want to add or deduct the tax.","ಎಲ್ಲ ಖರೀದಿ ವ್ಯವಹಾರಗಳು ಅನ್ವಯಿಸಬಹುದು ಸ್ಟ್ಯಾಂಡರ್ಡ್ ತೆರಿಗೆ ಟೆಂಪ್ಲೆಟ್. ಈ ಟೆಂಪ್ಲೇಟ್ ನೀವು ಇಲ್ಲಿ ವ್ಯಾಖ್ಯಾನಿಸಲು
 
- ತೆರಿಗೆ ಗಮನಿಸಿ #### 
+ ತೆರಿಗೆ ಗಮನಿಸಿ ####
 
  ಇತ್ಯಾದಿ ""ನಿರ್ವಹಣೆ"" ತೆರಿಗೆ ತಲೆ ಮತ್ತು ""ಶಿಪ್ಪಿಂಗ್"", ""ವಿಮೆ"" ನಂತಹ ಇತರ ವೆಚ್ಚದಲ್ಲಿ ತಲೆ ಪಟ್ಟಿ ಹೊಂದಿರಬಹುದು ** ಎಲ್ಲಾ ** ಐಟಂಗಳು ಗುಣಮಟ್ಟ ತೆರಿಗೆ ಇರುತ್ತದೆ. ಬೇರೆ ಬೇರೆ ದರಗಳನ್ನು ಹೊಂದಿವೆ ** ಎಂದು ** ಐಟಂಗಳು ಎಂದಾದರೆ ಅವರು ** ಐಟಂ ತೆರಿಗೆ ಸೇರಿಸಬೇಕು ** ** ಐಟಂ ** ಮಾಸ್ಟರ್ ಟೇಬಲ್.
 
- #### ಕಾಲಮ್ಗಳು 
+ #### ಕಾಲಮ್ಗಳು
 
- 1 ವಿವರಣೆ. ಲೆಕ್ಕ ಕೌಟುಂಬಿಕತೆ: 
+ 1 ವಿವರಣೆ. ಲೆಕ್ಕ ಕೌಟುಂಬಿಕತೆ:
  - ಈ ಮಾಡಬಹುದು ** ನೆಟ್ (ಮೂಲ ಪ್ರಮಾಣದ ಮೊತ್ತ) ** ಒಟ್ಟು.
  - ** ಹಿಂದಿನ ರೋ ಒಟ್ಟು / ಪ್ರಮಾಣ ** ರಂದು (ಸಂಚಿತ ತೆರಿಗೆ ಅಥವಾ ಆರೋಪಗಳನ್ನು). ನೀವು ಈ ಆಯ್ಕೆಯನ್ನು ಆರಿಸಿದರೆ, ತೆರಿಗೆ ಪ್ರಮಾಣವನ್ನು ಅಥವಾ ಒಟ್ಟು (ತೆರಿಗೆ ಕೋಷ್ಟಕದಲ್ಲಿ) ಹಿಂದಿನ ಸಾಲು ಶೇಕಡಾವಾರು ಅನ್ವಯಿಸಲಾಗುತ್ತದೆ.
  - ** ** ನಿಜವಾದ (ಹೇಳಿದಂತೆ).
- 2. ಖಾತೆ ಹೆಡ್: ಈ ತೆರಿಗೆ 
+ 2. ಖಾತೆ ಹೆಡ್: ಈ ತೆರಿಗೆ
  3 ಕಾಯ್ದಿರಿಸಬೇಕು ಇದು ಅಡಿಯಲ್ಲಿ ಖಾತೆ ಲೆಡ್ಜರ್. ವೆಚ್ಚ ಸೆಂಟರ್: ತೆರಿಗೆ / ಚಾರ್ಜ್ (ಹಡಗು ರೀತಿಯಲ್ಲಿ) ಒಂದು ಆದಾಯ ಅಥವಾ ಖರ್ಚು ವೇಳೆ ಇದು ಒಂದು ವೆಚ್ಚದ ಕೇಂದ್ರವಾಗಿ ವಿರುದ್ಧ ಕಾಯ್ದಿರಿಸಬೇಕು ಅಗತ್ಯವಿದೆ.
  4. ವಿವರಣೆ: ತೆರಿಗೆ ವಿವರಣೆ (ಇನ್ವಾಯ್ಸ್ಗಳು / ಉಲ್ಲೇಖಗಳಲ್ಲಿ ಮುದ್ರಿಸಲಾಗುತ್ತದೆ).
  5. ದರ: ತೆರಿಗೆ.
@@ -4516,7 +4516,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","ಪ್ರಮಾಣಿತ ನಿಯಮಗಳು ಮತ್ತು ಮಾರಾಟಗಳು ಮತ್ತು ಖರೀದಿಗಳ ಸೇರಿಸಬಹುದು ಸ್ಥಿತಿ.
 
- ಉದಾಹರಣೆಗಳು: 
+ ಉದಾಹರಣೆಗಳು:
 
  1. ಪ್ರಸ್ತಾಪವನ್ನು ಸಿಂಧುತ್ವವನ್ನು.
  1. ಪಾವತಿ ನಿಯಮಗಳು (ಕ್ರೆಡಿಟ್ ಮುಂಚಿತವಾಗಿ, ಭಾಗವಾಗಿ ಮುಂಗಡ ಇತ್ಯಾದಿ).
@@ -4525,7 +4525,7 @@ Examples:
  1. ಖಾತರಿ ಯಾವುದೇ ವೇಳೆ.
  1. ಆದಾಯ ನೀತಿ.
  1. ಹಡಗು ನಿಯಮಗಳು, ಅನ್ವಯಿಸಿದರೆ.
- 1. ಇತ್ಯಾದಿ ವಿಳಾಸ ವಿವಾದಗಳು, ನಷ್ಟ, ಹೊಣೆಗಾರಿಕೆ, 
+ 1. ಇತ್ಯಾದಿ ವಿಳಾಸ ವಿವಾದಗಳು, ನಷ್ಟ, ಹೊಣೆಗಾರಿಕೆ,
  1 ಮಾರ್ಗಗಳು. ವಿಳಾಸ ಮತ್ತು ನಿಮ್ಮ ಕಂಪನಿ ಸಂಪರ್ಕಿಸಿ."
 DocType: Homepage Section,Section Based On,ವಿಭಾಗ ಆಧಾರಿತ
 DocType: Shopping Cart Settings,Show Apply Coupon Code,ಅನ್ವಯಿಸು ಕೂಪನ್ ಕೋಡ್ ತೋರಿಸಿ
@@ -5355,11 +5355,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,ನೌಕರ ಮುಂಗಡವನ್ನು ಪಡೆಯಲು ಉದ್ಯೋಗಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ದಿನಾಂಕವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,ನಿಮ್ಮ ವ್ಯಾಪಾರ ಸ್ವರೂಪ ಆಯ್ಕೆಮಾಡಿ.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6455,7 +6455,7 @@ apps/erpnext/erpnext/accounts/doctype/bank_account/test_bank_account.py,BankAcco
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Brokerage,ದಲ್ಲಾಳಿಗೆ ಕೊಡುವ ಹಣ
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Attendance for employee {0} is already marked for this day,ನೌಕರ {0} ಹಾಜರಾತಿ ಈಗಾಗಲೇ ಈ ದಿನ ಗುರುತಿಸಲಾಗಿದೆ
 DocType: Work Order Operation,"in Minutes
-Updated via 'Time Log'","ನಿಮಿಷಗಳಲ್ಲಿ 
+Updated via 'Time Log'","ನಿಮಿಷಗಳಲ್ಲಿ
  'ಟೈಮ್ ಲಾಗ್' ಮೂಲಕ ಅಪ್ಡೇಟ್ಗೊಳಿಸಲಾಗಿದೆ"
 DocType: Customer,From Lead,ಮುಂಚೂಣಿಯಲ್ಲಿವೆ
 DocType: Amazon MWS Settings,Synch Orders,ಸಿಂಕ್ ಆರ್ಡರ್ಸ್
@@ -6811,7 +6811,7 @@ DocType: Subscription Plan Detail,Plan,ಯೋಜನೆ
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,ಜನರಲ್ ಲೆಡ್ಜರ್ ಪ್ರಕಾರ ಬ್ಯಾಂಕ್ ಹೇಳಿಕೆ ಸಮತೋಲನ
 DocType: Job Applicant,Applicant Name,ಅರ್ಜಿದಾರರ ಹೆಸರು
 DocType: Authorization Rule,Customer / Item Name,ಗ್ರಾಹಕ / ಐಟಂ ಹೆಸರು
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -7426,7 +7426,7 @@ apps/erpnext/erpnext/selling/doctype/customer/customer.py,Please mention the Lea
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Start date should be less than end date for Item {0},ಪ್ರಾರಂಭ ದಿನಾಂಕ ಐಟಂ ಅಂತಿಮ ದಿನಾಂಕವನ್ನು ಕಡಿಮೆ Shoulderstand {0}
 DocType: Shift Type,Auto Attendance Settings,ಸ್ವಯಂ ಹಾಜರಾತಿ ಸೆಟ್ಟಿಂಗ್‌ಗಳು
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","ಉದಾಹರಣೆಗೆ:. ಸರಣಿ ಹೊಂದಿಸಲಾಗಿದೆ ಮತ್ತು ಸೀರಿಯಲ್ ಯಾವುದೇ ವ್ಯವಹಾರಗಳಲ್ಲಿ ಉಲ್ಲೇಖಿಸಲ್ಪಟ್ಟಿಲ್ಲ ವೇಳೆ ABCD ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","ಉದಾಹರಣೆಗೆ:. ಸರಣಿ ಹೊಂದಿಸಲಾಗಿದೆ ಮತ್ತು ಸೀರಿಯಲ್ ಯಾವುದೇ ವ್ಯವಹಾರಗಳಲ್ಲಿ ಉಲ್ಲೇಖಿಸಲ್ಪಟ್ಟಿಲ್ಲ ವೇಳೆ ABCD #####
 , ನಂತರ ಸ್ವಯಂಚಾಲಿತ ಕ್ರಮಸಂಖ್ಯೆ ಈ ಸರಣಿ ಮೇಲೆ ನಡೆಯಲಿದೆ. ನೀವು ಯಾವಾಗಲೂ ಸ್ಪಷ್ಟವಾಗಿ ಈ ಐಟಂ ಸೀರಿಯಲ್ ನಾವು ಬಗ್ಗೆ ಬಯಸಿದರೆ. ಈ ಜಾಗವನ್ನು ಖಾಲಿ ಬಿಡುತ್ತಾರೆ."
 DocType: Upload Attendance,Upload Attendance,ಅಟೆಂಡೆನ್ಸ್ ಅಪ್ಲೋಡ್
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,BOM and Manufacturing Quantity are required,BOM ಮತ್ತು ಉತ್ಪಾದನೆ ಪ್ರಮಾಣ ಅಗತ್ಯವಿದೆ

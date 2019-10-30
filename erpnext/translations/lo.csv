@@ -1426,7 +1426,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1576,7 +1576,7 @@ DocType: Sales Invoice,Payment Due Date,ການຊໍາລະເງິນກ�
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Qty ທີ່ສະຫງວນໄວ້: ຈຳ ນວນທີ່ສັ່ງຊື້, ແຕ່ບໍ່ໄດ້ສົ່ງ."
 DocType: Drug Prescription,Interval UOM,Interval UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","ແກ້ໄຂ, ຖ້າຫາກວ່າທີ່ຢູ່ທີ່ເລືອກໄດ້ຖືກແກ້ໄຂຫຼັງຈາກທີ່ບັນທຶກ"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Qty ທີ່ສະຫງວນໄວ້ ສຳ ລັບສັນຍາຍ່ອຍ: ປະລິມານວັດຖຸດິບເພື່ອຜະລິດສິນຄ້າຍ່ອຍ.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Qty ທີ່ສະຫງວນໄວ້ ສຳ ລັບສັນຍາຍ່ອຍ: ປະລິມານວັດຖຸດິບເພື່ອຜະລິດສິນຄ້າຍ່ອຍ.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,ລາຍການ Variant {0} ມີຢູ່ແລ້ວກັບຄຸນລັກສະນະດຽວກັນ
 DocType: Item,Hub Publishing Details,Hub Publishing Details
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&quot;ເປີດ &#39;
@@ -4167,7 +4167,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -5386,11 +5386,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,ເລືອກເອົາພະນັກງານເພື່ອໃຫ້ພະນັກງານລ່ວງຫນ້າ.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,ກະລຸນາເລືອກວັນທີ່ຖືກຕ້ອງ
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,ເລືອກລັກສະນະຂອງທຸລະກິດຂອງທ່ານ.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6861,7 +6861,7 @@ DocType: Subscription Plan Detail,Plan,ແຜນການ
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,ທະນາຄານການດຸ່ນດ່ຽງງົບເປັນຕໍ່ຊີແຍກປະເພດທົ່ວໄປ
 DocType: Job Applicant,Applicant Name,ຊື່ຜູ້ສະຫມັກ
 DocType: Authorization Rule,Customer / Item Name,ລູກຄ້າ / ສິນຄ້າ
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 

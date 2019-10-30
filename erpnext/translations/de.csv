@@ -1413,7 +1413,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1424,15 +1424,15 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Standard-Steuer-Vorlage, die für alle Kauftransaktionen angewandt werden kann. Diese Vorlage kann eine Liste der Steuern und auch anderer Kosten wie ""Versand"", ""Versicherung"", ""Handhabung"" usw. enthalten. 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Standard-Steuer-Vorlage, die für alle Kauftransaktionen angewandt werden kann. Diese Vorlage kann eine Liste der Steuern und auch anderer Kosten wie ""Versand"", ""Versicherung"", ""Handhabung"" usw. enthalten.
 
- #### Hinweis 
+ #### Hinweis
 
 Der Steuersatz, den sie hier definieren, wird der Standardsteuersatz für alle Artikel. Wenn es Artikel mit davon abweichenden Steuersätzen gibt, müssen diese in der Tabelle ""Artikelsteuer"" im Artikelstamm hinzugefügt werden.
 
- #### Beschreibung der Spalten 
+ #### Beschreibung der Spalten
 
-1. Berechnungsart: 
+1. Berechnungsart:
 - Dies kann sein ""Auf Nettosumme"" (das ist die Summe der Grundbeträge).
 - ""Auf vorherige Zeilensumme/-Betrag"" (für kumulative Steuern oder Abgaben). Wenn diese Option ausgewählt wird, wird die Steuer als Prozentsatz der vorherigen Zeilesumme/des vorherigen Zeilenbetrags (in der Steuertabelle) angewendet.
 - ""Unmittelbar"" (wie bereits erwähnt).
@@ -1581,7 +1581,7 @@ DocType: Sales Invoice,Payment Due Date,Zahlungsstichtag
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Reservierte Menge: Für den Verkauf bestellte Menge, aber noch nicht geliefert."
 DocType: Drug Prescription,Interval UOM,Intervall UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Wählen Sie erneut, wenn die gewählte Adresse nach dem Speichern bearbeitet wird"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Reservierte Menge für Lohnbearbeiter: Rohstoffmenge für Lohnbearbeiter.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Reservierte Menge für Lohnbearbeiter: Rohstoffmenge für Lohnbearbeiter.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Artikelvariante {0} mit denselben Attributen existiert bereits
 DocType: Item,Hub Publishing Details,Hub-Veröffentlichungsdetails
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',"""Eröffnung"""
@@ -4146,7 +4146,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -4158,15 +4158,15 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","Standard-Steuer-Vorlage, die für alle Kauftransaktionen angewandt werden kann. Diese Vorlage kann eine Liste der Steuern und auch anderer Kosten wie ""Versand"", ""Versicherung"", ""Handhabung"" usw. enthalten. 
+10. Add or Deduct: Whether you want to add or deduct the tax.","Standard-Steuer-Vorlage, die für alle Kauftransaktionen angewandt werden kann. Diese Vorlage kann eine Liste der Steuern und auch anderer Kosten wie ""Versand"", ""Versicherung"", ""Handhabung"" usw. enthalten.
 
- #### Hinweis 
+ #### Hinweis
 
 Der Steuersatz, den sie hier definieren, wird der Standardsteuersatz für alle Artikel. Wenn es Artikel mit davon abweichenden Steuersätzen gibt, müssen diese in der Tabelle ""Artikelsteuer"" im Artikelstamm hinzugefügt werden.
 
- #### Beschreibung der Spalten 
+ #### Beschreibung der Spalten
 
-1. Berechnungsart: 
+1. Berechnungsart:
 - Dies kann sein ""Auf Nettosumme"" (das ist die Summe der Grundbeträge).
 - ""Auf vorherige Zeilensumme/-Betrag"" (für kumulative Steuern oder Abgaben). Wenn diese Option ausgewählt wird, wird die Steuer als Prozentsatz der vorherigen Zeilesumme/des vorherigen Zeilenbetrags (in der Steuertabelle) angewendet.
 - ""Unmittelbar"" (wie bereits erwähnt).
@@ -4540,7 +4540,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Allgemeine Geschäftsbedingungen, die bei Ver- und Einkäufen verwendet werden können.
 
- Beispiele: 
+ Beispiele:
 
 1. Gültigkeit des Angebots.
 2. Zahlungsbedingungen (Vorkasse, auf Rechnung, Teilweise Vorkasse usw.)
@@ -4549,7 +4549,7 @@ Examples:
 5. Garantie, falls vorhanden.
 6. Rückgabebedingungen.
 7. Lieferbedingungen, falls zutreffend.
-8. Beschwerdemanagement, Schadensersatz, Haftung usw. 
+8. Beschwerdemanagement, Schadensersatz, Haftung usw.
 9. Adresse und Kontaktdaten des Unternehmens."
 DocType: Homepage Section,Section Based On,Abschnitt basierend auf
 DocType: Shopping Cart Settings,Show Apply Coupon Code,Gutscheincode anwenden anzeigen
@@ -5386,11 +5386,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,"Wählen Sie einen Mitarbeiter aus, um den Mitarbeiter vorab zu erreichen."
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,Bitte wähle ein gültiges Datum aus
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,Wählen Sie die Art Ihres Unternehmens.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6842,7 +6842,7 @@ DocType: Subscription Plan Detail,Plan,Planen
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,Kontoauszug Bilanz nach Hauptbuch
 DocType: Job Applicant,Applicant Name,Bewerbername
 DocType: Authorization Rule,Customer / Item Name,Kunde / Artikelname
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -7461,7 +7461,7 @@ apps/erpnext/erpnext/selling/doctype/customer/customer.py,Please mention the Lea
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Start date should be less than end date for Item {0},Startdatum sollte für den Artikel {0} vor dem Enddatum liegen
 DocType: Shift Type,Auto Attendance Settings,Einstellungen für die automatische Teilnahme
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Beispiel: ABCD.##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Beispiel: ABCD.#####
  Wenn ""Serie"" eingestellt ist und ""Seriennummer"" in den Transaktionen nicht aufgeführt ist, dann wird eine Seriennummer automatisch auf der Grundlage dieser Serie erstellt. Wenn immer explizit Seriennummern für diesen Artikel aufgeführt werden sollen, muss das Feld leer gelassen werden."
 DocType: Upload Attendance,Upload Attendance,Anwesenheit hochladen
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,BOM and Manufacturing Quantity are required,Stückliste und Fertigungsmenge werden benötigt

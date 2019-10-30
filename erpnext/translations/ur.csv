@@ -1399,7 +1399,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1548,7 +1548,7 @@ DocType: Sales Invoice,Payment Due Date,ادائیگی کی وجہ سے تاری
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.",محفوظ مقدار: مقدار فروخت کے لئے آرڈر کی گئی ، لیکن فراہم نہیں کی گئی۔
 DocType: Drug Prescription,Interval UOM,انٹرا UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save",منتخب کرنے کے بعد، منتخب کردہ ایڈریس کو بچانے کے بعد میں ترمیم کیا جاتا ہے
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,ذیلی معاہدے کے لئے محفوظ مقدار: سب کوٹریکٹ اشیاء بنانے کے لئے خام مال کی مقدار۔
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,ذیلی معاہدے کے لئے محفوظ مقدار: سب کوٹریکٹ اشیاء بنانے کے لئے خام مال کی مقدار۔
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,آئٹم مختلف {0} پہلے ہی صفات کے ساتھ موجود
 DocType: Item,Hub Publishing Details,ہب پبلشنگ کی تفصیلات
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',افتتاحی'
@@ -4093,7 +4093,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -5288,11 +5288,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,ملازم کو پیش کرنے کے لئے ملازم کا انتخاب کریں.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,براہ کرم ایک درست تاریخ منتخب کریں
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,آپ کے کاروبار کی نوعیت کو منتخب کریں.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6737,7 +6737,7 @@ DocType: Subscription Plan Detail,Plan,منصوبہ
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,جنرل لیجر کے مطابق بینک کا گوشوارہ توازن
 DocType: Job Applicant,Applicant Name,درخواست گزار کا نام
 DocType: Authorization Rule,Customer / Item Name,کسٹمر / نام شے
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 

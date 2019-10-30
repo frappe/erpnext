@@ -1414,7 +1414,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1425,15 +1425,15 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Modèle de la taxe standard qui peut être appliqué à toutes les Opérations d'Achat. Ce modèle peut contenir la liste des titres d'impôts ainsi que d'autres titre de charges comme ""Livraison"", ""Assurance"", ""Gestion"", etc. 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Modèle de la taxe standard qui peut être appliqué à toutes les Opérations d'Achat. Ce modèle peut contenir la liste des titres d'impôts ainsi que d'autres titre de charges comme ""Livraison"", ""Assurance"", ""Gestion"", etc.
 
-#### Remarque 
+#### Remarque
 
 Le taux d'imposition que vous définissez ici sera le taux d'imposition standard pour tous les **Articles**. S'il y a des **Articles** qui ont des taux différents, ils doivent être ajoutés dans la table **Taxe de l'Article** dans les données de base **Article**.
 
 #### Description des Colonnes
 
-1. Type de Calcul : 
+1. Type de Calcul :
     - Cela peut être le **Total Net** (qui est la somme des montants de base).
     - **Total / Montant Sur la Ligne Précédente** (pour les taxes ou frais accumulés). Si vous sélectionnez cette option, la taxe sera appliquée en pourcentage du montant ou du total de la ligne précédente (dans la table d'impôts).
     - **Réel** (comme mentionné).
@@ -1583,7 +1583,7 @@ DocType: Sales Invoice,Payment Due Date,Date d'Échéance de Paiement
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Réservés Quantité: Quantité de commande pour la vente , mais pas livré ."
 DocType: Drug Prescription,Interval UOM,UDM d'Intervalle
 DocType: Customer,"Reselect, if the chosen address is edited after save","Re-sélectionner, si l'adresse choisie est éditée après l'enregistrement"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Qté réservée aux sous-traitants: quantité de matières premières permettant de fabriquer des articles sous-traités.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Qté réservée aux sous-traitants: quantité de matières premières permettant de fabriquer des articles sous-traités.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,La Variante de l'Article {0} existe déjà avec les mêmes caractéristiques
 DocType: Item,Hub Publishing Details,Détails Publiés sur le Hub
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening','Ouverture'
@@ -4150,7 +4150,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -4162,15 +4162,15 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","Modèle de la taxe standard qui peut être appliqué à toutes les Opérations d'Achat. Ce modèle peut contenir la liste des titres d'impôts ainsi que d'autres titre de charges comme ""Livraison"", ""Assurance"", ""Gestion"", etc. 
+10. Add or Deduct: Whether you want to add or deduct the tax.","Modèle de la taxe standard qui peut être appliqué à toutes les Opérations d'Achat. Ce modèle peut contenir la liste des titres d'impôts ainsi que d'autres titre de charges comme ""Livraison"", ""Assurance"", ""Gestion"", etc.
 
-#### Remarque 
+#### Remarque
 
 Le taux d'imposition que vous définissez ici sera le taux d'imposition standard pour tous les **Articles**. S'il y a des **Articles** qui ont des taux différents, ils doivent être ajoutés dans la table **Taxe de l'Article** dans les données de base **Article**.
 
 #### Description des Colonnes
 
-1. Type de Calcul : 
+1. Type de Calcul :
     - Cela peut être le **Total Net** (qui est la somme des montants de base).
     - **Total / Montant Sur la Ligne Précédente** (pour les taxes ou frais accumulés). Si vous sélectionnez cette option, la taxe sera appliquée en pourcentage du montant ou du total de la ligne précédente (dans la table d'impôts).
     - **Réel** (comme mentionné).
@@ -4544,7 +4544,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Termes et Conditions Standard qui peuvent être ajoutés aux Ventes et Achats.
 
-Exemples : 
+Exemples :
 
 1. Validité de l'offre.
 2. Conditions de paiement (À l'Avance, À Crédit, une partie en avance, etc).
@@ -4553,7 +4553,7 @@ Exemples :
 4. Garantie, le cas échéant.
 5. Politique de Retour.
 6. Conditions de Livraison, le cas échéant.
-7. Règlement des litiges, indemnisation, responsabilité, etc. 
+7. Règlement des litiges, indemnisation, responsabilité, etc.
 8. Adresse et Contact de votre Société."
 DocType: Homepage Section,Section Based On,Section basée sur
 DocType: Shopping Cart Settings,Show Apply Coupon Code,Afficher appliquer le code de coupon
@@ -5390,11 +5390,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,Sélectionnez un employé pour obtenir l'avance versée.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,Veuillez sélectionner une date valide
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,Sélectionner la nature de votre entreprise.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6848,7 +6848,7 @@ DocType: Subscription Plan Detail,Plan,Plan
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,Solde du Relevé Bancaire d’après le Grand Livre
 DocType: Job Applicant,Applicant Name,Nom du Candidat
 DocType: Authorization Rule,Customer / Item Name,Nom du Client / de l'Article
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 

@@ -1425,7 +1425,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1575,7 +1575,7 @@ DocType: Sales Invoice,Payment Due Date,Thanh toán đáo hạo
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Dành Số lượng: Số lượng đặt hàng để bán, nhưng không chuyển giao."
 DocType: Drug Prescription,Interval UOM,Interval UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Chọn lại, nếu địa chỉ đã chọn được chỉnh sửa sau khi lưu"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Qty dành riêng cho hợp đồng thầu phụ: Số lượng nguyên liệu thô để làm các mặt hàng được thu nhỏ.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Qty dành riêng cho hợp đồng thầu phụ: Số lượng nguyên liệu thô để làm các mặt hàng được thu nhỏ.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Biến thể mẫu hàng {0} đã tồn tại với cùng một thuộc tính
 DocType: Item,Hub Publishing Details,Chi tiết Xuất bản Trung tâm
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening','Đang mở'
@@ -4170,7 +4170,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -4546,7 +4546,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Điều khoản và Điều kiện Chuẩn có thể được bổ sung cho Bán hàng và Thu mua.
 
- Ví dụ: 
+ Ví dụ:
 
  1. Giá trị pháp lý của đề nghị.
  1. Điều khoản Thanh toán (Thanh toán trước, Tín dụng, Đặt cọc v.v.).
@@ -5401,11 +5401,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,Chọn một nhân viên để có được nhân viên trước.
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,Vui lòng chọn ngày hợp lệ
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,Chọn bản chất của doanh nghiệp của bạn.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6875,7 +6875,7 @@ DocType: Subscription Plan Detail,Plan,Kế hoạch
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,Báo cáo số dư ngân hàng theo Sổ cái tổng
 DocType: Job Applicant,Applicant Name,Tên đơn
 DocType: Authorization Rule,Customer / Item Name,Khách hàng / tên hàng hóa
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -7498,7 +7498,7 @@ apps/erpnext/erpnext/selling/doctype/customer/customer.py,Please mention the Lea
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Start date should be less than end date for Item {0},Ngày bắt đầu phải nhỏ hơn ngày kết thúc cho mẫu hàng {0}
 DocType: Shift Type,Auto Attendance Settings,Cài đặt tham dự tự động
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Ví dụ:. ABCD ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Ví dụ:. ABCD #####
  Nếu series được thiết lập và Serial No không được đề cập trong các giao dịch, số serial sau đó tự động sẽ được tạo ra dựa trên series này. Nếu bạn luôn muốn đề cập đến một cách rõ ràng nối tiếp Nos cho mặt hàng này. để trống này."
 DocType: Upload Attendance,Upload Attendance,Tải lên bảo quản
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,BOM and Manufacturing Quantity are required,BOM và số lượng sx được yêu cầu

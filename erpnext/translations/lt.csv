@@ -1425,7 +1425,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1575,7 +1575,7 @@ DocType: Sales Invoice,Payment Due Date,Sumokėti iki
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Rezervuotas kiekis: Parduodamas kiekis, bet nepristatytas."
 DocType: Drug Prescription,Interval UOM,Intervalas UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Iš naujo pažymėkite, jei pasirinktas adresas yra redaguotas po įrašymo"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,"Subrangos užsakytas kiekis: Žaliavų kiekis, iš kurio gaminami subtraktoriai."
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,"Subrangos užsakytas kiekis: Žaliavų kiekis, iš kurio gaminami subtraktoriai."
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Prekė variantas {0} jau egzistuoja su tais pačiais atributais
 DocType: Item,Hub Publishing Details,Hub Publishing duomenys
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&quot;Atidarymas&quot;
@@ -2070,7 +2070,7 @@ DocType: Payroll Entry,Employee Details,Informacija apie darbuotoją
 DocType: Amazon MWS Settings,CN,CN
 DocType: Item Variant Settings,Fields will be copied over only at time of creation.,Laukai bus kopijuojami tik kūrimo metu.
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Row {0}: asset is required for item {1},{0} eilutė: {1} elementui būtinas turtas
-apps/erpnext/erpnext/projects/doctype/task/task.py,'Actual Start Date' can not be greater than 'Actual End Date',"'Pradžios data' negali būti didesnė nei 
+apps/erpnext/erpnext/projects/doctype/task/task.py,'Actual Start Date' can not be greater than 'Actual End Date',"'Pradžios data' negali būti didesnė nei
 'Pabaigos data'"
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Management,valdymas
 apps/erpnext/erpnext/accounts/doctype/accounting_dimension/accounting_dimension.js,Show {0},Rodyti {0}
@@ -4165,7 +4165,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -5383,11 +5383,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,"Pasirinkite darbuotoją, kad darbuotojas gautų anksčiau."
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,Pasirinkite teisingą datą
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,Pasirinkite savo verslo pobūdį.
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6856,7 +6856,7 @@ DocType: Subscription Plan Detail,Plan,Suplanuoti
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,Banko pažyma likutis vienam General Ledger
 DocType: Job Applicant,Applicant Name,Vardas pareiškėjas
 DocType: Authorization Rule,Customer / Item Name,Klientas / Prekės pavadinimas
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 

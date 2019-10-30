@@ -1410,7 +1410,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -1421,19 +1421,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","सभी बिक्री लेनदेन करने के लिए लागू किया जा सकता है कि मानक कर टेम्पलेट। इस टेम्पलेट 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","सभी बिक्री लेनदेन करने के लिए लागू किया जा सकता है कि मानक कर टेम्पलेट। इस टेम्पलेट
 
- कर की दर आप ध्यान दें #### 
+ कर की दर आप ध्यान दें ####
 
  आदि ""हैंडलिंग"", कर सिर और ""नौवहन"", ""बीमा"" की तरह भी अन्य व्यय / आय प्रमुखों की सूची में शामिल कर सकते हैं ** सब ** आइटम के लिए मानक कर की दर हो जाएगा यहाँ परिभाषित करते हैं। अलग दर है ** कि ** आइटम हैं, तो वे ** आइटम टैक्स में जोड़ा जाना चाहिए ** ** आइटम ** मास्टर में मेज।
 
- #### कॉलम 
+ #### कॉलम
 
- 1 का विवरण। गणना के प्रकार: 
+ 1 का विवरण। गणना के प्रकार:
  - इस पर हो सकता है ** नेट (कि मूल राशि का योग है) ** कुल।
  - ** पिछली पंक्ति कुल / राशि ** पर (संचयी कर या शुल्क के लिए)। यदि आप इस विकल्प का चयन करते हैं, कर राशि या कुल (कर तालिका में) पिछली पंक्ति के एक प्रतिशत के रूप में लागू किया जाएगा।
  - ** ** वास्तविक (उल्लेख किया है)।
- दो। खाता सिर: इस कर 
+ दो। खाता सिर: इस कर
  3 बुक किया जा जाएगा, जिसके तहत खाता बही। लागत केंद्र: टैक्स / प्रभारी (शिपिंग) की तरह एक आय है या खर्च तो यह एक लागत केंद्र के खिलाफ बुक किया जा करने की जरूरत है।
  4। विवरण: टैक्स का विवरण (चालान कि / उद्धरण में मुद्रित किया जाएगा)।
  5। दर: टैक्स की दर।
@@ -1578,7 +1578,7 @@ DocType: Sales Invoice,Payment Due Date,भुगतान की नियत �
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","सुरक्षित मात्रा: मात्रा बिक्री के लिए आदेश दिया है , लेकिन नहीं पहुंचा."
 DocType: Drug Prescription,Interval UOM,अंतराल UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","अचयनित करें, अगर सहेजे जाने के बाद चुना हुआ पता संपादित किया गया है"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,सब-कॉन्ट्रैक्ट के लिए आरक्षित मात्रा: कच्चे माल की मात्रा उप-निर्मित आइटम बनाने के लिए।
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,सब-कॉन्ट्रैक्ट के लिए आरक्षित मात्रा: कच्चे माल की मात्रा उप-निर्मित आइटम बनाने के लिए।
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,मद संस्करण {0} पहले से ही एक ही गुण के साथ मौजूद है
 DocType: Item,Hub Publishing Details,हब प्रकाशन विवरण
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;उद्घाटन&#39;
@@ -4146,7 +4146,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -4158,19 +4158,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","सभी खरीद लेनदेन करने के लिए लागू किया जा सकता है कि मानक कर टेम्पलेट। इस टेम्पलेट आप यहाँ को परिभाषित 
+10. Add or Deduct: Whether you want to add or deduct the tax.","सभी खरीद लेनदेन करने के लिए लागू किया जा सकता है कि मानक कर टेम्पलेट। इस टेम्पलेट आप यहाँ को परिभाषित
 
- कर की दर नोट #### 
+ कर की दर नोट ####
 
  आदि ""हैंडलिंग"", कर सिर और ""नौवहन"", ""बीमा"" की तरह भी अन्य व्यय प्रमुखों की सूची में शामिल कर सकते हैं ** सब ** आइटम के लिए मानक कर की दर हो जाएगा। अलग दर है ** कि ** आइटम हैं, तो वे ** आइटम टैक्स में जोड़ा जाना चाहिए ** ** आइटम ** मास्टर में मेज।
 
- #### कॉलम 
+ #### कॉलम
 
- 1 का विवरण। गणना के प्रकार: 
+ 1 का विवरण। गणना के प्रकार:
  - इस पर हो सकता है ** नेट (कि मूल राशि का योग है) ** कुल।
  - ** पिछली पंक्ति कुल / राशि ** पर (संचयी कर या शुल्क के लिए)। यदि आप इस विकल्प का चयन करते हैं, कर राशि या कुल (कर तालिका में) पिछली पंक्ति के एक प्रतिशत के रूप में लागू किया जाएगा।
  - ** ** वास्तविक (उल्लेख किया है)।
- दो। खाता सिर: इस कर 
+ दो। खाता सिर: इस कर
  3 बुक किया जा जाएगा, जिसके तहत खाता बही। लागत केंद्र: टैक्स / प्रभारी (शिपिंग) की तरह एक आय है या खर्च तो यह एक लागत केंद्र के खिलाफ बुक किया जा करने की जरूरत है।
  4। विवरण: टैक्स का विवरण (चालान कि / उद्धरण में मुद्रित किया जाएगा)।
  5। दर: टैक्स की दर।
@@ -4540,7 +4540,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","मानक नियमों और बिक्री और खरीद के लिए जोड़ा जा सकता है कि स्थितियां।
 
- उदाहरण: 
+ उदाहरण:
 
  1। ऑफर की वैधता।
  1। भुगतान की शर्तें (क्रेडिट पर अग्रिम में, भाग अग्रिम आदि)।
@@ -4549,7 +4549,7 @@ Examples:
  1। वारंटी यदि कोई हो।
  1। वापस नीती।
  1। शिपिंग की शर्तें, यदि लागू हो।
- 1। आदि को संबोधित विवाद, क्षतिपूर्ति, दायित्व, 
+ 1। आदि को संबोधित विवाद, क्षतिपूर्ति, दायित्व,
  1 के तरीके। पता और अपनी कंपनी के संपर्क।"
 DocType: Homepage Section,Section Based On,अनुभाग के आधार पर
 DocType: Shopping Cart Settings,Show Apply Coupon Code,कूपन कोड लागू करें दिखाएं
@@ -5386,11 +5386,11 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Atleast one o
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Select an employee to get the employee advance.,कर्मचारी अग्रिम के लिए एक कर्मचारी का चयन करें
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Please select a valid Date,कृपया एक वैध तिथि चुनें
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select the nature of your business.,आपके व्यवसाय की प्रकृति का चयन करें।
-DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value 
+DocType: Lab Test Template,"Single for results which require only a single input, result UOM and normal value
 <br>
 Compound for results which require multiple input fields with corresponding event names, result UOMs and normal values
 <br>
-Descriptive for tests which have multiple result components and corresponding result entry fields. 
+Descriptive for tests which have multiple result components and corresponding result entry fields.
 <br>
 Grouped for test templates which are a group of other test templates.
 <br>
@@ -6486,7 +6486,7 @@ apps/erpnext/erpnext/accounts/doctype/bank_account/test_bank_account.py,BankAcco
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Brokerage,दलाली
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Attendance for employee {0} is already marked for this day,कर्मचारी {0} के लिए उपस्थिति पहले से ही इस दिन के लिए चिह्नित किया गया है
 DocType: Work Order Operation,"in Minutes
-Updated via 'Time Log'","मिनट में 
+Updated via 'Time Log'","मिनट में
  'टाइम प्रवेश' के माध्यम से अद्यतन"
 DocType: Customer,From Lead,लीड से
 DocType: Amazon MWS Settings,Synch Orders,सिंच ऑर्डर
@@ -6844,7 +6844,7 @@ DocType: Subscription Plan Detail,Plan,योजना
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,जनरल लेजर के अनुसार बैंक बैलेंस
 DocType: Job Applicant,Applicant Name,आवेदक के नाम
 DocType: Authorization Rule,Customer / Item Name,ग्राहक / मद का नाम
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -7462,7 +7462,7 @@ apps/erpnext/erpnext/selling/doctype/customer/customer.py,Please mention the Lea
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Start date should be less than end date for Item {0},प्रारंभ तिथि मद के लिए समाप्ति तिथि से कम होना चाहिए {0}
 DocType: Shift Type,Auto Attendance Settings,ऑटो उपस्थिति सेटिंग्स
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","उदाहरण:। श्रृंखला के लिए निर्धारित है और सीरियल कोई लेन-देन में उल्लेख नहीं किया गया है, तो एबीसीडी ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","उदाहरण:। श्रृंखला के लिए निर्धारित है और सीरियल कोई लेन-देन में उल्लेख नहीं किया गया है, तो एबीसीडी #####
 , तो स्वत: सीरियल नंबर इस श्रृंखला के आधार पर बनाया जाएगा। आप हमेशा स्पष्ट रूप से इस मद के लिए सीरियल नंबर का उल्लेख करना चाहते हैं। इस खाली छोड़ दें।"
 DocType: Upload Attendance,Upload Attendance,उपस्थिति अपलोड
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,BOM and Manufacturing Quantity are required,बीओएम और विनिर्माण मात्रा की आवश्यकता होती है
