@@ -21,10 +21,10 @@ frappe.ui.form.on('Maintenance Schedule', {
 		}
 	},
 	refresh: function(frm) {
-			setTimeout(() => { 
-				frm.toggle_display('generate_schedule', !(frm.is_new()));
-				frm.toggle_display('schedule', !(frm.is_new()));
-			},10);
+		setTimeout(() => { 
+			frm.toggle_display('generate_schedule', !(frm.is_new()));
+			frm.toggle_display('schedule', !(frm.is_new()));
+		},10);
 	},
 	customer: function(frm) {
 		erpnext.utils.get_party_details(frm)
