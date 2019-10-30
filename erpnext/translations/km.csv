@@ -1553,7 +1553,7 @@ DocType: Sales Invoice,Payment Due Date,ការទូទាត់កាលប�
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.",Qty បានបម្រុងទុក: បរិមាណបានបញ្ជាទិញសម្រាប់លក់ប៉ុន្តែមិនបានប្រគល់ឱ្យទេ។
 DocType: Drug Prescription,Interval UOM,ចន្លោះពេលវេលា UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save",ជ្រើសរើសបើអាសយដ្ឋានដែលបានជ្រើសត្រូវបានកែសម្រួលបន្ទាប់ពីរក្សាទុក
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Qty ដែលបានបម្រុងទុកសម្រាប់កិច្ចសន្យារង: បរិមាណវត្ថុធាតុដើមដើម្បីធ្វើឱ្យវត្ថុរង។
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Qty ដែលបានបម្រុងទុកសម្រាប់កិច្ចសន្យារង: បរិមាណវត្ថុធាតុដើមដើម្បីធ្វើឱ្យវត្ថុរង។
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,ធាតុវ៉ារ្យង់ {0} រួចហើយដែលមានគុណលក្ខណៈដូចគ្នា
 DocType: Item,Hub Publishing Details,ពត៌មានលម្អិតការបោះពុម្ព
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&quot;ការបើក&quot;
