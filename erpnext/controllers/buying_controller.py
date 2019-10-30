@@ -246,7 +246,7 @@ class BuyingController(StockController):
 		purchase_orders = set([d.purchase_order for d in self.items])
 
 		# qty of raw materials backflushed (for each item per purchase order)
-		backflushed_raw_materials = get_backflushed_subcontracted_raw_materials(purchase_orders)
+		backflushed_raw_materials_map = get_backflushed_subcontracted_raw_materials(purchase_orders)
 
 		# qty of "finished good" item yet to be received
 		qty_to_be_received_map = get_qty_to_be_received(purchase_orders)
@@ -262,22 +262,35 @@ class BuyingController(StockController):
 
 			item_key = '{}{}'.format(item.item_code, item.purchase_order)
 
-			for raw_material in transferred_raw_materials + non_stock_items:
-				fg_yet_to_be_received = qty_to_be_received_map.get(item_key)
+			fg_yet_to_be_received = qty_to_be_received_map.get(item_key)
 
-				consumed_qty = backflushed_raw_materials.get(item_key, 0)
+			consumed_qty = backflushed_raw_materials_map.get(item_key, {}).get('qty', 0)
+			consumed_serial_nos = backflushed_raw_materials_map.get(item_key, {}).get('serial_no', '')
+
+			for raw_material in transferred_raw_materials + non_stock_items:
 				transferred_qty = raw_material.qty
 
-				available_qty = transferred_qty - consumed_qty
+				rm_qty_to_be_consumed = transferred_qty - consumed_qty
 
 				# backflush all remaining transferred qty in the last Purchase Receipt
 				if fg_yet_to_be_received == item.qty:
-					qty = available_qty
+					qty = rm_qty_to_be_consumed
 				else:
-					qty = frappe.utils.ceil((available_qty / fg_yet_to_be_received) * item.qty)
+					qty = (rm_qty_to_be_consumed / fg_yet_to_be_received) * item.qty
 
-				if qty > available_qty:
-					qty = available_qty
+					if frappe.get_cached_value('UOM', raw_material.stock_uom, 'must_be_whole_number'):
+						qty = frappe.utils.ceil(qty)
+
+				if qty > rm_qty_to_be_consumed:
+					qty = rm_qty_to_be_consumed
+
+				if not qty: continue
+
+				if raw_material.serial_no:
+					serial_nos = set(get_serial_nos(raw_material.serial_no)) - \
+						set(get_serial_nos(consumed_serial_nos))
+					if serial_nos and qty < len(serial_nos):
+						raw_material.serial_no = serial_nos[:qty]
 
 				rm = self.append('supplied_items', {})
 				rm.update(raw_material)
@@ -776,8 +789,7 @@ def get_subcontracted_raw_materials_from_se(purchase_order, fg_item):
 			sed.description,
 			sed.stock_uom,
 			sed.subcontracted_item AS main_item_code,
-			sed.serial_no,
-			sed.batch_no
+			GROUP_CONCAT(sed.serial_no) AS serial_no
 		FROM `tabStock Entry` se,`tabStock Entry Detail` sed
 		WHERE
 			se.name = sed.parent
@@ -792,10 +804,11 @@ def get_subcontracted_raw_materials_from_se(purchase_order, fg_item):
 	return raw_materials
 
 def get_backflushed_subcontracted_raw_materials(purchase_orders):
-	return frappe._dict(frappe.db.sql("""
+	backflushed_raw_materials = frappe.db.sql("""
 		SELECT
 			CONCAT(prsi.rm_item_code, pri.purchase_order) AS item_key,
 			SUM(prsi.consumed_qty) AS qty
+			GROUP_CONCAT(prsi.serial_no) AS serial_no
 		FROM `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri, `tabPurchase Receipt Item Supplied` prsi
 		WHERE
 			pr.name = pri.parent
@@ -804,7 +817,13 @@ def get_backflushed_subcontracted_raw_materials(purchase_orders):
 			AND pri.item_code = prsi.main_item_code
 			AND pr.docstatus = 1
 		GROUP BY prsi.rm_item_code, pri.purchase_order
-	""", (purchase_orders, )))
+	""", (purchase_orders, ), as_dict=1)
+
+	backflushed_raw_materials_map = frappe._dict()
+	for item in backflushed_raw_materials:
+		backflushed_raw_materials_map.setdefault(d.item_key, d)
+
+	return backflushed_raw_materials_map
 
 def get_asset_item_details(asset_items):
 	asset_items_data = {}
@@ -846,6 +865,7 @@ def get_qty_to_be_received(purchase_orders):
 		WHERE
 			poi.`parent` in %s
 		GROUP BY poi.`item_code`, poi.`parent`
+		HAVING SUM(poi.`qty`) > SUM(poi.`received_qty`)
 	""", (purchase_orders)))
 
 def get_non_stock_items(purchase_order, fg_item_code):
