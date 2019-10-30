@@ -1548,7 +1548,7 @@ DocType: Sales Invoice,Payment Due Date,ادائیگی کی وجہ سے تاری
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.",محفوظ مقدار: مقدار فروخت کے لئے آرڈر کی گئی ، لیکن فراہم نہیں کی گئی۔
 DocType: Drug Prescription,Interval UOM,انٹرا UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save",منتخب کرنے کے بعد، منتخب کردہ ایڈریس کو بچانے کے بعد میں ترمیم کیا جاتا ہے
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,ذیلی معاہدے کے لئے محفوظ مقدار: سب کوٹریکٹ اشیاء بنانے کے لئے خام مال کی مقدار۔
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,ذیلی معاہدے کے لئے محفوظ مقدار: سب کوٹریکٹ اشیاء بنانے کے لئے خام مال کی مقدار۔
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,آئٹم مختلف {0} پہلے ہی صفات کے ساتھ موجود
 DocType: Item,Hub Publishing Details,ہب پبلشنگ کی تفصیلات
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',افتتاحی'
