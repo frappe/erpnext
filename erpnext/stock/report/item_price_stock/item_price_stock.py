@@ -129,17 +129,15 @@ def get_price_map(price_list_names, buying=0, selling=0):
 
 	rate_key = "Buying Rate" if buying else "Selling Rate"
 	price_list_key = "Buying Price List" if buying else "Selling Price List"
-	price_list_condition = " and buying=1" if buying else " and selling=1"
 
-	pricing_details = frappe.db.sql("""
-		select
-			name,price_list,price_list_rate
-		from
-			`tabItem Price`
-		where
-			name in ({price_list_names}) {price_list_condition}
-		""".format(price_list_names=', '.join(['%s']*len(price_list_names)),
-	price_list_condition=price_list_condition), price_list_names, as_dict=1)
+	filters = {"name": ("in", price_list_names)}
+	if buying:
+		filters["buying"] = 1
+	else:
+		filters["selling"] = 1
+
+	pricing_details = frappe.get_all("Item Price",
+		fields = ["name", "price_list", "price_list_rate"], filters=filters)
 
 	for d in pricing_details:
 		name = d["name"]
