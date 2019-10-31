@@ -20,7 +20,7 @@ frappe.ui.form.on("Delivery Note", {
 			callback: function(r) {
 				frm.doc.gst_accounts = r.message;
 			}
-		})
+		});
 	},
 
 	set_accounts_to_skip: function(frm) {
@@ -37,7 +37,7 @@ frappe.ui.form.on("Delivery Note", {
 });
 
 frappe.ui.form.on("Delivery Note Item", {
-	item_code: function(frm, cdt, cdn) {
+	item_code: function(frm) {
 		if (!frm.doc.gst_accounts) {
 			frappe.run_serially([
 				() => frm.trigger('get_gst_accounts'),

@@ -233,8 +233,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.frm.doc.rounding_adjustment = 0;
 		var actual_tax_dict = {};
 
-		//allow to skip tax calculation for some accounts in item tax template.
-		let accounts_to_skip = me.frm.doc.accounts_to_skip ? JSON.parse(me.frm.doc.accounts_to_skip) : []
+		// allow to skip tax calculation for some accounts in item tax template.
+		let accounts_to_skip = me.frm.doc.accounts_to_skip ? JSON.parse(me.frm.doc.accounts_to_skip) : [];
 
 		if (me.frm.doc.taxes && me.frm.doc.taxes.length > 0) {
 			for (let i=me.frm.doc["taxes"].length-1; i>=0; i--) {

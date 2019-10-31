@@ -57,7 +57,7 @@ frappe.ui.form.on("Sales Invoice", {
 			callback: function(r) {
 				frm.doc.gst_accounts = r.message;
 			}
-		})
+		});
 	},
 
 	set_accounts_to_skip: function(frm) {
@@ -74,7 +74,7 @@ frappe.ui.form.on("Sales Invoice", {
 });
 
 frappe.ui.form.on("Sales Invoice Item", {
-	item_code: function(frm, cdt, cdn) {
+	item_code: function(frm) {
 		if (!frm.doc.gst_accounts) {
 			frappe.run_serially([
 				() => frm.trigger('get_gst_accounts'),
