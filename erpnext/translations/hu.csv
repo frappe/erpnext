@@ -1562,7 +1562,7 @@ DocType: Sales Invoice,Payment Due Date,Fizetési határidő
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Reserved Mennyiség: Rendelhető mennyiség eladó, de nem teljesített."
 DocType: Drug Prescription,Interval UOM,Intervallum mértékegysége
 DocType: Customer,"Reselect, if the chosen address is edited after save","Újra válassza ki, ha a kiválasztott cím szerkesztésre került a mentés után"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Fenntartott mennyiség az alvállalkozók számára: Nyersanyag-mennyiség az alhúzásokhoz.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Fenntartott mennyiség az alvállalkozók számára: Nyersanyag-mennyiség az alhúzásokhoz.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Tétel variáció {0} már létezik azonos Jellemzővel
 DocType: Item,Hub Publishing Details,Hub közzétételének részletei
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',"""Nyitás"""
