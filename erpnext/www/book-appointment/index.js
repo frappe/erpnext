@@ -20,12 +20,7 @@ async function get_global_variables() {
     window.timezones = (await frappe.call({
         method: 'erpnext.www.book-appointment.index.get_timezones'
     })).message;
-    window.holiday_list = (await frappe.call({
-        method: 'erpnext.www.book-appointment.index.get_holiday_list',
-        args: {
-            'holiday_list_name': window.appointment_settings.holiday_list
-        }
-    })).message;
+    window.holiday_list = window.appointment_settings.holiday_list;
 }
 
 function setup_timezone_selector() {
@@ -201,7 +196,8 @@ async function submit() {
         args: {
             'date': window.selected_date,
             'time': window.selected_time,
-            'contact': window.contact
+            'contact': window.contact,
+            'tz':window.selected_timezone
         }
     })).message;
     frappe.msgprint(__('Appointment Created Successfully'));
