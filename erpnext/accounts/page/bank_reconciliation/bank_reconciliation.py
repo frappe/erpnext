@@ -18,9 +18,6 @@ def reconcile(bank_transaction, payment_doctype, payment_name):
 	account = frappe.db.get_value("Bank Account", transaction.bank_account, "account")
 	gl_entry = frappe.get_doc("GL Entry", dict(account=account, voucher_type=payment_doctype, voucher_no=payment_name))
 
-	if (payment_doctype == 'Payment Entry' and payment_entry.unallocated_amount > transaction.unallocated_amount):
-		frappe.throw(_("This Payment_entry's unallocated_amount is greater than this bank transactions's unallocated_amount"))
-
 	if transaction.unallocated_amount == 0:
 		frappe.throw(_("This bank transaction is already fully reconciled"))
 
@@ -29,6 +26,12 @@ def reconcile(bank_transaction, payment_doctype, payment_name):
 
 	if transaction.debit > 0 and gl_entry.debit > 0:
 		frappe.throw(_("The selected payment entry should be linked with a creditor bank transaction"))
+
+	if (payment_doctype == 'Payment Entry' and payment_entry.unallocated_amount > transaction.unallocated_amount):
+		frappe.throw(_("This Payment_entry's unallocated_amount is greater than this bank transactions's unallocated_amount"))
+
+	if (payment_doctype == 'Journal Entry' and payment_entry.total_amount > transaction.unallocated_amount):
+		frappe.throw(_("This Payment_entry's unallocated_amount is greater than this bank transactions's unallocated_amount"))
 
 	add_payment_to_transaction(transaction, payment_entry, gl_entry)
 
