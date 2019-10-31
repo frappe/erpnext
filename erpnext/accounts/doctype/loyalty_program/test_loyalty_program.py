@@ -8,10 +8,12 @@ import unittest
 from frappe.utils import today, cint, flt, getdate
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_program_details_with_points
 from erpnext.accounts.party import get_dashboard_info
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 class TestLoyaltyProgram(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
+		set_perpetual_inventory(0)
 		# create relevant item, customer, loyalty program, etc
 		create_records()
 
