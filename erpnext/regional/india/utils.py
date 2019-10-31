@@ -549,6 +549,20 @@ def validate_state_code(state_code, address):
 	else:
 		return int(state_code)
 
+def set_accounts_to_skip(doc, method=None):
+	gst_accounts = get_gst_accounts(doc.company)
+	inter_state_accounts = gst_accounts['igst_account']
+	intra_state_accounts = gst_accounts['cgst_account'] + gst_accounts['sgst_account']
+
+	if ((doc.doctype in ("Sales Invoice", "Delivery Note") and doc.company_gstin
+		and doc.company_gstin[:2] != doc.place_of_supply[:2]) or (doc.doctype == "Purchase Invoice"
+		and doc.supplier_gstin and doc.supplier_gstin[:2] != doc.place_of_supply[:2])):
+		doc.accounts_to_skip = intra_state_accounts
+	else:
+		doc.accounts_to_skip = inter_state_accounts
+
+
+@frappe.whitelist()
 def get_gst_accounts(company, account_wise=False):
 	gst_accounts = frappe._dict()
 	gst_settings_accounts = frappe.get_all("GST Account",
