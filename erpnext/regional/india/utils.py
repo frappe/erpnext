@@ -46,6 +46,14 @@ def validate_gstin_for_india(doc, method):
 			frappe.throw(_("Invalid GSTIN! First 2 digits of GSTIN should match with State number {0}.")
 				.format(doc.gst_state_number))
 
+def update_gst_category(doc, method):
+	for link in doc.links:
+		if link.link_doctype in ['Customer', 'Supplier']:
+			if doc.gstin:
+				frappe.db.set_value(link.link_doctype, link.link_name, "gst_category", "Registered Regular")
+			else:
+				frappe.db.set_value(link.link_doctype, link.link_name, "gst_category", "Unregistered")
+
 def set_gst_state_and_state_number(doc):
 	if not doc.gst_state:
 		if not doc.state:
