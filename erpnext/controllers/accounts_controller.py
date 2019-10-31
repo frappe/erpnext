@@ -1097,6 +1097,8 @@ def get_supplier_block_status(party_name):
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
 	data = json.loads(trans_items)
+	sales_doctypes = ['Sales Order', 'Sales Invoice', 'Delivery Note', 'Quotation']
+
 	for d in data:
 		child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
 
@@ -1118,18 +1120,22 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name):
 				#  if rate is greater than price_list_rate, set margin
 				#  or set discount
 				child_item.discount_percentage = 0
-				child_item.margin_type = "Amount"
-				child_item.margin_rate_or_amount = flt(child_item.rate - child_item.price_list_rate,
-					child_item.precision("margin_rate_or_amount"))
-				child_item.rate_with_margin = child_item.rate
+
+				if parent_doctype in sales_doctypes:
+					child_item.margin_type = "Amount"
+					child_item.margin_rate_or_amount = flt(child_item.rate - child_item.price_list_rate,
+						child_item.precision("margin_rate_or_amount"))
+					child_item.rate_with_margin = child_item.rate
 			else:
 				child_item.discount_percentage = flt((1 - flt(child_item.rate) / flt(child_item.price_list_rate)) * 100.0,
 					child_item.precision("discount_percentage"))
 				child_item.discount_amount = flt(
 					child_item.price_list_rate) - flt(child_item.rate)
-				child_item.margin_type = ""
-				child_item.margin_rate_or_amount = 0
-				child_item.rate_with_margin = 0
+
+				if parent_doctype in sales_doctypes:
+					child_item.margin_type = ""
+					child_item.margin_rate_or_amount = 0
+					child_item.rate_with_margin = 0
 
 		child_item.flags.ignore_validate_update_after_submit = True
 		child_item.save()
