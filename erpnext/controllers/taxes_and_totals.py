@@ -197,6 +197,13 @@ class calculate_taxes_and_totals(object):
 
 	def calculate_taxes(self):
 		self.doc.rounding_adjustment = 0
+		accounts_to_skip = self.doc.get('accounts_to_skip') or []
+
+		# Delete rows for account heads to skip
+		for i, tax in enumerate(self.doc.get('taxes')):
+			if tax.account_head in accounts_to_skip:
+				del self.doc.get('taxes')[i]
+
 		# maintain actual tax rate based on idx
 		actual_tax_dict = dict([[tax.idx, flt(tax.tax_amount, tax.precision("tax_amount"))]
 			for tax in self.doc.get("taxes") if tax.charge_type == "Actual"])
