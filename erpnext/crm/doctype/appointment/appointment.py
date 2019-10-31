@@ -85,8 +85,8 @@ class Appointment(Document):
         # Remove unverified status
         self.status = 'Open'
         # Create calender event
-        self.create_calendar_event()
         self.auto_assign()
+        self.create_calendar_event()
         self.save(ignore_permissions=True)
         frappe.db.commit()
 
