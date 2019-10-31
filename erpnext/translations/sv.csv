@@ -1573,7 +1573,7 @@ DocType: Sales Invoice,Payment Due Date,Förfallodag
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Reserverad antal: Antal som beställts för försäljning, men inte levererat."
 DocType: Drug Prescription,Interval UOM,Intervall UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save",Återmarkera om den valda adressen redigeras efter spara
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Reserverad kvantitet för underleverantör: Råvarukvantitet för att tillverka underleverantörer.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Reserverad kvantitet för underleverantör: Råvarukvantitet för att tillverka underleverantörer.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Punkt Variant {0} finns redan med samma attribut
 DocType: Item,Hub Publishing Details,Hub Publishing Detaljer
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&quot;Öppna&quot;
