@@ -140,11 +140,11 @@ class Appointment(Document):
             filters={
                 'party_name': self.lead,
             },
+            ignore_permissions=True,
             order_by='creation desc')
         if not opporutnities:
             return None
-        latest_opportunity = frappe.get_doc(
-            'Opportunity', opporutnities[0].name)
+        latest_opportunity = frappe.get_doc('Opportunity', opporutnities[0].name )
         assignee = latest_opportunity._assign
         if not assignee:
             return None
