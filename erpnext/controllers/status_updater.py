@@ -37,9 +37,9 @@ status_map = {
 	"Sales Order": [
 		["Draft", None],
 		["To Deliver and Bill", "eval:self.per_delivered < 100 and self.per_billed < 100 and self.docstatus == 1"],
-		["To Bill", "eval:self.per_delivered == 100 and self.per_billed < 100 and self.docstatus == 1"],
-		["To Deliver", "eval:self.per_delivered < 100 and self.per_billed == 100 and self.docstatus == 1"],
-		["Completed", "eval:self.per_delivered == 100 and self.per_billed == 100 and self.docstatus == 1"],
+		["To Bill", "eval:(self.per_delivered == 100 or self.skip_delivery_note) and self.per_billed < 100 and self.docstatus == 1"],
+		["To Deliver", "eval:self.per_delivered < 100 and self.per_billed == 100 and self.docstatus == 1 and not self.skip_delivery_note"],
+		["Completed", "eval:(self.per_delivered == 100 or self.skip_delivery_note) and self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
 		["On Hold", "eval:self.status=='On Hold'"],
