@@ -8,6 +8,7 @@
 	{
 		"doctype": "Account",
 		"company": "_Test GmbH",
+		"parent_account": null,
 		"account_name": "Aktiva",
 		"is_group": "1",
 		"root_type": "Asset"
@@ -30,6 +31,7 @@
 	{
 		"doctype": "Account",
 		"company": "_Test GmbH",
+		"parent_account": null,
 		"account_name": "Passiva",
 		"is_group": "1",
 		"root_type": "Liability"
