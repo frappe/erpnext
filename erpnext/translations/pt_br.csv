@@ -57,7 +57,7 @@ DocType: Shipping Rule,Shipping Amount,Valor do Transporte
 DocType: Job Opening,Job Title,Cargo
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Investment Banking,Investimento Bancário
 DocType: BOM,Item UOM,Unidade de Medida do Item
-DocType: Pricing Rule,Pricing Rule,Regra de Preços
+DocType: Coupon Code,Pricing Rule,Regra de Preços
 DocType: Item Customer Detail,Item Customer Detail,Detalhe do Cliente do Item
 apps/erpnext/erpnext/assets/doctype/asset/depreciation.py,Asset {0} must be submitted,O Ativo {0} deve ser enviado
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py,Work-in-Progress Warehouse is required before Submit,Armazén de Trabalho em Andamento é necessário antes de Enviar
@@ -2032,6 +2032,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Project Collaboration I
 DocType: Journal Entry Account,If Income or Expense,Se é Receita ou Despesa
 apps/erpnext/erpnext/controllers/accounts_controller.py,"Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.","Linha #{0}: A qtde deve ser 1, pois o item é um ativo imobilizado. Por favor, utilize uma linha separada para múltiplas qtdes."
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js,Please enter company first,Por favor insira primeira empresa
+apps/erpnext/erpnext/templates/pages/order.html,Make Purchase Invoice,Criar fatura de compra
 DocType: Price List,Applicable for Countries,Aplicável para os Países
 DocType: Landed Cost Voucher,Additional Charges,Encargos Adicionais
 DocType: Delivery Note Item,Against Sales Invoice,Contra a Fatura de Venda
