@@ -11,7 +11,6 @@ from datetime import timedelta
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.desk.form.assign_to import add as add_assignemnt
 from frappe.utils import get_url
 from frappe.utils.verified_command import verify_request, get_signed_params
 
@@ -37,13 +36,13 @@ class Appointment(Document):
     def after_insert(self):
         if self.lead:
             # Create Calendar event
-            self.create_calendar_event()
             self.auto_assign()
+            self.create_calendar_event()
         else:
             # Set status to unverified
             self.status = 'Unverified'
             # Send email to confirm
-            verify_url = self.get_verify_url()
+            verify_url = self._get_verify_url()
             message = ''.join(
                 ['Please click the following link to confirm your appointment:', verify_url])
             frappe.sendmail(recipients=[self.customer_email],
@@ -52,15 +51,6 @@ class Appointment(Document):
             frappe.msgprint(
                 'Please check your email to confirm the appointment')
 
-    def get_verify_url(self):
-        verify_route = '/book-appointment/verify'
-
-        params = {
-            'email': self.customer_email,
-            'appointment': self.name
-        }
-
-        return get_url(verify_route + '?' + get_signed_params(params))
 
     def on_change(self):
         # Sync Calendar
@@ -70,18 +60,12 @@ class Appointment(Document):
         cal_event.starts_on = self.scheduled_time
         cal_event.save(ignore_permissions=True)
 
-    def on_trash(self):
-        # Delete calendar event
-        cal_event = frappe.get_doc('Event', self.calendar_event)
-        if cal_event:
-            cal_event.delete()
-        # Delete task?
 
     def set_verified(self, email):
         if not email == self.customer_email:
             frappe.throw('Email verification failed.')
         # Create new lead
-        self.create_lead()
+        self.create_lead_and_link()
         # Remove unverified status
         self.status = 'Open'
         # Create calender event
@@ -90,7 +74,7 @@ class Appointment(Document):
         self.save(ignore_permissions=True)
         frappe.db.commit()
 
-    def create_lead(self):
+    def create_lead_and_link(self):
         # Return if already linked
         if self.lead:
             return
@@ -106,10 +90,11 @@ class Appointment(Document):
         self.lead = lead.name
 
     def auto_assign(self):
-        # If the latest opportunity is assigned to someone
-        # Assign the appointment to the same
+        from frappe.desk.form.assign_to import add as add_assignemnt
         existing_assignee = self.get_assignee_from_latest_opportunity()
         if existing_assignee:
+            # If the latest opportunity is assigned to someone
+            # Assign the appointment to the same
             add_assignemnt({
                 'doctype': self.doctype,
                 'name': self.name,
@@ -171,6 +156,14 @@ class Appointment(Document):
         appointment_event.insert(ignore_permissions=True)
         self.calendar_event = appointment_event.name
         self.save(ignore_permissions=True)
+    
+    def _get_verify_url(self):
+        verify_route = '/book-appointment/verify'
+        params = {
+            'email': self.customer_email,
+            'appointment': self.name
+        }
+        return get_url(verify_route + '?' + get_signed_params(params))
 
 
 def _get_agents_sorted_by_asc_workload(date):
@@ -214,3 +207,4 @@ def _get_employee_from_user(user):
         # frappe.db.exists returns a tuple of a tuple
         return frappe.get_doc('Employee', employee_docname[0][0])
     return None
+
