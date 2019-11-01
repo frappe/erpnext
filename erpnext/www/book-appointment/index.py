@@ -37,8 +37,8 @@ def get_appointment_slots(date, timezone):
         date + ' 00:00:00', format_string)
     query_end_time = datetime.datetime.strptime(
         date + ' 23:59:59', format_string)
-    query_start_time = convert_to_system_timzone(timezone,query_start_time)
-    query_end_time = convert_to_system_timzone(timezone,query_end_time)
+    query_start_time = convert_to_system_timezone(timezone,query_start_time)
+    query_end_time = convert_to_system_timezone(timezone,query_end_time)
     now = convert_to_guest_timezone(timezone,datetime.datetime.now())
 
     # Database queries
@@ -50,19 +50,19 @@ def get_appointment_slots(date, timezone):
     # Filter and convert timeslots
     converted_timeslots = []
     for timeslot in timeslots:
-        timeslot = convert_to_guest_timezone(timezone,timeslot)
+        converted_timeslot = convert_to_guest_timezone(timezone,timeslot)
         # Check if holiday
-        if _is_holiday(timeslot.date(), holiday_list):
+        if _is_holiday(converted_timeslot.date(), holiday_list):
             converted_timeslots.append(
-                dict(time=timeslot, availability=False))
+                dict(time=converted_timeslot, availability=False))
             continue
         # Check availability
-        if check_availabilty(timeslot, settings) and timeslot >= now:
+        if check_availabilty(timeslot, settings) and converted_timeslot >= now:
             converted_timeslots.append(
-                dict(time=timeslot, availability=True))
+                dict(time=converted_timeslot, availability=True))
         else:
             converted_timeslots.append(
-                dict(time=timeslot, availability=False))
+                dict(time=converted_timeslot, availability=False))
     date_required = datetime.datetime.strptime(
         date + ' 00:00:00', format_string).date()
     converted_timeslots = filter_timeslots(date_required, converted_timeslots)
@@ -98,7 +98,7 @@ def create_appointment(date, time, tz, contact):
     scheduled_time = datetime.datetime.strptime(
         date+" "+time, format_string)
     scheduled_time = scheduled_time.replace(tzinfo=None)
-    scheduled_time = convert_to_system_timzone(tz,scheduled_time)
+    scheduled_time = convert_to_system_timezone(tz,scheduled_time)
     scheduled_time= scheduled_time.replace(tzinfo=None)
     appointment.scheduled_time = scheduled_time
     contact = json.loads(contact)
@@ -126,7 +126,7 @@ def convert_to_guest_timezone(guest_tz,datetimeobject):
     datetimeobject = datetimeobject.astimezone(guest_tz)
     return datetimeobject
 
-def convert_to_system_timzone(guest_tz,datetimeobject):
+def convert_to_system_timezone(guest_tz,datetimeobject):
     import pytz
     guest_tz = pytz.timezone(guest_tz)
     datetimeobject = guest_tz.localize(datetimeobject)
