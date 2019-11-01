@@ -20,12 +20,42 @@ from .datev_constants import DebtorsCreditors
 from .datev_constants import AccountNames
 from .datev_constants import QUERY_REPORT_COLUMNS
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
 
 class TestDatev(TestCase):
 	def setUp(self):
-		path = os.path.join(os.path.dirname(__file__), "test_records.json")
-		with open(path, "r") as test_records:
-			make_test_objects("Account", json.load(test_records))
+		test_records_path = os.path.join(os.path.dirname(__file__), "test_records.json")
+		test_coa_path = os.path.join(os.path.dirname(__file__), "test_coa.json")
+
+		with open(test_records_path, "r") as test_records_file:
+			make_test_objects("Account", json.load(test_records_file))
+
+		with open(test_coa_path, "r") as test_coa_file:
+			test_coa = json.load(test_coa_file)
+			create_charts("_Test GmbH", None, None, test_coa)
+		
+		customer = frappe.get_doc("Customer", "_Test Kunde GmbH")
+		customer.append("accounts", {
+			"company": "_Test GmbH", 
+			"account": "10001 - _Test Kunde GmbH - _TG"
+		})
+		customer.save()
+
+		si = create_sales_invoice(
+			company="_Test GmbH",
+			customer="_Test Kunde GmbH",
+			currency="EUR",
+			debit_to="10001 - _Test Kunde GmbH - _TG",
+			income_account="4200 - Erlöse - _TG",
+			total=100
+		)
+
+		si.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "3806 - Umsatzsteuer 19% - _TG",
+			"rate": 19
+		})
+		si.submit()
 
 	def test_columns(self):
 		def is_subset(get_data, allowed_keys):

@@ -1,0 +1,14 @@
+{
+	"Aktiva": {
+		"is_group": "1",
+		"root_type": "Asset",
+		"_Test Kunde GmbH": {
+			"account_type": "Receivable",
+			"account_number": "10001"
+		},
+		"Erl\u00f6se": {
+			"account_number": "4200",
+            "account_type": "Income Account"
+		}
+	}
+}
