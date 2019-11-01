@@ -4,7 +4,7 @@ import os
 import json
 from unittest import TestCase
 import frappe
-from frappe.utils import getdate
+from frappe.utils import getdate, today
 from frappe.test_runner import make_test_objects
 from erpnext.regional.report.datev.datev import validate
 from erpnext.regional.report.datev.datev import get_transactions
@@ -79,6 +79,16 @@ class TestDatev(TestCase):
 		self.assertTrue(is_subset(get_customers, DebtorsCreditors.COLUMNS))
 		self.assertTrue(is_subset(get_suppliers, DebtorsCreditors.COLUMNS))
 		self.assertTrue(is_subset(get_account_names, AccountNames.COLUMNS))
+
+	def test_header(self):
+		filters = {
+			"company": "_Test GmbH",
+			"from_date": today(),
+			"to_date": today()
+		}
+		self.assertTrue(Transactions.DATA_CATEGORY in get_header(filters, Transactions))
+		self.assertTrue(AccountNames.DATA_CATEGORY in get_header(filters, AccountNames))
+		self.assertTrue(DebtorsCreditors.DATA_CATEGORY in get_header(filters, DebtorsCreditors))
 
 	def test_csv(self):
 		download_datev_csv(self.filters)
