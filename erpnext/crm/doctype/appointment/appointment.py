@@ -49,8 +49,6 @@ class Appointment(Document):
                 "site_url":frappe.utils.get_url(),
                 "full_name":self.customer_name,
             }
-            message = ''.join(
-                ['Please click the following link to confirm your appointment:', verify_url])
             frappe.sendmail(recipients=[self.customer_email],
                             template=template,
                             args=args,
