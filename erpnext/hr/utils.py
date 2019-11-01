@@ -389,9 +389,7 @@ def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):
 
 def get_holidays_for_employee(employee, start_date, end_date):
 	holiday_list = get_holiday_list_for_employee(employee)
-	print(holiday_list)
-	print(start_date)
-	print(end_date)
+
 	holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday`
 		where
 			parent=%(holiday_list)s
@@ -402,7 +400,6 @@ def get_holidays_for_employee(employee, start_date, end_date):
 				"end_date": end_date
 			})
 
-	print(holidays)
 	holidays = [cstr(i) for i in holidays]
 
 	return holidays

@@ -13,10 +13,10 @@ from erpnext.hr.doctype.leave_period.test_leave_period import create_leave_perio
 class TestCompensatoryLeaveRequest(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql(''' delete from `tabCompensatory Leave Request`''')
-		frappe.db.sql(''' delete from `tabLeave Ledger Entry` ''')
-		frappe.db.sql(''' delete from `tabLeave Period` ''')
-		frappe.db.sql(''' delete from `tabLeave Allocation` ''')
-		frappe.db.sql(''' delete from `tabHoliday List` ''')
+		frappe.db.sql(''' delete from `tabLeave Ledger Entry`''')
+		frappe.db.sql(''' delete from `tabLeave Allocation`''')
+		frappe.db.sql(''' delete from `tabLeave Period`''')
+		frappe.db.sql(''' delete from `tabHoliday List`''')
 		create_holiday_list()
 		create_leave_period(add_months(today(), -3), add_months(today(), 3), "_Test Company")
 
@@ -24,7 +24,7 @@ class TestCompensatoryLeaveRequest(unittest.TestCase):
 		employee.holiday_list = "_Test Compensatory Leave"
 		employee.save()
 
-	def test_creation_of_leave_allocation(self):
+	def test_leave_balance_on_submit(self):
 		''' check creation of leave allocation on submission of compensatory leave request '''
 		employee = get_employee()
 		mark_attendance(employee)
@@ -34,6 +34,30 @@ class TestCompensatoryLeaveRequest(unittest.TestCase):
 		compensatory_leave_request.submit()
 
 		self.assertEqual(get_leave_balance_on(employee.name, compensatory_leave_request.leave_type, add_days(today(), 1)), before + 1)
+
+	def test_creation_of_leave_ledger_entry_on_submit(self):
+		''' check creation of leave ledger entry on submission of leave request '''
+		employee = get_employee()
+		mark_attendance(employee)
+		compensatory_leave_request = get_compensatory_leave_request(employee.name)
+		compensatory_leave_request.submit()
+
+		filters = dict(transaction_name=compensatory_leave_request.leave_allocation)
+		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', fields='*', filters=filters)
+
+		self.assertEquals(len(leave_ledger_entry), 1)
+		self.assertEquals(leave_ledger_entry[0].employee, compensatory_leave_request.employee)
+		self.assertEquals(leave_ledger_entry[0].leave_type, compensatory_leave_request.leave_type)
+		self.assertEquals(leave_ledger_entry[0].leaves, 1)
+
+		# check reverse leave ledger entry on cancellation
+		compensatory_leave_request.cancel()
+		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', fields='*', filters=filters, order_by = 'creation desc')
+
+		self.assertEquals(len(leave_ledger_entry), 2)
+		self.assertEquals(leave_ledger_entry[0].employee, compensatory_leave_request.employee)
+		self.assertEquals(leave_ledger_entry[0].leave_type, compensatory_leave_request.leave_type)
+		self.assertEquals(leave_ledger_entry[0].leaves, -1)
 
 def get_compensatory_leave_request(employee, leave_date=today()):
 	prev_comp_leave_req = frappe.db.get_value('Compensatory Leave Request',
