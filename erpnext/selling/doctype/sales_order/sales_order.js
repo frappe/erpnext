@@ -11,7 +11,8 @@ frappe.ui.form.on("Sales Order", {
 			'Sales Invoice': 'Invoice',
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order',
-			'Project': 'Project'
+			'Project': 'Project',
+			'Payment Entry': "Payment"
 		}
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
 
@@ -135,7 +136,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			if(doc.status !== 'Closed') {
 				if(doc.status !== 'On Hold') {
 
-					allow_delivery = this.frm.doc.items.some(item => item.delivered_by_supplier === 0 && item.qty > flt(item.delivered_qty))
+					allow_delivery = this.frm.doc.items.some(item => item.delivered_by_supplier === 0 && item.qty > flt(item.delivered_qty)) 
+						&& !this.frm.doc.skip_delivery_note
 
 					if (this.frm.has_perm("submit")) {
 						if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
@@ -340,7 +342,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	},
 
 	order_type: function() {
-		this.frm.fields_dict.items.grid.toggle_reqd("delivery_date", this.frm.doc.order_type == "Sales");
+		this.toggle_delivery_date();
 	},
 
 	tc_name: function() {
@@ -352,6 +354,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
 			frm: this.frm
 		})
+	},
+
+	skip_delivery_note: function() {
+		this.toggle_delivery_date();
+	},
+
+	toggle_delivery_date: function() {
+		this.frm.fields_dict.items.grid.toggle_reqd("delivery_date", 
+			(this.frm.doc.order_type == "Sales" && !this.frm.doc.skip_delivery_note));
 	},
 
 	make_raw_material_request: function() {

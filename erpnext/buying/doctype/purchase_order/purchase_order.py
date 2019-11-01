@@ -386,7 +386,21 @@ def make_purchase_receipt(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
+	return get_mapped_purchase_invoice(source_name, target_doc)
+
+@frappe.whitelist()
+def make_purchase_invoice_from_portal(purchase_order_name):
+	doc = get_mapped_purchase_invoice(purchase_order_name, ignore_permissions=True)
+	if doc.contact_email != frappe.session.user:
+		frappe.throw(_('Not Permitted'), frappe.PermissionError)
+	doc.save()
+	frappe.db.commit()
+	frappe.response['type'] = 'redirect'
+	frappe.response.location = '/purchase-invoices/' + doc.name
+
+def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions=False):
 	def postprocess(source, target):
+		target.flags.ignore_permissions = ignore_permissions
 		set_missing_values(source, target)
 		#Get the advance paid Journal Entries in Purchase Invoice Advance
 
@@ -437,7 +451,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 			"add_if_empty": True
 		}
 
-	doc = get_mapped_doc("Purchase Order", source_name,	fields, target_doc, postprocess)
+	doc = get_mapped_doc("Purchase Order", source_name,	fields,
+		target_doc, postprocess, ignore_permissions=ignore_permissions)
 
 	return doc
 
@@ -500,6 +515,17 @@ def get_item_details(items):
 		item_details[d.item_code] = d
 
 	return item_details
+
+def get_list_context(context=None):
+	from erpnext.controllers.website_list_for_contact import get_list_context
+	list_context = get_list_context(context)
+	list_context.update({
+		'show_sidebar': True,
+		'show_search': True,
+		'no_breadcrumbs': True,
+		'title': _('Purchase Orders'),
+	})
+	return list_context
 
 @frappe.whitelist()
 def update_status(status, name):

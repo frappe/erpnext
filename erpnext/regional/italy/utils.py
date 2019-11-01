@@ -151,8 +151,7 @@ def get_invoice_summary(items, taxes):
 						tax_rate=tax.rate,
 						tax_amount=(reference_row.tax_amount * tax.rate) / 100,
 						net_amount=reference_row.tax_amount,
-						taxable_amount=(reference_row.tax_amount if tax.charge_type == 'On Previous Row Amount'
-							else reference_row.total),
+						taxable_amount=reference_row.tax_amount,
 						item_tax_rate={tax.account_head: tax.rate},
 						charges=True
 					)
@@ -176,6 +175,10 @@ def get_invoice_summary(items, taxes):
 					if key == "0.0":
 						summary_data[key]["tax_exemption_reason"] = tax.tax_exemption_reason
 						summary_data[key]["tax_exemption_law"] = tax.tax_exemption_law
+
+			if summary_data.get("0.0") and tax.charge_type in ["On Previous Row Total",
+				"On Previous Row Amount"]:
+				summary_data[key]["taxable_amount"] = tax.total
 
 			if summary_data == {}: #Implies that Zero VAT has not been set on any item.
 				summary_data.setdefault("0.0", {"tax_amount": 0.0, "taxable_amount": tax.total,

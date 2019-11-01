@@ -35,12 +35,15 @@ class BOM(WebsiteGenerator):
 			# name can be BOM/ITEM/001, BOM/ITEM/001-1, BOM-ITEM-001, BOM-ITEM-001-1
 
 			# split by item
-			names = [name.split(self.item)[-1][1:] for name in names]
+			names = [name.split(self.item, 1) for name in names]
+			names = [d[-1][1:] for d in filter(lambda x: len(x) > 1 and x[-1], names)]
 
 			# split by (-) if cancelled
-			names = [cint(name.split('-')[-1]) for name in names]
-
-			idx = max(names) + 1
+			if names:
+				names = [cint(name.split('-')[-1]) for name in names]
+				idx = max(names) + 1
+			else:
+				idx = 1
 		else:
 			idx = 1
 
@@ -173,7 +176,7 @@ class BOM(WebsiteGenerator):
 			#Customer Provided parts will have zero rate
 			if not frappe.db.get_value('Item', arg["item_code"], 'is_customer_provided_item'):
 				if arg.get('bom_no') and self.set_rate_of_sub_assembly_item_based_on_bom:
-					rate = self.get_bom_unitcost(arg['bom_no']) * (arg.get("conversion_factor") or 1)
+					rate = flt(self.get_bom_unitcost(arg['bom_no'])) * (arg.get("conversion_factor") or 1)
 				else:
 					if self.rm_cost_as_per == 'Valuation Rate':
 						rate = self.get_valuation_rate(arg) * (arg.get("conversion_factor") or 1)
@@ -289,7 +292,8 @@ class BOM(WebsiteGenerator):
 		return valuation_rate
 
 	def manage_default_bom(self):
-		""" Uncheck others if current one is selected as default,
+		""" Uncheck others if current one is selected as default or
+			check the current one as default if it the only bom for the selected item,
 			update default bom in item master
 		"""
 		if self.is_default and self.is_active:
@@ -298,6 +302,9 @@ class BOM(WebsiteGenerator):
 			item = frappe.get_doc("Item", self.item)
 			if item.default_bom != self.name:
 				frappe.db.set_value('Item', self.item, 'default_bom', self.name)
+		elif not frappe.db.exists(dict(doctype='BOM', docstatus=1, item=self.item, is_default=1)) \
+			and self.is_active:
+			frappe.db.set(self, "is_default", 1)
 		else:
 			frappe.db.set(self, "is_default", 0)
 			item = frappe.get_doc("Item", self.item)
@@ -648,7 +655,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			item_dict[item.item_code] = item
 
 	for item, item_details in item_dict.items():
-		for d in [["Account", "expense_account", "default_expense_account"],
+		for d in [["Account", "expense_account", "stock_adjustment_account"],
 			["Cost Center", "cost_center", "cost_center"], ["Warehouse", "default_warehouse", ""]]:
 				company_in_record = frappe.db.get_value(d[0], item_details.get(d[1]), "company")
 				if not item_details.get(d[1]) or (company_in_record and company != company_in_record):
