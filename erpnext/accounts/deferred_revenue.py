@@ -51,6 +51,8 @@ def convert_deferred_expense_to_expense(start_date=None, end_date=None):
 		doc = frappe.get_doc("Purchase Invoice", invoice)
 		book_deferred_income_or_expense(doc, end_date)
 
+	create_process_deferred_accounting('Expense', 'Purchase Invoice', end_date)
+
 def convert_deferred_revenue_to_income(start_date=None, end_date=None):
 	# book the expense/income on the last day, but it will be trigger on the 1st of month at 12:00 AM
 	if not start_date:
@@ -68,6 +70,8 @@ def convert_deferred_revenue_to_income(start_date=None, end_date=None):
 	for invoice in invoices:
 		doc = frappe.get_doc("Sales Invoice", invoice)
 		book_deferred_income_or_expense(doc, end_date)
+
+	create_process_deferred_accounting('Income', 'Sales Invoice', end_date)
 
 def get_booking_dates(doc, item, posting_date=None):
 	if not posting_date:

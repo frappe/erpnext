@@ -4,25 +4,14 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "type",
-  "document_type",
-  "document_name",
-  "column_break_4",
   "start_date",
   "end_date",
+  "column_break_3",
+  "type",
+  "document_type",
   "amended_from"
  ],
  "fields": [
-  {
-   "fieldname": "start_date",
-   "fieldtype": "Date",
-   "label": "Start Date"
-  },
-  {
-   "fieldname": "end_date",
-   "fieldtype": "Date",
-   "label": "End Date"
-  },
   {
    "fieldname": "type",
    "fieldtype": "Select",
@@ -36,12 +25,6 @@
    "options": "DocType"
   },
   {
-   "fieldname": "document_name",
-   "fieldtype": "Dynamic Link",
-   "label": "Document Name",
-   "options": "document_type"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -51,12 +34,22 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_4",
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-11-04 18:10:35.164223",
+ "modified": "2019-11-06 12:30:06.757961",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Deferred Accounting",
