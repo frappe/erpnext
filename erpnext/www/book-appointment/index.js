@@ -208,10 +208,7 @@ async function submit() {
 
 function get_form_data() {
     contact = {};
-    contact.name = document.getElementById('customer_name').value;
-    contact.number = document.getElementById('customer_number').value;
-    contact.skype = document.getElementById('customer_skype').value;
-    contact.notes = document.getElementById('customer_notes').value;
-    contact.email = document.getElementById('customer_email').value;
+    let inputs = ['name', 'skype', 'number', 'notes', 'email'];
+    inputs.forEach((id) => contact[id] = document.getElementById(`customer_${id}`).value)
     window.contact = contact
 }
