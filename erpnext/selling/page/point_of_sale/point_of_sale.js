@@ -451,7 +451,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	change_pos_profile() {
 		return new Promise((resolve) => {
-			const on_submit = ({ pos_profile, set_as_default }) => {
+			const on_submit = ({ company, pos_profile, set_as_default }) => {
 				if (pos_profile) {
 					this.pos_profile = pos_profile;
 				}
@@ -461,7 +461,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 						method: "erpnext.accounts.doctype.pos_profile.pos_profile.set_default_profile",
 						args: {
 							'pos_profile': pos_profile,
-							'company': this.frm.doc.company
+							'company': company
 						}
 					}).then(() => {
 						this.on_change_pos_profile();
@@ -495,7 +495,19 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	get_prompt_fields() {
+		var company_field = this.frm.doc.company;
 		return [{
+			fieldtype: 'Link',
+			label: __('Company'),
+			options: 'Company',
+			fieldname: 'company',
+			default: this.frm.doc.company,
+			reqd: 1,
+			onchange: function(e) {
+					company_field = this.value;
+				}
+			},
+			{
 			fieldtype: 'Link',
 			label: __('POS Profile'),
 			options: 'POS Profile',
@@ -505,7 +517,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				return {
 					query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
 					filters: {
-						company: this.frm.doc.company
+						company: company_field
 					}
 				};
 			}
