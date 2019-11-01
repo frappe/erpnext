@@ -31,14 +31,12 @@ def get_timezones():
 @frappe.whitelist(allow_guest=True)
 def get_appointment_slots(date, timezone):
     import pytz
-    guest_timezone = pytz.timezone(timezone)
-    local_timezone = pytz.timezone(frappe.utils.get_time_zone())
+    # Convert query to local timezones
     format_string = '%Y-%m-%d %H:%M:%S'
     query_start_time = datetime.datetime.strptime(
         date + ' 00:00:00', format_string)
     query_end_time = datetime.datetime.strptime(
         date + ' 23:59:59', format_string)
-    
     query_start_time = convert_to_system_timzone(timezone,query_start_time)
     query_end_time = convert_to_system_timzone(timezone,query_end_time)
     now = convert_to_guest_timezone(timezone,datetime.datetime.now())
@@ -49,12 +47,10 @@ def get_appointment_slots(date, timezone):
     timeslots = get_available_slots_between(
         query_start_time, query_end_time, settings)
 
-    # Filter timeslots based on date
+    # Filter and convert timeslots
     converted_timeslots = []
     for timeslot in timeslots:
-        print("Unconverted Timeslot:{0}".format(timeslot))
         timeslot = convert_to_guest_timezone(timezone,timeslot)
-        print("Converted Timeslot:{0}".format(timeslot))
         # Check if holiday
         if _is_holiday(timeslot.date(), holiday_list):
             converted_timeslots.append(
@@ -71,7 +67,6 @@ def get_appointment_slots(date, timezone):
         date + ' 00:00:00', format_string).date()
     converted_timeslots = filter_timeslots(date_required, converted_timeslots)
     return converted_timeslots
-
 
 def get_available_slots_between(query_start_time, query_end_time, settings):
     records = _get_records(query_start_time, query_end_time, settings)
