@@ -43,10 +43,17 @@ class Appointment(Document):
             self.status = 'Unverified'
             # Send email to confirm
             verify_url = self._get_verify_url()
+            template = 'confirm_appointment'
+            args = {
+                "link":verify_url,
+                "site_url":frappe.utils.get_url(),
+                "full_name":self.customer_name,
+            }
             message = ''.join(
                 ['Please click the following link to confirm your appointment:', verify_url])
             frappe.sendmail(recipients=[self.customer_email],
-                            message=message,
+                            template=template,
+                            args=args,
                             subject=_('Appointment Confirmation'))
             frappe.msgprint(
                 'Please check your email to confirm the appointment')
