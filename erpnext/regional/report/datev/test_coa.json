@@ -14,7 +14,7 @@
 	"Passiva": {
 		"is_group": 1,
 		"root_type": "Liability",
-		"Umsatzsteuer 19 %": {
+		"Umsatzsteuer 19%": {
 			"account_number": "3806",
 			"account_type": "Tax"
 		}
