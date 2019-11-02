@@ -125,7 +125,7 @@ class LeaveApplication(Document):
 				status = "Half Day" if date == self.half_day_date else "On Leave"
 
 				attendance_name = frappe.db.exists('Attendance', dict(employee = self.employee,
-					attenance_date = date, docstatus = ('!=', 2)))
+					attendance_date = date, docstatus = ('!=', 2)))
 
 				if attendance_name:
 					# update existing attendance, change absent to on leave
@@ -503,14 +503,17 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 
 def get_pending_leaves_for_period(employee, leave_type, from_date, to_date):
 	''' Returns leaves that are pending approval '''
-	return frappe.db.get_value("Leave Application",
+	leaves = frappe.get_all("Leave Application",
 		filters={
 			"employee": employee,
 			"leave_type": leave_type,
-			"from_date": ("<=", from_date),
-			"to_date": (">=", to_date),
 			"status": "Open"
-		}, fieldname=['SUM(total_leave_days)']) or flt(0)
+		},
+		or_filters={
+			"from_date": ["between", (from_date, to_date)],
+			"to_date": ["between", (from_date, to_date)]
+		}, fields=['SUM(total_leave_days) as leaves'])[0]
+	return leaves['leaves'] if leaves['leaves'] else 0.0
 
 def get_remaining_leaves(allocation, leaves_taken, date, expiry):
 	''' Returns minimum leaves remaining after comparing with remaining days for allocation expiry '''
