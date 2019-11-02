@@ -39,7 +39,11 @@ def _order(*args, **kwargs):
 
 	elif frappe.request and frappe.request.data:
 		verify_request()
-		fd = json.loads(frappe.request.data)
+		try:
+			fd = json.loads(frappe.request.data)
+		except ValueError:
+			#woocommerce returns 'webhook_id=value' for the first request which is not JSON
+			fd = frappe.request.data
 		event = frappe.get_request_header("X-Wc-Webhook-Event")
 
 	else:
