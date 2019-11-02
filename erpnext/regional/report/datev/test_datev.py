@@ -1,3 +1,4 @@
+# coding=utf-8
 from __future__ import unicode_literals
 
 import os
@@ -92,5 +93,18 @@ class TestDatev(TestCase):
 		self.assertTrue(DebtorsCreditors.DATA_CATEGORY in get_header(self.filters, DebtorsCreditors))
 
 	def test_csv(self):
+		test_data = [{
+			"Umsatz (ohne Soll/Haben-Kz)": 100,
+			"Soll/Haben-Kennzeichen": "H",
+			"Kontonummer": "4200",
+			"Gegenkonto (ohne BU-Schlüssel)": "10000",
+			"Belegdatum": today(),
+			"Buchungstext": "No remark",
+			"Beleginfo - Art 1": "Sales Invoice",
+			"Beleginfo - Inhalt 1": "SINV-0001"
+		}]
+		get_datev_csv(data=test_data, filters=self.filters, csv_class=Transactions)
+
+	def test_download(self):
 		download_datev_csv(self.filters)
 		zipfile.is_zipfile(frappe.response['filecontent'])
