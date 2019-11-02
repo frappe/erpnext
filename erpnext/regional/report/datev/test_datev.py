@@ -24,6 +24,12 @@ from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import
 
 class TestDatev(TestCase):
 	def setUp(self):
+		self.company = "_Test GmbH"
+		self.filters = {
+			"company": self.company,
+			"from_date": today(),
+			"to_date": today()
+		}
 		test_records_path = os.path.join(os.path.dirname(__file__), "test_records.json")
 		test_coa_path = os.path.join(os.path.dirname(__file__), "test_coa.json")
 
@@ -32,17 +38,17 @@ class TestDatev(TestCase):
 
 		with open(test_coa_path, "r") as test_coa_file:
 			test_coa = json.load(test_coa_file)
-			create_charts("_Test GmbH", None, None, test_coa)
+			create_charts(self.company, None, None, test_coa)
 		
 		customer = frappe.get_doc("Customer", "_Test Kunde GmbH")
 		customer.append("accounts", {
-			"company": "_Test GmbH", 
+			"company": self.company, 
 			"account": "10001 - _Test Kunde GmbH - _TG"
 		})
 		customer.save()
 
 		si = create_sales_invoice(
-			company="_Test GmbH",
+			company=self.company,
 			customer="_Test Kunde GmbH",
 			currency="EUR",
 			debit_to="10001 - _Test Kunde GmbH - _TG",
@@ -81,14 +87,9 @@ class TestDatev(TestCase):
 		self.assertTrue(is_subset(get_account_names, AccountNames.COLUMNS))
 
 	def test_header(self):
-		filters = {
-			"company": "_Test GmbH",
-			"from_date": today(),
-			"to_date": today()
-		}
-		self.assertTrue(Transactions.DATA_CATEGORY in get_header(filters, Transactions))
-		self.assertTrue(AccountNames.DATA_CATEGORY in get_header(filters, AccountNames))
-		self.assertTrue(DebtorsCreditors.DATA_CATEGORY in get_header(filters, DebtorsCreditors))
+		self.assertTrue(Transactions.DATA_CATEGORY in get_header(self.filters, Transactions))
+		self.assertTrue(AccountNames.DATA_CATEGORY in get_header(self.filters, AccountNames))
+		self.assertTrue(DebtorsCreditors.DATA_CATEGORY in get_header(self.filters, DebtorsCreditors))
 
 	def test_csv(self):
 		download_datev_csv(self.filters)
