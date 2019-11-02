@@ -92,12 +92,8 @@ def _order(*args, **kwargs):
 		order_delivery_date = str(order_delivery_date_str)
 
 		new_sales_order.delivery_date = order_delivery_date
-		default_set_company = frappe.get_doc("Global Defaults")
-		company = raw_billing_data.get("company") or default_set_company.default_company
-		found_company = frappe.get_doc("Company",{"name":company})
-		company_abbr = found_company.abbr
-
-		new_sales_order.company = company
+		new_sales_order.company = woocommerce_settings.company
+		company_abbr = frappe.db.get_value('Company', woocommerce_settings.company, 'abbr')
 
 		for item in items_list:
 			woocomm_item_id = item.get("product_id")
@@ -113,7 +109,7 @@ def _order(*args, **kwargs):
 				"uom": woocommerce_settings.uom or _("Nos"),
 				"qty": item.get("quantity"),
 				"rate": item.get("price"),
-				"warehouse": woocommerce_settings.warehouse or "Stores" + " - " + company_abbr
+				"warehouse": woocommerce_settings.warehouse or _("Stores - {0}").format(company_abbr)
 				})
 
 			add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax",0)
