@@ -10,5 +10,13 @@
 			"account_number": "4200",
             "account_type": "Income Account"
 		}
+	},
+	"Passiva": {
+		"is_group": 1,
+		"root_type": "Liability",
+		"Umsatzsteuer 19 %": {
+			"account_number": "3806",
+			"account_type": "Tax"
+		}
 	}
 }
