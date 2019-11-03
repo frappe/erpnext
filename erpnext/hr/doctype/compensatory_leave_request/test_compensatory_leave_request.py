@@ -15,8 +15,6 @@ class TestCompensatoryLeaveRequest(unittest.TestCase):
 		frappe.db.sql(''' delete from `tabCompensatory Leave Request`''')
 		frappe.db.sql(''' delete from `tabLeave Ledger Entry`''')
 		frappe.db.sql(''' delete from `tabLeave Allocation`''')
-		frappe.db.sql(''' delete from `tabLeave Period`''')
-		frappe.db.sql(''' delete from `tabHoliday List`''')
 		create_holiday_list()
 		create_leave_period(add_months(today(), -3), add_months(today(), 3), "_Test Company")
 
