@@ -128,10 +128,8 @@ def create_sales_order(order, woocommerce_settings, customer_name):
 	created_date = order.get("date_created").split("T")
 	new_sales_order.transaction_date = created_date[0]
 
-	raw_date = datetime.datetime.strptime(created_date[0], "%Y-%m-%d")
-	raw_delivery_date = frappe.utils.add_to_date(raw_date, days = 7)
-	order_delivery_date = raw_delivery_date.strftime("%Y-%m-%d")
-	new_sales_order.delivery_date = order_delivery_date
+	delivery_after = woocommerce_settings.delivery_after_days or 7
+	new_sales_order.delivery_date = frappe.utils.add_days(created_date[0], delivery_after)
 
 	new_sales_order.company = woocommerce_settings.company
 

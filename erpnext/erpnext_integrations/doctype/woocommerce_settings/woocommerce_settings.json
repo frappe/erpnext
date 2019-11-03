@@ -18,9 +18,10 @@
   "defaults_section",
   "creation_user",
   "warehouse",
+  "sales_order_series",
   "column_break_14",
   "company",
-  "sales_order_series",
+  "delivery_after_days",
   "uom",
   "endpoints",
   "endpoint"
@@ -101,7 +102,7 @@
    "reqd": 1
   },
   {
-   "description": "This warehouse will be used to create Sale Orders. The fallback warehouse is \"Stores\".",
+   "description": "This warehouse will be used to create Sales Orders. The fallback warehouse is \"Stores\".",
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Warehouse",
@@ -136,15 +137,22 @@
    "read_only": 1
   },
   {
+   "description": "This company will be used to create Sales Orders.",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "description": "This is the default offset (days) for the Delivery Date in Sales Orders. The fallback offset is 7 days from the order placement date.",
+   "fieldname": "delivery_after_days",
+   "fieldtype": "Int",
+   "label": "Delivery After (Days)"
   }
  ],
  "issingle": 1,
- "modified": "2019-11-02 23:16:27.642810",
+ "modified": "2019-11-04 00:45:21.232096",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Woocommerce Settings",
