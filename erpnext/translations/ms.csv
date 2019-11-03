@@ -1576,7 +1576,7 @@ DocType: Sales Invoice,Payment Due Date,Tarikh Pembayaran
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Dicadangkan Qty: Kuantiti yang dipesan untuk dijual, tetapi tidak dihantar."
 DocType: Drug Prescription,Interval UOM,Selang UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Pilih semula, jika alamat yang dipilih disunting selepas menyimpan"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Dicadangkan Qty untuk Subkontrak: Kuantiti bahan mentah untuk membuat item subcotracted.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Dicadangkan Qty untuk Subkontrak: Kuantiti bahan mentah untuk membuat item subcontracted.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Perkara Variant {0} telah wujud dengan sifat-sifat yang sama
 DocType: Item,Hub Publishing Details,Butiran Penerbitan Hab
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;Pembukaan&#39;
