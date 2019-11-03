@@ -49,7 +49,7 @@ def validate_gstin_for_india(doc, method):
 def update_gst_category(doc, method):
 	for link in doc.links:
 		if link.link_doctype in ['Customer', 'Supplier']:
-			if doc.gstin:
+			if doc.get('gstin'):
 				frappe.db.set_value(link.link_doctype, link.link_name, "gst_category", "Registered Regular")
 			else:
 				frappe.db.set_value(link.link_doctype, link.link_name, "gst_category", "Unregistered")
