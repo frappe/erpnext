@@ -52,11 +52,11 @@ def update_gst_category(doc, method):
 			if doc.get('gstin'):
 				frappe.db.sql("""
 					UPDATE `tab{0}` SET gst_category = %s WHERE name = %s AND gst_category = 'Unregistered'
-				""".format(link.link_doctype), ("Registered Regular", link.link_name))
+				""".format(link.link_doctype), ("Registered Regular", link.link_name)) #nosec
 			else:
 				frappe.db.sql("""
 					UPDATE `tab{0}` SET gst_category = %s WHERE name = %s AND gst_category = 'Registered Regular'
-				""".format(link.link_doctype), ("Unregistered", link.link_name))
+				""".format(link.link_doctype), ("Unregistered", link.link_name)) #nosec
 
 def set_gst_state_and_state_number(doc):
 	if not doc.gst_state:
@@ -564,7 +564,7 @@ def validate_state_code(state_code, address):
 def set_accounts_to_skip(doc, method=None):
 	gst_accounts = get_gst_accounts(doc.company)
 
-	if not gst_accounts:
+	if not gst_accounts or not doc.get('place_of_supply'):
 		return
 
 	inter_state_accounts = gst_accounts['igst_account']

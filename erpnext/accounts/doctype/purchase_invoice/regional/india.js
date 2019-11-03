@@ -28,6 +28,11 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	set_accounts_to_skip: function(frm) {
+
+		if (! frm.doc.place_of_supply) {
+			return;
+		}
+
 		let intra_state_gst_accounts = frm.doc.gst_accounts['cgst_account'].concat(frm.doc.gst_accounts['sgst_account']);
 		let inter_state_gst_accounts = frm.doc.gst_accounts['igst_account'];
 
