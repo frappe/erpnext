@@ -595,9 +595,7 @@ def make_asset_movement(assets):
 		frappe.throw(_('Atleast one asset has to be selected.'))
 
 	asset_movement = frappe.new_doc("Asset Movement")
-	asset_movement.purpose = "Receipt"
 	asset_movement.quantity = len(assets)
-	
 	prev_reference_docname = ''
 
 	for asset in assets:
