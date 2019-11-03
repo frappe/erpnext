@@ -116,6 +116,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -191,6 +192,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "item_code.stock_uom",
    "fieldname": "uom",
    "fieldtype": "Link",
    "label": "UOM",
@@ -618,6 +620,7 @@
   },
   {
    "default": "0",
+   "fetch_from": "item_code.is_fixed_asset",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
    "hidden": 1,
@@ -763,7 +766,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-10-14 16:02:41.880017",
+ "modified": "2019-11-03 13:43:23.782877",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
