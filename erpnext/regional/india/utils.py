@@ -50,9 +50,13 @@ def update_gst_category(doc, method):
 	for link in doc.links:
 		if link.link_doctype in ['Customer', 'Supplier']:
 			if doc.get('gstin'):
-				frappe.db.set_value(link.link_doctype, link.link_name, "gst_category", "Registered Regular")
+				frappe.db.sql("""
+					UPDATE `tab{0}` SET gst_category = %s WHERE name = %s AND gst_category = 'Unregistered'
+				""".format(link.link_doctype), ("Registered Regular", link.link_name))
 			else:
-				frappe.db.set_value(link.link_doctype, link.link_name, "gst_category", "Unregistered")
+				frappe.db.sql("""
+					UPDATE `tab{0}` SET gst_category = %s WHERE name = %s AND gst_category = 'Registered Regular'
+				""".format(link.link_doctype), ("Unregistered", link.link_name))
 
 def set_gst_state_and_state_number(doc):
 	if not doc.gst_state:
@@ -566,9 +570,9 @@ def set_accounts_to_skip(doc, method=None):
 	inter_state_accounts = gst_accounts['igst_account']
 	intra_state_accounts = gst_accounts['cgst_account'] + gst_accounts['sgst_account']
 
-	if ((doc.doctype in ("Sales Invoice", "Delivery Note") and doc.company_gstin
+	if ((doc.doctype in ("Sales Invoice", "Delivery Note") and doc.get('company_gstin')
 		and doc.company_gstin[:2] != doc.place_of_supply[:2]) or (doc.doctype == "Purchase Invoice"
-		and doc.supplier_gstin and doc.supplier_gstin[:2] != doc.place_of_supply[:2])):
+		and doc.get('supplier_gstin') and doc.supplier_gstin[:2] != doc.place_of_supply[:2])):
 		doc.accounts_to_skip = intra_state_accounts
 	else:
 		doc.accounts_to_skip = inter_state_accounts
