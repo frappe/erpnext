@@ -145,7 +145,7 @@ class SalesInvoice(SellingController):
 
 	def autoname(self):
 		if self.has_stin:
-			self.name = set_name_by_naming_series(self, 'stin')
+			set_name_by_naming_series(self, 'stin')
 
 	def validate(self):
 		super(SalesInvoice, self).validate()
