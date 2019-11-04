@@ -142,7 +142,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				// delivery note
 				if(flt(doc.per_delivered, 6) < 100 && allow_delivery) {
-					this.frm.add_custom_button(__('Delivery'),
+					this.frm.add_custom_button(__('Delivery Note'),
 						function() { me.make_delivery_note_based_on_delivery_date(); }, __("Make"));
 
 					if(["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1){
