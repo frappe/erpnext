@@ -144,14 +144,18 @@ class Asset(AccountsController):
 				if not has_pro_rata or n < cint(number_of_pending_depreciations) - 1:
 					schedule_date = add_months(d.depreciation_start_date,
 						n * cint(d.frequency_of_depreciation))
-					
+
+					# schedule date will be a year later from start date
+					# so monthly schedule date is calculated by removing 11 months from it
 					monthly_schedule_date = add_months(schedule_date, - d.frequency_of_depreciation + 1)
 
 				# For first row
 				if has_pro_rata and n==0:
 					depreciation_amount, days, months = get_pro_rata_amt(d, depreciation_amount,
 						self.available_for_use_date, d.depreciation_start_date)
-
+					
+					# For first depr schedule date will be the start date
+					# so monthly schedule date is calculated by removing month difference between use date and start date
 					monthly_schedule_date = add_months(d.depreciation_start_date, - months + 1)
 
 				# For last row
@@ -179,15 +183,9 @@ class Asset(AccountsController):
 					skip_row = True
 
 				if depreciation_amount > 0:
-					if not self.allow_monthly_depreciation:
-						self.append("schedules", {
-							"schedule_date": schedule_date,
-							"depreciation_amount": depreciation_amount,
-							"depreciation_method": d.depreciation_method,
-							"finance_book": d.finance_book,
-							"finance_book_id": d.idx
-						})
-					else:
+					if self.allow_monthly_depreciation:
+						# month range is 1 to 12
+						# In pro rata case, for first and last depreciation, month range would be different
 						month_range = months \
 							if (has_pro_rata and n==0) or (has_pro_rata and n == cint(number_of_pending_depreciations) - 1) \
 							else d.frequency_of_depreciation
@@ -209,6 +207,14 @@ class Asset(AccountsController):
 									"finance_book": d.finance_book,
 									"finance_book_id": d.idx
 								})
+					else:
+						self.append("schedules", {
+							"schedule_date": schedule_date,
+							"depreciation_amount": depreciation_amount,
+							"depreciation_method": d.depreciation_method,
+							"finance_book": d.finance_book,
+							"finance_book_id": d.idx
+						})
 
 	def check_is_pro_rata(self, row):
 		has_pro_rata = False
