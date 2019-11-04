@@ -23,7 +23,7 @@ class DuplicatePartyAccountError(frappe.ValidationError): pass
 @frappe.whitelist()
 def get_party_details(party=None, account=None, party_type="Customer", letter_of_credit=None, company=None, posting_date=None,
 		bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True,
-		order_type=None, cost_center=None, tax_id=None, tax_cnic=None, tax_strn=None, stin=None,
+		order_type=None, cost_center=None, tax_id=None, tax_cnic=None, tax_strn=None, has_stin=None,
 		party_address=None, shipping_address=None, pos_profile=None):
 
 	if not party:
@@ -32,12 +32,12 @@ def get_party_details(party=None, account=None, party_type="Customer", letter_of
 		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 	return _get_party_details(party, account, party_type, letter_of_credit, company, posting_date,
 		bill_date, price_list, currency, doctype, ignore_permissions, fetch_payment_terms_template,
-		order_type, cost_center, tax_id, tax_cnic, tax_strn, stin,
+		order_type, cost_center, tax_id, tax_cnic, tax_strn, has_stin,
 		party_address, shipping_address, pos_profile)
 
 def _get_party_details(party=None, account=None, party_type="Customer", letter_of_credit=None, company=None, posting_date=None,
 		bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True,
-		order_type=None, cost_center=None, tax_id=None, tax_cnic=None, tax_strn=None, stin=None,
+		order_type=None, cost_center=None, tax_id=None, tax_cnic=None, tax_strn=None, has_stin=None,
 		party_address=None, shipping_address=None, pos_profile=None):
 
 	out = frappe._dict(set_due_date(party, party_type, company, posting_date, bill_date, doctype))
@@ -64,7 +64,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 		party_address, shipping_address if party_type != "Supplier" else party_address)
 	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company,
 		customer_group=out.customer_group, supplier_group=out.supplier_group, tax_category=out.tax_category,
-		order_type=order_type, cost_center=cost_center, tax_id=tax_id, tax_cnic=tax_cnic, tax_strn=tax_strn, stin=stin,
+		order_type=order_type, cost_center=cost_center, tax_id=tax_id, tax_cnic=tax_cnic, tax_strn=tax_strn, has_stin=has_stin,
 		billing_address=party_address, shipping_address=shipping_address)
 
 	if fetch_payment_terms_template:
@@ -387,7 +387,7 @@ def get_address_tax_category(tax_category, billing_address=None, shipping_addres
 
 @frappe.whitelist()
 def set_taxes(party, party_type, posting_date, company, customer_group=None, supplier_group=None, tax_category=None,
-		order_type=None, cost_center=None, tax_id=None, tax_cnic=None, tax_strn=None, stin=None,
+		order_type=None, cost_center=None, tax_id=None, tax_cnic=None, tax_strn=None, has_stin=None,
 		billing_address=None, shipping_address=None, use_for_shopping_cart=None):
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
@@ -414,8 +414,8 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 	args['tax_cnic'] = "Set" if tax_cnic else "Not Set"
 	args['tax_strn'] = "Set" if tax_strn else "Not Set"
 
-	if stin is not None:
-		args['stin'] = "Set" if cint(stin) else "Not Set"
+	if has_stin is not None:
+		args['has_stin'] = "Yes" if cint(has_stin) else "No"
 
 	if billing_address or shipping_address:
 		args.update(get_party_details(party, party_type, {"billing_address": billing_address,

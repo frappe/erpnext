@@ -1614,8 +1614,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		erpnext.utils.set_taxes(this.frm, 'cost_center');
 	},
 
-	stin: function() {
-		erpnext.utils.set_taxes(this.frm, 'stin');
+	has_stin: function() {
+		erpnext.utils.set_taxes(this.frm, 'has_stin');
 	},
 
 	is_recurring: function() {

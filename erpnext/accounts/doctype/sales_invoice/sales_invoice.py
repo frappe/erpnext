@@ -144,19 +144,8 @@ class SalesInvoice(SellingController):
 			self.indicator_title = _("Paid")
 
 	def autoname(self):
-		if not self.stin:
-			set_name_by_naming_series(self)
-		else:
-			series_from_order_type = None
-			if self.order_type_name:
-				series_from_order_type = frappe.get_cached_value("Order Type", self.order_type_name, "tax_invoice_naming_prefix")
-
-			prefix = self.get_company_abbr()
-			if series_from_order_type:
-				prefix = "{0}-{1}".format(prefix, series_from_order_type)
-
-			nstr = cstr(self.stin).zfill(5)
-			self.name = "{0}-{1}".format(prefix, nstr)
+		if self.has_stin:
+			self.name = set_name_by_naming_series(self, 'stin')
 
 	def validate(self):
 		super(SalesInvoice, self).validate()

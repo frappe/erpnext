@@ -50,8 +50,8 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	args.tax_cnic = frm.doc.tax_cnic;
 	args.tax_strn = frm.doc.tax_strn;
 
-	if (frappe.meta.has_field(frm.doc.doctype, 'stin')) {
-		args["stin"] = cint(frm.doc.stin);
+	if (frappe.meta.has_field(frm.doc.doctype, 'has_stin')) {
+		args["has_stin"] = cint(frm.doc.has_stin);
 	}
 
 	frappe.call({
@@ -199,8 +199,8 @@ erpnext.utils.set_taxes = function(frm, triggered_from_field) {
 		"tax_strn": frm.doc.tax_strn
 	};
 
-	if (frappe.meta.has_field(frm.doc.doctype, 'stin')) {
-		args["stin"] = cint(frm.doc.stin);
+	if (frappe.meta.has_field(frm.doc.doctype, 'has_stin')) {
+		args["has_stin"] = cint(frm.doc.has_stin);
 	}
 
 	frappe.call({

@@ -74,7 +74,7 @@ class TaxRule(Document):
 			"tax_id":			self.tax_id,
 			"tax_cnic":			self.tax_cnic,
 			"tax_strn":			self.tax_strn,
-			"stin":				self.stin,
+			"has_stin":			self.has_stin,
 			"company":			self.company
 		}
 
