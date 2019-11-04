@@ -139,7 +139,7 @@ def get_data(filters):
 	data = []
 
 	company_list = get_company_set(filters.get("company"))
-	customer_details = get_customer_details(company_list)
+	customer_details = get_customer_details()
 	sales_order_records = get_sales_order_details(company_list, filters)
 
 	for record in sales_order_records:
@@ -181,7 +181,7 @@ def get_conditions(filters):
 
 	return conditions
 
-def get_customer_details(company_list):
+def get_customer_details():
 	details = frappe.get_all('Customer',
 		fields=['name', 'customer_name', "customer_group"])
 	customer_details = {}
@@ -194,7 +194,6 @@ def get_customer_details(company_list):
 
 def get_sales_order_details(company_list, filters):
 	conditions = get_conditions(filters)
-	print(conditions)
 	return frappe.db.sql("""
 		SELECT
 			so_item.item_code, so_item.item_name, so_item.item_group,
@@ -210,4 +209,4 @@ def get_sales_order_details(company_list, filters):
 			AND so.company in (%s)
 			AND so.docstatus = 1
 			{0}
-	""".format(conditions), company_list, as_dict=1)
+	""".format(conditions), company_list, as_dict=1) #nosec
