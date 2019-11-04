@@ -35,9 +35,9 @@ def validate_return_against(doc):
 				frappe.throw(_("Posting timestamp must be after {0}").format(format_datetime(ref_posting_datetime)))
 
 		# validate same transaction type
-		if doc.meta.get_field("order_type_name") and doc.order_type_name != ref_doc.order_type_name:
+		if doc.meta.get_field("transaction_type") and doc.transaction_type != ref_doc.transaction_type:
 			frappe.throw(_("Transaction Type must be the same as {0} {1} ({2})")
-				.format(doc.doctype, doc.return_against, ref_doc.order_type_name))
+				.format(doc.doctype, doc.return_against, ref_doc.transaction_type))
 
 
 def validate_returned_items(doc):

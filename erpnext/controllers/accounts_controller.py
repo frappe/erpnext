@@ -279,6 +279,9 @@ class AccountsController(TransactionBase):
 				document_type = "{} Item".format(self.doctype)
 				parent_dict.update({"document_type": document_type})
 
+			if 'transaction_type' in parent_dict:
+				parent_dict['transaction_type_name'] = parent_dict.pop('transaction_type')
+
 			# party_name field used for customer in quotation
 			if self.doctype == "Quotation" and self.quotation_to == "Customer" and parent_dict.get("party_name"):
 				parent_dict.update({"customer": parent_dict.get("party_name")})

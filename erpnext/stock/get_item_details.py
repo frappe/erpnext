@@ -14,7 +14,7 @@ from erpnext import get_company_currency
 from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor, convert_item_uom_for
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
-from erpnext.selling.doctype.order_type.order_type import get_order_type_defaults
+from erpnext.selling.doctype.transaction_type.transaction_type import get_transaction_type_defaults
 
 from six import string_types, iteritems
 
@@ -127,7 +127,7 @@ def set_valuation_rate(out, args):
 		})
 
 	else:
-		out.update(get_valuation_rate(args.item_code, args.company, out.get("warehouse"), args.order_type_name))
+		out.update(get_valuation_rate(args.item_code, args.company, out.get("warehouse"), args.transaction_type_name))
 
 
 def process_args(args):
@@ -204,7 +204,7 @@ def get_basic_details(args, item):
 			price_list: "",
 			company: "",
 			order_type: "",
-			order_type_name: "",
+			transaction_type_name: "",
 			is_pos: "",
 			project: "",
 			qty: "",
@@ -229,10 +229,10 @@ def get_basic_details(args, item):
 	item_defaults = get_item_defaults(item.name, args.company)
 	item_group_defaults = get_item_group_defaults(item.name, args.company)
 	brand_defaults = get_brand_defaults(item.name, args.company)
-	order_type_defaults = get_order_type_defaults(args.order_type_name, args.company)
+	transaction_type_defaults = get_transaction_type_defaults(args.transaction_type_name, args.company)
 
 	warehouse = args.get("set_warehouse") or user_default_warehouse\
-		or order_type_defaults.get("default_warehouse") or item_defaults.get("default_warehouse")\
+		or transaction_type_defaults.get("default_warehouse") or item_defaults.get("default_warehouse")\
 		or brand_defaults.get("default_warehouse")\
 		or item_group_defaults.get("default_warehouse") or args.warehouse
 
@@ -273,7 +273,7 @@ def get_basic_details(args, item):
 		"net_rate": 0.0,
 		"net_amount": 0.0,
 		"discount_percentage": 0.0,
-		"supplier": get_default_supplier(args, item_defaults, item_group_defaults, brand_defaults, order_type_defaults),
+		"supplier": get_default_supplier(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults),
 		"update_stock": args.get("update_stock") if args.get('doctype') in ['Sales Invoice', 'Purchase Invoice'] else 0,
 		"delivered_by_supplier": item.delivered_by_supplier if args.get("doctype") in ["Sales Order", "Sales Invoice"] else 0,
 		"is_fixed_asset": item.is_fixed_asset,
@@ -283,7 +283,7 @@ def get_basic_details(args, item):
 		"transaction_date": args.get("transaction_date")
 	})
 
-	out.update(get_item_defaults_details(args, item_defaults, item_group_defaults, brand_defaults, order_type_defaults))
+	out.update(get_item_defaults_details(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults))
 
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
 		out.update(calculate_service_end_date(args, item))
@@ -419,10 +419,10 @@ def calculate_service_end_date(args, item=None):
 
 	return deferred_detail
 
-def get_default_income_account(args, item, item_group, brand, order_type):
-	account = order_type.get("income_account")\
-		or item.get("income_account")\
-		or brand.get("income_account")\
+def get_default_income_account(args, item, item_group, brand, transaction_type):
+	account = transaction_type.get("income_account") \
+		or item.get("income_account") \
+		or brand.get("income_account") \
 		or item_group.get("income_account")
 
 	if not account and args.company:
@@ -430,10 +430,10 @@ def get_default_income_account(args, item, item_group, brand, order_type):
 
 	return account or args.income_account
 
-def get_default_expense_account(args, item, item_group, brand, order_type):
-	account = order_type.get("expense_account")\
-		or item.get("expense_account")\
-		or brand.get("expense_account")\
+def get_default_expense_account(args, item, item_group, brand, transaction_type):
+	account = transaction_type.get("expense_account") \
+		or item.get("expense_account") \
+		or brand.get("expense_account") \
 		or item_group.get("expense_account")
 
 	if not account and args.company:
@@ -449,20 +449,20 @@ def get_default_deferred_account(args, item, fieldname=None):
 	else:
 		return None
 
-def get_default_cost_center(args, item, item_group, brand, order_type=None, company=None):
+def get_default_cost_center(args, item, item_group, brand, transaction_type=None, company=None):
 	cost_center = None
 	if args.get('project'):
 		cost_center = frappe.db.get_value("Project", args.get("project"), "cost_center", cache=True)
 
-	if not order_type:
-		order_type = frappe._dict()
+	if not transaction_type:
+		transaction_type = frappe._dict()
 
 	if not cost_center:
 		if args.get('doctype') in sales_doctypes or args.get('customer'):
-			cost_center = order_type.get('selling_cost_center') or item.get('selling_cost_center')\
+			cost_center = transaction_type.get('selling_cost_center') or item.get('selling_cost_center') \
 				or brand.get('selling_cost_center') or item_group.get('selling_cost_center')
 		else:
-			cost_center = order_type.get('buying_cost_center') or item.get('buying_cost_center') \
+			cost_center = transaction_type.get('buying_cost_center') or item.get('buying_cost_center') \
 				or brand.get('buying_cost_center') or item_group.get('buying_cost_center')
 
 	if not cost_center and (company or args.company):
@@ -476,18 +476,18 @@ def get_default_cost_center(args, item, item_group, brand, order_type=None, comp
 
 	return cost_center
 
-def get_default_supplier(args, item, item_group, brand, order_type):
+def get_default_supplier(args, item, item_group, brand, transaction_type):
 	return (item.get("default_supplier")
 		or brand.get("default_supplier")
 		or item_group.get("default_supplier")
-		or order_type.get("default_supplier"))
+		or transaction_type.get("default_supplier"))
 
 
-def get_default_apply_discount_after_taxes(args, item, item_group, brand, order_type):
+def get_default_apply_discount_after_taxes(args, item, item_group, brand, transaction_type):
 	fieldname = "selling_apply_discount_after_taxes" if args.get('doctype') in sales_doctypes or args.get('customer') \
 		else "buying_apply_discount_after_taxes"
 
-	apply_discount_after_taxes = (order_type.get(fieldname)
+	apply_discount_after_taxes = (transaction_type.get(fieldname)
 		or item.get(fieldname)
 		or brand.get(fieldname)
 		or item_group.get(fieldname))
@@ -498,8 +498,8 @@ def get_default_apply_discount_after_taxes(args, item, item_group, brand, order_
 	return cint(apply_discount_after_taxes == "Yes" if apply_discount_after_taxes else args.apply_discount_after_taxes)
 
 
-def get_default_allow_zero_valuation_rate(args, item, item_group, brand, order_type):
-	allow_zero_valuation_rate = (order_type.get("allow_zero_valuation_rate")
+def get_default_allow_zero_valuation_rate(args, item, item_group, brand, transaction_type):
+	allow_zero_valuation_rate = (transaction_type.get("allow_zero_valuation_rate")
 		or item.get("allow_zero_valuation_rate")
 		or brand.get("allow_zero_valuation_rate")
 		or item_group.get("allow_zero_valuation_rate"))
@@ -507,13 +507,13 @@ def get_default_allow_zero_valuation_rate(args, item, item_group, brand, order_t
 	return cint(allow_zero_valuation_rate == "Yes" if allow_zero_valuation_rate else args.get('allow_zero_valuation_rate'))
 
 
-def get_target_warehouse_validation(item_code, order_type_name, company):
-	order_type = get_order_type_defaults(order_type_name, company)
+def get_target_warehouse_validation(item_code, transaction_type_name, company):
+	transaction_type = get_transaction_type_defaults(transaction_type_name, company)
 	item = get_item_defaults(item_code, company)
 	item_group = get_item_group_defaults(item_code, company)
 	brand = get_brand_defaults(item_code, company)
 
-	return (order_type.get("target_warehouse_validation")
+	return (transaction_type.get("target_warehouse_validation")
 		or item.get("target_warehouse_validation")
 		or brand.get("target_warehouse_validation")
 		or item_group.get("target_warehouse_validation"))
@@ -538,7 +538,7 @@ def get_item_defaults_info(args, items):
 	:param args: {
 		"doctype": "",
 		"company": "",
-		"order_type_name": "",
+		"transaction_type_name": "",
 		"customer": "",
 		"supplier": None,
 		"project": "",
@@ -569,19 +569,19 @@ def get_item_defaults_info(args, items):
 			item_defaults = get_item_defaults(item_args.item_code, item_args.company)
 			item_group_defaults = get_item_group_defaults(item_args.item_code, item_args.company)
 			brand_defaults = get_brand_defaults(item_args.item_code, item_args.company)
-			order_type_defaults = get_order_type_defaults(item_args.order_type_name, item_args.company)
+			transaction_type_defaults = get_transaction_type_defaults(item_args.transaction_type_name, item_args.company)
 
-			out[d['name']] = get_item_defaults_details(item_args, item_defaults, item_group_defaults, brand_defaults, order_type_defaults)
+			out[d['name']] = get_item_defaults_details(item_args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults)
 
 	return out
 
 
-def get_item_defaults_details(args, item_defaults, item_group_defaults, brand_defaults, order_type_defaults):
+def get_item_defaults_details(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults):
 	"""
 	:param args: {
 			"doctype": "",
 			"company": "",
-			"order_type_name": "",
+			"transaction_type_name": "",
 
 			"item_code": "",
 			"cost_center": "",
@@ -597,11 +597,11 @@ def get_item_defaults_details(args, item_defaults, item_group_defaults, brand_de
 	"""
 
 	return {
-		"income_account": get_default_income_account(args, item_defaults, item_group_defaults, brand_defaults, order_type_defaults),
-		"expense_account": get_default_expense_account(args, item_defaults, item_group_defaults, brand_defaults, order_type_defaults),
-		"cost_center": get_default_cost_center(args, item_defaults, item_group_defaults, brand_defaults, order_type_defaults),
-		"apply_discount_after_taxes": get_default_apply_discount_after_taxes(args, item_defaults, item_group_defaults, brand_defaults, order_type_defaults),
-		"allow_zero_valuation_rate": get_default_allow_zero_valuation_rate(args, item_defaults, item_group_defaults, brand_defaults, order_type_defaults)
+		"income_account": get_default_income_account(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults),
+		"expense_account": get_default_expense_account(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults),
+		"cost_center": get_default_cost_center(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults),
+		"apply_discount_after_taxes": get_default_apply_discount_after_taxes(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults),
+		"allow_zero_valuation_rate": get_default_allow_zero_valuation_rate(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults)
 	}
 
 def get_price_list_rate(args, item_doc, out):
@@ -1120,15 +1120,15 @@ def get_default_bom(item_code=None):
 		if bom:
 			return bom
 
-def get_valuation_rate(item_code, company, warehouse=None, order_type_name=None):
-	order_type = get_order_type_defaults(order_type_name, company)
+def get_valuation_rate(item_code, company, warehouse=None, transaction_type_name=None):
+	transaction_type = get_transaction_type_defaults(transaction_type_name, company)
 	item = get_item_defaults(item_code, company)
 	item_group = get_item_group_defaults(item_code, company)
 	brand = get_brand_defaults(item_code, company)
 	# item = frappe.get_doc("Item", item_code)
 	if item.get("is_stock_item"):
 		if not warehouse:
-			warehouse = order_type.get("default_warehouse") or item.get("default_warehouse")\
+			warehouse = transaction_type.get("default_warehouse") or item.get("default_warehouse")\
 				or brand.get("default_warehouse") or item_group.get("default_warehouse")
 
 		return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},

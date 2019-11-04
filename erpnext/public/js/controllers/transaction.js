@@ -460,7 +460,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
 							company: me.frm.doc.company,
 							order_type: me.frm.doc.order_type,
-							order_type_name: me.frm.doc.order_type_name,
+							transaction_type_name: me.frm.doc.transaction_type,
 							is_pos: cint(me.frm.doc.is_pos),
 							is_subcontracted: me.frm.doc.is_subcontracted,
 							transaction_date: me.frm.doc.transaction_date || me.frm.doc.posting_date,
@@ -1304,6 +1304,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"plc_conversion_rate": me.frm.doc.plc_conversion_rate,
 			"company": me.frm.doc.company,
 			"transaction_date": me.frm.doc.transaction_date || me.frm.doc.posting_date,
+			"transaction_type_name": me.frm.doc.transaction_type,
 			"campaign": me.frm.doc.campaign,
 			"sales_partner": me.frm.doc.sales_partner,
 			"ignore_pricing_rule": me.frm.doc.ignore_pricing_rule,
@@ -1581,7 +1582,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					args: {
 						doctype: me.frm.doc.doctype,
 						company: me.frm.doc.company,
-						order_type_name: me.frm.doc.order_type_name,
+						transaction_type_name: me.frm.doc.transaction_type,
 						customer: me.frm.doc.customer,
 						supplier: me.frm.doc.supplier,
 						project: me.frm.doc.project
@@ -1604,9 +1605,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	order_type_name: function() {
+	transaction_type: function() {
 		this.update_item_defaults();
-		erpnext.utils.set_taxes(this.frm, 'order_type_name');
+		erpnext.utils.set_taxes(this.frm, 'transaction_type');
 	},
 
 	cost_center: function() {

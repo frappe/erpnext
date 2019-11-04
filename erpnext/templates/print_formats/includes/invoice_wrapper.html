@@ -5,7 +5,6 @@
 
 {%- set company = frappe.get_cached_doc("Company", doc.company) -%}
 {%- set address = doc.company_address_doc -%}
-{%- set order_type_doc = frappe.get_cached_doc("Order Type", doc.order_type_name) if doc.order_type_name else None -%}
 
 {% macro row(label, value, value_border=True, hide_empty=True, empty_value=None, style=None) -%}
 	{% if not hide_empty or (value and value != empty_value) %}
@@ -50,7 +49,7 @@
 						<div>Tel: {{ company.phone_no }}, Fax: {{ company.fax }}, Email: {{ company.email }}</div>
 						{% if company.tax_strn %}<div>Sales Tax Reg No: {{ company.tax_strn }}</div>{% endif %}
 						{% if company.tax_id %}<div>NTN: {{ company.tax_id }}</div>{% endif %}
-						{% if order_type_doc and order_type_doc.type == "Maintenance" and company.provincial_strn %}<div>Sindh STRN: {{ company.provincial_strn }}</div>{% endif %}
+						{% if doc.order_type == "Maintenance" and company.provincial_strn %}<div>Sindh STRN: {{ company.provincial_strn }}</div>{% endif %}
 					</div>
 					{% endif %}
 				</div>

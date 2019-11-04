@@ -440,7 +440,7 @@ class SellingController(StockController):
 	def validate_target_warehouse(self):
 		if frappe.get_meta(self.doctype + " Item").has_field("target_warehouse"):
 			for d in self.items:
-				target_warehouse_validation = get_target_warehouse_validation(d.item_code, self.order_type_name, self.company)
+				target_warehouse_validation = get_target_warehouse_validation(d.item_code, self.transaction_type, self.company)
 
 				if target_warehouse_validation:
 					if target_warehouse_validation == "Mandatory" and not d.target_warehouse:

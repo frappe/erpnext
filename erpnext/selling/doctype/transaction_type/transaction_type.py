@@ -8,16 +8,16 @@ import copy
 from frappe.model.document import Document
 
 
-class OrderType(Document):
+class TransactionType(Document):
 	pass
 
 
 @frappe.whitelist()
-def get_order_type_defaults(order_type, company):
-	if order_type:
-		order_type_doc = frappe.get_cached_doc("Order Type", order_type)
-		if order_type_doc:
-			for d in order_type_doc.item_defaults or []:
+def get_transaction_type_defaults(transaction_type, company):
+	if transaction_type:
+		tranction_type_doc = frappe.get_cached_doc("Transaction Type", transaction_type)
+		if tranction_type_doc:
+			for d in tranction_type_doc.item_defaults or []:
 				if d.company == company:
 					row = copy.deepcopy(d.as_dict())
 					row.pop("name")

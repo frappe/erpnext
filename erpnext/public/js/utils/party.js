@@ -44,7 +44,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	args.currency = frm.doc.currency;
 	args.company = frm.doc.company;
 	args.doctype = frm.doc.doctype;
-	args.order_type = frm.doc.order_type_name;
+	args.transaction_type = frm.doc.transaction_type;
 	args.cost_center = frm.doc.cost_center;
 	args.tax_id = frm.doc.tax_id;
 	args.tax_cnic = frm.doc.tax_cnic;
@@ -192,7 +192,7 @@ erpnext.utils.set_taxes = function(frm, triggered_from_field) {
 		"tax_category": frm.doc.tax_category,
 		"billing_address": ((frm.doc.customer || frm.doc.lead) ? (frm.doc.customer_address) : (frm.doc.supplier_address)),
 		"shipping_address": frm.doc.shipping_address_name,
-		"order_type": frm.doc.order_type_name,
+		"transaction_type": frm.doc.transaction_type,
 		"cost_center": frm.doc.cost_center,
 		"tax_id": frm.doc.tax_id,
 		"tax_cnic": frm.doc.tax_cnic,

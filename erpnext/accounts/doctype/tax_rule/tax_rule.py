@@ -69,7 +69,7 @@ class TaxRule(Document):
 			"shipping_zipcode":	self.shipping_zipcode,
 			"shipping_country":	self.shipping_country,
 			"tax_category":		self.tax_category,
-			"order_type":		self.order_type,
+			"transaction_type":	self.transaction_type,
 			"cost_center":		self.cost_center,
 			"tax_id":			self.tax_id,
 			"tax_cnic":			self.tax_cnic,
