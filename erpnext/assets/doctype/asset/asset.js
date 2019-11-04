@@ -346,7 +346,7 @@ frappe.ui.form.on('Asset', {
 					frm.set_value('location', item.asset_location);
 				});
 			} else {
-				// show message. Please select Item Code First
+				frappe.msgprint(__('Please select Item Code first'))
 			}
 		}
 	},
@@ -363,7 +363,7 @@ frappe.ui.form.on('Asset', {
 					frm.set_value('location', item.asset_location);
 				});
 			} else {
-				// show message. Please select Item Code First
+				frappe.msgprint(__('Please select Item Code first'))
 			}
 		}
 	},
