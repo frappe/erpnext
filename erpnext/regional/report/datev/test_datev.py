@@ -54,14 +54,23 @@ class TestDatev(TestCase):
 			currency="EUR",
 			debit_to="10001 - _Test Kunde GmbH - _TG",
 			income_account="4200 - Erlöse - _TG",
-			total=100
+			do_not_save=1
 		)
+
+		si.append("items", {
+			"item_code": "_Test Item",
+			"qty": 1,
+			"rate": 100,
+			"income_account": "4200 - Erlöse - _TG",
+			"cost_center": "_Test Cost Center - _TG"
+		})
 
 		si.append("taxes", {
 			"charge_type": "On Net Total",
 			"account_head": "3806 - Umsatzsteuer 19% - _TG",
 			"rate": 19
 		})
+		si.save()
 		si.submit()
 
 	def test_columns(self):
