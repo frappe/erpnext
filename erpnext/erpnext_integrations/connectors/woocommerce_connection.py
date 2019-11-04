@@ -1,9 +1,7 @@
 
 from __future__ import unicode_literals
 import frappe, base64, hashlib, hmac, json
-import datetime
 from frappe import _
-
 
 def verify_request():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")

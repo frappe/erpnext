@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils.nestedset import get_root_of
 from frappe.model.document import Document
 from six.moves.urllib.parse import urlparse
+from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 
 class WoocommerceSettings(Document):
 	def validate(self):
