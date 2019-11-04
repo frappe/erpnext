@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, nowdate, get_url
+from frappe.utils import flt, nowdate, get_url, fmt_money
 from erpnext.accounts.party import get_party_account, get_party_bank_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, get_company_defaults
@@ -397,6 +397,32 @@ def make_status_as_paid(doc, method):
 			if doc.status != "Paid":
 				doc.db_set('status', 'Paid')
 				frappe.db.commit()
+
+def update_after_payment_entry(pe, method):
+	# if payment entry covers the payment request amount, pr can be set as paid
+	# otherwise pe amount is deducted from pr grand total.
+	# in case of multiple referent sale, pr total is deducted from pe amount until all amount is attributed
+	paid_amount = pe.paid_amount
+	for ref in pe.references:
+		payment_request_name = frappe.db.get_value("Payment Request",
+			{"reference_doctype": ref.reference_doctype, "reference_name": ref.reference_name,
+				"docstatus": 1})
+
+		if payment_request_name:
+			pr = frappe.get_doc("Payment Request", payment_request_name)
+			pr_amount = pr.grand_total
+			if pr.grand_total <= paid_amount:
+				# entirely paid; close PR
+				if pr.status != "Paid":
+					pr.db_set('status', 'Paid')
+					pr.add_comment("Comment", _("Paid by Payment Entry {0}".format(pe.name)))
+			else:
+				pr.db_set('grand_total', pr_amount - paid_amount)
+				pr.add_comment('Comment', ("{0} paid by Payment Entry {1}".format(fmt_money(paid_amount, currency=pe.paid_to_account_currency), pe.name)))
+			paid_amount = paid_amount - pr_amount
+
+			frappe.db.commit()
+
 
 def get_dummy_message(doc):
 	return frappe.render_template("""{% if doc.contact_person -%}
