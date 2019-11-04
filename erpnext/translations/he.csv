@@ -955,6 +955,7 @@ DocType: Payment Entry,Received Amount (Company Currency),הסכום שהתקב�
 DocType: Delivery Trip,Delivery Details,פרטי משלוח
 DocType: Authorization Rule,Average Discount,דיסקונט הממוצע
 DocType: Purchase Invoice,Taxes and Charges Deducted (Company Currency),מסים והיטלים שנוכה (חברת מטבע)
+DocType: Cost Center,rgt,rgt
 ,Item-wise Purchase Register,הרשם רכישת פריט-חכם
 DocType: Issue,ISS-,ISS-
 DocType: Manufacturing Settings,Capacity Planning,תכנון קיבולת
@@ -1464,7 +1465,6 @@ apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Cost Center wit
 apps/erpnext/erpnext/config/crm.py,Manage Sales Person Tree.,ניהול מכירות אדם עץ.
 apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py,C-form is not applicable for Invoice: {0},C-הטופס אינו ישים עבור חשבונית: {0}
 DocType: Fiscal Year Company,Fiscal Year Company,שנת כספי חברה
-apps/erpnext/erpnext/accounts/party.py,{0} {1} is disabled,{0} {1} מושבתת
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Banking,בנקאות
 DocType: Maintenance Visit Purpose,Maintenance Visit Purpose,מטרת התחזוקה בקר
 DocType: Project,Estimated Cost,מחיר משוער
@@ -1669,7 +1669,6 @@ apps/erpnext/erpnext/controllers/buying_controller.py,Please select BOM in BOM f
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Reference No is mandatory if you entered Reference Date,התייחסות לא חובה אם אתה נכנס תאריך ההפניה
 DocType: Global Defaults,"If disable, 'Rounded Total' field will not be visible in any transaction","אם להשבית, השדה 'מעוגל סה""כ' לא יהיה גלוי בכל עסקה"
 DocType: Upload Attendance,Attendance From Date,נוכחות מתאריך
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js,Please select Company,אנא בחר חברה
 DocType: C-Form Invoice Detail,Invoice No,חשבונית לא
 DocType: BOM Operation,Operation Time,מבצע זמן
 ,Invoiced Amount (Exculsive Tax),סכום חשבונית (מס Exculsive)
@@ -2112,7 +2111,7 @@ DocType: Payment Entry,Received Amount,הסכום שהתקבל
 DocType: Warehouse,Warehouse Detail,פרט מחסן
 DocType: Blanket Order,Order Type,סוג להזמין
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py,Fiscal Year {0} is required,שנת כספים {0} נדרש
-DocType: Pricing Rule,Pricing Rule,כלל תמחור
+DocType: Coupon Code,Pricing Rule,כלל תמחור
 apps/erpnext/erpnext/controllers/selling_controller.py,To {0} | {1} {2},כדי {0} | {1} {2}
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,Set as Lost,קבע כאבוד
 DocType: Student Applicant,Approved,אושר
@@ -2939,6 +2938,7 @@ DocType: Stock Entry Detail,BOM No. for a Finished Good Item,BOM מס לפריט
 DocType: Payment Entry,Difference Amount (Company Currency),סכום פרש (חברת מטבע)
 DocType: Opportunity,To Discuss,כדי לדון ב
 apps/erpnext/erpnext/accounts/doctype/account/account_tree.js,New Account Name,שם חשבון חדש
+apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js,Purchase Return,חזור רכישה
 DocType: Leave Type,Leave Type Name,השאר סוג שם
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,You can not enter current voucher in 'Against Journal Entry' column,אתה לא יכול להיכנס לשובר נוכחי ב'נגד תנועת יומן 'טור
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,"To not apply Pricing Rule in a particular transaction, all applicable Pricing Rules should be disabled.","שלא להחיל כלל תמחור בעסקה מסוימת, צריכים להיות נכה כל כללי התמחור הישימים."
@@ -3124,6 +3124,7 @@ DocType: Item Price,Valid From,בתוקף מ
 DocType: Employee,Contract End Date,תאריך החוזה End
 DocType: Leave Encashment,Payroll,גִלְיוֹן שָׂכָר
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js,Further cost centers can be made under Groups but entries can be made against non-Groups,מרכזי עלות נוספים יכולים להתבצע תחת קבוצות אבל ערכים יכולים להתבצע נגד לא-קבוצות
+DocType: Cost Center,Lft,LFT
 DocType: Shopping Cart Settings,Shopping Cart Settings,הגדרות סל קניות
 apps/erpnext/erpnext/hooks.py,Shipments,משלוחים
 DocType: Sales Order,Fully Delivered,נמסר באופן מלא
@@ -3265,10 +3266,12 @@ apps/erpnext/erpnext/config/crm.py,Customer database.,מאגר מידע על ל�
 DocType: Sales Person,Name and Employee ID,שם והעובדים ID
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py,Discount must be less than 100,דיסקונט חייב להיות פחות מ -100
 DocType: Purchase Invoice Item,Purchase Order Item,לרכוש פריט להזמין
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js,Transfer Material to Supplier,העברת חומר לספקים
 DocType: Cheque Print Template,Distance from top edge,מרחק הקצה העליון
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Payment against {0} {1} cannot be greater than Outstanding Amount {2},תשלום כנגד {0} {1} לא יכול להיות גדול מהסכום מצטיין {2}
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.html,Ref,"נ""צ"
 apps/erpnext/erpnext/accounts/utils.py,Please set default {0} in Company {1},אנא קבע את ברירת המחדל {0} ב החברה {1}
+apps/erpnext/erpnext/templates/pages/order.html,Make Purchase Invoice,לבצע את רכישת החשבונית
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Direct Income,הכנסה ישירה
 DocType: C-Form,IV,IV
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2},שורה לא {0}: הסכום אינו יכול להיות גדול מהסכום ממתין נגד תביעת {1} הוצאות. הסכום בהמתנת {2}

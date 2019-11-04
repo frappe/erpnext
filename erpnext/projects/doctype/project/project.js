@@ -11,6 +11,9 @@ frappe.ui.form.on("Project", {
 					// add a new row and set the project
 					let time_log = frappe.model.get_new_doc('Timesheet Detail');
 					time_log.project = frm.doc.name;
+					time_log.parent = new_doc.name;
+					time_log.parentfield = 'time_logs';
+					time_log.parenttype = 'Timesheet';
 					new_doc.time_logs = [time_log];
 
 					frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);

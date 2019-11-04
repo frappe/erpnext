@@ -97,7 +97,6 @@ frappe.ui.form.on('Invoice Discounting', {
 		}
 		frm.set_value("total_amount", total_amount);
 	},
-
 	get_invoices: (frm) => {
 		var d = new frappe.ui.Dialog({
 			title: __('Get Invoices based on Filters'),
