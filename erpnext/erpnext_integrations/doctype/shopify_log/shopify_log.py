@@ -39,7 +39,7 @@ def get_message(exception):
 	if hasattr(exception, 'message'):
 		message = exception.message
 	elif hasattr(exception, '__str__'):
-		message = e.__str__()
+		message = exception.__str__()
 	else:
 		message = "Something went wrong while syncing"
 	return message
