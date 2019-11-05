@@ -42,20 +42,21 @@ class Appointment(Document):
             # Set status to unverified
             self.status = 'Unverified'
             # Send email to confirm
-            verify_url = self._get_verify_url()
-            template = 'confirm_appointment'
-            args = {
-                "link":verify_url,
-                "site_url":frappe.utils.get_url(),
-                "full_name":self.customer_name,
-            }
-            frappe.sendmail(recipients=[self.customer_email],
-                            template=template,
-                            args=args,
-                            subject=_('Appointment Confirmation'))
-            frappe.msgprint(
-                'Please check your email to confirm the appointment')
 
+    def send_confirmation_email()
+        verify_url = self._get_verify_url()
+        template = 'confirm_appointment'
+        args = {
+            "link":verify_url,
+            "site_url":frappe.utils.get_url(),
+            "full_name":self.customer_name,
+        }
+        frappe.sendmail(recipients=[self.customer_email],
+                        template=template,
+                        args=args,
+                        subject=_('Appointment Confirmation'))
+        frappe.msgprint(
+            'Please check your email to confirm the appointment')
 
     def on_change(self):
         # Sync Calendar
