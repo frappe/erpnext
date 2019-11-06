@@ -42,8 +42,9 @@ class Appointment(Document):
             # Set status to unverified
             self.status = 'Unverified'
             # Send email to confirm
+            self.send_confirmation_email()
 
-    def send_confirmation_email()
+    def send_confirmation_email(self):
         verify_url = self._get_verify_url()
         template = 'confirm_appointment'
         args = {
