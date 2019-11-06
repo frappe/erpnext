@@ -782,14 +782,14 @@ def get_items_from_bom(item_code, bom, exploded_item=1):
 	return bom_items
 
 def get_subcontracted_raw_materials_from_se(purchase_order, fg_item):
-	raw_materials = frappe.db.sql("""
+	common_query = """
 		SELECT
 			sed.item_code AS rm_item_code,
 			SUM(sed.qty) AS qty,
 			sed.description,
 			sed.stock_uom,
 			sed.subcontracted_item AS main_item_code,
-			GROUP_CONCAT(sed.serial_no) AS serial_no
+			{concat_syntax} AS serial_no
 		FROM `tabStock Entry` se,`tabStock Entry Detail` sed
 		WHERE
 			se.name = sed.parent
@@ -799,16 +799,20 @@ def get_subcontracted_raw_materials_from_se(purchase_order, fg_item):
 			AND IFNULL(sed.t_warehouse, '') != ''
 			AND sed.subcontracted_item = %s
 		GROUP BY sed.item_code, sed.subcontracted_item
-	""", (purchase_order, fg_item), as_dict=1)
+	"""
+	raw_materials = frappe.db.multisql({
+		'mariadb': common_query.format(concat_syntax="GROUP_CONCAT(sed.serial_no)"),
+		'postgres': common_query.format(concat_syntax="STRING_AGG(sed.serial_no, ',')")
+	}, (purchase_order, fg_item), as_dict=1)
 
 	return raw_materials
 
 def get_backflushed_subcontracted_raw_materials(purchase_orders):
-	backflushed_raw_materials = frappe.db.sql("""
+	common_query = """
 		SELECT
 			CONCAT(prsi.rm_item_code, pri.purchase_order) AS item_key,
-			SUM(prsi.consumed_qty) AS qty
-			GROUP_CONCAT(prsi.serial_no) AS serial_no
+			SUM(prsi.consumed_qty) AS qty,
+			{concat_syntax} AS serial_no
 		FROM `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri, `tabPurchase Receipt Item Supplied` prsi
 		WHERE
 			pr.name = pri.parent
@@ -817,11 +821,16 @@ def get_backflushed_subcontracted_raw_materials(purchase_orders):
 			AND pri.item_code = prsi.main_item_code
 			AND pr.docstatus = 1
 		GROUP BY prsi.rm_item_code, pri.purchase_order
-	""", (purchase_orders, ), as_dict=1)
+	"""
+
+	backflushed_raw_materials = frappe.db.multisql({
+		'mariadb': common_query.format(concat_syntax="GROUP_CONCAT(prsi.serial_no)"),
+		'postgres': common_query.format(concat_syntax="STRING_AGG(prsi.serial_no, ',')")
+	}, (purchase_orders, ), as_dict=1)
 
 	backflushed_raw_materials_map = frappe._dict()
 	for item in backflushed_raw_materials:
-		backflushed_raw_materials_map.setdefault(d.item_key, d)
+		backflushed_raw_materials_map.setdefault(item.item_key, item)
 
 	return backflushed_raw_materials_map
 
