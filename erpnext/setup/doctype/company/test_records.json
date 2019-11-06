@@ -62,5 +62,16 @@
 		"domain": "Manufacturing",
 		"chart_of_accounts": "Standard",
 		"default_holiday_list": "_Test Holiday List"
+	},
+	{
+		"abbr": "TCP1",
+		"company_name": "_Test Company with perpetual inventory",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"domain": "Manufacturing",
+		"chart_of_accounts": "Standard",
+		"enable_perpetual_inventory": 1,
+		"default_holiday_list": "_Test Holiday List"
 	}
 ]

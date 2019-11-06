@@ -1558,7 +1558,7 @@ DocType: Sales Invoice,Payment Due Date,Maksetähtpäevast
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Reserveeritud kogus: Müügiks tellitud kogus, kuid tarnimata."
 DocType: Drug Prescription,Interval UOM,Intervall UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Kui valite valitud aadressi pärast salvestamist, vali uuesti"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Allhankelepingu jaoks reserveeritud kogus: Tooraine kogus alamhangete jaoks.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Allhankelepingu jaoks reserveeritud kogus: Tooraine kogus alamhangete jaoks.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Punkt Variant {0} on juba olemas sama atribuute
 DocType: Item,Hub Publishing Details,Hubi avaldamise üksikasjad
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&quot;Avamine&quot;
