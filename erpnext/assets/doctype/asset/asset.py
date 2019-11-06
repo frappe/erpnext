@@ -52,7 +52,7 @@ class Asset(AccountsController):
 			reference_name = self.purchase_invoice or self.purchase_receipt
 			reference_doc = frappe.get_doc(reference_doc, reference_name)
 			if reference_doc.get('company') != self.company:
-				frappe.throw(_("Company of asset {0} and purchase doc {1} doesn't matches.").format(self.name, reference_doc.get('name')))
+				frappe.throw(_("Company of asset {0} and purchase document {1} doesn't matches.").format(self.name, reference_doc.get('name')))
 		
 		
 		if self.is_existing_asset and self.purchase_invoice:

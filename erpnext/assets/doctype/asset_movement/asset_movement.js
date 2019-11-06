@@ -17,6 +17,13 @@ frappe.ui.form.on('Asset Movement', {
 				}
 			};
 		})
+		frm.set_query("reference_name", (doc) => {
+			return {
+				filters: {
+					company: doc.company
+				}
+			};
+		})
 	},
 
 	reference_name: function(frm) {

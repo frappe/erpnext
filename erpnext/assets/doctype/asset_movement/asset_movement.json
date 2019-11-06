@@ -7,15 +7,15 @@
  "field_order": [
   "naming_series",
   "company",
-  "purpose",
   "column_break_4",
   "transaction_date",
-  "quantity",
-  "section_break_10",
-  "assets",
+  "purpose",
   "reference",
   "reference_doctype",
+  "column_break_9",
   "reference_name",
+  "section_break_10",
+  "assets",
   "amended_from"
  ],
  "fields": [
@@ -49,11 +49,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "quantity",
-   "fieldtype": "Float",
-   "label": "Quantity"
-  },
-  {
    "fieldname": "reference",
    "fieldtype": "Section Break",
    "label": "Reference"
@@ -63,14 +58,16 @@
    "fieldtype": "Link",
    "label": "Reference DocType",
    "no_copy": 1,
-   "options": "DocType"
+   "options": "DocType",
+   "reqd": 1
   },
   {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "label": "Reference Name",
    "no_copy": 1,
-   "options": "reference_doctype"
+   "options": "reference_doctype",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -99,10 +96,14 @@
    "label": "Assets",
    "options": "Asset Movement Item",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-10-09 17:36:28.230398",
+ "modified": "2019-11-06 16:02:26.481665",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement",
