@@ -70,6 +70,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 			if tax_acc not in income_accounts:
 				tax_amount_precision = get_field_precision(frappe.get_meta("Sales Taxes and Charges").get_field("tax_amount"), currency=company_currency) or 2
 				tax_amount = flt(invoice_tax_map.get(inv.name, {}).get(tax_acc), tax_amount_precision)
+				total_tax += tax_amount
 				row.append(tax_amount)
 
 		# total tax, grand total, outstanding amount & rounded total

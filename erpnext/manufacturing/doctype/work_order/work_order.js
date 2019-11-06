@@ -318,7 +318,7 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	project: function(frm) {
-		if(!erpnext.in_production_item_onchange) {
+		if(!erpnext.in_production_item_onchange && !frm.doc.bom_no) {
 			frm.trigger("production_item");
 		}
 	},
