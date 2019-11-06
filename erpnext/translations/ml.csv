@@ -1544,7 +1544,7 @@ DocType: Sales Invoice,Payment Due Date,പെയ്മെന്റ് നിശ
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","റിസർവ്വ് ചെയ്ത ക്യൂട്ടി: അളവ് വിൽപ്പനയ്ക്ക് ഓർഡർ ചെയ്തു, പക്ഷേ വിതരണം ചെയ്തിട്ടില്ല."
 DocType: Drug Prescription,Interval UOM,ഇടവേള UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","തിരഞ്ഞെടുത്തതിനുശേഷം തിരഞ്ഞെടുത്ത വിലാസം എഡിറ്റുചെയ്തിട്ടുണ്ടെങ്കിൽ, തിരഞ്ഞെടുപ്പ് മാറ്റുക"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,സബ് കോൺ‌ട്രാക്റ്റിനായി റിസർവ്വ് ചെയ്‌ത ക്യൂട്ടി: സബ്‌കോട്രാക്റ്റ് ഇനങ്ങൾ‌ നിർമ്മിക്കുന്നതിനുള്ള അസംസ്കൃത വസ്തുക്കളുടെ അളവ്.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,സബ് കോൺ‌ട്രാക്റ്റിനായി റിസർവ്വ് ചെയ്‌ത ക്യൂട്ടി: സബ്‌കോട്രാക്റ്റ് ഇനങ്ങൾ‌ നിർമ്മിക്കുന്നതിനുള്ള അസംസ്കൃത വസ്തുക്കളുടെ അളവ്.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,ഇനം വേരിയന്റ് {0} ഇതിനകം അതേ ആട്രിബ്യൂട്ടുകളുമുള്ള നിലവിലുണ്ട്
 DocType: Item,Hub Publishing Details,ഹബ് പബ്ലിഷിംഗ് വിശദാംശങ്ങൾ
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;തുറക്കുന്നു&#39;

@@ -1581,7 +1581,7 @@ DocType: Sales Invoice,Payment Due Date,تاريخ استحقاق السداد
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.",الكمية المحجوزة : الكمية المطلوبة لل بيع، ولكن لم يتم تسليمها .
 DocType: Drug Prescription,Interval UOM,الفاصل الزمني أوم
 DocType: Customer,"Reselect, if the chosen address is edited after save",إعادة تحديد، إذا تم تحرير عنوان المختار بعد حفظ
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,الكمية المحجوزة للعقد من الباطن: كمية المواد الخام لصنع سلع من الباطن.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,الكمية المحجوزة للعقد من الباطن: كمية المواد الخام لصنع سلع من الباطن.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,متغير الصنف {0} موجود بالفعل مع نفس الخصائص
 DocType: Item,Hub Publishing Details,هاب تفاصيل النشر
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening','افتتاحي'
