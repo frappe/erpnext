@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.model.rename_doc import rename_doc
 
 class HealthcareServiceUnitType(Document):
 	def validate(self):
@@ -107,7 +108,7 @@ def change_item_code(item, item_code, doc_name):
 	if(item_exist):
 		frappe.throw(_("Code {0} already exist").format(item_code))
 	else:
-		frappe.rename_doc("Item", item, item_code, ignore_permissions = True)
+		rename_doc("Item", item, item_code, ignore_permissions=True)
 		frappe.db.set_value("Healthcare Service Unit Type", doc_name, "item_code", item_code)
 
 @frappe.whitelist()
