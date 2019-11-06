@@ -16,7 +16,6 @@ class TestAssetMovement(unittest.TestCase):
 	def setUp(self):
 		create_asset_data()
 		make_location()
-		# make_serialized_item()
 
 	def test_movement(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
@@ -52,13 +51,17 @@ class TestAssetMovement(unittest.TestCase):
 			assets = [{ 'asset': asset.name , 'source_location': 'Test Location 2', 'target_location': 'Test Location'}])
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
 
+		employee = make_employee("testassetemp@example.com")
+		movement3 = create_asset_movement(purpose = 'Transfer', company = asset.company, 
+			assets = [{ 'asset': asset.name , 'source_location': 'Test Location', 'to_employee': employee}])
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "custodian"), employee)
+
 		movement1.cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
 
 		movement2.cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
 
-		# Assets are not serialized
 def create_asset_movement(**args):
 	args = frappe._dict(args)
 
@@ -72,11 +75,6 @@ def create_asset_movement(**args):
 		"company": args.company,
 		'purpose': args.purpose or 'Receipt'
 	})
-
-	if args.source_location:
-		movement.update({
-			'source_location': args.source_location
-		})
 
 	movement.insert()
 	movement.submit()

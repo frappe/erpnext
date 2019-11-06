@@ -2,6 +2,23 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Asset Movement', {
+	setup: (frm) => {
+		frm.set_query("to_employee", "assets", (doc) => {
+			return {
+				filters: {
+					company: doc.company
+				}
+			};
+		})
+		frm.set_query("from_employee", "assets", (doc) => {
+			return {
+				filters: {
+					company: doc.company
+				}
+			};
+		})
+	},
+
 	reference_name: function(frm) {
 		if (frm.doc.reference_name && frm.doc.reference_doctype){
 			const reference_doctype = frm.doc.reference_doctype === 'Purchase Invoice' ? 'purchase_invoice' : 'purchase_receipt';
@@ -17,7 +34,7 @@ frappe.ui.form.on('Asset Movement', {
 
 			// fetches linked asset & adds to the assets table
 			frappe.db.get_list('Asset', {
-				fields: ['name', 'location'],
+				fields: ['name', 'location', 'custodian'],
 				filters: {
 					[reference_doctype] : frm.doc.reference_name
 				}
@@ -26,7 +43,7 @@ frappe.ui.form.on('Asset Movement', {
 					frm.add_child('assets', {
 						asset: doc.name,
 						source_location: doc.location,
-						from_employee: doc.employee
+						from_employee: doc.custodian
 					});
 					frm.refresh_field('assets');
 				})
@@ -47,7 +64,7 @@ frappe.ui.form.on('Asset Movement Item', {
 		if (asset_name){
 			frappe.db.get_doc('Asset', asset_name).then((asset_doc) => {
 				if(asset_doc.location) frappe.model.set_value(cdt, cdn, 'source_location', asset_doc.location);
-				if(asset_doc.employee) frappe.model.set_value(cdt, cdn, 'from_employee', asset_doc.employee);
+				if(asset_doc.custodian) frappe.model.set_value(cdt, cdn, 'from_employee', asset_doc.custodian);
 			}).catch((err) => {
 				console.log(err)
 			});

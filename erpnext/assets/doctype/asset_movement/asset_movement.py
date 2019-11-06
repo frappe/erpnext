@@ -11,6 +11,7 @@ class AssetMovement(Document):
 	def validate(self):
 		self.validate_asset()
 		self.validate_location()
+		self.validate_employee()
 
 	def validate_asset(self):
 		for d in self.assets:
@@ -46,6 +47,19 @@ class AssetMovement(Document):
 
 			if self.purpose == 'Receipt' and not (d.target_location or d.to_employee):
 				frappe.throw(_("Target Location or To Employee is required for the asset {0}").format(d.asset))
+			
+	def validate_employee(self):
+		for d in self.assets:
+			if d.from_employee:
+					current_custodian = frappe.db.get_value("Asset", d.asset, "custodian")
+
+					if current_custodian != d.from_employee:
+						frappe.throw(_("Asset {0} does not belongs to the custodian {1}").
+							format(d.asset, d.from_employee))
+			
+			if d.to_employee and frappe.db.get_value("Employee", d.to_employee, "company") != self.company:
+				frappe.throw(_("Employee {0} does not belongs to the company {1}").
+							format(d.to_employee, self.company))
 
 	def on_submit(self):
 		self.set_latest_location_in_asset()
