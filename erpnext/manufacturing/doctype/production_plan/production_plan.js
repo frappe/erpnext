@@ -233,7 +233,7 @@ frappe.ui.form.on('Production Plan', {
 
 		if (item_wise_qty) {
 			for (var key in item_wise_qty) {
-				title += __('Item {0}: {1} qty produced, ', [key, item_wise_qty[key]]);
+				title += __('Item {0}: {1} qty produced. ', [key, item_wise_qty[key]]);
 			}
 		}
 
