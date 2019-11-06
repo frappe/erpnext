@@ -1,0 +1,49 @@
+{% 
+	var report_columns = report.get_columns_for_print();
+%} 
+
+{% var letterhead= filters.letter_head || (frappe.get_doc(":Company", filters.company) && frappe.get_doc(":Company", filters.company).default_letter_head) %} 
+
+{% if(letterhead) { %}
+	<div style="margin-bottom: 7px;" class="text-center">
+		{%= frappe.boot.letter_heads[letterhead].header %}
+	</div>
+{% } %}
+
+<h2 class="text-center">{%= __(report.report_name) %}</h2>
+
+<hr>
+<h6>{%=  __("Sales Order") %} : {%= filters.salesOrder %}</h6>
+<h6>{%=  __("Production Plan") %} : {%= filters.productionPlan %}</h6>
+<h6>{%=  __("Item Name") %} : {%= report.raw_data.data_to_be_printed[1] %} </h6>
+<h6>{%=  __("Quantiry Produced") %} : {%= report.raw_data.data_to_be_printed[0] %} </h6>
+<h6>{%=  __("Cost per UOM") %} : {%= report.raw_data.data_to_be_printed[2] %} </h6>
+<h6>{%=  __("Item Group") %} : {%= filters.itemGroup %}</h6>
+<hr>
+
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th style="width: 30%; text-align: center">{%= __("Item Name") %}</th>
+			<th style="width: 15%; text-align: center">{%= __("Stock Entry Type") %}</th>
+			<th style="width: 15%; text-align: center">{%= __("Quantity") %}</th>
+			<th style="width: 10%; text-align: center">{%= __("UOM") %}</th>
+			<th style="width: 20%; text-align: center">{%= __("Amount") %}</th>
+		</tr>
+	</thead>
+	<tbody>
+			{% for(var j=0, k=data.length-1; j<k; j++) { %}
+			{%
+				var row = data[j];
+			%}
+			<tr>
+				<td>{%= row["Item Name"] %}</td>
+				<td>{%= row["Stock Entry Type"] %}</td>
+				<td>{%= row["Quantity"] %}</td>
+				<td>{%= row["UOM"] %}</td>
+				<td style="text-align: right">{%= row["Amount"] %}</td>
+			</tr>	
+			{% } %}
+	</tbody>
+</table>
+<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
