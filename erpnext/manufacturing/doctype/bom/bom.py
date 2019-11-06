@@ -420,8 +420,12 @@ class BOM(WebsiteGenerator):
 
 	def traverse_tree(self, bom_list=None):
 		def _get_children(bom_no):
-			return frappe.db.sql_list("""select bom_no from `tabBOM Item`
-				where parent = %s and ifnull(bom_no, '') != '' and parenttype='BOM'""", bom_no)
+			children = frappe.cache().hget('bom_children', bom_no)
+			if children is None:
+				children = frappe.db.sql_list("""SELECT `bom_no` FROM `tabBOM Item`
+					WHERE `parent`=%s AND `bom_no`!='' AND `parenttype`='BOM'""", bom_no)
+				frappe.cache().hset('bom_children', bom_no, children)
+			return children
 
 		count = 0
 		if not bom_list:
@@ -534,12 +538,24 @@ class BOM(WebsiteGenerator):
 	def get_child_exploded_items(self, bom_no, stock_qty):
 		""" Add all items from Flat BOM of child BOM"""
 		# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
-		child_fb_items = frappe.db.sql("""select bom_item.item_code, bom_item.item_name,
-			bom_item.description, bom_item.source_warehouse, bom_item.operation,
-			bom_item.stock_uom, bom_item.stock_qty, bom_item.rate, bom_item.include_item_in_manufacturing,
-			bom_item.stock_qty / ifnull(bom.quantity, 1) as qty_consumed_per_unit
-			from `tabBOM Explosion Item` bom_item, tabBOM bom
-			where bom_item.parent = bom.name and bom.name = %s and bom.docstatus = 1""", bom_no, as_dict = 1)
+		child_fb_items = frappe.db.sql("""
+			SELECT
+				bom_item.item_code,
+				bom_item.item_name,
+				bom_item.description,
+				bom_item.source_warehouse,
+				bom_item.operation,
+				bom_item.stock_uom,
+				bom_item.stock_qty,
+				bom_item.rate,
+				bom_item.include_item_in_manufacturing,
+				bom_item.stock_qty / ifnull(bom.quantity, 1) AS qty_consumed_per_unit
+			FROM `tabBOM Explosion Item` bom_item, tabBOM bom
+			WHERE
+				bom_item.parent = bom.name
+				AND bom.name = %s
+				AND bom.docstatus = 1
+		""", bom_no, as_dict = 1)
 
 		for d in child_fb_items:
 			self.add_to_cur_exploded_items(frappe._dict({
