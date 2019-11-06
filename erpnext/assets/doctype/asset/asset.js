@@ -342,11 +342,23 @@ frappe.ui.form.on('Asset', {
 					frm.set_value('company', pr_doc.company);
 					frm.set_value('purchase_date', pr_doc.posting_date);
 					const item = pr_doc.items.find(item => item.item_code === frm.doc.item_code);
+					if (!item) {
+						frm.set_value('purchase_receipt', '');
+						frappe.msgprint({
+							title: __('Invalid Purchase Receipt'),
+							message: __("The selected Purchase Receipt doesn't contains selected Asset Item."),
+							indicator: 'red'
+						});
+					}
 					frm.set_value('gross_purchase_amount', item.base_net_rate);
 					frm.set_value('location', item.asset_location);
 				});
 			} else {
-				frappe.msgprint(__('Please select Item Code first'))
+				frm.set_value('purchase_receipt', '');
+				frappe.msgprint({
+					title: __('Not Allowed'),
+					message: __("Please select Item Code first")
+				});
 			}
 		}
 	},
@@ -359,11 +371,23 @@ frappe.ui.form.on('Asset', {
 					frm.set_value('company', pi_doc.company);
 					frm.set_value('purchase_date', pi_doc.posting_date);
 					const item = pi_doc.items.find(item => item.item_code === frm.doc.item_code);
+					if (!item) {
+						frm.set_value('purchase_invoice', '');
+						frappe.msgprint({
+							title: __('Invalid Purchase Invoice'),
+							message: __("The selected Purchase Invoice doesn't contains selected Asset Item."),
+							indicator: 'red'
+						});
+					}
 					frm.set_value('gross_purchase_amount', item.base_net_rate);
 					frm.set_value('location', item.asset_location);
 				});
 			} else {
-				frappe.msgprint(__('Please select Item Code first'))
+				frm.set_value('purchase_invoice', '');
+				frappe.msgprint({
+					title: __('Not Allowed'),
+					message: __("Please select Item Code first")
+				});
 			}
 		}
 	},
