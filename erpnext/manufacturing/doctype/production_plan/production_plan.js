@@ -103,7 +103,7 @@ frappe.ui.form.on('Production Plan', {
 								${__('Reserved Qty for Production: Raw materials quantity to make manufacturing items.')}
 							</li>
 							<li>
-								${__('Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.')}
+								${__('Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.')}
 							</li>
 						</ul>
 					</div>
