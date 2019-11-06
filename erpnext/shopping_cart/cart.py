@@ -11,6 +11,7 @@ from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings
 from frappe.utils.nestedset import get_root_of
 from erpnext.accounts.utils import get_account_name
 from erpnext.utilities.product import get_qty_in_stock
+from frappe.contacts.doctype.contact.contact import get_contact_name
 
 
 class WebsitePriceListMissingError(frappe.ValidationError):
@@ -371,7 +372,7 @@ def get_party(user=None):
 	if not user:
 		user = frappe.session.user
 
-	contact_name = frappe.db.get_value("Contact", {"email_id": user})
+	contact_name = get_contact_name(user)
 	party = None
 
 	if contact_name:
@@ -417,7 +418,7 @@ def get_party(user=None):
 		contact = frappe.new_doc("Contact")
 		contact.update({
 			"first_name": fullname,
-			"email_id": user
+			"email_ids": [{"email_id": user, "is_primary": 1}]
 		})
 		contact.append('links', dict(link_doctype='Customer', link_name=customer.name))
 		contact.flags.ignore_mandatory = True
