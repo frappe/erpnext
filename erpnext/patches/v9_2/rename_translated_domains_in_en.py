@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.model.rename_doc import rename_doc
 
 def execute():
 	frappe.reload_doc('stock', 'doctype', 'item')
@@ -20,11 +21,11 @@ def execute():
 			if frappe.db.exists("Domain", domain):
 				merge=True
 
-			frappe.rename_doc("Domain", translated_domain, domain, ignore_permissions=True, merge=merge)
+			rename_doc("Domain", translated_domain, domain, ignore_permissions=True, merge=merge)
 
 	domain_settings = frappe.get_single("Domain Settings")
 	active_domains = [d.domain for d in domain_settings.active_domains]
-	
+
 	try:
 		for domain in active_domains:
 			domain = frappe.get_doc("Domain", domain)
