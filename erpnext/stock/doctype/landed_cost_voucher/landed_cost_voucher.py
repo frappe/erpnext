@@ -141,7 +141,8 @@ class LandedCostVoucher(Document):
 
 		for item in receipt_document.get("items"):
 			if item.is_fixed_asset:
-				docs = frappe.db.get_all('Asset', filters={ receipt_document_type: receipt_document.get('name') })
+				docs = frappe.db.get_all('Asset', filters={ receipt_document_type: receipt_document.get('name') }, 
+					fields=['name', 'docstatus'])
 				if not docs or len(docs) != item.qty:
 					frappe.throw(_('There are not enough asset created or linked to {0}. \
 						Please create or link {1} Assets with respective document.').format(receipt_document.get('name'), item.qty))
@@ -149,8 +150,7 @@ class LandedCostVoucher(Document):
 					for d in docs:
 						if d.docstatus == 1:
 							frappe.throw(_('Purchase Document {0} has submitted assets.').format(receipt_document.get('name')))
-				
-	
+
 	def update_rate_in_serial_no_for_non_asset_items(self, receipt_document):
 		for item in receipt_document.get("items"):
 			if not item.is_fixed_asset and item.serial_no:
