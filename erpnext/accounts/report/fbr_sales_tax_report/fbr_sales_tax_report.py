@@ -226,7 +226,7 @@ class FBRInvoiceWiseTaxes(object):
 			left join `tabAddress` addr on addr.name = i.customer_address
 			left join `tabCost Center` cc on cc.name = i.cost_center
 			where i.docstatus = 1 and i.company = %(company)s and i.posting_date between %(from_date)s and %(to_date)s
-				and ifnull(i.stin, 0) != 0 {0} and i.order_type != 'Maintenance'
+				and ifnull(i.stin, 0) != 0 and ifnull(i.is_return, 0) = 0 and i.order_type != 'Maintenance' {0}
 			order by i.posting_date, i.stin
 		""".format(conditions), self.filters, as_dict=1)
 
