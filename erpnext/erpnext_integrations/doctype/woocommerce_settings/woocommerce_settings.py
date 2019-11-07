@@ -34,15 +34,6 @@ class WoocommerceSettings(Document):
 				item_group.parent_item_group = get_root_of("Item Group")
 				item_group.insert()
 
-		elif not self.enable_sync:
-			names = ["Customer-woocommerce_id", "Sales Order-woocommerce_id", "Item-woocommerce_id", "Address-woocommerce_id", "Customer-woocommerce_email", "Address-woocommerce_email"]
-
-			# delete
-			for name in names:
-				frappe.delete_doc("Custom Field", name)
-			
-			frappe.delete_doc("Item Group", _("WooCommerce Products"))
-
 	def validate_settings(self):
 		if self.enable_sync:
 			if not self.secret:
