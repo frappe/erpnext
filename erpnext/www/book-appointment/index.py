@@ -4,15 +4,13 @@ import json
 import pytz
 
 
-WEEKDAYS = ["Monday", "Tuesday", "Wednesday",
-			"Thursday", "Friday", "Saturday", "Sunday"]
+WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 no_cache = 1
 
 
 def get_context(context):
-	is_enabled = frappe.db.get_single_value(
-		'Appointment Booking Settings', 'enable_scheduling')
+	is_enabled = frappe.db.get_single_value('Appointment Booking Settings', 'enable_scheduling')
 	if is_enabled:
 		return context
 	else:
@@ -32,10 +30,8 @@ def get_timezones():
 def get_appointment_slots(date, timezone):
 	# Convert query to local timezones
 	format_string = '%Y-%m-%d %H:%M:%S'
-	query_start_time = datetime.datetime.strptime(
-		date + ' 00:00:00', format_string)
-	query_end_time = datetime.datetime.strptime(
-		date + ' 23:59:59', format_string)
+	query_start_time = datetime.datetime.strptime(date + ' 00:00:00', format_string)
+	query_end_time = datetime.datetime.strptime(date + ' 23:59:59', format_string)
 	query_start_time = convert_to_system_timezone(timezone, query_start_time)
 	query_end_time = convert_to_system_timezone(timezone, query_end_time)
 	now = convert_to_guest_timezone(timezone, datetime.datetime.now())
@@ -43,8 +39,7 @@ def get_appointment_slots(date, timezone):
 	# Database queries
 	settings = frappe.get_doc('Appointment Booking Settings')
 	holiday_list = frappe.get_doc('Holiday List', settings.holiday_list)
-	timeslots = get_available_slots_between(
-		query_start_time, query_end_time, settings)
+	timeslots = get_available_slots_between(query_start_time, query_end_time, settings)
 
 	# Filter and convert timeslots
 	converted_timeslots = []
@@ -52,18 +47,14 @@ def get_appointment_slots(date, timezone):
 		converted_timeslot = convert_to_guest_timezone(timezone, timeslot)
 		# Check if holiday
 		if _is_holiday(converted_timeslot.date(), holiday_list):
-			converted_timeslots.append(
-				dict(time=converted_timeslot, availability=False))
+			converted_timeslots.append(dict(time=converted_timeslot, availability=False))
 			continue
 		# Check availability
 		if check_availabilty(timeslot, settings) and converted_timeslot >= now:
-			converted_timeslots.append(
-				dict(time=converted_timeslot, availability=True))
+			converted_timeslots.append(dict(time=converted_timeslot, availability=True))
 		else:
-			converted_timeslots.append(
-				dict(time=converted_timeslot, availability=False))
-	date_required = datetime.datetime.strptime(
-		date + ' 00:00:00', format_string).date()
+			converted_timeslots.append(dict(time=converted_timeslot, availability=False))
+	date_required = datetime.datetime.strptime(date + ' 00:00:00', format_string).date()
 	converted_timeslots = filter_timeslots(date_required, converted_timeslots)
 	return converted_timeslots
 
@@ -74,15 +65,11 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 		minutes=settings.appointment_duration)
 	for record in records:
 		if record.day_of_week == WEEKDAYS[query_start_time.weekday()]:
-			current_time = _deltatime_to_datetime(
-				query_start_time, record.from_time)
-			end_time = _deltatime_to_datetime(
-				query_start_time, record.to_time)
+			current_time = _deltatime_to_datetime(query_start_time, record.from_time)
+			end_time = _deltatime_to_datetime(query_start_time, record.to_time)
 		else:
-			current_time = _deltatime_to_datetime(
-				query_end_time, record.from_time)
-			end_time = _deltatime_to_datetime(
-				query_end_time, record.to_time)
+			current_time = _deltatime_to_datetime(query_end_time, record.from_time)
+			end_time = _deltatime_to_datetime(query_end_time, record.to_time)
 		while current_time + appointment_duration <= end_time:
 			timeslots.append(current_time)
 			current_time += appointment_duration
@@ -93,8 +80,7 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 def create_appointment(date, time, tz, contact):
 	appointment = frappe.new_doc('Appointment')
 	format_string = '%Y-%m-%d %H:%M:%S%z'
-	scheduled_time = datetime.datetime.strptime(
-		date+" "+time, format_string)
+	scheduled_time = datetime.datetime.strptime(date+" "+time, format_string)
 	scheduled_time = scheduled_time.replace(tzinfo=None)
 	scheduled_time = convert_to_system_timezone(tz, scheduled_time)
 	scheduled_time = scheduled_time.replace(tzinfo=None)
