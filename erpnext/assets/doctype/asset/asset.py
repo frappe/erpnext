@@ -579,15 +579,12 @@ def make_journal_entry(asset_name):
 	return je
 
 def is_cwip_accounting_enabled(company, asset_category=None):
-	enable_cwip_in_company = cint(frappe.db.get_value("Company",
-		company, "enable_cwip_accounting"))
-	enable_cwip_in_asset_category = cint(frappe.db.get_value("Asset Category",
-		asset_category, "enable_cwip_accounting"))
+	enable_cwip_in_company = cint(frappe.db.get_value("Company", company, "enable_cwip_accounting"))
 
 	if enable_cwip_in_company or not asset_category:
 		return enable_cwip_in_company
 
-	return enable_cwip_in_asset_category
+	return cint(frappe.db.get_value("Asset Category", asset_category, "enable_cwip_accounting"))
 
 def get_pro_rata_amt(row, depreciation_amount, from_date, to_date):
 	days = date_diff(to_date, from_date)
