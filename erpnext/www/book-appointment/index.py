@@ -14,7 +14,8 @@ def get_context(context):
 	if is_enabled:
 		return context
 	else:
-		raise frappe.DoesNotExistError
+		frappe.local.flags.redirect_location = '/404'
+		raise frappe.Redirect
 
 @frappe.whitelist(allow_guest=True)
 def get_appointment_settings():
