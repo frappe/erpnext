@@ -63,7 +63,7 @@ auto_value_setters = [
 			{"value": "Credit Note", "condition": "doc.has_stin and doc.is_return"},
 			{"value": "Sales Tax Invoice", "condition": "doc.has_stin"},
 			{"value": "Credit Note", "condition": "doc.is_return"},
-			{"value": "", "condition": "True"},
+			{"value": "", "condition": "1"},
 		]
 	},
 	{
@@ -79,7 +79,7 @@ auto_value_setters = [
 		"field_name": "select_print_heading",
 		"conditions": [
 			{"value": "Sales Return", "condition": "doc.is_return"},
-			{"value": "", "condition": "True"},
+			{"value": "", "condition": "1"},
 		]
 	},
 	{
@@ -101,7 +101,7 @@ auto_value_setters = [
 			{"value": "Bank Payment Voucher", "condition": "doc.payment_type == 'Pay'"},
 			{"value": "Cash Receipt Voucher", "condition": "doc.payment_type == 'Receive' and frappe.get_cached_value('Account', doc.paid_to, 'account_type') == 'Cash'"},
 			{"value": "Bank Receipt Voucher", "condition": "doc.payment_type == 'Receive'"},
-			{"value": "", "condition": "True"},
+			{"value": "", "condition": "1"},
 		]
 	}
 ]
