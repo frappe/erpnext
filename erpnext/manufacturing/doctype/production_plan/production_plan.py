@@ -558,7 +558,7 @@ def get_sales_orders(self):
 		item_filter += " and so_item.item_code = %(item)s"
 
 	open_so = frappe.db.sql("""
-		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
+		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total as grand_total
 		from `tabSales Order` so, `tabSales Order Item` so_item
 		where so_item.parent = so.name
 			and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
@@ -622,7 +622,7 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 	for data in po_items:
 		planned_qty = data.get('required_qty') or data.get('planned_qty')
 		ignore_existing_ordered_qty = data.get('ignore_existing_ordered_qty') or ignore_existing_ordered_qty
-		warehouse = data.get("warehouse") or warehouse
+		warehouse = warehouse or data.get("warehouse")
 
 		item_details = {}
 		if data.get("bom") or data.get("bom_no"):

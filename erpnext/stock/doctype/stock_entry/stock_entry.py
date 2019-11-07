@@ -241,7 +241,9 @@ class StockEntry(StockController):
 
 		for d in self.get("items"):
 			if not d.expense_account:
-				frappe.throw(_("Please enter Difference Account"))
+				frappe.throw(_("Please enter <b>Difference Account</b> or set default <b>Stock Adjustment Account</b> for company {0}")
+					.format(frappe.bold(self.company)))
+
 			elif self.is_opening == "Yes" and frappe.db.get_value("Account", d.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(_("Difference Account must be a Asset/Liability type account, since this Stock Entry is an Opening Entry"), OpeningEntryAccountError)
 
@@ -328,6 +330,10 @@ class StockEntry(StockController):
 			completed_qty = d.completed_qty + (allowance_percentage/100 * d.completed_qty)
 			if total_completed_qty > flt(completed_qty):
 				job_card = frappe.db.get_value('Job Card', {'operation_id': d.name}, 'name')
+				if not job_card:
+					frappe.throw(_("Work Order {0}: Job Card not found for the operation {1}")
+						.format(self.work_order, d.operation))
+
 				work_order_link = frappe.utils.get_link_to_form('Work Order', self.work_order)
 				job_card_link = frappe.utils.get_link_to_form('Job Card', job_card)
 				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}.")

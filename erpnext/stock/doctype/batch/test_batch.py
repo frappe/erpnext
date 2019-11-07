@@ -8,9 +8,12 @@ import unittest
 
 from erpnext.stock.doctype.batch.batch import get_batch_qty, UnableToSelectBatchError, get_batch_no
 from frappe.utils import cint
-
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 class TestBatch(unittest.TestCase):
+
+	def setUp(self):
+		set_perpetual_inventory(0)
 
 	def test_item_has_batch_enabled(self):
 		self.assertRaises(ValidationError, frappe.get_doc({
