@@ -31,7 +31,8 @@ class Appointment(Document):
         if(number_of_appointments_in_same_slot >= number_of_agents):
             frappe.throw('Time slot is not available')
         # Link lead
-        self.lead = self.find_lead_by_email()
+        if not self.lead:
+            self.lead = self.find_lead_by_email()
 
     def after_insert(self):
         if self.lead:
@@ -56,8 +57,9 @@ class Appointment(Document):
                         template=template,
                         args=args,
                         subject=_('Appointment Confirmation'))
-        frappe.msgprint(
-            'Please check your email to confirm the appointment')
+        if frappe.session.user == "Guest":
+            frappe.msgprint(
+                'Please check your email to confirm the appointment')
 
     def on_change(self):
         # Sync Calendar
