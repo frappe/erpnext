@@ -32,9 +32,9 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 		this.frm.set_query("expense_account", "taxes", function() {
 			return {
+				query: "erpnext.controllers.queries.tax_account_query",
 				filters: {
-					"root_type": "Expense",
-					"account_type": "Expenses Included In Valuation",
+					"account_type": ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation", "Expenses Included In Asset Valuation"],
 					"company": me.frm.doc.company
 				}
 			};
