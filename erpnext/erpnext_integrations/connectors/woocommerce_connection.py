@@ -66,7 +66,8 @@ def link_customer_and_address(raw_billing_data, customer_name):
 
 	customer.customer_name = customer_name
 	customer.woocommerce_email = customer_woo_com_email
-	customer.save()
+	customer.flags.ignore_mandatory = True
+	customer.save() 
 
 	if customer_exists:
 		frappe.rename_doc("Customer", old_name, customer_name)
@@ -88,6 +89,7 @@ def link_customer_and_address(raw_billing_data, customer_name):
 		"link_doctype": "Customer",
 		"link_name": customer.customer_name
 	})
+	address.flags.ignore_mandatory = True
 	address = address.save()
 
 	if customer_exists:
@@ -114,6 +116,7 @@ def link_items(items_list, woocommerce_settings):
 		item.woocommerce_id = item_data.get("product_id")
 		item.item_group = _("WooCommerce Products")
 		item.stock_uom = woocommerce_settings.uom or _("Nos")
+		item.flags.ignore_mandatory = True
 		item.save()
 
 def create_sales_order(order, woocommerce_settings, customer_name):	
@@ -131,6 +134,8 @@ def create_sales_order(order, woocommerce_settings, customer_name):
 	new_sales_order.company = woocommerce_settings.company
 
 	set_items_in_sales_order(new_sales_order, woocommerce_settings, order)
+	new_sales_order.flags.ignore_mandatory = True
+	new_sales_order.insert()
 	new_sales_order.submit()
 
 	frappe.db.commit()
