@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from frappe.utils import getdate, nowdate, cint, flt
-from erpnext.hr.utils import get_company_set
+from frappe.utils.nestedset import get_descendants_of
 
 class SubsidiaryCompanyError(frappe.ValidationError): pass
 class ParentCompanyError(frappe.ValidationError): pass
@@ -132,7 +132,8 @@ def get_designation_counts(designation, company):
 		return False
 
 	employee_counts = {}
-	company_set = get_company_set(company)
+	company_set = get_descendants_of('Company', company)
+	company_set.append(company)
 
 	employee_counts["employee_count"] = frappe.db.get_value("Employee",
 		filters={

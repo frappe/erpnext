@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt
-from erpnext.hr.utils import get_company_set
+from frappe.utils.nestedset import get_descendants_of
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
@@ -138,7 +138,9 @@ def get_data(filters):
 
 	data = []
 
-	company_list = get_company_set(filters.get("company"))
+	company_list = get_descendants_of("Company", filters.get("company"))
+	company_list.append(filters.get("company"))
+
 	customer_details = get_customer_details()
 	sales_order_records = get_sales_order_details(company_list, filters)
 
@@ -171,7 +173,7 @@ def get_data(filters):
 def get_conditions(filters):
 	conditions = ''
 	if filters.get('item_group'):
-		conditions += "AND so_item.item_group = '%s'" %filters.item_group
+		conditions += "AND so_item.item_group = %s" %frappe.db.escape(filters.item_group)
 
 	if filters.get('from_date'):
 		conditions += "AND so.transaction_date >= '%s'" %filters.from_date
