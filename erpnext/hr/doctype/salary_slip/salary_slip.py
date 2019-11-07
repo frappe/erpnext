@@ -75,7 +75,7 @@ class SalarySlip(TransactionBase):
 
 	def on_trash(self):
 		from frappe.model.naming import revert_series_if_last
-		revert_series_if_last(self.series, self.name)
+		revert_series_if_last(self.series, self.name, self)
 
 	def get_status(self):
 		if self.docstatus == 0:
