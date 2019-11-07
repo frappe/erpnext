@@ -480,17 +480,17 @@ class ReceivablePayableReport(object):
 			within_limit_total.update(grouped_by)
 			above_limit_total.update(grouped_by)
 
-		below_limit_total['voucher_type'] = _("Age < {0} Total").format(self.filters.from_age)
-		above_limit_total['voucher_type'] = _("Age > {0} Total").format(self.filters.to_age)
+		below_limit_total['party'] = _("'Age < {0} Total'").format(self.filters.from_age)
+		above_limit_total['party'] = _("'Age > {0} Total'").format(self.filters.to_age)
 
 		within_limit_total['_excludeFromTotal'] = True
 		within_limit_total['_bold'] = True
 		if self.filters.from_age and self.filters.to_age:
-			within_limit_total['voucher_type'] = _("Total of Age between {0} and {1}").format(self.filters.from_age, self.filters.to_age)
+			within_limit_total['party'] = _("'Total of Age between {0} and {1}'").format(self.filters.from_age, self.filters.to_age)
 		elif self.filters.from_age:
-			within_limit_total['voucher_type'] = _("Total of Age >= {0}").format(self.filters.from_age)
+			within_limit_total['party'] = _("'Total of Age >= {0}'").format(self.filters.from_age)
 		elif self.filters.to_age:
-			within_limit_total['voucher_type'] = _("Total of Age <= {0}").format(self.filters.to_age)
+			within_limit_total['party'] = _("'Total of Age <= {0}'").format(self.filters.to_age)
 
 		out = []
 		if self.filters.to_age:
