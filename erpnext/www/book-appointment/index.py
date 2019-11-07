@@ -37,9 +37,9 @@ def get_appointment_slots(date, timezone):
 		date + ' 00:00:00', format_string)
 	query_end_time = datetime.datetime.strptime(
 		date + ' 23:59:59', format_string)
-	query_start_time = convert_to_system_timezone(timezone,query_start_time)
-	query_end_time = convert_to_system_timezone(timezone,query_end_time)
-	now = convert_to_guest_timezone(timezone,datetime.datetime.now())
+	query_start_time = convert_to_system_timezone(timezone, query_start_time)
+	query_end_time = convert_to_system_timezone(timezone, query_end_time)
+	now = convert_to_guest_timezone(timezone, datetime.datetime.now())
 
 	# Database queries
 	settings = frappe.get_doc('Appointment Booking Settings')
@@ -50,7 +50,7 @@ def get_appointment_slots(date, timezone):
 	# Filter and convert timeslots
 	converted_timeslots = []
 	for timeslot in timeslots:
-		converted_timeslot = convert_to_guest_timezone(timezone,timeslot)
+		converted_timeslot = convert_to_guest_timezone(timezone, timeslot)
 		# Check if holiday
 		if _is_holiday(converted_timeslot.date(), holiday_list):
 			converted_timeslots.append(
@@ -98,15 +98,15 @@ def create_appointment(date, time, tz, contact):
 	scheduled_time = datetime.datetime.strptime(
 		date+" "+time, format_string)
 	scheduled_time = scheduled_time.replace(tzinfo=None)
-	scheduled_time = convert_to_system_timezone(tz,scheduled_time)
-	scheduled_time= scheduled_time.replace(tzinfo=None)
+	scheduled_time = convert_to_system_timezone(tz, scheduled_time)
+	scheduled_time = scheduled_time.replace(tzinfo=None)
 	appointment.scheduled_time = scheduled_time
 	contact = json.loads(contact)
-	appointment.customer_name = contact['name']
-	appointment.customer_phone_number = contact['number']
-	appointment.customer_skype = contact['skype']
-	appointment.customer_details = contact['notes']
-	appointment.customer_email = contact['email']
+	appointment.customer_name = contact.get('name',None)
+	appointment.customer_phone_number = contact.get('number', None)
+	appointment.customer_skype = contact.get('skype', None)
+	appointment.customer_details = contact.get('notes', None)
+	appointment.customer_email = contact.get('email', None)
 	appointment.status = 'Open'
 	appointment.insert()
 
