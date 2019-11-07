@@ -141,7 +141,7 @@ def get_gl_entries(filters):
 			%(ledger_currency)s as currency
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
-		order by posting_date, account, name
+		order by posting_date, voucher_type, voucher_no, account
 		""".format(conditions=get_conditions(filters)), filters, as_dict=1)
 
 	if filters.get('presentation_currency'):
