@@ -30,7 +30,6 @@ def get_timezones():
 
 @frappe.whitelist(allow_guest=True)
 def get_appointment_slots(date, timezone):
-	import pytz
 	# Convert query to local timezones
 	format_string = '%Y-%m-%d %H:%M:%S'
 	query_start_time = datetime.datetime.strptime(
@@ -92,7 +91,6 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 
 @frappe.whitelist(allow_guest=True)
 def create_appointment(date, time, tz, contact):
-	import pytz
 	appointment = frappe.new_doc('Appointment')
 	format_string = '%Y-%m-%d %H:%M:%S%z'
 	scheduled_time = datetime.datetime.strptime(
@@ -119,7 +117,6 @@ def filter_timeslots(date, timeslots):
 	return filtered_timeslots
 
 def convert_to_guest_timezone(guest_tz,datetimeobject):
-	import pytz
 	guest_tz = pytz.timezone(guest_tz)
 	local_timezone = pytz.timezone(frappe.utils.get_time_zone())
 	datetimeobject = local_timezone.localize(datetimeobject)
@@ -127,7 +124,6 @@ def convert_to_guest_timezone(guest_tz,datetimeobject):
 	return datetimeobject
 
 def convert_to_system_timezone(guest_tz,datetimeobject):
-	import pytz
 	guest_tz = pytz.timezone(guest_tz)
 	datetimeobject = guest_tz.localize(datetimeobject)
 	system_tz = pytz.timezone(frappe.utils.get_time_zone())
