@@ -776,6 +776,8 @@ def add_additional_cost(stock_entry, work_order):
 	# Add non stock items cost in the additional cost
 	bom = frappe.get_doc('BOM', work_order.bom_no)
 	table = 'exploded_items' if work_order.get('use_multi_level_bom') else 'items'
+	expenses_included_in_valuation = frappe.get_cached_value("Company", work_order.company,
+		"expenses_included_in_valuation")
 
 	items = {}
 	for d in bom.get(table):
@@ -786,6 +788,7 @@ def add_additional_cost(stock_entry, work_order):
 
 	for name in non_stock_items:
 		stock_entry.append('additional_costs', {
+			'expense_account': expenses_included_in_valuation,
 			'description': name[0],
 			'amount': items.get(name[0])
 		})
