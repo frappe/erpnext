@@ -175,7 +175,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 
 				// payment request
-				if(flt(doc.per_billed)==0) {
+				if(flt(doc.per_billed)==0 && flt(doc.per_completed, 2) < 100) {
 					this.frm.add_custom_button(__('Payment Request'),
 						function() { me.make_payment_request() }, __("Make"));
 					this.frm.add_custom_button(__('Payment'),

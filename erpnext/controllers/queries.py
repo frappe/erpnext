@@ -247,11 +247,11 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 			`tabDelivery Note`.docstatus = 1
 			and status not in ("Stopped", "Closed") %(fcond)s
 			and (
-				(`tabDelivery Note`.is_return = 0 and `tabDelivery Note`.per_billed < 100)
+				(`tabDelivery Note`.is_return = 0 and `tabDelivery Note`.per_completed < 100)
 				or `tabDelivery Note`.grand_total = 0
 				or (
 					`tabDelivery Note`.is_return = 1
-					and return_against in (select name from `tabDelivery Note` where per_billed < 100)
+					and return_against in (select name from `tabDelivery Note` where per_completed < 100)
 				)
 			)
 			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc limit %(start)s, %(page_len)s

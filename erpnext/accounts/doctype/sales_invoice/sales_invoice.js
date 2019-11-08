@@ -171,7 +171,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					get_query_filters: {
 						docstatus: 1,
 						status: ["!=", "Closed"],
-						per_billed: ["<", 99.99],
+						per_completed: ["<", 99.99],
 						company: me.frm.doc.company
 					}
 				})
