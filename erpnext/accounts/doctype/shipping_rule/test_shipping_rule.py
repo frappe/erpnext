@@ -14,13 +14,13 @@ class TestShippingRule(unittest.TestCase):
 		shipping_rule.name = test_records[0].get('name')
 		shipping_rule.get("conditions")[0].from_value = 101
 		self.assertRaises(FromGreaterThanToError, shipping_rule.insert)
-		
+
 	def test_many_zero_to_values(self):
 		shipping_rule = frappe.copy_doc(test_records[0])
 		shipping_rule.name = test_records[0].get('name')
 		shipping_rule.get("conditions")[0].to_value = 0
 		self.assertRaises(ManyBlankToValuesError, shipping_rule.insert)
-		
+
 	def test_overlapping_conditions(self):
 		for range_a, range_b in [
 			((50, 150), (0, 100)),
@@ -38,6 +38,10 @@ class TestShippingRule(unittest.TestCase):
 			self.assertRaises(OverlappingConditionError, shipping_rule.insert)
 
 def create_shipping_rule(shipping_rule_type, shipping_rule_name):
+
+	if frappe.db.exists("Shipping Rule", shipping_rule_name):
+		return frappe.get_doc("Shipping Rule", shipping_rule_name)
+
 	sr = frappe.new_doc("Shipping Rule")
 	sr.account =  "_Test Account Shipping Charges - _TC"
 	sr.calculate_based_on =  "Net Total"
@@ -70,4 +74,4 @@ def create_shipping_rule(shipping_rule_type, shipping_rule_name):
 		})
 	sr.insert(ignore_permissions=True)
 	sr.submit()
-	return sr			
+	return sr

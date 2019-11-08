@@ -139,15 +139,11 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 	}
 
 	make() {
-		const me = this;
-		frappe.upload.make({
-			args: {
-				method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement',
-				allow_multiple: 0
-			},
-			no_socketio: true,
-			sample_url: "e.g. http://example.com/somefile.csv",
-			callback: function(attachment, r) {
+		const me = this;	
+		new frappe.ui.FileUploader({
+			method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement',
+			allow_multiple: 0,
+			on_success: function(attachment, r) {
 				if (!r.exc && r.message) {
 					me.data = r.message;
 					me.setup_transactions_dom();

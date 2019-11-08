@@ -13,6 +13,10 @@ from six import iteritems
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency
 
+from erpnext.stock.utils import get_stock_value_on
+from erpnext.stock import get_warehouse_account_map
+
+
 class FiscalYearError(frappe.ValidationError): pass
 
 @frappe.whitelist()
@@ -560,23 +564,23 @@ def fix_total_debit_credit():
 				(dr_or_cr, dr_or_cr, '%s', '%s', '%s', dr_or_cr),
 				(d.diff, d.voucher_type, d.voucher_no))
 
-def get_stock_and_account_difference(account_list=None, posting_date=None, company=None):
-	from erpnext.stock.utils import get_stock_value_on
-	from erpnext.stock import get_warehouse_account_map
-
+def get_stock_and_account_balance(account=None, posting_date=None, company=None):
 	if not posting_date: posting_date = nowdate()
 
-	difference = {}
 	warehouse_account = get_warehouse_account_map(company)
 
-	for warehouse, account_data in iteritems(warehouse_account):
-		if account_data.get('account') in account_list:
-			account_balance = get_balance_on(account_data.get('account'), posting_date, in_account_currency=False)
-			stock_value = get_stock_value_on(warehouse, posting_date)
-			if abs(flt(stock_value) - flt(account_balance)) > 0.005:
-				difference.setdefault(account_data.get('account'), flt(stock_value) - flt(account_balance))
+	account_balance = get_balance_on(account, posting_date, in_account_currency=False)
 
-	return difference
+	related_warehouses = [wh for wh, wh_details in warehouse_account.items()
+		if wh_details.account == account and not wh_details.is_group]
+
+	total_stock_value = 0.0
+	for warehouse in related_warehouses:
+		value = get_stock_value_on(warehouse, posting_date)
+		total_stock_value += value
+
+	precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
+	return flt(account_balance, precision), flt(total_stock_value, precision), related_warehouses
 
 def get_currency_precision():
 	precision = cint(frappe.db.get_default("currency_precision"))

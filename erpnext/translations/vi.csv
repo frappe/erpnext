@@ -1575,7 +1575,7 @@ DocType: Sales Invoice,Payment Due Date,Thanh toán đáo hạo
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Dành Số lượng: Số lượng đặt hàng để bán, nhưng không chuyển giao."
 DocType: Drug Prescription,Interval UOM,Interval UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Chọn lại, nếu địa chỉ đã chọn được chỉnh sửa sau khi lưu"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Qty dành riêng cho hợp đồng thầu phụ: Số lượng nguyên liệu thô để làm các mặt hàng được thu nhỏ.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Qty dành riêng cho hợp đồng thầu phụ: Số lượng nguyên liệu thô để làm các mặt hàng được thu nhỏ.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Biến thể mẫu hàng {0} đã tồn tại với cùng một thuộc tính
 DocType: Item,Hub Publishing Details,Chi tiết Xuất bản Trung tâm
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening','Đang mở'

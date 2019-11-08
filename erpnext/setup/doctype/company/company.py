@@ -207,7 +207,7 @@ class Company(NestedSet):
 				"default_expense_account": "Cost of Goods Sold"
 			})
 
-		if self.update_default_account or frappe.flags.in_test:
+		if self.update_default_account:
 			for default_account in default_accounts:
 				self._set_default_account(default_account, default_accounts.get(default_account))
 
