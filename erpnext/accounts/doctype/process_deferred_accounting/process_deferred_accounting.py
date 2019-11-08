@@ -10,24 +10,18 @@ from erpnext.accounts.deferred_revenue import convert_deferred_expense_to_expens
 	convert_deferred_revenue_to_income
 
 class ProcessDeferredAccounting(Document):
-	def validate(self):
-		self.validate_reference_doc()
-
 	def on_submit(self):
+		conditions = self.build_conditions()
 		if self.type == 'Income':
-			convert_deferred_revenue_to_income(self.start_date, self.end_date)
+			convert_deferred_revenue_to_income(self.start_date, self.end_date, conditions)
 		else:
-			convert_deferred_expense_to_expense(self.start_date, self.end_date)
+			convert_deferred_expense_to_expense(self.start_date, self.end_date, conditions)
 
-def create_deferred_accounting_record(record_type, document_type, start_date, end_date):
-	''' Create deferred accounting entry '''
-	doc = frappe.get_doc(dict(
-		doctype='Process Deferred Accounting',
-		start_date=start_date,
-		end_date=end_date,
-		document_type=document_type,
-		record_type=record_type
-	))
+	def build_conditions(self):
+		conditions=''
+		if self.account:
+			conditions += "AND item.deferred_revenue_account='%s'"%(self.account)
+		elif self.company:
+			conditions += "AND p.company='%s'"%(self.company)
 
-	doc.insert()
-	doc.submit()
+		return conditions
