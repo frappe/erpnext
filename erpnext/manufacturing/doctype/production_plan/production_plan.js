@@ -123,7 +123,7 @@ frappe.ui.form.on('Production Plan', {
 						item.sales_order = d.sales_order;
 						item.warehouse = d.warehouse;
 						item.description = d.description;
-						item.uom = d.uom
+						item.uom = d.uom;
 					});
 				}
 				refresh_field('mr_items');
