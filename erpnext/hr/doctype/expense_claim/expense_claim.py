@@ -192,9 +192,6 @@ class ExpenseClaim(AccountsController):
 		if not self.cost_center:
 			frappe.throw(_("Cost center is required to book an expense claim"))
 
-		if not self.payable_account:
-			frappe.throw(_("Please set default payable account for the company {0}").format(getlink("Company",self.company)))
-
 		if self.is_paid:
 			if not self.mode_of_payment:
 				frappe.throw(_("Mode of payment is required to make a payment").format(self.employee))
