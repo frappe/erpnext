@@ -688,34 +688,12 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 		"account": account
 	}, as_dict=True)
 
-	# Get GL entries for expense claim that are paid or allocated by employee advance
-	if party_type == "Employee":
-		advance_allocated = frappe.db.sql("""
-			select against_voucher_type, against_voucher,
-				ifnull(sum({payment_dr_or_cr}), 0) as payment_amount
-			from `tabGL Entry`
-			where party_type = %(party_type)s and party = %(party)s
-				and account = %(account)s
-				and {payment_dr_or_cr} > 0
-				and against_voucher_type = 'Expense Claim'
-				and against_voucher is not null and against_voucher != ''
-			group by against_voucher_type, against_voucher
-			""".format(payment_dr_or_cr=dr_or_cr), { #nosec
-				"party_type": party_type,
-				"party": party,
-				"account": account
-			}, as_dict=True)
-
-	advance_allocated_map = frappe._dict()
-	for d in advance_allocated:
-		advance_allocated_map.setdefault((d.against_voucher_type, d.against_voucher), d.payment_amount)
-
 	pe_map = frappe._dict()
 	for d in payment_entries:
 		pe_map.setdefault((d.against_voucher_type, d.against_voucher), d.payment_amount)
 
 	for d in invoice_list:
-		payment_amount = pe_map.get((d.voucher_type, d.voucher_no), 0) + advance_allocated_map.get((d.voucher_type, d.voucher_no), 0)
+		payment_amount = pe_map.get((d.voucher_type, d.voucher_no), 0)
 		outstanding_amount = flt(d.invoice_amount - payment_amount, precision)
 		if outstanding_amount > 0.5 / (10**precision):
 			if (filters and filters.get("outstanding_amt_greater_than") and
