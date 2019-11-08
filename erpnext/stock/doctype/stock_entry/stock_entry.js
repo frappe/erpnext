@@ -70,10 +70,10 @@ frappe.ui.form.on('Stock Entry', {
 
 		frm.set_query("expense_account", "additional_costs", function() {
 			return {
+				query: "erpnext.controllers.queries.tax_account_query",
 				filters: {
-					"root_type": "Expense",
-					"account_type": "Expenses Included In Valuation",
-					"company": frm.doc.company
+					"account_type": ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation", "Expenses Included In Asset Valuation"],
+					"company": me.frm.doc.company
 				}
 			};
 		});
