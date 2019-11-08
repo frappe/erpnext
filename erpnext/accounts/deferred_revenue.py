@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.utils import date_diff, add_months, today, getdate, add_days, flt, get_last_day
+from frappe.utils import date_diff, add_months, today, getdate, add_days, flt, get_last_day, cint
 from erpnext.accounts.utils import get_account_currency
 from frappe.email import sendmail_to_system_managers
 
@@ -32,7 +32,7 @@ def validate_service_stop_date(doc):
 		if old_stop_dates and old_stop_dates.get(item.name) and item.service_stop_date!=old_stop_dates.get(item.name):
 			frappe.throw(_("Cannot change Service Stop Date for item in row {0}".format(item.idx)))
 
-def convert_deferred_expense_to_expense(start_date=None, end_date=None):
+def convert_deferred_expense_to_expense(start_date=None, end_date=None,  conditions=''):
 	# book the expense/income on the last day, but it will be trigger on the 1st of month at 12:00 AM
 	if not start_date:
 		start_date = add_months(today(), -1)
@@ -41,19 +41,22 @@ def convert_deferred_expense_to_expense(start_date=None, end_date=None):
 
 	# check for the purchase invoice for which GL entries has to be done
 	invoices = frappe.db.sql_list('''
-		select distinct parent from `tabPurchase Invoice Item`
-		where service_start_date<=%s and service_end_date>=%s
-		and enable_deferred_expense = 1 and docstatus = 1 and ifnull(amount, 0) > 0
-	''', (end_date, start_date))
+		select distinct item.parent
+		from `tabPurchase Invoice Item` item, `tabPurchase Invoice` p
+		where item.service_start_date<=%s and item.service_end_date>=%s
+		and item.enable_deferred_expense = 1 and item.parent=p.name
+		and item.docstatus = 1 and ifnull(item.amount, 0) > 0
+		{0}
+	'''.format(conditions), (end_date, start_date)) #nosec
 
 	# For each invoice, book deferred expense
 	for invoice in invoices:
 		doc = frappe.get_doc("Purchase Invoice", invoice)
 		book_deferred_income_or_expense(doc, end_date)
 
-	create_process_deferred_accounting('Expense', 'Purchase Invoice', end_date)
+	create_process_deferred_accounting('Expense', start_date, end_date)
 
-def convert_deferred_revenue_to_income(start_date=None, end_date=None):
+def convert_deferred_revenue_to_income(start_date=None, end_date=None, conditions=''):
 	# book the expense/income on the last day, but it will be trigger on the 1st of month at 12:00 AM
 	if not start_date:
 		start_date = add_months(today(), -1)
@@ -62,16 +65,19 @@ def convert_deferred_revenue_to_income(start_date=None, end_date=None):
 
 	# check for the sales invoice for which GL entries has to be done
 	invoices = frappe.db.sql_list('''
-		select distinct parent from `tabSales Invoice Item`
-		where service_start_date<=%s and service_end_date>=%s
-		and enable_deferred_revenue = 1 and docstatus = 1 and ifnull(amount, 0) > 0
-	''', (end_date, start_date))
+		select distinct item.parent
+		from `tabSales Invoice Item` item, `tabSales Invoice` p
+		where item.service_start_date<=%s and item.service_end_date>=%s
+		and item.enable_deferred_revenue = 1 and item.parent=p.name
+		and item.docstatus = 1 and ifnull(item.amount, 0) > 0
+		{0}
+	'''.format(conditions), (end_date, start_date)) #nosec
 
 	for invoice in invoices:
 		doc = frappe.get_doc("Sales Invoice", invoice)
 		book_deferred_income_or_expense(doc, end_date)
 
-	create_process_deferred_accounting('Income', 'Sales Invoice', end_date)
+	create_deferred_accounting_record('Income', start_date, end_date)
 
 def get_booking_dates(doc, item, posting_date=None):
 	if not posting_date:
@@ -172,6 +178,22 @@ def book_deferred_income_or_expense(doc, posting_date=None):
 	for item in doc.get('items'):
 		if item.get(enable_check):
 			_book_deferred_revenue_or_expense(item)
+
+def create_deferred_accounting_record(record_type, start_date, end_date, posting_date=today()):
+	''' Create deferred accounting entry '''
+	if not cint(frappe.db.get_singles_value('Accounts Settings', 'automatically_process_deferred_account_entry')):
+		return
+
+	doc = frappe.get_doc(dict(
+		doctype='Process Deferred Accounting',
+		posting_date=posting_date,
+		start_date=start_date,
+		end_date=end_date,
+		type=record_type
+	))
+
+	doc.insert()
+	doc.submit()
 
 def make_gl_entries(doc, credit_account, debit_account, against,
 	amount, base_amount, posting_date, project, account_currency, cost_center, voucher_detail_no):
