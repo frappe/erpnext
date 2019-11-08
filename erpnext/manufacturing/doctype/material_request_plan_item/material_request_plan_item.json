@@ -205,7 +205,7 @@
    "precision": "", 
    "print_hide": 1, 
    "print_hide_if_no_value": 0, 
-   "read_only": 0, 
+   "read_only": 1, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 1, 
