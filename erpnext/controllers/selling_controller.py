@@ -324,9 +324,9 @@ class SellingController(StockController):
 				return_rate = 0
 				if cint(self.is_return) and self.return_against and self.docstatus==1:
 					if d.get('delivery_note'):
-						return_rate = self.get_incoming_rate_for_sales_return(d.item_code, "Delivery Note", d.delivery_note)
+						return_rate = self.get_incoming_rate_for_sales_return(d.item_code, d.warehouse, "Delivery Note", d.delivery_note)
 					else:
-						return_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.doctype, self.return_against)
+						return_rate = self.get_incoming_rate_for_sales_return(d.item_code, d.warehouse, self.doctype, self.return_against)
 
 				# On cancellation or if return entry submission, make stock ledger entry for
 				# target warehouse first, to update serial no values properly
