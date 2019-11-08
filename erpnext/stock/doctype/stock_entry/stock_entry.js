@@ -73,7 +73,7 @@ frappe.ui.form.on('Stock Entry', {
 				query: "erpnext.controllers.queries.tax_account_query",
 				filters: {
 					"account_type": ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation", "Expenses Included In Asset Valuation"],
-					"company": me.frm.doc.company
+					"company": frm.doc.company
 				}
 			};
 		});
