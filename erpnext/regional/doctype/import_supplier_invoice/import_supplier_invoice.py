@@ -40,10 +40,15 @@ class ImportSupplierInvoice(Document):
 				taxes = []
 				terms = []
 				encoded_content = zf.read(file_name)
+
 				try:
 					content = encoded_content.decode("utf-8-sig")
 				except UnicodeDecodeError:
-					content = encoded_content.decode("utf-16")
+					try:
+						content = encoded_content.decode("utf-16")
+					except UnicodeDecodeError as e:
+						frappe.log_error(message=e, title="UTF-16 encoding error for File Name: " + file_name)
+
 				file_content = bs(content, "xml")
 
 				for line in file_content.find_all("DatiTrasmissione"):
