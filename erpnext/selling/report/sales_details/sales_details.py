@@ -424,9 +424,7 @@ class SalesPurchaseDetailsReport(object):
 			conditions.append("s.order_type=%(order_type)s")
 
 		if self.filters.get("cost_center"):
-			cost_centers = cstr(self.filters.get("cost_center")).strip()
-			self.filters.cost_center = [d.strip() for d in cost_centers.split(',') if d]
-			self.filters.cost_center = get_cost_centers_with_children(self.filters.cost_center)
+			self.filters.cost_center = get_cost_centers_with_children(self.filters.get("cost_center"))
 			conditions.append("i.cost_center in %(cost_center)s")
 
 		if self.filters.get("project"):

@@ -7,6 +7,7 @@ from frappe import _, scrub
 from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr
 from frappe.desk.query_report import group_report_data, hide_columns_if_filtered
 from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account, get_allow_project_in_entry_of_bs_account
+from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 
 class ReceivablePayableReport(object):
 	def __init__(self, filters=None):
@@ -688,19 +689,18 @@ class ReceivablePayableReport(object):
 
 	def is_in_cost_center(self, gle):
 		if self.filters.get("cost_center"):
-			if gle.get("cost_center_lft") and gle.get("cost_center_rgt"):
-				if not self.filters.get("cost_center_lft") or not self.filters.get("cost_center_rgt"):
-					self.filters["cost_center_lft"], self.filters["cost_center_rgt"] = frappe.get_value("Cost Center",
-						self.filters.get("cost_center"), ["lft", "rgt"])
-
-				return gle.cost_center_lft >= self.filters.cost_center_lft and gle.cost_center_rgt <= self.filters.cost_center_rgt
-			else:
-				return False
+			self.filters.cost_center = get_cost_centers_with_children(self.filters.get("cost_center"))
+			return gle.cost_center and gle.cost_center in self.filters.cost_center
 		else:
 			return True
 
 	def is_in_project(self, gle):
-		return not self.filters.get("project") or gle.project == self.filters.get("project")
+		if self.filters.get("project"):
+			if not isinstance(self.filters.get("project"), list):
+				self.filters.project = [d.strip() for d in cstr(self.filters.project).strip().split(',') if d]
+			return gle.project and gle.project in self.filters.cost_center
+		else:
+			return True
 
 	def get_return_entries(self, party_type):
 		doctype = None
@@ -813,12 +813,6 @@ class ReceivablePayableReport(object):
 		else:
 			select_fields = "sum(gle.debit) as debit, sum(gle.credit) as credit"
 
-		if self.filters.get("cost_center"):
-			cost_center_fields = ", cc.lft as cost_center_lft, cc.rgt as cost_center_rgt"
-			cost_center_join = "left join `tabCost Center` cc on cc.name = gle.cost_center"
-		else:
-			cost_center_fields = cost_center_join = ""
-
 		if date and not for_future:
 			conditions += " and gle.posting_date <= '%s'" % date
 
@@ -829,16 +823,14 @@ class ReceivablePayableReport(object):
 			select
 				gle.name, gle.posting_date, gle.account, gle.party_type, gle.party, gle.voucher_type, gle.voucher_no,
 				gle.against_voucher_type, gle.against_voucher, gle.account_currency, gle.remarks, gle.cost_center, gle.project,
-				{select_fields} {cost_center_fields}
+				{select_fields}
 			from
-				`tabGL Entry` gle {cost_center_join}
+				`tabGL Entry` gle
 			where
 				gle.docstatus < 2 and gle.party_type=%s and (gle.party is not null and gle.party != '') {conditions}
 				group by gle.voucher_type, gle.voucher_no, gle.against_voucher_type, gle.against_voucher, gle.party
 				order by gle.posting_date, gle.party""".format(  # nosec
 			select_fields=select_fields,
-			cost_center_fields=cost_center_fields,
-			cost_center_join=cost_center_join,
 			conditions=conditions), values, as_dict=True)
 
 		return self.gl_entries
@@ -1122,9 +1114,8 @@ def get_employee_advance_details(names):
 
 	if names:
 		employee_advances = frappe.db.sql("""
-			select ea.name, ea.cost_center, ea.project, ea.purpose, cc.lft as cost_center_lft, cc.rgt as cost_center_rgt
+			select ea.name, ea.cost_center, ea.project, ea.purpose
 			from `tabEmployee Advance` ea
-			left join `tabCost Center` cc on cc.name = ea.cost_center
 			where ea.docstatus = 1 and ea.name in ({0})
 			""".format(','.join(['%s'] * len(names))), names, as_dict=1)
 
