@@ -103,7 +103,7 @@ frappe.ui.form.on('Production Plan', {
 								${__('Reserved Qty for Production: Raw materials quantity to make manufacturing items.')}
 							</li>
 							<li>
-								${__('Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.')}
+								${__('Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.')}
 							</li>
 						</ul>
 					</div>
@@ -233,7 +233,7 @@ frappe.ui.form.on('Production Plan', {
 
 		if (item_wise_qty) {
 			for (var key in item_wise_qty) {
-				title += __('Item {0}: {1} qty produced, ', [key, item_wise_qty[key]]);
+				title += __('Item {0}: {1} qty produced. ', [key, item_wise_qty[key]]);
 			}
 		}
 
@@ -253,7 +253,7 @@ frappe.ui.form.on('Production Plan', {
 frappe.ui.form.on("Production Plan Item", {
 	item_code: function(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
-		if (row.item_code) {
+		if (row.item_code && frm.doc.company) {
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_item_data",
 				args: {
