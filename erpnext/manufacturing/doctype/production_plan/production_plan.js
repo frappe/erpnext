@@ -253,7 +253,7 @@ frappe.ui.form.on('Production Plan', {
 frappe.ui.form.on("Production Plan Item", {
 	item_code: function(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
-		if (row.item_code && frm.doc.company) {
+		if (row.item_code) {
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_item_data",
 				args: {
@@ -272,7 +272,7 @@ frappe.ui.form.on("Production Plan Item", {
 frappe.ui.form.on("Material Request Plan Item", {
 	warehouse: function(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
-		if (row.warehouse && row.item_code) {
+		if (row.warehouse && row.item_code && frm.doc.company) {
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_bin_details",
 				args: {
