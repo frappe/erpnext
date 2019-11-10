@@ -55,13 +55,8 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 	pi.qty = flt(qty)
 	if description and not pi.description:
 		pi.description = description
-<<<<<<< HEAD
-	if not pi.warehouse:
-		pi.warehouse = (main_item_row.warehouse if ((doc.get('is_pos')
-=======
 	if not pi.warehouse and not doc.amended_from:
 		pi.warehouse = (main_item_row.warehouse if ((doc.get('is_pos') or item.is_stock_item \
->>>>>>> 090f9a3dc9ee735c3ccbd994e79ed7e152585948
 			or not item.default_warehouse) and main_item_row.warehouse) else item.default_warehouse)
 	if not pi.batch_no and not doc.amended_from:
 		pi.batch_no = cstr(main_item_row.get("batch_no"))
@@ -123,12 +118,9 @@ def get_items_from_product_bundle(args):
 
 def on_doctype_update():
 	frappe.db.add_index("Packed Item", ["item_code", "warehouse"])
-<<<<<<< HEAD
-=======
 
 def get_old_packed_item_details(old_packed_items):
 	old_packed_items_map = {}
 	for items in old_packed_items:
 		old_packed_items_map.setdefault((items.item_code ,items.parent_item), []).append(items.as_dict())
 	return old_packed_items_map
->>>>>>> 090f9a3dc9ee735c3ccbd994e79ed7e152585948
