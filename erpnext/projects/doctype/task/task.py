@@ -201,9 +201,9 @@ def set_multiple_status(names, status):
 def set_tasks_as_overdue():
 	tasks = frappe.get_all("Task", filters={'status':['not in',['Cancelled', 'Closed']]})
 	for task in tasks:
-                if frappe.db.get_value("Task", task.name, "status") in 'Pending Approval' and not (getdate(frappe.db.get_value("Task", task.name, "review_date")) < getdate(today())):
+		if frappe.db.get_value("Task", task.name, "status") in 'Pending Approval' and not (getdate(frappe.db.get_value("Task", task.name, "review_date")) < getdate(today())):
 			continue
-                frappe.get_doc("Task", task.name).update_status()
+		frappe.get_doc("Task", task.name).update_status()
 
 @frappe.whitelist()
 def get_children(doctype, parent, task=None, project=None, is_root=False):
