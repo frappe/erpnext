@@ -277,6 +277,7 @@ frappe.ui.form.on("Material Request Plan Item", {
 				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_bin_details",
 				args: {
 					row: row,
+					company: frm.doc.company,
 					for_warehouse: row.warehouse
 				},
 				callback: function(r) {
