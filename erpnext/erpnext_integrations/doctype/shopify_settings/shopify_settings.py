@@ -43,7 +43,7 @@ class ShopifySettings(Document):
 				d.raise_for_status()
 				self.update_webhook_table(method, d.json())
 			except Exception as e:
-				make_shopify_log(status="Warning", message=e, exception=False)
+				make_shopify_log(status="Warning", exception=e, rollback=True)
 
 	def unregister_webhooks(self):
 		session = get_request_session()

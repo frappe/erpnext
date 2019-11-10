@@ -1580,7 +1580,7 @@ DocType: Sales Invoice,Payment Due Date,Splatno dne
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Reserved Množství: Množství objednal k prodeji, ale není doručena."
 DocType: Drug Prescription,Interval UOM,Interval UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Znovu vyberte, pokud je zvolená adresa po uložení upravena"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Vyhrazeno Množství pro subdodávky: Množství surovin pro výrobu subdodávek.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Vyhrazeno Množství pro subdodávky: Množství surovin pro výrobu subdodávek.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Bod Variant {0} již existuje se stejnými vlastnostmi
 DocType: Item,Hub Publishing Details,Podrobnosti o publikování Hubu
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',"""Otevírací"""

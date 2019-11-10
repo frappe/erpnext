@@ -1576,7 +1576,7 @@ DocType: Sales Invoice,Payment Due Date,ການຊໍາລະເງິນກ�
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Qty ທີ່ສະຫງວນໄວ້: ຈຳ ນວນທີ່ສັ່ງຊື້, ແຕ່ບໍ່ໄດ້ສົ່ງ."
 DocType: Drug Prescription,Interval UOM,Interval UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","ແກ້ໄຂ, ຖ້າຫາກວ່າທີ່ຢູ່ທີ່ເລືອກໄດ້ຖືກແກ້ໄຂຫຼັງຈາກທີ່ບັນທຶກ"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Qty ທີ່ສະຫງວນໄວ້ ສຳ ລັບສັນຍາຍ່ອຍ: ປະລິມານວັດຖຸດິບເພື່ອຜະລິດສິນຄ້າຍ່ອຍ.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Qty ທີ່ສະຫງວນໄວ້ ສຳ ລັບສັນຍາຍ່ອຍ: ປະລິມານວັດຖຸດິບເພື່ອຜະລິດສິນຄ້າຍ່ອຍ.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,ລາຍການ Variant {0} ມີຢູ່ແລ້ວກັບຄຸນລັກສະນະດຽວກັນ
 DocType: Item,Hub Publishing Details,Hub Publishing Details
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&quot;ເປີດ &#39;

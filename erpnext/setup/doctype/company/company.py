@@ -33,6 +33,10 @@ class Company(NestedSet):
 		return exists
 
 	def validate(self):
+		self.update_default_account = False
+		if self.is_new():
+			self.update_default_account = True
+
 		self.validate_abbr()
 		self.validate_default_accounts()
 		self.validate_currency()
@@ -203,8 +207,8 @@ class Company(NestedSet):
 				"default_expense_account": "Cost of Goods Sold"
 			})
 
-		for default_account in default_accounts:
-			if self.is_new() or frappe.flags.in_test or frappe.flags.in_demo:
+		if self.update_default_account:
+			for default_account in default_accounts:
 				self._set_default_account(default_account, default_accounts.get(default_account))
 
 		if not self.default_income_account:
