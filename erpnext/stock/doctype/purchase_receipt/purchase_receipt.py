@@ -15,6 +15,7 @@ from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from six import iteritems
 
 form_grid_templates = {
@@ -194,6 +195,7 @@ class PurchaseReceipt(BuyingController):
 		from erpnext.accounts.general_ledger import process_gl_map
 
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
+		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		gl_entries = []
@@ -232,15 +234,16 @@ class PurchaseReceipt(BuyingController):
 					negative_expense_to_be_booked += flt(d.item_tax_amount)
 
 					# Amount added through landed-cost-voucher
-					if flt(d.landed_cost_voucher_amount):
-						gl_entries.append(self.get_gl_dict({
-							"account": expenses_included_in_valuation,
-							"against": warehouse_account[d.warehouse]["account"],
-							"cost_center": d.cost_center,
-							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"credit": flt(d.landed_cost_voucher_amount),
-							"project": d.project
-						}, item=d))
+					if landed_cost_entries:
+						for account, amount in iteritems(landed_cost_entries[(d.item_code, d.name)]):
+							gl_entries.append(self.get_gl_dict({
+								"account": account,
+								"against": warehouse_account[d.warehouse]["account"],
+								"cost_center": d.cost_center,
+								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+								"credit": flt(amount),
+								"project": d.project
+							}, item=d))
 
 					# sub-contracting warehouse
 					if flt(d.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
@@ -278,8 +281,7 @@ class PurchaseReceipt(BuyingController):
 					d.rejected_warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(d.warehouse)
 
-		if not is_cwip_accounting_disabled():
-			self.get_asset_gl_entry(gl_entries)
+		self.get_asset_gl_entry(gl_entries, expenses_included_in_valuation)
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("taxes"):
@@ -333,14 +335,23 @@ class PurchaseReceipt(BuyingController):
 
 		return process_gl_map(gl_entries)
 
-	def get_asset_gl_entry(self, gl_entries):
+	def get_asset_gl_entry(self, gl_entries, expenses_included_in_valuation=None):
+		arbnb_account, cwip_account = None, None
+
+		cwip_disabled = is_cwip_accounting_disabled()
+
+		if not expenses_included_in_valuation:
+			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+
 		for d in self.get("items"):
-			if d.is_fixed_asset:
+			if d.is_fixed_asset and not (arbnb_account and cwip_account):
 				arbnb_account = self.get_company_default("asset_received_but_not_billed")
 
 				# CWIP entry
 				cwip_account = get_asset_account("capital_work_in_progress_account", d.asset,
 					company = self.company)
+
+			if d.is_fixed_asset and not cwip_disabled:
 
 				asset_amount = flt(d.net_amount) + flt(d.item_tax_amount/self.conversion_rate)
 				base_asset_amount = flt(d.base_net_amount + d.item_tax_amount)
@@ -368,6 +379,36 @@ class PurchaseReceipt(BuyingController):
 						if asset_rbnb_currency == self.company_currency else asset_amount)
 				}, item=d))
 
+			if d.is_fixed_asset and flt(d.landed_cost_voucher_amount):
+				asset_account = (get_asset_category_account(d.asset, 'fixed_asset_account',
+					company = self.company) if cwip_disabled else cwip_account)
+
+				gl_entries.append(self.get_gl_dict({
+					"account": expenses_included_in_valuation,
+					"against": asset_account,
+					"cost_center": d.cost_center,
+					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+					"credit": flt(d.landed_cost_voucher_amount),
+					"project": d.project
+				}, item=d))
+
+				gl_entries.append(self.get_gl_dict({
+					"account": asset_account,
+					"against": expenses_included_in_valuation,
+					"cost_center": d.cost_center,
+					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+					"debit": flt(d.landed_cost_voucher_amount),
+					"project": d.project
+				}, item=d))
+
+				if d.asset:
+					doc = frappe.get_doc("Asset", d.asset)
+					frappe.db.set_value("Asset", d.asset, "gross_purchase_amount",
+						doc.gross_purchase_amount + flt(d.landed_cost_voucher_amount))
+
+					frappe.db.set_value("Asset", d.asset, "purchase_receipt_amount",
+						doc.purchase_receipt_amount + flt(d.landed_cost_voucher_amount))
+
 		return gl_entries
 
 	def update_status(self, status):
@@ -386,16 +427,6 @@ class PurchaseReceipt(BuyingController):
 			pr_doc.update_billing_percentage(update_modified=update_modified)
 
 		self.load_from_db()
-
-	def make_return_invoice(self):
-		return_invoice = make_purchase_invoice(self.name)
-		return_invoice.is_return = True
-		return_invoice.save()
-		return_invoice.submit()
-
-		debit_note_link = frappe.utils.get_link_to_form('Purchase Invoice', return_invoice.name)
-
-		frappe.msgprint(_("Debit Note {0} has been created automatically").format(debit_note_link))
 
 def update_billed_amount_based_on_po(po_detail, update_modified=True):
 	# Billed against Sales Order directly
@@ -471,7 +502,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 		"Purchase Receipt": {
 			"doctype": "Purchase Invoice",
 			"field_map": {
-				"supplier_warehouse":"supplier_warehouse"
+				"supplier_warehouse":"supplier_warehouse",
+				"is_return": "is_return"
 			},
 			"validation": {
 				"docstatus": ["=", 1],
@@ -554,3 +586,30 @@ def make_stock_entry(source_name,target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+def get_item_account_wise_additional_cost(purchase_document):
+	landed_cost_voucher = frappe.get_value("Landed Cost Purchase Receipt",
+		{"receipt_document": purchase_document}, "parent")
+
+	if not landed_cost_voucher:
+		return
+
+	total_item_cost = 0
+	item_account_wise_cost = {}
+	landed_cost_voucher_doc = frappe.get_doc("Landed Cost Voucher", landed_cost_voucher)
+	based_on_field = frappe.scrub(landed_cost_voucher_doc.distribute_charges_based_on)
+
+	for item in landed_cost_voucher_doc.items:
+		if item.receipt_document == purchase_document:
+			total_item_cost += item.get(based_on_field)
+
+	for item in landed_cost_voucher_doc.items:
+		if item.receipt_document == purchase_document:
+			for account in landed_cost_voucher_doc.taxes:
+				item_account_wise_cost.setdefault((item.item_code, item.purchase_receipt_item), {})
+				item_account_wise_cost[(item.item_code, item.purchase_receipt_item)].setdefault(account.expense_account, 0.0)
+				item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][account.expense_account] += \
+					account.amount * item.get(based_on_field) / total_item_cost
+
+	return item_account_wise_cost
+

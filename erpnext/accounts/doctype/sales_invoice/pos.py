@@ -41,6 +41,8 @@ def get_pos_data():
 	items_list = get_items_list(pos_profile, doc.company)
 	customers = get_customers_list(pos_profile)
 
+	doc.plc_conversion_rate = update_plc_conversion_rate(doc, pos_profile)
+
 	return {
 		'doc': doc,
 		'default_customer': pos_profile.get('customer'),
@@ -53,7 +55,7 @@ def get_pos_data():
 		'batch_no_data': get_batch_no_data(),
 		'barcode_data': get_barcode_data(items_list),
 		'tax_data': get_item_tax_data(),
-		'price_list_data': get_price_list_data(doc.selling_price_list),
+		'price_list_data': get_price_list_data(doc.selling_price_list, doc.plc_conversion_rate),
 		'customer_wise_price_list': get_customer_wise_price_list(),
 		'bin_data': get_bin_data(pos_profile),
 		'pricing_rules': get_pricing_rule_data(doc),
@@ -62,6 +64,15 @@ def get_pos_data():
 		'meta': get_meta()
 	}
 
+def update_plc_conversion_rate(doc, pos_profile):
+	conversion_rate = 1.0
+
+	price_list_currency = frappe.get_cached_value("Price List", doc.selling_price_list, "currency")
+	if pos_profile.get("currency") != price_list_currency:
+		conversion_rate = get_exchange_rate(price_list_currency,
+			pos_profile.get("currency"), nowdate(), args="for_selling") or 1.0
+
+	return conversion_rate
 
 def get_meta():
 	doctype_meta = {
@@ -227,7 +238,7 @@ def get_contacts(customers):
 		customers = [frappe._dict({'name': customers})]
 
 	for data in customers:
-		contact = frappe.db.sql(""" select email_id, phone from `tabContact`
+		contact = frappe.db.sql(""" select email_id, phone, mobile_no from `tabContact`
 			where is_primary_contact=1 and name in
 			(select parent from `tabDynamic Link` where link_doctype = 'Customer' and link_name = %s
 			and parenttype = 'Contact')""", data.name, as_dict=1)
@@ -317,14 +328,14 @@ def get_item_tax_data():
 	return itemwise_tax
 
 
-def get_price_list_data(selling_price_list):
+def get_price_list_data(selling_price_list, conversion_rate):
 	itemwise_price_list = {}
 	price_lists = frappe.db.sql("""Select ifnull(price_list_rate, 0) as price_list_rate,
 		item_code from `tabItem Price` ip where price_list = %(price_list)s""",
         {'price_list': selling_price_list}, as_dict=1)
 
 	for item in price_lists:
-		itemwise_price_list[item.item_code] = item.price_list_rate
+		itemwise_price_list[item.item_code] = item.price_list_rate * conversion_rate
 
 	return itemwise_price_list
 
@@ -391,14 +402,21 @@ def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
 	for docs in doc_list:
 		for name, doc in iteritems(docs):
 			if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
-				validate_records(doc)
-				si_doc = frappe.new_doc('Sales Invoice')
-				si_doc.offline_pos_name = name
-				si_doc.update(doc)
-				si_doc.set_posting_time = 1
-				si_doc.customer = get_customer_id(doc)
-				si_doc.due_date = doc.get('posting_date')
-				name_list = submit_invoice(si_doc, name, doc, name_list)
+				if isinstance(doc, dict):
+					validate_records(doc)
+					si_doc = frappe.new_doc('Sales Invoice')
+					si_doc.offline_pos_name = name
+					si_doc.update(doc)
+					si_doc.set_posting_time = 1
+					si_doc.customer = get_customer_id(doc)
+					si_doc.due_date = doc.get('posting_date')
+					name_list = submit_invoice(si_doc, name, doc, name_list)
+				else:
+					doc.due_date = doc.get('posting_date')
+					doc.customer = get_customer_id(doc)
+					doc.set_posting_time = 1
+					doc.offline_pos_name = name
+					name_list = submit_invoice(doc, name, doc, name_list)
 			else:
 				name_list.append(name)
 

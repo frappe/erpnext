@@ -195,6 +195,7 @@ class ProductionPlan(Document):
 		for data in self.po_items:
 			if data.name == production_plan_item:
 				data.produced_qty = produced_qty
+				data.pending_qty = data.planned_qty - data.produced_qty
 				data.db_update()
 
 		self.calculate_total_produced_qty()
@@ -301,7 +302,6 @@ class ProductionPlan(Document):
 				wo_list.extend(work_orders)
 
 		frappe.flags.mute_messages = False
-
 		if wo_list:
 			wo_list = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
 				(p, p) for p in wo_list]
@@ -309,15 +309,16 @@ class ProductionPlan(Document):
 		else :
 			msgprint(_("No Work Orders created"))
 
+
 	def make_work_order_for_sub_assembly_items(self, item):
 		work_orders = []
 		bom_data = {}
 
-		get_sub_assembly_items(item.get("bom_no"), bom_data)
+		get_sub_assembly_items(item.get("bom_no"), bom_data, item.get("qty"))
 
 		for key, data in bom_data.items():
 			data.update({
-				'qty': data.get("stock_qty") * item.get("qty"),
+				'qty': data.get("stock_qty"),
 				'production_plan': self.name,
 				'company': self.company,
 				'fg_warehouse': item.get("fg_warehouse"),
@@ -557,7 +558,7 @@ def get_sales_orders(self):
 		item_filter += " and so_item.item_code = %(item)s"
 
 	open_so = frappe.db.sql("""
-		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
+		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total as grand_total
 		from `tabSales Order` so, `tabSales Order Item` so_item
 		where so_item.parent = so.name
 			and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
@@ -621,7 +622,7 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 	for data in po_items:
 		planned_qty = data.get('required_qty') or data.get('planned_qty')
 		ignore_existing_ordered_qty = data.get('ignore_existing_ordered_qty') or ignore_existing_ordered_qty
-		warehouse = data.get("warehouse") or warehouse
+		warehouse = warehouse or data.get("warehouse")
 
 		item_details = {}
 		if data.get("bom") or data.get("bom_no"):
@@ -708,7 +709,7 @@ def get_item_data(item_code):
 		"description": item_details.get("description")
 	}
 
-def get_sub_assembly_items(bom_no, bom_data):
+def get_sub_assembly_items(bom_no, bom_data, qty):
 	data = get_children('BOM', parent = bom_no)
 	for d in data:
 		if d.expandable:
@@ -725,6 +726,6 @@ def get_sub_assembly_items(bom_no, bom_data):
 				})
 
 			bom_item = bom_data.get(key)
-			bom_item["stock_qty"] += d.stock_qty
+			bom_item["stock_qty"] += ((d.stock_qty * qty) / d.parent_bom_qty)
 
-			get_sub_assembly_items(bom_item.get("bom_no"), bom_data)
+			get_sub_assembly_items(bom_item.get("bom_no"), bom_data, bom_item["stock_qty"])

@@ -241,7 +241,9 @@ class StockEntry(StockController):
 
 		for d in self.get("items"):
 			if not d.expense_account:
-				frappe.throw(_("Please enter Difference Account"))
+				frappe.throw(_("Please enter <b>Difference Account</b> or set default <b>Stock Adjustment Account</b> for company {0}")
+					.format(frappe.bold(self.company)))
+
 			elif self.is_opening == "Yes" and frappe.db.get_value("Account", d.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(_("Difference Account must be a Asset/Liability type account, since this Stock Entry is an Opening Entry"), OpeningEntryAccountError)
 
@@ -254,7 +256,7 @@ class StockEntry(StockController):
 		target_mandatory = ["Material Receipt", "Material Transfer", "Send to Subcontractor",
 			"Material Transfer for Manufacture", "Send to Warehouse", "Receive at Warehouse"]
 
-		validate_for_manufacture_repack = any([d.bom_no for d in self.get("items")])
+		validate_for_manufacture = any([d.bom_no for d in self.get("items")])
 
 		if self.purpose in source_mandatory and self.purpose not in target_mandatory:
 			self.to_warehouse = None
@@ -285,8 +287,8 @@ class StockEntry(StockController):
 				else:
 					frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
 
-			if self.purpose in ["Manufacture", "Repack"]:
-				if validate_for_manufacture_repack:
+			if self.purpose == "Manufacture":
+				if validate_for_manufacture:
 					if d.bom_no:
 						d.s_warehouse = None
 
@@ -328,6 +330,10 @@ class StockEntry(StockController):
 			completed_qty = d.completed_qty + (allowance_percentage/100 * d.completed_qty)
 			if total_completed_qty > flt(completed_qty):
 				job_card = frappe.db.get_value('Job Card', {'operation_id': d.name}, 'name')
+				if not job_card:
+					frappe.throw(_("Work Order {0}: Job Card not found for the operation {1}")
+						.format(self.work_order, d.operation))
+
 				work_order_link = frappe.utils.get_link_to_form('Work Order', self.work_order)
 				job_card_link = frappe.utils.get_link_to_form('Job Card', job_card)
 				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}.")
@@ -540,6 +546,21 @@ class StockEntry(StockController):
 				total_allowed = required_qty + (required_qty * (qty_allowance/100))
 
 				if not required_qty:
+					bom_no = frappe.db.get_value("Purchase Order Item",
+						{"parent": self.purchase_order, "item_code": se_item.subcontracted_item},
+						"bom")
+
+					allow_alternative_item = frappe.get_value("BOM", bom_no, "allow_alternative_item")
+
+					if allow_alternative_item:
+						original_item_code = frappe.get_value("Item Alternative", {"alternative_item_code": item_code}, "item_code")
+
+						required_qty = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
+							if d.rm_item_code == original_item_code])
+
+						total_allowed = required_qty + (required_qty * (qty_allowance/100))
+
+				if not required_qty:
 					frappe.throw(_("Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1}")
 						.format(se_item.item_code, self.purchase_order))
 				total_supplied = frappe.db.sql("""select sum(transfer_qty)
@@ -623,28 +644,37 @@ class StockEntry(StockController):
 		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No')
 
 	def get_gl_entries(self, warehouse_account):
-		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
-
 		gl_entries = super(StockEntry, self).get_gl_entries(warehouse_account)
 
-		for d in self.get("items"):
-			additional_cost = flt(d.additional_cost, d.precision("additional_cost"))
-			if additional_cost:
-				gl_entries.append(self.get_gl_dict({
-					"account": expenses_included_in_valuation,
-					"against": d.expense_account,
-					"cost_center": d.cost_center,
-					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-					"credit": additional_cost
-				}, item=d))
+		total_basic_amount = sum([flt(t.basic_amount) for t in self.get("items") if t.t_warehouse])
+		item_account_wise_additional_cost = {}
 
-				gl_entries.append(self.get_gl_dict({
-					"account": d.expense_account,
-					"against": expenses_included_in_valuation,
-					"cost_center": d.cost_center,
-					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-					"credit": -1 * additional_cost # put it as negative credit instead of debit purposefully
-				}, item=d))
+		for t in self.get("additional_costs"):
+			for d in self.get("items"):
+				if d.t_warehouse:
+					item_account_wise_additional_cost.setdefault((d.item_code, d.name), {})
+					item_account_wise_additional_cost[(d.item_code, d.name)].setdefault(t.expense_account, 0.0)
+					item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account] += \
+						(t.amount * d.basic_amount) / total_basic_amount
+
+		if item_account_wise_additional_cost:
+			for d in self.get("items"):
+				for account, amount in iteritems(item_account_wise_additional_cost.get((d.item_code, d.name), {})):
+					gl_entries.append(self.get_gl_dict({
+						"account": account,
+						"against": d.expense_account,
+						"cost_center": d.cost_center,
+						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+						"credit": amount
+					}, item=d))
+
+					gl_entries.append(self.get_gl_dict({
+						"account": d.expense_account,
+						"against": account,
+						"cost_center": d.cost_center,
+						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+						"credit": -1 * amount # put it as negative credit instead of debit purposefully
+					}, item=d))
 
 		return gl_entries
 
@@ -812,7 +842,7 @@ class StockEntry(StockController):
 
 					self.add_to_stock_entry_detail(item_dict)
 
-				if self.purpose != "Send to Subcontractor" and self.purpose == "Manufacture":
+				if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
 					scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
 					for item in itervalues(scrap_item_dict):
 						if self.pro_doc and self.pro_doc.scrap_warehouse:
@@ -1173,7 +1203,7 @@ class StockEntry(StockController):
 		frappe.db.sql("""UPDATE `tabPurchase Order Item Supplied` pos
 			SET pos.supplied_qty = (SELECT ifnull(sum(transfer_qty), 0) FROM `tabStock Entry Detail` sed
 			WHERE pos.name = sed.po_detail and sed.docstatus = 1)
-			WHERE pos.docstatus = 1""")
+			WHERE pos.docstatus = 1 and pos.parent = %s""", self.purchase_order)
 
 		#Update reserved sub contracted quantity in bin based on Supplied Item Details and
 		for d in self.get("items"):
@@ -1328,7 +1358,7 @@ def make_stock_in_entry(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
-def get_work_order_details(work_order):
+def get_work_order_details(work_order, company):
 	work_order = frappe.get_doc("Work Order", work_order)
 	pending_qty_to_produce = flt(work_order.qty) - flt(work_order.produced_qty)
 
@@ -1339,14 +1369,17 @@ def get_work_order_details(work_order):
 		"wip_warehouse": work_order.wip_warehouse,
 		"fg_warehouse": work_order.fg_warehouse,
 		"fg_completed_qty": pending_qty_to_produce,
-		"additional_costs": get_additional_costs(work_order, fg_qty=pending_qty_to_produce)
+		"additional_costs": get_additional_costs(work_order, fg_qty=pending_qty_to_produce, company=company)
 	}
 
-def get_additional_costs(work_order=None, bom_no=None, fg_qty=None):
+def get_additional_costs(work_order=None, bom_no=None, fg_qty=None, company=None):
 	additional_costs = []
 	operating_cost_per_unit = get_operating_cost_per_unit(work_order, bom_no)
+	expenses_included_in_valuation = frappe.get_cached_value("Company", company, "expenses_included_in_valuation")
+
 	if operating_cost_per_unit:
 		additional_costs.append({
+			"expense_account": expenses_included_in_valuation,
 			"description": "Operating Cost as per Work Order / BOM",
 			"amount": operating_cost_per_unit * flt(fg_qty)
 		})
@@ -1356,6 +1389,7 @@ def get_additional_costs(work_order=None, bom_no=None, fg_qty=None):
 			flt(work_order.additional_operating_cost) / flt(work_order.qty)
 
 		additional_costs.append({
+			"expense_account": expenses_included_in_valuation,
 			"description": "Additional Operating Cost",
 			"amount": additional_operating_cost_per_unit * flt(fg_qty)
 		})

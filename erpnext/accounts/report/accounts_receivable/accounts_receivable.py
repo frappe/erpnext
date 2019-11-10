@@ -59,7 +59,6 @@ class ReceivablePayableReport(object):
 		self.invoices = set()
 
 	def get_data(self):
-		t1 = now()
 		self.get_gl_entries()
 		self.voucher_balance = OrderedDict()
 		self.init_voucher_balance() # invoiced, paid, credit_note, outstanding
@@ -72,6 +71,9 @@ class ReceivablePayableReport(object):
 
 		# fetch future payments against invoices
 		self.get_future_payments()
+
+		# Get return entries
+		self.get_return_entries()
 
 		self.data = []
 		for gle in self.gl_entries:
@@ -91,6 +93,7 @@ class ReceivablePayableReport(object):
 					party = gle.party,
 					posting_date = gle.posting_date,
 					remarks = gle.remarks,
+					account_currency = gle.account_currency,
 					invoiced = 0.0,
 					paid = 0.0,
 					credit_note = 0.0,
@@ -106,7 +109,6 @@ class ReceivablePayableReport(object):
 		# get the row where this balance needs to be updated
 		# if its a payment, it will return the linked invoice or will be considered as advance
 		row = self.get_voucher_balance(gle)
-
 		# gle_balance will be the total "debit - credit" for receivable type reports and
 		# and vice-versa for payable type reports
 		gle_balance = self.get_gle_balance(gle)
@@ -131,7 +133,18 @@ class ReceivablePayableReport(object):
 
 		if gle.against_voucher:
 			# find invoice
-			voucher_balance = self.voucher_balance.get((gle.against_voucher_type, gle.against_voucher, gle.party))
+			against_voucher = gle.against_voucher
+
+			# If payment is made against credit note
+			# and credit note is made against a Sales Invoice
+			# then consider the payment against original sales invoice.
+			if gle.against_voucher_type in ('Sales Invoice', 'Purchase Invoice'):
+				if gle.against_voucher in self.return_entries:
+					return_against = self.return_entries.get(gle.against_voucher)
+					if return_against:
+						against_voucher = return_against
+
+			voucher_balance = self.voucher_balance.get((gle.against_voucher_type, against_voucher, gle.party))
 
 		if not voucher_balance:
 			# no invoice, this is an invoice / stand-alone payment / credit note
@@ -258,7 +271,6 @@ class ReceivablePayableReport(object):
 		# customer / supplier name
 		party_details = self.get_party_details(row.party)
 		row.update(party_details)
-
 		if self.filters.get(scrub(self.filters.party_type)):
 			row.currency = row.account_currency
 		else:
@@ -365,7 +377,7 @@ class ReceivablePayableReport(object):
 			on
 				(ref.parent = payment_entry.name)
 			where
-				payment_entry.docstatus = 1
+				payment_entry.docstatus < 2
 				and payment_entry.posting_date > %s
 				and payment_entry.party_type = %s
 			""", (self.filters.report_date, self.party_type), as_dict=1)
@@ -390,7 +402,7 @@ class ReceivablePayableReport(object):
 			on
 				(jea.parent = je.name)
 			where
-				je.docstatus = 1
+				je.docstatus < 2
 				and je.posting_date > %s
 				and jea.party_type = %s
 				and jea.reference_name is not null and jea.reference_name != ''
@@ -423,6 +435,19 @@ class ReceivablePayableReport(object):
 		if row.future_ref:
 			row.future_ref = ', '.join(row.future_ref)
 
+	def get_return_entries(self):
+		doctype = "Sales Invoice" if self.party_type == "Customer" else "Purchase Invoice"
+		filters={
+			'is_return': 1,
+			'docstatus': 1
+		}
+		party_field = scrub(self.filters.party_type)
+		if self.filters.get(party_field):
+			filters.update({party_field: self.filters.get(party_field)})
+		self.return_entries = frappe._dict(
+			frappe.get_all(doctype, filters, ['name', 'return_against'], as_list=1)
+		)
+
 	def set_ageing(self, row):
 		if self.filters.ageing_based_on == "Due Date":
 			entry_date = row.due_date
@@ -446,6 +471,10 @@ class ReceivablePayableReport(object):
 
 		row.age = (getdate(self.age_as_on) - getdate(entry_date)).days or 0
 		index = None
+
+		if not (self.filters.range1 and self.filters.range2 and self.filters.range3 and self.filters.range4):
+			self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4 = 30, 60, 90, 120
+
 		for i, days in enumerate([self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4]):
 			if row.age <= days:
 				index = i
@@ -685,11 +714,11 @@ class ReceivablePayableReport(object):
 	def get_chart_data(self):
 		rows = []
 		for row in self.data:
-			rows.append(
-				{
-					'values': [row.range1, row.range2, row.range3, row.range4, row.range5]
-				}
-			)
+			values = [row.range1, row.range2, row.range3, row.range4, row.range5]
+			precision = cint(frappe.db.get_default("float_precision")) or 2
+			rows.append({
+				'values': [flt(val, precision) for val in values]
+			})
 
 		self.chart = {
 			"data": {

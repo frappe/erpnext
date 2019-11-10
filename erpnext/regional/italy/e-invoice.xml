@@ -1,5 +1,11 @@
-{%- macro format_float(value) -%}
+{%- macro format_float(value, precision=2) -%}
+{%- if frappe.utils.cint(precision) == 3 %}
+{{ "%.3f" % value|abs }}
+{%- elif frappe.utils.cint(precision) == 4 -%}
+{{ "%.4f" % value|abs }}
+{%- else -%}
 {{ "%.2f" % value|abs }}
+{%- endif %}
 {%- endmacro -%}
 
 {%- macro render_address(address) %}
@@ -13,7 +19,7 @@
 {%- endmacro %}
 
 {%- macro render_discount_or_margin(item) -%}
-{%- if item.discount_percentage > 0.0 or item.margin_type %}
+{%- if (item.discount_percentage and item.discount_percentage > 0.0) or item.margin_type %}
 <ScontoMaggiorazione>
   {%- if item.discount_percentage > 0.0 %}
   <Tipo>SC</Tipo>
@@ -182,10 +188,10 @@
         <Descrizione>{{ html2text(item.description or '') or item.item_name }}</Descrizione>
         <Quantita>{{ format_float(item.qty) }}</Quantita>
         <UnitaMisura>{{ item.stock_uom }}</UnitaMisura>
-        <PrezzoUnitario>{{ format_float(item.price_list_rate or item.rate) }}</PrezzoUnitario>
+        <PrezzoUnitario>{{ format_float(item.price_list_rate or item.rate, item_meta.get_field("rate").precision) }}</PrezzoUnitario>
         {{ render_discount_or_margin(item) }}
-        <PrezzoTotale>{{ format_float(item.amount) }}</PrezzoTotale>
-        <AliquotaIVA>{{ format_float(item.tax_rate) }}</AliquotaIVA>
+        <PrezzoTotale>{{ format_float(item.amount, item_meta.get_field("amount").precision) }}</PrezzoTotale>
+        <AliquotaIVA>{{ format_float(item.tax_rate, item_meta.get_field("tax_rate").precision) }}</AliquotaIVA>
         {%- if item.tax_exemption_reason %}
         <Natura>{{ item.tax_exemption_reason.split("-")[0] }}</Natura>
         {%- endif %}
@@ -197,8 +203,8 @@
         {%- if data.tax_exemption_reason %}
         <Natura>{{ data.tax_exemption_reason.split("-")[0] }}</Natura>
         {%- endif %}
-        <ImponibileImporto>{{ format_float(data.taxable_amount) }}</ImponibileImporto>
-        <Imposta>{{ format_float(data.tax_amount) }}</Imposta>
+        <ImponibileImporto>{{ format_float(data.taxable_amount, item_meta.get_field("tax_amount").precision) }}</ImponibileImporto>
+        <Imposta>{{ format_float(data.tax_amount, item_meta.get_field("tax_amount").precision) }}</Imposta>
         <EsigibilitaIVA>{{ doc.vat_collectability.split("-")[0] }}</EsigibilitaIVA>
         {%- if data.tax_exemption_law %}
         <RiferimentoNormativo>{{ data.tax_exemption_law }}</RiferimentoNormativo>
