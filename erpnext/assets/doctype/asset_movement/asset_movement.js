@@ -20,7 +20,8 @@ frappe.ui.form.on('Asset Movement', {
 		frm.set_query("reference_name", (doc) => {
 			return {
 				filters: {
-					company: doc.company
+					company: doc.company,
+					docstatus: 1
 				}
 			};
 		})

@@ -63,9 +63,28 @@ class AssetMovement(Document):
 
 	def on_submit(self):
 		self.set_latest_location_in_asset()
+	
+	def before_cancel(self):
+		self.validate_last_movement()
 		
 	def on_cancel(self):
 		self.set_latest_location_in_asset()
+	
+	def validate_last_movement(self):
+		for d in self.assets:
+			movement_entries = frappe.db.sql(
+				"""
+				SELECT asm.name
+				FROM  `tabAsset Movement Item` asm_item, `tabAsset Movement` asm
+				WHERE 
+					asm.docstatus=1 and
+					asm_item.parent=asm.name and
+					asm_item.asset=%s and
+					asm.company=%s
+				""", (d.asset, self.company), as_dict=1)
+			if len(movement_entries) <= 1:
+				frappe.throw(_('{1} Cannot cancel this document as it is the last Asset Movement \
+					Entry for Asset {0}').format(d.asset, len(movement_entries)))
 
 	def set_latest_location_in_asset(self):
 		location, employee = '', ''
@@ -79,17 +98,15 @@ class AssetMovement(Document):
 
 			latest_movement_entry = frappe.db.sql(
 				"""
-				SELECT 
-					`tabAsset Movement Item`.target_location, `tabAsset Movement Item`.to_employee 
-				FROM 
-					`tabAsset Movement Item`, `tabAsset Movement`
+				SELECT asm_item.target_location, asm_item.to_employee 
+				FROM `tabAsset Movement Item` asm_item, `tabAsset Movement` asm
 				WHERE 
-					`tabAsset Movement Item`.parent=`tabAsset Movement`.name and
-					`tabAsset Movement Item`.asset=%(asset)s and
-					`tabAsset Movement`.company=%(company)s and 
-					`tabAsset Movement`.docstatus=1 and {0}
+					asm_item.parent=asm.name and
+					asm_item.asset=%(asset)s and
+					asm.company=%(company)s and 
+					asm.docstatus=1 and {0}
 				ORDER BY
-					`tabAsset Movement`.transaction_date desc limit 1
+					asm.transaction_date desc limit 1
 				""".format(cond), args)
 
 			if latest_movement_entry:

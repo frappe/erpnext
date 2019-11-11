@@ -101,7 +101,7 @@ class BuyingController(StockController):
 				msgprint(_('Tax Category has been changed to "Total" because all the Items are non-stock items'))
 
 	def get_asset_items(self):
-		if self.doctype not in ['Purchase Invoice', 'Purchase Receipt']:
+		if self.doctype not in ['Purchase Order', 'Purchase Invoice', 'Purchase Receipt']:
 			return []
 
 		return [d.item_code for d in self.items if d.is_fixed_asset]
@@ -578,7 +578,6 @@ class BuyingController(StockController):
 	def auto_make_assets(self, asset_items):
 		items_data = get_asset_item_details(asset_items)
 
-		assets = []
 		for d in self.items:
 			if d.is_fixed_asset:
 				item_data = items_data.get(d.item_code)
@@ -589,13 +588,8 @@ class BuyingController(StockController):
 					if item_data.get('asset_naming_series'):
 						for qty in range(cint(d.qty)):
 							asset_name = self.make_asset(d)
-							assets.append({
-								'asset': asset_name,
-								'asset_name': d.item_name,
-								'target_location': d.asset_location
-							})
-						frappe.msgprint(_('{0} Assets Created for {1}').format(cint(d.qty), d.item_code))
-						self.make_asset_movement(assets)
+						is_plural = 's' if cint(d.qty) != 1 else ''
+						frappe.msgprint(_('{0} Asset{2} Created for {1}').format(cint(d.qty), d.item_code, is_plural))
 					else:
 						frappe.throw(_("Asset Naming Series is mandatory for the auto creation for item {0}").format(d.item_code))
 				else:
@@ -609,7 +603,7 @@ class BuyingController(StockController):
 		item_data = frappe.db.get_value('Item',
 			row.item_code, ['asset_naming_series', 'asset_category'], as_dict=1)
 
-		purchase_amount = flt(row.rate + row.item_tax_amount)
+		purchase_amount = flt(row.base_rate + row.item_tax_amount)
 		asset = frappe.get_doc({
 			'doctype': 'Asset',
 			'item_code': row.item_code,
@@ -633,19 +627,6 @@ class BuyingController(StockController):
 		asset.insert()
 
 		return asset.name
-	
-	def make_asset_movement(self, assets):
-		asset_movement = frappe.get_doc({
-			'doctype': 'Asset Movement',
-			'assets': assets,
-			'purpose': 'Receipt',
-			'quantity': cint(len(assets)),
-			'company': self.company,
-			'transaction_date': self.posting_date,
-			'reference_doctype': self.doctype,
-			'reference_name': self.name
-		}).insert()
-		asset_movement.submit()
 
 	def update_fixed_asset(self, field, delete_asset = False):
 		for d in self.get("items"):

@@ -1,11 +1,10 @@
 {
  "allow_import": 1,
- "autoname": "naming_series:",
+ "autoname": "format:ACC-ASM-{YYYY}-{#####}",
  "creation": "2016-04-25 18:00:23.559973",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
   "company",
   "column_break_4",
   "transaction_date",
@@ -79,14 +78,6 @@
    "read_only": 1
   },
   {
-   "default": "ACC-ASM-.YYYY.-",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "options": "ACC-ASM-.YYYY.-",
-   "reqd": 1
-  },
-  {
    "fieldname": "section_break_10",
    "fieldtype": "Section Break"
   },
@@ -103,7 +94,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-11-06 16:02:26.481665",
+ "modified": "2019-11-07 15:33:23.466386",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement",

@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
+import erpnext
 from erpnext.stock.doctype.item.test_item import make_item
 from frappe.utils import now, nowdate, get_last_day, add_days
 from erpnext.assets.doctype.asset.test_asset import create_asset_data
@@ -37,6 +38,8 @@ class TestAssetMovement(unittest.TestCase):
 
 		if asset.docstatus == 0:
 			asset.submit()
+
+		# check asset movement is created
 		if not frappe.db.exists("Location", "Test Location 2"):
 			frappe.get_doc({
 				'doctype': 'Location',
@@ -51,7 +54,7 @@ class TestAssetMovement(unittest.TestCase):
 			assets = [{ 'asset': asset.name , 'source_location': 'Test Location 2', 'target_location': 'Test Location'}])
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
 
-		employee = make_employee("testassetemp@example.com")
+		employee = make_employee("testassetmovemp@example.com", company="_Test Company")
 		movement3 = create_asset_movement(purpose = 'Transfer', company = asset.company, 
 			assets = [{ 'asset': asset.name , 'source_location': 'Test Location', 'to_employee': employee}])
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "custodian"), employee)
@@ -60,6 +63,42 @@ class TestAssetMovement(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
 
 		movement2.cancel()
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
+	
+	def test_last_movement_cancellation(self):
+		pr = make_purchase_receipt(item_code="Macbook Pro",
+			qty=1, rate=100000.0, location="Test Location")
+		
+		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
+		asset = frappe.get_doc('Asset', asset_name)
+		asset.calculate_depreciation = 1
+		asset.available_for_use_date = '2020-06-06'
+		asset.purchase_date = '2020-06-06'
+		asset.append("finance_books", {
+			"expected_value_after_useful_life": 10000,
+			"next_depreciation_date": "2020-12-31",
+			"depreciation_method": "Straight Line",
+			"total_number_of_depreciations": 3,
+			"frequency_of_depreciation": 10,
+			"depreciation_start_date": "2020-06-06"
+		})
+		if asset.docstatus == 0:
+			asset.submit()
+		
+		if not frappe.db.exists("Location", "Test Location 2"):
+			frappe.get_doc({
+				'doctype': 'Location',
+				'location_name': 'Test Location 2'
+			}).insert()
+		
+		movement = frappe.get_doc({'doctype': 'Asset Movement', 'reference_name': pr.name })
+		self.assertRaises(frappe.ValidationError, movement.cancel)
+
+		movement1 = create_asset_movement(purpose = 'Transfer', company = asset.company, 
+			assets = [{ 'asset': asset.name , 'source_location': 'Test Location', 'target_location': 'Test Location 2'}])
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location 2")
+
+		movement1.cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
 
 def create_asset_movement(**args):
