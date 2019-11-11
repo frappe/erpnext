@@ -25,7 +25,7 @@ frappe.ui.form.on("Delivery Note", {
 
 	set_accounts_to_skip: function(frm) {
 
-		if (! frm.doc.place_of_supply) {
+		if (!frm.doc.place_of_supply || (!frm.doc.company_gstin)) {
 			return;
 		}
 

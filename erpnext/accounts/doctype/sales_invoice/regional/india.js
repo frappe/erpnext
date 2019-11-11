@@ -62,12 +62,20 @@ frappe.ui.form.on("Sales Invoice", {
 
 	set_accounts_to_skip: function(frm) {
 
-		if (! frm.doc.place_of_supply) {
+		let intra_state_gst_accounts = frm.doc.gst_accounts['cgst_account'].concat(frm.doc.gst_accounts['sgst_account']);
+		let inter_state_gst_accounts = frm.doc.gst_accounts['igst_account'];
+
+		if (frm.doc.gst_category == 'SEZ' && frm.doc.export_type == 'Without Payment of Tax') {
+			frm.doc.accounts_to_skip = JSON.stringify(intra_state_gst_accounts.concat(inter_state_gst_accounts));
+			return;
+		} else if (frm.doc.gst_category == 'SEZ' && frm.doc.export_type == 'With Payment of Tax') {
+			frm.doc.accounts_to_skip = JSON.stringify(intra_state_gst_accounts);
 			return;
 		}
 
-		let intra_state_gst_accounts = frm.doc.gst_accounts['cgst_account'].concat(frm.doc.gst_accounts['sgst_account']);
-		let inter_state_gst_accounts = frm.doc.gst_accounts['igst_account'];
+		if (!frm.doc.place_of_supply || (!frm.doc.company_gstin)) {
+			return;
+		}
 
 		if (frm.doc.company_gstin
 			&& (frm.doc.place_of_supply.substring(0, 2) != frm.doc.company_gstin.substring(0, 2))) {
@@ -75,6 +83,7 @@ frappe.ui.form.on("Sales Invoice", {
 		} else {
 			frm.doc.accounts_to_skip = JSON.stringify(inter_state_gst_accounts);
 		}
+
 	}
 });
 
