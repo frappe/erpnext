@@ -173,8 +173,10 @@ frappe.ui.form.on('Pick List Item', {
 });
 
 function get_item_details(item_code, uom=null) {
-	return frappe.xcall('erpnext.stock.doctype.pick_list.pick_list.get_item_details', {
-		item_code,
-		uom
-	});
+	if (item_code) {
+		return frappe.xcall('erpnext.stock.doctype.pick_list.pick_list.get_item_details', {
+			item_code,
+			uom
+		});
+	}
 }
