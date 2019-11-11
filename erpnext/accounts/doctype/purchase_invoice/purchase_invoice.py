@@ -97,7 +97,6 @@ class PurchaseInvoice(BuyingController):
 		self.set_against_expense_account()
 		self.validate_write_off_account()
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount", "items")
-		self.validate_fixed_asset()
 		self.create_remarks()
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
@@ -499,7 +498,7 @@ class PurchaseInvoice(BuyingController):
 						}, account_currency, item=item))
 					
 					# If asset is bought through this document and not linked to PR
-					if self.update_stock:
+					if self.update_stock and item.landed_cost_voucher_amount:
 						expenses_included_in_asset_valuation = self.get_company_default("expenses_included_in_asset_valuation")
 						# Amount added through landed-cost-voucher
 						gl_entries.append(self.get_gl_dict({
@@ -525,7 +524,6 @@ class PurchaseInvoice(BuyingController):
 							filters={ 'purchase_invoice': self.name, 'item_code': item.item_code }
 						)
 						for asset in assets:
-							doc = frappe.get_doc("Asset", asset.name)
 							frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
 							frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate))
 
@@ -642,7 +640,6 @@ class PurchaseInvoice(BuyingController):
 							filters={ 'purchase_invoice': self.name, 'item_code': item.item_code }
 						)
 						for asset in assets:
-							doc = frappe.get_doc("Asset", asset.name)
 							frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
 							frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate))
 
