@@ -343,8 +343,6 @@ class PurchaseReceipt(BuyingController):
 					# update assets gross amount by its valuation rate
 					# valuation rate is total of net rate, raw mat supp cost, tax amount, lcv amount per item
 					self.update_assets(item, item.valuation_rate)
-
-		return gl_entries
 	
 	def add_asset_gl_entries(self, item, gl_entries):
 		arbnb_account = self.get_company_default("asset_received_but_not_billed")
@@ -378,8 +376,6 @@ class PurchaseReceipt(BuyingController):
 				if asset_rbnb_currency == self.company_currency else asset_amount)
 		}, item=item))
 	
-		return gl_entries
-	
 	def add_lcv_gl_entries(self, item, gl_entries):
 		expenses_included_in_asset_valuation = self.get_company_default("expenses_included_in_asset_valuation")
 		if is_cwip_accounting_disabled():
@@ -407,15 +403,12 @@ class PurchaseReceipt(BuyingController):
 			"project": item.project
 		}, item=item))
 
-		return gl_entries
-
 	def update_assets(self, item, valuation_rate):
 		assets = frappe.db.get_all('Asset', 
 			filters={ 'purchase_receipt': self.name, 'item_code': item.item_code }
 		)
 
 		for asset in assets:
-			doc = frappe.get_doc("Asset", asset.name)
 			frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(valuation_rate))
 			frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(valuation_rate))
 
