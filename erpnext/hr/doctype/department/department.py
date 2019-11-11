@@ -23,13 +23,6 @@ class Department(NestedSet):
 			if root:
 				self.parent_department = root
 
-	def before_rename(self, old, new, merge=False):
-		# renaming consistency with abbreviation
-		if not frappe.get_cached_value('Company',  self.company,  'abbr') in new:
-			new = get_abbreviated_name(new, self.company)
-
-		return new
-
 	def on_update(self):
 		NestedSet.on_update(self)
 
