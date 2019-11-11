@@ -107,7 +107,12 @@ def make_custom_fields(update=True):
 		dict(fieldname='gst_category', label='GST Category',
 			fieldtype='Select', insert_after='gst_section', print_hide=1,
 			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nUIN Holders',
-			fetch_from='supplier.gst_category', fetch_if_empty=1)
+			fetch_from='supplier.gst_category', fetch_if_empty=1),
+		dict(fieldname='export_type', label='Export Type',
+			fieldtype='Select', insert_after='gst_category', print_hide=1,
+			depends_on='eval:in_list(["SEZ", "Overseas"], doc.gst_category)',
+			options='\nWith Payment of Tax\nWithout Payment of Tax', fetch_from='supplier.export_type',
+			fetch_if_empty=1),
 	]
 
 	sales_invoice_gst_category = [
@@ -116,20 +121,21 @@ def make_custom_fields(update=True):
 		dict(fieldname='gst_category', label='GST Category',
 			fieldtype='Select', insert_after='gst_section', print_hide=1,
 			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
-			fetch_from='customer.gst_category', fetch_if_empty=1)
+			fetch_from='customer.gst_category', fetch_if_empty=1),
+		dict(fieldname='export_type', label='Export Type',
+			fieldtype='Select', insert_after='gst_category', print_hide=1,
+			depends_on='eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
+			options='\nWith Payment of Tax\nWithout Payment of Tax', fetch_from='customer.export_type',
+			fetch_if_empty=1),
 	]
 
 	invoice_gst_fields = [
 		dict(fieldname='invoice_copy', label='Invoice Copy',
-			fieldtype='Select', insert_after='gst_category', print_hide=1, allow_on_submit=1,
+			fieldtype='Select', insert_after='export_type', print_hide=1, allow_on_submit=1,
 			options='Original for Recipient\nDuplicate for Transporter\nDuplicate for Supplier\nTriplicate for Supplier'),
 		dict(fieldname='reverse_charge', label='Reverse Charge',
 			fieldtype='Select', insert_after='invoice_copy', print_hide=1,
 			options='Y\nN', default='N'),
-		dict(fieldname='export_type', label='Export Type',
-			fieldtype='Select', insert_after='reverse_charge', print_hide=1,
-			depends_on='eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
-			options='\nWith Payment of Tax\nWithout Payment of Tax'),
 		dict(fieldname='ecommerce_gstin', label='E-commerce GSTIN',
 			fieldtype='Data', insert_after='export_type', print_hide=1),
 		dict(fieldname='gst_col_break', fieldtype='Column Break', insert_after='ecommerce_gstin'),
@@ -459,6 +465,15 @@ def make_custom_fields(update=True):
 				'insert_after': 'gst_transporter_id',
 				'options': 'Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nUIN Holders',
 				'default': 'Unregistered'
+			},
+			{
+				'fieldname': 'export_type',
+				'label': 'Export Type',
+				'fieldtype': 'Select',
+				'insert_after': 'gst_category',
+				'default': 'Without Payment of Tax',
+				'depends_on':'eval:in_list(["SEZ", "Overseas"], doc.gst_category)',
+				'options': '\nWith Payment of Tax\nWithout Payment of Tax'
 			}
 		],
 		'Customer': [
@@ -469,6 +484,15 @@ def make_custom_fields(update=True):
 				'insert_after': 'customer_type',
 				'options': 'Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
 				'default': 'Unregistered'
+			},
+			{
+				'fieldname': 'export_type',
+				'label': 'Export Type',
+				'fieldtype': 'Select',
+				'insert_after': 'gst_category',
+				'default': 'Without Payment of Tax',
+				'depends_on':'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
+				'options': '\nWith Payment of Tax\nWithout Payment of Tax'
 			}
 		]
 	}

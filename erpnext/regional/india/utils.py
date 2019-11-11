@@ -53,10 +53,6 @@ def update_gst_category(doc, method):
 				frappe.db.sql("""
 					UPDATE `tab{0}` SET gst_category = %s WHERE name = %s AND gst_category = 'Unregistered'
 				""".format(link.link_doctype), ("Registered Regular", link.link_name)) #nosec
-			else:
-				frappe.db.sql("""
-					UPDATE `tab{0}` SET gst_category = %s WHERE name = %s AND gst_category = 'Registered Regular'
-				""".format(link.link_doctype), ("Unregistered", link.link_name)) #nosec
 
 def set_gst_state_and_state_number(doc):
 	if not doc.gst_state:
@@ -150,16 +146,29 @@ def get_place_of_supply(out, doctype):
 def get_regional_address_details(out, doctype, company):
 	out.place_of_supply = get_place_of_supply(out, doctype)
 
-	if not out.place_of_supply: return
-
 	if doctype in ("Sales Invoice", "Delivery Note"):
 		master_doctype = "Sales Taxes and Charges Template"
+
+		gst_category = get_tax_template_for_sez(out, master_doctype, company, 'Customer')
+
+		if gst_category == 'SEZ':
+			return
+
 		if not out.company_gstin:
 			return
+
 	elif doctype == "Purchase Invoice":
 		master_doctype = "Purchase Taxes and Charges Template"
+
+		get_tax_template_for_sez(out, master_doctype, company, 'Supplier')
+
+		if gst_category == 'SEZ':
+			return
+
 		if not out.supplier_gstin:
 			return
+
+	if not out.place_of_supply: return
 
 	if ((doctype in ("Sales Invoice", "Delivery Note") and out.company_gstin
 		and out.company_gstin[:2] != out.place_of_supply[:2]) or (doctype == "Purchase Invoice"
@@ -172,6 +181,18 @@ def get_regional_address_details(out, doctype, company):
 		return
 	out["taxes_and_charges"] = default_tax
 	out.taxes = get_taxes_and_charges(master_doctype, default_tax)
+
+def get_tax_template_for_sez(out, master_doctype, company, party_type):
+
+	gst_details = frappe.db.get_value(party_type, {'name': out[frappe.scrub(party_type)]},
+			['gst_category', 'export_type'], as_dict=1)
+
+	if gst_details.gst_category == 'SEZ' and gst_details.export_type == 'With Payment of Tax':
+		default_tax = frappe.db.get_value(master_doctype, {"company": company, "is_inter_state":1, "disabled":0})
+		out["taxes_and_charges"] = default_tax
+		out.taxes = get_taxes_and_charges(master_doctype, default_tax)
+
+	return gst_details.gst_category
 
 def calculate_annual_eligible_hra_exemption(doc):
 	basic_component = frappe.get_cached_value('Company',  doc.company,  "basic_component")
@@ -563,12 +584,22 @@ def validate_state_code(state_code, address):
 
 def set_accounts_to_skip(doc, method=None):
 	gst_accounts = get_gst_accounts(doc.company)
+	inter_state_accounts = gst_accounts['igst_account']
+	intra_state_accounts = gst_accounts['cgst_account'] + gst_accounts['sgst_account']
+
+	if doc.gst_category == 'SEZ' and doc.export_type == 'With Payment of Tax':
+		doc.accounts_to_skip = intra_state_accounts
+	elif doc.gst_category == 'SEZ' and doc.export_type == 'Without Payment of Tax':
+		doc.accounts_to_skip = intra_state_accounts + inter_state_accounts
 
 	if not gst_accounts or not doc.get('place_of_supply'):
 		return
 
-	inter_state_accounts = gst_accounts['igst_account']
-	intra_state_accounts = gst_accounts['cgst_account'] + gst_accounts['sgst_account']
+	if (doc.doctype in ("Sales Invoice", "Delivery") and not doc.get('company_gstin')):
+		return
+
+	if (doc.doctype == "Purchase Invoice" and not doc.get('supplier_gstin')):
+		return
 
 	if ((doc.doctype in ("Sales Invoice", "Delivery Note") and doc.get('company_gstin')
 		and doc.company_gstin[:2] != doc.place_of_supply[:2]) or (doc.doctype == "Purchase Invoice"
