@@ -36,7 +36,6 @@ class Asset(AccountsController):
 		self.validate_in_use_date()
 		self.set_status()
 		self.make_asset_movement()
-		self.update_stock_movement()
 		if not self.booked_fixed_asset and not is_cwip_accounting_disabled():
 			self.make_gl_entries()
 
@@ -372,14 +371,6 @@ class Asset(AccountsController):
 			for d in self.get('finance_books'):
 				if d.finance_book == self.default_finance_book:
 					return cint(d.idx) - 1
-
-	def update_stock_movement(self):
-		asset_movement = frappe.db.get_value('Asset Movement',
-			{'reference_name': self.purchase_receipt, 'docstatus': 0 }, 'name')
-
-		if asset_movement:
-			doc = frappe.get_doc('Asset Movement', asset_movement)
-			doc.submit()
 
 	def make_gl_entries(self):
 		gl_entries = []
