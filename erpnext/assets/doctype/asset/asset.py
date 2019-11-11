@@ -35,6 +35,7 @@ class Asset(AccountsController):
 	def on_submit(self):
 		self.validate_in_use_date()
 		self.set_status()
+		self.make_asset_movement()
 		self.update_stock_movement()
 		if not self.booked_fixed_asset and not is_cwip_accounting_disabled():
 			self.make_gl_entries()
@@ -111,6 +112,26 @@ class Asset(AccountsController):
 
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(self.purchase_date):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
+		
+	def make_asset_movement(self):
+		reference_doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'
+		reference_docname = self.purchase_receipt or self.purchase_invoice
+		assets = [{
+			'asset': self.name,
+			'asset_name': self.asset_name,
+			'target_location': self.location,
+			'to_employee': self.custodian
+		}]
+		asset_movement = frappe.get_doc({
+			'doctype': 'Asset Movement',
+			'assets': assets,
+			'purpose': 'Receipt',
+			'company': self.company,
+			'transaction_date': getdate(nowdate()),
+			'reference_doctype': reference_doctype,
+			'reference_name': reference_docname
+		}).insert()
+		asset_movement.submit()
 
 	def set_depreciation_rate(self):
 		for d in self.get("finance_books"):
@@ -354,12 +375,10 @@ class Asset(AccountsController):
 
 	def update_stock_movement(self):
 		asset_movement = frappe.db.get_value('Asset Movement',
-			{'reference_name': self.purchase_receipt, 'docstatus': 0}, 'name')
+			{'reference_name': self.purchase_receipt, 'docstatus': 0 }, 'name')
 
 		if asset_movement:
 			doc = frappe.get_doc('Asset Movement', asset_movement)
-			# should this be hard coded ?
-			doc.naming_series = 'ACC-ASM-.YYYY.-'
 			doc.submit()
 
 	def make_gl_entries(self):
@@ -445,26 +464,6 @@ def make_post_gl_entry():
 def get_asset_naming_series():
 	meta = frappe.get_meta('Asset')
 	return meta.get_field("naming_series").options
-
-@frappe.whitelist()
-def make_purchase_invoice(asset, item_code, gross_purchase_amount, company, posting_date):
-	pi = frappe.new_doc("Purchase Invoice")
-	pi.company = company
-	pi.currency = frappe.get_cached_value('Company',  company,  "default_currency")
-	pi.set_posting_time = 1
-	pi.posting_date = posting_date
-
-	# expense account is dependent on cwip accounting as well as assets which are in use
-	# expense account will be auto fetched when making gl_entries
-	pi.append("items", {
-		"item_code": item_code,
-		"is_fixed_asset": 1,
-		"qty": 1,
-		"price_list_rate": gross_purchase_amount,
-		"rate": gross_purchase_amount
-	})
-	pi.set_missing_values()
-	return pi
 
 @frappe.whitelist()
 def make_sales_invoice(asset, item_code, company, serial_no=None):

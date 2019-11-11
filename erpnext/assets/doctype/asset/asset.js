@@ -41,6 +41,21 @@ frappe.ui.form.on('Asset', {
 		});
 	},
 
+	setup: function(frm) {
+		frm.set_query("purchase_receipt", (doc) => {
+			return {
+				query: "erpnext.controllers.queries.get_purchase_receipts",
+				filters: { item_code: doc.item_code }
+			}
+		});
+		frm.set_query("purchase_invoice", (doc) => {
+			return {
+				query: "erpnext.controllers.queries.get_purchase_invoices",
+				filters: { item_code: doc.item_code }
+			}
+		});
+	},
+
 	refresh: function(frm) {
 		frappe.ui.form.trigger("Asset", "is_existing_asset");
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
@@ -78,11 +93,6 @@ frappe.ui.form.on('Asset', {
 				});
 			}
 
-			if (frm.doc.status=='Submitted' && !frm.doc.is_existing_asset && !frm.doc.purchase_invoice) {
-				frm.add_custom_button(__("Purchase Invoice"), function() {
-					frm.trigger("make_purchase_invoice");
-				}, __('Create'));
-			}
 			if (frm.doc.maintenance_required && !frm.doc.maintenance_schedule) {
 				frm.add_custom_button(__("Asset Maintenance"), function() {
 					frm.trigger("create_asset_maintenance");
@@ -118,18 +128,18 @@ frappe.ui.form.on('Asset', {
 		}
 		else if (frm.doc.purchase_receipt) {
 			// if purchase receipt link is set then set PI disabled
-			frm.set_df_property('purchase_invoice', 'reqd', 0);
+			frm.toggle_reqd('purchase_invoice', 0);
 			frm.set_df_property('purchase_invoice', 'read_only', 1);
 		}
 		else if (frm.doc.purchase_invoice) {
 			// if purchase invoice link is set then set PR disabled
-			frm.set_df_property('purchase_receipt', 'reqd', 0);
+			frm.toggle_reqd('purchase_receipt', 0);
 			frm.set_df_property('purchase_receipt', 'read_only', 1);
 		}
 		else {
-			frm.set_df_property('purchase_receipt', 'reqd', 1);
+			frm.toggle_reqd('purchase_receipt', 1);
 			frm.set_df_property('purchase_receipt', 'read_only', 0);
-			frm.set_df_property('purchase_invoice', 'reqd', 1);
+			frm.toggle_reqd('purchase_invoice', 1);
 			frm.set_df_property('purchase_invoice', 'read_only', 0);
 		}
 	},
@@ -244,23 +254,6 @@ frappe.ui.form.on('Asset', {
 			frm.fields_dict["schedules"].grid.toggle_enable("schedule_date", is_editable);
 			frm.fields_dict["schedules"].grid.toggle_enable("depreciation_amount", is_editable);
 		}
-	},
-
-	make_purchase_invoice: function(frm) {
-		frappe.call({
-			args: {
-				"asset": frm.doc.name,
-				"item_code": frm.doc.item_code,
-				"gross_purchase_amount": frm.doc.gross_purchase_amount,
-				"company": frm.doc.company,
-				"posting_date": frm.doc.purchase_date
-			},
-			method: "erpnext.assets.doctype.asset.asset.make_purchase_invoice",
-			callback: function(r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			}
-		})
 	},
 
 	make_sales_invoice: function(frm) {

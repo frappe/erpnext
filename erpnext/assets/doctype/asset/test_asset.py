@@ -7,7 +7,7 @@ import frappe
 import unittest
 from frappe.utils import cstr, nowdate, getdate, flt, get_last_day, add_days, add_months
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset, restore_asset
-from erpnext.assets.doctype.asset.asset import make_sales_invoice, make_purchase_invoice
+from erpnext.assets.doctype.asset.asset import make_sales_invoice
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice as make_invoice
 
@@ -40,8 +40,7 @@ class TestAsset(unittest.TestCase):
 		})
 		asset.submit()
 
-		pi = make_purchase_invoice(asset.name, asset.item_code, asset.gross_purchase_amount,
-			asset.company, asset.purchase_date)
+		pi = make_invoice(pr.name)
 		pi.supplier = "_Test Supplier"
 		pi.insert()
 		pi.submit()
@@ -489,9 +488,6 @@ class TestAsset(unittest.TestCase):
 		self.assertTrue(asset.finance_books[0].expected_value_after_useful_life >= asset_value_after_full_schedule)
 
 	def test_cwip_accounting(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
-			make_purchase_invoice as make_purchase_invoice_from_pr)
-
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=1, rate=5000, do_not_submit=True, location="Test Location")
 
@@ -526,7 +522,7 @@ class TestAsset(unittest.TestCase):
 
 		self.assertEqual(gle, expected_gle)
 
-		pi = make_purchase_invoice_from_pr(pr.name)
+		pi = make_invoice(pr.name)
 		pi.submit()
 
 		expected_gle = (
