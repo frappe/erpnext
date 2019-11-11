@@ -528,6 +528,7 @@ def get_material_request_items(row, sales_order,
 		required_qty = ceil(required_qty)
 
 	if required_qty > 0:
+		print(row)
 		return {
 			'item_code': row.item_code,
 			'item_name': row.item_name,
@@ -540,7 +541,9 @@ def get_material_request_items(row, sales_order,
 			'projected_qty': bin_dict.get("projected_qty", 0),
 			'min_order_qty': row['min_order_qty'],
 			'material_request_type': row.get("default_material_request_type"),
-			'sales_order': sales_order
+			'sales_order': sales_order,
+			'description': row.get("description"),
+			'uom': row.get("purchase_uom") or row.get("stock_uom")
 		}
 
 def get_sales_orders(self):
