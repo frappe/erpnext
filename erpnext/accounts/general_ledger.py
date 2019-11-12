@@ -148,21 +148,13 @@ def validate_account_for_perpetual_inventory(gl_map):
 						.format(entry.account), StockAccountInvalidTransaction)
 
 def validate_cwip_accounts(gl_map):
-	from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
-	asset_category = None
-	enable_cwip_in_company = cint(frappe.get_cached_value("Company",
+	cwip_enabled = cint(frappe.get_cached_value("Company",
 		gl_map[0].company, "enable_cwip_accounting"))
 
-	if not enable_cwip_in_company:
-		asset_category_list = [x["name"] for x in frappe.db.get_all("Asset Category", "name")]
-		for d in asset_category_list:
-			cwip_enabled = cint(frappe.db.get_value("Asset Category", d, "enable_cwip_accounting"))
-			if cwip_enabled:
-				asset_category = d
-				break
+	if not cwip_enabled:
+		cwip_enabled = any([cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category","enable_cwip_accounting")])
 
-	if is_cwip_accounting_enabled(gl_map[0].company, asset_category) \
-		and gl_map[0].voucher_type == "Journal Entry":
+	if cwip_enabled and gl_map[0].voucher_type == "Journal Entry":
 			cwip_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
 				where account_type = 'Capital Work in Progress' and is_group=0""")]
 

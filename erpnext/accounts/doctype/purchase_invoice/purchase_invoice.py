@@ -411,10 +411,10 @@ class PurchaseInvoice(BuyingController):
 	def check_asset_cwip_enabled(self):
 		# Check if there exists any item with cwip accounting enabled in it's asset category
 		for item in self.get("items"):
-			if item.item_code:
+			if item.item_code and item.is_fixed_asset:
 				asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
-			if item.is_fixed_asset and is_cwip_accounting_enabled(self.company, asset_category):
-				return 1
+				if is_cwip_accounting_enabled(self.company, asset_category):
+					return 1
 		return 0
 
 	def make_supplier_gl_entry(self, gl_entries):
@@ -544,7 +544,7 @@ class PurchaseInvoice(BuyingController):
 
 	def get_asset_gl_entry(self, gl_entries):
 		for item in self.get("items"):
-			if item.item_code:
+			if item.item_code and item.is_fixed_asset :
 				asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
 
 			if item.is_fixed_asset and is_cwip_accounting_enabled(self.company, asset_category) :
