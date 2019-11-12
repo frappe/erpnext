@@ -10,7 +10,7 @@ cache:
 
 addons:
   hosts: test_site
-  mariadb: 10.3
+  mariadb: 10.4
 
 jobs:
   include:
