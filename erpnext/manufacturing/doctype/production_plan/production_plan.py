@@ -162,7 +162,7 @@ class ProductionPlan(Document):
 				'include_exploded_items': 1,
 				'warehouse': data.warehouse,
 				'item_code': data.item_code,
-				'description': data.description,
+				'description': data.description or item_details.description,
 				'stock_uom': item_details and item_details.stock_uom or '',
 				'bom_no': item_details and item_details.bom_no or '',
 				'planned_qty': data.pending_qty,
