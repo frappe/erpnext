@@ -135,10 +135,6 @@ class AssetMovement(Document):
 			if latest_movement_entry:
 				current_location = latest_movement_entry[0][0]
 				current_employee = latest_movement_entry[0][1]
-			else:
-				# for first receipt entry on asset submission
-				current_location = d.target_location
-				current_employee = d.to_employee
 
 			frappe.db.set_value('Asset', d.asset, 'location', current_location)
 			frappe.db.set_value('Asset', d.asset, 'custodian', current_employee)
