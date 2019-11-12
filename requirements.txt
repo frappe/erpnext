@@ -1,4 +1,4 @@
-frappe
+frappex
 unidecode
 pygithub
 googlemaps
