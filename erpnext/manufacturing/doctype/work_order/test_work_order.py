@@ -17,11 +17,11 @@ from erpnext.manufacturing.doctype.production_plan.test_production_plan import m
 
 class TestWorkOrder(unittest.TestCase):
 	def setUp(self):
+		set_perpetual_inventory(0)
 		self.warehouse = '_Test Warehouse 2 - _TC'
 		self.item = '_Test Item'
 
 	def check_planned_qty(self):
-		set_perpetual_inventory(0)
 
 		planned0 = frappe.db.get_value("Bin", {"item_code": "_Test FG Item",
 			"warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty") or 0

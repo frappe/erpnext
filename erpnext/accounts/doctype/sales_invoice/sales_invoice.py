@@ -686,7 +686,6 @@ class SalesInvoice(SellingController):
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
-
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
@@ -1231,7 +1230,8 @@ class SalesInvoice(SellingController):
 					self.status = "Unpaid and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
 					self.status = "Unpaid"
-				elif flt(self.outstanding_amount) < 0 and self.is_return==0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+				#Check if outstanding amount is 0 due to credit note issued against invoice
+				elif flt(self.outstanding_amount) <= 0 and self.is_return == 0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
 					self.status = "Credit Note Issued"
 				elif self.is_return == 1:
 					self.status = "Return"
