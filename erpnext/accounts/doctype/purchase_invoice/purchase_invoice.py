@@ -485,14 +485,16 @@ class PurchaseInvoice(BuyingController):
 
 					expense_account = (item.expense_account
 						if (not item.enable_deferred_expense or self.is_return) else item.deferred_expense_account)
+					
+					if not item.is_fixed_asset:
+						amount = flt(item.base_net_amount, item.precision("base_net_amount"))
+					else:
+						amount = flt(item.base_net_amount + item.item_tax_amount, item.precision("base_net_amount"))
 
 					gl_entries.append(self.get_gl_dict({
 							"account": expense_account,
 							"against": self.supplier,
-							"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
-							"debit_in_account_currency": (flt(item.base_net_amount,
-								item.precision("base_net_amount")) if account_currency==self.company_currency
-								else flt(item.net_amount, item.precision("net_amount"))),
+							"debit": amount,
 							"cost_center": item.cost_center,
 							"project": item.project
 						}, account_currency, item=item))
