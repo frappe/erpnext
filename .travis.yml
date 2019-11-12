@@ -34,22 +34,6 @@ jobs:
       - bench --site test_site --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz
     script: bench --site test_site migrate
 
-  - name: "Python 3.7 Patch Test"
-    python: 3.7
-    before_script:
-      - wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz
-      - bench --site test_site --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz
-    script: bench --site test_site migrate
-
-  - name: "Python 3.8 Patch Test"
-    python: 3.8
-    before_install:
-      - pip install psycopg2-binary  # psycopg2
-    before_script:
-      - wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz
-      - bench --site test_site --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz
-    script: bench --site test_site migrate
-
 install:
   - cd ~
   - nvm install 10
