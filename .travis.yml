@@ -56,7 +56,8 @@ install:
   - mysql -u root -e "CREATE USER 'test_frappe'@'localhost' IDENTIFIED BY 'test_frappe'"
   - mysql -u root -e "GRANT ALL PRIVILEGES ON \`test_frappe\`.* TO 'test_frappe'@'localhost'"
 
-  - mysql -u root -e "UPDATE mysql.global_priv SET Password=PASSWORD('travis') WHERE User='root'"
+  #- mysql -u root -e "UPDATE mysql.global_priv SET Password=PASSWORD('travis') WHERE User='root'"
+  - mysql -u root -e "SET Password=PASSWORD('travis') WHERE User='root'"
   - mysql -u root -e "FLUSH PRIVILEGES"
 
   - wget -O /tmp/wkhtmltox.tar.xz https://github.com/frappe/wkhtmltopdf/raw/master/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
