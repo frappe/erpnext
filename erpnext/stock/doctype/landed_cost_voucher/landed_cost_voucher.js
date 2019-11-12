@@ -119,6 +119,10 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 	distribute_charges_based_on: function (frm) {
 		this.set_applicable_charges_for_item();
+	},
+	
+	items_remove: () => {
+		this.trigger('set_applicable_charges_for_item')
 	}
 
 });

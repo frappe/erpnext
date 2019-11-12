@@ -136,20 +136,20 @@ class LandedCostVoucher(Document):
 			doc.make_gl_entries()
 
 	def validate_asset_qty_and_status(self, receipt_document_type, receipt_document):
-		receipt_document_type = 'purchase_invoice' if receipt_document_type == 'Purchase Invoice' \
-			else 'purchase_receipt'
-
-		for item in receipt_document.get("items"):
+		for item in self.get('items'):
 			if item.is_fixed_asset:
-				docs = frappe.db.get_all('Asset', filters={ receipt_document_type: receipt_document.get('name') }, 
+				receipt_document_type = 'purchase_invoice' if item.receipt_document_type == 'Purchase Invoice' \
+						else 'purchase_receipt'
+				docs = frappe.db.get_all('Asset', filters={ receipt_document_type: item.receipt_document }, 
 					fields=['name', 'docstatus'])
 				if not docs or len(docs) != item.qty:
 					frappe.throw(_('There are not enough asset created or linked to {0}. \
-						Please create or link {1} Assets with respective document.').format(receipt_document.get('name'), item.qty))
+						Please create or link {1} Assets with respective document.').format(item.receipt_document, item.qty))
 				if docs:
 					for d in docs:
 						if d.docstatus == 1:
-							frappe.throw(_('Purchase Document {0} has submitted assets.').format(receipt_document.get('name')))
+							frappe.throw(_('Purchase Document <b>{0}</b> has submitted Assets.\
+								Remove Item <b>{1}</b> from table to continue.').format(item.receipt_document, item.item_code))
 
 	def update_rate_in_serial_no_for_non_asset_items(self, receipt_document):
 		for item in receipt_document.get("items"):
