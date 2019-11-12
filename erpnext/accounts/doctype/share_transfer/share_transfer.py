@@ -82,19 +82,19 @@ class ShareTransfer(Document):
 	def basic_validations(self):
 		if self.transfer_type == 'Purchase':
 			self.to_shareholder = ''
-			if self.from_shareholder is None or self.from_shareholder is '':
+			if not self.from_shareholder:
 				frappe.throw(_('The field From Shareholder cannot be blank'))
-			if self.from_folio_no is None or self.from_folio_no is '':
+			if not self.from_folio_no:
 				self.to_folio_no = self.autoname_folio(self.to_shareholder)
-			if self.asset_account is None:
+			if not self.asset_account:
 				frappe.throw(_('The field Asset Account cannot be blank'))
 		elif (self.transfer_type == 'Issue'):
 			self.from_shareholder = ''
-			if self.to_shareholder is None or self.to_shareholder == '':
+			if not self.to_shareholder:
 				frappe.throw(_('The field To Shareholder cannot be blank'))
-			if self.to_folio_no is None or self.to_folio_no is '':
+			if not self.to_folio_no:
 				self.to_folio_no = self.autoname_folio(self.to_shareholder)
-			if self.asset_account is None:
+			if not self.asset_account:
 				frappe.throw(_('The field Asset Account cannot be blank'))
 		else:
 			if self.from_shareholder is None or self.to_shareholder is None:
