@@ -33,6 +33,7 @@
   "available_for_use_date",
   "column_break_18",
   "calculate_depreciation",
+  "allow_monthly_depreciation",
   "is_existing_asset",
   "opening_accumulated_depreciation",
   "number_of_depreciations_booked",
@@ -216,8 +217,7 @@
   {
    "fieldname": "available_for_use_date",
    "fieldtype": "Date",
-   "label": "Available-for-use Date",
-   "reqd": 1
+   "label": "Available-for-use Date"
   },
   {
    "fieldname": "column_break_18",
@@ -450,12 +450,19 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "calculate_depreciation",
+   "fieldname": "allow_monthly_depreciation",
+   "fieldtype": "Check",
+   "label": "Allow Monthly Depreciation"
   }
  ],
  "idx": 72,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2019-10-07 15:34:30.976208",
+ "modified": "2019-10-22 15:47:36.050828",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
