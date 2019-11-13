@@ -127,7 +127,11 @@ def get_data():
 					"name": "Shipping Rule",
 					"description": _("Rules for adding shipping costs."),
 				},
-
+				{
+					"type": "doctype",
+					"name": "Coupon Code",
+					"description": _("Define coupon codes."),
+				}
 			]
 		},
 		{

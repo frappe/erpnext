@@ -63,12 +63,15 @@ $.extend(erpnext, {
 			let callback = '';
 			let on_close = '';
 
-			if (grid_row.doc.serial_no) {
-				grid_row.doc.has_serial_no = true;
-			}
-
-			me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
-				callback, on_close, true);
+			frappe.model.get_value('Item', {'name':grid_row.doc.item_code}, 'has_serial_no',
+				(data) => {
+					if(data) {
+						grid_row.doc.has_serial_no = data.has_serial_no;
+						me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
+							callback, on_close, true);
+					}
+				}
+			);
 		});
 	},
 });

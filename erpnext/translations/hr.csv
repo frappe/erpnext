@@ -1581,7 +1581,7 @@ DocType: Sales Invoice,Payment Due Date,Plaćanje Due Date
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Rezervirano Količina : Količina naručiti za prodaju , ali nije dostavljena ."
 DocType: Drug Prescription,Interval UOM,Interval UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save",Ponovno odaberite ako je odabrana adresa uređena nakon spremanja
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Količina rezerviranog za podugovor: Količina sirovina za izradu poduhvata.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Količina rezerviranog za podugovor: Količina sirovina za izradu poduhvata.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Stavka Varijanta {0} već postoji s istim atributima
 DocType: Item,Hub Publishing Details,Pojedinosti objavljivanja središta
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&quot;Otvaranje &#39;
