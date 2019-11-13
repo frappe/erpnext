@@ -72,8 +72,8 @@
 			"holiday_management": "Ignore holidays"
 		}, {
 			"task_name": "Final cut",
-			"start_day": 13,
-			"end_day": 13,
+			"start_day": 15,
+			"end_day": 15,
 			"holiday_management": "Ignore holidays"
 		}]
 	}

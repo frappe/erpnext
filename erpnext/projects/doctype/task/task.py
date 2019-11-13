@@ -271,8 +271,8 @@ def on_doctype_update():
 	frappe.db.add_index("Task", ["lft", "rgt"])
 
 def validate_project_dates(project_end_date, task, task_start, task_end, actual_or_expected_date):
-	if date_diff(project_end_date, getdate(task.get(task_start))) < 0:
+	if task.get(task_start) and date_diff(project_end_date, getdate(task.get(task_start))) < 0:
 		frappe.throw(_("Task's {0} Start Date cannot be after Project's End Date.").format(actual_or_expected_date))
 
-	if date_diff(project_end_date, getdate(task.get(task_end))) < 0:
+	if task.get(task_end) and date_diff(project_end_date, getdate(task.get(task_end))) < 0:
 		frappe.throw(_("Task's {0} End Date cannot be after Project's End Date.").format(actual_or_expected_date))
