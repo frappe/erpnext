@@ -7,7 +7,6 @@ from __future__ import unicode_literals
 import frappe, json
 from frappe.utils import cstr, flt
 from erpnext.stock.get_item_details import get_item_details
-
 from frappe.model.document import Document
 
 class PackedItem(Document):
@@ -31,8 +30,11 @@ def get_bin_qty(item, warehouse):
 	return det and det[0] or frappe._dict()
 
 def update_packing_list_item(doc, packing_item_code, qty, main_item_row, description):
+	if doc.amended_from:
+		old_packed_items_map = get_old_packed_item_details(doc.packed_items)
+	else:
+		old_packed_items_map = False
 	item = get_packing_item_details(packing_item_code, doc.company)
-
 	# check if exists
 	exists = 0
 	for d in doc.get("packed_items"):
@@ -52,11 +54,10 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 	pi.uom = item.stock_uom
 	pi.qty = flt(qty)
 	pi.description = description
-	if not pi.warehouse:
+	if not pi.warehouse and not doc.amended_from:
 		pi.warehouse = (main_item_row.warehouse if ((doc.get('is_pos')
 			or not item.default_warehouse) and main_item_row.warehouse) else item.default_warehouse)
-
-	if not pi.batch_no:
+	if not pi.batch_no and not doc.amended_from:
 		pi.batch_no = cstr(main_item_row.get("batch_no"))
 	if not pi.target_warehouse:
 		pi.target_warehouse = main_item_row.get("target_warehouse")
@@ -64,9 +65,13 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 	pi.actual_qty = flt(bin.get("actual_qty"))
 	pi.projected_qty = flt(bin.get("projected_qty"))
 
+	if old_packed_items_map:
+		pi.batch_no = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].batch_no
+		pi.serial_no = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].serial_no
+		pi.warehouse = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].warehouse
+
 def make_packing_list(doc):
 	"""make packing list for Product Bundle item"""
-
 	if doc.get("_action") and doc._action == "update_after_submit": return
 
 	parent_items = []
@@ -108,8 +113,14 @@ def get_items_from_product_bundle(args):
 			"qty": flt(args["quantity"]) * flt(item.qty)
 		})
 		items.append(get_item_details(args))
-		
+
 	return items
-	
+
 def on_doctype_update():
 	frappe.db.add_index("Packed Item", ["item_code", "warehouse"])
+
+def get_old_packed_item_details(old_packed_items):
+	old_packed_items_map = {}
+	for items in old_packed_items:
+		old_packed_items_map.setdefault((items.item_code ,items.parent_item), []).append(items.as_dict())
+	return old_packed_items_map

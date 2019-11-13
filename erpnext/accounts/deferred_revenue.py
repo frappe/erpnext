@@ -174,6 +174,8 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 	# GL Entry for crediting the amount in the deferred expense
 	from erpnext.accounts.general_ledger import make_gl_entries
 
+	if amount == 0: return
+
 	gl_entries = []
 	gl_entries.append(
 		doc.get_gl_dict({
