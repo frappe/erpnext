@@ -25,8 +25,9 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 		approvers.append(approver)
 		return approvers
 
-	if employee.department:
-		department_details = frappe.db.get_value("Department", {"name": employee.department}, ["lft", "rgt"], as_dict=True)
+	employee_department = filters.get("department") or employee.department
+	if employee_department:
+		department_details = frappe.db.get_value("Department", {"name": employee_department}, ["lft", "rgt"], as_dict=True)
 	if department_details:
 		department_list = frappe.db.sql("""select name from `tabDepartment` where lft <= %s
 			and rgt >= %s
