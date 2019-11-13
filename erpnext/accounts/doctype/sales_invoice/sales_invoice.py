@@ -154,6 +154,7 @@ class SalesInvoice(SellingController):
 		if not self.is_pos:
 			self.so_dn_required()
 
+		self.validate_stin()
 		self.validate_proj_cust()
 		self.validate_pos_return()
 		self.validate_with_previous_doc()
@@ -401,6 +402,15 @@ class SalesInvoice(SellingController):
 
 		self.paid_amount = paid_amount
 		self.base_paid_amount = base_paid_amount
+
+	def validate_stin(self):
+		if self.amended_from:
+			prev_has_stin, prev_stin = frappe.db.get_value(self.doctype, self.amended_from, ['has_stin', 'stin'])
+			if self.has_stin != prev_has_stin or self.stin != prev_stin:
+				frappe.throw(_("Tax Invoice Number must be the same as the cancelled document {0}").format(self.amended_from))
+
+		if not self.has_stin:
+			self.stin = 0
 
 	def validate_time_sheets_are_submitted(self):
 		for data in self.timesheets:
