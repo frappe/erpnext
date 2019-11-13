@@ -185,30 +185,30 @@ function setup_details_page() {
 }
 
 async function submit() {
+    let button = document.getElementById('submit-button');
+    button.disabled = true;
     let form = document.querySelector('#customer-form');
     if (!form.checkValidity()) {
         form.reportValidity();
+        button.disabled = false;
         return;
     }
-    get_form_data();
+    let contact = get_form_data();
     let appointment = (await frappe.call({
         method: 'erpnext.www.book-appointment.index.create_appointment',
         args: {
             'date': window.selected_date,
             'time': window.selected_time,
-            'contact': window.contact,
+            'contact': contact,
             'tz':window.selected_timezone
         }
     })).message;
     frappe.msgprint(__('Appointment Created Successfully'));
-    let button = document.getElementById('submit-button');
-    button.disabled = true;
-    button.onclick = null
 }
 
 function get_form_data() {
     contact = {};
     let inputs = ['name', 'skype', 'number', 'notes', 'email'];
     inputs.forEach((id) => contact[id] = document.getElementById(`customer_${id}`).value)
-    window.contact = contact
+    return contact
 }
