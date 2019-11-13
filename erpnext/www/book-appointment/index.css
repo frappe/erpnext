@@ -9,6 +9,14 @@
     padding: 0.5em 1em;
 }
 
+@media (max-width: 768px) {
+    #submit-button-area {
+        display: grid;
+        grid-template-areas: 
+        "submit"
+        "back";
+    }
+}
 #customer-form{
     border-color: black;
 }
