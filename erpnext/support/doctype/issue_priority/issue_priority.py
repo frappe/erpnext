@@ -8,7 +8,4 @@ from frappe import _
 from frappe.model.document import Document
 
 class IssuePriority(Document):
-
-	def validate(self):
-		if frappe.db.exists("Issue Priority", {"name": self.name}):
-			frappe.throw(_("Issue Priority Already Exists"))
+	pass
