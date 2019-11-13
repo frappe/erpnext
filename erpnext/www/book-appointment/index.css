@@ -1,6 +1,4 @@
 .time-slot {
-    flex-grow: 1;
-    flex : 0 0 calc(16.66% - 20px);
     margin-bottom: 2em;
     margin-left: 0.5em;
     margin-right: 0.5em;
