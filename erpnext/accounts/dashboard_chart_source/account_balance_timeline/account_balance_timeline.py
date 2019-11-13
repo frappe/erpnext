@@ -19,6 +19,11 @@ def get(chart_name = None, chart = None, no_cache = None, from_date = None, to_d
 	else:
 		chart = frappe._dict(frappe.parse_json(chart))
 	timespan = chart.timespan
+
+	if chart.timespan == 'Select Date Range':
+		from_date = chart.from_date
+		to_date = chart.to_date
+
 	timegrain = chart.time_interval
 	filters = frappe.parse_json(chart.filters_json)
 

@@ -645,7 +645,8 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 		stock_entry.to_warehouse = work_order.fg_warehouse
 		stock_entry.project = work_order.project
 		if purpose=="Manufacture":
-			additional_costs = get_additional_costs(work_order, fg_qty=stock_entry.fg_completed_qty)
+			additional_costs = get_additional_costs(work_order, fg_qty=stock_entry.fg_completed_qty,
+				company=work_order.company)
 			stock_entry.set("additional_costs", additional_costs)
 
 	stock_entry.set_stock_entry_type()
