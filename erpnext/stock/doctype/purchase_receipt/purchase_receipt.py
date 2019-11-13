@@ -14,7 +14,7 @@ from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from erpnext.buying.utils import check_on_hold_or_closed_status
-from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
+from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from six import iteritems
 
@@ -338,12 +338,13 @@ class PurchaseReceipt(BuyingController):
 	def get_asset_gl_entry(self, gl_entries, expenses_included_in_valuation=None):
 		arbnb_account, cwip_account = None, None
 
-		cwip_disabled = is_cwip_accounting_disabled()
-
 		if not expenses_included_in_valuation:
 			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		for d in self.get("items"):
+			asset_category = frappe.get_cached_value("Item", d.item_code, "asset_category")
+			cwip_enabled = is_cwip_accounting_enabled(self.company, asset_category)
+
 			if d.is_fixed_asset and not (arbnb_account and cwip_account):
 				arbnb_account = self.get_company_default("asset_received_but_not_billed")
 
@@ -351,8 +352,7 @@ class PurchaseReceipt(BuyingController):
 				cwip_account = get_asset_account("capital_work_in_progress_account", d.asset,
 					company = self.company)
 
-			if d.is_fixed_asset and not cwip_disabled:
-
+			if d.is_fixed_asset and cwip_enabled:
 				asset_amount = flt(d.net_amount) + flt(d.item_tax_amount/self.conversion_rate)
 				base_asset_amount = flt(d.base_net_amount + d.item_tax_amount)
 
@@ -381,7 +381,7 @@ class PurchaseReceipt(BuyingController):
 
 			if d.is_fixed_asset and flt(d.landed_cost_voucher_amount):
 				asset_account = (get_asset_category_account(d.asset, 'fixed_asset_account',
-					company = self.company) if cwip_disabled else cwip_account)
+					company = self.company) if not cwip_enabled else cwip_account)
 
 				gl_entries.append(self.get_gl_dict({
 					"account": expenses_included_in_valuation,
