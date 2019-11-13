@@ -108,6 +108,7 @@ frappe.ui.form.on("Request for Quotation",{
 
 			 function load_suppliers(r) {
 				if(r.message) {
+					console.log(r);
 					for (var i = 0; i < r.message.length; i++) {
 						var exists = false;
 						if (r.message[i].constructor === Array){
@@ -134,7 +135,7 @@ frappe.ui.form.on("Request for Quotation",{
 			if (args.search_type === "Tag" && args.tag) {
 				return frappe.call({
 					type: "GET",
-					method: "frappe.desk.tags.get_tagged_docs",
+					method: "frappe.desk.doctype.tag.tag.get_tagged_docs",
 					args: {
 						"doctype": "Supplier",
 						"tag": args.tag
