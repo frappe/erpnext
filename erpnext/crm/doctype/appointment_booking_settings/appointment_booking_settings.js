@@ -1,6 +1,3 @@
-// frappe.ui.form.on('Availability Of Slots', 'from_time', check_time)
-// frappe.ui.form.on('Availability Of Slots', 'to_time', check_time)
-
 frappe.ui.form.on('Appointment Booking Settings', 'validate',check_times);
 function check_times(frm) {
 	$.each(frm.doc.availability_of_slots || [], function (i, d) {
