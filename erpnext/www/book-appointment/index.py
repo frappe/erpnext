@@ -86,8 +86,8 @@ def create_appointment(date, time, tz, contact):
 	scheduled_time = convert_to_system_timezone(tz, scheduled_time)
 	scheduled_time = scheduled_time.replace(tzinfo=None)
 	# Create a appointment document from form
-	appointment.scheduled_time = scheduled_time
 	appointment = frappe.new_doc('Appointment')
+	appointment.scheduled_time = scheduled_time
 	contact = json.loads(contact)
 	appointment.customer_name = contact.get('name',None)
 	appointment.customer_phone_number = contact.get('number', None)
