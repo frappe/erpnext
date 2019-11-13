@@ -95,8 +95,6 @@ class LandedCostVoucher(Document):
 		else:
 			frappe.throw(_("Total Applicable Charges in Purchase Receipt Items table must be same as Total Taxes and Charges"))
 
-
-
 	def on_submit(self):
 		self.update_landed_cost()
 
@@ -148,8 +146,10 @@ class LandedCostVoucher(Document):
 				if docs:
 					for d in docs:
 						if d.docstatus == 1:
-							frappe.throw(_('Purchase Document <b>{0}</b> has submitted Assets.\
-								Remove Item <b>{1}</b> from table to continue.').format(item.receipt_document, item.item_code))
+							frappe.throw(_('{2} <b>{0}</b> has submitted Assets.\
+								Remove Item <b>{1}</b> from table to continue.').format(
+									item.receipt_document, item.item_code, item.receipt_document_type)
+								)
 
 	def update_rate_in_serial_no_for_non_asset_items(self, receipt_document):
 		for item in receipt_document.get("items"):
