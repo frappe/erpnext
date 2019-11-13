@@ -108,7 +108,6 @@ frappe.ui.form.on("Request for Quotation",{
 
 			 function load_suppliers(r) {
 				if(r.message) {
-					console.log(r);
 					for (var i = 0; i < r.message.length; i++) {
 						var exists = false;
 						if (r.message[i].constructor === Array){
