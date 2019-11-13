@@ -21,6 +21,8 @@ frappe.ui.form.on('Share Transfer', {
 				erpnext.share_transfer.make_jv(frm);
 			});
 		}
+
+		frm.toggle_reqd("asset_account", frm.doc.transfer_type != "Transfer");
 	},
 	no_of_shares: (frm) => {
 		if (frm.doc.rate != undefined || frm.doc.rate != null){
@@ -56,6 +58,10 @@ frappe.ui.form.on('Share Transfer', {
 				};
 			});
 		}
+	},
+
+	transfer_type: function(frm) {
+		frm.toggle_reqd("asset_account", frm.doc.transfer_type != "Transfer");
 	}
 });
 
