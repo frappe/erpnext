@@ -6,9 +6,9 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
+  "purpose",
   "column_break_4",
   "transaction_date",
-  "purpose",
   "reference",
   "reference_doctype",
   "column_break_9",
@@ -29,7 +29,6 @@
    "reqd": 1
   },
   {
-   "default": "Transfer",
    "fieldname": "purpose",
    "fieldtype": "Select",
    "label": "Purpose",
@@ -94,7 +93,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-11-07 15:33:23.466386",
+ "modified": "2019-11-13 15:37:48.870147",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement",
