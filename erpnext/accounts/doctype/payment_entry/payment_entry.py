@@ -61,6 +61,7 @@ class PaymentEntry(AccountsController):
 		self.validate_duplicate_entry()
 		self.validate_allocated_amount()
 		self.ensure_supplier_is_not_blocked()
+		self.set_status()
 
 	def on_submit(self):
 		self.setup_party_account_field()
@@ -70,6 +71,7 @@ class PaymentEntry(AccountsController):
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.update_expense_claim()
+		self.set_status()
 
 
 	def on_cancel(self):
@@ -79,6 +81,7 @@ class PaymentEntry(AccountsController):
 		self.update_advance_paid()
 		self.update_expense_claim()
 		self.delink_advance_entry_references()
+		self.set_status()
 
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)
@@ -274,6 +277,14 @@ class PaymentEntry(AccountsController):
 					if not valid:
 						frappe.throw(_("Against Journal Entry {0} does not have any unmatched {1} entry")
 							.format(d.reference_name, dr_or_cr))
+
+	def set_status(self):
+		if self.docstatus == 2:
+			self.status = 'Cancelled'
+		elif self.docstatus == 1:
+			self.status = 'Submitted'
+		else:
+			self.status = 'Draft'
 
 	def set_amounts(self):
 		self.set_amounts_in_company_currency()
