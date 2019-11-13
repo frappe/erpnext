@@ -123,9 +123,10 @@ function clear_time_slots() {
 }
 
 function get_slot_layout(time) {
+    let timezone = document.getElementById("appointment-timezone").value;
     time = new Date(time);
-    let start_time_string = moment(time).format("LT");
-    let end_time = moment(time).add(window.appointment_settings.appointment_duration, 'minutes');
+    let start_time_string = moment(time).tz(timezone).format("LT");
+    let end_time = moment(time).tz(timezone).add(window.appointment_settings.appointment_duration, 'minutes');
     let end_time_string = end_time.format("LT");
     return `<span style="font-size: 1.2em;">${start_time_string}</span><br><span class="text-muted small">to ${end_time_string}</span>`;
 }
