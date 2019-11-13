@@ -644,28 +644,37 @@ class StockEntry(StockController):
 		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No')
 
 	def get_gl_entries(self, warehouse_account):
-		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
-
 		gl_entries = super(StockEntry, self).get_gl_entries(warehouse_account)
 
-		for d in self.get("items"):
-			additional_cost = flt(d.additional_cost, d.precision("additional_cost"))
-			if additional_cost:
-				gl_entries.append(self.get_gl_dict({
-					"account": expenses_included_in_valuation,
-					"against": d.expense_account,
-					"cost_center": d.cost_center,
-					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-					"credit": additional_cost
-				}, item=d))
+		total_basic_amount = sum([flt(t.basic_amount) for t in self.get("items") if t.t_warehouse])
+		item_account_wise_additional_cost = {}
 
-				gl_entries.append(self.get_gl_dict({
-					"account": d.expense_account,
-					"against": expenses_included_in_valuation,
-					"cost_center": d.cost_center,
-					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-					"credit": -1 * additional_cost # put it as negative credit instead of debit purposefully
-				}, item=d))
+		for t in self.get("additional_costs"):
+			for d in self.get("items"):
+				if d.t_warehouse:
+					item_account_wise_additional_cost.setdefault((d.item_code, d.name), {})
+					item_account_wise_additional_cost[(d.item_code, d.name)].setdefault(t.expense_account, 0.0)
+					item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account] += \
+						(t.amount * d.basic_amount) / total_basic_amount
+
+		if item_account_wise_additional_cost:
+			for d in self.get("items"):
+				for account, amount in iteritems(item_account_wise_additional_cost.get((d.item_code, d.name), {})):
+					gl_entries.append(self.get_gl_dict({
+						"account": account,
+						"against": d.expense_account,
+						"cost_center": d.cost_center,
+						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+						"credit": amount
+					}, item=d))
+
+					gl_entries.append(self.get_gl_dict({
+						"account": d.expense_account,
+						"against": account,
+						"cost_center": d.cost_center,
+						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+						"credit": -1 * amount # put it as negative credit instead of debit purposefully
+					}, item=d))
 
 		return gl_entries
 
@@ -1349,7 +1358,7 @@ def make_stock_in_entry(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
-def get_work_order_details(work_order):
+def get_work_order_details(work_order, company):
 	work_order = frappe.get_doc("Work Order", work_order)
 	pending_qty_to_produce = flt(work_order.qty) - flt(work_order.produced_qty)
 
@@ -1360,14 +1369,17 @@ def get_work_order_details(work_order):
 		"wip_warehouse": work_order.wip_warehouse,
 		"fg_warehouse": work_order.fg_warehouse,
 		"fg_completed_qty": pending_qty_to_produce,
-		"additional_costs": get_additional_costs(work_order, fg_qty=pending_qty_to_produce)
+		"additional_costs": get_additional_costs(work_order, fg_qty=pending_qty_to_produce, company=company)
 	}
 
-def get_additional_costs(work_order=None, bom_no=None, fg_qty=None):
+def get_additional_costs(work_order=None, bom_no=None, fg_qty=None, company=None):
 	additional_costs = []
 	operating_cost_per_unit = get_operating_cost_per_unit(work_order, bom_no)
+	expenses_included_in_valuation = frappe.get_cached_value("Company", company, "expenses_included_in_valuation")
+
 	if operating_cost_per_unit:
 		additional_costs.append({
+			"expense_account": expenses_included_in_valuation,
 			"description": "Operating Cost as per Work Order / BOM",
 			"amount": operating_cost_per_unit * flt(fg_qty)
 		})
@@ -1377,6 +1389,7 @@ def get_additional_costs(work_order=None, bom_no=None, fg_qty=None):
 			flt(work_order.additional_operating_cost) / flt(work_order.qty)
 
 		additional_costs.append({
+			"expense_account": expenses_included_in_valuation,
 			"description": "Additional Operating Cost",
 			"amount": additional_operating_cost_per_unit * flt(fg_qty)
 		})
