@@ -11,7 +11,9 @@ test_records = frappe.get_test_records('Currency Exchange')
 
 def save_new_records(test_records):
 	for record in test_records:
-		purpose = str("")
+		# If both selling and buying enabled
+		purpose = "Selling-Buying"
+
 		if cint(record.get("for_buying"))==0 and cint(record.get("for_selling"))==1:
 			purpose = "Selling"
 		if cint(record.get("for_buying"))==1 and cint(record.get("for_selling"))==0:
