@@ -187,7 +187,11 @@ class ReceivablePayableReport(object):
 		self.data.append(row)
 
 	def set_invoice_details(self, row):
-		row.update(self.invoice_details.get(row.voucher_no, {}))
+		invoice_details = self.invoice_details.get(row.voucher_no, {})
+		if row.due_date:
+			invoice_details.pop("due_date", None)
+		row.update(invoice_details)
+
 		if row.voucher_type == 'Sales Invoice':
 			if self.filters.show_delivery_notes:
 				self.set_delivery_notes(row)
