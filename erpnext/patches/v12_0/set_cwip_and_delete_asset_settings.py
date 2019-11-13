@@ -15,7 +15,7 @@ def execute():
 		companies = [x['name'] for x in frappe.get_all("Company", "name")]
 		for company in companies:
 			enable_cwip_accounting = cint(not cint(cwip_value[0]['value']))
-			frappe.set_value("Company", company, "enable_cwip_accounting", enable_cwip_accounting)
+			frappe.db.set_value("Company", company, "enable_cwip_accounting", enable_cwip_accounting)
 
 		frappe.db.sql(
 			""" DELETE FROM `tabSingles` where doctype = 'Asset Settings' """)
