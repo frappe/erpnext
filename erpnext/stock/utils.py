@@ -271,6 +271,7 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 				'fieldtype': 'Currency' if d.get("convertible") == 'rate' else 'Float'
 			})
 
+	update_dict_values = []
 	for row_idx, row in enumerate(result):
 		data = row.items() if is_dict_obj else enumerate(row)
 		for key, value in data:
@@ -286,7 +287,11 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 				row.insert(key+1, new_value)
 			else:
 				new_key = "{0}_{1}".format(key, frappe.scrub(include_uom))
-				row[new_key] = new_value
+				update_dict_values.append([row, new_key, new_value])
+
+	for data in update_dict_values:
+		row, key, value = data
+		row[key] = value
 
 def get_available_serial_nos(item_code, warehouse):
 	return frappe.get_all("Serial No", filters = {'item_code': item_code,

@@ -24,6 +24,11 @@ class AccountingDimension(Document):
 			msg = _("Not allowed to create accounting dimension for {0}").format(self.document_type)
 			frappe.throw(msg)
 
+		exists = frappe.db.get_value("Accounting Dimension", {'document_type': self.document_type}, ['name'])
+
+		if exists and self.is_new():
+			frappe.throw("Document Type already used as a dimension")
+
 	def after_insert(self):
 		if frappe.flags.in_test:
 			make_dimension_in_accounting_doctypes(doc=self)
@@ -60,7 +65,8 @@ def make_dimension_in_accounting_doctypes(doc):
 			"label": doc.label,
 			"fieldtype": "Link",
 			"options": doc.document_type,
-			"insert_after": insert_after_field
+			"insert_after": insert_after_field,
+			"owner": "Administrator"
 		}
 
 		if doctype == "Budget":
