@@ -82,14 +82,14 @@ def create_appointment(date, time, tz, contact):
 	format_string = '%Y-%m-%d %H:%M:%S%z'
 	scheduled_time = datetime.datetime.strptime(date + " " + time, format_string)
 	# Strip tzinfo from datetime objects since it's handled by the doctype
-	scheduled_time = scheduled_time.replace(tzinfo=None)
+	scheduled_time = scheduled_time.replace(tzinfo = None)
 	scheduled_time = convert_to_system_timezone(tz, scheduled_time)
-	scheduled_time = scheduled_time.replace(tzinfo=None)
+	scheduled_time = scheduled_time.replace(tzinfo = None)
 	# Create a appointment document from form
 	appointment = frappe.new_doc('Appointment')
 	appointment.scheduled_time = scheduled_time
 	contact = json.loads(contact)
-	appointment.customer_name = contact.get('name',None)
+	appointment.customer_name = contact.get('name', None)
 	appointment.customer_phone_number = contact.get('number', None)
 	appointment.customer_skype = contact.get('skype', None)
 	appointment.customer_details = contact.get('notes', None)
@@ -105,7 +105,7 @@ def filter_timeslots(date, timeslots):
 			filtered_timeslots.append(timeslot)
 	return filtered_timeslots
 
-def convert_to_guest_timezone(guest_tz,datetimeobject):
+def convert_to_guest_timezone(guest_tz, datetimeobject):
 	guest_tz = pytz.timezone(guest_tz)
 	local_timezone = pytz.timezone(frappe.utils.get_time_zone())
 	datetimeobject = local_timezone.localize(datetimeobject)
