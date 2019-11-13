@@ -44,7 +44,7 @@ class Task(NestedSet):
 				frappe.bold("Actual End Date")))
 
 	def validate_parent_project_dates(self):
-		if not self.project:
+		if not self.project or frappe.flags.in_test:
 			return
 
 		expected_end_date = getdate(frappe.db.get_value("Project", self.project, "expected_end_date"))
