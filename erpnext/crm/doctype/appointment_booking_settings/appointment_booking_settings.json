@@ -13,7 +13,9 @@
   "appointment_details_section",
   "appointment_duration",
   "email_reminders",
-  "advance_booking_days"
+  "advance_booking_days",
+  "success_details",
+  "success_redirect_url"
  ],
  "fields": [
   {
@@ -28,7 +30,7 @@
    "fieldname": "number_of_agents",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "No. Of Agents",
+   "label": "Number of Concurrent Appointments",
    "reqd": 1
   },
   {
@@ -48,9 +50,10 @@
   },
   {
    "default": "0",
+   "description": "Notify customer and agent via email on the day of the appointment.",
    "fieldname": "email_reminders",
    "fieldtype": "Check",
-   "label": "Email Reminders"
+   "label": "Notify Via Email"
   },
   {
    "default": "7",
@@ -82,10 +85,21 @@
    "fieldname": "appointment_details_section",
    "fieldtype": "Section Break",
    "label": "Appointment Details"
+  },
+  {
+   "fieldname": "success_details",
+   "fieldtype": "Section Break",
+   "label": "Success Settings"
+  },
+  {
+   "description": "Leave blank for home.\nThis is relative to site URL, for example \"/about\" will redirect to \"https://yoursitename.com/about\"",
+   "fieldname": "success_redirect_url",
+   "fieldtype": "Data",
+   "label": "Success Redirect URL"
   }
  ],
  "issingle": 1,
- "modified": "2019-10-04 11:36:20.839075",
+ "modified": "2019-11-14 12:17:08.721683",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Booking Settings",
