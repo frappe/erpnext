@@ -13,26 +13,31 @@ async function initialise_select_date() {
 }
 
 async function get_global_variables() {
-    // Using await 
+    // Using await through this file instead of then.
     window.appointment_settings = (await frappe.call({
         method: 'erpnext.www.book-appointment.index.get_appointment_settings'
     })).message;
     window.timezones = (await frappe.call({
-        method: 'erpnext.www.book-appointment.index.get_timezones'
+        method:'erpnext.www.book-appointment.index.get_timezones'
     })).message;
     window.holiday_list = window.appointment_settings.holiday_list;
 }
 
 function setup_timezone_selector() {
+    /**
+     * window.timezones is a dictionary with the following structure
+     * { IANA name: Pretty name}
+     * For example : { Asia/Kolkata : "India Time - Asia/Kolkata"}
+     */
     let timezones_element = document.getElementById('appointment-timezone');
     let offset = new Date().getTimezoneOffset();
-    window.timezones.forEach(timezone => {
+    Object.keys(window.timezones).forEach((timezone) => {
         let opt = document.createElement('option');
         opt.value = timezone;
         if (timezone == moment.tz.guess()) {
             opt.selected = true;
         }
-        opt.innerHTML = timezone;
+        opt.innerHTML = window.timezones[timezone]
         timezones_element.appendChild(opt)
     });
 }
