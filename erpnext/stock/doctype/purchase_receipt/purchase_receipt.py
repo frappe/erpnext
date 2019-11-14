@@ -338,7 +338,9 @@ class PurchaseReceipt(BuyingController):
 	def get_asset_gl_entry(self, gl_entries):
 		for item in self.get("items"):
 			if item.is_fixed_asset:
-				if not is_cwip_accounting_disabled():
+				if not item.asset_category:
+					item.asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
+				if not is_cwip_accounting_enabled(self.company, item.asset_category):
 					gl_entries = self.add_asset_gl_entries(item, gl_entries)
 				if flt(item.landed_cost_voucher_amount):
 					gl_entries = self.add_lcv_gl_entries(item, gl_entries)
@@ -380,7 +382,7 @@ class PurchaseReceipt(BuyingController):
 	
 	def add_lcv_gl_entries(self, item, gl_entries):
 		expenses_included_in_asset_valuation = self.get_company_default("expenses_included_in_asset_valuation")
-		if is_cwip_accounting_disabled():
+		if is_cwip_accounting_enabled(self.company, item.asset_category):
 			asset_account = get_asset_category_account(asset_category=item.asset_category, \
 					fieldname='fixed_asset_account', company=self.company)
 		else:
