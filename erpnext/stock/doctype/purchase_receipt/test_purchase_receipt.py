@@ -522,8 +522,10 @@ def make_purchase_receipt(**args):
 	received_qty = args.received_qty or qty
 	rejected_qty = args.rejected_qty or flt(received_qty) - flt(qty)
 
+	item_code = args.item or args.item_code or "_Test Item"
+	uom = args.uom or frappe.db.get_value("Item", item_code, "stock_uom") or "_Test UOM"
 	pr.append("items", {
-		"item_code": args.item or args.item_code or "_Test Item",
+		"item_code": item_code,
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": qty,
 		"received_qty": received_qty,
@@ -533,7 +535,7 @@ def make_purchase_receipt(**args):
 		"conversion_factor": args.conversion_factor or 1.0,
 		"serial_no": args.serial_no,
 		"stock_uom": args.stock_uom or "_Test UOM",
-		"uom": args.uom or "_Test UOM",
+		"uom": uom,
 		"cost_center": args.cost_center or frappe.get_cached_value('Company',  pr.company,  'cost_center'),
 		"asset_location": args.location or "Test Location"
 	})

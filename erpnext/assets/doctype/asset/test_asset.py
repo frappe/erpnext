@@ -514,11 +514,11 @@ class TestAsset(unittest.TestCase):
 			("CWIP Account - _TC", 5250.0, 0.0)
 		)
 
-		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
+		pr_gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
 			where voucher_type='Purchase Receipt' and voucher_no = %s
 			order by account""", pr.name)
 
-		self.assertEqual(gle, expected_gle)
+		self.assertEqual(pr_gle, expected_gle)
 
 		pi = make_invoice(pr.name)
 		pi.submit()
@@ -531,11 +531,11 @@ class TestAsset(unittest.TestCase):
 			("Expenses Included In Asset Valuation - _TC", 0.0, 250.0),
 		)
 
-		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
+		pi_gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
 			where voucher_type='Purchase Invoice' and voucher_no = %s
 			order by account""", pi.name)
 
-		self.assertEqual(gle, expected_gle)
+		self.assertEqual(pi_gle, expected_gle)
 
 		asset = frappe.db.get_value('Asset',
 			{'purchase_receipt': pr.name, 'docstatus': 0}, 'name')
