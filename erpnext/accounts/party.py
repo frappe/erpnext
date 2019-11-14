@@ -98,7 +98,7 @@ def set_address_details(out, party, party_type, doctype=None, company=None, part
 	else:
 		out.update(get_company_address(company))
 
-	if doctype and doctype in ['Delivery Note', 'Sales Invoice']:
+	if doctype and doctype in ['Delivery Note', 'Sales Invoice', 'Sales Order']:
 		if out.company_address:
 			out.update(get_fetch_values(doctype, 'company_address', out.company_address))
 		get_regional_address_details(out, doctype, company)

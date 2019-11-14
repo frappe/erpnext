@@ -134,7 +134,7 @@ def test_method():
 def get_place_of_supply(out, doctype):
 	if not frappe.get_meta('Address').has_field('gst_state'): return
 
-	if doctype in ("Sales Invoice", "Delivery Note"):
+	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
 		address_name = out.shipping_address_name or out.customer_address
 	elif doctype == "Purchase Invoice":
 		address_name = out.shipping_address or out.supplier_address
@@ -147,7 +147,7 @@ def get_place_of_supply(out, doctype):
 def get_regional_address_details(out, doctype, company):
 	out.place_of_supply = get_place_of_supply(out, doctype)
 
-	if doctype in ("Sales Invoice", "Delivery Note"):
+	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
 		master_doctype = "Sales Taxes and Charges Template"
 
 		gst_category = get_tax_template_for_sez(out, master_doctype, company, 'Customer')

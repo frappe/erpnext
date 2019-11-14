@@ -8,12 +8,14 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 		method = "erpnext.accounts.party.get_party_details";
 	}
 
-	if (frm.doc.company_address && (!args.company_address)) {
-		args.company_address = frm.doc.company_address;
-	}
+	if (args) {
+		if (frm.doc.company_address && (!args.company_address)) {
+			args.company_address = frm.doc.company_address;
+		}
 
-	if (frm.doc.shipping_address && (!args.shipping_address)) {
-		args.shipping_address = frm.doc.shipping_address;
+		if (frm.doc.shipping_address && (!args.shipping_address)) {
+			args.shipping_address = frm.doc.shipping_address;
+		}
 	}
 
 	if(!args) {
