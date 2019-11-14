@@ -47,7 +47,7 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 					master_name: frm.doc.taxes_and_charges
 				},
 				callback: function(r) {
-					frm.doc.taxes.forEach((tax) => {
+					r.message.forEach((tax) => {
 						account_heads.push(tax.account_head);
 					});
 
@@ -65,7 +65,6 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 
 	frappe.ui.form.on(doctype +' Item', {
 		item_code: function(frm) {
-			console.log("Test");
 			frappe.run_serially([
 				() => {
 					if(!frm.doc.gst_accounts) {
@@ -80,5 +79,5 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 			]);
 		}
 	});
-}
+};
 
