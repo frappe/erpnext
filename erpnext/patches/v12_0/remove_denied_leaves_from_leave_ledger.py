@@ -19,8 +19,10 @@ def get_denied_leave_application_list():
 	return frappe.db.sql_list(''' Select name from `tabLeave Application` where status <> 'Approved' ''')
 
 def delete_denied_leaves_from_leave_ledger_entry(leave_application_list):
-	frappe.db.sql(''' Delete
-		FROM `tabLeave Ledger Entry`
-		WHERE
-			transaction_type = 'Leave Application'
-			AND transaction_name in {0} '''.format(tuple(leave_application_list))) #nosec
+	if leave_application_list:
+		frappe.db.sql(''' Delete
+			FROM `tabLeave Ledger Entry`
+			WHERE
+				transaction_type = 'Leave Application'
+				AND transaction_name in (%s) ''' % (', '.join(['%s'] * len(leave_application_list))), #nosec
+				tuple(leave_application_list))
