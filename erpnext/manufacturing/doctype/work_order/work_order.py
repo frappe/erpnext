@@ -64,7 +64,8 @@ class WorkOrder(Document):
 				from `tabSales Order` so
 				inner join `tabSales Order Item` so_item on so_item.parent = so.name
 				left join `tabProduct Bundle Item` pk_item on so_item.item_code = pk_item.parent
-				where so.name=%s and so.docstatus = 1 and (
+				where so.name=%s and so.docstatus = 1
+					and so.skip_delivery_note  = 0 and (
 					so_item.item_code=%s or
 					pk_item.item_code=%s )
 			""", (self.sales_order, self.production_item, self.production_item), as_dict=1)
@@ -78,6 +79,7 @@ class WorkOrder(Document):
 					where so.name=%s
 						and so.name=so_item.parent
 						and so.name=packed_item.parent
+						and so.skip_delivery_note = 0
 						and so_item.item_code = packed_item.parent_item
 						and so.docstatus = 1 and packed_item.item_code=%s
 				""", (self.sales_order, self.production_item), as_dict=1)
@@ -221,7 +223,15 @@ class WorkOrder(Document):
 
 	def update_production_plan_status(self):
 		production_plan = frappe.get_doc('Production Plan', self.production_plan)
-		production_plan.run_method("update_produced_qty", self.produced_qty, self.production_plan_item)
+		produced_qty = 0
+		if self.production_plan_item:
+			total_qty = frappe.get_all("Work Order", fields = "sum(produced_qty) as produced_qty",
+				filters = {'docstatus': 1, 'production_plan': self.production_plan,
+					'production_plan_item': self.production_plan_item}, as_list=1)
+
+			produced_qty = total_qty[0][0] if total_qty else 0
+
+		production_plan.run_method("update_produced_qty", produced_qty, self.production_plan_item)
 
 	def on_submit(self):
 		if not self.wip_warehouse:
@@ -477,6 +487,9 @@ class WorkOrder(Document):
 						'include_item_in_manufacturing': item.include_item_in_manufacturing
 					})
 
+					if not self.project:
+						self.project = item.get("project")
+
 			self.set_available_qty()
 
 	def update_transaferred_qty_for_required_items(self):
@@ -640,7 +653,8 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 		stock_entry.to_warehouse = work_order.fg_warehouse
 		stock_entry.project = work_order.project
 		if purpose=="Manufacture":
-			additional_costs = get_additional_costs(work_order, fg_qty=stock_entry.fg_completed_qty)
+			additional_costs = get_additional_costs(work_order, fg_qty=stock_entry.fg_completed_qty,
+				company=work_order.company)
 			stock_entry.set("additional_costs", additional_costs)
 
 	stock_entry.set_stock_entry_type()

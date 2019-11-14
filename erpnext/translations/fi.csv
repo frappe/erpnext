@@ -46,6 +46,7 @@ DocType: Sales Taxes and Charges Template,* Will be calculated in the transactio
 DocType: Delivery Trip,MAT-DT-.YYYY.-,MAT-DT-.YYYY.-
 DocType: Purchase Order,Customer Contact,Asiakaspalvelu Yhteystiedot
 DocType: Shift Type,Enable Auto Attendance,Ota automaattinen läsnäolo käyttöön
+apps/erpnext/erpnext/stock/doctype/quick_stock_balance/quick_stock_balance.js,Please enter Warehouse and Date,Anna varasto ja päivämäärä
 DocType: Lost Reason Detail,Opportunity Lost Reason,Mahdollisuus menetetty syy
 DocType: Patient Appointment,Check availability,Tarkista saatavuus
 DocType: Retention Bonus,Bonus Payment Date,Bonuspäivä
@@ -265,6 +266,7 @@ DocType: Tax Rule,Tax Type,Verotyyppi
 ,Completed Work Orders,Valmistuneet työmääräykset
 DocType: Support Settings,Forum Posts,Foorumin viestit
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage","Tehtävä on vallattu taustatyöksi. Jos taustalla tapahtuvaan käsittelyyn liittyy ongelmia, järjestelmä lisää kommentin tämän kaluston täsmäytyksen virheestä ja palaa Luonnos-vaiheeseen"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/utils.py,"Sorry,coupon code validity has not started",Valitettavasti kuponkikoodin voimassaoloaika ei ole alkanut
 apps/erpnext/erpnext/regional/india/utils.py,Taxable Amount,veron perusteena
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py,You are not authorized to add or update entries before {0},sinulla ei ole lupaa lisätä tai päivittää kirjauksia ennen {0}
 DocType: Leave Policy,Leave Policy Details,Jätä politiikkatiedot
@@ -330,6 +332,7 @@ DocType: Asset Settings,Asset Settings,Omaisuusasetukset
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Consumable,käytettävä
 DocType: Student,B-,B -
 DocType: Assessment Result,Grade,Arvosana
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Tuotekoodi&gt; Tuoteryhmä&gt; Tuotemerkki
 DocType: Restaurant Table,No of Seats,Istumapaikkoja
 DocType: Sales Invoice,Overdue and Discounted,Erääntynyt ja alennettu
 apps/erpnext/erpnext/public/js/call_popup/call_popup.js,Call Disconnected,Puhelu katkesi
@@ -506,6 +509,7 @@ DocType: Healthcare Practitioner,Practitioner Schedules,Käytännön aikataulut
 DocType: Cheque Print Template,Line spacing for amount in words,Riviväli varten määrä kirjaimin
 DocType: Vehicle,Additional Details,Lisätiedot
 apps/erpnext/erpnext/templates/generators/bom.html,No description given,ei annettua kuvausta
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.js,Fetch Items from Warehouse,Hae tuotteet varastosta
 apps/erpnext/erpnext/config/buying.py,Request for purchase.,Pyydä ostaa.
 DocType: POS Closing Voucher Details,Collected Amount,Kerätty määrä
 DocType: Lab Test,Submitted Date,Lähetetty päivämäärä
@@ -613,6 +617,7 @@ DocType: Currency Exchange,For Selling,Myydään
 apps/erpnext/erpnext/config/desktop.py,Learn,Käyttö-opastus
 ,Trial Balance (Simple),Koetasapaino (yksinkertainen)
 DocType: Purchase Invoice Item,Enable Deferred Expense,Ota käyttöön laskennallinen kulutus
+apps/erpnext/erpnext/templates/includes/order/order_taxes.html,Applied Coupon Code,Sovellettu kuponkikoodi
 DocType: Asset,Next Depreciation Date,Seuraava poistopäivämäärä
 apps/erpnext/erpnext/projects/doctype/activity_type/activity_type.js,Activity Cost per Employee,Aktiviteetti kustannukset työntekijää kohti
 DocType: Accounts Settings,Settings for Accounts,Tilien asetukset
@@ -848,8 +853,6 @@ DocType: Request for Quotation,Message for Supplier,Viesti toimittaja
 DocType: BOM,Work Order,Työjärjestys
 DocType: Sales Invoice,Total Qty,yksikkömäärä yhteensä
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py,Guardian2 Email ID,Guardian2 -sähköpostitunnus
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","Poista työntekijä <a href=""#Form/Employee/{0}"">{0}</a> \ peruuttaaksesi tämän asiakirjan"
 DocType: Item,Show in Website (Variant),Näytä Web-sivuston (Variant)
 DocType: Employee,Health Concerns,"terveys, huolenaiheet"
 DocType: Payroll Entry,Select Payroll Period,Valitse Payroll Aika
@@ -1013,6 +1016,7 @@ DocType: Sales Invoice,Total Commission,Provisio yhteensä
 DocType: Tax Withholding Account,Tax Withholding Account,Verotettavaa tiliä
 DocType: Pricing Rule,Sales Partner,Myyntikumppani
 apps/erpnext/erpnext/config/buying.py,All Supplier scorecards.,Kaikki toimittajan tuloskortit.
+DocType: Coupon Code,To be used to get discount,Käytetään alennuksen saamiseksi
 DocType: Buying Settings,Purchase Receipt Required,Saapumistosite vaaditaan
 DocType: Sales Invoice,Rail,kisko
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Actual Cost,Todellinen kustannus
@@ -1063,6 +1067,7 @@ DocType: Sales Invoice,Shipping Bill Date,Shipping Bill päivä
 DocType: Production Plan,Production Plan,Tuotantosuunnitelma
 DocType: Opening Invoice Creation Tool,Opening Invoice Creation Tool,Avaustilien luomistyökalu
 DocType: Salary Component,Round to the Nearest Integer,Pyöreä lähimpään kokonaislukuun
+DocType: Shopping Cart Settings,Allow items not in stock to be added to cart,"Salli tuotteiden, joita ei ole varastossa, lisääminen ostoskoriin"
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js,Sales Return,Myynti Return
 DocType: Stock Settings,Set Qty in Transactions based on Serial No Input,"Aseta määrä operaatioihin, jotka perustuvat sarjamuotoiseen tuloon"
 ,Total Stock Summary,Yhteensä Stock Yhteenveto
@@ -1192,6 +1197,7 @@ DocType: Request for Quotation,For individual supplier,Yksittäisten toimittaja
 DocType: BOM Operation,Base Hour Rate(Company Currency),Base Hour Rate (Company valuutta)
 ,Qty To Be Billed,Määrä laskutettavaksi
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py,Delivered Amount,toimitettu
+DocType: Coupon Code,Gift Card,Lahjakortti
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Production: Raw materials quantity to make manufacturing items.,Varattu tuotantomäärä: Raaka-aineiden määrä valmistustuotteiden valmistamiseksi.
 DocType: Loyalty Point Entry Redemption,Redemption Date,Lunastuspäivä
 apps/erpnext/erpnext/accounts/page/bank_reconciliation/bank_reconciliation.py,This bank transaction is already fully reconciled,Tämä pankkitapahtuma on jo täysin sovitettu yhteen
@@ -1279,6 +1285,7 @@ apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js,Preview Sal
 apps/erpnext/erpnext/utilities/activation.py,Create Timesheet,Luo aikataulu
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py,Account {0} has been entered multiple times,Tili {0} on syötetty useita kertoja
 DocType: Account,Expenses Included In Valuation,Arvoon sisältyvät kustannukset
+apps/erpnext/erpnext/hooks.py,Purchase Invoices,Ostolaskut
 apps/erpnext/erpnext/non_profit/doctype/membership/membership.py,You can only renew if your membership expires within 30 days,"Voit uusia vain, jos jäsenyytesi päättyy 30 päivän kuluessa"
 DocType: Shopping Cart Settings,Show Stock Availability,Saatavuus Varastossa
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Set {0} in asset category {1} or company {2},Aseta {0} varallisuusluokkaan {1} tai yritys {2}
@@ -1555,7 +1562,7 @@ DocType: Sales Invoice,Payment Due Date,Maksun eräpäivä
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Varattu määrä: Myytävänä oleva määrä, mutta ei toimitettu."
 DocType: Drug Prescription,Interval UOM,Interval UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Vahvista valinta uudelleen, jos valittua osoitetta muokataan tallennuksen jälkeen"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Varattu määrä alihankintasopimuksille: Raaka-aineiden määrä alihankittujen tuotteiden valmistamiseksi.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Varattu määrä alihankintasopimuksille: Raaka-aineiden määrä alihankittujen tuotteiden valmistamiseksi.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Tuote Variant {0} on jo olemassa samoja ominaisuuksia
 DocType: Item,Hub Publishing Details,Hub-julkaisutiedot
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening','Avattu'
@@ -1818,6 +1825,7 @@ DocType: Holiday List,Holiday List Name,lomaluettelo nimi
 apps/erpnext/erpnext/erpnext_integrations/doctype/tally_migration/tally_migration.py,Importing Items and UOMs,Tuotteiden tuominen
 DocType: Repayment Schedule,Balance Loan Amount,Balance Lainamäärä
 apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.js,Added to details,Lisätty yksityiskohtiin
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/utils.py,"Sorry,coupon code are exhausted",Valitettavasti kuponkikoodi on käytetty loppuun
 DocType: Communication Medium,Catch All,Catch All
 apps/erpnext/erpnext/education/doctype/course_scheduling_tool/course_scheduling_tool.js,Schedule Course,Aikataulu kurssi
 DocType: Budget,Applicable on Material Request,Sovelletaan materiaalihakemukseen
@@ -1985,6 +1993,7 @@ DocType: Program Enrollment,Transportation,kuljetus
 apps/erpnext/erpnext/controllers/item_variant.py,Invalid Attribute,Virheellinen Taito
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,{0} {1} must be submitted,{0} {1} pitää olla vahvistettu
 apps/erpnext/erpnext/selling/doctype/campaign/campaign_dashboard.py,Email Campaigns,Sähköposti-kampanjat
+DocType: Sales Partner,To Track inbound purchase,Seurata saapuvaa hankintaa
 DocType: Buying Settings,Default Supplier Group,Oletuksena toimittajaryhmä
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Quantity must be less than or equal to {0},Määrä on oltava pienempi tai yhtä suuri kuin {0}
 apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py,Maximum amount eligible for the component {0} exceeds {1},Suurin sallittu summa komponentille {0} ylittää {1}
@@ -2140,8 +2149,8 @@ apps/erpnext/erpnext/config/help.py,Setting up Employees,Työntekijätietojen pe
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js,Make Stock Entry,Tee osakemerkintä
 DocType: Hotel Room Reservation,Hotel Reservation User,Hotellin varaus käyttäjä
 apps/erpnext/erpnext/projects/doctype/project/project.js,Set Status,Aseta tila
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Asenna läsnäolosuhteiden numerointisarjat kohdasta Asetukset&gt; Numerointisarjat
 apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please select prefix first,Ole hyvä ja valitse etuliite ensin
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Aseta Naming-sarjan asetukseksi {0} Asetukset&gt; Asetukset&gt; Sarjojen nimeäminen -kohdassa
 DocType: Contract,Fulfilment Deadline,Täytäntöönpanon määräaika
 apps/erpnext/erpnext/public/js/hub/pages/Home.vue,Near you,Lähellä sinua
 DocType: Student,O-,O -
@@ -2265,6 +2274,7 @@ apps/erpnext/erpnext/utilities/user_progress.py,Your Products or Services,Tarjot
 DocType: Quality Meeting Table,Under Review,Tarkasteltavana
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py,Failed to login,Sisäänkirjautuminen epäonnistui
 apps/erpnext/erpnext/controllers/buying_controller.py,Asset {0} created,Asetus {0} luotiin
+DocType: Coupon Code,Promotional,myynninedistämis-
 DocType: Special Test Items,Special Test Items,Erityiset testit
 apps/erpnext/erpnext/public/js/hub/marketplace.js,You need to be a user with System Manager and Item Manager roles to register on Marketplace.,"Sinun on oltava käyttäjä, jolla System Manager- ja Item Manager -roolit ovat rekisteröityneet Marketplacessa."
 apps/erpnext/erpnext/config/buying.py,Key Reports,Keskeiset raportit
@@ -2302,6 +2312,8 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js,Please set t
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Doc Type,asiakirja tyyppi
 apps/erpnext/erpnext/controllers/selling_controller.py,Total allocated percentage for sales team should be 100,Myyntitiimin yhteensä lasketun prosenttiosuuden pitää olla 100
 DocType: Subscription Plan,Billing Interval Count,Laskutusväli
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Poista työntekijä <a href=""#Form/Employee/{0}"">{0}</a> \ peruuttaaksesi tämän asiakirjan"
 apps/erpnext/erpnext/healthcare/doctype/healthcare_practitioner/healthcare_practitioner_dashboard.py,Appointments and Patient Encounters,Nimitykset ja potilaskokoukset
 apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.js,Value missing,Arvo puuttuu
 DocType: Employee,Department and Grade,Osasto ja palkkaluokka
@@ -2404,6 +2416,7 @@ apps/erpnext/erpnext/hr/doctype/appraisal_template/appraisal_template.py,Sum of 
 DocType: Project,Start and End Dates,Alkamis- ja päättymisajankohta
 DocType: Contract Template Fulfilment Terms,Contract Template Fulfilment Terms,Sopimusmallin täyttämisen ehdot
 ,Delivered Items To Be Billed,"toimitettu, laskuttamat"
+DocType: Coupon Code,Maximum Use,Suurin käyttö
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom_item_preview.html,Open BOM {0},Open BOM {0}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,Warehouse cannot be changed for Serial No.,Sarjanumerolle ei voi muuttaa varastoa
 DocType: Authorization Rule,Average Discount,Keskimääräinen alennus
@@ -2565,6 +2578,7 @@ DocType: Employee Benefit Application,Max Benefits (Yearly),Eniten hyötyä (vuo
 DocType: Item,Inventory,inventaario
 apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.js,Download as Json,Lataa nimellä Json
 DocType: Item,Sales Details,Myynnin lisätiedot
+DocType: Coupon Code,Used,käytetty
 DocType: Opportunity,With Items,Tuotteilla
 apps/erpnext/erpnext/crm/doctype/email_campaign/email_campaign.py,The Campaign '{0}' already exists for the {1} '{2}',Kampanja &#39;{0}&#39; on jo olemassa {1} &#39;{2}&#39;
 DocType: Asset Maintenance,Maintenance Team,Huoltoryhmä
@@ -2694,7 +2708,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,"No active BOM f
 						Serial No cannot be ensured",Mitään aktiivista BOM: tä ei löytynyt kohteen {0} kohdalle. Toimitusta \ Serial No ei voida taata
 DocType: Sales Partner,Sales Partner Target,Myyntikumppani tavoite
 DocType: Loan Type,Maximum Loan Amount,Suurin lainamäärä
-DocType: Pricing Rule,Pricing Rule,Hinnoittelusääntö
+DocType: Coupon Code,Pricing Rule,Hinnoittelusääntö
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,Duplicate roll number for student {0},Päällekkäisiä rullan numero opiskelijan {0}
 apps/erpnext/erpnext/config/help.py,Material Request to Purchase Order,Ostotilaus hankintapyynnöstä
 DocType: Company,Default Selling Terms,Oletusmyyntiehdot
@@ -2773,6 +2787,7 @@ DocType: Program,Allow Self Enroll,Salli itsenäinen ilmoittautuminen
 DocType: Payment Schedule,Payment Amount,maksun arvomäärä
 apps/erpnext/erpnext/hr/doctype/compensatory_leave_request/compensatory_leave_request.py,Half Day Date should be in between Work From Date and Work End Date,Puolen päivän Päivä pitää olla Työn alkamispäivästä ja Työn päättymispäivästä alkaen
 DocType: Healthcare Settings,Healthcare Service Items,Terveydenhoitopalvelut
+apps/erpnext/erpnext/stock/doctype/quick_stock_balance/quick_stock_balance.py,Invalid Barcode. There is no Item attached to this barcode.,Virheellinen viivakoodi. Tähän viivakoodiin ei ole liitetty tuotetta.
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py,Consumed Amount,käytetty arvomäärä
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py,Net Change in Cash,Rahavarojen muutos
 DocType: Assessment Plan,Grading Scale,Arvosteluasteikko
@@ -2892,7 +2907,6 @@ DocType: Salary Slip,Loan repayment,Lainan takaisinmaksu
 DocType: Share Transfer,Asset Account,Omaisuuden tili
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,New release date should be in the future,Uuden julkaisupäivän pitäisi olla tulevaisuudessa
 DocType: Purchase Invoice,End date of current invoice's period,nykyisen laskukauden päättymispäivä
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Asenna Työntekijöiden nimeämisjärjestelmä kohtaan Henkilöstöresurssit&gt; HR-asetukset
 DocType: Lab Test,Technician Name,Tekniikan nimi
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,"Cannot ensure delivery by Serial No as \
 					Item {0} is added with and without Ensure Delivery by \
@@ -3003,6 +3017,7 @@ DocType: Item,"If this item has variants, then it cannot be selected in sales or
 DocType: Products Settings,Hide Variants,Piilota variantit
 DocType: Lead,Next Contact By,seuraava yhteydenottohlö
 DocType: Compensatory Leave Request,Compensatory Leave Request,Korvaushyvityspyyntö
+apps/erpnext/erpnext/controllers/accounts_controller.py,"Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings",Tuotteen {0} rivillä {1} ei voida ylilaskuttaa enemmän kuin {2}. Aseta korvaus Tilin asetukset -kohdassa salliaksesi ylilaskutuksen
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,Quantity required for Item {0} in row {1},Vaadittu tuotemäärä {0} rivillä {1}
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py,Warehouse {0} can not be deleted as quantity exists for Item {1},Varastoa {0} ei voi poistaa koska se sisältää tuotetta {1}
 DocType: Blanket Order,Order Type,Tilaustyyppi
@@ -3172,7 +3187,6 @@ apps/erpnext/erpnext/templates/pages/help.html,Visit the forums,Käy foorumeilla
 DocType: Student,Student Mobile Number,Student Mobile Number
 DocType: Item,Has Variants,useita tuotemalleja
 DocType: Employee Benefit Claim,Claim Benefit For,Korvausetu
-apps/erpnext/erpnext/controllers/accounts_controller.py,"Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set in Stock Settings","Ei voida ylikirjoittaa rivikohta {0} {1} yli {2}. Jotta voit laskuttaa ylimääräisen hinnan, aseta Tukosasetukset"
 apps/erpnext/erpnext/templates/emails/training_event.html,Update Response,Päivitä vastaus
 apps/erpnext/erpnext/public/js/utils.js,You have already selected items from {0} {1},Olet jo valitut kohteet {0} {1}
 DocType: Monthly Distribution,Name of the Monthly Distribution,"toimitus kuukaudessa, nimi"
@@ -3462,6 +3476,7 @@ DocType: Vehicle,Fuel Type,Polttoaine
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py,Please specify currency in Company,Määritä yrityksen valuutta
 DocType: Workstation,Wages per hour,Tuntipalkat
 apps/erpnext/erpnext/templates/generators/item/item_configure.js,Configure {0},Määritä {0}
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Asiakas&gt; Asiakasryhmä&gt; Alue
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Stock balance in Batch {0} will become negative {1} for Item {2} at Warehouse {3},Erän varastotase {0} muuttuu negatiiviseksi {1} tuotteelle {2} varastossa {3}
 apps/erpnext/erpnext/templates/emails/reorder_item.html,Following Material Requests have been raised automatically based on Item's re-order level,Seuraavat hankintapyynnöt luotu tilauspisteen mukaisesti
 apps/erpnext/erpnext/controllers/accounts_controller.py,Account {0} is invalid. Account Currency must be {1},Tili {0} ei kelpaa. Tilin valuutan on oltava {1}
@@ -3791,6 +3806,7 @@ DocType: Student Admission Program,Application Fee,Hakemusmaksu
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js,Submit Salary Slip,Vahvista palkkatosite
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice_list.js,On Hold,Pidossa
 apps/erpnext/erpnext/education/doctype/question/question.py,A qustion must have at least one correct options,Lauseessa on oltava ainakin yksi oikea vaihtoehto
+apps/erpnext/erpnext/hooks.py,Purchase Orders,Tilaukset
 DocType: Account,Inter Company Account,Inter Company Account
 apps/erpnext/erpnext/stock/doctype/item_price/item_price.js,Import in Bulk,tuo massana
 DocType: Sales Partner,Address & Contacts,osoitteet ja yhteystiedot
@@ -3801,6 +3817,7 @@ DocType: HR Settings,Leave Approval Notification Template,Jätä hyväksyntäilm
 DocType: POS Profile,[Select],[valitse]
 DocType: Staffing Plan Detail,Number Of Positions,Asemien lukumäärä
 DocType: Vital Signs,Blood Pressure (diastolic),Verenpaine (diastolinen)
+apps/erpnext/erpnext/accounts/doctype/coupon_code/coupon_code.py,Please select the customer.,Ole hyvä ja valitse asiakas.
 DocType: SMS Log,Sent To,Lähetetty kenelle
 DocType: Agriculture Task,Holiday Management,Lomahallinta
 DocType: Payment Request,Make Sales Invoice,tee myyntilasku
@@ -4010,7 +4027,6 @@ DocType: Item Price,Packing Unit,Pakkausyksikkö
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,{0} {1} is not submitted,{0} {1} ei ole vahvistettu
 DocType: Subscription,Trialling,testaamista
 DocType: Sales Invoice Item,Deferred Revenue,Viivästyneet tulot
-DocType: Bank Account,GL Account,GL-tili
 DocType: Shopify Settings,Cash Account will used for Sales Invoice creation,Rahatiliä käytetään myyntilaskutuksen luomiseen
 DocType: Employee Tax Exemption Declaration Category,Exemption Sub Category,Poikkeusluokka
 DocType: Member,Membership Expiry Date,Jäsenyyden päättymispäivä
@@ -4414,13 +4430,13 @@ apps/erpnext/erpnext/accounts/report/consolidated_financial_statement/consolidat
 DocType: C-Form Invoice Detail,Territory,Alue
 DocType: Pricing Rule,Apply Rule On Item Code,Käytä tuotekoodia
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Please mention no of visits required,Vierailujen määrä vaaditaan
+apps/erpnext/erpnext/stock/doctype/quick_stock_balance/quick_stock_balance.js,Stock Balance Report,Varastotaseraportti
 DocType: Stock Settings,Default Valuation Method,oletus arvomenetelmä
 apps/erpnext/erpnext/education/doctype/program/program_dashboard.py,Fee,Maksu
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.js,Show Cumulative Amount,Näytä kumulatiivinen määrä
 apps/erpnext/erpnext/setup/doctype/company/company.js,Update in progress. It might take a while.,Päivitys käynnissä. Voi kestää hetken.
 DocType: Production Plan Item,Produced Qty,Tuotettu määrä
 DocType: Vehicle Log,Fuel Qty,polttoaineen määrä
-DocType: Stock Entry,Target Warehouse Name,Kohdevaraston nimi
 DocType: Work Order Operation,Planned Start Time,Suunniteltu aloitusaika
 DocType: Course,Assessment,Arviointi
 DocType: Payment Entry Reference,Allocated,kohdennettu
@@ -4486,10 +4502,12 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","perusehdot, jotka voidaan lisätä myynteihin ja ostoihin esim, 1. tarjouksen voimassaolo 1. maksuehdot (ennakko, luotto, osaennakko jne) 1. lisäkulut (asiakkaan maksettavaksi) 1. turvallisuus / käyttövaroitukset 1. takuuasiat 1. palautusoikeus. 1. toimitusehdot 1. riita-, korvaus- ja vastuuasioiden käsittely jne 1. omat osoite ja yhteystiedot"
 DocType: Homepage Section,Section Based On,Jakso perustuu
+DocType: Shopping Cart Settings,Show Apply Coupon Code,Näytä Käytä kuponkikoodia
 DocType: Issue,Issue Type,Julkaisutyyppi
 DocType: Attendance,Leave Type,Vapaan tyyppi
 DocType: Purchase Invoice,Supplier Invoice Details,Toimittaja Laskun tiedot
 DocType: Agriculture Task,Ignore holidays,Ohita vapaapäivät
+apps/erpnext/erpnext/accounts/doctype/coupon_code/coupon_code.js,Add/Edit Coupon Conditions,Lisää / muokkaa kuponkiehtoja
 apps/erpnext/erpnext/controllers/stock_controller.py,Expense / Difference account ({0}) must be a 'Profit or Loss' account,Kustannus- / erotuksen tili ({0}) tulee olla 'tuloslaskelma' tili
 DocType: Stock Entry Detail,Stock Entry Child,Osakemerkintä lapsi
 DocType: Project,Copied From,kopioitu
@@ -4664,6 +4682,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Colour,v�
 DocType: Assessment Plan Criteria,Assessment Plan Criteria,Assessment Plan Criteria
 apps/erpnext/erpnext/hr/doctype/leave_period/leave_period_dashboard.py,Transactions,liiketoimet
 DocType: Supplier Scorecard Scoring Standing,Prevent Purchase Orders,Estää ostotilaukset
+DocType: Coupon Code,Coupon Name,Kupongin nimi
 apps/erpnext/erpnext/healthcare/setup.py,Susceptible,herkkä
 DocType: Email Campaign,Scheduled,Aikataulutettu
 DocType: Shift Type,Working Hours Calculation Based On,Työajan laskeminen perustuu
@@ -4680,7 +4699,9 @@ DocType: Purchase Invoice Item,Valuation Rate,Arvostustaso
 apps/erpnext/erpnext/stock/doctype/item/item.js,Create Variants,tee malleja
 DocType: Vehicle,Diesel,diesel-
 apps/erpnext/erpnext/stock/get_item_details.py,Price List Currency not selected,"Hinnasto, valuutta ole valittu"
+DocType: Quick Stock Balance,Available Quantity,Saatavana oleva määrä
 DocType: Purchase Invoice,Availed ITC Cess,Käytti ITC Cessia
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Asenna ohjaajien nimeämisjärjestelmä kohdassa Koulutus&gt; Koulutusasetukset
 ,Student Monthly Attendance Sheet,Student Kuukauden Läsnäolo Sheet
 apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py,Shipping rule only applicable for Selling,Myyntiin sovellettava toimitussääntö
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Depreciation Row {0}: Next Depreciation Date cannot be before Purchase Date,Poisto Rivi {0}: Seuraava Poistoaika ei voi olla ennen ostopäivää
@@ -4747,8 +4768,8 @@ DocType: Department,Expense Approver,Kulukorvausten hyväksyjä
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Row {0}: Advance against Customer must be credit,Rivi {0}: Advance vastaan asiakkaan on luotto
 DocType: Quality Meeting,Quality Meeting,Laatukokous
 apps/erpnext/erpnext/accounts/doctype/account/account.js,Non-Group to Group,Non-ryhmän Group
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Aseta Naming-sarjan asetukseksi {0} Asetukset&gt; Asetukset&gt; Sarjojen nimeäminen -kohdassa
 DocType: Employee,ERPNext User,ERP-lisäkäyttäjä
+DocType: Coupon Code,Coupon Description,Kupongin kuvaus
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py,Batch is mandatory in row {0},Erä on pakollinen rivillä {0}
 DocType: Company,Default Buying Terms,Oletusostoehdot
 DocType: Purchase Receipt Item Supplied,Purchase Receipt Item Supplied,Saapumistositteen nimike toimitettu
@@ -4911,6 +4932,7 @@ apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.py,Lab Test(s) ,Lab-te
 DocType: Maintenance Visit Purpose,Against Document Detail No,Dokumentin yksityiskohta nro kohdistus
 apps/erpnext/erpnext/regional/__init__.py,Deletion is not permitted for country {0},Poistaminen ei ole sallittua maan {0}
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Party Type is mandatory,Osapuoli tyyppi on pakollinen
+apps/erpnext/erpnext/templates/includes/cart/cart_address.html,Apply Coupon Code,Käytä kuponkikoodia
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,"For job card {0}, you can only make the 'Material Transfer for Manufacture' type stock entry",Työkortilla {0} voit tehdä vain valmistusmateriaalin siirron
 DocType: Quality Inspection,Outgoing,Lähtevä
 DocType: Customer Feedback Table,Customer Feedback Table,Asiakaspalautetaulukko
@@ -5060,7 +5082,6 @@ DocType: Currency Exchange,For Buying,Ostaminen
 apps/erpnext/erpnext/setup/default_energy_point_rules.py,On Purchase Order Submission,Ostotilausten toimittaminen
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js,Add All Suppliers,Lisää kaikki toimittajat
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Row #{0}: Allocated Amount cannot be greater than outstanding amount.,Rivi # {0}: osuutensa ei voi olla suurempi kuin lainamäärä.
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Asiakas&gt; Asiakasryhmä&gt; Alue
 DocType: Tally Migration,Parties,osapuolet
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js,Browse BOM,selaa BOM:a
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Secured Loans,Taatut lainat
@@ -5092,7 +5113,6 @@ DocType: Subscription,Past Due Date,Erääntymispäivä
 apps/erpnext/erpnext/stock/doctype/item_alternative/item_alternative.py,Not allow to set alternative item for the item {0},Älä anna asettaa vaihtoehtoista kohdetta {0}
 apps/erpnext/erpnext/hr/doctype/leave_block_list/leave_block_list.py,Date is repeated,Päivä toistetaan
 apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html,Authorized Signatory,Valtuutettu allekirjoitus
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Asenna ohjaajien nimeämisjärjestelmä kohtaan Koulutus&gt; Koulutusasetukset
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Net ITC Available(A) - (B),Net ITC käytettävissä (A) - (B)
 apps/erpnext/erpnext/education/doctype/fee_schedule/fee_schedule.js,Create Fees,Luo palkkioita
 DocType: Project,Total Purchase Cost (via Purchase Invoice),hankintakustannusten kokonaismäärä (ostolaskuista)
@@ -5117,6 +5137,7 @@ apps/erpnext/erpnext/assets/report/fixed_asset_register/fixed_asset_register.py,
 DocType: Quiz Result,Wrong,Väärä
 DocType: Sales Invoice,Rate at which Price list currency is converted to customer's base currency,"taso, jolla hinnasto valuutta muunnetaan asiakkaan käyttämäksi perusvaluutaksi"
 DocType: Purchase Invoice Item,Net Amount (Company Currency),netto (yrityksen valuutassa)
+DocType: Sales Partner,Referral Code,viitekoodi
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py,Total advance amount cannot be greater than total sanctioned amount,Ennakkomaksun kokonaismäärä ei voi olla suurempi kuin kokonainen seuraamusmäärä
 DocType: Salary Slip,Hour Rate,tuntitaso
 apps/erpnext/erpnext/stock/doctype/item/item.py,Enable Auto Re-Order,Ota automaattinen uudelleenjärjestys käyttöön
@@ -5245,6 +5266,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please select BO
 DocType: Shopping Cart Settings,Show Stock Quantity,Näytä varastomäärä
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py,Net Cash from Operations,Liiketoiminnan nettorahavirta
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Row #{0}: Status must be {1} for Invoice Discounting {2},Rivi # {0}: Tila on oltava {1} laskun alennukselle {2}
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},UOM-muuntokerrointa ({0} -&gt; {1}) ei löydy tuotteelle: {2}
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js,Item 4,Nimike 4
 DocType: Student Admission,Admission End Date,Pääsymaksu Päättymispäivä
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order_dashboard.py,Sub-contracting,Alihankinta
@@ -5267,6 +5289,7 @@ DocType: Assessment Plan,Assessment Plan,arviointi Plan
 DocType: Travel Request,Fully Sponsored,Täysin sponsoroidut
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js,Reverse Journal Entry,Reverse Journal Entry
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js,Create Job Card,Luo työkortti
+DocType: Quotation,Referral Sales Partner,Suosittelumyyntikumppani
 DocType: Quality Procedure Process,Process Description,Prosessin kuvaus
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.py,Customer {0} is created.,Asiakas {0} luodaan.
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js, Currently no stock available in any warehouse,"Tällä hetkellä ei varastossa,"
@@ -5401,6 +5424,7 @@ DocType: Certification Application,Payment Details,Maksutiedot
 apps/erpnext/erpnext/stock/report/item_prices/item_prices.py,BOM Rate,BOM taso
 apps/erpnext/erpnext/erpnext_integrations/doctype/tally_migration/tally_migration.py,Reading Uploaded File,Lähetettyjen tiedostojen lukeminen
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py,"Stopped Work Order cannot be cancelled, Unstop it first to cancel","Pysäytettyä työjärjestystä ei voi peruuttaa, keskeyttää se ensin peruuttamalla"
+DocType: Coupon Code,Coupon Code,Kuponkikoodi
 DocType: Asset,Journal Entry for Scrap,Journal Entry for Romu
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py,Please pull items from Delivery Note,Siirrä tuotteita lähetteeltä
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py,Row {0}: select the workstation against the operation {1},Rivi {0}: valitse työasema operaatiota vastaan {1}
@@ -5483,6 +5507,7 @@ DocType: Woocommerce Settings,API consumer key,API-kuluttajansymboli
 apps/erpnext/erpnext/stock/report/product_bundle_balance/product_bundle_balance.py,'Date' is required,&#39;Päivämäärä&#39; vaaditaan
 apps/erpnext/erpnext/accounts/party.py,Due / Reference Date cannot be after {0},erä- / viitepäivä ei voi olla {0} jälkeen
 apps/erpnext/erpnext/config/settings.py,Data Import and Export,tietojen tuonti ja vienti
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/utils.py,"Sorry,coupon code validity has expired",Valitettavasti kuponkikoodin voimassaoloaika on vanhentunut
 DocType: Bank Account,Account Details,tilin tiedot
 DocType: Crop,Materials Required,Vaaditut materiaalit
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,No students Found,Ei opiskelijat Todettu
@@ -5520,6 +5545,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Delivery Notes {
 apps/erpnext/erpnext/utilities/user_progress.py,Go to Users,Siirry Käyttäjiin
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Paid amount + Write Off Amount can not be greater than Grand Total,Maksettu arvomäärä + poistotilin summa ei voi olla suurempi kuin kokonaissumma
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,{0} is not a valid Batch Number for Item {1},{0} ei sallittu eränumero tuotteelle {1}
+apps/erpnext/erpnext/shopping_cart/cart.py,Please enter valid coupon code !!,Anna voimassa oleva kuponkikoodi !!
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Note: There is not enough leave balance for Leave Type {0},Huom: jäännöstyypille {0} ei ole tarpeeksi vapaata jäännöstasetta
 DocType: Task,Task Description,Tehtävän kuvaus
 DocType: Training Event,Seminar,seminaari
@@ -5783,6 +5809,7 @@ apps/erpnext/erpnext/crm/report/prospects_engaged_but_not_converted/prospects_en
 ,TDS Payable Monthly,TDS maksetaan kuukausittain
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Queued for replacing the BOM. It may take a few minutes.,Jouduin korvaamaan BOM. Voi kestää muutaman minuutin.
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,Cannot deduct when category is for 'Valuation' or 'Valuation and Total',vähennystä ei voi tehdä jos kategoria on  'arvo'  tai 'arvo ja summa'
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Asenna Työntekijöiden nimeämisjärjestelmä kohtaan Henkilöstöresurssit&gt; HR-asetukset
 apps/erpnext/erpnext/regional/report/irs_1099/irs_1099.py,Total Payments,Maksut yhteensä
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,Serial Nos Required for Serialized Item {0},Sarjanumero tarvitaan sarjanumeroilla seuratulle tuotteelle {0}
 apps/erpnext/erpnext/config/accounting.py,Match Payments with Invoices,Match Maksut Laskut
@@ -5872,6 +5899,7 @@ DocType: Batch,Source Document Name,Lähde Asiakirjan nimi
 DocType: Production Plan,Get Raw Materials For Production,Hanki raaka-aineita tuotannolle
 DocType: Job Opening,Job Title,Työtehtävä
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py,Future Payment Ref,Tuleva maksu viite
+DocType: Quotation,Additional Discount and Coupon Code,Lisäalennus ja kuponkikoodi
 apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation.py,"{0} indicates that {1} will not provide a quotation, but all items \
 					have been quoted. Updating the RFQ quote status.","{0} ilmoittaa, että {1} ei anna tarjousta, mutta kaikki kohteet on mainittu. RFQ-lainauksen tilan päivittäminen."
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}.,Suurin näytteitä - {0} on jo säilytetty erää {1} ja erää {2} erää {3} varten.
@@ -6099,7 +6127,9 @@ DocType: Lab Prescription,Test Code,Testikoodi
 apps/erpnext/erpnext/config/website.py,Settings for website homepage,Verkkosivun kotisivun asetukset
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,{0} is on hold till {1},{0} on pidossa kunnes {1}
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py,RFQs are not allowed for {0} due to a scorecard standing of {1},"Tarjouspyynnöt eivät ole sallittuja {0}, koska tuloskortin arvo on {1}"
+apps/erpnext/erpnext/templates/pages/order.html,Make Purchase Invoice,tee ostolasku
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html,Used Leaves,Käytetyt lehdet
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/utils.py,{0} Coupon used are {1}. Allowed quantity is exhausted,{0} Käytetty kuponki on {1}. Sallittu määrä on käytetty loppuun
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Do you want to submit the material request,Haluatko lähettää materiaalipyynnön?
 DocType: Job Offer,Awaiting Response,Odottaa vastausta
 DocType: Course Schedule,EDU-CSH-.YYYY.-,EDU-CSH-.YYYY.-
@@ -6113,6 +6143,7 @@ apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py,Ro
 DocType: Training Event Employee,Optional,Valinnainen
 DocType: Salary Slip,Earning & Deduction,ansio & vähennys
 DocType: Agriculture Analysis Criteria,Water Analysis,Veden analyysi
+DocType: Sales Order,Skip Delivery Note,Ohita toimitusilmoitus
 DocType: Price List,Price Not UOM Dependent,Hinta ei ole riippuvainen UOM: sta
 apps/erpnext/erpnext/stock/doctype/item/item.js,{0} variants created.,{0} muunnoksia luotu.
 apps/erpnext/erpnext/support/doctype/service_level_agreement/service_level_agreement.py,A Default Service Level Agreement already exists.,Oletuksena oleva palvelutasosopimus on jo olemassa.
@@ -6217,6 +6248,7 @@ apps/erpnext/erpnext/public/js/hub/pages/Item.vue,Why do think this Item should 
 DocType: Vehicle,Last Carbon Check,Viimeksi Carbon Tarkista
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Legal Expenses,Juridiset kustannukset
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js,Please select quantity on row ,Valitse määrä rivillä
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Work Order {0}: job card not found for the operation {1},Työmääräys {0}: työkorttia ei löydy operaatiosta {1}
 DocType: Purchase Invoice,Posting Time,Tositeaika
 DocType: Timesheet,% Amount Billed,% laskutettu arvomäärä
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Telephone Expenses,Puhelinkulut
@@ -6319,7 +6351,6 @@ apps/erpnext/erpnext/hr/doctype/job_offer/job_offer.py,There are no vacancies un
 DocType: Purchase Invoice,Taxes and Charges Added,Lisätyt verot ja maksut
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Depreciation Row {0}: Next Depreciation Date cannot be before Available-for-use Date,Poistojauhe {0}: Seuraava Poistoaika ei voi olla ennen Käytettävissä olevaa päivämäärää
 ,Sales Funnel,Myyntihankekantaan
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Tuotekoodi&gt; Tuoteryhmä&gt; Tuotemerkki
 apps/erpnext/erpnext/setup/doctype/company/company.py,Abbreviation is mandatory,Lyhenne on pakollinen
 DocType: Project,Task Progress,tehtävä Progress
 apps/erpnext/erpnext/templates/includes/navbar/navbar_items.html,Cart,kori
@@ -6414,6 +6445,7 @@ apps/erpnext/erpnext/public/js/account_tree_grid.js,Select Fiscal Year...,Valits
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,POS Profile required to make POS Entry,POS profiili vaatii POS kirjauksen
 apps/erpnext/erpnext/accounts/doctype/loyalty_program/loyalty_program.js,"Loyalty Points will be calculated from the spent done (via the Sales Invoice), based on collection factor mentioned.","Hyvyyspisteet lasketaan vietyistä (myyntilaskun kautta), jotka perustuvat mainittuun keräyskertoimeen."
 DocType: Program Enrollment Tool,Enroll Students,Ilmoittaudu Opiskelijat
+DocType: Pricing Rule,Coupon Code Based,Kupongikoodi perustuu
 DocType: Company,HRA Settings,HRA-asetukset
 DocType: Homepage,Hero Section,Sankariosa
 DocType: Employee Transfer,Transfer Date,Siirtoaika
@@ -6529,6 +6561,7 @@ DocType: Contract,Party User,Party-käyttäjä
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py,Please set Company filter blank if Group By is 'Company',Aseta Yritysfiltteri tyhjäksi jos Ryhmittelyperuste on &#39;yritys&#39;
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py,Posting Date cannot be future date,Kirjoittamisen päivämäärä ei voi olla tulevaisuudessa
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,Row # {0}: Serial No {1} does not match with {2} {3},Rivi # {0}: Sarjanumero {1} ei vastaa {2} {3}
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Asenna läsnäolosuhteiden numerointisarjat kohdasta Asetukset&gt; Numerointisarjat
 DocType: Stock Entry,Target Warehouse Address,Kohdevaraston osoite
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Casual Leave,tavallinen poistuminen
 DocType: Shift Type,The time before the shift start time during which Employee Check-in is considered for attendance.,"Aika ennen vuoron alkamisaikaa, jonka aikana työntekijän lähtöselvitystä pidetään läsnäolona."
@@ -6563,7 +6596,6 @@ DocType: Education Settings,"For Course based Student Group, the Course will be 
 DocType: Employee Grade,Employee Grade,Työntekijäluokka
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Piecework,Urakkatyö
 DocType: GSTR 3B Report,June,kesäkuu
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Toimittaja&gt; Toimittajan tyyppi
 DocType: Share Balance,From No,Nro
 DocType: Shift Type,Early Exit Grace Period,Varhaisvaroitusaika
 DocType: Task,Actual Time (in Hours),todellinen aika (tunneissa)
@@ -6854,7 +6886,6 @@ apps/erpnext/erpnext/assets/doctype/asset/asset.py,Opening Accumulated Depreciat
 DocType: Warehouse,Warehouse Name,Varaston nimi
 DocType: Naming Series,Select Transaction,Valitse tapahtuma
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py,Please enter Approving Role or Approving User,Anna hyväksyminen rooli tai hyväksyminen Käyttäjä
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},UOM-muuntokerrointa ({0} -&gt; {1}) ei löydy tuotteelle: {2}
 apps/erpnext/erpnext/support/doctype/service_level_agreement/service_level_agreement.py,Service Level Agreement with Entity Type {0} and Entity {1} already exists.,Palvelutasosopimus entiteettityypin {0} ja kokonaisuuden {1} kanssa on jo olemassa.
 DocType: Journal Entry,Write Off Entry,Poiston kirjaus
 DocType: BOM,Rate Of Materials Based On,Materiaalilaskenta perustuen
@@ -6992,6 +7023,7 @@ apps/erpnext/erpnext/accounts/doctype/account/account.js,Merge with Existing Acc
 DocType: Budget,Warn,Varoita
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,All items have already been transferred for this Work Order.,Kaikki kohteet on jo siirretty tähän työjärjestykseen.
 DocType: Appraisal,"Any other remarks, noteworthy effort that should go in the records.","muut huomiot, huomioitavat asiat tulee laittaa tähän tietueeseen"
+DocType: Bank Account,Company Account,Yritystili
 DocType: Asset Maintenance,Manufacturing User,Valmistus peruskäyttäjä
 DocType: Purchase Invoice,Raw Materials Supplied,Raaka-aineet toimitettu
 DocType: Subscription Plan,Payment Plan,Maksusuunnitelma
@@ -7033,6 +7065,7 @@ DocType: Sales Invoice,Commission,provisio
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py,{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3},{0} ({1}) ei voi olla suurempi kuin suunniteltu määrä ({2}) Työjärjestyksessä {3}
 DocType: Certification Application,Name of Applicant,Hakijan nimi
 apps/erpnext/erpnext/config/manufacturing.py,Time Sheet for manufacturing.,Valmistuksen tuntilista
+DocType: Quick Stock Balance,Quick Stock Balance,Nopea varastotase
 apps/erpnext/erpnext/templates/pages/cart.html,Subtotal,Välisumma
 apps/erpnext/erpnext/stock/doctype/item/item.py,Cannot change Variant properties after stock transaction. You will have to make a new Item to do this.,Vaihtoehtoisia ominaisuuksia ei voi muuttaa varastotoiminnan jälkeen. Sinun täytyy tehdä uusi esine tehdä tämä.
 apps/erpnext/erpnext/config/integrations.py,GoCardless SEPA Mandate,GoCardless SEPA-toimeksianto
@@ -7359,6 +7392,7 @@ apps/erpnext/erpnext/config/accounting.py,Tax Category for overriding tax rates.
 apps/erpnext/erpnext/public/js/queries.js,Please set {0},Aseta {0}
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,{0} - {1} is inactive student,{0} - {1} ei ole aktiivinen opiskelija
 DocType: Employee,Health Details,"terveys, lisätiedot"
+DocType: Coupon Code,Coupon Type,Kupongin tyyppi
 DocType: Leave Encashment,Encashable days,Syytettävät päivät
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,To create a Payment Request reference document is required,Luoda maksatuspyyntö viiteasiakirja tarvitaan
 DocType: Soil Texture,Sandy Clay,Sandy Clay
@@ -7641,6 +7675,7 @@ apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py,Sales Person,M
 DocType: Hotel Room Package,Amenities,palveluihin
 DocType: Accounts Settings,Automatically Fetch Payment Terms,Hae maksuehdot automaattisesti
 DocType: QuickBooks Migrator,Undeposited Funds Account,Undeposited Funds Account
+DocType: Coupon Code,Uses,käyttötarkoitukset
 apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py,Multiple default mode of payment is not allowed,Useita oletusmaksutapoja ei sallita
 DocType: Sales Invoice,Loyalty Points Redemption,Uskollisuuspisteiden lunastus
 ,Appointment Analytics,Nimitys Analytics
@@ -7657,6 +7692,7 @@ DocType: Opening Invoice Creation Tool,Create Missing Party,Luo puuttuva puolue
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py,Total Budget,Kokonaisbudjetti
 DocType: Student Group Creation Tool,Leave blank if you make students groups per year,Jätä tyhjäksi jos teet opiskelijoiden ryhmää vuodessa
 DocType: HR Settings,"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day",täpättäessä lomapäivät sisältyvät työpäiviin ja tämä lisää palkan avoa / päivä
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py,Failed to add Domain,Verkkotunnuksen lisääminen epäonnistui
 apps/erpnext/erpnext/controllers/status_updater.py,"To allow over receipt / delivery, update ""Over Receipt/Delivery Allowance"" in Stock Settings or the Item.",Päivitä &quot;Yli kuitti / toimituskorvaus&quot; varastosäädöissä tai tuotteessa salliaksesi ylivastaanoton / toimituksen.
 apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.js,"Apps using current key won't be able to access, are you sure?","Nykyisen avaimen käyttämät sovellukset eivät voi käyttää, oletko varma?"
 DocType: Subscription Settings,Prorate,ositussopimuksen
@@ -7669,6 +7705,7 @@ DocType: Employee Benefit Claim,Max Amount Eligible,Suurin sallittu määrä
 ,BOM Stock Report,BOM Stock Report
 DocType: Communication Medium,"If there is no assigned timeslot, then communication will be handled by this group","Jos määritettyä aikaväliä ei ole, tämä ryhmä hoitaa viestinnän"
 DocType: Stock Reconciliation Item,Quantity Difference,Määrä ero
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Toimittaja&gt; Toimittajan tyyppi
 DocType: Opportunity Item,Basic Rate,perushinta
 DocType: GL Entry,Credit Amount,Luoton määrä
 ,Electronic Invoice Register,Sähköinen laskurekisteri
@@ -7922,6 +7959,7 @@ DocType: Academic Term,Term End Date,Ehtojen päättymispäivä
 DocType: Purchase Invoice,Taxes and Charges Deducted (Company Currency),Netto ilman veroja ja kuluja (yrityksen valuutassa)
 DocType: Item Group,General Settings,pääasetukset
 DocType: Article,Article,Artikla
+apps/erpnext/erpnext/shopping_cart/cart.py,Please enter coupon code !!,Anna kuponkikoodi !!
 apps/erpnext/erpnext/setup/doctype/currency_exchange/currency_exchange.py,From Currency and To Currency cannot be same,Lähde- ja kohdevaluutta eivät voi olla samoja
 DocType: Taxable Salary Slab,Percent Deduction,Prosentuaalinen vähennys
 DocType: GL Entry,To Rename,Nimeä uudelleen

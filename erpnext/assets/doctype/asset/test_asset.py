@@ -14,7 +14,6 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchas
 class TestAsset(unittest.TestCase):
 	def setUp(self):
 		set_depreciation_settings_in_company()
-		remove_prorated_depreciation_schedule()
 		create_asset_data()
 		frappe.db.sql("delete from `tabTax Rule`")
 
@@ -74,11 +73,13 @@ class TestAsset(unittest.TestCase):
 			{"voucher_type": "Purchase Invoice", "voucher_no": pi.name}))
 
 	def test_is_fixed_asset_set(self):
+		asset = create_asset(is_existing_asset = 1)
 		doc = frappe.new_doc('Purchase Invoice')
 		doc.supplier = '_Test Supplier'
 		doc.append('items', {
 			'item_code': 'Macbook Pro',
-			'qty': 1
+			'qty': 1,
+			'asset': asset.name
 		})
 
 		doc.set_missing_values()
@@ -204,7 +205,6 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(schedules, expected_schedules)
 
 	def test_schedule_for_prorated_straight_line_method(self):
-		set_prorated_depreciation_schedule()
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=1, rate=100000.0, location="Test Location")
 
@@ -236,8 +236,6 @@ class TestAsset(unittest.TestCase):
 			for d in asset.get("schedules")]
 
 		self.assertEqual(schedules, expected_schedules)
-
-		remove_prorated_depreciation_schedule()
 
 	def test_depreciation(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
@@ -566,6 +564,7 @@ class TestAsset(unittest.TestCase):
 			where voucher_type='Asset' and voucher_no = %s
 			order by account""", asset_doc.name)
 
+
 		self.assertEqual(gle, expected_gle)
 
 	def test_expense_head(self):
@@ -575,7 +574,6 @@ class TestAsset(unittest.TestCase):
 		doc = make_invoice(pr.name)
 
 		self.assertEquals('Asset Received But Not Billed - _TC', doc.items[0].expense_account)
-
 
 def create_asset_data():
 	if not frappe.db.exists("Asset Category", "Computers"):
@@ -597,15 +595,15 @@ def create_asset(**args):
 
 	asset = frappe.get_doc({
 		"doctype": "Asset",
-		"asset_name": "Macbook Pro 1",
+		"asset_name": args.asset_name or "Macbook Pro 1",
 		"asset_category": "Computers",
-		"item_code": "Macbook Pro",
-		"company": "_Test Company",
+		"item_code": args.item_code or "Macbook Pro",
+		"company": args.company or"_Test Company",
 		"purchase_date": "2015-01-01",
 		"calculate_depreciation": 0,
 		"gross_purchase_amount": 100000,
 		"expected_value_after_useful_life": 10000,
-		"warehouse": "_Test Warehouse - _TC",
+		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"available_for_use_date": "2020-06-06",
 		"location": "Test Location",
 		"asset_owner": "Company",
@@ -617,6 +615,9 @@ def create_asset(**args):
 	except frappe.DuplicateEntryError:
 		pass
 
+	if args.submit:
+		asset.submit()
+
 	return asset
 
 def create_asset_category():
@@ -624,6 +625,7 @@ def create_asset_category():
 	asset_category.asset_category_name = "Computers"
 	asset_category.total_number_of_depreciations = 3
 	asset_category.frequency_of_depreciation = 3
+	asset_category.enable_cwip_accounting = 1
 	asset_category.append("accounts", {
 		"company_name": "_Test Company",
 		"fixed_asset_account": "_Test Fixed Asset - _TC",
@@ -662,18 +664,3 @@ def set_depreciation_settings_in_company():
 
 	# Enable booking asset depreciation entry automatically
 	frappe.db.set_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically", 1)
-
-def remove_prorated_depreciation_schedule():
-	asset_settings = frappe.get_doc("Asset Settings", "Asset Settings")
-	asset_settings.schedule_based_on_fiscal_year = 0
-	asset_settings.save()
-
-	frappe.db.commit()
-
-def set_prorated_depreciation_schedule():
-	asset_settings = frappe.get_doc("Asset Settings", "Asset Settings")
-	asset_settings.schedule_based_on_fiscal_year = 1
-	asset_settings.number_of_days_in_fiscal_year = 360
-	asset_settings.save()
-
-	frappe.db.commit()

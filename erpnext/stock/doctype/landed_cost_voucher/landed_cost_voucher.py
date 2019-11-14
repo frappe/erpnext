@@ -130,7 +130,7 @@ class LandedCostVoucher(Document):
 
 			# update stock & gl entries for submit state of PR
 			doc.docstatus = 1
-			doc.update_stock_ledger(via_landed_cost_voucher=True)
+			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
 			doc.make_gl_entries()
 
 	def validate_asset_qty_and_status(self, receipt_document_type, receipt_document):
