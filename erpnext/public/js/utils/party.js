@@ -7,6 +7,15 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	if(!method) {
 		method = "erpnext.accounts.party.get_party_details";
 	}
+
+	if (frm.doc.company_address && (!args.company_address)) {
+		args.company_address = frm.doc.company_address;
+	}
+
+	if (frm.doc.shipping_address && (!args.shipping_address)) {
+		args.shipping_address = frm.doc.shipping_address;
+	}
+
 	if(!args) {
 		if((frm.doctype != "Purchase Order" && frm.doc.customer)
 			|| (frm.doc.party_name && in_list(['Quotation', 'Opportunity'], frm.doc.doctype))) {
