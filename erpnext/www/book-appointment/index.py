@@ -107,6 +107,7 @@ def create_appointment(date, time, tz, contact):
 	appointment.customer_email = contact.get('email', None)
 	appointment.status = 'Open'
 	appointment.insert()
+	return appointment
 
 # Helper Functions
 def filter_timeslots(date, timeslots):

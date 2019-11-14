@@ -200,16 +200,32 @@ async function submit() {
         return;
     }
     let contact = get_form_data();
-    let appointment = (await frappe.call({
+    let appointment =  frappe.call({
         method: 'erpnext.www.book-appointment.index.create_appointment',
         args: {
             'date': window.selected_date,
             'time': window.selected_time,
             'contact': contact,
             'tz':window.selected_timezone
+        },
+        callback: (response)=>{
+            if (response.message.status == "Unverified") {
+                frappe.show_alert("Please check your email to confirm the appointment")
+            } else {
+                frappe.show_alert("Appointment Created Successfully");
+            }
+            setTimeout(()=>{
+                let redirect_url = "/";
+                if (window.appointment_settings.success_redirect_url){
+                    redirect_url += window.appointment_settings.success_redirect_url;
+                }
+                window.location.href = redirect_url;},2)
+        },
+        error: (err)=>{
+            frappe.show_alert("Something went wrong please try again");
+            button.disabled = false;
         }
-    })).message;
-    frappe.msgprint(__('Appointment Created Successfully'));
+    });
 }
 
 function get_form_data() {
