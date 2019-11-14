@@ -47,23 +47,26 @@ class TestAssetMovement(unittest.TestCase):
 			}).insert()
 
 		movement1 = create_asset_movement(purpose = 'Transfer', company = asset.company, 
-			assets = [{ 'asset': asset.name , 'source_location': 'Test Location', 'target_location': 'Test Location 2'}])
+			assets = [{ 'asset': asset.name , 'source_location': 'Test Location', 'target_location': 'Test Location 2'}],
+			reference_doctype = 'Purchase Receipt', reference_name = pr.name)
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location 2")
 
 		movement2 = create_asset_movement(purpose = 'Transfer', company = asset.company, 
-			assets = [{ 'asset': asset.name , 'source_location': 'Test Location 2', 'target_location': 'Test Location'}])
+			assets = [{ 'asset': asset.name , 'source_location': 'Test Location 2', 'target_location': 'Test Location'}],
+			reference_doctype = 'Purchase Receipt', reference_name = pr.name)
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
-
-		employee = make_employee("testassetmovemp@example.com", company="_Test Company")
-		movement3 = create_asset_movement(purpose = 'Transfer', company = asset.company, 
-			assets = [{ 'asset': asset.name , 'source_location': 'Test Location', 'to_employee': employee}])
-		self.assertEqual(frappe.db.get_value("Asset", asset.name, "custodian"), employee)
 
 		movement1.cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
 
-		movement2.cancel()
-		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
+		employee = make_employee("testassetmovemp@example.com", company="_Test Company")
+		movement3 = create_asset_movement(purpose = 'Issue', company = asset.company, 
+			assets = [{ 'asset': asset.name , 'source_location': 'Test Location', 'to_employee': employee}],
+			reference_doctype = 'Purchase Receipt', reference_name = pr.name)
+		
+		# after issuing asset should belong to an employee not at a location
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), None)
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "custodian"), employee)
 	
 	def test_last_movement_cancellation(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
@@ -95,7 +98,8 @@ class TestAssetMovement(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, movement.cancel)
 
 		movement1 = create_asset_movement(purpose = 'Transfer', company = asset.company, 
-			assets = [{ 'asset': asset.name , 'source_location': 'Test Location', 'target_location': 'Test Location 2'}])
+			assets = [{ 'asset': asset.name , 'source_location': 'Test Location', 'target_location': 'Test Location 2'}],
+			reference_doctype = 'Purchase Receipt', reference_name = pr.name)
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location 2")
 
 		movement1.cancel()
@@ -112,7 +116,9 @@ def create_asset_movement(**args):
 		"assets": args.assets,
 		"transaction_date": args.transaction_date,
 		"company": args.company,
-		'purpose': args.purpose or 'Receipt'
+		'purpose': args.purpose or 'Receipt',
+		'reference_doctype': args.reference_doctype,
+		'reference_name': args.reference_name
 	})
 
 	movement.insert()

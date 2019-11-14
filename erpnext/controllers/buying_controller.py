@@ -629,6 +629,13 @@ class BuyingController(StockController):
 		return asset.name
 
 	def update_fixed_asset(self, field, delete_asset = False):
+		if delete_asset:
+			# need to delete movements to delete assets otherwise throws link exists error
+			movements = frappe.db.get_all('Asset Movement', filters={ 'reference_name': self.name })
+			for movement in movements:
+				movement.flags.force = 1
+				movement.delete()
+
 		for d in self.get("items"):
 			if d.is_fixed_asset:
 				assets = frappe.db.get_all("Asset", filters={ field : self.name, 'item_code' : d.item_code })
@@ -636,7 +643,7 @@ class BuyingController(StockController):
 				for asset in assets:
 					asset = frappe.get_doc('Asset', asset.name)
 					if delete_asset:
-						frappe.delete_doc("Asset", asset.name)
+						frappe.delete_doc("Asset", asset.name, force=1)
 						continue
 
 					if self.docstatus in [0, 1] and not asset.get(field):
