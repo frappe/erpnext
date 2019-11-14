@@ -237,7 +237,7 @@ class PurchaseInvoice(BuyingController):
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
 					item.expense_account = stock_not_billed_account
-			elif item.is_fixed_asset and is_cwip_accounting_enabled(self.company, asset_category):
+			elif item.is_fixed_asset and not is_cwip_accounting_enabled(self.company, asset_category):
 				item.expense_account = get_asset_category_account('fixed_asset_account', item=item.item_code,
 					company = self.company)
 			elif item.is_fixed_asset and item.pr_detail:
@@ -575,10 +575,7 @@ class PurchaseInvoice(BuyingController):
 		eiiav_account = self.get_company_default("expenses_included_in_asset_valuation")
 
 		for item in self.get("items"):
-			if item.item_code and item.is_fixed_asset :
-				asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
-
-			if item.is_fixed_asset and is_cwip_accounting_enabled(self.company, asset_category) :
+			if item.is_fixed_asset:
 				asset_amount = flt(item.net_amount) + flt(item.item_tax_amount/self.conversion_rate)
 				base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
 
