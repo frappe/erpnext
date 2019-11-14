@@ -21,7 +21,7 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 	department_list = []
 	employee = frappe.get_value("Employee", filters.get("employee"), ["department", "leave_approver"], as_dict=True)
 	if employee.leave_approver:
-		approver = frappe.db.get_value("User", leave_approver, ['name', 'first_name', 'last_name'])
+		approver = frappe.db.get_value("User", employee.leave_approver, ['name', 'first_name', 'last_name'])
 		approvers.append(approver)
 		return approvers
 
