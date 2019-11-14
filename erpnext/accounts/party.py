@@ -23,7 +23,7 @@ class DuplicatePartyAccountError(frappe.ValidationError): pass
 @frappe.whitelist()
 def get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None,
 	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True,
-	party_address=None, shipping_address=None, pos_profile=None):
+	party_address=None, company_address=None, shipping_address=None, pos_profile=None):
 
 	if not party:
 		return {}
@@ -31,11 +31,11 @@ def get_party_details(party=None, account=None, party_type="Customer", company=N
 		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 	return _get_party_details(party, account, party_type,
 		company, posting_date, bill_date, price_list, currency, doctype, ignore_permissions,
-		fetch_payment_terms_template, party_address, shipping_address, pos_profile)
+		fetch_payment_terms_template, party_address, company_address, shipping_address, pos_profile)
 
 def _get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None,
 	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False,
-	fetch_payment_terms_template=True, party_address=None, shipping_address=None, pos_profile=None):
+	fetch_payment_terms_template=True, party_address=None, company_address=None,shipping_address=None, pos_profile=None):
 
 	out = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype))
 	party = out[party_type.lower()]
@@ -46,16 +46,18 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	party = frappe.get_doc(party_type, party)
 	currency = party.default_currency if party.get("default_currency") else get_company_currency(company)
 
-	party_address, shipping_address = set_address_details(out, party, party_type, doctype, company, party_address, shipping_address)
+	party_address, shipping_address = set_address_details(out, party, party_type, doctype, company, party_address, company_address, shipping_address)
 	set_contact_details(out, party, party_type)
 	set_other_values(out, party, party_type)
 	set_price_list(out, party, party_type, price_list, pos_profile)
 
 	out["tax_category"] = get_address_tax_category(party.get("tax_category"),
 		party_address, shipping_address if party_type != "Supplier" else party_address)
-	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company,
-		customer_group=out.customer_group, supplier_group=out.supplier_group, tax_category=out.tax_category,
-		billing_address=party_address, shipping_address=shipping_address)
+
+	if not out.get("taxes_and_charges"):
+		out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company,
+			customer_group=out.customer_group, supplier_group=out.supplier_group, tax_category=out.tax_category,
+			billing_address=party_address, shipping_address=shipping_address)
 
 	if fetch_payment_terms_template:
 		out["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
@@ -76,7 +78,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 
 	return out
 
-def set_address_details(out, party, party_type, doctype=None, company=None, party_address=None, shipping_address=None):
+def set_address_details(out, party, party_type, doctype=None, company=None, party_address=None, company_address=None, shipping_address=None):
 	billing_address_field = "customer_address" if party_type == "Lead" \
 		else party_type.lower() + "_address"
 	out[billing_address_field] = party_address or get_default_address(party_type, party.name)
@@ -91,14 +93,17 @@ def set_address_details(out, party, party_type, doctype=None, company=None, part
 		if doctype:
 			out.update(get_fetch_values(doctype, 'shipping_address_name', out.shipping_address_name))
 
-	if doctype and doctype in ['Delivery Note', 'Sales Invoice']:
+	if company_address:
+		out.update({'company_address': company_address})
+	else:
 		out.update(get_company_address(company))
+
+	if doctype and doctype in ['Delivery Note', 'Sales Invoice']:
 		if out.company_address:
 			out.update(get_fetch_values(doctype, 'company_address', out.company_address))
 		get_regional_address_details(out, doctype, company)
 
 	elif doctype and doctype == "Purchase Invoice":
-		out.update(get_company_address(company))
 		if out.company_address:
 			out["shipping_address"] = shipping_address or out["company_address"]
 			out.shipping_address_display = get_address_display(out["shipping_address"])

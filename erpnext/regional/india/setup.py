@@ -148,13 +148,13 @@ def make_custom_fields(update=True):
 	purchase_invoice_gst_fields = [
 			dict(fieldname='supplier_gstin', label='Supplier GSTIN',
 				fieldtype='Data', insert_after='supplier_address',
-				fetch_from='supplier_address.gstin', print_hide=1),
+				fetch_from='supplier_address.gstin', print_hide=1, read_only=1),
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='shipping_address_display',
-				fetch_from='shipping_address.gstin', print_hide=1),
+				fetch_from='shipping_address.gstin', print_hide=1, read_only=1),
 			dict(fieldname='place_of_supply', label='Place of Supply',
 				fieldtype='Data', insert_after='shipping_address',
-				print_hide=1, read_only=0),
+				print_hide=1, read_only=1),
 		]
 
 	purchase_invoice_itc_fields = [
@@ -173,14 +173,14 @@ def make_custom_fields(update=True):
 
 	sales_invoice_gst_fields = [
 			dict(fieldname='billing_address_gstin', label='Billing Address GSTIN',
-				fieldtype='Data', insert_after='customer_address',
+				fieldtype='Data', insert_after='customer_address', read_only=1,
 				fetch_from='customer_address.gstin', print_hide=1),
 			dict(fieldname='customer_gstin', label='Customer GSTIN',
 				fieldtype='Data', insert_after='shipping_address_name',
 				fetch_from='shipping_address_name.gstin', print_hide=1),
 			dict(fieldname='place_of_supply', label='Place of Supply',
 				fieldtype='Data', insert_after='customer_gstin',
-				print_hide=1, read_only=0),
+				print_hide=1, read_only=1),
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='company_address',
 				fetch_from='company_address.gstin', print_hide=1),
@@ -200,7 +200,9 @@ def make_custom_fields(update=True):
 
 	inter_state_gst_field = [
 		dict(fieldname='is_inter_state', label='Is Inter State',
-			fieldtype='Check', insert_after='disabled', print_hide=1)
+			fieldtype='Check', insert_after='disabled', print_hide=1),
+		dict(fieldname='gst_state', label='Company GST State', fieldtype='Select',
+			options='\n'.join(states), insert_after='company')
 	]
 
 	ewaybill_fields = [
