@@ -589,6 +589,10 @@ def validate_state_code(state_code, address):
 
 def set_accounts_to_skip(doc, method=None):
 	gst_accounts = get_gst_accounts(doc.company)
+
+	if not gst_accounts:
+		return
+
 	inter_state_accounts = gst_accounts['igst_account']
 	intra_state_accounts = gst_accounts['cgst_account'] + gst_accounts['sgst_account']
 
