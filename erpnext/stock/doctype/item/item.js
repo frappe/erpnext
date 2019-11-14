@@ -49,7 +49,7 @@ frappe.ui.form.on("Item", {
 		if (!frm.doc.is_fixed_asset) {
 			erpnext.item.make_dashboard(frm);
 		}
-		
+
 		if (frm.doc.is_fixed_asset) {
 			frm.trigger('is_fixed_asset');
 			frm.trigger('auto_create_assets');

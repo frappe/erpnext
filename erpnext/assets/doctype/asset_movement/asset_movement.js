@@ -25,7 +25,7 @@ frappe.ui.form.on('Asset Movement', {
 				}
 			};
 		})
-		frm.set_query("reference_doctype", (doc) => {
+		frm.set_query("reference_doctype", () => {
 			return {
 				filters: {
 					name: ["in", ["Purchase Receipt", "Purchase Invoice"]]
@@ -38,43 +38,43 @@ frappe.ui.form.on('Asset Movement', {
 		frm.trigger('set_required_fields');
 	},
 
-	purpose: (frm, cdt, cdn) => {
+	purpose: (frm) => {
 		frm.trigger('set_required_fields');
 	},
 
 	set_required_fields: (frm, cdt, cdn) => {
 		let fieldnames_to_be_altered;
 		if (frm.doc.purpose === 'Transfer') {
-			fieldnames_to_be_altered = { 
+			fieldnames_to_be_altered = {
 				target_location: { read_only: 0, reqd: 1 },
 				source_location: { read_only: 1, reqd: 1 },
 				from_employee: { read_only: 1, reqd: 0 },
 				to_employee: { read_only: 1, reqd: 0 }
-			}
+			};
 		}
 		else if (frm.doc.purpose === 'Receipt') {
-			fieldnames_to_be_altered = { 
+			fieldnames_to_be_altered = {
 				target_location: { read_only: 0, reqd: 1 },
 				source_location: { read_only: 1, reqd: 0 },
 				from_employee: { read_only: 0, reqd: 1 },
 				to_employee: { read_only: 1, reqd: 0 }
-			}
+			};
 		}
 		else if (frm.doc.purpose === 'Issue') {
-			fieldnames_to_be_altered = { 
+			fieldnames_to_be_altered = {
 				target_location: { read_only: 1, reqd: 0 },
 				source_location: { read_only: 1, reqd: 1 },
 				from_employee: { read_only: 1, reqd: 0 },
 				to_employee: { read_only: 0, reqd: 1 }
-			}
+			};
 		}
 		Object.keys(fieldnames_to_be_altered).forEach(fieldname => {
 			let property_to_be_altered = fieldnames_to_be_altered[fieldname];
 			Object.keys(property_to_be_altered).forEach(property => {
 				let value = property_to_be_altered[property];
 				frm.set_df_property(fieldname, property, value, cdn, 'assets');
-			})
-		})
+			});
+		});
 		frm.refresh_field('assets');
 	},
 
@@ -114,7 +114,7 @@ frappe.ui.form.on('Asset Movement', {
 					frm.refresh_field('assets');
 				})
 			}).catch((err) => {
-				console.log(err);
+				console.log(err); // eslint-disable-line
 			});
 		} else {
 			// if reference is deleted then remove query
