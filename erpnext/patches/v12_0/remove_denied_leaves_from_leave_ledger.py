@@ -23,4 +23,4 @@ def delete_denied_leaves_from_leave_ledger_entry(leave_application_list):
 		FROM `tabLeave Ledger Entry`
 		WHERE
 			transaction_type = 'Leave Application'
-			AND transaction_name in {0} '''.format(tuple(leave_application_list)))
+			AND transaction_name in {0} '''.format(tuple(leave_application_list))) #nosec
