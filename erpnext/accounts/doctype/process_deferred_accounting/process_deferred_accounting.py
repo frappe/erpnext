@@ -10,6 +10,10 @@ from erpnext.accounts.deferred_revenue import convert_deferred_expense_to_expens
 	convert_deferred_revenue_to_income
 
 class ProcessDeferredAccounting(Document):
+	def autoname(self):
+		naming_series = [self.type, self.company, self.account, self.posting_date]
+		self.name = '-'.join(filter(None, naming_series))
+
 	def on_submit(self):
 		conditions = self.build_conditions()
 		if self.type == 'Income':

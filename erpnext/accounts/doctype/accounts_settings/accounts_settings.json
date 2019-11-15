@@ -21,7 +21,7 @@
   "allow_cost_center_in_entry_of_bs_account",
   "add_taxes_from_item_tax_template",
   "automatically_fetch_payment_terms",
-  "automatically_process_deferred_account_entry",
+  "automatically_process_deferred_accounting_entry",
   "print_settings",
   "show_inclusive_tax_in_print",
   "column_break_12",
@@ -185,15 +185,15 @@
   },
   {
    "default": "0",
-   "fieldname": "automatically_process_deferred_account_entry",
+   "fieldname": "automatically_process_deferred_accounting_entry",
    "fieldtype": "Check",
-   "label": "Automatically Process Deferred Account Entry"
+   "label": "Automatically Process Deferred Accounting Entry"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2019-11-20 01:29:06.616125",
+ "modified": "2019-11-20 02:32:44.443384",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

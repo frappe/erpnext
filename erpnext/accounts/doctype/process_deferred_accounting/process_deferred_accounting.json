@@ -4,9 +4,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "company",
   "type",
   "account",
-  "company",
   "column_break_3",
   "posting_date",
   "start_date",
@@ -17,8 +17,10 @@
   {
    "fieldname": "type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Type",
-   "options": "\nIncome\nExpense"
+   "options": "\nIncome\nExpense",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -32,12 +34,16 @@
   {
    "fieldname": "start_date",
    "fieldtype": "Date",
-   "label": "Start Date"
+   "in_list_view": 1,
+   "label": "Start Date",
+   "reqd": 1
   },
   {
    "fieldname": "end_date",
    "fieldtype": "Date",
-   "label": "End Date"
+   "in_list_view": 1,
+   "label": "End Date",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_3",
@@ -47,7 +53,9 @@
    "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "label": "Posting Date"
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
   },
   {
    "fieldname": "account",
@@ -63,7 +71,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-11-20 00:34:22.592556",
+ "modified": "2019-11-20 02:31:20.595163",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Deferred Accounting",
