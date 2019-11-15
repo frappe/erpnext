@@ -72,6 +72,8 @@ class Analytics(object):
 			})
 
 	def get_data(self):
+		self.company_currency = frappe.get_cached_value('Company', self.filters.get("company"), "default_currency")
+
 		if self.filters.tree_type == 'Customer':
 			self.get_entries("s.customer", "s.customer_name")
 			self.get_rows()
@@ -158,6 +160,16 @@ class Analytics(object):
 			"Transaction Qty": "qty"
 		}
 		return filter_to_field.get(self.filters.value_field, "base_net_amount")
+
+	def get_value_fieldtype(self):
+		filter_to_field = {
+			"Net Amount": "Currency",
+			"Amount": "Currency",
+			"Stock Qty": "Float",
+			"Contents Qty": "Float",
+			"Transaction Qty": "Float"
+		}
+		return filter_to_field.get(self.filters.value_field, "Currency")
 
 	def get_conditions(self):
 		conditions = []
@@ -349,5 +361,9 @@ class Analytics(object):
 				'labels': labels,
 				'datasets':[]
 			},
-			"type": "line"
+			"type": "line",
+			"fieldtype": self.get_value_fieldtype()
 		}
+
+		if self.chart.get("fieldtype") == "Currency":
+			self.chart['options'] = self.company_currency

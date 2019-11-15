@@ -634,6 +634,8 @@ class ReceivablePayableReport(object):
 		else:
 			row["currency"] = self.company_currency
 
+		self.account_currency = row["currency"]
+
 		remaining_balance = outstanding_amount - flt(pdc_amount)
 		pdc_details = ", ".join(pdc_details)
 
@@ -977,7 +979,9 @@ class ReceivablePayableReport(object):
 				'datasets': rows
 			},
 			"colors": ['light-blue', 'blue', 'purple', 'orange', 'red'],
-			"type": 'percentage'
+			"type": 'percentage',
+			"fieldtype": "Currency",
+			"options": getattr(self, 'account_currency')
 		}
 
 def execute(filters=None):
