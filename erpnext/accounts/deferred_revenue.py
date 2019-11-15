@@ -54,8 +54,6 @@ def convert_deferred_expense_to_expense(start_date=None, end_date=None,  conditi
 		doc = frappe.get_doc("Purchase Invoice", invoice)
 		book_deferred_income_or_expense(doc, end_date)
 
-	create_process_deferred_accounting('Expense', start_date, end_date)
-
 def convert_deferred_revenue_to_income(start_date=None, end_date=None, conditions=''):
 	# book the expense/income on the last day, but it will be trigger on the 1st of month at 12:00 AM
 	if not start_date:
@@ -76,8 +74,6 @@ def convert_deferred_revenue_to_income(start_date=None, end_date=None, condition
 	for invoice in invoices:
 		doc = frappe.get_doc("Sales Invoice", invoice)
 		book_deferred_income_or_expense(doc, end_date)
-
-	create_deferred_accounting_record('Income', start_date, end_date)
 
 def get_booking_dates(doc, item, posting_date=None):
 	if not posting_date:
@@ -179,21 +175,27 @@ def book_deferred_income_or_expense(doc, posting_date=None):
 		if item.get(enable_check):
 			_book_deferred_revenue_or_expense(item)
 
-def create_deferred_accounting_record(record_type, start_date, end_date, posting_date=today()):
-	''' Create deferred accounting entry '''
-	if not cint(frappe.db.get_singles_value('Accounts Settings', 'automatically_process_deferred_account_entry')):
+def process_deferred_accounting_record(posting_date=today()):
+	''' Converts deferred income/expense into income/expense
+		Executed via background jobs on every month end '''
+
+	if not cint(frappe.db.get_singles_value('Accounts Settings', 'automatically_process_deferred_accounting_entry')):
 		return
 
-	doc = frappe.get_doc(dict(
-		doctype='Process Deferred Accounting',
-		posting_date=posting_date,
-		start_date=start_date,
-		end_date=end_date,
-		type=record_type
-	))
+	start_date = add_months(today(), -1)
+	end_date = add_days(today(), -1)
 
-	doc.insert()
-	doc.submit()
+	for record_type in ('Income', 'Expense'):
+		doc = frappe.get_doc(dict(
+			doctype='Process Deferred Accounting',
+			posting_date=posting_date,
+			start_date=start_date,
+			end_date=end_date,
+			type=record_type
+		))
+
+		doc.insert()
+		doc.submit()
 
 def make_gl_entries(doc, credit_account, debit_account, against,
 	amount, base_amount, posting_date, project, account_currency, cost_center, voucher_detail_no):

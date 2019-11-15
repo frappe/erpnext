@@ -311,8 +311,7 @@ scheduler_events = {
 		"erpnext.hr.utils.generate_leave_encashment"
 	],
 	"monthly_long": [
-		"erpnext.accounts.deferred_revenue.convert_deferred_revenue_to_income",
-		"erpnext.accounts.deferred_revenue.convert_deferred_expense_to_expense",
+		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
 		"erpnext.hr.utils.allocate_earned_leaves"
 	]
 }
