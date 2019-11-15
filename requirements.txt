@@ -1,10 +1,10 @@
-frappe
-Unidecode==1.1.1
-PyGithub==1.43.8
-googlemaps==3.1.1
-python-stdnum==1.11
 braintree==3.57.1
+frappe
 gocardless-pro==1.10.0
-WooCommerce==2.1.1
+googlemaps==3.1.1
 pandas==0.25.1
 plaid-python==3.4.0
+PyGithub==1.43.8
+python-stdnum==1.11
+Unidecode==1.1.1
+WooCommerce==2.1.1
