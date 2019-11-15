@@ -36,7 +36,7 @@ class Asset(AccountsController):
 			self.make_gl_entries()
 		
 	def before_cancel(self):
-		self.cancel_asset_movements()
+		self.cancel_auto_gen_movement()
 
 	def on_cancel(self):
 		self.validate_cancellation()
@@ -125,13 +125,15 @@ class Asset(AccountsController):
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(self.purchase_date):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
 
-	def cancel_asset_movements(self):
+	def cancel_auto_gen_movement(self):
 		reference_docname = self.purchase_invoice or self.purchase_receipt
-		movements = frappe.db.get_all('Asset Movement', filters={ 'reference_name': reference_docname })
-		for movement in movements:
-			movement = frappe.get_doc('Asset Movement', movement.get('name'))
-			movement.flags.ignore_validate = True
-			movement.cancel()
+		movement = frappe.db.get_all('Asset Movement', filters={ 'reference_name': reference_docname, 'docstatus': 1 })
+		if len(movement) > 1:
+			frappe.throw(_('Asset has multiple Asset Movement Entries which has to be \
+				cancelled manually to cancel this asset.'))
+		movement = frappe.get_doc('Asset Movement', movement[0].get('name'))
+		movement.flags.ignore_validate = True
+		movement.cancel()
 		
 	def make_asset_movement(self):
 		reference_doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'

@@ -96,7 +96,7 @@ class AssetMovement(Document):
 	
 	def validate_last_movement(self):
 		for d in self.assets:
-			movement_entries = frappe.db.sql(
+			auto_gen_movement_entry = frappe.db.sql(
 				"""
 				SELECT asm.name
 				FROM  `tabAsset Movement Item` asm_item, `tabAsset Movement` asm
@@ -104,11 +104,15 @@ class AssetMovement(Document):
 					asm.docstatus=1 and
 					asm_item.parent=asm.name and
 					asm_item.asset=%s and
-					asm.company=%s
-				""", (d.asset, self.company), as_dict=1)
-			if len(movement_entries) <= 1:
-				frappe.throw(_('{1} Cannot cancel this document as it is the last Asset Movement \
-					Entry for Asset {0}').format(d.asset, len(movement_entries)))
+					asm.company=%s and
+					asm.source_location is NULL and
+					asm.purpose=%s
+				ORDER BY
+					asm.transaction_date asc
+				""", (d.asset, self.company, 'Receipt'), as_dict=1)
+			if auto_gen_movement_entry[0].get('name') == self.name:
+				frappe.throw(_('{0} will be cancelled automatically on asset cancellation as it was \
+					auto generated for Asset {1}').format(self.name, d.asset))
 
 	def set_latest_location_in_asset(self):
 		current_location, current_employee = '', ''
