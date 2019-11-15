@@ -981,7 +981,7 @@ class ReceivablePayableReport(object):
 			"colors": ['light-blue', 'blue', 'purple', 'orange', 'red'],
 			"type": 'percentage',
 			"fieldtype": "Currency",
-			"options": getattr(self, 'account_currency')
+			"options": getattr(self, 'account_currency', None)
 		}
 
 def execute(filters=None):
