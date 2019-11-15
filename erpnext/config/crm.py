@@ -46,6 +46,11 @@ def get_data():
 					"name": "Contract",
 					"description": _("Helps you keep tracks of Contracts based on Supplier, Customer and Employee"),
 				},
+				{
+					"type": "doctype",
+					"name": "Appointment",
+					"description" : _("Helps you manage appointments with your leads"),
+				},
 			]
 		},
 		{
