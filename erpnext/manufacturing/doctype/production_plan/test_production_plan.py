@@ -11,11 +11,9 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import get_sa
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 class TestProductionPlan(unittest.TestCase):
 	def setUp(self):
-		set_perpetual_inventory(0)
 		for item in ['Test Production Item 1', 'Subassembly Item 1',
 			'Raw Material Item 1', 'Raw Material Item 2']:
 			create_item(item, valuation_rate=100)
