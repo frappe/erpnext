@@ -105,7 +105,7 @@ class AssetMovement(Document):
 					asm_item.parent=asm.name and
 					asm_item.asset=%s and
 					asm.company=%s and
-					asm.source_location is NULL and
+					asm_item.source_location is NULL and
 					asm.purpose=%s
 				ORDER BY
 					asm.transaction_date asc
