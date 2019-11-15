@@ -471,7 +471,44 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				}
 			}
 
-			frappe.prompt(this.get_prompt_fields(),
+
+			let me = this;
+
+			var dialog = frappe.prompt([{
+					fieldtype: 'Link',
+					label: __('Company'),
+					options: 'Company',
+					fieldname: 'company',
+					default: me.frm.doc.company,
+					reqd: 1,
+					onchange: function(e) {
+							me.get_default_pos_profile(this.value).then((r) => {
+								if (r && r.name) {
+									dialog.set_value('pos_profile', r.name);
+								}
+							});
+						}
+					},
+					{
+					fieldtype: 'Link',
+					label: __('POS Profile'),
+					options: 'POS Profile',
+					fieldname: 'pos_profile',
+					default: me.frm.doc.pos_profile,
+					reqd: 1,
+					get_query: () => {
+						return {
+							query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
+							filters: {
+								company: dialog.get_value('company')
+							}
+						};
+					}
+				}, {
+					fieldtype: 'Check',
+					label: __('Set as default'),
+					fieldname: 'set_as_default'
+				}],
 				on_submit,
 				__('Select POS Profile')
 			);
@@ -494,38 +531,9 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		]);
 	}
 
-	get_prompt_fields() {
-		var company_field = this.frm.doc.company;
-		return [{
-			fieldtype: 'Link',
-			label: __('Company'),
-			options: 'Company',
-			fieldname: 'company',
-			default: this.frm.doc.company,
-			reqd: 1,
-			onchange: function(e) {
-					company_field = this.value;
-				}
-			},
-			{
-			fieldtype: 'Link',
-			label: __('POS Profile'),
-			options: 'POS Profile',
-			fieldname: 'pos_profile',
-			reqd: 1,
-			get_query: () => {
-				return {
-					query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
-					filters: {
-						company: company_field
-					}
-				};
-			}
-		}, {
-			fieldtype: 'Check',
-			label: __('Set as default'),
-			fieldname: 'set_as_default'
-		}];
+	get_default_pos_profile(company) {
+		return frappe.xcall("erpnext.stock.get_item_details.get_pos_profile",
+			{'company': company})
 	}
 
 	setup_company() {
