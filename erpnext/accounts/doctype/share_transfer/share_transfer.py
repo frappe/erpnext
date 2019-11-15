@@ -97,17 +97,17 @@ class ShareTransfer(Document):
 			if not self.asset_account:
 				frappe.throw(_('The field Asset Account cannot be blank'))
 		else:
-			if self.from_shareholder is None or self.to_shareholder is None:
+			if not self.from_shareholder or not self.to_shareholder:
 				frappe.throw(_('The fields From Shareholder and To Shareholder cannot be blank'))
-			if self.to_folio_no is None or self.to_folio_no is '':
+			if not self.to_folio_no:
 				self.to_folio_no = self.autoname_folio(self.to_shareholder)
-		if self.equity_or_liability_account is None:
+		if not self.equity_or_liability_account:
 				frappe.throw(_('The field Equity/Liability Account cannot be blank'))
 		if self.from_shareholder == self.to_shareholder:
 			frappe.throw(_('The seller and the buyer cannot be the same'))
 		if self.no_of_shares != self.to_no - self.from_no + 1:
 			frappe.throw(_('The number of shares and the share numbers are inconsistent'))
-		if self.amount is None:
+		if not self.amount:
 			self.amount = self.rate * self.no_of_shares
 		if self.amount != self.rate * self.no_of_shares:
 			frappe.throw(_('There are inconsistencies between the rate, no of shares and the amount calculated'))
@@ -190,9 +190,9 @@ class ShareTransfer(Document):
 			doc = frappe.get_doc('Shareholder', self.get(shareholder))
 			if doc.company != self.company:
 				frappe.throw(_('The shareholder does not belong to this company'))
-			if doc.folio_no is '' or doc.folio_no is None:
+			if not doc.folio_no:
 				doc.folio_no = self.from_folio_no \
-					if (shareholder == 'from_shareholder') else self.to_folio_no;
+					if (shareholder == 'from_shareholder') else self.to_folio_no
 				doc.save()
 			else:
 				if doc.folio_no and doc.folio_no != (self.from_folio_no if (shareholder == 'from_shareholder') else self.to_folio_no):
