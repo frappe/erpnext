@@ -163,9 +163,16 @@ def validate_account_for_perpetual_inventory(gl_map):
 						.format(account), StockAccountInvalidTransaction)
 
 			elif account_bal != stock_bal:
-				frappe.throw(_("Account Balance ({0}) and Stock Value ({1}) is out of sync for account {2} and linked warehouse ({3}). Please create adjustment Journal Entry for amount {4}.")
-					.format(account_bal, stock_bal, account, comma_and(warehouse_list), stock_bal - account_bal),
-					StockValueAndAccountBalanceOutOfSync)
+				error_reason = _("Account Balance ({0}) and Stock Value ({1}) is out of sync for account {2} and it's linked warehouses.").format(
+					account_bal, stock_bal, frappe.bold(account))
+				error_resolution = _("Please create adjustment Journal Entry for amount {0} ").format(frappe.bold(stock_bal - account_bal))
+				button_text = _("Make Adjustment Entry")
+
+				frappe.throw("""{0}<br></br>{1}<br></br>
+					<div style="text-align:right;">
+					<button class="btn btn-primary" onclick="frappe.new_doc('Journal Entry')">{2}</button>
+					</div>""".format(error_reason, error_resolution, button_text),
+					StockValueAndAccountBalanceOutOfSync, title=_('Account Balance Out Of Sync'))
 
 def validate_cwip_accounts(gl_map):
 	cwip_enabled = cint(frappe.get_cached_value("Company",
