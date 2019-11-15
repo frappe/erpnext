@@ -181,12 +181,6 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		}
 
-		if (frm.doc.docstatus === 0) {
-			frm.add_custom_button(__('Bill of Materials'), function(){
-				frm.events.get_items_from_bom(frm);
-			}, __("Get items from"));
-		}
-
 		if (frm.doc.docstatus===0) {
 			frm.add_custom_button(__('Purchase Invoice'), function() {
 				erpnext.utils.map_current_doc({
@@ -255,6 +249,17 @@ frappe.ui.form.on('Stock Entry', {
 		}
 
 		frm.trigger("setup_quality_inspection");
+	},
+
+	stock_entry_type: function(frm){
+		frm.remove_custom_button('Bill of Materials', "Get items from");
+
+		if (frm.doc.docstatus === 0 && ['Material Issue','Material Receipt',
+		'Material Transfer','Send to Subcontractor'].includes(frm.doc.purpose)) {
+			frm.add_custom_button(__('Bill of Materials'), function(){
+				frm.events.get_items_from_bom(frm);
+			}, __("Get items from"));
+		}
 	},
 
 	purpose: function(frm) {
@@ -411,10 +416,10 @@ frappe.ui.form.on('Stock Entry', {
 			"label":__("Fetch exploded BOM (including sub-assemblies)"), "default":1},
 			{"fieldname":"fetch", "label":__("Get Items from BOM"), "fieldtype":"Button"}
 		]
-		if (frm.doc.stock_entry_type == 'Material Issue'){
+		if (frm.doc.purpose == 'Material Issue'){
 			fields.splice(2,1);
 		}
-		else if(frm.doc.stock_entry_type == 'Material Receipt'){
+		else if(frm.doc.purpose == 'Material Receipt'){
 			fields.splice(1,1);
 		}
 
