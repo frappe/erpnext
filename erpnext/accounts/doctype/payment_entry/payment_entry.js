@@ -554,7 +554,7 @@ frappe.ui.form.on('Payment Entry', {
 			frappe.flags.allocate_payment_amount = true;
 			frm.events.validate_filters_data(frm, filters);
 			frm.events.get_outstanding_documents(frm, filters);
-		}, __("Filters"), __("Get Outstanding Invoices"));
+		}, __("Filters"), __("Get Outstanding Documents"));
 	},
 
 	validate_filters_data: function(frm, filters) {

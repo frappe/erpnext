@@ -991,10 +991,8 @@ class SalesInvoice(SellingController):
 				continue
 
 			for serial_no in item.serial_no.split("\n"):
-				if serial_no and frappe.db.exists('Serial No', serial_no):
-					sno = frappe.get_doc('Serial No', serial_no)
-					sno.sales_invoice = invoice
-					sno.db_update()
+				if serial_no and frappe.db.get_value('Serial No', serial_no, 'item_code') == item.item_code:
+					frappe.db.set_value('Serial No', serial_no, 'sales_invoice', invoice)
 
 	def validate_serial_numbers(self):
 		"""
@@ -1040,8 +1038,9 @@ class SalesInvoice(SellingController):
 				continue
 
 			for serial_no in item.serial_no.split("\n"):
-				sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
-				if sales_invoice and self.name != sales_invoice:
+				sales_invoice, item_code = frappe.db.get_value("Serial No", serial_no,
+					["sales_invoice", "item_code"])
+				if sales_invoice and item_code == item.item_code and self.name != sales_invoice:
 					sales_invoice_company = frappe.db.get_value("Sales Invoice", sales_invoice, "company")
 					if sales_invoice_company == self.company:
 						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}"
@@ -1230,7 +1229,8 @@ class SalesInvoice(SellingController):
 					self.status = "Unpaid and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
 					self.status = "Unpaid"
-				elif flt(self.outstanding_amount) < 0 and self.is_return==0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+				#Check if outstanding amount is 0 due to credit note issued against invoice
+				elif flt(self.outstanding_amount) <= 0 and self.is_return == 0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
 					self.status = "Credit Note Issued"
 				elif self.is_return == 1:
 					self.status = "Return"
