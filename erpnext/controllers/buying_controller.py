@@ -587,7 +587,7 @@ class BuyingController(StockController):
 					# Check for asset naming series
 					if item_data.get('asset_naming_series'):
 						for qty in range(cint(d.qty)):
-							asset_name = self.make_asset(d)
+							self.make_asset(d)
 						is_plural = 's' if cint(d.qty) != 1 else ''
 						frappe.msgprint(_('{0} Asset{2} Created for {1}').format(cint(d.qty), d.item_code, is_plural))
 					else:
@@ -626,23 +626,19 @@ class BuyingController(StockController):
 		asset.set_missing_values()
 		asset.insert()
 
-		return asset.name
-
 	def update_fixed_asset(self, field, delete_asset = False):
-		if delete_asset:
-			# need to delete movements to delete assets otherwise throws link exists error
-			movements = frappe.db.get_all('Asset Movement', filters={ 'reference_name': self.name })
-			for movement in movements:
-				movement.flags.force = 1
-				movement.delete()
-
 		for d in self.get("items"):
 			if d.is_fixed_asset:
-				assets = frappe.db.get_all("Asset", filters={ field : self.name, 'item_code' : d.item_code })
+				is_auto_create_enabled = frappe.db.get_value('Item', d.item_code, 'auto_create_assets')
+				assets = frappe.db.get_all('Asset', filters={ field : self.name, 'item_code' : d.item_code })
 
 				for asset in assets:
 					asset = frappe.get_doc('Asset', asset.name)
-					if delete_asset:
+					if delete_asset and is_auto_create_enabled:
+						# need to delete movements to delete assets otherwise throws link exists error
+						movements = frappe.db.get_all('Asset Movement', filters={ 'reference_name': self.name })
+						for movement in movements:
+							frappe.delete_doc('Asset Movement', movement.name, force=1)
 						frappe.delete_doc("Asset", asset.name, force=1)
 						continue
 
@@ -666,7 +662,6 @@ class BuyingController(StockController):
 			return
 
 		frappe.db.sql("delete from `tabAsset Movement` where reference_name=%s", self.name)
-		frappe.db.sql("delete from `tabSerial No` where purchase_document_no=%s", self.name)
 
 	def validate_schedule_date(self):
 		if not self.get("items"):
