@@ -292,8 +292,6 @@ class PurchaseReceipt(BuyingController):
 				valuation_tax[tax.name] += \
 					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.base_tax_amount_after_discount_amount)
 
-				account_head_list.append(tax.account_head)
-
 		if negative_expense_to_be_booked and valuation_tax:
 			# Backward compatibility:
 			# If expenses_included_in_valuation account has been credited in against PI
