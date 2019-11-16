@@ -86,7 +86,7 @@ class ProductionPlan(Document):
 				"item": self.item_code,
 				"company": self.company,
 				"from_delivery_date": self.from_delivery_date,
-				"to_delivery_date": self.from_delivery_date
+				"to_delivery_date": self.to_delivery_date
 			}, as_dict=1)
 
 		self.add_mr_in_table(pending_mr)
@@ -729,8 +729,8 @@ def get_item_data(item_code):
 
 	return {
 		"bom_no": item_details.get("bom_no"),
-		"stock_uom": item_details.get("stock_uom")
-#		"description": item_details.get("description")
+		"stock_uom": item_details.get("stock_uom"),
+		"description": item_details.get("description")
 	}
 
 def get_sub_assembly_items(bom_no, bom_data):
