@@ -729,8 +729,8 @@ def get_item_data(item_code):
 
 	return {
 		"bom_no": item_details.get("bom_no"),
-		"stock_uom": item_details.get("stock_uom"),
-		"description": item_details.get("description")
+		"stock_uom": item_details.get("stock_uom")
+#		"description": item_details.get("description")
 	}
 
 def get_sub_assembly_items(bom_no, bom_data):
