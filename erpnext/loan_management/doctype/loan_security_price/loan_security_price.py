@@ -19,91 +19,30 @@ class LoanSecurityPrice(Document):
 			frappe.throw(_("Valid From Time must be lesser than Valid Upto Time."))
 
 		existing_loan_security = frappe.db.sql(""" SELECT name from `tabLoan Security Price`
-			WHERE loan_security = %s AND (valid_from BETWEEN %s and %s OR valid_upto BETWEEN %s and %s) """,
-			(self.loan_security, self.valid_from, self.valid_upto, self.valid_from, self.valid_upto))
+			WHERE loan_security = %s AND name != %s AND (valid_from BETWEEN %s and %s OR valid_upto BETWEEN %s and %s) """,
+			(self.loan_security, self.name, self.valid_from, self.valid_upto, self.valid_from, self.valid_upto))
 
 		if existing_loan_security:
 			frappe.throw("Loan Security Price overlapping with {0}".format(existing_loan_security[0][0]))
 
 @frappe.whitelist()
-def update_loan_security_price(from_timestamp=None, to_timestamp=None, loan_security_type=None, process_loan_security_shortfall=None):
-	if not from_timestamp:
-		from_timestamp = get_datetime_str(getdate())
+def get_loan_security_price(loan_security, valid_time=None):
+	if not valid_time:
+		valid_time = get_datetime()
 
-	if not to_timestamp:
-		to_timestamp = get_datetime_str(add_to_date(getdate(), hours=24))
+	loan_security_price = frappe.db.get_value("Loan Security Price", {
+		'loan_security': loan_security,
+		'valid_from': ("<=",valid_time),
+		'valid_upto': (">=", valid_time)
+	}, 'loan_security_price')
 
-	filters = [["valid_upto", "<=", to_timestamp],["valid_from", ">=", from_timestamp]]
-
-	if loan_security_type:
-		filters.append(["loan_security_type", "=", loan_security_type])
-
-	loan_security_prices = frappe.get_all("Loan Security Price", fields=["loan_security", "loan_security_price"],
-		filters=filters)
-
-	if loan_security_prices:
-		for loan_security_price in loan_security_prices:
-			frappe.db.set_value("Loan Security", loan_security_price.loan_security, 'loan_security_price', loan_security_price.loan_security_price)
-
-	if not process_loan_security_shortfall:
-		process = frappe.new_doc("Process Loan Security Shortfall")
-		process.from_time = from_timestamp
-		process.to_time = to_timestamp
-		if loan_security_type:
-			process.loan_security_type = loan_security_type
-
-		process.save()
-
-		process_loan_security_shortfall = process.name
-
-	check_for_ltv_shortfall(process_loan_security_shortfall)
-
-def check_for_ltv_shortfall(process_loan_security_shortfall):
-
-	loan_security_price_map = frappe._dict(frappe.get_all("Loan Security",
-		fields=["name", "loan_security_price"], as_list=1))
-
-	loans = frappe.db.sql(""" SELECT l.name, l.loan_amount, l.total_principal_paid, lp.loan_security, lp.haircut, lp.qty
-		FROM `tabLoan` l, `tabPledge` lp , `tabLoan Security Pledge`p WHERE lp.parent = p.name and p.loan = l.name and l.docstatus = 1
-		and l.is_secured_loan and l.status = 'Disbursed' and p.status in ('Pledged', 'Partially Unpledged')""", as_dict=1)
-
-	loan_security_map = {}
-
-	for loan in loans:
-		loan_security_map.setdefault(loan.name, {
-			"loan_amount": loan.loan_amount - loan.total_principal_paid,
-			"security_value": 0.0
-		})
-
-		current_loan_security_amount = loan_security_price_map.get(loan.loan_security, 0) * loan.qty
-
-		loan_security_map[loan.name]['security_value'] += current_loan_security_amount - (current_loan_security_amount * loan.haircut/100)
-
-	for loan, value in iteritems(loan_security_map):
-		if value["security_value"] < value["loan_amount"]:
-			create_loan_security_shortfall(loan, value, process_loan_security_shortfall)
-
-def create_loan_security_shortfall(loan, value, process_loan_security_shortfall):
-
-	existing_shortfall = frappe.db.get_value("Loan Security Shortfall", {"loan": loan, "status": "Pending"}, "name")
-
-	if existing_shortfall:
-		ltv_shortfall = frappe.get_doc("Loan Security Shortfall", existing_shortfall)
-		ltv_shortfall.shortfall_time = get_datetime()
-		ltv_shortfall.loan_amount = value["loan_amount"]
-		ltv_shortfall.security_value = value["security_value"]
-		ltv_shortfall.shortfall_amount = value["loan_amount"] - value["security_value"]
-		ltv_shortfall.process_loan_security_shortfall = process_loan_security_shortfall
-		ltv_shortfall.save()
+	if not loan_security_price:
+		frappe.throw("No valid <b>Loan Security Price</b> found for <b>{0}</b>".format(loan_security))
 	else:
-		ltv_shortfall = frappe.new_doc("Loan Security Shortfall")
-		ltv_shortfall.loan = loan
-		ltv_shortfall.shortfall_time = get_datetime()
-		ltv_shortfall.loan_amount = value["loan_amount"]
-		ltv_shortfall.security_value = value["security_value"]
-		ltv_shortfall.shortfall_amount = value["loan_amount"] - value["security_value"]
-		ltv_shortfall.process_loan_security_shortfall = process_loan_security_shortfall
-		ltv_shortfall.save()
+		return loan_security_price
+
+
+
 
 
 

@@ -9,6 +9,7 @@ from frappe.utils import flt, rounded
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 from erpnext.loan_management.doctype.loan.loan import get_monthly_repayment_amount, validate_repayment_method
+from erpnext.loan_management.doctype.loan_security_price.loan_security_price import get_loan_security_price
 
 class LoanApplication(Document):
 	def validate(self):
@@ -40,6 +41,7 @@ class LoanApplication(Document):
 
 	def set_pledge_amount(self):
 		for proposed_pledge in self.proposed_pledges:
+			proposed_pledge.loan_security_price = get_loan_security_price(proposed_pledge.loan_security)
 			proposed_pledge.amount = proposed_pledge.qty * proposed_pledge.loan_security_price
 
 	def get_repayment_details(self):

@@ -7,6 +7,7 @@ import frappe
 from frappe.utils import now_datetime
 from frappe.model.document import Document
 from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import update_shortfall_status
+from erpnext.loan_management.doctype.loan_security_price.loan_security_price import get_loan_security_price
 
 class LoanSecurityPledge(Document):
 	def validate(self):
@@ -23,6 +24,7 @@ class LoanSecurityPledge(Document):
 		maximum_loan_value = 0
 
 		for pledge in self.securities:
+			pledge.loan_security_price = get_loan_security_price(pledge.loan_security)
 			pledge.amount = pledge.qty * pledge.loan_security_price
 
 			total_security_value += pledge.amount

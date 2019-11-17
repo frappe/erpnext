@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 import unittest
-from frappe.utils import (nowdate, add_days, get_datetime, get_first_day, get_last_day, date_diff, flt)
+from frappe.utils import (nowdate, add_days, get_datetime, get_first_day, get_last_day, date_diff, flt, add_to_date)
 from erpnext.loan_management.doctype.loan.test_loan import (create_loan_type, create_loan_security_pledge, create_repayment_entry,
-	make_loan_disbursement_entry, create_loan_accounts, create_loan_security_type, create_loan_security, create_demand_loan)
+	make_loan_disbursement_entry, create_loan_accounts, create_loan_security_type, create_loan_security, create_demand_loan, create_loan_security_price)
 from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (make_accrual_interest_entry_for_demand_loans,
 	make_accrual_interest_entry_for_term_loans, days_in_year)
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
@@ -21,6 +21,9 @@ class TestLoanDisbursement(unittest.TestCase):
 
 		create_loan_security_type()
 		create_loan_security()
+
+		create_loan_security_price("Test Security 1", 500, "Nos", get_datetime() , get_datetime(add_to_date(nowdate(), hours=24)))
+		create_loan_security_price("Test Security 2", 250, "Nos", get_datetime() , get_datetime(add_to_date(nowdate(), hours=24)))
 
 		if not frappe.db.exists("Customer", "_Test Loan Customer"):
 			frappe.get_doc(get_customer_dict('_Test Loan Customer')).insert(ignore_permissions=True)

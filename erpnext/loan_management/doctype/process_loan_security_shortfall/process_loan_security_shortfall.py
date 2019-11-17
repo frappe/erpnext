@@ -4,17 +4,14 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils import get_datetime
 from frappe import _
 from frappe.model.document import Document
-from erpnext.loan_management.doctype.loan_security_price.loan_security_price import update_loan_security_price
+from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import check_for_ltv_shortfall
 
 class ProcessLoanSecurityShortfall(Document):
-	def validate(self):
-		if self.from_time > self.to_time:
-			frappe.throw(_("From time must be lesser than Upto time."))
+	def onload(self):
+		self.set_onload('update_time', get_datetime())
 
-
-@frappe.whitelist()
-def update_loan_security(from_timestamp, to_timestamp,  process_loan_security_shortfall, loan_security_type=None):
-	update_loan_security_price(from_timestamp=from_timestamp, to_timestamp=to_timestamp,
-			loan_security_type=loan_security_type, process_loan_security_shortfall=process_loan_security_shortfall)
+	def on_submit(self):
+		check_for_ltv_shortfall(process_loan_security_shortfall = self.name)

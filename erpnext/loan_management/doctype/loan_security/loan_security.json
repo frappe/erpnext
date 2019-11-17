@@ -11,7 +11,6 @@
   "unit_of_measure",
   "column_break_3",
   "haircut",
-  "loan_security_price",
   "disabled"
  ],
  "fields": [
@@ -26,12 +25,6 @@
    "fieldname": "haircut",
    "fieldtype": "Percent",
    "label": "Haircut %"
-  },
-  {
-   "fieldname": "loan_security_price",
-   "fieldtype": "Currency",
-   "label": "Loan Security Price",
-   "options": "Company:company:default_currency"
   },
   {
    "fieldname": "column_break_3",
@@ -63,7 +56,7 @@
    "options": "UOM"
   }
  ],
- "modified": "2019-10-10 03:06:15.533908",
+ "modified": "2019-11-16 11:36:37.901656",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security",

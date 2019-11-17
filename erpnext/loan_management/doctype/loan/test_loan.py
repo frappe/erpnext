@@ -9,10 +9,11 @@ import unittest
 from frappe.utils import (nowdate, add_days, getdate, now_datetime, add_to_date, get_datetime,
 	add_months, get_first_day, get_last_day, flt, date_diff)
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
-from erpnext.loan_management.doctype.loan_security_price.loan_security_price import update_loan_security_price
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_employee
 from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (make_accrual_interest_entry_for_demand_loans,
 	make_accrual_interest_entry_for_term_loans, days_in_year)
+
+from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import check_for_ltv_shortfall
 
 class TestLoan(unittest.TestCase):
 	def setUp(self):
@@ -33,6 +34,9 @@ class TestLoan(unittest.TestCase):
 
 		create_loan_security_type()
 		create_loan_security()
+
+		create_loan_security_price("Test Security 1", 500, "Nos", get_datetime() , get_datetime(add_to_date(nowdate(), hours=24)))
+		create_loan_security_price("Test Security 2", 250, "Nos", get_datetime() , get_datetime(add_to_date(nowdate(), hours=24)))
 
 		self.applicant1 = make_employee("robert_loan@loan.com")
 		if not frappe.db.exists("Customer", "_Test Loan Customer"):
@@ -85,8 +89,7 @@ class TestLoan(unittest.TestCase):
 		pledges.append({
 			"loan_security": "Test Security 1",
 			"qty": 4000.00,
-			"haircut": 50,
-			"loan_security_price": 500.00
+			"haircut": 50
 		})
 
 		loan_security_pledge = create_loan_security_pledge(self.applicant2, pledges)
@@ -120,8 +123,7 @@ class TestLoan(unittest.TestCase):
 		pledges.append({
 			"loan_security": "Test Security 1",
 			"qty": 4000.00,
-			"haircut": 50,
-			"loan_security_price": 500.00
+			"haircut": 50
 		})
 
 		loan_security_pledge = create_loan_security_pledge(self.applicant2, pledges)
@@ -160,8 +162,7 @@ class TestLoan(unittest.TestCase):
 		pledges.append({
 			"loan_security": "Test Security 1",
 			"qty": 4000.00,
-			"haircut": 50,
-			"loan_security_price": 500.00
+			"haircut": 50
 		})
 
 		loan_security_pledge = create_loan_security_pledge(self.applicant2, pledges)
@@ -200,15 +201,13 @@ class TestLoan(unittest.TestCase):
 		pledges.append({
 			"loan_security": "Test Security 2",
 			"qty": 4000.00,
-			"haircut": 50,
-			"loan_security_price": 250.00
+			"haircut": 50
 		})
 
 		pledges.append({
 			"loan_security": "Test Security 1",
 			"qty": 2000.00,
-			"haircut": 50,
-			"loan_security_price": 500.00
+			"haircut": 50
 		})
 
 		loan_security_pledge = create_loan_security_pledge(self.applicant2, pledges)
@@ -238,8 +237,7 @@ class TestLoan(unittest.TestCase):
 		pledges.append({
 			"loan_security": "Test Security 1",
 			"qty": 4000.00,
-			"haircut": 50,
-			"loan_security_price": 500.00
+			"haircut": 50
 		})
 
 		loan_security_pledge = create_loan_security_pledge(self.applicant2, pledges)
@@ -282,7 +280,6 @@ class TestLoan(unittest.TestCase):
 			"loan_security": "Test Security 2",
 			"qty": 8000.00,
 			"haircut": 50,
-			"loan_security_price": 250.00
 		})
 
 		loan_security_pledge = create_loan_security_pledge(self.applicant2, pledges)
@@ -292,11 +289,10 @@ class TestLoan(unittest.TestCase):
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount)
 
-		from_timestamp = get_datetime()
-		to_timestamp = get_datetime(add_to_date(nowdate(), hours=24))
-		create_loan_security_price("Test Security 2", 100, "Nos", from_timestamp , to_timestamp)
+		frappe.db.sql(""" UPDATE `tabLoan Security Price` SET loan_security_price = %s
+		where loan_security=%s""", (100, 'Test Security 2'))
 
-		update_loan_security_price(from_timestamp, to_timestamp)
+		check_for_ltv_shortfall()
 		loan_security_shortfall = frappe.get_doc("Loan Security Shortfall", {"loan": loan.name})
 
 		self.assertTrue(loan_security_shortfall)
@@ -407,7 +403,6 @@ def create_loan_security():
 			"loan_security_name": "Test Security 1",
 			"unit_of_measure": "Nos",
 			"haircut": 50.00,
-			"loan_security_price": 500.00
 		}).insert(ignore_permissions=True)
 
 	if not frappe.db.exists("Loan Security", "Test Security 2"):
@@ -418,7 +413,6 @@ def create_loan_security():
 			"loan_security_name": "Test Security 2",
 			"unit_of_measure": "Nos",
 			"haircut": 50.00,
-			"loan_security_price": 250.00
 		}).insert(ignore_permissions=True)
 
 def create_loan_security_pledge(applicant, pledges):
@@ -432,7 +426,6 @@ def create_loan_security_pledge(applicant, pledges):
 		lsp.append('securities', {
 			"loan_security": pledge['loan_security'],
 			"qty": pledge['qty'],
-			"loan_security_price": pledge['loan_security_price'],
 			"haircut": pledge['haircut']
 		})
 
@@ -459,14 +452,17 @@ def make_loan_disbursement_entry(loan, amount, disbursement_date=None):
 
 def create_loan_security_price(loan_security, loan_security_price, uom, from_date, to_date):
 
-	lsp = frappe.get_doc({
-		"doctype": "Loan Security Price",
-		"loan_security": loan_security,
-		"loan_security_price": loan_security_price,
-		"uom": uom,
-		"valid_from":from_date,
-		"valid_upto": to_date
-	}).insert(ignore_permissions=True)
+	if not frappe.db.get_value("Loan Security Price",{"loan_security": loan_security,
+		"valid_from": ("<=", from_date), "valid_upto": (">=", to_date)}, 'name'):
+
+		lsp = frappe.get_doc({
+			"doctype": "Loan Security Price",
+			"loan_security": loan_security,
+			"loan_security_price": loan_security_price,
+			"uom": uom,
+			"valid_from":from_date,
+			"valid_upto": to_date
+		}).insert(ignore_permissions=True)
 
 def create_repayment_entry(loan, applicant, posting_date, payment_type, paid_amount):
 
