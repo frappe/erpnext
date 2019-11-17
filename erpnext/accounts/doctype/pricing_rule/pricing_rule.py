@@ -247,7 +247,11 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
 
 			rules.append(get_pricing_rule_details(args, pricing_rule))
 			if pricing_rule.mixed_conditions or pricing_rule.apply_rule_on_other:
-				continue
+				item_details.update({
+					'apply_rule_on_other_items': json.dumps(pricing_rule.apply_rule_on_other_items),
+					'apply_rule_on': (frappe.scrub(pricing_rule.apply_rule_on_other)
+						if pricing_rule.apply_rule_on_other else frappe.scrub(pricing_rule.get('apply_on')))
+				})
 
 			if pricing_rule.coupon_code_based==1 and args.coupon_code==None:
 				return item_details
@@ -258,16 +262,9 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
 
 		item_details.has_pricing_rule = 1
 
-		# if discount is applied on the rate and not on price list rate
-		# if price_list_rate:
-		# 	set_discount_amount(price_list_rate, item_details)
-
 		item_details.pricing_rules = ','.join([d.pricing_rule for d in rules])
 
 		if not doc: return item_details
-
-		for rule in rules:
-			doc.append('pricing_rules', rule)
 
 	elif args.get("pricing_rules"):
 		item_details = remove_pricing_rule_for_item(args.get("pricing_rules"),
@@ -327,10 +324,10 @@ def set_discount_amount(rate, item_details):
 			item_details.rate = rate
 
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
-	from erpnext.accounts.doctype.pricing_rule.utils import get_apply_on_and_items
+	from erpnext.accounts.doctype.pricing_rule.utils import get_pricing_rule_items
 	for d in pricing_rules.split(','):
 		if not d or not frappe.db.exists("Pricing Rule", d): continue
-		pricing_rule = frappe.get_doc('Pricing Rule', d)
+		pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
 
 		if pricing_rule.price_or_product_discount == 'Price':
 			if pricing_rule.rate_or_discount == 'Discount Percentage':
@@ -348,7 +345,7 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
 				else pricing_rule.get('free_item'))
 
 		if pricing_rule.get("mixed_conditions") or pricing_rule.get("apply_rule_on_other"):
-			apply_on, items = get_apply_on_and_items(pricing_rule, item_details)
+			apply_on, items = get_pricing_rule_items(pricing_rule, item_details)
 			item_details.apply_on = apply_on
 			item_details.applied_on_items = ','.join(items)
 
