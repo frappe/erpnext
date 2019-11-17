@@ -66,14 +66,15 @@ class TestPurchaseReceipt(unittest.TestCase):
 			expected_values = {
 				stock_in_hand_account: [750.0, 0.0],
 				"Stock Received But Not Billed - TCP1": [0.0, 500.0],
-				"Expenses Included In Valuation - TCP1": [0.0, 250.0]
+				"_Test Account Shipping Charges - TCP1": [0.0, 100.0],
+				"_Test Account Customs Duty - TCP1": [0.0, 150.0]
 			}
 		else:
 			expected_values = {
 				stock_in_hand_account: [375.0, 0.0],
 				fixed_asset_account: [375.0, 0.0],
 				"Stock Received But Not Billed - TCP1": [0.0, 500.0],
-				"Expenses Included In Valuation - TCP1": [0.0, 250.0]
+				"_Test Account Shipping Charges - TCP1": [0.0, 250.0]
 			}
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account][0], gle.debit)
