@@ -109,12 +109,12 @@ class ShareTransfer(Document):
 		if self.transfer_type == 'Issue':
 			# validate share doesn't exist in company
 			ret_val = self.share_exists(self.get_company_shareholder().name)
-			if ret_val:
+			if ret_val in ('Complete', 'Partial'):
 				frappe.throw(_('The shares already exist'), frappe.DuplicateEntryError)
 		else:
 			# validate share exists with from_shareholder
 			ret_val = self.share_exists(self.from_shareholder)
-			if not ret_val:
+			if ret_val in ('Outside', 'Partial'):
 				frappe.throw(_("The shares don't exist with the {0}")
 					.format(self.from_shareholder), ShareDontExists)
 
@@ -159,11 +159,13 @@ class ShareTransfer(Document):
 				entry.to_no < self.from_no:
 				continue # since query lies outside bounds
 			elif entry.from_no <= self.from_no and entry.to_no >= self.to_no: #both inside
-				return True # absolute truth!
-			elif (entry.from_no <= self.from_no <= self.to_no) or entry.from_no <= self.to_no and entry.to_no:
-				return True
+				return 'Complete' # absolute truth!
+			elif entry.from_no <= self.from_no <= self.to_no:
+				return 'Partial'
+			elif entry.from_no <= self.to_no <= entry.to_no:
+				return 'Partial'
 
-		return False
+		return 'Outside'
 
 	def folio_no_validation(self):
 		shareholders = ['from_shareholder', 'to_shareholder']
