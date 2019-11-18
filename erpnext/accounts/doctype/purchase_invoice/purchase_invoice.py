@@ -714,14 +714,14 @@ class PurchaseInvoice(BuyingController):
 							if account_currency==self.company_currency \
 							else tax.tax_amount_after_discount_amount,
 						"cost_center": tax.cost_center
-					}, account_currency)
+					}, account_currency, item=tax)
 				)
 			# accumulate valuation tax
 			if self.is_opening == "No" and tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
 				if self.auto_accounting_for_stock and not tax.cost_center:
 					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
-				valuation_tax.setdefault(tax.cost_center, 0)
-				valuation_tax[tax.cost_center] += \
+				valuation_tax.setdefault(tax.name, 0)
+				valuation_tax[tax.name] += \
 					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.base_tax_amount_after_discount_amount)
 
 		if self.is_opening == "No" and self.negative_expense_to_be_booked and valuation_tax:
@@ -731,36 +731,38 @@ class PurchaseInvoice(BuyingController):
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = self.negative_expense_to_be_booked
 			i = 1
-			for cost_center, amount in iteritems(valuation_tax):
-				if i == len(valuation_tax):
-					applicable_amount = amount_including_divisional_loss
-				else:
-					applicable_amount = self.negative_expense_to_be_booked * (amount / total_valuation_amount)
-					amount_including_divisional_loss -= applicable_amount
+			for tax in self.get("taxes"):
+				if valuation_tax.get(tax.name):
+					if i == len(valuation_tax):
+						applicable_amount = amount_including_divisional_loss
+					else:
+						applicable_amount = self.negative_expense_to_be_booked * (valuation_tax[tax.name] / total_valuation_amount)
+						amount_including_divisional_loss -= applicable_amount
 
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": self.expenses_included_in_valuation,
-						"cost_center": cost_center,
-						"against": self.supplier,
-						"credit": applicable_amount,
-						"remarks": self.remarks or "Accounting Entry for Stock"
-					})
-				)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": tax.account_head,
+							"cost_center": tax.cost_center,
+							"against": self.supplier,
+							"credit": applicable_amount,
+							"remarks": self.remarks or _("Accounting Entry for Stock"),
+						}, item=tax)
+					)
 
-				i += 1
+					i += 1
 
 		if self.auto_accounting_for_stock and self.update_stock and valuation_tax:
-			for cost_center, amount in iteritems(valuation_tax):
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": self.expenses_included_in_valuation,
-						"cost_center": cost_center,
-						"against": self.supplier,
-						"credit": amount,
-						"remarks": self.remarks or "Accounting Entry for Stock"
-					})
-				)
+			for tax in self.get("taxes"):
+				if valuation_tax.get(tax.name):
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": tax.account_head,
+							"cost_center": tax.cost_center,
+							"against": self.supplier,
+							"credit": valuation_tax[tax.name],
+							"remarks": self.remarks or "Accounting Entry for Stock"
+						}, item=tax)
+					)
 
 	def make_payment_gl_entries(self, gl_entries):
 		# Make Cash GL Entries

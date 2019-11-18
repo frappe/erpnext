@@ -288,8 +288,8 @@ class PurchaseReceipt(BuyingController):
 			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
 				if not tax.cost_center:
 					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
-				valuation_tax.setdefault(tax.cost_center, 0)
-				valuation_tax[tax.cost_center] += \
+				valuation_tax.setdefault(tax.name, 0)
+				valuation_tax[tax.name] += \
 					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.base_tax_amount_after_discount_amount)
 
 		if negative_expense_to_be_booked and valuation_tax:
@@ -297,37 +297,42 @@ class PurchaseReceipt(BuyingController):
 			# If expenses_included_in_valuation account has been credited in against PI
 			# and charges added via Landed Cost Voucher,
 			# post valuation related charges on "Stock Received But Not Billed"
+			# introduced in 2014 for backward compatibility of expenses already booked in expenses_included_in_valuation account
 
 			negative_expense_booked_in_pi = frappe.db.sql("""select name from `tabPurchase Invoice Item` pi
 				where docstatus = 1 and purchase_receipt=%s
 				and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice'
 					and voucher_no=pi.parent and account=%s)""", (self.name, expenses_included_in_valuation))
 
-			if negative_expense_booked_in_pi:
-				expenses_included_in_valuation = stock_rbnb
-
 			against_account = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
 			i = 1
-			for cost_center, amount in iteritems(valuation_tax):
-				if i == len(valuation_tax):
-					applicable_amount = amount_including_divisional_loss
-				else:
-					applicable_amount = negative_expense_to_be_booked * (amount / total_valuation_amount)
-					amount_including_divisional_loss -= applicable_amount
+			for tax in self.get("taxes"):
+				if valuation_tax.get(tax.name):
 
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": expenses_included_in_valuation,
-						"cost_center": cost_center,
-						"credit": applicable_amount,
-						"remarks": self.remarks or _("Accounting Entry for Stock"),
-						"against": against_account
-					})
-				)
+					if negative_expense_booked_in_pi:
+						account = stock_rbnb
+					else:
+						account = tax.account_head
 
-				i += 1
+					if i == len(valuation_tax):
+						applicable_amount = amount_including_divisional_loss
+					else:
+						applicable_amount = negative_expense_to_be_booked * (valuation_tax[tax.name] / total_valuation_amount)
+						amount_including_divisional_loss -= applicable_amount
+
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": account,
+							"cost_center": tax.cost_center,
+							"credit": applicable_amount,
+							"remarks": self.remarks or _("Accounting Entry for Stock"),
+							"against": against_account
+						}, item=tax)
+					)
+
+					i += 1
 
 		if warehouse_with_no_account:
 			frappe.msgprint(_("No accounting entries for the following warehouses") + ": \n" +
