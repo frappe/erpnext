@@ -16,7 +16,10 @@ def update_taxes_in_item_master(taxes, hsn_code):
 	})
 
 	taxes = frappe.parse_json(taxes)
+	frappe.enqueue(update_item_document, items=items, taxes=taxes)
+	return 1
 
+def update_item_document(items, taxes):
 	for item in items:
 		item_to_be_updated=frappe.get_doc("Item", item.name)
 		item_to_be_updated.taxes = []
@@ -24,4 +27,3 @@ def update_taxes_in_item_master(taxes, hsn_code):
 			tax = frappe._dict(tax)
 			item_to_be_updated.append("taxes", {'item_tax_template': tax.item_tax_template, 'tax_category': tax.tax_category})
 			item_to_be_updated.save()
-	return 1
