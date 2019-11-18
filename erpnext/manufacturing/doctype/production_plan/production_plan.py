@@ -472,7 +472,9 @@ def get_material_request_items(row, sales_order, company, ignore_existing_ordere
 				or row.get('default_warehouse') or item_group_defaults.get("default_warehouse"),
 			'actual_qty': actual_qty,
 			'min_order_qty': row['min_order_qty'],
-			'sales_order': sales_order
+			'sales_order': sales_order,
+			'description': row.get("description"),
+			'uom': row.get("purchase_uom") or row.get("stock_uom")
 		}
 
 def get_sales_orders(self):
