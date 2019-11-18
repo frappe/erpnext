@@ -135,7 +135,17 @@ class SalesInvoice(SellingController):
 
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
 			validate_loyalty_points(self, self.loyalty_points)
+	
+	def validate_fixed_asset(self):
+		for d in self.get("items"):
+			if d.is_fixed_asset and d.meta.get_field("asset") and d.asset:
+				asset = frappe.get_doc("Asset", d.asset)
+				if self.doctype == "Sales Invoice" and self.docstatus == 1:
+					if self.update_stock:
+						frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
 
+					elif asset.status in ("Scrapped", "Cancelled", "Sold"):
+						frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}").format(d.idx, d.asset, asset.status))
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
