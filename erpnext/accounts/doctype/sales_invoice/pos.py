@@ -550,11 +550,15 @@ def make_address(args, customer):
 
 def make_email_queue(email_queue):
 	name_list = []
+
 	for key, data in iteritems(email_queue):
 		name = frappe.db.get_value('Sales Invoice', {'offline_pos_name': key}, 'name')
+		if not name: continue
+
 		data = json.loads(data)
 		sender = frappe.session.user
 		print_format = "POS Invoice" if not cint(frappe.db.get_value('Print Format', 'POS Invoice', 'disabled')) else None
+
 		attachments = [frappe.attach_print('Sales Invoice', name, print_format=print_format)]
 
 		make(subject=data.get('subject'), content=data.get('content'), recipients=data.get('recipients'),
