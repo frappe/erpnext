@@ -8,6 +8,7 @@ import frappe, copy, json
 from frappe import throw, _
 from six import string_types
 from frappe.utils import flt, cint, get_datetime
+from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor
 
@@ -461,14 +462,7 @@ def get_pricing_rule_items(pr_doc):
 
 	for d in pr_doc.get(pricing_rule_apply_on):
 		if apply_on == 'item_group':
-			lft, rgt, is_group = frappe.get_cached_value('Item Group',
-				d.get(apply_on), ["lft", "rgt", "is_group"])
-
-			if is_group:
-				apply_on_data.extend(frappe.db.sql_list("""select name from `tabItem Group`
-					where lft>=%s and rgt<=%s""", (lft, rgt)))
-			else:
-				apply_on_data.append(d.get(apply_on))
+			get_child_item_groups(d.get(apply_on))
 		else:
 			apply_on_data.append(d.get(apply_on))
 

@@ -181,8 +181,9 @@ def get_serial_no_for_item(args):
 		item_details.serial_no = get_serial_no(args)
 	return item_details
 
-def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
-	from erpnext.accounts.doctype.pricing_rule.utils import get_pricing_rules
+def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=False):
+	from erpnext.accounts.doctype.pricing_rule.utils import (get_pricing_rules,
+		get_applied_pricing_rules, get_pricing_rule_items)
 
 	if isinstance(doc, string_types):
 		doc = json.loads(doc)
@@ -209,43 +210,28 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
 				item_details, args.get('item_code'))
 		return item_details
 
-	if not (args.item_group and args.brand):
-		try:
-			args.item_group, args.brand = frappe.get_cached_value("Item", args.item_code, ["item_group", "brand"])
-		except TypeError:
-			# invalid item_code
-			return item_details
-		if not args.item_group:
-			frappe.throw(_("Item Group not mentioned in item master for item {0}").format(args.item_code))
+	update_args_for_pricing_rule(args)
 
-	if args.transaction_type=="selling":
-		if args.customer and not (args.customer_group and args.territory):
-
-			if args.quotation_to and args.quotation_to != 'Customer':
-				customer = frappe._dict()
-			else:
-				customer = frappe.get_cached_value("Customer", args.customer, ["customer_group", "territory"])
-
-			if customer:
-				args.customer_group, args.territory = customer
-
-		args.supplier = args.supplier_group = None
-
-	elif args.supplier and not args.supplier_group:
-		args.supplier_group = frappe.get_cached_value("Supplier", args.supplier, "supplier_group")
-		args.customer = args.customer_group = args.territory = None
-
-	pricing_rules = get_pricing_rules(args, doc)
+	pricing_rules = (get_applied_pricing_rules(args)
+		if for_validate and args.get("pricing_rules") else get_pricing_rules(args, doc))
 
 	if pricing_rules:
 		rules = []
 
 		for pricing_rule in pricing_rules:
-			if not pricing_rule or pricing_rule.get('suggestion'): continue
+			if not pricing_rule: continue
+
+			if isinstance(pricing_rule, string_types):
+				pricing_rule = frappe.get_cached_doc("Pricing Rule", pricing_rule)
+				pricing_rule.apply_rule_on_other_items = get_pricing_rule_items(pricing_rule)
+
+			if pricing_rule.get('suggestion'): continue
 
 			item_details.validate_applied_rule = pricing_rule.get("validate_applied_rule", 0)
+			item_details.price_or_product_discount = pricing_rule.get("price_or_product_discount")
 
 			rules.append(get_pricing_rule_details(args, pricing_rule))
+
 			if pricing_rule.mixed_conditions or pricing_rule.apply_rule_on_other:
 				item_details.update({
 					'apply_rule_on_other_items': json.dumps(pricing_rule.apply_rule_on_other_items),
@@ -272,12 +258,39 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
 
 	return item_details
 
+def update_args_for_pricing_rule(args):
+	if not (args.item_group and args.brand):
+		try:
+			args.item_group, args.brand = frappe.get_cached_value("Item", args.item_code, ["item_group", "brand"])
+		except TypeError:
+			# invalid item_code
+			return item_details
+		if not args.item_group:
+			frappe.throw(_("Item Group not mentioned in item master for item {0}").format(args.item_code))
+
+	if args.transaction_type=="selling":
+		if args.customer and not (args.customer_group and args.territory):
+
+			if args.quotation_to and args.quotation_to != 'Customer':
+				customer = frappe._dict()
+			else:
+				customer = frappe.get_cached_value("Customer", args.customer, ["customer_group", "territory"])
+
+			if customer:
+				args.customer_group, args.territory = customer
+
+		args.supplier = args.supplier_group = None
+
+	elif args.supplier and not args.supplier_group:
+		args.supplier_group = frappe.get_cached_value("Supplier", args.supplier, "supplier_group")
+		args.customer = args.customer_group = args.territory = None
+
 def get_pricing_rule_details(args, pricing_rule):
 	return frappe._dict({
 		'pricing_rule': pricing_rule.name,
 		'rate_or_discount': pricing_rule.rate_or_discount,
 		'margin_type': pricing_rule.margin_type,
-		'item_code': pricing_rule.item_code or args.get("item_code"),
+		'item_code': args.get("item_code"),
 		'child_docname': args.get('child_docname')
 	})
 
@@ -345,8 +358,9 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
 				else pricing_rule.get('free_item'))
 
 		if pricing_rule.get("mixed_conditions") or pricing_rule.get("apply_rule_on_other"):
-			apply_on, items = get_pricing_rule_items(pricing_rule, item_details)
-			item_details.apply_on = apply_on
+			items = get_pricing_rule_items(pricing_rule)
+			item_details.apply_on = (frappe.scrub(pricing_rule.apply_rule_on_other)
+				if pricing_rule.apply_rule_on_other else frappe.scrub(pricing_rule.get('apply_on')))
 			item_details.applied_on_items = ','.join(items)
 
 	item_details.pricing_rules = ''

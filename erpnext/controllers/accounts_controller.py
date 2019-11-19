@@ -7,7 +7,7 @@ import json
 from frappe import _, throw
 from frappe.utils import (today, flt, cint, fmt_money, formatdate,
 	getdate, add_days, add_months, get_last_day, nowdate, get_link_to_form)
-from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.get_item_details import get_conversion_factor, get_item_details
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
@@ -234,7 +234,6 @@ class AccountsController(TransactionBase):
 
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
-		from erpnext.stock.get_item_details import get_item_details
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		if hasattr(self, "items"):
@@ -250,7 +249,6 @@ class AccountsController(TransactionBase):
 			if self.doctype == "Quotation" and self.quotation_to == "Customer" and parent_dict.get("party_name"):
 				parent_dict.update({"customer": parent_dict.get("party_name")})
 
-			apply_rule_on_other_items = {}
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
@@ -266,7 +264,7 @@ class AccountsController(TransactionBase):
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
 
-					ret = get_item_details(args, self, overwrite_warehouse=False)
+					ret = get_item_details(args, self, for_validate=True, overwrite_warehouse=False)
 
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
@@ -288,12 +286,12 @@ class AccountsController(TransactionBase):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
 
 					if ret.get("pricing_rules"):
-						self.apply_pricing_rule_on_items(item, ret, apply_rule_on_other_items)
+						self.apply_pricing_rule_on_items(item, ret)
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
 
-	def apply_pricing_rule_on_items(self, item, pricing_rule_args, apply_rule_on_other_items):
+	def apply_pricing_rule_on_items(self, item, pricing_rule_args):
 		if not pricing_rule_args.get("validate_applied_rule", 0):
 			# if user changed the discount percentage then set user's discount percentage ?
 			if pricing_rule_args.get("price_or_product_discount") == 'Price':
