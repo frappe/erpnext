@@ -159,8 +159,12 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	if "description" in searchfields:
 		searchfields.remove("description")
 
-	columns = [field for field in searchfields if not field in ["name", "item_group", "description"]]
-	columns = ", ".join(columns)
+	columns = ''
+	extra_searchfields = [field for field in searchfields
+		if not field in ["name", "item_group", "description"]]
+
+	if extra_searchfields:
+		columns = ", " + ", ".join(extra_searchfields)
 
 	searchfields = searchfields + [field for field in[searchfield or "name", "item_code", "item_group", "item_name"]
 		if not field in searchfields]
@@ -176,7 +180,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
 		tabItem.item_group,
 		if(length(tabItem.description) > 40, \
-			concat(substr(tabItem.description, 1, 40), "..."), description) as description,
+			concat(substr(tabItem.description, 1, 40), "..."), description) as description
 		{columns}
 		from tabItem
 		where tabItem.docstatus < 2
