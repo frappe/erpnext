@@ -46,4 +46,4 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 				and approver.parentfield = %s
 				and approver.approver=user.name""",(d, "%" + txt + "%", parentfield), as_list=True)
 
-	return approvers
+	return set(tuple(approver) for approver in approvers)
