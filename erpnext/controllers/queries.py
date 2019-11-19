@@ -161,7 +161,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 	columns = ''
 	extra_searchfields = [field for field in searchfields
-		if not field in ["name", "item_group", "description"]]
+		if field not in ["name", "item_group", "description"]]
 
 	if extra_searchfields:
 		columns = ", " + ", ".join(extra_searchfields)
