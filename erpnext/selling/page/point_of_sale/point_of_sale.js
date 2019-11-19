@@ -483,9 +483,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					reqd: 1,
 					onchange: function(e) {
 							me.get_default_pos_profile(this.value).then((r) => {
-								if (r && r.name) {
-									dialog.set_value('pos_profile', r.name);
-								}
+								dialog.set_value('pos_profile', (r && r.name)? r.name : '');
 							});
 						}
 					},
