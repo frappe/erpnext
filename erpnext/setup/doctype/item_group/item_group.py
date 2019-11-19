@@ -136,6 +136,7 @@ def get_child_groups_for_list_in_html(item_group, start, limit, search):
 		fields = ['name', 'route', 'description', 'image'],
 		filters = dict(
 			show_in_website = 1,
+			parent_item_group = item_group.name,
 			lft = ('>', item_group.lft),
 			rgt = ('<', item_group.rgt),
 		),
