@@ -186,12 +186,10 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	return doclist
 
 def set_expired_status():
-	quotations = frappe.get_all("Quotation")
-	for quotation in quotations:
-		quotation = frappe.get_doc("Quotation",quotation.name)
-		if quotation.valid_till and getdate(quotation.valid_till) < getdate(nowdate()):
-			frappe.db.set(quotation,'status','Expired')
-	frappe.db.commit()
+	from datetime import date
+	DATE_FORMAT = "%Y%m%d" # For converting python date to SQL comparable date
+	today = date.today().strftime(DATE_FORMAT)
+	frappe.db.sql("UPDATE tabQuotation SET status = 'Expired' WHERE valid_till < " + today)
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
