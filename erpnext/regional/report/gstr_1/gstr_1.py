@@ -116,7 +116,7 @@ class Gstr1Report(object):
 		taxable_value = 0
 		for item_code, net_amount in self.invoice_items.get(invoice).items():
 				if item_code in items:
-					if self.item_tax_rate.get(invoice) and tax_rate in self.item_tax_rate.get(invoice, {}).get(item_code):
+					if self.item_tax_rate.get(invoice) and tax_rate in self.item_tax_rate.get(invoice, {}).get(item_code, []):
 						taxable_value += abs(net_amount)
 					elif not self.item_tax_rate.get(invoice):
 						taxable_value += abs(net_amount)
