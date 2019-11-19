@@ -264,8 +264,11 @@ class BuyingController(StockController):
 
 			fg_yet_to_be_received = qty_to_be_received_map.get(item_key)
 
-			consumed_qty = backflushed_raw_materials_map.get(item_key, {}).get('qty', 0)
-			consumed_serial_nos = backflushed_raw_materials_map.get(item_key, {}).get('serial_no', '')
+			raw_material_data = backflushed_raw_materials_map.get(item_key, {})
+
+			consumed_qty = raw_material_data.get('qty', 0)
+			consumed_serial_nos = raw_material_data.get('serial_nos', '')
+			consumed_batch_nos = raw_material_data.get('batch_nos', '')
 
 			for raw_material in transferred_raw_materials + non_stock_items:
 				transferred_qty = raw_material.qty
@@ -286,11 +289,11 @@ class BuyingController(StockController):
 
 				if not qty: continue
 
-				if raw_material.serial_no:
-					serial_nos = set(get_serial_nos(raw_material.serial_no)) - \
-						set(get_serial_nos(consumed_serial_nos))
-					if serial_nos and qty < len(serial_nos):
-						raw_material.serial_no = serial_nos[:qty]
+				if raw_material.serial_nos:
+					set_serial_nos(raw_material, consumed_serial_nos, qty)
+
+				if raw_material.batch_nos:
+					set_batch_nos()
 
 				rm = self.append('supplied_items', {})
 				rm.update(raw_material)
@@ -789,7 +792,8 @@ def get_subcontracted_raw_materials_from_se(purchase_order, fg_item):
 			sed.description,
 			sed.stock_uom,
 			sed.subcontracted_item AS main_item_code,
-			{concat_syntax} AS serial_no
+			{serial_no_concat_syntax} AS serial_nos,
+			{batch_no_concat_syntax} AS batch_nos
 		FROM `tabStock Entry` se,`tabStock Entry Detail` sed
 		WHERE
 			se.name = sed.parent
@@ -801,8 +805,14 @@ def get_subcontracted_raw_materials_from_se(purchase_order, fg_item):
 		GROUP BY sed.item_code, sed.subcontracted_item
 	"""
 	raw_materials = frappe.db.multisql({
-		'mariadb': common_query.format(concat_syntax="GROUP_CONCAT(sed.serial_no)"),
-		'postgres': common_query.format(concat_syntax="STRING_AGG(sed.serial_no, ',')")
+		'mariadb': common_query.format(
+			serial_no_concat_syntax="GROUP_CONCAT(sed.serial_no)",
+			batch_no_concat_syntax="GROUP_CONCAT(sed.batch_no)"
+		),
+		'postgres': common_query.format(
+			serial_no_concat_syntax="STRING_AGG(sed.serial_no, ',')",
+			batch_no_concat_syntax="STRING_AGG(sed.batch_no, ',')"
+		)
 	}, (purchase_order, fg_item), as_dict=1)
 
 	return raw_materials
@@ -812,7 +822,8 @@ def get_backflushed_subcontracted_raw_materials(purchase_orders):
 		SELECT
 			CONCAT(prsi.rm_item_code, pri.purchase_order) AS item_key,
 			SUM(prsi.consumed_qty) AS qty,
-			{concat_syntax} AS serial_no
+			{serial_no_concat_syntax} AS serial_nos,
+			{batch_no_concat_syntax} AS batch_nos
 		FROM `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri, `tabPurchase Receipt Item Supplied` prsi
 		WHERE
 			pr.name = pri.parent
@@ -824,8 +835,14 @@ def get_backflushed_subcontracted_raw_materials(purchase_orders):
 	"""
 
 	backflushed_raw_materials = frappe.db.multisql({
-		'mariadb': common_query.format(concat_syntax="GROUP_CONCAT(prsi.serial_no)"),
-		'postgres': common_query.format(concat_syntax="STRING_AGG(prsi.serial_no, ',')")
+		'mariadb': common_query.format(
+			serial_no_concat_syntax="GROUP_CONCAT(prsi.serial_no)",
+			batch_no_concat_syntax="GROUP_CONCAT(prsi.batch_no)"
+		),
+		'postgres': common_query.format(
+			serial_no_concat_syntax="STRING_AGG(prsi.serial_no, ',')",
+			batch_no_concat_syntax="STRING_AGG(prsi.batch_no, ',')"
+		)
 	}, (purchase_orders, ), as_dict=1)
 
 	backflushed_raw_materials_map = frappe._dict()
@@ -894,3 +911,32 @@ def get_non_stock_items(purchase_order, fg_item_code):
 			AND pois.`parent` = %s
 			AND pois.`main_item_code` = %s
 	""", (purchase_order, fg_item_code), as_dict=1)
+
+
+def set_serial_nos(raw_material, consumed_serial_nos, qty):
+	serial_nos = set(get_serial_nos(raw_material.serial_nos)) - \
+		set(get_serial_nos(consumed_serial_nos))
+	if serial_nos and qty <= len(serial_nos):
+		raw_material.serial_no = '\n'.join(list(serial_nos)[0:frappe.utils.cint(qty)])
+
+def set_batch_nos(item_code, req_qty, po):
+	transferred_batch_map = transferred_batch_map(po, fg_item, rm_item)
+	# transferred batch map with qty
+	# required qty
+	# select batch based on availability
+	pass
+
+def transferred_batch_map(purchase_order, fg_item, rm_item):
+	return frappe._dict(frappe.db.sql("""
+		SELECT
+			sed.batch_no,
+			sed.qty AS qty
+		FROM `tabStock Entry` se,`tabStock Entry Detail` sed
+		WHERE
+			se.name = sed.parent
+			AND se.docstatus=1
+			AND se.purpose='Send to Subcontractor'
+			AND se.purchase_order = %s
+			AND sed.subcontracted_item = %s
+			AND sed.item_code = %s
+	""", (purchase_order, fg_item, rm_item)))
