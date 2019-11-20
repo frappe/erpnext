@@ -17,11 +17,8 @@ class AppointmentBookingSettings(Document):
 		self.validate_availability_of_slots()
 
 	def save(self):
-		self.infer_number_of_agents()
-		super().save()
-
-	def infer_number_of_agents(self):
 		self.number_of_agents = len(self.agent_list)
+		super().save()
 
 	def validate_availability_of_slots(self):
 		for record in self.availability_of_slots:
