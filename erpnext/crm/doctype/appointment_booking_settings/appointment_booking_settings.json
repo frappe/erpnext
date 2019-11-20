@@ -29,8 +29,10 @@
    "default": "1",
    "fieldname": "number_of_agents",
    "fieldtype": "Int",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Number of Concurrent Appointments",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -99,7 +101,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2019-11-19 10:53:26.935061",
+ "modified": "2019-11-20 10:23:37.393363",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Booking Settings",
