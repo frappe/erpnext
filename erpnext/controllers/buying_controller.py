@@ -271,6 +271,9 @@ class BuyingController(StockController):
 			consumed_serial_nos = raw_material_data.get('serial_nos', '')
 			consumed_batch_nos = raw_material_data.get('batch_nos', '')
 
+			transferred_batch_qty_map = get_transferred_batch_qty_map(item.purchase_order, item.item_code)
+			backflushed_batch_qty_map = get_backflushed_batch_qty_map(item.purchase_order, item.item_code)
+
 			for raw_material in transferred_raw_materials + non_stock_items:
 				transferred_qty = raw_material.qty
 
@@ -294,31 +297,39 @@ class BuyingController(StockController):
 					set_serial_nos(raw_material, consumed_serial_nos, qty)
 
 				if raw_material.batch_nos:
-					set_batch_nos()
+					batches_qty = get_batches_with_qty(raw_material.rm_item_code, raw_material.main_item_code,
+						qty, transferred_batch_qty_map, backflushed_batch_qty_map)
+					for batch_data in batches_qty:
+						qty = batch_data['qty']
+						raw_material.batch_no = batch_data['batch']
+						self.append_raw_material_to_be_backflushed(item, raw_material, qty)
+				else:
+					self.append_raw_material_to_be_backflushed(item, raw_material, qty)
 
-				rm = self.append('supplied_items', {})
-				rm.update(raw_material)
+	def append_raw_material_to_be_backflushed(self, fg_item_doc, raw_material_data, qty):
+		rm = self.append('supplied_items', {})
+		rm.update(raw_material_data)
 
-				rm.required_qty = qty
-				rm.consumed_qty = qty
+		rm.required_qty = qty
+		rm.consumed_qty = qty
 
-				if not raw_material.get('non_stock_item'):
-					from erpnext.stock.utils import get_incoming_rate
-					rm.rate = get_incoming_rate({
-						"item_code": raw_material.rm_item_code,
-						"warehouse": self.supplier_warehouse,
-						"posting_date": self.posting_date,
-						"posting_time": self.posting_time,
-						"qty": -1 * qty,
-						"serial_no": rm.serial_no
-					})
+		if not raw_material_data.get('non_stock_item'):
+			from erpnext.stock.utils import get_incoming_rate
+			rm.rate = get_incoming_rate({
+				"item_code": raw_material_data.rm_item_code,
+				"warehouse": self.supplier_warehouse,
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time,
+				"qty": -1 * qty,
+				"serial_no": rm.serial_no
+			})
 
-					if not rm.rate:
-						rm.rate = get_valuation_rate(raw_material.item_code, self.supplier_warehouse,
-							self.doctype, self.name, currency=self.company_currency, company=self.company)
+			if not rm.rate:
+				rm.rate = get_valuation_rate(raw_material_data.item_code, self.supplier_warehouse,
+					self.doctype, self.name, currency=self.company_currency, company=self.company)
 
-				rm.amount = qty * flt(rm.rate)
-				item.rm_supp_cost += rm.amount
+		rm.amount = qty * flt(rm.rate)
+		fg_item_doc.rm_supp_cost += rm.amount
 
 	def update_raw_materials_supplied_based_on_bom(self, item, raw_material_table):
 		exploded_item = 1
@@ -902,18 +913,20 @@ def set_serial_nos(raw_material, consumed_serial_nos, qty):
 	if serial_nos and qty <= len(serial_nos):
 		raw_material.serial_no = '\n'.join(list(serial_nos)[0:frappe.utils.cint(qty)])
 
-def set_batch_nos(item_code, req_qty, po):
-	transferred_batch_map = transferred_batch_map(po, fg_item, rm_item)
-	# transferred batch map with qty
-	# required qty
-	# select batch based on availability
-	pass
-
-def transferred_batch_map(purchase_order, fg_item, rm_item):
-	return frappe._dict(frappe.db.sql("""
+def get_transferred_batch_qty_map(purchase_order, fg_item):
+	# returns
+	# {
+	# 	(item_code, fg_code): {
+	# 		batch1: 10, # qty
+	# 		batch2: 16
+	# 	},
+	# }
+	transferred_batch_qty_map = {}
+	transferred_batches = frappe.db.sql("""
 		SELECT
 			sed.batch_no,
-			sed.qty AS qty
+			SUM(sed.qty) AS qty,
+			sed.item_code
 		FROM `tabStock Entry` se,`tabStock Entry Detail` sed
 		WHERE
 			se.name = sed.parent
@@ -921,5 +934,67 @@ def transferred_batch_map(purchase_order, fg_item, rm_item):
 			AND se.purpose='Send to Subcontractor'
 			AND se.purchase_order = %s
 			AND sed.subcontracted_item = %s
-			AND sed.item_code = %s
-	""", (purchase_order, fg_item, rm_item)))
+			AND sed.batch_no IS NOT NULL
+		GROUP BY
+			sed.batch_no,
+			sed.item_code
+	""", (purchase_order, fg_item), as_dict=1)
+
+	for batch_data in transferred_batches:
+		transferred_batch_qty_map.setdefault((batch_data.item_code, fg_item), {})
+		transferred_batch_qty_map[(batch_data.item_code, fg_item)][batch_data.batch_no] = batch_data.qty
+
+	return transferred_batch_qty_map
+
+def get_backflushed_batch_qty_map(purchase_order, fg_item):
+	# returns
+	# {
+	# 	(item_code, fg_code): {
+	# 		batch1: 10, # qty
+	# 		batch2: 16
+	# 	},
+	# }
+	backflushed_batch_qty_map = {}
+	backflushed_batches = frappe.db.sql("""
+		SELECT
+			pris.batch_no,
+			SUM(pris.consumed_qty) AS qty,
+			pris.rm_item_code AS item_code
+		FROM `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri, `tabPurchase Receipt Item Supplied` pris
+		WHERE
+			pr.name = pri.parent
+			AND pri.parent = pris.parent
+			AND pri.purchase_order = %s
+			AND pri.item_code = pris.main_item_code
+			AND pr.docstatus = 1
+			AND pris.main_item_code = %s
+			AND pris.batch_no IS NOT NULL
+		GROUP BY
+			pris.rm_item_code, pris.batch_no
+	""", (purchase_order, fg_item), as_dict=1)
+
+	for batch_data in backflushed_batches:
+		backflushed_batch_qty_map.setdefault((batch_data.item_code, fg_item), {})
+		backflushed_batch_qty_map[(batch_data.item_code, fg_item)][batch_data.batch_no] = batch_data.qty
+
+	return backflushed_batch_qty_map
+
+def get_batches_with_qty(item_code, fg_item, required_qty, transferred_batch_qty_map, backflushed_batch_qty_map):
+	# Returns available batches to be backflushed based on requirements
+	transferred_batches = transferred_batch_qty_map.get((item_code, fg_item), {})
+	backflushed_batches = backflushed_batch_qty_map.get((item_code, fg_item), {})
+
+	available_batches = []
+
+	for (batch, transferred_qty) in transferred_batches.items():
+		backflushed_qty = backflushed_batches.get(batch, 0)
+		available_qty = transferred_qty - backflushed_qty
+
+		if available_qty >= required_qty:
+			available_batches.append({'batch': batch, 'qty': required_qty})
+			break
+		else:
+			available_batches.append({'batch': batch, 'qty': available_qty})
+			required_qty -= available_qty
+
+	return available_batches
