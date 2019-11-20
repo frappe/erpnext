@@ -186,9 +186,6 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	return doclist
 
 def set_expired_status():
-	from datetime import date
-	DATE_FORMAT = "%Y%m%d" # For converting python date to SQL comparable date
-	today = date.today().strftime(DATE_FORMAT)
 	frappe.db.sql("""UPDATE `tabQuotation` SET status = 'Expired' 
 		WHERE status != 'Expired' AND 'valid_till < %s""" , (nowdate()))
 
