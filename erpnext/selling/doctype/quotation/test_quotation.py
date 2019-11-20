@@ -201,6 +201,27 @@ class TestQuotation(unittest.TestCase):
 		sec_qo = make_quotation(item_list=qo_item2, do_not_submit=True)
 		sec_qo.submit()
 
+	def test_expired_quotations(self):
+		import datetime
+		from erpnext.selling.doctype.quotation.quotation import set_expired_status
+		test_item = make_item("_Test Paraglider",
+						{"is_stock_item":1})
+
+		quotation_item = [
+			{
+				"item_code": test_item.item_code,
+				"warehouse":"",
+				"qty": 1,
+				"rate": 500
+			}
+		]
+		yesterday = getdate(nowdate()) + datetime.timedelta(days=-1)
+		expired_quotation = make_quotation(item_list=quotation_item,transaction_date=yesterday,do_not_submit=True)
+		set_expired_status()
+
+		self.assertEqual(expired_quotation.status,"Expired")
+
+
 test_records = frappe.get_test_records('Quotation')
 
 def get_quotation_dict(party_name=None, item_code=None):
@@ -258,3 +279,5 @@ def make_quotation(**args):
 			qo.submit()
 
 	return qo
+
+
