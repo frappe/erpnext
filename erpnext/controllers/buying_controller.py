@@ -600,6 +600,7 @@ class BuyingController(StockController):
 						'item_code': d.item_code,
 						'via_stock_ledger': False,
 						'company': self.company,
+						'supplier': self.supplier,
 						'actual_qty': d.qty,
 						'purchase_document_type': self.doctype,
 						'purchase_document_no': self.name,
@@ -627,6 +628,7 @@ class BuyingController(StockController):
 			'asset_category': item_data.get('asset_category'),
 			'location': row.asset_location,
 			'company': self.company,
+			'supplier': self.supplier,
 			'purchase_date': self.posting_date,
 			'calculate_depreciation': 1,
 			'purchase_receipt_amount': purchase_amount,
@@ -695,8 +697,10 @@ class BuyingController(StockController):
 	def validate_schedule_date(self):
 		if not self.get("items"):
 			return
-		if not self.schedule_date:
-			self.schedule_date = min([d.schedule_date for d in self.get("items")])
+
+		earliest_schedule_date = min([d.schedule_date for d in self.get("items")])
+		if earliest_schedule_date:
+			self.schedule_date = earliest_schedule_date
 
 		if self.schedule_date:
 			for d in self.get('items'):
