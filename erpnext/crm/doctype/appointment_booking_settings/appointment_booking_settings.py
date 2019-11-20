@@ -10,6 +10,7 @@ from frappe.model.document import Document
 
 
 class AppointmentBookingSettings(Document):
+	agent_list = [] #Hack
 	min_date = '01/01/1970 '
 	format_string = "%d/%m/%Y %H:%M:%S"
 
