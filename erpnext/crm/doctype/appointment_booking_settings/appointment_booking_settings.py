@@ -18,8 +18,9 @@ class AppointmentBookingSettings(Document):
 
 	def save(self):
 		self.infer_number_of_agents()
+		super().save()
 
-	def infer_number_of_agents():
+	def infer_number_of_agents(self):
 		self.number_of_agents = len(self.agent_list)
 
 	def validate_availability_of_slots(self):
