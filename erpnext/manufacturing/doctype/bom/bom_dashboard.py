@@ -17,11 +17,13 @@ def get_data():
 			},
 			{
 				'label': _('Manufacture'),
-				'items': ['BOM', 'Work Order', 'Job Card', 'Production Plan']
+				'items': ['BOM', 'Work Order', 'Job Card']
 			},
 			{
-				'label': _('Purchase'),
+				'label': _('Subcontract'),
 				'items': ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 			}
-		]
+		],
+		'disable_create_buttons': ["Item", "Purchase Order", "Purchase Receipt",
+			"Purchase Invoice", "Job Card", "Stock Entry"]
 	}
