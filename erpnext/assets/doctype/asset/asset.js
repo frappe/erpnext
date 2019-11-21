@@ -41,6 +41,21 @@ frappe.ui.form.on('Asset', {
 		});
 	},
 
+	setup: function(frm) {
+		frm.set_query("purchase_receipt", (doc) => {
+			return {
+				query: "erpnext.controllers.queries.get_purchase_receipts",
+				filters: { item_code: doc.item_code }
+			}
+		});
+		frm.set_query("purchase_invoice", (doc) => {
+			return {
+				query: "erpnext.controllers.queries.get_purchase_invoices",
+				filters: { item_code: doc.item_code }
+			}
+		});
+	},
+
 	refresh: function(frm) {
 		frappe.ui.form.trigger("Asset", "is_existing_asset");
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
@@ -78,11 +93,6 @@ frappe.ui.form.on('Asset', {
 				});
 			}
 
-			if (frm.doc.status=='Submitted' && !frm.doc.is_existing_asset && !frm.doc.purchase_invoice) {
-				frm.add_custom_button(__("Purchase Invoice"), function() {
-					frm.trigger("make_purchase_invoice");
-				}, __('Create'));
-			}
 			if (frm.doc.maintenance_required && !frm.doc.maintenance_schedule) {
 				frm.add_custom_button(__("Asset Maintenance"), function() {
 					frm.trigger("create_asset_maintenance");
@@ -104,8 +114,33 @@ frappe.ui.form.on('Asset', {
 			frm.trigger("setup_chart");
 		}
 
+		frm.trigger("toggle_reference_doc");
+
 		if (frm.doc.docstatus == 0) {
 			frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
+		}
+	},
+
+	toggle_reference_doc: function(frm) {
+		if (frm.doc.purchase_receipt && frm.doc.purchase_invoice && frm.doc.docstatus === 1) {
+			frm.set_df_property('purchase_invoice', 'read_only', 1);
+			frm.set_df_property('purchase_receipt', 'read_only', 1);
+		}
+		else if (frm.doc.purchase_receipt) {
+			// if purchase receipt link is set then set PI disabled
+			frm.toggle_reqd('purchase_invoice', 0);
+			frm.set_df_property('purchase_invoice', 'read_only', 1);
+		}
+		else if (frm.doc.purchase_invoice) {
+			// if purchase invoice link is set then set PR disabled
+			frm.toggle_reqd('purchase_receipt', 0);
+			frm.set_df_property('purchase_receipt', 'read_only', 1);
+		}
+		else {
+			frm.toggle_reqd('purchase_receipt', 1);
+			frm.set_df_property('purchase_receipt', 'read_only', 0);
+			frm.toggle_reqd('purchase_invoice', 1);
+			frm.set_df_property('purchase_invoice', 'read_only', 0);
 		}
 	},
 
@@ -176,19 +211,23 @@ frappe.ui.form.on('Asset', {
 
 	item_code: function(frm) {
 		if(frm.doc.item_code) {
-			frappe.call({
-				method: "erpnext.assets.doctype.asset.asset.get_item_details",
-				args: {
-					item_code: frm.doc.item_code,
-					asset_category: frm.doc.asset_category
-				},
-				callback: function(r, rt) {
-					if(r.message) {
-						frm.set_value('finance_books', r.message);
-					}
-				}
-			})
+			frm.trigger('set_finance_book');
 		}
+	},
+
+	set_finance_book: function(frm) {
+		frappe.call({
+			method: "erpnext.assets.doctype.asset.asset.get_item_details",
+			args: {
+				item_code: frm.doc.item_code,
+				asset_category: frm.doc.asset_category
+			},
+			callback: function(r, rt) {
+				if(r.message) {
+					frm.set_value('finance_books', r.message);
+				}
+			}
+		})
 	},
 
 	available_for_use_date: function(frm) {
@@ -207,29 +246,14 @@ frappe.ui.form.on('Asset', {
 	},
 
 	make_schedules_editable: function(frm) {
-		var is_editable = frm.doc.finance_books.filter(d => d.depreciation_method == "Manual").length > 0
-			? true : false;
+		if (frm.doc.finance_books) {
+			var is_editable = frm.doc.finance_books.filter(d => d.depreciation_method == "Manual").length > 0
+				? true : false;
 
-		frm.toggle_enable("schedules", is_editable);
-		frm.fields_dict["schedules"].grid.toggle_enable("schedule_date", is_editable);
-		frm.fields_dict["schedules"].grid.toggle_enable("depreciation_amount", is_editable);
-	},
-
-	make_purchase_invoice: function(frm) {
-		frappe.call({
-			args: {
-				"asset": frm.doc.name,
-				"item_code": frm.doc.item_code,
-				"gross_purchase_amount": frm.doc.gross_purchase_amount,
-				"company": frm.doc.company,
-				"posting_date": frm.doc.purchase_date
-			},
-			method: "erpnext.assets.doctype.asset.asset.make_purchase_invoice",
-			callback: function(r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			}
-		})
+			frm.toggle_enable("schedules", is_editable);
+			frm.fields_dict["schedules"].grid.toggle_enable("schedule_date", is_editable);
+			frm.fields_dict["schedules"].grid.toggle_enable("depreciation_amount", is_editable);
+		}
 	},
 
 	make_sales_invoice: function(frm) {
@@ -289,6 +313,65 @@ frappe.ui.form.on('Asset', {
 		frm.doc.finance_books.forEach(d => {
 			frm.events.set_depreciation_rate(frm, d);
 		})
+	},
+
+	purchase_receipt: function(frm) {
+		frm.trigger('toggle_reference_doc');
+
+		if (frm.doc.purchase_receipt) {
+			if (frm.doc.item_code) {
+				frappe.db.get_doc('Purchase Receipt', frm.doc.purchase_receipt).then(pr_doc => {
+					frm.set_value('company', pr_doc.company);
+					frm.set_value('purchase_date', pr_doc.posting_date);
+					const item = pr_doc.items.find(item => item.item_code === frm.doc.item_code);
+					if (!item) {
+						frm.set_value('purchase_receipt', '');
+						frappe.msgprint({
+							title: __('Invalid Purchase Receipt'),
+							message: __("The selected Purchase Receipt doesn't contains selected Asset Item."),
+							indicator: 'red'
+						});
+					}
+					frm.set_value('gross_purchase_amount', item.base_net_rate);
+					frm.set_value('location', item.asset_location);
+				});
+			} else {
+				frm.set_value('purchase_receipt', '');
+				frappe.msgprint({
+					title: __('Not Allowed'),
+					message: __("Please select Item Code first")
+				});
+			}
+		}
+	},
+
+	purchase_invoice: function(frm) {
+		frm.trigger('toggle_reference_doc');
+		if (frm.doc.purchase_invoice) {
+			if (frm.doc.item_code) {
+				frappe.db.get_doc('Purchase Invoice', frm.doc.purchase_invoice).then(pi_doc => {
+					frm.set_value('company', pi_doc.company);
+					frm.set_value('purchase_date', pi_doc.posting_date);
+					const item = pi_doc.items.find(item => item.item_code === frm.doc.item_code);
+					if (!item) {
+						frm.set_value('purchase_invoice', '');
+						frappe.msgprint({
+							title: __('Invalid Purchase Invoice'),
+							message: __("The selected Purchase Invoice doesn't contains selected Asset Item."),
+							indicator: 'red'
+						});
+					}
+					frm.set_value('gross_purchase_amount', item.base_net_rate);
+					frm.set_value('location', item.asset_location);
+				});
+			} else {
+				frm.set_value('purchase_invoice', '');
+				frappe.msgprint({
+					title: __('Not Allowed'),
+					message: __("Please select Item Code first")
+				});
+			}
+		}
 	},
 
 	set_depreciation_rate: function(frm, row) {
