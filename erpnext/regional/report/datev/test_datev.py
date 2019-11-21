@@ -52,11 +52,12 @@ def make_customer_with_account(customer_name, company):
 			"doctype": "Account",
 			"parent_account": "1 - Forderungen aus Lieferungen und Leistungen - _TG",
 			"account_name": customer_name,
+			"company": company.name,
 			"account_type": "Receivable",
 			"account_number": "10001"
 		}).save()
 		acc_name = acc.name
-	
+
 	if not frappe.db.exists("Customer", customer_name):
 		customer = frappe.get_doc({
 			"doctype": "Customer",		
