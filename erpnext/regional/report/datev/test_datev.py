@@ -7,7 +7,6 @@ from unittest import TestCase
 import frappe
 from frappe.utils import getdate, today
 from frappe.test_runner import make_test_objects
-from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
 
@@ -77,6 +76,32 @@ def make_customer_with_account(customer_name, company):
 
 	return customer
 
+def make_item(item_code, company):
+	warehouse_name = frappe.db.get_value("Warehouse", {
+			"warehouse_name": "Stores",
+			"company": company.name
+		}, "name")
+
+	if not frappe.db.exists("Item", item_code):
+		item = frappe.get_doc({
+			"doctype": "Item",
+			"item_code": item_code,
+			"item_name": item_code,
+			"description": item_code,
+			"item_group": "All Item Groups",
+			"is_stock_item": 0,
+			"is_purchase_item": 0,
+			"is_customer_provided_item": 0,
+			"item_defaults": {
+				"default_warehouse": warehouse_name,
+				"company": company.name
+			}
+		})
+		item.save()
+	else:
+		item = frappe.get_doc("Item", item_code)
+	return item
+
 def make_datev_settings(company):
 	if not frappe.db.exists("DATEV Settings", company.name):
 		frappe.get_doc({
@@ -97,7 +122,7 @@ class TestDatev(TestCase):
 		}
 
 		make_datev_settings(self.company)
-		item = create_item("_Test Item", {"is_stock_item": 0})
+		item = make_item("_Test Item", self.company)
 		income_account = frappe.db.get_value("Account", {
 				"account_number":"4200", 
 				"company": self.company.name
