@@ -92,10 +92,10 @@ def make_item(item_code, company):
 			"is_stock_item": 0,
 			"is_purchase_item": 0,
 			"is_customer_provided_item": 0,
-			"item_defaults": {
+			"item_defaults": [{
 				"default_warehouse": warehouse_name,
 				"company": company.name
-			}
+			}]
 		})
 		item.save()
 	else:
