@@ -37,6 +37,7 @@ def make_company(company_name, abbr):
 		})
 		company.save()
 		company.create_default_cost_center()
+		company.create_default_warehouses()
 	else:
 		company = frappe.get_doc("Company", company_name)
 
