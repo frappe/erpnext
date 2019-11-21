@@ -1663,7 +1663,7 @@ class TestSalesInvoice(unittest.TestCase):
 			["Sales - _TC", 0.0, 33.85, "2019-01-31"]
 		]
 
-		self.check_gl_entries(si.name, expected_gle, "2019-01-10")
+		check_gl_entries(self, si.name, expected_gle, "2019-01-10")
 
 		convert_deferred_revenue_to_income(start_date="2019-01-01", end_date="2019-03-31")
 
@@ -1674,19 +1674,7 @@ class TestSalesInvoice(unittest.TestCase):
 			["Sales - _TC", 0.0, 23.07, "2019-03-15"]
 		]
 
-		self.check_gl_entries(si.name, expected_gle, "2019-01-31")
-
-	def check_gl_entries(self, voucher_no, expected_gle, posting_date):
-		gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
-			from `tabGL Entry`
-			where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
-			order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
-
-		for i, gle in enumerate(gl_entries):
-			self.assertEqual(expected_gle[i][0], gle.account)
-			self.assertEqual(expected_gle[i][1], gle.debit)
-			self.assertEqual(expected_gle[i][2], gle.credit)
-			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+		check_gl_entries(self, si.name, expected_gle, "2019-01-31")
 
 	def test_inter_company_transaction(self):
 
@@ -1847,6 +1835,17 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(data['billLists'][0]['vehicleNo'], 'KA12KA1234')
 		self.assertEqual(data['billLists'][0]['itemList'][0]['taxableAmount'], 60000)
 
+def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
+		gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
+			from `tabGL Entry`
+			where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
+			order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
+
+		for i, gle in enumerate(gl_entries):
+			doc.assertEqual(expected_gle[i][0], gle.account)
+			doc.assertEqual(expected_gle[i][1], gle.debit)
+			doc.assertEqual(expected_gle[i][2], gle.credit)
+			doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
