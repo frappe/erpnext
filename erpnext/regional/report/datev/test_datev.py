@@ -148,19 +148,14 @@ class TestDatev(TestCase):
 			expense_account="6990 - Herstellungskosten - _TG",
 			cost_center=self.company.cost_center,
 			warehouse=warehouse,
+			item=item.name,
 			do_not_save=1
 		)
-
-		si.append("items", {
-			"item_code": item.name,
-			"qty": 1,
-			"rate": 100,
-			"income_account": income_account
-		})
 
 		si.append("taxes", {
 			"charge_type": "On Net Total",
 			"account_head": tax_account,
+			"description": "Umsatzsteuer 19 %",
 			"rate": 19
 		})
 
