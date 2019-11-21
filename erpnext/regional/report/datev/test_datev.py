@@ -123,6 +123,12 @@ class TestDatev(TestCase):
 
 		make_datev_settings(self.company)
 		item = make_item("_Test Item", self.company)
+
+		warehouse = frappe.db.get_value("Item Default", {
+				"parent": item.name, 
+				"company": self.company.name
+			}, "default_warehouse")
+
 		income_account = frappe.db.get_value("Account", {
 				"account_number":"4200", 
 				"company": self.company.name
@@ -135,10 +141,12 @@ class TestDatev(TestCase):
 
 		si = create_sales_invoice(
 			company=self.company.name,
-			customer="_Test Kunde GmbH",
-			currency="EUR",
+			customer=self.customer.name,
+			currency=self.company.default_currency,
 			debit_to=self.customer.accounts[0].account,
 			income_account="4200 - Erlöse - _TG",
+			cost_center=self.company.cost_center,
+			warehouse=warehouse,
 			do_not_save=1
 		)
 
@@ -146,8 +154,7 @@ class TestDatev(TestCase):
 			"item_code": item.name,
 			"qty": 1,
 			"rate": 100,
-			"income_account": income_account,
-			"cost_center": self.company.cost_center
+			"income_account": income_account
 		})
 
 		si.append("taxes", {
