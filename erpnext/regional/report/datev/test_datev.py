@@ -49,6 +49,7 @@ def make_customer_with_account(customer_name, company):
 
 	if not acc_name:
 		acc = frappe.get_doc({
+			"doctype": "Account",
 			"parent_account": "1 - Forderungen aus Lieferungen und Leistungen - _TG",
 			"account_name": customer_name,
 			"account_type": "Receivable",
