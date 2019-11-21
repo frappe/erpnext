@@ -204,19 +204,40 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.insert()
 		pi.submit()
 
-		self.check_gle_for_pi(pi.name)
+		self.check_gle_for_pi_against_pr(pi.name)
 
 	def check_gle_for_pi(self, pi):
-		gl_entries = frappe.db.sql("""select account, debit, credit
+		gl_entries = frappe.db.sql("""select account, sum(debit) as debit, sum(credit) as credit
 			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
-			order by account asc""", pi, as_dict=1)
+			group by account""", pi, as_dict=1)
+
 		self.assertTrue(gl_entries)
 
 		expected_values = dict((d[0], d) for d in [
 			["Creditors - TCP1", 0, 720],
 			["Stock Received But Not Billed - TCP1", 500.0, 0],
-			["_Test Account Shipping Charges - TCP1", 100.0, 0],
+			["_Test Account Shipping Charges - TCP1", 100.0, 0.0],
+			["_Test Account VAT - TCP1", 120.0, 0]
+		])
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_values[gle.account][0], gle.account)
+			self.assertEqual(expected_values[gle.account][1], gle.debit)
+			self.assertEqual(expected_values[gle.account][2], gle.credit)
+
+	def check_gle_for_pi_against_pr(self, pi):
+		gl_entries = frappe.db.sql("""select account, sum(debit) as debit, sum(credit) as credit
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			group by account""", pi, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		expected_values = dict((d[0], d) for d in [
+			["Creditors - TCP1", 0, 720],
+			["Stock Received But Not Billed - TCP1", 750.0, 0],
+			["_Test Account Shipping Charges - TCP1", 100.0, 100.0],
 			["_Test Account VAT - TCP1", 120.0, 0],
+			["_Test Account Customs Duty - TCP1", 0, 150]
 		])
 
 		for i, gle in enumerate(gl_entries):
