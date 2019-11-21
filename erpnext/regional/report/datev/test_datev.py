@@ -177,6 +177,7 @@ class TestDatev(TestCase):
 			allowed_set = set(allowed_keys)
 			return actual_set.issubset(allowed_set)
 
+		# TODO: encoding does not match
 		self.assertTrue(is_subset(get_transactions, Transactions.COLUMNS))
 		self.assertTrue(is_subset(get_customers, DebtorsCreditors.COLUMNS))
 		self.assertTrue(is_subset(get_suppliers, DebtorsCreditors.COLUMNS))
@@ -202,4 +203,5 @@ class TestDatev(TestCase):
 
 	def test_download(self):
 		download_datev_csv(self.filters)
+		# TODO: encode response (?)
 		zipfile.is_zipfile(frappe.response['filecontent'])
