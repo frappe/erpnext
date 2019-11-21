@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import os
 import json
+import zipfile
 from unittest import TestCase
 import frappe
 from frappe.utils import getdate, today
