@@ -145,6 +145,7 @@ class TestDatev(TestCase):
 			currency=self.company.default_currency,
 			debit_to=self.customer.accounts[0].account,
 			income_account="4200 - Erlöse - _TG",
+			expense_account="6990 - Herstellungskosten - _TG",
 			cost_center=self.company.cost_center,
 			warehouse=warehouse,
 			do_not_save=1
