@@ -34,7 +34,8 @@ def make_company(company_name, abbr):
 			"default_currency": "EUR",
 			"create_chart_of_accounts_based_on": "Standard Template",
 			"chart_of_accounts": "SKR04 mit Kontonummern"
-		}).save()
+		})
+		company.save()
 		company.create_default_cost_center()
 	else:
 		company = frappe.get_doc("Company", company_name)
@@ -55,7 +56,8 @@ def make_customer_with_account(customer_name, company):
 			"company": company.name,
 			"account_type": "Receivable",
 			"account_number": "10001"
-		}).save()
+		})
+		acc.save()
 		acc_name = acc.name
 
 	if not frappe.db.exists("Customer", customer_name):
@@ -63,13 +65,12 @@ def make_customer_with_account(customer_name, company):
 			"doctype": "Customer",		
 			"customer_name": customer_name,
 			"customer_type": "Company",
-			"customer_group": "_Test Customer Group",
-			"territory": "_Test Territory",
 			"accounts": [{
 				"company": company.name,
 				"account": acc_name
 			}]
-		}).save()
+		})
+		customer.save()
 	else:
 		customer = frappe.get_doc("Customer", customer_name)
 
