@@ -204,6 +204,7 @@ class TestQuotation(unittest.TestCase):
 	def test_expired_quotations(self):
 		import datetime
 		from erpnext.selling.doctype.quotation.quotation import set_expired_status
+		from erpnext.stock.doctype.item.test_item import make_item
 		test_item = make_item("_Test Paraglider",
 						{"is_stock_item":1})
 
