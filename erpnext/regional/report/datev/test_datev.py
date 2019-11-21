@@ -35,24 +35,11 @@ def make_company(company_name, abbr):
 			"create_chart_of_accounts_based_on": "Standard Template",
 			"chart_of_accounts": "SKR04 mit Kontonummern"
 		}).save()
+		company.create_default_cost_center()
 	else:
 		company = frappe.get_doc("Company", company_name)
 
 	return company
-
-def make_cost_center(cc_name, company):
-	if not frappe.db.exists("Cost Center", cc_name):
-		cc = frappe.get_doc({
-			"doctype": "Cost Center",
-			"company": company.name,
-			"cost_center_name": cc_name,
-			"is_group": 0,
-			"parent_cost_center": "{} - {}".format(company.name, company.abbr)
-		}).save()
-	else:
-		cc = frappe.get_doc("Cost Center", cc_name)
-
-	return cc
 
 def make_customer_with_account(customer_name, company):
 	acc_name = frappe.db.get_value("Account", {
@@ -98,7 +85,6 @@ def make_datev_settings(company):
 class TestDatev(TestCase):
 	def setUp(self):
 		self.company = make_company("_Test GmbH", "_TG")
-		self.cost_center = make_cost_center("_Test Cost Center", self.company)
 		self.customer = make_customer_with_account("_Test Kunde GmbH", self.company)
 		self.filters = {
 			"company": self.company.name,
@@ -132,7 +118,7 @@ class TestDatev(TestCase):
 			"qty": 1,
 			"rate": 100,
 			"income_account": income_account,
-			"cost_center": self.cost_center.name
+			"cost_center": self.company.cost_center
 		})
 
 		si.append("taxes", {
