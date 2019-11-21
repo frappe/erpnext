@@ -577,8 +577,8 @@ def get_leave_entries(employee, leave_type, from_date, to_date):
 	''' Returns leave entries between from_date and to_date '''
 	return frappe.db.sql("""
 		SELECT
-			employee, leave_type, from_date, to_date, leaves, transaction_name
-			transaction_type, is_carry_forward, is_expired
+			employee, leave_type, from_date, to_date, leaves, transaction_name, transaction_type,
+			is_carry_forward, is_expired
 		FROM `tabLeave Ledger Entry`
 		WHERE employee=%(employee)s AND leave_type=%(leave_type)s
 			AND docstatus=1 AND leaves<0
