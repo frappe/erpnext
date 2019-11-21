@@ -646,7 +646,7 @@ def make_journal_entry(asset_name):
 	return je
 
 @frappe.whitelist()
-def make_asset_movement(assets):
+def make_asset_movement(assets, purpose=None):
 	import json
 	from six import string_types
 	
@@ -657,7 +657,7 @@ def make_asset_movement(assets):
 		frappe.throw(_('Atleast one asset has to be selected.'))
 
 	asset_movement = frappe.new_doc("Asset Movement")
-	asset_movement.quantity = len(assets)
+	asset_movement.purpose = purpose
 	prev_reference_docname = ''
 
 	for asset in assets:
