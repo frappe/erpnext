@@ -452,6 +452,10 @@ class PurchaseInvoice(BuyingController):
 				fields = ["voucher_detail_no", "stock_value_difference"], filters={'voucher_no': self.name}):
 				voucher_wise_stock_value.setdefault(d.voucher_detail_no, d.stock_value_difference)
 
+		valuation_tax_accounts = [d.account_head for d in self.get("taxes")
+			if d.category in ('Valuation', 'Total and Valuation')
+			and flt(d.base_tax_amount_after_discount_amount)]
+
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
 				account_currency = get_account_currency(item.expense_account)
@@ -551,10 +555,10 @@ class PurchaseInvoice(BuyingController):
 			if self.auto_accounting_for_stock and self.is_opening == "No" and \
 				item.item_code in stock_items and item.item_tax_amount:
 					# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
-					if item.purchase_receipt:
+					if item.purchase_receipt and valuation_tax_accounts:
 						negative_expense_booked_in_pr = frappe.db.sql("""select name from `tabGL Entry`
-							where voucher_type='Purchase Receipt' and voucher_no=%s and account=%s""",
-							(item.purchase_receipt, self.expenses_included_in_valuation))
+							where voucher_type='Purchase Receipt' and voucher_no=%s and account in %s""",
+							(item.purchase_receipt, valuation_tax_accounts))
 
 						if not negative_expense_booked_in_pr:
 							gl_entries.append(
