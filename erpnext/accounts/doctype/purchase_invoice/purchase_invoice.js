@@ -331,15 +331,15 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		})
 	},
 
-	asset: function(frm, cdt, cdn) {
+	item_code: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
-		if(row.asset) {
+		if(row.item_code) {
 			frappe.call({
 				method: "erpnext.assets.doctype.asset_category.asset_category.get_asset_category_account",
 				args: {
-					"asset": row.asset,
+					"item": row.item_code,
 					"fieldname": "fixed_asset_account",
-					"account": row.expense_account
+					"company": frm.doc.company
 				},
 				callback: function(r, rt) {
 					frappe.model.set_value(cdt, cdn, "expense_account", r.message);
@@ -430,19 +430,7 @@ cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) 
 cur_frm.set_query("expense_account", "items", function(doc) {
 	return {
 		query: "erpnext.controllers.queries.get_expense_account",
-		filters: {'company': doc.company}
-	}
-});
-
-cur_frm.set_query("asset", "items", function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	return {
-		filters: {
-			'item_code': d.item_code,
-			'docstatus': 1,
-			'company': doc.company,
-			'status': 'Submitted'
-		}
+		filters: {'company': doc.company }
 	}
 });
 

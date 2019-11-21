@@ -73,8 +73,10 @@ def create_asset_data():
 			'doctype': 'Location',
 			'location_name': 'Test Location'
 		}).insert()
-
+	
 	if not frappe.db.exists("Item", "Photocopier"):
+		meta = frappe.get_meta('Asset')
+		naming_series = meta.get_field("naming_series").options
 		frappe.get_doc({
 			"doctype": "Item",
 			"item_code": "Photocopier",
@@ -83,7 +85,9 @@ def create_asset_data():
 			"company": "_Test Company",
 			"is_fixed_asset": 1,
 			"is_stock_item": 0,
-			"asset_category": "Equipment"
+			"asset_category": "Equipment",
+			"auto_create_assets": 1,
+			"asset_naming_series": naming_series
 		}).insert()
 
 def create_maintenance_team():

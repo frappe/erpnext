@@ -163,19 +163,32 @@ def validate_account_for_perpetual_inventory(gl_map):
 						.format(account), StockAccountInvalidTransaction)
 
 			elif account_bal != stock_bal:
-				frappe.throw(_("Account Balance ({0}) and Stock Value ({1}) is out of sync for account {2} and linked warehouse ({3}). Please create adjustment Journal Entry for amount {4}.")
-					.format(account_bal, stock_bal, account, comma_and(warehouse_list), stock_bal - account_bal),
-					StockValueAndAccountBalanceOutOfSync)
+				error_reason = _("Account Balance ({0}) and Stock Value ({1}) is out of sync for account {2} and it's linked warehouses.").format(
+					account_bal, stock_bal, frappe.bold(account))
+				error_resolution = _("Please create adjustment Journal Entry for amount {0} ").format(frappe.bold(stock_bal - account_bal))
+				button_text = _("Make Adjustment Entry")
+
+				frappe.throw("""{0}<br></br>{1}<br></br>
+					<div style="text-align:right;">
+					<button class="btn btn-primary" onclick="frappe.new_doc('Journal Entry')">{2}</button>
+					</div>""".format(error_reason, error_resolution, button_text),
+					StockValueAndAccountBalanceOutOfSync, title=_('Account Balance Out Of Sync'))
 
 def validate_cwip_accounts(gl_map):
-	if not cint(frappe.db.get_value("Asset Settings", None, "disable_cwip_accounting")) \
-		and gl_map[0].voucher_type == "Journal Entry":
+	cwip_enabled = cint(frappe.get_cached_value("Company",
+		gl_map[0].company, "enable_cwip_accounting"))
+
+	if not cwip_enabled:
+		cwip_enabled = any([cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category","enable_cwip_accounting")])
+
+	if cwip_enabled and gl_map[0].voucher_type == "Journal Entry":
 			cwip_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
 				where account_type = 'Capital Work in Progress' and is_group=0""")]
 
 			for entry in gl_map:
 				if entry.account in cwip_accounts:
-					frappe.throw(_("Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry").format(entry.account))
+					frappe.throw(
+						_("Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry").format(entry.account))
 
 def round_off_debit_credit(gl_map):
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
