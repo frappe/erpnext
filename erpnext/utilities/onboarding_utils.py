@@ -20,7 +20,7 @@ def create_customers(args_data):
 	args = json.loads(args_data)
 	defaults = frappe.defaults.get_defaults()
 	for i in range(1,4):
-		customer = args.get("customer_" + str(i))
+		customer = args.get("customer_name_" + str(i))
 		if customer:
 			try:
 				doc = frappe.get_doc({
@@ -58,7 +58,7 @@ def create_suppliers(args_data):
 	args = json.loads(args_data)
 	defaults = frappe.defaults.get_defaults()
 	for i in range(1,4):
-		supplier = args.get("supplier_" + str(i))
+		supplier = args.get("supplier_name_" + str(i))
 		if supplier:
 			try:
 				doc = frappe.get_doc({
@@ -76,7 +76,7 @@ def create_suppliers(args_data):
 
 def create_contact(contact, party_type, party):
 	"""Create contact based on given contact name"""
-	contact = contact	.split(" ")
+	contact = contact.split(" ")
 
 	contact = frappe.get_doc({
 		"doctype":"Contact",
@@ -232,9 +232,3 @@ def create_users(args_data):
 				emp.insert(ignore_permissions = True)
 
 # Ennumerate the setup hooks you're going to need, apart from the slides
-
-@frappe.whitelist()
-def update_default_domain_actions_and_get_state():
-	domain = frappe.get_cached_value('Company',  erpnext.get_default_company(),  'domain')
-	update_domain_actions(domain)
-	return get_domain_actions_state(domain)
