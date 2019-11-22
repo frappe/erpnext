@@ -261,7 +261,7 @@ def validate_filters(filters):
 	if not (filters.get("item_code") or filters.get("warehouse")):
 		sle_count = flt(frappe.db.sql("""select count(name) from `tabStock Ledger Entry`""")[0][0])
 		if sle_count > 500000:
-			frappe.throw(_("Please set filter based on Item or Warehouse"))
+			frappe.throw(_("Please set filter based on Item or Warehouse due to a large amount of entries."))
 
 def get_variants_attributes():
 	'''Return all item variant attributes.'''
