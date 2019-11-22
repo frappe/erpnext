@@ -217,7 +217,7 @@ class TestQuotation(unittest.TestCase):
 			}
 		]
 		yesterday = getdate(nowdate()) + datetime.timedelta(days=-1)
-		expired_quotation = make_quotation(item_list=quotation_item,transaction_date=yesterday,do_not_submit=True)
+		expired_quotation = make_quotation(item_list=quotation_item,transaction_date=yesterday)
 		set_expired_status()
 
 		self.assertEqual(expired_quotation.status,"Expired")
