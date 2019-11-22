@@ -237,7 +237,7 @@ class PurchaseInvoice(BuyingController):
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
 					item.expense_account = stock_not_billed_account
-			elif item.is_fixed_asset and not is_cwip_accounting_enabled(self.company, asset_category):
+			elif item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category):
 				item.expense_account = get_asset_category_account('fixed_asset_account', item=item.item_code,
 					company = self.company)
 			elif item.is_fixed_asset and item.pr_detail:
@@ -408,7 +408,7 @@ class PurchaseInvoice(BuyingController):
 		for item in self.get("items"):
 			if item.item_code and item.is_fixed_asset:
 				asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
-				if is_cwip_accounting_enabled(self.company, asset_category):
+				if is_cwip_accounting_enabled(asset_category):
 					return 1
 		return 0
 
@@ -504,8 +504,7 @@ class PurchaseInvoice(BuyingController):
 							"credit": flt(item.rm_supp_cost)
 						}, warehouse_account[self.supplier_warehouse]["account_currency"], item=item))
 
-				elif not item.is_fixed_asset or (item.is_fixed_asset and not is_cwip_accounting_enabled(self.company,
-					asset_category)):
+				elif not item.is_fixed_asset or (item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category)):
 					expense_account = (item.expense_account
 						if (not item.enable_deferred_expense or self.is_return) else item.deferred_expense_account)
 					
