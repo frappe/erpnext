@@ -295,7 +295,9 @@ class Asset(AccountsController):
 				.format(row.idx))
 
 		if not row.depreciation_start_date:
-			frappe.throw(_("Row {0}: Depreciation Start Date is required").format(row.idx))
+			if not self.available_for_use_date:
+				frappe.throw(_("Row {0}: Depreciation Start Date is required").format(row.idx))
+			row.depreciation_start_date = self.available_for_use_date
 
 		if not self.is_existing_asset:
 			self.opening_accumulated_depreciation = 0
