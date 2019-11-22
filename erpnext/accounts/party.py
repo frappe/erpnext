@@ -103,7 +103,7 @@ def set_address_details(out, party, party_type, doctype=None, company=None, part
 			out.update(get_fetch_values(doctype, 'company_address', out.company_address))
 		get_regional_address_details(out, doctype, company)
 
-	elif doctype and doctype == "Purchase Invoice":
+	elif doctype and doctype in ["Purchase Invoice", "Purchase Order", "Purchase Receipt"]:
 		if out.company_address:
 			out["shipping_address"] = shipping_address or out["company_address"]
 			out.shipping_address_display = get_address_display(out["shipping_address"])

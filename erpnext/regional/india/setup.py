@@ -183,7 +183,7 @@ def make_custom_fields(update=True):
 				print_hide=1, read_only=1),
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='company_address',
-				fetch_from='company_address.gstin', print_hide=1),
+				fetch_from='company_address.gstin', print_hide=1, read_only=1),
 		]
 
 	sales_invoice_shipping_fields = [
@@ -201,7 +201,9 @@ def make_custom_fields(update=True):
 	inter_state_gst_field = [
 		dict(fieldname='is_inter_state', label='Is Inter State',
 			fieldtype='Check', insert_after='disabled', print_hide=1),
-		dict(fieldname='gst_state', label='Company GST State', fieldtype='Select',
+		dict(fieldname='tax_category_column_break', fieldtype='Column Break',
+			insert_after='is_inter_state'),
+		dict(fieldname='gst_state', label='Source State', fieldtype='Select',
 			options='\n'.join(states), insert_after='company')
 	]
 
@@ -382,8 +384,7 @@ def make_custom_fields(update=True):
 		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields + si_ewaybill_fields,
 		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields,
 		'Sales Order': sales_invoice_gst_fields,
-		'Sales Taxes and Charges Template': inter_state_gst_field,
-		'Purchase Taxes and Charges Template': inter_state_gst_field,
+		'Tax Category': inter_state_gst_field,
 		'Item': [
 			dict(fieldname='gst_hsn_code', label='HSN/SAC',
 				fieldtype='Link', options='GST HSN Code', insert_after='item_group'),
