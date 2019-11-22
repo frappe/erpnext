@@ -1,7 +1,10 @@
 erpnext.setup_auto_gst_taxation = (doctype) => {
 	frappe.ui.form.on(doctype, {
 		onload: function(frm) {
-			frm.trigger('get_gst_accounts');
+			frappe.run_serially([
+				() => frm.trigger('get_gst_accounts'),
+				() => frm.trigger('set_accounts_to_skip')
+			]);
 		},
 
 		customer_address: function(frm) {
@@ -39,6 +42,7 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 			let accounts = intra_state_gst_accounts.concat(inter_state_gst_accounts);
 			let account_heads = [];
 			let accounts_to_skip =[];
+			frm.doc.accounts_to_skip = [];
 
 			frm.call({
 				method: "erpnext.controllers.accounts_controller.get_taxes_and_charges",

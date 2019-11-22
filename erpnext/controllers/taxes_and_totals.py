@@ -200,7 +200,7 @@ class calculate_taxes_and_totals(object):
 		accounts_to_skip = self.doc.get('accounts_to_skip') or []
 
 		# Delete rows for account heads to skip
-		for i, tax in enumerate(self.doc.get('taxes')):
+		for i, tax in reversed(list(enumerate(self.doc.get('taxes')))):
 			if tax.account_head in accounts_to_skip:
 				del self.doc.get('taxes')[i]
 

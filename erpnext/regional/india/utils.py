@@ -136,7 +136,7 @@ def get_place_of_supply(out, doctype):
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
 		address_name = out.shipping_address_name or out.customer_address
-	elif doctype == "Purchase Invoice":
+	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		address_name = out.shipping_address or out.supplier_address
 
 	if address_name:
@@ -146,7 +146,6 @@ def get_place_of_supply(out, doctype):
 
 def get_regional_address_details(out, doctype, company):
 	out.place_of_supply = get_place_of_supply(out, doctype)
-
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
 		master_doctype = "Sales Taxes and Charges Template"
 
@@ -158,7 +157,7 @@ def get_regional_address_details(out, doctype, company):
 		if not out.company_gstin:
 			return
 
-	elif doctype == "Purchase Invoice":
+	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		master_doctype = "Purchase Taxes and Charges Template"
 
 		gst_category = get_tax_template_for_sez(out, master_doctype, company, 'Supplier')
@@ -171,19 +170,31 @@ def get_regional_address_details(out, doctype, company):
 
 	if not out.place_of_supply: return
 
-	if ((doctype in ("Sales Invoice", "Delivery Note") and out.company_gstin
-		and out.company_gstin[:2] != out.place_of_supply[:2]) or (doctype == "Purchase Invoice"
-		and out.supplier_gstin and out.supplier_gstin[:2] != out.place_of_supply[:2])):
-		default_tax = frappe.db.get_value(master_doctype, {"company": company, "is_inter_state":1, "disabled":0,
-			"gst_state": number_state_mapping[out.company_gstin[:2]]})
+	if ((doctype in ("Sales Invoice", "Delivery Note", "Sales Order") and out.company_gstin
+		and out.company_gstin[:2] != out.place_of_supply[:2]) or (doctype in ("Purchase Invoice",
+		"Purchase Order", "Purchase Receipt") and out.supplier_gstin and out.supplier_gstin[:2] != out.place_of_supply[:2])):
+		default_tax = get_tax_template(master_doctype, company, 1, out.company_gstin[:2])
 	else:
-		default_tax = frappe.db.get_value(master_doctype, {"company": company, "disabled":0,
-			"is_inter_state": 0, "gst_state": number_state_mapping[out.company_gstin[:2]]})
+		default_tax = get_tax_template(master_doctype, company, 0, out.company_gstin[:2])
 
 	if not default_tax:
 		return
 	out["taxes_and_charges"] = default_tax
 	out.taxes = get_taxes_and_charges(master_doctype, default_tax)
+
+def get_tax_template(master_doctype, company, is_inter_state, company_gstin):
+	tax_categories = frappe.get_all('Tax Category', fields = ['name', 'is_inter_state', 'gst_state'],
+		filters = {'is_inter_state': is_inter_state})
+
+	default_tax = ''
+
+	for tax_category in tax_categories:
+		if tax_category.gst_state == number_state_mapping[company_gstin] or \
+	 		(not default_tax and not tax_category.gst_state):
+			default_tax = frappe.db.get_value(master_doctype,
+				{'disabled': 0, 'tax_category': tax_category.name}, 'name')
+
+	return default_tax
 
 def get_tax_template_for_sez(out, master_doctype, company, party_type):
 
@@ -611,12 +622,15 @@ def set_accounts_to_skip(doc, method=None):
 	get_regional_address_details(out, doc.doctype, doc.company)
 	doc.accounts_to_skip = []
 
-	if out.get('taxes'):
-		accounts = [t.account_head for t in out.get('taxes')]
+	if not out.get('taxes'):
+		return
 
+	accounts = [t.account_head for t in out.get('taxes')]
 	for account in inter_state_accounts + intra_state_accounts:
 		if account not in accounts:
 			doc.accounts_to_skip.append(account)
+
+	doc.calculate_taxes_and_totals()
 
 @frappe.whitelist()
 def get_gst_accounts(company, account_wise=False):
