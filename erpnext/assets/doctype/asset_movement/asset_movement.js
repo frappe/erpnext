@@ -132,7 +132,7 @@ frappe.ui.form.on('Asset Movement Item', {
 				if(asset_doc.location) frappe.model.set_value(cdt, cdn, 'source_location', asset_doc.location);
 				if(asset_doc.custodian) frappe.model.set_value(cdt, cdn, 'from_employee', asset_doc.custodian);
 			}).catch((err) => {
-				console.log(err);
+				console.log(err); // eslint-disable-line
 			});
 		}
 	}
