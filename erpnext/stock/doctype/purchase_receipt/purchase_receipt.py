@@ -82,11 +82,19 @@ class PurchaseReceipt(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
+		if is_cwip_accounting_enabled(self.company):
+			self.validate_cwip_accounts()
 
 		self.check_on_hold_or_closed_status()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
+	
+	def validate_cwip_accounts(self):
+		# check cwip accounts before making auto assets
+		# Improves UX by not giving messages of "Assets Created" before throwing error of not finding arbnb account
+		arbnb_account = self.get_company_default("asset_received_but_not_billed")
+		cwip_account = get_asset_account("capital_work_in_progress_account", company = self.company)
 
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc({
