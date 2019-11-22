@@ -42,6 +42,24 @@ frappe.ui.form.on('Asset', {
 	},
 
 	setup: function(frm) {
+		frm.make_methods = {
+			'Asset Movement': () => {
+				frappe.call({
+				method: "erpnext.assets.doctype.asset.asset.make_asset_movement",
+				freeze: true,
+				args:{
+					"assets": [{ name: cur_frm.doc.name }]
+				},
+				callback: function (r) {
+					if (r.message) {
+						var doc = frappe.model.sync(r.message)[0];
+						frappe.set_route("Form", doc.doctype, doc.name);
+					}
+				}
+			});
+			},
+		}
+
 		frm.set_query("purchase_receipt", (doc) => {
 			return {
 				query: "erpnext.controllers.queries.get_purchase_receipts",
@@ -487,92 +505,19 @@ erpnext.asset.restore_asset = function(frm) {
 	})
 };
 
-erpnext.asset.transfer_asset = function(frm) {
-	var dialog = new frappe.ui.Dialog({
-		title: __("Transfer Asset"),
-		fields: [
-			{
-				"label": __("Target Location"),
-				"fieldname": "target_location",
-				"fieldtype": "Link",
-				"options": "Location",
-				"get_query": function () {
-					return {
-						filters: [
-							["Location", "is_group", "=", 0]
-						]
-					}
-				},
-				"reqd": 1
-			},
-			{
-				"label": __("Select Serial No"),
-				"fieldname": "serial_nos",
-				"fieldtype": "Link",
-				"options": "Serial No",
-				"get_query": function () {
-					return {
-						filters: {
-							'asset': frm.doc.name
-						}
-					}
-				},
-				"onchange": function() {
-					let val = this.get_value();
-					if (val) {
-						let serial_nos = dialog.get_value("serial_no") || val;
-						if (serial_nos) {
-							serial_nos = serial_nos.split('\n');
-							serial_nos.push(val);
-
-							const unique_sn = serial_nos.filter(function(elem, index, self) {
-							    return index === self.indexOf(elem);
-							});
-
-							dialog.set_value("serial_no", unique_sn.join('\n'));
-							dialog.set_value("serial_nos", "");
-						}
-					}
-				}
-			},
-			{
-				"label": __("Serial No"),
-				"fieldname": "serial_no",
-				"read_only": 1,
-				"fieldtype": "Small Text"
-			},
-			{
-				"label": __("Date"),
-				"fieldname": "transfer_date",
-				"fieldtype": "Datetime",
-				"reqd": 1,
-				"default": frappe.datetime.now_datetime()
+erpnext.asset.transfer_asset = function() {
+	frappe.call({
+		method: "erpnext.assets.doctype.asset.asset.make_asset_movement",
+		freeze: true,
+		args:{
+			"assets": [{ name: cur_frm.doc.name }],
+			"purpose": "Transfer"
+		},
+		callback: function (r) {
+			if (r.message) {
+				var doc = frappe.model.sync(r.message)[0];
+				frappe.set_route("Form", doc.doctype, doc.name);
 			}
-		]
+		}
 	});
-
-	dialog.set_primary_action(__("Transfer"), function() {
-		var args = dialog.get_values();
-		if(!args) return;
-		dialog.hide();
-		return frappe.call({
-			type: "GET",
-			method: "erpnext.assets.doctype.asset.asset.transfer_asset",
-			args: {
-				args: {
-					"asset": frm.doc.name,
-					"transaction_date": args.transfer_date,
-					"source_location": frm.doc.location,
-					"target_location": args.target_location,
-					"serial_no": args.serial_no,
-					"company": frm.doc.company
-				}
-			},
-			freeze: true,
-			callback: function(r) {
-				cur_frm.reload_doc();
-			}
-		})
-	});
-	dialog.show();
 };
