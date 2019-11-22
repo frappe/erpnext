@@ -31,8 +31,7 @@ class Asset(AccountsController):
 		self.validate_in_use_date()
 		self.set_status()
 		self.make_asset_movement()
-		if not self.booked_fixed_asset and is_cwip_accounting_enabled(self.company,
-			self.asset_category):
+		if not self.booked_fixed_asset and is_cwip_accounting_enabled(self.asset_category):
 			self.make_gl_entries()
 		
 	def before_cancel(self):
@@ -99,7 +98,7 @@ class Asset(AccountsController):
 		if not flt(self.gross_purchase_amount):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
 
-		if is_cwip_accounting_enabled(self.company, self.asset_category):
+		if is_cwip_accounting_enabled(self.asset_category):
 			if not self.is_existing_asset and not (self.purchase_receipt or self.purchase_invoice):
 				frappe.throw(_("Please create purchase receipt or purchase invoice for the item {0}").
 					format(self.item_code))
@@ -295,7 +294,9 @@ class Asset(AccountsController):
 				.format(row.idx))
 
 		if not row.depreciation_start_date:
-			frappe.throw(_("Row {0}: Depreciation Start Date is required").format(row.idx))
+			if not self.available_for_use_date:
+				frappe.throw(_("Row {0}: Depreciation Start Date is required").format(row.idx))
+			row.depreciation_start_date = self.available_for_use_date
 
 		if not self.is_existing_asset:
 			self.opening_accumulated_depreciation = 0
@@ -514,7 +515,7 @@ def update_maintenance_status():
 			asset.set_status('Out of Order')
 
 def make_post_gl_entry():
-	if not is_cwip_accounting_enabled(self.company, self.asset_category):
+	if not is_cwip_accounting_enabled(self.asset_category):
 		return
 
 	assets = frappe.db.sql_list(""" select name from `tabAsset`
@@ -683,12 +684,7 @@ def make_asset_movement(assets, purpose=None):
 	if asset_movement.get('assets'):
 		return asset_movement.as_dict()
 
-def is_cwip_accounting_enabled(company, asset_category=None):
-	enable_cwip_in_company = cint(frappe.db.get_value("Company", company, "enable_cwip_accounting"))
-
-	if enable_cwip_in_company or not asset_category:
-		return enable_cwip_in_company
-
+def is_cwip_accounting_enabled(asset_category):
 	return cint(frappe.db.get_value("Asset Category", asset_category, "enable_cwip_accounting"))
 
 def get_pro_rata_amt(row, depreciation_amount, from_date, to_date):
