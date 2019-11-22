@@ -7,6 +7,7 @@ import frappe
 import unittest
 from frappe.utils import today, add_months, add_days
 from erpnext.hr.doctype.attendance_request.test_attendance_request import get_employee
+from erpnext.hr.doctype.leave_period.test_leave_period import create_leave_period
 from erpnext.hr.doctype.leave_application.leave_application import get_leave_balance_on
 
 class TestCompensatoryLeaveRequest(unittest.TestCase):
@@ -15,6 +16,7 @@ class TestCompensatoryLeaveRequest(unittest.TestCase):
 		frappe.db.sql(''' delete from `tabLeave Ledger Entry`''')
 		frappe.db.sql(''' delete from `tabLeave Allocation`''')
 		frappe.db.sql(''' delete from `tabAttendance` where attendance_date=%s ''', (today()))
+		create_leave_period(add_months(today(), -3), add_months(today(), 3), "_Test Company")
 		create_holiday_list()
 
 		employee = get_employee()
