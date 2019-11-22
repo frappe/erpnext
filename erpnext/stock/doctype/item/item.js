@@ -49,7 +49,7 @@ frappe.ui.form.on("Item", {
 		if (!frm.doc.is_fixed_asset) {
 			erpnext.item.make_dashboard(frm);
 		}
-
+		
 		if (frm.doc.is_fixed_asset) {
 			frm.trigger('is_fixed_asset');
 			frm.trigger('auto_create_assets');
@@ -140,6 +140,7 @@ frappe.ui.form.on("Item", {
 		// set serial no to false & toggles its visibility
 		frm.set_value('has_serial_no', 0);
 		frm.toggle_enable(['has_serial_no', 'serial_no_series'], !frm.doc.is_fixed_asset);
+		frm.toggle_reqd(['asset_category'], frm.doc.is_fixed_asset);
 		frm.toggle_display(['has_serial_no', 'serial_no_series'], !frm.doc.is_fixed_asset);
 
 		frm.call({
@@ -150,6 +151,8 @@ frappe.ui.form.on("Item", {
 				frm.trigger("set_asset_naming_series");
 			}
 		});
+
+		frm.trigger('auto_create_assets');
 	},
 
 	set_asset_naming_series: function(frm) {
@@ -159,8 +162,8 @@ frappe.ui.form.on("Item", {
 	},
 
 	auto_create_assets: function(frm) {
-		frm.toggle_reqd(['asset_category', 'asset_naming_series'], frm.doc.auto_create_assets);
-		frm.toggle_display(['asset_category', 'asset_naming_series'], frm.doc.auto_create_assets);
+		frm.toggle_reqd(['asset_naming_series'], frm.doc.auto_create_assets);
+		frm.toggle_display(['asset_naming_series'], frm.doc.auto_create_assets);
 	},
 
 	page_name: frappe.utils.warn_page_name_change,
