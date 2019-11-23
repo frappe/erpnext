@@ -19,6 +19,9 @@ import dateutil
 from frappe.utils.file_manager import save_file
 
 class ImportSupplierInvoice(Document):
+	def validate(self):
+		if not frappe.db.get_value("Stock Settings", fieldname="stock_uom"):
+			frappe.throw(_("Please set default UOM in Stock Settings"))
 
 	def autoname(self):
 		if not self.name:
@@ -34,9 +37,6 @@ class ImportSupplierInvoice(Document):
 		mop_dict = dict(item.split("-") for item in mop_str.split(","))
 
 		default_uom = frappe.db.get_value("Stock Settings", fieldname="stock_uom")
-
-		if not default_uom:
-			frappe.throw(_("Please set default UOM in Stock Settings"))
 
 		with zipfile.ZipFile(get_full_path(self.zip_file)) as zf:
 			file_count = 0
@@ -158,7 +158,6 @@ class ImportSupplierInvoice(Document):
 						#read payment data from file
 						for line in file_content.find_all("DettaglioPagamento"):
 							mop_code = line.ModalitaPagamento.text + '-' + mop_dict.get(line.ModalitaPagamento.text)
-							
 							if line.find("DataScadenzaPagamento"):
 								due_date = dateutil.parser.parse(line.DataScadenzaPagamento.text).strftime("%Y-%m-%d")
 							else:
@@ -208,7 +207,6 @@ class ImportSupplierInvoice(Document):
 		frappe.publish_realtime("import_invoice_update", {"title": title, "message": message, "count": count, "total": total})
 
 def create_supplier(**args):
-
 	args = frappe._dict(args)
 	existing_supplier_name = frappe.db.get_value("Supplier",
 				filters={"tax_id": args.tax_id}, fieldname="name")
@@ -261,7 +259,6 @@ def create_supplier(**args):
 		return new_supplier.name
 
 def create_address(**args):
-
 	args = frappe._dict(args)
 	filters = [
 			["Dynamic Link", "link_doctype", "=", "Supplier"],
@@ -301,7 +298,6 @@ def create_address(**args):
 		return None
 
 def create_purchase_invoice(**args):
-
 	args = frappe._dict(args)
 	pi = frappe.get_doc({
 			"doctype": "Purchase Invoice",
@@ -321,13 +317,11 @@ def create_purchase_invoice(**args):
 	try:
 		pi.set_missing_values()
 		pi.insert(ignore_permissions=True)
-
 		#if discount exists in file, apply any discount on grand total
 		if args.total_discount > 0:
 			pi.apply_discount_on = "Grand Total"
 			pi.discount_amount = args.total_discount
 			pi.save()
-
 		#adjust payment amount to match with grand total calculated
 		calc_total = 0
 		adj = 0
@@ -344,14 +338,12 @@ def create_purchase_invoice(**args):
 			adj = 0
 		pi.imported_grand_total = calc_total
 		pi.save()
-
 		return pi.name
 	except Exception as e:
 		frappe.log_error(message=e, title="Create Purchase Invoice: " + args.bill_no + "File Name: " + args.file_name)
 		return None
 
 def get_country(code):
-
 	existing_country_name = frappe.db.get_value("Country",
 			filters={"code": code}, fieldname="name")
 	if existing_country_name:
@@ -360,7 +352,6 @@ def get_country(code):
 		frappe.throw(_("Country Code in File does not match with country code set up in the system"))
 
 def create_uom(uom):
-
 	existing_uom = frappe.db.get_value("UOM",
 			filters={"uom_name": uom}, fieldname="uom_name")
 	if existing_uom:
