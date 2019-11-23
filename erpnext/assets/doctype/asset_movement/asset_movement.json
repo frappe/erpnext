@@ -55,14 +55,14 @@
   {
    "fieldname": "reference_doctype",
    "fieldtype": "Link",
-   "label": "Reference DocType",
+   "label": "Reference Document Type",
    "no_copy": 1,
    "options": "DocType"
   },
   {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
-   "label": "Reference Name",
+   "label": "Reference Document Name",
    "no_copy": 1,
    "options": "reference_doctype"
   },
@@ -92,7 +92,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-11-22 15:15:47.875969",
+ "modified": "2019-11-23 13:28:47.256935",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement",
