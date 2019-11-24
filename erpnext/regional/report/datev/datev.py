@@ -253,7 +253,8 @@ def get_datev_csv(data, filters, csv_class):
 
 	header = ';'.join(header).encode('latin_1')
 	data = result.to_csv(
-		sep=b';',
+		# Reason for str(';'): https://github.com/pandas-dev/pandas/issues/6035
+		sep=str(';'),
 		# European decimal seperator
 		decimal=',',
 		# Windows "ANSI" encoding
