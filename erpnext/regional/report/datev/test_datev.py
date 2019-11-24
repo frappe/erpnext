@@ -204,4 +204,4 @@ class TestDatev(TestCase):
 	def test_download(self):
 		download_datev_csv(self.filters)
 		# must be encoded string
-		zipfile.is_zipfile(frappe.response['filecontent'].encode())
+		zipfile.is_zipfile(frappe.response['filecontent'].encode('utf-8').strip())
