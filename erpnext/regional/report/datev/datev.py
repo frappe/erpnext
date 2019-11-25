@@ -240,7 +240,7 @@ def get_datev_csv(data, filters, csv_class):
 	empty_df = pd.DataFrame(columns=csv_class.COLUMNS)
 	data_df = pd.DataFrame.from_records(data)
 
-	result = empty_df.append(data_df)
+	result = empty_df.append(data_df, sort=True)
 
 	if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS:
 		result['Belegdatum'] = pd.to_datetime(result['Belegdatum'])
