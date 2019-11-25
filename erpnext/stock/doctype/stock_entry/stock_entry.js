@@ -416,9 +416,12 @@ frappe.ui.form.on('Stock Entry', {
 			"label":__("Fetch exploded BOM (including sub-assemblies)"), "default":1},
 			{"fieldname":"fetch", "label":__("Get Items from BOM"), "fieldtype":"Button"}
 		]
+
+		//Exclude field 'Target Warehouse' in case of Material Issue
 		if (frm.doc.purpose == 'Material Issue'){
 			fields.splice(2,1);
 		}
+		//Exclude field 'Source Warehouse' in case of Material Receipt
 		else if(frm.doc.purpose == 'Material Receipt'){
 			fields.splice(1,1);
 		}
