@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+from pprint import pprint
 import frappe
 from frappe.utils import flt
 from frappe import _
@@ -40,6 +41,11 @@ def get_columns():
 		'fieldname': 'opening_balance',
 		'width': 160,
 	}, {
+		'label': _('Total leave allocated'),
+		'fieldtype': 'float',
+		'fieldname': 'total_leave_allocated',
+		'width': 160,
+	}, {
 		'label': _('Leaves Taken'),
 		'fieldtype': 'float',
 		'fieldname': 'leaves_taken',
@@ -67,12 +73,13 @@ def get_data(filters):
 
 	data = []
 
+	total_leave_allocated_map = get_total_leave_allocated_map(filters)
 	for leave_type in leave_types:
 		data.append({
 			'leave_type': leave_type
 		})
 		for employee in active_employees:
-			
+
 			leave_approvers = department_approver_map.get(employee.department_name, []).append(employee.leave_approver)
 
 			if (leave_approvers and len(leave_approvers) and user in leave_approvers) or (user in ["Administrator", employee.user_id]) \
@@ -87,7 +94,7 @@ def get_data(filters):
 
 				opening = get_leave_balance_on(employee.name, leave_type, filters.from_date)
 				closing = get_leave_balance_on(employee.name, leave_type, filters.to_date)
-
+				row.total_leave_allocated = total_leave_allocated_map.get((leave_type, employee.name), 0)
 				row.opening_balance = opening
 				row.leaves_taken = leaves_taken
 				row.closing_balance = closing
@@ -128,3 +135,16 @@ def get_department_leave_approver_map(department=None):
 		approvers.setdefault(k, []).append(v)
 
 	return approvers
+
+def get_total_leave_allocated_map(filters):
+	total_leave_allocated_map = frappe._dict()
+	total_leave_allocated = frappe.db.sql("SELECT SUM(total_leaves_allocated) as total_leave_allocated, employee, leave_type FROM `tabLeave Allocation` WHERE from_date >= '"+filters.get("from_date")+"' GROUP BY employee, leave_type", as_dict = 1)
+
+
+	for total_leaves in total_leave_allocated:
+			total_leave_allocated_map.setdefault((total_leaves.get('leave_type'),total_leaves.get('employee')),total_leaves.get('total_leave_allocated'))
+
+	pprint(total_leave_allocated_map)
+	return total_leave_allocated_map
+
+

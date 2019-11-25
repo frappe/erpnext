@@ -465,7 +465,6 @@ def get_leave_balance_on(employee, leave_type, date, to_date=None, consider_all_
 	expiry = get_allocation_expiry(employee, leave_type, to_date, date)
 
 	leaves_taken = get_leaves_for_period(employee, leave_type, allocation.from_date, end_date)
-
 	return get_remaining_leaves(allocation, leaves_taken, date, expiry)
 
 def get_leave_allocation_records(employee, date, leave_type=None):
@@ -526,7 +525,6 @@ def get_remaining_leaves(allocation, leaves_taken, date, expiry):
 		if remaining_leaves > 0:
 			remaining_days = date_diff(end_date, date) + 1
 			remaining_leaves = min(remaining_days, remaining_leaves)
-
 		return remaining_leaves
 
 	total_leaves = allocation.total_leaves_allocated
