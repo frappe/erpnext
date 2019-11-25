@@ -7,19 +7,12 @@ import frappe, erpnext
 import json
 from frappe import _
 from frappe.utils import flt
-from erpnext.setup.doctype.setup_progress.setup_progress import update_domain_actions, get_domain_actions_state
-
-@frappe.whitelist()
-def set_sales_target(args_data):
-	args = json.loads(args_data)
-	defaults = frappe.defaults.get_defaults()
-	frappe.db.set_value("Company", defaults.get("company"), "monthly_sales_target", args.get('monthly_sales_target'))
 
 @frappe.whitelist()
 def create_customers(args_data):
 	args = json.loads(args_data)
 	defaults = frappe.defaults.get_defaults()
-	for i in range(1,4):
+	for i in range(1,args.get('max_count')):
 		customer = args.get("customer_name_" + str(i))
 		if customer:
 			try:
@@ -57,7 +50,7 @@ def create_letterhead(args_data):
 def create_suppliers(args_data):
 	args = json.loads(args_data)
 	defaults = frappe.defaults.get_defaults()
-	for i in range(1,4):
+	for i in range(1,args.get('max_count')):
 		supplier = args.get("supplier_name_" + str(i))
 		if supplier:
 			try:
@@ -90,7 +83,7 @@ def create_contact(contact, party_type, party):
 def create_items(args_data):
 	args = json.loads(args_data)
 	defaults = frappe.defaults.get_defaults()
-	for i in range(1,4):
+	for i in range(1, args.get('max_count')):
 		item = args.get("item_" + str(i))
 		if item:
 			default_warehouse = ""
@@ -141,7 +134,7 @@ def make_item_price(item, price_list_name, item_price):
 @frappe.whitelist()
 def create_program(args_data):
 	args = json.loads(args_data)
-	for i in range(1,4):
+	for i in range(1,args.get('max_count')):
 		if args.get("program_" + str(i)):
 			program = frappe.new_doc("Program")
 			program.program_code = args.get("program_" + str(i))
@@ -154,7 +147,7 @@ def create_program(args_data):
 @frappe.whitelist()
 def create_course(args_data):
 	args = json.loads(args_data)
-	for i in range(1,4):
+	for i in range(1,args.get('max_count')):
 		if args.get("course_" + str(i)):
 			course = frappe.new_doc("Course")
 			course.course_code = args.get("course_" + str(i))
@@ -167,7 +160,7 @@ def create_course(args_data):
 @frappe.whitelist()
 def create_instructor(args_data):
 	args = json.loads(args_data)
-	for i in range(1,4):
+	for i in range(1,args.get('max_count')):
 		if args.get("instructor_" + str(i)):
 			instructor = frappe.new_doc("Instructor")
 			instructor.instructor_name = args.get("instructor_" + str(i))
@@ -179,7 +172,7 @@ def create_instructor(args_data):
 @frappe.whitelist()
 def create_room(args_data):
 	args = json.loads(args_data)
-	for i in range(1,4):
+	for i in range(1,args.get('max_count')):
 		if args.get("room_" + str(i)):
 			room = frappe.new_doc("Room")
 			room.room_name = args.get("room_" + str(i))
@@ -195,7 +188,7 @@ def create_users(args_data):
 		return
 	args = json.loads(args_data)
 	defaults = frappe.defaults.get_defaults()
-	for i in range(1,4):
+	for i in range(1,args.get('max_count')):
 		email = args.get("user_email_" + str(i))
 		fullname = args.get("user_fullname_" + str(i))
 		if email:
@@ -231,4 +224,4 @@ def create_users(args_data):
 				emp.flags.ignore_mandatory = True
 				emp.insert(ignore_permissions = True)
 
-# Ennumerate the setup hooks you're going to need, apart from the slides
+# Enumerate the setup hooks you're going to need, apart from the slides
