@@ -185,7 +185,7 @@ def validate_account_for_perpetual_inventory(gl_map):
 					raise_exception=StockValueAndAccountBalanceOutOfSync,
 					title=_('Values Out Of Sync'),
 					primary_action={
-						'label': 'Make Journal Entry',
+						'label': _('Make Journal Entry'),
 						'client_action': 'erpnext.route_to_adjustment_jv',
 						'args': journal_entry_args
 					})
