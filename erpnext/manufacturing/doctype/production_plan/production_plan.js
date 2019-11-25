@@ -3,6 +3,11 @@
 
 frappe.ui.form.on('Production Plan', {
 	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Work Order': 'Work Order',
+			'Material Request': 'Material Request',
+		};
+
 		frm.fields_dict['po_items'].grid.get_field('warehouse').get_query = function(doc) {
 			return {
 				filters: {
