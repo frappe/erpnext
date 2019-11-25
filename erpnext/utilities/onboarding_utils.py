@@ -17,7 +17,7 @@ def create_customers(args_data):
 		if customer:
 			try:
 				doc = frappe.get_doc({
-					"doctype":"Customer",
+					"doctype": "Customer",
 					"customer_name": customer,
 					"customer_type": "Company",
 					"customer_group": _("Commercial"),
@@ -25,9 +25,9 @@ def create_customers(args_data):
 					"company": defaults.get("company")
 				}).insert()
 
-				if args.get("customer_contact_" + str(i)):
-					create_contact(args.get("customer_contact_" + str(i)),
-						"Customer", doc.name)
+				if args.get("customer_email_" + str(i)):
+					create_contact(customer, "Customer",
+						doc.name, args.get("customer_email_" + str(i)))
 			except frappe.NameError:
 				pass
 
@@ -38,8 +38,8 @@ def create_letterhead(args_data):
 	if letterhead:
 		try:
 			frappe.get_doc({
-					"doctype":"Letter Head",
-					"content":"""<div><img src="{0}" style='max-width: 100%%;'><br></div>""".format(letterhead.encode('utf-8')),
+					"doctype": "Letter Head",
+					"image": letterhead,
 					"letter_head_name": _("Standard"),
 					"is_default": 1
 			}).insert()
@@ -61,21 +61,22 @@ def create_suppliers(args_data):
 					"company": defaults.get("company")
 				}).insert()
 
-				if args.get("supplier_contact_" + str(i)):
-					create_contact(args.get("supplier_contact_" + str(i)),
-						"Supplier", doc.name)
+				if args.get("supplier_email_" + str(i)):
+					create_contact(supplier, "Supplier",
+						doc.name, args.get("supplier_email_" + str(i)))
 			except frappe.NameError:
 				pass
 
-def create_contact(contact, party_type, party):
+def create_contact(contact, party_type, party, email):
 	"""Create contact based on given contact name"""
 	contact = contact.split(" ")
 
 	contact = frappe.get_doc({
-		"doctype":"Contact",
-		"first_name":contact[0],
+		"doctype": "Contact",
+		"first_name": contact[0],
 		"last_name": len(contact) > 1 and contact[1] or ""
 	})
+	contact.append('email_ids', dict(email_id=email, is_primary=1))
 	contact.append('links', dict(link_doctype=party_type, link_name=party))
 	contact.insert()
 
