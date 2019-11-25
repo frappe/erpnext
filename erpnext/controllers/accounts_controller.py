@@ -718,48 +718,6 @@ class AccountsController(TransactionBase):
 				# at quotation / sales order level and we shouldn't stop someone
 				# from creating a sales invoice if sales order is already created
 
-	def validate_fixed_asset(self):
-		for d in self.get("items"):
-			if d.is_fixed_asset:
-				# if d.qty > 1:
-				# 					frappe.throw(_("Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.").format(d.idx))
-
-				if d.meta.get_field("asset") and d.asset:
-					asset = frappe.get_doc("Asset", d.asset)
-
-					if asset.company != self.company:
-						frappe.throw(_("Row #{0}: Asset {1} does not belong to company {2}")
-									 .format(d.idx, d.asset, self.company))
-
-					elif asset.item_code != d.item_code:
-						frappe.throw(_("Row #{0}: Asset {1} does not linked to Item {2}")
-									 .format(d.idx, d.asset, d.item_code))
-
-					# elif asset.docstatus != 1:
-					# 						frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(d.idx, d.asset))
-
-					elif self.doctype == "Purchase Invoice":
-						# if asset.status != "Submitted":
-						# 							frappe.throw(_("Row #{0}: Asset {1} is already {2}")
-						# 								.format(d.idx, d.asset, asset.status))
-						if getdate(asset.purchase_date) != getdate(self.posting_date):
-							frappe.throw(
-								_("Row #{0}: Posting Date must be same as purchase date {1} of asset {2}").format(d.idx,
-																												  asset.purchase_date,
-																												  d.asset))
-						elif asset.is_existing_asset:
-							frappe.throw(
-								_("Row #{0}: Purchase Invoice cannot be made against an existing asset {1}").format(
-									d.idx, d.asset))
-
-					elif self.docstatus == "Sales Invoice" and self.docstatus == 1:
-						if self.update_stock:
-							frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
-
-						elif asset.status in ("Scrapped", "Cancelled", "Sold"):
-							frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}")
-										 .format(d.idx, d.asset, asset.status))
-
 	def delink_advance_entries(self, linked_doc_name):
 		total_allocated_amount = 0
 		for adv in self.advances:
@@ -1172,6 +1130,7 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
 	data = json.loads(trans_items)
 
+	sales_doctypes = ['Sales Order', 'Sales Invoice', 'Delivery Note', 'Quotation']
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 
 	for d in data:
@@ -1192,8 +1151,9 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			frappe.throw(_("Cannot set quantity less than received quantity"))
 
 		child_item.qty = flt(d.get("qty"))
+		precision = child_item.precision("rate") or 2
 
-		if flt(child_item.billed_amt) > (flt(d.get("rate")) * flt(d.get("qty"))):
+		if flt(child_item.billed_amt, precision) > flt(flt(d.get("rate")) * flt(d.get("qty")), precision):
 			frappe.throw(_("Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.")
 						 .format(child_item.idx, child_item.item_code))
 		else:
@@ -1204,18 +1164,22 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 				#  if rate is greater than price_list_rate, set margin
 				#  or set discount
 				child_item.discount_percentage = 0
-				child_item.margin_type = "Amount"
-				child_item.margin_rate_or_amount = flt(child_item.rate - child_item.price_list_rate,
-					child_item.precision("margin_rate_or_amount"))
-				child_item.rate_with_margin = child_item.rate
+
+				if parent_doctype in sales_doctypes:
+					child_item.margin_type = "Amount"
+					child_item.margin_rate_or_amount = flt(child_item.rate - child_item.price_list_rate,
+						child_item.precision("margin_rate_or_amount"))
+					child_item.rate_with_margin = child_item.rate
 			else:
 				child_item.discount_percentage = flt((1 - flt(child_item.rate) / flt(child_item.price_list_rate)) * 100.0,
 					child_item.precision("discount_percentage"))
 				child_item.discount_amount = flt(
 					child_item.price_list_rate) - flt(child_item.rate)
-				child_item.margin_type = ""
-				child_item.margin_rate_or_amount = 0
-				child_item.rate_with_margin = 0
+
+				if parent_doctype in sales_doctypes:
+					child_item.margin_type = ""
+					child_item.margin_rate_or_amount = 0
+					child_item.rate_with_margin = 0
 
 		child_item.flags.ignore_validate_update_after_submit = True
 		if new_child_flag:

@@ -205,7 +205,7 @@ class SalesOrder(SellingController):
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 			update_coupon_code_count(self.coupon_code,'cancelled')
-			
+
 	def update_project(self):
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') != "Each Transaction":
 			return
@@ -661,11 +661,14 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 
 		if source_parent.project:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
-		if not target.cost_center and target.item_code:
+		if target.item_code:
 			item = get_item_defaults(target.item_code, source_parent.company)
 			item_group = get_item_group_defaults(target.item_code, source_parent.company)
-			target.cost_center = item.get("selling_cost_center") \
+			cost_center = item.get("selling_cost_center") \
 				or item_group.get("selling_cost_center")
+
+			if cost_center:
+				target.cost_center = cost_center
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -1035,14 +1038,18 @@ def create_pick_list(source_name, target_doc=None):
 
 	return doc
 
-def update_produced_qty_in_so_item(sales_order_item):
+def update_produced_qty_in_so_item(sales_order, sales_order_item):
 	#for multiple work orders against same sales order item
 	linked_wo_with_so_item = frappe.db.get_all('Work Order', ['produced_qty'], {
 		'sales_order_item': sales_order_item,
+		'sales_order': sales_order,
 		'docstatus': 1
 	})
-	if len(linked_wo_with_so_item) > 0:
-		total_produced_qty = 0
-		for wo in linked_wo_with_so_item:
-			total_produced_qty += flt(wo.get('produced_qty'))
-		frappe.db.set_value('Sales Order Item', sales_order_item, 'produced_qty', total_produced_qty)
+
+	total_produced_qty = 0
+	for wo in linked_wo_with_so_item:
+		total_produced_qty += flt(wo.get('produced_qty'))
+
+	if not total_produced_qty and frappe.flags.in_patch: return
+
+	frappe.db.set_value('Sales Order Item', sales_order_item, 'produced_qty', total_produced_qty)
