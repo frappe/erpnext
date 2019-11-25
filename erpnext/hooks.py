@@ -235,17 +235,16 @@ doc_events = {
 	("Sales Taxes and Charges Template", 'Price List'): {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
 	},
-
 	"Website Settings": {
 		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
 	},
 	"Sales Invoice": {
-		"on_submit": ["erpnext.regional.france.utils.create_transaction_log", "erpnext.regional.italy.utils.sales_invoice_on_submit"],
+		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.regional.italy.utils.sales_invoice_on_submit"],
 		"on_cancel": "erpnext.regional.italy.utils.sales_invoice_on_cancel",
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	"Payment Entry": {
-		"on_submit": ["erpnext.regional.france.utils.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"],
+		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"],
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	'Address': {
@@ -283,7 +282,6 @@ scheduler_events = {
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
-		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
 		"erpnext.crm.doctype.opportunity.opportunity.auto_close_opportunity",
 		"erpnext.controllers.accounts_controller.update_invoice_status",
@@ -306,6 +304,7 @@ scheduler_events = {
 		"erpnext.crm.doctype.email_campaign.email_campaign.set_email_campaign_status"
 	],
 	"daily_long": [
+		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
 		"erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry.process_expired_allocation",
 		"erpnext.hr.utils.generate_leave_encashment"
