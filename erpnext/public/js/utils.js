@@ -74,6 +74,22 @@ $.extend(erpnext, {
 			);
 		});
 	},
+
+	route_to_adjustment_jv: (args) => {
+		frappe.model.with_doctype('Journal Entry', () => {
+			// route to adjustment Journal Entry to handle Account Balance and Stock Value mismatch
+			let journal_entry = frappe.model.get_new_doc('Journal Entry');
+
+			args.accounts.forEach((je_account) => {
+				let child_row = frappe.model.add_child(journal_entry, "accounts");
+				child_row.account = je_account.account;
+				child_row.debit_in_account_currency = je_account.debit_in_account_currency;
+				child_row.credit_in_account_currency = je_account.credit_in_account_currency;
+				child_row.party_type = "" ;
+			});
+			frappe.set_route('Form','Journal Entry', journal_entry.name);
+		});
+	}
 });
 
 

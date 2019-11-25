@@ -163,7 +163,10 @@ def validate_account_for_perpetual_inventory(gl_map):
 						.format(account), StockAccountInvalidTransaction)
 
 			elif account_bal != stock_bal:
-				diff = flt(stock_bal - account_bal)
+				precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
+					currency=frappe.get_cached_value('Company',  gl_map[0].company,  "default_currency"))
+
+				diff = flt(stock_bal - account_bal, precision)
 				error_reason = _("Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses.").format(
 					stock_bal, account_bal, frappe.bold(account))
 				error_resolution = _("Please create adjustment Journal Entry for amount {0} ").format(frappe.bold(diff))
@@ -182,7 +185,7 @@ def validate_account_for_perpetual_inventory(gl_map):
 					raise_exception=StockValueAndAccountBalanceOutOfSync,
 					title=_('Values Out Of Sync'),
 					primary_action={
-						'label': 'Make JV',
+						'label': 'Make Journal Entry',
 						'client_action': 'erpnext.route_to_adjustment_jv',
 						'args': journal_entry_args
 					})
