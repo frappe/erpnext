@@ -259,7 +259,7 @@ def get_datev_csv(data, filters, csv_class):
 		# format date as DDMM
 		date_format='%d%m',
 		# Windows line terminator
-		line_terminator=b'\r\n',
+		line_terminator='\r\n',
 		# Do not number rows
 		index=False,
 		# Use all columns defined above
