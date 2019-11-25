@@ -205,7 +205,9 @@
         {%- endif %}
         <ImponibileImporto>{{ format_float(data.taxable_amount, item_meta.get_field("tax_amount").precision) }}</ImponibileImporto>
         <Imposta>{{ format_float(data.tax_amount, item_meta.get_field("tax_amount").precision) }}</Imposta>
-        <EsigibilitaIVA>{{ doc.vat_collectability.split("-")[0] }}</EsigibilitaIVA>
+        {%- if data.vat_collectability %}
+          <EsigibilitaIVA>{{ doc.vat_collectability.split("-")[0] }}</EsigibilitaIVA>
+        {%- endif %}
         {%- if data.tax_exemption_law %}
         <RiferimentoNormativo>{{ data.tax_exemption_law }}</RiferimentoNormativo>
         {%- endif %}
