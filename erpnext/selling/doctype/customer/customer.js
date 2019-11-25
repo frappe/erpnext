@@ -50,6 +50,7 @@ frappe.ui.form.on("Customer", {
 		frm.set_query('customer_primary_address', function(doc) {
 			return {
 				filters: {
+					'link_doctype': 'Customer',
 					'link_name': doc.name
 				}
 			}
