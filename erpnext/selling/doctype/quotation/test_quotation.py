@@ -222,6 +222,7 @@ class TestQuotation(unittest.TestCase):
 		expired_quotation.save()
 		expired_quotation.submit()
 		set_expired_status()
+		expired_quotation = frappe.get_doc("Quotation",expired_quotation.name)
 		self.assertEqual(expired_quotation.status,"Expired")
 
 
