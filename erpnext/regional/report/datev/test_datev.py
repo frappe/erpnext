@@ -35,10 +35,11 @@ def make_company(company_name, abbr):
 			"company_name": company_name,
 			"abbr": abbr,
 			"default_currency": "EUR",
+			"country": "Germany",
 			"create_chart_of_accounts_based_on": "Standard Template",
 			"chart_of_accounts": "SKR04 mit Kontonummern"
 		})
-		company.save()
+		company.insert()
 	else:
 		company = frappe.get_doc("Company", company_name)
 
@@ -66,7 +67,7 @@ def make_customer_with_account(customer_name, company):
 			"account_type": "Receivable",
 			"account_number": "10001"
 		})
-		acc.save()
+		acc.insert()
 		acc_name = acc.name
 
 	if not frappe.db.exists("Customer", customer_name):
@@ -79,7 +80,7 @@ def make_customer_with_account(customer_name, company):
 				"account": acc_name
 			}]
 		})
-		customer.save()
+		customer.insert()
 	else:
 		customer = frappe.get_doc("Customer", customer_name)
 
@@ -106,7 +107,7 @@ def make_item(item_code, company):
 				"company": company.name
 			}]
 		})
-		item.save()
+		item.insert()
 	else:
 		item = frappe.get_doc("Item", item_code)
 	return item
@@ -118,7 +119,8 @@ def make_datev_settings(company):
 			"client": company.name,
 			"client_number": "12345",
 			"consultant_number": "67890"
-		}).save()
+		}).insert()
+
 
 class TestDatev(TestCase):
 	def setUp(self):
@@ -139,12 +141,12 @@ class TestDatev(TestCase):
 			}, "default_warehouse")
 
 		income_account = frappe.db.get_value("Account", {
-				"account_number":"4200", 
+				"account_number": "4200", 
 				"company": self.company.name
 			}, "name")
 
 		tax_account = frappe.db.get_value("Account", {
-				"account_number":"3806", 
+				"account_number": "3806", 
 				"company": self.company.name
 			}, "name")
 
