@@ -175,11 +175,7 @@ def validate_account_for_perpetual_inventory(gl_map):
 					StockValueAndAccountBalanceOutOfSync, title=_('Account Balance Out Of Sync'))
 
 def validate_cwip_accounts(gl_map):
-	cwip_enabled = cint(frappe.get_cached_value("Company",
-		gl_map[0].company, "enable_cwip_accounting"))
-
-	if not cwip_enabled:
-		cwip_enabled = any([cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category","enable_cwip_accounting")])
+	cwip_enabled = any([cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category","enable_cwip_accounting")])
 
 	if cwip_enabled and gl_map[0].voucher_type == "Journal Entry":
 			cwip_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount

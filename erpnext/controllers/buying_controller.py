@@ -577,6 +577,7 @@ class BuyingController(StockController):
 
 	def auto_make_assets(self, asset_items):
 		items_data = get_asset_item_details(asset_items)
+		messages = []
 
 		for d in self.items:
 			if d.is_fixed_asset:
@@ -589,12 +590,16 @@ class BuyingController(StockController):
 						for qty in range(cint(d.qty)):
 							self.make_asset(d)
 						is_plural = 's' if cint(d.qty) != 1 else ''
-						frappe.msgprint(_('{0} Asset{2} Created for {1}').format(cint(d.qty), d.item_code, is_plural))
+						messages.append(_('{0} Asset{2} Created for <b>{1}</b>').format(cint(d.qty), d.item_code, is_plural))
 					else:
-						frappe.throw(_("Asset Naming Series is mandatory for the auto creation for item {0}").format(d.item_code))
+						frappe.throw(_("Row {1}: Asset Naming Series is mandatory for the auto creation for item {0}")
+							.format(d.item_code, d.idx))
 				else:
-					frappe.msgprint(_("Assets not created. You will have to create asset manually."))
-					
+					messages.append(_("Assets not created for <b>{0}</b>. You will have to create asset manually.")
+						.format(d.item_code))
+
+		for message in messages:
+			frappe.msgprint(message, title="Success")
 
 	def make_asset(self, row):
 		if not row.asset_location:
