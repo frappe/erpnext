@@ -218,7 +218,7 @@ def get_suppliers(filters):
 
 def get_account_names(filters):
 	return frappe.get_list("Account", 
-		fields=["account_number", "name"], 
+		fields=["account_number as Konto", "name as Kontenbeschriftung"], 
 		filters={"company": filters.get("company"), "is_group": "0"})
 
 
@@ -239,9 +239,6 @@ def get_datev_csv(data, filters, csv_class):
 
 	empty_df = pd.DataFrame(columns=csv_class.COLUMNS)
 	data_df = pd.DataFrame.from_records(data)
-
-	if csv_class.DATA_CATEGORY == DataCategory.ACCOUNT_NAMES:
-		data_df.rename(columns={'account_number':'Konto','name':'Kontenbeschriftung'}, inplace=True)
 
 	result = empty_df.append(data_df)
 

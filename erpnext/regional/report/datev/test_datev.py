@@ -184,7 +184,6 @@ class TestDatev(TestCase):
 			allowed_set = set({unicode(key) for key in allowed_keys})
 			return actual_set.issubset(allowed_set)
 
-		# TODO: encoding does not match
 		self.assertTrue(is_subset(get_transactions, Transactions.COLUMNS))
 		self.assertTrue(is_subset(get_customers, DebtorsCreditors.COLUMNS))
 		self.assertTrue(is_subset(get_suppliers, DebtorsCreditors.COLUMNS))
