@@ -176,6 +176,9 @@ class TestDatev(TestCase):
 			allowed_keys -- List of allowed keys
 			"""
 			data = get_data(self.filters)
+			if data == []:
+				# No data and, therefore, no columns is okay
+				return True
 			actual_set = set(data[0].keys())
 			# allowed set must be interpreted as unicode to match the actual set
 			allowed_set = set({unicode(key) for key in allowed_keys})
