@@ -19,7 +19,7 @@ class AppointmentBookingSettings(Document):
 
 	def save(self):
 		self.number_of_agents = len(self.agent_list)
-		super(AppointmentBookingSettings,self).save()
+		super(AppointmentBookingSettings, self).save()
 
 	def validate_availability_of_slots(self):
 		for record in self.availability_of_slots:
