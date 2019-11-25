@@ -51,6 +51,11 @@ def get_data():
 					"name": "Appointment",
 					"description" : _("Helps you manage appointments with your leads"),
 				},
+        {
+          "type": "doctype",
+					"name": "Newsletter",
+					"label": _("Newsletter"),
+				}
 			]
 		},
 		{
@@ -170,6 +175,11 @@ def get_data():
 					"type": "doctype",
 					"name": "SMS Settings",
 					"description": _("Setup SMS gateway settings")
+				},
+				{
+					"type": "doctype",
+					"label": _("Email Group"),
+					"name": "Email Group",
 				}
 			]
 		},

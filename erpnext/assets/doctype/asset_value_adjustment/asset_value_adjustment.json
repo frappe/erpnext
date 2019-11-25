@@ -60,7 +60,8 @@
   {
    "fieldname": "date",
    "fieldtype": "Date",
-   "label": "Date"
+   "label": "Date",
+   "reqd": 1
   },
   {
    "fieldname": "current_asset_value",
@@ -110,7 +111,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-26 09:46:23.613412",
+ "modified": "2019-11-22 14:09:25.800375",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Value Adjustment",
