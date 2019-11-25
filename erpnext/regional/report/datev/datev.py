@@ -136,7 +136,7 @@ def get_customers(filters):
 			coalesce(con.mobile_no, con.phone) as 'Telefon',
 			cus.website as 'Internet',
 			cus.tax_id as 'Steuernummer',
-			cus.credit_limit as 'Kreditlimit (Debitor)'
+			ccl.credit_limit as 'Kreditlimit (Debitor)'
 
 		FROM `tabParty Account` par
 
@@ -154,6 +154,10 @@ def get_customers(filters):
 
 			left join `tabContact` con
 			on con.name = cus.customer_primary_contact
+
+			left join `tabCustomer Credit Limit` ccl
+			on ccl.parent = cus.name
+			and ccl.company = par.company
 
 		WHERE par.company = %(company)s
 		AND par.parenttype = 'Customer'""", filters, as_dict=1, as_utf8=1)
