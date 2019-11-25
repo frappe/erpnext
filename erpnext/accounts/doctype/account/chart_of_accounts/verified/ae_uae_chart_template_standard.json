@@ -212,6 +212,9 @@
                     "Credit Card Charges": {},
                     "Credit Card Swipe Charges": {},
                     "PayPal Charges": {}
+                },
+                "Stock Expenses": {
+                    "account_type": "Stock Adjustment"
                 }
             },
             "MISC Charges": {
