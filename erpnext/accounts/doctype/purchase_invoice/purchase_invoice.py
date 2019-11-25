@@ -357,7 +357,7 @@ class PurchaseInvoice(BuyingController):
 			return
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
-			
+
 		if gl_entries:
 			update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
 
@@ -507,7 +507,7 @@ class PurchaseInvoice(BuyingController):
 				elif not item.is_fixed_asset or (item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category)):
 					expense_account = (item.expense_account
 						if (not item.enable_deferred_expense or self.is_return) else item.deferred_expense_account)
-					
+
 					if not item.is_fixed_asset:
 						amount = flt(item.base_net_amount, item.precision("base_net_amount"))
 					else:
@@ -520,7 +520,7 @@ class PurchaseInvoice(BuyingController):
 							"cost_center": item.cost_center,
 							"project": item.project
 						}, account_currency, item=item))
-					
+
 					# If asset is bought through this document and not linked to PR
 					if self.update_stock and item.landed_cost_voucher_amount:
 						expenses_included_in_asset_valuation = self.get_company_default("expenses_included_in_asset_valuation")
@@ -542,9 +542,9 @@ class PurchaseInvoice(BuyingController):
 							"debit": flt(item.landed_cost_voucher_amount),
 							"project": item.project
 						}, item=item))
-						
+
 						# update gross amount of asset bought through this document
-						assets = frappe.db.get_all('Asset', 
+						assets = frappe.db.get_all('Asset',
 							filters={ 'purchase_invoice': self.name, 'item_code': item.item_code }
 						)
 						for asset in assets:
@@ -636,7 +636,7 @@ class PurchaseInvoice(BuyingController):
 								if asset_eiiav_currency == self.company_currency else
 									item.item_tax_amount / self.conversion_rate)
 						}, item=item))
-					
+
 					# When update stock is checked
 					# Assets are bought through this document then it will be linked to this document
 					if self.update_stock:
@@ -658,9 +658,9 @@ class PurchaseInvoice(BuyingController):
 								"debit": flt(item.landed_cost_voucher_amount),
 								"project": item.project
 							}, item=item))
-						
+
 						# update gross amount of assets bought through this document
-						assets = frappe.db.get_all('Asset', 
+						assets = frappe.db.get_all('Asset',
 							filters={ 'purchase_invoice': self.name, 'item_code': item.item_code }
 						)
 						for asset in assets:

@@ -31,6 +31,13 @@ frappe.ui.form.on('Asset Movement', {
 					name: ["in", ["Purchase Receipt", "Purchase Invoice"]]
 				}
 			};
+		}),
+		frm.set_query("asset", "assets", () => {
+			return {
+				filters: {
+					status: ["not in", ["Draft"]]
+				}
+			}
 		})
 	},
 
@@ -76,50 +83,6 @@ frappe.ui.form.on('Asset Movement', {
 			});
 		});
 		frm.refresh_field('assets');
-	},
-
-	reference_name: function(frm) {
-		if (frm.doc.reference_name && frm.doc.reference_doctype) {
-			const reference_doctype = frm.doc.reference_doctype === 'Purchase Invoice' ? 'purchase_invoice' : 'purchase_receipt';
-			// On selection of reference name,
-			// sets query to display assets linked to that reference doc
-			frm.set_query('asset', 'assets', function() {
-				return {
-					filters: {
-						[reference_doctype] : frm.doc.reference_name
-					}
-				};
-			});
-
-			// fetches linked asset & adds to the assets table
-			frappe.db.get_list('Asset', {
-				fields: ['name', 'location', 'custodian'],
-				filters: {
-					[reference_doctype] : frm.doc.reference_name
-				}
-			}).then((docs) => {
-				if (docs.length == 0) {
-					frappe.msgprint(frappe._(`Please select ${frm.doc.reference_doctype} which has assets.`));
-					frm.doc.reference_name = '';
-					frm.refresh_field('reference_name');
-					return;
-				}
-				frm.doc.assets = [];
-				docs.forEach(doc => {
-					frm.add_child('assets', {
-						asset: doc.name,
-						source_location: doc.location,
-						from_employee: doc.custodian
-					});
-					frm.refresh_field('assets');
-				})
-			}).catch((err) => {
-				console.log(err); // eslint-disable-line
-			});
-		} else {
-			// if reference is deleted then remove query
-			frm.set_query('asset', 'assets', () => ({ filters: {} }));
-		}
 	}
 });
 
