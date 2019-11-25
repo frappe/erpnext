@@ -125,12 +125,14 @@ class Asset(AccountsController):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
 
 	def cancel_auto_gen_movement(self):
-		reference_docname = self.purchase_invoice or self.purchase_receipt
-		movement = frappe.db.get_all('Asset Movement', filters={ 'reference_name': reference_docname, 'docstatus': 1 })
-		if len(movement) > 1:
+		movements = frappe.db.sql(
+			"""SELECT asm.name, asm.docstatus
+			FROM `tabAsset Movement` asm, `tabAsset Movement Item` asm_item
+			WHERE asm_item.parent=asm.name and asm_item.asset=%s and asm.docstatus=1""", self.name, as_dict=1)
+		if len(movements) > 1:
 			frappe.throw(_('Asset has multiple Asset Movement Entries which has to be \
 				cancelled manually to cancel this asset.'))
-		movement = frappe.get_doc('Asset Movement', movement[0].get('name'))
+		movement = frappe.get_doc('Asset Movement', movements[0].get('name'))
 		movement.flags.ignore_validate = True
 		movement.cancel()
 		
@@ -658,23 +660,10 @@ def make_asset_movement(assets, purpose=None):
 		frappe.throw(_('Atleast one asset has to be selected.'))
 
 	asset_movement = frappe.new_doc("Asset Movement")
-	asset_movement.purpose = purpose
-	prev_reference_docname = ''
-
+	asset_movement.quantity = len(assets)
 	for asset in assets:
 		asset = frappe.get_doc('Asset', asset.get('name'))
-		# get PR/PI linked with asset
-		reference_docname = asset.get('purchase_receipt') if asset.get('purchase_receipt') \
-				else asset.get('purchase_invoice')
-		# checks if all the assets are linked with a single PR/PI
-		if prev_reference_docname == '':
-			prev_reference_docname = reference_docname
-		elif prev_reference_docname != reference_docname:
-			frappe.throw(_('Assets selected should belong to same reference document.'))
-
 		asset_movement.company = asset.get('company')
-		asset_movement.reference_doctype = 'Purchase Receipt' if asset.get('purchase_receipt') else 'Purchase Invoice'
-		asset_movement.reference_name = prev_reference_docname
 		asset_movement.append("assets", {
 			'asset': asset.get('name'),
 			'source_location': asset.get('location'),
