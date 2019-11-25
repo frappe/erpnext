@@ -216,7 +216,7 @@ class TestQuotation(unittest.TestCase):
 				"rate": 500
 			}
 		]
-		yesterday = getdate(nowdate()) + datetime.timedelta(days=-1)
+		yesterday = getdate(nowdate()) - datetime.timedelta(days=1)
 		expired_quotation = make_quotation(item_list=quotation_item,transaction_date=yesterday)
 		set_expired_status()
 
