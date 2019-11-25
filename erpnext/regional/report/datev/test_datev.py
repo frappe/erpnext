@@ -38,6 +38,7 @@ def make_company(company_name, abbr):
 			"create_chart_of_accounts_based_on": "Standard Template",
 			"chart_of_accounts": "SKR04 mit Kontonummern"
 		})
+		company.save()
 	else:
 		company = frappe.get_doc("Company", company_name)
 
