@@ -130,11 +130,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"label": _("Email Group"),
-					"name": "Email Group",
-				},
-				{
-					"type": "doctype",
 					"label": _("Territory"),
 					"name": "Territory",
 					"icon": "fa fa-sitemap",
@@ -175,6 +170,11 @@ def get_data():
 					"type": "doctype",
 					"name": "SMS Settings",
 					"description": _("Setup SMS gateway settings")
+				},
+				{
+					"type": "doctype",
+					"label": _("Email Group"),
+					"name": "Email Group",
 				}
 			]
 		},
