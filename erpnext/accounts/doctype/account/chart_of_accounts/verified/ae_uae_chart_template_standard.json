@@ -188,6 +188,9 @@
                 },
                 "Expenses Included In Valuation": {
                     "account_type": "Expenses Included In Valuation"
+                },
+                "Stock Adjustment": {
+                    "account_type": "Stock Adjustment"
                 }
             },
             "Depreciation": {
@@ -212,9 +215,6 @@
                     "Credit Card Charges": {},
                     "Credit Card Swipe Charges": {},
                     "PayPal Charges": {}
-                },
-                "Stock Expenses": {
-                    "account_type": "Stock Adjustment"
                 }
             },
             "MISC Charges": {
