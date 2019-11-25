@@ -177,7 +177,8 @@ class TestDatev(TestCase):
 			"""
 			data = get_data(self.filters, as_dict=1)
 			actual_set = set(data[0].keys())
-			allowed_set = set(allowed_keys)
+			# allowed set must be interpreted as unicode to match the actual set
+			allowed_set = set({unicode(key) for key in allowed_keys})
 			return actual_set.issubset(allowed_set)
 
 		# TODO: encoding does not match
