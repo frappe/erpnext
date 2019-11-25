@@ -54,9 +54,10 @@ class TestLandedCostVoucher(unittest.TestCase):
 			expected_values = {
 				stock_in_hand_account: [800.0, 0.0],
 				"Stock Received But Not Billed - TCP1": [0.0, 500.0],
-				"Expenses Included In Valuation - TCP1": [0.0, 300.0]
+				"Expenses Included In Valuation - TCP1": [0.0, 50.0],
+				"_Test Account Customs Duty - TCP1": [0.0, 150],
+				"_Test Account Shipping Charges - TCP1": [0.0, 100.00]
 			}
-
 		else:
 			expected_values = {
 				stock_in_hand_account: [400.0, 0.0],
