@@ -9,12 +9,12 @@
   "purpose",
   "column_break_4",
   "transaction_date",
+  "section_break_10",
+  "assets",
   "reference",
   "reference_doctype",
   "column_break_9",
   "reference_name",
-  "section_break_10",
-  "assets",
   "amended_from"
  ],
  "fields": [
@@ -47,6 +47,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "reference",
    "fieldtype": "Section Break",
    "label": "Reference"
@@ -54,18 +55,16 @@
   {
    "fieldname": "reference_doctype",
    "fieldtype": "Link",
-   "label": "Reference Document",
+   "label": "Reference Document Type",
    "no_copy": 1,
-   "options": "DocType",
-   "reqd": 1
+   "options": "DocType"
   },
   {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "label": "Reference Document Name",
    "no_copy": 1,
-   "options": "reference_doctype",
-   "reqd": 1
+   "options": "reference_doctype"
   },
   {
    "fieldname": "amended_from",
@@ -93,7 +92,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-11-21 14:35:51.880332",
+ "modified": "2019-11-23 13:28:47.256935",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement",
