@@ -175,7 +175,7 @@ class TestDatev(TestCase):
 			get_data -- Function that returns a list of dicts.
 			allowed_keys -- List of allowed keys
 			"""
-			data = get_data(self.filters, as_dict=1)
+			data = get_data(self.filters)
 			actual_set = set(data[0].keys())
 			# allowed set must be interpreted as unicode to match the actual set
 			allowed_set = set({unicode(key) for key in allowed_keys})

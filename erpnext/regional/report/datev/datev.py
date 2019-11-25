@@ -50,7 +50,7 @@ def validate(filters):
 		frappe.throw(_('Please create <b>DATEV Settings</b> for Company <b>{}</b>.').format(filters.get('company')))
 
 
-def get_transactions(filters, as_dict):
+def get_transactions(filters, as_dict=1):
 	"""
 	Get a list of accounting entries.
 
@@ -356,7 +356,7 @@ def download_datev_csv(filters=None):
 	# This is my zip file
 	datev_zip = zipfile.ZipFile(zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED)
 
-	transactions = get_transactions(filters, as_dict=1)
+	transactions = get_transactions(filters)
 	transactions_csv = get_datev_csv(transactions, filters, csv_class=Transactions)
 	datev_zip.writestr('EXTF_Buchungsstapel.csv', transactions_csv)
 
