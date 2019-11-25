@@ -38,12 +38,16 @@ def make_company(company_name, abbr):
 			"create_chart_of_accounts_based_on": "Standard Template",
 			"chart_of_accounts": "SKR04 mit Kontonummern"
 		})
-		company.save()
-		company.create_default_cost_center()
-		company.create_default_warehouses()
 	else:
 		company = frappe.get_doc("Company", company_name)
 
+	# indempotent
+	company.create_default_warehouses()
+
+	if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": company.name}):
+		company.create_default_cost_center()
+
+	company.save()
 	return company
 
 def make_customer_with_account(customer_name, company):
