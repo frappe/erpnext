@@ -4,7 +4,9 @@ from __future__ import unicode_literals
 import os
 import json
 import zipfile
+from six import StringIO
 from unittest import TestCase
+
 import frappe
 from frappe.utils import getdate, today
 from frappe.test_runner import make_test_objects
@@ -19,11 +21,12 @@ from erpnext.regional.report.datev.datev import get_account_names
 from erpnext.regional.report.datev.datev import get_datev_csv
 from erpnext.regional.report.datev.datev import get_header
 from erpnext.regional.report.datev.datev import download_datev_csv
-from .datev_constants import DataCategory
-from .datev_constants import Transactions
-from .datev_constants import DebtorsCreditors
-from .datev_constants import AccountNames
-from .datev_constants import QUERY_REPORT_COLUMNS
+
+from erpnext.regional.report.datev.datev_constants import DataCategory
+from erpnext.regional.report.datev.datev_constants import Transactions
+from erpnext.regional.report.datev.datev_constants import DebtorsCreditors
+from erpnext.regional.report.datev.datev_constants import AccountNames
+from erpnext.regional.report.datev.datev_constants import QUERY_REPORT_COLUMNS
 
 def make_company(company_name, abbr):
 	if not frappe.db.exists("Company", company_name):
@@ -202,6 +205,11 @@ class TestDatev(TestCase):
 		get_datev_csv(data=test_data, filters=self.filters, csv_class=Transactions)
 
 	def test_download(self):
+		"""Assert that the returned file is a ZIP file."""
 		download_datev_csv(self.filters)
-		# must be encoded string
-		zipfile.is_zipfile(frappe.response['filecontent'].encode('utf-8').strip())
+
+		# zipfile.is_zipfile() expects a file-like object
+		zip_buffer = StringIO()
+		zip_buffer.write(frappe.response['filecontent'])
+
+		self.assertTrue(zipfile.is_zipfile(zip_buffer))
