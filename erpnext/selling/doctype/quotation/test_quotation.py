@@ -217,7 +217,13 @@ class TestQuotation(unittest.TestCase):
 			}
 		]
 		yesterday = getdate(nowdate()) - datetime.timedelta(days=1)
-		expired_quotation = make_quotation(item_list=quotation_item,transaction_date=yesterday)
+		expired_quotation = make_quotation(item_list=quotation_item)
+		# Manually set valid till date to bypass validation
+		frappe.db.sql("""
+		UPDATE tabQuotation
+		SET valid_till = %s
+		WHERE name = %s
+		""",(yesterday,expired_quotation.name))
 		set_expired_status()
 
 		self.assertEqual(expired_quotation.status,"Expired")
