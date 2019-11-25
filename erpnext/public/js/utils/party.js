@@ -13,8 +13,10 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 			args.company_address = frm.doc.company_address;
 		}
 
-		if (frm.doc.shipping_address && (!args.shipping_address)) {
-			args.shipping_address = frm.doc.shipping_address;
+		if (in_list(['Purchase Invoice', 'Purchase Order', 'Purchase Receipt'], frm.doc.doctype)) {
+			if (frm.doc.shipping_address && (!args.shipping_address)) {
+				args.shipping_address = frm.doc.shipping_address;
+			}
 		}
 	}
 
@@ -41,7 +43,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 			};
 		}
 
-		if (in_list(['Sales Invoice', 'Sales Order', 'Delivery Note'],frm.doc.doctype)) {
+		if (in_list(['Sales Invoice', 'Sales Order', 'Delivery Note'], frm.doc.doctype)) {
 			if (frm.doc.company_address && (!args.company_address)) {
 				args.company_address = frm.doc.company_address;
 			}
@@ -51,7 +53,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 			}
 		}
 
-		if (in_list(['Purchase Invoice', 'Purchase Order', 'Purchase Receipt'],frm.doc.doctype)) {
+		if (in_list(['Purchase Invoice', 'Purchase Order', 'Purchase Receipt'], frm.doc.doctype)) {
 			if (frm.doc.shipping_address && (!args.shipping_address)) {
 				args.shipping_address = frm.doc.shipping_address;
 			}
