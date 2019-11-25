@@ -8,7 +8,7 @@ from six import StringIO
 from unittest import TestCase
 
 import frappe
-from frappe.utils import getdate, today
+from frappe.utils import getdate, today, now_datetime
 from frappe.test_runner import make_test_objects
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
@@ -51,6 +51,21 @@ def make_company(company_name, abbr):
 
 	company.save()
 	return company
+
+def setup_fiscal_year():
+	fiscal_year = None
+	year = now_datetime().year
+	if not frappe.db.exists("Fiscal Year", year):
+		fiscal_year = frappe.get_doc({
+			"doctype": "Fiscal Year",
+			"year": cstr(year),
+			"year_start_date": "{0}-01-01".format(year),
+			"year_end_date": "{0}-12-31".format(year)
+		})
+		fiscal_year.insert()
+
+	if fiscal_year:
+		fiscal_year.set_as_default()
 
 def make_customer_with_account(customer_name, company):
 	acc_name = frappe.db.get_value("Account", {
@@ -134,6 +149,7 @@ class TestDatev(TestCase):
 
 		make_datev_settings(self.company)
 		item = make_item("_Test Item", self.company)
+		setup_fiscal_year()
 
 		warehouse = frappe.db.get_value("Item Default", {
 				"parent": item.name, 
