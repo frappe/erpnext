@@ -28,7 +28,7 @@ class Appointment(Document):
 		number_of_appointments_in_same_slot = frappe.db.count(
 			'Appointment', filters={'scheduled_time': self.scheduled_time})
 		number_of_agents = frappe.db.get_single_value('Appointment Booking Settings', 'number_of_agents')
-		if(number_of_appointments_in_same_slot >= number_of_agents):
+		if (number_of_appointments_in_same_slot >= number_of_agents):
 			frappe.throw('Time slot is not available')
 		# Link lead
 		if not self.lead:
