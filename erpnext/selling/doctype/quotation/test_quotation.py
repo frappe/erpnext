@@ -218,9 +218,9 @@ class TestQuotation(unittest.TestCase):
 		]
 		yesterday = getdate(nowdate()) - datetime.timedelta(days=1)
 		expired_quotation = make_quotation(item_list=quotation_item)
-		# Manually set valid till date to bypass validation
 		expired_quotation.valid_till = yesterday
 		expired_quotation.save()
+		# Call schedular method
 		set_expired_status()
 
 		self.assertEqual(expired_quotation.status,"Expired")

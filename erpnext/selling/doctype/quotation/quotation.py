@@ -186,8 +186,8 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	return doclist
 
 def set_expired_status():
-	frappe.db.sql("""UPDATE `tabQuotation` SET status = 'Expired' 
-		WHERE 'valid_till' < %s""", (nowdate()))
+	frappe.db.sql("""UPDATE `tabQuotation` SET `status` = 'Expired' 
+		WHERE `status` != "Expired" AND `valid_till` < %s""", (nowdate()))
 	frappe.db.commit()
 
 @frappe.whitelist()
