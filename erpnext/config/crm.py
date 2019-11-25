@@ -46,6 +46,11 @@ def get_data():
 					"name": "Contract",
 					"description": _("Helps you keep tracks of Contracts based on Supplier, Customer and Employee"),
 				},
+				{
+					"type": "doctype",
+					"name": "Newsletter",
+					"label": _("Newsletter"),
+				}
 			]
 		},
 		{
@@ -122,6 +127,11 @@ def get_data():
 					"link": "Tree/Customer Group",
 					"description": _("Manage Customer Group Tree."),
 					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"label": _("Email Group"),
+					"name": "Email Group",
 				},
 				{
 					"type": "doctype",
