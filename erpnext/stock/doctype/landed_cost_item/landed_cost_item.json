@@ -13,6 +13,7 @@
   "qty",
   "rate",
   "amount",
+  "is_fixed_asset",
   "applicable_charges",
   "purchase_receipt_item",
   "accounting_dimensions_section",
@@ -119,14 +120,25 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.is_fixed_asset",
+   "fieldname": "is_fixed_asset",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Fixed Asset",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-26 09:48:15.569956",
+ "modified": "2019-11-12 15:41:21.053462",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Item",
  "owner": "wasim@webnotestech.com",
- "permissions": []
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
 }

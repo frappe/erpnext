@@ -17,6 +17,7 @@
   "supplier",
   "customer",
   "image",
+  "purchase_invoice",
   "column_break_3",
   "company",
   "location",
@@ -25,6 +26,7 @@
   "purchase_date",
   "disposal_date",
   "journal_entry_for_scrap",
+  "purchase_receipt",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -33,6 +35,7 @@
   "available_for_use_date",
   "column_break_18",
   "calculate_depreciation",
+  "allow_monthly_depreciation",
   "is_existing_asset",
   "opening_accumulated_depreciation",
   "number_of_depreciations_booked",
@@ -61,9 +64,8 @@
   "status",
   "booked_fixed_asset",
   "column_break_51",
-  "purchase_receipt",
+
   "purchase_receipt_amount",
-  "purchase_invoice",
   "default_finance_book",
   "amended_from"
  ],
@@ -216,8 +218,7 @@
   {
    "fieldname": "available_for_use_date",
    "fieldtype": "Date",
-   "label": "Available-for-use Date",
-   "reqd": 1
+   "label": "Available-for-use Date"
   },
   {
    "fieldname": "column_break_18",
@@ -403,8 +404,7 @@
    "label": "Purchase Receipt",
    "no_copy": 1,
    "options": "Purchase Receipt",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "purchase_receipt_amount",
@@ -420,8 +420,7 @@
    "fieldtype": "Link",
    "label": "Purchase Invoice",
    "no_copy": 1,
-   "options": "Purchase Invoice",
-   "read_only": 1
+   "options": "Purchase Invoice"
   },
   {
    "fetch_from": "company.default_finance_book",
@@ -450,12 +449,19 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "calculate_depreciation",
+   "fieldname": "allow_monthly_depreciation",
+   "fieldtype": "Check",
+   "label": "Allow Monthly Depreciation"
   }
  ],
  "idx": 72,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2019-10-07 15:34:30.976208",
+ "modified": "2019-10-22 15:47:36.050828",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
