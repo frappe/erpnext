@@ -52,9 +52,10 @@ class StockReconciliation(StockController):
 		def _changed(item):
 			item_dict = get_stock_balance_for(item.item_code, item.warehouse,
 				self.posting_date, self.posting_time, batch_no=item.batch_no)
-			if (((item.qty is None or item.qty==item_dict.get("qty")) and
-				(item.valuation_rate is None or item.valuation_rate==item_dict.get("rate")) and not item.serial_no)
-				or (item.serial_no and item.serial_no == item_dict.get("serial_nos"))):
+
+			if ((item.qty is None or item.qty==item_dict.get("qty")) and
+				(item.valuation_rate is None or item.valuation_rate==item_dict.get("rate")) and
+				(not item.serial_no or (item.serial_no == item_dict.get("serial_nos")) )):
 				return False
 			else:
 				# set default as current rates
@@ -182,9 +183,11 @@ class StockReconciliation(StockController):
 		from erpnext.stock.stock_ledger import get_previous_sle
 
 		sl_entries = []
+		has_serial_no = False
 		for row in self.items:
 			item = frappe.get_doc("Item", row.item_code)
 			if item.has_serial_no or item.has_batch_no:
+				has_serial_no = True
 				self.get_sle_for_serialized_items(row, sl_entries)
 			else:
 				previous_sle = get_previous_sle({
@@ -212,7 +215,13 @@ class StockReconciliation(StockController):
 				sl_entries.append(self.get_sle_for_items(row))
 
 		if sl_entries:
+			if has_serial_no:
+				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
+
 			self.make_sl_entries(sl_entries)
+
+		if has_serial_no and sl_entries:
+			self.update_valuation_rate_for_serial_no()
 
 	def get_sle_for_serialized_items(self, row, sl_entries):
 		from erpnext.stock.stock_ledger import get_previous_sle
@@ -275,8 +284,18 @@ class StockReconciliation(StockController):
 			# update valuation rate
 			self.update_valuation_rate_for_serial_nos(row, serial_nos)
 
+	def update_valuation_rate_for_serial_no(self):
+		for d in self.items:
+			if not d.serial_no: continue
+
+			serial_nos = get_serial_nos(d.serial_no)
+			self.update_valuation_rate_for_serial_nos(d, serial_nos)
+
 	def update_valuation_rate_for_serial_nos(self, row, serial_nos):
 		valuation_rate = row.valuation_rate if self.docstatus == 1 else row.current_valuation_rate
+		if valuation_rate is None:
+			return
+
 		for d in serial_nos:
 			frappe.db.set_value("Serial No", d, 'purchase_rate', valuation_rate)
 
@@ -321,11 +340,17 @@ class StockReconciliation(StockController):
 			where voucher_type=%s and voucher_no=%s""", (self.doctype, self.name))
 
 		sl_entries = []
+
+		has_serial_no = False
 		for row in self.items:
 			if row.serial_no or row.batch_no or row.current_serial_no:
+				has_serial_no = True
 				self.get_sle_for_serialized_items(row, sl_entries)
 
 		if sl_entries:
+			if has_serial_no:
+				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
+
 			sl_entries.reverse()
 			allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
@@ -338,6 +363,35 @@ class StockReconciliation(StockController):
 				"posting_date": self.posting_date,
 				"posting_time": self.posting_time
 			})
+
+	def merge_similar_item_serial_nos(self, sl_entries):
+		# If user has put the same item in multiple row with different serial no
+		new_sl_entries = []
+		merge_similar_entries = {}
+
+		for d in sl_entries:
+			if not d.serial_no or d.actual_qty < 0:
+				new_sl_entries.append(d)
+				continue
+
+			key = (d.item_code, d.warehouse)
+			if key not in merge_similar_entries:
+				merge_similar_entries[key] = d
+			elif d.serial_no:
+				data = merge_similar_entries[key]
+				data.actual_qty += d.actual_qty
+				data.qty_after_transaction += d.qty_after_transaction
+
+				data.valuation_rate = (data.valuation_rate + d.valuation_rate) / data.actual_qty
+				data.serial_no += '\n' + d.serial_no
+
+				if data.incoming_rate:
+					data.incoming_rate = (data.incoming_rate + d.incoming_rate) / data.actual_qty
+
+		for key, value in merge_similar_entries.items():
+			new_sl_entries.append(value)
+
+		return new_sl_entries
 
 	def get_gl_entries(self, warehouse_account=None):
 		if not self.cost_center:
@@ -456,7 +510,7 @@ def get_qty_rate_for_serial_nos(item_code, warehouse, posting_date, posting_time
 	}
 
 	serial_nos_list = [serial_no.get("name")
-			for serial_no in get_available_serial_nos(item_code, warehouse)]
+			for serial_no in get_available_serial_nos(args)]
 
 	qty = len(serial_nos_list)
 	serial_nos = '\n'.join(serial_nos_list)

@@ -11,7 +11,6 @@ from frappe.model.document import Document
 class AssetCategory(Document):
 	def validate(self):
 		self.validate_finance_books()
-		self.validate_enable_cwip_accounting()
 
 	def validate_finance_books(self):
 		for d in self.finance_books:
@@ -19,18 +18,12 @@ class AssetCategory(Document):
 				if cint(d.get(frappe.scrub(field)))<1:
 					frappe.throw(_("Row {0}: {1} must be greater than 0").format(d.idx, field), frappe.MandatoryError)
 
-	def validate_enable_cwip_accounting(self):
-		if self.enable_cwip_accounting :
-			for d in self.accounts:
-				cwip = frappe.db.get_value("Company",d.company_name,"enable_cwip_accounting")
-				if cwip:
-					frappe.throw(_
-						("CWIP is enabled globally in Company {1}. To enable it in Asset Category, first disable it in {1} ").format(
-							frappe.bold(d.idx), frappe.bold(d.company_name)))
-
 @frappe.whitelist()
-def get_asset_category_account(asset, fieldname, account=None, asset_category = None, company = None):
-	if not asset_category and company:
+def get_asset_category_account(fieldname, item=None, asset=None, account=None, asset_category = None, company = None):
+	if item and frappe.db.get_value("Item", item, "is_fixed_asset"):
+		asset_category = frappe.db.get_value("Item", item, ["asset_category"])
+
+	elif not asset_category or not company:
 		if account:
 			if frappe.db.get_value("Account", account, "account_type") != "Fixed Asset":
 				account=None
