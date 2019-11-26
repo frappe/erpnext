@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import today, now_datetime
+from frappe.utils import today, now_datetime, getdate
 from frappe.model.document import Document
 from frappe.desk.reportview import get_match_cond
 
@@ -15,11 +15,20 @@ class InpatientRecord(Document):
 		frappe.db.set_value("Patient", self.patient, "inpatient_record", self.name)
 
 	def validate(self):
+		self.validate_dates()
 		self.validate_already_scheduled_or_admitted()
 		if self.status == "Discharged":
 			frappe.db.set_value("Patient", self.patient, "inpatient_status", None)
 			frappe.db.set_value("Patient", self.patient, "inpatient_record", None)
 
+	def validate_dates(self):
+		if (getdate(self.scheduled_date) < getdate(today())) or \
+			(getdate(self.admitted_datetime) < getdate(today())):
+				frappe.throw(_("Scheduled and Admitted dates can not be less than today"))
+		if (getdate(self.expected_discharge) < getdate(self.scheduled_date)) or \
+			(getdate(self.discharge_date) < getdate(self.scheduled_date)):
+			frappe.throw(_("Expected and Discharge dates cannot be less than Admission Schedule date"))
+	
 	def validate_already_scheduled_or_admitted(self):
 		query = """
 			select name, status
