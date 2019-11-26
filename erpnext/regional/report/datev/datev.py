@@ -270,7 +270,7 @@ def get_datev_csv(data, filters, csv_class):
 		columns=csv_class.COLUMNS
 	)
 
-	return header + b'\r\n' + data
+	return header + '\r\n' + data
 
 
 def get_header(filters, csv_class):
