@@ -54,15 +54,18 @@ def make_company(company_name, abbr):
 
 def setup_fiscal_year():
 	fiscal_year = None
-	year = now_datetime().year
-	if not frappe.db.exists("Fiscal Year", year):
-		fiscal_year = frappe.get_doc({
-			"doctype": "Fiscal Year",
-			"year": cstr(year),
-			"year_start_date": "{0}-01-01".format(year),
-			"year_end_date": "{0}-12-31".format(year)
-		})
-		fiscal_year.insert()
+	year = cstr(now_datetime().year)
+	if not frappe.db.get_value("Fiscal Year", {"year": year}, "name"):
+		try:
+			fiscal_year = frappe.get_doc({
+				"doctype": "Fiscal Year",
+				"year": year,
+				"year_start_date": "{0}-01-01".format(year),
+				"year_end_date": "{0}-12-31".format(year)
+			})
+			fiscal_year.insert()
+		except frappe.NameError:
+			pass
 
 	if fiscal_year:
 		fiscal_year.set_as_default()
