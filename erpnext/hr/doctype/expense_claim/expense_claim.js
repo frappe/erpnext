@@ -38,7 +38,7 @@ cur_frm.add_fetch('employee','employee_name','employee_name');
 cur_frm.add_fetch('expense_type','description','description');
 
 cur_frm.cscript.onload = function(doc) {
-	set_schedule_date(doc)
+	set_schedule_date(doc);
 	if (doc.__islocal) {
 		cur_frm.set_value("posting_date", frappe.datetime.get_today());
 		cur_frm.cscript.clear_sanctioned(doc);
@@ -410,12 +410,12 @@ cur_frm.fields_dict['task'].get_query = function(doc) {
 };
 
 cur_frm.fields_dict["expenses"].grid.get_field("cost_center").get_query = function() {
-    return {
-        filters: {
-            "is_group": 0
-        }
-    }
-}
+	return {
+		filters: {
+			"is_group": 0
+		}
+	};
+};
 function set_schedule_date(frm) {
 	if(frm.doc.schedule_date){
 		erpnext.utils.copy_value_in_all_rows(frm.doc, frm.doc.doctype, frm.doc.name, "items", "schedule_date");
