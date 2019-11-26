@@ -313,7 +313,7 @@ def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=
 
 	last_purchase_details =  get_last_purchase_details(item_code, name)
 	if last_purchase_details:
-		last_purchase_rate = (last_purchase_details['base_rate'] * (flt(conversion_factor) or 1.0)) / conversion_rate
+		last_purchase_rate = (last_purchase_details['base_net_rate'] * (flt(conversion_factor) or 1.0)) / conversion_rate
 		return last_purchase_rate
 	else:
 		item_last_purchase_rate = frappe.get_cached_value("Item", item_code, "last_purchase_rate")
