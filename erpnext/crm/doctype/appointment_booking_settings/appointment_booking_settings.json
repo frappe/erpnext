@@ -94,14 +94,14 @@
    "label": "Success Settings"
   },
   {
-   "description": "Leave blank for home.\nThis is relative to site URL, for example \"/about\" will redirect to \"https://yoursitename.com/about\"",
+   "description": "Leave blank for home.\nThis is relative to site URL, for example \"about\" will redirect to \"https://yoursitename.com/about\"",
    "fieldname": "success_redirect_url",
    "fieldtype": "Data",
    "label": "Success Redirect URL"
   }
  ],
  "issingle": 1,
- "modified": "2019-11-20 15:17:55.617364",
+ "modified": "2019-11-26 12:14:17.669366",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Booking Settings",

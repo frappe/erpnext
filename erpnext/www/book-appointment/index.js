@@ -219,7 +219,7 @@ async function submit() {
                 if (window.appointment_settings.success_redirect_url){
                     redirect_url += window.appointment_settings.success_redirect_url;
                 }
-                window.location.href = redirect_url;},2)
+                window.location.href = redirect_url;},5000)
         },
         error: (err)=>{
             frappe.show_alert("Something went wrong please try again");
