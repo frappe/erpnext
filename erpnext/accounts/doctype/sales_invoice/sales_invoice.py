@@ -1047,10 +1047,10 @@ class SalesInvoice(SellingController):
 
 				if serial_no_details.sales_invoice and serial_no_details.item_code == item.item_code \
 					and self.name != serial_no_details.sales_invoice:
-					sales_invoice_company = frappe.db.get_value("Sales Invoice", sales_invoice, "company")
+					sales_invoice_company = frappe.db.get_value("Sales Invoice", serial_no_details.sales_invoice, "company")
 					if sales_invoice_company == self.company:
 						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}"
-							.format(serial_no, sales_invoice)))
+							.format(serial_no, serial_no_details.sales_invoice)))
 
 	def update_project(self):
 		if self.project:
