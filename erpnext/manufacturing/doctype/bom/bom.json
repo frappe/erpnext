@@ -3,33 +3,36 @@
  "creation": "2013-01-22 15:11:38",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "item",
-  "item_name",
-  "image",
-  "uom",
   "quantity",
+  "set_rate_of_sub_assembly_item_based_on_bom",
   "cb0",
   "is_active",
   "is_default",
-  "with_operations",
-  "inspection_required",
   "allow_alternative_item",
-  "allow_same_item_multiple_times",
-  "set_rate_of_sub_assembly_item_based_on_bom",
-  "quality_inspection_template",
+  "image",
+  "item_name",
+  "uom",
   "currency_detail",
   "company",
-  "transfer_material_against",
+  "project",
   "conversion_rate",
   "column_break_12",
   "currency",
   "rm_cost_as_per",
   "buying_price_list",
-  "operations_section",
+  "section_break_21",
+  "with_operations",
+  "column_break_23",
+  "transfer_material_against",
   "routing",
+  "operations_section",
   "operations",
   "materials_section",
+  "inspection_required",
+  "quality_inspection_template",
   "items",
   "scrap_section",
   "scrap_items",
@@ -41,14 +44,9 @@
   "base_operating_cost",
   "base_raw_material_cost",
   "base_scrap_material_cost",
-  "total_cost_of_bom",
-  "total_cost",
   "column_break_26",
+  "total_cost",
   "base_total_cost",
-  "more_info_section",
-  "project",
-  "amended_from",
-  "col_break23",
   "section_break_25",
   "description",
   "column_break_27",
@@ -57,12 +55,14 @@
   "website_section",
   "show_in_website",
   "route",
+  "column_break_52",
   "website_image",
   "thumbnail",
   "sb_web_spec",
-  "web_long_description",
   "show_items",
-  "show_operations"
+  "show_operations",
+  "web_long_description",
+  "amended_from"
  ],
  "fields": [
   {
@@ -152,19 +152,13 @@
    "default": "0",
    "fieldname": "inspection_required",
    "fieldtype": "Check",
-   "label": "Inspection Required"
+   "label": "Quality Inspection Required"
   },
   {
    "default": "0",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
    "label": "Allow Alternative Item"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_same_item_multiple_times",
-   "fieldtype": "Check",
-   "label": "Allow Same Item Multiple Times"
   },
   {
    "allow_on_submit": 1,
@@ -193,6 +187,7 @@
    "reqd": 1
   },
   {
+   "default": "Work Order",
    "fieldname": "transfer_material_against",
    "fieldtype": "Select",
    "label": "Transfer Material Against",
@@ -235,10 +230,10 @@
   {
    "fieldname": "operations_section",
    "fieldtype": "Section Break",
-   "label": "Operations",
    "oldfieldtype": "Section Break"
   },
   {
+   "depends_on": "with_operations",
    "fieldname": "routing",
    "fieldtype": "Link",
    "label": "Routing",
@@ -336,10 +331,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "total_cost_of_bom",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "total_cost",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -360,10 +351,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "more_info_section",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -380,10 +367,6 @@
    "options": "BOM",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "col_break23",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "section_break_25",
@@ -481,13 +464,26 @@
    "fieldname": "show_operations",
    "fieldtype": "Check",
    "label": "Show Operations"
+  },
+  {
+   "fieldname": "section_break_21",
+   "fieldtype": "Section Break",
+   "label": "Operations"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_52",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2019-07-30 17:00:09.665068",
+ "modified": "2019-11-22 14:35:12.142150",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

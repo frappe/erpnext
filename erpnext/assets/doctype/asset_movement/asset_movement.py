@@ -22,7 +22,7 @@ class AssetMovement(Document):
 			if company != self.company:
 				frappe.throw(_("Asset {0} does not belong to company {1}").format(d.asset, self.company))
 
-			if not(d.source_location or d.target_location or d.from_employee or d.to_employee):
+			if not (d.source_location or d.target_location or d.from_employee or d.to_employee):
 				frappe.throw(_("Either location or employee must be required"))
 
 	def validate_location(self):
