@@ -1589,7 +1589,7 @@ DocType: Sales Invoice,Payment Due Date,支払期日
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.",予約数量：販売用に数量が注文されていますが、納品されていません。
 DocType: Drug Prescription,Interval UOM,インターバル単位
 DocType: Customer,"Reselect, if the chosen address is edited after save",選択したアドレスが保存後に編集された場合は、再選択します。
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,外注の予約数量：外注品目を作成するための原料数量。
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,外注の予約数量：外注品目を作成するための原料数量。
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,アイテムバリエーション{0}は既に同じ属性で存在しています
 DocType: Item,Hub Publishing Details,ハブ公開の詳細
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',「オープニング」
