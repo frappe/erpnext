@@ -1589,7 +1589,7 @@ DocType: Sales Invoice,Payment Due Date,Data Limite de Pagamento
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Gereserveerd Aantal : Aantal besteld te koop , maar niet geleverd ."
 DocType: Drug Prescription,Interval UOM,UOM Intervalo
 DocType: Customer,"Reselect, if the chosen address is edited after save","Reseleccione, se o endereço escolhido for editado após salvar"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Qtd reservada para subcontratação: quantidade de matérias-primas para fazer itens subcotados.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Qtd reservada para subcontratação: quantidade de matérias-primas para fazer itens subcotados.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,A Variante do Item {0} já existe com mesmos atributos
 DocType: Item,Hub Publishing Details,Detalhes da publicação do hub
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening','Abertura'
