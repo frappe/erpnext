@@ -62,7 +62,10 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 var validate_csv_data = function(frm) {
 	frappe.call({
 		method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.validate_accounts",
-		args: {file_name: frm.doc.import_file},
+		args: {
+			file_name: frm.doc.import_file,
+			use_account_number_as_parent: frm.doc.use_account_number_as_parent
+		},
 		callback: function(r) {
 			if(r.message && r.message[0]===true) {
 				frm.page["show_import_button"] = true;
@@ -82,7 +85,8 @@ var create_import_button = function(frm) {
 			method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.import_coa",
 			args: {
 				file_name: frm.doc.import_file,
-				company: frm.doc.company
+				company: frm.doc.company,
+				use_account_number_as_parent: frm.doc.use_account_number_as_parent
 			},
 			freeze: true,
 			freeze_message: __("Creating Accounts..."),
@@ -118,7 +122,8 @@ var generate_tree_preview = function(frm) {
 		args: {
 			file_name: frm.doc.import_file,
 			parent: parent,
-			doctype: 'Chart of Accounts Importer'
+			doctype: 'Chart of Accounts Importer',
+			use_account_number_as_parent: frm.doc.use_account_number_as_parent
 		},
 		onclick: function(node) {
 			parent = node.value;
