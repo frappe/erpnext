@@ -610,6 +610,22 @@ def get_item_details(item, project = None):
 	return res
 
 @frappe.whitelist()
+def make_work_order(item, qty=0, project=None):
+	if not frappe.has_permission("Work Order", "write"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	item_details = get_item_details(item, project)
+
+	wo_doc = frappe.new_doc("Work Order")
+	wo_doc.production_item = item
+	wo_doc.update(item_details)
+	if qty > 0:
+		wo_doc.qty = qty
+		wo_doc.get_items_and_operations_from_bom()
+
+	return wo_doc
+
+@frappe.whitelist()
 def check_if_scrap_warehouse_mandatory(bom_no):
 	res = {"set_scrap_wh_mandatory": False }
 	if bom_no:

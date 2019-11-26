@@ -82,11 +82,21 @@ class PurchaseReceipt(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
+		self.validate_cwip_accounts()
 
 		self.check_on_hold_or_closed_status()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
+	
+	def validate_cwip_accounts(self):
+		for item in self.get('items'):
+			if item.is_fixed_asset and is_cwip_accounting_enabled(item.asset_category):
+				# check cwip accounts before making auto assets
+				# Improves UX by not giving messages of "Assets Created" before throwing error of not finding arbnb account
+				arbnb_account = self.get_company_default("asset_received_but_not_billed")
+				cwip_account = get_asset_account("capital_work_in_progress_account", company = self.company)
+				break
 
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc({
@@ -343,7 +353,7 @@ class PurchaseReceipt(BuyingController):
 	def get_asset_gl_entry(self, gl_entries):
 		for item in self.get("items"):
 			if item.is_fixed_asset:
-				if is_cwip_accounting_enabled(self.company, item.asset_category):
+				if is_cwip_accounting_enabled(item.asset_category):
 					self.add_asset_gl_entries(item, gl_entries)
 				if flt(item.landed_cost_voucher_amount):
 					self.add_lcv_gl_entries(item, gl_entries)
@@ -386,7 +396,7 @@ class PurchaseReceipt(BuyingController):
 	
 	def add_lcv_gl_entries(self, item, gl_entries):
 		expenses_included_in_asset_valuation = self.get_company_default("expenses_included_in_asset_valuation")
-		if not is_cwip_accounting_enabled(self.company, item.asset_category):
+		if not is_cwip_accounting_enabled(item.asset_category):
 			asset_account = get_asset_category_account(asset_category=item.asset_category, \
 					fieldname='fixed_asset_account', company=self.company)
 		else:
