@@ -8,7 +8,7 @@ from six import StringIO
 from unittest import TestCase
 
 import frappe
-from frappe.utils import getdate, today, now_datetime
+from frappe.utils import getdate, today, now_datetime, cstr
 from frappe.test_runner import make_test_objects
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
