@@ -7,7 +7,7 @@ import json
 
 import frappe
 from frappe import _, throw
-from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate
+from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate, today
 from frappe.utils.nestedset import NestedSet
 from frappe.desk.form.assign_to import close_all_assignments, clear
 from frappe.utils import date_diff
@@ -212,8 +212,11 @@ def set_multiple_status(names, status):
 		task.save()
 
 def set_tasks_as_overdue():
-	tasks = frappe.get_all("Task", filters={'status':['not in',['Cancelled', 'Completed']]})
+	tasks = frappe.get_all("Task", filters={'status':['not in',['Cancelled', 'Closed']]})
 	for task in tasks:
+		if frappe.db.get_value("Task", task.name, "status") in 'Pending Review':
+			if getdate(frappe.db.get_value("Task", task.name, "review_date")) < getdate(today()):
+				continue
 		frappe.get_doc("Task", task.name).update_status()
 
 @frappe.whitelist()
