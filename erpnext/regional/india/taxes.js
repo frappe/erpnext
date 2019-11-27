@@ -35,6 +35,10 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 				}
 			}
 
+			frappe.db.get_value('Address', {'name': frm.doc.company_address}, 'gstin', (r) => {
+				frm.set_value('company_gstin', r);
+			})
+
 			erpnext.utils.get_party_details(frm, null, args, null);
 		},
 
@@ -55,7 +59,7 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 		},
 
 		set_accounts_to_skip: function(frm) {
-			if(!frm.doc.taxes_and_charges){
+			if(!frm.doc.taxes_and_charges || (!frm.doc.gst_accounts)){
 				return;
 			}
 
