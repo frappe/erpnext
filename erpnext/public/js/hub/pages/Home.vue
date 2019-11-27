@@ -9,6 +9,14 @@
 			v-model="search_value"
 		/>
 
+		<drop-down
+			:options="dropdown_list" 
+			:selected="active_sort" 
+			v-on:update_option="sort_items" 
+			:placeholder="'Sort By'"
+			:close_on_outside_click="outside_click">
+		</drop-down>
+
 		<div v-if="show_skeleton">
 			<section-header>
 				<h4 class="hub-skeleton">Explore Explore Explore</h4>
@@ -51,15 +59,36 @@ export default {
 
 			// Constants
 			search_placeholder: __('Search for anything ...'),
+
+			dropdown_list: [
+				{
+					name: 'Upload Date',
+					based_on: 'creation'
+				},{
+					name:'Popularity',
+					based_on: 'rating'
+				}],
+			active_sort: {},
 		};
 	},
 	created() {
 		// refreshed
 		this.search_value = '';
+		this.active_sort = {};
 		this.get_items();
 	},
 	methods: {
 		get_items() {
+			if (this.active_sort && !this.active_sort.name) {
+				this.get_data_for_homepage();
+			}
+			else {
+				this.sections=[]
+				this.get_sorted_data();
+			}
+		},
+
+		get_data_for_homepage() {
 			hub.call('get_data_for_homepage', frappe.defaults ? {
 				country: frappe.defaults.get_user_default('country')
 			} : null)
@@ -93,6 +122,19 @@ export default {
 			})
 		},
 
+		get_sorted_data() {
+			hub.call('get_items', {
+				order_by: this.active_sort.based_on,
+				limit: 50
+			})
+			.then((items) => {
+				this.sections.push({
+					title: __(`Items Sorted By the ${this.active_sort.name}`),
+					items: items
+				});
+			})
+		},
+
 		go_to_item_details_page(hub_item_name) {
 			frappe.set_route(`marketplace/item/${hub_item_name}`);
 		},
@@ -100,6 +142,11 @@ export default {
 		set_search_route() {
 			frappe.set_route('marketplace', 'search', this.search_value);
 		},
+
+		sort_items(payload) {
+			this.active_sort = payload;
+			this.get_items()
+		}
 	}
 }
 </script>
