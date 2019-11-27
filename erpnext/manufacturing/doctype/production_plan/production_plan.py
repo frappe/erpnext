@@ -529,7 +529,6 @@ def get_material_request_items(row, sales_order,
 		required_qty = ceil(required_qty)
 
 	if required_qty > 0:
-		print(row)
 		return {
 			'item_code': row.item_code,
 			'item_name': row.item_name,
