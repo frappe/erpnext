@@ -17,10 +17,6 @@ def execute():
 		frappe.db.sql(""" update `tabAsset` ast, `tabWarehouse` wh
 			set ast.location = wh.warehouse_name where ast.warehouse = wh.name""")
 
-		frappe.db.sql(""" update `tabAsset Movement` ast_mv
-			set ast_mv.source_location = (select warehouse_name from `tabWarehouse` where name = ast_mv.source_warehouse),
-			ast_mv.target_location = (select warehouse_name from `tabWarehouse` where name = ast_mv.target_warehouse)""")
-
 		for d in frappe.get_all('Asset'):
 			doc = frappe.get_doc('Asset', d.name)
 			if doc.calculate_depreciation:

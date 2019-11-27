@@ -67,26 +67,26 @@
   "warehouse_and_reference",
   "warehouse",
   "rejected_warehouse",
-  "quality_inspection",
   "purchase_order",
   "material_request",
-  "purchase_order_item",
-  "material_request_item",
   "column_break_40",
   "is_fixed_asset",
-  "asset",
   "asset_location",
+  "asset_category",
   "schedule_date",
+  "quality_inspection",
   "stock_qty",
+  "purchase_order_item",
+  "material_request_item",
   "section_break_45",
+  "allow_zero_valuation_rate",
+  "bom",
+  "col_break5",
   "serial_no",
   "batch_no",
   "column_break_48",
   "rejected_serial_no",
   "expense_account",
-  "col_break5",
-  "allow_zero_valuation_rate",
-  "bom",
   "include_exploded_items",
   "item_tax_rate",
   "accounting_dimensions_section",
@@ -501,21 +501,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "is_fixed_asset",
-   "fieldname": "asset",
-   "fieldtype": "Link",
-   "label": "Asset",
-   "no_copy": 1,
-   "options": "Asset"
-  },
-  {
-   "depends_on": "is_fixed_asset",
-   "fieldname": "asset_location",
-   "fieldtype": "Link",
-   "label": "Asset Location",
-   "options": "Location"
-  },
-  {
    "fieldname": "purchase_order",
    "fieldtype": "Link",
    "label": "Purchase Order",
@@ -553,6 +538,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "serial_no",
    "fieldtype": "Small Text",
    "in_list_view": 1,
@@ -562,10 +548,11 @@
    "oldfieldtype": "Text"
   },
   {
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Batch No",
+   "label": "Batch No!",
    "no_copy": 1,
    "oldfieldname": "batch_no",
    "oldfieldtype": "Link",
@@ -577,6 +564,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "rejected_serial_no",
    "fieldtype": "Small Text",
    "label": "Rejected Serial No",
@@ -814,11 +802,28 @@
    "fieldtype": "Data",
    "label": "Manufacturer Part Number",
    "read_only": 1
+  },
+  {
+   "depends_on": "is_fixed_asset",
+   "fieldname": "asset_location",
+   "fieldtype": "Link",
+   "label": "Asset Location",
+   "options": "Location"
+  },
+  {
+   "depends_on": "is_fixed_asset",
+   "fetch_from": "item_code.asset_category",
+   "fieldname": "asset_category",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Asset Category",
+   "options": "Asset Category",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-09-17 22:33:01.109004",
+ "modified": "2019-10-14 16:03:25.499557",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

@@ -102,11 +102,12 @@ frappe.ui.form.on('Stock Entry', {
 
 		frm.set_query("quality_inspection", "items", function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
+
 			return {
+				query:"erpnext.stock.doctype.quality_inspection.quality_inspection.quality_inspection_query",
 				filters: {
-					docstatus: 1,
-					item_code: d.item_code,
-					reference_name: doc.name
+					'item_code': d.item_code,
+					'reference_name': doc.name
 				}
 			}
 		});
