@@ -207,7 +207,7 @@ class TestDatev(TestCase):
 				return True
 			actual_set = set(data[0].keys())
 			# allowed set must be interpreted as unicode to match the actual set
-			allowed_set = set({unicode(key) for key in allowed_keys})
+			allowed_set = set({frappe.as_unicode(key) for key in allowed_keys})
 			return actual_set.issubset(allowed_set)
 
 		self.assertTrue(is_subset(get_transactions, Transactions.COLUMNS))
