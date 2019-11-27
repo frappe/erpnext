@@ -13,7 +13,7 @@ import json
 import zlib
 import zipfile
 import six
-from six import StringIO
+from six import BytesIO
 from six import string_types
 import frappe
 from frappe import _
@@ -357,7 +357,7 @@ def download_datev_csv(filters=None):
 	validate(filters)
 
 	# This is where my zip will be written
-	zip_buffer = StringIO()
+	zip_buffer = BytesIO()
 	# This is my zip file
 	datev_zip = zipfile.ZipFile(zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED)
 
