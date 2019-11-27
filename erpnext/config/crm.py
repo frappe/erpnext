@@ -48,6 +48,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Appointment",
+					"description" : _("Helps you manage appointments with your leads"),
+				},
+        {
+          "type": "doctype",
 					"name": "Newsletter",
 					"label": _("Newsletter"),
 				}
