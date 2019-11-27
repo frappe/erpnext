@@ -267,67 +267,48 @@ def update_user_permissions(doc, method):
 		employee = frappe.get_doc("Employee", {"user_id": doc.name})
 		employee.update_user_permissions()
 
+
 def send_birthday_reminders():
 	"""Send Employee birthday reminders if no 'Stop Birthday Reminders' is not set."""
 	if int(frappe.db.get_single_value("HR Settings", "stop_birthday_reminders") or 0):
 		return
 
-	birthdays = get_employees_who_are_born_today()
+	employees = get_employees_born_today()
+	if employees:
+		recipients_list = frappe.get_all('Employee', filters={'status': 'Active'})
+		recipients = get_employee_emails(recipients_list)
 
-	if birthdays:
-		employee_list = frappe.get_all('Employee',
-			fields=['name','employee_name'],
-			filters={'status': 'Active',
-				'company': birthdays[0]['company']
-		 	}
-		)
-		employee_emails = get_employee_emails(employee_list)
-		birthday_names = [name["employee_name"] for name in birthdays]
-		birthday_emails = [email["user_id"] or email["personal_email"] or email["company_email"] for email in birthdays]
+		birthday_email_template = frappe.db.get_single_value("HR Settings", "birthday_email_template")
+		if birthday_email_template:
+			email_template = frappe.get_doc("Email Template", birthday_email_template)
 
-		birthdays.append({'company_email': '','employee_name': '','personal_email': '','user_id': ''})
-
-		for e in birthdays:
-			if e['company_email'] or e['personal_email'] or e['user_id']:
-				if len(birthday_names) == 1:
-					continue
-				recipients = e['company_email'] or e['personal_email'] or e['user_id']
-
-
+		for employee in employees:
+			if birthday_email_template:
+				message = frappe.render_template(email_template.response, employee)
+				subject = frappe.render_template(email_template.subject, employee)
 			else:
-				recipients = list(set(employee_emails) - set(birthday_emails))
-
+				message = "Happy Birthday {0}! \U0001F603".format(employee.employee_name)
+				subject = _("Happy Birthday")
 			frappe.sendmail(recipients=recipients,
-				subject=_("Birthday Reminder"),
-				message=get_birthday_reminder_message(e, birthday_names),
-				header=['Birthday Reminder', 'green'],
-			)
-
-def get_birthday_reminder_message(employee, employee_names):
-	"""Get employee birthday reminder message"""
-	pattern = "</Li><Br><Li>"
-	message = pattern.join(filter(lambda u: u not in (employee['employee_name']), employee_names))
-	message = message.title()
-
-	if pattern not in message:
-		message = "Today is {0}'s birthday \U0001F603".format(message)
-
-	else:
-		message = "Today your colleagues are celebrating their birthdays \U0001F382<br><ul><strong><li> " + message +"</li></strong></ul>"
-
-	return message
+							message=message,
+							subject=subject
+					)
 
 
-def get_employees_who_are_born_today():
+def get_employees_born_today():
 	"""Get Employee properties whose birthday is today."""
-	return frappe.db.get_values("Employee",
-		fieldname=["name", "personal_email", "company", "company_email", "user_id", "employee_name"],
-		filters={
-			"date_of_birth": ("like", "%{}".format(format_datetime(getdate(), "-MM-dd"))),
-			"status": "Active",
-		},
-		as_dict=True
-	)
+	current_date = getdate()
+	month = current_date.month
+	day = current_date.day
+
+	employees_born_today = []
+	employee_birthdays = frappe.get_all("Employee", filters={"status": "Active"}, fields=["*"])
+	for employee in employee_birthdays:
+		birthdate = getdate(employee.date_of_birth)
+		if birthdate.month == month and birthdate.day == day:
+			employees_born_today.append(employee)
+
+	return employees_born_today
 
 
 def get_holiday_list_for_employee(employee, raise_exception=True):

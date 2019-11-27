@@ -10,7 +10,6 @@
   "retirement_age",
   "emp_created_by",
   "column_break_4",
-  "stop_birthday_reminders",
   "expense_approver_mandatory_in_expense_claim",
   "payroll_settings",
   "include_holidays_in_total_working_days",
@@ -20,6 +19,9 @@
   "email_salary_slip_to_employee",
   "encrypt_salary_slips_in_emails",
   "password_policy",
+  "birthday_reminder_settings_section",
+  "stop_birthday_reminders",
+  "birthday_email_template",
   "leave_settings",
   "leave_approval_notification_template",
   "leave_status_notification_template",
@@ -169,14 +171,26 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "fieldname": "birthday_reminder_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Birthday Reminder Settings"
+  },
+  {
+   "depends_on": "eval:doc.stop_birthday_reminders == 0",
+   "fieldname": "birthday_email_template",
+   "fieldtype": "Link",
+   "label": "Birthday Email Template",
+   "options": "Email Template"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2019-12-31 14:28:32.004121",
- "modified_by": "Administrator",
+ "modified": "2020-01-02 12:53:17.117345",
+ "modified_by": "diksha@digithinkit.com",
  "module": "HR",
  "name": "HR Settings",
  "owner": "Administrator",
