@@ -19,6 +19,25 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 			frm.trigger('set_accounts_to_skip');
 		},
 
+		company_address: function(frm) {
+			let args = {};
+			if (in_list(['Sales Invoice', 'Sales Order', 'Delivery Note'], frm.doc.doctype)) {
+				args = {
+					'posting_date': frm.doc.posting_date || frm.doc.transaction_date,
+					'party_type': 'Customer',
+					'party': frm.doc.customer
+				}
+			} else {
+				args = {
+					'posting_date': frm.doc.posting_date,
+					'party_type': 'Supplier',
+					'party': frm.doc.supplier
+				}
+			}
+
+			erpnext.utils.get_party_details(frm, null, args, null);
+		},
+
 		get_gst_accounts: function(frm) {
 			frappe.call({
 				method: "erpnext.regional.india.utils.get_gst_accounts",
@@ -29,6 +48,10 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 					frm.doc.gst_accounts = r.message;
 				}
 			});
+		},
+
+		taxes_and_charges: function(frm) {
+			frm.trigger('set_accounts_to_skip');
 		},
 
 		set_accounts_to_skip: function(frm) {
