@@ -25,7 +25,7 @@ frappe.ui.form.on("Item", {
 	},
 
 	refresh: function(frm) {
-		if(frm.doc.is_stock_item) {
+		if (frm.doc.is_stock_item) {
 			frm.add_custom_button(__("Balance"), function() {
 				frappe.route_options = {
 					"item_code": frm.doc.name
@@ -46,8 +46,13 @@ frappe.ui.form.on("Item", {
 			}, __("View"));
 		}
 
-		if(!frm.doc.is_fixed_asset) {
+		if (!frm.doc.is_fixed_asset) {
 			erpnext.item.make_dashboard(frm);
+		}
+		
+		if (frm.doc.is_fixed_asset) {
+			frm.trigger('is_fixed_asset');
+			frm.trigger('auto_create_assets');
 		}
 
 		// clear intro
@@ -132,6 +137,12 @@ frappe.ui.form.on("Item", {
 	},
 
 	is_fixed_asset: function(frm) {
+		// set serial no to false & toggles its visibility
+		frm.set_value('has_serial_no', 0);
+		frm.toggle_enable(['has_serial_no', 'serial_no_series'], !frm.doc.is_fixed_asset);
+		frm.toggle_reqd(['asset_category'], frm.doc.is_fixed_asset);
+		frm.toggle_display(['has_serial_no', 'serial_no_series'], !frm.doc.is_fixed_asset);
+
 		frm.call({
 			method: "set_asset_naming_series",
 			doc: frm.doc,
@@ -139,13 +150,20 @@ frappe.ui.form.on("Item", {
 				frm.set_value("is_stock_item", frm.doc.is_fixed_asset ? 0 : 1);
 				frm.trigger("set_asset_naming_series");
 			}
-		})
+		});
+
+		frm.trigger('auto_create_assets');
 	},
 
 	set_asset_naming_series: function(frm) {
 		if (frm.doc.__onload && frm.doc.__onload.asset_naming_series) {
 			frm.set_df_property("asset_naming_series", "options", frm.doc.__onload.asset_naming_series);
 		}
+	},
+
+	auto_create_assets: function(frm) {
+		frm.toggle_reqd(['asset_naming_series'], frm.doc.auto_create_assets);
+		frm.toggle_display(['asset_naming_series'], frm.doc.auto_create_assets);
 	},
 
 	page_name: frappe.utils.warn_page_name_change,
