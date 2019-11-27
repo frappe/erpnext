@@ -64,7 +64,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 				}
 			})
 		}
-	}	
+	}
 });
 
 frappe.ui.form.on('Sales Invoice Payment', {
