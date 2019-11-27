@@ -9,13 +9,13 @@
 			v-model="search_value"
 		/>
 
-		<drop-down
+		<item-sort
 			:options="dropdown_list" 
 			:selected="active_sort" 
 			v-on:update_option="sort_items" 
 			:placeholder="'Sort By'"
 			:close_on_outside_click="outside_click">
-		</drop-down>
+		</item-sort>
 
 		<div v-if="show_skeleton">
 			<section-header>
