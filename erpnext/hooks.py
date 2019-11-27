@@ -263,6 +263,12 @@ doc_events = {
 	}
 }
 
+
+cancel_exempt_doctypes = [
+	"Payment Entry"
+]
+
+
 scheduler_events = {
 	"all": [
 		"erpnext.projects.doctype.project.project.project_status_update_reminder"
