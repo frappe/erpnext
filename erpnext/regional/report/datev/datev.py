@@ -12,6 +12,7 @@ import datetime
 import json
 import zlib
 import zipfile
+import six
 from six import StringIO
 from six import string_types
 import frappe
@@ -270,7 +271,10 @@ def get_datev_csv(data, filters, csv_class):
 		columns=csv_class.COLUMNS
 	)
 
-	return header + '\r\n' + data
+	if not six.PY2:
+		data = data.encode('latin_1')
+
+	return header + b'\r\n' + data
 
 
 def get_header(filters, csv_class):
