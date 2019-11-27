@@ -36,7 +36,7 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 			}
 
 			frappe.db.get_value('Address', {'name': frm.doc.company_address}, 'gstin', (r) => {
-				frm.set_value('company_gstin', r);
+				frm.set_value('company_gstin', r.gstin);
 			})
 
 			erpnext.utils.get_party_details(frm, null, args, null);
