@@ -140,32 +140,6 @@ class ExpenseClaim(AccountsController):
 					"against": ",".join([d.default_account for d in self.expenses]),
 					"party_type": "Employee",
 					"party": self.employee,
-					"against_voucher_type": self.doctype,
-					"against_voucher": self.name
-				})
-			)
-
-			gl_entry.append(
-				self.get_gl_dict({
-					"account": data.advance_account,
-					"debit": data.allocated_amount,
-					"debit_in_account_currency": data.allocated_amount,
-					"against": self.payable_account,
-					"party_type": "Employee",
-					"party": self.employee,
-					"against_voucher_type": self.doctype,
-					"against_voucher": self.name
-				})
-			)
-
-			gl_entry.append(
-				self.get_gl_dict({
-					"account": self.payable_account,
-					"credit": data.allocated_amount,
-					"credit_in_account_currency": data.allocated_amount,
-					"against": data.advance_account,
-					"party_type": "Employee",
-					"party": self.employee,
 					"against_voucher_type": "Employee Advance",
 					"against_voucher": data.employee_advance
 				})

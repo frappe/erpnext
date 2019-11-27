@@ -510,7 +510,7 @@ def get_qty_rate_for_serial_nos(item_code, warehouse, posting_date, posting_time
 	}
 
 	serial_nos_list = [serial_no.get("name")
-			for serial_no in get_available_serial_nos(item_code, warehouse)]
+			for serial_no in get_available_serial_nos(args)]
 
 	qty = len(serial_nos_list)
 	serial_nos = '\n'.join(serial_nos_list)

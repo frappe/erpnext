@@ -136,6 +136,16 @@ class SalesInvoice(SellingController):
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
 			validate_loyalty_points(self, self.loyalty_points)
 
+	def validate_fixed_asset(self):
+		for d in self.get("items"):
+			if d.is_fixed_asset and d.meta.get_field("asset") and d.asset:
+				asset = frappe.get_doc("Asset", d.asset)
+				if self.doctype == "Sales Invoice" and self.docstatus == 1:
+					if self.update_stock:
+						frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
+
+					elif asset.status in ("Scrapped", "Cancelled", "Sold"):
+						frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}").format(d.idx, d.asset, asset.status))
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
@@ -991,10 +1001,8 @@ class SalesInvoice(SellingController):
 				continue
 
 			for serial_no in item.serial_no.split("\n"):
-				if serial_no and frappe.db.exists('Serial No', serial_no):
-					sno = frappe.get_doc('Serial No', serial_no)
-					sno.sales_invoice = invoice
-					sno.db_update()
+				if serial_no and frappe.db.get_value('Serial No', serial_no, 'item_code') == item.item_code:
+					frappe.db.set_value('Serial No', serial_no, 'sales_invoice', invoice)
 
 	def validate_serial_numbers(self):
 		"""
@@ -1040,8 +1048,9 @@ class SalesInvoice(SellingController):
 				continue
 
 			for serial_no in item.serial_no.split("\n"):
-				sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
-				if sales_invoice and self.name != sales_invoice:
+				sales_invoice, item_code = frappe.db.get_value("Serial No", serial_no,
+					["sales_invoice", "item_code"])
+				if sales_invoice and item_code == item.item_code and self.name != sales_invoice:
 					sales_invoice_company = frappe.db.get_value("Sales Invoice", sales_invoice, "company")
 					if sales_invoice_company == self.company:
 						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}"

@@ -17,6 +17,7 @@
   "supplier",
   "customer",
   "image",
+  "purchase_invoice",
   "column_break_3",
   "company",
   "location",
@@ -25,6 +26,7 @@
   "purchase_date",
   "disposal_date",
   "journal_entry_for_scrap",
+  "purchase_receipt",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -62,9 +64,8 @@
   "status",
   "booked_fixed_asset",
   "column_break_51",
-  "purchase_receipt",
+
   "purchase_receipt_amount",
-  "purchase_invoice",
   "default_finance_book",
   "amended_from"
  ],
@@ -403,8 +404,7 @@
    "label": "Purchase Receipt",
    "no_copy": 1,
    "options": "Purchase Receipt",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "purchase_receipt_amount",
@@ -420,8 +420,7 @@
    "fieldtype": "Link",
    "label": "Purchase Invoice",
    "no_copy": 1,
-   "options": "Purchase Invoice",
-   "read_only": 1
+   "options": "Purchase Invoice"
   },
   {
    "fetch_from": "company.default_finance_book",
