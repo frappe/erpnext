@@ -565,8 +565,6 @@ class TestPurchaseOrder(unittest.TestCase):
 		issued_items = sorted([d.rm_item_code for d in pr.get('supplied_items')])
 
 		self.assertEquals(transferred_items, issued_items)
-		for item in pr.get('supplied_items'):
-			print(item.main_item_code, item.rm_item_code, item.required_qty, item.amount, item.rate)
 		self.assertEquals(pr.get('items')[0].rm_supp_cost, 2000)
 
 
