@@ -163,6 +163,7 @@ def validate_account_for_perpetual_inventory(gl_map):
 						.format(account), StockAccountInvalidTransaction)
 
 			elif account_bal != stock_bal:
+				continue
 				precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
 					currency=frappe.get_cached_value('Company',  gl_map[0].company,  "default_currency"))
 
