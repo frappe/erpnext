@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import os
 import json
 import zipfile
-from six import StringIO
+from six import BytesIO
 from unittest import TestCase
 
 import frappe
@@ -238,7 +238,7 @@ class TestDatev(TestCase):
 		download_datev_csv(self.filters)
 
 		# zipfile.is_zipfile() expects a file-like object
-		zip_buffer = StringIO()
+		zip_buffer = BytesIO()
 		zip_buffer.write(frappe.response['filecontent'])
 
 		self.assertTrue(zipfile.is_zipfile(zip_buffer))
