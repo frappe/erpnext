@@ -67,8 +67,17 @@ class Quotation(SellingController):
 			opportunity = self.opportunity
 
 		opp = frappe.get_doc("Opportunity", opportunity)
-		opp.status = None
-		opp.set_status(update=True)
+		
+		quotations_on_opportunity = frappe.db.sql("""
+			SELECT name
+			FROM tabQuotation
+			WHERE `opportunity` = %s AND `status` != "Lost"
+		""",(opportunity))
+
+		if(len(quotations_on_opportunity) <= 1):
+			print("Setting as lost")
+			opp.status = "Lost"
+			opp.set_status(update=True)
 
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_sales_order():
