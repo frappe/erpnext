@@ -204,6 +204,40 @@ class Customer(TransactionBase):
 		else:
 			frappe.msgprint(_("Multiple Loyalty Program found for the Customer. Please select manually."))
 
+	def create_onboarding_docs(self, args):
+		defaults = frappe.defaults.get_defaults()
+		for i in range(1, args.get('max_count')):
+			customer = args.get('customer_name_' + str(i))
+			if customer:
+				try:
+					doc = frappe.get_doc({
+						'doctype': self.doctype,
+						'customer_name': customer,
+						'customer_type': 'Company',
+						'customer_group': _('Commercial'),
+						'territory': defaults.get('country'),
+						'company': defaults.get('company')
+					}).insert()
+
+					if args.get('customer_email_' + str(i)):
+						create_contact(customer, self.doctype,
+							doc.name, args.get("customer_email_" + str(i)))
+				except frappe.NameError:
+					pass
+
+def create_contact(contact, party_type, party, email):
+	"""Create contact based on given contact name"""
+	contact = contact.split(' ')
+
+	contact = frappe.get_doc({
+		'doctype': 'Contact',
+		'first_name': contact[0],
+		'last_name': len(contact) > 1 and contact[1] or ""
+	})
+	contact.append('email_ids', dict(email_id=email, is_primary=1))
+	contact.append('links', dict(link_doctype=party_type, link_name=party))
+	contact.insert()
+
 @frappe.whitelist()
 def get_loyalty_programs(doc):
 	''' returns applicable loyalty programs for a customer '''
