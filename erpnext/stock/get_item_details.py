@@ -261,6 +261,11 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		elif (args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']) or \
 			(args.get('doctype') == 'Material Request' and args.get('material_request_type') == 'Purchase'):
 			args.uom = item.purchase_uom if item.purchase_uom else item.stock_uom
+			if args.get('doctype') == 'Purchase Invoice':
+				from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
+				expense_account = get_asset_category_account(fieldname = "fixed_asset_account", item = args.item_code, company= args.company)
+				if not expense_account:
+					expense_account = get_default_expense_account(args, item_defaults, item_group_defaults, brand_defaults)
 		else:
 			args.uom = item.stock_uom
 
@@ -271,7 +276,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"image": cstr(item.image).strip(),
 		"warehouse": warehouse,
 		"income_account": get_default_income_account(args, item_defaults, item_group_defaults, brand_defaults),
-		"expense_account": get_default_expense_account(args, item_defaults, item_group_defaults, brand_defaults),
+		"expense_account": expense_account,
 		"cost_center": get_default_cost_center(args, item_defaults, item_group_defaults, brand_defaults),
 		'has_serial_no': item.has_serial_no,
 		'has_batch_no': item.has_batch_no,
