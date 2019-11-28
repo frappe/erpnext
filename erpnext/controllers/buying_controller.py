@@ -577,6 +577,7 @@ class BuyingController(StockController):
 
 	def auto_make_assets(self, asset_items):
 		items_data = get_asset_item_details(asset_items)
+		messages = []
 
 		for d in self.items:
 			if d.is_fixed_asset:
@@ -589,12 +590,16 @@ class BuyingController(StockController):
 						for qty in range(cint(d.qty)):
 							self.make_asset(d)
 						is_plural = 's' if cint(d.qty) != 1 else ''
-						frappe.msgprint(_('{0} Asset{2} Created for {1}').format(cint(d.qty), d.item_code, is_plural))
+						messages.append(_('{0} Asset{2} Created for <b>{1}</b>').format(cint(d.qty), d.item_code, is_plural))
 					else:
-						frappe.throw(_("Asset Naming Series is mandatory for the auto creation for item {0}").format(d.item_code))
+						frappe.throw(_("Row {1}: Asset Naming Series is mandatory for the auto creation for item {0}")
+							.format(d.item_code, d.idx))
 				else:
-					frappe.msgprint(_("Assets not created. You will have to create asset manually."))
-					
+					messages.append(_("Assets not created for <b>{0}</b>. You will have to create asset manually.")
+						.format(d.item_code))
+
+		for message in messages:
+			frappe.msgprint(message, title="Success")
 
 	def make_asset(self, row):
 		if not row.asset_location:
@@ -636,7 +641,10 @@ class BuyingController(StockController):
 					asset = frappe.get_doc('Asset', asset.name)
 					if delete_asset and is_auto_create_enabled:
 						# need to delete movements to delete assets otherwise throws link exists error
-						movements = frappe.db.get_all('Asset Movement', filters={ 'reference_name': self.name })
+						movements = frappe.db.sql(
+							"""SELECT asm.name 
+							FROM `tabAsset Movement` asm, `tabAsset Movement Item` asm_item
+							WHERE asm_item.parent=asm.name and asm_item.asset=%s""", asset.name, as_dict=1)
 						for movement in movements:
 							frappe.delete_doc('Asset Movement', movement.name, force=1)
 						frappe.delete_doc("Asset", asset.name, force=1)
@@ -647,8 +655,12 @@ class BuyingController(StockController):
 						asset.purchase_date = self.posting_date
 						asset.supplier = self.supplier
 					elif self.docstatus == 2:
-						asset.set(field, None)
-						asset.supplier = None
+						if asset.docstatus == 0:
+							asset.set(field, None)
+							asset.supplier = None
+						if asset.docstatus == 1 and delete_asset:
+							frappe.throw(_('Cannot cancel this document as it is linked with submitted asset {0}.\
+								Please cancel the it to continue.').format(asset.name))
 
 					asset.flags.ignore_validate_update_after_submit = True
 					asset.flags.ignore_mandatory = True

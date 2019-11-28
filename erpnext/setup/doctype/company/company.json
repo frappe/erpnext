@@ -72,7 +72,6 @@
   "stock_received_but_not_billed",
   "expenses_included_in_valuation",
   "fixed_asset_depreciation_settings",
-  "enable_cwip_accounting",
   "accumulated_depreciation_account",
   "depreciation_expense_account",
   "series_for_depreciation_entry",
@@ -721,18 +720,12 @@
    "fieldtype": "Link",
    "label": "Default Buying Terms",
    "options": "Terms and Conditions"
-  },
-  {
-   "default": "0",
-   "fieldname": "enable_cwip_accounting",
-   "fieldtype": "Check",
-   "label": "Enable Capital Work in Progress Accounting"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",
- "modified": "2019-10-09 14:42:04.440974",
+ "modified": "2019-11-22 13:04:47.470768",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
