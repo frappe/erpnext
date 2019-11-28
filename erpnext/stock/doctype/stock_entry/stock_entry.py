@@ -657,7 +657,7 @@ class StockEntry(StockController):
 					item_account_wise_additional_cost.setdefault((d.item_code, d.name), {})
 					item_account_wise_additional_cost[(d.item_code, d.name)].setdefault(t.expense_account, 0.0)
 					item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account] += \
-						(t.amount * d.basic_amount) / total_basic_amount
+						(t.amount * d.basic_amount) / total_basic_amount if total_basic_amount else 0
 
 		if item_account_wise_additional_cost:
 			for d in self.get("items"):
