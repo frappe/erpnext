@@ -49,7 +49,7 @@ class CompensatoryLeaveRequest(Document):
 			date_difference -= 0.5
 		leave_period = get_leave_period(self.work_from_date, self.work_end_date, company)
 		if leave_period:
-			leave_allocation = self.exists_allocation_for_period(leave_period)
+			leave_allocation = self.get_existing_allocation_for_period(leave_period)
 			if leave_allocation:
 				leave_allocation.new_leaves_allocated += date_difference
 				leave_allocation.validate()
@@ -82,7 +82,7 @@ class CompensatoryLeaveRequest(Document):
 				# create reverse entry on cancelation
 				create_additional_leave_ledger_entry(leave_allocation, date_difference * -1, add_days(self.work_end_date, 1))
 
-	def exists_allocation_for_period(self, leave_period):
+	def get_existing_allocation_for_period(self, leave_period):
 		leave_allocation = frappe.db.sql("""
 			select name
 			from `tabLeave Allocation`
