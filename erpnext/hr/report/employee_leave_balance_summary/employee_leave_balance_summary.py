@@ -137,14 +137,16 @@ def get_department_leave_approver_map(department=None):
 	return approvers
 
 def get_total_leave_allocated_map(filters):
-	total_leave_allocated_map = frappe._dict()
-	total_leave_allocated = frappe.db.sql("SELECT SUM(total_leaves_allocated) as total_leave_allocated, employee, leave_type FROM `tabLeave Allocation` WHERE from_date >= '"+filters.get("from_date")+"' GROUP BY employee, leave_type", as_dict = 1)
+	query = """SELECT SUM(total_leaves_allocated) as total_leave_allocated, employee,
+	leave_type FROM `tabLeave Allocation` WHERE from_date >= '{0}' GROUP BY employee, leave_type""".format(filters.get("from_date"))
 
+	total_leave_allocated_map = frappe._dict()
+	total_leave_allocated = frappe.db.sql(query, as_dict = 1)
 
 	for total_leaves in total_leave_allocated:
-			total_leave_allocated_map.setdefault((total_leaves.get('leave_type'),total_leaves.get('employee')),total_leaves.get('total_leave_allocated'))
+		total_leave_allocated_map.setdefault((total_leaves.get('leave_type'), total_leaves.get('employee')),\
+			total_leaves.get('total_leave_allocated'))
 
-	pprint(total_leave_allocated_map)
 	return total_leave_allocated_map
 
 
