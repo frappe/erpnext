@@ -302,7 +302,7 @@ scheduler_events = {
 		"erpnext.support.doctype.service_level_agreement.service_level_agreement.check_agreement_status",
 		"erpnext.crm.doctype.email_campaign.email_campaign.send_email_to_leads_or_contacts",
 		"erpnext.crm.doctype.email_campaign.email_campaign.set_email_campaign_status",
-		"erpnext.selling.doctype.quotation.set_expired_status"
+		"erpnext.selling.doctype.quotation.quotation.set_expired_status"
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",
