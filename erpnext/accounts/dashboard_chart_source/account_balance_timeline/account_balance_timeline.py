@@ -93,7 +93,8 @@ def get_gl_entries(account, to_date):
 		fields = ['posting_date', 'debit', 'credit'],
 		filters = [
 			dict(posting_date = ('<', to_date)),
-			dict(account = ('in', child_accounts))
+			dict(account = ('in', child_accounts)),
+			dict(voucher_type = ('!=', 'Period Closing Voucher'))
 		],
 		order_by = 'posting_date asc')
 
