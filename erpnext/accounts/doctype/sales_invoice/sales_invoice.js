@@ -789,22 +789,21 @@ frappe.ui.form.on('Sales Invoice', {
 					method: "frappe.client.get_value",
 					args:{
 						doctype: "Patient",
-						filters: {"name": frm.doc.patient},
+						filters: {
+							"name": frm.doc.patient
+						},
 						fieldname: "customer"
 					},
-					callback:function(patient_customer) {
-						if(patient_customer){
-							frm.set_value("customer", patient_customer.message.customer);
-							frm.refresh_fields();
+					callback:function(r) {
+						if(r && r.message.customer){
+							frm.set_value("customer", r.message.customer);
 						}
 					}
 				});
 			}
-			else{
-					frm.set_value("customer", '');
-			}
 		}
 	},
+
 	refresh: function(frm) {
 		if (frappe.boot.active_domains.includes("Healthcare")){
 			frm.set_df_property("patient", "hidden", 0);
