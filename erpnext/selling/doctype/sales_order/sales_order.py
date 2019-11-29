@@ -578,8 +578,13 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
 
-		# set company address
-		target.update(get_company_address(target.company))
+		if source.company_address:
+			print("In delivery Note", source.company_address)
+			target.update({'company_address': source.company_address})
+		else:
+			# set company address
+			target.update(get_company_address(target.company))
+
 		if target.company_address:
 			target.update(get_fetch_values("Delivery Note", 'company_address', target.company_address))
 
@@ -650,8 +655,9 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		else:
 			# set company address
 			target.update(get_company_address(target.company))
-			if target.company_address:
-				target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
+
+		if target.company_address:
+			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
 
 		# set the redeem loyalty points if provided via shopping cart
 		if source.loyalty_points and source.order_type == "Shopping Cart":
