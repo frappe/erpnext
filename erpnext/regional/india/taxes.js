@@ -1,114 +1,41 @@
 erpnext.setup_auto_gst_taxation = (doctype) => {
 	frappe.ui.form.on(doctype, {
-		onload: function(frm) {
-			frappe.run_serially([
-				() => frm.trigger('get_gst_accounts'),
-				() => frm.trigger('set_accounts_to_skip')
-			]);
-		},
-
-		customer_address: function(frm) {
-			frm.trigger('set_accounts_to_skip');
-		},
-
-		shipping_address_name: function(frm) {
-			frm.trigger('set_accounts_to_skip');
-		},
-
-		supplier_address: function(frm) {
-			frm.trigger('set_accounts_to_skip');
-		},
-
 		company_address: function(frm) {
-			let args = {};
-			if (in_list(['Sales Invoice', 'Sales Order', 'Delivery Note'], frm.doc.doctype)) {
-				args = {
-					'posting_date': frm.doc.posting_date || frm.doc.transaction_date,
-					'party_type': 'Customer',
-					'party': frm.doc.customer
-				}
-			} else {
-				args = {
-					'posting_date': frm.doc.posting_date,
-					'party_type': 'Supplier',
-					'party': frm.doc.supplier
-				}
+			frm.trigger('get_tax_template');
+		},
+		shipping_address: function(frm) {
+			frm.trigger('get_tax_template');
+		},
+		tax_category: function(frm) {
+			frm.trigger('get_tax_template');
+		},
+		get_tax_template: function(frm) {
+			let out = {
+				'shipping_address': frm.doc.shipping_address || '',
+				'shipping_address_name': frm.doc.shipping_address_name || '',
+				'customer_address': frm.doc.customer_address || '',
+				'customer': frm.doc.customer,
+				'supplier': frm.doc.supplier,
+				'supplier_gstin': frm.doc.supplier_gstin,
+				'company_gstin': frm.doc.company_gstin,
+				'tax_category': frm.doc.tax_category
 			}
 
-			frappe.db.get_value('Address', {'name': frm.doc.company_address}, 'gstin', (r) => {
-				frm.set_value('company_gstin', r.gstin);
-			})
-
-			erpnext.utils.get_party_details(frm, null, args, null);
-		},
-
-		get_gst_accounts: function(frm) {
 			frappe.call({
-				method: "erpnext.regional.india.utils.get_gst_accounts",
-				args : {
-					company: frm.doc.company
-				},
-				callback: function(r) {
-					frm.doc.gst_accounts = r.message;
-				}
-			});
-		},
-
-		taxes_and_charges: function(frm) {
-			frm.trigger('set_accounts_to_skip');
-		},
-
-		set_accounts_to_skip: function(frm) {
-			if(!frm.doc.taxes_and_charges || (!frm.doc.gst_accounts)){
-				return;
-			}
-
-			let intra_state_gst_accounts = frm.doc.gst_accounts['cgst_account'].concat(frm.doc.gst_accounts['sgst_account']);
-			let inter_state_gst_accounts = frm.doc.gst_accounts['igst_account'];
-
-			let accounts = intra_state_gst_accounts.concat(inter_state_gst_accounts);
-			let account_heads = [];
-			let accounts_to_skip =[];
-			frm.doc.accounts_to_skip = [];
-
-			frm.call({
-				method: "erpnext.controllers.accounts_controller.get_taxes_and_charges",
+				method: 'erpnext.regional.india.utils.get_regional_address_details',
 				args: {
-					master_doctype: "Sales Taxes and Charges Template",
-					master_name: frm.doc.taxes_and_charges
+					out: out,
+					doctype: frm.doc.doctype,
+					company: frm.doc.company,
+					return_out: 1
 				},
 				callback: function(r) {
-					r.message.forEach((tax) => {
-						account_heads.push(tax.account_head);
-					});
-
-					accounts.forEach((account) => {
-						if(!in_list(account_heads, account)) {
-							accounts_to_skip.push(account);
-						}
-					});
-
-					frm.doc.accounts_to_skip = JSON.stringify(accounts_to_skip);
-				}
-			});
-		}
-	});
-
-	frappe.ui.form.on(doctype +' Item', {
-		item_code: function(frm) {
-			frappe.run_serially([
-				() => {
-					if(!frm.doc.gst_accounts) {
-						frm.trigger('get_gst_accounts');
-					}
-				},
-				() => {
-					if(!frm.doc.accounts_to_skip) {
-						frm.trigger('set_accounts_to_skip');
+					if(r.message) {
+						frm.set_value('taxes_and_charges', r.message.taxes_and_charges);
 					}
 				}
-			]);
+			})
 		}
 	});
-};
+}
 

@@ -9,8 +9,10 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	}
 
 	if (args) {
-		if (frm.doc.company_address && (!args.company_address)) {
-			args.company_address = frm.doc.company_address;
+		if (in_list(['Sales Invoice', 'Sales Order', 'Delivery Note'], frm.doc.doctype)) {
+			if (frm.doc.company_address && (!args.company_address)) {
+				args.company_address = frm.doc.company_address;
+			}
 		}
 
 		if (in_list(['Purchase Invoice', 'Purchase Order', 'Purchase Receipt'], frm.doc.doctype)) {
@@ -44,16 +46,29 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 		}
 
 		if (in_list(['Sales Invoice', 'Sales Order', 'Delivery Note'], frm.doc.doctype)) {
+			if (!args) {
+				args = {
+					party: frm.doc.customer || frm.doc.party_name,
+					party_type: 'Customer'
+				}
+			}
 			if (frm.doc.company_address && (!args.company_address)) {
 				args.company_address = frm.doc.company_address;
 			}
 
-			if (frm.doc.shipping_address_name && (!args.shipping_address_name)) {
+			if (frm.doc.shipping_address_name &&(!args.shipping_address_name)) {
 				args.shipping_address_name = frm.doc.shipping_address_name;
 			}
 		}
 
 		if (in_list(['Purchase Invoice', 'Purchase Order', 'Purchase Receipt'], frm.doc.doctype)) {
+			if (!args) {
+				args = {
+					party: frm.doc.supplier,
+					party_type: 'Supplier'
+				}
+			}
+
 			if (frm.doc.shipping_address && (!args.shipping_address)) {
 				args.shipping_address = frm.doc.shipping_address;
 			}

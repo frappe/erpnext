@@ -698,7 +698,7 @@ frappe.ui.form.on('Sales Invoice', {
 		{
 			frappe.call({
 				method:"frappe.contacts.doctype.address.address.get_default_address",
-				args:{ doctype:'Company',name:frm.doc.company},
+				args:{ doctype:'Company',name:frm.doc.company, existing_address: frm.doc.company_address},
 				callback: function(r){
 					if (r.message){
 						frm.set_value("company_address",r.message)
