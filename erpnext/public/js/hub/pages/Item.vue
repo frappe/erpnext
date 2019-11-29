@@ -300,7 +300,21 @@ export default {
 		},
 
 		unpublish_item() {
-			frappe.msgprint(__('This feature is under development...'));
+			let me = this;
+			frappe.confirm(__(`Unpublish ${this.item.item_name}?`), function () {
+				frappe.call(
+					'erpnext.hub_node.api.unpublish_item',
+					{
+						item: me.item
+					}
+				)
+				.then((r) => {
+					frappe.set_route(`marketplace/home`);
+					frappe.show_alert(__('Item listing removed'))
+
+				})
+				
+			})
 		}
 	}
 }

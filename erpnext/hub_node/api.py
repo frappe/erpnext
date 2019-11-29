@@ -70,7 +70,7 @@ def map_fields(items):
 	field_mappings = get_field_mappings()
 	table_fields = [d.fieldname for d in frappe.get_meta('Item').get_table_fields()]
 
-	hub_seller_name = frappe.db.get_value('Marketplace Settings' , 'Marketplace Settings', 'hub_seller_name')
+	hub_seller_name = frappe.db.get_value('Marketplace Settings', 'Marketplace Settings', 'hub_seller_name')
 
 	for item in items:
 		for fieldname in table_fields:
@@ -144,6 +144,23 @@ def publish_selected_items(items_to_publish):
 		connection.insert_many(items)
 
 		item_sync_postprocess()
+	except Exception as e:
+		frappe.log_error(message=e, title='Hub Sync Error')
+
+@frappe.whitelist()
+def unpublish_item(item):
+	''' Remove item listing from the marketplace '''
+	item = json.loads(item)
+
+	item_code = item.get('item_code')
+	frappe.db.set_value('Item', item_code, 'publish_in_hub', 0)
+
+	item = map_fields([item])[0]
+
+	try:
+		connection = get_hub_connection()
+		connection.set_value('Hub Item', item.get('name'), 'published', 0)
+
 	except Exception as e:
 		frappe.log_error(message=e, title='Hub Sync Error')
 
