@@ -201,8 +201,7 @@ def get_data():
 					"type": "page",
 					"name": "bank-reconciliation",
 					"label": _("Bank Reconciliation"),
-					"icon": "fa fa-bar-chart",
-					"onboard": 1,
+					"icon": "fa fa-bar-chart"
 				},
 				{
 					"type": "report",
