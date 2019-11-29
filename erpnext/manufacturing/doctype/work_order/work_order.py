@@ -22,6 +22,7 @@ from erpnext.utilities.transaction_base import validate_uom_is_integer
 from frappe.model.mapper import get_mapped_doc
 
 class OverProductionError(frappe.ValidationError): pass
+class CapacityError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
 class OperationTooLongError(frappe.ValidationError): pass
 class ItemHasVariantError(frappe.ValidationError): pass
@@ -282,7 +283,7 @@ class WorkOrder(Document):
 
 				if date_diff(row.planned_start_time, original_start_time) > plan_days:
 					frappe.throw(_("Unable to find the time slot in the next {0} days for the operation {1}.")
-						.format(plan_days, row.operation))
+						.format(plan_days, row.operation), CapacityError)
 
 				row.db_update()
 
