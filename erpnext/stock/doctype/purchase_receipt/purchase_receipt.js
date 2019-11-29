@@ -37,7 +37,7 @@ frappe.ui.form.on("Purchase Receipt", {
 
 		frm.set_query("taxes_and_charges", function() {
 			return {
-				filters: {'company': cur_frm.doc.company }
+				filters: {'company': frm.doc.company }
 			}
 		});
 		
