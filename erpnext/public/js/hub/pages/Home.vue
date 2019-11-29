@@ -12,7 +12,7 @@
 		<item-sort
 			:options="dropdown_list" 
 			:selected="active_sort" 
-			v-on:update_option="sort_items" 
+			@update_option="sort_items" 
 			:placeholder="'Sort By'"
 			:close_on_outside_click="outside_click">
 		</item-sort>
@@ -69,6 +69,7 @@ export default {
 					based_on: 'rating'
 				}],
 			active_sort: {},
+			outside_click: true
 		};
 	},
 	created() {
@@ -124,7 +125,7 @@ export default {
 
 		get_sorted_data() {
 			hub.call('get_items', {
-				order_by: this.active_sort.based_on,
+				order_by: this.active_sort.based_on +' '+ (this.active_sort.asc? 'asc': 'desc'),
 				limit: 50
 			})
 			.then((items) => {

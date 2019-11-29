@@ -1,6 +1,9 @@
 <template>
 	<div class="item-sort">
-		<button class="sort-grp material-icons">
+		<button @click="asc = !asc"
+			:class="['sort-grp',
+				'material-icons',
+				{'icon-flipped': this.asc}]">
 			<i class="material-icons">
 				sort
 			</i>
@@ -31,6 +34,7 @@
 				selected_option: {
 					name: '',
 				},
+				asc: false,
 				showMenu: false,
 				placeholderText: 'Please select an item',
 			}
@@ -42,8 +46,8 @@
 			selected: {},
 			placeholder: [String],
 			close_on_outside_click: {
-			  type: [Boolean],
-			  default: true,
+				type: [Boolean],
+				default: true,
 			},
 		},
 
@@ -66,6 +70,7 @@
 		methods: {
 			update_option(option) {
 				this.selected_option = option;
+				this.selected_option['asc'] = this.asc
 				this.showMenu = false;
 				this.$emit('update_option', this.selected_option);
 			},
