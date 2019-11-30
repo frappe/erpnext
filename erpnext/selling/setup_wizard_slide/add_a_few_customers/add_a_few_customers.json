@@ -7,14 +7,14 @@
  "domains": [],
  "help_links": [
   {
-   "label": "Customers",
+   "label": "Learn More",
    "video_id": "zsrrVDk6VBs"
   }
  ],
  "idx": 0,
- "image_src": "/assets/erpnext/images/illustrations/customer.png",
+ "image_src": "/assets/erpnext/images/illustrations/customers-onboard.png",
  "max_count": 3,
- "modified": "2019-11-26 18:26:15.888794",
+ "modified": "2019-11-30 13:33:40.040267",
  "modified_by": "Administrator",
  "name": "Add A Few Customers",
  "owner": "Administrator",
