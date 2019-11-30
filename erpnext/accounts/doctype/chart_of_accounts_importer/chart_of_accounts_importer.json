@@ -212,6 +212,13 @@
    "share": 1, 
    "submit": 0, 
    "write": 1
+  },
+  {
+   "default": "0",
+   "description": "Use Account Number as Parent Account \n(Instead of Account Name)",
+   "fieldname": "use_account_number_as_parent",
+   "fieldtype": "Check",
+   "label": "Use Account Number As Parent"
   }
  ], 
  "quick_entry": 1, 
