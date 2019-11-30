@@ -19,6 +19,54 @@ frappe.ui.form.on("Project", {
 					frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
 				});
 			},
+			'Purchase Order': () => {
+				let doctype = 'Purchase Order';
+				frappe.model.with_doctype(doctype, () => {
+					let new_doc = frappe.model.get_new_doc(doctype);
+
+					// add a new row and set the project
+					let purchase_order_item = frappe.model.get_new_doc('Purchase Order Item');
+					purchase_order_item.project = frm.doc.name;
+					purchase_order_item.parent = new_doc.name;
+					purchase_order_item.parentfield = 'items';
+					purchase_order_item.parenttype = 'Purchase Order';
+					new_doc.items = [purchase_order_item];
+
+					frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
+				});
+			},
+			'Purchase Receipt': () => {
+				let doctype = 'Purchase Receipt';
+				frappe.model.with_doctype(doctype, () => {
+					let new_doc = frappe.model.get_new_doc(doctype);
+
+					// add a new row and set the project
+					let purchase_receipt_item = frappe.model.get_new_doc('Purchase Receipt Item');
+					purchase_receipt_item.project = frm.doc.name;
+					purchase_receipt_item.parent = new_doc.name;
+					purchase_receipt_item.parentfield = 'items';
+					purchase_receipt_item.parenttype = 'Purchase Receipt';
+					new_doc.items = [purchase_receipt_item];
+
+					frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
+				});
+			},
+			'Purchase Invoice': () => {
+				let doctype = 'Purchase Invoice';
+				frappe.model.with_doctype(doctype, () => {
+					let new_doc = frappe.model.get_new_doc(doctype);
+
+					// add a new row and set the project
+					let purchase_invoice_item = frappe.model.get_new_doc('Purchase Invoice Item');
+					purchase_invoice_item.project = frm.doc.name;
+					purchase_invoice_item.parent = new_doc.name;
+					purchase_invoice_item.parentfield = 'items';
+					purchase_invoice_item.parenttype = 'Purchase Invoice';
+					new_doc.items = [purchase_invoice_item];
+
+					frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
+				});
+			},
 		};
 	},
 	onload: function (frm) {
@@ -80,7 +128,7 @@ frappe.ui.form.on("Project", {
 				frm.events.set_status(frm, 'Cancelled');
 			}, __('Set Status'));
 		}
-		
+
 		if (frappe.model.can_read("Task")) {
 			frm.add_custom_button(__("Gantt Chart"), function () {
 				frappe.route_options = {
