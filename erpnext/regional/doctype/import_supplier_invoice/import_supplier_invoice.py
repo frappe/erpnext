@@ -28,15 +28,9 @@ class ImportSupplierInvoice(Document):
 			self.name = "Import Invoice on " + format_datetime(self.creation)
 
 	def import_xml_data(self):
+		pi_count = 0
 		import_file = frappe.get_doc("File", {"file_url": self.zip_file})
 		self.publish("File Import", _("Processing XML Files"), 1, 3)
-
-		pi_count = 0
-		mop_options = frappe.get_meta('Mode of Payment').fields[4].options
-		mop_str = re.sub('\n', ',', mop_options)
-		mop_dict = dict(item.split("-") for item in mop_str.split(","))
-
-		default_uom = frappe.db.get_value("Stock Settings", fieldname="stock_uom")
 
 		with zipfile.ZipFile(get_full_path(self.zip_file)) as zf:
 			file_count = 0
@@ -56,126 +50,26 @@ class ImportSupplierInvoice(Document):
 
 				file_content = bs(content, "xml")
 
-				for line in file_content.find_all("DatiTrasmissione"):
-					destination_code = line.CodiceDestinatario.text
-
-				#read address information from file
 				for line in file_content.find_all("DatiGeneraliDocumento"):
 					document_type = line.TipoDocumento.text
 					bill_date = dateutil.parser.parse(line.Data.text).strftime("%Y-%m-%d")
 					invoice_no = line.Numero.text
 					if len(invoice_no) != 0:
-						for line in file_content.find_all("CedentePrestatore"):
-							tax_id = line.DatiAnagrafici.IdPaese.text + line.DatiAnagrafici.IdCodice.text
-							if line.find("CodiceFiscale"):
-								fiscal_code = line.DatiAnagrafici.CodiceFiscale.text
-							else:
-								fiscal_code = ""
-							if line.find("RegimeFiscale"):
-								fiscal_regime = line.DatiAnagrafici.RegimeFiscale.text
-							else:
-								fiscal_regime = ""
-							if line.find("Denominazione"):
-								supplier = line.DatiAnagrafici.Anagrafica.Denominazione.text
-							if line.find("Nome"):
-								supplier = line.DatiAnagrafici.Anagrafica.Nome.text + " " + line.DatiAnagrafici.Anagrafica.Cognome.text
-							address_line1 = line.Sede.Indirizzo.text
-							city = line.Sede.Comune.text
-							if line.find("Provincia"):
-								province = line.Sede.Provincia.text
-							else:
-								province = ""
-							pin_code = line.Sede.CAP.text
-							country = get_country(line.Sede.Nazione.text)
-
 						total_discount = 0
 
-						#read item information from file
-						for line in file_content.find_all("DettaglioLinee"):
-							if line.find("PrezzoUnitario") and line.find("PrezzoTotale"):
-								unit_rate = flt(line.PrezzoUnitario.text) or 0
-								line_total = flt(line.PrezzoTotale.text) or 0
+						supp_dict = get_supplier_info_from_file(file_content)
+						destination_code = get_destination_code_from_file(file_content)
+						items, return_invoice, total_discount = get_item_from_file(file_content, self.item_code)
+						taxes = get_taxes_from_file(file_content, self.tax_account)
+						terms = get_payment_terms_from_file(file_content)
 
-								if (unit_rate == 0.0):
-									qty = 1.0
-									uom = default_uom
-									rate = tax_rate = 0
-								else:
-									if (line_total / unit_rate) == 1.0:
-										qty = 1.0
-										uom = default_uom
-									else:
-										if line.find("Quantita"):
-											qty = flt(line.Quantita.text) or 0
-											if line.find("UnitaMisura"):
-												uom = create_uom(line.UnitaMisura.text)
-											else:
-												uom = default_uom
+						supplier_name = create_supplier(supplier = supp_dict.get('supplier'), supplier_group = self.supplier_group, 
+											tax_id = supp_dict.get('tax_id'), fiscal_code = supp_dict.get('fiscal_code'),
+											fiscal_regime = supp_dict.get('fiscal_regime'))
 
-									if (unit_rate < 0 and line_total < 0):
-										qty *= -1
-										return_invoice = 1
-									else:
-										return_invoice = 0
-
-									rate = unit_rate
-									if line.find("AliquotaIVA"):
-										tax_rate = flt(line.AliquotaIVA.text)
-
-								line_str = re.sub('[^A-Za-z0-9]+', '-', line.Descrizione.text)
-								item_name = line_str[0:140]
-								items.append({
-												"item_code": self.item_code,
-												"item_name": item_name,
-												"description": line_str,
-												"qty": qty,
-												"uom": uom,
-												"rate": rate,
-												"conversion_factor": 1.0,
-												"tax_rate": tax_rate
-											})
-
-								for disc_line in line.find_all("ScontoMaggiorazione"):
-									if disc_line.find("Percentuale"):
-										discount = flt(disc_line.Percentuale.text) or 0
-										total_discount += flt((discount / 100) * (rate * qty))
-
-						#read taxes from file
-						for line in file_content.find_all("DatiRiepilogo"):
-							if line.find("AliquotaIVA"):
-								if line.find("EsigibilitaIVA"):
-									descr = line.EsigibilitaIVA.text
-								else:
-									descr = "None"
-								taxes.append({
-									"charge_type": "Actual",
-									"account_head": self.tax_account,
-									"tax_rate": flt(line.AliquotaIVA.text) or 0,
-									"description": descr,
-									"tax_amount": flt(line.Imposta.text) if len(line.find("Imposta"))!=0 else 0
-								})
-
-						#read payment data from file
-						for line in file_content.find_all("DettaglioPagamento"):
-							mop_code = line.ModalitaPagamento.text + '-' + mop_dict.get(line.ModalitaPagamento.text)
-							if line.find("DataScadenzaPagamento"):
-								due_date = dateutil.parser.parse(line.DataScadenzaPagamento.text).strftime("%Y-%m-%d")
-							else:
-								due_date = today()
-							terms.append({
-											"mode_of_payment_code": mop_code,
-											"bank_account_iban": line.IBAN.text if line.find("IBAN") else "",
-											"due_date": due_date,
-											"payment_amount": line.ImportoPagamento.text
-							})
-
-						supplier_name = create_supplier(supplier = supplier, supplier_group = self.supplier_group, 
-											tax_id = tax_id, fiscal_code = fiscal_code,
-											fiscal_regime = fiscal_regime)
-
-						address = create_address(supplier_name = supplier_name, address_line1 = address_line1, 
-									city = city, province = province, 
-									pin_code = pin_code, country = country)
+						address = create_address(supplier_name = supplier_name, address_line1 = supp_dict.get('address_line1'), 
+									city = supp_dict.get('city'), province = supp_dict.get('province'), 
+									pin_code = supp_dict.get('pin_code'), country = supp_dict.get('country'))
 
 						pi_name = create_purchase_invoice(company = self.company, naming_series = self.invoice_series,
 									supplier_name = supplier_name, bill_no = invoice_no,document_type = document_type, 
@@ -205,6 +99,147 @@ class ImportSupplierInvoice(Document):
 
 	def publish(self, title, message, count, total):
 		frappe.publish_realtime("import_invoice_update", {"title": title, "message": message, "count": count, "total": total})
+
+def get_supplier_info_from_file(file_content):
+	supplier_info = {}
+	for line in file_content.find_all("CedentePrestatore"):
+		tax_id = line.DatiAnagrafici.IdPaese.text + line.DatiAnagrafici.IdCodice.text
+		if line.find("CodiceFiscale"):
+			fiscal_code = line.DatiAnagrafici.CodiceFiscale.text
+		else:
+			fiscal_code = ""
+		if line.find("RegimeFiscale"):
+			fiscal_regime = line.DatiAnagrafici.RegimeFiscale.text
+		else:
+			fiscal_regime = ""
+		if line.find("Denominazione"):
+			supplier = line.DatiAnagrafici.Anagrafica.Denominazione.text
+		if line.find("Nome"):
+			supplier = line.DatiAnagrafici.Anagrafica.Nome.text + " " + line.DatiAnagrafici.Anagrafica.Cognome.text
+		address_line1 = line.Sede.Indirizzo.text
+		city = line.Sede.Comune.text
+		if line.find("Provincia"):
+			province = line.Sede.Provincia.text
+		else:
+			province = ""
+		pin_code = line.Sede.CAP.text
+		country = get_country(line.Sede.Nazione.text)
+		#set the dict values
+		supplier_info['tax_id'] = tax_id
+		supplier_info['fiscal_code'] = fiscal_code
+		supplier_info['fiscal_regime'] = fiscal_regime
+		supplier_info['supplier'] = supplier
+		supplier_info['address_line1'] = address_line1
+		supplier_info['city'] = city
+		supplier_info['province'] = province
+		supplier_info['pin_code'] = pin_code
+		supplier_info['country'] = country
+
+		return supplier_info
+
+def get_item_from_file(file_content, item_code):
+	items = []
+	total_discount = 0
+	default_uom = frappe.db.get_value("Stock Settings", fieldname="stock_uom")
+	#read file for item information
+	for line in file_content.find_all("DettaglioLinee"):
+		if line.find("PrezzoUnitario") and line.find("PrezzoTotale"):
+			unit_rate = flt(line.PrezzoUnitario.text) or 0
+			line_total = flt(line.PrezzoTotale.text) or 0
+
+			if (unit_rate == 0.0):
+				qty = 1.0
+				uom = default_uom
+				rate = tax_rate = 0
+			else:
+				if (line_total / unit_rate) == 1.0:
+					qty = 1.0
+					uom = default_uom
+				else:
+					if line.find("Quantita"):
+						qty = flt(line.Quantita.text) or 0
+						if line.find("UnitaMisura"):
+							uom = create_uom(line.UnitaMisura.text)
+						else:
+							uom = default_uom
+
+				if (unit_rate < 0 and line_total < 0):
+					qty *= -1
+					return_invoice = 1
+					unit_rate *= -1
+				else:
+					return_invoice = 0
+
+				rate = unit_rate
+				if line.find("AliquotaIVA"):
+					tax_rate = flt(line.AliquotaIVA.text)
+
+			line_str = re.sub('[^A-Za-z0-9]+', '-', line.Descrizione.text)
+			item_name = line_str[0:140]
+			items.append({
+							"item_code": item_code,
+							"item_name": item_name,
+							"description": line_str,
+							"qty": qty,
+							"uom": uom,
+							"rate": rate,
+							"conversion_factor": 1.0,
+							"tax_rate": tax_rate
+						})
+
+			for disc_line in line.find_all("ScontoMaggiorazione"):
+				if disc_line.find("Percentuale"):
+					discount = flt(disc_line.Percentuale.text) or 0
+					total_discount += flt((discount / 100) * (rate * qty))
+
+	return items, return_invoice, total_discount
+
+def get_taxes_from_file(file_content, tax_account):
+	taxes = []
+	#read file for taxes information
+	for line in file_content.find_all("DatiRiepilogo"):
+		if line.find("AliquotaIVA"):
+			if line.find("EsigibilitaIVA"):
+				descr = line.EsigibilitaIVA.text
+			else:
+				descr = "None"
+			taxes.append({
+				"charge_type": "Actual",
+				"account_head": tax_account,
+				"tax_rate": flt(line.AliquotaIVA.text) or 0,
+				"description": descr,
+				"tax_amount": flt(line.Imposta.text) if len(line.find("Imposta"))!=0 else 0
+			})
+
+	return taxes
+
+def get_payment_terms_from_file(file_content):
+	terms = []
+	#Get mode of payment dict from setup
+	mop_options = frappe.get_meta('Mode of Payment').fields[4].options
+	mop_str = re.sub('\n', ',', mop_options)
+	mop_dict = dict(item.split("-") for item in mop_str.split(","))
+	#read file for payment information
+	for line in file_content.find_all("DettaglioPagamento"):
+		mop_code = line.ModalitaPagamento.text + '-' + mop_dict.get(line.ModalitaPagamento.text)
+		if line.find("DataScadenzaPagamento"):
+			due_date = dateutil.parser.parse(line.DataScadenzaPagamento.text).strftime("%Y-%m-%d")
+		else:
+			due_date = today()
+		terms.append({
+						"mode_of_payment_code": mop_code,
+						"bank_account_iban": line.IBAN.text if line.find("IBAN") else "",
+						"due_date": due_date,
+						"payment_amount": line.ImportoPagamento.text
+		})
+
+	return terms
+
+def get_destination_code_from_file(file_content):
+	for line in file_content.find_all("DatiTrasmissione"):
+		destination_code = line.CodiceDestinatario.text
+
+	return destination_code
 
 def create_supplier(**args):
 	args = frappe._dict(args)
