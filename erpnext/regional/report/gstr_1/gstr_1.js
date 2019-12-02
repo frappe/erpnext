@@ -52,7 +52,7 @@ frappe.query_reports["GSTR-1"] = {
 	],
 	onload: function (report) {
 
-		report.page.add_inner_button(__("Download as Json"), function () {
+		report.page.add_inner_button(__("Download as JSON"), function () {
 			var filters = report.get_values();
 
 			const args = {

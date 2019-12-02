@@ -96,6 +96,7 @@ class BOM(WebsiteGenerator):
 
 	def get_routing(self):
 		if self.routing:
+			self.set("operations", [])
 			for d in frappe.get_all("BOM Operation", fields = ["*"],
 				filters = {'parenttype': 'Routing', 'parent': self.routing}):
 				child = self.append('operations', d)
@@ -289,7 +290,7 @@ class BOM(WebsiteGenerator):
 		if not valuation_rate:
 			valuation_rate = frappe.db.get_value("Item", args['item_code'], "valuation_rate")
 
-		return valuation_rate
+		return flt(valuation_rate)
 
 	def manage_default_bom(self):
 		""" Uncheck others if current one is selected as default or
@@ -362,15 +363,9 @@ class BOM(WebsiteGenerator):
 	def validate_materials(self):
 		""" Validate raw material entries """
 
-		def get_duplicates(lst):
-			seen = set()
-			seen_add = seen.add
-			for item in lst:
-				if item.item_code in seen or seen_add(item.item_code):
-					yield item
-
 		if not self.get('items'):
 			frappe.throw(_("Raw Materials cannot be blank."))
+
 		check_list = []
 		for m in self.get('items'):
 			if m.bom_no:
@@ -378,16 +373,6 @@ class BOM(WebsiteGenerator):
 			if flt(m.qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
-
-		if not self.allow_same_item_multiple_times:
-			duplicate_items = list(get_duplicates(check_list))
-			if duplicate_items:
-				li = []
-				for i in duplicate_items:
-					li.append("{0} on row {1}".format(i.item_code, i.idx))
-				duplicate_list = '<br>' + '<br>'.join(li)
-
-				frappe.throw(_("Same item has been entered multiple times. {0}").format(duplicate_list))
 
 	def check_recursion(self, bom_list=[]):
 		""" Check whether recursion occurs in any bom"""
@@ -420,8 +405,12 @@ class BOM(WebsiteGenerator):
 
 	def traverse_tree(self, bom_list=None):
 		def _get_children(bom_no):
-			return frappe.db.sql_list("""select bom_no from `tabBOM Item`
-				where parent = %s and ifnull(bom_no, '') != '' and parenttype='BOM'""", bom_no)
+			children = frappe.cache().hget('bom_children', bom_no)
+			if children is None:
+				children = frappe.db.sql_list("""SELECT `bom_no` FROM `tabBOM Item`
+					WHERE `parent`=%s AND `bom_no`!='' AND `parenttype`='BOM'""", bom_no)
+				frappe.cache().hset('bom_children', bom_no, children)
+			return children
 
 		count = 0
 		if not bom_list:
@@ -534,12 +523,24 @@ class BOM(WebsiteGenerator):
 	def get_child_exploded_items(self, bom_no, stock_qty):
 		""" Add all items from Flat BOM of child BOM"""
 		# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
-		child_fb_items = frappe.db.sql("""select bom_item.item_code, bom_item.item_name,
-			bom_item.description, bom_item.source_warehouse, bom_item.operation,
-			bom_item.stock_uom, bom_item.stock_qty, bom_item.rate, bom_item.include_item_in_manufacturing,
-			bom_item.stock_qty / ifnull(bom.quantity, 1) as qty_consumed_per_unit
-			from `tabBOM Explosion Item` bom_item, tabBOM bom
-			where bom_item.parent = bom.name and bom.name = %s and bom.docstatus = 1""", bom_no, as_dict = 1)
+		child_fb_items = frappe.db.sql("""
+			SELECT
+				bom_item.item_code,
+				bom_item.item_name,
+				bom_item.description,
+				bom_item.source_warehouse,
+				bom_item.operation,
+				bom_item.stock_uom,
+				bom_item.stock_qty,
+				bom_item.rate,
+				bom_item.include_item_in_manufacturing,
+				bom_item.stock_qty / ifnull(bom.quantity, 1) AS qty_consumed_per_unit
+			FROM `tabBOM Explosion Item` bom_item, tabBOM bom
+			WHERE
+				bom_item.parent = bom.name
+				AND bom.name = %s
+				AND bom.docstatus = 1
+		""", bom_no, as_dict = 1)
 
 		for d in child_fb_items:
 			self.add_to_cur_exploded_items(frappe._dict({
@@ -760,6 +761,8 @@ def add_additional_cost(stock_entry, work_order):
 	# Add non stock items cost in the additional cost
 	bom = frappe.get_doc('BOM', work_order.bom_no)
 	table = 'exploded_items' if work_order.get('use_multi_level_bom') else 'items'
+	expenses_included_in_valuation = frappe.get_cached_value("Company", work_order.company,
+		"expenses_included_in_valuation")
 
 	items = {}
 	for d in bom.get(table):
@@ -770,6 +773,7 @@ def add_additional_cost(stock_entry, work_order):
 
 	for name in non_stock_items:
 		stock_entry.append('additional_costs', {
+			'expense_account': expenses_included_in_valuation,
 			'description': name[0],
 			'amount': items.get(name[0])
 		})

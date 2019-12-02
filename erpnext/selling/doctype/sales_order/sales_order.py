@@ -830,6 +830,10 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 		for item in sales_order.items:
 			if item.supplier and item.supplier not in suppliers:
 				suppliers.append(item.supplier)
+
+	if not suppliers:
+		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
+
 	for supplier in suppliers:
 		po =frappe.get_list("Purchase Order", filters={"sales_order":source_name, "supplier":supplier, "docstatus": ("<", "2")})
 		if len(po) == 0:
@@ -1034,14 +1038,18 @@ def create_pick_list(source_name, target_doc=None):
 
 	return doc
 
-def update_produced_qty_in_so_item(sales_order_item):
+def update_produced_qty_in_so_item(sales_order, sales_order_item):
 	#for multiple work orders against same sales order item
 	linked_wo_with_so_item = frappe.db.get_all('Work Order', ['produced_qty'], {
 		'sales_order_item': sales_order_item,
+		'sales_order': sales_order,
 		'docstatus': 1
 	})
-	if len(linked_wo_with_so_item) > 0:
-		total_produced_qty = 0
-		for wo in linked_wo_with_so_item:
-			total_produced_qty += flt(wo.get('produced_qty'))
-		frappe.db.set_value('Sales Order Item', sales_order_item, 'produced_qty', total_produced_qty)
+
+	total_produced_qty = 0
+	for wo in linked_wo_with_so_item:
+		total_produced_qty += flt(wo.get('produced_qty'))
+
+	if not total_produced_qty and frappe.flags.in_patch: return
+
+	frappe.db.set_value('Sales Order Item', sales_order_item, 'produced_qty', total_produced_qty)

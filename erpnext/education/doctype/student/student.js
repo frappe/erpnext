@@ -27,3 +27,16 @@ frappe.ui.form.on('Student', {
 		}
 	}
 });
+
+frappe.ui.form.on('Student Guardian', {
+	guardians_add: function(frm){
+		frm.fields_dict['guardians'].grid.get_field('guardian').get_query = function(doc){
+			var guardian_list = [];
+			if(!doc.__islocal) guardian_list.push(doc.guardian);
+			$.each(doc.guardians, function(idx, val){
+				if (val.guardian) guardian_list.push(val.guardian);
+			});
+			return { filters: [['Guardian', 'name', 'not in', guardian_list]] };
+		};
+	}
+});

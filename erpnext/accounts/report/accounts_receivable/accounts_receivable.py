@@ -188,7 +188,11 @@ class ReceivablePayableReport(object):
 		self.data.append(row)
 
 	def set_invoice_details(self, row):
-		row.update(self.invoice_details.get(row.voucher_no, {}))
+		invoice_details = self.invoice_details.get(row.voucher_no, {})
+		if row.due_date:
+			invoice_details.pop("due_date", None)
+		row.update(invoice_details)
+
 		if row.voucher_type == 'Sales Invoice':
 			if self.filters.show_delivery_notes:
 				self.set_delivery_notes(row)
@@ -314,7 +318,7 @@ class ReceivablePayableReport(object):
 			self.append_payment_term(row, d, term)
 
 	def append_payment_term(self, row, d, term):
-		if self.filters.get("customer") and d.currency == d.party_account_currency:
+		if (self.filters.get("customer") or self.filters.get("supplier")) and d.currency == d.party_account_currency:
 			invoiced = d.payment_amount
 		else:
 			invoiced = flt(flt(d.payment_amount) * flt(d.conversion_rate), self.currency_precision)
