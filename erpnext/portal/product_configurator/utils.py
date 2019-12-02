@@ -322,6 +322,11 @@ def get_items(filters=None, search=None):
 
 		# Join the meta fields and default fields set
 		search_fields = default_fields.union(meta_fields)
+		try:
+			if frappe.db.count('Item', cache=True) > 50000:
+				search_fields.remove('description')
+		except KeyError:
+			pass
 
 		# Build or filters for query
 		search = '%{}%'.format(search)
