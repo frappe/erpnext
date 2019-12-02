@@ -197,7 +197,6 @@ class calculate_taxes_and_totals(object):
 
 	def calculate_taxes(self):
 		self.doc.rounding_adjustment = 0
-
 		# maintain actual tax rate based on idx
 		actual_tax_dict = dict([[tax.idx, flt(tax.tax_amount, tax.precision("tax_amount"))]
 			for tax in self.doc.get("taxes") if tax.charge_type == "Actual"])
