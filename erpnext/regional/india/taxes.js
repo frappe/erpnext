@@ -34,8 +34,8 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 						frm.set_value('taxes_and_charges', r.message.taxes_and_charges);
 					}
 				}
-			})
+			});
 		}
 	});
-}
+};
 
