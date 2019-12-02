@@ -5,10 +5,11 @@
 from __future__ import unicode_literals
 import frappe, math
 from frappe import _
-from frappe.utils import flt, rounded
+from frappe.utils import flt, rounded, cint
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
-from erpnext.loan_management.doctype.loan.loan import get_monthly_repayment_amount, validate_repayment_method
+from erpnext.loan_management.doctype.loan.loan import (get_monthly_repayment_amount, validate_repayment_method,
+		get_total_loan_amount, get_sanctioned_amount_limit)
 from erpnext.loan_management.doctype.loan_security_price.loan_security_price import get_loan_security_price
 
 class LoanApplication(Document):
@@ -22,6 +23,7 @@ class LoanApplication(Document):
 		self.set_pledge_amount()
 		self.validate_loan_amount()
 		self.get_repayment_details()
+		self.check_sanctioned_amount_limit()
 
 	def validate_loan_type(self):
 		company = frappe.get_value("Loan Type", self.loan_type, "company")
@@ -39,10 +41,26 @@ class LoanApplication(Document):
 		if self.maximum_loan_amount and self.loan_amount > self.maximum_loan_amount:
 			frappe.throw(_("Loan Amount exceeds maximum loan amount of {0} as per proposed securities").format(self.maximum_loan_amount))
 
+	def check_sanctioned_amount_limit(self):
+		total_loan_amount = get_total_loan_amount(self.applicant_type, self.applicant, self.company)
+		sanctioned_amount_limit = get_sanctioned_amount_limit(self.applicant_type, self.applicant, self.company)
+
+		if sanctioned_amount_limit and self.loan_amount + total_loan_amount > sanctioned_amount_limit:
+			frappe.throw(_("Sanctioned Amount limit crossed for {0} {1}").format(self.applicant_type, frappe.bold(self.applicant)))
+
 	def set_pledge_amount(self):
 		for proposed_pledge in self.proposed_pledges:
+
+			if not proposed_pledge.qty and not proposed_pledge.amount:
+				frappe.throw(_("Qty or Amount is mandatroy for loan security"))
+
 			proposed_pledge.loan_security_price = get_loan_security_price(proposed_pledge.loan_security)
+
+			if not proposed_pledge.qty:
+				proposed_pledge.qty = cint(proposed_pledge.amount/proposed_pledge.loan_security_price)
+
 			proposed_pledge.amount = proposed_pledge.qty * proposed_pledge.loan_security_price
+			proposed_pledge.post_haircut_amount = proposed_pledge.amount - (proposed_pledge.amount * proposed_pledge.haircut/100)
 
 	def get_repayment_details(self):
 

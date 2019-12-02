@@ -4,7 +4,8 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import now_datetime
+from frappe import _
+from frappe.utils import now_datetime, cint
 from frappe.model.document import Document
 from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import update_shortfall_status
 from erpnext.loan_management.doctype.loan_security_price.loan_security_price import get_loan_security_price
@@ -24,8 +25,17 @@ class LoanSecurityPledge(Document):
 		maximum_loan_value = 0
 
 		for pledge in self.securities:
+
+			if not pledge.qty and not pledge.amount:
+				frappe.throw(_("Qty or Amount is mandatroy for loan security"))
+
 			pledge.loan_security_price = get_loan_security_price(pledge.loan_security)
+
+			if not pledge.qty:
+				pledge.qty = cint(pledge.amount/pledge.loan_security_price)
+
 			pledge.amount = pledge.qty * pledge.loan_security_price
+			pledge.post_haircut_amount = pledge.amount - (pledge.amount * pledge.haircut/100)
 
 			total_security_value += pledge.amount
 			maximum_loan_value += pledge.amount - (pledge.amount * pledge.haircut)/100

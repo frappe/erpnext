@@ -71,6 +71,21 @@ frappe.ui.form.on('Loan Application', {
 	},
 	is_secured_loan: function(frm) {
 		frm.set_df_property('proposed_pledges', 'reqd', frm.doc.is_secured_loan);
+	},
+
+	calculate_amounts: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		frappe.model.set_value(cdt, cdn, 'amount', row.qty * row.loan_security_price);
+		frappe.model.set_value(cdt, cdn, 'post_haircut_amount', row.amount - (row.amount * row.haircut/100));
+
+		let maximum_amount = 0;
+
+		$.each(frm.doc.proposed_pledges || [], function(i, item){
+			maximum_amount += item.amount - (item.amount * item.haircut/100);
+		});
+
+		frm.set_value('maximum_loan_amount', maximum_amount);
 	}
 });
 
@@ -84,20 +99,12 @@ frappe.ui.form.on("Proposed Pledge", {
 			},
 			callback: function(r) {
 				frappe.model.set_value(cdt, cdn, 'loan_security_price', r.message);
+				frm.events.calculate_amounts(frm, cdt, cdn);
 			}
 		})
 	},
 
 	qty: function(frm, cdt, cdn) {
-		let row = locals[cdt][cdn];
-		frappe.model.set_value(cdt, cdn, 'amount', row.qty * row.loan_security_price);
-
-		let maximum_amount = 0;
-
-		$.each(frm.doc.proposed_pledges || [], function(i, item){
-			maximum_amount += item.amount - (item.amount * item.haircut/100);
-		});
-
-		frm.set_value('maximum_loan_amount', maximum_amount);
-	}
+		frm.events.calculate_amounts(frm, cdt, cdn);
+	},
 })

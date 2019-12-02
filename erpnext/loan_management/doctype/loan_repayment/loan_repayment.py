@@ -9,7 +9,7 @@ from frappe import _
 from frappe.utils import flt
 from six import iteritems
 from frappe.model.document import Document
-from frappe.utils import date_diff, add_days, getdate, add_months, get_first_day
+from frappe.utils import date_diff, add_days, getdate, add_months, get_first_day, get_datetime
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import update_shortfall_status
@@ -17,7 +17,7 @@ from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_short
 class LoanRepayment(AccountsController):
 
 	def validate(self):
-		amounts = calculate_amounts(self.against_loan, self.posting_date, self.loan_type, self.payment_type)
+		amounts = calculate_amounts(self.against_loan, self.posting_date, self.payment_type)
 		self.set_missing_values(amounts)
 
 	def before_submit(self):
@@ -32,7 +32,7 @@ class LoanRepayment(AccountsController):
 
 	def set_missing_values(self, amounts):
 		if not self.posting_date:
-			self.posting_date = nowdate()
+			self.posting_date = get_datetime()
 
 		if not self.cost_center:
 			self.cost_center = erpnext.get_default_cost_center(self.company)
@@ -230,10 +230,10 @@ def get_accrued_interest_entries(against_loan):
 # This function returns the amounts that are payable at the time of loan repayment based on posting date
 # So it pulls all the unpaid Loan Interest Accrual Entries and calculates the penalty if applicable
 
-def get_amounts(amounts, against_loan, loan_type, posting_date, payment_type):
+def get_amounts(amounts, against_loan, posting_date, payment_type):
 
 	against_loan_doc = frappe.get_doc("Loan", against_loan)
-	loan_type_details = frappe.get_doc("Loan Type", loan_type)
+	loan_type_details = frappe.get_doc("Loan Type", against_loan_doc.loan_type)
 	accrued_interest_entries = get_accrued_interest_entries(against_loan_doc.name)
 
 	pending_accrual_entries = {}
@@ -274,7 +274,7 @@ def get_amounts(amounts, against_loan, loan_type, posting_date, payment_type):
 	return amounts
 
 @frappe.whitelist()
-def calculate_amounts(against_loan, posting_date, loan_type, payment_type):
+def calculate_amounts(against_loan, posting_date, payment_type):
 
 	amounts = {
 		'penalty_amount': 0.0,
@@ -284,7 +284,7 @@ def calculate_amounts(against_loan, posting_date, loan_type, payment_type):
 		'payable_amount': 0.0
 	}
 
-	amounts = get_amounts(amounts, against_loan, loan_type, posting_date, payment_type)
+	amounts = get_amounts(amounts, against_loan, posting_date, payment_type)
 
 	return amounts
 

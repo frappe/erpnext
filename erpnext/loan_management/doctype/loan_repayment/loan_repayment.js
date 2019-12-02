@@ -43,7 +43,6 @@ frappe.ui.form.on('Loan Repayment', {
 			args: {
 				'against_loan': frm.doc.against_loan,
 				'posting_date': frm.doc.posting_date,
-				'loan_type': frm.doc.loan_type,
 				'payment_type': frm.doc.payment_type
 			},
 			callback: function(r) {

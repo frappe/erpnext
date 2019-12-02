@@ -7,6 +7,7 @@ import frappe, math, json
 import erpnext
 from frappe import _
 from frappe.utils import flt, rounded, add_months, nowdate, getdate, now_datetime
+
 from erpnext.controllers.accounts_controller import AccountsController
 
 class Loan(AccountsController):
@@ -17,6 +18,7 @@ class Loan(AccountsController):
 		self.validate_accounts()
 		self.validate_loan_security_pledge()
 		self.validate_loan_amount()
+		self.check_sanctioned_amount_limit()
 
 		if self.is_term_loan:
 			validate_repayment_method(self.repayment_method, self.loan_amount, self.monthly_repayment_amount,
@@ -67,6 +69,13 @@ class Loan(AccountsController):
 
 			if loan_security_details.company != self.company:
 				frappe.throw(_("Loan Security Pledge Company and Loan Company must be same"))
+
+	def check_sanctioned_amount_limit(self):
+		total_loan_amount = get_total_loan_amount(self.applicant_type, self.applicant, self.company)
+		sanctioned_amount_limit = get_sanctioned_amount_limit(self.applicant_type, self.applicant, self.company)
+
+		if sanctioned_amount_limit and self.loan_amount + total_loan_amount > sanctioned_amount_limit:
+			frappe.throw(_("Sanctioned Amount limit crossed for {0} {1}").format(self.applicant_type, frappe.bold(self.applicant)))
 
 	def make_repayment_schedule(self):
 
@@ -143,6 +152,16 @@ def update_total_amount_paid(doc):
 		if data.paid:
 			total_amount_paid += data.total_payment
 	frappe.db.set_value("Loan", doc.name, "total_amount_paid", total_amount_paid)
+
+def get_total_loan_amount(applicant_type, applicant, company):
+	return frappe.db.get_value('Loan',
+		{'applicant_type': applicant_type, 'company': company, 'applicant': applicant, 'docstatus': 1},
+		'sum(loan_amount)')
+
+def get_sanctioned_amount_limit(applicant_type, applicant, company):
+	return frappe.db.get_value('Sanctioned Loan Amount',
+		{'applicant_type': applicant_type, 'company': company, 'applicant': applicant},
+		'sanctioned_amount_limit')
 
 def validate_repayment_method(repayment_method, loan_amount, monthly_repayment_amount, repayment_periods, is_term_loan):
 

@@ -1,24 +1,11 @@
 // Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on("Pledge", {
-
-	loan_security: function(frm, cdt, cdn) {
-		let row = locals[cdt][cdn];
-		frappe.call({
-			method: "erpnext.loan_management.doctype.loan_security_price.loan_security_price.get_loan_security_price",
-			args: {
-				loan_security: row.loan_security
-			},
-			callback: function(r) {
-				frappe.model.set_value(cdt, cdn, 'loan_security_price', r.message);
-			}
-		})
-	},
-
-	qty: function(frm, cdt, cdn) {
+frappe.ui.form.on('Loan Security Pledge', {
+	calculate_amounts: function(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, 'amount', row.qty * row.loan_security_price);
+		frappe.model.set_value(cdt, cdn, 'post_haircut_amount', row.amount - (row.amount * row.haircut/100));
 
 		let amount = 0;
 		let maximum_amount = 0;
@@ -30,4 +17,24 @@ frappe.ui.form.on("Pledge", {
 		frm.set_value('total_security_value', amount);
 		frm.set_value('maximum_loan_value', maximum_amount);
 	}
+});
+
+frappe.ui.form.on("Pledge", {
+	loan_security: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		frappe.call({
+			method: "erpnext.loan_management.doctype.loan_security_price.loan_security_price.get_loan_security_price",
+			args: {
+				loan_security: row.loan_security
+			},
+			callback: function(r) {
+				frappe.model.set_value(cdt, cdn, 'loan_security_price', r.message);
+				frm.events.calculate_amounts(frm, cdt, cdn);
+			}
+		})
+	},
+
+	qty: function(frm, cdt, cdn) {
+		frm.events.calculate_amounts(frm, cdt, cdn);
+	},
 });

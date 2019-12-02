@@ -754,7 +754,7 @@ class SalarySlip(TransactionBase):
 
 		for loan in self.get_loan_details():
 
-			amounts = calculate_amounts(loan.name, self.posting_date, loan.loan_type, "Regular Payment")
+			amounts = calculate_amounts(loan.name, self.posting_date, "Regular Payment")
 
 			total_payment = amounts['interest_amount'] + amounts['payable_principal_amount']
 
