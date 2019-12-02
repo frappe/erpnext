@@ -194,8 +194,9 @@ class JobCard(Document):
 		if self.total_completed_qty <= 0.0:
 			frappe.throw(_("Total completed qty must be greater than zero"))
 
-		if self.total_completed_qty > self.for_quantity:
-			frappe.throw(_("Total completed qty can not be greater than for quantity"))
+		if self.total_completed_qty != self.for_quantity:
+			frappe.throw(_("The total completed qty({0}) must be equal to qty to manufacture({1})"
+				.format(frappe.bold(self.total_completed_qty),frappe.bold(self.for_quantity))))
 
 	def update_work_order(self):
 		if not self.work_order:
@@ -271,6 +272,8 @@ class JobCard(Document):
 		self.set_status(update_status)
 
 	def set_status(self, update_status=False):
+		if self.status == "On Hold": return
+
 		self.status = {
 			0: "Open",
 			1: "Submitted",
@@ -329,6 +332,7 @@ def make_stock_entry(source_name, target_doc=None):
 		target.fg_completed_qty = source.get('for_quantity', 0) - source.get('transferred_qty', 0)
 		target.calculate_rate_and_amount()
 		target.set_missing_values()
+		target.set_stock_entry_type()
 
 	doclist = get_mapped_doc("Job Card", source_name, {
 		"Job Card": {
@@ -353,3 +357,45 @@ def make_stock_entry(source_name, target_doc=None):
 
 def time_diff_in_minutes(string_ed_date, string_st_date):
 	return time_diff(string_ed_date, string_st_date).total_seconds() / 60
+
+@frappe.whitelist()
+def get_job_details(start, end, filters=None):
+	events = []
+
+	event_color = {
+		"Completed": "#cdf5a6",
+		"Material Transferred": "#ffdd9e",
+		"Work In Progress": "#D3D3D3"
+	}
+
+	from frappe.desk.reportview import get_filters_cond
+	conditions = get_filters_cond("Job Card", filters, [])
+
+	job_cards = frappe.db.sql(""" SELECT `tabJob Card`.name, `tabJob Card`.work_order,
+			`tabJob Card`.employee_name, `tabJob Card`.status, ifnull(`tabJob Card`.remarks, ''), 
+			min(`tabJob Card Time Log`.from_time) as from_time,
+			max(`tabJob Card Time Log`.to_time) as to_time
+		FROM `tabJob Card` , `tabJob Card Time Log`
+		WHERE
+			`tabJob Card`.name = `tabJob Card Time Log`.parent {0}
+			group by `tabJob Card`.name""".format(conditions), as_dict=1)
+
+	for d in job_cards:
+			subject_data = []
+			for field in ["name", "work_order", "remarks", "employee_name"]:
+				if not d.get(field): continue
+
+				subject_data.append(d.get(field))
+
+			color = event_color.get(d.status)
+			job_card_data = {
+				'from_time': d.from_time,
+				'to_time': d.to_time,
+				'name': d.name,
+				'subject': '\n'.join(subject_data),
+				'color': color if color else "#89bcde"
+			}
+
+			events.append(job_card_data)
+
+	return events
