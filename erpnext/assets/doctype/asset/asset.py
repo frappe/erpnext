@@ -517,15 +517,18 @@ def update_maintenance_status():
 			asset.set_status('Out of Order')
 
 def make_post_gl_entry():
-	if not is_cwip_accounting_enabled(self.asset_category):
-		return
 
-	assets = frappe.db.sql_list(""" select name from `tabAsset`
-		where ifnull(booked_fixed_asset, 0) = 0 and available_for_use_date = %s""", nowdate())
+	asset_categories = frappe.db.get_all('Asset Category', fields = ['name', 'enable_cwip_accounting'])
 
-	for asset in assets:
-		doc = frappe.get_doc('Asset', asset)
-		doc.make_gl_entries()
+	for asset_category in asset_categories:
+		if cint(asset_category.enable_cwip_accounting):
+			assets = frappe.db.sql_list(""" select name from `tabAsset`
+				where asset_category = %s and ifnull(booked_fixed_asset, 0) = 0
+				and available_for_use_date = %s""", (asset_category.name, nowdate()))
+
+			for asset in assets:
+				doc = frappe.get_doc('Asset', asset)
+				doc.make_gl_entries()
 
 def get_asset_naming_series():
 	meta = frappe.get_meta('Asset')
