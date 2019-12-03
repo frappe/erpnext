@@ -61,7 +61,7 @@ class CompensatoryLeaveRequest(Document):
 
 			else:
 				leave_allocation = self.create_leave_allocation(leave_period, date_difference)
-			self.db_set("leave_allocation", leave_allocation.name)
+			self.leave_allocation=leave_allocation.name
 		else:
 			frappe.throw(_("There is no leave period in between {0} and {1}").format(self.work_from_date, self.work_end_date))
 
