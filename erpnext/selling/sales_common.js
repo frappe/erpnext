@@ -309,7 +309,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					child: item,
 					args: {
 						"batch_no": item.batch_no,
-						"stock_qty": item.stock_qty,
+						"stock_qty": item.stock_qty || item.qty, //if stock_qty field is not available fetch qty (in case of Packed Items table)
 						"warehouse": item.warehouse,
 						"item_code": item.item_code,
 						"has_serial_no": has_serial_no

@@ -551,6 +551,7 @@ erpnext.work_order = {
 					if (!r.exe) {
 						frm.set_value("wip_warehouse", r.message.wip_warehouse);
 						frm.set_value("fg_warehouse", r.message.fg_warehouse);
+						frm.set_value("scrap_warehouse", r.message.scrap_warehouse);
 					}
 				}
 			});
