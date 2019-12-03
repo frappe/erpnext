@@ -357,14 +357,11 @@ def get_customer_wise_price_list():
 
 def get_bin_data(pos_profile):
 	itemwise_bin_data = {}
-	cond = "1=1"
+	filters = { 'actual_qty': ['>', 0] }
 	if pos_profile.get('warehouse'):
-		cond = "warehouse = %(warehouse)s"
+		filters.update({ 'warehouse': pos_profile.get('warehouse') })
 
-	bin_data = frappe.db.sql(""" select item_code, warehouse, actual_qty from `tabBin`
-		where actual_qty > 0 and {cond}""".format(cond=cond), {
-			'warehouse': frappe.db.escape(pos_profile.get('warehouse'))
-		}, as_dict=1)
+	bin_data = frappe.db.get_all('Bin', fields = ['item_code', 'warehouse', 'actual_qty'], filters=filters)
 
 	for bins in bin_data:
 		if bins.item_code not in itemwise_bin_data:
