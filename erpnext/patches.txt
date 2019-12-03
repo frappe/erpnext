@@ -647,3 +647,4 @@ erpnext.patches.v12_0.update_owner_fields_in_acc_dimension_custom_fields
 erpnext.patches.v12_0.set_default_for_add_taxes_from_item_tax_template
 erpnext.patches.v12_0.remove_denied_leaves_from_leave_ledger
 erpnext.patches.v12_0.update_price_or_product_discount
+erpnext.patches.v12_0.set_production_capacity_in_workstation
