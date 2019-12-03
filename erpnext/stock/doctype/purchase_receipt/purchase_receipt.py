@@ -86,13 +86,14 @@ class PurchaseReceipt(BuyingController):
 			self.status_updater.append({
 				'source_dt': 'Purchase Receipt Item',
 				'target_dt': 'Purchase Receipt Item',
-				'join_field': 'dn_detail',
+				'join_field': 'pr_detail',
 				'target_field': '(billed_qty + returned_qty)',
 				'update_children': False,
 				'target_ref_field': 'qty',
 				'target_parent_dt': 'Purchase Receipt',
 				'target_parent_field': 'per_completed',
-				'percent_join_name': self.return_against
+				'percent_join_name': self.return_against,
+				'no_tolerance': 1
 			})
 			self.status_updater.append({
 				'source_dt': 'Purchase Receipt Item',

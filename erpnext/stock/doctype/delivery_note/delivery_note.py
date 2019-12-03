@@ -109,7 +109,8 @@ class DeliveryNote(SellingController):
 				'target_ref_field': 'qty',
 				'target_parent_dt': 'Delivery Note',
 				'target_parent_field': 'per_completed',
-				'percent_join_name': self.return_against
+				'percent_join_name': self.return_against,
+				'no_tolerance': 1
 			})
 			self.status_updater.append({
 				'source_dt': 'Delivery Note Item',

@@ -80,6 +80,15 @@ class PurchaseInvoice(BuyingController):
 			'target_parent_dt': 'Purchase Order',
 			'target_parent_field': 'per_completed',
 			'percent_join_field': 'purchase_order'
+		},
+		{
+			'source_dt': 'Purchase Invoice Item',
+			'target_dt': 'Purchase Receipt Item',
+			'join_field': 'pr_detail',
+			'target_field': '(billed_qty + returned_qty)',
+			'update_children': False,
+			'target_ref_field': 'qty',
+			'no_tolerance': 1
 		}]
 
 	def update_status_updater_args(self):

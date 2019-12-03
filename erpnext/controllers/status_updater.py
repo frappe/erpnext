@@ -195,6 +195,13 @@ class StatusUpdater(Document):
 				if d.doctype == args['source_dt'] and d.get(args["join_field"]):
 					args['name'] = d.get(args['join_field'])
 
+					if "ignore_overflow" in args:
+						if callable(args['ignore_overflow']):
+							if args['ignore_overflow'](d):
+								continue
+						elif args['ignore_overflow']:
+							continue
+
 					# get all qty where qty > target_field
 					item = frappe.db.sql("""select item_code, `{target_ref_field}`,
 						{target_field}, parenttype, parent from `tab{target_dt}`

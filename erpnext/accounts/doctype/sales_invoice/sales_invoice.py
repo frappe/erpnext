@@ -83,6 +83,15 @@ class SalesInvoice(SellingController):
 			'target_parent_dt': 'Sales Order',
 			'target_parent_field': 'per_completed',
 			'percent_join_field': 'sales_order'
+		},
+		{
+			'source_dt': 'Sales Invoice Item',
+			'target_dt': 'Delivery Note Item',
+			'join_field': 'dn_detail',
+			'target_field': '(billed_qty + returned_qty)',
+			'update_children': False,
+			'target_ref_field': 'qty',
+			'no_tolerance': 1
 		}]
 
 	def update_status_updater_args(self):
