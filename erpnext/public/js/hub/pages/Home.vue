@@ -66,7 +66,7 @@ export default {
 					based_on: 'creation'
 				},{
 					name:'Popularity',
-					based_on: 'rating'
+					based_on: 'view count'
 				}],
 			active_sort: {},
 			outside_click: true
@@ -124,8 +124,9 @@ export default {
 		},
 
 		get_sorted_data() {
-			hub.call('get_items', {
-				order_by: this.active_sort.based_on +' '+ (this.active_sort.asc? 'asc': 'desc'),
+			hub.call('get_sorted_data', {
+				based_on: this.active_sort.based_on,
+				sort_key: (this.active_sort.asc? 'asc': 'desc'),
 				limit: 50
 			})
 			.then((items) => {

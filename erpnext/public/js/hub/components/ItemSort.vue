@@ -1,6 +1,6 @@
 <template>
 	<div class="item-sort">
-		<button @click="asc = !asc"
+		<button @click="change_sort"
 			:class="['sort-grp',
 				'material-icons',
 				{'icon-flipped': this.asc}]">
@@ -79,6 +79,13 @@
 				this.showMenu = !this.showMenu;
 			},
 
+			change_sort() {
+				this.asc = !this.asc;
+				if (this.selected !== 'Sort By') {
+					this.update_option(this.selected)
+				}
+			},
+
 			clickHandler(event) {
 				const { target } = event;
 				const { $el } = this;
@@ -92,7 +99,6 @@
 </script>
 
 <style scoped>
-
 @font-face {
 	font-family: 'Material Icons';
 	font-style: normal;
