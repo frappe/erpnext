@@ -238,6 +238,8 @@ frappe.ui.form.on('Stock Entry', {
 			}, __("Get items from"));
 		}
 
+		frm.events.show_bom_custom_button(frm);
+
 		if (frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
@@ -253,13 +255,7 @@ frappe.ui.form.on('Stock Entry', {
 
 	stock_entry_type: function(frm){
 		frm.remove_custom_button('Bill of Materials', "Get items from");
-
-		if (frm.doc.docstatus === 0 &&
-			['Material Issue', 'Material Receipt', 'Material Transfer', 'Send to Subcontractor'].includes(frm.doc.purpose)) {
-				frm.add_custom_button(__('Bill of Materials'), function() {
-					frm.events.get_items_from_bom(frm);
-				}, __("Get items from"));
-		}
+		frm.events.show_bom_custom_button(frm);
 	},
 
 	purpose: function(frm) {
@@ -398,6 +394,15 @@ frappe.ui.form.on('Stock Entry', {
 		}
 	},
 
+	show_bom_custom_button: function(frm){
+		if (frm.doc.docstatus === 0 &&
+			['Material Issue', 'Material Receipt', 'Material Transfer', 'Send to Subcontractor'].includes(frm.doc.purpose)) {
+				frm.add_custom_button(__('Bill of Materials'), function() {
+					frm.events.get_items_from_bom(frm);
+				}, __("Get items from"));
+		}
+	},
+
 	get_items_from_bom: function(frm) {
 		let filters = function(){
 			return {filters: { docstatus:1 }};
@@ -417,11 +422,11 @@ frappe.ui.form.on('Stock Entry', {
 			{"fieldname":"fetch", "label":__("Get Items from BOM"), "fieldtype":"Button"}
 		]
 
-		//Exclude field 'Target Warehouse' in case of Material Issue
+		// Exclude field 'Target Warehouse' in case of Material Issue
 		if (frm.doc.purpose == 'Material Issue'){
 			fields.splice(2,1);
 		}
-		//Exclude field 'Source Warehouse' in case of Material Receipt
+		// Exclude field 'Source Warehouse' in case of Material Receipt
 		else if(frm.doc.purpose == 'Material Receipt'){
 			fields.splice(1,1);
 		}
