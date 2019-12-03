@@ -569,7 +569,7 @@ def get_stock_and_account_balance(account=None, posting_date=None, company=None)
 
 	warehouse_account = get_warehouse_account_map(company)
 
-	account_balance = get_balance_on(account, posting_date, in_account_currency=False)
+	account_balance = get_balance_on(account, posting_date, in_account_currency=False, ignore_account_permission=True)
 
 	related_warehouses = [wh for wh, wh_details in warehouse_account.items()
 		if wh_details.account == account and not wh_details.is_group]
@@ -630,7 +630,7 @@ def get_held_invoices(party_type, party):
 			'select name from `tabPurchase Invoice` where release_date IS NOT NULL and release_date > CURDATE()',
 			as_dict=1
 		)
-		held_invoices = [d['name'] for d in held_invoices]
+		held_invoices = set([d['name'] for d in held_invoices])
 
 	return held_invoices
 
@@ -639,14 +639,19 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
-	if erpnext.get_party_account_type(party_type) == 'Receivable':
+	if account:
+		root_type = frappe.get_cached_value("Account", account, "root_type")
+		party_account_type = "Receivable" if root_type == "Asset" else "Payable"
+	else:
+		party_account_type = erpnext.get_party_account_type(party_type)
+
+	if party_account_type == 'Receivable':
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 		payment_dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 	else:
 		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 		payment_dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 
-	invoice = 'Sales Invoice' if erpnext.get_party_account_type(party_type) == 'Receivable' else 'Purchase Invoice'
 	held_invoices = get_held_invoices(party_type, party)
 
 	invoice_list = frappe.db.sql("""
@@ -665,7 +670,6 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 		group by voucher_type, voucher_no
 		order by posting_date, name""".format(
 			dr_or_cr=dr_or_cr,
-			invoice = invoice,
 			condition=condition or ""
 		), {
 			"party_type": party_type,
