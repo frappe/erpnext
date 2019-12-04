@@ -3,7 +3,9 @@
 		class="marketplace-page"
 		:data-page-name="page_name"
 	>
+
 		<search-input
+			class="home-page-search"
 			:placeholder="search_placeholder"
 			:on_search="set_search_route"
 			v-model="search_value"
@@ -153,4 +155,9 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+	.home-page-search {
+			width: 75%;
+			display: inline-block;
+		}
+</style>
