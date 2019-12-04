@@ -31,7 +31,8 @@ function ItemPublishDialog(primary_action, secondary_action) {
 	hub.call('get_categories')
 		.then(categories => {
 			categories = categories.map(d => d.name);
-			dialog.fields_dict.hub_category.set_data(categories);
+			dialog.fields_dict.hub_category.df.options = categories;
+			dialog.fields_dict.hub_category.set_options();
 		});
 
 	return dialog;
