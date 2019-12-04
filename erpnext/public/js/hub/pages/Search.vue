@@ -42,7 +42,7 @@ export default {
 	computed: {
 		page_title() {
 			return this.items.length
-				? __(`Results for "${this.search_value}" ${this.category!=='All'? `in category ${this.category}`: ''}`)
+				? __(`Results for "${this.search_value}" ${this.category !== 'All'? `in category ${this.category}` : ''}`)
 				: __('No Items found.');
 		}
 	},
@@ -52,9 +52,10 @@ export default {
 	methods: {
 		get_items() {
 			if (this.category !== 'All') {
-				this.filters['hub_category']=this.category;
+				this.filters['hub_category'] = this.category;
 			}
-			hub.call('get_items', { keyword: this.search_value,
+			hub.call('get_items', {
+				keyword: this.search_value,
 				filters: this.filters
 			})
 			.then((items) => {
