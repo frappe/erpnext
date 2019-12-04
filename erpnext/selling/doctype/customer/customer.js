@@ -12,7 +12,8 @@ frappe.ui.form.on("Customer", {
 			'Opportunity': () => erpnext.utils.create_new_doc('Opportunity', {
 				'opportunity_from': frm.doc.doctype,
 				'party_name': frm.doc.name
-			})
+			}),
+			'Test': () => console.log("Test")
 		}
 
 		frm.add_fetch('lead_name', 'company_name', 'customer_name');

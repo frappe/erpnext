@@ -133,7 +133,7 @@ class Opportunity(TransactionBase):
 			select q.name
 			from `tabQuotation` q, `tabQuotation Item` qi
 			where q.name = qi.parent and q.docstatus=1
-				and qi.prevdoc_docname =%s and q.status = 'Lost'
+				and q.status = 'Lost'
 			""", self.name)
 		if lost_quotation:
 			if self.has_active_quotation():
