@@ -128,11 +128,11 @@ frappe.ui.form.on("Expense Claim", {
 		frm.add_fetch("company", "cost_center", "cost_center");
 		frm.add_fetch("company", "default_expense_claim_payable_account", "payable_account");
 
-		frm.set_query("employee_advance", "advances", function(doc) {
+		frm.set_query("employee_advance", "advances", function() {
 			return {
 				filters: [
 					['docstatus', '=', 1],
-					['employee', '=', doc.employee],
+					['employee', '=', frm.doc.employee],
 					['paid_amount', '>', 0],
 					['paid_amount', '>', 'claimed_amount']
 				]
@@ -149,16 +149,16 @@ frappe.ui.form.on("Expense Claim", {
 			};
 		});
 
-		frm.set_query("account_head", "taxes", function(doc) {
+		frm.set_query("account_head", "taxes", function() {
 			return {
 				filters: [
-					['company', '=', doc.company],
+					['company', '=', frm.doc.company],
 					['account_type', 'in', ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation"]]
 				]
 			};
 		});
 
-		frm.set_query("cost_center", "expenses", function(doc) {
+		frm.set_query("cost_center", "expenses", function() {
 			return {
 				filters: {
 					"company": frm.doc.company,
@@ -181,7 +181,7 @@ frappe.ui.form.on("Expense Claim", {
 		frm.set_query("task", function() {
 			return {
 				filters: {
-					'project': doc.project
+					'project': frm.doc.project
 				}
 			};
 		});
