@@ -67,7 +67,6 @@ class Quotation(SellingController):
 			opportunity = self.opportunity
 
 		opp = frappe.get_doc("Opportunity", opportunity)
-		opp.status = None
 		opp.set_status(update=True)
 
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
