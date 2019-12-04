@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from pprint import pprint
 import frappe
 from frappe.utils import flt
 from frappe import _
@@ -138,7 +137,7 @@ def get_department_leave_approver_map(department=None):
 
 def get_total_leave_allocated_map(filters):
 	query = """SELECT SUM(total_leaves_allocated) as total_leave_allocated, employee,
-	leave_type FROM `tabLeave Allocation` WHERE from_date >= '{0}' GROUP BY employee, leave_type""".format(filters.get("from_date"))
+	leave_type FROM `tabLeave Allocation` WHERE from_date >= '{0}' and from_date <= '{1}' GROUP BY employee, leave_type""".format(filters.get("from_date"), filters.get("to_date"))
 
 	total_leave_allocated_map = frappe._dict()
 	total_leave_allocated = frappe.db.sql(query, as_dict = 1)

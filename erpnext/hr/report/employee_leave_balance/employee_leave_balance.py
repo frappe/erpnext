@@ -9,7 +9,7 @@ from erpnext.hr.doctype.leave_application.leave_application \
 	import get_leave_balance_on, get_leaves_for_period
 
 from erpnext.hr.report.employee_leave_balance_summary.employee_leave_balance_summary \
-	import get_department_leave_approver_map
+	import get_department_leave_approver_map, get_total_leave_allocated_map
 
 def execute(filters=None):
 	leave_types = frappe.db.sql_list("select name from `tabLeave Type` order by name asc")
@@ -28,6 +28,7 @@ def get_columns(leave_types):
 
 	for leave_type in leave_types:
 		columns.append(_(leave_type) + " " + _("Opening") + ":Float:160")
+		columns.append(_(leave_type) + " " + _("Allocated") + ":Float:160")
 		columns.append(_(leave_type) + " " + _("Taken") + ":Float:160")
 		columns.append(_(leave_type) + " " + _("Balance") + ":Float:160")
 
@@ -59,6 +60,7 @@ def get_data(filters, leave_types):
 	department_approver_map = get_department_leave_approver_map(filters.get('department'))
 
 	data = []
+	total_leave_allocated_map = get_total_leave_allocated_map(filters)
 	for employee in active_employees:
 		leave_approvers = department_approver_map.get(employee.department_name, [])
 		if employee.leave_approver:
@@ -72,13 +74,16 @@ def get_data(filters, leave_types):
 				leaves_taken = get_leaves_for_period(employee.name, leave_type,
 					filters.from_date, filters.to_date) * -1
 
+				# Leaves allocated within the period
+				allocated = total_leave_allocated_map.get((leave_type, employee.name), 0)
+
 				# opening balance
 				opening = get_leave_balance_on(employee.name, leave_type, filters.from_date)
 
 				# closing balance
 				closing = get_leave_balance_on(employee.name, leave_type, filters.to_date)
 
-				row += [opening, leaves_taken, closing]
+				row += [opening, allocated, leaves_taken, closing]
 
 			data.append(row)
 

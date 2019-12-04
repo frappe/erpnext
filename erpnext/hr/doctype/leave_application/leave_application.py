@@ -454,7 +454,6 @@ def get_leave_balance_on(employee, leave_type, date, to_date=None, consider_all_
 		:param to_date: future date to check for allocation expiry
 		:param consider_all_leaves_in_the_allocation_period: consider all leaves taken till the allocation end date
 	'''
-
 	if not to_date:
 		to_date = nowdate()
 
