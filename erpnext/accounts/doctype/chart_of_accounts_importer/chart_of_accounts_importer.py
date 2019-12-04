@@ -185,7 +185,8 @@ def validate_account_types(accounts):
 		return _("Please identify/create Account (Ledger) for type - {0}").format(' , '.join(missing))
 
 	account_types_for_group = ["Bank", "Cash", "Stock"]
-	account_groups = [accounts[d]["account_type"] for d in accounts if accounts[d]['is_group'] not in ('', 1)]
+	# fix logic bug
+	account_groups = [accounts[d]["account_type"] for d in accounts if accounts[d]['is_group'] == 1]
 
 	missing = list(set(account_types_for_group) - set(account_groups))
 	if missing:
