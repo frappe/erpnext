@@ -1,0 +1,22 @@
+{
+ "add_more_button": 0,
+ "app": "ERPNext",
+ "creation": "2019-12-03 23:02:54.308213",
+ "docstatus": 0,
+ "doctype": "Onboarding Slide",
+ "domains": [],
+ "help_links": [],
+ "idx": 0,
+ "image_src": "/assets/erpnext/images/illustrations/desk-onboard.png",
+ "max_count": 3,
+ "modified": "2019-12-03 23:10:54.704965",
+ "modified_by": "Administrator",
+ "name": "Welcome Back to ERPNext!",
+ "owner": "Administrator",
+ "slide_desc": "Let's begin from where you left!",
+ "slide_fields": [],
+ "slide_module": "Setup",
+ "slide_order": 0,
+ "slide_title": "Welcome Back to ERPNext!",
+ "slide_type": "Continue"
+}
