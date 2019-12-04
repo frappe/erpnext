@@ -514,10 +514,6 @@ class WorkOrder(Document):
 						'item': d.item_code
 					})[0][0]
 
-			if backflush_based_on == "BOM" and (flt(transferred_qty) > d.required_qty):
-				frappe.throw(_("Row {0}: For item {1}, transferred qty ({2}) cannot be greater than required qty ({3}) in Work Order {4}")
-					.format(d.idx, d.item_code, transferred_qty, d.required_qty, self.name), StockOverProductionError)
-
 			d.db_set('transferred_qty', flt(transferred_qty), update_modified = False)
 
 	def update_consumed_qty_for_required_items(self):
