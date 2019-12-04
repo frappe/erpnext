@@ -1716,6 +1716,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	against_blanket_order: function(doc, cdt, cdn) {
+		var item = locals[cdt][cdn];
+		if(!item.against_blanket_order) {
+			frappe.model.set_value(this.frm.doctype + " Item", item.name, "blanket_order", null);
+			frappe.model.set_value(this.frm.doctype + " Item", item.name, "blanket_order_rate", 0.00);
+		}
+	},
+
 	blanket_order: function(doc, cdt, cdn) {
 		var me = this;
 		var item = locals[cdt][cdn];
