@@ -79,6 +79,36 @@ frappe.ui.form.on('Delivery Trip', {
 		}, () => {
 			frm.reload_doc();
 		});
+	},
+
+	driver: function (frm) {
+		if (frm.doc.driver) {
+			frappe.db.get_value("Delivery Trip", {
+				docstatus: ["<", 2],
+				driver: frm.doc.driver,
+				departure_time: [">", frappe.datetime.nowdate()]
+			}, "name", (r) => {
+				if (r) {
+					let confirm_message = `${frm.doc.driver_name} has already been assigned a Delivery Trip
+											today (${r.name}). Do you want to modify that instead?`;
+
+					frappe.confirm(__(confirm_message), function () {
+						frappe.set_route("Form", "Delivery Trip", r.name);
+					});
+				};
+			});
+
+			frappe.call({
+				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.get_driver_email",
+				args: {
+					driver: frm.doc.driver
+				},
+				callback: (data) => {
+					frm.set_value("driver_email", data.message.email);
+				}
+			});
+		};
+	},
 
 	},
 
