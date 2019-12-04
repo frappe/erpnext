@@ -107,9 +107,11 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 			response.raise_for_status()
 			value = response.json()["rates"][to_currency]
 			cache.setex(key, value, 6 * 60 * 60)
+			print(from_currency, to_currency, value, response.json())
 		return flt(value)
-	except:
+	except Exception, e:
 		frappe.log_error(title="Get Exchange Rate")
+		print(from_currency, to_currency, e, "Errrrooooorrr")
 		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually").format(from_currency, to_currency, transaction_date))
 		return 0.0
 
