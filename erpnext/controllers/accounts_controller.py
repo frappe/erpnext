@@ -61,7 +61,6 @@ class AccountsController(TransactionBase):
 						_('{0} is blocked so this transaction cannot proceed'.format(supplier_name)), raise_exception=1)
 
 	def validate(self):
-
 		if not self.get('is_return'):
 			self.validate_qty_is_not_zero()
 
@@ -100,10 +99,22 @@ class AccountsController(TransactionBase):
 
 			if self.is_return:
 				self.validate_qty()
+			else:
+				self.validate_deferred_start_and_end_date()
 
 		validate_regional(self)
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
+
+	def validate_deferred_start_and_end_date(self):
+		for d in self.items:
+			if d.get("enable_deferred_revenue") or d.get("enable_deferred_expense"):
+				if not (d.service_start_date and d.service_end_date):
+					frappe.throw(_("Row #{0}: Service Start and End Date is required for deferred accounting").format(d.idx))
+				elif getdate(d.service_start_date) > getdate(d.service_end_date):
+					frappe.throw(_("Row #{0}: Service Start Date cannot be greater than Service End Date").format(d.idx))
+				elif getdate(self.posting_date) > getdate(d.service_end_date):
+					frappe.throw(_("Row #{0}: Service End Date cannot be before Invoice Posting Date").format(d.idx))
 
 	def validate_invoice_documents_schedule(self):
 		self.validate_payment_schedule_dates()
@@ -415,9 +426,10 @@ class AccountsController(TransactionBase):
 		return gl_dict
 
 	def validate_qty_is_not_zero(self):
-		for item in self.items:
-			if not item.qty:
-				frappe.throw(_("Item quantity can not be zero"))
+		if self.doctype != "Purchase Receipt":
+			for item in self.items:
+				if not item.qty:
+					frappe.throw(_("Item quantity can not be zero"))
 
 	def validate_account_currency(self, account, account_currency=None):
 		valid_currency = [self.company_currency]
