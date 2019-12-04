@@ -114,7 +114,7 @@ def get_data(filters):
 	data = []
 
 	conditions = get_conditions(filters)
-	depreciation_amount_map = get_finance_book_value_map(filters.finance_book, filters.date)
+	depreciation_amount_map = get_finance_book_value_map(filters.date, filters.finance_book)
 	pr_supplier_map = get_purchase_receipt_supplier_map()
 	pi_supplier_map = get_purchase_invoice_supplier_map()
 
@@ -146,7 +146,9 @@ def get_data(filters):
 
 	return data
 
-def get_finance_book_value_map(finance_book='', date=today()):
+def get_finance_book_value_map(date, finance_book=''):
+	if not date:
+		date = today()
 	return frappe._dict(frappe.db.sql(''' Select
 		parent, SUM(depreciation_amount)
 		FROM `tabDepreciation Schedule`
