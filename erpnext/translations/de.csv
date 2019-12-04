@@ -1329,7 +1329,7 @@ apps/erpnext/erpnext/hr/doctype/job_offer/job_offer.js,Create Employee,Mitarbeit
 apps/erpnext/erpnext/utilities/transaction_base.py,Invalid Posting Time,Ungültige Buchungszeit
 DocType: Salary Component,Condition and Formula,Zustand und Formel
 DocType: Lead,Campaign Name,Kampagnenname
-apps/erpnext/erpnext/setup/default_energy_point_rules.py,On Task Completion,Bei Abschluss der Aufgabe
+apps/erpnext/erpnext/setup/default_energy_point_rules.py,On Task Completion,Bei Abschluss des Vorgangs
 apps/erpnext/erpnext/hr/doctype/compensatory_leave_request/compensatory_leave_request.py,There is no leave period in between {0} and {1},Es gibt keinen Urlaub zwischen {0} und {1}
 DocType: Fee Validity,Healthcare Practitioner,praktischer Arzt
 DocType: Hotel Room,Capacity,Kapazität
@@ -1353,7 +1353,7 @@ DocType: Payment Entry,Received Amount (Company Currency),Erhaltene Menge (Gesel
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Cancelled. Please check your GoCardless Account for more details,Zahlung abgebrochen. Bitte überprüfen Sie Ihr GoCardless Konto für weitere Details
 DocType: Work Order,Skip Material Transfer to WIP Warehouse,Überspringen Sie die Materialübertragung in das WIP-Lager
 DocType: Contract,N/A,nicht verfügbar
-DocType: Task Type,Task Type,Aufgabentyp
+DocType: Task Type,Task Type,Vorgangstyp
 DocType: Topic,Topic Content,Themeninhalt
 DocType: Delivery Settings,Send with Attachment,Senden mit Anhang
 DocType: Service Level,Priorities,Prioritäten
@@ -2449,7 +2449,7 @@ apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js,Please select b
 DocType: Asset,Depreciation Schedules,Abschreibungen Termine
 apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.js,Create Sales Invoice,Verkaufsrechnung erstellen
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Ineligible ITC,Nicht förderfähiges ITC
-DocType: Task,Dependent Tasks,Abhängige Aufgaben
+DocType: Task,Dependent Tasks,Abhängige Vorgänge
 apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.py,Following accounts might be selected in GST Settings:,In den GST-Einstellungen können folgende Konten ausgewählt werden:
 apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.js,Quantity to Produce,Menge zu produzieren
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Application period cannot be outside leave allocation period,Beantragter Zeitraum kann nicht außerhalb der beantragten Urlaubszeit liegen
@@ -2846,7 +2846,7 @@ DocType: Loan,Applicant Type,Bewerbertyp
 DocType: Purchase Invoice,03-Deficiency in services,03-Mangel an Dienstleistungen
 DocType: Healthcare Settings,Default Medical Code Standard,Default Medical Code Standard
 DocType: Purchase Invoice Item,HSN/SAC,HSN / SAC
-DocType: Project Template Task,Project Template Task,Projektvorlagenaufgabe
+DocType: Project Template Task,Project Template Task,Projektvorgangsvorlage
 DocType: Accounts Settings,Over Billing Allowance (%),Mehr als Abrechnungsbetrag (%)
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Purchase Receipt {0} is not submitted,Kaufbeleg {0} wurde nicht übertragen
 DocType: Company,Default Payable Account,Standard-Verbindlichkeitenkonto
@@ -3323,7 +3323,7 @@ DocType: Soil Texture,Silt,Schlick
 ,Qty to Order,Zu bestellende Menge
 DocType: Period Closing Voucher,"The account head under Liability or Equity, in which Profit/Loss will be booked","Der Kontenkopf unter Eigen- oder Fremdkapital, in dem Gewinn / Verlust verbucht wird"
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py,Another Budget record '{0}' already exists against {1} '{2}' and account '{3}' for fiscal year {4},Ein weiterer Budgeteintrag &#39;{0}&#39; existiert bereits für {1} &#39;{2}&#39; und für &#39;{3}&#39; für das Geschäftsjahr {4}
-apps/erpnext/erpnext/config/projects.py,Gantt chart of all tasks.,Gantt-Diagramm aller Aufgaben
+apps/erpnext/erpnext/config/projects.py,Gantt chart of all tasks.,Gantt-Diagramm aller Vorgänge
 DocType: Opportunity,Mins to First Response,Minuten zum First Response
 DocType: Pricing Rule,Margin Type,Margenart
 apps/erpnext/erpnext/projects/doctype/project/project_dashboard.html,{0} hours,{0} Stunden
@@ -3961,7 +3961,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Maintenance Sche
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py,Student LMS Activity,Student LMS Aktivität
 DocType: POS Profile,Applicable for Users,Anwendbar für Benutzer
 DocType: Supplier Quotation,PUR-SQTN-.YYYY.-,PUR-SQTN-.JJJJ.-
-apps/erpnext/erpnext/projects/doctype/project/project.js,Set Project and all Tasks to status {0}?,Projekt und alle Aufgaben auf Status {0} setzen?
+apps/erpnext/erpnext/projects/doctype/project/project.js,Set Project and all Tasks to status {0}?,Projekt und alle Vorgänge auf Status {0} setzen?
 DocType: Purchase Invoice,Set Advances and Allocate (FIFO),Vorschüsse setzen und zuordnen (FIFO)
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,No Work Orders created,Keine Arbeitsaufträge erstellt
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py,Salary Slip of employee {0} already created for this period,Gehaltsabrechnung der Mitarbeiter {0} für diesen Zeitraum bereits erstellt
@@ -4418,7 +4418,7 @@ DocType: Normal Test Items,Result Value,Ergebnis Wert
 DocType: Hotel Room,Hotels,Hotels
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js,New Cost Center Name,Neuer Kostenstellenname
 DocType: Leave Control Panel,Leave Control Panel,Urlaubsverwaltung
-DocType: Project,Task Completion,Aufgabenerledigung
+DocType: Project,Task Completion,Vorgangserfüllung
 apps/erpnext/erpnext/templates/generators/item/item_add_to_cart.html,Not in Stock,Nicht lagernd
 DocType: Volunteer,Volunteer Skills,Freiwillige Fähigkeiten
 DocType: Additional Salary,HR User,Nutzer Personalabteilung
@@ -5197,7 +5197,7 @@ DocType: Work Order,Material Transferred for Manufacturing,Material zur Herstell
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,Account {0} does not exists,Konto {0} existiert nicht
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,Select Loyalty Program,Wählen Sie Treueprogramm
 DocType: Project,Project Type,Projekttyp
-apps/erpnext/erpnext/projects/doctype/task/task.py,Child Task exists for this Task. You can not delete this Task.,Für diese Aufgabe existiert eine untergeordnete Aufgabe. Sie können diese Aufgabe daher nicht löschen.
+apps/erpnext/erpnext/projects/doctype/task/task.py,Child Task exists for this Task. You can not delete this Task.,Für diesen Vorgang existiert ein untergeordneter Vorgang. Sie können diese Aufgabe daher nicht löschen.
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py,Either target qty or target amount is mandatory.,Entweder Zielstückzahl oder Zielmenge ist zwingend erforderlich.
 apps/erpnext/erpnext/config/projects.py,Cost of various activities,Aufwendungen für verschiedene Tätigkeiten
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","Einstellen Events auf {0}, da die Mitarbeiter auf die beigefügten unter Verkaufs Personen keine Benutzer-ID {1}"
@@ -5597,7 +5597,7 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Paid 
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,{0} is not a valid Batch Number for Item {1},{0} ist keine gültige Chargennummer für Artikel {1}
 apps/erpnext/erpnext/shopping_cart/cart.py,Please enter valid coupon code !!,Bitte geben Sie einen gültigen Gutscheincode ein !!
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Note: There is not enough leave balance for Leave Type {0},Hinweis: Es gibt nicht genügend Urlaubsguthaben für Abwesenheitstyp {0}
-DocType: Task,Task Description,Aufgabenbeschreibung
+DocType: Task,Task Description,Vorgangsbeschreibung
 DocType: Training Event,Seminar,Seminar
 DocType: Program Enrollment Fee,Program Enrollment Fee,Programm Einschreibegebühr
 DocType: Item,Supplier Items,Lieferantenartikel
@@ -5754,7 +5754,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/pos.py,All Territories,Alle 
 DocType: Lost Reason Detail,Lost Reason Detail,Verlorene Begründung Detail
 apps/erpnext/erpnext/hr/utils.py,Please set leave policy for employee {0} in Employee / Grade record,Legen Sie die Abwesenheitsrichtlinie für den Mitarbeiter {0} im Mitarbeiter- / Notensatz fest
 apps/erpnext/erpnext/public/js/controllers/transaction.js,Invalid Blanket Order for the selected Customer and Item,Ungültiger Blankoauftrag für den ausgewählten Kunden und Artikel
-apps/erpnext/erpnext/projects/doctype/task/task_tree.js,Add Multiple Tasks,Mehrere Aufgaben hinzufügen
+apps/erpnext/erpnext/projects/doctype/task/task_tree.js,Add Multiple Tasks,Mehrere Vorgänge hinzufügen
 DocType: Purchase Invoice,Items,Artikel
 apps/erpnext/erpnext/crm/doctype/contract/contract.py,End Date cannot be before Start Date.,Das Enddatum darf nicht vor dem Startdatum liegen.
 apps/erpnext/erpnext/education/doctype/course_enrollment/course_enrollment.py,Student is already enrolled.,Student ist bereits eingetragen sind.
