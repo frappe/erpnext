@@ -269,7 +269,7 @@ def create_supplier(**args):
 				"link_doctype": "Supplier",
 				"link_name": existing_supplier_name
 			})
-			new_contact.insert()
+			new_contact.insert(ignore_mandatory=True)
 
 		return existing_supplier_name
 	else:
@@ -289,7 +289,7 @@ def create_supplier(**args):
 			"link_name": new_supplier.name
 		})
 
-		new_contact.insert()
+		new_contact.insert(ignore_mandatory=True)
 
 		return new_supplier.name
 
@@ -327,7 +327,7 @@ def create_address(**args):
 			"link_name": args.supplier_name
 		})
 		new_address_doc.address_type = "Billing"
-		new_address_doc.insert()
+		new_address_doc.insert(ignore_mandatory=True)
 		return new_address_doc.name
 	else:
 		return None
@@ -351,7 +351,7 @@ def create_purchase_invoice(**args):
 
 	try:
 		pi.set_missing_values()
-		pi.insert(ignore_permissions=True)
+		pi.insert(ignore_mandatory=True)
 		#if discount exists in file, apply any discount on grand total
 		if args.total_discount > 0:
 			pi.apply_discount_on = "Grand Total"
