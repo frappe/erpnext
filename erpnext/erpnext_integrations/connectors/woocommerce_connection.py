@@ -50,6 +50,7 @@ def _order(*args, **kwargs):
 		raw_billing_data = fd.get("billing")
 		metaDataList = fd.get("meta_data")
 		gstInclusive = "True"
+		customerID = None
 		for meta in metaDataList:
 			if meta.get("key") == "store_code":
 				customerID = meta.get("value")
