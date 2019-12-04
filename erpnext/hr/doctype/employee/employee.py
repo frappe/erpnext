@@ -153,7 +153,7 @@ class Employee(NestedSet):
 			throw(_("Date Of Retirement must be greater than Date of Joining"))
 
 		elif self.relieving_date and self.date_of_joining and (getdate(self.relieving_date) < getdate(self.date_of_joining)):
-			throw(_("Relieving Date must be greater than Date of Joining"))
+			throw(_("Relieving Date must be greater than or equal to Date of Joining"))
 
 		elif self.contract_end_date and self.date_of_joining and (getdate(self.contract_end_date) <= getdate(self.date_of_joining)):
 			throw(_("Contract End Date must be greater than Date of Joining"))
