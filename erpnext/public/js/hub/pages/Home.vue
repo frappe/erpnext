@@ -58,6 +58,11 @@ export default {
 		this.search_value = '';
 		this.get_items();
 	},
+	watch:{
+		$route (to, from){
+			this.get_items()
+		}
+	},
 	methods: {
 		get_items() {
 			hub.call('get_data_for_homepage', frappe.defaults ? {
