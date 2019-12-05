@@ -33,7 +33,7 @@ class Asset(AccountsController):
 		self.make_asset_movement()
 		if not self.booked_fixed_asset and is_cwip_accounting_enabled(self.asset_category):
 			self.make_gl_entries()
-		
+
 	def before_cancel(self):
 		self.cancel_auto_gen_movement()
 
@@ -43,7 +43,7 @@ class Asset(AccountsController):
 		self.set_status()
 		delete_gl_entries(voucher_type='Asset', voucher_no=self.name)
 		self.db_set('booked_fixed_asset', 0)
-	
+
 	def validate_asset_and_reference(self):
 		if self.purchase_invoice or self.purchase_receipt:
 			reference_doc = 'Purchase Invoice' if self.purchase_invoice else 'Purchase Receipt'
@@ -51,8 +51,8 @@ class Asset(AccountsController):
 			reference_doc = frappe.get_doc(reference_doc, reference_name)
 			if reference_doc.get('company') != self.company:
 				frappe.throw(_("Company of asset {0} and purchase document {1} doesn't matches.").format(self.name, reference_doc.get('name')))
-		
-		
+
+
 		if self.is_existing_asset and self.purchase_invoice:
 			frappe.throw(_("Purchase Invoice cannot be made against an existing asset {0}").format(self.name))
 
@@ -125,15 +125,17 @@ class Asset(AccountsController):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
 
 	def cancel_auto_gen_movement(self):
-		reference_docname = self.purchase_invoice or self.purchase_receipt
-		movement = frappe.db.get_all('Asset Movement', filters={ 'reference_name': reference_docname, 'docstatus': 1 })
-		if len(movement) > 1:
+		movements = frappe.db.sql(
+			"""SELECT asm.name, asm.docstatus
+			FROM `tabAsset Movement` asm, `tabAsset Movement Item` asm_item
+			WHERE asm_item.parent=asm.name and asm_item.asset=%s and asm.docstatus=1""", self.name, as_dict=1)
+		if len(movements) > 1:
 			frappe.throw(_('Asset has multiple Asset Movement Entries which has to be \
 				cancelled manually to cancel this asset.'))
-		movement = frappe.get_doc('Asset Movement', movement[0].get('name'))
+		movement = frappe.get_doc('Asset Movement', movements[0].get('name'))
 		movement.flags.ignore_validate = True
 		movement.cancel()
-		
+
 	def make_asset_movement(self):
 		reference_doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'
 		reference_docname = self.purchase_receipt or self.purchase_invoice
@@ -202,7 +204,7 @@ class Asset(AccountsController):
 				if has_pro_rata and n==0:
 					depreciation_amount, days, months = get_pro_rata_amt(d, depreciation_amount,
 						self.available_for_use_date, d.depreciation_start_date)
-					
+
 					# For first depr schedule date will be the start date
 					# so monthly schedule date is calculated by removing month difference between use date and start date
 					monthly_schedule_date = add_months(d.depreciation_start_date, - months + 1)
@@ -260,7 +262,7 @@ class Asset(AccountsController):
 							else:
 								date = add_months(monthly_schedule_date, r)
 								amount = depreciation_amount / month_range
-							
+
 							self.append("schedules", {
 								"schedule_date": date,
 								"depreciation_amount": amount,
@@ -515,15 +517,18 @@ def update_maintenance_status():
 			asset.set_status('Out of Order')
 
 def make_post_gl_entry():
-	if not is_cwip_accounting_enabled(self.asset_category):
-		return
 
-	assets = frappe.db.sql_list(""" select name from `tabAsset`
-		where ifnull(booked_fixed_asset, 0) = 0 and available_for_use_date = %s""", nowdate())
+	asset_categories = frappe.db.get_all('Asset Category', fields = ['name', 'enable_cwip_accounting'])
 
-	for asset in assets:
-		doc = frappe.get_doc('Asset', asset)
-		doc.make_gl_entries()
+	for asset_category in asset_categories:
+		if cint(asset_category.enable_cwip_accounting):
+			assets = frappe.db.sql_list(""" select name from `tabAsset`
+				where asset_category = %s and ifnull(booked_fixed_asset, 0) = 0
+				and available_for_use_date = %s""", (asset_category.name, nowdate()))
+
+			for asset in assets:
+				doc = frappe.get_doc('Asset', asset)
+				doc.make_gl_entries()
 
 def get_asset_naming_series():
 	meta = frappe.get_meta('Asset')
@@ -650,31 +655,18 @@ def make_journal_entry(asset_name):
 def make_asset_movement(assets, purpose=None):
 	import json
 	from six import string_types
-	
+
 	if isinstance(assets, string_types):
 		assets = json.loads(assets)
-	
+
 	if len(assets) == 0:
 		frappe.throw(_('Atleast one asset has to be selected.'))
 
 	asset_movement = frappe.new_doc("Asset Movement")
-	asset_movement.purpose = purpose
-	prev_reference_docname = ''
-
+	asset_movement.quantity = len(assets)
 	for asset in assets:
 		asset = frappe.get_doc('Asset', asset.get('name'))
-		# get PR/PI linked with asset
-		reference_docname = asset.get('purchase_receipt') if asset.get('purchase_receipt') \
-				else asset.get('purchase_invoice')
-		# checks if all the assets are linked with a single PR/PI
-		if prev_reference_docname == '':
-			prev_reference_docname = reference_docname
-		elif prev_reference_docname != reference_docname:
-			frappe.throw(_('Assets selected should belong to same reference document.'))
-
 		asset_movement.company = asset.get('company')
-		asset_movement.reference_doctype = 'Purchase Receipt' if asset.get('purchase_receipt') else 'Purchase Invoice'
-		asset_movement.reference_name = prev_reference_docname
 		asset_movement.append("assets", {
 			'asset': asset.get('name'),
 			'source_location': asset.get('location'),

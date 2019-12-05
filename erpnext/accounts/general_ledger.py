@@ -162,33 +162,34 @@ def validate_account_for_perpetual_inventory(gl_map):
 					frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
 						.format(account), StockAccountInvalidTransaction)
 
-			elif account_bal != stock_bal:
-				precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
-					currency=frappe.get_cached_value('Company',  gl_map[0].company,  "default_currency"))
+			# This has been comment for a temporary, will add this code again on release of immutable ledger
+			# elif account_bal != stock_bal:
+			# 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
+			# 		currency=frappe.get_cached_value('Company',  gl_map[0].company,  "default_currency"))
 
-				diff = flt(stock_bal - account_bal, precision)
-				error_reason = _("Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses.").format(
-					stock_bal, account_bal, frappe.bold(account))
-				error_resolution = _("Please create adjustment Journal Entry for amount {0} ").format(frappe.bold(diff))
-				stock_adjustment_account = frappe.db.get_value("Company",gl_map[0].company,"stock_adjustment_account")
+			# 	diff = flt(stock_bal - account_bal, precision)
+			# 	error_reason = _("Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses.").format(
+			# 		stock_bal, account_bal, frappe.bold(account))
+			# 	error_resolution = _("Please create adjustment Journal Entry for amount {0} ").format(frappe.bold(diff))
+			# 	stock_adjustment_account = frappe.db.get_value("Company",gl_map[0].company,"stock_adjustment_account")
 
-				db_or_cr_warehouse_account =('credit_in_account_currency' if diff < 0 else 'debit_in_account_currency')
-				db_or_cr_stock_adjustment_account = ('debit_in_account_currency' if diff < 0 else 'credit_in_account_currency')
+			# 	db_or_cr_warehouse_account =('credit_in_account_currency' if diff < 0 else 'debit_in_account_currency')
+			# 	db_or_cr_stock_adjustment_account = ('debit_in_account_currency' if diff < 0 else 'credit_in_account_currency')
 
-				journal_entry_args = {
-				'accounts':[
-					{'account': account, db_or_cr_warehouse_account : abs(diff)},
-					{'account': stock_adjustment_account, db_or_cr_stock_adjustment_account : abs(diff) }]
-				}
+			# 	journal_entry_args = {
+			# 	'accounts':[
+			# 		{'account': account, db_or_cr_warehouse_account : abs(diff)},
+			# 		{'account': stock_adjustment_account, db_or_cr_stock_adjustment_account : abs(diff) }]
+			# 	}
 
-				frappe.msgprint(msg="""{0}<br></br>{1}<br></br>""".format(error_reason, error_resolution),
-					raise_exception=StockValueAndAccountBalanceOutOfSync,
-					title=_('Values Out Of Sync'),
-					primary_action={
-						'label': 'Make Journal Entry',
-						'client_action': 'erpnext.route_to_adjustment_jv',
-						'args': journal_entry_args
-					})
+			# 	frappe.msgprint(msg="""{0}<br></br>{1}<br></br>""".format(error_reason, error_resolution),
+			# 		raise_exception=StockValueAndAccountBalanceOutOfSync,
+			# 		title=_('Values Out Of Sync'),
+			# 		primary_action={
+			# 			'label': _('Make Journal Entry'),
+			# 			'client_action': 'erpnext.route_to_adjustment_jv',
+			# 			'args': journal_entry_args
+			# 		})
 
 def validate_cwip_accounts(gl_map):
 	cwip_enabled = any([cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category","enable_cwip_accounting")])

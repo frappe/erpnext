@@ -834,6 +834,10 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 		for item in sales_order.items:
 			if item.supplier and item.supplier not in suppliers:
 				suppliers.append(item.supplier)
+
+	if not suppliers:
+		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
+
 	for supplier in suppliers:
 		po =frappe.get_list("Purchase Order", filters={"sales_order":source_name, "supplier":supplier, "docstatus": ("<", "2")})
 		if len(po) == 0:

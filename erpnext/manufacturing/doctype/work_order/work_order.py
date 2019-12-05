@@ -12,7 +12,7 @@ from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_bom_items
 from dateutil.relativedelta import relativedelta
 from erpnext.stock.doctype.item.item import validate_end_of_life
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
-from erpnext.projects.doctype.timesheet.timesheet import OverlapError
+from erpnext.manufacturing.doctype.job_card.job_card import OverlapError
 from erpnext.stock.doctype.stock_entry.stock_entry import get_additional_costs
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
@@ -22,6 +22,7 @@ from erpnext.utilities.transaction_base import validate_uom_is_integer
 from frappe.model.mapper import get_mapped_doc
 
 class OverProductionError(frappe.ValidationError): pass
+class CapacityError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
 class OperationTooLongError(frappe.ValidationError): pass
 class ItemHasVariantError(frappe.ValidationError): pass
@@ -260,12 +261,50 @@ class WorkOrder(Document):
 		self.update_reserved_qty_for_production()
 
 	def create_job_card(self):
-		for row in self.operations:
+		manufacturing_settings_doc = frappe.get_doc("Manufacturing Settings")
+
+		enable_capacity_planning = not cint(manufacturing_settings_doc.disable_capacity_planning)
+		plan_days = cint(manufacturing_settings_doc.capacity_planning_for_days) or 30
+
+		for i, row in enumerate(self.operations):
+			self.set_operation_start_end_time(i, row)
+
 			if not row.workstation:
 				frappe.throw(_("Row {0}: select the workstation against the operation {1}")
 					.format(row.idx, row.operation))
 
-			create_job_card(self, row, auto_create=True)
+			original_start_time = row.planned_start_time
+			job_card_doc = create_job_card(self, row,
+				enable_capacity_planning=enable_capacity_planning, auto_create=True)
+
+			if enable_capacity_planning and job_card_doc:
+				row.planned_start_time = job_card_doc.time_logs[0].from_time
+				row.planned_end_time = job_card_doc.time_logs[-1].to_time
+
+				if date_diff(row.planned_start_time, original_start_time) > plan_days:
+					frappe.throw(_("Unable to find the time slot in the next {0} days for the operation {1}.")
+						.format(plan_days, row.operation), CapacityError)
+
+				row.db_update()
+
+		planned_end_date = self.operations and self.operations[-1].planned_end_time
+		if planned_end_date:
+			self.db_set("planned_end_date", planned_end_date)
+
+	def set_operation_start_end_time(self, idx, row):
+		"""Set start and end time for given operation. If first operation, set start as
+		`planned_start_date`, else add time diff to end time of earlier operation."""
+		if idx==0:
+			# first operation at planned_start date
+			row.planned_start_time = self.planned_start_date
+		else:
+			row.planned_start_time = get_datetime(self.operations[idx-1].planned_end_time)\
+				+ get_mins_between_operations()
+
+		row.planned_end_time = get_datetime(row.planned_start_time) + relativedelta(minutes = row.time_in_mins)
+
+		if row.planned_start_time == row.planned_end_time:
+			frappe.throw(_("Capacity Planning Error, planned start time can not be same as end time"))
 
 	def validate_cancel(self):
 		if self.status == "Stopped":
@@ -327,9 +366,8 @@ class WorkOrder(Document):
 		"""Fetch operations from BOM and set in 'Work Order'"""
 		self.set('operations', [])
 
-		if not self.bom_no \
-			or cint(frappe.db.get_single_value("Manufacturing Settings", "disable_capacity_planning")):
-				return
+		if not self.bom_no:
+			return
 
 		if self.use_multi_level_bom:
 			bom_list = frappe.get_doc("BOM", self.bom_no).traverse_tree()
@@ -610,6 +648,22 @@ def get_item_details(item, project = None):
 	return res
 
 @frappe.whitelist()
+def make_work_order(item, qty=0, project=None):
+	if not frappe.has_permission("Work Order", "write"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	item_details = get_item_details(item, project)
+
+	wo_doc = frappe.new_doc("Work Order")
+	wo_doc.production_item = item
+	wo_doc.update(item_details)
+	if qty > 0:
+		wo_doc.qty = qty
+		wo_doc.get_items_and_operations_from_bom()
+
+	return wo_doc
+
+@frappe.whitelist()
 def check_if_scrap_warehouse_mandatory(bom_no):
 	res = {"set_scrap_wh_mandatory": False }
 	if bom_no:
@@ -665,11 +719,13 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 
 @frappe.whitelist()
 def get_default_warehouse():
-	wip_warehouse = frappe.db.get_single_value("Manufacturing Settings",
-		"default_wip_warehouse")
-	fg_warehouse = frappe.db.get_single_value("Manufacturing Settings",
-		"default_fg_warehouse")
-	return {"wip_warehouse": wip_warehouse, "fg_warehouse": fg_warehouse}
+	doc = frappe.get_cached_doc("Manufacturing Settings")
+
+	return {
+		"wip_warehouse": doc.default_wip_warehouse,
+		"fg_warehouse": doc.default_fg_warehouse,
+		"scrap_warehouse": doc.default_scrap_warehouse
+	}
 
 @frappe.whitelist()
 def stop_unstop(work_order, status):
@@ -705,7 +761,7 @@ def make_job_card(work_order, operation, workstation, qty=0):
 	if row:
 		return create_job_card(work_order, row, qty)
 
-def create_job_card(work_order, row, qty=0, auto_create=False):
+def create_job_card(work_order, row, qty=0, enable_capacity_planning=False, auto_create=False):
 	doc = frappe.new_doc("Job Card")
 	doc.update({
 		'work_order': work_order.name,
@@ -725,6 +781,9 @@ def create_job_card(work_order, row, qty=0, auto_create=False):
 
 	if auto_create:
 		doc.flags.ignore_mandatory = True
+		if enable_capacity_planning:
+			doc.schedule_time_logs(row)
+
 		doc.insert()
 		frappe.msgprint(_("Job card {0} created").format(doc.name))
 
