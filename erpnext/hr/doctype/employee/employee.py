@@ -164,6 +164,12 @@ class Employee(NestedSet):
 		if self.personal_email:
 			validate_email_address(self.personal_email, True)
 
+	def set_preferred_email(self):
+		preferred_email_field = frappe.scrub(self.prefered_contact_email)
+		if preferred_email_field:
+			preferred_email = self.get(preferred_email_field)
+			self.prefered_email = preferred_email
+
 	def validate_status(self):
 		if self.status == 'Left':
 			reports_to = frappe.db.get_all('Employee',
