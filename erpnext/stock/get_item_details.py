@@ -213,7 +213,8 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			project: "",
 			qty: "",
 			stock_qty: "",
-			conversion_factor: ""
+			conversion_factor: "",
+			against_blanket_order: 0/1
 		}
 	:param item: `item_code` of Item object
 	:return: frappe._dict
@@ -302,7 +303,8 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"weight_per_unit":item.weight_per_unit,
 		"weight_uom":item.weight_uom,
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
-		"transaction_date": args.get("transaction_date")
+		"transaction_date": args.get("transaction_date"),
+		"against_blanket_order": args.get("against_blanket_order")
 	})
 
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
@@ -996,9 +998,10 @@ def get_serial_no(args, serial_nos=None, sales_order=None):
 
 
 def update_party_blanket_order(args, out):
-	blanket_order_details = get_blanket_order_details(args)
-	if blanket_order_details:
-		out.update(blanket_order_details)
+	if out["against_blanket_order"]:
+		blanket_order_details = get_blanket_order_details(args)
+		if blanket_order_details:
+			out.update(blanket_order_details)
 
 @frappe.whitelist()
 def get_blanket_order_details(args):
