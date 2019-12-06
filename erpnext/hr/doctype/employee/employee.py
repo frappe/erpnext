@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, validate_email_address, today, add_years, format_datetime
+from frappe.utils import getdate, validate_email_address, today, add_years, format_datetime, cstr
 from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
 from frappe.permissions import add_user_permission, remove_user_permission, \
@@ -152,8 +152,8 @@ class Employee(NestedSet):
 		elif self.date_of_retirement and self.date_of_joining and (getdate(self.date_of_retirement) <= getdate(self.date_of_joining)):
 			throw(_("Date Of Retirement must be greater than Date of Joining"))
 
-		elif self.relieving_date and self.date_of_joining and (getdate(self.relieving_date) <= getdate(self.date_of_joining)):
-			throw(_("Relieving Date must be greater than Date of Joining"))
+		elif self.relieving_date and self.date_of_joining and (getdate(self.relieving_date) < getdate(self.date_of_joining)):
+			throw(_("Relieving Date must be greater than or equal to Date of Joining"))
 
 		elif self.contract_end_date and self.date_of_joining and (getdate(self.contract_end_date) <= getdate(self.date_of_joining)):
 			throw(_("Contract End Date must be greater than Date of Joining"))
@@ -218,8 +218,8 @@ class Employee(NestedSet):
 
 	def reset_employee_emails_cache(self):
 		prev_doc = self.get_doc_before_save() or {}
-		cell_number = self.get('cell_number')
-		prev_number = prev_doc.get('cell_number')
+		cell_number = cstr(self.get('cell_number'))
+		prev_number = cstr(prev_doc.get('cell_number'))
 		if (cell_number != prev_number or
 			self.get('user_id') != prev_doc.get('user_id')):
 			frappe.cache().hdel('employees_with_number', cell_number)

@@ -44,6 +44,8 @@ def make_sales_order(source_name):
 			target.item_name = item.get("item_name")
 			target.description = item.get("description")
 			target.uom = item.get("stock_uom")
+			target.against_blanket_order = 1
+			target.blanket_order = source_name
 
 	target_doc = get_mapped_doc("Blanket Order", source_name, {
 		"Blanket Order": {
@@ -71,6 +73,8 @@ def make_purchase_order(source_name):
 			target.description = item.get("description")
 			target.uom = item.get("stock_uom")
 			target.warehouse = item.get("default_warehouse")
+			target.against_blanket_order = 1
+			target.blanket_order = source_name
 
 	target_doc = get_mapped_doc("Blanket Order", source_name, {
 		"Blanket Order": {
