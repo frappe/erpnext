@@ -884,6 +884,54 @@ class Item(WebsiteGenerator):
 			if not enabled:
 				frappe.msgprint(msg=_("You have to enable auto re-order in Stock Settings to maintain re-order levels."), title=_("Enable Auto Re-Order"), indicator="orange")
 
+	def create_onboarding_docs(self, args):
+		defaults = frappe.defaults.get_defaults()
+		for i in range(1, args.get('max_count')):
+			item = args.get('item_' + str(i))
+			if item:
+				default_warehouse = ''
+				default_warehouse = frappe.db.get_value('Warehouse', filters={
+					'warehouse_name': _('Finished Goods'),
+					'company': defaults.get('company_name')
+				})
+
+				try:
+					frappe.get_doc({
+						'doctype': self.doctype,
+						'item_code': item,
+						'item_name': item,
+						'description': item,
+						'show_in_website': 1,
+						'is_sales_item': 1,
+						'is_purchase_item': 1,
+						'is_stock_item': 1,
+						'item_group': _('Products'),
+						'stock_uom': _(args.get('item_uom_' + str(i))),
+						'item_defaults': [{
+							'default_warehouse': default_warehouse,
+							'company': defaults.get('company_name')
+						}]
+					}).insert()
+
+				except frappe.NameError:
+					pass
+				else:
+					if args.get('item_price_' + str(i)):
+						item_price = flt(args.get('tem_price_' + str(i)))
+
+						price_list_name = frappe.db.get_value('Price List', {'selling': 1})
+						make_item_price(item, price_list_name, item_price)
+						price_list_name = frappe.db.get_value('Price List', {'buying': 1})
+						make_item_price(item, price_list_name, item_price)
+
+def make_item_price(item, price_list_name, item_price):
+	frappe.get_doc({
+		'doctype': 'Item Price',
+		'price_list': price_list_name,
+		'item_code': item,
+		'price_list_rate': item_price
+	}).insert()
+
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''
 	out = {}

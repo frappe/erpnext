@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils.data import comma_and
 
 def execute(filters=None):
 #	if not filters: filters = {}
@@ -13,35 +14,36 @@ def execute(filters=None):
 	data = get_bom_stock(filters)
 	qty_to_make = filters.get("qty_to_make")
 
+	manufacture_details = get_manufacturer_records()
 	for row in data:
-		item_map = get_item_details(row.item_code)
 		reqd_qty = qty_to_make * row.actual_qty
 		last_pur_price = frappe.db.get_value("Item", row.item_code, "last_purchase_rate")
-		if row.to_build > 0:
-			diff_qty = row.to_build - reqd_qty
-			summ_data.append([row.item_code, row.description, item_map[row.item_code]["manufacturer"], item_map[row.item_code]["manufacturer_part_no"], row.actual_qty, row.to_build, reqd_qty, diff_qty, last_pur_price])
-		else:
-			diff_qty = 0 - reqd_qty
-			summ_data.append([row.item_code, row.description, item_map[row.item_code]["manufacturer"], item_map[row.item_code]["manufacturer_part_no"], row.actual_qty, "0.000", reqd_qty, diff_qty, last_pur_price])
 
+		summ_data.append(get_report_data(last_pur_price, reqd_qty, row, manufacture_details))
 	return columns, summ_data
+
+def get_report_data(last_pur_price, reqd_qty, row, manufacture_details):
+	to_build = row.to_build if row.to_build > 0 else 0
+	diff_qty = to_build - reqd_qty
+	return [row.item_code, row.description,
+		comma_and(manufacture_details.get(row.item_code, {}).get('manufacturer', []), add_quotes=False),
+		comma_and(manufacture_details.get(row.item_code, {}).get('manufacturer_part', []), add_quotes=False),
+		row.actual_qty, str(to_build),
+		reqd_qty, diff_qty, last_pur_price]
 
 def get_columns():
 	"""return columns"""
 	columns = [
 		_("Item") + ":Link/Item:100",
 		_("Description") + "::150",
-		_("Manufacturer") + "::100",
-		_("Manufacturer Part Number") + "::100",
+		_("Manufacturer") + "::250",
+		_("Manufacturer Part Number") + "::250",
 		_("Qty") + ":Float:50",
 		_("Stock Qty") + ":Float:100",
 		_("Reqd Qty")+ ":Float:100",
 		_("Diff Qty")+ ":Float:100",
 		_("Last Purchase Price")+ ":Float:100",
-
-
 	]
-
 	return columns
 
 def get_bom_stock(filters):
@@ -85,7 +87,12 @@ def get_bom_stock(filters):
 
 			GROUP BY bom_item.item_code""".format(qty_field=qty_field, table=table, conditions=conditions, bom=bom), as_dict=1)
 
-def get_item_details(item_code):
-		items = frappe.db.sql("""select it.item_group, it.item_name, it.stock_uom, it.name, it.brand, it.description, it.manufacturer_part_no, it.manufacturer from tabItem it where it.item_code = %s""", item_code, as_dict=1)
+def get_manufacturer_records():
+	details = frappe.get_list('Item Manufacturer', fields = ["manufacturer", "manufacturer_part_no, parent"])
+	manufacture_details = frappe._dict()
+	for detail in details:
+		dic = manufacture_details.setdefault(detail.get('parent'), {})
+		dic.setdefault('manufacturer', []).append(detail.get('manufacturer'))
+		dic.setdefault('manufacturer_part', []).append(detail.get('manufacturer_part_no'))
 
-		return dict((d.name, d) for d in items)
+	return manufacture_details
