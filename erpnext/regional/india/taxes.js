@@ -19,7 +19,7 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 				'supplier_gstin': frm.doc.supplier_gstin,
 				'company_gstin': frm.doc.company_gstin,
 				'tax_category': frm.doc.tax_category
-			}
+			};
 
 			frappe.call({
 				method: 'erpnext.regional.india.utils.get_regional_address_details',
