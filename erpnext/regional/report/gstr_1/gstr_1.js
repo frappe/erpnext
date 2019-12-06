@@ -73,7 +73,7 @@ frappe.query_reports["GSTR-1"] = {
 						open_url_post(frappe.request.url, args);
 					}
 				}
-			})
+			});
 		});
 	}
 }
