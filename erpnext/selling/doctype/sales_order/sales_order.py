@@ -579,7 +579,6 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 		target.run_method("calculate_taxes_and_totals")
 
 		if source.company_address:
-			print("In delivery Note", source.company_address)
 			target.update({'company_address': source.company_address})
 		else:
 			# set company address
