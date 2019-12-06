@@ -14,7 +14,7 @@
  "modified_by": "Administrator",
  "name": "Welcome back to ERPNext!",
  "owner": "Administrator",
- "slide_desc": "<p>Let's continue from where you left!</p>",
+ "slide_desc": "<p>Let's continue where you left from!</p>",
  "slide_fields": [],
  "slide_module": "Setup",
  "slide_order": 0,
