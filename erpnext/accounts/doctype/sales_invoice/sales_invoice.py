@@ -538,7 +538,7 @@ class SalesInvoice(SellingController):
 					is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
 					if  (d.item_code and is_stock_item == 1\
 						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1])):
-						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
+						msgprint(_("{0} is mandatory for Stock Item {1}").format(i,d.item_code), raise_exception=1)
 
 
 	def validate_proj_cust(self):
@@ -1048,13 +1048,18 @@ class SalesInvoice(SellingController):
 				continue
 
 			for serial_no in item.serial_no.split("\n"):
-				sales_invoice, item_code = frappe.db.get_value("Serial No", serial_no,
-					["sales_invoice", "item_code"])
-				if sales_invoice and item_code == item.item_code and self.name != sales_invoice:
-					sales_invoice_company = frappe.db.get_value("Sales Invoice", sales_invoice, "company")
+				serial_no_details = frappe.db.get_value("Serial No", serial_no,
+					["sales_invoice", "item_code"], as_dict=1)
+
+				if not serial_no_details:
+					continue
+
+				if serial_no_details.sales_invoice and serial_no_details.item_code == item.item_code \
+					and self.name != serial_no_details.sales_invoice:
+					sales_invoice_company = frappe.db.get_value("Sales Invoice", serial_no_details.sales_invoice, "company")
 					if sales_invoice_company == self.company:
 						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}"
-							.format(serial_no, sales_invoice)))
+							.format(serial_no, serial_no_details.sales_invoice)))
 
 	def update_project(self):
 		if self.project:
