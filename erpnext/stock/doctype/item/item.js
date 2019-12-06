@@ -136,6 +136,20 @@ frappe.ui.form.on("Item", {
 		frm.toggle_reqd('customer', frm.doc.is_customer_provided_item ? 1:0);
 	},
 
+	gst_hsn_code: function(frm){
+		if(!frm.doc.taxes){
+			frappe.db.get_doc("GST HSN Code", frm.doc.gst_hsn_code).then(hsn_doc=>{
+				frm.doc.taxes = [];
+				$.each(hsn_doc.taxes || [], function(i, tax) {
+					let a = frappe.model.add_child(cur_frm.doc, 'Item Tax', 'taxes');
+					a.item_tax_template = tax.item_tax_template;
+					a.tax_category = tax.tax_category;
+					frm.refresh_field('taxes');
+				});
+			});
+		}
+	},
+
 	is_fixed_asset: function(frm) {
 		// set serial no to false & toggles its visibility
 		frm.set_value('has_serial_no', 0);

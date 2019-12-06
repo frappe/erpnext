@@ -213,7 +213,8 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			project: "",
 			qty: "",
 			stock_qty: "",
-			conversion_factor: ""
+			conversion_factor: "",
+			against_blanket_order: 0/1
 		}
 	:param item: `item_code` of Item object
 	:return: frappe._dict
@@ -254,6 +255,12 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
 			args.get('name'), 'material_request_type', cache=True)
 
+	expense_account = None
+
+	if args.get('doctype') == 'Purchase Invoice' and item.is_fixed_asset:
+		from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
+		expense_account = get_asset_category_account(fieldname = "fixed_asset_account", item = args.item_code, company= args.company)
+
 	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not args.uom:
 		if args.get('doctype') in sales_doctypes:
@@ -271,7 +278,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"image": cstr(item.image).strip(),
 		"warehouse": warehouse,
 		"income_account": get_default_income_account(args, item_defaults, item_group_defaults, brand_defaults),
-		"expense_account": get_default_expense_account(args, item_defaults, item_group_defaults, brand_defaults),
+		"expense_account": expense_account or get_default_expense_account(args, item_defaults, item_group_defaults, brand_defaults) ,
 		"cost_center": get_default_cost_center(args, item_defaults, item_group_defaults, brand_defaults),
 		'has_serial_no': item.has_serial_no,
 		'has_batch_no': item.has_batch_no,
@@ -296,7 +303,8 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"weight_per_unit":item.weight_per_unit,
 		"weight_uom":item.weight_uom,
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
-		"transaction_date": args.get("transaction_date")
+		"transaction_date": args.get("transaction_date"),
+		"against_blanket_order": args.get("against_blanket_order")
 	})
 
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
@@ -990,9 +998,10 @@ def get_serial_no(args, serial_nos=None, sales_order=None):
 
 
 def update_party_blanket_order(args, out):
-	blanket_order_details = get_blanket_order_details(args)
-	if blanket_order_details:
-		out.update(blanket_order_details)
+	if out["against_blanket_order"]:
+		blanket_order_details = get_blanket_order_details(args)
+		if blanket_order_details:
+			out.update(blanket_order_details)
 
 @frappe.whitelist()
 def get_blanket_order_details(args):
