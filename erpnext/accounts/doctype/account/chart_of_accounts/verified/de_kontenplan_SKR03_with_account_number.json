@@ -2925,104 +2925,101 @@
                     "account_number": "4595"
                 }
             },
-            "Werbekosten (Gruppe)": {
-                "is_group": 1,
-                "Werbekosten": {
-                    "account_number": "4600"
-                },
-                "Streuartikel": {
-                    "account_number": "4605"
-                },
-                "Geschenke abzugsf\u00e4hig ohne \u00a7 37b EStG": {
-                    "account_number": "4630"
-                },
-                "Geschenke abzugsf\u00e4hig mit \u00a7 37b EStG": {
-                    "account_number": "4631"
-                },
-                "Pauschale Steuern f. Geschenke und Zugaben abzugsf\u00e4hig": {
-                    "account_number": "4632"
-                },
-                "Geschenke nicht abzugsf\u00e4hig ohne \u00a7 37b EStG": {
-                    "account_number": "4635"
-                },
-                "Geschenke nicht abzugsf\u00e4hig mit \u00a7 37b EStG": {
-                    "account_number": "4636"
-                },
-                "Pauschale Steuern f. Geschenke und Zuwendungen nicht abzugsf\u00e4hig": {
-                    "account_number": "4637"
-                },
-                "Geschenke ausschlie\u00dflich betrieblich genutzt": {
-                    "account_number": "4638"
-                },
-                "Zugaben mit \u00a7 37b EStG": {
-                    "account_number": "4639"
-                },
-                "Repr\u00e4sentationskosten": {
-                    "account_number": "4640"
-                },
-                "Bewirtungskosten": {
-                    "account_number": "4650"
-                },
-                "Sonstige eingeschr\u00e4nkt abziehbare Betriebsausgaben (abziehbarer Anteil)": {
-                    "account_number": "4651"
-                },
-                "Sonstige eingeschr\u00e4nkt abziehbare Betriebsausgaben (nicht abziehbarer Anteil)": {
-                    "account_number": "4652"
-                },
-                "Aufmerksamkeiten": {
-                    "account_number": "4653"
-                },
-                "Nicht abzugsf\u00e4hige Bewirtungskosten": {
-                    "account_number": "4654"
-                },
-                "Nicht abzugsf\u00e4hige Betriebsausgaben aus Werbe- und Repr\u00e4sentationskosten": {
-                    "account_number": "4655"
-                },
-                "Reisekosten Arbeitnehmer": {
-                    "account_number": "4660"
-                },
-				"Reisekosten Arbeitnehmer Fahrtkosten": {
-					"account_number": "4663"
+			"Werbekosten": {
+				"account_number": "4600"
+			},
+			"Streuartikel": {
+				"account_number": "4605"
+			},
+			"Geschenke abzugsf\u00e4hig ohne \u00a7 37b EStG": {
+				"account_number": "4630"
+			},
+			"Geschenke abzugsf\u00e4hig mit \u00a7 37b EStG": {
+				"account_number": "4631"
+			},
+			"Pauschale Steuern f. Geschenke und Zugaben abzugsf\u00e4hig": {
+				"account_number": "4632"
+			},
+			"Geschenke nicht abzugsf\u00e4hig ohne \u00a7 37b EStG": {
+				"account_number": "4635"
+			},
+			"Geschenke nicht abzugsf\u00e4hig mit \u00a7 37b EStG": {
+				"account_number": "4636"
+			},
+			"Pauschale Steuern f. Geschenke und Zuwendungen nicht abzugsf\u00e4hig": {
+				"account_number": "4637"
+			},
+			"Geschenke ausschlie\u00dflich betrieblich genutzt": {
+				"account_number": "4638"
+			},
+			"Zugaben mit \u00a7 37b EStG": {
+				"account_number": "4639"
+			},
+			"Repr\u00e4sentationskosten": {
+				"account_number": "4640"
+			},
+			"Bewirtungskosten": {
+				"account_number": "4650"
+			},
+			"Sonstige eingeschr\u00e4nkt abziehbare Betriebsausgaben (abziehbarer Anteil)": {
+				"account_number": "4651"
+			},
+			"Sonstige eingeschr\u00e4nkt abziehbare Betriebsausgaben (nicht abziehbarer Anteil)": {
+				"account_number": "4652"
+			},
+			"Aufmerksamkeiten": {
+				"account_number": "4653"
+			},
+			"Nicht abzugsf\u00e4hige Bewirtungskosten": {
+				"account_number": "4654"
+			},
+			"Nicht abzugsf\u00e4hige Betriebsausgaben aus Werbe- und Repr\u00e4sentationskosten": {
+				"account_number": "4655"
+			},
+			"Reisekosten Arbeitnehmer": {
+				"account_number": "4660"
+			},
+			"Reisekosten Arbeitnehmer Fahrtkosten": {
+				"account_number": "4663"
+			},
+			"Reisekosten Arbeitnehmer Verpflegungsmehraufwand": {
+				"account_number": "4664"
+			},
+			"Reisekosten Arbeitnehmer \u00dcbernachtungsaufwand": {
+				"account_number": "4666"
+			},
+			"Kilometergelderstattung Arbeitnehmer": {
+				"account_number": "4668"
+			},
+			"Reisekosten Unternehmer (Gruppe)": {
+				"is_group": 1,
+				"Reisekosten Unternehmer": {
+					"account_number": "4670"
 				},
-				"Reisekosten Arbeitnehmer Verpflegungsmehraufwand": {
-					"account_number": "4664"
+				"Reisekosten Unternehmer (nicht abziehbarer Anteil)": {
+					"account_number": "4672"
 				},
-                "Reisekosten Arbeitnehmer \u00dcbernachtungsaufwand": {
-                    "account_number": "4666"
-                },
-                "Kilometergelderstattung Arbeitnehmer": {
-                    "account_number": "4668"
-                },
-                "Reisekosten Unternehmer (Gruppe)": {
-                    "is_group": 1,
-                    "Reisekosten Unternehmer": {
-                        "account_number": "4670"
-                    },
-                    "Reisekosten Unternehmer (nicht abziehbarer Anteil)": {
-                        "account_number": "4672"
-                    },
-                    "Reisekosten Unternehmer Fahrtkosten": {
-                        "account_number": "4673"
-                    },
-                    "Reisekosten Unternehmer Verpflegungsmehraufwand": {
-                        "account_number": "4674"
-                    },
-                    "Reisekosten Unternehmer \u00dcbernachtungsaufwand": {
-                        "account_number": "4676"
-                    }
-                },
-                "Fahrten zwischen Wohnung und Betriebsst\u00e4tte und Familienheimfahrten (abziehbarer Anteil)": {
-                    "account_number": "4678"
-                },
-                "Fahrten zwischen Wohnung und Betriebsst\u00e4tte und Familienheimfahrten (nicht abziehbarer Anteil)": {
-                    "account_number": "4679"
-                },
-                "Fahrten zwischen Wohnung und Betriebsst\u00e4tte und Familienheimfahrten (Haben)": {
-                    "account_number": "4680"
-                },
-                "Verpflegungsmehraufwendungen i. R. d. doppelten Haushaltsf\u00fchrung (abziehbarer Anteil)": {
-                    "account_number": "4681"
-                }
+				"Reisekosten Unternehmer Fahrtkosten": {
+					"account_number": "4673"
+				},
+				"Reisekosten Unternehmer Verpflegungsmehraufwand": {
+					"account_number": "4674"
+				},
+				"Reisekosten Unternehmer \u00dcbernachtungsaufwand": {
+					"account_number": "4676"
+				}
+			},
+			"Fahrten zwischen Wohnung und Betriebsst\u00e4tte und Familienheimfahrten (abziehbarer Anteil)": {
+				"account_number": "4678"
+			},
+			"Fahrten zwischen Wohnung und Betriebsst\u00e4tte und Familienheimfahrten (nicht abziehbarer Anteil)": {
+				"account_number": "4679"
+			},
+			"Fahrten zwischen Wohnung und Betriebsst\u00e4tte und Familienheimfahrten (Haben)": {
+				"account_number": "4680"
+			},
+			"Verpflegungsmehraufwendungen i. R. d. doppelten Haushaltsf\u00fchrung (abziehbarer Anteil)": {
+				"account_number": "4681"
             },
             "Kosten Warenabgabe (Gruppe)": {
                 "is_group": 1,
@@ -3114,9 +3111,6 @@
             "Aufwendungen aus Bewertung Finanzmittelfonds": {
 				"account_number": "2166"
             },
-			"Nicht abziehbare Vorsteuer 19 %": {
-				"account_number": "2176"
-			},
 			"Erl\u00f6se aus Verk\u00e4ufen Sachanlageverm\u00f6gen (bei Buchverlust)": {
 				"account_number": "8800"
 			},
