@@ -2825,6 +2825,9 @@
             },
             "Versicherungen (Gruppe)": {
                 "is_group": 1,
+				"Ausgleichsabgabe i. S. d. Schwerbehindertengesetzes": {
+					"account_number": "4139"
+				},
                 "Versicherungen": {
                     "account_number": "4360"
                 },
@@ -2846,29 +2849,23 @@
                 "Steuerlich nicht abzugsf\u00e4hige Versp\u00e4tungszuschl\u00e4ge und Zwangsgelder": {
                     "account_number": "4397"
                 },
-                "Ausgleichsabgabe i. S. d. Schwerbehindertengesetzes": {
-                    "account_number": "4139"
-                },
+				"Reparaturen und Instandhaltung von technischenAnlagen und Maschinen": {
+					"account_number": "4800"
+				},
                 "Reparaturen und Instandhaltung von Bauten": {
                     "account_number": "4801"
-                },
-                "Reparaturen und Instandhaltung von technischenAnlagen und Maschinen": {
-                    "account_number": "4800"
                 },
                 "Reparaturen und Instandhaltung von anderen Anlagen und Betriebs- und Gesch\u00e4ftsausstattung": {
                     "account_number": "4805"
                 },
+				"Wartungskosten f. Hard- und Software": {
+					"account_number": "4806"
+				},
                 "Zuf\u00fchrung zu Aufwandsr\u00fcckstellungen": {
                     "account_number": "4808"
                 },
-                "Reparaturen und Instandhaltung von anderen Anlagen": {
-                    "account_number": "4805"
-                },
                 "Sonstige Reparaturen und Instandhaltungen": {
                     "account_number": "4809"
-                },
-                "Wartungskosten f. Hard- und Software": {
-                    "account_number": "4806"
                 },
                 "Mietleasing (bewegliche Wirtschaftsg\u00fcter)": {
                     "account_number": "4810"
@@ -2903,6 +2900,12 @@
                         "account_number": "4550"
                     }
                 },
+				"Mautgeb\u00fchren (Gruppe)": {
+					"is_group": 1,
+					"Mautgeb\u00fchren": {
+						"account_number": "4560"
+					}
+				},
                 "Mietleasing Kfz (Gruppe)": {
                     "is_group": 1,
                     "Mietleasing Kfz": {
@@ -2913,12 +2916,6 @@
                     "is_group": 1,
                     "Sonstige Kfz-Kosten": {
                         "account_number": "4580"
-                    }
-                },
-                "Mautgeb\u00fchren (Gruppe)": {
-                    "is_group": 1,
-                    "Mautgeb\u00fchren": {
-                        "account_number": "4560"
                     }
                 },
                 "Kfz-Kosten f. betrieblich genutzte zum Privatverm\u00f6gen geh\u00f6rende Kraftfahrzeuge": {
@@ -2984,14 +2981,14 @@
                 "Reisekosten Arbeitnehmer": {
                     "account_number": "4660"
                 },
+				"Reisekosten Arbeitnehmer Fahrtkosten": {
+					"account_number": "4663"
+				},
+				"Reisekosten Arbeitnehmer Verpflegungsmehraufwand": {
+					"account_number": "4664"
+				},
                 "Reisekosten Arbeitnehmer \u00dcbernachtungsaufwand": {
                     "account_number": "4666"
-                },
-                "Reisekosten Arbeitnehmer Fahrtkosten": {
-                    "account_number": "4663"
-                },
-                "Reisekosten Arbeitnehmer Verpflegungsmehraufwand": {
-                    "account_number": "4664"
                 },
                 "Kilometergelderstattung Arbeitnehmer": {
                     "account_number": "4668"
