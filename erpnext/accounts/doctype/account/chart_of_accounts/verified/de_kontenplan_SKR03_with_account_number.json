@@ -407,11 +407,11 @@
 							"account_number": "10000"
 						},
                         "Forderungen aus Lieferungen und Leistungen": {
-                            "account_number": "1570",
+                            "account_number": "1400",
                             "account_type": "Receivable"
                         },
                         "Forderungen aus Lieferungen und Leistungen ohne Kontokorrent": {
-                            "account_number": "1560"
+                            "account_number": "1410"
                         },
                         "Forderungen aus Lieferungen und Leistungen ohne Kontokorrent(b. 1 J.)": {
                             "account_number": "1451"
