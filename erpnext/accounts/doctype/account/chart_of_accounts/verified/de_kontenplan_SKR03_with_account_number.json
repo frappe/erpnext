@@ -150,15 +150,13 @@
                     },
                     "2 - technische Anlagen und Maschinen": {
                         "is_group": 1,
-                        "Technische Anlagen und Maschinen": {
-                            "account_number": "0200",
-                            "account_type": "Fixed Asset"
-                        },
                         "Technische Anlagen": {
-                            "account_number": "0200"
+							"account_number": "0200",
+							"account_type": "Fixed Asset"
                         },
                         "Maschinen": {
-                            "account_number": "0210"
+							"account_number": "0210",
+							"account_type": "Fixed Asset"
                         },
                         "Transportanlagen und \u00c4hnliches ": {
                             "account_number": "0260"
