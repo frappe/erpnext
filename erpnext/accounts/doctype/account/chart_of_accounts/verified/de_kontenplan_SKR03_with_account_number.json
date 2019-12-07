@@ -237,7 +237,7 @@
                             "account_number": "0159"
                         },
                         "Gesch\u00e4fts-, Fabrik- und andere Bauten im Bau auf fremden Grundst\u00fccken": {
-                            "account_number": "0120"
+                            "account_number": "0180"
                         },
                         "Anz. auf Gesch\u00e4fts-, Fabrik- und andere Bauten auf fremden Grundst\u00fccken ": {
                             "account_number": "0189"
@@ -272,15 +272,15 @@
                         "Anteile an verbundenen Unternehmen, Kapitalgesellschaften": {
                             "account_number": "0502"
                         },
+						"Anteile an herrschender oder mehrheitlich beteiligter Gesellschaft, Kapitalgesellschaften": {
+							"account_number": "0503"
+						},
+						"Anteile an herrschender oder mit Mehrheit beteiligter Gesellschaft": {
+							"account_number": "0504"
+						},
                         "Anteile an herrschender oder mehrheitlich beteiligter Gesellschaft, Personengesellschaft": {
-                            "account_number": "0504"
-                        },
-                        "Anteile an herrschender oder mehrheitlich beteiligter Gesellschaft, Kapitalgesellschaften": {
-                            "account_number": "0503"
-                        },
-                        "Anteile an herrschender oder mit Mehrheit beteiligter Gesellschaft": {
-                            "account_number": "0504"
-                        }
+                            "account_number": "0509"
+						}
                     },
                     "2 - Ausleihungen an verb. Unternehmen": {
                         "is_group": 1,
@@ -379,11 +379,11 @@
                     "3 - fertige Erzeugnisse und Waren": {
                         "is_group": 1,
                         "Fertige Erzeugnisse und Waren (Bestand)": {
-                            "account_number": "2650",
+                            "account_number": "7100",
                             "account_type": "Stock"
                         },
                         "Fertige Erzeugnisse (Bestand)": {
-                            "account_number": "2650"
+                            "account_number": "7110"
                         },
                         "Waren (Bestand)": {
                             "account_number": "7140"
@@ -536,7 +536,7 @@
                     "4 - sonstige VG": {
                         "account_type": "Receivable",
                         "is_group": 1,
-                        "Bewertungskorrektur zu sonstigen VGn": {
+                        "Bewertungskorrektur zu sonstigen Verm\u00f6gensgegenst.": {
                             "account_number": "9965"
                         },
                         "Verrechnungskonto geleistete Anz. bei Buchung \u00fcber Kreditorenkonto": {
