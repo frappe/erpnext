@@ -26,16 +26,19 @@
                         "\u00c4hnliche Rechte und Werte": {
                             "account_number": "0025"
                         },
-                        "EDV-Software": {
-                            "account_number": "0044"
-                        },
                         "Lizenzen an gewerblichen Schutzrechten und \u00e4hnl. Rechten und Werten": {
-                            "account_number": "0030"
+							"account_number": "0030"
+						},
+                        "Geleistete Anz. auf immaterielle VG": {
+                            "account_number": "0039"
                         },
                         "Selbst geschaffene immaterielle VG": {
-                            "account_number": "0043",
+							"account_number": "0043",
                             "account_type": "Fixed Asset"
                         },
+						"EDV-Software": {
+							"account_number": "0044"
+						},
                         "Lizenzen und Franchisevertr\u00e4ge": {
                             "account_number": "0045"
                         },
@@ -47,9 +50,6 @@
                         },
                         "Immaterielle VG in Entwicklung": {
                             "account_number": "0048"
-                        },
-                        "Geleistete Anz. auf immaterielle VG": {
-                            "account_number": "0039"
                         }
                     },
                     "3 - Gesch\u00e4fts- oder Firmenwert": {
@@ -64,16 +64,10 @@
                     "4 - geleistete Anz.": {
                         "is_group": 1,
                         "Geleistete Anz. auf Vorr\u00e4te": {
-                            "account_number": "1348"
+                            "account_number": "1510"
                         },
                         "Geleistete Anz., 7 % Vorsteuer": {
                             "account_number": "1511"
-                        },
-                        "Geleistete Anz., 16 % Vorsteuer": {
-                            "account_number": "1517"
-                        },
-                        "Geleistete Anz., 15 % Vorsteuer": {
-                            "account_number": "1516"
                         },
                         "Geleistete Anz., 19 % Vorsteuer": {
                             "account_number": "1518"
@@ -87,6 +81,9 @@
                             "account_number": "0050",
                             "account_type": "Fixed Asset"
                         },
+						"Grundst\u00fccksanteil h\u00e4usliches Arbeitszimmer": {
+							"account_number": "0059"
+						},
                         "Grundst\u00fccksgleiche Rechte ohne Bauten": {
                             "account_number": "0060"
                         },
@@ -98,9 +95,6 @@
                         },
                         "Grundst\u00fccke mit Substanzverzehr": {
                             "account_number": "0075"
-                        },
-                        "Grundst\u00fccksanteil h\u00e4usliches Arbeitszimmer": {
-                            "account_number": "0059"
                         },
                         "Bauten auf eigenen Grundst\u00fccken und grundst\u00fccksgleichen Rechten": {
                             "account_number": "0080"
@@ -135,18 +129,18 @@
                         "Au\u00dfenanlagen ": {
                             "account_number": "0146"
                         },
-                        "Einrichtungen f. Wohnbauten ": {
-                            "account_number": "0194"
-                        },
                         "Geb\u00e4udeanteil h\u00e4usliches Arbeitszimmer": {
-                            "account_number": "0149"
+							"account_number": "0149"
                         },
                         "Bauten auf fremden Grundst\u00fccken": {
-                            "account_number": "0160"
+							"account_number": "0160"
                         },
                         "Einrichtungen f. Gesch\u00e4fts-, Fabrik-, Wohn- und andere Bauten": {
-                            "account_number": "0148"
-                        }
+							"account_number": "0148"
+                        },
+						"Einrichtungen f. Wohnbauten": {
+							"account_number": "0194"
+						}
                     },
                     "2 - technische Anlagen und Maschinen": {
                         "is_group": 1,
@@ -154,6 +148,10 @@
 							"account_number": "0200",
 							"account_type": "Fixed Asset"
                         },
+						"Wertberichtigung Technische Anlagen und Maschinen": {
+							"account_number": "0209",
+							"account_type": "Accumulated Depreciation"
+						},
                         "Maschinen": {
 							"account_number": "0210",
 							"account_type": "Fixed Asset"
@@ -163,10 +161,6 @@
                         },
                         "Betriebsvorrichtungen": {
                             "account_number": "0280"
-                        },
-                        "Wertberichtigung Technische Anlagen und Maschinen": {
-                            "account_number": "0209",
-                            "account_type": "Accumulated Depreciation"
                         }
                     },
                     "3 - andere Anlagen, Betriebs- und Gesch\u00e4ftsausstattung": {
@@ -187,32 +181,32 @@
                         "Sonstige Transportmittel": {
                             "account_number": "0380"
                         },
-                        "Werkzeuge": {
-                            "account_number": "0440"
-                        },
                         "Betriebsausstattung": {
-                            "account_number": "0400"
+							"account_number": "0400"
                         },
                         "Gesch\u00e4ftsausstattung": {
-                            "account_number": "0410"
+							"account_number": "0410"
                         },
+						"B\u00fcroeinrichtung": {
+							"account_number": "0420"
+						},
                         "Ladeneinrichtung": {
-                            "account_number": "0430"
+							"account_number": "0430"
                         },
-                        "B\u00fcroeinrichtung": {
-                            "account_number": "0420"
-                        },
+						"Werkzeuge": {
+							"account_number": "0440"
+						},
+						"Einbauten in fremde Grundst\u00fccke": {
+							"account_number": "0450"
+						},
                         "Ger\u00fcst- und Schalungsmaterial": {
                             "account_number": "0460"
                         },
                         "Geringwertige Wirtschaftsg\u00fcter": {
                             "account_number": "0480"
                         },
-                        "Wirtschaftsg\u00fcter gr\u00f6\u00dfer 150  bis 1000 Euro (Sammelposten)": {
+                        "Wirtschaftsg\u00fcter (Sammelposten)": {
                             "account_number": "0485"
-                        },
-                        "Einbauten in fremde Grundst\u00fccke": {
-                            "account_number": "0450"
                         },
                         "Sonstige Betriebs- und Gesch\u00e4ftsausstattung": {
                             "account_number": "0490"
@@ -220,7 +214,7 @@
                     },
                     "4 - geleistete Anz. und Anlagen im Bau": {
                         "is_group": 1,
-                        "Anz. auf Grundst\u00fcckeund grundst\u00fccksgleiche Rechte ohne Bauten ": {
+                        "Anz. auf Grundst\u00fccke und grundst\u00fccksgleiche Rechte ohne Bauten ": {
                             "account_number": "0079"
                         },
                         "Gesch\u00e4fts-, Fabrik- und andere Bauten im Bau auf eigenen Grundst\u00fccken": {
@@ -562,60 +556,7 @@
                         },
                         "Forderungen gg. typisch stille Gesellschafter (gr\u00f6\u00dfer 1 J.)": {
                             "account_number": "1378"
-                        },
-                        "Forderungen gg. Personal aus Lohn- und Gehaltsabrechnung (Gruppe)": {
-                            "is_group": 1,
-                            "Forderungen gg. Personal aus Lohn- und Gehaltsabrechnung": {
-                                "account_number": "1530"
-                            },
-                            "Forderungen gg. Personal aus Lohn- und Gehaltsabrechnung (b. 1 J.)": {
-                                "account_number": "1531"
-                            },
-                            "Forderungen gg. Personal aus Lohn- und Gehaltsabrechnung (gr\u00f6\u00dfer 1 J.)": {
-                                "account_number": "1537"
-                            }
-                        },
-                        "Kautionen (Gruppe)": {
-                            "is_group": 1,
-                            "Kautionen": {
-                                "account_number": "1525"
-                            },
-                            "Kautionen (b. 1 J.)": {
-                                "account_number": "1526"
-                            },
-                            "Kautionen (gr\u00f6\u00dfer 1 J.)": {
-                                "account_number": "1527"
-                            }
-                        },
-                        "Darlehen (Gruppe)": {
-                            "Darlehen": {
-                                "account_number": "1550"
-                            },
-                            "Darlehen (b. 1 J.)": {
-                                "account_number": "1551"
-                            },
-                            "Darlehen (gr\u00f6\u00dfer 1 J.)": {
-                                "account_number": "1555"
-                            }
-                        },
-                        "Forderungen gg. Krankenkassen aus Aufwendungsausgleichsgesetz": {
-                            "account_number": "1520"
-                        },
-                        "Durchlaufende Posten": {
-                            "account_number": "1590"
-                        },
-                        "Fremdgeld": {
-                            "account_number": "1592"
-                        },
-                        "Agenturwarenabrechnung": {
-                            "account_number": "1521"
-                        },
-                        "Nachtr\u00e4glich abziehbare Vorsteuer, \u00a7 15a Abs. 2 UStG": {
-                            "account_number": "1528"
-                        },
-                        "Zur\u00fcckzuzahlende Vorsteuer, \u00a7 15a Abs. 2 UStG": {
-                            "account_number": "1529"
-                        },
+						},
                         "Anspr\u00fcche aus R\u00fcckdeckungsversicherungen": {
                             "account_number": "1355"
                         },
@@ -630,15 +571,71 @@
                         },
                         "GmbH-Anteile zum kurzfr. Verbleib": {
                             "account_number": "1350"
+						},
+						"Geldtransit": {
+                            "account_number": "1360"
                         },
-                        "Forderungen gg. Arbeitsgemeinschaften": {
+                        "\u00dcberleitungskonto Kostenstellen": {
+							"account_number": "1380"
+						},
+						"Verrechnungskonto Ist-Versteuerung": {
+							"account_number": "1390"
+						},
+						"Forderungen gg. Arbeitsgemeinschaften": {
                             "account_number": "1519"
                         },
-                        "Genussrechte": {
-                            "account_number": "1522"
+						"Forderungen gg. Krankenkassen aus Aufwendungsausgleichsgesetz": {
+							"account_number": "1520"
                         },
-                        "Einzahlungsanspr\u00fcche zu Nebenleistungen oder Zuzahlungen": {
+                        "Agenturwarenabrechnung": {
+							"account_number": "1521"
+                        },
+						"Genussrechte": {
+							"account_number": "1522"
+						},
+						"Einzahlungsanspr\u00fcche zu Nebenleistungen oder Zuzahlungen": {
                             "account_number": "1524"
+                        },
+                        "Kautionen (Gruppe)": {
+                            "is_group": 1,
+                            "Kautionen": {
+                                "account_number": "1525"
+                            },
+                            "Kautionen (b. 1 J.)": {
+                                "account_number": "1526"
+                            },
+                            "Kautionen (gr\u00f6\u00dfer 1 J.)": {
+                                "account_number": "1527"
+                            }
+						},
+						"Nachtr\u00e4glich abziehbare Vorsteuer, \u00a7 15a Abs. 2 UStG": {
+                            "account_number": "1528"
+                        },
+                        "Zur\u00fcckzuzahlende Vorsteuer, \u00a7 15a Abs. 2 UStG": {
+                            "account_number": "1529"
+                        },
+						"Forderungen gg. Personal aus Lohn- und Gehaltsabrechnung (Gruppe)": {
+                            "is_group": 1,
+                            "Forderungen gg. Personal aus Lohn- und Gehaltsabrechnung": {
+                                "account_number": "1530"
+                            },
+                            "Forderungen gg. Personal aus Lohn- und Gehaltsabrechnung (b. 1 J.)": {
+                                "account_number": "1531"
+                            },
+                            "Forderungen gg. Personal aus Lohn- und Gehaltsabrechnung (gr\u00f6\u00dfer 1 J.)": {
+                                "account_number": "1537"
+                            }
+                        },
+                        "Darlehen (Gruppe)": {
+                            "Darlehen": {
+                                "account_number": "1550"
+                            },
+                            "Darlehen (b. 1 J.)": {
+                                "account_number": "1551"
+                            },
+                            "Darlehen (gr\u00f6\u00dfer 1 J.)": {
+                                "account_number": "1555"
+                            }
                         },
                         "Genossenschaftsanteile zum kurzfr. Verbleib": {
                             "account_number": "1352"
@@ -748,20 +745,17 @@
                         "Forderungen gg. Bundesagentur f. Arbeit": {
                             "account_number": "1544"
                         },
-                        "Geldtransit": {
-                            "account_number": "1360"
+						"Vorsteuer nach allgemeinen Durchschnittss\u00e4tzen UStVA Kz. 63": {
+							"account_number": "1587"
+						},
+						"Verrechnungskonto erhaltene Anz. bei Buchung \u00fcber Debitorenkonto": {
+							"account_number": "1593"
+						},
+						"Durchlaufende Posten": {
+                            "account_number": "1590"
                         },
-                        "Vorsteuer nach allgemeinen Durchschnittss\u00e4tzen UStVA Kz. 63": {
-                            "account_number": "1587"
-                        },
-                        "Verrechnungskonto Ist-Versteuerung": {
-                            "account_number": "1390"
-                        },
-                        "Verrechnungskonto erhaltene Anz. bei Buchung \u00fcber Debitorenkonto": {
-                            "account_number": "1593"
-                        },
-                        "\u00dcberleitungskonto Kostenstellen": {
-                            "account_number": "1380"
+                        "Fremdgeld": {
+                            "account_number": "1592"
                         }
                     },
                     "is_group": 1
