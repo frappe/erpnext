@@ -33,10 +33,20 @@
                 "Ladeneinrichtung": {
                     "account_number": "0430",
                     "account_type": "Fixed Asset"
-                }
+				},
+				"Aktive Rechnungsabgrenzung": {
+                    "account_number": "0980"
+				},
+				"Passive Rechnungsabgrenzung": {
+                    "account_number": "0990"
+				}
             },
             "Finanzkonten 1": {
-                "is_group": 1,
+				"is_group": 1,
+				"Kasse": {
+                    "account_number": "1100",
+                    "account_type": "Cash"
+                },
                 "Postbank": {
                     "account_number": "1100",
                     "account_type": "Bank"
@@ -107,14 +117,22 @@
                 "Verblk. aus Lieferungen u. Leistungen": {
                     "account_number": "1600",
                     "account_type": "Payable"
-                }
+				},
+				"Verblk. aus Lohn und Gehalt": {
+                    "account_number": "1740",
+                    "account_type": "Payable"
+				}
             }
         },
         "Erl\u00f6se u. Ertr\u00e4ge 2/8": {
             "is_group": 1,
             "root_type": "Income",
             "Erl\u00f6skonten 8": {
-                "is_group": 1,
+				"is_group": 1,
+				"Erl\u00f6se": {
+                    "account_number": "8200",
+                    "account_type": "Income Account"
+                },
                 "Erl\u00f6se USt. 19%": {
                     "account_number": "8400",
                     "account_type": "Income Account"
