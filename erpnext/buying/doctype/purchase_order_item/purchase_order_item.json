@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-05-24 19:29:06",
  "doctype": "DocType",
@@ -43,6 +44,7 @@
   "base_amount",
   "pricing_rules",
   "is_free_item",
+  "is_fixed_asset",
   "section_break_29",
   "net_rate",
   "net_amount",
@@ -708,11 +710,20 @@
    "fieldname": "against_blanket_order",
    "fieldtype": "Check",
    "label": "Against Blanket Order"
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.is_fixed_asset",
+   "fieldname": "is_fixed_asset",
+   "fieldtype": "Check",
+   "label": "Is Fixed Asset",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-11-19 14:10:52.865006",
+ "links": [],
+ "modified": "2019-12-06 13:17:12.142799",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
