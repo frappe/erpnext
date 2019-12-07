@@ -3335,16 +3335,13 @@
             "is_group": 1,
             "davon aus verbundenen Unternehmen": {
                 "is_group": 1,
-                "Diskontertr\u00e4ge aus verbundenen Unternehmen": {
-                    "account_number": "2679"
-                },
                 "Sonstige Zinsen und \u00e4hnliche Ertr\u00e4ge aus verbundenen Unternehmen": {
-                    "account_number": "2659"
+					"account_number": "2659",
+					"account_type": "Income Account"
                 },
-                "Sonstige Zinsertr\u00e4ge aus verbundenen Unternehmen": {
-                    "account_number": "2659",
-                    "account_type": "Income Account"
-                },
+				"Diskontertr\u00e4ge aus verbundenen Unternehmen": {
+					"account_number": "2679"
+				},
                 "Zins\u00e4hnliche Ertr\u00e4ge aus verbundenen Unternehmen": {
                     "account_number": "2689"
                 }
@@ -3353,26 +3350,23 @@
                 "account_number": "2650",
                 "account_type": "Income Account"
             },
+			"Zinsertr\u00e4ge \u00a7 233a AO, \u00a7 4 Abs. 5b EStG, steuerfrei": {
+				"account_number": "2653"
+			},
+			"Ertr\u00e4ge aus anderen Wertpapieren und Ausleihungen des Umlaufverm.": {
+				"account_number": "2654"
+			},
             "Ertr\u00e4ge aus Anteilen an Kap.Ges. (Umlaufverm\u00f6gen, inl\u00e4ndische Kap.Ges.)": {
                 "account_number": "2655"
             },
             "Zinsertr\u00e4ge \u00a7 233a AO steuerpflichtig": {
                 "account_number": "2657"
             },
-            "Zinsertr\u00e4ge \u00a7 233a AO, \u00a7 4 Abs. 5b EStG, steuerfrei": {
-                "account_number": "2653"
-            },
-            "Sonstige Zinsertr\u00e4ge": {
-                "account_number": "2650"
-            },
-            "Ertr\u00e4ge aus anderen Wertpapieren und Ausleihungen des Umlaufverm.": {
-                "account_number": "2654"
-            },
+			"Diskontertr\u00e4ge": {
+				"account_number": "2670"
+			},
             "Zins\u00e4hnliche Ertr\u00e4ge": {
                 "account_number": "2680"
-            },
-            "Diskontertr\u00e4ge": {
-                "account_number": "2670"
             },
             "Zinsertr\u00e4ge aus der Abzinsung von Verb.": {
                 "account_number": "2683"
@@ -3396,61 +3390,58 @@
         "11 - Abschreibungen auf Finanzanlagen und auf Wertpapiere des Umlaufverm.": {
             "root_type": "Expense",
             "is_group": 1,
-            "Abschreibungen auf Finanzanlagen (dauerhaft)": {
-                "account_number": "4870",
-                "account_type": "Depreciation"
-            },
             "Abschreibungen auf Finanzanlagen (nicht dauerhaft)": {
-                "account_number": "4866"
+				"account_number": "4866"
             },
+			"Abschreibungen auf Finanzanlagen (dauerhaft)": {
+				"account_number": "4870",
+				"account_type": "Depreciation"
+			},
             "Abschreibungen auf Finanzanlagen \u00a7 3 Nr. 40 EStG / \u00a7 8b Abs. 3 KStG (inl. Kap.Ges., dauerh.)": {
                 "account_number": "4871"
             },
-            "Abschreibungen auf Finanzanlagen - verb. Unternehmen": {
-                "account_number": "4877"
-            },
-            "Aufwendungen auf Grund von Verlustanteilen an Mitunternehmerschaften \u00a7 8 GewStG": {
-                "account_number": "4872"
-            },
-            "Abschreibungen auf Wertpapiere des Umlaufverm. (Gruppe)": {
-                "is_group": 1,
-                "Abschreibungen auf Wertpapiere des Umlaufverm.": {
-                    "account_number": "4875"
-                },
-                "Abschreibungen auf Wertpapiere des Umlaufverm. \u00a73Nr.40EStG/\u00a78bAbs.3KStG (inl. Kap.Ges.)": {
-                    "account_number": "4876"
-                },
-                "Abschreibungen auf Wertpapiere des Umlaufverm. - verb. Unternehmen": {
-                    "account_number": "4878"
-                }
-            },
-            "Abschreibungen auf Finanzanlagen auf Grund \u00a7 6b EStG-R\u00fccklage": {
-                "account_number": "4874"
-            },
-            "Abschreibungen auf Finanzanlagen auf Grund \u00a7 3Nr.40EStG/\u00a78bAbs.3KStG (inl. Kap.Ges.)": {
-                "account_number": "4873"
-            }
+			"Aufwendungen auf Grund von Verlustanteilen an Mitunternehmerschaften \u00a7 8 GewStG": {
+				"account_number": "4872"
+			},
+			"Abschreibungen auf Finanzanlagen auf Grund \u00a7 3Nr.40EStG/\u00a78bAbs.3KStG (inl. Kap.Ges.)": {
+				"account_number": "4873"
+			},
+			"Abschreibungen auf Finanzanlagen auf Grund \u00a7 6b EStG-R\u00fccklage": {
+				"account_number": "4874"
+			},
+			"Abschreibungen auf Wertpapiere des Umlaufverm.": {
+				"account_number": "4875"
+			},
+			"Abschreibungen auf Wertpapiere des Umlaufverm. \u00a73Nr.40EStG/\u00a78bAbs.3KStG (inl. Kap.Ges.)": {
+				"account_number": "4876"
+			},
+			"Abschreibungen auf Finanzanlagen - verb. Unternehmen": {
+				"account_number": "4877"
+			},
+			"Abschreibungen auf Wertpapiere des Umlaufverm. - verb. Unternehmen": {
+				"account_number": "4878"
+			}
         },
         "12- Zinsen und \u00e4hnliche Aufwendungen": {
             "root_type": "Expense",
             "is_group": 1,
             "davon an verb. Unternehmen": {
                 "is_group": 1,
+				"Zinsaufwendungen f. kurzfistige Verb. an verb. Unternehmen": {
+					"account_number": "2109"
+				},
                 "Zinsen und \u00e4hnliche Aufwendungen an verb. Unternehmen (inl. Kap.Ges.)": {
                     "account_number": "2116"
                 },
-                "Zinsen und \u00e4hnliche Aufwendungen an verb. Unternehmen": {
-                    "account_number": "2149"
-                },
-                "Zinsaufwendungen f. kurzfistige Verb. an verb. Unternehmen": {
-                    "account_number": "2109"
-                },
                 "Zinsaufwendungen f. langfristigeVerb. an verb. Unternehmen": {
-                    "account_number": "2129"
+					"account_number": "2129"
                 },
                 "Diskontaufwendungen an verb. Unternehmen": {
-                    "account_number": "2139"
-                }
+					"account_number": "2139"
+                },
+				"Zinsen und \u00e4hnliche Aufwendungen an verb. Unternehmen": {
+					"account_number": "2149"
+				}
             },
             "Zinsen und \u00e4hnliche Aufwendungen": {
                 "account_number": "2100"
@@ -3464,20 +3455,23 @@
             "Steuerlich nicht abzugsf\u00e4hige, andere Nebenleistungen zu Steuern": {
                 "account_number": "2104"
             },
+			"Zinsaufwendungen \u00a7 233a AO, \u00a7 4 Abs. 5b EStG": {
+				"account_number": "2105"
+			},
             "Zinsaufwendungen \u00a7 233a AO betriebliche Steuern": {
                 "account_number": "2107"
             },
             "Zinsaufwendungen \u00a7\u00a7 233a bis 237 AO Personensteuern": {
                 "account_number": "2108"
             },
-            "Zinsaufwendungen \u00a7 233a AO, \u00a7 4 Abs. 5b EStG": {
-                "account_number": "2105"
-            },
             "Zinsaufwendungen f. kurzfristige Verb.": {
                 "account_number": "2110"
             },
             "Nicht abzugsf\u00e4hige Schuldzinsen gem\u00e4\u00df \u00a7 4 Abs. 4a EStG (Hinzurechnungsbetrag)": {
                 "account_number": "2113"
+			},
+			"Zinsen und \u00e4hnl. Aufwendungen \u00a7\u00a73Nr.40,3cEStG/\u00a78bAbs.1KStG (inl. Kap.Ges.)": {
+                "account_number": "2115"
             },
             "Zinsen auf Kontokorrentkonten": {
                 "account_number": "2118"
@@ -3500,15 +3494,12 @@
             "Renten und dauernde Lasten": {
                 "account_number": "2127"
             },
-            "Zins\u00e4hnliche Aufwendungen": {
-                "account_number": "2140"
-            },
             "Diskontaufwendungen": {
-                "account_number": "2130"
+				"account_number": "2130"
             },
-            "Zinsen und \u00e4hnl. Aufwendungen \u00a7\u00a73Nr.40,3cEStG/\u00a78bAbs.1KStG (inl. Kap.Ges.)": {
-                "account_number": "2115"
-            },
+			"Zins\u00e4hnliche Aufwendungen": {
+				"account_number": "2140"
+			},
             "Kreditprovisionen und Verwaltungskostenbeitr\u00e4ge": {
                 "account_number": "2141"
             },
@@ -3538,10 +3529,6 @@
                 "account_number": "2200",
                 "account_type": "Tax"
             },
-            "Gewerbesteuer": {
-                "account_number": "4320",
-                "account_type": "Tax"
-            },
             "Kapitalertragsteuer 25 %": {
                 "account_number": "2213"
             },
@@ -3551,6 +3538,12 @@
             "Anzurechnende ausl\u00e4ndische Quellensteuer": {
                 "account_number": "2219"
             },
+			"Aufwendungen aus der Zuf\u00fchrung und Aufl\u00f6sung von latenten Steuern": {
+				"account_number": "2250"
+			},
+			"Ertr\u00e4ge aus der Zuf\u00fchrung und Aufl\u00f6sung von latenten Steuern": {
+				"account_number": "2255"
+			},
             "Gewerbesteuernachzahlungen Vorjahre": {
                 "account_number": "2280"
             },
@@ -3566,37 +3559,35 @@
             "Ertr\u00e4ge aus der Aufl\u00f6sung von Gewerbesteuerr\u00fcckstellungen": {
                 "account_number": "2284"
             },
-            "Aufwendungen aus der Zuf\u00fchrung und Aufl\u00f6sung von latenten Steuern": {
-                "account_number": "2250"
-            },
-            "Ertr\u00e4ge aus der Zuf\u00fchrung und Aufl\u00f6sung von latenten Steuern": {
-                "account_number": "2255"
+			"Gewerbesteuer": {
+                "account_number": "4320",
+                "account_type": "Tax"
             }
         },
         "15 - sonstige Steuern": {
             "root_type": "Expense",
             "is_group": 1,
-            "Verbrauchsteuer": {
-                "account_number": "4350"
-            },
-            "\u00d6kosteuer": {
-                "account_number": "4355"
-            },
-            "Grundsteuer": {
-                "account_number": "2375"
-            },
-            "Kfz-Steuer": {
-                "account_number": "4510"
-            },
             "Steuernachzahlungen Vorjahre f. sonstige Steuern": {
-                "account_number": "2285"
+				"account_number": "2285"
             },
             "Steuererstattungen Vorjahre f. sonstige Steuern": {
-                "account_number": "2287"
+				"account_number": "2287"
             },
             "Ertr\u00e4ge aus der Aufl\u00f6sung von R\u00fcckstellungen f. sonstige Steuern": {
-                "account_number": "2289"
-            }
+				"account_number": "2289"
+            },
+			"Grundsteuer": {
+				"account_number": "2375"
+			},
+			"Kfz-Steuer": {
+				"account_number": "4510"
+			},
+			"Verbrauchsteuer": {
+				"account_number": "4350"
+			},
+			"\u00d6kosteuer": {
+				"account_number": "4355"
+			}
         }
     }
 }
