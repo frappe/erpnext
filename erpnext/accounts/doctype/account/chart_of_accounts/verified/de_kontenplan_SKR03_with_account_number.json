@@ -220,10 +220,6 @@
                     },
                     "4 - geleistete Anz. und Anlagen im Bau": {
                         "is_group": 1,
-                        "Geleistete Anz. und Anlagen im Bau": {
-                            "account_number": "0129",
-                            "account_type": "Capital Work in Progress"
-                        },
                         "Anz. auf Grundst\u00fcckeund grundst\u00fccksgleiche Rechte ohne Bauten ": {
                             "account_number": "0079"
                         },
@@ -231,7 +227,8 @@
                             "account_number": "0120"
                         },
                         "Anz. auf Gesch\u00e4fts-, Fabrik- und andere Bauten auf eigenen Grundst. und grundst\u00fccksgleichen Rechten ": {
-                            "account_number": "0129"
+							"account_number": "0129",
+							"account_type": "Capital Work in Progress"
                         },
                         "Wohnbauten im Bau": {
                             "account_number": "0150"
@@ -1241,7 +1238,7 @@
                     "account_type": "Payable",
                     "is_group": 1,
                     "Verb. gg. verbundenen Unternehmen": {
-                        "account_number": "0129"
+                        "account_number": "0700"
                     },
                     "Verb. gg. verbundenen Unternehmen (b. 1 J.)": {
                         "account_number": "0701"
