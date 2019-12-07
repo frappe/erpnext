@@ -254,8 +254,8 @@
                         "Andere Anlagen, Betriebs- und Gesch\u00e4ftsausstattung im Bau": {
                             "account_number": "0498"
                         },
-                        "Andere Anlagen, Betriebs- und Gesch\u00e4ftsausstattung": {
-                            "account_number": "0300"
+                        "Anz. auf andere Anlagen, Betriebs- und Gesch\u00e4ftsausstattung": {
+                            "account_number": "0499"
                         }
                     },
                     "is_group": 1
