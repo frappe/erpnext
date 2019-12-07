@@ -433,20 +433,23 @@
                             "Zweifelhafte Forderungen (gr\u00f6\u00dfer 1 J.)": {
                                 "account_number": "1465"
                             },
-                            "Einzelwertberichtigungen auf Forderungen mit einer (b. 1 J.)": {
+							"Pauschalwertberichtigung auf Forderungen (b. 1 J.)": {
+								"account_number": "0996"
+							},
+							"Pauschalwertberichtigung auf Forderungen (gr\u00f6\u00dfer 1 J.)": {
+								"account_number": "0997"
+							},
+                            "Einzelwertberichtigungen auf Forderungen (b. 1 J.)": {
                                 "account_number": "0998"
                             },
-                            "Einzelwertberichtigung auf Forderungen mit einer (mehr als 1 J.)": {
+                            "Einzelwertberichtigung auf Forderungen (gr\u00f6\u00dfer 1 J.)": {
                                 "account_number": "0999"
-                            },
-                            "Pauschalwertberichtigung auf Forderungen mit einer (mehr als 1 J.)": {
-                                "account_number": "0997"
-                            }
+							}
                         },
                         "Gegenkonto zu sonstigen VGn bei Buchung \u00fcber Debitorenkonto": {
-                            "account_number": "1380"
+                            "account_number": "1498"
                         },
-                        "Gegenkonto 1221-1229,1240-1245,1250-1257, 1270-1279, 1290-1297 bei Aufteilung Debitorenkonto": {
+                        "Gegenkonto 1451-1497 bei Aufteilung Debitorenkonto": {
                             "account_number": "1499"
                         }
                     },
@@ -488,7 +491,7 @@
                             "Wertberichtigungen auf Forderungen mit einer (b. 1 J.) gg. verb. Unternehmen": {
                                 "account_number": "1478"
                             },
-                            "Wertberichtigungen auf Forderungen mit einer (mehr als 1 J.) gg. verbundene  Unternehmen": {
+                            "Wertberichtigungen auf Forderungen mit einer (gr\u00f6\u00dfer 1 J.) gg. verbundene  Unternehmen": {
                                 "account_number": "1479"
                             }
                         }
@@ -529,7 +532,7 @@
                         "Wertberichtigungen auf Ford. (b. 1 J.) gg. Unt., mit denen ein Beteiligungsverh. besteht": {
                             "account_number": "1488"
                         },
-                        "Wertberichtigungen auf Ford. (mehr als 1 J.) gg. Unt., mit denen ein Beteiligungsverh. besteht": {
+                        "Wertberichtigungen auf Ford. (gr\u00f6\u00dfer 1 J.) gg. Unt., mit denen ein Beteiligungsverh. besteht": {
                             "account_number": "1489"
                         }
                     },
