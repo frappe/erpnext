@@ -188,7 +188,8 @@ class Timesheet(Document):
 			}, as_dict=True)
 		# check internal overlap
 		for time_log in self.time_logs:
-			if not (time_log.from_time or time_log.to_time): continue
+			if not (time_log.from_time and time_log.to_time
+				and args.from_time and args.to_time): continue
 
 			if (fieldname != 'workstation' or args.get(fieldname) == time_log.get(fieldname)) and \
 				args.idx != time_log.idx and ((args.from_time > time_log.from_time and args.from_time < time_log.to_time) or
