@@ -1,6 +1,6 @@
 {
     "country_code": "de",
-    "name": "SKR03 GnuCash",
+    "name": "SKR03 mit Kontonummern",
     "tree": {
         "Aktiva": {
             "is_group": 1,
