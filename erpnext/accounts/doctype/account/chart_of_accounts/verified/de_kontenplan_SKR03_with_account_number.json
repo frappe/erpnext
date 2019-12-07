@@ -543,7 +543,7 @@
                             "account_number": "1793"
                         },
                         "Sonstige VG": {
-                            "account_number": "1340"
+                            "account_number": "1500"
                         },
                         "Sonstige VG (b. 1 J.)": {
                             "account_number": "1501"
@@ -552,18 +552,18 @@
                             "account_number": "1502"
                         },
                         "Forderungen gg. typisch stille Gesellschafter": {
-                            "account_number": "1528"
+                            "account_number": "1376"
                         },
-                        "Forderungen gg. typisch stille Gesellschafter - Restlaufzeit bis1 Jahr": {
-                            "account_number": "1529"
+                        "Forderungen gg. typisch stille Gesellschafter - Restlaufzeit bis 1 Jahr": {
+                            "account_number": "1377"
                         },
                         "Forderungen gg. typisch stille Gesellschafter (gr\u00f6\u00dfer 1 J.)": {
-                            "account_number": "1355"
+                            "account_number": "1378"
                         },
                         "Forderungen gg. Personal aus Lohn- und Gehaltsabrechnung (Gruppe)": {
                             "is_group": 1,
                             "Forderungen gg. Personal aus Lohn- und Gehaltsabrechnung": {
-                                "account_number": "1349"
+                                "account_number": "1530"
                             },
                             "Forderungen gg. Personal aus Lohn- und Gehaltsabrechnung (b. 1 J.)": {
                                 "account_number": "1531"
@@ -575,7 +575,7 @@
                         "Kautionen (Gruppe)": {
                             "is_group": 1,
                             "Kautionen": {
-                                "account_number": "1329"
+                                "account_number": "1525"
                             },
                             "Kautionen (b. 1 J.)": {
                                 "account_number": "1526"
@@ -586,7 +586,7 @@
                         },
                         "Darlehen (Gruppe)": {
                             "Darlehen": {
-                                "account_number": "1360"
+                                "account_number": "1550"
                             },
                             "Darlehen (b. 1 J.)": {
                                 "account_number": "1551"
@@ -596,7 +596,7 @@
                             }
                         },
                         "Forderungen gg. Krankenkassen aus Aufwendungsausgleichsgesetz": {
-                            "account_number": "1327"
+                            "account_number": "1520"
                         },
                         "Durchlaufende Posten": {
                             "account_number": "1590"
@@ -708,16 +708,16 @@
                         },
                         "Umsatzsteuerforderungen (Gruppe)": {
                             "is_group": 1,
-                            "Umsatzsteuerforderungen": {
+                            "Forderungen aus Umsatzsteuer-Vorauszahlungen": {
                                 "account_number": "1545"
                             },
-                            "Umsatzsteuerforderungen laufendes Jahr": {
+                            "Umsatzsteuer laufendes Jahr": {
                                 "account_number": "1789"
                             },
                             "Umsatzsteuerforderungen Vorjahr": {
-                                "account_number": "1195"
+                                "account_number": "1546"
                             },
-                            "Umsatzsteuerforderungen fr\u00fchere Jahre": {
+                            "Umsatzsteuer fr\u00fchere Jahre": {
                                 "account_number": "1791"
                             },
                             "Forderungen aus entrichteten Verbrauchsteuern": {
@@ -1756,16 +1756,12 @@
                     "account_type": "Stock Adjustment"
                 }
             },
-            "Aufwendungen f. Roh-, Hilfs- und Betriebsstoffe und f. bezogene Waren": {
-                "account_number": "3000",
-                "account_type": "Expense Account"
-            },
-            "Einkauf Roh-, Hilfs- und Betriebsstoffe (Gruppe)": {
-                "is_group": 1,
-                "Einkauf Roh-, Hilfs- und Betriebsstoffe": {
-                    "account_number": "3010",
-                    "account_type": "Expense Account"
-                },
+            "Materialaufwand (Gruppe)": {
+				"is_group": 1,
+				"Roh-, Hilfs- und Betriebsstoffe": {
+					"account_number": "3000",
+					"account_type": "Expense Account"
+				},
                 "Einkauf Roh-, Hilfs- und Betriebsstoffe 7% Vorsteuer": {
                     "account_number": "3010"
                 },
@@ -2116,7 +2112,7 @@
             },
             "Soziale Abgaben und Aufwendungen f.  Altersvers. und f. Unterst\u00fctzung (Gruppe)": {
                 "is_group": 1,
-                "Soziale Abgaben und Aufwendungen f.  Altersvers. und f. Unterst\u00fctzung": {
+                "Aufwendungen für Altersversorgung": {
                     "account_number": "4165",
                     "account_type": "Expense Account"
                 },
@@ -2131,7 +2127,7 @@
                 "Freiwillige soziale Aufwendungen lohnsteuerfrei": {
                     "account_number": "4140"
                 },
-                "Aufwendungen f. Altersvers.": {
+                "Versorgungskassen": {
                     "account_number": "4160"
                 },
                 "Aufwendungen f. Unterst\u00fctzung": {
