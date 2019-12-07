@@ -3084,50 +3084,50 @@
             "Pacht (bewegliche Wirtschaftsg\u00fcter)": {
                 "account_number": "4961"
             },
-            "Aufwendungen f. die zeitlich befristete \u00dcberlassung von Rechten (Lizenzen, Konzessionen)": {
-                "account_number": "4964"
-            },
             "Aufwendungen f. gemietete oder gepachtete bewegliche Wirtschaftsg., die gewerbest. hinzuzurechnen sind": {
-                "account_number": "4963"
+				"account_number": "4963"
             },
+			"Aufwendungen f. die zeitlich befristete \u00dcberlassung von Rechten (Lizenzen, Konzessionen)": {
+				"account_number": "4964"
+			},
+			"Aufwendungen f. Abraum- und Abfallbeseitigung": {
+				"account_number": "4969"
+			},
+			"Nebenkosten des Geldverkehrs": {
+				"account_number": "4970"
+			},
+			"Aufwendungen aus Anteilen an inl\u00e4ndischen Kap.Ges.": {
+				"account_number": "4975"
+			},
+			"Ver\u00e4u\u00dferungskosten \u00a7 3 Nr. 40 EStG/\u00a7 8b Abs. 2 KStG (inl. Kap.Ges.)": {
+				"account_number": "4976"
+			},
+			"Betriebsbedarf": {
+				"account_number": "4980"
+			},
             "Werkzeuge und Kleinger\u00e4te": {
                 "account_number": "4985"
             },
-            "Betriebsbedarf": {
-                "account_number": "4980"
-            },
-            "Nebenkosten des Geldverkehrs": {
-                "account_number": "9965"
-            },
-            "Aufwendungen aus Anteilen an inl\u00e4ndischen Kap.Ges.": {
-                "account_number": "4975"
-            },
-            "Ver\u00e4u\u00dferungskosten \u00a7 3 Nr. 40 EStG/\u00a7 8b Abs. 2 KStG (inl. Kap.Ges.)": {
-                "account_number": "4976"
-            },
-            "Aufwendungen f. Abraum- und Abfallbeseitigung": {
-                "account_number": "4969"
-            },
-            "Nicht abziehbare Vorsteuer 19 %": {
-                "account_number": "2176"
-            },
             "Aufwendungen aus der W\u00e4hrungsumrechnung": {
-                "account_number": "2150"
+				"account_number": "2150"
             },
             "Aufwendungen aus Bewertung Finanzmittelfonds": {
-                "account_number": "2166"
+				"account_number": "2166"
             },
-            "Erl\u00f6se aus Verk\u00e4ufen Sachanlageverm\u00f6gen steuerfrei \u00a7 4 Nr. 1a UStG (bei Buchverlust)": {
-                "account_number": "8807"
-            },
+			"Nicht abziehbare Vorsteuer 19 %": {
+				"account_number": "2176"
+			},
+			"Erl\u00f6se aus Verk\u00e4ufen Sachanlageverm\u00f6gen (bei Buchverlust)": {
+				"account_number": "8800"
+			},
             "Erl\u00f6se aus Verk\u00e4ufen Sachanlageverm\u00f6gen 19 % USt (bei Buchverlust)": {
-                "account_number": "8801"
+				"account_number": "8801"
             },
+			"Erl\u00f6se aus Verk\u00e4ufen Sachanlageverm\u00f6gen steuerfrei \u00a7 4 Nr. 1a UStG (bei Buchverlust)": {
+				"account_number": "8807"
+			},
             "Erl\u00f6se aus Verk\u00e4ufen Sachanlageverm\u00f6gen steuerfrei \u00a7 4 Nr. 1b UStG (bei Buchverlust)": {
                 "account_number": "8808"
-            },
-            "Erl\u00f6se aus Verk\u00e4ufen Sachanlageverm\u00f6gen (bei Buchverlust)": {
-                "account_number": "8800"
             },
             "Erl\u00f6se aus Verk\u00e4ufen immaterieller VG (bei Buchverlust)": {
                 "account_number": "8817"
@@ -3172,11 +3172,11 @@
             "Einstellung in die Pauschalwertberichtigung auf Forderungen": {
                 "account_number": "2450"
             },
+			"Einstellung in die Einzelwertberichtigung auf Forderungen": {
+				"account_number": "2451"
+			},
             "Einstellungen in die steuerliche R\u00fccklage nach \u00a7 6b Abs. 3 EStG": {
                 "account_number": "2342"
-            },
-            "Einstellung in die Einzelwertberichtigung auf Forderungen": {
-                "account_number": "2451"
             },
             "Einstellungen in die steuerliche R\u00fccklage nach \u00a7 6b Abs. 10 EStG": {
                 "account_number": "2343"
