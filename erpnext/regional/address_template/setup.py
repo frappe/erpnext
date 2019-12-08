@@ -4,8 +4,8 @@ import frappe
 
 def setup():
 	for template in get_address_templates():
-		html = get_file_content(template.path)
-		update_address_template(template.country, html)
+		html = get_file_content(template.get("path"))
+		update_address_template(template.get("country"), html)
 
 def get_address_templates():
 	"""
