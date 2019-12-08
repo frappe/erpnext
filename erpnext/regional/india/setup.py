@@ -13,7 +13,6 @@ from frappe.utils import today
 def setup(company=None, patch=True):
 	setup_company_independent_fixtures()
 	if not patch:
-		update_address_template()
 		make_fixtures(company)
 
 # TODO: for all countries
@@ -23,21 +22,6 @@ def setup_company_independent_fixtures():
 	add_custom_roles_for_reports()
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', now=frappe.flags.in_test)
 	add_print_formats()
-
-def update_address_template():
-	with open(os.path.join(os.path.dirname(__file__), 'address_template.html'), 'r') as f:
-		html = f.read()
-
-	address_template = frappe.db.get_value('Address Template', 'India')
-	if address_template:
-		frappe.db.set_value('Address Template', 'India', 'template', html)
-	else:
-		# make new html template for India
-		frappe.get_doc(dict(
-			doctype='Address Template',
-			country='India',
-			template=html
-		)).insert()
 
 def add_hsn_sac_codes():
 	# HSN codes
