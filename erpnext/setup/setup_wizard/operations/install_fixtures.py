@@ -8,8 +8,10 @@ import frappe, os, json
 from frappe import _
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import cstr, getdate
-from erpnext.accounts.doctype.account.account import RootNotEditable
 from frappe.desk.doctype.global_search_settings.global_search_settings import update_global_search_doctypes
+
+from erpnext.accounts.doctype.account.account import RootNotEditable
+from erpnext.regional.address_template.setup import setup as set_up_address_templates
 
 default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 	"Cold Calling", "Exhibition", "Supplier Reference", "Mass Mailing",
@@ -29,9 +31,6 @@ def install(country=None):
 		{ 'doctype': 'Domain', 'domain': 'Healthcare'},
 		{ 'doctype': 'Domain', 'domain': 'Agriculture'},
 		{ 'doctype': 'Domain', 'domain': 'Non Profit'},
-
-		# address template
-		{'doctype':"Address Template", "country": country},
 
 		# item group
 		{'doctype': 'Item Group', 'item_group_name': _('All Item Groups'),
@@ -269,12 +268,11 @@ def install(country=None):
 
 	# Records for the Supplier Scorecard
 	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records
+	
 	make_default_records()
-
 	make_records(records)
-
+	set_up_address_templates()
 	set_more_defaults()
-
 	update_global_search_doctypes()
 
 	# path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(country))
