@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-import unittest import TestCase
+from unittest import TestCase
 
 import frappe
 from erpnext.regional.address_template.setup import get_address_templates
