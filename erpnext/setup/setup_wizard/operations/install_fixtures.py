@@ -32,6 +32,9 @@ def install(country=None):
 		{ 'doctype': 'Domain', 'domain': 'Agriculture'},
 		{ 'doctype': 'Domain', 'domain': 'Non Profit'},
 
+		# address template	
+		{'doctype':"Address Template", "country": country},
+
 		# item group
 		{'doctype': 'Item Group', 'item_group_name': _('All Item Groups'),
 			'is_group': 1, 'parent_item_group': ''},
@@ -271,7 +274,7 @@ def install(country=None):
 	
 	make_default_records()
 	make_records(records)
-	set_up_address_templates(country)
+	set_up_address_templates()
 	set_more_defaults()
 	update_global_search_doctypes()
 
