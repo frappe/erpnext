@@ -14,6 +14,8 @@ from frappe.model.document import Document
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.utils.nestedset import NestedSet
 
+import functools
+
 class Company(NestedSet):
 	nsm_parent_field = 'parent_company'
 
