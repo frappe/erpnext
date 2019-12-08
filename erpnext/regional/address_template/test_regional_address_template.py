@@ -1,10 +1,11 @@
 from __future__ import unicode_literals
-import unittest
+import unittest import TestCase
 
+import frappe
 from erpnext.regional.address_template.setup import get_address_templates
 from erpnext.regional.address_template.setup import update_address_template
 
-class TestInit(unittest.TestCase):
+class TestRegionalAddressTemplate(TestCase):
 	def test_get_address_templates(self):
 		templates = get_address_templates()
 		self.assertIsInstance(templates, list)
