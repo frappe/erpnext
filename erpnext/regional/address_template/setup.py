@@ -1,10 +1,8 @@
+"""Import Address Templates from ./templates directory."""
 import os
 import frappe
 
-def setup(company=None, patch=True):
-	if patch:
-		return
-
+def setup():
 	for template in get_address_templates():
 		html = get_file_content(template.path)
 		update_address_template(template.country, html)
@@ -24,7 +22,7 @@ def get_address_templates():
 		return " ".join(file[:file.find(".html")].split("_")).title()
 
 	dir_name = os.path.dirname(__file__)
-	template_dir = os.path.join(os.getcwd(), "templates")
+	template_dir = os.path.join(dir_name, "templates")
 	file_names = os.listdir(template_dir)
 	html_files = [file for file in file_names if file.endswith(".html")]
 
