@@ -8,15 +8,12 @@ from frappe.model.document import Document
 from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import make_accrual_interest_entry_for_demand_loans
 
 class ProcessLoanInterestAccrual(Document):
-	pass
+	def on_submit(self):
+		open_loans = []
 
+		if self.loan:
+			open_loans.append(self.loan)
 
-@frappe.whitelist()
-def process_manual_loan_interest(posting_date, process_loan_interest, loan=None, loan_type=None ):
-	open_loans = []
+		make_accrual_interest_entry_for_demand_loans(self.posting_date,
+			open_loans = open_loans, loan_type = self.loan_type, process_loan_interest=self.name)
 
-	if loan:
-		open_loans.append(loan)
-
-	make_accrual_interest_entry_for_demand_loans(posting_date,
-		open_loans = open_loans, loan_type = loan_type, process_loan_interest=process_loan_interest)
