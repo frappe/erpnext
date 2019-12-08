@@ -271,7 +271,7 @@ def install(country=None):
 	
 	make_default_records()
 	make_records(records)
-	set_up_address_templates()
+	set_up_address_templates(country)
 	set_more_defaults()
 	update_global_search_doctypes()
 

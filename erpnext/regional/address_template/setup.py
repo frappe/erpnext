@@ -2,10 +2,22 @@
 import os
 import frappe
 
-def setup():
+def setup(installation_country):
 	for template in get_address_templates():
 		html = get_file_content(template.get("path"))
 		update_address_template(template.get("country"), html)
+
+	if frappe.db.exists("Address Template", installation_country):
+		# make this the default template
+		doc = frappe.get_doc("Address Template", installation_country)
+		doc.is_default = 1
+		doc.save()
+	else:
+		# use erpnext's default template
+		doc = frappe.new_doc("Address Template")
+		doc.country = installation_country
+		doc.is_default = 1
+		doc.insert()
 
 def get_address_templates():
 	"""
@@ -33,18 +45,19 @@ def get_address_templates():
 
 def get_file_content(path):
 	"""Return the content of the file at path."""
-	with open(path, 'r') as f:
+	with open(path, "r") as f:
 		content = f.read()
 
 	return content
 
 def update_address_template(country, html):
 	"""Update existing Address Template or create a new one."""
-	if frappe.db.exists('Address Template', country):
-		frappe.db.set_value('Address Template', country, 'template', html)
+	if frappe.db.exists("Address Template", country):
+		frappe.db.set_value("Address Template", country, "template", html)
 	else:
 		frappe.get_doc(dict(
-			doctype='Address Template',
+			doctype="Address Template",
 			country=country,
-			html=html
+			html=html,
+			is_default=0
 		)).insert()
