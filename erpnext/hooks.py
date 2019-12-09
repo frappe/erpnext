@@ -266,6 +266,10 @@ doc_events = {
 	}
 }
 
+# To maintain data integrity, we exempt payments from being auto-cancelled when related documents
+# are cancelled; payments will be unlinked instead whenever linked invoices are cancelled
+auto_cancel_exempt_doctypes = ["Payment Entry"]
+
 scheduler_events = {
 	"all": [
 		"erpnext.projects.doctype.project.project.project_status_update_reminder"
