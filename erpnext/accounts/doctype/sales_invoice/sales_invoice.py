@@ -535,10 +535,8 @@ class SalesInvoice(SellingController):
 		for i in dic:
 			if frappe.db.get_single_value('Selling Settings', dic[i][0]) == 'Yes':
 				for d in self.get('items'):
-					is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
-					if  (d.item_code and is_stock_item == 1\
-						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1])):
-						msgprint(_("{0} is mandatory for Stock Item {1}").format(i,d.item_code), raise_exception=1)
+					if (d.item_code and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1])):
+						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
 
 	def validate_proj_cust(self):
