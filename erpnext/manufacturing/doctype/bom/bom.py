@@ -606,6 +606,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				item.image,
 				bom.project,
 				item.stock_uom,
+				item.item_group,
 				item.allow_alternative_item,
 				item_default.default_warehouse,
 				item_default.expense_account as expense_account,
