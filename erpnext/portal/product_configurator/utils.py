@@ -313,13 +313,25 @@ def get_items(filters=None, search=None):
 
 	search_condition = ''
 	if search:
+		# Default fields to search from
+		default_fields = {'name', 'item_name', 'description', 'item_group'}
+
+		# Get meta search fields
+		meta = frappe.get_meta("Item")
+		meta_fields = set(meta.get_search_fields())
+
+		# Join the meta fields and default fields set
+		search_fields = default_fields.union(meta_fields)
+		try:
+			if frappe.db.count('Item', cache=True) > 50000:
+				search_fields.remove('description')
+		except KeyError:
+			pass
+
+		# Build or filters for query
 		search = '%{}%'.format(search)
-		or_filters = [
-			['name', 'like', search],
-			['item_name', 'like', search],
-			['description', 'like', search],
-			['item_group', 'like', search]
-		]
+		or_filters = [[field, 'like', search] for field in search_fields]
+
 		search_condition = get_conditions(or_filters, 'or')
 
 	filter_condition = get_conditions(filters, 'and')

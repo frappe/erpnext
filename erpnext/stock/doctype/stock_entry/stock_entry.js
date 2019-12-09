@@ -102,11 +102,12 @@ frappe.ui.form.on('Stock Entry', {
 
 		frm.set_query("quality_inspection", "items", function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
+
 			return {
+				query:"erpnext.stock.doctype.quality_inspection.quality_inspection.quality_inspection_query",
 				filters: {
-					docstatus: 1,
-					item_code: d.item_code,
-					reference_name: doc.name
+					'item_code': d.item_code,
+					'reference_name': doc.name
 				}
 			}
 		});
@@ -248,6 +249,8 @@ frappe.ui.form.on('Stock Entry', {
 			}, __("Get items from"));
 		}
 
+		frm.events.show_bom_custom_button(frm);
+
 		if (frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
@@ -259,6 +262,11 @@ frappe.ui.form.on('Stock Entry', {
 		}
 
 		frm.trigger("setup_quality_inspection");
+	},
+
+	stock_entry_type: function(frm){
+		frm.remove_custom_button('Bill of Materials', "Get items from");
+		frm.events.show_bom_custom_button(frm);
 	},
 
 	purpose: function(frm) {
@@ -395,6 +403,85 @@ frappe.ui.form.on('Stock Entry', {
 				}
 			});
 		}
+	},
+
+	show_bom_custom_button: function(frm){
+		if (frm.doc.docstatus === 0 &&
+			['Material Issue', 'Material Receipt', 'Material Transfer', 'Send to Subcontractor'].includes(frm.doc.purpose)) {
+				frm.add_custom_button(__('Bill of Materials'), function() {
+					frm.events.get_items_from_bom(frm);
+				}, __("Get items from"));
+		}
+	},
+
+	get_items_from_bom: function(frm) {
+		let filters = function(){
+			return {filters: { docstatus:1 }};
+		}
+
+		let fields = [
+			{"fieldname":"bom", "fieldtype":"Link", "label":__("BOM"),
+			options:"BOM", reqd: 1, get_query: filters()},
+			{"fieldname":"source_warehouse", "fieldtype":"Link", "label":__("Source Warehouse"),
+			options:"Warehouse"},
+			{"fieldname":"target_warehouse", "fieldtype":"Link", "label":__("Target Warehouse"),
+			options:"Warehouse"},
+			{"fieldname":"qty", "fieldtype":"Float", "label":__("Quantity"),
+			reqd: 1, "default": 1},
+			{"fieldname":"fetch_exploded", "fieldtype":"Check",
+			"label":__("Fetch exploded BOM (including sub-assemblies)"), "default":1},
+			{"fieldname":"fetch", "label":__("Get Items from BOM"), "fieldtype":"Button"}
+		]
+
+		// Exclude field 'Target Warehouse' in case of Material Issue
+		if (frm.doc.purpose == 'Material Issue'){
+			fields.splice(2,1);
+		}
+		// Exclude field 'Source Warehouse' in case of Material Receipt
+		else if(frm.doc.purpose == 'Material Receipt'){
+			fields.splice(1,1);
+		}
+
+		let d = new frappe.ui.Dialog({
+			title: __("Get Items from BOM"),
+			fields: fields
+		});
+		d.get_input("fetch").on("click", function() {
+			let values = d.get_values();
+			if(!values) return;
+			values["company"] = frm.doc.company;
+			if(!frm.doc.company) frappe.throw(__("Company field is required"));
+			frappe.call({
+				method: "erpnext.manufacturing.doctype.bom.bom.get_bom_items",
+				args: values,
+				callback: function(r) {
+					if (!r.message) {
+						frappe.throw(__("BOM does not contain any stock item"));
+					} else {
+						erpnext.utils.remove_empty_first_row(frm, "items");
+						$.each(r.message, function(i, item) {
+							let d = frappe.model.add_child(cur_frm.doc, "Stock Entry Detail", "items");
+							d.item_code = item.item_code;
+							d.item_name = item.item_name;
+							d.item_group = item.item_group;
+							d.s_warehouse = values.source_warehouse;
+							d.t_warehouse = values.target_warehouse;
+							d.uom = item.stock_uom;
+							d.stock_uom = item.stock_uom;
+							d.conversion_factor = item.conversion_factor ? item.conversion_factor : 1;
+							d.qty = item.qty;
+							d.expense_account = item.expense_account;
+							d.project = item.project;
+							frm.events.set_basic_rate(frm, d.doctype, d.name);
+						});
+					}
+					d.hide();
+					refresh_field("items");
+				}
+			});
+
+		});
+		d.show();
 	},
 
 	calculate_basic_amount: function(frm, item) {

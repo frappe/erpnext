@@ -529,7 +529,6 @@ def get_material_request_items(row, sales_order,
 		required_qty = ceil(required_qty)
 
 	if required_qty > 0:
-		print(row)
 		return {
 			'item_code': row.item_code,
 			'item_name': row.item_name,
@@ -616,6 +615,9 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 
 	doc['mr_items'] = []
 	po_items = doc.get('po_items') if doc.get('po_items') else doc.get('items')
+	if not po_items:
+		frappe.throw(_("Items are required to pull the raw materials which is associated with it."))
+
 	company = doc.get('company')
 	warehouse = doc.get('for_warehouse')
 

@@ -1,0 +1,51 @@
+{
+ "add_more_button": 1,
+ "app": "ERPNext",
+ "creation": "2019-11-15 14:41:12.007359",
+ "docstatus": 0,
+ "doctype": "Onboarding Slide",
+ "domains": [],
+ "help_links": [],
+ "idx": 0,
+ "image_src": "/assets/erpnext/images/illustrations/products-onboard.png",
+ "max_count": 3,
+ "modified": "2019-12-03 22:54:07.558632",
+ "modified_by": "Administrator",
+ "name": "Add A Few Products You Buy Or Sell",
+ "owner": "Administrator",
+ "ref_doctype": "Item",
+ "slide_desc": "",
+ "slide_fields": [
+  {
+   "align": "",
+   "fieldname": "item",
+   "fieldtype": "Data",
+   "label": "Item",
+   "placeholder": "Product Name",
+   "reqd": 1
+  },
+  {
+   "align": "",
+   "fieldname": "item_price",
+   "fieldtype": "Currency",
+   "label": "Item Price",
+   "reqd": 1
+  },
+  {
+   "align": "",
+   "fieldtype": "Column Break",
+   "reqd": 0
+  },
+  {
+   "align": "",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM",
+   "reqd": 1
+  }
+ ],
+ "slide_order": 30,
+ "slide_title": "Add A Few Products You Buy Or Sell",
+ "slide_type": "Create"
+}
