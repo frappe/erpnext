@@ -1,5 +1,6 @@
 /* global Clusterize */
 frappe.provide('erpnext.pos');
+frappe.provide('erpnext.queries');
 
 frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 	frappe.ui.make_app_page({
@@ -556,6 +557,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				if (this.cart) {
 					this.cart.frm = this.frm;
 					this.cart.reset();
+					this.cart.reset_pos_field_value();
 				} else {
 					this.make_items();
 					this.make_cart();
@@ -641,11 +643,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		var me = this;
 		this.page.clear_menu();
 
-		// for mobile
-		// this.page.add_menu_item(__("Pay"), function () {
-		//
-		// }).addClass('visible-xs');
-
 		this.page.add_menu_item(__("Form View"), function () {
 			frappe.model.sync(me.frm.doc);
 			frappe.set_route("Form", me.frm.doc.doctype, me.frm.doc.name);
@@ -713,6 +710,7 @@ class POSCart {
 	make() {
 		this.make_dom();
 		this.make_customer_field();
+		this.make_pos_fields();
 		this.make_loyalty_points();
 		this.make_numpad();
 	}
@@ -721,6 +719,13 @@ class POSCart {
 		this.wrapper.append(`
 			<div class="pos-cart">
 				<div class="customer-field">
+				</div>
+				<div class="pos-field-section" style="margin-bottom:12px; display:none">
+					<a class="h6 uppercase more-fields-section" disabled> ${__("More Information")} </a>
+					<i class="octicon octicon-chevron-down pos-fields-octicon collapse-indicator"
+						style="color:#cacaca; cursor: pointer"></i>
+					<div class="pos-fields" style ="margin-top:12px">
+					</div>
 				</div>
 				<div class="cart-wrapper">
 					<div class="list-item-table">
@@ -808,6 +813,22 @@ class POSCart {
 
 			this.numpad.enable_buttons(enable_btns);
 		}
+	}
+
+	reset_pos_field_value() {
+		let value = '';
+		if (this.custom_pos_fields) {
+			this.custom_pos_fields.forEach(r => {
+				value = this.frm.doc[r.fieldname] || r.default_value || '';
+
+				if (this.fields) {
+					this.fields[r.fieldname].set_value(value);
+				}
+			})
+		}
+
+		this.wrapper.find('.pos-fields').toggle(false);
+		this.wrapper.find('.pos-fields-octicon').toggle(true);
 	}
 
 	get_grand_total() {
@@ -948,6 +969,67 @@ class POSCart {
 		this.customer_field.set_value(this.frm.doc.customer);
 	}
 
+	make_pos_fields() {
+		const me = this;
+
+		this.fields = {};
+		this.wrapper.find('.pos-fields-octicon, .more-fields-section').click(() => {
+			this.wrapper.find('.pos-fields').toggle();
+			this.wrapper.find('.pos-fields-octicon').toggleClass('octicon-chevron-down').toggleClass('octicon-chevron-up');
+		});
+		this.wrapper.find('.pos-fields').toggle(false);
+
+		return new Promise(res => {
+			frappe.call({
+				method: "erpnext.selling.page.point_of_sale.point_of_sale.get_pos_fields",
+				freeze: true,
+			}).then(r => {
+				if(r.message.length) {
+					this.wrapper.find('.pos-field-section').css('display','block');
+					this.custom_pos_fields = r.message;
+					if (r.message.length < 3) {
+						this.wrapper.find('.pos-fields').toggle(true);
+						this.wrapper.find('.pos-fields-octicon').toggleClass('octicon-chevron-down').toggleClass('octicon-chevron-up');
+					}
+
+					r.message.forEach(field => {
+						this.fields[field.fieldname] = frappe.ui.form.make_control({
+							df: {
+								fieldtype: field.fieldtype,
+								label: field.label,
+								fieldname: field.fieldname,
+								options: field.options,
+								reqd: field.reqd || 0,
+								read_only: field.read_only || 0,
+								default: field.default_value,
+								onchange: function() {
+									if (this.value) {
+										me.frm.set_value(this.df.fieldname, this.value);
+									}
+								},
+								get_query: () => {
+									return this.get_query_for_pos_fields(field.fieldname)
+								},
+							},
+							parent: this.wrapper.find('.pos-fields'),
+							render_input: true
+						});
+
+						if (this.frm.doc[field.fieldname]) {
+							this.fields[field.fieldname].set_value(this.frm.doc[field.fieldname]);
+						}
+					});
+				}
+			});
+		});
+	}
+
+	get_query_for_pos_fields(field) {
+		if (this.frm.fields_dict && this.frm.fields_dict[field]
+			&& this.frm.fields_dict[field].get_query) {
+			return this.frm.fields_dict[field].get_query(this.frm.doc);
+		}
+	}
 
 	make_loyalty_points() {
 		this.available_loyalty_points = frappe.ui.form.make_control({
