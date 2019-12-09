@@ -14,7 +14,7 @@
  "modified_by": "Administrator",
  "name": "Welcome to ERPNext!",
  "owner": "Administrator",
- "slide_desc": "Setting up an ERP can be overwhelming. But don't worry, we have got your back!\nLet's setup your company.\nThis wizard will help you onboard to ERPNext in a short time!",
+ "slide_desc": "Setting up an ERP can be overwhelming, but don't worry, we have got your back.\nLet's setup your company.\nThis wizard will help you onboard to ERPNext in a short time!",
  "slide_fields": [],
  "slide_module": "Setup",
  "slide_order": 1,
