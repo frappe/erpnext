@@ -183,7 +183,7 @@ def get_serial_no_for_item(args):
 
 def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
 	from erpnext.accounts.doctype.pricing_rule.utils import get_pricing_rules
-
+	
 	if isinstance(doc, string_types):
 		doc = json.loads(doc)
 
