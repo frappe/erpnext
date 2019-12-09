@@ -610,6 +610,9 @@ def get_asset_account(account_name, asset=None, asset_category=None, company=Non
 	if asset:
 		account = get_asset_category_account(account_name, asset=asset,
 				asset_category = asset_category, company = company)
+	
+	if not asset and not account:
+		account = get_asset_category_account(account_name, asset_category = asset_category, company = company)
 
 	if not account:
 		account = frappe.get_cached_value('Company',  company,  account_name)
