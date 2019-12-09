@@ -1,9 +1,7 @@
 
 from __future__ import unicode_literals
 import frappe, base64, hashlib, hmac, json
-import datetime
 from frappe import _
-
 
 def verify_request():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
@@ -30,16 +28,19 @@ def order(*args, **kwargs):
 		frappe.log_error(error_message, "WooCommerce Error")
 		raise
 
-
 def _order(*args, **kwargs):
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 	if frappe.flags.woocomm_test_order_data:
-		fd = frappe.flags.woocomm_test_order_data
+		order = frappe.flags.woocomm_test_order_data
 		event = "created"
 
 	elif frappe.request and frappe.request.data:
 		verify_request()
-		fd = json.loads(frappe.request.data)
+		try:
+			order = json.loads(frappe.request.data)
+		except ValueError:
+			#woocommerce returns 'webhook_id=value' for the first request which is not JSON
+			order = frappe.request.data
 		event = frappe.get_request_header("X-Wc-Webhook-Event")
 
 	else:
@@ -187,12 +188,11 @@ def link_customer_and_address(raw_billing_data,customer_status, customerID):
 
 		address = frappe.get_doc("Address",{"woocommerce_email":customer_woo_com_email})
 		old_address_title = address.name
-		new_address_title = customer.customer_name+"-billing"
+		new_address_title = customer.customer_name + "-billing"
 		address.address_title = customer.customer_name
 		address.save()
 
-		frappe.rename_doc("Address",old_address_title,new_address_title)
-
+		frappe.rename_doc("Address", old_address_title, new_address_title)
 		frappe.db.commit()
 
 def link_item(item_data,item_status):
@@ -222,15 +222,11 @@ def add_tax_details(newSI,price,desc,status):
 	if status == 0:
 		# Product taxes
 		account_head_type = woocommerce_settings.tax_account
-
-	if status == 1:
-		# Shipping taxes
-		account_head_type = woocommerce_settings.f_n_f_account
-
+	frappe.db.commit()
+  
 	newSI.append("taxes",{
 			"charge_type":"Actual",
 			"account_head": account_head_type,
 			"tax_amount": price,
 			"description": desc
 			})
-	

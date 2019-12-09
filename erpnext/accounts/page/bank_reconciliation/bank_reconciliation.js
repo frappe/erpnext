@@ -151,8 +151,6 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 			method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement',
 			allow_multiple: 0,
 			on_success: function(attachment, r) {
-				console.log(r)
-				console.log(attachment)
 				if (!r.exc && r.message) {
 					me.data = r.message;
 					me.setup_transactions_dom();
@@ -588,9 +586,3 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 
 	}
 }
-
-frappe.pages['bank-reconciliation'].refresh = function (wrapper) {
-	// console.log('worked!');
-	// console.log(".page-form", $(".page-form").children().length);
-	// $(".page-form").children().slice(3,6).remove();
- }

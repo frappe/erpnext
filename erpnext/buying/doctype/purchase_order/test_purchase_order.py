@@ -589,6 +589,23 @@ class TestPurchaseOrder(unittest.TestCase):
 		frappe.db.set_value("Accounts Settings", "Accounts Settings",
 			"unlink_advance_payment_on_cancelation_of_order", 0)
 
+	def test_schedule_date(self):
+		po = create_purchase_order(do_not_submit=True)
+		po.schedule_date = None
+		po.append("items", {
+			"item_code": "_Test Item",
+			"qty": 1,
+			"rate": 100,
+			"schedule_date": add_days(nowdate(), 5)
+		})
+		po.save()
+		self.assertEqual(po.schedule_date, add_days(nowdate(), 1))
+
+		po.items[0].schedule_date = add_days(nowdate(), 2)
+		po.save()
+		self.assertEqual(po.schedule_date, add_days(nowdate(), 2))
+
+
 def make_pr_against_po(po, received_qty=0):
 	pr = make_purchase_receipt(po)
 	pr.get("items")[0].qty = received_qty or 5
