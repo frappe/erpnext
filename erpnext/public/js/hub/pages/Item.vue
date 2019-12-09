@@ -309,11 +309,11 @@ export default {
 		},
 
 		unpublish_item() {
-			let me = this;
-			frappe.confirm(__(`Unpublish ${this.item.item_name}?`), function() {
+			frappe.confirm(__(`Unpublish ${this.item.item_name}?`), () => {
 				frappe
 					.call('erpnext.hub_node.api.unpublish_item', {
-						item: me.item
+						item_code: this.item.item_code,
+						hub_item_name: this.hub_item_name
 					})
 					.then(r => {
 						frappe.set_route(`marketplace/home`);
