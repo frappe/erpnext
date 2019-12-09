@@ -79,6 +79,10 @@ class LeaveApplication(Document):
 						frappe.throw(_("{0} applicable after {1} working days").format(self.leave_type, leave_type.applicable_after))
 
 	def validate_dates(self):
+		if self.from_date < frappe.utils.today():
+			if "HR Manager" not in frappe.get_roles(frappe.session.user):
+				frappe.throw(_("Only HR Managers can create backdated leave entries"))
+
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
 			frappe.throw(_("To date cannot be before from date"))
 
