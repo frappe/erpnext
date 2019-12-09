@@ -311,7 +311,9 @@ export default {
 				}
 			)
 			.then((r) => {
-				this.get_item_details();
+				return this.get_item_details();
+			})
+			.then(() => {
 				frappe.show_alert(__(`${this.item.item_name} Updated`));
 			})
 		},
