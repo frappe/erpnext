@@ -16,6 +16,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse, make_stock_in_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
+from erpnext.stock.doctype.stock_entry.stock_entry import TotalBasicAmountZeroError
 from six import iteritems
 
 def get_sle(**args):
@@ -789,6 +790,32 @@ class TestStockEntry(unittest.TestCase):
 		is_opening = frappe.db.get_value("GL Entry",
 			filters={"voucher_type": "Stock Entry", "voucher_no": mr.name}, fieldname="is_opening")
 		self.assertEqual(is_opening, "Yes")
+
+	def test_total_basic_amount_zero(self):
+		se = frappe.get_doc({"doctype":"Stock Entry",
+		"purpose":"Material Receipt",
+		"stock_entry_type":"Material Receipt",
+		"posting_date": nowdate(),
+		"company":"_Test Company with perpetual inventory",
+		"items":[
+			{"item_code":"Basil Leaves",
+			"description":"Basil Leaves",
+			 "qty": 1,
+			 "basic_rate": 0,
+			 "uom":"Nos",
+			 "t_warehouse": "Stores - TCP1",
+			 "allow_zero_valuation_rate": 1,
+			 "cost_center": "Main - TCP1"}
+			 ],
+		"additional_costs":[
+			{"expense_account":"Miscellaneous Expenses - TCP1",
+			"amount":100,
+			"description": "miscellanous"}
+			]
+		})
+
+		se.insert()
+		self.assertRaises(TotalBasicAmountZeroError, se.submit)
 
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])
