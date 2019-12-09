@@ -95,7 +95,8 @@ class PurchaseReceipt(BuyingController):
 				# check cwip accounts before making auto assets
 				# Improves UX by not giving messages of "Assets Created" before throwing error of not finding arbnb account
 				arbnb_account = self.get_company_default("asset_received_but_not_billed")
-				cwip_account = get_asset_account("capital_work_in_progress_account", company = self.company)
+				cwip_account = get_asset_account("capital_work_in_progress_account", asset_category = item.asset_category, \
+					company = self.company)
 				break
 
 	def validate_with_previous_doc(self):
@@ -364,8 +365,9 @@ class PurchaseReceipt(BuyingController):
 	
 	def add_asset_gl_entries(self, item, gl_entries):
 		arbnb_account = self.get_company_default("asset_received_but_not_billed")
-		# This returns company's default cwip account
-		cwip_account = get_asset_account("capital_work_in_progress_account", company = self.company)
+		# This returns category's cwip account if not then fallback to company's default cwip account
+		cwip_account = get_asset_account("capital_work_in_progress_account", asset_category = item.asset_category, \
+			company = self.company)
 
 		asset_amount = flt(item.net_amount) + flt(item.item_tax_amount/self.conversion_rate)
 		base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
