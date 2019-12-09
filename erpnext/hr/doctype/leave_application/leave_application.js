@@ -170,7 +170,7 @@ frappe.ui.form.on("Leave Application", {
 				frm.set_value('to_date', '');
 				return;
 			}
-				// server call is done to include holidays in leave days calculations
+			// server call is done to include holidays in leave days calculations
 			return frappe.call({
 				method: 'erpnext.hr.doctype.leave_application.leave_application.get_number_of_leave_days',
 				args: {
@@ -193,7 +193,7 @@ frappe.ui.form.on("Leave Application", {
 
 	set_leave_approver: function(frm) {
 		if(frm.doc.employee) {
-				// server call is done to include holidays in leave days calculations
+			// server call is done to include holidays in leave days calculations
 			return frappe.call({
 				method: 'erpnext.hr.doctype.leave_application.leave_application.get_leave_approver',
 				args: {
