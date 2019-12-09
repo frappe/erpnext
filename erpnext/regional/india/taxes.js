@@ -10,7 +10,7 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 			frm.trigger('get_tax_template');
 		},
 		get_tax_template: function(frm) {
-			let out = {
+			let party_details = {
 				'shipping_address': frm.doc.shipping_address || '',
 				'shipping_address_name': frm.doc.shipping_address_name || '',
 				'customer_address': frm.doc.customer_address || '',
@@ -24,10 +24,10 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 			frappe.call({
 				method: 'erpnext.regional.india.utils.get_regional_address_details',
 				args: {
-					out: out,
+					party_details: JSON.stringify(party_details),
 					doctype: frm.doc.doctype,
 					company: frm.doc.company,
-					return_out: 1
+					return_taxes: 1
 				},
 				callback: function(r) {
 					if(r.message) {

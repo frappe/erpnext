@@ -132,13 +132,13 @@ def test_method():
 	'''test function'''
 	return 'overridden'
 
-def get_place_of_supply(out, doctype):
+def get_place_of_supply(party_details, doctype):
 	if not frappe.get_meta('Address').has_field('gst_state'): return
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
-		address_name = out.shipping_address_name or out.customer_address
+		address_name = party_details.shipping_address_name or party_details.customer_address
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
-		address_name = out.shipping_address or out.supplier_address
+		address_name = party_details.shipping_address or party_details.supplier_address
 
 	if address_name:
 		address = frappe.db.get_value("Address", address_name, ["gst_state", "gst_state_number"], as_dict=1)
@@ -146,91 +146,91 @@ def get_place_of_supply(out, doctype):
 			return cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
 
 @frappe.whitelist()
-def get_regional_address_details(out, doctype, company, return_out=None):
+def get_regional_address_details(party_details, doctype, company, return_taxes=None):
 
-	if isinstance(out, string_types):
-		out = json.loads(out)
-		out = frappe._dict(out)
+	if isinstance(party_details, string_types):
+		party_details = json.loads(party_details)
+		party_details = frappe._dict(party_details)
 
-	out.place_of_supply = get_place_of_supply(out, doctype)
+	party_details.place_of_supply = get_place_of_supply(party_details, doctype)
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
 		master_doctype = "Sales Taxes and Charges Template"
 
-		get_tax_template_for_sez(out, master_doctype, company, 'Customer')
-		get_tax_template_based_on_category(master_doctype, company, out)
+		get_tax_template_for_sez(party_details, master_doctype, company, 'Customer')
+		get_tax_template_based_on_category(master_doctype, company, party_details)
 
-		if out.get('taxes_and_charges') and return_out:
-			return out
+		if party_details.get('taxes_and_charges') and return_taxes:
+			return party_details
 
-		if not out.company_gstin:
+		if not party_details.company_gstin:
 			return
 
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		master_doctype = "Purchase Taxes and Charges Template"
 
-		get_tax_template_for_sez(out, master_doctype, company, 'Supplier')
-		get_tax_template_based_on_category(master_doctype, company, out)
+		get_tax_template_for_sez(party_details, master_doctype, company, 'Supplier')
+		get_tax_template_based_on_category(master_doctype, company, party_details)
 
-		if out.get('taxes_and_charges') and return_out:
-			return out
+		if party_details.get('taxes_and_charges') and return_taxes:
+			return party_details
 
-		if not out.supplier_gstin:
+		if not party_details.supplier_gstin:
 			return
 
-	if not out.place_of_supply: return
+	if not party_details.place_of_supply: return
 
-	if ((doctype in ("Sales Invoice", "Delivery Note", "Sales Order") and out.company_gstin
-		and out.company_gstin[:2] != out.place_of_supply[:2]) or (doctype in ("Purchase Invoice",
-		"Purchase Order", "Purchase Receipt") and out.supplier_gstin and out.supplier_gstin[:2] != out.place_of_supply[:2])):
-		default_tax = get_tax_template(master_doctype, company, 1, out.company_gstin[:2])
+	if ((doctype in ("Sales Invoice", "Delivery Note", "Sales Order") and party_details.company_gstin
+		and party_details.company_gstin[:2] != party_details.place_of_supply[:2]) or (doctype in ("Purchase Invoice",
+		"Purchase Order", "Purchase Receipt") and party_details.supplier_gstin and party_details.supplier_gstin[:2] != party_details.place_of_supply[:2])):
+		default_tax = get_tax_template(master_doctype, company, 1, party_details.company_gstin[:2])
 	else:
-		default_tax = get_tax_template(master_doctype, company, 0, out.company_gstin[:2])
+		default_tax = get_tax_template(master_doctype, company, 0, party_details.company_gstin[:2])
 
 	if not default_tax:
 		return
-	out["taxes_and_charges"] = default_tax
-	out.taxes = get_taxes_and_charges(master_doctype, default_tax)
+	party_details["taxes_and_charges"] = default_tax
+	party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
 
-	if return_out:
-		return out
+	if return_taxes:
+		return party_details
 
-def get_tax_template_based_on_category(master_doctype, company, out):
-	if not out.get('tax_category'):
+def get_tax_template_based_on_category(master_doctype, company, party_details):
+	if not party_details.get('tax_category'):
 		return
 
-	default_tax = frappe.db.get_value(master_doctype, {'company': company, 'tax_category': out.get('tax_category')},
+	default_tax = frappe.db.get_value(master_doctype, {'company': company, 'tax_category': party_details.get('tax_category')},
 		'name')
 
 	if default_tax:
-		out["taxes_and_charges"] = default_tax
-		out.taxes = get_taxes_and_charges(master_doctype, default_tax)
+		party_details["taxes_and_charges"] = default_tax
+		party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
 
-def get_tax_template(master_doctype, company, is_inter_state, company_gstin):
+def get_tax_template(master_doctype, company, is_inter_state, state_code):
 	tax_categories = frappe.get_all('Tax Category', fields = ['name', 'is_inter_state', 'gst_state'],
 		filters = {'is_inter_state': is_inter_state})
 
 	default_tax = ''
 
 	for tax_category in tax_categories:
-		if tax_category.gst_state == number_state_mapping[company_gstin] or \
+		if tax_category.gst_state == number_state_mapping[state_code] or \
 	 		(not default_tax and not tax_category.gst_state):
 			default_tax = frappe.db.get_value(master_doctype,
 				{'disabled': 0, 'tax_category': tax_category.name}, 'name')
 
 	return default_tax
 
-def get_tax_template_for_sez(out, master_doctype, company, party_type):
+def get_tax_template_for_sez(party_details, master_doctype, company, party_type):
 
-	gst_details = frappe.db.get_value(party_type, {'name': out.get(frappe.scrub(party_type))},
+	gst_details = frappe.db.get_value(party_type, {'name': party_details.get(frappe.scrub(party_type))},
 			['gst_category', 'export_type'], as_dict=1)
 
 	if gst_details:
 		if gst_details.gst_category == 'SEZ' and gst_details.export_type == 'With Payment of Tax':
 			default_tax = frappe.db.get_value(master_doctype, {"company": company, "is_inter_state":1, "disabled":0,
-				"gst_state": number_state_mapping[out.company_gstin[:2]]})
+				"gst_state": number_state_mapping[party_details.company_gstin[:2]]})
 
-			out["taxes_and_charges"] = default_tax
-			out.taxes = get_taxes_and_charges(master_doctype, default_tax)
+			party_details["taxes_and_charges"] = default_tax
+			party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
 
 
 def calculate_annual_eligible_hra_exemption(doc):

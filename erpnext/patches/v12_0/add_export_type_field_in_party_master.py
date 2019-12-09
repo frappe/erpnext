@@ -15,12 +15,12 @@ def execute():
 	frappe.reload_doctype('Purchase Taxes and Charges Template')
 
 	# Create tax category with inter state field checked
-	tax_category =  frappe.db.get_value('Tax Category', {'name': 'OUT STATE'}, 'name')
+	tax_category =  frappe.db.get_value('Tax Category', {'name': 'OUT OF STATE'}, 'name')
 
 	if not tax_category:
 		inter_state_category = frappe.get_doc({
 			'doctype': 'Tax Category',
-			'title': 'OUT STATE',
+			'title': 'OUT OF STATE',
 			'is_inter_state': 1
 		}).insert()
 
