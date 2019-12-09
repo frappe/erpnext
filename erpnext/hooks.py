@@ -264,12 +264,9 @@ doc_events = {
 	}
 }
 
-# On cancel event Payment Entry will be exempted and all linked submittable doctype will get cancelled.
-# to maintain data integrity we exempted payment entry. it will un-link when sales invoice get cancelled.
-# if payment entry not in auto cancel exempt doctype it will cancel payment entry.
-auto_cancel_exempt_doctypes = [
-	"Payment Entry"
-]
+# To maintain data integrity, we exempt payments from being auto-cancelled when related documents
+# are cancelled; payments will be unlinked instead whenever linked invoices are cancelled
+auto_cancel_exempt_doctypes = ["Payment Entry"]
 
 scheduler_events = {
 	"all": [
