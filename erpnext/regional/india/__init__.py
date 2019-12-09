@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from six import iteritems
 
 states = [
  '',
@@ -81,42 +82,4 @@ state_numbers = {
  "West Bengal": "19",
 }
 
-number_state_mapping = {
-	"36": "Telangana",
-	"34": "Pondicherry",
-	"37": "Andhra Pradesh",
-	"06": "Haryana",
-	"02": "Himachal Pradesh",
-	"30": "Goa",
-	"22": "Chhattisgarh",
-	"32": "Kerala",
-	"25": "Daman and Diu",
-	"31": "Lakshadweep Islands",
-	"24": "Gujarat",
-	"12": "Arunachal Pradesh",
-	"27": "Maharashtra",
-	"10": "Bihar",
-	"16": "Tripura",
-	"13": "Nagaland",
-	"98": "Other Territory",
-	"04": "Chandigarh",
-	"11": "Sikkim",
-	"01": "Jammu and Kashmir",
-	"29": "Karnataka",
-	"23": "Madhya Pradesh",
-	"20": "Jharkhand",
-	"17": "Meghalaya",
-	"07": "Delhi",
-	"15": "Mizoram",
-	"05": "Uttarakhand",
-	"18": "Assam",
-	"26": "Dadra and Nagar Haveli",
-	"21": "Odisha",
-	"09": "Uttar Pradesh",
-	"14": "Manipur",
-	"08": "Rajasthan",
-	"33": "Tamil Nadu",
-	"03": "Punjab",
-	"35": "Andaman and Nicobar Islands",
-	"19": "West Bengal",
-}
+number_state_mapping = {v: k for k, v in state_numbers.iteritems()}

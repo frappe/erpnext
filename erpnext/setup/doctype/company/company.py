@@ -575,7 +575,7 @@ def get_default_company_address(name, sort_key='is_primary_address', existing_ad
 		WHERE
 			dl.parent = addr.name and dl.link_doctype = 'Company' and
 			dl.link_name = %s and ifnull(addr.disabled, 0) = 0
-		""" %(sort_key, '%s'), (name))
+		""" %(sort_key, '%s'), (name)) #nosec
 
 	if existing_address:
 		if existing_address in [d[0] for d in out]:
