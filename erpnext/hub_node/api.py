@@ -148,21 +148,17 @@ def publish_selected_items(items_to_publish):
 		frappe.log_error(message=e, title='Hub Sync Error')
 
 @frappe.whitelist()
-def unpublish_item(item):
+def unpublish_item(item_code, hub_item_name):
 	''' Remove item listing from the marketplace '''
-	item = json.loads(item)
 
-	item_code = item.get('item_code')
-	frappe.db.set_value('Item', item_code, 'publish_in_hub', 0)
+	response = call_hub_method('unpublish_item', {
+		'hub_item_name': hub_item_name
+	})
 
-	item = map_fields([item])[0]
-
-	try:
-		connection = get_hub_connection()
-		connection.set_value('Hub Item', item.get('name'), 'published', 0)
-
-	except Exception as e:
-		frappe.log_error(message=e, title='Hub Sync Error')
+	if response:
+		frappe.db.set_value('Item', item_code, 'publish_in_hub', 0)
+	else:
+		frappe.throw(_('Unable to update remote activity'))
 
 @frappe.whitelist()
 def get_unregistered_users():

@@ -58,10 +58,10 @@ export default {
 		this.search_value = '';
 		this.get_items();
 	},
-	watch:{
-		$route (to, from){
-			this.get_items()
-		}
+	mounted() {
+		frappe.route.on('change', () => {
+			this.get_items();
+		})
 	},
 	methods: {
 		get_items() {
