@@ -95,7 +95,8 @@ class PurchaseReceipt(BuyingController):
 				# check cwip accounts before making auto assets
 				# Improves UX by not giving messages of "Assets Created" before throwing error of not finding arbnb account
 				arbnb_account = self.get_company_default("asset_received_but_not_billed")
-				cwip_account = get_asset_account("capital_work_in_progress_account", company = self.company)
+				cwip_account = get_asset_account("capital_work_in_progress_account", asset_category = item.asset_category, \
+					company = self.company)
 				break
 
 	def validate_with_previous_doc(self):
