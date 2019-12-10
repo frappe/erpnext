@@ -351,7 +351,7 @@ class LeaveApplication(Document):
 				pass
 
 	def create_leave_ledger_entry(self, submit=True):
-		if self.status != 'Approved':
+		if self.status != 'Approved' and submit:
 			return
 
 		expiry_date = get_allocation_expiry(self.employee, self.leave_type,
