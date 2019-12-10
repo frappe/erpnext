@@ -171,7 +171,7 @@ class Appointment(Document):
 		self.save(ignore_permissions=True)
 	
 	def _get_verify_url(self):
-		verify_route = '/book-appointment/verify'
+		verify_route = '/book_appointment/verify'
 		params = {
 			'email': self.customer_email,
 			'appointment': self.name
