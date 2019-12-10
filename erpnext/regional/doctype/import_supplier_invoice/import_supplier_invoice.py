@@ -68,9 +68,9 @@ class ImportSupplierInvoice(Document):
 
 			supp_dict = get_supplier_details(file_content)
 			invoices_args["destination_code"] = get_destination_code_from_file(file_content)
+			self.prepare_items_for_invoice(file_content, invoices_args)
 			invoices_args["taxes"] = get_taxes_from_file(file_content, self.tax_account)
 			invoices_args["terms"] = get_payment_terms_from_file(file_content)
-			self.prepare_items_for_invoice(file_content, invoices_args)
 
 			supplier_name = create_supplier(self.supplier_group, supp_dict)
 			address = create_address(supplier_name, supp_dict)
