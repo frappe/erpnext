@@ -114,7 +114,7 @@ class Account(NestedSet):
 			for d in frappe.db.get_values('Account',
 				{ "company": ["in", descendants], "account_name": parent_acc_name, 
 					"account_number": parent_acc_number },
-				["company", "name"], as_dict=True, debug=1):
+				["company", "name"], as_dict=True):
 				parent_acc_name_map[d["company"]] = d["name"]
 			if not parent_acc_name_map: return
 
