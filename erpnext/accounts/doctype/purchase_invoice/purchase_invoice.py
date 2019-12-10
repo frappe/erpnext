@@ -285,7 +285,7 @@ class PurchaseInvoice(BuyingController):
 	def check_valuation_amounts_with_previous_doc(self):
 		does_revalue = False
 
-		if not self.is_return:
+		if not self.is_return or not self.update_stock:
 			for item in self.items:
 				if item.pr_detail:
 					pr_item = frappe.db.get_value("Purchase Receipt Item", item.pr_detail,
@@ -450,7 +450,7 @@ class PurchaseInvoice(BuyingController):
 			from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 			update_serial_nos_after_submit(self, "items")
 
-		if not self.is_return:
+		if not self.is_return or not self.update_stock:
 			self.update_receipts_valuation()
 
 		# this sequence because outstanding may get -negative
@@ -919,7 +919,7 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock == 1:
 			self.update_stock_ledger()
 
-		if not self.is_return:
+		if not self.is_return or not self.update_stock:
 			self.update_receipts_valuation()
 
 		self.make_gl_entries_on_cancel()

@@ -200,7 +200,7 @@ class BuyingController(StockController):
 				valuation_net_amount = self.get_item_valuation_net_amount(item)
 
 				item.valuation_rate = ((valuation_net_amount + valuation_item_tax_amount + rm_supp_cost
-					 + landed_cost_voucher_amount) / qty_in_stock_uom)
+					+ landed_cost_voucher_amount) / qty_in_stock_uom)
 
 	def get_item_valuation_tax_amount(self, item):
 		amt = item.item_tax_amount

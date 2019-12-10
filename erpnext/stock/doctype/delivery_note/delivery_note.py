@@ -381,7 +381,8 @@ def update_billed_amount_based_on_dn(dn_detail, update_modified=True):
 	billed = frappe.db.sql("""
 		select sum(item.qty), sum(item.amount)
 		from `tabSales Invoice Item` item, `tabSales Invoice` inv
-		where inv.name=item.parent and item.dn_detail=%s and item.docstatus=1 and inv.is_return = 0
+		where inv.name=item.parent and item.dn_detail=%s and item.docstatus=1
+			and (inv.is_return = 0 or (inv.reopen_order = 1 and inv.update_stock = 0))
 	""", dn_detail)
 
 	billed_qty = flt(billed[0][0]) if billed else 0
@@ -394,8 +395,8 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 	billed_against_so = frappe.db.sql("""
 		select sum(item.qty), sum(item.amount)
 		from `tabSales Invoice Item` item, `tabSales Invoice` inv
-		where inv.name=item.parent and item.so_detail=%s and (item.dn_detail is null or item.dn_detail = '')
-			and item.docstatus=1 and inv.is_return = 0
+		where inv.name=item.parent and item.so_detail=%s and (item.dn_detail is null or item.dn_detail = '') and item.docstatus=1
+			and (inv.is_return = 0 or inv.reopen_order = 1)
 	""", so_detail)
 	billed_qty_against_so = flt(billed_against_so[0][0]) if billed_against_so else 0
 	billed_amt_against_so = flt(billed_against_so[0][1]) if billed_against_so else 0
@@ -424,7 +425,8 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 			billed_against_dn = frappe.db.sql("""
 				select sum(item.qty), sum(item.amount)
 				from `tabSales Invoice Item` item, `tabSales Invoice` inv
-				where inv.name=item.parent and item.dn_detail=%s and item.docstatus=1 and inv.is_return = 0
+				where inv.name=item.parent and item.dn_detail=%s and item.docstatus=1
+					and (inv.is_return = 0 or (inv.reopen_order = 1 and inv.update_stock = 0))
 			""", dnd.name)
 			billed_qty_against_dn = flt(billed_against_dn[0][0]) if billed_against_dn else 0
 			billed_amt_against_dn = flt(billed_against_dn[0][1]) if billed_against_dn else 0
@@ -460,39 +462,10 @@ def get_list_context(context=None):
 	})
 	return list_context
 
-def get_invoiced_qty_map(delivery_note):
-	"""returns a map: {dn_detail: invoiced_qty}"""
-	invoiced_qty_map = frappe._dict(frappe.db.sql("""
-		select si_item.dn_detail, sum(si_item.qty)
-		from `tabSales Invoice Item` si_item, `tabSales Invoice` si
-		where si.name = si_item.parent
-			and si.docstatus = 1
-			and si.is_return = 0
-			and si_item.delivery_note = %s
-		group by si_item.dn_detail""", delivery_note))
-	return invoiced_qty_map
-
-def get_returned_qty_map(delivery_note):
-	"""returns a map: {dn_detail: returned_qty}"""
-	returned_qty_map = frappe._dict(frappe.db.sql("""
-		select dn_item.dn_detail, sum(abs(dn_item.qty)) as qty
-		from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
-		where dn.name = dn_item.parent
-			and dn.docstatus = 1
-			and dn.is_return = 1
-			and dn.return_against = %s
-		group by dn_item.dn_detail
-	""", delivery_note))
-
-	return returned_qty_map
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
 	doc = frappe.get_doc('Delivery Note', source_name)
-
-	to_make_invoice_qty_map = {}
-	returned_qty_map = get_returned_qty_map(source_name)
-	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
 		target.is_pos = 0
@@ -511,31 +484,11 @@ def make_sales_invoice(source_name, target_doc=None):
 			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
 
 	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty = to_make_invoice_qty_map[source_doc.name]
+		target_doc.qty = source_doc.qty - source_doc.billed_qty - source_doc.returned_qty
 
 		if source_doc.serial_no and source_parent.per_billed > 0:
 			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
 				target_doc.qty, source_parent.name)
-
-	def get_pending_qty(item_row):
-		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0)
-
-		returned_qty = 0
-		if returned_qty_map.get(item_row.name, 0) > 0:
-			returned_qty = flt(returned_qty_map.get(item_row.name, 0))
-			returned_qty_map[item_row.name] -= pending_qty
-
-		if returned_qty:
-			if returned_qty >= pending_qty:
-				pending_qty = 0
-				returned_qty -= pending_qty
-			else:
-				pending_qty -= returned_qty
-				returned_qty = 0
-
-		to_make_invoice_qty_map[item_row.name] = pending_qty
-
-		return pending_qty
 
 	doc = get_mapped_doc("Delivery Note", source_name, {
 		"Delivery Note": {
@@ -555,7 +508,7 @@ def make_sales_invoice(source_name, target_doc=None):
 				"cost_center": "cost_center"
 			},
 			"postprocess": update_item,
-			"filter": lambda d: get_pending_qty(d) <= 0 if not doc.get("is_return") else get_pending_qty(d) > 0
+			"filter": lambda d: d.qty <= 0 if not doc.get("is_return") else d.qty >= 0
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",

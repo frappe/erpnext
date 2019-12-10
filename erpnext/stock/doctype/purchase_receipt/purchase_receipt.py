@@ -440,19 +440,30 @@ class PurchaseReceipt(BuyingController):
 
 	def set_billed_valuation_amounts(self):
 		for d in self.get("items"):
-			data = frappe.db.sql("""select sum(i.base_net_amount), sum(i.item_tax_amount), sum(i.qty)
+			data = frappe.db.sql("""
+				select i.base_net_amount, i.item_tax_amount, i.qty, pi.is_return, pi.update_stock, pi.reopen_order
 				from `tabPurchase Invoice Item` i
-				inner  join `tabPurchase Invoice` pi on pi.name = i.parent and pi.is_return = 0
-				where pi.docstatus = 1 and i.pr_detail = %s""", d.name)
-			d.billed_net_amount = flt(data[0][0]) if data else 0.0
-			d.billed_item_tax_amount = flt(data[0][1]) if data else 0.0
-			d.billed_qty = flt(data[0][2]) if data else 0.0
+				inner join `tabPurchase Invoice` pi on pi.name = i.parent
+				where pi.docstatus = 1 and i.pr_detail = %s
+			""", d.name, as_dict=1)
+
+			d.billed_net_amount = 0.0
+			d.billed_item_tax_amount = 0.0
+			d.billed_qty = 0.0
+
+			for pinv_item in data:
+				if not pinv_item.is_return or not pinv_item.update_stock:
+					d.billed_net_amount += pinv_item.base_net_amount
+					d.billed_item_tax_amount += pinv_item.item_tax_amount
+				if not pinv_item.is_return or (pinv_item.reopen_order and not pinv_item.update_stock):
+					d.billed_qty += pinv_item.qty
 
 def update_billed_amount_based_on_pr(pr_detail, update_modified=True):
 	billed = frappe.db.sql("""
 		select sum(item.qty), sum(item.amount)
 		from `tabPurchase Invoice Item` item, `tabPurchase Invoice` inv
-		where inv.name=item.parent and item.pr_detail=%s and item.docstatus=1 and inv.is_return = 0
+		where inv.name=item.parent and item.pr_detail=%s and item.docstatus=1
+			and (inv.is_return = 0 or (inv.reopen_order = 1 and inv.update_stock = 0))
 	""", pr_detail)
 
 	billed_qty = flt(billed[0][0]) if billed else 0
@@ -467,7 +478,7 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 		select sum(item.qty), sum(item.amount)
 		from `tabPurchase Invoice Item` item, `tabPurchase Invoice` inv
 		where inv.name=item.parent and item.po_detail=%s and (item.pr_detail is null or item.pr_detail = '') and item.docstatus=1
-			and inv.is_return = 0
+			and (inv.is_return = 0 or inv.reopen_order = 1)
 	""", po_detail)
 	billed_qty_against_po = flt(billed_against_po[0][0]) if billed_against_po else 0
 	billed_amt_against_po = flt(billed_against_po[0][1]) if billed_against_po else 0
@@ -486,7 +497,9 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 		billed_against_pr = frappe.db.sql("""
 			select sum(item.qty), sum(item.amount)
 			from `tabPurchase Invoice Item` item, `tabPurchase Invoice` inv
-			where inv.name=item.parent and item.pr_detail=%s and item.docstatus=1 and inv.is_return = 0""", pr_item.name)
+			where inv.name=item.parent and item.pr_detail=%s and item.docstatus=1
+				and (inv.is_return = 0 or (inv.reopen_order = 1 and inv.update_stock = 0))
+		""", pr_item.name)
 		billed_qty_against_pr = flt(billed_against_pr[0][0]) if billed_against_pr else 0
 		billed_amt_against_pr = flt(billed_against_pr[0][1]) if billed_against_pr else 0
 
@@ -518,8 +531,6 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 def make_purchase_invoice(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	doc = frappe.get_doc('Purchase Receipt', source_name)
-	returned_qty_map = get_returned_qty_map(source_name)
-	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
 		if len(target.get("items")) == 0:
@@ -532,21 +543,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 		doc.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty, returned_qty = get_pending_qty(source_doc)
-		returned_qty_map[source_doc.name] = returned_qty
-
-	def get_pending_qty(item_row):
-		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0)
-		returned_qty = flt(returned_qty_map.get(item_row.name, 0))
-		if returned_qty:
-			if returned_qty >= pending_qty:
-				pending_qty = 0
-				returned_qty -= pending_qty
-			else:
-				pending_qty -= returned_qty
-				returned_qty = 0
-		return pending_qty, returned_qty
-
+		target_doc.qty = source_doc.qty - source_doc.billed_qty - source_doc.returned_qty
+		target_doc.received_qty = target_doc.qty
 
 	doclist = get_mapped_doc("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {
@@ -569,7 +567,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"asset": "asset",
 			},
 			"postprocess": update_item,
-			"filter": lambda d: get_pending_qty(d)[0] <= 0 if not doc.get("is_return") else get_pending_qty(d)[0] > 0
+			"filter": lambda d: d.qty <= 0 if not doc.get("is_return") else d.qty >= 0
 		},
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",
@@ -578,32 +576,6 @@ def make_purchase_invoice(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
-
-def get_invoiced_qty_map(purchase_receipt):
-	"""returns a map: {pr_detail: invoiced_qty}"""
-	invoiced_qty_map = frappe._dict(frappe.db.sql("""
-		select pi_item.pr_detail, sum(pi_item.qty)
-		from `tabPurchase Invoice Item` pi_item, `tabPurchase Invoice` si
-		where si.name = pi_item.parent
-			and si.docstatus = 1
-			and si.is_return = 0
-			and pi_item.purchase_receipt = %s
-		group by pi_item.pr_detail""", purchase_receipt))
-	return invoiced_qty_map
-
-def get_returned_qty_map(purchase_receipt):
-	"""returns a map: {pr_detail: returned_qty}"""
-	returned_qty_map = frappe._dict(frappe.db.sql("""
-		select pr_item.pr_detail, sum(abs(pr_item.qty)) as qty
-		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
-		where pr.name = pr_item.parent
-			and pr.docstatus = 1
-			and pr.is_return = 1
-			and pr.return_against = %s
-		group by pr_item.pr_detail
-	""", purchase_receipt))
-
-	return returned_qty_map
 
 @frappe.whitelist()
 def make_purchase_return(source_name, target_doc=None):
