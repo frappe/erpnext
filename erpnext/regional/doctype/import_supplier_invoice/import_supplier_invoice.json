@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2019-10-15 12:33:21.845329",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -7,9 +8,11 @@
   "invoice_series",
   "company",
   "item_code",
+  "column_break_5",
   "supplier_group",
   "tax_account",
-  "column_break_5",
+  "default_buying_price_list",
+  "upload_xml_invoices_section",
   "zip_file",
   "import_invoices",
   "status"
@@ -75,9 +78,22 @@
    "label": "Invoice Series",
    "options": "ACC-PINV-.YYYY.-",
    "reqd": 1
+  },
+  {
+   "fieldname": "default_buying_price_list",
+   "fieldtype": "Link",
+   "label": "Default Buying Price List",
+   "options": "Price List",
+   "reqd": 1
+  },
+  {
+   "fieldname": "upload_xml_invoices_section",
+   "fieldtype": "Section Break",
+   "label": "Upload XML Invoices"
   }
  ],
- "modified": "2019-10-19 00:15:11.404733",
+ "links": [],
+ "modified": "2019-12-10 16:37:26.793398",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Import Supplier Invoice",

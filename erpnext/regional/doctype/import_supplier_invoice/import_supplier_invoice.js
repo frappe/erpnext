@@ -11,9 +11,20 @@ frappe.ui.form.on('Import Supplier Invoice', {
 		});
 	},
 	setup: function(frm) {
-		frm.set_query("tax_account", function() {
+		frm.set_query("tax_account", function(doc) {
 			return {
-				filters: { account_type: 'Tax' }
+				filters: {
+					account_type: 'Tax',
+					company: doc.company
+				}
+			};
+		});
+
+		frm.set_query("default_buying_price_list", function(doc) {
+			return {
+				filters: {
+					currency: frappe.get_doc(":Company", doc.company).default_currency
+				}
 			};
 		});
 	}
