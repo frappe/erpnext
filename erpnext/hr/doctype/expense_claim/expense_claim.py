@@ -248,7 +248,7 @@ class ExpenseClaim(AccountsController):
 						.format(d.idx, ref_doc.advance_account, d.reference_name, self.payable_account))
 				if ref_doc.employee != self.employee:
 					frappe.throw(_("Row #{0}: Employee {1} in Employee Advance {2} is not the same as {3} in Expense Claim")
-						.format(d.idx, ref_doc.employee, d.reference_name, self.payable_account))
+						.format(d.idx, ref_doc.employee, d.reference_name, self.employee))
 
 				d.paid_amount = ref_doc.paid_amount
 				d.advance_amount = flt(ref_doc.balance_amount)
