@@ -40,6 +40,10 @@ def get_file_content(path):
 
 def update_address_template(country, html):
 	"""Update existing Address Template or create a new one."""
+	if not frappe.db.exists("Country", country):
+		frappe.log_error("Country {} for regional Address Template does not exist.".format(country))
+		return
+
 	if frappe.db.exists("Address Template", country):
 		frappe.db.set_value("Address Template", country, "template", html)
 	else:
