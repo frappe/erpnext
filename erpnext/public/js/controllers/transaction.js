@@ -1352,7 +1352,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		let me = this;
 		const fields = ["discount_percentage", "discount_amount", "pricing_rules"];
 
-		if (item.pricing_rules) {
+		if (item.pricing_rules && item.apply_rule_on_other_items) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.pricing_rule.utils.validate_pricing_rule_for_different_cond",
 				args: {

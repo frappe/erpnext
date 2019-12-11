@@ -410,7 +410,8 @@ def validate_pricing_rule_on_items(doc, item_row, do_not_validate = False):
 	for pricing_rule in get_applied_pricing_rules(doc, item_row):
 		pr_doc = frappe.get_doc('Pricing Rule', pricing_rule)
 
-		if pr_doc.get('apply_on') == 'Transaction': continue
+		if (pr_doc.get('apply_on') == 'Transaction'
+			or not pr_doc.get("mixed_conditions")): continue
 
 		if pr_doc.get('price_or_product_discount') == 'Product':
 			apply_pricing_rule_for_free_items(doc, pr_doc)
