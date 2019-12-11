@@ -46,7 +46,6 @@ frappe.ui.form.on('Student Sibling', {
 	siblings_add: function(frm){
 		frm.fields_dict['siblings'].grid.get_field('student').get_query = function(doc){
 			let sibling_list = [frm.doc.name];
-			if(!doc.__islocal) sibling_list.push(doc.student);
 			$.each(doc.siblings, function(idx, val){
 				if (val.student && val.studying_in_same_institute == 'YES') {
 					sibling_list.push(val.student);
