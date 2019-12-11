@@ -25,5 +25,5 @@ def get_data():
 			}
 		],
 		'disable_create_buttons': ["Item", "Purchase Order", "Purchase Receipt",
-			"Purchase Invoice", "Job Card", "Stock Entry"]
+			"Purchase Invoice", "Job Card", "Stock Entry", "BOM"]
 	}
