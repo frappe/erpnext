@@ -609,7 +609,7 @@ def make_stock_entry(source_name,target_doc=None):
 
 def get_item_account_wise_additional_cost(purchase_document):
 	landed_cost_voucher = frappe.get_value("Landed Cost Purchase Receipt",
-		{"receipt_document": purchase_document}, "parent")
+		{"receipt_document": purchase_document, "docstatus": 1}, "parent")
 
 	if not landed_cost_voucher:
 		return
