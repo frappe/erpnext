@@ -53,15 +53,31 @@ class Project(Document):
 			if not self.project_type:
 				self.project_type = template.project_type
 
+			skip_weekdays = template.get_skip_weekdays()
+			# task_carry_forward_by is incremented if any ignore day is skipped while creating Project
+			task_carry_forward_by = 0
+			weekdays = frappe.utils.get_weekdays()
+
 			# create tasks from template
 			for task in template.tasks:
+				is_task_date_set, exp_start_date, exp_end_date = False, None, None
+
+				while not is_task_date_set:
+					exp_start_date = add_days(self.expected_start_date, task.start + task_carry_forward_by)
+					exp_end_date = add_days(self.expected_start_date, task.start + task.duration + task_carry_forward_by)
+
+					if weekdays[getdate(exp_start_date).weekday()] in skip_weekdays:
+						task_carry_forward_by = task_carry_forward_by + 1
+					else:
+						is_task_date_set = True
+
 				frappe.get_doc(dict(
 					doctype = 'Task',
 					subject = task.subject,
 					project = self.name,
 					status = 'Open',
-					exp_start_date = add_days(self.expected_start_date, task.start),
-					exp_end_date = add_days(self.expected_start_date, task.start + task.duration),
+					exp_start_date = exp_start_date,
+					exp_end_date = exp_end_date,
 					description = task.description,
 					task_weight = task.task_weight
 				)).insert()

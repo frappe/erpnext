@@ -27,3 +27,26 @@ def get_project_template():
 		)).insert()
 
 	return frappe.get_doc('Project Template', 'Test Project Template')
+
+def get_project_template_for_skipping_weekends():
+	if not frappe.db.exists('Project Template', 'Test Project Template Skip Days'):
+		frappe.get_doc(dict(
+			doctype = 'Project Template',
+			name = 'Test Project Template',
+			tasks = [
+				dict(subject='Task 1', description='Task 1 description',
+					start=0, duration=1),
+				dict(subject='Task 2', description='Task 2 description',
+					start=1, duration=1),
+				dict(subject='Task 3', description='Task 3 description',
+					start=1, duration=2),
+				dict(subject='Task 4', description='Task 4 description',
+					start=3, duration=2),
+			],
+			skip_weekdays = [
+				dict(day="Saturday"),
+				dict(day="Sunday"),
+			]
+		)).insert()
+
+	return frappe.get_doc('Project Template', 'Test Project Template Skip Days')
