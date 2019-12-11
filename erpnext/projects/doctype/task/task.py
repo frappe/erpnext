@@ -47,11 +47,10 @@ class Task(NestedSet):
 		if not self.project or frappe.flags.in_test:
 			return
 
-		expected_end_date = getdate(frappe.db.get_value("Project", self.project, "expected_end_date"))
-
+		expected_end_date = frappe.db.get_value("Project", self.project, "expected_end_date")
 		if expected_end_date:
-			validate_project_dates(expected_end_date, self, "exp_start_date", "exp_end_date", "Expected")
-			validate_project_dates(expected_end_date, self, "act_start_date", "act_end_date", "Actual")
+			validate_project_dates(getdate(expected_end_date), self, "exp_start_date", "exp_end_date", "Expected")
+			validate_project_dates(getdate(expected_end_date), self, "act_start_date", "act_end_date", "Actual")
 
 	def validate_status(self):
 		if self.status!=self.get_db_value("status") and self.status == "Completed":
@@ -274,8 +273,8 @@ def on_doctype_update():
 	frappe.db.add_index("Task", ["lft", "rgt"])
 
 def validate_project_dates(project_end_date, task, task_start, task_end, actual_or_expected_date):
-	if task.get(task_start) and date_diff(project_end_date, getdate(task.get(task_start))) < 0:
+	if task.get(task_start) and project_end_date and date_diff(project_end_date, getdate(task.get(task_start))) < 0:
 		frappe.throw(_("Task's {0} Start Date cannot be after Project's End Date.").format(actual_or_expected_date))
 
-	if task.get(task_end) and date_diff(project_end_date, getdate(task.get(task_end))) < 0:
+	if task.get(task_end) and project_end_date and date_diff(project_end_date, getdate(task.get(task_end))) < 0:
 		frappe.throw(_("Task's {0} End Date cannot be after Project's End Date.").format(actual_or_expected_date))
