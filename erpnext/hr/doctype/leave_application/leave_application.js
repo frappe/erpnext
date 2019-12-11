@@ -60,6 +60,7 @@ frappe.ui.form.on("Leave Application", {
 					}
 				}
 			});
+			$("div").remove(".form-dashboard-section.custom");
 			frm.dashboard.add_section(
 				frappe.render_template('leave_application_dashboard', {
 					data: leave_details
