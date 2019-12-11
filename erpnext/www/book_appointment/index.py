@@ -90,7 +90,7 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 
 @frappe.whitelist(allow_guest=True)
 def create_appointment(date, time, tz, contact):
-	format_string = '%Y-%m-%d %H:%M:%S%z'
+	format_string = '%Y-%m-%d %H:%M:%S'
 	scheduled_time = datetime.datetime.strptime(date + " " + time, format_string)
 	# Strip tzinfo from datetime objects since it's handled by the doctype
 	scheduled_time = scheduled_time.replace(tzinfo = None)
