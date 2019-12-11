@@ -18,6 +18,7 @@ def ensure_country(country):
 
 class TestRegionalAddressTemplate(TestCase):
 	def test_get_address_templates(self):
+		"""Get the countries and paths from the templates directory."""
 		templates = get_address_templates()
 		self.assertIsInstance(templates, list)
 		self.assertIsInstance(templates[0], dict)
@@ -30,7 +31,15 @@ class TestRegionalAddressTemplate(TestCase):
 		self.assertEqual(doc.template, "TEST")
 
 	def test_update_address_template(self):
-		template = "TEST {{ address_line1 }}"
-		update_address_template("Test Regional", template)
-		doc = frappe.get_doc("Address Template", "Test Regional")
-		self.assertEqual(template, doc.template)
+		"""Update an existing Address Template."""
+		country = ensure_country("Germany")
+		if not frappe.db.exists("Address Template", country):
+			template = frappe.get_doc({
+				"doctype": "Address Template",
+				"country": country.name,
+				"template": "EXISTING"
+			}).insert()
+
+		update_address_template(country.name, "NEW")
+		doc = frappe.get_doc("Address Template", country.name)
+		self.assertEqual(doc.template, "NEW")
