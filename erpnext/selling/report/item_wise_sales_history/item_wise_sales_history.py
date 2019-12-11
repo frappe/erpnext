@@ -196,6 +196,7 @@ def get_customer_details():
 
 def get_sales_order_details(company_list, filters):
 	conditions = get_conditions(filters)
+
 	return frappe.db.sql("""
 		SELECT
 			so_item.item_code, so_item.item_name, so_item.item_group,
@@ -208,7 +209,6 @@ def get_sales_order_details(company_list, filters):
 			`tabSales Order` so, `tabSales Order Item` so_item
 		WHERE
 			so.name = so_item.parent
-			AND so.company in (%s)
-			AND so.docstatus = 1
-			{0}
-	""".format(conditions), company_list, as_dict=1) #nosec
+			AND so.company in ({0})
+			AND so.docstatus = 1 {1}
+	""".format(','.join(["%s"] * len(company_list)), conditions), tuple(company_list), as_dict=1)
