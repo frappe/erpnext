@@ -335,12 +335,14 @@ def get_items(filters=None, search=None):
 		search_condition = get_conditions(or_filters, 'or')
 
 	filter_condition = get_conditions(filters, 'and')
-	
-	where_conditions = 'disabled = 0 and '
 
-	where_conditions += ' and '.join(
+	where_conditions = ' and '.join(
 		[condition for condition in [show_in_website_condition, search_condition, filter_condition] if condition]
 	)
+	if where_conditions:
+		where_conditions += ' and disabled = 0'
+	else:
+		where_conditions += 'disabled = 0'
 
 	left_joins = []
 	for f in filters:
