@@ -1163,6 +1163,26 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	sales_doctypes = ['Sales Order', 'Sales Invoice', 'Delivery Note', 'Quotation']
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 
+	deleted_childs = []
+	if len(parent.items) > len(data):
+		updated_item_names = [d.get("docname") for d in data]
+		for item in parent.items:
+			if item.name not in updated_item_names:
+				deleted_childs.append(item)
+
+	for d in deleted_childs:
+		if parent_doctype == "Sales Order" and flt(d.delivered_qty):
+			frappe.throw(_("Row #{0}: Cannot delete item {1} which has already been delivered").format(d.idx, d.item_code))
+
+		if parent_doctype == "Purchase Order" and flt(d.received_qty):
+			frappe.throw(_("Row #{0}: Cannot delete item {1} which has already been received").format(d.idx, d.item_code))
+		
+		if flt(d.billed_amt):
+			frappe.throw(_("Row #{0}: Cannot delete item {1} which has already been billed.").format(d.idx, d.item_code))
+
+		d.cancel()
+		d.delete()
+
 	for d in data:
 		new_child_flag = False
 		if not d.get("docname"):
