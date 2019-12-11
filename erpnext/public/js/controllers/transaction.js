@@ -169,7 +169,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	onload: function() {
 		var me = this;
 
-		if(this.frm.doc.__islocal) {
+		if(this.frm.is_new()) {
 			var currency = frappe.defaults.get_user_default("currency");
 
 			let set_value = (fieldname, value) => {
@@ -183,6 +183,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				() => set_value('price_list_currency', currency),
 				() => set_value('status', 'Draft'),
 				() => set_value('is_subcontracted', 'No'),
+				() => {
+					if(this.frm.doc.party_name) { return this.frm.trigger('party_name'); } // pricelist selection
+				},
 				() => {
 					if(this.frm.doc.company && !this.frm.doc.amended_from) {
 						this.frm.trigger("company");
