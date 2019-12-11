@@ -114,7 +114,7 @@ function get_timeslot_div_layout(timeslot) {
         timeslot_div.classList.add('unavailable')
     }
     timeslot_div.innerHTML = get_slot_layout(start_time);
-    timeslot_div.id = timeslot.time.substr(11, 20);
+    timeslot_div.id = timeslot.time.substring(11, 19);
     timeslot_div.addEventListener('click', select_time);
     return timeslot_div
 }
