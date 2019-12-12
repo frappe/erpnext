@@ -245,7 +245,7 @@ class PurchaseReceipt(BuyingController):
 					negative_expense_to_be_booked += flt(d.item_tax_amount)
 
 					# Amount added through landed-cost-voucher
-					if landed_cost_entries:
+					if d.landed_cost_voucher_amount and landed_cost_entries:
 						for account, amount in iteritems(landed_cost_entries[(d.item_code, d.name)]):
 							gl_entries.append(self.get_gl_dict({
 								"account": account,
@@ -622,8 +622,7 @@ def get_item_account_wise_additional_cost(purchase_document):
 	based_on_field = frappe.scrub(landed_cost_voucher_doc.distribute_charges_based_on)
 
 	for item in landed_cost_voucher_doc.items:
-		if item.receipt_document == purchase_document:
-			total_item_cost += item.get(based_on_field)
+		total_item_cost += item.get(based_on_field)
 
 	for item in landed_cost_voucher_doc.items:
 		if item.receipt_document == purchase_document:
