@@ -16,7 +16,6 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse, make_stock_in_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
-from erpnext.stock.doctype.stock_entry.stock_entry import TotalBasicAmountZeroError
 from six import iteritems
 
 def get_sle(**args):
@@ -798,14 +797,26 @@ class TestStockEntry(unittest.TestCase):
 		"posting_date": nowdate(),
 		"company":"_Test Company with perpetual inventory",
 		"items":[
-			{"item_code":"Basil Leaves",
-			"description":"Basil Leaves",
-			 "qty": 1,
-			 "basic_rate": 0,
-			 "uom":"Nos",
-			 "t_warehouse": "Stores - TCP1",
-			 "allow_zero_valuation_rate": 1,
-			 "cost_center": "Main - TCP1"}
+			{
+				"item_code":"Basil Leaves",
+				"description":"Basil Leaves",
+				"qty": 1,
+				"basic_rate": 0,
+				"uom":"Nos",
+				"t_warehouse": "Stores - TCP1",
+				"allow_zero_valuation_rate": 1,
+				"cost_center": "Main - TCP1"
+			 },
+			 {
+				"item_code":"Basil Leaves",
+				"description":"Basil Leaves",
+				"qty": 2,
+				"basic_rate": 0,
+				"uom":"Nos",
+				"t_warehouse": "Stores - TCP1",
+				"allow_zero_valuation_rate": 1,
+				"cost_center": "Main - TCP1"
+			 },
 			 ],
 		"additional_costs":[
 			{"expense_account":"Miscellaneous Expenses - TCP1",
@@ -813,9 +824,15 @@ class TestStockEntry(unittest.TestCase):
 			"description": "miscellanous"}
 			]
 		})
-
 		se.insert()
-		self.assertRaises(TotalBasicAmountZeroError, se.submit)
+		se.submit()
+
+		self.check_gl_entries("Stock Entry", se.name,
+			sorted([
+				["Stock Adjustment - TCP1", 100.0, 0.0],
+				["Miscellaneous Expenses - TCP1", 0.0, 100.0]
+			])
+		)
 
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])
