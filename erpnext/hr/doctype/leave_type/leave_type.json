@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:leave_type_name",
@@ -24,10 +25,12 @@
   "encashment",
   "allow_encashment",
   "encashment_threshold_days",
+  "column_break_17",
   "earning_component",
   "earned_leave",
   "is_earned_leave",
   "earned_leave_frequency",
+  "column_break_22",
   "rounding"
  ],
  "fields": [
@@ -172,11 +175,20 @@
    "fieldname": "maximum_carry_forwarded_leaves",
    "fieldtype": "Float",
    "label": "Maximum Carry Forwarded Leaves"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-flag",
  "idx": 1,
- "modified": "2019-09-06 18:48:48.946074",
+ "links": [],
+ "modified": "2019-12-12 12:48:37.780254",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",
