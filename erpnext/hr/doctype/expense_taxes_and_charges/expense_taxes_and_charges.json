@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2019-06-03 11:42:33.123976",
  "doctype": "DocType",
@@ -8,8 +9,8 @@
  "field_order": [
   "account_head",
   "cost_center",
-  "col_break1",
   "rate",
+  "col_break1",
   "description",
   "section_break_6",
   "tax_amount",
@@ -93,7 +94,8 @@
   }
  ],
  "istable": 1,
- "modified": "2019-06-20 12:01:33.919555",
+ "links": [],
+ "modified": "2019-12-11 13:50:02.883328",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Taxes and Charges",

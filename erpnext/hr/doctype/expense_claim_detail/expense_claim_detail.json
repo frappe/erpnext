@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-02-22 01:27:46",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -12,9 +13,9 @@
   "description",
   "section_break_6",
   "amount",
+  "cost_center",
   "column_break_8",
-  "sanctioned_amount",
-  "cost_center"
+  "sanctioned_amount"
  ],
  "fields": [
   {
@@ -107,8 +108,9 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-11-22 11:57:25.110942",
- "modified_by": "jangeles@bai.ph",
+ "links": [],
+ "modified": "2019-12-11 13:42:33.233432",
+ "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim Detail",
  "owner": "harshada@webnotestech.com",
