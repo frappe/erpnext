@@ -36,7 +36,7 @@ class TestProject(unittest.TestCase):
 		frappe.db.sql('delete from tabTask where project = "Test Project with Template and Skip Weekends"')
 		frappe.delete_doc('Project', 'Test Project with Template and Skip Weekends')
 
-		project = get_project('Test Project with Template and Skip Weekends')
+		project = get_project_for_skiping_weekends('Test Project with Template and Skip Weekends')
 
 		tasks = frappe.get_all('Task', '*', dict(project=project.name), order_by='creation asc')
 		self.assertEqual(len(tasks), 4)
