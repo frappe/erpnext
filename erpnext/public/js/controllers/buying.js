@@ -30,7 +30,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			&& frappe.meta.has_field(this.frm.doc.doctype, "disable_rounded_total")) {
 
 				var df = frappe.meta.get_docfield(this.frm.doc.doctype, "disable_rounded_total");
-				var disable = df.default || cint(frappe.sys_defaults.disable_rounded_total);
+				var disable = cint(df.default) || cint(frappe.sys_defaults.disable_rounded_total);
 				this.frm.set_value("disable_rounded_total", disable);
 		}
 
