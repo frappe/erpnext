@@ -179,6 +179,8 @@ def get_regional_address_details(party_details, doctype, company, return_taxes=N
 
 	if not party_details.place_of_supply: return
 
+	if not party_details.company_gstin: return
+
 	if ((doctype in ("Sales Invoice", "Delivery Note", "Sales Order") and party_details.company_gstin
 		and party_details.company_gstin[:2] != party_details.place_of_supply[:2]) or (doctype in ("Purchase Invoice",
 		"Purchase Order", "Purchase Receipt") and party_details.supplier_gstin and party_details.supplier_gstin[:2] != party_details.place_of_supply[:2])):
