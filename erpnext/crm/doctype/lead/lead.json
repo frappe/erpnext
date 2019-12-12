@@ -1,10 +1,12 @@
 {
+ "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-04-10 11:45:37",
  "doctype": "DocType",
  "document_type": "Document",
+ "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
   "organization_lead",
@@ -366,7 +368,8 @@
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
- "modified": "2019-09-19 12:49:02.536647",
+ "links": [],
+ "modified": "2019-12-12 21:00:59.166518",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -435,8 +438,10 @@
   }
  ],
  "search_fields": "lead_name,lead_owner,status",
+ "sender_field": "status",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "subject_field": "notes",
  "title_field": "lead_name"
 }
