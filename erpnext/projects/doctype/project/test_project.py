@@ -88,3 +88,5 @@ def get_project_for_skiping_weekends(name):
 		project_template = template.name,
 		expected_start_date = '2019-12-11'
 	)).insert()
+	
+	return project
