@@ -119,6 +119,7 @@ def get_valid_items(search_value=''):
 @frappe.whitelist()
 def publish_selected_items(items_to_publish):
 	items_to_publish = json.loads(items_to_publish)
+	items_to_update = []
 	if not len(items_to_publish):
 		frappe.throw(_('No items to publish'))
 
@@ -126,14 +127,24 @@ def publish_selected_items(items_to_publish):
 		item_code = item.get('item_code')
 		frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
 
-		frappe.get_doc({
+		hub_dict = {
 			'doctype': 'Hub Tracked Item',
 			'item_code': item_code,
+			'published': 1,
 			'hub_category': item.get('hub_category'),
 			'image_list': item.get('image_list')
-		}).insert(ignore_if_duplicate=True)
+		}
+		if frappe.db.exists('Hub Tracked Item', item_code):
+			items_to_update.append(item)
+			hub_tracked_item = frappe.get_doc('Hub Tracked Item', item_code)
+			hub_tracked_item.update(hub_dict)
+			hub_tracked_items.save()
+		else:
+			frappe.get_doc(hub_dict).insert(ignore_if_duplicate=True)
 
-	items = map_fields(items_to_publish)
+	items_to_publish = list(filter(lambda x: x not in items_to_update, items_to_publish))
+	new_items = map_fields(items_to_publish)
+	existing_items = map_fields(items_to_update)
 
 	try:
 		item_sync_preprocess(len(items))
@@ -141,7 +152,8 @@ def publish_selected_items(items_to_publish):
 
 		# TODO: Publish Progress
 		connection = get_hub_connection()
-		connection.insert_many(items)
+		connection.insert_many(new_items)
+		connection.bulk_update(existing_items)
 
 		item_sync_postprocess()
 	except Exception as e:
