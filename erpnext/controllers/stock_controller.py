@@ -282,6 +282,11 @@ class StockController(AccountsController):
 		warehouses = list(set([d.warehouse for d in
 			self.get("items") if getattr(d, "warehouse", None)]))
 
+		target_warehouses = list(set([d.target_warehouse for d in
+			self.get("items") if getattr(d, "target_warehouse", None)]))
+
+		warehouses.extend(target_warehouses)
+
 		for w in warehouses:
 			validate_warehouse_company(w, self.company)
 
