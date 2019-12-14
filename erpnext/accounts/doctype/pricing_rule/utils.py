@@ -284,7 +284,7 @@ def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 			status = True
 
 		# if user has created item price against the transaction UOM
-		if rule.get("uom") == args.get("uom"):
+		if args and rule.get("uom") == args.get("uom"):
 			conversion_factor = 1.0
 
 		if status and (flt(rate) >= (flt(rule.min_amt) * conversion_factor)

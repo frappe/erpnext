@@ -68,6 +68,7 @@
   "target_warehouse",
   "prevdoc_docname",
   "col_break4",
+  "against_blanket_order",
   "blanket_order",
   "blanket_order_rate",
   "planning_section",
@@ -574,6 +575,7 @@
    "report_hide": 1
   },
   {
+   "depends_on": "eval:doc.against_blanket_order",
    "fieldname": "blanket_order",
    "fieldtype": "Link",
    "label": "Blanket Order",
@@ -581,6 +583,7 @@
    "options": "Blanket Order"
   },
   {
+   "depends_on": "eval:doc.against_blanket_order",
    "fieldname": "blanket_order_rate",
    "fieldtype": "Currency",
    "label": "Blanket Order Rate",
@@ -741,11 +744,17 @@
    "fieldname": "image_section",
    "fieldtype": "Section Break",
    "label": "Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "against_blanket_order",
+   "fieldtype": "Check",
+   "label": "Against Blanket Order"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-10-10 08:46:26.244823",
+ "modified": "2019-11-19 14:19:29.491945",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

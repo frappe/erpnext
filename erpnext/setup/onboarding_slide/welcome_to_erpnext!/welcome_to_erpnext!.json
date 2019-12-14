@@ -1,0 +1,22 @@
+{
+ "add_more_button": 0,
+ "app": "ERPNext",
+ "creation": "2019-11-26 17:01:26.671859",
+ "docstatus": 0,
+ "doctype": "Onboarding Slide",
+ "domains": [],
+ "help_links": [],
+ "idx": 0,
+ "image_src": "/assets/erpnext/images/illustrations/desk-onboard.png",
+ "max_count": 0,
+ "modified": "2019-12-03 22:49:12.871260",
+ "modified_by": "Administrator",
+ "name": "Welcome to ERPNext!",
+ "owner": "Administrator",
+ "slide_desc": "Setting up an ERP can be overwhelming. But don't worry, we have got your back!\nLet's setup your company.\nThis wizard will help you onboard to ERPNext in a short time!",
+ "slide_fields": [],
+ "slide_module": "Setup",
+ "slide_order": 1,
+ "slide_title": "Welcome to ERPNext!",
+ "slide_type": "Information"
+}
