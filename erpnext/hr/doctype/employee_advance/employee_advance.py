@@ -53,11 +53,25 @@ class EmployeeAdvance(Document):
 				and party = %s
 		""", (self.name, self.employee), as_dict=1)[0].paid_amount
 
+		return_amount = frappe.db.sql("""
+			select name, ifnull(sum(credit_in_account_currency), 0) as return_amount
+			from `tabGL Entry`
+			where against_voucher_type = 'Employee Advance'
+				and voucher_type != 'Expense Claim'
+				and against_voucher = %s
+				and party_type = 'Employee'
+				and party = %s
+		""", (self.name, self.employee), as_dict=1)[0].return_amount
+
 		if flt(paid_amount) > self.advance_amount:
 			frappe.throw(_("Row {0}# Paid Amount cannot be greater than requested advance amount"),
 				EmployeeAdvanceOverPayment)
 
+		if flt(return_amount) > self.paid_amount - self.claimed_amount:
+			frappe.throw(_("Return amount cannot be greater unclaimed amount"))
+
 		self.db_set("paid_amount", paid_amount)
+		self.db_set("return_amount", return_amount)
 		self.set_status()
 		frappe.db.set_value("Employee Advance", self.name , "status", self.status)
 

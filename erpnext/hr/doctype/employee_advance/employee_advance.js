@@ -34,7 +34,7 @@ frappe.ui.form.on('Employee Advance', {
 		}
 		else if (
 			frm.doc.docstatus === 1
-			&& flt(frm.doc.claimed_amount) < flt(frm.doc.paid_amount)
+			&& flt(frm.doc.claimed_amount) < flt(frm.doc.paid_amount) - flt(frm.doc.return_amount)
 			&& frappe.model.can_create("Expense Claim")
 		) {
 			frm.add_custom_button(
