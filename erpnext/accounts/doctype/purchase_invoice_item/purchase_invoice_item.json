@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-05-22 12:43:10",
  "doctype": "DocType",
@@ -507,7 +508,8 @@
    "depends_on": "enable_deferred_expense",
    "fieldname": "service_stop_date",
    "fieldtype": "Date",
-   "label": "Service Stop Date"
+   "label": "Service Stop Date",
+   "no_copy": 1
   },
   {
    "default": "0",
@@ -523,13 +525,15 @@
    "depends_on": "enable_deferred_expense",
    "fieldname": "service_start_date",
    "fieldtype": "Date",
-   "label": "Service Start Date"
+   "label": "Service Start Date",
+   "no_copy": 1
   },
   {
    "depends_on": "enable_deferred_expense",
    "fieldname": "service_end_date",
    "fieldtype": "Date",
-   "label": "Service End Date"
+   "label": "Service End Date",
+   "no_copy": 1
   },
   {
    "fieldname": "reference",
@@ -766,7 +770,8 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-11-21 16:27:52.043744",
+ "links": [],
+ "modified": "2019-12-04 12:23:17.046413",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

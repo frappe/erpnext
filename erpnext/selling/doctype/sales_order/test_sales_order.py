@@ -12,6 +12,7 @@ from erpnext.selling.doctype.sales_order.sales_order import make_work_orders
 from erpnext.controllers.accounts_controller import update_child_qty_rate
 import json
 from erpnext.selling.doctype.sales_order.sales_order import make_raw_material_request
+from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
 
 class TestSalesOrder(unittest.TestCase):
 	def tearDown(self):
@@ -819,6 +820,25 @@ class TestSalesOrder(unittest.TestCase):
 		mr_doc = frappe.get_doc('Material Request',mr.get('name'))
 		self.assertEqual(mr_doc.items[0].sales_order, so.name)
 
+	def test_so_optional_blanket_order(self):
+		"""
+			Expected result: Blanket order Ordered Quantity should only be affected on Sales Order with against_blanket_order = 1.
+			Second Sales Order should not add on to Blanket Orders Ordered Quantity.
+		"""
+
+		bo = make_blanket_order(blanket_order_type = "Selling", quantity = 10, rate = 10)
+
+		so = make_sales_order(item_code= "_Test Item", qty = 5, against_blanket_order = 1)
+		so_doc = frappe.get_doc('Sales Order', so.get('name'))
+		# To test if the SO has a Blanket Order
+		self.assertTrue(so_doc.items[0].blanket_order)
+
+		so = make_sales_order(item_code= "_Test Item", qty = 5, against_blanket_order = 0)
+		so_doc = frappe.get_doc('Sales Order', so.get('name'))
+		# To test if the SO does NOT have a Blanket Order
+		self.assertEqual(so_doc.items[0].blanket_order, None)
+
+
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
 	args = frappe._dict(args)
@@ -845,7 +865,8 @@ def make_sales_order(**args):
 			"warehouse": args.warehouse,
 			"qty": args.qty or 10,
 			"uom": args.uom or None,
-			"rate": args.rate or 100
+			"rate": args.rate or 100,
+			"against_blanket_order": args.against_blanket_order
 		})
 
 	so.delivery_date = add_days(so.transaction_date, 10)

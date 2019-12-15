@@ -532,16 +532,9 @@ class Gstr1Report(object):
 		self.columns = self.invoice_columns + self.tax_columns + self.other_columns
 
 @frappe.whitelist()
-def get_json():
-	data = frappe._dict(frappe.local.form_dict)
-
-	del data["cmd"]
-	if "csrf_token" in data:
-		del data["csrf_token"]
-
-	filters = json.loads(data["filters"])
-	report_data = json.loads(data["data"])
-	report_name = data["report_name"]
+def get_json(filters, report_name, data):
+	filters = json.loads(filters)
+	report_data = json.loads(data)
 	gstin = get_company_gstin_number(filters["company"])
 
 	fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
@@ -575,7 +568,11 @@ def get_json():
 		out = get_export_json(res)
 		gst_json["exp"] = out
 
-	download_json_file(report_name, filters["type_of_business"], gst_json)
+	return {
+		'report_name': report_name,
+		'report_type': filters['type_of_business'],
+		'data': gst_json
+	}
 
 def get_b2b_json(res, gstin):
 	inv_type, out = {"Registered Regular": "R", "Deemed Export": "DE", "URD": "URD", "SEZ": "SEZ"}, []
@@ -722,11 +719,15 @@ def get_company_gstin_number(company):
 	if gstin:
 		return gstin[0]["gstin"]
 	else:
-		frappe.throw(_("Please set valid GSTIN No. in Company Address"))
+		frappe.throw(_("Please set valid GSTIN No. in Company Address for company {0}".format(
+			frappe.bold(company)
+		)))
 
-def download_json_file(filename, report_type, data):
+@frappe.whitelist()
+def download_json_file():
 	''' download json content in a file '''
-	frappe.response['filename'] = frappe.scrub("{0} {1}".format(filename, report_type)) + '.json'
-	frappe.response['filecontent'] = json.dumps(data)
+	data = frappe._dict(frappe.local.form_dict)
+	frappe.response['filename'] = frappe.scrub("{0} {1}".format(data['report_name'], data['report_type'])) + '.json'
+	frappe.response['filecontent'] = data['data']
 	frappe.response['content_type'] = 'application/json'
 	frappe.response['type'] = 'download'

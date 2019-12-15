@@ -127,7 +127,7 @@ class ExpenseClaim(AccountsController):
 					"debit": data.sanctioned_amount,
 					"debit_in_account_currency": data.sanctioned_amount,
 					"against": self.employee,
-					"cost_center": self.cost_center
+					"cost_center": data.cost_center
 				})
 			)
 
@@ -190,8 +190,9 @@ class ExpenseClaim(AccountsController):
 			)
 
 	def validate_account_details(self):
-		if not self.cost_center:
-			frappe.throw(_("Cost center is required to book an expense claim"))
+		for data in self.expenses:
+			if not data.cost_center:
+				frappe.throw(_("Cost center is required to book an expense claim"))
 
 		if self.is_paid:
 			if not self.mode_of_payment:
