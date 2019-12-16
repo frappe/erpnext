@@ -259,6 +259,8 @@ class TestStockEntry(unittest.TestCase):
 		repack.posting_date = nowdate()
 		repack.posting_time = nowtime()
 
+		expenses_included_in_valuation = frappe.get_value("Company", company, "expenses_included_in_valuation")
+
 		items = get_multiple_items()
 		repack.items = []
 		for item in items:
@@ -266,11 +268,13 @@ class TestStockEntry(unittest.TestCase):
 
 		repack.set("additional_costs", [
 			{
-				"description": "Actual Oerating Cost",
+				"expense_account": expenses_included_in_valuation,
+				"description": "Actual Operating Cost",
 				"amount": 1000
 			},
 			{
-				"description": "additional operating costs",
+				"expense_account": expenses_included_in_valuation,
+				"description": "Additional Operating Cost",
 				"amount": 200
 			},
 		])
@@ -785,6 +789,50 @@ class TestStockEntry(unittest.TestCase):
 		is_opening = frappe.db.get_value("GL Entry",
 			filters={"voucher_type": "Stock Entry", "voucher_no": mr.name}, fieldname="is_opening")
 		self.assertEqual(is_opening, "Yes")
+
+	def test_total_basic_amount_zero(self):
+		se = frappe.get_doc({"doctype":"Stock Entry",
+		"purpose":"Material Receipt",
+		"stock_entry_type":"Material Receipt",
+		"posting_date": nowdate(),
+		"company":"_Test Company with perpetual inventory",
+		"items":[
+			{
+				"item_code":"Basil Leaves",
+				"description":"Basil Leaves",
+				"qty": 1,
+				"basic_rate": 0,
+				"uom":"Nos",
+				"t_warehouse": "Stores - TCP1",
+				"allow_zero_valuation_rate": 1,
+				"cost_center": "Main - TCP1"
+			 },
+			 {
+				"item_code":"Basil Leaves",
+				"description":"Basil Leaves",
+				"qty": 2,
+				"basic_rate": 0,
+				"uom":"Nos",
+				"t_warehouse": "Stores - TCP1",
+				"allow_zero_valuation_rate": 1,
+				"cost_center": "Main - TCP1"
+			 },
+			 ],
+		"additional_costs":[
+			{"expense_account":"Miscellaneous Expenses - TCP1",
+			"amount":100,
+			"description": "miscellanous"}
+			]
+		})
+		se.insert()
+		se.submit()
+
+		self.check_gl_entries("Stock Entry", se.name,
+			sorted([
+				["Stock Adjustment - TCP1", 100.0, 0.0],
+				["Miscellaneous Expenses - TCP1", 0.0, 100.0]
+			])
+		)
 
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])

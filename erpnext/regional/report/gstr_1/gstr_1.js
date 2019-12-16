@@ -52,17 +52,28 @@ frappe.query_reports["GSTR-1"] = {
 	],
 	onload: function (report) {
 
-		report.page.add_inner_button(__("Download as Json"), function () {
+		report.page.add_inner_button(__("Download as JSON"), function () {
 			var filters = report.get_values();
 
-			const args = {
-				cmd: 'erpnext.regional.report.gstr_1.gstr_1.get_json',
-				data: report.data,
-				report_name: report.report_name,
-				filters: filters
-			};
-
-			open_url_post(frappe.request.url, args);
+			frappe.call({
+				method: 'erpnext.regional.report.gstr_1.gstr_1.get_json',
+				args: {
+					data: report.data,
+					report_name: report.report_name,
+					filters: filters
+				},
+				callback: function(r) {
+					if (r.message) {
+						const args = {
+							cmd: 'erpnext.regional.report.gstr_1.gstr_1.download_json_file',
+							data: r.message.data,
+							report_name: r.message.report_name,
+							report_type: r.message.report_type
+						};
+						open_url_post(frappe.request.url, args);
+					}
+				}
+			});
 		});
 	}
 }
