@@ -301,6 +301,8 @@ def get_items(filters=None, search=None):
 	if isinstance(filters, dict):
 		filters = [['Item', fieldname, '=', value] for fieldname, value in filters.items()]
 
+	enabled_items_filter = get_conditions({ 'disabled': 0 }, 'and')
+
 	show_in_website_condition = ''
 	if products_settings.hide_variants:
 		show_in_website_condition = get_conditions({'show_in_website': 1 }, 'and')
@@ -336,12 +338,9 @@ def get_items(filters=None, search=None):
 	filter_condition = get_conditions(filters, 'and')
 
 	where_conditions = ' and '.join(
-		[condition for condition in [show_in_website_condition, search_condition, filter_condition] if condition]
+		[condition for condition in [enabled_items_filter, show_in_website_condition, \
+			search_condition, filter_condition] if condition]
 	)
-	if where_conditions:
-		where_conditions += ' and disabled = 0'
-	else:
-		where_conditions += 'disabled = 0'
 
 	left_joins = []
 	for f in filters:
