@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import frappe, copy, json
 from frappe import throw, _
 from six import string_types
-from frappe.utils import flt, cint, get_datetime, get_link_to_form
+from frappe.utils import flt, cint, get_datetime, get_link_to_form, today
 from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -434,8 +434,8 @@ def apply_pricing_rule_on_transaction(doc):
 
 				doc.calculate_taxes_and_totals()
 			elif d.price_or_product_discount == 'Product':
-				item_details = frappe._dict()
-				get_product_discount_rule(d, item_details)
+				item_details = frappe._dict({'parenttype': doc.doctype})
+				get_product_discount_rule(d, item_details, doc)
 				apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
 				doc.set_missing_values()
 
@@ -443,7 +443,7 @@ def get_applied_pricing_rules(item_row):
 	return (item_row.get("pricing_rules").split(',')
 		if item_row.get("pricing_rules") else [])
 
-def get_product_discount_rule(pricing_rule, item_details):
+def get_product_discount_rule(pricing_rule, item_details, doc=None):
 	free_item = (pricing_rule.free_item
 		if not pricing_rule.same_item or pricing_rule.apply_on == 'Transaction' else item_details.item_code)
 
@@ -466,6 +466,12 @@ def get_product_discount_rule(pricing_rule, item_details):
 	item_details.free_item_data['uom'] = pricing_rule.free_item_uom or item_data.stock_uom
 	item_details.free_item_data['conversion_factor'] = get_conversion_factor(free_item, 
 		item_details.free_item_data['uom']).get("conversion_factor", 1)
+
+	if item_details.get("parenttype") == 'Purchase Order':
+		item_details.free_item_data['schedule_date'] = doc.schedule_date if doc else today()
+
+	if item_details.get("parenttype") == 'Sales Order':
+		item_details.free_item_data['delivery_date'] = doc.delivery_date if doc else today()
 
 def apply_pricing_rule_for_free_items(doc, pricing_rule_args, set_missing_values=False):
 	if pricing_rule_args.get('item_code'):
