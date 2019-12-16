@@ -223,7 +223,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			me.frm.doc.net_total += item.net_amount;
 			me.frm.doc.base_net_total += item.base_net_amount;
 			});
-
 		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total"]);
 	},
 
@@ -387,7 +386,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				var diff = me.frm.doc.total + non_inclusive_tax_amount
 					- flt(last_tax.total, precision("grand_total"));
 
-				if ( diff < 0 && Math.abs(diff) <= (5.0 / Math.pow(10, precision("tax_amount", last_tax))) ) {
+				diff = ((diff - me.frm.doc.discount_amount) <= (1.0/ Math.pow(10, precision("tax_amount", last_tax)))) ? 0 : diff;
+
+				if ( diff && Math.abs(diff) <= (5.0 / Math.pow(10, precision("tax_amount", last_tax))) ) {
 					this.frm.doc.rounding_adjustment = flt(flt(this.frm.doc.rounding_adjustment) + diff,
 						precision("rounding_adjustment"));
 				}
