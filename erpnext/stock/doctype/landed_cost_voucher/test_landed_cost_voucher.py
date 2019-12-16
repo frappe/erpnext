@@ -14,15 +14,15 @@ from erpnext.accounts.doctype.account.test_account import get_inventory_account
 class TestLandedCostVoucher(unittest.TestCase):
 	def test_landed_cost_voucher(self):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
-		set_perpetual_inventory(1)
-		pr = frappe.copy_doc(pr_test_records[0])
-		pr.submit()
+
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", get_multiple_items = True, get_taxes_and_charges = True)
+
 
 		last_sle = frappe.db.get_value("Stock Ledger Entry", {
 				"voucher_type": pr.doctype,
 				"voucher_no": pr.name,
 				"item_code": "_Test Item",
-				"warehouse": "_Test Warehouse - _TC"
+				"warehouse": "Stores - TCP1"
 			},
 			fieldname=["qty_after_transaction", "stock_value"], as_dict=1)
 
@@ -35,7 +35,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 				"voucher_type": pr.doctype,
 				"voucher_no": pr.name,
 				"item_code": "_Test Item",
-				"warehouse": "_Test Warehouse - _TC"
+				"warehouse": "Stores - TCP1"
 			},
 			fieldname=["qty_after_transaction", "stock_value"], as_dict=1)
 
@@ -53,16 +53,17 @@ class TestLandedCostVoucher(unittest.TestCase):
 		if stock_in_hand_account == fixed_asset_account:
 			expected_values = {
 				stock_in_hand_account: [800.0, 0.0],
-				"Stock Received But Not Billed - _TC": [0.0, 500.0],
-				"Expenses Included In Valuation - _TC": [0.0, 300.0]
+				"Stock Received But Not Billed - TCP1": [0.0, 500.0],
+				"Expenses Included In Valuation - TCP1": [0.0, 50.0],
+				"_Test Account Customs Duty - TCP1": [0.0, 150],
+				"_Test Account Shipping Charges - TCP1": [0.0, 100.00]
 			}
-
 		else:
 			expected_values = {
 				stock_in_hand_account: [400.0, 0.0],
 				fixed_asset_account: [400.0, 0.0],
-				"Stock Received But Not Billed - _TC": [0.0, 500.0],
-				"Expenses Included In Valuation - _TC": [0.0, 300.0]
+				"Stock Received But Not Billed - TCP1": [0.0, 500.0],
+				"Expenses Included In Valuation - TCP1": [0.0, 300.0]
 			}
 
 		for gle in gl_entries:
@@ -70,19 +71,20 @@ class TestLandedCostVoucher(unittest.TestCase):
 				self.assertEqual(expected_values[gle.account][0], gle.debit)
 				self.assertEqual(expected_values[gle.account][1], gle.credit)
 
-		set_perpetual_inventory(0)
 
 	def test_landed_cost_voucher_against_purchase_invoice(self):
-		set_perpetual_inventory(1)
 
 		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(),
-			posting_time=frappe.utils.nowtime())
+			posting_time=frappe.utils.nowtime(), cash_bank_account="Cash - TCP1",
+			company="_Test Company with perpetual inventory", supplier_warehouse="Work In Progress - TCP1",
+			warehouse= "Stores - TCP1", cost_center = "Main - TCP1",
+			expense_account ="_Test Account Cost for Goods Sold - TCP1")
 
 		last_sle = frappe.db.get_value("Stock Ledger Entry", {
 				"voucher_type": pi.doctype,
 				"voucher_no": pi.name,
 				"item_code": "_Test Item",
-				"warehouse": "_Test Warehouse - _TC"
+				"warehouse": "Stores - TCP1"
 			},
 			fieldname=["qty_after_transaction", "stock_value"], as_dict=1)
 
@@ -97,7 +99,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 				"voucher_type": pi.doctype,
 				"voucher_no": pi.name,
 				"item_code": "_Test Item",
-				"warehouse": "_Test Warehouse - _TC"
+				"warehouse": "Stores - TCP1"
 			},
 			fieldname=["qty_after_transaction", "stock_value"], as_dict=1)
 
@@ -112,8 +114,8 @@ class TestLandedCostVoucher(unittest.TestCase):
 
 		expected_values = {
 			stock_in_hand_account: [300.0, 0.0],
-			"Creditors - _TC": [0.0, 250.0],
-			"Expenses Included In Valuation - _TC": [0.0, 50.0]
+			"Creditors - TCP1": [0.0, 250.0],
+			"Expenses Included In Valuation - TCP1": [0.0, 50.0]
 		}
 
 		for gle in gl_entries:
@@ -121,13 +123,13 @@ class TestLandedCostVoucher(unittest.TestCase):
 				self.assertEqual(expected_values[gle.account][0], gle.debit)
 				self.assertEqual(expected_values[gle.account][1], gle.credit)
 
-		set_perpetual_inventory(0)
 
 	def test_landed_cost_voucher_for_serialized_item(self):
-		set_perpetual_inventory(1)
 		frappe.db.sql("delete from `tabSerial No` where name in ('SN001', 'SN002', 'SN003', 'SN004', 'SN005')")
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1",
+		supplier_warehouse = "Work in Progress - TCP1", get_multiple_items = True,
+		get_taxes_and_charges = True, do_not_submit = True)
 
-		pr = frappe.copy_doc(pr_test_records[0])
 		pr.items[0].item_code = "_Test Serialized Item"
 		pr.items[0].serial_no = "SN001\nSN002\nSN003\nSN004\nSN005"
 		pr.submit()
@@ -140,20 +142,18 @@ class TestLandedCostVoucher(unittest.TestCase):
 			["warehouse", "purchase_rate"], as_dict=1)
 
 		self.assertEqual(serial_no.purchase_rate - serial_no_rate, 5.0)
-		self.assertEqual(serial_no.warehouse, "_Test Warehouse - _TC")
+		self.assertEqual(serial_no.warehouse, "Stores - TCP1")
 
-		set_perpetual_inventory(0)
 
 	def test_landed_cost_voucher_for_odd_numbers (self):
-		set_perpetual_inventory(1)
 
-		pr = make_purchase_receipt(do_not_save=True)
-		pr.items[0].cost_center = "_Test Company - _TC"
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", do_not_save=True)
+		pr.items[0].cost_center = "Main - TCP1"
 		for x in range(2):
 			pr.append("items", {
 				"item_code": "_Test Item",
-				"warehouse": "_Test Warehouse - _TC",
-				"cost_center": "_Test Company - _TC",
+				"warehouse": "Stores - TCP1",
+				"cost_center": "Main - TCP1",
 				"qty": 5,
 				"rate": 50
 			})
@@ -164,7 +164,6 @@ class TestLandedCostVoucher(unittest.TestCase):
 		self.assertEqual(lcv.items[0].applicable_charges, 41.07)
 		self.assertEqual(lcv.items[2].applicable_charges, 41.08)
 
-		set_perpetual_inventory(0)
 
 def submit_landed_cost_voucher(receipt_document_type, receipt_document, charges=50):
 	ref_doc = frappe.get_doc(receipt_document_type, receipt_document)
@@ -183,7 +182,7 @@ def submit_landed_cost_voucher(receipt_document_type, receipt_document, charges=
 
 	lcv.set("taxes", [{
 		"description": "Insurance Charges",
-		"account": "_Test Account Insurance Charges - _TC",
+		"expense_account": "Expenses Included In Valuation - TCP1",
 		"amount": charges
 	}])
 

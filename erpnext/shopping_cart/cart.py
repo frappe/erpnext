@@ -11,6 +11,7 @@ from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings
 from frappe.utils.nestedset import get_root_of
 from erpnext.accounts.utils import get_account_name
 from erpnext.utilities.product import get_qty_in_stock
+from frappe.contacts.doctype.contact.contact import get_contact_name
 
 
 class WebsitePriceListMissingError(frappe.ValidationError):
@@ -55,8 +56,6 @@ def place_order():
 	cart_settings = frappe.db.get_value("Shopping Cart Settings", None,
 		["company", "allow_items_not_in_stock"], as_dict=1)
 	quotation.company = cart_settings.company
-	if not quotation.get("customer_address"):
-		throw(_("{0} is required").format(_(quotation.meta.get_label("customer_address"))))
 
 	quotation.flags.ignore_permissions = True
 	quotation.submit()
@@ -67,8 +66,9 @@ def place_order():
 
 	from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))
+	sales_order.payment_schedule = []
 
-	if not cart_settings.allow_items_not_in_stock:
+	if not cint(cart_settings.allow_items_not_in_stock):
 		for item in sales_order.get("items"):
 			item.reserved_warehouse, is_stock_item = frappe.db.get_value("Item",
 				item.item_code, ["website_warehouse", "is_stock_item"])
@@ -373,7 +373,7 @@ def get_party(user=None):
 	if not user:
 		user = frappe.session.user
 
-	contact_name = frappe.db.get_value("Contact", {"email_id": user})
+	contact_name = get_contact_name(user)
 	party = None
 
 	if contact_name:
@@ -419,7 +419,7 @@ def get_party(user=None):
 		contact = frappe.new_doc("Contact")
 		contact.update({
 			"first_name": fullname,
-			"email_id": user
+			"email_ids": [{"email_id": user, "is_primary": 1}]
 		})
 		contact.append('links', dict(link_doctype='Customer', link_name=customer.name))
 		contact.flags.ignore_mandatory = True
@@ -506,7 +506,7 @@ def get_applicable_shipping_rules(party=None, quotation=None):
 	if shipping_rules:
 		rule_label_map = frappe.db.get_values("Shipping Rule", shipping_rules, "label")
 		# we need this in sorted order as per the position of the rule in the settings page
-		return [[rule, rule_label_map.get(rule)] for rule in shipping_rules]
+		return [[rule, rule] for rule in shipping_rules]
 
 def get_shipping_rules(quotation=None, cart_settings=None):
 	if not quotation:
@@ -539,3 +539,29 @@ def get_address_territory(address_name):
 
 def show_terms(doc):
 	return doc.tc_name
+
+@frappe.whitelist(allow_guest=True)
+def apply_coupon_code(applied_code,applied_referral_sales_partner):
+	quotation = True
+	if applied_code:
+		coupon_list=frappe.get_all('Coupon Code', filters={"docstatus": ("<", "2"), 'coupon_code':applied_code }, fields=['name'])
+		if coupon_list:
+			coupon_name=coupon_list[0].name
+			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
+			validate_coupon_code(coupon_name)
+			quotation = _get_cart_quotation()
+			quotation.coupon_code=coupon_name
+			quotation.flags.ignore_permissions = True
+			quotation.save()
+			if applied_referral_sales_partner:
+				sales_partner_list=frappe.get_all('Sales Partner', filters={'docstatus': 0, 'referral_code':applied_referral_sales_partner }, fields=['name'])
+				if sales_partner_list:
+					sales_partner_name=sales_partner_list[0].name
+					quotation.referral_sales_partner=sales_partner_name
+					quotation.flags.ignore_permissions = True
+					quotation.save()
+		else:
+			frappe.throw(_("Please enter valid coupon code !!"))
+	else:
+		frappe.throw(_("Please enter coupon code !!"))
+	return quotation

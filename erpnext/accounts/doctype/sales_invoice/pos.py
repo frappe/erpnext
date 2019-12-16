@@ -238,7 +238,7 @@ def get_contacts(customers):
 		customers = [frappe._dict({'name': customers})]
 
 	for data in customers:
-		contact = frappe.db.sql(""" select email_id, phone from `tabContact`
+		contact = frappe.db.sql(""" select email_id, phone, mobile_no from `tabContact`
 			where is_primary_contact=1 and name in
 			(select parent from `tabDynamic Link` where link_doctype = 'Customer' and link_name = %s
 			and parenttype = 'Contact')""", data.name, as_dict=1)
@@ -357,14 +357,11 @@ def get_customer_wise_price_list():
 
 def get_bin_data(pos_profile):
 	itemwise_bin_data = {}
-	cond = "1=1"
+	filters = { 'actual_qty': ['>', 0] }
 	if pos_profile.get('warehouse'):
-		cond = "warehouse = %(warehouse)s"
+		filters.update({ 'warehouse': pos_profile.get('warehouse') })
 
-	bin_data = frappe.db.sql(""" select item_code, warehouse, actual_qty from `tabBin`
-		where actual_qty > 0 and {cond}""".format(cond=cond), {
-			'warehouse': frappe.db.escape(pos_profile.get('warehouse'))
-		}, as_dict=1)
+	bin_data = frappe.db.get_all('Bin', fields = ['item_code', 'warehouse', 'actual_qty'], filters=filters)
 
 	for bins in bin_data:
 		if bins.item_code not in itemwise_bin_data:
@@ -402,14 +399,21 @@ def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
 	for docs in doc_list:
 		for name, doc in iteritems(docs):
 			if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
-				validate_records(doc)
-				si_doc = frappe.new_doc('Sales Invoice')
-				si_doc.offline_pos_name = name
-				si_doc.update(doc)
-				si_doc.set_posting_time = 1
-				si_doc.customer = get_customer_id(doc)
-				si_doc.due_date = doc.get('posting_date')
-				name_list = submit_invoice(si_doc, name, doc, name_list)
+				if isinstance(doc, dict):
+					validate_records(doc)
+					si_doc = frappe.new_doc('Sales Invoice')
+					si_doc.offline_pos_name = name
+					si_doc.update(doc)
+					si_doc.set_posting_time = 1
+					si_doc.customer = get_customer_id(doc)
+					si_doc.due_date = doc.get('posting_date')
+					name_list = submit_invoice(si_doc, name, doc, name_list)
+				else:
+					doc.due_date = doc.get('posting_date')
+					doc.customer = get_customer_id(doc)
+					doc.set_posting_time = 1
+					doc.offline_pos_name = name
+					name_list = submit_invoice(doc, name, doc, name_list)
 			else:
 				name_list.append(name)
 
@@ -543,11 +547,15 @@ def make_address(args, customer):
 
 def make_email_queue(email_queue):
 	name_list = []
+
 	for key, data in iteritems(email_queue):
 		name = frappe.db.get_value('Sales Invoice', {'offline_pos_name': key}, 'name')
+		if not name: continue
+
 		data = json.loads(data)
 		sender = frappe.session.user
 		print_format = "POS Invoice" if not cint(frappe.db.get_value('Print Format', 'POS Invoice', 'disabled')) else None
+
 		attachments = [frappe.attach_print('Sales Invoice', name, print_format=print_format)]
 
 		make(subject=data.get('subject'), content=data.get('content'), recipients=data.get('recipients'),

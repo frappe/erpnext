@@ -19,10 +19,26 @@ def execute(filters=None):
 	if opening_row:
 		data.append(opening_row)
 
+	actual_qty = stock_value = 0
+
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
 
 		sle.update(item_detail)
+
+		if filters.get("batch_no"):
+			actual_qty += sle.actual_qty
+			stock_value += sle.stock_value_difference
+
+			if sle.voucher_type == 'Stock Reconciliation':
+				actual_qty = sle.qty_after_transaction
+				stock_value = sle.stock_value
+
+			sle.update({
+				"qty_after_transaction": actual_qty,
+				"stock_value": stock_value
+			})
+
 		data.append(sle)
 
 		if include_uom:
@@ -67,7 +83,7 @@ def get_stock_ledger_entries(filters, items):
 
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
 			item_code, warehouse, actual_qty, qty_after_transaction, incoming_rate, valuation_rate,
-			stock_value, voucher_type, voucher_no, batch_no, serial_no, company, project
+			stock_value, voucher_type, voucher_no, batch_no, serial_no, company, project, stock_value_difference
 		from `tabStock Ledger Entry` sle
 		where company = %(company)s and
 			posting_date between %(from_date)s and %(to_date)s
@@ -106,7 +122,7 @@ def get_item_details(items, sl_entries, include_uom):
 	cf_field = cf_join = ""
 	if include_uom:
 		cf_field = ", ucd.conversion_factor"
-		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom='%s'" \
+		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%s" \
 			% frappe.db.escape(include_uom)
 
 	res = frappe.db.sql("""

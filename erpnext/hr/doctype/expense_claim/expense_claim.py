@@ -128,7 +128,7 @@ class ExpenseClaim(AccountsController):
 					"debit": data.sanctioned_amount,
 					"debit_in_account_currency": data.sanctioned_amount,
 					"against": self.employee,
-					"cost_center": self.cost_center
+					"cost_center": data.cost_center
 				})
 			)
 
@@ -141,10 +141,11 @@ class ExpenseClaim(AccountsController):
 					"against": ",".join([d.default_account for d in self.expenses]),
 					"party_type": "Employee",
 					"party": self.employee,
-					"against_voucher_type": self.doctype,
-					"against_voucher": self.name
+					"against_voucher_type": "Employee Advance",
+					"against_voucher": data.employee_advance
 				})
 			)
+
 		self.add_tax_gl_entries(gl_entry)
 
 		if self.is_paid and self.grand_total:
@@ -190,11 +191,9 @@ class ExpenseClaim(AccountsController):
 			)
 
 	def validate_account_details(self):
-		if not self.cost_center:
-			frappe.throw(_("Cost center is required to book an expense claim"))
-
-		if not self.payable_account:
-			frappe.throw(_("Please set default payable account for the company {0}").format(getlink("Company",self.company)))
+		for data in self.expenses:
+			if not data.cost_center:
+				frappe.throw(_("Cost center is required to book an expense claim"))
 
 		if self.is_paid:
 			if not self.mode_of_payment:

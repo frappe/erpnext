@@ -46,6 +46,7 @@ DocType: Sales Taxes and Charges Template,* Will be calculated in the transactio
 DocType: Delivery Trip,MAT-DT-.YYYY.-,MAT-DT-YYYY-
 DocType: Purchase Order,Customer Contact,Stranka Kontakt
 DocType: Shift Type,Enable Auto Attendance,Omogoči samodejno udeležbo
+apps/erpnext/erpnext/stock/doctype/quick_stock_balance/quick_stock_balance.js,Please enter Warehouse and Date,Vnesite skladišče in datum
 DocType: Lost Reason Detail,Opportunity Lost Reason,Priložnost izgubljen razlog
 DocType: Patient Appointment,Check availability,Preveri razpoložljivost
 DocType: Retention Bonus,Bonus Payment Date,Datum plačila bonusa
@@ -265,6 +266,7 @@ DocType: Tax Rule,Tax Type,Davčna Type
 ,Completed Work Orders,Dokončana delovna naročila
 DocType: Support Settings,Forum Posts,Objave foruma
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage","Naloga je bila vključena v ozadje. Če obstaja kakšna težava pri obdelavi v ozadju, bo sistem dodal komentar o napaki na tej usklajevanju zalog in se vrnil v fazo osnutka."
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/utils.py,"Sorry,coupon code validity has not started",Veljavnost kode kupona se žal ni začela
 apps/erpnext/erpnext/regional/india/utils.py,Taxable Amount,Davčna osnova
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py,You are not authorized to add or update entries before {0},Nimate dovoljenja za dodajanje ali posodobitev vnose pred {0}
 DocType: Leave Policy,Leave Policy Details,Pustite podrobnosti pravilnika
@@ -289,7 +291,6 @@ apps/erpnext/erpnext/accounts/doctype/cheque_print_template/cheque_print_templat
 DocType: Loan,Repay Over Number of Periods,Odplačilo Over število obdobij
 apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py,Quantity to Produce can not be less than Zero,Količina za proizvodnjo ne sme biti manjša od ničle
 DocType: Stock Entry,Additional Costs,Dodatni stroški
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Stranka&gt; Skupina kupcev&gt; Ozemlje
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account with existing transaction can not be converted to group.,Račun z obstoječim poslom ni mogoče pretvoriti v skupini.
 DocType: Lead,Product Enquiry,Povpraševanje izdelek
 DocType: Education Settings,Validate Batch for Students in Student Group,Potrdite Batch za študente v študentskih skupine
@@ -331,6 +332,7 @@ DocType: Asset Settings,Asset Settings,Nastavitve sredstva
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Consumable,Potrošni
 DocType: Student,B-,B-
 DocType: Assessment Result,Grade,razred
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Koda izdelka&gt; Skupina izdelkov&gt; Blagovna znamka
 DocType: Restaurant Table,No of Seats,Število sedežev
 DocType: Sales Invoice,Overdue and Discounted,Prepozno in znižano
 apps/erpnext/erpnext/public/js/call_popup/call_popup.js,Call Disconnected,Klic prekinjen
@@ -508,6 +510,7 @@ DocType: Healthcare Practitioner,Practitioner Schedules,Urniki zdravnikov
 DocType: Cheque Print Template,Line spacing for amount in words,Razmik med vrsticami za znesek z besedami
 DocType: Vehicle,Additional Details,Dodatne podrobnosti
 apps/erpnext/erpnext/templates/generators/bom.html,No description given,Opis ni dana
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.js,Fetch Items from Warehouse,Pridobivanje izdelkov iz skladišča
 apps/erpnext/erpnext/config/buying.py,Request for purchase.,Zaprosi za nakup.
 DocType: POS Closing Voucher Details,Collected Amount,Zbrani znesek
 DocType: Lab Test,Submitted Date,Datum predložitve
@@ -587,6 +590,7 @@ DocType: Payment Term,Payment Term Name,Ime izraza za plačilo
 DocType: Healthcare Settings,Create documents for sample collection,Ustvarite dokumente za zbiranje vzorcev
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Payment against {0} {1} cannot be greater than Outstanding Amount {2},Plačilo pred {0} {1} ne sme biti večja od neporavnanega zneska {2}
 apps/erpnext/erpnext/patches/v11_0/add_healthcare_service_unit_tree_root.py,All Healthcare Service Units,Vse enote zdravstvenega varstva
+apps/erpnext/erpnext/setup/default_energy_point_rules.py,On Converting Opportunity,O pretvorbi priložnosti
 DocType: Bank Account,Address HTML,Naslov HTML
 DocType: Lead,Mobile No.,Mobilni No.
 apps/erpnext/erpnext/selling/doctype/pos_closing_voucher/closing_voucher_details.html,Mode of Payments,Način plačila
@@ -614,6 +618,7 @@ DocType: Currency Exchange,For Selling,Za prodajo
 apps/erpnext/erpnext/config/desktop.py,Learn,Naučite
 ,Trial Balance (Simple),Preizkusna bilanca (preprosto)
 DocType: Purchase Invoice Item,Enable Deferred Expense,Omogoči odloženi strošek
+apps/erpnext/erpnext/templates/includes/order/order_taxes.html,Applied Coupon Code,Uporabljena koda kupona
 DocType: Asset,Next Depreciation Date,Naslednja Amortizacija Datum
 apps/erpnext/erpnext/projects/doctype/activity_type/activity_type.js,Activity Cost per Employee,Stroški dejavnost na zaposlenega
 DocType: Accounts Settings,Settings for Accounts,Nastavitve za račune
@@ -651,7 +656,6 @@ DocType: Stock Settings,Notify by Email on creation of automatic Material Reques
 DocType: Accounting Dimension,Dimension Name,Ime razsežnosti
 apps/erpnext/erpnext/healthcare/setup.py,Resistant,Odporen
 apps/erpnext/erpnext/hotels/doctype/hotel_room_reservation/hotel_room_reservation.py,Please set Hotel Room Rate on {},"Prosimo, nastavite hotelsko sobo na {"
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Nastavite serijsko številčenje za udeležbo prek Setup&gt; Seting Number
 DocType: Journal Entry,Multi Currency,Multi Valuta
 DocType: Bank Statement Transaction Invoice Item,Invoice Type,Račun Type
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Valid from date must be less than valid upto date,"Velja od datuma, ki mora biti manjši od veljavnega do datuma"
@@ -769,6 +773,7 @@ apps/erpnext/erpnext/public/js/controllers/transaction.js,Cannot find Item with 
 apps/erpnext/erpnext/accounts/page/pos/pos.js,Create a new Customer,Ustvari novo stranko
 apps/erpnext/erpnext/non_profit/report/expiring_memberships/expiring_memberships.py,Expiring On,Izteče se
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,"If multiple Pricing Rules continue to prevail, users are asked to set Priority manually to resolve conflict.","Če je več Rules Cenik še naprej prevladovala, so pozvane, da nastavite Priority ročno za reševanje morebitnih sporov."
+apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js,Purchase Return,nakup Return
 apps/erpnext/erpnext/utilities/activation.py,Create Purchase Orders,Ustvari naročilnice
 ,Purchase Register,Nakup Register
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.py,Patient not found,Bolnik ni najden
@@ -784,7 +789,6 @@ DocType: Announcement,Receiver,sprejemnik
 DocType: Location,Area UOM,Področje UOM
 apps/erpnext/erpnext/manufacturing/doctype/workstation/workstation.py,Workstation is closed on the following dates as per Holiday List: {0},Workstation je zaprt na naslednje datume kot na Holiday Seznam: {0}
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.py,Opportunities,Priložnosti
-apps/erpnext/erpnext/www/all-products/index.html,Clear filters,Počistite filtre
 DocType: Lab Test Template,Single,Samski
 DocType: Compensatory Leave Request,Work From Date,Delo od datuma
 DocType: Salary Slip,Total Loan Repayment,Skupaj posojila Povračilo
@@ -828,6 +832,7 @@ DocType: Account,Old Parent,Stara Parent
 apps/erpnext/erpnext/education/doctype/program_enrollment_tool/program_enrollment_tool.py,Mandatory field - Academic Year,Obvezno polje - študijsko leto
 apps/erpnext/erpnext/education/doctype/program_enrollment_tool/program_enrollment_tool.py,Mandatory field - Academic Year,Obvezno polje - študijsko leto
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,{0} {1} is not associated with {2} {3},{0} {1} ni povezan z {2} {3}
+DocType: Opportunity,Converted By,Pretvoril
 apps/erpnext/erpnext/public/js/hub/components/ReviewArea.vue,You need to login as a Marketplace User before you can add any reviews.,"Preden lahko dodate ocene, se morate prijaviti kot uporabnik tržnice."
 apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.py,Row {0} : Operation is required against the raw material item {1},Vrstica {0}: delovanje je potrebno proti elementu surovin {1}
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py,Please set default payable account for the company {0},"Prosimo, nastavite privzeto se plača račun za podjetje {0}"
@@ -913,7 +918,6 @@ apps/erpnext/erpnext/education/doctype/student_group/student_group.py,Please sel
 DocType: Codification Table,Codification Table,Tabela kodifikacije
 DocType: Timesheet Detail,Hrs,Ur
 apps/erpnext/erpnext/manufacturing/page/bom_comparison_tool/bom_comparison_tool.js,Changes in {0},Spremembe v {0}
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js,Please select Company,"Prosimo, izberite Company"
 DocType: Employee Skill,Employee Skill,Spretnost zaposlenih
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js,Difference Account,Razlika račun
 DocType: Pricing Rule,Discount on Other Item,Popust na drugi artikel
@@ -982,6 +986,7 @@ DocType: Global Defaults,"If disable, 'Rounded Total' field will not be visible 
 DocType: BOM,Operating Cost,Obratovalni stroški
 DocType: Crop,Produced Items,Proizvedeni elementi
 DocType: Bank Statement Transaction Entry,Match Transaction to Invoices,Ujemanje transakcije z računi
+apps/erpnext/erpnext/erpnext_integrations/exotel_integration.py,Error in Exotel incoming call,Napaka pri dohodnem klicu Exotel
 DocType: Sales Order Item,Gross Profit,Bruto dobiček
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,Unblock Invoice,Odblokiraj račun
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,Increment cannot be 0,Prirastek ne more biti 0
@@ -1018,6 +1023,7 @@ DocType: Sales Invoice,Total Commission,Skupaj Komisija
 DocType: Tax Withholding Account,Tax Withholding Account,Davčni odtegljaj
 DocType: Pricing Rule,Sales Partner,Prodaja Partner
 apps/erpnext/erpnext/config/buying.py,All Supplier scorecards.,Vse ocenjevalne table dobaviteljev.
+DocType: Coupon Code,To be used to get discount,Uporabiti za popust
 DocType: Buying Settings,Purchase Receipt Required,Potrdilo o nakupu Obvezno
 DocType: Sales Invoice,Rail,Železnica
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Actual Cost,Dejanski stroški
@@ -1068,6 +1074,7 @@ DocType: Sales Invoice,Shipping Bill Date,Datum pošiljanja
 DocType: Production Plan,Production Plan,Načrt proizvodnje
 DocType: Opening Invoice Creation Tool,Opening Invoice Creation Tool,Odpiranje orodja za ustvarjanje računov
 DocType: Salary Component,Round to the Nearest Integer,Zaokrožite do najbližjega celega števila
+DocType: Shopping Cart Settings,Allow items not in stock to be added to cart,"Dovoli, da se izdelki, ki niso na zalogi, dodajo v košarico"
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js,Sales Return,Prodaja Return
 DocType: Stock Settings,Set Qty in Transactions based on Serial No Input,Nastavite količino transakcij na podlagi serijskega vhoda
 ,Total Stock Summary,Skupaj Stock Povzetek
@@ -1197,7 +1204,9 @@ apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js,Convert to Grou
 DocType: Activity Cost,Activity Type,Vrsta dejavnosti
 DocType: Request for Quotation,For individual supplier,Za posameznega dobavitelja
 DocType: BOM Operation,Base Hour Rate(Company Currency),Osnovna urni tečaj (družba Valuta)
+,Qty To Be Billed,"Količina, ki jo morate plačati"
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py,Delivered Amount,Delivered Znesek
+DocType: Coupon Code,Gift Card,Darilne kartice
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Production: Raw materials quantity to make manufacturing items.,Količina pridržane za proizvodnjo: Količina surovin za izdelavo izdelkov.
 DocType: Loyalty Point Entry Redemption,Redemption Date,Datum odkupa
 apps/erpnext/erpnext/accounts/page/bank_reconciliation/bank_reconciliation.py,This bank transaction is already fully reconciled,Ta bančna transakcija je že v celoti usklajena
@@ -1287,6 +1296,7 @@ apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js,Preview Sal
 apps/erpnext/erpnext/utilities/activation.py,Create Timesheet,Ustvari časopis
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py,Account {0} has been entered multiple times,Račun {0} je bil vpisan večkrat
 DocType: Account,Expenses Included In Valuation,Stroški Vključeno v vrednotenju
+apps/erpnext/erpnext/hooks.py,Purchase Invoices,Nakup računov
 apps/erpnext/erpnext/non_profit/doctype/membership/membership.py,You can only renew if your membership expires within 30 days,"Obnovite lahko le, če vaše članstvo poteče v 30 dneh"
 DocType: Shopping Cart Settings,Show Stock Availability,Prihranite sedaj null%!
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Set {0} in asset category {1} or company {2},Nastavite {0} v kategoriji sredstev {1} ali podjetje {2}
@@ -1318,7 +1328,7 @@ DocType: Sales Invoice,Commission Rate (%),Komisija Stopnja (%)
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,Please select Program,Izberite program
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,Please select Program,Izberite program
 DocType: Project,Estimated Cost,Ocenjeni strošek
-DocType: Request for Quotation,Link to material requests,Povezava na materialne zahteve
+DocType: Supplier Quotation,Link to material requests,Povezava na materialne zahteve
 apps/erpnext/erpnext/public/js/hub/pages/Publish.vue,Publish,Objavi
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Aerospace,Aerospace
 ,Fichier des Ecritures Comptables [FEC],Fichier des Ecritures Comptables [FEC]
@@ -1331,6 +1341,7 @@ apps/erpnext/erpnext/hr/doctype/job_offer/job_offer.js,Create Employee,Ustvari z
 apps/erpnext/erpnext/utilities/transaction_base.py,Invalid Posting Time,Neveljaven čas pošiljanja
 DocType: Salary Component,Condition and Formula,Pogoj in formula
 DocType: Lead,Campaign Name,Ime kampanje
+apps/erpnext/erpnext/setup/default_energy_point_rules.py,On Task Completion,Ob zaključku naloge
 apps/erpnext/erpnext/hr/doctype/compensatory_leave_request/compensatory_leave_request.py,There is no leave period in between {0} and {1},Obdobja dopusta ni med {0} in {1}
 DocType: Fee Validity,Healthcare Practitioner,Zdravstveni delavec
 DocType: Hotel Room,Capacity,Zmogljivost
@@ -1564,7 +1575,7 @@ DocType: Sales Invoice,Payment Due Date,Datum zapadlosti
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Količina rezervirana: Količina, naročena za prodajo, vendar ni dobavljena."
 DocType: Drug Prescription,Interval UOM,Interval UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Ponovno izberite, če je izbrani naslov urejen po shranjevanju"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Količina za naročila podizvajalcev: Količina surovin za izdelavo odvzetih predmetov.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Količina za naročila podizvajalcev: Količina surovin za izdelavo odvzetih predmetov.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Postavka Variant {0} že obstaja z enakimi atributi
 DocType: Item,Hub Publishing Details,Podrobnosti o objavi vozlišča
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&quot;Odpiranje&quot;
@@ -1676,7 +1687,6 @@ apps/erpnext/erpnext/healthcare/utils.py,The Patient {0} do not have customer re
 DocType: Quality Feedback Template,Quality Feedback Template,Predloga za povratne informacije o kakovosti
 apps/erpnext/erpnext/config/education.py,LMS Activity,LMS dejavnost
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Internet Publishing,Internet Založništvo
-DocType: Prescription Duration,Number,Številka
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js,Creating {0} Invoice,Ustvarjanje računa {0}
 DocType: Medical Code,Medical Code Standard,Standard medicinske oznake
 DocType: Soil Texture,Clay Composition (%),Glina Sestava (%)
@@ -1751,6 +1761,7 @@ DocType: Cheque Print Template,Has Print Format,Ima format tiskanja
 DocType: Support Settings,Get Started Sections,Začnite razdelke
 DocType: Lead,CRM-LEAD-.YYYY.-,CRM-LEAD-.YYYY.-
 DocType: Invoice Discounting,Sanctioned,sankcionirano
+,Base Amount,Osnovni znesek
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.js,Total Contribution Amount: {0},Skupni znesek prispevka: {0}
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Row #{0}: Please specify Serial No for Item {1},Vrstica # {0}: Navedite Zaporedna številka za postavko {1}
 DocType: Payroll Entry,Salary Slips Submitted,Poslane plačljive plače
@@ -1828,6 +1839,7 @@ DocType: Holiday List,Holiday List Name,Naziv seznama praznikov
 apps/erpnext/erpnext/erpnext_integrations/doctype/tally_migration/tally_migration.py,Importing Items and UOMs,Uvoz elementov in UOM-ov
 DocType: Repayment Schedule,Balance Loan Amount,Bilanca Znesek posojila
 apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.js,Added to details,Dodano v podrobnosti
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/utils.py,"Sorry,coupon code are exhausted","Oprostite, koda kupona je izčrpana"
 DocType: Communication Medium,Catch All,Ujemite vse
 apps/erpnext/erpnext/education/doctype/course_scheduling_tool/course_scheduling_tool.js,Schedule Course,urnik predmeta
 DocType: Budget,Applicable on Material Request,Velja za materialno zahtevo
@@ -1971,6 +1983,7 @@ DocType: Payment Request,Inward,V notranjost
 apps/erpnext/erpnext/utilities/user_progress.py,List a few of your suppliers. They could be organizations or individuals.,Naštejte nekaj vaših dobaviteljev. Ti bi se lahko organizacije ali posamezniki.
 DocType: Accounting Dimension,Dimension Defaults,Privzete dimenzije
 apps/erpnext/erpnext/crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.js,Minimum Lead Age (Days),Minimalna Svinec Starost (dnevi)
+apps/erpnext/erpnext/assets/report/fixed_asset_register/fixed_asset_register.py,Available For Use Date,Na voljo za uporabo
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,All BOMs,Vse BOMs
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js,Create Inter Company Journal Entry,Ustvari vpis v revijo Inter Company
 DocType: Company,Parent Company,Matična družba
@@ -1996,6 +2009,7 @@ DocType: Program Enrollment,Transportation,Prevoz
 apps/erpnext/erpnext/controllers/item_variant.py,Invalid Attribute,Neveljavna Lastnost
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,{0} {1} must be submitted,{0} {1} je potrebno vložiti
 apps/erpnext/erpnext/selling/doctype/campaign/campaign_dashboard.py,Email Campaigns,E-poštne oglaševalske akcije
+DocType: Sales Partner,To Track inbound purchase,Sledenje vhodnemu nakupu
 DocType: Buying Settings,Default Supplier Group,Privzeta dobaviteljska skupina
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Quantity must be less than or equal to {0},Količina mora biti manjša ali enaka {0}
 apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py,Maximum amount eligible for the component {0} exceeds {1},Najvišji znesek primernega za sestavino {0} presega {1}
@@ -2035,6 +2049,7 @@ DocType: Shift Type,Process Attendance After,Obiskanost procesa po
 ,IRS 1099,IRS 1099
 DocType: Salary Slip,Leave Without Pay,Leave brez plačila
 DocType: Payment Request,Outward,Zunaj
+apps/erpnext/erpnext/setup/default_energy_point_rules.py,On {0} Creation,Ob {0} Ustvarjanje
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,State/UT Tax,Državni / davek na UT
 ,Trial Balance for Party,Trial Balance za stranke
 ,Gross and Net Profit Report,Poročilo o bruto in neto dobičku
@@ -2153,6 +2168,7 @@ apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js,Make Sto
 DocType: Hotel Room Reservation,Hotel Reservation User,Uporabnik rezervacije hotela
 apps/erpnext/erpnext/projects/doctype/project/project.js,Set Status,Nastavi stanje
 apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please select prefix first,"Prosimo, izberite predpono najprej"
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,"Prosimo, nastavite Naming Series za {0} z nastavitvijo&gt; Settings&gt; Naming Series"
 DocType: Contract,Fulfilment Deadline,Rok izpolnjevanja
 apps/erpnext/erpnext/public/js/hub/pages/Home.vue,Near you,Blizu vas
 DocType: Student,O-,O-
@@ -2167,6 +2183,7 @@ apps/erpnext/erpnext/controllers/item_variant.py,Please specify at least one att
 DocType: Announcement,All Students,Vse Študenti
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Item {0} must be a non-stock item,"Točka {0} mora biti postavka, non-stock"
 apps/erpnext/erpnext/stock/doctype/batch/batch.js,View Ledger,Ogled Ledger
+DocType: Cost Center,Lft,LFT
 DocType: Grading Scale,Intervals,intervali
 DocType: Bank Statement Transaction Entry,Reconciled Transactions,Usklajene transakcije
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py,Earliest,Najzgodnejša
@@ -2275,6 +2292,7 @@ apps/erpnext/erpnext/utilities/user_progress.py,Your Products or Services,Svoje 
 DocType: Quality Meeting Table,Under Review,V pregledu
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py,Failed to login,Prijava ni uspel
 apps/erpnext/erpnext/controllers/buying_controller.py,Asset {0} created,Sredstvo {0} je ustvarjeno
+DocType: Coupon Code,Promotional,Promocijska
 DocType: Special Test Items,Special Test Items,Posebni testni elementi
 apps/erpnext/erpnext/public/js/hub/marketplace.js,You need to be a user with System Manager and Item Manager roles to register on Marketplace.,Za registracijo v Marketplace morate biti uporabnik z vlogami upravitelja sistemov in upravitelja elementov.
 apps/erpnext/erpnext/config/buying.py,Key Reports,Ključna poročila
@@ -2282,6 +2300,7 @@ DocType: Bank Statement Transaction Payment Item,Mode of Payment,Način plačila
 apps/erpnext/erpnext/hr/doctype/employee_benefit_application/employee_benefit_application.py,As per your assigned Salary Structure you cannot apply for benefits,Glede na dodeljeno strukturo plače ne morete zaprositi za ugodnosti
 apps/erpnext/erpnext/stock/doctype/item/item.py,Website Image should be a public file or website URL,Spletna stran Slika bi morala biti javna datoteka ali spletna stran URL
 DocType: Purchase Invoice Item,BOM,Surovine
+apps/erpnext/erpnext/stock/doctype/item/item.py,Duplicate entry in Manufacturers table,Podvojen vnos v tabeli Proizvajalci
 apps/erpnext/erpnext/setup/doctype/item_group/item_group.js,This is a root item group and cannot be edited.,"To je skupina, root element in ga ni mogoče urejati."
 apps/erpnext/erpnext/accounts/doctype/account/account.js,Merge,Spoji se
 DocType: Journal Entry Account,Purchase Order,Naročilnica
@@ -2312,6 +2331,8 @@ apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js,Please set t
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Doc Type,Doc Type
 apps/erpnext/erpnext/controllers/selling_controller.py,Total allocated percentage for sales team should be 100,Skupna dodeljena odstotek za prodajne ekipe mora biti 100
 DocType: Subscription Plan,Billing Interval Count,Številka obračunavanja
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Izbrišite zaposlenega <a href=""#Form/Employee/{0}"">{0}</a> \, če želite preklicati ta dokument"
 apps/erpnext/erpnext/healthcare/doctype/healthcare_practitioner/healthcare_practitioner_dashboard.py,Appointments and Patient Encounters,Imenovanja in srečanja s pacienti
 apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.js,Value missing,Manjka vrednost
 DocType: Employee,Department and Grade,Oddelek in razred
@@ -2415,6 +2436,7 @@ apps/erpnext/erpnext/hr/doctype/appraisal_template/appraisal_template.py,Sum of 
 DocType: Project,Start and End Dates,Začetni in končni datum
 DocType: Contract Template Fulfilment Terms,Contract Template Fulfilment Terms,Pogoji izpolnjevanja pogodbenih pogojev
 ,Delivered Items To Be Billed,Dobavljeni artikli placevali
+DocType: Coupon Code,Maximum Use,Največja uporaba
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom_item_preview.html,Open BOM {0},Odprti BOM {0}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,Warehouse cannot be changed for Serial No.,Skladišče ni mogoče spremeniti za Serial No.
 DocType: Authorization Rule,Average Discount,Povprečen Popust
@@ -2428,7 +2450,6 @@ apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js,Please select b
 DocType: Asset,Depreciation Schedules,Amortizacija Urniki
 apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.js,Create Sales Invoice,Ustvari prodajni račun
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Ineligible ITC,Neupravičena ITC
-apps/erpnext/erpnext/erpnext_integrations/doctype/shopify_settings/shopify_settings.py,"Support for public app is deprecated. Please setup private app, for more details refer user manual","Podpora za javno aplikacijo je zastarela. Prosimo, nastavite zasebno aplikacijo, za več podrobnosti glejte uporabniški priročnik"
 DocType: Task,Dependent Tasks,Odvisne naloge
 apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.py,Following accounts might be selected in GST Settings:,V nastavitvah GST se lahko izberejo naslednji računi:
 apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.js,Quantity to Produce,Količina za proizvodnjo
@@ -2577,6 +2598,7 @@ DocType: Employee Benefit Application,Max Benefits (Yearly),Maksimalne ugodnosti
 DocType: Item,Inventory,Popis
 apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.js,Download as Json,Prenesite kot Json
 DocType: Item,Sales Details,Prodajna Podrobnosti
+DocType: Coupon Code,Used,Rabljeni
 DocType: Opportunity,With Items,Z Items
 apps/erpnext/erpnext/crm/doctype/email_campaign/email_campaign.py,The Campaign '{0}' already exists for the {1} '{2}',Kampanja &#39;{0}&#39; že obstaja za {1} &#39;{2}&#39;
 DocType: Asset Maintenance,Maintenance Team,Vzdrževalna ekipa
@@ -2680,6 +2702,7 @@ apps/erpnext/erpnext/erpnext_integrations/utils.py,Unverified Webhook Data,Nepre
 DocType: Water Analysis,Container,Zabojnik
 apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.py,Please set valid GSTIN No. in Company Address,V naslov podjetja nastavite veljavno številko GSTIN
 apps/erpnext/erpnext/education/utils.py,Student {0} - {1} appears Multiple times in row {2} & {3},Študent {0} - {1} pojavi večkrat v vrsti {2} {3}
+apps/erpnext/erpnext/selling/doctype/customer/customer.py,Following fields are mandatory to create address:,Naslednja polja so obvezna za ustvarjanje naslova:
 DocType: Item Alternative,Two-way,Dvosmerni
 DocType: Item,Manufacturers,Proizvajalci
 apps/erpnext/erpnext/accounts/deferred_revenue.py,Error while processing deferred accounting for {0},Napaka pri obdelavi odloženega računovodstva za {0}
@@ -2705,7 +2728,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,"No active BOM f
 						Serial No cannot be ensured",Za element {0} ni najdena aktivna BOM. Dostava z \ Serial No ne more biti zagotovljena
 DocType: Sales Partner,Sales Partner Target,Prodaja Partner Target
 DocType: Loan Type,Maximum Loan Amount,Največja Znesek posojila
-DocType: Pricing Rule,Pricing Rule,Cen Pravilo
+DocType: Coupon Code,Pricing Rule,Cen Pravilo
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,Duplicate roll number for student {0},Podvojena številka rola študent {0}
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,Duplicate roll number for student {0},Podvojena številka rola študent {0}
 apps/erpnext/erpnext/config/help.py,Material Request to Purchase Order,Material Zahteva za narocilo
@@ -2755,9 +2778,9 @@ DocType: Staffing Plan Detail,Estimated Cost Per Position,Ocenjeni strošek na p
 DocType: Employee,HR-EMP-,HR-EMP-
 apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py,User {0} doesn't have any default POS Profile. Check Default at Row {1} for this User.,Uporabnik {0} nima privzetega profila POS. Preverite privzeto na vrstici {1} za tega uporabnika.
 DocType: Quality Meeting Minutes,Quality Meeting Minutes,Zapisniki o kakovostnem sestanku
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Dobavitelj&gt; Vrsta dobavitelja
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Employee Referral,Napotitev zaposlenih
 DocType: Student Group,Set 0 for no limit,Nastavite 0 za brez omejitev
+DocType: Cost Center,rgt,RGT
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,The day(s) on which you are applying for leave are holidays. You need not apply for leave.,"Dan (s), na kateri se prijavljate za dopust, so prazniki. Vam ni treba zaprositi za dopust."
 DocType: Customer,Primary Address and Contact Detail,Osnovni naslov in kontaktni podatki
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.js,Resend Payment Email,Ponovno pošlji plačila Email
@@ -2785,6 +2808,7 @@ DocType: Program,Allow Self Enroll,Dovoli samovpis
 DocType: Payment Schedule,Payment Amount,Znesek Plačila
 apps/erpnext/erpnext/hr/doctype/compensatory_leave_request/compensatory_leave_request.py,Half Day Date should be in between Work From Date and Work End Date,Datum poldnevnega dneva mora biti med delovnim časom in končnim datumom dela
 DocType: Healthcare Settings,Healthcare Service Items,Točke zdravstvenega varstva
+apps/erpnext/erpnext/stock/doctype/quick_stock_balance/quick_stock_balance.py,Invalid Barcode. There is no Item attached to this barcode.,Neveljavna črtna koda. Na tej črtni kodi ni nobenega predmeta.
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py,Consumed Amount,Porabljeni znesek
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py,Net Change in Cash,Neto sprememba v gotovini
 DocType: Assessment Plan,Grading Scale,Ocenjevalna lestvica
@@ -2867,7 +2891,6 @@ DocType: Vital Signs,Constipated,Zaprta
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Against Supplier Invoice {0} dated {1},Zoper dobavitelja Račun {0} dne {1}
 DocType: Customer,Default Price List,Privzeto Cenik
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Asset Movement record {0} created,zapis Gibanje sredstvo {0} ustvaril
-apps/erpnext/erpnext/utilities/page/leaderboard/leaderboard.js,No items found.,Ni elementov.
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py,You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global Settings,"Ne, ne moreš brisati poslovnega leta {0}. Poslovno leto {0} je privzet v globalnih nastavitvah"
 DocType: Share Transfer,Equity/Liability Account,Račun kapitala / obveznost
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.py,A customer with the same name already exists,Kupec z istim imenom že obstaja
@@ -2883,6 +2906,7 @@ apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py,Net Change in Accoun
 apps/erpnext/erpnext/selling/doctype/customer/customer.py,Credit limit has been crossed for customer {0} ({1}/{2}),Kreditna meja je prešla za stranko {0} ({1} / {2})
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py,Customer required for 'Customerwise Discount',Stranka zahteva za &quot;Customerwise popust&quot;
 apps/erpnext/erpnext/config/accounting.py,Update bank payment dates with journals.,Posodobite rok plačila banka s revijah.
+,Billed Qty,Število računov
 apps/erpnext/erpnext/stock/doctype/item/item_dashboard.py,Pricing,Cenitev
 DocType: Employee,Attendance Device ID (Biometric/RF tag ID),ID naprave za udeležbo (ID biometrične / RF oznake)
 DocType: Quotation,Term Details,Izraz Podrobnosti
@@ -2913,6 +2937,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,"Cannot ensure d
 DocType: Accounts Settings,Unlink Payment on Cancellation of Invoice,Prekinitev povezave med Plačilo na Izbris računa
 DocType: Bank Reconciliation,From Date,Od datuma
 apps/erpnext/erpnext/hr/doctype/vehicle_log/vehicle_log.py,Current Odometer reading entered should be greater than initial Vehicle Odometer {0},Trenutni Stanje kilometrov vpisana mora biti večja od začetne števca prevožene poti vozila {0}
+,Purchase Order Items To Be Received or Billed,"Nabavni predmeti, ki jih je treba prejeti ali plačati"
 DocType: Restaurant Reservation,No Show,Ni predstave
 apps/erpnext/erpnext/regional/india/utils.py,You must be a registered supplier to generate e-Way Bill,Za generiranje e-poti morate biti registrirani dobavitelj
 DocType: Shipping Rule Country,Shipping Rule Country,Država dostavnega pravila
@@ -2955,6 +2980,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order_dashboard.py,Fulfil
 apps/erpnext/erpnext/templates/generators/item/item_add_to_cart.html,View in Cart,Poglej v košarico
 DocType: Employee Checkin,Shift Actual Start,Dejanski začetek premika
 DocType: Tally Migration,Is Day Book Data Imported,Ali so uvoženi podatki o dnevnikih
+,Purchase Order Items To Be Received or Billed1,"Nabavni predmeti, ki jih je treba prejeti ali plačati1"
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Marketing Expenses,Stroški trženja
 apps/erpnext/erpnext/stock/doctype/pick_list/pick_list.py,{0} units of {1} is not available.,{0} enot od {1} ni na voljo.
 ,Item Shortage Report,Postavka Pomanjkanje Poročilo
@@ -3015,6 +3041,7 @@ DocType: Item,"If this item has variants, then it cannot be selected in sales or
 DocType: Products Settings,Hide Variants,Skrij variante
 DocType: Lead,Next Contact By,Naslednja Kontakt Z
 DocType: Compensatory Leave Request,Compensatory Leave Request,Zahtevek za kompenzacijski odhod
+apps/erpnext/erpnext/controllers/accounts_controller.py,"Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings","Za postavko {0} v vrstici {1} več kot {2} ni mogoče preplačati. Če želite dovoliti preplačilo, nastavite dovoljenje v nastavitvah računov"
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,Quantity required for Item {0} in row {1},"Količina, potrebna za postavko {0} v vrstici {1}"
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py,Warehouse {0} can not be deleted as quantity exists for Item {1},"Skladišče {0} ni mogoče izbrisati, kot obstaja količina za postavko {1}"
 DocType: Blanket Order,Order Type,Tip naročila
@@ -3182,12 +3209,10 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,Material Consumpti
 apps/erpnext/erpnext/public/js/call_popup/call_popup.js,View all issues from {0},Oglejte si vse težave od {0}
 DocType: Quality Inspection,MAT-QA-.YYYY.-,MAT-QA-YYYY-
 DocType: Quality Meeting Table,Quality Meeting Table,Kakovostna tabela za sestanke
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,"Prosimo, nastavite Naming Series za {0} z nastavitvijo&gt; Settings&gt; Naming Series"
 apps/erpnext/erpnext/templates/pages/help.html,Visit the forums,Obiščite forume
 DocType: Student,Student Mobile Number,Študent mobilno številko
 DocType: Item,Has Variants,Ima različice
 DocType: Employee Benefit Claim,Claim Benefit For,Claim Benefit For
-apps/erpnext/erpnext/controllers/accounts_controller.py,"Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set in Stock Settings","Za postavko {0} v vrstici {1} ne moremo preseči več kot {2}. Če želite omogočiti prekomerno zaračunavanje, nastavite nastavitve zalog"
 apps/erpnext/erpnext/templates/emails/training_event.html,Update Response,Posodobi odgovor
 apps/erpnext/erpnext/public/js/utils.js,You have already selected items from {0} {1},Ste že izbrane postavke iz {0} {1}
 DocType: Monthly Distribution,Name of the Monthly Distribution,Ime mesečnim izplačilom
@@ -3325,6 +3350,7 @@ apps/erpnext/erpnext/config/selling.py,Customer Addresses And Contacts,Naslovi s
 DocType: Homepage Section,Section Cards,Karte oddelka
 ,Campaign Efficiency,kampanja Učinkovitost
 DocType: Discussion,Discussion,Diskusija
+apps/erpnext/erpnext/setup/default_energy_point_rules.py,On Sales Order Submission,Ob oddaji prodajnega naročila
 DocType: Bank Transaction,Transaction ID,Transaction ID
 DocType: Payroll Entry,Deduct Tax For Unsubmitted Tax Exemption Proof,Davek od odbitka za neosnovan dokaz o davčni oprostitvi
 DocType: Volunteer,Anytime,Kadarkoli
@@ -3332,7 +3358,6 @@ DocType: Bank Account,Bank Account No,Bančni račun št
 DocType: Employee Tax Exemption Proof Submission,Employee Tax Exemption Proof Submission,Predložitev dokazila o oprostitvi davka na zaposlene
 DocType: Patient,Surgical History,Kirurška zgodovina
 DocType: Bank Statement Settings Item,Mapped Header,Mapped Header
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,"Prosimo, nastavite sistem poimenovanja zaposlenih v kadrovski službi&gt; Nastavitve človeških virov"
 DocType: Employee,Resignation Letter Date,Odstop pismo Datum
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Pricing Rules are further filtered based on quantity.,Cenovne Pravila so dodatno filtriran temelji na količini.
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py,Please set the Date Of Joining for employee {0},"Prosimo, da določi datum Vstop za zaposlenega {0}"
@@ -3347,6 +3372,7 @@ DocType: Quiz,Enter 0 to waive limit,Vnesite 0 za omejitev omejitve
 DocType: Bank Statement Settings,Mapped Items,Kartirani elementi
 DocType: Amazon MWS Settings,IT,IT
 DocType: Chapter,Chapter,Poglavje
+,Fixed Asset Register,Register nepremičnega premoženja
 apps/erpnext/erpnext/utilities/user_progress.py,Pair,Par
 DocType: Mode of Payment Account,Default account will be automatically updated in POS Invoice when this mode is selected.,"Privzet račun se samodejno posodablja v računu POS, ko je ta način izbran."
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js,Select BOM and Qty for Production,Izberite BOM in Količina za proizvodnjo
@@ -3478,11 +3504,11 @@ DocType: Vehicle,Fuel Type,Vrsta goriva
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py,Please specify currency in Company,"Prosimo, navedite valuto v družbi"
 DocType: Workstation,Wages per hour,Plače na uro
 apps/erpnext/erpnext/templates/generators/item/item_configure.js,Configure {0},Konfigurirajte {0}
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Stranka&gt; Skupina kupcev&gt; Ozemlje
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Stock balance in Batch {0} will become negative {1} for Item {2} at Warehouse {3},Stock ravnotežje Serija {0} bo postal negativen {1} za postavko {2} v skladišču {3}
 apps/erpnext/erpnext/templates/emails/reorder_item.html,Following Material Requests have been raised automatically based on Item's re-order level,Po Material Zahteve so bile samodejno dvigne temelji na ravni re-naročilnico elementa
 apps/erpnext/erpnext/controllers/accounts_controller.py,Account {0} is invalid. Account Currency must be {1},Račun {0} ni veljaven. Valuta računa mora biti {1}
 apps/erpnext/erpnext/hr/doctype/salary_structure_assignment/salary_structure_assignment.py,From Date {0} cannot be after employee's relieving Date {1},Od datuma {0} ne more biti po razrešitvi delavca Datum {1}
-apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py,Debit Note {0} has been created automatically,Opomba o bremenitvi {0} je bila ustvarjena samodejno
 apps/erpnext/erpnext/accounts/doctype/payment_order/payment_order.js,Create Payment Entries,Ustvari plačilne vnose
 DocType: Supplier,Is Internal Supplier,Je notranji dobavitelj
 DocType: Employee,Create User Permission,Ustvarite dovoljenje za uporabnika
@@ -3812,6 +3838,7 @@ DocType: Student Admission Program,Application Fee,Fee uporaba
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js,Submit Salary Slip,Predloži plačilni list
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice_list.js,On Hold,Na čakanju
 apps/erpnext/erpnext/education/doctype/question/question.py,A qustion must have at least one correct options,Karakter mora imeti vsaj eno pravilno možnost
+apps/erpnext/erpnext/hooks.py,Purchase Orders,Naročila
 DocType: Account,Inter Company Account,Inter Company račun
 apps/erpnext/erpnext/stock/doctype/item_price/item_price.js,Import in Bulk,Uvoz v večjih količinah
 DocType: Sales Partner,Address & Contacts,Naslov &amp; Kontakti
@@ -3822,6 +3849,7 @@ DocType: HR Settings,Leave Approval Notification Template,Zapusti predlogo za od
 DocType: POS Profile,[Select],[Izberite]
 DocType: Staffing Plan Detail,Number Of Positions,Število položajev
 DocType: Vital Signs,Blood Pressure (diastolic),Krvni tlak (diastolični)
+apps/erpnext/erpnext/accounts/doctype/coupon_code/coupon_code.py,Please select the customer.,Izberite stranko.
 DocType: SMS Log,Sent To,Poslano
 DocType: Agriculture Task,Holiday Management,Upravljanje praznikov
 DocType: Payment Request,Make Sales Invoice,Naredi račun
@@ -4031,7 +4059,6 @@ DocType: Item Price,Packing Unit,Pakirna enota
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,{0} {1} is not submitted,{0} {1} ni vložen
 DocType: Subscription,Trialling,Trialling
 DocType: Sales Invoice Item,Deferred Revenue,Odloženi prihodki
-DocType: Bank Account,GL Account,GL račun
 DocType: Shopify Settings,Cash Account will used for Sales Invoice creation,Gotovinski račun se bo uporabil za ustvarjanje prodajne fakture
 DocType: Employee Tax Exemption Declaration Category,Exemption Sub Category,Podskupina za izvzetje
 DocType: Member,Membership Expiry Date,Datum prenehanja članstva
@@ -4045,7 +4072,6 @@ apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.js,La
 DocType: Project User,Project Status,Stanje projekta
 DocType: UOM,Check this to disallow fractions. (for Nos),"Preverite, da je to prepoveste frakcij. (za številkami)"
 DocType: Student Admission Program,Naming Series (for Student Applicant),Poimenovanje Series (za Student prijavitelja)
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},Faktor konverzije UOM ({0} -&gt; {1}) za element: {2}
 apps/erpnext/erpnext/hr/doctype/retention_bonus/retention_bonus.py,Bonus Payment Date cannot be a past date,Datum plačila bonusa ne more biti pretekli datum
 DocType: Travel Request,Copy of Invitation/Announcement,Kopija vabila / obvestila
 DocType: Practitioner Service Unit Schedule,Practitioner Service Unit Schedule,Urnik službe zdravnika
@@ -4194,6 +4220,7 @@ DocType: Blanket Order,MFG-BLR-.YYYY.-,MFG-BLR-.YYYY.-
 apps/erpnext/erpnext/utilities/user_progress.py,Setup Company,Setup Company
 ,Lab Test Report,Poročilo o laboratorijskem testu
 DocType: Employee Benefit Application,Employee Benefit Application,Application Employee Benefit
+apps/erpnext/erpnext/accounts/doctype/invoice_discounting/invoice_discounting.py,Row({0}): {1} is already discounted in {2},Vrstica ({0}): {1} je že znižana v {2}
 apps/erpnext/erpnext/hr/doctype/additional_salary/additional_salary.py,Additional Salary Component Exists.,Dodatne komponente plače obstajajo.
 DocType: Purchase Invoice,Unregistered,Neregistrirani
 DocType: Student Applicant,Application Date,uporaba Datum
@@ -4273,7 +4300,6 @@ DocType: Shopping Cart Settings,Shopping Cart Settings,Nastavitve Košarica
 DocType: Journal Entry,Accounting Entries,Vknjižbe
 DocType: Job Card Time Log,Job Card Time Log,Dnevni dnevnik delovne kartice
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,"If selected Pricing Rule is made for 'Rate', it will overwrite Price List. Pricing Rule rate is the final rate, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field.","Če je izbrano cenovno pravilo za &quot;Oceni&quot;, bo prepisalo cenik. Cena pravilnika je končna obrestna mera, zato ni treba uporabljati dodatnega popusta. Zato se pri transakcijah, kot je prodajna naročilo, naročilnica itd., Dobijo v polju »Oceni«, ne pa na »cenik tečaja«."
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Nastavite sistem poimenovanja inštruktorjev v izobraževanju&gt; Nastavitve za izobraževanje
 DocType: Journal Entry,Paid Loan,Plačano posojilo
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py,Duplicate Entry. Please check Authorization Rule {0},"Podvojenega vnosa. Prosimo, preverite Dovoljenje Pravilo {0}"
 DocType: Journal Entry Account,Reference Due Date,Referenčni datum roka
@@ -4290,7 +4316,6 @@ DocType: Shopify Settings,Webhooks Details,Podrobnosti o spletnih urah
 apps/erpnext/erpnext/templates/pages/projects.html,No time sheets,Ni listami
 DocType: GoCardless Mandate,GoCardless Customer,GoCardless stranka
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,Leave Type {0} cannot be carry-forwarded,"Pustite Type {0} ni mogoče izvajati, posredovati"
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Koda izdelka&gt; Skupina izdelkov&gt; Blagovna znamka
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Maintenance Schedule is not generated for all the items. Please click on 'Generate Schedule',"Vzdrževanje Urnik se ne ustvari za vse postavke. Prosimo, kliknite na &quot;ustvarjajo Seznamu&quot;"
 ,To Produce,Za izdelavo
 DocType: Leave Encashment,Payroll,izplačane plače
@@ -4406,7 +4431,6 @@ DocType: Delivery Note,Required only for sample item.,Zahteva le za točko vzorc
 DocType: Stock Ledger Entry,Actual Qty After Transaction,Dejanska Kol Po Transaction
 ,Pending SO Items For Purchase Request,Dokler SO Točke za nakup dogovoru
 apps/erpnext/erpnext/education/doctype/student_admission/student_admission.py,Student Admissions,Študentski Sprejemi
-apps/erpnext/erpnext/accounts/party.py,{0} {1} is disabled,{0} {1} je onemogočeno
 DocType: Supplier,Billing Currency,Zaračunavanje Valuta
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Extra Large,Extra Large
 DocType: Loan,Loan Application,Loan Application
@@ -4441,13 +4465,13 @@ apps/erpnext/erpnext/accounts/report/consolidated_financial_statement/consolidat
 DocType: C-Form Invoice Detail,Territory,Ozemlje
 DocType: Pricing Rule,Apply Rule On Item Code,Uporabi pravilo za kodo predmeta
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Please mention no of visits required,Navedite ni obiskov zahtevanih
+apps/erpnext/erpnext/stock/doctype/quick_stock_balance/quick_stock_balance.js,Stock Balance Report,Poročilo o stanju zalog
 DocType: Stock Settings,Default Valuation Method,Način Privzeto Vrednotenje
 apps/erpnext/erpnext/education/doctype/program/program_dashboard.py,Fee,Fee
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.js,Show Cumulative Amount,Prikaži skupni znesek
 apps/erpnext/erpnext/setup/doctype/company/company.js,Update in progress. It might take a while.,Posodabljanje je v teku. Mogoče bo trajalo nekaj časa.
 DocType: Production Plan Item,Produced Qty,Proizvedeno količino
 DocType: Vehicle Log,Fuel Qty,gorivo Kol
-DocType: Stock Entry,Target Warehouse Name,Ime ciljne skladišča
 DocType: Work Order Operation,Planned Start Time,Načrtovano Start Time
 DocType: Course,Assessment,ocena
 DocType: Payment Entry Reference,Allocated,Razporejeni
@@ -4483,7 +4507,6 @@ DocType: Supplier Scorecard Scoring Variable,Parameter Name,Ime parametra
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Only Leave Applications with status 'Approved' and 'Rejected' can be submitted,Pustite samo aplikacije s statusom &quot;Approved&quot; in &quot;Zavrnjeno&quot; se lahko predloži
 apps/erpnext/erpnext/accounts/doctype/accounting_dimension/accounting_dimension.py,Creating Dimensions...,Ustvarjanje dimenzij ...
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py,Student Group Name is mandatory in row {0},Študent Group Ime je obvezno v vrsti {0}
-DocType: Customer Credit Limit,Bypass credit limit_check,Obvozite kreditno omejitev
 DocType: Homepage,Products to be shown on website homepage,"Proizvodi, ki se prikaže na spletni strani"
 DocType: HR Settings,Password Policy,Politika gesla
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.js,This is a root customer group and cannot be edited.,To je skupina koren stranke in jih ni mogoče urejati.
@@ -4514,10 +4537,12 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Standardni Pogoji, ki se lahko dodajajo prodaje in nakupe. Primeri: 1. Veljavnost ponudbe. 1. Plačilni pogoji (vnaprej, na kredit, del predujem itd). 1. Kaj je dodatno (ali ga je dolžan plačati davek). Opozorilo / uporaba 1. varnost. 1. Garancija če sploh. 1. Izjava zasebnosti. 1. Pogoji ladijskega prometa, če je to primerno. 1. načine reševanja sporov, jamstva, odgovornosti, itd 1. Naslov in kontaktne vašega podjetja."
 DocType: Homepage Section,Section Based On,Oddelek temelji na
+DocType: Shopping Cart Settings,Show Apply Coupon Code,Prikaži Uporabi kodo kupona
 DocType: Issue,Issue Type,Vrsta izdaje
 DocType: Attendance,Leave Type,Zapusti Type
 DocType: Purchase Invoice,Supplier Invoice Details,Dobavitelj Podrobnosti računa
 DocType: Agriculture Task,Ignore holidays,Prezri praznike
+apps/erpnext/erpnext/accounts/doctype/coupon_code/coupon_code.js,Add/Edit Coupon Conditions,Dodaj / uredite pogoje kupona
 apps/erpnext/erpnext/controllers/stock_controller.py,Expense / Difference account ({0}) must be a 'Profit or Loss' account,Expense / Razlika račun ({0}) mora biti račun &quot;poslovni izid&quot;
 DocType: Stock Entry Detail,Stock Entry Child,Zaloga Otrok
 DocType: Project,Copied From,Kopirano iz
@@ -4693,6 +4718,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Colour,Ba
 DocType: Assessment Plan Criteria,Assessment Plan Criteria,Merila načrt ocenjevanja
 apps/erpnext/erpnext/hr/doctype/leave_period/leave_period_dashboard.py,Transactions,Transakcije
 DocType: Supplier Scorecard Scoring Standing,Prevent Purchase Orders,Preprečevanje nakupnih naročil
+DocType: Coupon Code,Coupon Name,Ime kupona
 apps/erpnext/erpnext/healthcare/setup.py,Susceptible,Občutljivo
 DocType: Email Campaign,Scheduled,Načrtovano
 DocType: Shift Type,Working Hours Calculation Based On,Izračun delovnega časa na podlagi
@@ -4709,7 +4735,9 @@ DocType: Purchase Invoice Item,Valuation Rate,Oceni Vrednotenje
 apps/erpnext/erpnext/stock/doctype/item/item.js,Create Variants,Ustvari različice
 DocType: Vehicle,Diesel,Diesel
 apps/erpnext/erpnext/stock/get_item_details.py,Price List Currency not selected,Cenik Valuta ni izbran
+DocType: Quick Stock Balance,Available Quantity,Količina na voljo
 DocType: Purchase Invoice,Availed ITC Cess,Uporabil ITC Cess
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Nastavite sistem poimenovanja inštruktorjev v izobraževanju&gt; Nastavitve za izobraževanje
 ,Student Monthly Attendance Sheet,Študent Mesečni Udeležba Sheet
 apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py,Shipping rule only applicable for Selling,Pravilo o dostavi velja samo za prodajo
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Depreciation Row {0}: Next Depreciation Date cannot be before Purchase Date,Amortizacijski vrstici {0}: Naslednji amortizacijski datum ne more biti pred datumom nakupa
@@ -4778,6 +4806,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Row {0}: Ad
 DocType: Quality Meeting,Quality Meeting,Kakovostno srečanje
 apps/erpnext/erpnext/accounts/doctype/account/account.js,Non-Group to Group,Non-Group skupini
 DocType: Employee,ERPNext User,Uporabnik ERPNext
+DocType: Coupon Code,Coupon Description,Opis kupona
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py,Batch is mandatory in row {0},Serija je obvezna v vrstici {0}
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py,Batch is mandatory in row {0},Serija je obvezna v vrstici {0}
 DocType: Company,Default Buying Terms,Privzeti pogoji nakupa
@@ -4942,6 +4971,7 @@ apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.py,Lab Test(s) ,Labora
 DocType: Maintenance Visit Purpose,Against Document Detail No,Proti Podrobnosti dokumenta št
 apps/erpnext/erpnext/regional/__init__.py,Deletion is not permitted for country {0},Brisanje ni dovoljeno za državo {0}
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Party Type is mandatory,Vrsta Party je obvezen
+apps/erpnext/erpnext/templates/includes/cart/cart_address.html,Apply Coupon Code,Uporabi kodo kupona
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,"For job card {0}, you can only make the 'Material Transfer for Manufacture' type stock entry",Za delovno izkaznico {0} lahko vnesete samo zalogo vrste &quot;Prenos materiala za proizvodnjo&quot;
 DocType: Quality Inspection,Outgoing,Odhodni
 DocType: Customer Feedback Table,Customer Feedback Table,Tabela povratnih informacij kupcev
@@ -5074,6 +5104,7 @@ apps/erpnext/erpnext/patches/v7_0/create_warehouse_nestedset.py,All Warehouses,V
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,No {0} found for Inter Company Transactions.,Št. {0} je bil najden za transakcije podjetja Inter.
 DocType: Travel Itinerary,Rented Car,Najem avtomobila
 apps/erpnext/erpnext/public/js/hub/components/profile_dialog.js,About your Company,O vaši družbi
+apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.js,Show Stock Ageing Data,Prikaži podatke o staranju zalog
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Credit To account must be a Balance Sheet account,Credit Za računu mora biti bilanca računa
 DocType: Donor,Donor,Darovalec
 DocType: Global Defaults,Disable In Words,"Onemogoči ""z besedami"""
@@ -5088,6 +5119,7 @@ DocType: Patient,Patient ID,ID bolnika
 DocType: Practitioner Schedule,Schedule Name,Ime seznama
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.py,Please enter GSTIN and state for the Company Address {0},Vnesite GSTIN in navedite naslov podjetja {0}
 DocType: Currency Exchange,For Buying,Za nakup
+apps/erpnext/erpnext/setup/default_energy_point_rules.py,On Purchase Order Submission,Ob oddaji naročilnice
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js,Add All Suppliers,Dodaj vse dobavitelje
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Row #{0}: Allocated Amount cannot be greater than outstanding amount.,Vrstica # {0}: Razporejeni vrednosti ne sme biti večja od neplačanega zneska.
 DocType: Tally Migration,Parties,Pogodbenice
@@ -5141,9 +5173,11 @@ apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.js,Message Sent,Sporočilo je bilo poslano
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account with child nodes cannot be set as ledger,Račun z zapirali vozlišč ni mogoče nastaviti kot knjigo
 DocType: C-Form,II,II
+apps/erpnext/erpnext/assets/report/fixed_asset_register/fixed_asset_register.py,Vendor Name,Ime prodajalca
 DocType: Quiz Result,Wrong,Napačno
 DocType: Sales Invoice,Rate at which Price list currency is converted to customer's base currency,"Obrestna mera, po kateri Cenik valuti se pretvorijo v osn stranke"
 DocType: Purchase Invoice Item,Net Amount (Company Currency),Neto znesek (družba Valuta)
+DocType: Sales Partner,Referral Code,napotitvena koda
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py,Total advance amount cannot be greater than total sanctioned amount,Skupni znesek predplačila ne more biti večji od skupnega sankcioniranega zneska
 DocType: Salary Slip,Hour Rate,Urna postavka
 apps/erpnext/erpnext/stock/doctype/item/item.py,Enable Auto Re-Order,Omogoči samodejno ponovno naročilo
@@ -5273,6 +5307,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please select BO
 DocType: Shopping Cart Settings,Show Stock Quantity,Prikaži dodatke skladno z RoHS
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py,Net Cash from Operations,Čisti denarni tok iz poslovanja
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Row #{0}: Status must be {1} for Invoice Discounting {2},Vrstica # {0}: za popust na računu mora biti stanje {1} {2}
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},Faktor konverzije za UOM ({0} -&gt; {1}) za element: {2}
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js,Item 4,Postavka 4
 DocType: Student Admission,Admission End Date,Sprejem Končni datum
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order_dashboard.py,Sub-contracting,Podizvajalcem
@@ -5295,6 +5330,7 @@ DocType: Assessment Plan,Assessment Plan,načrt ocenjevanja
 DocType: Travel Request,Fully Sponsored,Popolnoma sponzorirani
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js,Reverse Journal Entry,Reverse Journal Entry
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js,Create Job Card,Ustvari Job Card
+DocType: Quotation,Referral Sales Partner,Referral Sales Partner
 DocType: Quality Procedure Process,Process Description,Opis postopka
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.py,Customer {0} is created.,Stranka {0} je ustvarjena.
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js, Currently no stock available in any warehouse,Trenutno ni na zalogi
@@ -5385,6 +5421,7 @@ DocType: Patient,Marital Status,Zakonski stan
 DocType: Stock Settings,Auto Material Request,Auto Material Zahteva
 DocType: Woocommerce Settings,API consumer secret,API potrošnikov skrivnost
 DocType: Delivery Note Item,Available Batch Qty at From Warehouse,Dostopno Serija Količina na IZ SKLADIŠČA
+,Received Qty Amount,Prejeta količina v količini
 DocType: Salary Slip,Gross Pay - Total Deduction - Loan Repayment,Bruto plača - Skupaj Odbitek - Posojilo Povračilo
 DocType: Bank Account,Last Integration Date,Zadnji datum vključitve
 DocType: Expense Claim,Expense Taxes and Charges,Davek na dajatve in dajatve
@@ -5428,6 +5465,7 @@ DocType: Certification Application,Payment Details,Podatki o plačilu
 apps/erpnext/erpnext/stock/report/item_prices/item_prices.py,BOM Rate,BOM Rate
 apps/erpnext/erpnext/erpnext_integrations/doctype/tally_migration/tally_migration.py,Reading Uploaded File,Branje naložene datoteke
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py,"Stopped Work Order cannot be cancelled, Unstop it first to cancel","Prenehanja delovnega naročila ni mogoče preklicati, jo najprej izključite"
+DocType: Coupon Code,Coupon Code,Koda kupona
 DocType: Asset,Journal Entry for Scrap,Journal Entry za pretep
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py,Please pull items from Delivery Note,Prosimo povlecite predmete iz dobavnice
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py,Row {0}: select the workstation against the operation {1},Vrstica {0}: izberite delovno postajo proti operaciji {1}
@@ -5512,6 +5550,7 @@ DocType: Woocommerce Settings,API consumer key,API-ključ potrošnika
 apps/erpnext/erpnext/stock/report/product_bundle_balance/product_bundle_balance.py,'Date' is required,&#39;Datum&#39; je obvezen
 apps/erpnext/erpnext/accounts/party.py,Due / Reference Date cannot be after {0},Zaradi / Referenčni datum ne more biti po {0}
 apps/erpnext/erpnext/config/settings.py,Data Import and Export,Uvoz in izvoz podatkov
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/utils.py,"Sorry,coupon code validity has expired",Žal je veljavnost kode kupona potekla
 DocType: Bank Account,Account Details,podrobnosti računa
 DocType: Crop,Materials Required,Potrebni materiali
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,No students Found,Najdeno študenti
@@ -5549,6 +5588,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Delivery Notes {
 apps/erpnext/erpnext/utilities/user_progress.py,Go to Users,Pojdi na uporabnike
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Paid amount + Write Off Amount can not be greater than Grand Total,Plačan znesek + odpis Znesek ne sme biti večja od Grand Skupaj
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,{0} is not a valid Batch Number for Item {1},{0} ni veljavna številka serije za postavko {1}
+apps/erpnext/erpnext/shopping_cart/cart.py,Please enter valid coupon code !!,Vnesite veljavno kodo kupona !!
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Note: There is not enough leave balance for Leave Type {0},Opomba: Ni dovolj bilanca dopust za dopust tipa {0}
 DocType: Task,Task Description,Opis naloge
 DocType: Training Event,Seminar,seminar
@@ -5816,6 +5856,7 @@ apps/erpnext/erpnext/crm/report/prospects_engaged_but_not_converted/prospects_en
 ,TDS Payable Monthly,TDS se plača mesečno
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Queued for replacing the BOM. It may take a few minutes.,Vrstni red za zamenjavo BOM. Traja lahko nekaj minut.
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,Cannot deduct when category is for 'Valuation' or 'Valuation and Total',"Ne more odbiti, če je kategorija za &quot;vrednotenje&quot; ali &quot;Vrednotenje in Total&quot;"
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,"Prosimo, nastavite sistem poimenovanja zaposlenih v kadrovski službi&gt; Nastavitve človeških virov"
 apps/erpnext/erpnext/regional/report/irs_1099/irs_1099.py,Total Payments,Skupna plačila
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,Serial Nos Required for Serialized Item {0},Serijska št Zahtevano za zaporednimi postavki {0}
 apps/erpnext/erpnext/config/accounting.py,Match Payments with Invoices,Match plačila z računov
@@ -5849,6 +5890,8 @@ DocType: Work Order,MFG-WO-.YYYY.-,MFG-WO-.YYYY.-
 DocType: Drug Prescription,Hour,Ura
 DocType: Restaurant Order Entry,Last Sales Invoice,Zadnji račun za prodajo
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please select Qty against item {0},Izberite količino proti elementu {0}
+apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Latest Age,Najnovejša doba
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js,Transfer Material to Supplier,Prenos Material za dobavitelja
 apps/erpnext/erpnext/hr/report/loan_repayment/loan_repayment.py,EMI,EMI
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,Nova serijska številka ne more imeti skladišče. Skladišče mora nastaviti borze vstopu ali Potrdilo o nakupu
 DocType: Lead,Lead Type,Tip ponudbe
@@ -5872,7 +5915,6 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js,Work Order not c
 apps/erpnext/erpnext/hr/doctype/employee_benefit_application/employee_benefit_application.py,"An amount of {0} already claimed for the component {1},\
 						 set the amount equal or greater than {2}","Količina {0}, ki je bila že zahtevana za komponento {1}, \ nastavite znesek, enak ali večji od {2}"
 DocType: Shipping Rule,Shipping Rule Conditions,Pogoji dostavnega pravila
-DocType: Purchase Invoice,Export Type,Izvozna vrsta
 DocType: Salary Slip Loan,Salary Slip Loan,Posojilo za plačilo
 DocType: BOM Update Tool,The new BOM after replacement,Novi BOM po zamenjavi
 ,Point of Sale,Prodajno mesto
@@ -5905,6 +5947,7 @@ DocType: Batch,Source Document Name,Vir Ime dokumenta
 DocType: Production Plan,Get Raw Materials For Production,Pridobite surovine za proizvodnjo
 DocType: Job Opening,Job Title,Job Naslov
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py,Future Payment Ref,Prihodnje plačilo Ref
+DocType: Quotation,Additional Discount and Coupon Code,Dodatna koda popusta in kupona
 apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation.py,"{0} indicates that {1} will not provide a quotation, but all items \
 					have been quoted. Updating the RFQ quote status.","{0} označuje, da {1} ne bo podal ponudbe, ampak cene vseh postavk so navedene. Posodabljanje statusa ponudb RFQ."
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}.,Največji vzorci - {0} so bili že shranjeni za serijo {1} in element {2} v seriji {3}.
@@ -5993,7 +6036,6 @@ apps/erpnext/erpnext/hr/doctype/loan/loan.js,Create Repayment Entry,Ustvari vnos
 DocType: Purchase Order Item,Blanket Order Rate,Stopnja poravnave
 ,Customer Ledger Summary,Povzetek glavne knjige strank
 apps/erpnext/erpnext/hooks.py,Certification,Certificiranje
-apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js,Are you sure you want to make debit note?,"Ali ste prepričani, da želite dodati opombo?"
 DocType: Bank Guarantee,Clauses and Conditions,Klavzule in pogoji
 DocType: Serial No,Creation Document Type,Creation Document Type
 DocType: Amazon MWS Settings,ES,ES
@@ -6031,8 +6073,6 @@ apps/erpnext/erpnext/buying/doctype/supplier/supplier.py,Series is mandatory,Ser
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Financial Services,Finančne storitve
 DocType: Student Sibling,Student ID,Student ID
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js,For Quantity must be greater than zero,Za količino mora biti večja od nič
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","Izbrišite zaposlenega <a href=""#Form/Employee/{0}"">{0}</a> \, če želite preklicati ta dokument"
 apps/erpnext/erpnext/config/projects.py,Types of activities for Time Logs,Vrste dejavnosti za Čas Dnevniki
 DocType: Opening Invoice Creation Tool,Sales,Prodaja
 DocType: Stock Entry Detail,Basic Amount,Osnovni znesek
@@ -6111,6 +6151,7 @@ DocType: Journal Entry,Write Off Based On,Odpisuje temelji na
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Print and Stationery,Tiskanje in Pisalne
 DocType: Stock Settings,Show Barcode Field,Prikaži Barcode Field
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js,Send Supplier Emails,Pošlji Dobavitelj e-pošte
+DocType: Asset Movement,ACC-ASM-.YYYY.-,ACC-ASM-.LLLL.-
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,"Salary already processed for period between {0} and {1}, Leave application period cannot be between this date range.","Plača je že pripravljena za obdobje med {0} in {1}, Pusti obdobje uporabe ne more biti med tem časovnem obdobju."
 DocType: Fiscal Year,Auto Created,Samodejno ustvarjeno
 apps/erpnext/erpnext/hr/doctype/employee_onboarding/employee_onboarding.py,Submit this to create the Employee record,"Pošljite to, da ustvarite zapis zaposlenega"
@@ -6135,7 +6176,9 @@ DocType: Lab Prescription,Test Code,Testna koda
 apps/erpnext/erpnext/config/website.py,Settings for website homepage,Nastavitve za spletni strani
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,{0} is on hold till {1},{0} je na čakanju do {1}
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py,RFQs are not allowed for {0} due to a scorecard standing of {1},RFQ-ji niso dovoljeni za {0} zaradi postavke ocene rezultatov {1}
+apps/erpnext/erpnext/templates/pages/order.html,Make Purchase Invoice,Naredite račun za nakup
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html,Used Leaves,Uporabljeni listi
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/utils.py,{0} Coupon used are {1}. Allowed quantity is exhausted,{0} Uporabljeni kuponi so {1}. Dovoljena količina je izčrpana
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Do you want to submit the material request,Ali želite oddati materialno zahtevo
 DocType: Job Offer,Awaiting Response,Čakanje na odgovor
 DocType: Course Schedule,EDU-CSH-.YYYY.-,EDU-CSH-YYYY-
@@ -6149,6 +6192,7 @@ apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py,Ro
 DocType: Training Event Employee,Optional,Neobvezno
 DocType: Salary Slip,Earning & Deduction,Zaslužek &amp; Odbitek
 DocType: Agriculture Analysis Criteria,Water Analysis,Analiza vode
+DocType: Sales Order,Skip Delivery Note,Preskočite dobavnico
 DocType: Price List,Price Not UOM Dependent,Cena ni odvisna od UOM
 apps/erpnext/erpnext/stock/doctype/item/item.js,{0} variants created.,{0} ustvarjene različice.
 apps/erpnext/erpnext/support/doctype/service_level_agreement/service_level_agreement.py,A Default Service Level Agreement already exists.,Pogodba o ravni privzete storitve že obstaja.
@@ -6191,7 +6235,6 @@ DocType: Clinical Procedure Item,Clinical Procedure Item,Postavka kliničnega po
 DocType: Sales Team,Contact No.,Kontakt št.
 apps/erpnext/erpnext/templates/includes/cart/cart_address.html,Billing Address is same as Shipping Address,Naslov za izstavitev računa je isti kot naslov za pošiljanje
 DocType: Bank Reconciliation,Payment Entries,Plačilni vnosi
-apps/erpnext/erpnext/erpnext_integrations/doctype/shopify_settings/shopify_settings.py,Access token or Shopify URL missing,Manjka dostopni žeton ali Shopify URL
 DocType: Location,Latitude,Zemljepisna širina
 DocType: Work Order,Scrap Warehouse,ostanki Skladišče
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,"Warehouse required at Row No {0}, please set default warehouse for the item {1} for the company {2}","Skladišče, potrebno na vrstico št. {0}, nastavite privzeto skladišče za predmet {1} za podjetje {2}"
@@ -6236,7 +6279,6 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Job Offer Term,Value / Description,Vrednost / Opis
 apps/erpnext/erpnext/controllers/accounts_controller.py,"Row #{0}: Asset {1} cannot be submitted, it is already {2}","Row # {0}: Asset {1} ni mogoče predložiti, je že {2}"
 DocType: Tax Rule,Billing Country,Zaračunavanje Država
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js,Are you sure you want to make credit note?,"Ali ste prepričani, da želite opraviti dobropis?"
 DocType: Purchase Order Item,Expected Delivery Date,Pričakuje Dostava Datum
 DocType: Restaurant Order Entry,Restaurant Order Entry,Vnos naročila restavracij
 apps/erpnext/erpnext/accounts/general_ledger.py,Debit and Credit not equal for {0} #{1}. Difference is {2}.,Debetnih in kreditnih ni enaka za {0} # {1}. Razlika je {2}.
@@ -6259,6 +6301,7 @@ apps/erpnext/erpnext/public/js/hub/pages/Item.vue,Why do think this Item should 
 DocType: Vehicle,Last Carbon Check,Zadnja Carbon Check
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Legal Expenses,Pravni stroški
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js,Please select quantity on row ,Izberite količino na vrsti
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Work Order {0}: job card not found for the operation {1},Delovni nalog {0}: službene izkaznice ni mogoče najti za operacijo {1}
 DocType: Purchase Invoice,Posting Time,Ura vnosa
 DocType: Timesheet,% Amount Billed,% Zaračunani znesek
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Telephone Expenses,Telefonske Stroški
@@ -6456,6 +6499,7 @@ apps/erpnext/erpnext/public/js/account_tree_grid.js,Select Fiscal Year...,Izberi
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,POS Profile required to make POS Entry,"POS Profil zahteva, da POS Entry"
 apps/erpnext/erpnext/accounts/doctype/loyalty_program/loyalty_program.js,"Loyalty Points will be calculated from the spent done (via the Sales Invoice), based on collection factor mentioned.",Točke zvestobe bodo izračunane na podlagi porabljenega zneska (prek prodajnega računa) na podlagi navedenega faktorja zbiranja.
 DocType: Program Enrollment Tool,Enroll Students,včlanite Študenti
+DocType: Pricing Rule,Coupon Code Based,Na osnovi kode kupona
 DocType: Company,HRA Settings,Nastavitve HRA
 DocType: Homepage,Hero Section,Oddelek za junake
 DocType: Employee Transfer,Transfer Date,Datum prenosa
@@ -6572,6 +6616,7 @@ DocType: Contract,Party User,Stranski uporabnik
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py,Please set Company filter blank if Group By is 'Company',"Nastavite Podjetje filtriranje prazno, če skupina Z je &quot;Podjetje&quot;"
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py,Posting Date cannot be future date,Napotitev datum ne more biti prihodnji datum
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,Row # {0}: Serial No {1} does not match with {2} {3},Vrstica # {0}: Serijska št {1} ne ujema z {2} {3}
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Nastavite serijsko številčenje za udeležbo prek Setup&gt; Seting Number
 DocType: Stock Entry,Target Warehouse Address,Naslov tarče skladišča
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Casual Leave,Casual Zapusti
 DocType: Shift Type,The time before the shift start time during which Employee Check-in is considered for attendance.,"Čas pred začetkom izmene, v katerem se šteje prijava zaposlenih za udeležbo."
@@ -7030,6 +7075,7 @@ apps/erpnext/erpnext/accounts/doctype/account/account.js,Merge with Existing Acc
 DocType: Budget,Warn,Opozori
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,All items have already been transferred for this Work Order.,Vsi elementi so bili že preneseni za ta delovni nalog.
 DocType: Appraisal,"Any other remarks, noteworthy effort that should go in the records.","Kakršne koli druge pripombe, omembe vredna napora, da bi moral iti v evidencah."
+DocType: Bank Account,Company Account,Račun podjetja
 DocType: Asset Maintenance,Manufacturing User,Proizvodnja Uporabnik
 DocType: Purchase Invoice,Raw Materials Supplied,"Surovin, dobavljenih"
 DocType: Subscription Plan,Payment Plan,Plačilni načrt
@@ -7071,6 +7117,7 @@ DocType: Sales Invoice,Commission,Komisija
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py,{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3},{0} ({1}) ne more biti večja od načrtovane količine ({2}) v delovnem redu {3}
 DocType: Certification Application,Name of Applicant,Ime prosilca
 apps/erpnext/erpnext/config/manufacturing.py,Time Sheet for manufacturing.,Čas List za proizvodnjo.
+DocType: Quick Stock Balance,Quick Stock Balance,Hitro stanje zalog
 apps/erpnext/erpnext/templates/pages/cart.html,Subtotal,Vmesni seštevek
 apps/erpnext/erpnext/stock/doctype/item/item.py,Cannot change Variant properties after stock transaction. You will have to make a new Item to do this.,Lastnosti variant ni mogoče spremeniti po transakciji z delnicami. Za to morate narediti novo postavko.
 apps/erpnext/erpnext/config/integrations.py,GoCardless SEPA Mandate,GoCardless Mandat SEPA
@@ -7083,6 +7130,7 @@ apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py,This Month's Sum
 DocType: Quality Inspection Reading,Quality Inspection Reading,Kakovost Inšpekcijski Reading
 apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py,`Freeze Stocks Older Than` should be smaller than %d days.,`Zamrzni zaloge starejše od` mora biti manjša od %d dni.
 DocType: Tax Rule,Purchase Tax Template,Nakup Davčna Template
+apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Earliest Age,Najstarejša starost
 apps/erpnext/erpnext/utilities/user_progress.py,Set a sales goal you'd like to achieve for your company.,"Določite prodajni cilj, ki ga želite doseči za vaše podjetje."
 DocType: Quality Goal,Revision,Revizija
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,Healthcare Services,Zdravstvene storitve
@@ -7126,6 +7174,7 @@ DocType: Warranty Claim,Resolved By,Rešujejo s
 apps/erpnext/erpnext/healthcare/doctype/patient_encounter/patient_encounter.js,Schedule Discharge,Razrešnica razporeda
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Cheques and Deposits incorrectly cleared,Čeki in depoziti nepravilno izbil
 DocType: Homepage Section Card,Homepage Section Card,Kartica oddelka za domačo stran
+,Amount To Be Billed,"Znesek, ki ga je treba plačati"
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account {0}: You can not assign itself as parent account,Račun {0}: ne moreš dodeliti samega sebe kot matični račun
 DocType: Purchase Invoice Item,Price List Rate,Cenik Rate
 apps/erpnext/erpnext/utilities/activation.py,Create customer quotes,Ustvari ponudbe kupcev
@@ -7178,6 +7227,7 @@ apps/erpnext/erpnext/config/accounting.py,Tax Withholding rates to be applied on
 DocType: Supplier Scorecard Criteria,Supplier Scorecard Criteria,Merila ocenjevalnih meril za dobavitelje
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Please select Start Date and End Date for Item {0},"Prosimo, izberite Start in končni datum za postavko {0}"
 DocType: Maintenance Schedule,MAT-MSH-.YYYY.-,MAT-MSH-YYYY.-
+,Amount to Receive,Znesek za prejem
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py,Course is mandatory in row {0},Seveda je obvezna v vrsti {0}
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py,From date can not be greater than than To date,Od datuma ne sme biti večje od Do danes
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,To date cannot be before from date,Do danes ne more biti pred od datuma
@@ -7396,6 +7446,7 @@ apps/erpnext/erpnext/public/js/queries.js,Please set {0},"Prosim, nastavite {0}"
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,{0} - {1} is inactive student,{0} - {1} neaktiven študent
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,{0} - {1} is inactive student,{0} - {1} neaktiven študent
 DocType: Employee,Health Details,Podrobnosti zdravja
+DocType: Coupon Code,Coupon Type,Vrsta kupona
 DocType: Leave Encashment,Encashable days,Priloženi dnevi
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,To create a Payment Request reference document is required,Če želite ustvariti zahtevek za plačilo je potrebno referenčni dokument
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,To create a Payment Request reference document is required,Če želite ustvariti zahtevek za plačilo je potrebno referenčni dokument
@@ -7428,7 +7479,6 @@ DocType: Upload Attendance,Upload Attendance,Naloži Udeležba
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,BOM and Manufacturing Quantity are required,BOM and Manufacturing Količina so obvezna
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,Ageing Range 2,Staranje Razpon 2
 DocType: SG Creation Tool Course,Max Strength,Max moč
-apps/erpnext/erpnext/accounts/doctype/account/account.py,"Account {0} already exists in child company {1}. The following fields have different values, they should be same:<ul><li>{2}</li></ul>",Račun {0} že obstaja v otroškem podjetju {1}. Naslednja polja imajo različne vrednosti in morajo biti enaka: <ul><li> {2} </li></ul>
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py,Installing presets,Namestitev prednastavitev
 DocType: Fee Schedule,EDU-FSH-.YYYY.-,EDU-FSH-.YYYY.-
 apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js,No Delivery Note selected for Customer {},Za kupca ni izbranega obvestila o dostavi {}
@@ -7639,6 +7689,7 @@ apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Please enter pa
 DocType: Delivery Note,Print Without Amount,Natisni Brez Znesek
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py,Depreciation Date,Amortizacija Datum
 ,Work Orders in Progress,Delovni nalogi v teku
+DocType: Customer Credit Limit,Bypass Credit Limit Check,Obhodno preverjanje kreditnega limita
 DocType: Issue,Support Team,Support Team
 apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py,Expiry (In Days),Iztek (v dnevih)
 DocType: Appraisal,Total Score (Out of 5),Skupna ocena (od 5)
@@ -7683,6 +7734,7 @@ apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py,Sales Person,P
 DocType: Hotel Room Package,Amenities,Amenities
 DocType: Accounts Settings,Automatically Fetch Payment Terms,Samodejno prejmite plačilne pogoje
 DocType: QuickBooks Migrator,Undeposited Funds Account,Račun nedefiniranih skladov
+DocType: Coupon Code,Uses,Uporaba
 apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py,Multiple default mode of payment is not allowed,Večkratni način plačila ni dovoljen
 DocType: Sales Invoice,Loyalty Points Redemption,Odkupi točk zvestobe
 ,Appointment Analytics,Imenovanje Analytics
@@ -7700,6 +7752,7 @@ apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_repo
 DocType: Student Group Creation Tool,Leave blank if you make students groups per year,"Pustite prazno, če bi študenti skupin na leto"
 DocType: Student Group Creation Tool,Leave blank if you make students groups per year,"Pustite prazno, če bi študenti skupin na leto"
 DocType: HR Settings,"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day","Če je označeno, Total no. delovnih dni bo vključeval praznike, in to se bo zmanjšala vrednost plač dan na"
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py,Failed to add Domain,Domene ni bilo mogoče dodati
 apps/erpnext/erpnext/controllers/status_updater.py,"To allow over receipt / delivery, update ""Over Receipt/Delivery Allowance"" in Stock Settings or the Item.","Če želite dovoliti prejem / dostavo, posodobite &quot;Over Prejem / Dovoljenje za dostavo&quot; v nastavitvah zaloge ali pošiljko."
 apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.js,"Apps using current key won't be able to access, are you sure?","Aplikacije, ki uporabljajo trenutni ključ, ne bodo imele dostopa, ali ste prepričani?"
 DocType: Subscription Settings,Prorate,Prorate
@@ -7712,6 +7765,7 @@ DocType: Employee Benefit Claim,Max Amount Eligible,Najvišji znesek je primeren
 ,BOM Stock Report,BOM Stock Poročilo
 DocType: Communication Medium,"If there is no assigned timeslot, then communication will be handled by this group","Če ni določenega časovnega razporeda, bo komunikacija upravljala ta skupina"
 DocType: Stock Reconciliation Item,Quantity Difference,količina Razlika
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Dobavitelj&gt; Vrsta dobavitelja
 DocType: Opportunity Item,Basic Rate,Osnovni tečaj
 DocType: GL Entry,Credit Amount,Credit Znesek
 ,Electronic Invoice Register,Register elektronskih računov
@@ -7824,6 +7878,7 @@ apps/erpnext/erpnext/accounts/doctype/account/account_tree.js,"Optional. Sets co
 DocType: Sales Invoice,Customer GSTIN,GSTIN stranka
 DocType: Crop Cycle,List of diseases detected on the field. When selected it'll automatically add a list of tasks to deal with the disease ,"Seznam bolezni, odkritih na terenu. Ko je izbran, bo samodejno dodal seznam nalog, ki se ukvarjajo z boleznijo"
 apps/erpnext/erpnext/manufacturing/page/bom_comparison_tool/bom_comparison_tool.js,BOM 1,BOM 1
+apps/erpnext/erpnext/assets/report/fixed_asset_register/fixed_asset_register.py,Asset Id,ID premoženja
 apps/erpnext/erpnext/healthcare/doctype/healthcare_service_unit/healthcare_service_unit.js,This is a root healthcare service unit and cannot be edited.,To je korenska storitev zdravstvene oskrbe in je ni mogoče urejati.
 DocType: Asset Repair,Repair Status,Stanje popravila
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Requested Qty: Quantity requested for purchase, but not ordered.","Zahtevana količina: Zahtevana količina za nakup, vendar ni naročena."
@@ -7965,6 +8020,7 @@ DocType: Academic Term,Term End Date,Izraz Končni datum
 DocType: Purchase Invoice,Taxes and Charges Deducted (Company Currency),Davki in dajatve Odbitek (družba Valuta)
 DocType: Item Group,General Settings,Splošne nastavitve
 DocType: Article,Article,Člen
+apps/erpnext/erpnext/shopping_cart/cart.py,Please enter coupon code !!,"Prosimo, vnesite kodo kupona !!"
 apps/erpnext/erpnext/setup/doctype/currency_exchange/currency_exchange.py,From Currency and To Currency cannot be same,Od denarja in denarja ne more biti enaka
 DocType: Taxable Salary Slab,Percent Deduction,Odstotek odbitka
 DocType: GL Entry,To Rename,Če želite preimenovati

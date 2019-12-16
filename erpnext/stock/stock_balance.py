@@ -3,10 +3,10 @@
 
 from __future__ import print_function, unicode_literals
 import frappe
-
 from frappe.utils import flt, cstr, nowdate, nowtime
 from erpnext.stock.utils import update_bin
 from erpnext.stock.stock_ledger import update_entries_after
+from erpnext.controllers.stock_controller import update_gl_entries_after
 
 def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False, only_bin=False):
 	"""
@@ -18,23 +18,29 @@ def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False,
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
-	for d in frappe.db.sql("""select distinct item_code, warehouse from
-		(select item_code, warehouse from tabBin
-		union
-		select item_code, warehouse from `tabStock Ledger Entry`) a"""):
-			try:
-				repost_stock(d[0], d[1], allow_zero_rate, only_actual, only_bin)
-				frappe.db.commit()
-			except:
-				frappe.db.rollback()
+	item_warehouses = frappe.db.sql("""
+		select distinct item_code, warehouse
+		from
+			(select item_code, warehouse from tabBin
+			union
+			select item_code, warehouse from `tabStock Ledger Entry`) a
+	""")
+	for d in item_warehouses:
+		try:
+			repost_stock(d[0], d[1], allow_zero_rate, only_actual, only_bin, allow_negative_stock)
+			frappe.db.commit()
+		except:
+			frappe.db.rollback()
 
 	if allow_negative_stock:
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 	frappe.db.auto_commit_on_many_writes = 0
 
-def repost_stock(item_code, warehouse, allow_zero_rate=False, only_actual=False, only_bin=False):
+def repost_stock(item_code, warehouse, allow_zero_rate=False,
+	only_actual=False, only_bin=False, allow_negative_stock=False):
+
 	if not only_bin:
-		repost_actual_qty(item_code, warehouse, allow_zero_rate)
+		repost_actual_qty(item_code, warehouse, allow_zero_rate, allow_negative_stock)
 
 	if item_code and warehouse and not only_actual:
 		qty_dict = {
@@ -50,11 +56,8 @@ def repost_stock(item_code, warehouse, allow_zero_rate=False, only_actual=False,
 
 		update_bin_qty(item_code, warehouse, qty_dict)
 
-def repost_actual_qty(item_code, warehouse, allow_zero_rate=False):
-	try:
-		update_entries_after({ "item_code": item_code, "warehouse": warehouse }, allow_zero_rate)
-	except:
-		pass
+def repost_actual_qty(item_code, warehouse, allow_zero_rate=False, allow_negative_stock=False):		update_entries_after({ "item_code": item_code, "warehouse": warehouse },
+		allow_zero_rate=allow_zero_rate, allow_negative_stock=allow_negative_stock)
 
 def get_balance_qty_from_sle(item_code, warehouse):
 	balance_qty = frappe.db.sql("""select qty_after_transaction from `tabStock Ledger Entry`
@@ -259,5 +262,15 @@ def repost_all_stock_vouchers():
 			print(frappe.get_traceback())
 			rejected.append([voucher_type, voucher_no])
 			frappe.db.rollback()
+			
+def repost_gle_for_stock_transactions(posting_date=None, posting_time=None, for_warehouses=None):
+	frappe.db.auto_commit_on_many_writes = 1
 
-	print(rejected)
+	if not posting_date:
+		posting_date = "1900-01-01"
+	if not posting_time:
+		posting_time = "00:00"
+
+	update_gl_entries_after(posting_date, posting_time, for_warehouses=for_warehouses)
+
+	frappe.db.auto_commit_on_many_writes = 0

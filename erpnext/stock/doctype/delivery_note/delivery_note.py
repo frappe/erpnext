@@ -425,7 +425,12 @@ def make_sales_invoice(source_name, target_doc=None):
 		target.run_method("calculate_taxes_and_totals")
 
 		# set company address
-		target.update(get_company_address(target.company))
+		if source.company_address:
+			target.update({'company_address': source.company_address})
+		else:
+			# set company address
+			target.update(get_company_address(target.company))
+
 		if target.company_address:
 			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
 
@@ -459,6 +464,9 @@ def make_sales_invoice(source_name, target_doc=None):
 	doc = get_mapped_doc("Delivery Note", source_name, {
 		"Delivery Note": {
 			"doctype": "Sales Invoice",
+			"field_map": {
+				"is_return": "is_return"
+			},
 			"validation": {
 				"docstatus": ["=", 1]
 			}
