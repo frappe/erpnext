@@ -66,6 +66,7 @@ def place_order():
 
 	from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))
+	sales_order.payment_schedule = []
 
 	if not cart_settings.allow_items_not_in_stock:
 		for item in sales_order.get("items"):
@@ -454,9 +455,8 @@ def get_applicable_shipping_rules(party=None, quotation=None):
 	shipping_rules = get_shipping_rules(quotation)
 
 	if shipping_rules:
-		rule_label_map = frappe.db.get_values("Shipping Rule", shipping_rules, "label")
 		# we need this in sorted order as per the position of the rule in the settings page
-		return [[rule, rule_label_map.get(rule)] for rule in shipping_rules]
+		return [[rule, rule] for rule in shipping_rules]
 
 def get_shipping_rules(quotation=None, cart_settings=None):
 	if not quotation:
