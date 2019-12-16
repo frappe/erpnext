@@ -183,7 +183,7 @@ def get_serial_no_for_item(args):
 
 def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=False):
 	from erpnext.accounts.doctype.pricing_rule.utils import (get_pricing_rules,
-		get_applied_pricing_rules, get_pricing_rule_items)
+		get_applied_pricing_rules, get_pricing_rule_items, get_product_discount_rule)
 
 	if isinstance(doc, string_types):
 		doc = json.loads(doc)
@@ -242,9 +242,11 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 			if pricing_rule.coupon_code_based==1 and args.coupon_code==None:
 				return item_details
 				
-			if (not pricing_rule.validate_applied_rule and
-				pricing_rule.price_or_product_discount == "Price"):
-				apply_price_discount_pricing_rule(pricing_rule, item_details, args)
+			if not pricing_rule.validate_applied_rule:
+				if pricing_rule.price_or_product_discount == "Price":
+					apply_price_discount_rule(pricing_rule, item_details, args)
+				else:
+					get_product_discount_rule(pricing_rule, item_details, doc)
 
 		item_details.has_pricing_rule = 1
 
@@ -294,7 +296,7 @@ def get_pricing_rule_details(args, pricing_rule):
 		'child_docname': args.get('child_docname')
 	})
 
-def apply_price_discount_pricing_rule(pricing_rule, item_details, args):
+def apply_price_discount_rule(pricing_rule, item_details, args):
 	item_details.pricing_rule_for = pricing_rule.rate_or_discount
 
 	if ((pricing_rule.margin_type == 'Amount' and pricing_rule.currency == args.currency)
