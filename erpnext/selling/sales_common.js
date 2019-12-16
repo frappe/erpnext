@@ -134,8 +134,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
+		// for internal customer instead of pricing rule directly apply valuation rate on item
+		if (doc.is_internal_customer && in_list(["Delivery Note Item"], cdt)) {
+			this.apply_valuation_rate_on_item(item, doc.company);
+		}
 		// check if child doctype is Sales Order Item/Qutation Item and calculate the rate
-		if(in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item"]), cdt)
+		else if(in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item"]), cdt)
 			this.apply_pricing_rule_on_item(item);
 		else
 			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
