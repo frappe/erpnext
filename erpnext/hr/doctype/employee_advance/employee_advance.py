@@ -7,6 +7,7 @@ import frappe, erpnext
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate
+from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 
 class EmployeeAdvanceOverPayment(frappe.ValidationError):
 	pass
@@ -102,8 +103,6 @@ def get_due_advance_amount(employee, posting_date):
 
 @frappe.whitelist()
 def make_bank_entry(dt, dn):
-	from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
-
 	doc = frappe.get_doc(dt, dn)
 	payment_account = get_default_bank_cash_account(doc.company, account_type="Cash",
 		mode_of_payment=doc.mode_of_payment)
@@ -132,3 +131,33 @@ def make_bank_entry(dt, dn):
 	})
 
 	return je.as_dict()
+
+@frappe.whitelist()
+def make_return_entry(employee_name, company, employee_advance_name, return_amount, mode_of_payment, advance_account):
+	return_account = get_default_bank_cash_account(company, account_type='Cash', mode_of_payment = mode_of_payment)
+	je = frappe.new_doc('Journal Entry')
+	je.posting_date = nowdate()
+	je.voucher_type = 'Bank Entry'
+	je.company = company
+	je.remark = 'Return against Employee Advance: ' + employee_advance_name
+
+	je.append('accounts', {
+		'account': advance_account,
+		'credit_in_account_currency': return_amount,
+		'reference_type': 'Employee Advance',
+		'reference_name': employee_advance_name,
+		'party_type': 'Employee',
+		'party': employee_name,
+		'is_advance': 'Yes'
+	})
+
+	je.append("accounts", {
+		"account": return_account.account,
+		"debit_in_account_currency": return_amount,
+		"account_currency": return_account.account_currency,
+		"account_type": return_account.account_type
+	})
+
+	return je.as_dict()
+	
+
