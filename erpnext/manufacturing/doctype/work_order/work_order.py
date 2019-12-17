@@ -619,8 +619,9 @@ def make_work_order(item, qty=0, project=None):
 	wo_doc = frappe.new_doc("Work Order")
 	wo_doc.production_item = item
 	wo_doc.update(item_details)
-	if qty > 0:
-		wo_doc.qty = qty
+
+	if flt(qty) > 0:
+		wo_doc.qty = flt(qty)
 		wo_doc.get_items_and_operations_from_bom()
 
 	return wo_doc
