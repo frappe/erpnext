@@ -153,6 +153,29 @@ def get_monthly_repayment_amount(repayment_method, loan_amount, rate_of_interest
 		monthly_repayment_amount = math.ceil(flt(loan_amount) / repayment_periods)
 	return monthly_repayment_amount
 
+def update_loan_for_salary_slips(loans, ss_docstatus):
+	for loan in loans:
+		doc = frappe.get_doc("Loan", loan.name)
+
+		#setting repayment schedule and updating total amount to pay and paid
+		if ss_docstatus == 1:
+			frappe.db.set_value("Repayment Schedule", loan.repayment_name, "paid", 1)
+			total_paid_amount = doc.total_amount_paid + loan.total_payment
+			total_pay = doc.total_payment - loan.total_payment
+		elif ss_docstatus == 2:
+			frappe.db.set_value("Repayment Schedule", loan.repayment_name, "paid", 0)
+			total_paid_amount = doc.total_amount_paid - loan.total_payment
+			total_pay = doc.total_payment + loan.total_payment
+
+		frappe.db.set_value("Loan", doc.name, "total_amount_paid", total_paid_amount)
+		frappe.db.set_value("Loan", doc.name, "total_payment", total_pay)
+
+		#setting loan status
+		if doc.total_payment <= 0:
+			frappe.db.set_value("Loan", doc.name, "status", "Repaid/Closed")
+		elif doc.total_payment > 0 and doc.status != "Disbursed":
+			frappe.db.set_value("Loan", doc.name, "status", "Disbursed")
+
 @frappe.whitelist()
 def get_loan_application(loan_application):
 	loan = frappe.get_doc("Loan Application", loan_application)

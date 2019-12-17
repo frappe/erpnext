@@ -17,6 +17,7 @@ from erpnext.hr.doctype.additional_salary.additional_salary import get_additiona
 from erpnext.hr.doctype.payroll_period.payroll_period import get_period_factor, get_payroll_period
 from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_benefit_component_amount
 from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount, get_last_payroll_period_benefits
+from erpnext.hr.doctype.loan.loan import update_loan_for_salary_slips
 
 class SalarySlip(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -62,6 +63,7 @@ class SalarySlip(TransactionBase):
 		if self.net_pay < 0:
 			frappe.throw(_("Net Pay cannot be less than 0"))
 		else:
+			self.update_loans()
 			self.set_status()
 			self.update_status(self.name)
 			self.update_salary_slip_in_additional_salary()
@@ -69,6 +71,7 @@ class SalarySlip(TransactionBase):
 				self.email_salary_slip()
 
 	def on_cancel(self):
+		self.update_loans()
 		self.set_status()
 		self.update_status()
 		self.update_salary_slip_in_additional_salary()
@@ -764,7 +767,8 @@ class SalarySlip(TransactionBase):
 			self.total_principal_amount += loan.principal_amount
 
 	def get_loan_details(self):
-		return frappe.db.sql("""select rps.principal_amount, rps.interest_amount, l.name,
+		return frappe.db.sql("""select rps.principal_amount,
+				rps.name as repayment_name, rps.interest_amount, l.name,
 				rps.total_payment, l.loan_account, l.interest_income_account
 			from
 				`tabRepayment Schedule` as rps, `tabLoan` as l
@@ -814,6 +818,9 @@ class SalarySlip(TransactionBase):
 				timesheet.flags.ignore_validate_update_after_submit = True
 				timesheet.set_status()
 				timesheet.save()
+
+	def update_loans(self):
+		update_loan_for_salary_slips(self.get_loan_details(),self.docstatus)
 
 	def set_status(self, status=None):
 		'''Get and update status'''
