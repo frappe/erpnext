@@ -247,6 +247,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None):
 
 			rules.append(get_pricing_rule_details(args, pricing_rule))
 			if pricing_rule.mixed_conditions or pricing_rule.apply_rule_on_other:
+				item_details.apply_rule_on_other_items = 1
 				continue
 
 			if pricing_rule.coupon_code_based==1 and args.coupon_code==None:

@@ -65,7 +65,7 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 	bin = get_bin_qty(packing_item_code, pi.warehouse)
 	pi.actual_qty = flt(bin.get("actual_qty"))
 	pi.projected_qty = flt(bin.get("projected_qty"))
-	if old_packed_items_map:
+	if old_packed_items_map and old_packed_items_map.get((packing_item_code, main_item_row.item_code)):
 		pi.batch_no = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].batch_no
 		pi.serial_no = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].serial_no
 		pi.warehouse = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].warehouse
