@@ -46,10 +46,10 @@ frappe.ui.form.on('Employee Advance', {
 			);
 		}
 
-		if (frm.doc.docstatus === 1 
+		if (frm.doc.docstatus === 1
 			&& (flt(frm.doc.claimed_amount) < flt(frm.doc.paid_amount))
 			&& frappe.model.can_create("Journal Entry")) {
-	
+
 			frm.add_custom_button(__("Return"),  function() {
 				frm.trigger('make_return_entry');
 			}, __('Create'));
@@ -107,7 +107,7 @@ frappe.ui.form.on('Employee Advance', {
 				const doclist = frappe.model.sync(r.message);
 				frappe.set_route('Form', doclist[0].doctype, doclist[0].name);
 			}
-		})
+		});
 	},
 
 	employee: function (frm) {
