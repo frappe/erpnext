@@ -48,6 +48,9 @@ class PricingRule(Document):
 		if tocheck and not self.get(tocheck):
 			throw(_("{0} is required").format(self.meta.get_label(tocheck)), frappe.MandatoryError)
 
+		if self.price_or_product_discount == 'Price' and not self.rate_or_discount:
+			throw(_("Rate or Discount is required for the price discount."), frappe.MandatoryError)
+
 	def validate_applicable_for_selling_or_buying(self):
 		if not self.selling and not self.buying:
 			throw(_("Atleast one of the Selling or Buying must be selected"))
