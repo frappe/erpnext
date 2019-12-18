@@ -1412,7 +1412,7 @@ def set_account_for_mode_of_payment(self):
 			data.account = get_bank_cash_account(data.mode_of_payment, self.company).get("account")
 
 def get_inter_company_details(doc, doctype):
-	if doctype in ["Sales Invoice", "Sales Order"]:
+	if doctype in ["Sales Invoice", "Sales Order", "Delivery Note"]:
 		party = frappe.db.get_value("Supplier", {"disabled": 0, "is_internal_supplier": 1, "represents_company": doc.company}, "name")
 		company = frappe.get_cached_value("Customer", doc.customer, "represents_company")
 	else:
@@ -1428,7 +1428,7 @@ def get_inter_company_details(doc, doctype):
 def validate_inter_company_transaction(doc, doctype):
 
 	details = get_inter_company_details(doc, doctype)
-	price_list = doc.selling_price_list if doctype in ["Sales Invoice", "Sales Order"] else doc.buying_price_list
+	price_list = doc.selling_price_list if doctype in ["Sales Invoice", "Sales Order", "Delivery Note"] else doc.buying_price_list
 	valid_price_list = frappe.db.get_value("Price List", {"name": price_list, "buying": 1, "selling": 1})
 	if not valid_price_list:
 		frappe.throw(_("Selected Price List should have buying and selling fields checked."))

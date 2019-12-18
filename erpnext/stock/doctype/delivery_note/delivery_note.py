@@ -587,3 +587,53 @@ def make_sales_return(source_name, target_doc=None):
 def update_delivery_note_status(docname, status):
 	dn = frappe.get_doc("Delivery Note", docname)
 	dn.update_status(status)
+
+@frappe.whitelist()
+def make_inter_company_receipt_delievry(source_name, target_doc=None):
+	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
+
+def make_inter_company_transaction(doctype, source_name, target_doc=None):
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_transaction, get_inter_company_details
+
+	if doctype == 'Delivery Note':
+		source_doc = frappe.get_doc(doctype, source_name)
+		target_doctype = "Purchase Receipt"
+	else:
+		source_doc = frappe.get_doc(doctype, source_name)
+		target_doctype = 'Delievry Note'
+
+	validate_inter_company_transaction(source_doc, doctype)
+	details = get_inter_company_details(source_doc, doctype)
+
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
+
+	def update_details(source_doc, target_doc, source_parent):
+		target_doc.inter_company_invoice_reference = source_doc.name
+		if target_doc.doctype == 'Purchase Receipt':
+			target_doc.company = details.get("company")
+			target_doc.supplier = details.get("party")
+			target_doc.buying_price_list = source_doc.selling_price_list
+		else:
+			target_doc.company = details.get("company")
+			target_doc.customer = details.get("party")
+			target_doc.selling_price_list = source_doc.buying_price_list
+
+	doclist = get_mapped_doc(doctype, source_name,	{
+		doctype: {
+			"doctype": target_doctype,
+			"postprocess": update_details,
+			"field_no_map": [
+				"taxes_and_charges"
+			]
+		},
+		doctype +" Item": {
+			"doctype": target_doctype + " Item",
+			"field_no_map": {
+				"warehouse": "warehouse"
+			}
+		}
+
+	}, target_doc, set_missing_values)
+
+	return doclist

@@ -92,6 +92,15 @@ frappe.ui.form.on("Delivery Note", {
 			}, __('Create'));
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
+
+		if (frm.doc.docstatus === 1 && frm.doc.is_internal_customer) {
+			frm.add_custom_button(__('Purchase Receipt'), function() {
+				frappe.model.open_mapped_doc({
+					method: 'erpnext.stock.doctype.delivery_note.delivery_note.make_inter_company_receipt_delievry',
+					frm: frm,
+				})
+			}, __('Create'));
+		}
 	}
 });
 
