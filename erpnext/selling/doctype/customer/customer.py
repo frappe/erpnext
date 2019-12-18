@@ -224,7 +224,10 @@ def make_quotation(source_name, target_doc=None):
 	target_doc.run_method("set_other_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
 
-	target_doc.selling_price_list = frappe.get_doc("Customer",source_name).default_price_list
+	price_list = frappe.get_doc("Customer", source_name, "default_price_list")
+	if price_list:
+		target_doc.selling_price_list = price_list
+
 	return target_doc
 
 @frappe.whitelist()
