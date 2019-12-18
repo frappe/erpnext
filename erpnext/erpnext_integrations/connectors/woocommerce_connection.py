@@ -48,8 +48,8 @@ def _order(*args, **kwargs):
 
 	if event == "created":
 		#Get user ID and check GST
-		raw_billing_data = fd.get("billing")
-		metaDataList = fd.get("meta_data")
+		raw_billing_data = order.get("billing")
+		metaDataList = order.get("meta_data")
 		gstInclusive = "True"
 		customerID = None
 		for meta in metaDataList:
@@ -65,7 +65,7 @@ def _order(*args, **kwargs):
 			frappe.log_error("Cant find Customer")
 			link_customer_and_address(raw_billing_data,0)
 
-		items_list = fd.get("line_items")
+		items_list = order.get("line_items")
 		for item in items_list:
 			itemID = item.get("sku")
 			frappe.log_error(itemID)
@@ -80,11 +80,11 @@ def _order(*args, **kwargs):
 		newSI = frappe.new_doc("Sales Invoice")
 		newSI.customer = customer.name
 
-		created_date = fd.get("date_created").split("T")
+		created_date = order.get("date_created").split("T")
 		newSI.transaction_date = created_date[0]
 
-		newSI.po_no = fd.get("id")
-		newSI.woocommerce_id = fd.get("id")
+		newSI.po_no = order.get("id")
+		newSI.woocommerce_id = order.get("id")
 		newSI.naming_series = "ACC-SINV-.YYYY.-"
 
 		placed_order_date = created_date[0]
@@ -118,7 +118,7 @@ def _order(*args, **kwargs):
 				ordered_items_tax = item.get("total_tax")
 			else:
 				itemTax = item.get("taxes")
-				rate = float(item.get("price")) + float(itemTax[0].get("total"))
+				rate = float(item.get("price")) + float(itemTax[0].get("total")/item.get("quantity"))
 				ordered_items_tax = rate * 0.1
 
 			newSI.append("items",{
@@ -134,14 +134,14 @@ def _order(*args, **kwargs):
 
 			add_tax_details(newSI,ordered_items_tax,"Ordered Item tax",0)
 
-		# shipping_details = fd.get("shipping_lines") # used for detailed order
-		shipping_total = fd.get("shipping_total")
+		# shipping_details = forder.get("shipping_lines") # used for detailed order
+		shipping_total = order.get("shipping_total")
 		shipping_tax = int(float(shipping_total)) * 0.1
 
 		add_tax_details(newSI,shipping_tax,"Shipping Tax",1)
 		add_tax_details(newSI,shipping_total,"Shipping Total",1)
 
-		newSI.submit()
+		#newSI.submit()
 
 		frappe.db.commit()
 
