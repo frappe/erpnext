@@ -944,7 +944,7 @@ class SalesInvoice(SellingController):
 			)
 
 	def make_gle_for_rounding_adjustment(self, gl_entries):
-		if flt(self.rounding_adjustment, self.precision("rounding_adjustment")):
+		if flt(self.rounding_adjustment, self.precision("rounding_adjustment")) and self.base_rounding_adjustment:
 			round_off_account, round_off_cost_center = \
 				get_round_off_account_and_cost_center(self.company)
 
@@ -1039,13 +1039,18 @@ class SalesInvoice(SellingController):
 				continue
 
 			for serial_no in item.serial_no.split("\n"):
-				sales_invoice, item_code = frappe.db.get_value("Serial No", serial_no,
-					["sales_invoice", "item_code"])
-				if sales_invoice and item_code == item.item_code and self.name != sales_invoice:
-					sales_invoice_company = frappe.db.get_value("Sales Invoice", sales_invoice, "company")
+				serial_no_details = frappe.db.get_value("Serial No", serial_no,
+					["sales_invoice", "item_code"], as_dict=1)
+
+				if not serial_no_details:
+					continue
+
+				if serial_no_details.sales_invoice and serial_no_details.item_code == item.item_code \
+					and self.name != serial_no_details.sales_invoice:
+					sales_invoice_company = frappe.db.get_value("Sales Invoice", serial_no_details.sales_invoice, "company")
 					if sales_invoice_company == self.company:
 						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}"
-							.format(serial_no, sales_invoice)))
+							.format(serial_no, serial_no_details.sales_invoice)))
 
 	def update_project(self):
 		if self.project:
