@@ -90,6 +90,7 @@ class SalesInvoice(SellingController):
 		self.validate_account_for_change_amount()
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
+		self.validate_item_cost_centers()
 		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_invoice_reference)
 
 		if cint(self.is_pos):
@@ -146,6 +147,12 @@ class SalesInvoice(SellingController):
 
 					elif asset.status in ("Scrapped", "Cancelled", "Sold"):
 						frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}").format(d.idx, d.asset, asset.status))
+
+	def validate_item_cost_centers(self):
+		for item in self.get("items",None):
+			cc = frappe.get_doc("Cost Center",item.cost_center)
+			if cc.company != self.company:
+				frappe.throw(_("Row #{0} : Cost Center <strong>{1}</strong> does not belong to company <strong>{2}</strong>").format(item.idx, item.cost_center, self.company))
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
