@@ -1,9 +1,7 @@
 
 from __future__ import unicode_literals
 import frappe, base64, hashlib, hmac, json
-import datetime
 from frappe import _
-
 
 def verify_request():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
@@ -30,16 +28,19 @@ def order(*args, **kwargs):
 		frappe.log_error(error_message, "WooCommerce Error")
 		raise
 
-
 def _order(*args, **kwargs):
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 	if frappe.flags.woocomm_test_order_data:
-		fd = frappe.flags.woocomm_test_order_data
+		order = frappe.flags.woocomm_test_order_data
 		event = "created"
 
 	elif frappe.request and frappe.request.data:
 		verify_request()
-		fd = json.loads(frappe.request.data)
+		try:
+			order = json.loads(frappe.request.data)
+		except ValueError:
+			#woocommerce returns 'webhook_id=value' for the first request which is not JSON
+			order = frappe.request.data
 		event = frappe.get_request_header("X-Wc-Webhook-Event")
 
 	else:
@@ -47,9 +48,10 @@ def _order(*args, **kwargs):
 
 	if event == "created":
 		#Get user ID and check GST
-		raw_billing_data = fd.get("billing")
-		metaDataList = fd.get("meta_data")
+		raw_billing_data = order.get("billing")
+		metaDataList = order.get("meta_data")
 		gstInclusive = "True"
+		customerID = None
 		for meta in metaDataList:
 			if meta.get("key") == "store_code":
 				customerID = meta.get("value")
@@ -63,7 +65,7 @@ def _order(*args, **kwargs):
 			frappe.log_error("Cant find Customer")
 			link_customer_and_address(raw_billing_data,0)
 
-		items_list = fd.get("line_items")
+		items_list = order.get("line_items")
 		for item in items_list:
 			itemID = item.get("sku")
 			frappe.log_error(itemID)
@@ -78,11 +80,11 @@ def _order(*args, **kwargs):
 		newSI = frappe.new_doc("Sales Invoice")
 		newSI.customer = customer.name
 
-		created_date = fd.get("date_created").split("T")
+		created_date = order.get("date_created").split("T")
 		newSI.transaction_date = created_date[0]
 
-		newSI.po_no = fd.get("id")
-		newSI.woocommerce_id = fd.get("id")
+		newSI.po_no = order.get("id")
+		newSI.woocommerce_id = order.get("id")
 		newSI.naming_series = "ACC-SINV-.YYYY.-"
 
 		placed_order_date = created_date[0]
@@ -116,7 +118,7 @@ def _order(*args, **kwargs):
 				ordered_items_tax = item.get("total_tax")
 			else:
 				itemTax = item.get("taxes")
-				rate = float(item.get("price")) + float(itemTax[0].get("total"))
+				rate = float(item.get("price")) + float(itemTax[0].get("total")/item.get("quantity"))
 				ordered_items_tax = rate * 0.1
 
 			newSI.append("items",{
@@ -132,14 +134,14 @@ def _order(*args, **kwargs):
 
 			add_tax_details(newSI,ordered_items_tax,"Ordered Item tax",0)
 
-		# shipping_details = fd.get("shipping_lines") # used for detailed order
-		shipping_total = fd.get("shipping_total")
+		# shipping_details = forder.get("shipping_lines") # used for detailed order
+		shipping_total = order.get("shipping_total")
 		shipping_tax = int(float(shipping_total)) * 0.1
 
 		add_tax_details(newSI,shipping_tax,"Shipping Tax",1)
 		add_tax_details(newSI,shipping_total,"Shipping Total",1)
 
-		newSI.submit()
+		#newSI.submit()
 
 		frappe.db.commit()
 
@@ -186,12 +188,11 @@ def link_customer_and_address(raw_billing_data,customer_status, customerID):
 
 		address = frappe.get_doc("Address",{"woocommerce_email":customer_woo_com_email})
 		old_address_title = address.name
-		new_address_title = customer.customer_name+"-billing"
+		new_address_title = customer.customer_name + "-billing"
 		address.address_title = customer.customer_name
 		address.save()
 
-		frappe.rename_doc("Address",old_address_title,new_address_title)
-
+		frappe.rename_doc("Address", old_address_title, new_address_title)
 		frappe.db.commit()
 
 def link_item(item_data,item_status):
@@ -221,15 +222,11 @@ def add_tax_details(newSI,price,desc,status):
 	if status == 0:
 		# Product taxes
 		account_head_type = woocommerce_settings.tax_account
-
-	if status == 1:
-		# Shipping taxes
-		account_head_type = woocommerce_settings.f_n_f_account
-
+	frappe.db.commit()
+  
 	newSI.append("taxes",{
 			"charge_type":"Actual",
 			"account_head": account_head_type,
 			"tax_amount": price,
 			"description": desc
 			})
-	

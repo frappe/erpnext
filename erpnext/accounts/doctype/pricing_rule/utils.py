@@ -410,7 +410,8 @@ def validate_pricing_rule_on_items(doc, item_row, do_not_validate = False):
 	for pricing_rule in get_applied_pricing_rules(doc, item_row):
 		pr_doc = frappe.get_doc('Pricing Rule', pricing_rule)
 
-		if pr_doc.get('apply_on') == 'Transaction': continue
+		if (pr_doc.get('apply_on') == 'Transaction'
+			or not pr_doc.get("mixed_conditions")): continue
 
 		if pr_doc.get('price_or_product_discount') == 'Product':
 			apply_pricing_rule_for_free_items(doc, pr_doc)
@@ -534,3 +535,31 @@ def validate_pricing_rule_for_different_cond(doc):
 		validate_pricing_rule_on_items(doc, d, True)
 
 	return doc
+
+def validate_coupon_code(coupon_name):
+	from frappe.utils import today,getdate
+	coupon=frappe.get_doc("Coupon Code",coupon_name)
+	if coupon.valid_from:
+		if coupon.valid_from > getdate(today()) :
+			frappe.throw(_("Sorry,coupon code validity has not started"))
+	elif coupon.valid_upto:
+		if coupon.valid_upto < getdate(today()) :
+			frappe.throw(_("Sorry,coupon code validity has expired"))	
+	elif coupon.used>=coupon.maximum_use:
+		frappe.throw(_("Sorry,coupon code are exhausted"))
+	else:
+		return
+
+def update_coupon_code_count(coupon_name,transaction_type):
+	coupon=frappe.get_doc("Coupon Code",coupon_name)
+	if coupon:
+		if transaction_type=='used':
+			if coupon.used<coupon.maximum_use:
+				coupon.used=coupon.used+1
+				coupon.save(ignore_permissions=True)
+			else:
+				frappe.throw(_("{0} Coupon used are {1}. Allowed quantity is exhausted").format(coupon.coupon_code,coupon.used))
+		elif transaction_type=='cancelled':
+			if coupon.used>0:
+				coupon.used=coupon.used-1
+				coupon.save(ignore_permissions=True)

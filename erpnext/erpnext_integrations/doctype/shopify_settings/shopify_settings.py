@@ -30,13 +30,9 @@ class ShopifySettings(Document):
 		# url = get_shopify_url('admin/webhooks.json', self)
 		created_webhooks = [d.method for d in self.webhooks]
 		url = get_shopify_url('admin/api/2019-04/webhooks.json', self)
-		print('url', url)
 		for method in webhooks:
-			print('method', method)
 			session = get_request_session()
-			print('session', session)
 			try:
-				print(get_header(self))
 				d = session.post(url, data=json.dumps({
 					"webhook": {
 						"topic": method,
@@ -44,18 +40,17 @@ class ShopifySettings(Document):
 						"format": "json"
 						}
 					}), headers=get_header(self))
-				print('d', d.json())
 				d.raise_for_status()
 				self.update_webhook_table(method, d.json())
 			except Exception as e:
-				make_shopify_log(status="Warning", message=e, exception=False)
+				make_shopify_log(status="Warning", exception=e, rollback=True)
 
 	def unregister_webhooks(self):
 		session = get_request_session()
 		deleted_webhooks = []
 
 		for d in self.webhooks:
-			url = get_shopify_url('admin/api/2019-04/webhooks.json'.format(d.webhook_id), self)
+			url = get_shopify_url('admin/api/2019-04/webhooks/{0}.json'.format(d.webhook_id), self)
 			try:
 				res = session.delete(url, headers=get_header(self))
 				res.raise_for_status()
@@ -67,7 +62,6 @@ class ShopifySettings(Document):
 			self.remove(d)
 
 	def update_webhook_table(self, method, res):
-		print('update')
 		self.append("webhooks", {
 			"webhook_id": res['webhook']['id'],
 			"method": method
@@ -75,7 +69,6 @@ class ShopifySettings(Document):
 
 def get_shopify_url(path, settings):
 	if settings.app_type == "Private":
-		print(settings.api_key, settings.get_password('password'), settings.shopify_url, path)
 		return 'https://{}:{}@{}/{}'.format(settings.api_key, settings.get_password('password'), settings.shopify_url, path)
 	else:
 		return 'https://{}/{}'.format(settings.shopify_url, path)

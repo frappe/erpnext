@@ -57,7 +57,7 @@ DocType: Shipping Rule,Shipping Amount,Valor do Transporte
 DocType: Job Opening,Job Title,Cargo
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Investment Banking,Investimento Bancário
 DocType: BOM,Item UOM,Unidade de Medida do Item
-DocType: Pricing Rule,Pricing Rule,Regra de Preços
+DocType: Coupon Code,Pricing Rule,Regra de Preços
 DocType: Item Customer Detail,Item Customer Detail,Detalhe do Cliente do Item
 apps/erpnext/erpnext/assets/doctype/asset/depreciation.py,Asset {0} must be submitted,O Ativo {0} deve ser enviado
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py,Work-in-Progress Warehouse is required before Submit,Armazén de Trabalho em Andamento é necessário antes de Enviar
@@ -1528,7 +1528,6 @@ apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Please set filt
 DocType: Fiscal Year,Year Start Date,Data do início do ano
 DocType: Item Attribute,From Range,Da Faixa
 DocType: Bank Reconciliation,Get Payment Entries,Obter Lançamentos de Pagamentos
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js,Please select Company,"Por favor, selecione Empresa"
 DocType: Purchase Invoice,Unpaid,A Pagar
 DocType: Account,Income Account,Conta de Receitas
 DocType: Company,Default Income Account,Conta Padrão de Recebimento
@@ -2033,6 +2032,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Project Collaboration I
 DocType: Journal Entry Account,If Income or Expense,Se é Receita ou Despesa
 apps/erpnext/erpnext/controllers/accounts_controller.py,"Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.","Linha #{0}: A qtde deve ser 1, pois o item é um ativo imobilizado. Por favor, utilize uma linha separada para múltiplas qtdes."
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js,Please enter company first,Por favor insira primeira empresa
+apps/erpnext/erpnext/templates/pages/order.html,Make Purchase Invoice,Criar fatura de compra
 DocType: Price List,Applicable for Countries,Aplicável para os Países
 DocType: Landed Cost Voucher,Additional Charges,Encargos Adicionais
 DocType: Delivery Note Item,Against Sales Invoice,Contra a Fatura de Venda
@@ -2209,6 +2209,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Make Pa
 DocType: GL Entry,Credit Amount,Total de Crédito
 apps/erpnext/erpnext/education/doctype/course_schedule/course_schedule.js,Attendance,Comparecimento
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Reserved Qty,Qtde Reservada
+DocType: Cost Center,Lft,LFT
 DocType: Customer Group,Only leaf nodes are allowed in transaction,Somente nós-folha são permitidos em transações
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py,Delay in payment (Days),Atraso no Pagamento (Dias)
 apps/erpnext/erpnext/config/healthcare.py,Record Patient Vitals,Gravar Sinais Vitais do Paciente

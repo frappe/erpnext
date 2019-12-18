@@ -91,6 +91,16 @@ frappe.ui.form.on("Work Order", {
 			};
 		});
 
+		frm.set_query("operation", "required_items", function() {
+			return {
+				query: "erpnext.manufacturing.doctype.work_order.work_order.get_bom_operations",
+				filters: {
+					'parent': frm.doc.bom_no,
+					'parenttype': 'BOM'
+				}
+			};
+		});
+
 		// formatter for work order operation
 		frm.set_indicator_formatter('operation',
 			function(doc) { return (frm.doc.qty==doc.completed_qty) ? "green" : "orange"; });
@@ -332,7 +342,7 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	project: function(frm) {
-		if(!erpnext.in_production_item_onchange) {
+		if(!erpnext.in_production_item_onchange && !frm.doc.bom_no) {
 			frm.trigger("production_item");
 		}
 	},
@@ -385,6 +395,11 @@ frappe.ui.form.on("Work Order", {
 				}
 			});
 		}
+	},
+
+	additional_operating_cost: function(frm) {
+		erpnext.work_order.calculate_cost(frm.doc);
+		erpnext.work_order.calculate_total_cost(frm);
 	}
 });
 
@@ -524,8 +539,7 @@ erpnext.work_order = {
 	},
 
 	calculate_total_cost: function(frm) {
-		var variable_cost = frm.doc.actual_operating_cost ?
-			flt(frm.doc.actual_operating_cost) : flt(frm.doc.planned_operating_cost);
+		let variable_cost = flt(frm.doc.actual_operating_cost) || flt(frm.doc.planned_operating_cost);
 		frm.set_value("total_operating_cost", (flt(frm.doc.additional_operating_cost) + variable_cost));
 	},
 

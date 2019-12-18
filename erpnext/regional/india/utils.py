@@ -72,8 +72,8 @@ def validate_gstin_check_digit(gstin, label='GSTIN'):
 		total += digit
 		factor = 2 if factor == 1 else 1
 	if gstin[-1] != code_point_chars[((mod - (total % mod)) % mod)]:
-		frappe.throw(_("Invalid {0}! The check digit validation has failed. " +
-			"Please ensure you've typed the {0} correctly.".format(label)))
+		frappe.throw(_("""Invalid {0}! The check digit validation has failed.
+			Please ensure you've typed the {0} correctly.""".format(label)))
 
 def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
 	if frappe.get_meta(item_doctype).has_field('gst_hsn_code'):
