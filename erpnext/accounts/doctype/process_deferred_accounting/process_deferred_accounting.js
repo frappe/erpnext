@@ -12,13 +12,16 @@ frappe.ui.form.on('Process Deferred Accounting', {
 		});
 	},
 
-	before_submit: function(frm) {
-		frappe.db.get_single_value('Accounts Settings', 'automatically_process_deferred_accounting_entry')
-			.then(value => {
-				if(value) {
-					frappe.throw(__('Manual entry cannot be created! Disable automatic entry for deferred accounting in accounts settings and try again'));
-				}
-			});
+	validate: function() {
+		return new Promise((resolve) => {
+			return frappe.db.get_single_value('Accounts Settings', 'automatically_process_deferred_accounting_entry')
+				.then(value => {
+					if(value) {
+						frappe.throw(__('Manual entry cannot be created! Disable automatic entry for deferred accounting in accounts settings and try again'));
+					}
+					resolve(value);
+				});
+		});
 	},
 
 	end_date: function(frm) {

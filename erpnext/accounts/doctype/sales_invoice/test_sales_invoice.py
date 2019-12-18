@@ -1836,16 +1836,16 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(data['billLists'][0]['itemList'][0]['taxableAmount'], 60000)
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
-		gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
-			from `tabGL Entry`
-			where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
-			order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
+	gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
+		from `tabGL Entry`
+		where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
+		order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
 
-		for i, gle in enumerate(gl_entries):
-			doc.assertEqual(expected_gle[i][0], gle.account)
-			doc.assertEqual(expected_gle[i][1], gle.debit)
-			doc.assertEqual(expected_gle[i][2], gle.credit)
-			doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+	for i, gle in enumerate(gl_entries):
+		doc.assertEqual(expected_gle[i][0], gle.account)
+		doc.assertEqual(expected_gle[i][1], gle.debit)
+		doc.assertEqual(expected_gle[i][2], gle.credit)
+		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
