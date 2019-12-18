@@ -116,6 +116,14 @@ def upload():
 	if not frappe.has_permission("Attendance", "create"):
 		raise frappe.PermissionError
 
+	if getattr(frappe, "uploaded_file", None):
+		fname = frappe.uploaded_file
+	else:
+		fname = frappe.form_dict.filename
+
+	if fname and not fname.lower().endswith(".csv"):
+		frappe.throw(_('The file "{}" is not a valid CSV file'.format(fname)))
+
 	from frappe.utils.csvutils import read_csv_content
 	rows = read_csv_content(frappe.local.uploaded_file)
 	if not rows:
