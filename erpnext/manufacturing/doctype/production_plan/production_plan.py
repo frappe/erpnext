@@ -615,6 +615,9 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 
 	doc['mr_items'] = []
 	po_items = doc.get('po_items') if doc.get('po_items') else doc.get('items')
+	if not po_items:
+		frappe.throw(_("Items are required to pull the raw materials which is associated with it."))
+
 	company = doc.get('company')
 	warehouse = doc.get('for_warehouse')
 
