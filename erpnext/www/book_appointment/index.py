@@ -25,18 +25,8 @@ def get_appointment_settings():
 
 @frappe.whitelist(allow_guest=True)
 def get_timezones():
-	from babel.dates import get_timezone, get_timezone_name, Locale
-	from frappe.utils.momentjs import get_all_timezones
-
-	translated_dict = {}
-	locale = Locale.parse(frappe.local.lang, sep="-")
-
-	for tz in get_all_timezones():
-		timezone_name = get_timezone_name(get_timezone(tz), locale=locale, width='short')
-		if timezone_name:
-			translated_dict[tz] = timezone_name + ' - ' + tz
-
-	return translated_dict
+	import pytz
+	return pytz.all_timezones
 
 @frappe.whitelist(allow_guest=True)
 def get_appointment_slots(date, timezone):

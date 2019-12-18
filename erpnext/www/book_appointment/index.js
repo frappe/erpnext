@@ -24,20 +24,15 @@ async function get_global_variables() {
 }
 
 function setup_timezone_selector() {
-    /**
-     * window.timezones is a dictionary with the following structure
-     * { IANA name: Pretty name}
-     * For example : { Asia/Kolkata : "India Time - Asia/Kolkata"}
-     */
     let timezones_element = document.getElementById('appointment-timezone');
     let offset = new Date().getTimezoneOffset();
-    Object.keys(window.timezones).forEach((timezone) => {
+    window.timezones.forEach((timezone) => {
         let opt = document.createElement('option');
         opt.value = timezone;
         if (timezone == moment.tz.guess()) {
             opt.selected = true;
         }
-        opt.innerHTML = window.timezones[timezone]
+        opt.innerHTML = timezone
         timezones_element.appendChild(opt)
     });
 }
