@@ -25,15 +25,15 @@ async function get_global_variables() {
 
 function setup_timezone_selector() {
     let timezones_element = document.getElementById('appointment-timezone');
-    let offset = new Date().getTimezoneOffset();
+    let local_timezone = moment.tz.guess()
     window.timezones.forEach((timezone) => {
         let opt = document.createElement('option');
         opt.value = timezone;
-        if (timezone == moment.tz.guess()) {
+        if (timezone == local_timezone) {
             opt.selected = true;
         }
-        opt.innerHTML = timezone
-        timezones_element.appendChild(opt)
+        opt.innerHTML = timezone;
+        timezones_element.appendChild(opt);
     });
 }
 
