@@ -372,7 +372,7 @@ class StockEntry(StockController):
 			elif d.t_warehouse and not d.basic_rate:
 				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
 					self.doctype, self.name, d.allow_zero_valuation_rate,
-					currency=erpnext.get_company_currency(self.company))
+					currency=erpnext.get_company_currency(self.company), company=self.company)
 
 	def set_actual_qty(self):
 		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
