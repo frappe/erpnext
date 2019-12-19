@@ -500,6 +500,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								() => {
 									var d = locals[cdt][cdn];
 									me.add_taxes_from_item_tax_template(d.item_tax_rate);
+									if (d.free_item_data) {
+										me.apply_product_discount(d.free_item_data);
+									}
 								},
 								() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn),
 								() => me.toggle_conversion_factor(item),
@@ -1305,6 +1308,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				me.remove_pricing_rule(frappe.get_doc(d.doctype, d.name));
 			}
 
+			if (d.free_item_data) {
+				me.apply_product_discount(d.free_item_data);
+			}
+
 			if (d.apply_rule_on_other_items) {
 				items_rule_dict[d.name] = d;
 			}
@@ -1331,6 +1338,20 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					}
 				}
 			});
+		}
+	},
+
+	apply_product_discount: function(free_item_data) {
+		const items = this.frm.doc.items.filter(d => (d.item_code == free_item_data.item_code
+			&& d.is_free_item)) || [];
+
+		if (!items.length) {
+			let row_to_modify = frappe.model.add_child(this.frm.doc,
+				this.frm.doc.doctype + ' Item', 'items');
+
+			for (let key in free_item_data) {
+				row_to_modify[key] = free_item_data[key];
+			}
 		}
 	},
 
