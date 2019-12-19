@@ -9,7 +9,7 @@ from unidecode import unidecode
 from six import iteritems
 from frappe.utils.nestedset import rebuild_tree
 
-def create_charts(company, chart_template=None, existing_company=None, custom_chart=None):
+def create_charts(company, chart_template=None, existing_company=None, custom_chart=None, use_account_number_as_parent=None):
 	chart = custom_chart or get_chart(chart_template, existing_company)
 	if chart:
 		accounts = []
@@ -55,10 +55,55 @@ def create_charts(company, chart_template=None, existing_company=None, custom_ch
 
 					_import_accounts(child, account.name, root_type)
 
+		def _import_accounts_number(children, parent, root_type, root_account=False):
+			for account_number, child in iteritems(children):
+				if root_account:
+					root_type = child.get("root_type")
+
+				if account_number not in ["account_name", "account_type",
+					"root_type", "is_group", "tax_rate"]:
+
+					account_number = cstr(account_number).strip()
+					account_name, account_name_in_db = add_suffix_if_duplicate(child.get("account_name"),
+						account_number, accounts)
+
+					is_group = identify_is_group_account_number(child)
+					report_type = "Balance Sheet" if root_type in ["Asset", "Liability", "Equity"] \
+						else "Profit and Loss"
+
+					account = frappe.get_doc({
+						"doctype": "Account",
+						"account_name": account_name,
+						"company": company,
+						"parent_account": parent,
+						"is_group": is_group,
+						"root_type": root_type,
+						"report_type": report_type,
+						"account_number": account_number,
+						"account_type": child.get("account_type"),
+						"account_currency": child.get('account_currency') or frappe.db.get_value('Company',  company,  "default_currency"),
+						"tax_rate": child.get("tax_rate")
+					})
+
+					if root_account or frappe.local.flags.allow_unverified_charts:
+						account.flags.ignore_mandatory = True
+
+					account.flags.ignore_permissions = True
+
+					account.insert()
+
+					accounts.append(account_name_in_db)
+
+					_import_accounts_number(child, account.name, root_type)
+
 		# Rebuild NestedSet HSM tree for Account Doctype
 		# after all accounts are already inserted.
 		frappe.local.flags.ignore_on_update = True
-		_import_accounts(chart, None, None, root_account=True)
+
+		if use_account_number_as_parent:
+			_import_accounts_number(chart, None, None, root_account=True)
+		else:
+			_import_accounts(chart, None, None, root_account=True)
 		rebuild_tree("Account", "parent_account")
 		frappe.local.flags.ignore_on_update = False
 
@@ -79,6 +124,16 @@ def identify_is_group(child):
 	if child.get("is_group"):
 		is_group = child.get("is_group")
 	elif len(set(child.keys()) - set(["account_type", "root_type", "is_group", "tax_rate", "account_number"])):
+		is_group = 1
+	else:
+		is_group = 0
+
+	return is_group
+
+def identify_is_group_account_number(child):
+	if child.get("is_group"):
+		is_group = child.get("is_group")
+	elif len(set(child.keys()) - set(["account_type", "root_type", "is_group", "tax_rate", "account_name"])):
 		is_group = 1
 	else:
 		is_group = 0
@@ -207,7 +262,7 @@ def validate_bank_account(coa, bank_account):
 	return (bank_account in accounts)
 
 @frappe.whitelist()
-def build_tree_from_json(chart_template, chart_data=None):
+def build_tree_from_json(chart_template, chart_data=None, use_account_number_as_parent=None):
 	''' get chart template from its folder and parse the json to be rendered as tree '''
 	chart = chart_data or get_chart(chart_template)
 
@@ -230,5 +285,21 @@ def build_tree_from_json(chart_template, chart_data=None):
 			accounts.append(account)
 			_import_accounts(child, account['value'])
 
-	_import_accounts(chart, None)
+	def _import_accounts_number(children, parent):
+		''' recursively called to form a parent-child based list of dict from chart template '''
+		for account_number, child in iteritems(children):
+			account = {}
+			if account_number in ["account_name", "account_type",\
+				"root_type", "is_group", "tax_rate"]: continue
+
+			account['parent_account'] = parent
+			account['expandable'] = True if identify_is_group_account_number(child) else False
+			account['value'] = account_number + ' - ' + child.get('account_name')
+			accounts.append(account)
+			_import_accounts_number(child, account['value'])
+
+	if use_account_number_as_parent:
+		_import_accounts_number(chart, None)
+	else:
+		_import_accounts(chart, None)
 	return accounts

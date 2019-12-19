@@ -25,8 +25,17 @@ def import_coa(file_name, company):
 	unset_existing_data(company)
 
 	# create accounts
-	forest = build_forest(generate_data_from_csv(file_name))
-	create_charts(company, custom_chart=forest)
+	accounts = generate_data_from_csv(file_name)
+	if which_parent(accounts) == "account_number":
+		# for root accounts, set parent to account_number
+		for account in accounts:
+			if account[0] == account[1]:
+				account[1] = account[2]
+		forest = build_forest_parent_account_number(accounts)
+		create_charts(company, custom_chart=forest, use_account_number_as_parent=1)
+	else:
+		forest = build_forest(accounts)
+		create_charts(company, custom_chart=forest)
 
 	# trigger on_update for company to reset default accounts
 	set_default_accounts(company)
@@ -55,13 +64,37 @@ def generate_data_from_csv(file_name, as_dict=False):
 	# convert csv data
 	return data
 
+#returns account_number or account_name
+#depending on which is used as parent_account
+def which_parent(accounts):
+	for account in accounts:
+		if account[0] == account[1]:
+			continue
+		if account[1]:
+			for parent in accounts:
+				if parent[0] == account[1]:
+					return "account_name"
+				if parent[2] == account[1]:
+					return "account_number"
+
 @frappe.whitelist()
 def get_coa(doctype, parent, is_root=False, file_name=None):
 	''' called by tree view (to fetch node's children) '''
 
-	parent = None if parent==_('All Accounts') else parent
-	forest = build_forest(generate_data_from_csv(file_name))
-	accounts = build_tree_from_json("", chart_data=forest) # returns alist of dict in a tree render-able form
+	parent = None if parent == _('All Accounts') else parent
+	# test if parent_account uses account_name or number
+	accounts = generate_data_from_csv(file_name)
+
+	if which_parent(accounts) == "account_number":
+		# for root accounts, set parent to account_number
+		for account in accounts:
+			if account[0] == account[1]:
+				account[1] = account[2]
+		forest = build_forest_parent_account_number(accounts)
+		accounts = build_tree_from_json("", chart_data=forest, use_account_number_as_parent=1)  # returns alist of dict in a tree render-able form
+	else:
+		forest = build_forest(accounts)
+		accounts = build_tree_from_json("", chart_data=forest)  # returns alist of dict in a tree render-able form
 
 	# filter out to show data for the selected node only
 	accounts = [d for d in accounts if d['parent_account']==parent]
@@ -110,7 +143,7 @@ def build_forest(data):
 			error_messages.append("Row {0}: Please enter Account Name".format(line_no))
 
 		charts_map[account_name] = {}
-		if is_group == 1: charts_map[account_name]["is_group"] = is_group
+		if is_group in ('1', 1): charts_map[account_name]["is_group"] = is_group
 		if account_type: charts_map[account_name]["account_type"] = account_type
 		if root_type: charts_map[account_name]["root_type"] = root_type
 		if account_number: charts_map[account_name]["account_number"] = account_number
@@ -125,6 +158,66 @@ def build_forest(data):
 	for path in paths:
 		for n, account_name in enumerate(path):
 			set_nested(out, path[:n+1], charts_map[account_name]) # setting the value of nested dictionary.
+
+	return out
+
+def build_forest_parent_account_number(data):
+	'''
+		converts list of list into a nested tree
+		if a = [[1,1], [1,2], [3,2], [4,4], [5,4]]
+		tree = {
+			1: {
+				2: {
+					3: {}
+				}
+			},
+			4: {
+				5: {}
+			}
+		}
+	'''
+
+	# set the value of nested dictionary
+	def set_nested(d, path, value):
+		reduce(lambda d, k: d.setdefault(k, {}), path[:-1], d)[path[-1]] = value
+		return d
+
+	# returns the path of any node in list format
+	def return_parent(data, child):
+		for row in data:
+			parent_account, account_number = row[1:3]
+			if parent_account == account_number == child:
+				return [parent_account]
+			elif account_number == child:
+				return [child] + return_parent(data, parent_account)
+
+	charts_map, paths = {}, []
+
+	line_no = 3
+	error_messages = []
+
+	for i in data:
+		account_name, _, account_number, is_group, account_type, root_type = i
+
+		if not account_number:
+			error_messages.append("Row {0}: Please enter Account Number".format(line_no))
+
+		charts_map[account_number] = {}
+		if is_group in ('1', 1): charts_map[account_number]["is_group"] = is_group
+		if account_type: charts_map[account_number]["account_type"] = account_type
+		if root_type: charts_map[account_number]["root_type"] = root_type
+		if account_name: charts_map[account_number]["account_name"] = account_name
+		path = return_parent(data, account_number)[::-1]
+		paths.append(path) # List of path is created
+		line_no += 1
+
+	if error_messages:
+		frappe.throw("<br>".join(error_messages))
+
+	out = {}
+	for path in paths:
+		for n, account_number in enumerate(path):
+			set_nested(out, path[:n+1], charts_map[account_number]) # setting the value of nested dictionary.
 
 	return out
 
@@ -178,15 +271,14 @@ def validate_root(accounts):
 
 def validate_account_types(accounts):
 	account_types_for_ledger = ["Cost of Goods Sold", "Depreciation", "Fixed Asset", "Payable", "Receivable", "Stock Adjustment"]
-	account_types = [accounts[d]["account_type"] for d in accounts if not accounts[d]['is_group'] == 1]
+	account_types = [accounts[d]["account_type"] for d in accounts if not accounts[d]['is_group'] in ('1', 1)]
 
 	missing = list(set(account_types_for_ledger) - set(account_types))
 	if missing:
 		return _("Please identify/create Account (Ledger) for type - {0}").format(' , '.join(missing))
 
 	account_types_for_group = ["Bank", "Cash", "Stock"]
-	# fix logic bug
-	account_groups = [accounts[d]["account_type"] for d in accounts if accounts[d]['is_group'] == 1]
+	account_groups = [accounts[d]["account_type"] for d in accounts if accounts[d]['is_group'] in ('1',1)]
 
 	missing = list(set(account_types_for_group) - set(account_groups))
 	if missing:
