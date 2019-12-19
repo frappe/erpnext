@@ -281,6 +281,28 @@ class PurchaseInvoice(BuyingController):
 				if not submitted:
 					frappe.throw(_("Purchase Receipt {0} is not submitted").format(d.purchase_receipt))
 
+	def is_paid_status(self):
+		payment_entry = frappe.db.sql("""
+					SELECT pe.name
+					FROM `tabPayment Entry` pe, `tabPayment Entry Reference` per
+					WHERE pe.docstatus = 1 AND pe.name = per.parent
+					AND pe.payment_type = "Pay" AND per.reference_name = %s
+					""", self.name)
+		return (self.outstanding_amount == 0 and payment_entry) or (self.is_paid)
+
+	def has_debit_note_issued(self):
+		payment_entry = frappe.db.sql("""
+					SELECT pe.name
+					FROM `tabPayment Entry` pe, `tabPayment Entry Reference` per
+					WHERE pe.docstatus = 1 AND pe.name = per.parent
+					AND pe.payment_type = "Pay" AND per.reference_name = %s
+					""", self.name)
+		
+		if self.outstanding_amount:
+			return_invoice = frappe.get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1})
+			has_return_invoice = self.outstanding_amount < 0 and self.docstatus == 1 and self.is_return == 0 and return_invoice
+			return has_return_invoice or (self.outstanding_amount == 0 and not payment_entry)
+
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
 			self.status_updater.append({
