@@ -243,9 +243,9 @@ def create_contact(contact, party_type, party, email):
 def make_quotation(source_name, target_doc=None):
 
 	def set_missing_values(source, target):
-		_set_missing_values(source,target)
+		_set_missing_values(source, target)
 
-	target_doc = get_mapped_doc("Customer", source_name, 
+	target_doc = get_mapped_doc("Customer", source_name,
 		{"Customer": {
 			"doctype": "Quotation",
 			"field_map": {
@@ -258,7 +258,7 @@ def make_quotation(source_name, target_doc=None):
 	target_doc.run_method("set_other_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
 
-	price_list = frappe.get_value("Customer",source_name, 'default_price_list')
+	price_list = frappe.get_value("Customer", source_name, 'default_price_list')
 	if price_list:
 		target_doc.selling_price_list = price_list
 
@@ -267,17 +267,16 @@ def make_quotation(source_name, target_doc=None):
 @frappe.whitelist()
 def make_opportunity(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		_set_missing_values(source,target)
+		_set_missing_values(source, target)
 
-	target_doc = get_mapped_doc("Customer", source_name, 
+	target_doc = get_mapped_doc("Customer", source_name,
 		{"Customer": {
 			"doctype": "Opportunity",
 			"field_map": {
 				"name": "party_name",
 				"doctype": "opportunity_from",
 			}
-		}}, target_doc, set_missing_values
-	)
+		}}, target_doc, set_missing_values)
 
 	return target_doc
 
