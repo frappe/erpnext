@@ -1,4 +1,4 @@
-function EditDetailsDialog(primary_action, defaults) {
+function edit_details_dialog(params) {
 	let dialog = new frappe.ui.Dialog({
 		title: __('Update Details'),
 		fields: [
@@ -6,14 +6,14 @@ function EditDetailsDialog(primary_action, defaults) {
 				label: 'Item Name',
 				fieldname: 'item_name',
 				fieldtype: 'Data',
-				default: defaults.item_name,
+				default: params.defaults.item_name,
 				reqd: 1
 			},
 			{
 				label: 'Hub Category',
 				fieldname: 'hub_category',
 				fieldtype: 'Autocomplete',
-				default: defaults.hub_category,
+				default: params.defaults.hub_category,
 				options: [],
 				reqd: 1
 			},
@@ -21,13 +21,13 @@ function EditDetailsDialog(primary_action, defaults) {
 				label: 'Description',
 				fieldname: 'description',
 				fieldtype: 'Text',
-				default: defaults.description,
+				default: params.defaults.description,
 				options: [],
 				reqd: 1
 			}
 		],
-		primary_action_label: primary_action.label || __('Update Details'),
-		primary_action: primary_action.fn
+		primary_action_label: params.primary_action.label || __('Update Details'),
+		primary_action: params.primary_action.fn
 	});
 
 	hub.call('get_categories').then(categories => {
@@ -38,4 +38,4 @@ function EditDetailsDialog(primary_action, defaults) {
 	return dialog;
 }
 
-export { EditDetailsDialog };
+export { edit_details_dialog };
