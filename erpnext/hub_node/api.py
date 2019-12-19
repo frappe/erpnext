@@ -116,10 +116,10 @@ def get_valid_items(search_value=''):
 	return valid_items
 
 @frappe.whitelist()
-def update_item(ref_doctype, ref_doc, data):
+def update_item(ref_doc, data):
 	data = json.loads(data)
 
-	data.update(dict(doctype=ref_doctype, name=ref_doc))
+	data.update(dict(doctype='Hub Item', name=ref_doc))
 	try:
 		connection = get_hub_connection()
 		connection.update(data)
