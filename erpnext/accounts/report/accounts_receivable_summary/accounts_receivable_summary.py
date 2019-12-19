@@ -21,6 +21,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 	def run(self, args):
 		self.party_type = args.get('party_type')
 		self.party_naming_by = frappe.db.get_value(args.get("naming_by")[0], None, args.get("naming_by")[1])
+		# print("self.party_naming_by", self.party_naming_by) #Naming Series
 		self.get_columns()
 		self.get_data(args)
 		return self.columns, self.data
@@ -36,8 +37,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			self.filters.report_date) or {}
 
 		for party, party_dict in iteritems(self.party_total):
-			if party_dict.outstanding <= 0:
-				continue
+			# if party_dict.outstanding <= 0:
+			# 	continue
 
 			row = frappe._dict()
 
