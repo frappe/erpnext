@@ -500,6 +500,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								() => {
 									var d = locals[cdt][cdn];
 									me.add_taxes_from_item_tax_template(d.item_tax_rate);
+									if (d.free_item_data) {
+										me.apply_product_discount(d.free_item_data);
+									}
 								},
 								() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn),
 								() => me.toggle_conversion_factor(item),
