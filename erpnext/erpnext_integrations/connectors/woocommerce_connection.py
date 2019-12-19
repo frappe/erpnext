@@ -63,7 +63,7 @@ def _order(*args, **kwargs):
 			link_customer_and_address(raw_billing_data,1, customerID)
 		else:
 			frappe.log_error("Cant find Customer")
-			link_customer_and_address(raw_billing_data,0)
+			#link_customer_and_address(raw_billing_data,0)
 
 		items_list = order.get("line_items")
 		for item in items_list:
@@ -102,11 +102,6 @@ def _order(*args, **kwargs):
 		newSI.company = company
 		
 		if customer:
-			if customer.territory == "WA":
-				warehouse = "Perth" + " - " + company_abbr
-			else:
-				warehouse = "Brisbane" + " - " + company_abbr
-		else:
 			warehouse = "Brisbane" + " - " + company_abbr
 
 		for item in items_list:
@@ -129,7 +124,8 @@ def _order(*args, **kwargs):
 				"uom": "Unit",
 				"qty": item.get("quantity"),
 				"rate": rate,
-				"warehouse": warehouse
+				"warehouse": warehouse,
+				"ignore_pricing_rules": 1
 				})
 
 			add_tax_details(newSI,ordered_items_tax,"Ordered Item tax",0)
@@ -145,7 +141,7 @@ def _order(*args, **kwargs):
 
 		frappe.db.commit()
 
-def link_customer_and_address(raw_billing_data,customer_status, customerID):
+def link_customer_and_address(raw_billing_data,customer_status, customerID= ""):
 
 	#Check Customer Status
 	if customer_status == 0:
