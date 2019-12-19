@@ -14,7 +14,7 @@ class TestAttendance(unittest.TestCase):
 		employee = make_employee("test_mark_absent@example.com")
 		date = nowdate()
 		frappe.db.delete('Attendance', {'employee':employee, 'attendance_date':date})
-		from erpnext.hr.doctype.attendance.attendance import mark_absent
-		attendance = mark_absent(employee, date)
+		from erpnext.hr.doctype.attendance.attendance import mark_attendance
+		attendance = mark_attendance(employee, date, 'Absent')
 		fetch_attendance = frappe.get_value('Attendance', {'employee':employee, 'attendance_date':date, 'status':'Absent'})
 		self.assertEqual(attendance, fetch_attendance)
