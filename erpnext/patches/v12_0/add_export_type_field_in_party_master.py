@@ -27,6 +27,8 @@ def execute():
 		tax_category = inter_state_category.name
 
 	for doctype in ('Sales Taxes and Charges Template', 'Purchase Taxes and Charges Template'):
+		if not frappe.get_meta(doctype).has_field('is_inter_state'): continue
+
 		template = frappe.db.get_value(doctype, {'is_inter_state': 1, 'disabled': 0}, ['name'])
 		if template:
 			frappe.db.set_value(doctype, template, 'tax_category', tax_category)
