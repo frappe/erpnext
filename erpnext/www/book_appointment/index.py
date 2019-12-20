@@ -25,18 +25,8 @@ def get_appointment_settings():
 
 @frappe.whitelist(allow_guest=True)
 def get_timezones():
-	from babel.dates import get_timezone, get_timezone_name, Locale
-	from frappe.utils.momentjs import get_all_timezones
-
-	translated_dict = {}
-	locale = Locale.parse(frappe.local.lang, sep="-")
-
-	for tz in get_all_timezones():
-		timezone_name = get_timezone_name(get_timezone(tz), locale=locale, width='short')
-		if timezone_name:
-			translated_dict[tz] = timezone_name + ' - ' + tz
-
-	return translated_dict
+	import pytz
+	return pytz.all_timezones
 
 @frappe.whitelist(allow_guest=True)
 def get_appointment_slots(date, timezone):
@@ -90,7 +80,7 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 
 @frappe.whitelist(allow_guest=True)
 def create_appointment(date, time, tz, contact):
-	format_string = '%Y-%m-%d %H:%M:%S%z'
+	format_string = '%Y-%m-%d %H:%M:%S'
 	scheduled_time = datetime.datetime.strptime(date + " " + time, format_string)
 	# Strip tzinfo from datetime objects since it's handled by the doctype
 	scheduled_time = scheduled_time.replace(tzinfo = None)
