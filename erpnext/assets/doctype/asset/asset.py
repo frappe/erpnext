@@ -33,7 +33,7 @@ class Asset(AccountsController):
 		self.make_asset_movement()
 		if not self.booked_fixed_asset and is_cwip_accounting_enabled(self.asset_category):
 			self.make_gl_entries()
-		
+
 	def before_cancel(self):
 		self.cancel_auto_gen_movement()
 
@@ -43,7 +43,7 @@ class Asset(AccountsController):
 		self.set_status()
 		delete_gl_entries(voucher_type='Asset', voucher_no=self.name)
 		self.db_set('booked_fixed_asset', 0)
-	
+
 	def validate_asset_and_reference(self):
 		if self.purchase_invoice or self.purchase_receipt:
 			reference_doc = 'Purchase Invoice' if self.purchase_invoice else 'Purchase Receipt'
@@ -51,8 +51,8 @@ class Asset(AccountsController):
 			reference_doc = frappe.get_doc(reference_doc, reference_name)
 			if reference_doc.get('company') != self.company:
 				frappe.throw(_("Company of asset {0} and purchase document {1} doesn't matches.").format(self.name, reference_doc.get('name')))
-		
-		
+
+
 		if self.is_existing_asset and self.purchase_invoice:
 			frappe.throw(_("Purchase Invoice cannot be made against an existing asset {0}").format(self.name))
 
@@ -135,7 +135,7 @@ class Asset(AccountsController):
 		movement = frappe.get_doc('Asset Movement', movements[0].get('name'))
 		movement.flags.ignore_validate = True
 		movement.cancel()
-		
+
 	def make_asset_movement(self):
 		reference_doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'
 		reference_docname = self.purchase_receipt or self.purchase_invoice
@@ -204,7 +204,7 @@ class Asset(AccountsController):
 				if has_pro_rata and n==0:
 					depreciation_amount, days, months = get_pro_rata_amt(d, depreciation_amount,
 						self.available_for_use_date, d.depreciation_start_date)
-					
+
 					# For first depr schedule date will be the start date
 					# so monthly schedule date is calculated by removing month difference between use date and start date
 					monthly_schedule_date = add_months(d.depreciation_start_date, - months + 1)
@@ -262,7 +262,7 @@ class Asset(AccountsController):
 							else:
 								date = add_months(monthly_schedule_date, r)
 								amount = depreciation_amount / month_range
-							
+
 							self.append("schedules", {
 								"schedule_date": date,
 								"depreciation_amount": amount,
@@ -517,15 +517,18 @@ def update_maintenance_status():
 			asset.set_status('Out of Order')
 
 def make_post_gl_entry():
-	if not is_cwip_accounting_enabled(self.asset_category):
-		return
 
-	assets = frappe.db.sql_list(""" select name from `tabAsset`
-		where ifnull(booked_fixed_asset, 0) = 0 and available_for_use_date = %s""", nowdate())
+	asset_categories = frappe.db.get_all('Asset Category', fields = ['name', 'enable_cwip_accounting'])
 
-	for asset in assets:
-		doc = frappe.get_doc('Asset', asset)
-		doc.make_gl_entries()
+	for asset_category in asset_categories:
+		if cint(asset_category.enable_cwip_accounting):
+			assets = frappe.db.sql_list(""" select name from `tabAsset`
+				where asset_category = %s and ifnull(booked_fixed_asset, 0) = 0
+				and available_for_use_date = %s""", (asset_category.name, nowdate()))
+
+			for asset in assets:
+				doc = frappe.get_doc('Asset', asset)
+				doc.make_gl_entries()
 
 def get_asset_naming_series():
 	meta = frappe.get_meta('Asset')
@@ -607,13 +610,19 @@ def get_asset_account(account_name, asset=None, asset_category=None, company=Non
 	if asset:
 		account = get_asset_category_account(account_name, asset=asset,
 				asset_category = asset_category, company = company)
+	
+	if not asset and not account:
+		account = get_asset_category_account(account_name, asset_category = asset_category, company = company)
 
 	if not account:
 		account = frappe.get_cached_value('Company',  company,  account_name)
 
 	if not account:
-		frappe.throw(_("Set {0} in asset category {1} or company {2}")
-			.format(account_name.replace('_', ' ').title(), asset_category, company))
+		if not asset_category:
+			frappe.throw(_("Set {0} in company {2}").format(account_name.replace('_', ' ').title(), company))
+		else:
+			frappe.throw(_("Set {0} in asset category {1} or company {2}")
+				.format(account_name.replace('_', ' ').title(), asset_category, company))
 
 	return account
 
@@ -652,10 +661,10 @@ def make_journal_entry(asset_name):
 def make_asset_movement(assets, purpose=None):
 	import json
 	from six import string_types
-	
+
 	if isinstance(assets, string_types):
 		assets = json.loads(assets)
-	
+
 	if len(assets) == 0:
 		frappe.throw(_('Atleast one asset has to be selected.'))
 

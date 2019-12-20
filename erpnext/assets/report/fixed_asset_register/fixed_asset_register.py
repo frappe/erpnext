@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cstr
+from frappe.utils import cstr, today, flt
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
@@ -86,8 +86,8 @@ def get_columns(filters):
 			"width": 90
 		},
 		{
-			"label": _("Current Value"),
-			"fieldname": "current_value",
+			"label": _("Asset Value"),
+			"fieldname": "asset_value",
 			"options": "Currency",
 			"width": 90
 		},
@@ -114,7 +114,7 @@ def get_data(filters):
 	data = []
 
 	conditions = get_conditions(filters)
-	current_value_map = get_finance_book_value_map(filters.finance_book)
+	depreciation_amount_map = get_finance_book_value_map(filters.date, filters.finance_book)
 	pr_supplier_map = get_purchase_receipt_supplier_map()
 	pi_supplier_map = get_purchase_invoice_supplier_map()
 
@@ -125,7 +125,9 @@ def get_data(filters):
 			"available_for_use_date", "status", "purchase_invoice"])
 
 	for asset in assets_record:
-		if current_value_map.get(asset.name) is not None:
+		asset_value = asset.gross_purchase_amount - flt(asset.opening_accumulated_depreciation) \
+			- flt(depreciation_amount_map.get(asset.name))
+		if asset_value:
 			row = {
 				"asset_id": asset.name,
 				"asset_name": asset.asset_name,
@@ -138,19 +140,24 @@ def get_data(filters):
 				"location": asset.location,
 				"asset_category": asset.asset_category,
 				"purchase_date": asset.purchase_date,
-				"current_value": current_value_map.get(asset.name)
+				"asset_value": asset_value
 			}
 			data.append(row)
 
 	return data
 
-def get_finance_book_value_map(finance_book=''):
+def get_finance_book_value_map(date, finance_book=''):
+	if not date:
+		date = today()
 	return frappe._dict(frappe.db.sql(''' Select
-		parent, value_after_depreciation
-		FROM `tabAsset Finance Book`
+		parent, SUM(depreciation_amount)
+		FROM `tabDepreciation Schedule`
 		WHERE
-			parentfield='finance_books'
-			AND ifnull(finance_book, '')=%s''', cstr(finance_book)))
+			parentfield='schedules'
+			AND schedule_date<=%s
+			AND journal_entry IS NOT NULL
+			AND ifnull(finance_book, '')=%s
+		GROUP BY parent''', (date, cstr(finance_book))))
 
 def get_purchase_receipt_supplier_map():
 	return frappe._dict(frappe.db.sql(''' Select
