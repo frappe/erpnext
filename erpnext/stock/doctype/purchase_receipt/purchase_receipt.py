@@ -95,7 +95,8 @@ class PurchaseReceipt(BuyingController):
 				# check cwip accounts before making auto assets
 				# Improves UX by not giving messages of "Assets Created" before throwing error of not finding arbnb account
 				arbnb_account = self.get_company_default("asset_received_but_not_billed")
-				cwip_account = get_asset_account("capital_work_in_progress_account", company = self.company)
+				cwip_account = get_asset_account("capital_work_in_progress_account", asset_category = item.asset_category, \
+					company = self.company)
 				break
 
 	def validate_with_previous_doc(self):
@@ -244,7 +245,7 @@ class PurchaseReceipt(BuyingController):
 					negative_expense_to_be_booked += flt(d.item_tax_amount)
 
 					# Amount added through landed-cost-voucher
-					if landed_cost_entries:
+					if d.landed_cost_voucher_amount and landed_cost_entries:
 						for account, amount in iteritems(landed_cost_entries[(d.item_code, d.name)]):
 							gl_entries.append(self.get_gl_dict({
 								"account": account,
@@ -364,8 +365,9 @@ class PurchaseReceipt(BuyingController):
 	
 	def add_asset_gl_entries(self, item, gl_entries):
 		arbnb_account = self.get_company_default("asset_received_but_not_billed")
-		# This returns company's default cwip account
-		cwip_account = get_asset_account("capital_work_in_progress_account", company = self.company)
+		# This returns category's cwip account if not then fallback to company's default cwip account
+		cwip_account = get_asset_account("capital_work_in_progress_account", asset_category = item.asset_category, \
+			company = self.company)
 
 		asset_amount = flt(item.net_amount) + flt(item.item_tax_amount/self.conversion_rate)
 		base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
@@ -609,7 +611,7 @@ def make_stock_entry(source_name,target_doc=None):
 
 def get_item_account_wise_additional_cost(purchase_document):
 	landed_cost_voucher = frappe.get_value("Landed Cost Purchase Receipt",
-		{"receipt_document": purchase_document}, "parent")
+		{"receipt_document": purchase_document, "docstatus": 1}, "parent")
 
 	if not landed_cost_voucher:
 		return
@@ -620,8 +622,7 @@ def get_item_account_wise_additional_cost(purchase_document):
 	based_on_field = frappe.scrub(landed_cost_voucher_doc.distribute_charges_based_on)
 
 	for item in landed_cost_voucher_doc.items:
-		if item.receipt_document == purchase_document:
-			total_item_cost += item.get(based_on_field)
+		total_item_cost += item.get(based_on_field)
 
 	for item in landed_cost_voucher_doc.items:
 		if item.receipt_document == purchase_document:

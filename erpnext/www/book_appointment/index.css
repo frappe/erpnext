@@ -1,0 +1,53 @@
+.time-slot {
+    margin-bottom: 2em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    border-radius: 0.4em;
+    cursor: pointer;
+    border: 0.5px solid #cccccc;
+    min-height: 75px;
+    padding: 0.5em 1em;
+}
+
+@media (max-width: 768px) {
+    #submit-button-area {
+        display: grid;
+        grid-template-areas: 
+        "submit"
+        "back";
+    }
+}
+#customer-form{
+    border-color: black;
+}
+#customer-form ::placeholder{
+    color: #ddd;
+}
+#timeslot-container{
+	display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.time-slot:hover {
+    background: #ddd;
+}
+
+.time-slot.unavailable {
+    background: #CBD5E0;
+    cursor: not-allowed;
+    color: #718096
+}
+
+.time-slot.unavailable .text-muted {
+    color: #718096
+}
+
+.time-slot.selected {
+    color: white;
+    background: #5e64ff;
+}
+
+.time-slot.selected .text-muted {
+    color: #EDF2F7 !important;
+}

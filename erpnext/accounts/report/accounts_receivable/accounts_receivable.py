@@ -60,6 +60,7 @@ class ReceivablePayableReport(object):
 
 	def get_data(self):
 		self.get_gl_entries()
+		self.get_sales_invoices_or_customers_based_on_sales_person()
 		self.voucher_balance = OrderedDict()
 		self.init_voucher_balance() # invoiced, paid, credit_note, outstanding
 
@@ -103,12 +104,18 @@ class ReceivablePayableReport(object):
 
 	def get_invoices(self, gle):
 		if gle.voucher_type in ('Sales Invoice', 'Purchase Invoice'):
-			self.invoices.add(gle.voucher_no)
+			if self.filters.get("sales_person"):
+				if gle.voucher_no in self.sales_person_records.get("Sales Invoice", []) \
+					or gle.party in self.sales_person_records.get("Customer", []):
+						self.invoices.add(gle.voucher_no)
+			else:
+				self.invoices.add(gle.voucher_no)
 
 	def update_voucher_balance(self, gle):
 		# get the row where this balance needs to be updated
 		# if its a payment, it will return the linked invoice or will be considered as advance
 		row = self.get_voucher_balance(gle)
+		if not row: return
 		# gle_balance will be the total "debit - credit" for receivable type reports and
 		# and vice-versa for payable type reports
 		gle_balance = self.get_gle_balance(gle)
@@ -129,8 +136,13 @@ class ReceivablePayableReport(object):
 				row.paid -= gle_balance
 
 	def get_voucher_balance(self, gle):
-		voucher_balance = None
+		if self.filters.get("sales_person"):
+			against_voucher = gle.against_voucher or gle.voucher_no
+			if not (gle.party in self.sales_person_records.get("Customer", []) or \
+				against_voucher in self.sales_person_records.get("Sales Invoice", [])):
+					return
 
+		voucher_balance = None
 		if gle.against_voucher:
 			# find invoice
 			against_voucher = gle.against_voucher
@@ -318,7 +330,7 @@ class ReceivablePayableReport(object):
 			self.append_payment_term(row, d, term)
 
 	def append_payment_term(self, row, d, term):
-		if self.filters.get("customer") and d.currency == d.party_account_currency:
+		if (self.filters.get("customer") or self.filters.get("supplier")) and d.currency == d.party_account_currency:
 			invoiced = d.payment_amount
 		else:
 			invoiced = flt(flt(d.payment_amount) * flt(d.conversion_rate), self.currency_precision)
@@ -512,6 +524,22 @@ class ReceivablePayableReport(object):
 			order by posting_date, party"""
 			.format(select_fields, conditions), values, as_dict=True)
 
+	def get_sales_invoices_or_customers_based_on_sales_person(self):
+		if self.filters.get("sales_person"):
+			lft, rgt = frappe.db.get_value("Sales Person",
+				self.filters.get("sales_person"), ["lft", "rgt"])
+
+			records = frappe.db.sql("""
+				select distinct parent, parenttype
+				from `tabSales Team` steam
+				where parenttype in ('Customer', 'Sales Invoice')
+					and exists(select name from `tabSales Person` where lft >= %s and rgt <= %s and name = steam.sales_person)
+			""", (lft, rgt), as_dict=1)
+
+			self.sales_person_records = frappe._dict()
+			for d in records:
+				self.sales_person_records.setdefault(d.parenttype, set()).add(d.parent)
+
 	def prepare_conditions(self):
 		conditions = [""]
 		values = [self.party_type, self.filters.report_date]
@@ -563,16 +591,6 @@ class ReceivablePayableReport(object):
 		if self.filters.get("sales_partner"):
 			conditions.append("party in (select name from tabCustomer where default_sales_partner=%s)")
 			values.append(self.filters.get("sales_partner"))
-
-		if self.filters.get("sales_person"):
-			lft, rgt = frappe.db.get_value("Sales Person",
-				self.filters.get("sales_person"), ["lft", "rgt"])
-
-			conditions.append("""exists(select name from `tabSales Team` steam where
-				steam.sales_person in (select name from `tabSales Person` where lft >= {0} and rgt <= {1})
-				and ((steam.parent = voucher_no and steam.parenttype = voucher_type)
-					or (steam.parent = against_voucher and steam.parenttype = against_voucher_type)
-					or (steam.parent = party and steam.parenttype = 'Customer')))""".format(lft, rgt))
 
 	def add_supplier_filters(self, conditions, values):
 		if self.filters.get("supplier_group"):

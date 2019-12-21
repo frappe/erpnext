@@ -5,15 +5,17 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import json
 from frappe import _, throw
-from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day, nowdate
-from erpnext.stock.get_item_details import get_conversion_factor
+from frappe.utils import (today, flt, cint, fmt_money, formatdate,
+	getdate, add_days, add_months, get_last_day, nowdate, get_link_to_form)
+from erpnext.stock.get_item_details import get_conversion_factor, get_item_details
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.buying.utils import update_last_purchase_rate
 from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled
-from erpnext.accounts.doctype.pricing_rule.utils import validate_pricing_rules
+from erpnext.accounts.doctype.pricing_rule.utils import (apply_pricing_rule_on_transaction,
+	apply_pricing_rule_for_free_items, get_applied_pricing_rules)
 from erpnext.exceptions import InvalidCurrency
 from six import text_type
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
@@ -59,7 +61,6 @@ class AccountsController(TransactionBase):
 						_('{0} is blocked so this transaction cannot proceed'.format(supplier_name)), raise_exception=1)
 
 	def validate(self):
-
 		if not self.get('is_return'):
 			self.validate_qty_is_not_zero()
 
@@ -98,10 +99,22 @@ class AccountsController(TransactionBase):
 
 			if self.is_return:
 				self.validate_qty()
+			else:
+				self.validate_deferred_start_and_end_date()
 
 		validate_regional(self)
 		if self.doctype != 'Material Request':
-			validate_pricing_rules(self)
+			apply_pricing_rule_on_transaction(self)
+
+	def validate_deferred_start_and_end_date(self):
+		for d in self.items:
+			if d.get("enable_deferred_revenue") or d.get("enable_deferred_expense"):
+				if not (d.service_start_date and d.service_end_date):
+					frappe.throw(_("Row #{0}: Service Start and End Date is required for deferred accounting").format(d.idx))
+				elif getdate(d.service_start_date) > getdate(d.service_end_date):
+					frappe.throw(_("Row #{0}: Service Start Date cannot be greater than Service End Date").format(d.idx))
+				elif getdate(self.posting_date) > getdate(d.service_end_date):
+					frappe.throw(_("Row #{0}: Service End Date cannot be before Invoice Posting Date").format(d.idx))
 
 	def validate_invoice_documents_schedule(self):
 		self.validate_payment_schedule_dates()
@@ -232,7 +245,6 @@ class AccountsController(TransactionBase):
 
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
-		from erpnext.stock.get_item_details import get_item_details
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		if hasattr(self, "items"):
@@ -244,7 +256,6 @@ class AccountsController(TransactionBase):
 				document_type = "{} Item".format(self.doctype)
 				parent_dict.update({"document_type": document_type})
 
-			self.set('pricing_rules', [])
 			# party_name field used for customer in quotation
 			if self.doctype == "Quotation" and self.quotation_to == "Customer" and parent_dict.get("party_name"):
 				parent_dict.update({"customer": parent_dict.get("party_name")})
@@ -264,7 +275,7 @@ class AccountsController(TransactionBase):
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
 
-					ret = get_item_details(args, self, overwrite_warehouse=False)
+					ret = get_item_details(args, self, for_validate=True, overwrite_warehouse=False)
 
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
@@ -285,23 +296,41 @@ class AccountsController(TransactionBase):
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
 
-					if ret.get("pricing_rules") and not ret.get("validate_applied_rule", 0):
-						# if user changed the discount percentage then set user's discount percentage ?
-						item.set("pricing_rules", ret.get("pricing_rules"))
-						item.set("discount_percentage", ret.get("discount_percentage"))
-						item.set("discount_amount", ret.get("discount_amount"))
-						if ret.get("pricing_rule_for") == "Rate":
-							item.set("price_list_rate", ret.get("price_list_rate"))
-
-						if item.get("price_list_rate"):
-							item.rate = flt(item.price_list_rate *
-								(1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate"))
-
-							if item.get('discount_amount'):
-								item.rate = item.price_list_rate - item.discount_amount
+					if ret.get("pricing_rules"):
+						self.apply_pricing_rule_on_items(item, ret)
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
+
+	def apply_pricing_rule_on_items(self, item, pricing_rule_args):
+		if not pricing_rule_args.get("validate_applied_rule", 0):
+			# if user changed the discount percentage then set user's discount percentage ?
+			if pricing_rule_args.get("price_or_product_discount") == 'Price':
+				item.set("pricing_rules", pricing_rule_args.get("pricing_rules"))
+				item.set("discount_percentage", pricing_rule_args.get("discount_percentage"))
+				item.set("discount_amount", pricing_rule_args.get("discount_amount"))
+				if pricing_rule_args.get("pricing_rule_for") == "Rate":
+					item.set("price_list_rate", pricing_rule_args.get("price_list_rate"))
+
+				if item.get("price_list_rate"):
+					item.rate = flt(item.price_list_rate *
+						(1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate"))
+
+					if item.get('discount_amount'):
+						item.rate = item.price_list_rate - item.discount_amount
+
+			elif pricing_rule_args.get('free_item_data'):
+				apply_pricing_rule_for_free_items(self, pricing_rule_args.get('free_item_data'))
+
+		elif pricing_rule_args.get("validate_applied_rule"):
+			for pricing_rule in get_applied_pricing_rules(item):
+				pricing_rule_doc = frappe.get_cached_doc("Pricing Rule", pricing_rule)
+				for field in ['discount_percentage', 'discount_amount', 'rate']:
+					if item.get(field) < pricing_rule_doc.get(field):
+						title = get_link_to_form("Pricing Rule", pricing_rule)
+
+						frappe.msgprint(_("Row {0}: user has not applied the rule {1} on the item {2}")
+							.format(item.idx, frappe.bold(title), frappe.bold(item.item_code)))
 
 	def set_taxes(self):
 		if not self.meta.get_field("taxes"):
@@ -397,9 +426,10 @@ class AccountsController(TransactionBase):
 		return gl_dict
 
 	def validate_qty_is_not_zero(self):
-		for item in self.items:
-			if not item.qty:
-				frappe.throw(_("Item quantity can not be zero"))
+		if self.doctype != "Purchase Receipt":
+			for item in self.items:
+				if not item.qty:
+					frappe.throw(_("Item quantity can not be zero"))
 
 	def validate_account_currency(self, account, account_currency=None):
 		valid_currency = [self.company_currency]
