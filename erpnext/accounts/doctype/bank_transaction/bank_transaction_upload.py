@@ -12,29 +12,12 @@ from six import iteritems
 
 @frappe.whitelist()
 def upload_bank_statement():
-	
-	#frappe.log_error(frappe.local.uploaded_file)
-	#frappe.log_error()
-	
-	#from frappe.utils.file_manager import get_uploaded_content
-	#fname, fcontent = get_uploaded_content()
-	#frappe.log_error(fname)
-	#frappe.log_error(fcontent)
-	#
-	#from frappe.utils.csvutils import read_csv_content
-	#rows = read_csv_content(frappe.local.uploaded_file)
-	#if not rows:
-	#	frappe.throw(_("Please select a csv file"))	
-		
-	#if getattr(frappe, "uploaded_file", None):
-	#	with open(frappe.uploaded_file, "rb") as upfile:
-	#		fcontent = upfile.read()
-	#else:
-	#	from frappe.utils.file_manager import get_uploaded_content
-	#	fname, fcontent = get_uploaded_content()
-	
-	fname = frappe.local.uploaded_filename
-	fcontent = frappe.local.uploaded_file
+	if getattr(frappe, "uploaded_file", None):
+		with open(frappe.uploaded_file, "rb") as upfile:
+			fcontent = upfile.read()
+	else:
+		fcontent = frappe.local.uploaded_file
+		fname = frappe.local.uploaded_filename
 
 	if frappe.safe_encode(fname).lower().endswith("csv".encode('utf-8')):
 		from frappe.utils.csvutils import read_csv_content
