@@ -500,6 +500,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								() => {
 									var d = locals[cdt][cdn];
 									me.add_taxes_from_item_tax_template(d.item_tax_rate);
+									if (d.free_item_data) {
+										me.apply_product_discount(d.free_item_data);
+									}
 								},
 								() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn),
 								() => me.toggle_conversion_factor(item),
@@ -516,7 +519,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 									}
 								},
 								() => me.conversion_factor(doc, cdt, cdn, true),
-								() => me.validate_pricing_rule(item)
+								() => me.remove_pricing_rule(item)
 							]);
 						}
 					}
@@ -1174,7 +1177,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				callback: function(r) {
 					if (!r.exc && r.message) {
 						r.message.forEach(row_item => {
-							me.validate_pricing_rule(row_item);
+							me.remove_pricing_rule(row_item);
 						});
 						me._set_values_for_item_list(r.message);
 						me.calculate_taxes_and_totals();
@@ -1283,6 +1286,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	_set_values_for_item_list: function(children) {
 		var me = this;
 		var price_list_rate_changed = false;
+		var items_rule_dict = {};
+
 		for(var i=0, l=children.length; i<l; i++) {
 			var d = children[i];
 			var existing_pricing_rule = frappe.model.get_value(d.doctype, d.name, "pricing_rules");
@@ -1299,12 +1304,55 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			// if pricing rule set as blank from an existing value, apply price_list
 			if(!me.frm.doc.ignore_pricing_rule && existing_pricing_rule && !d.pricing_rules) {
 				me.apply_price_list(frappe.get_doc(d.doctype, d.name));
-			} else {
-				me.validate_pricing_rule(frappe.get_doc(d.doctype, d.name));
+			} else if(!d.pricing_rules) {
+				me.remove_pricing_rule(frappe.get_doc(d.doctype, d.name));
+			}
+
+			if (d.free_item_data) {
+				me.apply_product_discount(d.free_item_data);
+			}
+
+			if (d.apply_rule_on_other_items) {
+				items_rule_dict[d.name] = d;
 			}
 		}
 
+		me.apply_rule_on_other_items(items_rule_dict);
+
 		if(!price_list_rate_changed) me.calculate_taxes_and_totals();
+	},
+
+	apply_rule_on_other_items: function(args) {
+		const me = this;
+		const fields = ["discount_percentage", "discount_amount", "rate"];
+
+		for(var k in args) {
+			let data = args[k];
+
+			me.frm.doc.items.forEach(d => {
+				if (in_list(data.apply_rule_on_other_items, d[data.apply_rule_on])) {
+					for(var k in data) {
+						if (in_list(fields, k)) {
+							frappe.model.set_value(d.doctype, d.name, k, data[k]);
+						}
+					}
+				}
+			});
+		}
+	},
+
+	apply_product_discount: function(free_item_data) {
+		const items = this.frm.doc.items.filter(d => (d.item_code == free_item_data.item_code
+			&& d.is_free_item)) || [];
+
+		if (!items.length) {
+			let row_to_modify = frappe.model.add_child(this.frm.doc,
+				this.frm.doc.doctype + ' Item', 'items');
+
+			for (let key in free_item_data) {
+				row_to_modify[key] = free_item_data[key];
+			}
+		}
 	},
 
 	apply_price_list: function(item, reset_plc_conversion) {
@@ -1348,33 +1396,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 	},
 
-	validate_pricing_rule: function(item) {
+	remove_pricing_rule: function(item) {
 		let me = this;
 		const fields = ["discount_percentage", "discount_amount", "pricing_rules"];
 
-		if (item.pricing_rules && item.apply_rule_on_other_items) {
-			frappe.call({
-				method: "erpnext.accounts.doctype.pricing_rule.utils.validate_pricing_rule_for_different_cond",
-				args: {
-					doc: me.frm.doc
-				},
-				callback: function(r) {
-					if (r.message) {
-						r.message.items.forEach(d => {
-							me.frm.doc.items.forEach(row => {
-								if(d.name == row.name) {
-									fields.forEach(f => {
-										row[f] = d[f];
-									});
-								}
-							});
-						});
-
-						me.trigger_price_list_rate();
-					}
-				}
-			});
-		} else if(item.remove_free_item) {
+		if(item.remove_free_item) {
 			var items = [];
 
 			me.frm.doc.items.forEach(d => {

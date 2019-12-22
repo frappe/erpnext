@@ -62,12 +62,12 @@ def execute():
 	]
 	
 	for dt in doctypes:
-		for d in frappe.db.sql("""select name, parent, item_code, item_tax_rate from `tab{0} Item`
+		for d in frappe.db.sql("""select name, parenttype, parent, item_code, item_tax_rate from `tab{0} Item`
 								where ifnull(item_tax_rate, '') not in ('', '{{}}') 
 								and item_tax_template is NULL""".format(dt), as_dict=1):
 			item_tax_map = json.loads(d.item_tax_rate)
 			item_tax_template_name = get_item_tax_template(item_tax_templates,
-				item_tax_map, d.item_code, d.parent)
+				item_tax_map, d.item_code, d.parenttype, d.parent)
 			frappe.db.set_value(dt + " Item", d.name, "item_tax_template", item_tax_template_name)
 
 	frappe.db.auto_commit_on_many_writes = False
@@ -77,7 +77,7 @@ def execute():
 	settings.determine_address_tax_category_from = "Billing Address"
 	settings.save()
 
-def get_item_tax_template(item_tax_templates, item_tax_map, item_code, parent=None):
+def get_item_tax_template(item_tax_templates, item_tax_map, item_code, parenttype=None, parent=None):
 	# search for previously created item tax template by comparing tax maps
 	for template, item_tax_template_map in iteritems(item_tax_templates):
 		if item_tax_map == item_tax_template_map:
@@ -88,23 +88,44 @@ def get_item_tax_template(item_tax_templates, item_tax_map, item_code, parent=No
 	item_tax_template.title = make_autoname("Item Tax Template-.####")
 
 	for tax_type, tax_rate in iteritems(item_tax_map):
-		if not frappe.db.exists("Account", tax_type):
+		account_details = frappe.db.get_value("Account", tax_type, ['name', 'account_type'], as_dict=1)
+		if account_details:
+			if account_details.account_type not in ('Tax', 'Chargeable', 'Income Account', 'Expense Account', 'Expenses Included In Valuation'):
+				frappe.db.set_value('Account', account_details.name, 'account_type', 'Chargeable')
+		else:
 			parts = tax_type.strip().split(" - ")
 			account_name = " - ".join(parts[:-1])
-			company = frappe.db.get_value("Company", filters={"abbr": parts[-1]})
+			company = get_company(parts[-1], parenttype, parent)
 			parent_account = frappe.db.get_value("Account",
 				filters={"account_type": "Tax", "root_type": "Liability", "is_group": 0, "company": company}, fieldname="parent_account")
-
-			frappe.get_doc({
-				"doctype": "Account",
+			filters = {
 				"account_name": account_name,
-				"company": company,
-				"account_type": "Tax",
-				"parent_account": parent_account
-			}).insert()
+                                "company": company,
+                                "account_type": "Tax",
+                                "parent_account": parent_account
+                        }
+			tax_type = frappe.db.get_value("Account", filters)
+			if not tax_type:
+				account = frappe.new_doc("Account")
+				account.update(filters)
+				account.insert()
+				tax_type = account.name
 
 		item_tax_template.append("taxes", {"tax_type": tax_type, "tax_rate": tax_rate})
 		item_tax_templates.setdefault(item_tax_template.title, {})
 		item_tax_templates[item_tax_template.title][tax_type] = tax_rate
 	item_tax_template.save()
 	return item_tax_template.name
+
+def get_company(company_abbr, parenttype=None, parent=None):
+	if parenttype and parent:
+		company = frappe.get_cached_value(parenttype, parent, 'company')
+	else:
+		company = frappe.db.get_value("Company", filters={"abbr": company_abbr})
+
+	if not company:
+		companies = frappe.get_all('Company')
+		if len(companies) == 1:
+			company = companies[0].name
+
+	return company
