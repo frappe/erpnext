@@ -6,7 +6,7 @@ import frappe
 import json
 import math
 from frappe import _
-from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate
+from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate, get_link_to_form
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_bom_items_as_dict
 from dateutil.relativedelta import relativedelta
@@ -38,7 +38,7 @@ class WorkOrder(Document):
 		ms = frappe.get_doc("Manufacturing Settings")
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
-
+		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
 
 	def validate(self):
 		self.validate_production_item()
@@ -657,8 +657,9 @@ def make_work_order(item, qty=0, project=None):
 	wo_doc = frappe.new_doc("Work Order")
 	wo_doc.production_item = item
 	wo_doc.update(item_details)
-	if qty > 0:
-		wo_doc.qty = qty
+
+	if flt(qty) > 0:
+		wo_doc.qty = flt(qty)
 		wo_doc.get_items_and_operations_from_bom()
 
 	return wo_doc
@@ -755,21 +756,41 @@ def query_sales_order(production_item):
 	return out
 
 @frappe.whitelist()
-def make_job_card(work_order, operation, workstation, qty=0):
+def make_job_card(work_order, operations):
+	if isinstance(operations, string_types):
+		operations = json.loads(operations)
+
 	work_order = frappe.get_doc('Work Order', work_order)
-	row = get_work_order_operation_data(work_order, operation, workstation)
-	if row:
-		return create_job_card(work_order, row, qty)
+	for row in operations:
+		validate_operation_data(row)
+		create_job_card(work_order, row, row.get("qty"), auto_create=True)
+
+def validate_operation_data(row):
+	if row.get("qty") <= 0:
+		frappe.throw(_("Quantity to Manufacture can not be zero for the operation {0}")
+			.format(
+				frappe.bold(row.get("operation"))
+			)
+		)
+
+	if row.get("qty") > row.get("pending_qty"):
+		frappe.throw(_("For operation {0}: Quantity ({1}) can not be greter than pending quantity({2})")
+			.format(
+				frappe.bold(row.get("operation")),
+				frappe.bold(row.get("qty")),
+				frappe.bold(row.get("pending_qty"))
+			)
+		)
 
 def create_job_card(work_order, row, qty=0, enable_capacity_planning=False, auto_create=False):
 	doc = frappe.new_doc("Job Card")
 	doc.update({
 		'work_order': work_order.name,
-		'operation': row.operation,
-		'workstation': row.workstation,
+		'operation': row.get("operation"),
+		'workstation': row.get("workstation"),
 		'posting_date': nowdate(),
 		'for_quantity': qty or work_order.get('qty', 0),
-		'operation_id': row.name,
+		'operation_id': row.get("name"),
 		'bom_no': work_order.bom_no,
 		'project': work_order.project,
 		'company': work_order.company,
@@ -785,7 +806,7 @@ def create_job_card(work_order, row, qty=0, enable_capacity_planning=False, auto
 			doc.schedule_time_logs(row)
 
 		doc.insert()
-		frappe.msgprint(_("Job card {0} created").format(doc.name))
+		frappe.msgprint(_("Job card {0} created").format(get_link_to_form("Job Card", doc.name)))
 
 	return doc
 

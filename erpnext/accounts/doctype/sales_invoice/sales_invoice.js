@@ -697,8 +697,8 @@ frappe.ui.form.on('Sales Invoice', {
 		if (frm.doc.company)
 		{
 			frappe.call({
-				method:"frappe.contacts.doctype.address.address.get_default_address",
-				args:{ doctype:'Company',name:frm.doc.company},
+				method:"erpnext.setup.doctype.company.company.get_default_company_address",
+				args:{name:frm.doc.company, existing_address: frm.doc.company_address},
 				callback: function(r){
 					if (r.message){
 						frm.set_value("company_address",r.message)

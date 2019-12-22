@@ -13,5 +13,7 @@ def get_data():
 				'label': _('Transaction'),
 				'items': ['Work Order', 'Job Card', 'Timesheet']
 			}
-		]
+		],
+		'disable_create_buttons': ['BOM', 'Routing', 'Operation',
+			'Work Order', 'Job Card', 'Timesheet']
 	}
