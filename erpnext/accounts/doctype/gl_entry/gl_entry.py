@@ -29,9 +29,9 @@ class GLEntry(Document):
 		self.validate_and_set_fiscal_year()
 		self.pl_must_have_cost_center()
 		self.validate_cost_center()
-		self.validate_dimensions_for_pl_and_bs()
 
 		if not self.flags.from_repost:
+			self.validate_dimensions_for_pl_and_bs()
 			self.check_pl_account()
 			self.validate_party()
 			self.validate_currency()
