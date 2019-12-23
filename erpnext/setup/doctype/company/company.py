@@ -14,6 +14,7 @@ from frappe.model.document import Document
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.utils.nestedset import NestedSet
 
+from past.builtins import cmp
 import functools
 
 class Company(NestedSet):
