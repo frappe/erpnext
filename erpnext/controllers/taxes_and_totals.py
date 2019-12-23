@@ -308,7 +308,8 @@ class calculate_taxes_and_totals(object):
 			diff = self.doc.total + non_inclusive_tax_amount \
 				- flt(last_tax.total, last_tax.precision("total"))
 
-			diff = 0 if ((diff - self.doc.discount_amount) <= (1.0/ 10**last_tax.precision("tax_amount"))) else diff
+			diff = 0 if ((diff - flt(self.doc.discount_amount, self.doc.precision('discount_amount')))\
+				<= (1.0/ 10**last_tax.precision("tax_amount"))) else diff
 
 			if diff and abs(diff) <= (5.0 / 10**last_tax.precision("tax_amount")):
 				self.doc.rounding_adjustment = flt(flt(self.doc.rounding_adjustment) +

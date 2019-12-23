@@ -386,7 +386,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				var diff = me.frm.doc.total + non_inclusive_tax_amount
 					- flt(last_tax.total, precision("grand_total"));
 
-				diff = ((diff - me.frm.doc.discount_amount) <= (1.0/ Math.pow(10, precision("tax_amount", last_tax)))) ? 0 : diff;
+				diff = ((diff - flt(me.frm.doc.discount_amount, precision('discount_amount')))
+					<= (1.0/ Math.pow(10, precision("tax_amount", last_tax)))) ? 0 : diff;
 
 				if ( diff && Math.abs(diff) <= (5.0 / Math.pow(10, precision("tax_amount", last_tax))) ) {
 					this.frm.doc.rounding_adjustment = flt(flt(this.frm.doc.rounding_adjustment) + diff,
