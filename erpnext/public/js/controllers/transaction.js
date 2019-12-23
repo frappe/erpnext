@@ -1775,14 +1775,28 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	set_reserve_warehouse: function() {
+		this.autofill_warehouse("reserve_warehouse");
+	},
+
 	set_warehouse: function() {
+		this.autofill_warehouse("warehouse");
+	},
+
+	autofill_warehouse : function (warehouse_field) {
+		// set warehouse in all child table rows
 		var me = this;
-		if(this.frm.doc.set_warehouse) {
-			$.each(this.frm.doc.items || [], function(i, item) {
-				frappe.model.set_value(me.frm.doctype + " Item", item.name, "warehouse", me.frm.doc.set_warehouse);
+		let warehouse = (warehouse_field === "warehouse") ? me.frm.doc.set_warehouse : me.frm.doc.set_reserve_warehouse;
+		let child_table = (warehouse_field === "warehouse") ? me.frm.doc.items : me.frm.doc.supplied_items;
+		let doctype = (warehouse_field === "warehouse") ? (me.frm.doctype + " Item") : (me.frm.doctype + " Item Supplied");
+
+		if(warehouse) {
+			$.each(child_table || [], function(i, item) {
+				frappe.model.set_value(doctype, item.name, warehouse_field, warehouse);
 			});
 		}
 	},
+
 	coupon_code: function() {
 		var me = this;
 		frappe.run_serially([
