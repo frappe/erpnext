@@ -294,10 +294,14 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 		row[key] = value
 
 def get_available_serial_nos(args):
+	cond = ''
+	if args.get("batch_no"):
+		cond = " and batch_no = %(batch_no)s"
+
 	return frappe.db.sql(""" SELECT name from `tabSerial No`
-		WHERE item_code = %(item_code)s and warehouse = %(warehouse)s
-		 and timestamp(purchase_date, purchase_time) <= timestamp(%(posting_date)s, %(posting_time)s)
-	""", args, as_dict=1)
+		WHERE item_code = %(item_code)s and warehouse = %(warehouse)s and
+		timestamp(purchase_date, purchase_time) <= timestamp(%(posting_date)s, %(posting_time)s) {0}
+	""".format(cond), args, as_dict=1)
 
 def add_additional_uom_columns(columns, result, include_uom, conversion_factors):
 	if not include_uom or not conversion_factors:
