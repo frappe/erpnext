@@ -12,9 +12,10 @@
   }
  ],
  "idx": 0,
- "image_src": "/assets/erpnext/images/illustrations/customers-onboard.png",
+ "image_src": "",
+ "is_completed": 0,
  "max_count": 3,
- "modified": "2019-12-03 22:54:28.959549",
+ "modified": "2019-12-09 17:54:01.686006",
  "modified_by": "Administrator",
  "name": "Add A Few Customers",
  "owner": "Administrator",
