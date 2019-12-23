@@ -47,11 +47,11 @@ class Task(NestedSet):
 		if not self.project or frappe.flags.in_test:
 			return
 
-		expected_end_date = getdate(frappe.db.get_value("Project", self.project, "expected_end_date"))
+		expected_end_date = frappe.db.get_value("Project", self.project, "expected_end_date")
 
 		if expected_end_date:
-			validate_project_dates(expected_end_date, self, "exp_start_date", "exp_end_date", "Expected")
-			validate_project_dates(expected_end_date, self, "act_start_date", "act_end_date", "Actual")
+			validate_project_dates(getdate(expected_end_date), self, "exp_start_date", "exp_end_date", "Expected")
+			validate_project_dates(getdate(expected_end_date), self, "act_start_date", "act_end_date", "Actual")
 
 	def validate_status(self):
 		if self.status!=self.get_db_value("status") and self.status == "Completed":
