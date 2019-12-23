@@ -91,6 +91,7 @@ class StockEntry(StockController):
 		self.update_cost_in_project()
 		self.validate_reserved_serial_no_consumption()
 		self.update_transferred_qty()
+		self.update_quality_inspection()
 		if self.work_order and self.purpose == "Manufacture":
 			self.update_so_in_serial_number()
 
@@ -108,6 +109,7 @@ class StockEntry(StockController):
 		self.make_gl_entries_on_cancel()
 		self.update_cost_in_project()
 		self.update_transferred_qty()
+		self.update_quality_inspection()
 
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
@@ -647,6 +649,12 @@ class StockEntry(StockController):
 		gl_entries = super(StockEntry, self).get_gl_entries(warehouse_account)
 
 		total_basic_amount = sum([flt(t.basic_amount) for t in self.get("items") if t.t_warehouse])
+		divide_based_on = total_basic_amount
+
+		if self.get("additional_costs") and not total_basic_amount:
+			# if total_basic_amount is 0, distribute additional charges based on qty
+			divide_based_on = sum(item.qty for item in list(self.get("items")))
+
 		item_account_wise_additional_cost = {}
 
 		for t in self.get("additional_costs"):
@@ -654,8 +662,11 @@ class StockEntry(StockController):
 				if d.t_warehouse:
 					item_account_wise_additional_cost.setdefault((d.item_code, d.name), {})
 					item_account_wise_additional_cost[(d.item_code, d.name)].setdefault(t.expense_account, 0.0)
+
+					multiply_based_on = d.basic_amount if total_basic_amount else d.qty
+
 					item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account] += \
-						(t.amount * d.basic_amount) / total_basic_amount
+						(t.amount * multiply_based_on) / divide_based_on
 
 		if item_account_wise_additional_cost:
 			for d in self.get("items"):
@@ -1284,6 +1295,20 @@ class StockEntry(StockController):
 			}
 
 			self._update_percent_field_in_targets(args, update_modified=True)
+
+	def update_quality_inspection(self):
+		if self.inspection_required:
+			reference_type = reference_name = ''
+			if self.docstatus == 1:
+				reference_name = self.name
+				reference_type = 'Stock Entry'
+
+			for d in self.items:
+				if d.quality_inspection:
+					frappe.db.set_value("Quality Inspection", d.quality_inspection, {
+						'reference_type': reference_type,
+						'reference_name': reference_name
+					})
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):

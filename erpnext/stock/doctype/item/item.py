@@ -125,7 +125,6 @@ class Item(WebsiteGenerator):
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
 		self.update_show_in_website()
-		self.validate_manufacturer()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -144,13 +143,6 @@ class Item(WebsiteGenerator):
 		'''Clean HTML description if set'''
 		if cint(frappe.db.get_single_value('Stock Settings', 'clean_description_html')):
 			self.description = clean_html(self.description)
-
-	def validate_manufacturer(self):
-		list_man = [(x.manufacturer, x.manufacturer_part_no) for x in self.get('manufacturers')]
-		set_man = set(list_man)
-
-		if len(list_man) != len(set_man):
-			frappe.throw(_("Duplicate entry in Manufacturers table"))
 
 	def validate_customer_provided_part(self):
 		if self.is_customer_provided_item:

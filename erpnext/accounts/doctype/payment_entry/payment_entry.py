@@ -931,9 +931,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 			grand_total = doc.rounded_total or doc.grand_total
 		outstanding_amount = doc.outstanding_amount
 	elif dt in ("Expense Claim"):
-		grand_total = doc.total_sanctioned_amount
-		outstanding_amount = doc.total_sanctioned_amount \
-			- doc.total_amount_reimbursed - flt(doc.total_advance_amount)
+		grand_total = doc.total_sanctioned_amount + doc.total_taxes_and_charges
+		outstanding_amount = doc.grand_total \
+			- doc.total_amount_reimbursed
 	elif dt == "Employee Advance":
 		grand_total = doc.advance_amount
 		outstanding_amount = flt(doc.advance_amount) - flt(doc.paid_amount)

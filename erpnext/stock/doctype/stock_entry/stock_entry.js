@@ -102,11 +102,12 @@ frappe.ui.form.on('Stock Entry', {
 
 		frm.set_query("quality_inspection", "items", function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
+
 			return {
+				query:"erpnext.stock.doctype.quality_inspection.quality_inspection.quality_inspection_query",
 				filters: {
-					docstatus: 1,
-					item_code: d.item_code,
-					reference_name: doc.name
+					'item_code': d.item_code,
+					'reference_name': doc.name
 				}
 			}
 		});
@@ -535,7 +536,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 					if(r.message) {
 						var d = locals[cdt][cdn];
 						$.each(r.message, function(k, v) {
-							d[k] = v;
+							frappe.model.set_value(cdt, cdn, k, v); // qty and it's subsequent fields weren't triggered
 						});
 						refresh_field("items");
 						erpnext.stock.select_batch_and_serial_no(frm, d);
