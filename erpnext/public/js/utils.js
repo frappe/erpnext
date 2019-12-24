@@ -501,6 +501,7 @@ erpnext.utils.update_child_items = function(opts) {
 	frm.doc[opts.child_docname].forEach(d => {
 		dialog.fields_dict.trans_items.df.data.push({
 			"docname": d.name,
+			"name": d.name,
 			"item_code": d.item_code,
 			"qty": d.qty,
 			"rate": d.rate,

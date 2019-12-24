@@ -321,11 +321,11 @@ def allocate_earned_leaves():
 				if new_allocation == allocation.total_leaves_allocated:
 					continue
 				allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
-				create_earned_leave_ledger_entry(allocation, earned_leaves, today)
+				create_additional_leave_ledger_entry(allocation, earned_leaves, today)
 
-def create_earned_leave_ledger_entry(allocation, earned_leaves, date):
-	''' Create leave ledger entry based on the earned leave frequency '''
-	allocation.new_leaves_allocated = earned_leaves
+def create_additional_leave_ledger_entry(allocation, leaves, date):
+	''' Create leave ledger entry for leave types '''
+	allocation.new_leaves_allocated = leaves
 	allocation.from_date = date
 	allocation.unused_leaves = 0
 	allocation.create_leave_ledger_entry()
@@ -389,6 +389,7 @@ def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):
 
 def get_holidays_for_employee(employee, start_date, end_date):
 	holiday_list = get_holiday_list_for_employee(employee)
+
 	holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday`
 		where
 			parent=%(holiday_list)s

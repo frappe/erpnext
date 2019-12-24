@@ -353,17 +353,19 @@ def get_auto_serial_nos(serial_no_series, qty):
 def auto_make_serial_nos(args):
 	serial_nos = get_serial_nos(args.get('serial_no'))
 	created_numbers = []
+	voucher_type = args.get('voucher_type')
+	item_code = args.get('item_code')
 	for serial_no in serial_nos:
 		if frappe.db.exists("Serial No", serial_no):
 			sr = frappe.get_doc("Serial No", serial_no)
 			sr.via_stock_ledger = True
-			sr.item_code = args.get('item_code')
+			sr.item_code = item_code
 			sr.warehouse = args.get('warehouse') if args.get('actual_qty', 0) > 0 else None
 			sr.batch_no = args.get('batch_no')
 			sr.location = args.get('location')
 			sr.company = args.get('company')
 			sr.supplier = args.get('supplier')
-			if sr.sales_order and args.get('voucher_type') == "Stock Entry" \
+			if sr.sales_order and voucher_type == "Stock Entry" \
 				and not args.get('actual_qty', 0) > 0:
 				sr.sales_order = None
 			sr.save(ignore_permissions=True)
@@ -371,10 +373,28 @@ def auto_make_serial_nos(args):
 			created_numbers.append(make_serial_no(serial_no, args))
 
 	form_links = list(map(lambda d: frappe.utils.get_link_to_form('Serial No', d), created_numbers))
+
+	# Setting up tranlated title field for all cases
+	singular_title = _("Serial Number Created")
+	multiple_title = _("Serial Numbers Created")
+
+	if voucher_type:
+		multiple_title = singular_title = _("{0} Created").format(voucher_type)
+
 	if len(form_links) == 1:
-		frappe.msgprint(_("Serial No {0} created").format(form_links[0]))
+		frappe.msgprint(_("Serial No {0} Created").format(form_links[0]), singular_title)
 	elif len(form_links) > 0:
-		frappe.msgprint(_("The following serial numbers were created: <br> {0}").format(', '.join(form_links)))
+		message = _("The following serial numbers were created: <br><br> {0}").format(get_items_html(form_links, item_code))
+		frappe.msgprint(message, multiple_title)
+
+def get_items_html(serial_nos, item_code):
+	body = ', '.join(serial_nos)
+	return '''<details><summary>
+		<b>{0}:</b> {1} Serial Numbers <span class="caret"></span>
+	</summary>
+	<div class="small">{2}</div></details>
+	'''.format(item_code, len(serial_nos), body)
+
 
 def get_item_details(item_code):
 	return frappe.db.sql("""select name, has_batch_no, docstatus,
@@ -397,7 +417,7 @@ def make_serial_no(serial_no, args):
 	sr.via_stock_ledger = args.get('via_stock_ledger') or True
 	sr.asset = args.get('asset')
 	sr.location = args.get('location')
-	
+
 
 	if args.get('purchase_document_type'):
 		sr.purchase_document_type = args.get('purchase_document_type')
