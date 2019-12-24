@@ -622,7 +622,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 					if(r.message) {
 						var d = locals[cdt][cdn];
 						$.each(r.message, function(k, v) {
-							d[k] = v;
+							frappe.model.set_value(cdt, cdn, k, v); // qty and it's subsequent fields weren't triggered
 						});
 						refresh_field("items");
 						erpnext.stock.select_batch_and_serial_no(frm, d);
