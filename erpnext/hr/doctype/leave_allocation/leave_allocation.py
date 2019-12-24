@@ -69,10 +69,14 @@ class LeaveAllocation(Document):
 
 	def validate_allocation_overlap(self):
 		leave_allocation = frappe.db.sql("""
-			select name from `tabLeave Allocation`
-			where employee=%s and leave_type=%s and docstatus=1
-			and to_date >= %s and from_date <= %s""",
-			(self.employee, self.leave_type, self.from_date, self.to_date))
+			SELECT
+				name
+			FROM `tabLeave Allocation`
+			WHERE
+				employee=%s AND leave_type=%s
+				AND name <> %s AND docstatus=1
+				AND to_date >= %s AND from_date <= %s""",
+			(self.employee, self.leave_type, self.name, self.from_date, self.to_date))
 
 		if leave_allocation:
 			frappe.msgprint(_("{0} already allocated for Employee {1} for period {2} to {3}")

@@ -29,8 +29,10 @@ export default {
 		return {
 			page_name: frappe.get_route()[1],
 			items: [],
-			search_value: frappe.get_route()[2],
+			category: frappe.get_route()[2],
+			search_value: frappe.get_route()[3],
 			item_id_fieldname: 'name',
+			filters: {},
 
 			// Constants
 			search_placeholder: __('Search for anything ...'),
@@ -40,7 +42,7 @@ export default {
 	computed: {
 		page_title() {
 			return this.items.length
-				? __(`Results for "${this.search_value}"`)
+				? __(`Results for "${this.search_value}" ${this.category !== 'All'? `in category ${this.category}` : ''}`)
 				: __('No Items found.');
 		}
 	},
@@ -49,14 +51,20 @@ export default {
 	},
 	methods: {
 		get_items() {
-			hub.call('get_items', { keyword: this.search_value })
+			if (this.category !== 'All') {
+				this.filters['hub_category'] = this.category;
+			}
+			hub.call('get_items', {
+				keyword: this.search_value,
+				filters: this.filters
+			})
 			.then((items) => {
 				this.items = items;
 			})
 		},
 
 		set_route_and_get_items() {
-			frappe.set_route('marketplace', 'search', this.search_value);
+			frappe.set_route('marketplace', 'search', this.category, this.search_value);
 			this.get_items();
 		},
 

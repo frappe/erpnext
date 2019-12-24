@@ -54,9 +54,11 @@ class LeaveApplication(Document):
 		self.create_leave_ledger_entry()
 		self.reload()
 
+	def before_cancel(self):
+		self.status = "Cancelled"
+
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
-		self.status = "Cancelled"
 		# notify leave applier about cancellation
 		self.notify_employee()
 		self.cancel_attendance()
@@ -351,7 +353,7 @@ class LeaveApplication(Document):
 				pass
 
 	def create_leave_ledger_entry(self, submit=True):
-		if self.status != 'Approved':
+		if self.status != 'Approved' and submit:
 			return
 
 		expiry_date = get_allocation_expiry(self.employee, self.leave_type,
@@ -549,10 +551,10 @@ def get_leaves_for_period(employee, leave_type, from_date, to_date):
 			leave_days += leave_entry.leaves
 
 		elif inclusive_period and leave_entry.transaction_type == 'Leave Allocation' \
-			and not skip_expiry_leaves(leave_entry, to_date):
+			and leave_entry.is_expired and not skip_expiry_leaves(leave_entry, to_date):
 			leave_days += leave_entry.leaves
 
-		else:
+		elif leave_entry.transaction_type == 'Leave Application':
 			if leave_entry.from_date < getdate(from_date):
 				leave_entry.from_date = from_date
 			if leave_entry.to_date > getdate(to_date):
@@ -579,14 +581,15 @@ def skip_expiry_leaves(leave_entry, date):
 def get_leave_entries(employee, leave_type, from_date, to_date):
 	''' Returns leave entries between from_date and to_date '''
 	return frappe.db.sql("""
-		select employee, leave_type, from_date, to_date, leaves, transaction_type, is_carry_forward, transaction_name
-		from `tabLeave Ledger Entry`
-		where employee=%(employee)s and leave_type=%(leave_type)s
-			and docstatus=1
-			and leaves<0
-			and (from_date between %(from_date)s and %(to_date)s
-				or to_date between %(from_date)s and %(to_date)s
-				or (from_date < %(from_date)s and to_date > %(to_date)s))
+		SELECT
+			employee, leave_type, from_date, to_date, leaves, transaction_name, transaction_type,
+			is_carry_forward, is_expired
+		FROM `tabLeave Ledger Entry`
+		WHERE employee=%(employee)s AND leave_type=%(leave_type)s
+			AND docstatus=1 AND leaves<0
+			AND (from_date between %(from_date)s AND %(to_date)s
+				OR to_date between %(from_date)s AND %(to_date)s
+				OR (from_date < %(from_date)s AND to_date > %(to_date)s))
 	""", {
 		"from_date": from_date,
 		"to_date": to_date,
