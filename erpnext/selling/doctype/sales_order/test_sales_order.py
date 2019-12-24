@@ -320,7 +320,12 @@ class TestSalesOrder(unittest.TestCase):
 		create_dn_against_so(so.name, 4)
 		make_sales_invoice(so.name)
 
-		trans_item = json.dumps([{'item_code' : '_Test Item 2', 'rate' : 200, 'qty' : 7}])
+		first_item_of_so = so.get("items")[0]
+		trans_item = json.dumps([
+			{'item_code' : first_item_of_so.item_code, 'rate' : first_item_of_so.rate, \
+				'qty' : first_item_of_so.qty, 'docname': first_item_of_so.name},
+			{'item_code' : '_Test Item 2', 'rate' : 200, 'qty' : 7}
+		])
 		update_child_qty_rate('Sales Order', trans_item, so.name)
 
 		so.reload()
@@ -328,6 +333,48 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.get("items")[-1].rate, 200)
 		self.assertEqual(so.get("items")[-1].qty, 7)
 		self.assertEqual(so.get("items")[-1].amount, 1400)
+		self.assertEqual(so.status, 'To Deliver and Bill')
+	
+	def test_remove_item_in_update_child_qty_rate(self):
+		so = make_sales_order(**{
+			"item_list": [{
+				"item_code": '_Test Item',
+				"qty": 5,
+				"rate":1000
+			}]
+		})
+		create_dn_against_so(so.name, 2)
+		make_sales_invoice(so.name)
+
+		# add an item so as to try removing items
+		trans_item = json.dumps([
+			{"item_code": '_Test Item', "qty": 5, "rate":1000, "docname": so.get("items")[0].name},
+			{"item_code": '_Test Item 2', "qty": 2, "rate":500}
+		])
+		update_child_qty_rate('Sales Order', trans_item, so.name)
+		so.reload()
+		self.assertEqual(len(so.get("items")), 2)
+
+		# check if delivered items can be removed
+		trans_item = json.dumps([{
+			"item_code": '_Test Item 2',
+			"qty": 2,
+			"rate":500,
+			"docname": so.get("items")[1].name
+		}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate, 'Sales Order', trans_item, so.name)
+
+		#remove last added item
+		trans_item = json.dumps([{
+			"item_code": '_Test Item',
+			"qty": 5,
+			"rate":1000,
+			"docname": so.get("items")[0].name
+		}])
+		update_child_qty_rate('Sales Order', trans_item, so.name)
+		
+		so.reload()
+		self.assertEqual(len(so.get("items")), 1)
 		self.assertEqual(so.status, 'To Deliver and Bill')
 
 
