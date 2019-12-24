@@ -54,9 +54,11 @@ class LeaveApplication(Document):
 		self.create_leave_ledger_entry()
 		self.reload()
 
+	def before_cancel(self):
+		self.status = "Cancelled"
+
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
-		self.status = "Cancelled"
 		# notify leave applier about cancellation
 		self.notify_employee()
 		self.cancel_attendance()

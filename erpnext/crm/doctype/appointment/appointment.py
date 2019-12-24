@@ -11,7 +11,7 @@ from datetime import timedelta
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_url
+from frappe.utils import get_url, getdate
 from frappe.utils.verified_command import verify_request, get_signed_params
 
 
@@ -117,7 +117,7 @@ class Appointment(Document):
 		if self._assign:
 			return
 		available_agents = _get_agents_sorted_by_asc_workload(
-			self.scheduled_time.date())
+			getdate(self.scheduled_time))
 		for agent in available_agents:
 			if(_check_agent_availability(agent, self.scheduled_time)):
 				agent = agent[0]
@@ -189,7 +189,7 @@ def _get_agents_sorted_by_asc_workload(date):
 		assigned_to = frappe.parse_json(appointment._assign)
 		if not assigned_to:
 			continue
-		if (assigned_to[0] in agent_list) and appointment.scheduled_time.date() == date:
+		if (assigned_to[0] in agent_list) and getdate(appointment.scheduled_time) == date:
 			appointment_counter[assigned_to[0]] += 1
 	sorted_agent_list = appointment_counter.most_common()
 	sorted_agent_list.reverse()
