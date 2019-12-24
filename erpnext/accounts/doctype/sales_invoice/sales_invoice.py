@@ -149,10 +149,10 @@ class SalesInvoice(SellingController):
 						frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}").format(d.idx, d.asset, asset.status))
 
 	def validate_item_cost_centers(self):
-		for item in self.get("items",None):
-			cc = frappe.get_doc("Cost Center",item.cost_center)
-			if cc.company != self.company:
-				frappe.throw(_("Row #{0} : Cost Center <strong>{1}</strong> does not belong to company <strong>{2}</strong>").format(item.idx, item.cost_center, self.company))
+		for item in self.items:
+			cost_center_company = frappe.get_cached_value("Cost Center", item.cost_center, "company")
+			if cost_center_company != self.company:
+				frappe.throw(_("Row #{0}: Cost Center {1} does not belong to company {2}").format(frappe.bold(item.idx), frappe.bold(item.cost_center), frappe.bold(self.company)))
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
