@@ -27,7 +27,7 @@ class Instructor(Document):
 		self.validate_duplicate_employee()
 
 	def validate_duplicate_employee(self):
-		if self.employee and frappe.db.get_value("Instructor", {'employee': self.employee}, 'name'):
+		if self.employee and frappe.db.get_value("Instructor", {'employee': self.employee, 'name': ['!=', self.name]}, 'name'):
 			frappe.throw(_("Employee ID is linked with another instructor"))
 
 
