@@ -138,7 +138,7 @@ def publish_selected_items(items_to_publish):
 			items_to_update.append(item)
 			hub_tracked_item = frappe.get_doc('Hub Tracked Item', item_code)
 			hub_tracked_item.update(hub_dict)
-			hub_tracked_items.save()
+			hub_tracked_item.save()
 		else:
 			frappe.get_doc(hub_dict).insert(ignore_if_duplicate=True)
 
