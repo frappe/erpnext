@@ -190,7 +190,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			if(jvd.reference_type==="Employee Advance") {
 				return {
 					filters: {
-						'status': ['=', 'Unpaid'],
 						'docstatus': 1
 					}
 				};
