@@ -65,16 +65,6 @@ frappe.ready(() => {
 					reqd: 1
 				},
 				{
-					label: __('Address Type'),
-					fieldname: 'address_type',
-					fieldtype: 'Select',
-					options: [
-						'Billing',
-						'Shipping'
-					],
-					reqd: 1
-				},
-				{
 					label: __('Address Line 1'),
 					fieldname: 'address_line1',
 					fieldtype: 'Data',
@@ -97,15 +87,36 @@ frappe.ready(() => {
 					fieldtype: 'Data'
 				},
 				{
+					label: __('Country'),
+					fieldname: 'country',
+					fieldtype: 'Link',
+					options: 'Country',
+					reqd: 1
+				},
+				{
+					fieldname: "column_break0",
+					fieldtype: "Column Break",
+					width: "50%"
+				},
+				{
+					label: __('Address Type'),
+					fieldname: 'address_type',
+					fieldtype: 'Select',
+					options: [
+						'Billing',
+						'Shipping'
+					],
+					reqd: 1
+				},
+				{
 					label: __('Pin Code'),
 					fieldname: 'pincode',
 					fieldtype: 'Data'
 				},
 				{
-					label: __('Country'),
-					fieldname: 'country',
-					fieldtype: 'Link',
-					reqd: 1
+					fieldname: "phone",
+					fieldtype: "Data",
+					label: "Phone"
 				},
 			],
 			primary_action_label: __('Save'),
