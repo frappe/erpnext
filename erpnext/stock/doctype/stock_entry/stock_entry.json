@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-04-09 11:43:55",
@@ -350,6 +351,7 @@
    "options": "Simple"
   },
   {
+   "description": "Scan item barcodes, serial numbers and batch numbers",
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
    "label": "Scan Barcode"
@@ -627,7 +629,8 @@
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2019-09-27 14:38:20.801420",
+ "links": [],
+ "modified": "2019-12-24 02:30:55.030433",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

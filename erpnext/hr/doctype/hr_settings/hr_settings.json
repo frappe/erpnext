@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-08-02 13:45:23",
  "doctype": "DocType",
  "document_type": "Other",
@@ -9,8 +10,10 @@
   "retirement_age",
   "emp_created_by",
   "column_break_4",
-  "stop_birthday_reminders",
   "expense_approver_mandatory_in_expense_claim",
+  "sb_birthday",
+  "stop_birthday_reminders",
+  "birthday_email_template",
   "payroll_settings",
   "include_holidays_in_total_working_days",
   "max_working_hours_against_timesheet",
@@ -160,12 +163,26 @@
    "fieldname": "auto_leave_encashment",
    "fieldtype": "Check",
    "label": "Auto Leave Encashment"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_birthday",
+   "fieldtype": "Section Break",
+   "label": "Birthday Settings"
+  },
+  {
+   "depends_on": "eval:!doc.stop_birthday_reminders",
+   "fieldname": "birthday_email_template",
+   "fieldtype": "Link",
+   "label": "Birthday Email Template",
+   "options": "Email Template"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2019-08-05 13:07:17.993968",
+ "links": [],
+ "modified": "2019-12-24 02:55:04.270272",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",

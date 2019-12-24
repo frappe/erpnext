@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -557,6 +558,7 @@
    "print_hide": 1
   },
   {
+   "description": "Scan item barcodes, serial numbers and batch numbers",
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
    "label": "Scan Barcode"
@@ -1287,7 +1289,8 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2019-09-17 22:31:42.666601",
+ "links": [],
+ "modified": "2019-12-24 02:27:26.421816",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
