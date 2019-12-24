@@ -93,17 +93,18 @@ def get_status(start_date, end_date):
 
 def update_status_for_contracts():
 	"""
-	Run the daily hook to update the statuses for all signed
-	and submitted Contracts
+		Daily scheduler event to verify and update contract status
 	"""
 
-	contracts = frappe.get_all("Contract",
-								filters={"is_signed": True,
-										"docstatus": 1},
-								fields=["name", "start_date", "end_date"])
+	contracts = frappe.get_all("Contract", filters={"docstatus": 1})
 
 	for contract in contracts:
-		status = get_status(contract.get("start_date"),
-							contract.get("end_date"))
+		contract_doc = frappe.get_doc("Contract", contract.name)
 
-		frappe.db.set_value("Contract", contract.get("name"), "status", status)
+		current_statuses = (contract_doc.status, contract_doc.fulfilment_status)
+
+		contract_doc.update_fulfilment_status()
+		contract_doc.update_contract_status()
+
+		if current_statuses != (contract_doc.status, contract_doc.fulfilment_status):
+			contract_doc.save(ignore_permissions=True)
