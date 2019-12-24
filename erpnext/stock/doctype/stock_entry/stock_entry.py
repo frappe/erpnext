@@ -808,24 +808,26 @@ class StockEntry(StockController):
 
 		if self.bom_no:
 
+			backflush_based_on = frappe.db.get_single_value("Manufacturing Settings",
+				"backflush_raw_materials_based_on")
+
 			if self.purpose in ["Material Issue", "Material Transfer", "Manufacture", "Repack",
 					"Send to Subcontractor", "Material Transfer for Manufacture", "Material Consumption for Manufacture"]:
 
 				if self.work_order and self.purpose == "Material Transfer for Manufacture":
-					item_dict = self.get_pending_raw_materials()
+					item_dict = self.get_pending_raw_materials(backflush_based_on)
 					if self.to_warehouse and self.pro_doc:
 						for item in itervalues(item_dict):
 							item["to_warehouse"] = self.pro_doc.wip_warehouse
 					self.add_to_stock_entry_detail(item_dict)
 
 				elif (self.work_order and (self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture")
-					and not self.pro_doc.skip_transfer and frappe.db.get_single_value("Manufacturing Settings",
-					"backflush_raw_materials_based_on")== "Material Transferred for Manufacture"):
+					and not self.pro_doc.skip_transfer and backflush_based_on == "Material Transferred for Manufacture"):
 					self.get_transfered_raw_materials()
 
-				elif self.work_order and (self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture") and \
-					frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")== "BOM" and \
-					frappe.db.get_single_value("Manufacturing Settings", "material_consumption")== 1:
+				elif (self.work_order and backflush_based_on== "BOM" and
+					(self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture")
+					and frappe.db.get_single_value("Manufacturing Settings", "material_consumption")== 1):
 					self.get_unconsumed_raw_materials()
 
 				else:
@@ -1034,10 +1036,6 @@ class StockEntry(StockController):
 				filters={'parent': self.work_order, 'item_code': item_code},
 				fields=["required_qty", "consumed_qty"]
 				)
-			if not req_items:
-				frappe.msgprint(_("Did not found transfered item {0} in Work Order {1}, the item not added in Stock Entry")
-					.format(item_code, self.work_order))
-				continue
 
 			req_qty = flt(req_items[0].required_qty)
 			req_qty_each = flt(req_qty / manufacturing_qty)
@@ -1085,18 +1083,20 @@ class StockEntry(StockController):
 					}
 				})
 
-	def get_pending_raw_materials(self):
+	def get_pending_raw_materials(self, backflush_based_on=None):
 		"""
 			issue (item quantity) that is pending to issue or desire to transfer,
 			whichever is less
 		"""
-		item_dict = self.get_pro_order_required_items()
+		item_dict = self.get_pro_order_required_items(backflush_based_on)
+
 		max_qty = flt(self.pro_doc.qty)
 		for item, item_details in iteritems(item_dict):
 			pending_to_issue = flt(item_details.required_qty) - flt(item_details.transferred_qty)
 			desire_to_transfer = flt(self.fg_completed_qty) * flt(item_details.required_qty) / max_qty
 
-			if desire_to_transfer <= pending_to_issue:
+			if (desire_to_transfer <= pending_to_issue or
+				(desire_to_transfer > 0 and backflush_based_on == "Material Transferred for Manufacture")):
 				item_dict[item]["qty"] = desire_to_transfer
 			elif pending_to_issue > 0:
 				item_dict[item]["qty"] = pending_to_issue
@@ -1114,7 +1114,7 @@ class StockEntry(StockController):
 
 		return item_dict
 
-	def get_pro_order_required_items(self):
+	def get_pro_order_required_items(self, backflush_based_on=None):
 		item_dict = frappe._dict()
 		pro_order = frappe.get_doc("Work Order", self.work_order)
 		if not frappe.db.get_value("Warehouse", pro_order.wip_warehouse, "is_group"):
@@ -1123,7 +1123,8 @@ class StockEntry(StockController):
 			wip_warehouse = None
 
 		for d in pro_order.get("required_items"):
-			if (flt(d.required_qty) > flt(d.transferred_qty) and
+			if ( ((flt(d.required_qty) > flt(d.transferred_qty)) or
+				(backflush_based_on == "Material Transferred for Manufacture")) and
 				(d.include_item_in_manufacturing or self.purpose != "Material Transfer for Manufacture")):
 				item_row = d.as_dict()
 				if d.source_warehouse and not frappe.db.get_value("Warehouse", d.source_warehouse, "is_group"):
