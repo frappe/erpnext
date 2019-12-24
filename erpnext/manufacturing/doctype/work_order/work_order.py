@@ -498,9 +498,6 @@ class WorkOrder(Document):
 		'''update transferred qty from submitted stock entries for that item against
 			the work order'''
 
-		backflush_based_on = frappe.db.get_single_value("Manufacturing Settings",
-				"backflush_raw_materials_based_on")
-
 		for d in self.required_items:
 			transferred_qty = frappe.db.sql('''select sum(qty)
 				from `tabStock Entry` entry, `tabStock Entry Detail` detail
