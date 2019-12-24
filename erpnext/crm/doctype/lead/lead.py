@@ -161,22 +161,25 @@ class Lead(SellingController):
 			"salutation": self.salutation,
 			"gender": self.gender,
 			"designation": self.designation,
-			"email_ids": [
-				{
-					"email_id": self.email_id,
-					"is_primary": 1
-				}
-			],
-			"phone_nos": [
-				{
-					"phone": self.phone,
-					"is_primary": 1
-				},
-				{
-					"phone": self.mobile_no,
-				}
-			]
 		})
+
+		if self.email_id:
+			contact.append("email_ids", {
+				"email_id": self.email_id,
+				"is_primary": 1
+			})
+
+		if self.phone:
+			contact.append("phone_nos", {
+				"phone": self.phone,
+				"is_primary": 1
+			})
+
+		if self.mobile_no:
+			contact.append("phone_nos", {
+				"phone": self.mobile_no
+			})
+
 		contact.insert()
 
 		return contact
