@@ -166,7 +166,7 @@
   {
    "fieldname": "return_amount",
    "fieldtype": "Currency",
-   "label": "Return Amount",
+   "label": "Returned Amount",
    "options": "Company:company:default_currency",
    "read_only": 1
   }
