@@ -1,0 +1,49 @@
+{
+ "creation": "2019-12-09 14:18:00.481560",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "previous_location",
+  "previous_port",
+  "start_date",
+  "end_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "previous_location",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Previous Location"
+  },
+  {
+   "fieldname": "previous_port",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Previous Port"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "End Date"
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-12-10 08:45:23.796406",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Camera History Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

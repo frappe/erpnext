@@ -41,6 +41,7 @@
   "target_address_display",
   "sb0",
   "scan_barcode",
+  "parent_item",
   "items",
   "get_stock_and_rate",
   "section_break_19",
@@ -339,10 +340,10 @@
    "options": "Address"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "target_address_display",
    "fieldtype": "Small Text",
-   "label": "Target Warehouse Address",
-   "read_only": 1
+   "label": "Target Warehouse Address"
   },
   {
    "fieldname": "sb0",
@@ -622,12 +623,17 @@
    "label": "Pick List",
    "options": "Pick List",
    "read_only": 1
+  },
+  {
+   "fieldname": "parent_item",
+   "fieldtype": "Data",
+   "label": "Parent Item"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2019-09-27 14:38:20.801420",
+ "modified": "2019-12-11 13:52:11.046673",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

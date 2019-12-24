@@ -1,0 +1,62 @@
+{
+ "allow_import": 1,
+ "autoname": "field:serial_state_name",
+ "creation": "2019-10-09 15:39:46.794383",
+ "description": "Workflow state represents the current state of a document.",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "serial_state_name",
+  "icon",
+  "style"
+ ],
+ "fields": [
+  {
+   "description": "Icon will appear on the button",
+   "fieldname": "icon",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Icon",
+   "options": "\nglass\nmusic\nsearch\nenvelope\nheart\nstar\nstar-empty\nuser\nfilm\nth-large\nth\nth-list\nok\nremove\nzoom-in\nzoom-out\noff\nsignal\ncog\ntrash\nhome\nfile\ntime\nroad\ndownload-alt\ndownload\nupload\ninbox\nplay-circle\nrepeat\nrefresh\nlist-alt\nlock\nflag\nheadphones\nvolume-off\nvolume-down\nvolume-up\nqrcode\nbarcode\ntag\ntags\nbook\nbookmark\nprint\ncamera\nfont\nbold\nitalic\ntext-height\ntext-width\nalign-left\nalign-center\nalign-right\nalign-justify\nlist\nindent-left\nindent-right\nfacetime-video\npicture\npencil\nmap-marker\nadjust\ntint\nedit\nshare\ncheck\nmove\nstep-backward\nfast-backward\nbackward\nplay\npause\nstop\nforward\nfast-forward\nstep-forward\neject\nchevron-left\nchevron-right\nplus-sign\nminus-sign\nremove-sign\nok-sign\nquestion-sign\ninfo-sign\nscreenshot\nremove-circle\nok-circle\nban-circle\narrow-left\narrow-right\narrow-up\narrow-down\nshare-alt\nresize-full\nresize-small\nplus\nminus\nasterisk\nexclamation-sign\ngift\nleaf\nfire\neye-open\neye-close\nwarning-sign\nplane\ncalendar\nrandom\ncomment\nmagnet\nchevron-up\nchevron-down\nretweet\nshopping-cart\nfolder-close\nfolder-open\nresize-vertical\nresize-horizontal\nhdd\nbullhorn\nbell\ncertificate\nthumbs-up\nthumbs-down\nhand-right\nhand-left\nhand-up\nhand-down\ncircle-arrow-right\ncircle-arrow-left\ncircle-arrow-up\ncircle-arrow-down\nglobe\nwrench\ntasks\nfilter\nbriefcase\nfullscreen"
+  },
+  {
+   "description": "Style represents the button color: Success - Green, Danger - Red, Inverse - Black, Primary - Dark Blue, Info - Light Blue, Warning - Orange",
+   "fieldname": "style",
+   "fieldtype": "Select",
+   "label": "Style",
+   "options": "\nPrimary\nInfo\nSuccess\nWarning\nDanger\nInverse"
+  },
+  {
+   "fieldname": "serial_state_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "State",
+   "reqd": 1,
+   "unique": 1
+  }
+ ],
+ "icon": "fa fa-flag",
+ "modified": "2019-10-09 15:41:44.116557",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Serial No State",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

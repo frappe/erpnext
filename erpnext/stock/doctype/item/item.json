@@ -135,7 +135,8 @@
   "publish_in_hub",
   "hub_category_to_publish",
   "hub_warehouse",
-  "synced_with_hub"
+  "synced_with_hub",
+  "manufacturers"
  ],
  "fields": [
   {
@@ -1014,6 +1015,12 @@
    "fieldtype": "Check",
    "label": "Synced With Hub",
    "read_only": 1
+  },
+  {
+   "fieldname": "manufacturers",
+   "fieldtype": "Table",
+   "label": "Manufacturers",
+   "options": "Item Manufacturer"
   },
   {
    "depends_on": "eval:!doc.__islocal",

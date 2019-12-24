@@ -267,6 +267,7 @@
    "oldfieldname": "import_rate",
    "oldfieldtype": "Currency",
    "options": "currency",
+   "precision": "9",
    "reqd": 1
   },
   {

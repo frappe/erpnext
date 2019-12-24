@@ -1,0 +1,13 @@
+{
+ "creation": "2019-11-05 15:04:40.627400",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart Source",
+ "idx": 0,
+ "modified": "2019-11-05 15:04:40.627400",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Cameras",
+ "owner": "Administrator",
+ "source_name": "Cameras",
+ "timeseries": 0
+}

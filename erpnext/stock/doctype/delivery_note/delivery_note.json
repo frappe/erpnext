@@ -1,6 +1,6 @@
 {
  "allow_import": 1,
- "autoname": "naming_series:",
+ "autoname": "format:{naming_series}_{project}",
  "creation": "2013-05-24 19:29:09",
  "doctype": "DocType",
  "document_type": "Document",
@@ -111,6 +111,7 @@
   "lr_date",
   "more_info",
   "project",
+  "project_name",
   "campaign",
   "source",
   "column_break5",
@@ -172,7 +173,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "MAT-DN-.YYYY.-",
+   "options": "SHCC-.YY.MM.DD",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -969,10 +970,14 @@
    "description": "Track this Delivery Note against any Project",
    "fieldname": "project",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Project",
    "oldfieldname": "project",
    "oldfieldtype": "Link",
-   "options": "Project"
+   "options": "Project",
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "campaign",
@@ -1233,12 +1238,19 @@
   {
    "fieldname": "section_break_18",
    "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "project",
+   "fetch_from": "project.project_name",
+   "fieldname": "project_name",
+   "fieldtype": "Data",
+   "label": "Project Name"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2019-09-27 14:24:20.269682",
+ "modified": "2019-12-09 13:35:52.160096",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
