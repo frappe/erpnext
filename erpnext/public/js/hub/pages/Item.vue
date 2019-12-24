@@ -205,9 +205,7 @@ export default {
 					hub_user: frappe.session.user
 				})
 				.then(() => {
-					const saved_items_link = `<b><a href="#marketplace/saved-items">${__(
-						'Saved'
-					)}</a></b>`;
+					const saved_items_link = `<b><a href="#marketplace/saved-items">${__('Saved')}</a></b>`;
 					frappe.show_alert(saved_items_link);
 					erpnext.hub.trigger('action:item_save');
 				})
@@ -223,9 +221,7 @@ export default {
 					hub_user: frappe.session.user
 				})
 				.then(() => {
-					const featured_items_link = `<b><a href="#marketplace/featured-items">${__(
-						'Added to Featured Items'
-					)}</a></b>`;
+					const featured_items_link = `<b><a href="#marketplace/featured-items">${__('Added to Featured Items')}</a></b>`;
 					frappe.show_alert(featured_items_link);
 					erpnext.hub.trigger('action:item_feature');
 				})
@@ -309,7 +305,7 @@ export default {
 		},
 
 		unpublish_item() {
-			frappe.confirm(__(`Unpublish ${this.item.item_name}?`), () => {
+			frappe.confirm(__(`Unpublish {0}?`, [this.item.item_name]), () => {
 				frappe
 					.call('erpnext.hub_node.api.unpublish_item', {
 						item_code: this.item.item_code,

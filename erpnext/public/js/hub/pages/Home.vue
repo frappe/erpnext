@@ -60,7 +60,9 @@ export default {
 	},
 	mounted() {
 		frappe.route.on('change', () => {
-			this.get_items();
+			if (frappe.get_route_str() === 'marketplace/home') {
+				this.get_items();
+			}
 		})
 	},
 	methods: {
