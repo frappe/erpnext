@@ -128,7 +128,7 @@ frappe.ui.form.on('Student Group Instructor', {
 		frm.fields_dict['instructors'].grid.get_field('instructor').get_query = function(doc){
 			let instructor_list = [];
 			$.each(doc.instructors, function(idx, val){
-					instructor_list.push(val.instructor);
+				instructor_list.push(val.instructor);
 			});
 			return { filters: [['Instructor', 'name', 'not in', instructor_list]] };
 		};
