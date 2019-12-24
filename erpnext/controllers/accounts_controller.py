@@ -319,8 +319,8 @@ class AccountsController(TransactionBase):
 					if item.get('discount_amount'):
 						item.rate = item.price_list_rate - item.discount_amount
 
-			elif pricing_rule_args.get('free_item'):
-				apply_pricing_rule_for_free_items(self, pricing_rule_args)
+			elif pricing_rule_args.get('free_item_data'):
+				apply_pricing_rule_for_free_items(self, pricing_rule_args.get('free_item_data'))
 
 		elif pricing_rule_args.get("validate_applied_rule"):
 			for pricing_rule in get_applied_pricing_rules(item):

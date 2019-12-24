@@ -372,7 +372,7 @@ class StockEntry(StockController):
 			elif d.t_warehouse and not d.basic_rate:
 				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
 					self.doctype, self.name, d.allow_zero_valuation_rate,
-					currency=erpnext.get_company_currency(self.company))
+					currency=erpnext.get_company_currency(self.company), company=self.company)
 
 	def set_actual_qty(self):
 		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
@@ -649,6 +649,12 @@ class StockEntry(StockController):
 		gl_entries = super(StockEntry, self).get_gl_entries(warehouse_account)
 
 		total_basic_amount = sum([flt(t.basic_amount) for t in self.get("items") if t.t_warehouse])
+		divide_based_on = total_basic_amount
+
+		if self.get("additional_costs") and not total_basic_amount:
+			# if total_basic_amount is 0, distribute additional charges based on qty
+			divide_based_on = sum(item.qty for item in list(self.get("items")))
+
 		item_account_wise_additional_cost = {}
 
 		for t in self.get("additional_costs"):
@@ -656,8 +662,11 @@ class StockEntry(StockController):
 				if d.t_warehouse:
 					item_account_wise_additional_cost.setdefault((d.item_code, d.name), {})
 					item_account_wise_additional_cost[(d.item_code, d.name)].setdefault(t.expense_account, 0.0)
+
+					multiply_based_on = d.basic_amount if total_basic_amount else d.qty
+
 					item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account] += \
-						(t.amount * d.basic_amount) / total_basic_amount
+						(t.amount * multiply_based_on) / divide_based_on
 
 		if item_account_wise_additional_cost:
 			for d in self.get("items"):

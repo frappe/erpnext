@@ -38,32 +38,46 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 		cost_center = list(set(invoice_cc_wh_map.get(inv.name, {}).get("cost_center", [])))
 		warehouse = list(set(invoice_cc_wh_map.get(inv.name, {}).get("warehouse", [])))
 
-		row = [
-			inv.name, inv.posting_date, inv.customer, inv.customer_name
-		]
+		row = {
+			'invoice': inv.name,
+			'posting_date': inv.posting_date,
+			'customer': inv.customer,
+			'customer_name': inv.customer_name
+		}
 
 		if additional_query_columns:
 			for col in additional_query_columns:
-				row.append(inv.get(col))
+				row.update({
+					col: inv.get(col)
+				})
 
-		row +=[
-			inv.get("customer_group"),
-			inv.get("territory"),
-			inv.get("tax_id"),
-			inv.debit_to, ", ".join(mode_of_payments.get(inv.name, [])),
-			inv.project, inv.owner, inv.remarks,
-			", ".join(sales_order), ", ".join(delivery_note),", ".join(cost_center),
-			", ".join(warehouse), company_currency
-		]
+		row.update({
+			'customer_group': inv.get("customer_group"),
+			'territory': inv.get("territory"),
+			'tax_id': inv.get("tax_id"),
+			'receivable_account': inv.debit_to,
+			'mode_of_payment':  ", ".join(mode_of_payments.get(inv.name, [])),
+			'project': inv.project,
+			'owner': inv.owner,
+			'remarks': inv.remarks,
+			'sales_order': ", ".join(sales_order),
+			'delivery_note': ", ".join(delivery_note),
+			'cost_center': ", ".join(cost_center),
+			'warehouse': ", ".join(warehouse),
+			'currency': company_currency
+		})
+
 		# map income values
 		base_net_total = 0
 		for income_acc in income_accounts:
 			income_amount = flt(invoice_income_map.get(inv.name, {}).get(income_acc))
 			base_net_total += income_amount
-			row.append(income_amount)
+			row.update({
+				frappe.scrub(income_acc): income_amount
+			})
 
 		# net total
-		row.append(base_net_total or inv.base_net_total)
+		row.update({'net_total': base_net_total or inv.base_net_total})
 
 		# tax account
 		total_tax = 0
@@ -72,10 +86,18 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 				tax_amount_precision = get_field_precision(frappe.get_meta("Sales Taxes and Charges").get_field("tax_amount"), currency=company_currency) or 2
 				tax_amount = flt(invoice_tax_map.get(inv.name, {}).get(tax_acc), tax_amount_precision)
 				total_tax += tax_amount
-				row.append(tax_amount)
+				row.update({
+					frappe.scrub(tax_acc): tax_amount
+				})
 
 		# total tax, grand total, outstanding amount & rounded total
-		row += [total_tax, inv.base_grand_total, inv.base_rounded_total, inv.outstanding_amount]
+
+		row.update({
+			'tax_total': total_tax,
+			'grand_total': inv.base_grand_total,
+			'rounded_total': inv.base_rounded_total,
+			'outstanding_amount': inv.outstanding_amount
+		})
 
 		data.append(row)
 
@@ -84,19 +106,118 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 def get_columns(invoice_list, additional_table_columns):
 	"""return columns based on filters"""
 	columns = [
-		_("Invoice") + ":Link/Sales Invoice:120", _("Posting Date") + ":Date:80",
-		_("Customer") + ":Link/Customer:120", _("Customer Name") + "::120"
+		{
+			'label': _("Invoice"),
+			'fieldname': 'invoice',
+			'fieldtype': 'Link',
+			'options': 'Sales Invoice',
+			'width': 120
+		},
+		{
+			'label': _("Posting Date"),
+			'fieldname': 'posting_date',
+			'fieldtype': 'Date',
+			'width': 80
+		},
+		{
+			'label': _("Customer"),
+			'fieldname': 'customer',
+			'fieldtype': 'Link',
+			'options': 'Customer',
+			'width': 120
+		},
+		{
+			'label': _("Customer Name"),
+			'fieldname': 'customer_name',
+			'fieldtype': 'Data',
+			'width': 120
+		},
 	]
 
 	if additional_table_columns:
 		columns += additional_table_columns
 
 	columns +=[
-		_("Customer Group") + ":Link/Customer Group:120", _("Territory") + ":Link/Territory:80",
-		_("Tax Id") + "::80", _("Receivable Account") + ":Link/Account:120", _("Mode of Payment") + "::120",
-		_("Project") +":Link/Project:80", _("Owner") + "::150", _("Remarks") + "::150",
-		_("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100",
-		_("Cost Center") + ":Link/Cost Center:100", _("Warehouse") + ":Link/Warehouse:100",
+		{
+			'label': _("Custmer Group"),
+			'fieldname': 'customer_group',
+			'fieldtype': 'Link',
+			'options': 'Customer Group',
+			'width': 120
+		},
+		{
+			'label': _("Territory"),
+			'fieldname': 'territory',
+			'fieldtype': 'Link',
+			'options': 'Territory',
+			'width': 80
+		},
+		{
+			'label': _("Tax Id"),
+			'fieldname': 'tax_id',
+			'fieldtype': 'Data',
+			'width': 120
+		},
+		{
+			'label': _("Receivable Account"),
+			'fieldname': 'receivable_account',
+			'fieldtype': 'Link',
+			'options': 'Account',
+			'width': 80
+		},
+		{
+			'label': _("Mode Of Payment"),
+			'fieldname': 'mode_of_payment',
+			'fieldtype': 'Data',
+			'width': 120
+		},
+		{
+			'label': _("Project"),
+			'fieldname': 'project',
+			'fieldtype': 'Link',
+			'options': 'project',
+			'width': 80
+		},
+		{
+			'label': _("Owner"),
+			'fieldname': 'owner',
+			'fieldtype': 'Data',
+			'width': 150
+		},
+		{
+			'label': _("Remarks"),
+			'fieldname': 'remarks',
+			'fieldtype': 'Data',
+			'width': 150
+		},
+		{
+			'label': _("Sales Order"),
+			'fieldname': 'sales_order',
+			'fieldtype': 'Link',
+			'options': 'Sales Order',
+			'width': 100
+		},
+		{
+			'label': _("Delivery Note"),
+			'fieldname': 'delivery_note',
+			'fieldtype': 'Link',
+			'options': 'Delivery Note',
+			'width': 100
+		},
+		{
+			'label': _("Cost Center"),
+			'fieldname': 'cost_center',
+			'fieldtype': 'Link',
+			'options': 'Cost Center',
+			'width': 100
+		},
+		{
+			'label': _("Warehouse"),
+			'fieldname': 'warehouse',
+			'fieldtype': 'Link',
+			'options': 'Warehouse',
+			'width': 100
+		},
 		{
 			"fieldname": "currency",
 			"label": _("Currency"),
@@ -105,7 +226,10 @@ def get_columns(invoice_list, additional_table_columns):
 		}
 	]
 
-	income_accounts = tax_accounts = income_columns = tax_columns = []
+	income_accounts = []
+	tax_accounts = []
+	income_columns = []
+	tax_columns = []
 
 	if invoice_list:
 		income_accounts = frappe.db.sql_list("""select distinct income_account
@@ -119,14 +243,65 @@ def get_columns(invoice_list, additional_table_columns):
 			and parent in (%s) order by account_head""" %
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 
-	income_columns = [(account + ":Currency/currency:120") for account in income_accounts]
+	for account in income_accounts:
+		income_columns.append({
+			"label": account,
+			"fieldname": frappe.scrub(account),
+			"fieldtype": "Currency",
+			"options": 'currency',
+			"width": 120
+		})
+
 	for account in tax_accounts:
 		if account not in income_accounts:
-			tax_columns.append(account + ":Currency/currency:120")
+			tax_columns.append({
+				"label": account,
+				"fieldname": frappe.scrub(account),
+				"fieldtype": "Currency",
+				"options": 'currency',
+				"width": 120
+			})
 
-	columns = columns + income_columns + [_("Net Total") + ":Currency/currency:120"] + tax_columns + \
-		[_("Total Tax") + ":Currency/currency:120", _("Grand Total") + ":Currency/currency:120",
-		_("Rounded Total") + ":Currency/currency:120", _("Outstanding Amount") + ":Currency/currency:120"]
+	net_total_column = [{
+		"label": _("Net Total"),
+		"fieldname": "net_total",
+		"fieldtype": "Currency",
+		"options": 'currency',
+		"width": 120
+	}]
+
+	total_columns = [
+		{
+			"label": _("Tax Total"),
+			"fieldname": "tax_total",
+			"fieldtype": "Currency",
+			"options": 'currency',
+			"width": 120
+		},
+		{
+			"label": _("Grand Total"),
+			"fieldname": "grand_total",
+			"fieldtype": "Currency",
+			"options": 'currency',
+			"width": 120
+		},
+		{
+			"label": _("Rounded Total"),
+			"fieldname": "rounded_total",
+			"fieldtype": "Currency",
+			"options": 'currency',
+			"width": 120
+		},
+		{
+			"label": _("Outstanding Amount"),
+			"fieldname": "outstanding_amount",
+			"fieldtype": "Currency",
+			"options": 'currency',
+			"width": 120
+		}
+	]
+
+	columns = columns + income_columns + net_total_column + tax_columns + total_columns
 
 	return columns, income_accounts, tax_accounts
 
