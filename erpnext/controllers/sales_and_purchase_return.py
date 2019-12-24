@@ -104,11 +104,11 @@ def validate_returned_items(doc):
 				ref = valid_items.get(d.item_code, frappe._dict())
 				validate_quantity(doc, d, ref, valid_items, already_returned_items)
 
-				if ref.rate and doc.doctype in ("Delivery Note", "Sales Invoice") and flt(d.rate) > ref.rate:
+				'''if ref.rate and doc.doctype in ("Delivery Note", "Sales Invoice") and flt(d.rate) > ref.rate:
 					frappe.throw(_("Row # {0}: Rate cannot be greater than the rate used in {1} {2}")
-						.format(d.idx, doc.doctype, doc.return_against))
+						.format(d.idx, doc.doctype, doc.return_against))'''
 
-				elif ref.batch_no and d.batch_no not in ref.batch_no:
+				if ref.batch_no and d.batch_no not in ref.batch_no:
 					frappe.throw(_("Row # {0}: Batch No must be same as {1} {2}")
 						.format(d.idx, doc.doctype, doc.return_against))
 
