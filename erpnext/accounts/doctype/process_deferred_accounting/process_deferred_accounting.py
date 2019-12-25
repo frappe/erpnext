@@ -20,6 +20,10 @@ class ProcessDeferredAccounting(Document):
 
 	def on_submit(self):
 		conditions = self.build_conditions()
+		if self.type == 'Income':
+			convert_deferred_revenue_to_income(self.start_date, self.end_date, conditions)
+		else:
+			convert_deferred_expense_to_expense(self.start_date, self.end_date, conditions)
 
 	def build_conditions(self):
 		conditions=''
