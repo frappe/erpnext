@@ -312,11 +312,19 @@ class calculate_taxes_and_totals(object):
 			last_tax = self.doc.get("taxes")[-1]
 			non_inclusive_tax_amount = sum([flt(d.tax_amount_after_discount_amount)
 				for d in self.doc.get("taxes") if not d.included_in_print_rate])
+
 			diff = self.doc.total + non_inclusive_tax_amount \
 				- flt(last_tax.total, last_tax.precision("total"))
+
+			# If discount amount applied, deduct the discount amount
+			# because self.doc.total is always without discount, but last_tax.total is after discount
+			if self.discount_amount_applied and self.doc.discount_amount:
+				diff -= flt(self.doc.discount_amount)
+
+			diff = flt(diff, self.doc.precision("rounding_adjustment"))
+
 			if diff and abs(diff) <= (5.0 / 10**last_tax.precision("tax_amount")):
-				self.doc.rounding_adjustment = flt(flt(self.doc.rounding_adjustment) +
-					flt(diff), self.doc.precision("rounding_adjustment"))
+				self.doc.rounding_adjustment = diff
 
 	def calculate_totals(self):
 		self.doc.grand_total = flt(self.doc.get("taxes")[-1].total) + flt(self.doc.rounding_adjustment) \
