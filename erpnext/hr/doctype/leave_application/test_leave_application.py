@@ -301,7 +301,7 @@ class TestLeaveApplication(unittest.TestCase):
 			to_date = add_days(date, 2),
 			company = "_Test Company",
 			docstatus = 1,
-            status = "Approved"
+			status = "Approved"
 		))
 		leave_application.submit()
 
@@ -314,7 +314,7 @@ class TestLeaveApplication(unittest.TestCase):
 			to_date = add_days(date, 8),
 			company = "_Test Company",
 			docstatus = 1,
-            status = "Approved"
+			status = "Approved"
 		))
 		self.assertRaises(frappe.ValidationError, leave_application.insert)
 

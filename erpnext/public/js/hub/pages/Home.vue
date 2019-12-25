@@ -105,7 +105,7 @@ export default {
 		},
 
 		set_search_route() {
-			frappe.set_route('marketplace', 'search', this.search_value);
+			frappe.set_route('marketplace', 'search', 'All', this.search_value);
 		},
 	}
 }

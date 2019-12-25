@@ -389,8 +389,7 @@
    "fieldname": "rate_or_discount",
    "fieldtype": "Select",
    "label": "Rate or Discount",
-   "options": "\nRate\nDiscount Percentage\nDiscount Amount",
-   "reqd": 1
+   "options": "\nRate\nDiscount Percentage\nDiscount Amount"
   },
   {
    "default": "Grand Total",
@@ -439,19 +438,20 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:!doc.mixed_conditions",
+   "depends_on": "eval:!doc.mixed_conditions && doc.apply_on != 'Transaction'",
    "fieldname": "same_item",
    "fieldtype": "Check",
    "label": "Same Item"
   },
   {
-   "depends_on": "eval:!doc.same_item || doc.mixed_conditions",
+   "depends_on": "eval:(!doc.same_item || doc.apply_on == 'Transaction') || doc.mixed_conditions",
    "fieldname": "free_item",
    "fieldtype": "Link",
    "label": "Free Item",
    "options": "Item"
   },
   {
+   "default": "0",
    "fieldname": "free_qty",
    "fieldtype": "Float",
    "label": "Qty"
@@ -554,7 +554,7 @@
  ],
  "icon": "fa fa-gift",
  "idx": 1,
- "modified": "2019-10-15 12:39:40.399792",
+ "modified": "2019-12-18 17:29:22.957077",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",

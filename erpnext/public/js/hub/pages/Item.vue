@@ -25,6 +25,7 @@
 <script>
 import ReviewArea from '../components/ReviewArea.vue';
 import { get_rating_html } from '../components/reviews';
+import { edit_details_dialog } from '../components/edit_details_dialog';
 
 export default {
 	name: 'item-page',
@@ -196,11 +197,11 @@ export default {
 		make_dialogs() {
 			this.make_contact_seller_dialog();
 			this.make_report_item_dialog();
+			this.make_editing_dialog();
 		},
 
 		add_to_saved_items() {
-			hub
-				.call('add_item_to_user_saved_items', {
+			hub.call('add_item_to_user_saved_items', {
 					hub_item_name: this.hub_item_name,
 					hub_user: frappe.session.user
 				})
@@ -215,8 +216,7 @@ export default {
 		},
 
 		add_to_featured_items() {
-			hub
-				.call('add_item_to_seller_featured_items', {
+			hub.call('add_item_to_seller_featured_items', {
 					hub_item_name: this.hub_item_name,
 					hub_user: frappe.session.user
 				})
@@ -249,8 +249,7 @@ export default {
 				primary_action: ({ message }) => {
 					if (!message) return;
 
-					hub
-						.call('send_message', {
+					hub.call('send_message', {
 							hub_item: this.item.name,
 							message
 						})
@@ -274,8 +273,7 @@ export default {
 					}
 				],
 				primary_action: ({ message }) => {
-					hub
-						.call('add_reported_item', {
+					hub.call('add_reported_item', {
 							hub_item_name: this.item.name,
 							message
 						})
@@ -285,6 +283,35 @@ export default {
 						});
 				}
 			});
+		},
+
+		make_editing_dialog() {
+			this.edit_dialog = edit_details_dialog({
+				primary_action: {
+					fn: values => {
+						this.update_details(values);
+						this.edit_dialog.hide();
+					}
+				},
+				defaults: {
+					item_name: this.item.item_name,
+					hub_category: this.item.hub_category,
+					description: this.item.description
+				}
+			});
+		},
+
+		update_details(values) {
+			frappe.call('erpnext.hub_node.api.update_item', {
+					ref_doc: this.item.name,
+					data: values
+				})
+				.then(r => {
+					return this.get_item_details();
+				})
+				.then(() => {
+					frappe.show_alert(__(`${this.item.item_name} Updated`));
+				});
 		},
 
 		contact_seller() {
@@ -301,7 +328,12 @@ export default {
 		},
 
 		edit_details() {
-			frappe.msgprint(__('This feature is under development...'));
+			if (!hub.is_seller_registered()) {
+				frappe.throw(
+					__('Please login as a Marketplace User to edit this item.')
+				);
+			}
+			this.edit_dialog.show();
 		},
 
 		unpublish_item() {
