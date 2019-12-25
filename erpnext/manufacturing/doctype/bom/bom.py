@@ -65,6 +65,7 @@ class BOM(WebsiteGenerator):
 		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
 
 	def on_update(self):
+		frappe.cache().hdel('bom_children', self.name)
 		self.check_recursion()
 		self.update_stock_qty()
 		self.update_exploded_items()
@@ -606,6 +607,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				item.image,
 				bom.project,
 				item.stock_uom,
+				item.item_group,
 				item.allow_alternative_item,
 				item_default.default_warehouse,
 				item_default.expense_account as expense_account,

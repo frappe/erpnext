@@ -3,18 +3,19 @@
  "app": "ERPNext",
  "creation": "2019-11-15 14:44:10.065014",
  "docstatus": 0,
- "doctype": "Setup Wizard Slide",
+ "doctype": "Onboarding Slide",
  "domains": [],
  "help_links": [
   {
-   "label": "Customers",
+   "label": "Learn More",
    "video_id": "zsrrVDk6VBs"
   }
  ],
  "idx": 0,
- "image_src": "/assets/erpnext/images/illustrations/customer.png",
+ "image_src": "",
+ "is_completed": 0,
  "max_count": 3,
- "modified": "2019-11-26 18:26:15.888794",
+ "modified": "2019-12-09 17:54:01.686006",
  "modified_by": "Administrator",
  "name": "Add A Few Customers",
  "owner": "Administrator",
@@ -44,6 +45,5 @@
  ],
  "slide_order": 40,
  "slide_title": "Add A Few Customers",
- "slide_type": "Create",
- "submit_method": ""
+ "slide_type": "Create"
 }

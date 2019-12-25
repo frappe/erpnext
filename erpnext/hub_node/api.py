@@ -115,6 +115,16 @@ def get_valid_items(search_value=''):
 
 	return valid_items
 
+@frappe.whitelist()
+def update_item(ref_doc, data):
+	data = json.loads(data)
+
+	data.update(dict(doctype='Hub Item', name=ref_doc))
+	try:
+		connection = get_hub_connection()
+		connection.update(data)
+	except Exception as e:
+		frappe.log_error(message=e, title='Hub Sync Error')
 
 @frappe.whitelist()
 def publish_selected_items(items_to_publish):

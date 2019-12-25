@@ -171,7 +171,7 @@ class ReceivablePayableReport(object):
 			row.outstanding = flt(row.invoiced - row.paid - row.credit_note, self.currency_precision)
 			row.invoice_grand_total = row.invoiced
 
-			if abs(row.outstanding) > 0.1/10 ** self.currency_precision:
+			if abs(row.outstanding) > 1.0/10 ** self.currency_precision:
 				# non-zero oustanding, we must consider this row
 
 				if self.is_invoice(row) and self.filters.based_on_payment_terms:
@@ -285,7 +285,7 @@ class ReceivablePayableReport(object):
 
 	def set_party_details(self, row):
 		# customer / supplier name
-		party_details = self.get_party_details(row.party)
+		party_details = self.get_party_details(row.party) or {}
 		row.update(party_details)
 		if self.filters.get(scrub(self.filters.party_type)):
 			row.currency = row.account_currency

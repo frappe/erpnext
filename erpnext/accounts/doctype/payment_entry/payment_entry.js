@@ -652,14 +652,16 @@ frappe.ui.form.on('Payment Entry', {
 						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student")
 					) {
 						if(total_positive_outstanding > total_negative_outstanding)
-							frm.set_value("paid_amount",
-								total_positive_outstanding - total_negative_outstanding);
+							if (!frm.doc.paid_amount)
+								frm.set_value("paid_amount",
+									total_positive_outstanding - total_negative_outstanding);
 					} else if (
 						total_negative_outstanding &&
 						total_positive_outstanding < total_negative_outstanding
 					) {
-						frm.set_value("received_amount",
-							total_negative_outstanding - total_positive_outstanding);
+						if (!frm.doc.received_amount)
+							frm.set_value("received_amount",
+								total_negative_outstanding - total_positive_outstanding);
 					}
 				}
 

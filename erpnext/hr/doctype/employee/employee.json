@@ -232,7 +232,6 @@
    "reqd": 1
   },
   {
-   "description": "You can enter any date manually",
    "fieldname": "date_of_birth",
    "fieldtype": "Date",
    "label": "Date of Birth",
