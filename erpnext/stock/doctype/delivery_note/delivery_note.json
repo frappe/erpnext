@@ -116,6 +116,7 @@
   "source",
   "column_break5",
   "is_internal_customer",
+  "inter_company_reference",
   "per_billed",
   "customer_group",
   "territory",
@@ -1243,13 +1244,19 @@
    "fieldtype": "Check",
    "label": "Is Internal Customer",
    "read_only": 1
+  },
+  {
+   "fieldname": "inter_company_reference",
+   "fieldtype": "Link",
+   "label": "Inter Company Reference",
+   "options": "Purchase Receipt"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-16 18:25:36.022831",
+ "modified": "2019-12-25 17:25:28.128843",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

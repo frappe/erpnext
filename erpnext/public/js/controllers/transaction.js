@@ -491,6 +491,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							tax_category: me.frm.doc.tax_category,
 							item_tax_template: item.item_tax_template,
 							child_docname: item.name,
+							is_internal_customer: me.frm.doc.is_internal_customer
 						}
 					},
 
@@ -504,7 +505,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 										me.apply_product_discount(d.free_item_data);
 									}
 								},
-								() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn),
+								() => {
+									// for internal customer instead of pricing rule directly apply valuation rate on item
+									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
+										item.rate = r.message.valuation_rate;
+									} else {
+										me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
+									}
+								},
+								() => me.calculate_taxes_and_totals(),
 								() => me.toggle_conversion_factor(item),
 								() => {
 									if(show_batch_dialog && !frappe.flags.hide_serial_batch_dialog) {

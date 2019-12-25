@@ -59,7 +59,7 @@ class StockController(AccountsController):
 			if sle_list:
 				for sle in sle_list:
 					if warehouse_account.get(sle.warehouse):
-						# from warehouse account
+						# from warehouse account/ target warehouse account
 
 						self.check_expense_account(item_row)
 
@@ -83,7 +83,7 @@ class StockController(AccountsController):
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
 						}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
 
-						# to target warehouse / expense account
+						# expense account
 						gl_list.append(self.get_gl_dict({
 							"account": item_row.expense_account,
 							"against": warehouse_account[sle.warehouse]["account"],

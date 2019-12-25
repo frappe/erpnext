@@ -589,7 +589,7 @@ def update_delivery_note_status(docname, status):
 	dn.update_status(status)
 
 @frappe.whitelist()
-def make_inter_company_receipt_delievry(source_name, target_doc=None):
+def make_inter_company_purchase_receipt(source_name, target_doc=None):
 	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
 
 def make_inter_company_transaction(doctype, source_name, target_doc=None):
@@ -598,9 +598,13 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	if doctype == 'Delivery Note':
 		source_doc = frappe.get_doc(doctype, source_name)
 		target_doctype = "Purchase Receipt"
+		warehouse_field = 'target_warehouse'
+		warehouse_value = 'from_warehouse'
 	else:
 		source_doc = frappe.get_doc(doctype, source_name)
-		target_doctype = 'Delievry Note'
+		target_doctype = 'Delivery Note'
+		warehouse_field = 'from_warehouse'
+		warehouse_value = 'target_warehouse'
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
@@ -614,23 +618,24 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
 			target_doc.buying_price_list = source_doc.selling_price_list
+			target_doc.is_internal_supplier = 1
+			target_doc.inter_company_reference = source_doc.name
 		else:
 			target_doc.company = details.get("company")
 			target_doc.customer = details.get("party")
 			target_doc.selling_price_list = source_doc.buying_price_list
+			target_doc.is_internal_customer = 1
+			target_doc.inter_company_reference = source_doc.name
 
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {
 			"doctype": target_doctype,
 			"postprocess": update_details,
-			"field_no_map": [
-				"taxes_and_charges"
-			]
 		},
 		doctype +" Item": {
 			"doctype": target_doctype + " Item",
-			"field_no_map": {
-				"warehouse": "warehouse"
+			"field_map": {
+				warehouse_field: warehouse_value
 			}
 		}
 

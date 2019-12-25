@@ -141,8 +141,9 @@ def get_place_of_supply(party_details, doctype):
 		address_name = party_details.shipping_address or party_details.supplier_address
 
 	if address_name:
-		address = frappe.db.get_value("Address", address_name, ["gst_state", "gst_state_number"], as_dict=1)
+		address = frappe.db.get_value("Address", address_name, ["gst_state", "gst_state_number", "gstin"], as_dict=1)
 		if address and address.gst_state and address.gst_state_number:
+			party_details.gstin = address.gstin
 			return cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
 
 @frappe.whitelist()
@@ -153,6 +154,11 @@ def get_regional_address_details(party_details, doctype, company, return_taxes=N
 		party_details = frappe._dict(party_details)
 
 	party_details.place_of_supply = get_place_of_supply(party_details, doctype)
+
+	if is_internal_transfer(party_details, doctype):
+		party_details.taxes = ''
+		return
+
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
 		master_doctype = "Sales Taxes and Charges Template"
 
@@ -195,6 +201,17 @@ def get_regional_address_details(party_details, doctype, company, return_taxes=N
 
 	if return_taxes:
 		return party_details
+
+def is_internal_transfer(party_details, doctype):
+	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
+		destination_gstin = party_details.company_gstin
+	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
+		destination_gstin = party_details.supplier_gstin
+
+	if party_details.gstin == destination_gstin:
+		return True
+	else:
+		False
 
 def get_tax_template_based_on_category(master_doctype, company, party_details):
 	if not party_details.get('tax_category'):
@@ -357,16 +374,13 @@ def calculate_hra_exemption_for_period(doc):
 		return exemptions
 
 def get_ewb_data(dt, dn):
-	if dt != 'Sales Invoice':
-		frappe.throw(_('e-Way Bill JSON can only be generated from Sales Invoice'))
-
 	dn = dn.split(',')
 
 	ewaybills = []
 	for doc_name in dn:
 		doc = frappe.get_doc(dt, doc_name)
 
-		validate_sales_invoice(doc)
+		validate_doc(doc)
 
 		data = frappe._dict({
 			"transporterId": "",
@@ -376,7 +390,9 @@ def get_ewb_data(dt, dn):
 		data.userGstin = data.fromGstin = doc.company_gstin
 		data.supplyType = 'O'
 
-		if doc.gst_category in ['Registered Regular', 'SEZ']:
+		if dt == 'Delivery Note':
+			data.subSupplyType = 1
+		elif doc.gst_category in ['Registered Regular', 'SEZ']:
 			data.subSupplyType = 1
 		elif doc.gst_category in ['Overseas', 'Deemed Export']:
 			data.subSupplyType = 3
@@ -535,7 +551,7 @@ def get_item_list(data, doc):
 
 	return data
 
-def validate_sales_invoice(doc):
+def validate_doc(doc):
 	if doc.docstatus != 1:
 		frappe.throw(_('e-Way Bill JSON can only be generated from submitted document'))
 

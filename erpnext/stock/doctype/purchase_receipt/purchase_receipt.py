@@ -17,6 +17,7 @@ from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from six import iteritems
+from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -88,7 +89,7 @@ class PurchaseReceipt(BuyingController):
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
-	
+
 	def validate_cwip_accounts(self):
 		for item in self.get('items'):
 			if item.is_fixed_asset and is_cwip_accounting_enabled(item.asset_category):
@@ -230,17 +231,27 @@ class PurchaseReceipt(BuyingController):
 						"debit": stock_value_diff
 					}, warehouse_account[d.warehouse]["account_currency"], item=d))
 
+					if d.from_warehouse and warehouse_account.get(d.from_warehouse):
+						gl_entries.append(self.get_gl_dict({
+							"account": warehouse_account[d.from_warehouse]["account"],
+							"against": warehouse_account[d.warehouse]["account"],
+							"cost_center": d.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"debit": -1 * stock_value_diff
+						}, warehouse_account[d.from_warehouse]["account_currency"], item=d))
+
 					# stock received but not billed
 					stock_rbnb_currency = get_account_currency(stock_rbnb)
-					gl_entries.append(self.get_gl_dict({
-						"account": stock_rbnb,
-						"against": warehouse_account[d.warehouse]["account"],
-						"cost_center": d.cost_center,
-						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-						"credit": flt(d.base_net_amount, d.precision("base_net_amount")),
-						"credit_in_account_currency": flt(d.base_net_amount, d.precision("base_net_amount")) \
-							if stock_rbnb_currency==self.company_currency else flt(d.net_amount, d.precision("net_amount"))
-					}, stock_rbnb_currency, item=d))
+					if not d.from_warehouse:
+						gl_entries.append(self.get_gl_dict({
+							"account": stock_rbnb,
+							"against": warehouse_account[d.warehouse]["account"],
+							"cost_center": d.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"credit": flt(d.base_net_amount, d.precision("base_net_amount")),
+							"credit_in_account_currency": flt(d.base_net_amount, d.precision("base_net_amount")) \
+								if stock_rbnb_currency==self.company_currency else flt(d.net_amount, d.precision("net_amount"))
+						}, stock_rbnb_currency, item=d))
 
 					negative_expense_to_be_booked += flt(d.item_tax_amount)
 
@@ -362,7 +373,7 @@ class PurchaseReceipt(BuyingController):
 					# valuation rate is total of net rate, raw mat supp cost, tax amount, lcv amount per item
 					self.update_assets(item, item.valuation_rate)
 		return gl_entries
-	
+
 	def add_asset_gl_entries(self, item, gl_entries):
 		arbnb_account = self.get_company_default("asset_received_but_not_billed")
 		# This returns category's cwip account if not then fallback to company's default cwip account
@@ -395,7 +406,7 @@ class PurchaseReceipt(BuyingController):
 			"credit_in_account_currency": (base_asset_amount
 				if asset_rbnb_currency == self.company_currency else asset_amount)
 		}, item=item))
-	
+
 	def add_lcv_gl_entries(self, item, gl_entries):
 		expenses_included_in_asset_valuation = self.get_company_default("expenses_included_in_asset_valuation")
 		if not is_cwip_accounting_enabled(item.asset_category):
@@ -404,7 +415,7 @@ class PurchaseReceipt(BuyingController):
 		else:
 			# This returns company's default cwip account
 			asset_account = get_asset_account("capital_work_in_progress_account", company=self.company)
-		
+
 		gl_entries.append(self.get_gl_dict({
 			"account": expenses_included_in_asset_valuation,
 			"against": asset_account,
@@ -424,7 +435,7 @@ class PurchaseReceipt(BuyingController):
 		}, item=item))
 
 	def update_assets(self, item, valuation_rate):
-		assets = frappe.db.get_all('Asset', 
+		assets = frappe.db.get_all('Asset',
 			filters={ 'purchase_receipt': self.name, 'item_code': item.item_code }
 		)
 
@@ -608,6 +619,10 @@ def make_stock_entry(source_name,target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+@frappe.whitelist()
+def make_inter_company_delivery_note(source_name, target_doc=None):
+	return make_inter_company_transaction("Purchase Receipt", source_name, target_doc)
 
 def get_item_account_wise_additional_cost(purchase_document):
 	landed_cost_voucher = frappe.get_value("Landed Cost Purchase Receipt",

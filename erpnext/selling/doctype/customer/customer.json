@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -207,8 +208,7 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Represents Company",
-   "options": "Company",
-   "unique": 1
+   "options": "Company"
   },
   {
    "depends_on": "represents_company",
@@ -469,7 +469,8 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2019-09-06 12:40:31.801424",
+ "links": [],
+ "modified": "2019-12-19 18:16:19.409488",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
