@@ -265,16 +265,17 @@ class BuyingController(StockController):
 
 			fg_yet_to_be_received = qty_to_be_received_map.get(item_key)
 
-			raw_material_data = backflushed_raw_materials_map.get(item_key, {})
-
-			consumed_qty = raw_material_data.get('qty', 0)
-			consumed_serial_nos = raw_material_data.get('serial_nos', '')
-			consumed_batch_nos = raw_material_data.get('batch_nos', '')
-
 			transferred_batch_qty_map = get_transferred_batch_qty_map(item.purchase_order, item.item_code)
 			backflushed_batch_qty_map = get_backflushed_batch_qty_map(item.purchase_order, item.item_code)
 
 			for raw_material in transferred_raw_materials + non_stock_items:
+				rm_item_key = '{}{}'.format(raw_material.rm_item_code, item.purchase_order)
+				raw_material_data = backflushed_raw_materials_map.get(rm_item_key, {})
+
+				consumed_qty = raw_material_data.get('qty', 0)
+				consumed_serial_nos = raw_material_data.get('serial_nos', '')
+				consumed_batch_nos = raw_material_data.get('batch_nos', '')
+
 				transferred_qty = raw_material.qty
 
 				rm_qty_to_be_consumed = transferred_qty - consumed_qty

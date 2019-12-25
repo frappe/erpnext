@@ -308,6 +308,7 @@
    "fieldname": "contact_email",
    "fieldtype": "Small Text",
    "label": "Contact Email",
+   "options": "Email",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1075,7 +1076,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-23 21:50:05.570325",
+ "modified": "2019-12-24 12:52:17.216304",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

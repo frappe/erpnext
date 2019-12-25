@@ -625,27 +625,36 @@ def make_inter_company_delivery_note(source_name, target_doc=None):
 	return make_inter_company_transaction("Purchase Receipt", source_name, target_doc)
 
 def get_item_account_wise_additional_cost(purchase_document):
-	landed_cost_voucher = frappe.get_value("Landed Cost Purchase Receipt",
-		{"receipt_document": purchase_document, "docstatus": 1}, "parent")
+	landed_cost_vouchers = frappe.get_all("Landed Cost Purchase Receipt", fields=["parent"],
+		filters = {"receipt_document": purchase_document, "docstatus": 1})
 
-	if not landed_cost_voucher:
+	if not landed_cost_vouchers:
 		return
 
 	total_item_cost = 0
 	item_account_wise_cost = {}
-	landed_cost_voucher_doc = frappe.get_doc("Landed Cost Voucher", landed_cost_voucher)
-	based_on_field = frappe.scrub(landed_cost_voucher_doc.distribute_charges_based_on)
+	item_cost_allocated = []
 
-	for item in landed_cost_voucher_doc.items:
-		total_item_cost += item.get(based_on_field)
+	for lcv in landed_cost_vouchers:
+		landed_cost_voucher_doc = frappe.get_cached_doc("Landed Cost Voucher", lcv.parent)
+		based_on_field = frappe.scrub(landed_cost_voucher_doc.distribute_charges_based_on)
 
-	for item in landed_cost_voucher_doc.items:
-		if item.receipt_document == purchase_document:
-			for account in landed_cost_voucher_doc.taxes:
-				item_account_wise_cost.setdefault((item.item_code, item.purchase_receipt_item), {})
-				item_account_wise_cost[(item.item_code, item.purchase_receipt_item)].setdefault(account.expense_account, 0.0)
-				item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][account.expense_account] += \
-					account.amount * item.get(based_on_field) / total_item_cost
+		for item in landed_cost_voucher_doc.items:
+			if item.purchase_receipt_item not in item_cost_allocated:
+				total_item_cost += item.get(based_on_field)
+				item_cost_allocated.append(item.purchase_receipt_item)
+
+	for lcv in landed_cost_vouchers:
+		landed_cost_voucher_doc = frappe.get_cached_doc("Landed Cost Voucher", lcv.parent)
+		based_on_field = frappe.scrub(landed_cost_voucher_doc.distribute_charges_based_on)
+
+		for item in landed_cost_voucher_doc.items:
+			if item.receipt_document == purchase_document:
+				for account in landed_cost_voucher_doc.taxes:
+					item_account_wise_cost.setdefault((item.item_code, item.purchase_receipt_item), {})
+					item_account_wise_cost[(item.item_code, item.purchase_receipt_item)].setdefault(account.expense_account, 0.0)
+					item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][account.expense_account] += \
+						account.amount * item.get(based_on_field) / total_item_cost
 
 	return item_account_wise_cost
 
