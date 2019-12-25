@@ -17,7 +17,6 @@ from erpnext.hr.doctype.additional_salary.additional_salary import get_additiona
 from erpnext.hr.doctype.payroll_period.payroll_period import get_period_factor, get_payroll_period
 from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_benefit_component_amount
 from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount, get_last_payroll_period_benefits
-from erpnext.hr.doctype.loan.loan import update_loan_for_salary_slips
 
 class SalarySlip(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -820,7 +819,22 @@ class SalarySlip(TransactionBase):
 				timesheet.save()
 
 	def update_loans(self):
-		update_loan_for_salary_slips(self.get_loan_details(),self.docstatus)
+		for loan in self.get_loan_details():
+			doc = frappe.get_doc("Loan", loan.name)
+
+			#setting repayment schedule and updating total amount to pay and paid
+			if self.docstatus == 1:
+				frappe.db.set_value("Repayment Schedule", loan.repayment_name, "paid", 1)
+				doc.reload()
+				doc.update_total_amount_paid()
+				doc.set_status()
+			elif self.docstatus == 2:
+				frappe.db.set_value("Repayment Schedule", loan.repayment_name, "paid", 0)
+				doc.reload()
+				doc.update_total_amount_paid()
+				doc.set_status()
+
+			#update_loan_for_salary_slips(self.get_loan_details(),self.docstatus)
 
 	def set_status(self, status=None):
 		'''Get and update status'''
