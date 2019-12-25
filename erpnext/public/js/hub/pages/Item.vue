@@ -1,10 +1,5 @@
 <template>
-	<div
-		class="marketplace-page"
-		:data-page-name="page_name"
-		v-if="init || item"
-	>
-
+	<div class="marketplace-page" :data-page-name="page_name" v-if="init || item">
 		<detail-view
 			:title="title"
 			:image="image"
@@ -12,20 +7,15 @@
 			:menu_items="menu_items"
 			:show_skeleton="init"
 		>
-			<detail-header-item slot="detail-header-item"
-				:value="item_subtitle"
-			></detail-header-item>
-			<detail-header-item slot="detail-header-item"
-				:value="item_views_and_ratings"
-			></detail-header-item>
+			<detail-header-item slot="detail-header-item" :value="item_subtitle"></detail-header-item>
+			<detail-header-item slot="detail-header-item" :value="item_views_and_ratings"></detail-header-item>
 
-			<button v-if="primary_action" slot="detail-header-item"
+			<button
+				v-if="primary_action"
+				slot="detail-header-item"
 				class="btn btn-primary btn-sm margin-top"
 				@click="primary_action.action"
-			>
-				{{ primary_action.label }}
-			</button>
-
+			>{{ primary_action.label }}</button>
 		</detail-view>
 
 		<review-area v-if="!init" :hub_item_name="hub_item_name"></review-area>
@@ -35,6 +25,7 @@
 <script>
 import ReviewArea from '../components/ReviewArea.vue';
 import { get_rating_html } from '../components/reviews';
+import { edit_details_dialog } from '../components/edit_details_dialog';
 
 export default {
 	name: 'item-page',
@@ -51,21 +42,20 @@ export default {
 			item: null,
 			title: null,
 			image: null,
-			sections: [],
-
+			sections: []
 		};
 	},
 	computed: {
 		is_own_item() {
 			let is_own_item = false;
-			if(this.item) {
-				if(this.item.hub_seller === hub.settings.hub_seller_name) {
+			if (this.item) {
+				if (this.item.hub_seller === hub.settings.hub_seller_name) {
 					is_own_item = true;
 				}
 			}
 			return is_own_item;
 		},
-		menu_items(){
+		menu_items() {
 			return [
 				{
 					label: __('Save Item'),
@@ -92,11 +82,11 @@ export default {
 					condition: hub.is_user_registered() && this.is_own_item,
 					action: this.unpublish_item
 				}
-			]
+			];
 		},
 
 		item_subtitle() {
-			if(!this.item) {
+			if (!this.item) {
 				return '';
 			}
 
@@ -105,25 +95,31 @@ export default {
 			const rating = this.item.average_rating;
 
 			if (rating > 0) {
-				subtitle_items.push(rating + `<i class='fa fa-fw fa-star-o'></i>`)
+				subtitle_items.push(rating + `<i class='fa fa-fw fa-star-o'></i>`);
 			}
 
-			subtitle_items.push({value:this.item.company,on_click:this.go_to_seller_profile_page});
+			subtitle_items.push({
+				value: this.item.company,
+				on_click: this.go_to_seller_profile_page
+			});
 
 			return subtitle_items;
 		},
 
 		item_views_and_ratings() {
-			if(!this.item) {
+			if (!this.item) {
 				return '';
 			}
 
 			let stats = __('No views yet');
-			if(this.item.view_count) {
+			if (this.item.view_count) {
 				const views_message = __(`${this.item.view_count} Views`);
 
 				const rating_html = get_rating_html(this.item.average_rating);
-				const rating_count = this.item.no_of_ratings > 0 ? `${this.item.no_of_ratings} reviews` : __('No reviews yet');
+				const rating_count =
+					this.item.no_of_ratings > 0
+						? `${this.item.no_of_ratings} reviews`
+						: __('No reviews yet');
 
 				stats = [views_message, rating_html, rating_count];
 			}
@@ -136,7 +132,7 @@ export default {
 				return {
 					label: __('Contact Seller'),
 					action: this.contact_seller.bind(this)
-				}
+				};
 			} else {
 				return undefined;
 			}
@@ -156,7 +152,7 @@ export default {
 			setTimeout(() => {
 				hub.call('add_item_view', {
 					hub_item_name: this.hub_item_name
-				})
+				});
 				// .then(() => {
 				// 	erpnext.hub.item_view_cache.push(this.hub_item_name);
 				// });
@@ -167,12 +163,12 @@ export default {
 		get_item_details() {
 			this.item_received = hub.call('get_item_details', { hub_item_name: this.hub_item_name })
 				.then(item => {
-				this.init = false;
-				this.item = item;
+					this.init = false;
+					this.item = item;
 
-				this.build_data();
-				this.make_dialogs();
-			});
+					this.build_data();
+					this.make_dialogs();
+				});
 		},
 		go_to_seller_profile_page(seller_name) {
 			frappe.set_route(`marketplace/seller/${seller_name}`);
@@ -200,36 +196,41 @@ export default {
 		make_dialogs() {
 			this.make_contact_seller_dialog();
 			this.make_report_item_dialog();
+			this.make_editing_dialog();
 		},
 
 		add_to_saved_items() {
 			hub.call('add_item_to_user_saved_items', {
-				hub_item_name: this.hub_item_name,
-				hub_user: frappe.session.user
-			})
-			.then(() => {
-				const saved_items_link = `<b><a href="#marketplace/saved-items">${__('Saved')}</a></b>`
-				frappe.show_alert(saved_items_link);
-				erpnext.hub.trigger('action:item_save');
-			})
-			.catch(e => {
-				console.error(e);
-			});
+					hub_item_name: this.hub_item_name,
+					hub_user: frappe.session.user
+				})
+				.then(() => {
+					const saved_items_link = `<b><a href="#marketplace/saved-items">${__(
+						'Saved'
+					)}</a></b>`;
+					frappe.show_alert(saved_items_link);
+					erpnext.hub.trigger('action:item_save');
+				})
+				.catch(e => {
+					console.error(e);
+				});
 		},
 
 		add_to_featured_items() {
 			hub.call('add_item_to_seller_featured_items', {
-				hub_item_name: this.hub_item_name,
-				hub_user: frappe.session.user
-			},)
-			.then(() => {
-				const featured_items_link = `<b><a href="#marketplace/featured-items">${__('Added to Featured Items')}</a></b>`
-				frappe.show_alert(featured_items_link);
-				erpnext.hub.trigger('action:item_feature');
-			})
-			.catch(e => {
-				console.error(e);
-			});
+					hub_item_name: this.hub_item_name,
+					hub_user: frappe.session.user
+				})
+				.then(() => {
+					const featured_items_link = `<b><a href="#marketplace/featured-items">${__(
+						'Added to Featured Items'
+					)}</a></b>`;
+					frappe.show_alert(featured_items_link);
+					erpnext.hub.trigger('action:item_feature');
+				})
+				.catch(e => {
+					console.error(e);
+				});
 		},
 
 		make_contact_seller_dialog() {
@@ -252,13 +253,13 @@ export default {
 					if (!message) return;
 
 					hub.call('send_message', {
-						hub_item: this.item.name,
-						message
-					})
+							hub_item: this.item.name,
+							message
+						})
 						.then(() => {
 							this.contact_seller_dialog.hide();
 							frappe.set_route('marketplace', 'buying', this.item.name);
-							erpnext.hub.trigger('action:send_message')
+							erpnext.hub.trigger('action:send_message');
 						});
 				}
 			});
@@ -275,7 +276,10 @@ export default {
 					}
 				],
 				primary_action: ({ message }) => {
-					hub.call('add_reported_item', { hub_item_name: this.item.name, message })
+					hub.call('add_reported_item', {
+							hub_item_name: this.item.name,
+							message
+						})
 						.then(() => {
 							d.hide();
 							frappe.show_alert(__('Item Reported'));
@@ -284,26 +288,62 @@ export default {
 			});
 		},
 
+		make_editing_dialog() {
+			this.edit_dialog = edit_details_dialog({
+				primary_action: {
+					fn: values => {
+						this.update_details(values);
+						this.edit_dialog.hide();
+					}
+				},
+				defaults: {
+					item_name: this.item.item_name,
+					hub_category: this.item.hub_category,
+					description: this.item.description
+				}
+			});
+		},
+
+		update_details(values) {
+			frappe.call('erpnext.hub_node.api.update_item', {
+					ref_doc: this.item.name,
+					data: values
+				})
+				.then(r => {
+					return this.get_item_details();
+				})
+				.then(() => {
+					frappe.show_alert(__(`${this.item.item_name} Updated`));
+				});
+		},
+
 		contact_seller() {
 			this.contact_seller_dialog.show();
 		},
 
 		report_item() {
 			if (!hub.is_seller_registered()) {
-				frappe.throw(__('Please login as a Marketplace User to report this item.'));
+				frappe.throw(
+					__('Please login as a Marketplace User to report this item.')
+				);
 			}
 			this.report_item_dialog.show();
 		},
 
 		edit_details() {
-			frappe.msgprint(__('This feature is under development...'));
+			if (!hub.is_seller_registered()) {
+				frappe.throw(
+					__('Please login as a Marketplace User to edit this item.')
+				);
+			}
+			this.edit_dialog.show();
 		},
 
 		unpublish_item() {
 			frappe.msgprint(__('This feature is under development...'));
 		}
 	}
-}
+};
 </script>
 
 <style scoped></style>

@@ -15,29 +15,24 @@ async function initialise_select_date() {
 async function get_global_variables() {
     // Using await through this file instead of then.
     window.appointment_settings = (await frappe.call({
-        method: 'erpnext.www.book-appointment.index.get_appointment_settings'
+        method: 'erpnext.www.book_appointment.index.get_appointment_settings'
     })).message;
     window.timezones = (await frappe.call({
-        method:'erpnext.www.book-appointment.index.get_timezones'
+        method:'erpnext.www.book_appointment.index.get_timezones'
     })).message;
     window.holiday_list = window.appointment_settings.holiday_list;
 }
 
 function setup_timezone_selector() {
-    /**
-     * window.timezones is a dictionary with the following structure
-     * { IANA name: Pretty name}
-     * For example : { Asia/Kolkata : "India Time - Asia/Kolkata"}
-     */
     let timezones_element = document.getElementById('appointment-timezone');
-    let offset = new Date().getTimezoneOffset();
-    Object.keys(window.timezones).forEach((timezone) => {
+    let local_timezone = moment.tz.guess()
+    window.timezones.forEach(timezone => {
         let opt = document.createElement('option');
         opt.value = timezone;
-        if (timezone == moment.tz.guess()) {
+        if (timezone == local_timezone) {
             opt.selected = true;
         }
-        opt.innerHTML = window.timezones[timezone]
+        opt.innerHTML = timezone;
         timezones_element.appendChild(opt)
     });
 }
@@ -79,7 +74,7 @@ function on_date_or_timezone_select() {
 
 async function get_time_slots(date, timezone) {
     let slots = (await frappe.call({
-        method: 'erpnext.www.book-appointment.index.get_appointment_slots',
+        method: 'erpnext.www.book_appointment.index.get_appointment_slots',
         args: {
             date: date,
             timezone: timezone
@@ -114,7 +109,7 @@ function get_timeslot_div_layout(timeslot) {
         timeslot_div.classList.add('unavailable')
     }
     timeslot_div.innerHTML = get_slot_layout(start_time);
-    timeslot_div.id = timeslot.time.substr(11, 20);
+    timeslot_div.id = timeslot.time.substring(11, 19);
     timeslot_div.addEventListener('click', select_time);
     return timeslot_div
 }
@@ -201,7 +196,7 @@ async function submit() {
     }
     let contact = get_form_data();
     let appointment =  frappe.call({
-        method: 'erpnext.www.book-appointment.index.create_appointment',
+        method: 'erpnext.www.book_appointment.index.create_appointment',
         args: {
             'date': window.selected_date,
             'time': window.selected_time,
