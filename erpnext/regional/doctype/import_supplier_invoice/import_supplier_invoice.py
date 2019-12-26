@@ -74,7 +74,7 @@ class ImportSupplierInvoice(Document):
 
 			supplier_name = create_supplier(self.supplier_group, supp_dict)
 			address = create_address(supplier_name, supp_dict)
-			pi_name = create_purchase_invoice(supplier_name, file_name, invoices_args)
+			pi_name = create_purchase_invoice(supplier_name, file_name, invoices_args, self.name)
 
 			self.file_count += 1
 			if pi_name:
@@ -309,7 +309,7 @@ def create_address(supplier_name, args):
 	else:
 		return None
 
-def create_purchase_invoice(supplier_name, file_name, args):
+def create_purchase_invoice(supplier_name, file_name, args, name):
 	args = frappe._dict(args)
 	pi = frappe.get_doc({
 		"doctype": "Purchase Invoice",
@@ -324,6 +324,7 @@ def create_purchase_invoice(supplier_name, file_name, args):
 		"bill_date": args.bill_date,
 		"destination_code": args.destination_code,
 		"document_type": args.document_type,
+		"disable_rounded_total": 1,
 		"items": args["items"],
 		"taxes": args["taxes"]
 	})
@@ -355,8 +356,9 @@ def create_purchase_invoice(supplier_name, file_name, args):
 		pi.save()
 		return pi.name
 	except Exception as e:
+		frappe.db.set_value("Import Supplier Invoice", name, "status", "Error")
 		frappe.log_error(message=e,
-			title="Create Purchase Invoice: " + args.bill_no + "File Name: " + file_name)
+			title="Create Purchase Invoice: " + args.get("bill_no") + "File Name: " + file_name)
 		return None
 
 def get_country(code):
