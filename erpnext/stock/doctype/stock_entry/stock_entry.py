@@ -1437,6 +1437,9 @@ def get_work_order_details(work_order, company):
 	}
 
 def get_additional_costs(work_order=None, bom_no=None, fg_qty=None, company=None):
+	if not company:
+		company = erpnext.get_default_company()
+
 	additional_costs = []
 	operating_cost_per_unit = get_operating_cost_per_unit(work_order, bom_no)
 	expenses_included_in_valuation = frappe.get_cached_value("Company", company, "expenses_included_in_valuation")
