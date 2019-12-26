@@ -231,9 +231,10 @@ class PurchaseReceipt(BuyingController):
 						"debit": stock_value_diff
 					}, warehouse_account[d.warehouse]["account_currency"], item=d))
 
-					if d.from_warehouse and warehouse_account.get(d.from_warehouse):
+					if d.from_warehouse:
 						gl_entries.append(self.get_gl_dict({
-							"account": warehouse_account[d.from_warehouse]["account"],
+							"account":  warehouse_account.get(d.from_warehouse, {}).get('account') \
+								or stock_rbnb,
 							"against": warehouse_account[d.warehouse]["account"],
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
