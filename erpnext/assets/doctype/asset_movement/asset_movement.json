@@ -1,26 +1,19 @@
 {
  "allow_import": 1,
- "autoname": "naming_series:",
+ "autoname": "format:ACC-ASM-{YYYY}-{#####}",
  "creation": "2016-04-25 18:00:23.559973",
  "doctype": "DocType",
+ "engine": "InnoDB",
  "field_order": [
-  "naming_series",
   "company",
   "purpose",
-  "asset",
-  "transaction_date",
   "column_break_4",
-  "quantity",
-  "select_serial_no",
-  "serial_no",
-  "section_break_7",
-  "source_location",
-  "target_location",
-  "column_break_10",
-  "from_employee",
-  "to_employee",
+  "transaction_date",
+  "section_break_10",
+  "assets",
   "reference",
   "reference_doctype",
+  "column_break_9",
   "reference_name",
   "amended_from"
  ],
@@ -36,21 +29,10 @@
    "reqd": 1
   },
   {
-   "default": "Transfer",
    "fieldname": "purpose",
    "fieldtype": "Select",
    "label": "Purpose",
    "options": "\nIssue\nReceipt\nTransfer",
-   "reqd": 1
-  },
-  {
-   "fieldname": "asset",
-   "fieldtype": "Link",
-   "in_global_search": 1,
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Asset",
-   "options": "Asset",
    "reqd": 1
   },
   {
@@ -65,56 +47,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "quantity",
-   "fieldtype": "Float",
-   "label": "Quantity"
-  },
-  {
-   "fieldname": "select_serial_no",
-   "fieldtype": "Link",
-   "label": "Select Serial No",
-   "options": "Serial No"
-  },
-  {
-   "fieldname": "serial_no",
-   "fieldtype": "Small Text",
-   "label": "Serial No"
-  },
-  {
-   "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "source_location",
-   "fieldtype": "Link",
-   "label": "Source Location",
-   "options": "Location"
-  },
-  {
-   "fieldname": "target_location",
-   "fieldtype": "Link",
-   "label": "Target Location",
-   "options": "Location"
-  },
-  {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "from_employee",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "From Employee",
-   "options": "Employee"
-  },
-  {
-   "fieldname": "to_employee",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "To Employee",
-   "options": "Employee"
-  },
-  {
+   "collapsible": 1,
    "fieldname": "reference",
    "fieldtype": "Section Break",
    "label": "Reference"
@@ -122,18 +55,16 @@
   {
    "fieldname": "reference_doctype",
    "fieldtype": "Link",
-   "label": "Reference DocType",
+   "label": "Reference Document Type",
    "no_copy": 1,
-   "options": "DocType",
-   "read_only": 1
+   "options": "DocType"
   },
   {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
-   "label": "Reference Name",
+   "label": "Reference Document Name",
    "no_copy": 1,
-   "options": "reference_doctype",
-   "read_only": 1
+   "options": "reference_doctype"
   },
   {
    "fieldname": "amended_from",
@@ -145,16 +76,23 @@
    "read_only": 1
   },
   {
-   "default": "ACC-ASM-.YYYY.-",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "options": "ACC-ASM-.YYYY.-",
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "assets",
+   "fieldtype": "Table",
+   "label": "Assets",
+   "options": "Asset Movement Item",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-16 16:27:53.887634",
+ "modified": "2019-11-23 13:28:47.256935",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement",

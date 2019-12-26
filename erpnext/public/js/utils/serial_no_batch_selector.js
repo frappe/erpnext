@@ -389,12 +389,14 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 		let serial_no_filters = {
 			item_code: me.item_code,
+			batch_no: this.doc.batch_no || null,
 			delivery_document_no: ""
 		}
 
 		if (me.warehouse_details.name) {
 			serial_no_filters['warehouse'] = me.warehouse_details.name;
 		}
+
 		return [
 			{fieldtype: 'Section Break', label: __('Serial Numbers')},
 			{

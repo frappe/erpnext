@@ -5,101 +5,142 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from frappe.model.document import Document
 
 class AssetMovement(Document):
 	def validate(self):
 		self.validate_asset()
 		self.validate_location()
+		self.validate_employee()
 
 	def validate_asset(self):
-		status, company = frappe.db.get_value("Asset", self.asset, ["status", "company"])
-		if self.purpose == 'Transfer' and status in ("Draft", "Scrapped", "Sold"):
-			frappe.throw(_("{0} asset cannot be transferred").format(status))
+		for d in self.assets:
+			status, company = frappe.db.get_value("Asset", d.asset, ["status", "company"])
+			if self.purpose == 'Transfer' and status in ("Draft", "Scrapped", "Sold"):
+				frappe.throw(_("{0} asset cannot be transferred").format(status))
 
-		if company != self.company:
-			frappe.throw(_("Asset {0} does not belong to company {1}").format(self.asset, self.company))
+			if company != self.company:
+				frappe.throw(_("Asset {0} does not belong to company {1}").format(d.asset, self.company))
 
-		if self.serial_no and len(get_serial_nos(self.serial_no)) != self.quantity:
-			frappe.throw(_("Number of serial nos and quantity must be the same"))
-
-		if not(self.source_location or self.target_location or self.from_employee or self.to_employee):
-			frappe.throw(_("Either location or employee must be required"))
-
-		if (not self.serial_no and
-			frappe.db.get_value('Serial No', {'asset': self.asset}, 'name')):
-			frappe.throw(_("Serial no is required for the asset {0}").format(self.asset))
+			if not (d.source_location or d.target_location or d.from_employee or d.to_employee):
+				frappe.throw(_("Either location or employee must be required"))
 
 	def validate_location(self):
-		if self.purpose in ['Transfer', 'Issue']:
-			if not self.serial_no and not (self.from_employee or self.to_employee):
-				self.source_location = frappe.db.get_value("Asset", self.asset, "location")
+		for d in self.assets:
+			if self.purpose in ['Transfer', 'Issue']:
+				if not d.source_location:
+					d.source_location = frappe.db.get_value("Asset", d.asset, "location")
 
-			if self.purpose == 'Issue' and not (self.source_location or self.from_employee):
-				frappe.throw(_("Source Location is required for the asset {0}").format(self.asset))
+				if not d.source_location:
+					frappe.throw(_("Source Location is required for the Asset {0}").format(d.asset))
 
-			if self.serial_no and self.source_location:
-				s_nos = get_serial_nos(self.serial_no)
-				serial_nos = frappe.db.sql_list(""" select name from `tabSerial No` where location != '%s'
-					and name in (%s)""" %(self.source_location, ','.join(['%s'] * len(s_nos))), tuple(s_nos))
+				if d.source_location:
+					current_location = frappe.db.get_value("Asset", d.asset, "location")
 
-				if serial_nos:
-					frappe.throw(_("Serial nos {0} does not belongs to the location {1}").
-						format(','.join(serial_nos), self.source_location))
+					if current_location != d.source_location:
+						frappe.throw(_("Asset {0} does not belongs to the location {1}").
+							format(d.asset, d.source_location))
+			
+			if self.purpose == 'Issue':
+				if d.target_location:
+					frappe.throw(_("Issuing cannot be done to a location. \
+						Please enter employee who has issued Asset {0}").format(d.asset), title="Incorrect Movement Purpose")
+				if not d.to_employee:
+					frappe.throw(_("Employee is required while issuing Asset {0}").format(d.asset))
+			
+			if self.purpose == 'Transfer':
+				if d.to_employee:
+					frappe.throw(_("Transferring cannot be done to an Employee. \
+						Please enter location where Asset {0} has to be transferred").format(
+							d.asset), title="Incorrect Movement Purpose")
+				if not d.target_location:
+					frappe.throw(_("Target Location is required while transferring Asset {0}").format(d.asset))
+				if d.source_location == d.target_location:
+					frappe.throw(_("Source and Target Location cannot be same"))
+			
+			if self.purpose == 'Receipt':
+				# only when asset is bought and first entry is made
+				if not d.source_location and not (d.target_location or d.to_employee):
+					frappe.throw(_("Target Location or To Employee is required while receiving Asset {0}").format(d.asset))
+				elif d.source_location:
+					# when asset is received from an employee
+					if d.target_location and not d.from_employee:
+						frappe.throw(_("From employee is required while receiving Asset {0} to a target location").format(d.asset))
+					if d.from_employee and not d.target_location:
+						frappe.throw(_("Target Location is required while receiving Asset {0} from an employee").format(d.asset))
+					if d.to_employee and d.target_location:
+						frappe.throw(_("Asset {0} cannot be received at a location and \
+							given to employee in a single movement").format(d.asset))
 
-		if self.source_location and self.source_location == self.target_location and self.purpose == 'Transfer':
-			frappe.throw(_("Source and Target Location cannot be same"))
+	def validate_employee(self):
+		for d in self.assets:
+			if d.from_employee:
+					current_custodian = frappe.db.get_value("Asset", d.asset, "custodian")
 
-		if self.purpose == 'Receipt' and not (self.target_location or self.to_employee):
-			frappe.throw(_("Target Location is required for the asset {0}").format(self.asset))
+					if current_custodian != d.from_employee:
+						frappe.throw(_("Asset {0} does not belongs to the custodian {1}").
+							format(d.asset, d.from_employee))
+			
+			if d.to_employee and frappe.db.get_value("Employee", d.to_employee, "company") != self.company:
+				frappe.throw(_("Employee {0} does not belongs to the company {1}").
+							format(d.to_employee, self.company))
 
 	def on_submit(self):
 		self.set_latest_location_in_asset()
+	
+	def before_cancel(self):
+		self.validate_last_movement()
 		
 	def on_cancel(self):
 		self.set_latest_location_in_asset()
+	
+	def validate_last_movement(self):
+		for d in self.assets:
+			auto_gen_movement_entry = frappe.db.sql(
+				"""
+				SELECT asm.name
+				FROM  `tabAsset Movement Item` asm_item, `tabAsset Movement` asm
+				WHERE 
+					asm.docstatus=1 and
+					asm_item.parent=asm.name and
+					asm_item.asset=%s and
+					asm.company=%s and
+					asm_item.source_location is NULL and
+					asm.purpose=%s
+				ORDER BY
+					asm.transaction_date asc
+				""", (d.asset, self.company, 'Receipt'), as_dict=1)
+			if auto_gen_movement_entry and auto_gen_movement_entry[0].get('name') == self.name:
+				frappe.throw(_('{0} will be cancelled automatically on asset cancellation as it was \
+					auto generated for Asset {1}').format(self.name, d.asset))
 
 	def set_latest_location_in_asset(self):
-		location, employee = '', ''
+		current_location, current_employee = '', ''
 		cond = "1=1"
 
-		args = {
-			'asset': self.asset,
-			'company': self.company
-		}
+		for d in self.assets:
+			args = {
+				'asset': d.asset,
+				'company': self.company
+			}
 
-		if self.serial_no:
-			cond = "serial_no like %(txt)s"
-			args.update({
-				'txt': "%%%s%%" % self.serial_no
-			})
+			# latest entry corresponds to current document's location, employee when transaction date > previous dates
+			# In case of cancellation it corresponds to previous latest document's location, employee
+			latest_movement_entry = frappe.db.sql(
+				"""
+				SELECT asm_item.target_location, asm_item.to_employee 
+				FROM `tabAsset Movement Item` asm_item, `tabAsset Movement` asm
+				WHERE 
+					asm_item.parent=asm.name and
+					asm_item.asset=%(asset)s and
+					asm.company=%(company)s and 
+					asm.docstatus=1 and {0}
+				ORDER BY
+					asm.transaction_date desc limit 1
+				""".format(cond), args)
+			if latest_movement_entry:
+				current_location = latest_movement_entry[0][0]
+				current_employee = latest_movement_entry[0][1]
 
-		latest_movement_entry = frappe.db.sql("""select target_location, to_employee from `tabAsset Movement`
-			where asset=%(asset)s and docstatus=1 and company=%(company)s and {0}
-			order by transaction_date desc limit 1""".format(cond), args)
-
-		if latest_movement_entry:
-			location = latest_movement_entry[0][0]
-			employee = latest_movement_entry[0][1]
-		elif self.purpose in ['Transfer', 'Receipt']:
-			movement_entry = frappe.db.sql("""select source_location, from_employee from `tabAsset Movement`
-				where asset=%(asset)s and docstatus=2 and company=%(company)s and {0}
-				order by transaction_date asc limit 1""".format(cond), args)
-			if movement_entry:
-				location = movement_entry[0][0]
-				employee = movement_entry[0][1]
-
-		if not self.serial_no:
-			frappe.db.set_value("Asset", self.asset, "location", location)
-
-		if not employee and self.purpose in ['Receipt', 'Transfer']:
-			employee = self.to_employee
-
-		if self.serial_no:
-			for d in get_serial_nos(self.serial_no):
-				if (location or (self.purpose == 'Issue' and self.source_location)):
-					frappe.db.set_value('Serial No', d, 'location', location)
-
-				if employee or self.docstatus==2 or self.purpose == 'Issue':
-					frappe.db.set_value('Serial No', d, 'employee', employee)
+			frappe.db.set_value('Asset', d.asset, 'location', current_location)
+			frappe.db.set_value('Asset', d.asset, 'custodian', current_employee)

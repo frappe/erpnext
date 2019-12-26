@@ -1,0 +1,49 @@
+{
+ "add_more_button": 1,
+ "app": "ERPNext",
+ "creation": "2019-11-15 14:44:10.065014",
+ "docstatus": 0,
+ "doctype": "Onboarding Slide",
+ "domains": [],
+ "help_links": [
+  {
+   "label": "Learn More",
+   "video_id": "zsrrVDk6VBs"
+  }
+ ],
+ "idx": 0,
+ "image_src": "",
+ "is_completed": 0,
+ "max_count": 3,
+ "modified": "2019-12-09 17:54:01.686006",
+ "modified_by": "Administrator",
+ "name": "Add A Few Customers",
+ "owner": "Administrator",
+ "ref_doctype": "Customer",
+ "slide_desc": "",
+ "slide_fields": [
+  {
+   "align": "",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "placeholder": "",
+   "reqd": 1
+  },
+  {
+   "align": "",
+   "fieldtype": "Column Break",
+   "reqd": 0
+  },
+  {
+   "align": "",
+   "fieldname": "customer_email",
+   "fieldtype": "Data",
+   "label": "Email ID",
+   "reqd": 1
+  }
+ ],
+ "slide_order": 40,
+ "slide_title": "Add A Few Customers",
+ "slide_type": "Create"
+}

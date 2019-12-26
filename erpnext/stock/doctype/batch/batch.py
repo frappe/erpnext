@@ -185,9 +185,17 @@ def get_batches_by_oldest(item_code, warehouse):
 def split_batch(batch_no, item_code, warehouse, qty, new_batch_id=None):
 	"""Split the batch into a new batch"""
 	batch = frappe.get_doc(dict(doctype='Batch', item=item_code, batch_id=new_batch_id)).insert()
+
+	company = frappe.db.get_value('Stock Ledger Entry', dict(
+			item_code=item_code,
+			batch_no=batch_no,
+			warehouse=warehouse
+		), ['company'])
+
 	stock_entry = frappe.get_doc(dict(
 		doctype='Stock Entry',
 		purpose='Repack',
+		company=company,
 		items=[
 			dict(
 				item_code=item_code,
@@ -253,15 +261,14 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False):
 
 
 def get_batches(item_code, warehouse, qty=1, throw=False):
-	batches = frappe.db.sql(
-		'select batch_id, sum(actual_qty) as qty from `tabBatch` join `tabStock Ledger Entry` ignore index (item_code, warehouse) '
-		'on (`tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no )'
-		'where `tabStock Ledger Entry`.item_code = %s and  `tabStock Ledger Entry`.warehouse = %s '
-		'and (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL)'
-		'group by batch_id '
-		'order by `tabBatch`.expiry_date ASC, `tabBatch`.creation ASC',
-		(item_code, warehouse),
-		as_dict=True
-	)
 
-	return batches
+	return frappe.db.sql("""
+		select batch_id, sum(`tabStock Ledger Entry`.actual_qty) as qty
+		from `tabBatch`
+			join `tabStock Ledger Entry` ignore index (item_code, warehouse)
+				on (`tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no )
+		where `tabStock Ledger Entry`.item_code = %s and `tabStock Ledger Entry`.warehouse = %s
+			and (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL)
+		group by batch_id
+		order by `tabBatch`.expiry_date ASC, `tabBatch`.creation ASC
+	""", (item_code, warehouse), as_dict=True)
