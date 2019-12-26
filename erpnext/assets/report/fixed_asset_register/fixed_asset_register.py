@@ -122,7 +122,7 @@ def get_data(filters):
 		filters=conditions,
 		fields=["name", "asset_name", "department", "cost_center", "purchase_receipt",
 			"asset_category", "purchase_date", "gross_purchase_amount", "location",
-			"available_for_use_date", "status", "purchase_invoice"])
+			"available_for_use_date", "status", "purchase_invoice", "opening_accumulated_depreciation"])
 
 	for asset in assets_record:
 		asset_value = asset.gross_purchase_amount - flt(asset.opening_accumulated_depreciation) \
