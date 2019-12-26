@@ -757,6 +757,12 @@
    "fieldname": "additional_notes",
    "fieldtype": "Text",
    "label": "Additional Notes"
+  },
+  {
+   "default": "0",
+   "fieldname": "against_blanket_order",
+   "fieldtype": "Check",
+   "label": "Against Blanket Order"
   }
  ],
  "idx": 1,
