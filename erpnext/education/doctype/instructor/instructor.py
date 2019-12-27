@@ -22,3 +22,12 @@ class Instructor(Document):
 				self.name = self.employee
 			elif naming_method == 'Full Name':
 				self.name = self.instructor_name
+
+	def validate(self):
+		self.validate_duplicate_employee()
+
+	def validate_duplicate_employee(self):
+		if self.employee and frappe.db.get_value("Instructor", {'employee': self.employee, 'name': ['!=', self.name]}, 'name'):
+			frappe.throw(_("Employee ID is linked with another instructor"))
+
+

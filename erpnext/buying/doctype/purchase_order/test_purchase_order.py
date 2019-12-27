@@ -118,6 +118,73 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(po.get("items")[0].amount, 1400)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 3)
 
+	
+	def test_add_new_item_in_update_child_qty_rate(self):
+		po = create_purchase_order(do_not_save=1)
+		po.items[0].qty = 4
+		po.save()
+		po.submit()
+		pr = make_pr_against_po(po.name, 2)
+
+		po.load_from_db()
+		first_item_of_po = po.get("items")[0]
+
+		trans_item = json.dumps([
+			{
+				'item_code': first_item_of_po.item_code,
+				'rate': first_item_of_po.rate,
+				'qty': first_item_of_po.qty,
+				'docname': first_item_of_po.name
+			},
+			{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7}
+		])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+
+		po.reload()
+		self.assertEquals(len(po.get('items')), 2)
+		self.assertEqual(po.status, 'To Receive and Bill')
+
+	
+	def test_remove_item_in_update_child_qty_rate(self):
+		po = create_purchase_order(do_not_save=1)
+		po.items[0].qty = 4
+		po.save()
+		po.submit()
+		pr = make_pr_against_po(po.name, 2)
+
+		po.reload()
+		first_item_of_po = po.get("items")[0]
+		# add an item
+		trans_item = json.dumps([
+			{
+				'item_code': first_item_of_po.item_code,
+				'rate': first_item_of_po.rate,
+				'qty': first_item_of_po.qty,
+				'docname': first_item_of_po.name
+			},
+			{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7}])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+
+		po.reload()
+		# check if can remove received item
+		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7, 'docname': po.get("items")[1].name}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate, 'Purchase Order', trans_item, po.name)
+
+		first_item_of_po = po.get("items")[0]
+		trans_item = json.dumps([
+			{
+				'item_code': first_item_of_po.item_code,
+				'rate': first_item_of_po.rate,
+				'qty': first_item_of_po.qty,
+				'docname': first_item_of_po.name
+			}
+		])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+
+		po.reload()
+		self.assertEquals(len(po.get('items')), 1)
+		self.assertEqual(po.status, 'To Receive and Bill')
+
 	def test_update_qty(self):
 		po = create_purchase_order()
 
