@@ -51,10 +51,10 @@ def execute(filters=None):
 				finished_product = frappe.db.get_value("Work Order", work_order, "item_name")
 				finished_qty = fg_completed_qty
 
-			sle.update({
-				"finished_product": finished_product,
-				"finished_qty": finished_qty,
-			})
+				sle.update({
+					"finished_product": finished_product,
+					"finished_qty": finished_qty,
+				})
 
 		data.append(sle)
 
