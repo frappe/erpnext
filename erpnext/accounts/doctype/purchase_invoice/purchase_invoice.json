@@ -418,6 +418,7 @@
    "fieldname": "contact_email",
    "fieldtype": "Small Text",
    "label": "Contact Email",
+   "options": "Email",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1290,7 +1291,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-24 02:27:26.421816",
+ "modified": "2019-12-25 02:27:26.421816",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
