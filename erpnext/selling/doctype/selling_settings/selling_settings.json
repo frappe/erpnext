@@ -77,7 +77,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Only for Stock Items",
    "fieldname": "so_required",
    "fieldtype": "Select",
    "label": "Sales Order Required",
@@ -138,7 +137,7 @@
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2019-11-25 18:35:51.472653",
+ "modified": "2019-12-09 13:38:36.486298",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

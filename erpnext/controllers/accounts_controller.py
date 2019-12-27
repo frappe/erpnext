@@ -319,8 +319,8 @@ class AccountsController(TransactionBase):
 					if item.get('discount_amount'):
 						item.rate = item.price_list_rate - item.discount_amount
 
-			elif pricing_rule_args.get('free_item'):
-				apply_pricing_rule_for_free_items(self, pricing_rule_args)
+			elif pricing_rule_args.get('free_item_data'):
+				apply_pricing_rule_for_free_items(self, pricing_rule_args.get('free_item_data'))
 
 		elif pricing_rule_args.get("validate_applied_rule"):
 			for pricing_rule in get_applied_pricing_rules(item):
@@ -1155,6 +1155,25 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 	child_item.base_amount = 1 # Initiallize value will update in parent validation
 	return child_item
 
+def check_and_delete_children(parent, data):
+	deleted_children = []
+	updated_item_names = [d.get("docname") for d in data]
+	for item in parent.items:
+		if item.name not in updated_item_names:
+			deleted_children.append(item)
+
+	for d in deleted_children:
+		if parent.doctype == "Sales Order" and flt(d.delivered_qty):
+			frappe.throw(_("Row #{0}: Cannot delete item {1} which has already been delivered").format(d.idx, d.item_code))
+
+		if parent.doctype == "Purchase Order" and flt(d.received_qty):
+			frappe.throw(_("Row #{0}: Cannot delete item {1} which has already been received").format(d.idx, d.item_code))
+		
+		if flt(d.billed_amt):
+			frappe.throw(_("Row #{0}: Cannot delete item {1} which has already been billed.").format(d.idx, d.item_code))
+
+		d.cancel()
+		d.delete()
 
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
@@ -1162,6 +1181,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 	sales_doctypes = ['Sales Order', 'Sales Invoice', 'Delivery Note', 'Quotation']
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
+
+	check_and_delete_children(parent, data)
 
 	for d in data:
 		new_child_flag = False

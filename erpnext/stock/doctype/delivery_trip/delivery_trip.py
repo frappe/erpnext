@@ -387,3 +387,9 @@ def get_attachments(delivery_stop):
 		file_name="Delivery Note", print_format=dispatch_attachment)
 
 	return [attachments]
+
+@frappe.whitelist()
+def get_driver_email(driver):
+	employee = frappe.db.get_value("Driver", driver, "employee")
+	email = frappe.db.get_value("Employee", employee, "prefered_email")
+	return {"email": email}

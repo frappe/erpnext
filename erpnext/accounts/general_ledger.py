@@ -90,8 +90,12 @@ def merge_similar_entries(gl_map):
 		else:
 			merged_gl_map.append(entry)
 
+	company = gl_map[0].company if gl_map else erpnext.get_default_company()
+	company_currency = erpnext.get_company_currency(company)
+	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), company_currency)
+
 	# filter zero debit and credit entries
-	merged_gl_map = filter(lambda x: flt(x.debit, 9)!=0 or flt(x.credit, 9)!=0, merged_gl_map)
+	merged_gl_map = filter(lambda x: flt(x.debit, precision)!=0 or flt(x.credit, precision)!=0, merged_gl_map)
 	merged_gl_map = list(merged_gl_map)
 
 	return merged_gl_map

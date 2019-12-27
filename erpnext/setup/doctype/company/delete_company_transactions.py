@@ -106,7 +106,10 @@ def delete_lead_addresses(company_name):
 		frappe.db.sql("""update tabCustomer set lead_name=NULL where lead_name in ({leads})""".format(leads=",".join(leads)))
 
 def delete_communications(doctype, company_name, company_fieldname):
-		frappe.db.sql("""
-			DELETE FROM `tabCommunication` WHERE reference_doctype = %s AND
-			EXISTS (SELECT name FROM `tab{0}` WHERE {1} = %s AND `tabCommunication`.reference_name = name)
-			""".format(doctype, company_fieldname), (doctype, company_name))
+		reference_docs = frappe.get_all(doctype, filters={company_fieldname:company_name})
+		reference_doc_names = [r.name for r in reference_docs]
+		
+		communications = frappe.get_all("Communication", filters={"reference_doctype":doctype,"reference_name":["in", reference_doc_names]})
+		communication_names = [c.name for c in communications]
+
+		frappe.delete_doc("Communication", communication_names)

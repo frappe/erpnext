@@ -135,8 +135,7 @@
   "publish_in_hub",
   "hub_category_to_publish",
   "hub_warehouse",
-  "synced_with_hub",
-  "manufacturers"
+  "synced_with_hub"
  ],
  "fields": [
   {
@@ -1017,12 +1016,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "manufacturers",
-   "fieldtype": "Table",
-   "label": "Manufacturers",
-   "options": "Item Manufacturer"
-  },
-  {
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "over_delivery_receipt_allowance",
    "fieldtype": "Float",
@@ -1049,7 +1042,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2019-10-09 17:05:59.576119",
+ "modified": "2019-12-13 12:15:56.197246",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

@@ -248,7 +248,7 @@ class PurchaseInvoice(BuyingController):
 	def set_against_expense_account(self):
 		against_accounts = []
 		for item in self.get("items"):
-			if item.expense_account not in against_accounts:
+			if item.expense_account and (item.expense_account not in against_accounts):
 				against_accounts.append(item.expense_account)
 
 		self.against_expense_account = ",".join(against_accounts)
@@ -830,7 +830,11 @@ class PurchaseInvoice(BuyingController):
 			)
 
 	def make_gle_for_rounding_adjustment(self, gl_entries):
-		if self.rounding_adjustment:
+		# if rounding adjustment in small and conversion rate is also small then
+		# base_rounding_adjustment may become zero due to small precision
+		# eg: rounding_adjustment = 0.01 and exchange rate = 0.05 and precision of base_rounding_adjustment is 2
+		#	then base_rounding_adjustment becomes zero and error is thrown in GL Entry
+		if self.rounding_adjustment and self.base_rounding_adjustment:
 			round_off_account, round_off_cost_center = \
 				get_round_off_account_and_cost_center(self.company)
 

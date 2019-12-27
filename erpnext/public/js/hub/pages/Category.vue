@@ -3,6 +3,12 @@
 		class="marketplace-page"
 		:data-page-name="page_name"
 	>
+		<search-input
+			:placeholder="search_placeholder"
+			:on_search="set_search_route"
+			v-model="search_value"
+		/>
+
 		<h5>{{ page_title }}</h5>
 
 		<item-cards-container
@@ -26,7 +32,13 @@ export default {
 			item_id_fieldname: 'name',
 
 			// Constants
-			empty_state_message: __(`No items in this category yet.`)
+			empty_state_message: __(`No items in this category yet.`),
+
+			search_value: '',
+
+			// Constants
+			search_placeholder: __('Search for anything ...'),
+
 		};
 	},
 	computed: {
@@ -35,6 +47,7 @@ export default {
 		}
 	},
 	created() {
+		this.search_value = '';
 		this.get_items();
 	},
 	methods: {
@@ -51,7 +64,11 @@ export default {
 
 		go_to_item_details_page(hub_item_name) {
 			frappe.set_route(`marketplace/item/${hub_item_name}`);
-		}
+		},
+
+		set_search_route() {
+			frappe.set_route('marketplace', 'search', this.category, this.search_value);
+		},
 	}
 }
 </script>
