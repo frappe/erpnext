@@ -23,6 +23,8 @@ class PaymentReconciliation(Document):
 
 		if self.party_type in ["Customer", "Supplier"]:
 			dr_or_cr_notes = self.get_dr_or_cr_notes()
+		else:
+			dr_or_cr_notes = []
 
 		self.add_payment_entries(payment_entries + journal_entries + dr_or_cr_notes)
 
