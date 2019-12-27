@@ -1163,8 +1163,13 @@ def check_and_delete_children(parent, data):
 			deleted_children.append(item)
 
 	for d in deleted_children:
-		if parent.doctype == "Sales Order" and flt(d.delivered_qty):
-			frappe.throw(_("Row #{0}: Cannot delete item {1} which has already been delivered").format(d.idx, d.item_code))
+		if parent.doctype == "Sales Order":
+			if flt(d.delivered_qty):
+				frappe.throw(_("Row #{0}: Cannot delete item {1} which has already been delivered").format(d.idx, d.item_code))
+			if flt(d.work_order_qty):
+				frappe.throw(_("Row #{0}: Cannot delete item {1} which has work order assigned to it.").format(d.idx, d.item_code))
+			if flt(d.ordered_qty):
+				frappe.throw(_("Row #{0}: Cannot delete item {1} which is assigned to customer's purchase order.").format(d.idx, d.item_code))
 
 		if parent.doctype == "Purchase Order" and flt(d.received_qty):
 			frappe.throw(_("Row #{0}: Cannot delete item {1} which has already been received").format(d.idx, d.item_code))
