@@ -77,10 +77,12 @@
   "ordered_qty",
   "planned_qty",
   "column_break_69",
-  "delivered_qty",
   "work_order_qty",
+  "delivered_qty",
   "produced_qty",
   "returned_qty",
+  "shopping_cart_section",
+  "additional_notes",
   "section_break_63",
   "page_break",
   "item_tax_rate",
@@ -746,6 +748,17 @@
    "label": "Image"
   },
   {
+   "collapsible": 1,
+   "fieldname": "shopping_cart_section",
+   "fieldtype": "Section Break",
+   "label": "Shopping Cart"
+  },
+  {
+   "fieldname": "additional_notes",
+   "fieldtype": "Text",
+   "label": "Additional Notes"
+  },
+  {
    "default": "0",
    "fieldname": "against_blanket_order",
    "fieldtype": "Check",
@@ -754,7 +767,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-11-19 14:19:29.491945",
+ "modified": "2019-12-12 18:06:26.238169",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

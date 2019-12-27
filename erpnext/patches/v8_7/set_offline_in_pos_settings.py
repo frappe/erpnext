@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+	frappe.reload_doc('accounts', 'doctype', 'pos_field')
 	frappe.reload_doc('accounts', 'doctype', 'pos_settings')
 
 	doc = frappe.get_doc('POS Settings')
