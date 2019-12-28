@@ -586,6 +586,7 @@ erpnext.patches.v11_0.add_permissions_in_gst_settings
 erpnext.patches.v11_1.setup_guardian_role
 execute:frappe.delete_doc('DocType', 'Notification Control')
 erpnext.patches.v12_0.set_gst_category
+erpnext.patches.v12_0.update_gst_category
 erpnext.patches.v11_0.remove_barcodes_field_from_copy_fields_to_variants
 erpnext.patches.v12_0.set_task_status
 erpnext.patches.v11_0.make_italian_localization_fields # 26-03-2019
@@ -605,7 +606,6 @@ erpnext.patches.v11_1.rename_depends_on_lwp
 execute:frappe.delete_doc("Report", "Inactive Items")
 erpnext.patches.v11_1.delete_scheduling_tool
 erpnext.patches.v12_0.rename_tolerance_fields
-erpnext.patches.v12_0.make_custom_fields_for_bank_remittance #14-06-2019
 execute:frappe.delete_doc_if_exists("Page", "support-analytics")
 erpnext.patches.v12_0.remove_patient_medical_record_page
 erpnext.patches.v11_1.move_customer_lead_to_dynamic_column
@@ -626,3 +626,26 @@ erpnext.patches.v12_0.add_default_buying_selling_terms_in_company
 erpnext.patches.v12_0.update_ewaybill_field_position
 erpnext.patches.v12_0.create_accounting_dimensions_in_missing_doctypes
 erpnext.patches.v11_1.set_status_for_material_request_type_manufacture
+erpnext.patches.v12_0.move_plaid_settings_to_doctype
+execute:frappe.reload_doc('desk', 'doctype','dashboard_chart_link')
+execute:frappe.reload_doc('desk', 'doctype','dashboard')
+execute:frappe.reload_doc('desk', 'doctype','dashboard_chart_source')
+execute:frappe.reload_doc('desk', 'doctype','dashboard_chart')
+erpnext.patches.v12_0.add_default_dashboards
+erpnext.patches.v12_0.remove_bank_remittance_custom_fields
+erpnext.patches.v12_0.generate_leave_ledger_entries
+erpnext.patches.v12_0.move_credit_limit_to_customer_credit_limit
+erpnext.patches.v12_0.add_variant_of_in_item_attribute_table
+erpnext.patches.v12_0.rename_bank_account_field_in_journal_entry_account
+erpnext.patches.v12_0.create_default_energy_point_rules
+erpnext.patches.v12_0.set_produced_qty_field_in_sales_order_for_work_order
+erpnext.patches.v12_0.set_default_shopify_app_type
+erpnext.patches.v12_0.set_cwip_and_delete_asset_settings
+erpnext.patches.v12_0.set_expense_account_in_landed_cost_voucher_taxes
+erpnext.patches.v12_0.replace_accounting_with_accounts_in_home_settings
+erpnext.patches.v12_0.set_payment_entry_status
+erpnext.patches.v12_0.update_owner_fields_in_acc_dimension_custom_fields
+erpnext.patches.v12_0.set_default_for_add_taxes_from_item_tax_template
+erpnext.patches.v12_0.remove_denied_leaves_from_leave_ledger
+erpnext.patches.v12_0.update_price_or_product_discount
+erpnext.patches.v12_0.add_export_type_field_in_party_master

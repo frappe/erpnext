@@ -70,16 +70,16 @@ class TestEmployeeCheckin(unittest.TestCase):
 		logs_type_2 = [frappe._dict(x) for x in logs_type_2]
 
 		working_hours = calculate_working_hours(logs_type_1,check_in_out_type[0],working_hours_calc_type[0])
-		self.assertEqual(working_hours, 6.5)
+		self.assertEqual(working_hours, (6.5, logs_type_1[0].time, logs_type_1[-1].time))
 
 		working_hours = calculate_working_hours(logs_type_1,check_in_out_type[0],working_hours_calc_type[1])
-		self.assertEqual(working_hours, 4.5)
+		self.assertEqual(working_hours, (4.5, logs_type_1[0].time, logs_type_1[-1].time))
 
 		working_hours = calculate_working_hours(logs_type_2,check_in_out_type[1],working_hours_calc_type[0])
-		self.assertEqual(working_hours, 5)
+		self.assertEqual(working_hours, (5, logs_type_2[1].time, logs_type_2[-1].time))
 
 		working_hours = calculate_working_hours(logs_type_2,check_in_out_type[1],working_hours_calc_type[1])
-		self.assertEqual(working_hours, 4.5)
+		self.assertEqual(working_hours, (4.5, logs_type_2[1].time, logs_type_2[-1].time))
 
 def make_n_checkins(employee, n, hours_to_reverse=1):
 	logs = [make_checkin(employee, now_datetime() - timedelta(hours=hours_to_reverse, minutes=n+1))]

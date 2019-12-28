@@ -10,7 +10,7 @@ cur_frm.fields_dict['delivery_note'].get_query = function(doc, cdt, cdn) {
 
 cur_frm.fields_dict['items'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
 	if(!doc.delivery_note) {
-		frappe.throw(__("Please Delivery Note first"))
+		frappe.throw(__("Please select a Delivery Note"));
 	} else {
 		return {
 			query: "erpnext.stock.doctype.packing_slip.packing_slip.item_details",

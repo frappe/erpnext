@@ -39,7 +39,6 @@ def validate_filters(filters):
 		frappe.throw(_("'Based On' and 'Group By' can not be same"))
 
 def get_data(filters, conditions):
-	
 	data = []
 	inc, cond= '',''
 	query_details =  conditions["based_on_select"] + conditions["period_wise_select"]
@@ -47,12 +46,16 @@ def get_data(filters, conditions):
 	posting_date = 't1.transaction_date'
 	if conditions.get('trans') in ['Sales Invoice', 'Purchase Invoice', 'Purchase Receipt', 'Delivery Note']:
 		posting_date = 't1.posting_date'
+		if filters.period_based_on:
+			posting_date = 't1.'+filters.period_based_on
 
 	if conditions["based_on_select"] in ["t1.project,", "t2.project,"]:
 		cond = ' and '+ conditions["based_on_select"][:-1] +' IS Not NULL'
-	
 	if conditions.get('trans') in ['Sales Order', 'Purchase Order']:
 		cond += " and t1.status != 'Closed'"
+
+	if conditions.get('trans') == 'Quotation' and filters.get("group_by") == 'Customer':
+		cond += " and t1.quotation_to = 'Customer'"
 
 	year_start_date, year_end_date = frappe.db.get_value("Fiscal Year",
 		filters.get('fiscal_year'), ["year_start_date", "year_end_date"])
@@ -64,7 +67,7 @@ def get_data(filters, conditions):
 		if filters.get("group_by") == 'Item':
 			sel_col = 't2.item_code'
 		elif filters.get("group_by") == 'Customer':
-			sel_col = 't1.customer'
+			sel_col = 't1.party_name' if conditions.get('trans') == 'Quotation' else 't1.customer'
 		elif filters.get("group_by") == 'Supplier':
 			sel_col = 't1.supplier'
 
@@ -137,6 +140,8 @@ def period_wise_columns_query(filters, trans):
 
 	if trans in ['Purchase Receipt', 'Delivery Note', 'Purchase Invoice', 'Sales Invoice']:
 		trans_date = 'posting_date'
+		if filters.period_based_on:
+			trans_date = filters.period_based_on
 	else:
 		trans_date = 'transaction_date'
 
@@ -225,7 +230,7 @@ def based_wise_columns_query(based_on, trans):
 	elif based_on == "Customer":
 		based_on_details["based_on_cols"] = ["Customer:Link/Customer:120", "Territory:Link/Territory:120"]
 		based_on_details["based_on_select"] = "t1.customer_name, t1.territory, "
-		based_on_details["based_on_group_by"] = 't1.customer'
+		based_on_details["based_on_group_by"] = 't1.party_name' if trans == 'Quotation' else 't1.customer'
 		based_on_details["addl_tables"] = ''
 
 	elif based_on == "Customer Group":

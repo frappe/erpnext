@@ -5,9 +5,13 @@ frappe.ui.form.on('Accounting Dimension', {
 
 	refresh: function(frm) {
 		frm.set_query('document_type', () => {
+			let invalid_doctypes = frappe.model.core_doctypes_list;
+			invalid_doctypes.push('Accounting Dimension', 'Project',
+				'Cost Center', 'Accounting Dimension Detail');
+
 			return {
 				filters: {
-					name: ['not in', ['Accounting Dimension', 'Project', 'Cost Center', 'Accounting Dimension Detail']]
+					name: ['not in', invalid_doctypes]
 				}
 			};
 		});

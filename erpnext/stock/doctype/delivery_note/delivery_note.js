@@ -85,26 +85,13 @@ frappe.ui.form.on("Delivery Note", {
 	refresh: function(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.is_return === 1 && frm.doc.per_billed !== 100) {
 			frm.add_custom_button(__('Credit Note'), function() {
-				frappe.confirm(__("Are you sure you want to make credit note?"),
-					function() {
-						frm.trigger("make_credit_note");
-					}
-				);
+				frappe.model.open_mapped_doc({
+					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
+					frm: cur_frm,
+				})
 			}, __('Create'));
-
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
-	},
-
-	make_credit_note: function(frm) {
-		frm.call({
-			method: "make_return_invoice",
-			doc: frm.doc,
-			freeze: true,
-			callback: function() {
-				frm.reload_doc();
-			}
-		});
 	}
 });
 
@@ -123,6 +110,9 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	setup: function(doc) {
 		this.setup_posting_date_time_check();
 		this._super(doc);
+		this.frm.make_methods = {
+			'Delivery Trip': this.make_delivery_trip,
+		};
 	},
 	refresh: function(doc, dt, dn) {
 		var me = this;
@@ -239,7 +229,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	make_delivery_trip: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_delivery_trip",
-			frm: this.frm
+			frm: cur_frm
 		})
 	},
 

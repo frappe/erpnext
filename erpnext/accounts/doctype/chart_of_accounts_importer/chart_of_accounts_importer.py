@@ -150,7 +150,7 @@ def validate_accounts(file_name):
 	accounts_dict = {}
 	for account in accounts:
 		accounts_dict.setdefault(account["account_name"], account)
-		if account["parent_account"] and accounts_dict[account["parent_account"]]:
+		if account["parent_account"] and accounts_dict.get(account["parent_account"]):
 			accounts_dict[account["parent_account"]]["is_group"] = 1
 
 	message = validate_root(accounts_dict)

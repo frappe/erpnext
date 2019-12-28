@@ -4,7 +4,7 @@ erpnext.financial_statements = {
 	"filters": get_filters(),
 	"formatter": function(value, row, column, data, default_formatter) {
 		if (column.fieldname=="account") {
-			value = data.account_name;
+			value = data.account_name || value;
 
 			column.link_onclick =
 				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(data) + ")";

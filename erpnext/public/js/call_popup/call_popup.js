@@ -11,12 +11,51 @@ class CallPopup {
 			'static': true,
 			'minimizable': true,
 			'fields': [{
-				'fieldname': 'caller_info',
-				'fieldtype': 'HTML'
+				'fieldname': 'name',
+				'label': 'Name',
+				'default': this.get_caller_name() || __('Unknown Caller'),
+				'fieldtype': 'Data',
+				'read_only': 1
+			}, {
+				'fieldtype': 'Button',
+				'label': __('Open Contact'),
+				'click': () => frappe.set_route('Form', 'Contact', this.call_log.contact),
+				'depends_on': () => this.call_log.contact
+			}, {
+				'fieldtype': 'Button',
+				'label': __('Open Lead'),
+				'click': () => frappe.set_route('Form', 'Lead', this.call_log.lead),
+				'depends_on': () => this.call_log.lead
+			}, {
+				'fieldtype': 'Button',
+				'label': __('Create New Contact'),
+				'click': () => frappe.new_doc('Contact', { 'mobile_no': this.caller_number }),
+				'depends_on': () => !this.get_caller_name()
+			}, {
+				'fieldtype': 'Button',
+				'label': __('Create New Lead'),
+				'click': () => frappe.new_doc('Lead', { 'mobile_no': this.caller_number }),
+				'depends_on': () => !this.get_caller_name()
+			}, {
+				'fieldtype': 'Column Break',
+			}, {
+				'fieldname': 'number',
+				'label': 'Phone Number',
+				'fieldtype': 'Data',
+				'default': this.caller_number,
+				'read_only': 1
 			}, {
 				'fielname': 'last_interaction',
 				'fieldtype': 'Section Break',
 				'label': __('Activity'),
+				'depends_on': () => this.get_caller_name()
+			}, {
+				'fieldtype': 'Small Text',
+				'label': __('Last Issue'),
+				'fieldname': 'last_issue',
+				'read_only': true,
+				'depends_on': () => this.call_log.contact,
+				'default': `<i class="text-muted">${__('No issue has been raised by the caller.')}<i>`
 			}, {
 				'fieldtype': 'Small Text',
 				'label': __('Last Communication'),
@@ -24,13 +63,7 @@ class CallPopup {
 				'read_only': true,
 				'default': `<i class="text-muted">${__('No communication found.')}<i>`
 			}, {
-				'fieldtype': 'Small Text',
-				'label': __('Last Issue'),
-				'fieldname': 'last_issue',
-				'read_only': true,
-				'default': `<i class="text-muted">${__('No issue raised by the customer.')}<i>`
-			}, {
-				'fieldtype': 'Column Break',
+				'fieldtype': 'Section Break',
 			}, {
 				'fieldtype': 'Small Text',
 				'label': __('Call Summary'),
@@ -41,13 +74,21 @@ class CallPopup {
 				'click': () => {
 					const call_summary = this.dialog.get_value('call_summary');
 					if (!call_summary) return;
-					frappe.xcall('erpnext.crm.doctype.utils.add_call_summary', {
-						'docname': this.call_log.id,
+					frappe.xcall('erpnext.communication.doctype.call_log.call_log.add_call_summary', {
+						'call_log': this.call_log.name,
 						'summary': call_summary,
 					}).then(() => {
 						this.close_modal();
 						frappe.show_alert({
-							message: `${__('Call Summary Saved')}<br><a class="text-small text-muted" href="#Form/Call Log/${this.call_log.name}">${__('View call log')}</a>`,
+							message: `
+								${__('Call Summary Saved')}
+								<br>
+								<a
+									class="text-small text-muted"
+									href="#Form/Call Log/${this.call_log.name}">
+									${__('View call log')}
+								</a>
+							`,
 							indicator: 'green'
 						});
 					});
@@ -55,69 +96,12 @@ class CallPopup {
 			}],
 		});
 		this.set_call_status();
-		this.make_caller_info_section();
 		this.dialog.get_close_btn().show();
+		this.make_last_interaction_section();
 		this.dialog.$body.addClass('call-popup');
 		this.dialog.set_secondary_action(this.close_modal.bind(this));
 		frappe.utils.play_sound('incoming-call');
 		this.dialog.show();
-	}
-
-	make_caller_info_section() {
-		const wrapper = this.dialog.get_field('caller_info').$wrapper;
-		wrapper.append(`<div class="text-muted"> ${__("Loading...")} </div>`);
-		frappe.xcall('erpnext.crm.doctype.utils.get_document_with_phone_number', {
-			'number': this.caller_number
-		}).then(contact_doc => {
-			wrapper.empty();
-			const contact = this.contact = contact_doc;
-			if (!contact) {
-				this.setup_unknown_caller(wrapper);
-			} else {
-				this.setup_known_caller(wrapper);
-				this.set_call_status();
-				this.make_last_interaction_section();
-			}
-		});
-	}
-
-	setup_unknown_caller(wrapper) {
-		wrapper.append(`
-			<div class="caller-info">
-				<b>${__('Unknown Number')}:</b> ${this.caller_number}
-				<button
-					class="margin-left btn btn-new btn-default btn-xs"
-					data-doctype="Contact"
-					title=${__("Make New Contact")}>
-					<i class="octicon octicon-plus text-medium"></i>
-				</button>
-			</div>
-		`).find('button').click(
-			() => frappe.set_route(`Form/Contact/New Contact?phone=${this.caller_number}`)
-		);
-	}
-
-	setup_known_caller(wrapper) {
-		const contact = this.contact;
-		const contact_name = frappe.utils.get_form_link(contact.doctype, contact.name, true, this.get_caller_name());
-		const links = contact.links ? contact.links : [];
-
-		let contact_links = '';
-
-		links.forEach(link => {
-			contact_links += `<div>${link.link_doctype}: ${frappe.utils.get_form_link(link.link_doctype, link.link_name, true)}</div>`;
-		});
-		wrapper.append(`
-			<div class="caller-info flex">
-				${frappe.avatar(null, 'avatar-xl', contact.name, contact.image || '')}
-				<div>
-					<h5>${contact_name}</h5>
-					<div>${contact.mobile_no || ''}</div>
-					<div>${contact.phone_no || ''}</div>
-					${contact_links}
-				</div>
-			</div>
-		`);
 	}
 
 	set_indicator(color, blink=false) {
@@ -129,7 +113,7 @@ class CallPopup {
 		let title = '';
 		call_status = call_status || this.call_log.status;
 		if (['Ringing'].includes(call_status) || !call_status) {
-			title = __('Incoming call from {0}', [this.get_caller_name()]);
+			title = __('Incoming call from {0}', [this.get_caller_name() || this.caller_number]);
 			this.set_indicator('blue', true);
 		} else if (call_status === 'In Progress') {
 			title = __('Call Connected');
@@ -164,13 +148,13 @@ class CallPopup {
 			if (!this.dialog.get_value('call_summary')) {
 				this.close_modal();
 			}
-		}, 10000);
+		}, 30000);
 	}
 
 	make_last_interaction_section() {
 		frappe.xcall('erpnext.crm.doctype.utils.get_last_interaction', {
-			'number': this.caller_number,
-			'reference_doc': this.contact
+			'contact': this.call_log.contact,
+			'lead': this.call_log.lead
 		}).then(data => {
 			const comm_field = this.dialog.get_field('last_communication');
 			if (data.last_communication) {
@@ -182,15 +166,20 @@ class CallPopup {
 				const issue = data.last_issue;
 				const issue_field = this.dialog.get_field("last_issue");
 				issue_field.set_value(issue.subject);
-				issue_field.$wrapper.append(`<a class="text-medium" href="#List/Issue?customer=${issue.customer}">
-					${__('View all issues from {0}', [issue.customer])}
-				</a>`);
+				issue_field.$wrapper.append(`
+					<a class="text-medium" href="#List/Issue?customer=${issue.customer}">
+						${__('View all issues from {0}', [issue.customer])}
+					</a>
+				`);
 			}
 		});
 	}
+
 	get_caller_name() {
-		return this.contact ? this.contact.lead_name || this.contact.name || '' : this.caller_number;
+		let log = this.call_log;
+		return log.contact_name || log.lead_name;
 	}
+
 	setup_listener() {
 		frappe.realtime.on(`call_${this.call_log.id}_disconnected`, call_log => {
 			this.call_disconnected(call_log);

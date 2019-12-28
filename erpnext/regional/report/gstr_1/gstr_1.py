@@ -116,7 +116,7 @@ class Gstr1Report(object):
 		taxable_value = 0
 		for item_code, net_amount in self.invoice_items.get(invoice).items():
 				if item_code in items:
-					if self.item_tax_rate.get(invoice) and tax_rate in self.item_tax_rate.get(invoice, {}).get(item_code):
+					if self.item_tax_rate.get(invoice) and tax_rate in self.item_tax_rate.get(invoice, {}).get(item_code, []):
 						taxable_value += abs(net_amount)
 					elif not self.item_tax_rate.get(invoice):
 						taxable_value += abs(net_amount)
@@ -156,34 +156,21 @@ class Gstr1Report(object):
 
 
 		if self.filters.get("type_of_business") ==  "B2B":
-			customers = frappe.get_all("Customer",
-				filters={
-					"gst_category": ["in", ["Registered Regular", "Deemed Export", "SEZ"]]
-			})
-
-			if customers:
-				conditions += """ and ifnull(gst_category, '') != 'Overseas' and is_return != 1
-					and customer in ({0})""".format(", ".join([frappe.db.escape(c.name) for c in customers]))
+			conditions += "and ifnull(gst_category, '') in ('Registered Regular', 'Deemed Export', 'SEZ') and is_return != 1"
 
 		if self.filters.get("type_of_business") in ("B2C Large", "B2C Small"):
 			b2c_limit = frappe.db.get_single_value('GST Settings', 'b2c_limit')
 			if not b2c_limit:
 				frappe.throw(_("Please set B2C Limit in GST Settings."))
 
-		customers = frappe.get_all("Customer",
-			filters={
-				"gst_category": ["in", ["Unregistered"]]
-		})
-
-		if self.filters.get("type_of_business") ==  "B2C Large" and customers:
+		if self.filters.get("type_of_business") ==  "B2C Large":
 			conditions += """ and SUBSTR(place_of_supply, 1, 2) != SUBSTR(company_gstin, 1, 2)
-				and grand_total > {0} and is_return != 1 and customer in ({1})""".\
-					format(flt(b2c_limit), ", ".join([frappe.db.escape(c.name) for c in customers]))
-		elif self.filters.get("type_of_business") ==  "B2C Small" and customers:
+				and grand_total > {0} and is_return != 1 and gst_category ='Unregistered' """.format(flt(b2c_limit))
+
+		elif self.filters.get("type_of_business") ==  "B2C Small":
 			conditions += """ and (
 				SUBSTR(place_of_supply, 1, 2) = SUBSTR(company_gstin, 1, 2)
-					or grand_total <= {0}) and is_return != 1 and customer in ({1})""".\
-						format(flt(b2c_limit), ", ".join([frappe.db.escape(c.name) for c in customers]))
+					or grand_total <= {0}) and is_return != 1 and gst_category ='Unregistered' """.format(flt(b2c_limit))
 
 		elif self.filters.get("type_of_business") ==  "CDNR":
 			conditions += """ and is_return = 1 """
@@ -545,16 +532,9 @@ class Gstr1Report(object):
 		self.columns = self.invoice_columns + self.tax_columns + self.other_columns
 
 @frappe.whitelist()
-def get_json():
-	data = frappe._dict(frappe.local.form_dict)
-
-	del data["cmd"]
-	if "csrf_token" in data:
-		del data["csrf_token"]
-
-	filters = json.loads(data["filters"])
-	report_data = json.loads(data["data"])
-	report_name = data["report_name"]
+def get_json(filters, report_name, data):
+	filters = json.loads(filters)
+	report_data = json.loads(data)
 	gstin = get_company_gstin_number(filters["company"])
 
 	fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
@@ -588,7 +568,11 @@ def get_json():
 		out = get_export_json(res)
 		gst_json["exp"] = out
 
-	download_json_file(report_name, filters["type_of_business"], gst_json)
+	return {
+		'report_name': report_name,
+		'report_type': filters['type_of_business'],
+		'data': gst_json
+	}
 
 def get_b2b_json(res, gstin):
 	inv_type, out = {"Registered Regular": "R", "Deemed Export": "DE", "URD": "URD", "SEZ": "SEZ"}, []
@@ -735,11 +719,15 @@ def get_company_gstin_number(company):
 	if gstin:
 		return gstin[0]["gstin"]
 	else:
-		frappe.throw(_("No GST No. found for the Company."))
+		frappe.throw(_("Please set valid GSTIN No. in Company Address for company {0}".format(
+			frappe.bold(company)
+		)))
 
-def download_json_file(filename, report_type, data):
+@frappe.whitelist()
+def download_json_file():
 	''' download json content in a file '''
-	frappe.response['filename'] = frappe.scrub("{0} {1}".format(filename, report_type)) + '.json'
-	frappe.response['filecontent'] = json.dumps(data)
+	data = frappe._dict(frappe.local.form_dict)
+	frappe.response['filename'] = frappe.scrub("{0} {1}".format(data['report_name'], data['report_type'])) + '.json'
+	frappe.response['filecontent'] = data['data']
 	frappe.response['content_type'] = 'application/json'
 	frappe.response['type'] = 'download'

@@ -4,6 +4,7 @@
  "creation": "2013-01-10 16:34:13",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "attendance_details",
   "naming_series",
@@ -19,7 +20,9 @@
   "department",
   "shift",
   "attendance_request",
-  "amended_from"
+  "amended_from",
+  "late_entry",
+  "early_exit"
  ],
  "fields": [
   {
@@ -153,12 +156,24 @@
    "fieldtype": "Link",
    "label": "Shift",
    "options": "Shift Type"
+  },
+  {
+   "default": "0",
+   "fieldname": "late_entry",
+   "fieldtype": "Check",
+   "label": "Late Entry"
+  },
+  {
+   "default": "0",
+   "fieldname": "early_exit",
+   "fieldtype": "Check",
+   "label": "Early Exit"
   }
  ],
  "icon": "fa fa-ok",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2019-06-05 19:37:30.410071",
+ "modified": "2019-07-29 20:35:40.845422",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",

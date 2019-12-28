@@ -181,10 +181,7 @@ class update_entries_after(object):
 		# rounding as per precision
 		self.stock_value = flt(self.stock_value, self.precision)
 
-		if self.prev_stock_value < 0 and self.stock_value >= 0 and sle.voucher_type != 'Stock Reconciliation':
-			stock_value_difference = sle.actual_qty * self.valuation_rate
-		else:
-			stock_value_difference = self.stock_value - self.prev_stock_value
+		stock_value_difference = self.stock_value - self.prev_stock_value
 
 		self.prev_stock_value = self.stock_value
 
@@ -227,9 +224,9 @@ class update_entries_after(object):
 		elif actual_qty < 0:
 			# In case of delivery/stock issue, get average purchase rate
 			# of serial nos of current entry
-			stock_value_change = -1 * flt(frappe.db.sql("""select sum(purchase_rate)
-				from `tabSerial No` where name in (%s)""" % (", ".join(["%s"]*len(serial_no))),
-				tuple(serial_no))[0][0])
+			stock_value_change = -1 * flt(frappe.get_all("Serial No",
+				fields=["sum(purchase_rate)"],
+				filters = {'name': ('in', serial_no)}, as_list=1)[0][0])
 
 		new_stock_qty = self.qty_after_transaction + actual_qty
 
@@ -464,16 +461,22 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 
 	last_valuation_rate = frappe.db.sql("""select valuation_rate
 		from `tabStock Ledger Entry`
-		where item_code = %s and warehouse = %s
-		and valuation_rate >= 0
-		order by posting_date desc, posting_time desc, creation desc limit 1""", (item_code, warehouse))
+		where
+			item_code = %s
+			AND warehouse = %s
+			AND valuation_rate >= 0
+			AND NOT (voucher_no = %s AND voucher_type = %s)
+		order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse, voucher_no, voucher_type))
 
 	if not last_valuation_rate:
 		# Get valuation rate from last sle for the item against any warehouse
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry`
-			where item_code = %s and valuation_rate > 0
-			order by posting_date desc, posting_time desc, creation desc limit 1""", item_code)
+			where
+				item_code = %s
+				AND valuation_rate > 0
+				AND NOT(voucher_no = %s AND voucher_type = %s)
+			order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, voucher_no, voucher_type))
 
 	if last_valuation_rate:
 		return flt(last_valuation_rate[0][0]) # as there is previous records, it might come with zero rate

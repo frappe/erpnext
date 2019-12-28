@@ -4,13 +4,21 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt
+from frappe import _
+from frappe.utils import flt, getdate
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.doctype.item.item import get_item_defaults
 
 
 class BlanketOrder(Document):
+	def validate(self):
+		self.validate_dates()
+
+	def validate_dates(self):
+		if getdate(self.from_date) > getdate(self.to_date):
+			frappe.throw(_("From date cannot be greater than To date")) 
+
 	def update_ordered_qty(self):
 		ref_doctype = "Sales Order" if self.blanket_order_type == "Selling" else "Purchase Order"
 		item_ordered_qty = frappe._dict(frappe.db.sql("""

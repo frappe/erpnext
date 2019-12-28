@@ -61,6 +61,7 @@ class PaymentEntry(AccountsController):
 		self.validate_duplicate_entry()
 		self.validate_allocated_amount()
 		self.ensure_supplier_is_not_blocked()
+		self.set_status()
 
 	def on_submit(self):
 		self.setup_party_account_field()
@@ -70,6 +71,7 @@ class PaymentEntry(AccountsController):
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.update_expense_claim()
+		self.set_status()
 
 
 	def on_cancel(self):
@@ -79,6 +81,7 @@ class PaymentEntry(AccountsController):
 		self.update_advance_paid()
 		self.update_expense_claim()
 		self.delink_advance_entry_references()
+		self.set_status()
 
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)
@@ -126,7 +129,7 @@ class PaymentEntry(AccountsController):
 			if not self.party:
 				frappe.throw(_("Party is mandatory"))
 
-			_party_name = "title" if self.party_type == "Student" else self.party_type.lower() + "_name"
+			_party_name = "title" if self.party_type in ("Student", "Shareholder") else self.party_type.lower() + "_name"
 			self.party_name = frappe.db.get_value(self.party_type, self.party, _party_name)
 
 		if self.party:
@@ -274,6 +277,14 @@ class PaymentEntry(AccountsController):
 					if not valid:
 						frappe.throw(_("Against Journal Entry {0} does not have any unmatched {1} entry")
 							.format(d.reference_name, dr_or_cr))
+
+	def set_status(self):
+		if self.docstatus == 2:
+			self.status = 'Cancelled'
+		elif self.docstatus == 1:
+			self.status = 'Submitted'
+		else:
+			self.status = 'Draft'
 
 	def set_amounts(self):
 		self.set_amounts_in_company_currency()
@@ -624,8 +635,8 @@ def get_outstanding_reference_documents(args):
 	data = negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 
 	if not data:
-		frappe.msgprint(_("No outstanding invoices found for the {0} <b>{1}</b> which qualify the filters you have specified")
-			.format(args.get("party_type").lower(), args.get("party")))
+		frappe.msgprint(_("No outstanding invoices found for the {0} {1} which qualify the filters you have specified.")
+			.format(args.get("party_type").lower(), frappe.bold(args.get("party"))))
 
 	return data
 
@@ -683,8 +694,8 @@ def get_orders_to_be_billed(posting_date, party_type, party,
 
 	order_list = []
 	for d in orders:
-		if not (d.outstanding_amount >= filters.get("outstanding_amt_greater_than")
-			and d.outstanding_amount <= filters.get("outstanding_amt_less_than")):
+		if not (flt(d.outstanding_amount) >= flt(filters.get("outstanding_amt_greater_than"))
+			and flt(d.outstanding_amount) <= flt(filters.get("outstanding_amt_less_than"))):
 			continue
 
 		d["voucher_type"] = voucher_type
@@ -761,9 +772,23 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 @frappe.whitelist()
 def get_account_details(account, date, cost_center=None):
 	frappe.has_permission('Payment Entry', throw=True)
+
+	# to check if the passed account is accessible under reference doctype Payment Entry
+	account_list = frappe.get_list('Account', {
+		'name': account
+	}, reference_doctype='Payment Entry', limit=1)
+
+	# There might be some user permissions which will allow account under certain doctypes
+	# except for Payment Entry, only in such case we should throw permission error
+	if not account_list:
+		frappe.throw(_('Account: {0} is not permitted under Payment Entry').format(account))
+
+	account_balance = get_balance_on(account, date, cost_center=cost_center,
+		ignore_account_permission=True)
+
 	return frappe._dict({
 		"account_currency": get_account_currency(account),
-		"account_balance": get_balance_on(account, date, cost_center=cost_center),
+		"account_balance": account_balance,
 		"account_type": frappe.db.get_value("Account", account, "account_type")
 	})
 
@@ -906,9 +931,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 			grand_total = doc.rounded_total or doc.grand_total
 		outstanding_amount = doc.outstanding_amount
 	elif dt in ("Expense Claim"):
-		grand_total = doc.total_sanctioned_amount
-		outstanding_amount = doc.total_sanctioned_amount \
-			- doc.total_amount_reimbursed - flt(doc.total_advance_amount)
+		grand_total = doc.total_sanctioned_amount + doc.total_taxes_and_charges
+		outstanding_amount = doc.grand_total \
+			- doc.total_amount_reimbursed
 	elif dt == "Employee Advance":
 		grand_total = doc.advance_amount
 		outstanding_amount = flt(doc.advance_amount) - flt(doc.paid_amount)
@@ -926,6 +951,10 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	bank = get_default_bank_cash_account(doc.company, "Bank", mode_of_payment=doc.get("mode_of_payment"),
 		account=bank_account)
 
+	if not bank:
+		bank = get_default_bank_cash_account(doc.company, "Cash", mode_of_payment=doc.get("mode_of_payment"),
+			account=bank_account)
+
 	paid_amount = received_amount = 0
 	if party_account_currency == bank.account_currency:
 		paid_amount = received_amount = abs(outstanding_amount)
@@ -933,10 +962,15 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		paid_amount = abs(outstanding_amount)
 		if bank_amount:
 			received_amount = bank_amount
+		else:
+			received_amount = paid_amount * doc.conversion_rate
 	else:
 		received_amount = abs(outstanding_amount)
 		if bank_amount:
 			paid_amount = bank_amount
+		else:
+			# if party account currency and bank currency is different then populate paid amount as well
+			paid_amount = received_amount * doc.conversion_rate
 
 	pe = frappe.new_doc("Payment Entry")
 	pe.payment_type = payment_type
@@ -1022,7 +1056,7 @@ def make_payment_order(source_name, target_doc=None):
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.bank_account = source_parent.party_bank_account
-		target_doc.amount = source_parent.base_paid_amount
+		target_doc.amount = source_doc.allocated_amount
 		target_doc.account = source_parent.paid_to
 		target_doc.payment_entry = source_parent.name
 		target_doc.supplier = source_parent.party

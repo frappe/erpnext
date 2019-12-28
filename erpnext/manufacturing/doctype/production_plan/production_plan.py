@@ -109,7 +109,7 @@ class ProductionPlan(Document):
 			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
 		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
-			(qty - work_order_qty) * conversion_factor as pending_qty, name
+			(qty - work_order_qty) * conversion_factor as pending_qty, description, name
 			from `tabSales Order Item` so_item
 			where parent in (%s) and docstatus = 1 and qty > work_order_qty
 			and exists (select name from `tabBOM` bom where bom.item=so_item.item_code
@@ -121,7 +121,7 @@ class ProductionPlan(Document):
 
 		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as warehouse,
 			(((so_item.qty - so_item.work_order_qty) * pi.qty) / so_item.qty)
-				as pending_qty, pi.parent_item, so_item.name
+				as pending_qty, pi.parent_item, pi.description, so_item.name
 			from `tabSales Order Item` so_item, `tabPacked Item` pi
 			where so_item.parent = pi.parent and so_item.docstatus = 1
 			and pi.parent_item = so_item.item_code
@@ -143,7 +143,7 @@ class ProductionPlan(Document):
 		if self.item_code:
 			item_condition = " and mr_item.item_code ={0}".format(frappe.db.escape(self.item_code))
 
-		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse,
+		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse, description,
 			(qty - ordered_qty) as pending_qty
 			from `tabMaterial Request Item` mr_item
 			where parent in (%s) and docstatus = 1 and qty > ordered_qty
@@ -162,7 +162,7 @@ class ProductionPlan(Document):
 				'include_exploded_items': 1,
 				'warehouse': data.warehouse,
 				'item_code': data.item_code,
-				'description': item_details and item_details.description or '',
+				'description': data.description or item_details.description,
 				'stock_uom': item_details and item_details.stock_uom or '',
 				'bom_no': item_details and item_details.bom_no or '',
 				'planned_qty': data.pending_qty,
@@ -174,10 +174,12 @@ class ProductionPlan(Document):
 			if self.get_items_from == "Sales Order":
 				pi.sales_order = data.parent
 				pi.sales_order_item = data.name
+				pi.description = data.description
 
 			elif self.get_items_from == "Material Request":
 				pi.material_request = data.parent
 				pi.material_request_item = data.name
+				pi.description = data.description
 
 	def calculate_total_planned_qty(self):
 		self.total_planned_qty = 0
@@ -539,7 +541,9 @@ def get_material_request_items(row, sales_order,
 			'projected_qty': bin_dict.get("projected_qty", 0),
 			'min_order_qty': row['min_order_qty'],
 			'material_request_type': row.get("default_material_request_type"),
-			'sales_order': sales_order
+			'sales_order': sales_order,
+			'description': row.get("description"),
+			'uom': row.get("purchase_uom") or row.get("stock_uom")
 		}
 
 def get_sales_orders(self):
@@ -704,8 +708,8 @@ def get_item_data(item_code):
 
 	return {
 		"bom_no": item_details.get("bom_no"),
-		"stock_uom": item_details.get("stock_uom"),
-		"description": item_details.get("description")
+		"stock_uom": item_details.get("stock_uom")
+#		"description": item_details.get("description")
 	}
 
 def get_sub_assembly_items(bom_no, bom_data):

@@ -107,7 +107,7 @@ frappe.ui.form.on("Issue", {
 				}, () => {
 					reset_sla.enable_primary_action();
 					frm.refresh();
-					frappe.msgprint(__("Service Level Agreement Reset."));
+					frappe.msgprint(__("Service Level Agreement was reset."));
 				});
 			}
 		});

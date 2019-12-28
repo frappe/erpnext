@@ -62,6 +62,7 @@
   "dimension_col_break",
   "cost_center",
   "section_break_12",
+  "status",
   "remarks",
   "column_break_16",
   "letter_head",
@@ -563,10 +564,18 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nDraft\nSubmitted\nCancelled",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-27 15:53:21.108857",
+ "modified": "2019-11-06 12:59:43.151721",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

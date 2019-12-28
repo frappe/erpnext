@@ -45,7 +45,6 @@ class TestExpenseClaim(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 700)
 
 		expense_claim2.cancel()
-		frappe.delete_doc("Expense Claim", expense_claim2.name)
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 200)
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 200)

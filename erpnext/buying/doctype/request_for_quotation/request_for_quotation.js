@@ -134,7 +134,7 @@ frappe.ui.form.on("Request for Quotation",{
 			if (args.search_type === "Tag" && args.tag) {
 				return frappe.call({
 					type: "GET",
-					method: "frappe.desk.tags.get_tagged_docs",
+					method: "frappe.desk.doctype.tag.tag.get_tagged_docs",
 					args: {
 						"doctype": "Supplier",
 						"tag": args.tag

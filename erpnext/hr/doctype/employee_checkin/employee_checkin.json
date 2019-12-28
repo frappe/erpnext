@@ -14,8 +14,6 @@
   "device_id",
   "skip_auto_attendance",
   "attendance",
-  "entry_grace_period_consequence",
-  "exit_grace_period_consequence",
   "shift_start",
   "shift_end",
   "shift_actual_start",
@@ -81,20 +79,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "entry_grace_period_consequence",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Entry Grace Period Consequence"
-  },
-  {
-   "default": "0",
-   "fieldname": "exit_grace_period_consequence",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Exit Grace Period Consequence"
-  },
-  {
    "fieldname": "shift_start",
    "fieldtype": "Datetime",
    "hidden": 1,
@@ -119,7 +103,7 @@
    "label": "Shift Actual End"
   }
  ],
- "modified": "2019-06-10 15:33:22.731697",
+ "modified": "2019-07-23 23:47:33.975263",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Checkin",

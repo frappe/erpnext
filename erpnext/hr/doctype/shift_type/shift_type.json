@@ -23,14 +23,9 @@
   "grace_period_settings_auto_attendance_section",
   "enable_entry_grace_period",
   "late_entry_grace_period",
-  "consequence_after",
-  "consequence",
   "column_break_18",
   "enable_exit_grace_period",
-  "enable_different_consequence_for_early_exit",
-  "early_exit_grace_period",
-  "early_exit_consequence_after",
-  "early_exit_consequence"
+  "early_exit_grace_period"
  ],
  "fields": [
   {
@@ -108,21 +103,6 @@
    "label": "Late Entry Grace Period"
   },
   {
-   "depends_on": "enable_entry_grace_period",
-   "description": "The number of occurrence after which the consequence is executed.",
-   "fieldname": "consequence_after",
-   "fieldtype": "Int",
-   "label": "Consequence after"
-  },
-  {
-   "default": "Half Day",
-   "depends_on": "enable_entry_grace_period",
-   "fieldname": "consequence",
-   "fieldtype": "Select",
-   "label": "Consequence",
-   "options": "Half Day\nAbsent"
-  },
-  {
    "fieldname": "column_break_18",
    "fieldtype": "Column Break"
   },
@@ -133,33 +113,11 @@
    "label": "Enable Exit Grace Period"
   },
   {
-   "default": "0",
-   "depends_on": "enable_exit_grace_period",
-   "fieldname": "enable_different_consequence_for_early_exit",
-   "fieldtype": "Check",
-   "label": "Enable Different Consequence for Early Exit"
-  },
-  {
    "depends_on": "eval:doc.enable_exit_grace_period",
    "description": "The time before the shift end time when check-out is considered as early (in minutes).",
    "fieldname": "early_exit_grace_period",
    "fieldtype": "Int",
    "label": "Early Exit Grace Period"
-  },
-  {
-   "depends_on": "eval:doc.enable_exit_grace_period && doc.enable_different_consequence_for_early_exit",
-   "description": "The number of occurrence after which the consequence is executed.",
-   "fieldname": "early_exit_consequence_after",
-   "fieldtype": "Int",
-   "label": "Early Exit Consequence after"
-  },
-  {
-   "default": "Half Day",
-   "depends_on": "eval:doc.enable_exit_grace_period && doc.enable_different_consequence_for_early_exit",
-   "fieldname": "early_exit_consequence",
-   "fieldtype": "Select",
-   "label": "Early Exit Consequence",
-   "options": "Half Day\nAbsent"
   },
   {
    "default": "60",
@@ -178,7 +136,6 @@
    "depends_on": "enable_auto_attendance",
    "fieldname": "grace_period_settings_auto_attendance_section",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Grace Period Settings For Auto Attendance"
   },
   {
@@ -201,7 +158,7 @@
    "label": "Last Sync of Checkin"
   }
  ],
- "modified": "2019-06-10 06:02:44.272036",
+ "modified": "2019-07-30 01:05:24.660666",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Type",

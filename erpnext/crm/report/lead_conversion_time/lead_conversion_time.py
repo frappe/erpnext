@@ -67,7 +67,7 @@ def get_communication_details(filters):
 	communication_count = None
 	communication_list = []
 	opportunities = frappe.db.get_values('Opportunity', {'opportunity_from': 'Lead'},\
-		['name', 'customer_name', 'lead', 'contact_email'], as_dict=1)
+		['name', 'customer_name', 'contact_email'], as_dict=1)
 
 	for d in opportunities:
 		invoice = frappe.db.sql('''

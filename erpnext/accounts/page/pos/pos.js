@@ -816,8 +816,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				contact = me.contacts[data.name];
 				if(reg.test(data.name.toLowerCase())
 					|| reg.test(data.customer_name.toLowerCase())
-					|| (contact && reg.test(contact["mobile_no"]))
 					|| (contact && reg.test(contact["phone"]))
+					|| (contact && reg.test(contact["mobile_no"]))
 					|| (data.customer_group && reg.test(data.customer_group.toLowerCase()))){
 						return data;
 				}
@@ -1121,7 +1121,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		if (key) {
 			return $.grep(this.items_list, function (item) {
 				if (search_status) {
-					if (in_list(me.batch_no_data[item.item_code], me.search_item.$input.val())) {
+					if (me.batch_no_data[item.item_code] &&
+						in_list(me.batch_no_data[item.item_code], me.search_item.$input.val())) {
 						search_status = false;
 						return me.item_batch_no[item.item_code] = me.search_item.$input.val()
 					} else if (me.serial_no_data[item.item_code]
@@ -1129,7 +1130,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 						search_status = false;
 						me.item_serial_no[item.item_code] = [me.search_item.$input.val(), me.serial_no_data[item.item_code][me.search_item.$input.val()]]
 						return true
-					} else if (in_list(me.barcode_data[item.item_code], me.search_item.$input.val())) {
+					} else if (me.barcode_data[item.item_code] &&
+						in_list(me.barcode_data[item.item_code], me.search_item.$input.val())) {
 						search_status = false;
 						return true;
 					} else if (reg.test(item.item_code.toLowerCase()) || (item.description && reg.test(item.description.toLowerCase())) ||
@@ -1625,7 +1627,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		setTimeout(function () {
 			w.print();
 			w.close();
-		}, 1000)
+		}, 1000);
 	},
 
 	submit_invoice: function () {
@@ -1682,6 +1684,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		$(this.wrapper).find('.pos-bill').css('pointer-events', pointer_events);
 		$(this.wrapper).find('.pos-items-section').css('pointer-events', pointer_events);
 		this.set_primary_action();
+
+		$(this.wrapper).find('#pos-item-disc').prop('disabled',
+			this.pos_profile_data.allow_user_to_edit_discount ? false : true);
+
+		$(this.wrapper).find('#pos-item-price').prop('disabled',
+			this.pos_profile_data.allow_user_to_edit_rate ? false : true);
 	},
 
 	create_invoice: function () {
@@ -1692,20 +1700,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		if(this.si_docs) {
 			this.si_docs.forEach((row) => {
-				existing_pos_list.push(Object.keys(row));
+				existing_pos_list.push(Object.keys(row)[0]);
 			});
 		}
 
 		if (this.frm.doc.offline_pos_name
-			&& in_list(existing_pos_list, this.frm.doc.offline_pos_name)) {
+			&& in_list(existing_pos_list, cstr(this.frm.doc.offline_pos_name))) {
 			this.update_invoice()
-			//to retrieve and set the default payment
-			invoice_data[this.frm.doc.offline_pos_name] = this.frm.doc;
-			invoice_data[this.frm.doc.offline_pos_name].payments[0].amount = this.frm.doc.net_total
-			invoice_data[this.frm.doc.offline_pos_name].payments[0].base_amount = this.frm.doc.net_total
-
-			this.frm.doc.paid_amount = this.frm.doc.net_total
-			this.frm.doc.outstanding_amount = 0
 		} else if(!this.frm.doc.offline_pos_name) {
 			this.frm.doc.offline_pos_name = frappe.datetime.now_datetime();
 			this.frm.doc.posting_date = frappe.datetime.get_today();
@@ -1762,18 +1763,11 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.si_docs = this.get_submitted_invoice() || [];
 		this.email_queue_list = this.get_email_queue() || {};
 		this.customers_list = this.get_customers_details() || {};
-		if(this.customer_doc) {
-			this.freeze = this.customer_doc.display
-		}
 
-		freeze_screen = this.freeze_screen || false;
-
-		if ((this.si_docs.length || this.email_queue_list || this.customers_list) && !this.freeze) {
-			this.freeze = true;
-
+		if (this.si_docs.length || this.email_queue_list || this.customers_list) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.sales_invoice.pos.make_invoice",
-				freeze: freeze_screen,
+				freeze: true,
 				args: {
 					doc_list: me.si_docs,
 					email_queue_list: me.email_queue_list,
@@ -1906,7 +1900,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			serial_no = me.item_serial_no[key][0];
 		}
 
-		if (this.items[0].has_serial_no && serial_no == "") {
+		if (this.items && this.items[0].has_serial_no && serial_no == "") {
 			this.refresh();
 			frappe.throw(__(repl("Error: Serial no is mandatory for item %(item)s", {
 				'item': this.items[0].item_code

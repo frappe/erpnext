@@ -29,6 +29,9 @@ class EmployeeOnboarding(EmployeeBoardingController):
 	def on_submit(self):
 		super(EmployeeOnboarding, self).on_submit()
 
+	def on_update_after_submit(self):
+		self.create_task_and_notify_user()
+
 	def on_cancel(self):
 		super(EmployeeOnboarding, self).on_cancel()
 

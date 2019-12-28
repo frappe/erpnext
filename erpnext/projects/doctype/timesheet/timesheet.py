@@ -96,7 +96,7 @@ class Timesheet(Document):
 
 		for time in self.time_logs:
 			if time.from_time and time.to_time:
-				if flt(std_working_hours) > 0:
+				if flt(std_working_hours) and date_diff(time.to_time, time.from_time):
 					time.hours = flt(std_working_hours) * date_diff(time.to_time, time.from_time)
 				else:
 					if not time.hours:
@@ -145,11 +145,16 @@ class Timesheet(Document):
 	def validate_time_logs(self):
 		for data in self.get('time_logs'):
 			self.validate_overlap(data)
+			self.validate_task_project()
 
 	def validate_overlap(self, data):
 		settings = frappe.get_single('Projects Settings')
 		self.validate_overlap_for("user", data, self.user, settings.ignore_user_time_overlap)
 		self.validate_overlap_for("employee", data, self.employee, settings.ignore_employee_time_overlap)
+
+	def validate_task_project(self):
+		for log in self.time_logs:
+			log.project = log.project or frappe.db.get_value("Task", log.task, "project")
 
 	def validate_overlap_for(self, fieldname, args, value, ignore_validation=False):
 		if not value or ignore_validation:
@@ -183,6 +188,9 @@ class Timesheet(Document):
 			}, as_dict=True)
 		# check internal overlap
 		for time_log in self.time_logs:
+			if not (time_log.from_time and time_log.to_time
+				and args.from_time and args.to_time): continue
+
 			if (fieldname != 'workstation' or args.get(fieldname) == time_log.get(fieldname)) and \
 				args.idx != time_log.idx and ((args.from_time > time_log.from_time and args.from_time < time_log.to_time) or
 				(args.to_time > time_log.from_time and args.to_time < time_log.to_time) or
@@ -348,17 +356,35 @@ def get_events(start, end, filters=None):
 def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
 	user = frappe.session.user
 	# find customer name from contact.
-	customer = frappe.db.sql('''SELECT dl.link_name FROM `tabContact` AS c inner join \
-		`tabDynamic Link` AS dl ON c.first_name=dl.link_name WHERE c.email_id=%s''',user)
+	customer = ''
+	timesheets = []
+
+	contact = frappe.db.exists('Contact', {'user': user})
+	if contact:
+		# find customer
+		contact = frappe.get_doc('Contact', contact)
+		customer = contact.get_link_for('Customer')
 
 	if customer:
-		# find list of Sales Invoice for made for customer.
-		sales_invoice = frappe.db.sql('''SELECT name FROM `tabSales Invoice` WHERE customer = %s''',customer)
+		sales_invoices = [d.name for d in frappe.get_all('Sales Invoice', filters={'customer': customer})] or [None]
+		projects = [d.name for d in frappe.get_all('Project', filters={'customer': customer})]
 		# Return timesheet related data to web portal.
-		return frappe. db.sql('''SELECT ts.name, tsd.activity_type, ts.status, ts.total_billable_hours, \
-			tsd.sales_invoice, tsd.project  FROM `tabTimesheet` AS ts inner join `tabTimesheet Detail` \
-			AS tsd ON tsd.parent = ts.name where tsd.sales_invoice IN %s order by\
-			end_date asc limit {0} , {1}'''.format(limit_start, limit_page_length), [sales_invoice], as_dict = True)
+		timesheets = frappe.db.sql('''
+			SELECT
+				ts.name, tsd.activity_type, ts.status, ts.total_billable_hours,
+				COALESCE(ts.sales_invoice, tsd.sales_invoice) AS sales_invoice, tsd.project
+			FROM `tabTimesheet` ts, `tabTimesheet Detail` tsd
+			WHERE tsd.parent = ts.name AND
+				(
+					ts.sales_invoice IN %(sales_invoices)s OR
+					tsd.sales_invoice IN %(sales_invoices)s OR
+					tsd.project IN %(projects)s
+				)
+			ORDER BY `end_date` ASC
+			LIMIT {0}, {1}
+		'''.format(limit_start, limit_page_length), dict(sales_invoices=sales_invoices, projects=projects), as_dict=True) #nosec
+
+	return timesheets
 
 def get_list_context(context=None):
 	return {

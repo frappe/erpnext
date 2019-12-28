@@ -12,6 +12,7 @@ from frappe.model.meta import get_field_precision
 from erpnext.stock.doctype.batch.batch import get_batch_no
 from erpnext import get_company_currency
 from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor
+from erpnext.stock.doctype.price_list.price_list import get_price_list_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_manufacturer_part_no
@@ -22,7 +23,7 @@ sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
 purchase_doctypes = ['Material Request', 'Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 
 @frappe.whitelist()
-def get_item_details(args, doc=None):
+def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=True):
 	"""
 		args = {
 			"item_code": "",
@@ -44,11 +45,12 @@ def get_item_details(args, doc=None):
 			"set_warehouse": ""
 		}
 	"""
+
 	args = process_args(args)
 	item = frappe.get_cached_doc("Item", args.item_code)
 	validate_item_details(args, item)
 
-	out = get_basic_details(args, item)
+	out = get_basic_details(args, item, overwrite_warehouse)
 
 	get_item_tax_template(args, item, out)
 	out["item_tax_rate"] = get_item_tax_map(args.company, args.get("item_tax_template") if out.get("item_tax_template") is None \
@@ -73,7 +75,9 @@ def get_item_details(args, doc=None):
 		if args.get(key) is None:
 			args[key] = value
 
-	data = get_pricing_rule_for_item(args, out.price_list_rate, doc)
+	data = get_pricing_rule_for_item(args, out.price_list_rate,
+		doc, for_validate=for_validate)
+
 	out.update(data)
 
 	update_stock(args, out)
@@ -178,7 +182,7 @@ def validate_item_details(args, item):
 			throw(_("Item {0} must be a Sub-contracted Item").format(item.name))
 
 
-def get_basic_details(args, item):
+def get_basic_details(args, item, overwrite_warehouse=True):
 	"""
 	:param args: {
 			"item_code": "",
@@ -225,18 +229,36 @@ def get_basic_details(args, item):
 	item_group_defaults = get_item_group_defaults(item.name, args.company)
 	brand_defaults = get_brand_defaults(item.name, args.company)
 
-	warehouse = (args.get("set_warehouse") or item_defaults.get("default_warehouse") or
-		item_group_defaults.get("default_warehouse") or brand_defaults.get("default_warehouse") or args.warehouse)
+	if overwrite_warehouse or not args.warehouse:
+		warehouse = (
+			args.get("set_warehouse") or
+			item_defaults.get("default_warehouse") or
+			item_group_defaults.get("default_warehouse") or
+			brand_defaults.get("default_warehouse") or
+			args.warehouse
+		)
 
-	if not warehouse:
-		defaults = frappe.defaults.get_defaults() or {}
-		if defaults.get("default_warehouse") and frappe.db.exists("Warehouse",
-			{'name': defaults.default_warehouse, 'company': args.company}):
-			warehouse = defaults.default_warehouse
+		if not warehouse:
+			defaults = frappe.defaults.get_defaults() or {}
+			warehouse_exists = frappe.db.exists("Warehouse", {
+				'name': defaults.default_warehouse,
+				'company': args.company
+			})
+			if defaults.get("default_warehouse") and warehouse_exists:
+				warehouse = defaults.default_warehouse
+
+	else:
+		warehouse = args.warehouse
 
 	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
 			args.get('name'), 'material_request_type', cache=True)
+
+	expense_account = None
+
+	if args.get('doctype') == 'Purchase Invoice' and item.is_fixed_asset:
+		from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
+		expense_account = get_asset_category_account(fieldname = "fixed_asset_account", item = args.item_code, company= args.company)
 
 	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not args.uom:
@@ -255,7 +277,7 @@ def get_basic_details(args, item):
 		"image": cstr(item.image).strip(),
 		"warehouse": warehouse,
 		"income_account": get_default_income_account(args, item_defaults, item_group_defaults, brand_defaults),
-		"expense_account": get_default_expense_account(args, item_defaults, item_group_defaults, brand_defaults),
+		"expense_account": expense_account or get_default_expense_account(args, item_defaults, item_group_defaults, brand_defaults) ,
 		"cost_center": get_default_cost_center(args, item_defaults, item_group_defaults, brand_defaults),
 		'has_serial_no': item.has_serial_no,
 		'has_batch_no': item.has_batch_no,
@@ -466,7 +488,6 @@ def get_price_list_rate(args, item_doc, out):
 	if meta.get_field("currency") or args.get('currency'):
 		pl_details = get_price_list_currency_and_exchange_rate(args)
 		args.update(pl_details)
-		validate_price_list(args)
 		if meta.get_field("currency"):
 			validate_conversion_rate(args, meta)
 
@@ -620,14 +641,6 @@ def check_packing_list(price_list_rate_name, desired_qty, item_code):
 			flag = False
 
 	return flag
-
-def validate_price_list(args):
-	if args.get("price_list"):
-		if not frappe.db.get_value("Price List",
-			{"name": args.price_list, args.transaction_type: 1, "enabled": 1}):
-			throw(_("Price List {0} is disabled or does not exist").format(args.price_list))
-	elif not args.get("supplier"):
-		throw(_("Price List not selected"))
 
 def validate_conversion_rate(args, meta):
 	from erpnext.controllers.accounts_controller import validate_conversion_rate
@@ -795,7 +808,7 @@ def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
 	return {'serial_no': serial_no}
 
 @frappe.whitelist()
-def get_bin_details_and_serial_nos(item_code, warehouse, has_batch_no, stock_qty=None, serial_no=None):
+def get_bin_details_and_serial_nos(item_code, warehouse, has_batch_no=None, stock_qty=None, serial_no=None):
 	bin_details_and_serial_nos = {}
 	bin_details_and_serial_nos.update(get_bin_details(item_code, warehouse))
 	if flt(stock_qty) > 0:
@@ -892,27 +905,6 @@ def apply_price_list_on_item(args):
 
 	return item_details
 
-def get_price_list_currency(price_list):
-	if price_list:
-		result = frappe.db.get_value("Price List", {"name": price_list,
-			"enabled": 1}, ["name", "currency"], as_dict=True)
-
-		if not result:
-			throw(_("Price List {0} is disabled or does not exist").format(price_list))
-
-		return result.currency
-
-def get_price_list_uom_dependant(price_list):
-	if price_list:
-		result = frappe.db.get_value("Price List", {"name": price_list,
-			"enabled": 1}, ["name", "price_not_uom_dependent"], as_dict=True)
-
-		if not result:
-			throw(_("Price List {0} is disabled or does not exist").format(price_list))
-
-		return not result.price_not_uom_dependent
-
-
 def get_price_list_currency_and_exchange_rate(args):
 	if not args.price_list:
 		return {}
@@ -922,8 +914,11 @@ def get_price_list_currency_and_exchange_rate(args):
 	elif args.doctype in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']:
 		args.update({"exchange_rate": "for_buying"})
 
-	price_list_currency = get_price_list_currency(args.price_list)
-	price_list_uom_dependant = get_price_list_uom_dependant(args.price_list)
+	price_list_details = get_price_list_details(args.price_list)
+
+	price_list_currency = price_list_details.get("currency")
+	price_list_uom_dependant = price_list_details.get("price_list_uom_dependant")
+
 	plc_conversion_rate = args.plc_conversion_rate
 	company_currency = get_company_currency(args.company)
 

@@ -9,6 +9,7 @@ from frappe import _
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import cstr, getdate
 from erpnext.accounts.doctype.account.account import RootNotEditable
+from frappe.desk.doctype.global_search_settings.global_search_settings import update_global_search_doctypes
 
 default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 	"Cold Calling", "Exhibition", "Supplier Reference", "Mass Mailing",
@@ -64,7 +65,7 @@ def install(country=None):
 		{'doctype': 'Leave Type', 'leave_type_name': _('Casual Leave'), 'name': _('Casual Leave'),
 			'allow_encashment': 1, 'is_carry_forward': 1, 'max_continuous_days_allowed': '3', 'include_holiday': 1},
 		{'doctype': 'Leave Type', 'leave_type_name': _('Compensatory Off'), 'name': _('Compensatory Off'),
-			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1},
+			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1, 'is_compensatory':1 },
 		{'doctype': 'Leave Type', 'leave_type_name': _('Sick Leave'), 'name': _('Sick Leave'),
 			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1},
 		{'doctype': 'Leave Type', 'leave_type_name': _('Privilege Leave'), 'name': _('Privilege Leave'),
@@ -274,6 +275,8 @@ def install(country=None):
 
 	set_more_defaults()
 
+	update_global_search_doctypes()
+
 	# path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(country))
 	# if os.path.exists(path.encode("utf-8")):
 	# 	frappe.get_attr("erpnext.regional.{0}.setup.setup_company_independent_fixtures".format(frappe.scrub(country)))()
@@ -475,12 +478,13 @@ def install_defaults(args=None):
 
 				frappe.db.set_value("Company", args.company_name, "default_bank_account", bank_account.name, update_modified=False)
 
-				return doc
 			except RootNotEditable:
 				frappe.throw(_("Bank account cannot be named as {0}").format(args.bank_account))
 			except frappe.DuplicateEntryError:
 				# bank account same as a CoA entry
 				pass
+
+	add_dashboards()
 
 	# Now, with fixtures out of the way, onto concrete stuff
 	records = [
@@ -498,6 +502,27 @@ def install_defaults(args=None):
 	]
 
 	make_records(records)
+
+def add_dashboards():
+	from erpnext.setup.setup_wizard.data.dashboard_charts import get_company_for_dashboards
+
+	if not get_company_for_dashboards():
+		return
+
+	from erpnext.setup.setup_wizard.data.dashboard_charts import get_default_dashboards
+	from frappe.modules.import_file import import_file_by_path
+
+	dashboard_data = get_default_dashboards()
+
+	# create account balance timeline before creating dashbaord charts
+	doctype = "dashboard_chart_source"
+	docname = "account_balance_timeline"
+	folder = os.path.dirname(frappe.get_module("erpnext.accounts").__file__)
+	doc_path = os.path.join(folder, doctype, docname, docname) + ".json"
+	import_file_by_path(doc_path, force=0, for_sync=True)
+
+	make_records(dashboard_data["Charts"])
+	make_records(dashboard_data["Dashboards"])
 
 
 def get_fy_details(fy_start_date, fy_end_date):

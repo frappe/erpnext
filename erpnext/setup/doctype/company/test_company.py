@@ -22,7 +22,7 @@ class TestCompany(unittest.TestCase):
 		company.create_chart_of_accounts_based_on = "Existing Company"
 		company.existing_company = "_Test Company"
 		company.save()
-		
+
 		expected_results = {
 			"Debtors - CFEC": {
 				"account_type": "Receivable",
@@ -37,7 +37,7 @@ class TestCompany(unittest.TestCase):
 				"parent_account": "Cash In Hand - CFEC"
 			}
 		}
-		
+
 		for account, acc_property in expected_results.items():
 			acc = frappe.get_doc("Account", account)
 			for prop, val in acc_property.items():
@@ -50,14 +50,14 @@ class TestCompany(unittest.TestCase):
 		countries = ["India", "Brazil", "United Arab Emirates", "Canada", "Germany", "France",
 			"Guatemala", "Indonesia", "Italy", "Mexico", "Nicaragua", "Netherlands", "Singapore",
 			"Brazil", "Argentina", "Hungary", "Taiwan"]
-		
+
 		for country in countries:
 			templates = get_charts_for_country(country)
 			if len(templates) != 1 and "Standard" in templates:
 				templates.remove("Standard")
-			
+
 			self.assertTrue(templates)
-			
+
 			for template in templates:
 				try:
 					company = frappe.new_doc("Company")
@@ -67,11 +67,11 @@ class TestCompany(unittest.TestCase):
 					company.create_chart_of_accounts_based_on = "Standard Template"
 					company.chart_of_accounts = template
 					company.save()
-				
-					account_types = ["Cost of Goods Sold", "Depreciation", 
-						"Expenses Included In Valuation", "Fixed Asset", "Payable", "Receivable", 
+
+					account_types = ["Cost of Goods Sold", "Depreciation",
+						"Expenses Included In Valuation", "Fixed Asset", "Payable", "Receivable",
 						"Stock Adjustment", "Stock Received But Not Billed", "Bank", "Cash", "Stock"]
-				
+
 					for account_type in account_types:
 						filters = {
 							"company": template,
@@ -88,6 +88,56 @@ class TestCompany(unittest.TestCase):
 					self.delete_mode_of_payment(template)
 					frappe.delete_doc("Company", template)
 
+	def test_delete_communication(self):
+		from erpnext.setup.doctype.company.delete_company_transactions import delete_communications
+		company = create_child_company()
+		lead = create_test_lead_in_company(company)
+		communication = create_company_communication("Lead", lead)
+		delete_communications("Lead", "Test Company", "company")
+		self.assertFalse(frappe.db.exists("Communcation", communication))
+		self.assertFalse(frappe.db.exists({"doctype":"Comunication Link", "link_name": communication}))
+
 	def delete_mode_of_payment(self, company):
 		frappe.db.sql(""" delete from `tabMode of Payment Account`
 			where company =%s """, (company))
+
+def create_company_communication(doctype, docname):
+	comm = frappe.get_doc({
+			"doctype": "Communication",
+			"communication_type": "Communication",
+			"content": "Deduplication of Links",
+			"communication_medium": "Email",
+			"reference_doctype":doctype,
+			"reference_name":docname
+		})
+	comm.insert()
+
+def create_child_company():
+	child_company = frappe.db.exists("Company", "Test Company")
+	if not child_company:
+		child_company = frappe.get_doc({
+			"doctype":"Company",
+			"company_name":"Test Company",
+			"abbr":"test_company",
+			"default_currency":"INR"
+		})
+		child_company.insert()
+	else:
+		child_company = frappe.get_doc("Company", child_company)
+
+	return child_company.name
+
+def create_test_lead_in_company(company):
+	lead = frappe.db.exists("Lead", "Test Lead in new company")
+	if not lead:
+		lead = frappe.get_doc({
+			"doctype": "Lead",
+			"lead_name": "Test Lead in new company",
+			"scompany": company
+		})
+		lead.insert()
+	else:
+		lead = frappe.get_doc("Lead", lead)
+		lead.company = company
+		lead.save()
+	return lead.name

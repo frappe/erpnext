@@ -4,8 +4,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import fmt_money, formatdate, format_time, now_datetime, \
-	get_url_to_form, get_url_to_list, flt, get_link_to_report
+from frappe.utils import (fmt_money, formatdate, format_time, now_datetime,
+	get_url_to_form, get_url_to_list, flt, get_link_to_report, add_to_date, today)
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from frappe.core.doctype.user.user import STANDARD_USERS
@@ -151,8 +151,9 @@ class EmailDigest(Document):
 	def get_calendar_events(self):
 		"""Get calendar events for given user"""
 		from frappe.desk.doctype.event.event import get_events
-		events = get_events(self.future_from_date.strftime("%Y-%m-%d"),
-			self.future_to_date.strftime("%Y-%m-%d")) or []
+		from_date, to_date = get_future_date_for_calendaer_event(self.frequency)
+
+		events = get_events(from_date, to_date)
 
 		event_count = 0
 		for i, e in enumerate(events):
@@ -826,3 +827,13 @@ def get_count_for_period(account, fieldname, from_date, to_date):
 		count = count_on_to_date + (last_year_closing_count - count_before_from_date)
 
 	return count
+
+def get_future_date_for_calendaer_event(frequency):
+	from_date = to_date = today()
+
+	if frequency == "Weekly":
+		to_date = add_to_date(from_date, weeks=1)
+	elif frequency == "Monthly":
+		to_date = add_to_date(from_date, months=1)
+
+	return from_date, to_date

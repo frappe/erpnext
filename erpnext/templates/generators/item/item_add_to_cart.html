@@ -27,6 +27,7 @@
 			{% endif %}
 		</div>
 		{% endif %}
+		{% if product_info.price and (cart_settings.allow_items_not_in_stock or product_info.in_stock) %}
 		<div class="mt-3">
 			<a href="/cart"
 				class="btn btn-light btn-view-in-cart {% if not product_info.qty %}hidden{% endif %}"
@@ -41,6 +42,7 @@
 				{{ _("Add to Cart") }}
 			</button>
 		</div>
+		{% endif %}
 	</div>
 </div>
 

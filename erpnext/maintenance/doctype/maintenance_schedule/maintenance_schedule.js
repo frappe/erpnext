@@ -20,6 +20,12 @@ frappe.ui.form.on('Maintenance Schedule', {
 			frm.set_value({transaction_date: frappe.datetime.get_today()});
 		}
 	},
+	refresh: function(frm) {
+		setTimeout(() => {
+			frm.toggle_display('generate_schedule', !(frm.is_new()));
+			frm.toggle_display('schedule', !(frm.is_new()));
+		},10);
+	},
 	customer: function(frm) {
 		erpnext.utils.get_party_details(frm)
 	},

@@ -68,8 +68,6 @@
   "selling_price_list": "_Test Price List",
   "territory": "_Test Territory"
  },
- 
- 
  {
   "company": "_Test Company",
   "conversion_rate": 1.0,
@@ -276,7 +274,6 @@
 	  "uom": "_Test UOM 1",
 	  "conversion_factor": 1,
     "stock_uom": "_Test UOM 1"
-	
    },
    {
     "cost_center": "_Test Cost Center - _TC",

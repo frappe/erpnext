@@ -23,6 +23,8 @@ class PaymentReconciliation(Document):
 
 		if self.party_type in ["Customer", "Supplier"]:
 			dr_or_cr_notes = self.get_dr_or_cr_notes()
+		else:
+			dr_or_cr_notes = []
 
 		self.add_payment_entries(payment_entries + journal_entries + dr_or_cr_notes)
 
@@ -90,7 +92,8 @@ class PaymentReconciliation(Document):
 			FROM `tab{doc}`, `tabGL Entry`
 			WHERE
 				(`tab{doc}`.name = `tabGL Entry`.against_voucher or `tab{doc}`.name = `tabGL Entry`.voucher_no)
-				and `tab{doc}`.is_return = 1 and `tabGL Entry`.against_voucher_type = %(voucher_type)s
+				and `tab{doc}`.is_return = 1 and `tab{doc}`.return_against IS NULL
+				and `tabGL Entry`.against_voucher_type = %(voucher_type)s
 				and `tab{doc}`.docstatus = 1 and `tabGL Entry`.party = %(party)s
 				and `tabGL Entry`.party_type = %(party_type)s and `tabGL Entry`.account = %(account)s
 			GROUP BY `tab{doc}`.name
@@ -257,11 +260,8 @@ def reconcile_dr_cr_note(dr_cr_notes):
 		voucher_type = ('Credit Note'
 			if d.voucher_type == 'Sales Invoice' else 'Debit Note')
 
-		dr_or_cr = ('credit_in_account_currency'
-			if d.reference_type == 'Sales Invoice' else 'debit_in_account_currency')
-
 		reconcile_dr_or_cr = ('debit_in_account_currency'
-			if dr_or_cr == 'credit_in_account_currency' else 'credit_in_account_currency')
+			if d.dr_or_cr == 'credit_in_account_currency' else 'credit_in_account_currency')
 
 		jv = frappe.get_doc({
 			"doctype": "Journal Entry",
@@ -272,8 +272,7 @@ def reconcile_dr_cr_note(dr_cr_notes):
 					'account': d.account,
 					'party': d.party,
 					'party_type': d.party_type,
-					reconcile_dr_or_cr: (abs(d.allocated_amount)
-						if abs(d.unadjusted_amount) > abs(d.allocated_amount) else abs(d.unadjusted_amount)),
+					d.dr_or_cr: abs(d.allocated_amount),
 					'reference_type': d.against_voucher_type,
 					'reference_name': d.against_voucher
 				},
@@ -281,7 +280,8 @@ def reconcile_dr_cr_note(dr_cr_notes):
 					'account': d.account,
 					'party': d.party,
 					'party_type': d.party_type,
-					dr_or_cr: abs(d.allocated_amount),
+					reconcile_dr_or_cr: (abs(d.allocated_amount)
+						if abs(d.unadjusted_amount) > abs(d.allocated_amount) else abs(d.unadjusted_amount)),
 					'reference_type': d.voucher_type,
 					'reference_name': d.voucher_no
 				}

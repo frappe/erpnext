@@ -127,7 +127,11 @@ def get_data():
 					"name": "Shipping Rule",
 					"description": _("Rules for adding shipping costs."),
 				},
-
+				{
+					"type": "doctype",
+					"name": "Coupon Code",
+					"description": _("Define coupon codes."),
+				}
 			]
 		},
 		{
@@ -302,12 +306,6 @@ def get_data():
 					"type": "report",
 					"is_query_report": True,
 					"name": "Customers Without Any Sales Transactions",
-					"doctype": "Customer"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Sales Partners Commission",
 					"doctype": "Customer"
 				},
 				{

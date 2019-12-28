@@ -827,10 +827,10 @@ def get_opening_accounts(company):
 	accounts = frappe.db.sql_list("""select
 			name from tabAccount
 		where
-			is_group=0 and report_type='Balance Sheet' and company=%s and
-			name not in(select distinct account from tabWarehouse where
+			is_group=0 and report_type='Balance Sheet' and company={0} and
+			name not in (select distinct account from tabWarehouse where
 			account is not null and account != '')
-		order by name asc""", frappe.db.escape(company))
+		order by name asc""".format(frappe.db.escape(company)))
 
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 
@@ -968,7 +968,7 @@ def get_exchange_rate(posting_date, account=None, account_currency=None, company
 
 		# The date used to retreive the exchange rate here is the date passed
 		# in as an argument to this function.
-		elif (not exchange_rate or exchange_rate==1) and account_currency and posting_date:
+		elif (not exchange_rate or flt(exchange_rate)==1) and account_currency and posting_date:
 			exchange_rate = get_exchange_rate(account_currency, company_currency, posting_date)
 	else:
 		exchange_rate = 1
