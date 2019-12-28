@@ -28,6 +28,7 @@ class GLEntry(Document):
 		self.check_mandatory()
 		self.validate_and_set_fiscal_year()
 		self.pl_must_have_cost_center()
+		self.project_in_gl()
 		self.validate_cost_center()
 
 		if not self.flags.from_repost:
@@ -79,8 +80,11 @@ class GLEntry(Document):
 			from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account
 			if not get_allow_cost_center_in_entry_of_bs_account() and self.cost_center:
 				self.cost_center = None
-			if self.project:
-				self.project = None
+			
+	def project_in_gl(self):
+		from erpnext.accounts.utils import get_allow_project_in_entry_of_bs_account	
+		if not get_allow_project_in_entry_of_bs_account() and self.project:	
+			self.project = None
 
 	def validate_dimensions_for_pl_and_bs(self):
 
