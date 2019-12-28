@@ -32,7 +32,7 @@ def validate_service_stop_date(doc):
 		if old_stop_dates and old_stop_dates.get(item.name) and item.service_stop_date!=old_stop_dates.get(item.name):
 			frappe.throw(_("Cannot change Service Stop Date for item in row {0}".format(item.idx)))
 
-def convert_deferred_expense_to_expense(start_date=None, end_date=None,  conditions=''):
+def convert_deferred_expense_to_expense(start_date=None, end_date=None,  conditions='', deferred_process=None):
 	# book the expense/income on the last day, but it will be trigger on the 1st of month at 12:00 AM
 	if not start_date:
 		start_date = add_months(today(), -1)
@@ -52,9 +52,9 @@ def convert_deferred_expense_to_expense(start_date=None, end_date=None,  conditi
 	# For each invoice, book deferred expense
 	for invoice in invoices:
 		doc = frappe.get_doc("Purchase Invoice", invoice)
-		book_deferred_income_or_expense(doc, end_date)
+		book_deferred_income_or_expense(doc, end_date, deferred_process)
 
-def convert_deferred_revenue_to_income(start_date=None, end_date=None, conditions=''):
+def convert_deferred_revenue_to_income(start_date=None, end_date=None, conditions='', deferred_process=None):
 	# book the expense/income on the last day, but it will be trigger on the 1st of month at 12:00 AM
 	if not start_date:
 		start_date = add_months(today(), -1)
@@ -73,7 +73,7 @@ def convert_deferred_revenue_to_income(start_date=None, end_date=None, condition
 
 	for invoice in invoices:
 		doc = frappe.get_doc("Sales Invoice", invoice)
-		book_deferred_income_or_expense(doc, end_date)
+		book_deferred_income_or_expense(doc, end_date, deferred_process)
 
 def get_booking_dates(doc, item, posting_date=None):
 	if not posting_date:
@@ -142,7 +142,7 @@ def calculate_amount(doc, item, last_gl_entry, total_days, total_booking_days, a
 
 	return amount, base_amount
 
-def book_deferred_income_or_expense(doc, posting_date=None):
+def book_deferred_income_or_expense(doc, posting_date=None, deferred_process=None):
 	enable_check = "enable_deferred_revenue" \
 		if doc.doctype=="Sales Invoice" else "enable_deferred_expense"
 
@@ -165,7 +165,7 @@ def book_deferred_income_or_expense(doc, posting_date=None):
 			total_days, total_booking_days, account_currency)
 
 		make_gl_entries(doc, credit_account, debit_account, against,
-			amount, base_amount, end_date, project, account_currency, item.cost_center, item.name)
+			amount, base_amount, end_date, project, account_currency, item.cost_center, item.name, deferred_process)
 
 		if getdate(end_date) < getdate(posting_date) and not last_gl_entry:
 			_book_deferred_revenue_or_expense(item)
@@ -175,7 +175,7 @@ def book_deferred_income_or_expense(doc, posting_date=None):
 		if item.get(enable_check):
 			_book_deferred_revenue_or_expense(item)
 
-def process_deferred_accounting_record(posting_date=today()):
+def process_deferred_accounting(posting_date=today()):
 	''' Converts deferred income/expense into income/expense
 		Executed via background jobs on every month end '''
 
@@ -198,7 +198,7 @@ def process_deferred_accounting_record(posting_date=today()):
 		doc.submit()
 
 def make_gl_entries(doc, credit_account, debit_account, against,
-	amount, base_amount, posting_date, project, account_currency, cost_center, voucher_detail_no):
+	amount, base_amount, posting_date, project, account_currency, cost_center, voucher_detail_no, deferred_process=None):
 	# GL Entry for crediting the amount in the deferred expense
 	from erpnext.accounts.general_ledger import make_gl_entries
 
@@ -214,7 +214,8 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 			"cost_center": cost_center,
 			"voucher_detail_no": voucher_detail_no,
 			'posting_date': posting_date,
-			'project': project
+			'project': project,
+			'deferred_process': deferred_process
 		}, account_currency)
 	)
 	# GL Entry to debit the amount from the expense
@@ -227,7 +228,8 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 			"cost_center": cost_center,
 			"voucher_detail_no": voucher_detail_no,
 			'posting_date': posting_date,
-			'project': project
+			'project': project,
+			'deferred_process': deferred_process
 		}, account_currency)
 	)
 

@@ -31,7 +31,7 @@ frappe.ui.form.on('Process Deferred Accounting', {
 	},
 
 	onload: function(frm) {
-		if (frm.doc.posting_date) {
+		if (frm.doc.posting_date && frm.doc.docstatus === 0) {
 			frm.set_value('start_date', frappe.datetime.add_months(frm.doc.posting_date, -1));
 			frm.set_value('end_date', frm.doc.posting_date);
 		}
