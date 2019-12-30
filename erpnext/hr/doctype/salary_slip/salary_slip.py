@@ -43,9 +43,9 @@ class SalarySlip(TransactionBase):
 
 		if not (len(self.get("earnings")) or len(self.get("deductions"))):
 			# get details from salary structure
-			self.get_emp_and_leave_details()
+			self.get_emp_and_working_day_details()
 		else:
-			self.get_leave_details(lwp = self.leave_without_pay)
+			self.get_working_days_details(lwp = self.leave_without_pay, absent_days=self.absent_days)
 
 		self.calculate_net_pay()
 
@@ -114,7 +114,7 @@ class SalarySlip(TransactionBase):
 			self.start_date = date_details.start_date
 			self.end_date = date_details.end_date
 
-	def get_emp_and_leave_details(self):
+	def get_emp_and_working_day_details(self):
 		'''First time, load all the components from salary structure'''
 		if self.employee:
 			self.set("earnings", [])
@@ -126,7 +126,8 @@ class SalarySlip(TransactionBase):
 			joining_date, relieving_date = frappe.get_cached_value("Employee", self.employee,
 				["date_of_joining", "relieving_date"])
 
-			self.get_leave_details(joining_date, relieving_date)
+			#getin leave details
+			self.get_working_days_details(joining_date, relieving_date)
 			struct = self.check_sal_struct(joining_date, relieving_date)
 
 			if struct:
@@ -185,7 +186,10 @@ class SalarySlip(TransactionBase):
 
 		make_salary_slip(self._salary_structure_doc.name, self)
 
-	def get_leave_details(self, joining_date=None, relieving_date=None, lwp=None, for_preview=0):
+	def get_working_days_details(self, joining_date=None, relieving_date=None, lwp=None, absent_days=None,for_preview=0):
+
+		payroll_based_on = frappe.db.get_value("HR Settings", None, "payroll_based_on")
+
 		if not joining_date:
 			joining_date, relieving_date = frappe.get_cached_value("Employee", self.employee,
 				["date_of_joining", "relieving_date"])
@@ -197,21 +201,36 @@ class SalarySlip(TransactionBase):
 			return
 
 		holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
+		non_working_days = 0
 		actual_lwp = self.calculate_lwp(holidays, working_days)
+		if payroll_based_on == 'Attendance':
+			actual_absent_days = self.calculate_absents() + actual_lwp
+		if not payroll_based_on:
+			frappe.throw(_("Please set Payroll based on in HR settings"))
+
 		if not cint(frappe.db.get_value("HR Settings", None, "include_holidays_in_total_working_days")):
 			working_days -= len(holidays)
 			if working_days < 0:
 				frappe.throw(_("There are more holidays than working days this month."))
 
-		if not lwp:
-			lwp = actual_lwp
-		elif lwp != actual_lwp:
-			frappe.msgprint(_("Leave Without Pay does not match with approved Leave Application records"))
+		if payroll_based_on == 'Leave':
+			if not lwp:
+				non_working_days = actual_lwp
+			elif lwp != actual_lwp:
+				frappe.msgprint(_("Leave Without Pay does not match with approved Leave Application records"))
+			self.leave_without_pay = non_working_days
+
+		if payroll_based_on == 'Attendance':
+			if not absent_days:
+				non_working_days = actual_absent_days
+			elif absent_days != actual_absent_days:
+				frappe.msgprint(_("Number of Absent days does not match your Attendance record"))
+
+			self.absent_days = non_working_days
 
 		self.total_working_days = working_days
-		self.leave_without_pay = lwp
 
-		payment_days = flt(self.get_payment_days(joining_date, relieving_date)) - flt(lwp)
+		payment_days = flt(self.get_payment_days(joining_date, relieving_date)) - flt(non_working_days)
 		self.payment_days = payment_days > 0 and payment_days or 0
 
 	def get_payment_days(self, joining_date, relieving_date):
@@ -275,6 +294,28 @@ class SalarySlip(TransactionBase):
 			if leave:
 				lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
 		return lwp
+
+	def calculate_absents(self):
+		absent_days = 0
+
+		attendances = frappe.db.sql('''SELECT status, count(*) as non_working_days
+			FROM `tabAttendance`
+			WHERE
+				status NOT IN ("Present","On leave")
+				AND employee = %s
+				AND docstatus = 1
+				AND attendance_date between %s and %s
+			GROUP BY status''', values=(self.employee, self.start_date, self.end_date), as_dict = 1)
+
+		if attendances:
+			attendance_map = { attendance.status: attendance for attendance in attendances}
+			absent_days = 0
+			if attendance_map.get('Absent'):
+				absent_days += attendance_map.get('Absent').get("non_working_days", 0)
+			if attendance_map.get('Half Day'):
+				absent_days += (attendance_map.get('Half Day').get("non_working_days", 0)*0.5)
+
+		return absent_days
 
 	def add_earning_for_hourly_wages(self, doc, salary_component, amount):
 		row_exists = False
@@ -831,7 +872,7 @@ class SalarySlip(TransactionBase):
 		if not self.salary_slip_based_on_timesheet:
 			self.get_date_details()
 		self.pull_emp_details()
-		self.get_leave_details(for_preview=for_preview)
+		self.get_working_days_details(for_preview=for_preview)
 		self.calculate_net_pay()
 
 	def pull_emp_details(self):
@@ -841,7 +882,7 @@ class SalarySlip(TransactionBase):
 			self.bank_account_no = emp.bank_ac_no
 
 	def process_salary_based_on_leave(self, lwp=0):
-		self.get_leave_details(lwp=lwp)
+		self.get_working_days_details(lwp=lwp)
 		self.calculate_net_pay()
 
 def unlink_ref_doc_from_salary_slip(ref_no):

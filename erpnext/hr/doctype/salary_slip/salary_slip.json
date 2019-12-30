@@ -11,22 +11,23 @@
   "employee_name",
   "department",
   "designation",
+  "branch",
   "column_break1",
-  "company",
+  "status",
   "journal_entry",
   "payroll_entry",
+  "company",
   "letter_head",
-  "branch",
-  "status",
   "section_break_10",
   "salary_slip_based_on_timesheet",
-  "payroll_frequency",
   "start_date",
   "end_date",
   "column_break_15",
   "salary_structure",
+  "payroll_frequency",
   "total_working_days",
   "leave_without_pay",
+  "absent_days",
   "payment_days",
   "hourly_wages",
   "timesheets",
@@ -309,6 +310,7 @@
   {
    "fieldname": "earning",
    "fieldtype": "Column Break",
+   "label": "Earning",
    "oldfieldtype": "Column Break",
    "width": "50%"
   },
@@ -323,6 +325,7 @@
   {
    "fieldname": "deduction",
    "fieldtype": "Column Break",
+   "label": "Deduction",
    "oldfieldtype": "Column Break",
    "width": "50%"
   },
@@ -458,13 +461,18 @@
    "options": "Salary Slip",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "absent_days",
+   "fieldtype": "Float",
+   "label": "Absent Days"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-31 17:13:45.146271",
+ "modified": "2019-02-01 17:13:45.146271",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip",
