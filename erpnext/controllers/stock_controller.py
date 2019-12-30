@@ -46,14 +46,13 @@ class StockController(AccountsController):
 	def validate_serialized_batch(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		for d in self.get("items"):
-			if hasattr(d, 'serial_no') and not (d.serial_no and d.batch_no): continue
-
-			serial_nos = get_serial_nos(d.serial_no)
-			for serial_no_data in frappe.get_all("Serial No",
-				filters={"name": ("in", serial_nos)}, fields=["batch_no", "name"]):
-				if serial_no_data.batch_no != d.batch_no:
-					frappe.throw(_("Row #{0}: Serial No {1} does not belong to Batch {2}")
-						.format(d.idx, serial_no_data.name, d.batch_no))
+			if hasattr(d, 'serial_no') and hasattr(d, 'batch_no') and d.serial_no and d.batch_no:
+				serial_nos = get_serial_nos(d.serial_no)
+				for serial_no_data in frappe.get_all("Serial No",
+					filters={"name": ("in", serial_nos)}, fields=["batch_no", "name"]):
+					if serial_no_data.batch_no != d.batch_no:
+						frappe.throw(_("Row #{0}: Serial No {1} does not belong to Batch {2}")
+							.format(d.idx, serial_no_data.name, d.batch_no))
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
