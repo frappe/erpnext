@@ -491,6 +491,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							tax_category: me.frm.doc.tax_category,
 							item_tax_template: item.item_tax_template,
 							child_docname: item.name,
+							expense_account: item.expense_account,
 							is_internal_customer: me.frm.doc.is_internal_customer
 						}
 					},
@@ -508,7 +509,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								() => {
 									// for internal customer instead of pricing rule directly apply valuation rate on item
 									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
-										item.rate = r.message.valuation_rate;
+										me.get_incoming_rate(item, me.frm.posting_date, me.frm.posting_time,
+												me.frm.doc.doctype, me.frm.doc.company);
 									} else {
 										me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 									}
@@ -535,6 +537,31 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				});
 			}
 		}
+	},
+
+	get_incoming_rate: function(item, posting_date, posting_time, voucher_type, company) {
+
+		let item_args = {
+			'item_code': item.item_code,
+			'warehouse': item.warehouse,
+			'posting_date': posting_date,
+			'posting_time': posting_time,
+			'qty': item.qty,
+			'serial_no': item.serial_no,
+			'voucher_type': voucher_type,
+			'company': company,
+			'allow_zero_valuation_rate': item.allow_zero_valuation_rate
+		}
+
+		frappe.call({
+			method: 'erpnext.stock.utils.get_incoming_rate',
+			args: {
+				args: item_args
+			},
+			callback: function(r) {
+				frappe.model.set_value(item.doctype, item.name, 'rate', r.message);
+			}
+		});
 	},
 
 	add_taxes_from_item_tax_template: function(item_tax_map) {

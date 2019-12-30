@@ -3,19 +3,6 @@
 
 erpnext.taxes_and_totals = erpnext.payments.extend({
 	setup: function() {},
-	apply_valuation_rate_on_item: function(item, company) {
-		frappe.call({
-			method: 'erpnext.stock.get_item_details.get_valuation_rate',
-			args: {
-				item_code: item.item_code,
-				warehouse: item.warehouse,
-				company: company
-			},
-			callback: function(r) {
-				item.rate = r.message.valuation_rate;
-			}
-		})
-	},
 
 	apply_pricing_rule_on_item: function(item){
 		let effective_item_rate = item.price_list_rate;

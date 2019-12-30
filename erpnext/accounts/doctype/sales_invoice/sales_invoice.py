@@ -1437,7 +1437,7 @@ def get_inter_company_details(doc, doctype):
 
 def get_internal_party(parties, link_doctype, doc):
 	if len(parties) == 1:
-			party = parties[0]
+			party = parties[0].name
 	else:
 		# If more than one Internal Supplier/Customer, get supplier/customer on basis of address
 		if doc.get('company_address') or doc.get('shipping_address'):
@@ -1445,9 +1445,9 @@ def get_internal_party(parties, link_doctype, doc):
 			"parenttype": "Address", "link_doctype": link_doctype}, "link_name")
 
 			if not party:
-				party = parties[0]
+				party = parties[0].name
 		else:
-			party = parties[0]
+			party = parties[0].name
 
 	return party
 
