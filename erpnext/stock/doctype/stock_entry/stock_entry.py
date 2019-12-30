@@ -75,6 +75,7 @@ class StockEntry(StockController):
 			set_batch_nos(self, 's_warehouse')
 
 		self.set_incoming_rate()
+		self.validate_serialized_batch()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
 
