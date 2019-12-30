@@ -139,10 +139,10 @@ class TestPickList(unittest.TestCase):
 		})
 
 		pick_list.set_item_locations()
-		self.assertEqual(pick_list.locations[0].item_code, '_Test Serialized Item')
-		self.assertEqual(pick_list.locations[0].warehouse, '_Test Warehouse - _TC')
-		self.assertEqual(pick_list.locations[0].qty, 5)
-		self.assertEqual(pick_list.locations[0].serial_no, '123450\n123451\n123452\n123453\n123454')
+		self.assertEqual(pick_list.get("locations")[0].item_code, '_Test Serialized Item')
+		self.assertEqual(pick_list.get("locations")[0].warehouse, '_Test Warehouse - _TC')
+		self.assertEqual(pick_list.get("locations")[0].qty, 5)
+		self.assertEqual(pick_list.get("locations")[0].serial_no, '123450\n123451\n123452\n123453\n123454')
 
 	def test_pick_list_for_items_from_multiple_sales_orders(self):
 		try:
