@@ -113,30 +113,26 @@ class Loan(AccountsController):
 		disbursement = self.get_disbursement_entry()
 		disbursement_date = None
 
-		status = "Draft"
+		self.status = "Draft"
 
 		if (not disbursement or disbursement.disbursed_amount == 0) and self.docstatus == 1:
-			status = "Sanctioned"
-			if from_validate:
-				self.status = status
+			self.status = "Sanctioned"
 		if disbursement:
 			self.validate_disbursed_amount_and_loan_amount(disbursement.disbursed_amount)
 			if disbursement.disbursed_amount == self.loan_amount and disbursement.disbursed_amount != 0:
-				status = "Disbursed"
+				self.status = "Disbursed"
 				disbursement_date = disbursement.posting_date
-				self.validate_disbursement_date(disbursement_date, status)
+				self.validate_disbursement_date(disbursement_date, self.status)
 
 		if self.total_amount_paid == self.total_payment:
-			status = "Repaid/Closed"
+			self.status = "Repaid/Closed"
 
 		if from_validate and self.docstatus == 0:
-			self.status = status
 			return
-
-		if status:
-			frappe.db.set_value("Loan", self.name, "status", status)
-		if disbursement_date:
-			frappe.db.set_value("Loan", self.name, "disbursement_date", disbursement_date)
+		else:
+			frappe.db.set_value("Loan", self.name, "status", self.status)
+			if disbursement_date:
+				frappe.db.set_value("Loan", self.name, "disbursement_date", disbursement_date)
 
 	def validate_disbursement_date(self, disbursement_date, loan_status):
 		if loan_status == 'Disbursed' and getdate(disbursement_date) > getdate(frappe.db.get_value("Loan", self.name, "repayment_start_date")):
