@@ -1071,19 +1071,10 @@ class StockEntry(StockController):
 		transferred_materials = frappe.db.sql(query, (['Material Transfer for Manufacture'], self.work_order), as_dict=1)
 		for item in transferred_materials:
 			item_code = item.original_item or item.item_code
+
 			transferred_qty = item.qty
 			transferred_qty_each = flt(transferred_qty / qty_to_manufacture)
-
-			required_item = frappe.get_all("Work Order Item",
-				filters={'parent': self.work_order, 'item_code': item_code},
-				fields=["consumed_qty"])
-
-			if not required_item:
-				frappe.msgprint(_("Could not find transferred item {0} in Work Order {1}, the item will not be added in Stock Entry")
-					.format(item_code, self.work_order))
-				continue
-
-			consumed_qty = flt(required_item[0].consumed_qty)
+			consumed_qty = flt(frappe.db.get_value("Work Order Item", {'parent': self.work_order, 'item_code': item_code}, "consumed_qty"))
 
 			if remaining_qty >= flt(self.fg_completed_qty):
 				if self.purpose == "Material Consumption for Manufacture":
