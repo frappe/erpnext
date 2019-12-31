@@ -127,18 +127,18 @@ def mark_bulk_attendance(data):
 
 def get_month_map():
 	return frappe._dict({
-		"January":1,
-		"February":2,
-		"March":3,
-		"April":4,
-		"May":5,
-		"June":6,
-		"July":7,
-		"August":8,
-		"September":9,
-		"October":10,
-		"November":11,
-		"December":12
+		"January": 1,
+		"February": 2,
+		"March": 3,
+		"April": 4,
+		"May": 5,
+		"June": 6,
+		"July": 7,
+		"August": 8,
+		"September": 9,
+		"October": 10,
+		"November": 11,
+		"December": 12
 		})
 
 @frappe.whitelist()
@@ -161,14 +161,14 @@ def get_unmarked_days(employee, month):
 		["docstatus", "!=", 2]
 	])
 
-	marked_day = [get_datetime(record.attendance_date) for record in records]
-	unmarked_day = []
+	marked_days = [get_datetime(record.attendance_date) for record in records]
+	unmarked_days = []
 
 	for date in dates_of_month:
 		date_time = get_datetime(date)
 		if today.day == date_time.day and today.month == date_time.month:
 			break
-		if date_time not in marked_day:
-			unmarked_day.append(date)
+		if date_time not in marked_days:
+			unmarked_days.append(date)
 
-	return unmarked_day
+	return unmarked_days
