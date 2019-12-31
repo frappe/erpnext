@@ -309,7 +309,6 @@
   {
    "fieldname": "earning",
    "fieldtype": "Column Break",
-   "label": "Earning",
    "oldfieldtype": "Column Break",
    "width": "50%"
   },
@@ -324,7 +323,6 @@
   {
    "fieldname": "deduction",
    "fieldtype": "Column Break",
-   "label": "Deduction",
    "oldfieldtype": "Column Break",
    "width": "50%"
   },
@@ -466,7 +464,7 @@
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-12 15:30:23.678933",
+ "modified": "2019-12-31 17:13:45.146271",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip",
