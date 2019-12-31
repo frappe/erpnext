@@ -62,6 +62,7 @@ class SalarySlip(TransactionBase):
 		if self.net_pay < 0:
 			frappe.throw(_("Net Pay cannot be less than 0"))
 		else:
+			self.update_loans()
 			self.set_status()
 			self.update_status(self.name)
 			self.update_salary_slip_in_additional_salary()
@@ -69,6 +70,7 @@ class SalarySlip(TransactionBase):
 				self.email_salary_slip()
 
 	def on_cancel(self):
+		self.update_loans()
 		self.set_status()
 		self.update_status()
 		self.update_salary_slip_in_additional_salary()
@@ -764,7 +766,8 @@ class SalarySlip(TransactionBase):
 			self.total_principal_amount += loan.principal_amount
 
 	def get_loan_details(self):
-		return frappe.db.sql("""select rps.principal_amount, rps.interest_amount, l.name,
+		return frappe.db.sql("""select rps.principal_amount,
+				rps.name as repayment_name, rps.interest_amount, l.name,
 				rps.total_payment, l.loan_account, l.interest_income_account
 			from
 				`tabRepayment Schedule` as rps, `tabLoan` as l
@@ -814,6 +817,17 @@ class SalarySlip(TransactionBase):
 				timesheet.flags.ignore_validate_update_after_submit = True
 				timesheet.set_status()
 				timesheet.save()
+
+	def update_loans(self):
+		for loan in self.get_loan_details():
+			doc = frappe.get_doc("Loan", loan.name)
+
+			#setting repayment schedule and updating total amount to pay
+			repayment_status = 1 if doc.docstatus == 1 else 0
+			frappe.db.set_value("Repayment Schedule", loan.repayment_name, "paid", repayment_status)
+			doc.reload()
+			doc.update_total_amount_paid()
+			doc.set_status()
 
 	def set_status(self, status=None):
 		'''Get and update status'''
