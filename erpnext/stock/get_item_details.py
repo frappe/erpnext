@@ -406,18 +406,27 @@ def get_item_tax_template(args, item, out):
 
 def _get_item_tax_template(args, taxes, out):
 	taxes_with_validity = []
+	taxes_with_no_validity = []
 
 	for tax in taxes:
 		if tax.valid_from:
 			# In purchase Invoice first preference will be given to supplier invoice date
 			# if supplier date is not present then posting date
-			if args.get('bill_date') and tax.valid_from >= getdate(args.get('bill_date')):
+			if args.get('bill_date') and tax.valid_from <= getdate(args.get('bill_date')):
 				taxes_with_validity.append(tax)
-			elif not args.get('bill_date') and args.get('posting_date') and tax.valid_from >= getdate(args.get('posting_date')):
+			elif not args.get('bill_date') and args.get('posting_date') and tax.valid_from <= getdate(args.get('posting_date')):
 				taxes_with_validity.append(tax)
+		else:
+			taxes_with_no_validity.append(tax)
 
 	if taxes_with_validity:
-		taxes = taxes_with_validity
+		taxes = sorted(taxes_with_validity, key = lambda i: i.valid_from, reverse=True)
+	elif taxes_with_no_validity:
+		taxes = taxes_with_no_validity
+
+	# all templates have validity and no template is valid
+	if not taxes_with_validity and (not taxes_with_no_validity):
+		return None
 
 	for tax in taxes:
 		if cstr(tax.tax_category) == cstr(args.get("tax_category")):
