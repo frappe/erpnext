@@ -402,7 +402,7 @@ def get_item_tax_template(args, item, out):
 			item_tax_template = _get_item_tax_template(args, item_group_doc.taxes, out)
 			item_group = item_group_doc.parent_item_group
 
-def _get_item_tax_template(args, taxes, out):
+def _get_item_tax_template(args, taxes, out={}, for_validate=False):
 	taxes_with_validity = []
 	taxes_with_no_validity = []
 
@@ -421,6 +421,9 @@ def _get_item_tax_template(args, taxes, out):
 		taxes = sorted(taxes_with_validity, key = lambda i: i.valid_from, reverse=True)
 	elif taxes_with_no_validity:
 		taxes = taxes_with_no_validity
+
+	if for_validate:
+		return [tax.item_tax_template for tax in taxes if cstr(tax.tax_category) == cstr(args.get('tax_category'))]
 
 	# all templates have validity and no template is valid
 	if not taxes_with_validity and (not taxes_with_no_validity):
