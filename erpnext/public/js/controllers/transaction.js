@@ -1697,7 +1697,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		var item = frappe.get_doc(cdt, cdn);
 		if(!item.item_code) {
-			frappe.throw(__("Please enter Item Code to get item taxes"))
+			frappe.throw(__("Please enter Item Code to get item taxes"));
 		} else {
 
 			let filters = {
