@@ -1693,6 +1693,29 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	set_query_for_item_tax_template: function(doc, cdt, cdn) {
+
+		var item = frappe.get_doc(cdt, cdn);
+		if(!item.item_code) {
+			frappe.throw(__("Please enter Item Code to get item taxes"))
+		} else {
+
+			let filters = {
+				'item_code': item.item_code,
+				'valid_from': doc.posting_date
+			}
+
+			if (doc.doctype === 'Purchase Invoice' && doc.bill_date) {
+				filters['valid_from'] = doc.bill_date;
+			}
+
+			return {
+				query: "erpnext.controllers.queries.get_tax_template",
+				filters: filters
+			}
+		}
+	},
+
 	payment_terms_template: function() {
 		var me = this;
 		const doc = this.frm.doc;
