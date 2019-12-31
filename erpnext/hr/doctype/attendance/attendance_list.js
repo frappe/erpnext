@@ -66,7 +66,6 @@ frappe.listview_settings['Attendance'] = {
 								data : data
 							},
 							callback: function(r) {
-								console.log(r.message);
 								if(r.message === 1) {
 									frappe.show_alert({message:__("Attendance Marked"), indicator:'blue'});
 									cur_dialog.hide();
