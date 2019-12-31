@@ -55,6 +55,11 @@ class calculate_taxes_and_totals(object):
 						'posting_date': self.doc.get('posting_date'),
 						'bill_date': self.doc.get('bill_date')
 					}
+
+					#Do not validate tax if no template mentioned in Item Tax
+					if not item_doc.taxes:
+						continue
+
 					taxes = _get_item_tax_template(args, item_doc.taxes, for_validate=True)
 
 					if item.item_tax_template not in taxes:
