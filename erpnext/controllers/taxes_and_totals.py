@@ -47,19 +47,20 @@ class calculate_taxes_and_totals(object):
 
 	def validate_item_tax_template(self):
 		for item in self.doc.get('items'):
-			item_doc = frappe.get_cached_doc("Item", item.item_code)
-			if item.get('item_tax_template'):
-				args = {
-					'tax_category': self.doc.get('tax_category'),
-					'posting_date': self.doc.get('posting_date'),
-					'bill_date': self.doc.get('bill_date')
-				}
-				taxes = _get_item_tax_template(args, item_doc.taxes, for_validate=True)
+			if item.item_code:
+				item_doc = frappe.get_cached_doc("Item", item.item_code)
+				if item.get('item_tax_template'):
+					args = {
+						'tax_category': self.doc.get('tax_category'),
+						'posting_date': self.doc.get('posting_date'),
+						'bill_date': self.doc.get('bill_date')
+					}
+					taxes = _get_item_tax_template(args, item_doc.taxes, for_validate=True)
 
-				if item.item_tax_template not in taxes:
-					frappe.throw(_("Row {0}: Invalid Item Tax Template for item {1}").format(
-						item.idx, frappe.bold(item.item_code)
-					))
+					if item.item_tax_template not in taxes:
+						frappe.throw(_("Row {0}: Invalid Item Tax Template for item {1}").format(
+							item.idx, frappe.bold(item.item_code)
+						))
 
 	def validate_conversion_rate(self):
 		# validate conversion rate
