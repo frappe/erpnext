@@ -108,7 +108,7 @@ def get_filtered_date_list(employee, start_date, end_date, filter_attendance=Tru
 	if filter_attendance:
 		condition_query += """ and a.selected_date not in (
 			select attendance_date from `tabAttendance`
-			where docstatus = '1' and employee = %(employee)s
+			where docstatus = 1 and employee = %(employee)s
 			and attendance_date between %(start_date)s and %(end_date)s)"""
 	if holiday_list:
 		condition_query += """ and a.selected_date not in (
