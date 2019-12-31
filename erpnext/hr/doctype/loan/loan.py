@@ -127,9 +127,7 @@ class Loan(AccountsController):
 		if self.total_amount_paid == self.total_payment:
 			self.status = "Repaid/Closed"
 
-		if from_validate and self.docstatus == 0:
-			return
-		else:
+		if not from_validate:
 			frappe.db.set_value("Loan", self.name, "status", self.status)
 			if disbursement_date:
 				frappe.db.set_value("Loan", self.name, "disbursement_date", disbursement_date)
