@@ -512,7 +512,12 @@ def get_purchase_invoices(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 
-	return frappe.db.sql("""
-		SELECT item_tax_template FROM `tabItem Tax`
-		WHERE parent = %s AND (ifnull(valid_from, '') = '' OR valid_from <= %s)
-	""", (filters.get('item_code'), getdate(filters.get('valid_from'))))
+	item_doc = frappe.get_cached_doc('Item', filters.get('item_code'))
+
+	if not item_doc.taxes:
+		return frappe.db.sql(""" SELECT  name FROM `tabItem Tax Template` """)
+	else:
+		return frappe.db.sql("""
+			SELECT item_tax_template FROM `tabItem Tax`
+			WHERE parent = %s AND (ifnull(valid_from, '') = '' OR valid_from <= %s)
+		""", (filters.get('item_code'), getdate(filters.get('valid_from'))))
