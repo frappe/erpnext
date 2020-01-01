@@ -4,8 +4,8 @@
     "tree": {
         "Aktiva": {
             "is_group": 1,
-            "root_type": "Asset",
-            "Anlage- u. Kapitalkonten 0": {
+			"root_type": "Asset",
+            "A - Anlagevermögen": {
                 "is_group": 1,
                 "EDV-Software": {
                     "account_number": "0027",
@@ -34,95 +34,184 @@
                     "account_number": "0430",
                     "account_type": "Fixed Asset"
 				},
+				"Accumulated Depreciation": {
+					"account_type": "Accumulated Depreciation"
+				}
+			},
+			"B - Umlaufvermögen": {
+				"is_group": 1,
+				"I. Vorräte": {
+					"is_group": 1,
+					"Roh-, Hilfs- und Betriebsstoffe (Bestand)": {
+						"account_number": "3970",
+						"account_type": "Stock"
+					},
+					"Waren (Bestand)": {
+						"account_number": "3980",
+						"account_type": "Stock"
+					}
+				},
+				"II. Forderungen und sonstige Vermögensgegenstände": {
+					"is_group": 1,
+					"Ford. a. Lieferungen und Leistungen": {
+						"account_number": "1400",
+						"account_type": "Receivable"
+					},
+					"Durchlaufende Posten": {
+						"account_number": "1590"
+					},
+					"Gewinnermittlung \u00a74/3 nicht Ergebniswirksam": {
+						"account_number": "1371"
+					},
+					"Abziehbare VSt. 7%": {
+						"account_number": "1571"
+					},
+					"Abziehbare VSt. 19%": {
+						"account_number": "1576"
+					},
+					"Abziehbare VStr. nach \u00a713b UStG 19%": {
+						"account_number": "1577"
+					},
+					"Leistungen \u00a713b UStG 19% Vorsteuer, 19% Umsatzsteuer": {
+						"account_number": "3120"
+					}
+				},
+				"III. Wertpapiere": {
+					"is_group": 1
+				},
+				"IV. Kassenbestand, Bundesbankguthaben, Guthaben bei Kreditinstituten und Schecks.": {
+					"is_group": 1,
+					"Kasse": {
+						"account_number": "1100",
+						"account_type": "Cash"
+					},
+					"Postbank": {
+						"account_number": "1100",
+						"account_type": "Bank"
+					},
+					"Bankkonto": {
+						"account_number": "1200",
+						"account_type": "Bank"
+					}
+				}
+			},
+			"C - Rechnungsabgrenzungsposten": {
+				"is_group": 1,
 				"Aktive Rechnungsabgrenzung": {
                     "account_number": "0980"
-				},
-				"Passive Rechnungsabgrenzung": {
-                    "account_number": "0990"
 				}
-            },
-            "Finanzkonten 1": {
+			},
+			"D - Aktive latente Steuern": {
 				"is_group": 1,
-				"Kasse": {
-                    "account_number": "1100",
-                    "account_type": "Cash"
-                },
-                "Postbank": {
-                    "account_number": "1100",
-                    "account_type": "Bank"
-                },
-                "Bankkonto": {
-                    "account_number": "1200",
-                    "account_type": "Bank"
-                },
-                "Durchlaufende Posten": {
-                    "account_number": "1590"
-                },
-                "Gewinnermittlung \u00a74/3 nicht Ergebniswirksam": {
-                    "account_number": "1371"
-                },
-                "Abziehbare VSt. 7%": {
-                    "account_number": "1571"
-                },
-                "Abziehbare VSt. 19%": {
-                    "account_number": "1576"
-                },
-                "Abziehbare VStr. nach \u00a713b UStG 19%": {
-                    "account_number": "1577"
-                },
-                "Ford. a. Lieferungen und Leistungen": {
-                    "account_number": "1400",
-                    "account_type": "Receivable"
-                }
-            },
-            "Wareneingangs- u. Bestandskonten 3": {
-                "is_group": 1,
-                "Leistungen \u00a713b UStG 19% Vorsteuer, 19% Umsatzsteuer": {
-                    "account_number": "3120"
-                },
-                "Wareneingang VSt. 19%": {
-                    "account_number": "3400"
-                }
-            }
+				"Aktive latente Steuern": {
+                    "account_number": "0983"
+				}
+			},
+			"E - Aktiver Unterschiedsbetrag aus der Vermögensverrechnung": {
+				"is_group": 1
+			}
         },
         "Passiva": {
             "is_group": 1,
-            "root_type": "Liability",
-            "Umsatzsteuer": {
-                "is_group": 1,
-                "Umsatzsteuer 7%": {
-                    "account_number": "1771"
-                },
-                "Umsatzsteuer 19%": {
-                    "account_number": "1776"
-                },
-                "Umsatzsteuer-Vorauszahlung": {
-                    "account_number": "1780"
-                },
-                "Umsatzsteuer-Vorauszahlung 1/11": {
-                    "account_number": "1781"
-                },
-                "Umsatzsteuer \u00a7 13b UStG 19%": {
-                    "account_number": "1787"
-                },
-                "Umsatzsteuer Vorjahr": {
-                    "account_number": "1790"
-                },
-                "Umsatzsteuer fr\u00fchere Jahre": {
-                    "account_number": "1791"
-                }
-            },
-            "Verbindlichkeiten": {
-                "is_group": 1,
-                "Verblk. aus Lieferungen u. Leistungen": {
-                    "account_number": "1600",
-                    "account_type": "Payable"
+			"root_type": "Liability",
+			"A. Eigenkapital": {
+				"is_group": 1,
+				"I. Gezeichnetes Kapital": {
+					"is_group": 1
 				},
-				"Verblk. aus Lohn und Gehalt": {
-                    "account_number": "1740",
-                    "account_type": "Payable"
+				"II. Kapitalrücklage": {
+					"is_group": 1
+				},
+				"III. Gewinnrücklagen": {
+					"is_group": 1
+				},
+				"IV. Gewinnvortrag/Verlustvortrag": {
+					"is_group": 1
+				},
+				"V. Jahresüberschuß/Jahresfehlbetrag": {
+					"is_group": 1
 				}
-            }
+			},
+			"B. Rückstellungen": {
+				"is_group": 1,
+				"I. Rückstellungen für Pensionen und ähnliche Verpflichtungen": {
+					"is_group": 1
+				},
+				"II. Steuerrückstellungen": {
+					"is_group": 1
+				},
+				"III. sonstige Rückstellungen": {
+					"is_group": 1
+				}
+			},
+			"C. Verbindlichkeiten": {
+				"is_group": 1,
+				"I. Anleihen": {
+					"is_group": 1
+				},
+				"II. Verbindlichkeiten gegenüber Kreditinstituten": {
+					"is_group": 1
+				},
+				"III. Erhaltene Anzahlungen auf Bestellungen": {
+					"is_group": 1
+				},
+				"IV. Verbindlichkeiten aus Lieferungen und Leistungen": {
+					"is_group": 1,
+					"Verbindlichkeiten aus Lieferungen u. Leistungen": {
+						"account_number": "1600",
+						"account_type": "Payable"
+					}
+				},
+				"V. Verbindlichkeiten aus der Annahme gezogener Wechsel und der Ausstellung eigener Wechsel": {
+					"is_group": 1
+				},
+				"VI. Verbindlichkeiten gegenüber verbundenen Unternehmen": {
+					"is_group": 1
+				},
+				"VII. Verbindlichkeiten gegenüber Unternehmen, mit denen ein Beteiligungsverhältnis besteht": {
+					"is_group": 1
+				},
+				"VIII. sonstige Verbindlichkeiten": {
+					"is_group": 1,
+					"Verbindlichkeiten aus Lohn und Gehalt": {
+						"account_number": "1740",
+						"account_type": "Payable"
+					},
+					"Umsatzsteuer": {
+						"is_group": 1,
+						"Umsatzsteuer 7%": {
+							"account_number": "1771"
+						},
+						"Umsatzsteuer 19%": {
+							"account_number": "1776"
+						},
+						"Umsatzsteuer-Vorauszahlung": {
+							"account_number": "1780"
+						},
+						"Umsatzsteuer-Vorauszahlung 1/11": {
+							"account_number": "1781"
+						},
+						"Umsatzsteuer \u00a7 13b UStG 19%": {
+							"account_number": "1787"
+						},
+						"Umsatzsteuer Vorjahr": {
+							"account_number": "1790"
+						},
+						"Umsatzsteuer fr\u00fchere Jahre": {
+							"account_number": "1791"
+						}
+					}
+				}
+			},
+			"D. Rechnungsabgrenzungsposten": {
+				"is_group": 1,
+				"Passive Rechnungsabgrenzung": {
+					"account_number": "0990"
+				}
+			},
+			"E. Passive latente Steuern": {
+				"is_group": 1
+			}
         },
         "Erl\u00f6se u. Ertr\u00e4ge 2/8": {
             "is_group": 1,
@@ -160,13 +249,47 @@
         },
         "Aufwendungen 2/4": {
             "is_group": 1,
-            "root_type": "Expense",
+			"root_type": "Expense",
+			"Wareneingang": {
+				"account_number": "3200"
+			},
+			"Herstellungskosten": {
+				"account_number": "4996",
+				"account_type": "Cost of Goods Sold"
+			},
+			"Verluste aus dem Abgang von Gegenständen des Anlagevermögens": {
+				"account_number": "2320",
+				"account_type": "Stock Adjustment"
+			},
+			"Verwaltungskosten": {
+				"account_number": "4997",
+				"account_type": "Expenses Included In Valuation"
+			},
+			"Vertriebskosten": {
+				"account_number": "4998",
+				"account_type": "Expenses Included In Valuation"
+			},
+			"Gegenkonto 4996-4998": {
+				"account_number": "4999"
+			},
             "Abschreibungen": {
                 "is_group": 1,
-                "Sofortabschreibung GWG": {
+				"Abschreibungen auf Sachanlagen (ohne AfA auf Kfz und Gebäude)": {
+                    "account_number": "4830",
+                    "account_type": "Depreciation"
+				},
+				"Abschreibungen auf Gebäude": {
+                    "account_number": "4831",
+                    "account_type": "Depreciation"
+				},
+				"Abschreibungen auf Kfz": {
+                    "account_number": "4832",
+                    "account_type": "Depreciation"
+				},
+				"Sofortabschreibung GWG": {
                     "account_number": "4855",
                     "account_type": "Expense Account"
-                }
+				}
             },
             "Kfz-Kosten": {
                 "is_group": 1,
