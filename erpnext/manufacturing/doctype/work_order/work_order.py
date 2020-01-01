@@ -200,13 +200,26 @@ class WorkOrder(Document):
 
 		for purpose, fieldname in (("Manufacture", "produced_qty"),
 			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")):
+			qty = 0
 			if (purpose == 'Material Transfer for Manufacture' and
 				self.operations and self.transfer_material_against == 'Job Card'):
-				continue
-
-			qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
-				from `tabStock Entry` where work_order=%s and docstatus=1
-				and purpose=%s""", (self.name, purpose))[0][0])
+				operation_wise_qty = {}
+				for data in frappe.get_all("Stock Entry",
+					fields=["sum(fg_completed_qty) as qty, operation_id"],
+					filters={
+						"docstatus": 1,
+						"purpose": purpose,
+						"operation_id": ("in", [d.name for d in self.operations])
+					},
+					group_by = "operation_id"):
+					operation_wise_qty[data.operation_id] = flt(data.qty)
+				
+				if operation_wise_qty and len(self.operations) == len(operation_wise_qty):
+					qty = min([val for key, val in operation_wise_qty.items()])
+			else:
+				qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
+					from `tabStock Entry` where work_order=%s and docstatus=1
+					and purpose=%s""", (self.name, purpose))[0][0])
 
 			completed_qty = self.qty + (allowance_percentage/100 * self.qty)
 			if qty > completed_qty:
@@ -638,8 +651,8 @@ def get_item_details(item, project = None):
 		else:
 			frappe.throw(_("Default BOM for {0} not found").format(item))
 
-	bom_data = frappe.db.get_value('BOM', res['bom_no'],
-		['project', 'allow_alternative_item', 'transfer_material_against', 'item_name'], as_dict=1)
+	bom_data = frappe.db.get_value("BOM", res["bom_no"], ["project", "allow_alternative_item",
+		"transfer_material_against", "material_consumption_against", "item_name"], as_dict=1)
 
 	res['project'] = project or bom_data.pop("project")
 	res.update(bom_data)

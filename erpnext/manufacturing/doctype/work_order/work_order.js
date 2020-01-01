@@ -137,7 +137,7 @@ frappe.ui.form.on("Work Order", {
 
 		if (frm.doc.docstatus === 1
 			&& frm.doc.operations && frm.doc.operations.length
-			&& frm.doc.qty != frm.doc.material_transferred_for_manufacturing) {
+			&& frm.doc.qty != frm.doc.produced_qty) {
 
 			const not_completed = frm.doc.operations.filter(d => {
 				if(d.status != 'Completed') {
@@ -349,7 +349,7 @@ frappe.ui.form.on("Work Order", {
 						erpnext.in_production_item_onchange = true;
 
 						$.each(["description", "stock_uom", "project", "bom_no", "allow_alternative_item",
-							"transfer_material_against", "item_name"], function(i, field) {
+							"transfer_material_against", "material_consumption_against", "item_name"], function(i, field) {
 							frm.set_value(field, r.message[field]);
 						});
 
@@ -396,6 +396,8 @@ frappe.ui.form.on("Work Order", {
 		frm.toggle_reqd(["fg_warehouse", "wip_warehouse"], true);
 		frm.fields_dict.required_items.grid.toggle_reqd("source_warehouse", true);
 		frm.toggle_reqd("transfer_material_against",
+			frm.doc.operations && frm.doc.operations.length > 0);
+		frm.toggle_reqd("material_consumption_against",
 			frm.doc.operations && frm.doc.operations.length > 0);
 		frm.fields_dict.operations.grid.toggle_reqd("workstation", frm.doc.operations);
 	},
@@ -507,7 +509,8 @@ erpnext.work_order = {
 				&& frm.doc.status != 'Stopped') {
 					frm.has_finish_btn = true;
 
-					if (frm.doc.__onload && frm.doc.__onload.material_consumption == 1) {
+					if (frm.doc.material_consumption_against !== 'Job Card' &&
+						frm.doc.__onload && frm.doc.__onload.material_consumption == 1) {
 						// Only show "Material Consumption" when required_qty > consumed_qty
 						var counter = 0;
 						var tbl = frm.doc.required_items || [];

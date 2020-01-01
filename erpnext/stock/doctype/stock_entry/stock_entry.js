@@ -280,7 +280,8 @@ frappe.ui.form.on('Stock Entry', {
 			method: "erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings.is_material_consumption_enabled",
 		}).then(r => {
 			if (cint(r.message) == 0
-				&& frm.doc.purpose=="Material Consumption for Manufacture") {
+				&& frm.doc.purpose=="Material Consumption for Manufacture"
+				&& !frm.doc.operation_id) {
 				frm.set_value("purpose", 'Manufacture');
 				frappe.throw(__('Material Consumption is not set in Manufacturing Settings.'));
 			}
@@ -817,7 +818,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	work_order: function() {
 		var me = this;
 		this.toggle_enable_bom();
-		if(!me.frm.doc.work_order || me.frm.doc.job_card) {
+		if(!me.frm.doc.work_order || me.frm.doc.operation_id) {
 			return;
 		}
 

@@ -6,23 +6,36 @@ frappe.ui.form.on('Job Card', {
 		frappe.flags.pause_job = 0;
 		frappe.flags.resume_job = 0;
 
+		if(frm.doc.docstatus === 0) {
+			frm.set_df_property("operation", "read_only", frm.doc.operation_id ? 1 : 0);
+		}
+
 		if(!frm.doc.__islocal && frm.doc.items && frm.doc.items.length) {
-			if (frm.doc.for_quantity != frm.doc.transferred_qty) {
+			if (frm.doc.per_transferred !== 100) {
 				frm.add_custom_button(__("Material Request"), () => {
 					frm.trigger("make_material_request");
 				});
 			}
 
-			if (frm.doc.for_quantity != frm.doc.transferred_qty) {
+			if (frm.doc.__onload && frm.doc.__onload.allow_material_transfer
+				&& frm.doc.per_transferred !== 100) {
 				frm.add_custom_button(__("Material Transfer"), () => {
-					frm.trigger("make_stock_entry");
+					frm.events.make_stock_entry(frm, "Material Transfer for Manufacture");
 				}).addClass("btn-primary");
 			}
 		}
 
-		if (frm.doc.docstatus == 0 && frm.doc.for_quantity > frm.doc.total_completed_qty
-			&& (!frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)) {
+		if (frm.doc.docstatus === 0 && frm.doc.for_quantity > frm.doc.total_completed_qty
+			&& (!frm.doc.items.length || frm.doc.per_transferred > 0)) {
 			frm.trigger("prepare_timer_buttons");
+		}
+
+		if (frm.doc.docstatus == 1 && frm.doc.items && frm.doc.__onload &&
+			frm.doc.__onload.allow_material_consumption && frm.doc.items.length &&
+			frm.doc.per_transferred > 0 && frm.doc.per_consumed !== 100) {
+			frm.add_custom_button(__("Material Consumption"), () => {
+				frm.events.make_stock_entry(frm, "Material Consumption for Manufacture");
+			}).addClass("btn-primary");
 		}
 	},
 
@@ -174,11 +187,17 @@ frappe.ui.form.on('Job Card', {
 		});
 	},
 
-	make_stock_entry: function(frm) {
-		frappe.model.open_mapped_doc({
+	make_stock_entry: function(frm, purpose) {
+		frappe.call({
 			method: "erpnext.manufacturing.doctype.job_card.job_card.make_stock_entry",
-			frm: frm,
-			run_link_triggers: true
+			args: {
+				source_name: frm.doc.name,
+				purpose: purpose
+			},
+			freeze: true,
+			callback: function() {
+				frm.reload_doc();
+			}
 		});
 	},
 

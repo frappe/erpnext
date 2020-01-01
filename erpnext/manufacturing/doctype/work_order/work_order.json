@@ -44,6 +44,9 @@
   "expected_delivery_date",
   "operations_section",
   "transfer_material_against",
+  "column_break_38",
+  "material_consumption_against",
+  "section_break_39",
   "operations",
   "section_break_22",
   "planned_operating_cost",
@@ -312,6 +315,7 @@
   {
    "default": "Work Order",
    "depends_on": "operations",
+   "description": "Transfer materials to work in progress warehouse",
    "fieldname": "transfer_material_against",
    "fieldtype": "Select",
    "label": "Transfer Material Against",
@@ -320,7 +324,6 @@
   {
    "fieldname": "operations",
    "fieldtype": "Table",
-   "label": "Operations",
    "options": "Work Order Operation",
    "read_only": 1
   },
@@ -463,6 +466,24 @@
    "fieldname": "update_consumed_material_cost_in_project",
    "fieldtype": "Check",
    "label": "Update Consumed Material Cost In Project"
+  },
+  {
+   "default": "Work Order",
+   "description": "Either consume all the raw materials against the work order at once or against the job card based on operations",
+   "fetch_from": "bom_no.material_consumption_against",
+   "fetch_if_empty": 1,
+   "fieldname": "material_consumption_against",
+   "fieldtype": "Select",
+   "label": "Material Consumption Against",
+   "options": "\nWork Order\nJob Card"
+  },
+  {
+   "fieldname": "section_break_39",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_38",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cogs",
@@ -470,7 +491,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-04 11:20:04.695123",
+ "modified": "2020-01-08 00:15:47.821048",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

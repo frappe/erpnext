@@ -454,6 +454,8 @@ var toggle_operations = function(frm) {
 	frm.toggle_display("operations_section", cint(frm.doc.with_operations) == 1);
 	frm.toggle_display("transfer_material_against", cint(frm.doc.with_operations) == 1);
 	frm.toggle_reqd("transfer_material_against", cint(frm.doc.with_operations) == 1);
+	frm.toggle_display("material_consumption_against", cint(frm.doc.with_operations) == 1);
+	frm.toggle_reqd("material_consumption_against", cint(frm.doc.with_operations) == 1);
 };
 
 frappe.ui.form.on("BOM", "with_operations", function(frm) {

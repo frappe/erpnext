@@ -9,13 +9,23 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 from frappe.utils import (flt, cint, time_diff_in_hours, get_datetime, getdate, 
-	get_time, add_to_date, time_diff, add_days, get_datetime_str)
+	get_time, add_to_date, time_diff, add_days, get_datetime_str, get_link_to_form)
 
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
 
 class OverlapError(frappe.ValidationError): pass
 
 class JobCard(Document):
+	def onload(self):
+		if self.get("work_order"):
+			work_order_data = frappe.db.get_value("Work Order", self.work_order, 
+				["transfer_material_against", "material_consumption_against"], as_dict=1)
+
+			self.set_onload("allow_material_transfer",
+				True if work_order_data.transfer_material_against == "Job Card" else False)
+			self.set_onload("allow_material_consumption",
+				True if work_order_data.material_consumption_against == "Job Card" else False)
+
 	def validate(self):
 		self.validate_time_logs()
 		self.set_status()
@@ -156,11 +166,12 @@ class JobCard(Document):
 		})
 
 	def get_required_items(self):
-		if not self.get('work_order'):
+		if not self.get("work_order"):
 			return
 
-		doc = frappe.get_doc('Work Order', self.get('work_order'))
-		if doc.transfer_material_against == 'Work Order' or doc.skip_transfer:
+		doc = frappe.get_doc("Work Order", self.get("work_order"))
+		if not (doc.transfer_material_against == "Job Card" or
+			doc.material_consumption_against == "Job Card") or doc.skip_transfer:
 			return
 
 		for d in doc.required_items:
@@ -168,24 +179,22 @@ class JobCard(Document):
 				frappe.throw(_("Row {0} : Operation is required against the raw material item {1}")
 					.format(d.idx, d.item_code))
 
-			if self.get('operation') == d.operation:
-				self.append('items', {
-					'item_code': d.item_code,
-					'source_warehouse': d.source_warehouse,
-					'uom': frappe.db.get_value("Item", d.item_code, 'stock_uom'),
-					'item_name': d.item_name,
-					'description': d.description,
-					'required_qty': (d.required_qty * flt(self.for_quantity)) / doc.qty
+			if self.get("operation") == d.operation:
+				self.append("items", {
+					"item_code": d.item_code,
+					"source_warehouse": d.source_warehouse,
+					"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
+					"item_name": d.item_name,
+					"description": d.description,
+					"required_qty": (d.required_qty * flt(self.for_quantity)) / doc.qty
 				})
 
 	def on_submit(self):
 		self.validate_job_card()
 		self.update_work_order()
-		self.set_transferred_qty()
 
 	def on_cancel(self):
 		self.update_work_order()
-		self.set_transferred_qty()
 
 	def validate_job_card(self):
 		if not self.time_logs:
@@ -217,61 +226,22 @@ class JobCard(Document):
 				if time_log.to_time:
 					to_time_list.append(time_log.to_time)
 
-		if for_quantity:
-			wo = frappe.get_doc('Work Order', self.work_order)
+		wo = frappe.get_doc('Work Order', self.work_order)
 
-			for data in wo.operations:
-				if data.name == self.operation_id:
-					data.completed_qty = for_quantity
-					data.actual_operation_time = time_in_mins
-					data.actual_start_time = min(from_time_list) if from_time_list else None
-					data.actual_end_time = max(to_time_list) if to_time_list else None
+		for data in wo.operations:
+			if data.name == self.operation_id:
+				data.completed_qty = for_quantity
+				data.actual_operation_time = time_in_mins
+				data.actual_start_time = min(from_time_list) if from_time_list else None
+				data.actual_end_time = max(to_time_list) if to_time_list else None
 
-			wo.flags.ignore_validate_update_after_submit = True
-			wo.update_operation_status()
-			wo.calculate_operating_cost()
-			wo.set_actual_dates()
-			wo.save()
+		wo.flags.ignore_validate_update_after_submit = True
+		wo.update_operation_status()
+		wo.calculate_operating_cost()
+		wo.set_actual_dates()
+		wo.save()
 
-	def set_transferred_qty(self, update_status=False):
-		if not self.items:
-			self.transferred_qty = self.for_quantity if self.docstatus == 1 else 0
-
-		doc = frappe.get_doc('Work Order', self.get('work_order'))
-		if doc.transfer_material_against == 'Work Order' or doc.skip_transfer:
-			return
-
-		if self.items:
-			self.transferred_qty = frappe.db.get_value('Stock Entry', {
-				'job_card': self.name,
-				'work_order': self.work_order,
-				'docstatus': 1
-			}, 'sum(fg_completed_qty)') or 0
-
-		self.db_set("transferred_qty", self.transferred_qty)
-
-		qty = 0
-		if self.work_order:
-			doc = frappe.get_doc('Work Order', self.work_order)
-			if doc.transfer_material_against == 'Job Card' and not doc.skip_transfer:
-				completed = True
-				for d in doc.operations:
-					if d.status != 'Completed':
-						completed = False
-						break
-
-				if completed:
-					job_cards = frappe.get_all('Job Card', filters = {'work_order': self.work_order,
-						'docstatus': ('!=', 2)}, fields = 'sum(transferred_qty) as qty', group_by='operation_id')
-
-					if job_cards:
-						qty = min([d.qty for d in job_cards])
-
-			doc.db_set('material_transferred_for_manufacturing', qty)
-
-		self.set_status(update_status)
-
-	def set_status(self, update_status=False):
+	def set_status(self, update=False):
 		if self.status == "On Hold": return
 
 		self.status = {
@@ -283,15 +253,14 @@ class JobCard(Document):
 		if self.time_logs:
 			self.status = 'Work In Progress'
 
-		if (self.docstatus == 1 and
-			(self.for_quantity == self.transferred_qty or not self.items)):
-			self.status = 'Completed'
+		if self.per_transferred == 100:
+			self.status = 'Material Transferred'
 
-		if self.status != 'Completed':
-			if self.for_quantity == self.transferred_qty:
-				self.status = 'Material Transferred'
+		if self.docstatus == 1:
+			if self.per_transferred == 100 and self.per_consumed == 100:
+				self.status = 'Completed'
 
-		if update_status:
+		if update:
 			self.db_set('status', self.status)
 
 @frappe.whitelist()
@@ -307,13 +276,17 @@ def make_material_request(source_name, target_doc=None):
 			"doctype": "Material Request",
 			"field_map": {
 				"name": "job_card",
+				"operation_id": "operation_id"
 			},
 		},
 		"Job Card Item": {
 			"doctype": "Material Request Item",
 			"field_map": {
 				"required_qty": "qty",
-				"uom": "stock_uom"
+				"uom": "stock_uom",
+				"uom": "uom",
+				"name": "job_card_item",
+				"parent": "job_card",
 			},
 			"postprocess": update_item,
 		}
@@ -322,38 +295,65 @@ def make_material_request(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
-def make_stock_entry(source_name, target_doc=None):
+def make_stock_entry(source_name, purpose):
+	message = {
+		"Material Transfer for Manufacture": "Materials are transferred from source to work in progress warehouse",
+		"Material Consumption for Manufacture": "Materials are consumed from the work in progress warehouse"
+	}
+
+	doc = _make_stock_entry(source_name, purpose=purpose)
+	doc.submit()
+
+	frappe.msgprint(_("{0}, check {1}")
+		.format(message.get(purpose), get_link_to_form("Stock Entry", doc.name)))
+
+@frappe.whitelist()
+def _make_stock_entry(source_name, target_doc=None, purpose=None):
 	def update_item(obj, target, source_parent):
-		target.t_warehouse = source_parent.wip_warehouse
+		target.s_warehouse = source_parent.wip_warehouse
+		target.qty = obj.required_qty - obj.consumed_qty
+		if purpose == "Material Transfer for Manufacture":
+			target.qty = obj.required_qty - obj.transferred_qty
+			target.s_warehouse = obj.source_warehouse
+			target.t_warehouse = source_parent.wip_warehouse
 
 	def set_missing_values(source, target):
-		target.purpose = "Material Transfer for Manufacture"
 		target.from_bom = 1
-		target.fg_completed_qty = source.get('for_quantity', 0) - source.get('transferred_qty', 0)
+		target.purpose = purpose
+		target.fg_completed_qty = source.get("for_quantity", 0)
 		target.calculate_rate_and_amount()
 		target.set_missing_values()
 		target.set_stock_entry_type()
+		
+		if (purpose == "Material Consumption for Manufacture" and
+			frappe.db.get_single_value("Manufacturing Settings",
+				"backflush_raw_materials_based_on") == "Material Transferred for Manufacture"):
+			target.items = []
+			target.get_transfered_raw_materials(source_name)
 
 	doclist = get_mapped_doc("Job Card", source_name, {
 		"Job Card": {
 			"doctype": "Stock Entry",
 			"field_map": {
 				"name": "job_card",
-				"for_quantity": "fg_completed_qty"
+				"for_quantity": "fg_completed_qty",
+				"operation_id": "operation_id"
 			},
 		},
 		"Job Card Item": {
 			"doctype": "Stock Entry Detail",
 			"field_map": {
-				"source_warehouse": "s_warehouse",
-				"required_qty": "qty",
-				"uom": "stock_uom"
+				"name": "job_card_item",
+				"parent": "job_card",
+				"uom": "stock_uom",
+				"uom": "uom"
 			},
 			"postprocess": update_item,
 		}
 	}, target_doc, set_missing_values)
 
 	return doclist
+
 
 def time_diff_in_minutes(string_ed_date, string_st_date):
 	return time_diff(string_ed_date, string_st_date).total_seconds() / 60

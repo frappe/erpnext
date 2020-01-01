@@ -455,14 +455,19 @@ def make_stock_entry(source_name, target_doc=None):
 			"validation": {
 				"docstatus": ["=", 1],
 				"material_request_type": ["in", ["Material Transfer", "Material Issue"]]
-			}
+			},
+			"field_map": {
+				"operation_id": "operation_id"
+			},
 		},
 		"Material Request Item": {
 			"doctype": "Stock Entry Detail",
 			"field_map": {
 				"name": "material_request_item",
 				"parent": "material_request",
-				"uom": "stock_uom"
+				"uom": "stock_uom",
+				"job_card_item": "job_card_item",
+				"job_card": "job_card",
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.ordered_qty < doc.stock_qty

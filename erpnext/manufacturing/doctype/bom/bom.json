@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "creation": "2013-01-22 15:11:38",
  "doctype": "DocType",
@@ -25,9 +26,10 @@
   "buying_price_list",
   "section_break_21",
   "with_operations",
+  "routing",
   "column_break_23",
   "transfer_material_against",
-  "routing",
+  "material_consumption_against",
   "operations_section",
   "operations",
   "materials_section",
@@ -477,13 +479,22 @@
   {
    "fieldname": "column_break_52",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "Work Order",
+   "description": "Either consume all the raw materials against the work order at once or against the job card based on operations",
+   "fieldname": "material_consumption_against",
+   "fieldtype": "Select",
+   "label": "Material Consumption Against",
+   "options": "\nWork Order\nJob Card"
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2019-11-22 14:35:12.142150",
+ "links": [],
+ "modified": "2020-01-08 00:15:31.237101",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

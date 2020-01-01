@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2018-07-09 17:23:29.518745",
  "doctype": "DocType",
@@ -26,16 +27,16 @@
   "project",
   "timing_detail",
   "time_logs",
-  "section_break_13",
-  "total_completed_qty",
-  "total_time_in_mins",
-  "column_break_15",
   "section_break_8",
   "items",
+  "section_break_13",
+  "total_completed_qty",
+  "column_break_15",
+  "total_time_in_mins",
   "more_information",
   "operation_id",
-  "transferred_qty",
-  "requested_qty",
+  "per_transferred",
+  "per_consumed",
   "column_break_20",
   "barcode",
   "job_started",
@@ -173,20 +174,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "transferred_qty",
-   "fieldtype": "Float",
-   "label": "Transferred Qty",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "requested_qty",
-   "fieldtype": "Float",
-   "label": "Requested Qty",
-   "read_only": 1
-  },
-  {
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -207,7 +194,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "Open\nWork In Progress\nMaterial Transferred\nOn Hold\nSubmitted\nCancelled\nCompleted",
+   "options": "Open\nWork In Progress\nMaterial Transferred\nMaterial Consumed\nOn Hold\nSubmitted\nCancelled\nCompleted",
    "read_only": 1
   },
   {
@@ -287,10 +274,25 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "per_transferred",
+   "fieldtype": "Percent",
+   "hidden": 1,
+   "label": "Per Transferred",
+   "read_only": 1
+  },
+  {
+   "fieldname": "per_consumed",
+   "fieldtype": "Percent",
+   "hidden": 1,
+   "label": "Per Consumed",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-12-03 13:08:57.926201",
+ "links": [],
+ "modified": "2019-12-31 15:34:09.727126",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

@@ -74,14 +74,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Timesheet",
-					"description": _("Time Sheet for manufacturing."),
+					"name": "Job Card",
 					"onboard": 1,
-					"dependencies": ["Activity Type"]
-				},
-				{
-					"type": "doctype",
-					"name": "Job Card"
 				}
 			]
 		},

@@ -35,6 +35,10 @@ form_grid_templates = {
 }
 
 class StockEntry(StockController):
+	def __init__(self, *args, **kwargs):
+		super(StockEntry, self).__init__(*args, **kwargs)
+		self.status_updater = []
+
 	def get_feed(self):
 		return self.stock_entry_type
 
@@ -80,7 +84,6 @@ class StockEntry(StockController):
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
 
 	def on_submit(self):
-
 		self.update_stock_ledger()
 
 		update_serial_nos_after_submit(self, "items")
@@ -97,7 +100,6 @@ class StockEntry(StockController):
 			self.update_so_in_serial_number()
 
 	def on_cancel(self):
-
 		if self.purchase_order and self.purpose == "Send to Subcontractor":
 			self.update_purchase_order_supplied_items()
 
@@ -133,10 +135,6 @@ class StockEntry(StockController):
 
 		if self.purpose not in valid_purposes:
 			frappe.throw(_("Purpose must be one of {0}").format(comma_or(valid_purposes)))
-
-		if self.job_card and self.purpose != 'Material Transfer for Manufacture':
-			frappe.throw(_("For job card {0}, you can only make the 'Material Transfer for Manufacture' type stock entry")
-				.format(self.job_card))
 
 	def set_transfer_qty(self):
 		for item in self.get("items"):
@@ -324,6 +322,8 @@ class StockEntry(StockController):
 
 	def check_if_operations_completed(self):
 		"""Check if Time Sheets are completed against before manufacturing to capture operating costs."""
+		if self.purpose=="Material Consumption for Manufacture" and self.job_card: return
+
 		prod_order = frappe.get_doc("Work Order", self.work_order)
 		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
 			"overproduction_percentage_for_work_order"))
@@ -711,15 +711,49 @@ class StockEntry(StockController):
 			if pro_doc.status == 'Stopped':
 				frappe.throw(_("Transaction not allowed against stopped Work Order {0}").format(self.work_order))
 
-		if self.job_card:
-			job_doc = frappe.get_doc('Job Card', self.job_card)
-			job_doc.set_transferred_qty(update_status=True)
+		if self.operation_id:
+			if self.purpose == "Material Transfer for Manufacture":
+				self.status_updater.append({
+					"source_dt": "Stock Entry Detail",
+					"target_dt": "Job Card Item",
+					"target_ref_field": "required_qty",
+					"target_parent_field": "per_transferred",
+					"percent_join_field":"job_card",
+					"join_field": "job_card_item",
+					"second_join_field": "job_card",
+					"target_field": "transferred_qty",
+					"target_parent_dt": "Job Card",
+					"source_field": "qty",
+					"extra_cond": """ and parent in (select name from `tabStock Entry` where
+						purpose = 'Material Transfer for Manufacture' and docstatus=1
+						and work_order = %s)""" % frappe.db.escape(self.work_order)
+				})
+
+			if self.purpose == "Material Consumption for Manufacture":
+				self.status_updater.append({
+					"source_dt": "Stock Entry Detail",
+					"target_dt": "Job Card Item",
+					"join_field": "job_card_item",
+					"target_parent_field": "per_consumed",
+					"percent_join_field":"job_card",
+					"second_join_field": "job_card",
+					"target_field": "consumed_qty",
+					"target_ref_field": "required_qty",
+					"target_parent_dt": "Job Card",
+					"source_field": "qty",
+					"extra_cond": """ and parent in (select name from `tabStock Entry` where
+						purpose = 'Material Consumption for Manufacture' and docstatus=1
+						and work_order = %s)""" % frappe.db.escape(self.work_order)
+				})
+
+			if self.status_updater:
+				self.update_prevdoc_status()
 
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
 			_validate_work_order(pro_doc)
 			pro_doc.run_method("update_status")
-			if self.fg_completed_qty:
+			if self.fg_completed_qty and self.purpose != 'Material Consumption for Manufacture':
 				pro_doc.run_method("update_work_order_qty")
 				if self.purpose == "Manufacture":
 					pro_doc.run_method("update_planned_qty")
@@ -843,7 +877,9 @@ class StockEntry(StockController):
 					(self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture")
 					and frappe.db.get_single_value("Manufacturing Settings", "material_consumption")== 1):
 					self.get_unconsumed_raw_materials()
-				else:
+
+				elif frappe.get_cached_value("Work Order",
+					self.work_order, "material_consumption_against") != "Job Card":
 					if not self.fg_completed_qty:
 						frappe.throw(_("Manufacturing Quantity is mandatory"))
 
@@ -1007,33 +1043,41 @@ class StockEntry(StockController):
 					}
 				})
 
-	def get_transfered_raw_materials(self):
+	def get_transfered_raw_materials(self, job_card=None):
+		job_card_cond = ""
+		if job_card:
+			job_card_cond = " and se.job_card = %s" %(frappe.db.escape(job_card))
+
 		transferred_materials = frappe.db.sql("""
 			select
 				item_name, original_item, item_code, sum(qty) as qty, sed.t_warehouse as warehouse,
-				description, stock_uom, expense_account, cost_center
+				description, stock_uom, expense_account, cost_center, sed.job_card, sed.job_card_item
 			from `tabStock Entry` se,`tabStock Entry Detail` sed
 			where
 				se.name = sed.parent and se.docstatus=1 and se.purpose='Material Transfer for Manufacture'
-				and se.work_order= %s and ifnull(sed.t_warehouse, '') != ''
+				and se.work_order= %s and ifnull(sed.t_warehouse, '') != '' {0}
 			group by sed.item_code, sed.t_warehouse
-		""", self.work_order, as_dict=1)
+		""".format(job_card_cond), self.work_order, as_dict=1)
 
 		materials_already_backflushed = frappe.db.sql("""
 			select
-				item_code, sed.s_warehouse as warehouse, sum(qty) as qty
+				item_code, sed.s_warehouse as warehouse, sum(qty) as qty, sed.job_card, sed.job_card_item
 			from
 				`tabStock Entry` se, `tabStock Entry Detail` sed
 			where
 				se.name = sed.parent and se.docstatus=1
 				and (se.purpose='Manufacture' or se.purpose='Material Consumption for Manufacture')
-				and se.work_order= %s and ifnull(sed.s_warehouse, '') != ''
+				and se.work_order= %s and ifnull(sed.s_warehouse, '') != '' {0}
 			group by sed.item_code, sed.s_warehouse
-		""", self.work_order, as_dict=1)
+		""".format(job_card_cond), self.work_order, as_dict=1)
 
 		backflushed_materials= {}
 		for d in materials_already_backflushed:
-			backflushed_materials.setdefault(d.item_code,[]).append({d.warehouse: d.qty})
+			key = d.item_code
+			if d.get("job_card"):
+				key = (d.item_code, d.job_card, d.job_card_item)
+
+			backflushed_materials.setdefault(key,[]).append({d.warehouse: d.qty})
 
 		po_qty = frappe.db.sql("""select qty, produced_qty, material_transferred_for_manufacturing from
 			`tabWork Order` where name=%s""", self.work_order, as_dict=1)[0]
@@ -1043,7 +1087,11 @@ class StockEntry(StockController):
 		trans_qty = flt(po_qty.material_transferred_for_manufacturing)
 
 		for item in transferred_materials:
-			qty= item.qty
+			qty= item.qty			
+			key = item.item_code
+			if item.get("job_card"):
+				key = (item.item_code, item.job_card, item.job_card_item)
+
 			item_code = item.original_item or item.item_code
 			req_items = frappe.get_all('Work Order Item',
 				filters={'parent': self.work_order, 'item_code': item_code},
@@ -1074,8 +1122,8 @@ class StockEntry(StockController):
 						qty = req_qty_each * flt(self.fg_completed_qty)
 
 
-			elif backflushed_materials.get(item.item_code):
-				for d in backflushed_materials.get(item.item_code):
+			elif backflushed_materials.get(key):
+				for d in backflushed_materials.get(key):
 					if d.get(item.warehouse):
 						if (qty > req_qty):
 							qty = req_qty
@@ -1092,7 +1140,9 @@ class StockEntry(StockController):
 						"stock_uom": item.stock_uom,
 						"expense_account": item.expense_account,
 						"cost_center": item.buying_cost_center,
-						"original_item": item.original_item
+						"original_item": item.original_item,
+						"job_card": item.job_card,
+						"job_card_item": item.job_card_item,
 					}
 				})
 
@@ -1169,7 +1219,7 @@ class StockEntry(StockController):
 			se_child.subcontracted_item = item_dict[d].get("main_item_code")
 
 			for field in ["idx", "po_detail", "original_item",
-				"expense_account", "description", "item_name"]:
+				"expense_account", "description", "item_name", "job_card", "job_card_item"]:
 				if item_dict[d].get(field):
 					se_child.set(field, item_dict[d].get(field))
 
