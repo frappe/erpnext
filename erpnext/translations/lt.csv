@@ -1575,7 +1575,7 @@ DocType: Sales Invoice,Payment Due Date,Sumokėti iki
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Rezervuotas kiekis: Parduodamas kiekis, bet nepristatytas."
 DocType: Drug Prescription,Interval UOM,Intervalas UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Iš naujo pažymėkite, jei pasirinktas adresas yra redaguotas po įrašymo"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,"Subrangos užsakytas kiekis: Žaliavų kiekis, iš kurio gaminami subtraktoriai."
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,"Subrangos užsakytas kiekis: Žaliavų kiekis, iš kurio gaminami subtraktoriai."
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Prekė variantas {0} jau egzistuoja su tais pačiais atributais
 DocType: Item,Hub Publishing Details,Hub Publishing duomenys
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&quot;Atidarymas&quot;

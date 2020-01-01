@@ -139,7 +139,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				this.dialog.set_value('serial_no', d.serial_no);
 			}
 
-			if (d.batch_no) {
+			if (d.has_batch_no && d.batch_no) {
 				this.frm.doc.items.forEach(data => {
 					if(data.item_code == d.item_code) {
 						this.dialog.fields_dict.batches.df.data.push({
@@ -389,12 +389,14 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 		let serial_no_filters = {
 			item_code: me.item_code,
+			batch_no: this.doc.batch_no || null,
 			delivery_document_no: ""
 		}
 
 		if (me.warehouse_details.name) {
 			serial_no_filters['warehouse'] = me.warehouse_details.name;
 		}
+
 		return [
 			{fieldtype: 'Section Break', label: __('Serial Numbers')},
 			{

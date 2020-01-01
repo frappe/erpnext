@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import datetime, math
 
-from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, getdate
+from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
@@ -51,7 +51,8 @@ class SalarySlip(TransactionBase):
 		self.calculate_net_pay()
 
 		company_currency = erpnext.get_company_currency(self.company)
-		self.total_in_words = money_in_words(self.rounded_total, company_currency)
+		total = self.net_pay if self.is_rounding_total_disabled() else self.rounded_total
+		self.total_in_words = money_in_words(total, company_currency)
 
 		if frappe.db.get_single_value("HR Settings", "max_working_hours_against_timesheet"):
 			max_working_hours = frappe.db.get_single_value("HR Settings", "max_working_hours_against_timesheet")
@@ -92,6 +93,9 @@ class SalarySlip(TransactionBase):
 	def validate_dates(self):
 		if date_diff(self.end_date, self.start_date) < 0:
 			frappe.throw(_("To date cannot be before From date"))
+
+	def is_rounding_total_disabled(self):
+		return cint(frappe.db.get_single_value("HR Settings", "disable_rounded_total"))
 
 	def check_existing(self):
 		if not self.salary_slip_based_on_timesheet:

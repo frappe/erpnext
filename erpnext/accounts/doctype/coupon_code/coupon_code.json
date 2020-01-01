@@ -24,6 +24,7 @@
  ],
  "fields": [
   {
+   "description": "e.g. \"Summer Holiday 2019 Offer 20\"",
    "fieldname": "coupon_name",
    "fieldtype": "Data",
    "label": "Coupon Name",
@@ -50,7 +51,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "To be used to get discount",
+   "description": "unique e.g. SAVE20  To be used to get discount",
    "fieldname": "coupon_code",
    "fieldtype": "Data",
    "label": "Coupon Code",
@@ -62,12 +63,13 @@
    "fieldname": "pricing_rule",
    "fieldtype": "Link",
    "label": "Pricing Rule",
-   "options": "Pricing Rule"
+   "options": "Pricing Rule",
+   "reqd": 1
   },
   {
    "fieldname": "uses",
    "fieldtype": "Section Break",
-   "label": "Uses"
+   "label": "Validity and Usage"
   },
   {
    "fieldname": "valid_from",
@@ -113,7 +115,7 @@
    "read_only": 1
   }
  ],
- "modified": "2019-10-15 14:12:22.686986",
+ "modified": "2019-10-19 14:48:14.602481",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Coupon Code",

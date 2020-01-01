@@ -42,12 +42,6 @@ cur_frm.cscript.onload = function(doc) {
 		cur_frm.set_value("posting_date", frappe.datetime.get_today());
 		cur_frm.cscript.clear_sanctioned(doc);
 	}
-
-	cur_frm.fields_dict.employee.get_query = function() {
-		return {
-			query: "erpnext.controllers.queries.employee_query"
-		};
-	};
 };
 
 cur_frm.cscript.clear_sanctioned = function(doc) {
@@ -119,7 +113,7 @@ cur_frm.cscript.calculate_total_amount = function(doc,cdt,cdn){
 };
 
 erpnext.expense_claim = {
-	set_title :function(frm) {
+	set_title: function(frm) {
 		if (!frm.doc.task) {
 			frm.set_value("title", frm.doc.employee_name);
 		}
@@ -131,20 +125,20 @@ erpnext.expense_claim = {
 
 frappe.ui.form.on("Expense Claim", {
 	setup: function(frm) {
-		frm.trigger("set_query_for_cost_center");
-		frm.trigger("set_query_for_payable_account");
 		frm.add_fetch("company", "cost_center", "cost_center");
 		frm.add_fetch("company", "default_expense_claim_payable_account", "payable_account");
-		frm.set_query("employee_advance", "advances", function(doc) {
+
+		frm.set_query("employee_advance", "advances", function() {
 			return {
 				filters: [
 					['docstatus', '=', 1],
-					['employee', '=', doc.employee],
+					['employee', '=', frm.doc.employee],
 					['paid_amount', '>', 0],
 					['paid_amount', '>', 'claimed_amount']
 				]
 			};
 		});
+
 		frm.set_query("expense_approver", function() {
 			return {
 				query: "erpnext.hr.doctype.department_approver.department_approver.get_approvers",
@@ -154,12 +148,47 @@ frappe.ui.form.on("Expense Claim", {
 				}
 			};
 		});
-		frm.set_query("account_head", "taxes", function(doc) {
+
+		frm.set_query("account_head", "taxes", function() {
 			return {
 				filters: [
-					['company', '=', doc.company],
+					['company', '=', frm.doc.company],
 					['account_type', 'in', ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation"]]
 				]
+			};
+		});
+
+		frm.set_query("cost_center", "expenses", function() {
+			return {
+				filters: {
+					"company": frm.doc.company,
+					"is_group": 0
+				}
+			};
+		});
+
+		frm.set_query("payable_account", function() {
+			return {
+				filters: {
+					"report_type": "Balance Sheet",
+					"account_type": "Payable",
+					"company": frm.doc.company,
+					"is_group": 0
+				}
+			};
+		});
+
+		frm.set_query("task", function() {
+			return {
+				filters: {
+					'project': frm.doc.project
+				}
+			};
+		});
+
+		frm.set_query("employee", function() {
+			return {
+				query: "erpnext.controllers.queries.employee_query"
 			};
 		});
 	},
@@ -208,6 +237,24 @@ frappe.ui.form.on("Expense Claim", {
 		frm.refresh_fields();
 	},
 
+	grand_total: function(frm) {
+		frm.trigger("update_employee_advance_claimed_amount");
+	},
+
+	update_employee_advance_claimed_amount: function(frm) {
+		let amount_to_be_allocated = frm.doc.grand_total;
+		$.each(frm.doc.advances || [], function(i, advance) {
+			if (amount_to_be_allocated >= advance.unclaimed_amount) {
+				frm.doc.advances[i].allocated_amount = frm.doc.advances[i].unclaimed_amount;
+				amount_to_be_allocated -= advance.allocated_amount;
+			} else {
+				frm.doc.advances[i].allocated_amount = amount_to_be_allocated;
+				amount_to_be_allocated = 0;
+			}
+			frm.refresh_field("advances");
+		});
+	},
+
 	make_payment_entry: function(frm) {
 		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
 		if(frm.doc.__onload && frm.doc.__onload.make_payment_via_journal_entry) {
@@ -224,30 +271,6 @@ frappe.ui.form.on("Expense Claim", {
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});
-	},
-
-	set_query_for_cost_center: function(frm) {
-		frm.fields_dict["cost_center"].get_query = function() {
-			return {
-				filters: {
-					"company": frm.doc.company,
-					"is_group": 0
-				}
-			};
-		};
-	},
-
-	set_query_for_payable_account: function(frm) {
-		frm.fields_dict["payable_account"].get_query = function() {
-			return {
-				filters: {
-					"report_type": "Balance Sheet",
-					"account_type": "Payable",
-					"company": frm.doc.company,
-					"is_group": 0
-				}
-			};
-		};
 	},
 
 	is_paid: function(frm) {
@@ -300,7 +323,7 @@ frappe.ui.form.on("Expense Claim", {
 							row.advance_account = d.advance_account;
 							row.advance_paid = d.paid_amount;
 							row.unclaimed_amount = flt(d.paid_amount) - flt(d.claimed_amount);
-							row.allocated_amount = flt(d.paid_amount) - flt(d.claimed_amount);
+							row.allocated_amount = 0;
 						});
 						refresh_field("advances");
 					}
@@ -311,6 +334,10 @@ frappe.ui.form.on("Expense Claim", {
 });
 
 frappe.ui.form.on("Expense Claim Detail", {
+	expenses_add: function(frm, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		frm.script_manager.copy_from_first_row("expenses", row, ["cost_center"]);
+	},
 	amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		var doc = frm.doc;
@@ -323,6 +350,9 @@ frappe.ui.form.on("Expense Claim Detail", {
 		cur_frm.cscript.calculate_total(doc,cdt,cdn);
 		frm.trigger("get_taxes");
 		frm.trigger("calculate_grand_total");
+	},
+	cost_center: function(frm, cdt, cdn) {
+		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "expenses", "cost_center");
 	}
 });
 
@@ -394,11 +424,3 @@ frappe.ui.form.on("Expense Taxes and Charges", {
 		frm.trigger("calculate_total_tax", cdt, cdn);
 	}
 });
-
-cur_frm.fields_dict['task'].get_query = function(doc) {
-	return {
-		filters:{
-			'project': doc.project
-		}
-	};
-};

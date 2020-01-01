@@ -18,12 +18,19 @@ class CostCenter(NestedSet):
 
 	def validate(self):
 		self.validate_mandatory()
+		self.validate_parent_cost_center()
 
 	def validate_mandatory(self):
 		if self.cost_center_name != self.company and not self.parent_cost_center:
 			frappe.throw(_("Please enter parent cost center"))
 		elif self.cost_center_name == self.company and self.parent_cost_center:
 			frappe.throw(_("Root cannot have a parent cost center"))
+
+	def validate_parent_cost_center(self):
+		if self.parent_cost_center:
+			if not frappe.db.get_value('Cost Center', self.parent_cost_center, 'is_group'):
+				frappe.throw(_("{0} is not a group node. Please select a group node as parent cost center").format(
+					frappe.bold(self.parent_cost_center)))
 
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():

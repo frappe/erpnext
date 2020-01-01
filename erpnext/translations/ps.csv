@@ -1550,7 +1550,7 @@ DocType: Sales Invoice,Payment Due Date,د پیسو له امله نېټه
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.",خوندي مقدار: مقدار د پلور لپاره امر کړی ، مګر تحویلی شوی نه دی.
 DocType: Drug Prescription,Interval UOM,د UOM منځګړیتوب
 DocType: Customer,"Reselect, if the chosen address is edited after save",بې ځایه کړئ، که چیرې غوره شوي پتې د خوندي کولو وروسته سمبال شي
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,د فرعي تړون لپاره خوندي مقدار: د فرعي محصولاتو جوړولو لپاره د خامو موادو مقدار.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,د فرعي تړون لپاره خوندي مقدار: د فرعي محصولاتو جوړولو لپاره د خامو موادو مقدار.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,د قالب variant {0} لا د همدې صفتونو شتون لري
 DocType: Item,Hub Publishing Details,د هوب د خپرولو توضیحات
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;پرانیستل&#39;

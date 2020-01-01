@@ -43,14 +43,14 @@ class ShopifySettings(Document):
 				d.raise_for_status()
 				self.update_webhook_table(method, d.json())
 			except Exception as e:
-				make_shopify_log(status="Warning", message=e, exception=False)
+				make_shopify_log(status="Warning", exception=e, rollback=True)
 
 	def unregister_webhooks(self):
 		session = get_request_session()
 		deleted_webhooks = []
 
 		for d in self.webhooks:
-			url = get_shopify_url('admin/api/2019-04/webhooks.json'.format(d.webhook_id), self)
+			url = get_shopify_url('admin/api/2019-04/webhooks/{0}.json'.format(d.webhook_id), self)
 			try:
 				res = session.delete(url, headers=get_header(self))
 				res.raise_for_status()

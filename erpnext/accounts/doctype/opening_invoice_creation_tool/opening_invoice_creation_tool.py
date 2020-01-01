@@ -32,8 +32,10 @@ class OpeningInvoiceCreationTool(Document):
 				})
 				invoices_summary.update({company: _summary})
 
-				paid_amount.append(invoice.paid_amount)
-				outstanding_amount.append(invoice.outstanding_amount)
+				if invoice.paid_amount:
+					paid_amount.append(invoice.paid_amount)
+				if invoice.outstanding_amount:
+					outstanding_amount.append(invoice.outstanding_amount)
 
 			if paid_amount or outstanding_amount:
 				max_count.update({

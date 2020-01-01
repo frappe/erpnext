@@ -232,6 +232,7 @@ class PayrollEntry(Document):
 				accounts.append({
 						"account": acc,
 						"debit_in_account_currency": flt(amount, precision),
+						"party_type": '',
 						"cost_center": self.cost_center,
 						"project": self.project
 					})
@@ -243,13 +244,15 @@ class PayrollEntry(Document):
 						"account": acc,
 						"credit_in_account_currency": flt(amount, precision),
 						"cost_center": self.cost_center,
+						"party_type": '',
 						"project": self.project
 					})
 
 			# Payable amount
 			accounts.append({
 				"account": default_payroll_payable_account,
-				"credit_in_account_currency": flt(payable_amount, precision)
+				"credit_in_account_currency": flt(payable_amount, precision),
+				"party_type": '',
 			})
 
 			journal_entry.set("accounts", accounts)
@@ -513,7 +516,6 @@ def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progr
 		count += 1
 		if publish_progress:
 			frappe.publish_progress(count*100/len(salary_slips), title = _("Submitting Salary Slips..."))
-
 	if submitted_ss:
 		payroll_entry.make_accrual_jv_entry()
 		frappe.msgprint(_("Salary Slip submitted for period from {0} to {1}")

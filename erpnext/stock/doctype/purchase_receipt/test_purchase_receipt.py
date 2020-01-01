@@ -14,6 +14,7 @@ from erpnext.stock.doctype.item.test_item import make_item
 from six import iteritems
 class TestPurchaseReceipt(unittest.TestCase):
 	def setUp(self):
+		set_perpetual_inventory(0)
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 
 	def test_make_purchase_invoice(self):
@@ -32,7 +33,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 	def test_purchase_receipt_no_gl_entry(self):
 		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
-		set_perpetual_inventory(0, company)
 
 		existing_bin_stock_value = frappe.db.get_value("Bin", {"item_code": "_Test Item",
 			"warehouse": "_Test Warehouse - _TC"}, "stock_value")
@@ -52,41 +52,36 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
 
 	def test_purchase_receipt_gl_entry(self):
-		pr = frappe.copy_doc(test_records[0])
-		set_perpetual_inventory(1, pr.company)
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", get_multiple_items = True, get_taxes_and_charges = True)
 		self.assertEqual(cint(erpnext.is_perpetual_inventory_enabled(pr.company)), 1)
-		pr.insert()
-		pr.submit()
 
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 
 		self.assertTrue(gl_entries)
 
-		stock_in_hand_account = get_inventory_account(pr.company, pr.get("items")[0].warehouse)
-		fixed_asset_account = get_inventory_account(pr.company, pr.get("items")[1].warehouse)
+		stock_in_hand_account = get_inventory_account(pr.company, pr.items[0].warehouse)
+		fixed_asset_account = get_inventory_account(pr.company, pr.items[1].warehouse)
 
 		if stock_in_hand_account == fixed_asset_account:
 			expected_values = {
 				stock_in_hand_account: [750.0, 0.0],
-				"Stock Received But Not Billed - _TC": [0.0, 500.0],
-				"Expenses Included In Valuation - _TC": [0.0, 250.0]
+				"Stock Received But Not Billed - TCP1": [0.0, 500.0],
+				"_Test Account Shipping Charges - TCP1": [0.0, 100.0],
+				"_Test Account Customs Duty - TCP1": [0.0, 150.0]
 			}
 		else:
 			expected_values = {
 				stock_in_hand_account: [375.0, 0.0],
 				fixed_asset_account: [375.0, 0.0],
-				"Stock Received But Not Billed - _TC": [0.0, 500.0],
-				"Expenses Included In Valuation - _TC": [0.0, 250.0]
+				"Stock Received But Not Billed - TCP1": [0.0, 500.0],
+				"_Test Account Shipping Charges - TCP1": [0.0, 250.0]
 			}
-
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account][0], gle.debit)
 			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
 		pr.cancel()
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
-
-		set_perpetual_inventory(0, pr.company)
 
 	def test_subcontracting(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -132,11 +127,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 				pr.get("items")[0].rejected_warehouse)
 
 	def test_purchase_return(self):
-		set_perpetual_inventory()
 
-		pr = make_purchase_receipt()
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1")
 
-		return_pr = make_purchase_receipt(is_return=1, return_against=pr.name, qty=-2)
+		return_pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", is_return=1, return_against=pr.name, qty=-2)
 
 		# check sle
 		outgoing_rate = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
@@ -153,28 +147,28 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		expected_values = {
 			stock_in_hand_account: [0.0, 100.0],
-			"Stock Received But Not Billed - _TC": [100.0, 0.0],
+			"Stock Received But Not Billed - TCP1": [100.0, 0.0],
 		}
 
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account][0], gle.debit)
 			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
-		set_perpetual_inventory(0)
 
 	def test_purchase_return_for_rejected_qty(self):
-		set_perpetual_inventory()
+		from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
 
-		pr = make_purchase_receipt(received_qty=4, qty=2)
+		rejected_warehouse=get_warehouse(company = "_Test Company with perpetual inventory", abbr = " - TCP1", warehouse_name = "_Test Rejected Warehouse").name
+		print(rejected_warehouse)
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", received_qty=4, qty=2, rejected_warehouse=rejected_warehouse)
 
-		return_pr = make_purchase_receipt(is_return=1, return_against=pr.name, received_qty = -4, qty=-2)
+		return_pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", is_return=1, return_against=pr.name, received_qty = -4, qty=-2, rejected_warehouse=rejected_warehouse)
 
 		actual_qty = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
 			"voucher_no": return_pr.name, 'warehouse': return_pr.items[0].rejected_warehouse}, "actual_qty")
 
 		self.assertEqual(actual_qty, -2)
 
-		set_perpetual_inventory(0)
 
 	def test_purchase_return_for_serialized_items(self):
 		def _check_serial_no_values(serial_no, field_values):
@@ -288,8 +282,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 			serial_no=serial_no, basic_rate=100, do_not_submit=True)
 		self.assertRaises(SerialNoDuplicateError, se.submit)
 
-	def test_serialized_asset_item(self):
-		asset_item = "Test Serialized Asset Item"
+	def test_auto_asset_creation(self):
+		asset_item = "Test Asset Item"
 
 		if not frappe.db.exists('Item', asset_item):
 			asset_category = frappe.get_all('Asset Category')
@@ -315,38 +309,25 @@ class TestPurchaseReceipt(unittest.TestCase):
 				asset_category = doc.name
 
 			item_data = make_item(asset_item, {'is_stock_item':0,
-				'stock_uom': 'Box', 'is_fixed_asset': 1, 'has_serial_no': 1,
-				'asset_category': asset_category, 'serial_no_series': 'ABC.###'})
+				'stock_uom': 'Box', 'is_fixed_asset': 1, 'auto_create_assets': 1,
+				'asset_category': asset_category, 'asset_naming_series': 'ABC.###'})
 			asset_item = item_data.item_code
 
 		pr = make_purchase_receipt(item_code=asset_item, qty=3)
-		asset = frappe.db.get_value('Asset', {'purchase_receipt': pr.name}, 'name')
-		asset_movement = frappe.db.get_value('Asset Movement', {'reference_name': pr.name}, 'name')
-		serial_nos = frappe.get_all('Serial No', {'asset': asset}, 'name')
+		assets = frappe.db.get_all('Asset', filters={'purchase_receipt': pr.name})
 
-		self.assertEquals(len(serial_nos), 3)
+		self.assertEquals(len(assets), 3)
 
-		location = frappe.db.get_value('Serial No', serial_nos[0].name, 'location')
+		location = frappe.db.get_value('Asset', assets[0].name, 'location')
 		self.assertEquals(location, "Test Location")
-
-		frappe.db.set_value("Asset", asset, "purchase_receipt", "")
-		frappe.db.set_value("Purchase Receipt Item", pr.items[0].name, "asset", "")
-
-		pr.load_from_db()
-
-		pr.cancel()
-		serial_nos = frappe.get_all('Serial No', {'asset': asset}, 'name') or []
-		self.assertEquals(len(serial_nos), 0)
-		#frappe.db.sql("delete from `tabLocation")
-		frappe.db.sql("delete from `tabAsset`")
 
 	def test_purchase_receipt_for_enable_allow_cost_center_in_entry_of_bs_account(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
 		accounts_settings.save()
-		cost_center = "_Test Cost Center for BS Account - _TC"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		cost_center = "_Test Cost Center for BS Account - TCP1"
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company with perpetual inventory")
 
 		if not frappe.db.exists('Location', 'Test Location'):
 			frappe.get_doc({
@@ -354,8 +335,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 				'location_name': 'Test Location'
 			}).insert()
 
-		set_perpetual_inventory(1, "_Test Company")
-		pr = make_purchase_receipt(cost_center=cost_center)
+		pr = make_purchase_receipt(cost_center=cost_center, company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1")
 
 		stock_in_hand_account = get_inventory_account(pr.company, pr.get("items")[0].warehouse)
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
@@ -363,7 +343,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = {
-			"Stock Received But Not Billed - _TC": {
+			"Stock Received But Not Billed - TCP1": {
 				"cost_center": cost_center
 			},
 			stock_in_hand_account: {
@@ -373,7 +353,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
-		set_perpetual_inventory(0, pr.company)
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
 		accounts_settings.save()
 
@@ -387,9 +366,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 				'doctype': 'Location',
 				'location_name': 'Test Location'
 			}).insert()
-
-		set_perpetual_inventory(1, "_Test Company")
-		pr = make_purchase_receipt()
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1")
 
 		stock_in_hand_account = get_inventory_account(pr.company, pr.get("items")[0].warehouse)
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
@@ -397,7 +374,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = {
-			"Stock Received But Not Billed - _TC": {
+			"Stock Received But Not Billed - TCP1": {
 				"cost_center": None
 			},
 			stock_in_hand_account: {
@@ -406,8 +383,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 		}
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
-
-		set_perpetual_inventory(0, pr.company)
 
 	def test_make_purchase_invoice_from_pr_for_returned_qty(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order, create_pr_against_po
@@ -452,6 +427,78 @@ def get_gl_entries(voucher_type, voucher_no):
 		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
 		order by account desc""", (voucher_type, voucher_no), as_dict=1)
 
+def get_taxes(**args):
+
+	args = frappe._dict(args)
+
+	return [{'account_head': '_Test Account Shipping Charges - TCP1',
+			'add_deduct_tax': 'Add',
+			'category': 'Valuation and Total',
+			'charge_type': 'Actual',
+			'cost_center': args.cost_center or 'Main - TCP1',
+			'description': 'Shipping Charges',
+			'doctype': 'Purchase Taxes and Charges',
+			'parentfield': 'taxes',
+			'rate': 100.0,
+			'tax_amount': 100.0},
+		{'account_head': '_Test Account VAT - TCP1',
+			'add_deduct_tax': 'Add',
+			'category': 'Total',
+			'charge_type': 'Actual',
+			'cost_center': args.cost_center or 'Main - TCP1',
+			'description': 'VAT',
+			'doctype': 'Purchase Taxes and Charges',
+			'parentfield': 'taxes',
+			'rate': 120.0,
+			'tax_amount': 120.0},
+		{'account_head': '_Test Account Customs Duty - TCP1',
+			'add_deduct_tax': 'Add',
+			'category': 'Valuation',
+			'charge_type': 'Actual',
+			'cost_center': args.cost_center or 'Main - TCP1',
+			'description': 'Customs Duty',
+			'doctype': 'Purchase Taxes and Charges',
+			'parentfield': 'taxes',
+			'rate': 150.0,
+			'tax_amount': 150.0}]
+
+def get_items(**args):
+	args = frappe._dict(args)
+	return [{
+	"base_amount": 250.0,
+	"conversion_factor": 1.0,
+	"description": "_Test Item",
+	"doctype": "Purchase Receipt Item",
+	"item_code": "_Test Item",
+	"item_name": "_Test Item",
+	"parentfield": "items",
+	"qty": 5.0,
+	"rate": 50.0,
+	"received_qty": 5.0,
+	"rejected_qty": 0.0,
+	"stock_uom": "_Test UOM",
+	"uom": "_Test UOM",
+	"warehouse": args.warehouse or "_Test Warehouse - _TC",
+	"cost_center": args.cost_center or "Main - _TC"
+	},
+	{
+	"base_amount": 250.0,
+	"conversion_factor": 1.0,
+	"description": "_Test Item Home Desktop 100",
+	"doctype": "Purchase Receipt Item",
+	"item_code": "_Test Item Home Desktop 100",
+	"item_name": "_Test Item Home Desktop 100",
+	"parentfield": "items",
+	"qty": 5.0,
+	"rate": 50.0,
+	"received_qty": 5.0,
+	"rejected_qty": 0.0,
+	"stock_uom": "_Test UOM",
+	"uom": "_Test UOM",
+	"warehouse": args.warehouse or "_Test Warehouse 1 - _TC",
+	"cost_center": args.cost_center or "Main - _TC"
+	}]
+
 def make_purchase_receipt(**args):
 	if not frappe.db.exists('Location', 'Test Location'):
 		frappe.get_doc({
@@ -468,7 +515,7 @@ def make_purchase_receipt(**args):
 	pr.company = args.company or "_Test Company"
 	pr.supplier = args.supplier or "_Test Supplier"
 	pr.is_subcontracted = args.is_subcontracted or "No"
-	pr.supplier_warehouse = "_Test Warehouse 1 - _TC"
+	pr.supplier_warehouse = args.supplier_warehouse or "_Test Warehouse 1 - _TC"
 	pr.currency = args.currency or "INR"
 	pr.is_return = args.is_return
 	pr.return_against = args.return_against
@@ -476,8 +523,10 @@ def make_purchase_receipt(**args):
 	received_qty = args.received_qty or qty
 	rejected_qty = args.rejected_qty or flt(received_qty) - flt(qty)
 
+	item_code = args.item or args.item_code or "_Test Item"
+	uom = args.uom or frappe.db.get_value("Item", item_code, "stock_uom") or "_Test UOM"
 	pr.append("items", {
-		"item_code": args.item or args.item_code or "_Test Item",
+		"item_code": item_code,
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": qty,
 		"received_qty": received_qty,
@@ -487,10 +536,20 @@ def make_purchase_receipt(**args):
 		"conversion_factor": args.conversion_factor or 1.0,
 		"serial_no": args.serial_no,
 		"stock_uom": args.stock_uom or "_Test UOM",
-		"uom": args.uom or "_Test UOM",
+		"uom": uom,
 		"cost_center": args.cost_center or frappe.get_cached_value('Company',  pr.company,  'cost_center'),
 		"asset_location": args.location or "Test Location"
 	})
+
+	if args.get_multiple_items:
+		pr.items = []
+		for item in get_items(warehouse= args.warehouse, cost_center = args.cost_center or frappe.get_cached_value('Company', pr.company, 'cost_center')):
+			pr.append("items", item)
+
+
+	if args.get_taxes_and_charges:
+		for tax in get_taxes():
+			pr.append("taxes", tax)
 
 	if not args.do_not_save:
 		pr.insert()

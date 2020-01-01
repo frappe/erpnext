@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-06-18 12:39:59",
@@ -31,8 +32,8 @@
   "contact_phone",
   "contact_mobile",
   "contact_email",
-  "company_address_display",
   "company_address",
+  "company_address_display",
   "col_break46",
   "shipping_address_name",
   "shipping_address",
@@ -342,12 +343,13 @@
   {
    "fieldname": "company_address_display",
    "fieldtype": "Small Text",
+   "label": "Company Address",
    "read_only": 1
   },
   {
    "fieldname": "company_address",
    "fieldtype": "Link",
-   "label": "Company Address",
+   "label": "Company Address Name",
    "options": "Address"
   },
   {
@@ -618,7 +620,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Text",
+   "fieldtype": "Long Text",
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -1193,7 +1195,8 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2019-10-22 14:26:42.767189",
+ "links": [],
+ "modified": "2019-12-30 19:15:28.605085",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

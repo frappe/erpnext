@@ -1558,7 +1558,7 @@ DocType: Sales Invoice,Payment Due Date,To&#39;lov sanasi
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Savdo zahirasi: Sotish uchun buyurtma berilgan, ammo etkazib berilmagan."
 DocType: Drug Prescription,Interval UOM,Intervalli UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Tanlangan manzil saqlashdan so&#39;ng tahrirlangan taqdirda, qayta belgilanadi"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Subtrudrat uchun ajratilgan Qty: subkartralangan buyumlarni tayyorlash uchun xom ashyo miqdori.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Subtrudrat uchun ajratilgan Qty: subkartralangan buyumlarni tayyorlash uchun xom ashyo miqdori.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Mavzu Variant {0} allaqachon bir xil atributlarga ega
 DocType: Item,Hub Publishing Details,Hub nashriyot tafsilotlari
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&quot;Ochilish&quot;

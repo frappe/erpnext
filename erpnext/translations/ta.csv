@@ -1565,7 +1565,7 @@ DocType: Sales Invoice,Payment Due Date,கொடுப்பனவு கா
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","பாதுகாக்கப்பட்டவை அளவு: அளவு விற்பனை உத்தரவிட்டார் , ஆனால் கொடுத்தது இல்லை ."
 DocType: Drug Prescription,Interval UOM,இடைவெளி UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","தேர்ந்தெடுக்கப்பட்ட முகவரி சேமிக்கப்பட்ட பிறகு திருத்தப்பட்டால், தேர்வுநீக்கம் செய்யவும்"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,துணை ஒப்பந்தத்திற்கான ஒதுக்கப்பட்ட Qty: துணை ஒப்பந்தம் செய்யப்பட்ட பொருட்களை உருவாக்க மூலப்பொருட்களின் அளவு.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,துணை ஒப்பந்தத்திற்கான ஒதுக்கப்பட்ட Qty: துணை ஒப்பந்தம் செய்யப்பட்ட பொருட்களை உருவாக்க மூலப்பொருட்களின் அளவு.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,பொருள் மாற்று {0} ஏற்கனவே அதே பண்புகளை கொண்ட உள்ளது
 DocType: Item,Hub Publishing Details,ஹப் பப்ளிஷிங் விவரங்கள்
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;திறந்து&#39;

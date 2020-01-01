@@ -1560,7 +1560,7 @@ DocType: Sales Invoice,Payment Due Date,ክፍያ መጠናቀቅ ያለበት �
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.",የተያዙ ጫፎች ብዛት ለሽያጭ የታዘዘ ፣ ግን አልደረሰም ፡፡
 DocType: Drug Prescription,Interval UOM,የጊዜ ክፍተት UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save",የተመረጠው አድራሻ ከተቀመጠ በኋላ ማስተካከያ ከተደረገበት አይምረጡ
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,የተያዙ ዕቃዎች ለንዑስ-ኮንትራክተር-ንዑስ-ንዑስ ንጥል ነገሮችን ለመስራት ጥሬ ዕቃዎች ብዛት።
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,የተያዙ ዕቃዎች ለንዑስ-ኮንትራክተር-ንዑስ-ንዑስ ንጥል ነገሮችን ለመስራት ጥሬ ዕቃዎች ብዛት።
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,ንጥል ተለዋጭ {0} ቀድሞውኑ ተመሳሳይ ባሕርያት ጋር አለ
 DocType: Item,Hub Publishing Details,ሃቢ የህትመት ዝርዝሮች
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;በመክፈት ላይ&#39;

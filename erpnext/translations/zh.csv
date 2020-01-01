@@ -1585,7 +1585,7 @@ DocType: Sales Invoice,Payment Due Date,付款到期日
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.",版权所有数量：订购数量出售，但未交付。
 DocType: Drug Prescription,Interval UOM,间隔UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save",重新选择，如果所选地址在保存后被编辑
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,分包合同的保留数量：制作分项目的原材料数量。
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,分包合同的保留数量：制作分项目的原材料数量。
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,项目变体{0}已经具有相同属性的存在
 DocType: Item,Hub Publishing Details,集线器发布细节
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',“打开”
