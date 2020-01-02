@@ -1702,11 +1702,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 			let filters = {
 				'item_code': item.item_code,
-				'valid_from': doc.posting_date
-			}
-
-			if (doc.doctype === 'Purchase Invoice' && doc.bill_date) {
-				filters['valid_from'] = doc.bill_date;
+				'valid_from': doc.transaction_date || doc.bill_date || doc.posting_date,
+				'item_group': item.item_group
 			}
 
 			return {
