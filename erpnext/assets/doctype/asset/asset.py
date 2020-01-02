@@ -452,7 +452,7 @@ class Asset(AccountsController):
 
 		if ((self.purchase_receipt \
 			or (self.purchase_invoice and frappe.db.get_value('Purchase Invoice', self.purchase_invoice, 'update_stock')))
-			and self.purchase_receipt_amount and self.available_for_use_date <= nowdate()):
+			and self.purchase_receipt_amount and self.available_for_use_date <= getdate(nowdate())):
 			fixed_asset_account = get_asset_category_account('fixed_asset_account', asset=self.name,
 					asset_category = self.asset_category, company = self.company)
 
