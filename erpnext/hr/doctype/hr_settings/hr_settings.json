@@ -57,13 +57,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "description": "Don't send Employee Birthday Reminders",
-   "fieldname": "stop_birthday_reminders",
-   "fieldtype": "Check",
-   "label": "Stop Birthday Reminders"
-  },
-  {
    "default": "1",
    "fieldname": "expense_approver_mandatory_in_expense_claim",
    "fieldtype": "Check",
@@ -178,6 +171,13 @@
    "label": "Birthday Reminder Settings"
   },
   {
+   "default": "0",
+   "description": "Don't send Employee Birthday Reminders",
+   "fieldname": "stop_birthday_reminders",
+   "fieldtype": "Check",
+   "label": "Stop Birthday Reminders"
+  },
+  {
    "depends_on": "eval:doc.stop_birthday_reminders == 0",
    "fieldname": "birthday_email_template",
    "fieldtype": "Link",
@@ -188,7 +188,8 @@
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2019-11-27 17:41:39.717584",
+ "links": [],
+ "modified": "2020-01-02 13:02:40.925804",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
