@@ -26,8 +26,8 @@ def execute(filters=None):
 		account_details.setdefault(acc.name, acc)
 
 	if filters.get('party'):
-		parties = cstr(filters.get("party")).strip()
-		filters.party = [d.strip() for d in parties.split(',') if d]
+		parties = cstr(filters.get("party"))
+		filters.party = [d.strip() for d in parties.split(', ') if d]
 
 	validate_filters(filters, account_details)
 
@@ -71,7 +71,6 @@ def validate_filters(filters, account_details):
 
 def validate_party(filters):
 	party_type, party = filters.get("party_type"), filters.get("party")
-
 	if party:
 		if not party_type:
 			frappe.throw(_("To filter based on Party, select Party Type first"))
