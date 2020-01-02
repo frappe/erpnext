@@ -514,10 +514,10 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 
 	item_doc = frappe.get_cached_doc('Item', filters.get('item_code'))
 
-	if not item_doc.taxes:
+	if not item_doc.taxes and (not frappe.db.exists('Item Tax', {'parent': item_doc.item_group})):
 		return frappe.db.sql(""" SELECT  name FROM `tabItem Tax Template` """)
 	else:
 		return frappe.db.sql("""
 			SELECT item_tax_template FROM `tabItem Tax`
-			WHERE parent = %s AND (ifnull(valid_from, '') = '' OR valid_from <= %s)
-		""", (filters.get('item_code'), getdate(filters.get('valid_from'))))
+			WHERE parent in (%s, %s) AND (ifnull(valid_from, '') = '' OR valid_from <= %s)
+		""", (filters.get('item_code'), filters.get('item_group'), getdate(filters.get('valid_from'))))

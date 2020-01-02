@@ -60,6 +60,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	if doc:
 		args['posting_date'] = doc.get('posting_date')
+		args['transaction_date'] = doc.get('transaction_date')
 
 	get_item_tax_template(args, item, out)
 	out["item_tax_rate"] = get_item_tax_map(args.company, args.get("item_tax_template") if out.get("item_tax_template") is None \
@@ -410,16 +411,16 @@ def _get_item_tax_template(args, taxes, out={}, for_validate=False):
 		if tax.valid_from:
 			# In purchase Invoice first preference will be given to supplier invoice date
 			# if supplier date is not present then posting date
-			if args.get('bill_date') and tax.valid_from <= getdate(args.get('bill_date')):
-				taxes_with_validity.append(tax)
-			elif not args.get('bill_date') and args.get('posting_date') and tax.valid_from <= getdate(args.get('posting_date')):
+			validation_date = args.get('transaction_date') or args.get('bill_date') or args.get('posting_date')
+
+			if getdate(tax.valid_from) <= getdate(validation_date):
 				taxes_with_validity.append(tax)
 		else:
 			taxes_with_no_validity.append(tax)
 
 	if taxes_with_validity:
 		taxes = sorted(taxes_with_validity, key = lambda i: i.valid_from, reverse=True)
-	elif taxes_with_no_validity:
+	else:
 		taxes = taxes_with_no_validity
 
 	if for_validate:
