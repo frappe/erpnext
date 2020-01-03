@@ -1242,12 +1242,14 @@ class SalesInvoice(SellingController):
 					self.status = "Unpaid and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
 					self.status = "Unpaid"
-				#Check if outstanding amount is 0 due to credit note issued against invoice
-				elif flt(self.outstanding_amount) <= 0 and self.is_return == 0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+				# If outstanding amount is less than zero and there's a credit note issue status is set to ""
+				elif flt(self.outstanding_amount) < 0 and self.is_return == 0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
 					self.status = "Credit Note Issued"
+				elif flt(self.outstanding_amount) == 0 and frappe.db.get_value("Sales Invoice",{"is_return": 1, "return_against": self.name, "docstatus": 1}):
+					self.status = "Credit Note Issued and Paid"
 				elif self.is_return == 1:
 					self.status = "Return"
-				elif flt(self.outstanding_amount)<=0:
+				elif flt(self.outstanding_amount) == 0:
 					self.status = "Paid"
 				else:
 					self.status = "Submitted"
