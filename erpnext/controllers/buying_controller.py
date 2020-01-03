@@ -521,6 +521,16 @@ class BuyingController(StockController):
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 
 				if pr_qty:
+
+					if d.from_warehouse and ((not cint(self.is_return) and self.docstatus==1)
+						or (cint(self.is_return) and self.docstatus==2)):
+						from_warehouse_sle = self.get_sl_entries(d, {
+							"actual_qty": -1 * pr_qty,
+							"warehouse": d.from_warehouse
+						})
+
+						sl_entries.append(from_warehouse_sle)
+
 					sle = self.get_sl_entries(d, {
 						"actual_qty": flt(pr_qty),
 						"serial_no": cstr(d.serial_no).strip()
@@ -541,9 +551,10 @@ class BuyingController(StockController):
 						})
 					sl_entries.append(sle)
 
-					if d.from_warehouse:
+					if d.from_warehouse and ((not cint(self.is_return) and self.docstatus==2)
+						or (cint(self.is_return) and self.docstatus==1)):
 						from_warehouse_sle = self.get_sl_entries(d, {
-							"actual_qty": -1*flt(d.qty),
+							"actual_qty": -1 * pr_qty,
 							"warehouse": d.from_warehouse
 						})
 

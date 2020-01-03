@@ -264,7 +264,7 @@ class StockController(AccountsController):
 
 		return serialized_items
 
-	def get_incoming_rate_for_sales_return(self, item_code, against_document):
+	def get_incoming_rate_for_return(self, item_code, against_document):
 		incoming_rate = 0.0
 		if against_document and item_code:
 			incoming_rate = frappe.db.sql("""select abs(stock_value_difference / actual_qty)
@@ -286,6 +286,11 @@ class StockController(AccountsController):
 			self.get("items") if getattr(d, "target_warehouse", None)]))
 
 		warehouses.extend(target_warehouses)
+
+		from_warehouse = list(set([d.from_warehouse for d in
+			self.get("items") if getattr(d, "from_warehouse", None)]))
+
+		warehouses.extend(from_warehouse)
 
 		for w in warehouses:
 			validate_warehouse_company(w, self.company)

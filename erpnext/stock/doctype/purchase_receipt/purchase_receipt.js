@@ -63,7 +63,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 
-		if (frm.doc.docstatus === 1 && !frm.doc.inter_company_reference) {
+		if (frm.doc.docstatus === 1 && frm.doc.is_internal_supplier && !frm.doc.inter_company_reference) {
 			frm.add_custom_button(__('Delivery Note'), function() {
 				frappe.model.open_mapped_doc({
 					method: 'erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_inter_company_delivery_note',

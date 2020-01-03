@@ -515,7 +515,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 										me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 									}
 								},
-								() => me.calculate_taxes_and_totals(),
+								() => {
+									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
+										me.calculate_taxes_and_totals();
+									}
+								},
 								() => me.toggle_conversion_factor(item),
 								() => {
 									if(show_batch_dialog && !frappe.flags.hide_serial_batch_dialog) {
@@ -543,10 +547,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		let item_args = {
 			'item_code': item.item_code,
-			'warehouse': item.warehouse,
+			'warehouse': in_list('Purchase Receipt', 'Purchase Invoice') ? item.from_warehouse : item.warehouse,
 			'posting_date': posting_date,
 			'posting_time': posting_time,
-			'qty': item.qty,
+			'qty': item.qty * item.conversion_factor,
 			'serial_no': item.serial_no,
 			'voucher_type': voucher_type,
 			'company': company,
