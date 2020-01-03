@@ -426,7 +426,8 @@ def _get_item_tax_template(args, taxes, out={}, for_validate=False):
 		taxes = taxes_with_no_validity
 
 	if for_validate:
-		return [tax.item_tax_template for tax in taxes if cstr(tax.tax_category) == cstr(args.get('tax_category'))]
+		return [tax.item_tax_template for tax in taxes if (cstr(tax.tax_category) == cstr(args.get('tax_category')) \
+			and (tax.item_tax_template not in taxes))]
 
 	# all templates have validity and no template is valid
 	if not taxes_with_validity and (not taxes_with_no_validity):

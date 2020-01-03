@@ -6,7 +6,7 @@ import frappe
 from frappe.desk.reportview import get_match_cond, get_filters_cond
 from frappe.utils import nowdate, getdate
 from collections import defaultdict
-
+from erpnext.stock.get_item_details import _get_item_tax_template
 
  # searches for active employees
 def employee_query(doctype, txt, searchfield, start, page_len, filters):
@@ -513,11 +513,24 @@ def get_purchase_invoices(doctype, txt, searchfield, start, page_len, filters):
 def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 
 	item_doc = frappe.get_cached_doc('Item', filters.get('item_code'))
+	item_group = filters.get('item_group')
+	taxes = item_doc.taxes or []
 
-	if not item_doc.taxes and (not frappe.db.exists('Item Tax', {'parent': item_doc.item_group})):
-		return frappe.db.sql(""" SELECT  name FROM `tabItem Tax Template` """)
+	while item_group:
+		item_group_doc = frappe.get_cached_doc('Item Group', item_group)
+		taxes += item_group_doc.taxes or []
+		item_group = item_group_doc.parent_item_group
+
+	if not taxes:
+		return frappe.db.sql(""" SELECT name FROM `tabItem Tax Template` """)
 	else:
-		return frappe.db.sql("""
-			SELECT item_tax_template FROM `tabItem Tax`
-			WHERE parent in (%s, %s) AND (ifnull(valid_from, '') = '' OR valid_from <= %s)
-		""", (filters.get('item_code'), filters.get('item_group'), getdate(filters.get('valid_from'))))
+		args = {
+			'item_code': filters.get('item_code'),
+			'posting_date': filters.get('valid_from'),
+			'tax_category': filters.get('tax_category')
+		}
+
+		taxes = _get_item_tax_template(args, taxes, for_validate=True)
+
+		return frappe.db.sql(""" SELECT name FROM `tabItem Tax Template` where name
+			IN (%s)""" % ', '.join(['%s']*len(taxes)) ,tuple(taxes))

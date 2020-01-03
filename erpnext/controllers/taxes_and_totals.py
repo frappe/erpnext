@@ -52,17 +52,25 @@ class calculate_taxes_and_totals(object):
 				args = {
 					'tax_category': self.doc.get('tax_category'),
 					'posting_date': self.doc.get('posting_date'),
-					'bill_date': self.doc.get('bill_date')
+					'bill_date': self.doc.get('bill_date'),
+					'transaction_date': self.doc.get('transaction_date')
 				}
 
-				item_group_taxes = frappe.get_cached_doc('Item Group', item_doc.item_group).taxes or []
+				item_group = item_doc.item_group
+				item_group_taxes = []
+
+				while item_group:
+					item_group_doc = frappe.get_cached_doc('Item Group', item_group)
+					item_group_taxes += item_group_doc.taxes or []
+					item_group = item_group_doc.parent_item_group
+
 				item_taxes = item_doc.taxes or []
 
 				if not item_group_taxes and (not item_taxes):
 					# No validation if no taxes in item or item group
 					continue
 
-				taxes = set(_get_item_tax_template(args, item_taxes + item_group_taxes, for_validate=True))
+				taxes = _get_item_tax_template(args, item_taxes + item_group_taxes, for_validate=True)
 
 				if item.item_tax_template not in taxes:
 					frappe.throw(_("Row {0}: Invalid Item Tax Template for item {1}").format(
