@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-08-02 13:45:23",
  "doctype": "DocType",
  "document_type": "Other",
@@ -13,6 +14,7 @@
   "expense_approver_mandatory_in_expense_claim",
   "payroll_settings",
   "include_holidays_in_total_working_days",
+  "disable_rounded_total",
   "max_working_hours_against_timesheet",
   "column_break_11",
   "email_salary_slip_to_employee",
@@ -160,12 +162,20 @@
    "fieldname": "auto_leave_encashment",
    "fieldtype": "Check",
    "label": "Auto Leave Encashment"
+  },
+  {
+   "default": "0",
+   "description": "If checked, hides and disables Rounded Total field in Salary Slips",
+   "fieldname": "disable_rounded_total",
+   "fieldtype": "Check",
+   "label": "Disable Rounded Total"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2019-08-05 13:07:17.993968",
+ "links": [],
+ "modified": "2019-12-31 14:28:32.004121",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
