@@ -655,3 +655,5 @@ erpnext.patches.v12_0.set_against_blanket_order_in_sales_and_purchase_order
 erpnext.patches.v12_0.set_cost_center_in_child_table_of_expense_claim
 erpnext.patches.v12_0.set_lead_title_field
 erpnext.patches.v12_0.set_permission_einvoicing
+erpnext.patches.v12_0.set_published_in_hub_tracked_item
+erpnext.patches.v12_0.set_job_offer_applicant_email

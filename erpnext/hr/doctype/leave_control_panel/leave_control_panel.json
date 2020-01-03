@@ -1,25 +1,28 @@
 {
+ "actions": [],
  "allow_copy": 1,
  "creation": "2013-01-10 16:34:15",
  "doctype": "DocType",
+ "engine": "InnoDB",
  "field_order": [
   "select_employees_section",
   "company",
   "employment_type",
   "branch",
-  "column_break1",
   "department",
+  "column_break1",
   "designation",
   "employee_grade",
   "employee",
   "allocate_leaves_section",
   "from_date",
   "to_date",
-  "leave_policy",
-  "leave_type",
   "carry_forward",
   "no_of_days",
-  "allocate"
+  "allocate",
+  "column_break_16",
+  "leave_policy",
+  "leave_type"
  ],
  "fields": [
   {
@@ -125,13 +128,18 @@
    "fieldname": "allocate_leaves_section",
    "fieldtype": "Section Break",
    "label": "Allocate Leaves"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2019-05-24 09:41:34.105741",
+ "links": [],
+ "modified": "2019-12-12 18:51:41.573349",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Control Panel",
