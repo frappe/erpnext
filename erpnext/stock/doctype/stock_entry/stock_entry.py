@@ -1073,13 +1073,16 @@ class StockEntry(StockController):
 					else:
 						actual_consumed_qty = transferred_qty_each * produced_qty
 						remaining_consumed_qty = consumed_qty - actual_consumed_qty
-						transferred_qty = max(0, frappe.utils.ceil(remaining_item_qty - remaining_consumed_qty))
+						transferred_qty = max(0, remaining_item_qty - remaining_consumed_qty)
 			elif backflushed_materials.get(item.item_code):
 				for d in backflushed_materials.get(item.item_code):
 					if d.get(item.warehouse):
 						transferred_qty -= d.get(item.warehouse)
 
 			if transferred_qty > 0:
+				if frappe.db.get_value("UOM", item.stock_uom, "must_be_whole_number"):
+					transferred_qty = frappe.utils.ceil(transferred_qty)
+
 				self.add_to_stock_entry_detail({
 					item.item_code: {
 						"from_warehouse": item.warehouse,
