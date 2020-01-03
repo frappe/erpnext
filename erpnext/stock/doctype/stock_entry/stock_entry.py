@@ -75,6 +75,7 @@ class StockEntry(StockController):
 			set_batch_nos(self, 's_warehouse')
 
 		self.set_incoming_rate()
+		self.validate_serialized_batch()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
 
@@ -849,7 +850,7 @@ class StockEntry(StockController):
 								and po.name = %s""",self.purchase_order))
 
 					for item in itervalues(item_dict):
-						if self.pro_doc and (cint(self.pro_doc.from_wip_warehouse) or not self.pro_doc.skip_transfer):
+						if self.pro_doc and cint(self.pro_doc.from_wip_warehouse):
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
 						#Get Reserve Warehouse from PO
 						if self.purchase_order and self.purpose=="Send to Subcontractor":
