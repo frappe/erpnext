@@ -1438,7 +1438,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	remove_pricing_rule: function(item) {
 		let me = this;
-		const fields = ["discount_percentage", "discount_amount", "pricing_rules"];
+		const fields = ["discount_percentage",
+			"discount_amount", "margin_rate_or_amount", "rate_with_margin"];
 
 		if(item.remove_free_item) {
 			var items = [];
@@ -1458,6 +1459,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					fields.forEach(f => {
 						row[f] = 0;
 					});
+
+					["pricing_rules", "margin_type"].forEach(field => {
+						if (row[field]) {
+							row[field] = '';
+						}
+					})
 				}
 			});
 

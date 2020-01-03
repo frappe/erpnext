@@ -685,7 +685,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Text",
+   "fieldtype": "Long Text",
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -1256,7 +1256,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-25 17:25:28.128843",
+ "modified": "2019-12-30 19:17:13.122644",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
