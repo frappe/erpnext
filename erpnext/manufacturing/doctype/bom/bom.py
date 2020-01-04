@@ -768,7 +768,7 @@ def add_additional_cost(stock_entry, work_order):
 
 	items = {}
 	for d in bom.get(table):
-		items.setdefault(d.item_code, d.rate)
+		items.setdefault(d.item_code, d.amount)
 
 	non_stock_items = frappe.get_all('Item',
 		fields="name", filters={'name': ('in', list(items.keys())), 'ifnull(is_stock_item, 0)': 0}, as_list=1)
@@ -777,7 +777,7 @@ def add_additional_cost(stock_entry, work_order):
 		stock_entry.append('additional_costs', {
 			'expense_account': expenses_included_in_valuation,
 			'description': name[0],
-			'amount': items.get(name[0])
+			'amount': flt(items.get(name[0])) * flt(stock_entry.fg_completed_qty) / flt(bom.quantity)
 		})
 
 @frappe.whitelist()

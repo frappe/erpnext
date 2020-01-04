@@ -355,7 +355,8 @@ class SalesInvoice(SellingController):
 				"print_format": print_format,
 				"allow_edit_rate": pos.get("allow_user_to_edit_rate"),
 				"allow_edit_discount": pos.get("allow_user_to_edit_discount"),
-				"campaign": pos.get("campaign")
+				"campaign": pos.get("campaign"),
+				"allow_print_before_pay": pos.get("allow_print_before_pay")
 			}
 
 	def update_time_sheet(self, sales_invoice):

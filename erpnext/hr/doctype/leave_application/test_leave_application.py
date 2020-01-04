@@ -235,8 +235,8 @@ class TestLeaveApplication(unittest.TestCase):
 			frappe.get_doc(dict(
 				doctype = 'Holiday List',
 				holiday_list_name = holiday_list,
-				from_date = date(date.today().year, 1, 1),
-				to_date = date(date.today().year, 12, 31),
+				from_date = add_months(today, -6),
+				to_date = add_months(today, 6),
 				holidays = [
 					dict(holiday_date = today, description = 'Test')
 				]
@@ -597,8 +597,8 @@ def get_leave_period():
 		return frappe.get_doc(dict(
 				name = 'Test Leave Period',
 				doctype = 'Leave Period',
-				from_date = "{0}-12-01".format(now_datetime().year - 1),
-				to_date = "{0}-12-31".format(now_datetime().year),
+				from_date = add_months(nowdate(), -6),
+				to_date = add_months(nowdate(), 6),
 				company = "_Test Company",
 				is_active = 1
 			)).insert()
