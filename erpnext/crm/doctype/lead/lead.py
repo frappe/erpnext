@@ -2,17 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
-from frappe import _
-from frappe.utils import (cstr, validate_email_address, cint, comma_and, has_gravatar, now, getdate, nowdate)
-from frappe.model.mapper import get_mapped_doc
 
-from erpnext.controllers.selling_controller import SellingController
-from frappe.contacts.address_and_contact import load_address_and_contact
+import frappe
 from erpnext.accounts.party import set_taxes
+from erpnext.controllers.selling_controller import SellingController
+from frappe import _
+from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.email.inbox import link_communication_to_document
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, comma_and, cstr, getdate, has_gravatar, nowdate, validate_email_address
 
 sender_field = "email_id"
+
 
 class Lead(SellingController):
 	def get_feed(self):
@@ -23,15 +24,23 @@ class Lead(SellingController):
 		self.get("__onload").is_customer = customer
 		load_address_and_contact(self)
 
+	def before_insert(self):
+		self.address_doc = self.create_address()
+		self.contact_doc = self.create_contact()
+
+	def after_insert(self):
+		self.update_links()
+		# after the address and contact are created, flush the field values
+		# to avoid inconsistent reporting in case the documents are changed
+		self.flush_address_and_contact_fields()
+
 	def validate(self):
 		self.set_lead_name()
+		self.set_title()
 		self._prev = frappe._dict({
-			"contact_date": frappe.db.get_value("Lead", self.name, "contact_date") if \
-				(not cint(self.get("__islocal"))) else None,
-			"ends_on": frappe.db.get_value("Lead", self.name, "ends_on") if \
-				(not cint(self.get("__islocal"))) else None,
-			"contact_by": frappe.db.get_value("Lead", self.name, "contact_by") if \
-				(not cint(self.get("__islocal"))) else None,
+			"contact_date": frappe.db.get_value("Lead", self.name, "contact_date") if (not cint(self.is_new())) else None,
+			"ends_on": frappe.db.get_value("Lead", self.name, "ends_on") if (not cint(self.is_new())) else None,
+			"contact_by": frappe.db.get_value("Lead", self.name, "contact_by") if (not cint(self.is_new())) else None,
 		})
 
 		self.set_status()
@@ -39,7 +48,7 @@ class Lead(SellingController):
 
 		if self.email_id:
 			if not self.flags.ignore_email_validation:
-				validate_email_address(self.email_id, True)
+				validate_email_address(self.email_id, throw=True)
 
 			if self.email_id == self.lead_owner:
 				frappe.throw(_("Lead Owner cannot be same as the Lead"))
@@ -53,8 +62,7 @@ class Lead(SellingController):
 		if self.contact_date and getdate(self.contact_date) < getdate(nowdate()):
 			frappe.throw(_("Next Contact Date cannot be in the past"))
 
-		if self.ends_on and self.contact_date and\
-			(self.ends_on < self.contact_date):
+		if self.ends_on and self.contact_date and (self.ends_on < self.contact_date):
 			frappe.throw(_("Ends On date cannot be before Next Contact Date."))
 
 	def on_update(self):
@@ -66,23 +74,21 @@ class Lead(SellingController):
 			"starts_on": self.contact_date,
 			"ends_on": self.ends_on or "",
 			"subject": ('Contact ' + cstr(self.lead_name)),
-			"description": ('Contact ' + cstr(self.lead_name)) + \
-				(self.contact_by and ('. By : ' + cstr(self.contact_by)) or '')
+			"description": ('Contact ' + cstr(self.lead_name)) + (self.contact_by and ('. By : ' + cstr(self.contact_by)) or '')
 		}, force)
 
 	def check_email_id_is_unique(self):
 		if self.email_id:
 			# validate email is unique
-			duplicate_leads = frappe.db.sql_list("""select name from tabLead
-				where email_id=%s and name!=%s""", (self.email_id, self.name))
+			duplicate_leads = frappe.get_all("Lead", filters={"email_id": self.email_id, "name": ["!=", self.name]})
+			duplicate_leads = [lead.name for lead in duplicate_leads]
 
 			if duplicate_leads:
 				frappe.throw(_("Email Address must be unique, already exists for {0}")
 					.format(comma_and(duplicate_leads)), frappe.DuplicateEntryError)
 
 	def on_trash(self):
-		frappe.db.sql("""update `tabIssue` set lead='' where lead=%s""",
-			self.name)
+		frappe.db.sql("""update `tabIssue` set lead='' where lead=%s""", self.name)
 
 		self.delete_events()
 
@@ -115,9 +121,100 @@ class Lead(SellingController):
 
 			self.lead_name = self.company_name
 
+	def set_title(self):
+		if self.organization_lead:
+			self.title = self.company_name
+		else:
+			self.title = self.lead_name
+
+	def create_address(self):
+		address_fields = ["address_title", "address_line1", "address_line2",
+			"city", "county", "state", "country", "pincode"]
+		info_fields = ["email_id", "phone", "fax"]
+
+		# do not create an address if no fields are available,
+		# skipping country since the system auto-sets it from system defaults
+		if not any([self.get(field) for field in address_fields if field != "country"]):
+			return
+
+		address = frappe.new_doc("Address")
+		address.update({addr_field: self.get(addr_field) for addr_field in address_fields})
+		address.update({info_field: self.get(info_field) for info_field in info_fields})
+		address.insert()
+
+		return address
+
+	def create_contact(self):
+		if not self.lead_name:
+			self.set_lead_name()
+
+		names = self.lead_name.split(" ")
+		if len(names) > 1:
+			first_name, last_name = names[0], " ".join(names[1:])
+		else:
+			first_name, last_name = self.lead_name, None
+
+		contact = frappe.new_doc("Contact")
+		contact.update({
+			"first_name": first_name,
+			"last_name": last_name,
+			"salutation": self.salutation,
+			"gender": self.gender,
+			"designation": self.designation,
+		})
+
+		if self.email_id:
+			contact.append("email_ids", {
+				"email_id": self.email_id,
+				"is_primary": 1
+			})
+
+		if self.phone:
+			contact.append("phone_nos", {
+				"phone": self.phone,
+				"is_primary": 1
+			})
+
+		if self.mobile_no:
+			contact.append("phone_nos", {
+				"phone": self.mobile_no
+			})
+
+		contact.insert()
+
+		return contact
+
+	def update_links(self):
+		# update address links
+		if self.address_doc:
+			self.address_doc.append("links", {
+				"link_doctype": "Lead",
+				"link_name": self.name,
+				"link_title": self.lead_name
+			})
+			self.address_doc.save()
+
+		# update contact links
+		if self.contact_doc:
+			self.contact_doc.append("links", {
+				"link_doctype": "Lead",
+				"link_name": self.name,
+				"link_title": self.lead_name
+			})
+			self.contact_doc.save()
+
+	def flush_address_and_contact_fields(self):
+		fields = ['address_line1', 'address_line2', 'address_title',
+			'city', 'county', 'country', 'fax', 'pincode', 'state']
+
+		for field in fields:
+			self.set(field, None)
+
+
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):
 	return _make_customer(source_name, target_doc)
+
 
 def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 	def set_missing_values(source, target):
@@ -143,6 +240,7 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 
 	return doclist
 
+
 @frappe.whitelist()
 def make_opportunity(source_name, target_doc=None):
 	def set_missing_values(source, target):
@@ -163,6 +261,7 @@ def make_opportunity(source_name, target_doc=None):
 		}}, target_doc, set_missing_values)
 
 	return target_doc
+
 
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
@@ -205,7 +304,8 @@ def _set_missing_values(source, target):
 
 @frappe.whitelist()
 def get_lead_details(lead, posting_date=None, company=None):
-	if not lead: return {}
+	if not lead:
+		return {}
 
 	from erpnext.accounts.party import set_address_details
 	out = frappe._dict()
@@ -230,6 +330,7 @@ def get_lead_details(lead, posting_date=None, company=None):
 		out['taxes_and_charges'] = taxes_and_charges
 
 	return out
+
 
 @frappe.whitelist()
 def make_lead_from_communication(communication, ignore_communication_links=False):
