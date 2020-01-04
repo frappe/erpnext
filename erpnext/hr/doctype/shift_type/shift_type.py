@@ -11,7 +11,7 @@ from frappe.model.document import Document
 from frappe.utils import cint, getdate, get_datetime
 from erpnext.hr.doctype.shift_assignment.shift_assignment import get_actual_start_end_datetime_of_shift, get_employee_shift
 from erpnext.hr.doctype.employee_checkin.employee_checkin import mark_attendance_and_link_log, calculate_working_hours
-from erpnext.hr.doctype.attendance.attendance import mark_absent
+from erpnext.hr.doctype.attendance.attendance import mark_attendance
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 class ShiftType(Document):
@@ -35,7 +35,7 @@ class ShiftType(Document):
 
 	def get_attendance(self, logs):
 		"""Return attendance_status, working_hours for a set of logs belonging to a single shift.
-		Assumtion: 
+		Assumtion:
 			1. These logs belongs to an single shift, single employee and is not in a holiday date.
 			2. Logs are in chronological order
 		"""
@@ -43,10 +43,10 @@ class ShiftType(Document):
 		total_working_hours, in_time, out_time = calculate_working_hours(logs, self.determine_check_in_and_check_out, self.working_hours_calculation_based_on)
 		if cint(self.enable_entry_grace_period) and in_time and in_time > logs[0].shift_start + timedelta(minutes=cint(self.late_entry_grace_period)):
 			late_entry = True
-		
+
 		if cint(self.enable_exit_grace_period) and out_time and out_time < logs[0].shift_end - timedelta(minutes=cint(self.early_exit_grace_period)):
 			early_exit = True
-			
+
 		if self.working_hours_threshold_for_absent and total_working_hours < self.working_hours_threshold_for_absent:
 			return 'Absent', total_working_hours, late_entry, early_exit
 		if self.working_hours_threshold_for_half_day and total_working_hours < self.working_hours_threshold_for_half_day:
@@ -75,7 +75,7 @@ class ShiftType(Document):
 		for date in dates:
 			shift_details = get_employee_shift(employee, date, True)
 			if shift_details and shift_details.shift_type.name == self.name:
-				mark_absent(employee, date, self.name)
+				mark_attendance(employee, date, self.name, 'Absent')
 
 	def get_assigned_employee(self, from_date=None, consider_default_shift=False):
 		filters = {'date':('>=', from_date), 'shift_type': self.name, 'docstatus': '1'}
@@ -107,15 +107,15 @@ def get_filtered_date_list(employee, start_date, end_date, filter_attendance=Tru
 	condition_query = ''
 	if filter_attendance:
 		condition_query += """ and a.selected_date not in (
-			select attendance_date from `tabAttendance` 
-			where docstatus = '1' and employee = %(employee)s 
+			select attendance_date from `tabAttendance`
+			where docstatus = 1 and employee = %(employee)s
 			and attendance_date between %(start_date)s and %(end_date)s)"""
 	if holiday_list:
 		condition_query += """ and a.selected_date not in (
 			select holiday_date from `tabHoliday` where parenttype = 'Holiday List' and
     		parentfield = 'holidays' and parent = %(holiday_list)s
     		and holiday_date between %(start_date)s and %(end_date)s)"""
-	
+
 	dates = frappe.db.sql("""select * from
 		({base_dates_query}) as a
 		where a.selected_date <= %(end_date)s {condition_query}
