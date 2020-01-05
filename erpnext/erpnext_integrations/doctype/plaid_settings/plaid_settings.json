@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2018-10-25 10:02:48.656165",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -23,48 +24,41 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.enabled==1",
+   "depends_on": "enabled",
    "fieldname": "automatic_sync",
    "fieldtype": "Check",
    "label": "Synchronize all accounts every hour"
   },
   {
-   "depends_on": "eval:doc.enabled==1",
    "fieldname": "plaid_client_id",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Plaid Client ID",
-   "reqd": 1
+   "label": "Plaid Client ID"
   },
   {
-   "depends_on": "eval:doc.enabled==1",
    "fieldname": "plaid_secret",
    "fieldtype": "Password",
    "in_list_view": 1,
-   "label": "Plaid Secret",
-   "reqd": 1
+   "label": "Plaid Secret"
   },
   {
-   "depends_on": "eval:doc.enabled==1",
    "fieldname": "plaid_public_key",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Plaid Public Key",
-   "reqd": 1
+   "label": "Plaid Public Key"
   },
   {
-   "depends_on": "eval:doc.enabled==1",
    "fieldname": "plaid_env",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Plaid Environment",
-   "reqd": 1
+   "label": "Plaid Environment"
   },
   {
    "fieldname": "column_break_2",
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "enabled",
    "fieldname": "section_break_4",
    "fieldtype": "Section Break"
   },
@@ -74,7 +68,8 @@
   }
  ],
  "issingle": 1,
- "modified": "2019-08-13 17:00:06.939422",
+ "links": [],
+ "modified": "2020-01-05 10:00:22.137832",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Plaid Settings",
