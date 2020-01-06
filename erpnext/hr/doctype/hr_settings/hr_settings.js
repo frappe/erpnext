@@ -19,5 +19,8 @@ frappe.ui.form.on('HR Settings', {
 			}
 			frm.set_value('password_policy', policy.split(new RegExp(" |-", 'g')).filter((token) => token).join('-'));
 		}
+		if(frm.doc.restrict_backdated_leave_application ==1) {
+			frm.set_df_property("role_allowed_to_create_backdated_leave_application", "reqd", 1);
+		}
 	}
 });

@@ -81,9 +81,9 @@ class LeaveApplication(Document):
 	def validate_dates(self):
 		if frappe.db.get_single_value("HR Settings", "restrict_backdated_leave_application"):
 			if self.from_date and self.from_date < frappe.utils.today():
-				hr_manager_role =  frappe.db.get_single_value("HR Settings", "role_allowed_to_create_backdated_leave_application")
-				if hr_manager_role not in frappe.get_roles():
-					frappe.throw(_("Only HR Managers can create backdated leave applications"))
+				allowed_role = frappe.db.get_single_value("HR Settings", "role_allowed_to_create_backdated_leave_application")
+				if allowed_role not in frappe.get_roles():
+					frappe.throw(_("Only {0} can create backdated leave applications").format(allowed_role))
 
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
 			frappe.throw(_("To date cannot be before from date"))
