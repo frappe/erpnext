@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import flt, cint, add_days, cstr, add_months
+from frappe.utils import flt, cint, add_days, cstr, add_months, getdate
 import json, copy
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, set_transaction_type
 from erpnext.setup.utils import get_exchange_rate
@@ -51,6 +51,16 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	validate_item_details(args, item)
 
 	out = get_basic_details(args, item, overwrite_warehouse)
+
+	if isinstance(doc, string_types):
+		doc = json.loads(doc)
+
+	if doc and doc.get('doctype') == 'Purchase Invoice':
+		args['bill_date'] = doc.get('bill_date')
+
+	if doc:
+		args['posting_date'] = doc.get('posting_date')
+		args['transaction_date'] = doc.get('transaction_date')
 
 	get_item_tax_template(args, item, out)
 	out["item_tax_rate"] = get_item_tax_map(args.company, args.get("item_tax_template") if out.get("item_tax_template") is None \
@@ -395,7 +405,34 @@ def get_item_tax_template(args, item, out):
 			item_tax_template = _get_item_tax_template(args, item_group_doc.taxes, out)
 			item_group = item_group_doc.parent_item_group
 
-def _get_item_tax_template(args, taxes, out):
+def _get_item_tax_template(args, taxes, out={}, for_validate=False):
+	taxes_with_validity = []
+	taxes_with_no_validity = []
+
+	for tax in taxes:
+		if tax.valid_from:
+			# In purchase Invoice first preference will be given to supplier invoice date
+			# if supplier date is not present then posting date
+			validation_date = args.get('transaction_date') or args.get('bill_date') or args.get('posting_date')
+
+			if getdate(tax.valid_from) <= getdate(validation_date):
+				taxes_with_validity.append(tax)
+		else:
+			taxes_with_no_validity.append(tax)
+
+	if taxes_with_validity:
+		taxes = sorted(taxes_with_validity, key = lambda i: i.valid_from, reverse=True)
+	else:
+		taxes = taxes_with_no_validity
+
+	if for_validate:
+		return [tax.item_tax_template for tax in taxes if (cstr(tax.tax_category) == cstr(args.get('tax_category')) \
+			and (tax.item_tax_template not in taxes))]
+
+	# all templates have validity and no template is valid
+	if not taxes_with_validity and (not taxes_with_no_validity):
+		return None
+
 	for tax in taxes:
 		if cstr(tax.tax_category) == cstr(args.get("tax_category")):
 			out["item_tax_template"] = tax.item_tax_template
