@@ -261,10 +261,6 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 		expense_account = get_asset_category_account(fieldname = "fixed_asset_account", item = args.item_code, company= args.company)
 
-	if args.get('doctype') in ['Sales Invoice', 'Delivery Note'] and args.get('is_internal_customer'):
-		expense_account = frappe.get_value('Account', {'company': args.company, 'account_type': 'Cost of Goods Sold',
-			'root_type': 'Expense', 'inter_company_account': 1}, 'name')
-
 	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not args.uom:
 		if args.get('doctype') in sales_doctypes:

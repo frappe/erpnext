@@ -233,7 +233,7 @@ class PurchaseInvoice(BuyingController):
 				and (not item.po_detail or
 					not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
 
-				if self.update_stock:
+				if self.update_stock and (not item.from_warehouse):
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
 					if item.purchase_receipt:
@@ -474,25 +474,46 @@ class PurchaseInvoice(BuyingController):
 					warehouse_debit_amount = self.make_stock_adjustment_entry(gl_entries,
 						item, voucher_wise_stock_value, account_currency)
 
-					if d.from_warehouse:
+					if item.from_warehouse:
+
 						gl_entries.append(self.get_gl_dict({
-							"account":  warehouse_account[d.from_warehouse]['account'],
-							"against": warehouse_account[d.warehouse]["account"],
-							"cost_center": d.cost_center,
+							"account":  warehouse_account[item.warehouse]['account'],
+							"against": warehouse_account[item.from_warehouse]["account"],
+							"cost_center": item.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"debit": warehouse_debit_amount,
+						}, warehouse_account[item.warehouse]["account_currency"], item=item))
+
+						gl_entries.append(self.get_gl_dict({
+							"account":  warehouse_account[item.from_warehouse]['account'],
+							"against": warehouse_account[item.warehouse]["account"],
+							"cost_center": item.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"debit": -1 * warehouse_debit_amount,
-						}, warehouse_account[d.from_warehouse]["account_currency"], item=d))
+						}, warehouse_account[item.from_warehouse]["account_currency"], item=item))
 
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": item.expense_account,
-							"against": self.supplier,
-							"debit": warehouse_debit_amount,
-							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"cost_center": item.cost_center,
-							"project": item.project
-						}, account_currency, item=item)
-					)
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": item.expense_account,
+								"against": self.supplier,
+								"debit": warehouse_debit_amount,
+								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+								"cost_center": item.cost_center,
+								"project": item.project
+							}, account_currency, item=item)
+						)
+
+					else:
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": item.expense_account,
+								"against": self.supplier,
+								"debit": warehouse_debit_amount,
+								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+								"cost_center": item.cost_center,
+								"project": item.project
+							}, account_currency, item=item)
+						)
 
 					# Amount added through landed-cost-voucher
 					if landed_cost_entries:
