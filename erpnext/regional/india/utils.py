@@ -156,6 +156,7 @@ def get_regional_address_details(party_details, doctype, company, return_taxes=N
 	party_details.place_of_supply = get_place_of_supply(party_details, doctype)
 
 	if is_internal_transfer(party_details, doctype):
+		party_details.taxes_and_charges = ''
 		party_details.taxes = ''
 		return
 
