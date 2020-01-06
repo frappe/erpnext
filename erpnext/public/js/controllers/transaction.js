@@ -968,7 +968,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	qty: function(doc, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
-		this.conversion_factor(doc, cdt, cdn, true);
+		this.conversion_factor(doc, cdt, cdn, false);
 		this.apply_pricing_rule(item, true);
 	},
 
