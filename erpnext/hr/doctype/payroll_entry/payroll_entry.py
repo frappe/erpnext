@@ -329,6 +329,10 @@ class PayrollEntry(Document):
 					statistical_component = frappe.db.get_value("Salary Component", sal_detail.salary_component, 'statistical_component')
 					if statistical_component != 1:
 						salary_slip_total -= sal_detail.amount
+
+				#loan deduction from bank entry during payroll
+				salary_slip_total -= salary_slip.total_loan_repayment
+
 			if salary_slip_total > 0:
 				self.create_journal_entry(salary_slip_total, "salary")
 
