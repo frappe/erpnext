@@ -44,7 +44,7 @@
 					{% if doc.supplier_name or doc.supplier -%}
 						<strong>{{ row('Supplier', doc.supplier_name or doc.supplier) }}</strong>
 					{%- endif %}
-					{{ row('Address', doc.address_display, style="line-height:1.3;") }}
+					{{ row('Address', doc.shipping_address or doc.address_display if doc.doctype == "Delivery Note" else doc.address_display, style="line-height:1.3;") }}
 					{{ row('Port Of Loading', doc.pol_address_display, style="line-height:1.3;") }}
 					{{ row('Port Of Arrival', doc.poa_address_display, style="line-height:1.3;") }}
 					{{ row('Description', doc.remarks, empty_value="No Remarks") }}
