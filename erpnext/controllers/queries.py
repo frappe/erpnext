@@ -531,6 +531,4 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 		}
 
 		taxes = _get_item_tax_template(args, taxes, for_validate=True)
-
-		return frappe.db.sql(""" SELECT name FROM `tabItem Tax Template` where name
-			IN (%s)""" % ', '.join(['%s']*len(taxes)) ,tuple(taxes)) #nosec
+		return [(d,) for d in set(taxes)]
