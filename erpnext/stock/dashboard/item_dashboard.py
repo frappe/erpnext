@@ -10,7 +10,7 @@ def get_data(item_code=None, status=None, item_group=None,
 	filters = []
 	if item_code:
 		filters.append(['item_code', '=', item_code])
-	if warehouse:
+	if status:
 		filters.append(['status', '=', status])
 	if item_group:
 		lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
