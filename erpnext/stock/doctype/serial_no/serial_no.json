@@ -423,13 +423,12 @@
    "search_index": 1
   },
   {
-   "default": "Free",
    "fieldname": "status",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Free\nUsed\nLost\nBroken\nOn Site\nWIP\nTo Be Tested",
+   "options": "Serial No State",
    "read_only": 1
   },
   {
@@ -532,7 +531,7 @@
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
- "modified": "2020-01-07 10:26:23.319455",
+ "modified": "2020-01-07 13:53:10.746573",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
