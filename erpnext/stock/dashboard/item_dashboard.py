@@ -4,14 +4,14 @@ import frappe
 from frappe.model.db_query import DatabaseQuery
 
 @frappe.whitelist()
-def get_data(item_code=None, warehouse=None, item_group=None,
+def get_data(item_code=None, status=None, item_group=None,
 	start=0, sort_by='actual_qty', sort_order='desc'):
 	'''Return data to render the item dashboard'''
 	filters = []
 	if item_code:
 		filters.append(['item_code', '=', item_code])
-	if warehouse:
-		filters.append(['warehouse', '=', warehouse])
+	if status:
+		filters.append(['status', '=', status])
 	if item_group:
 		lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
 		items = frappe.db.sql_list("""
@@ -28,7 +28,7 @@ def get_data(item_code=None, warehouse=None, item_group=None,
 		# user does not have access on warehouse
 		return []
 
-	items = frappe.db.get_all('Bin', fields=['item_code', 'warehouse', 'projected_qty',
+	items = frappe.db.get_all('Bin', fields=['item_code', 'status', 'projected_qty',
 			'reserved_qty', 'reserved_qty_for_production', 'reserved_qty_for_sub_contract', 'actual_qty', 'valuation_rate'],
 		or_filters={
 			'projected_qty': ['!=', 0],
