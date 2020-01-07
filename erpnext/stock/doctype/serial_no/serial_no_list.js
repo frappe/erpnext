@@ -4,6 +4,10 @@ frappe.listview_settings['Serial No'] = {
 		return [__(doc.status), {
 			"Free": "green",
 			"Used": "red",
+			"Broken": "red",
+			"Lost": "red",
+			"On Site": "blue",
+			"To Be Tested": "yellow"
 		}[doc.status],"status,=,"+ doc.status];
 	}/*
 		if (doc.status) {
