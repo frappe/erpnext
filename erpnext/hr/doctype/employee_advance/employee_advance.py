@@ -133,8 +133,24 @@ def make_bank_entry(dt, dn):
 	return je.as_dict()
 
 @frappe.whitelist()
-def make_return_entry(employee, company, employee_advance_name,
-		return_amount, advance_account, mode_of_payment=None):
+def create_return_through_additional_salary(doc):
+	import json
+	doc = frappe._dict(json.loads(doc))
+	additional_salary = frappe.new_doc('Additional Salary')
+	additional_salary.employee = doc.employee
+	additional_salary.salary_component = doc.salary_component
+	additional_salary.amount = doc.paid_amount - doc.claimed_amount
+	additional_salary.payroll_date = doc.payroll_date
+	additional_salary.company = doc.company
+
+	additional_salary.submit()
+
+	frappe.db.set_value("Employee Advance", doc.name, "return_amount", additional_salary.amount)
+
+	return additional_salary.name
+
+@frappe.whitelist()
+def make_return_entry(employee_name, company, employee_advance_name, return_amount, mode_of_payment, advance_account):
 	return_account = get_default_bank_cash_account(company, account_type='Cash', mode_of_payment = mode_of_payment)
 	je = frappe.new_doc('Journal Entry')
 	je.posting_date = nowdate()
