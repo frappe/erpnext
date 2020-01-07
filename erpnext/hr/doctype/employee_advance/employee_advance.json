@@ -10,9 +10,12 @@
   "naming_series",
   "employee",
   "employee_name",
+  "department",
   "column_break_4",
   "posting_date",
-  "department",
+  "repay_unclaimed_amount_from_salary",
+  "payroll_date",
+  "salary_component",
   "section_break_8",
   "purpose",
   "column_break_11",
@@ -169,11 +172,30 @@
    "label": "Returned Amount",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "repay_unclaimed_amount_from_salary",
+   "fieldtype": "Check",
+   "label": "Repay unclaimed amount from salary"
+  },
+  {
+   "depends_on": "eval:doc.repay_unclaimed_amount_from_salary == 1",
+   "fieldname": "payroll_date",
+   "fieldtype": "Date",
+   "label": "Payroll date"
+  },
+  {
+   "depends_on": "eval:doc.repay_unclaimed_amount_from_salary == 1",
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "label": "Salary Component",
+   "options": "Salary Component"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-15 19:04:07.044505",
+ "modified": "2020-01-03 13:02:32.094099",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Advance",
