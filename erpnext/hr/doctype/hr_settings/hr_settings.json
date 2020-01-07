@@ -24,10 +24,12 @@
   "leave_settings",
   "leave_approval_notification_template",
   "leave_status_notification_template",
+  "role_allowed_to_create_backdated_leave_application",
   "column_break_18",
   "leave_approver_mandatory_in_leave_application",
   "show_leaves_of_all_department_members_in_calendar",
   "auto_leave_encashment",
+  "restrict_backdated_leave_application",
   "hiring_settings",
   "check_vacancies"
  ],
@@ -176,13 +178,26 @@
    "fieldtype": "Link",
    "label": "Birthday Email Template",
    "options": "Email Template"
+  },
+  {
+   "depends_on": "eval:doc.restrict_backdated_leave_application == 1",
+   "fieldname": "role_allowed_to_create_backdated_leave_application",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Create Backdated Leave Application",
+   "options": "Role"
+  },
+  {
+   "default": "0",
+   "fieldname": "restrict_backdated_leave_application",
+   "fieldtype": "Check",
+   "label": "Restrict Backdated Leave Application"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2019-12-24 02:55:04.270272",
+ "modified": "2020-01-06 17:35:13.827644",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
