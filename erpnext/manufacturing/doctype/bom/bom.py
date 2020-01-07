@@ -607,6 +607,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				item.image,
 				bom.project,
 				item.stock_uom,
+				item.item_group,
 				item.allow_alternative_item,
 				item_default.default_warehouse,
 				item_default.expense_account as expense_account,
@@ -767,7 +768,7 @@ def add_additional_cost(stock_entry, work_order):
 
 	items = {}
 	for d in bom.get(table):
-		items.setdefault(d.item_code, d.rate)
+		items.setdefault(d.item_code, d.amount)
 
 	non_stock_items = frappe.get_all('Item',
 		fields="name", filters={'name': ('in', list(items.keys())), 'ifnull(is_stock_item, 0)': 0}, as_list=1)
@@ -776,7 +777,7 @@ def add_additional_cost(stock_entry, work_order):
 		stock_entry.append('additional_costs', {
 			'expense_account': expenses_included_in_valuation,
 			'description': name[0],
-			'amount': items.get(name[0])
+			'amount': flt(items.get(name[0])) * flt(stock_entry.fg_completed_qty) / flt(bom.quantity)
 		})
 
 @frappe.whitelist()

@@ -79,6 +79,21 @@ frappe.ui.form.on('Delivery Trip', {
 		}, () => {
 			frm.reload_doc();
 		});
+	},
+
+	driver: function (frm) {
+		if (frm.doc.driver) {
+			frappe.call({
+				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.get_driver_email",
+				args: {
+					driver: frm.doc.driver
+				},
+				callback: (data) => {
+					frm.set_value("driver_email", data.message.email);
+				}
+			});
+		};
+	},
 
 	},
 

@@ -46,13 +46,24 @@ frappe.query_reports["Budget Variance Report"] = {
 			fieldtype: "Select",
 			options: ["Cost Center", "Project"],
 			default: "Cost Center",
-			reqd: 1
+			reqd: 1,
+			on_change: function() {
+				frappe.query_report.set_filter_value("budget_against_filter", []);
+				frappe.query_report.refresh();
+			}
 		},
 		{
-			fieldname: "cost_center",
-			label: __("Cost Center"),
-			fieldtype: "Link",
-			options: "Cost Center"
+			fieldname:"budget_against_filter",
+			label: __('Dimension Filter'),
+			fieldtype: "MultiSelectList",
+			get_data: function(txt) {
+				if (!frappe.query_report.filters) return;
+
+				let budget_against = frappe.query_report.get_filter_value('budget_against');
+				if (!budget_against) return;
+
+				return frappe.db.get_link_options(budget_against, txt);
+			}
 		},
 		{
 			fieldname:"show_cumulative",

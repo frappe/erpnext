@@ -52,7 +52,6 @@ def get_attribute_filter_data():
 
 
 def get_products_for_website(field_filters=None, attribute_filters=None, search=None):
-
 	if attribute_filters:
 		item_codes = get_item_codes_by_attributes(attribute_filters)
 		items_by_attributes = get_items([['name', 'in', item_codes]])

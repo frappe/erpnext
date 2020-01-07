@@ -132,9 +132,8 @@ class Opportunity(TransactionBase):
 		lost_quotation = frappe.db.sql("""
 			select name
 			from `tabQuotation`
-			where  docstatus=1
-				and opportunity =%s
-				and status = 'Lost'
+			where docstatus=1
+				and opportunity =%s and status = 'Lost'
 			""", self.name)
 		if lost_quotation:
 			if self.has_active_quotation():

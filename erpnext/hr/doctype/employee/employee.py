@@ -152,8 +152,8 @@ class Employee(NestedSet):
 		elif self.date_of_retirement and self.date_of_joining and (getdate(self.date_of_retirement) <= getdate(self.date_of_joining)):
 			throw(_("Date Of Retirement must be greater than Date of Joining"))
 
-		elif self.relieving_date and self.date_of_joining and (getdate(self.relieving_date) <= getdate(self.date_of_joining)):
-			throw(_("Relieving Date must be greater than Date of Joining"))
+		elif self.relieving_date and self.date_of_joining and (getdate(self.relieving_date) < getdate(self.date_of_joining)):
+			throw(_("Relieving Date must be greater than or equal to Date of Joining"))
 
 		elif self.contract_end_date and self.date_of_joining and (getdate(self.contract_end_date) <= getdate(self.date_of_joining)):
 			throw(_("Contract End Date must be greater than Date of Joining"))
@@ -163,6 +163,12 @@ class Employee(NestedSet):
 			validate_email_address(self.company_email, True)
 		if self.personal_email:
 			validate_email_address(self.personal_email, True)
+
+	def set_preferred_email(self):
+		preferred_email_field = frappe.scrub(self.prefered_contact_email)
+		if preferred_email_field:
+			preferred_email = self.get(preferred_email_field)
+			self.prefered_email = preferred_email
 
 	def validate_status(self):
 		if self.status == 'Left':

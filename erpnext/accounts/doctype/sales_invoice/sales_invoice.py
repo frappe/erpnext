@@ -90,6 +90,7 @@ class SalesInvoice(SellingController):
 		self.validate_account_for_change_amount()
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
+		self.validate_item_cost_centers()
 		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_invoice_reference)
 
 		if cint(self.is_pos):
@@ -146,6 +147,12 @@ class SalesInvoice(SellingController):
 
 					elif asset.status in ("Scrapped", "Cancelled", "Sold"):
 						frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}").format(d.idx, d.asset, asset.status))
+
+	def validate_item_cost_centers(self):
+		for item in self.items:
+			cost_center_company = frappe.get_cached_value("Cost Center", item.cost_center, "company")
+			if cost_center_company != self.company:
+				frappe.throw(_("Row #{0}: Cost Center {1} does not belong to company {2}").format(frappe.bold(item.idx), frappe.bold(item.cost_center), frappe.bold(self.company)))
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
@@ -348,7 +355,8 @@ class SalesInvoice(SellingController):
 				"print_format": print_format,
 				"allow_edit_rate": pos.get("allow_user_to_edit_rate"),
 				"allow_edit_discount": pos.get("allow_user_to_edit_discount"),
-				"campaign": pos.get("campaign")
+				"campaign": pos.get("campaign"),
+				"allow_print_before_pay": pos.get("allow_print_before_pay")
 			}
 
 	def update_time_sheet(self, sales_invoice):
@@ -535,9 +543,7 @@ class SalesInvoice(SellingController):
 		for i in dic:
 			if frappe.db.get_single_value('Selling Settings', dic[i][0]) == 'Yes':
 				for d in self.get('items'):
-					is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
-					if  (d.item_code and is_stock_item == 1\
-						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1])):
+					if (d.item_code and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1])):
 						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
 
