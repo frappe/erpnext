@@ -423,6 +423,7 @@
    "search_index": 1
   },
   {
+   "default": "Free",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -531,7 +532,7 @@
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
- "modified": "2019-12-24 14:33:27.544499",
+ "modified": "2020-01-07 10:26:23.319455",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
