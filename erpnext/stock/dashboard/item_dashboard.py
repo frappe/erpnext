@@ -11,7 +11,7 @@ def get_data(item_code=None, status=None, item_group=None,
 	if item_code:
 		filters.append(['item_code', '=', item_code])
 	if status:
-		filters.append(['status', '=', status])
+		filters.append(['Used', '=', status])
 	if item_group:
 		lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
 		items = frappe.db.sql_list("""
