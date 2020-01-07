@@ -294,7 +294,8 @@
    "label": "Rate",
    "oldfieldname": "import_rate",
    "oldfieldtype": "Currency",
-   "options": "currency"
+   "options": "currency",
+   "precision": "9"
   },
   {
    "columns": 2,
@@ -305,6 +306,7 @@
    "oldfieldname": "import_amount",
    "oldfieldtype": "Currency",
    "options": "currency",
+   "precision": "9",
    "read_only": 1
   },
   {

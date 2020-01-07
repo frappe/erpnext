@@ -519,12 +519,13 @@
   },
   {
    "fieldname": "serial_no",
-   "fieldtype": "Text",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Serial No",
    "no_copy": 1,
    "oldfieldname": "serial_no",
-   "oldfieldtype": "Text"
+   "oldfieldtype": "Text",
+   "options": "Serial No"
   },
   {
    "fieldname": "item_group",
@@ -702,7 +703,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-25 22:08:27.452734",
+ "modified": "2019-12-23 15:16:20.224395",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

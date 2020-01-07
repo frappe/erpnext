@@ -153,7 +153,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "MAT-PRE-.YYYY.-",
+   "options": "MAT-PRE-.YYYY.-\nPOCC-2017082103-RCPT",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -403,7 +403,7 @@
   {
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
-   "label": "Accepted Warehouse",
+   "label": "Set Accepted Warehouse",
    "options": "Warehouse",
    "print_hide": 1
   },

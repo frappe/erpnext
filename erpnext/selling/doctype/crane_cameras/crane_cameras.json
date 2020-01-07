@@ -1,6 +1,6 @@
 {
  "allow_import": 1,
- "creation": "2013-06-20 11:53:21",
+ "creation": "2019-10-04 11:29:04.849426",
  "description": "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. \n\nThe package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".\n\nFor Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Product Bundle Item.\n\nNote: BOM = Bill of Materials",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -43,7 +43,6 @@
    "label": "Items"
   },
   {
-   "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
@@ -63,11 +62,10 @@
   }
  ],
  "icon": "fa fa-sitemap",
- "idx": 1,
- "modified": "2019-11-11 14:39:03.745265",
+ "modified": "2019-10-04 11:29:04.849426",
  "modified_by": "Administrator",
  "module": "Selling",
- "name": "Product Bundle",
+ "name": "Crane Cameras",
  "owner": "Administrator",
  "permissions": [
   {

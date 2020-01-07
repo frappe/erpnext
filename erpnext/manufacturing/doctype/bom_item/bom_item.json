@@ -3,6 +3,7 @@
  "doctype": "DocType",
  "document_type": "Setup",
  "editable_grid": 1,
+ "engine": "InnoDB",
  "field_order": [
   "item_code",
   "item_name",
@@ -33,6 +34,7 @@
   "scrap",
   "qty_consumed_per_unit",
   "section_break_27",
+  "allow_alternative_item",
   "include_item_in_manufacturing",
   "original_item"
  ],
@@ -79,6 +81,7 @@
    "width": "150px"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "source_warehouse",
    "fieldtype": "Link",
    "label": "Source Warehouse",
@@ -242,7 +245,9 @@
    "default": "0",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
-   "label": "Allow Alternative Item"
+   "hidden": 1,
+   "label": "Allow Alternative Item",
+   "read_only": 1
   },
   {
    "default": "0",

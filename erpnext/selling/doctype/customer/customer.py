@@ -300,6 +300,66 @@ def _set_missing_values(source, target):
 		target.contact_person = contact[0].parent
 
 @frappe.whitelist()
+def make_quotation(source_name, target_doc=None):
+
+	def set_missing_values(source, target):
+		_set_missing_values(source, target)
+
+	target_doc = get_mapped_doc("Customer", source_name,
+		{"Customer": {
+			"doctype": "Quotation",
+			"field_map": {
+				"name":"party_name"
+			}
+		}}, target_doc, set_missing_values)
+
+	target_doc.quotation_to = "Customer"
+	target_doc.run_method("set_missing_values")
+	target_doc.run_method("set_other_charges")
+	target_doc.run_method("calculate_taxes_and_totals")
+
+	price_list = frappe.get_value("Customer", source_name, "default_price_list")
+	if price_list:
+		target_doc.selling_price_list = price_list
+
+	return target_doc
+
+@frappe.whitelist()
+def make_opportunity(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		_set_missing_values(source, target)
+
+	target_doc = get_mapped_doc("Customer", source_name,
+		{"Customer": {
+			"doctype": "Opportunity",
+			"field_map": {
+				"name": "party_name",
+				"doctype": "opportunity_from",
+			}
+		}}, target_doc, set_missing_values)
+
+	return target_doc
+
+def _set_missing_values(source, target):
+	address = frappe.get_all('Dynamic Link', {
+			'link_doctype': source.doctype,
+			'link_name': source.name,
+			'parenttype': 'Address',
+		}, ['parent'], limit=1)
+
+	contact = frappe.get_all('Dynamic Link', {
+			'link_doctype': source.doctype,
+			'link_name': source.name,
+			'parenttype': 'Contact',
+		}, ['parent'], limit=1)
+
+	if address:
+		target.customer_address = address[0].parent
+
+	if contact:
+		target.contact_person = contact[0].parent
+
+@frappe.whitelist()
 def get_loyalty_programs(doc):
 	''' returns applicable loyalty programs for a customer '''
 	from frappe.desk.treeview import get_children

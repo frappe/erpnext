@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:serial_no",
@@ -6,6 +7,7 @@
  "description": "Distinct unit of an Item",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "details",
   "column_break0",
@@ -13,12 +15,20 @@
   "item_code",
   "warehouse",
   "batch_no",
+  "status",
+  "parent_item_serial_no",
+  "cam_port",
   "column_break1",
   "item_name",
   "description",
   "item_group",
+  "imei_no",
   "brand",
   "sales_order",
+  "on_site",
+  "sub_items",
+  "item_details",
+  "system_items",
   "purchase_details",
   "column_break2",
   "purchase_document_type",
@@ -44,18 +54,24 @@
   "column_break5",
   "customer",
   "customer_name",
+  "project",
   "invoice_details",
   "sales_invoice",
+  "history",
+  "camera_history",
   "warranty_amc_details",
   "column_break6",
   "warranty_expiry_date",
   "amc_expiry_date",
   "column_break7",
   "maintenance_status",
-  "warranty_period",
   "more_info",
   "serial_no_details",
-  "company"
+  "company",
+  "lft",
+  "rgt",
+  "is_group",
+  "old_parent"
  ],
  "fields": [
   {
@@ -92,14 +108,11 @@
    "description": "Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt",
    "fieldname": "warehouse",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Warehouse",
    "no_copy": 1,
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
    "options": "Warehouse",
-   "read_only": 1,
    "search_index": 1
   },
   {
@@ -132,6 +145,7 @@
   {
    "fieldname": "item_group",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Item Group",
    "oldfieldname": "item_group",
    "oldfieldtype": "Link",
@@ -168,16 +182,14 @@
    "fieldtype": "Link",
    "label": "Creation Document Type",
    "no_copy": 1,
-   "options": "DocType",
-   "read_only": 1
+   "options": "DocType"
   },
   {
    "fieldname": "purchase_document_no",
    "fieldtype": "Dynamic Link",
    "label": "Creation Document No",
    "no_copy": 1,
-   "options": "purchase_document_type",
-   "read_only": 1
+   "options": "purchase_document_type"
   },
   {
    "fieldname": "purchase_date",
@@ -185,15 +197,13 @@
    "label": "Creation Date",
    "no_copy": 1,
    "oldfieldname": "purchase_date",
-   "oldfieldtype": "Date",
-   "read_only": 1
+   "oldfieldtype": "Date"
   },
   {
    "fieldname": "purchase_time",
    "fieldtype": "Time",
    "label": "Creation Time",
-   "no_copy": 1,
-   "read_only": 1
+   "no_copy": 1
   },
   {
    "fieldname": "purchase_rate",
@@ -202,8 +212,7 @@
    "no_copy": 1,
    "oldfieldname": "purchase_rate",
    "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency",
-   "read_only": 1
+   "options": "Company:company:default_currency"
   },
   {
    "fieldname": "column_break3",
@@ -373,15 +382,6 @@
    "width": "150px"
   },
   {
-   "fieldname": "warranty_period",
-   "fieldtype": "Int",
-   "label": "Warranty Period (Days)",
-   "oldfieldname": "warranty_period",
-   "oldfieldtype": "Int",
-   "read_only": 1,
-   "width": "150px"
-  },
-  {
    "fieldname": "column_break7",
    "fieldtype": "Column Break",
    "width": "50%"
@@ -421,14 +421,121 @@
    "remember_last_selected_value": 1,
    "reqd": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Free\nUsed\nLost\nBroken\nOn Site\nWIP\nTo Be Tested",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.item_group !== \"Full Systems\"",
+   "fieldname": "parent_item_serial_no",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Parent Item Serial No",
+   "options": "Serial No"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "no_copy": 1,
+   "options": "Project",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Left",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Right",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group"
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Link",
+   "label": "Old Parent",
+   "options": "Serial No"
+  },
+  {
+   "fieldname": "sub_items",
+   "fieldtype": "Section Break",
+   "label": "Sub Items"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "depends_on": "eval:doc.item_group == \"Full Systems\"",
+   "fieldname": "item_details",
+   "fieldtype": "Table",
+   "label": "Item Details",
+   "options": "Crane Camera Item"
+  },
+  {
+   "depends_on": "eval:doc.item_code.substr(0,4)==\"MdmN\"",
+   "fieldname": "imei_no",
+   "fieldtype": "Data",
+   "label": "IMEI No"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "system_items",
+   "fieldtype": "Table",
+   "label": "System Items",
+   "options": "Crane Camera Components"
+  },
+  {
+   "depends_on": "eval:(doc.item_group == \"Full Systems\" && doc.status == \"Used\")",
+   "fieldname": "on_site",
+   "fieldtype": "Data",
+   "label": "On Site"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "depends_on": "eval:doc.item_group == \"Full Systems\"",
+   "fieldname": "camera_history",
+   "fieldtype": "Table",
+   "label": "Camera History",
+   "options": "Camera History Item"
+  },
+  {
+   "fieldname": "history",
+   "fieldtype": "Section Break",
+   "label": "History"
+  },
+  {
+   "depends_on": "eval:doc.item_group===\"Full Systems\"",
+   "fieldname": "cam_port",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Port"
   }
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
- "modified": "2019-08-07 17:28:32.243280",
+ "links": [],
+ "modified": "2019-12-24 14:33:27.544499",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
+ "nsm_parent_field": "parent_serial_no",
  "owner": "Administrator",
  "permissions": [
   {
@@ -465,7 +572,7 @@
  ],
  "search_fields": "item_code",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
- "sort_order": "DESC",
+ "sort_field": "name",
+ "sort_order": "ASC",
  "track_changes": 1
 }

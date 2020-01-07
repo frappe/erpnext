@@ -220,18 +220,21 @@
    "label": "Backflush Raw Materials From Work-in-Progress Warehouse"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "warehouses",
    "fieldtype": "Section Break",
    "label": "Warehouses",
    "options": "fa fa-building"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "wip_warehouse",
    "fieldtype": "Link",
    "label": "Work-in-Progress Warehouse",
    "options": "Warehouse"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "fg_warehouse",
    "fieldtype": "Link",
    "label": "Target Warehouse",
@@ -242,6 +245,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "scrap_warehouse",
    "fieldtype": "Link",
    "label": "Scrap Warehouse",

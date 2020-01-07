@@ -14,6 +14,7 @@
   "sec_break1",
   "item_code",
   "item_group",
+  "is_parent_item",
   "col_break2",
   "item_name",
   "section_break_8",
@@ -76,6 +77,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "s_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -281,11 +283,14 @@
   },
   {
    "fieldname": "serial_no",
-   "fieldtype": "Small Text",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Serial No",
    "no_copy": 1,
    "oldfieldname": "serial_no",
-   "oldfieldtype": "Text"
+   "oldfieldtype": "Text",
+   "options": "Serial No"
   },
   {
    "fieldname": "col_break4",
@@ -465,7 +470,6 @@
    "fetch_from": "item_code.item_group",
    "fieldname": "item_group",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Item Group"
   },
   {
@@ -490,11 +494,17 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_parent_item",
+   "fieldtype": "Check",
+   "label": "Is Parent Item"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-08-20 14:01:02.319754",
+ "modified": "2019-12-11 13:50:19.215194",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

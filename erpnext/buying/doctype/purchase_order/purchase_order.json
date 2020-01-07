@@ -149,11 +149,9 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
-   "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "PUR-ORD-.YYYY.-",
-   "print_hide": 1,
+   "options": "POCC-.YYYY.MM.DD.##",
    "reqd": 1,
    "set_only_once": 1
   },
@@ -1054,7 +1052,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "links": [],
+"links": [],
  "modified": "2019-12-30 19:11:54.122264",
  "modified_by": "Administrator",
  "module": "Buying",
@@ -1103,8 +1101,8 @@
  ],
  "search_fields": "status, transaction_date, supplier,grand_total",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
- "sort_order": "DESC",
+ "sort_field": "name",
+ "sort_order": "ASC",
  "timeline_field": "supplier",
  "title_field": "title"
 }
