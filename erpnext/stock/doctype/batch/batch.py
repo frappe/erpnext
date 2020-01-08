@@ -227,16 +227,14 @@ def set_batch_nos(doc, warehouse_field, throw=False):
 		warehouse = d.get(warehouse_field, None)
 		if has_batch_no and warehouse and qty > 0:
 			if not d.batch_no:
-				d.batch_no = get_batch_no(d.item_code, warehouse, qty, throw)
+				d.batch_no = get_batch_no(d.item_code, warehouse, qty, throw, d.serial_no)
 			else:
 				batch_qty = get_batch_qty(batch_no=d.batch_no, warehouse=warehouse)
 				if flt(batch_qty, d.precision("qty")) < flt(qty, d.precision("qty")):
 					frappe.throw(_("Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches").format(d.idx, d.batch_no, batch_qty, qty))
 
-
-
 @frappe.whitelist()
-def get_batch_no(item_code, warehouse, qty=1, throw=False):
+def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	"""
 	Get batch number using First Expiring First Out method.
 	:param item_code: `item_code` of Item Document
@@ -246,7 +244,7 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False):
 	"""
 
 	batch_no = None
-	batches = get_batches(item_code, warehouse, qty)
+	batches = get_batches(item_code, warehouse, qty, serial_no)
 
 	for batch in batches:
 		if cint(qty) <= cint(batch.qty):
@@ -261,7 +259,25 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False):
 	return batch_no
 
 
-def get_batches(item_code, warehouse, qty=1, as_dict=True):
+def get_batches(item_code, warehouse, qty=1, serial_no=None, as_dict=True):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	cond = ''
+	if serial_no:
+		batch = frappe.get_all("Serial No",
+			fields = ["distinct batch_no"],
+			filters= {
+				"item_code": item_code,
+				"warehouse": warehouse,
+				"name": ("in", get_serial_nos(serial_no))
+			}
+		)
+
+		if batch and len(batch) > 1:
+			return []
+
+		cond = " and batch.name = %s" %(frappe.db.escape(batch[0].batch_no))
+
 	batches = frappe.db.sql("""
 		SELECT
 			batch.batch_id,
@@ -275,6 +291,7 @@ def get_batches(item_code, warehouse, qty=1, as_dict=True):
 				AND sle.warehouse = %s
 				AND batch.disabled = 0
 				AND (batch.expiry_date >= CURDATE() or batch.expiry_date IS NULL)
+				{0}
 		GROUP BY
 			batch.batch_id
 		HAVING
@@ -282,7 +299,7 @@ def get_batches(item_code, warehouse, qty=1, as_dict=True):
 		ORDER BY
 			batch.expiry_date ASC,
 			batch.creation ASC
-		""",
+		""".format(cond),
 		(item_code, warehouse, qty),
 		as_dict=as_dict
 	)

@@ -586,6 +586,7 @@ erpnext.patches.v11_0.add_permissions_in_gst_settings
 erpnext.patches.v11_1.setup_guardian_role
 execute:frappe.delete_doc('DocType', 'Notification Control')
 erpnext.patches.v12_0.set_gst_category
+erpnext.patches.v12_0.update_gst_category
 erpnext.patches.v11_0.remove_barcodes_field_from_copy_fields_to_variants
 erpnext.patches.v12_0.set_task_status
 erpnext.patches.v11_0.make_italian_localization_fields # 26-03-2019

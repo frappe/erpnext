@@ -49,7 +49,7 @@ frappe.ui.form.on("Item", {
 		if (!frm.doc.is_fixed_asset) {
 			erpnext.item.make_dashboard(frm);
 		}
-		
+
 		if (frm.doc.is_fixed_asset) {
 			frm.trigger('is_fixed_asset');
 			frm.trigger('auto_create_assets');
@@ -134,6 +134,20 @@ frappe.ui.form.on("Item", {
 
 	is_customer_provided_item: function(frm) {
 		frm.toggle_reqd('customer', frm.doc.is_customer_provided_item ? 1:0);
+	},
+
+	gst_hsn_code: function(frm){
+		if(!frm.doc.taxes.length) {
+			frappe.db.get_doc("GST HSN Code", frm.doc.gst_hsn_code).then(hsn_doc => {
+				$.each(hsn_doc.taxes || [], function(i, tax) {
+					let a = frappe.model.add_child(frm.doc, 'Item Tax', 'taxes');
+					a.item_tax_template = tax.item_tax_template;
+					a.tax_category = tax.tax_category;
+					a.valid_from = tax.valid_from;
+					frm.refresh_field('taxes');
+				});
+			});
+		}
 	},
 
 	is_fixed_asset: function(frm) {

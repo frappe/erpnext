@@ -6,13 +6,14 @@
 frappe.ui.form.on("Sales Order", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Delivery Note': 'Delivery',
+			'Delivery Note': 'Delivery Note',
 			'Pick List': 'Pick List',
 			'Sales Invoice': 'Invoice',
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order',
 			'Project': 'Project',
-			'Payment Entry': "Payment"
+			'Payment Entry': "Payment",
+			'Work Order': "Work Order"
 		}
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
 
