@@ -6,11 +6,11 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 	});
 	page.start = 0;
 
-	page.status_field = page.add_field({
-		fieldname: 'status',
-		label: __('Status'),
+	page.warehouse_field = page.add_field({
+		fieldname: 'warehouse',
+		label: __('Warehouse'),
 		fieldtype:'Link',
-		options:'Serial No State',
+		options:'Warehouse',
 		change: function() {
 			page.item_dashboard.start = 0;
 			page.item_dashboard.refresh();
@@ -69,7 +69,7 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 
 		page.item_dashboard.before_refresh = function() {
 			this.item_code = page.item_field.get_value();
-			this.status = page.status_field.get_value();
+			this.warehouse = page.warehouse_field.get_value();
 			this.item_group = page.item_group_field.get_value();
 		}
 
@@ -90,7 +90,7 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 		}
 
 		setup_click('Item');
-		setup_click('Serial No State');
+		setup_click('Warehouse');
 	});
 
 
