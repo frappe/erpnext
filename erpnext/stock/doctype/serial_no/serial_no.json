@@ -18,6 +18,7 @@
   "status",
   "parent_item_serial_no",
   "cam_port",
+  "is_v1_comp",
   "column_break1",
   "item_name",
   "description",
@@ -526,12 +527,20 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Port"
+  },
+  {
+   "fieldname": "is_v1_comp",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Is V1 Component",
+   "options": "Yes\nNo"
   }
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
- "modified": "2020-01-07 13:53:10.746573",
+ "modified": "2020-01-09 06:45:07.593521",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",

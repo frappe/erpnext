@@ -3,11 +3,11 @@
  "docstatus": 0,
  "doctype": "Dashboard Chart Source",
  "idx": 0,
- "modified": "2019-11-05 15:04:40.627400",
+ "modified": "2020-01-08 08:32:42.267827",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Cameras",
  "owner": "Administrator",
  "source_name": "Cameras",
- "timeseries": 0
+ "timeseries": 1
 }

@@ -1,0 +1,44 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "creation": "2020-01-09 06:30:27.670991",
+ "description": "Workflow state represents the current state of a document.",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "is_v1"
+ ],
+ "fields": [
+  {
+   "fieldname": "is_v1",
+   "fieldtype": "Select",
+   "label": "Is V1",
+   "options": "Yes\nNo"
+  }
+ ],
+ "icon": "fa fa-flag",
+ "links": [],
+ "modified": "2020-01-09 06:41:04.497489",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Is V1 Component",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

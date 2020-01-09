@@ -28,6 +28,7 @@
   "valuation_rate",
   "standard_rate",
   "is_fixed_asset",
+  "is_v1_comp",
   "auto_create_assets",
   "asset_category",
   "asset_naming_series",
@@ -136,7 +137,8 @@
   "publish_in_hub",
   "hub_category_to_publish",
   "hub_warehouse",
-  "synced_with_hub"
+  "synced_with_hub",
+  "manufacturers"
  ],
  "fields": [
   {
@@ -570,7 +572,6 @@
   {
    "default": "0.00",
    "depends_on": "is_stock_item",
-   "description": "Minimum quantity should be as per Stock UOM",
    "fieldname": "min_order_qty",
    "fieldtype": "Float",
    "label": "Minimum Order Qty",
@@ -1037,6 +1038,18 @@
    "fieldname": "auto_create_assets",
    "fieldtype": "Check",
    "label": "Auto Create Assets on Purchase"
+  },
+  {
+   "fieldname": "is_v1_comp",
+   "fieldtype": "Select",
+   "label": "Is V1 Component",
+   "options": "Yes\nNo"
+  },
+  {
+   "fieldname": "manufacturers",
+   "fieldtype": "Table",
+   "label": "Manufacturers",
+   "options": "Item Manufacturer"
   }
  ],
  "has_web_view": 1,
@@ -1045,7 +1058,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 1,
- "modified": "2020-01-02 19:13:59.295963",
+ "modified": "2020-01-09 06:44:38.549429",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
