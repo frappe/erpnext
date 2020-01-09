@@ -197,6 +197,11 @@ def get_data():
 					"name": "Bank Reconciliation Statement",
 					"is_query_report": True,
 					"doctype": "Journal Entry"
+				},{
+					"type": "page",
+					"name": "bank-reconciliation",
+					"label": _("Bank Reconciliation"),
+					"icon": "fa fa-bar-chart"
 				},
 				{
 					"type": "report",

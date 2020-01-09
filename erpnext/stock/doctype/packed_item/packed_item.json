@@ -18,6 +18,7 @@
   "serial_no",
   "column_break_11",
   "batch_no",
+  "actual_batch_qty",
   "section_break_13",
   "actual_qty",
   "projected_qty",
@@ -189,15 +190,26 @@
    "oldfieldtype": "Data",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "batch_no",
+   "fieldname": "actual_batch_qty",
+   "fieldtype": "Float",
+   "label": "Actual Batch Quantity",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-08-27 18:17:37.167512",
+ "modified": "2019-11-26 20:09:59.400960",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packed Item",
  "owner": "Administrator",
  "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
  "track_changes": 1
 }

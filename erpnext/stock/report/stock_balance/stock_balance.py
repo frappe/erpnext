@@ -55,7 +55,7 @@ def execute(filters=None):
 				'item_code': item,
 				'warehouse': warehouse,
 				'company': company,
-				'reorder_level': item_reorder_qty,
+				'reorder_level': item_reorder_level,
 				'reorder_qty': item_reorder_qty,
 			}
 			report_data.update(item_map[item])
@@ -292,7 +292,7 @@ def validate_filters(filters):
 	if not (filters.get("item_code") or filters.get("warehouse")):
 		sle_count = flt(frappe.db.sql("""select count(name) from `tabStock Ledger Entry`""")[0][0])
 		if sle_count > 500000:
-			frappe.throw(_("Please set filter based on Item or Warehouse"))
+			frappe.throw(_("Please set filter based on Item or Warehouse due to a large amount of entries."))
 
 def get_variants_attributes():
 	'''Return all item variant attributes.'''

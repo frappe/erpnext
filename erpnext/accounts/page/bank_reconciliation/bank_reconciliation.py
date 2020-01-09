@@ -18,6 +18,10 @@ def reconcile(bank_transaction, payment_doctype, payment_name):
 	account = frappe.db.get_value("Bank Account", transaction.bank_account, "account")
 	gl_entry = frappe.get_doc("GL Entry", dict(account=account, voucher_type=payment_doctype, voucher_no=payment_name))
 
+	if payment_doctype == "Payment Entry" and payment_entry.unallocated_amount > transaction.unallocated_amount:
+		frappe.throw(_("The unallocated amount of Payment Entry {0} \
+			is greater than the Bank Transaction's unallocated amount").format(payment_name))
+		
 	if transaction.unallocated_amount == 0:
 		frappe.throw(_("This bank transaction is already fully reconciled"))
 

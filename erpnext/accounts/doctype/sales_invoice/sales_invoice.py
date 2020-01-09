@@ -90,6 +90,7 @@ class SalesInvoice(SellingController):
 		self.validate_account_for_change_amount()
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
+		self.validate_item_cost_centers()
 		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_invoice_reference)
 
 		if cint(self.is_pos):
@@ -136,6 +137,22 @@ class SalesInvoice(SellingController):
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
 			validate_loyalty_points(self, self.loyalty_points)
 
+	def validate_fixed_asset(self):
+		for d in self.get("items"):
+			if d.is_fixed_asset and d.meta.get_field("asset") and d.asset:
+				asset = frappe.get_doc("Asset", d.asset)
+				if self.doctype == "Sales Invoice" and self.docstatus == 1:
+					if self.update_stock:
+						frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
+
+					elif asset.status in ("Scrapped", "Cancelled", "Sold"):
+						frappe.throw(_("Row #{0}: Asset {1} cannot be submitted, it is already {2}").format(d.idx, d.asset, asset.status))
+
+	def validate_item_cost_centers(self):
+		for item in self.items:
+			cost_center_company = frappe.get_cached_value("Cost Center", item.cost_center, "company")
+			if cost_center_company != self.company:
+				frappe.throw(_("Row #{0}: Cost Center {1} does not belong to company {2}").format(frappe.bold(item.idx), frappe.bold(item.cost_center), frappe.bold(self.company)))
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
@@ -338,7 +355,8 @@ class SalesInvoice(SellingController):
 				"print_format": print_format,
 				"allow_edit_rate": pos.get("allow_user_to_edit_rate"),
 				"allow_edit_discount": pos.get("allow_user_to_edit_discount"),
-				"campaign": pos.get("campaign")
+				"campaign": pos.get("campaign"),
+				"allow_print_before_pay": pos.get("allow_print_before_pay")
 			}
 
 	def update_time_sheet(self, sales_invoice):
@@ -525,9 +543,7 @@ class SalesInvoice(SellingController):
 		for i in dic:
 			if frappe.db.get_single_value('Selling Settings', dic[i][0]) == 'Yes':
 				for d in self.get('items'):
-					is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
-					if  (d.item_code and is_stock_item == 1\
-						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1])):
+					if (d.item_code and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1])):
 						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
 
@@ -686,7 +702,6 @@ class SalesInvoice(SellingController):
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
-
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
@@ -944,7 +959,7 @@ class SalesInvoice(SellingController):
 			)
 
 	def make_gle_for_rounding_adjustment(self, gl_entries):
-		if flt(self.rounding_adjustment, self.precision("rounding_adjustment")):
+		if flt(self.rounding_adjustment, self.precision("rounding_adjustment")) and self.base_rounding_adjustment:
 			round_off_account, round_off_cost_center = \
 				get_round_off_account_and_cost_center(self.company)
 
@@ -992,10 +1007,8 @@ class SalesInvoice(SellingController):
 				continue
 
 			for serial_no in item.serial_no.split("\n"):
-				if serial_no and frappe.db.exists('Serial No', serial_no):
-					sno = frappe.get_doc('Serial No', serial_no)
-					sno.sales_invoice = invoice
-					sno.db_update()
+				if serial_no and frappe.db.get_value('Serial No', serial_no, 'item_code') == item.item_code:
+					frappe.db.set_value('Serial No', serial_no, 'sales_invoice', invoice)
 
 	def validate_serial_numbers(self):
 		"""
@@ -1041,12 +1054,18 @@ class SalesInvoice(SellingController):
 				continue
 
 			for serial_no in item.serial_no.split("\n"):
-				sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
-				if sales_invoice and self.name != sales_invoice:
-					sales_invoice_company = frappe.db.get_value("Sales Invoice", sales_invoice, "company")
+				serial_no_details = frappe.db.get_value("Serial No", serial_no,
+					["sales_invoice", "item_code"], as_dict=1)
+
+				if not serial_no_details:
+					continue
+
+				if serial_no_details.sales_invoice and serial_no_details.item_code == item.item_code \
+					and self.name != serial_no_details.sales_invoice:
+					sales_invoice_company = frappe.db.get_value("Sales Invoice", serial_no_details.sales_invoice, "company")
 					if sales_invoice_company == self.company:
 						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}"
-							.format(serial_no, sales_invoice)))
+							.format(serial_no, serial_no_details.sales_invoice)))
 
 	def update_project(self):
 		if self.project:
@@ -1231,7 +1250,8 @@ class SalesInvoice(SellingController):
 					self.status = "Unpaid and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
 					self.status = "Unpaid"
-				elif flt(self.outstanding_amount) < 0 and self.is_return==0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+				#Check if outstanding amount is 0 due to credit note issued against invoice
+				elif flt(self.outstanding_amount) <= 0 and self.is_return == 0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
 					self.status = "Credit Note Issued"
 				elif self.is_return == 1:
 					self.status = "Return"

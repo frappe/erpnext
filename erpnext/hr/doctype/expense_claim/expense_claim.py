@@ -43,9 +43,9 @@ class ExpenseClaim(AccountsController):
 		}[cstr(self.docstatus or 0)]
 
 		paid_amount = flt(self.total_amount_reimbursed) + flt(self.total_advance_amount)
-		precision = self.precision("total_sanctioned_amount")
+		precision = self.precision("grand_total")
 		if (self.is_paid or (flt(self.total_sanctioned_amount) > 0
-			and flt(self.total_sanctioned_amount, precision) ==  flt(paid_amount, precision))) \
+			and flt(self.grand_total, precision) ==  flt(paid_amount, precision))) \
 			and self.docstatus == 1 and self.approval_status == 'Approved':
 				self.status = "Paid"
 		elif flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
@@ -127,7 +127,7 @@ class ExpenseClaim(AccountsController):
 					"debit": data.sanctioned_amount,
 					"debit_in_account_currency": data.sanctioned_amount,
 					"against": self.employee,
-					"cost_center": self.cost_center
+					"cost_center": data.cost_center
 				})
 			)
 
@@ -140,10 +140,11 @@ class ExpenseClaim(AccountsController):
 					"against": ",".join([d.default_account for d in self.expenses]),
 					"party_type": "Employee",
 					"party": self.employee,
-					"against_voucher_type": self.doctype,
-					"against_voucher": self.name
+					"against_voucher_type": "Employee Advance",
+					"against_voucher": data.employee_advance
 				})
 			)
+
 		self.add_tax_gl_entries(gl_entry)
 
 		if self.is_paid and self.grand_total:
@@ -189,11 +190,9 @@ class ExpenseClaim(AccountsController):
 			)
 
 	def validate_account_details(self):
-		if not self.cost_center:
-			frappe.throw(_("Cost center is required to book an expense claim"))
-
-		if not self.payable_account:
-			frappe.throw(_("Please set default payable account for the company {0}").format(getlink("Company",self.company)))
+		for data in self.expenses:
+			if not data.cost_center:
+				frappe.throw(_("Cost center is required to book an expense claim"))
 
 		if self.is_paid:
 			if not self.mode_of_payment:
@@ -323,7 +322,7 @@ def get_expense_claim_account(expense_claim_type, company):
 @frappe.whitelist()
 def get_advances(employee, advance_id=None):
 	if not advance_id:
-		condition = 'docstatus=1 and employee={0} and paid_amount > 0 and paid_amount > claimed_amount'.format(frappe.db.escape(employee))
+		condition = 'docstatus=1 and employee={0} and paid_amount > 0 and paid_amount > claimed_amount + return_amount'.format(frappe.db.escape(employee))
 	else:
 		condition = 'name={0}'.format(frappe.db.escape(advance_id))
 

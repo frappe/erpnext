@@ -61,6 +61,7 @@ class PaymentEntry(AccountsController):
 		self.validate_duplicate_entry()
 		self.validate_allocated_amount()
 		self.ensure_supplier_is_not_blocked()
+		self.set_status()
 
 	def on_submit(self):
 		self.setup_party_account_field()
@@ -70,6 +71,7 @@ class PaymentEntry(AccountsController):
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.update_expense_claim()
+		self.set_status()
 
 
 	def on_cancel(self):
@@ -79,6 +81,7 @@ class PaymentEntry(AccountsController):
 		self.update_advance_paid()
 		self.update_expense_claim()
 		self.delink_advance_entry_references()
+		self.set_status()
 
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)
@@ -274,6 +277,14 @@ class PaymentEntry(AccountsController):
 					if not valid:
 						frappe.throw(_("Against Journal Entry {0} does not have any unmatched {1} entry")
 							.format(d.reference_name, dr_or_cr))
+
+	def set_status(self):
+		if self.docstatus == 2:
+			self.status = 'Cancelled'
+		elif self.docstatus == 1:
+			self.status = 'Submitted'
+		else:
+			self.status = 'Draft'
 
 	def set_amounts(self):
 		self.set_amounts_in_company_currency()
@@ -900,7 +911,10 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	else:
 		party_account = get_party_account(party_type, doc.get(party_type.lower()), doc.company)
 
-	party_account_currency = doc.get("party_account_currency") or get_account_currency(party_account)
+	if dt not in ("Sales Invoice", "Purchase Invoice"):
+		party_account_currency = get_account_currency(party_account)
+	else:
+		party_account_currency = doc.get("party_account_currency") or get_account_currency(party_account)
 
 	# payment type
 	if (dt == "Sales Order" or (dt in ("Sales Invoice", "Fees") and doc.outstanding_amount > 0)) \
@@ -920,9 +934,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 			grand_total = doc.rounded_total or doc.grand_total
 		outstanding_amount = doc.outstanding_amount
 	elif dt in ("Expense Claim"):
-		grand_total = doc.total_sanctioned_amount
-		outstanding_amount = doc.total_sanctioned_amount \
-			- doc.total_amount_reimbursed - flt(doc.total_advance_amount)
+		grand_total = doc.total_sanctioned_amount + doc.total_taxes_and_charges
+		outstanding_amount = doc.grand_total \
+			- doc.total_amount_reimbursed
 	elif dt == "Employee Advance":
 		grand_total = doc.advance_amount
 		outstanding_amount = flt(doc.advance_amount) - flt(doc.paid_amount)

@@ -190,7 +190,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			if(jvd.reference_type==="Employee Advance") {
 				return {
 					filters: {
-						'status': ['=', 'Unpaid'],
 						'docstatus': 1
 					}
 				};
@@ -398,7 +397,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account",
 				args: {
 					"account_type": (doc.voucher_type=="Bank Entry" ?
-						"Bank" : (doc.voucher_type=="Cash" ? "Cash" : null)),
+						"Bank" : (doc.voucher_type=="Cash Entry" ? "Cash" : null)),
 					"company": doc.company
 				},
 				callback: function(r) {
@@ -570,7 +569,7 @@ $.extend(erpnext.journal_entry, {
 				},
 				{fieldtype: "Date", fieldname: "posting_date", label: __("Date"), reqd: 1,
 					default: frm.doc.posting_date},
-				{fieldtype: "Small Text", fieldname: "user_remark", label: __("User Remark"), reqd: 1},
+				{fieldtype: "Small Text", fieldname: "user_remark", label: __("User Remark")},
 				{fieldtype: "Select", fieldname: "naming_series", label: __("Series"), reqd: 1,
 					options: naming_series_options, default: naming_series_default},
 			]
