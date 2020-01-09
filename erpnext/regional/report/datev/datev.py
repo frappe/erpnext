@@ -10,7 +10,9 @@ Provide a report and downloadable CSV according to the German DATEV format.
 from __future__ import unicode_literals
 import datetime
 import json
+import six
 from six import string_types
+
 import frappe
 from frappe import _
 import pandas as pd
@@ -158,7 +160,7 @@ def get_gl_entries(filters, as_dict):
 		where gl.company = %(company)s 
 		and DATE(gl.posting_date) >= %(from_date)s
 		and DATE(gl.posting_date) <= %(to_date)s
-		order by 'Belegdatum', gl.voucher_no""", filters, as_dict=as_dict)
+		order by 'Belegdatum', gl.voucher_no""", filters, as_dict=as_dict, as_utf8=1)
 
 	return gl_entries
 
@@ -404,7 +406,8 @@ def get_datev_csv(data, filters):
 
 	header = ';'.join(header).encode('latin_1')
 	data = result.to_csv(
-		sep=b';',
+		# Reason for str(';'): https://github.com/pandas-dev/pandas/issues/6035
+		sep=str(';'),
 		# European decimal seperator
 		decimal=',',
 		# Windows "ANSI" encoding
@@ -412,12 +415,15 @@ def get_datev_csv(data, filters):
 		# format date as DDMM
 		date_format='%d%m',
 		# Windows line terminator
-		line_terminator=b'\r\n',
+		line_terminator='\r\n',
 		# Do not number rows
 		index=False,
 		# Use all columns defined above
 		columns=columns
 	)
+
+	if not six.PY2:
+		data = data.encode('latin_1')
 
 	return header + b'\r\n' + data
 

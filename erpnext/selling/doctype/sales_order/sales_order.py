@@ -380,6 +380,9 @@ class SalesOrder(SellingController):
 	def get_work_order_items(self, for_raw_material_request=0):
 		'''Returns items with BOM that already do not have a linked work order'''
 		items = []
+		item_codes = [i.item_code for i in self.items]
+		product_bundle_parents = [pb.new_item_code for pb in frappe.get_all("Product Bundle", {"new_item_code": ["in", item_codes]}, ["new_item_code"])]
+
 		for table in [self.items, self.packed_items]:
 			for i in table:
 				bom = get_default_bom_item(i.item_code)
@@ -391,7 +394,7 @@ class SalesOrder(SellingController):
 				else:
 					pending_qty = stock_qty
 
-				if pending_qty:
+				if pending_qty and i.item_code not in product_bundle_parents:
 					if bom:
 						items.append(dict(
 							name= i.name,
@@ -420,7 +423,7 @@ class SalesOrder(SellingController):
 
 		def _get_delivery_date(ref_doc_delivery_date, red_doc_transaction_date, transaction_date):
 			delivery_date = get_next_schedule_date(ref_doc_delivery_date,
-				auto_repeat_doc.frequency, cint(auto_repeat_doc.repeat_on_day))
+				auto_repeat_doc.frequency, auto_repeat_doc.start_date, cint(auto_repeat_doc.repeat_on_day))
 
 			if delivery_date <= transaction_date:
 				delivery_date_diff = frappe.utils.date_diff(ref_doc_delivery_date, red_doc_transaction_date)

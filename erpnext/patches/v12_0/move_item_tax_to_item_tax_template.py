@@ -60,10 +60,10 @@ def execute():
 		'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',
 		'Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice'
 	]
-	
+
 	for dt in doctypes:
 		for d in frappe.db.sql("""select name, parenttype, parent, item_code, item_tax_rate from `tab{0} Item`
-								where ifnull(item_tax_rate, '') not in ('', '{{}}') 
+								where ifnull(item_tax_rate, '') not in ('', '{{}}')
 								and item_tax_template is NULL""".format(dt), as_dict=1):
 			item_tax_map = json.loads(d.item_tax_rate)
 			item_tax_template_name = get_item_tax_template(item_tax_templates,
@@ -98,12 +98,15 @@ def get_item_tax_template(item_tax_templates, item_tax_map, item_code, parenttyp
 			company = get_company(parts[-1], parenttype, parent)
 			parent_account = frappe.db.get_value("Account",
 				filters={"account_type": "Tax", "root_type": "Liability", "is_group": 0, "company": company}, fieldname="parent_account")
+			if not parent_account:
+				parent_account = frappe.db.get_value("Account",
+					filters={"account_type": "Tax", "root_type": "Liability", "is_group": 1, "company": company})
 			filters = {
 				"account_name": account_name,
-                                "company": company,
-                                "account_type": "Tax",
-                                "parent_account": parent_account
-                        }
+				"company": company,
+				"account_type": "Tax",
+				"parent_account": parent_account
+			}
 			tax_type = frappe.db.get_value("Account", filters)
 			if not tax_type:
 				account = frappe.new_doc("Account")
