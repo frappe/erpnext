@@ -51,16 +51,13 @@ frappe.query_reports["Item-wise Sales Register"] = {
 			"label": __("Group By"),
 			"fieldname": "group_by",
 			"fieldtype": "Select",
-			"options": ["Customer", "Item", "Item Group", "Invoice"]
+			"options": ["Customer", "Item Group", "Invoice"]
 		}
 	],
 	"formatter": function(value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
 
 		if (data && data.bold) {
-			// value = $(`<span>${value}</span>`);
-			// var $value = $(value).css("font-weight", "bold");
-			// $value.addClass("text-danger");
 			value = value.bold();
 
 		}
