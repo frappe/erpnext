@@ -68,7 +68,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 				prev_group_by_value = d.get(group_by_field)
 
 				total_row = {
-					group_by_field: d.get(group_by_field),
+					'item_code': d.get(group_by_field),
 					'stock_qty': 0.0,
 					'amount': 0.0,
 					'bold': 1,
