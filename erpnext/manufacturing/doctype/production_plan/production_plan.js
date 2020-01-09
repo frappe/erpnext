@@ -3,6 +3,11 @@
 
 frappe.ui.form.on('Production Plan', {
 	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Work Order': 'Work Order',
+			'Material Request': 'Material Request',
+		};
+
 		frm.fields_dict['po_items'].grid.get_field('warehouse').get_query = function(doc) {
 			return {
 				filters: {
@@ -66,12 +71,13 @@ frappe.ui.form.on('Production Plan', {
 			}, __('Create'));
 		}
 
+		frm.page.set_inner_btn_group_as_primary(__('Create'));
 		frm.trigger("material_requirement");
 
 		const projected_qty_formula = ` <table class="table table-bordered" style="background-color: #f9f9f9;">
 			<tr><td style="padding-left:25px">
 				<div>
-				<h3>
+				<h3 style="text-decoration: underline;">
 					<a href = "https://erpnext.com/docs/user/manual/en/stock/projected-quantity">
 						${__("Projected Quantity Formula")}
 					</a>
@@ -182,8 +188,8 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	get_items_for_mr: function(frm) {
-		const set_fields = ['actual_qty', 'item_code',
-			'item_name', 'min_order_qty', 'quantity', 'sales_order', 'warehouse', 'projected_qty', 'material_request_type'];
+		const set_fields = ['actual_qty', 'item_code','item_name', 'description', 'uom', 
+			'min_order_qty', 'quantity', 'sales_order', 'warehouse', 'projected_qty', 'material_request_type'];
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_items_for_material_requests",
 			freeze: true,
@@ -233,7 +239,7 @@ frappe.ui.form.on('Production Plan', {
 
 		if (item_wise_qty) {
 			for (var key in item_wise_qty) {
-				title += __('Item {0}: {1} qty produced, ', [key, item_wise_qty[key]]);
+				title += __('Item {0}: {1} qty produced. ', [key, item_wise_qty[key]]);
 			}
 		}
 

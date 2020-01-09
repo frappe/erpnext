@@ -11,6 +11,7 @@ from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings
 from frappe.utils.nestedset import get_root_of
 from erpnext.accounts.utils import get_account_name
 from erpnext.utilities.product import get_qty_in_stock
+from frappe.contacts.doctype.contact.contact import get_contact_name
 
 
 class WebsitePriceListMissingError(frappe.ValidationError):
@@ -65,6 +66,7 @@ def place_order():
 
 	from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))
+	sales_order.payment_schedule = []
 
 	if not cint(cart_settings.allow_items_not_in_stock):
 		for item in sales_order.get("items"):
@@ -371,7 +373,7 @@ def get_party(user=None):
 	if not user:
 		user = frappe.session.user
 
-	contact_name = frappe.db.get_value("Contact", {"email_id": user})
+	contact_name = get_contact_name(user)
 	party = None
 
 	if contact_name:
@@ -417,7 +419,7 @@ def get_party(user=None):
 		contact = frappe.new_doc("Contact")
 		contact.update({
 			"first_name": fullname,
-			"email_id": user
+			"email_ids": [{"email_id": user, "is_primary": 1}]
 		})
 		contact.append('links', dict(link_doctype='Customer', link_name=customer.name))
 		contact.flags.ignore_mandatory = True
@@ -504,7 +506,7 @@ def get_applicable_shipping_rules(party=None, quotation=None):
 	if shipping_rules:
 		rule_label_map = frappe.db.get_values("Shipping Rule", shipping_rules, "label")
 		# we need this in sorted order as per the position of the rule in the settings page
-		return [[rule, rule_label_map.get(rule)] for rule in shipping_rules]
+		return [[rule, rule] for rule in shipping_rules]
 
 def get_shipping_rules(quotation=None, cart_settings=None):
 	if not quotation:

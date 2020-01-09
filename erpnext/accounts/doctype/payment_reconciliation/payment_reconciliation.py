@@ -23,6 +23,8 @@ class PaymentReconciliation(Document):
 
 		if self.party_type in ["Customer", "Supplier"]:
 			dr_or_cr_notes = self.get_dr_or_cr_notes()
+		else:
+			dr_or_cr_notes = []
 
 		self.add_payment_entries(payment_entries + journal_entries + dr_or_cr_notes)
 
@@ -90,7 +92,8 @@ class PaymentReconciliation(Document):
 			FROM `tab{doc}`, `tabGL Entry`
 			WHERE
 				(`tab{doc}`.name = `tabGL Entry`.against_voucher or `tab{doc}`.name = `tabGL Entry`.voucher_no)
-				and `tab{doc}`.is_return = 1 and `tabGL Entry`.against_voucher_type = %(voucher_type)s
+				and `tab{doc}`.is_return = 1 and `tab{doc}`.return_against IS NULL
+				and `tabGL Entry`.against_voucher_type = %(voucher_type)s
 				and `tab{doc}`.docstatus = 1 and `tabGL Entry`.party = %(party)s
 				and `tabGL Entry`.party_type = %(party_type)s and `tabGL Entry`.account = %(account)s
 			GROUP BY `tab{doc}`.name

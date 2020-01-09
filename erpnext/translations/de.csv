@@ -304,7 +304,7 @@ apps/erpnext/erpnext/selling/report/sales_partner_target_variance_based_on_item_
 DocType: BOM,Total Cost,Gesamtkosten
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.js,Allocation Expired!,Zuteilung abgelaufen!
 DocType: Soil Analysis,Ca/K,Ca / K
-DocType: Leave Type,Maximum Carry Forwarded Leaves,Maximale Anzahl weitergeleiteter Blätter
+DocType: Leave Type,Maximum Carry Forwarded Leaves,Obergrenze für übertragbaren Urlaub erreicht
 DocType: Salary Slip,Employee Loan,MItarbeiterdarlehen
 DocType: Additional Salary,HR-ADS-.YY.-.MM.-,HR-ADS-.YY .-. MM.-
 DocType: Fee Schedule,Send Payment Request Email,Zahlungaufforderung per E-Mail versenden
@@ -893,7 +893,7 @@ DocType: Supplier Scorecard Standing,Notify Other,Andere benachrichtigen
 DocType: Vital Signs,Blood Pressure (systolic),Blutdruck (systolisch)
 apps/erpnext/erpnext/controllers/buying_controller.py,{0} {1} is {2},{0} {1} ist {2}
 DocType: Item Price,Valid Upto,Gültig bis
-DocType: Leave Type,Expire Carry Forwarded Leaves (Days),Verfallsdatum für weitergeleitete Blätter (Tage)
+DocType: Leave Type,Expire Carry Forwarded Leaves (Days),Verfallsdatum für übertragenen Urlaub (Tage)
 DocType: Training Event,Workshop,Werkstatt
 DocType: Supplier Scorecard Scoring Standing,Warn Purchase Orders,Warnung Bestellungen
 apps/erpnext/erpnext/utilities/user_progress.py,List a few of your customers. They could be organizations or individuals.,Bitte ein paar Kunden angeben. Dies können Firmen oder Einzelpersonen sein.
@@ -1103,7 +1103,7 @@ apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,
 DocType: Payroll Entry,Select Payment Account to make Bank Entry,Wählen Sie ein Zahlungskonto für die Buchung
 apps/erpnext/erpnext/config/accounting.py,Opening and Closing,Öffnen und Schließen
 DocType: Hotel Settings,Default Invoice Naming Series,Standard-Rechnungsnummernkreis
-apps/erpnext/erpnext/utilities/activation.py,"Create Employee records to manage leaves, expense claims and payroll","Erstellen Sie Mitarbeiterdaten Blätter, Spesenabrechnung und Gehaltsabrechnung zu verwalten"
+apps/erpnext/erpnext/utilities/activation.py,"Create Employee records to manage leaves, expense claims and payroll","Erstellen Sie Mitarbeiterdaten für Urlaubs, Spesenabrechnung und Gehaltsabrechnung zu verwalten"
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,An error occurred during the update process,Während des Aktualisierungsprozesses ist ein Fehler aufgetreten
 DocType: Restaurant Reservation,Restaurant Reservation,Restaurant Reservierung
 apps/erpnext/erpnext/public/js/hub/Sidebar.vue,Your Items,Ihre Artikel
@@ -1329,7 +1329,7 @@ apps/erpnext/erpnext/hr/doctype/job_offer/job_offer.js,Create Employee,Mitarbeit
 apps/erpnext/erpnext/utilities/transaction_base.py,Invalid Posting Time,Ungültige Buchungszeit
 DocType: Salary Component,Condition and Formula,Zustand und Formel
 DocType: Lead,Campaign Name,Kampagnenname
-apps/erpnext/erpnext/setup/default_energy_point_rules.py,On Task Completion,Bei Abschluss der Aufgabe
+apps/erpnext/erpnext/setup/default_energy_point_rules.py,On Task Completion,Bei Abschluss des Vorgangs
 apps/erpnext/erpnext/hr/doctype/compensatory_leave_request/compensatory_leave_request.py,There is no leave period in between {0} and {1},Es gibt keinen Urlaub zwischen {0} und {1}
 DocType: Fee Validity,Healthcare Practitioner,praktischer Arzt
 DocType: Hotel Room,Capacity,Kapazität
@@ -1353,7 +1353,7 @@ DocType: Payment Entry,Received Amount (Company Currency),Erhaltene Menge (Gesel
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Cancelled. Please check your GoCardless Account for more details,Zahlung abgebrochen. Bitte überprüfen Sie Ihr GoCardless Konto für weitere Details
 DocType: Work Order,Skip Material Transfer to WIP Warehouse,Überspringen Sie die Materialübertragung in das WIP-Lager
 DocType: Contract,N/A,nicht verfügbar
-DocType: Task Type,Task Type,Aufgabentyp
+DocType: Task Type,Task Type,Vorgangstyp
 DocType: Topic,Topic Content,Themeninhalt
 DocType: Delivery Settings,Send with Attachment,Senden mit Anhang
 DocType: Service Level,Priorities,Prioritäten
@@ -1548,7 +1548,7 @@ DocType: Share Transfer,To Shareholder,An den Aktionär
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,{0} against Bill {1} dated {2},{0} zu Rechnung {1} vom {2}
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,From State,Aus dem Staat
 apps/erpnext/erpnext/utilities/user_progress.py,Setup Institution,Einrichtung Einrichtung
-apps/erpnext/erpnext/hr/doctype/leave_period/leave_period.py,Allocating leaves...,Blätter zuordnen...
+apps/erpnext/erpnext/hr/doctype/leave_period/leave_period.py,Allocating leaves...,Urlaub zuordnen...
 DocType: Program Enrollment,Vehicle/Bus Number,Fahrzeug / Bus Nummer
 apps/erpnext/erpnext/public/js/call_popup/call_popup.js,Create New Contact,Neuen Kontakt erstellen
 apps/erpnext/erpnext/education/doctype/course/course.js,Course Schedule,Kurstermine
@@ -1806,7 +1806,7 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Chemical,Chemische
 DocType: Salary Component Account,Default Bank / Cash account will be automatically updated in Salary Journal Entry when this mode is selected.,"Standard Bank / Geldkonto wird automatisch in Gehalts Journal Entry aktualisiert werden, wenn dieser Modus ausgewählt ist."
 DocType: Quiz,Latest Attempt,Letzter Versuch
 DocType: Quiz Result,Quiz Result,Quiz-Ergebnis
-apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,Total leaves allocated is mandatory for Leave Type {0},Die Gesamtzahl der zugewiesenen Blätter ist für Abwesenheitsart {0} erforderlich.
+apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,Total leaves allocated is mandatory for Leave Type {0},Die Gesamtzahl der zugewiesenen Urlaube ist für Abwesenheitsart {0} erforderlich.
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,Row # {0}: Rate cannot be greater than the rate used in {1} {2},"Row # {0}: Die Rate kann nicht größer sein als die Rate, die in {1} {2}"
 apps/erpnext/erpnext/utilities/user_progress.py,Meter,Meter
 DocType: Workstation,Electricity Cost,Stromkosten
@@ -1916,7 +1916,7 @@ apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html,Go to
 apps/erpnext/erpnext/templates/pages/order.js,Pay Remaining,Verbleibende Bezahlung
 DocType: Purchase Invoice Item,Manufacturer,Hersteller
 DocType: Landed Cost Item,Purchase Receipt Item,Kaufbeleg-Artikel
-DocType: Leave Allocation,Total Leaves Encashed,Insgesamt Blätter umkränzt
+DocType: Leave Allocation,Total Leaves Encashed,Summe ausbezahlter Urlaubstage
 DocType: POS Profile,Sales Invoice Payment,Ausgangsrechnung-Zahlungen
 DocType: Quality Inspection Template,Quality Inspection Template Name,Name der Qualitätsinspektionsvorlage
 DocType: Project,First Email,Erste E-Mail
@@ -2449,7 +2449,7 @@ apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js,Please select b
 DocType: Asset,Depreciation Schedules,Abschreibungen Termine
 apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.js,Create Sales Invoice,Verkaufsrechnung erstellen
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Ineligible ITC,Nicht förderfähiges ITC
-DocType: Task,Dependent Tasks,Abhängige Aufgaben
+DocType: Task,Dependent Tasks,Abhängige Vorgänge
 apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.py,Following accounts might be selected in GST Settings:,In den GST-Einstellungen können folgende Konten ausgewählt werden:
 apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.js,Quantity to Produce,Menge zu produzieren
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Application period cannot be outside leave allocation period,Beantragter Zeitraum kann nicht außerhalb der beantragten Urlaubszeit liegen
@@ -2540,7 +2540,7 @@ Used for Taxes and Charges",Die Tabelle Steuerdetails wird aus dem Artikelstamm 
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Employee cannot report to himself.,Mitarbeiter können nicht an sich selbst Bericht erstatten
 apps/erpnext/erpnext/templates/pages/order.html,Rate:,Bewertung:
 DocType: Bank Account,Change this date manually to setup the next synchronization start date,"Ändern Sie dieses Datum manuell, um das nächste Startdatum für die Synchronisierung festzulegen"
-DocType: Leave Type,Max Leaves Allowed,Max Blätter erlaubt
+DocType: Leave Type,Max Leaves Allowed,Höchstzahl erlaubter Urlaubstage
 DocType: Account,"If the account is frozen, entries are allowed to restricted users.","Wenn das Konto gesperrt ist, sind einem eingeschränkten Benutzerkreis Buchungen erlaubt."
 DocType: Email Digest,Bank Balance,Kontostand
 apps/erpnext/erpnext/controllers/accounts_controller.py,Accounting Entry for {0}: {1} can only be made in currency: {2},Eine Buchung für {0}: {1} kann nur in der Währung: {2} vorgenommen werden
@@ -2846,7 +2846,7 @@ DocType: Loan,Applicant Type,Bewerbertyp
 DocType: Purchase Invoice,03-Deficiency in services,03-Mangel an Dienstleistungen
 DocType: Healthcare Settings,Default Medical Code Standard,Default Medical Code Standard
 DocType: Purchase Invoice Item,HSN/SAC,HSN / SAC
-DocType: Project Template Task,Project Template Task,Projektvorlagenaufgabe
+DocType: Project Template Task,Project Template Task,Projektvorgangsvorlage
 DocType: Accounts Settings,Over Billing Allowance (%),Mehr als Abrechnungsbetrag (%)
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Purchase Receipt {0} is not submitted,Kaufbeleg {0} wurde nicht übertragen
 DocType: Company,Default Payable Account,Standard-Verbindlichkeitenkonto
@@ -2990,7 +2990,7 @@ DocType: Student Group Creation Tool,Separate course based Group for every Batch
 apps/erpnext/erpnext/config/support.py,Single unit of an Item.,Einzelnes Element eines Artikels
 DocType: Fee Category,Fee Category,Gebührenkategorie
 DocType: Agriculture Task,Next Business Day,Nächster Arbeitstag
-apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html,Allocated Leaves,Zugewiesene Blätter
+apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html,Allocated Leaves,Genehmigter Urlaub
 DocType: Drug Prescription,Dosage by time interval,Dosierung nach Zeitintervall
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Total Taxable Value,Steuerpflichtiger Gesamtwert
 DocType: Cash Flow Mapper,Section Header,Abschnitt Kopfzeile
@@ -3323,7 +3323,7 @@ DocType: Soil Texture,Silt,Schlick
 ,Qty to Order,Zu bestellende Menge
 DocType: Period Closing Voucher,"The account head under Liability or Equity, in which Profit/Loss will be booked","Der Kontenkopf unter Eigen- oder Fremdkapital, in dem Gewinn / Verlust verbucht wird"
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py,Another Budget record '{0}' already exists against {1} '{2}' and account '{3}' for fiscal year {4},Ein weiterer Budgeteintrag &#39;{0}&#39; existiert bereits für {1} &#39;{2}&#39; und für &#39;{3}&#39; für das Geschäftsjahr {4}
-apps/erpnext/erpnext/config/projects.py,Gantt chart of all tasks.,Gantt-Diagramm aller Aufgaben
+apps/erpnext/erpnext/config/projects.py,Gantt chart of all tasks.,Gantt-Diagramm aller Vorgänge
 DocType: Opportunity,Mins to First Response,Minuten zum First Response
 DocType: Pricing Rule,Margin Type,Margenart
 apps/erpnext/erpnext/projects/doctype/project/project_dashboard.html,{0} hours,{0} Stunden
@@ -3774,10 +3774,10 @@ apps/erpnext/erpnext/public/js/templates/address_list.html,New Address,Neue Adre
 DocType: Quality Inspection,Sample Size,Stichprobenumfang
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py,Please enter Receipt Document,Bitte geben Sie Eingangsbeleg
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py,All items have already been invoiced,Alle Artikel sind bereits abgerechnet
-apps/erpnext/erpnext/hr/report/employee_leave_balance_summary/employee_leave_balance_summary.py,Leaves Taken,Blätter genommen
+apps/erpnext/erpnext/hr/report/employee_leave_balance_summary/employee_leave_balance_summary.py,Leaves Taken,Urlaubstage genommen
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py,Please specify a valid 'From Case No.',"Bitte eine eine gültige ""Von Fall Nr."" angeben"
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js,Further cost centers can be made under Groups but entries can be made against non-Groups,"Weitere Kostenstellen können unter Gruppen angelegt werden, aber Buchungen können zu nicht-Gruppen erstellt werden"
-apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,Total allocated leaves are more days than maximum allocation of {0} leave type for employee {1} in the period,Die insgesamt zugewiesenen Blätter sind mehr Tage als die maximale Zuweisung von {0} Abwesenheitsart für den Mitarbeiter {1} in der Periode
+apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,Total allocated leaves are more days than maximum allocation of {0} leave type for employee {1} in the period,Die insgesamt zugewiesenen Urlaubstage sind mehr Tage als die maximale Zuweisung von {0} Abwesenheitsart für den Mitarbeiter {1} in der Periode
 DocType: Branch,Branch,Betrieb
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Other outward supplies(Nil rated,Exempted)","Sonstige Auslandslieferungen (ohne Rating, ausgenommen)"
 DocType: Soil Analysis,Ca/(K+Ca+Mg),Ca / (K + Ca + Mg)
@@ -3961,7 +3961,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Maintenance Sche
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py,Student LMS Activity,Student LMS Aktivität
 DocType: POS Profile,Applicable for Users,Anwendbar für Benutzer
 DocType: Supplier Quotation,PUR-SQTN-.YYYY.-,PUR-SQTN-.JJJJ.-
-apps/erpnext/erpnext/projects/doctype/project/project.js,Set Project and all Tasks to status {0}?,Projekt und alle Aufgaben auf Status {0} setzen?
+apps/erpnext/erpnext/projects/doctype/project/project.js,Set Project and all Tasks to status {0}?,Projekt und alle Vorgänge auf Status {0} setzen?
 DocType: Purchase Invoice,Set Advances and Allocate (FIFO),Vorschüsse setzen und zuordnen (FIFO)
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,No Work Orders created,Keine Arbeitsaufträge erstellt
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py,Salary Slip of employee {0} already created for this period,Gehaltsabrechnung der Mitarbeiter {0} für diesen Zeitraum bereits erstellt
@@ -4097,7 +4097,7 @@ DocType: Work Order,Actual End Date,Tatsächliches Enddatum
 DocType: Cash Flow Mapping,Is Finance Cost Adjustment,Ist Finanzkostenanpassung
 DocType: BOM,Operating Cost (Company Currency),Betriebskosten (Gesellschaft Währung)
 DocType: Authorization Rule,Applicable To (Role),Anwenden auf (Rolle)
-apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html,Pending Leaves,Ausstehende Blätter
+apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html,Pending Leaves,Schwebende Urlaubstage
 DocType: BOM Update Tool,Replace BOM,Erstelle Stückliste
 apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.py,Code {0} already exist,Code {0} existiert bereits
 DocType: Patient Encounter,Procedures,Verfahren
@@ -4342,7 +4342,7 @@ apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depr
 DocType: Sales Invoice,Is Return (Credit Note),ist Rücklieferung (Gutschrift)
 apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.js,Start Job,Job starten
 apps/erpnext/erpnext/assets/doctype/asset_movement/asset_movement.py,Serial no is required for the asset {0},Für Vermögenswert {0} ist eine Seriennr. Erforderlich.
-DocType: Leave Control Panel,Allocate Leaves,Blätter zuweisen
+DocType: Leave Control Panel,Allocate Leaves,Urlaubstage zuweisen
 apps/erpnext/erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.py,Disabled template must not be default template,Deaktivierte Vorlage darf nicht Standardvorlage sein
 DocType: Pricing Rule,Price or Product Discount,Preis- oder Produktrabatt
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,For row {0}: Enter planned qty,Für Zeile {0}: Geben Sie die geplante Menge ein
@@ -4418,7 +4418,7 @@ DocType: Normal Test Items,Result Value,Ergebnis Wert
 DocType: Hotel Room,Hotels,Hotels
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center_tree.js,New Cost Center Name,Neuer Kostenstellenname
 DocType: Leave Control Panel,Leave Control Panel,Urlaubsverwaltung
-DocType: Project,Task Completion,Aufgabenerledigung
+DocType: Project,Task Completion,Vorgangserfüllung
 apps/erpnext/erpnext/templates/generators/item/item_add_to_cart.html,Not in Stock,Nicht lagernd
 DocType: Volunteer,Volunteer Skills,Freiwillige Fähigkeiten
 DocType: Additional Salary,HR User,Nutzer Personalabteilung
@@ -4440,7 +4440,7 @@ DocType: Loan,Loan Application,Kreditantrag
 DocType: Crop,Scientific Name,Wissenschaftlicher Name
 DocType: Healthcare Service Unit,Service Unit Type,Serviceeinheitstyp
 DocType: Bank Account,Branch Code,Bankleitzahl / BIC
-apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py,Total Leaves,insgesamt Blätter
+apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py,Total Leaves,summe der Urlaubstage
 DocType: Customer,"Reselect, if the chosen contact is edited after save","Wählen Sie erneut, wenn der ausgewählte Kontakt nach dem Speichern bearbeitet wird"
 DocType: Quality Procedure,Parent Procedure,Übergeordnetes Verfahren
 DocType: Patient Encounter,In print,in Druckbuchstaben
@@ -5197,7 +5197,7 @@ DocType: Work Order,Material Transferred for Manufacturing,Material zur Herstell
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,Account {0} does not exists,Konto {0} existiert nicht
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,Select Loyalty Program,Wählen Sie Treueprogramm
 DocType: Project,Project Type,Projekttyp
-apps/erpnext/erpnext/projects/doctype/task/task.py,Child Task exists for this Task. You can not delete this Task.,Für diese Aufgabe existiert eine untergeordnete Aufgabe. Sie können diese Aufgabe daher nicht löschen.
+apps/erpnext/erpnext/projects/doctype/task/task.py,Child Task exists for this Task. You can not delete this Task.,Für diesen Vorgang existiert ein untergeordneter Vorgang. Sie können diese Aufgabe daher nicht löschen.
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py,Either target qty or target amount is mandatory.,Entweder Zielstückzahl oder Zielmenge ist zwingend erforderlich.
 apps/erpnext/erpnext/config/projects.py,Cost of various activities,Aufwendungen für verschiedene Tätigkeiten
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","Einstellen Events auf {0}, da die Mitarbeiter auf die beigefügten unter Verkaufs Personen keine Benutzer-ID {1}"
@@ -5597,7 +5597,7 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Paid 
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,{0} is not a valid Batch Number for Item {1},{0} ist keine gültige Chargennummer für Artikel {1}
 apps/erpnext/erpnext/shopping_cart/cart.py,Please enter valid coupon code !!,Bitte geben Sie einen gültigen Gutscheincode ein !!
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Note: There is not enough leave balance for Leave Type {0},Hinweis: Es gibt nicht genügend Urlaubsguthaben für Abwesenheitstyp {0}
-DocType: Task,Task Description,Aufgabenbeschreibung
+DocType: Task,Task Description,Vorgangsbeschreibung
 DocType: Training Event,Seminar,Seminar
 DocType: Program Enrollment Fee,Program Enrollment Fee,Programm Einschreibegebühr
 DocType: Item,Supplier Items,Lieferantenartikel
@@ -5658,7 +5658,7 @@ apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_
 DocType: Depreciation Schedule,Finance Book Id,Finanzbuch-ID
 DocType: Item,Safety Stock,Sicherheitsbestand
 DocType: Healthcare Settings,Healthcare Settings,Gesundheitswesen
-apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html,Total Allocated Leaves,Insgesamt zugeteilte Blätter
+apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html,Total Allocated Leaves,Insgesamt zugeteilte Urlaubstage
 apps/erpnext/erpnext/projects/doctype/task/task.py,Progress % for a task cannot be more than 100.,Fortschritt-% eines Vorgangs darf nicht größer 100 sein.
 DocType: Stock Reconciliation Item,Before reconciliation,Vor Ausgleich
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py,To {0},An {0}
@@ -5754,7 +5754,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/pos.py,All Territories,Alle 
 DocType: Lost Reason Detail,Lost Reason Detail,Verlorene Begründung Detail
 apps/erpnext/erpnext/hr/utils.py,Please set leave policy for employee {0} in Employee / Grade record,Legen Sie die Abwesenheitsrichtlinie für den Mitarbeiter {0} im Mitarbeiter- / Notensatz fest
 apps/erpnext/erpnext/public/js/controllers/transaction.js,Invalid Blanket Order for the selected Customer and Item,Ungültiger Blankoauftrag für den ausgewählten Kunden und Artikel
-apps/erpnext/erpnext/projects/doctype/task/task_tree.js,Add Multiple Tasks,Mehrere Aufgaben hinzufügen
+apps/erpnext/erpnext/projects/doctype/task/task_tree.js,Add Multiple Tasks,Mehrere Vorgänge hinzufügen
 DocType: Purchase Invoice,Items,Artikel
 apps/erpnext/erpnext/crm/doctype/contract/contract.py,End Date cannot be before Start Date.,Das Enddatum darf nicht vor dem Startdatum liegen.
 apps/erpnext/erpnext/education/doctype/course_enrollment/course_enrollment.py,Student is already enrolled.,Student ist bereits eingetragen sind.
@@ -5769,7 +5769,7 @@ apps/erpnext/erpnext/accounts/doctype/bank_account/test_bank_account.py,BankAcco
 DocType: Normal Test Items,Normal Test Items,Normale Testartikel
 DocType: QuickBooks Migrator,Company Settings,Unternehmenseinstellungen
 DocType: Additional Salary,Overwrite Salary Structure Amount,Gehaltsstruktur überschreiben
-DocType: Leave Ledger Entry,Leaves,Blätter
+DocType: Leave Ledger Entry,Leaves,Urlaubstage
 DocType: Student Language,Student Language,Student Sprache
 DocType: Cash Flow Mapping,Is Working Capital,Ist Arbeitskapital
 apps/erpnext/erpnext/hr/doctype/employee_tax_exemption_declaration/employee_tax_exemption_declaration.js,Submit Proof,Nachweis einreichen
@@ -6362,7 +6362,7 @@ apps/erpnext/erpnext/hr/doctype/employee_tax_exemption_sub_category/employee_tax
 DocType: Sales Partner,Contact Desc,Kontakt-Beschr.
 DocType: Email Digest,Send regular summary reports via Email.,Regelmäßig zusammenfassende Berichte per E-Mail senden.
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py,Please set default account in Expense Claim Type {0},Bitte setzen Sie Standardkonto in Kostenabrechnung Typ {0}
-apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html,Available Leaves,Verfügbare Blätter
+apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html,Available Leaves,Verfügbare Urlaubstage
 DocType: Assessment Result,Student Name,Name des Studenten
 DocType: Hub Tracked Item,Item Manager,Artikel-Manager
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Payroll Payable,Payroll Kreditoren
@@ -7508,7 +7508,7 @@ DocType: Pricing Rule,Percentage,Prozentsatz
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Item {0} must be a stock Item,Artikel {0} muss ein Lagerartikel sein
 DocType: Manufacturing Settings,Default Work In Progress Warehouse,Standard-Fertigungslager
 apps/erpnext/erpnext/healthcare/doctype/practitioner_schedule/practitioner_schedule.js,"Schedules for {0} overlaps, do you want to proceed after skiping overlaped slots ?","Schedules für {0} Überlappungen, möchten Sie nach Überlappung überlappender Slots fortfahren?"
-apps/erpnext/erpnext/hr/doctype/leave_period/leave_period.js,Grant Leaves,Grant Blätter
+apps/erpnext/erpnext/hr/doctype/leave_period/leave_period.js,Grant Leaves,Urlaubstage gewähren
 DocType: Restaurant,Default Tax Template,Standardsteuervorlage
 apps/erpnext/erpnext/education/doctype/program_enrollment_tool/program_enrollment_tool.py,{0} Students have been enrolled,{0} Studenten wurden angemeldet
 DocType: Fees,Student Details,Studenten Details

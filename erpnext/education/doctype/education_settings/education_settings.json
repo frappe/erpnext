@@ -11,6 +11,7 @@
   "validate_batch",
   "validate_course",
   "academic_term_reqd",
+  "user_creation_skip",
   "section_break_7",
   "instructor_created_by",
   "web_academy_settings_section",
@@ -91,6 +92,13 @@
    "fieldname": "enable_lms",
    "fieldtype": "Check",
    "label": "Enable LMS"
+  },
+  {
+   "default": "0",
+   "description": "By default, a new User is created for every new Student. If enabled, no new User will be created when a new Student is created.",
+   "fieldname": "user_creation_skip",
+   "fieldtype": "Check",
+   "label": "Skip User creation for new Student"
   }
  ],
  "issingle": 1,

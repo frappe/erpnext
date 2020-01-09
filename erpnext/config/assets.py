@@ -23,10 +23,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Asset Settings",
-				},
-				{
-					"type": "doctype",
 					"name": "Asset Movement",
 					"description": _("Transfer an asset from one warehouse to another")
 				},

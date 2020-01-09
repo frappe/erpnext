@@ -3,8 +3,9 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import flt, cstr, cint
+from frappe.utils import flt, cstr, cint, comma_and
 from frappe import _
+from erpnext.accounts.utils import get_stock_and_account_balance
 from frappe.model.meta import get_field_precision
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
@@ -12,6 +13,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import g
 
 class ClosedAccountingPeriod(frappe.ValidationError): pass
 class StockAccountInvalidTransaction(frappe.ValidationError): pass
+class StockValueAndAccountBalanceOutOfSync(frappe.ValidationError): pass
 
 def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, update_outstanding='Yes', from_repost=False):
 	if gl_map:
@@ -88,8 +90,12 @@ def merge_similar_entries(gl_map):
 		else:
 			merged_gl_map.append(entry)
 
+	company = gl_map[0].company if gl_map else erpnext.get_default_company()
+	company_currency = erpnext.get_company_currency(company)
+	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), company_currency)
+
 	# filter zero debit and credit entries
-	merged_gl_map = filter(lambda x: flt(x.debit, 9)!=0 or flt(x.credit, 9)!=0, merged_gl_map)
+	merged_gl_map = filter(lambda x: flt(x.debit, precision)!=0 or flt(x.credit, precision)!=0, merged_gl_map)
 	merged_gl_map = list(merged_gl_map)
 
 	return merged_gl_map
@@ -115,17 +121,19 @@ def check_if_in_list(gle, gl_map, dimensions=None):
 
 def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 	if not from_repost:
-		validate_account_for_perpetual_inventory(gl_map)
 		validate_cwip_accounts(gl_map)
 
 	round_off_debit_credit(gl_map)
-
 	for entry in gl_map:
 		make_entry(entry, adv_adj, update_outstanding, from_repost)
 
 		# check against budget
 		if not from_repost:
 			validate_expense_against_budget(entry)
+
+	if not from_repost:
+		validate_account_for_perpetual_inventory(gl_map)
+
 
 def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	args.update({"doctype": "GL Entry"})
@@ -137,25 +145,67 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.submit()
 
 def validate_account_for_perpetual_inventory(gl_map):
-	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)) \
-		and gl_map[0].voucher_type=="Journal Entry":
-			aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
-				where account_type = 'Stock' and is_group=0""")]
+	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)):
+		account_list = [gl_entries.account for gl_entries in gl_map]
 
-			for entry in gl_map:
-				if entry.account in aii_accounts:
+		aii_accounts = [d.name for d in frappe.get_all("Account",
+			filters={'account_type': 'Stock', 'is_group': 0, 'company': gl_map[0].company})]
+
+		for account in account_list:
+			if account not in aii_accounts:
+				continue
+
+			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(account,
+				gl_map[0].posting_date, gl_map[0].company)
+
+			if gl_map[0].voucher_type=="Journal Entry":
+				# In case of Journal Entry, there are no corresponding SL entries,
+				# hence deducting currency amount
+				account_bal -= flt(gl_map[0].debit) - flt(gl_map[0].credit)
+				if account_bal == stock_bal:
 					frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
-						.format(entry.account), StockAccountInvalidTransaction)
+						.format(account), StockAccountInvalidTransaction)
+
+			# This has been comment for a temporary, will add this code again on release of immutable ledger
+			# elif account_bal != stock_bal:
+			# 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
+			# 		currency=frappe.get_cached_value('Company',  gl_map[0].company,  "default_currency"))
+
+			# 	diff = flt(stock_bal - account_bal, precision)
+			# 	error_reason = _("Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses.").format(
+			# 		stock_bal, account_bal, frappe.bold(account))
+			# 	error_resolution = _("Please create adjustment Journal Entry for amount {0} ").format(frappe.bold(diff))
+			# 	stock_adjustment_account = frappe.db.get_value("Company",gl_map[0].company,"stock_adjustment_account")
+
+			# 	db_or_cr_warehouse_account =('credit_in_account_currency' if diff < 0 else 'debit_in_account_currency')
+			# 	db_or_cr_stock_adjustment_account = ('debit_in_account_currency' if diff < 0 else 'credit_in_account_currency')
+
+			# 	journal_entry_args = {
+			# 	'accounts':[
+			# 		{'account': account, db_or_cr_warehouse_account : abs(diff)},
+			# 		{'account': stock_adjustment_account, db_or_cr_stock_adjustment_account : abs(diff) }]
+			# 	}
+
+			# 	frappe.msgprint(msg="""{0}<br></br>{1}<br></br>""".format(error_reason, error_resolution),
+			# 		raise_exception=StockValueAndAccountBalanceOutOfSync,
+			# 		title=_('Values Out Of Sync'),
+			# 		primary_action={
+			# 			'label': _('Make Journal Entry'),
+			# 			'client_action': 'erpnext.route_to_adjustment_jv',
+			# 			'args': journal_entry_args
+			# 		})
 
 def validate_cwip_accounts(gl_map):
-	if not cint(frappe.db.get_value("Asset Settings", None, "disable_cwip_accounting")) \
-		and gl_map[0].voucher_type == "Journal Entry":
+	cwip_enabled = any([cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category","enable_cwip_accounting")])
+
+	if cwip_enabled and gl_map[0].voucher_type == "Journal Entry":
 			cwip_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
 				where account_type = 'Capital Work in Progress' and is_group=0""")]
 
 			for entry in gl_map:
 				if entry.account in cwip_accounts:
-					frappe.throw(_("Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry").format(entry.account))
+					frappe.throw(
+						_("Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry").format(entry.account))
 
 def round_off_debit_credit(gl_map):
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),

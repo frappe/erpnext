@@ -84,6 +84,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				return me.set_query_for_batch(doc, cdt, cdn)
 			});
 		}
+
+		if(this.frm.fields_dict["items"].grid.get_field('item_code')) {
+			this.frm.set_query("item_tax_template", "items", function(doc, cdt, cdn) {
+				return me.set_query_for_item_tax_template(doc, cdt, cdn)
+			});
+		}
+
 	},
 
 	refresh: function() {
@@ -309,7 +316,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					child: item,
 					args: {
 						"batch_no": item.batch_no,
-						"stock_qty": item.stock_qty,
+						"stock_qty": item.stock_qty || item.qty, //if stock_qty field is not available fetch qty (in case of Packed Items table)
 						"warehouse": item.warehouse,
 						"item_code": item.item_code,
 						"has_serial_no": has_serial_no

@@ -30,6 +30,16 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		this.frm.add_fetch("receipt_document", "posting_date", "posting_date");
 		this.frm.add_fetch("receipt_document", "base_grand_total", "grand_total");
 
+		this.frm.set_query("expense_account", "taxes", function() {
+			return {
+				query: "erpnext.controllers.queries.tax_account_query",
+				filters: {
+					"account_type": ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation", "Expenses Included In Asset Valuation"],
+					"company": me.frm.doc.company
+				}
+			};
+		});
+
 	},
 
 	refresh: function(frm) {
@@ -38,7 +48,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			<table class="table table-bordered" style="background-color: #f9f9f9;">
 				<tr><td>
 					<h4>
-						<i class="fa fa-hand-right"></i> 
+						<i class="fa fa-hand-right"></i>
 						${__("Notes")}:
 					</h4>
 					<ul>
@@ -96,7 +106,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		var me = this;
 
 		if(this.frm.doc.taxes.length) {
-			
+
 			var total_item_cost = 0.0;
 			var based_on = this.frm.doc.distribute_charges_based_on.toLowerCase();
 			$.each(this.frm.doc.items || [], function(i, d) {
@@ -105,7 +115,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 			var total_charges = 0.0;
 			$.each(this.frm.doc.items || [], function(i, item) {
-				item.applicable_charges = flt(item[based_on]) * flt(me.frm.doc.total_taxes_and_charges) / flt(total_item_cost)			
+				item.applicable_charges = flt(item[based_on]) * flt(me.frm.doc.total_taxes_and_charges) / flt(total_item_cost)
 				item.applicable_charges = flt(item.applicable_charges, precision("applicable_charges", item))
 				total_charges += item.applicable_charges
 			});
@@ -119,6 +129,10 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 	distribute_charges_based_on: function (frm) {
 		this.set_applicable_charges_for_item();
+	},
+
+	items_remove: () => {
+		this.trigger('set_applicable_charges_for_item');
 	}
 
 });

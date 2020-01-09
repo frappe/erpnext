@@ -8,6 +8,7 @@ from frappe import _, scrub
 from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 from erpnext.controllers.accounts_controller import validate_conversion_rate, \
 	validate_taxes_and_charges, validate_inclusive_tax
+from erpnext.stock.get_item_details import _get_item_tax_template
 
 class calculate_taxes_and_totals(object):
 	def __init__(self, doc):
@@ -34,6 +35,7 @@ class calculate_taxes_and_totals(object):
 	def _calculate(self):
 		self.validate_conversion_rate()
 		self.calculate_item_values()
+		self.validate_item_tax_template()
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
 		self.calculate_net_total()
@@ -42,6 +44,38 @@ class calculate_taxes_and_totals(object):
 		self.calculate_totals()
 		self._cleanup()
 		self.calculate_total_net_weight()
+
+	def validate_item_tax_template(self):
+		for item in self.doc.get('items'):
+			if item.item_code and item.get('item_tax_template'):
+				item_doc = frappe.get_cached_doc("Item", item.item_code)
+				args = {
+					'tax_category': self.doc.get('tax_category'),
+					'posting_date': self.doc.get('posting_date'),
+					'bill_date': self.doc.get('bill_date'),
+					'transaction_date': self.doc.get('transaction_date')
+				}
+
+				item_group = item_doc.item_group
+				item_group_taxes = []
+
+				while item_group:
+					item_group_doc = frappe.get_cached_doc('Item Group', item_group)
+					item_group_taxes += item_group_doc.taxes or []
+					item_group = item_group_doc.parent_item_group
+
+				item_taxes = item_doc.taxes or []
+
+				if not item_group_taxes and (not item_taxes):
+					# No validation if no taxes in item or item group
+					continue
+
+				taxes = _get_item_tax_template(args, item_taxes + item_group_taxes, for_validate=True)
+
+				if item.item_tax_template not in taxes:
+					frappe.throw(_("Row {0}: Invalid Item Tax Template for item {1}").format(
+						item.idx, frappe.bold(item.item_code)
+					))
 
 	def validate_conversion_rate(self):
 		# validate conversion rate
@@ -312,11 +346,19 @@ class calculate_taxes_and_totals(object):
 			last_tax = self.doc.get("taxes")[-1]
 			non_inclusive_tax_amount = sum([flt(d.tax_amount_after_discount_amount)
 				for d in self.doc.get("taxes") if not d.included_in_print_rate])
+
 			diff = self.doc.total + non_inclusive_tax_amount \
 				- flt(last_tax.total, last_tax.precision("total"))
+
+			# If discount amount applied, deduct the discount amount
+			# because self.doc.total is always without discount, but last_tax.total is after discount
+			if self.discount_amount_applied and self.doc.discount_amount:
+				diff -= flt(self.doc.discount_amount)
+
+			diff = flt(diff, self.doc.precision("rounding_adjustment"))
+
 			if diff and abs(diff) <= (5.0 / 10**last_tax.precision("tax_amount")):
-				self.doc.rounding_adjustment = flt(flt(self.doc.rounding_adjustment) +
-					flt(diff), self.doc.precision("rounding_adjustment"))
+				self.doc.rounding_adjustment = diff
 
 	def calculate_totals(self):
 		self.doc.grand_total = flt(self.doc.get("taxes")[-1].total) + flt(self.doc.rounding_adjustment) \
@@ -552,7 +594,7 @@ class calculate_taxes_and_totals(object):
 		if item.price_list_rate:
 			if item.pricing_rules and not self.doc.ignore_pricing_rule:
 				for d in item.pricing_rules.split(','):
-					pricing_rule = frappe.get_doc('Pricing Rule', d)
+					pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
 
 					if (pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency)\
 							or (pricing_rule.margin_type == 'Percentage'):

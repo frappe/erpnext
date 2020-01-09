@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2019-08-28 17:29:42.115592",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -34,11 +35,12 @@
    "fieldname": "bypass_credit_limit_check",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Bypass Credit Limit Check"
+   "label": "Bypass Credit Limit Check at Sales Order"
   }
  ],
  "istable": 1,
- "modified": "2019-09-24 15:05:26.069911",
+ "links": [],
+ "modified": "2019-12-31 15:43:05.822328",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer Credit Limit",
