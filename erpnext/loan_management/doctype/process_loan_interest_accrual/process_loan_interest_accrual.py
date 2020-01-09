@@ -12,7 +12,8 @@ class ProcessLoanInterestAccrual(Document):
 		open_loans = []
 
 		if self.loan:
-			open_loans.append(self.loan)
+			loan_doc = frappe.get_doc('Loan', self.loan)
+			open_loans.append(loan_doc)
 
 		make_accrual_interest_entry_for_demand_loans(self.posting_date,
 			open_loans = open_loans, loan_type = self.loan_type, process_loan_interest=self.name)
