@@ -20,7 +20,7 @@ def execute(filters=None):
 def get_data(filters, show_party_name):
 	if filters.get('party_type') in ('Customer', 'Supplier', 'Employee', 'Member'):
 		party_name_field = "{0}_name".format(frappe.scrub(filters.get('party_type')))
-	if filters.get('party_type') == 'Student':
+	elif filters.get('party_type') == 'Student':
 		party_name_field = 'first_name'
 	elif filters.get('party_type') == 'Shareholder':
 		party_name_field = 'title'
