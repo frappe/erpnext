@@ -243,6 +243,8 @@ class PurchaseInvoice(BuyingController):
 
 						if negative_expense_booked_in_pr:
 							item.expense_account = stock_not_billed_account
+					else:
+						item.expense_account = stock_not_billed_account
 
 			elif item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category):
 				item.expense_account = get_asset_category_account('fixed_asset_account', item=item.item_code,

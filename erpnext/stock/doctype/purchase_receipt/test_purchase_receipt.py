@@ -422,6 +422,31 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEquals(pi2.items[0].qty, 2)
 		self.assertEquals(pi2.items[1].qty, 1)
 
+	def test_stock_transfer_from_purchase_receipt(self):
+		pr = make_purchase_receipt(do_not_save=1)
+		pr.items[0].from_warehouse = '_Test Warehouse 2 - _TC'
+
+		pr.submit()
+
+		gl_entries = get_gl_entries('Purchase Receipt', pr.name)
+		sl_entries = get_sl_entries('Purchase Receipt', pr.name)
+
+		self.assertFalse(gl_entries)
+
+		expected_sle = {
+			'_Test Warehouse 2 - _TC': -5,
+			'_Test Warehouse - _TC': 5
+		}
+
+		for sle in sl_entries:
+			self.assertEqual(expected_sle[sle.warehouse], sle.actual_qty)
+
+
+def get_sl_entries(voucher_type, voucher_no):
+	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference
+		from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s
+		order by posting_time desc""", (voucher_type, voucher_no), as_dict=1)
+
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit, cost_center
 		from `tabGL Entry` where voucher_type=%s and voucher_no=%s

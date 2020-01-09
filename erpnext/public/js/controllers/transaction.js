@@ -510,7 +510,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 									// for internal customer instead of pricing rule directly apply valuation rate on item
 									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
 										me.get_incoming_rate(item, me.frm.posting_date, me.frm.posting_time,
-												me.frm.doc.doctype, me.frm.doc.company);
+											me.frm.doc.doctype, me.frm.doc.company);
 									} else {
 										me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 									}
