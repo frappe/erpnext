@@ -136,8 +136,8 @@ frappe.ui.form.on("Item", {
 		frm.toggle_reqd('customer', frm.doc.is_customer_provided_item ? 1:0);
 	},
 
-	gst_hsn_code: function(frm){
-		if(!frm.doc.taxes.length) {
+	gst_hsn_code: function(frm) {
+		if(!frm.doc.taxes || !frm.doc.taxes.length) {
 			frappe.db.get_doc("GST HSN Code", frm.doc.gst_hsn_code).then(hsn_doc => {
 				$.each(hsn_doc.taxes || [], function(i, tax) {
 					let a = frappe.model.add_child(frm.doc, 'Item Tax', 'taxes');
