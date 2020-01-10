@@ -25,5 +25,9 @@ def update_item_document(items, taxes):
 		item_to_be_updated.taxes = []
 		for tax in taxes:
 			tax = frappe._dict(tax)
-			item_to_be_updated.append("taxes", {'item_tax_template': tax.item_tax_template, 'tax_category': tax.tax_category})
+			item_to_be_updated.append("taxes", {
+				'item_tax_template': tax.item_tax_template,
+				'tax_category': tax.tax_category,
+				'valid_from': tax.valid_from
+			})
 			item_to_be_updated.save()
