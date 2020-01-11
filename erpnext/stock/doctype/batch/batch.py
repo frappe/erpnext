@@ -185,9 +185,17 @@ def get_batches_by_oldest(item_code, warehouse):
 def split_batch(batch_no, item_code, warehouse, qty, new_batch_id=None):
 	"""Split the batch into a new batch"""
 	batch = frappe.get_doc(dict(doctype='Batch', item=item_code, batch_id=new_batch_id)).insert()
+
+	company = frappe.db.get_value('Stock Ledger Entry', dict(
+			item_code=item_code,
+			batch_no=batch_no,
+			warehouse=warehouse
+		), ['company'])
+
 	stock_entry = frappe.get_doc(dict(
 		doctype='Stock Entry',
 		purpose='Repack',
+		company=company,
 		items=[
 			dict(
 				item_code=item_code,

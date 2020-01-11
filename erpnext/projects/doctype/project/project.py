@@ -87,6 +87,11 @@ class Project(Document):
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
 	def update_percent_complete(self):
+		if self.percent_complete_method == "Manual":
+			if self.status == "Completed":
+				self.percent_complete = 100
+			return
+
 		total = frappe.db.count('Task', dict(project=self.name))
 
 		if not total:
@@ -317,6 +322,37 @@ def allow_to_make_project_update(project, time, frequency):
 
 	if get_time(nowtime()) >= get_time(time):
 		return True
+
+
+@frappe.whitelist()
+def create_duplicate_project(prev_doc, project_name):
+	''' Create duplicate project based on the old project '''
+	import json
+	prev_doc = json.loads(prev_doc)
+
+	if project_name == prev_doc.get('name'):
+		frappe.throw(_("Use a name that is different from previous project name"))
+
+	# change the copied doc name to new project name
+	project = frappe.copy_doc(prev_doc)
+	project.name = project_name
+	project.project_template = ''
+	project.project_name = project_name
+	project.insert()
+
+	# fetch all the task linked with the old project
+	task_list = frappe.get_all("Task", filters={
+		'project': prev_doc.get('name')
+	}, fields=['name'])
+
+	# Create duplicate task for all the task
+	for task in task_list:
+		task = frappe.get_doc('Task', task)
+		new_task = frappe.copy_doc(task)
+		new_task.project = project.name
+		new_task.insert()
+
+	project.db_set('project_template', prev_doc.get('project_template'))
 
 def get_projects_for_collect_progress(frequency, fields):
 	fields.extend(["name"])

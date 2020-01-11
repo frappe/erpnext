@@ -57,7 +57,7 @@ def calculate_next_due_date(periodicity, start_date = None, end_date = None, las
 	if not start_date and not last_completion_date:
 		start_date = frappe.utils.now()
 
-	if last_completion_date and (last_completion_date > start_date or not start_date):
+	if last_completion_date and ((start_date and last_completion_date > start_date) or not start_date):
 		start_date = last_completion_date
 	if periodicity == 'Daily':
 		next_due_date = add_days(start_date, 1)
@@ -71,9 +71,10 @@ def calculate_next_due_date(periodicity, start_date = None, end_date = None, las
 		next_due_date = add_years(start_date, 2)
 	if periodicity == 'Quarterly':
 		next_due_date = add_months(start_date, 3)
-	if end_date and (start_date >= end_date or last_completion_date >= end_date or next_due_date):
+	if end_date and ((start_date and start_date >= end_date) or (last_completion_date and last_completion_date >= end_date) or next_due_date):
 		next_due_date = ""
 	return next_due_date
+
 
 def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 	asset_maintenance_log = frappe.get_value("Asset Maintenance Log", {"asset_maintenance": asset_maintenance,

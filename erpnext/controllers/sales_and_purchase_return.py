@@ -72,7 +72,7 @@ def validate_returned_items(doc):
 
 	items_returned = False
 	for d in doc.get("items"):
-		if d.item_code and (flt(d.qty) < 0 or d.get('received_qty') < 0):
+		if d.item_code and (flt(d.qty) < 0 or flt(d.get('received_qty')) < 0):
 			if d.item_code not in valid_items:
 				frappe.throw(_("Row # {0}: Returned Item {1} does not exists in {2} {3}")
 					.format(d.idx, d.item_code, doc.doctype, doc.return_against))
@@ -246,6 +246,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			elif doc.doctype == 'Purchase Invoice':
 				doc.paid_amount = -1 * source.paid_amount
 				doc.base_paid_amount = -1 * source.base_paid_amount
+				doc.payment_terms_template = ''
+				doc.payment_schedule = []
 
 		if doc.get("is_return") and hasattr(doc, "packed_items"):
 			for d in doc.get("packed_items"):

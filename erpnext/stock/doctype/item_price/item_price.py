@@ -32,10 +32,16 @@ class ItemPrice(Document):
 
 	def update_price_list_details(self):
 		if self.price_list:
-			self.buying, self.selling, self.currency = \
-				frappe.db.get_value("Price List",
-					{"name": self.price_list, "enabled": 1},
-					["buying", "selling", "currency"])
+			price_list_details = frappe.db.get_value("Price List",
+				{"name": self.price_list, "enabled": 1},
+				["buying", "selling", "currency"])
+
+			if not price_list_details:
+				link = frappe.utils.get_link_to_form('Price List', self.price_list)
+				frappe.throw("The price list {0} does not exists or disabled".
+					format(link))
+
+			self.buying, self.selling, self.currency = price_list_details
 
 	def update_item_details(self):
 		if self.item_code:

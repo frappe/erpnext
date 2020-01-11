@@ -7,6 +7,7 @@
  "doctype": "DocType",
  "document_type": "Setup",
  "editable_grid": 1,
+ "engine": "InnoDB",
  "field_order": [
   "basic_information",
   "employee",
@@ -54,6 +55,7 @@
   "column_break_44",
   "holiday_list",
   "default_shift",
+  "leave_approver",
   "salary_information",
   "salary_mode",
   "bank_name",
@@ -169,6 +171,8 @@
    "read_only": 1
   },
   {
+   "fetch_from": "user_id.user_image",
+   "fetch_if_empty": 1,
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
@@ -767,12 +771,18 @@
    "fieldtype": "Link",
    "label": "Default Shift",
    "options": "Shift Type"
+  },
+  {
+   "fieldname": "leave_approver",
+   "fieldtype": "Link",
+   "label": "Leave Approver",
+   "options": "User"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2019-06-01 16:05:55.132180",
+ "modified": "2019-09-12 14:21:12.711280",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

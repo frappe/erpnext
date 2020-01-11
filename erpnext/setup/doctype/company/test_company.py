@@ -22,7 +22,7 @@ class TestCompany(unittest.TestCase):
 		company.create_chart_of_accounts_based_on = "Existing Company"
 		company.existing_company = "_Test Company"
 		company.save()
-		
+
 		expected_results = {
 			"Debtors - CFEC": {
 				"account_type": "Receivable",
@@ -37,7 +37,7 @@ class TestCompany(unittest.TestCase):
 				"parent_account": "Cash In Hand - CFEC"
 			}
 		}
-		
+
 		for account, acc_property in expected_results.items():
 			acc = frappe.get_doc("Account", account)
 			for prop, val in acc_property.items():
@@ -50,14 +50,14 @@ class TestCompany(unittest.TestCase):
 		countries = ["India", "Brazil", "United Arab Emirates", "Canada", "Germany", "France",
 			"Guatemala", "Indonesia", "Italy", "Mexico", "Nicaragua", "Netherlands", "Singapore",
 			"Brazil", "Argentina", "Hungary", "Taiwan"]
-		
+
 		for country in countries:
 			templates = get_charts_for_country(country)
 			if len(templates) != 1 and "Standard" in templates:
 				templates.remove("Standard")
-			
+
 			self.assertTrue(templates)
-			
+
 			for template in templates:
 				try:
 					company = frappe.new_doc("Company")
@@ -67,11 +67,11 @@ class TestCompany(unittest.TestCase):
 					company.create_chart_of_accounts_based_on = "Standard Template"
 					company.chart_of_accounts = template
 					company.save()
-				
-					account_types = ["Cost of Goods Sold", "Depreciation", 
-						"Expenses Included In Valuation", "Fixed Asset", "Payable", "Receivable", 
+
+					account_types = ["Cost of Goods Sold", "Depreciation",
+						"Expenses Included In Valuation", "Fixed Asset", "Payable", "Receivable",
 						"Stock Adjustment", "Stock Received But Not Billed", "Bank", "Cash", "Stock"]
-				
+
 					for account_type in account_types:
 						filters = {
 							"company": template,

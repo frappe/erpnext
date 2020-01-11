@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, getdate
+from frappe.utils import cint, cstr, getdate, flt
 import dateutil
 from frappe.model.naming import set_name_by_naming_series
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account,send_registration_sms
@@ -64,7 +64,7 @@ class Patient(Document):
 	def invoice_patient_registration(self):
 		frappe.db.set_value("Patient", self.name, "disabled", 0)
 		send_registration_sms(self)
-		if(frappe.get_value("Healthcare Settings", None, "registration_fee")>0):
+		if(flt(frappe.get_value("Healthcare Settings", None, "registration_fee"))>0):
 			company = frappe.defaults.get_user_default('company')
 			if not company:
 				company = frappe.db.get_value("Global Defaults", None, "default_company")

@@ -16,8 +16,13 @@ class PlaidSettings(Document):
 
 @frappe.whitelist()
 def plaid_configuration():
-	if frappe.db.get_value("Plaid Settings", None, "enabled") == "1":
-		return {"plaid_public_key": frappe.conf.get("plaid_public_key") or None, "plaid_env": frappe.conf.get("plaid_env") or None, "client_name": frappe.local.site }
+	if frappe.db.get_single_value("Plaid Settings", "enabled"):
+		plaid_settings = frappe.get_single("Plaid Settings")
+		return {
+			"plaid_public_key": plaid_settings.plaid_public_key,
+			"plaid_env": plaid_settings.plaid_env,
+			"client_name": frappe.local.site
+		}
 	else:
 		return "disabled"
 

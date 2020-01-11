@@ -166,12 +166,11 @@
    "fieldname": "driver_address",
    "fieldtype": "Link",
    "label": "Driver Address",
-   "options": "Address",
-   "read_only": 1
+   "options": "Address"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-07-18 16:38:44.112651",
+ "modified": "2019-09-27 15:43:01.975139",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Trip",

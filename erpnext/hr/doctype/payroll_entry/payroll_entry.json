@@ -37,8 +37,9 @@
   "cost_center",
   "account",
   "payment_account",
-  "section_break2",
   "amended_from",
+  "column_break_33",
+  "bank_account",
   "salary_slips_created",
   "salary_slips_submitted"
  ],
@@ -206,14 +207,11 @@
   {
    "allow_on_submit": 1,
    "description": "Select Payment Account to make Bank Entry",
+   "fetch_from": "bank_account.account",
    "fieldname": "payment_account",
    "fieldtype": "Link",
    "label": "Payment Account",
    "options": "Account"
-  },
-  {
-   "fieldname": "section_break2",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "amended_from",
@@ -248,11 +246,21 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account"
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cog",
  "is_submittable": 1,
- "modified": "2019-05-25 22:47:49.977955",
+ "modified": "2019-09-12 15:46:31.436381",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Payroll Entry",

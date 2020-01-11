@@ -32,6 +32,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Pick List",
+					"onboard": 1,
+					"dependencies": ["Item"],
+				},
+				{
+					"type": "doctype",
 					"name": "Delivery Trip"
 				},
 			]
@@ -235,6 +241,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Quality Inspection Template",
 				},
+				{
+					"type": "doctype",
+					"name": "Quick Stock Balance",
+				},
 			]
 		},
 		{
@@ -329,5 +339,5 @@ def get_data():
 				}
 			]
 		},
-			
+
 	]

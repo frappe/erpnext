@@ -552,7 +552,7 @@ class calculate_taxes_and_totals(object):
 		if item.price_list_rate:
 			if item.pricing_rules and not self.doc.ignore_pricing_rule:
 				for d in item.pricing_rules.split(','):
-					pricing_rule = frappe.get_doc('Pricing Rule', d)
+					pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
 
 					if (pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency)\
 							or (pricing_rule.margin_type == 'Percentage'):

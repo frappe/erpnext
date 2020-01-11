@@ -37,12 +37,12 @@ class TestPaymentRequest(unittest.TestCase):
 	def setUp(self):
 		if not frappe.db.get_value("Payment Gateway", payment_gateway["gateway"], "name"):
 			frappe.get_doc(payment_gateway).insert(ignore_permissions=True)
-			
+
 		for method in payment_method:
-			if not frappe.db.get_value("Payment Gateway Account", {"payment_gateway": method["payment_gateway"], 
+			if not frappe.db.get_value("Payment Gateway Account", {"payment_gateway": method["payment_gateway"],
 				"currency": method["currency"]}, "name"):
 				frappe.get_doc(method).insert(ignore_permissions=True)
-			
+
 	def test_payment_request_linkings(self):
 		so_inr = make_sales_order(currency="INR")
 		pr = make_payment_request(dt="Sales Order", dn=so_inr.name, recipient_id="saurabh@erpnext.com")
@@ -100,3 +100,23 @@ class TestPaymentRequest(unittest.TestCase):
 			self.assertEqual(expected_gle[gle.account][1], gle.debit)
 			self.assertEqual(expected_gle[gle.account][2], gle.credit)
 			self.assertEqual(expected_gle[gle.account][3], gle.against_voucher)
+
+	def test_multiple_payment_entries_against_sales_order(self):
+		# Make Sales Order, grand_total = 1000
+		so = make_sales_order()
+
+		# Payment Request amount = 200
+		pr1 = make_payment_request(dt="Sales Order", dn=so.name,
+			recipient_id="nabin@erpnext.com", return_doc=1)
+		pr1.grand_total = 200
+		pr1.submit()
+
+		# Make a 2nd Payment Request
+		pr2 = make_payment_request(dt="Sales Order", dn=so.name,
+			recipient_id="nabin@erpnext.com", return_doc=1)
+
+		self.assertEqual(pr2.grand_total, 800)
+
+		# Try to make Payment Request more than SO amount, should give validation
+		pr2.grand_total = 900
+		self.assertRaises(frappe.ValidationError, pr2.save)

@@ -308,7 +308,7 @@ frappe.ui.form.on('Payment Entry', {
 							() => {
 								frm.set_party_account_based_on_party = false;
 								if (r.message.bank_account) {
-									frm.set_value("bank_account", r.message.bank_account);
+									frm.set_value("party_bank_account", r.message.bank_account);
 								}
 							}
 						]);
@@ -554,7 +554,7 @@ frappe.ui.form.on('Payment Entry', {
 			frappe.flags.allocate_payment_amount = true;
 			frm.events.validate_filters_data(frm, filters);
 			frm.events.get_outstanding_documents(frm, filters);
-		}, __("Filters"), __("Get Outstanding Invoices"));
+		}, __("Filters"), __("Get Outstanding Documents"));
 	},
 
 	validate_filters_data: function(frm, filters) {
@@ -720,7 +720,7 @@ frappe.ui.form.on('Payment Entry', {
 
 		$.each(frm.doc.references || [], function(i, row) {
 			row.allocated_amount = 0 //If allocate payment amount checkbox is unchecked, set zero to allocate amount
-			if(frappe.flags.allocate_payment_amount){
+			if(frappe.flags.allocate_payment_amount != 0){
 				if(row.outstanding_amount > 0 && allocated_positive_outstanding > 0) {
 					if(row.outstanding_amount >= allocated_positive_outstanding) {
 						row.allocated_amount = allocated_positive_outstanding;

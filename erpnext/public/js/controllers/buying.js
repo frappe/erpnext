@@ -30,7 +30,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			&& frappe.meta.has_field(this.frm.doc.doctype, "disable_rounded_total")) {
 
 				var df = frappe.meta.get_docfield(this.frm.doc.doctype, "disable_rounded_total");
-				var disable = df.default || cint(frappe.sys_defaults.disable_rounded_total);
+				var disable = cint(df.default) || cint(frappe.sys_defaults.disable_rounded_total);
 				this.frm.set_value("disable_rounded_total", disable);
 		}
 
@@ -293,7 +293,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				items: my_items
 			},
 			callback: function(r) {
-				if(!r.message) {
+				if(!r.message || r.message.length == 0) {
 					frappe.throw(__("No pending Material Requests found to link for the given items."))
 				}
 				else {

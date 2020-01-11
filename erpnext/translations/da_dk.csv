@@ -1,5 +1,5 @@
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening','Åbning'
-DocType: Email Campaign,Lead,Bly
+DocType: Call Log,Lead,Bly
 apps/erpnext/erpnext/config/selling.py,Default settings for selling transactions.,Standardindstillinger for at sælge transaktioner.
 DocType: Timesheet,% Amount Billed,% Beløb Billed
 DocType: Purchase Order,% Billed,% Billed
@@ -23,5 +23,5 @@ apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,'Update Stock' can
 apps/erpnext/erpnext/patches/v4_0/create_price_list_if_missing.py,Standard Selling,Standard Selling
 ,Lead Details,Bly Detaljer
 DocType: Selling Settings,Settings for Selling Module,Indstillinger for Selling modul
-,Lead Name,Bly navn
+DocType: Call Log,Lead Name,Bly navn
 DocType: Rename Tool,"Attach .csv file with two columns, one for the old name and one for the new name","Vedhæfte .csv fil med to kolonner, en for det gamle navn og et til det nye navn"

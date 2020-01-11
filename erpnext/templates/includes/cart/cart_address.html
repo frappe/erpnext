@@ -4,6 +4,16 @@
 	{% set select_address = True %}
 {% endif %}
 
+{% set show_coupon_code = frappe.db.get_single_value('Shopping Cart Settings', 'show_apply_coupon_code_in_website') %}
+{% if show_coupon_code == 1%}
+<div class="mb-3">
+	<div class="row no-gutters">
+		<input type="text" class="txtcoupon form-control mr-3 w-25" placeholder="Enter Coupon Code" name="txtcouponcode"  ></input>
+		<button class="btn btn-primary btn-sm  bt-coupon">{{ _("Apply Coupon Code") }}</button>
+		<input type="hidden" class="txtreferral_sales_partner" placeholder="Enter Sales Partner" name="txtreferral_sales_partner" type="text"></input>
+		</div>
+</div>
+{% endif %}
 <div class="mb-3" data-section="shipping-address">
 	<h6 class="text-uppercase">{{ _("Shipping Address") }}</h6>
 	<div class="row no-gutters" data-fieldname="shipping_address_name">
@@ -55,16 +65,6 @@ frappe.ready(() => {
 					reqd: 1
 				},
 				{
-					label: __('Address Type'),
-					fieldname: 'address_type',
-					fieldtype: 'Select',
-					options: [
-						'Billing',
-						'Shipping'
-					],
-					reqd: 1
-				},
-				{
 					label: __('Address Line 1'),
 					fieldname: 'address_line1',
 					fieldtype: 'Data',
@@ -87,15 +87,36 @@ frappe.ready(() => {
 					fieldtype: 'Data'
 				},
 				{
+					label: __('Country'),
+					fieldname: 'country',
+					fieldtype: 'Link',
+					options: 'Country',
+					reqd: 1
+				},
+				{
+					fieldname: "column_break0",
+					fieldtype: "Column Break",
+					width: "50%"
+				},
+				{
+					label: __('Address Type'),
+					fieldname: 'address_type',
+					fieldtype: 'Select',
+					options: [
+						'Billing',
+						'Shipping'
+					],
+					reqd: 1
+				},
+				{
 					label: __('Pin Code'),
 					fieldname: 'pincode',
 					fieldtype: 'Data'
 				},
 				{
-					label: __('Country'),
-					fieldname: 'country',
-					fieldtype: 'Data',
-					reqd: 1
+					fieldname: "phone",
+					fieldtype: "Data",
+					label: "Phone"
 				},
 			],
 			primary_action_label: __('Save'),

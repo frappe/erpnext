@@ -69,7 +69,7 @@ def get_columns(filters):
 	for year in fiscal_year:
 		for from_date, to_date in get_period_date_ranges(filters["period"], year[0]):
 			if filters["period"] == "Yearly":
-				labels = [_("Budget") + " " + str(year[0]), _("Actual ") + " " + str(year[0]), _("Varaiance ") + " " + str(year[0])]
+				labels = [_("Budget") + " " + str(year[0]), _("Actual ") + " " + str(year[0]), _("Variance ") + " " + str(year[0])]
 				for label in labels:
 					columns.append(label+":Float:150")
 			else:

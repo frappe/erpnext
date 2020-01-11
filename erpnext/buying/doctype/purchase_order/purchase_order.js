@@ -10,13 +10,15 @@ frappe.ui.form.on("Purchase Order", {
 		frm.custom_make_buttons = {
 			'Purchase Receipt': 'Receipt',
 			'Purchase Invoice': 'Invoice',
-			'Stock Entry': 'Material to Supplier'
+			'Stock Entry': 'Material to Supplier',
+			'Payment Entry': 'Payment'
 		}
 
 		frm.set_query("reserve_warehouse", "supplied_items", function() {
 			return {
 				filters: {
 					"company": frm.doc.company,
+					"name": ['!=', frm.doc.supplier_warehouse],
 					"is_group": 0
 				}
 			}
@@ -196,10 +198,10 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		if(items.length >= 1){
 			me.raw_material_data = [];
 			me.show_dialog = 1;
-			let title = "";
+			let title = __('Transfer Material to Supplier');
 			let fields = [
 			{fieldtype:'Section Break', label: __('Raw Materials')},
-			{fieldname: 'sub_con_rm_items', fieldtype: 'Table',
+			{fieldname: 'sub_con_rm_items', fieldtype: 'Table', label: __('Items'),
 				fields: [
 					{
 						fieldtype:'Data',
@@ -271,7 +273,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						'item_code': item.main_item_code,
 						'rm_item_code': item.rm_item_code,
 						'item_name': item.rm_item_code,
-						'qty': item.required_qty,
+						'qty': item.required_qty - item.supplied_qty,
 						'warehouse':item.reserve_warehouse,
 						'rate':item.rate,
 						'amount':item.amount,
@@ -281,6 +283,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				}
 			})
 		}
+
+		me.dialog.get_field('sub_con_rm_items').check_all_rows()
 
 		me.dialog.show()
 		this.dialog.set_primary_action(__('Transfer'), function() {

@@ -28,7 +28,7 @@ class CallLog(Document):
 			self.trigger_call_popup()
 
 	def trigger_call_popup(self):
-		scheduled_employees = get_scheduled_employees_for_popup(self.to)
+		scheduled_employees = get_scheduled_employees_for_popup(self.medium)
 		employee_emails = get_employees_with_number(self.to)
 
 		# check if employees with matched number are scheduled to receive popup
@@ -60,7 +60,7 @@ def get_employees_with_number(number):
 	employee_emails = [employee.user_id for employee in employees]
 	frappe.cache().hset('employees_with_number', number, employee_emails)
 
-	return employee
+	return employee_emails
 
 def set_caller_information(doc, state):
 	'''Called from hooks on creation of Lead or Contact'''
@@ -72,6 +72,10 @@ def set_caller_information(doc, state):
 
 	# contact_name or lead_name
 	display_name_field = '{}_name'.format(fieldname)
+
+	# Contact now has all the nos saved in child table
+	if doc.doctype == 'Contact':
+		numbers = [d.phone for d in doc.phone_nos]
 
 	for number in numbers:
 		number = strip_number(number)
