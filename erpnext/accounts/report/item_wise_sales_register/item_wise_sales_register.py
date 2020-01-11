@@ -54,10 +54,13 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		if filters.get('group_by'):
 			if filters.get('group_by') == 'Item':
 				group_by_field = 'item_code'
+				subtotal_display_field = 'customer'
 			elif filters.get('group_by') == 'Invoice':
 				group_by_field = 'parent'
+				subtotal_display_field = 'item_code'
 			else:
 				group_by_field = frappe.scrub(filters.get('group_by'))
+				subtotal_display_field = 'item_code'
 
 			if prev_group_by_value != d.get(group_by_field):
 				if prev_group_by_value:
@@ -68,7 +71,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 				prev_group_by_value = d.get(group_by_field)
 
 				total_row = {
-					'item_code': d.get(group_by_field),
+					subtotal_display_field: d.get(group_by_field),
 					'stock_qty': 0.0,
 					'amount': 0.0,
 					'bold': 1,
@@ -350,15 +353,17 @@ def get_conditions(filters):
 			 	and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s)"""
 
 	if not filters.get("group_by"):
-		conditions += "ORDER BY `tabSales Invoice`.posting_date desc, `tabSales Invoice Item`.item_code desc"
+		conditions += "ORDER BY `tabSales Invoice`.posting_date desc, `tabSales Invoice Item`.item_group desc"
 
 	if filters.get("group_by"):
 		if filters.get("group_by") == 'Invoice':
 			conditions += " ORDER BY `tabSales Invoice Item`.parent desc"
 		elif filters.get("group_by") == 'Item':
-			conditions += " ORDER BY `tabSales Invoice Item`.item_code desc"
-		else:
-			conditions += " ORDER BY {0}".format(frappe.scrub(filters.get("group_by")))
+			conditions += " ORDER BY `tabSales Invoice Item`.item_code"
+		elif filters.get("group_by") == 'Item Group':
+			conditions += " ORDER BY `tabSales Invoice Item`.`item_group`"
+		elif filters.get("group_by") == 'Customer':
+			conditions += " ORDER BY `tabSales Invoice`.customer"
 
 	return conditions
 
@@ -388,8 +393,8 @@ def get_items(filters, additional_query_columns):
 			`tabSales Invoice`.update_stock, `tabSales Invoice Item`.uom, `tabSales Invoice Item`.qty {0}
 		from `tabSales Invoice`, `tabSales Invoice Item`
 		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent
-			and `tabSales Invoice`.docstatus = 1 %s %s
-		""".format(additional_query_columns or '') % (conditions, match_conditions), filters, as_dict=1)
+			and `tabSales Invoice`.docstatus = 1 {1} {2}
+		""".format(additional_query_columns or '', conditions, match_conditions), filters, as_dict=1, debug=1)
 
 def get_delivery_notes_against_sales_order(item_list):
 	so_dn_map = frappe._dict()
@@ -409,13 +414,13 @@ def get_delivery_notes_against_sales_order(item_list):
 	return so_dn_map
 
 def get_grand_total(filters):
-	conditions = get_conditions(filters)
 
 	return frappe.db.sql(""" SELECT
 		SUM(`tabSales Invoice`.grand_total)
 		FROM `tabSales Invoice`
-		WHERE `tabSales Invoice`.docstatus = 1  %s
-	""" % (conditions), filters)[0][0]
+		WHERE `tabSales Invoice`.docstatus = 1
+		and posting_date between %s and %s
+	""", (filters.get('from_date'), filters.get('to_date')))[0][0]
 
 def get_deducted_taxes():
 	return frappe.db.sql_list("select name from `tabPurchase Taxes and Charges` where add_deduct_tax = 'Deduct'")

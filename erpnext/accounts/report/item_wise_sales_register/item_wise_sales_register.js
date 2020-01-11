@@ -51,7 +51,7 @@ frappe.query_reports["Item-wise Sales Register"] = {
 			"label": __("Group By"),
 			"fieldname": "group_by",
 			"fieldtype": "Select",
-			"options": ["Customer", "Item Group", "Invoice"]
+			"options": ["Customer", "Item Group", "Item", "Invoice"]
 		}
 	],
 	"formatter": function(value, row, column, data, default_formatter) {
