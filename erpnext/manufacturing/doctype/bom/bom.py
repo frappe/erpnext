@@ -47,7 +47,18 @@ class BOM(WebsiteGenerator):
 		else:
 			idx = 1
 
-		self.name = 'BOM-' + self.item + ('-%.3i' % idx)
+		name = 'BOM-' + self.item + ('-%.3i' % idx)
+		if frappe.db.exists("BOM", name):
+			conflicting_bom = frappe.get_doc("BOM", name)
+
+			if conflicting_bom.item != self.item:
+
+				frappe.throw(_("""A BOM with name {0} already exists for item {1}.
+					<br> Did you rename the item? Please contact Administrator / Tech support
+				""").format(frappe.bold(name), frappe.bold(conflicting_bom.item)))
+
+		self.name = name
+
 
 	def validate(self):
 		self.route = frappe.scrub(self.name).replace('_', '-')
