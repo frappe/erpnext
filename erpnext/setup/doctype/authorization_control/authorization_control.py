@@ -85,7 +85,7 @@ class AuthorizationControl(TransactionBase):
 			if doc_obj:
 				if doc_obj.doctype == 'Sales Invoice': customer = doc_obj.customer
 				else: customer = doc_obj.customer_name
-				add_cond = " and master_name = '"+ frappe.db.escape(customer) +"'"
+				add_cond = " and master_name = "+ frappe.db.escape(customer) +""
 		if based_on == 'Itemwise Discount':
 			if doc_obj:
 				for t in doc_obj.get("items"):
