@@ -21,6 +21,8 @@ class TestLoanInterestAccrual(unittest.TestCase):
 		create_loan_security_type()
 		create_loan_security()
 
+		create_loan_security_price("Test Security 1", 500, "Nos", get_datetime() , get_datetime(add_to_date(nowdate(), hours=24)))
+
 		if not frappe.db.exists("Customer", "_Test Loan Customer"):
 			frappe.get_doc(get_customer_dict('_Test Loan Customer')).insert(ignore_permissions=True)
 
