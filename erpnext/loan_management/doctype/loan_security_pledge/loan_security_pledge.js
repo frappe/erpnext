@@ -31,7 +31,7 @@ frappe.ui.form.on("Pledge", {
 				frappe.model.set_value(cdt, cdn, 'loan_security_price', r.message);
 				frm.events.calculate_amounts(frm, cdt, cdn);
 			}
-		})
+		});
 	},
 
 	qty: function(frm, cdt, cdn) {
