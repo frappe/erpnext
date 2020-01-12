@@ -75,7 +75,7 @@ class AuthorizationControl(TransactionBase):
 	def bifurcate_based_on_type(self, doctype_name, total, av_dis, based_on, doc_obj, val, company):
 		add_cond = ''
 		auth_value = av_dis
-		
+
 		if val == 1: add_cond += " and system_user = {}".format(frappe.db.escape(session['user']))
 		elif val == 2: add_cond += " and system_role IN %s" % ("('"+"','".join(frappe.get_roles())+"')")
 		else: add_cond += " and ifnull(system_user,'') = '' and ifnull(system_role,'') = ''"
