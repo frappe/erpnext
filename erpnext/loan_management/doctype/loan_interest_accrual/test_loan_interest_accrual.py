@@ -4,8 +4,8 @@
 from __future__ import unicode_literals
 import frappe
 import unittest
-from frappe.utils import (nowdate, add_days, get_datetime, get_first_day, get_last_day, date_diff, flt)
-from erpnext.loan_management.doctype.loan.test_loan import (create_loan_type, create_loan_security_pledge,
+from frappe.utils import (nowdate, add_days, get_datetime, get_first_day, get_last_day, date_diff, flt, add_to_date)
+from erpnext.loan_management.doctype.loan.test_loan import (create_loan_type, create_loan_security_pledge, create_loan_security_price,
 	make_loan_disbursement_entry, create_loan_accounts, create_loan_security_type, create_loan_security, create_demand_loan)
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual
 from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (make_accrual_interest_entry_for_term_loans, days_in_year)
