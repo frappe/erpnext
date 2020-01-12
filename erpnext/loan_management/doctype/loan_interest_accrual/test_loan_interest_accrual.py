@@ -7,8 +7,8 @@ import unittest
 from frappe.utils import (nowdate, add_days, get_datetime, get_first_day, get_last_day, date_diff, flt)
 from erpnext.loan_management.doctype.loan.test_loan import (create_loan_type, create_loan_security_pledge,
 	make_loan_disbursement_entry, create_loan_accounts, create_loan_security_type, create_loan_security, create_demand_loan)
-from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (make_accrual_interest_entry_for_demand_loans,
-	make_accrual_interest_entry_for_term_loans, days_in_year)
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual
+from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (make_accrual_interest_entry_for_term_loans, days_in_year)
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
 
 class TestLoanInterestAccrual(unittest.TestCase):
@@ -52,7 +52,7 @@ class TestLoanInterestAccrual(unittest.TestCase):
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=first_date)
 
-		make_accrual_interest_entry_for_demand_loans(posting_date=last_date)
+		process_loan_interest_accrual(posting_date=last_date)
 
 		loan_interest_accural = frappe.get_doc("Loan Interest Accrual", {'loan': loan.name})
 

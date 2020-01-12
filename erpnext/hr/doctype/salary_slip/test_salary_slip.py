@@ -146,8 +146,7 @@ class TestSalarySlip(unittest.TestCase):
 
 	def test_loan_repayment_salary_slip(self):
 		from erpnext.loan_management.doctype.loan.test_loan import create_loan_type, create_loan, make_loan_disbursement_entry, create_loan_accounts
-		from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (make_accrual_interest_entry_for_demand_loans,
-			make_accrual_interest_entry_for_term_loans)
+		from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import make_accrual_interest_entry_for_term_loans
 
 		applicant = make_employee("test_loanemployee@salary.com", company="_Test Company")
 

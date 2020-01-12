@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from frappe.utils import nowdate, getdate, add_days
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import make_accrual_interest_entry_for_demand_loans
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual
 
 class LoanDisbursement(AccountsController):
 
@@ -45,17 +45,8 @@ class LoanDisbursement(AccountsController):
 		)[0]
 
 		if loan_details.status == "Disbursed" and not loan_details.is_term_loan:
-			open_loans = frappe.get_all("Loan",
-			fields=["name", "total_payment", "total_amount_paid", "loan_account", "interest_income_account", "is_term_loan",
-				"disbursement_date", "applicant_type", "applicant", "rate_of_interest", "total_interest_payable", "repayment_start_date"],
-			filters= {
-				"status": "Disbursed",
-				"docstatus": 1,
-				"name": self.against_loan
-			})
-
-			make_accrual_interest_entry_for_demand_loans(posting_date=add_days(self.disbursement_date, -1),
-				open_loans=open_loans)
+			process_loan_interest_accrual(posting_date=add_days(self.disbursement_date, -1),
+				loan=self.against_loan)
 
 		disbursed_amount = self.disbursed_amount + loan_details.disbursed_amount
 

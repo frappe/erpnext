@@ -68,9 +68,9 @@ class LoanInterestAccrual(AccountsController):
 
 # For Eg: If Loan disbursement date is '01-09-2019' and disbursed amount is 1000000 and
 # rate of interest is 13.5 then first loan interest accural will be on '01-10-2019'
-# which means interest will be accured for 30 days which should be equal to 11095.89
-def calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_interest, from_background_job=0):
-	no_of_days = get_no_of_days_for_interest_accural(loan, posting_date, from_background_job)
+# which means interest will be accrued for 30 days which should be equal to 11095.89
+def calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_interest):
+	no_of_days = get_no_of_days_for_interest_accural(loan, posting_date)
 
 	if no_of_days <= 0:
 		return
@@ -85,8 +85,7 @@ def calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_i
 		loan.loan_account, pending_principal_amount, payable_interest, process_loan_interest = process_loan_interest,
 		 posting_date=posting_date)
 
-def make_accrual_interest_entry_for_demand_loans(posting_date=None, open_loans=None, loan_type=None, process_loan_interest=None):
-
+def make_accrual_interest_entry_for_demand_loans(posting_date, process_loan_interest, open_loans=None, loan_type=None):
 	query_filters = {
 		"status": "Disbursed",
 		"docstatus": 1
@@ -103,19 +102,8 @@ def make_accrual_interest_entry_for_demand_loans(posting_date=None, open_loans=N
 				"disbursement_date", "applicant_type", "applicant", "rate_of_interest", "total_interest_payable", "repayment_start_date"],
 			filters=query_filters)
 
-	from_background_job = 0
-	if not process_loan_interest:
-		from_background_job = 1
-
-		loan_interest_accural_log = frappe.new_doc("Process Loan Interest Accrual")
-		loan_interest_accural_log.posting_date = posting_date or nowdate()
-		loan_interest_accural_log.submit()
-
-		process_loan_interest = loan_interest_accural_log.name
-
 	for loan in open_loans:
-		calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_interest,
-			from_background_job=from_background_job)
+		calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_interest)
 
 def make_accrual_interest_entry_for_term_loans(posting_date=None):
 	curr_date = posting_date or add_days(nowdate(), 1)
@@ -164,7 +152,7 @@ def make_loan_interest_accrual_entry(loan, applicant_type, applicant, interest_i
 		loan_interest_accrual.submit()
 
 
-def get_no_of_days_for_interest_accural(loan, posting_date, from_background_job):
+def get_no_of_days_for_interest_accural(loan, posting_date):
 	last_interest_accrual_date = get_last_accural_date_in_current_month(loan)
 
 	no_of_days = date_diff(posting_date or nowdate(), last_interest_accrual_date) + 1

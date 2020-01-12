@@ -13,8 +13,7 @@ from erpnext.hr.doctype.salary_slip.test_salary_slip import get_salary_component
 		make_earning_salary_component, make_deduction_salary_component
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_salary_structure
 from erpnext.loan_management.doctype.loan.test_loan import create_loan, make_loan_disbursement_entry
-from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (make_accrual_interest_entry_for_demand_loans,
-			make_accrual_interest_entry_for_term_loans)
+from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import make_accrual_interest_entry_for_term_loans
 
 class TestPayrollEntry(unittest.TestCase):
 	def setUp(self):
