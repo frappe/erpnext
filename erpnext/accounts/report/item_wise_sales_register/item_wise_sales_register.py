@@ -394,7 +394,7 @@ def get_items(filters, additional_query_columns):
 		from `tabSales Invoice`, `tabSales Invoice Item`
 		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent
 			and `tabSales Invoice`.docstatus = 1 {1} {2}
-		""".format(additional_query_columns or '', conditions, match_conditions), filters, as_dict=1, debug=1)
+		""".format(additional_query_columns or '', conditions, match_conditions), filters, as_dict=1) #nosec
 
 def get_delivery_notes_against_sales_order(item_list):
 	so_dn_map = frappe._dict()
