@@ -243,11 +243,11 @@ frappe.ui.form.on("Expense Claim", {
 
 	update_employee_advance_claimed_amount: function(frm) {
 		let amount_to_be_allocated = frm.doc.grand_total;
-		$.each(frm.doc.advances || [], function(i, advance){
-			if (amount_to_be_allocated >= advance.unclaimed_amount){
+		$.each(frm.doc.advances || [], function(i, advance) {
+			if (amount_to_be_allocated >= advance.unclaimed_amount) {
 				frm.doc.advances[i].allocated_amount = frm.doc.advances[i].unclaimed_amount;
 				amount_to_be_allocated -= advance.allocated_amount;
-			} else{
+			} else {
 				frm.doc.advances[i].allocated_amount = amount_to_be_allocated;
 				amount_to_be_allocated = 0;
 			}

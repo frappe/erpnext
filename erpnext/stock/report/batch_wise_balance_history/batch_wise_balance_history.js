@@ -16,6 +16,29 @@ frappe.query_reports["Batch-Wise Balance History"] = {
 			"fieldtype": "Date",
 			"width": "80",
 			"default": frappe.datetime.get_today()
+		},
+		{
+			"fieldname": "item",
+			"label": __("Item"),
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": "80"
 		}
-	]
+	],
+	"formatter": function (value, row, column, data, default_formatter) {
+		if (column.fieldname == "Batch" && data && !!data["Batch"]) {
+			value = data["Batch"];
+			column.link_onclick = "frappe.query_reports['Batch-Wise Balance History'].set_batch_route_to_stock_ledger(" + JSON.stringify(data) + ")";
+		}
+
+		value = default_formatter(value, row, column, data);
+		return value;
+	},
+	"set_batch_route_to_stock_ledger": function (data) {
+		frappe.route_options = {
+			"batch_no": data["Batch"]
+		};
+
+		frappe.set_route("query-report", "Stock Ledger");
+	}
 }

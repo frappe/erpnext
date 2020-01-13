@@ -55,7 +55,7 @@ def execute(filters=None):
 				'item_code': item,
 				'warehouse': warehouse,
 				'company': company,
-				'reorder_level': item_reorder_qty,
+				'reorder_level': item_reorder_level,
 				'reorder_qty': item_reorder_qty,
 			}
 			report_data.update(item_map[item])
@@ -264,7 +264,7 @@ def get_item_details(items, sle, filters):
 			`tabItem` item
 			%s
 		where
-			item.name in (%s) and ifnull(item.disabled, 0) = 0
+			item.name in (%s)
 	""" % (cf_field, cf_join, ','.join(['%s'] *len(items))), items, as_dict=1)
 
 	for item in res:
