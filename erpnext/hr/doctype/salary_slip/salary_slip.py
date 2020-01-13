@@ -410,6 +410,7 @@ class SalarySlip(TransactionBase):
 		if additional_components:
 			for additional_component in additional_components:
 				amount = additional_component.amount
+				print("-------------[>>>]", amount)
 				overwrite = additional_component.overwrite
 				self.update_component_row(frappe._dict(additional_component.struct_row), amount,
 					component_type, overwrite=overwrite)
