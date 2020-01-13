@@ -25,6 +25,9 @@ class Student(Document):
 		if self.date_of_birth and getdate(self.date_of_birth) >= getdate(today()):
 			frappe.throw(_("Date of Birth cannot be greater than today."))
 
+		if self.joining_date and self.date_of_leaving and getdate(self.joining_date) > getdate(self.date_of_leaving):
+			frappe.throw(_("Joining Date can not be greater than Leaving Date"))
+
 	def update_student_name_in_linked_doctype(self):
 		linked_doctypes = get_linked_doctypes("Student")
 		for d in linked_doctypes:

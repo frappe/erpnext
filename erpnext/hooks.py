@@ -180,6 +180,7 @@ standard_portal_menu_items = [
 	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission", "role": "Student"},
 	{"title": _("Certification"), "route": "/certification", "reference_doctype": "Certification Application", "role": "Non Profit Portal User"},
 	{"title": _("Material Request"), "route": "/material-requests", "reference_doctype": "Material Request", "role": "Customer"},
+	{"title": _("Appointment Booking"), "route": "/book_appointment"},
 ]
 
 default_roles = [

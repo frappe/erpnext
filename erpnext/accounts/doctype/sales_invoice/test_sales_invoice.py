@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 import unittest, copy, time
-from frappe.utils import nowdate, flt, getdate, cint
+from frappe.utils import nowdate, flt, getdate, cint, add_days
 from frappe.model.dynamic_links import get_dynamic_link_map
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
@@ -1847,6 +1847,26 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(data['billLists'][0]['vehicleNo'], 'KA12KA1234')
 		self.assertEqual(data['billLists'][0]['itemList'][0]['taxableAmount'], 60000)
 
+	def test_item_tax_validity(self):
+		item = frappe.get_doc("Item", "_Test Item 2")
+
+		if item.taxes:
+			item.taxes = []
+			item.save()
+
+		item.append("taxes", {
+			"item_tax_template": "_Test Item Tax Template 1",
+			"valid_from": add_days(nowdate(), 1)
+		})
+
+		item.save()
+
+		sales_invoice = create_sales_invoice(item = "_Test Item 2", do_not_save=1)
+		sales_invoice.items[0].item_tax_template = "_Test Item Tax Template 1"
+		self.assertRaises(frappe.ValidationError, sales_invoice.save)
+
+		item.taxes = []
+		item.save()
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")

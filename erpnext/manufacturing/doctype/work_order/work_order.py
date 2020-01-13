@@ -38,7 +38,7 @@ class WorkOrder(Document):
 		ms = frappe.get_doc("Manufacturing Settings")
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
-
+		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
 
 	def validate(self):
 		self.validate_production_item()
@@ -657,8 +657,9 @@ def make_work_order(item, qty=0, project=None):
 	wo_doc = frappe.new_doc("Work Order")
 	wo_doc.production_item = item
 	wo_doc.update(item_details)
-	if qty > 0:
-		wo_doc.qty = qty
+
+	if flt(qty) > 0:
+		wo_doc.qty = flt(qty)
 		wo_doc.get_items_and_operations_from_bom()
 
 	return wo_doc
@@ -683,8 +684,7 @@ def set_work_order_ops(name):
 @frappe.whitelist()
 def make_stock_entry(work_order_id, purpose, qty=None):
 	work_order = frappe.get_doc("Work Order", work_order_id)
-	if not frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group") \
-			and not work_order.skip_transfer:
+	if not frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group"):
 		wip_warehouse = work_order.wip_warehouse
 	else:
 		wip_warehouse = None
