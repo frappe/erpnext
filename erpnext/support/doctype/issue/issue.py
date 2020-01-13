@@ -14,9 +14,6 @@ from frappe.utils.user import is_website_user
 from erpnext.support.doctype.service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
 from frappe.email.inbox import link_communication_to_document
 
-sender_field = "raised_by"
-
-
 class Issue(Document):
 	def get_feed(self):
 		return "{0}: {1}".format(_(self.status), self.subject)
