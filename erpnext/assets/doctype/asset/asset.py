@@ -132,9 +132,10 @@ class Asset(AccountsController):
 		if len(movements) > 1:
 			frappe.throw(_('Asset has multiple Asset Movement Entries which has to be \
 				cancelled manually to cancel this asset.'))
-		movement = frappe.get_doc('Asset Movement', movements[0].get('name'))
-		movement.flags.ignore_validate = True
-		movement.cancel()
+		if movements:
+			movement = frappe.get_doc('Asset Movement', movements[0].get('name'))
+			movement.flags.ignore_validate = True
+			movement.cancel()
 
 	def make_asset_movement(self):
 		reference_doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'
