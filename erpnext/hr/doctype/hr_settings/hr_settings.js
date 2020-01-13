@@ -2,10 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('HR Settings', {
-	refresh: function(frm) {
-
-	},
-
 	encrypt_salary_slips_in_emails: function(frm) {
 		let encrypt_state = frm.doc.encrypt_salary_slips_in_emails;
 		frm.set_df_property('password_policy', 'reqd', encrypt_state);
@@ -19,5 +15,9 @@ frappe.ui.form.on('HR Settings', {
 			}
 			frm.set_value('password_policy', policy.split(new RegExp(" |-", 'g')).filter((token) => token).join('-'));
 		}
+	},
+
+	restrict_backdated_leave_application: function(frm) {
+		frm.toggle_reqd("role_allowed_to_create_backdated_leave_application", frm.doc.restrict_backdated_leave_application);
 	}
 });
