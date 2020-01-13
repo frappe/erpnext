@@ -2,6 +2,16 @@ cur_frm.add_fetch("payment_gateway_account", "payment_account", "payment_account
 cur_frm.add_fetch("payment_gateway_account", "payment_gateway", "payment_gateway")
 cur_frm.add_fetch("payment_gateway_account", "message", "message")
 
+frappe.ui.form.on("Payment Request", {
+	setup: function(frm) {
+		frm.set_query("party_type", function() {
+			return {
+				query: "erpnext.setup.doctype.party_type.party_type.get_party_type",
+			};
+		});
+	}
+})
+
 frappe.ui.form.on("Payment Request", "onload", function(frm, dt, dn){
 	if (frm.doc.reference_doctype) {
 		frappe.call({
