@@ -21,10 +21,23 @@ class AdditionalSalary(Document):
 			frappe.throw(_("Amount should not be less than zero."))
 
 	def validate_dates(self):
- 		date_of_joining, relieving_date = frappe.db.get_value("Employee", self.employee,
+		date_of_joining, relieving_date = frappe.db.get_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
- 		if date_of_joining and getdate(self.payroll_date) < getdate(date_of_joining):
- 			frappe.throw(_("Payroll date can not be less than employee's joining date"))
+
+		if not self.is_recurring and not self.payroll_date:
+			frappe.msgprint(_("Please enter Payroll Date."), indicator='blue', raise_exception=1)
+		if self.is_recurring and not self.from_date and not self.to_date:
+			frappe.msgprint(_("Please enter From Date and To Date."), indicator='blue', raise_exception=1)
+		if getdate(self.from_date) > getdate(self.to_date):
+			frappe.throw(_("From Date can not be greater than To Date."))
+
+		if date_of_joining:
+			if getdate(self.payroll_date) < getdate(date_of_joining):
+				frappe.throw(_("Payroll date can not be less than employee's joining date."))
+			elif getdate(self.from_date) < getdate(date_of_joining):
+				frappe.throw(_("From date can not be less than employee's joining date."))
+			elif getdate(self.to_date) > getdate(relieving_date):
+				frappe.throw(_("To date can not be greater than employee's relieving date."))
 
 	def get_amount(self, sal_start_date, sal_end_date):
 		start_date = getdate(sal_start_date)
@@ -45,8 +58,12 @@ def get_additional_salary_component(employee, start_date, end_date, component_ty
 		from `tabAdditional Salary`
 		where employee=%(employee)s
 			and docstatus = 1
-			and payroll_date between %(from_date)s and %(to_date)s
-			and type = %(component_type)s
+			and (payroll_date between %(from_date)s and %(to_date)s)
+			or (
+				(from_date between %(from_date)s and %(to_date)s)
+				or(to_date between %(from_date)s and %(to_date)s)
+			)
+		and type = %(component_type)s
 		group by salary_component, overwrite_salary_structure_amount
 		order by salary_component, overwrite_salary_structure_amount
 	""", {

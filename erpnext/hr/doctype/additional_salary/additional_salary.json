@@ -15,6 +15,9 @@
   "deduct_full_tax_on_selected_payroll_date",
   "column_break_5",
   "company",
+  "is_recurring",
+  "from_date",
+  "to_date",
   "payroll_date",
   "salary_slip",
   "type",
@@ -74,12 +77,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:(doc.is_recurring==0)",
    "description": "Date on which this component is applied",
    "fieldname": "payroll_date",
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Payroll Date",
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -127,11 +130,29 @@
    "options": "Additional Salary",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_recurring",
+   "fieldtype": "Check",
+   "label": "Is Recurring"
+  },
+  {
+   "depends_on": "eval:(doc.is_recurring==1)",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "depends_on": "eval:(doc.is_recurring==1)",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-12 19:07:23.635901",
+ "modified": "2020-01-13 18:25:56.254114",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Additional Salary",
