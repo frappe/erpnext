@@ -12,9 +12,6 @@ from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, comma_and, cstr, getdate, has_gravatar, nowdate, validate_email_address
 
-sender_field = "email_id"
-
-
 class Lead(SellingController):
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.lead_name)

@@ -440,11 +440,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
-<<<<<<< HEAD
- "modified": "2019-12-12 21:00:59.166518",
-=======
- "modified": "2019-12-24 16:00:44.239168",
->>>>>>> 2d151a7b85acc2bd530793ff3586a58f117ee270
+ "modified": "2020-01-13 16:16:48.885228",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -513,7 +509,7 @@
   }
  ],
  "search_fields": "lead_name,lead_owner,status",
- "sender_field": "status",
+ "sender_field": "email_id",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
