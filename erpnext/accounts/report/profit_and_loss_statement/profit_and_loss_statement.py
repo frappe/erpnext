@@ -58,7 +58,7 @@ def get_report_summary(columns, income, expense, net_profit_loss, period_list, p
 	return [
 		{
 			"value": net_profit[-1],
-			"indicator": "Green" if income_data[-1] > 0 else "Red",
+			"indicator": "Green" if net_profit[-1] > 0 else "Red",
 			"label": profit_label,
 			"datatype": "Currency",
 			"currency": net_profit_loss.get("currency")
