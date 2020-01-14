@@ -311,6 +311,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				and sle.item_code = %(item_code)s
 				and sle.warehouse = %(warehouse)s
 				and (sle.batch_no like %(txt)s
+				or batch.expiry_date like %(txt)s
 				or batch.manufacturing_date like %(txt)s)
 				and batch.docstatus < 2
 				{cond}
@@ -329,6 +330,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 			where batch.disabled = 0
 			and item = %(item_code)s
 			and (name like %(txt)s
+			or expiry_date like %(txt)s
 			or manufacturing_date like %(txt)s)
 			and docstatus < 2
 			{0}
