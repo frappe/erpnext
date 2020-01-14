@@ -223,6 +223,7 @@ class PurchaseReceipt(BuyingController):
 
 					if not stock_value_diff:
 						continue
+
 					gl_entries.append(self.get_gl_dict({
 						"account": warehouse_account[d.warehouse]["account"],
 						"against": stock_rbnb,
@@ -231,27 +232,23 @@ class PurchaseReceipt(BuyingController):
 						"debit": stock_value_diff
 					}, warehouse_account[d.warehouse]["account_currency"], item=d))
 
-					if d.from_warehouse:
-						gl_entries.append(self.get_gl_dict({
-							"account":  warehouse_account[d.from_warehouse]['account'],
-							"against": warehouse_account[d.warehouse]["account"],
-							"cost_center": d.cost_center,
-							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"debit": -1 * stock_value_diff
-						}, warehouse_account[d.from_warehouse]["account_currency"], item=d))
+					# GL Entry for from warehouse or Stock Received but not billed
+					# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
+					credit_currency = get_account_currency(warehouse_account[d.from_warehouse]['account']) \
+						if d.from_warehouse else get_account_currency(stock_rbnb)
 
-					# stock received but not billed
-					stock_rbnb_currency = get_account_currency(stock_rbnb)
-					if not d.from_warehouse:
-						gl_entries.append(self.get_gl_dict({
-							"account": stock_rbnb,
-							"against": warehouse_account[d.warehouse]["account"],
-							"cost_center": d.cost_center,
-							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"credit": flt(d.base_net_amount, d.precision("base_net_amount")),
-							"credit_in_account_currency": flt(d.base_net_amount, d.precision("base_net_amount")) \
-								if stock_rbnb_currency==self.company_currency else flt(d.net_amount, d.precision("net_amount"))
-						}, stock_rbnb_currency, item=d))
+					credit_amount = flt(d.base_net_amount, d.precision("base_net_amount")) \
+						if credit_currency == self.company_currency else flt(d.net_amount, d.precision("net_amount"))
+
+					gl_entries.append(self.get_gl_dict({
+						"account":  warehouse_account[d.from_warehouse]['account'] \
+							if d.from_warehouse else stock_rbnb,
+						"against": warehouse_account[d.warehouse]["account"],
+						"cost_center": d.cost_center,
+						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+						"debit": -1 * flt(d.base_net_amount, d.precision("base_net_amount")),
+						"debit_in_account_currency": -1 * credit_amount
+					}, credit_currency, item=d))
 
 					negative_expense_to_be_booked += flt(d.item_tax_amount)
 

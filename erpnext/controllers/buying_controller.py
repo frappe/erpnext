@@ -43,6 +43,7 @@ class BuyingController(StockController):
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
+		self.validate_from_warehouse()
 		self.set_supplier_address()
 
 		if self.doctype=="Purchase Invoice":
@@ -114,6 +115,14 @@ class BuyingController(StockController):
 			d.landed_cost_voucher_amount = lc_voucher_data[0][0] if lc_voucher_data else 0.0
 			if not d.cost_center and lc_voucher_data and lc_voucher_data[0][1]:
 				d.db_set('cost_center', lc_voucher_data[0][1])
+
+	def validate_from_warehouse(self):
+		for item in self.get('items'):
+			if item.from_warehouse and (item.from_warehouse == item.warehouse):
+				frappe.throw(_("Row #{0}: Accepted Warehouse and Supplier Warehouse cannot be same").format(item.idx))
+
+			if item.from_warehouse and self.supplier_warehouse:
+				frappe.throw(_("Row #{0}: Cannot select Supplier Warehouse while suppling raw materials to subcontractor").format(item.idx))
 
 	def set_supplier_address(self):
 		address_dict = {

@@ -255,7 +255,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
 			args.get('name'), 'material_request_type', cache=True)
 
-	expense_account = args.get('expense_account')
+	expense_account = None
 
 	if args.get('doctype') == 'Purchase Invoice' and item.is_fixed_asset:
 		from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account

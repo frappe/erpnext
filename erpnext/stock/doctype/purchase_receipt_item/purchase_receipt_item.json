@@ -825,6 +825,7 @@
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
    "hidden": 1,
+   "ignore_user_permissions": 1,
    "label": "Supplier Warehouse",
    "options": "Warehouse"
   }
@@ -832,7 +833,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2019-12-19 18:01:58.270916",
+ "modified": "2020-01-13 16:03:34.879827",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

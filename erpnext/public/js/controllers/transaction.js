@@ -490,9 +490,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							cost_center: item.cost_center,
 							tax_category: me.frm.doc.tax_category,
 							item_tax_template: item.item_tax_template,
-							child_docname: item.name,
-							expense_account: item.expense_account,
-							is_internal_customer: me.frm.doc.is_internal_customer
+							child_docname: item.name
 						}
 					},
 

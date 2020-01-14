@@ -770,6 +770,7 @@
   {
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Supplier Warehouse",
    "options": "Warehouse"
   }
@@ -777,7 +778,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2019-12-26 12:32:04.386990",
+ "modified": "2020-01-13 16:04:14.200462",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
