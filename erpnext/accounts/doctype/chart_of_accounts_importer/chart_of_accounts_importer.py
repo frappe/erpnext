@@ -83,7 +83,6 @@ def build_forest(data):
 			}
 		}
 	'''
-
 	# set the value of nested dictionary
 	def set_nested(d, path, value):
 		reduce(lambda d, k: d.setdefault(k, {}), path[:-1], d)[path[-1]] = value
@@ -102,12 +101,21 @@ def build_forest(data):
 
 	line_no = 3
 	error_messages = []
+	accounts = []
 
 	for i in data:
-		account_name, _, account_number, is_group, account_type, root_type = i
+		account_name, parent_name, account_number, is_group, account_type, root_type = i
 
 		if not account_name:
 			error_messages.append("Row {0}: Please enter Account Name".format(line_no))
+
+		accounts.append(account_name)
+
+		if parent_name:
+			validate_parent_account(parent_name, accounts)
+
+		if account_type:
+			validate_type_account(account_type)
 
 		charts_map[account_name] = {}
 		if is_group == 1: charts_map[account_name]["is_group"] = is_group
@@ -118,6 +126,8 @@ def build_forest(data):
 		paths.append(path) # List of path is created
 		line_no += 1
 
+
+
 	if error_messages:
 		frappe.throw("<br>".join(error_messages))
 
@@ -127,6 +137,36 @@ def build_forest(data):
 			set_nested(out, path[:n+1], charts_map[account_name]) # setting the value of nested dictionary.
 
 	return out
+
+def validate_parent_account(parent_account, account):
+	# frappe.throw(_("cuenta padre {} cuentas {}".format(parent_account, account)))
+
+	validator = 0
+
+	for item in account:
+		if item == parent_account:
+			validator = validator + 1
+
+	if validator == 0:
+		frappe.throw(_("The parent account {} no exist or is poorly defined.".format(parent_account)))
+
+def validate_type_account(type_account):
+	# frappe.throw(_("item {}".format(type_account)))
+
+	types_accounts = ["Accumulated Depreciation", "Asset Received But Not Billed", "Bank", "Cash", "Chargeable",
+					 "Capital Work in Progress", "Cost of Goods Sold", "Depreciation", "Equity", "Expense Account",
+					 "Expenses Included In Asset Valuation", "Expenses Included In Valuation", "Fixed Asset", 
+					 "Income Account", "Payable", "Receivable", "Round Off", "Stock", "Stock Adjustment", 
+					 "Stock Received But Not Billed", "Tax", "Temporary"]
+
+	validator = 0
+
+	for item in types_accounts:
+		if item == type_account:
+			validator = validator + 1
+
+	if validator == 0:
+		frappe.throw(_("Type of account {} no valid.".format(type_account)))
 
 @frappe.whitelist()
 def download_template():
@@ -148,9 +188,15 @@ def validate_accounts(file_name):
 	accounts = generate_data_from_csv(file_name, as_dict=True)
 
 	accounts_dict = {}
+	accounts_list = []
 	for account in accounts:
+		accounts_list.append(account["account_name"])
+
+		if account["parent_account"]:
+			validate_parent_account(account["parent_account"],accounts_list)
+
 		accounts_dict.setdefault(account["account_name"], account)
-		if account["parent_account"] and accounts_dict.get(account["parent_account"]):
+		if account["parent_account"] and accounts_dict[account["parent_account"]]:
 			accounts_dict[account["parent_account"]]["is_group"] = 1
 
 	message = validate_root(accounts_dict)
