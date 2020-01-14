@@ -37,7 +37,7 @@ class WorkOrder(Document):
 		ms = frappe.get_doc("Manufacturing Settings")
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
-
+		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
 
 	def validate(self):
 		self.validate_production_item()
@@ -608,6 +608,23 @@ def get_item_details(item, project = None):
 	res.update(check_if_scrap_warehouse_mandatory(res["bom_no"]))
 
 	return res
+
+@frappe.whitelist()
+def make_work_order(item, qty=0, project=None):
+	if not frappe.has_permission("Work Order", "write"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	item_details = get_item_details(item, project)
+
+	wo_doc = frappe.new_doc("Work Order")
+	wo_doc.production_item = item
+	wo_doc.update(item_details)
+
+	if flt(qty) > 0:
+		wo_doc.qty = flt(qty)
+		wo_doc.get_items_and_operations_from_bom()
+
+	return wo_doc
 
 @frappe.whitelist()
 def check_if_scrap_warehouse_mandatory(bom_no):

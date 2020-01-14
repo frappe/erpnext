@@ -40,7 +40,7 @@ class Student(Document):
 			frappe.throw(_("Student {0} exist against student applicant {1}").format(student[0][0], self.student_applicant))
 
 	def after_insert(self):
-		if not frappe.get_single('Education Settings').user_creation_skip:
+		if not frappe.get_single('Education Settings').get('user_creation_skip'):
 			self.create_student_user()
 
 	def create_student_user(self):

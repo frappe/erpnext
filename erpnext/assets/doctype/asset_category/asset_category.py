@@ -29,7 +29,8 @@ def get_asset_category_account(fieldname, item=None, asset=None, account=None, a
 				account=None
 
 		if not account:
-			asset_category, company = frappe.db.get_value("Asset", asset, ["asset_category", "company"])
+			asset_details = frappe.db.get_value("Asset", asset, ["asset_category", "company"])
+			asset_category, company = asset_details or [None, None]
 
 	account = frappe.db.get_value("Asset Category Account",
 		filters={"parent": asset_category, "company_name": company}, fieldname=fieldname)

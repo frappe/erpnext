@@ -26,5 +26,11 @@ frappe.query_reports["Fixed Asset Register"] = {
 			fieldtype: "Link",
 			options: "Finance Book"
 		},
+		{
+			fieldname:"date",
+			label: __("Date"),
+			fieldtype: "Date",
+			default: frappe.datetime.get_today()
+		},
 	]
 };

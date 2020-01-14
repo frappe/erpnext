@@ -208,6 +208,24 @@ frappe.ui.form.on("Expense Claim", {
 		frm.refresh_fields();
 	},
 
+	grand_total: function(frm) {
+		frm.trigger("update_employee_advance_claimed_amount");
+	},
+
+	update_employee_advance_claimed_amount: function(frm) {
+		let amount_to_be_allocated = frm.doc.grand_total;
+		$.each(frm.doc.advances || [], function(i, advance){
+			if (amount_to_be_allocated >= advance.unclaimed_amount){
+				frm.doc.advances[i].allocated_amount = frm.doc.advances[i].unclaimed_amount;
+				amount_to_be_allocated -= advance.allocated_amount;
+			} else{
+				frm.doc.advances[i].allocated_amount = amount_to_be_allocated;
+				amount_to_be_allocated = 0;
+			}
+			frm.refresh_field("advances");
+		});
+	},
+
 	make_payment_entry: function(frm) {
 		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
 		if(frm.doc.__onload && frm.doc.__onload.make_payment_via_journal_entry) {
@@ -300,7 +318,7 @@ frappe.ui.form.on("Expense Claim", {
 							row.advance_account = d.advance_account;
 							row.advance_paid = d.paid_amount;
 							row.unclaimed_amount = flt(d.paid_amount) - flt(d.claimed_amount);
-							row.allocated_amount = flt(d.paid_amount) - flt(d.claimed_amount);
+							row.allocated_amount = 0;
 						});
 						refresh_field("advances");
 					}
