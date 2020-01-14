@@ -294,7 +294,7 @@ class PurchaseReceipt(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"debit": divisional_loss,
 							"project": d.project
-						}, stock_rbnb_currency, item=d))
+						}, credit_currency, item=d))
 
 				elif d.warehouse not in warehouse_with_no_account or \
 					d.rejected_warehouse not in warehouse_with_no_account:

@@ -425,6 +425,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 	def test_stock_transfer_from_purchase_receipt(self):
 		set_perpetual_inventory(1)
 		pr = make_purchase_receipt(do_not_save=1)
+		pr.supplier_warehouse = ''
 		pr.items[0].from_warehouse = '_Test Warehouse 2 - _TC'
 
 		pr.submit()
@@ -452,6 +453,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		pr = make_purchase_receipt(do_not_save=1)
 		pr.items[0].from_warehouse = '_Test Warehouse 2 - _TC'
+		pr.supplier_warehouse = ''
+
 
 		pr.append('taxes', {
 			'charge_type': 'On Net Total',
