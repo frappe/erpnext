@@ -118,10 +118,10 @@ class BuyingController(StockController):
 
 	def validate_from_warehouse(self):
 		for item in self.get('items'):
-			if item.from_warehouse and (item.from_warehouse == item.warehouse):
+			if item.get('from_warehouse') and (item.get('from_warehouse') == item.get('warehouse')):
 				frappe.throw(_("Row #{0}: Accepted Warehouse and Supplier Warehouse cannot be same").format(item.idx))
 
-			if item.from_warehouse and self.supplier_warehouse:
+			if item.get('from_warehouse') and self.get('supplier_warehouse'):
 				frappe.throw(_("Row #{0}: Cannot select Supplier Warehouse while suppling raw materials to subcontractor").format(item.idx))
 
 	def set_supplier_address(self):
