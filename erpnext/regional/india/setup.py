@@ -436,7 +436,7 @@ def make_custom_fields(update=True):
 		'Employee Tax Exemption Proof Submission': [
 			dict(fieldname='hra_section', label='HRA Exemption',
 				fieldtype='Section Break', insert_after='tax_exemption_proofs'),
-			dict(fieldname='house_rent_payment_amount', label='House Rent Payment Amount',
+			dict(fieldname='house_rent_payment_amount', label='Yearly House Rent',
 				fieldtype='Currency', insert_after='hra_section'),
 			dict(fieldname='rented_in_metro_city', label='Rented in Metro City',
 				fieldtype='Check', insert_after='house_rent_payment_amount', depends_on='house_rent_payment_amount'),
