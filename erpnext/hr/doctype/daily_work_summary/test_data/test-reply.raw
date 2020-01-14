@@ -29,7 +29,7 @@ response will be recorded!
 <http://demo-test.erpnext.com.dev/api/method/frappe.email.queue.unsubscrib=
 e?email=3Drmehta%40gmail.com&name=3D26cc3e5a5d&doctype=3DDaily+Work+Summar=
 y&_signature=3D2c7ab37e6d775e5a481e9b4376154a41>
-> Sent via ERPNext <https://erpnext.com/?source=3Dvia_email_footer>
+> Sent via Leaf <http://leaf.grintsys.com>
 
 
 --Apple-Mail=_29597CF7-20DD-4184-B3FA-85582C5C4361
@@ -62,8 +62,8 @@ Content-Type: text/html;
 				</a>
 			</p>
 		</div><div style="margin: 15px auto;" class=""><div style="text-align: center;" class="">
-	<a href="https://erpnext.com/?source=via_email_footer" target="_blank" style="color: #8d99a6;" class="">
-		Sent via ERPNext
+	<a href="http://leaf.grintsys.com" target="_blank" style="color: #8d99a6;" class="">
+		Sent via Leaf
 	</a>
 </div></div>
 </div>
