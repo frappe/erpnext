@@ -1,0 +1,137 @@
+# Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
+
+from __future__ import unicode_literals
+import frappe
+from erpnext import get_default_currency
+from frappe import _
+
+def execute(filters=None):
+	filters = frappe._dict(filters)
+	columns = get_columns()
+	data = get_data(filters)
+	return columns, data
+
+
+def get_columns():
+	currency = get_default_currency()
+	return [
+		{
+			"label": _("Territory"),
+			"fieldname": "territory",
+			"fieldtype": "Link",
+			"options": "Territory"
+		},
+		{
+			"label": _("Opportunity Amount"),
+			"fieldname": "opportunity_amount",
+			"fieldtype": "Currency",
+			"options": currency
+		},
+		{
+			"label": _("Quotation Amount"),
+			"fieldname": "quotation_amount",
+			"fieldtype": "Currency",
+			"options": currency
+		},
+		{
+			"label": _("Order Amount"),
+			"fieldname": "order_amount",
+			"fieldtype": "Currency",
+			"options": currency
+		},
+		{
+			"label": _("Billing Amount"),
+			"fieldname": "billing_amount",
+			"fieldtype": "Currency",
+			"options": currency
+		}
+	]
+
+def get_data(filters=None):
+	data = []
+
+	opportunities = get_opportunities(filters)
+	quotations = get_quotations(opportunities)
+	sales_orders = get_sales_orders(quotations)
+	sales_invoices = get_sales_invoice(sales_orders)
+
+	for territory in frappe.get_all("Territory"):
+		territory_opportunities = list(filter(lambda x: x.territory == territory.name, opportunities)) if opportunities and opportunities else None
+		t_opportunity_names = [t.name for t in territory_opportunities] if territory_opportunities else None
+
+		territory_quotations = list(filter(lambda x: x.opportunity in t_opportunity_names, quotations)) if t_opportunity_names and quotations else None
+		t_quotation_names = [t.name for t in territory_quotations] if territory_quotations else None
+
+		territory_orders = list(filter(lambda x: x.quotation in t_quotation_names, sales_orders)) if t_quotation_names and sales_orders else None
+		t_order_names = [t.name for t in territory_orders] if territory_orders else None
+
+		territory_invoices = list(filter(lambda x: x.sales_order in t_order_names, sales_invoices)) if t_order_names and sales_invoices else None
+
+		territory_data = {
+			"territory": territory.name,
+			"opportunity_amount": _get_total(territory_opportunities, "opportunity_amount"),
+			"quotation_amount": _get_total(territory_quotations),
+			"order_amount": _get_total(territory_orders),
+			"billing_amount": _get_total(territory_invoices)
+		}
+		data.append(territory_data)
+
+	return data
+
+def get_opportunities(filters):
+	conditions = ""
+
+	if filters.from_date and filters.to_date:
+		conditions = " WHERE expected_closing between %(from_date)s and %(to_date)s"
+
+	return frappe.db.sql("""
+		SELECT name, territory, opportunity_amount
+		FROM `tabOpportunity` {0}
+	""".format(conditions), filters, as_dict=1)
+
+def get_quotations(opportunities):
+	if not opportunities:
+		return []
+	
+	opportunity_names = [o.name for o in opportunities]
+
+	return frappe.db.sql("""
+		SELECT `name`,`base_grand_total`, `opportunity`
+		FROM `tabQuotation`
+		WHERE docstatus=1 AND opportunity in ({0})
+	""".format(', '.join(["%s"]*len(opportunity_names))), tuple(opportunity_names), as_dict=1)
+
+def get_sales_orders(quotations):
+	if not quotations:
+		return []
+
+	quotation_names = [q.name for q in quotations]
+
+	return frappe.db.sql("""
+	SELECT so.`name`, so.`base_grand_total`, soi.prevdoc_docname as quotation
+	FROM `tabSales Order` so, `tabSales Order Item` soi
+	WHERE so.docstatus=1 AND so.name = soi.parent AND soi.prevdoc_docname in ({0})
+	""".format(', '.join(["%s"]*len(quotation_names))), tuple(quotation_names), as_dict=1)
+
+def get_sales_invoice(sales_orders):
+	if not sales_orders:
+		return []
+
+	so_names = [so.name for so in sales_orders]
+
+	return frappe.db.sql("""
+	SELECT si.name, si.base_grand_total, sii.sales_order
+	FROM `tabSales Invoice` si, `tabSales Invoice Item` sii
+	WHERE si.docstatus=1 AND si.name = sii.parent AND sii.sales_order in ({0})
+	""".format(', '.join(["%s"]*len(so_names))), tuple(so_names), as_dict=1)
+
+def _get_total(doclist, amount_field="base_grand_total"):
+	if not doclist:
+		return 0
+
+	total = 0
+	for doc in doclist:
+		total = total + doc.get(amount_field, 0)
+	
+	return total
