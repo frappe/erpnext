@@ -28,7 +28,9 @@ def execute(filters=None):
 
 		# for e in earning_types:
 		# 	row.append(e.)
-		Employee = frappe.get_all("Salary Structure Assignment", ["employee", "employee_name","base"], filters = {"employee_name": ss.employee_name})
+		split = ss.name.split("/")
+		name = split[1]
+		Employee = frappe.get_all("Salary Structure Assignment", ["name", "employee","employee_name", "base"], filters = {"employee": name})
 		
 		row = [ss.employee_name, ss.payment_days]
 
