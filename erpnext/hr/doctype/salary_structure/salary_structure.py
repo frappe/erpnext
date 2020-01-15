@@ -117,6 +117,7 @@ def create_salary_structures_assignment(employee, salary_structure, from_date, b
 	assignment = frappe.new_doc("Salary Structure Assignment")
 	assignment.employee = employee
 	assignment.salary_structure = salary_structure.name
+	assignment.company = salary_structure.company
 	assignment.from_date = from_date
 	assignment.base = base
 	assignment.variable = variable
