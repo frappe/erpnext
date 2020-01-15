@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_guest_to_view": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -569,6 +570,7 @@
   {
    "default": "0.00",
    "depends_on": "is_stock_item",
+   "description": "Minimum quantity should be as per Stock UOM",
    "fieldname": "min_order_qty",
    "fieldtype": "Float",
    "label": "Minimum Order Qty",
@@ -1041,8 +1043,9 @@
  "icon": "fa fa-tag",
  "idx": 2,
  "image_field": "image",
+ "links": [],
  "max_attachments": 1,
- "modified": "2019-12-13 12:15:56.197246",
+ "modified": "2020-01-02 19:13:59.295963",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
