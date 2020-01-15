@@ -373,6 +373,7 @@ def get_existing_payment_request_amount(ref_dt, ref_dn):
 			reference_doctype = %s
 			and reference_name = %s
 			and docstatus = 1
+			and status != 'Paid'
 	""", (ref_dt, ref_dn))
 	return flt(existing_payment_request_amount[0][0]) if existing_payment_request_amount else 0
 
