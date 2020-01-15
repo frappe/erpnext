@@ -532,3 +532,17 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 
 		taxes = _get_item_tax_template(args, taxes, for_validate=True)
 		return [(d,) for d in set(taxes)]
+
+@frappe.whitelist()
+def get_subcontracted_items(doctype, txt, searchfield, start, page_len, filters):
+	if txt:
+		filters.update({
+			"main_item_code": ("like", "%{0}%".format(txt))
+		})
+
+	return frappe.get_all("Purchase Order Item Supplied",
+		fields = ["distinct main_item_code as name"],
+		filters = filters,
+		limit_start = start,
+		limit_page_length = page_len
+	, as_list=1)

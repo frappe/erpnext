@@ -78,6 +78,7 @@ class StockEntry(StockController):
 		self.validate_serialized_batch()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
+		self.set_subcontracted_item()
 
 	def on_submit(self):
 
@@ -422,6 +423,21 @@ class StockEntry(StockController):
 		self.update_valuation_rate()
 		self.set_total_incoming_outgoing_value()
 		self.set_total_amount()
+
+	def set_subcontracted_item(self):
+		if self.purpose != 'Send to Subcontractor': return
+
+		subcontracted_items = [d.subcontracted_item for d in self.items if d.subcontracted_item]
+		if len(subcontracted_items) == len(self.items): return
+
+		for row in self.items:
+			if row.subcontracted_item: continue
+
+			if len(set(subcontracted_items)) == 1:
+				row.subcontracted_item = subcontracted_items[0]
+			else:
+				frappe.throw(_("Row {0}: select subcontracted item for the raw material {1}")
+					.format(row.idx, row.item_code))
 
 	def set_basic_rate(self, force=False, update_finished_item_rate=True, raise_error_if_no_rate=True):
 		"""get stock and incoming rate on posting date"""
