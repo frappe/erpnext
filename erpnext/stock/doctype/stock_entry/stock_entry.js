@@ -68,6 +68,15 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		});
 
+		frm.set_query("subcontracted_item", 'items', function(doc, cdt, cdn) {
+			let filters = { parent: doc.purchase_order }
+
+			return {
+				query : "erpnext.controllers.queries.get_subcontracted_items",
+				filters: filters
+			}
+		});
+
 		frm.set_query("expense_account", "additional_costs", function() {
 			return {
 				query: "erpnext.controllers.queries.tax_account_query",
