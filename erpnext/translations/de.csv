@@ -3432,7 +3432,7 @@ apps/erpnext/erpnext/accounts/doctype/bank_transaction/bank_transaction.py,The t
 DocType: Landed Cost Voucher,Distribute Charges Based On,Kosten auf folgender Grundlage verteilen
 DocType: Projects Settings,Timesheets,Zeiterfassungen
 DocType: HR Settings,HR Settings,Einstellungen zum Modul Personalwesen
-apps/erpnext/erpnext/config/accounting.py,Accounting Masters,Accounting Masters
+apps/erpnext/erpnext/config/accounting.py,Accounting Masters,Buchhaltungsstammdaten
 DocType: Salary Slip,net pay info,Netto-Zahlung Info
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,CESS Amount,CESS-Betrag
 DocType: Woocommerce Settings,Enable Sync,Aktivieren Sie die Synchronisierung
