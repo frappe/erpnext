@@ -278,10 +278,11 @@ class WorkOrder(Document):
 				enable_capacity_planning=enable_capacity_planning, auto_create=True)
 
 			if enable_capacity_planning and job_card_doc:
-				row.planned_start_time = job_card_doc.time_logs[0].from_time
+				row.planned_start_time = job_card_doc.time_logs[-1].from_time
 				row.planned_end_time = job_card_doc.time_logs[-1].to_time
 
 				if date_diff(row.planned_start_time, original_start_time) > plan_days:
+					frappe.message_log.pop()
 					frappe.throw(_("Unable to find the time slot in the next {0} days for the operation {1}.")
 						.format(plan_days, row.operation), CapacityError)
 
