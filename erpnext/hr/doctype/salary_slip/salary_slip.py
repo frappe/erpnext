@@ -56,7 +56,18 @@ class SalarySlip(TransactionBase):
 			max_working_hours = frappe.db.get_single_value("HR Settings", "max_working_hours_against_timesheet")
 			if self.salary_slip_based_on_timesheet and (self.total_working_hours > int(max_working_hours)):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
-								format(max_working_hours), alert=True)
+								format(max_working_hours), alert=True)		
+	
+	def delete_patronal_deductions(self):
+		earnings = frappe.get_all("Salary Detail", ["name", "salary_component"], filters = {"parent":self.name})
+		
+		for item in earnings:
+			salary_component = frappe.get_all("Salary Component", ["salary_component","do_not_include_in_total"], filters= {"salary_component":item.salary_component})
+
+			for commponent in salary_component:
+				if commponent.do_not_include_in_total == 1:
+					frappe.delete_doc("Salary Detail", item.name)
+					
 
 	def on_submit(self):
 		if self.net_pay < 0:
@@ -81,6 +92,7 @@ class SalarySlip(TransactionBase):
 		if self.docstatus == 0:
 			status = "Draft"
 		elif self.docstatus == 1:
+			self.delete_patronal_deductions()
 			status = "Submitted"
 		elif self.docstatus == 2:
 			status = "Cancelled"
