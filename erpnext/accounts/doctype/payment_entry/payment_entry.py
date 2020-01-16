@@ -911,7 +911,10 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	else:
 		party_account = get_party_account(party_type, doc.get(party_type.lower()), doc.company)
 
-	party_account_currency = doc.get("party_account_currency") or get_account_currency(party_account)
+	if dt not in ("Sales Invoice", "Purchase Invoice"):
+		party_account_currency = get_account_currency(party_account)
+	else:
+		party_account_currency = doc.get("party_account_currency") or get_account_currency(party_account)
 
 	# payment type
 	if (dt == "Sales Order" or (dt in ("Sales Invoice", "Fees") and doc.outstanding_amount > 0)) \
