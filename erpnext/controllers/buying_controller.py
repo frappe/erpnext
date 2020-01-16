@@ -261,7 +261,7 @@ class BuyingController(StockController):
 
 			non_stock_items = get_non_stock_items(item.purchase_order, item.item_code)
 
-			item_key = '{}{}{}'.format(item.item_code, item.purchase_order, item.purchase_order_item)
+			item_key = '{}{}'.format(item.item_code, item.purchase_order)
 
 			fg_yet_to_be_received = qty_to_be_received_map.get(item_key)
 
@@ -269,9 +269,7 @@ class BuyingController(StockController):
 			backflushed_batch_qty_map = get_backflushed_batch_qty_map(item.purchase_order, item.item_code)
 
 			for raw_material in transferred_raw_materials + non_stock_items:
-				rm_item_key = '{}{}{}'.format(raw_material.rm_item_code,
-					item.purchase_order, item.purchase_order_item)
-
+				rm_item_key = '{}{}'.format(raw_material.rm_item_code, item.purchase_order)
 				raw_material_data = backflushed_raw_materials_map.get(rm_item_key, {})
 
 				consumed_qty = raw_material_data.get('qty', 0)
@@ -817,7 +815,7 @@ def get_subcontracted_raw_materials_from_se(purchase_order, fg_item):
 def get_backflushed_subcontracted_raw_materials(purchase_orders):
 	common_query = """
 		SELECT
-			CONCAT(prsi.rm_item_code, pri.purchase_order, pri.purchase_order_item) AS item_key,
+			CONCAT(prsi.rm_item_code, pri.purchase_order) AS item_key,
 			SUM(prsi.consumed_qty) AS qty,
 			{serial_no_concat_syntax} AS serial_nos,
 			{batch_no_concat_syntax} AS batch_nos
@@ -828,7 +826,7 @@ def get_backflushed_subcontracted_raw_materials(purchase_orders):
 			AND pri.purchase_order IN %s
 			AND pri.item_code = prsi.main_item_code
 			AND pr.docstatus = 1
-		GROUP BY prsi.rm_item_code, pri.purchase_order, pri.purchase_order_item
+		GROUP BY prsi.rm_item_code, pri.purchase_order
 	"""
 
 	backflushed_raw_materials = frappe.db.multisql({
@@ -882,7 +880,7 @@ def validate_item_type(doc, fieldname, message):
 
 def get_qty_to_be_received(purchase_orders):
 	return frappe._dict(frappe.db.sql("""
-		SELECT CONCAT(poi.`item_code`, poi.`parent`, poi.`name`) AS item_key,
+		SELECT CONCAT(poi.`item_code`, poi.`parent`) AS item_key,
 		SUM(poi.`qty`) - SUM(poi.`received_qty`) AS qty_to_be_received
 		FROM `tabPurchase Order Item` poi
 		WHERE
