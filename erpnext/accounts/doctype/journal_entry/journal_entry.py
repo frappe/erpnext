@@ -9,7 +9,6 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
-from erpnext.hr.doctype.loan.loan import update_disbursement_status, update_total_amount_paid
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_party_account_based_on_invoice_discounting
 
 from six import string_types, iteritems
@@ -606,8 +605,8 @@ class JournalEntry(AccountsController):
 		for d in self.accounts:
 			if d.reference_type=="Loan" and flt(d.debit) > 0:
 				doc = frappe.get_doc("Loan", d.reference_name)
-				update_disbursement_status(doc)
-				update_total_amount_paid(doc)
+				doc.update_total_amount_paid()
+				doc.set_status()
 
 	def validate_expense_claim(self):
 		for d in self.accounts:
@@ -968,7 +967,7 @@ def get_exchange_rate(posting_date, account=None, account_currency=None, company
 
 		# The date used to retreive the exchange rate here is the date passed
 		# in as an argument to this function.
-		elif (not exchange_rate or exchange_rate==1) and account_currency and posting_date:
+		elif (not exchange_rate or flt(exchange_rate)==1) and account_currency and posting_date:
 			exchange_rate = get_exchange_rate(account_currency, company_currency, posting_date)
 	else:
 		exchange_rate = 1

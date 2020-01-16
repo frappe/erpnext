@@ -968,7 +968,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	qty: function(doc, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
-		this.conversion_factor(doc, cdt, cdn, true);
+		this.conversion_factor(doc, cdt, cdn, false);
 		this.apply_pricing_rule(item, true);
 	},
 
@@ -1398,7 +1398,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	remove_pricing_rule: function(item) {
 		let me = this;
-		const fields = ["discount_percentage", "discount_amount", "pricing_rules"];
+		const fields = ["discount_percentage",
+			"discount_amount", "margin_rate_or_amount", "rate_with_margin"];
 
 		if(item.remove_free_item) {
 			var items = [];
@@ -1418,6 +1419,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					fields.forEach(f => {
 						row[f] = 0;
 					});
+
+					["pricing_rules", "margin_type"].forEach(field => {
+						if (row[field]) {
+							row[field] = '';
+						}
+					})
 				}
 			});
 
@@ -1693,6 +1700,29 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	set_query_for_item_tax_template: function(doc, cdt, cdn) {
+
+		var item = frappe.get_doc(cdt, cdn);
+		if(!item.item_code) {
+			frappe.throw(__("Please enter Item Code to get item taxes"));
+		} else {
+
+			let filters = {
+				'item_code': item.item_code,
+				'valid_from': doc.transaction_date || doc.bill_date || doc.posting_date,
+				'item_group': item.item_group,
+			}
+
+			if (doc.tax_category)
+				filters['tax_category'] = doc.tax_category;
+
+			return {
+				query: "erpnext.controllers.queries.get_tax_template",
+				filters: filters
+			}
+		}
+	},
+
 	payment_terms_template: function() {
 		var me = this;
 		const doc = this.frm.doc;
@@ -1767,14 +1797,28 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	set_reserve_warehouse: function() {
+		this.autofill_warehouse("reserve_warehouse");
+	},
+
 	set_warehouse: function() {
+		this.autofill_warehouse("warehouse");
+	},
+
+	autofill_warehouse : function (warehouse_field) {
+		// set warehouse in all child table rows
 		var me = this;
-		if(this.frm.doc.set_warehouse) {
-			$.each(this.frm.doc.items || [], function(i, item) {
-				frappe.model.set_value(me.frm.doctype + " Item", item.name, "warehouse", me.frm.doc.set_warehouse);
+		let warehouse = (warehouse_field === "warehouse") ? me.frm.doc.set_warehouse : me.frm.doc.set_reserve_warehouse;
+		let child_table = (warehouse_field === "warehouse") ? me.frm.doc.items : me.frm.doc.supplied_items;
+		let doctype = (warehouse_field === "warehouse") ? (me.frm.doctype + " Item") : (me.frm.doctype + " Item Supplied");
+
+		if(warehouse) {
+			$.each(child_table || [], function(i, item) {
+				frappe.model.set_value(doctype, item.name, warehouse_field, warehouse);
 			});
 		}
 	},
+
 	coupon_code: function() {
 		var me = this;
 		frappe.run_serially([
