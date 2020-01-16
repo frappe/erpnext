@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:05",
@@ -774,7 +775,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Text",
+   "fieldtype": "Long Text",
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -1567,7 +1568,8 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2019-10-05 21:39:49.235990",
+ "links": [],
+ "modified": "2019-12-30 19:15:59.580414",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

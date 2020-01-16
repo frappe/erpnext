@@ -243,6 +243,7 @@ class ExpenseClaim(AccountsController):
 			precision = self.precision("total_advance_amount")
 			if flt(self.total_advance_amount, precision) > flt(self.total_claimed_amount, precision):
 				frappe.throw(_("Total advance amount cannot be greater than total claimed amount"))
+
 			if self.total_sanctioned_amount \
 					and flt(self.total_advance_amount, precision) > flt(self.total_sanctioned_amount, precision):
 				frappe.throw(_("Total advance amount cannot be greater than total sanctioned amount"))
@@ -321,7 +322,7 @@ def get_expense_claim_account(expense_claim_type, company):
 @frappe.whitelist()
 def get_advances(employee, advance_id=None):
 	if not advance_id:
-		condition = 'docstatus=1 and employee={0} and paid_amount > 0 and paid_amount > claimed_amount'.format(frappe.db.escape(employee))
+		condition = 'docstatus=1 and employee={0} and paid_amount > 0 and paid_amount > claimed_amount + return_amount'.format(frappe.db.escape(employee))
 	else:
 		condition = 'name={0}'.format(frappe.db.escape(advance_id))
 
