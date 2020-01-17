@@ -53,7 +53,11 @@ def add_institution(token, response):
 
 @frappe.whitelist()
 def add_bank_accounts(response, bank, company):
-	response = json.loads(response) if not "accounts" in response else response
+	try:
+		response = json.loads(response)
+	except TypeError:
+		pass
+
 	bank = json.loads(bank)
 	result = []
 
