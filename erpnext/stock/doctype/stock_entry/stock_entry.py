@@ -515,15 +515,17 @@ class StockEntry(StockController):
 	def set_basic_rate_for_finished_goods(self, raw_material_cost, scrap_material_cost):
 		if self.purpose in ["Manufacture", "Repack"]:
 			for d in self.get("items"):
-				if (d.transfer_qty and (d.bom_no or d.t_warehouse) and raw_material_cost
+				if (d.transfer_qty and (d.bom_no or d.t_warehouse)
 					and (getattr(self, "pro_doc", frappe._dict()).scrap_warehouse != d.t_warehouse)):
-					d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
-					d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
 
-				if (not d.basic_rate and self.work_order and
-					frappe.db.get_single_value("Manufacturing Settings", "material_consumption")):
-					d.basic_rate = get_valuation_rate_for_finished_good_entry(self.work_order) or 0
-					d.basic_amount = d.basic_rate * d.qty
+					if self.work_order \
+						and frappe.db.get_single_value("Manufacturing Settings", "material_consumption"):
+						bom_items = self.get_bom_raw_materials(d.transfer_qty)
+						raw_material_cost = sum([flt(d.qty)*flt(d.rate) for d in bom_items.values()])
+
+					if raw_material_cost:
+						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
+						d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
 
 	def distribute_additional_costs(self):
 		if self.purpose == "Material Issue":
