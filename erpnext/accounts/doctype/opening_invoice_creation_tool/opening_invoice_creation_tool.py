@@ -96,7 +96,15 @@ class OpeningInvoiceCreationTool(Document):
 			if not args:
 				continue
 
-			doc = frappe.get_doc(args).insert()
+			def set_old_name():
+				doc.name = row.old_name
+
+			doc = frappe.get_doc(args)
+			setattr(doc, 'disable_rounded_total', 1)
+			if row.old_name:
+				doc.autoname = set_old_name
+
+			doc.insert()
 			doc.submit()
 			names.append(doc.name)
 
@@ -129,8 +137,8 @@ class OpeningInvoiceCreationTool(Document):
 	def get_invoice_dict(self, row=None):
 		def get_item_dict():
 			default_uom = frappe.db.get_single_value("Stock Settings", "stock_uom") or _("Nos")
-			cost_center = frappe.get_cached_value('Company',  self.company,  "cost_center")
-			if not cost_center:
+			default_cost_center = frappe.get_cached_value('Company',  self.company,  "cost_center")
+			if not default_cost_center:
 				frappe.throw(
 					_("Please set the Default Cost Center in {0} company.").format(frappe.bold(self.company))
 				)
@@ -141,10 +149,11 @@ class OpeningInvoiceCreationTool(Document):
 				"rate": rate or 0.0,
 				"qty": row.qty,
 				"conversion_factor": 1.0,
+				"item_code": self.item_code,
 				"item_name": row.item_name or "Opening Invoice Item",
 				"description": row.item_name or "Opening Invoice Item",
 				income_expense_account_field: row.temporary_opening_account,
-				"cost_center": cost_center
+				"cost_center": row.cost_center or default_cost_center
 			})
 
 		if not row:
@@ -167,10 +176,21 @@ class OpeningInvoiceCreationTool(Document):
 			"posting_date": row.posting_date,
 			frappe.scrub(party_type): row.party,
 			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
-			"currency": frappe.get_cached_value('Company',  self.company,  "default_currency")
+			"currency": frappe.get_cached_value('Company',  self.company,  "default_currency"),
+			"cost_center": row.cost_center,
+			"remarks": row.remarks
 		})
 
 		if self.invoice_type == "Sales":
+			if row.sales_person:
+				args.sales_team = [frappe._dict({
+					"sales_person": row.sales_person,
+					"allocated_percentage": 100
+				})]
+
+			if row.transaction_type:
+				args.transaction_type = row.transaction_type
+
 			args["is_pos"] = 0
 
 		return args

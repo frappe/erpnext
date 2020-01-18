@@ -13,6 +13,7 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 	},
 
 	refresh: function(frm) {
+		erpnext.hide_company(frm);
 		frm.disable_save();
 		frm.trigger("make_dashboard");
 		frm.page.set_primary_action(__("Make Invoices"), () => {
