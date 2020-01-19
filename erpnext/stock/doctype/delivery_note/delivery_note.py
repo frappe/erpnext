@@ -436,7 +436,7 @@ def make_sales_invoice(source_name, target_doc=None):
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = to_make_invoice_qty_map[source_doc.name]
 
-		if source_doc.serial_no and source_parent.per_billed > 0:
+		if source_doc.serial_no and source_parent.per_billed > 0 and not source_parent.is_return:
 			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
 				target_doc.qty, source_parent.name)
 
