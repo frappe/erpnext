@@ -610,7 +610,7 @@ def get_item_price(args, item_code, ignore_party=False):
 
 	return frappe.db.sql(""" select name, price_list_rate, uom
 		from `tabItem Price` {conditions}
-		order by uom desc, min_qty desc, valid_from desc """.format(conditions=conditions), args)
+		order by valid_from desc, min_qty desc, uom desc """.format(conditions=conditions), args)
 
 def get_price_list_rate_for(args, item_code):
 	"""
@@ -632,7 +632,8 @@ def get_price_list_rate_for(args, item_code):
 			"customer": args.get('customer'),
 			"supplier": args.get('supplier'),
 			"uom": args.get('uom'),
-			"min_qty": args.get('qty'),
+			"min_qty": args.get('qty') if args.get('price_list_uom_dependant')\
+				else flt(args.get('qty')) * flt(args.get("conversion_factor", 1)),
 			"transaction_date": args.get('transaction_date'),
 	}
 
@@ -646,8 +647,8 @@ def get_price_list_rate_for(args, item_code):
 		for field in ["customer", "supplier"]:
 			del item_price_args[field]
 
-		general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=args.get("ignore_party"))
-
+		general_price_list_rate = get_item_price(item_price_args, item_code,
+			ignore_party=args.get("ignore_party"))
 		if not general_price_list_rate:
 			del item_price_args["min_qty"]
 			general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=args.get("ignore_party"))

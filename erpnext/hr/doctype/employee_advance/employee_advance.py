@@ -133,7 +133,8 @@ def make_bank_entry(dt, dn):
 	return je.as_dict()
 
 @frappe.whitelist()
-def make_return_entry(employee_name, company, employee_advance_name, return_amount, mode_of_payment, advance_account):
+def make_return_entry(employee, company, employee_advance_name,
+		return_amount, advance_account, mode_of_payment=None):
 	return_account = get_default_bank_cash_account(company, account_type='Cash', mode_of_payment = mode_of_payment)
 	je = frappe.new_doc('Journal Entry')
 	je.posting_date = nowdate()
@@ -147,7 +148,7 @@ def make_return_entry(employee_name, company, employee_advance_name, return_amou
 		'reference_type': 'Employee Advance',
 		'reference_name': employee_advance_name,
 		'party_type': 'Employee',
-		'party': employee_name,
+		'party': employee,
 		'is_advance': 'Yes'
 	})
 
@@ -159,5 +160,5 @@ def make_return_entry(employee_name, company, employee_advance_name, return_amou
 	})
 
 	return je.as_dict()
-	
+
 
