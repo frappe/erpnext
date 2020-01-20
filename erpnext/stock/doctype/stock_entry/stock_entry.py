@@ -682,6 +682,8 @@ class StockEntry(StockController):
 		if item_account_wise_additional_cost:
 			for d in self.get("items"):
 				for account, amount in iteritems(item_account_wise_additional_cost.get((d.item_code, d.name), {})):
+					if not amount: continue
+
 					gl_entries.append(self.get_gl_dict({
 						"account": account,
 						"against": d.expense_account,
@@ -1400,8 +1402,7 @@ def get_work_order_details(work_order, company):
 		"use_multi_level_bom": work_order.use_multi_level_bom,
 		"wip_warehouse": work_order.wip_warehouse,
 		"fg_warehouse": work_order.fg_warehouse,
-		"fg_completed_qty": pending_qty_to_produce,
-		"additional_costs": get_additional_costs(work_order, fg_qty=pending_qty_to_produce, company=company)
+		"fg_completed_qty": pending_qty_to_produce
 	}
 
 def get_operating_cost_per_unit(work_order=None, bom_no=None):
