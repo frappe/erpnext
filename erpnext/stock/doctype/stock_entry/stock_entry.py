@@ -682,6 +682,8 @@ class StockEntry(StockController):
 		if item_account_wise_additional_cost:
 			for d in self.get("items"):
 				for account, amount in iteritems(item_account_wise_additional_cost.get((d.item_code, d.name), {})):
+					if not amount: continue
+
 					gl_entries.append(self.get_gl_dict({
 						"account": account,
 						"against": d.expense_account,
