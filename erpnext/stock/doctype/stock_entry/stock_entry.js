@@ -843,6 +843,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 						}
 						if (!me.frm.doc.from_warehouse) me.frm.set_value("from_warehouse", r.message["wip_warehouse"]);
 					}
+					me.get_items();
 				}
 			}
 		});
