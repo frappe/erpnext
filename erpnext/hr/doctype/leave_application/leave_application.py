@@ -528,7 +528,7 @@ def get_pending_leaves_for_period(employee, leave_type, from_date, to_date):
 
 def get_remaining_leaves(allocation, leaves_taken, date, expiry):
 	''' Returns minimum leaves remaining after comparing with remaining days for allocation expiry '''
-	def _get_remaining_leaves(allocated_leaves, end_date):
+	def _get_remaining_leaves(remaining_leaves, end_date):
 
 		if remaining_leaves > 0:
 			remaining_days = date_diff(end_date, date) + 1
@@ -536,7 +536,7 @@ def get_remaining_leaves(allocation, leaves_taken, date, expiry):
 
 		return remaining_leaves
 
-	total_leaves = allocation.total_leaves_allocated + flt(leaves_taken)
+	total_leaves = flt(allocation.total_leaves_allocated) + flt(leaves_taken)
 
 	if expiry and allocation.unused_leaves:
 		remaining_leaves = flt(allocation.unused_leaves) + flt(leaves_taken)
