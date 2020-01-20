@@ -588,7 +588,7 @@ class BOM(WebsiteGenerator):
 			for d in self.operations:
 				if not d.description:
 					d.description = frappe.db.get_value('Operation', d.operation, 'description')
-				if not d.batch_size > 0:
+				if not d.batch_size or d.batch_size <= 0:
 					d.batch_size = 1
 
 def get_list_context(context):
@@ -634,7 +634,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
 			select_columns = """, bom_item.source_warehouse, bom_item.operation,
-				bom_item.include_item_in_manufacturing, bom_item.description,
+				bom_item.include_item_in_manufacturing, bom_item.description, bom_item.rate,
 				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1) as idx""")
 
 		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)
@@ -648,7 +648,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
 			select_columns = """, bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
 				bom_item.idx, bom_item.operation, bom_item.include_item_in_manufacturing,
-				bom_item.description """)
+				bom_item.description, bom_item.base_rate as rate """)
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 
 	for item in items:
@@ -761,10 +761,16 @@ def get_boms_in_bottom_up_order(bom_no=None):
 
 def add_additional_cost(stock_entry, work_order):
 	# Add non stock items cost in the additional cost
-	bom = frappe.get_doc('BOM', work_order.bom_no)
-	table = 'exploded_items' if work_order.get('use_multi_level_bom') else 'items'
+	stock_entry.additional_costs = []
 	expenses_included_in_valuation = frappe.get_cached_value("Company", work_order.company,
 		"expenses_included_in_valuation")
+
+	add_non_stock_items_cost(stock_entry, work_order, expenses_included_in_valuation)
+	add_operations_cost(stock_entry, work_order, expenses_included_in_valuation)
+
+def add_non_stock_items_cost(stock_entry, work_order, expense_account):
+	bom = frappe.get_doc('BOM', work_order.bom_no)
+	table = 'exploded_items' if work_order.get('use_multi_level_bom') else 'items'
 
 	items = {}
 	for d in bom.get(table):
@@ -773,12 +779,38 @@ def add_additional_cost(stock_entry, work_order):
 	non_stock_items = frappe.get_all('Item',
 		fields="name", filters={'name': ('in', list(items.keys())), 'ifnull(is_stock_item, 0)': 0}, as_list=1)
 
+	non_stock_items_cost = 0.0
 	for name in non_stock_items:
+		non_stock_items_cost += flt(items.get(name[0])) * flt(stock_entry.fg_completed_qty) / flt(bom.quantity)
+
+	if non_stock_items_cost:
 		stock_entry.append('additional_costs', {
-			'expense_account': expenses_included_in_valuation,
-			'description': name[0],
-			'amount': flt(items.get(name[0])) * flt(stock_entry.fg_completed_qty) / flt(bom.quantity)
+			'expense_account': expense_account,
+			'description': _("Non stock items"),
+			'amount': non_stock_items_cost
 		})
+
+def add_operations_cost(stock_entry, work_order=None, expense_account=None):
+	from erpnext.stock.doctype.stock_entry.stock_entry import get_operating_cost_per_unit
+	operating_cost_per_unit = get_operating_cost_per_unit(work_order, stock_entry.bom_no)
+
+	if operating_cost_per_unit:
+		stock_entry.append('additional_costs', {
+			"expense_account": expense_account,
+			"description": _("Operating Cost as per Work Order / BOM"),
+			"amount": operating_cost_per_unit * flt(stock_entry.fg_completed_qty)
+		})
+
+	if work_order and work_order.additional_operating_cost and work_order.qty:
+		additional_operating_cost_per_unit = \
+			flt(work_order.additional_operating_cost) / flt(work_order.qty)
+
+		if additional_operating_cost_per_unit:
+			stock_entry.append('additional_costs', {
+				"expense_account": expense_account,
+				"description": "Additional Operating Cost",
+				"amount": additional_operating_cost_per_unit * flt(stock_entry.fg_completed_qty)
+			})
 
 @frappe.whitelist()
 def get_bom_diff(bom1, bom2):

@@ -583,7 +583,7 @@ def get_item_price(args, item_code, ignore_party=False):
 		Get name, price_list_rate from Item Price based on conditions
 			Check if the desired qty is within the increment of the packing list.
 		:param args: dict (or frappe._dict) with mandatory fields price_list, uom
-			optional fields min_qty, transaction_date, customer, supplier
+			optional fields transaction_date, customer, supplier
 		:param item_code: str, Item Doctype field item_code
 	"""
 
@@ -601,24 +601,16 @@ def get_item_price(args, item_code, ignore_party=False):
 		else:
 			conditions += " and (customer is null or customer = '') and (supplier is null or supplier = '')"
 
-	if args.get('min_qty'):
-		conditions += " and ifnull(min_qty, 0) <= %(min_qty)s"
-
 	if args.get('transaction_date'):
 		conditions += """ and %(transaction_date)s between
 			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
 
 	return frappe.db.sql(""" select name, price_list_rate, uom
 		from `tabItem Price` {conditions}
-		order by uom desc, min_qty desc, valid_from desc """.format(conditions=conditions), args)
+		order by valid_from desc, uom desc """.format(conditions=conditions), args)
 
 def get_price_list_rate_for(args, item_code):
 	"""
-		Return Price Rate based on min_qty of each Item Price Rate.\
-		For example, desired qty is 10 and Item Price Rates exists
-		for min_qty 9 and min_qty 20. It returns Item Price Rate for qty 9 as
-		the best fit in the range of avaliable min_qtyies
-
 		:param customer: link to Customer DocType
 		:param supplier: link to Supplier DocType
 		:param price_list: str (Standard Buying or Standard Selling)
@@ -632,7 +624,6 @@ def get_price_list_rate_for(args, item_code):
 			"customer": args.get('customer'),
 			"supplier": args.get('supplier'),
 			"uom": args.get('uom'),
-			"min_qty": args.get('qty'),
 			"transaction_date": args.get('transaction_date'),
 	}
 
@@ -646,11 +637,8 @@ def get_price_list_rate_for(args, item_code):
 		for field in ["customer", "supplier"]:
 			del item_price_args[field]
 
-		general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=args.get("ignore_party"))
-
-		if not general_price_list_rate:
-			del item_price_args["min_qty"]
-			general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=args.get("ignore_party"))
+		general_price_list_rate = get_item_price(item_price_args, item_code,
+			ignore_party=args.get("ignore_party"))
 
 		if not general_price_list_rate and args.get("uom") != args.get("stock_uom"):
 			item_price_args["uom"] = args.get("stock_uom")

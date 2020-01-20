@@ -478,15 +478,17 @@ class StockEntry(StockController):
 	def set_basic_rate_for_finished_goods(self, raw_material_cost, scrap_material_cost):
 		if self.purpose in ["Manufacture", "Repack"]:
 			for d in self.get("items"):
-				if (d.transfer_qty and (d.bom_no or d.t_warehouse) and raw_material_cost
+				if (d.transfer_qty and (d.bom_no or d.t_warehouse)
 					and (getattr(self, "pro_doc", frappe._dict()).scrap_warehouse != d.t_warehouse)):
-					d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
-					d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
 
-				if (not d.basic_rate and self.work_order and
-					frappe.db.get_single_value("Manufacturing Settings", "material_consumption")):
-					d.basic_rate = get_valuation_rate_for_finished_good_entry(self.work_order) or 0
-					d.basic_amount = d.basic_rate * d.qty
+					if self.work_order \
+						and frappe.db.get_single_value("Manufacturing Settings", "material_consumption"):
+						bom_items = self.get_bom_raw_materials(d.transfer_qty)
+						raw_material_cost = sum([flt(d.qty)*flt(d.rate) for d in bom_items.values()])
+
+					if raw_material_cost:
+						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
+						d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
 
 	def distribute_additional_costs(self):
 		if self.purpose == "Material Issue":
@@ -680,6 +682,8 @@ class StockEntry(StockController):
 		if item_account_wise_additional_cost:
 			for d in self.get("items"):
 				for account, amount in iteritems(item_account_wise_additional_cost.get((d.item_code, d.name), {})):
+					if not amount: continue
+
 					gl_entries.append(self.get_gl_dict({
 						"account": account,
 						"against": d.expense_account,
@@ -1399,33 +1403,8 @@ def get_work_order_details(work_order, company):
 		"use_multi_level_bom": work_order.use_multi_level_bom,
 		"wip_warehouse": work_order.wip_warehouse,
 		"fg_warehouse": work_order.fg_warehouse,
-		"fg_completed_qty": pending_qty_to_produce,
-		"additional_costs": get_additional_costs(work_order, fg_qty=pending_qty_to_produce, company=company)
+		"fg_completed_qty": pending_qty_to_produce
 	}
-
-def get_additional_costs(work_order=None, bom_no=None, fg_qty=None, company=None):
-	additional_costs = []
-	operating_cost_per_unit = get_operating_cost_per_unit(work_order, bom_no)
-	expenses_included_in_valuation = frappe.get_cached_value("Company", company, "expenses_included_in_valuation")
-
-	if operating_cost_per_unit:
-		additional_costs.append({
-			"expense_account": expenses_included_in_valuation,
-			"description": "Operating Cost as per Work Order / BOM",
-			"amount": operating_cost_per_unit * flt(fg_qty)
-		})
-
-	if work_order and work_order.additional_operating_cost and work_order.qty:
-		additional_operating_cost_per_unit = \
-			flt(work_order.additional_operating_cost) / flt(work_order.qty)
-
-		additional_costs.append({
-			"expense_account": expenses_included_in_valuation,
-			"description": "Additional Operating Cost",
-			"amount": additional_operating_cost_per_unit * flt(fg_qty)
-		})
-
-	return additional_costs
 
 def get_operating_cost_per_unit(work_order=None, bom_no=None):
 	operating_cost_per_unit = 0
