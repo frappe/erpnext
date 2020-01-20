@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "EMP-CKIN-.MM.-.YYYY.-.######",
  "creation": "2019-06-10 11:56:34.536413",
@@ -23,7 +24,6 @@
   {
    "fieldname": "employee",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Employee",
    "options": "Employee",
    "reqd": 1
@@ -32,12 +32,14 @@
    "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Employee Name",
    "read_only": 1
   },
   {
    "fieldname": "log_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Log Type",
    "options": "\nIN\nOUT"
   },
@@ -58,6 +60,7 @@
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Time",
+   "permlevel": 1,
    "reqd": 1
   },
   {
@@ -103,7 +106,8 @@
    "label": "Shift Actual End"
   }
  ],
- "modified": "2019-07-23 23:47:33.975263",
+ "links": [],
+ "modified": "2020-01-20 00:59:39.792700",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Checkin",
@@ -147,9 +151,41 @@
    "role": "HR User",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Employee",
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
   }
  ],
  "sort_field": "modified",
  "sort_order": "ASC",
+ "title_field": "employee_name",
  "track_changes": 1
 }
