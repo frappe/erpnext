@@ -218,6 +218,10 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	download_materials_required: function(frm) {
+		if(frm.is_new()) {
+			frappe.throw(__("Please save the document before downloading the material required."));
+			return;
+		}
 		let get_template_url = 'erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials';
 		open_url_post(frappe.request.url, { cmd: get_template_url, production_plan: frm.doc.name });
 	},
