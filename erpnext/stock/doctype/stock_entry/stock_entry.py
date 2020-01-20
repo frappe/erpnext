@@ -614,7 +614,7 @@ class StockEntry(StockController):
 		if self.work_order and self.purpose == "Manufacture":
 			allowed_qty = wo_qty + (allowance_percentage/100 * wo_qty)
 			if self.fg_completed_qty > allowed_qty:
-				frappe.throw(_("For quantity {0} should not be grater than work order quantity {1}")
+				frappe.throw(_("For quantity {0} should not be greater than work order quantity {1}")
 					.format(flt(self.fg_completed_qty), wo_qty))
 
 			if production_item not in items_with_target_warehouse:
