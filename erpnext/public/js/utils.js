@@ -726,11 +726,7 @@ erpnext.utils.map_current_doc = function(opts) {
 
 frappe.form.link_formatters['Item'] = function(value, doc) {
 	if(doc && doc.item_name && doc.item_name !== value) {
-		if (doc.hide_item_code) {
-			return doc.item_name;
-		} else {
-			return value ? value + ': ' + doc.item_name : doc.item_name;
-		}
+		return value ? value + ': ' + doc.item_name : doc.item_name;
 	} else {
 		return value;
 	}
