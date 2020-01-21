@@ -12,8 +12,8 @@
   "supplier",
   "get_items_from_open_material_requests",
   "supplier_name",
-  "company",
   "column_break1",
+  "company",
   "transaction_date",
   "schedule_date",
   "order_confirmation_no",
@@ -171,6 +171,7 @@
   },
   {
    "depends_on": "eval:doc.supplier && doc.docstatus===0 && (!(doc.items && doc.items.length) || (doc.items.length==1 && !doc.items[0].item_code))",
+   "description": "Based on Supplier.",
    "fieldname": "get_items_from_open_material_requests",
    "fieldtype": "Button",
    "label": "Get Items from Open Material Requests"

@@ -582,7 +582,7 @@ erpnext.utils.map_current_doc = function(opts) {
 				"method": opts.method,
 				"source_names": opts.source_name,
 				"target_doc": cur_frm.doc,
-				'args': opts.args
+				"args": opts.args
 			},
 			callback: function(r) {
 				if(!r.exc) {
@@ -600,6 +600,8 @@ erpnext.utils.map_current_doc = function(opts) {
 			date_field: opts.date_field || undefined,
 			setters: opts.setters,
 			get_query: opts.get_query,
+			method: opts.query_method,
+			method_args: opts.query_method_args,
 			action: function(selections, args) {
 				let values = selections;
 				if(values.length === 0){

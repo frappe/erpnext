@@ -180,7 +180,19 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	get_items_from_open_material_requests: function() {
 		erpnext.utils.map_current_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
+			args: {
+				supplier: this.frm.doc.supplier
+			},
+			source_doctype: "Material Request",
 			source_name: this.frm.doc.supplier,
+			query_method: "erpnext.stock.doctype.material_request.material_request.get_material_requests_based_on_supplier" ,
+			query_method_args: {
+				supplier: this.frm.doc.supplier
+			},
+			target: this.frm,
+			setters: {
+				company: me.frm.doc.company
+			},
 			get_query_filters: {
 				docstatus: ["!=", 2],
 			}

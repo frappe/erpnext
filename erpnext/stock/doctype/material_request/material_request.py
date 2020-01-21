@@ -6,6 +6,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 
 from frappe.utils import cstr, flt, getdate, new_line_sep, nowdate, add_days
 from frappe import msgprint, _
@@ -329,17 +330,13 @@ def make_request_for_quotation(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
-def make_purchase_order_based_on_supplier(source_name, target_doc=None):
-	if target_doc:
-		if isinstance(target_doc, string_types):
-			import json
-			target_doc = frappe.get_doc(json.loads(target_doc))
-		target_doc.set("items", [])
+def make_purchase_order_based_on_supplier(source_name, target_doc=None, args=None):
+	mr = source_name
 
-	material_requests, supplier_items = get_material_requests_based_on_supplier(source_name)
+	supplier_items = get_items_based_on_default_supplier(args.get("supplier"))
 
 	def postprocess(source, target_doc):
-		target_doc.supplier = source_name
+		target_doc.supplier = args.get("supplier")
 		if getdate(target_doc.schedule_date) < getdate(nowdate()):
 			target_doc.schedule_date = None
 		target_doc.set("items", [d for d in target_doc.get("items")
@@ -347,33 +344,42 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 
 		set_missing_values(source, target_doc)
 
-	for mr in material_requests:
-		target_doc = get_mapped_doc("Material Request", mr, 	{
-			"Material Request": {
-				"doctype": "Purchase Order",
-			},
-			"Material Request Item": {
-				"doctype": "Purchase Order Item",
-				"field_map": [
-					["name", "material_request_item"],
-					["parent", "material_request"],
-					["uom", "stock_uom"],
-					["uom", "uom"]
-				],
-				"postprocess": update_item,
-				"condition": lambda doc: doc.ordered_qty < doc.qty
-			}
-		}, target_doc, postprocess)
+	target_doc = get_mapped_doc("Material Request", mr, {
+		"Material Request": {
+			"doctype": "Purchase Order",
+		},
+		"Material Request Item": {
+			"doctype": "Purchase Order Item",
+			"field_map": [
+				["name", "material_request_item"],
+				["parent", "material_request"],
+				["uom", "stock_uom"],
+				["uom", "uom"]
+			],
+			"postprocess": update_item,
+			"condition": lambda doc: doc.ordered_qty < doc.qty
+		}
+	}, target_doc, postprocess)
 
 	return target_doc
 
-def get_material_requests_based_on_supplier(supplier):
+@frappe.whitelist()
+def get_items_based_on_default_supplier(supplier):
 	supplier_items = [d.parent for d in frappe.db.get_all("Item Default",
 		{"default_supplier": supplier}, 'parent')]
+
+	return supplier_items
+
+@frappe.whitelist()
+def get_material_requests_based_on_supplier(method_args):
+	method_args = json.loads(method_args)
+	supplier = method_args.get("supplier")
+	supplier_items = get_items_based_on_default_supplier(supplier)
+
 	if not supplier_items:
 		frappe.throw(_("{0} is not the default supplier for any items.".format(supplier)))
 
-	material_requests = frappe.db.sql_list("""select distinct mr.name
+	material_requests = frappe.db.sql("""select distinct mr.name, transaction_date,company
 		from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
 		where mr.name = mr_item.parent
 			and mr_item.item_code in (%s)
@@ -382,9 +388,9 @@ def get_material_requests_based_on_supplier(supplier):
 			and mr.docstatus = 1
 			and mr.status != 'Stopped'
 		order by mr_item.item_code ASC""" % ', '.join(['%s']*len(supplier_items)),
-		tuple(supplier_items))
+		tuple(supplier_items),as_dict=1)
 
-	return material_requests, supplier_items
+	return material_requests
 
 def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filters):
 	doc = frappe.get_doc("Material Request", filters.get("doc"))
