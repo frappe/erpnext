@@ -116,7 +116,6 @@ class Account(NestedSet):
 				filters["account_number"] = parent_acc_number
 
 			for d in frappe.db.get_values('Account', filters=filters, fieldname=["company", "name"], as_dict=True):
-				print(d["company"], d["name"])
 				parent_acc_name_map[d["company"]] = d["name"]
 			if not parent_acc_name_map: return
 			self.create_account_for_child_company(parent_acc_name_map, descendants, parent_acc_name)
