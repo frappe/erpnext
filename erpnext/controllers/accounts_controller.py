@@ -1122,35 +1122,74 @@ def get_supplier_block_status(party_name):
 	}
 	return info
 
+def get_args_for_item_details(item, parent_doc):
+	return {
+		"item_code": item.get("item_code"),
+		"barcode": item.get("barcode"),
+		"serial_no": item.get("serial_no"),
+		"set_warehouse": parent_doc.get("set_warehouse"),
+		"warehouse": item.get("warehouse"),
+		"customer": parent_doc.get("customer") or parent_doc.get("party_name"),
+		"quotation_to": parent_doc.get("quotation_to"),
+		"supplier": parent_doc.get("supplier"),
+		"currency": parent_doc.get("currency"),
+		"conversion_rate": parent_doc.get("conversion_rate"),
+		"price_list": parent_doc.get("selling_price_list") or parent_doc.get("buying_price_list"),
+		"price_list_currency": parent_doc.get("price_list_currency"),
+		"plc_conversion_rate": parent_doc.get("plc_conversion_rate"),
+		"company": parent_doc.get("company"),
+		"order_type": parent_doc.get("order_type"),
+		"is_pos": cint(parent_doc.get("is_pos")),
+		"is_subcontracted": parent_doc.get("is_subcontracted"),
+		"transaction_date": parent_doc.get("transaction_date") or parent_doc.get("posting_date"),
+		"ignore_pricing_rule": parent_doc.get("ignore_pricing_rule"),
+		"doctype": parent_doc.get("doctype"),
+		"name": parent_doc.get("name"),
+		"project": item.get("project") or parent_doc.get("project"),
+		"qty": item.get("qty") or 1,
+		"stock_qty": item.get("stock_qty"),
+		"conversion_factor": item.get("conversion_factor"),
+		"weight_per_unit": item.get("weight_per_unit"),
+		"weight_uom": item.get("weight_uom"),
+		"uom" : item.get("uom"),
+		"manufacturer": item.get("manufacturer"),
+		"stock_uom": item.get("stock_uom"),
+		"cost_center": item.get("cost_center"),
+		"tax_category": parent_doc.get("tax_category"),
+		"item_tax_template": item.get("item_tax_template"),
+		"child_docname": item.get("name"),
+	}
+
 def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, item_code):
 	"""
 	Returns a Sales Order Item child item containing the default values
 	"""
-	p_doctype = frappe.get_doc(parent_doctype, parent_doctype_name)
-	child_item = frappe.new_doc('Sales Order Item', p_doctype, child_docname)
+	parent_doc = frappe.get_doc(parent_doctype, parent_doctype_name)
+	child_item = frappe.new_doc('Sales Order Item', parent_doc, child_docname)
 	item = frappe.get_doc("Item", item_code)
-	child_item.item_code = item.item_code
-	child_item.item_name = item.item_name
-	child_item.description = item.description
-	child_item.reqd_by_date = p_doctype.delivery_date
-	child_item.uom = item.stock_uom
-	child_item.conversion_factor = get_conversion_factor(item_code, item.stock_uom).get("conversion_factor") or 1.0
+	args = get_args_for_item_details(item, parent_doc)
+	item_details = get_item_details(args, parent_doc)
+	for fieldname, value in item_details.items():
+		if child_item.meta.get_field(fieldname) and value is not None:
+			if (child_item.get(fieldname) is None):
+				child_item.set(fieldname, value)
+	child_item.reqd_by_date = parent_doc.delivery_date
 	return child_item
-
 
 def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, item_code):
 	"""
 	Returns a Purchase Order Item child item containing the default values
 	"""
-	p_doctype = frappe.get_doc(parent_doctype, parent_doctype_name)
-	child_item = frappe.new_doc('Purchase Order Item', p_doctype, child_docname)
+	parent_doc = frappe.get_doc(parent_doctype, parent_doctype_name)
+	child_item = frappe.new_doc('Purchase Order Item', parent_doc, child_docname)
 	item = frappe.get_doc("Item", item_code)
-	child_item.item_code = item.item_code
-	child_item.item_name = item.item_name
-	child_item.description = item.description
-	child_item.schedule_date = p_doctype.schedule_date
-	child_item.uom = item.stock_uom
-	child_item.conversion_factor = get_conversion_factor(item_code, item.stock_uom).get("conversion_factor") or 1.0
+	args = get_args_for_item_details(item, parent_doc)
+	item_details = get_item_details(args, parent_doc)
+	for fieldname, value in item_details.items():
+		if child_item.meta.get_field(fieldname) and value is not None:
+			if (child_item.get(fieldname) is None):
+				child_item.set(fieldname, value)
+	child_item.schedule_date = parent_doc.schedule_date
 	child_item.base_rate = 1 # Initiallize value will update in parent validation
 	child_item.base_amount = 1 # Initiallize value will update in parent validation
 	return child_item
