@@ -16,6 +16,7 @@
   "department",
   "column_break_3",
   "lab_test_template_type",
+  "disabled",
   "is_billable",
   "lab_test_rate",
   "section_break_normal",
@@ -36,8 +37,7 @@
   "sample_uom",
   "sample_quantity",
   "sample_collection_details",
-  "change_in_item",
-  "disabled"
+  "change_in_item"
  ],
  "fields": [
   {
@@ -239,7 +239,7 @@
   }
  ],
  "links": [],
- "modified": "2020-01-21 20:40:03.271059",
+ "modified": "2020-01-21 21:02:16.108347",
  "modified_by": "ruchamahabal2@gmail.com",
  "module": "Healthcare",
  "name": "Lab Test Template",
