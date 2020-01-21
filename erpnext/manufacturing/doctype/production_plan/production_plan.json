@@ -225,6 +225,7 @@
    "options": "Warehouse"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "download_materials_required",
    "fieldtype": "Button",
    "label": "Download Required Materials"
@@ -296,7 +297,7 @@
  "icon": "fa fa-calendar",
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-04 15:58:50.940460",
+ "modified": "2020-01-21 19:13:10.113854",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
