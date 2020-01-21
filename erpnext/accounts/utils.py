@@ -569,7 +569,7 @@ def get_stock_and_account_balance(account=None, posting_date=None, company=None)
 
 	warehouse_account = get_warehouse_account_map(company)
 
-	account_balance = get_balance_on(account, posting_date, in_account_currency=False)
+	account_balance = get_balance_on(account, posting_date, in_account_currency=False, ignore_account_permission=True)
 
 	related_warehouses = [wh for wh, wh_details in warehouse_account.items()
 		if wh_details.account == account and not wh_details.is_group]
@@ -891,3 +891,9 @@ def get_allow_cost_center_in_entry_of_bs_account():
 	def generator():
 		return cint(frappe.db.get_value('Accounts Settings', None, 'allow_cost_center_in_entry_of_bs_account'))
 	return frappe.local_cache("get_allow_cost_center_in_entry_of_bs_account", (), generator, regenerate_if_none=True)
+
+def get_stock_accounts(company):
+	return frappe.get_all("Account", filters = {
+		"account_type": "Stock",
+		"company": company
+	})

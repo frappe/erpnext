@@ -190,7 +190,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			if(jvd.reference_type==="Employee Advance") {
 				return {
 					filters: {
-						'status': ['=', 'Unpaid'],
 						'docstatus': 1
 					}
 				};
@@ -398,7 +397,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account",
 				args: {
 					"account_type": (doc.voucher_type=="Bank Entry" ?
-						"Bank" : (doc.voucher_type=="Cash" ? "Cash" : null)),
+						"Bank" : (doc.voucher_type=="Cash Entry" ? "Cash" : null)),
 					"company": doc.company
 				},
 				callback: function(r) {

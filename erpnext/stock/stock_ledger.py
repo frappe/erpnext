@@ -212,7 +212,7 @@ class update_entries_after(object):
 	def get_serialized_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
 		actual_qty = flt(sle.actual_qty)
-		serial_no = cstr(sle.serial_no).split("\n")
+		serial_nos = cstr(sle.serial_no).split("\n")
 
 		if incoming_rate < 0:
 			# wrong incoming rate
@@ -224,9 +224,8 @@ class update_entries_after(object):
 		elif actual_qty < 0:
 			# In case of delivery/stock issue, get average purchase rate
 			# of serial nos of current entry
-			stock_value_change = -1 * flt(frappe.get_all("Serial No",
-				fields=["sum(purchase_rate)"],
-				filters = {'name': ('in', serial_no)}, as_list=1)[0][0])
+			outgoing_value = self.get_incoming_value_for_serial_nos(sle, serial_nos)
+			stock_value_change = -1 * outgoing_value
 
 		new_stock_qty = self.qty_after_transaction + actual_qty
 
@@ -243,6 +242,36 @@ class update_entries_after(object):
 				self.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 					sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
 					currency=erpnext.get_company_currency(sle.company))
+
+	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
+		# get rate from serial nos within same company
+		all_serial_nos = frappe.get_all("Serial No",
+			fields=["purchase_rate", "name", "company"],
+			filters = {'name': ('in', serial_nos)})
+
+		incoming_values = sum([flt(d.purchase_rate) for d in all_serial_nos if d.company==sle.company])
+
+		# Get rate for serial nos which has been transferred to other company
+		invalid_serial_nos = [d.name for d in all_serial_nos if d.company!=sle.company]
+		for serial_no in invalid_serial_nos:
+			incoming_rate = frappe.db.sql("""
+				select incoming_rate
+				from `tabStock Ledger Entry`
+				where
+					company = %s
+					and actual_qty > 0
+					and (serial_no = %s
+						or serial_no like %s
+						or serial_no like %s
+						or serial_no like %s
+					)
+				order by posting_date desc
+				limit 1
+			""", (sle.company, serial_no, serial_no+'\n%', '%\n'+serial_no, '%\n'+serial_no+'\n%'))
+
+			incoming_values += flt(incoming_rate[0][0]) if incoming_rate else 0
+
+		return incoming_values
 
 	def get_moving_average_values(self, sle):
 		actual_qty = flt(sle.actual_qty)

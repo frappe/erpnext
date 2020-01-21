@@ -556,63 +556,11 @@ frappe.ui.form.on('Payment Entry', {
 			{fieldtype:"Check", label: __("Allocate Payment Amount"), fieldname:"allocate_payment_amount", default:1},
 		];
 
-		var d = new frappe.ui.Dialog({
-			'fields': fields,
-			primary_action: function(){
-				var filters = d.get_values();
-				frappe.flags.allocate_payment_amount = true;
-				frm.events.validate_filters_data(frm, filters);
-				frm.events.get_outstanding_documents(frm, filters);
-				d.hide();
-			},
-			primary_action_label: 'Get Outstanding Invoices'
-		});
-		d.fields_dict.today_overdue.$input.on('click',function(event){
-			var date = new Date();
-			var to = new Date().toISOString().slice(0, 10)
-			//date.setDate(date.getDate() - 29);
-			//var from = date.toISOString().slice(0, 10)
-			d.set_value('from_due_date','1901-01-01')
-			d.set_value('to_due_date',to)
-			d.set_value('from_posting_date','')
-			d.set_value('to_posting_date','')
-		});	
-		d.fields_dict.thirty_days_overdue.$input.on('click',function(event){
-			//var date = new Date();
-			//date.setDate(date.getDate() - 59);
-			//var from = date.toISOString().slice(0, 10)
-			var date = new Date();
-			date.setDate(date.getDate() - 30);
-			var to = date.toISOString().slice(0, 10)
-			d.set_value('from_due_date','1901-01-01')
-			d.set_value('to_due_date',to)
-			d.set_value('from_posting_date','')
-			d.set_value('to_posting_date','')
-		});	
-		d.fields_dict.sixty_days_overdue.$input.on('click',function(event){
-			//var date = new Date();
-			//date.setDate(date.getDate() - 89);
-			//var from = date.toISOString().slice(0, 10)
-			var date = new Date();
-			date.setDate(date.getDate() - 60);
-			var to = date.toISOString().slice(0, 10)
-			d.set_value('from_due_date','1901-01-01')
-			d.set_value('to_due_date',to)
-			d.set_value('from_posting_date','')
-			d.set_value('to_posting_date','')
-		});	
-		d.fields_dict.ninety_days_overdue.$input.on('click',function(event){
-			var date = new Date();
-			//date.setDate(date.getDate() - 59);
-			//var from = date.toISOString().slice(0, 10)
-			date.setDate(date.getDate() - 90);
-			var to = date.toISOString().slice(0, 10)
-			d.set_value('from_due_date','1901-01-01')
-			d.set_value('to_due_date',to)
-			d.set_value('from_posting_date','')
-			d.set_value('to_posting_date','')
-		});	
-		d.show();
+		frappe.prompt(fields, function(filters){
+			frappe.flags.allocate_payment_amount = true;
+			frm.events.validate_filters_data(frm, filters);
+			frm.events.get_outstanding_documents(frm, filters);
+		}, __("Filters"), __("Get Outstanding Documents"));
 	},
 
 	validate_filters_data: function(frm, filters) {
@@ -638,6 +586,14 @@ frappe.ui.form.on('Payment Entry', {
 		}
 	},
 
+	fetch_all_outstanding: function(frm) {
+		let filters = {
+			'from_posting_date': '2010-01-01',
+			'to_posting_date': frm.doc.posting_date,
+			'allocate_payment_amount': 1
+		}
+		frm.events.get_outstanding_documents(frm, filters);
+	},
 	get_outstanding_documents: function(frm, filters) {
 		frm.clear_table("references");
 
@@ -710,14 +666,16 @@ frappe.ui.form.on('Payment Entry', {
 						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student")
 					) {
 						if(total_positive_outstanding > total_negative_outstanding)
-							frm.set_value("paid_amount",
-								total_positive_outstanding - total_negative_outstanding);
+							if (!frm.doc.paid_amount)
+								frm.set_value("paid_amount",
+									total_positive_outstanding - total_negative_outstanding);
 					} else if (
 						total_negative_outstanding &&
 						total_positive_outstanding < total_negative_outstanding
 					) {
-						frm.set_value("received_amount",
-							total_negative_outstanding - total_positive_outstanding);
+						if (!frm.doc.received_amount)
+							frm.set_value("received_amount",
+								total_negative_outstanding - total_positive_outstanding);
 					}
 				}
 

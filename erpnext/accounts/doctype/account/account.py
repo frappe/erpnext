@@ -109,12 +109,13 @@ class Account(NestedSet):
 			if not descendants: return
 
 			parent_acc_name_map = {}
-			parent_acc_name = frappe.db.get_value('Account', self.parent_account, "account_name")
+			parent_acc_name, parent_acc_number = frappe.db.get_value('Account', self.parent_account, \
+				["account_name", "account_number"])
 			for d in frappe.db.get_values('Account',
-				{"company": ["in", descendants], "account_name": parent_acc_name},
+				{ "company": ["in", descendants], "account_name": parent_acc_name, 
+					"account_number": parent_acc_number },
 				["company", "name"], as_dict=True):
 				parent_acc_name_map[d["company"]] = d["name"]
-
 			if not parent_acc_name_map: return
 
 			self.create_account_for_child_company(parent_acc_name_map, descendants, parent_acc_name)
