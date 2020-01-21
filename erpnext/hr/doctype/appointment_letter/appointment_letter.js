@@ -13,11 +13,12 @@ frappe.ui.form.on('Appointment Letter', {
 					if(r.message){
 						let message_body = r.message;
 						frm.set_value("introduction", message_body[0].introduction);
-						frm.doc.content = []
+						frm.set_value("closing_notes", message_body[0].closing_notes);
+						frm.doc.terms = []
 						for (var i in message_body[1].description){
-							frm.add_child("content");
-							frm.fields_dict.content.get_value()[i].title = message_body[1].description[i].title;
-							frm.fields_dict.content.get_value()[i].description = message_body[1].description[i].description;
+							frm.add_child("terms");
+							frm.fields_dict.terms.get_value()[i].title = message_body[1].description[i].title;
+							frm.fields_dict.terms.get_value()[i].description = message_body[1].description[i].description;
 						}
 						frm.refresh();
 					}

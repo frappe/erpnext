@@ -1,13 +1,14 @@
 {
  "actions": [],
- "autoname": "APP-LETTER-TEMP-.#####",
+ "autoname": "HR-APP-LETTER-TEMP-.#####",
  "creation": "2019-12-26 12:20:14.219578",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "introduction",
-  "content"
+  "terms",
+  "closing_notes"
  ],
  "fields": [
   {
@@ -18,15 +19,20 @@
    "reqd": 1
   },
   {
-   "fieldname": "content",
+   "fieldname": "closing_notes",
+   "fieldtype": "Text",
+   "label": "Closing Notes"
+  },
+  {
+   "fieldname": "terms",
    "fieldtype": "Table",
-   "label": "Content",
+   "label": "Terms",
    "options": "Appointment Letter content",
    "reqd": 1
   }
  ],
  "links": [],
- "modified": "2019-12-26 12:54:15.970460",
+ "modified": "2020-01-21 17:00:46.779420",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Appointment Letter Template",
@@ -43,9 +49,20 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

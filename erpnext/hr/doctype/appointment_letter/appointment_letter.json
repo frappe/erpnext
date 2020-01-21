@@ -1,7 +1,8 @@
 {
  "actions": [],
- "autoname": "APP-LETTER-.YYYY.-.#####",
+ "autoname": "HR-APP-LETTER-.#####",
  "creation": "2019-12-26 12:35:49.574828",
+ "default_print_format": "Standard Appointment Letter",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -14,7 +15,7 @@
   "appointment_letter_template",
   "body_section",
   "introduction",
-  "content",
+  "terms",
   "closing_notes"
  ],
  "fields": [
@@ -49,13 +50,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "content",
-   "fieldtype": "Table",
-   "label": "Content",
-   "options": "Appointment Letter content",
-   "reqd": 1
-  },
-  {
    "fieldname": "body_section",
    "fieldtype": "Section Break",
    "label": "Body"
@@ -82,10 +76,17 @@
    "fieldname": "closing_notes",
    "fieldtype": "Text",
    "label": "Closing Notes"
+  },
+  {
+   "fieldname": "terms",
+   "fieldtype": "Table",
+   "label": "Terms",
+   "options": "Appointment Letter content",
+   "reqd": 1
   }
  ],
  "links": [],
- "modified": "2019-12-26 17:50:27.391018",
+ "modified": "2020-01-21 17:30:36.334395",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Appointment Letter",
@@ -101,6 +102,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
    "share": 1,
    "write": 1
   }
