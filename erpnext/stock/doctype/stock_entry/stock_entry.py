@@ -484,7 +484,7 @@ class StockEntry(StockController):
 					if self.work_order \
 						and frappe.db.get_single_value("Manufacturing Settings", "material_consumption"):
 						bom_items = self.get_bom_raw_materials(d.transfer_qty)
-						raw_material_cost = sum([flt(d.qty)*flt(d.rate) for d in bom_items.values()])
+						raw_material_cost = sum([flt(row.qty)*flt(row.rate) for row in bom_items.values()])
 
 					if raw_material_cost:
 						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
