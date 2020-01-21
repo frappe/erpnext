@@ -133,8 +133,11 @@ def sync_transactions(bank, bank_account):
 
 	try:
 		transactions = get_transactions(bank=bank, bank_account=bank_account, start_date=start_date, end_date=end_date)
+
 		result = []
 		if transactions:
+			frappe.logger().info("Plaid is adding {} Bank Transactions from '{}' between {} and {}".format(
+				len(transactions), bank_account, start_date, end_date))
 			for transaction in transactions:
 				result.append(new_bank_transaction(transaction))
 
@@ -201,7 +204,7 @@ def automatic_synchronization():
 	settings = frappe.get_doc("Plaid Settings", "Plaid Settings")
 
 	if settings.enabled == 1 and settings.automatic_sync == 1:
-		plaid_accounts = frappe.get_all("Bank Account", filter={"integration_id": ["!=", ""]}, fields=["name", "bank"])
+		plaid_accounts = frappe.get_all("Bank Account", filters={"integration_id": ["!=", ""]}, fields=["name", "bank"])
 
 		for plaid_account in plaid_accounts:
 			frappe.enqueue("erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.sync_transactions", bank=plaid_account.bank, bank_account=plaid_account.name)
