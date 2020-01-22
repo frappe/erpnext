@@ -617,17 +617,23 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		if target_doc.doctype == 'Purchase Receipt':
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
-			target_doc.shipping_address = source_doc.company_address
+			target_doc.supplier_address = source_doc.company_address
+			target_doc.shipping_address = source_doc.shipping_address_name or source_doc.customer_address
 			target_doc.buying_price_list = source_doc.selling_price_list
 			target_doc.is_internal_supplier = 1
 			target_doc.inter_company_reference = source_doc.name
+			target_doc.taxes_and_charges = None
+			target_doc.taxes = None
 		else:
 			target_doc.company = details.get("company")
 			target_doc.customer = details.get("party")
-			target_doc.company_address = source_doc.shipping_address
+			target_doc.company_address = source_doc.supplier_address
+			target_doc.shipping_address_name = source_doc.shipping_address
 			target_doc.selling_price_list = source_doc.buying_price_list
 			target_doc.is_internal_customer = 1
 			target_doc.inter_company_reference = source_doc.name
+			target_doc.taxes_and_charges = None
+			target_doc.taxes = None
 
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {

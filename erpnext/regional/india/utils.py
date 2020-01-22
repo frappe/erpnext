@@ -148,7 +148,6 @@ def get_place_of_supply(party_details, doctype):
 
 @frappe.whitelist()
 def get_regional_address_details(party_details, doctype, company, return_taxes=None):
-
 	if isinstance(party_details, string_types):
 		party_details = json.loads(party_details)
 		party_details = frappe._dict(party_details)
@@ -174,7 +173,6 @@ def get_regional_address_details(party_details, doctype, company, return_taxes=N
 
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		master_doctype = "Purchase Taxes and Charges Template"
-
 		get_tax_template_for_sez(party_details, master_doctype, company, 'Supplier')
 		get_tax_template_based_on_category(master_doctype, company, party_details)
 
@@ -236,7 +234,6 @@ def get_tax_template(master_doctype, company, is_inter_state, state_code):
 	 		(not default_tax and not tax_category.gst_state):
 			default_tax = frappe.db.get_value(master_doctype,
 				{'disabled': 0, 'tax_category': tax_category.name}, 'name')
-
 	return default_tax
 
 def get_tax_template_for_sez(party_details, master_doctype, company, party_type):
