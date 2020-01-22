@@ -34,6 +34,9 @@ class PricingRule(Document):
 
 	def validate_duplicate_apply_on(self):
 		field = apply_on_dict.get(self.apply_on)
+		if not field:
+			return False
+
 		values = [d.get(frappe.scrub(self.apply_on)) for d in self.get(field)]
 
 		if len(values) != len(set(values)):

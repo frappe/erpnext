@@ -163,7 +163,7 @@ class PayrollEntry(Document):
 		"""
 		cond = self.get_filter_condition()
 		return frappe.db.sql(""" select eld.loan_account, eld.loan,
-				eld.interest_income_account, eld.principal_amount, eld.interest_amount, eld.total_payment
+				eld.interest_income_account, eld.principal_amount, eld.interest_amount, eld.total_payment,t1.employee
 			from
 				`tabSalary Slip` t1, `tabSalary Slip Loan` eld
 			where
@@ -246,6 +246,7 @@ class PayrollEntry(Document):
 				accounts.append({
 						"account": acc,
 						"debit_in_account_currency": flt(amount, precision),
+						"party_type": '',
 						"cost_center": self.cost_center,
 						"project": self.project
 					})
@@ -257,6 +258,7 @@ class PayrollEntry(Document):
 						"account": acc,
 						"credit_in_account_currency": flt(amount, precision),
 						"cost_center": self.cost_center,
+						"party_type": '',
 						"project": self.project
 					})
 
@@ -264,7 +266,9 @@ class PayrollEntry(Document):
 			for data in loan_details:
 				accounts.append({
 						"account": data.loan_account,
-						"credit_in_account_currency": data.principal_amount
+						"credit_in_account_currency": data.principal_amount,
+						"party_type": "Employee",
+						"party": data.employee
 					})
 
 				if data.interest_amount and not data.interest_income_account:
@@ -275,14 +279,17 @@ class PayrollEntry(Document):
 						"account": data.interest_income_account,
 						"credit_in_account_currency": data.interest_amount,
 						"cost_center": self.cost_center,
-						"project": self.project
+						"project": self.project,
+						"party_type": "Employee",
+						"party": data.employee
 					})
 				payable_amount -= flt(data.total_payment, precision)
 
 			# Payable amount
 			accounts.append({
 				"account": default_payroll_payable_account,
-				"credit_in_account_currency": flt(payable_amount, precision)
+				"credit_in_account_currency": flt(payable_amount, precision),
+				"party_type": '',
 			})
 
 			journal_entry.set("accounts", accounts)
@@ -322,6 +329,10 @@ class PayrollEntry(Document):
 					statistical_component = frappe.db.get_value("Salary Component", sal_detail.salary_component, 'statistical_component')
 					if statistical_component != 1:
 						salary_slip_total -= sal_detail.amount
+
+				#loan deduction from bank entry during payroll
+				salary_slip_total -= salary_slip.total_loan_repayment
+
 			if salary_slip_total > 0:
 				self.create_journal_entry(salary_slip_total, "salary")
 
@@ -546,7 +557,6 @@ def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progr
 		count += 1
 		if publish_progress:
 			frappe.publish_progress(count*100/len(salary_slips), title = _("Submitting Salary Slips..."))
-
 	if submitted_ss:
 		payroll_entry.make_accrual_jv_entry()
 		frappe.msgprint(_("Salary Slip submitted for period from {0} to {1}")

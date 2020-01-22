@@ -144,6 +144,10 @@ frappe.ui.form.on('Asset', {
 			frm.set_df_property('purchase_invoice', 'read_only', 1);
 			frm.set_df_property('purchase_receipt', 'read_only', 1);
 		}
+		else if (frm.doc.is_existing_asset) {
+			frm.toggle_reqd('purchase_receipt', 0);
+			frm.toggle_reqd('purchase_invoice', 0);
+		}
 		else if (frm.doc.purchase_receipt) {
 			// if purchase receipt link is set then set PI disabled
 			frm.toggle_reqd('purchase_invoice', 0);
@@ -256,6 +260,7 @@ frappe.ui.form.on('Asset', {
 	},
 
 	is_existing_asset: function(frm) {
+		frm.trigger("toggle_reference_doc");
 		// frm.toggle_reqd("next_depreciation_date", (!frm.doc.is_existing_asset && frm.doc.calculate_depreciation));
 	},
 
@@ -333,25 +338,12 @@ frappe.ui.form.on('Asset', {
 		})
 	},
 
-	purchase_receipt: function(frm) {
+	purchase_receipt: (frm) => {
 		frm.trigger('toggle_reference_doc');
-
 		if (frm.doc.purchase_receipt) {
 			if (frm.doc.item_code) {
 				frappe.db.get_doc('Purchase Receipt', frm.doc.purchase_receipt).then(pr_doc => {
-					frm.set_value('company', pr_doc.company);
-					frm.set_value('purchase_date', pr_doc.posting_date);
-					const item = pr_doc.items.find(item => item.item_code === frm.doc.item_code);
-					if (!item) {
-						frm.set_value('purchase_receipt', '');
-						frappe.msgprint({
-							title: __('Invalid Purchase Receipt'),
-							message: __("The selected Purchase Receipt doesn't contains selected Asset Item."),
-							indicator: 'red'
-						});
-					}
-					frm.set_value('gross_purchase_amount', item.base_net_rate);
-					frm.set_value('location', item.asset_location);
+					frm.events.set_values_from_purchase_doc(frm, 'Purchase Receipt', pr_doc)
 				});
 			} else {
 				frm.set_value('purchase_receipt', '');
@@ -363,24 +355,12 @@ frappe.ui.form.on('Asset', {
 		}
 	},
 
-	purchase_invoice: function(frm) {
+	purchase_invoice: (frm) => {
 		frm.trigger('toggle_reference_doc');
 		if (frm.doc.purchase_invoice) {
 			if (frm.doc.item_code) {
 				frappe.db.get_doc('Purchase Invoice', frm.doc.purchase_invoice).then(pi_doc => {
-					frm.set_value('company', pi_doc.company);
-					frm.set_value('purchase_date', pi_doc.posting_date);
-					const item = pi_doc.items.find(item => item.item_code === frm.doc.item_code);
-					if (!item) {
-						frm.set_value('purchase_invoice', '');
-						frappe.msgprint({
-							title: __('Invalid Purchase Invoice'),
-							message: __("The selected Purchase Invoice doesn't contains selected Asset Item."),
-							indicator: 'red'
-						});
-					}
-					frm.set_value('gross_purchase_amount', item.base_net_rate);
-					frm.set_value('location', item.asset_location);
+					frm.events.set_values_from_purchase_doc(frm, 'Purchase Invoice', pi_doc)
 				});
 			} else {
 				frm.set_value('purchase_invoice', '');
@@ -390,6 +370,24 @@ frappe.ui.form.on('Asset', {
 				});
 			}
 		}
+	},
+
+	set_values_from_purchase_doc: function(frm, doctype, purchase_doc) {
+		frm.set_value('company', purchase_doc.company);
+		frm.set_value('purchase_date', purchase_doc.posting_date);
+		const item = purchase_doc.items.find(item => item.item_code === frm.doc.item_code);
+		if (!item) {
+			doctype_field = frappe.scrub(doctype)
+			frm.set_value(doctype_field, '');
+			frappe.msgprint({
+				title: __(`Invalid ${doctype}`),
+				message: __(`The selected ${doctype} doesn't contains selected Asset Item.`),
+				indicator: 'red'
+			});
+		}
+		frm.set_value('gross_purchase_amount', item.base_net_rate + item.item_tax_amount);
+		frm.set_value('purchase_receipt_amount', item.base_net_rate + item.item_tax_amount);
+		frm.set_value('location', item.asset_location);
 	},
 
 	set_depreciation_rate: function(frm, row) {

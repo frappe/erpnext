@@ -13,7 +13,6 @@ from dateutil.relativedelta import relativedelta
 from erpnext.stock.doctype.item.item import validate_end_of_life
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError
-from erpnext.stock.doctype.stock_entry.stock_entry import get_additional_costs
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 from frappe.utils.csvutils import getlink
@@ -671,10 +670,6 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 		stock_entry.from_warehouse = wip_warehouse
 		stock_entry.to_warehouse = work_order.fg_warehouse
 		stock_entry.project = work_order.project
-		if purpose=="Manufacture":
-			additional_costs = get_additional_costs(work_order, fg_qty=stock_entry.fg_completed_qty,
-				company=work_order.company)
-			stock_entry.set("additional_costs", additional_costs)
 
 	stock_entry.set_stock_entry_type()
 	stock_entry.get_items()
