@@ -110,6 +110,7 @@ class StockEntry(StockController):
 		self.update_cost_in_project()
 		self.update_transferred_qty()
 		self.update_quality_inspection()
+		self.delete_auto_created_batches()
 
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
