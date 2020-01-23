@@ -11,6 +11,8 @@ from frappe.model.document import Document
 from erpnext.loan_management.doctype.loan.loan import (get_monthly_repayment_amount, validate_repayment_method,
 		get_total_loan_amount, get_sanctioned_amount_limit)
 from erpnext.loan_management.doctype.loan_security_price.loan_security_price import get_loan_security_price
+import json
+from six import string_types
 
 class LoanApplication(Document):
 	def validate(self):
@@ -45,7 +47,7 @@ class LoanApplication(Document):
 		total_loan_amount = get_total_loan_amount(self.applicant_type, self.applicant, self.company)
 		sanctioned_amount_limit = get_sanctioned_amount_limit(self.applicant_type, self.applicant, self.company)
 
-		if sanctioned_amount_limit and self.loan_amount + total_loan_amount > sanctioned_amount_limit:
+		if sanctioned_amount_limit and flt(self.loan_amount) + flt(total_loan_amount) > flt(sanctioned_amount_limit):
 			frappe.throw(_("Sanctioned Amount limit crossed for {0} {1}").format(self.applicant_type, frappe.bold(self.applicant)))
 
 	def set_pledge_amount(self):
@@ -167,3 +169,28 @@ def create_pledge(loan_application):
 	frappe.msgprint(message)
 
 	return lsp.name
+
+#This is a sandbox method to get the proposed pledges
+@frappe.whitelist()
+def get_proposed_pledge(securities):
+	if isinstance(securities, string_types):
+		securities = json.loads(securities)
+
+	maximum_loan_amount = 0
+
+	for security in securities:
+		security = frappe._dict(security)
+		if not security.qty and not security.amount:
+			frappe.throw(_("Qty or Amount is mandatroy for loan security"))
+
+		security.loan_security_price = get_loan_security_price(security.loan_security)
+
+		if not security.qty:
+			security.qty = cint(security.amount/security.loan_security_price)
+
+		security.amount = security.qty * security.loan_security_price
+		security.post_haircut_amount = security.amount - (security.amount * security.haircut/100)
+		maximum_loan_amount += security.post_haircut_amount
+
+	return securities, maximum_loan_amount
+
