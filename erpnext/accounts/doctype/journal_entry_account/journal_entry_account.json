@@ -90,7 +90,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "Customer",
    "fieldname": "party_type",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -201,7 +200,7 @@
    "fieldname": "reference_type",
    "fieldtype": "Select",
    "label": "Reference Type",
-   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting"
+   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting\nFees"
   },
   {
    "fieldname": "reference_name",
@@ -272,7 +271,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-10-02 12:23:21.693443",
+ "modified": "2020-01-13 12:41:33.968025",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
