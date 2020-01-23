@@ -234,6 +234,13 @@ class StockController(AccountsController):
 				frappe.throw(_("{0} {1}: Cost Center is mandatory for Item {2}").format(
 					_(self.doctype), self.name, item.get("item_code")))
 
+	def unlink_reference_from_batch(self):
+		frappe.db.sql(""" UPDATE `tabBatch`
+			SET reference_doctype = NULL, reference_name = NULL
+			WHERE
+				reference_doctype = %s and reference_name = %s
+		""", (self.doctype, self.name))
+
 	def get_sl_entries(self, d, args):
 		sl_dict = frappe._dict({
 			"item_code": d.get("item_code", None),
