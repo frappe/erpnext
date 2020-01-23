@@ -866,6 +866,7 @@ class PurchaseInvoice(BuyingController):
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		if self.update_stock == 1:
 			self.update_stock_ledger()
+			self.delete_auto_created_batches()
 
 		self.make_gl_entries_on_cancel()
 		self.update_project()
