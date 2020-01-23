@@ -13,7 +13,6 @@ from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock.doctype.stock_entry.stock_entry import get_used_alternative_items
 from erpnext.stock.doctype.serial_no.serial_no import get_auto_serial_nos, auto_make_serial_nos, get_serial_nos
 from frappe.contacts.doctype.address.address import get_address_display
-from erpnext.controllers.accounts_controller import get_taxes_and_charges
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.controllers.stock_controller import StockController
@@ -74,10 +73,6 @@ class BuyingController(StockController):
 		if getattr(self, "supplier", None):
 			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions,
 			doctype=self.doctype, company=self.company, party_address=self.supplier_address, shipping_address=self.get('shipping_address')))
-
-		if not self.get('taxes') and self.get('taxes_and_charges'):
-			for tax in get_taxes_and_charges('Purchase Taxes and Charges Template', self.get('taxes_and_charges')):
-				self.append('taxes', tax)
 
 		self.set_missing_item_details(for_validate)
 
