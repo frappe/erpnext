@@ -41,7 +41,8 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Log Type",
-   "options": "\nIN\nOUT"
+   "options": "\nIN\nOUT",
+   "reqd": 1
   },
   {
    "fieldname": "shift",
@@ -107,7 +108,7 @@
   }
  ],
  "links": [],
- "modified": "2020-01-20 00:59:39.792700",
+ "modified": "2020-01-23 04:06:49.924565",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Checkin",
