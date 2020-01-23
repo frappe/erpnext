@@ -75,7 +75,7 @@ class BuyingController(StockController):
 			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions,
 			doctype=self.doctype, company=self.company, party_address=self.supplier_address, shipping_address=self.get('shipping_address')))
 
-		if not self.get('taxes'):
+		if not self.get('taxes') and self.get('taxes_and_charges'):
 			for tax in get_taxes_and_charges('Purchase Taxes and Charges Template', self.get('taxes_and_charges')):
 				self.append('taxes', tax)
 
