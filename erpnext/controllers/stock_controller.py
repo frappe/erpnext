@@ -234,12 +234,16 @@ class StockController(AccountsController):
 				frappe.throw(_("{0} {1}: Cost Center is mandatory for Item {2}").format(
 					_(self.doctype), self.name, item.get("item_code")))
 
-	def unlink_reference_from_batch(self):
-		frappe.db.sql(""" UPDATE `tabBatch`
-			SET reference_doctype = NULL, reference_name = NULL
-			WHERE
-				reference_doctype = %s and reference_name = %s
-		""", (self.doctype, self.name))
+	def delete_auto_created_batches(self):
+		for d in self.items:
+			if not d.batch_no: continue
+
+			d.batch_no = None
+			d.db_set("batch_no", None)
+
+		for data in frappe.get_all("Batch",
+			{'reference_name': self.name, 'reference_doctype': self.doctype}):
+			frappe.delete_doc("Batch", data.name)
 
 	def get_sl_entries(self, d, args):
 		sl_dict = frappe._dict({
