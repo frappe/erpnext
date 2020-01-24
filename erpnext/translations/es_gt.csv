@@ -5,5 +5,6 @@ apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_re
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.py,{0} on Half day Leave on {1},{0} en Medio día Permiso en {1}
 apps/erpnext/erpnext/selling/report/customer_credit_balance/customer_credit_balance.py,Outstanding Amt,Saldo Pendiente
 DocType: Bank Statement Transaction Invoice Item,Outstanding Amount,Saldo Pendiente
+DocType: Manufacturing Settings,Other Settings,Otros Ajustes
 DocType: Payment Entry Reference,Outstanding,Pendiente
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.py,{0} on Leave on {1},{0} De permiso De permiso {1}
