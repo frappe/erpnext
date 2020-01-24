@@ -192,6 +192,13 @@ class Opportunity(TransactionBase):
 			for key in item_fields:
 				if not d.get(key): d.set(key, item.get(key))
 
+@frappe.whitelist()
+def amount_opportunity(Item):
+ 	lead = frappe.get_all("Lead", ["opportunity_amount","currency"], filters = {"name": Item})
+ 	return {
+		'opportunity_amount': lead[0].opportunity_amount,
+		'currency': lead[0].currency
+	}
 
 @frappe.whitelist()
 def get_item_details(item_code):
