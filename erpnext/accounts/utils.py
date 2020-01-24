@@ -640,8 +640,9 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
 	if account:
-		root_type = frappe.get_cached_value("Account", account, "root_type")
+		root_type, account_type = frappe.get_cached_value("Account", account, ["root_type", "account_type"])
 		party_account_type = "Receivable" if root_type == "Asset" else "Payable"
+		party_account_type = account_type or party_account_type
 	else:
 		party_account_type = erpnext.get_party_account_type(party_type)
 
