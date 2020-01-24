@@ -176,6 +176,9 @@ def get_proposed_pledge(securities):
 	if isinstance(securities, string_types):
 		securities = json.loads(securities)
 
+	proposed_pledges = {
+		'securities': []
+	}
 	maximum_loan_amount = 0
 
 	for security in securities:
@@ -190,7 +193,11 @@ def get_proposed_pledge(securities):
 
 		security.amount = security.qty * security.loan_security_price
 		security.post_haircut_amount = security.amount - (security.amount * security.haircut/100)
+
 		maximum_loan_amount += security.post_haircut_amount
 
-	return securities, maximum_loan_amount
+		proposed_pledges['securities'].append(security)
 
+	proposed_pledges['maximum_loan_amount'] = maximum_loan_amount
+
+	return proposed_pledges
