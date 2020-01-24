@@ -168,6 +168,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Assignment Salary Component",
+					"dependencies": ["Payroll Entry"]
+				},
+				{
+					"type": "doctype",
 					"name": "Payroll Period",
 				},
 				{
@@ -187,12 +192,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Employee Incentive",
 					"dependencies": ["Employee"]
-				},
-				{
-					"type": "doctype",
-					"name": "Assigment Salary Component",
-					"dependencies": ["Payroll Entry"]
-				},
+				},				
 				{
 					"type": "report",
 					"is_query_report": True,
