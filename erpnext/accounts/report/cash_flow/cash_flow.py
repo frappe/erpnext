@@ -134,7 +134,7 @@ def get_account_type_based_gl_data(company, start_date, end_date, account_type, 
 		if filters.include_default_book_entries:
 			company_fb = frappe.db.get_value("Company", company, 'default_finance_book')
 
-			cond = """ and finance_book in (%s, %s)
+			cond = """ and ifnull(finance_book, '') in (%s, %s, '')
 				""" %(frappe.db.escape(filters.finance_book), frappe.db.escape(company_fb))
 
 	gl_sum = frappe.db.sql_list("""
