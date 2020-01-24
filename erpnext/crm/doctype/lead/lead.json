@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
@@ -26,6 +27,9 @@
   "column_break_14",
   "contact_date",
   "ends_on",
+  "opportunity_section",
+  "currency",
+  "opportunity_amount",
   "notes_section",
   "notes",
   "contact_info",
@@ -361,12 +365,29 @@
    "fieldname": "blog_subscriber",
    "fieldtype": "Check",
    "label": "Blog Subscriber"
+  },
+  {
+   "fieldname": "opportunity_section",
+   "fieldtype": "Section Break",
+   "label": "Opportunity Amount"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "opportunity_amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
   }
  ],
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
- "modified": "2019-09-19 12:49:02.536647",
+ "links": [],
+ "modified": "2020-01-24 09:40:05.441695",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
