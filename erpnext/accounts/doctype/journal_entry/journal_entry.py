@@ -32,6 +32,7 @@ class JournalEntry(AccountsController):
 		self.validate_total_debit_and_credit()
 		self.validate_against_jv()
 		self.validate_reference_doc()
+		self.validate_cheque_info()
 		self.set_against_account()
 		self.create_remarks()
 		self.set_print_format_fields()
