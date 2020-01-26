@@ -336,6 +336,24 @@ def get_data():
 					"is_query_report": True,
 					"name": "Item Variant Details",
 					"doctype": "Item"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Subcontracted Raw Materials To Be Transferred",
+					"doctype": "Purchase Order"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Subcontracted Item To Be Received",
+					"doctype": "Purchase Order"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Stock and Account Value Comparison",
+					"doctype": "Stock Ledger Entry"
 				}
 			]
 		},

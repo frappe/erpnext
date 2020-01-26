@@ -24,20 +24,15 @@ async function get_global_variables() {
 }
 
 function setup_timezone_selector() {
-    /**
-     * window.timezones is a dictionary with the following structure
-     * { IANA name: Pretty name}
-     * For example : { Asia/Kolkata : "India Time - Asia/Kolkata"}
-     */
     let timezones_element = document.getElementById('appointment-timezone');
-    let offset = new Date().getTimezoneOffset();
-    Object.keys(window.timezones).forEach((timezone) => {
+    let local_timezone = moment.tz.guess()
+    window.timezones.forEach(timezone => {
         let opt = document.createElement('option');
         opt.value = timezone;
-        if (timezone == moment.tz.guess()) {
+        if (timezone == local_timezone) {
             opt.selected = true;
         }
-        opt.innerHTML = window.timezones[timezone]
+        opt.innerHTML = timezone;
         timezones_element.appendChild(opt)
     });
 }
@@ -114,7 +109,7 @@ function get_timeslot_div_layout(timeslot) {
         timeslot_div.classList.add('unavailable')
     }
     timeslot_div.innerHTML = get_slot_layout(start_time);
-    timeslot_div.id = timeslot.time.substr(11, 20);
+    timeslot_div.id = timeslot.time.substring(11, 19);
     timeslot_div.addEventListener('click', select_time);
     return timeslot_div
 }

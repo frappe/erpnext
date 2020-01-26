@@ -132,9 +132,10 @@ class Asset(AccountsController):
 		if len(movements) > 1:
 			frappe.throw(_('Asset has multiple Asset Movement Entries which has to be \
 				cancelled manually to cancel this asset.'))
-		movement = frappe.get_doc('Asset Movement', movements[0].get('name'))
-		movement.flags.ignore_validate = True
-		movement.cancel()
+		if movements:
+			movement = frappe.get_doc('Asset Movement', movements[0].get('name'))
+			movement.flags.ignore_validate = True
+			movement.cancel()
 
 	def make_asset_movement(self):
 		reference_doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'
@@ -619,7 +620,7 @@ def get_asset_account(account_name, asset=None, asset_category=None, company=Non
 
 	if not account:
 		if not asset_category:
-			frappe.throw(_("Set {0} in company {2}").format(account_name.replace('_', ' ').title(), company))
+			frappe.throw(_("Set {0} in company {1}").format(account_name.replace('_', ' ').title(), company))
 		else:
 			frappe.throw(_("Set {0} in asset category {1} or company {2}")
 				.format(account_name.replace('_', ' ').title(), asset_category, company))
