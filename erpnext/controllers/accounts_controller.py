@@ -296,7 +296,7 @@ class AccountsController(TransactionBase):
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
 
-					if ret.get("pricing_rules"):
+					if ret.get("pricing_rules") and item.ignore_pricing_rules == 0:
 						self.apply_pricing_rule_on_items(item, ret)
 
 			if self.doctype == "Purchase Invoice":
