@@ -48,7 +48,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2020-01-27 16:19:33.066270",
+ "modified": "2020-01-28 11:20:12.317701",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "GST Settings",
@@ -71,6 +71,26 @@
    "print": 1,
    "read": 1,
    "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Item Manager",
    "share": 1,
    "write": 1
   }

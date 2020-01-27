@@ -32,7 +32,7 @@
    "options": "Item Tax"
   }
  ],
- "modified": "2020-01-27 16:20:09.277395",
+ "modified": "2020-01-28 11:20:28.084240",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "GST HSN Code",
@@ -61,6 +61,33 @@
    "role": "Accounts Manager",
    "share": 1,
    "write": 1
+<<<<<<< HEAD
+=======
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Item Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "write": 1
+>>>>>>> e69ab31113... fix: permissions for gst settings & hsn
   }
  ],
  "quick_entry": 1,
