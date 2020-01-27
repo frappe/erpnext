@@ -424,8 +424,12 @@ class ReceivablePayableReport(object):
 			if c['fieldtype'] in ['Float', 'Currency', 'Int'] and c['fieldname'] != 'age']
 
 		def postprocess_group(group_object, grouped_by):
-			group_object.totals['party'] = "'Total'" if not group_object.group_field else\
-				"'{0}: {1}'".format(group_object.group_label, group_object.group_value)
+			if not group_object.group_field:
+				group_object.totals['party'] = "'Total'"
+			elif group_object.group_field == 'party':
+				group_object.totals['party'] = group_object.group_value
+			else:
+				group_object.totals['party'] = "'{0}: {1}'".format(group_object.group_label, group_object.group_value)
 
 			if group_object.group_field == 'party':
 				group_object.totals['currency'] = group_object.rows[0].get("currency")
