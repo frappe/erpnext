@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, cstr
 from frappe.model.meta import get_field_precision
 from frappe.utils.xlsxutils import handle_html
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
@@ -23,22 +23,15 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	if item_list:
 		itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency)
 
-	columns.append({
-		'fieldname': 'currency',
-		'label': _('Currency'),
-		'fieldtype': 'Currency',
-		'width': 80,
-		'hidden': 1
-	})
-
 	mode_of_payments = get_mode_of_payments(set([d.parent for d in item_list]))
 	so_dn_map = get_delivery_notes_against_sales_order(item_list)
 
-	if filters.get('group_by'):
-		grand_total = get_grand_total(filters)
-
 	data = []
+	total_row_map = {}
 	prev_group_by_value = ''
+
+	if filters.get('group_by'):
+		grand_total = get_grand_total(filters, 'Sales Invoice')
 
 	for d in item_list:
 		delivery_note = None
@@ -50,35 +43,6 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		if not delivery_note and d.update_stock:
 			delivery_note = d.parent
 
-
-		if filters.get('group_by'):
-			if filters.get('group_by') == 'Item':
-				group_by_field = 'item_code'
-				subtotal_display_field = 'customer'
-			elif filters.get('group_by') == 'Invoice':
-				group_by_field = 'parent'
-				subtotal_display_field = 'item_code'
-			else:
-				group_by_field = frappe.scrub(filters.get('group_by'))
-				subtotal_display_field = 'item_code'
-
-			if prev_group_by_value != d.get(group_by_field):
-				if prev_group_by_value:
-					total_row['percent_gt'] = flt(total_row['total']/grand_total * 100)
-					data.append(total_row)
-					data.append({})
-
-				prev_group_by_value = d.get(group_by_field)
-
-				total_row = {
-					subtotal_display_field: d.get(group_by_field),
-					'stock_qty': 0.0,
-					'amount': 0.0,
-					'bold': 1,
-					'total_tax': 0.0,
-					'total': 0.0
-				}
-
 		row = {
 			'item_code': d.item_code,
 			'item_name': d.item_name,
@@ -87,7 +51,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			'invoice': d.parent,
 			'posting_date': d.posting_date,
 			'customer': d.customer,
-			'customer_name': d.customer_name
+			'customer_name': d.customer_name,
+			'customer_group': d.customer_group,
 		}
 
 		if additional_query_columns:
@@ -97,7 +62,6 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 				})
 
 		row.update({
-			'customer_group': d.customer_group,
 			'debit_to': d.debit_to,
 			'mode_of_payment': ", ".join(mode_of_payments.get(d.parent, [])),
 			'territory': d.territory,
@@ -138,42 +102,56 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		})
 
 		if filters.get('group_by'):
-			total_row['stock_qty'] += row['stock_qty']
-			total_row['amount'] += row['amount']
-			total_row['total_tax'] += row['total_tax']
-			total_row['total'] += row['total']
+			row.update({'percent_gt': flt(row['total']/grand_total) * 100})
+			group_by_field, subtotal_display_field = get_group_by_and_display_fields(filters)
+			data, prev_group_by_value = add_total_row(data, filters, prev_group_by_value, d, total_row_map,
+				group_by_field, subtotal_display_field, grand_total)
+			update_total_row(row, total_row_map, d.get(group_by_field, ''), tax_columns)
 
 		data.append(row)
 
 	if filters.get('group_by'):
-		total_row['percent_gt'] = frappe.bold(total_row['total']/grand_total * 100)
+		total_row = total_row_map.get(prev_group_by_value or d.get('item_name'))
+		total_row['percent_gt'] = flt(total_row['total']/grand_total * 100)
 		data.append(total_row)
 		data.append({})
 
 	return columns, data
 
 def get_columns(additional_table_columns, filters):
-	columns = [
-		{
-			'label': _('Item Code'),
-			'fieldname': 'item_code',
-			'fieldtype': 'Link',
-			'options': 'Item',
-			'width': 120
-		},
-		{
-			'label': _('Item Name'),
-			'fieldname': 'item_name',
-			'fieldtype': 'Data',
-			'width': 120
-		},
-		{
-			'label': _('Item Group'),
-			'fieldname': 'item_group',
-			'fieldtype': 'Link',
-			'options': 'Item Group',
-			'width': 120
-		},
+	columns = []
+
+	if filters.get('group_by') != ('Item'):
+		columns.extend(
+			[
+				{
+					'label': _('Item Code'),
+					'fieldname': 'item_code',
+					'fieldtype': 'Link',
+					'options': 'Item',
+					'width': 120
+				},
+				{
+					'label': _('Item Name'),
+					'fieldname': 'item_name',
+					'fieldtype': 'Data',
+					'width': 120
+				}
+			]
+		)
+
+	if filters.get('group_by') not in ('Item', 'Item Group'):
+		columns.extend([
+			{
+				'label': _('Item Group'),
+				'fieldname': 'item_group',
+				'fieldtype': 'Link',
+				'options': 'Item Group',
+				'width': 120
+			}
+		])
+
+	columns.extend([
 		{
 			'label': _('Description'),
 			'fieldname': 'description',
@@ -192,33 +170,41 @@ def get_columns(additional_table_columns, filters):
 			'fieldname': 'posting_date',
 			'fieldtype': 'Date',
 			'width': 120
-		},
-		{
-			'label': _('Customer'),
-			'fieldname': 'customer',
-			'fieldtype': 'Link',
-			'options': 'Customer',
-			'width': 120
-		},
-		{
-			'label': _('Customer Name'),
-			'fieldname': 'customer_name',
-			'fieldtype': 'Data',
-			'width': 120
 		}
-	]
+	])
+
+	if filters.get('group_by') != 'Customer':
+		columns.extend([
+			{
+				'label': _('Customer Group'),
+				'fieldname': 'customer_group',
+				'fieldtype': 'Link',
+				'options': 'Customer Group',
+				'width': 120
+			}
+		])
+
+	if filters.get('group_by') not in ('Customer', 'Customer Group'):
+		columns.extend([
+			{
+				'label': _('Customer'),
+				'fieldname': 'customer',
+				'fieldtype': 'Link',
+				'options': 'Customer',
+				'width': 120
+			},
+			{
+				'label': _('Customer Name'),
+				'fieldname': 'customer_name',
+				'fieldtype': 'Data',
+				'width': 120
+			}
+		])
 
 	if additional_table_columns:
 		columns += additional_table_columns
 
 	columns += [
-		{
-			'label': _('Customer Group'),
-			'fieldname': 'customer_group',
-			'fieldtype': 'Link',
-			'options': 'Customer Group',
-			'width': 120
-		},
 		{
 			'label': _('Receivable Account'),
 			'fieldname': 'debit_to',
@@ -231,14 +217,22 @@ def get_columns(additional_table_columns, filters):
 			'fieldname': 'mode_of_payment',
 			'fieldtype': 'Data',
 			'width': 120
-		},
-		{
-			'label': _("Territory"),
-			'fieldname': 'territory',
-			'fieldtype': 'Link',
-			'options': 'Territory',
-			'width': 80
-		},
+		}
+	]
+
+	if filters.get('group_by') != 'Terriotory':
+		columns.extend([
+			{
+				'label': _("Territory"),
+				'fieldname': 'territory',
+				'fieldtype': 'Link',
+				'options': 'Territory',
+				'width': 80
+			}
+		])
+
+
+	columns += [
 		{
 			'label': _('Project'),
 			'fieldname': 'project',
@@ -307,6 +301,13 @@ def get_columns(additional_table_columns, filters):
 			'fieldtype': 'Currency',
 			'options': 'currency',
 			'width': 100
+		},
+		{
+			'fieldname': 'currency',
+			'label': _('Currency'),
+			'fieldtype': 'Currency',
+			'width': 80,
+			'hidden': 1
 		}
 	]
 
@@ -337,35 +338,34 @@ def get_conditions(filters):
 				and ifnull(`tabSales Invoice Payment`.mode_of_payment, '') = %(mode_of_payment)s)"""
 
 	if filters.get("warehouse"):
-		conditions +=  """ and exists(select name from `tabSales Invoice Item`
-			 where parent=`tabSales Invoice`.name
-			 	and ifnull(`tabSales Invoice Item`.warehouse, '') = %(warehouse)s)"""
+		conditions +=  """and ifnull(`tabSales Invoice Item`.warehouse, '') = %(warehouse)s"""
 
 
 	if filters.get("brand"):
-		conditions +=  """ and exists(select name from `tabSales Invoice Item`
-			 where parent=`tabSales Invoice`.name
-			 	and ifnull(`tabSales Invoice Item`.brand, '') = %(brand)s)"""
+		conditions +=  """and ifnull(`tabSales Invoice Item`.brand, '') = %(brand)s"""
 
 	if filters.get("item_group"):
-		conditions +=  """ and exists(select name from `tabSales Invoice Item`
-			 where parent=`tabSales Invoice`.name
-			 	and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s)"""
+		conditions +=  """and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s"""
 
 	if not filters.get("group_by"):
 		conditions += "ORDER BY `tabSales Invoice`.posting_date desc, `tabSales Invoice Item`.item_group desc"
+	else:
+		conditions += get_group_by_conditions(filters, 'Sales Invoice')
+
+	return conditions
+
+def get_group_by_conditions(filters, doctype):
 
 	if filters.get("group_by"):
 		if filters.get("group_by") == 'Invoice':
-			conditions += " ORDER BY `tabSales Invoice Item`.parent desc"
+			return "ORDER BY `tab{0} Item`.parent desc".format(doctype)
 		elif filters.get("group_by") == 'Item':
-			conditions += " ORDER BY `tabSales Invoice Item`.item_code"
+			return "ORDER BY `tab{0} Item`.`item_code`".format(doctype)
 		elif filters.get("group_by") == 'Item Group':
-			conditions += " ORDER BY `tabSales Invoice Item`.`item_group`"
-		elif filters.get("group_by") == 'Customer':
-			conditions += " ORDER BY `tabSales Invoice`.customer"
+			return "ORDER BY `tab{0} Item`.{1}".format(doctype, frappe.scrub(filters.get('group_by')))
+		elif filters.get("group_by") in ('Customer', 'Customer Group', 'Territory', 'Supplier'):
+			return "ORDER BY `tab{0}`.{1}".format(doctype, frappe.scrub(filters.get('group_by')))
 
-	return conditions
 
 def get_items(filters, additional_query_columns):
 	conditions = get_conditions(filters)
@@ -413,14 +413,14 @@ def get_delivery_notes_against_sales_order(item_list):
 
 	return so_dn_map
 
-def get_grand_total(filters):
+def get_grand_total(filters, doctype):
 
 	return frappe.db.sql(""" SELECT
-		SUM(`tabSales Invoice`.grand_total)
-		FROM `tabSales Invoice`
-		WHERE `tabSales Invoice`.docstatus = 1
+		SUM(`tab{0}`.base_grand_total)
+		FROM `tab{0}`
+		WHERE `tab{0}`.docstatus = 1
 		and posting_date between %s and %s
-	""", (filters.get('from_date'), filters.get('to_date')))[0][0]
+	""".format(doctype), (filters.get('from_date'), filters.get('to_date')))[0][0]
 
 def get_deducted_taxes():
 	return frappe.db.sql_list("select name from `tabPurchase Taxes and Charges` where add_deduct_tax = 'Deduct'")
@@ -542,3 +542,65 @@ def get_tax_accounts(item_list, columns, company_currency,
 	]
 
 	return itemised_tax, tax_columns
+
+def add_total_row(data, filters, prev_group_by_value, item, total_row_map,
+	group_by_field, subtotal_display_field, grand_total):
+	if prev_group_by_value != item.get(group_by_field, ''):
+		if prev_group_by_value:
+			total_row = total_row_map.get(prev_group_by_value)
+			total_row['percent_gt'] = flt(total_row['total']/grand_total * 100)
+			data.append(total_row)
+			data.append({})
+
+		prev_group_by_value = item.get(group_by_field, '')
+
+		total_row_map.setdefault(item.get(group_by_field, ''), {
+			subtotal_display_field: get_display_value(filters, group_by_field, item),
+			'stock_qty': 0.0,
+			'amount': 0.0,
+			'bold': 1,
+			'total_tax': 0.0,
+			'total': 0.0
+		})
+
+	return data, prev_group_by_value
+
+def get_display_value(filters, group_by_field, item):
+	if filters.get('group_by') == 'Item':
+		return "Item: " + cstr(item.get('item_code')) \
+		+ "<br><br>" + "Item Name: " + cstr(item.get('item_name'))
+	elif filters.get('group_by') in ('Customer', 'Supplier'):
+		return filters.get('group_by')+": " + cstr(item.get(frappe.scrub(filters.get('group_by')))) \
+		+ "<br><br>" + filters.get('group_by') + " Name: " + item.get(frappe.scrub(filters.get('group_by'))+'_name', '')
+	else:
+		return item.get(group_by_field)
+
+def get_group_by_and_display_fields(filters):
+	if filters.get('group_by') == 'Item':
+		group_by_field = 'item_code'
+		subtotal_display_field = 'invoice'
+	elif filters.get('group_by') == 'Invoice':
+		group_by_field = 'parent'
+		subtotal_display_field = 'item_code'
+	else:
+		group_by_field = frappe.scrub(filters.get('group_by'))
+		subtotal_display_field = 'item_code'
+
+	return group_by_field, subtotal_display_field
+
+def update_total_row(item, total_row_map, group_by_value, tax_columns):
+	total_row = total_row_map.get(group_by_value)
+	total_row['stock_qty'] += item['stock_qty']
+	total_row['amount'] += item['amount']
+	total_row['total_tax'] += item['total_tax']
+	total_row['total'] += item['total']
+
+	for tax in tax_columns:
+		total_row.setdefault(frappe.scrub(tax + ' Amount'), 0.0)
+		total_row.setdefault(frappe.scrub(tax + ' Rate'), 0.0)
+		total_row[frappe.scrub(tax + ' Rate')] += flt(item[frappe.scrub(tax + ' Rate')])
+		total_row[frappe.scrub(tax + ' Amount')] += flt(item[frappe.scrub(tax + ' Amount')])
+
+
+
+
