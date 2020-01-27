@@ -8,7 +8,7 @@ frappe.ui.form.on("Company", {
 		if (frm.doc.__islocal && frm.doc.parent_company) {
 			frappe.db.get_value('Company', frm.doc.parent_company, 'is_group', (r) => {
 				if (!r.is_group) {
-					frm.set_value('parent_company', '')
+					frm.set_value('parent_company', '');
 				}
 			});
 		}

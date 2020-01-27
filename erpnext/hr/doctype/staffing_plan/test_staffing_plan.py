@@ -90,7 +90,7 @@ def make_company():
 	company = frappe.new_doc("Company")
 	company.company_name = "_Test Company 10"
 	company.abbr = "_TC10"
-	company.parent_company = "_Test Company"
+	company.parent_company = "_Test Company 3"
 	company.default_currency = "INR"
 	company.country = "Pakistan"
 	company.insert()
