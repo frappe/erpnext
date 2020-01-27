@@ -355,17 +355,14 @@ def get_conditions(filters):
 	return conditions
 
 def get_group_by_conditions(filters, doctype):
-
-	if filters.get("group_by"):
-		if filters.get("group_by") == 'Invoice':
-			return "ORDER BY `tab{0} Item`.parent desc".format(doctype)
-		elif filters.get("group_by") == 'Item':
-			return "ORDER BY `tab{0} Item`.`item_code`".format(doctype)
-		elif filters.get("group_by") == 'Item Group':
-			return "ORDER BY `tab{0} Item`.{1}".format(doctype, frappe.scrub(filters.get('group_by')))
-		elif filters.get("group_by") in ('Customer', 'Customer Group', 'Territory', 'Supplier'):
-			return "ORDER BY `tab{0}`.{1}".format(doctype, frappe.scrub(filters.get('group_by')))
-
+	if filters.get("group_by") == 'Invoice':
+		return "ORDER BY `tab{0} Item`.parent desc".format(doctype)
+	elif filters.get("group_by") == 'Item':
+		return "ORDER BY `tab{0} Item`.`item_code`".format(doctype)
+	elif filters.get("group_by") == 'Item Group':
+		return "ORDER BY `tab{0} Item`.{1}".format(doctype, frappe.scrub(filters.get('group_by')))
+	elif filters.get("group_by") in ('Customer', 'Customer Group', 'Territory', 'Supplier'):
+		return "ORDER BY `tab{0}`.{1}".format(doctype, frappe.scrub(filters.get('group_by')))
 
 def get_items(filters, additional_query_columns):
 	conditions = get_conditions(filters)
@@ -420,7 +417,7 @@ def get_grand_total(filters, doctype):
 		FROM `tab{0}`
 		WHERE `tab{0}`.docstatus = 1
 		and posting_date between %s and %s
-	""".format(doctype), (filters.get('from_date'), filters.get('to_date')))[0][0]
+	""".format(doctype), (filters.get('from_date'), filters.get('to_date')))[0][0] #nosec
 
 def get_deducted_taxes():
 	return frappe.db.sql_list("select name from `tabPurchase Taxes and Charges` where add_deduct_tax = 'Deduct'")
@@ -567,13 +564,22 @@ def add_total_row(data, filters, prev_group_by_value, item, total_row_map,
 
 def get_display_value(filters, group_by_field, item):
 	if filters.get('group_by') == 'Item':
-		return "Item: " + cstr(item.get('item_code')) \
-		+ "<br><br>" + "Item Name: " + cstr(item.get('item_name'))
+		if item.get('item_code') != item.get('item_name'):
+			value =  item.get('item_code') + "<br><br>" + \
+			"<span style='font-weight: normal'>" + item.get('item_name') + "</span>"
+		else:
+			value =  cstr(item.get('item_code'))
 	elif filters.get('group_by') in ('Customer', 'Supplier'):
-		return filters.get('group_by')+": " + cstr(item.get(frappe.scrub(filters.get('group_by')))) \
-		+ "<br><br>" + filters.get('group_by') + " Name: " + item.get(frappe.scrub(filters.get('group_by'))+'_name', '')
+		party = frappe.scrub(filters.get('group_by'))
+		if item.get(party) != item.get(party+'_name'):
+			value = item.get(party) + "<br><br>" + \
+			"<span style='font-weight: normal'>" + item.get(party+'_name') + "</span>"
+		else:
+			value =  item.get(party)
 	else:
-		return item.get(group_by_field)
+		value = item.get(group_by_field)
+
+	return value
 
 def get_group_by_and_display_fields(filters):
 	if filters.get('group_by') == 'Item':
