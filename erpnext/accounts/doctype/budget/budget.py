@@ -233,7 +233,8 @@ def get_other_condition(args, budget, for_doc):
 	budget_against_field = frappe.scrub(args.get("budget_against_field"))
 
 	if budget_against_field and args.get(budget_against_field):
-		condition += " and %s = '%s'" %(budget_against_field, args.get(budget_against_field))
+		alias = 'mri' if for_doc == 'Material Request' else 'poi'
+		condition += " and %s.%s = '%s'" %(alias, budget_against_field, args.get(budget_against_field))
 
 	if args.get('fiscal_year'):
 		date_field = 'schedule_date' if for_doc == 'Material Request' else 'transaction_date'
