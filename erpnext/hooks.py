@@ -264,6 +264,13 @@ doc_events = {
 	}
 }
 
+# On cancel event Payment Entry will be exempted and all linked submittable doctype will get cancelled.
+# to maintain data integrity we exempted payment entry. it will un-link when sales invoice get cancelled.
+# if payment entry not in auto cancel exempted doctypes it will cancel payment entry.
+auto_cancel_exempted_doctypes= [
+	"Payment Entry"
+]
+
 scheduler_events = {
 	"all": [
 		"erpnext.projects.doctype.project.project.project_status_update_reminder"

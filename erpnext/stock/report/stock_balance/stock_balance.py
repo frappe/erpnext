@@ -264,7 +264,7 @@ def get_item_details(items, sle, filters):
 			`tabItem` item
 			%s
 		where
-			item.name in (%s) and ifnull(item.disabled, 0) = 0
+			item.name in (%s)
 	""" % (cf_field, cf_join, ','.join(['%s'] *len(items))), items, as_dict=1)
 
 	for item in res:
