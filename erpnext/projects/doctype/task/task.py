@@ -47,8 +47,8 @@ class Task(NestedSet):
 	def validate_status(self):
 		if self.status!=self.get_db_value("status") and self.status == "Closed":
 			for d in self.depends_on:
-				if frappe.db.get_value("Task", d.task, "status") != "Closed":
-					frappe.throw(_("Cannot close task as its dependant task {0} is not closed.").format(d.task))
+				if frappe.db.get_value("Task", d.task, "status") not in ("Closed", "Cancelled"):
+					frappe.throw(_("Cannot close task as its dependant task {0} is not closed/cancelled.").format(d.task))
 
 			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
