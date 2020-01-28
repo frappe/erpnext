@@ -47,7 +47,18 @@ class BOM(WebsiteGenerator):
 		else:
 			idx = 1
 
-		self.name = 'BOM-' + self.item + ('-%.3i' % idx)
+		name = 'BOM-' + self.item + ('-%.3i' % idx)
+		if frappe.db.exists("BOM", name):
+			conflicting_bom = frappe.get_doc("BOM", name)
+
+			if conflicting_bom.item != self.item:
+
+				frappe.throw(_("""A BOM with name {0} already exists for item {1}.
+					<br> Did you rename the item? Please contact Administrator / Tech support
+				""").format(frappe.bold(name), frappe.bold(conflicting_bom.item)))
+
+		self.name = name
+
 
 	def validate(self):
 		self.route = frappe.scrub(self.name).replace('_', '-')
@@ -783,11 +794,12 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account):
 	for name in non_stock_items:
 		non_stock_items_cost += flt(items.get(name[0])) * flt(stock_entry.fg_completed_qty) / flt(bom.quantity)
 
-	stock_entry.append('additional_costs', {
-		'expense_account': expense_account,
-		'description': _("Non stock items"),
-		'amount': non_stock_items_cost
-	})
+	if non_stock_items_cost:
+		stock_entry.append('additional_costs', {
+			'expense_account': expense_account,
+			'description': _("Non stock items"),
+			'amount': non_stock_items_cost
+		})
 
 def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 	from erpnext.stock.doctype.stock_entry.stock_entry import get_operating_cost_per_unit
@@ -804,11 +816,12 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 		additional_operating_cost_per_unit = \
 			flt(work_order.additional_operating_cost) / flt(work_order.qty)
 
-		stock_entry.append('additional_costs', {
-			"expense_account": expense_account,
-			"description": "Additional Operating Cost",
-			"amount": additional_operating_cost_per_unit * flt(stock_entry.fg_completed_qty)
-		})
+		if additional_operating_cost_per_unit:
+			stock_entry.append('additional_costs', {
+				"expense_account": expense_account,
+				"description": "Additional Operating Cost",
+				"amount": additional_operating_cost_per_unit * flt(stock_entry.fg_completed_qty)
+			})
 
 @frappe.whitelist()
 def get_bom_diff(bom1, bom2):
