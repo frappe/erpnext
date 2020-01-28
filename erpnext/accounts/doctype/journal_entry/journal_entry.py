@@ -182,10 +182,10 @@ class JournalEntry(AccountsController):
 		if self.voucher_type in ['Bank Entry']:
 			if not self.cheque_no or not self.cheque_date:
 				msgprint(_("Reference No & Reference Date is required for {0}").format(self.voucher_type),
-					raise_exception=1)
+					raise_exception=frappe.MandatoryError)
 
 		if self.cheque_date and not self.cheque_no:
-			msgprint(_("Reference No is mandatory if you entered Reference Date"), raise_exception=1)
+			msgprint(_("Reference No is mandatory if you entered Reference Date"), raise_exception=frappe.MandatoryError)
 
 	def validate_entries_for_advance(self):
 		for d in self.get('accounts'):
