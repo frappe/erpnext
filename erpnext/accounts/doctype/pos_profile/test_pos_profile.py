@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from erpnext.stock.get_item_details import get_pos_profile
-from erpnext.accounts.doctype.sales_invoice.pos import get_items_list, get_customers_list
+from erpnext.selling.doctype.pos_invoice.pos import get_items_list, get_customers_list
 
 class TestPOSProfile(unittest.TestCase):
 	def test_pos_profile(self):

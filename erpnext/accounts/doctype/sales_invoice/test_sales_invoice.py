@@ -726,7 +726,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(pos.write_off_amount, -5)
 
 	def test_make_pos_invoice(self):
-		from erpnext.accounts.doctype.sales_invoice.pos import make_invoice
+		from erpnext.selling.doctype.pos_invoice.pos import make_invoice
 
 		make_pos_profile()
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
@@ -755,7 +755,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.pos_gl_entry(si, pos, 50)
 
 	def test_make_pos_invoice_in_draft(self):
-		from erpnext.accounts.doctype.sales_invoice.pos import make_invoice
+		from erpnext.selling.doctype.pos_invoice.pos import make_invoice
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
