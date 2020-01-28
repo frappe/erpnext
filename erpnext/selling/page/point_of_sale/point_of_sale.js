@@ -574,7 +574,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	make_sales_invoice_frm() {
-		const doctype = 'Sales Invoice';
+		const doctype = 'POS Invoice';
 		return new Promise(resolve => {
 			if (this.frm) {
 				this.frm = get_frm(this.frm);
@@ -622,16 +622,20 @@ erpnext.pos.PointOfSale = class PointOfSale {
 						frappe.dom.unfreeze();
 						this.raise_exception_for_pos_profile();
 					}
-					this.frm.script_manager.trigger("update_stock");
+					this.frm.trigger("update_stock");
 					frappe.model.set_default_values(this.frm.doc);
-					this.frm.cscript.calculate_taxes_and_totals();
-
+					this.frm.trigger('calculate_taxes_and_totals');
 					if (r.message) {
+						this.frm.pos_print_format = r.message.print_format || "";
 						this.frm.meta.default_print_format = r.message.print_format || "";
 						this.frm.allow_edit_rate = r.message.allow_edit_rate;
 						this.frm.allow_edit_discount = r.message.allow_edit_discount;
 						this.frm.doc.campaign = r.message.campaign;
 						this.frm.allow_print_before_pay = r.message.allow_print_before_pay;
+					}
+
+					if(this.frm.doc.taxes_and_charges) {
+						me.frm.script_manager.trigger("taxes_and_charges");
 					}
 				}
 
@@ -1135,7 +1139,7 @@ class POSCart {
 
 	add_item(item) {
 		this.$empty_state.hide();
-
+		
 		if (this.exists(item.item_code, item.batch_no)) {
 			// update quantity
 			this.update_item(item);
