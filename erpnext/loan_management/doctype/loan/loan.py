@@ -74,7 +74,7 @@ class Loan(AccountsController):
 		total_loan_amount = get_total_loan_amount(self.applicant_type, self.applicant, self.company)
 		sanctioned_amount_limit = get_sanctioned_amount_limit(self.applicant_type, self.applicant, self.company)
 
-		if sanctioned_amount_limit and self.loan_amount + total_loan_amount > sanctioned_amount_limit:
+		if sanctioned_amount_limit and flt(self.loan_amount) + flt(total_loan_amount) > flt(sanctioned_amount_limit):
 			frappe.throw(_("Sanctioned Amount limit crossed for {0} {1}").format(self.applicant_type, frappe.bold(self.applicant)))
 
 	def make_repayment_schedule(self):
