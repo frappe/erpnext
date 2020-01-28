@@ -36,9 +36,12 @@ def execute(filters=None):
 				actual_qty = sle.qty_after_transaction
 				stock_value = sle.stock_value
 
+			sle.update({
+				"qty_after_transaction": actual_qty,
+				"stock_value": stock_value,
+			})
+
 		sle.update({
-			"qty_after_transaction": actual_qty,
-			"stock_value": stock_value,
 			"in_qty": max(sle.actual_qty, 0),
 			"out_qty": min(sle.actual_qty, 0)
 		})
