@@ -9,15 +9,6 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 		this._super(doc);
 	},
 
-	onload(doc) {
-		this._super(doc);
-	},
-
-	calculate_taxes_and_totals() {
-		this._calculate_taxes_and_totals();
-		this.calculate_discount_amount();
-	},
-
 	is_pos: function(frm){
 		this.set_pos_data();
 	},
@@ -86,6 +77,38 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 		// 		}
 		// 	});
 		// }
+	},
+
+	amount: function(){
+		this.write_off_outstanding_amount_automatically()
+	},
+
+	change_amount: function(){
+		// if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
+		// 	this.calculate_write_off_amount();
+		// }else {
+		// 	this.frm.set_value("change_amount", 0.0);
+		// 	this.frm.set_value("base_change_amount", 0.0);
+		// }
+
+		this.frm.refresh_fields();
+	},
+
+	write_off_outstanding_amount_automatically: function() {
+		if(cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
+			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
+			// this will make outstanding amount 0
+			this.frm.set_value("write_off_amount",
+				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount - this.frm.doc.total_advance, precision("write_off_amount"))
+			);
+			this.frm.toggle_enable("write_off_amount", false);
+
+		} else {
+			this.frm.toggle_enable("write_off_amount", true);
+		}
+
+		this.calculate_outstanding_amount(false);
+		this.frm.refresh_fields();
 	},
 })
 
