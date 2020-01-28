@@ -234,6 +234,17 @@ class StockController(AccountsController):
 				frappe.throw(_("{0} {1}: Cost Center is mandatory for Item {2}").format(
 					_(self.doctype), self.name, item.get("item_code")))
 
+	def delete_auto_created_batches(self):
+		for d in self.items:
+			if not d.batch_no: continue
+
+			d.batch_no = None
+			d.db_set("batch_no", None)
+
+		for data in frappe.get_all("Batch",
+			{'reference_name': self.name, 'reference_doctype': self.doctype}):
+			frappe.delete_doc("Batch", data.name)
+
 	def get_sl_entries(self, d, args):
 		sl_dict = frappe._dict({
 			"item_code": d.get("item_code", None),

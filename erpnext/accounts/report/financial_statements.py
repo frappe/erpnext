@@ -408,9 +408,9 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 
 		if filters.get("finance_book"):
 			if filters.get("include_default_book_entries"):
-				additional_conditions.append("finance_book in (%(finance_book)s, %(company_fb)s)")
+				additional_conditions.append("(finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)")
 			else:
-				additional_conditions.append("finance_book in (%(finance_book)s)")
+				additional_conditions.append("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)")
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
