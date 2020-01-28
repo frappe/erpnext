@@ -5432,7 +5432,7 @@ DocType: Pricing Rule,Margin,Marge
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py,New Customers,Nouveaux Clients
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py,Gross Profit %,Bénéfice Brut %
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.py,Appointment {0} and Sales Invoice {1} cancelled,Rendez-vous {0} et facture de vente {1} annulés
-apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.js,Opportunities by lead source,Opportunités par source de plomb
+apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.js,Opportunities by lead source,Opportunités par source de prospect
 DocType: Appraisal Goal,Weightage (%),Poids (%)
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js,Change POS Profile,Modifier le profil POS
 DocType: Bank Reconciliation Detail,Clearance Date,Date de Compensation
