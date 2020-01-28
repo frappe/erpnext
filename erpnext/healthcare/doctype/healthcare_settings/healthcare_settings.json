@@ -8,7 +8,7 @@
  "field_order": [
   "sb_op_settings",
   "patient_master_name",
-  "manage_customer",
+  "link_customer_to_patient",
   "default_medical_code_standard",
   "column_break_9",
   "collect_registration_fee",
@@ -21,9 +21,19 @@
   "op_consulting_charge_item",
   "column_break_13",
   "clinical_procedure_consumable_item",
+  "sb_in_ac",
+  "income_account",
+  "receivable_account",
+  "sb_lab_settings",
+  "create_lab_test_on_si_submit",
+  "create_sample_collection_for_lab_test",
+  "column_break_34",
+  "employee_name_and_designation_in_print",
+  "lab_test_approval_required",
+  "custom_signature_in_print",
   "out_patient_sms_alerts",
-  "reg_sms",
   "reg_msg",
+  "reg_sms",
   "app_con",
   "app_con_msg",
   "no_con",
@@ -31,17 +41,6 @@
   "app_rem",
   "app_rem_msg",
   "rem_before",
-  "sb_in_ac",
-  "income_account",
-  "sb_r_ac",
-  "receivable_account",
-  "sb_lab_settings",
-  "create_test_on_si_submit",
-  "require_sample_collection",
-  "require_test_result_approval",
-  "column_break_34",
-  "employee_name_and_designation_in_print",
-  "custom_signature_in_print",
   "laboratory_sms_alerts",
   "sms_printed",
   "column_break_28",
@@ -58,13 +57,6 @@
    "fieldtype": "Select",
    "label": "Patient Name By",
    "options": "Patient Name\nNaming Series"
-  },
-  {
-   "default": "1",
-   "description": "If checked, a customer will be created, mapped to Patient.\nPatient Invoices will be created against this Customer. You can also select existing Customer while creating Patient.",
-   "fieldname": "manage_customer",
-   "fieldtype": "Check",
-   "label": "Manage Customer"
   },
   {
    "fieldname": "default_medical_code_standard",
@@ -98,20 +90,23 @@
    "label": "Invoice Appointments Automatically"
   },
   {
+   "description": "The number of free follow ups (Patient Encounters in valid days) allowed",
    "fieldname": "max_visit",
    "fieldtype": "Int",
    "label": "Patient Encounters in valid days"
   },
   {
+   "description": "Time period (Valid number of days) for free consultations",
    "fieldname": "valid_days",
    "fieldtype": "Int",
    "label": "Valid number of days"
   },
   {
    "collapsible": 1,
+   "description": "You can configure default Items for billing consultation charges, procedure consumption items and inpatient visits",
    "fieldname": "healthcare_service_items",
    "fieldtype": "Section Break",
-   "label": "Healthcare Service Items"
+   "label": "Default Healthcare Service Items"
   },
   {
    "fieldname": "inpatient_visit_charge_item",
@@ -203,25 +198,19 @@
   },
   {
    "collapsible": 1,
-   "description": "Default income accounts to be used if not set in Healthcare Practitioner to book Appointment charges.",
    "fieldname": "sb_in_ac",
    "fieldtype": "Section Break",
-   "label": "Income Account"
+   "label": "Default Accounts"
   },
   {
+   "description": "Default income accounts to be used if not set in Healthcare Practitioner to book Appointment charges.",
    "fieldname": "income_account",
    "fieldtype": "Table",
    "label": "Income Account",
    "options": "Party Account"
   },
   {
-   "collapsible": 1,
-   "description": "Default receivable accounts to be used if not set in Patient to book Appointment charges.",
-   "fieldname": "sb_r_ac",
-   "fieldtype": "Section Break",
-   "label": "Receivable Account"
-  },
-  {
+   "description": "Default receivable accounts to be used to book Appointment charges.",
    "fieldname": "receivable_account",
    "fieldtype": "Table",
    "label": "Receivable Account",
@@ -234,30 +223,12 @@
    "label": "Laboratory Settings"
   },
   {
-   "default": "0",
-   "fieldname": "create_test_on_si_submit",
-   "fieldtype": "Check",
-   "label": "Create Lab Test(s) on Sales Invoice Submit"
-  },
-  {
-   "default": "0",
-   "description": "Create documents for sample collection",
-   "fieldname": "require_sample_collection",
-   "fieldtype": "Check",
-   "label": "Manage Sample Collection"
-  },
-  {
-   "default": "0",
-   "fieldname": "require_test_result_approval",
-   "fieldtype": "Check",
-   "label": "Require Lab Test Approval"
-  },
-  {
    "fieldname": "column_break_34",
    "fieldtype": "Column Break"
   },
   {
    "default": "1",
+   "description": "Check this if you want the Name and Designation of the Employee associated with the User who submits the document to be printed in the Lab Test Report.",
    "fieldname": "employee_name_and_designation_in_print",
    "fieldtype": "Check",
    "label": "Employee name and designation in print"
@@ -279,7 +250,7 @@
    "fieldname": "sms_printed",
    "fieldtype": "Small Text",
    "ignore_xss_filter": 1,
-   "label": "Result Printed"
+   "label": "Result Printed Message"
   },
   {
    "fieldname": "column_break_28",
@@ -290,12 +261,40 @@
    "fieldname": "sms_emailed",
    "fieldtype": "Small Text",
    "ignore_xss_filter": 1,
-   "label": "Result Emailed"
+   "label": "Result Emailed Message"
+  },
+  {
+   "default": "0",
+   "description": "Checking this will restrict printing and emailing of Lab Test documents unless they have the status as Approved.",
+   "fieldname": "lab_test_approval_required",
+   "fieldtype": "Check",
+   "label": "Do not print or email Lab Tests without Approval"
+  },
+  {
+   "default": "1",
+   "description": "If checked, a customer will be created, mapped to Patient.\nPatient Invoices will be created against this Customer. You can also select existing Customer while creating Patient.",
+   "fieldname": "link_customer_to_patient",
+   "fieldtype": "Check",
+   "label": "Link Customer to Patient"
+  },
+  {
+   "default": "0",
+   "description": "Checking this will create Lab Test(s) specified in the Sales Invoice on submission.",
+   "fieldname": "create_lab_test_on_si_submit",
+   "fieldtype": "Check",
+   "label": "Create Lab Test(s) on Sales Invoice Submission"
+  },
+  {
+   "default": "0",
+   "description": "Checking this will create a Sample Collection document  every time you create a Lab Test",
+   "fieldname": "create_sample_collection_for_lab_test",
+   "fieldtype": "Check",
+   "label": "Create Sample Collection document for Lab Test"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-01-23 13:31:43.699711",
+ "modified": "2020-01-28 18:04:48.671093",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",

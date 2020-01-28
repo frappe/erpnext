@@ -224,7 +224,7 @@ def create_sample_doc(template, patient, invoice):
 		return sample_collection
 
 def create_sample_collection(lab_test, template, patient, invoice):
-	if(frappe.db.get_value("Healthcare Settings", None, "require_sample_collection") == "1"):
+	if(frappe.db.get_value("Healthcare Settings", None, "create_sample_collection_for_lab_test") == "1"):
 		sample_collection = create_sample_doc(template, patient, invoice)
 		if(sample_collection):
 			lab_test.sample = sample_collection.name

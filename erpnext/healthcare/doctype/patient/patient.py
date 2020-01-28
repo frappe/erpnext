@@ -13,7 +13,7 @@ from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import g
 
 class Patient(Document):
 	def after_insert(self):
-		if(frappe.db.get_value("Healthcare Settings", None, "manage_customer") == '1' and not self.customer):
+		if(frappe.db.get_value("Healthcare Settings", None, "link_customer_to_patient") == '1' and not self.customer):
 			create_customer(self)
 		if(frappe.db.get_value("Healthcare Settings", None, "collect_registration_fee") == '1'):
 			frappe.db.set_value("Patient", self.name, "disabled", 1)

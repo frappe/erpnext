@@ -224,7 +224,7 @@ def manage_invoice_submit_cancel(doc, method):
 				if frappe.get_meta(item.reference_dt).has_field("invoiced"):
 					set_invoiced(item, method, doc.name)
 
-	if method=="on_submit" and frappe.db.get_value("Healthcare Settings", None, "create_test_on_si_submit") == '1':
+	if method=="on_submit" and frappe.db.get_value("Healthcare Settings", None, "create_lab_test_on_si_submit") == '1':
 		create_multiple("Sales Invoice", doc.name)
 
 def set_invoiced(item, method, ref_invoice=None):
