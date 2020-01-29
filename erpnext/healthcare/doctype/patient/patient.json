@@ -12,9 +12,10 @@
  "engine": "InnoDB",
  "field_order": [
   "basic_info",
-  "inpatient_status",
-  "inpatient_record",
   "naming_series",
+  "first_name",
+  "middle_name",
+  "last_name",
   "patient_name",
   "sex",
   "blood_group",
@@ -23,11 +24,17 @@
   "image",
   "column_break_14",
   "status",
+  "inpatient_status",
+  "inpatient_record",
   "customer",
-  "report_preference",
   "mobile",
   "email",
   "phone",
+  "report_preference",
+  "personal_and_social_history",
+  "occupation",
+  "column_break_25",
+  "marital_status",
   "sb_relation",
   "patient_relation",
   "allergy_medical_and_surgical_history",
@@ -36,10 +43,6 @@
   "column_break_20",
   "medical_history",
   "surgical_history",
-  "personal_and_social_history",
-  "occupation",
-  "column_break_25",
-  "marital_status",
   "risk_factors",
   "tobacco_past_use",
   "tobacco_current_use",
@@ -87,12 +90,11 @@
    "bold": 1,
    "fieldname": "patient_name",
    "fieldtype": "Data",
-   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Full Name",
-   "no_copy": 1,
-   "oldfieldtype": "Data",
-   "reqd": 1,
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -149,6 +151,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "If \"Link Customer to Patient\" is checked in Healthcare Settings and an existing Customer is not selected then, a Customer will be created for this Patient for recording transactions in Accounts module.",
    "fieldname": "customer",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -263,27 +266,31 @@
   },
   {
    "fieldname": "tobacco_past_use",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "ignore_xss_filter": 1,
-   "label": "Tobacco Past Use"
+   "label": "Tobacco Consumption (Past)",
+   "options": "\nYes\nNo"
   },
   {
    "fieldname": "tobacco_current_use",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "ignore_xss_filter": 1,
-   "label": "Tobacco Current Use"
+   "label": "Tobacco Consumption (Present)",
+   "options": "\nYes\nNo"
   },
   {
    "fieldname": "alcohol_past_use",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "ignore_xss_filter": 1,
-   "label": "Alcohol Past Use"
+   "label": "Alcohol Consumption (Past)",
+   "options": "\nYes\nNo"
   },
   {
    "fieldname": "alcohol_current_use",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "ignore_user_permissions": 1,
-   "label": "Alcohol Current Use"
+   "label": "Alcohol Consumption (Present)",
+   "options": "\nYes\nNo"
   },
   {
    "fieldname": "column_break_32",
@@ -331,13 +338,31 @@
    "label": "Default Currency",
    "options": "Currency",
    "print_hide": 1
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name",
+   "oldfieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "middle_name",
+   "fieldtype": "Data",
+   "label": "Middle Name (optional)"
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2020-01-29 11:22:40.698125",
+ "modified": "2020-01-29 13:56:10.174897",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",

@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "sb_op_settings",
-  "patient_master_name",
+  "patient_name_by",
   "link_customer_to_patient",
   "default_medical_code_standard",
   "column_break_9",
@@ -51,12 +51,6 @@
    "fieldname": "sb_op_settings",
    "fieldtype": "Section Break",
    "label": "Out Patient Settings"
-  },
-  {
-   "fieldname": "patient_master_name",
-   "fieldtype": "Select",
-   "label": "Patient Name By",
-   "options": "Patient Name\nNaming Series"
   },
   {
    "fieldname": "default_medical_code_standard",
@@ -291,11 +285,17 @@
    "fieldname": "create_sample_collection_for_lab_test",
    "fieldtype": "Check",
    "label": "Create Sample Collection document for Lab Test"
+  },
+  {
+   "fieldname": "patient_name_by",
+   "fieldtype": "Select",
+   "label": "Patient Name By",
+   "options": "Patient Name\nNaming Series"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-01-29 10:49:00.758580",
+ "modified": "2020-01-29 14:31:56.983534",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",
