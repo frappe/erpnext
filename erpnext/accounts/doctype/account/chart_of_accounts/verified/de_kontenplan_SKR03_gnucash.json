@@ -173,6 +173,14 @@
 				},
 				"VIII. sonstige Verbindlichkeiten": {
 					"is_group": 1,
+					"Sonstige Verbindlichkeiten": {
+						"account_number": "1700",
+						"account_type": "Asset Received But Not Billed"
+					},
+					"Sonstige Verbindlichkeiten (1 bis 5 Jahre)": {
+						"account_number": "1702",
+						"account_type": "Stock Received But Not Billed"
+					},
 					"Verbindlichkeiten aus Lohn und Gehalt": {
 						"account_number": "1740",
 						"account_type": "Payable"
@@ -253,6 +261,10 @@
 			"Wareneingang": {
 				"account_number": "3200"
 			},
+			"Bezugsnebenkosten": {
+				"account_number": "3800",
+				"account_type": "Expenses Included In Asset Valuation"
+			},
 			"Herstellungskosten": {
 				"account_number": "4996",
 				"account_type": "Cost of Goods Sold"
@@ -276,7 +288,7 @@
                 "is_group": 1,
 				"Abschreibungen auf Sachanlagen (ohne AfA auf Kfz und Gebäude)": {
                     "account_number": "4830",
-                    "account_type": "Depreciation"
+                    "account_type": "Accumulated Depreciation"
 				},
 				"Abschreibungen auf Gebäude": {
                     "account_number": "4831",
