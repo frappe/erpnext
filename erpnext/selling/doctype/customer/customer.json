@@ -322,8 +322,9 @@
   },
   {
    "fieldname": "primary_address",
-   "fieldtype": "Read Only",
-   "label": "Primary Address"
+   "fieldtype": "Text",
+   "label": "Primary Address",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -469,7 +470,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2019-09-06 12:40:31.801424",
+ "modified": "2020-01-24 15:07:48.815546",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
