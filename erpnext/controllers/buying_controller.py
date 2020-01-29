@@ -500,8 +500,8 @@ class BuyingController(StockController):
 		item_row = item_row.as_dict()
 		for fieldname in field_list:
 			if flt(item_row[fieldname]) < 0:
-				frappe.throw(_("Row #{0}: {1} can not be negative for item {2}".format(item_row['idx'],
-					frappe.get_meta(item_row.doctype).get_label(fieldname), item_row['item_code'])))
+				frappe.throw(_("Row #{0}: {1} can not be negative for item {2}").format(item_row['idx'],
+					frappe.get_meta(item_row.doctype).get_label(fieldname), item_row['item_code']))
 
 	def check_for_on_hold_or_closed_status(self, ref_doctype, ref_fieldname):
 		for d in self.get("items"):

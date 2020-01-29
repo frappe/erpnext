@@ -1044,8 +1044,8 @@ class SalesInvoice(SellingController):
 				frappe.throw(_("Serial Numbers in row {0} does not match with Delivery Note").format(item.idx))
 
 			if item.serial_no and cint(item.qty) != len(si_serial_nos):
-				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
-					item.idx, item.qty, item.item_code, len(si_serial_nos))))
+				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.").format(
+					item.idx, item.qty, item.item_code, len(si_serial_nos)))
 
 	def validate_serial_against_sales_invoice(self):
 		""" check if serial number is already used in other sales invoice """
