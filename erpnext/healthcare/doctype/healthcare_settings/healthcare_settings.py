@@ -11,7 +11,7 @@ import json
 
 class HealthcareSettings(Document):
 	def validate(self):
-		for key in ['collect_registration_fee', 'link_customer_to_patient', 'patient_master_name',
+		for key in ['collect_registration_fee', 'link_customer_to_patient', 'patient_name_by',
 		'lab_test_approval_required', 'create_sample_collection_for_lab_test', 'default_medical_code_standard']:
 			frappe.db.set_default(key, self.get(key, ""))
 
@@ -46,12 +46,12 @@ def get_sms_text(doc):
 	return sms_text
 
 def send_registration_sms(doc):
-	if frappe.db.get_value('Healthcare Settings', None, 'reg_sms'):
+	if frappe.db.get_single_value('Healthcare Settings', 'reg_sms'):
 		if doc.mobile:
 			context = {'doc': doc, 'alert': doc, 'comments': None}
 			if doc.get('_comments'):
 				context['comments'] = json.loads(doc.get('_comments'))
-			messages = frappe.db.get_value('Healthcare Settings', None, 'reg_msg')
+			messages = frappe.db.get_single_value('Healthcare Settings', 'reg_msg')
 			messages = frappe.render_template(messages, context)
 			number = [doc.mobile]
 			send_sms(number,messages)
