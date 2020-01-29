@@ -364,11 +364,11 @@ class SalarySlip(TransactionBase):
 			return amount
 
 		except NameError as err:
-			frappe.throw(_("Name error: {0}".format(err)))
+			frappe.throw(_("Name error: {0}").format(err))
 		except SyntaxError as err:
-			frappe.throw(_("Syntax error in formula or condition: {0}".format(err)))
+			frappe.throw(_("Syntax error in formula or condition: {0}").format(err))
 		except Exception as e:
-			frappe.throw(_("Error in formula or condition: {0}".format(e)))
+			frappe.throw(_("Error in formula or condition: {0}").format(e))
 			raise
 
 	def add_employee_benefits(self, payroll_period):
@@ -705,11 +705,11 @@ class SalarySlip(TransactionBase):
 			if condition:
 				return frappe.safe_eval(condition, self.whitelisted_globals, data)
 		except NameError as err:
-			frappe.throw(_("Name error: {0}".format(err)))
+			frappe.throw(_("Name error: {0}").format(err))
 		except SyntaxError as err:
-			frappe.throw(_("Syntax error in condition: {0}".format(err)))
+			frappe.throw(_("Syntax error in condition: {0}").format(err))
 		except Exception as e:
-			frappe.throw(_("Error in formula or condition: {0}".format(e)))
+			frappe.throw(_("Error in formula or condition: {0}").format(e))
 			raise
 
 	def get_salary_slip_row(self, salary_component):

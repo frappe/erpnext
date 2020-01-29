@@ -25,7 +25,7 @@ class ItemAlternative(Document):
 	def validate_duplicate(self):
 		if frappe.db.get_value("Item Alternative", {'item_code': self.item_code,
 			'alternative_item_code': self.alternative_item_code, 'name': ('!=', self.name)}):
-			frappe.throw(_("Already record exists for the item {0}".format(self.item_code)))
+			frappe.throw(_("Already record exists for the item {0}").format(self.item_code))
 
 def get_alternative_items(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql(""" (select alternative_item_code from `tabItem Alternative`
