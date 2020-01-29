@@ -550,9 +550,9 @@ def validate_sales_invoice(doc):
 
 	for fieldname in reqd_fields:
 		if not doc.get(fieldname):
-			frappe.throw(_('{} is required to generate e-Way Bill JSON'.format(
+			frappe.throw(_('{} is required to generate e-Way Bill JSON').format(
 				doc.meta.get_label(fieldname)
-			)))
+			))
 
 	if len(doc.company_gstin) < 15:
 		frappe.throw(_('You must be a registered supplier to generate e-Way Bill'))
