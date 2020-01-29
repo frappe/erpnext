@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import erpnext
 from frappe import _
 from frappe.model.document import Document
 from erpnext.accounts.deferred_revenue import convert_deferred_expense_to_expense, \
@@ -14,19 +15,15 @@ class ProcessDeferredAccounting(Document):
 		if self.end_date < self.start_date:
 			frappe.throw(_("End date cannot be before start date"))
 
-	def autoname(self):
-		naming_series = [self.type, self.company, self.account, self.posting_date]
-		self.name = '-'.join(filter(None, naming_series))
-
 	def on_submit(self):
 		conditions = self.build_conditions()
 		if self.type == 'Income':
-			convert_deferred_revenue_to_income(self.start_date, self.end_date, conditions, self.name)
+			convert_deferred_revenue_to_income(self.name, self.start_date, self.end_date, conditions)
 		else:
-			convert_deferred_expense_to_expense(self.start_date, self.end_date, conditions, self.name)
+			convert_deferred_expense_to_expense(self.name, self.start_date, self.end_date, conditions)
 
 	def on_cancel(self):
-		frappe.db.sql("DELETE from `tabGL Entry` where deferred_process = %s", (self.name))
+		frappe.db.sql("DELETE from `tabGL Entry` where against_voucher = %s", (self.name))
 
 	def build_conditions(self):
 		conditions=''
