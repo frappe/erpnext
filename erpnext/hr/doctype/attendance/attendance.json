@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-01-10 16:34:13",
@@ -64,6 +65,14 @@
    "oldfieldtype": "Data"
   },
   {
+   "depends_on": "working_hours",
+   "fieldname": "working_hours",
+   "fieldtype": "Float",
+   "label": "Working Hours",
+   "precision": "1",
+   "read_only": 1
+  },
+  {
    "default": "Present",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -72,7 +81,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nPresent\nAbsent\nOn Leave\nHalf Day",
+   "options": "\nPresent\nAbsent\nOn Leave\nHalf Day\nWork From Home",
    "reqd": 1,
    "search_index": 1
   },
@@ -127,6 +136,12 @@
    "read_only": 1
   },
   {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "label": "Shift",
+   "options": "Shift Type"
+  },
+  {
    "fieldname": "attendance_request",
    "fieldtype": "Link",
    "label": "Attendance Request",
@@ -144,20 +159,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "working_hours",
-   "fieldname": "working_hours",
-   "fieldtype": "Float",
-   "label": "Working Hours",
-   "precision": "1",
-   "read_only": 1
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "label": "Shift",
-   "options": "Shift Type"
-  },
-  {
    "default": "0",
    "fieldname": "late_entry",
    "fieldtype": "Check",
@@ -173,7 +174,8 @@
  "icon": "fa fa-ok",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2019-07-29 20:35:40.845422",
+ "links": [],
+ "modified": "2020-01-27 20:25:29.572281",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",
