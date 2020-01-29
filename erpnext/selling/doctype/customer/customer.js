@@ -56,7 +56,7 @@ frappe.ui.form.on("Customer", {
 			}
 		})
 
-		frm.set_query('default_bank_account', function(c) {
+		frm.set_query('default_bank_account', function() {
 			return {
 				filters: {
 					'is_company_account': 1
