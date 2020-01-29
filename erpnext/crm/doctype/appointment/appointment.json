@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "format:APMT-{customer_name}-{####}",
  "creation": "2019-08-27 10:48:27.926283",
  "doctype": "DocType",
@@ -15,7 +16,8 @@
   "col_br_2",
   "customer_details",
   "linked_docs_section",
-  "lead",
+  "appointment_with",
+  "party",
   "col_br_3",
   "calendar_event"
  ],
@@ -62,12 +64,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "lead",
-   "fieldtype": "Link",
-   "label": "Lead",
-   "options": "Lead"
-  },
-  {
    "fieldname": "calendar_event",
    "fieldtype": "Link",
    "label": "Calendar Event",
@@ -91,9 +87,22 @@
   {
    "fieldname": "col_br_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "appointment_with",
+   "fieldtype": "Link",
+   "label": "Appointment With",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Party",
+   "options": "appointment_with"
   }
  ],
- "modified": "2019-10-14 15:23:54.630731",
+ "links": [],
+ "modified": "2020-01-28 16:16:45.447213",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
