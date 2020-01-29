@@ -82,7 +82,7 @@
 				"IV. Kassenbestand, Bundesbankguthaben, Guthaben bei Kreditinstituten und Schecks.": {
 					"is_group": 1,
 					"Kasse": {
-						"account_number": "1100",
+						"account_number": "1000",
 						"account_type": "Cash"
 					},
 					"Postbank": {
