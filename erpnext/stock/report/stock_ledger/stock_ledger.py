@@ -38,7 +38,7 @@ def execute(filters=None):
 
 			sle.update({
 				"qty_after_transaction": actual_qty,
-				"stock_value": stock_value,
+				"stock_value": stock_value
 			})
 
 		sle.update({
