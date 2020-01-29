@@ -513,7 +513,7 @@ def remove_ref_doc_link_from_jv(ref_type, ref_no):
 			where reference_type=%s and reference_name=%s
 			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
 
-		frappe.msgprint(_("Journal Entries {0} are un-linked".format("\n".join(linked_jv))))
+		frappe.msgprint(_("Journal Entries {0} are un-linked").format("\n".join(linked_jv)))
 
 def remove_ref_doc_link_from_pe(ref_type, ref_no):
 	linked_pe = frappe.db.sql_list("""select parent from `tabPayment Entry Reference`
@@ -536,7 +536,7 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 				where name=%s""", (pe_doc.total_allocated_amount, pe_doc.base_total_allocated_amount,
 					pe_doc.unallocated_amount, now(), frappe.session.user, pe))
 
-		frappe.msgprint(_("Payment Entries {0} are un-linked".format("\n".join(linked_pe))))
+		frappe.msgprint(_("Payment Entries {0} are un-linked").format("\n".join(linked_pe)))
 
 @frappe.whitelist()
 def get_company_default(company, fieldname):

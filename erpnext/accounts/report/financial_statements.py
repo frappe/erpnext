@@ -175,7 +175,7 @@ def calculate_values(
 			d = accounts_by_name.get(entry.account)
 			if not d:
 				frappe.msgprint(
-					_("Could not retrieve information for {0}.".format(entry.account)), title="Error",
+					_("Could not retrieve information for {0}.").format(entry.account), title="Error",
 					raise_exception=1
 				)
 			for period in period_list:
@@ -430,7 +430,7 @@ def get_cost_centers_with_children(cost_centers):
 			children = frappe.get_all("Cost Center", filters={"lft": [">=", lft], "rgt": ["<=", rgt]})
 			all_cost_centers += [c.name for c in children]
 		else:
-			frappe.throw(_("Cost Center: {0} does not exist".format(d)))
+			frappe.throw(_("Cost Center: {0} does not exist").format(d))
 
 	return list(set(all_cost_centers))
 

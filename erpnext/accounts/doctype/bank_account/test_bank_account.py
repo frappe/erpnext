@@ -39,11 +39,11 @@ class TestBankAccount(unittest.TestCase):
 			try:
 				bank_account.validate_iban()
 			except ValidationError:
-				msg = _('BankAccount.validate_iban() failed for valid IBAN {}'.format(iban))
+				msg = _('BankAccount.validate_iban() failed for valid IBAN {}').format(iban)
 				self.fail(msg=msg)
 
 		for not_iban in invalid_ibans:
 			bank_account.iban = not_iban
-			msg = _('BankAccount.validate_iban() accepted invalid IBAN {}'.format(not_iban))
+			msg = _('BankAccount.validate_iban() accepted invalid IBAN {}').format(not_iban)
 			with self.assertRaises(ValidationError, msg=msg):
 				bank_account.validate_iban()
