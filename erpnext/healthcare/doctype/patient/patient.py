@@ -15,8 +15,8 @@ class Patient(Document):
 	def after_insert(self):
 		if(frappe.db.get_value("Healthcare Settings", None, "link_customer_to_patient") == '1' and not self.customer):
 			create_customer(self)
-		if(frappe.db.get_value("Healthcare Settings", None, "collect_registration_fee") == '1'):
-			frappe.db.set_value("Patient", self.name, "disabled", 1)
+		if frappe.db.get_single_value('Healthcare Settings', 'collect_registration_fee'):
+			frappe.db.set_value('Patient', self.name, 'status', 'Disabled')
 		else:
 			send_registration_sms(self)
 		self.reload()
@@ -62,7 +62,7 @@ class Patient(Document):
 		return age_str
 
 	def invoice_patient_registration(self):
-		frappe.db.set_value("Patient", self.name, "disabled", 0)
+		frappe.db.set_value("Patient", self.name, "status", "Active")
 		send_registration_sms(self)
 		if(flt(frappe.get_value("Healthcare Settings", None, "registration_fee"))>0):
 			company = frappe.defaults.get_user_default('company')

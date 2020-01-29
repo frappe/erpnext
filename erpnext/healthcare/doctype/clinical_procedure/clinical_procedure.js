@@ -29,7 +29,7 @@ frappe.ui.form.on('Clinical Procedure', {
 	refresh: function(frm) {
 		frm.set_query("patient", function () {
 			return {
-				filters: {"disabled": 0}
+				filters: {"status": "Disabled"}
 			};
 		});
 		frm.set_query("appointment", function () {
